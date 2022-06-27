@@ -128,7 +128,7 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
     else if (negated && !negative)
         bytes.push_back(positive_sign_byte);
 
-    else if (!negated && negative)
+    else if (negative && !negated)
         bytes.back() = to_negated(bytes.back());
 
     // !negative && !negated is a no-op.
@@ -187,7 +187,7 @@ inline bool boolean::strict_false(const data_chunk& vary) noexcept
 // protected
 inline bool boolean::is_sign_byte(uint8_t byte) noexcept
 {
-    return byte == positive_sign_byte || byte == negative_sign_byte;
+    return (byte == positive_sign_byte) || (byte == negative_sign_byte);
 }
 
 } // namespace number
