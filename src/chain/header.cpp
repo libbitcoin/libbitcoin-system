@@ -235,8 +235,6 @@ hash_digest header::hash() const noexcept
 // static/private
 uint256_t header::difficulty(uint32_t bits) noexcept
 {
-    static_assert(is_same<decltype(compact::expand(0)), uint256_t>());
-
     auto target = compact::expand(bits);
 
     //*************************************************************************
@@ -247,10 +245,9 @@ uint256_t header::difficulty(uint32_t bits) noexcept
         return target;
 
     //*************************************************************************
-    // CONSENSUS: If target is (2^256)-1, division will fail, however a target
-    // of this magnitude would first fail is_invalid_proof_of_work.
+    // CONSENSUS: If target is (2^256)-1, division would fail, however compact
+    // compression is lossy, and therefore unable to produce negative one.
     //*************************************************************************
-    BC_ASSERT_MSG(target != negative_one, "difficulty overflow");
 
     // We need to compute 2**256 / (target + 1), but we can't represent 2**256
     // as it's too large for uint256. However as 2**256 is at least as large as
