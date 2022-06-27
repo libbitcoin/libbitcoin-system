@@ -68,31 +68,55 @@ static_assert(absolute(max_int32) == max_int32);
 static_assert(absolute(min_int32 + 1) == max_int32);
 static_assert(absolute(max_uint32) == max_uint32);
 
+// Due to lack of promotion, these are not constexpr.
+// -minimum<integral> is undefined unless promotable.
+////static_assert(absolute(min_int64) == 0);
+////static_assert(absolute(min_int32) == 0);
+
+// These are both overflows, allowed due to native int promotion.
+static_assert(absolute(min_int16) == add1<uint32_t>(max_int16));
+static_assert(absolute(min_int8) == add1<uint16_t>(max_int8));
+
+// These can be mitigated using explicit domain promotion (except for uint64_t).
+static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
+static_assert(absolute<int32_t>(min_int16) == add1<uint32_t>(max_int16));
+static_assert(absolute<int16_t>(min_int8) == add1<uint16_t>(max_int8));
+
 // negate
-static_assert(negate<int8_t> (int8_t{  0 })  ==   0);
-static_assert(negate<int8_t> (int8_t{ -0 })  ==   0);
-static_assert(negate<int8_t> (int8_t{  42 }) == -42);
-static_assert(negate<int8_t> (int8_t{ -42 }) ==  42);
-static_assert(negate<int16_t>(int8_t{  42 }) == -42);
-static_assert(negate<int16_t>(int8_t{ -42 }) ==  42);
-static_assert(negate<int32_t>(int8_t{  42 }) == -42);
-static_assert(negate<int32_t>(int8_t{ -42 }) ==  42);
-static_assert(negate<int64_t>(int8_t{  42 }) == -42);
-static_assert(negate<int64_t>(int8_t{ -42 }) ==  42);
-static_assert(negate<int16_t>(max_int8) == -max_int8);
-static_assert(negate<int32_t>(max_int16) == -max_int16);
-static_assert(negate<int64_t>(max_int32) == -max_int32);
-static_assert(negate<int64_t>(max_int64) == -max_int64);
+static_assert(negate(int8_t{  0 })  ==   0);
+static_assert(negate(int8_t{ -0 })  ==   0);
+static_assert(negate(int8_t{  42 }) == -42);
+static_assert(negate(int8_t{ -42 }) ==  42);
+static_assert(negate(int8_t{  42 }) == -42);
+static_assert(negate(int8_t{ -42 }) ==  42);
+static_assert(negate(int8_t{  42 }) == -42);
+static_assert(negate(int8_t{ -42 }) ==  42);
+static_assert(negate(int8_t{  42 }) == -42);
+static_assert(negate(int8_t{ -42 }) ==  42);
+static_assert(negate(max_int8) == -max_int8);
+static_assert(negate(max_int16) == -max_int16);
+static_assert(negate(max_int32) == -max_int32);
+static_assert(negate(max_int64) == -max_int64);
 
-// This case relies on native int domain promotion.
-static_assert(negate<int16_t>(min_int8) == -min_int8);
+// Due to lack of promotion, these are not constexpr.
+// -minimum<integral> is undefined unless promotable.
+////static_assert(negate(min_int64) == 0);
+////static_assert(negate(min_int32) == 0);
 
-// This case relies on native int domain promotion.
+// These are both overflows, allowed due to native int promotion.
+static_assert(negate(min_int16) == add1(max_int16));
+static_assert(negate(min_int8) == add1(max_int8));
+
+// These can be mitigated using explicit domain promotion (except for uint64_t).
+static_assert(negate<int64_t>(min_int32) == add1<int64_t>(max_int32));
+static_assert(negate<int32_t>(min_int16) == add1<int32_t>(max_int16));
+static_assert(negate<int16_t>(min_int8) == add1<int16_t>(max_int8));
+
+// uint32 requires explicit promotion before negation.
+////static_assert(negate<int64_t>(min_int64) == -min_int64);
+static_assert(negate<int64_t>(min_int32) == -int64_t(min_int32));
 static_assert(negate<int32_t>(min_int16) == -min_int16);
-
-// This one case requires negate's promotion before negation (bitcoin).
-static_assert(negate<int64_t>(min_int32) != -min_int32);
-static_assert(negate<int64_t>(min_int32) == -int64_t{ min_int32 });
+static_assert(negate<int16_t>(min_int8) == -min_int8);
 
 // is_negative
 static_assert(is_negative(min_int32));
