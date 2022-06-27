@@ -268,7 +268,7 @@ static bool data_from_decimal(data_chunk& out_data,
     if (!deserialize(value, token))
         return false;
 
-    out_data = machine::number::chunk::from_int(value);
+    out_data = machine::number::chunk::from_integer(value);
     return true;
 }
 
