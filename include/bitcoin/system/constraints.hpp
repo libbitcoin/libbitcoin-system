@@ -300,7 +300,6 @@ static_assert(
 
 // This are design limitations, and not a matter of C++ specification.
 static_assert(sizeof(char) == one);
-static_assert(sizeof(wchar_t) == two);
 static_assert(
     sizeof(size_t) == sizeof(uint32_t) ||
     sizeof(size_t) == sizeof(uint64_t));
