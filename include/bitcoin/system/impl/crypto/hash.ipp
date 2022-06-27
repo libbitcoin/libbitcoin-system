@@ -27,13 +27,13 @@
 namespace libbitcoin {
 namespace system {
 
-template <size_t Bits, size_t Bytes>
+template <uint32_t Bits, size_t Bytes>
 constexpr data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept
 {
     return to_little_endian_size<Bytes>(value);
 }
 
-template <size_t Bytes, size_t Bits>
+template <size_t Bytes, uint32_t Bits>
 constexpr uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept
 {
     return uintx_from_little_endian_array<Bytes>(hash);

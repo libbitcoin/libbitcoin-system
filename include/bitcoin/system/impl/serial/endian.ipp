@@ -421,28 +421,28 @@ inline data_chunk to_little_endian(const Integer& value) noexcept
 // TODO: recombine and rename when data_slice is constexpr.
 
 template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)>
+inline uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_big_endian_chunk(const data_slice& data) noexcept
 {
     return from_big_chunk<uintx_t<to_bits(Bytes)>>(Bytes, data);
 }
 
 template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)> 
+inline uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_little_endian_chunk(const data_slice& data) noexcept
 {
-    return from_little_chunk<uintx_t<to_bits(Bytes)>>(Bytes, data);
+    return from_little_chunk<uintx_t<to_bits<uint32_t>(Bytes)>>(Bytes, data);
 }
 
 template <size_t Bytes>
-constexpr uintx_t<to_bits(Bytes)>
+constexpr uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_big_endian_array(const data_array<Bytes>& data) noexcept
 {
-    return from_big_array<uintx_t<to_bits(Bytes)>, Bytes>(data);
+    return from_big_array<uintx_t<to_bits<uint32_t>(Bytes)>, Bytes>(data);
 }
 
 template <size_t Bytes>
-constexpr uintx_t<to_bits(Bytes)>
+constexpr uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_little_endian_array(const data_array<Bytes>& data) noexcept
 {
     return from_little_array<uintx_t<to_bits(Bytes)>, Bytes>(data);

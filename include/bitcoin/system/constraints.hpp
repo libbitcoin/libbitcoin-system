@@ -249,7 +249,7 @@ using if_little_endian_integral_integer = bool_unless<
 
 /// Template for constructing uintx types.
 /// There is no dynamic memory allocation when minBits == maxBits.
-template <uint32_t Bits>
+template <uint32_t Bits> // <= uint32_t
 using uintx_t = boost::multiprecision::number<
     boost::multiprecision::cpp_int_backend<Bits, Bits,
     boost::multiprecision::unsigned_magnitude,

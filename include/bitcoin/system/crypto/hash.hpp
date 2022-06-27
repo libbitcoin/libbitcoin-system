@@ -114,11 +114,11 @@ constexpr long_hash null_long_hash
 };
 
 /// Hash conversions of corresponding integers.
-template <size_t Bits, size_t Bytes = to_ceilinged_bytes(Bits)>
+template <uint32_t Bits, size_t Bytes = to_ceilinged_bytes(Bits)>
 constexpr data_array<Bytes> to_hash(const uintx_t<Bits>& value) noexcept;
 
 /// Integer conversions of corresponding hashes.
-template <size_t Bytes, size_t Bits = to_bits(Bytes)>
+template <size_t Bytes, uint32_t Bits = to_bits<uint32_t>(Bytes)>
 constexpr uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) noexcept;
 
 /// Generate a scrypt hash to fill a byte array.

@@ -111,19 +111,19 @@ inline data_chunk to_little_endian(const Integer& value) noexcept;
 // data_array   to_big|little_endian<Size>(uintx_t/integer)
 
 template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)>
+inline uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_big_endian_chunk(const data_slice& data) noexcept;
 
 template <size_t Bytes>
-inline uintx_t<to_bits(Bytes)>
+inline uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_little_endian_chunk(const data_slice& data) noexcept;
 
 template <size_t Bytes>
-constexpr uintx_t<to_bits(Bytes)>
+constexpr uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_big_endian_array(const data_array<Bytes>& data) noexcept;
 
 template <size_t Bytes>
-constexpr uintx_t<to_bits(Bytes)>
+constexpr uintx_t<to_bits<uint32_t>(Bytes)>
 uintx_from_little_endian_array(const data_array<Bytes>& data) noexcept;
 
 template <size_t Bytes, typename Integer, if_integer<Integer> = true>
