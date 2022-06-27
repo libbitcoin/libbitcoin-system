@@ -59,7 +59,7 @@ bool script::is_coinbase_pattern(const operations& ops,
     // TODO: number::chunk::from_int constexpr?
     return !ops.empty()
         && ops[0].is_nominal_push()
-        && ops[0].data() == number::chunk::from_int(to_unsigned(height));
+        && ops[0].data() == number::chunk::from_integer(to_unsigned(height));
 }
 
 // Constructors.

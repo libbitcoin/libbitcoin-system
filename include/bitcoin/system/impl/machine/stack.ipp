@@ -199,12 +199,12 @@ inline bool stack<Container>::peek_signed(Integer& value) const noexcept
         [&](bool vary) noexcept
         {
             // This is never executed in standard scripts.
-            value = boolean::to_int<Bytes>(vary);
+            value = boolean::to_integer<Bytes>(vary);
         },
         [&](int64_t vary) noexcept
         {
             // This is the canonical use case (bounds check only).
-            result = integer<Bytes>::from_int(value, vary);
+            result = integer<Bytes>::from_integer(value, vary);
         },
         [&](const chunk_xptr& vary) noexcept
         {
@@ -302,7 +302,7 @@ inline chunk_xptr stack<Container>::peek_chunk() const noexcept
         [&](int64_t vary) noexcept
         {
             // This is never executed in standard scripts.
-            value = make_external(chunk::from_int(vary), tether_);
+            value = make_external(chunk::from_integer(vary), tether_);
         },
         [&](const chunk_xptr& vary) noexcept
         {
@@ -342,7 +342,7 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
                     same = std::get<bool>(right) == vary;
                     break;
                 case int64_:
-                    same = std::get<int64_t>(right) == boolean::to_int(vary);
+                    same = std::get<int64_t>(right) == boolean::to_integer(vary);
                     break;
                 case pchunk_:
                     same = *std::get<chunk_xptr>(right) == chunk::from_bool(vary);
@@ -355,13 +355,13 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
             switch (right_type)
             {
                 case bool_:
-                    same = boolean::to_int(std::get<bool>(right)) == vary;
+                    same = boolean::to_integer(std::get<bool>(right)) == vary;
                     break;
                 case int64_:
                     same = std::get<int64_t>(right) == vary;
                     break;
                 case pchunk_:
-                    same = *std::get<chunk_xptr>(right) == chunk::from_int(vary);
+                    same = *std::get<chunk_xptr>(right) == chunk::from_integer(vary);
             }
         },
 
@@ -376,7 +376,7 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
                     break;
                 case int64_:
                     // This is never executed in standard scripts.
-                    same = chunk::from_int(std::get<int64_t>(right)) == *vary;
+                    same = chunk::from_integer(std::get<int64_t>(right)) == *vary;
                     break;
                 case pchunk_:
                     // This is the canonical use case.

@@ -37,29 +37,34 @@ class integer
 {
 public:
     typedef signed_type<Size> Integer;
-    static_assert(Size <= sizeof(int64_t), "type constraint");
 
-    static inline bool from_int(Integer& out, int64_t vary) noexcept;
+    static inline bool from_integer(Integer& out, int64_t vary) noexcept;
     static inline bool from_chunk(Integer& out,
         const data_chunk& vary) noexcept;
 
 protected:
     static inline bool strict_zero(const data_chunk& vary) noexcept;
+    static inline bool is_overflow(const data_chunk& vary) noexcept;
     static inline bool is_overflow(int64_t value) noexcept;
+
+private:
+    // TODO: .ipp class type constraint syntax.
+    static_assert(Size <= sizeof(int64_t), "guards from_little_endian");
+    static_assert(is_signed<Integer>(), "stack integrals are signed");
 };
 
 class BC_API chunk
 {
 public:
     static inline data_chunk from_bool(bool vary) noexcept;
-    static inline data_chunk from_int(int64_t vary) noexcept;
+    static inline data_chunk from_integer(int64_t vary) noexcept;
 };
 
 class BC_API boolean
 {
 public:
     template <size_t Size = sizeof(int64_t)>
-    static inline signed_type<Size> to_int(bool vary) noexcept;
+    static inline signed_type<Size> to_integer(bool vary) noexcept;
 
     static inline bool from_chunk(const data_chunk& vary) noexcept;
     static inline bool strict_from_chunk(const data_chunk& vary) noexcept;
