@@ -116,7 +116,7 @@ uintx_from_big_endian_chunk(const data_slice& data) noexcept;
 
 template <size_t Bytes>
 inline uintx_t<to_bits(Bytes)>
-uintx_from_little_endian_chunk(const data_chunk& data) noexcept;
+uintx_from_little_endian_chunk(const data_slice& data) noexcept;
 
 template <size_t Bytes>
 constexpr uintx_t<to_bits(Bytes)>
