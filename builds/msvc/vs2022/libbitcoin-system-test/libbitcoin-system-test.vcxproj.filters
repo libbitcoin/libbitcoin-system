@@ -503,9 +503,6 @@
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\machine\number.hpp">
-      <Filter>src\machine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\test.hpp">
       <Filter>src</Filter>
     </ClInclude>

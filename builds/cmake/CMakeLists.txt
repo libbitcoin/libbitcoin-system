@@ -579,7 +579,6 @@ if (with-tests)
         "../../test/error/transaction_error_t.cpp"
         "../../test/machine/interpreter.cpp"
         "../../test/machine/number.cpp"
-        "../../test/machine/number.hpp"
         "../../test/machine/program.cpp"
         "../../test/math/addition.cpp"
         "../../test/math/bits.cpp"

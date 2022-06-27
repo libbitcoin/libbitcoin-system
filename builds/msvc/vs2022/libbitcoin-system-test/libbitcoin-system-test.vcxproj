@@ -233,7 +233,6 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp" />
-    <ClInclude Include="..\..\..\..\test\machine\number.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />
