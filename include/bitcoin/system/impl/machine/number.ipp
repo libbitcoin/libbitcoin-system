@@ -126,10 +126,10 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
     if (negated && negative)
         bytes.push_back(negative_sign_byte);
 
-    else if (negated && !negative)
+    else if (negated /*&& !negative*/)
         bytes.push_back(positive_sign_byte);
 
-    else if (!negated && negative)
+    else if (/*!negated &&*/ negative)
         bytes.back() = to_negated(bytes.back());
 
     // !negated && !negative is a no-op.
