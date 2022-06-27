@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <string>
+#include <string_view>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -61,13 +62,13 @@ BC_API bool decode_base16(data_chunk& out, const std::string& in) noexcept;
 /// False if the input is malformed, or the wrong length.
 template <size_t Size>
 constexpr bool decode_base16(data_array<Size>& out,
-    const std::string& in) noexcept;
+    const std::string_view& in) noexcept;
 
 /// Convert a reversed byte order hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
 template <size_t Size>
 constexpr bool decode_hash(data_array<Size>& out,
-    const std::string& in) noexcept;
+    const std::string_view& in) noexcept;
 
 // Literal decodings of hex string, errors reflected in data.
 // ----------------------------------------------------------------------------

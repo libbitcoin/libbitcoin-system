@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -74,7 +75,7 @@ constexpr bool is_base16(Byte character) noexcept
 
 template <size_t Size>
 constexpr bool decode_base16(data_array<Size>& out,
-    const std::string& in) noexcept
+    const std::string_view& in) noexcept
 {
     if (in.size() != Size * octet_width)
         return false;
@@ -96,7 +97,7 @@ constexpr bool decode_base16(data_array<Size>& out,
 
 template <size_t Size>
 constexpr bool decode_hash(data_array<Size>& out,
-    const std::string& in) noexcept
+    const std::string_view& in) noexcept
 {
     if (in.size() != Size * octet_width)
         return false;
