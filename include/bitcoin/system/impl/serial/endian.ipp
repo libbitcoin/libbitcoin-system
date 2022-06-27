@@ -208,6 +208,8 @@ constexpr Integer from_big(size_t size, const data_slice& data) noexcept
     return value;
 }
 
+// TODO: split into integral and non-integral, use bytecasting for integrals.
+
 template <typename Integer, if_not_one_byte<Integer> = true>
 constexpr Integer from_little(size_t size, const data_slice& data) noexcept
 {
@@ -358,7 +360,7 @@ constexpr Integer from_big_endian(const data_slice& data) noexcept
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
-constexpr  Integer from_little_endian(const data_slice& data) noexcept
+constexpr Integer from_little_endian(const data_slice& data) noexcept
 {
     return from_little<uintx>(data.size(), data);
 }
