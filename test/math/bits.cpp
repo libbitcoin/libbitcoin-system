@@ -82,7 +82,7 @@ static_assert(bit_width(-9) == 32u); // promoted to int by negation
 // 32 bit (signed/negated)
 static_assert(bit_width(-0x80) == 32u); // promoted to int by negation
 static_assert(bit_width(-0x8000) == 32u); // promoted to int by negation
-static_assert(bit_width(-0x800100l) == 32u); // promoted to int by negation
+////static_assert(bit_width(-0x00800100l) == 32u); // literal may be unsigned
 ////static_assert(bit_width(-0x80000000l) == 32u); // max_int32 (sign inverted by negation)
 
 // 64 bit (signed/negated)
@@ -92,7 +92,7 @@ static_assert(bit_width(-0x80010000000000ll) == 64u);
 ////static_assert(bit_width(-0x8000000000000000ll) == 64u);
 static_assert(bit_width<int64_t>(-0x80) == 64u); // promoted to int by negation
 static_assert(bit_width<int64_t>(-0x8000) == 64u); // promoted to int by negation
-static_assert(bit_width<int64_t>(-0x800100l) == 64u); // promoted to int by negation
+static_assert(bit_width<int64_t>(-0x00800100l) == 64u);
 ////static_assert(bit_width<int64_t>(-0x80000000l) == 32u); // max_int32 (sign inverted by negation)
 static_assert(bit_width<int64_t>(-0x8001000000ll) == 64u);
 static_assert(bit_width<int64_t>(-0x800000000000ll) == 64u);

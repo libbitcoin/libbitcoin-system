@@ -96,7 +96,7 @@ static_assert(byte_width(-8) == 4u); // promoted to 32 bit by negation
 static_assert(byte_width(-9) == 4u); // promoted to 32 bit by negation
 static_assert(byte_width(-0x80) == 4u); // promoted to 32 bit by negation
 static_assert(byte_width(-0x8000) == 4u); // promoted to 32 bit by negation
-static_assert(byte_width(-0x800100l) == 4u); // promoted to 32 bit by negation
+////static_assert(byte_width(-0x00800100l) == 4u); // literal may be unsigned
 ////static_assert(byte_width(-0x80000000l) == 4u); // max_int32 (sign inverted by negation)
 
 // 64 bit (signed/negated)
@@ -172,7 +172,7 @@ static_assert(to_negated<uint8_t>(0x01) == 0x81u);
 static_assert(to_negated<uint8_t>(0x7f) == 0xffu);
 static_assert(to_negated<int16_t>(0x7f00) == -256);
 static_assert(to_negated<uint16_t>(0x7f00) == 0xff00u);
-static_assert(to_negated(0x7f000000l) == 0xff000000l); // literal is unsigned
+////static_assert(to_negated(0x7f000000l) == 0xff000000l); // literal is unsigned
 static_assert(to_negated<uint32_t>(0x7f000000l) == 0xff000000l);
 static_assert(to_negated(0x7f00000000000000ll) == 0xff00000000000000ll); // literal is unsigned
 static_assert(std::is_same<decltype(to_negated<int32_t>(0)), int32_t>::value);
