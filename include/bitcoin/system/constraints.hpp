@@ -260,7 +260,7 @@ static_assert(
 
 static_assert(sizeof(size_t) == sizeof(signed_size_t));
 
-/// Alias for -> decltype(dividend / divisor).
+/// Alias for -> decltype(Left [op] Right), resulting integral promotion type.
 template <typename Left, typename Right>
 using to_common_type = typename std::common_type<Left, Right>::type;
 
