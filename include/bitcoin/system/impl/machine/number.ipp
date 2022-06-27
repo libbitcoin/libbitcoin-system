@@ -115,12 +115,13 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
     if (is_zero(vary))
         return {};
 
-    const auto negated = is_negated(vary);
+    const auto value = absolute(vary);
+    const auto negated = is_negated(value);
     const auto negative = is_negative(vary);
 
     // Minimally-sized byte encoding, with extra allocated byte if negated.
     // absolute(minimum<int64_t>) is guarded by the presumption of int32 ops.
-    auto bytes = to_little_endian_chunk(absolute(vary), to_int(negated));
+    auto bytes = to_little_endian_chunk(value, to_int(negated));
 
     if (negated && negative)
         bytes.push_back(negative_sign_byte);
