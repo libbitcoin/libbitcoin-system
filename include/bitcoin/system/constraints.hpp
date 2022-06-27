@@ -223,42 +223,9 @@ using unsigned_type =
 
 template <typename Type>
 using to_signed_type = std::make_signed_t<Type>;
-////std::conditional_t<is_same_size<Type, uint8_t>(), int8_t,
-////    std::conditional_t<is_same_size<Type, uint16_t>(), int16_t,
-////        std::conditional_t<is_same_size<Type, uint32_t>(), int32_t,
-////            int64_t>>>;
 
 template <typename Type>
 using to_unsigned_type = std::make_unsigned_t<Type>;
-////std::conditional_t<is_same_size<Type, int8_t>(), uint8_t,
-////    std::conditional_t<is_same_size<Type, int16_t>(), uint16_t,
-////        std::conditional_t<is_same_size<Type, int32_t>(), uint32_t,
-////            uint64_t>>>;
-
-/// Guard type/size assumptions within the codebase.
-
-// ???
-/// std::make_signed<size_t> creates a type that fails this assertion, which
-/// means that it would fail to bind template arguments. So we implement an
-/// equivalent for the integral types by size. This strips the converted type
-/// of const (as with std::make_signed), but also volatile and least/fast.
-static_assert(
-    is_same<signed_size_t, int32_t>() ||
-    is_same<signed_size_t, int64_t>());
-
-static_assert(
-    is_same_size<signed_size_t, int32_t>() ||
-    is_same_size<signed_size_t, int64_t>());
-
-static_assert(
-    is_same<to_signed_type<size_t>, signed_size_t>() &&
-    is_same<to_unsigned_type<signed_size_t>, size_t>());
-
-static_assert(
-    sizeof(size_t) == sizeof(uint32_t) ||
-    sizeof(size_t) == sizeof(uint64_t));
-
-static_assert(sizeof(size_t) == sizeof(signed_size_t));
 
 /// Alias for -> decltype(Left [op] Right), resulting integral promotion type.
 template <typename Left, typename Right>
@@ -315,6 +282,36 @@ using unsigned_exact_type =
                 std::conditional_t<Bytes == 4u, uint32_t,
                     std::conditional_t<Bytes == 8u, uint64_t,
                         uintx_t<to_bits(Bytes)>>>>>>;
+
+/// Guard type/size assumptions within the codebase.
+
+/// signed_size_t is not the same type, despite having the same size.
+/// In clang/gcc (x86): !(is_same<long, int>() || is_same<long, long long>()).
+/// In which case long and int are both 32 bit types, but are not the same type.
+////static_assert(
+////    is_same<signed_size_t, int32_t>() ||
+////    is_same<signed_size_t, int64_t>());
+
+// This relies on the construction of signed_size_t using std::make_signed_t<size_t>,
+// as this is how the to_signed_type/to_unsigned_type conversions also work.
+static_assert(
+    is_same<to_signed_type<size_t>, signed_size_t>() &&
+    is_same<to_unsigned_type<signed_size_t>, size_t>());
+
+// This are design limitations, and not a matter of C++ specification.
+static_assert(sizeof(char) == one);
+static_assert(sizeof(wchar_t) == two);
+static_assert(
+    sizeof(size_t) == sizeof(uint32_t) ||
+    sizeof(size_t) == sizeof(uint64_t));
+
+// This tests that signed_size_t confirms to the design limitation.
+static_assert(
+    is_same_size<signed_size_t, int32_t>() ||
+    is_same_size<signed_size_t, int64_t>());
+
+// This would be ideal.
+static_assert(sizeof(size_t) == sizeof(signed_size_t));
 
 } // namespace system
 } // namespace libbitcoin

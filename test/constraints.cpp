@@ -440,12 +440,10 @@ static_assert(is_same<to_signed_type<uint8_t>, int8_t>());
 static_assert(is_same<to_signed_type<uint16_t>, int16_t>());
 static_assert(is_same<to_signed_type<uint32_t>, int32_t>());
 static_assert(is_same<to_signed_type<uint64_t>, int64_t>());
-static_assert(is_same<to_signed_type<size_t>, signed_size_t>());
 static_assert(is_same<to_signed_type<int8_t>, int8_t>());
 static_assert(is_same<to_signed_type<int16_t>, int16_t>());
 static_assert(is_same<to_signed_type<int32_t>, int32_t>());
 static_assert(is_same<to_signed_type<int64_t>, int64_t>());
-static_assert(is_same<to_signed_type<signed_size_t>, signed_size_t>());
 
 ////static_assert(is_same<to_signed_type<signed char>, unsigned char>());
 ////static_assert(is_same<to_signed_type<signed short>, unsigned short>());
@@ -456,12 +454,16 @@ static_assert(is_same<to_unsigned_type<int8_t>, uint8_t>());
 static_assert(is_same<to_unsigned_type<int16_t>, uint16_t>());
 static_assert(is_same<to_unsigned_type<int32_t>, uint32_t>());
 static_assert(is_same<to_unsigned_type<int64_t>, uint64_t>());
-static_assert(is_same<to_unsigned_type<signed_size_t>, size_t>());
 static_assert(is_same<to_unsigned_type<uint8_t>, uint8_t>());
 static_assert(is_same<to_unsigned_type<uint16_t>, uint16_t>());
 static_assert(is_same<to_unsigned_type<uint32_t>, uint32_t>());
 static_assert(is_same<to_unsigned_type<uint64_t>, uint64_t>());
 static_assert(is_same<to_unsigned_type<size_t>, size_t>());
+
+// These are guarded in header.
+////static_assert(is_same<to_signed_type<size_t>, signed_size_t>());
+////static_assert(is_same<to_signed_type<signed_size_t>, signed_size_t>());
+////static_assert(is_same<to_unsigned_type<signed_size_t>, size_t>());
 
 static_assert(is_same<to_common_type<bool, int>, int>());
 static_assert(is_same<to_common_type<int, bool>, int>());

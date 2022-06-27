@@ -29,7 +29,6 @@ namespace libbitcoin {
     
 /// Type alias for unsigned size_t.
 using signed_size_t = std::make_signed_t<size_t>;
-////std::conditional_t<sizeof(size_t) == sizeof(uint32_t), int32_t, int64_t>;
 
 /// C++20: all signed types require two's complement negative representation.
 
