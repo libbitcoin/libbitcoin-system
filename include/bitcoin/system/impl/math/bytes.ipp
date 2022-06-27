@@ -53,7 +53,7 @@ template <typename Integer, if_integer<Integer>>
 constexpr Integer to_negated(Integer value) noexcept
 {
     return is_zero(value) ? value :
-        set_right(value, sub1(bit_width(value)), true);
+        set_right(value, sub1(byte_width(value) * byte_bits), true);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
