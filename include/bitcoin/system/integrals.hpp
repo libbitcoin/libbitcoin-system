@@ -33,7 +33,7 @@ static_assert(sizeof(size_t) == sizeof(uint32_t) ||
 
 /// Type alias for unsigned size_t.
 using signed_size_t = std::conditional_t<
-    std::is_same_v<size_t, uint32_t>, int32_t, int64_t>;
+    sizeof(size_t) == sizeof(int32_t), int32_t, int64_t>;
 
 /// std::make_unsigned does not guarantee size correspondence.
 static_assert(sizeof(size_t) == sizeof(signed_size_t));
