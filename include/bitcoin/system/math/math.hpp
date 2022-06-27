@@ -23,21 +23,20 @@
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/bytes.hpp>
 #include <bitcoin/system/math/division.hpp>
-#include <bitcoin/system/math/bytes.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 // Inclusion dependencies:
-// bits     <-
-// bytes    <-
-// limits   <- addition
-// addition <-
-// division <- [bits], power
-// power    <- [bits, limits]
-// safe     <- [bits, limits, addition], sign, power
-// sign     <- [bits, limits, addition, division], power
+// safe     ->
+// sign     -> safe
+// bytes    -> sign
+// division -> sign
+// addition -> sign, safe, limits
+// limits   -> sign, safe, power
+// power    -> sign, safe, division
+// bits     -> sign, safe, division, power
 
 // TODO: verify all non-integral operations do not unnecessarily copy unitx.
 

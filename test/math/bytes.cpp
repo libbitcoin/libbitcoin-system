@@ -18,15 +18,165 @@
  */
 #include "../test.hpp"
 
+BOOST_AUTO_TEST_SUITE(bytes_tests)
+
+ // byte_width (unsigned/positive)
+static_assert(byte_width(0u) == 0u);
+static_assert(byte_width(1u) == 1u);
+static_assert(byte_width(2u) == 1u);
+static_assert(byte_width(3u) == 1u);
+static_assert(byte_width(4u) == 1u);
+static_assert(byte_width(5u) == 1u);
+static_assert(byte_width(6u) == 1u);
+static_assert(byte_width(7u) == 1u);
+static_assert(byte_width(8u) == 1u);
+static_assert(byte_width(9u) == 1u);
+static_assert(byte_width(9u) == 1u);
+static_assert(byte_width(0x80u) == 1u);
+static_assert(byte_width(0x8000u) == 2u);
+static_assert(byte_width(0x800100ul) == 3u);
+static_assert(byte_width(0x80000000ul) == 4u);
+static_assert(byte_width(0x8001000000ull) == 5u);
+static_assert(byte_width(0x800000000000ull) == 6u);
+static_assert(byte_width(0x80010000000000ull) == 7u);
+static_assert(byte_width(0x8000000000000000ull) == 8u);
+
+// 64 bit (unsigned/positive)
+static_assert(byte_width<int64_t>(0x80u) == 1u); // negative
+static_assert(byte_width<int64_t>(0x8000u) == 2u); // negative
+static_assert(byte_width<int64_t>(0x800100ul) == 3u);
+static_assert(byte_width<int64_t>(0x80000000ul) == 4u); // negative
+static_assert(byte_width<int64_t>(0x8001000000ull) == 5u);
+static_assert(byte_width<int64_t>(0x800000000000ull) == 6u);
+static_assert(byte_width<int64_t>(0x80010000000000ull) == 7u);
+static_assert(byte_width<int64_t>(0x8000000000000000ull) == 8u); // negative
+
+// byte_width (signed/positive)
+static_assert(byte_width(0) == 0u);
+static_assert(byte_width(1) == 1u);
+static_assert(byte_width(2) == 1u);
+static_assert(byte_width(3) == 1u);
+static_assert(byte_width(4) == 1u);
+static_assert(byte_width(5) == 1u);
+static_assert(byte_width(6) == 1u);
+static_assert(byte_width(7) == 1u);
+static_assert(byte_width(8) == 1u);
+static_assert(byte_width(9) == 1u);
+static_assert(byte_width(9) == 1u);
+static_assert(byte_width(0x80) == 1u);
+static_assert(byte_width(0x8000) == 2u);
+static_assert(byte_width(0x800100l) == 3u);
+static_assert(byte_width(0x80000000l) == 4u);
+static_assert(byte_width(0x8001000000ll) == 5u);
+static_assert(byte_width(0x800000000000ll) == 6u);
+static_assert(byte_width(0x80010000000000ll) == 7u);
+static_assert(byte_width(0x8000000000000000ll) == 8u);
+static_assert(byte_width<int64_t>(0x80u) == 1u);
+static_assert(byte_width<int64_t>(0x8000u) == 2u);
+static_assert(byte_width<int64_t>(0x800100ul) == 3u);
+static_assert(byte_width<int64_t>(0x80000000ul) == 4u);
+static_assert(byte_width<int64_t>(0x8001000000ull) == 5u);
+static_assert(byte_width<int64_t>(0x800000000000ull) == 6u);
+static_assert(byte_width<int64_t>(0x80010000000000ull) == 7u);
+static_assert(byte_width<int64_t>(0x8000000000000000ull) == 8u);
+
+// byte_width (signed/negative)
+
+// 32 bit (signed/negated)
+static_assert(byte_width(-1) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-2) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-3) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-4) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-5) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-6) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-7) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-8) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-9) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-0x80) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-0x8000) == 4u); // promoted to 32 bit by negation
+static_assert(byte_width(-0x800100l) == 4u); // promoted to 32 bit by negation
+////static_assert(byte_width(-0x80000000l) == 4u); // max_int32 (sign inverted by negation)
+
+// 64 bit (signed/negated)
+static_assert(byte_width(-0x8001000000ll) == 8u);
+static_assert(byte_width(-0x800000000000ll) == 8u);
+static_assert(byte_width(-0x80010000000000ll) == 8u);
+////static_assert(byte_width(-0x8000000000000000ll) == 8u);
+static_assert(byte_width<int64_t>(-0x80) == 8u); // promoted to 32 bit by negation
+static_assert(byte_width<int64_t>(-0x8000) == 8u); // promoted to 32 bit by negation
+static_assert(byte_width<int64_t>(-0x800100) == 8u); // promoted to 32 bit by negation
+////static_assert(byte_width<int64_t>(-0x80000000l) == 4u); // max_int32 (sign inverted by negation)
+static_assert(byte_width<int64_t>(-0x8001000000ll) == 8u);
+static_assert(byte_width<int64_t>(-0x800000000000ll) == 8u);
+static_assert(byte_width<int64_t>(-0x80010000000000ll) == 8u);
+////static_assert(byte_width<int64_t>(-0x8000000000000000ll) == 8u);
+static_assert(std::is_same<decltype(byte_width<int8_t>(0)), size_t>::value);
+
+////static_assert(add1(bit_width(0x00) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x01) % byte_bits) == 2);
+////static_assert(add1(bit_width(0x02) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x03) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x7f) % byte_bits) == 8);
+////static_assert(add1(bit_width(0x80) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x81) % byte_bits) == 1);
+////static_assert(add1(bit_width(0xff) % byte_bits) == 1);
+////
+////static_assert(add1(bit_width(0x0000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x0100) % byte_bits) == 2);
+////static_assert(add1(bit_width(0x0200) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x0300) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x7f00) % byte_bits) == 8);
+////static_assert(add1(bit_width(0x8000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x8100) % byte_bits) == 1);
+////static_assert(add1(bit_width(0xff00) % byte_bits) == 1);
+////
+////static_assert(add1(bit_width(0x000000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x010000) % byte_bits) == 2);
+////static_assert(add1(bit_width(0x020000) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x030000) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x7f0000) % byte_bits) == 8);
+////static_assert(add1(bit_width(0x800000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x810000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0xff0000) % byte_bits) == 1);
+////
+////static_assert(add1(bit_width(0x00000000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x01000000) % byte_bits) == 2);
+////static_assert(add1(bit_width(0x02000000) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x03000000) % byte_bits) == 3);
+////static_assert(add1(bit_width(0x7f000000) % byte_bits) == 8);
+////static_assert(add1(bit_width(0x80000000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0x81000000) % byte_bits) == 1);
+////static_assert(add1(bit_width(0xff000000) % byte_bits) == 1);
+
+// endian
+
 static_assert(to_big_end(narrow_sign_cast<uint8_t>(0x01)) == narrow_sign_cast<uint8_t>(0x01));
 static_assert(to_big_end(narrow_sign_cast<uint16_t>(0x0102)) == narrow_sign_cast<uint16_t>(0x0201));
 static_assert(to_big_end(0x01020304ul) == 0x04030201ul);
 static_assert(to_big_end(0x0102030405060708ull) == 0x0807060504030201ull);
 
+BOOST_AUTO_TEST_CASE(to_big_end__not_constant_evaluated__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
+    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0201));
+    BOOST_REQUIRE_EQUAL(to_big_end(0x01020304ul), 0x04030201ul);
+    BOOST_REQUIRE_EQUAL(to_big_end(0x0102030405060708ull), 0x0807060504030201ull);
+}
+
 static_assert(to_little_end(narrow_sign_cast<uint8_t>(0x01)) == narrow_sign_cast<uint8_t>(0x01));
 static_assert(to_little_end(narrow_sign_cast<uint16_t>(0x0102)) == narrow_sign_cast<uint16_t>(0x0102));
 static_assert(to_little_end(0x01020304ul) == 0x01020304ul);
 static_assert(to_little_end(0x0102030405060708ull) == 0x0102030405060708ull);
+
+BOOST_AUTO_TEST_CASE(to_little_end__not_constant_evaluated__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
+    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0102));
+    BOOST_REQUIRE_EQUAL(to_little_end(0x01020304ul), 0x01020304ul);
+    BOOST_REQUIRE_EQUAL(to_little_end(0x0102030405060708ull), 0x0102030405060708ull);
+}
+
+// byteswap
 
  // Beware of type promotion (use explicit argument).
 static_assert(byteswap(0x01u) == 0x01000000u);
@@ -59,49 +209,6 @@ static_assert(byteswap<int16_t>(narrow_cast<int8_t>(0xfffe)) == narrow_cast<int1
 static_assert(byteswap<int32_t>(0xffffff00) == 0x00ffffff);
 static_assert(byteswap<int64_t>(0xffffffffffffff00ll) == 0x00ffffffffffffffll);
 
-static_assert(to_ceilinged_bytes(0u) == 0);
-static_assert(to_ceilinged_bytes(1u) == 1);
-static_assert(to_ceilinged_bytes(42u) == (42 + 7)/ 8);
-static_assert(to_ceilinged_bytes(0xffu) == (0xff + 7) / 8);
-static_assert(std::is_same<decltype(to_ceilinged_bytes<uint16_t>(0)), uint16_t>::value);
-
-static_assert(to_floored_bytes(0u) == 0);
-static_assert(to_floored_bytes(1u) == 0);
-static_assert(to_floored_bytes(42u) == 42 / 8);
-static_assert(to_floored_bytes(0xffu) == 0xff / 8);
-static_assert(std::is_same<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>::value);
-
-////static_assert(to_bytes<0u>() == 0u);
-static_assert(to_bytes<8u>() == 1u);
-static_assert(to_bytes<16u>() == 2u);
-static_assert(to_bytes<24u>() == 3u);
-static_assert(to_bytes<32u>() == 4u);
-static_assert(to_bytes<40u>() == 5u);
-static_assert(to_bytes<48u>() == 6u);
-static_assert(to_bytes<56u>() == 7u);
-static_assert(to_bytes<64u>() == 8u);
-static_assert(to_bytes<128u>() == 16u);
-static_assert(to_bytes<256u>() == 32u);
-static_assert(std::is_same<decltype(to_bytes<8u>()), size_t>::value);
-
-BOOST_AUTO_TEST_SUITE(bytes_tests)
-
-BOOST_AUTO_TEST_CASE(to_big_end__not_constant_evaluated__always__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
-    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0201));
-    BOOST_REQUIRE_EQUAL(to_big_end(0x01020304ul), 0x04030201ul);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x0102030405060708ull), 0x0807060504030201ull);
-}
-
-BOOST_AUTO_TEST_CASE(to_little_end__not_constant_evaluated__always__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
-    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0102));
-    BOOST_REQUIRE_EQUAL(to_little_end(0x01020304ul), 0x01020304ul);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x0102030405060708ull), 0x0102030405060708ull);
-}
-
 BOOST_AUTO_TEST_CASE(byteswap__not_constant_evaluated__always__swapped)
 {
     BOOST_REQUIRE_EQUAL(byteswap(0x01u), 0x01000000u);
@@ -129,5 +236,30 @@ BOOST_AUTO_TEST_CASE(byteswap__not_constant_evaluated__always__swapped)
     BOOST_REQUIRE_EQUAL(byteswap<int32_t>(0xffffff00l), 0x00ffffff);
     BOOST_REQUIRE_EQUAL(byteswap<int64_t>(0xffffffffffffff00ll), 0x00ffffffffffffff);
 }
+
+////static_assert(to_bytes<0u>() == 0u);
+static_assert(to_bytes<8u>() == 1u);
+static_assert(to_bytes<16u>() == 2u);
+static_assert(to_bytes<24u>() == 3u);
+static_assert(to_bytes<32u>() == 4u);
+static_assert(to_bytes<40u>() == 5u);
+static_assert(to_bytes<48u>() == 6u);
+static_assert(to_bytes<56u>() == 7u);
+static_assert(to_bytes<64u>() == 8u);
+static_assert(to_bytes<128u>() == 16u);
+static_assert(to_bytes<256u>() == 32u);
+static_assert(std::is_same<decltype(to_bytes<8u>()), size_t>::value);
+
+static_assert(to_ceilinged_bytes(0u) == 0);
+static_assert(to_ceilinged_bytes(1u) == 1);
+static_assert(to_ceilinged_bytes(42u) == (42 + 7)/ 8);
+static_assert(to_ceilinged_bytes(0xffu) == (0xff + 7) / 8);
+static_assert(std::is_same<decltype(to_ceilinged_bytes<uint16_t>(0)), uint16_t>::value);
+
+static_assert(to_floored_bytes(0u) == 0);
+static_assert(to_floored_bytes(1u) == 0);
+static_assert(to_floored_bytes(42u) == 42 / 8);
+static_assert(to_floored_bytes(0xffu) == 0xff / 8);
+static_assert(std::is_same<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>::value);
 
 BOOST_AUTO_TEST_SUITE_END()

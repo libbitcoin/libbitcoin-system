@@ -37,7 +37,7 @@ namespace system {
 // Use of =&, =|,=<<, =>> is unguarded as these operators are not subject to
 // promotion. All other native operators are guarded against promotion.
 
-// Bit field width determinations.
+// Widths.
 // ----------------------------------------------------------------------------
 
 template <typename Value, if_unsigned_integer<Value>>
@@ -50,18 +50,6 @@ template <typename Value, if_signed_integer<Value>>
 constexpr size_t bit_width(Value value) noexcept
 {
     return is_negative(value) ? width<Value>() : bit_width(to_unsigned(value));
-}
-
-template <typename Value, if_unsigned_integer<Value>>
-constexpr size_t byte_width(Value value) noexcept
-{
-    return ceilinged_divide(bit_width(value), byte_bits);
-}
-
-template <typename Value, if_signed_integer<Value>>
-constexpr size_t byte_width(Value value) noexcept
-{
-    return is_negative(value) ? sizeof(Value) : byte_width(to_unsigned(value));
 }
 
 // Bitwise logical operations.

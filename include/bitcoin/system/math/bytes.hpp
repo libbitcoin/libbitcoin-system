@@ -25,6 +25,30 @@
 namespace libbitcoin {
 namespace system {
 
+/// Widths.
+
+/// See also std::bit_width (C++20).
+/// The number of bytes required to store value, byte_width(0) returns zero.
+/// A negative value always returns sizeof(Value).
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t byte_width(Value value) noexcept;
+template <typename Value, if_signed_integer<Value> = true>
+constexpr size_t byte_width(Value value) noexcept;
+
+/// Get high order bit of high order byte.
+template <typename Integer, if_integer<Integer> = true>
+constexpr bool is_negated(Integer value) noexcept;
+
+/// Set high order bit of high order byte.
+template <typename Integer, if_integer<Integer> = true>
+constexpr Integer to_negated(Integer value) noexcept;
+
+/// Clear high order bit of high order byte, and if set negate the result.
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr Integer to_unnegated(Integer value) noexcept;
+
+/// Endianness.
+
 /// Convert a native integral integer to big-endian.
 template <typename Integer,
     if_big_endian_integral_integer<Integer> = true>
