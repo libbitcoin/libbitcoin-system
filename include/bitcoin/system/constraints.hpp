@@ -222,14 +222,14 @@ using unsigned_type =
                     uint64_t>>>>;
 
 template <typename Type>
-using to_signed_type = std::make_signed<Type>::type;
+using to_signed_type = std::make_signed_t<Type>;
 ////std::conditional_t<is_same_size<Type, uint8_t>(), int8_t,
 ////    std::conditional_t<is_same_size<Type, uint16_t>(), int16_t,
 ////        std::conditional_t<is_same_size<Type, uint32_t>(), int32_t,
 ////            int64_t>>>;
 
 template <typename Type>
-using to_unsigned_type = std::make_unsigned<Type>::type;
+using to_unsigned_type = std::make_unsigned_t<Type>;
 ////std::conditional_t<is_same_size<Type, int8_t>(), uint8_t,
 ////    std::conditional_t<is_same_size<Type, int16_t>(), uint16_t,
 ////        std::conditional_t<is_same_size<Type, int32_t>(), uint32_t,
