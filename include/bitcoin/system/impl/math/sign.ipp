@@ -40,30 +40,26 @@ constexpr Unsigned to_unsigned(Integer value) noexcept
     return possible_sign_cast<Unsigned>(value);
 }
 
-template <typename Integer, typename Absolute,
+template <typename Integer, typename Result,
     if_signed_integer<Integer>>
-constexpr Absolute absolute(Integer value) noexcept
+constexpr Result absolute(Integer value) noexcept
 {
     // std::abs is limited to signed types.
-    // -minimum<signed> is undefined behavior.
-    // Casting alone obtains the twos complement, not same as negation.
-    return to_unsigned(is_negative(value) ? -value : value);
+    return to_unsigned(is_negative(value) ? negate(value) : value);
 }
 
-template <typename Integer, typename Absolute,
+template <typename Integer,
     if_unsigned_integer<Integer>>
-constexpr Absolute absolute(Integer value) noexcept
+constexpr Integer absolute(Integer value) noexcept
 {
     return value;
 }
-template <typename Result, typename Integer,
-    if_signed_integer<Result>,
-    if_signed_integer<Integer>,
-    if_not_lesser_width<Result, Integer>>
-constexpr Result negate(Integer value) noexcept
+
+template <typename Integer,
+    if_signed_integer<Integer>>
+constexpr Integer negate(Integer value) noexcept
 {
-    // Wide cast to result domain, narrow cast in case of negate promotion.
-    return possible_narrow_cast<Result>(-possible_wide_cast<Result>(value));
+    return depromote<Integer>(-value);
 }
 
 template <typename Integer,
@@ -127,8 +123,7 @@ template<typename Result, typename Left, typename Right,
 constexpr Result greater(Left left, Right right) noexcept
 {
     // Precludes Result narrower than either operand.
-    return is_greater(left, right) ? possible_sign_cast<Result>(left) :
-        possible_sign_cast<Result>(right);
+    return possible_sign_cast<Result>(is_greater(left, right) ? left : right);
 }
 
 template<typename Result, typename Left, typename Right,
@@ -136,8 +131,7 @@ template<typename Result, typename Left, typename Right,
 constexpr Result lesser(Left left, Right right) noexcept
 {
     // Precludes Result narrower than either operand.
-    return is_lesser(left, right) ? possible_sign_cast<Result>(left) :
-        possible_sign_cast<Result>(right);
+    return possible_sign_cast<Result>(is_lesser(left, right) ? left : right);
 }
 
 } // namespace system
