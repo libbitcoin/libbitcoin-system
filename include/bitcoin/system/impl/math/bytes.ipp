@@ -117,9 +117,9 @@ template <typename Integer,
 constexpr Integer byteswap(Integer value) noexcept
 {
     // Compiles away to direct API call for non-constexpr.
-    return possible_sign_cast<Integer>(std::is_constant_evaluated() ?
-        byte_swap16_native(to_unsigned(value)) :
-        byte_swap16(to_unsigned(value)));
+    return std::is_constant_evaluated() ?
+        possible_sign_cast<Integer>(byte_swap16_native(to_unsigned(value))) :
+        possible_sign_cast<Integer>(byte_swap16(to_unsigned(value)));
 }
 
 template <typename Integer,
@@ -129,9 +129,9 @@ template <typename Integer,
 constexpr Integer byteswap(Integer value) noexcept
 {
     // Compiles away to direct API call for non-constexpr.
-    return possible_sign_cast<Integer>(std::is_constant_evaluated() ?
-        byte_swap32_native(to_unsigned(value)) :
-        byte_swap32(to_unsigned(value)));
+    return std::is_constant_evaluated() ?
+        possible_sign_cast<Integer>(byte_swap32_native(to_unsigned(value))) :
+        possible_sign_cast<Integer>(byte_swap32(to_unsigned(value)));
 }
 
 template <typename Integer,
@@ -141,9 +141,9 @@ template <typename Integer,
 constexpr Integer byteswap(Integer value) noexcept
 {
     // Compiles away to direct API call for non-constexpr.
-    return possible_sign_cast<Integer>(std::is_constant_evaluated() ?
-        byte_swap64_native(to_unsigned(value)) :
-        byte_swap64(to_unsigned(value)));
+    return std::is_constant_evaluated() ?
+        possible_sign_cast<Integer>(byte_swap64_native(to_unsigned(value))) :
+        possible_sign_cast<Integer>(byte_swap64(to_unsigned(value)));
 }
 
 // bits to bytes
