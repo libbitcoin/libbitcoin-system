@@ -160,32 +160,28 @@ constexpr bool get_right(Value value, size_t offset) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value set_left(const Value& target, size_t offset,
-    bool state) noexcept
+constexpr Value set_left(Value target, size_t offset, bool state) noexcept
 {
     const auto bit = bit_left<Value>(offset);
     return state ? bit_or(target, bit) : bit_and(target, bit_not(bit));
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr void set_left_into(Value& target, size_t offset,
-    bool state) noexcept
+constexpr void set_left_into(Value& target, size_t offset, bool state) noexcept
 {
     const auto bit = bit_left<Value>(offset);
     state ? target |= bit : target &= bit_not(bit);
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value set_right(const Value& target, size_t offset,
-    bool state) noexcept
+constexpr Value set_right(Value target, size_t offset, bool state) noexcept
 {
     const auto bit = bit_right<Value>(offset);
     return state ? bit_or(target, bit) : bit_and(target, bit_not(bit));
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr void set_right_into(Value& target, size_t offset,
-    bool state) noexcept
+constexpr void set_right_into(Value& target, size_t offset, bool state) noexcept
 {
     const auto bit = bit_right<Value>(offset);
     state ? target |= bit : target &= bit_not(bit);
@@ -208,7 +204,7 @@ constexpr Value mask_left(size_t bits) noexcept
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value mask_left(const Value& value, size_t bits) noexcept
+constexpr Value mask_left(Value value, size_t bits) noexcept
 {
     return bit_and(value, mask_left<Value>(bits));
 }
@@ -226,7 +222,7 @@ constexpr Value mask_right(size_t bits) noexcept
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value mask_right(const Value& value, size_t bits) noexcept
+constexpr Value mask_right(Value value, size_t bits) noexcept
 {
     return bit_and(value, mask_right<Value>(bits));
 }
@@ -247,7 +243,7 @@ constexpr Value unmask_left(size_t bits) noexcept
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value unmask_left(const Value& value, size_t bits) noexcept
+constexpr Value unmask_left(Value value, size_t bits) noexcept
 {
     return bit_or(unmask_left<Value>(bits), value);
 }
@@ -265,7 +261,7 @@ constexpr Value unmask_right(size_t bits) noexcept
 }
 
 template <typename Value, if_integral_integer<Value>>
-constexpr Value unmask_right(const Value& value, size_t bits) noexcept
+constexpr Value unmask_right(Value value, size_t bits) noexcept
 {
     return bit_or(unmask_right<Value>(bits), value);
 }
@@ -290,16 +286,14 @@ constexpr void unmask_right_into(Value& value, size_t bits) noexcept
 
 // OPERATOR <<
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr Value shift_left(const Value& value, size_t shift,
-    bool overflow) noexcept
+constexpr Value shift_left(Value value, size_t shift, bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     return overflow && shift >= span ? 0 : depromote<Value>(
         value << (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr void shift_left_into(Value& value, size_t shift,
-    bool overflow) noexcept
+constexpr void shift_left_into(Value& value, size_t shift, bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     overflow && shift >= span ? value = 0 :
@@ -308,16 +302,14 @@ constexpr void shift_left_into(Value& value, size_t shift,
 
 // signed overloads (shift left of negative is undefined behavior).
 template <typename Value, if_signed_integral_integer<Value>>
-constexpr Value shift_left(const Value& value, size_t shift,
-    bool overflow) noexcept
+constexpr Value shift_left(Value value, size_t shift, bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     return overflow && shift >= span ? 0 : depromote<Value>(
         to_signed(to_unsigned(value) << (shift % span)));
 }
 template <typename Value, if_signed_integral_integer<Value>>
-constexpr void shift_left_into(Value& value, size_t shift,
-    bool overflow) noexcept
+constexpr void shift_left_into(Value& value, size_t shift, bool overflow) noexcept
 {
     // Defined behavior for negative value.
     value = to_signed<Value>(shift_left(to_unsigned(value), shift, overflow));
@@ -325,16 +317,14 @@ constexpr void shift_left_into(Value& value, size_t shift,
 
 // OPERATOR >>
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr Value shift_right(const Value& value, size_t shift,
-    bool overflow) noexcept
+constexpr Value shift_right(Value value, size_t shift, bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     return overflow && shift >= span ? 0 : depromote<Value>(
         value >> (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr void shift_right_into(Value& value, size_t shift,
-    bool overflow) noexcept
+constexpr void shift_right_into(Value& value, size_t shift, bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     overflow && shift >= span ? value = 0 : depromote<Value>(
@@ -343,8 +333,7 @@ constexpr void shift_right_into(Value& value, size_t shift,
 
 // signed overloads (shift right of negative is unspecified behavior).
 template <typename Value, if_signed_integral_integer<Value>>
-constexpr Value shift_right(const Value& value, size_t shift,
-    bool overflow) noexcept
+constexpr Value shift_right(Value value, size_t shift, bool overflow) noexcept
 {
     constexpr auto span = width<Value>();
     return overflow && shift >= span ? 0 : depromote<Value>(
@@ -367,7 +356,7 @@ constexpr void shift_right_into(Value& value, size_t shift,
 // Shift left/right of negative is undefined/unspecified, so these are unsigned.
 
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr Value rotate_left(const Value& value, size_t shift) noexcept
+constexpr Value rotate_left(Value value, size_t shift) noexcept
 {
     constexpr auto span = width<Value>();
     return bit_or(shift_left(value, shift % span),
@@ -383,7 +372,7 @@ constexpr void rotate_left_into(Value& value, size_t shift) noexcept
 }
 
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr Value rotate_right(const Value& value, size_t shift) noexcept
+constexpr Value rotate_right(Value value, size_t shift) noexcept
 {
     constexpr auto span = width<Value>();
     return bit_or(shift_right(value, shift % span),

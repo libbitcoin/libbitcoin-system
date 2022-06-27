@@ -102,7 +102,7 @@ constexpr bool get_right(Value value, size_t offset=zero) noexcept;
 
 /// Set a bit in target, offset relative to highest order bit.
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value set_left(const Value& target, size_t offset=zero,
+constexpr Value set_left(Value target, size_t offset=zero,
     bool state=true) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr void set_left_into(Value& target, size_t offset=zero,
@@ -110,7 +110,7 @@ constexpr void set_left_into(Value& target, size_t offset=zero,
 
 /// Set a bit in target, offset relative to lowest order bit.
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value set_right(const Value& target, size_t offset=zero,
+constexpr Value set_right(Value target, size_t offset=zero,
     bool state=true) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr void set_right_into(Value& target, size_t offset=zero,
@@ -123,7 +123,7 @@ constexpr void set_right_into(Value& target, size_t offset=zero,
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value mask_left(size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value mask_left(const Value& target, size_t bits=one) noexcept;
+constexpr Value mask_left(Value target, size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr void mask_left_into(Value& target, size_t bits=one) noexcept;
 
@@ -131,7 +131,7 @@ constexpr void mask_left_into(Value& target, size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value mask_right(size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value mask_right(const Value& target, size_t bits=one) noexcept;
+constexpr Value mask_right(Value target, size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr void mask_right_into(Value& target, size_t bits=one) noexcept;
 
@@ -142,7 +142,7 @@ constexpr void mask_right_into(Value& target, size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value unmask_left(size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value unmask_left(const Value& target, size_t bits=one) noexcept;
+constexpr Value unmask_left(Value target, size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value unmask_left_into(Value& target, size_t bits=one) noexcept;
 
@@ -150,7 +150,7 @@ constexpr Value unmask_left_into(Value& target, size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr Value unmask_right(size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value unmask_right(const Value& target, size_t bits=one) noexcept;
+constexpr Value unmask_right(Value target, size_t bits=one) noexcept;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr void unmask_right_into(Value& target, size_t bits=one) noexcept;
 
@@ -161,10 +161,10 @@ constexpr void unmask_right_into(Value& target, size_t bits=one) noexcept;
 /// Set overflow to false to modulo shift by Value width.
 /// Signed overload interpret value as unsigned for shift.
 template <typename Value, if_signed_integral_integer<Value> = true>
-constexpr Value shift_left(const Value& value, size_t shift=one,
+constexpr Value shift_left(Value value, size_t shift=one,
     bool overflow=true) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
-constexpr Value shift_left(const Value& value, size_t shift=one,
+constexpr Value shift_left(Value value, size_t shift=one,
     bool overflow = true) noexcept;
 template <typename Value, if_signed_integral_integer<Value> = true>
 constexpr void shift_left_into(Value& value, size_t shift=one,
@@ -177,10 +177,10 @@ constexpr void shift_left_into(Value& value, size_t shift=one,
 /// Set overflow to false to modulo shift by Value width.
 /// Signed overload interpret value as unsigned for shift.
 template <typename Value, if_signed_integral_integer<Value> = true>
-constexpr Value shift_right(const Value& value, size_t shift=one,
+constexpr Value shift_right(Value value, size_t shift=one,
     bool overflow=true) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
-constexpr Value shift_right(const Value& value, size_t shift=one,
+constexpr Value shift_right(Value value, size_t shift=one,
     bool overflow = true) noexcept;
 template <typename Value, if_signed_integral_integer<Value> = true>
 constexpr void shift_right_into(Value& value, size_t shift=one,
@@ -195,14 +195,14 @@ constexpr void shift_right_into(Value& value, size_t shift=one,
 /// Bitwise left rotation of value by shift.
 /// Rotation by any shift behaves as a continuous rotation.
 template <typename Value, if_unsigned_integral_integer<Value> = true>
-constexpr Value rotate_left(const Value& value, size_t shift=one) noexcept;
+constexpr Value rotate_left(Value value, size_t shift=one) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
 constexpr void rotate_left_into(Value& value, size_t shift=one) noexcept;
 
 /// Bitwise right rotation of value by shift.
 /// Rotation by any shift behaves as a continuous rotation.
 template <typename Value, if_unsigned_integral_integer<Value> = true>
-constexpr Value rotate_right(const Value& value, size_t shift=one) noexcept;
+constexpr Value rotate_right(Value value, size_t shift=one) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
 constexpr void rotate_right_into(Value& value, size_t shift=one) noexcept;
 
