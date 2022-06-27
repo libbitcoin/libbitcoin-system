@@ -16,22 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_256E_HPP
-#define LIBBITCOIN_SYSTEM_RADIX_BASE_256E_HPP
+#ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_2N_HPP
+#define LIBBITCOIN_SYSTEM_RADIX_BASE_2N_HPP
 
-#include <cstdint>
+#include <cstddef>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace base256e {
 
-/// base256e
-/// A base 256 exponential form representation of 32 byte (uint256_t) values,
-/// with 24 bits of precision. Two bits wasted in exponential representation.
-
+/// base2n
 // For unsigned and byte-aligned { span, base, precision } where
 // [precision <= span / log2(base)] and representation is integral:
 
@@ -60,40 +56,60 @@ namespace base256e {
 // [m * base^e] == [m << shift] for +e.
 // [m * base^e] == [m >> shift] for -e.
 
-/// All derived from parameters, no magic numbers.
+template <size_t Base = 256u, size_t Precision = 24u, size_t Span = 256u>
+class base2n
+{
+public:
+    static constexpr size_t base = Base;
+    static constexpr size_t precision = Precision;
+    static constexpr size_t span = Span;
 
-/// Parameters
-constexpr auto span = 256u;
-constexpr auto base = 256u;
-constexpr auto precision = 24u;
-static_assert(is_bytes_width(span));
-static_assert(is_bytes_width(base));
-static_assert(is_bytes_width(precision));
+    static constexpr size_t factor  = floored_log2(base);
+    static constexpr size_t e_max   = span / factor;
+    static constexpr size_t e_bits  = ceilinged_log2(e_max);
+    static constexpr size_t e_bytes = to_ceilinged_bytes(e_bits);
+    static constexpr size_t e_width = to_bits(e_bytes);
+    static constexpr size_t m_bytes = precision / factor;
 
-/// Sizes
-constexpr auto factor = floored_log2(base);
-constexpr auto e_max = span / factor;
-constexpr auto e_bits = ceilinged_log2(e_max);
-constexpr auto e_bytes = to_ceilinged_bytes(e_bits);
-constexpr auto e_width = to_bits(e_bytes);
-constexpr auto m_bytes = precision / factor;
-static_assert(precision <= e_max);
+    using span_type = unsigned_exact_type<span / byte_bits>;
+    using small_type = unsigned_type<m_bytes + e_bytes>;
 
-/// Types
-using compact_type = unsigned_type<m_bytes + e_bytes>;
-using number_type = unsigned_exact_type<to_bytes<span>()>;
-static_assert(is_integral<compact_type>());
+    /// A zero value implies an invalid (including zero) parameter.
+    /// Invalid if a padding bit is set. Allows non-minimal exponent encoding.
+    static constexpr span_type expand(small_type exponential) noexcept;
 
-/// A zero value implies an invalid (including zero) parameter.
-/// Invalid if either padding bit is set. Allows non-minimal exponent encoding.
-number_type expand(compact_type exponential) noexcept;
+    /// (m * ^e) bit-encoded as [00eeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
+    /// Highest two bits are padded with zeros, uses minimal exponent encoding.
+    static constexpr small_type compress(const span_type& value) noexcept;
 
-/// (m * 256^e) bit-encoded as [00eeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
-/// The highest two bits are padded with zeros, uses minimal exponent encoding.
-compact_type compress(const number_type& value) noexcept;
+protected:
+    template <typename Integer>
+    static constexpr Integer raise(Integer exponent) noexcept
+    {
+        return exponent * factor;
+    }
 
-} // namespace base256e
+    template <typename Integer>
+    static constexpr Integer lower(Integer exponent) noexcept
+    {
+        return exponent / factor;
+    }
+
+private:
+    // Paramter constraints.
+    static_assert(is_bytes_width(Span));
+    static_assert(is_bytes_width(base));
+    static_assert(is_bytes_width(precision));
+    static_assert(is_integral<small_type>());
+    static_assert(precision <= e_max);
+};
+
+/// chain::header.bits
+using base256e = base2n<256, 24, 256>;
+
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/radix/base_2n.ipp>
 
 #endif

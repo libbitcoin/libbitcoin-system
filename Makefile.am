@@ -110,7 +110,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/radix/base_10.cpp \
     src/radix/base_16.cpp \
     src/radix/base_2048.cpp \
-    src/radix/base_256e.cpp \
     src/radix/base_32.cpp \
     src/radix/base_58.cpp \
     src/radix/base_64.cpp \
@@ -290,7 +289,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
     test/radix/base_2048.cpp \
-    test/radix/base_256e.cpp \
+    test/radix/base_2n.cpp \
     test/radix/base_32.cpp \
     test/radix/base_58.cpp \
     test/radix/base_64.cpp \
@@ -536,6 +535,7 @@ include_bitcoin_system_impl_math_HEADERS = \
 include_bitcoin_system_impl_radixdir = ${includedir}/bitcoin/system/impl/radix
 include_bitcoin_system_impl_radix_HEADERS = \
     include/bitcoin/system/impl/radix/base_16.ipp \
+    include/bitcoin/system/impl/radix/base_2n.ipp \
     include/bitcoin/system/impl/radix/base_58.ipp
 
 include_bitcoin_system_impl_serialdir = ${includedir}/bitcoin/system/impl/serial
@@ -595,7 +595,7 @@ include_bitcoin_system_radix_HEADERS = \
     include/bitcoin/system/radix/base_10.hpp \
     include/bitcoin/system/radix/base_16.hpp \
     include/bitcoin/system/radix/base_2048.hpp \
-    include/bitcoin/system/radix/base_256e.hpp \
+    include/bitcoin/system/radix/base_2n.hpp \
     include/bitcoin/system/radix/base_32.hpp \
     include/bitcoin/system/radix/base_58.hpp \
     include/bitcoin/system/radix/base_64.hpp \

@@ -175,7 +175,6 @@
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
-    <ClCompile Include="..\..\..\..\src\radix\base_256e.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_32.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_58.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_64.cpp" />
@@ -364,7 +363,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2048.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_256e.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2n.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_32.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_64.hpp" />
@@ -499,6 +498,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\safe.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\deserialize.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\endian.ipp" />

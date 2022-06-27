@@ -144,7 +144,7 @@
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />
-    <ClCompile Include="..\..\..\..\test\radix\base_256e.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_2n.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_32.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_58.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_64.cpp" />

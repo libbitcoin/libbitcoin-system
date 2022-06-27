@@ -20,13 +20,13 @@
 #define LIBBITCOIN_SYSTEM_RADIX_RADIX_HPP
 
 ////#include <bitcoin/system/radix/base_2.hpp>
+#include <bitcoin/system/radix/base_2n.hpp>
 #include <bitcoin/system/radix/base_10.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/radix/base_32.hpp>
 #include <bitcoin/system/radix/base_58.hpp>
 #include <bitcoin/system/radix/base_64.hpp>
 #include <bitcoin/system/radix/base_85.hpp>
-#include <bitcoin/system/radix/base_256e.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>
 
 #endif

@@ -417,9 +417,6 @@
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\radix\base_256e.cpp">
-      <Filter>src\radix</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\radix\base_32.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
@@ -938,7 +935,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2048.hpp">
       <Filter>include\bitcoin\system\radix</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_256e.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2n.hpp">
       <Filter>include\bitcoin\system\radix</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_32.hpp">
@@ -1337,6 +1334,9 @@
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp">
+      <Filter>include\bitcoin\system\impl\radix</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp">
       <Filter>include\bitcoin\system\impl\radix</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp">
