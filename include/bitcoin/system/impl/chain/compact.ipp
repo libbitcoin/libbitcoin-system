@@ -86,18 +86,20 @@ constexpr compact::span_type
 compact::expand(small_type exponential) noexcept
 {
     auto compact = to_compact(exponential);
-    
+
     if (compact.negative)
         return 0;
 
-    // This is strict validation (lax would also allow add2/sub2).
+    // This is strict validation.
     if (compact.exponent == add1(e_max) &&
         is_negated(compact.mantissa) &&
-        ceilinged_log256(compact.mantissa) == sub1(m_bytes))
+        byte_width(compact.mantissa) == sub1(m_bytes))
     {
         compact.exponent--;
         compact.mantissa <<= raise(one);
     }
+
+    // Above exists only because negatives were inadvertently excluded.
     
     return base256e::expand(from_compact(compact));
 }
@@ -106,6 +108,8 @@ constexpr compact::small_type
 compact::compress(const span_type& number) noexcept
 {
     auto compact = to_compact(base256e::compress(number));
+
+    // Below exists only to work around negatives being inadvertently excluded.
 
     if (compact.negative)
     {

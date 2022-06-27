@@ -165,13 +165,13 @@ constexpr Value shift_left(Value value, size_t shift=one,
     bool overflow=true) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
 constexpr Value shift_left(Value value, size_t shift=one,
-    bool overflow = true) noexcept;
+    bool overflow=true) noexcept;
 template <typename Value, if_signed_integral_integer<Value> = true>
 constexpr void shift_left_into(Value& value, size_t shift=one,
     bool overflow=true) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
 constexpr void shift_left_into(Value& value, size_t shift=one,
-    bool overflow = true) noexcept;
+    bool overflow=true) noexcept;
 
 /// Bitwise RIGHT SHIFT (value >> shift) operation.
 /// Set overflow to false to modulo shift by Value width.
@@ -181,13 +181,13 @@ constexpr Value shift_right(Value value, size_t shift=one,
     bool overflow=true) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
 constexpr Value shift_right(Value value, size_t shift=one,
-    bool overflow = true) noexcept;
+    bool overflow=true) noexcept;
 template <typename Value, if_signed_integral_integer<Value> = true>
 constexpr void shift_right_into(Value& value, size_t shift=one,
     bool overflow=true) noexcept;
 template <typename Value, if_unsigned_integral_integer<Value> = true>
 constexpr void shift_right_into(Value& value, size_t shift=one,
-    bool overflow = true) noexcept;
+    bool overflow=true) noexcept;
 
 /// Rotate (left/right).
 /// ---------------------------------------------------------------------------

@@ -167,15 +167,13 @@ static_assert( is_negated(0xff000000000042ll));
 static_assert(std::is_same<decltype(is_negated<int32_t>(0)), bool>::value);
 
 // to_negated (integral)
-static_assert(to_negated(0x00) == 0x00);
-static_assert(to_negated(0x01) == 0x81);
-static_assert(to_negated(0x7f) == 0xff);
-static_assert(to_negated(0x7f00) == 0xff00);
-static_assert(to_negated(0x7f0000l) == 0xff0000l);
+static_assert(to_negated<int8_t>(0x00) == -128);
+static_assert(to_negated<uint8_t>(0x01) == 0x81u);
+static_assert(to_negated<uint8_t>(0x7f) == 0xffu);
+static_assert(to_negated<int16_t>(0x7f00) == -256);
+static_assert(to_negated<uint16_t>(0x7f00) == 0xff00u);
 static_assert(to_negated(0x7f000000l) == 0xff000000l); // literal is unsigned
-static_assert(to_negated(0x7f00000000l) == 0xff00000000l);
-static_assert(to_negated(0x7f0000000000ll) == 0xff0000000000ll);
-static_assert(to_negated(0x7f000000000000ll) == 0xff000000000000ll);
+static_assert(to_negated<uint32_t>(0x7f000000l) == 0xff000000l);
 static_assert(to_negated(0x7f00000000000000ll) == 0xff00000000000000ll); // literal is unsigned
 static_assert(std::is_same<decltype(to_negated<int32_t>(0)), int32_t>::value);
 

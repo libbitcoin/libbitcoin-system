@@ -33,7 +33,7 @@ namespace system {
 template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t byte_width(Value value) noexcept
 {
-    return ceilinged_divide(bit_width(value), byte_bits);
+    return ceilinged_log256(value);
 }
 
 template <typename Value, if_signed_integer<Value>>
@@ -42,26 +42,28 @@ constexpr size_t byte_width(Value value) noexcept
     return is_negative(value) ? sizeof(Value) : byte_width(to_unsigned(value));
 }
 
+// ****************************************************************************
+// CONSENSUS: negation is consensus behavior, see machine::number.
+// ****************************************************************************
+
 template <typename Integer, if_integer<Integer>>
 constexpr bool is_negated(Integer value) noexcept
 {
-    // High order bit of high order byte.
-    return is_nonzero(value) && (add1(bit_width(value) % byte_bits) == one);
+    return is_nonzero(value) && add1(bit_width(value) % byte_bits) == one;
 };
 
 template <typename Integer, if_integer<Integer>>
 constexpr Integer to_negated(Integer value) noexcept
 {
-    return is_zero(value) ? value :
-        set_right(value, sub1(to_bits(byte_width(value))), true);
+    return set_left(value, zero, true);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
 constexpr Integer to_unnegated(Integer value) noexcept
 {
-    // -minimum<Integer> is undefined, but this is precluded by set_right.
-    return !is_negated(value) ? value :
-        negate<Integer>(set_right(value, sub1(bit_width(value)), false));
+    // -minimum<Integer> (undefined behavior) precluded by set_right.
+    return !is_negated(value) ? value : negate(
+        set_right(value, sub1(bit_width(value)), false));
 }
 
 // native-to-endian integral conversions

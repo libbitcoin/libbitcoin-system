@@ -35,8 +35,21 @@ namespace system {
 namespace machine {
 namespace number {
 
+// ****************************************************************************
+// CONSENSUS:
+// Due to compression, a leading sign byte is required if high bit is set.
+// This produces two zero representations (+/-0). The subsequent byte-based
+// overflow constraint thereby restricts the stack's 64-bit integer domain by
+// one value. An implementation that either avoided vectorization or vector
+// compression in the first place, or later implemented the overflow guard over
+// the converted integeral would have avoided this seam. These were both
+// premature optimizations, as a variant stack is more efficient than variably-
+// lengthed byte vector integral storage. The resulting integer domain
+// reduction is captured by the is_overflow functions below.
+// ****************************************************************************
+
 constexpr uint8_t positive_sign_byte = 0x00;
-constexpr uint8_t negative_sign_byte = bit_hi<uint8_t>();
+constexpr uint8_t negative_sign_byte = to_negated(positive_sign_byte);
 
 // integer
 // ----------------------------------------------------------------------------
@@ -62,9 +75,12 @@ inline bool integer<Size>::from_chunk(Integer& out,
     if (is_overflow(vary))
         return false;
 
-    // Signed type alowed, value is presumed positive by stack encoding but may
-    // not be due to conversion of non-integral chunks pushed to the stack.
-    out = to_unnegated(from_little_endian<Integer>(vary));
+    out = from_little_endian<Integer>(vary);
+
+    // Restore sign from indication.
+    if (is_negated(vary.back()))
+        out = to_unnegated(out);
+
     return true;
 }
 
@@ -74,18 +90,6 @@ inline bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
 {
     return vary.empty();
 }
-
-// ****************************************************************************
-// CONSENSUS: Due to compression, a leading sign byte is required if high bit
-// is set. This produces two zero representations (+/-0). The subsequent byte-
-// based overflow constraint thereby restricts the stack's 64-bit integer
-// domain by one value. An implementation that either avoided vectorization or
-// vector compression in the first place, or later implemented the overflow
-// guard over the converted integeral would have avoided this seam. These were
-// both premature optimizations, as a variant stack is more efficient than
-// variably-lengthed byte vector integral storage. The resulting integer domain
-// reduction is captured by the is_overflow functions below.
-// ****************************************************************************
 
 // protected
 template <size_t Size>
@@ -103,6 +107,8 @@ inline bool integer<Size>::is_overflow(int64_t value) noexcept
 
 // chunk
 // ----------------------------------------------------------------------------
+// Minimally-sized byte encoding, with extra allocated byte if negated.
+// absolute(minimum<int64_t>) is guarded by the presumption of int32 ops.
 
 inline data_chunk chunk::from_bool(bool vary) noexcept
 {
@@ -119,20 +125,16 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
     const auto negated = is_negated(value);
     const auto negative = is_negative(vary);
 
-    // Minimally-sized byte encoding, with extra allocated byte if negated.
-    // absolute(minimum<int64_t>) is guarded by the presumption of int32 ops.
     auto bytes = to_little_endian_size(value, to_int(negated));
 
+    // Indicate the sign.
     if (negated && negative)
         bytes.push_back(negative_sign_byte);
-
-    else if (negated /*&& !negative*/)
+    else if (negated)
         bytes.push_back(positive_sign_byte);
-
-    else if (negative /*&& !negated*/)
+    else if (negative)
         bytes.back() = to_negated(bytes.back());
 
-    // !negated && !negative is a no-op.
     return bytes;
 }
 
@@ -161,10 +163,10 @@ inline bool boolean::from_chunk(const data_chunk& vary) noexcept
         return true;
 
     // A logical zero is any +/- sequence of zero bytes (sign excluded above).
-    ////return std::any_of(vary.begin(), std::prev(vary.end()), is_nonzero<uint8_t>);
+    return std::any_of(vary.begin(), std::prev(vary.end()), is_nonzero<uint8_t>);
 
     // any_of optimizes by eliminating this conversion, allocation, and copy.
-    return bc::to_bool(from_little_endian<uintx>(vary));
+    ////return bc::to_bool(from_little_endian<uintx>(vary));
 }
 
 inline bool boolean::strict_from_chunk(const data_chunk& vary) noexcept

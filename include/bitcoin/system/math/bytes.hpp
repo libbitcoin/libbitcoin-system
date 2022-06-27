@@ -35,15 +35,15 @@ constexpr size_t byte_width(Value value) noexcept;
 template <typename Value, if_signed_integer<Value> = true>
 constexpr size_t byte_width(Value value) noexcept;
 
-/// Get high order bit of high order byte.
+/// Get the high order bit of high order non-zero byte.
 template <typename Integer, if_integer<Integer> = true>
 constexpr bool is_negated(Integer value) noexcept;
 
-/// Set high order bit of high order byte.
+/// Set high order bit of the value.
 template <typename Integer, if_integer<Integer> = true>
 constexpr Integer to_negated(Integer value) noexcept;
 
-/// Clear high order bit of high order byte, and if set negate the result.
+/// Clear high order bit of high order non-zero byte.
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr Integer to_unnegated(Integer value) noexcept;
 
