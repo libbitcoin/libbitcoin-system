@@ -74,7 +74,7 @@ std::string encode_hash(const data_slice& hash) noexcept
 }
 
 
-bool decode_base16(data_chunk& out, const std::string_view& in) noexcept
+bool decode_base16(data_chunk& out, const std::string& in) noexcept
 {
     if (is_odd(in.size()))
         return false;

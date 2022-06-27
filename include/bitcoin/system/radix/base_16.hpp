@@ -56,7 +56,7 @@ BC_API std::string encode_hash(const data_slice& hash) noexcept;
 
 /// Convert a hexidecimal string to a byte vector.
 /// False if the input is malformed.
-BC_API bool decode_base16(data_chunk& out, const std::string_view& in) noexcept;
+BC_API bool decode_base16(data_chunk& out, const std::string& in) noexcept;
 
 /// Convert a hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
