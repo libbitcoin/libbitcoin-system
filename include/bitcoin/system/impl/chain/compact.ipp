@@ -21,36 +21,27 @@
 
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
 // private
-// ----------------------------------------------------------------------------
 
-template <typename Integer>
-constexpr Integer compact::ratio(Integer value) noexcept
+constexpr typename compact::parse
+compact::to_compact(small_type small) noexcept
 {
-    return value * (from / to);
-}
-
-constexpr compact compact::to_compact(compact_type small) noexcept
-{
-    const auto mantissa = mask_left<compact_type>(small, exponent_width);
-
-    return compact
+    return
     {
         get_right(small, sub1(precision)),
         narrow_cast<exponent_type>(shift_right(small, precision)),
-        mantissa
+        mask_left<small_type>(small, e_width)
     };
 }
 
-constexpr compact::compact_type compact::from_compact(const compact& compact) noexcept
+constexpr typename compact::small_type
+compact::from_compact(const parse& compact) noexcept
 {
     return bit_or
     (
@@ -60,7 +51,6 @@ constexpr compact::compact_type compact::from_compact(const compact& compact) no
 }
 
 // public
-// ----------------------------------------------------------------------------
 
 //*****************************************************************************
 // CONSENSUS: Only an invalid compact number could produce a big -1.
@@ -74,19 +64,21 @@ constexpr compact::compact_type compact::from_compact(const compact& compact) no
 // byte mantissa, however this is not necessary to validate any value produced
 // by compression, nor is it possible for any such value to affect consensus.
 //*****************************************************************************
-inline compact::number_type compact::expand(compact_type exponential) noexcept
+constexpr compact::span_type
+compact::expand(small_type exponential) noexcept
 {
     auto compact = to_compact(exponential);
     
     if (compact.negative)
         return 0;
 
-    if (compact.exponent == add1(to) &&
-        ceilinged_log256(compact.mantissa) == sub1(mantissa_bytes) &&
-        get_right(compact.mantissa, sub1(to_bits(sub1(mantissa_bytes)))))
+    // strict validation
+    if (compact.exponent == add1(e_max) &&
+        ceilinged_log256(compact.mantissa) == sub1(m_bytes) &&
+        get_right(compact.mantissa, sub1(to_bits(sub1(m_bytes)))))
     {
         compact.exponent--;
-        compact.mantissa <<= ratio(one);
+        compact.mantissa <<= raise(one);
     }
     
     return base256e::expand(from_compact(compact));
@@ -101,14 +93,15 @@ inline compact::number_type compact::expand(compact_type exponential) noexcept
 // "sign" bit. There is of course never an actual negative mantissa sign in
 // exponential notation of an unsigned number, so this was a mistake.
 //*************************************************************************
-inline compact::compact_type compact::compress(const number_type& number) noexcept
+constexpr compact::small_type
+compact::compress(const span_type& number) noexcept
 {
     auto compact = to_compact(base256e::compress(number));
 
     if (compact.negative)
     {
         compact.exponent++;
-        compact.mantissa >>= ratio(one);
+        compact.mantissa >>= raise(one);
         compact.negative = false;
     }
 

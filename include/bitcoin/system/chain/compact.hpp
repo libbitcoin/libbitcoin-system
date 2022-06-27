@@ -33,55 +33,30 @@ namespace chain {
 /// possible to create an invalid compact form from 32 bytes. The compression
 /// loses all but the highest 29 or 30 significant bits of precision.
 
-/// TODO: Inherit from base256e static template with compact parameters.
-/// TODO: Provide only sign bug compensation. Add lax overflow option.
-
 struct compact
+  : public base256e
 {
 public:
-    // All parameters are derived, no magic numbers.
-
-    // Parameters
-    static constexpr auto to = 32u;
-    static constexpr auto from = 256u;
-    static constexpr auto precision = 24u;
-
-    // Sizes
-    static constexpr auto mantissa_bytes = to_bytes<precision>();
-    static constexpr auto exponent_bits = ceilinged_log2(to_bytes<from>());
-    static constexpr auto exponent_bytes = to_ceilinged_bytes(exponent_bits);
-    static constexpr auto compact_bytes = mantissa_bytes + exponent_bytes;
-
-    // Types
-    using number_type = uintx_t<from>;
-    static_assert(is_same<number_type, uint256_t>());
-    using compact_type = unsigned_type<compact_bytes>;
-    static_assert(is_same<compact_type, uint32_t>());
-    using exponent_type = unsigned_type<exponent_bytes>;
-    static_assert(is_same<exponent_type, uint8_t>());
-
-    // Widths
-    static constexpr auto compact_width = width<compact_type>();
-    static constexpr auto exponent_width = width<exponent_type>();
-    static_assert(exponent_width - exponent_bits == 2u);
-
     /// A zero value implies an invalid (including zero) parameter.
     /// Non-minimal exponent encoding allowed only for high bit hack.
-    static inline number_type expand(compact_type exponential) noexcept;
+    static constexpr span_type expand(small_type exponential) noexcept;
 
     /// (m * 256^e) bit-encoded as [0eeeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
     /// Uses non-minimal exponent encoding to avoid high mantissa bit (hack).
-    static inline compact_type compress(const number_type& number) noexcept;
-
-    bool negative;
-    exponent_type exponent;
-    compact_type mantissa;
+    static constexpr small_type compress(const span_type& number) noexcept;
 
 protected:
-    template <typename Integer>
-    static constexpr Integer ratio(Integer value) noexcept;
-    static constexpr compact to_compact(compact_type small) noexcept;
-    static constexpr compact_type from_compact(const compact& compact) noexcept;
+    using exponent_type = unsigned_type<e_bytes>;
+
+    struct parse
+    {
+        bool negative;
+        exponent_type exponent;
+        small_type mantissa;
+    };
+
+    static constexpr parse to_compact(small_type small) noexcept;
+    static constexpr small_type from_compact(const parse& compact) noexcept;
 };
 
 } // namespace chain
