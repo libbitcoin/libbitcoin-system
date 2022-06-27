@@ -204,38 +204,61 @@ using if_unsigned_integral_integer = bool_unless<
 /// Type conversions.
 
 /// Signed integral type selection by byte width and sign.
-template <size_t Bytes = 0, if_not_greater<Bytes, sizeof(int64_t)> = true>
+template <size_t Bytes = 0u, if_not_greater<Bytes, sizeof(int64_t)> = true>
 using signed_type =
-    std::conditional_t<Bytes == 0, signed_size_t,
-        std::conditional_t<Bytes == 1, int8_t,
-            std::conditional_t<Bytes == 2, int16_t,
-                std::conditional_t<Bytes <= 4, int32_t,
+    std::conditional_t<Bytes == 0u, signed_size_t,
+        std::conditional_t<Bytes == 1u, int8_t,
+            std::conditional_t<Bytes == 2u, int16_t,
+                std::conditional_t<Bytes <= 4u, int32_t,
                     int64_t>>>>;
 
 /// Unsigned integral type selection by byte width and sign.
-template <size_t Bytes = 0, if_not_greater<Bytes, sizeof(uint64_t)> = true>
+template <size_t Bytes = 0u, if_not_greater<Bytes, sizeof(uint64_t)> = true>
 using unsigned_type =
-    std::conditional_t<Bytes == 0, size_t,
-        std::conditional_t<Bytes == 1, uint8_t,
-            std::conditional_t<Bytes == 2, uint16_t,
-                std::conditional_t<Bytes <= 4, uint32_t,
+    std::conditional_t<Bytes == 0u, size_t,
+        std::conditional_t<Bytes == 1u, uint8_t,
+            std::conditional_t<Bytes == 2u, uint16_t,
+                std::conditional_t<Bytes <= 4u, uint32_t,
                     uint64_t>>>>;
 
-/// std::make_unsigned does not guarantee size correspondence.
 template <typename Type>
-using to_signed_type =
-    std::conditional_t<is_same_size<Type, uint8_t>(), int8_t,
-        std::conditional_t<is_same_size<Type, uint16_t>(), int16_t,
-            std::conditional_t<is_same_size<Type, uint32_t>(), int32_t,
-                int64_t>>>;
+using to_signed_type = std::make_signed<Type>::type;
+////std::conditional_t<is_same_size<Type, uint8_t>(), int8_t,
+////    std::conditional_t<is_same_size<Type, uint16_t>(), int16_t,
+////        std::conditional_t<is_same_size<Type, uint32_t>(), int32_t,
+////            int64_t>>>;
 
-/// std::make_unsigned does not guarantee size correspondence.
 template <typename Type>
-using to_unsigned_type =
-    std::conditional_t<is_same_size<Type, int8_t>(), uint8_t,
-        std::conditional_t<is_same_size<Type, int16_t>(), uint16_t,
-            std::conditional_t<is_same_size<Type, int32_t>(), uint32_t,
-                uint64_t>>>;
+using to_unsigned_type = std::make_unsigned<Type>::type;
+////std::conditional_t<is_same_size<Type, int8_t>(), uint8_t,
+////    std::conditional_t<is_same_size<Type, int16_t>(), uint16_t,
+////        std::conditional_t<is_same_size<Type, int32_t>(), uint32_t,
+////            uint64_t>>>;
+
+/// Guard type/size assumptions within the codebase.
+
+// ???
+/// std::make_signed<size_t> creates a type that fails this assertion, which
+/// means that it would fail to bind template arguments. So we implement an
+/// equivalent for the integral types by size. This strips the converted type
+/// of const (as with std::make_signed), but also volatile and least/fast.
+static_assert(
+    is_same<signed_size_t, int32_t>() ||
+    is_same<signed_size_t, int64_t>());
+
+static_assert(
+    is_same_size<signed_size_t, int32_t>() ||
+    is_same_size<signed_size_t, int64_t>());
+
+static_assert(
+    is_same<to_signed_type<size_t>, signed_size_t>() &&
+    is_same<to_unsigned_type<signed_size_t>, size_t>());
+
+static_assert(
+    sizeof(size_t) == sizeof(uint32_t) ||
+    sizeof(size_t) == sizeof(uint64_t));
+
+static_assert(sizeof(size_t) == sizeof(signed_size_t));
 
 /// Alias for -> decltype(dividend / divisor).
 template <typename Left, typename Right>
@@ -274,23 +297,23 @@ typedef boost::multiprecision::cpp_int uintx;
 
 /// C++11: use std::integral_constant (up to primitives limit).
 /// These are predefined due to use in the library, but any width is valid.
-typedef uintx_t<5> uint5_t;
-typedef uintx_t<11> uint11_t;
-typedef uintx_t<48> uint48_t;
-typedef uintx_t<128> uint128_t;
-typedef uintx_t<160> uint160_t;
-typedef uintx_t<256> uint256_t;
-typedef uintx_t<512> uint512_t;
+typedef uintx_t<5u> uint5_t;
+typedef uintx_t<11u> uint11_t;
+typedef uintx_t<48u> uint48_t;
+typedef uintx_t<128u> uint128_t;
+typedef uintx_t<160u> uint160_t;
+typedef uintx_t<256u> uint256_t;
+typedef uintx_t<512u> uint512_t;
 
 /// No integral type rounding, all types exact byte size.
 /// Prefers the exact integral type and falls back to uintx_t.
 template <size_t Bytes>
 using unsigned_exact_type =
-    std::conditional_t<Bytes == 0, size_t,
-        std::conditional_t<Bytes == 1, uint8_t,
-            std::conditional_t<Bytes == 2, uint16_t,
-                std::conditional_t<Bytes == 4, uint32_t,
-                    std::conditional_t<Bytes == 8, uint64_t,
+    std::conditional_t<Bytes == 0u, size_t,
+        std::conditional_t<Bytes == 1u, uint8_t,
+            std::conditional_t<Bytes == 2u, uint16_t,
+                std::conditional_t<Bytes == 4u, uint32_t,
+                    std::conditional_t<Bytes == 8u, uint64_t,
                         uintx_t<to_bits(Bytes)>>>>>>;
 
 } // namespace system
