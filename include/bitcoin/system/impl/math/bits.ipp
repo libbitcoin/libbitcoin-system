@@ -23,8 +23,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/division.hpp>
-#include <bitcoin/system/math/power.hpp>
+#include <bitcoin/system/math/log.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
@@ -40,12 +39,16 @@ namespace system {
 // Widths.
 // ----------------------------------------------------------------------------
 
+// Called by bc::base2n (for sizing).
+// Called by machine::number (for is_negated/to_unnegated).
 template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t bit_width(Value value) noexcept
 {
+    // zero-based position of msb.
     return ceilinged_log2(value);
 }
 
+// Called by machine::number (for to_unnegated).
 template <typename Value, if_signed_integer<Value>>
 constexpr size_t bit_width(Value value) noexcept
 {
@@ -54,6 +57,7 @@ constexpr size_t bit_width(Value value) noexcept
 
 // Bitwise logical operations.
 // ----------------------------------------------------------------------------
+// Use depromote only for integral constrained functions.
 
 template <typename Value, if_integer<Value>>
 constexpr Value twos_complement(Value value) noexcept

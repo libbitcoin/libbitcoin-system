@@ -73,8 +73,8 @@ ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
         (is_ceilinged(dividend, divisor) ? 0 : 1);
 }
 
-// Always negative logical result, but operands may be unsigned.
-// So convert the result to unsigned type of the same size.
+// The native % operator is truncated and the common type is unsigned.
+// But ceilinged modulo is logically negative, so type is changed to signed.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr to_signed_type<to_common_type<Dividend, Divisor>>

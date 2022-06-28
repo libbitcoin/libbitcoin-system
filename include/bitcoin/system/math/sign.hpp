@@ -41,7 +41,6 @@ constexpr Unsigned to_unsigned(Integer value) noexcept;
 /// -minimum<Integer> is undefined behavior (overflows if not upcasted).
 /// absolute<Integer>(minimum<Integer>) may or may not return zero.
 /// Caller must guard (use higher domain if value == minimum<Integer>).
-/// This is not possible if Integer is int64_t.
 template <typename Integer, typename Result = to_unsigned_type<Integer>,
     if_signed_integer<Integer> = true>
 constexpr Result absolute(Integer value) noexcept;
@@ -53,9 +52,12 @@ constexpr Integer absolute(Integer value) noexcept;
 /// -minimum<Integer> is undefined behavior (overflows if not upcasted).
 /// negate<Integer>(minimum<Integer>) may or may not return zero.
 /// Caller must guard (use higher domain if value == minimum<Integer>).
-/// This is not possible if Integer is int64_t. Unsigned negate is not defined.
+// Unsigned negate yields the two's complement of value.
 template <typename Integer,
     if_signed_integer<Integer> = true>
+constexpr Integer negate(Integer value) noexcept;
+template <typename Integer,
+    if_unsigned_integer<Integer> = true>
 constexpr Integer negate(Integer value) noexcept;
 
 /// Determine whether the integer is negative.

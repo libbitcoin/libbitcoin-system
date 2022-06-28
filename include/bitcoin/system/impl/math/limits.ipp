@@ -94,7 +94,7 @@ template <size_t Bytes, typename Return>
 constexpr Return minimum() noexcept
 {
     using unsigned_t = to_unsigned_type<Return>;
-    return -to_signed(power2<unsigned_t>(sub1(to_bits(Bytes))));
+    return negate(to_signed(power2<unsigned_t>(sub1(to_bits(Bytes)))));
 }
 
 template <size_t Bytes, typename Return>

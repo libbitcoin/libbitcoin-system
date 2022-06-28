@@ -282,6 +282,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/bytes.cpp \
     test/math/division.cpp \
     test/math/limits.cpp \
+    test/math/log.cpp \
     test/math/power.cpp \
     test/math/safe.cpp \
     test/math/sign.cpp \
@@ -527,6 +528,7 @@ include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/bytes.ipp \
     include/bitcoin/system/impl/math/division.ipp \
     include/bitcoin/system/impl/math/limits.ipp \
+    include/bitcoin/system/impl/math/log.ipp \
     include/bitcoin/system/impl/math/power.ipp \
     include/bitcoin/system/impl/math/safe.ipp \
     include/bitcoin/system/impl/math/sign.ipp
@@ -580,6 +582,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/bytes.hpp \
     include/bitcoin/system/math/division.hpp \
     include/bitcoin/system/math/limits.hpp \
+    include/bitcoin/system/math/log.hpp \
     include/bitcoin/system/math/math.hpp \
     include/bitcoin/system/math/power.hpp \
     include/bitcoin/system/math/safe.hpp \

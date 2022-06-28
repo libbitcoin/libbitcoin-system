@@ -585,6 +585,7 @@ if (with-tests)
         "../../test/math/bytes.cpp"
         "../../test/math/division.cpp"
         "../../test/math/limits.cpp"
+        "../../test/math/log.cpp"
         "../../test/math/power.cpp"
         "../../test/math/safe.cpp"
         "../../test/math/sign.cpp"

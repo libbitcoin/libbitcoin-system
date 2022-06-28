@@ -44,8 +44,8 @@ template <typename Integer, typename Result,
     if_signed_integer<Integer>>
 constexpr Result absolute(Integer value) noexcept
 {
-    // std::abs is limited to signed types.
-    return to_unsigned(is_negative(value) ? negate(value) : value);
+    // std::abs is signed types only and not constexpr until C++23.
+    return to_unsigned(is_negative(value) ? negate<Integer>(value) : value);
 }
 
 template <typename Integer,
@@ -59,7 +59,16 @@ template <typename Integer,
     if_signed_integer<Integer>>
 constexpr Integer negate(Integer value) noexcept
 {
-    return depromote<Integer>(-value);
+    // Use depromote only for integral constrained functions.
+    return possible_narrow_cast<Integer>(-value);
+}
+
+template <typename Integer,
+    if_unsigned_integer<Integer>>
+constexpr Integer negate(Integer value) noexcept
+{
+    // Avoids circularity (bits::twos_complement).
+    return add1<Integer>(~value);
 }
 
 template <typename Integer,

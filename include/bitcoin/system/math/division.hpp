@@ -28,6 +28,9 @@ namespace system {
 /// All operations below support signed and unsigned parameters.
 /// github.com/libbitcoin/libbitcoin-system/wiki/Integer-Division-Unraveled
 
+/// These are subject to domain promotion and sign change. With the exception
+/// of ceilinged_modulo these return the common type of the native operators.
+
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to C++ % for negative quotients.
 template <typename Dividend, typename Divisor,
@@ -37,9 +40,9 @@ ceilinged_divide(Dividend dividend, Divisor divisor) noexcept;
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to C++ % for negative quotients.
-/// The result is signed because positive operands yield a negative result.
-/// Native operators would convert a negative logical result to its two's
-/// complement representation, which is not generally useful as the negative.
+/// The native modulo operator is truncated, resulting in a positive common
+/// type. However ceilinged modulo is naturally negative, so the modulo common
+/// type is converted to signed, as otherwise the two's compliment is returned.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_signed_type<to_common_type<Dividend, Divisor>>

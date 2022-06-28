@@ -19,170 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_POWER_IPP
 #define LIBBITCOIN_SYSTEM_MATH_POWER_IPP
 
-#include <bit>
 #include <cstddef>
-#include <cstdint>
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// TODO: change if_non_integral_integer to uintx constraint, pass by reference.
+namespace mp = boost::multiprecision;
 
-// Ceilinged logarithms.
-// ----------------------------------------------------------------------------
-    
-// Returns 0 for undefined (base < 2 or value < 1).
-template <size_t Base, typename Exponent, typename Value>
-constexpr Exponent ceilinged_log(Value value) noexcept
-{
-    if constexpr (Base == 2u)
-        return ceilinged_log2<Exponent>(value);
-    else if constexpr (Base == 256u)
-        return ceilinged_log256<Exponent>(value);
-    else
-        return ceilinged_log<Exponent>(Base, value);
-}
-
-// Returns 0 for undefined (base < 2 or value < 1).
-template <typename Exponent, typename Base, typename Value,
-    if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
-constexpr Exponent ceilinged_log(Base base, Value value) noexcept
-{
-    if (base < 2 || value < 1)
-        return 0;
-
-    auto factor = possible_narrow_and_sign_cast<Value>(base);
-
-    Exponent exponent = 0;
-    while (value > 0) { ++exponent; value /= factor; }
-    return exponent;
-}
-
-// optimizations
-
-// Returns 0 for undefined (value < 1).
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_integral_integer<Value>>
-constexpr Exponent ceilinged_log2(Value value) noexcept
-{
-    if (value < 1)
-        return 0;
-
-    return possible_narrow_and_sign_cast<Exponent>(
-        std::bit_width(to_unsigned(value)));
-}
-
-// Returns 0 for undefined (value < 1).
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_non_integral_integer<Value>>
-constexpr Exponent ceilinged_log2(Value value) noexcept
-{
-    if (value < 1)
-        return 0;
-
-    return possible_narrow_and_sign_cast<Exponent>(
-        add1(boost::multiprecision::msb(value)));
-}
-
-// Returns 0 for undefined (value < 1).
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_integer<Value>>
-constexpr Exponent ceilinged_log256(Value value) noexcept
-{
-    if (value < 1)
-        return 0;
-
-    return depromote<Exponent>(
-        ceilinged_divide(ceilinged_log2<Exponent>(value), 8u));
-}
-
-// Floored logarithms.
-// ----------------------------------------------------------------------------
-
-// Returns 0 for undefined (base < 2 or value < 1).
-template <size_t Base, typename Exponent, typename Value>
-constexpr Exponent floored_log(Value value) noexcept
-{
-    if constexpr (Base == 2u)
-        return floored_log2<Exponent>(value);
-    else if constexpr (Base == 256u)
-        return floored_log256<Exponent>(value);
-    else
-        return floored_log<Exponent>(Base, value);
-}
-
-// Returns 0 for undefined (base < 2 or value < 1).
-template <typename Exponent, typename Base, typename Value,
-    if_integer<Exponent>,
-    if_integer<Base>,
-    if_integer<Value>>
-constexpr Exponent floored_log(Base base, Value value) noexcept
-{
-    if (base < 2 || value < 1)
-        return 0;
-
-    auto factor = possible_narrow_and_sign_cast<Value>(base);
-
-    Exponent exponent = 0;
-    while (((value /= factor)) > 0) { ++exponent; }
-    return exponent;
-}
-
-// optimizations
-
-// Returns 0 for undefined (value < 1).
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_integral_integer<Value>>
-constexpr Exponent floored_log2(Value value) noexcept
-{
-    if (value < 1)
-        return 0;
-
-    return possible_narrow_and_sign_cast<Exponent>(
-        sub1(std::bit_width(to_unsigned(value))));
-}
-
-// Returns 0 for undefined (value < 1).
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_non_integral_integer<Value>>
-constexpr Exponent floored_log2(Value value) noexcept
-{
-    if (value < 1)
-        return 0;
-
-    return possible_narrow_and_sign_cast<Exponent>(
-        boost::multiprecision::msb(value));
-}
-
-// Returns 0 for undefined (value < 1).
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_integer<Value>>
-constexpr Exponent floored_log256(Value value) noexcept
-{
-    if (value < 1)
-        return 0;
-
-    return depromote<Exponent>(
-        floored_divide(floored_log2<Exponent>(value), 8u));
-}
-
-// Powers.
-// ----------------------------------------------------------------------------
-
-// Returns 0 for undefined (0^0).
+// dispatch
 template <size_t Base, typename Value, typename Exponent>
 constexpr Value power(Exponent exponent) noexcept
 {
@@ -192,7 +42,9 @@ constexpr Value power(Exponent exponent) noexcept
         return power<Value>(Base, exponent);
 }
 
-// Returns 0 for undefined (0^0).
+// normal form
+// Called by bc::base85 (for number coding).
+// Called by wallet::electrum_v1 (for number coding).
 template <typename Value, typename Base, typename Exponent,
     if_integer<Value>,
     if_integer<Base>,
@@ -221,7 +73,8 @@ constexpr Value power(Base base, Exponent exponent) noexcept
 
 // optimizations
 
-// Returns 0 for undefined (0^0).
+// Called by bc::props (for json number limits).
+// Called by chain::number (for limits::minimum/maximum).
 template <typename Value, typename Exponent,
     if_integral_integer<Value>,
     if_integer<Exponent>>
@@ -230,14 +83,9 @@ constexpr Value power2(Exponent exponent) noexcept
     if (is_negative(exponent))
         return 0;
 
-    // Shift is undefined if >= to the width of the promoted left operand.
-    if (!is_lesser(exponent, width<Value>()))
-        return 0;
-
-    return depromote<Value>(to_int<Value>(true) << to_unsigned(exponent));
+    return shift_left<Value>(1, to_unsigned(exponent));
 }
 
-// Returns 0 for undefined (0^0).
 template <typename Value, typename Exponent,
     if_non_integral_integer<Value>,
     if_integer<Exponent>>
@@ -246,10 +94,8 @@ constexpr Value power2(Exponent exponent) noexcept
     if (is_negative(exponent))
         return 0;
 
-    // constexpr because stack only memory allocation for uintx.
     Value value{};
-
-    return boost::multiprecision::bit_set(value, exponent);
+    return mp::bit_set(value, exponent);
 }
 
 } // namespace system

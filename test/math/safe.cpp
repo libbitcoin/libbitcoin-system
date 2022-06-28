@@ -26,12 +26,233 @@ constexpr size_t minimum = 0;
 constexpr size_t maximum = max_size_t;
 constexpr size_t half = maximum / 2;
 
-// ????
-////constexpr int32_t left = static_cast<int32_t>(min_int64);
-////constexpr int32_t right = narrow_cast<int32_t>(min_int64);
-////static_assert(left == 0, "");
-////static_assert(left == right, "");
-////static_assert(right == min_int64, "");
+// Down-casting a negative loses the sign bit.
+static_assert(static_cast<int32_t>(min_int64) == 0);
+
+constexpr auto right = narrow_cast<int32_t>(min_int64);
+static_assert(right == min_int64);
+static_assert(narrow_cast<int32_t>(min_int64) != min_int64);
+
+// Verify compiler "usual arithmetic conversion" expectations.
+// ----------------------------------------------------------------------------
+// Shift works like a unary operator (right operand is not incorporated).
+// Order of operands does not affect (other) binary operators.
+// std::common_type does not support unary operators.
+// std::common_type<Left, Right>::type == decltype(left - right)
+// std::common_type<Value>::type != decltype(-value)
+
+// Compiler warns on bool safety for -b, ~b, <<b, >>b, /b, %b, b/, b% (assertions disabled).
+using integer = decltype(-'a');
+using character = std::common_type_t<char>;
+static_assert(!std::is_same_v<integer, character>);
+
+// negate
+static_assert(std::is_same<decltype(-char{0}),                   int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(-int8_t{0}),                 int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(-int16_t{0}),                int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(-int32_t{0}),                int32_t>::value,  "unpromoted (>=32");
+static_assert(std::is_same<decltype(-int64_t{0}),                int64_t>::value,  "unpromoted (>=32");
+////static_assert(std::is_same<decltype(-bool{false}),               int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(-uint8_t{0}),                int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(-uint16_t{0}),               int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(-uint32_t{0}),               uint32_t>::value, "unpromoted (>=32");
+static_assert(std::is_same<decltype(-uint64_t{0}),               uint64_t>::value, "unpromoted (>=32");
+
+// ones_complement
+static_assert(std::is_same<decltype(~char{0}),                   int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(~int8_t{0}),                 int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(~int16_t{0}),                int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(~int32_t{0}),                int32_t>::value,  "unpromoted (>=32");
+static_assert(std::is_same<decltype(~int64_t{0}),                int64_t>::value,  "unpromoted (>=32");
+////static_assert(std::is_same<decltype(~bool{false}),               int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(~uint8_t{0}),                int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(~uint16_t{0}),               int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(~uint32_t{0}),               uint32_t>::value, "unpromoted (>=32");
+static_assert(std::is_same<decltype(~uint64_t{0}),               uint64_t>::value, "unpromoted (>=32");
+
+// shift_left
+static_assert(std::is_same<decltype(uint8_t{0}  << char{0}),     int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  << uint8_t{0}),  int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  << uint16_t{0}), int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint16_t{0} << uint32_t{0}), int >::value,     "promoted   (<32)");
+static_assert(std::is_same<decltype(uint32_t{0} << uint64_t{0}), uint32_t>::value, "unpromoted (>=32");
+static_assert(std::is_same<decltype(uint64_t{0} << uint64_t{0}), uint64_t>::value, "unpromoted (>=32");
+////static_assert(std::is_same<decltype(uint8_t{0}  << bool{false}), int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(bool{false} << uint32_t{0}), int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  << int8_t{0}),   int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  << int16_t{0}),  int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint16_t{0} << int32_t{0}),  int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint32_t{0} << int64_t{0}),  uint32_t>::value, "unpromoted (>=32");
+static_assert(std::is_same<decltype(int64_t{0}  << uint32_t{0}), int64_t>::value,  "unpromoted (>=32");
+
+// shift_right
+static_assert(std::is_same<decltype(uint8_t{0}  >> char{0}),     int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  >> uint8_t{0}),  int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  >> uint16_t{0}), int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint16_t{0} >> uint32_t{0}), int >::value,     "promoted   (<32)");
+static_assert(std::is_same<decltype(uint32_t{0} >> uint64_t{0}), uint32_t>::value, "unpromoted (>=32");
+static_assert(std::is_same<decltype(uint64_t{0} >> uint64_t{0}), uint64_t>::value, "unpromoted (>=32");
+////static_assert(std::is_same<decltype(uint8_t{0}  >> bool{false}), int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(bool{false} >> uint32_t{0}), int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  >> int8_t{0}),   int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint8_t{0}  >> int16_t{0}),  int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint16_t{0} >> int32_t{0}),  int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(uint32_t{0} >> int64_t{0}),  uint32_t>::value, "unpromoted (>=32");
+static_assert(std::is_same<decltype(int64_t{0}  >> uint32_t{0}), int64_t>::value,  "unpromoted (>=32");
+
+// bit_and
+static_assert(std::is_same<decltype(uint8_t{0}  & char{0}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  & uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  & uint16_t{0}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} & uint32_t{0}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} & uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} & uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint8_t{0}  & bool{false}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  & int8_t{0}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  & int16_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} & int32_t{0}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} & int64_t{0}),  int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(int64_t{0}  & uint32_t{0}), int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// bit_or
+static_assert(std::is_same<decltype(uint8_t{0}  | char{0}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  | uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  | uint16_t{0}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} | uint32_t{0}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} | uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} | uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint8_t{0}  | bool{false}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  | int8_t{0}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  | int16_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} | int32_t{0}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} | int64_t{0}),  int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(int64_t{0}  | uint32_t{0}), int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// bit_xor
+static_assert(std::is_same<decltype(uint8_t{0}  ^ char{0}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  ^ uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  ^ uint16_t{0}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} ^ uint32_t{0}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} ^ uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} ^ uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint8_t{0}  ^ bool{false}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  ^ int8_t{0}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  ^ int16_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} ^ int32_t{0}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} ^ int64_t{0}),  int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(int64_t{0}  ^ uint32_t{0}), int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// add
+static_assert(std::is_same<decltype(uint8_t{0}  + char{0}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  + uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  + uint16_t{0}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} + uint32_t{0}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} + uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} + uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint8_t{0}  + bool{false}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  + int8_t{0}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  + int16_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} + int32_t{0}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} + int64_t{0}),  int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(int64_t{0}  + uint32_t{0}), int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// subtract
+static_assert(std::is_same<decltype(uint8_t{0}  - char{0}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  - uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  - uint16_t{0}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} - uint32_t{0}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} - uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} - uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint8_t{0}  - bool{false}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  - int8_t{0}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  - int16_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} - int32_t{0}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} - int64_t{0}),  int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(int64_t{0}  - uint32_t{0}), int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// subtract (reversed)
+static_assert(std::is_same<decltype(char{0}     - uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  - uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} - uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint32_t{0} - uint16_t{0}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} - uint32_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} - uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(bool{false} - uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int8_t{0}   - uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int16_t{0}  - uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int32_t{0}  - uint16_t{0}), int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(int64_t{0}  - uint32_t{0}), int64_t>::value,  "unsigned (two >=32, s-u)");
+static_assert(std::is_same<decltype(uint32_t{0} - int64_t{0}),  int64_t>::value,  "unsigned (two >=32, u-s)");
+
+// multiply
+static_assert(std::is_same<decltype(uint8_t{0}  * char{0}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  * uint8_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  * uint16_t{0}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} * uint32_t{0}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} * uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} * uint64_t{0}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint8_t{0}  * bool{false}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  * int8_t{0}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  * int16_t{0}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} * int32_t{0}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} * int64_t{0}),  int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(int64_t{0}  * uint32_t{0}), int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// divide
+static_assert(std::is_same<decltype(uint8_t{0}  / char{1}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  / uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  / uint16_t{1}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} / uint32_t{1}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} / uint64_t{1}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} / uint64_t{1}), uint64_t>::value, "widest   (two >=32)");
+////static_assert(std::is_same<decltype(uint8_t{0}  / bool{true}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  / int8_t{1}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  / int16_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} / int32_t{1}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} / int64_t{1}),  int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(int64_t{0}  / uint32_t{1}), int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// divide (reversed)
+static_assert(std::is_same<decltype(char{0}     / uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  / uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} / uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint32_t{0} / uint16_t{1}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} / uint32_t{1}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} / uint64_t{1}), uint64_t>::value, "widest   (two >=32)");
+////static_assert(std::is_same<decltype(bool{false} / uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int8_t{0}   / uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int16_t{0}  / uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int32_t{0}  / uint16_t{1}), int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(int64_t{0}  / uint32_t{1}), int64_t>::value,  "unsigned (two >=32, s/u)");
+static_assert(std::is_same<decltype(uint32_t{0} / int64_t{1}),  int64_t>::value,  "unsigned (two >=32, u/s)");
+
+// modulo
+static_assert(std::is_same<decltype(uint8_t{0}  % char{1}),     int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  % uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  % uint16_t{1}), int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} % uint32_t{1}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} % uint64_t{1}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} % uint64_t{1}), uint64_t>::value, "widest   (two >=32)");
+////static_assert(std::is_same<decltype(uint8_t{0}  % bool{true}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  % int8_t{1}),   int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  % int16_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} % int32_t{1}),  int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint32_t{0} % int64_t{1}),  int64_t>::value,  "unsigned (two >=32, s%u)");
+static_assert(std::is_same<decltype(int64_t{0}  % uint32_t{1}), int64_t>::value,  "unsigned (two >=32, u%s)");
+
+// modulo (reversed)
+static_assert(std::is_same<decltype(char{0}     % uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint8_t{0}  % uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint16_t{0} % uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(uint32_t{0} % uint16_t{1}), uint32_t>::value, "widest   (one >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} % uint32_t{1}), uint64_t>::value, "widest   (two >=32)");
+static_assert(std::is_same<decltype(uint64_t{0} % uint64_t{1}), uint64_t>::value, "widest   (two >=32)");
+////static_assert(std::is_same<decltype(bool{false} % uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int8_t{0}   % uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int16_t{0}  % uint8_t{1}),  int>::value,      "promoted (two <32)");
+static_assert(std::is_same<decltype(int32_t{0}  % uint16_t{1}), int32_t>::value,  "widest   (one >=32)");
+static_assert(std::is_same<decltype(int64_t{0}  % uint32_t{1}), int64_t>::value,  "unsigned (two >=32, s%u)");
+static_assert(std::is_same<decltype(uint32_t{0} % int64_t{1}),  int64_t>::value,  "unsigned (two >=32, u%s)");
 
 // safe_multiply
 

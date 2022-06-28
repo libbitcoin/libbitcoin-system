@@ -356,6 +356,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\division.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\external\byte_swap.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\log.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\safe.hpp" />
@@ -494,6 +495,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bytes.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\division.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\limits.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\log.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\safe.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp" />

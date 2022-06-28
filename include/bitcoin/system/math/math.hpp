@@ -24,6 +24,7 @@
 #include <bitcoin/system/math/bytes.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/log.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
@@ -31,45 +32,19 @@
 // Inclusion dependencies:
 // safe     ->
 // sign     -> safe
-// bytes    -> sign
 // division -> sign
+// power    -> sign, safe
 // addition -> sign, safe, limits
 // limits   -> sign, safe, power
-// power    -> sign, safe, division
-// bits     -> sign, safe, division, power
+// log      -> sign, safe, division
+// bits     -> sign, safe, log
+// bytes    -> sign, log
 
-// TODO: verify all non-integral operations do not unnecessarily copy unitx.
+// sign/safe should not call any other math libs and are safe from all others.
+// bits/bytes should otherwise call only log. Otherwise only the natural:
+// addition->limits, limits->power, log->division.
 
-// safe.hpp
-// ============================================================================
-// Explicit [required]/possible operators for narrowing and sign casting.
-//
-// bits.hpp
-// ============================================================================
-// follow established return type (not standardized).
-// sizes are all size_t (width, offset, bits, shift).
-// unary operations : (including all shifts) return Value type.
-// binary operations: return unpromoted std::common_type.
-//
-// addition.hpp
-// ============================================================================
-// Unsigned add/subtract may expand.
-// Return defines expanded space, defaults to common_type.
-// Objective is default native behavior with optional space/return typing.
-// Always execute in max(common, expanded) and return min(common, expanded).
-// These functions are intended as domain transitions, not overflow guards.
-// Execution may still overflow, so functions are provided to detect.
-//
-// division.hpp
-// ============================================================================
-// div/mod contract (div is reducing, mod is [0..sub1(divisor)]).
-// Return is unpromoted common_type (auto) with sign adj for ceilinged_modulo.
-// ----------------------------------------------------------------------------
-// ceilinged_divide: unpromoted common_type
-// ceilinged_modulo: unpromoted common_type (coerces neg, common_type wrong)
-// floored_divide  : unpromoted common_type
-// floored_modulo  : unpromoted common_type (always naturally pos)
-// truncated_divide: unpromoted common_type (aliases for native div)
-// truncated_modulo: unpromoted common_type (aliases for native mod)
+// TODO: create type constraints for unitx/unitx_t<> optimization.
+// TODO: verify non-integral ops do not unnecessarily copy unitx/unitx_t<>.
 
 #endif

@@ -70,53 +70,70 @@ static_assert(absolute(max_uint32) == max_uint32);
 
 // Due to lack of promotion, these are not constexpr.
 // -minimum<integral> is undefined unless promotable.
-////static_assert(absolute(min_int64) == 0);
 ////static_assert(absolute(min_int32) == 0);
+////static_assert(absolute(min_int64) == 0);
 
 // These are both overflows, allowed due to native int promotion.
-static_assert(absolute(min_int16) == add1<uint32_t>(max_int16));
 static_assert(absolute(min_int8) == add1<uint16_t>(max_int8));
+static_assert(absolute(min_int16) == add1<uint32_t>(max_int16));
 
 // These can be mitigated using explicit domain promotion (except for uint64_t).
-static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
-static_assert(absolute<int32_t>(min_int16) == add1<uint32_t>(max_int16));
 static_assert(absolute<int16_t>(min_int8) == add1<uint16_t>(max_int8));
+static_assert(absolute<int32_t>(min_int16) == add1<uint32_t>(max_int16));
+static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
 
 // negate
-static_assert(negate(int8_t{  0 })  ==   0);
-static_assert(negate(int8_t{ -0 })  ==   0);
-static_assert(negate(int8_t{  42 }) == -42);
-static_assert(negate(int8_t{ -42 }) ==  42);
-static_assert(negate(int8_t{  42 }) == -42);
-static_assert(negate(int8_t{ -42 }) ==  42);
-static_assert(negate(int8_t{  42 }) == -42);
-static_assert(negate(int8_t{ -42 }) ==  42);
-static_assert(negate(int8_t{  42 }) == -42);
-static_assert(negate(int8_t{ -42 }) ==  42);
+static_assert(negate<int8_t>(0)  == 0);
+static_assert(negate<int16_t>(-1)  == 1);
+static_assert(negate<int32_t>(42) == -42);
+static_assert(negate<int64_t>(-42) ==  42);
 static_assert(negate(max_int8) == -max_int8);
 static_assert(negate(max_int16) == -max_int16);
 static_assert(negate(max_int32) == -max_int32);
 static_assert(negate(max_int64) == -max_int64);
 
+static_assert(negate<uint8_t>(0) == 0);
+static_assert(negate<uint16_t>(-1) == 1);
+static_assert(negate<uint32_t>(42) == -42);
+static_assert(negate<uint64_t>(-42) == 42);
+static_assert(negate<uint8_t>(max_uint8) != -max_uint8); // -promotion
+static_assert(negate<uint16_t>(max_uint16) != -max_uint16); // -promotion
+static_assert(negate(max_uint8) != -max_uint8); // -promotion
+static_assert(negate(max_uint16) != -max_uint16); // -promotion
+static_assert(negate(max_uint8) == uint8_t(-max_uint8)); // can't use safe cast, same types!
+static_assert(negate(max_uint16) == uint16_t(-max_uint16)); // can't use safe cast, same types!
+static_assert(negate(max_uint32) == -max_uint32);
+static_assert(negate(max_uint64) == -max_uint64);
+
+// unsigned negate and twos_complement produce safe/expected results for any type.
+static_assert(negate<uint8_t>(0) == twos_complement(0));
+static_assert(negate<uint16_t>(-1) == twos_complement(-1));
+static_assert(negate<uint32_t>(42) == twos_complement(42));
+static_assert(negate<uint64_t>(-42) == twos_complement(-42));
+static_assert(negate(max_uint8) == twos_complement(max_uint8));
+static_assert(negate(max_uint16) == twos_complement(max_uint16));
+static_assert(negate(max_uint32) == twos_complement(max_uint32));
+static_assert(negate(max_uint64) == twos_complement(max_uint64));
+
 // Due to lack of promotion, these are not constexpr.
 // -minimum<integral> is undefined unless promotable.
-////static_assert(negate(min_int64) == 0);
 ////static_assert(negate(min_int32) == 0);
+////static_assert(negate(min_int64) == 0);
 
 // These are both overflows, allowed due to native int promotion.
-static_assert(negate(min_int16) == add1(max_int16));
 static_assert(negate(min_int8) == add1(max_int8));
+static_assert(negate(min_int16) == add1(max_int16));
 
 // These can be mitigated using explicit domain promotion (except for uint64_t).
-static_assert(negate<int64_t>(min_int32) == add1<int64_t>(max_int32));
-static_assert(negate<int32_t>(min_int16) == add1<int32_t>(max_int16));
 static_assert(negate<int16_t>(min_int8) == add1<int16_t>(max_int8));
+static_assert(negate<int32_t>(min_int16) == add1<int32_t>(max_int16));
+static_assert(negate<int64_t>(min_int32) == add1<int64_t>(max_int32));
 
 // uint32 requires explicit promotion before negation.
-////static_assert(negate<int64_t>(min_int64) == -min_int64);
-static_assert(negate<int64_t>(min_int32) == -int64_t(min_int32));
-static_assert(negate<int32_t>(min_int16) == -min_int16);
 static_assert(negate<int16_t>(min_int8) == -min_int8);
+static_assert(negate<int32_t>(min_int16) == -min_int16);
+static_assert(negate<int64_t>(min_int32) == -int64_t(min_int32));
+////static_assert(negate<int64_t>(min_int64) == -min_int64);
 
 // is_negative
 static_assert(is_negative(min_int32));
@@ -128,142 +145,112 @@ static_assert(!is_negative(42u));
 static_assert(!is_negative(max_int32));
 static_assert(!is_negative(max_uint32));
 
-// to_unsigned (C++14: required for constexpr of differing signs)
+// to_unsigned
 static_assert(is_greater(1, 0));
-////static_assert(is_greater(1u, 0));
+static_assert(is_greater(1u, 0));
 static_assert(is_greater(1u, 0u));
 static_assert(is_greater(0, -1));
-////static_assert(is_greater(0u, -1));
+static_assert(is_greater(0u, -1));
 static_assert(!is_greater(-1, -1));
-////static_assert(!is_greater(0u, 0));
+static_assert(!is_greater(0u, 0));
 static_assert(!is_greater(0u, 0u));
-////static_assert(!is_greater(0, 0u));
+static_assert(!is_greater(0, 0u));
 static_assert(!is_greater(1, 1));
-////static_assert(!is_greater(1u, 1));
+static_assert(!is_greater(1u, 1));
 static_assert(!is_greater(1u, 1u));
-////static_assert(!is_greater(1, 1u));
+static_assert(!is_greater(1, 1u));
 static_assert(!is_greater(0, 1));
 static_assert(!is_greater(-1, 0));
 
-// to_unsigned (C++14: required for constexpr of differing signs)
+// to_unsigned
 static_assert(!is_lesser(1, 0));
-////static_assert(!is_lesser(1u, 0));
+static_assert(!is_lesser(1u, 0));
 static_assert(!is_lesser(1u, 0u));
 static_assert(!is_lesser(0, -1));
-////static_assert(!is_lesser(0u, -1));
+static_assert(!is_lesser(0u, -1));
 static_assert(!is_lesser(-1, -1));
-////static_assert(!is_lesser(0u, 0));
+static_assert(!is_lesser(0u, 0));
 static_assert(!is_lesser(0u, 0u));
-////static_assert(!is_lesser(0, 0u));
+static_assert(!is_lesser(0, 0u));
 static_assert(!is_lesser(1, 1));
-////static_assert(!is_lesser(1u, 1));
+static_assert(!is_lesser(1u, 1));
 static_assert(!is_lesser(1u, 1u));
-////static_assert(!is_lesser(1, 1u));
+static_assert(!is_lesser(1, 1u));
 static_assert(is_lesser(0, 1));
 static_assert(is_lesser(-1, 0));
 
 // greater
 
 static_assert(greater<signed>(1, 0) == 1);
+static_assert(greater<signed>(0, 1) == 1);
+static_assert(greater<signed>(1u, 0u) == 1);
+static_assert(greater<signed>(0u, 1u) == 1);
+static_assert(greater<signed>(1, 0u) == 1);
+static_assert(greater<signed>(0, 1u) == 1);
+static_assert(greater<signed>(1u, 0) == 1);
+static_assert(greater<signed>(0u, 1) == 1);
 
-BOOST_AUTO_TEST_CASE(greater__signed__different__expected)
-{
-    BOOST_REQUIRE_EQUAL(greater<signed>(1, 0), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(0, 1), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 0u), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 1u), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(1, 0u), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(0, 1u), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 0), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 1), 1);
-}
+static_assert(greater<signed>(0, 0) == 0);
+static_assert(greater<signed>(1, 1) == 1);
+static_assert(greater<signed>(0u, 0u) == 0);
+static_assert(greater<signed>(1u, 1u) == 1);
+static_assert(greater<signed>(0u, 0) == 0);
+static_assert(greater<signed>(1u, 1) == 1);
+static_assert(greater<signed>(0, 0u) == 0);
+static_assert(greater<signed>(1, 1u) == 1);
 
-BOOST_AUTO_TEST_CASE(greater__signed__equal__expected)
-{
-    BOOST_REQUIRE_EQUAL(greater<signed>(0, 0), 0);
-    BOOST_REQUIRE_EQUAL(greater<signed>(1, 1), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 0u), 0);
-    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 1u), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(0u, 0), 0);
-    BOOST_REQUIRE_EQUAL(greater<signed>(1u, 1), 1);
-    BOOST_REQUIRE_EQUAL(greater<signed>(0, 0u), 0);
-    BOOST_REQUIRE_EQUAL(greater<signed>(1, 1u), 1);
-}
+static_assert(greater<unsigned>(1, 0) == 1u);
+static_assert(greater<unsigned>(0, 1) == 1u);
+static_assert(greater<unsigned>(1u, 0u) == 1u);
+static_assert(greater<unsigned>(0u, 1u) == 1u);
+static_assert(greater<unsigned>(1, 0u) == 1u);
+static_assert(greater<unsigned>(0, 1u) == 1u);
+static_assert(greater<unsigned>(1u, 0) == 1u);
+static_assert(greater<unsigned>(0u, 1) == 1u);
 
-BOOST_AUTO_TEST_CASE(greater__unsigned__different__expected)
-{
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 0), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 1), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 0u), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 1u), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 0u), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 1u), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 0), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 1), 1u);
-}
-
-BOOST_AUTO_TEST_CASE(greater__unsigned__equal__expected)
-{
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 0), 0u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 1), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 1u), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0u, 0), 0u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1u, 1), 1u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(0, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(greater<unsigned>(1, 1u), 1u);
-}
+static_assert(greater<unsigned>(0, 0) == 0u);
+static_assert(greater<unsigned>(1, 1) == 1u);
+static_assert(greater<unsigned>(0u, 0u) == 0u);
+static_assert(greater<unsigned>(1u, 1u) == 1u);
+static_assert(greater<unsigned>(0u, 0) == 0u);
+static_assert(greater<unsigned>(1u, 1) == 1u);
+static_assert(greater<unsigned>(0, 0u) == 0u);
+static_assert(greater<unsigned>(1, 1u) == 1u);
 
 // lesser
 
-BOOST_AUTO_TEST_CASE(lesser__signed__different__expected)
-{
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 0), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 1), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 0u), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 1u), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 0u), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 1u), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 0), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 1), 0);
-}
+static_assert(lesser<signed>(1, 0) == 0);
+static_assert(lesser<signed>(0, 1) == 0);
+static_assert(lesser<signed>(1u, 0u) == 0);
+static_assert(lesser<signed>(0u, 1u) == 0);
+static_assert(lesser<signed>(1, 0u) == 0);
+static_assert(lesser<signed>(0, 1u) == 0);
+static_assert(lesser<signed>(1u, 0) == 0);
+static_assert(lesser<signed>(0u, 1) == 0);
 
-BOOST_AUTO_TEST_CASE(lesser__signed__equal__expected)
-{
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 0), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 1), 1);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 0u), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 1u), 1);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0u, 0), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1u, 1), 1);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(0, 0u), 0);
-    BOOST_REQUIRE_EQUAL(lesser<signed>(1, 1u), 1);
-}
+static_assert(lesser<signed>(0, 0) == 0);
+static_assert(lesser<signed>(1, 1) == 1);
+static_assert(lesser<signed>(0u, 0u) == 0);
+static_assert(lesser<signed>(1u, 1u) == 1);
+static_assert(lesser<signed>(0u, 0) == 0);
+static_assert(lesser<signed>(1u, 1) == 1);
+static_assert(lesser<signed>(0, 0u) == 0);
+static_assert(lesser<signed>(1, 1u) == 1);
 
-BOOST_AUTO_TEST_CASE(lesser__unsigned__different__expected)
-{
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 0), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 1), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 1u), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 1u), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 0), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 1), 0u);
-}
+static_assert(lesser<unsigned>(1, 0) == 0u);
+static_assert(lesser<unsigned>(0, 1) == 0u);
+static_assert(lesser<unsigned>(1u, 0u) == 0u);
+static_assert(lesser<unsigned>(0u, 1u) == 0u);
+static_assert(lesser<unsigned>(1, 0u) == 0u);
+static_assert(lesser<unsigned>(0, 1u) == 0u);
+static_assert(lesser<unsigned>(1u, 0) == 0u);
+static_assert(lesser<unsigned>(0u, 1) == 0u);
 
-BOOST_AUTO_TEST_CASE(lesser__unsigned__equal__expected)
-{
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 0), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 1), 1u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 1u), 1u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0u, 0), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1u, 1), 1u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(0, 0u), 0u);
-    BOOST_REQUIRE_EQUAL(lesser<unsigned>(1, 1u), 1u);
-}
-
-BOOST_AUTO_TEST_SUITE(sign_tests)
-
-BOOST_AUTO_TEST_SUITE_END()
+static_assert(lesser<unsigned>(0, 0) == 0u);
+static_assert(lesser<unsigned>(1, 1) == 1u);
+static_assert(lesser<unsigned>(0u, 0u) == 0u);
+static_assert(lesser<unsigned>(1u, 1u) == 1u);
+static_assert(lesser<unsigned>(0u, 0) == 0u);
+static_assert(lesser<unsigned>(1u, 1) == 1u);
+static_assert(lesser<unsigned>(0, 0u) == 0u);
+static_assert(lesser<unsigned>(1, 1u) == 1u);

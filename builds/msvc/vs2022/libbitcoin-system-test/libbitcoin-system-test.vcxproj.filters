@@ -264,6 +264,9 @@
     <ClCompile Include="..\..\..\..\test\math\limits.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\log.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\power.cpp">
       <Filter>src\math</Filter>
     </ClCompile>

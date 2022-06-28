@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
+#include <bitcoin/system/math/log.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -30,12 +31,17 @@ namespace system {
 // widths
 // ----------------------------------------------------------------------------
 
+// Called by chain::compact (for validation).
 template <typename Value, if_unsigned_integer<Value>>
 constexpr size_t byte_width(Value value) noexcept
 {
+    // (zero-based position of msb) + 7 / 8.
+    // (bit_width(value) + 7) / 8
+    // (ceilinged_log2(value) + 7) / 8
     return ceilinged_log256(value);
 }
 
+// Called by machine::number (for little-endian chunk sizing).
 template <typename Value, if_signed_integer<Value>>
 constexpr size_t byte_width(Value value) noexcept
 {

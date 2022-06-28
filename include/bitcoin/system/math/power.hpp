@@ -20,83 +20,19 @@
 #define LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 
 #include <cstddef>
-#include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constraints.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Division by Zero warning
-/// log(0, n) is undefined, and given inlining of these functions, a compiler
-/// may warn of a "possible" (but actually unreachable) division by zero when
-/// the base is const 0. This occurs because the compiler is inlining
-/// "value / 0". The resolution is to not make this call in production code
-/// (the warning is beneficial) and to use a non-const base 0 in tests.
-
-/// All operations below support signed and unsigned template parameters.
-
-/// Ceilinged logarithms.
-
-/// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
-/// Returns 0 for undefined (base < 2 or value < 1).
-template <size_t Base, typename Exponent = size_t, typename Value>
-constexpr Exponent ceilinged_log(Value value) noexcept;
-template <typename Exponent = size_t, typename Base, typename Value,
-    if_integer<Exponent> = true,
-    if_integer<Base> = true,
-    if_integer<Value> = true>
-constexpr Exponent ceilinged_log(Base base, Value value) noexcept;
-
-/// Optimizations for ceilinged_log(2, Value).
-template <typename Exponent = size_t, typename Value,
-    if_integer<Exponent> = true,
-    if_integral_integer<Value> = true>
-constexpr Exponent ceilinged_log2(Value value) noexcept;
-template <typename Exponent = size_t, typename Value,
-    if_integer<Exponent> = true,
-    if_non_integral_integer<Value> = true>
-constexpr Exponent ceilinged_log2(Value value) noexcept;
-
-/// Optimizations for ceilinged_log(256, integral).
-template <typename Exponent = size_t, typename Value,
-    if_integer<Exponent> = true,
-    if_integer<Value> = true>
-constexpr Exponent ceilinged_log256(Value value) noexcept;
-
-/// Floored logarithms.
-
-/// Obtain the floored (rounded down) integer logarithm of given value and base.
-/// Returns 0 for undefined (base < 2 or value < 1).
-template <size_t Base, typename Exponent = size_t, typename Value>
-constexpr Exponent floored_log(Value value) noexcept;
-template <typename Exponent = size_t, typename Base, typename Value,
-    if_integer<Exponent> = true,
-    if_integer<Base> = true,
-    if_integer<Value> = true>
-constexpr Exponent floored_log(Base base, Value value) noexcept;
-
-/// Optimizations for floored_log(2, Value).
-template <typename Exponent = size_t, typename Value,
-    if_integer<Exponent> = true,
-    if_integral_integer<Value> = true>
-constexpr Exponent floored_log2(Value value) noexcept;
-template <typename Exponent = size_t, typename Value,
-    if_integer<Exponent> = true,
-    if_non_integral_integer<Value> = true>
-constexpr Exponent floored_log2(Value value) noexcept;
-
-/// Optimizations for floored_log(256, Value).
-template <typename Exponent = size_t, typename Value,
-    if_integer<Exponent> = true,
-    if_integer<Value> = true>
-constexpr Exponent floored_log256(Value value) noexcept;
-
-/// Powers.
-
 /// Obtain the integer power of given base for given exponent.
-/// Returns zero if both operands are zero (undefined).
+/// Returns zero if all undefined operations (base < 2 or value < 1).
+
+// Constexpr dispatches to optimal overload.
 template <size_t Base, typename Value = size_t, typename Exponent>
 constexpr Value power(Exponent exponent) noexcept;
+
+// Normal form, for all integer types.
 template <typename Value = size_t, typename Base, typename Exponent,
     if_integer<Value> = true,
     if_integer<Base> = true,

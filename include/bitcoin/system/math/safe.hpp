@@ -27,6 +27,7 @@ namespace system {
 /// Explicit integral casts.
 
 /// Cast away integral sign/size promotion, overflow left to caller.
+/// Native operators always promote to at least int and possibly to unsigned.
 template <typename To, typename From,
     if_not_lesser_width<From, int> = true,
     if_integral_integer<To> = true,

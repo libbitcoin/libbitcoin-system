@@ -117,6 +117,7 @@
 #include <bitcoin/system/math/bytes.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
+#include <bitcoin/system/math/log.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>

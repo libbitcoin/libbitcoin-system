@@ -138,6 +138,7 @@
     <ClCompile Include="..\..\..\..\test\math\bytes.cpp" />
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\log.cpp" />
     <ClCompile Include="..\..\..\..\test\math\power.cpp" />
     <ClCompile Include="..\..\..\..\test\math\safe.cpp" />
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
