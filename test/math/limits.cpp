@@ -268,3 +268,41 @@ static_assert(twos_complement(max_uint64) == add1(min_uint64));
 /// 6 bytes:[-2^47+1...2^47-1]
 /// 7 bytes:[-2^55+1...2^55-1]
 /// 8 bytes:[-2^63+1...2^63-1]
+
+// This demonstrates the loss of one value in the domain.
+static_assert(!is_negated(absolute(int8_t(0b11111111))));
+static_assert(!is_negated(absolute(int8_t(0b11111110))));
+static_assert(!is_negated(absolute(int8_t(0b11111100))));
+static_assert(!is_negated(absolute(int8_t(0b11111000))));
+static_assert(!is_negated(absolute(int8_t(0b11110000))));
+static_assert(!is_negated(absolute(int8_t(0b11100000))));
+static_assert(!is_negated(absolute(int8_t(0b1100000))));
+static_assert( is_negated(absolute(int8_t(0b10000000)))); // <== min_int8 (unpromoted)
+static_assert(!is_negated(absolute(int8_t(0b01111111))));
+static_assert(!is_negated(absolute(int8_t(0b00111111))));
+static_assert(!is_negated(absolute(int8_t(0b00011111))));
+static_assert(!is_negated(absolute(int8_t(0b00001111))));
+static_assert(!is_negated(absolute(int8_t(0b00000111))));
+static_assert(!is_negated(absolute(int8_t(0b00000011))));
+static_assert(!is_negated(absolute(int8_t(0b00000010))));
+static_assert(!is_negated(absolute(int8_t(0b00000001))));
+static_assert(!is_negated(absolute(int8_t(0b00000000))));
+
+// For any integral, this is the integral signed integer domain minimum value.
+static_assert(is_negated(absolute(0x80_i8)));
+static_assert(is_negated(absolute(0x8000_i16)));
+static_assert(is_negated(absolute(0x80000000_i32)));
+////static_assert(is_negated(absolute(0x8000000000000000_i64))); // absolute undefined
+
+// Note that the leading bit of any leading byte would satisfy the above assertions.
+static_assert(is_negated(absolute(0x00800000_i32)));
+
+// However stack number compresses out all leading zero bytes, and then adds 
+// a sign byte. Yet when converting to stack number to a int32_t, it guards
+// against previous operation overflow by rejecting any 4 byte little-endian
+// stack chunk size. This causes a 4 byte negated integer to be discarded,
+// because its sign byte is a 5th stack chunk byte. But, the only value that
+// can have an absolute value with a high bit is the integral minimum. So that
+// value is considered an overflow as a matter of consensus. This could have
+// been easily avoided, by converting the necessary 5 bytes and confirming the
+// range, but alas.
