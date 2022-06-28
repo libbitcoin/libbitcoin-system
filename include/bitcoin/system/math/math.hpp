@@ -33,16 +33,16 @@
 // safe     ->
 // sign     -> safe
 // division -> sign
-// power    -> sign, safe
+// power    -> sign, safe, bits
 // addition -> sign, safe, limits
 // limits   -> sign, safe, power
 // log      -> sign, safe, division
 // bits     -> sign, safe, log
-// bytes    -> sign, log
+// bytes    -> sign, safe, log
 
 // sign/safe should not call any other math libs and are safe from all others.
-// bits/bytes should otherwise call only log. Otherwise only the natural:
-// addition->limits, limits->power, log->division.
+// bits/bytes should otherwise call only log. Otherwise only:
+// addition->limits, limits->power, power->bits, log->division.
 
 // TODO: create type constraints for unitx/unitx_t<> optimization.
 // TODO: verify non-integral ops do not unnecessarily copy unitx/unitx_t<>.

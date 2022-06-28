@@ -23,6 +23,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
 #include <bitcoin/system/math/log.hpp>
+#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {

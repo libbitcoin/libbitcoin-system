@@ -24,6 +24,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
@@ -83,7 +84,7 @@ constexpr Value power2(Exponent exponent) noexcept
     if (is_negative(exponent))
         return 0;
 
-    return shift_left<Value>(1, to_unsigned(exponent));
+    return shift_left<Value>(1u, to_unsigned(exponent));
 }
 
 template <typename Value, typename Exponent,

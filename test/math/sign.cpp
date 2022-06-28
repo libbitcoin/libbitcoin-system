@@ -75,7 +75,7 @@ static_assert(absolute(max_uint32) == max_uint32);
 ////static_assert(absolute(min_int64) == 0);
 
 // These are both overflows, allowed due to native int promotion.
-static_assert(absolute(min_int8) == add1<uint16_t>(max_int8));
+static_assert(absolute(min_int8)  == add1<uint16_t>(max_int8));
 static_assert(absolute(min_int16) == add1<uint32_t>(max_int16));
 
 // These can be mitigated using explicit domain promotion (except for uint64_t).
@@ -85,34 +85,39 @@ static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
 
 // negate
 
-static_assert(negate<int8_t>(0)  == 0);
-static_assert(negate<int16_t>(-1)  == 1);
-static_assert(negate<int32_t>(42) == -42);
-static_assert(negate<int64_t>(-42) ==  42);
-static_assert(negate(max_int8) == -max_int8);
+static_assert(negate(0)   ==  0);
+static_assert(negate(0u)  ==  0);
+static_assert(negate(1)   == -1);
+static_assert(negate(1u)  == -1);
+static_assert(negate(-1)  ==  1);
+static_assert(negate(42)  == -42);
+static_assert(negate(-42) ==  42);
+static_assert(negate(42u) == -42);
+
+static_assert(negate(max_int8)  == -max_int8);
 static_assert(negate(max_int16) == -max_int16);
 static_assert(negate(max_int32) == -max_int32);
 static_assert(negate(max_int64) == -max_int64);
 
-static_assert(negate<uint8_t>(0) == 0);
-static_assert(negate<uint16_t>(-1) == 1);
-static_assert(negate<uint32_t>(42) == -42);
-static_assert(negate<uint64_t>(-42) == 42);
-static_assert(negate<uint8_t>(max_uint8) != -max_uint8);    // -promotion
-static_assert(negate<uint16_t>(max_uint16) != -max_uint16); // -promotion
-static_assert(negate(max_uint8) != -max_uint8);             // -promotion
-static_assert(negate(max_uint16) != -max_uint16);           // -promotion
-static_assert(negate(max_uint8) == uint8_t(-max_uint8));    // can't use safe cast, same types!
-static_assert(negate(max_uint16) == uint16_t(-max_uint16)); // can't use safe cast, same types!
-static_assert(negate(max_uint32) == -max_uint32);
-static_assert(negate(max_uint64) == -max_uint64);
+static_assert(negate(max_uint8)  != -max_uint8);                // -promotion
+static_assert(negate(max_uint16) != -max_uint16);               // -promotion
+static_assert(negate(max_uint8)  != -max_uint8);                // -promotion
+static_assert(negate(max_uint16) != -max_uint16);               // -promotion
 
-// unsigned negate and twos_complement produce safe/expected results for any type.
-static_assert(negate<uint8_t>(0) == twos_complement(0));
-static_assert(negate<uint16_t>(-1) == twos_complement(-1));
-static_assert(negate<uint32_t>(42) == twos_complement(42));
-static_assert(negate<uint64_t>(-42) == twos_complement(-42));
-static_assert(negate(max_uint8) == twos_complement(max_uint8));
+static_assert(negate(max_uint8)  ==  uint8_t(-max_uint8));      // truncate -promotion
+static_assert(negate(max_uint16) == uint16_t(-max_uint16));     // truncate -promotion
+static_assert(negate(max_uint32) == to_unsigned(-to_signed(max_uint32)));    // compiler warns on lack of sign change
+static_assert(negate(max_uint64) == to_unsigned(-to_signed(max_uint64)));    // compiler warns on lack of sign change
+
+static_assert(negate(0)   == twos_complement(0));
+static_assert(negate(0u)  == twos_complement(0u));
+static_assert(negate(1)   == twos_complement(1));
+static_assert(negate(1u)  == twos_complement(1u));
+static_assert(negate(-1)  == twos_complement(-1));
+static_assert(negate(-42) == twos_complement(-42));
+static_assert(negate(42u) == twos_complement(42u));
+
+static_assert(negate(max_uint8)  == twos_complement(max_uint8));
 static_assert(negate(max_uint16) == twos_complement(max_uint16));
 static_assert(negate(max_uint32) == twos_complement(max_uint32));
 static_assert(negate(max_uint64) == twos_complement(max_uint64));
@@ -123,16 +128,16 @@ static_assert(negate(max_uint64) == twos_complement(max_uint64));
 ////static_assert(negate(min_int64) == 0);
 
 // These are both overflows, allowed due to native int promotion.
-static_assert(negate(min_int8) == add1(max_int8));
+static_assert(negate(min_int8)  == add1(max_int8));
 static_assert(negate(min_int16) == add1(max_int16));
 
 // These can be mitigated using explicit domain promotion (except for uint64_t).
-static_assert(negate<int16_t>(min_int8) == add1<int16_t>(max_int8));
+static_assert(negate<int16_t>(min_int8)  == add1<int16_t>(max_int8));
 static_assert(negate<int32_t>(min_int16) == add1<int32_t>(max_int16));
 static_assert(negate<int64_t>(min_int32) == add1<int64_t>(max_int32));
 
 // uint32 requires explicit promotion before negation.
-static_assert(negate<int16_t>(min_int8) == -min_int8);
+static_assert(negate<int16_t>(min_int8)  == -min_int8);
 static_assert(negate<int32_t>(min_int16) == -min_int16);
 static_assert(negate<int64_t>(min_int32) == -int64_t(min_int32));
 ////static_assert(negate<int64_t>(min_int64) == -min_int64);

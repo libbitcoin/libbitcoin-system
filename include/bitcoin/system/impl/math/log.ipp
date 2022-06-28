@@ -98,7 +98,7 @@ constexpr Exponent ceilinged_log2(Value value) noexcept
     if (value < 1)
         return 0;
 
-    return possible_narrow_and_sign_cast<Exponent>(mp::msb(value));
+    return add1<Exponent>(mp::msb(value));
 }
 
 // Called by bc::byte_width.
@@ -202,8 +202,7 @@ constexpr Exponent floored_log2(Value value) noexcept
     if (value < 1)
         return 0;
 
-    return possible_narrow_and_sign_cast<Exponent>(
-        sub1(std::bit_width(to_unsigned(value))));
+    return sub1<Exponent>(std::bit_width(to_unsigned(value)));
 }
 
 // Called by chain:::chain_state (for timewarp detection).
