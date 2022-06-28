@@ -111,7 +111,7 @@ bool encode_base85(std::string& out, const data_slice& in) noexcept
         accumulator = accumulator * 256u + unencoded_byte;
         if (is_zero(++byte_index % 4u))
         {
-            for (auto divise = power<uint32_t>(85, 4); !is_zero(divise);
+            for (auto divise = power<85, uint32_t>(4); !is_zero(divise);
                 divise /= 85u)
                 encoded.push_back(encoder[accumulator / divise % 85u]);
 
@@ -146,7 +146,7 @@ bool decode_base85(data_chunk& out, const std::string& in) noexcept
         accumulator = accumulator * 85u + decoder[position];
         if (is_zero(++char_index % 5u))
         {
-            for (auto divise = power<uint32_t>(256, 3); !is_zero(divise);
+            for (auto divise = power<256, uint32_t>(3); !is_zero(divise);
                 divise /= 256u)
                 decoded.push_back(accumulator / divise % 256u);
 

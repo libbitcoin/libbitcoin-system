@@ -123,10 +123,10 @@ static_assert((1625 * 1) + (1625 * 1626) + (1625 * 1626 * 1626ll) ==
 // local constants
 // ----------------------------------------------------------------------------
 
-static const auto size = static_cast<int>(electrum_v1::dictionary::size());
-static const auto size0 = power<int64_t>(size, 0);
-static const auto size1 = power<int64_t>(size, 1);
-static const auto size2 = power<int64_t>(size, 2);
+constexpr auto size = electrum_v1::dictionary::size();
+constexpr auto size0 = power<size, int64_t>(0);
+constexpr auto size1 = power<size, int64_t>(1);
+constexpr auto size2 = power<size, int64_t>(2);
 
 // private static
 // ----------------------------------------------------------------------------
@@ -154,19 +154,22 @@ string_list electrum_v1::encoder(const data_chunk& entropy,
     {
         // Guard: entropy verified as multiples of four bytes.
         // Guard: below cannot overflow even if this reads max_uint32.
-        const auto value = reader.read_4_bytes_big_endian();
+        const int64_t value = reader.read_4_bytes_big_endian();
 
         // [(value/size0 + 0)%size1] is a nop, shown for consistency.
         // Pos quotient integer div/mod is floor in C++ and python[2/3].
-        const auto uno = (value / size0 + 0x0) % size1;
-        const auto dos = (value / size1 + uno) % size1;
-        const auto tre = (value / size2 + dos) % size1;
+        const auto uno = (floored_divide(value, size0) + 0x0) % size1;
+        const auto dos = (floored_divide(value, size1) + uno) % size1;
+        const auto tre = (floored_divide(value, size2) + dos) % size1;
 
         // Guard: dictionary membership has been verified.
         // Guard: any positive number modulo 1626 is always [0-1625].
-        words.push_back(dictionaries_.at(static_cast<size_t>(uno), identifier));
-        words.push_back(dictionaries_.at(static_cast<size_t>(dos), identifier));
-        words.push_back(dictionaries_.at(static_cast<size_t>(tre), identifier));
+        words.push_back(dictionaries_.at(
+            possible_narrow_sign_cast<size_t>(uno), identifier));
+        words.push_back(dictionaries_.at(
+            possible_narrow_sign_cast<size_t>(dos), identifier));
+        words.push_back(dictionaries_.at(
+            possible_narrow_sign_cast<size_t>(tre), identifier));
     }
 
     return words;
@@ -204,7 +207,7 @@ v1_decoding electrum_v1::decoder(const string_list& words,
 
         // Guard: floored modulo with positive divisor is always positive.
         // Casting away a non-zero (overflow bit) will prevent round trip.
-        out.write_4_bytes_big_endian(static_cast<uint32_t>(value));
+        out.write_4_bytes_big_endian(possible_narrow_sign_cast<uint32_t>(value));
     }
 
     out.flush();
@@ -216,7 +219,7 @@ hash_digest electrum_v1::strecher(const data_chunk& seed_entropy) noexcept
 {
     constexpr size_t hash_iterations = 100000;
 
-    auto streched = seed_entropy;
+    data_chunk streched{ seed_entropy };
     for (size_t count = 0; count < hash_iterations; ++count)
         streched = sha256_hash_chunk(splice(streched, seed_entropy));
 
@@ -397,7 +400,7 @@ ec_private electrum_v1::to_seed(const context& context) const noexcept
 
     // Set public key compression to false as is the electrum convention.
     // Causes derived payment addresses to use the uncompressed public key.
-    static const auto compression = false;
+    constexpr auto compression = false;
 
     // Strech entropy into the seed, which is also the master private key.
     const auto seed = strecher(seed_entropy());

@@ -66,7 +66,7 @@ public:
 
     static constexpr size_t factor  = floored_log2(base);
     static constexpr size_t e_max   = span / factor;
-    static constexpr size_t e_bits  = ceilinged_log2(e_max);
+    static constexpr size_t e_bits  = bit_width(e_max);
     static constexpr size_t e_bytes = to_ceilinged_bytes(e_bits);
     static constexpr size_t e_width = to_bits(e_bytes);
     static constexpr size_t m_bytes = precision / factor;
