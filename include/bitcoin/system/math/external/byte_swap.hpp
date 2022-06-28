@@ -29,7 +29,7 @@
 constexpr uint16_t byte_swap16_native(uint16_t value)
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<uint16_t>((value << 8) | (value >> 8));
+    return static_cast<uint16_t>((value << 8u) | (value >> 8u));
     BC_POP_WARNING()
 }
 
@@ -37,8 +37,8 @@ constexpr uint32_t byte_swap32_native(uint32_t value)
 {
     return
         ((value << 24) |
-        ((value <<  8) & 0xff0000ul) |
-        ((value >>  8) & 0xff00ul) |
+        ((value <<  8) & 0x00ff0000ul) |
+        ((value >>  8) & 0x0000ff00ul) |
          (value >> 24));
 }
 
@@ -47,11 +47,11 @@ constexpr uint64_t byte_swap64_native(uint64_t value)
     return
         ((value << 56) |
         ((value << 40) & 0xff000000000000ull) |
-        ((value << 24) & 0xff0000000000ull) |
-        ((value <<  8) & 0xff00000000ull) |
-        ((value >>  8) & 0xff000000ull) |
-        ((value >> 24) & 0xff0000ull) |
-        ((value >> 40) & 0xff00ull) |
+        ((value << 24) & 0x00ff0000000000ull) |
+        ((value <<  8) & 0x0000ff00000000ull) |
+        ((value >>  8) & 0x000000ff000000ull) |
+        ((value >> 24) & 0x00000000ff0000ull) |
+        ((value >> 40) & 0x0000000000ff00ull) |
          (value >> 56));
 }
 
@@ -94,7 +94,7 @@ constexpr uint64_t byte_swap64_native(uint64_t value)
     #define byte_swap16(value) bswap16(value)
     #define byte_swap32(value) bswap32(value)
     #define byte_swap64(value) bswap64(value)
-#elif
+#else
     // Native implementation.
     #define byte_swap16(value) byte_swap16_native(value)
     #define byte_swap32(value) byte_swap32_native(value)
