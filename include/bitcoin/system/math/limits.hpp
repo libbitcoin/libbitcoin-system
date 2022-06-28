@@ -73,20 +73,6 @@ constexpr Return minimum() noexcept;
 template <size_t Bytes, typename Return = signed_type<Bytes>>
 constexpr Return maximum() noexcept;
 
-/// Bitcoin serialization imposes the following domain constraint on integers.
-/// The domains are constrained by one less negative value than C++ integrals.
-/// This is a consequence of a valid encoding for both negative zero (e.g 0x80)
-/// and positive zero (e.g. 0x00). This is a side effect of the use of variable
-/// lenth serialization (sighash/stack) encoding of integers as byte vectors.
-/// 1 byte :[-2^07+1...2^07-1]
-/// 2 bytes:[-2^15+1...2^15-1]
-/// 3 bytes:[-2^23+1...2^23-1]
-/// 4 bytes:[-2^31+1...2^31-1]
-/// 5 bytes:[-2^39+1...2^39-1]
-/// 6 bytes:[-2^47+1...2^47-1]
-/// 7 bytes:[-2^55+1...2^55-1]
-/// 8 bytes:[-2^63+1...2^63-1]
-
 /// The minimum value of a bitcoin integer by byte size (1-8 bytes).
 template <size_t Bytes, typename Return = signed_type<Bytes>>
 constexpr Return bitcoin_min() noexcept;

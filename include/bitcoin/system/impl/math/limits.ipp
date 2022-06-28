@@ -76,13 +76,7 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
             possible_narrow_and_sign_cast<Result>(value));
 }
 
-// minimum/maximum
-
-template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer minimum() noexcept
-{
-    return std::numeric_limits<Integer>::min();
-}
+// integral minimum/maximum
 
 template <typename Integer, if_integral_integer<Integer>>
 constexpr Integer maximum() noexcept
@@ -90,35 +84,40 @@ constexpr Integer maximum() noexcept
     return std::numeric_limits<Integer>::max();
 }
 
-template <size_t Bytes, typename Return>
-constexpr Return minimum() noexcept
+template <typename Integer, if_integral_integer<Integer>>
+constexpr Integer minimum() noexcept
 {
-    using unsigned_t = to_unsigned_type<Return>;
-
-    // negate(--max) prevents integral overflow (for 1, 2, 4, or 8 bytes).
-    // sub1(negate(--max)) restores the negative domain.
-    return sub1(negate(sub1(maximum<Bytes>())));
+    return std::numeric_limits<Integer>::min();
 }
+
+// byte-based minimum/maximum
 
 template <size_t Bytes, typename Return>
 constexpr Return maximum() noexcept
 {
-    using unsigned_t = to_unsigned_type<Return>;
-    return to_signed(sub1(power2<unsigned_t>(sub1(to_bits(Bytes)))));
+    using result = to_unsigned_type<Return>;
+    constexpr auto bit = sub1(to_bits(Bytes));
+    return to_signed(sub1(power2<result>(bit)));
 }
-
-// bitcoin_minimum/bitcoin_maximum (stack_number)
 
 template <size_t Bytes, typename Return>
-constexpr Return bitcoin_min() noexcept
+constexpr Return minimum() noexcept
 {
-    return add1(minimum<Bytes>());
+    return ones_complement(maximum<Bytes>());
 }
+
+// bitcoin minimum/maximum (stack_number)
 
 template <size_t Bytes, typename Return>
 constexpr Return bitcoin_max() noexcept
 {
     return maximum<Bytes>();
+}
+
+template <size_t Bytes, typename Return>
+constexpr Return bitcoin_min() noexcept
+{
+    return twos_complement(bitcoin_max<Bytes>());
 }
 
 } // namespace system
