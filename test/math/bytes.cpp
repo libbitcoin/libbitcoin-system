@@ -192,91 +192,70 @@ static_assert(std::is_same<decltype(to_unnegated<int32_t>(0)), int32_t>::value);
 
 // endian
 
-static_assert(to_big_end(narrow_sign_cast<uint8_t>(0x01)) == narrow_sign_cast<uint8_t>(0x01));
-static_assert(to_big_end(narrow_sign_cast<uint16_t>(0x0102)) == narrow_sign_cast<uint16_t>(0x0201));
-static_assert(to_big_end(0x01020304ul) == 0x04030201ul);
-static_assert(to_big_end(0x0102030405060708ull) == 0x0807060504030201ull);
+ // Beware of type promotion (use explicit types).
 
-BOOST_AUTO_TEST_CASE(to_big_end__not_constant_evaluated__always__expected)
+static_assert(to_big_end(depromote<uint8_t>(                0x01)) ==               0x01u);
+static_assert(to_big_end(depromote<uint16_t>(               0x0102)) ==             0x0201u);
+static_assert(to_big_end(uint32_t(                          0x01020304)) ==         0x04030201ul);
+static_assert(to_big_end(uint64_t(                          0x0102030405060708)) == 0x0807060504030201ull);
+static_assert(to_big_end(depromote<int8_t>(                 0x01)) ==               0x01);
+static_assert(to_big_end(depromote<int16_t>(                0x0102)) ==             0x0201);
+static_assert(to_big_end(int32_t(                           0x01020304)) ==         0x04030201l);
+static_assert(to_big_end(int64_t(                           0x0102030405060708)) == 0x0807060504030201ll);
+
+static_assert(to_little_end(depromote<uint8_t>(             0x01)) ==               0x01u);
+static_assert(to_little_end(depromote<uint16_t>(            0x0102)) ==             0x0102u);
+static_assert(to_little_end(uint32_t(                       0x01020304)) ==         0x01020304ul);
+static_assert(to_little_end(uint64_t(                       0x0102030405060708)) == 0x0102030405060708ull);
+static_assert(to_little_end(depromote<int8_t>(              0x01)) ==               0x01);
+static_assert(to_little_end(depromote<int16_t>(             0x0102)) ==             0x0102);
+static_assert(to_little_end(int32_t(                        0x01020304)) ==         0x01020304l);
+static_assert(to_little_end(int64_t(                        0x0102030405060708)) == 0x0102030405060708ll);
+
+BOOST_AUTO_TEST_CASE(to_endian__not_constant_evaluated__always__expected)
 {
-    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
-    BOOST_REQUIRE_EQUAL(to_big_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0201));
-    BOOST_REQUIRE_EQUAL(to_big_end(0x01020304ul), 0x04030201ul);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x0102030405060708ull), 0x0807060504030201ull);
-}
+    BOOST_REQUIRE_EQUAL(to_big_end(depromote<uint8_t>(      0x01)),                 0x01u);
+    BOOST_REQUIRE_EQUAL(to_big_end(depromote<uint16_t>(     0x0102)),               0x0201u);
+    BOOST_REQUIRE_EQUAL(to_big_end(uint32_t(                0x01020304)),           0x04030201ul);
+    BOOST_REQUIRE_EQUAL(to_big_end(uint64_t(                0x0102030405060708)),   0x0807060504030201ull);
+    BOOST_REQUIRE_EQUAL(to_big_end(depromote<int8_t>(       0x01)),                 0x01);
+    BOOST_REQUIRE_EQUAL(to_big_end(depromote<int16_t>(      0x0102)),               0x0201);
+    BOOST_REQUIRE_EQUAL(to_big_end(int32_t(                 0x01020304)),           0x04030201l);
+    BOOST_REQUIRE_EQUAL(to_big_end(int64_t(                 0x0102030405060708)),   0x0807060504030201ll);
 
-static_assert(to_little_end(narrow_sign_cast<uint8_t>(0x01)) == narrow_sign_cast<uint8_t>(0x01));
-static_assert(to_little_end(narrow_sign_cast<uint16_t>(0x0102)) == narrow_sign_cast<uint16_t>(0x0102));
-static_assert(to_little_end(0x01020304ul) == 0x01020304ul);
-static_assert(to_little_end(0x0102030405060708ull) == 0x0102030405060708ull);
-
-BOOST_AUTO_TEST_CASE(to_little_end__not_constant_evaluated__always__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint8_t>(0x01)), narrow_sign_cast<uint8_t>(0x01));
-    BOOST_REQUIRE_EQUAL(to_little_end(narrow_sign_cast<uint16_t>(0x0102)), narrow_sign_cast<uint16_t>(0x0102));
-    BOOST_REQUIRE_EQUAL(to_little_end(0x01020304ul), 0x01020304ul);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x0102030405060708ull), 0x0102030405060708ull);
+    BOOST_REQUIRE_EQUAL(to_little_end(depromote<uint8_t>(   0x01)),                 0x01u);
+    BOOST_REQUIRE_EQUAL(to_little_end(depromote<uint16_t>(  0x0102)),               0x0102u);
+    BOOST_REQUIRE_EQUAL(to_little_end(uint32_t(             0x01020304)),           0x01020304ul);
+    BOOST_REQUIRE_EQUAL(to_little_end(uint64_t(             0x0102030405060708)),   0x0102030405060708ull);
+    BOOST_REQUIRE_EQUAL(to_little_end(depromote<int8_t>(    0x01)),                 0x01);
+    BOOST_REQUIRE_EQUAL(to_little_end(depromote<int16_t>(   0x0102)),               0x0102);
+    BOOST_REQUIRE_EQUAL(to_little_end(int32_t(              0x01020304)),           0x01020304l);
+    BOOST_REQUIRE_EQUAL(to_little_end(int64_t(              0x0102030405060708)),   0x0102030405060708ll);
 }
 
 // byteswap
 
- // Beware of type promotion (use explicit argument).
-static_assert(byteswap(0x01u) == 0x01000000ul);
-static_assert(byteswap(0x0102u) == 0x02010000ul);
-static_assert(byteswap(0x01020304ul) == 0x04030201ul);
-static_assert(byteswap(0x0102030405060708ull) == 0x0807060504030201ull);
+ // Beware of type promotion (use explicit types).
 
-static_assert(byteswap<uint8_t>(0x01u) == 0x01u);
-static_assert(byteswap<uint16_t>(0x0102u) == 0x0201u);
-static_assert(byteswap<uint32_t>(0x01020304ul) == 0x04030201ul);
-static_assert(byteswap<uint64_t>(0x0102030405060708ull) == 0x0807060504030201ull);
-
-static_assert(byteswap(0x01) == 0x01000000l);
-static_assert(byteswap(0x0102) == 0x02010000l);
-static_assert(byteswap(0x01020304l) == 0x04030201l);
-static_assert(byteswap(0x0102030405060708ll) == 0x0807060504030201ll);
-
-static_assert(byteswap<int8_t>(0x01) == 0x01);
-static_assert(byteswap<int16_t>(0x0102) == 0x0201);
-static_assert(byteswap<int32_t>(0x01020304l) == 0x04030201l);
-static_assert(byteswap<int64_t>(0x0102030405060708ll) == 0x0807060504030201ll);
-
-static_assert(byteswap(0xfe) == 0xfe000000);
-static_assert(byteswap(0xfffe) == 0xfeff0000l);
-static_assert(byteswap(0xffffff00l) == 0x00ffffffl);
-static_assert(byteswap(0xffffffffffffff00ll) == 0x00ffffffffffffffll);
-
-static_assert(byteswap<int8_t>(narrow_cast<int8_t>(0xfe)) == narrow_cast<int8_t>(0xfe));
-static_assert(byteswap<int16_t>(narrow_cast<int8_t>(0xfffe)) == narrow_cast<int16_t>(0xfeff));
-static_assert(byteswap<int32_t>(0xffffff00l) == 0x00ffffffl);
-static_assert(byteswap<int64_t>(0xffffffffffffff00ll) == 0x00ffffffffffffffll);
+static_assert(byteswap<uint8_t>(                            0x01) ==                0x01u);
+static_assert(byteswap<uint16_t>(                           0x0102) ==              0x0201u);
+static_assert(byteswap<uint32_t>(                           0x01020304) ==          0x04030201ul);
+static_assert(byteswap<uint64_t>(                           0x0102030405060708) ==  0x0807060504030201ull);
+static_assert(byteswap<int8_t>(                             0x01) ==                0x01);
+static_assert(byteswap<int16_t>(                            0x0102) ==              0x0201);
+static_assert(byteswap<int32_t>(                            0x01020304) ==          0x04030201l);
+static_assert(byteswap<int64_t>(                            0x0102030405060708) ==  0x0807060504030201ll);
 
 BOOST_AUTO_TEST_CASE(byteswap__not_constant_evaluated__always__swapped)
 {
-    BOOST_REQUIRE_EQUAL(byteswap(0x01u), 0x01000000ul);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102u), 0x02010000ul);
-    BOOST_REQUIRE_EQUAL(byteswap(0x01020304ul), 0x04030201ul);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102030405060708ull), 0x0807060504030201ull);
-
-    BOOST_REQUIRE_EQUAL(byteswap<uint8_t>(0x01u), 0x01u);
-    BOOST_REQUIRE_EQUAL(byteswap<uint16_t>(0x0102u), 0x0201u);
-    BOOST_REQUIRE_EQUAL(byteswap<uint32_t>(0x01020304ul), 0x04030201ul);
-    BOOST_REQUIRE_EQUAL(byteswap<uint64_t>(0x0102030405060708ull), 0x0807060504030201ull);
-
-    BOOST_REQUIRE_EQUAL(byteswap<int8_t>(0x01), 0x01);
-    BOOST_REQUIRE_EQUAL(byteswap<int16_t>(0x0102), 0x0201);
-    BOOST_REQUIRE_EQUAL(byteswap<int32_t>(0x01020304l), 0x04030201l);
-    BOOST_REQUIRE_EQUAL(byteswap<int64_t>(0x0102030405060708ll), 0x0807060504030201ll);
-
-    BOOST_REQUIRE_EQUAL(byteswap(0xfe), to_signed(0xfe000000l));
-    BOOST_REQUIRE_EQUAL(byteswap(0xff00), 0x00ff0000l);
-    BOOST_REQUIRE_EQUAL(byteswap(0xffffff00l), to_unsigned(0x00ffffffl));
-    BOOST_REQUIRE_EQUAL(byteswap(0xffffffffffffff00ll), to_unsigned(0x00ffffffffffffffll));
-
-    BOOST_REQUIRE_EQUAL(byteswap<int8_t>(narrow_cast<int8_t>(0xfe)), narrow_cast<int8_t>(0xfe));
-    BOOST_REQUIRE_EQUAL(byteswap<int16_t>(narrow_cast<int8_t>(0xfffe)), narrow_cast<int16_t>(0xfeff));
-    BOOST_REQUIRE_EQUAL(byteswap<int32_t>(0xffffff00l), 0x00ffffffl);
-    BOOST_REQUIRE_EQUAL(byteswap<int64_t>(0xffffffffffffff00ll), 0x00ffffffffffffffll);
+    BOOST_REQUIRE_EQUAL(byteswap<uint8_t>(                  0x01u),                 0x01u);
+    BOOST_REQUIRE_EQUAL(byteswap<uint16_t>(                 0x0102u),               0x0201u);
+    BOOST_REQUIRE_EQUAL(byteswap<uint32_t>(                 0x01020304),            0x04030201ul);
+    BOOST_REQUIRE_EQUAL(byteswap<uint64_t>(                 0x0102030405060708),    0x0807060504030201ull);
+    BOOST_REQUIRE_EQUAL(byteswap<int8_t>(                   0x01),                  0x01);
+    BOOST_REQUIRE_EQUAL(byteswap<int16_t>(                  0x0102),                0x0201);
+    BOOST_REQUIRE_EQUAL(byteswap<int32_t>(                  0x01020304),            0x04030201);
+    BOOST_REQUIRE_EQUAL(byteswap<int64_t>(                  0x0102030405060708),    0x0807060504030201);
 }
 
 ////static_assert(to_bytes<0u>() == 0u);
