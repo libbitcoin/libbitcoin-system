@@ -28,10 +28,10 @@ constexpr size_t half = maximum / 2;
 
 // Downcasting a negative loses the sign bit.
 static_assert(static_cast<int32_t>(min_int64) == 0);
-constexpr auto right = narrow_cast<int32_t>(min_int64);
 static_assert(narrow_cast<int32_t>(min_int64) != min_int64);
 
 // MSVC static compiler gets above right but this wrong (asserting true):
+//// constexpr auto right = narrow_cast<int32_t>(min_int64);
 //// static_assert(right == min_int64);
 
 // Verify compiler "usual arithmetic conversion" expectations.
