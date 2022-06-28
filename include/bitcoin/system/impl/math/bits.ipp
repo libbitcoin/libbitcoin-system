@@ -60,9 +60,15 @@ constexpr size_t bit_width(Value value) noexcept
 // Use depromote only for integral constrained functions.
 
 template <typename Value, if_integer<Value>>
+constexpr Value ones_complement(Value value) noexcept
+{
+    return bit_not(value);
+}
+
+template <typename Value, if_integer<Value>>
 constexpr Value twos_complement(Value value) noexcept
 {
-    return add1(bit_not(value));
+    return add1(ones_complement(value));
 }
 
 // OPERATOR ~
