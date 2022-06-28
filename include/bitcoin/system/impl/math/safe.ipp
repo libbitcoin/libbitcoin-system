@@ -30,15 +30,15 @@ namespace system {
 
 // Explicit integral casts.
 
-template <typename To, typename From,
-    if_not_lesser_width<From, int>,
-    if_integral_integer<To>,
-    if_integral_integer<From>>
-constexpr To depromote(From value) noexcept
+template <typename Restored, typename Common,
+    if_not_lesser_width<to_common_sized_type<Restored>, Restored>,
+    if_integral_integer<Restored>,
+    if_integral_integer<Common>>
+constexpr Restored depromote(Common value) noexcept
 {
     BC_PUSH_WARNING(NO_IDENTITY_CAST)
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<To>(value);
+    return static_cast<Restored>(value);
     BC_POP_WARNING()
     BC_POP_WARNING()
 }

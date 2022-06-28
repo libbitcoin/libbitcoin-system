@@ -26,13 +26,16 @@ namespace system {
 
 /// Explicit integral casts.
 
-/// Cast away integral sign/size promotion, overflow left to caller.
-/// Native operators always promote to at least int and possibly to unsigned.
-template <typename To, typename From,
-    if_not_lesser_width<From, int> = true,
-    if_integral_integer<To> = true,
-    if_integral_integer<From> = true>
-constexpr To depromote(From value) noexcept;
+/// Sign may be changed on promotion by binary operators.
+/// Sign will not be changed by unary ops (-) unless size is also promoted.
+/// This is a narrowing cast to restore Restored type from any native operation
+/// (type of Common) resulting in at least decltype(+Restored{}) size.
+/// This should not be used except in the case of possible integral promotion.
+template <typename Restored, typename Common,
+    if_not_lesser_width<to_common_sized_type<Restored>, Restored> = true,
+    if_integral_integer<Restored> = true,
+    if_integral_integer<Common> = true>
+constexpr Restored depromote(Common value) noexcept;
 
 /// Cast integral to integral of narrower bit width.
 template <typename To, typename From,

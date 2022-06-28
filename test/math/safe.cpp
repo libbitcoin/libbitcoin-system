@@ -26,25 +26,72 @@ constexpr size_t minimum = 0;
 constexpr size_t maximum = max_size_t;
 constexpr size_t half = maximum / 2;
 
-// Down-casting a negative loses the sign bit.
+// Downcasting a negative loses the sign bit.
 static_assert(static_cast<int32_t>(min_int64) == 0);
-
 constexpr auto right = narrow_cast<int32_t>(min_int64);
-static_assert(right == min_int64);
 static_assert(narrow_cast<int32_t>(min_int64) != min_int64);
+
+// MSVC static compiler gets above right but this wrong (asserting true):
+//// static_assert(right == min_int64);
 
 // Verify compiler "usual arithmetic conversion" expectations.
 // ----------------------------------------------------------------------------
-// Shift works like a unary operator (right operand is not incorporated).
-// Order of operands does not affect (other) binary operators.
+// Shift works like a unary op (right operand is not incorporated).
+// Order of operands does not affect (other) binary ops.
+// self-assigning (e.g. >>=, /=) ops obviously do not (cannot) promote.
+// ! and comparison are not mathematical ops.
+
+// Unary ops (+/-/~) change to unsigned upon width promotion, not otherwise.
+// + is a unary op and produces promotion.
 // std::common_type does not support unary operators.
 // std::common_type<Left, Right>::type == decltype(left - right)
 // std::common_type<Value>::type != decltype(-value)
-
-// Compiler warns on bool safety for -b, ~b, <<b, >>b, /b, %b, b/, b% (assertions disabled).
 using integer = decltype(-'a');
 using character = std::common_type_t<char>;
+using common_character = std::common_type_t<char, char>;
 static_assert(!std::is_same_v<integer, character>);
+static_assert(!std::is_same_v<integer, common_character>);
+
+// Compiler warns on bool safety for -b, ~b, <<b, >>b, /b, %b, b/, b% (assertions disabled).
+
+// invert
+static_assert(std::is_same<decltype(!char{0}),                   bool>::value, "boolean");
+static_assert(std::is_same<decltype(!int8_t{0}),                 bool>::value, "boolean");
+static_assert(std::is_same<decltype(!int16_t{0}),                bool>::value, "boolean");
+static_assert(std::is_same<decltype(!int32_t{0}),                bool>::value, "boolean");
+static_assert(std::is_same<decltype(!int64_t{0}),                bool>::value, "boolean");
+static_assert(std::is_same<decltype(!bool{false}),               bool>::value, "boolean");
+static_assert(std::is_same<decltype(!uint8_t{0}),                bool>::value, "boolean");
+static_assert(std::is_same<decltype(!uint16_t{0}),               bool>::value, "boolean");
+static_assert(std::is_same<decltype(!uint32_t{0}),               bool>::value, "boolean");
+static_assert(std::is_same<decltype(!uint64_t{0}),               bool>::value, "boolean");
+
+// comparison
+static_assert(std::is_same<decltype(uint8_t{0}  == char{0}),     bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint8_t{0}  != uint8_t{0}),  bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint8_t{0}  >= uint16_t{0}), bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint16_t{0} <= uint32_t{0}), bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint32_t{0} == uint64_t{0}), bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint64_t{0} == uint64_t{0}), bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint8_t{0}  == bool{false}), bool>::value, "boolean");
+static_assert(std::is_same<decltype(bool{false} == uint32_t{0}), bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint8_t{0}  == int8_t{0}),   bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint8_t{0}  == int16_t{0}),  bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint16_t{0} == int32_t{0}),  bool>::value, "boolean");
+static_assert(std::is_same<decltype(uint32_t{0} == int64_t{0}),  bool>::value, "boolean");
+static_assert(std::is_same<decltype(int64_t{0}  == uint32_t{0}), bool>::value, "boolean");
+
+// positive
+static_assert(std::is_same<decltype(+char{0}),                   int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(+int8_t{0}),                 int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(+int16_t{0}),                int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(+int32_t{0}),                int32_t>::value,  "unpromoted (>=32");
+static_assert(std::is_same<decltype(+int64_t{0}),                int64_t>::value,  "unpromoted (>=32");
+static_assert(std::is_same<decltype(+bool{false}),               int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(+uint8_t{0}),                int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(+uint16_t{0}),               int>::value,      "promoted   (<32)");
+static_assert(std::is_same<decltype(+uint32_t{0}),               uint32_t>::value, "unpromoted (>=32");
+static_assert(std::is_same<decltype(+uint64_t{0}),               uint64_t>::value, "unpromoted (>=32");
 
 // negate
 static_assert(std::is_same<decltype(-char{0}),                   int>::value,      "promoted   (<32)");
@@ -55,8 +102,8 @@ static_assert(std::is_same<decltype(-int64_t{0}),                int64_t>::value
 ////static_assert(std::is_same<decltype(-bool{false}),               int>::value,      "promoted   (<32)");
 static_assert(std::is_same<decltype(-uint8_t{0}),                int>::value,      "promoted   (<32)");
 static_assert(std::is_same<decltype(-uint16_t{0}),               int>::value,      "promoted   (<32)");
-static_assert(std::is_same<decltype(-uint32_t{0}),               uint32_t>::value, "unpromoted (>=32");
-static_assert(std::is_same<decltype(-uint64_t{0}),               uint64_t>::value, "unpromoted (>=32");
+////static_assert(std::is_same<decltype(-uint32_t{0}),               uint32_t>::value, "unpromoted (>=32");
+////static_assert(std::is_same<decltype(-uint64_t{0}),               uint64_t>::value, "unpromoted (>=32");
 
 // ones_complement
 static_assert(std::is_same<decltype(~char{0}),                   int>::value,      "promoted   (<32)");

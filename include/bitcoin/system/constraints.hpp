@@ -231,6 +231,11 @@ using to_unsigned_type = std::make_unsigned_t<Type>;
 template <typename Left, typename Right>
 using to_common_type = typename std::common_type<Left, Right>::type;
 
+/// Alias for -> decltype([op] Unary), resulting integral promotion type.
+/// This provides a type constraint for depromotion of native operator results.
+template <typename Unary>
+using to_common_sized_type = decltype(+Unary{});
+
 /// Endianness.
 
 template <typename Integer>

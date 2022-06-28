@@ -476,6 +476,16 @@ static_assert(is_same<to_common_type<uint32_t, uint64_t>, uint64_t>());
 static_assert(is_same<to_common_type<uint32_t, int64_t>, int64_t>());
 static_assert(is_same<to_common_type<uint32_t, uint64_t>, uint64_t>());
 
+static_assert(is_same<to_common_sized_type<bool>, int>());
+static_assert(is_same<to_common_sized_type<int8_t>, int>());
+static_assert(is_same<to_common_sized_type<int16_t>, int>());
+static_assert(is_same<to_common_sized_type<int32_t>, int32_t>());
+static_assert(is_same<to_common_sized_type<int64_t>, int64_t>());
+static_assert(is_same<to_common_sized_type<uint8_t>, int>());
+static_assert(is_same<to_common_sized_type<uint16_t>, int>());
+static_assert(is_same<to_common_sized_type<uint32_t>, uint32_t>());
+static_assert(is_same<to_common_sized_type<uint64_t>, uint64_t>());
+
 // Endianness.
 
 ////static_assert(is_defined<if_little_endian_integral_integer<size_t>>() == is_little_endian);

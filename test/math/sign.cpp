@@ -53,6 +53,7 @@ static_assert(to_unsigned(1u) == 1u);
 static_assert(to_unsigned(2u) == 2u);
 
 // absolute
+
 static_assert(is_unsigned(absolute(-1)));
 static_assert(is_unsigned(absolute(0)));
 static_assert(is_unsigned(absolute(1u)));
@@ -83,6 +84,7 @@ static_assert(absolute<int32_t>(min_int16) == add1<uint32_t>(max_int16));
 static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
 
 // negate
+
 static_assert(negate<int8_t>(0)  == 0);
 static_assert(negate<int16_t>(-1)  == 1);
 static_assert(negate<int32_t>(42) == -42);
@@ -96,11 +98,11 @@ static_assert(negate<uint8_t>(0) == 0);
 static_assert(negate<uint16_t>(-1) == 1);
 static_assert(negate<uint32_t>(42) == -42);
 static_assert(negate<uint64_t>(-42) == 42);
-static_assert(negate<uint8_t>(max_uint8) != -max_uint8); // -promotion
+static_assert(negate<uint8_t>(max_uint8) != -max_uint8);    // -promotion
 static_assert(negate<uint16_t>(max_uint16) != -max_uint16); // -promotion
-static_assert(negate(max_uint8) != -max_uint8); // -promotion
-static_assert(negate(max_uint16) != -max_uint16); // -promotion
-static_assert(negate(max_uint8) == uint8_t(-max_uint8)); // can't use safe cast, same types!
+static_assert(negate(max_uint8) != -max_uint8);             // -promotion
+static_assert(negate(max_uint16) != -max_uint16);           // -promotion
+static_assert(negate(max_uint8) == uint8_t(-max_uint8));    // can't use safe cast, same types!
 static_assert(negate(max_uint16) == uint16_t(-max_uint16)); // can't use safe cast, same types!
 static_assert(negate(max_uint32) == -max_uint32);
 static_assert(negate(max_uint64) == -max_uint64);
