@@ -106,6 +106,7 @@ constexpr Integer to_little_end(Integer from) noexcept
 
 // endianness reversals
 // ----------------------------------------------------------------------------
+// If wrong overload is selected (such as for a literal) result is unexpected.
 
 template <typename Integer,
     if_integral_integer<Integer>,
