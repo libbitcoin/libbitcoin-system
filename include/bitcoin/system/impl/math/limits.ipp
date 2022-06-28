@@ -94,7 +94,10 @@ template <size_t Bytes, typename Return>
 constexpr Return minimum() noexcept
 {
     using unsigned_t = to_unsigned_type<Return>;
-    return negate(to_signed(power2<unsigned_t>(sub1(to_bits(Bytes)))));
+
+    // negate(--max) prevents integral overflow (for 1, 2, 4, or 8 bytes).
+    // sub1(negate(--max)) restores the negative domain.
+    return sub1(negate(sub1(maximum<Bytes>())));
 }
 
 template <size_t Bytes, typename Return>

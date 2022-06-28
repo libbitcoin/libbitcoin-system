@@ -64,9 +64,11 @@ constexpr Value power(Base base, Exponent exponent) noexcept
 
     auto value = possible_narrow_and_sign_cast<Value>(base);
 
-    // Overflow is allowed behavior as this mimics a mathematical operator.
+    // Overflow is allowed behavior as this models a mathematical operator.
     BC_PUSH_WARNING(NARROWING_CONVERSION)
+    BC_PUSH_WARNING(SIZE_NARROWING_CONVERSION)
     while (--exponent > 0) { value *= base; }
+    BC_POP_WARNING();
     BC_POP_WARNING();
 
     return value;
