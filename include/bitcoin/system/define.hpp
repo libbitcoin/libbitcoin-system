@@ -118,6 +118,10 @@ namespace bc = libbitcoin;
     #define BC_CPP_20
 #endif
 
+#if !defined(BC_CPP_20)
+    static_assert(false, "C++20 minimum required.");
+#endif
+
 // MSFT predefined constant for VS version.
 #if _MSC_VER >= 1800
     #define BC_VS2013
@@ -133,6 +137,17 @@ namespace bc = libbitcoin;
 #endif
 #if _MSC_VER >= 1930
     #define BC_VS2022
+#endif
+
+#if defined(_MSC_VER) && !defined(BC_VS2022)
+    static_assert(false, "Visual Studio 2022 minimum required.");
+#endif
+
+// clang does not yet have consteval.
+#if defined(BC_VS2022) && defined(BC_CPP_20)
+    #define CONSTEVAL consteval
+#else
+    #define CONSTEVAL constexpr
 #endif
 
 // Define so we can have better visibility of lcov exclusion ranges.
