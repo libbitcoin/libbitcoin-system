@@ -25,6 +25,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Explicit integral casts.
+/// ---------------------------------------------------------------------------
 
 /// Sign may be changed on promotion by binary operators.
 /// Sign will not be changed by unary ops (-) unless size is also promoted.
@@ -68,6 +69,7 @@ template <typename To, typename From,
 constexpr To wide_cast(From value) noexcept;
 
 /// Possible integer casts.
+/// ---------------------------------------------------------------------------
 
 /// Possible narrowing without sign cast.
 template <typename To, typename From,
@@ -98,6 +100,7 @@ template <typename To, typename From, if_same_signed_integer<To, From> = true>
 constexpr To possible_wide_cast(From value) noexcept;
 
 /// Explicit pointer casts.
+/// ---------------------------------------------------------------------------
 
 /// Cast of pointer.
 template <typename To, typename From>
@@ -122,6 +125,10 @@ Integer safe_multiply(Integer left, Integer right) noexcept(false);
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_add(Integer left, Integer right) noexcept(false);
 
+/// Undefined Behaviors.
+/// ---------------------------------------------------------------------------
+
+/// Abort process if value is Integer domain minimum.
 template <typename Integer,
     if_signed_integer<Integer> = true>
 constexpr void terminate_minimum(Integer value) noexcept;

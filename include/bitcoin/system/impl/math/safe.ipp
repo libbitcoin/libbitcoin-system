@@ -196,7 +196,7 @@ Integer safe_add(Integer left, Integer right) noexcept(false)
 
 // Only absolute<signed> and negate<signed> are subject to undefined behavior.
 // All library functions that call these are guarded against this condition.
-template <typename Integer, if_signed_integer<Integer> = true>
+template <typename Integer, if_signed_integer<Integer>>
 constexpr void terminate_minimum(Integer value) noexcept
 {
     // This is elided as a no-op in non-constexpr and non-debug.
