@@ -58,7 +58,7 @@ template <typename Type>
 constexpr Type lo_bit(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) % 2);
+    return static_cast<Type>(value % 2);
     BC_POP_WARNING()
 }
 
@@ -84,7 +84,7 @@ template <typename Type>
 constexpr Type to_bits(Type bytes) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(bytes) * 8);
+    return static_cast<Type>(bytes * 8);
     BC_POP_WARNING()
 }
 
@@ -100,7 +100,7 @@ template <typename Type>
 constexpr Type to_half(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) / 2);
+    return static_cast<Type>(value / 2);
     BC_POP_WARNING()
 }
 
@@ -122,7 +122,7 @@ template <typename Type>
 constexpr Type add1(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) + 1);
+    return static_cast<Type>(value + 1);
     BC_POP_WARNING()
 }
 
@@ -130,7 +130,7 @@ template <typename Type>
 constexpr Type sub1(Type value) noexcept
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<Type>(static_cast<Type>(value) - 1);
+    return static_cast<Type>(value - 1);
     BC_POP_WARNING()
 }
 
