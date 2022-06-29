@@ -29,8 +29,9 @@
 namespace libbitcoin {
 namespace system {
 
-// widths
+// Byte widths.
 // ----------------------------------------------------------------------------
+// See also std::bit_width (C++20).
 
 // Called by chain::compact (for validation).
 template <typename Value, if_unsigned_integer<Value>>
@@ -49,31 +50,7 @@ constexpr size_t byte_width(Value value) noexcept
     return is_negative(value) ? sizeof(Value) : byte_width(to_unsigned(value));
 }
 
-// ****************************************************************************
-// CONSENSUS: negation is consensus behavior, see machine::number.
-// ****************************************************************************
-
-template <typename Integer, if_integer<Integer>>
-constexpr bool is_negated(Integer value) noexcept
-{
-    return is_nonzero(value) && add1(bit_width(value) % byte_bits) == one;
-};
-
-template <typename Integer, if_integer<Integer>>
-constexpr Integer to_negated(Integer value) noexcept
-{
-    return set_left(value, zero, true);
-}
-
-template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer to_unnegated(Integer value) noexcept
-{
-    // -minimum<Integer> (undefined behavior) precluded by set_right.
-    return !is_negated(value) ? value : negate(
-        set_right(value, sub1(bit_width(value)), false));
-}
-
-// native-to-endian integral conversions
+// Endianness (native to specified).
 // ----------------------------------------------------------------------------
 
 template <typename Integer,
@@ -104,9 +81,10 @@ constexpr Integer to_little_end(Integer from) noexcept
     return from;
 }
 
-// endianness reversals
+// Byteswap (platform independent byte reversal).
 // ----------------------------------------------------------------------------
 // If wrong overload is selected (such as for a literal) result is unexpected.
+// C++23 std::byteswap does not support signed integrals.
 
 template <typename Integer,
     if_integral_integer<Integer>,
@@ -154,7 +132,7 @@ constexpr Integer byteswap(Integer value) noexcept
         possible_sign_cast<Integer>(byte_swap64(to_unsigned(value)));
 }
 
-// bits to bytes
+// Bits to bytes utilities.
 // ----------------------------------------------------------------------------
 
 template <size_t Bits, if_bytes_width<Bits>>
@@ -173,6 +151,33 @@ template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer to_floored_bytes(Integer bits) noexcept
 {
     return floored_divide(bits, byte_bits);
+}
+
+// Byte Negation.
+// ----------------------------------------------------------------------------
+// ****************************************************************************
+// CONSENSUS: byte negation is consensus behavior, see machine::number.
+// ****************************************************************************
+
+template <typename Integer, if_integer<Integer>>
+constexpr bool is_negated(Integer value) noexcept
+{
+    // Guard precludes zero appearing negated: ((0 % 8) + 1) == 1.
+    return is_nonzero(value) && sub1(bit_width(value) % byte_bits) == one;
+};
+
+template <typename Integer, if_integer<Integer>>
+constexpr Integer to_negated(Integer value) noexcept
+{
+    return set_left(value);
+}
+
+template <typename Integer, if_signed_integer<Integer>>
+constexpr Integer to_unnegated(Integer value) noexcept
+{
+    // negate(minimum) is undefined behavior, but precluded by clearing a bit.
+    return !is_negated(value) ? value : negate(
+        set_right(value, sub1(bit_width(value)), false));
 }
 
 } // namespace system

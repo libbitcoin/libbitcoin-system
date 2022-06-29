@@ -25,29 +25,22 @@
 namespace libbitcoin {
 namespace system {
 
-/// Widths.
+/// Byte widths.
+/// ---------------------------------------------------------------------------
 
-/// See also std::bit_width (C++20).
-/// The number of bytes required to store value, byte_width(0) returns zero.
-/// A negative value always returns sizeof(Value).
-template <typename Value, if_unsigned_integer<Value> = true>
-constexpr size_t byte_width(Value value) noexcept;
-template <typename Value, if_signed_integer<Value> = true>
+/// The number of bytes required to store value (zero returns zero).
+template <typename Value,
+    if_unsigned_integer<Value> = true>
 constexpr size_t byte_width(Value value) noexcept;
 
-/// Get the high order bit of high order non-zero byte.
-template <typename Integer, if_integer<Integer> = true>
-constexpr bool is_negated(Integer value) noexcept;
+/// The number of bytes required to store value.
+/// Negative value always returns sizeof Value (zero returns zero).
+template <typename Value,
+    if_signed_integer<Value> = true>
+constexpr size_t byte_width(Value value) noexcept;
 
-/// Set high order bit of the value.
-template <typename Integer, if_integer<Integer> = true>
-constexpr Integer to_negated(Integer value) noexcept;
-
-/// Clear high order bit of high order non-zero byte.
-template <typename Integer, if_signed_integer<Integer> = true>
-constexpr Integer to_unnegated(Integer value) noexcept;
-
-/// Endianness.
+/// Endianness (native to specified).
+/// ---------------------------------------------------------------------------
 
 /// Convert a native integral integer to big-endian.
 template <typename Integer,
@@ -69,7 +62,8 @@ template <typename Integer,
     if_big_endian_integral_integer<Integer> = true>
 constexpr Integer to_little_end(Integer from) noexcept;
 
-/// C++23: std::byteswap implementation (but also allows signed integrals).
+/// Byteswap (platform independent byte reversal).
+/// ---------------------------------------------------------------------------
 
 template <typename Integer,
     if_integral_integer<Integer> = true,
@@ -96,6 +90,7 @@ template <typename Integer,
 constexpr Integer byteswap(Integer value) noexcept;
 
 /// Bits to bytes utilities.
+/// ---------------------------------------------------------------------------
 
 template <size_t Bits, if_bytes_width<Bits> = true>
 constexpr size_t to_bytes() noexcept;
@@ -105,6 +100,24 @@ constexpr Integer to_ceilinged_bytes(Integer bits) noexcept;
 
 template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr Integer to_floored_bytes(Integer bits) noexcept;
+
+/// Byte Negation.
+/// ---------------------------------------------------------------------------
+
+/// Get the high order bit of high order non-zero byte.
+template <typename Integer,
+    if_integer<Integer> = true>
+constexpr bool is_negated(Integer value) noexcept;
+
+/// Set high order bit.
+template <typename Integer,
+    if_integer<Integer> = true>
+constexpr Integer to_negated(Integer value) noexcept;
+
+/// Clear high order bit of high order non-zero byte.
+template <typename Integer,
+    if_signed_integer<Integer> = true>
+constexpr Integer to_unnegated(Integer value) noexcept;
 
 } // namespace system
 } // namespace libbitcoin
