@@ -58,8 +58,6 @@ constexpr size_t bit_width(Value value) noexcept
 template <typename Value, if_integer<Value>>
 constexpr Value bit_not(Value value) noexcept
 {
-    // TODO: Unary operators do not promote sign.
-    // Revert domain promotion for < 32 bit Value.
     return possible_narrow_and_sign_cast<Value>(~value);
 }
 

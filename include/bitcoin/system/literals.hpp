@@ -22,105 +22,72 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
-#include <limits>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/constraints.hpp>
+
+// TODO: move to math.
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
+namespace system {
 
-// TODO: make these consteval and remove non-constexpr evaluation test cases.
-
-/// User-defined literals.
 /// en.cppreference.com/w/cpp/language/user_literal
 
-/// The only integer type allowed for customization.
-using unsigned64 = unsigned long long int;
-
-BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-
-CONSTEVAL int8_t operator "" _i8(unsigned64 value) noexcept
+template <typename Domain, if_integral_integer<Domain> = true>
+CONSTEVAL Domain positive(uint64_t value) noexcept
 {
-    if ((value & 0xffffffffffffff00) != 0) std::terminate();
-
-    // Since the native "one byte" literal is signed, it does not require
-    // domain coercion to properly overflow.
-    return static_cast<int8_t>(value);
+    using narrow = to_unsigned_type<Domain>;
+    if (value > unsigned_maximum<Domain>()) std::terminate();
+    const auto narrowed = possible_narrow_and_sign_cast<narrow>(value);
+    return possible_narrow_and_sign_cast<Domain>(narrowed);
 }
 
-CONSTEVAL int16_t operator "" _i16(unsigned64 value) noexcept
+template <typename Domain, if_integral_integer<Domain> = true>
+CONSTEVAL Domain negative(uint64_t value) noexcept
 {
-    if ((value & 0xffffffffffff0000) != 0) std::terminate();
-
-    // Since the native "two byte" literal is signed, it does not require 
-    // domain coercion to properly overflow.
-    return static_cast<int16_t>(value);
+    using narrow = to_unsigned_type<Domain>;
+    if (value > absolute_minimum<Domain>()) std::terminate();
+    const auto narrowed = possible_narrow_and_sign_cast<narrow>(value);
+    return possible_narrow_and_sign_cast<Domain>(twos_complement(narrowed));
 }
 
-CONSTEVAL int32_t operator "" _i32(unsigned64 value) noexcept
-{
-    if ((value & 0xffffffff00000000) != 0) std::terminate();
-
-    // Since the native "four byte" literal is either signed (high bit not
-    // set), or unsigned (high bit set), it must be coerced back to unsigned
-    // 32 bit from unsigned 64 bit before casting it to an unsigned 32 bit.
-    // This ensures that the value will overflow as expected.
-    const auto sized = static_cast<uint32_t>(value);
-    return static_cast<int32_t>(sized);
+#define DECLARE_LITERAL(name, type, sign) \
+CONSTEVAL type operator "" name(uint64_t value) noexcept \
+{ \
+    return sign<type>(value); \
 }
 
-CONSTEVAL int64_t operator "" _i64(unsigned64 value) noexcept
-{
-    // Domains aligned, will overflow as expected.
-    return static_cast<int64_t>(value);
-}
+DECLARE_LITERAL(_i08, int8_t, positive)
+DECLARE_LITERAL(_i16, int16_t, positive)
+DECLARE_LITERAL(_i32, int32_t, positive)
+DECLARE_LITERAL(_i64, int64_t, positive)
 
-CONSTEVAL uint8_t operator "" _u8(unsigned64 value) noexcept
-{
-    if ((value & 0xffffffffffffff00) != 0) std::terminate();
-    return static_cast<uint8_t>(value);
-}
+DECLARE_LITERAL(_u08, uint8_t, positive)
+DECLARE_LITERAL(_u16, uint16_t, positive)
+DECLARE_LITERAL(_u32, uint32_t, positive)
+DECLARE_LITERAL(_u64, uint64_t, positive)
 
-CONSTEVAL uint16_t operator "" _u16(unsigned64 value) noexcept
-{
-    if ((value & 0xffffffffffff0000) != 0) std::terminate();
-    return static_cast<uint16_t>(value);
-}
+DECLARE_LITERAL(_ni08, int8_t, negative)
+DECLARE_LITERAL(_ni16, int16_t, negative)
+DECLARE_LITERAL(_ni32, int32_t, negative)
+DECLARE_LITERAL(_ni64, int64_t, negative)
 
-CONSTEVAL uint32_t operator "" _u32(unsigned64 value) noexcept
-{
-    if ((value & 0xffffffff00000000) != 0) std::terminate();
-    return static_cast<uint32_t>(value);
-}
+DECLARE_LITERAL(_nu08, uint8_t, negative)
+DECLARE_LITERAL(_nu16, uint16_t, negative)
+DECLARE_LITERAL(_nu32, uint32_t, negative)
+DECLARE_LITERAL(_nu64, uint64_t, negative)
 
-CONSTEVAL uint64_t operator "" _u64(unsigned64 value) noexcept
-{
-    return static_cast<uint64_t>(value);
-}
+// Aliases
+DECLARE_LITERAL(_i8, int8_t, positive)
+DECLARE_LITERAL(_u8, uint8_t, positive)
+DECLARE_LITERAL(_ni8, int8_t, negative)
+DECLARE_LITERAL(_nu8, uint8_t, negative)
+DECLARE_LITERAL(_size, size_t, positive)
+DECLARE_LITERAL(_nsize, size_t, negative)
 
-CONSTEVAL size_t operator "" _size(unsigned64 value) noexcept
-{
-    if (value > std::numeric_limits<size_t>::max()) std::terminate();
-    return static_cast<size_t>(value);
-}
+#undef DECLARE_LITERAL
 
-/// Aliases (for vertial alignment).
-
-CONSTEVAL int8_t operator "" _i08(unsigned64 value) noexcept
-{
-    return operator "" _i8(value);
-}
-
-CONSTEVAL uint8_t operator "" _u08(unsigned64 value) noexcept
-{
-    return operator "" _u8(value);
-}
-
-CONSTEVAL size_t operator "" _siz(unsigned64 value) noexcept
-{
-    return operator "" _size(value);
-}
-
-BC_POP_WARNING()
-
+} // namespace system
 } // namespace libbitcoin
 
 #endif

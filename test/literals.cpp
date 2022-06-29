@@ -214,7 +214,7 @@ static_assert(sizeof(0xffff) >= sizeof(int16_t));
 static_assert(sizeof(0xffff'ffff) >= sizeof(int32_t));
 static_assert(sizeof(0xffff'ffff'ffff'ffff) >= sizeof(int64_t));
 
-// Custom literals cast to the specified type.
+// Custom literals cast to the specified positive type.
 static_assert(is_same<decltype(0xff_i8), int8_t>());
 static_assert(is_same<decltype(0xff_i16), int16_t>());
 static_assert(is_same<decltype(0xff_i32), int32_t>());
@@ -222,13 +222,22 @@ static_assert(is_same<decltype(0xff_i64), int64_t>());
 static_assert(is_same<decltype(0xff_u8), uint8_t>());
 static_assert(is_same<decltype(0xff_u16), uint16_t>());
 static_assert(is_same<decltype(0xff_u32), uint32_t>());
-static_assert(is_same<decltype(0xff_u64), uint64_t>());
+static_assert(is_same<decltype(0xff_ni8), int8_t>());
+static_assert(is_same<decltype(0xff_ni16), int16_t>());
+static_assert(is_same<decltype(0xff_ni32), int32_t>());
+static_assert(is_same<decltype(0xff_ni64), int64_t>());
+static_assert(is_same<decltype(0xff_nu8), uint8_t>());
+static_assert(is_same<decltype(0xff_nu16), uint16_t>());
+static_assert(is_same<decltype(0xff_nu32), uint32_t>());
+static_assert(is_same<decltype(0xff_nu64), uint64_t>());
 static_assert(is_same<decltype(0xff_size), size_t>());
+static_assert(is_same<decltype(0xff_nsize), size_t>());
 
 // Custom literal aliases (for vertical alignment).
 static_assert(is_same<decltype(0xff_i08), decltype(0xff_i8)>());
 static_assert(is_same<decltype(0xff_u08), decltype(0xff_u8)>());
-static_assert(is_same<decltype(0xff_siz), decltype(0xff_size)>());
+static_assert(is_same<decltype(0xff_ni8), decltype(0xff_ni8)>());
+static_assert(is_same<decltype(0xff_nu8), decltype(0xff_nu8)>());
 
 // Oversized literals are truncated in type (64 bit cannot be overflowed).
 static_assert(is_same<decltype(0x42ff_i8), int8_t>());
@@ -255,14 +264,8 @@ static_assert(0xffffffffffffffff_i64 == 0xffffffffffffffff_i64);
 static_assert(0xffffffffffffffff_u64 == 0xffffffffffffffff_u64);
 ////static_assert(0xffffffffffffffff_size == 0xffffffffffffffff_size);
 
-// Possible confusion (custom signed literals are signed, native ones are not).
-static_assert(0xff_i8 != 0xff);
-static_assert(0xff'ff_i16 != 0xff'ff);
-static_assert(0xff'ff'ff'ff_i32 == 0xff'ff'ff'ff);
-static_assert(0xff'ff'ff'ff'ff'ff'ff'ff_i64 == 0xff'ff'ff'ff'ff'ff'ff'ff);
-
-// Expected overflow conditions (_i8).
-static_assert(0xff_i16 == 255);
+// Hexadecimal literals.
+static_assert(0x0100_i16 == 256);
 static_assert(0x7f_i8 == 127);
 static_assert(0x70_i8 == 112);
 static_assert(0x60_i8 == 96);
@@ -299,8 +302,13 @@ static_assert(0xa0_i8 == -96);
 static_assert(0x90_i8 == -112);
 static_assert(0x80_i8 == -128);
 static_assert(0xff00_i16 == -256);
+static_assert(is_same<decltype(0x42_i8), int8_t>());
 
-// Binary literals okay.
+constexpr auto foo = -1;
+constexpr auto bar = 0xff_i8;
+static_assert(foo == bar);
+
+// Binary literals.
 static_assert(0b0111'1111_i8 == 127);
 static_assert(0b0111'0000_i8 == 112);
 static_assert(0b0110'0000_i8 == 96);
@@ -311,63 +319,129 @@ static_assert(0b0010'0000_i8 == 32);
 static_assert(0b0001'0000_i8 == 16);
 static_assert(0b0000'0001_i8 == 1);
 static_assert(0b0000'0000_i8 == 0);
-static_assert(is_same<decltype(127_i8), int8_t>());
-static_assert(is_same<decltype(0_i8), int8_t>());
+static_assert(is_same<decltype(0b0101'0101_i8), int8_t>());
 
-// Decimal literals okay (but...).
+// Decimal literals okay, but...
 static_assert(127_i8 == 127);
 static_assert(112_i8 == 112);
-static_assert(96_i8 == 96);
-static_assert(80_i8 == 80);
-static_assert(64_i8 == 64);
-static_assert(48_i8 == 48);
-static_assert(32_i8 == 32);
-static_assert(16_i8 == 16);
-static_assert(1_i8 == 1);
-static_assert(0_i8 == 0);
-static_assert(is_same<decltype(127_i8), int8_t>());
-static_assert(is_same<decltype(0_i8), int8_t>());
+static_assert( 96_i8 == 96);
+static_assert( 80_i8 == 80);
+static_assert( 64_i8 == 64);
+static_assert( 48_i8 == 48);
+static_assert( 32_i8 == 32);
+static_assert( 16_i8 == 16);
+static_assert(  1_i8 == 1);
+static_assert(  0_i8 == 0);
+static_assert(is_same<decltype(42_i8), int8_t>());
 
 // ...negatives are not decimal literals, they are (promoting) operators!
 // While they may appear to represent the value in the type, they do not.
 // And the minimum value cannot be expressed (maximum positive exceeded).
 // There is *no way* to represent a negative value using a decimal literal.
-static_assert(-1_i8 == -1);
-static_assert(-16_i8 == -16);
-static_assert(-32_i8 == -32);
-static_assert(-48_i8 == -48);
-static_assert(-64_i8 == -64);
-static_assert(-80_i8 == -80);
-static_assert(-96_i8 == -96);
+static_assert(  -1_i8 == -1);
+static_assert( -16_i8 == -16);
+static_assert( -32_i8 == -32);
+static_assert( -48_i8 == -48);
+static_assert( -64_i8 == -64);
+static_assert( -80_i8 == -80);
+static_assert( -96_i8 == -96);
 static_assert(-112_i8 == -112);
-///static_assert(-128_i8 == -128);
-static_assert(is_same<decltype(-1_i8), signed int>());
+////static_assert(-128_i8 == -128); // <== undefined negation (but in range)
+static_assert(is_same<decltype(-42_i8), signed int>()); // <==
 
-// Expected overflow conditions (_i16).
-static_assert(0x7fff_i16 == 32'767);
+// Instead use negated literals, which preserve type/domain.
+
+// Negative representation (signed).
+static_assert(0_ni8 == 0);
+static_assert(1_ni8 == -1);
+static_assert(2_ni8 == -2);
+static_assert(3_ni8 == -3);
+static_assert(126_ni8 == -126);
+static_assert(127_ni8 == -127);
+static_assert(128_ni8 == -128); // <== defined (no negation)
+////static_assert(129_ni8 == -129); // <== correctly out of range
+static_assert(is_same<decltype(42_ni8), int8_t>()); // <==
+
+// Twos complement representation (unsigned).
+static_assert(0_nu8 == 0);
+static_assert(1_nu8 == 255);
+static_assert(2_nu8 == 254);
+static_assert(3_nu8 == 253);
+static_assert(126_nu8 == 130);
+static_assert(127_nu8 == 129);
+static_assert(128_nu8 == 128);
+////static_assert(129_nu8 == 127);
+static_assert(is_same<decltype(1_nu8), uint8_t>());
+
+// Literal bounds.
+
+// Domain bounds (_i8).
+static_assert(0x7f_i8 == sub1(to_half(power2<uint16_t>(8))));
+static_assert(0x01_i8 == 1);
+static_assert(0x00_i8 == 0);
+static_assert(0xff_i8 == 1_ni8);
+static_assert(0x80_i8 == 128_ni8);
+
+// Domain bounds (_i16).
+static_assert(0x7fff_i16 == sub1(to_half(power2<uint32_t>(16))));
 static_assert(0x0001_i16 == 1);
 static_assert(0x0000_i16 == 0);
-static_assert(0xffff_i16 == -1);
-static_assert(0x8000_i16 == -32'768);
+static_assert(0xffff_i16 == 1_ni16);
+static_assert(0x8000_i16 == 32'768_ni16);
 
-// Expected overflow conditions (_i32).
-static_assert(0x7fffffff_i32 == 2'147'483'647);
+// Domain bounds (_i32).
+static_assert(0x7fffffff_i32 == sub1(to_half(power2<uint64_t>(32))));
 static_assert(0x00000001_i32 == 1);
 static_assert(0x00000000_i32 == 0);
-static_assert(0xffffffff_i32 == -1);
-static_assert(0x80000000_i32 == -2'147'483'648);
+static_assert(0xffffffff_i32 == 1_ni64);
+static_assert(0x80000000_i32 == 2'147'483'648_ni64);
 
-// Expected overflow conditions (_i64).
-// Note that since 
-static_assert(0x7fffffffffffffff_i64 == 9'223'372'036'854'775'807);
+// Domain bounds (_i64).
+static_assert(0x7fffffffffffffff_i64 == sub1(to_half(power2<uint128_t>(64))));
 static_assert(0x0000000000000001_i64 == 1);
 static_assert(0x0000000000000000_i64 == 0);
-static_assert(0xffffffffffffffff_i64 == -1);
-static_assert(0x8000000000000000_i64 == sub1(-9'223'372'036'854'775'807));
+static_assert(0xffffffffffffffff_i64 == 1_ni64);
+static_assert(0x8000000000000000_i64 == 9'223'372'036'854'775'808_ni64);
 
-// This is the maximum unsigned 64 bit literal.
-// So sub1(-(maximum)) above to get the negative minimum for verification.
-static_assert(0x7f'ff'ff'ff'ff'ff'ff'ff == 9'223'372'036'854'775'807);
+// Domain bounds (_u8).
+static_assert(0xff_u8 == sub1(power2<uint16_t>(8)));
+static_assert(0x01_u8 == 1);
+static_assert(0x00_u8 == 0);
+
+// Domain bounds (_u16).
+static_assert(0xffff_u16 == sub1(power2<uint32_t>(16)));
+static_assert(0x0001_u16 == 1);
+static_assert(0x0000_u16 == 0);
+
+// Domain bounds (_u32).
+static_assert(0xffffffff_u32 == sub1(power2<uint64_t>(32)));
+static_assert(0x00000001_u32 == 1);
+static_assert(0x00000000_u32 == 0);
+
+// Domain bounds (_u64).
+static_assert(0xffffffffffffffff_u64 == sub1(power2<uint128_t>(64)));
+static_assert(0x0000000000000001_u64 == 1);
+static_assert(0x0000000000000000_u64 == 0);
+
+// Domain bounds (_ni8).
+static_assert(0x00_ni8 == 0);
+static_assert(0x01_ni8 == -1);
+static_assert(0x80_ni8 == -to_half(power2<int16_t>(8)));
+
+// Domain bounds (_ni16).
+static_assert(0x0000_ni16 == 0);
+static_assert(0x0001_ni16 == -1);
+static_assert(0x8000_ni16 == -to_half(power2<int32_t>(16)));
+
+// Domain bounds (_ni32).
+static_assert(0x00000000_ni32 == 0);
+static_assert(0x00000001_ni32 == -1);
+static_assert(0x80000000_ni32 == -to_half(power2<int64_t>(32)));
+
+// Domain bounds (_ni64).
+static_assert(0x0000000000000000_ni64 == 0);
+static_assert(0x0000000000000001_ni64 == -1);
+static_assert(0x8000000000000000_ni64 == twos_complement(to_half(power2<uint128_t>(64))));
 
 BOOST_AUTO_TEST_SUITE(literals_tests)
 
@@ -394,7 +468,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ff_i8, -1);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__i16__literal_overflow__terminate)
 ////{
 ////    // thread safe
@@ -408,7 +482,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ffff_i16, -1);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__i32__literal_overflow__terminate)
 ////{
 ////    // thread safe
@@ -422,7 +496,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ffffffff_i32, -1);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__u8__literal_overflow__terminate)
 ////{
 ////    const auto saved = std::set_terminate([]()
@@ -435,7 +509,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ff_u8, 0xffU);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__u16__literal_overflow__terminate)
 ////{
 ////    const auto saved = std::set_terminate([]()
@@ -448,7 +522,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ffff_u16, 0xffffU);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__u32__literal_overflow__terminate)
 ////{
 ////    const auto saved = std::set_terminate([]()
@@ -461,7 +535,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ffffffff_u32, 0xffffffffU);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__size__literal_overflow__terminate)
 ////{
 ////    // size_t(64) cannot be overflowed due to limit of integer literal expression.
@@ -478,9 +552,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////        std::set_terminate(saved);
 ////    }
 ////}
-
-// Aliases
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__i08__literal_overflow__terminate)
 ////{
 ////    // thread safe
@@ -494,7 +566,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ff_i08, -1);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__u08__literal_overflow__terminate)
 ////{
 ////    const auto saved = std::set_terminate([]()
@@ -507,7 +579,7 @@ BOOST_AUTO_TEST_SUITE(literals_tests)
 ////    BOOST_REQUIRE_NE(0x42ff_u08, 0xffU);
 ////    std::set_terminate(saved);
 ////}
-
+////
 ////BOOST_AUTO_TEST_CASE(literals__siz__literal_overflow__terminate)
 ////{
 ////    // size_t(64) cannot be overflowed due to limit of integer literal expression.

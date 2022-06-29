@@ -24,7 +24,6 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
-#include <bitcoin/system/literals.hpp>
 
 namespace libbitcoin {
     
