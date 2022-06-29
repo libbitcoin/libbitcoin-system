@@ -73,7 +73,7 @@ template <typename Integer, if_signed_integer<Integer>>
 constexpr Integer negate(Integer value) noexcept
 {
     terminate_minimum(value);
-    return possible_narrow_cast<Integer>(-value);
+    return depromote<Integer>(-value);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
@@ -93,7 +93,7 @@ template <typename Value, if_integer<Value>>
 constexpr Value ones_complement(Value value) noexcept
 {
     // Alias for bit_not.
-    return possible_narrow_cast<Value>(~value);
+    return possible_narrow_and_sign_cast<Value>(~value);
 }
 
 template <typename Integer, typename Signed, if_integer<Integer>>

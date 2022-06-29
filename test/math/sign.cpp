@@ -76,7 +76,7 @@ static_assert(is_unsigned(absolute(1u)));
 ////static_assert(absolute(min_int16) == add1(max_int16));
 
 // These can be mitigated using explicit domain promotion (except for uint64_t).
-static_assert(absolute<int16_t>(min_int8) == add1<uint16_t>(max_int8));
+static_assert(absolute<int16_t>(min_int8)  == add1<uint16_t>(max_int8));
 static_assert(absolute<int32_t>(min_int16) == add1<uint32_t>(max_int16));
 static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
 
@@ -92,24 +92,24 @@ static_assert(negate(42u) == -42);
 
 // twos_complement
 // similar to but different than absolute (~n+1)
-static_assert(twos_complement(-4) == 4);
-static_assert(twos_complement(-3) == 3);
-static_assert(twos_complement(-2) == 2);
-static_assert(twos_complement(-1) == 1);
-static_assert(twos_complement(0) == 0);
-static_assert(twos_complement(1) == -1);
-static_assert(twos_complement(2) == -2);
-static_assert(twos_complement(3) == -3);
-static_assert(twos_complement(4) == -4);
-static_assert(twos_complement<int8_t>(-4) == 4);
-static_assert(twos_complement<int8_t>(-3) == 3);
-static_assert(twos_complement<int8_t>(-2) == 2);
-static_assert(twos_complement<int8_t>(-1) == 1);
-static_assert(twos_complement<uint8_t>(0x00) == 0u);
-static_assert(twos_complement<uint8_t>(0xff) == 1u);
-static_assert(twos_complement<uint8_t>(0xfe) == 2u);
-static_assert(twos_complement<uint8_t>(0xfd) == 3u);
-static_assert(twos_complement<uint8_t>(0xfc) == 4u);
+static_assert(twos_complement(4_ni32) == 4_i32);
+static_assert(twos_complement(3_ni32) == 3_i32);
+static_assert(twos_complement(2_ni32) == 2_i32);
+static_assert(twos_complement(1_ni32) == 1_i32);
+static_assert(twos_complement(0_i16) == 0_i16);
+static_assert(twos_complement(1_i16) == 1_ni16);
+static_assert(twos_complement(2_i16) == 2_ni16);
+static_assert(twos_complement(3_i16) == 3_ni16);
+static_assert(twos_complement(4_i16) == 4_ni16);
+static_assert(twos_complement(4_ni8) == 4_i8);
+static_assert(twos_complement(3_ni8) == 3_i8);
+static_assert(twos_complement(2_ni8) == 2_i8);
+static_assert(twos_complement(1_ni8) == 1_i8);
+static_assert(twos_complement(0x00_u8) == 0_u8);
+static_assert(twos_complement(0xffff_i16) == 1_i16);
+static_assert(twos_complement(0xfffffffe_u32) == 2_u32);
+static_assert(twos_complement(0xfffffffffffffffd_u64) == 3_u64);
+static_assert(twos_complement(0xfffffffffffffffc_u64) == 4_u64);
 static_assert(std::is_same<decltype(twos_complement<int8_t>(0)), int8_t>::value);
 
 // signed
@@ -157,16 +157,16 @@ static_assert(negate<int64_t>(min_int32) == -int64_t(min_int32));
 ////static_assert(negate<int64_t>(min_int64) == -min_int64);
 
 // is_negative
-static_assert(is_negative(-1));
-static_assert(is_negative(-42));
+static_assert(is_negative(1_ni32));
+static_assert(is_negative(42_ni16));
 static_assert(is_negative(0x80_i8));
 static_assert(is_negative(0xff_i8));
 static_assert(is_negative(min_int32));
-static_assert(!is_negative(0u));
-static_assert(!is_negative(1u));
-static_assert(!is_negative(42u));
+static_assert(!is_negative(0_u16));
+static_assert(!is_negative(1_u32));
+static_assert(!is_negative(42_u64));
 static_assert(!is_negative(0x00_i8));
-static_assert(!is_negative(0x01_i8));
+static_assert(!is_negative(0x01_u8));
 static_assert(!is_negative(0x80_u8));
 static_assert(!is_negative(0xff_u8));
 static_assert(!is_negative(max_int32));
