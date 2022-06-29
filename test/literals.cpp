@@ -262,6 +262,7 @@ static_assert(0xff'ff'ff'ff_i32 == 0xff'ff'ff'ff);
 static_assert(0xff'ff'ff'ff'ff'ff'ff'ff_i64 == 0xff'ff'ff'ff'ff'ff'ff'ff);
 
 // Expected overflow conditions (_i8).
+static_assert(0xff_i16 == 255);
 static_assert(0x7f_i8 == 127);
 static_assert(0x70_i8 == 112);
 static_assert(0x60_i8 == 96);
@@ -270,9 +271,25 @@ static_assert(0x40_i8 == 64);
 static_assert(0x30_i8 == 48);
 static_assert(0x20_i8 == 32);
 static_assert(0x10_i8 == 16);
+static_assert(0x09_i8 == 9);
+static_assert(0x08_i8 == 8);
+static_assert(0x07_i8 == 7);
+static_assert(0x06_i8 == 6);
+static_assert(0x05_i8 == 5);
+static_assert(0x04_i8 == 4);
+static_assert(0x03_i8 == 3);
+static_assert(0x02_i8 == 2);
 static_assert(0x01_i8 == 1);
 static_assert(0x00_i8 == 0);
 static_assert(0xff_i8 == -1);
+static_assert(0xfe_i8 == -2);
+static_assert(0xfd_i8 == -3);
+static_assert(0xfc_i8 == -4);
+static_assert(0xfb_i8 == -5);
+static_assert(0xfa_i8 == -6);
+static_assert(0xf9_i8 == -7);
+static_assert(0xf8_i8 == -8);
+static_assert(0xf7_i8 == -9);
 static_assert(0xf0_i8 == -16);
 static_assert(0xe0_i8 == -32);
 static_assert(0xd0_i8 == -48);
@@ -281,6 +298,7 @@ static_assert(0xb0_i8 == -80);
 static_assert(0xa0_i8 == -96);
 static_assert(0x90_i8 == -112);
 static_assert(0x80_i8 == -128);
+static_assert(0xff00_i16 == -256);
 
 // Binary literals okay.
 static_assert(0b0111'1111_i8 == 127);

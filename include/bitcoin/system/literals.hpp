@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <exception>
 #include <limits>
 #include <bitcoin/system/define.hpp>
 
@@ -36,7 +37,7 @@ using unsigned64 = unsigned long long int;
 
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
-constexpr int8_t operator "" _i8(unsigned64 value) noexcept
+CONSTEVAL int8_t operator "" _i8(unsigned64 value) noexcept
 {
     if ((value & 0xffffffffffffff00) != 0) std::terminate();
 
@@ -45,7 +46,7 @@ constexpr int8_t operator "" _i8(unsigned64 value) noexcept
     return static_cast<int8_t>(value);
 }
 
-constexpr int16_t operator "" _i16(unsigned64 value) noexcept
+CONSTEVAL int16_t operator "" _i16(unsigned64 value) noexcept
 {
     if ((value & 0xffffffffffff0000) != 0) std::terminate();
 
@@ -54,7 +55,7 @@ constexpr int16_t operator "" _i16(unsigned64 value) noexcept
     return static_cast<int16_t>(value);
 }
 
-constexpr int32_t operator "" _i32(unsigned64 value) noexcept
+CONSTEVAL int32_t operator "" _i32(unsigned64 value) noexcept
 {
     if ((value & 0xffffffff00000000) != 0) std::terminate();
 
@@ -66,36 +67,36 @@ constexpr int32_t operator "" _i32(unsigned64 value) noexcept
     return static_cast<int32_t>(sized);
 }
 
-constexpr int64_t operator "" _i64(unsigned64 value) noexcept
+CONSTEVAL int64_t operator "" _i64(unsigned64 value) noexcept
 {
     // Domains aligned, will overflow as expected.
     return static_cast<int64_t>(value);
 }
 
-constexpr uint8_t operator "" _u8(unsigned64 value) noexcept
+CONSTEVAL uint8_t operator "" _u8(unsigned64 value) noexcept
 {
     if ((value & 0xffffffffffffff00) != 0) std::terminate();
     return static_cast<uint8_t>(value);
 }
 
-constexpr uint16_t operator "" _u16(unsigned64 value) noexcept
+CONSTEVAL uint16_t operator "" _u16(unsigned64 value) noexcept
 {
     if ((value & 0xffffffffffff0000) != 0) std::terminate();
     return static_cast<uint16_t>(value);
 }
 
-constexpr uint32_t operator "" _u32(unsigned64 value) noexcept
+CONSTEVAL uint32_t operator "" _u32(unsigned64 value) noexcept
 {
     if ((value & 0xffffffff00000000) != 0) std::terminate();
     return static_cast<uint32_t>(value);
 }
 
-constexpr uint64_t operator "" _u64(unsigned64 value) noexcept
+CONSTEVAL uint64_t operator "" _u64(unsigned64 value) noexcept
 {
     return static_cast<uint64_t>(value);
 }
 
-constexpr size_t operator "" _size(unsigned64 value) noexcept
+CONSTEVAL size_t operator "" _size(unsigned64 value) noexcept
 {
     if (value > std::numeric_limits<size_t>::max()) std::terminate();
     return static_cast<size_t>(value);
@@ -103,17 +104,17 @@ constexpr size_t operator "" _size(unsigned64 value) noexcept
 
 /// Aliases (for vertial alignment).
 
-constexpr int8_t operator "" _i08(unsigned64 value) noexcept
+CONSTEVAL int8_t operator "" _i08(unsigned64 value) noexcept
 {
     return operator "" _i8(value);
 }
 
-constexpr uint8_t operator "" _u08(unsigned64 value) noexcept
+CONSTEVAL uint8_t operator "" _u08(unsigned64 value) noexcept
 {
     return operator "" _u8(value);
 }
 
-constexpr size_t operator "" _siz(unsigned64 value) noexcept
+CONSTEVAL size_t operator "" _siz(unsigned64 value) noexcept
 {
     return operator "" _size(value);
 }
