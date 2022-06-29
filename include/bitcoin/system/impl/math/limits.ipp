@@ -78,19 +78,55 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
 
 // integral minimum/maximum
 
-template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer maximum() noexcept
-{
-    return std::numeric_limits<Integer>::max();
-}
-
-template <typename Integer, if_integral_integer<Integer>>
+template <typename Integer,
+    if_integral_integer<Integer>>
 constexpr Integer minimum() noexcept
 {
     return std::numeric_limits<Integer>::min();
 }
 
+template <typename Integer,
+    if_integral_integer<Integer>>
+constexpr Integer maximum() noexcept
+{
+    return std::numeric_limits<Integer>::max();
+}
+
+template <typename Integer, typename Absolute,
+    if_signed_integral_integer<Integer>>
+constexpr Absolute absolute_minimum() noexcept
+{
+    return power2<Absolute>(sub1(width<Integer>()));
+}
+
+template <typename Integer,
+    if_unsigned_integral_integer<Integer>>
+constexpr Integer absolute_minimum() noexcept
+{
+    return minimum<Integer>();
+}
+
+template <typename Integer, typename Unsigned,
+    if_signed_integral_integer<Integer>>
+constexpr Unsigned unsigned_maximum() noexcept
+{
+    return to_unsigned(maximum<Integer>());
+}
+
+template <typename Integer,
+    if_unsigned_integral_integer<Integer>>
+constexpr Integer unsigned_maximum() noexcept
+{
+    return maximum<Integer>();
+}
+
 // byte-based minimum/maximum
+
+template <size_t Bytes, typename Return>
+constexpr Return minimum() noexcept
+{
+    return ones_complement(maximum<Bytes>());
+}
 
 template <size_t Bytes, typename Return>
 constexpr Return maximum() noexcept
@@ -100,24 +136,18 @@ constexpr Return maximum() noexcept
     return to_signed(sub1(power2<result>(bit)));
 }
 
-template <size_t Bytes, typename Return>
-constexpr Return minimum() noexcept
-{
-    return ones_complement(maximum<Bytes>());
-}
-
 // bitcoin minimum/maximum (stack_number)
-
-template <size_t Bytes, typename Return>
-constexpr Return bitcoin_max() noexcept
-{
-    return maximum<Bytes>();
-}
 
 template <size_t Bytes, typename Return>
 constexpr Return bitcoin_min() noexcept
 {
     return twos_complement(bitcoin_max<Bytes>());
+}
+
+template <size_t Bytes, typename Return>
+constexpr Return bitcoin_max() noexcept
+{
+    return maximum<Bytes>();
 }
 
 } // namespace system
