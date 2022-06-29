@@ -237,6 +237,9 @@
     <ClCompile Include="..\..\..\..\test\integrals.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\literals.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>

@@ -520,6 +520,7 @@ if (with-tests)
         "../../test/constants.cpp"
         "../../test/constraints.cpp"
         "../../test/integrals.cpp"
+        "../../test/literals.cpp"
         "../../test/main.cpp"
         "../../test/settings.cpp"
         "../../test/test.cpp"
