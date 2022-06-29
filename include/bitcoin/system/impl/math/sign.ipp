@@ -32,21 +32,23 @@ namespace system {
 // represented in the unsigned domain of the same bit width. Fundamentally this
 // is because there is not a negative zero, allowing space for one more value.
 //
-// This is the nature of two's complement vs. one's complement. In one's
+// This is the nature of twos complement vs. ones complement. In ones
 // complement, all bits in the positive domain are inverted to obtained the
 // corresponding negative value. This results in a negative zero. By adding one
-// to the one's complement, two's complement consumes this negative zero value,
+// to the ones complement, twos complement consumes this negative zero value,
 // and therefore has a magnitude of one more than the unsigned domain (which
 // retains the zero representation).
+
 // C++20: requires twos complement integer representation.
 // This makes negate<signed> twos_complement, and negate<unsigned> is defined
-// as twos_complement. So these are functionally identical at C++20 (required).
-// std::abs is signed types only and not constexpr until C++23 (avoid).
-//
-// if negate/absolute/twos_complement is called with the domain minimum value,
-// this terminate_minimum aborts the process, as this is undefined behavior.
-// terminate_minimum is elided as a no-op in non-constexpr and non-debug.
+// as twos_complement. So these are conceptually identical at C++20 (required).
+// This library implements twos complement with safe overflow behavior.
 
+// if negate or absolute is called with the domain minimum value, this aborts
+// the process, as this is undefined behavior. terminate_minimum is elided as a
+// no-op in non-constexpr and non-debug builds.
+
+// std::abs is signed types only and not constexpr until C++23 (avoid).
 // All operations below support signed and unsigned integer parameters.
 // Use depromote only for integral constrained functions.
 // Unary operators do not promote sign.
@@ -54,64 +56,53 @@ namespace system {
 // Coversions.
 // ----------------------------------------------------------------------------
 
-template <typename Integer, typename Result,
-    if_signed_integer<Integer>>
+template <typename Integer, typename Result, if_signed_integer<Integer>>
 constexpr Result absolute(Integer value) noexcept
 {
     // Calls negate (unsafe).
     return to_unsigned(is_negative(value) ? negate(value) : value);
 }
 
-template <typename Integer,
-    if_unsigned_integer<Integer>>
+template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer absolute(Integer value) noexcept
 {
     return value;
 }
 
-template <typename Integer,
-    if_signed_integer<Integer>>
+template <typename Integer, if_signed_integer<Integer>>
 constexpr Integer negate(Integer value) noexcept
 {
     terminate_minimum(value);
     return possible_narrow_cast<Integer>(-value);
 }
 
-template <typename Integer,
-    if_unsigned_integer<Integer>>
+template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer negate(Integer value) noexcept
 {
     return add1(ones_complement(value));
 }
 
-template <typename Value, if_signed_integer<Value>>
+template <typename Value, if_integer<Value>>
 constexpr Value twos_complement(Value value) noexcept
 {
-    terminate_minimum(value);
-    return add1(ones_complement(value));
-}
-
-template <typename Value, if_unsigned_integer<Value>>
-constexpr Value twos_complement(Value value) noexcept
-{
+    // Overflows from minimum to ~minimum (-1) to +1 => zero.
     return add1(ones_complement(value));
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value ones_complement(Value value) noexcept
 {
-    return possible_narrow_cast<Integer>(~value);
+    // Alias for bit_not.
+    return possible_narrow_cast<Value>(~value);
 }
 
-template <typename Integer, typename Signed,
-    if_integer<Integer>>
+template <typename Integer, typename Signed, if_integer<Integer>>
 constexpr Signed to_signed(Integer value) noexcept
 {
     return possible_sign_cast<Signed>(value);
 }
 
-template <typename Integer, typename Unsigned,
-    if_integer<Integer>>
+template <typename Integer, typename Unsigned, if_integer<Integer>>
 constexpr Unsigned to_unsigned(Integer value) noexcept
 {
     return possible_sign_cast<Unsigned>(value);

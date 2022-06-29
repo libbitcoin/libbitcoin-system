@@ -27,17 +27,12 @@ namespace system {
 
 /// Conversions.
 /// ---------------------------------------------------------------------------
-
-// ****************************************************************************
-/// signed absolute, negate, and twos_complement are unsafe.
-/// Passing the domain minimum value to any of these is undefined behavior.
+/// signed absolute and negate are inherently unsafe.
+/// Passing the domain minimum value to either of these is undefined behavior.
 /// The magnitude of a negative integer domain is one greater than positive.
-/// ***************************************************************************
 
 /// Signed absolute value (unsafe).
-/// -minimum is undefined behavior, caller must guard (or use higher domain).
-/// absolute(minimum) asserts in debug builds.
-/// absolute(minimum) calls std::terminate if undefined in constexpr.
+/// absolute(minimum) asserts debug builds, calls std::terminate in constexpr.
 template <typename Integer,
     typename Result = to_unsigned_type<Integer>,
     if_signed_integer<Integer> = true>
@@ -49,9 +44,7 @@ template <typename Integer,
 constexpr Integer absolute(Integer value) noexcept;
 
 /// Signed integer negation (unsafe).
-/// -minimum is undefined behavior, caller must guard (or use higher domain).
-/// negate(minimum) asserts in debug builds.
-/// negate(minimum) calls std::terminate if undefined in constexpr.
+/// negate(minimum) asserts debug builds, calls std::terminate in constexpr.
 template <typename Integer,
     if_signed_integer<Integer> = true>
 constexpr Integer negate(Integer value) noexcept;
@@ -61,25 +54,22 @@ template <typename Integer,
     if_unsigned_integer<Integer> = true>
 constexpr Integer negate(Integer value) noexcept;
 
-/// Signed integer two's complement (unsafe).
-/// -minimum is undefined behavior, caller must guard (or use higher domain).
-/// twos_complement(minimum) asserts in debug builds.
-/// twos_complement(minimum) calls std::terminate if undefined in constexpr.
+/// Ones complement, alias for bit_not (safe).
 template <typename Value,
-    if_signed_integer<Value> = true>
+    if_integer<Value> = true>
+constexpr Value ones_complement(Value value) noexcept;
+
+/// Twos complement, overflows from minimum to zero (safe).
+template <typename Value,
+    if_integer<Value> = true>
 constexpr Value twos_complement(Value value) noexcept;
 
-/// Unsigned integer two's complement (safe).
-template <typename Value,
-    if_unsigned_integer<Value> = true>
-constexpr Value twos_complement(Value value) noexcept;
-
-/// Cast to signed type of corresponding size.
+/// Cast to signed type of corresponding size (bit cast).
 template <typename Integer,
     typename Signed = to_signed_type<Integer>, if_integer<Integer> = true>
 constexpr Signed to_signed(Integer value) noexcept;
 
-/// Cast to unsigned type of corresponding size.
+/// Cast to unsigned type of corresponding size (bit cast).
 template <typename Integer,
     typename Unsigned = to_unsigned_type<Integer>, if_integer<Integer> = true>
 constexpr Unsigned to_unsigned(Integer value) noexcept;
