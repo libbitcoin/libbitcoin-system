@@ -19,12 +19,89 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 
-#include <type_traits>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/safe.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+// Integer Representations:
+//
+// Unsigned to signed is of the same size is non-narrowing, but signed to
+// unsigned of the same size is narrowing. The minimum signed value cannot be
+// represented in the unsigned domain of the same bit width. Fundamentally this
+// is because there is not a negative zero, allowing space for one more value.
+//
+// This is the nature of two's complement vs. one's complement. In one's
+// complement, all bits in the positive domain are inverted to obtained the
+// corresponding negative value. This results in a negative zero. By adding one
+// to the one's complement, two's complement consumes this negative zero value,
+// and therefore has a magnitude of one more than the unsigned domain (which
+// retains the zero representation).
+// C++20: requires twos complement integer representation.
+// This makes negate<signed> twos_complement, and negate<unsigned> is defined
+// as twos_complement. So these are functionally identical at C++20 (required).
+// std::abs is signed types only and not constexpr until C++23 (avoid).
+//
+// if negate/absolute/twos_complement is called with the domain minimum value,
+// this terminate_minimum aborts the process, as this is undefined behavior.
+// terminate_minimum is elided as a no-op in non-constexpr and non-debug.
+
+// All operations below support signed and unsigned integer parameters.
+// Use depromote only for integral constrained functions.
+// Unary operators do not promote sign.
+
+// Coversions.
+// ----------------------------------------------------------------------------
+
+template <typename Integer, typename Result,
+    if_signed_integer<Integer>>
+constexpr Result absolute(Integer value) noexcept
+{
+    // Calls negate (unsafe).
+    return to_unsigned(is_negative(value) ? negate(value) : value);
+}
+
+template <typename Integer,
+    if_unsigned_integer<Integer>>
+constexpr Integer absolute(Integer value) noexcept
+{
+    return value;
+}
+
+template <typename Integer,
+    if_signed_integer<Integer>>
+constexpr Integer negate(Integer value) noexcept
+{
+    terminate_minimum(value);
+    return possible_narrow_cast<Integer>(-value);
+}
+
+template <typename Integer,
+    if_unsigned_integer<Integer>>
+constexpr Integer negate(Integer value) noexcept
+{
+    return add1(ones_complement(value));
+}
+
+template <typename Value, if_signed_integer<Value>>
+constexpr Value twos_complement(Value value) noexcept
+{
+    terminate_minimum(value);
+    return add1(ones_complement(value));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr Value twos_complement(Value value) noexcept
+{
+    return add1(ones_complement(value));
+}
+
+template <typename Value, if_integer<Value>>
+constexpr Value ones_complement(Value value) noexcept
+{
+    return possible_narrow_cast<Integer>(~value);
+}
 
 template <typename Integer, typename Signed,
     if_integer<Integer>>
@@ -40,36 +117,8 @@ constexpr Unsigned to_unsigned(Integer value) noexcept
     return possible_sign_cast<Unsigned>(value);
 }
 
-template <typename Integer, typename Result,
-    if_signed_integer<Integer>>
-constexpr Result absolute(Integer value) noexcept
-{
-    // std::abs is signed types only and not constexpr until C++23.
-    return to_unsigned(is_negative(value) ? negate<Integer>(value) : value);
-}
-
-template <typename Integer,
-    if_unsigned_integer<Integer>>
-constexpr Integer absolute(Integer value) noexcept
-{
-    return value;
-}
-
-template <typename Integer,
-    if_signed_integer<Integer>>
-constexpr Integer negate(Integer value) noexcept
-{
-    // Use depromote only for integral constrained functions.
-    return possible_narrow_cast<Integer>(-value);
-}
-
-template <typename Integer,
-    if_unsigned_integer<Integer>>
-constexpr Integer negate(Integer value) noexcept
-{
-    // Avoids circularity (bits::twos_complement).
-    return add1<Integer>(~value);
-}
+// Comparisons.
+// ----------------------------------------------------------------------------
 
 template <typename Integer,
     if_signed_integer<Integer>>

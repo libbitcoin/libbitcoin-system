@@ -25,40 +25,67 @@
 namespace libbitcoin {
 namespace system {
 
-/// All operations below support signed and unsigned integer parameters.
+/// Conversions.
+/// ---------------------------------------------------------------------------
 
-/// Cast to smallest signed integer type to hold the maximum unsigned value.
+// ****************************************************************************
+/// signed absolute, negate, and twos_complement are unsafe.
+/// Passing the domain minimum value to any of these is undefined behavior.
+/// The magnitude of a negative integer domain is one greater than positive.
+/// ***************************************************************************
+
+/// Signed absolute value (unsafe).
+/// -minimum is undefined behavior, caller must guard (or use higher domain).
+/// absolute(minimum) asserts in debug builds.
+/// absolute(minimum) calls std::terminate if undefined in constexpr.
 template <typename Integer,
-    typename Signed = to_signed_type<Integer>, if_integer<Integer> = true>
-constexpr Signed to_signed(Integer value) noexcept;
-
-/// Cast to smallest unsigned integer type to hold the maximum signed value.
-template <typename Integer,
-    typename Unsigned = to_unsigned_type<Integer>, if_integer<Integer> = true>
-constexpr Unsigned to_unsigned(Integer value) noexcept;
-
-/// Obtain the absolute value of the integer.
-/// -minimum<Integer> is undefined behavior (overflows if not upcasted).
-/// absolute<Integer>(minimum<Integer>) may or may not return zero.
-/// Caller must guard (use higher domain if value == minimum<Integer>).
-template <typename Integer, typename Result = to_unsigned_type<Integer>,
+    typename Result = to_unsigned_type<Integer>,
     if_signed_integer<Integer> = true>
 constexpr Result absolute(Integer value) noexcept;
+
+/// Unsigned absolute value (no-op) (safe).
 template <typename Integer,
     if_unsigned_integer<Integer> = true>
 constexpr Integer absolute(Integer value) noexcept;
 
-/// Negate the value of the signed integer in the result domain.
-/// -minimum<Integer> is undefined behavior (overflows if not upcasted).
-/// negate<Integer>(minimum<Integer>) may or may not return zero.
-/// Caller must guard (use higher domain if value == minimum<Integer>).
-// Unsigned negate yields the two's complement of value.
+/// Signed integer negation (unsafe).
+/// -minimum is undefined behavior, caller must guard (or use higher domain).
+/// negate(minimum) asserts in debug builds.
+/// negate(minimum) calls std::terminate if undefined in constexpr.
 template <typename Integer,
     if_signed_integer<Integer> = true>
 constexpr Integer negate(Integer value) noexcept;
+
+/// Unsigned integer two's complement (safe).
 template <typename Integer,
     if_unsigned_integer<Integer> = true>
 constexpr Integer negate(Integer value) noexcept;
+
+/// Signed integer two's complement (unsafe).
+/// -minimum is undefined behavior, caller must guard (or use higher domain).
+/// twos_complement(minimum) asserts in debug builds.
+/// twos_complement(minimum) calls std::terminate if undefined in constexpr.
+template <typename Value,
+    if_signed_integer<Value> = true>
+constexpr Value twos_complement(Value value) noexcept;
+
+/// Unsigned integer two's complement (safe).
+template <typename Value,
+    if_unsigned_integer<Value> = true>
+constexpr Value twos_complement(Value value) noexcept;
+
+/// Cast to signed type of corresponding size.
+template <typename Integer,
+    typename Signed = to_signed_type<Integer>, if_integer<Integer> = true>
+constexpr Signed to_signed(Integer value) noexcept;
+
+/// Cast to unsigned type of corresponding size.
+template <typename Integer,
+    typename Unsigned = to_unsigned_type<Integer>, if_integer<Integer> = true>
+constexpr Unsigned to_unsigned(Integer value) noexcept;
+
+/// Comparisons.
+/// ---------------------------------------------------------------------------
 
 /// Determine whether the integer is negative.
 template <typename Integer,

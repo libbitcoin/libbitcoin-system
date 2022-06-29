@@ -19,7 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SAFE_IPP
 #define LIBBITCOIN_SYSTEM_MATH_SAFE_IPP
 
+#include <exception>
 #include <limits>
+#include <type_traits>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
@@ -190,6 +192,27 @@ Integer safe_add(Integer left, Integer right) noexcept(false)
         throw overflow_exception("safe addition overflow");
 
     return left + right;
+}
+
+// Only absolute<signed> and negate<signed> are subject to undefined behavior.
+// All library functions that call these are guarded against this condition.
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr void terminate_minimum(Integer value) noexcept
+{
+    // This is elided as a no-op in non-constexpr and non-debug.
+    if (value == std::numeric_limits<Integer>::min())
+    {
+        if (std::is_constant_evaluated())
+        {
+            // Disallow undefined behavior in constexpr.
+            std::terminate();
+        }
+        else
+        {
+            // Warn on runtime undefined behavior (compiler-defined).
+            BC_ASSERT_MSG(false, "absolute(signed minimum) is undefined");
+        }
+    }
 }
 
 } // namespace system

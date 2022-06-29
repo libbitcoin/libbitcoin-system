@@ -122,6 +122,10 @@ Integer safe_multiply(Integer left, Integer right) noexcept(false);
 template <typename Integer, if_unsigned_integer<Integer> = true>
 Integer safe_add(Integer left, Integer right) noexcept(false);
 
+template <typename Integer,
+    if_signed_integer<Integer> = true>
+constexpr void terminate_minimum(Integer value) noexcept;
+
 } // namespace system
 } // namespace libbitcoin
 

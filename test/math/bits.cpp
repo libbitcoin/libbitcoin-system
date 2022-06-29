@@ -121,28 +121,6 @@ static_assert(ones_complement<uint8_t>(0xfd) == 2u);
 static_assert(ones_complement<uint8_t>(0xfc) == 3u);
 static_assert(std::is_same<decltype(ones_complement<int8_t>(0)), int8_t>::value);
 
-// twos_complement
-// similar to but different than absolute (~n+1)
-static_assert(twos_complement(-4) == 4);
-static_assert(twos_complement(-3) == 3);
-static_assert(twos_complement(-2) == 2);
-static_assert(twos_complement(-1) == 1);
-static_assert(twos_complement(0) == 0);
-static_assert(twos_complement(1) == -1);
-static_assert(twos_complement(2) == -2);
-static_assert(twos_complement(3) == -3);
-static_assert(twos_complement(4) == -4);
-static_assert(twos_complement<int8_t>(-4) == 4);
-static_assert(twos_complement<int8_t>(-3) == 3);
-static_assert(twos_complement<int8_t>(-2) == 2);
-static_assert(twos_complement<int8_t>(-1) == 1);
-static_assert(twos_complement<uint8_t>(0x00) == 0u);
-static_assert(twos_complement<uint8_t>(0xff) == 1u);
-static_assert(twos_complement<uint8_t>(0xfe) == 2u);
-static_assert(twos_complement<uint8_t>(0xfd) == 3u);
-static_assert(twos_complement<uint8_t>(0xfc) == 4u);
-static_assert(std::is_same<decltype(twos_complement<int8_t>(0)), int8_t>::value);
-
 // ones_complement (NOT)
 // inverts all bits (~n, !bool)
 static_assert(bit_not(-4) == 3);

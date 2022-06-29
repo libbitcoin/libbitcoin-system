@@ -43,16 +43,6 @@ constexpr size_t bit_width(Value value) noexcept;
 /// Bitwise logical operations.
 /// ---------------------------------------------------------------------------
 
-/// Ones's complement (~value).
-template <typename Value, if_integer<Value> = true>
-constexpr Value ones_complement(Value value) noexcept;
-
-/// Two's complement (~value + 1).
-/// Absolute value of an unsigned negative value.
-/// Avoid use of unsigned negation as this relies on CPU architecture.
-template <typename Value, if_integer<Value> = true>
-constexpr Value twos_complement(Value value) noexcept;
-
 /// Bitwise NOT (~value) operation.
 /// One's complement, the bit inversion of any value.
 template <typename Value, if_integer<Value> = true>

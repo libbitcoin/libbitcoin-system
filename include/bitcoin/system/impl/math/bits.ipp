@@ -30,11 +30,7 @@
 namespace libbitcoin {
 namespace system {
 
-// These functions avoid integral promotion, by recasting to the original type.
-// The native operators promote sizeof(type) < 32 operands to int, causing
-// a narrowing warning when it is coerced back to a positive Value type.
-// Use of =&, =|,=<<, =>> is unguarded as these operators are not subject to
-// promotion. All other native operators are guarded against promotion.
+// Use depromote only for integral constrained functions.
 
 // Widths.
 // ----------------------------------------------------------------------------
@@ -57,24 +53,12 @@ constexpr size_t bit_width(Value value) noexcept
 
 // Bitwise logical operations.
 // ----------------------------------------------------------------------------
-// Use depromote only for integral constrained functions.
-
-template <typename Value, if_integer<Value>>
-constexpr Value ones_complement(Value value) noexcept
-{
-    return bit_not(value);
-}
-
-template <typename Value, if_integer<Value>>
-constexpr Value twos_complement(Value value) noexcept
-{
-    return add1(ones_complement(value));
-}
 
 // OPERATOR ~
 template <typename Value, if_integer<Value>>
 constexpr Value bit_not(Value value) noexcept
 {
+    // TODO: Unary operators do not promote sign.
     // Revert domain promotion for < 32 bit Value.
     return possible_narrow_and_sign_cast<Value>(~value);
 }
@@ -228,7 +212,7 @@ constexpr void mask_left_into(Value& value, size_t bits) noexcept
 template <typename Value, if_integral_integer<Value>>
 constexpr Value mask_right(size_t bits) noexcept
 {
-    return shift_left<Value>(bit_all<Value>(), bits, true);
+    return shift_left(bit_all<Value>(), bits, true);
 }
 
 template <typename Value, if_integral_integer<Value>>
