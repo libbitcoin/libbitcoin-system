@@ -20,58 +20,59 @@
 
 // power2
 
-static_assert(power2(0) == 1u);
+static_assert(power2(0)  == 1u);
 static_assert(power2(0u) == 1u);
 
-static_assert(power2(1) == 2u);
+static_assert(power2(1)  == 2u);
 static_assert(power2(1u) == 2u);
 
 static_assert(power2(-1) == 1u / 2u);
 static_assert(power2(-2) == 1u / 4u);
-static_assert(power2(-3) == 0u);
-static_assert(power2<uint16_t>(15) == 0x8000u);
-static_assert(power2<uint16_t>(16) == 0u);
+static_assert(power2(-3) == 1u / 8u);
+static_assert(power2<uint16_t>(15) == 0b1000'0000'0000'0000_u16);
+static_assert(power2<uint16_t>(16) == 0_u16);
 
-static_assert(power(0, 0) == 0u);
+static_assert(power(0,   0) == 0u);
 static_assert(power(0u, 0u) == 0u);
-static_assert(power(0, 1) == 0u);
+static_assert(power(0,   1) == 0u);
 static_assert(power(0u, 1u) == 0u);
 
-static_assert(power(1, 0) == 1u);
+static_assert(power(1,   0) == 1u);
 static_assert(power(1u, 0u) == 1u);
-static_assert(power(1, 1) == 1u);
+static_assert(power(1,   1) == 1u);
 static_assert(power(1u, 1u) == 1u);
 
-static_assert(power(3, 0) == 1u);
-static_assert(power(3u, 0u) == 1u);
-static_assert(power(1, -1) == 1u / 1u);
-static_assert(power(3, -1) == 1u / 3u);
-static_assert(power(3, -2) == 1u / 9u);
-static_assert(power(3, -3) == 1u / 81u);
-static_assert(power(3, 10) == 0xe6a9u);
-static_assert(power(3u, 10u) == 0xe6a9u);
-static_assert(power<uint16_t>(3, 11) == 0xb3fbu);
+static_assert(power(3,    0) == 1u);
+static_assert(power(3u,  0u) == 1u);
+static_assert(power(1,   -1) == 1u / 1u);
+static_assert(power(3,   -1) == 1u / 3u);
+static_assert(power(3,   -2) == 1u / 9u);
+static_assert(power(3,   -3) == 1u / 81u);
+static_assert(power(3,   10) == 0xe6a9_size);
+static_assert(power(3u, 10u) == 0xe6a9_size);
+static_assert(power<uint16_t>(3, 11) == 0xb3fb_u16);
 
-static_assert(power(2, 16) == power2(16));
-static_assert(power(2u, 16u) == power2(16u));
+static_assert(power(2,   16) == power2(16));
+static_assert(power(2u, 16u) == 0b1'0000'0000'0000'0000_size);
 
 static_assert(power(-1, 0) == 1u);
-static_assert(power(-1, 1) == static_cast<size_t>(-1));
+static_assert(power(-1, 1) == 1_nsize);
 
-static_assert(power(-3, 0) == 1u);
-static_assert(power(-3, 1) == static_cast<size_t>(-3));
-static_assert(power(-3, -1) == 1u / static_cast<size_t>(-3));
-static_assert(power(-3, -2) ==  1u / 9u);
-static_assert(power(-3, -3) == 1u / static_cast<size_t>(-81));
-static_assert(power(-3, 10) == 0xe6a9u);
-static_assert(power<uint16_t>(-3, 11) == 0x4c05u);
+static_assert(power(-3,  0) == 1u);
+static_assert(power(-3,  1) == 3_nsize);
+static_assert(power(-3, -1) == 1u / 3_nsize);
+static_assert(power(-3, -2) == 1u / 9_size);
+static_assert(power(-3, -3) == 1u / 81_nsize);
+static_assert(power(-3, 10) == 0xe6a9_size);
+static_assert(power<uint16_t>(-3, 11) == 0x4c05_u16);
 
 // power<base>
-static_assert(power<0u>(16) == power(0, 16));
-static_assert(power<2u>(16) == power(2, 16));
+static_assert(power<0u>(16)  == power(0, 16));
+static_assert(power<2u>(16)  == power(2, 16));
 static_assert(power<2u>(16u) == power2(16u));
-static_assert(power<2u, uint16_t>(15) == 0x8000u);
-static_assert(power<3u>(0) == 1u);
+static_assert(power<2u, uint16_t>(15) == 0b1000'0000'0000'0000_u16);
+
+static_assert(power<3u>(0)  == 1u);
 static_assert(power<3u>(0u) == 1u);
 static_assert(power<3u, size_t>(0u) == 1u);
 
