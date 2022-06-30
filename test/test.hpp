@@ -25,11 +25,6 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
-
-// Enable aborting exceptions for test capture.
-#define BC_NO_THROW false
-#define TEST_LITERAL_EXCEPTIONS
-
 #include <bitcoin/system.hpp>
 
 #define TEST_NAME \
