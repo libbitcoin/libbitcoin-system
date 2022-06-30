@@ -99,28 +99,6 @@ static_assert(bit_width<int64_t>(-0x800000000000ll) == 64u);
 static_assert(bit_width<int64_t>(-0x80010000000000ll) == 64u);
 ////static_assert(bit_width<int64_t>(-0x8000000000000000ll) == 64u);
 
-// ones_complement
-// alias for bit_not (~n)
-static_assert(ones_complement(-4) == 3);
-static_assert(ones_complement(-3) == 2);
-static_assert(ones_complement(-2) == 1);
-static_assert(ones_complement(-1) == 0);
-static_assert(ones_complement(0) == -1);
-static_assert(ones_complement(1) == -2);
-static_assert(ones_complement(2) == -3);
-static_assert(ones_complement(3) == -4);
-static_assert(ones_complement(4) == -5);
-static_assert(ones_complement<int8_t>(-4) == 3);
-static_assert(ones_complement<int8_t>(-3) == 2);
-static_assert(ones_complement<int8_t>(-2) == 1);
-static_assert(ones_complement<int8_t>(-1) == 0);
-static_assert(ones_complement<uint8_t>(0x00) == 0xffu);
-static_assert(ones_complement<uint8_t>(0xff) == 0u);
-static_assert(ones_complement<uint8_t>(0xfe) == 1u);
-static_assert(ones_complement<uint8_t>(0xfd) == 2u);
-static_assert(ones_complement<uint8_t>(0xfc) == 3u);
-static_assert(std::is_same<decltype(ones_complement<int8_t>(0)), int8_t>::value);
-
 // ones_complement (NOT)
 // inverts all bits (~n, !bool)
 static_assert(bit_not(-4) == 3);

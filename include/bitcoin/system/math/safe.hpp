@@ -28,10 +28,11 @@ namespace system {
 /// ---------------------------------------------------------------------------
 
 /// Sign may be changed on promotion by binary operators.
-/// Sign will not be changed by unary ops (-) unless size is also promoted.
+/// Sign will not (?) be changed by unary ops (-) unless size is also promoted.
 /// This is a narrowing cast to restore Restored type from any native operation
 /// (type of Common) resulting in at least decltype(+Restored{}) size.
-/// This should not be used except in the case of possible integral promotion.
+/// This should not be used except in the case of integral only promotion as
+/// its use will preclude non-integral template matching.
 template <typename Restored, typename Common,
     if_not_lesser_width<to_common_sized_type<Restored>, Restored> = true,
     if_integral_integer<Restored> = true,
@@ -114,24 +115,21 @@ constexpr To* possible_pointer_cast(From* value) noexcept;
 template <typename To, typename From>
 constexpr To* integer_pointer_cast(From value) noexcept;
 
-/// Mathematical operations that throw on overflow.
+/// Overflows.
+/// ---------------------------------------------------------------------------
 /// Avoid structured exception handling, use only to cause program abort.
 
 /// Throws overflow_exception on overflow (2 uses in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
-Integer safe_multiply(Integer left, Integer right) noexcept(false);
+constexpr Integer safe_multiply(Integer left, Integer right) noexcept(BC_NO_THROW);
 
 /// Throws overflow_exception on overflow (1 use in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
-Integer safe_add(Integer left, Integer right) noexcept(false);
+constexpr Integer safe_add(Integer left, Integer right) noexcept(BC_NO_THROW);
 
-/// Undefined Behaviors.
-/// ---------------------------------------------------------------------------
-
-/// Abort process if value is Integer domain minimum.
-template <typename Integer,
-    if_signed_integer<Integer> = true>
-constexpr void terminate_minimum(Integer value) noexcept;
+/// Throws overflow_exception on negate signed minimum (1 use in libbitcoin).
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr Integer safe_negate(Integer value) noexcept(BC_NO_THROW);
 
 } // namespace system
 } // namespace libbitcoin

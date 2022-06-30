@@ -21,41 +21,72 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <exception>
+#include <cstdlib>
+#include <iostream>
+#include <typeinfo>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 // TODO: move to math.
 #include <bitcoin/system/math/math.hpp>
+
+#define DECLARE_LITERAL(name, type, sign) \
+CONSTEVAL type operator "" name(uint64_t value) noexcept \
+{ return sign<type>(value); }
 
 namespace libbitcoin {
 namespace system {
 
 /// en.cppreference.com/w/cpp/language/user_literal
 
+// Abort is intended.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 template <typename Domain, if_integral_integer<Domain> = true>
-CONSTEVAL Domain positive(uint64_t value) noexcept
+constexpr void overflow(uint64_t value, bool positive) noexcept(false)
 {
-    using narrow = to_unsigned_type<Domain>;
-    if (value > unsigned_maximum<Domain>()) std::terminate();
+    if (std::is_constant_evaluated())
+    {
+        // Under consteval this remains for compile time validation.
+        throw overflow_exception{ "literal overflow" };
+    }
+    else
+    {
+        // Under consteval this is unreachable code.
+        BC_ASSERT_MSG(false, "literal overflow");
+        const auto sign = positive ? "positive" : "negative";
+        const std::type_info& type = typeid(Domain);
+        ////const auto number = encode_base16(to_big_endian_size(value));
+        std::cout
+            << "User-defined literal overflow: " << sign << "<"
+            << type.name() << ">" << "(0x" << value << ")." << std::endl;
+    }
+}
+
+template <typename Domain, if_integral_integer<Domain> = true>
+CONSTEVAL Domain positive(uint64_t value) noexcept(BC_NO_THROW)
+{
+    typedef to_unsigned_type<Domain> narrow, limit;
+    if (value > unsigned_maximum<limit>()) overflow<Domain>(value, true);
     const auto narrowed = possible_narrow_and_sign_cast<narrow>(value);
     return possible_narrow_and_sign_cast<Domain>(narrowed);
 }
 
 template <typename Domain, if_integral_integer<Domain> = true>
-CONSTEVAL Domain negative(uint64_t value) noexcept
+CONSTEVAL Domain negative(uint64_t value) noexcept(BC_NO_THROW)
 {
+    using limit = to_signed_type<Domain>;
     using narrow = to_unsigned_type<Domain>;
-    if (value > absolute_minimum<Domain>()) std::terminate();
+    if (value > absolute_minimum<limit>()) overflow<Domain>(value, false);
     const auto narrowed = possible_narrow_and_sign_cast<narrow>(value);
     return possible_narrow_and_sign_cast<Domain>(twos_complement(narrowed));
 }
 
-#define DECLARE_LITERAL(name, type, sign) \
-CONSTEVAL type operator "" name(uint64_t value) noexcept \
-{ \
-    return sign<type>(value); \
-}
+BC_POP_WARNING()
+
+namespace literals {
 
 DECLARE_LITERAL(_i08, int8_t, positive)
 DECLARE_LITERAL(_i16, int16_t, positive)
@@ -85,9 +116,10 @@ DECLARE_LITERAL(_nu8, uint8_t, negative)
 DECLARE_LITERAL(_size, size_t, positive)
 DECLARE_LITERAL(_nsize, size_t, negative)
 
-#undef DECLARE_LITERAL
-
+} // namespace literals
 } // namespace system
 } // namespace libbitcoin
+
+#undef DECLARE_LITERAL
 
 #endif

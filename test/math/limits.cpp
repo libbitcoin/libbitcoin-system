@@ -192,11 +192,15 @@ static_assert(std::is_same<decltype(maximum<int16_t>()), int16_t>::value);
 
 // absolute_minimum<T>
 
+static_assert(absolute_minimum<int8_t >() == power2(sub1(width<int8_t>())));
+static_assert(absolute_minimum<int16_t>() == power2(sub1(width<int16_t>())));
+static_assert(absolute_minimum<int32_t>() == power2(sub1(width<int32_t>())));
+static_assert(absolute_minimum<int64_t>() == power2(sub1(width<int64_t>())));
 static_assert(absolute_minimum<int8_t >() == add1(absolute(add1(min_int8))));
 static_assert(absolute_minimum<int16_t>() == add1(absolute(add1(min_int16))));
 static_assert(absolute_minimum<int32_t>() == add1(absolute(add1(min_int32))));
 static_assert(absolute_minimum<int64_t>() == add1(absolute(add1(min_int64))));
-static_assert(absolute_minimum<uint8_t >() == min_uint8);
+static_assert(absolute_minimum<uint8_t>()  == min_uint8);
 static_assert(absolute_minimum<uint16_t>() == min_uint16);
 static_assert(absolute_minimum<uint32_t>() == min_uint32);
 static_assert(absolute_minimum<uint64_t>() == min_uint64);
@@ -204,6 +208,10 @@ static_assert(std::is_same<decltype(maximum<int64_t>()), int64_t>::value);
 
 // unsigned_maximum<T>
 
+static_assert(unsigned_maximum<int8_t >() == sub1(to_half(power2(width<int8_t>()))));
+static_assert(unsigned_maximum<int16_t>() == sub1(to_half(power2(width<int16_t>()))));
+static_assert(unsigned_maximum<int32_t>() == sub1(to_half(power2(width<int32_t>()))));
+static_assert(unsigned_maximum<int64_t>() == sub1(to_half(power2<uint256_t>(width<int64_t>()))));
 static_assert(unsigned_maximum<int8_t >() == to_unsigned(max_int8));
 static_assert(unsigned_maximum<int16_t>() == to_unsigned(max_int16));
 static_assert(unsigned_maximum<int32_t>() == to_unsigned(max_int32));
@@ -213,6 +221,16 @@ static_assert(unsigned_maximum<uint16_t>() == max_uint16);
 static_assert(unsigned_maximum<uint32_t>() == max_uint32);
 static_assert(unsigned_maximum<uint64_t>() == max_uint64);
 static_assert(std::is_same<decltype(maximum<int16_t>()), int16_t>::value);
+
+// min/max bytes expecations
+constexpr auto max_int24 = sub1(0x00000000800000_i32);
+constexpr auto max_int40 = sub1(0x00008000000000_i64);
+constexpr auto max_int48 = sub1(0x00800000000000_i64);
+constexpr auto max_int56 = sub1(0x80000000000000_i64);
+constexpr auto min_int24 = negate(0x00000000800000_i32);
+constexpr auto min_int40 = negate(0x00008000000000_i64);
+constexpr auto min_int48 = negate(0x00800000000000_i64);
+constexpr auto min_int56 = negate(0x80000000000000_i64);
 
 // minimum<Bytes>
 
@@ -227,16 +245,6 @@ static_assert(minimum<8>() == min_int64);
 static_assert(std::is_same<decltype(minimum<2>()), int16_t>::value);
 
 // maximum<Bytes>
-
-constexpr auto max_int24 = sub1(0x00000000800000_i32);
-constexpr auto max_int40 = sub1(0x00008000000000_i64);
-constexpr auto max_int48 = sub1(0x00800000000000_i64);
-constexpr auto max_int56 = sub1(0x80000000000000_i64);
-
-constexpr auto min_int24 = negate(0x00000000800000_i32);
-constexpr auto min_int40 = negate(0x00008000000000_i64);
-constexpr auto min_int48 = negate(0x00800000000000_i64);
-constexpr auto min_int56 = negate(0x80000000000000_i64);
 
 static_assert(maximum<1>() == max_int8);
 static_assert(maximum<2>() == max_int16);
@@ -295,54 +303,54 @@ static_assert(twos_complement(max_uint16) == add1(min_uint16));
 static_assert(twos_complement(max_uint32) == add1(min_uint32));
 static_assert(twos_complement(max_uint64) == add1(min_uint64));
 
-// This demonstrates the loss of one value in the domain.
-static_assert(!is_negated(0b11111111_u8));
-static_assert(!is_negated(0b11111110_u8));
-static_assert(!is_negated(0b11111100_u8));
-static_assert(!is_negated(0b11111000_u8));
-static_assert(!is_negated(0b11110000_u8));
-static_assert(!is_negated(0b11100000_u8));
-static_assert(!is_negated(0b11000000_u8));
-static_assert(is_negated(0b10000000_u8)); // <==
-static_assert(!is_negated(0b01111111_u8));
-static_assert(!is_negated(0b00111111_u8));
-static_assert(!is_negated(0b00011111_u8));
-static_assert(!is_negated(0b00001111_u8));
-static_assert(!is_negated(0b00000111_u8));
-static_assert(!is_negated(0b00000011_u8));
-static_assert(!is_negated(0b00000010_u8));
-static_assert(!is_negated(0b00000001_u8));
-static_assert(!is_negated(0b00000000_u8));
-
-// Leading byte and leading bit (signed).
-static_assert(is_negated(0x80_i8));
-static_assert(is_negated(0x8000_i16));
-static_assert(is_negated(0x80000000_i32));
-static_assert(is_negated(0x8000000000000000_i64));
-
-// Leading byte and leading bit (unsigned).
-static_assert(is_negated(0x81_u8));
-static_assert(is_negated(0x8001_u16));
-static_assert(is_negated(0x80000001_u32));
-static_assert(is_negated(0x8000000000000001_u64));
-
-// Leading bit but not leading byte (unsigned).
-static_assert(!is_negated(0x00820002_u32));
-static_assert(!is_negated(0x00008303_u32));
-static_assert(!is_negated(0x00000084_u32));
-static_assert(!is_negated(0x0000810000000001_u64));
-static_assert(!is_negated(0x0000008200000002_u64));
-static_assert(!is_negated(0x0000000083000003_u64));
-static_assert(!is_negated(0x0000000000840004_u64));
-static_assert(!is_negated(0x0000000000008505_u64));
-static_assert(!is_negated(0x0000000000000086_u64));
-
-// However stack number compresses out all leading zero bytes, and then adds 
-// a sign byte. Yet when converting to stack number to a int32_t, it guards
-// against previous operation overflow by rejecting any 4 byte little-endian
-// stack chunk size. This causes a 4 byte negated integer to be discarded,
-// because its sign byte is a 5th stack chunk byte. But, the only value that
-// can have an absolute value with a high bit is the integral minimum. So that
-// value is considered an overflow as a matter of consensus. This could have
-// been easily avoided, by converting the necessary 5 bytes and confirming the
-// range, but alas.
+////// This demonstrates the loss of one value in the domain.
+////static_assert(!is_negated(0b11111111_u8));
+////static_assert(!is_negated(0b11111110_u8));
+////static_assert(!is_negated(0b11111100_u8));
+////static_assert(!is_negated(0b11111000_u8));
+////static_assert(!is_negated(0b11110000_u8));
+////static_assert(!is_negated(0b11100000_u8));
+////static_assert(!is_negated(0b11000000_u8));
+////static_assert(is_negated(0b10000000_u8)); // <==
+////static_assert(!is_negated(0b01111111_u8));
+////static_assert(!is_negated(0b00111111_u8));
+////static_assert(!is_negated(0b00011111_u8));
+////static_assert(!is_negated(0b00001111_u8));
+////static_assert(!is_negated(0b00000111_u8));
+////static_assert(!is_negated(0b00000011_u8));
+////static_assert(!is_negated(0b00000010_u8));
+////static_assert(!is_negated(0b00000001_u8));
+////static_assert(!is_negated(0b00000000_u8));
+////
+////// Leading byte and leading bit (signed).
+////static_assert(is_negated(0x80_i8));
+////static_assert(is_negated(0x8000_i16));
+////static_assert(is_negated(0x80000000_i32));
+////static_assert(is_negated(0x8000000000000000_i64));
+////
+////// Leading byte and leading bit (unsigned).
+////static_assert(is_negated(0x81_u8));
+////static_assert(is_negated(0x8001_u16));
+////static_assert(is_negated(0x80000001_u32));
+////static_assert(is_negated(0x8000000000000001_u64));
+////
+////// Leading bit but not leading byte (unsigned).
+////static_assert(!is_negated(0x00820002_u32));
+////static_assert(!is_negated(0x00008303_u32));
+////static_assert(!is_negated(0x00000084_u32));
+////static_assert(!is_negated(0x0000810000000001_u64));
+////static_assert(!is_negated(0x0000008200000002_u64));
+////static_assert(!is_negated(0x0000000083000003_u64));
+////static_assert(!is_negated(0x0000000000840004_u64));
+////static_assert(!is_negated(0x0000000000008505_u64));
+////static_assert(!is_negated(0x0000000000000086_u64));
+////
+////// However stack number compresses out all leading zero bytes, and then adds 
+////// a sign byte. Yet when converting to stack number to a int32_t, it guards
+////// against previous operation overflow by rejecting any 4 byte little-endian
+////// stack chunk size. This causes a 4 byte negated integer to be discarded,
+////// because its sign byte is a 5th stack chunk byte. But, the only value that
+////// can have an absolute value with a high bit is the integral minimum. So that
+////// value is considered an overflow as a matter of consensus. This could have
+////// been easily avoided, by converting the necessary 5 bytes and confirming the
+////// range, but alas.

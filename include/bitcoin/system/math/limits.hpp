@@ -25,6 +25,9 @@
 namespace libbitcoin {
 namespace system {
 
+/// Conditionals.
+/// ---------------------------------------------------------------------------
+
 /// The value is outside of the type bounds.
 template <typename By, typename Integer,
     if_integer<By> = true, if_integer<Integer> = true>
@@ -57,6 +60,9 @@ template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
 constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept;
 
+/// Integral bounds.
+/// ---------------------------------------------------------------------------
+
 /// The minimum value of a integral integer type (std::numeric_limits).
 template <typename Integer, if_integral_integer<Integer> = true>
 constexpr Integer minimum() noexcept;
@@ -66,17 +72,21 @@ template <typename Integer, if_integral_integer<Integer> = true>
 constexpr Integer maximum() noexcept;
 
 /// The absolute value of minimum value of a integral integer type.
-template <typename Integer, typename Absolute = to_unsigned_type<Integer>,
+template <typename Integer,
+    typename Absolute = to_unsigned_type<Integer>,
     if_signed_integral_integer<Integer> = true>
 constexpr Absolute absolute_minimum() noexcept;
-template <typename Integer, if_unsigned_integral_integer<Integer> = true>
+template <typename Integer,
+    if_unsigned_integral_integer<Integer> = true>
 constexpr Integer absolute_minimum() noexcept;
 
 /// The maximum value of a integral integer type (unsigned).
-template <typename Integer, typename Unsigned = to_unsigned_type<Integer>,
+template <typename Integer,
+    typename Unsigned = to_unsigned_type<Integer>,
     if_signed_integral_integer<Integer> = true>
 constexpr Unsigned unsigned_maximum() noexcept;
-template <typename Integer, if_unsigned_integral_integer<Integer> = true>
+template <typename Integer,
+    if_unsigned_integral_integer<Integer> = true>
 constexpr Integer unsigned_maximum() noexcept;
 
 /// The minimum value of a type by byte size (1-8 bytes).

@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 
+#include <cstdint>
 #include <limits>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/math/power.hpp>
@@ -28,7 +29,8 @@
 namespace libbitcoin {
 namespace system {
 
-// is_limited
+// Conditionals.
+// ----------------------------------------------------------------------------
 
 template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
@@ -76,8 +78,8 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
             possible_narrow_and_sign_cast<Result>(value));
 }
 
-// integral minimum/maximum
-
+// Integral bounds.
+// ----------------------------------------------------------------------------
 template <typename Integer,
     if_integral_integer<Integer>>
 constexpr Integer minimum() noexcept
@@ -96,7 +98,12 @@ template <typename Integer, typename Absolute,
     if_signed_integral_integer<Integer>>
 constexpr Absolute absolute_minimum() noexcept
 {
-    return power2<Absolute>(sub1(width<Integer>()));
+    // Avoids overflow in calling negate(minimum<Integer>()).
+    static_assert(
+        add1(to_unsigned(maximum<int8_t>())) == 
+        add1(to_unsigned(safe_negate(add1(min_int8)))));
+
+    return add1(to_unsigned(maximum<Integer>()));
 }
 
 template <typename Integer,

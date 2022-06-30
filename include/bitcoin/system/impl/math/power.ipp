@@ -98,7 +98,8 @@ constexpr Value power2(Exponent exponent) noexcept
         return 0;
 
     Value value{};
-    return mp::bit_set(value, exponent);
+    return mp::bit_set(value,
+        possible_narrow_and_sign_cast<unsigned>(exponent));
 }
 
 } // namespace system

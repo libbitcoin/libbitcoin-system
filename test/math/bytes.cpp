@@ -80,20 +80,20 @@ static_assert(byte_width(0x00000000ff00000000000000_i64) == 8);
 static_assert(std::is_same<decltype(byte_width<int8_t>(0)), size_t>::value);
 
 // is_negated (negative signed values)
-////static_assert(is_negated(0x80_i8));
-////static_assert(is_negated(0xff_i8));
-////static_assert(is_negated(0x8042_i16));
-////static_assert(is_negated(0xff42_i16));
-////static_assert(is_negated(0x00800042_i32));
-////static_assert(is_negated(0x00ff0042_i32));
-////static_assert(is_negated(0x80000042_i32));
-////static_assert(is_negated(0xff000042_i32));
-////static_assert(is_negated(0x00008000000042_i64));
-////static_assert(is_negated(0x0000ff00000042_i64));
-////static_assert(is_negated(0x00800000000042_i64));
-////static_assert(is_negated(0x00ff0000000042_i64));
-////static_assert(is_negated(0x80000000000042_i64));
-////static_assert(is_negated(0xff000000000042_i64));
+static_assert(is_negated(0x80_i8));
+static_assert(is_negated(0xff_i8));
+static_assert(is_negated(0x8042_i16));
+static_assert(is_negated(0xff42_i16));
+static_assert(is_negated(0x00800042_i32));
+static_assert(is_negated(0x00ff0042_i32));
+static_assert(is_negated(0x80000042_i32));
+static_assert(is_negated(0xff000042_i32));
+static_assert(is_negated(0x00008000000042_i64));
+static_assert(is_negated(0x0000ff00000042_i64));
+static_assert(is_negated(0x00800000000042_i64));
+static_assert(is_negated(0x00ff0000000042_i64));
+static_assert(is_negated(0x80000000000042_i64));
+static_assert(is_negated(0xff000000000042_i64));
 
 // is_negated (positive signed values)
 static_assert(!is_negated(0x00_i8));

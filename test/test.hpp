@@ -25,6 +25,10 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
+
+// Enable aborting exceptions for test capture.
+#define BC_NO_THROW false
+
 #include <bitcoin/system.hpp>
 
 #define TEST_NAME \
@@ -50,6 +54,7 @@
 
 using namespace bc;
 using namespace bc::system;
+using namespace bc::system::literals;
 
 namespace std {
 

@@ -376,21 +376,21 @@ static_assert(is_same<decltype(1_nu8), uint8_t>());
 // Literal bounds.
 
 // Domain bounds (_i8).
-static_assert(0x7f_i8 == sub1(to_half(power2<uint16_t>(8))));
+static_assert(0x7f_i8 == sub1(to_half(power2<int16_t>(8))));
 static_assert(0x01_i8 == 1);
 static_assert(0x00_i8 == 0);
 static_assert(0xff_i8 == 1_ni8);
 static_assert(0x80_i8 == 128_ni8);
 
 // Domain bounds (_i16).
-static_assert(0x7fff_i16 == sub1(to_half(power2<uint32_t>(16))));
+static_assert(0x7fff_i16 == sub1(to_half(power2<int32_t>(16))));
 static_assert(0x0001_i16 == 1);
 static_assert(0x0000_i16 == 0);
 static_assert(0xffff_i16 == 1_ni16);
 static_assert(0x8000_i16 == 32'768_ni16);
 
 // Domain bounds (_i32).
-static_assert(0x7fffffff_i32 == sub1(to_half(power2<uint64_t>(32))));
+static_assert(0x7fffffff_i32 == sub1(to_half(power2<int64_t>(32))));
 static_assert(0x00000001_i32 == 1);
 static_assert(0x00000000_i32 == 0);
 static_assert(0xffffffff_i32 == 1_ni64);
@@ -444,6 +444,35 @@ static_assert(0x0000000000000001_ni64 == -1);
 static_assert(0x8000000000000000_ni64 == twos_complement(to_half(power2<uint128_t>(64))));
 
 BOOST_AUTO_TEST_SUITE(literals_tests)
+
+BOOST_AUTO_TEST_CASE(literals__positive__invalid_u32__overflow_exception)
+{
+    BOOST_REQUIRE_EQUAL(positive<uint32_t>(0x000fbaadf00d_u64), 0_u32);
+}
+
+BOOST_AUTO_TEST_CASE(literals__positive__1_u8__expected)
+{
+    static_assert(positive<uint8_t>(0xff_u64) == 0xff_u8);
+    BOOST_REQUIRE_EQUAL(positive<uint8_t>(0xff_u64), 0xff_u8);
+}
+
+BOOST_AUTO_TEST_CASE(literals__positive__1_i8__expected)
+{
+    static_assert(positive<int16_t>(0x7fff_u64) == 0x7fff_u16);
+    BOOST_REQUIRE_EQUAL(positive<int16_t>(0x7fff_u64), 0x7fff_u16);
+}
+
+BOOST_AUTO_TEST_CASE(literals__negative__1_nu8__expected)
+{
+    static_assert(negative<uint32_t>(12'345'678_u64) == 12'345'678_nu32);
+    BOOST_REQUIRE_EQUAL(negative<uint32_t>(12'345'678_u64), 12'345'678_nu32);
+}
+
+BOOST_AUTO_TEST_CASE(literals__negative__1_ni8__expected)
+{
+    static_assert(negative<int64_t>(12'345'678'900_u64) == 12'345'678'900_ni64);
+    BOOST_REQUIRE_EQUAL(negative<int64_t>(12'345'678'900_u64), 12'345'678'900_ni64);
+}
 
 // Static msvc++20 compiler incorrectly suggests const may be made constexpr.
 

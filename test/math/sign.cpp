@@ -90,6 +90,29 @@ static_assert(negate(42)  == -42);
 static_assert(negate(-42) ==  42);
 static_assert(negate(42u) == -42);
 
+// ones_complement
+// alias for bit_not (~n)
+static_assert(ones_complement(-4) == 3);
+static_assert(ones_complement(-3) == 2);
+static_assert(ones_complement(-2) == 1);
+static_assert(ones_complement(-1) == 0);
+static_assert(ones_complement(0) == -1);
+static_assert(ones_complement(1) == -2);
+static_assert(ones_complement(2) == -3);
+static_assert(ones_complement(3) == -4);
+static_assert(ones_complement(4) == -5);
+static_assert(ones_complement<int8_t>(-4) == 3);
+static_assert(ones_complement<int8_t>(-3) == 2);
+static_assert(ones_complement<int8_t>(-2) == 1);
+static_assert(ones_complement<int8_t>(-1) == 0);
+static_assert(ones_complement<uint8_t>(0x00) == 0xffu);
+static_assert(ones_complement<uint8_t>(0xff) == 0u);
+static_assert(ones_complement<uint8_t>(0xfe) == 1u);
+static_assert(ones_complement<uint8_t>(0xfd) == 2u);
+static_assert(ones_complement<uint8_t>(0xfc) == 3u);
+static_assert(ones_complement(ones_complement(0x12345678)) == 0x12345678);
+static_assert(std::is_same<decltype(ones_complement<int8_t>(0)), int8_t>::value);
+
 // twos_complement
 // similar to but different than absolute (~n+1)
 static_assert(twos_complement(4_ni32) == 4_i32);
@@ -110,6 +133,7 @@ static_assert(twos_complement(0xffff_i16) == 1_i16);
 static_assert(twos_complement(0xfffffffe_u32) == 2_u32);
 static_assert(twos_complement(0xfffffffffffffffd_u64) == 3_u64);
 static_assert(twos_complement(0xfffffffffffffffc_u64) == 4_u64);
+static_assert(twos_complement(twos_complement(0x12345678)) == 0x12345678);
 static_assert(std::is_same<decltype(twos_complement<int8_t>(0)), int8_t>::value);
 
 // signed

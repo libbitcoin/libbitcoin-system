@@ -56,10 +56,10 @@ namespace system {
 // Coversions.
 // ----------------------------------------------------------------------------
 
+// unsafe
 template <typename Integer, typename Result, if_signed_integer<Integer>>
 constexpr Result absolute(Integer value) noexcept
 {
-    // Calls negate (unsafe).
     return to_unsigned(is_negative(value) ? negate(value) : value);
 }
 
@@ -69,11 +69,11 @@ constexpr Integer absolute(Integer value) noexcept
     return value;
 }
 
+// unsafe
 template <typename Integer, if_signed_integer<Integer>>
 constexpr Integer negate(Integer value) noexcept
 {
-    terminate_minimum(value);
-    return depromote<Integer>(-value);
+    return safe_negate(value);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>

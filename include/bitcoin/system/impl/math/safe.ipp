@@ -31,6 +31,7 @@ namespace libbitcoin {
 namespace system {
 
 // Explicit integral casts.
+// ----------------------------------------------------------------------------
 
 template <typename Restored, typename Common,
     if_not_lesser_width<to_common_sized_type<Restored>, Restored>,
@@ -92,6 +93,7 @@ constexpr To wide_cast(From value) noexcept
 }
 
 // Possible integer casts.
+// ----------------------------------------------------------------------------
 
 template <typename To, typename From, if_same_signed_integer<To, From>>
 constexpr To possible_narrow_cast(From value) noexcept
@@ -144,6 +146,7 @@ constexpr To possible_wide_cast(From value) noexcept
 }
 
 // Explicit pointer casts.
+// ----------------------------------------------------------------------------
 
 template <typename To, typename From>
 constexpr To* pointer_cast(From* value) noexcept
@@ -171,49 +174,43 @@ constexpr To* integer_pointer_cast(From value) noexcept
     BC_POP_WARNING()
 }
 
+// Overflows.
+// ----------------------------------------------------------------------------
+
+// Abort is intended.
+BC_PUSH_WARNING(THROW_FROM_NOEXCEPT)
+
 template <typename Integer, if_unsigned_integer<Integer>>
-Integer safe_multiply(Integer left, Integer right) noexcept(false)
+constexpr Integer safe_multiply(Integer left, Integer right) noexcept(BC_NO_THROW)
 {
     if (is_zero(left) || is_zero(right))
         return 0;
 
-    // Use std lib to avoid cicularity with limits.hpp.
     if (left > (std::numeric_limits<Integer>::max() / right))
         throw overflow_exception("safe multiplication overflow");
 
-    return left * right;
+    return possible_narrow_and_sign_cast<Integer>(left * right);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-Integer safe_add(Integer left, Integer right) noexcept(false)
+constexpr Integer safe_add(Integer left, Integer right) noexcept(BC_NO_THROW)
 {
-    // Use std lib to avoid cicularity with limits.hpp.
     if (left > (std::numeric_limits<Integer>::max() - right))
         throw overflow_exception("safe addition overflow");
 
-    return left + right;
+    return possible_narrow_and_sign_cast<Integer>(left + right);
 }
 
-// Only absolute<signed> and negate<signed> are subject to undefined behavior.
-// All library functions that call these are guarded against this condition.
 template <typename Integer, if_signed_integer<Integer>>
-constexpr void terminate_minimum(Integer value) noexcept
+constexpr Integer safe_negate(Integer value) noexcept(BC_NO_THROW)
 {
-    // This is elided as a no-op in non-constexpr and non-debug.
     if (value == std::numeric_limits<Integer>::min())
-    {
-        if (std::is_constant_evaluated())
-        {
-            // Disallow undefined behavior in constexpr.
-            std::terminate();
-        }
-        else
-        {
-            // Warn on runtime undefined behavior (compiler-defined).
-            BC_ASSERT_MSG(false, "absolute(signed minimum) is undefined");
-        }
-    }
+        throw overflow_exception("safe negate overflow");
+
+    return possible_narrow_and_sign_cast<Integer>(-value);
 }
+
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin

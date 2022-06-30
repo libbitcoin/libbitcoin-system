@@ -145,9 +145,14 @@ namespace bc = libbitcoin;
 
 // clang does not yet have consteval.
 #if defined(BC_VS2022) && defined(BC_CPP_20)
-    #define CONSTEVAL consteval
+    #define CONSTEVAL constexpr
 #else
     #define CONSTEVAL constexpr
+#endif
+
+// define BC_NO_THROW false in test to capture exceptions. 
+#ifndef BC_NO_THROW
+#define BC_NO_THROW true
 #endif
 
 // Define so we can have better visibility of lcov exclusion ranges.

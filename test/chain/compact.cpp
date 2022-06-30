@@ -200,8 +200,8 @@ static_assert(compact::compress(compact::expand(factory(30, true, 0x007fffff))) 
 
 // positive, overflow above 0x0000ffff
 static_assert(compact::compress(compact::expand(factory(30, false, 0x00000000))) == 0x00000000u);   // zero
-static_assert(compact::compress(compact::expand(factory(30, false, 0x000000ff))) == 0x00000000u);   // requires lax (^33)
-static_assert(compact::compress(compact::expand(factory(30, false, 0x0000ffff))) == 0x2100ffffu);   // strict (valid)
+static_assert(compact::compress(compact::expand(factory(30, false, 0x000000ff))) == 0x00000000u);   // requires lax (^33|1)
+static_assert(compact::compress(compact::expand(factory(30, false, 0x0000ffff))) == 0x2100ffffu);   // strict       (^33|2)
 static_assert(compact::compress(compact::expand(factory(30, false, 0x007fffff))) == 0x00000000u);   // overflow
 
 // negative, always zero
@@ -212,7 +212,7 @@ static_assert(compact::compress(compact::expand(factory(31, true, 0x007fffff))) 
 
 // positive, overflow above 0x000000ff
 static_assert(compact::compress(compact::expand(factory(31, false, 0x00000000))) == 0x00000000u);   // zero
-static_assert(compact::compress(compact::expand(factory(31, false, 0x000000ff))) == 0x00000000u);   // requires lax (^34)
+static_assert(compact::compress(compact::expand(factory(31, false, 0x000000ff))) == 0x00000000u);   // requires lax (^34|1)
 static_assert(compact::compress(compact::expand(factory(31, false, 0x0000ffff))) == 0x00000000u);   // overflow...
 static_assert(compact::compress(compact::expand(factory(31, false, 0x007fffff))) == 0x00000000u);
 
@@ -256,9 +256,9 @@ static_assert(compact::expand(compact::compress(uint256_t(42))) == uint256_t(42)
 // Satoshi: for any exponent [0x00..0x000000ff] and mantissa [0x000000..0x007fffff].
 //bool overflow =
 //(
-//    (exponent > 34 && mantissa > 0x000000) || // invalid
-//    (exponent > 33 && mantissa > 0x0000ff) || // lax    (34 with 1)
-//    (exponent > 32 && mantissa > 0x00ffff)    // strict (33 with 2)
+//    (exponent > 34 && mantissa > 0x000000) || // invalid (35 with 0)
+//    (exponent > 33 && mantissa > 0x0000ff) || // lax     (34 with 0|1)
+//    (exponent > 32 && mantissa > 0x00ffff)    // strict  (33 with 1|2)
 //)
 
 // > 0x0000 <= 0x00ff (overflow if exponent > 31 and ceilinged_log256(mantissa) > 1)

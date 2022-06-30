@@ -287,22 +287,37 @@ static_assert(std::is_same<decltype(int32_t{0}  % uint16_t{1}), int32_t>::value,
 static_assert(std::is_same<decltype(int64_t{0}  % uint32_t{1}), int64_t>::value,  "unsigned (two >=32, s%u)");
 static_assert(std::is_same<decltype(uint32_t{0} % int64_t{1}),  int64_t>::value,  "unsigned (two >=32, u%s)");
 
-BOOST_AUTO_TEST_SUITE(limits_tests)
-
+// parameters
 constexpr size_t minimal = 0;
 constexpr size_t maximal = max_size_t;
 constexpr size_t half = to_half(maximal);
+
+// safe_multiply
+static_assert(safe_multiply(minimal, minimal) == minimal);
+static_assert(safe_multiply(minimal, maximal) == minimal);
+static_assert(safe_multiply(maximal, minimal) == minimal);
+static_assert(safe_multiply(half, 2_size)     == sub1(maximal));
+static_assert(safe_multiply(2_size, half)     == sub1(maximal));
+////static_assert(safe_multiply(maximal, maximal) == 0u);
+
+// safe_add
+static_assert(safe_add(minimal, minimal)  == minimal);
+static_assert(safe_add(minimal, maximal)  ==  maximal);
+static_assert(safe_add(maximal, minimal)  == maximal);
+////static_assert(safe_add(half, maximal) == maximal);
+////static_assert(safe_add(maximal, maximal) == maximal);
+
+// safe_negate
+static_assert(safe_negate(add1(min_int32)) == max_int32);
+////static_assert(safe_negate(min_int32) == 0u);
+
+BOOST_AUTO_TEST_SUITE(limits_tests)
 
 // safe_multiply
 
 BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_minimum_times_minimum__minimum)
 {
     BOOST_REQUIRE_EQUAL(safe_multiply(minimal, minimal), minimal);
-}
-
-BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_maximum_times_maximum__throws_overflow)
-{
-    BOOST_REQUIRE_THROW(safe_multiply(maximal, maximal), overflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_minimum_times_maximum__minimum)
@@ -317,14 +332,17 @@ BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_maximum_times_minimum__minimum)
 
 BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_half_times_2__maximum_minus_1)
 {
-    // The maximal of an unsigned integer is always odd, so half is always rounded down.
-    // Therefore 2 * half is always one less than the unsigned integer maximum.
     BOOST_REQUIRE_EQUAL(safe_multiply(half, size_t(2)), sub1(maximal));
 }
 
-BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_2_times_half_plus_1__throws_overflow)
+BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_2_times_half__maximum_minus_1)
 {
-    BOOST_REQUIRE_THROW(safe_multiply(size_t(2), add1(half)), overflow_exception);
+    BOOST_REQUIRE_EQUAL(safe_multiply(size_t(2), half), sub1(maximal));
+}
+
+BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_maximum_times_maximum__throws_overflow)
+{
+    BOOST_REQUIRE_THROW(safe_multiply(maximal, maximal), overflow_exception);
 }
 
 // safe_add
@@ -332,11 +350,6 @@ BOOST_AUTO_TEST_CASE(safe__safe_multiply__size_t_2_times_half_plus_1__throws_ove
 BOOST_AUTO_TEST_CASE(safe__safe_add__size_t_minimum_plus_minimum__minimum)
 {
     BOOST_REQUIRE_EQUAL(safe_add(minimal, minimal), minimal);
-}
-
-BOOST_AUTO_TEST_CASE(safe__safe_add__size_t_maximum_plus_maximum__throws_overflow)
-{
-    BOOST_REQUIRE_THROW(safe_add(maximal, maximal), overflow_exception);
 }
 
 BOOST_AUTO_TEST_CASE(safe__safe_add__size_t_minimum_plus_maximum__maximum)
@@ -352,6 +365,23 @@ BOOST_AUTO_TEST_CASE(safe__safe_add__size_t_maximum_plus_minimum__maximum)
 BOOST_AUTO_TEST_CASE(safe__safe_add__size_t_half_plus_maximum__throws_overflow)
 {
     BOOST_REQUIRE_THROW(safe_add(half, maximal), overflow_exception);
+}
+
+BOOST_AUTO_TEST_CASE(safe__safe_add__size_t_maximum_plus_maximum__throws_overflow)
+{
+    BOOST_REQUIRE_THROW(safe_add(maximal, maximal), overflow_exception);
+}
+
+// safe_negate
+
+BOOST_AUTO_TEST_CASE(safe__safe_negate__int32_minimum_plus_one__expected)
+{
+    BOOST_REQUIRE_EQUAL(safe_negate(add1(min_int32)), max_int32);
+}
+
+BOOST_AUTO_TEST_CASE(safe__safe_negate__int32_minimum__throws_overflow)
+{
+    BOOST_REQUIRE_THROW(safe_negate(min_int32), overflow_exception);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
