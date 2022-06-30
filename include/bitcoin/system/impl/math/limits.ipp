@@ -80,6 +80,7 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
 
 // Integral bounds.
 // ----------------------------------------------------------------------------
+
 template <typename Integer,
     if_integral_integer<Integer>>
 constexpr Integer minimum() noexcept
@@ -98,11 +99,7 @@ template <typename Integer, typename Absolute,
     if_signed_integral_integer<Integer>>
 constexpr Absolute absolute_minimum() noexcept
 {
-    // Avoids overflow in calling negate(minimum<Integer>()).
-    static_assert(
-        add1(to_unsigned(maximum<int8_t>())) == 
-        add1(to_unsigned(safe_negate(add1(min_int8)))));
-
+    // Avoids calling negate(minimum), which is undefined.
     return add1(to_unsigned(maximum<Integer>()));
 }
 

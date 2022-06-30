@@ -21,105 +21,148 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
-#include <iostream>
-#include <typeinfo>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
+#include <limits>
+#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
 
-// TODO: move to math.
-#include <bitcoin/system/math/math.hpp>
+namespace libbitcoin {
+namespace system {
+namespace literals {
+
+/// en.cppreference.com/w/cpp/language/user_literal
+
+/// This uses no libbitcoin utilities, so that it may have few dependencies and
+/// therefore be useful everywhere in the library. It is also important that it
+/// not be subject to regressions in other code, as a break here causes a large
+/// number of test and other failures. See tests for usage and detailed info.
+/// ---------------------------------------------------------------------------
+/// These should be consteval for safety, but waiting on clang++20 to catch up.
+
+template <typename Integer,
+    std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
+CONSTEVAL Integer lower() noexcept
+{
+    return std::numeric_limits<Integer>::min();
+}
+
+template <typename Integer,
+    std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
+CONSTEVAL Integer upper() noexcept
+{
+    return std::numeric_limits<Integer>::max();
+}
+
+// Casting is the whole point.
+// Abort is intended, can be changed by macro for exception testing.
+BC_PUSH_WARNING(THROW_FROM_NOEXCEPT)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+
+template <typename Integer,
+    std::enable_if_t<std::is_signed_v<Integer>, bool> = true>
+CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept
+{
+    return Integer{1} + static_cast<
+        std::make_unsigned_t<Integer>>(
+            std::numeric_limits<Integer>::max());
+}
+
+template <typename Integer,
+    std::enable_if_t<std::is_signed_v<Integer>, bool> = true>
+CONSTEVAL std::make_unsigned_t<Integer> upper() noexcept
+{
+    return static_cast<
+        std::make_unsigned_t<Integer>>(
+            std::numeric_limits<Integer>::max());
+}
+
+template <typename Domain,
+    std::enable_if_t<std::numeric_limits<Domain>::is_integer, bool> = true>
+CONSTEVAL Domain positive(uint64_t value) noexcept(BC_NO_THROW)
+{
+    typedef std::make_unsigned_t<Domain> narrow, limit;
+
+    if (value > upper<limit>())
+        throw overflow_exception{ "literal overflow" };
+
+    const auto narrowed = static_cast<narrow>(value);
+    return static_cast<Domain>(narrowed);
+}
+
+template <typename Domain,
+    std::enable_if_t<std::numeric_limits<Domain>::is_integer, bool> = true>
+CONSTEVAL Domain negative(uint64_t value) noexcept(BC_NO_THROW)
+{
+    using limit = std::make_signed_t<Domain>;
+    using narrow = std::make_unsigned_t<Domain>;
+
+    if (value > lower<limit>())
+        throw overflow_exception{ "literal overflow" };
+
+    const auto narrowed = static_cast<narrow>(value);
+    return static_cast<Domain>(~narrowed + narrow{1});
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 #define DECLARE_LITERAL(name, type, sign) \
 CONSTEVAL type operator "" name(uint64_t value) noexcept \
 { return sign<type>(value); }
 
-namespace libbitcoin {
-namespace system {
+/// Supported represenations.
+/// ---------------------------------------------------------------------------
+/// All integer literals are positive, so this is what there is to customize.
+/// To achieve negative representation we use a positive domain with the
+/// magnitide of the negative domain with all values entered as absolute.
+/// Integrals do not have negative signs, and applying the negative operator
+/// to a literal changes it to an operation, which promotes the type. All
+/// numeric representations are possible (binary, octal, hex, decimal) as are
+/// digit separators. A build-in suffix cannot be used with a user-defined
+/// suffix, and there would be no reason to.
 
-/// en.cppreference.com/w/cpp/language/user_literal
-
-// Abort is intended.
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
-template <typename Domain, if_integral_integer<Domain> = true>
-constexpr void overflow(uint64_t value, bool positive) noexcept(false)
-{
-    if (std::is_constant_evaluated())
-    {
-        // Under consteval this remains for compile time validation.
-        throw overflow_exception{ "literal overflow" };
-    }
-    else
-    {
-        // Under consteval this is unreachable code.
-        BC_ASSERT_MSG(false, "literal overflow");
-        const auto sign = positive ? "positive" : "negative";
-        const std::type_info& type = typeid(Domain);
-        ////const auto number = encode_base16(to_big_endian_size(value));
-        std::cout
-            << "User-defined literal overflow: " << sign << "<"
-            << type.name() << ">" << "(0x" << value << ")." << std::endl;
-    }
-}
-
-template <typename Domain, if_integral_integer<Domain> = true>
-CONSTEVAL Domain positive(uint64_t value) noexcept(BC_NO_THROW)
-{
-    typedef to_unsigned_type<Domain> narrow, limit;
-    if (value > unsigned_maximum<limit>()) overflow<Domain>(value, true);
-    const auto narrowed = possible_narrow_and_sign_cast<narrow>(value);
-    return possible_narrow_and_sign_cast<Domain>(narrowed);
-}
-
-template <typename Domain, if_integral_integer<Domain> = true>
-CONSTEVAL Domain negative(uint64_t value) noexcept(BC_NO_THROW)
-{
-    using limit = to_signed_type<Domain>;
-    using narrow = to_unsigned_type<Domain>;
-    if (value > absolute_minimum<limit>()) overflow<Domain>(value, false);
-    const auto narrowed = possible_narrow_and_sign_cast<narrow>(value);
-    return possible_narrow_and_sign_cast<Domain>(twos_complement(narrowed));
-}
-
-BC_POP_WARNING()
-
-namespace literals {
-
-DECLARE_LITERAL(_i08, int8_t, positive)
+/// positive signed integer
+DECLARE_LITERAL(_i08, int8_t,  positive)
 DECLARE_LITERAL(_i16, int16_t, positive)
 DECLARE_LITERAL(_i32, int32_t, positive)
 DECLARE_LITERAL(_i64, int64_t, positive)
 
-DECLARE_LITERAL(_u08, uint8_t, positive)
+/// positive unsigned integer
+DECLARE_LITERAL(_u08, uint8_t,  positive)
 DECLARE_LITERAL(_u16, uint16_t, positive)
 DECLARE_LITERAL(_u32, uint32_t, positive)
 DECLARE_LITERAL(_u64, uint64_t, positive)
 
-DECLARE_LITERAL(_ni08, int8_t, negative)
+/// negative signed integer
+DECLARE_LITERAL(_ni08, int8_t,  negative)
 DECLARE_LITERAL(_ni16, int16_t, negative)
 DECLARE_LITERAL(_ni32, int32_t, negative)
 DECLARE_LITERAL(_ni64, int64_t, negative)
 
-DECLARE_LITERAL(_nu08, uint8_t, negative)
+/// negative unsigned integer
+DECLARE_LITERAL(_nu08, uint8_t,  negative)
 DECLARE_LITERAL(_nu16, uint16_t, negative)
 DECLARE_LITERAL(_nu32, uint32_t, negative)
 DECLARE_LITERAL(_nu64, uint64_t, negative)
 
-// Aliases
-DECLARE_LITERAL(_i8, int8_t, positive)
-DECLARE_LITERAL(_u8, uint8_t, positive)
-DECLARE_LITERAL(_ni8, int8_t, negative)
-DECLARE_LITERAL(_nu8, uint8_t, negative)
-DECLARE_LITERAL(_size, size_t, positive)
+/// size_t
+DECLARE_LITERAL(_size,  size_t, positive)
 DECLARE_LITERAL(_nsize, size_t, negative)
+
+/// aliases (preferred unless vertical alignment is helpful)
+DECLARE_LITERAL(_i8,  int8_t,  positive)
+DECLARE_LITERAL(_u8,  uint8_t, positive)
+DECLARE_LITERAL(_ni8, int8_t,  negative)
+DECLARE_LITERAL(_nu8, uint8_t, negative)
+
+/// ---------------------------------------------------------------------------
+
+#undef DECLARE_LITERAL
 
 } // namespace literals
 } // namespace system
 } // namespace libbitcoin
-
-#undef DECLARE_LITERAL
 
 #endif

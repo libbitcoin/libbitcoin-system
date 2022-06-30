@@ -79,7 +79,7 @@ static_assert(byte_width(0x0000000000ff010000000000_i64) == 7);
 static_assert(byte_width(0x00000000ff00000000000000_i64) == 8);
 static_assert(std::is_same<decltype(byte_width<int8_t>(0)), size_t>::value);
 
-// is_negated (negative signed values)
+// is_negated (negated signed values)
 static_assert(is_negated(0x80_i8));
 static_assert(is_negated(0xff_i8));
 static_assert(is_negated(0x8042_i16));
@@ -95,12 +95,11 @@ static_assert(is_negated(0x00ff0000000042_i64));
 static_assert(is_negated(0x80000000000042_i64));
 static_assert(is_negated(0xff000000000042_i64));
 
-// is_negated (positive signed values)
+// is_negated (non-negated signed values)
 static_assert(!is_negated(0x00_i8));
 static_assert(!is_negated(0x01_i8));
 static_assert(!is_negated(0x0f_i8));
 static_assert(!is_negated(0x7f_i8));
-static_assert(!is_negated(0xff_i8));//
 static_assert(!is_negated(0x0042_i16));
 static_assert(!is_negated(0x0142_i16));
 static_assert(!is_negated(0x0f42_i16));
@@ -133,17 +132,16 @@ static_assert(!is_negated(0x7f000000000042_i64));
 static_assert(!is_negated(0x7f000000000042_i64));
 static_assert(std::is_same<decltype(is_negated<int32_t>(0)), bool>::value);
 
-// is_negated (positive unsigned values)
+// is_negated (non-negated unsigned values)
 static_assert(!is_negated(0x00_u8));
 static_assert(!is_negated(0x01_u8));
 static_assert(!is_negated(0x0f_u8));
 static_assert(!is_negated(0x7f_u8));
-static_assert(!is_negated(0xff_u8));
 static_assert(!is_negated(0x0042_u16));
-static_assert(!is_negated(0x0142_i16));
-static_assert(!is_negated(0x0f42_i16));
-static_assert(!is_negated(0x7f42_i16));
-static_assert(!is_negated(0x7f42_i16));
+static_assert(!is_negated(0x0142_u16));
+static_assert(!is_negated(0x0f42_u16));
+static_assert(!is_negated(0x7f42_u16));
+static_assert(!is_negated(0x7f42_u16));
 static_assert(!is_negated(0x00000042_u32));
 static_assert(!is_negated(0x00010042_u32));
 static_assert(!is_negated(0x000f0042_u32));
@@ -189,12 +187,13 @@ static_assert(std::is_same<decltype(to_negated<int32_t>(0)), int32_t>::value);
 static_assert(to_unnegated(0x00_i8) == 0x00_i8);
 static_assert(to_unnegated(0x01_i8) == 0x01_i8);
 static_assert(to_unnegated(0x7f_i8) == 0x7f_i8);
-static_assert(to_unnegated(0x80_i8) == 0x00_i8); // bug
-static_assert(to_unnegated(0xff_i8) == 0x7f_i8); // bug
+static_assert(to_unnegated(0x80_i8) == 0x00_i8);
+static_assert(to_unnegated(1_ni8) == 0x7f_ni8);
+static_assert(to_unnegated(0xff_i8) == 0x7f_ni8);
 static_assert(to_unnegated(0x7f00_i16) == 0x7f00_i16);
-static_assert(to_unnegated(0x810a_i16) == 0x010a_i16); // bug
+static_assert(to_unnegated(0x810a_i16) == 0x010a_ni16);
 static_assert(to_unnegated(0x7f000000_i32) == 0x7f000000_i32);
-static_assert(to_unnegated(0x8f000000_i32) == 0x0f000000_i32); // bug
+static_assert(to_unnegated(0x8f000000_i32) == 0x0f000000_ni32);
 static_assert(to_unnegated(0x7f00000000000000_i64) == 0x7f00000000000000_i64);
 static_assert(to_unnegated(0x000000000000007f_i64) == 0x000000000000007f_i64);
 static_assert(std::is_same<decltype(to_unnegated<int32_t>(0)), int32_t>::value);
