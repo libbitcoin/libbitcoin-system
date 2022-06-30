@@ -26,6 +26,12 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
 
+// May be used to exclude test evaluation.
+// Remove this when all platforms suppoty consteval.
+#if !defined(HAVE_CONSTEVAL)
+    #define RUNTIME_LITERALS
+#endif
+
 namespace libbitcoin {
 namespace system {
 namespace literals {
@@ -38,6 +44,11 @@ namespace literals {
 /// number of test and other failures. See tests for usage and detailed info.
 /// ---------------------------------------------------------------------------
 /// These should be consteval for safety, but waiting on clang++20 to catch up.
+
+// Casting is the whole point.
+// It is consteval where available.
+BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
+BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
@@ -52,12 +63,6 @@ CONSTEVAL Integer upper() NOEXCEPT
 {
     return std::numeric_limits<Integer>::max();
 }
-
-// Casting is the whole point.
-// Abort is intended, can be changed by macro for exception testing.
-BC_PUSH_WARNING(THROW_FROM_NOEXCEPT)
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
 template <typename Integer, std::enable_if_t<
     std::is_signed_v<Integer>, bool> = true>
@@ -104,7 +109,6 @@ CONSTEVAL Domain negative(uint64_t value) THROWS
     return static_cast<Domain>(~narrowed + narrow{1});
 }
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 

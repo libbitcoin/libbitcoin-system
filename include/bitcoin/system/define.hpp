@@ -146,6 +146,7 @@ namespace bc = libbitcoin;
 // clang does not yet have consteval.
 #if defined(BC_VS2022) && defined(BC_CPP_20)
     #define CONSTEVAL consteval
+    #define HAVE_CONSTEVAL
 #else
     #define CONSTEVAL constexpr
 #endif

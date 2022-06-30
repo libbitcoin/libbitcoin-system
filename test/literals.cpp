@@ -225,7 +225,7 @@ static_assert(0x00000001_u32 == 1);
 static_assert(0x00000000_u32 == 0);
 
 // Domain bounds (_u64).
-static_assert(0xffffffffffffffff_u64 == sub1(power2<uint128_t>(64)));
+static_assert(0xffffffffffffffff_u64 == sub1(power2<uint256_t>(64))); // uintx_t
 static_assert(0x0000000000000001_u64 == 1);
 static_assert(0x0000000000000000_u64 == 0);
 
@@ -247,101 +247,13 @@ static_assert(0x80000000_ni32 == -to_half(power2<int64_t>(32)));
 // Domain bounds (_ni64).
 static_assert(0x0000000000000000_ni64 == 0);
 static_assert(0x0000000000000001_ni64 == -1);
-static_assert(0x8000000000000000_ni64 == twos_complement(to_half(power2<uint128_t>(64))));
-
-BOOST_AUTO_TEST_SUITE(literals_tests)
-
-// Template tests.
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(literals__positive__invalid_u32__overflow_exception)
-{
-    BOOST_REQUIRE_THROW(positive<uint32_t>(0x000fbaadf00d_u64), overflow_exception);
-}
-
-BOOST_AUTO_TEST_CASE(literals__positive__1_u8__expected)
-{
-    static_assert(positive<uint8_t>(0xff_u64) == 0xff_u8);
-    BOOST_REQUIRE_EQUAL(positive<uint8_t>(0xff_u64), 0xff_u8);
-}
-
-BOOST_AUTO_TEST_CASE(literals__positive__1_i8__expected)
-{
-    static_assert(positive<int16_t>(0x7fff_u64) == 0x7fff_u16);
-    BOOST_REQUIRE_EQUAL(positive<int16_t>(0x7fff_u64), 0x7fff_u16);
-}
-
-BOOST_AUTO_TEST_CASE(literals__negative__1_nu8__expected)
-{
-    static_assert(negative<uint32_t>(12'345'678_u64) == 12'345'678_nu32);
-    BOOST_REQUIRE_EQUAL(negative<uint32_t>(12'345'678_u64), 12'345'678_nu32);
-}
-
-BOOST_AUTO_TEST_CASE(literals__negative__1_ni8__expected)
-{
-    static_assert(negative<int64_t>(12'345'678'900_u64) == 12'345'678'900_ni64);
-    BOOST_REQUIRE_EQUAL(negative<int64_t>(12'345'678'900_u64), 12'345'678'900_ni64);
-}
-
-// Literal exception tests.
-// ----------------------------------------------------------------------------
-// Exceptions are not thrown during constexpr evaluation.
-
-#if defined(TEST_LITERAL_EXCEPTIONS)
-
-#define LITERAL_OVERFLOW(value, name) \
-BOOST_AUTO_TEST_CASE(literals__##name##__##value##__throws_overflow_exception) \
-{ \
-    BOOST_REQUIRE_THROW(value##name, overflow_exception); \
-}
-
-LITERAL_OVERFLOW(0x42ff, _i08);
-LITERAL_OVERFLOW(0x42ffff, _i16);
-LITERAL_OVERFLOW(0x42ffffffff, _i32);
-
-LITERAL_OVERFLOW(0x42ff, _u08);
-LITERAL_OVERFLOW(0x42ffff, _u16);
-LITERAL_OVERFLOW(0x42ffffffff, _u32);
-
-LITERAL_OVERFLOW(0x42ff, _ni08);
-LITERAL_OVERFLOW(0x42ffff, _ni16);
-LITERAL_OVERFLOW(0x42ffffffff, _ni32);
-
-LITERAL_OVERFLOW(0x42ff, _nu08);
-LITERAL_OVERFLOW(0x42ffff, _nu16);
-LITERAL_OVERFLOW(0x42ffffffff, _nu32);
-
-LITERAL_OVERFLOW(0x42ff, _i8);
-LITERAL_OVERFLOW(0x42ff, _u8);
-LITERAL_OVERFLOW(0x42ff, _ni8);
-LITERAL_OVERFLOW(0x42ff, _nu8);
-
-#undef LITERAL_OVERFLOW
-
-// size_t(64) cannot be overflowed due to limit of integer literal expression.
-
-BOOST_AUTO_TEST_CASE(literals__size__literal_overflow__throws_overflow_exception)
-{
-    if constexpr (sizeof(size_t) == sizeof(uint32_t))
-    {
-        BOOST_REQUIRE_THROW(0x42ffffffff_size, overflow_exception);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(literals__nsize__literal_overflow__throws_overflow_exception)
-{
-    if constexpr (sizeof(size_t) == sizeof(uint32_t))
-    {
-        BOOST_REQUIRE_THROW(0x42ffffffff_nsize, overflow_exception);
-    }
-}
-
-#endif // TEST_LITERAL_EXCEPTIONS
-
-BOOST_AUTO_TEST_SUITE_END()
+static_assert(0x8000000000000000_ni64 == twos_complement(to_half(power2<uint256_t>(64)))); // uintx_t
 
 // Analysis.
 // ----------------------------------------------------------------------------
+// These sizes may vary by platform.
+
+#if defined(DISABLED)
 
 // There are NO integer literals of lesser size than int.
 static_assert(is_same<decltype(0xff), signed int>());
@@ -536,3 +448,87 @@ static_assert(sizeof(0xff) >= sizeof(int8_t));
 static_assert(sizeof(0xffff) >= sizeof(int16_t));
 static_assert(sizeof(0xffff'ffff) >= sizeof(int32_t));
 static_assert(sizeof(0xffff'ffff'ffff'ffff) >= sizeof(int64_t));
+
+#endif // DISABLED
+
+// Runtime tests (when no consteval guarantee).
+// ----------------------------------------------------------------------------
+
+#if defined(RUNTIME_LITERALS)
+
+#define LITERAL_OVERFLOW(value, name) \
+BOOST_AUTO_TEST_CASE(literals__##name##__##value##__throws_overflow_exception) \
+{ \
+    BOOST_REQUIRE_THROW(value##name, overflow_exception); \
+}
+
+LITERAL_OVERFLOW(0x42ff, _i08);
+LITERAL_OVERFLOW(0x42ffff, _i16);
+LITERAL_OVERFLOW(0x42ffffffff, _i32);
+
+LITERAL_OVERFLOW(0x42ff, _u08);
+LITERAL_OVERFLOW(0x42ffff, _u16);
+LITERAL_OVERFLOW(0x42ffffffff, _u32);
+
+LITERAL_OVERFLOW(0x42ff, _ni08);
+LITERAL_OVERFLOW(0x42ffff, _ni16);
+LITERAL_OVERFLOW(0x42ffffffff, _ni32);
+
+LITERAL_OVERFLOW(0x42ff, _nu08);
+LITERAL_OVERFLOW(0x42ffff, _nu16);
+LITERAL_OVERFLOW(0x42ffffffff, _nu32);
+
+LITERAL_OVERFLOW(0x42ff, _i8);
+LITERAL_OVERFLOW(0x42ff, _u8);
+LITERAL_OVERFLOW(0x42ff, _ni8);
+LITERAL_OVERFLOW(0x42ff, _nu8);
+
+#undef LITERAL_OVERFLOW
+
+BOOST_AUTO_TEST_SUITE(literals_tests)
+
+BOOST_AUTO_TEST_CASE(literals__positive__1_u8__expected)
+{
+    static_assert(positive<uint8_t>(0xff_u64) == 0xff_u8);
+    BOOST_REQUIRE_EQUAL(positive<uint8_t>(0xff_u64), 0xff_u8);
+}
+
+BOOST_AUTO_TEST_CASE(literals__positive__1_i8__expected)
+{
+    static_assert(positive<int16_t>(0x7fff_u64) == 0x7fff_u16);
+    BOOST_REQUIRE_EQUAL(positive<int16_t>(0x7fff_u64), 0x7fff_u16);
+}
+
+BOOST_AUTO_TEST_CASE(literals__negative__1_nu8__expected)
+{
+    static_assert(negative<uint32_t>(12'345'678_u64) == 12'345'678_nu32);
+    BOOST_REQUIRE_EQUAL(negative<uint32_t>(12'345'678_u64), 12'345'678_nu32);
+}
+
+BOOST_AUTO_TEST_CASE(literals__negative__1_ni8__expected)
+{
+    static_assert(negative<int64_t>(12'345'678'900_u64) == 12'345'678'900_ni64);
+    BOOST_REQUIRE_EQUAL(negative<int64_t>(12'345'678'900_u64), 12'345'678'900_ni64);
+}
+
+// size_t(64) cannot be overflowed due to limit of integer literal expression.
+
+BOOST_AUTO_TEST_CASE(literals__size__literal_overflow__throws_overflow_exception)
+{
+    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    {
+        BOOST_REQUIRE_THROW(0x42ffffffff_size, overflow_exception);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(literals__nsize__literal_overflow__throws_overflow_exception)
+{
+    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    {
+        BOOST_REQUIRE_THROW(0x42ffffffff_nsize, overflow_exception);
+    }
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+#endif // RUNTIME_LITERALS
