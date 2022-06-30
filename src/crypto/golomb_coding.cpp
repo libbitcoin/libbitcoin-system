@@ -37,7 +37,7 @@ namespace system {
 namespace golomb {
 
 static void encode(bitwriter& sink, uint64_t value,
-    uint8_t modulo_exponent) noexcept
+    uint8_t modulo_exponent) NOEXCEPT
 {
     const uint64_t quotient = value >> modulo_exponent;
     for (uint64_t index = 0; index < quotient; index++)
@@ -47,7 +47,7 @@ static void encode(bitwriter& sink, uint64_t value,
     sink.write_bits(value, modulo_exponent);
 }
 
-static uint64_t decode(bitreader& source, uint8_t modulo_exponent) noexcept
+static uint64_t decode(bitreader& source, uint8_t modulo_exponent) NOEXCEPT
 {
     uint64_t quotient = 0;
     while (source.read_bit())
@@ -58,7 +58,7 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent) noexcept
 }
 
 inline uint64_t hash_to_range(const data_slice& item, uint64_t bound,
-    const siphash_key& key) noexcept
+    const siphash_key& key) NOEXCEPT
 {
     const auto product = uint128_t(siphash(key, item)) * uint128_t(bound);
     return (product >> width<uint64_t>()).convert_to<uint64_t>();
@@ -66,7 +66,7 @@ inline uint64_t hash_to_range(const data_slice& item, uint64_t bound,
 
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     uint64_t set_size, uint64_t target_false_positive_rate,
-    const siphash_key& key) noexcept
+    const siphash_key& key) NOEXCEPT
 {
     // Guard against overflow.
     if (max_uint64 / set_size < target_false_positive_rate)
@@ -78,7 +78,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
 
     // C++17: parallel policy for std::transform.
     std::transform(items.begin(), items.end(), hashes.begin(),
-        [&](const data_chunk& item) noexcept
+        [&](const data_chunk& item) NOEXCEPT
         {
             return hash_to_range(item, bound, key);
         });
@@ -90,7 +90,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
 // ----------------------------------------------------------------------------
 
 static void construct(bitwriter& sink, const data_stack& items, uint8_t bits,
-    const siphash_key& entropy, uint64_t target_false_positive_rate) noexcept
+    const siphash_key& entropy, uint64_t target_false_positive_rate) NOEXCEPT
 {
     const auto set = hashed_set_construct(items, items.size(),
         target_false_positive_rate, entropy);
@@ -104,14 +104,14 @@ static void construct(bitwriter& sink, const data_stack& items, uint8_t bits,
 }
 
 data_chunk construct(const data_stack& items, uint8_t bits,
-    const half_hash& entropy, uint64_t target_false_positive_rate) noexcept
+    const half_hash& entropy, uint64_t target_false_positive_rate) NOEXCEPT
 {
     return construct(items, bits, to_siphash_key(entropy),
         target_false_positive_rate);
 }
 
 data_chunk construct(const data_stack& items, uint8_t bits,
-    const siphash_key& entropy, uint64_t target_false_positive_rate) noexcept
+    const siphash_key& entropy, uint64_t target_false_positive_rate) NOEXCEPT
 {
     data_chunk result;
     stream::out::data stream(result);
@@ -121,14 +121,14 @@ data_chunk construct(const data_stack& items, uint8_t bits,
 }
 
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
-    const half_hash& entropy, uint64_t target_false_positive_rate) noexcept
+    const half_hash& entropy, uint64_t target_false_positive_rate) NOEXCEPT
 {
     construct(stream, items, bits, to_siphash_key(entropy),
         target_false_positive_rate);
 }
 
 void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
-    const siphash_key& entropy, uint64_t target_false_positive_rate) noexcept
+    const siphash_key& entropy, uint64_t target_false_positive_rate) NOEXCEPT
 {
     write::bits::ostream sink(stream);
     construct(sink, items, bits, entropy, target_false_positive_rate);
@@ -140,7 +140,7 @@ void construct(std::ostream& stream, const data_stack& items, uint8_t bits,
 
 static bool match(const data_chunk& target, bitreader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     const auto bound = target_false_positive_rate * set_size;
     const auto range = hash_to_range(target, bound, entropy);
@@ -164,7 +164,7 @@ static bool match(const data_chunk& target, bitreader& compressed_set,
 
 bool match(const data_chunk& target, const data_chunk& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     return match(target, compressed_set, set_size, to_siphash_key(entropy),
         bits, target_false_positive_rate);
@@ -172,7 +172,7 @@ bool match(const data_chunk& target, const data_chunk& compressed_set,
 
 bool match(const data_chunk& target, const data_chunk& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     stream::in::copy source(compressed_set);
     return match(target, source, set_size, entropy, bits,
@@ -181,7 +181,7 @@ bool match(const data_chunk& target, const data_chunk& compressed_set,
 
 bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     return match(target, compressed_set, set_size, to_siphash_key(entropy),
         bits, target_false_positive_rate);
@@ -189,7 +189,7 @@ bool match(const data_chunk& target, std::istream& compressed_set,
 
 bool match(const data_chunk& target, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     read::bits::istream reader(compressed_set);
     return match(target, reader, set_size, entropy, bits,
@@ -201,7 +201,7 @@ bool match(const data_chunk& target, std::istream& compressed_set,
 
 static bool match(const data_stack& targets, bitreader& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     if (targets.empty())
         return false;
@@ -231,7 +231,7 @@ static bool match(const data_stack& targets, bitreader& compressed_set,
 
 bool match(const data_stack& targets, const data_chunk& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     return match(targets, compressed_set, set_size, to_siphash_key(entropy),
         bits, target_false_positive_rate);
@@ -239,7 +239,7 @@ bool match(const data_stack& targets, const data_chunk& compressed_set,
 
 bool match(const data_stack& targets, const data_chunk& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     stream::in::copy source(compressed_set);
     return match(targets, source, set_size, entropy, bits,
@@ -248,7 +248,7 @@ bool match(const data_stack& targets, const data_chunk& compressed_set,
 
 bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     return match(targets, compressed_set, set_size, to_siphash_key(entropy),
         bits, target_false_positive_rate);
@@ -256,7 +256,7 @@ bool match(const data_stack& targets, std::istream& compressed_set,
 
 bool match(const data_stack& targets, std::istream& compressed_set,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) noexcept
+    uint64_t target_false_positive_rate) NOEXCEPT
 {
     read::bits::istream reader(compressed_set);
     return match(targets, reader, set_size, entropy, bits,

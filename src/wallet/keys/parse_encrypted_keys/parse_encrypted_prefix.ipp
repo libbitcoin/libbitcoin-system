@@ -30,31 +30,31 @@ namespace wallet {
 
 template<uint8_t Size>
 parse_encrypted_prefix<Size>::parse_encrypted_prefix(
-    const data_array<Size>& value) noexcept
+    const data_array<Size>& value) NOEXCEPT
   : prefix_(value), valid_(false)
 {
 }
 
 template<uint8_t Size>
-uint8_t parse_encrypted_prefix<Size>::context() const noexcept
+uint8_t parse_encrypted_prefix<Size>::context() const NOEXCEPT
 {
     return prefix_.back();
 }
 
 template<uint8_t Size>
-data_array<Size> parse_encrypted_prefix<Size>::prefix() const noexcept
+data_array<Size> parse_encrypted_prefix<Size>::prefix() const NOEXCEPT
 {
     return prefix_;
 }
 
 template<uint8_t Size>
-bool parse_encrypted_prefix<Size>::is_valid() const noexcept
+bool parse_encrypted_prefix<Size>::is_valid() const NOEXCEPT
 {
     return valid_;
 }
 
 template<uint8_t Size>
-void parse_encrypted_prefix<Size>::set_valid(bool value) noexcept
+void parse_encrypted_prefix<Size>::set_valid(bool value) NOEXCEPT
 {
     valid_ = value;
 }

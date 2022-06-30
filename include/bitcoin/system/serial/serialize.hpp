@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -41,35 +42,35 @@ namespace system {
 /// Stream configuration is not honored for value conversion to text.
 template <typename Value>
 void serialize(std::ostream& output, const Value& value,
-    const std::string& fallback) noexcept;
+    const std::string& fallback) NOEXCEPT;
 
 /// Specialize template because basic_ostream treats uint8_t as char.
 inline std::string serialize(uint8_t value,
-    const std::string& fallback="") noexcept;
+    const std::string& fallback="") NOEXCEPT;
 
 /// Specialize data_array to base16 (avoids join and fallback).
 template <size_t Size>
 std::string serialize(const data_array<Size>& value,
-    const std::string& fallback="") noexcept;
+    const std::string& fallback="") NOEXCEPT;
 
 /// Specialize data_chunk to base16 (avoids join and fallback).
 inline std::string serialize(const data_chunk& value,
-    const std::string& fallback="") noexcept;
+    const std::string& fallback="") NOEXCEPT;
 
 /// Specialize arrays to add fallback and join with space delimiter.
 template <typename Value, size_t Size>
 std::string serialize(const std::array<Value, Size>& values,
-    const std::string& fallback="?") noexcept;
+    const std::string& fallback="?") NOEXCEPT;
 
 /// Specialize arrays to add fallback and join with space delimiter.
 template <typename Value>
 std::string serialize(const std::vector<Value>& values,
-    const std::string& fallback="?") noexcept;
+    const std::string& fallback="?") NOEXCEPT;
 
 /// General serializer.
 template <typename Value>
 std::string serialize(const Value& value,
-    const std::string& fallback="") noexcept;
+    const std::string& fallback="") NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

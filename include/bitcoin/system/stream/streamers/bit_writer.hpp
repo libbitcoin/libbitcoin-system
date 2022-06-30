@@ -44,29 +44,29 @@ class bit_writer
 {
 public:
     /// Constructors.
-    bit_writer(OStream& sink) noexcept;
+    bit_writer(OStream& sink) NOEXCEPT;
 
     /// Copy/move/destruct.
     bit_writer(bit_writer&&);
     bit_writer(const bit_writer&);
     bit_writer& operator=(bit_writer&&);
     bit_writer& operator=(const bit_writer&);
-    ~bit_writer() noexcept override;
+    ~bit_writer() NOEXCEPT override;
 
     /// Write one bit (high to low).
-    void write_bit(bool value) noexcept override;
+    void write_bit(bool value) NOEXCEPT override;
 
     /// Write size bits from an integer (high to low).
-    void write_bits(uint64_t value, size_t bits) noexcept override;
+    void write_bits(uint64_t value, size_t bits) NOEXCEPT override;
 
 protected:
-    void do_write_bytes(const uint8_t* data, size_t size) noexcept override;
-    void do_flush() noexcept override;
+    void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
+    void do_flush() NOEXCEPT override;
 
 private:
-    void unload() noexcept;
-    void flusher() noexcept;
-    uint8_t shift() const noexcept;
+    void unload() NOEXCEPT;
+    void flusher() NOEXCEPT;
+    uint8_t shift() const NOEXCEPT;
 
     uint8_t byte_;
     uint8_t offset_;

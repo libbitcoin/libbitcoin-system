@@ -39,36 +39,36 @@ namespace system {
     
 template <typename Value>
 void serialize(std::ostream& output, const Value& value,
-    const std::string& fallback) noexcept
+    const std::string& fallback) NOEXCEPT
 {
     output << serialize(value, fallback);
 }
 
 inline std::string serialize(uint8_t value,
-    const std::string& fallback) noexcept
+    const std::string& fallback) NOEXCEPT
 {
     return serialize(static_cast<uint16_t>(value), fallback);
 }
 
 template <size_t Size>
 std::string serialize(const data_array<Size>& value,
-    const std::string&) noexcept
+    const std::string&) NOEXCEPT
 {
     return encode_base16(value);
 }
 
 inline std::string serialize(const data_chunk& value,
-    const std::string&) noexcept
+    const std::string&) NOEXCEPT
 {
     return encode_base16(value);
 }
 
 template <typename Value, size_t Size>
 std::string serialize(const std::array<Value, Size>& values,
-    const std::string& fallback) noexcept
+    const std::string& fallback) NOEXCEPT
 {
     string_list tokens(values.size());
-    const auto serializer = [&fallback](const Value& value) noexcept
+    const auto serializer = [&fallback](const Value& value) NOEXCEPT
     {
         return serialize(value, fallback);
     };
@@ -79,10 +79,10 @@ std::string serialize(const std::array<Value, Size>& values,
 
 template <typename Value>
 std::string serialize(const std::vector<Value>& values,
-    const std::string& fallback) noexcept
+    const std::string& fallback) NOEXCEPT
 {
     string_list tokens(values.size());
-    const auto serializer = [&fallback](const Value& value) noexcept
+    const auto serializer = [&fallback](const Value& value) NOEXCEPT
     {
         return serialize(value, fallback);
     };
@@ -92,9 +92,9 @@ std::string serialize(const std::vector<Value>& values,
 }
 
 template <typename Value>
-std::string serialize(const Value& value, const std::string& fallback) noexcept
+std::string serialize(const Value& value, const std::string& fallback) NOEXCEPT
 {
-    // Suppress ostringstream may throw inside noexcept.
+    // Suppress ostringstream may throw inside NOEXCEPT.
     // The intended behavior in this case is program abort.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 

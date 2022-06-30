@@ -24,6 +24,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 
 namespace libbitcoin {
@@ -35,18 +36,18 @@ class bitreader
 {
 public:
     /// Read one bit (high to low).
-    virtual bool read_bit() noexcept = 0;
+    virtual bool read_bit() NOEXCEPT = 0;
 
     /// Read size bits into an integer (high to low).
-    virtual uint64_t read_bits(size_t bits) noexcept = 0;
+    virtual uint64_t read_bits(size_t bits) NOEXCEPT = 0;
 
     /// Advance the iterator.
-    virtual void skip_bit() noexcept = 0;
-    virtual void skip_bits(size_t bits) noexcept = 0;
+    virtual void skip_bit() NOEXCEPT = 0;
+    virtual void skip_bits(size_t bits) NOEXCEPT = 0;
 
     /// Rewind the iterator.
-    virtual void rewind_bit() noexcept = 0;
-    virtual void rewind_bits(size_t bits) noexcept = 0;
+    virtual void rewind_bit() NOEXCEPT = 0;
+    virtual void rewind_bits(size_t bits) NOEXCEPT = 0;
 };
 
 } // namespace system

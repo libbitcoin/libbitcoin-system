@@ -40,19 +40,19 @@ public:
     ~base64() = default;
 
     /// Constructors.
-    base64() noexcept;
-    base64(data_chunk&& value) noexcept;
-    base64(const data_chunk& value) noexcept;
-    base64(const std::string& base64) noexcept(false);
+    base64() NOEXCEPT;
+    base64(data_chunk&& value) NOEXCEPT;
+    base64(const data_chunk& value) NOEXCEPT;
+    base64(const std::string& base64) THROWS;
 
     /// Operators.
 
-    operator const data_chunk&() const noexcept;
+    operator const data_chunk&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        base64& argument) noexcept(false);
+        base64& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const base64& argument) noexcept;
+        const base64& argument) NOEXCEPT;
 
 private:
     data_chunk value_;

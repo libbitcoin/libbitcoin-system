@@ -41,23 +41,23 @@ public:
     ~base85() = default;
 
     /// Constructors.
-    base85() noexcept;
-    base85(data_chunk&& value) noexcept;
-    base85(const data_chunk& value) noexcept;
-    base85(const std::string& base85) noexcept(false);
+    base85() NOEXCEPT;
+    base85(data_chunk&& value) NOEXCEPT;
+    base85(const data_chunk& value) NOEXCEPT;
+    base85(const std::string& base85) THROWS;
 
     /// Operators.
 
     /// True if the data size is evenly divisible by 4.
-    operator bool() const noexcept;
+    operator bool() const NOEXCEPT;
 
-    operator const data_chunk&() const noexcept;
+    operator const data_chunk&() const NOEXCEPT;
 
     /// The key as a base85 encoded (z85) string.
     std::string to_string() const;
 
     friend std::istream& operator>>(std::istream& stream,
-        base85& argument) noexcept(false);
+        base85& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
         const base85& argument);
 

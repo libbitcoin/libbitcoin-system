@@ -30,22 +30,22 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-ek_private::ek_private() noexcept
+ek_private::ek_private() NOEXCEPT
   : valid_(false), private_()
 {
 }
 
-ek_private::ek_private(const std::string& encoded) noexcept
+ek_private::ek_private(const std::string& encoded) NOEXCEPT
   : ek_private(from_string(encoded))
 {
 }
 
-ek_private::ek_private(const ek_private& other) noexcept
+ek_private::ek_private(const ek_private& other) NOEXCEPT
   : valid_(other.valid_), private_(other.private_)
 {
 }
 
-ek_private::ek_private(const encrypted_private& value) noexcept
+ek_private::ek_private(const encrypted_private& value) NOEXCEPT
   : valid_(true), private_(value)
 {
 }
@@ -53,7 +53,7 @@ ek_private::ek_private(const encrypted_private& value) noexcept
 // Factories.
 // ----------------------------------------------------------------------------
 
-ek_private ek_private::from_string(const std::string& encoded) noexcept
+ek_private ek_private::from_string(const std::string& encoded) NOEXCEPT
 {
     // TODO: incorporate existing parser here, setting new members.
 
@@ -65,12 +65,12 @@ ek_private ek_private::from_string(const std::string& encoded) noexcept
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ek_private::operator bool() const noexcept
+ek_private::operator bool() const NOEXCEPT
 {
     return valid_;
 }
 
-ek_private::operator const encrypted_private&() const noexcept
+ek_private::operator const encrypted_private&() const NOEXCEPT
 {
     return private_;
 }
@@ -78,7 +78,7 @@ ek_private::operator const encrypted_private&() const noexcept
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string ek_private::encoded() const noexcept
+std::string ek_private::encoded() const NOEXCEPT
 {
     return encode_base58(private_);
 }
@@ -86,7 +86,7 @@ std::string ek_private::encoded() const noexcept
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const encrypted_private& ek_private::private_key() const noexcept
+const encrypted_private& ek_private::private_key() const NOEXCEPT
 {
     return private_;
 }
@@ -94,24 +94,24 @@ const encrypted_private& ek_private::private_key() const noexcept
 // Operators.
 // ----------------------------------------------------------------------------
 
-ek_private& ek_private::operator=(const ek_private& other) noexcept
+ek_private& ek_private::operator=(const ek_private& other) NOEXCEPT
 {
     valid_ = other.valid_;
     private_ = other.private_;
     return *this;
 }
 
-bool ek_private::operator<(const ek_private& other) const noexcept
+bool ek_private::operator<(const ek_private& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
 }
 
-bool ek_private::operator==(const ek_private& other) const noexcept
+bool ek_private::operator==(const ek_private& other) const NOEXCEPT
 {
     return valid_ == other.valid_ && private_ == other.private_;
 }
 
-bool ek_private::operator!=(const ek_private& other) const noexcept
+bool ek_private::operator!=(const ek_private& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -128,7 +128,7 @@ std::istream& operator>>(std::istream& in, ek_private& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const ek_private& of) noexcept
+std::ostream& operator<<(std::ostream& out, const ek_private& of) NOEXCEPT
 {
     out << of.encoded();
     return out;

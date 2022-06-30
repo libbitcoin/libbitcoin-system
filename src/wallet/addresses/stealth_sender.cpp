@@ -30,7 +30,7 @@ namespace system {
 namespace wallet {
 
 stealth_sender::stealth_sender(const stealth_address& address,
-    const data_chunk& seed, const binary& filter, uint8_t version) noexcept
+    const data_chunk& seed, const binary& filter, uint8_t version) NOEXCEPT
   : version_(version)
 {
     ec_secret ephemeral_private;
@@ -40,13 +40,13 @@ stealth_sender::stealth_sender(const stealth_address& address,
 
 stealth_sender::stealth_sender(const ec_secret& ephemeral_private,
     const stealth_address& address, const data_chunk& seed,
-    const binary& filter, uint8_t version) noexcept
+    const binary& filter, uint8_t version) NOEXCEPT
   : version_(version)
 {
     initialize(ephemeral_private, address, seed, filter);
 }
 
-stealth_sender::operator bool() const noexcept
+stealth_sender::operator bool() const NOEXCEPT
 {
     return address_;
 }
@@ -55,7 +55,7 @@ stealth_sender::operator bool() const noexcept
 // TODO: convert to factory and make script_ and address_ const.
 void stealth_sender::initialize(const ec_secret& ephemeral_private,
     const stealth_address& address, const data_chunk& seed,
-    const binary& filter) noexcept
+    const binary& filter) NOEXCEPT
 {
     ec_compressed ephemeral_public;
     if (!secret_to_public(ephemeral_public, ephemeral_private))
@@ -75,13 +75,13 @@ void stealth_sender::initialize(const ec_secret& ephemeral_private,
 }
 
 // Will be invalid if construct fails.
-const chain::script& stealth_sender::stealth_script() const noexcept
+const chain::script& stealth_sender::stealth_script() const NOEXCEPT
 {
     return script_;
 }
 
 // Will be invalid if construct fails.
-const wallet::payment_address& stealth_sender::payment_address() const noexcept
+const wallet::payment_address& stealth_sender::payment_address() const NOEXCEPT
 {
     return address_;
 }

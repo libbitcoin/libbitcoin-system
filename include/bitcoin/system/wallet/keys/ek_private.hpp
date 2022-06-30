@@ -33,33 +33,33 @@ class BC_API ek_private
 {
 public:
     /// Constructors.
-    ek_private() noexcept;
-    ek_private(const std::string& encoded) noexcept;
-    ek_private(const encrypted_private& key) noexcept;
-    ek_private(const ek_private& other) noexcept;
+    ek_private() NOEXCEPT;
+    ek_private(const std::string& encoded) NOEXCEPT;
+    ek_private(const encrypted_private& key) NOEXCEPT;
+    ek_private(const ek_private& other) NOEXCEPT;
 
     /// Operators.
-    bool operator<(const ek_private& other) const noexcept;
-    bool operator==(const ek_private& other) const noexcept;
-    bool operator!=(const ek_private& other) const noexcept;
-    ek_private& operator=(const ek_private& other) noexcept;
+    bool operator<(const ek_private& other) const NOEXCEPT;
+    bool operator==(const ek_private& other) const NOEXCEPT;
+    bool operator!=(const ek_private& other) const NOEXCEPT;
+    ek_private& operator=(const ek_private& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, ek_private& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const ek_private& of) noexcept;
+        const ek_private& of) NOEXCEPT;
 
     /// Cast operators.
-    operator bool() const noexcept;
-    operator const encrypted_private&() const noexcept;
+    operator bool() const NOEXCEPT;
+    operator const encrypted_private&() const NOEXCEPT;
 
     /// Serializer.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Accessors.
-    const encrypted_private& private_key() const noexcept;
+    const encrypted_private& private_key() const NOEXCEPT;
 
 private:
     /// Factories.
-    static ek_private from_string(const std::string& encoded) noexcept;
+    static ek_private from_string(const std::string& encoded) NOEXCEPT;
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.

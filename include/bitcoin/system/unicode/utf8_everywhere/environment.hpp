@@ -34,32 +34,32 @@ namespace system {
 
 /// Initialize windows to use UTF8 for stdio. This cannot be uninitialized and
 /// once set bc stdio must be used in place of std stdio.
-BC_API void set_utf8_stdio() noexcept(false);
+BC_API void set_utf8_stdio() THROWS;
 
 /// Initialize windows to use UTF8 for stdin. This cannot be uninitialized and
 /// once set bc::system::cin must be used in place of std::cin.
-BC_API void set_utf8_stdin() noexcept(false);
+BC_API void set_utf8_stdin() THROWS;
 
 /// Initialize windows to use UTF8 for stdout. This cannot be uninitialized and
 /// once set bc::system::cout must be used in place of std::cout.
-BC_API void set_utf8_stdout() noexcept(false);
+BC_API void set_utf8_stdout() THROWS;
 
 /// Initialize windows to use UTF8 for stderr. This cannot be uninitialized and
 /// once set bc::system::cerr must be used in place of std::cerr.
-BC_API void set_utf8_stderr() noexcept(false);
+BC_API void set_utf8_stderr() THROWS;
 
 /// Initialize windows to use binary for stdin. This cannot be uninitialized.
-BC_API void set_binary_stdin() noexcept(false);
+BC_API void set_binary_stdin() THROWS;
 
 /// Initialize windows to use binary for stdout. This cannot be uninitialized.
-BC_API void set_binary_stdout() noexcept(false);
+BC_API void set_binary_stdout() THROWS;
 
 // System Configuration.
 // ----------------------------------------------------------------------------
 
 /// Get the default configuration file path with subdirectory.
 BC_API std::filesystem::path default_config_path(
-    const std::filesystem::path& subdirectory) noexcept;
+    const std::filesystem::path& subdirectory) NOEXCEPT;
 
 // BC_USE_LIBBITCOIN_MAIN dependencies.
 // ----------------------------------------------------------------------------
@@ -67,34 +67,34 @@ BC_API std::filesystem::path default_config_path(
 
 // For standard I/O, use <system/unicode/conversion.hpp>.
 constexpr size_t utf8_max_character_size = 4;
-BC_API size_t utf8_remainder_size(const char text[], size_t size) noexcept;
+BC_API size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT;
 BC_API size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
-    size_t from_chars) noexcept;
+    size_t from_chars) NOEXCEPT;
 BC_API size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
-    const char from[], size_t from_bytes) noexcept;
+    const char from[], size_t from_bytes) NOEXCEPT;
 
 #ifdef _MSC_VER
 
 // For standard I/O.
-BC_API std::istream& cin_stream() noexcept(false);
-BC_API std::ostream& cout_stream() noexcept(false);
-BC_API std::ostream& cerr_stream() noexcept(false);
+BC_API std::istream& cin_stream() THROWS;
+BC_API std::ostream& cout_stream() THROWS;
+BC_API std::ostream& cerr_stream() THROWS;
 
 // For args/environment.
-BC_API void free_environment(char* environment[]) noexcept;
-BC_API char** allocate_environment(wchar_t* environment[]) noexcept;
-BC_API char** allocate_environment(int argc, wchar_t* argv[]) noexcept;
+BC_API void free_environment(char* environment[]) NOEXCEPT;
+BC_API char** allocate_environment(wchar_t* environment[]) NOEXCEPT;
+BC_API char** allocate_environment(int argc, wchar_t* argv[]) NOEXCEPT;
 BC_API int call_utf8_main(int argc, wchar_t* argv[],
-    int(*main)(int argc, char* argv[])) noexcept;
+    int(*main)(int argc, char* argv[])) NOEXCEPT;
 #endif
 
 #ifdef _MSC_VER
 // Not thread safe.
 BC_API std::wstring to_extended_path(
-    const std::filesystem::path& path) noexcept;
+    const std::filesystem::path& path) NOEXCEPT;
 #else
 BC_API std::string to_extended_path(
-    const std::filesystem::path& path) noexcept;
+    const std::filesystem::path& path) NOEXCEPT;
 #endif
 
 } // namespace system

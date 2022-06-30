@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -60,7 +61,7 @@ namespace chain {
 // private
 
 constexpr typename compact::parse
-compact::to_compact(small_type small) noexcept
+compact::to_compact(small_type small) NOEXCEPT
 {
     return
     {
@@ -71,7 +72,7 @@ compact::to_compact(small_type small) noexcept
 }
 
 constexpr typename compact::small_type
-compact::from_compact(const parse& compact) noexcept
+compact::from_compact(const parse& compact) NOEXCEPT
 {
     return bit_or
     (
@@ -83,7 +84,7 @@ compact::from_compact(const parse& compact) noexcept
 // public
 
 constexpr compact::span_type
-compact::expand(small_type exponential) noexcept
+compact::expand(small_type exponential) NOEXCEPT
 {
     auto compact = to_compact(exponential);
 
@@ -105,7 +106,7 @@ compact::expand(small_type exponential) noexcept
 }
 
 constexpr compact::small_type
-compact::compress(const span_type& number) noexcept
+compact::compress(const span_type& number) NOEXCEPT
 {
     auto compact = to_compact(base256e::compress(number));
 

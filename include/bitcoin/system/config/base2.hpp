@@ -40,19 +40,19 @@ public:
     ~base2() = default;
 
     /// Constructors.
-    base2() noexcept;
-    base2(binary&& value) noexcept;
-    base2(const binary& value) noexcept;
-    base2(const std::string& binary) noexcept(false);
+    base2() NOEXCEPT;
+    base2(binary&& value) NOEXCEPT;
+    base2(const binary& value) NOEXCEPT;
+    base2(const std::string& binary) THROWS;
 
     /// Operators.
 
-    operator const binary&() const noexcept;
+    operator const binary&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        base2& argument) noexcept(false);
+        base2& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const base2& argument) noexcept;
+        const base2& argument) NOEXCEPT;
 
 private:
     binary value_;

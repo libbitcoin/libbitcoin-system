@@ -82,20 +82,20 @@ typedef external_ptr<data_chunk> chunk_xptr;
 typedef std::vector<chunk_xptr> chunk_xptrs;
 
 /// Create a single byte data_chunk with given element value.
-BC_API data_chunk to_chunk(uint8_t byte) noexcept;
+BC_API data_chunk to_chunk(uint8_t byte) NOEXCEPT;
 
 /// Create a data chunk from data slice.
 /// to_chunk(to_string(data)) == data.
-BC_API data_chunk to_chunk(const data_slice& bytes) noexcept;
+BC_API data_chunk to_chunk(const data_slice& bytes) NOEXCEPT;
 
 /// Concatenate several data slices into a single data_chunk.
 /// extra_reserve reserves but does not allocate additional bytes.
 BC_API data_chunk build_chunk(const data_loaf& slices,
-    size_t extra_reserve=0) noexcept;
+    size_t extra_reserve=0) NOEXCEPT;
 
 /// Concatenate two data_slices into a single data chunk.
 BC_API data_chunk splice(const data_slice& left,
-    const data_slice& right) noexcept;
+    const data_slice& right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

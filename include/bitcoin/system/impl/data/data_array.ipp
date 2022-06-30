@@ -38,7 +38,7 @@ namespace libbitcoin {
 namespace system {
 
 template <size_t Size>
-constexpr data_array<Size> to_array(const data_slice& bytes) noexcept
+constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT
 {
     return bytes.to_array<Size>();
 }
@@ -46,11 +46,11 @@ constexpr data_array<Size> to_array(const data_slice& bytes) noexcept
 // TODO: test.
 template <size_t Size>
 const data_stack to_stack(
-    const std::vector<data_array<Size>>& values) noexcept
+    const std::vector<data_array<Size>>& values) NOEXCEPT
 {
     data_stack chunks(values.size(), no_fill_byte_allocator);
     std::transform(values.begin(), values.end(), chunks.begin(),
-        [](const data_array<Size>& value) noexcept
+        [](const data_array<Size>& value) NOEXCEPT
         {
             return to_chunk(value);
         });
@@ -59,7 +59,7 @@ const data_stack to_stack(
 }
 
 template <size_t Size>
-constexpr data_array<Size> build_array(const data_loaf& slices) noexcept
+constexpr data_array<Size> build_array(const data_loaf& slices) NOEXCEPT
 {
     data_array<Size> out;
     auto position = out.begin();
@@ -80,7 +80,7 @@ constexpr data_array<Size> build_array(const data_loaf& slices) noexcept
 
 // This is really more of a data_chunk utility.
 template <class Target>
-constexpr Target& extend(Target& target, const data_slice& extension) noexcept
+constexpr Target& extend(Target& target, const data_slice& extension) NOEXCEPT
 {
     target.insert(std::end(target), std::begin(extension),
         std::end(extension));
@@ -90,7 +90,7 @@ constexpr Target& extend(Target& target, const data_slice& extension) noexcept
 
 // This is really more of a data_chunk utility.
 template <class Target, class Extension>
-constexpr Target& extend(Target& target, Extension&& extension) noexcept
+constexpr Target& extend(Target& target, Extension&& extension) NOEXCEPT
 {
     target.insert(std::end(target),
         std::make_move_iterator(std::begin(extension)),
@@ -102,7 +102,7 @@ constexpr Target& extend(Target& target, Extension&& extension) noexcept
 template <size_t Start, size_t End, size_t Size,
     if_not_greater<Start, Size>, if_not_greater<End, Size>,
     if_not_lesser<End, Start>>
-constexpr data_array<End - Start> slice(const data_array<Size>& bytes) noexcept
+constexpr data_array<End - Start> slice(const data_array<Size>& bytes) NOEXCEPT
 {
     data_array<End - Start> out;
     std::copy(std::next(bytes.begin(), Start), std::next(bytes.begin(), End),
@@ -112,7 +112,7 @@ constexpr data_array<End - Start> slice(const data_array<Size>& bytes) noexcept
 
 template <size_t Left, size_t Right>
 constexpr data_array<Left + Right> splice(const data_array<Left>& left,
-    const data_array<Right>& right) noexcept
+    const data_array<Right>& right) NOEXCEPT
 {
     data_array<Left + Right> out;
     std::copy(right.begin(), right.end(),
@@ -123,7 +123,7 @@ constexpr data_array<Left + Right> splice(const data_array<Left>& left,
 
 template <size_t Left, size_t Middle, size_t Right>
 constexpr data_array<Left + Middle + Right> splice(const data_array<Left>& left,
-    const data_array<Middle>& middle, const data_array<Right>& right) noexcept
+    const data_array<Middle>& middle, const data_array<Right>& right) NOEXCEPT
 {
     data_array<Left + Middle + Right> out;
     std::copy(right.begin(), right.end(),
@@ -134,7 +134,7 @@ constexpr data_array<Left + Middle + Right> splice(const data_array<Left>& left,
 }
 
 template <size_t Size, if_even<Size>>
-constexpr split_parts<to_half(Size)> split(const data_array<Size>& bytes) noexcept
+constexpr split_parts<to_half(Size)> split(const data_array<Size>& bytes) NOEXCEPT
 {
     constexpr auto half = to_half(Size);
     split_parts<half> out;
@@ -146,7 +146,7 @@ constexpr split_parts<to_half(Size)> split(const data_array<Size>& bytes) noexce
 template <size_t Size, size_t Size1, size_t Size2,
     if_not_lesser<Size1, Size>, if_not_lesser<Size2, Size>>
 constexpr data_array<Size> xor_data(const data_array<Size1>& bytes1,
-    const data_array<Size2>& bytes2) noexcept
+    const data_array<Size2>& bytes2) NOEXCEPT
 {
     return xor_offset<Size, zero, zero>(bytes1, bytes2);
 }
@@ -154,7 +154,7 @@ constexpr data_array<Size> xor_data(const data_array<Size1>& bytes1,
 template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size2,
     if_not_lesser<Size1, Offset1 + Size>, if_not_lesser<Size2, Offset2 + Size>>
 constexpr data_array<Size> xor_offset(const data_array<Size1>& bytes1,
-    const data_array<Size2>& bytes2) noexcept
+    const data_array<Size2>& bytes2) NOEXCEPT
 {
     data_array<Size> out;
     for (size_t index = 0; index < Size; index++)

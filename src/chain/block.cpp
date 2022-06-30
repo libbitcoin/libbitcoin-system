@@ -51,31 +51,31 @@ namespace chain {
 // Constructors.
 // ----------------------------------------------------------------------------
 
-block::block() noexcept
+block::block() NOEXCEPT
   : block(to_shared<chain::header>(), to_shared<chain::transaction_ptrs>(),
       false)
 {
 }
 
-block::block(chain::header&& header, chain::transactions&& txs) noexcept
+block::block(chain::header&& header, chain::transactions&& txs) NOEXCEPT
   : block(to_shared(std::move(header)), to_shareds(std::move(txs)), true)
 {
 }
 
 block::block(const chain::header& header,
-    const chain::transactions& txs) noexcept
+    const chain::transactions& txs) NOEXCEPT
   : block(to_shared<chain::header>(header), to_shareds(txs), true)
 {
 }
 
 block::block(const chain::header::cptr& header,
-    const chain::transactions_cptr& txs) noexcept
+    const chain::transactions_cptr& txs) NOEXCEPT
   : block(header ? header : to_shared<chain::header>(),
       txs ? txs : to_shared<transaction_ptrs>(), true)
 {
 }
 
-block::block(const data_slice& data, bool witness) noexcept
+block::block(const data_slice& data, bool witness) NOEXCEPT
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : block(stream::in::copy(data), witness)
     BC_POP_WARNING()
@@ -83,29 +83,29 @@ block::block(const data_slice& data, bool witness) noexcept
 }
 
 
-block::block(std::istream&& stream, bool witness) noexcept
+block::block(std::istream&& stream, bool witness) NOEXCEPT
   : block(read::bytes::istream(stream), witness)
 {
 }
 
-block::block(std::istream& stream, bool witness) noexcept
+block::block(std::istream& stream, bool witness) NOEXCEPT
   : block(read::bytes::istream(stream), witness)
 {
 }
 
-block::block(reader&& source, bool witness) noexcept
+block::block(reader&& source, bool witness) NOEXCEPT
   : block(from_data(source, witness))
 {
 }
 
-block::block(reader& source, bool witness) noexcept
+block::block(reader& source, bool witness) NOEXCEPT
   : block(from_data(source, witness))
 {
 }
 
 // protected
 block::block(const chain::header::cptr& header,
-    const chain::transactions_cptr& txs, bool valid) noexcept
+    const chain::transactions_cptr& txs, bool valid) NOEXCEPT
   : header_(header), txs_(txs), valid_(valid)
 {
 }
@@ -113,13 +113,13 @@ block::block(const chain::header::cptr& header,
 // Operators.
 // ----------------------------------------------------------------------------
 
-bool block::operator==(const block& other) const noexcept
+bool block::operator==(const block& other) const NOEXCEPT
 {
     return (header_ == other.header_ || *header_ == *other.header_)
         && deep_equal(*txs_, *other.txs_);
 }
 
-bool block::operator!=(const block& other) const noexcept
+bool block::operator!=(const block& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -128,9 +128,9 @@ bool block::operator!=(const block& other) const noexcept
 // ----------------------------------------------------------------------------
 
 // static/private
-block block::from_data(reader& source, bool witness) noexcept
+block block::from_data(reader& source, bool witness) NOEXCEPT
 {
-    const auto read_transactions = [witness](reader& source) noexcept
+    const auto read_transactions = [witness](reader& source) NOEXCEPT
     {
         auto txs = std::make_shared<transaction_ptrs>();
         txs->reserve(source.read_size(max_block_size));
@@ -163,7 +163,7 @@ block block::from_data(reader& source, bool witness) noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk block::to_data(bool witness) const noexcept
+data_chunk block::to_data(bool witness) const NOEXCEPT
 {
     data_chunk data(serialized_size(witness), no_fill_byte_allocator);
 
@@ -175,13 +175,13 @@ data_chunk block::to_data(bool witness) const noexcept
     return data;
 }
 
-void block::to_data(std::ostream& stream, bool witness) const noexcept
+void block::to_data(std::ostream& stream, bool witness) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out, witness);
 }
 
-void block::to_data(writer& sink, bool witness) const noexcept
+void block::to_data(writer& sink, bool witness) const NOEXCEPT
 {
     header_->to_data(sink);
     sink.write_variable(txs_->size());
@@ -193,29 +193,29 @@ void block::to_data(writer& sink, bool witness) const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool block::is_valid() const noexcept
+bool block::is_valid() const NOEXCEPT
 {
     return valid_;
 }
 
-const chain::header&block::header() const noexcept
+const chain::header&block::header() const NOEXCEPT
 {
     return *header_;
 }
 
-const chain::header::cptr block::header_ptr() const noexcept
+const chain::header::cptr block::header_ptr() const NOEXCEPT
 {
     return header_;
 }
 
 // vector<transaction> is not exposed (because we don't have it).
 // This would reqiure a from_shared(txs_) conversion (expensive).
-const transactions_cptr& block::transactions_ptr() const noexcept
+const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 {
     return txs_;
 }
 
-hash_list block::transaction_hashes(bool witness) const noexcept
+hash_list block::transaction_hashes(bool witness) const NOEXCEPT
 {
     static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
     const auto count = txs_->size();
@@ -229,7 +229,7 @@ hash_list block::transaction_hashes(bool witness) const noexcept
     // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
 
-    const auto hash = [witness](const transaction::cptr& tx) noexcept
+    const auto hash = [witness](const transaction::cptr& tx) NOEXCEPT
     {
         return tx->hash(witness);
     };
@@ -239,15 +239,15 @@ hash_list block::transaction_hashes(bool witness) const noexcept
 }
 
 // computed
-hash_digest block::hash() const noexcept
+hash_digest block::hash() const NOEXCEPT
 {
     return header_->hash();
 }
 
-size_t block::serialized_size(bool witness) const noexcept
+size_t block::serialized_size(bool witness) const NOEXCEPT
 {
     // Overflow returns max_size_t.
-    const auto sum = [witness](size_t total, const transaction::cptr& tx) noexcept
+    const auto sum = [witness](size_t total, const transaction::cptr& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->serialized_size(witness));
     };
@@ -273,29 +273,29 @@ size_t block::serialized_size(bool witness) const noexcept
 ////    return hashes.size() == txs_->size();
 ////}
 
-bool block::is_empty() const noexcept
+bool block::is_empty() const NOEXCEPT
 {
     return txs_->empty();
 }
 
-bool block::is_oversized() const noexcept
+bool block::is_oversized() const NOEXCEPT
 {
     return serialized_size(false) > max_block_size;
 }
 
-bool block::is_first_non_coinbase() const noexcept
+bool block::is_first_non_coinbase() const NOEXCEPT
 {
     return !txs_->front()->is_coinbase();
 }
 
 // True if there is another coinbase other than the first tx.
 // No txs or coinbases returns false.
-bool block::is_extra_coinbases() const noexcept
+bool block::is_extra_coinbases() const NOEXCEPT
 {
     if (txs_->empty())
         return false;
 
-    const auto value = [](const transaction::cptr& tx) noexcept
+    const auto value = [](const transaction::cptr& tx) NOEXCEPT
     {
         return tx->is_coinbase();
     };
@@ -307,13 +307,13 @@ bool block::is_extra_coinbases() const noexcept
 // CONSENSUS: This is only necessary because satoshi stores and queries as it
 // validates, imposing an otherwise unnecessary partial transaction ordering.
 //*****************************************************************************
-bool block::is_forward_reference() const noexcept
+bool block::is_forward_reference() const NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     std::unordered_map<hash_digest, bool> hashes(txs_->size());
     BC_POP_WARNING()
 
-    const auto is_forward = [&hashes](const input::cptr& input) noexcept
+    const auto is_forward = [&hashes](const input::cptr& input) NOEXCEPT
     {
         return !is_zero(hashes.count(input->point().hash()));
     };
@@ -333,10 +333,10 @@ bool block::is_forward_reference() const noexcept
 }
 
 // private
-size_t block::non_coinbase_inputs() const noexcept
+size_t block::non_coinbase_inputs() const NOEXCEPT
 {
     // Overflow returns max_size_t.
-    const auto inputs = [](size_t total, const transaction::cptr& tx) noexcept
+    const auto inputs = [](size_t total, const transaction::cptr& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->inputs_ptr()->size());
     };
@@ -344,7 +344,7 @@ size_t block::non_coinbase_inputs() const noexcept
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
 }
 
-bool block::is_internal_double_spend() const noexcept
+bool block::is_internal_double_spend() const NOEXCEPT
 {
     if (txs_->empty())
         return false;
@@ -363,7 +363,7 @@ bool block::is_internal_double_spend() const noexcept
 }
 
 // private
-hash_digest block::generate_merkle_root(bool witness) const noexcept
+hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
     if (txs_->empty())
         return null_hash;
@@ -385,7 +385,7 @@ hash_digest block::generate_merkle_root(bool witness) const noexcept
     return merkle.front();
 }
 
-bool block::is_invalid_merkle_root() const noexcept
+bool block::is_invalid_merkle_root() const NOEXCEPT
 {
     return generate_merkle_root(false) != header_->merkle_root();
 }
@@ -393,19 +393,19 @@ bool block::is_invalid_merkle_root() const noexcept
 // Accept (contextual).
 // ----------------------------------------------------------------------------
 
-size_t block::weight() const noexcept
+size_t block::weight() const NOEXCEPT
 {
     // Block weight is 3 * Base size * + 1 * Total size (bip141).
     return base_size_contribution * serialized_size(false) +
         total_size_contribution * serialized_size(true);
 }
 
-bool block::is_overweight() const noexcept
+bool block::is_overweight() const NOEXCEPT
 {
     return weight() > max_block_weight;
 }
 
-bool block::is_invalid_coinbase_script(size_t height) const noexcept
+bool block::is_invalid_coinbase_script(size_t height) const NOEXCEPT
 {
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
@@ -418,7 +418,7 @@ bool block::is_invalid_coinbase_script(size_t height) const noexcept
 // "Special short-term limits to avoid 10,000 BDB lock limit.
 // Count of unique txids <= 4500 to prevent 10000 BDB lock exhaustion.
 // header.timestamp > 1363039171 && header.timestamp < 1368576000."
-bool block::is_hash_limit_exceeded() const noexcept
+bool block::is_hash_limit_exceeded() const NOEXCEPT
 {
     if (txs_->empty())
         return false;
@@ -452,9 +452,9 @@ bool block::is_hash_limit_exceeded() const noexcept
     return hashes.size() > hash_limit;
 }
 
-bool block::is_segregated() const noexcept
+bool block::is_segregated() const NOEXCEPT
 {
-    const auto segregated = [](const transaction::cptr& tx) noexcept
+    const auto segregated = [](const transaction::cptr& tx) NOEXCEPT
     {
         return tx->is_segregated();
     };
@@ -462,7 +462,7 @@ bool block::is_segregated() const noexcept
     return std::any_of(txs_->begin(), txs_->end(), segregated);
 }
 
-bool block::is_invalid_witness_commitment() const noexcept
+bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
@@ -496,7 +496,7 @@ bool block::is_invalid_witness_commitment() const noexcept
 // default, and specified bip42 behavior (shift overflow to zero) with bip42.
 //*****************************************************************************
 static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
-    uint64_t initial_block_subsidy_satoshi, bool bip42) noexcept
+    uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT
 {
     // Guard: quotient domain cannot increase with positive integer divisor.
     const auto halves = possible_narrow_cast<size_t>(height / subsidy_interval);
@@ -505,10 +505,10 @@ static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
 
 // Prevouts required.
 
-uint64_t block::fees() const noexcept
+uint64_t block::fees() const NOEXCEPT
 {
     // Overflow returns max_uint64.
-    const auto value = [](uint64_t total, const transaction::cptr& tx) noexcept
+    const auto value = [](uint64_t total, const transaction::cptr& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->fee());
     };
@@ -516,13 +516,13 @@ uint64_t block::fees() const noexcept
     return std::accumulate(txs_->begin(), txs_->end(), uint64_t{0}, value);
 }
 
-uint64_t block::claim() const noexcept
+uint64_t block::claim() const NOEXCEPT
 {
     return txs_->empty() ? zero : txs_->front()->value();
 }
 
 uint64_t block::reward(size_t height, uint64_t subsidy_interval,
-    uint64_t initial_block_subsidy_satoshi, bool bip42) const noexcept
+    uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     // Overflow returns max_uint64.
     return ceilinged_add(fees(), block_subsidy(height, subsidy_interval,
@@ -530,19 +530,19 @@ uint64_t block::reward(size_t height, uint64_t subsidy_interval,
 }
 
 bool block::is_overspent(size_t height, uint64_t subsidy_interval,
-    uint64_t initial_block_subsidy_satoshi, bool bip42) const noexcept
+    uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
 {
     return claim() > reward(height, subsidy_interval,
         initial_block_subsidy_satoshi, bip42);
 }
 
 bool block::is_signature_operations_limited(bool bip16,
-    bool bip141) const noexcept
+    bool bip141) const NOEXCEPT
 {
     const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
 
     // Overflow returns max_size_t.
-    const auto value = [=](size_t total, const transaction::cptr& tx) noexcept
+    const auto value = [=](size_t total, const transaction::cptr& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->signature_operations(bip16, bip141));
     };
@@ -557,7 +557,7 @@ bool block::is_signature_operations_limited(bool bip16,
 // presumption of sha256 non-collision. So this check is bypassed for both
 // exception blocks and if bip34 is active (including under bip90 activation).
 //*****************************************************************************
-bool block::is_unspent_coinbase_collision(size_t height) const noexcept
+bool block::is_unspent_coinbase_collision(size_t height) const NOEXCEPT
 {
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
@@ -572,7 +572,7 @@ bool block::is_unspent_coinbase_collision(size_t height) const noexcept
 // Delegated.
 // ----------------------------------------------------------------------------
 
-code block::check_transactions() const noexcept
+code block::check_transactions() const NOEXCEPT
 {
     code ec;
 
@@ -583,7 +583,7 @@ code block::check_transactions() const noexcept
     return error::block_success;
 }
 
-code block::accept_transactions(const context& state) const noexcept
+code block::accept_transactions(const context& state) const NOEXCEPT
 {
     code ec;
 
@@ -594,7 +594,7 @@ code block::accept_transactions(const context& state) const noexcept
     return error::block_success;
 }
 
-code block::connect_transactions(const context& state) const noexcept
+code block::connect_transactions(const context& state) const NOEXCEPT
 {
     code ec;
 
@@ -610,7 +610,7 @@ code block::connect_transactions(const context& state) const noexcept
 
 // The block header is checked independently.
 // These checks are self-contained; blockchain (and so version) independent.
-code block::check() const noexcept
+code block::check() const NOEXCEPT
 {
     // Inputs and outputs are required.
     if (is_empty())
@@ -652,7 +652,7 @@ code block::check() const noexcept
 // The block header is accepted independently using chain_state.
 // These checks assume that prevout caching is completed on all tx.inputs.
 code block::accept(const context& state, size_t subsidy_interval,
-    uint64_t initial_subsidy) const noexcept
+    uint64_t initial_subsidy) const NOEXCEPT
 {
     const auto bip16 = state.is_enabled(bip16_rule);
     const auto bip30 = state.is_enabled(bip30_rule);
@@ -700,7 +700,7 @@ code block::accept(const context& state, size_t subsidy_interval,
     return accept_transactions(state);
 }
 
-code block::connect(const context& state) const noexcept
+code block::connect(const context& state) const NOEXCEPT
 {
     return connect_transactions(state);
 }
@@ -710,11 +710,11 @@ code block::connect(const context& state) const noexcept
 
 namespace json = boost::json;
 
-// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 block tag_invoke(json::value_to_tag<block>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return
     {
@@ -724,7 +724,7 @@ block tag_invoke(json::value_to_tag<block>,
 }
 
 void tag_invoke(json::value_from_tag, json::value& value,
-    const block& block) noexcept
+    const block& block) NOEXCEPT
 {
     value =
     {
@@ -736,7 +736,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
 BC_POP_WARNING()
 
 block::cptr tag_invoke(json::value_to_tag<block::cptr>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return to_shared(tag_invoke(json::value_to_tag<block>{}, value));
 }
@@ -746,7 +746,7 @@ BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const block::cptr& block) noexcept
+    const block::cptr& block) NOEXCEPT
 {
     tag_invoke(tag, value, *block);
 }

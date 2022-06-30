@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 
 // Common default values (no settings context).
-settings::settings() noexcept
+settings::settings() NOEXCEPT
   : retargeting_factor(4),
     retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
     block_spacing_seconds(10 * 60),
@@ -47,7 +47,7 @@ settings::settings() noexcept
 {
 }
 
-settings::settings(chain::selection context) noexcept
+settings::settings(chain::selection context) NOEXCEPT
   : settings()
 {
     switch (context)
@@ -260,9 +260,9 @@ settings::settings(chain::selection context) noexcept
 // consensus limit on money is stricly a function of subsidy recursion and
 // overspend constraints.
 //*****************************************************************************
-uint64_t settings::max_money() const noexcept
+uint64_t settings::max_money() const NOEXCEPT
 {
-    std::function<uint64_t(uint64_t)> total = [&](uint64_t subsidy) noexcept
+    std::function<uint64_t(uint64_t)> total = [&](uint64_t subsidy) NOEXCEPT
     {
         // DEPRECATED: safe_add.
         // Guarded by parameterization (config).
@@ -275,7 +275,7 @@ uint64_t settings::max_money() const noexcept
 }
 
 // Used to initialize initial subsidy setting.
-uint64_t settings::bitcoin_to_satoshi(uint64_t value) const noexcept
+uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
 {
     // DEPRECATED: safe_multiply.
     // Guarded by parameterization (config).
@@ -283,27 +283,27 @@ uint64_t settings::bitcoin_to_satoshi(uint64_t value) const noexcept
 }
 
 // The initial block subsidy in satoshis.
-uint64_t settings::initial_subsidy() const noexcept
+uint64_t settings::initial_subsidy() const NOEXCEPT
 {
     return bitcoin_to_satoshi(initial_subsidy_bitcoin);
 }
 
 // The lower bound for the retargeting timespan.
-uint32_t settings::minimum_timespan() const noexcept
+uint32_t settings::minimum_timespan() const NOEXCEPT
 {
     return chain::chain_state::minimum_timespan(retargeting_interval_seconds,
         retargeting_factor);
 }
 
 // The upper bound for the retargeting timespan.
-uint32_t settings::maximum_timespan() const noexcept
+uint32_t settings::maximum_timespan() const NOEXCEPT
 {
     return chain::chain_state::maximum_timespan(retargeting_interval_seconds,
         retargeting_factor);
 }
 
 // The target number of blocks for 2 weeks of work (2016 blocks).
-size_t settings::retargeting_interval() const noexcept
+size_t settings::retargeting_interval() const NOEXCEPT
 {
     return chain::chain_state::retargeting_interval(
         retargeting_interval_seconds, block_spacing_seconds);

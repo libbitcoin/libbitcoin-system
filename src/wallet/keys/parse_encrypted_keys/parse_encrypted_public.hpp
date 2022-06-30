@@ -34,17 +34,17 @@ class parse_encrypted_public
   : public parse_encrypted_key<5u>
 {
 public:
-    static data_array<prefix_size> prefix_factory(uint8_t address) noexcept;
+    static data_array<prefix_size> prefix_factory(uint8_t address) NOEXCEPT;
 
-    explicit parse_encrypted_public(const encrypted_public& key) noexcept;
+    explicit parse_encrypted_public(const encrypted_public& key) NOEXCEPT;
 
-    uint8_t address_version() const noexcept;
+    uint8_t address_version() const NOEXCEPT;
 
-    one_byte sign() const noexcept;
-    hash_digest data() const noexcept;
+    one_byte sign() const NOEXCEPT;
+    hash_digest data() const NOEXCEPT;
 
 private:
-    bool verify_magic() const noexcept;
+    bool verify_magic() const NOEXCEPT;
 
     static constexpr uint8_t default_context_ = 0x9a;
     static const data_array<magic_size> magic_;

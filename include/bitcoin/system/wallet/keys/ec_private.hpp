@@ -63,78 +63,78 @@ public:
     static const uint16_t mainnet;
     static const uint16_t testnet;
 
-    static constexpr uint8_t to_address_version(uint16_t versions) noexcept
+    static constexpr uint8_t to_address_version(uint16_t versions) NOEXCEPT
     {
         return narrow_cast<uint8_t>(versions);
     }
 
-    static constexpr uint8_t to_wif_version(uint16_t versions) noexcept
+    static constexpr uint8_t to_wif_version(uint16_t versions) NOEXCEPT
     {
         return narrow_cast<uint8_t>(shift_right(versions, width<uint8_t>()));
     }
 
-    static constexpr uint16_t to_versions(uint8_t address, uint8_t wif) noexcept
+    static constexpr uint16_t to_versions(uint8_t address, uint8_t wif) NOEXCEPT
     {
         return shift_left<uint16_t>(wif, width<uint8_t>()) | address;
     }
 
     /// Constructors.
-    ec_private() noexcept;
-    ec_private(const ec_private& other) noexcept;
+    ec_private() NOEXCEPT;
+    ec_private(const ec_private& other) NOEXCEPT;
     ec_private(const ec_scalar& scalar,
-        uint8_t address = mainnet_p2kh) noexcept;
+        uint8_t address = mainnet_p2kh) NOEXCEPT;
     ec_private(const data_chunk& entropy,
-        uint8_t address=mainnet_p2kh) noexcept;
+        uint8_t address=mainnet_p2kh) NOEXCEPT;
     ec_private(const std::string& wif,
-        uint8_t address=mainnet_p2kh) noexcept;
+        uint8_t address=mainnet_p2kh) NOEXCEPT;
     ec_private(const wif_compressed& wif,
-        uint8_t address=mainnet_p2kh) noexcept;
+        uint8_t address=mainnet_p2kh) NOEXCEPT;
     ec_private(const wif_uncompressed& wif,
-        uint8_t address=mainnet_p2kh) noexcept;
+        uint8_t address=mainnet_p2kh) NOEXCEPT;
 
     /// The version is 16 bits. The most significant byte is the WIF prefix and
     /// the least significant byte is the address perfix. 0x8000 by default.
     ec_private(const ec_secret& secret, uint16_t versions=mainnet,
-        bool compress=true) noexcept;
+        bool compress=true) NOEXCEPT;
 
     /// Operators.
-    ec_private& operator=(ec_private other) noexcept;
-    bool operator<(const ec_private& other) const noexcept;
-    bool operator==(const ec_private& other) const noexcept;
-    bool operator!=(const ec_private& other) const noexcept;
+    ec_private& operator=(ec_private other) NOEXCEPT;
+    bool operator<(const ec_private& other) const NOEXCEPT;
+    bool operator==(const ec_private& other) const NOEXCEPT;
+    bool operator!=(const ec_private& other) const NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, ec_private& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const ec_private& of) noexcept;
+        const ec_private& of) NOEXCEPT;
 
     // Swap implementation required to properly handle base class.
-    friend void swap(ec_private& left, ec_private& right) noexcept;
+    friend void swap(ec_private& left, ec_private& right) NOEXCEPT;
 
     /// Serializer.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Accessors.
-    uint16_t versions() const noexcept;
-    uint8_t payment_version() const noexcept;
-    uint8_t wif_version() const noexcept;
-    bool compressed() const noexcept;
+    uint16_t versions() const NOEXCEPT;
+    uint8_t payment_version() const NOEXCEPT;
+    uint8_t wif_version() const NOEXCEPT;
+    bool compressed() const NOEXCEPT;
 
     /// Methods.
-    ec_public to_public() const noexcept;
-    payment_address to_payment_address() const noexcept;
+    ec_public to_public() const NOEXCEPT;
+    payment_address to_payment_address() const NOEXCEPT;
 
 private:
     /// Validators.
-    static bool is_wif(const data_slice& decoded) noexcept;
+    static bool is_wif(const data_slice& decoded) NOEXCEPT;
 
     /// Factories.
     static ec_private from_string(const std::string& wif,
-        uint8_t address) noexcept;
+        uint8_t address) NOEXCEPT;
     static ec_private from_entropy(const data_chunk& entropy,
-        uint8_t address) noexcept;
+        uint8_t address) NOEXCEPT;
     static ec_private from_compressed(const wif_compressed& wif,
-        uint8_t address) noexcept;
+        uint8_t address) NOEXCEPT;
     static ec_private from_uncompressed(const wif_uncompressed& wif,
-        uint8_t address) noexcept;
+        uint8_t address) NOEXCEPT;
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.

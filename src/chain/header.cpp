@@ -41,14 +41,14 @@ using wall_clock = std::chrono::system_clock;
 // Constructors.
 // ----------------------------------------------------------------------------
 
-header::header() noexcept
+header::header() NOEXCEPT
   : header(0, {}, {}, 0, 0, 0, false)
 {
 }
 
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce) noexcept
+    uint32_t nonce) NOEXCEPT
   : header(version, std::move(previous_block_hash), std::move(merkle_root),
       timestamp, bits, nonce, true)
 {
@@ -56,35 +56,35 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
 
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce) noexcept
+    uint32_t nonce) NOEXCEPT
   : header(version, previous_block_hash, merkle_root, timestamp, bits, nonce,
       true)
 {
 }
 
-header::header(const data_slice& data) noexcept
+header::header(const data_slice& data) NOEXCEPT
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : header(stream::in::copy(data))
     BC_POP_WARNING()
 {
 }
 
-header::header(std::istream&& stream) noexcept
+header::header(std::istream&& stream) NOEXCEPT
   : header(read::bytes::istream(stream))
 {
 }
 
-header::header(std::istream& stream) noexcept
+header::header(std::istream& stream) NOEXCEPT
   : header(read::bytes::istream(stream))
 {
 }
 
-header::header(reader&& source) noexcept
+header::header(reader&& source) NOEXCEPT
   : header(from_data(source))
 {
 }
 
-header::header(reader& source) noexcept
+header::header(reader& source) NOEXCEPT
   : header(from_data(source))
 {
 }
@@ -92,7 +92,7 @@ header::header(reader& source) noexcept
 // protected
 header::header(uint32_t version, hash_digest&& previous_block_hash,
     hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, bool valid) noexcept
+    uint32_t nonce, bool valid) NOEXCEPT
   : version_(version),
     previous_block_hash_(std::move(previous_block_hash)),
     merkle_root_(std::move(merkle_root)),
@@ -106,7 +106,7 @@ header::header(uint32_t version, hash_digest&& previous_block_hash,
 // protected
 header::header(uint32_t version, const hash_digest& previous_block_hash,
     const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-    uint32_t nonce, bool valid) noexcept
+    uint32_t nonce, bool valid) NOEXCEPT
   : version_(version),
     previous_block_hash_(previous_block_hash),
     merkle_root_(merkle_root),
@@ -120,7 +120,7 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 // Operators.
 // ----------------------------------------------------------------------------
 
-bool header::operator==(const header& other) const noexcept
+bool header::operator==(const header& other) const NOEXCEPT
 {
     return (version_ == other.version_)
         && (previous_block_hash_ == other.previous_block_hash_)
@@ -130,7 +130,7 @@ bool header::operator==(const header& other) const noexcept
         && (nonce_ == other.nonce_);
 }
 
-bool header::operator!=(const header& other) const noexcept
+bool header::operator!=(const header& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -139,7 +139,7 @@ bool header::operator!=(const header& other) const noexcept
 // ----------------------------------------------------------------------------
 
 // static/private
-header header::from_data(reader& source) noexcept
+header header::from_data(reader& source) NOEXCEPT
 {
     return
     {
@@ -156,7 +156,7 @@ header header::from_data(reader& source) noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk header::to_data() const noexcept
+data_chunk header::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size(), no_fill_byte_allocator);
 
@@ -168,13 +168,13 @@ data_chunk header::to_data() const noexcept
     return data;
 }
 
-void header::to_data(std::ostream& stream) const noexcept
+void header::to_data(std::ostream& stream) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out);
 }
 
-void header::to_data(writer& sink) const noexcept
+void header::to_data(writer& sink) const NOEXCEPT
 {
     sink.write_4_bytes_little_endian(version_);
     sink.write_bytes(previous_block_hash_);
@@ -187,43 +187,43 @@ void header::to_data(writer& sink) const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool header::is_valid() const noexcept
+bool header::is_valid() const NOEXCEPT
 {
     return valid_;
 }
 
-uint32_t header::version() const noexcept
+uint32_t header::version() const NOEXCEPT
 {
     return version_;
 }
 
-const hash_digest& header::previous_block_hash() const noexcept
+const hash_digest& header::previous_block_hash() const NOEXCEPT
 {
     return previous_block_hash_;
 }
 
-const hash_digest& header::merkle_root() const noexcept
+const hash_digest& header::merkle_root() const NOEXCEPT
 {
     return merkle_root_;
 }
 
-uint32_t header::timestamp() const noexcept
+uint32_t header::timestamp() const NOEXCEPT
 {
     return timestamp_;
 }
 
-uint32_t header::bits() const noexcept
+uint32_t header::bits() const NOEXCEPT
 {
     return bits_;
 }
 
-uint32_t header::nonce() const noexcept
+uint32_t header::nonce() const NOEXCEPT
 {
     return nonce_;
 }
 
 // computed
-hash_digest header::hash() const noexcept
+hash_digest header::hash() const NOEXCEPT
 {
     hash_digest sha256{};
     hash::sha256::copy sink(sha256);
@@ -233,7 +233,7 @@ hash_digest header::hash() const noexcept
 }
 
 // static/private
-uint256_t header::difficulty(uint32_t bits) noexcept
+uint256_t header::difficulty(uint32_t bits) NOEXCEPT
 {
     auto target = compact::expand(bits);
 
@@ -257,7 +257,7 @@ uint256_t header::difficulty(uint32_t bits) noexcept
 }
 
 // computed
-uint256_t header::difficulty() const noexcept
+uint256_t header::difficulty() const NOEXCEPT
 {
     // Returns zero if bits_ mantissa is less than one or bits_ is overflowed.
     return difficulty(bits_);
@@ -267,7 +267,7 @@ uint256_t header::difficulty() const noexcept
 // ----------------------------------------------------------------------------
 
 bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
-    bool scrypt) const noexcept
+    bool scrypt) const NOEXCEPT
 {
     static const auto limit = compact::expand(proof_of_work_limit);
     const auto target = compact::expand(bits_);
@@ -291,7 +291,7 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
 /// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
 // ****************************************************************************
 bool header::is_invalid_timestamp(
-    uint32_t timestamp_limit_seconds) const noexcept
+    uint32_t timestamp_limit_seconds) const NOEXCEPT
 {
     using namespace std::chrono;
     static const auto two_hours = seconds(timestamp_limit_seconds);
@@ -304,7 +304,7 @@ bool header::is_invalid_timestamp(
 // ----------------------------------------------------------------------------
 
 code header::check(uint32_t timestamp_limit_seconds,
-    uint32_t proof_of_work_limit, bool scrypt) const noexcept
+    uint32_t proof_of_work_limit, bool scrypt) const NOEXCEPT
 {
     if (is_invalid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
@@ -315,7 +315,7 @@ code header::check(uint32_t timestamp_limit_seconds,
     return error::success;
 }
 
-code header::accept(const chain_state& state) const noexcept
+code header::accept(const chain_state& state) const NOEXCEPT
 {
     if (state.is_checkpoint_conflict(hash()))
         return error::checkpoints_failed;
@@ -339,11 +339,11 @@ code header::accept(const chain_state& state) const noexcept
 
 namespace json = boost::json;
 
-// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 header tag_invoke(json::value_to_tag<header>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     hash_digest previous, merkle_root;
     if (!decode_hash(previous, value.at("previous").get_string().c_str()) ||
@@ -362,7 +362,7 @@ header tag_invoke(json::value_to_tag<header>,
 }
 
 void tag_invoke(json::value_from_tag, json::value& value,
-    const header& tx) noexcept
+    const header& tx) NOEXCEPT
 {
     value =
     {
@@ -378,7 +378,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
 BC_POP_WARNING()
 
 header::cptr tag_invoke(json::value_to_tag<header::cptr>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return to_shared(tag_invoke(json::value_to_tag<header>{}, value));
 }
@@ -388,7 +388,7 @@ BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const header::cptr& tx) noexcept
+    const header::cptr& tx) NOEXCEPT
 {
     tag_invoke(tag, value, *tx);
 }

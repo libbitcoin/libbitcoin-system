@@ -35,29 +35,29 @@ using namespace std::chrono;
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
 // Values may or may not be truly random depending on the underlying device.
 
-void pseudo_random::fill(data_chunk& out) noexcept
+void pseudo_random::fill(data_chunk& out) NOEXCEPT
 {
-    std::transform(out.begin(), out.end(), out.begin(), [](uint8_t) noexcept
+    std::transform(out.begin(), out.end(), out.begin(), [](uint8_t) NOEXCEPT
     {
         return next();
     });
 }
 
-uint8_t pseudo_random::next() noexcept
+uint8_t pseudo_random::next() NOEXCEPT
 {
     return next(minimum<uint8_t>(), maximum<uint8_t>());
 }
 
-uint8_t pseudo_random::next(uint8_t begin, uint8_t end) noexcept
+uint8_t pseudo_random::next(uint8_t begin, uint8_t end) NOEXCEPT
 {
     std::uniform_int_distribution<uint16_t> distribution(begin, end);
     return static_cast<uint8_t>(distribution(get_twister()));
 }
 
-std::mt19937& pseudo_random::get_twister() noexcept
+std::mt19937& pseudo_random::get_twister() NOEXCEPT
 {
     // Boost.thread will clean up the thread statics using this function.
-    const auto deleter = [](std::mt19937* twister) noexcept
+    const auto deleter = [](std::mt19937* twister) NOEXCEPT
     {
         delete twister;
     };
@@ -67,7 +67,7 @@ std::mt19937& pseudo_random::get_twister() noexcept
     static boost::thread_specific_ptr<std::mt19937> twister(deleter);
 
     // Use the clock for seeding.
-    const auto get_clock_seed = []() noexcept
+    const auto get_clock_seed = []() NOEXCEPT
     {
         const auto now = high_resolution_clock::now();
         return static_cast<uint32_t>(now.time_since_epoch().count());
@@ -89,7 +89,7 @@ std::mt19937& pseudo_random::get_twister() noexcept
 // [(expiration - expiration / ratio) .. expiration]
 // Not fully testable due to lack of random engine injection.
 steady_clock::duration pseudo_random::duration(
-    const steady_clock::duration& expiration, uint8_t ratio) noexcept
+    const steady_clock::duration& expiration, uint8_t ratio) NOEXCEPT
 {
     if (is_zero(ratio))
         return expiration;

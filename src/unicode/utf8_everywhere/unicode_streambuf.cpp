@@ -32,7 +32,7 @@ namespace libbitcoin {
 namespace system {
 
 unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer,
-    size_t size) noexcept(false)
+    size_t size) THROWS
   : wide_size_(size),
     narrow_size_(wide_size_ * utf8_max_character_size),
     narrow_(new char[narrow_size_]),
@@ -50,7 +50,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer,
     setp(narrow_, &narrow_[sub1(narrow_size_)]);
 }
 
-unicode_streambuf::~unicode_streambuf() noexcept
+unicode_streambuf::~unicode_streambuf() NOEXCEPT
 {
     sync();
     delete[] wide_;
@@ -61,7 +61,7 @@ unicode_streambuf::~unicode_streambuf() noexcept
 // This invokes wide_buffer_.xsgetn() which requires a patch for
 // console (keyboard) input on Windows, so ensure this class is
 // initialized with a patched std::wcin when std::wcin is used.
-std::streambuf::int_type unicode_streambuf::underflow() noexcept(false)
+std::streambuf::int_type unicode_streambuf::underflow() THROWS
 {
     // streamsize is signed.
     const auto size = static_cast<std::streamsize>(wide_size_);
@@ -95,7 +95,7 @@ std::streambuf::int_type unicode_streambuf::underflow() noexcept(false)
 // assumes the stream will treat each byte of a multibyte narrow
 // chracter as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
-    std::streambuf::int_type character) noexcept(false)
+    std::streambuf::int_type character) THROWS
 {
     // Add a single explicitly read byte to the buffer.
     // The narrow buffer is underexposed by 1 byte to accomodate this.
@@ -156,7 +156,7 @@ std::streambuf::int_type unicode_streambuf::overflow(
 }
 
 // Flush our output sequence.
-int unicode_streambuf::sync() noexcept(false)
+int unicode_streambuf::sync() THROWS
 {
     const int success = zero;
     const int failure = negative_one;

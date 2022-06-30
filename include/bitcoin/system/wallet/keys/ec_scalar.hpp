@@ -35,46 +35,46 @@ class BC_API ec_scalar
 {
 public:
     /// Constructors.
-    ec_scalar() noexcept;
-    ec_scalar(ec_scalar&& scalar) noexcept;
-    ec_scalar(const ec_scalar& scalar) noexcept;
-    ec_scalar(ec_secret&& secret) noexcept;
-    ec_scalar(const ec_secret& secret) noexcept;
-    ec_scalar(int64_t value) noexcept;
+    ec_scalar() NOEXCEPT;
+    ec_scalar(ec_scalar&& scalar) NOEXCEPT;
+    ec_scalar(const ec_scalar& scalar) NOEXCEPT;
+    ec_scalar(ec_secret&& secret) NOEXCEPT;
+    ec_scalar(const ec_secret& secret) NOEXCEPT;
+    ec_scalar(int64_t value) NOEXCEPT;
 
     /// Operators.
-    ec_scalar& operator=(const ec_scalar& scalar) noexcept;
-    ec_scalar& operator=(ec_scalar&& scalar) noexcept;
-    ec_scalar& operator=(const ec_secret& secret) noexcept;
-    ec_scalar& operator=(ec_secret&& secret) noexcept;
-    ec_scalar& operator+=(const ec_scalar& scalar) noexcept;
-    ec_scalar& operator-=(const ec_scalar& scalar) noexcept;
-    ec_scalar& operator*=(const ec_scalar& scalar) noexcept;
-    ec_scalar operator-() const noexcept;
+    ec_scalar& operator=(const ec_scalar& scalar) NOEXCEPT;
+    ec_scalar& operator=(ec_scalar&& scalar) NOEXCEPT;
+    ec_scalar& operator=(const ec_secret& secret) NOEXCEPT;
+    ec_scalar& operator=(ec_secret&& secret) NOEXCEPT;
+    ec_scalar& operator+=(const ec_scalar& scalar) NOEXCEPT;
+    ec_scalar& operator-=(const ec_scalar& scalar) NOEXCEPT;
+    ec_scalar& operator*=(const ec_scalar& scalar) NOEXCEPT;
+    ec_scalar operator-() const NOEXCEPT;
 
     /// Cast operators.
-    operator bool() const noexcept;
-    operator const ec_secret&() const noexcept;
+    operator bool() const NOEXCEPT;
+    operator const ec_secret&() const NOEXCEPT;
 
     /// Accessors.
-    const ec_secret& secret() const noexcept;
+    const ec_secret& secret() const NOEXCEPT;
 
 private:
-    static ec_scalar from_int64(int64_t value) noexcept;
+    static ec_scalar from_int64(int64_t value) NOEXCEPT;
 
     // This should be const, apart from the need to implement assignment.
     ec_secret secret_;
 };
 
-BC_API bool operator==(int64_t left, const ec_scalar& right) noexcept;
-BC_API bool operator!=(int64_t left, const ec_scalar& right) noexcept;
-BC_API bool operator==(const ec_scalar& left, int64_t right) noexcept;
-BC_API bool operator!=(const ec_scalar& left, int64_t right) noexcept;
-BC_API bool operator==(const ec_scalar& left, const ec_scalar& right) noexcept;
-BC_API bool operator!=(const ec_scalar& left, const ec_scalar& right) noexcept;
-BC_API ec_scalar operator+(const ec_scalar& left, const ec_scalar& right) noexcept;
-BC_API ec_scalar operator-(const ec_scalar& left, const ec_scalar& right) noexcept;
-BC_API ec_scalar operator*(const ec_scalar& left, const ec_scalar& right) noexcept;
+BC_API bool operator==(int64_t left, const ec_scalar& right) NOEXCEPT;
+BC_API bool operator!=(int64_t left, const ec_scalar& right) NOEXCEPT;
+BC_API bool operator==(const ec_scalar& left, int64_t right) NOEXCEPT;
+BC_API bool operator!=(const ec_scalar& left, int64_t right) NOEXCEPT;
+BC_API bool operator==(const ec_scalar& left, const ec_scalar& right) NOEXCEPT;
+BC_API bool operator!=(const ec_scalar& left, const ec_scalar& right) NOEXCEPT;
+BC_API ec_scalar operator+(const ec_scalar& left, const ec_scalar& right) NOEXCEPT;
+BC_API ec_scalar operator-(const ec_scalar& left, const ec_scalar& right) NOEXCEPT;
+BC_API ec_scalar operator*(const ec_scalar& left, const ec_scalar& right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

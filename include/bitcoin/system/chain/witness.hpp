@@ -47,7 +47,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default witness is an invalid empty stack object.
-    witness() noexcept;
+    witness() NOEXCEPT;
 
     /// Defaults.
     witness(witness&&) = default;
@@ -56,56 +56,56 @@ public:
     witness& operator=(const witness&) = default;
     ~witness() = default;
 
-    witness(data_stack&& stack) noexcept;
-    witness(const data_stack& stack) noexcept;
+    witness(data_stack&& stack) NOEXCEPT;
+    witness(const data_stack& stack) NOEXCEPT;
 
-    witness(chunk_cptrs&& stack) noexcept;
-    witness(const chunk_cptrs& stack) noexcept;
+    witness(chunk_cptrs&& stack) NOEXCEPT;
+    witness(const chunk_cptrs& stack) NOEXCEPT;
 
-    witness(const data_slice& data, bool prefix) noexcept;
-    witness(std::istream&& stream, bool prefix) noexcept;
-    witness(std::istream& stream, bool prefix) noexcept;
-    witness(reader&& source, bool prefix) noexcept;
-    witness(reader& source, bool prefix) noexcept;
+    witness(const data_slice& data, bool prefix) NOEXCEPT;
+    witness(std::istream&& stream, bool prefix) NOEXCEPT;
+    witness(std::istream& stream, bool prefix) NOEXCEPT;
+    witness(reader&& source, bool prefix) NOEXCEPT;
+    witness(reader& source, bool prefix) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    witness(const std::string& mnemonic) noexcept;
+    witness(const std::string& mnemonic) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    bool operator==(const witness& other) const noexcept;
-    bool operator!=(const witness& other) const noexcept;
+    bool operator==(const witness& other) const NOEXCEPT;
+    bool operator!=(const witness& other) const NOEXCEPT;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool prefix) const noexcept;
-    void to_data(std::ostream& stream, bool prefix) const noexcept;
-    void to_data(writer& sink, bool prefix) const noexcept;
+    data_chunk to_data(bool prefix) const NOEXCEPT;
+    void to_data(std::ostream& stream, bool prefix) const NOEXCEPT;
+    void to_data(writer& sink, bool prefix) const NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    std::string to_string() const noexcept;
+    std::string to_string() const NOEXCEPT;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const noexcept;
-    const chunk_cptrs& stack() const noexcept;
+    bool is_valid() const NOEXCEPT;
+    const chunk_cptrs& stack() const NOEXCEPT;
 
     /// Computed properties.
-    size_t serialized_size(bool prefix) const noexcept;
+    size_t serialized_size(bool prefix) const NOEXCEPT;
 
     // Utilities.
     // ------------------------------------------------------------------------
 
     // C++20: constexpr.
-    static inline bool is_push_size(const chunk_cptrs& stack) noexcept
+    static inline bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
     {
         // C++17: parallel policy for std::all_of.
         return std::all_of(stack.begin(), stack.end(),
-            [](const auto& element) noexcept
+            [](const auto& element) NOEXCEPT
             {
                 return element->size() <= max_push_data_size;
             });
@@ -113,24 +113,24 @@ public:
 
     // C++20: constexpr.
     // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-    static inline bool is_reserved_pattern(const chunk_cptrs& stack) noexcept
+    static inline bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
     {
         return stack.size() == one && stack.front()->size() == hash_size;
     }
 
     bool extract_sigop_script(script& out_script,
-        const script& program_script) const noexcept;
+        const script& program_script) const NOEXCEPT;
     bool extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
-        const script& program_script) const noexcept;
+        const script& program_script) const NOEXCEPT;
 
 private:
     // TODO: move to config serialization wrapper.
-    static witness from_string(const std::string& mnemonic) noexcept;
-    static witness from_data(reader& source, bool prefix) noexcept;
-    size_t serialized_size() const noexcept;
+    static witness from_string(const std::string& mnemonic) NOEXCEPT;
+    static witness from_data(reader& source, bool prefix) NOEXCEPT;
+    size_t serialized_size() const NOEXCEPT;
 
-    witness(chunk_cptrs&& stack, bool valid) noexcept;
-    witness(const chunk_cptrs& stack, bool valid) noexcept;
+    witness(chunk_cptrs&& stack, bool valid) NOEXCEPT;
+    witness(const chunk_cptrs& stack, bool valid) NOEXCEPT;
 
     // Witness should be stored as shared.
     chunk_cptrs stack_;
@@ -151,7 +151,7 @@ namespace std
 template<>
 struct hash<bc::system::chain::witness>
 {
-    size_t operator()(const bc::system::chain::witness& value) const noexcept
+    size_t operator()(const bc::system::chain::witness& value) const NOEXCEPT
     {
         // Witness coinbases will collide (null_hash).
         return std::hash<bc::system::data_chunk>{}(value.to_data(true));

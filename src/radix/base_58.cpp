@@ -32,16 +32,16 @@ namespace system {
 const std::string base58_chars =
     "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-bool is_base58(char character) noexcept
+bool is_base58(char character) NOEXCEPT
 {
     // The base58 character list is lexically sorted.
     return std::binary_search(base58_chars.begin(), base58_chars.end(),
         character);
 }
 
-bool is_base58(const std::string& text) noexcept
+bool is_base58(const std::string& text) NOEXCEPT
 {
-    const auto test = [](const char character) noexcept
+    const auto test = [](const char character) NOEXCEPT
     {
         return is_base58(character);
     };
@@ -50,7 +50,7 @@ bool is_base58(const std::string& text) noexcept
 }
 
 template <typename Data>
-static auto find_first_nonzero(const Data& data) noexcept ->
+static auto find_first_nonzero(const Data& data) NOEXCEPT ->
     decltype(data.cbegin())
 {
     auto first_nonzero = data.cbegin();
@@ -60,7 +60,7 @@ static auto find_first_nonzero(const Data& data) noexcept ->
     return first_nonzero;
 }
 
-size_t count_leading_zeros(const data_slice& unencoded) noexcept
+size_t count_leading_zeros(const data_slice& unencoded) NOEXCEPT
 {
     // Skip and count leading '1's.
     size_t leading_zeros = 0;
@@ -75,7 +75,7 @@ size_t count_leading_zeros(const data_slice& unencoded) noexcept
     return leading_zeros;
 }
 
-void pack_value(data_chunk& indexes, size_t carry) noexcept
+void pack_value(data_chunk& indexes, size_t carry) NOEXCEPT
 {
     // Apply "b58 = b58 * 256 + ch".
     for (auto it = indexes.rbegin(); it != indexes.rend(); ++it)
@@ -88,7 +88,7 @@ void pack_value(data_chunk& indexes, size_t carry) noexcept
     BC_ASSERT(is_zero(carry));
 }
 
-std::string encode_base58(const data_slice& unencoded) noexcept
+std::string encode_base58(const data_slice& unencoded) NOEXCEPT
 {
     const auto leading_zeros = count_leading_zeros(unencoded);
 
@@ -123,7 +123,7 @@ std::string encode_base58(const data_slice& unencoded) noexcept
     return encoded;
 }
 
-size_t count_leading_zeros(const std::string& encoded) noexcept
+size_t count_leading_zeros(const std::string& encoded) NOEXCEPT
 {
     // Skip and count leading '1's.
     size_t leading_zeros = 0;
@@ -138,7 +138,7 @@ size_t count_leading_zeros(const std::string& encoded) noexcept
     return leading_zeros;
 }
 
-void unpack_char(data_chunk& data, size_t carry) noexcept
+void unpack_char(data_chunk& data, size_t carry) NOEXCEPT
 {
     for (auto it = data.rbegin(); it != data.rend(); it++)
     {
@@ -150,7 +150,7 @@ void unpack_char(data_chunk& data, size_t carry) noexcept
     BC_ASSERT(is_zero(carry));
 }
 
-bool decode_base58(data_chunk& out, const std::string& in) noexcept
+bool decode_base58(data_chunk& out, const std::string& in) NOEXCEPT
 {
     out.clear();
 

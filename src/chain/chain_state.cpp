@@ -54,43 +54,43 @@ static const checkpoint mainnet_bip30_exception_checkpoint2
 // Inlines.
 // ----------------------------------------------------------------------------
 
-constexpr bool is_active(size_t count, size_t activation_threshold) noexcept
+constexpr bool is_active(size_t count, size_t activation_threshold) NOEXCEPT
 {
     return count >= activation_threshold;
 }
 
-constexpr bool is_enforced(size_t count, size_t enforcement_threshold) noexcept
+constexpr bool is_enforced(size_t count, size_t enforcement_threshold) NOEXCEPT
 {
     return count >= enforcement_threshold;
 }
 
 // Determine the number of blocks back to the closest retarget height.
 constexpr size_t retarget_distance(size_t height,
-    size_t retargeting_interval) noexcept
+    size_t retargeting_interval) NOEXCEPT
 {
     return height % retargeting_interval;
 }
 
 // Determine if height is a multiple of retargeting_interval.
 constexpr bool is_retarget_height(size_t height,
-    size_t retargeting_interval) noexcept
+    size_t retargeting_interval) NOEXCEPT
 {
     return is_zero(retarget_distance(height, retargeting_interval));
 }
 
-inline bool is_bip30_exception(const checkpoint& check, bool mainnet) noexcept
+inline bool is_bip30_exception(const checkpoint& check, bool mainnet) NOEXCEPT
 {
     return mainnet &&
         ((check == mainnet_bip30_exception_checkpoint1) ||
          (check == mainnet_bip30_exception_checkpoint2));
 }
 
-inline uint32_t timestamp_high(const chain_state::data& values) noexcept
+inline uint32_t timestamp_high(const chain_state::data& values) NOEXCEPT
 {
     return values.timestamp.ordered.back();
 }
 
-inline uint32_t bits_high(const chain_state::data& values) noexcept
+inline uint32_t bits_high(const chain_state::data& values) NOEXCEPT
 {
     return values.bits.ordered.back();
 }
@@ -99,7 +99,7 @@ inline uint32_t bits_high(const chain_state::data& values) noexcept
 // ----------------------------------------------------------------------------
 
 chain_state::activations chain_state::activation(const data& values,
-    uint32_t forks, const system::settings& settings) noexcept
+    uint32_t forks, const system::settings& settings) NOEXCEPT
 {
     const auto height = values.height;
     const auto version = values.version.self;
@@ -114,17 +114,17 @@ chain_state::activations chain_state::activation(const data& values,
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
     // performed this comparison using the signed integer version value.
     //*************************************************************************
-    const auto ge = [](uint32_t value, uint32_t version) noexcept
+    const auto ge = [](uint32_t value, uint32_t version) NOEXCEPT
     {
         return sign_cast<int32_t>(value) >= sign_cast<int32_t>(version);
     };
 
     // Declare bip34-based version predicates.
-    const auto ge_2 = [&](uint32_t value) noexcept { return ge(value,
+    const auto ge_2 = [&](uint32_t value) NOEXCEPT { return ge(value,
         settings.bip34_version); };
-    const auto ge_3 = [&](uint32_t value) noexcept { return ge(value,
+    const auto ge_3 = [&](uint32_t value) NOEXCEPT { return ge(value,
         settings.bip66_version); };
-    const auto ge_4 = [&](uint32_t value) noexcept { return ge(value,
+    const auto ge_4 = [&](uint32_t value) NOEXCEPT { return ge(value,
         settings.bip65_version); };
 
     // Compute bip34-based activation version summaries.
@@ -233,7 +233,7 @@ chain_state::activations chain_state::activation(const data& values,
 }
 
 size_t chain_state::bits_count(size_t height, uint32_t forks,
-    size_t retargeting_interval) noexcept
+    size_t retargeting_interval) NOEXCEPT
 {
     // Mainnet doesn't use bits in retargeting.
     if (script::is_enabled(forks, forks::difficult))
@@ -252,7 +252,7 @@ size_t chain_state::bits_count(size_t height, uint32_t forks,
 }
 
 size_t chain_state::version_count(size_t height, uint32_t forks,
-    size_t activation_sample) noexcept
+    size_t activation_sample) NOEXCEPT
 {
     if (script::is_enabled(forks, forks::bip90_rule) ||
         !script::is_enabled(forks, forks::bip34_activations))
@@ -263,13 +263,13 @@ size_t chain_state::version_count(size_t height, uint32_t forks,
     return std::min(height, activation_sample);
 }
 
-size_t chain_state::timestamp_count(size_t height, uint32_t) noexcept
+size_t chain_state::timestamp_count(size_t height, uint32_t) NOEXCEPT
 {
     return std::min(height, median_time_past_interval);
 }
 
 size_t chain_state::retarget_height(size_t height, uint32_t forks,
-    size_t retargeting_interval) noexcept
+    size_t retargeting_interval) NOEXCEPT
 {
     if (!script::is_enabled(forks, forks::retarget))
         return map::unrequested;
@@ -281,7 +281,7 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
 }
 
 size_t chain_state::bip9_bit0_height(size_t height,
-    const checkpoint& bip9_bit0_active_checkpoint) noexcept
+    const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT
 {
     const auto activation_height = bip9_bit0_active_checkpoint.height();
     // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
@@ -289,7 +289,7 @@ size_t chain_state::bip9_bit0_height(size_t height,
 }
 
 size_t chain_state::bip9_bit1_height(size_t height,
-    const checkpoint& bip9_bit1_active_checkpoint) noexcept
+    const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT
 {
     const auto activation_height = bip9_bit1_active_checkpoint.height();
 
@@ -301,7 +301,7 @@ size_t chain_state::bip9_bit1_height(size_t height,
 // ----------------------------------------------------------------------------
 
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
-    const system::settings& settings) noexcept
+    const system::settings& settings) NOEXCEPT
 {
     BC_ASSERT_MSG(!is_zero(compact::expand(bits_high(values))),
         "previous block has invalid bits value");
@@ -335,7 +335,7 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 
 // Get the bounded total time spanning the highest 2016 blocks.
 uint32_t chain_state::retarget_timespan(const data& values,
-    uint32_t minimum_timespan, uint32_t maximum_timespan) noexcept
+    uint32_t minimum_timespan, uint32_t maximum_timespan) NOEXCEPT
 {
     const auto high = timestamp_high(values);
     const auto retarget = values.timestamp.retarget;
@@ -349,7 +349,7 @@ uint32_t chain_state::retarget_timespan(const data& values,
 }
 
 static inline bool patch_timewarp(uint32_t forks, const uint256_t& limit,
-    const uint256_t& target) noexcept
+    const uint256_t& target) NOEXCEPT
 {
     return script::is_enabled(forks, forks::retarget_overflow_patch) &&
         floored_log2(target) >= floored_log2(limit);
@@ -357,7 +357,7 @@ static inline bool patch_timewarp(uint32_t forks, const uint256_t& limit,
 
 uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     uint32_t proof_of_work_limit, uint32_t minimum_timespan,
-    uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) noexcept
+    uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) NOEXCEPT
 {
     static const auto limit = compact::expand(proof_of_work_limit);
     auto target = compact::expand(bits_high(values));
@@ -376,7 +376,7 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
 }
 
 inline uint32_t easy_time_limit(const chain_state::data& values,
-    int64_t spacing) noexcept
+    int64_t spacing) NOEXCEPT
 {
     const int64_t high = timestamp_high(values);
 
@@ -389,7 +389,7 @@ inline uint32_t easy_time_limit(const chain_state::data& values,
 
 // A retarget height, or a block that does not have proof_of_work_limit bits.
 constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
-    size_t retargeting_interval, uint32_t proof_of_work_limit) noexcept
+    size_t retargeting_interval, uint32_t proof_of_work_limit) NOEXCEPT
 {
     // Zero is a retarget height, termination required before height underflow.
     // This is guaranteed, just a comment here because it may not be obvious.
@@ -399,7 +399,7 @@ constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
 
 uint32_t chain_state::easy_work_required(const data& values,
     size_t retargeting_interval, uint32_t proof_of_work_limit,
-    uint32_t block_spacing_seconds) noexcept
+    uint32_t block_spacing_seconds) NOEXCEPT
 {
     BC_ASSERT(!is_zero(values.height));
 
@@ -434,7 +434,7 @@ chain_state::map chain_state::get_map(size_t height,
     const checkpoints& /* checkpoints */, uint32_t forks,
     size_t retargeting_interval, size_t activation_sample,
     const checkpoint& bip9_bit0_active_checkpoint,
-    const checkpoint& bip9_bit1_active_checkpoint) noexcept
+    const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT
 {
     if (is_zero(height))
         return {};
@@ -472,7 +472,7 @@ chain_state::map chain_state::get_map(size_t height,
 }
 
 uint32_t chain_state::signal_version(uint32_t forks,
-    const system::settings& settings) noexcept
+    const system::settings& settings) NOEXCEPT
 {
     if (script::is_enabled(forks, forks::bip65_rule))
         return settings.bip65_version;
@@ -507,7 +507,7 @@ uint32_t chain_state::signal_version(uint32_t forks,
 // curious and confusing convention. We associate the median time past for
 // block N with block N. This is simple but requires care when comparing code.
 //*****************************************************************************
-uint32_t chain_state::median_time_past(const data& values, uint32_t) noexcept
+uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
 {
     // Sort the times by value to obtain the median.
     auto times = sort_copy(values.timestamp.ordered);
@@ -523,7 +523,7 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t) noexcept
 
 // This is promotion from a preceding height to the next.
 chain_state::data chain_state::to_pool(const chain_state& top,
-    const system::settings& settings) noexcept
+    const system::settings& settings) NOEXCEPT
 {
     // Alias configured forks.
     const auto forks = top.forks_;
@@ -583,7 +583,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 // Top to pool.
 // This generates a state for the pool above the presumed top block state.
 chain_state::chain_state(const chain_state& top,
-    const system::settings& settings) noexcept
+    const system::settings& settings) NOEXCEPT
   : data_(to_pool(top, settings)),
     forks_(top.forks_),
     stale_seconds_(top.stale_seconds_),
@@ -596,7 +596,7 @@ chain_state::chain_state(const chain_state& top,
 
 chain_state::data chain_state::to_block(const chain_state& pool,
     const block& block, const checkpoint& bip9_bit0_active_checkpoint,
-    const checkpoint& bip9_bit1_active_checkpoint) noexcept
+    const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT
 {
     // Copy data from presumed same-height pool state.
     chain_state::data data{ pool.data_ };
@@ -623,7 +623,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 // Pool to block.
 // This assumes that the pool state is the same height as the block.
 chain_state::chain_state(const chain_state& pool, const block& block,
-    const system::settings& settings) noexcept
+    const system::settings& settings) NOEXCEPT
   : data_(to_block(pool, block, settings.bip9_bit0_active_checkpoint,
         settings.bip9_bit1_active_checkpoint)),
     forks_(pool.forks_),
@@ -636,7 +636,7 @@ chain_state::chain_state(const chain_state& pool, const block& block,
 }
 
 chain_state::data chain_state::to_header(const chain_state& parent,
-    const header& header, const system::settings& settings) noexcept
+    const header& header, const system::settings& settings) NOEXCEPT
 {
     BC_ASSERT(header.previous_block_hash() == parent.hash());
 
@@ -664,7 +664,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
 // Parent to header.
 // This assumes that parent is the state of the header's previous block.
 chain_state::chain_state(const chain_state& parent, const header& header,
-    const system::settings& settings) noexcept
+    const system::settings& settings) NOEXCEPT
   : data_(to_header(parent, header, settings)),
     forks_(parent.forks_),
     stale_seconds_(parent.stale_seconds_),
@@ -678,7 +678,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
 // From raw data.
 chain_state::chain_state(data&& values, const checkpoints& checkpoints,
     uint32_t forks, uint32_t stale_seconds,
-    const system::settings& settings) noexcept
+    const system::settings& settings) NOEXCEPT
   : data_(std::move(values)),
     forks_(forks),
     stale_seconds_(stale_seconds),
@@ -692,54 +692,54 @@ chain_state::chain_state(data&& values, const checkpoints& checkpoints,
 // Properties.
 // ----------------------------------------------------------------------------
 
-const hash_digest& chain_state::hash() const noexcept
+const hash_digest& chain_state::hash() const NOEXCEPT
 {
     return data_.hash;
 }
 
-uint32_t chain_state::minimum_block_version() const noexcept
+uint32_t chain_state::minimum_block_version() const NOEXCEPT
 {
     return active_.minimum_block_version;
 }
 
-uint32_t chain_state::maximum_transaction_version() const noexcept
+uint32_t chain_state::maximum_transaction_version() const NOEXCEPT
 {
     return active_.maximum_transaction_version;
 }
 
-uint32_t chain_state::work_required() const noexcept
+uint32_t chain_state::work_required() const NOEXCEPT
 {
     return work_required_;
 }
 
 // context
 
-uint32_t chain_state::timestamp() const noexcept
+uint32_t chain_state::timestamp() const NOEXCEPT
 {
     return data_.timestamp.self;
 }
 
-uint32_t chain_state::median_time_past() const noexcept
+uint32_t chain_state::median_time_past() const NOEXCEPT
 {
     return median_time_past_;
 }
 
-uint32_t chain_state::forks() const noexcept
+uint32_t chain_state::forks() const NOEXCEPT
 {
     return active_.forks;
 }
 
-uint32_t chain_state::policy() const noexcept
+uint32_t chain_state::policy() const NOEXCEPT
 {
     return policy::no_policy;
 }
 
-size_t chain_state::height() const noexcept
+size_t chain_state::height() const NOEXCEPT
 {
     return data_.height;
 }
 
-chain::context chain_state::context() const noexcept
+chain::context chain_state::context() const NOEXCEPT
 {
     chain::context context{};
     context.forks = forks();
@@ -753,7 +753,7 @@ chain::context chain_state::context() const noexcept
 /// Current zulu (utc) time in seconds since epoch, using the wall clock.
 /// Although not defined, epoch is almost always: 00:00, Jan 1 1970 UTC.
 /// BUGBUG: en.wikipedia.org/wiki/Year_2038_problem
-inline uint64_t zulu_time_seconds() noexcept
+inline uint64_t zulu_time_seconds() NOEXCEPT
 {
     using wall_clock = std::chrono::system_clock;
     const auto now = wall_clock::now();
@@ -761,7 +761,7 @@ inline uint64_t zulu_time_seconds() noexcept
 }
 
 // If there is a zero limit then the chain is never considered stale.
-bool chain_state::is_stale() const noexcept
+bool chain_state::is_stale() const NOEXCEPT
 {
     return !is_zero(stale_seconds_) && data_.timestamp.self <
         floored_subtract<uint64_t>(zulu_time_seconds(), stale_seconds_);
@@ -770,7 +770,7 @@ bool chain_state::is_stale() const noexcept
 // Semantic invalidity can also arise from too many/few values in the arrays.
 // The same computations used to specify the ranges could detect such errors.
 // These are the conditions that would cause exception during execution.
-bool chain_state::is_valid() const noexcept
+bool chain_state::is_valid() const NOEXCEPT
 {
     return !is_zero(data_.height);
 }
@@ -779,10 +779,10 @@ bool chain_state::is_valid() const noexcept
 // ----------------------------------------------------------------------------
 
 bool chain_state::is_checkpoint_conflict(
-    const hash_digest& hash) const noexcept
+    const hash_digest& hash) const NOEXCEPT
 {
     const auto it = std::find_if(checkpoints_.begin(), checkpoints_.end(),
-        [&](const checkpoint& item) noexcept
+        [&](const checkpoint& item) NOEXCEPT
         {
             return data_.height == item.height();
         });
@@ -790,12 +790,12 @@ bool chain_state::is_checkpoint_conflict(
     return it != checkpoints_.end() && it->hash() == hash;
 }
 
-bool chain_state::is_under_checkpoint() const noexcept
+bool chain_state::is_under_checkpoint() const NOEXCEPT
 {
     // False if empty.
     // This is optimial if checkpoints are sorted by increasing height.
     return std::any_of(checkpoints_.rbegin(), checkpoints_.rend(),
-        [&](const checkpoint& item) noexcept
+        [&](const checkpoint& item) NOEXCEPT
         {
             return data_.height <= item.height();
         });

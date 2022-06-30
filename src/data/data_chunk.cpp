@@ -26,17 +26,17 @@
 namespace libbitcoin {
 namespace system {
 
-data_chunk to_chunk(uint8_t byte) noexcept
+data_chunk to_chunk(uint8_t byte) NOEXCEPT
 {
     return { byte };
 }
 
-data_chunk to_chunk(const data_slice& bytes) noexcept
+data_chunk to_chunk(const data_slice& bytes) NOEXCEPT
 {
     return bytes.to_chunk();
 }
 
-data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve) noexcept
+data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve) NOEXCEPT
 {
     size_t size = 0;
     for (const auto& slice: slices)
@@ -51,7 +51,7 @@ data_chunk build_chunk(const data_loaf& slices, size_t extra_reserve) noexcept
     return out;
 }
 
-data_chunk splice(const data_slice& left, const data_slice& right) noexcept
+data_chunk splice(const data_slice& left, const data_slice& right) NOEXCEPT
 {
     data_chunk out(left.size() + right.size());
     std::copy(right.begin(), right.end(),

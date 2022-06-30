@@ -31,57 +31,57 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-block::block() noexcept
+block::block() NOEXCEPT
   : value_()
 {
 }
 
-block::block(chain::block&& value) noexcept
+block::block(chain::block&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-block::block(const chain::block& value) noexcept
+block::block(const chain::block& value) NOEXCEPT
   : value_(value)
 {
 }
 
-block::block(const std::string& base16) noexcept(false)
+block::block(const std::string& base16) THROWS
   : value_()
 {
     std::istringstream(base16) >> *this;
 }
 
-block& block::operator=(chain::block&& value) noexcept
+block& block::operator=(chain::block&& value) NOEXCEPT
 {
     value_ = std::move(value);
     return *this;
 }
 
-block& block::operator=(const chain::block& value) noexcept
+block& block::operator=(const chain::block& value) NOEXCEPT
 {
     value_ = value;
     return *this;
 }
 
-bool block::operator==(const block& other) const noexcept
+bool block::operator==(const block& other) const NOEXCEPT
 {
     return value_ == other.value_;
 }
 
-block::operator const chain::block&() const noexcept
+block::operator const chain::block&() const NOEXCEPT
 {
     return value_;
 }
 
-std::string block::to_string() const noexcept
+std::string block::to_string() const NOEXCEPT
 {
     std::stringstream value;
     value << *this;
     return value.str();
 }
 
-std::istream& operator>>(std::istream& stream, block& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, block& argument) THROWS
 {
     std::string base16;
     stream >> base16;
@@ -98,7 +98,7 @@ std::istream& operator>>(std::istream& stream, block& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const block& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const block& argument) NOEXCEPT
 {
     stream << encode_base16(argument.value_.to_data(true));
     return stream;

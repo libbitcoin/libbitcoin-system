@@ -41,55 +41,55 @@ const uint8_t payment_address::mainnet_p2sh = 0x05;
 const uint8_t payment_address::testnet_p2kh = 0x6f;
 const uint8_t payment_address::testnet_p2sh = 0xc4;
 
-payment_address::payment_address() noexcept
+payment_address::payment_address() NOEXCEPT
   : payment_()
 {
 }
 
-payment_address::payment_address(payment_address&& other) noexcept
+payment_address::payment_address(payment_address&& other) NOEXCEPT
   : payment_(std::move(other.payment_))
 {
 }
 
-payment_address::payment_address(const payment_address& other) noexcept
+payment_address::payment_address(const payment_address& other) NOEXCEPT
   : payment_(other.payment_)
 {
 }
 
-payment_address::payment_address(payment&& decoded) noexcept
+payment_address::payment_address(payment&& decoded) NOEXCEPT
   : payment_(std::move(decoded))
 {
 }
 
-payment_address::payment_address(const payment& decoded) noexcept
+payment_address::payment_address(const payment& decoded) NOEXCEPT
   : payment_(decoded)
 {
 }
 
-payment_address::payment_address(const std::string& address) noexcept
+payment_address::payment_address(const std::string& address) NOEXCEPT
   : payment_address(from_string(address))
 {
 }
 
-payment_address::payment_address(const ec_private& secret) noexcept
+payment_address::payment_address(const ec_private& secret) NOEXCEPT
   : payment_address(from_private(secret))
 {
 }
 
 payment_address::payment_address(const ec_public& point,
-    uint8_t prefix) noexcept
+    uint8_t prefix) NOEXCEPT
   : payment_address(from_public(point, prefix))
 {
 }
 
 payment_address::payment_address(const chain::script& script,
-    uint8_t prefix) noexcept
+    uint8_t prefix) NOEXCEPT
   : payment_address(from_script(script, prefix))
 {
 }
 
 payment_address::payment_address(const short_hash& hash,
-    uint8_t prefix) noexcept
+    uint8_t prefix) NOEXCEPT
   : payment_(to_array(prefix), hash)
 {
 }
@@ -98,7 +98,7 @@ payment_address::payment_address(const short_hash& hash,
 // ----------------------------------------------------------------------------
 
 payment_address payment_address::from_string(
-    const std::string& address) noexcept
+    const std::string& address) NOEXCEPT
 {
     data_array<payment::value_size> decoded;
     if (!decode_base58(decoded, address) || 
@@ -114,7 +114,7 @@ payment_address payment_address::from_string(
     return { std::move(value) };
 }
 
-payment_address payment_address::from_private(const ec_private& secret) noexcept
+payment_address payment_address::from_private(const ec_private& secret) NOEXCEPT
 {
     if (!secret)
         return {};
@@ -123,7 +123,7 @@ payment_address payment_address::from_private(const ec_private& secret) noexcept
 }
 
 payment_address payment_address::from_public(const ec_public& point,
-    uint8_t prefix) noexcept
+    uint8_t prefix) NOEXCEPT
 {
     if (!point)
         return {};
@@ -136,7 +136,7 @@ payment_address payment_address::from_public(const ec_public& point,
 }
 
 payment_address payment_address::from_script(const chain::script& script,
-    uint8_t prefix) noexcept
+    uint8_t prefix) NOEXCEPT
 {
     if (!script.is_valid())
         return {};
@@ -147,7 +147,7 @@ payment_address payment_address::from_script(const chain::script& script,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-payment_address::operator bool() const noexcept
+payment_address::operator bool() const NOEXCEPT
 {
     return payment_;
 }
@@ -155,7 +155,7 @@ payment_address::operator bool() const noexcept
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string payment_address::encoded() const noexcept
+std::string payment_address::encoded() const NOEXCEPT
 {
     return encode_base58(payment_);
 }
@@ -163,17 +163,17 @@ std::string payment_address::encoded() const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-uint8_t payment_address::prefix() const noexcept
+uint8_t payment_address::prefix() const NOEXCEPT
 {
     return payment_.prefix().front();
 }
 
-short_hash payment_address::hash() const noexcept
+short_hash payment_address::hash() const NOEXCEPT
 {
     return payment_.payload();
 }
 
-chain::script payment_address::output_script() const noexcept
+chain::script payment_address::output_script() const NOEXCEPT
 {
     switch (prefix())
     {
@@ -192,7 +192,7 @@ chain::script payment_address::output_script() const noexcept
 // Methods.
 // ----------------------------------------------------------------------------
 
-const payment& payment_address::to_payment() const noexcept
+const payment& payment_address::to_payment() const NOEXCEPT
 {
     return payment_;
 }
@@ -200,32 +200,32 @@ const payment& payment_address::to_payment() const noexcept
 // Operators.
 // ----------------------------------------------------------------------------
 
-payment_address& payment_address::operator=(payment_address&& other) noexcept
+payment_address& payment_address::operator=(payment_address&& other) NOEXCEPT
 {
     payment_ = std::move(other.payment_);
     return *this;
 }
 
 payment_address& payment_address::operator=(
-    const payment_address& other) noexcept
+    const payment_address& other) NOEXCEPT
 {
     payment_ = other.payment_;
     return *this;
 }
 
-bool payment_address::operator<(const payment_address& other) const noexcept
+bool payment_address::operator<(const payment_address& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
 }
 
 bool operator==(const payment_address& left,
-    const payment_address& right) noexcept
+    const payment_address& right) NOEXCEPT
 {
     return left.to_payment() == right.to_payment();
 }
 
 bool operator!=(const payment_address& left,
-    const payment_address& right) noexcept
+    const payment_address& right) NOEXCEPT
 {
     return !(left == right);
 }
@@ -242,7 +242,7 @@ std::istream& operator>>(std::istream& in, payment_address& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const payment_address& of) noexcept
+std::ostream& operator<<(std::ostream& out, const payment_address& of) NOEXCEPT
 {
     out << of.encoded();
     return out;
@@ -253,7 +253,7 @@ std::ostream& operator<<(std::ostream& out, const payment_address& of) noexcept
 
 // Context free input extraction is provably ambiguous (see extract_input).
 payment_address::list payment_address::extract(const chain::script& script,
-    uint8_t p2kh_prefix, uint8_t p2sh_prefix) noexcept
+    uint8_t p2kh_prefix, uint8_t p2sh_prefix) NOEXCEPT
 {
     const auto input = extract_input(script, p2kh_prefix, p2sh_prefix);
 
@@ -266,7 +266,7 @@ payment_address::list payment_address::extract(const chain::script& script,
 // Context free input extraction is provably ambiguous. See inline comments.
 payment_address::list payment_address::extract_input(
     const chain::script& script, uint8_t p2kh_prefix,
-    uint8_t p2sh_prefix) noexcept
+    uint8_t p2sh_prefix) NOEXCEPT
 {
     // A sign_key_hash result always implies sign_script_hash as well.
     const auto pattern = script.input_pattern();
@@ -316,7 +316,7 @@ payment_address::list payment_address::extract_input(
 // A server should use this against the prevout instead of using extract_input.
 payment_address payment_address::extract_output(
     const chain::script& script, uint8_t p2kh_prefix,
-    uint8_t p2sh_prefix) noexcept
+    uint8_t p2sh_prefix) NOEXCEPT
 {
     const auto pattern = script.output_pattern();
 

@@ -28,6 +28,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -44,66 +45,66 @@ using split_parts = std::pair<data_array<Size>, data_array<Size>>;
 typedef data_array<one> one_byte;
 
 /// Create a single byte arrray with given element value.
-constexpr one_byte to_array(uint8_t byte) noexcept { return { { byte } };}
+constexpr one_byte to_array(uint8_t byte) NOEXCEPT { return { { byte } };}
 
 /// Convert the data slice to an array.
 /// Underfill is padded with 0x00, excess is truncated.
 /// to_array(to_string(data)) == data.
 template <size_t Size>
-constexpr data_array<Size> to_array(const data_slice& bytes) noexcept;
+constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT;
 
 /// Create a data stack from vector of data array.
 template <size_t Size>
 const data_stack to_stack(
-    const std::vector<data_array<Size>>& values) noexcept;
+    const std::vector<data_array<Size>>& values) NOEXCEPT;
 
 /// Concatenate several data slices into a single array.
 /// Underfill is padded with 0x00, excess is truncated.
 template <size_t Size>
-constexpr data_array<Size> build_array(const data_loaf& slices) noexcept;
+constexpr data_array<Size> build_array(const data_loaf& slices) NOEXCEPT;
 
 /// Extend insertable target by copying extension.
 template <class Target>
-constexpr Target& extend(Target& target, const data_slice& extension) noexcept;
+constexpr Target& extend(Target& target, const data_slice& extension) NOEXCEPT;
 
 /// Extend insertable target by moving extension.
 template <class Target, class Extension>
-constexpr Target& extend(Target& target, Extension&& extension) noexcept;
+constexpr Target& extend(Target& target, Extension&& extension) NOEXCEPT;
 
 /// Extract a byte subarray from start position with length end minus start.
 template <size_t Start, size_t End, size_t Size,
     if_not_greater<Start, Size> = true, if_not_greater<End, Size> = true,
     if_not_lesser<End, Start> = true>
 constexpr data_array<End - Start> slice(
-    const data_array<Size>& bytes) noexcept;
+    const data_array<Size>& bytes) NOEXCEPT;
 
 /// Break an evenly-sized byte array array into two equal length parts.
 template <size_t Size, if_even<Size> = true>
 constexpr split_parts<to_half(Size)> split(
-    const data_array<Size>& bytes) noexcept;
+    const data_array<Size>& bytes) NOEXCEPT;
 
 /// Concatenate two byte arrays into a new array.
 template <size_t Left, size_t Right>
 constexpr data_array<Left + Right> splice(const data_array<Left>& left,
-    const data_array<Right>& right) noexcept;
+    const data_array<Right>& right) NOEXCEPT;
 
 /// Concatenate three byte arrays into a new array.
 template <size_t Left, size_t Middle, size_t Right>
 constexpr data_array<Left + Middle + Right> splice(const data_array<Left>& left,
-    const data_array<Middle>& middle, const data_array<Right>& right) noexcept;
+    const data_array<Middle>& middle, const data_array<Right>& right) NOEXCEPT;
 
 /// Perform an exclusive or (xor) on two arrays to specified length.
 template <size_t Size, size_t Size1, size_t Size2,
     if_not_lesser<Size1, Size> = true, if_not_lesser<Size2, Size> = true>
 constexpr data_array<Size> xor_data(const data_array<Size1>& bytes1,
-    const data_array<Size2>& bytes2) noexcept;
+    const data_array<Size2>& bytes2) NOEXCEPT;
 
 /// Perform an exclusive or (xor) on two arrays at specified offsets and length.
 template <size_t Size, size_t Offset1, size_t Offset2, size_t Size1, size_t Size2,
     if_not_lesser<Size1, Offset1 + Size> = true,
     if_not_lesser<Size2, Offset2 + Size> = true>
 constexpr data_array<Size> xor_offset(const data_array<Size1>& bytes1,
-    const data_array<Size2>& bytes2) noexcept;
+    const data_array<Size2>& bytes2) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

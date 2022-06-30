@@ -32,12 +32,12 @@ namespace config {
 
 /// Shorthand for property declarations in printer class.
 #define BC_PROPERTY(type, name) \
-    public: virtual const type& name() const noexcept { return name##_; } \
+    public: virtual const type& name() const NOEXCEPT { return name##_; } \
     private: type name##_
 
 /// Shorthand for reference getter declarations in printer class.
 #define BC_PROPERTY_GET_REF(type, name) \
-    public: virtual type& get_##name() noexcept { return name##_; } \
+    public: virtual type& get_##name() NOEXCEPT { return name##_; } \
     private: type name##_
 
 /// Class for managing the serialization of command line options and arguments.
@@ -54,7 +54,7 @@ public:
     /// description  This application description (e.g. 'Server').
     printer(const boost::program_options::options_description& settings,
         const std::string& application,
-        const std::string& description="") noexcept;
+        const std::string& description="") NOEXCEPT;
 
     /// Construct an instance of the printer class.
     /// options      Populated command line options metadata.
@@ -65,7 +65,7 @@ public:
     printer(const boost::program_options::options_description& options,
         const boost::program_options::positional_options_description& arguments,
         const std::string& application, const std::string& description="",
-        const std::string& command="") noexcept;
+        const std::string& command="") NOEXCEPT;
 
 
     /// Defaults.
@@ -82,50 +82,50 @@ public:
     /// paragraph  The paragraph to columnize.
     /// return     The column, as a list of fragments.
     virtual std::vector<std::string> columnize(const std::string& paragraph,
-        size_t width) noexcept;
+        size_t width) NOEXCEPT;
 
     /// Format the command description.
-    virtual std::string format_description() noexcept;
+    virtual std::string format_description() NOEXCEPT;
 
     /// Format the parameters table.
     /// positional  True for positional otherwize named.
     /// return      The formatted help arguments table.
-    virtual std::string format_parameters_table(bool positional) noexcept;
+    virtual std::string format_parameters_table(bool positional) NOEXCEPT;
 
     /// Format the settings table.
     /// return  The formatted settings table.
-    virtual std::string format_settings_table() noexcept;
+    virtual std::string format_settings_table() NOEXCEPT;
 
     /// Format a paragraph.
     /// paragraph  The text to format.
     /// return     The formatted paragraph.
     virtual std::string format_paragraph(
-        const std::string& paragraph) noexcept;
+        const std::string& paragraph) NOEXCEPT;
 
     /// Format the command line usage.
     /// return  The formatted usage.
-    virtual std::string format_usage() noexcept;
+    virtual std::string format_usage() NOEXCEPT;
 
     /// Format the command line parameters.
     /// return  The formatted command line parameters.
-    virtual std::string format_usage_parameters() noexcept;
+    virtual std::string format_usage_parameters() NOEXCEPT;
 
     /// Build the list of argument name/count tuples.
-    virtual void generate_argument_names() noexcept;
+    virtual void generate_argument_names() NOEXCEPT;
 
     /// Build the list of parameters.
-    virtual void generate_parameters() noexcept;
+    virtual void generate_parameters() NOEXCEPT;
 
     /// Parse the arguments and options into the normalized parameter list.
-    virtual void initialize() noexcept;
+    virtual void initialize() NOEXCEPT;
 
     /// Serialize command line help (full details).
     /// output  Stream that is sink for output.
-    virtual void commandline(std::ostream& output) noexcept;
+    virtual void commandline(std::ostream& output) NOEXCEPT;
 
     /// Serialize as config settings (full details).
     /// output  Stream that is sink for output.
-    virtual void settings(std::ostream& output) noexcept;
+    virtual void settings(std::ostream& output) NOEXCEPT;
 
     /// Virtual property declarations, passed on construct.
     BC_PROPERTY(boost::program_options::options_description, options);

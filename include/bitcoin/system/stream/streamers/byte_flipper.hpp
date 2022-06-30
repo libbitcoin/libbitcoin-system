@@ -40,7 +40,7 @@ class byte_flipper
     public virtual byteflipper
 {
 public:
-    byte_flipper(IOStream& stream) noexcept
+    byte_flipper(IOStream& stream) NOEXCEPT
       : byte_reader<IOStream>(stream), byte_writer<IOStream>(stream)
     {
         // Base constructions only capture references.
@@ -58,13 +58,13 @@ public:
     // Two base destructor calls order is unimportant (only writes flush).
     ~byte_flipper() override = default;
 
-    operator bool() const noexcept override
+    operator bool() const NOEXCEPT override
     {
         // Rely on reader implementation, both are trivial and identical.
         return byte_reader<IOStream>::operator bool();
     }
 
-    bool operator!() const noexcept override
+    bool operator!() const NOEXCEPT override
     {
         // Rely on reader implementation, both are trivial and identical.
         return byte_reader<IOStream>::operator!();

@@ -25,7 +25,7 @@ namespace libbitcoin {
 namespace system {
     
 template <typename Stream>
-Stream& stream_result(Stream& stream, bool success) noexcept
+Stream& stream_result(Stream& stream, bool success) NOEXCEPT
 {
     if (success)
         stream.clear(Stream::failbit);

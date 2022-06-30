@@ -40,7 +40,7 @@ public:
     /// @return The parsed URI or a default instance if the `uri` is malformed
     /// according to the  `UriReader`.
     template <class UriReader>
-    static UriReader parse(const std::string& uri, bool strict=true) noexcept
+    static UriReader parse(const std::string& uri, bool strict=true) NOEXCEPT
     {
         wallet::uri parsed;
         if (!parsed.decode(uri, strict))
@@ -71,13 +71,13 @@ public:
     }
 
     /// uri_reader interface.
-    virtual void set_strict(bool strict) noexcept = 0;
-    virtual bool set_scheme(const std::string& scheme) noexcept = 0;
-    virtual bool set_authority(const std::string& authority) noexcept = 0;
-    virtual bool set_path(const std::string& path) noexcept = 0;
-    virtual bool set_fragment(const std::string& fragment) noexcept = 0;
+    virtual void set_strict(bool strict) NOEXCEPT = 0;
+    virtual bool set_scheme(const std::string& scheme) NOEXCEPT = 0;
+    virtual bool set_authority(const std::string& authority) NOEXCEPT = 0;
+    virtual bool set_path(const std::string& path) NOEXCEPT = 0;
+    virtual bool set_fragment(const std::string& fragment) NOEXCEPT = 0;
     virtual bool set_parameter(const std::string& key,
-        const std::string& value) noexcept = 0;
+        const std::string& value) NOEXCEPT = 0;
 };
 
 } // namespace wallet

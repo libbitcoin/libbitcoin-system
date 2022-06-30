@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

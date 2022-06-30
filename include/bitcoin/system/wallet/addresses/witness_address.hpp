@@ -105,82 +105,82 @@ class BC_API witness_address
 
     /// Parsers.
     static parse_result parse_prefix(const std::string& prefix,
-        bool strict=false) noexcept;
+        bool strict=false) NOEXCEPT;
     static program_type parse_program(uint8_t version,
-        const data_slice& program, bool strict=false) noexcept;
+        const data_slice& program, bool strict=false) NOEXCEPT;
     static parse_result parse_address(std::string& out_prefix,
         uint8_t& out_version, data_chunk& out_program,
-        const std::string& address, bool strict=false) noexcept;
+        const std::string& address, bool strict=false) NOEXCEPT;
 
     /// Constructors.
-    witness_address() noexcept;
-    witness_address(witness_address&& other) noexcept;
-    witness_address(const witness_address& other) noexcept;
-    witness_address(const std::string& address, bool strict=false) noexcept;
+    witness_address() NOEXCEPT;
+    witness_address(witness_address&& other) NOEXCEPT;
+    witness_address(const witness_address& other) NOEXCEPT;
+    witness_address(const std::string& address, bool strict=false) NOEXCEPT;
     witness_address(const data_slice& program, const std::string& prefix,
-        uint8_t version) noexcept;
+        uint8_t version) NOEXCEPT;
 
     // version_0_p2kh
     witness_address(const short_hash& public_key_hash,
-        const std::string& prefix=mainnet) noexcept;
+        const std::string& prefix=mainnet) NOEXCEPT;
     witness_address(const ec_private& secret,
-        const std::string& prefix=mainnet) noexcept;
+        const std::string& prefix=mainnet) NOEXCEPT;
     witness_address(const ec_public& point,
-        const std::string& prefix=mainnet) noexcept;
+        const std::string& prefix=mainnet) NOEXCEPT;
 
     // version_0_p2sh
     witness_address(const hash_digest& script_hash,
-        const std::string& prefix=mainnet) noexcept;
+        const std::string& prefix=mainnet) NOEXCEPT;
     witness_address(const chain::script& script,
-        const std::string& prefix=mainnet) noexcept;
+        const std::string& prefix=mainnet) NOEXCEPT;
 
     /// Operators.
-    witness_address& operator=(witness_address&& other) noexcept;
-    witness_address& operator=(const witness_address& other) noexcept;
-    bool operator<(const witness_address& other) const noexcept;
+    witness_address& operator=(witness_address&& other) NOEXCEPT;
+    witness_address& operator=(const witness_address& other) NOEXCEPT;
+    bool operator<(const witness_address& other) const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& in, witness_address& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const witness_address& of) noexcept;
+        const witness_address& of) NOEXCEPT;
 
     /// Cast operators.
-    operator bool() const noexcept;
+    operator bool() const NOEXCEPT;
 
     /// Serializer.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Properties.
-    const std::string& prefix() const noexcept;
-    const data_chunk& program() const noexcept;
-    uint8_t version() const noexcept;
-    program_type identifier() const noexcept;
-    chain::script script() const noexcept;
+    const std::string& prefix() const NOEXCEPT;
+    const data_chunk& program() const NOEXCEPT;
+    uint8_t version() const NOEXCEPT;
+    program_type identifier() const NOEXCEPT;
+    chain::script script() const NOEXCEPT;
 
 protected:
     witness_address(const std::string& prefix, uint8_t version,
-        data_chunk&& program) noexcept;
+        data_chunk&& program) NOEXCEPT;
 
     // Factories.
 
     // fully specified
     static witness_address from_address(const std::string& address,
-        bool strict) noexcept;
+        bool strict) NOEXCEPT;
     static witness_address from_parameters(const data_slice& program,
-        const std::string& prefix, uint8_t version) noexcept;
+        const std::string& prefix, uint8_t version) NOEXCEPT;
 
     // version_0_p2kh
     static witness_address from_short(const short_hash& hash,
-        const std::string& prefix) noexcept;
+        const std::string& prefix) NOEXCEPT;
     static witness_address from_private(const ec_private& secret,
-        const std::string& prefix) noexcept;
+        const std::string& prefix) NOEXCEPT;
     static witness_address from_public(const ec_public& point,
-        const std::string& prefix) noexcept;
+        const std::string& prefix) NOEXCEPT;
 
     // version_0_p2sh
     static witness_address from_long(const hash_digest& hash,
-        const std::string& prefix) noexcept;
+        const std::string& prefix) NOEXCEPT;
     static witness_address from_script(const chain::script& script,
-        const std::string& prefix) noexcept;
+        const std::string& prefix) NOEXCEPT;
 
 private:
     data_chunk program_;
@@ -189,9 +189,9 @@ private:
 };
 
 BC_API bool operator==(const witness_address& left,
-    const witness_address& right) noexcept;
+    const witness_address& right) NOEXCEPT;
 BC_API bool operator!=(const witness_address& left,
-    const witness_address& right) noexcept;
+    const witness_address& right) NOEXCEPT;
 
 } // namespace wallet
 } // namespace system

@@ -140,7 +140,7 @@ size_t tiff::max_image_bytes = max_uint32;
 
 // TODO: accept and return stream.
 bool tiff::to_image(std::ostream& out, const data_chunk& data,
-    uint16_t width) noexcept
+    uint16_t width) NOEXCEPT
 {
     // Empty image is not valid TIFF.
     if (width == 0u || data.empty())

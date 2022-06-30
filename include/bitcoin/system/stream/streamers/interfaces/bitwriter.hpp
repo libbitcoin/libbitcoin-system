@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
 
 namespace libbitcoin {
@@ -36,10 +37,10 @@ class bitwriter
 {
 public:
     /// Write one bit (high to low).
-    virtual void write_bit(bool value) noexcept = 0;
+    virtual void write_bit(bool value) NOEXCEPT = 0;
 
     /// Write size bits from an integer (high to low)
-    virtual void write_bits(uint64_t value, size_t bits) noexcept = 0;
+    virtual void write_bits(uint64_t value, size_t bits) NOEXCEPT = 0;
 };
 
 } // namespace system

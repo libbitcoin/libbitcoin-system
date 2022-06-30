@@ -45,20 +45,20 @@ public:
 
     /// Select outpoints for a spend from a list of unspent outputs.
     static void select(points_value& out, const points_value& unspent,
-        uint64_t minimum_value, selection option=selection::greedy) noexcept;
+        uint64_t minimum_value, selection option=selection::greedy) NOEXCEPT;
 
     /// Total value of the current set of points.
-    uint64_t value() const noexcept;
+    uint64_t value() const NOEXCEPT;
 
     /// A set of valued points.
     point_value::list points;
 
 private:
     static void greedy(points_value& out, const points_value& unspent,
-        uint64_t minimum_value) noexcept;
+        uint64_t minimum_value) NOEXCEPT;
 
     static void individual(points_value& out, const points_value& unspent,
-        uint64_t minimum_value) noexcept;
+        uint64_t minimum_value) NOEXCEPT;
 };
 
 } // namespace chain

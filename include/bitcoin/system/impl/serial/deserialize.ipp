@@ -40,7 +40,7 @@ namespace libbitcoin {
 namespace system {
 
 template <typename Value>
-bool deserialize(Value& out, std::istream& input) noexcept
+bool deserialize(Value& out, std::istream& input) NOEXCEPT
 {
     // Consumes an entire whitespace-delimited stream.
     std::istreambuf_iterator<char> begin(input), end;
@@ -48,13 +48,13 @@ bool deserialize(Value& out, std::istream& input) noexcept
     return deserialize(out, text);
 }
 
-inline bool deserialize(std::string& out, const std::string& text) noexcept
+inline bool deserialize(std::string& out, const std::string& text) NOEXCEPT
 {
     out.assign(text);
     return true;
 }
 
-inline bool deserialize(uint8_t& out, const std::string& text) noexcept
+inline bool deserialize(uint8_t& out, const std::string& text) NOEXCEPT
 {
     uint16_t value;
     if (!deserialize(value, text))
@@ -65,21 +65,21 @@ inline bool deserialize(uint8_t& out, const std::string& text) noexcept
 }
 
 template <size_t Size>
-bool deserialize(data_array<Size>& out, const std::string& text) noexcept
+bool deserialize(data_array<Size>& out, const std::string& text) NOEXCEPT
 {
     return decode_base16(out, text);
 }
 
-inline bool deserialize(data_chunk& out, const std::string& text) noexcept
+inline bool deserialize(data_chunk& out, const std::string& text) NOEXCEPT
 {
     return decode_base16(out, text);
 }
 
 template <typename Value, size_t Size>
-bool deserialize(std::array<Value, Size>& out, const std::string& text) noexcept
+bool deserialize(std::array<Value, Size>& out, const std::string& text) NOEXCEPT
 {
     auto result = true;
-    const auto deserializer = [&result](const std::string& token) noexcept
+    const auto deserializer = [&result](const std::string& token) NOEXCEPT
     {
         Value value{};
         result &= deserialize(value, token);
@@ -92,10 +92,10 @@ bool deserialize(std::array<Value, Size>& out, const std::string& text) noexcept
 }
 
 template <typename Value>
-bool deserialize(std::vector<Value>& out, const std::string& text) noexcept
+bool deserialize(std::vector<Value>& out, const std::string& text) NOEXCEPT
 {
     auto result = true;
-    const auto deserializer = [&result](const std::string& token) noexcept
+    const auto deserializer = [&result](const std::string& token) NOEXCEPT
     {
         Value value{};
         result &= deserialize(value, token);
@@ -109,9 +109,9 @@ bool deserialize(std::vector<Value>& out, const std::string& text) noexcept
 }
 
 template <typename Value>
-bool deserialize(Value& out, const std::string& text) noexcept
+bool deserialize(Value& out, const std::string& text) NOEXCEPT
 {
-    // Suppress istringstream may throw inside noexcept.
+    // Suppress istringstream may throw inside NOEXCEPT.
     // The intended behavior in this case is program abort.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 

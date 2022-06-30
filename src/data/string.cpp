@@ -30,13 +30,13 @@
 namespace libbitcoin {
 namespace system {
 
-std::string to_string(const data_slice& bytes) noexcept
+std::string to_string(const data_slice& bytes) NOEXCEPT
 {
     return bytes.to_string();
 }
 
 std::string join(const string_list& tokens,
-    const std::string& delimiter) noexcept
+    const std::string& delimiter) NOEXCEPT
 {
     if (tokens.empty())
         return {};
@@ -53,7 +53,7 @@ std::string join(const string_list& tokens,
 }
 
 void reduce(string_list& tokens, const string_list& trim_tokens,
-    bool compress) noexcept
+    bool compress) NOEXCEPT
 {
     static const std::string empty{};
 
@@ -72,7 +72,7 @@ void reduce(string_list& tokens, const string_list& trim_tokens,
 }
 
 string_list reduce_copy(const string_list& tokens,
-    const string_list& trim_tokens, bool compress) noexcept
+    const string_list& trim_tokens, bool compress) NOEXCEPT
 {
     auto copy = tokens;
     reduce(copy, trim_tokens, compress);
@@ -80,7 +80,7 @@ string_list reduce_copy(const string_list& tokens,
 }
 
 size_t replace(std::string& text, const std::string& from,
-    const std::string& to) noexcept
+    const std::string& to) NOEXCEPT
 {
     size_t count = 0;
 
@@ -96,7 +96,7 @@ size_t replace(std::string& text, const std::string& from,
 }
 
 std::string replace_copy(const std::string& text, const std::string& from,
-    const std::string& to) noexcept
+    const std::string& to) NOEXCEPT
 {
     auto copy = text;
     replace(copy, from, to);
@@ -104,7 +104,7 @@ std::string replace_copy(const std::string& text, const std::string& from,
 }
 
 static string_list splitter(const std::string& text, const std::string& delimiter,
-    const string_list& trim_tokens, bool compress) noexcept
+    const string_list& trim_tokens, bool compress) NOEXCEPT
 {
     size_t start = 0;
     string_list tokens;
@@ -125,7 +125,7 @@ static string_list splitter(const std::string& text, const std::string& delimite
 }
 
 string_list split(const std::string& text, const string_list& delimiters,
-    const string_list& trim_tokens, bool compress) noexcept
+    const string_list& trim_tokens, bool compress) NOEXCEPT
 {
     // Nothing to do.
     if (delimiters.empty() && trim_tokens.empty())
@@ -147,20 +147,20 @@ string_list split(const std::string& text, const string_list& delimiters,
 }
 
 string_list split(const std::string& text, const std::string& delimiter,
-    bool trim, bool compress) noexcept
+    bool trim, bool compress) NOEXCEPT
 {
     const auto trim_tokens = trim ? ascii_whitespace : string_list{};
     return split(text, string_list{ delimiter }, trim_tokens, compress);
 }
 
-string_list split(const std::string& text, bool compress) noexcept
+string_list split(const std::string& text, bool compress) NOEXCEPT
 {
     // Splitting is prioritized over trimming, because each token is trimmed.
     // So trimming is not an option when splitting on the trim characters.
     return split(text, ascii_whitespace, ascii_whitespace, compress);
 }
 
-bool trim_left(std::string& text, const std::string& token) noexcept
+bool trim_left(std::string& text, const std::string& token) NOEXCEPT
 {
     auto found = false;
     const auto length = token.length();
@@ -173,7 +173,7 @@ bool trim_left(std::string& text, const std::string& token) noexcept
     return found;
 }
 
-bool trim_right(std::string& text, const std::string& token) noexcept
+bool trim_right(std::string& text, const std::string& token) NOEXCEPT
 {
     auto found = false;
     const auto length = token.length();
@@ -186,7 +186,7 @@ bool trim_right(std::string& text, const std::string& token) noexcept
     return found;
 }
 
-bool trim_left(std::string& text, const string_list& trim_tokens) noexcept
+bool trim_left(std::string& text, const string_list& trim_tokens) NOEXCEPT
 {
     bool found;
     do
@@ -200,7 +200,7 @@ bool trim_left(std::string& text, const string_list& trim_tokens) noexcept
     return found;
 }
 
-bool trim_right(std::string& text, const string_list& trim_tokens) noexcept
+bool trim_right(std::string& text, const string_list& trim_tokens) NOEXCEPT
 {
     bool found;
     do
@@ -214,14 +214,14 @@ bool trim_right(std::string& text, const string_list& trim_tokens) noexcept
     return found;
 }
 
-void trim(std::string& text, const string_list& trim_tokens) noexcept
+void trim(std::string& text, const string_list& trim_tokens) NOEXCEPT
 {
     trim_left(text, trim_tokens);
     trim_right(text, trim_tokens);
 }
 
 std::string trim_left_copy(const std::string& text,
-    const string_list& trim_tokens) noexcept
+    const string_list& trim_tokens) NOEXCEPT
 {
     auto copy = text;
     trim_left(copy, trim_tokens);
@@ -229,7 +229,7 @@ std::string trim_left_copy(const std::string& text,
 }
 
 std::string trim_right_copy(const std::string& text,
-    const string_list& trim_tokens) noexcept
+    const string_list& trim_tokens) NOEXCEPT
 {
     auto copy = text;
     trim_right(copy, trim_tokens);
@@ -237,20 +237,20 @@ std::string trim_right_copy(const std::string& text,
 }
 
 std::string trim_copy(const std::string& text,
-    const string_list& trim_tokens) noexcept
+    const string_list& trim_tokens) NOEXCEPT
 {
     auto copy = text;
     trim(copy, trim_tokens);
     return copy;
 }
 
-bool ends_with(const std::string& text, const std::string& suffix) noexcept
+bool ends_with(const std::string& text, const std::string& suffix) NOEXCEPT
 {
     const auto at = text.rfind(suffix);
     return at != std::string::npos && (at + suffix.length()) == text.length();
 }
 
-bool starts_with(const std::string& text, const std::string& prefix) noexcept
+bool starts_with(const std::string& text, const std::string& prefix) NOEXCEPT
 {
     return is_zero(text.find(prefix));
 }

@@ -30,32 +30,32 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-hash160::hash160() noexcept
+hash160::hash160() NOEXCEPT
   : value_(null_short_hash)
 {
 }
 
-hash160::hash160(short_hash&& value) noexcept
+hash160::hash160(short_hash&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-hash160::hash160(const short_hash& value) noexcept
+hash160::hash160(const short_hash& value) NOEXCEPT
     : value_(value)
 {
 }
 
-hash160::hash160(const std::string& base16) noexcept(false)
+hash160::hash160(const std::string& base16) THROWS
 {
     std::istringstream(base16) >> *this;
 }
 
-hash160::operator const short_hash&() const noexcept
+hash160::operator const short_hash&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, hash160& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, hash160& argument) THROWS
 {
     std::string base16;
     stream >> base16;
@@ -66,7 +66,7 @@ std::istream& operator>>(std::istream& stream, hash160& argument) noexcept(false
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const hash160& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const hash160& argument) NOEXCEPT
 {
     stream << encode_base16(argument.value_);
     return stream;

@@ -35,22 +35,22 @@ class BC_API console_streambuf
 {
 public:
     /// Initialize stdio to use utf8 translation on Windows.
-    static void initialize(size_t stream_buffer_size) noexcept(false);
+    static void initialize(size_t stream_buffer_size) THROWS;
 
 protected:
     /// Protected construction, use static initialize method.
     console_streambuf(const std::wstreambuf& stream_buffer,
-        size_t stream_buffer_size) noexcept(false);
+        size_t stream_buffer_size) THROWS;
 
     /// Delete stream buffer.
-    virtual ~console_streambuf() noexcept;
+    virtual ~console_streambuf() NOEXCEPT;
 
     /// Alternate console read.
     virtual std::streamsize xsgetn(wchar_t* buffer,
-        std::streamsize size) noexcept(false);
+        std::streamsize size) THROWS;
 
     /// Alternate console read.
-    virtual std::wstreambuf::int_type underflow() noexcept(false);
+    virtual std::wstreambuf::int_type underflow() THROWS;
 
 #ifdef _MSC_VER
 private:

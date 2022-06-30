@@ -37,14 +37,14 @@ const data_array<parse_encrypted_token::magic_size> parse_encrypted_token::magic
 };
 
 data_array<parse_encrypted_token::prefix_size>
-parse_encrypted_token::prefix_factory(bool lot_sequence) noexcept
+parse_encrypted_token::prefix_factory(bool lot_sequence) NOEXCEPT
 {
     const auto context = lot_sequence ? lot_context_ : default_context_;
     return splice(magic_, to_array(context));
 }
 
 parse_encrypted_token::parse_encrypted_token(
-    const encrypted_token& value) noexcept
+    const encrypted_token& value) NOEXCEPT
   : parse_encrypted_prefix(slice<0, 8>(value)),
     entropy_(slice<8, 16>(value)),
     sign_(slice<16, 17>(value)),
@@ -53,33 +53,33 @@ parse_encrypted_token::parse_encrypted_token(
     set_valid(verify_magic() && verify_context() && verify_checksum(value));
 }
 
-hash_digest parse_encrypted_token::data() const noexcept
+hash_digest parse_encrypted_token::data() const NOEXCEPT
 {
     return data_;
 }
 
-ek_entropy parse_encrypted_token::entropy() const noexcept
+ek_entropy parse_encrypted_token::entropy() const NOEXCEPT
 {
     return entropy_;
 }
 
-bool parse_encrypted_token::lot_sequence() const noexcept
+bool parse_encrypted_token::lot_sequence() const NOEXCEPT
 {
     // There is no "flags" byte in token, we rely on prefix context.
     return context() == lot_context_;
 }
 
-one_byte parse_encrypted_token::sign() const noexcept
+one_byte parse_encrypted_token::sign() const NOEXCEPT
 {
     return sign_;
 }
 
-bool parse_encrypted_token::verify_context() const noexcept
+bool parse_encrypted_token::verify_context() const NOEXCEPT
 {
     return (context() == default_context_) || lot_sequence();
 }
 
-bool parse_encrypted_token::verify_magic() const noexcept
+bool parse_encrypted_token::verify_magic() const NOEXCEPT
 {
     return slice<zero, magic_size>(prefix()) == magic_;
 }

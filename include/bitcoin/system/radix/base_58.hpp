@@ -26,25 +26,25 @@
 namespace libbitcoin {
 namespace system {
 
-BC_API bool is_base58(const char character) noexcept;
-BC_API bool is_base58(const std::string& text) noexcept;
+BC_API bool is_base58(const char character) NOEXCEPT;
+BC_API bool is_base58(const std::string& text) NOEXCEPT;
 
 /// Converts a base58 string to a number of bytes.
 /// @return false if the input is malformed, or the wrong length.
 template <size_t Size>
-bool decode_base58(data_array<Size>& out, const std::string& in) noexcept;
+bool decode_base58(data_array<Size>& out, const std::string& in) NOEXCEPT;
 
 /// Converts a base58 string literal to a data array.
 template <size_t Size>
-data_array<Size * 733 / 1000> base58_array(const char(&string)[Size]) noexcept;
+data_array<Size * 733 / 1000> base58_array(const char(&string)[Size]) NOEXCEPT;
 
 /// Encode data as base58.
 /// @return the base58 encoded string.
-BC_API std::string encode_base58(const data_slice& unencoded) noexcept;
+BC_API std::string encode_base58(const data_slice& unencoded) NOEXCEPT;
 
 /// Attempt to decode base58 data.
 /// @return false if the input contains non-base58 characters.
-BC_API bool decode_base58(data_chunk& out, const std::string& in) noexcept;
+BC_API bool decode_base58(data_chunk& out, const std::string& in) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

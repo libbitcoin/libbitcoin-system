@@ -21,6 +21,7 @@
 
 #include <type_traits>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -36,7 +37,7 @@ namespace system {
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_common_type<Dividend, Divisor>
-ceilinged_divide(Dividend dividend, Divisor divisor) noexcept;
+ceilinged_divide(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to C++ % for negative quotients.
@@ -46,35 +47,35 @@ ceilinged_divide(Dividend dividend, Divisor divisor) noexcept;
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_signed_type<to_common_type<Dividend, Divisor>>
-ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept;
+ceilinged_modulo(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 /// Obtain the floored (rounded down) integer modulo quotient.
 /// This is equivalent to C++ % for positive quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_common_type<Dividend, Divisor>
-floored_divide(Dividend dividend, Divisor divisor) noexcept;
+floored_divide(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 /// Obtain the floorded (rounded down) integer modulo quotient.
 /// This is equivalent to C++ % for positive quotients.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_common_type<Dividend, Divisor>
-floored_modulo(Dividend dividend, Divisor divisor) noexcept;
+floored_modulo(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 /// Obtain the truncated (rounded toward zero) integer quotient.
 /// This is equivalent to C++ /.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_common_type<Dividend, Divisor>
-truncated_divide(Dividend dividend, Divisor divisor) noexcept;
+truncated_divide(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 /// Obtain the truncated (rounded toward zero) integer divide remainder.
 /// This is equivalent to C++ %.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_common_type<Dividend, Divisor>
-truncated_modulo(Dividend dividend, Divisor divisor) noexcept;
+truncated_modulo(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

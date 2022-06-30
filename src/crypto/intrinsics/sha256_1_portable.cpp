@@ -71,14 +71,14 @@ constexpr size_t block_size = 64;
 constexpr size_t state_size = hash_size / sizeof(uint32_t);
 
 // sha256_context context{ sha256_initial };
-void sha256_initialize(sha256_context& context) noexcept
+void sha256_initialize(sha256_context& context) NOEXCEPT
 {
     context.state = sha256_initial;
     context.count[0] = 0;
     context.count[1] = 0;
 }
 
-void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) noexcept
+void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
     uint32_t t0, t1;
     uint32_t W[block_size];
@@ -222,7 +222,7 @@ void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) noexcept
 // This calls single_sha256, which may call any of the instrinsic transforms or
 // may call sha256_x1_portable (above), depending on platform configuration.
 void sha256_update(sha256_context& context, const uint8_t input[],
-    size_t size) noexcept
+    size_t size) NOEXCEPT
 {
     const uint32_t bit_length[]
     {
@@ -263,7 +263,7 @@ void sha256_update(sha256_context& context, const uint8_t input[],
     BC_POP_WARNING()
 }
 
-void sha256_pad(sha256_context& context) noexcept
+void sha256_pad(sha256_context& context) NOEXCEPT
 {
     uint8_t size[8];
     uint32_t r, psize;
@@ -276,13 +276,13 @@ void sha256_pad(sha256_context& context) noexcept
     sha256_update(context, size, 8);
 }
 
-void sha256_finalize(sha256_context& context, uint8_t digest[32]) noexcept
+void sha256_finalize(sha256_context& context, uint8_t digest[32]) NOEXCEPT
 {
     sha256_pad(context);
     to_big_endian<8>(digest, context.state.data());
 }
 
-void sha256(const uint8_t input[], size_t size, uint8_t digest[32]) noexcept
+void sha256(const uint8_t input[], size_t size, uint8_t digest[32]) NOEXCEPT
 {
     sha256_context context{ sha256_initial };
     sha256_update(context, input, size);

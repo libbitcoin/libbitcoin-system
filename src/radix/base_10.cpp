@@ -50,19 +50,19 @@ namespace system {
 // The C standard library function 'isdigit' depends on the current locale
 // and doesn't necessarily correspond to our valid base10 encoding digits.
 // msvc++ 'isdigit' includes superscript characters like '²'.
-inline bool is_digit(const char character) noexcept
+inline bool is_digit(const char character) NOEXCEPT
 {
     return '0' <= character && character <= '9';
 }
 
 template <char Character>
-inline bool is_character(const char character) noexcept
+inline bool is_character(const char character) NOEXCEPT
 {
     return character == Character;
 }
 
 bool decode_base10(uint64_t& out, const std::string& amount,
-    uint8_t decimal_places, bool strict) noexcept
+    uint8_t decimal_places, bool strict) NOEXCEPT
 {
     std::string value(amount);
 
@@ -104,7 +104,7 @@ bool decode_base10(uint64_t& out, const std::string& amount,
     return true;
 }
 
-std::string encode_base10(uint64_t amount, uint8_t decimal_places) noexcept
+std::string encode_base10(uint64_t amount, uint8_t decimal_places) NOEXCEPT
 {
     std::ostringstream stream;
     stream.fill('0');

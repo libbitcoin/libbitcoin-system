@@ -26,14 +26,14 @@ namespace libbitcoin {
 namespace system {
 
 // Protected base class constructor (must be derived).
-secp256k1_initializer::secp256k1_initializer(int flags) noexcept
+secp256k1_initializer::secp256k1_initializer(int flags) NOEXCEPT
   : context_(secp256k1_context_create(flags))
 {
     BC_ASSERT(context_ != nullptr);
 }
 
 // Clean up the context on destruct.
-secp256k1_initializer::~secp256k1_initializer() noexcept
+secp256k1_initializer::~secp256k1_initializer() NOEXCEPT
 {
     BC_ASSERT(context_ != nullptr);
 
@@ -42,12 +42,12 @@ secp256k1_initializer::~secp256k1_initializer() noexcept
 }
 
 // Concrete type for signing init.
-secp256k1_signing::secp256k1_signing() noexcept
+secp256k1_signing::secp256k1_signing() NOEXCEPT
   : secp256k1_initializer(SECP256K1_CONTEXT_SIGN)
 {
 }
 
-secp256k1_context* secp256k1_signing::context() noexcept
+secp256k1_context* secp256k1_signing::context() NOEXCEPT
 {
     static secp256k1_signing instance;
     static auto context = instance.context_;
@@ -55,12 +55,12 @@ secp256k1_context* secp256k1_signing::context() noexcept
 }
 
 // Concrete type for verification init.
-secp256k1_verification::secp256k1_verification() noexcept
+secp256k1_verification::secp256k1_verification() NOEXCEPT
   : secp256k1_initializer(SECP256K1_CONTEXT_VERIFY)
 {
 }
 
-secp256k1_context* secp256k1_verification::context() noexcept
+secp256k1_context* secp256k1_verification::context() NOEXCEPT
 {
     static secp256k1_verification instance;
     static auto context = instance.context_;

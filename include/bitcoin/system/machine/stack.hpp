@@ -56,42 +56,42 @@ public:
     inline ~stack() = default;
 
     /// Construct.
-    inline stack() noexcept;
-    inline stack(Container&& container) noexcept;
+    inline stack() NOEXCEPT;
+    inline stack(Container&& container) NOEXCEPT;
 
     /// Pure stack abstraction.
-    inline const stack_variant& top() const noexcept;
-    inline stack_variant pop() noexcept;
-    inline void drop() noexcept;
-    inline bool empty() const noexcept;
-    inline size_t size() const noexcept;
-    inline void push(data_chunk&& value) noexcept;
-    inline void push(stack_variant&& value) noexcept;
-    inline void push(const stack_variant& value) noexcept;
-    inline void emplace_boolean(bool value) noexcept;
-    inline void emplace_integer(int64_t value) noexcept;
-    inline void emplace_chunk(const chunk_xptr& value) noexcept;
+    inline const stack_variant& top() const NOEXCEPT;
+    inline stack_variant pop() NOEXCEPT;
+    inline void drop() NOEXCEPT;
+    inline bool empty() const NOEXCEPT;
+    inline size_t size() const NOEXCEPT;
+    inline void push(data_chunk&& value) NOEXCEPT;
+    inline void push(stack_variant&& value) NOEXCEPT;
+    inline void push(const stack_variant& value) NOEXCEPT;
+    inline void emplace_boolean(bool value) NOEXCEPT;
+    inline void emplace_integer(int64_t value) NOEXCEPT;
+    inline void emplace_chunk(const chunk_xptr& value) NOEXCEPT;
 
     /// Positional (stack cheats).
-    inline void erase(size_t index) noexcept;
-    inline void swap(size_t left_index, size_t right_index) noexcept;
-    inline const stack_variant& peek(size_t index) const noexcept;
+    inline void erase(size_t index) NOEXCEPT;
+    inline void swap(size_t left_index, size_t right_index) NOEXCEPT;
+    inline const stack_variant& peek(size_t index) const NOEXCEPT;
 
     /// Variant data conversions.
-    inline bool peek_signed4(int32_t& value) const noexcept;
-    inline bool peek_signed5(int64_t& value) const noexcept;
-    inline bool peek_bool() const noexcept;
-    inline bool peek_strict_bool() const noexcept;
-    inline chunk_xptr peek_chunk() const noexcept;
+    inline bool peek_signed4(int32_t& value) const NOEXCEPT;
+    inline bool peek_signed5(int64_t& value) const NOEXCEPT;
+    inline bool peek_bool() const NOEXCEPT;
+    inline bool peek_strict_bool() const NOEXCEPT;
+    inline chunk_xptr peek_chunk() const NOEXCEPT;
 
     static inline bool equal_chunks(const stack_variant& left,
-        const stack_variant& right) noexcept;
+        const stack_variant& right) NOEXCEPT;
 
 private:
     template<size_t Bytes, typename Integer,
         if_not_greater<Bytes, sizeof(Integer)> = true,
         if_signed_integral_integer<Integer> = true>
-    inline bool peek_signed(Integer& value) const noexcept;
+    inline bool peek_signed(Integer& value) const NOEXCEPT;
 
     static constexpr auto linked_ = is_same<Container, linked_stack>();
     static constexpr auto vector_ = is_same<Container, contiguous_stack>();

@@ -21,7 +21,7 @@ namespace libbitcoin {
 namespace system {
 namespace intrinsics {
 
-inline uint32_t from_little_endian(const uint8_t data[4]) noexcept
+inline uint32_t from_little_endian(const uint8_t data[4]) NOEXCEPT
 {
     return
         (static_cast<uint32_t>(data[0]) << 0) |
@@ -30,7 +30,7 @@ inline uint32_t from_little_endian(const uint8_t data[4]) noexcept
         (static_cast<uint32_t>(data[3]) << 24);
 }
 
-inline void to_little_endian(uint8_t data[4], uint32_t value) noexcept
+inline void to_little_endian(uint8_t data[4], uint32_t value) NOEXCEPT
 {
     data[0] = (value >> 0) & 0xff;
     data[1] = (value >> 8) & 0xff;
@@ -38,31 +38,31 @@ inline void to_little_endian(uint8_t data[4], uint32_t value) noexcept
     data[3] = (value >> 24) & 0xff;
 }
 
-__m128i inline K(uint32_t x) noexcept { return _mm_set1_epi32(x); }
+__m128i inline K(uint32_t x) NOEXCEPT { return _mm_set1_epi32(x); }
 
-__m128i inline Add(__m128i x, __m128i y) noexcept { return _mm_add_epi32(x, y); }
-__m128i inline Add(__m128i x, __m128i y, __m128i z) noexcept { return Add(Add(x, y), z); }
-__m128i inline Add(__m128i x, __m128i y, __m128i z, __m128i w) noexcept { return Add(Add(x, y), Add(z, w)); }
-__m128i inline Add(__m128i x, __m128i y, __m128i z, __m128i w, __m128i v) noexcept { return Add(Add(x, y, z), Add(w, v)); }
-__m128i inline Inc(__m128i& x, __m128i y) noexcept { x = Add(x, y); return x; }
-__m128i inline Inc(__m128i& x, __m128i y, __m128i z) noexcept { x = Add(x, y, z); return x; }
-__m128i inline Inc(__m128i& x, __m128i y, __m128i z, __m128i w) noexcept { x = Add(x, y, z, w); return x; }
-__m128i inline Xor(__m128i x, __m128i y) noexcept { return _mm_xor_si128(x, y); }
-__m128i inline Xor(__m128i x, __m128i y, __m128i z) noexcept { return Xor(Xor(x, y), z); }
-__m128i inline Or(__m128i x, __m128i y) noexcept { return _mm_or_si128(x, y); }
-__m128i inline And(__m128i x, __m128i y) noexcept { return _mm_and_si128(x, y); }
-__m128i inline ShR(__m128i x, int n) noexcept { return _mm_srli_epi32(x, n); }
-__m128i inline ShL(__m128i x, int n) noexcept { return _mm_slli_epi32(x, n); }
+__m128i inline Add(__m128i x, __m128i y) NOEXCEPT { return _mm_add_epi32(x, y); }
+__m128i inline Add(__m128i x, __m128i y, __m128i z) NOEXCEPT { return Add(Add(x, y), z); }
+__m128i inline Add(__m128i x, __m128i y, __m128i z, __m128i w) NOEXCEPT { return Add(Add(x, y), Add(z, w)); }
+__m128i inline Add(__m128i x, __m128i y, __m128i z, __m128i w, __m128i v) NOEXCEPT { return Add(Add(x, y, z), Add(w, v)); }
+__m128i inline Inc(__m128i& x, __m128i y) NOEXCEPT { x = Add(x, y); return x; }
+__m128i inline Inc(__m128i& x, __m128i y, __m128i z) NOEXCEPT { x = Add(x, y, z); return x; }
+__m128i inline Inc(__m128i& x, __m128i y, __m128i z, __m128i w) NOEXCEPT { x = Add(x, y, z, w); return x; }
+__m128i inline Xor(__m128i x, __m128i y) NOEXCEPT { return _mm_xor_si128(x, y); }
+__m128i inline Xor(__m128i x, __m128i y, __m128i z) NOEXCEPT { return Xor(Xor(x, y), z); }
+__m128i inline Or(__m128i x, __m128i y) NOEXCEPT { return _mm_or_si128(x, y); }
+__m128i inline And(__m128i x, __m128i y) NOEXCEPT { return _mm_and_si128(x, y); }
+__m128i inline ShR(__m128i x, int n) NOEXCEPT { return _mm_srli_epi32(x, n); }
+__m128i inline ShL(__m128i x, int n) NOEXCEPT { return _mm_slli_epi32(x, n); }
 
-__m128i inline Ch(__m128i x, __m128i y, __m128i z) noexcept { return Xor(z, And(x, Xor(y, z))); }
-__m128i inline Maj(__m128i x, __m128i y, __m128i z) noexcept { return Or(And(x, y), And(z, Or(x, y))); }
-__m128i inline Sigma0(__m128i x) noexcept { return Xor(Or(ShR(x, 2), ShL(x, 30)), Or(ShR(x, 13), ShL(x, 19)), Or(ShR(x, 22), ShL(x, 10))); }
-__m128i inline Sigma1(__m128i x) noexcept { return Xor(Or(ShR(x, 6), ShL(x, 26)), Or(ShR(x, 11), ShL(x, 21)), Or(ShR(x, 25), ShL(x, 7))); }
-__m128i inline sigma0(__m128i x) noexcept { return Xor(Or(ShR(x, 7), ShL(x, 25)), Or(ShR(x, 18), ShL(x, 14)), ShR(x, 3)); }
-__m128i inline sigma1(__m128i x) noexcept { return Xor(Or(ShR(x, 17), ShL(x, 15)), Or(ShR(x, 19), ShL(x, 13)), ShR(x, 10)); }
+__m128i inline Ch(__m128i x, __m128i y, __m128i z) NOEXCEPT { return Xor(z, And(x, Xor(y, z))); }
+__m128i inline Maj(__m128i x, __m128i y, __m128i z) NOEXCEPT { return Or(And(x, y), And(z, Or(x, y))); }
+__m128i inline Sigma0(__m128i x) NOEXCEPT { return Xor(Or(ShR(x, 2), ShL(x, 30)), Or(ShR(x, 13), ShL(x, 19)), Or(ShR(x, 22), ShL(x, 10))); }
+__m128i inline Sigma1(__m128i x) NOEXCEPT { return Xor(Or(ShR(x, 6), ShL(x, 26)), Or(ShR(x, 11), ShL(x, 21)), Or(ShR(x, 25), ShL(x, 7))); }
+__m128i inline sigma0(__m128i x) NOEXCEPT { return Xor(Or(ShR(x, 7), ShL(x, 25)), Or(ShR(x, 18), ShL(x, 14)), ShR(x, 3)); }
+__m128i inline sigma1(__m128i x) NOEXCEPT { return Xor(Or(ShR(x, 17), ShL(x, 15)), Or(ShR(x, 19), ShL(x, 13)), ShR(x, 10)); }
 
 // One round of SHA-256.
-void inline Round(__m128i a, __m128i b, __m128i c, __m128i& d, __m128i e, __m128i f, __m128i g, __m128i& h, __m128i k) noexcept
+void inline Round(__m128i a, __m128i b, __m128i c, __m128i& d, __m128i e, __m128i f, __m128i g, __m128i& h, __m128i k) NOEXCEPT
 {
     __m128i t1 = Add(h, Sigma1(e), Ch(e, f, g), k);
     __m128i t2 = Add(Sigma0(a), Maj(a, b, c));
@@ -70,7 +70,7 @@ void inline Round(__m128i a, __m128i b, __m128i c, __m128i& d, __m128i e, __m128
     h = Add(t1, t2);
 }
 
-__m128i inline Read4(const uint8_t* chunk, int offset) noexcept
+__m128i inline Read4(const uint8_t* chunk, int offset) NOEXCEPT
 {
     __m128i ret = _mm_set_epi32(
         from_little_endian(chunk + 0 + offset),
@@ -85,7 +85,7 @@ __m128i inline Read4(const uint8_t* chunk, int offset) noexcept
         0x00010203ul));
 }
 
-void inline Write4(uint8_t* out, int offset, __m128i v) noexcept
+void inline Write4(uint8_t* out, int offset, __m128i v) NOEXCEPT
 {
     v = _mm_shuffle_epi8(v, _mm_set_epi32(
         0x0c0d0e0ful,
@@ -108,23 +108,23 @@ void sha256_sse41(uint32_t*, const uint8_t*, uint32_t)
 }
 
 // One block in four lanes.
-void sha256_x1_sse41(uint32_t state[8], const uint8_t block[64]) noexcept
+void sha256_x1_sse41(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
     return sha256_sse41(state, block, 1);
 }
 
-////void sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+////void sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 ////{
 ////    // TODO: four blocks in four lanes. 
 ////}
 
-////void double_sha256_x1_sse41(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+////void double_sha256_x1_sse41(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 ////{
 ////    // TODO: one block in four lanes, doubled.
 ////}
 
 // four blocks in four lanes, doubled.
-void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 {
     // Transform 1
     __m128i a = K(0x6a09e667ul);

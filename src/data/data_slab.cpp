@@ -30,19 +30,19 @@ namespace system {
 // constructors
 // ----------------------------------------------------------------------------
 
-data_slab::data_slab() noexcept
+data_slab::data_slab() NOEXCEPT
   : data_slab(nullptr, nullptr, zero)
 {
 }
 
-data_slab::data_slab(std::string& text) noexcept
+data_slab::data_slab(std::string& text) NOEXCEPT
   : data_slab(from_size(text.begin(), text.size()))
 {
 }
 
 // private
 data_slab::data_slab(const pointer begin, const pointer end,
-    size_type size) noexcept
+    size_type size) NOEXCEPT
   : begin_(begin), end_(end), size_(size)
 {
 }
@@ -50,28 +50,28 @@ data_slab::data_slab(const pointer begin, const pointer end,
 // methods
 // ----------------------------------------------------------------------------
 
-std::vector<data_slab::value_type> data_slab::to_chunk() const noexcept
+std::vector<data_slab::value_type> data_slab::to_chunk() const NOEXCEPT
 {
     return { begin_, end_ };
 }
 
-data_slice data_slab::to_slice() const noexcept
+data_slice data_slab::to_slice() const NOEXCEPT
 {
     return { begin_, end_ };
 }
 
-std::string data_slab::to_string() const noexcept
+std::string data_slab::to_string() const NOEXCEPT
 {
     return { begin_, end_ };
 }
 
 // Cannot provide a "decode" factory since the data is not owned.
-std::string data_slab::encoded() const noexcept
+std::string data_slab::encoded() const NOEXCEPT
 {
     return to_slice().encoded();
 }
 
-bool data_slab::resize(size_t size) noexcept
+bool data_slab::resize(size_t size) NOEXCEPT
 {
     if (size >= size_)
         return false;
@@ -85,41 +85,41 @@ bool data_slab::resize(size_t size) noexcept
 // ----------------------------------------------------------------------------
 
 // Undefined to dereference >= end.
-data_slab::pointer data_slab::data() const noexcept
+data_slab::pointer data_slab::data() const NOEXCEPT
 {
     return begin_;
 }
 
 // Undefined to dereference >= end.
-data_slab::pointer data_slab::begin() const noexcept
+data_slab::pointer data_slab::begin() const NOEXCEPT
 {
     return begin_;
 }
 
 // Undefined to dereference >= end.
-data_slab::pointer data_slab::end() const noexcept
+data_slab::pointer data_slab::end() const NOEXCEPT
 {
     return end_;
 }
 
-data_slab::value_type data_slab::front() const noexcept
+data_slab::value_type data_slab::front() const NOEXCEPT
 {
     // Guard against end overrun (return zero).
     return empty() ? 0x00 : *begin_;
 }
 
-data_slab::value_type data_slab::back() const noexcept
+data_slab::value_type data_slab::back() const NOEXCEPT
 {
     // Guard against begin underrun (return zero).
     return empty() ? 0x00 : *std::prev(end_);
 }
 
-data_slab::size_type data_slab::size() const noexcept
+data_slab::size_type data_slab::size() const NOEXCEPT
 {
     return size_;
 }
 
-bool data_slab::empty() const noexcept
+bool data_slab::empty() const NOEXCEPT
 {
     return is_zero(size_);
 }
@@ -127,28 +127,28 @@ bool data_slab::empty() const noexcept
 // operators
 // ----------------------------------------------------------------------------
 
-data_slab::operator std::vector<data_slab::value_type>() const noexcept
+data_slab::operator std::vector<data_slab::value_type>() const NOEXCEPT
 {
     return data_slab::to_chunk();
 }
 
-data_slab::operator data_slice() const noexcept
+data_slab::operator data_slice() const NOEXCEPT
 {
     return data_slab::to_slice();
 }
 
-data_slab::value_type data_slab::operator[](size_type index) const noexcept
+data_slab::value_type data_slab::operator[](size_type index) const NOEXCEPT
 {
     // Guard against end overrun (return zero).
     return index < size_ ? *std::next(begin_, index) : 0x00;
 }
 
-bool operator==(const data_slab& left, const data_slab& right) noexcept
+bool operator==(const data_slab& left, const data_slab& right) NOEXCEPT
 {
     return left.to_slice() == right.to_slice();
 }
 
-bool operator!=(const data_slab& left, const data_slab& right) noexcept
+bool operator!=(const data_slab& left, const data_slab& right) NOEXCEPT
 {
     return !(left == right);
 }

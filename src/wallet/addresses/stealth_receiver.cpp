@@ -32,7 +32,7 @@ namespace wallet {
 // TODO: use to factory and make address_ and spend_public_ const.
 stealth_receiver::stealth_receiver(const ec_secret& scan_private,
     const ec_secret& spend_private, const binary& filter,
-    uint8_t version) noexcept
+    uint8_t version) NOEXCEPT
   : version_(version), scan_private_(scan_private),
     spend_private_(spend_private)
 {
@@ -44,19 +44,19 @@ stealth_receiver::stealth_receiver(const ec_secret& scan_private,
     }
 }
 
-stealth_receiver::operator bool() const noexcept
+stealth_receiver::operator bool() const NOEXCEPT
 {
     return address_;
 }
 
 // Will be invalid if construct fails.
-const wallet::stealth_address& stealth_receiver::stealth_address() const noexcept
+const wallet::stealth_address& stealth_receiver::stealth_address() const NOEXCEPT
 {
     return address_;
 }
 
 bool stealth_receiver::derive_address(payment_address& out_address,
-    const ec_compressed& ephemeral_public) const noexcept
+    const ec_compressed& ephemeral_public) const NOEXCEPT
 {
     ec_compressed receiver_public;
     if (!uncover_stealth(receiver_public, ephemeral_public, scan_private_,
@@ -68,7 +68,7 @@ bool stealth_receiver::derive_address(payment_address& out_address,
 }
 
 bool stealth_receiver::derive_private(ec_secret& out_private,
-    const ec_compressed& ephemeral_public) const noexcept
+    const ec_compressed& ephemeral_public) const NOEXCEPT
 {
     return uncover_stealth(out_private, ephemeral_public, scan_private_,
         spend_private_);

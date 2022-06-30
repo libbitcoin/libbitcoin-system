@@ -52,48 +52,48 @@ static_assert(2 * quarter == aes256_block_size);
 // address_
 // ----------------------------------------------------------------------------
 
-static hash_digest address_hash(const payment_address& address) noexcept
+static hash_digest address_hash(const payment_address& address) NOEXCEPT
 {
     return bitcoin_hash(to_chunk(address.encoded()));
 }
 
 static bool address_salt(ek_salt& salt,
-    const payment_address& address) noexcept
+    const payment_address& address) NOEXCEPT
 {
     salt = slice<zero, ek_salt_size>(address_hash(address));
     return true;
 }
 
 static bool address_salt(ek_salt& salt, const ec_compressed& point,
-    uint8_t version, bool compressed) noexcept
+    uint8_t version, bool compressed) NOEXCEPT
 {
     payment_address address(ec_public{ point, compressed }, version);
     return address ? address_salt(salt, address) : false;
 }
 
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
-    uint8_t version, bool compressed) noexcept
+    uint8_t version, bool compressed) NOEXCEPT
 {
     payment_address address({ secret, version, compressed });
     return address ? address_salt(salt, address) : false;
 }
 
 static bool address_validate(const ek_salt& salt,
-    const payment_address& address) noexcept
+    const payment_address& address) NOEXCEPT
 {
     const auto hash = address_hash(address);
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
-    uint8_t version, bool compressed) noexcept
+    uint8_t version, bool compressed) NOEXCEPT
 {
     payment_address address(ec_public{ point, compressed }, version);
     return address ? address_validate(salt, address) : false;
 }
 
 static bool address_validate(const ek_salt& salt, const ec_secret& secret,
-    uint8_t version, bool compressed) noexcept
+    uint8_t version, bool compressed) NOEXCEPT
 {
     payment_address address({ secret, version, compressed });
     return address ? address_validate(salt, address) : false;
@@ -102,12 +102,12 @@ static bool address_validate(const ek_salt& salt, const ec_secret& secret,
 // point_
 // ----------------------------------------------------------------------------
 
-static hash_digest point_hash(const ec_compressed& point) noexcept
+static hash_digest point_hash(const ec_compressed& point) NOEXCEPT
 {
     return slice<one, ec_compressed_size>(point);
 }
 
-static one_byte point_sign(uint8_t byte, const hash_digest& hash) noexcept
+static one_byte point_sign(uint8_t byte, const hash_digest& hash) NOEXCEPT
 {
     static constexpr uint8_t low_bit_mask = 0x01;
     const uint8_t last_byte = hash.back();
@@ -117,7 +117,7 @@ static one_byte point_sign(uint8_t byte, const hash_digest& hash) noexcept
 }
 
 static one_byte point_sign(const one_byte& single,
-    const hash_digest& hash) noexcept
+    const hash_digest& hash) NOEXCEPT
 {
     return point_sign(single.front(), hash);
 }
@@ -126,21 +126,21 @@ static one_byte point_sign(const one_byte& single,
 // ----------------------------------------------------------------------------
 
 static hash_digest scrypt_token(const data_slice& data,
-    const data_slice& salt) noexcept
+    const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<hash_size>(data, salt, 16384, 8, 8);
 }
 
 static long_hash scrypt_pair(const data_slice& data,
-    const data_slice& salt) noexcept
+    const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 1024, 1, 1);
 }
 
 static long_hash scrypt_private(const data_slice& data,
-    const data_slice& salt) noexcept
+    const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
     return scrypt<long_hash_size>(data, salt, 16384, 8, 8);
@@ -150,7 +150,7 @@ static long_hash scrypt_private(const data_slice& data,
 // ----------------------------------------------------------------------------
 
 static one_byte set_flags(bool compressed, bool lot_sequence,
-    bool multiplied) noexcept
+    bool multiplied) NOEXCEPT
 {
     uint8_t byte = 0;
 
@@ -166,12 +166,12 @@ static one_byte set_flags(bool compressed, bool lot_sequence,
     return to_array(byte);
 }
 
-static one_byte set_flags(bool compressed, bool lot_sequence) noexcept
+static one_byte set_flags(bool compressed, bool lot_sequence) NOEXCEPT
 {
     return set_flags(compressed, lot_sequence, false);
 }
 
-static one_byte set_flags(bool compressed) noexcept
+static one_byte set_flags(bool compressed) NOEXCEPT
 {
     return set_flags(compressed, false);
 }
@@ -182,7 +182,7 @@ static one_byte set_flags(bool compressed) noexcept
 static void create_private_key(encrypted_private& out_private,
     const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy,
     const hash_digest& derived1, const hash_digest& derived2,
-    const ek_seed& seed, uint8_t version) noexcept
+    const ek_seed& seed, uint8_t version) NOEXCEPT
 {
     const auto prefix = parse_encrypted_private::prefix_factory(version, true);
 
@@ -208,7 +208,7 @@ static void create_private_key(encrypted_private& out_private,
 static bool create_public_key(encrypted_public& out_public,
     const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy,
     const hash_digest& derived1, const hash_digest& derived2,
-    const ec_secret& secret, uint8_t version) noexcept
+    const ec_secret& secret, uint8_t version) NOEXCEPT
 {
     ec_compressed point;
     if (!secret_to_public(point, secret))
@@ -242,7 +242,7 @@ static bool create_public_key(encrypted_public& out_public,
 bool create_key_pair(encrypted_private& out_private,
     encrypted_public& out_public, ec_compressed& out_point,
     const encrypted_token& token, const ek_seed& seed, uint8_t version,
-    bool compressed) noexcept
+    bool compressed) NOEXCEPT
 {
     const parse_encrypted_token parse(token);
     if (!parse.is_valid())
@@ -275,7 +275,7 @@ bool create_key_pair(encrypted_private& out_private,
 
 bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
     const encrypted_token& token, const ek_seed& seed, uint8_t version,
-    bool compressed) noexcept
+    bool compressed) NOEXCEPT
 {
     encrypted_public out_public;
     return create_key_pair(out_private, out_public, out_point, token, seed,
@@ -286,7 +286,7 @@ bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
 // ----------------------------------------------------------------------------
 
 // This call requires an ICU build, the other excluded calls are dependencies.
-static data_chunk normal(const std::string& passphrase) noexcept
+static data_chunk normal(const std::string& passphrase) NOEXCEPT
 {
     auto copy = passphrase;
 
@@ -298,7 +298,7 @@ static data_chunk normal(const std::string& passphrase) noexcept
 static bool create_token(encrypted_token& out_token,
     const std::string& passphrase, const data_slice& owner_salt,
     const ek_entropy& owner_entropy,
-    const data_array<parse_encrypted_token::prefix_size>& prefix) noexcept
+    const data_array<parse_encrypted_token::prefix_size>& prefix) NOEXCEPT
 {
     BC_ASSERT(owner_salt.size() == ek_salt_size ||
         owner_salt.size() == ek_entropy_size);
@@ -325,7 +325,7 @@ static bool create_token(encrypted_token& out_token,
 
 // The salt here is owner-supplied random bits, not the address hash.
 bool create_token(encrypted_token& out_token, const std::string& passphrase,
-    const ek_entropy& entropy) noexcept
+    const ek_entropy& entropy) NOEXCEPT
 {
     // BIP38: If lot and sequence numbers are not being included, then
     // owner_salt is 8 random bytes instead of 4, lot_sequence is omitted and
@@ -336,7 +336,7 @@ bool create_token(encrypted_token& out_token, const std::string& passphrase,
 
 // The salt here is owner-supplied random bits, not the address hash.
 bool create_token(encrypted_token& out_token, const std::string& passphrase,
-    const ek_salt& salt, uint32_t lot, uint32_t sequence) noexcept
+    const ek_salt& salt, uint32_t lot, uint32_t sequence) NOEXCEPT
 {
     if (lot > ek_max_lot || sequence > ek_max_sequence)
         return false;
@@ -353,7 +353,7 @@ bool create_token(encrypted_token& out_token, const std::string& passphrase,
 // ----------------------------------------------------------------------------
 
 bool encrypt(encrypted_private& out_private, const ec_secret& secret,
-    const std::string& passphrase, uint8_t version, bool compressed) noexcept
+    const std::string& passphrase, uint8_t version, bool compressed) NOEXCEPT
 {
     ek_salt salt;
     if (!address_salt(salt, secret, version, compressed))
@@ -386,7 +386,7 @@ bool encrypt(encrypted_private& out_private, const ec_secret& secret,
 
 static bool decrypt_multiplied(ec_secret& out_secret,
     const parse_encrypted_private& parse,
-    const std::string& passphrase) noexcept
+    const std::string& passphrase) NOEXCEPT
 {
     auto secret = scrypt_token(normal(passphrase), parse.owner_salt());
 
@@ -425,7 +425,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
 
 static bool decrypt_secret(ec_secret& out_secret,
     const parse_encrypted_private& parse,
-    const std::string& passphrase) noexcept
+    const std::string& passphrase) NOEXCEPT
 {
     auto encrypt1 = splice(parse.entropy(), parse.data1());
     auto encrypt2 = parse.data2();
@@ -448,7 +448,7 @@ static bool decrypt_secret(ec_secret& out_secret,
 }
 
 bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& out_compressed,
-    const encrypted_private& key, const std::string& passphrase) noexcept
+    const encrypted_private& key, const std::string& passphrase) NOEXCEPT
 {
     const parse_encrypted_private parse(key);
     if (!parse.is_valid())
@@ -472,7 +472,7 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& out_compressed,
 
 bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     bool& out_compressed, const encrypted_public& key,
-    const std::string& passphrase) noexcept
+    const std::string& passphrase) NOEXCEPT
 {
     const parse_encrypted_public parse(key);
     if (!parse.is_valid())

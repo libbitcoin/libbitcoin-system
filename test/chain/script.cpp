@@ -135,12 +135,12 @@ class transaction_accessor
 public:
     using transaction::transaction;
 
-    code connect(const context& state) const noexcept
+    code connect(const context& state) const NOEXCEPT
     {
         return transaction::connect(state);
     }
 
-    code connect(const context& state, uint32_t index) const noexcept
+    code connect(const context& state, uint32_t index) const NOEXCEPT
     {
         return interpreter<contiguous_stack>::connect(state, *this, index);
     }

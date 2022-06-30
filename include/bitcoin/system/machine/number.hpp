@@ -38,14 +38,14 @@ class integer
 public:
     typedef signed_type<Size> Integer;
 
-    static inline bool from_integer(Integer& out, int64_t vary) noexcept;
+    static inline bool from_integer(Integer& out, int64_t vary) NOEXCEPT;
     static inline bool from_chunk(Integer& out,
-        const data_chunk& vary) noexcept;
+        const data_chunk& vary) NOEXCEPT;
 
 protected:
-    static inline bool strict_zero(const data_chunk& vary) noexcept;
-    static inline bool is_overflow(const data_chunk& vary) noexcept;
-    static inline bool is_overflow(int64_t value) noexcept;
+    static inline bool strict_zero(const data_chunk& vary) NOEXCEPT;
+    static inline bool is_overflow(const data_chunk& vary) NOEXCEPT;
+    static inline bool is_overflow(int64_t value) NOEXCEPT;
 
 private:
     // TODO: .ipp class type constraint syntax.
@@ -56,23 +56,23 @@ private:
 class BC_API chunk
 {
 public:
-    static inline data_chunk from_bool(bool vary) noexcept;
-    static inline data_chunk from_integer(int64_t vary) noexcept;
+    static inline data_chunk from_bool(bool vary) NOEXCEPT;
+    static inline data_chunk from_integer(int64_t vary) NOEXCEPT;
 };
 
 class BC_API boolean
 {
 public:
     template <size_t Size = sizeof(int64_t)>
-    static inline signed_type<Size> to_integer(bool vary) noexcept;
+    static inline signed_type<Size> to_integer(bool vary) NOEXCEPT;
 
-    static inline bool from_chunk(const data_chunk& vary) noexcept;
-    static inline bool strict_from_chunk(const data_chunk& vary) noexcept;
-    static constexpr bool to_bool(int64_t vary) noexcept;
+    static inline bool from_chunk(const data_chunk& vary) NOEXCEPT;
+    static inline bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool to_bool(int64_t vary) NOEXCEPT;
 
 protected:
-    static inline bool strict_false(const data_chunk& vary) noexcept;
-    static constexpr bool is_sign_byte(uint8_t byte) noexcept;
+    static inline bool strict_false(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
 };
 
 } // namespace number

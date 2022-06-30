@@ -50,7 +50,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default block is an invalid object.
-    block() noexcept;
+    block() NOEXCEPT;
 
     /// Defaults.
     block(block&&) = default;
@@ -59,71 +59,71 @@ public:
     block& operator=(const block&) = default;
     ~block() = default;
 
-    block(chain::header&& header, transactions&& txs) noexcept;
-    block(const chain::header& header, const transactions& txs) noexcept;
+    block(chain::header&& header, transactions&& txs) NOEXCEPT;
+    block(const chain::header& header, const transactions& txs) NOEXCEPT;
     block(const chain::header::cptr& header,
-        const transactions_cptr& txs) noexcept;
+        const transactions_cptr& txs) NOEXCEPT;
 
-    block(const data_slice& data, bool witness) noexcept;
-    block(std::istream&& stream, bool witness) noexcept;
-    block(std::istream& stream, bool witness) noexcept;
-    block(reader&& source, bool witness) noexcept;
-    block(reader& source, bool witness) noexcept;
+    block(const data_slice& data, bool witness) NOEXCEPT;
+    block(std::istream&& stream, bool witness) NOEXCEPT;
+    block(std::istream& stream, bool witness) NOEXCEPT;
+    block(reader&& source, bool witness) NOEXCEPT;
+    block(reader& source, bool witness) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    bool operator==(const block& other) const noexcept;
-    bool operator!=(const block& other) const noexcept;
+    bool operator==(const block& other) const NOEXCEPT;
+    bool operator!=(const block& other) const NOEXCEPT;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool witness) const noexcept;
-    void to_data(std::ostream& stream, bool witness) const noexcept;
-    void to_data(writer& sink, bool witness) const noexcept;
+    data_chunk to_data(bool witness) const NOEXCEPT;
+    void to_data(std::ostream& stream, bool witness) const NOEXCEPT;
+    void to_data(writer& sink, bool witness) const NOEXCEPT;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const noexcept;
-    const chain::header& header() const noexcept;
-    const chain::header::cptr header_ptr() const noexcept;
-    const transactions_cptr& transactions_ptr() const noexcept;
-    hash_list transaction_hashes(bool witness) const noexcept;
+    bool is_valid() const NOEXCEPT;
+    const chain::header& header() const NOEXCEPT;
+    const chain::header::cptr header_ptr() const NOEXCEPT;
+    const transactions_cptr& transactions_ptr() const NOEXCEPT;
+    hash_list transaction_hashes(bool witness) const NOEXCEPT;
 
     /// Computed properties.
-    size_t weight() const noexcept;
-    uint64_t fees() const noexcept;
-    uint64_t claim() const noexcept;
-    hash_digest hash() const noexcept;
-    bool is_segregated() const noexcept;
-    size_t serialized_size(bool witness) const noexcept;
+    size_t weight() const NOEXCEPT;
+    uint64_t fees() const NOEXCEPT;
+    uint64_t claim() const NOEXCEPT;
+    hash_digest hash() const NOEXCEPT;
+    bool is_segregated() const NOEXCEPT;
+    size_t serialized_size(bool witness) const NOEXCEPT;
 
     // Validation.
     // ------------------------------------------------------------------------
 
     /// Consensus checks (no DoS guards for block sync without headers first).
-    code check() const noexcept;
+    code check() const NOEXCEPT;
     code accept(const context& state, size_t subsidy_interval,
-        uint64_t initial_subsidy) const noexcept;
-    code connect(const context& state) const noexcept;
+        uint64_t initial_subsidy) const NOEXCEPT;
+    code connect(const context& state) const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,
-        const chain::transactions_cptr& txs, bool valid) noexcept;
+        const chain::transactions_cptr& txs, bool valid) NOEXCEPT;
 
     // Check (context free).
     // ------------------------------------------------------------------------
 
-    bool is_empty() const noexcept;
-    bool is_oversized() const noexcept;
-    bool is_first_non_coinbase() const noexcept;
-    bool is_extra_coinbases() const noexcept;
-    bool is_forward_reference() const noexcept;
-    bool is_internal_double_spend() const noexcept;
-    bool is_invalid_merkle_root() const noexcept;
+    bool is_empty() const NOEXCEPT;
+    bool is_oversized() const NOEXCEPT;
+    bool is_first_non_coinbase() const NOEXCEPT;
+    bool is_extra_coinbases() const NOEXCEPT;
+    bool is_forward_reference() const NOEXCEPT;
+    bool is_internal_double_spend() const NOEXCEPT;
+    bool is_invalid_merkle_root() const NOEXCEPT;
 
     // TX: error::empty_transaction
     // TX: error::previous_output_null
@@ -132,19 +132,19 @@ protected:
     // Accept (contextual).
     // ------------------------------------------------------------------------
 
-    bool is_overweight() const noexcept;
-    bool is_invalid_coinbase_script(size_t height) const noexcept;
-    bool is_hash_limit_exceeded() const noexcept;
-    bool is_invalid_witness_commitment() const noexcept;
+    bool is_overweight() const NOEXCEPT;
+    bool is_invalid_coinbase_script(size_t height) const NOEXCEPT;
+    bool is_hash_limit_exceeded() const NOEXCEPT;
+    bool is_invalid_witness_commitment() const NOEXCEPT;
 
     // prevouts required
     bool is_overspent(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi, bool bip42) const noexcept;
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
     bool is_signature_operations_limited(bool bip16,
-        bool bip141) const noexcept;
+        bool bip141) const NOEXCEPT;
 
     // prevout confirmation state required
-    bool is_unspent_coinbase_collision(size_t height) const noexcept;
+    bool is_unspent_coinbase_collision(size_t height) const NOEXCEPT;
 
     // TX: error::transaction_non_final (context)
     // TX: error::missing_previous_output (prevouts)
@@ -155,20 +155,20 @@ protected:
     // TX: error::confirmed_double_spend (prevout confirmation state)
 
 private:
-    static block from_data(reader& source, bool witness) noexcept;
+    static block from_data(reader& source, bool witness) NOEXCEPT;
 
     // context free
-    hash_digest generate_merkle_root(bool witness) const noexcept;
+    hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
 
     // contextual
-    size_t non_coinbase_inputs() const noexcept;
+    size_t non_coinbase_inputs() const NOEXCEPT;
     uint64_t reward(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi, bool bip42) const noexcept;
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
 
     // delegated
-    code check_transactions() const noexcept;
-    code accept_transactions(const context& state) const noexcept;
-    code connect_transactions(const context& state) const noexcept;
+    code check_transactions() const NOEXCEPT;
+    code accept_transactions(const context& state) const NOEXCEPT;
+    code connect_transactions(const context& state) const NOEXCEPT;
 
     // Block should be stored as shared (adds 16 bytes).
     // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).
@@ -191,7 +191,7 @@ namespace std
 template<>
 struct hash<bc::system::chain::block>
 {
-    size_t operator()(const bc::system::chain::block& value) const noexcept
+    size_t operator()(const bc::system::chain::block& value) const NOEXCEPT
     {
         return std::hash<bc::system::hash_digest>{}(value.hash());
     }

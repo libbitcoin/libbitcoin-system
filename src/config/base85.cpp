@@ -29,31 +29,31 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base85::base85() noexcept
+base85::base85() NOEXCEPT
 {
 }
 
-base85::base85(data_chunk&& value) noexcept
+base85::base85(data_chunk&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-base85::base85(const data_chunk& value) noexcept
+base85::base85(const data_chunk& value) NOEXCEPT
   : value_(value)
 {
 }
 
-base85::base85(const std::string& base85) noexcept(false)
+base85::base85(const std::string& base85) THROWS
 {
     std::istringstream(base85) >> *this;
 }
 
-base85::operator bool() const noexcept
+base85::operator bool() const NOEXCEPT
 {
     return (value_.size() % 4) == 0u;
 }
 
-base85::operator const data_chunk&() const noexcept
+base85::operator const data_chunk&() const NOEXCEPT
 {
     return value_;
 }
@@ -65,7 +65,7 @@ std::string base85::to_string() const
     return value.str();
 }
 
-std::istream& operator>>(std::istream& stream, base85& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base85& argument) THROWS
 {
     std::string base85;
     stream >> base85;

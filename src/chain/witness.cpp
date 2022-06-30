@@ -46,71 +46,71 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // Constructors.
 // ----------------------------------------------------------------------------
 
-witness::witness() noexcept
+witness::witness() NOEXCEPT
   : witness(chunk_cptrs{}, false)
 {
 }
 
-witness::witness(data_stack&& stack) noexcept
+witness::witness(data_stack&& stack) NOEXCEPT
   : witness(*to_shareds(std::move(stack)), true)
 {
 }
 
-witness::witness(const data_stack& stack) noexcept
+witness::witness(const data_stack& stack) NOEXCEPT
   : witness(*to_shareds(stack), true)
 {
 }
 
-witness::witness(chunk_cptrs&& stack) noexcept
+witness::witness(chunk_cptrs&& stack) NOEXCEPT
   : witness(std::move(stack), true)
 {
 }
 
-witness::witness(const chunk_cptrs& stack) noexcept
+witness::witness(const chunk_cptrs& stack) NOEXCEPT
   : witness(stack, true)
 {
 }
 
-witness::witness(const data_slice& data, bool prefix) noexcept
+witness::witness(const data_slice& data, bool prefix) NOEXCEPT
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : witness(stream::in::copy(data), prefix)
     BC_POP_WARNING()
 {
 }
 
-witness::witness(std::istream&& stream, bool prefix) noexcept
+witness::witness(std::istream&& stream, bool prefix) NOEXCEPT
   : witness(read::bytes::istream(stream), prefix)
 {
 }
 
-witness::witness(std::istream& stream, bool prefix) noexcept
+witness::witness(std::istream& stream, bool prefix) NOEXCEPT
   : witness(read::bytes::istream(stream), prefix)
 {
 }
 
-witness::witness(reader&& source, bool prefix) noexcept
+witness::witness(reader&& source, bool prefix) NOEXCEPT
   : witness(from_data(source, prefix))
 {
 }
 
-witness::witness(reader& source, bool prefix) noexcept
+witness::witness(reader& source, bool prefix) NOEXCEPT
   : witness(from_data(source, prefix))
 {
 }
 
-witness::witness(const std::string& mnemonic) noexcept
+witness::witness(const std::string& mnemonic) NOEXCEPT
   : witness(from_string(mnemonic))
 {
 }
 
 // protected
-witness::witness(chunk_cptrs&& stack, bool valid) noexcept
+witness::witness(chunk_cptrs&& stack, bool valid) NOEXCEPT
   : stack_(std::move(stack)), valid_(valid)
 {
 }
 
 // protected
-witness::witness(const chunk_cptrs& stack, bool valid) noexcept
+witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
   : stack_(stack), valid_(valid)
 {
 }
@@ -118,12 +118,12 @@ witness::witness(const chunk_cptrs& stack, bool valid) noexcept
 // Operators.
 // ----------------------------------------------------------------------------
 
-bool witness::operator==(const witness& other) const noexcept
+bool witness::operator==(const witness& other) const NOEXCEPT
 {
     return deep_equal(stack_, other.stack_);
 }
 
-bool witness::operator!=(const witness& other) const noexcept
+bool witness::operator!=(const witness& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -131,14 +131,14 @@ bool witness::operator!=(const witness& other) const noexcept
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-static data_chunk read_element(reader& source) noexcept
+static data_chunk read_element(reader& source) NOEXCEPT
 {
     // Each witness encoded as variable integer prefixed byte array (bip144).
     return source.read_bytes(source.read_size(max_block_weight));
 }
 
 // static/private
-witness witness::from_data(reader& source, bool prefix) noexcept
+witness witness::from_data(reader& source, bool prefix) NOEXCEPT
 {
     chunk_cptrs stack;
 
@@ -160,19 +160,19 @@ witness witness::from_data(reader& source, bool prefix) noexcept
     return { stack, source };
 }
 
-inline bool is_push_token(const std::string& token) noexcept
+inline bool is_push_token(const std::string& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '[' && token.back() == ']';
 }
 
-inline std::string remove_token_delimiters(const std::string& token) noexcept
+inline std::string remove_token_delimiters(const std::string& token) NOEXCEPT
 {
     BC_ASSERT(token.size() > one);
     return std::string(std::next(token.begin()), std::prev(token.end()));
 }
 
 // static/private
-witness witness::from_string(const std::string& mnemonic) noexcept
+witness witness::from_string(const std::string& mnemonic) NOEXCEPT
 {
     // There is always one data element per non-empty string token.
     auto tokens = split(mnemonic);
@@ -199,7 +199,7 @@ witness witness::from_string(const std::string& mnemonic) noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk witness::to_data(bool prefix) const noexcept
+data_chunk witness::to_data(bool prefix) const NOEXCEPT
 {
     data_chunk data(serialized_size(prefix), no_fill_byte_allocator);
 
@@ -211,13 +211,13 @@ data_chunk witness::to_data(bool prefix) const noexcept
     return data;
 }
 
-void witness::to_data(std::ostream& stream, bool prefix) const noexcept
+void witness::to_data(std::ostream& stream, bool prefix) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out, prefix);
 }
 
-void witness::to_data(writer& sink, bool prefix) const noexcept
+void witness::to_data(writer& sink, bool prefix) const NOEXCEPT
 {
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
@@ -231,7 +231,7 @@ void witness::to_data(writer& sink, bool prefix) const noexcept
     }
 }
 
-std::string witness::to_string() const noexcept
+std::string witness::to_string() const NOEXCEPT
 {
     if (!valid_)
         return "(?)";
@@ -247,20 +247,20 @@ std::string witness::to_string() const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool witness::is_valid() const noexcept
+bool witness::is_valid() const NOEXCEPT
 {
     return valid_;
 }
 
-const chunk_cptrs& witness::stack() const noexcept
+const chunk_cptrs& witness::stack() const NOEXCEPT
 {
     return stack_;
 }
 
 // private
-size_t witness::serialized_size() const noexcept
+size_t witness::serialized_size() const NOEXCEPT
 {
-    const auto sum = [](size_t total, const chunk_cptr& element) noexcept
+    const auto sum = [](size_t total, const chunk_cptr& element) NOEXCEPT
     {
         // Tokens encoded as variable integer prefixed byte array (bip144).
         const auto size = element->size();
@@ -270,7 +270,7 @@ size_t witness::serialized_size() const noexcept
     return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
 }
 
-size_t witness::serialized_size(bool prefix) const noexcept
+size_t witness::serialized_size(bool prefix) const NOEXCEPT
 {
     // Witness prefix is an element count, not a byte length (unlike script).
     return (prefix ? variable_size(stack_.size()) : zero) + serialized_size();
@@ -280,7 +280,7 @@ size_t witness::serialized_size(bool prefix) const noexcept
 // ----------------------------------------------------------------------------
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-inline operations to_pay_key_hash(data_chunk&& program) noexcept
+inline operations to_pay_key_hash(data_chunk&& program) NOEXCEPT
 {
     BC_ASSERT(program.size() == short_hash_size);
 
@@ -296,7 +296,7 @@ inline operations to_pay_key_hash(data_chunk&& program) noexcept
 
 // The return script is only useful only for sigop counting.
 bool witness::extract_sigop_script(script& out_script,
-    const script& program_script) const noexcept
+    const script& program_script) const NOEXCEPT
 {
     // Caller may recycle script parameter.
     out_script = {};
@@ -338,7 +338,7 @@ bool witness::extract_sigop_script(script& out_script,
 
 // Extract script and initial execution stack.
 bool witness::extract_script(script::cptr& out_script,
-    chunk_cptrs_ptr& out_stack, const script& program_script) const noexcept
+    chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
     out_stack = std::make_shared<chunk_cptrs>(stack_);
@@ -406,17 +406,17 @@ bool witness::extract_script(script::cptr& out_script,
 
 namespace json = boost::json;
 
-// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 witness tag_invoke(json::value_to_tag<witness>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return witness{ std::string(value.get_string().c_str()) };
 }
 
 void tag_invoke(json::value_from_tag, json::value& value,
-    const witness& witness) noexcept
+    const witness& witness) NOEXCEPT
 {
     value = witness.to_string();
 }
@@ -424,7 +424,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
 BC_POP_WARNING()
 
 witness::cptr tag_invoke(json::value_to_tag<witness::cptr>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return to_shared(tag_invoke(json::value_to_tag<witness>{}, value));
 }
@@ -434,7 +434,7 @@ BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const witness::cptr& output) noexcept
+    const witness::cptr& output) NOEXCEPT
 {
     tag_invoke(tag, value, *output);
 }

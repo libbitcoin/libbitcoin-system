@@ -51,22 +51,22 @@ public:
     typedef std::pair<char_type*, char_type*> sequence;
 
     /// seekable input/output (direct devices only).
-    sequence input_sequence() const noexcept;
-    sequence output_sequence() const noexcept;
+    sequence input_sequence() const NOEXCEPT;
+    sequence output_sequence() const NOEXCEPT;
 
     /// input/output devices (indirect devices only).
-    size_type read(char_type* buffer, size_type count) noexcept;
-    size_type write(const char_type* buffer, size_type count) noexcept;
+    size_type read(char_type* buffer, size_type count) NOEXCEPT;
+    size_type write(const char_type* buffer, size_type count) NOEXCEPT;
 
     /// Buffer allocation (indirect devices only).
-    size_type optimal_buffer_size() const noexcept;
+    size_type optimal_buffer_size() const NOEXCEPT;
 
 protected:
-    device(size_type remaining) noexcept;
-    virtual sequence do_sequence() const noexcept;
-    virtual void do_read(value_type* to, size_type size) noexcept;
-    virtual void do_write(const value_type* from, size_type size) noexcept;
-    virtual size_type do_optimal_buffer_size() const noexcept;
+    device(size_type remaining) NOEXCEPT;
+    virtual sequence do_sequence() const NOEXCEPT;
+    virtual void do_read(value_type* to, size_type size) NOEXCEPT;
+    virtual void do_write(const value_type* from, size_type size) NOEXCEPT;
+    virtual size_type do_optimal_buffer_size() const NOEXCEPT;
 
     size_type remaining_;
 };

@@ -25,6 +25,7 @@
 #include <string>
 #include <type_traits>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/words/language.hpp>
 #include <bitcoin/system/words/languages.hpp>
@@ -44,19 +45,19 @@ static_assert(std::is_pod<dictionary<1>::words>(), "performance");
 // ----------------------------------------------------------------------------
 
 template<size_t Size>
-dictionary<Size>::dictionary(language identifier, const words& words) noexcept
+dictionary<Size>::dictionary(language identifier, const words& words) NOEXCEPT
   : identifier_(identifier), words_(words)
 {
 }
 
 template <size_t Size>
-language dictionary<Size>::identifier() const noexcept
+language dictionary<Size>::identifier() const NOEXCEPT
 {
     return identifier_;
 }
 
 template <size_t Size>
-std::string dictionary<Size>::name() const noexcept
+std::string dictionary<Size>::name() const NOEXCEPT
 {
     return languages::to_name(identifier_);
 }
@@ -65,13 +66,13 @@ std::string dictionary<Size>::name() const noexcept
 // ----------------------------------------------------------------------------
 
 template <size_t Size>
-std::string dictionary<Size>::at(size_t index) const noexcept
+std::string dictionary<Size>::at(size_t index) const NOEXCEPT
 {
     return index < size() ? words_.word[index] : "";
 }
 
 template <size_t Size>
-string_list dictionary<Size>::at(const search& indexes) const noexcept
+string_list dictionary<Size>::at(const search& indexes) const NOEXCEPT
 {
     string_list out(indexes.size());
 
@@ -87,7 +88,7 @@ string_list dictionary<Size>::at(const search& indexes) const noexcept
 }
 
 template <size_t Size>
-int32_t dictionary<Size>::index(const std::string& word) const noexcept
+int32_t dictionary<Size>::index(const std::string& word) const NOEXCEPT
 {
     // Dictionary sort is configured on each dictionary, verified by tests.
     // Dictionary is char* elements but using std::string (word) for compares.
@@ -102,7 +103,7 @@ int32_t dictionary<Size>::index(const std::string& word) const noexcept
 
 template <size_t Size>
 typename dictionary<Size>::result
-dictionary<Size>::index(const string_list& words) const noexcept
+dictionary<Size>::index(const string_list& words) const NOEXCEPT
 {
     dictionary<Size>::result out(words.size());
 
@@ -117,13 +118,13 @@ dictionary<Size>::index(const string_list& words) const noexcept
 }
 
 template <size_t Size>
-bool dictionary<Size>::contains(const std::string& word) const noexcept
+bool dictionary<Size>::contains(const std::string& word) const NOEXCEPT
 {
     return index(word) >= 0;
 }
 
 template <size_t Size>
-bool dictionary<Size>::contains(const string_list& words) const noexcept
+bool dictionary<Size>::contains(const string_list& words) const NOEXCEPT
 {
     // std::all_of can be parallel and order doesn't matter.
     return std::all_of(words.begin(), words.end(),

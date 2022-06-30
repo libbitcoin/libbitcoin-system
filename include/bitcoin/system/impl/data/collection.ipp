@@ -47,7 +47,7 @@ namespace system {
 template <typename Collection, typename Element>
 typename Collection::difference_type
 constexpr binary_search(const Collection& list,
-    const Element& element) noexcept
+    const Element& element) NOEXCEPT
 {
     if (std::empty(list))
         return negative_one;
@@ -73,13 +73,13 @@ constexpr binary_search(const Collection& list,
 
 // C++17: Parallel policy for std::transform.
 template <typename To, typename From>
-inline To projection(const From& source) noexcept
+inline To projection(const From& source) NOEXCEPT
 {
     ////static no_fill_allocator<To::value_type> no_fill_to_allocator{};
     To out(std::size(source));
 
     std::transform(std::begin(source), std::end(source), std::begin(out),
-        [](const auto& element) noexcept
+        [](const auto& element) NOEXCEPT
         {
             return element;
         });
@@ -89,11 +89,11 @@ inline To projection(const From& source) noexcept
 
 // C++17: Parallel policy for std::equal.
 template <typename Left, typename Right>
-constexpr bool deep_equal(const Left& left, const Right& right) noexcept
+constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT
 {
     return std::equal(std::begin(left), std::end(left),
         std::begin(right), std::end(right),
-        [](const auto& first, const auto& second) noexcept
+        [](const auto& first, const auto& second) NOEXCEPT
         {
             return 
                 ((first != nullptr && second != nullptr) &&
@@ -105,10 +105,10 @@ constexpr bool deep_equal(const Left& left, const Right& right) noexcept
 // C++17: Parallel policy for std::any_of.
 template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
-    const Element& element) noexcept
+    const Element& element) NOEXCEPT
 {
     return std::any_of(std::begin(list), std::end(list),
-        [&element](const auto& value) noexcept
+        [&element](const auto& value) NOEXCEPT
         {
             return value == element;
         });
@@ -118,10 +118,10 @@ constexpr bool contains(const Collection& list,
 template <typename Collection>
 typename Collection::difference_type
 constexpr find_pair_position(const Collection& list,
-    const typename Collection::value_type::first_type& key) noexcept
+    const typename Collection::value_type::first_type& key) NOEXCEPT
 {
     const auto position = std::find_if(std::begin(list), std::end(list),
-        [&key](const auto& pair) noexcept
+        [&key](const auto& pair) NOEXCEPT
         {
             return pair.first == key;
         });
@@ -134,7 +134,7 @@ constexpr find_pair_position(const Collection& list,
 template <typename Collection>
 typename Collection::difference_type
 constexpr find_position(const Collection& list,
-    const typename Collection::value_type& element) noexcept
+    const typename Collection::value_type& element) NOEXCEPT
 {
     const auto position = std::find(std::begin(list), std::end(list), element);
     return position == std::end(list) ? negative_one :
@@ -145,7 +145,7 @@ constexpr find_position(const Collection& list,
 template <typename Collection, typename Predicate>
 typename Collection::iterator
 inline insert_sorted(Collection& list,
-    typename Collection::value_type& element, Predicate predicate) noexcept
+    typename Collection::value_type& element, Predicate predicate) NOEXCEPT
 {
     return list.insert(std::upper_bound(std::begin(list),
         std::end(list), element, predicate), element);
@@ -154,7 +154,7 @@ inline insert_sorted(Collection& list,
 // Collection requires back and pop_back methods (vector).
 template <typename Collection>
 typename Collection::value_type
-inline pop(Collection& stack) noexcept
+inline pop(Collection& stack) NOEXCEPT
 {
     if (std::empty(stack))
         return {};
@@ -166,14 +166,14 @@ inline pop(Collection& stack) noexcept
 
 // C++17: Parallel policy for std::sort, std::unique.
 template <typename Collection>
-constexpr bool is_distinct(Collection&& list) noexcept
+constexpr bool is_distinct(Collection&& list) NOEXCEPT
 {
     std::sort(std::begin(list), std::end(list));
     return std::unique(std::begin(list), std::end(list)) == std::end(list);
 }
 
 template <typename Collection>
-constexpr bool is_distinct(const Collection& list) noexcept
+constexpr bool is_distinct(const Collection& list) NOEXCEPT
 {
     Collection copy{ list };
     return is_distinct(copy);
@@ -181,14 +181,14 @@ constexpr bool is_distinct(const Collection& list) noexcept
 
 // C++17: Parallel policy for std::is_sorted.
 template <typename Collection>
-constexpr bool is_sorted(const Collection& list) noexcept
+constexpr bool is_sorted(const Collection& list) NOEXCEPT
 {
     return std::is_sorted(std::begin(list), std::end(list));
 }
 
 // C++17: Parallel policy for std::sort, std::erase.
 template <typename Collection>
-constexpr void distinct(Collection& list) noexcept
+constexpr void distinct(Collection& list) NOEXCEPT
 {
     std::sort(std::begin(list), std::end(list));
     list.erase(std::unique(std::begin(list), std::end(list)), std::end(list));
@@ -196,27 +196,27 @@ constexpr void distinct(Collection& list) noexcept
 }
 
 template <typename Collection>
-inline Collection distinct(Collection&& list) noexcept
+inline Collection distinct(Collection&& list) NOEXCEPT
 {
     distinct(list);
     return std::forward<Collection>(list);
 }
 
 template <typename Collection>
-inline Collection distinct_copy(const Collection& list) noexcept
+inline Collection distinct_copy(const Collection& list) NOEXCEPT
 {
     return distinct(Collection{ list });
 }
 
 template <typename Left, typename Right>
-inline Left difference(const Left& left, const Right& right) noexcept
+inline Left difference(const Left& left, const Right& right) NOEXCEPT
 {
     return difference<Left>(std::begin(left), std::end(left), right);
 }
 
 template <typename Left, typename Right>
 inline Left difference(const typename Left::const_iterator& begin,
-    const typename Left::const_iterator& end, const Right& right) noexcept
+    const typename Left::const_iterator& end, const Right& right) NOEXCEPT
 {
     Left copy{};
     copy.reserve(std::distance(begin, end));
@@ -231,7 +231,7 @@ inline Left difference(const typename Left::const_iterator& begin,
 }
 
 template <typename Left, typename Right>
-constexpr bool is_intersecting(const Left& left, const Right& right) noexcept
+constexpr bool is_intersecting(const Left& left, const Right& right) NOEXCEPT
 {
     return is_intersecting<Left>(std::begin(left), std::end(left), right);
 }
@@ -239,7 +239,7 @@ constexpr bool is_intersecting(const Left& left, const Right& right) noexcept
 // C++17: Parallel policy for std::find_first_of.
 template <typename Left, typename Right>
 constexpr bool is_intersecting(const typename Left::const_iterator& begin,
-    const typename Left::const_iterator& end, const Right& right) noexcept
+    const typename Left::const_iterator& end, const Right& right) NOEXCEPT
 {
     return std::find_first_of(begin, end, std::begin(right),
         std::end(right)) != end;
@@ -247,34 +247,34 @@ constexpr bool is_intersecting(const typename Left::const_iterator& begin,
 
 // C++17: Parallel policy for std::reverse.
 template <typename Collection>
-inline Collection reverse(Collection&& list) noexcept
+inline Collection reverse(Collection&& list) NOEXCEPT
 {
     std::reverse(std::begin(list), std::end(list));
     return std::forward<Collection>(list);
 }
 
 template <typename Collection>
-inline Collection reverse_copy(const Collection& list) noexcept
+inline Collection reverse_copy(const Collection& list) NOEXCEPT
 {
     return reverse(Collection{ list });
 }
 
 // C++17: Parallel policy for std::sort.
 template <typename Collection>
-constexpr void sort(Collection& list) noexcept
+constexpr void sort(Collection& list) NOEXCEPT
 {
     std::sort(std::begin(list), std::end(list));
 }
 
 template <typename Collection>
-inline Collection sort(Collection&& list) noexcept
+inline Collection sort(Collection&& list) NOEXCEPT
 {
     sort(list);
     return std::forward<Collection>(list);
 }
 
 template <typename Collection>
-inline Collection sort_copy(const Collection& list) noexcept
+inline Collection sort_copy(const Collection& list) NOEXCEPT
 {
     return sort(Collection{ list });
 }
@@ -283,7 +283,7 @@ inline Collection sort_copy(const Collection& list) noexcept
 template <typename Collection>
 constexpr bool starts_with(const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
-    const Collection& value) noexcept
+    const Collection& value) NOEXCEPT
 {
     return !is_lesser(std::distance(begin, end), std::size(value)) &&
         std::equal(std::begin(value), std::end(value), begin);

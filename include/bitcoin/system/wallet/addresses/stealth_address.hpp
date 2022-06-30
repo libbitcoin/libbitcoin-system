@@ -49,56 +49,56 @@ public:
     static const size_t max_filter_bits;
 
     /// Constructors.
-    stealth_address() noexcept;
-    stealth_address(const data_chunk& decoded) noexcept;
-    stealth_address(const std::string& encoded) noexcept;
-    stealth_address(const stealth_address& other) noexcept;
+    stealth_address() NOEXCEPT;
+    stealth_address(const data_chunk& decoded) NOEXCEPT;
+    stealth_address(const std::string& encoded) NOEXCEPT;
+    stealth_address(const stealth_address& other) NOEXCEPT;
     stealth_address(const binary& filter, const ec_compressed& scan_key,
         const compressed_list& spend_keys, uint8_t signatures=0,
-        uint8_t version=mainnet_p2kh) noexcept;
+        uint8_t version=mainnet_p2kh) NOEXCEPT;
 
     /// Operators.
-    bool operator<(const stealth_address& other) const noexcept;
-    bool operator==(const stealth_address& other) const noexcept;
-    bool operator!=(const stealth_address& other) const noexcept;
-    stealth_address& operator=(const stealth_address& other) noexcept;
+    bool operator<(const stealth_address& other) const NOEXCEPT;
+    bool operator==(const stealth_address& other) const NOEXCEPT;
+    bool operator!=(const stealth_address& other) const NOEXCEPT;
+    stealth_address& operator=(const stealth_address& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, stealth_address& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const stealth_address& of) noexcept;
+        const stealth_address& of) NOEXCEPT;
 
     /// Cast operators.
-    operator bool() const noexcept;
-    operator const data_chunk() const noexcept;
+    operator bool() const NOEXCEPT;
+    operator const data_chunk() const NOEXCEPT;
 
     /// Serializer.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Accessors.
-    uint8_t version() const noexcept;
-    const ec_compressed& scan_key() const noexcept;
-    const compressed_list& spend_keys() const noexcept;
-    uint8_t signatures() const noexcept;
-    const binary& filter() const noexcept;
+    uint8_t version() const NOEXCEPT;
+    const ec_compressed& scan_key() const NOEXCEPT;
+    const compressed_list& spend_keys() const NOEXCEPT;
+    uint8_t signatures() const NOEXCEPT;
+    const binary& filter() const NOEXCEPT;
 
     /// Methods.
-    data_chunk to_chunk() const noexcept;
+    data_chunk to_chunk() const NOEXCEPT;
 
 private:
     /// Factories.
-    static stealth_address from_string(const std::string& encoded) noexcept;
-    static stealth_address from_stealth(const data_chunk& decoded) noexcept;
+    static stealth_address from_string(const std::string& encoded) NOEXCEPT;
+    static stealth_address from_stealth(const data_chunk& decoded) NOEXCEPT;
     static stealth_address from_stealth(const binary& filter,
         const ec_compressed& scan_key, const compressed_list& spend_keys,
-        uint8_t signatures, uint8_t version) noexcept;
+        uint8_t signatures, uint8_t version) NOEXCEPT;
 
     /// Parameter order is used to change the constructor signature.
     stealth_address(uint8_t version, const binary& filter,
         const ec_compressed& scan_key, const compressed_list& spend_keys,
-        uint8_t signatures) noexcept;
+        uint8_t signatures) NOEXCEPT;
 
     /// Helpers.
-    bool reuse_key() const noexcept;
-    uint8_t options() const noexcept;
+    bool reuse_key() const NOEXCEPT;
+    uint8_t options() const NOEXCEPT;
 
 
     /// Members.

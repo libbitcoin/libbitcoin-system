@@ -25,24 +25,25 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-constexpr bool is_between(uint8_t value, uint8_t low, uint8_t high) noexcept
+constexpr bool is_between(uint8_t value, uint8_t low, uint8_t high) NOEXCEPT
 {
     return low <= value && value <= high;
 }
 
-constexpr char to_base16_character(char digit) noexcept
+constexpr char to_base16_character(char digit) NOEXCEPT
 {
     return (is_between(digit, 0, 9) ? '0' : 'a' - '\xa') + digit;
 }
 
-constexpr uint8_t from_base16_characters(char high, char low) noexcept
+constexpr uint8_t from_base16_characters(char high, char low) NOEXCEPT
 {
-    const auto from_base16_digit = [](char character) noexcept
+    const auto from_base16_digit = [](char character) NOEXCEPT
     {
         if (is_between(character, 'A', 'F'))
             return narrow_sign_cast<uint8_t>(character - 'A' + '\xA');
@@ -65,7 +66,7 @@ constexpr uint8_t from_base16_characters(char high, char low) noexcept
 // algorithms when the iterator's value type is char." [e.g. std::string]
 // en.cppreference.com/w/cpp/string/byte/isxdigit
 template <typename Byte, if_one_byte<Byte>>
-constexpr bool is_base16(Byte character) noexcept
+constexpr bool is_base16(Byte character) NOEXCEPT
 {
     return
         (is_between(possible_sign_cast<uint8_t>(character), '0', '9')) ||
@@ -75,7 +76,7 @@ constexpr bool is_base16(Byte character) noexcept
 
 template <size_t Size>
 constexpr bool decode_base16(data_array<Size>& out,
-    const std::string_view& in) noexcept
+    const std::string_view& in) NOEXCEPT
 {
     if (in.size() != Size * octet_width)
         return false;
@@ -97,7 +98,7 @@ constexpr bool decode_base16(data_array<Size>& out,
 
 template <size_t Size>
 constexpr bool decode_hash(data_array<Size>& out,
-    const std::string_view& in) noexcept
+    const std::string_view& in) NOEXCEPT
 {
     if (in.size() != Size * octet_width)
         return false;
@@ -118,13 +119,13 @@ constexpr bool decode_hash(data_array<Size>& out,
 }
 
 template <size_t Size, if_odd<Size>>
-inline std::string base16_string(const char(&string)[Size]) noexcept
+inline std::string base16_string(const char(&string)[Size]) NOEXCEPT
 {
     return to_string(base16_chunk(string));
 }
 
 template <size_t Size, if_odd<Size>>
-inline data_chunk base16_chunk(const char(&string)[Size]) noexcept
+inline data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT
 {
     data_chunk out;
     decode_base16(out, string);
@@ -133,7 +134,7 @@ inline data_chunk base16_chunk(const char(&string)[Size]) noexcept
 
 template <size_t Size, if_odd<Size>>
 constexpr data_array<to_half(sub1(Size))>
-base16_array(const char(&string)[Size]) noexcept
+base16_array(const char(&string)[Size]) NOEXCEPT
 {
     data_array<to_half(sub1(Size))> out{};
     if (!decode_base16(out, string))
@@ -144,7 +145,7 @@ base16_array(const char(&string)[Size]) noexcept
 
 template <size_t Size, if_odd<Size>>
 constexpr data_array<to_half(sub1(Size))>
-base16_hash(const char(&string)[Size]) noexcept
+base16_hash(const char(&string)[Size]) NOEXCEPT
 {
     data_array<to_half(sub1(Size))> out{};
     if (!decode_hash(out, string))

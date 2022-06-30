@@ -88,138 +88,138 @@ struct BC_API recoverable_signature
 // ----------------------------------------------------------------------------
 
 /// Compute the sum a += G * b.
-BC_API bool ec_add(ec_compressed& point, const ec_secret& scalar) noexcept;
+BC_API bool ec_add(ec_compressed& point, const ec_secret& scalar) NOEXCEPT;
 
 /// Compute the sum a += G * b.
-BC_API bool ec_add(ec_uncompressed& point, const ec_secret& scalar) noexcept;
+BC_API bool ec_add(ec_uncompressed& point, const ec_secret& scalar) NOEXCEPT;
 
 /// Compute the sum a = (a + b) % n.
-BC_API bool ec_add(ec_secret& left, const ec_secret& right) noexcept;
+BC_API bool ec_add(ec_secret& left, const ec_secret& right) NOEXCEPT;
 
 /// Compute the sum a += b.
-BC_API bool ec_add(ec_compressed& left, const ec_compressed& right) noexcept;
+BC_API bool ec_add(ec_compressed& left, const ec_compressed& right) NOEXCEPT;
 
 /// Compute the sum a += b.
-BC_API bool ec_add(ec_compressed& left, const ec_uncompressed& right) noexcept;
+BC_API bool ec_add(ec_compressed& left, const ec_uncompressed& right) NOEXCEPT;
 
 /// Compute the sum of compressed point values.
-BC_API bool ec_sum(ec_compressed& out, const compressed_list& values) noexcept;
+BC_API bool ec_sum(ec_compressed& out, const compressed_list& values) NOEXCEPT;
 
 // Multiply EC values
 // ----------------------------------------------------------------------------
 
 /// Compute the product point *= secret.
 BC_API bool ec_multiply(ec_compressed& point,
-    const ec_secret& scalar) noexcept;
+    const ec_secret& scalar) NOEXCEPT;
 
 /// Compute the product point *= secret.
 BC_API bool ec_multiply(ec_uncompressed& point,
-    const ec_secret& scalar) noexcept;
+    const ec_secret& scalar) NOEXCEPT;
 
 /// Compute the product a = (a * b) % n.
-BC_API bool ec_multiply(ec_secret& left, const ec_secret& right) noexcept;
+BC_API bool ec_multiply(ec_secret& left, const ec_secret& right) NOEXCEPT;
 
 // Negate EC values
 // ----------------------------------------------------------------------------
 
 /// Negate scalar.
-BC_API bool ec_negate(ec_secret& scalar) noexcept;
+BC_API bool ec_negate(ec_secret& scalar) NOEXCEPT;
 
 /// Invert point (flip on Y axis).
-BC_API bool ec_negate(ec_compressed& point) noexcept;
+BC_API bool ec_negate(ec_compressed& point) NOEXCEPT;
 
 /// Invert point (flip on Y axis).
-BC_API bool ec_negate(ec_uncompressed& point) noexcept;
+BC_API bool ec_negate(ec_uncompressed& point) NOEXCEPT;
 
 // Convert keys
 // ----------------------------------------------------------------------------
 
 /// Convert uncompressed point to compressed.
 BC_API bool compress(ec_compressed& out,
-    const ec_uncompressed& point) noexcept;
+    const ec_uncompressed& point) NOEXCEPT;
 
 /// Convert compressed point to decompressed.
 BC_API bool decompress(ec_uncompressed& out,
-    const ec_compressed& point) noexcept;
+    const ec_compressed& point) NOEXCEPT;
 
 /// Convert secret to a compressed point.
 BC_API bool secret_to_public(ec_compressed& out,
-    const ec_secret& secret) noexcept;
+    const ec_secret& secret) NOEXCEPT;
 
 /// Convert secret to an uncompressed point.
 BC_API bool secret_to_public(ec_uncompressed& out,
-    const ec_secret& secret) noexcept;
+    const ec_secret& secret) NOEXCEPT;
 
 // Verify keys
 // ----------------------------------------------------------------------------
 
 /// Verify secret.
-BC_API bool verify(const ec_secret& secret) noexcept;
+BC_API bool verify(const ec_secret& secret) NOEXCEPT;
 
 /// Verify point.
-BC_API bool verify(const data_slice& point) noexcept;
+BC_API bool verify(const data_slice& point) NOEXCEPT;
 
 // Detect public keys
 // ----------------------------------------------------------------------------
 
 /// Determine if the compressed public key is even (y-valued).
-BC_API bool is_even_key(const ec_compressed& point) noexcept;
+BC_API bool is_even_key(const ec_compressed& point) NOEXCEPT;
 
 /// Fast detection of compressed public key structure.
-BC_API bool is_compressed_key(const data_slice& point) noexcept;
+BC_API bool is_compressed_key(const data_slice& point) NOEXCEPT;
 
 /// Fast detection of uncompressed public key structure.
-BC_API bool is_uncompressed_key(const data_slice& point) noexcept;
+BC_API bool is_uncompressed_key(const data_slice& point) NOEXCEPT;
 
 /// Fast detection of compressed or uncompressed public key structure.
-BC_API bool is_public_key(const data_slice& point) noexcept;
+BC_API bool is_public_key(const data_slice& point) NOEXCEPT;
 
 /// Fast detection of endorsement structure (DER with signature hash type).
-BC_API bool is_endorsement(const endorsement& endorsement) noexcept;
+BC_API bool is_endorsement(const endorsement& endorsement) NOEXCEPT;
 
 // DER parse/encode
 // ----------------------------------------------------------------------------
 
 /// Parse an endorsement into signature hash type and DER signature.
 BC_API bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
-    const endorsement& endorsement) noexcept;
+    const endorsement& endorsement) NOEXCEPT;
 
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
 BC_API bool parse_signature(ec_signature& out, const data_slice& der_signature,
-    bool strict) noexcept;
+    bool strict) NOEXCEPT;
 
 /// Encode an EC signature as DER (strict).
 BC_API bool encode_signature(der_signature& out,
-    const ec_signature& signature) noexcept;
+    const ec_signature& signature) NOEXCEPT;
 
 // EC sign/verify
 // ----------------------------------------------------------------------------
 
 /// Create a deterministic ECDSA signature using a private key.
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
-    const hash_digest& hash) noexcept;
+    const hash_digest& hash) NOEXCEPT;
 
 /// Verify an EC signature using a potential point.
 BC_API bool verify_signature(const data_slice& point, const hash_digest& hash,
-    const ec_signature& signature) noexcept;
+    const ec_signature& signature) NOEXCEPT;
 
 // Recoverable sign/recover
 // ----------------------------------------------------------------------------
 
 /// Create a recoverable signature for use in message signing.
 BC_API bool sign_recoverable(recoverable_signature& out,
-    const ec_secret& secret, const hash_digest& hash) noexcept;
+    const ec_secret& secret, const hash_digest& hash) NOEXCEPT;
 
 /// Recover the compressed point from a recoverable message signature.
 BC_API bool recover_public(ec_compressed& out,
     const recoverable_signature& recoverable,
-    const hash_digest& hash) noexcept;
+    const hash_digest& hash) NOEXCEPT;
 
 /// Recover the uncompressed point from a recoverable message signature.
 BC_API bool recover_public(ec_uncompressed& out,
     const recoverable_signature& recoverable,
-    const hash_digest& hash) noexcept;
+    const hash_digest& hash) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

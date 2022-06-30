@@ -39,55 +39,55 @@ class BC_API bitcoin_uri
 {
 public:
     /// Constructors.
-    bitcoin_uri() noexcept;
-    bitcoin_uri(const bitcoin_uri& other) noexcept;
-    bitcoin_uri(const std::string& uri, bool strict=true) noexcept;
+    bitcoin_uri() NOEXCEPT;
+    bitcoin_uri(const bitcoin_uri& other) NOEXCEPT;
+    bitcoin_uri(const std::string& uri, bool strict=true) NOEXCEPT;
 
     /// Operators.
-    bool operator<(const bitcoin_uri& other) const noexcept;
-    bool operator==(const bitcoin_uri& other) const noexcept;
-    bool operator!=(const bitcoin_uri& other) const noexcept;
-    bitcoin_uri& operator=(const bitcoin_uri& other) noexcept;
+    bool operator<(const bitcoin_uri& other) const NOEXCEPT;
+    bool operator==(const bitcoin_uri& other) const NOEXCEPT;
+    bool operator!=(const bitcoin_uri& other) const NOEXCEPT;
+    bitcoin_uri& operator=(const bitcoin_uri& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, bitcoin_uri& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const bitcoin_uri& from) noexcept;
+        const bitcoin_uri& from) NOEXCEPT;
 
     /// Test whether the URI has been initialized.
-    operator bool() const noexcept;
+    operator bool() const NOEXCEPT;
 
     /// Get the serialized URI representation.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Property getters.
-    uint64_t amount() const noexcept;
-    std::string label() const noexcept;
-    std::string message() const noexcept;
-    std::string r() const noexcept;
-    std::string address() const noexcept;
-    payment_address payment() const noexcept;
-    stealth_address stealth() const noexcept;
-    std::string parameter(const std::string& key) const noexcept;
+    uint64_t amount() const NOEXCEPT;
+    std::string label() const NOEXCEPT;
+    std::string message() const NOEXCEPT;
+    std::string r() const NOEXCEPT;
+    std::string address() const NOEXCEPT;
+    payment_address payment() const NOEXCEPT;
+    stealth_address stealth() const NOEXCEPT;
+    std::string parameter(const std::string& key) const NOEXCEPT;
 
     /// Property setters.
-    void set_amount(uint64_t satoshis) noexcept;
-    void set_label(const std::string& label) noexcept;
-    void set_message(const std::string& message) noexcept;
-    void set_r(const std::string& r) noexcept;
-    bool set_address(const std::string& address) noexcept;
-    void set_address(const payment_address& payment) noexcept;
-    void set_address(const stealth_address& stealth) noexcept;
+    void set_amount(uint64_t satoshis) NOEXCEPT;
+    void set_label(const std::string& label) NOEXCEPT;
+    void set_message(const std::string& message) NOEXCEPT;
+    void set_r(const std::string& r) NOEXCEPT;
+    bool set_address(const std::string& address) NOEXCEPT;
+    void set_address(const payment_address& payment) NOEXCEPT;
+    void set_address(const stealth_address& stealth) NOEXCEPT;
 
     /// uri_reader implementation.
-    void set_strict(bool strict) noexcept;
-    bool set_scheme(const std::string& scheme) noexcept;
-    bool set_authority(const std::string& authority) noexcept;
-    bool set_path(const std::string& path) noexcept;
-    bool set_fragment(const std::string& fragment) noexcept;
-    bool set_parameter(const std::string& key, const std::string& value) noexcept;
+    void set_strict(bool strict) NOEXCEPT;
+    bool set_scheme(const std::string& scheme) NOEXCEPT;
+    bool set_authority(const std::string& authority) NOEXCEPT;
+    bool set_path(const std::string& path) NOEXCEPT;
+    bool set_fragment(const std::string& fragment) NOEXCEPT;
+    bool set_parameter(const std::string& key, const std::string& value) NOEXCEPT;
 
 private:
     /// Private helpers.
-    bool set_amount(const std::string& satoshis) noexcept;
+    bool set_amount(const std::string& satoshis) NOEXCEPT;
 
     /// Member state.
     bool strict_;

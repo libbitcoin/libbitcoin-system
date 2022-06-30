@@ -37,13 +37,13 @@ namespace system {
 namespace machine {
 
 template <typename Container>
-inline stack<Container>::stack() noexcept
+inline stack<Container>::stack() NOEXCEPT
   : container_{}, tether_{}
 {
 }
 
 template <typename Container>
-inline stack<Container>::stack(Container&& container) noexcept
+inline stack<Container>::stack(Container&& container) NOEXCEPT
   : container_(std::move(container)), tether_{}
 {
 }
@@ -52,14 +52,14 @@ inline stack<Container>::stack(Container&& container) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename Container>
-inline const stack_variant& stack<Container>::top() const noexcept
+inline const stack_variant& stack<Container>::top() const NOEXCEPT
 {
     BC_ASSERT(!empty());
     return container_.back();
 }
 
 template <typename Container>
-inline stack_variant stack<Container>::pop() noexcept
+inline stack_variant stack<Container>::pop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     stack_variant temporary{ std::move(container_.back()) };
@@ -68,26 +68,26 @@ inline stack_variant stack<Container>::pop() noexcept
 }
 
 template <typename Container>
-inline void stack<Container>::drop() noexcept
+inline void stack<Container>::drop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     container_.pop_back();
 }
 
 template <typename Container>
-inline bool stack<Container>::empty() const noexcept
+inline bool stack<Container>::empty() const NOEXCEPT
 {
     return container_.empty();
 }
 
 template <typename Container>
-inline size_t stack<Container>::size() const noexcept
+inline size_t stack<Container>::size() const NOEXCEPT
 {
     return container_.size();
 }
 
 template <typename Container>
-inline void stack<Container>::push(data_chunk&& value) noexcept
+inline void stack<Container>::push(data_chunk&& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(make_external(std::move(value), tether_));
@@ -95,7 +95,7 @@ inline void stack<Container>::push(data_chunk&& value) noexcept
 }
 
 template <typename Container>
-inline void stack<Container>::push(stack_variant&& value) noexcept
+inline void stack<Container>::push(stack_variant&& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(std::move(value));
@@ -103,7 +103,7 @@ inline void stack<Container>::push(stack_variant&& value) noexcept
 }
 
 template <typename Container>
-inline void stack<Container>::push(const stack_variant& value) noexcept
+inline void stack<Container>::push(const stack_variant& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(value);
@@ -111,7 +111,7 @@ inline void stack<Container>::push(const stack_variant& value) noexcept
 }
 
 template <typename Container>
-inline void stack<Container>::emplace_boolean(bool value) noexcept
+inline void stack<Container>::emplace_boolean(bool value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
@@ -119,7 +119,7 @@ inline void stack<Container>::emplace_boolean(bool value) noexcept
 }
 
 template <typename Container>
-inline void stack<Container>::emplace_integer(int64_t value) noexcept
+inline void stack<Container>::emplace_integer(int64_t value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
@@ -127,7 +127,7 @@ inline void stack<Container>::emplace_integer(int64_t value) noexcept
 }
 
 template <typename Container>
-inline void stack<Container>::emplace_chunk(const chunk_xptr& value) noexcept
+inline void stack<Container>::emplace_chunk(const chunk_xptr& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value.get());
@@ -139,7 +139,7 @@ inline void stack<Container>::emplace_chunk(const chunk_xptr& value) noexcept
 // These optimizations prevent used of std::stack.
 
 template <typename Container>
-inline void stack<Container>::erase(size_t index) noexcept
+inline void stack<Container>::erase(size_t index) NOEXCEPT
 {
     BC_ASSERT(index < size());
     container_.erase(std::prev(container_.end(), add1(index)));
@@ -147,7 +147,7 @@ inline void stack<Container>::erase(size_t index) noexcept
 
 template <typename Container>
 inline void stack<Container>::swap(size_t left_index,
-    size_t right_index) noexcept
+    size_t right_index) NOEXCEPT
 {
     BC_ASSERT(left_index < size() && right_index < size());
 
@@ -169,7 +169,7 @@ inline void stack<Container>::swap(size_t left_index,
 }
 
 template <typename Container>
-inline const stack_variant& stack<Container>::peek(size_t index) const noexcept
+inline const stack_variant& stack<Container>::peek(size_t index) const NOEXCEPT
 {
     BC_ASSERT(index < size());
 
@@ -189,24 +189,24 @@ template <typename Container>
 template<size_t Bytes, typename Integer,
     if_not_greater<Bytes, sizeof(Integer)>,
     if_signed_integral_integer<Integer>>
-inline bool stack<Container>::peek_signed(Integer& value) const noexcept
+inline bool stack<Container>::peek_signed(Integer& value) const NOEXCEPT
 {
     using namespace number;
     auto result{ true };
 
     std::visit(overload
     {
-        [&](bool vary) noexcept
+        [&](bool vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = boolean::to_integer<Bytes>(vary);
         },
-        [&](int64_t vary) noexcept
+        [&](int64_t vary) NOEXCEPT
         {
             // This is the canonical use case (bounds check only).
             result = integer<Bytes>::from_integer(value, vary);
         },
-        [&](const chunk_xptr& vary) noexcept
+        [&](const chunk_xptr& vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             result = integer<Bytes>::from_chunk(value , *vary);
@@ -217,36 +217,36 @@ inline bool stack<Container>::peek_signed(Integer& value) const noexcept
 }
 
 template <typename Container>
-inline bool stack<Container>::peek_signed4(int32_t& value) const noexcept
+inline bool stack<Container>::peek_signed4(int32_t& value) const NOEXCEPT
 {
     return peek_signed<4>(value);
 }
 
 template <typename Container>
-inline bool stack<Container>::peek_signed5(int64_t& value) const noexcept
+inline bool stack<Container>::peek_signed5(int64_t& value) const NOEXCEPT
 {
     return peek_signed<5>(value);
 }
 
 template <typename Container>
-inline bool stack<Container>::peek_bool() const noexcept
+inline bool stack<Container>::peek_bool() const NOEXCEPT
 {
     using namespace number;
     bool value{};
 
     std::visit(overload
     {
-        [&](bool vary) noexcept
+        [&](bool vary) NOEXCEPT
         {
             // This is the canonical use case.
             value = vary;
         },
-        [&](int64_t vary) noexcept
+        [&](int64_t vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = boolean::to_bool(vary);
         },
-        [&](const chunk_xptr& vary) noexcept
+        [&](const chunk_xptr& vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = boolean::from_chunk(*vary);
@@ -258,24 +258,24 @@ inline bool stack<Container>::peek_bool() const noexcept
 
 // This differs from peek_bool in that a stack chunk must be empty.
 template <typename Container>
-inline bool stack<Container>::peek_strict_bool() const noexcept
+inline bool stack<Container>::peek_strict_bool() const NOEXCEPT
 {
     using namespace number;
     bool value{};
 
     std::visit(overload
     {
-        [&](bool vary) noexcept
+        [&](bool vary) NOEXCEPT
         {
             // This is the canonical use case (after bip147).
             value = vary;
         },
-        [&](int64_t vary) noexcept
+        [&](int64_t vary) NOEXCEPT
         {
             // This may be executed in standard scripts (before bip147).
             value = boolean::to_bool(vary);
         },
-        [&](const chunk_xptr& vary) noexcept
+        [&](const chunk_xptr& vary) NOEXCEPT
         {
             // This may be executed in standard scripts (before bip147).
             value = boolean::strict_from_chunk(*vary);
@@ -287,24 +287,24 @@ inline bool stack<Container>::peek_strict_bool() const noexcept
 
 // This is the only source of peek/pop (read) tethering.
 template <typename Container>
-inline chunk_xptr stack<Container>::peek_chunk() const noexcept
+inline chunk_xptr stack<Container>::peek_chunk() const NOEXCEPT
 {
     using namespace number;
     chunk_xptr value{};
 
     std::visit(overload
     {
-        [&, this](bool vary) noexcept
+        [&, this](bool vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = make_external(chunk::from_bool(vary), tether_);
         },
-        [&](int64_t vary) noexcept
+        [&](int64_t vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = make_external(chunk::from_integer(vary), tether_);
         },
-        [&](const chunk_xptr& vary) noexcept
+        [&](const chunk_xptr& vary) NOEXCEPT
         {
             // This is the canonical use case.
             value = vary;
@@ -318,7 +318,7 @@ inline chunk_xptr stack<Container>::peek_chunk() const noexcept
 /// Integers are unconstrained as these are stack chunk equality comparisons.
 template <typename Container>
 inline bool stack<Container>::equal_chunks(const stack_variant& left,
-    const stack_variant& right) noexcept
+    const stack_variant& right) NOEXCEPT
 {
     enum stack_type { bool_, int64_, pchunk_ };
     static_assert(std::variant_size<stack_variant>::value == 3u);
@@ -334,7 +334,7 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
     std::visit(overload
     {
         // This is never executed in standard scripts.
-        [&](bool vary) noexcept
+        [&](bool vary) NOEXCEPT
         {
             switch (right_type)
             {
@@ -350,7 +350,7 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
         },
 
         // This is never executed in standard scripts.
-        [&](int64_t vary) noexcept
+        [&](int64_t vary) NOEXCEPT
         {
             switch (right_type)
             {
@@ -366,7 +366,7 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
         },
 
         // This is the canonical use case.
-        [&](chunk_xptr vary) noexcept
+        [&](chunk_xptr vary) NOEXCEPT
         {
             switch (right_type)
             {

@@ -43,13 +43,13 @@ public:
 
     /// Constructors.
 
-    base16() noexcept;
-    base16(data_chunk&& value) noexcept;
-    base16(const data_chunk& value) noexcept;
-    base16(const std::string& base16) noexcept(false);
+    base16() NOEXCEPT;
+    base16(data_chunk&& value) NOEXCEPT;
+    base16(const data_chunk& value) NOEXCEPT;
+    base16(const std::string& base16) THROWS;
 
     template<size_t Size>
-    base16(const data_array<Size>& value) noexcept
+    base16(const data_array<Size>& value) NOEXCEPT
       : value_(value.begin(), value.end())
     {
     }
@@ -57,13 +57,13 @@ public:
     // Operators.
     
     // unsafe
-    ////operator data_slice() const noexcept;
-    operator const data_chunk&() const noexcept;
+    ////operator data_slice() const NOEXCEPT;
+    operator const data_chunk&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        base16& argument) noexcept(false);
+        base16& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const base16& argument) noexcept;
+        const base16& argument) NOEXCEPT;
 
 private:
     data_chunk value_;

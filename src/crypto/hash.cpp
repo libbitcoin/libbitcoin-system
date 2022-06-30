@@ -41,23 +41,23 @@ namespace system {
 // Hash generators.
 // ----------------------------------------------------------------------------
 
-hash_digest scrypt_hash(const data_slice& data) noexcept
+hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
     return scrypt<hash_size>(data, data, 1024u, 1u, 1u);
 }
 
-hash_digest bitcoin_hash(const data_slice& data) noexcept
+hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT
 {
     return sha256_hash(sha256_hash(data));
 }
 
 hash_digest bitcoin_hash(const data_slice& first,
-    const data_slice& second) noexcept
+    const data_slice& second) NOEXCEPT
 {
     return sha256_hash(sha256_hash(first, second));
 }
 
-bool hash_reduce(std::vector<hash_digest>& hashes) noexcept
+bool hash_reduce(std::vector<hash_digest>& hashes) NOEXCEPT
 {
     const auto size = hashes.size();
 
@@ -74,47 +74,47 @@ bool hash_reduce(std::vector<hash_digest>& hashes) noexcept
     return true;
 }
 
-short_hash bitcoin_short_hash(const data_slice& data) noexcept
+short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
 {
     return ripemd160_hash(sha256_hash(data));
 }
 
-short_hash ripemd160_hash(const data_slice& data) noexcept
+short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash;
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
 
-data_chunk ripemd160_hash_chunk(const data_slice& data) noexcept
+data_chunk ripemd160_hash_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
 
-short_hash sha1_hash(const data_slice& data) noexcept
+short_hash sha1_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash;
     SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
 
-data_chunk sha1_hash_chunk(const data_slice& data) noexcept
+data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
     SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
 
-hash_digest sha256_hash(const data_slice& data) noexcept
+hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
     hash_digest hash;
     intrinsics::sha256(data.data(), data.size(), hash.data());
     return hash;
 }
 
-data_chunk sha256_hash_chunk(const data_slice& data) noexcept
+data_chunk sha256_hash_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(hash_size, no_fill_byte_allocator);
     intrinsics::sha256(data.data(), data.size(), hash.data());
@@ -122,7 +122,7 @@ data_chunk sha256_hash_chunk(const data_slice& data) noexcept
 }
 
 hash_digest sha256_hash(const data_slice& first,
-    const data_slice& second) noexcept
+    const data_slice& second) NOEXCEPT
 {
     using namespace intrinsics;
 
@@ -135,7 +135,7 @@ hash_digest sha256_hash(const data_slice& first,
 }
 
 hash_digest hmac_sha256_hash(const data_slice& data,
-    const data_slice& key) noexcept
+    const data_slice& key) NOEXCEPT
 {
     hash_digest hash;
     HMACSHA256(data.data(), data.size(), key.data(), key.size(), hash.data());
@@ -151,7 +151,7 @@ data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
     return hash;
 }
 
-long_hash sha512_hash(const data_slice& data) noexcept
+long_hash sha512_hash(const data_slice& data) NOEXCEPT
 {
     long_hash hash;
     SHA512(data.data(), data.size(), hash.data());
@@ -159,7 +159,7 @@ long_hash sha512_hash(const data_slice& data) noexcept
 }
 
 long_hash hmac_sha512_hash(const data_slice& data,
-    const data_slice& key) noexcept
+    const data_slice& key) NOEXCEPT
 {
     long_hash hash;
     HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.data());
@@ -167,7 +167,7 @@ long_hash hmac_sha512_hash(const data_slice& data,
 }
 
 long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations) noexcept
+    const data_slice& salt, size_t iterations) NOEXCEPT
 {
     auto hash = null_long_hash;
     pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
@@ -180,7 +180,7 @@ long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
 
 data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
     uint64_t work, uint32_t resources, uint32_t parallelism,
-    size_t length) noexcept
+    size_t length) NOEXCEPT
 {
     data_chunk hash(no_fill_byte_allocator);
     data_chunk out(length, 0x00);
@@ -193,7 +193,7 @@ data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
 }
 
 // Objectives: deterministic, uniform distribution, efficient computation.
-size_t djb2_hash(const data_slice& data) noexcept
+size_t djb2_hash(const data_slice& data) NOEXCEPT
 {
     // Nothing special here except that it tested well against collisions.
     size_t hash = 5381;

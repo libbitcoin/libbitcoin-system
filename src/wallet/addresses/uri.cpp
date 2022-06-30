@@ -32,14 +32,14 @@ namespace wallet {
 // These character classification functions correspond to RFC 3986.
 // They avoid C standard library character classification functions,
 // since those give different answers based on the current locale.
-static bool is_alpha(const char c) noexcept
+static bool is_alpha(const char c) NOEXCEPT
 {
     return
         ('A' <= c && c <= 'Z') ||
         ('a' <= c && c <= 'z');
 }
 
-static bool is_scheme(const char c) noexcept
+static bool is_scheme(const char c) NOEXCEPT
 {
     return
         is_alpha(c) || ('0' <= c && c <= '9') ||
@@ -57,17 +57,17 @@ static bool is_path_character(const char c)
         ':' == c || '@' == c;
 }
 
-static bool is_path(const char c) noexcept
+static bool is_path(const char c) NOEXCEPT
 {
     return is_path_character(c) || '/' == c;
 }
 
-static bool is_query(const char c) noexcept
+static bool is_query(const char c) NOEXCEPT
 {
     return is_path_character(c) || '/' == c || '?' == c;
 }
 
-static bool is_query_character(const char c) noexcept
+static bool is_query_character(const char c) NOEXCEPT
 {
     return is_query(c) && '&' != c && '=' != c;
 }
@@ -75,7 +75,7 @@ static bool is_query_character(const char c) noexcept
 // Verifies that all RFC 3986 escape sequences in a string are valid, and that
 // all characters belong to the given class.
 static bool validate(const std::string& in,
-    bool (*is_valid)(const char)) noexcept
+    bool (*is_valid)(const char)) NOEXCEPT
 {
     for (auto it = in.begin(); it != in.end();)
     {
@@ -103,7 +103,7 @@ static bool validate(const std::string& in,
 }
 
 // Decodes all RFC 3986 escape sequences in a string.
-static std::string unescape(const std::string& in) noexcept
+static std::string unescape(const std::string& in) NOEXCEPT
 {
     // Do the conversion:
     std::string out;
@@ -132,7 +132,7 @@ static std::string unescape(const std::string& in) noexcept
 // URI encodes a string (i.e. percent encoding).
 // is_valid a function returning true for acceptable characters.
 static std::string escape(const std::string& in,
-    bool (*is_valid)(char)) noexcept
+    bool (*is_valid)(char)) NOEXCEPT
 {
     std::ostringstream stream;
     stream << std::hex << std::uppercase << std::setfill('0');
@@ -147,7 +147,7 @@ static std::string escape(const std::string& in,
     return stream.str();
 }
 
-bool uri::decode(const std::string& encoded, bool strict) noexcept
+bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
 {
     auto it = encoded.begin();
 
@@ -226,7 +226,7 @@ bool uri::decode(const std::string& encoded, bool strict) noexcept
     return !strict || validate(fragment_, is_query);
 }
 
-std::string uri::encoded() const noexcept
+std::string uri::encoded() const NOEXCEPT
 {
     std::ostringstream out;
     out << scheme_ << ':';
@@ -245,100 +245,100 @@ std::string uri::encoded() const noexcept
 
 // Scheme accessors:
 
-std::string uri::scheme() const noexcept
+std::string uri::scheme() const NOEXCEPT
 {
     return ascii_to_lower(scheme_);
 }
 
-void uri::set_scheme(const std::string& scheme) noexcept
+void uri::set_scheme(const std::string& scheme) NOEXCEPT
 {
     scheme_ = scheme;
 }
 
 // Authority accessors:
 
-std::string uri::authority() const noexcept
+std::string uri::authority() const NOEXCEPT
 {
     return unescape(authority_);
 }
 
-bool uri::has_authority() const noexcept
+bool uri::has_authority() const NOEXCEPT
 {
     return has_authority_;
 }
 
-void uri::set_authority(const std::string& authority) noexcept
+void uri::set_authority(const std::string& authority) NOEXCEPT
 {
     has_authority_ = true;
     authority_ = escape(authority, is_path_character);
 }
 
-void uri::remove_authority() noexcept
+void uri::remove_authority() NOEXCEPT
 {
     has_authority_ = false;
 }
 
 // Path accessors:
 
-std::string uri::path() const noexcept
+std::string uri::path() const NOEXCEPT
 {
     return unescape(path_);
 }
 
-void uri::set_path(const std::string& path) noexcept
+void uri::set_path(const std::string& path) NOEXCEPT
 {
     path_ = escape(path, is_path);
 }
 
 // Query accessors:
 
-std::string uri::query() const noexcept
+std::string uri::query() const NOEXCEPT
 {
     return unescape(query_);
 }
 
-bool uri::has_query() const noexcept
+bool uri::has_query() const NOEXCEPT
 {
     return has_query_;
 }
 
-void uri::set_query(const std::string& query) noexcept
+void uri::set_query(const std::string& query) NOEXCEPT
 {
     has_query_ = true;
     query_ = escape(query, is_query);
 }
 
-void uri::remove_query() noexcept
+void uri::remove_query() NOEXCEPT
 {
     has_query_ = false;
 }
 
 // Fragment accessors:
 
-std::string uri::fragment() const noexcept
+std::string uri::fragment() const NOEXCEPT
 {
     return unescape(fragment_);
 }
 
-bool uri::has_fragment() const noexcept
+bool uri::has_fragment() const NOEXCEPT
 {
     return has_fragment_;
 }
 
-void uri::set_fragment(const std::string& fragment) noexcept
+void uri::set_fragment(const std::string& fragment) NOEXCEPT
 {
     has_fragment_ = true;
     fragment_ = escape(fragment, is_query);
 }
 
-void uri::remove_fragment() noexcept
+void uri::remove_fragment() NOEXCEPT
 {
     has_fragment_ = false;
 }
 
 // Query interpretation:
 
-uri::query_map uri::decode_query() const noexcept
+uri::query_map uri::decode_query() const NOEXCEPT
 {
     query_map out;
     for (auto it = query_.begin(); it != query_.end();)
@@ -369,7 +369,7 @@ uri::query_map uri::decode_query() const noexcept
     return out;
 }
 
-void uri::encode_query(const query_map& map) noexcept
+void uri::encode_query(const query_map& map) NOEXCEPT
 {
     auto first = true;
     std::ostringstream query;

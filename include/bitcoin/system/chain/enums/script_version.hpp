@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_SCRIPT_VERSION_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_SCRIPT_VERSION_HPP
 
+#include <bitcoin/system/define.hpp>
+
 namespace libbitcoin {
 namespace system {
 namespace chain {

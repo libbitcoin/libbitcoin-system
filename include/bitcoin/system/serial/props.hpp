@@ -56,24 +56,24 @@ public:
     } format;
 
     /// Move/copy construct.
-    props(props&& other) noexcept;
-    props(const props& other) noexcept;
+    props(props&& other) NOEXCEPT;
+    props(const props& other) NOEXCEPT;
 
     /// "null" property value.
-    props() noexcept;
+    props() NOEXCEPT;
 
     /// "true" or "false" property value.
-    props(truth boolean) noexcept;
+    props(truth boolean) NOEXCEPT;
 
     /// number property value. 
-    props(int64_t number) noexcept;
+    props(int64_t number) NOEXCEPT;
 
     /// string property value, whitespace is not trimmed.
-    props(const std::string& text) noexcept;
+    props(const std::string& text) NOEXCEPT;
 
     /// Serialize the properties to the specified format.
     std::ostream& write(std::ostream& stream, format format,
-        bool flat=true) const noexcept;
+        bool flat=true) const NOEXCEPT;
 
 protected:
     typedef std::pair<std::string, props> named_props;
@@ -89,13 +89,13 @@ protected:
         invalid_
     } type;
 
-    static props from_number(int64_t number) noexcept;
-    props(type type, const std::string& text={}) noexcept;
-    bool is_complex() const noexcept;
+    static props from_number(int64_t number) NOEXCEPT;
+    props(type type, const std::string& text={}) NOEXCEPT;
+    bool is_complex() const NOEXCEPT;
     std::ostream& write(std::ostream& stream, format format,
-        size_t depth, bool flat) const noexcept;
+        size_t depth, bool flat) const NOEXCEPT;
     std::ostream& write(std::ostream& stream, format format,
-        size_t depth, bool flat, const std::string& name) const noexcept;
+        size_t depth, bool flat, const std::string& name) const NOEXCEPT;
 
     const type type_;
     std::string value_;
@@ -107,13 +107,13 @@ class BC_API array_props
 {
 public:
     /// Construct an array properties value, name applied to all children.
-    array_props(const std::string& name) noexcept;
+    array_props(const std::string& name) NOEXCEPT;
     array_props(const std::string& name,
-        std::initializer_list<props> values) noexcept;
+        std::initializer_list<props> values) NOEXCEPT;
 
     /// Add child array property values.
-    array_props& add(const props& value) noexcept;
-    array_props& add(std::initializer_list<props> values) noexcept;
+    array_props& add(const props& value) NOEXCEPT;
+    array_props& add(std::initializer_list<props> values) NOEXCEPT;
 };
 
 class BC_API object_props
@@ -121,12 +121,12 @@ class BC_API object_props
 {
 public:
     /// Construct an object properties value, each child is explicitly named.
-    object_props() noexcept;
-    object_props(std::initializer_list<named_props> values) noexcept;
+    object_props() NOEXCEPT;
+    object_props(std::initializer_list<named_props> values) NOEXCEPT;
 
     /// Add child object property values.
-    object_props& add(const named_props& value) noexcept;
-    object_props& add(std::initializer_list<named_props> values) noexcept;
+    object_props& add(const named_props& value) NOEXCEPT;
+    object_props& add(std::initializer_list<named_props> values) NOEXCEPT;
 };
 
 } // namespace system

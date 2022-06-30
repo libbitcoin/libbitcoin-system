@@ -45,21 +45,21 @@ public:
 
     /// Input script run (default/empty stack).
     inline program(const chain::transaction& transaction,
-        const input_iterator& input, uint32_t forks) noexcept;
+        const input_iterator& input, uint32_t forks) NOEXCEPT;
 
     /// Legacy p2sh or prevout script run (copied input stack).
     inline program(const program& other,
-        const chain::script::cptr& script) noexcept;
+        const chain::script::cptr& script) NOEXCEPT;
 
     /// Legacy p2sh or prevout script run (moved input stack).
     inline program(program&& other,
-        const chain::script::cptr& script) noexcept;
+        const chain::script::cptr& script) NOEXCEPT;
 
     /// Witness script run (witness-initialized stack).
     inline program(const chain::transaction& transaction,
         const input_iterator& input, const chain::script::cptr& script,
         uint32_t forks, chain::script_version version,
-        const chunk_cptrs_ptr& stack) noexcept;
+        const chunk_cptrs_ptr& stack) NOEXCEPT;
 
     /// Defaults.
     program(program&&) = delete;
@@ -69,109 +69,109 @@ public:
     inline ~program() = default;
 
     /// Program result.
-    inline bool is_true(bool clean) const noexcept;
+    inline bool is_true(bool clean) const NOEXCEPT;
 
     /// Transaction must pop top input stack element (bip16).
-    inline const data_chunk& pop() noexcept;
+    inline const data_chunk& pop() NOEXCEPT;
 
 protected:
     static inline bool equal_chunks(const stack_variant& left,
-        const stack_variant& right) noexcept;
+        const stack_variant& right) NOEXCEPT;
 
     /// Constants.
     /// -----------------------------------------------------------------------
 
-    inline bool is_prefail() const noexcept;
-    inline op_iterator begin() const noexcept;
-    inline op_iterator end() const noexcept;
-    inline const chain::input& input() const noexcept;
-    inline const chain::transaction& transaction() const noexcept;
-    inline bool is_enabled(chain::forks rule) const noexcept;
-    inline error::script_error_t validate() const noexcept;
+    inline bool is_prefail() const NOEXCEPT;
+    inline op_iterator begin() const NOEXCEPT;
+    inline op_iterator end() const NOEXCEPT;
+    inline const chain::input& input() const NOEXCEPT;
+    inline const chain::transaction& transaction() const NOEXCEPT;
+    inline bool is_enabled(chain::forks rule) const NOEXCEPT;
+    inline error::script_error_t validate() const NOEXCEPT;
 
     /// Primary stack.
     /// -----------------------------------------------------------------------
 
     /// Primary stack (push).
-    inline void push_chunk(data_chunk&& datum) noexcept;
-    inline void push_chunk(const chunk_cptr& datum) noexcept;
-    inline void push_bool(bool value) noexcept;
-    inline void push_signed64(int64_t value) noexcept;
-    inline void push_length(size_t value) noexcept;
+    inline void push_chunk(data_chunk&& datum) NOEXCEPT;
+    inline void push_chunk(const chunk_cptr& datum) NOEXCEPT;
+    inline void push_bool(bool value) NOEXCEPT;
+    inline void push_signed64(int64_t value) NOEXCEPT;
+    inline void push_length(size_t value) NOEXCEPT;
 
     /// Primary stack (pop).
-    inline chunk_xptr pop_chunk_() noexcept;
-    inline bool pop_bool_() noexcept;
-    inline bool pop_strict_bool_() noexcept;
-    inline bool pop_chunks(chunk_xptrs& data, size_t count) noexcept;
-    inline bool pop_signed32(int32_t& value) noexcept;
-    inline bool pop_binary32(int32_t& left, int32_t& right) noexcept;
+    inline chunk_xptr pop_chunk_() NOEXCEPT;
+    inline bool pop_bool_() NOEXCEPT;
+    inline bool pop_strict_bool_() NOEXCEPT;
+    inline bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
+    inline bool pop_signed32(int32_t& value) NOEXCEPT;
+    inline bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
     inline bool pop_ternary32(int32_t& upper, int32_t& lower,
-        int32_t& value) noexcept;
-    inline bool pop_index32(size_t& index) noexcept;
+        int32_t& value) NOEXCEPT;
+    inline bool pop_index32(size_t& index) NOEXCEPT;
 
     /// Primary stack (peek).
-    inline bool peek_bool_() const noexcept;
-    inline bool peek_unsigned32(uint32_t& value) const noexcept;
-    inline bool peek_unsigned40(uint64_t& value) const noexcept;
+    inline bool peek_bool_() const NOEXCEPT;
+    inline bool peek_unsigned32(uint32_t& value) const NOEXCEPT;
+    inline bool peek_unsigned40(uint64_t& value) const NOEXCEPT;
 
     /// Primary stack (variant - index).
-    inline void swap_(size_t left_index, size_t right_index) noexcept;
-    inline void erase_(size_t index) noexcept;
-    inline const stack_variant& peek_() const noexcept;
-    inline const stack_variant& peek_(size_t index) const noexcept;
+    inline void swap_(size_t left_index, size_t right_index) NOEXCEPT;
+    inline void erase_(size_t index) NOEXCEPT;
+    inline const stack_variant& peek_() const NOEXCEPT;
+    inline const stack_variant& peek_(size_t index) const NOEXCEPT;
 
     /// Primary stack (variant - top).
-    inline void drop_() noexcept;
-    inline void push_variant(const stack_variant& vary) noexcept;
-    inline stack_variant pop_() noexcept;
+    inline void drop_() NOEXCEPT;
+    inline void push_variant(const stack_variant& vary) NOEXCEPT;
+    inline stack_variant pop_() NOEXCEPT;
 
     /// Primary stack state (untyped).
-    inline size_t stack_size() const noexcept;
-    inline bool is_stack_empty() const noexcept;
-    inline bool is_stack_overflow() const noexcept;
+    inline size_t stack_size() const NOEXCEPT;
+    inline bool is_stack_empty() const NOEXCEPT;
+    inline bool is_stack_overflow() const NOEXCEPT;
 
     /// Alternate stack.
     /// -----------------------------------------------------------------------
 
-    inline bool is_alternate_empty() const noexcept;
-    inline void push_alternate(stack_variant&& vary) noexcept;
-    inline stack_variant pop_alternate_() noexcept;
+    inline bool is_alternate_empty() const NOEXCEPT;
+    inline void push_alternate(stack_variant&& vary) NOEXCEPT;
+    inline stack_variant pop_alternate_() NOEXCEPT;
 
     /// Conditional stack.
     /// -----------------------------------------------------------------------
 
-    inline void begin_if(bool value) noexcept;
-    inline void else_if_() noexcept;
-    inline void end_if_() noexcept;
-    inline bool is_balanced() const noexcept;
-    inline bool is_succeess() const noexcept;
-    inline bool if_(const chain::operation& op) const noexcept;
+    inline void begin_if(bool value) NOEXCEPT;
+    inline void else_if_() NOEXCEPT;
+    inline void end_if_() NOEXCEPT;
+    inline bool is_balanced() const NOEXCEPT;
+    inline bool is_succeess() const NOEXCEPT;
+    inline bool if_(const chain::operation& op) const NOEXCEPT;
 
     /// Accumulator.
     /// -----------------------------------------------------------------------
 
-    inline bool ops_increment(const chain::operation& op) noexcept;
-    inline bool ops_increment(size_t public_keys) noexcept;
+    inline bool ops_increment(const chain::operation& op) NOEXCEPT;
+    inline bool ops_increment(size_t public_keys) NOEXCEPT;
 
     /// Signature validation helpers.
     /// -----------------------------------------------------------------------
 
     /// Set subscript position to next op.
-    inline bool set_subscript(const op_iterator& op) noexcept;
+    inline bool set_subscript(const op_iterator& op) NOEXCEPT;
 
     /// Strip endorsement and code_separator opcodes from returned subscript.
     inline chain::script::cptr subscript(
-        const chunk_xptrs& endorsements) const noexcept;
+        const chunk_xptrs& endorsements) const NOEXCEPT;
 
     /// Prepare signature (enables generalized signing).
     inline bool prepare(ec_signature& signature, const data_chunk& key,
-        hash_digest& hash, const chunk_xptr& endorsement) const noexcept;
+        hash_digest& hash, const chunk_xptr& endorsement) const NOEXCEPT;
 
     /// Prepare signature, with caching for multisig with same flags.
     inline bool prepare(ec_signature& signature, const data_chunk& key,
         hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
-        const chain::script& sub) const noexcept;
+        const chain::script& sub) const NOEXCEPT;
 
 private:
     using primary_stack = stack<Stack>;
@@ -181,19 +181,19 @@ private:
         if_signed_integer<Integer> = true,
         if_integral_integer<Integer> = true,
         if_not_greater<Bytes, sizeof(Integer)> = true>
-    inline bool peek_signed_(Integer& value) const noexcept;
-    inline void push_chunk(const chunk_xptr& datum) noexcept;
-    inline bool pop_signed32_(int32_t& value) noexcept;
-    inline chunk_xptr peek_chunk_() const noexcept;
-    inline bool peek_signed32_(int32_t& value) const noexcept;
-    inline bool peek_signed40_(int64_t& value) const noexcept;
-    inline bool is_stack_clean() const noexcept;
+    inline bool peek_signed_(Integer& value) const NOEXCEPT;
+    inline void push_chunk(const chunk_xptr& datum) NOEXCEPT;
+    inline bool pop_signed32_(int32_t& value) NOEXCEPT;
+    inline chunk_xptr peek_chunk_() const NOEXCEPT;
+    inline bool peek_signed32_(int32_t& value) const NOEXCEPT;
+    inline bool peek_signed40_(int64_t& value) const NOEXCEPT;
+    inline bool is_stack_clean() const NOEXCEPT;
 
     // Signature hashing.
     inline hash_digest signature_hash(const chain::script& sub,
-        uint8_t flags) const noexcept;
+        uint8_t flags) const NOEXCEPT;
     inline void signature_hash(hash_cache& cache, const chain::script& sub,
-        uint8_t flags) const noexcept;
+        uint8_t flags) const NOEXCEPT;
 
     // Constants.
     const chain::transaction& transaction_;

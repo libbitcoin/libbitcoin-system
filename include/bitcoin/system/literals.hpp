@@ -41,14 +41,14 @@ namespace literals {
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer lower() noexcept
+CONSTEVAL Integer lower() NOEXCEPT
 {
     return std::numeric_limits<Integer>::min();
 }
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer upper() noexcept
+CONSTEVAL Integer upper() NOEXCEPT
 {
     return std::numeric_limits<Integer>::max();
 }
@@ -59,27 +59,27 @@ BC_PUSH_WARNING(THROW_FROM_NOEXCEPT)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
-template <typename Integer,
-    std::enable_if_t<std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept
+template <typename Integer, std::enable_if_t<
+    std::is_signed_v<Integer>, bool> = true>
+CONSTEVAL std::make_unsigned_t<Integer> lower() NOEXCEPT
 {
     return Integer{1} + static_cast<
         std::make_unsigned_t<Integer>>(
             std::numeric_limits<Integer>::max());
 }
 
-template <typename Integer,
-    std::enable_if_t<std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> upper() noexcept
+template <typename Integer, std::enable_if_t<
+    std::is_signed_v<Integer>, bool> = true>
+CONSTEVAL std::make_unsigned_t<Integer> upper() NOEXCEPT
 {
     return static_cast<
         std::make_unsigned_t<Integer>>(
             std::numeric_limits<Integer>::max());
 }
 
-template <typename Domain,
-    std::enable_if_t<std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain positive(uint64_t value) noexcept(BC_NO_THROW)
+template <typename Domain, std::enable_if_t<
+    std::numeric_limits<Domain>::is_integer, bool> = true>
+CONSTEVAL Domain positive(uint64_t value) THROWS
 {
     typedef std::make_unsigned_t<Domain> narrow, limit;
 
@@ -90,9 +90,9 @@ CONSTEVAL Domain positive(uint64_t value) noexcept(BC_NO_THROW)
     return static_cast<Domain>(narrowed);
 }
 
-template <typename Domain,
-    std::enable_if_t<std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain negative(uint64_t value) noexcept(BC_NO_THROW)
+template <typename Domain, std::enable_if_t<
+    std::numeric_limits<Domain>::is_integer, bool> = true>
+CONSTEVAL Domain negative(uint64_t value) THROWS
 {
     using limit = std::make_signed_t<Domain>;
     using narrow = std::make_unsigned_t<Domain>;
@@ -109,7 +109,7 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 
 #define DECLARE_LITERAL(name, type, sign) \
-CONSTEVAL type operator "" name(uint64_t value) noexcept \
+CONSTEVAL type operator "" name(uint64_t value) THROWS \
 { return sign<type>(value); }
 
 /// Supported represenations.
@@ -120,7 +120,7 @@ CONSTEVAL type operator "" name(uint64_t value) noexcept \
 /// Integrals do not have negative signs, and applying the negative operator
 /// to a literal changes it to an operation, which promotes the type. All
 /// numeric representations are possible (binary, octal, hex, decimal) as are
-/// digit separators. A build-in suffix cannot be used with a user-defined
+/// digit separators. A built-in suffix cannot be used with a user-defined
 /// suffix, and there would be no reason to.
 
 /// positive signed integer

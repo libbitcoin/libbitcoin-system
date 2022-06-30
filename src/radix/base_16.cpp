@@ -37,12 +37,12 @@ namespace libbitcoin {
 namespace system {
 
 // Unspecified (but safe/defined) behavior if characters are not base16. 
-uint8_t encode_octet(const char(&string)[add1(octet_width)]) noexcept
+uint8_t encode_octet(const char(&string)[add1(octet_width)]) NOEXCEPT
 {
     return from_base16_characters(string[0], string[1]);
 }
 
-std::string encode_base16(const data_slice& data) noexcept
+std::string encode_base16(const data_slice& data) NOEXCEPT
 {
     std::string out;
     out.resize(data.size() * octet_width);
@@ -58,7 +58,7 @@ std::string encode_base16(const data_slice& data) noexcept
 }
 
 
-std::string encode_hash(const data_slice& hash) noexcept
+std::string encode_hash(const data_slice& hash) NOEXCEPT
 {
     std::string out;
     out.resize(hash.size() * octet_width);
@@ -74,7 +74,7 @@ std::string encode_hash(const data_slice& hash) noexcept
 }
 
 
-bool decode_base16(data_chunk& out, const std::string& in) noexcept
+bool decode_base16(data_chunk& out, const std::string& in) NOEXCEPT
 {
     if (is_odd(in.size()))
         return false;

@@ -44,7 +44,7 @@ class bit_reader
 {
 public:
     /// Constructors.
-    bit_reader(IStream& source) noexcept;
+    bit_reader(IStream& source) NOEXCEPT;
 
     /// Defaults.
     bit_reader(bit_reader&&) = default;
@@ -54,31 +54,31 @@ public:
     ~bit_reader() override = default;
 
     /// Read one bit (high to low).
-    bool read_bit() noexcept override;
+    bool read_bit() NOEXCEPT override;
 
     /// Read size bits into an integer (high to low).
-    uint64_t read_bits(size_t bits) noexcept override;
+    uint64_t read_bits(size_t bits) NOEXCEPT override;
 
     /// Advance the iterator.
-    void skip_bit() noexcept override;
-    void skip_bits(size_t bits) noexcept override;
+    void skip_bit() NOEXCEPT override;
+    void skip_bits(size_t bits) NOEXCEPT override;
 
     /// Rewind the iterator.
-    void rewind_bit() noexcept override;
-    void rewind_bits(size_t bits) noexcept override;
+    void rewind_bit() NOEXCEPT override;
+    void rewind_bits(size_t bits) NOEXCEPT override;
 
 protected:
-    uint8_t do_peek_byte() noexcept override;
-    void do_read_bytes(uint8_t* buffer, size_t size) noexcept override;
-    void do_skip_bytes(size_t size) noexcept override;
-    void do_rewind_bytes(size_t size) noexcept override;
-    bool get_exhausted() const noexcept override;
+    uint8_t do_peek_byte() NOEXCEPT override;
+    void do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT override;
+    void do_skip_bytes(size_t size) NOEXCEPT override;
+    void do_rewind_bytes(size_t size) NOEXCEPT override;
+    bool get_exhausted() const NOEXCEPT override;
 
 private:
-    void load() noexcept;
-    void reload() noexcept;
-    uint8_t peek() noexcept;
-    uint8_t shift() const noexcept;
+    void load() NOEXCEPT;
+    void reload() NOEXCEPT;
+    uint8_t peek() NOEXCEPT;
+    uint8_t shift() const NOEXCEPT;
 
     uint8_t byte_;
     uint8_t offset_;

@@ -30,36 +30,36 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-base16::base16() noexcept
+base16::base16() NOEXCEPT
 {
 }
 
-base16::base16(data_chunk&& value) noexcept
+base16::base16(data_chunk&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-base16::base16(const data_chunk& value) noexcept
+base16::base16(const data_chunk& value) NOEXCEPT
   : value_(value)
 {
 }
 
-base16::base16(const std::string& base16) noexcept(false)
+base16::base16(const std::string& base16) THROWS
 {
     std::istringstream(base16) >> *this;
 }
 
-base16::operator const data_chunk&() const noexcept
+base16::operator const data_chunk&() const NOEXCEPT
 {
     return value_;
 }
 
-////base16::operator data_slice() const noexcept
+////base16::operator data_slice() const NOEXCEPT
 ////{
 ////    return { value_.begin(), value_.end() };
 ////}
 
-std::istream& operator>>(std::istream& stream, base16& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, base16& argument) THROWS
 {
     std::string base16;
     stream >> base16;
@@ -73,7 +73,7 @@ std::istream& operator>>(std::istream& stream, base16& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const base16& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const base16& argument) NOEXCEPT
 {
     stream << encode_base16(argument.value_);
     return stream;

@@ -48,7 +48,7 @@ using namespace system::error;
 template <typename Stack>
 inline program<Stack>::
 program(const chain::transaction& tx, const input_iterator& input,
-     uint32_t forks) noexcept
+     uint32_t forks) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_((*input)->script_ptr()),
@@ -66,7 +66,7 @@ program(const chain::transaction& tx, const input_iterator& input,
 // and copied program tether (which is not tx state).
 template <typename Stack>
 inline program<Stack>::
-program(const program& other, const script::cptr& script) noexcept
+program(const program& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
@@ -81,7 +81,7 @@ program(const program& other, const script::cptr& script) noexcept
 // Legacy p2sh or prevout script run (moved input stack/tether - use last).
 template <typename Stack>
 inline program<Stack>::
-program(program&& other, const script::cptr& script) noexcept
+program(program&& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
@@ -102,7 +102,7 @@ template <typename Stack>
 inline program<Stack>::
 program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_cptrs_ptr& witness) noexcept
+    const chunk_cptrs_ptr& witness) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_(script),
@@ -119,7 +119,7 @@ program(const chain::transaction& tx, const input_iterator& input,
 
 template <typename Stack>
 inline bool program<Stack>::
-is_true(bool clean_stack) const noexcept
+is_true(bool clean_stack) const NOEXCEPT
 {
     return (!clean_stack || is_stack_clean()) && !is_stack_empty() &&
         peek_bool_();
@@ -127,7 +127,7 @@ is_true(bool clean_stack) const noexcept
 
 template <typename Stack>
 inline const data_chunk& program<Stack>::
-pop() noexcept
+pop() NOEXCEPT
 {
     BC_ASSERT_MSG(!is_stack_empty(), "pop from empty stack");
 
@@ -139,42 +139,42 @@ pop() noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-is_prefail() const noexcept
+is_prefail() const NOEXCEPT
 {
     return script_->is_prefail();
 }
 
 template <typename Stack>
 inline typename program<Stack>::op_iterator program<Stack>::
-begin() const noexcept
+begin() const NOEXCEPT
 {
     return script_->ops().begin();
 }
 
 template <typename Stack>
 inline typename program<Stack>::op_iterator program<Stack>::
-end() const noexcept
+end() const NOEXCEPT
 {
     return script_->ops().end();
 }
 
 template <typename Stack>
 inline const chain::input& program<Stack>::
-input() const noexcept
+input() const NOEXCEPT
 {
     return **input_;
 }
 
 template <typename Stack>
 inline const chain::transaction& program<Stack>::
-transaction() const noexcept
+transaction() const NOEXCEPT
 {
     return transaction_;
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-is_enabled(chain::forks rule) const noexcept
+is_enabled(chain::forks rule) const NOEXCEPT
 {
     return to_bool(forks_ & rule);
 }
@@ -183,7 +183,7 @@ is_enabled(chain::forks rule) const noexcept
 // TODO: others are either empty or presumed push_size from prevout script run.
 template <typename Stack>
 inline script_error_t program<Stack>::
-validate() const noexcept
+validate() const NOEXCEPT
 {
     // TODO: nops rule must first be enabled in tests and config.
     const auto bip141 = is_enabled(forks::bip141_rule);
@@ -207,21 +207,21 @@ validate() const noexcept
 // static
 template <typename Stack>
 inline bool program<Stack>::
-equal_chunks(const stack_variant& left, const stack_variant& right) noexcept
+equal_chunks(const stack_variant& left, const stack_variant& right) NOEXCEPT
 {
     return primary_stack::equal_chunks(left, right);
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-peek_bool_() const noexcept
+peek_bool_() const NOEXCEPT
 {
     return primary_.peek_bool();
 }
 
 template <typename Stack>
 inline chunk_xptr program<Stack>::
-peek_chunk_() const noexcept
+peek_chunk_() const NOEXCEPT
 {
     return primary_.peek_chunk();
 }
@@ -232,7 +232,7 @@ peek_chunk_() const noexcept
 // This is the only source of push (write) tethering.
 template <typename Stack>
 inline void program<Stack>::
-push_chunk(data_chunk&& datum) noexcept
+push_chunk(data_chunk&& datum) NOEXCEPT
 {
     primary_.push(std::move(datum));
 }
@@ -243,7 +243,7 @@ BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 template <typename Stack>
 inline void program<Stack>::
-push_chunk(const chunk_cptr& datum) noexcept
+push_chunk(const chunk_cptr& datum) NOEXCEPT
 BC_POP_WARNING()
 BC_POP_WARNING()
 {
@@ -253,28 +253,28 @@ BC_POP_WARNING()
 // private
 template <typename Stack>
 inline void program<Stack>::
-push_chunk(const chunk_xptr& datum) noexcept
+push_chunk(const chunk_xptr& datum) NOEXCEPT
 {
     primary_.emplace_chunk(datum);
 }
 
 template <typename Stack>
 inline void program<Stack>::
-push_bool(bool value) noexcept
+push_bool(bool value) NOEXCEPT
 {
     primary_.emplace_boolean(value);
 }
 
 template <typename Stack>
 inline void program<Stack>::
-push_signed64(int64_t value) noexcept
+push_signed64(int64_t value) NOEXCEPT
 {
     primary_.emplace_integer(value);
 }
 
 template <typename Stack>
 inline void program<Stack>::
-push_length(size_t value) noexcept
+push_length(size_t value) NOEXCEPT
 {
     // This is guarded by stack size and push data limits.
     BC_ASSERT_MSG(value <= max_int64, "integer overflow");
@@ -288,7 +288,7 @@ push_length(size_t value) noexcept
 // This tethers a chunk if the stack value is not chunk.
 template <typename Stack>
 inline chunk_xptr program<Stack>::
-pop_chunk_() noexcept
+pop_chunk_() NOEXCEPT
 {
     const auto value = peek_chunk_();
     drop_();
@@ -298,7 +298,7 @@ pop_chunk_() noexcept
 // This tethers chunks if the stack values are not chunk.
 template <typename Stack>
 inline bool program<Stack>::
-pop_chunks(chunk_xptrs& data, size_t count) noexcept
+pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT
 {
     if (stack_size() < count)
         return false;
@@ -312,7 +312,7 @@ pop_chunks(chunk_xptrs& data, size_t count) noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-pop_bool_() noexcept
+pop_bool_() NOEXCEPT
 {
     const auto value = peek_bool_();
     drop_();
@@ -321,7 +321,7 @@ pop_bool_() noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-pop_strict_bool_() noexcept
+pop_strict_bool_() NOEXCEPT
 {
     const auto value = primary_.peek_strict_bool();
     drop_();
@@ -331,7 +331,7 @@ pop_strict_bool_() noexcept
 // private
 template <typename Stack>
 inline bool program<Stack>::
-pop_signed32_(int32_t& value) noexcept
+pop_signed32_(int32_t& value) NOEXCEPT
 {
     const auto result = peek_signed32_(value);
     drop_();
@@ -340,7 +340,7 @@ pop_signed32_(int32_t& value) noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-pop_signed32(int32_t& value) noexcept
+pop_signed32(int32_t& value) NOEXCEPT
 {
     if (is_stack_empty())
         return false;
@@ -350,7 +350,7 @@ pop_signed32(int32_t& value) noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-pop_binary32(int32_t& left, int32_t& right) noexcept
+pop_binary32(int32_t& left, int32_t& right) NOEXCEPT
 {
     if (stack_size() < 2)
         return false;
@@ -362,7 +362,7 @@ pop_binary32(int32_t& left, int32_t& right) noexcept
 template <typename Stack>
 inline bool program<Stack>::
 pop_ternary32(int32_t& upper, int32_t& lower,
-    int32_t& value) noexcept
+    int32_t& value) NOEXCEPT
 {
     if (stack_size() < 3)
         return false;
@@ -382,7 +382,7 @@ pop_ternary32(int32_t& upper, int32_t& lower,
 // ************************************************************************
 template <typename Stack>
 inline bool program<Stack>::
-pop_index32(size_t& index) noexcept
+pop_index32(size_t& index) NOEXCEPT
 {
     int32_t value;
     if (!pop_signed32(value))
@@ -400,7 +400,7 @@ pop_index32(size_t& index) noexcept
 // private
 template <typename Stack>
 inline bool program<Stack>::
-peek_signed32_(int32_t& value) const noexcept
+peek_signed32_(int32_t& value) const NOEXCEPT
 {
     return primary_.peek_signed4(value);
 }
@@ -408,7 +408,7 @@ peek_signed32_(int32_t& value) const noexcept
 // private
 template <typename Stack>
 inline bool program<Stack>::
-peek_signed40_(int64_t& value) const noexcept
+peek_signed40_(int64_t& value) const NOEXCEPT
 {
     return primary_.peek_signed5(value);
 }
@@ -420,7 +420,7 @@ peek_signed40_(int64_t& value) const noexcept
 // ****************************************************************************
 template <typename Stack>
 inline bool program<Stack>::
-peek_unsigned32(uint32_t& value) const noexcept
+peek_unsigned32(uint32_t& value) const NOEXCEPT
 {
     if (is_stack_empty())
         return false;
@@ -442,7 +442,7 @@ peek_unsigned32(uint32_t& value) const noexcept
 // ****************************************************************************
 template <typename Stack>
 inline bool program<Stack>::
-peek_unsigned40(uint64_t& value) const noexcept
+peek_unsigned40(uint64_t& value) const NOEXCEPT
 {
     if (is_stack_empty())
         return false;
@@ -463,21 +463,21 @@ peek_unsigned40(uint64_t& value) const noexcept
 // This swaps the variant elements of the stack vector.
 template <typename Stack>
 inline void program<Stack>::
-swap_(size_t left_index, size_t right_index) noexcept
+swap_(size_t left_index, size_t right_index) NOEXCEPT
 {
     primary_.swap(left_index, right_index);
 }
 
 template <typename Stack>
 inline void program<Stack>::
-erase_(size_t index) noexcept
+erase_(size_t index) NOEXCEPT
 {
     primary_.erase(index);
 }
 
 template <typename Stack>
 inline const stack_variant& program<Stack>::
-peek_(size_t index) const noexcept
+peek_(size_t index) const NOEXCEPT
 {
     return primary_.peek(index);
 }
@@ -487,28 +487,28 @@ peek_(size_t index) const noexcept
 
 template <typename Stack>
 inline void program<Stack>::
-drop_() noexcept
+drop_() NOEXCEPT
 {
     primary_.drop();
 }
 
 template <typename Stack>
 inline void program<Stack>::
-push_variant(const stack_variant& vary) noexcept
+push_variant(const stack_variant& vary) NOEXCEPT
 {
     primary_.push(vary);
 }
 
 template <typename Stack>
 inline const stack_variant& program<Stack>::
-peek_() const noexcept
+peek_() const NOEXCEPT
 {
     return primary_.top();
 }
 
 template <typename Stack>
 inline stack_variant program<Stack>::
-pop_() noexcept
+pop_() NOEXCEPT
 {
     return primary_.pop();
 }
@@ -518,21 +518,21 @@ pop_() noexcept
 
 template <typename Stack>
 inline size_t program<Stack>::
-stack_size() const noexcept
+stack_size() const NOEXCEPT
 {
     return primary_.size();
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-is_stack_empty() const noexcept
+is_stack_empty() const NOEXCEPT
 {
     return primary_.empty();
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-is_stack_overflow() const noexcept
+is_stack_overflow() const NOEXCEPT
 {
     // Addition is safe due to stack size constraint.
     return (stack_size() + alternate_.size()) > max_stack_size;
@@ -541,7 +541,7 @@ is_stack_overflow() const noexcept
 // private
 template <typename Stack>
 inline bool program<Stack>::
-is_stack_clean() const noexcept
+is_stack_clean() const NOEXCEPT
 {
     return stack_size() == one;
 }
@@ -551,7 +551,7 @@ is_stack_clean() const noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-is_alternate_empty() const noexcept
+is_alternate_empty() const NOEXCEPT
 {
     return alternate_.empty();
 }
@@ -560,7 +560,7 @@ is_alternate_empty() const noexcept
 BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 template <typename Stack>
 inline void program<Stack>::
-push_alternate(stack_variant&& vary) noexcept
+push_alternate(stack_variant&& vary) NOEXCEPT
 BC_POP_WARNING()
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -570,7 +570,7 @@ BC_POP_WARNING()
 
 template <typename Stack>
 inline stack_variant program<Stack>::
-pop_alternate_() noexcept
+pop_alternate_() NOEXCEPT
 {
     BC_ASSERT(!alternate_.empty());
 
@@ -584,7 +584,7 @@ pop_alternate_() noexcept
 
 template <typename Stack>
 inline void program<Stack>::
-begin_if(bool value) noexcept
+begin_if(bool value) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
     BC_ASSERT(value || !overflows(negative_condition_count_, one));
@@ -602,7 +602,7 @@ begin_if(bool value) noexcept
 // ****************************************************************************
 template <typename Stack>
 inline void program<Stack>::
-else_if_() noexcept
+else_if_() NOEXCEPT
 {
     // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
@@ -616,7 +616,7 @@ else_if_() noexcept
 
 template <typename Stack>
 inline void program<Stack>::
-end_if_() noexcept
+end_if_() NOEXCEPT
 {
     // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
@@ -627,14 +627,14 @@ end_if_() noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-is_balanced() const noexcept
+is_balanced() const NOEXCEPT
 {
     return condition_.empty();
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-is_succeess() const noexcept
+is_succeess() const NOEXCEPT
 {
     // Optimization changes O(n) search [for every operation] to O(1).
     // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
@@ -643,7 +643,7 @@ is_succeess() const noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-if_(const operation& op) const noexcept
+if_(const operation& op) const NOEXCEPT
 {
     // Conditional op execution is not predicated on conditional stack.
     return op.is_conditional() || is_succeess();
@@ -659,14 +659,14 @@ if_(const operation& op) const noexcept
 // later revised to make this explicit, by use of a prefix increment against a
 // limit of 201.
 // ****************************************************************************
-constexpr bool operation_count_exceeded(size_t count) noexcept
+constexpr bool operation_count_exceeded(size_t count) NOEXCEPT
 {
     return count > max_counted_ops;
 }
 
 template <typename Stack>
 inline bool program<Stack>::
-ops_increment(const operation& op) noexcept
+ops_increment(const operation& op) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
     BC_ASSERT(!overflows(operation_count_, one));
@@ -679,7 +679,7 @@ ops_increment(const operation& op) noexcept
 
 template <typename Stack>
 inline bool program<Stack>::
-ops_increment(size_t public_keys) noexcept
+ops_increment(size_t public_keys) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
     BC_ASSERT(!overflows(operation_count_, public_keys));
@@ -696,7 +696,7 @@ ops_increment(size_t public_keys) noexcept
 // one input script instance is not thread safe (unnecessary scenario).
 template <typename Stack>
 inline bool program<Stack>::
-set_subscript(const op_iterator& op) noexcept
+set_subscript(const op_iterator& op) NOEXCEPT
 {
     // End is not reachable if op is an element of script_.
     if (script_->ops().empty() || op == script_->ops().end())
@@ -708,7 +708,7 @@ set_subscript(const op_iterator& op) noexcept
     return true;
 }
 
-inline strippers create_strip_ops(const chunk_xptrs& endorsements) noexcept
+inline strippers create_strip_ops(const chunk_xptrs& endorsements) NOEXCEPT
 {
     static no_fill_allocator<stripper> no_fill_stripper_allocator{};
     strippers strip(no_fill_stripper_allocator);
@@ -733,7 +733,7 @@ inline strippers create_strip_ops(const chunk_xptrs& endorsements) noexcept
 // ****************************************************************************
 template <typename Stack>
 inline script::cptr program<Stack>::
-subscript(const chunk_xptrs& endorsements) const noexcept
+subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 {
     // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
@@ -763,7 +763,7 @@ subscript(const chunk_xptrs& endorsements) const noexcept
 template <typename Stack>
 inline bool program<Stack>::
 prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
-    const chunk_xptr& endorsement) const noexcept
+    const chunk_xptr& endorsement) const NOEXCEPT
 {
     uint8_t flags;
     data_slice distinguished;
@@ -784,7 +784,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
 template <typename Stack>
 inline bool program<Stack>::
 prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
-    uint8_t& flags, const data_chunk& endorsement, const script& sub) const noexcept
+    uint8_t& flags, const data_chunk& endorsement, const script& sub) const NOEXCEPT
 {
     data_slice distinguished;
 
@@ -805,7 +805,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
 
 template <typename Stack>
 inline hash_digest program<Stack>::
-signature_hash(const script& sub, uint8_t flags) const noexcept
+signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
     const auto bip143 = is_enabled(forks::bip143_rule);
@@ -820,7 +820,7 @@ signature_hash(const script& sub, uint8_t flags) const noexcept
 template <typename Stack>
 inline void program<Stack>::
 signature_hash(hash_cache& cache, const script& sub,
-    uint8_t flags) const noexcept
+    uint8_t flags) const NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     if (cache.find(flags) == cache.end())

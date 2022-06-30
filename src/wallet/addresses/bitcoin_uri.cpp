@@ -41,18 +41,18 @@ static const auto parameter_r = "r";
 static const auto parameter_req_ = "req-";
 static constexpr size_t parameter_req_length = 4;
 
-bitcoin_uri::bitcoin_uri() noexcept
+bitcoin_uri::bitcoin_uri() NOEXCEPT
   : strict_(true)
 {
 }
 
-bitcoin_uri::bitcoin_uri(const bitcoin_uri& other) noexcept
+bitcoin_uri::bitcoin_uri(const bitcoin_uri& other) NOEXCEPT
   : strict_(other.strict_), scheme_(other.scheme_), address_(other.address_),
     query_(other.query_)
 {
 }
 
-bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict) noexcept
+bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict) NOEXCEPT
   : bitcoin_uri(uri_reader::parse<bitcoin_uri>(uri, strict))
 {
 }
@@ -60,7 +60,7 @@ bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict) noexcept
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-bitcoin_uri::operator bool() const noexcept
+bitcoin_uri::operator bool() const NOEXCEPT
 {
     // An uninitialized URI returns false.
     return !address_.empty() || !query_.empty() || !scheme_.empty();
@@ -69,7 +69,7 @@ bitcoin_uri::operator bool() const noexcept
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string bitcoin_uri::encoded() const noexcept
+std::string bitcoin_uri::encoded() const NOEXCEPT
 {
     // Bitcoin URIs don't use the authority or fragment components.
     uri out;
@@ -82,45 +82,45 @@ std::string bitcoin_uri::encoded() const noexcept
 // Property getters.
 // ----------------------------------------------------------------------------
 
-uint64_t bitcoin_uri::amount() const noexcept
+uint64_t bitcoin_uri::amount() const NOEXCEPT
 {
     uint64_t satoshis;
     decode_base10(satoshis, parameter(parameter_amount), btc_decimal_places);
     return satoshis;
 }
 
-std::string bitcoin_uri::label() const noexcept
+std::string bitcoin_uri::label() const NOEXCEPT
 {
     return parameter(parameter_label);
 }
 
-std::string bitcoin_uri::message() const noexcept
+std::string bitcoin_uri::message() const NOEXCEPT
 {
     return parameter(parameter_message);
 }
 
-std::string bitcoin_uri::r() const noexcept
+std::string bitcoin_uri::r() const NOEXCEPT
 {
     return parameter(parameter_r);
 }
 
-payment_address bitcoin_uri::payment() const noexcept
+payment_address bitcoin_uri::payment() const NOEXCEPT
 {
     return payment_address(address_);
 }
 
-stealth_address bitcoin_uri::stealth() const noexcept
+stealth_address bitcoin_uri::stealth() const NOEXCEPT
 {
     return stealth_address(address_);
 }
 
-std::string bitcoin_uri::parameter(const std::string& key) const noexcept
+std::string bitcoin_uri::parameter(const std::string& key) const NOEXCEPT
 {
     const auto value = query_.find(key);
     return value == query_.end() ? std::string() : value->second;
 }
 
-std::string bitcoin_uri::address() const noexcept
+std::string bitcoin_uri::address() const NOEXCEPT
 {
     return address_;
 }
@@ -128,28 +128,28 @@ std::string bitcoin_uri::address() const noexcept
 // Property setters.
 // ----------------------------------------------------------------------------
 
-void bitcoin_uri::set_amount(uint64_t satoshis) noexcept
+void bitcoin_uri::set_amount(uint64_t satoshis) NOEXCEPT
 {
     const auto amount = encode_base10(satoshis, btc_decimal_places);
     query_[parameter_amount] = amount;
 }
 
-void bitcoin_uri::set_label(const std::string& label) noexcept
+void bitcoin_uri::set_label(const std::string& label) NOEXCEPT
 {
     query_[parameter_label] = label;
 }
 
-void bitcoin_uri::set_message(const std::string& message) noexcept
+void bitcoin_uri::set_message(const std::string& message) NOEXCEPT
 {
     query_[parameter_message] = message;
 }
 
-void bitcoin_uri::set_r(const std::string& r) noexcept
+void bitcoin_uri::set_r(const std::string& r) NOEXCEPT
 {
     query_[parameter_r] = r;
 }
 
-bool bitcoin_uri::set_address(const std::string& address) noexcept
+bool bitcoin_uri::set_address(const std::string& address) NOEXCEPT
 {
     payment_address payment(address);
     if (payment)
@@ -168,17 +168,17 @@ bool bitcoin_uri::set_address(const std::string& address) noexcept
     return false;
 }
 
-void bitcoin_uri::set_address(const payment_address& payment) noexcept
+void bitcoin_uri::set_address(const payment_address& payment) NOEXCEPT
 {
     address_ = payment.encoded();
 }
 
-void bitcoin_uri::set_address(const stealth_address& stealth) noexcept
+void bitcoin_uri::set_address(const stealth_address& stealth) NOEXCEPT
 {
     address_ = stealth.encoded();
 }
 
-bool bitcoin_uri::set_amount(const std::string& satoshis) noexcept
+bool bitcoin_uri::set_amount(const std::string& satoshis) NOEXCEPT
 {
     uint64_t decoded;
     if (!decode_base10(decoded, satoshis, btc_decimal_places, strict_))
@@ -192,12 +192,12 @@ bool bitcoin_uri::set_amount(const std::string& satoshis) noexcept
 // uri_reader implementation.
 // ----------------------------------------------------------------------------
 
-void bitcoin_uri::set_strict(bool strict) noexcept
+void bitcoin_uri::set_strict(bool strict) NOEXCEPT
 {
     strict_ = strict;
 }
 
-bool bitcoin_uri::set_scheme(const std::string& scheme) noexcept
+bool bitcoin_uri::set_scheme(const std::string& scheme) NOEXCEPT
 {
     if (scheme == bitcoin_scheme)
     {
@@ -208,28 +208,28 @@ bool bitcoin_uri::set_scheme(const std::string& scheme) noexcept
     return false;
 }
 
-bool bitcoin_uri::set_authority(const std::string& authority) noexcept
+bool bitcoin_uri::set_authority(const std::string& authority) NOEXCEPT
 {
     // Using "bitcoin://" instead of "bitcoin:" is a common mistake, so we
     // allow the authority in place of the path when not strict.
     return !strict_ && set_path(authority);
 }
 
-bool bitcoin_uri::set_path(const std::string& path) noexcept
+bool bitcoin_uri::set_path(const std::string& path) NOEXCEPT
 {
     // Guard against the path having been set via authority (or second set).
     return address_.empty() && set_address(path);
 }
 
-bool bitcoin_uri::set_fragment(const std::string& /* fragment */) noexcept
+bool bitcoin_uri::set_fragment(const std::string& /* fragment */) NOEXCEPT
 {
     return false;
 }
 
 bool bitcoin_uri::set_parameter(const std::string& key,
-    const std::string& value) noexcept
+    const std::string& value) NOEXCEPT
 {
-    const auto required = [](const std::string& key) noexcept
+    const auto required = [](const std::string& key) NOEXCEPT
     {
         return key.substr(0, parameter_req_length) == parameter_req_;
     };
@@ -251,7 +251,7 @@ bool bitcoin_uri::set_parameter(const std::string& key,
 // Operators.
 // ----------------------------------------------------------------------------
 
-bitcoin_uri& bitcoin_uri::operator=(const bitcoin_uri& other) noexcept
+bitcoin_uri& bitcoin_uri::operator=(const bitcoin_uri& other) NOEXCEPT
 {
     strict_ = other.strict_;
     scheme_ = other.scheme_;
@@ -260,18 +260,18 @@ bitcoin_uri& bitcoin_uri::operator=(const bitcoin_uri& other) noexcept
     return *this;
 }
 
-bool bitcoin_uri::operator<(const bitcoin_uri& other) const noexcept
+bool bitcoin_uri::operator<(const bitcoin_uri& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
 }
 
-bool bitcoin_uri::operator==(const bitcoin_uri& other) const noexcept
+bool bitcoin_uri::operator==(const bitcoin_uri& other) const NOEXCEPT
 {
     return strict_ == other.strict_ && scheme_ == other.scheme_ &&
         address_ == other.address_ && query_ == other.query_;
 }
 
-bool bitcoin_uri::operator!=(const bitcoin_uri& other) const noexcept
+bool bitcoin_uri::operator!=(const bitcoin_uri& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -289,7 +289,7 @@ std::istream& operator>>(std::istream& in, bitcoin_uri& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const bitcoin_uri& from) noexcept
+std::ostream& operator<<(std::ostream& out, const bitcoin_uri& from) NOEXCEPT
 {
     out << from.encoded();
     return out;

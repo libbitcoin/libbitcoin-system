@@ -36,11 +36,11 @@ class BC_API binary
 {
 public:
     /// True if all characters are '0' or '1'.
-    static bool is_base2(const std::string& text) noexcept;
+    static bool is_base2(const std::string& text) NOEXCEPT;
 
     /// Constructors.
 
-    binary() noexcept;
+    binary() NOEXCEPT;
 
     /// Defaults.
     binary(binary&&) = default;
@@ -49,33 +49,33 @@ public:
     binary& operator=(const binary&) = default;
     ~binary() = default;
 
-    binary(const std::string& bits) noexcept;
-    binary(size_t bits, const data_slice& data) noexcept;
+    binary(const std::string& bits) NOEXCEPT;
+    binary(size_t bits, const data_slice& data) NOEXCEPT;
 
     /// Methods.
-    std::string encoded() const noexcept;
-    const data_chunk& data() const noexcept;
-    size_t bytes() const noexcept;
-    size_t bits() const noexcept;
+    std::string encoded() const NOEXCEPT;
+    const data_chunk& data() const NOEXCEPT;
+    size_t bytes() const NOEXCEPT;
+    size_t bits() const NOEXCEPT;
 
     /// Operators.
-    operator const data_chunk&() const noexcept;
-    bool operator[](size_t index) const noexcept;
-    bool operator<(const binary& other) const noexcept;
+    operator const data_chunk&() const NOEXCEPT;
+    bool operator[](size_t index) const NOEXCEPT;
+    bool operator<(const binary& other) const NOEXCEPT;
 
 private:
-    binary(data_chunk&& bytes, size_t bits) noexcept;
-    static binary from_string(const std::string bits) noexcept;
-    static binary from_data(size_t size, data_chunk&& bytes) noexcept;
+    binary(data_chunk&& bytes, size_t bits) NOEXCEPT;
+    static binary from_string(const std::string bits) NOEXCEPT;
+    static binary from_data(size_t size, data_chunk&& bytes) NOEXCEPT;
 
     size_t bits_;
     data_chunk bytes_;
 };
 
-bool operator==(const binary& left, const binary& right) noexcept;
-bool operator!=(const binary& left, const binary& right) noexcept;
-std::istream& operator>>(std::istream& in, binary& to) noexcept;
-std::ostream& operator<<(std::ostream& out, const binary& of) noexcept;
+bool operator==(const binary& left, const binary& right) NOEXCEPT;
+bool operator!=(const binary& left, const binary& right) NOEXCEPT;
+std::istream& operator>>(std::istream& in, binary& to) NOEXCEPT;
+std::ostream& operator<<(std::ostream& out, const binary& of) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
@@ -86,7 +86,7 @@ namespace std
 template<>
 struct hash<bc::system::binary>
 {
-    size_t operator()(const bc::system::binary& value) const noexcept
+    size_t operator()(const bc::system::binary& value) const NOEXCEPT
     {
         return std::hash<std::string>()(value.encoded());
     }

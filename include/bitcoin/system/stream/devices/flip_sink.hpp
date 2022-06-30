@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICES_FLIP_SINK_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICES_FLIP_SINK_HPP
 
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/stream/devices/copy_sink.hpp>
 
@@ -38,7 +39,7 @@ public:
     {
     };
 
-    flip_sink(const Container& data) noexcept
+    flip_sink(const Container& data) NOEXCEPT
       : copy_sink<Container>(data)
     {
     }

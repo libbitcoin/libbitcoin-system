@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_INTERFACES_BITFLIPPER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_INTERFACES_BITFLIPPER_HPP
 
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/byteflipper.hpp>

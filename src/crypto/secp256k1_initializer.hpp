@@ -30,10 +30,10 @@ class BC_API secp256k1_initializer
 {
 public:
     /// Free the context if successfully initialized.
-    virtual ~secp256k1_initializer() noexcept;
+    virtual ~secp256k1_initializer() NOEXCEPT;
 
 protected:
-    secp256k1_initializer(int flags) noexcept;
+    secp256k1_initializer(int flags) NOEXCEPT;
 
     secp256k1_context* context_;
 };
@@ -43,10 +43,10 @@ class BC_API secp256k1_signing
   : public secp256k1_initializer
 {
 public:
-    static secp256k1_context* context() noexcept;
+    static secp256k1_context* context() NOEXCEPT;
 
 protected:
-    secp256k1_signing() noexcept;
+    secp256k1_signing() NOEXCEPT;
 };
 
 /// A verification context singleton initializer.
@@ -54,10 +54,10 @@ class BC_API secp256k1_verification
   : public secp256k1_initializer
 {
 public:
-    static secp256k1_context* context() noexcept;
+    static secp256k1_context* context() NOEXCEPT;
 
 protected:
-    secp256k1_verification() noexcept;
+    secp256k1_verification() NOEXCEPT;
 };
 
 } // namespace system

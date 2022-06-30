@@ -27,7 +27,7 @@ namespace system {
 
 template <typename CharOut, typename CharIn>
 static std::basic_string<CharOut> to_utf(
-    const std::basic_string<CharIn>& in) noexcept
+    const std::basic_string<CharIn>& in) NOEXCEPT
 {
     using namespace boost::locale;
     std::basic_string<CharOut> out;
@@ -51,11 +51,11 @@ static std::basic_string<CharOut> to_utf(
 
 template <typename CharOut, typename CharIn>
 static std::vector<std::basic_string<CharOut>> to_utf(
-    const std::vector<std::basic_string<CharIn>>& in) noexcept
+    const std::vector<std::basic_string<CharIn>>& in) NOEXCEPT
 {
     std::vector<std::basic_string<CharOut>> out(in.size());
     std::transform(in.begin(), in.end(), out.begin(),
-        [](const std::basic_string<CharIn>& word) noexcept
+        [](const std::basic_string<CharIn>& word) NOEXCEPT
         {
             return to_utf<CharOut>(word);
         });
@@ -64,67 +64,67 @@ static std::vector<std::basic_string<CharOut>> to_utf(
 }
 
 // char32_t is the only 1:1 char encoding.
-std::string to_utf8(char32_t point) noexcept
+std::string to_utf8(char32_t point) NOEXCEPT
 {
     return to_utf8(std::u32string{ point });
 }
 
-std::string to_utf8(const std::wstring& text) noexcept
+std::string to_utf8(const std::wstring& text) NOEXCEPT
 {
     return to_utf<char>(text);
 }
 
-std::string to_utf8(const std::u32string& text) noexcept
+std::string to_utf8(const std::u32string& text) NOEXCEPT
 {
     return to_utf<char>(text);
 }
 
-std::wstring to_utf16(const std::string& text) noexcept
+std::wstring to_utf16(const std::string& text) NOEXCEPT
 {
     return to_utf<wchar_t>(text);
 }
 
-std::wstring to_utf16(const std::u32string& text) noexcept
+std::wstring to_utf16(const std::u32string& text) NOEXCEPT
 {
     return to_utf<wchar_t>(text);
 }
 
-std::u32string to_utf32(const std::string& text) noexcept
+std::u32string to_utf32(const std::string& text) NOEXCEPT
 {
     return to_utf<char32_t>(text);
 }
 
-std::u32string to_utf32(const std::wstring& text) noexcept
+std::u32string to_utf32(const std::wstring& text) NOEXCEPT
 {
     return to_utf<char32_t>(text);
 }
 
-string_list to_utf8(const wstring_list& text) noexcept
+string_list to_utf8(const wstring_list& text) NOEXCEPT
 {
     return to_utf<char>(text);
 }
 
-string_list to_utf8(const u32string_list& text) noexcept
+string_list to_utf8(const u32string_list& text) NOEXCEPT
 {
     return to_utf<char>(text);
 }
 
-wstring_list to_utf16(const string_list& text) noexcept
+wstring_list to_utf16(const string_list& text) NOEXCEPT
 {
     return to_utf<wchar_t>(text);
 }
 
-wstring_list to_utf16(const u32string_list& text) noexcept
+wstring_list to_utf16(const u32string_list& text) NOEXCEPT
 {
     return to_utf<wchar_t>(text);
 }
 
-u32string_list to_utf32(const string_list& text) noexcept
+u32string_list to_utf32(const string_list& text) NOEXCEPT
 {
     return to_utf<char32_t>(text);
 }
 
-u32string_list to_utf32(const wstring_list& text) noexcept
+u32string_list to_utf32(const wstring_list& text) NOEXCEPT
 {
     return to_utf<char32_t>(text);
 }

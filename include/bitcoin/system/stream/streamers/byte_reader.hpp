@@ -28,6 +28,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 
@@ -41,7 +42,7 @@ class byte_reader
 {
 public:
     /// Constructors.
-    byte_reader(IStream& source) noexcept;
+    byte_reader(IStream& source) NOEXCEPT;
 
     /// Defaults.
     byte_reader(byte_reader&&) = default;
@@ -52,92 +53,92 @@ public:
 
     /// Read integer, size determined from parameter type.
     template <typename Integer, if_integer<Integer> = true>
-    Integer read_big_endian() noexcept;
+    Integer read_big_endian() NOEXCEPT;
     template <typename Integer, if_integer<Integer> = true>
-    Integer read_little_endian() noexcept;
+    Integer read_little_endian() NOEXCEPT;
 
     /// Read big endian (explicit specializations of read_big_endian).
-    uint16_t read_2_bytes_big_endian() noexcept override;
-    uint32_t read_4_bytes_big_endian() noexcept override;
-    uint64_t read_8_bytes_big_endian() noexcept override;
+    uint16_t read_2_bytes_big_endian() NOEXCEPT override;
+    uint32_t read_4_bytes_big_endian() NOEXCEPT override;
+    uint64_t read_8_bytes_big_endian() NOEXCEPT override;
 
     /// Little endian integer readers (specializations of read_little_endian).
-    uint16_t read_2_bytes_little_endian() noexcept override;
-    uint32_t read_4_bytes_little_endian() noexcept override;
-    uint64_t read_8_bytes_little_endian() noexcept override;
+    uint16_t read_2_bytes_little_endian() NOEXCEPT override;
+    uint32_t read_4_bytes_little_endian() NOEXCEPT override;
+    uint64_t read_8_bytes_little_endian() NOEXCEPT override;
 
     /// Read Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
-    uint64_t read_variable() noexcept override;
+    uint64_t read_variable() NOEXCEPT override;
 
     /// Cast read_variable to size_t, facilitates read_bytes(read_size()).
     /// Returns zero and invalidates stream if would exceed read limit.
-    size_t read_size(size_t limit=max_size_t) noexcept override;
+    size_t read_size(size_t limit=max_size_t) NOEXCEPT override;
 
     /// Convert read_4_bytes_little_endian to an error code.
-    code read_error_code() noexcept override;
+    code read_error_code() NOEXCEPT override;
 
     /// Read size bytes into array.
     template <size_t Size>
-    data_array<Size> read_forward() noexcept;
+    data_array<Size> read_forward() NOEXCEPT;
     template <size_t Size>
-    data_array<Size> read_reverse() noexcept;
+    data_array<Size> read_reverse() NOEXCEPT;
 
     /// Read into stream until buffer is exhausted.
-    std::ostream& read(std::ostream& out) noexcept override;
+    std::ostream& read(std::ostream& out) NOEXCEPT override;
 
     /// Read hash (explicit specializations of read_forward).
-    mini_hash read_mini_hash() noexcept override;
-    short_hash read_short_hash() noexcept override;
-    hash_digest read_hash() noexcept override;
-    long_hash read_long_hash() noexcept override;
+    mini_hash read_mini_hash() NOEXCEPT override;
+    short_hash read_short_hash() NOEXCEPT override;
+    hash_digest read_hash() NOEXCEPT override;
+    long_hash read_long_hash() NOEXCEPT override;
 
     /// Read/peek one byte (invalidates an empty stream).
-    uint8_t peek_byte() noexcept override;
-    uint8_t read_byte() noexcept override;
+    uint8_t peek_byte() NOEXCEPT override;
+    uint8_t read_byte() NOEXCEPT override;
 
     /// Read all remaining bytes.
-    data_chunk read_bytes() noexcept override;
+    data_chunk read_bytes() NOEXCEPT override;
 
     /// Read size bytes, return size is guaranteed.
-    data_chunk read_bytes(size_t size) noexcept override;
-    void read_bytes(uint8_t* buffer, size_t size) noexcept override;
+    data_chunk read_bytes(size_t size) NOEXCEPT override;
+    void read_bytes(uint8_t* buffer, size_t size) NOEXCEPT override;
 
     /// Read Bitcoin length-prefixed string.
     /// Returns empty and invalidates stream if would exceed read limit.
-    std::string read_string(size_t limit=max_size_t) noexcept override;
+    std::string read_string(size_t limit=max_size_t) NOEXCEPT override;
 
     /// Read string, truncated at size or first null.
     /// This is only used for reading Bitcoin heading command text.
-    std::string read_string_buffer(size_t size) noexcept override;
+    std::string read_string_buffer(size_t size) NOEXCEPT override;
 
     /// Advance the iterator.
-    void skip_byte() noexcept override;
-    void skip_bytes(size_t size) noexcept override;
+    void skip_byte() NOEXCEPT override;
+    void skip_bytes(size_t size) NOEXCEPT override;
 
     /// Rewind the iterator.
-    void rewind_byte() noexcept override;
-    void rewind_bytes(size_t size) noexcept override;
+    void rewind_byte() NOEXCEPT override;
+    void rewind_bytes(size_t size) NOEXCEPT override;
 
     /// The stream is empty (or invalid).
-    bool is_exhausted() const noexcept override;
+    bool is_exhausted() const NOEXCEPT override;
 
     /// Get the current absolute position.
-    size_t get_position() noexcept override;
+    size_t get_position() NOEXCEPT override;
 
     /// Clear invalid state and set absolute position.
-    void set_position(size_t absolute) noexcept override;
+    void set_position(size_t absolute) NOEXCEPT override;
 
     /// Limit stream upper bound to current position plus size (default resets).
-    void set_limit(size_t size=max_size_t) noexcept override;
+    void set_limit(size_t size=max_size_t) NOEXCEPT override;
 
     /// Invalidate the stream.
-    void invalidate() noexcept override;
+    void invalidate() NOEXCEPT override;
 
     /// The stream is valid.
-    operator bool() const noexcept override;
+    operator bool() const NOEXCEPT override;
 
     /// The stream is invalid.
-    bool operator!() const noexcept override;
+    bool operator!() const NOEXCEPT override;
 
 protected:
     static constexpr uint8_t pad() { return 0x00; };
@@ -146,26 +147,26 @@ protected:
     // Should be defined on IStream::pos_type, however that is implementation
     // defined and is not an integer domain. Could rely on std::streamsize,
     // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
-    static constexpr size_t maximum() noexcept
+    static constexpr size_t maximum() NOEXCEPT
     {
         return system::maximum<size_t>();
     };
 
-    virtual uint8_t do_peek_byte() noexcept;
-    virtual void do_read_bytes(uint8_t* buffer, size_t size) noexcept;
-    virtual void do_skip_bytes(size_t size) noexcept;
-    virtual void do_rewind_bytes(size_t size) noexcept;
-    virtual bool get_exhausted() const noexcept;
+    virtual uint8_t do_peek_byte() NOEXCEPT;
+    virtual void do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT;
+    virtual void do_skip_bytes(size_t size) NOEXCEPT;
+    virtual void do_rewind_bytes(size_t size) NOEXCEPT;
+    virtual bool get_exhausted() const NOEXCEPT;
 
 private:
-    bool valid() const noexcept;
-    void invalid() noexcept;
-    void validate() noexcept;
-    void clear() noexcept;
-    size_t getter() noexcept;
-    void limit(size_t size) noexcept;
-    bool limiter(size_t size) noexcept;
-    void seeker(typename IStream::pos_type offset) noexcept;
+    bool valid() const NOEXCEPT;
+    void invalid() NOEXCEPT;
+    void validate() NOEXCEPT;
+    void clear() NOEXCEPT;
+    size_t getter() NOEXCEPT;
+    void limit(size_t size) NOEXCEPT;
+    bool limiter(size_t size) NOEXCEPT;
+    void seeker(typename IStream::pos_type offset) NOEXCEPT;
 
     IStream& stream_;
     size_t remaining_;

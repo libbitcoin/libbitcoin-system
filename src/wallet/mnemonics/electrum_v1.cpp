@@ -59,33 +59,33 @@ namespace wallet {
 // The result can be an odd number of characters (9 total max).
 // print('%08x' % x) emits >= 8 hex characters, and can be odd length.
 
-v1_decoding::v1_decoding() noexcept
+v1_decoding::v1_decoding() NOEXCEPT
   : v1_decoding({}, {})
 {
 }
 
-v1_decoding::v1_decoding(const data_chunk& entropy) noexcept
+v1_decoding::v1_decoding(const data_chunk& entropy) NOEXCEPT
   : v1_decoding(entropy, {})
 {
 }
 
-v1_decoding::v1_decoding(const data_chunk& entropy, const overflow& overflows) noexcept
+v1_decoding::v1_decoding(const data_chunk& entropy, const overflow& overflows) NOEXCEPT
   : entropy_(entropy), overflows_(overflows)
 {
 }
 
-const data_chunk& v1_decoding::entropy() const noexcept
+const data_chunk& v1_decoding::entropy() const NOEXCEPT
 {
     return entropy_;
 }
 
-const v1_decoding::overflow& v1_decoding::overflows() const noexcept
+const v1_decoding::overflow& v1_decoding::overflows() const NOEXCEPT
 {
     return overflows_;
 }
 
 // Electrum hashes the base16 encoded ascii *text* of the seed.
-data_chunk v1_decoding::seed_entropy() const noexcept
+data_chunk v1_decoding::seed_entropy() const NOEXCEPT
 {
     // overflows is empty for entropy constructions.
     if (overflows_.empty())
@@ -144,7 +144,7 @@ const electrum_v1::dictionaries electrum_v1::dictionaries_
 
 // electrum/old_mnemonic.py#L1669
 string_list electrum_v1::encoder(const data_chunk& entropy,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     string_list words;
     words.reserve(word_count(entropy));
@@ -177,7 +177,7 @@ string_list electrum_v1::encoder(const data_chunk& entropy,
 
 // electrum/old_mnemonic.py#L1682
 v1_decoding electrum_v1::decoder(const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     data_chunk entropy;
     entropy.reserve(entropy_size(words));
@@ -215,7 +215,7 @@ v1_decoding electrum_v1::decoder(const string_list& words,
 }
 
 // electrum/keystore.py#L692
-hash_digest electrum_v1::strecher(const data_chunk& seed_entropy) noexcept
+hash_digest electrum_v1::strecher(const data_chunk& seed_entropy) NOEXCEPT
 {
     constexpr size_t hash_iterations = 100000;
 
@@ -229,22 +229,22 @@ hash_digest electrum_v1::strecher(const data_chunk& seed_entropy) noexcept
 // protected static (sizers)
 // ----------------------------------------------------------------------------
 
-size_t electrum_v1::entropy_bits(const data_slice& entropy) noexcept
+size_t electrum_v1::entropy_bits(const data_slice& entropy) NOEXCEPT
 {
     return to_bits(entropy.size());
 }
 
-size_t electrum_v1::entropy_bits(const string_list& words) noexcept
+size_t electrum_v1::entropy_bits(const string_list& words) NOEXCEPT
 {
     return (words.size() * sizeof(uint32_t)) / word_multiple;
 }
 
-size_t electrum_v1::entropy_size(const string_list& words) noexcept
+size_t electrum_v1::entropy_size(const string_list& words) NOEXCEPT
 {
     return to_floored_bytes(entropy_bits(words));
 }
 
-size_t electrum_v1::word_count(const data_slice& entropy) noexcept
+size_t electrum_v1::word_count(const data_slice& entropy) NOEXCEPT
 {
     return entropy_bits(entropy) / sizeof(uint32_t);
 }
@@ -253,22 +253,22 @@ size_t electrum_v1::word_count(const data_slice& entropy) noexcept
 // ----------------------------------------------------------------------------
 
 language electrum_v1::contained_by(const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     return dictionaries_.contains(words, identifier);
 }
 
-bool electrum_v1::is_valid_dictionary(language identifier) noexcept
+bool electrum_v1::is_valid_dictionary(language identifier) NOEXCEPT
 {
     return dictionaries_.exists(identifier);
 }
 
-bool electrum_v1::is_valid_entropy_size(size_t value) noexcept
+bool electrum_v1::is_valid_entropy_size(size_t value) NOEXCEPT
 {
     return value == entropy_minimum || value == entropy_maximum;
 }
 
-bool electrum_v1::is_valid_word_count(size_t count) noexcept
+bool electrum_v1::is_valid_word_count(size_t count) NOEXCEPT
 {
     return count == word_minimum || count == word_maximum;
 }
@@ -276,56 +276,56 @@ bool electrum_v1::is_valid_word_count(size_t count) noexcept
 // construction
 // ----------------------------------------------------------------------------
 
-electrum_v1::electrum_v1() noexcept
+electrum_v1::electrum_v1() NOEXCEPT
   : languages(), overflows_()
 {
 }
 
-electrum_v1::electrum_v1(const electrum_v1& other) noexcept
+electrum_v1::electrum_v1(const electrum_v1& other) NOEXCEPT
   : languages(other), overflows_(other.overflows_)
 {
 }
 
 electrum_v1::electrum_v1(const std::string& sentence,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : electrum_v1(split(sentence, identifier), identifier)
 {
 }
 
 electrum_v1::electrum_v1(const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : electrum_v1(from_words(words, identifier))
 {
 }
 
 electrum_v1::electrum_v1(const data_chunk& entropy,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : electrum_v1(from_entropy(entropy, identifier))
 {
 }
 
 electrum_v1::electrum_v1(const minimum_entropy& entropy,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : electrum_v1(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
 electrum_v1::electrum_v1(const maximum_entropy& entropy,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : electrum_v1(from_entropy(to_chunk(entropy), identifier))
 {
 }
 
 // protected
 electrum_v1::electrum_v1(const data_chunk& entropy, const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : electrum_v1(v1_decoding(entropy), words, identifier)
 {
 }
 
 // protected
 electrum_v1::electrum_v1(const v1_decoding& decoding, const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : languages(decoding.entropy(), words, identifier),
     overflows_(decoding.overflows())
 {
@@ -335,7 +335,7 @@ electrum_v1::electrum_v1(const v1_decoding& decoding, const string_list& words,
 // ----------------------------------------------------------------------------
 
 electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
@@ -348,7 +348,7 @@ electrum_v1 electrum_v1::from_entropy(const data_chunk& entropy,
 }
 
 electrum_v1 electrum_v1::from_words(const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     if (!is_valid_word_count(words.size()))
         return {};
@@ -372,7 +372,7 @@ electrum_v1 electrum_v1::from_words(const string_list& words,
 // Manage overflow bug and conversion to idiosyncratic textual seed data.
 
 // public
-bool electrum_v1::overflow() const noexcept
+bool electrum_v1::overflow() const NOEXCEPT
 {
     return std::any_of(overflows_.begin(), overflows_.end(), [](bool value)
     {
@@ -380,12 +380,12 @@ bool electrum_v1::overflow() const noexcept
     });
 }
 
-const v1_decoding::overflow& electrum_v1::overflows() const noexcept
+const v1_decoding::overflow& electrum_v1::overflows() const NOEXCEPT
 {
     return overflows_;
 }
 
-data_chunk electrum_v1::seed_entropy() const noexcept
+data_chunk electrum_v1::seed_entropy() const NOEXCEPT
 {
     return v1_decoding(entropy_, overflows_).seed_entropy();
 }
@@ -393,7 +393,7 @@ data_chunk electrum_v1::seed_entropy() const noexcept
 // public methods
 // ----------------------------------------------------------------------------
 
-ec_private electrum_v1::to_seed(const context& context) const noexcept
+ec_private electrum_v1::to_seed(const context& context) const NOEXCEPT
 {
     if (!(*this))
         return {};
@@ -410,7 +410,7 @@ ec_private electrum_v1::to_seed(const context& context) const noexcept
     return { ec_scalar(seed), context.address_version, compression };
 }
 
-ec_public electrum_v1::to_public_key(const context& context) const noexcept
+ec_public electrum_v1::to_public_key(const context& context) const NOEXCEPT
 {
     if (!(*this))
         return {};
@@ -422,14 +422,14 @@ ec_public electrum_v1::to_public_key(const context& context) const noexcept
 // operators
 // ----------------------------------------------------------------------------
 
-electrum_v1& electrum_v1::operator=(electrum_v1 other) noexcept
+electrum_v1& electrum_v1::operator=(electrum_v1 other) NOEXCEPT
 {
     swap(*this, other);
     return *this;
 }
 
 // friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(electrum_v1& left, electrum_v1& right) noexcept
+void swap(electrum_v1& left, electrum_v1& right) NOEXCEPT
 {
     using std::swap;
     using namespace bc::system::words;

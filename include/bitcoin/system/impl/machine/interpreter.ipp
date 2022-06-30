@@ -26,6 +26,7 @@
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -58,7 +59,7 @@ using namespace system::error;
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_unevaluated(opcode code) const noexcept
+op_unevaluated(opcode code) const NOEXCEPT
 {
     return operation::is_invalid(code) ? error::op_invalid :
         error::op_reserved;
@@ -69,7 +70,7 @@ op_unevaluated(opcode code) const noexcept
 // Codes op_nop1..op_nop10 promoted from reserved by [0.3.6] hard fork.
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_nop(opcode) const noexcept
+op_nop(opcode) const NOEXCEPT
 {
     if (state::is_enabled(forks::nops_rule))
         return error::op_success;
@@ -80,7 +81,7 @@ op_nop(opcode) const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_push_number(int8_t value) noexcept
+op_push_number(int8_t value) NOEXCEPT
 {
     state::push_signed64(value);
     return error::op_success;
@@ -88,7 +89,7 @@ op_push_number(int8_t value) noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_push_size(const operation& op) noexcept
+op_push_size(const operation& op) NOEXCEPT
 {
     if (op.is_underclaimed())
         return error::op_push_size;
@@ -99,7 +100,7 @@ op_push_size(const operation& op) noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_push_one_size(const operation& op) noexcept
+op_push_one_size(const operation& op) NOEXCEPT
 {
     if (op.is_underclaimed())
         return error::op_push_one_size;
@@ -110,7 +111,7 @@ op_push_one_size(const operation& op) noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_push_two_size(const operation& op) noexcept
+op_push_two_size(const operation& op) NOEXCEPT
 {
     if (op.is_underclaimed())
         return error::op_push_two_size;
@@ -121,7 +122,7 @@ op_push_two_size(const operation& op) noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_push_four_size(const operation& op) noexcept
+op_push_four_size(const operation& op) NOEXCEPT
 {
     if (op.is_underclaimed())
         return error::op_push_four_size;
@@ -132,7 +133,7 @@ op_push_four_size(const operation& op) noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_nop() const noexcept
+op_nop() const NOEXCEPT
 {
     return error::op_success;
 }
@@ -140,7 +141,7 @@ op_nop() const noexcept
 // This opcode pushed the version to the stack, a hard fork per release.
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_ver() const noexcept
+op_ver() const NOEXCEPT
 {
     if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_ver);
@@ -150,7 +151,7 @@ op_ver() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_if() noexcept
+op_if() NOEXCEPT
 {
     auto value = false;
 
@@ -168,7 +169,7 @@ op_if() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_notif() noexcept
+op_notif() NOEXCEPT
 {
     auto value = false;
 
@@ -186,7 +187,7 @@ op_notif() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_verif() const noexcept
+op_verif() const NOEXCEPT
 {
     if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_verif);
@@ -196,7 +197,7 @@ op_verif() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_vernotif() const noexcept
+op_vernotif() const NOEXCEPT
 {
     if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
@@ -206,7 +207,7 @@ op_vernotif() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_else() noexcept
+op_else() NOEXCEPT
 {
     if (state::is_balanced())
         return error::op_else;
@@ -217,7 +218,7 @@ op_else() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_endif() noexcept
+op_endif() NOEXCEPT
 {
     if (state::is_balanced())
         return error::op_endif;
@@ -228,7 +229,7 @@ op_endif() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_verify() noexcept
+op_verify() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_verify1;
@@ -242,7 +243,7 @@ op_verify() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_return() const noexcept
+op_return() const NOEXCEPT
 {
     if (state::is_enabled(forks::nops_rule))
         return op_unevaluated(opcode::op_return);
@@ -252,7 +253,7 @@ op_return() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_to_alt_stack() noexcept
+op_to_alt_stack() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_to_alt_stack;
@@ -263,7 +264,7 @@ op_to_alt_stack() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_from_alt_stack() noexcept
+op_from_alt_stack() NOEXCEPT
 {
     if (state::is_alternate_empty())
         return error::op_from_alt_stack;
@@ -274,7 +275,7 @@ op_from_alt_stack() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_drop2() noexcept
+op_drop2() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_drop2;
@@ -287,7 +288,7 @@ op_drop2() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_dup2() noexcept
+op_dup2() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_dup2;
@@ -300,7 +301,7 @@ op_dup2() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_dup3() noexcept
+op_dup3() NOEXCEPT
 {
     if (state::stack_size() < 3)
         return error::op_dup3;
@@ -314,7 +315,7 @@ op_dup3() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_over2() noexcept
+op_over2() NOEXCEPT
 {
     if (state::stack_size() < 4)
         return error::op_over2;
@@ -327,7 +328,7 @@ op_over2() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_rot2() noexcept
+op_rot2() NOEXCEPT
 {
     if (state::stack_size() < 6)
         return error::op_rot2;
@@ -343,7 +344,7 @@ op_rot2() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_swap2() noexcept
+op_swap2() NOEXCEPT
 {
     if (state::stack_size() < 4)
         return error::op_swap2;
@@ -356,7 +357,7 @@ op_swap2() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_if_dup() noexcept
+op_if_dup() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_if_dup;
@@ -370,7 +371,7 @@ op_if_dup() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_depth() noexcept
+op_depth() NOEXCEPT
 {
     // [0,1,2] => 3,[0,1,2]
     state::push_length(state::stack_size());
@@ -379,7 +380,7 @@ op_depth() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_drop() noexcept
+op_drop() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_drop;
@@ -391,7 +392,7 @@ op_drop() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_dup() noexcept
+op_dup() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_dup;
@@ -403,7 +404,7 @@ op_dup() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_nip() noexcept
+op_nip() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_nip;
@@ -416,7 +417,7 @@ op_nip() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_over() noexcept
+op_over() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_over;
@@ -428,7 +429,7 @@ op_over() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_pick() noexcept
+op_pick() NOEXCEPT
 {
     size_t index;
 
@@ -454,7 +455,7 @@ op_pick() noexcept
 // ****************************************************************************
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_roll() noexcept
+op_roll() NOEXCEPT
 {
     size_t index;
 
@@ -476,7 +477,7 @@ op_roll() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_rot() noexcept
+op_rot() NOEXCEPT
 {
     if (state::stack_size() < 3)
         return error::op_rot;
@@ -489,7 +490,7 @@ op_rot() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_swap() noexcept
+op_swap() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_swap;
@@ -501,7 +502,7 @@ op_swap() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_tuck() noexcept
+op_tuck() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_tuck;
@@ -514,7 +515,7 @@ op_tuck() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_cat() const noexcept
+op_cat() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_cat);
@@ -524,7 +525,7 @@ op_cat() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_substr() const noexcept
+op_substr() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_substr);
@@ -534,7 +535,7 @@ op_substr() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_left() const noexcept
+op_left() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_left);
@@ -544,7 +545,7 @@ op_left() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_right() const noexcept
+op_right() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_right);
@@ -554,7 +555,7 @@ op_right() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_size() noexcept
+op_size() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_size;
@@ -565,7 +566,7 @@ op_size() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_invert() const noexcept
+op_invert() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_invert);
@@ -575,7 +576,7 @@ op_invert() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_and() const noexcept
+op_and() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_and);
@@ -585,7 +586,7 @@ op_and() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_or() const noexcept
+op_or() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_or);
@@ -595,7 +596,7 @@ op_or() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_xor() const noexcept
+op_xor() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_xor);
@@ -605,7 +606,7 @@ op_xor() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_equal() noexcept
+op_equal() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_equal;
@@ -618,7 +619,7 @@ op_equal() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_equal_verify() noexcept
+op_equal_verify() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_equal_verify1;
@@ -631,7 +632,7 @@ op_equal_verify() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_add1() noexcept
+op_add1() NOEXCEPT
 {
     int32_t number;
     if (!state::pop_signed32(number))
@@ -643,7 +644,7 @@ op_add1() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_sub1() noexcept
+op_sub1() NOEXCEPT
 {
     int32_t number;
     if (!state::pop_signed32(number))
@@ -655,7 +656,7 @@ op_sub1() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_mul2() const noexcept
+op_mul2() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul2);
@@ -665,7 +666,7 @@ op_mul2() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_div2() const noexcept
+op_div2() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div2);
@@ -675,7 +676,7 @@ op_div2() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_negate() noexcept
+op_negate() NOEXCEPT
 {
     int32_t number;
     if (!state::pop_signed32(number))
@@ -687,7 +688,7 @@ op_negate() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_abs() noexcept
+op_abs() NOEXCEPT
 {
     int32_t number;
     if (!state::pop_signed32(number))
@@ -699,7 +700,7 @@ op_abs() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_not() noexcept
+op_not() NOEXCEPT
 {
     int32_t number;
     if (!state::pop_signed32(number))
@@ -712,7 +713,7 @@ op_not() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_nonzero() noexcept
+op_nonzero() NOEXCEPT
 {
     int32_t number;
     if (!state::pop_signed32(number))
@@ -724,7 +725,7 @@ op_nonzero() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_add() noexcept
+op_add() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -736,7 +737,7 @@ op_add() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_sub() noexcept
+op_sub() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -748,7 +749,7 @@ op_sub() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_mul() const noexcept
+op_mul() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mul);
@@ -758,7 +759,7 @@ op_mul() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_div() const noexcept
+op_div() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_div);
@@ -768,7 +769,7 @@ op_div() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_mod() const noexcept
+op_mod() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_mod);
@@ -778,7 +779,7 @@ op_mod() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_lshift() const noexcept
+op_lshift() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_lshift);
@@ -788,7 +789,7 @@ op_lshift() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_rshift() const noexcept
+op_rshift() const NOEXCEPT
 {
     if (state::is_enabled(forks::cats_rule))
         return op_unevaluated(opcode::op_rshift);
@@ -798,7 +799,7 @@ op_rshift() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_bool_and() noexcept
+op_bool_and() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -810,7 +811,7 @@ op_bool_and() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_bool_or() noexcept
+op_bool_or() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -822,7 +823,7 @@ op_bool_or() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_num_equal() noexcept
+op_num_equal() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -834,7 +835,7 @@ op_num_equal() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_num_equal_verify() noexcept
+op_num_equal_verify() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -846,7 +847,7 @@ op_num_equal_verify() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_num_not_equal() noexcept
+op_num_not_equal() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -858,7 +859,7 @@ op_num_not_equal() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_less_than() noexcept
+op_less_than() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -870,7 +871,7 @@ op_less_than() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_greater_than() noexcept
+op_greater_than() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -882,7 +883,7 @@ op_greater_than() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_less_than_or_equal() noexcept
+op_less_than_or_equal() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -894,7 +895,7 @@ op_less_than_or_equal() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_greater_than_or_equal() noexcept
+op_greater_than_or_equal() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -906,7 +907,7 @@ op_greater_than_or_equal() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_min() noexcept
+op_min() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -918,7 +919,7 @@ op_min() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_max() noexcept
+op_max() NOEXCEPT
 {
     int32_t right, left;
     if (!state::pop_binary32(left, right))
@@ -930,7 +931,7 @@ op_max() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_within() noexcept
+op_within() NOEXCEPT
 {
     int32_t upper, lower, value;
     if (!state::pop_ternary32(upper, lower, value))
@@ -942,7 +943,7 @@ op_within() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_ripemd160() noexcept
+op_ripemd160() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_ripemd160;
@@ -953,7 +954,7 @@ op_ripemd160() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_sha1() noexcept
+op_sha1() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_sha1;
@@ -964,7 +965,7 @@ op_sha1() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_sha256() noexcept
+op_sha256() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_sha256;
@@ -975,7 +976,7 @@ op_sha256() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_hash160() noexcept
+op_hash160() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_hash160;
@@ -986,7 +987,7 @@ op_hash160() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_hash256() noexcept
+op_hash256() NOEXCEPT
 {
     if (state::is_stack_empty())
         return error::op_hash256;
@@ -997,7 +998,7 @@ op_hash256() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_codeseparator(const op_iterator& op) noexcept
+op_codeseparator(const op_iterator& op) NOEXCEPT
 {
     // Not thread safe for the script (changes script object metadata).
     return state::set_subscript(op) ? error::op_success :
@@ -1006,7 +1007,7 @@ op_codeseparator(const op_iterator& op) noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_check_sig() noexcept
+op_check_sig() NOEXCEPT
 {
     const auto verify = op_check_sig_verify();
     const auto bip66 = state::is_enabled(forks::bip66_rule);
@@ -1024,7 +1025,7 @@ op_check_sig() noexcept
 // then verified against the key and hash as if obtained from the script.
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_check_sig_verify() noexcept
+op_check_sig_verify() NOEXCEPT
 {
     if (state::stack_size() < 2)
         return error::op_check_sig_verify1;
@@ -1056,7 +1057,7 @@ op_check_sig_verify() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_check_multisig() noexcept
+op_check_multisig() NOEXCEPT
 {
     const auto verify = op_check_multisig_verify();
     const auto bip66 = state::is_enabled(forks::bip66_rule);
@@ -1071,7 +1072,7 @@ op_check_multisig() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_check_multisig_verify() noexcept
+op_check_multisig_verify() NOEXCEPT
 {
     const auto bip147 = state::is_enabled(forks::bip147_rule);
 
@@ -1151,7 +1152,7 @@ op_check_multisig_verify() noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_check_locktime_verify() const noexcept
+op_check_locktime_verify() const NOEXCEPT
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
     if (!state::is_enabled(forks::bip65_rule))
@@ -1183,7 +1184,7 @@ op_check_locktime_verify() const noexcept
 
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-op_check_sequence_verify() const noexcept
+op_check_sequence_verify() const NOEXCEPT
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
     if (!state::is_enabled(forks::bip112_rule))
@@ -1231,7 +1232,7 @@ op_check_sequence_verify() const noexcept
 // private:
 template <typename Stack>
 inline op_error_t interpreter<Stack>::
-run_op(const op_iterator& op) noexcept
+run_op(const op_iterator& op) NOEXCEPT
 {
     const auto code = op->code();
 
@@ -1539,7 +1540,7 @@ run_op(const op_iterator& op) noexcept
 
 template <typename Stack>
 inline code interpreter<Stack>::
-run() noexcept
+run() NOEXCEPT
 {
     error::op_error_t operation_ec;
     error::script_error_t script_ec;
@@ -1587,7 +1588,7 @@ run() noexcept
 
 template <typename Stack>
 code interpreter<Stack>::
-connect(const context& state, const transaction& tx, uint32_t index) noexcept
+connect(const context& state, const transaction& tx, uint32_t index) NOEXCEPT
 {
     if (index >= tx.inputs_ptr()->size())
         return error::inputs_overflow;
@@ -1600,7 +1601,7 @@ connect(const context& state, const transaction& tx, uint32_t index) noexcept
 template <typename Stack>
 code interpreter<Stack>::
 connect(const context& state, const transaction& tx,
-    const input_iterator& it) noexcept
+    const input_iterator& it) NOEXCEPT
 {
     using namespace system::machine;
     const auto& input = **it;

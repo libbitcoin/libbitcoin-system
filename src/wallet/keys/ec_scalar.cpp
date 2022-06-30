@@ -31,32 +31,32 @@ namespace system {
 // construction
 // ----------------------------------------------------------------------------
 
-ec_scalar::ec_scalar() noexcept
+ec_scalar::ec_scalar() NOEXCEPT
   : secret_(null_hash)
 {
 }
 
-ec_scalar::ec_scalar(ec_scalar&& scalar) noexcept
+ec_scalar::ec_scalar(ec_scalar&& scalar) NOEXCEPT
   : secret_(std::move(scalar.secret_))
 {
 }
 
-ec_scalar::ec_scalar(const ec_scalar& scalar) noexcept
+ec_scalar::ec_scalar(const ec_scalar& scalar) NOEXCEPT
   : secret_(scalar.secret_)
 {
 }
 
-ec_scalar::ec_scalar(ec_secret&& secret) noexcept
+ec_scalar::ec_scalar(ec_secret&& secret) NOEXCEPT
   : secret_(std::move(secret))
 {
 }
 
-ec_scalar::ec_scalar(const ec_secret& secret) noexcept
+ec_scalar::ec_scalar(const ec_secret& secret) NOEXCEPT
   : secret_(secret)
 {
 }
 
-ec_scalar::ec_scalar(int64_t value) noexcept
+ec_scalar::ec_scalar(int64_t value) NOEXCEPT
   : ec_scalar(from_int64(value))
 {
 }
@@ -64,7 +64,7 @@ ec_scalar::ec_scalar(int64_t value) noexcept
 // assignment operators
 // ----------------------------------------------------------------------------
 
-ec_scalar& ec_scalar::operator=(ec_scalar&& scalar) noexcept
+ec_scalar& ec_scalar::operator=(ec_scalar&& scalar) NOEXCEPT
 {
     if (&scalar == this)
         return *this;
@@ -73,7 +73,7 @@ ec_scalar& ec_scalar::operator=(ec_scalar&& scalar) noexcept
     return *this;
 }
 
-ec_scalar& ec_scalar::operator=(const ec_scalar& scalar) noexcept
+ec_scalar& ec_scalar::operator=(const ec_scalar& scalar) NOEXCEPT
 {
     if (&scalar == this)
         return *this;
@@ -82,20 +82,20 @@ ec_scalar& ec_scalar::operator=(const ec_scalar& scalar) noexcept
     return *this;
 }
 
-ec_scalar& ec_scalar::operator=(ec_secret&& secret) noexcept
+ec_scalar& ec_scalar::operator=(ec_secret&& secret) NOEXCEPT
 {
     secret_ = std::move(secret);
     return *this;
 }
 
-ec_scalar& ec_scalar::operator=(const ec_secret& secret) noexcept
+ec_scalar& ec_scalar::operator=(const ec_secret& secret) NOEXCEPT
 {
     secret_ = secret;
     return *this;
 }
 
 // private
-ec_scalar ec_scalar::from_int64(int64_t value) noexcept
+ec_scalar ec_scalar::from_int64(int64_t value) NOEXCEPT
 {
     // Shortcircuit writing a zero.
     if (is_zero(value))
@@ -117,19 +117,19 @@ ec_scalar ec_scalar::from_int64(int64_t value) noexcept
 // arithmetic assignment operators
 // ----------------------------------------------------------------------------
 
-ec_scalar& ec_scalar::operator+=(const ec_scalar& scalar) noexcept
+ec_scalar& ec_scalar::operator+=(const ec_scalar& scalar) NOEXCEPT
 {
     *this = (*this + scalar);
     return *this;
 }
 
-ec_scalar& ec_scalar::operator-=(const ec_scalar& scalar) noexcept
+ec_scalar& ec_scalar::operator-=(const ec_scalar& scalar) NOEXCEPT
 {
     *this = (*this - scalar);
     return *this;
 }
 
-ec_scalar& ec_scalar::operator*=(const ec_scalar& scalar) noexcept
+ec_scalar& ec_scalar::operator*=(const ec_scalar& scalar) NOEXCEPT
 {
     *this = (*this * scalar);
     return *this;
@@ -138,7 +138,7 @@ ec_scalar& ec_scalar::operator*=(const ec_scalar& scalar) noexcept
 // unary operators (const)
 // ----------------------------------------------------------------------------
 
-ec_scalar ec_scalar::operator-() const noexcept
+ec_scalar ec_scalar::operator-() const NOEXCEPT
 {
     auto out = secret_;
     if (!ec_negate(out))
@@ -150,7 +150,7 @@ ec_scalar ec_scalar::operator-() const noexcept
 // binary math operators (const)
 // ----------------------------------------------------------------------------
 
-ec_scalar operator+(const ec_scalar& left, const ec_scalar& right) noexcept
+ec_scalar operator+(const ec_scalar& left, const ec_scalar& right) NOEXCEPT
 {
     ec_secret out = left.secret();
     if (!ec_add(out, right.secret()))
@@ -159,12 +159,12 @@ ec_scalar operator+(const ec_scalar& left, const ec_scalar& right) noexcept
     return ec_scalar{ std::move(out) };
 }
 
-ec_scalar operator-(const ec_scalar& left, const ec_scalar& right) noexcept
+ec_scalar operator-(const ec_scalar& left, const ec_scalar& right) NOEXCEPT
 {
     return left + -right;
 }
 
-ec_scalar operator*(const ec_scalar& left, const ec_scalar& right) noexcept
+ec_scalar operator*(const ec_scalar& left, const ec_scalar& right) NOEXCEPT
 {
     auto out = left.secret();
     if (!ec_multiply(out, right.secret()))
@@ -176,27 +176,27 @@ ec_scalar operator*(const ec_scalar& left, const ec_scalar& right) noexcept
 // comparison operators
 // ----------------------------------------------------------------------------
 
-bool operator==(int64_t left, const ec_scalar& right) noexcept
+bool operator==(int64_t left, const ec_scalar& right) NOEXCEPT
 {
     return ec_scalar(left) == right;
 }
 
-bool operator!=(int64_t left, const ec_scalar& right) noexcept
+bool operator!=(int64_t left, const ec_scalar& right) NOEXCEPT
 {
     return !(left == right);
 }
 
-bool operator==(const ec_scalar& left, int64_t right) noexcept
+bool operator==(const ec_scalar& left, int64_t right) NOEXCEPT
 {
     return right == left;
 }
 
-bool operator!=(const ec_scalar& left, int64_t right) noexcept
+bool operator!=(const ec_scalar& left, int64_t right) NOEXCEPT
 {
     return !(right == left);
 }
 
-bool operator==(const ec_scalar& left, const ec_scalar& right) noexcept
+bool operator==(const ec_scalar& left, const ec_scalar& right) NOEXCEPT
 {
     // Compare arrays from left and right in reverse order since scalars are
     // encoded in big endian format, with leading bytes zero for small scalars.
@@ -204,7 +204,7 @@ bool operator==(const ec_scalar& left, const ec_scalar& right) noexcept
         right.secret().rbegin());
 }
 
-bool operator!=(const ec_scalar& left, const ec_scalar& right) noexcept
+bool operator!=(const ec_scalar& left, const ec_scalar& right) NOEXCEPT
 {
     return !(left == right);
 }
@@ -212,13 +212,13 @@ bool operator!=(const ec_scalar& left, const ec_scalar& right) noexcept
 // cast operators
 // ----------------------------------------------------------------------------
 
-ec_scalar::operator bool() const noexcept
+ec_scalar::operator bool() const NOEXCEPT
 {
     // Use reverse comparison, typically only 1 byte compare if non-zero.
     return !((*this) == null_hash);
 }
 
-ec_scalar::operator const ec_secret&() const noexcept
+ec_scalar::operator const ec_secret&() const NOEXCEPT
 {
     return secret_;
 }
@@ -226,7 +226,7 @@ ec_scalar::operator const ec_secret&() const noexcept
 // properties
 // ----------------------------------------------------------------------------
 
-const ec_secret& ec_scalar::secret() const noexcept
+const ec_secret& ec_scalar::secret() const NOEXCEPT
 {
     return secret_;
 }

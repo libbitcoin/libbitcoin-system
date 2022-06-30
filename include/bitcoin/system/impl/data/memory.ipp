@@ -23,6 +23,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -30,7 +31,7 @@ namespace system {
 /// Create shared pointer to vector of const shared ptr from the moved vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
-to_shareds(std::vector<Type>&& values) noexcept
+to_shareds(std::vector<Type>&& values) NOEXCEPT
 {
     // Pointed must be to non-const to allow vector population.
     // Returned pointer may be copied/moved to pointer to const as required.
@@ -50,7 +51,7 @@ to_shareds(std::vector<Type>&& values) noexcept
 /// Create shared pointer to vector of const shared ptr from the copied vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
-    const std::vector<Type>& values) noexcept
+    const std::vector<Type>& values) NOEXCEPT
 {
     // Pointed must be to non-const to allow vector population.
     // Returned pointer may be copied/moved to pointer to const as required.

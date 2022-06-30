@@ -40,14 +40,14 @@ namespace chain {
 static constexpr auto any_invalid = opcode::op_xor;
 
 // static
-chunk_cptr operation::no_data_ptr() noexcept
+chunk_cptr operation::no_data_ptr() NOEXCEPT
 {
     static const auto empty = to_shared<data_chunk>();
     return empty;
 }
 
 // static
-chunk_cptr operation::any_data_ptr() noexcept
+chunk_cptr operation::any_data_ptr() NOEXCEPT
 {
     // Push data is not possible with an invalid code, combination is invalid.
     static const auto any = to_shared<data_chunk>({ 0x42 });
@@ -57,67 +57,67 @@ chunk_cptr operation::any_data_ptr() noexcept
 // Constructors.
 // ----------------------------------------------------------------------------
 
-operation::operation() noexcept
+operation::operation() NOEXCEPT
   : operation(any_invalid, any_data_ptr(), false)
 {
 }
 
 // If code is push data the data member will be inconsistent (empty).
-operation::operation(opcode code) noexcept
+operation::operation(opcode code) NOEXCEPT
   : operation(code, no_data_ptr(), false)
 {
 }
 
-operation::operation(data_chunk&& push_data, bool minimal) noexcept
+operation::operation(data_chunk&& push_data, bool minimal) NOEXCEPT
   : operation(from_push_data(to_shared(std::move(push_data)), minimal))
 {
 }
 
-operation::operation(const data_chunk& push_data, bool minimal) noexcept
+operation::operation(const data_chunk& push_data, bool minimal) NOEXCEPT
   : operation(from_push_data(to_shared(push_data), minimal))
 {
 }
 
-operation::operation(const chunk_cptr& push_data, bool minimal) noexcept
+operation::operation(const chunk_cptr& push_data, bool minimal) NOEXCEPT
   : operation(from_push_data(push_data, minimal))
 {
 }
 
-operation::operation(const data_slice& op_data) noexcept
+operation::operation(const data_slice& op_data) NOEXCEPT
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : operation(stream::in::copy(op_data))
     BC_POP_WARNING()
 {
 }
 
-operation::operation(std::istream&& stream) noexcept
+operation::operation(std::istream&& stream) NOEXCEPT
   : operation(read::bytes::istream(stream))
 {
 }
 
-operation::operation(std::istream& stream) noexcept
+operation::operation(std::istream& stream) NOEXCEPT
   : operation(read::bytes::istream(stream))
 {
 }
 
-operation::operation(reader&& source) noexcept
+operation::operation(reader&& source) NOEXCEPT
   : operation(from_data(source))
 {
 }
 
-operation::operation(reader& source) noexcept
+operation::operation(reader& source) NOEXCEPT
   : operation(from_data(source))
 {
 }
 
-operation::operation(const std::string& mnemonic) noexcept
+operation::operation(const std::string& mnemonic) NOEXCEPT
   : operation(from_string(mnemonic))
 {
 }
 
 // protected
 operation::operation(opcode code, const chunk_cptr& push_data,
-    bool underflow) noexcept
+    bool underflow) NOEXCEPT
   : code_(code), data_(push_data), underflow_(underflow)
 {
 }
@@ -125,14 +125,14 @@ operation::operation(opcode code, const chunk_cptr& push_data,
 // Operators.
 // ----------------------------------------------------------------------------
 
-bool operation::operator==(const operation& other) const noexcept
+bool operation::operator==(const operation& other) const NOEXCEPT
 {
     return (code_ == other.code_)
         && (data_ == other.data_ || *data_ == *other.data_)
         && (underflow_ == other.underflow_);
 }
 
-bool operation::operator!=(const operation& other) const noexcept
+bool operation::operator!=(const operation& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -141,7 +141,7 @@ bool operation::operator!=(const operation& other) const noexcept
 // ----------------------------------------------------------------------------
 
 // static/private
-operation operation::from_data(reader& source) noexcept
+operation operation::from_data(reader& source) NOEXCEPT
 {
     // Guard against resetting a previously-invalid stream.
     if (!source)
@@ -190,7 +190,7 @@ operation operation::from_data(reader& source) noexcept
 
 // static/private
 operation operation::from_push_data(const chunk_cptr& data,
-    bool minimal) noexcept
+    bool minimal) NOEXCEPT
 {
     const auto code = opcode_from_data(*data, minimal);
 
@@ -201,34 +201,34 @@ operation operation::from_push_data(const chunk_cptr& data,
     return { code, push, false };
 }
 
-inline bool is_push_token(const std::string& token) noexcept
+inline bool is_push_token(const std::string& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '[' && token.back() == ']';
 }
 
-inline bool is_text_token(const std::string& token) noexcept
+inline bool is_text_token(const std::string& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '\'' && token.back() == '\'';
 }
 
-inline bool is_underflow_token(const std::string& token) noexcept
+inline bool is_underflow_token(const std::string& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '<' && token.back() == '>';
 }
 
-inline std::string remove_token_delimiters(const std::string& token) noexcept
+inline std::string remove_token_delimiters(const std::string& token) NOEXCEPT
 {
     BC_ASSERT(token.size() > one);
     return std::string(std::next(token.begin()), std::prev(token.end()));
 }
 
-inline string_list split_push_token(const std::string& token) noexcept
+inline string_list split_push_token(const std::string& token) NOEXCEPT
 {
     return split(remove_token_delimiters(token), ".", false, false);
 }
 
 static bool opcode_from_data_prefix(opcode& out_code,
-    const std::string& prefix, const data_chunk& push_data) noexcept
+    const std::string& prefix, const data_chunk& push_data) NOEXCEPT
 {
     constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
     const auto size = push_data.size();
@@ -258,7 +258,7 @@ static bool opcode_from_data_prefix(opcode& out_code,
 }
 
 static bool data_from_decimal(data_chunk& out_data,
-    const std::string& token) noexcept
+    const std::string& token) NOEXCEPT
 {
     // Deserialization to a number can convert random text to zero.
     if (!is_ascii_numeric(token))
@@ -273,7 +273,7 @@ static bool data_from_decimal(data_chunk& out_data,
 }
 
 // private/static
-operation operation::from_string(const std::string& mnemonic) noexcept
+operation operation::from_string(const std::string& mnemonic) NOEXCEPT
 {
     data_chunk chunk;
     auto valid = false;
@@ -340,7 +340,7 @@ operation operation::from_string(const std::string& mnemonic) noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk operation::to_data() const noexcept
+data_chunk operation::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size(), no_fill_byte_allocator);
 
@@ -352,13 +352,13 @@ data_chunk operation::to_data() const noexcept
     return data;
 }
 
-void operation::to_data(std::ostream& stream) const noexcept
+void operation::to_data(std::ostream& stream) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out);
 }
 
-void operation::to_data(writer& sink) const noexcept
+void operation::to_data(writer& sink) const NOEXCEPT
 {
     // Underflow is op-undersized data, it is serialized with no opcode.
     // An underflow could only be a final token in a script deserialization.
@@ -395,7 +395,7 @@ void operation::to_data(writer& sink) const noexcept
 // ----------------------------------------------------------------------------
 
 static std::string opcode_to_prefix(opcode code,
-    const data_chunk& data) noexcept
+    const data_chunk& data) NOEXCEPT
 {
     // If opcode is minimal for a size-based encoding, do not set a prefix.
     if (code == operation::opcode_from_size(data.size()))
@@ -414,7 +414,7 @@ static std::string opcode_to_prefix(opcode code,
     }
 }
 
-std::string operation::to_string(uint32_t active_forks) const noexcept
+std::string operation::to_string(uint32_t active_forks) const NOEXCEPT
 {
     if (!is_valid())
         return "(?)";
@@ -432,29 +432,29 @@ std::string operation::to_string(uint32_t active_forks) const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool operation::is_valid() const noexcept
+bool operation::is_valid() const NOEXCEPT
 {
     // Push data not possible with any is_invalid, combination is invalid.
     // This is necessary because there can be no invalid sentinel value.
     return !(code_ == any_invalid && !underflow_ && !data_->empty());
 }
 
-opcode operation::code() const noexcept
+opcode operation::code() const NOEXCEPT
 {
     return code_;
 }
 
-const data_chunk& operation::data() const noexcept
+const data_chunk& operation::data() const NOEXCEPT
 {
     return *data_;
 }
 
-const chunk_cptr& operation::data_ptr() const noexcept
+const chunk_cptr& operation::data_ptr() const NOEXCEPT
 {
     return data_;
 }
 
-size_t operation::serialized_size() const noexcept
+size_t operation::serialized_size() const NOEXCEPT
 {
     static constexpr auto op_size = sizeof(uint8_t);
     const auto size = data_->size();
@@ -481,7 +481,7 @@ size_t operation::serialized_size() const noexcept
 // static/private
 // Advances stream, returns true unless exhausted.
 // Does not advance to end position in the case of underflow operation.
-bool operation::count_op(reader& source) noexcept
+bool operation::count_op(reader& source) NOEXCEPT
 {
     if (source.is_exhausted())
         return false;
@@ -492,7 +492,7 @@ bool operation::count_op(reader& source) noexcept
 }
 
 // static/private
-uint32_t operation::read_data_size(opcode code, reader& source) noexcept
+uint32_t operation::read_data_size(opcode code, reader& source) NOEXCEPT
 {
     constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
@@ -513,73 +513,73 @@ uint32_t operation::read_data_size(opcode code, reader& source) noexcept
 // Categories of operations.
 // ----------------------------------------------------------------------------
 
-bool operation::is_invalid() const noexcept
+bool operation::is_invalid() const NOEXCEPT
 {
     return is_invalid(code_);
 }
 
-bool operation::is_push() const noexcept
+bool operation::is_push() const NOEXCEPT
 {
     return is_push(code_);
 }
 
-bool operation::is_payload() const noexcept
+bool operation::is_payload() const NOEXCEPT
 {
     return is_payload(code_);
 }
 
-bool operation::is_counted() const noexcept
+bool operation::is_counted() const NOEXCEPT
 {
     return is_counted(code_);
 }
 
-bool operation::is_version() const noexcept
+bool operation::is_version() const NOEXCEPT
 {
     return is_version(code_);
 }
 
-bool operation::is_numeric() const noexcept
+bool operation::is_numeric() const NOEXCEPT
 {
     return is_numeric(code_);
 }
 
-bool operation::is_positive() const noexcept
+bool operation::is_positive() const NOEXCEPT
 {
     return is_positive(code_);
 }
 
-bool operation::is_reserved() const noexcept
+bool operation::is_reserved() const NOEXCEPT
 {
     return is_reserved(code_);
 }
 
-bool operation::is_conditional() const noexcept
+bool operation::is_conditional() const NOEXCEPT
 {
     return is_conditional(code_);
 }
 
-bool operation::is_relaxed_push() const noexcept
+bool operation::is_relaxed_push() const NOEXCEPT
 {
     return is_relaxed_push(code_);
 }
 
-bool operation::is_minimal_push() const noexcept
+bool operation::is_minimal_push() const NOEXCEPT
 {
     return code_ == minimal_opcode_from_data(*data_);
 }
 
-bool operation::is_nominal_push() const noexcept
+bool operation::is_nominal_push() const NOEXCEPT
 {
     return code_ == nominal_opcode_from_data(*data_);
 }
 
-bool operation::is_oversized() const noexcept
+bool operation::is_oversized() const NOEXCEPT
 {
     // Rule max_push_data_size imposed by [0.3.6] soft fork.
     return data_->size() > max_push_data_size;
 }
 
-bool operation::is_underclaimed() const noexcept
+bool operation::is_underclaimed() const NOEXCEPT
 {
     return data_->size() > operation::opcode_to_maximum_size(code_);
 }
@@ -588,7 +588,7 @@ bool operation::is_underclaimed() const noexcept
 // CONSENSUS: An underflow is sized op-undersized data. This is valid as long
 // as the operation is not executed. For example, coinbase input scripts.
 // ****************************************************************************
-bool operation::is_underflow() const noexcept
+bool operation::is_underflow() const NOEXCEPT
 {
     return underflow_;
 }
@@ -598,17 +598,17 @@ bool operation::is_underflow() const noexcept
 
 namespace json = boost::json;
 
-// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 operation tag_invoke(json::value_to_tag<operation>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return operation{ std::string(value.get_string().c_str()) };
 }
 
 void tag_invoke(json::value_from_tag, json::value& value,
-    const operation& operation) noexcept
+    const operation& operation) NOEXCEPT
 {
     value = operation.to_string(forks::all_rules);
 }
@@ -616,7 +616,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
 BC_POP_WARNING()
 
 operation::cptr tag_invoke(json::value_to_tag<operation::cptr>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return to_shared(tag_invoke(json::value_to_tag<operation>{}, value));
 }
@@ -626,7 +626,7 @@ BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const operation::cptr& operation) noexcept
+    const operation::cptr& operation) NOEXCEPT
 {
     tag_invoke(tag, value, *operation);
 }

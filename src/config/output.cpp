@@ -39,7 +39,7 @@ using namespace boost::program_options;
 // "script:value"
 
 static bool decode_output(chain::output& output,
-    const std::string& tuple) noexcept(false)
+    const std::string& tuple) THROWS
 {
     const auto tokens = split(tuple, point::delimiter);
     if (tokens.size() != 2)
@@ -59,40 +59,40 @@ static bool decode_output(chain::output& output,
     return true;
 }
 
-static std::string encode_output(const chain::output& output) noexcept
+static std::string encode_output(const chain::output& output) NOEXCEPT
 {
     std::ostringstream result;
     result << script(output.script()) << point::delimiter << output.value();
     return result.str();
 }
 
-output::output() noexcept
+output::output() NOEXCEPT
   : value_()
 {
 }
 
-output::output(chain::output&& value) noexcept
+output::output(chain::output&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-output::output(const chain::output& value) noexcept
+output::output(const chain::output& value) NOEXCEPT
   : value_(value)
 {
 }
 
-output::output(const std::string& tuple) noexcept(false)
+output::output(const std::string& tuple) THROWS
   : output()
 {
     std::istringstream(tuple) >> *this;
 }
 
-output::operator const chain::output&() const noexcept
+output::operator const chain::output&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, output& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, output& argument) THROWS
 {
     std::string tuple;
     stream >> tuple;
@@ -103,7 +103,7 @@ std::istream& operator>>(std::istream& stream, output& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const output& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const output& argument) NOEXCEPT
 {
     stream << encode_output(argument.value_);
     return stream;

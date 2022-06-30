@@ -26,14 +26,14 @@
 // Shift right is implementation-defined for negative value.
 // So these are unsigned though caller may cast from/to signed.
 
-constexpr uint16_t byte_swap16_native(uint16_t value) noexcept
+constexpr uint16_t byte_swap16_native(uint16_t value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<uint16_t>((value << 8u) | (value >> 8u));
     BC_POP_WARNING()
 }
 
-constexpr uint32_t byte_swap32_native(uint32_t value) noexcept
+constexpr uint32_t byte_swap32_native(uint32_t value) NOEXCEPT
 {
     return
         ((value << 24) |
@@ -42,7 +42,7 @@ constexpr uint32_t byte_swap32_native(uint32_t value) noexcept
          (value >> 24));
 }
 
-constexpr uint64_t byte_swap64_native(uint64_t value) noexcept
+constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
 {
     return
         ((value << 56) |

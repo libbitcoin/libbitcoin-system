@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_WORDS_LANGUAGE_HPP
 #define LIBBITCOIN_SYSTEM_WORDS_LANGUAGE_HPP
 
+#include <bitcoin/system/define.hpp>
+
 namespace libbitcoin {
 namespace system {
 
@@ -45,7 +47,7 @@ namespace std
 template<>
 struct hash<bc::system::language>
 {
-    size_t operator()(const bc::system::language& value) const noexcept
+    size_t operator()(const bc::system::language& value) const NOEXCEPT
     {
         return std::hash<uint8_t>{}(static_cast<uint8_t>(value));
     }

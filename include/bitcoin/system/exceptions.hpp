@@ -34,7 +34,7 @@ namespace system {
 /// We try to avoid the use of external API calls that throw.
 /// If an external API is documented to throw for non-exceptional results, we
 /// catch and squash. If an external API throws unepxectedly, our pervasize use
-/// of noexcept will cause a call to std::terminate.
+/// of NOEXCEPT will cause a call to std::terminate.
 
 /// We throw for istream >> read failures, given the nature of streams.
 

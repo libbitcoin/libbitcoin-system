@@ -42,7 +42,7 @@ public:
     /// This value is serialized and defined by consensus, not implementation.
     static const uint32_t null_index;
 
-    static constexpr size_t serialized_size() noexcept
+    static constexpr size_t serialized_size() NOEXCEPT
     {
         return hash_size + sizeof(uint32_t);
     }
@@ -51,7 +51,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default point is an invalid null point (null_hash/null_index) object.
-    point() noexcept;
+    point() NOEXCEPT;
 
     /// Defaults.
     point(point&&) = default;
@@ -60,45 +60,45 @@ public:
     point& operator=(const point&) = default;
     ~point() = default;
 
-    point(hash_digest&& hash, uint32_t index) noexcept;
-    point(const hash_digest& hash, uint32_t index) noexcept;
+    point(hash_digest&& hash, uint32_t index) NOEXCEPT;
+    point(const hash_digest& hash, uint32_t index) NOEXCEPT;
 
-    point(const data_slice& data) noexcept;
-    point(std::istream&& stream) noexcept;
-    point(std::istream& stream) noexcept;
-    point(reader&& source) noexcept;
-    point(reader& source) noexcept;
+    point(const data_slice& data) NOEXCEPT;
+    point(std::istream&& stream) NOEXCEPT;
+    point(std::istream& stream) NOEXCEPT;
+    point(reader&& source) NOEXCEPT;
+    point(reader& source) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    bool operator==(const point& other) const noexcept;
-    bool operator!=(const point& other) const noexcept;
+    bool operator==(const point& other) const NOEXCEPT;
+    bool operator!=(const point& other) const NOEXCEPT;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const noexcept;
-    void to_data(std::ostream& stream) const noexcept;
-    void to_data(writer& sink) const noexcept;
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const noexcept;
-    const hash_digest& hash() const noexcept;
-    uint32_t index() const noexcept;
+    bool is_valid() const NOEXCEPT;
+    const hash_digest& hash() const NOEXCEPT;
+    uint32_t index() const NOEXCEPT;
 
     /// Computed properties.
-    bool is_null() const noexcept;
+    bool is_null() const NOEXCEPT;
 
 protected:
-    point(hash_digest&& hash, uint32_t index, bool valid) noexcept;
-    point(const hash_digest& hash, uint32_t index, bool valid) noexcept;
+    point(hash_digest&& hash, uint32_t index, bool valid) NOEXCEPT;
+    point(const hash_digest& hash, uint32_t index, bool valid) NOEXCEPT;
 
 private:
-    static point from_data(reader& source) noexcept;
+    static point from_data(reader& source) NOEXCEPT;
 
     // The index is consensus-serialized as a fixed 4 bytes, however it is
     // effectively bound to 2^17 by the block byte size limit.
@@ -111,7 +111,7 @@ private:
 };
 
 /// Arbitrary compare, for uniqueness sorting.
-bool operator<(const point& left, const point& right) noexcept;
+bool operator<(const point& left, const point& right) NOEXCEPT;
 
 typedef std::vector<point> points;
 
@@ -127,7 +127,7 @@ namespace std
 template<>
 struct hash<bc::system::chain::point>
 {
-    size_t operator()(const bc::system::chain::point& value) const noexcept
+    size_t operator()(const bc::system::chain::point& value) const NOEXCEPT
     {
         return bc::system::hash_combine(
             std::hash<bc::system::hash_digest>{}(value.hash()), value.index());

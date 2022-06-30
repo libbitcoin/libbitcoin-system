@@ -33,7 +33,7 @@ namespace system {
 
 // protected
 template <typename Container>
-device<Container>::device(size_type remaining) noexcept
+device<Container>::device(size_type remaining) NOEXCEPT
   : remaining_(remaining)
 {
 }
@@ -43,7 +43,7 @@ device<Container>::device(size_type remaining) noexcept
 
 template <typename Container>
 typename device<Container>::sequence
-device<Container>::input_sequence() const noexcept
+device<Container>::input_sequence() const NOEXCEPT
 {
     // Required to match output_sequence for read/write devices.
     return do_sequence();
@@ -51,7 +51,7 @@ device<Container>::input_sequence() const noexcept
 
 template <typename Container>
 typename device<Container>::sequence
-device<Container>::output_sequence() const noexcept
+device<Container>::output_sequence() const NOEXCEPT
 {
     // Required to match input_sequence for read/write devices.
     return do_sequence();
@@ -59,7 +59,7 @@ device<Container>::output_sequence() const noexcept
 
 template <typename Container>
 typename device<Container>::size_type
-device<Container>::read(char_type* buffer, size_type count) noexcept
+device<Container>::read(char_type* buffer, size_type count) NOEXCEPT
 {
     if (is_null(buffer) || is_negative(count))
         return negative_one;
@@ -74,7 +74,7 @@ device<Container>::read(char_type* buffer, size_type count) noexcept
 
 template <typename Container>
 typename device<Container>::size_type
-device<Container>::write(const char_type* buffer, size_type count) noexcept
+device<Container>::write(const char_type* buffer, size_type count) NOEXCEPT
 {
     if (is_null(buffer) || is_negative(count))
         return negative_one;
@@ -89,7 +89,7 @@ device<Container>::write(const char_type* buffer, size_type count) noexcept
 
 template <typename Container>
 typename device<Container>::size_type
-device<Container>::optimal_buffer_size() const noexcept
+device<Container>::optimal_buffer_size() const NOEXCEPT
 {
     // The buffer size allocated by iostreams upon indirect device construct.
     return do_optimal_buffer_size();
@@ -100,27 +100,27 @@ device<Container>::optimal_buffer_size() const noexcept
 
 template <typename Container>
 typename device<Container>::sequence
-device<Container>::do_sequence() const noexcept
+device<Container>::do_sequence() const NOEXCEPT
 {
     BC_ASSERT_MSG(false, "device<Container>::do_sequence() not implemented");
     return {};
 }
 
 template <typename Container>
-void device<Container>::do_read(value_type*, size_type) noexcept
+void device<Container>::do_read(value_type*, size_type) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "device<Container>::do_read() not implemented");
 }
 
 template <typename Container>
-void device<Container>::do_write(const value_type*, size_type) noexcept
+void device<Container>::do_write(const value_type*, size_type) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "device<Container>::do_write() not implemented");
 }
 
 template <typename Container>
 typename device<Container>::size_type
-device<Container>::do_optimal_buffer_size() const noexcept
+device<Container>::do_optimal_buffer_size() const NOEXCEPT
 {
     // Defaults to 4k bytes, override in indirect devices.
     return BOOST_IOSTREAMS_DEFAULT_DEVICE_BUFFER_SIZE;

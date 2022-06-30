@@ -32,10 +32,10 @@ class BC_API context
 {
 public:
     /// Determine if the fork is ative for this block.
-    bool is_enabled(chain::forks fork) const noexcept;
+    bool is_enabled(chain::forks fork) const NOEXCEPT;
 
     /// Determine if the policy is configured active.
-    bool is_policy(chain::policy police) const noexcept;
+    bool is_policy(chain::policy police) const NOEXCEPT;
 
     /// Public mutable metadata access.
     uint32_t forks;

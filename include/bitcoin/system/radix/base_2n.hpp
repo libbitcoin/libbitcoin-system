@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -76,21 +77,21 @@ public:
 
     /// A zero value implies an invalid (including zero) parameter.
     /// Invalid if a padding bit is set. Allows non-minimal exponent encoding.
-    static constexpr span_type expand(small_type exponential) noexcept;
+    static constexpr span_type expand(small_type exponential) NOEXCEPT;
 
     /// (m * base^e) bit-encoded as [00eeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
     /// Highest two bits are padded with zeros, uses minimal exponent encoding.
-    static constexpr small_type compress(const span_type& value) noexcept;
+    static constexpr small_type compress(const span_type& value) NOEXCEPT;
 
 protected:
     template <typename Integer>
-    static constexpr Integer raise(Integer exponent) noexcept
+    static constexpr Integer raise(Integer exponent) NOEXCEPT
     {
         return exponent * factor;
     }
 
     template <typename Integer>
-    static constexpr Integer lower(Integer exponent) noexcept
+    static constexpr Integer lower(Integer exponent) NOEXCEPT
     {
         return exponent / factor;
     }

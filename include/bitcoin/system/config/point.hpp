@@ -42,21 +42,21 @@ public:
     ~point() = default;
 
     /// Constructors.
-    point() noexcept;
-    point(chain::point&& value) noexcept;
-    point(const chain::point& value) noexcept;
-    point(const std::string& tuple) noexcept(false);
+    point() NOEXCEPT;
+    point(chain::point&& value) NOEXCEPT;
+    point(const chain::point& value) NOEXCEPT;
+    point(const std::string& tuple) THROWS;
 
-    ////std::string to_string() const noexcept;
+    ////std::string to_string() const NOEXCEPT;
 
     /// Operators.
 
-    operator const chain::point&() const noexcept;
+    operator const chain::point&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        point& argument) noexcept(false);
+        point& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const point& argument) noexcept;
+        const point& argument) NOEXCEPT;
 
 private:
     chain::point value_;

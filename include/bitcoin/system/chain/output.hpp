@@ -45,7 +45,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default output is an invalid object (input.prevout relies on this).
-    output() noexcept;
+    output() NOEXCEPT;
 
     /// Defaults.
     output(output&&) = default;
@@ -54,54 +54,54 @@ public:
     output& operator=(const output&) = default;
     ~output() = default;
 
-    output(uint64_t value, chain::script&& script) noexcept;
-    output(uint64_t value, const chain::script& script) noexcept;
-    output(uint64_t value, const chain::script::cptr& script) noexcept;
+    output(uint64_t value, chain::script&& script) NOEXCEPT;
+    output(uint64_t value, const chain::script& script) NOEXCEPT;
+    output(uint64_t value, const chain::script::cptr& script) NOEXCEPT;
 
-    output(const data_slice& data) noexcept;
-    output(std::istream&& stream) noexcept;
-    output(std::istream& stream) noexcept;
-    output(reader&& source) noexcept;
-    output(reader& source) noexcept;
+    output(const data_slice& data) NOEXCEPT;
+    output(std::istream&& stream) NOEXCEPT;
+    output(std::istream& stream) NOEXCEPT;
+    output(reader&& source) NOEXCEPT;
+    output(reader& source) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    bool operator==(const output& other) const noexcept;
-    bool operator!=(const output& other) const noexcept;
+    bool operator==(const output& other) const NOEXCEPT;
+    bool operator!=(const output& other) const NOEXCEPT;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const noexcept;
-    void to_data(std::ostream& stream) const noexcept;
-    void to_data(writer& sink) const noexcept;
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const noexcept;
-    uint64_t value() const noexcept;
-    const chain::script& script() const noexcept;
-    const chain::script::cptr& script_ptr() const noexcept;
+    bool is_valid() const NOEXCEPT;
+    uint64_t value() const NOEXCEPT;
+    const chain::script& script() const NOEXCEPT;
+    const chain::script::cptr& script_ptr() const NOEXCEPT;
 
     /// Computed properties.
-    size_t serialized_size() const noexcept;
+    size_t serialized_size() const NOEXCEPT;
 
     // Methods.
     // ------------------------------------------------------------------------
 
-    bool committed_hash(hash_digest& out) const noexcept;
-    size_t signature_operations(bool bip141) const noexcept;
-    bool is_dust(uint64_t minimum_output_value) const noexcept;
+    bool committed_hash(hash_digest& out) const NOEXCEPT;
+    size_t signature_operations(bool bip141) const NOEXCEPT;
+    bool is_dust(uint64_t minimum_output_value) const NOEXCEPT;
 
 protected:
     output(uint64_t value, const chain::script::cptr& script,
-        bool valid) noexcept;
+        bool valid) NOEXCEPT;
 
 private:
-    static output from_data(reader& source) noexcept;
+    static output from_data(reader& source) NOEXCEPT;
 
     // Output should be stored as shared (adds 16 bytes).
     // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).
@@ -126,7 +126,7 @@ namespace std
 template<>
 struct hash<bc::system::chain::output>
 {
-    size_t operator()(const bc::system::chain::output& value) const noexcept
+    size_t operator()(const bc::system::chain::output& value) const NOEXCEPT
     {
         return std::hash<bc::system::data_chunk>{}(value.to_data());
     }

@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -35,7 +36,7 @@ namespace system {
 // one compressed representation for any given span of bits.
 template <size_t Base, size_t Precision, size_t Span>
 constexpr typename base2n<Base, Precision, Span>::span_type
-base2n<Base, Precision, Span>::expand(small_type exponential) noexcept
+base2n<Base, Precision, Span>::expand(small_type exponential) NOEXCEPT
 {
     const auto shift = raise(shift_right(exponential, precision));
     const auto mantissa = mask_left<small_type>(exponential, e_width);
@@ -59,7 +60,7 @@ base2n<Base, Precision, Span>::expand(small_type exponential) noexcept
 // produces a normal form, with minimal exponent selection.
 template <size_t Base, size_t Precision, size_t Span>
 constexpr typename base2n<Base, Precision, Span>::small_type
-base2n<Base, Precision, Span>::compress(const span_type& number) noexcept
+base2n<Base, Precision, Span>::compress(const span_type& number) NOEXCEPT
 {
     if (is_zero(number))
         return 0;

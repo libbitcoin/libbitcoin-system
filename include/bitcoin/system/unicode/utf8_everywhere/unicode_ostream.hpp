@@ -33,10 +33,10 @@ class BC_API unicode_ostream
 public:
     /// Construct instance of a conditionally-widening output stream.
     unicode_ostream(std::ostream& narrow_stream, std::wostream& wide_stream,
-        size_t wide_buffer_size) noexcept(false);
+        size_t wide_buffer_size) THROWS;
 
     /// Delete the unicode_streambuf that wraps wide_stream.
-    virtual ~unicode_ostream() noexcept;
+    virtual ~unicode_ostream() NOEXCEPT;
 };
 
 } // namespace system

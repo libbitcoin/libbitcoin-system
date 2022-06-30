@@ -41,7 +41,7 @@ public:
     {
     };
 
-    copy_source(const Container& data) noexcept
+    copy_source(const Container& data) NOEXCEPT
       : device<Container>(limit<typename device<Container>::size_type>(
           data.size())),
         container_(data),
@@ -56,7 +56,7 @@ public:
     ~copy_source() override = default;
 
 protected:
-    typename device<Container>::sequence do_sequence() const noexcept override
+    typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
         // boost input_sequence/output_sequence both require non-const buffer
         // ptrs, but the data member is const, so we must cast it for direct

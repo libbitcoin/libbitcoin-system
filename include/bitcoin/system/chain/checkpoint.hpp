@@ -43,7 +43,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default checkpoint is an invalid object.
-    checkpoint() noexcept;
+    checkpoint() NOEXCEPT;
 
     /// Defaults.
     checkpoint(checkpoint&&) = default;
@@ -52,13 +52,13 @@ public:
     checkpoint& operator=(const checkpoint&) = default;
     ~checkpoint() = default;
 
-    checkpoint(hash_digest&& hash, size_t height) noexcept;
-    checkpoint(const hash_digest& hash, size_t height) noexcept;
-    explicit checkpoint(const std::string& hash, size_t height) noexcept;
+    checkpoint(hash_digest&& hash, size_t height) NOEXCEPT;
+    checkpoint(const hash_digest& hash, size_t height) NOEXCEPT;
+    explicit checkpoint(const std::string& hash, size_t height) NOEXCEPT;
 
     // TODO: move to config serialization wrapper (?).
     template <size_t Size, if_equal<Size, add1(two * hash_size)> = true>
-    checkpoint(const char(&string)[Size], size_t height) noexcept
+    checkpoint(const char(&string)[Size], size_t height) NOEXCEPT
       : checkpoint(std::string(string), height)
     {
     }
@@ -67,47 +67,47 @@ public:
     // ------------------------------------------------------------------------
 
     // TODO: move to config serialization wrapper.
-    ////bool from_string(const std::string& text) noexcept;
-    ////bool from_string(std::istream& stream) noexcept;
-    ////bool from_string(reader& source) noexcept;
+    ////bool from_string(const std::string& text) NOEXCEPT;
+    ////bool from_string(std::istream& stream) NOEXCEPT;
+    ////bool from_string(reader& source) NOEXCEPT;
 
-    bool is_valid() const noexcept;
+    bool is_valid() const NOEXCEPT;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
     // TODO: move to config serialization wrapper.
-    std::string to_string() const noexcept;
-    ////bool to_string(std::ostream& stream) const noexcept;
-    ////bool to_string(writer& sink) const noexcept;
+    std::string to_string() const NOEXCEPT;
+    ////bool to_string(std::ostream& stream) const NOEXCEPT;
+    ////bool to_string(writer& sink) const NOEXCEPT;
 
     // Properties.
     // ------------------------------------------------------------------------
 
-    size_t height() const noexcept;
-    const hash_digest& hash() const noexcept;
+    size_t height() const NOEXCEPT;
+    const hash_digest& hash() const NOEXCEPT;
 
 protected:
-    checkpoint(hash_digest&& hash, size_t height, bool valid) noexcept;
-    checkpoint(const hash_digest& hash, size_t height, bool valid) noexcept;
+    checkpoint(hash_digest&& hash, size_t height, bool valid) NOEXCEPT;
+    checkpoint(const hash_digest& hash, size_t height, bool valid) NOEXCEPT;
 
 private:
     // TODO: move to config serialization wrapper.
     static checkpoint from_string(const std::string& hash,
-        size_t height) noexcept;
+        size_t height) NOEXCEPT;
 
     hash_digest hash_;
     size_t height_;
     bool valid_;
 };
 
-bool operator<(const checkpoint& left, const checkpoint& right) noexcept;
-bool operator==(const checkpoint& left, const checkpoint& right) noexcept;
-bool operator!=(const checkpoint& left, const checkpoint& right) noexcept;
+bool operator<(const checkpoint& left, const checkpoint& right) NOEXCEPT;
+bool operator==(const checkpoint& left, const checkpoint& right) NOEXCEPT;
+bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT;
 
 // TODO: rationalize with config.
-std::ostream& operator<<(std::ostream& stream, const checkpoint& in) noexcept;
-std::istream& operator>>(std::istream& stream, checkpoint& out) noexcept;
+std::ostream& operator<<(std::ostream& stream, const checkpoint& in) NOEXCEPT;
+std::istream& operator>>(std::istream& stream, checkpoint& out) NOEXCEPT;
 
 typedef std::vector<checkpoint> checkpoints;
 
@@ -122,7 +122,7 @@ namespace std
 template<>
 struct hash<bc::system::chain::checkpoint>
 {
-    size_t operator()(const bc::system::chain::checkpoint& value) const noexcept
+    size_t operator()(const bc::system::chain::checkpoint& value) const NOEXCEPT
     {
         return bc::system::hash_combine(
             std::hash<bc::system::hash_digest>{}(value.hash()), value.height());

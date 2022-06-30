@@ -29,49 +29,49 @@ namespace libbitcoin {
 namespace system {
 
 /// Determine if the script is a null-data script of at least 32 data bytes.
-BC_API bool is_stealth_script(const chain::script& script) noexcept;
+BC_API bool is_stealth_script(const chain::script& script) NOEXCEPT;
 
 /// Convert a stealth info script to a prefix usable for stealth.
 BC_API bool to_stealth_prefix(uint32_t& out_prefix,
-    const chain::script& script) noexcept;
+    const chain::script& script) NOEXCEPT;
 
 /// Create a valid stealth ephemeral private key from the provided seed.
 BC_API bool create_ephemeral_key(ec_secret& out_secret,
-    const data_chunk& seed) noexcept;
+    const data_chunk& seed) NOEXCEPT;
 
 /// Create a stealth null data script the specified filter prefix.
 /// Create an ephemeral secret key generated from the seed.
 BC_API bool create_stealth_data(chain::script& out_null_data,
     ec_secret& out_secret, const binary& filter,
-    const data_chunk& seed) noexcept;
+    const data_chunk& seed) NOEXCEPT;
 
 /// Create a stealth null data script the specified filter prefix.
 /// Use the ephemeral secret key provided by parameter.
 BC_API bool create_stealth_script(chain::script& out_null_data,
     const ec_secret& secret, const binary& filter,
-    const data_chunk& seed) noexcept;
+    const data_chunk& seed) NOEXCEPT;
 
 /// Extract the stealth ephemeral public key from an output script.
 BC_API bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
-    const chain::script& script) noexcept;
+    const chain::script& script) NOEXCEPT;
 
 /// Extract the unsigned stealth ephemeral public key from an output script.
 BC_API bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
-    const chain::script& script) noexcept;
+    const chain::script& script) NOEXCEPT;
 
 /// Calculate the shared secret.
 BC_API bool shared_secret(ec_secret& out_shared, const ec_secret& secret,
-    const ec_compressed& point) noexcept;
+    const ec_compressed& point) NOEXCEPT;
 
 /// Uncover the stealth public key.
 BC_API bool uncover_stealth(ec_compressed& out_stealth,
     const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ephemeral,
-    const ec_compressed& spend) noexcept;
+    const ec_compressed& spend) NOEXCEPT;
 
 /// Uncover the stealth secret.
 BC_API bool uncover_stealth(ec_secret& out_stealth,
     const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ephemeral,
-    const ec_secret& spend) noexcept;
+    const ec_secret& spend) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

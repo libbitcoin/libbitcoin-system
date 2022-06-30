@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -37,34 +38,34 @@ namespace system {
 /// Deserialize to untrimmed/unsplit text, call deserialize(Value, string).
 /// Stream configuration is not honored for value conversion from text.
 template <typename Value>
-bool deserialize(Value& out, std::istream& input) noexcept;
+bool deserialize(Value& out, std::istream& input) NOEXCEPT;
 
 /// Specialize template to avoid trimming of string deserialization.
 /// Strings are pass through unchanged, this provides type generalization.
-inline bool deserialize(std::string& out, const std::string& text) noexcept;
+inline bool deserialize(std::string& out, const std::string& text) NOEXCEPT;
 
 /// Specialize template because basic_ostream treats uint8_t as char.
-inline bool deserialize(uint8_t& out, const std::string& text) noexcept;
+inline bool deserialize(uint8_t& out, const std::string& text) NOEXCEPT;
 
 /// Specialize data_array to base16 (avoids split).
 template <size_t Size>
-bool deserialize(data_array<Size>& out, const std::string& text) noexcept;
+bool deserialize(data_array<Size>& out, const std::string& text) NOEXCEPT;
 
 /// Specialize data_chunk to base16 (avoids split).
-inline bool deserialize(data_chunk& out, const std::string& text) noexcept;
+inline bool deserialize(data_chunk& out, const std::string& text) NOEXCEPT;
 
 /// Specialize arrays to add space delimiter.
 template <typename Value, size_t Size>
 bool deserialize(std::array<Value, Size>& out,
-	const std::string& text) noexcept;
+	const std::string& text) NOEXCEPT;
 
 /// Specialize arrays to add space delimiter.
 template <typename Value>
-bool deserialize(std::vector<Value>& out, const std::string& text) noexcept;
+bool deserialize(std::vector<Value>& out, const std::string& text) NOEXCEPT;
 
 /// General deserializer.
 template <typename Value>
-bool deserialize(Value& out, const std::string& text) noexcept;
+bool deserialize(Value& out, const std::string& text) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

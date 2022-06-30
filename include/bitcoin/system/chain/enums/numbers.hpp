@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_NUMBERS_HPP
 
 #include <cstdint>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {

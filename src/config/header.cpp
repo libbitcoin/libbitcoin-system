@@ -33,33 +33,33 @@ namespace config {
 
 using namespace boost::program_options;
 
-header::header() noexcept
+header::header() NOEXCEPT
   : value_()
 {
 }
 
-header::header(chain::header&& value) noexcept
+header::header(chain::header&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-header::header(const chain::header& value) noexcept
+header::header(const chain::header& value) NOEXCEPT
   : value_(value)
 {
 }
 
-header::header(const std::string& hexcode) noexcept(false)
+header::header(const std::string& hexcode) THROWS
   : value_()
 {
     std::istringstream(hexcode) >> *this;
 }
 
-header::operator const chain::header&() const noexcept
+header::operator const chain::header&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, header& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, header& argument) THROWS
 {
     std::string base16;
     stream >> base16;
@@ -76,7 +76,7 @@ std::istream& operator>>(std::istream& stream, header& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const header& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const header& argument) NOEXCEPT
 {
     stream << encode_base16(argument.value_.to_data());
     return stream;

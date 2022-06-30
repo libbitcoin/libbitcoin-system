@@ -41,7 +41,7 @@ namespace system {
 
 /// Create empty shared pointer.
 template <typename Type>
-inline std::shared_ptr<Type> to_shared() noexcept
+inline std::shared_ptr<Type> to_shared() NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<Type>();
@@ -50,7 +50,7 @@ inline std::shared_ptr<Type> to_shared() noexcept
 
 /// Create shared pointer to const from instance pointer.
 template <typename Type>
-inline std::shared_ptr<const Type> to_shared(Type* value) noexcept
+inline std::shared_ptr<const Type> to_shared(Type* value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::shared_ptr<const Type>(value);
@@ -59,7 +59,7 @@ inline std::shared_ptr<const Type> to_shared(Type* value) noexcept
 
 /// Create shared pointer to const from moved instance.
 template <typename Type>
-inline std::shared_ptr<const Type> to_shared(Type&& value) noexcept
+inline std::shared_ptr<const Type> to_shared(Type&& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<const Type>(std::forward<Type>(value));
@@ -68,7 +68,7 @@ inline std::shared_ptr<const Type> to_shared(Type&& value) noexcept
 
 /// Create shared pointer to const from copied instance.
 template <typename Type>
-inline std::shared_ptr<const Type> to_shared(const Type& value) noexcept
+inline std::shared_ptr<const Type> to_shared(const Type& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<const Type>(value);
@@ -78,12 +78,12 @@ inline std::shared_ptr<const Type> to_shared(const Type& value) noexcept
 /// Create shared pointer to vector of const shared pointers from moved vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
-to_shareds(std::vector<Type>&& values) noexcept;
+to_shareds(std::vector<Type>&& values) NOEXCEPT;
 
 /// Create shared pointer to vector of const shared pointers from copied vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
-to_shareds(const std::vector<Type>& values) noexcept;
+to_shareds(const std::vector<Type>& values) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

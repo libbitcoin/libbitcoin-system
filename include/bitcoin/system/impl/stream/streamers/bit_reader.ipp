@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 
@@ -38,7 +39,7 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-bit_reader<IStream>::bit_reader(IStream& source) noexcept
+bit_reader<IStream>::bit_reader(IStream& source) NOEXCEPT
   : byte_reader<IStream>(source), byte_(byte_reader<IStream>::pad()),
     offset_(byte_bits)
 {
@@ -48,7 +49,7 @@ bit_reader<IStream>::bit_reader(IStream& source) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-bool bit_reader<IStream>::read_bit() noexcept
+bool bit_reader<IStream>::read_bit() NOEXCEPT
 {
     // load resets offset_ to zero.
     if (is_zero(shift()))
@@ -59,7 +60,7 @@ bool bit_reader<IStream>::read_bit() noexcept
 }
 
 template <typename IStream>
-uint64_t bit_reader<IStream>::read_bits(size_t bits) noexcept
+uint64_t bit_reader<IStream>::read_bits(size_t bits) NOEXCEPT
 {
     uint64_t out = 0;
     bits = lesser<size_t>(width(out), bits);
@@ -74,7 +75,7 @@ uint64_t bit_reader<IStream>::read_bits(size_t bits) noexcept
 }
 
 template <typename IStream>
-void bit_reader<IStream>::skip_bit() noexcept
+void bit_reader<IStream>::skip_bit() NOEXCEPT
 {
     // load resets offset_ to zero.
     if (is_zero(shift()))
@@ -84,14 +85,14 @@ void bit_reader<IStream>::skip_bit() noexcept
 }
 
 template <typename IStream>
-void bit_reader<IStream>::skip_bits(size_t bits) noexcept
+void bit_reader<IStream>::skip_bits(size_t bits) NOEXCEPT
 {
     while (!is_zero(bits--))
         skip_bit();
 }
 
 template <typename IStream>
-void bit_reader<IStream>::rewind_bit() noexcept
+void bit_reader<IStream>::rewind_bit() NOEXCEPT
 {
     // reload resets offset_ to byte_bits.
     if (is_zero(offset_))
@@ -101,7 +102,7 @@ void bit_reader<IStream>::rewind_bit() noexcept
 }
 
 template <typename IStream>
-void bit_reader<IStream>::rewind_bits(size_t bits) noexcept
+void bit_reader<IStream>::rewind_bits(size_t bits) NOEXCEPT
 {
     while (!is_zero(bits--))
         rewind_bit();
@@ -111,7 +112,7 @@ void bit_reader<IStream>::rewind_bits(size_t bits) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-uint8_t bit_reader<IStream>::do_peek_byte() noexcept
+uint8_t bit_reader<IStream>::do_peek_byte() NOEXCEPT
 {
     if (is_zero(offset_))
         return peek();
@@ -121,7 +122,7 @@ uint8_t bit_reader<IStream>::do_peek_byte() noexcept
 }
 
 template <typename IStream>
-void bit_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
+void bit_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT
 {
     // Suboptimal because shifts each bit and reads single bytes, but simple.
     for (size_t byte = 0; byte < size; ++byte)
@@ -129,14 +130,14 @@ void bit_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 }
 
 template <typename IStream>
-void bit_reader<IStream>::do_skip_bytes(size_t size) noexcept
+void bit_reader<IStream>::do_skip_bytes(size_t size) NOEXCEPT
 {
     while (!is_zero(size--))
         skip_bits(byte_bits);
 }
 
 template <typename IStream>
-void bit_reader<IStream>::do_rewind_bytes(size_t size) noexcept
+void bit_reader<IStream>::do_rewind_bytes(size_t size) NOEXCEPT
 {
     while (!is_zero(size--))
         rewind_bits(byte_bits);
@@ -144,7 +145,7 @@ void bit_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 
  // This is the only use of the offset apart from peek and read.
 template <typename IStream>
-bool bit_reader<IStream>::get_exhausted() const noexcept
+bool bit_reader<IStream>::get_exhausted() const NOEXCEPT
 {
     if (byte_reader<IStream>::operator!())
         return true;
@@ -156,7 +157,7 @@ bool bit_reader<IStream>::get_exhausted() const noexcept
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-void bit_reader<IStream>::load() noexcept
+void bit_reader<IStream>::load() NOEXCEPT
 {
     // The next bit read will be from this byte.
     offset_ = 0;
@@ -165,7 +166,7 @@ void bit_reader<IStream>::load() noexcept
 }
 
 template <typename IStream>
-void bit_reader<IStream>::reload() noexcept
+void bit_reader<IStream>::reload() NOEXCEPT
 {
     offset_ = byte_bits;
     byte_ = byte_reader<IStream>::pad();
@@ -175,13 +176,13 @@ void bit_reader<IStream>::reload() noexcept
 
 // This is the only byte peek.
 template <typename IStream>
-uint8_t bit_reader<IStream>::peek() noexcept
+uint8_t bit_reader<IStream>::peek() NOEXCEPT
 {
     return byte_reader<IStream>::do_peek_byte();
 }
 
 template <typename OStream>
-uint8_t bit_reader<OStream>::shift() const noexcept
+uint8_t bit_reader<OStream>::shift() const NOEXCEPT
 {
     // If shift is zero then eight bits have been read, so time to load.
     // If offset is zero then no bits have been read since last load.

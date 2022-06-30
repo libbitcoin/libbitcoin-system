@@ -38,42 +38,42 @@ static const std::string null_text{ "null" };
 static const std::string true_text{ "true" };
 static const std::string false_text{ "false" };
 
-props::props(props&& other) noexcept
+props::props(props&& other) NOEXCEPT
   : type_(other.type_),
     value_(std::move(other.value_)),
     children_(std::move(other.children_))
 {
 }
 
-props::props(const props& other) noexcept
+props::props(const props& other) NOEXCEPT
   : type_(other.type_),
     value_(other.value_),
     children_(other.children_)
 {
 }
 
-props::props() noexcept
+props::props() NOEXCEPT
   : props(type::null_)
 {
 }
 
-props::props(truth boolean) noexcept
+props::props(truth boolean) NOEXCEPT
   : props(boolean == truth::true_ ? type::true_ : type::false_)
 {
 }
 
-props::props(int64_t number) noexcept
+props::props(int64_t number) NOEXCEPT
   : props(from_number(number))
 {
 }
 
-props::props(const std::string& text) noexcept
+props::props(const std::string& text) NOEXCEPT
   : props(type::string_, text)
 {
 }
 
 // private
-props::props(type type, const std::string& text) noexcept
+props::props(type type, const std::string& text) NOEXCEPT
   : type_(type),
     value_(text),
     children_()
@@ -81,7 +81,7 @@ props::props(type type, const std::string& text) noexcept
 }
 
 // private static
-props props::from_number(int64_t number) noexcept
+props props::from_number(int64_t number) NOEXCEPT
 {
     // datatracker.ietf.org/doc/html/rfc7159#section-6
     // limit to [-(2**53) + 1, (2**53) - 1] for interoperability.
@@ -94,27 +94,27 @@ props props::from_number(int64_t number) noexcept
 }
 
 std::ostream& props::write(std::ostream& stream, format format,
-    bool flat) const noexcept
+    bool flat) const NOEXCEPT
 {
     return write(stream, format, zero, flat);
 }
 
 constexpr size_t tab = 4;
 
-bool props::is_complex() const noexcept
+bool props::is_complex() const NOEXCEPT
 {
     return type_ == type::array_ || type_ == type::object_;
 }
 
 // private
 std::ostream& props::write(std::ostream& stream, format format, size_t depth,
-    bool flat, const std::string& name) const noexcept
+    bool flat, const std::string& name) const NOEXCEPT
 {
     const auto end = flat ? "" : ("\n" + std::string(depth * tab, ' '));
     const auto start = flat ? "" : (is_zero(depth) ? "" : end);
 
     // Keep simple values on same line.
-    const auto is_simple = [&]() noexcept
+    const auto is_simple = [&]() NOEXCEPT
     {
         return type_ != type::array_ && type_ != type::object_;
     };
@@ -159,7 +159,7 @@ std::ostream& props::write(std::ostream& stream, format format, size_t depth,
 
 // private
 std::ostream& props::write(std::ostream& stream,
-    format format, size_t depth, bool flat) const noexcept
+    format format, size_t depth, bool flat) const NOEXCEPT
 {
     const auto end = flat ? "" : ("\n" + std::string(depth * tab, ' '));
     const auto start = flat ? "" : (is_zero(depth) ? "" : end);
@@ -398,7 +398,7 @@ std::ostream& props::write(std::ostream& stream,
 // array_properties
 // ----------------------------------------------------------------------------
 
-array_props::array_props(const std::string& name) noexcept
+array_props::array_props(const std::string& name) NOEXCEPT
   : props(type::array_, name)
 {
     // Unused value_ member overloaded to store all-element name.
@@ -406,19 +406,19 @@ array_props::array_props(const std::string& name) noexcept
 }
 
 array_props::array_props(const std::string& name,
-    std::initializer_list<props> values) noexcept
+    std::initializer_list<props> values) NOEXCEPT
   : array_props(name)
 {
     add(values);
 }
 
-array_props& array_props::add(const props& value) noexcept
+array_props& array_props::add(const props& value) NOEXCEPT
 {
     children_.emplace_back(value_, value);
     return *this;
 }
 
-array_props& array_props::add(std::initializer_list<props> values) noexcept
+array_props& array_props::add(std::initializer_list<props> values) NOEXCEPT
 {
     // ordered
     std::for_each(values.begin(), values.end(), [&](const props& value)
@@ -432,25 +432,25 @@ array_props& array_props::add(std::initializer_list<props> values) noexcept
 // object_properties
 // ----------------------------------------------------------------------------
 
-object_props::object_props() noexcept
+object_props::object_props() NOEXCEPT
   : props(type::object_)
 {
 }
 
-object_props::object_props(std::initializer_list<named_props> values) noexcept
+object_props::object_props(std::initializer_list<named_props> values) NOEXCEPT
   : object_props()
 {
     add(values);
 }
 
-object_props& object_props::add(const named_props& value) noexcept
+object_props& object_props::add(const named_props& value) NOEXCEPT
 {
     children_.push_back(value);
     return *this;
 }
 
 object_props& object_props::add(
-    std::initializer_list<named_props> values) noexcept
+    std::initializer_list<named_props> values) NOEXCEPT
 {
     // ordered
     std::for_each(values.begin(), values.end(), [&](const named_props& value)

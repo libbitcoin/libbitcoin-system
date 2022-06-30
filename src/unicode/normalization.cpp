@@ -47,7 +47,7 @@ using namespace boost::locale;
 // ----------------------------------------------------------------------------
 
 constexpr bool is_contained(char32_t value,
-    const char32_interval& interval) noexcept
+    const char32_interval& interval) NOEXCEPT
 {
     return interval.first <= value && value <= interval.second;
 }
@@ -61,7 +61,7 @@ constexpr bool is_contained(char32_t value,
 // The required header file and DLL are part of the Microsoft Internationalized
 // Domain Name(IDN) Mitigation APIs, which are no longer available for download.
 
-static NORM_FORM to_win32_normal_form(norm_type form) noexcept
+static NORM_FORM to_win32_normal_form(norm_type form) NOEXCEPT
 {
     switch (form)
     {
@@ -80,7 +80,7 @@ static NORM_FORM to_win32_normal_form(norm_type form) noexcept
 }
 
 static bool normal_form(std::string& out, const std::string& in,
-    norm_type form) noexcept
+    norm_type form) NOEXCEPT
 {
 #ifndef WITH_ICU
     return false;
@@ -113,7 +113,7 @@ static bool normal_form(std::string& out, const std::string& in,
     return true;
 }
 
-bool to_lower(std::string& out, const std::string& in) noexcept
+bool to_lower(std::string& out, const std::string& in) NOEXCEPT
 {
 #ifndef WITH_ICU
     return false;
@@ -137,7 +137,7 @@ bool to_lower(std::string& out, const std::string& in) noexcept
     return true;
 }
 
-bool to_upper(std::string& out, const std::string& in) noexcept
+bool to_upper(std::string& out, const std::string& in) NOEXCEPT
 {
 #ifndef WITH_ICU
     return false;
@@ -166,7 +166,7 @@ bool to_upper(std::string& out, const std::string& in) noexcept
 constexpr auto icu_backend_name = "icu";
 constexpr auto utf8_locale_name = "en_US.UTF8";
 
-static bool get_backend_manager(localization_backend_manager& out) noexcept
+static bool get_backend_manager(localization_backend_manager& out) NOEXCEPT
 {
     static std::once_flag mutex;
     static bool initialized;
@@ -176,7 +176,7 @@ static bool get_backend_manager(localization_backend_manager& out) noexcept
     out = localization_backend_manager::global();
 
     // Set the static initialization state.
-    const auto validate = [&]() noexcept
+    const auto validate = [&]() NOEXCEPT
     {
         // Not thread safe, use call_once.
         const auto all = out.get_all_backends();
@@ -192,7 +192,7 @@ static bool get_backend_manager(localization_backend_manager& out) noexcept
 }
 
 static bool normal_form(std::string& out, const std::string& in,
-    norm_type form) noexcept
+    norm_type form) NOEXCEPT
 {
 #ifndef WITH_ICU
     return false;
@@ -208,7 +208,7 @@ static bool normal_form(std::string& out, const std::string& in,
     return true;
 }
 
-bool to_lower(std::string& out, const std::string& in) noexcept
+bool to_lower(std::string& out, const std::string& in) NOEXCEPT
 {
 #ifndef WITH_ICU
     return false;
@@ -224,7 +224,7 @@ bool to_lower(std::string& out, const std::string& in) noexcept
     return true;
 }
 
-bool to_upper(std::string& out, const std::string& in) noexcept
+bool to_upper(std::string& out, const std::string& in) NOEXCEPT
 {
 #ifndef WITH_ICU
     return false;
@@ -245,7 +245,7 @@ bool to_upper(std::string& out, const std::string& in) noexcept
 // ICU dependency (ascii supported, otherwise false if WITH_ICU not defined).
 // ----------------------------------------------------------------------------
 
-bool to_lower(std::string& value) noexcept
+bool to_lower(std::string& value) NOEXCEPT
 {
     if (is_ascii(value))
     {
@@ -256,7 +256,7 @@ bool to_lower(std::string& value) noexcept
     return to_lower(value, value);
 }
 
-bool to_upper(std::string& value) noexcept
+bool to_upper(std::string& value) NOEXCEPT
 {
     if (is_ascii(value))
     {
@@ -267,22 +267,22 @@ bool to_upper(std::string& value) noexcept
     return to_upper(value, value);
 }
 
-bool to_canonical_composition(std::string& value) noexcept
+bool to_canonical_composition(std::string& value) NOEXCEPT
 {
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfc);
 }
 
-bool to_canonical_decomposition(std::string& value) noexcept
+bool to_canonical_decomposition(std::string& value) NOEXCEPT
 {
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfd);
 }
 
-bool to_compatibility_composition(std::string& value) noexcept
+bool to_compatibility_composition(std::string& value) NOEXCEPT
 {
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkc);
 }
 
-bool to_compatibility_decomposition(std::string& value) noexcept
+bool to_compatibility_decomposition(std::string& value) NOEXCEPT
 {
     return is_ascii(value) || normal_form(value, value, norm_type::norm_nfkd);
 }
@@ -290,12 +290,12 @@ bool to_compatibility_decomposition(std::string& value) noexcept
 // No ICU dependency.
 // ----------------------------------------------------------------------------
 
-bool is_unicode(char32_t point) noexcept
+bool is_unicode(char32_t point) NOEXCEPT
 {
     return point < 0x0010ffff;
 }
 
-bool is_separator(char32_t point) noexcept
+bool is_separator(char32_t point) NOEXCEPT
 {
     if (!is_unicode(point))
         return false;
@@ -307,7 +307,7 @@ bool is_separator(char32_t point) noexcept
     return false;
 }
 
-bool is_whitespace(char32_t point) noexcept
+bool is_whitespace(char32_t point) NOEXCEPT
 {
     if (!is_unicode(point))
         return false;
@@ -319,7 +319,7 @@ bool is_whitespace(char32_t point) noexcept
     return false;
 }
 
-bool is_combining(char32_t point) noexcept
+bool is_combining(char32_t point) NOEXCEPT
 {
     if (!is_unicode(point))
         return false;
@@ -330,7 +330,7 @@ bool is_combining(char32_t point) noexcept
     return !is_zero(combining_index[data2]);
 }
 
-bool is_diacritic(char32_t point) noexcept
+bool is_diacritic(char32_t point) NOEXCEPT
 {
     if (!is_unicode(point))
         return false;
@@ -342,7 +342,7 @@ bool is_diacritic(char32_t point) noexcept
     return false;
 }
 
-bool is_chinese_japanese_or_korean(char32_t point) noexcept
+bool is_chinese_japanese_or_korean(char32_t point) NOEXCEPT
 {
     if (!is_unicode(point))
         return false;
@@ -354,7 +354,7 @@ bool is_chinese_japanese_or_korean(char32_t point) noexcept
     return false;
 }
 
-bool has_whitespace(const std::string& value) noexcept
+bool has_whitespace(const std::string& value) NOEXCEPT
 {
     if (value.empty())
         return false;
@@ -366,7 +366,7 @@ bool has_whitespace(const std::string& value) noexcept
     });
 }
 
-std::string to_non_combining_form(const std::string& value) noexcept
+std::string to_non_combining_form(const std::string& value) NOEXCEPT
 {
     if (value.empty())
         return value;
@@ -380,7 +380,7 @@ std::string to_non_combining_form(const std::string& value) noexcept
     return to_utf8(points);
 }
 
-std::string to_non_diacritic_form(const std::string& value) noexcept
+std::string to_non_diacritic_form(const std::string& value) NOEXCEPT
 {
     if (value.empty())
         return value;
@@ -395,7 +395,7 @@ std::string to_non_diacritic_form(const std::string& value) noexcept
 }
 
 // Compress ascii whitespace and remove ascii spaces between cjk characters.
-std::string to_compressed_form(const std::string& value) noexcept
+std::string to_compressed_form(const std::string& value) NOEXCEPT
 {
     // Compress ascii whitespace to a single 0x20 between each utf32 token.
     const auto normalized = system::join(system::split(value));

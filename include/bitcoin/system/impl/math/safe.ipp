@@ -37,7 +37,7 @@ template <typename Restored, typename Common,
     if_not_lesser_width<to_common_sized_type<Restored>, Restored>,
     if_integral_integer<Restored>,
     if_integral_integer<Common>>
-constexpr Restored depromote(Common value) noexcept
+constexpr Restored depromote(Common value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_IDENTITY_CAST)
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -51,7 +51,7 @@ template <typename To, typename From,
     if_integral_integer<To>,
     if_integral_integer<From>,
     if_same_signed_integer<To, From>>
-constexpr To narrow_cast(From value) noexcept
+constexpr To narrow_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -63,7 +63,7 @@ template <typename To, typename From,
     if_integral_integer<To>,
     if_integral_integer<From>,
     if_not_same_signed_integer<To, From>>
-constexpr To sign_cast(From value) noexcept
+constexpr To sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -75,7 +75,7 @@ template <typename To, typename From,
     if_integral_integer<To>,
     if_integral_integer<From>,
     if_not_same_signed_integer<To, From>>
-constexpr To narrow_sign_cast(From value) noexcept
+constexpr To narrow_sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -85,7 +85,7 @@ constexpr To narrow_sign_cast(From value) noexcept
 template <typename To, typename From,
     if_lesser_width<From, To>,
     if_same_signed_integer<To, From>>
-constexpr To wide_cast(From value) noexcept
+constexpr To wide_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -96,7 +96,7 @@ constexpr To wide_cast(From value) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename To, typename From, if_same_signed_integer<To, From>>
-constexpr To possible_narrow_cast(From value) noexcept
+constexpr To possible_narrow_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -104,7 +104,7 @@ constexpr To possible_narrow_cast(From value) noexcept
 }
 
 template <typename To, typename From, if_not_lesser_width<To, From>>
-constexpr To possible_sign_cast(From value) noexcept
+constexpr To possible_sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -112,7 +112,7 @@ constexpr To possible_sign_cast(From value) noexcept
 }
 
 template <typename To, typename From, if_not_same_signed_integer<To, From>>
-constexpr To possible_narrow_sign_cast(From value) noexcept
+constexpr To possible_narrow_sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -120,7 +120,7 @@ constexpr To possible_narrow_sign_cast(From value) noexcept
 }
 
 template <typename To, typename From, if_lesser_width<To, From>>
-constexpr To possible_sign_narrow_cast(From value) noexcept
+constexpr To possible_sign_narrow_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -128,7 +128,7 @@ constexpr To possible_sign_narrow_cast(From value) noexcept
 }
 
 template <typename To, typename From>
-constexpr To possible_narrow_and_sign_cast(From value) noexcept
+constexpr To possible_narrow_and_sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
@@ -136,7 +136,7 @@ constexpr To possible_narrow_and_sign_cast(From value) noexcept
 }
 
 template <typename To, typename From, if_same_signed_integer<To, From>>
-constexpr To possible_wide_cast(From value) noexcept
+constexpr To possible_wide_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_IDENTITY_CAST)
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -149,7 +149,7 @@ constexpr To possible_wide_cast(From value) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename To, typename From>
-constexpr To* pointer_cast(From* value) noexcept
+constexpr To* pointer_cast(From* value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_REINTERPRET_CAST)
     return reinterpret_cast<To*>(value);
@@ -157,7 +157,7 @@ constexpr To* pointer_cast(From* value) noexcept
 }
 
 template <typename To, typename From>
-constexpr To* possible_pointer_cast(From* value) noexcept
+constexpr To* possible_pointer_cast(From* value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_IDENTITY_CAST)
     BC_PUSH_WARNING(NO_REINTERPRET_CAST)
@@ -167,7 +167,7 @@ constexpr To* possible_pointer_cast(From* value) noexcept
 }
 
 template <typename To, typename From>
-constexpr To* integer_pointer_cast(From value) noexcept
+constexpr To* integer_pointer_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_REINTERPRET_CAST)
     return reinterpret_cast<To*>(value);
@@ -181,7 +181,7 @@ constexpr To* integer_pointer_cast(From value) noexcept
 BC_PUSH_WARNING(THROW_FROM_NOEXCEPT)
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer safe_multiply(Integer left, Integer right) noexcept(BC_NO_THROW)
+constexpr Integer safe_multiply(Integer left, Integer right) NOEXCEPT
 {
     if (is_zero(left) || is_zero(right))
         return 0;
@@ -193,7 +193,7 @@ constexpr Integer safe_multiply(Integer left, Integer right) noexcept(BC_NO_THRO
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer safe_add(Integer left, Integer right) noexcept(BC_NO_THROW)
+constexpr Integer safe_add(Integer left, Integer right) NOEXCEPT
 {
     if (left > (std::numeric_limits<Integer>::max() - right))
         throw overflow_exception("safe addition overflow");
@@ -202,7 +202,7 @@ constexpr Integer safe_add(Integer left, Integer right) noexcept(BC_NO_THROW)
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer safe_negate(Integer value) noexcept(BC_NO_THROW)
+constexpr Integer safe_negate(Integer value) NOEXCEPT
 {
     if (value == std::numeric_limits<Integer>::min())
         throw overflow_exception("safe negate overflow");

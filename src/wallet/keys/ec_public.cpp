@@ -35,43 +35,43 @@ namespace wallet {
 const uint8_t ec_public::mainnet_p2kh = 0x00;
 const uint8_t ec_public::testnet_p2kh = 0x6f;
 
-ec_public::ec_public() noexcept
+ec_public::ec_public() NOEXCEPT
   : ec_public(ec_point{})
 {
 }
 
-ec_public::ec_public(const ec_point& point) noexcept
+ec_public::ec_public(const ec_point& point) NOEXCEPT
   : ec_point(point), compress_(true)
 {
 }
 
-ec_public::ec_public(const ec_public& other) noexcept
+ec_public::ec_public(const ec_public& other) NOEXCEPT
   : ec_point(other), compress_(other.compress_)
 {
 }
 
-ec_public::ec_public(const ec_private& secret) noexcept
+ec_public::ec_public(const ec_private& secret) NOEXCEPT
   : ec_public(from_private(secret))
 {
 }
 
-ec_public::ec_public(const data_chunk& decoded) noexcept
+ec_public::ec_public(const data_chunk& decoded) NOEXCEPT
   : ec_public(from_data(decoded))
 {
 }
 
-ec_public::ec_public(const std::string& base16) noexcept
+ec_public::ec_public(const std::string& base16) NOEXCEPT
   : ec_public(from_string(base16))
 {
 }
 
-ec_public::ec_public(const ec_compressed& compressed, bool compress) noexcept
+ec_public::ec_public(const ec_compressed& compressed, bool compress) NOEXCEPT
   : ec_point(compressed), compress_(compress)
 {
 }
 
 ec_public::ec_public(const ec_uncompressed& uncompressed,
-    bool compress) noexcept
+    bool compress) NOEXCEPT
   : ec_public(from_point(uncompressed, compress))
 {
 }
@@ -79,7 +79,7 @@ ec_public::ec_public(const ec_uncompressed& uncompressed,
 // Validators.
 // ----------------------------------------------------------------------------
 
-bool ec_public::is_point(const data_slice& decoded) noexcept
+bool ec_public::is_point(const data_slice& decoded) NOEXCEPT
 {
     return is_public_key(decoded);
 }
@@ -87,7 +87,7 @@ bool ec_public::is_point(const data_slice& decoded) noexcept
 // Factories.
 // ----------------------------------------------------------------------------
 
-ec_public ec_public::from_private(const ec_private& secret) noexcept
+ec_public ec_public::from_private(const ec_private& secret) NOEXCEPT
 {
     if (!secret)
         return {};
@@ -95,7 +95,7 @@ ec_public ec_public::from_private(const ec_private& secret) noexcept
     return { secret.to_public() };
 }
 
-ec_public ec_public::from_string(const std::string& base16) noexcept
+ec_public ec_public::from_string(const std::string& base16) NOEXCEPT
 {
     data_chunk decoded;
     if (!decode_base16(decoded, base16))
@@ -104,7 +104,7 @@ ec_public ec_public::from_string(const std::string& base16) noexcept
     return { decoded };
 }
 
-ec_public ec_public::from_data(const data_chunk& decoded) noexcept
+ec_public ec_public::from_data(const data_chunk& decoded) NOEXCEPT
 {
     if (!is_point(decoded))
         return {};
@@ -120,7 +120,7 @@ ec_public ec_public::from_data(const data_chunk& decoded) noexcept
 }
 
 ec_public ec_public::from_point(const ec_uncompressed& point,
-    bool compress) noexcept
+    bool compress) NOEXCEPT
 {
     if (!is_point(point))
         return {};
@@ -135,7 +135,7 @@ ec_public ec_public::from_point(const ec_uncompressed& point,
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string ec_public::encoded() const noexcept
+std::string ec_public::encoded() const NOEXCEPT
 {
     if (compressed())
         return encode_base16(point());
@@ -149,7 +149,7 @@ std::string ec_public::encoded() const noexcept
 // Accessors.
 // ----------------------------------------------------------------------------
 
-bool ec_public::compressed() const noexcept
+bool ec_public::compressed() const NOEXCEPT
 {
     return compress_;
 }
@@ -157,7 +157,7 @@ bool ec_public::compressed() const noexcept
 // Methods.
 // ----------------------------------------------------------------------------
 
-bool ec_public::to_data(data_chunk& out) const noexcept
+bool ec_public::to_data(data_chunk& out) const NOEXCEPT
 {
     if (!(*this))
         return false;
@@ -180,7 +180,7 @@ bool ec_public::to_data(data_chunk& out) const noexcept
     return false;
 }
 
-bool ec_public::to_uncompressed(ec_uncompressed& out) const noexcept
+bool ec_public::to_uncompressed(ec_uncompressed& out) const NOEXCEPT
 {
     if (!(*this))
         return false;
@@ -188,7 +188,7 @@ bool ec_public::to_uncompressed(ec_uncompressed& out) const noexcept
     return decompress(out, to_array<ec_compressed_size>(point()));
 }
 
-payment_address ec_public::to_payment_address(uint8_t version) const noexcept
+payment_address ec_public::to_payment_address(uint8_t version) const NOEXCEPT
 {
     return { *this, version };
 }
@@ -196,23 +196,23 @@ payment_address ec_public::to_payment_address(uint8_t version) const noexcept
 // Operators.
 // ----------------------------------------------------------------------------
 
-ec_public& ec_public::operator=(ec_public other) noexcept
+ec_public& ec_public::operator=(ec_public other) NOEXCEPT
 {
     swap(*this, other);
     return *this;
 }
 
-bool ec_public::operator<(const ec_public& other) const noexcept
+bool ec_public::operator<(const ec_public& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
 }
 
-bool ec_public::operator==(const ec_public& other) const noexcept
+bool ec_public::operator==(const ec_public& other) const NOEXCEPT
 {
     return compress_ == other.compress_ && point() == other.point();
 }
 
-bool ec_public::operator!=(const ec_public& other) const noexcept
+bool ec_public::operator!=(const ec_public& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -229,14 +229,14 @@ std::istream& operator>>(std::istream& in, ec_public& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const ec_public& of) noexcept
+std::ostream& operator<<(std::ostream& out, const ec_public& of) NOEXCEPT
 {
     out << of.encoded();
     return out;
 }
 
 // friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(ec_public& left, ec_public& right) noexcept
+void swap(ec_public& left, ec_public& right) NOEXCEPT
 {
     using std::swap;
 

@@ -64,7 +64,7 @@ namespace intrinsics {
 #if defined(_M_X64) || defined(_M_AMD64)  || defined(_M_IX86)
 
 // Iterate over N blocks, four lanes per block.
-void sha256_sse4(uint32_t*, const uint8_t*, size_t) noexcept
+void sha256_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
 {
     // TODO: define assembly for _MSC_VER.
     // TODO: this is currently disabled by try_sse4().
@@ -73,7 +73,7 @@ void sha256_sse4(uint32_t*, const uint8_t*, size_t) noexcept
 #elif (defined(__x86_64__) || defined(__amd64__) || defined(__i386__))
 
 // Iterate over N blocks, four lanes per block.
-void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
+void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) NOEXCEPT
 {
     static const uint32_t K256 alignas(16) [] =
     {
@@ -1032,7 +1032,7 @@ void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
 
 #else
 
-void sha256_x1_sse4(uint32_t*, const uint8_t*, size_t) noexcept
+void sha256_x1_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
 {
     // have_sse4() is false in this context, so this doesn't ever execute.
 }
@@ -1040,18 +1040,18 @@ void sha256_x1_sse4(uint32_t*, const uint8_t*, size_t) noexcept
 #endif
 
 // One block in four lanes.
-void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) noexcept
+void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
     return sha256_sse4(state, block, 1);
 }
 
-////void sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+////void sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 ////{
 ////    // TODO: four blocks in four lanes. 
 ////}
 
 // One block in four lanes, doubled.
-void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
     auto buffer = sha256x2_buffer;
 
@@ -1065,7 +1065,7 @@ void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) noexcept
     to_big_endian<8>(out, state.data());
 }
 
-////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 ////{
 ////    // TODO: four blocks in four lanes, doubled.
 ////}

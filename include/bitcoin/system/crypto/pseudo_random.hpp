@@ -37,36 +37,36 @@ class BC_API pseudo_random
   public:
     /// Fill a byte array with randomness using the default random engine.
     template<size_t Size>
-    static void fill(data_array<Size>& out) noexcept
+    static void fill(data_array<Size>& out) NOEXCEPT
     {
         // C++17: Parallel policy for std::transform.
-        std::transform(out.begin(), out.end(), out.begin(), [](uint8_t) noexcept
+        std::transform(out.begin(), out.end(), out.begin(), [](uint8_t) NOEXCEPT
         {
             return next();
         });
     }
 
     /// Fill a byte vector with randomness using the default random engine.
-    static void fill(data_chunk& out) noexcept;
+    static void fill(data_chunk& out) NOEXCEPT;
 
     /// Generate a pseudo random number within the uint8_t domain.
     /// Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
-    static uint8_t next() noexcept;
+    static uint8_t next() NOEXCEPT;
 
     /// Generate a pseudo random number within [begin, end].
     /// Specialized: uniform_int_distribution is undefined for sizes < 16 bits.
-    static uint8_t next(uint8_t begin, uint8_t end) noexcept;
+    static uint8_t next(uint8_t begin, uint8_t end) NOEXCEPT;
 
     /// Generate a pseudo random number within the Type domain.
     template<typename Type, if_integer<Type> = true>
-    static Type next() noexcept
+    static Type next() NOEXCEPT
     {
         return next(minimum<Type>(), maximum<Type>());
     }
 
     /// Generate a pseudo random integer value within [begin, end].
     template<typename Integer, if_integer<Integer> = true>
-    static Integer next(Integer begin, Integer end) noexcept
+    static Integer next(Integer begin, Integer end) NOEXCEPT
     {
         std::uniform_int_distribution<Integer> distribution(begin, end);
         return distribution(get_twister());
@@ -74,7 +74,7 @@ class BC_API pseudo_random
 
     /// Shuffle a container elements using the random engine.
     template<class Container>
-    static void shuffle(Container& out) noexcept
+    static void shuffle(Container& out) NOEXCEPT
     {
         std::shuffle(out.begin(), out.end(), get_twister());
     }
@@ -85,10 +85,10 @@ class BC_API pseudo_random
     /// duration. Returns the randomized duration.
     static std::chrono::steady_clock::duration duration(
         const std::chrono::steady_clock::duration& maximum,
-        uint8_t ratio=2) noexcept;
+        uint8_t ratio=2) NOEXCEPT;
 
 private:
-    static std::mt19937& get_twister() noexcept;
+    static std::mt19937& get_twister() NOEXCEPT;
 };
 
 } // namespace system

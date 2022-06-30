@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_ADDITION_IPP
 
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
@@ -33,7 +34,7 @@ template <typename Result, typename Left, typename Right,
     if_not_lesser_width<Result, Left>,
     if_not_lesser_width<Result, Right>,
     if_same_signed_integer<Left, Right>>
-constexpr Result add(Left left, Right right) noexcept
+constexpr Result add(Left left, Right right) NOEXCEPT
 {
     return possible_sign_cast<Result>(left) +
         possible_sign_cast<Result>(right);
@@ -43,14 +44,14 @@ template <typename Result, typename Left, typename Right,
     if_not_lesser_width<Result, Left>,
     if_not_lesser_width<Result, Right>,
     if_same_signed_integer<Left, Right>>
-constexpr Result subtract(Left left, Right right) noexcept
+constexpr Result subtract(Left left, Right right) NOEXCEPT
 {
     return possible_sign_cast<Result>(left) -
         possible_sign_cast<Result>(right);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr bool overflows(Integer left, Integer right) noexcept
+constexpr bool overflows(Integer left, Integer right) NOEXCEPT
 {
     const auto negative_right = is_negative(right);
     return !is_zero(right) &&
@@ -59,13 +60,13 @@ constexpr bool overflows(Integer left, Integer right) noexcept
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr bool overflows(Integer left, Integer right) noexcept
+constexpr bool overflows(Integer left, Integer right) NOEXCEPT
 {
     return right > (maximum<Integer>() - left);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr bool underflows(Integer left, Integer right) noexcept
+constexpr bool underflows(Integer left, Integer right) NOEXCEPT
 {
     const auto negative_right = is_negative(right);
     return !is_zero(right) &&
@@ -74,33 +75,33 @@ constexpr bool underflows(Integer left, Integer right) noexcept
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr bool underflows(Integer left, Integer right) noexcept
+constexpr bool underflows(Integer left, Integer right) NOEXCEPT
 {
     return right > left;
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
 {
     return overflows(left, right) ? (is_negative(right) ?
         minimum<Integer>() : maximum<Integer>()) : (left + right);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
 {
     return overflows(left, right) ? maximum<Integer>() : (left + right);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer floored_subtract(Integer left, Integer right) noexcept
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
 {
     return underflows(left, right) ? (is_negative(right) ?
         maximum<Integer>() : minimum<Integer>()) : (left - right);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer floored_subtract(Integer left, Integer right) noexcept
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
 {
     return underflows(left, right) ? minimum<Integer>() : (left - right);
 }

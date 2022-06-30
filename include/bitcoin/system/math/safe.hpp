@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -37,7 +38,7 @@ template <typename Restored, typename Common,
     if_not_lesser_width<to_common_sized_type<Restored>, Restored> = true,
     if_integral_integer<Restored> = true,
     if_integral_integer<Common> = true>
-constexpr Restored depromote(Common value) noexcept;
+constexpr Restored depromote(Common value) NOEXCEPT;
 
 /// Cast integral to integral of narrower bit width.
 template <typename To, typename From,
@@ -45,7 +46,7 @@ template <typename To, typename From,
     if_integral_integer<To> = true,
     if_integral_integer<From> = true,
     if_same_signed_integer<To, From> = true>
-constexpr To narrow_cast(From value) noexcept;
+constexpr To narrow_cast(From value) NOEXCEPT;
 
 /// Cast integral sign (non-narrowing).
 template <typename To, typename From,
@@ -53,7 +54,7 @@ template <typename To, typename From,
     if_integral_integer<To> = true,
     if_integral_integer<From> = true,
     if_not_same_signed_integer<To, From> = true>
-constexpr To sign_cast(From value) noexcept;
+constexpr To sign_cast(From value) NOEXCEPT;
 
 /// Cast integral sign to integral of narrower bit width.
 template <typename To, typename From,
@@ -61,13 +62,13 @@ template <typename To, typename From,
     if_integral_integer<To> = true,
     if_integral_integer<From> = true,
     if_not_same_signed_integer<To, From> = true>
-constexpr To narrow_sign_cast(From value) noexcept;
+constexpr To narrow_sign_cast(From value) NOEXCEPT;
 
 /// Cast integral to integral of wider bit width (precludes reassignment).
 template <typename To, typename From,
     if_lesser_width<From, To> = true,
     if_same_signed_integer<To, From> = true>
-constexpr To wide_cast(From value) noexcept;
+constexpr To wide_cast(From value) NOEXCEPT;
 
 /// Possible integer casts.
 /// ---------------------------------------------------------------------------
@@ -75,45 +76,45 @@ constexpr To wide_cast(From value) noexcept;
 /// Possible narrowing without sign cast.
 template <typename To, typename From,
     if_same_signed_integer<To, From> = true>
-constexpr To possible_narrow_cast(From value) noexcept;
+constexpr To possible_narrow_cast(From value) NOEXCEPT;
 
 /// Possible sign cast without narrowing.
 template <typename To, typename From,
     if_not_lesser_width<To, From> = true>
-constexpr To possible_sign_cast(From value) noexcept;
+constexpr To possible_sign_cast(From value) NOEXCEPT;
 
 /// Possible narrowing with sign cast.
 template <typename To, typename From,
     if_not_same_signed_integer<To, From> = true>
-constexpr To possible_narrow_sign_cast(From value) noexcept;
+constexpr To possible_narrow_sign_cast(From value) NOEXCEPT;
 
 /// Possible sign cast with narrowing.
 template <typename To, typename From,
     if_lesser_width<To, From> = true>
-constexpr To possible_sign_narrow_cast(From value) noexcept;
+constexpr To possible_sign_narrow_cast(From value) NOEXCEPT;
 
 /// Possible narrowing and possible sign cast (unrestricted).
 template <typename To, typename From>
-constexpr To possible_narrow_and_sign_cast(From value) noexcept;
+constexpr To possible_narrow_and_sign_cast(From value) NOEXCEPT;
 
 /// Possible widening without sign cast (precludes reassignment).
 template <typename To, typename From, if_same_signed_integer<To, From> = true>
-constexpr To possible_wide_cast(From value) noexcept;
+constexpr To possible_wide_cast(From value) NOEXCEPT;
 
 /// Explicit pointer casts.
 /// ---------------------------------------------------------------------------
 
 /// Cast of pointer.
 template <typename To, typename From>
-constexpr To* pointer_cast(From* value) noexcept;
+constexpr To* pointer_cast(From* value) NOEXCEPT;
 
 /// Possible cast of pointer.
 template <typename To, typename From>
-constexpr To* possible_pointer_cast(From* value) noexcept;
+constexpr To* possible_pointer_cast(From* value) NOEXCEPT;
 
 /// Cast integer to pointer.
 template <typename To, typename From>
-constexpr To* integer_pointer_cast(From value) noexcept;
+constexpr To* integer_pointer_cast(From value) NOEXCEPT;
 
 /// Overflows.
 /// ---------------------------------------------------------------------------
@@ -121,15 +122,15 @@ constexpr To* integer_pointer_cast(From value) noexcept;
 
 /// Throws overflow_exception on overflow (2 uses in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr Integer safe_multiply(Integer left, Integer right) noexcept(BC_NO_THROW);
+constexpr Integer safe_multiply(Integer left, Integer right) NOEXCEPT;
 
 /// Throws overflow_exception on overflow (1 use in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr Integer safe_add(Integer left, Integer right) noexcept(BC_NO_THROW);
+constexpr Integer safe_add(Integer left, Integer right) NOEXCEPT;
 
 /// Throws overflow_exception on negate signed minimum (1 use in libbitcoin).
 template <typename Integer, if_signed_integer<Integer> = true>
-constexpr Integer safe_negate(Integer value) noexcept(BC_NO_THROW);
+constexpr Integer safe_negate(Integer value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

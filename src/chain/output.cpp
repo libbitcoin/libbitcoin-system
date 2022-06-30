@@ -41,56 +41,56 @@ const uint64_t output::not_found = sighash_null_value;
 
 // Invalid default used in signature hashing (validity ignored).
 // Invalidity is also used to determine that a prevout is not found.
-output::output() noexcept
+output::output() NOEXCEPT
   : output(output::not_found, to_shared<chain::script>(), false)
 {
 }
 
-output::output(uint64_t value, chain::script&& script) noexcept
+output::output(uint64_t value, chain::script&& script) NOEXCEPT
   : output(value, to_shared(std::move(script)), true)
 {
 }
 
-output::output(uint64_t value, const chain::script& script) noexcept
+output::output(uint64_t value, const chain::script& script) NOEXCEPT
   : output(value, to_shared(script), true)
 {
 }
 
-output::output(uint64_t value, const chain::script::cptr& script) noexcept
+output::output(uint64_t value, const chain::script::cptr& script) NOEXCEPT
   : output(value, script ? script : to_shared<chain::script>(), true)
 {
 }
 
-output::output(const data_slice& data) noexcept
+output::output(const data_slice& data) NOEXCEPT
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : output(stream::in::copy(data))
     BC_POP_WARNING()
 {
 }
 
-output::output(std::istream&& stream) noexcept
+output::output(std::istream&& stream) NOEXCEPT
   : output(read::bytes::istream(stream))
 {
 }
 
-output::output(std::istream& stream) noexcept
+output::output(std::istream& stream) NOEXCEPT
   : output(read::bytes::istream(stream))
 {
 }
 
-output::output(reader&& source) noexcept
+output::output(reader&& source) NOEXCEPT
   : output(from_data(source))
 {
 }
 
-output::output(reader& source) noexcept
+output::output(reader& source) NOEXCEPT
   : output(from_data(source))
 {
 }
 
 // protected
 output::output(uint64_t value, const chain::script::cptr& script,
-    bool valid) noexcept
+    bool valid) NOEXCEPT
   : value_(value), script_(script), valid_(valid)
 {
 }
@@ -98,13 +98,13 @@ output::output(uint64_t value, const chain::script::cptr& script,
 // Operators.
 // ----------------------------------------------------------------------------
 
-bool output::operator==(const output& other) const noexcept
+bool output::operator==(const output& other) const NOEXCEPT
 {
     return (value_ == other.value_)
         && (script_ == other.script_ || *script_ == *other.script_);
 }
 
-bool output::operator!=(const output& other) const noexcept
+bool output::operator!=(const output& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -113,7 +113,7 @@ bool output::operator!=(const output& other) const noexcept
 // ----------------------------------------------------------------------------
 
 // static/private
-output output::from_data(reader& source) noexcept
+output output::from_data(reader& source) NOEXCEPT
 {
     return
     {
@@ -132,7 +132,7 @@ output output::from_data(reader& source) noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk output::to_data() const noexcept
+data_chunk output::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size(), no_fill_byte_allocator);
 
@@ -144,19 +144,19 @@ data_chunk output::to_data() const noexcept
     return data;
 }
 
-void output::to_data(std::ostream& stream) const noexcept
+void output::to_data(std::ostream& stream) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out);
 }
 
-void output::to_data(writer& sink) const noexcept
+void output::to_data(writer& sink) const NOEXCEPT
 {
     sink.write_8_bytes_little_endian(value_);
     script_->to_data(sink, true);
 }
 
-size_t output::serialized_size() const noexcept
+size_t output::serialized_size() const NOEXCEPT
 {
     return sizeof(value_) + script_->serialized_size(true);
 }
@@ -164,22 +164,22 @@ size_t output::serialized_size() const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool output::is_valid() const noexcept
+bool output::is_valid() const NOEXCEPT
 {
     return valid_;
 }
 
-uint64_t output::value() const noexcept
+uint64_t output::value() const NOEXCEPT
 {
     return value_;
 }
 
-const chain::script& output::script() const noexcept
+const chain::script& output::script() const NOEXCEPT
 {
     return *script_;
 }
 
-const chain::script::cptr& output::script_ptr() const noexcept
+const chain::script::cptr& output::script_ptr() const NOEXCEPT
 {
     return script_;
 }
@@ -187,7 +187,7 @@ const chain::script::cptr& output::script_ptr() const noexcept
 // Methods.
 // ----------------------------------------------------------------------------
 
-bool output::committed_hash(hash_digest& out) const noexcept
+bool output::committed_hash(hash_digest& out) const NOEXCEPT
 {
     const auto& ops = script_->ops();
     if (!script::is_commitment_pattern(ops))
@@ -208,7 +208,7 @@ bool output::committed_hash(hash_digest& out) const noexcept
 static_assert(max_script_size < max_size_t / multisig_default_sigops / 
     heavy_sigops_factor, "output sigop overflow guard");
 
-size_t output::signature_operations(bool bip141) const noexcept
+size_t output::signature_operations(bool bip141) const NOEXCEPT
 {
     // Penalize quadratic signature operations (bip141).
     const auto factor = bip141 ? heavy_sigops_factor : one;
@@ -217,7 +217,7 @@ size_t output::signature_operations(bool bip141) const noexcept
     return script_->sigops(false) * factor;
 }
 
-bool output::is_dust(uint64_t minimum_value) const noexcept
+bool output::is_dust(uint64_t minimum_value) const NOEXCEPT
 {
     // If provably unspendable it does not expand the unspent output set. Dust
     // is all about prunability. Miners can be expected take the largest fee
@@ -231,11 +231,11 @@ bool output::is_dust(uint64_t minimum_value) const noexcept
 
 namespace json = boost::json;
 
-// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 output tag_invoke(json::value_to_tag<output>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return
     {
@@ -245,7 +245,7 @@ output tag_invoke(json::value_to_tag<output>,
 }
 
 void tag_invoke(json::value_from_tag, json::value& value,
-    const output& output) noexcept
+    const output& output) NOEXCEPT
 {
     value =
     {
@@ -257,7 +257,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
 BC_POP_WARNING()
 
 output::cptr tag_invoke(json::value_to_tag<output::cptr>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return to_shared(tag_invoke(json::value_to_tag<output>{}, value));
 }
@@ -267,7 +267,7 @@ BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const output::cptr& output) noexcept
+    const output::cptr& output) NOEXCEPT
 {
     tag_invoke(tag, value, *output);
 }

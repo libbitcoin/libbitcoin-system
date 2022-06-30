@@ -42,21 +42,21 @@ public:
     ~hash256() = default;
 
     /// Constructors.
-    hash256() noexcept;
-    hash256(hash_digest&& value) noexcept;
-    hash256(const hash_digest& value) noexcept;
-    hash256(const std::string& base16) noexcept(false);
+    hash256() NOEXCEPT;
+    hash256(hash_digest&& value) NOEXCEPT;
+    hash256(const hash_digest& value) NOEXCEPT;
+    hash256(const std::string& base16) THROWS;
 
-    std::string to_string() const noexcept;
+    std::string to_string() const NOEXCEPT;
 
     /// Operators.
 
-    operator const hash_digest&() const noexcept;
+    operator const hash_digest&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        hash256& argument) noexcept(false);
+        hash256& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const hash256& argument) noexcept;
+        const hash256& argument) NOEXCEPT;
 
 private:
     hash_digest value_;

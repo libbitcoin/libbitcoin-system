@@ -36,21 +36,21 @@ class BC_API unicode_streambuf
 {
 public:
     /// Construct unicode stream buffer from a weak reference to a wide buffer.
-    unicode_streambuf(std::wstreambuf* wide_buffer, size_t size) noexcept(false);
+    unicode_streambuf(std::wstreambuf* wide_buffer, size_t size) THROWS;
 
     /// Synchronize stream buffer.
-    virtual ~unicode_streambuf() noexcept;
+    virtual ~unicode_streambuf() NOEXCEPT;
 
 protected:
     /// Underflow for support of input streams.
-    virtual std::streambuf::int_type underflow() noexcept(false);
+    virtual std::streambuf::int_type underflow() THROWS;
 
     /// Overflow for support of output streams.
     virtual std::streambuf::int_type overflow(
-        std::streambuf::int_type character) noexcept(false);
+        std::streambuf::int_type character) THROWS;
 
     //// Sync for support of output streams.
-    virtual int sync() noexcept(false);
+    virtual int sync() THROWS;
 
 private:
     // These are not thread safe.

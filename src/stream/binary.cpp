@@ -32,12 +32,12 @@ namespace system {
 
 constexpr uint8_t pad = 0x00;
 
-constexpr bool is_binary(char character) noexcept
+constexpr bool is_binary(char character) NOEXCEPT
 {
     return character == '0' || character == '1';
 }
 
-bool binary::is_base2(const std::string& text) noexcept
+bool binary::is_base2(const std::string& text) NOEXCEPT
 {
     return std::all_of(text.begin(), text.end(), is_binary);
 }
@@ -45,23 +45,23 @@ bool binary::is_base2(const std::string& text) noexcept
 // constructors
 // ----------------------------------------------------------------------------
 
-binary::binary() noexcept
+binary::binary() NOEXCEPT
   : bits_(0), bytes_()
 {
 }
 
-binary::binary(const std::string& bits) noexcept
+binary::binary(const std::string& bits) NOEXCEPT
   : binary(from_string(bits))
 {
 }
 
-binary::binary(size_t bits, const data_slice& data) noexcept
+binary::binary(size_t bits, const data_slice& data) NOEXCEPT
   : binary(from_data(bits, data.to_chunk()))
 {
 }
 
 // private
-binary::binary(data_chunk&& bytes, size_t bits) noexcept
+binary::binary(data_chunk&& bytes, size_t bits) NOEXCEPT
   : bits_(bits), bytes_(bytes)
 {
 }
@@ -69,7 +69,7 @@ binary::binary(data_chunk&& bytes, size_t bits) noexcept
 // factories
 // ----------------------------------------------------------------------------
 
-binary binary::from_data(size_t bits, data_chunk&& data) noexcept
+binary binary::from_data(size_t bits, data_chunk&& data) NOEXCEPT
 {
     data.resize(ceilinged_divide(bits, byte_bits), pad);
 
@@ -80,7 +80,7 @@ binary binary::from_data(size_t bits, data_chunk&& data) noexcept
     return { std::move(data), bits };
 }
 
-binary binary::from_string(const std::string bits) noexcept
+binary binary::from_string(const std::string bits) NOEXCEPT
 {
     if (!binary::is_base2(bits))
         return {};
@@ -99,7 +99,7 @@ binary binary::from_string(const std::string bits) noexcept
 // methods
 // ----------------------------------------------------------------------------
 
-std::string binary::encoded() const noexcept
+std::string binary::encoded() const NOEXCEPT
 {
     std::string text(to_bits(bytes_.size()), pad);
     write::bytes::copy writer(text);
@@ -114,17 +114,17 @@ std::string binary::encoded() const noexcept
     return text;
 }
 
-const data_chunk& binary::data() const noexcept
+const data_chunk& binary::data() const NOEXCEPT
 {
     return bytes_;
 }
 
-size_t binary::bytes() const noexcept
+size_t binary::bytes() const NOEXCEPT
 {
     return bytes_.size();
 }
 
-size_t binary::bits() const noexcept
+size_t binary::bits() const NOEXCEPT
 {
     return bits_;
 }
@@ -132,33 +132,33 @@ size_t binary::bits() const noexcept
 // operators
 // ----------------------------------------------------------------------------
 
-binary::operator const data_chunk&() const noexcept
+binary::operator const data_chunk&() const NOEXCEPT
 {
     return bytes_;
 }
 
-bool binary::operator[](size_t index) const noexcept
+bool binary::operator[](size_t index) const NOEXCEPT
 {
     const auto byte = index / byte_bits;
     return (byte < bits_) && get_left(bytes_[byte], index % byte_bits);
 }
 
-bool binary::operator<(const binary& other) const noexcept
+bool binary::operator<(const binary& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
 }
 
-bool operator==(const binary& left, const binary& right) noexcept
+bool operator==(const binary& left, const binary& right) NOEXCEPT
 {
     return left.encoded() == right.encoded();
 }
 
-bool operator!=(const binary& left, const binary& right) noexcept
+bool operator!=(const binary& left, const binary& right) NOEXCEPT
 {
     return !(left == right);
 }
 
-std::istream& operator>>(std::istream& in, binary& to) noexcept
+std::istream& operator>>(std::istream& in, binary& to) NOEXCEPT
 {
     std::string text;
     in >> text;
@@ -166,7 +166,7 @@ std::istream& operator>>(std::istream& in, binary& to) noexcept
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const binary& of) noexcept
+std::ostream& operator<<(std::ostream& out, const binary& of) NOEXCEPT
 {
     out << of.encoded();
     return out;

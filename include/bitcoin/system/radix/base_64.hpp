@@ -28,11 +28,11 @@ namespace system {
 
 /// Encode data as base64.
 /// @return the base64 encoded string.
-BC_API std::string encode_base64(const data_slice& unencoded) noexcept;
+BC_API std::string encode_base64(const data_slice& unencoded) NOEXCEPT;
 
 /// Attempt to decode base64 data.
 /// @return false if the input contains non-base64 characters.
-BC_API bool decode_base64(data_chunk& out, const std::string& in) noexcept;
+BC_API bool decode_base64(data_chunk& out, const std::string& in) NOEXCEPT;
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

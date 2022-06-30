@@ -104,7 +104,7 @@ enum ek_flag : uint8_t
  */
 BC_API bool create_key_pair(encrypted_private& out_private,
     ec_compressed& out_point, const encrypted_token& token,
-    const ek_seed& seed, uint8_t version, bool compressed=true) noexcept;
+    const ek_seed& seed, uint8_t version, bool compressed=true) NOEXCEPT;
 
 /**
  * DEPRECATED (scenario)
@@ -123,7 +123,7 @@ BC_API bool create_key_pair(encrypted_private& out_private,
 BC_API bool create_key_pair(encrypted_private& out_private,
     encrypted_public& out_public, ec_compressed& out_point,
     const encrypted_token& token, const ek_seed& seed, uint8_t version,
-    bool compressed=true) noexcept;
+    bool compressed=true) NOEXCEPT;
 
 /**
  * Create an intermediate passphrase for subsequent key pair generation.
@@ -133,7 +133,7 @@ BC_API bool create_key_pair(encrypted_private& out_private,
  * @return false if the token could not be created from the entropy.
  */
 BC_API bool create_token(encrypted_token& out_token,
-    const std::string& passphrase, const ek_entropy& entropy) noexcept;
+    const std::string& passphrase, const ek_entropy& entropy) NOEXCEPT;
 
 /**
  * Create an intermediate passphrase for subsequent key pair generation.
@@ -147,7 +147,7 @@ BC_API bool create_token(encrypted_token& out_token,
  */
 BC_API bool create_token(encrypted_token& out_token,
     const std::string& passphrase, const ek_salt& salt, uint32_t lot,
-    uint32_t sequence) noexcept;
+    uint32_t sequence) NOEXCEPT;
 
 /**
  * Encrypt the ec secret to an encrypted public key using the passphrase.
@@ -160,7 +160,7 @@ BC_API bool create_token(encrypted_token& out_token,
  */
 BC_API bool encrypt(encrypted_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version,
-    bool compressed=true) noexcept;
+    bool compressed=true) NOEXCEPT;
 
 /**
  * Decrypt the ec secret associated with the encrypted private key.
@@ -173,7 +173,7 @@ BC_API bool encrypt(encrypted_private& out_private, const ec_secret& secret,
  */
 BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
     bool& out_compressed, const encrypted_private& key,
-    const std::string& passphrase) noexcept;
+    const std::string& passphrase) NOEXCEPT;
 
 /**
  * DEPRECATED (scenario)
@@ -187,7 +187,7 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
  */
 BC_API bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     bool& out_compressed, const encrypted_public& key,
-    const std::string& passphrase) noexcept;
+    const std::string& passphrase) NOEXCEPT;
 
 } // namespace wallet
 } // namespace system

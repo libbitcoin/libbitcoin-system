@@ -54,7 +54,7 @@ using namespace bc::system::machine;
 // static (should be inline or constexpr).
 // TODO: Avoiding circular include on machine.
 bool script::is_coinbase_pattern(const operations& ops,
-    size_t height) noexcept
+    size_t height) NOEXCEPT
 {
     // TODO: number::chunk::from_int constexpr?
     return !ops.empty()
@@ -65,87 +65,87 @@ bool script::is_coinbase_pattern(const operations& ops,
 // Constructors.
 // ----------------------------------------------------------------------------
 
-script::script() noexcept
+script::script() NOEXCEPT
   : script(operations{}, false, false)
 {
 }
 
-script::~script() noexcept
+script::~script() NOEXCEPT
 {
 }
 
-script::script(script&& other) noexcept
+script::script(script&& other) NOEXCEPT
   : script(std::move(other.ops_), other.valid_, other.prefail_)
 {
 }
 
-script::script(const script& other) noexcept
+script::script(const script& other) NOEXCEPT
   : script(other.ops_, other.valid_, other.prefail_)
 {
 }
 
 // Prefail is false.
-script::script(operations&& ops) noexcept
+script::script(operations&& ops) NOEXCEPT
   : script(std::move(ops), true, false)
 {
 }
 
 // Prefail is false.
-script::script(const operations& ops) noexcept
+script::script(const operations& ops) NOEXCEPT
   : script(ops, true, false)
 {
 }
 
-script::script(operations&& ops, bool prefail) noexcept
+script::script(operations&& ops, bool prefail) NOEXCEPT
     : script(std::move(ops), true, prefail)
 {
 }
 
-script::script(const operations& ops, bool prefail) noexcept
+script::script(const operations& ops, bool prefail) NOEXCEPT
     : script(ops, true, prefail)
 {
 }
 
-script::script(const data_slice& data, bool prefix) noexcept
+script::script(const data_slice& data, bool prefix) NOEXCEPT
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : script(stream::in::copy(data), prefix)
     BC_POP_WARNING()
 {
 }
 
-script::script(std::istream&& stream, bool prefix) noexcept
+script::script(std::istream&& stream, bool prefix) NOEXCEPT
   : script(read::bytes::istream(stream), prefix)
 {
 }
 
-script::script(std::istream& stream, bool prefix) noexcept
+script::script(std::istream& stream, bool prefix) NOEXCEPT
   : script(read::bytes::istream(stream), prefix)
 {
 }
 
-script::script(reader&& source, bool prefix) noexcept
+script::script(reader&& source, bool prefix) NOEXCEPT
   : script(from_data(source, prefix))
 {
 }
 
-script::script(reader& source, bool prefix) noexcept
+script::script(reader& source, bool prefix) NOEXCEPT
   : script(from_data(source, prefix))
 {
 }
 
-script::script(const std::string& mnemonic) noexcept
+script::script(const std::string& mnemonic) NOEXCEPT
   : script(from_string(mnemonic))
 {
 }
 
 // protected
-script::script(operations&& ops, bool valid, bool prefail) noexcept
+script::script(operations&& ops, bool valid, bool prefail) NOEXCEPT
   : ops_(std::move(ops)), valid_(valid), prefail_(prefail), offset(ops_.begin())
 {
 }
 
 // protected
-script::script(const operations& ops, bool valid, bool prefail) noexcept
+script::script(const operations& ops, bool valid, bool prefail) NOEXCEPT
   : ops_(ops), valid_(valid), prefail_(prefail), offset(ops_.begin())
 {
 }
@@ -153,7 +153,7 @@ script::script(const operations& ops, bool valid, bool prefail) noexcept
 // Operators.
 // ----------------------------------------------------------------------------
 
-script& script::operator=(script&& other) noexcept
+script& script::operator=(script&& other) NOEXCEPT
 {
     ops_ = std::move(other.ops_);
     valid_ = other.valid_;
@@ -162,7 +162,7 @@ script& script::operator=(script&& other) noexcept
     return *this;
 }
 
-script& script::operator=(const script& other) noexcept
+script& script::operator=(const script& other) NOEXCEPT
 {
     ops_ = other.ops_;
     valid_ = other.valid_;
@@ -171,12 +171,12 @@ script& script::operator=(const script& other) noexcept
     return *this;
 }
 
-bool script::operator==(const script& other) const noexcept
+bool script::operator==(const script& other) const NOEXCEPT
 {
     return (ops_ == other.ops_);
 }
 
-bool script::operator!=(const script& other) const noexcept
+bool script::operator!=(const script& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -185,7 +185,7 @@ bool script::operator!=(const script& other) const noexcept
 // ----------------------------------------------------------------------------
 
 // static/private
-size_t script::op_count(reader& source) noexcept
+size_t script::op_count(reader& source) NOEXCEPT
 {
     const auto start = source.get_position();
     auto count = zero;
@@ -199,7 +199,7 @@ size_t script::op_count(reader& source) noexcept
 }
 
 // static/private
-script script::from_data(reader& source, bool prefix) noexcept
+script script::from_data(reader& source, bool prefix) NOEXCEPT
 {
     auto size = zero;
     auto start = zero;
@@ -237,7 +237,7 @@ script script::from_data(reader& source, bool prefix) noexcept
 }
 
 // static/private
-script script::from_string(const std::string& mnemonic) noexcept
+script script::from_string(const std::string& mnemonic) NOEXCEPT
 {
     // There is always one operation per non-empty string token.
     auto tokens = split(mnemonic);
@@ -268,7 +268,7 @@ script script::from_string(const std::string& mnemonic) noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-data_chunk script::to_data(bool prefix) const noexcept
+data_chunk script::to_data(bool prefix) const NOEXCEPT
 {
     data_chunk data(serialized_size(prefix), no_fill_byte_allocator);
 
@@ -280,14 +280,14 @@ data_chunk script::to_data(bool prefix) const noexcept
     return data;
 }
 
-void script::to_data(std::ostream& stream, bool prefix) const noexcept
+void script::to_data(std::ostream& stream, bool prefix) const NOEXCEPT
 {
     write::bytes::ostream out(stream);
     to_data(out, prefix);
 }
 
 // see also: subscript.to_data().
-void script::to_data(writer& sink, bool prefix) const noexcept
+void script::to_data(writer& sink, bool prefix) const NOEXCEPT
 {
     if (prefix)
         sink.write_variable(serialized_size(false));
@@ -304,7 +304,7 @@ void script::to_data(writer& sink, bool prefix) const noexcept
     BC_POP_WARNING()
 }
 
-std::string script::to_string(uint32_t active_forks) const noexcept
+std::string script::to_string(uint32_t active_forks) const NOEXCEPT
 {
     auto first = true;
     std::ostringstream text;
@@ -328,26 +328,26 @@ std::string script::to_string(uint32_t active_forks) const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-bool script::is_valid() const noexcept
+bool script::is_valid() const NOEXCEPT
 {
     // Any byte vector is a valid script.
     // This is false only if the byte count did not match the size prefix.
     return valid_;
 }
 
-bool script::is_prefail() const noexcept
+bool script::is_prefail() const NOEXCEPT
 {
     // The script contains an invalid opcode and will thus fail evaluation.
     return prefail_;
 }
 
-const operations& script::ops() const noexcept
+const operations& script::ops() const NOEXCEPT
 {
     return ops_;
 }
 
 // Consensus (witness::extract_script) and Electrum server payments key.
-hash_digest script::hash() const noexcept
+hash_digest script::hash() const NOEXCEPT
 {
     hash_digest sha256{};
     hash::sha256::copy sink(sha256);
@@ -356,9 +356,9 @@ hash_digest script::hash() const noexcept
     return sha256;
 }
 
-size_t script::serialized_size(bool prefix) const noexcept
+size_t script::serialized_size(bool prefix) const NOEXCEPT
 {
-    const auto op_size = [](size_t total, const operation& op) noexcept
+    const auto op_size = [](size_t total, const operation& op) NOEXCEPT
     {
         return total + op.serialized_size();
     };
@@ -376,7 +376,7 @@ size_t script::serialized_size(bool prefix) const noexcept
 // Utilities.
 // ----------------------------------------------------------------------------
 
-const data_chunk& script::witness_program() const noexcept
+const data_chunk& script::witness_program() const NOEXCEPT
 {
     static const data_chunk empty;
 
@@ -385,7 +385,7 @@ const data_chunk& script::witness_program() const noexcept
     BC_POP_WARNING()
 }
 
-script_version script::version() const noexcept
+script_version script::version() const NOEXCEPT
 {
     if (!is_witness_program_pattern(ops()))
         return script_version::unversioned;
@@ -401,7 +401,7 @@ script_version script::version() const noexcept
 
 // Caller should test for is_sign_script_hash_pattern when sign_key_hash result
 // as it is possible for an input script to match both patterns.
-script_pattern script::pattern() const noexcept
+script_pattern script::pattern() const NOEXCEPT
 {
     const auto input = output_pattern();
     return input == script_pattern::non_standard ? input_pattern() : input;
@@ -409,7 +409,7 @@ script_pattern script::pattern() const noexcept
 
 // Output patterns are mutually and input unambiguous.
 // The bip141 coinbase pattern is not tested here, must test independently.
-script_pattern script::output_pattern() const noexcept
+script_pattern script::output_pattern() const NOEXCEPT
 {
     if (is_pay_key_hash_pattern(ops()))
         return script_pattern::pay_key_hash;
@@ -432,7 +432,7 @@ script_pattern script::output_pattern() const noexcept
 
 // A sign_key_hash result always implies sign_script_hash as well.
 // The bip34 coinbase pattern is not tested here, must test independently.
-script_pattern script::input_pattern() const noexcept
+script_pattern script::input_pattern() const NOEXCEPT
 {
     if (is_sign_key_hash_pattern(ops()))
         return script_pattern::sign_key_hash;
@@ -450,14 +450,14 @@ script_pattern script::input_pattern() const noexcept
     return script_pattern::non_standard;
 }
 
-bool script::is_pay_to_witness(uint32_t forks) const noexcept
+bool script::is_pay_to_witness(uint32_t forks) const NOEXCEPT
 {
     // This is an optimization over using script::pattern.
     return is_enabled(forks, forks::bip141_rule) &&
         is_witness_program_pattern(ops());
 }
 
-bool script::is_pay_to_script_hash(uint32_t forks) const noexcept
+bool script::is_pay_to_script_hash(uint32_t forks) const NOEXCEPT
 {
     // This is an optimization over using script::pattern.
     return is_enabled(forks, forks::bip16_rule) &&
@@ -465,23 +465,23 @@ bool script::is_pay_to_script_hash(uint32_t forks) const noexcept
 }
 
 // Count 1..16 multisig accurately for embedded (bip16) and witness (bip141).
-constexpr size_t multisig_sigops(bool accurate, opcode code) noexcept
+constexpr size_t multisig_sigops(bool accurate, opcode code) NOEXCEPT
 {
     return accurate && operation::is_positive(code) ?
         operation::opcode_to_positive(code) : multisig_default_sigops;
 }
 
-constexpr bool is_single_sigop(opcode code) noexcept
+constexpr bool is_single_sigop(opcode code) NOEXCEPT
 {
     return code == opcode::checksig || code == opcode::checksigverify;
 }
 
-constexpr bool is_multiple_sigop(opcode code) noexcept
+constexpr bool is_multiple_sigop(opcode code) NOEXCEPT
 {
     return code == opcode::checkmultisig || code == opcode::checkmultisigverify;
 }
 
-size_t script::sigops(bool accurate) const noexcept
+size_t script::sigops(bool accurate) const NOEXCEPT
 {
     auto total = zero;
     auto preceding = opcode::push_negative_1;
@@ -501,7 +501,7 @@ size_t script::sigops(bool accurate) const noexcept
     return total;
 }
 
-bool script::is_oversized() const noexcept
+bool script::is_oversized() const NOEXCEPT
 {
     return serialized_size(false) > max_script_size;
 }
@@ -509,7 +509,7 @@ bool script::is_oversized() const noexcept
 // An unspendable script is any that can provably not be spent under any
 // circumstance. This allows for exclusion of the output as unspendable.
 // The criteria below are not comprehensive but are fast to evaluate.
-bool script::is_unspendable() const noexcept
+bool script::is_unspendable() const NOEXCEPT
 {
     if (ops_.empty())
         return false;
@@ -527,17 +527,17 @@ bool script::is_unspendable() const noexcept
 
 namespace json = boost::json;
 
-// boost/json will soon have noexcept: github.com/boostorg/json/pull/636
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 script tag_invoke(json::value_to_tag<script>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return script{ std::string(value.get_string().c_str()) };
 }
 
 void tag_invoke(json::value_from_tag, json::value& value,
-    const script& script) noexcept
+    const script& script) NOEXCEPT
 {
     value = script.to_string(forks::all_rules);
 }
@@ -545,7 +545,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
 BC_POP_WARNING()
 
 script::cptr tag_invoke(json::value_to_tag<script::cptr>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     return to_shared(tag_invoke(json::value_to_tag<script>{}, value));
 }
@@ -555,7 +555,7 @@ BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 void tag_invoke(json::value_from_tag tag, json::value& value,
-    const script::cptr& script) noexcept
+    const script::cptr& script) NOEXCEPT
 {
     tag_invoke(tag, value, *script);
 }

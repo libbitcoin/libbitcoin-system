@@ -35,7 +35,7 @@ namespace mp = boost::multiprecision;
 
 // dispatch
 template <size_t Base, typename Value, typename Exponent>
-constexpr Value power(Exponent exponent) noexcept
+constexpr Value power(Exponent exponent) NOEXCEPT
 {
     if constexpr (Base == 2u)
         return power2<Value>(exponent);
@@ -50,7 +50,7 @@ template <typename Value, typename Base, typename Exponent,
     if_integer<Value>,
     if_integer<Base>,
     if_integer<Exponent>>
-constexpr Value power(Base base, Exponent exponent) noexcept
+constexpr Value power(Base base, Exponent exponent) NOEXCEPT
 {
     if (is_zero(base))
         return 0;
@@ -81,7 +81,7 @@ constexpr Value power(Base base, Exponent exponent) noexcept
 template <typename Value, typename Exponent,
     if_integral_integer<Value>,
     if_integer<Exponent>>
-constexpr Value power2(Exponent exponent) noexcept
+constexpr Value power2(Exponent exponent) NOEXCEPT
 {
     if (is_negative(exponent))
         return 0;
@@ -92,7 +92,7 @@ constexpr Value power2(Exponent exponent) noexcept
 template <typename Value, typename Exponent,
     if_non_integral_integer<Value>,
     if_integer<Exponent>>
-constexpr Value power2(Exponent exponent) noexcept
+constexpr Value power2(Exponent exponent) NOEXCEPT
 {
     if (is_negative(exponent))
         return 0;

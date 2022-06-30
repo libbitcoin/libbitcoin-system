@@ -40,19 +40,19 @@ public:
     ~base58() = default;
 
     /// Constructors.
-    base58() noexcept;
-    base58(data_chunk&& value) noexcept;
-    base58(const data_chunk& value) noexcept;
-    base58(const std::string& base58) noexcept(false);
+    base58() NOEXCEPT;
+    base58(data_chunk&& value) NOEXCEPT;
+    base58(const data_chunk& value) NOEXCEPT;
+    base58(const std::string& base58) THROWS;
 
     /// Operators.
 
-    operator const data_chunk&() const noexcept;
+    operator const data_chunk&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        base58& argument) noexcept(false);
+        base58& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const base58& argument) noexcept;
+        const base58& argument) NOEXCEPT;
 
 private:
     data_chunk value_;

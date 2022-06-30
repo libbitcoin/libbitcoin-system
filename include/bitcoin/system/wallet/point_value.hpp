@@ -38,29 +38,29 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
-    point_value() noexcept;
-    point_value(point_value&& other) noexcept;
-    point_value(const point_value& other) noexcept;
-    point_value(point&& instance, uint64_t value) noexcept;
-    point_value(const point& instance, uint64_t value) noexcept;
+    point_value() NOEXCEPT;
+    point_value(point_value&& other) NOEXCEPT;
+    point_value(const point_value& other) NOEXCEPT;
+    point_value(point&& instance, uint64_t value) NOEXCEPT;
+    point_value(const point& instance, uint64_t value) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
     /// This class is move assignable and copy assignable.
-    point_value& operator=(point_value other) noexcept;
+    point_value& operator=(point_value other) NOEXCEPT;
 
-    bool operator==(const point_value& other) const noexcept;
-    bool operator!=(const point_value& other) const noexcept;
+    bool operator==(const point_value& other) const NOEXCEPT;
+    bool operator!=(const point_value& other) const NOEXCEPT;
 
     // Swap implementation required to properly handle base class.
-    friend void swap(point_value& left, point_value& right) noexcept;
+    friend void swap(point_value& left, point_value& right) NOEXCEPT;
 
     // Properties (accessors).
     // ------------------------------------------------------------------------
 
-    uint64_t value() const noexcept;
-    void set_value(uint64_t value) noexcept;
+    uint64_t value() const NOEXCEPT;
+    void set_value(uint64_t value) NOEXCEPT;
 
 private:
     uint64_t value_;

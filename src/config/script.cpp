@@ -31,27 +31,27 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-script::script() noexcept
+script::script() NOEXCEPT
   : value_()
 {
 }
 
-script::script(chain::script&& value) noexcept
+script::script(chain::script&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-script::script(const chain::script& value) noexcept
+script::script(const chain::script& value) NOEXCEPT
   : value_(value)
 {
 }
 
-script::script(const data_chunk& value) noexcept
+script::script(const data_chunk& value) NOEXCEPT
 {
     value_ = chain::script(value, false);
 }
 
-script::script(const std::vector<std::string>& tokens) noexcept(false)
+script::script(const std::vector<std::string>& tokens) THROWS
   : script(join(tokens))
 {
 }
@@ -61,12 +61,12 @@ script::script(const std::string& mnemonic)
     std::istringstream(mnemonic) >> *this;
 }
 
-script::operator const chain::script&() const noexcept
+script::operator const chain::script&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, script& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, script& argument) THROWS
 {
     std::istreambuf_iterator<char> end;
     std::string mnemonic(std::istreambuf_iterator<char>(stream), end);
@@ -79,7 +79,7 @@ std::istream& operator>>(std::istream& stream, script& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const script& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const script& argument) NOEXCEPT
 {
     stream << argument.value_.to_string(chain::forks::all_rules);
     return stream;

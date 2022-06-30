@@ -36,42 +36,42 @@ namespace chain {
 // Constructors.
 // ----------------------------------------------------------------------------
 
-checkpoint::checkpoint() noexcept
+checkpoint::checkpoint() NOEXCEPT
   : checkpoint({}, zero, false)
 {
 }
 
-checkpoint::checkpoint(hash_digest&& hash, size_t height) noexcept
+checkpoint::checkpoint(hash_digest&& hash, size_t height) NOEXCEPT
   : checkpoint(std::move(hash), height, true)
 {
 }
 
-checkpoint::checkpoint(const hash_digest& hash, size_t height) noexcept
+checkpoint::checkpoint(const hash_digest& hash, size_t height) NOEXCEPT
   : checkpoint(hash, height, true)
 {
 }
 
-checkpoint::checkpoint(const std::string& hash, size_t height) noexcept
+checkpoint::checkpoint(const std::string& hash, size_t height) NOEXCEPT
   : checkpoint(from_string(hash, height))
 {
 }
 
 // protected
-checkpoint::checkpoint(hash_digest&& hash, size_t height, bool valid) noexcept
+checkpoint::checkpoint(hash_digest&& hash, size_t height, bool valid) NOEXCEPT
   : hash_(std::move(hash)), height_(height), valid_(valid)
 {
 }
 
 // protected
 checkpoint::checkpoint(const hash_digest& hash, size_t height,
-    bool valid) noexcept
+    bool valid) NOEXCEPT
   : hash_(hash), height_(height), valid_(valid)
 {
 }
 
 // private
 checkpoint checkpoint::from_string(const std::string& hash,
-    size_t height) noexcept
+    size_t height) NOEXCEPT
 {
     hash_digest digest;
     if (!decode_hash(digest, hash))
@@ -83,17 +83,17 @@ checkpoint checkpoint::from_string(const std::string& hash,
 // Operators.
 // ----------------------------------------------------------------------------
 
-bool operator<(const checkpoint& left, const checkpoint& right) noexcept
+bool operator<(const checkpoint& left, const checkpoint& right) NOEXCEPT
 {
     return left.height() < right.height();
 }
 
-bool operator==(const checkpoint& left, const checkpoint& right) noexcept
+bool operator==(const checkpoint& left, const checkpoint& right) NOEXCEPT
 {
     return left.hash() == right.hash() && left.height() == right.height();
 }
 
-bool operator!=(const checkpoint& left, const checkpoint& right) noexcept
+bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT
 {
     return !(left == right);
 }
@@ -103,7 +103,7 @@ bool operator!=(const checkpoint& left, const checkpoint& right) noexcept
 
 // TODO: add from_string.
 // TODO: add get_line/put_line to reader and eliminate stream_result.
-std::istream& operator>>(std::istream& stream, checkpoint& out) noexcept
+std::istream& operator>>(std::istream& stream, checkpoint& out) NOEXCEPT
 {
     std::string value;
     stream >> value;
@@ -124,7 +124,7 @@ std::istream& operator>>(std::istream& stream, checkpoint& out) noexcept
     return stream_result(stream, false);
 }
 
-bool checkpoint::is_valid() const noexcept
+bool checkpoint::is_valid() const NOEXCEPT
 {
     return valid_;
 }
@@ -132,13 +132,13 @@ bool checkpoint::is_valid() const noexcept
 // Serialization.
 // ----------------------------------------------------------------------------
 
-std::ostream& operator<<(std::ostream& stream, const checkpoint& in) noexcept
+std::ostream& operator<<(std::ostream& stream, const checkpoint& in) NOEXCEPT
 {
     stream << in.to_string();
     return stream;
 }
 
-std::string checkpoint::to_string() const noexcept
+std::string checkpoint::to_string() const NOEXCEPT
 {
     return encode_hash(hash_) + ":" + serialize(height_);
 }
@@ -146,12 +146,12 @@ std::string checkpoint::to_string() const noexcept
 // Properties.
 // ----------------------------------------------------------------------------
 
-size_t checkpoint::height() const noexcept
+size_t checkpoint::height() const NOEXCEPT
 {
     return height_;
 }
 
-const hash_digest& checkpoint::hash() const noexcept
+const hash_digest& checkpoint::hash() const NOEXCEPT
 {
     return hash_;
 }
@@ -162,7 +162,7 @@ const hash_digest& checkpoint::hash() const noexcept
 namespace json = boost::json;
 
 checkpoint tag_invoke(json::value_to_tag<checkpoint>,
-    const json::value& value) noexcept
+    const json::value& value) NOEXCEPT
 {
     hash_digest hash;
     if (!decode_hash(hash, value.at("hash").get_string().c_str()))
@@ -176,7 +176,7 @@ checkpoint tag_invoke(json::value_to_tag<checkpoint>,
 }
 
 void tag_invoke(json::value_from_tag, json::value& value,
-    const checkpoint& checkpoint) noexcept
+    const checkpoint& checkpoint) NOEXCEPT
 {
     value =
     {

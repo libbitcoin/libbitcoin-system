@@ -43,7 +43,7 @@ class BC_API header
 public:
     typedef std::shared_ptr<const header> cptr;
 
-    static constexpr size_t serialized_size() noexcept
+    static constexpr size_t serialized_size() NOEXCEPT
     {
         return sizeof(version_)
             + hash_size
@@ -57,7 +57,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default header is an invalid object.
-    header() noexcept;
+    header() NOEXCEPT;
 
     /// Defaults.
     header(header&&) = default;
@@ -68,68 +68,68 @@ public:
 
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce) noexcept;
+        uint32_t nonce) NOEXCEPT;
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce) noexcept;
+        uint32_t nonce) NOEXCEPT;
 
-    header(const data_slice& data) noexcept;
-    header(std::istream&& stream) noexcept;
-    header(std::istream& stream) noexcept;
-    header(reader&& source) noexcept;
-    header(reader& source) noexcept;
+    header(const data_slice& data) NOEXCEPT;
+    header(std::istream&& stream) NOEXCEPT;
+    header(std::istream& stream) NOEXCEPT;
+    header(reader&& source) NOEXCEPT;
+    header(reader& source) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    bool operator==(const header& other) const noexcept;
-    bool operator!=(const header& other) const noexcept;
+    bool operator==(const header& other) const NOEXCEPT;
+    bool operator!=(const header& other) const NOEXCEPT;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const noexcept;
-    void to_data(std::ostream& stream) const noexcept;
-    void to_data(writer& sink) const noexcept;
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
 
     // Properties.
     // ------------------------------------------------------------------------
     /// Native properties.
-    bool is_valid() const noexcept;
-    uint32_t version() const noexcept;
-    const hash_digest& previous_block_hash() const noexcept;
-    const hash_digest& merkle_root() const noexcept;
-    uint32_t timestamp() const noexcept;
-    uint32_t bits() const noexcept;
-    uint32_t nonce() const noexcept;
+    bool is_valid() const NOEXCEPT;
+    uint32_t version() const NOEXCEPT;
+    const hash_digest& previous_block_hash() const NOEXCEPT;
+    const hash_digest& merkle_root() const NOEXCEPT;
+    uint32_t timestamp() const NOEXCEPT;
+    uint32_t bits() const NOEXCEPT;
+    uint32_t nonce() const NOEXCEPT;
 
     /// Computed properties.
-    hash_digest hash() const noexcept;
-    uint256_t difficulty() const noexcept;
+    hash_digest hash() const NOEXCEPT;
+    uint256_t difficulty() const NOEXCEPT;
 
     // Validation.
     // ------------------------------------------------------------------------
 
     code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
-        bool scrypt=false) const noexcept;
+        bool scrypt=false) const NOEXCEPT;
 
-    code accept(const chain_state& state) const noexcept;
+    code accept(const chain_state& state) const NOEXCEPT;
 
 protected:
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, bool valid) noexcept;
+        uint32_t nonce, bool valid) NOEXCEPT;
     header(uint32_t version, const hash_digest& previous_block_hash,
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce, bool valid) noexcept;
+        uint32_t nonce, bool valid) NOEXCEPT;
 
     // Check (context free).
     // ------------------------------------------------------------------------
 
     bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
-        bool scrypt=false) const noexcept;
-    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const noexcept;
+        bool scrypt=false) const NOEXCEPT;
+    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
 
     // Accept (relative to chain_state).
     // ------------------------------------------------------------------------
@@ -140,8 +140,8 @@ protected:
     // error::incorrect_proof_of_work
 
 private:
-    static header from_data(reader& source) noexcept;
-    static uint256_t difficulty(uint32_t bits) noexcept;
+    static header from_data(reader& source) NOEXCEPT;
+    static uint256_t difficulty(uint32_t bits) NOEXCEPT;
 
     // Header should be stored as shared (adds 16 bytes).
     // copy: 4 * 32 + 2 * 256 + 1 = 81 bytes (vs. 16 when shared).
@@ -170,7 +170,7 @@ namespace std
 template<>
 struct hash<bc::system::chain::header>
 {
-    size_t operator()(const bc::system::chain::header& value) const noexcept
+    size_t operator()(const bc::system::chain::header& value) const NOEXCEPT
     {
         return std::hash<bc::system::hash_digest>{}(value.hash());
     }

@@ -50,7 +50,7 @@ class bit_flipper
 {
 public:
     /// Constructors.
-    bit_flipper(IOStream& stream) noexcept
+    bit_flipper(IOStream& stream) NOEXCEPT
       : bit_reader<IOStream>(stream), bit_writer<IOStream>(stream)
     {
         // Base constructions only capture references.
@@ -68,13 +68,13 @@ public:
     // Two base destructor calls order is unimportant (only writes flush).
     ~bit_flipper() override = default;
 
-    operator bool() const noexcept override
+    operator bool() const NOEXCEPT override
     {
         // Rely on reader implementation, both are trivial and identical.
         return bit_reader<IOStream>::operator bool();
     }
 
-    bool operator!() const noexcept override
+    bool operator!() const NOEXCEPT override
     {
         // Rely on reader implementation, both are trivial and identical.
         return bit_reader<IOStream>::operator!();

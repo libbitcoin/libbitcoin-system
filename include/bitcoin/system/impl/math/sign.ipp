@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/safe.hpp>
 
 namespace libbitcoin {
@@ -58,52 +59,52 @@ namespace system {
 
 // unsafe
 template <typename Integer, typename Result, if_signed_integer<Integer>>
-constexpr Result absolute(Integer value) noexcept
+constexpr Result absolute(Integer value) NOEXCEPT
 {
     return to_unsigned(is_negative(value) ? negate(value) : value);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer absolute(Integer value) noexcept
+constexpr Integer absolute(Integer value) NOEXCEPT
 {
     return value;
 }
 
 // unsafe
 template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer negate(Integer value) noexcept
+constexpr Integer negate(Integer value) NOEXCEPT
 {
     return safe_negate(value);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer negate(Integer value) noexcept
+constexpr Integer negate(Integer value) NOEXCEPT
 {
     return add1(ones_complement(value));
 }
 
 template <typename Value, if_integer<Value>>
-constexpr Value twos_complement(Value value) noexcept
+constexpr Value twos_complement(Value value) NOEXCEPT
 {
     // Overflows from minimum to ~minimum (-1) to +1 => zero.
     return add1(ones_complement(value));
 }
 
 template <typename Value, if_integer<Value>>
-constexpr Value ones_complement(Value value) noexcept
+constexpr Value ones_complement(Value value) NOEXCEPT
 {
     // Alias for bit_not.
     return possible_narrow_and_sign_cast<Value>(~value);
 }
 
 template <typename Integer, typename Signed, if_integer<Integer>>
-constexpr Signed to_signed(Integer value) noexcept
+constexpr Signed to_signed(Integer value) NOEXCEPT
 {
     return possible_sign_cast<Signed>(value);
 }
 
 template <typename Integer, typename Unsigned, if_integer<Integer>>
-constexpr Unsigned to_unsigned(Integer value) noexcept
+constexpr Unsigned to_unsigned(Integer value) NOEXCEPT
 {
     return possible_sign_cast<Unsigned>(value);
 }
@@ -113,63 +114,63 @@ constexpr Unsigned to_unsigned(Integer value) noexcept
 
 template <typename Integer,
     if_signed_integer<Integer>>
-constexpr bool is_negative(Integer value) noexcept
+constexpr bool is_negative(Integer value) NOEXCEPT
 {
     return value < 0;
 }
 
 template <typename Integer,
     if_unsigned_integer<Integer>>
-constexpr bool is_negative(Integer) noexcept
+constexpr bool is_negative(Integer) NOEXCEPT
 {
     return false;
 }
 
 template <typename Left, typename Right,
     if_same_signed_integer<Left, Right>>
-constexpr bool is_greater(Left left, Right right) noexcept
+constexpr bool is_greater(Left left, Right right) NOEXCEPT
 {
     return left > right;
 }
 
 template <typename Left, typename Right,
     if_unsigned_integer<Left>, if_signed_integer<Right>>
-constexpr bool is_greater(Left left, Right right) noexcept
+constexpr bool is_greater(Left left, Right right) NOEXCEPT
 {
     return is_negative(right) || (left > to_unsigned(right));
 }
 
 template <typename Left, typename Right,
     if_signed_integer<Left>, if_unsigned_integer<Right>>
-constexpr bool is_greater(Left left, Right right) noexcept
+constexpr bool is_greater(Left left, Right right) NOEXCEPT
 {
      return !is_negative(left) && (right < to_unsigned(left));
 }
 
 template <typename Left, typename Right,
     if_same_signed_integer<Left, Right>>
-constexpr bool is_lesser(Left left, Right right) noexcept
+constexpr bool is_lesser(Left left, Right right) NOEXCEPT
 {
     return left < right;
 }
 
 template <typename Left, typename Right,
     if_signed_integer<Left>, if_unsigned_integer<Right>>
-constexpr bool is_lesser(Left left, Right right) noexcept
+constexpr bool is_lesser(Left left, Right right) NOEXCEPT
 {
     return is_negative(left) || (to_unsigned(left) < right);
 }
 
 template <typename Left, typename Right,
     if_unsigned_integer<Left>, if_signed_integer<Right>>
-constexpr bool is_lesser(Left left, Right right) noexcept
+constexpr bool is_lesser(Left left, Right right) NOEXCEPT
 {
     return !is_negative(right) && (to_unsigned(right) > left);
 }
 
 template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
-constexpr Result greater(Left left, Right right) noexcept
+constexpr Result greater(Left left, Right right) NOEXCEPT
 {
     // Precludes Result narrower than either operand.
     return possible_sign_cast<Result>(is_greater(left, right) ? left : right);
@@ -177,7 +178,7 @@ constexpr Result greater(Left left, Right right) noexcept
 
 template<typename Result, typename Left, typename Right,
     if_integer<Left>, if_integer<Right>>
-constexpr Result lesser(Left left, Right right) noexcept
+constexpr Result lesser(Left left, Right right) NOEXCEPT
 {
     // Precludes Result narrower than either operand.
     return possible_sign_cast<Result>(is_lesser(left, right) ? left : right);

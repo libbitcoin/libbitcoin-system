@@ -33,7 +33,7 @@ namespace libbitcoin {
 /// This isolates integral promotion, and caller controls operating domain.
 
 template <typename Type>
-constexpr bool is_zero(Type value) noexcept
+constexpr bool is_zero(Type value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return value == static_cast<Type>(zero);
@@ -41,13 +41,13 @@ constexpr bool is_zero(Type value) noexcept
 }
 
 template <typename Type>
-constexpr bool is_nonzero(Type value) noexcept
+constexpr bool is_nonzero(Type value) NOEXCEPT
 {
     return !is_zero(value);
 }
 
 template <typename Type>
-constexpr bool is_one(Type value) noexcept
+constexpr bool is_one(Type value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return value == static_cast<Type>(1);
@@ -55,7 +55,7 @@ constexpr bool is_one(Type value) noexcept
 }
 
 template <typename Type>
-constexpr Type lo_bit(Type value) noexcept
+constexpr Type lo_bit(Type value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<Type>(value % 2);
@@ -63,32 +63,32 @@ constexpr Type lo_bit(Type value) noexcept
 }
 
 template <typename Type>
-constexpr bool is_even(Type value) noexcept
+constexpr bool is_even(Type value) NOEXCEPT
 {
     return is_zero(lo_bit(value));
 }
 
 template <typename Type>
-constexpr bool is_odd(Type value) noexcept
+constexpr bool is_odd(Type value) NOEXCEPT
 {
     return !is_even(value);
 }
 
 template <typename Type>
-constexpr bool is_null(Type value) noexcept
+constexpr bool is_null(Type value) NOEXCEPT
 {
     return value == nullptr;
 }
 
 template <typename Type>
-constexpr Type to_bits(Type bytes) noexcept
+constexpr Type to_bits(Type bytes) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<Type>(bytes * 8);
     BC_POP_WARNING()
 }
 
-constexpr uint8_t to_byte(char character) noexcept
+constexpr uint8_t to_byte(char character) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<uint8_t>(character);
@@ -97,7 +97,7 @@ constexpr uint8_t to_byte(char character) noexcept
 
 // floored
 template <typename Type>
-constexpr Type to_half(Type value) noexcept
+constexpr Type to_half(Type value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<Type>(value / 2);
@@ -105,7 +105,7 @@ constexpr Type to_half(Type value) noexcept
 }
 
 template <typename Type = int>
-constexpr Type to_int(bool value) noexcept
+constexpr Type to_int(bool value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<Type>(value ? 1 : 0);
@@ -113,13 +113,13 @@ constexpr Type to_int(bool value) noexcept
 }
 
 template <typename Type>
-constexpr bool to_bool(Type value) noexcept
+constexpr bool to_bool(Type value) NOEXCEPT
 {
     return is_nonzero(value);
 }
 
 template <typename Type>
-constexpr Type add1(Type value) noexcept
+constexpr Type add1(Type value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<Type>(value + 1);
@@ -127,7 +127,7 @@ constexpr Type add1(Type value) noexcept
 }
 
 template <typename Type>
-constexpr Type sub1(Type value) noexcept
+constexpr Type sub1(Type value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<Type>(value - 1);
@@ -135,7 +135,7 @@ constexpr Type sub1(Type value) noexcept
 }
 
 template <typename Type>
-constexpr size_t width() noexcept
+constexpr size_t width() NOEXCEPT
 {
     // This is not always a logical size for non-integral types.
     // see comments in is_integral_size for expected integral sizes.
@@ -143,7 +143,7 @@ constexpr size_t width() noexcept
 }
 
 template <typename Type>
-constexpr size_t width(Type value) noexcept
+constexpr size_t width(Type value) NOEXCEPT
 {
     // This is not always a logical size for non-integral types.
     // see comments in is_integral_size for expected integral sizes.
@@ -151,7 +151,7 @@ constexpr size_t width(Type value) noexcept
 }
 
 /// Determine the bitcoin variable-serialized size of a given value.
-constexpr size_t variable_size(uint64_t value) noexcept
+constexpr size_t variable_size(uint64_t value) NOEXCEPT
 {
     if (value < varint_two_bytes)
         return sizeof(uint8_t);
@@ -166,20 +166,20 @@ constexpr size_t variable_size(uint64_t value) noexcept
 }
 
 template <typename Left, typename Right>
-constexpr bool is_same() noexcept
+constexpr bool is_same() NOEXCEPT
 {
     // implies same size and signedness, independent of const and volatility.
     return std::is_same_v<Left, Right>;
 }
 
 template <typename Left, typename Right>
-constexpr bool is_same_size() noexcept
+constexpr bool is_same_size() NOEXCEPT
 {
     return sizeof(Left) == sizeof(Right);
 }
 
 template <typename Type>
-constexpr bool is_signed() noexcept
+constexpr bool is_signed() NOEXCEPT
 {
     // bool is unsigned: bool(-1) < bool(0). w/char sign unspecified.
     // w/charxx_t types are unsigned. iostream relies on w/char.
@@ -187,13 +187,13 @@ constexpr bool is_signed() noexcept
 }
 
 template <typename Type>
-constexpr bool is_integer() noexcept
+constexpr bool is_integer() NOEXCEPT
 {
     // numeric_limits may be specialized by non-integrals (such as uintx).
     return std::numeric_limits<Type>::is_integer && !is_same<Type, bool>();
 }
 
-constexpr bool is_integral_size(size_t bytes) noexcept
+constexpr bool is_integral_size(size_t bytes) NOEXCEPT
 {
     // non-numbered integrals have unreliable sizes (as do least/fast types).
     // s/u char are one byte. bool and wchar_t are of unspecified size, as are
@@ -207,13 +207,13 @@ constexpr bool is_integral_size(size_t bytes) noexcept
 // This is future-proofing against larger integrals or language features that
 // promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
 template <typename Type>
-constexpr bool is_integral_size() noexcept
+constexpr bool is_integral_size() NOEXCEPT
 {
     return is_integral_size(sizeof(Type));
 }
 
 template <typename Type>
-constexpr bool is_integral() noexcept
+constexpr bool is_integral() NOEXCEPT
 {
     // bool is integral, but excluded here.
     return std::is_integral_v<Type>
@@ -223,7 +223,7 @@ constexpr bool is_integral() noexcept
 
 // This is future-proofing against larger integrals or language features that
 // promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
-constexpr bool is_bytes_width(size_t bits) noexcept
+constexpr bool is_bytes_width(size_t bits) NOEXCEPT
 {
     return !is_zero(bits) && is_zero(bits % byte_bits);
 }

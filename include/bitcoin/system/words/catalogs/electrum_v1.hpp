@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WORDS_CATALOGS_ELECTRUM_V1_HPP
 #define LIBBITCOIN_SYSTEM_WORDS_CATALOGS_ELECTRUM_V1_HPP
 
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/words/dictionary.hpp>
 #include <bitcoin/system/words/dictionaries.hpp>
 

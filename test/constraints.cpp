@@ -32,7 +32,7 @@ class derived : base {};
 ////class not_default_constructible { not_default_constructible(int) {}};
 
 template <typename>
-constexpr bool is_defined() noexcept
+constexpr bool is_defined() NOEXCEPT
 {
     return true;
 }

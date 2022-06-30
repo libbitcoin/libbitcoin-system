@@ -34,7 +34,7 @@ class BC_API ifstream
 public:
     /// This also opens the file.
     ifstream(const std::filesystem::path& path,
-        std::ifstream::openmode mode=std::ifstream::in) noexcept(false);
+        std::ifstream::openmode mode=std::ifstream::in) THROWS;
 };
 
 } // namespace system

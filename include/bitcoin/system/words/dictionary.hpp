@@ -26,6 +26,7 @@
 #include <vector>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/words/language.hpp>
 
@@ -46,36 +47,36 @@ public:
     static_assert(Size <= possible_narrow_sign_cast<size_t>(max_int32));
 
     /// The number of words in the dictionary.
-    static constexpr size_t size() noexcept { return Size; };
+    static constexpr size_t size() NOEXCEPT { return Size; };
 
     /// Constructor.
-    dictionary(language identifier, const words& words) noexcept;
+    dictionary(language identifier, const words& words) NOEXCEPT;
 
     /// The language identifier of the dictionary.
-    language identifier() const noexcept;
+    language identifier() const NOEXCEPT;
 
     /// The language name of the dictionary.
-    std::string name() const noexcept;
+    std::string name() const NOEXCEPT;
 
     /// Search.
 
     /// Empty string if index > Size.
-    std::string at(size_t index) const noexcept;
+    std::string at(size_t index) const NOEXCEPT;
 
     /// Empty string for any index > Size.
-    string_list at(const search& indexes) const noexcept;
+    string_list at(const search& indexes) const NOEXCEPT;
 
     /// -1 if word is not found.
-    int32_t index(const std::string& word) const noexcept;
+    int32_t index(const std::string& word) const NOEXCEPT;
 
     /// -1 for any word that is not found.
-    result index(const string_list& words) const noexcept;
+    result index(const string_list& words) const NOEXCEPT;
 
     /// True if the word is in the dictionary.
-    bool contains(const std::string& word) const noexcept;
+    bool contains(const std::string& word) const NOEXCEPT;
 
     /// True if all words are in the dictionary.
-    bool contains(const string_list& words) const noexcept;
+    bool contains(const string_list& words) const NOEXCEPT;
 
 private:
     // This dictionary creates only this one word of state.

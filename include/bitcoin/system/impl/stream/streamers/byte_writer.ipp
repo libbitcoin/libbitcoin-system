@@ -44,7 +44,7 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-byte_writer<OStream>::byte_writer(OStream& sink) noexcept
+byte_writer<OStream>::byte_writer(OStream& sink) NOEXCEPT
   : stream_(sink)
 {
     ////BC_ASSERT_MSG(stream_.exceptions() == OStream::goodbit,
@@ -76,7 +76,7 @@ byte_writer<OStream>& byte_writer<OStream>::operator=(const byte_writer& other)
 }
 
 template <typename OStream>
-byte_writer<OStream>::~byte_writer() noexcept
+byte_writer<OStream>::~byte_writer() NOEXCEPT
 {
     flusher();
 }
@@ -86,7 +86,7 @@ byte_writer<OStream>::~byte_writer() noexcept
 
 template <typename OStream>
 template <typename Integer, if_integer<Integer>>
-void byte_writer<OStream>::write_big_endian(Integer value) noexcept
+void byte_writer<OStream>::write_big_endian(Integer value) NOEXCEPT
 {
     // TODO: reimplement on derived classes and change to this here:
     ////to_big_endian<Integer>(stream_, value);
@@ -97,19 +97,19 @@ void byte_writer<OStream>::write_big_endian(Integer value) noexcept
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_2_bytes_big_endian(uint16_t value) noexcept
+void byte_writer<OStream>::write_2_bytes_big_endian(uint16_t value) NOEXCEPT
 {
     write_big_endian<uint16_t>(value);
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_4_bytes_big_endian(uint32_t value) noexcept
+void byte_writer<OStream>::write_4_bytes_big_endian(uint32_t value) NOEXCEPT
 {
     write_big_endian<uint32_t>(value);
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_8_bytes_big_endian(uint64_t value) noexcept
+void byte_writer<OStream>::write_8_bytes_big_endian(uint64_t value) NOEXCEPT
 {
     write_big_endian<uint64_t>(value);
 }
@@ -119,7 +119,7 @@ void byte_writer<OStream>::write_8_bytes_big_endian(uint64_t value) noexcept
 
 template <typename OStream>
 template <typename Integer, if_integer<Integer>>
-void byte_writer<OStream>::write_little_endian(Integer value) noexcept
+void byte_writer<OStream>::write_little_endian(Integer value) NOEXCEPT
 {
     // TODO: reimplement on derived classes and change to this here:
     ////to_little_endian<Integer>(stream_, value);
@@ -130,19 +130,19 @@ void byte_writer<OStream>::write_little_endian(Integer value) noexcept
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_2_bytes_little_endian(uint16_t value) noexcept
+void byte_writer<OStream>::write_2_bytes_little_endian(uint16_t value) NOEXCEPT
 {
     write_little_endian<uint16_t>(value);
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_4_bytes_little_endian(uint32_t value) noexcept
+void byte_writer<OStream>::write_4_bytes_little_endian(uint32_t value) NOEXCEPT
 {
     write_little_endian<uint32_t>(value);
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_8_bytes_little_endian(uint64_t value) noexcept
+void byte_writer<OStream>::write_8_bytes_little_endian(uint64_t value) NOEXCEPT
 {
     write_little_endian<uint64_t>(value);
 }
@@ -150,7 +150,7 @@ void byte_writer<OStream>::write_8_bytes_little_endian(uint64_t value) noexcept
 // Normal consensus form.
 // There is exactly one representation for any number in the domain.
 template <typename OStream>
-void byte_writer<OStream>::write_variable(uint64_t value) noexcept
+void byte_writer<OStream>::write_variable(uint64_t value) NOEXCEPT
 {
     if (value < varint_two_bytes)
     {
@@ -175,7 +175,7 @@ void byte_writer<OStream>::write_variable(uint64_t value) noexcept
 
 // Normal client-server form.
 template <typename OStream>
-void byte_writer<OStream>::write_error_code(const code& ec) noexcept
+void byte_writer<OStream>::write_error_code(const code& ec) NOEXCEPT
 {
     write_4_bytes_little_endian(sign_cast<uint32_t>(ec.value()));
 }
@@ -184,7 +184,7 @@ void byte_writer<OStream>::write_error_code(const code& ec) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-std::istream& byte_writer<OStream>::write(std::istream& in) noexcept
+std::istream& byte_writer<OStream>::write(std::istream& in) NOEXCEPT
 {
     // This creates an intermediate buffer the size of the stream.
     // This is presumed to be more optimal than looping individual bytes.
@@ -193,20 +193,20 @@ std::istream& byte_writer<OStream>::write(std::istream& in) noexcept
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_byte(uint8_t value) noexcept
+void byte_writer<OStream>::write_byte(uint8_t value) NOEXCEPT
 {
     do_write_bytes(&value, one);
 }
 
 template <typename OStream>
-void byte_writer<OStream>::write_bytes(const data_slice& data) noexcept
+void byte_writer<OStream>::write_bytes(const data_slice& data) NOEXCEPT
 {
     do_write_bytes(data.data(), data.size());
 }
 
 template <typename OStream>
 void byte_writer<OStream>::write_bytes(const uint8_t* data,
-    size_t size) noexcept
+    size_t size) NOEXCEPT
 {
     do_write_bytes(data, size);
 }
@@ -216,7 +216,7 @@ void byte_writer<OStream>::write_bytes(const uint8_t* data,
 // Normal p2p form (consensus hash no strings).
 
 template <typename OStream>
-void byte_writer<OStream>::write_string(const std::string& value) noexcept
+void byte_writer<OStream>::write_string(const std::string& value) NOEXCEPT
 {
     write_variable(value.size());
     write_string_buffer(value, value.size());
@@ -224,7 +224,7 @@ void byte_writer<OStream>::write_string(const std::string& value) noexcept
 
 template <typename OStream>
 void byte_writer<OStream>::write_string_buffer(const std::string& value,
-    size_t size) noexcept
+    size_t size) NOEXCEPT
 {
     const auto length = std::min(size, value.size());
 
@@ -239,7 +239,7 @@ void byte_writer<OStream>::write_string_buffer(const std::string& value,
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-void byte_writer<OStream>::flush() noexcept
+void byte_writer<OStream>::flush() NOEXCEPT
 {
     do_flush();
 }
@@ -249,20 +249,20 @@ void byte_writer<OStream>::flush() noexcept
 // These only call non-virtual (private) methods.
 
 template <typename OStream>
-size_t byte_writer<OStream>::get_position() noexcept
+size_t byte_writer<OStream>::get_position() NOEXCEPT
 {
     return getter();
 }
 
 template <typename OStream>
-byte_writer<OStream>::operator bool() const noexcept
+byte_writer<OStream>::operator bool() const NOEXCEPT
 {
     return valid();
 }
 
 // This should not be necessary with bool() defined, but it is.
 template <typename OStream>
-bool byte_writer<OStream>::operator!() const noexcept
+bool byte_writer<OStream>::operator!() const NOEXCEPT
 {
     return !valid();
 }
@@ -271,13 +271,13 @@ bool byte_writer<OStream>::operator!() const noexcept
 // ----------------------------------------------------------------------------
 // These may only call non-virtual (private) methods (due to overriding).
 
-// Suppress ostream members may throw inside noexcept.
+// Suppress ostream members may throw inside NOEXCEPT.
 // The intended behavior in this case is program abort.
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 template <typename OStream>
 void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
-    size_t size) noexcept
+    size_t size) NOEXCEPT
 {
     // It is not generally more efficient to call stream_.put() for one byte.
 
@@ -290,7 +290,7 @@ void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
 }
 
 template <typename OStream>
-void byte_writer<OStream>::do_flush() noexcept
+void byte_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
     validate();
@@ -301,14 +301,14 @@ void byte_writer<OStream>::do_flush() noexcept
 // These may only call other private methods (due to overriding).
 
 template <typename OStream>
-bool byte_writer<OStream>::valid() const noexcept
+bool byte_writer<OStream>::valid() const NOEXCEPT
 {
     // zero is the istream documented flag for no error.
     return stream_.rdstate() == OStream::goodbit;
 }
 
 template <typename OStream>
-void byte_writer<OStream>::invalid() noexcept
+void byte_writer<OStream>::invalid() NOEXCEPT
 {
     // If eofbit is set, failbit is generally set on all operations.
     // badbit is unrecoverable, set the others to ensure consistency.
@@ -316,7 +316,7 @@ void byte_writer<OStream>::invalid() noexcept
 }
 
 template <typename OStream>
-void byte_writer<OStream>::validate() noexcept
+void byte_writer<OStream>::validate() NOEXCEPT
 {
     // Ensure that any failure in the call fully invalidates the stream/writer.
     // Some errors are recoverable, so a sequence of operations without testing
@@ -326,13 +326,13 @@ void byte_writer<OStream>::validate() noexcept
 }
 
 template <typename OStream>
-void byte_writer<OStream>::flusher() noexcept
+void byte_writer<OStream>::flusher() NOEXCEPT
 {
     stream_.flush();
 }
 
 template <typename OStream>
-size_t byte_writer<OStream>::getter() noexcept
+size_t byte_writer<OStream>::getter() NOEXCEPT
 {
     static const auto failure = typename OStream::pos_type(-1);
     typename OStream::pos_type position;

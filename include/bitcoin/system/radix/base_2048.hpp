@@ -42,28 +42,28 @@ typedef std::vector<uint11_t> base2048_chunk;
 /// Convert a base2048 sentence to bytes.
 /// False if any word is not from the specified dictionary.
 BC_API bool encode_base2048(data_chunk& out, const std::string& in,
-    language language =language::en) noexcept;
+    language language =language::en) NOEXCEPT;
 
 /// Convert bytes to a base2048 sentence in the specified language.
 /// Returns empty if language is not a supported dictionary.
 BC_API std::string decode_base2048(const data_chunk& data,
-    language language=language::en) noexcept;
+    language language=language::en) NOEXCEPT;
 
 /// Convert a base2048 word list to bytes.
 /// False if any word is not from the specified dictionary.
 BC_API bool encode_base2048_list(data_chunk& out, const string_list& in,
-    language language=language::en) noexcept;
+    language language=language::en) NOEXCEPT;
 
 /// Convert bytes to a base2048 word list in the specified language.
 /// Returns empty if language is not a supported dictionary.
 BC_API string_list decode_base2048_list(const data_chunk& data,
-    language language=language::en) noexcept;
+    language language=language::en) NOEXCEPT;
 
 /// Pack any vector of 8 bit bytes to vector of 11 bit bytes.
-BC_API base2048_chunk base2048_pack(const data_chunk& unpacked) noexcept;
+BC_API base2048_chunk base2048_pack(const data_chunk& unpacked) NOEXCEPT;
 
 /// Unpack any vector of 11 bit bytes to a vector of 8 bit bytes.
-BC_API data_chunk base2048_unpack(const base2048_chunk& packed) noexcept;
+BC_API data_chunk base2048_unpack(const base2048_chunk& packed) NOEXCEPT;
 
 // TODO: en.cppreference.com/w/cpp/language/user_literal
 

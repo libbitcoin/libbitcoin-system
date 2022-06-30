@@ -58,32 +58,32 @@ const uint8_t stealth_address::reuse_key_flag = 1 << 0;
 const size_t stealth_address::min_filter_bits = width<uint8_t>();
 const size_t stealth_address::max_filter_bits = width<uint32_t>();
 
-stealth_address::stealth_address() noexcept
+stealth_address::stealth_address() NOEXCEPT
   : valid_(false), version_(0), scan_key_(null_ec_compressed),
     spend_keys_(), signatures_(0), filter_()
 {
 }
 
-stealth_address::stealth_address(const stealth_address& other) noexcept
+stealth_address::stealth_address(const stealth_address& other) NOEXCEPT
   : valid_(other.valid_), version_(other.version_), scan_key_(other.scan_key_),
     spend_keys_(other.spend_keys_), signatures_(other.signatures_),
     filter_(other.filter_)
 {
 }
 
-stealth_address::stealth_address(const std::string& encoded) noexcept
+stealth_address::stealth_address(const std::string& encoded) NOEXCEPT
   : stealth_address(from_string(encoded))
 {
 }
 
-stealth_address::stealth_address(const data_chunk& decoded) noexcept
+stealth_address::stealth_address(const data_chunk& decoded) NOEXCEPT
   : stealth_address(from_stealth(decoded))
 {
 }
 
 stealth_address::stealth_address(const binary& filter,
     const ec_compressed& scan_key, const compressed_list& spend_keys,
-    uint8_t signatures, uint8_t version) noexcept
+    uint8_t signatures, uint8_t version) NOEXCEPT
   : stealth_address(from_stealth(filter, scan_key, spend_keys, signatures,
         version))
 {
@@ -91,7 +91,7 @@ stealth_address::stealth_address(const binary& filter,
 
 stealth_address::stealth_address(uint8_t version, const binary& filter,
     const ec_compressed& scan_key, const compressed_list& spend_keys,
-    uint8_t signatures) noexcept
+    uint8_t signatures) NOEXCEPT
   : valid_(true), filter_(filter), scan_key_(scan_key),
     spend_keys_(spend_keys), signatures_(signatures), version_(version)
 {
@@ -101,7 +101,7 @@ stealth_address::stealth_address(uint8_t version, const binary& filter,
 // ----------------------------------------------------------------------------
 
 stealth_address stealth_address::from_string(
-    const std::string& encoded) noexcept
+    const std::string& encoded) NOEXCEPT
 {
     data_chunk decoded;
     return decode_base58(decoded, encoded) ? stealth_address(decoded) :
@@ -110,7 +110,7 @@ stealth_address stealth_address::from_string(
 
 // This is the stealth address parser.
 stealth_address stealth_address::from_stealth(
-    const data_chunk& decoded) noexcept
+    const data_chunk& decoded) NOEXCEPT
 {
     // Size is guarded until we get to N.
     auto required_size = min_address_size;
@@ -185,7 +185,7 @@ stealth_address stealth_address::from_stealth(
 // This corrects signature and spend_keys.
 stealth_address stealth_address::from_stealth(const binary& filter,
     const ec_compressed& scan_key, const compressed_list& spend_keys,
-    uint8_t signatures, uint8_t version) noexcept
+    uint8_t signatures, uint8_t version) NOEXCEPT
 {
     // Ensure there is at least one spend key.
     auto spenders = spend_keys;
@@ -214,12 +214,12 @@ stealth_address stealth_address::from_stealth(const binary& filter,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-stealth_address::operator bool() const noexcept
+stealth_address::operator bool() const NOEXCEPT
 {
     return valid_;
 }
 
-stealth_address::operator const data_chunk() const noexcept
+stealth_address::operator const data_chunk() const NOEXCEPT
 {
     return stealth_address::to_chunk();
 }
@@ -227,12 +227,12 @@ stealth_address::operator const data_chunk() const noexcept
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string stealth_address::encoded() const noexcept
+std::string stealth_address::encoded() const NOEXCEPT
 {
     return encode_base58(stealth_address::to_chunk());
 }
 
-uint8_t stealth_address::version() const noexcept
+uint8_t stealth_address::version() const NOEXCEPT
 {
     return version_;
 }
@@ -240,22 +240,22 @@ uint8_t stealth_address::version() const noexcept
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const binary& stealth_address::filter() const noexcept
+const binary& stealth_address::filter() const NOEXCEPT
 {
     return filter_;
 }
 
-const ec_compressed& stealth_address::scan_key() const noexcept
+const ec_compressed& stealth_address::scan_key() const NOEXCEPT
 {
     return scan_key_;
 }
 
-uint8_t stealth_address::signatures() const noexcept
+uint8_t stealth_address::signatures() const NOEXCEPT
 {
     return signatures_;
 }
 
-const compressed_list& stealth_address::spend_keys() const noexcept
+const compressed_list& stealth_address::spend_keys() const NOEXCEPT
 {
     return spend_keys_;
 }
@@ -263,7 +263,7 @@ const compressed_list& stealth_address::spend_keys() const noexcept
 // Methods.
 // ----------------------------------------------------------------------------
 
-data_chunk stealth_address::to_chunk() const noexcept
+data_chunk stealth_address::to_chunk() const NOEXCEPT
 {
     data_chunk address;
     address.push_back(version());
@@ -302,14 +302,14 @@ data_chunk stealth_address::to_chunk() const noexcept
 // Helpers.
 // ----------------------------------------------------------------------------
 
-bool stealth_address::reuse_key() const noexcept
+bool stealth_address::reuse_key() const NOEXCEPT
 {
     // If the spend_keys_ contains the scan_key_ then the key is reused.
     return std::find(spend_keys_.begin(), spend_keys_.end(), scan_key_) !=
         spend_keys_.end();
 }
 
-uint8_t stealth_address::options() const noexcept
+uint8_t stealth_address::options() const NOEXCEPT
 {
     // There is currently only one option.
     return reuse_key() ? reuse_key_flag : 0x00;
@@ -319,7 +319,7 @@ uint8_t stealth_address::options() const noexcept
 // ----------------------------------------------------------------------------
 
 stealth_address& stealth_address::operator=(
-    const stealth_address& other) noexcept
+    const stealth_address& other) NOEXCEPT
 {
     valid_ = other.valid_;
     version_ = other.version_;
@@ -330,19 +330,19 @@ stealth_address& stealth_address::operator=(
     return *this;
 }
 
-bool stealth_address::operator<(const stealth_address& other) const noexcept
+bool stealth_address::operator<(const stealth_address& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
 }
 
-bool stealth_address::operator==(const stealth_address& other) const noexcept
+bool stealth_address::operator==(const stealth_address& other) const NOEXCEPT
 {
     return valid_ == other.valid_ && version_ == other.version_ &&
         scan_key_ == other.scan_key_&& spend_keys_ == other.spend_keys_ &&
         signatures_ == other.signatures_ && filter_ == other.filter_;
 }
 
-bool stealth_address::operator!=(const stealth_address& other) const noexcept
+bool stealth_address::operator!=(const stealth_address& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -359,7 +359,7 @@ std::istream& operator>>(std::istream& in, stealth_address& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const stealth_address& of) noexcept
+std::ostream& operator<<(std::ostream& out, const stealth_address& of) NOEXCEPT
 {
     out << of.encoded();
     return out;

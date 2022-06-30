@@ -23,8 +23,8 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -42,27 +42,27 @@ public:
     ~script() = default;
 
     /// Constructors.
-    script() noexcept;
-    script(chain::script&& value) noexcept;
-    script(const chain::script& value) noexcept;
+    script() NOEXCEPT;
+    script(chain::script&& value) NOEXCEPT;
+    script(const chain::script& value) NOEXCEPT;
 
     /// Split or unsplit tokens.
-    script(const std::string& mnemonic) noexcept(false);
-    script(const std::vector<std::string>& tokens) noexcept(false);
+    script(const std::string& mnemonic) THROWS;
+    script(const std::vector<std::string>& tokens) THROWS;
 
     /// Default text encoding is mnemonic, so provide data for base16.
-    script(const data_chunk& value) noexcept;
+    script(const data_chunk& value) NOEXCEPT;
 
-    ////std::string to_string() const noexcept;
+    ////std::string to_string() const NOEXCEPT;
 
     /// Operators.
 
-    operator const chain::script&() const noexcept;
+    operator const chain::script&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        script& argument) noexcept(false);
+        script& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const script& argument) noexcept;
+        const script& argument) NOEXCEPT;
 
 private:
     chain::script value_;

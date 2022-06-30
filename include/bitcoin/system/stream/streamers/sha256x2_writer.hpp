@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
@@ -36,24 +37,24 @@ class sha256x2_writer
 {
 public:
     /// Constructors.
-    sha256x2_writer(OStream& sink) noexcept;
+    sha256x2_writer(OStream& sink) NOEXCEPT;
 
     /// Copy/move/destruct.
     sha256x2_writer(sha256x2_writer&&);
     sha256x2_writer(const sha256x2_writer&);
     sha256x2_writer& operator=(sha256x2_writer&&);
     sha256x2_writer& operator=(const sha256x2_writer&);
-    ~sha256x2_writer() noexcept override;
+    ~sha256x2_writer() NOEXCEPT override;
 
 protected:
     /// The maximum addressable stream position.
     static constexpr size_t maximum = hash_size;
 
-    void do_write_bytes(const uint8_t* data, size_t size) noexcept override;
-    void do_flush() noexcept override;
+    void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
+    void do_flush() NOEXCEPT override;
 
 private:
-    void flusher() noexcept;
+    void flusher() NOEXCEPT;
 
     intrinsics::sha256_context context_;
 };

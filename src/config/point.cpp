@@ -41,7 +41,7 @@ const std::string point::delimiter = ":";
 // "txhash:index"
 
 static bool decode_point(chain::point& point,
-    const std::string& tuple) noexcept(false)
+    const std::string& tuple) THROWS
 {
     uint32_t index;
     const auto tokens = split(tuple, point::delimiter);
@@ -58,39 +58,39 @@ static bool decode_point(chain::point& point,
     return true;
 }
 
-static std::string encode_point(const chain::point& point) noexcept
+static std::string encode_point(const chain::point& point) NOEXCEPT
 {
     std::ostringstream result;
     result << hash256(point.hash()) << point::delimiter << point.index();
     return result.str();
 }
 
-point::point() noexcept
+point::point() NOEXCEPT
   : value_()
 {
 }
 
-point::point(chain::point&& value) noexcept
+point::point(chain::point&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-point::point(const chain::point& value) noexcept
+point::point(const chain::point& value) NOEXCEPT
   : value_(value)
 {
 }
 
-point::point(const std::string& tuple) noexcept(false)
+point::point(const std::string& tuple) THROWS
 {
     std::istringstream(tuple) >> *this;
 }
 
-point::operator const chain::point&() const noexcept
+point::operator const chain::point&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, point& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, point& argument) THROWS
 {
     std::string tuple;
     stream >> tuple;
@@ -101,7 +101,7 @@ std::istream& operator>>(std::istream& stream, point& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const point& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const point& argument) NOEXCEPT
 {
     stream << encode_point(argument.value_);
     return stream;

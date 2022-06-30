@@ -40,60 +40,60 @@ namespace wallet {
 const uint64_t hd_private::mainnet = to_prefixes(0x0488ade4, hd_public::mainnet);
 const uint64_t hd_private::testnet = to_prefixes(0x04358394, hd_public::testnet);
 
-hd_private::hd_private() noexcept
+hd_private::hd_private() NOEXCEPT
   : hd_public(), secret_(null_hash)
 {
 }
 
-hd_private::hd_private(const hd_private& other) noexcept
+hd_private::hd_private(const hd_private& other) NOEXCEPT
   : hd_public(other), secret_(other.secret_)
 {
 }
 
-hd_private::hd_private(const data_chunk& entropy, uint64_t prefixes) noexcept
+hd_private::hd_private(const data_chunk& entropy, uint64_t prefixes) NOEXCEPT
   : hd_private(from_entropy(entropy, prefixes))
 {
 }
 
 // This reads the private version and sets the public to mainnet.
-hd_private::hd_private(const hd_key& private_key) noexcept
+hd_private::hd_private(const hd_key& private_key) NOEXCEPT
   : hd_private(from_key(private_key, hd_public::mainnet))
 {
 }
 // This reads the private version and sets the public.
 hd_private::hd_private(const hd_key& private_key,
-    uint32_t public_prefix) noexcept
+    uint32_t public_prefix) NOEXCEPT
   : hd_private(from_key(private_key, public_prefix))
 {
 }
 
 // This validates the private version and sets the public.
-hd_private::hd_private(const hd_key& private_key, uint64_t prefixes) noexcept
+hd_private::hd_private(const hd_key& private_key, uint64_t prefixes) NOEXCEPT
   : hd_private(from_key(private_key, prefixes))
 {
 }
 
 // This reads the private version and sets the public to mainnet.
-hd_private::hd_private(const std::string& encoded) noexcept
+hd_private::hd_private(const std::string& encoded) NOEXCEPT
   : hd_private(from_string(encoded, hd_public::mainnet))
 {
 }
 
 // This reads the private version and sets the public.
 hd_private::hd_private(const std::string& encoded,
-    uint32_t public_prefix) noexcept
+    uint32_t public_prefix) NOEXCEPT
   : hd_private(from_string(encoded, public_prefix))
 {
 }
 
 // This validates the private version and sets the public.
-hd_private::hd_private(const std::string& encoded, uint64_t prefixes) noexcept
+hd_private::hd_private(const std::string& encoded, uint64_t prefixes) NOEXCEPT
   : hd_private(from_string(encoded, prefixes))
 {
 }
 
 hd_private::hd_private(const ec_secret& secret,
-    const hd_chain_code& chain_code, uint64_t prefixes) noexcept
+    const hd_chain_code& chain_code, uint64_t prefixes) NOEXCEPT
   : hd_public(from_private(secret, chain_code, prefixes)),
     secret_(secret)
 {
@@ -101,7 +101,7 @@ hd_private::hd_private(const ec_secret& secret,
 
 // private
 hd_private::hd_private(const ec_secret& secret,
-    const hd_chain_code& chain_code, const hd_lineage& lineage) noexcept
+    const hd_chain_code& chain_code, const hd_lineage& lineage) NOEXCEPT
   : hd_public(from_secret(secret, chain_code, lineage)),
     secret_(secret)
 {
@@ -111,7 +111,7 @@ hd_private::hd_private(const ec_secret& secret,
 // ----------------------------------------------------------------------------
 
 hd_private hd_private::from_private(const ec_secret& secret,
-    const hd_chain_code& chain_code, uint64_t prefixes) noexcept
+    const hd_chain_code& chain_code, uint64_t prefixes) NOEXCEPT
 {
     // The key is invalid if parse256(IL) >= n or 0:
     if (!verify(secret))
@@ -129,7 +129,7 @@ hd_private hd_private::from_private(const ec_secret& secret,
 }
 
 hd_private hd_private::from_entropy(const data_slice& entropy,
-    uint64_t prefixes) noexcept
+    uint64_t prefixes) NOEXCEPT
 {
     // This is a magic constant from BIP32.
     static const auto magic = to_chunk("Bitcoin seed");
@@ -139,13 +139,13 @@ hd_private hd_private::from_entropy(const data_slice& entropy,
 }
 
 hd_private hd_private::from_key(const hd_key& key,
-    uint32_t public_prefix) noexcept
+    uint32_t public_prefix) NOEXCEPT
 {
     const auto prefix = from_big_endian<uint32_t>(key);
     return from_key(key, to_prefixes(prefix, public_prefix));
 }
 
-hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) noexcept
+hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) NOEXCEPT
 {
     read::bytes::copy source(key);
 
@@ -173,7 +173,7 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) noexcept
 }
 
 hd_private hd_private::from_string(const std::string& encoded,
-    uint32_t public_prefix) noexcept
+    uint32_t public_prefix) NOEXCEPT
 {
     hd_key key;
     if (!decode_base58(key, encoded))
@@ -183,7 +183,7 @@ hd_private hd_private::from_string(const std::string& encoded,
 }
 
 hd_private hd_private::from_string(const std::string& encoded,
-    uint64_t prefixes) noexcept
+    uint64_t prefixes) NOEXCEPT
 {
     hd_key key;
     return decode_base58(key, encoded) ? hd_private(key, prefixes) :
@@ -193,7 +193,7 @@ hd_private hd_private::from_string(const std::string& encoded,
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-hd_private::operator const ec_secret&() const noexcept
+hd_private::operator const ec_secret&() const NOEXCEPT
 {
     return secret_;
 }
@@ -201,7 +201,7 @@ hd_private::operator const ec_secret&() const noexcept
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string hd_private::encoded() const noexcept
+std::string hd_private::encoded() const NOEXCEPT
 {
     return encode_base58(to_hd_key());
 }
@@ -209,7 +209,7 @@ std::string hd_private::encoded() const noexcept
 /// Accessors.
 // ----------------------------------------------------------------------------
 
-const ec_secret& hd_private::secret() const noexcept
+const ec_secret& hd_private::secret() const NOEXCEPT
 {
     return secret_;
 }
@@ -220,7 +220,7 @@ const ec_secret& hd_private::secret() const noexcept
 // HD keys do not carry a payment address prefix (just like WIF).
 // So we are currently not converting to ec_public or ec_private.
 
-hd_key hd_private::to_hd_key() const noexcept
+hd_key hd_private::to_hd_key() const NOEXCEPT
 {
     static constexpr uint8_t private_key_padding = 0x00;
 
@@ -236,13 +236,13 @@ hd_key hd_private::to_hd_key() const noexcept
     });
 }
 
-hd_public hd_private::to_public() const noexcept
+hd_public hd_private::to_public() const NOEXCEPT
 {
     return hd_public(((hd_public)*this).to_hd_key(),
         hd_public::to_prefix(lineage_.prefixes));
 }
 
-hd_private hd_private::derive_private(uint32_t index) const noexcept
+hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
 {
     constexpr uint8_t depth = 0;
 
@@ -271,7 +271,7 @@ hd_private hd_private::derive_private(uint32_t index) const noexcept
     return hd_private(child, intermediate.second, lineage);
 }
 
-hd_public hd_private::derive_public(uint32_t index) const noexcept
+hd_public hd_private::derive_public(uint32_t index) const NOEXCEPT
 {
     return derive_private(index).to_public();
 }
@@ -279,25 +279,25 @@ hd_public hd_private::derive_public(uint32_t index) const noexcept
 // Operators.
 // ----------------------------------------------------------------------------
 
-hd_private& hd_private::operator=(hd_private other) noexcept
+hd_private& hd_private::operator=(hd_private other) NOEXCEPT
 {
     swap(*this, other);
     return *this;
 }
 
-bool hd_private::operator<(const hd_private& other) const noexcept
+bool hd_private::operator<(const hd_private& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
 }
 
-bool hd_private::operator==(const hd_private& other) const noexcept
+bool hd_private::operator==(const hd_private& other) const NOEXCEPT
 {
     return secret_ == other.secret_ && valid_ == other.valid_ &&
         chain_ == other.chain_ && lineage_ == other.lineage_ &&
         point_ == other.point_;
 }
 
-bool hd_private::operator!=(const hd_private& other) const noexcept
+bool hd_private::operator!=(const hd_private& other) const NOEXCEPT
 {
     return !(*this == other);
 }
@@ -317,14 +317,14 @@ std::istream& operator>>(std::istream& in, hd_private& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const hd_private& of) noexcept
+std::ostream& operator<<(std::ostream& out, const hd_private& of) NOEXCEPT
 {
     out << of.encoded();
     return out;
 }
 
 // friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(hd_private& left, hd_private& right) noexcept
+void swap(hd_private& left, hd_private& right) NOEXCEPT
 {
     using std::swap;
 

@@ -25,6 +25,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -34,97 +35,97 @@ namespace system {
 template <typename Collection, typename Element>
 typename Collection::difference_type
 constexpr binary_search(const Collection& list,
-    const Element& element) noexcept;
+    const Element& element) NOEXCEPT;
 
 /// Copy a collection of From members to a new collection of To members.
 template <typename To, typename From>
-inline To projection(const From& source) noexcept;
+inline To projection(const From& source) NOEXCEPT;
 
 /// Determine if collection of pointers to elements have equal elements.
 template <typename Left, typename Right>
-constexpr bool deep_equal(const Left& left, const Right& right) noexcept;
+constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT;
 
 /// Determine if a collection contains the specified element.
 template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
-    const Element& element) noexcept;
+    const Element& element) NOEXCEPT;
 
 /// Find the position of a std::pair in an ordered list.
 template <typename Collection>
 typename Collection::difference_type
 constexpr find_pair_position(const Collection& list,
-    const typename Collection::value_type::first_type& key) noexcept;
+    const typename Collection::value_type::first_type& key) NOEXCEPT;
 
 /// Find the position of an element in an ordered collection.
 template <typename Collection>
 typename Collection::difference_type
 constexpr find_position(const Collection& list,
-    const typename Collection::value_type& value) noexcept;
+    const typename Collection::value_type& value) NOEXCEPT;
 
 /// Facilitate a list insertion sort by inserting into a sorted position.
 template <typename Collection, typename Predicate>
 typename Collection::iterator
 constexpr insert_sorted(Collection& list,
     const typename Collection::value_type& element,
-    Predicate predicate) noexcept;
+    Predicate predicate) NOEXCEPT;
 
 /// Pop an element from the stack and return its value.
 template <typename Collection>
 typename Collection::value_type
-inline pop(Collection& stack) noexcept;
+inline pop(Collection& stack) NOEXCEPT;
 
 /// Determine if a collection contains only distinct members.
 template <typename Collection>
-constexpr bool is_distinct(Collection&& list) noexcept;
+constexpr bool is_distinct(Collection&& list) NOEXCEPT;
 template <typename Collection>
-constexpr bool is_distinct(const Collection& list) noexcept;
+constexpr bool is_distinct(const Collection& list) NOEXCEPT;
 
 /// Determine if a collection is lexically sorted.
 template <typename Collection>
-constexpr bool is_sorted(const Collection& list) noexcept;
+constexpr bool is_sorted(const Collection& list) NOEXCEPT;
 
 /// Obtain the (sorted) distinct elements of a collection.
 template <typename Collection>
-constexpr void distinct(Collection& list) noexcept;
+constexpr void distinct(Collection& list) NOEXCEPT;
 template <typename Collection>
-inline Collection distinct(Collection&& list) noexcept;
+inline Collection distinct(Collection&& list) NOEXCEPT;
 template <typename Collection>
-inline Collection distinct_copy(const Collection& list) noexcept;
+inline Collection distinct_copy(const Collection& list) NOEXCEPT;
 
 /// Obtain the set difference of left less right.
 template <typename Left, typename Right>
-inline Left difference(const Left& left, const Right& right) noexcept;
+inline Left difference(const Left& left, const Right& right) NOEXCEPT;
 template <typename Left, typename Right>
 inline Left difference(const typename Left::const_iterator& begin,
-    const typename Left::const_iterator& end, const Right& right) noexcept;
+    const typename Left::const_iterator& end, const Right& right) NOEXCEPT;
 
 /// Determing if the sets have an intersection.
 template <typename Left, typename Right>
-constexpr bool is_intersecting(const Left& left, const Right& right) noexcept;
+constexpr bool is_intersecting(const Left& left, const Right& right) NOEXCEPT;
 template <typename Left, typename Right>
 constexpr bool is_intersecting(const typename Left::const_iterator& begin,
-    const typename Left::const_iterator& end, const Right& right) noexcept;
+    const typename Left::const_iterator& end, const Right& right) NOEXCEPT;
 
 /// Reverse the order of collection elements.
 /// Use reverse_view for reverse iteration.
 template <typename Collection>
-inline Collection reverse(Collection&& list) noexcept;
+inline Collection reverse(Collection&& list) NOEXCEPT;
 template <typename Collection>
-inline Collection reverse_copy(const Collection& list) noexcept;
+inline Collection reverse_copy(const Collection& list) NOEXCEPT;
 
 /// Sort collection elements.
 template <typename Collection>
-constexpr void sort(Collection& list) noexcept;
+constexpr void sort(Collection& list) NOEXCEPT;
 template <typename Collection>
-inline Collection sort(Collection&& list) noexcept;
+inline Collection sort(Collection&& list) NOEXCEPT;
 template <typename Collection>
-inline Collection sort_copy(const Collection& list) noexcept;
+inline Collection sort_copy(const Collection& list) NOEXCEPT;
 
 /// Determine if a collection range starts with another collection.
 template <typename Collection>
 constexpr bool starts_with(const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
-    const Collection& value) noexcept;
+    const Collection& value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

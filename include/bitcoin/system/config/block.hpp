@@ -40,25 +40,25 @@ public:
     ~block() = default;
 
     /// Constructors.
-    block() noexcept;
-    block(chain::block&& value) noexcept;
-    block(const chain::block& value) noexcept;
-    block(const std::string& base16) noexcept(false);
+    block() NOEXCEPT;
+    block(chain::block&& value) NOEXCEPT;
+    block(const chain::block& value) NOEXCEPT;
+    block(const std::string& base16) THROWS;
 
-    std::string to_string() const noexcept;
+    std::string to_string() const NOEXCEPT;
 
     /// Operators.
 
-    block& operator=(chain::block&& value) noexcept;
-    block& operator=(const chain::block& value) noexcept;
-    bool operator==(const block& other) const noexcept;
+    block& operator=(chain::block&& value) NOEXCEPT;
+    block& operator=(const chain::block& value) NOEXCEPT;
+    bool operator==(const block& other) const NOEXCEPT;
 
-    operator const chain::block&() const noexcept;
+    operator const chain::block&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        block& argument) noexcept(false);
+        block& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const block& argument) noexcept;
+        const block& argument) NOEXCEPT;
 
 private:
     chain::block value_;

@@ -94,7 +94,7 @@ static uint8_t decoder[96] =
 };
 
 // Accepts only byte arrays bounded to 4 bytes.
-bool encode_base85(std::string& out, const data_slice& in) noexcept
+bool encode_base85(std::string& out, const data_slice& in) NOEXCEPT
 {
     const auto size = in.size();
     if (!is_zero(size % 4u))
@@ -125,7 +125,7 @@ bool encode_base85(std::string& out, const data_slice& in) noexcept
 }
 
 // Accepts only strings bounded to 5 characters.
-bool decode_base85(data_chunk& out, const std::string& in) noexcept
+bool decode_base85(data_chunk& out, const std::string& in) NOEXCEPT
 {
     const auto length = in.size();
     if (!is_zero(length % 5u))

@@ -33,33 +33,33 @@ class BC_API ek_public
 {
 public:
     /// Constructors.
-    ek_public() noexcept;
-    ek_public(const std::string& encoded) noexcept;
-    ek_public(const encrypted_public& key) noexcept;
-    ek_public(const ek_public& other) noexcept;
+    ek_public() NOEXCEPT;
+    ek_public(const std::string& encoded) NOEXCEPT;
+    ek_public(const encrypted_public& key) NOEXCEPT;
+    ek_public(const ek_public& other) NOEXCEPT;
 
     /// Operators.
-    bool operator<(const ek_public& other) const noexcept;
-    bool operator==(const ek_public& other) const noexcept;
-    bool operator!=(const ek_public& other) const noexcept;
-    ek_public& operator=(const ek_public& other) noexcept;
+    bool operator<(const ek_public& other) const NOEXCEPT;
+    bool operator==(const ek_public& other) const NOEXCEPT;
+    bool operator!=(const ek_public& other) const NOEXCEPT;
+    ek_public& operator=(const ek_public& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, ek_public& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const ek_public& of) noexcept;
+        const ek_public& of) NOEXCEPT;
 
     /// Cast operators.
-    operator bool() const noexcept;
-    operator const encrypted_public&() const noexcept;
+    operator bool() const NOEXCEPT;
+    operator const encrypted_public&() const NOEXCEPT;
 
     /// Serializer.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Accessors.
-    const encrypted_public& public_key() const noexcept;
+    const encrypted_public& public_key() const NOEXCEPT;
 
 private:
     /// Factories.
-    static ek_public from_string(const std::string& encoded) noexcept;
+    static ek_public from_string(const std::string& encoded) NOEXCEPT;
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.

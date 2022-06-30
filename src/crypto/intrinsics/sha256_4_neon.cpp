@@ -221,18 +221,18 @@ void sha256_neon(uint32_t* state, const uint8_t* data, uint32_t blocks)
 }
 
 // One block in four lanes.
-void sha256_x1_neon(uint32_t state[8], const uint8_t block[64]) noexcept
+void sha256_x1_neon(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
     return sha256_neon(state, block, 1);
 }
 
-////void sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+////void sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 ////{
 ////    // TODO: four blocks in four lanes. 
 ////}
 
 // One block in four lanes, doubled.
-void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
     auto buffer = sha256x2_buffer;
 
@@ -246,7 +246,7 @@ void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) noexcept
     to_big_endian<8>(out, state.data());
 }
 
-////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) noexcept
+////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 ////{
 ////    // TODO: four blocks in four lanes, doubled.
 ////}

@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -31,64 +32,64 @@ namespace system {
 /// Obtain the ceilinged (rounded up) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
 template <size_t Base, typename Exponent = size_t, typename Value>
-constexpr Exponent ceilinged_log(Value value) noexcept;
+constexpr Exponent ceilinged_log(Value value) NOEXCEPT;
 template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Exponent> = true,
     if_integer<Base> = true,
     if_integer<Value> = true>
-constexpr Exponent ceilinged_log(Base base, Value value) noexcept;
+constexpr Exponent ceilinged_log(Base base, Value value) NOEXCEPT;
 
 /// Optimizations for ceilinged_log(2, Value).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_integral_integer<Value> = true>
-constexpr Exponent ceilinged_log2(Value value) noexcept;
+constexpr Exponent ceilinged_log2(Value value) NOEXCEPT;
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_non_integral_integer<Value> = true>
-constexpr Exponent ceilinged_log2(Value value) noexcept;
+constexpr Exponent ceilinged_log2(Value value) NOEXCEPT;
 
 /// Optimizations for ceilinged_log(256, integral).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_integral_integer<Value> = true>
-constexpr Exponent ceilinged_log256(Value value) noexcept;
+constexpr Exponent ceilinged_log256(Value value) NOEXCEPT;
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_non_integral_integer<Value> = true>
-constexpr Exponent ceilinged_log256(Value value) noexcept;
+constexpr Exponent ceilinged_log256(Value value) NOEXCEPT;
 
 /// Floored logarithms.
 
 /// Obtain the floored (rounded down) integer logarithm of given value and base.
 /// Returns 0 for undefined (base < 2 or value < 1).
 template <size_t Base, typename Exponent = size_t, typename Value>
-constexpr Exponent floored_log(Value value) noexcept;
+constexpr Exponent floored_log(Value value) NOEXCEPT;
 template <typename Exponent = size_t, typename Base, typename Value,
     if_integer<Exponent> = true,
     if_integer<Base> = true,
     if_integer<Value> = true>
-constexpr Exponent floored_log(Base base, Value value) noexcept;
+constexpr Exponent floored_log(Base base, Value value) NOEXCEPT;
 
 /// Optimizations for floored_log(2, Value).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_integral_integer<Value> = true>
-constexpr Exponent floored_log2(Value value) noexcept;
+constexpr Exponent floored_log2(Value value) NOEXCEPT;
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_non_integral_integer<Value> = true>
-constexpr Exponent floored_log2(Value value) noexcept;
+constexpr Exponent floored_log2(Value value) NOEXCEPT;
 
 /// Optimizations for floored_log(256, Value).
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_integral_integer<Value> = true>
-constexpr Exponent floored_log256(Value value) noexcept;
+constexpr Exponent floored_log256(Value value) NOEXCEPT;
 template <typename Exponent = size_t, typename Value,
     if_integer<Exponent> = true,
     if_non_integral_integer<Value> = true>
-constexpr Exponent floored_log256(Value value) noexcept;
+constexpr Exponent floored_log256(Value value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

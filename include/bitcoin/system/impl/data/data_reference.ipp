@@ -24,27 +24,28 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 /// data_array constructor.
 template <data_reference::size_type Size>
-data_reference::data_reference(const data_array<Size>& data) noexcept
+data_reference::data_reference(const data_array<Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 /// Byte array constructor (casts Byte to uint8_t).
 template <data_reference::size_type Size, typename Byte, if_one_byte<Byte>>
-data_reference::data_reference(const std::array<Byte, Size>& data) noexcept
+data_reference::data_reference(const std::array<Byte, Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 /// Byte vector constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-data_reference::data_reference(const std::vector<Byte>& data) noexcept
+data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
   : data_slice(data)
 {
 }
@@ -52,14 +53,14 @@ data_reference::data_reference(const std::vector<Byte>& data) noexcept
 /// Byte iterators constructor (casts to uint8_t).
 template <typename Iterator>
 data_reference::data_reference(const Iterator& begin,
-    const Iterator& end) noexcept
+    const Iterator& end) NOEXCEPT
   : data_slice(begin, end)
 {
 }
 
 /// Byte pointer to const constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-data_reference::data_reference(const Byte* begin, const Byte* end) noexcept
+data_reference::data_reference(const Byte* begin, const Byte* end) NOEXCEPT
   : data_slice(begin, end)
 {
 }

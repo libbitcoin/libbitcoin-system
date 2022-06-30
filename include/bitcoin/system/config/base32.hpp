@@ -40,19 +40,19 @@ public:
     ~base32() = default;
 
     /// Constructors.
-    base32() noexcept;
-    base32(data_chunk&& value) noexcept;
-    base32(const data_chunk& value) noexcept;
-    base32(const std::string& base32) noexcept(false);
+    base32() NOEXCEPT;
+    base32(data_chunk&& value) NOEXCEPT;
+    base32(const data_chunk& value) NOEXCEPT;
+    base32(const std::string& base32) THROWS;
 
     /// Operators.
 
-    operator const data_chunk&() const noexcept;
+    operator const data_chunk&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        base32& argument) noexcept(false);
+        base32& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const base32& argument) noexcept;
+        const base32& argument) NOEXCEPT;
 
 private:
     data_chunk value_;

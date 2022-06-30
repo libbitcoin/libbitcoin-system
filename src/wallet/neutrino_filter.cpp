@@ -39,7 +39,7 @@ constexpr uint64_t golomb_target_false_positive_rate = 784931;
 
 constexpr auto rate = golomb_target_false_positive_rate;
 
-bool compute_filter(const chain::block& block, data_chunk& out_filter) noexcept
+bool compute_filter(const chain::block& block, data_chunk& out_filter) NOEXCEPT
 {
     const auto hash = block.hash();
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
@@ -92,13 +92,13 @@ bool compute_filter(const chain::block& block, data_chunk& out_filter) noexcept
 }
 
 hash_digest compute_filter_header(const hash_digest& previous_block_hash,
-    const data_chunk& filter) noexcept
+    const data_chunk& filter) NOEXCEPT
 {
     return bitcoin_hash(splice(bitcoin_hash(filter), previous_block_hash));
 }
 
 bool match_filter(const block_filter& filter,
-    const chain::script& script) noexcept
+    const chain::script& script) NOEXCEPT
 {
     if (script.ops().empty())
         return false;
@@ -121,7 +121,7 @@ bool match_filter(const block_filter& filter,
 }
 
 bool match_filter(const block_filter& filter,
-    const chain::scripts& scripts) noexcept
+    const chain::scripts& scripts) NOEXCEPT
 {
     if (scripts.empty())
         return false;
@@ -131,7 +131,7 @@ bool match_filter(const block_filter& filter,
 
     // ordered
     std::for_each(scripts.begin(), scripts.end(),
-        [&](const auto& script) noexcept
+        [&](const auto& script) NOEXCEPT
         {
             if (!script.ops().empty())
                 stack.push_back(script.to_data(false));
@@ -158,13 +158,13 @@ bool match_filter(const block_filter& filter,
 }
 
 bool match_filter(const block_filter& filter,
-    const wallet::payment_address& address) noexcept
+    const wallet::payment_address& address) NOEXCEPT
 {
     return match_filter(filter, address.output_script());
 }
 
 bool match_filter(const block_filter& filter,
-    const wallet::payment_address::list& addresses) noexcept
+    const wallet::payment_address::list& addresses) NOEXCEPT
 {
     if (addresses.empty())
         return false;
@@ -173,7 +173,7 @@ bool match_filter(const block_filter& filter,
     chain::scripts stack(addresses.size(), no_fill_script_allocator);
 
     std::transform(addresses.begin(), addresses.end(), stack.begin(),
-        [](const wallet::payment_address& address) noexcept
+        [](const wallet::payment_address& address) NOEXCEPT
         {
             return address.output_script();
         });

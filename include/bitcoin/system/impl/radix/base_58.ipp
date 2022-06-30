@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 
 template <size_t Size>
-bool decode_base58(data_array<Size>& out, const std::string& in) noexcept
+bool decode_base58(data_array<Size>& out, const std::string& in) NOEXCEPT
 {
     data_chunk data;
     if (!decode_base58(data, in) || (data.size() != Size))
@@ -39,7 +39,7 @@ bool decode_base58(data_array<Size>& out, const std::string& in) noexcept
 
 // TODO: determine if the sizing function is always accurate.
 template <size_t Size>
-data_array<Size * 733 / 1000> base58_array(const char(&string)[Size]) noexcept
+data_array<Size * 733 / 1000> base58_array(const char(&string)[Size]) NOEXCEPT
 {
     // log(58) / log(256), rounded up.
     data_array<Size * 733 / 1000> out;

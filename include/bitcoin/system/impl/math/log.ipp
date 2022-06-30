@@ -41,7 +41,7 @@ namespace mp = boost::multiprecision;
 
 // dispatch
 template <size_t Base, typename Exponent, typename Value>
-constexpr Exponent ceilinged_log(Value value) noexcept
+constexpr Exponent ceilinged_log(Value value) NOEXCEPT
 {
     if constexpr (Base == 2u)
         return ceilinged_log2<Exponent>(value);
@@ -54,7 +54,7 @@ constexpr Exponent ceilinged_log(Value value) noexcept
 // normal form
 template <typename Exponent, typename Base, typename Value,
     if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
-constexpr Exponent ceilinged_log(Base base, Value value) noexcept
+constexpr Exponent ceilinged_log(Base base, Value value) NOEXCEPT
 {
     if (base < 2 || value < 1)
         return 0;
@@ -80,7 +80,7 @@ constexpr Exponent ceilinged_log(Base base, Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_integral_integer<Value>>
-constexpr Exponent ceilinged_log2(Value value) noexcept
+constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;
@@ -93,7 +93,7 @@ constexpr Exponent ceilinged_log2(Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_non_integral_integer<Value>>
-constexpr Exponent ceilinged_log2(Value value) noexcept
+constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;
@@ -107,7 +107,7 @@ constexpr Exponent ceilinged_log2(Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_integral_integer<Value>>
-constexpr Exponent ceilinged_log256(Value value) noexcept
+constexpr Exponent ceilinged_log256(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;
@@ -141,7 +141,7 @@ constexpr Exponent ceilinged_log256(Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_non_integral_integer<Value>>
-constexpr Exponent ceilinged_log256(Value value) noexcept
+constexpr Exponent ceilinged_log256(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;
@@ -156,7 +156,7 @@ constexpr Exponent ceilinged_log256(Value value) noexcept
 
 // dispatch
 template <size_t Base, typename Exponent, typename Value>
-constexpr Exponent floored_log(Value value) noexcept
+constexpr Exponent floored_log(Value value) NOEXCEPT
 {
     if constexpr (Base == 2u)
         return floored_log2<Exponent>(value);
@@ -171,7 +171,7 @@ template <typename Exponent, typename Base, typename Value,
     if_integer<Exponent>,
     if_integer<Base>,
     if_integer<Value>>
-constexpr Exponent floored_log(Base base, Value value) noexcept
+constexpr Exponent floored_log(Base base, Value value) NOEXCEPT
 {
     if (base < 2 || value < 1)
         return 0;
@@ -198,7 +198,7 @@ constexpr Exponent floored_log(Base base, Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_integral_integer<Value>>
-constexpr Exponent floored_log2(Value value) noexcept
+constexpr Exponent floored_log2(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;
@@ -211,7 +211,7 @@ constexpr Exponent floored_log2(Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_non_integral_integer<Value>>
-constexpr Exponent floored_log2(Value value) noexcept
+constexpr Exponent floored_log2(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;
@@ -224,7 +224,7 @@ constexpr Exponent floored_log2(Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_integral_integer<Value>>
-constexpr Exponent floored_log256(Value value) noexcept
+constexpr Exponent floored_log256(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;
@@ -257,7 +257,7 @@ constexpr Exponent floored_log256(Value value) noexcept
 template <typename Exponent, typename Value,
     if_integer<Exponent>,
     if_non_integral_integer<Value>>
-constexpr Exponent floored_log256(Value value) noexcept
+constexpr Exponent floored_log256(Value value) NOEXCEPT
 {
     if (value < 1)
         return 0;

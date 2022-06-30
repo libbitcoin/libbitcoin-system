@@ -33,21 +33,21 @@ namespace wallet {
 // ----------------------------------------------------------------------------
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::checked() noexcept
+checked<Prefix, Payload, Checksum>::checked() NOEXCEPT
   : data_slice(value_), value_()
 {
     // This is an invalid instance (unchecked).
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::checked(checked&& other) noexcept
+checked<Prefix, Payload, Checksum>::checked(checked&& other) NOEXCEPT
   : data_slice(value_), value_(std::move(other.value_))
 {
     // This may be an invalid instance.
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::checked(const checked& other) noexcept
+checked<Prefix, Payload, Checksum>::checked(const checked& other) NOEXCEPT
   : data_slice(value_), value_(other.value_)
 {
     // This may be an invalid instance.
@@ -55,21 +55,21 @@ checked<Prefix, Payload, Checksum>::checked(const checked& other) noexcept
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(const prefix_type& prefix,
-    const payload_type& payload) noexcept
+    const payload_type& payload) NOEXCEPT
   : checked(from_payload(prefix, payload))
 {
     // This is a valid instance.
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::checked(value_type&& value) noexcept
+checked<Prefix, Payload, Checksum>::checked(value_type&& value) NOEXCEPT
   : data_slice(value_), value_(std::move(value))
 {
     // This may be an invalid instance (if value is unchecked).
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::checked(const value_type& value) noexcept
+checked<Prefix, Payload, Checksum>::checked(const value_type& value) NOEXCEPT
   : data_slice(value_), value_(value)
 {
     // This may be an invalid instance (if value is unchecked).
@@ -79,7 +79,7 @@ checked<Prefix, Payload, Checksum>::checked(const value_type& value) noexcept
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>
 checked<Prefix, Payload, Checksum>::from_payload(const prefix_type& version,
-    const payload_type& payload) noexcept
+    const payload_type& payload) NOEXCEPT
 {
     // Accessing the Checksum parameter requires explicitly specifying both.
     return insert_checksum<value_size, Checksum>({ version, payload });
@@ -90,7 +90,7 @@ checked<Prefix, Payload, Checksum>::from_payload(const prefix_type& version,
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>&
-checked<Prefix, Payload, Checksum>::operator=(checked&& other) noexcept
+checked<Prefix, Payload, Checksum>::operator=(checked&& other) NOEXCEPT
 {
     if (&other == this)
         return *this;
@@ -102,7 +102,7 @@ checked<Prefix, Payload, Checksum>::operator=(checked&& other) noexcept
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>&
-checked<Prefix, Payload, Checksum>::operator=(const checked& other) noexcept
+checked<Prefix, Payload, Checksum>::operator=(const checked& other) NOEXCEPT
 {
     if (&other == this)
         return *this;
@@ -113,21 +113,21 @@ checked<Prefix, Payload, Checksum>::operator=(const checked& other) noexcept
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::operator bool() const noexcept
+checked<Prefix, Payload, Checksum>::operator bool() const NOEXCEPT
 {
     // Accessing the Checksum parameter requires explicitly specifying both.
     return verify_checksum<value_size, Checksum>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::operator data_chunk() const noexcept
+checked<Prefix, Payload, Checksum>::operator data_chunk() const NOEXCEPT
 {
     return to_chunk(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::operator
-const typename checked<Prefix, Payload, Checksum>::value_type&() const noexcept
+const typename checked<Prefix, Payload, Checksum>::value_type&() const NOEXCEPT
 {
     return value_;
 }
@@ -137,28 +137,28 @@ const typename checked<Prefix, Payload, Checksum>::value_type&() const noexcept
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 typename checked<Prefix, Payload, Checksum>::prefix_type
-checked<Prefix, Payload, Checksum>::prefix() const noexcept
+checked<Prefix, Payload, Checksum>::prefix() const NOEXCEPT
 {
     return slice<0u, Prefix>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 typename checked<Prefix, Payload, Checksum>::payload_type
-checked<Prefix, Payload, Checksum>::payload() const noexcept
+checked<Prefix, Payload, Checksum>::payload() const NOEXCEPT
 {
     return slice<Prefix, Prefix + Payload>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 typename checked<Prefix, Payload, Checksum>::checksum_type
-checked<Prefix, Payload, Checksum>::checksum() const noexcept
+checked<Prefix, Payload, Checksum>::checksum() const NOEXCEPT
 {
     return slice<Prefix + Payload, value_size>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 const typename checked<Prefix, Payload, Checksum>::value_type&
-checked<Prefix, Payload, Checksum>::value() const noexcept
+checked<Prefix, Payload, Checksum>::value() const NOEXCEPT
 {
     return value_;
 }

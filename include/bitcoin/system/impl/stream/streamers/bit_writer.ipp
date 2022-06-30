@@ -29,6 +29,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 
@@ -39,7 +40,7 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-bit_writer<OStream>::bit_writer(OStream& sink) noexcept
+bit_writer<OStream>::bit_writer(OStream& sink) NOEXCEPT
   : byte_writer<OStream>(sink), byte_(byte_writer<OStream>::pad()), offset_(0)
 {
 }
@@ -79,7 +80,7 @@ bit_writer<OStream>& bit_writer<OStream>::operator=(const bit_writer& other)
 }
 
 template <typename OStream>
-bit_writer<OStream>::~bit_writer() noexcept
+bit_writer<OStream>::~bit_writer() NOEXCEPT
 {
     // Derived virtual destructor called before base destructor.
     flusher();
@@ -89,7 +90,7 @@ bit_writer<OStream>::~bit_writer() noexcept
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-void bit_writer<OStream>::write_bit(bool value) noexcept
+void bit_writer<OStream>::write_bit(bool value) NOEXCEPT
 {
     // Insert bit into byte.
     set_left_into(byte_, offset_++, value);
@@ -100,7 +101,7 @@ void bit_writer<OStream>::write_bit(bool value) noexcept
 }
 
 template <typename OStream>
-void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) noexcept
+void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) NOEXCEPT
 {
     bits = lesser<size_t>(width(value), bits);
 
@@ -116,7 +117,7 @@ void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) noexcept
 
 template <typename OStream>
 void bit_writer<OStream>::do_write_bytes(const uint8_t* data,
-    size_t size) noexcept
+    size_t size) NOEXCEPT
 {
     // Suboptimal because shifts each bit and writes single bytes, but simple.
     for (size_t byte = 0; byte < size; ++byte)
@@ -124,7 +125,7 @@ void bit_writer<OStream>::do_write_bytes(const uint8_t* data,
 }
 
 template <typename OStream>
-void bit_writer<OStream>::do_flush() noexcept
+void bit_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
     byte_writer<OStream>::do_flush();
@@ -135,7 +136,7 @@ void bit_writer<OStream>::do_flush() noexcept
 
 // This is the only byte write and offset change.
 template <typename OStream>
-void bit_writer<OStream>::unload() noexcept
+void bit_writer<OStream>::unload() NOEXCEPT
 {
     byte_writer<OStream>::do_write_bytes(&byte_, one);
     byte_ = byte_writer<OStream>::pad();
@@ -143,14 +144,14 @@ void bit_writer<OStream>::unload() noexcept
 }
 
 template <typename OStream>
-void bit_writer<OStream>::flusher() noexcept
+void bit_writer<OStream>::flusher() NOEXCEPT
 {
     if (!is_zero(offset_))
         unload();
 }
 
 template <typename OStream>
-uint8_t bit_writer<OStream>::shift() const noexcept
+uint8_t bit_writer<OStream>::shift() const NOEXCEPT
 {
     // If shift is zero then eight bits have been written, so time to dump.
     // If offset is zero then no bits have been written since last dump.

@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <limits>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
@@ -34,21 +35,21 @@ namespace system {
 
 template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
-constexpr bool is_limited(Integer value) noexcept
+constexpr bool is_limited(Integer value) NOEXCEPT
 {
     return is_limited(value, maximum<By>());
 }
 
 template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
-constexpr bool is_limited(Integer value, By maximum) noexcept
+constexpr bool is_limited(Integer value, By maximum) NOEXCEPT
 {
     return is_limited(value, minimum<By>(), maximum);
 }
 
 template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
-constexpr bool is_limited(Integer value, By minimum, By maximum) noexcept
+constexpr bool is_limited(Integer value, By minimum, By maximum) NOEXCEPT
 {
     return is_lesser(value, minimum) || is_greater(value, maximum);
 }
@@ -57,21 +58,21 @@ constexpr bool is_limited(Integer value, By minimum, By maximum) noexcept
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
-constexpr Result limit(Integer value) noexcept
+constexpr Result limit(Integer value) NOEXCEPT
 {
     return limit(value, maximum<Result>());
 }
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
-constexpr Result limit(Integer value, Result maximum) noexcept
+constexpr Result limit(Integer value, Result maximum) NOEXCEPT
 {
     return limit(value, minimum<Result>(), maximum);
 }
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
-constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
+constexpr Result limit(Integer value, Result minimum, Result maximum) NOEXCEPT
 {
     return is_lesser(value, minimum) ? minimum :
         (is_greater(value, maximum) ? maximum :
@@ -83,21 +84,21 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept
 
 template <typename Integer,
     if_integral_integer<Integer>>
-constexpr Integer minimum() noexcept
+constexpr Integer minimum() NOEXCEPT
 {
     return std::numeric_limits<Integer>::min();
 }
 
 template <typename Integer,
     if_integral_integer<Integer>>
-constexpr Integer maximum() noexcept
+constexpr Integer maximum() NOEXCEPT
 {
     return std::numeric_limits<Integer>::max();
 }
 
 template <typename Integer, typename Absolute,
     if_signed_integral_integer<Integer>>
-constexpr Absolute absolute_minimum() noexcept
+constexpr Absolute absolute_minimum() NOEXCEPT
 {
     // Avoids calling negate(minimum), which is undefined.
     return add1(to_unsigned(maximum<Integer>()));
@@ -105,21 +106,21 @@ constexpr Absolute absolute_minimum() noexcept
 
 template <typename Integer,
     if_unsigned_integral_integer<Integer>>
-constexpr Integer absolute_minimum() noexcept
+constexpr Integer absolute_minimum() NOEXCEPT
 {
     return minimum<Integer>();
 }
 
 template <typename Integer, typename Unsigned,
     if_signed_integral_integer<Integer>>
-constexpr Unsigned unsigned_maximum() noexcept
+constexpr Unsigned unsigned_maximum() NOEXCEPT
 {
     return to_unsigned(maximum<Integer>());
 }
 
 template <typename Integer,
     if_unsigned_integral_integer<Integer>>
-constexpr Integer unsigned_maximum() noexcept
+constexpr Integer unsigned_maximum() NOEXCEPT
 {
     return maximum<Integer>();
 }
@@ -127,13 +128,13 @@ constexpr Integer unsigned_maximum() noexcept
 // byte-based minimum/maximum
 
 template <size_t Bytes, typename Return>
-constexpr Return minimum() noexcept
+constexpr Return minimum() NOEXCEPT
 {
     return ones_complement(maximum<Bytes>());
 }
 
 template <size_t Bytes, typename Return>
-constexpr Return maximum() noexcept
+constexpr Return maximum() NOEXCEPT
 {
     using result = to_unsigned_type<Return>;
     constexpr auto bit = sub1(to_bits(Bytes));
@@ -143,13 +144,13 @@ constexpr Return maximum() noexcept
 // bitcoin minimum/maximum (stack_number)
 
 template <size_t Bytes, typename Return>
-constexpr Return bitcoin_min() noexcept
+constexpr Return bitcoin_min() NOEXCEPT
 {
     return twos_complement(bitcoin_max<Bytes>());
 }
 
 template <size_t Bytes, typename Return>
-constexpr Return bitcoin_max() noexcept
+constexpr Return bitcoin_max() NOEXCEPT
 {
     return maximum<Bytes>();
 }

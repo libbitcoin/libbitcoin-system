@@ -73,7 +73,7 @@ public:
     /// Constructors.
 
     /// Empty slice.
-    data_slice() noexcept;
+    data_slice() NOEXCEPT;
 
     /// Defaults.
     data_slice(data_slice&&) = default;
@@ -85,80 +85,80 @@ public:
     /// Literal bytes constructor.
     /// Integral null terminator is not indexed.
     template <size_type Size>
-    data_slice(const char(&text)[Size]) noexcept;
+    data_slice(const char(&text)[Size]) NOEXCEPT;
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_one_byte<Byte> = true>
-    data_slice(const std::array<Byte, Size>& data) noexcept;
+    data_slice(const std::array<Byte, Size>& data) NOEXCEPT;
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_slice(const std::vector<Byte>& data) noexcept;
+    data_slice(const std::vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-const references.
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>
-    data_slice(const Iterator& begin, const Iterator& end) noexcept;
+    data_slice(const Iterator& begin, const Iterator& end) NOEXCEPT;
 
     // TODO: change to begin/size construction.
     /// Byte pointer to const constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_slice(const Byte* begin, const Byte* end) noexcept;
+    data_slice(const Byte* begin, const Byte* end) NOEXCEPT;
 
     /// String constructor (casts char to uint8_t).
-    data_slice(const std::string& text) noexcept;
+    data_slice(const std::string& text) NOEXCEPT;
 
     /// Byte initializer list constructor.
-    data_slice(std::initializer_list<value_type> bytes) noexcept;
+    data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
 
     /// Methods.
 
     /// Copy data to an array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
-    std::array<value_type, Size> to_array() const noexcept;
+    std::array<value_type, Size> to_array() const NOEXCEPT;
 
     /// Copy data to a vector.
-    std::vector<value_type> to_chunk() const noexcept;
+    std::vector<value_type> to_chunk() const NOEXCEPT;
 
     /// Convert data to a string (casts uint8_t to char).
-    std::string to_string() const noexcept;
+    std::string to_string() const NOEXCEPT;
 
     /// Convert data to a base16 string.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Resize the slice by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slice.
     /// Returns true if the size was reduced (expansion is not allowed).
-    bool resize(size_t size) noexcept;
+    bool resize(size_t size) NOEXCEPT;
 
     /// Properties.
-    pointer data() const noexcept;
-    pointer begin() const noexcept;
-    pointer end() const noexcept;
-    value_type front() const noexcept;
-    value_type back() const noexcept;
-    size_type size() const noexcept;
-    bool empty() const noexcept;
+    pointer data() const NOEXCEPT;
+    pointer begin() const NOEXCEPT;
+    pointer end() const NOEXCEPT;
+    value_type front() const NOEXCEPT;
+    value_type back() const NOEXCEPT;
+    size_type size() const NOEXCEPT;
+    bool empty() const NOEXCEPT;
 
     /// Operators.
     template<size_type Size>
-    operator std::array<value_type, Size>() const noexcept;
-    operator std::vector<value_type>() const noexcept;
-    value_type operator[](size_type index) const noexcept;
+    operator std::array<value_type, Size>() const NOEXCEPT;
+    operator std::vector<value_type>() const NOEXCEPT;
+    value_type operator[](size_type index) const NOEXCEPT;
 
 private:
-    data_slice(pointer begin, pointer end, size_type size) noexcept;
+    data_slice(pointer begin, pointer end, size_type size) NOEXCEPT;
 
     template <size_type Size, typename Byte>
-    static data_slice from_literal(const Byte(&text)[Size]) noexcept;
+    static data_slice from_literal(const Byte(&text)[Size]) NOEXCEPT;
 
     template <typename Iterator>
     static data_slice from_iterators(const Iterator& begin,
-        const Iterator& end) noexcept;
+        const Iterator& end) NOEXCEPT;
 
     template <typename Pointer>
-    static data_slice from_size(Pointer begin, size_type size) noexcept;
+    static data_slice from_size(Pointer begin, size_type size) NOEXCEPT;
 
     pointer begin_;
     pointer end_;
@@ -166,8 +166,8 @@ private:
 };
 
 /// Binary operators.
-BC_API bool operator==(const data_slice& left, const data_slice& right) noexcept;
-BC_API bool operator!=(const data_slice& left, const data_slice& right) noexcept;
+BC_API bool operator==(const data_slice& left, const data_slice& right) NOEXCEPT;
+BC_API bool operator!=(const data_slice& left, const data_slice& right) NOEXCEPT;
 
 typedef std::initializer_list<data_slice> data_loaf;
 

@@ -56,7 +56,7 @@ static const words::mnemonic::catalogs base2048
 // encode
 
 static bool encode_base2048(base2048_chunk& out, const string_list& in,
-    language language) noexcept
+    language language) NOEXCEPT
 {
     // Empty if words not contained in dictionary.
     const auto indexes = base2048.index(in, language);
@@ -75,7 +75,7 @@ static bool encode_base2048(base2048_chunk& out, const string_list& in,
 }
 
 bool encode_base2048_list(data_chunk& out, const string_list& in,
-    language language) noexcept
+    language language) NOEXCEPT
 {
     base2048_chunk packed;
     if (!encode_base2048(packed, in, language))
@@ -86,7 +86,7 @@ bool encode_base2048_list(data_chunk& out, const string_list& in,
 }
 
 bool encode_base2048(data_chunk& out, const std::string& in,
-    language language) noexcept
+    language language) NOEXCEPT
 {
     out.clear();
 
@@ -97,7 +97,7 @@ bool encode_base2048(data_chunk& out, const std::string& in,
 // decode
 
 static string_list decode_base2048(const base2048_chunk& data,
-    language language) noexcept
+    language language) NOEXCEPT
 {
     words::mnemonic::catalogs::search indexes(data.size());
     std::transform(data.begin(), data.end(), indexes.begin(),
@@ -108,12 +108,12 @@ static string_list decode_base2048(const base2048_chunk& data,
 }
 
 string_list decode_base2048_list(const data_chunk& data,
-    language language) noexcept
+    language language) NOEXCEPT
 {
     return decode_base2048(base2048_pack(data), language);
 }
 
-std::string decode_base2048(const data_chunk& data, language language) noexcept
+std::string decode_base2048(const data_chunk& data, language language) NOEXCEPT
 {
     // Empty chunk returns empty string, consistent with encoding empty string.
     return join(decode_base2048_list(data, language));
@@ -121,7 +121,7 @@ std::string decode_base2048(const data_chunk& data, language language) noexcept
 
 // pack/unpack
 
-base2048_chunk base2048_pack(const data_chunk& unpacked) noexcept
+base2048_chunk base2048_pack(const data_chunk& unpacked) NOEXCEPT
 {
     base2048_chunk packed;
     read::bits::copy source(unpacked);
@@ -146,7 +146,7 @@ base2048_chunk base2048_pack(const data_chunk& unpacked) noexcept
     return packed;
 }
 
-data_chunk base2048_unpack(const base2048_chunk& packed) noexcept
+data_chunk base2048_unpack(const base2048_chunk& packed) NOEXCEPT
 {
     data_chunk unpacked;
     write::bits::data sink(unpacked);

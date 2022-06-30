@@ -22,6 +22,7 @@
 #include <utility>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/device.hpp>
 
@@ -40,7 +41,7 @@ public:
     {
     };
 
-    copy_sink(const Container& data) noexcept
+    copy_sink(const Container& data) NOEXCEPT
       : device<Container>(limit<typename device<Container>::size_type>(
           data.size())),
         container_(data),
@@ -55,7 +56,7 @@ public:
     ~copy_sink() override = default;
 
 protected:
-    typename device<Container>::sequence do_sequence() const noexcept override
+    typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
         return std::make_pair(
             integer_pointer_cast<typename device<Container>::char_type>(

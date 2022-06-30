@@ -25,22 +25,22 @@
 namespace libbitcoin {
 namespace system {
 
-data_reference::data_reference() noexcept
+data_reference::data_reference() NOEXCEPT
   : data_slice()
 {
 }
 
-data_reference::data_reference(const data_slice& data) noexcept
+data_reference::data_reference(const data_slice& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
-data_reference::data_reference(const std::string& text) noexcept
+data_reference::data_reference(const std::string& text) NOEXCEPT
   : data_slice(text)
 {
 }
 
-data_reference::data_reference(const data_chunk& data) noexcept
+data_reference::data_reference(const data_chunk& data) NOEXCEPT
   : data_slice(data)
 {
 }

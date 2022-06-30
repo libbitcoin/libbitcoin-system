@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -30,24 +31,24 @@ namespace system {
 
 // Constexpr dispatches to optimal overload.
 template <size_t Base, typename Value = size_t, typename Exponent>
-constexpr Value power(Exponent exponent) noexcept;
+constexpr Value power(Exponent exponent) NOEXCEPT;
 
 // Normal form, for all integer types.
 template <typename Value = size_t, typename Base, typename Exponent,
     if_integer<Value> = true,
     if_integer<Base> = true,
     if_integer<Exponent> = true>
-constexpr Value power(Base base, Exponent exponent) noexcept;
+constexpr Value power(Base base, Exponent exponent) NOEXCEPT;
 
 /// Optimizations for power(2, Exponent).
 template <typename Value = size_t, typename Exponent,
     if_integral_integer<Value> = true,
     if_integer<Exponent> = true>
-constexpr Value power2(Exponent exponent) noexcept;
+constexpr Value power2(Exponent exponent) NOEXCEPT;
 template <typename Value = size_t, typename Exponent,
     if_non_integral_integer<Value> = true,
     if_integer<Exponent> = true>
-constexpr Value power2(Exponent exponent) noexcept;
+constexpr Value power2(Exponent exponent) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

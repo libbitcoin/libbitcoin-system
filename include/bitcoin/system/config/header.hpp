@@ -40,21 +40,21 @@ public:
     ~header() = default;
 
     /// Constructors.
-    header() noexcept;
-    header(chain::header&& value) noexcept;
-    header(const chain::header& value) noexcept;
-    header(const std::string& base16) noexcept(false);
+    header() NOEXCEPT;
+    header(chain::header&& value) NOEXCEPT;
+    header(const chain::header& value) NOEXCEPT;
+    header(const std::string& base16) THROWS;
 
-    ////std::string to_string() const noexcept;
+    ////std::string to_string() const NOEXCEPT;
 
     /// Operators.
 
-    operator const chain::header&() const noexcept;
+    operator const chain::header&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        header& argument) noexcept(false);
+        header& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const header& argument) noexcept;
+        const header& argument) NOEXCEPT;
 
 private:
     chain::header value_;

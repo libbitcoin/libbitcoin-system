@@ -33,25 +33,25 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <data_slab::size_type Size, typename Byte, if_one_byte<Byte>>
-data_slab::data_slab(std::array<Byte, Size>& data) noexcept
+data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
   : data_slab(from_size(data.begin(), Size))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
-data_slab::data_slab(std::vector<Byte>& data) noexcept
+data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
   : data_slab(from_size(data.begin(), data.size()))
 {
 }
 
 template <typename Iterator>
-data_slab::data_slab(const Iterator& begin, const Iterator& end) noexcept
+data_slab::data_slab(const Iterator& begin, const Iterator& end) NOEXCEPT
   : data_slab(from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
-data_slab::data_slab(const Byte* begin, const Byte* end) noexcept
+data_slab::data_slab(const Byte* begin, const Byte* end) NOEXCEPT
   : data_slab(from_iterators(begin, end))
 {
 }
@@ -62,7 +62,7 @@ data_slab::data_slab(const Byte* begin, const Byte* end) noexcept
 // static
 template <typename Iterator>
 data_slab data_slab::from_iterators(const Iterator& begin,
-    const Iterator& end) noexcept
+    const Iterator& end) NOEXCEPT
 {
     // An end iterator can be anything, so convert to size.
     const auto size = std::distance(begin, end);
@@ -77,7 +77,7 @@ data_slab data_slab::from_iterators(const Iterator& begin,
 
 // static
 template <typename Pointer>
-data_slab data_slab::from_size(const Pointer begin, size_type size) noexcept
+data_slab data_slab::from_size(const Pointer begin, size_type size) NOEXCEPT
 {
     // Guard 0 because &begin[0] is undefined if size is zero.
     if (is_zero(size))
@@ -97,7 +97,7 @@ data_slab data_slab::from_size(const Pointer begin, size_type size) noexcept
 
 template <data_slab::size_type Size>
 std::array<typename data_slab::value_type, Size>
-data_slab::to_array() const noexcept
+data_slab::to_array() const NOEXCEPT
 {
     std::array<data_slab::value_type, Size> out;
 
@@ -118,7 +118,7 @@ data_slab::to_array() const noexcept
 
 template <data_slab::size_type Size>
 data_slab::operator
-std::array<typename data_slab::value_type, Size>() const noexcept
+std::array<typename data_slab::value_type, Size>() const NOEXCEPT
 {
     return to_array<Size>();
 }

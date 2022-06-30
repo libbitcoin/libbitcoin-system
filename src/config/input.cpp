@@ -38,7 +38,7 @@ using namespace boost::program_options;
 // "script:txhash:index:sequence=max_input_sequence"
 
 static bool decode_input(chain::input& input,
-    const std::string& tuple) noexcept(false)
+    const std::string& tuple) THROWS
 {
     const auto tokens = split(tuple, point::delimiter);
     if (tokens.size() != 3 && tokens.size() != 4)
@@ -59,7 +59,7 @@ static bool decode_input(chain::input& input,
     return true;
 }
 
-static std::string encode_input(const chain::input& input) noexcept
+static std::string encode_input(const chain::input& input) NOEXCEPT
 {
     std::ostringstream result;
     result << script(input.script()) << point(input.point())
@@ -67,32 +67,32 @@ static std::string encode_input(const chain::input& input) noexcept
     return result.str();
 }
 
-input::input() noexcept
+input::input() NOEXCEPT
   : value_()
 {
 }
 
-input::input(chain::input&& value) noexcept
+input::input(chain::input&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-input::input(const chain::input& value) noexcept
+input::input(const chain::input& value) NOEXCEPT
   : value_(value)
 {
 }
 
-input::input(const std::string& tuple) noexcept(false)
+input::input(const std::string& tuple) THROWS
 {
     std::istringstream(tuple) >> *this;
 }
 
-input::operator const chain::input&() const noexcept
+input::operator const chain::input&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, input& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, input& argument) THROWS
 {
     std::string tuple;
     stream >> tuple;
@@ -103,7 +103,7 @@ std::istream& operator>>(std::istream& stream, input& argument) noexcept(false)
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const input& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const input& argument) NOEXCEPT
 {
     stream << encode_input(argument.value_);
     return stream;

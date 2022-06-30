@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -32,7 +33,7 @@ namespace system {
 
 template <typename Factor1, typename Factor2,
     if_integer<Factor1> = true, if_integer<Factor2> = true>
-constexpr bool is_negative(Factor1 factor1, Factor2 factor2) noexcept
+constexpr bool is_negative(Factor1 factor1, Factor2 factor2) NOEXCEPT
 {
     return is_negative(factor1) != is_negative(factor2);
 }
@@ -40,7 +41,7 @@ constexpr bool is_negative(Factor1 factor1, Factor2 factor2) noexcept
 // local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr bool no_remainder(Dividend dividend, Divisor divisor) noexcept
+constexpr bool no_remainder(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return is_zero(dividend % divisor);
 }
@@ -48,7 +49,7 @@ constexpr bool no_remainder(Dividend dividend, Divisor divisor) noexcept
 // local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr bool is_ceilinged(Dividend dividend, Divisor divisor) noexcept
+constexpr bool is_ceilinged(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return is_negative(dividend, divisor) || no_remainder(dividend, divisor);
 }
@@ -56,7 +57,7 @@ constexpr bool is_ceilinged(Dividend dividend, Divisor divisor) noexcept
 // local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr bool is_floored(Dividend dividend, Divisor divisor) noexcept
+constexpr bool is_floored(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return !is_negative(dividend, divisor) || no_remainder(dividend, divisor);
 }
@@ -67,7 +68,7 @@ constexpr bool is_floored(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr to_common_type<Dividend, Divisor>
-ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
+ceilinged_divide(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_divide(dividend, divisor) + 
         (is_ceilinged(dividend, divisor) ? 0 : 1);
@@ -78,7 +79,7 @@ ceilinged_divide(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr to_signed_type<to_common_type<Dividend, Divisor>>
-ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
+ceilinged_modulo(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_modulo(dividend, divisor) -
         (is_ceilinged(dividend, divisor) ? 0 : divisor);
@@ -87,7 +88,7 @@ ceilinged_modulo(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr to_common_type<Dividend, Divisor>
-floored_divide(Dividend dividend, Divisor divisor) noexcept
+floored_divide(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_divide(dividend, divisor) -
         (is_floored(dividend, divisor) ? 0 : 1);
@@ -97,7 +98,7 @@ floored_divide(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr to_common_type<Dividend, Divisor>
-floored_modulo(Dividend dividend, Divisor divisor) noexcept
+floored_modulo(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_modulo(dividend, divisor) +
         (is_floored(dividend, divisor) ? 0 : divisor);
@@ -106,7 +107,7 @@ floored_modulo(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr to_common_type<Dividend, Divisor>
-truncated_divide(Dividend dividend, Divisor divisor) noexcept
+truncated_divide(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return dividend / divisor;
 }
@@ -114,7 +115,7 @@ truncated_divide(Dividend dividend, Divisor divisor) noexcept
 template <typename Dividend, typename Divisor,
     if_integer<Dividend>, if_integer<Divisor>>
 constexpr to_common_type<Dividend, Divisor>
-truncated_modulo(Dividend dividend, Divisor divisor) noexcept
+truncated_modulo(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return dividend % divisor;
 }

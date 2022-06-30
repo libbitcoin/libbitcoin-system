@@ -33,34 +33,34 @@ namespace system {
 
 // char32_t functions.
 
-bool is_ascii_character(char32_t character) noexcept
+bool is_ascii_character(char32_t character) NOEXCEPT
 {
     return is_zero(character & 0xffffff80);
 }
 
-bool is_ascii_number(char32_t point) noexcept
+bool is_ascii_number(char32_t point) NOEXCEPT
 {
     return '0' <= point && point <= '9';
 }
 
-bool is_ascii_separator(char32_t point) noexcept
+bool is_ascii_separator(char32_t point) NOEXCEPT
 {
     return is_ascii_character(point) && is_separator(point);
 }
 
-bool is_ascii_whitespace(char32_t point) noexcept
+bool is_ascii_whitespace(char32_t point) NOEXCEPT
 {
     return is_ascii_character(point) && is_whitespace(point);
 }
 
 // string functions.
 
-bool is_ascii(const std::string& text) noexcept
+bool is_ascii(const std::string& text) NOEXCEPT
 {
     return std::all_of(text.begin(), text.end(), is_ascii_character);
 }
 
-bool is_ascii_numeric(const std::string& text) noexcept
+bool is_ascii_numeric(const std::string& text) NOEXCEPT
 {
     if (text.empty())
         return true;
@@ -70,13 +70,13 @@ bool is_ascii_numeric(const std::string& text) noexcept
     return std::all_of(start, text.end(), is_ascii_number);
 }
 
-std::string ascii_to_lower(const std::string& text) noexcept
+std::string ascii_to_lower(const std::string& text) NOEXCEPT
 {
     std::string copy{ text};
 
     // C++17: parallel policy for std::transform.
     std::transform(text.begin(), text.end(), copy.begin(),
-        [](char value) noexcept
+        [](char value) NOEXCEPT
         {
             return narrow_sign_cast<uint8_t>(
                 'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value);
@@ -84,13 +84,13 @@ std::string ascii_to_lower(const std::string& text) noexcept
     return copy;
 }
 
-std::string ascii_to_upper(const std::string& text) noexcept
+std::string ascii_to_upper(const std::string& text) NOEXCEPT
 {
     std::string copy{ text };
 
     // C++17: parallel policy for std::transform.
     std::transform(text.begin(), text.end(), copy.begin(),
-        [](char value) noexcept
+        [](char value) NOEXCEPT
         {
             return narrow_sign_cast<uint8_t>(
                 'a' <= value && value <= 'z' ? value + ('A' - 'a') : value);
@@ -99,24 +99,24 @@ std::string ascii_to_upper(const std::string& text) noexcept
     return copy;
 }
 
-bool has_ascii_whitespace(const std::string& text) noexcept
+bool has_ascii_whitespace(const std::string& text) NOEXCEPT
 {
     // C++17: parallel policy for std::any_of.
     return std::any_of(text.begin(), text.end(),
-        [](char character) noexcept
+        [](char character) NOEXCEPT
         {
             return is_ascii_whitespace(character);
         });
 }
 
-bool has_mixed_ascii_case(const std::string& text) noexcept
+bool has_mixed_ascii_case(const std::string& text) NOEXCEPT
 {
     auto lower = false;
     auto upper = false;
 
     // non-parallel (side effect).
     std::for_each(text.begin(), text.end(),
-        [&](char character) noexcept
+        [&](char character) NOEXCEPT
         {
             lower |= ('a' <= character && character <= 'z');
             upper |= ('A' <= character && character <= 'Z');

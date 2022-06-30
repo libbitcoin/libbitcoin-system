@@ -28,7 +28,7 @@ const int parameter::not_positional = -1;
 const char parameter::no_short_name = 0x00;
 const char parameter::option_prefix_char = '-';
 
-parameter::~parameter() noexcept
+parameter::~parameter() NOEXCEPT
 {
 }
 
@@ -36,7 +36,7 @@ parameter::~parameter() noexcept
 // A required argument may only be preceded by required arguments.
 // Requiredness may be in error if the metadata is inconsistent.
 void parameter::initialize(const po::option_description& option,
-    const argument_list& arguments) noexcept
+    const argument_list& arguments) NOEXCEPT
 {
     set_position(position(option, arguments));
     set_args_limit(arguments_limit(position(), option, arguments));
@@ -50,13 +50,13 @@ void parameter::initialize(const po::option_description& option,
 
 // 100% component coverage, all three scenarios (long, short, both)
 int parameter::position(const po::option_description& option,
-    const argument_list& arguments) const noexcept
+    const argument_list& arguments) const NOEXCEPT
 {
     return static_cast<int>(find_pair_position(arguments, option.long_name()));
 }
 
 // 100% unit coverage, all three scenarios (long, short, both)
-char parameter::short_name(const po::option_description& option) const noexcept
+char parameter::short_name(const po::option_description& option) const NOEXCEPT
 {
     std::string name{ split(option.format_name()).front() };
     const auto is_short_name = 
@@ -69,7 +69,7 @@ char parameter::short_name(const po::option_description& option) const noexcept
 // 100% component coverage
 unsigned parameter::arguments_limit(int position,
     const po::option_description& option,
-    const argument_list& arguments) const noexcept
+    const argument_list& arguments) const NOEXCEPT
 {
     if (position == parameter::not_positional)
         return option.semantic()->max_tokens();

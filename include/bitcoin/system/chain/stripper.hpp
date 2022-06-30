@@ -43,28 +43,28 @@ public:
     // ************************************************************************
     // CONSENSUS: nominal endorsement operation encoding is required.
     // ************************************************************************
-    inline explicit stripper(const chunk_xptr& push_data) noexcept
+    inline explicit stripper(const chunk_xptr& push_data) NOEXCEPT
       : code_(operation::nominal_opcode_from_data(*push_data)),
         data_(push_data)
     {
     }
 
-    inline explicit stripper(opcode code) noexcept
+    inline explicit stripper(opcode code) NOEXCEPT
       : code_(code), data_()
     {
     }
 
-    inline opcode code() const noexcept
+    inline opcode code() const NOEXCEPT
     {
         return code_;
     }
 
-    inline const data_chunk& data() const noexcept
+    inline const data_chunk& data() const NOEXCEPT
     {
         return *data_;
     }
 
-    inline const chunk_xptr& data_ptr() const noexcept
+    inline const chunk_xptr& data_ptr() const NOEXCEPT
     {
         return data_;
     }
@@ -74,7 +74,7 @@ private:
     chunk_xptr data_;
 };
 
-inline bool operator==(const operation& op, const stripper& strip) noexcept
+inline bool operator==(const operation& op, const stripper& strip) NOEXCEPT
 {
     // Endorsements should match by value but not pointer.
     return op.code() == strip.code() && op.data() == strip.data();

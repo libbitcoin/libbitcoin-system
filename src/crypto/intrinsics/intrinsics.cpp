@@ -82,7 +82,7 @@ namespace xcr0
 // is unreliable, so we revert to the lowest common interface (assembly).
 
 #if defined(WITH_AVX2)
-static bool xgetbv(uint64_t& value, uint32_t index) noexcept
+static bool xgetbv(uint64_t& value, uint32_t index) NOEXCEPT
 {
 #if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
     // Compile error: built-in _xgetbv requires target feature xsave.
@@ -104,7 +104,7 @@ static bool xgetbv(uint64_t& value, uint32_t index) noexcept
 
 #if defined(WITH_AVX2) || defined(WITH_SSE41) || defined(WITH_SSE4) || defined(WITH_SHANI)
 static bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-    uint32_t leaf, uint32_t subleaf) noexcept
+    uint32_t leaf, uint32_t subleaf) NOEXCEPT
 {
 #if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
     // __cpuid_count too commonly undefined, so just always use assembly.
@@ -129,7 +129,7 @@ static bool cpuid_ex(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 // ----------------------------------------------------------------------------
 
 #ifdef WITH_AVX2
-inline bool try_avx2() noexcept
+inline bool try_avx2() NOEXCEPT
 {
     uint64_t extended;
     uint32_t eax, ebx, ecx, edx;
@@ -143,39 +143,39 @@ inline bool try_avx2() noexcept
         && cpuid_ex(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_right(ebx, cpu7_0::avx2_ebx_bit);
 }
-bool have_avx2() noexcept
+bool have_avx2() NOEXCEPT
 {
     static auto enable = try_avx2();
     return enable;
 }
 #endif
 #ifdef WITH_NEON
-inline bool try_neon() noexcept
+inline bool try_neon() NOEXCEPT
 {
     // TODO: test for ARM Neon.
     return false;
 }
-bool have_neon() noexcept
+bool have_neon() NOEXCEPT
 {
     static auto enable = try_neon();
     return enable;
 }
 #endif
 #ifdef WITH_SSE41
-inline bool try_sse41() noexcept
+inline bool try_sse41() NOEXCEPT
 {
     uint32_t eax, ebx, ecx, edx;
     return cpuid_ex(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_right(ecx, cpu1_0::sse4_ecx_bit);
 }
-bool have_sse41() noexcept
+bool have_sse41() NOEXCEPT
 {
     static auto enable = try_sse41();
     return enable;
 }
 #endif
 #ifdef WITH_SSE4
-inline bool try_sse4() noexcept
+inline bool try_sse4() NOEXCEPT
 {
 #if defined(_M_X64) || defined(_M_AMD64)  || defined(_M_IX86)
     // sha256_x1_sse4() is not yet defined in this context.
@@ -186,14 +186,14 @@ inline bool try_sse4() noexcept
         && get_right(ecx, cpu1_0::sse4_ecx_bit);
 #endif
 }
-bool have_sse4() noexcept
+bool have_sse4() NOEXCEPT
 {
     static auto enable = try_sse4();
     return enable;
 }
 #endif
 #ifdef WITH_SHANI
-inline bool try_shani() noexcept
+inline bool try_shani() NOEXCEPT
 {
     uint32_t eax, ebx, ecx, edx;
     return cpuid_ex(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
@@ -202,7 +202,7 @@ inline bool try_shani() noexcept
         && cpuid_ex(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_right(ebx, cpu7_0::shani_ebx_bit);
 }
-bool have_shani() noexcept
+bool have_shani() NOEXCEPT
 {
     static auto enable = try_shani();
     return enable;
@@ -210,27 +210,27 @@ bool have_shani() noexcept
 #endif
 
 #ifdef WITH_AVX2
-void sha256_x1_avx2(uint32_t state[8], const uint8_t block[64]) noexcept;
-void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) noexcept;
+void sha256_x1_avx2(uint32_t state[8], const uint8_t block[64]) NOEXCEPT;
+void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) NOEXCEPT;
 #endif
 #ifdef WITH_NEON
-void sha256_x1_neon(uint32_t state[8], const uint8_t block[64]) noexcept;
-////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) noexcept;
-void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
+void sha256_x1_neon(uint32_t state[8], const uint8_t block[64]) NOEXCEPT;
+////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT;
+void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT;
 #endif
 #ifdef WITH_SSE41
-void sha256_x1_sse41(uint32_t state[8], const uint8_t block[64]) noexcept;
-void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) noexcept;
+void sha256_x1_sse41(uint32_t state[8], const uint8_t block[64]) NOEXCEPT;
+void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT;
 #endif
 #ifdef WITH_SSE4
-void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) noexcept;
-////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) noexcept;
-void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
+void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) NOEXCEPT;
+////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT;
+void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT;
 #endif
 #ifdef WITH_SHANI
-void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) noexcept;
-void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) noexcept;
-void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
+void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) NOEXCEPT;
+void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT;
+void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT;
 #endif
 
 // single sha256
@@ -238,7 +238,7 @@ void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) noexcept;
 
 // Iterate over contibuous blocks, with hash accumulation in 'state'. This can
 // be used to replace SHA256Transform.
-void sha256_single(uint32_t state[8], const uint8_t block[64]) noexcept
+void sha256_single(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
 #ifdef WITH_SHANI
     if (have_shani())
@@ -285,7 +285,7 @@ void sha256_single(uint32_t state[8], const uint8_t block[64]) noexcept
 // Multiple blocks are hashed independently into an array of hash values stored
 // into 'out'. This is used to reduce hash sets during merkle tree computation.
 void sha256_paired_double(uint8_t out[], const uint8_t in[],
-    size_t blocks) noexcept
+    size_t blocks) NOEXCEPT
 {
     constexpr auto block_size = 64;
 
@@ -412,7 +412,7 @@ const std::array<uint8_t, 64> sha256x2_buffer
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00
 };
 
-void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) noexcept
+void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) NOEXCEPT
 {
     auto buffer = sha256x2_buffer;
 

@@ -56,7 +56,7 @@ constexpr uint8_t negative_sign_byte = to_negated(positive_sign_byte);
 // C++20: constexpr.
 
 template <size_t Size>
-inline bool integer<Size>::from_integer(Integer& out, int64_t vary) noexcept
+inline bool integer<Size>::from_integer(Integer& out, int64_t vary) NOEXCEPT
 {
     out = possible_narrow_cast<Integer>(vary);
     return !is_overflow(vary);
@@ -64,7 +64,7 @@ inline bool integer<Size>::from_integer(Integer& out, int64_t vary) noexcept
 
 template <size_t Size>
 inline bool integer<Size>::from_chunk(Integer& out,
-    const data_chunk& vary) noexcept
+    const data_chunk& vary) NOEXCEPT
 {
     out = 0;
 
@@ -86,21 +86,21 @@ inline bool integer<Size>::from_chunk(Integer& out,
 
 // protected
 template <size_t Size>
-inline bool integer<Size>::strict_zero(const data_chunk& vary) noexcept
+inline bool integer<Size>::strict_zero(const data_chunk& vary) NOEXCEPT
 {
     return vary.empty();
 }
 
 // protected
 template <size_t Size>
-inline bool integer<Size>::is_overflow(const data_chunk& vary) noexcept
+inline bool integer<Size>::is_overflow(const data_chunk& vary) NOEXCEPT
 {
     return vary.size() > Size;
 }
 
 // protected
 template <size_t Size>
-inline bool integer<Size>::is_overflow(int64_t value) noexcept
+inline bool integer<Size>::is_overflow(int64_t value) NOEXCEPT
 {
     return is_limited(value, bitcoin_min<Size>(), bitcoin_max<Size>());
 }
@@ -110,12 +110,12 @@ inline bool integer<Size>::is_overflow(int64_t value) noexcept
 // Minimally-sized byte encoding, with extra allocated byte if negated.
 // absolute(minimum<int64_t>) is guarded by the presumption of int32 ops.
 
-inline data_chunk chunk::from_bool(bool vary) noexcept
+inline data_chunk chunk::from_bool(bool vary) NOEXCEPT
 {
     return { bc::to_int<uint8_t>(vary) };
 }
 
-inline data_chunk chunk::from_integer(int64_t vary) noexcept
+inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
 {
     // Just an optimization.
     if (is_zero(vary))
@@ -143,13 +143,13 @@ inline data_chunk chunk::from_integer(int64_t vary) noexcept
 // C++20: constexpr.
 
 template <size_t Size>
-inline signed_type<Size> boolean::to_integer(bool vary) noexcept
+inline signed_type<Size> boolean::to_integer(bool vary) NOEXCEPT
 {
     // The cast can safely be ignored, which is why Size is defaulted.
     return bc::to_int<signed_type<Size>>(vary);
 }
 
-inline bool boolean::from_chunk(const data_chunk& vary) noexcept
+inline bool boolean::from_chunk(const data_chunk& vary) NOEXCEPT
 {
     // An optimization, also guards vector empty.
     if (strict_false(vary))
@@ -169,26 +169,26 @@ inline bool boolean::from_chunk(const data_chunk& vary) noexcept
     ////return bc::to_bool(from_little_endian<uintx>(vary));
 }
 
-inline bool boolean::strict_from_chunk(const data_chunk& vary) noexcept
+inline bool boolean::strict_from_chunk(const data_chunk& vary) NOEXCEPT
 {
     // Strict bool tests for integral false/zero, or a single empty byte.
     return strict_false(vary);
 }
 
-constexpr bool boolean::to_bool(int64_t vary) noexcept
+constexpr bool boolean::to_bool(int64_t vary) NOEXCEPT
 {
     // Boolean is not overflow constrained.
     return bc::to_bool(vary);
 }
 
 // protected
-inline bool boolean::strict_false(const data_chunk& vary) noexcept
+inline bool boolean::strict_false(const data_chunk& vary) NOEXCEPT
 {
     return vary.empty();
 }
 
 // protected
-constexpr bool boolean::is_sign_byte(uint8_t byte) noexcept
+constexpr bool boolean::is_sign_byte(uint8_t byte) NOEXCEPT
 {
     return (byte == positive_sign_byte) || (byte == negative_sign_byte);
 }

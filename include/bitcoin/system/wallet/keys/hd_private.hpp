@@ -44,75 +44,75 @@ public:
     static const uint64_t mainnet;
     static const uint64_t testnet;
 
-    static constexpr uint32_t to_prefix(uint64_t prefixes) noexcept
+    static constexpr uint32_t to_prefix(uint64_t prefixes) NOEXCEPT
     {
         return narrow_cast<uint32_t>(shift_right(prefixes, width<uint32_t>()));
     }
 
     static constexpr uint64_t to_prefixes(uint32_t private_prefix,
-        uint32_t public_prefix) noexcept
+        uint32_t public_prefix) NOEXCEPT
     {
         return shift_left<uint64_t>(private_prefix, width<uint32_t>()) |
             public_prefix;
     }
 
     /// Constructors.
-    hd_private() noexcept;
-    hd_private(const hd_private& other) noexcept;
-    hd_private(const data_chunk& entropy, uint64_t prefixes=mainnet) noexcept;
-    hd_private(const hd_key& private_key) noexcept;
-    hd_private(const hd_key& private_key, uint64_t prefixes) noexcept;
-    hd_private(const hd_key& private_key, uint32_t public_prefix) noexcept;
-    hd_private(const std::string& encoded) noexcept;
-    hd_private(const std::string& encoded, uint64_t prefixes) noexcept;
-    hd_private(const std::string& encoded, uint32_t public_prefix) noexcept;
+    hd_private() NOEXCEPT;
+    hd_private(const hd_private& other) NOEXCEPT;
+    hd_private(const data_chunk& entropy, uint64_t prefixes=mainnet) NOEXCEPT;
+    hd_private(const hd_key& private_key) NOEXCEPT;
+    hd_private(const hd_key& private_key, uint64_t prefixes) NOEXCEPT;
+    hd_private(const hd_key& private_key, uint32_t public_prefix) NOEXCEPT;
+    hd_private(const std::string& encoded) NOEXCEPT;
+    hd_private(const std::string& encoded, uint64_t prefixes) NOEXCEPT;
+    hd_private(const std::string& encoded, uint32_t public_prefix) NOEXCEPT;
     hd_private(const ec_secret& secret, const hd_chain_code& chain_code,
-        uint64_t prefixes=mainnet) noexcept;
+        uint64_t prefixes=mainnet) NOEXCEPT;
 
     /// Operators.
-    bool operator<(const hd_private& other) const noexcept;
-    bool operator==(const hd_private& other) const noexcept;
-    bool operator!=(const hd_private& other) const noexcept;
-    hd_private& operator=(hd_private other) noexcept;
+    bool operator<(const hd_private& other) const NOEXCEPT;
+    bool operator==(const hd_private& other) const NOEXCEPT;
+    bool operator!=(const hd_private& other) const NOEXCEPT;
+    hd_private& operator=(hd_private other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, hd_private& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const hd_private& of) noexcept;
+        const hd_private& of) NOEXCEPT;
 
     /// Swap implementation required to properly handle derived class assign.
-    friend void swap(hd_private& left, hd_private& right) noexcept;
+    friend void swap(hd_private& left, hd_private& right) NOEXCEPT;
 
     /// Cast operators.
-    operator const ec_secret&() const noexcept;
+    operator const ec_secret&() const NOEXCEPT;
 
     /// Serializer.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Accessors.
-    const ec_secret& secret() const noexcept;
+    const ec_secret& secret() const NOEXCEPT;
 
     /// Methods.
-    hd_key to_hd_key() const noexcept;
-    hd_public to_public() const noexcept;
-    hd_private derive_private(uint32_t index) const noexcept;
-    hd_public derive_public(uint32_t index) const noexcept;
+    hd_key to_hd_key() const NOEXCEPT;
+    hd_public to_public() const NOEXCEPT;
+    hd_private derive_private(uint32_t index) const NOEXCEPT;
+    hd_public derive_public(uint32_t index) const NOEXCEPT;
 
 private:
     /// Factories.
     static hd_private from_entropy(const data_slice& seed,
-        uint64_t prefixes) noexcept;
+        uint64_t prefixes) NOEXCEPT;
     static hd_private from_key(const hd_key& decoded,
-        uint32_t public_prefix) noexcept;
+        uint32_t public_prefix) NOEXCEPT;
     static hd_private from_key(const hd_key& decoded,
-        uint64_t prefixes) noexcept;
+        uint64_t prefixes) NOEXCEPT;
     static hd_private from_private(const ec_secret& secret,
-        const hd_chain_code& chain_code, uint64_t prefixes) noexcept;
+        const hd_chain_code& chain_code, uint64_t prefixes) NOEXCEPT;
     static hd_private from_string(const std::string& encoded,
-        uint32_t public_prefix) noexcept;
+        uint32_t public_prefix) NOEXCEPT;
     static hd_private from_string(const std::string& encoded,
-        uint64_t prefixes) noexcept;
+        uint64_t prefixes) NOEXCEPT;
 
     hd_private(const ec_secret& secret, const hd_chain_code& chain_code,
-        const hd_lineage& lineage) noexcept;
+        const hd_lineage& lineage) NOEXCEPT;
 
     /// Members.
     /// This should be const, apart from the need to implement assignment.

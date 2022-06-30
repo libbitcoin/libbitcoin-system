@@ -38,7 +38,7 @@ typedef data_array<message_signature_size> message_signature;
 /**
  * Hashes a messages in preparation for signing.
  */
-BC_API hash_digest hash_message(const data_slice& message) noexcept;
+BC_API hash_digest hash_message(const data_slice& message) NOEXCEPT;
 
 /**
  * Signs a message using deterministic signature.
@@ -47,7 +47,7 @@ BC_API hash_digest hash_message(const data_slice& message) noexcept;
  * @return true if wif is valid and signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& out_signature,
-    const data_slice& message, const ec_private& secret) noexcept;
+    const data_slice& message, const ec_private& secret) NOEXCEPT;
 
 /**
  * Signs a message using deterministic signature.
@@ -56,7 +56,7 @@ BC_API bool sign_message(message_signature& out_signature,
  * @return true if wif is valid and signature encoding is successful.
  */
 BC_API bool sign_message(message_signature& out_signature,
-    const data_slice& message, const std::string& wif) noexcept;
+    const data_slice& message, const std::string& wif) NOEXCEPT;
 
 /**
  * Signs a message using deterministic signature.
@@ -68,7 +68,7 @@ BC_API bool sign_message(message_signature& out_signature,
  */
 BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const ec_secret& secret,
-    bool compressed=true) noexcept;
+    bool compressed=true) NOEXCEPT;
 
 /**
  * Verifies a message.
@@ -80,15 +80,15 @@ BC_API bool sign_message(message_signature& out_signature,
  */
 BC_API bool verify_message(const data_slice& message,
     const payment_address& address,
-    const message_signature& signature) noexcept;
+    const message_signature& signature) NOEXCEPT;
 
 /// Exposed primarily for independent testability.
 BC_API bool recovery_id_to_magic(uint8_t& out_magic, uint8_t recovery_id,
-    bool compressed) noexcept;
+    bool compressed) NOEXCEPT;
 
 /// Exposed primarily for independent testability.
 BC_API bool magic_to_recovery_id(uint8_t& out_recovery_id,
-    bool& out_compressed, uint8_t magic) noexcept;
+    bool& out_compressed, uint8_t magic) NOEXCEPT;
 
 } // namespace wallet
 } // namespace system

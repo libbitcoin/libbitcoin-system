@@ -40,19 +40,19 @@ public:
     ~hash160() = default;
 
     /// Constructors.
-    hash160() noexcept;
-    hash160(short_hash&& value) noexcept;
-    hash160(const short_hash& value) noexcept;
-    hash160(const std::string& base16) noexcept(false);
+    hash160() NOEXCEPT;
+    hash160(short_hash&& value) NOEXCEPT;
+    hash160(const short_hash& value) NOEXCEPT;
+    hash160(const std::string& base16) THROWS;
 
     /// Operators.
 
-    operator const short_hash&() const noexcept;
+    operator const short_hash&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        hash160& argument) noexcept(false);
+        hash160& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const hash160& argument) noexcept;
+        const hash160& argument) NOEXCEPT;
 
 private:
     short_hash value_;

@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -31,79 +32,79 @@ namespace system {
 /// The value is outside of the type bounds.
 template <typename By, typename Integer,
     if_integer<By> = true, if_integer<Integer> = true>
-constexpr bool is_limited(Integer value) noexcept;
+constexpr bool is_limited(Integer value) NOEXCEPT;
 
 /// The value exceeds the type bound or upper limit.
 template <typename By, typename Integer,
     if_integer<By> = true, if_integer<Integer> = true>
-constexpr bool is_limited(Integer value, By maximum) noexcept;
+constexpr bool is_limited(Integer value, By maximum) NOEXCEPT;
 
 /// The value exceeds the lower or upper limit.
 template <typename By, typename Integer,
     if_integer<By> = true, if_integer<Integer> = true>
-constexpr bool is_limited(Integer value, By minimum, By maximum) noexcept;
+constexpr bool is_limited(Integer value, By minimum, By maximum) NOEXCEPT;
 
 /// Cast a value to Result, constrained to the limits of both types.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
-constexpr Result limit(Integer value) noexcept;
+constexpr Result limit(Integer value) NOEXCEPT;
 
 /// Cast a value to Result, constrained to the type and upper limit.
 /// Casting positive to/from negative may change the sign of the result.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
-constexpr Result limit(Integer value, Result maximum) noexcept;
+constexpr Result limit(Integer value, Result maximum) NOEXCEPT;
 
 /// Cast a value to Result, constrained to the specified limits.
 /// Casting positive to/from negative may change the sign of the result.
 template <typename Result, typename Integer,
     if_integer<Result> = true, if_integer<Integer> = true>
-constexpr Result limit(Integer value, Result minimum, Result maximum) noexcept;
+constexpr Result limit(Integer value, Result minimum, Result maximum) NOEXCEPT;
 
 /// Integral bounds.
 /// ---------------------------------------------------------------------------
 
 /// The minimum value of a integral integer type (std::numeric_limits).
 template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer minimum() noexcept;
+constexpr Integer minimum() NOEXCEPT;
 
 /// The maximum value of a integral integer type (std::numeric_limits).
 template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer maximum() noexcept;
+constexpr Integer maximum() NOEXCEPT;
 
 /// The absolute value of minimum value of a integral integer type.
 template <typename Integer,
     typename Absolute = to_unsigned_type<Integer>,
     if_signed_integral_integer<Integer> = true>
-constexpr Absolute absolute_minimum() noexcept;
+constexpr Absolute absolute_minimum() NOEXCEPT;
 template <typename Integer,
     if_unsigned_integral_integer<Integer> = true>
-constexpr Integer absolute_minimum() noexcept;
+constexpr Integer absolute_minimum() NOEXCEPT;
 
 /// The maximum value of a integral integer type (unsigned).
 template <typename Integer,
     typename Unsigned = to_unsigned_type<Integer>,
     if_signed_integral_integer<Integer> = true>
-constexpr Unsigned unsigned_maximum() noexcept;
+constexpr Unsigned unsigned_maximum() NOEXCEPT;
 template <typename Integer,
     if_unsigned_integral_integer<Integer> = true>
-constexpr Integer unsigned_maximum() noexcept;
+constexpr Integer unsigned_maximum() NOEXCEPT;
 
 /// The minimum value of a type by byte size (1-8 bytes).
 template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return minimum() noexcept;
+constexpr Return minimum() NOEXCEPT;
 
 /// The maximum value of a type by byte size (1-8 bytes).
 template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return maximum() noexcept;
+constexpr Return maximum() NOEXCEPT;
 
 /// The minimum value of a bitcoin integer by byte size (1-8 bytes).
 template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return bitcoin_min() noexcept;
+constexpr Return bitcoin_min() NOEXCEPT;
 
 /// The maximum value of a bitcoin integer by byte size (1-8 bytes).
 template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return bitcoin_max() noexcept;
+constexpr Return bitcoin_max() NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

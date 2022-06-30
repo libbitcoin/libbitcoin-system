@@ -27,6 +27,7 @@
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
 
@@ -40,68 +41,68 @@ class byte_writer
 {
 public:
     /// Constructors.
-    byte_writer(OStream& sink) noexcept;
+    byte_writer(OStream& sink) NOEXCEPT;
 
     /// Copy/move/destruct.
     byte_writer(byte_writer&& other);
     byte_writer(const byte_writer& other);
     byte_writer& operator=(byte_writer&& other);
     byte_writer& operator=(const byte_writer& other);
-    virtual ~byte_writer() noexcept;
+    virtual ~byte_writer() NOEXCEPT;
 
     /// Type-inferenced integer writers.
     template <typename Integer, if_integer<Integer> = true>
-    void write_big_endian(Integer value) noexcept;
+    void write_big_endian(Integer value) NOEXCEPT;
     template <typename Integer, if_integer<Integer> = true>
-    void write_little_endian(Integer value) noexcept;
+    void write_little_endian(Integer value) NOEXCEPT;
 
     /// Write big endian integers.
-    void write_2_bytes_big_endian(uint16_t value) noexcept override;
-    void write_4_bytes_big_endian(uint32_t value) noexcept override;
-    void write_8_bytes_big_endian(uint64_t value) noexcept override;
+    void write_2_bytes_big_endian(uint16_t value) NOEXCEPT override;
+    void write_4_bytes_big_endian(uint32_t value) NOEXCEPT override;
+    void write_8_bytes_big_endian(uint64_t value) NOEXCEPT override;
 
     /// Write little endian integers.
-    void write_2_bytes_little_endian(uint16_t value) noexcept override;
-    void write_4_bytes_little_endian(uint32_t value) noexcept override;
-    void write_8_bytes_little_endian(uint64_t value) noexcept override;
+    void write_2_bytes_little_endian(uint16_t value) NOEXCEPT override;
+    void write_4_bytes_little_endian(uint32_t value) NOEXCEPT override;
+    void write_8_bytes_little_endian(uint64_t value) NOEXCEPT override;
 
     /// Write Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
-    void write_variable(uint64_t value) noexcept override;
+    void write_variable(uint64_t value) NOEXCEPT override;
 
     /// Call write_4_bytes_little_endian with integer value of error code.
-    void write_error_code(const code& ec) noexcept override;
+    void write_error_code(const code& ec) NOEXCEPT override;
 
     /// Write into buffer until stream is exhausted.
-    std::istream& write(std::istream& in) noexcept override;
+    std::istream& write(std::istream& in) NOEXCEPT override;
 
     /// Write one byte.
-    void write_byte(uint8_t value) noexcept override;
+    void write_byte(uint8_t value) NOEXCEPT override;
 
     /// Write all bytes.
-    void write_bytes(const data_slice& data) noexcept override;
+    void write_bytes(const data_slice& data) NOEXCEPT override;
 
     /// Write size bytes.
-    void write_bytes(const uint8_t* data, size_t size) noexcept override;
+    void write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
 
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
-    void write_string(const std::string& value) noexcept override;
+    void write_string(const std::string& value) NOEXCEPT override;
 
     /// This is only used for writing Bitcoin command command text.
     /// Write string to specified length, padded with nulls as required.
-    void write_string_buffer(const std::string& value, size_t size) noexcept
+    void write_string_buffer(const std::string& value, size_t size) NOEXCEPT
         override;
 
     /// Flush the buffer.
-    void flush() noexcept override;
+    void flush() NOEXCEPT override;
 
     /// Get the current absolute position (fails with push_sink).
-    size_t get_position() noexcept override;
+    size_t get_position() NOEXCEPT override;
 
     /// The stream is valid.
-    operator bool() const noexcept override;
+    operator bool() const NOEXCEPT override;
 
     /// The stream is invalid.
-    bool operator!() const noexcept override;
+    bool operator!() const NOEXCEPT override;
 
 protected:
     static constexpr uint8_t pad() { return 0x00; };
@@ -115,15 +116,15 @@ protected:
         return system::maximum<size_t>();
     };
 
-    virtual void do_write_bytes(const uint8_t* data, size_t size) noexcept;
-    virtual void do_flush() noexcept;
+    virtual void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT;
+    virtual void do_flush() NOEXCEPT;
 
 private:
-    bool valid() const noexcept;
-    void invalid() noexcept;
-    void validate() noexcept;
-    void flusher() noexcept;
-    size_t getter() noexcept;
+    bool valid() const NOEXCEPT;
+    void invalid() NOEXCEPT;
+    void validate() NOEXCEPT;
+    void flusher() NOEXCEPT;
+    size_t getter() NOEXCEPT;
 
     OStream& stream_;
 };

@@ -46,35 +46,35 @@ class BC_API parser
 {
 public:
     static std::string format_invalid_parameter(
-        const std::string& message) noexcept;
+        const std::string& message) NOEXCEPT;
     static bool get_option(variables_map& variables,
-        const std::string& name) noexcept;
+        const std::string& name) NOEXCEPT;
     static std::filesystem::path get_config_option(variables_map& variables,
-        const std::string& name) noexcept;
+        const std::string& name) NOEXCEPT;
 
-    virtual ~parser() noexcept;
+    virtual ~parser() NOEXCEPT;
 
     /// Load command line options (named).
-    virtual options_metadata load_options() noexcept(false) = 0;
+    virtual options_metadata load_options() THROWS = 0;
 
     /// Load command line arguments (positional).
-    virtual arguments_metadata load_arguments() noexcept(false) = 0;
+    virtual arguments_metadata load_arguments() THROWS = 0;
 
     /// Load environment variable settings.
-    virtual options_metadata load_environment() noexcept(false) = 0;
+    virtual options_metadata load_environment() THROWS = 0;
 
     /// Load configuration file settings.
-    virtual options_metadata load_settings() noexcept(false) = 0;
+    virtual options_metadata load_settings() THROWS = 0;
 
 protected:
     virtual void load_command_variables(variables_map& variables,
-        int argc, const char* argv[]) noexcept(false);
+        int argc, const char* argv[]) THROWS;
 
     virtual bool load_configuration_variables(variables_map& variables,
-        const std::string& option_name) noexcept(false);
+        const std::string& option_name) THROWS;
 
     virtual void load_environment_variables(variables_map& variables,
-        const std::string& prefix) noexcept(false);
+        const std::string& prefix) THROWS;
 };
 
 } // namespace config

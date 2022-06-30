@@ -30,27 +30,27 @@ namespace wallet {
 // Constructors.
 //-------------------------------------------------------------------------
 
-point_value::point_value() noexcept
+point_value::point_value() NOEXCEPT
   : point(), value_(0)
 {
 }
 
-point_value::point_value(point_value&& other) noexcept
+point_value::point_value(point_value&& other) NOEXCEPT
   : value_(other.value_), point(std::move(other))
 {
 }
 
-point_value::point_value(const point_value& other) noexcept
+point_value::point_value(const point_value& other) NOEXCEPT
   : point(other), value_(other.value_)
 {
 }
 
-point_value::point_value(point&& instance, uint64_t value) noexcept
+point_value::point_value(point&& instance, uint64_t value) NOEXCEPT
   : point(std::move(instance)), value_(value)
 {
 }
 
-point_value::point_value(const point& instance, uint64_t value) noexcept
+point_value::point_value(const point& instance, uint64_t value) NOEXCEPT
   : point(instance), value_(value)
 {
 }
@@ -59,25 +59,25 @@ point_value::point_value(const point& instance, uint64_t value) noexcept
 //-------------------------------------------------------------------------
 
 // Copy and swap idiom, see: stackoverflow.com/a/3279550/1172329
-point_value& point_value::operator=(point_value other) noexcept
+point_value& point_value::operator=(point_value other) NOEXCEPT
 {
     swap(*this, other);
     return *this;
 }
 
-bool point_value::operator==(const point_value& other) const noexcept
+bool point_value::operator==(const point_value& other) const NOEXCEPT
 {
     return static_cast<point>(*this) == static_cast<point>(other) &&
         (value_ == other.value_);
 }
 
-bool point_value::operator!=(const point_value& other) const noexcept
+bool point_value::operator!=(const point_value& other) const NOEXCEPT
 {
     return !(*this == other);
 }
 
 // friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(point_value& left, point_value& right) noexcept
+void swap(point_value& left, point_value& right) NOEXCEPT
 {
     using std::swap;
     using namespace chain;
@@ -90,12 +90,12 @@ void swap(point_value& left, point_value& right) noexcept
 // Properties (accessors).
 //-------------------------------------------------------------------------
 
-uint64_t point_value::value() const noexcept
+uint64_t point_value::value() const NOEXCEPT
 {
     return value_;
 }
 
-void point_value::set_value(uint64_t value) noexcept
+void point_value::set_value(uint64_t value) NOEXCEPT
 {
     value_ = value;
 }

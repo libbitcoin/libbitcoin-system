@@ -36,7 +36,7 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-sha256_writer<OStream>::sha256_writer(OStream& sink) noexcept
+sha256_writer<OStream>::sha256_writer(OStream& sink) NOEXCEPT
   : byte_writer<OStream>(sink),
     context_{ intrinsics::sha256_initial }
 {
@@ -44,7 +44,7 @@ sha256_writer<OStream>::sha256_writer(OStream& sink) noexcept
 }
 
 template <typename OStream>
-sha256_writer<OStream>::~sha256_writer() noexcept
+sha256_writer<OStream>::~sha256_writer() NOEXCEPT
 {
     // Derived virtual destructor called before base destructor.
     flusher();
@@ -55,13 +55,13 @@ sha256_writer<OStream>::~sha256_writer() noexcept
 
 template <typename OStream>
 void sha256_writer<OStream>::do_write_bytes(const uint8_t* data,
-    size_t size) noexcept
+    size_t size) NOEXCEPT
 {
     sha256_update(context_, data, size);
 }
 
 template <typename OStream>
-void sha256_writer<OStream>::do_flush() noexcept
+void sha256_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
 }
@@ -70,7 +70,7 @@ void sha256_writer<OStream>::do_flush() noexcept
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-void sha256_writer<OStream>::flusher() noexcept
+void sha256_writer<OStream>::flusher() NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest hash;

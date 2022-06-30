@@ -31,7 +31,7 @@ namespace wallet {
 // ----------------------------------------------------------------------------
 
 void points_value::greedy(points_value& out, const points_value& unspent,
-    uint64_t minimum_value) noexcept
+    uint64_t minimum_value) NOEXCEPT
 {
     out.points.clear();
 
@@ -50,19 +50,19 @@ void points_value::greedy(points_value& out, const points_value& unspent,
     point_value::list points{ unspent.points };
 
     const auto below = [minimum_value](
-        const point_value& point) noexcept
+        const point_value& point) NOEXCEPT
         {
             return point.value() < minimum_value;
         };
 
     const auto lesser = [](const point_value& left,
-        const point_value& right) noexcept
+        const point_value& right) NOEXCEPT
         {
             return left.value() < right.value();
         };
 
     const auto greater = [](const point_value& left,
-        const point_value& right) noexcept
+        const point_value& right) NOEXCEPT
         {
             return left.value() > right.value();
         };
@@ -96,7 +96,7 @@ void points_value::greedy(points_value& out, const points_value& unspent,
 }
 
 void points_value::individual(points_value& out, const points_value& unspent,
-    uint64_t minimum_value) noexcept
+    uint64_t minimum_value) NOEXCEPT
 {
     out.points.clear();
     out.points.reserve(unspent.points.size());
@@ -109,7 +109,7 @@ void points_value::individual(points_value& out, const points_value& unspent,
     out.points.shrink_to_fit();
 
     const auto lesser = [](const point_value& left,
-        const point_value& right) noexcept
+        const point_value& right) NOEXCEPT
         {
             return left.value() < right.value();
         };
@@ -120,7 +120,7 @@ void points_value::individual(points_value& out, const points_value& unspent,
 }
 
 void points_value::select(points_value& out, const points_value& unspent,
-    uint64_t minimum_value, selection option) noexcept
+    uint64_t minimum_value, selection option) NOEXCEPT
 {
     switch (option)
     {
@@ -138,9 +138,9 @@ void points_value::select(points_value& out, const points_value& unspent,
 // ----------------------------------------------------------------------------
 
 // Overflow returns max_uint64.
-uint64_t points_value::value() const noexcept
+uint64_t points_value::value() const NOEXCEPT
 {
-    const auto sum = [](uint64_t total, const point_value& point) noexcept
+    const auto sum = [](uint64_t total, const point_value& point) NOEXCEPT
     {
         return ceilinged_add(total, point.value());
     };

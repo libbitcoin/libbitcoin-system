@@ -67,8 +67,8 @@
 // ADL free functions for use with boost-json.
 #define DECLARE_JSON_VALUE_CONVERTORS(name) \
 BC_API name tag_invoke(boost::json::value_to_tag<name>, \
-    const boost::json::value& value) noexcept; \
+    const boost::json::value& value) NOEXCEPT; \
 BC_API void tag_invoke(boost::json::value_from_tag, \
-    boost::json::value& value, const name& instance) noexcept
+    boost::json::value& value, const name& instance) NOEXCEPT
 
 #endif

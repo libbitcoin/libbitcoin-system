@@ -51,8 +51,8 @@ struct BC_API hd_lineage
     uint32_t parent_fingerprint;
     uint32_t child_number;
 
-    bool operator==(const hd_lineage& other) const noexcept;
-    bool operator!=(const hd_lineage& other) const noexcept;
+    bool operator==(const hd_lineage& other) const NOEXCEPT;
+    bool operator!=(const hd_lineage& other) const NOEXCEPT;
 };
 
 class hd_private;
@@ -64,51 +64,51 @@ public:
     static const uint32_t mainnet;
     static const uint32_t testnet;
 
-    static constexpr uint32_t to_prefix(uint64_t prefixes) noexcept
+    static constexpr uint32_t to_prefix(uint64_t prefixes) NOEXCEPT
     {
         return narrow_cast<uint32_t>(prefixes);
     }
 
     /// Constructors.
-    hd_public() noexcept;
-    hd_public(const hd_public& other) noexcept;
-    hd_public(const hd_key& public_key) noexcept;
-    hd_public(const hd_key& public_key, uint32_t prefix) noexcept;
-    hd_public(const std::string& encoded) noexcept;
-    hd_public(const std::string& encoded, uint32_t prefix) noexcept;
+    hd_public() NOEXCEPT;
+    hd_public(const hd_public& other) NOEXCEPT;
+    hd_public(const hd_key& public_key) NOEXCEPT;
+    hd_public(const hd_key& public_key, uint32_t prefix) NOEXCEPT;
+    hd_public(const std::string& encoded) NOEXCEPT;
+    hd_public(const std::string& encoded, uint32_t prefix) NOEXCEPT;
 
     /// Operators.
-    bool operator<(const hd_public& other) const noexcept;
-    bool operator==(const hd_public& other) const noexcept;
-    bool operator!=(const hd_public& other) const noexcept;
-    hd_public& operator=(const hd_public& other) noexcept;
+    bool operator<(const hd_public& other) const NOEXCEPT;
+    bool operator==(const hd_public& other) const NOEXCEPT;
+    bool operator!=(const hd_public& other) const NOEXCEPT;
+    hd_public& operator=(const hd_public& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, hd_public& to);
     friend std::ostream& operator<<(std::ostream& out,
-        const hd_public& of) noexcept;
+        const hd_public& of) NOEXCEPT;
 
     /// Cast operators.
-    operator bool() const noexcept;
-    operator const ec_compressed&() const noexcept;
+    operator bool() const NOEXCEPT;
+    operator const ec_compressed&() const NOEXCEPT;
 
     /// Serializer.
-    std::string encoded() const noexcept;
+    std::string encoded() const NOEXCEPT;
 
     /// Accessors.
-    const hd_chain_code& chain_code() const noexcept;
-    const hd_lineage& lineage() const noexcept;
-    const ec_compressed& point() const noexcept;
+    const hd_chain_code& chain_code() const NOEXCEPT;
+    const hd_lineage& lineage() const NOEXCEPT;
+    const ec_compressed& point() const NOEXCEPT;
 
     /// Methods.
-    hd_key to_hd_key() const noexcept;
-    hd_public derive_public(uint32_t index) const noexcept;
+    hd_key to_hd_key() const NOEXCEPT;
+    hd_public derive_public(uint32_t index) const NOEXCEPT;
 
 protected:
     /// Factories.
     static hd_public from_secret(const ec_secret& secret,
-        const hd_chain_code& chain_code, const hd_lineage& lineage) noexcept;
+        const hd_chain_code& chain_code, const hd_lineage& lineage) NOEXCEPT;
 
     /// Helpers.
-    uint32_t fingerprint() const noexcept;
+    uint32_t fingerprint() const NOEXCEPT;
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.
@@ -118,15 +118,15 @@ protected:
     ec_compressed point_;
 
 private:
-    static hd_public from_key(const hd_key& public_key) noexcept;
-    static hd_public from_string(const std::string& encoded) noexcept;
+    static hd_public from_key(const hd_key& public_key) NOEXCEPT;
+    static hd_public from_string(const std::string& encoded) NOEXCEPT;
     static hd_public from_key(const hd_key& public_key,
-        uint32_t prefix) noexcept;
+        uint32_t prefix) NOEXCEPT;
     static hd_public from_string(const std::string& encoded,
-        uint32_t prefix) noexcept;
+        uint32_t prefix) NOEXCEPT;
 
     hd_public(const ec_compressed& point,
-        const hd_chain_code& chain_code, const hd_lineage& lineage) noexcept;
+        const hd_chain_code& chain_code, const hd_lineage& lineage) NOEXCEPT;
 };
 
 } // namespace wallet

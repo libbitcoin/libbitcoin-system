@@ -48,7 +48,7 @@ public:
     //*************************************************************************
     // CONSENSUS: non-minial encoding consensus critical for find_and_delete.
     //*************************************************************************
-    static constexpr opcode opcode_from_size(size_t size) noexcept
+    static constexpr opcode opcode_from_size(size_t size) NOEXCEPT
     {
         ////BC_ASSERT(size <= max_uint32);
         constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
@@ -67,7 +67,7 @@ public:
     /// Compute the minimal data opcode for a given chunk of data.
     /// Caller should clear data if converting to non-payload opcode.
     static inline opcode minimal_opcode_from_data(
-        const data_chunk& data) noexcept
+        const data_chunk& data) NOEXCEPT
     {
         const auto size = data.size();
 
@@ -94,13 +94,13 @@ public:
     /// Compute the nominal data opcode for a given chunk of data.
     /// Restricted to sized data, avoids conversion to numeric opcodes.
     static inline opcode nominal_opcode_from_data(
-        const data_chunk& data) noexcept
+        const data_chunk& data) NOEXCEPT
     {
         return opcode_from_size(data.size());
     }
 
     /// Convert the [0..16] value to the corresponding opcode (or undefined).
-    static constexpr opcode opcode_from_version(uint8_t value) noexcept
+    static constexpr opcode opcode_from_version(uint8_t value) NOEXCEPT
     {
         ////BC_ASSERT(value <= numbers::positive_16);
         return (value == numbers::number_0) ? opcode::push_size_0 :
@@ -108,7 +108,7 @@ public:
     }
 
     /// Convert the [1..16] value to the corresponding opcode (or undefined).
-    static constexpr opcode opcode_from_positive(uint8_t value) noexcept
+    static constexpr opcode opcode_from_positive(uint8_t value) NOEXCEPT
     {
         ////BC_ASSERT(value >= numbers::positive_1);
         ////BC_ASSERT(value <= numbers::positive_16);
@@ -117,7 +117,7 @@ public:
     }
 
     /// Convert the opcode to the corresponding [1..16] value (or undefined).
-    static constexpr uint8_t opcode_to_positive(opcode code) noexcept
+    static constexpr uint8_t opcode_to_positive(opcode code) NOEXCEPT
     {
         ////BC_ASSERT(is_positive(code));
         constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
@@ -125,7 +125,7 @@ public:
     }
 
     /// Compute maximum push data size for the opcode (without script limit).
-    static constexpr size_t opcode_to_maximum_size(opcode code) noexcept
+    static constexpr size_t opcode_to_maximum_size(opcode code) NOEXCEPT
     {
         constexpr auto op_75 = static_cast<uint8_t>(opcode::push_size_75);
 
@@ -152,21 +152,21 @@ public:
     // This affects the operation count in p2sh script evaluation.
     // Presumably this was an unintended consequence of range testing enums.
     //*************************************************************************
-    static constexpr bool is_relaxed_push(opcode code) noexcept
+    static constexpr bool is_relaxed_push(opcode code) NOEXCEPT
     {
         constexpr auto op_96 = opcode::push_positive_16;
         return code <= op_96;
     }
 
     /// opcode: [0..79, 81..96].
-    static constexpr bool is_push(opcode code) noexcept
+    static constexpr bool is_push(opcode code) NOEXCEPT
     {
         constexpr auto op_80 = opcode::reserved_80;
         return is_relaxed_push(code) && code != op_80;
     }
 
     /// opcode: [1..78].
-    static constexpr bool is_payload(opcode code) noexcept
+    static constexpr bool is_payload(opcode code) NOEXCEPT
     {
         constexpr auto op_1 = opcode::push_size_1;
         constexpr auto op_78 = opcode::push_four_size;
@@ -174,14 +174,14 @@ public:
     }
 
     /// opcode: [97..255].
-    static constexpr bool is_counted(opcode code) noexcept
+    static constexpr bool is_counted(opcode code) NOEXCEPT
     {
         constexpr auto op_97 = opcode::nop;
         return code >= op_97;
     }
 
     /// stack: [1..16].
-    static constexpr bool is_positive(opcode code) noexcept
+    static constexpr bool is_positive(opcode code) NOEXCEPT
     {
         constexpr auto op_81 = opcode::push_positive_1;
         constexpr auto op_96 = opcode::push_positive_16;
@@ -189,21 +189,21 @@ public:
     }
 
     /// stack: [0, 1..16].
-    static constexpr bool is_version(opcode code) noexcept
+    static constexpr bool is_version(opcode code) NOEXCEPT
     {
         constexpr auto op_0 = opcode::push_size_0;
         return code == op_0 || is_positive(code);
     }
 
     /// stack: [-1, 1..16] (zero is not 'numeric' on the stack).
-    static constexpr bool is_numeric(opcode code) noexcept
+    static constexpr bool is_numeric(opcode code) NOEXCEPT
     {
         constexpr auto op_79 = opcode::push_negative_1;
         return code == op_79 || is_positive(code);
     }
 
     /// stack: [-1, 0, 1..16].
-    static constexpr bool is_number(opcode code) noexcept
+    static constexpr bool is_number(opcode code) NOEXCEPT
     {
         constexpr auto op_79 = opcode::push_negative_1;
         return code == op_79 || is_version(code);
@@ -213,7 +213,7 @@ public:
     // ************************************************************************
     // CONSENSUS: These fail script even if wrapped by a conditional operation.
     // ************************************************************************
-    static constexpr bool is_invalid(opcode code) noexcept
+    static constexpr bool is_invalid(opcode code) NOEXCEPT
     {
         switch (code)
         {
@@ -244,7 +244,7 @@ public:
     }
 
     // opcode: [99..100, 103..104]
-    static constexpr bool is_conditional(opcode code) noexcept
+    static constexpr bool is_conditional(opcode code) NOEXCEPT
     {
         switch (code)
         {
@@ -329,7 +329,7 @@ public:
     /// "invalid" above because of the confusion that can cause. The only truly
     /// "reserved" codes are op_nop# codes, which were promoted by a hard fork.
     /// ************************************************************************
-    static constexpr bool is_reserved(opcode code) noexcept
+    static constexpr bool is_reserved(opcode code) NOEXCEPT
     {
         constexpr auto op_185 = opcode::nop10;
 
@@ -353,7 +353,7 @@ public:
     // ------------------------------------------------------------------------
 
     /// Default operation is any invalid opcode with underflow set.
-    operation() noexcept;
+    operation() NOEXCEPT;
 
     /// Defaults.
     operation(operation&&) = default;
@@ -363,20 +363,20 @@ public:
     ~operation() = default;
 
     /// Use data constructors for push_data ops.
-    operation(opcode code) noexcept;
+    operation(opcode code) NOEXCEPT;
 
     /// These construct from push-data, not serialized operations (no codes).
     /// When minimal is true the data is interpreted as minimally-encoded push.
-    operation(data_chunk&& push_data, bool minimal) noexcept;
-    operation(const data_chunk& push_data, bool minimal) noexcept;
-    operation(const chunk_cptr& push_data, bool minimal) noexcept;
+    operation(data_chunk&& push_data, bool minimal) NOEXCEPT;
+    operation(const data_chunk& push_data, bool minimal) NOEXCEPT;
+    operation(const chunk_cptr& push_data, bool minimal) NOEXCEPT;
 
     /// These deserialize operations (with codes), not from push-data.
-    operation(const data_slice& op_data) noexcept;
-    operation(std::istream&& stream) noexcept;
-    operation(std::istream& stream) noexcept;
-    operation(reader&& source) noexcept;
-    operation(reader& source) noexcept;
+    operation(const data_slice& op_data) NOEXCEPT;
+    operation(std::istream&& stream) NOEXCEPT;
+    operation(std::istream& stream) NOEXCEPT;
+    operation(reader&& source) NOEXCEPT;
+    operation(reader& source) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
     // TODO: a byte-deserialized operation cannot be invalid unless empty.
@@ -384,79 +384,79 @@ public:
     // TODO: but mnemonic decoding may be invalid. moving this to config
     // TODO: allows string decoding to throw, consistent with other config.
     /// Literal string is disallowed, as it conflicts with const data_slice&.
-    explicit operation(const std::string& mnemonic) noexcept;
+    explicit operation(const std::string& mnemonic) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    bool operator==(const operation& other) const noexcept;
-    bool operator!=(const operation& other) const noexcept;
+    bool operator==(const operation& other) const NOEXCEPT;
+    bool operator!=(const operation& other) const NOEXCEPT;
 
     // Serialization.
     // ------------------------------------------------------------------------
 
-    data_chunk to_data() const noexcept;
-    void to_data(std::ostream& stream) const noexcept;
-    void to_data(writer& sink) const noexcept;
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    std::string to_string(uint32_t active_forks) const noexcept;
+    std::string to_string(uint32_t active_forks) const NOEXCEPT;
 
     // Properties.
     // ------------------------------------------------------------------------
 
     /// Native properties.
-    bool is_valid() const noexcept;
-    opcode code() const noexcept;
-    const data_chunk& data() const noexcept;
-    const chunk_cptr& data_ptr() const noexcept;
+    bool is_valid() const NOEXCEPT;
+    opcode code() const NOEXCEPT;
+    const data_chunk& data() const NOEXCEPT;
+    const chunk_cptr& data_ptr() const NOEXCEPT;
 
     /// Computed properties.
-    size_t serialized_size() const noexcept;
+    size_t serialized_size() const NOEXCEPT;
 
     /// Categories of operations.
     /// -----------------------------------------------------------------------
 
     /// The is_invalid() method pertains only to opcode consensus validity and
     /// should not be confused with the inversion of is_valid (serialization).
-    bool is_invalid() const noexcept;
-    bool is_push() const noexcept;
-    bool is_payload() const noexcept;
-    bool is_counted() const noexcept;
-    bool is_version() const noexcept;
-    bool is_numeric() const noexcept;
-    bool is_positive() const noexcept;
-    bool is_reserved() const noexcept;
-    bool is_conditional() const noexcept;
-    bool is_relaxed_push() const noexcept;
-    bool is_minimal_push() const noexcept;
-    bool is_nominal_push() const noexcept;
-    bool is_underflow() const noexcept;
-    bool is_oversized() const noexcept;
-    bool is_underclaimed() const noexcept;
+    bool is_invalid() const NOEXCEPT;
+    bool is_push() const NOEXCEPT;
+    bool is_payload() const NOEXCEPT;
+    bool is_counted() const NOEXCEPT;
+    bool is_version() const NOEXCEPT;
+    bool is_numeric() const NOEXCEPT;
+    bool is_positive() const NOEXCEPT;
+    bool is_reserved() const NOEXCEPT;
+    bool is_conditional() const NOEXCEPT;
+    bool is_relaxed_push() const NOEXCEPT;
+    bool is_minimal_push() const NOEXCEPT;
+    bool is_nominal_push() const NOEXCEPT;
+    bool is_underflow() const NOEXCEPT;
+    bool is_oversized() const NOEXCEPT;
+    bool is_underclaimed() const NOEXCEPT;
 
 protected:
     operation(opcode code, const chunk_cptr& push_data_ptr,
-        bool underflow) noexcept;
+        bool underflow) NOEXCEPT;
 
 private:
     // So script may call count_op.
     friend class script;
 
-    static operation from_data(reader& source) noexcept;
+    static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,
-        bool minimal) noexcept;
+        bool minimal) NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    static operation from_string(const std::string& mnemonic) noexcept;
+    static operation from_string(const std::string& mnemonic) NOEXCEPT;
 
-    static chunk_cptr no_data_ptr() noexcept;
-    static chunk_cptr any_data_ptr() noexcept;
-    static bool count_op(reader& source) noexcept;
-    static uint32_t read_data_size(opcode code, reader& source) noexcept;
+    static chunk_cptr no_data_ptr() NOEXCEPT;
+    static chunk_cptr any_data_ptr() NOEXCEPT;
+    static bool count_op(reader& source) NOEXCEPT;
+    static uint32_t read_data_size(opcode code, reader& source) NOEXCEPT;
 
     static inline opcode opcode_from_data(const data_chunk& push_data,
-        bool minimal) noexcept
+        bool minimal) NOEXCEPT
     {
         return minimal ? minimal_opcode_from_data(push_data) :
             nominal_opcode_from_data(push_data);
@@ -483,7 +483,7 @@ namespace std
 template<>
 struct hash<bc::system::chain::operation>
 {
-    size_t operator()(const bc::system::chain::operation& value) const noexcept
+    size_t operator()(const bc::system::chain::operation& value) const NOEXCEPT
     {
         return std::hash<bc::system::data_chunk>{}(value.to_data());
     }

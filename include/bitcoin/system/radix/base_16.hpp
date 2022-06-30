@@ -37,38 +37,38 @@ constexpr size_t octet_width = 2;
 
 /// True if the character is a hexadecimal digit.
 template <typename Byte, if_one_byte<Byte> = true>
-constexpr bool is_base16(Byte character) noexcept;
+constexpr bool is_base16(Byte character) NOEXCEPT;
 
 /// Byte value of the literal octet, undefined (but safe) if not base16.
-BC_API uint8_t encode_octet(const char(&string)[add1(octet_width)]) noexcept;
+BC_API uint8_t encode_octet(const char(&string)[add1(octet_width)]) NOEXCEPT;
 
 // Encoding of data_slice (e.g. data_array/data_chunk/string) to hex string.
 // ----------------------------------------------------------------------------
 
 /// Convert a byte vector to a hexidecimal string.
-BC_API std::string encode_base16(const data_slice& data) noexcept;
+BC_API std::string encode_base16(const data_slice& data) NOEXCEPT;
 
 /// Convert a byte array to a reversed byte order hexidecimal string.
-BC_API std::string encode_hash(const data_slice& hash) noexcept;
+BC_API std::string encode_hash(const data_slice& hash) NOEXCEPT;
 
 // Decoding of hex string to data_array or data_chunk.
 // ----------------------------------------------------------------------------
 
 /// Convert a hexidecimal string to a byte vector.
 /// False if the input is malformed.
-BC_API bool decode_base16(data_chunk& out, const std::string& in) noexcept;
+BC_API bool decode_base16(data_chunk& out, const std::string& in) NOEXCEPT;
 
 /// Convert a hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
 template <size_t Size>
 constexpr bool decode_base16(data_array<Size>& out,
-    const std::string_view& in) noexcept;
+    const std::string_view& in) NOEXCEPT;
 
 /// Convert a reversed byte order hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
 template <size_t Size>
 constexpr bool decode_hash(data_array<Size>& out,
-    const std::string_view& in) noexcept;
+    const std::string_view& in) NOEXCEPT;
 
 // Literal decodings of hex string, errors reflected in data.
 // ----------------------------------------------------------------------------
@@ -76,24 +76,24 @@ constexpr bool decode_hash(data_array<Size>& out,
 /// Convert a literal hex string to a string (bytes are cast to string chars).
 /// Empty string returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-inline std::string base16_string(const char(&string)[Size]) noexcept;
+inline std::string base16_string(const char(&string)[Size]) NOEXCEPT;
 
 /// Convert a literal hexidecimal string literal to a byte array.
 /// Empty chunk returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-inline data_chunk base16_chunk(const char(&string)[Size]) noexcept;
+inline data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT;
 
 /// Convert a hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
 constexpr data_array<to_half(sub1(Size))>
-base16_array(const char(&string)[Size]) noexcept;
+base16_array(const char(&string)[Size]) NOEXCEPT;
 
 /// Convert a reversed byte order hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
 constexpr data_array<to_half(sub1(Size))>
-base16_hash(const char(&string)[Size]) noexcept;
+base16_hash(const char(&string)[Size]) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

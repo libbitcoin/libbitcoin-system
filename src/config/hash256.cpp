@@ -30,39 +30,39 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-hash256::hash256() noexcept
+hash256::hash256() NOEXCEPT
   : value_(null_hash)
 {
 }
 
-hash256::hash256(hash_digest&& value) noexcept
+hash256::hash256(hash_digest&& value) NOEXCEPT
   : value_(std::move(value))
 {
 }
 
-hash256::hash256(const hash_digest& value) noexcept
+hash256::hash256(const hash_digest& value) NOEXCEPT
   : value_(value)
 {
 }
 
-hash256::hash256(const std::string& base16) noexcept(false)
+hash256::hash256(const std::string& base16) THROWS
 {
     std::istringstream(base16) >> *this;
 }
 
-std::string hash256::to_string() const noexcept
+std::string hash256::to_string() const NOEXCEPT
 {
     std::ostringstream value;
     value << *this;
     return value.str();
 }
 
-hash256::operator const hash_digest&() const noexcept
+hash256::operator const hash_digest&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& stream, hash256& argument) noexcept(false)
+std::istream& operator>>(std::istream& stream, hash256& argument) THROWS
 {
     std::string base16;
     stream >> base16;
@@ -73,7 +73,7 @@ std::istream& operator>>(std::istream& stream, hash256& argument) noexcept(false
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const hash256& argument) noexcept
+std::ostream& operator<<(std::ostream& stream, const hash256& argument) NOEXCEPT
 {
     stream << encode_hash(argument.value_);
     return stream;

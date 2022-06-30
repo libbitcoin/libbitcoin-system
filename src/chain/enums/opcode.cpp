@@ -36,7 +36,7 @@ if (norm == text) { out_code = opcode::code; return true; }
 #define RETURN_IF_OPCODE_OR_ALIAS(text, alias, code) \
 if (norm == text || norm == alias) { out_code = opcode::code; return true; }
 
-std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) noexcept
+std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) NOEXCEPT
 {
     constexpr auto push_zero = static_cast<uint8_t>(opcode::reserved_80);
 
@@ -405,7 +405,7 @@ std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) noexcept
 
 // This converts only names, not any data for push codes.
 // This also converts hexadecial representations of opcode ('0x' prefixed).
-bool opcode_from_mnemonic(opcode& out_code, const std::string& value) noexcept
+bool opcode_from_mnemonic(opcode& out_code, const std::string& value) NOEXCEPT
 {
     // Normalize to ASCII lower case.
     const auto norm = ascii_to_lower(value);
@@ -673,13 +673,13 @@ bool opcode_from_mnemonic(opcode& out_code, const std::string& value) noexcept
     return opcode_from_hexadecimal(out_code, value);
 }
 
-std::string opcode_to_hexadecimal(opcode code) noexcept
+std::string opcode_to_hexadecimal(opcode code) NOEXCEPT
 {
     return "0x" + encode_base16({ static_cast<uint8_t>(code) });
 }
 
 bool opcode_from_hexadecimal(opcode& out_code,
-    const std::string& value) noexcept
+    const std::string& value) NOEXCEPT
 {
     static const std::string ox = "0x";
     static const auto prefix = ox.size();

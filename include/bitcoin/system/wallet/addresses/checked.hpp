@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -49,34 +50,34 @@ public:
 
     /// Constructors.
 
-    checked() noexcept;
-    checked(checked&& other) noexcept;
-    checked(const checked& other) noexcept;
-    checked(value_type&& value) noexcept;
-    checked(const value_type& value) noexcept;
+    checked() NOEXCEPT;
+    checked(checked&& other) NOEXCEPT;
+    checked(const checked& other) NOEXCEPT;
+    checked(value_type&& value) NOEXCEPT;
+    checked(const value_type& value) NOEXCEPT;
 
     /// Validity is guaranteed from this construction.
-    checked(const prefix_type& prefix, const payload_type& payload) noexcept;
+    checked(const prefix_type& prefix, const payload_type& payload) NOEXCEPT;
 
     /// Operators.
 
-    checked& operator=(checked&& other) noexcept;
-    checked& operator=(const checked& other) noexcept;
+    checked& operator=(checked&& other) NOEXCEPT;
+    checked& operator=(const checked& other) NOEXCEPT;
 
-    operator bool() const noexcept;
-    operator data_chunk() const noexcept;
-    operator const value_type&() const noexcept;
+    operator bool() const NOEXCEPT;
+    operator data_chunk() const NOEXCEPT;
+    operator const value_type&() const NOEXCEPT;
 
     /// Properties.
 
-    prefix_type prefix() const noexcept;
-    payload_type payload() const noexcept;
-    checksum_type checksum() const noexcept;
-    const value_type& value() const noexcept;
+    prefix_type prefix() const NOEXCEPT;
+    payload_type payload() const NOEXCEPT;
+    checksum_type checksum() const NOEXCEPT;
+    const value_type& value() const NOEXCEPT;
 
 private:
     static checked from_payload(const prefix_type& version,
-        const payload_type& payload) noexcept;
+        const payload_type& payload) NOEXCEPT;
 
     value_type value_;
 };
@@ -87,7 +88,7 @@ template <size_t Prefix, size_t Payload,
     size_t Checksum = checksum_default_size>
 bool operator==(
     const checked<Prefix, Payload, Checksum>& left,
-    const checked<Prefix, Payload, Checksum>& right) noexcept
+    const checked<Prefix, Payload, Checksum>& right) NOEXCEPT
 {
     return left.value() == right.value();
 }
@@ -96,7 +97,7 @@ template <size_t Prefix, size_t Payload,
     size_t Checksum = checksum_default_size>
 bool operator!=(
     const checked<Prefix, Payload, Checksum>& left,
-    const checked<Prefix, Payload, Checksum>& right) noexcept
+    const checked<Prefix, Payload, Checksum>& right) NOEXCEPT
 {
     return !(left == right);
 }

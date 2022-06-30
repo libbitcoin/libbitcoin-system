@@ -40,21 +40,21 @@ public:
     ~output() = default;
 
     /// Constructors.
-    output() noexcept;
-    output(chain::output&& value) noexcept;
-    output(const chain::output& value) noexcept;
-    output(const std::string& tuple) noexcept(false);
+    output() NOEXCEPT;
+    output(chain::output&& value) NOEXCEPT;
+    output(const chain::output& value) NOEXCEPT;
+    output(const std::string& tuple) THROWS;
 
-    ////std::string to_string() const noexcept;
+    ////std::string to_string() const NOEXCEPT;
 
     /// Operators.
 
-    operator const chain::output&() const noexcept;
+    operator const chain::output&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        output& argument) noexcept(false);
+        output& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const output& argument) noexcept;
+        const output& argument) NOEXCEPT;
 
 private:
     chain::output value_;

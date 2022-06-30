@@ -66,7 +66,7 @@ const mnemonic::dictionaries mnemonic::dictionaries_
 
 // Entropy requires wordlist mapping because of the checksum.
 string_list mnemonic::encoder(const data_chunk& entropy,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     // Bytes are the base2048 encoding, so this is byte decoding.
     const auto buffer = splice(entropy, { checksum_byte(entropy) });
@@ -75,7 +75,7 @@ string_list mnemonic::encoder(const data_chunk& entropy,
 
 // Entropy requires wordlist mapping because of the checksum.
 data_chunk mnemonic::decoder(const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     // Words are the base2048 decoding, so this is word encoding.
     data_chunk buffer;
@@ -89,7 +89,7 @@ data_chunk mnemonic::decoder(const string_list& words,
 }
 
 long_hash mnemonic::seeder(const string_list& words,
-    const std::string& passphrase) noexcept
+    const std::string& passphrase) NOEXCEPT
 {
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "mnemonic";
@@ -110,7 +110,7 @@ long_hash mnemonic::seeder(const string_list& words,
         passphrase_prefix + phrase, hmac_iterations);
 }
 
-uint8_t mnemonic::checksum_byte(const data_slice& entropy) noexcept
+uint8_t mnemonic::checksum_byte(const data_slice& entropy) NOEXCEPT
 {
     // The high order bits of the first sha256_hash byte are the checksum.
     // Only 4, 5, 6, 7, or 8 bits of the hash are used (based on size).
@@ -122,32 +122,32 @@ uint8_t mnemonic::checksum_byte(const data_slice& entropy) noexcept
 // protected static (sizers)
 // ----------------------------------------------------------------------------
 
-size_t mnemonic::checksum_bits(const data_slice& entropy) noexcept
+size_t mnemonic::checksum_bits(const data_slice& entropy) NOEXCEPT
 {
     return entropy.size() / entropy_multiple;
 }
 
-size_t mnemonic::checksum_bits(const string_list& words) noexcept
+size_t mnemonic::checksum_bits(const string_list& words) NOEXCEPT
 {
     return words.size() / word_multiple;
 }
 
-size_t mnemonic::entropy_bits(const data_slice& entropy) noexcept
+size_t mnemonic::entropy_bits(const data_slice& entropy) NOEXCEPT
 {
     return to_bits(entropy.size());
 }
 
-size_t mnemonic::entropy_bits(const string_list& words) noexcept
+size_t mnemonic::entropy_bits(const string_list& words) NOEXCEPT
 {
     return words.size() * index_bits - checksum_bits(words);
 }
 
-size_t mnemonic::entropy_size(const string_list& words) noexcept
+size_t mnemonic::entropy_size(const string_list& words) NOEXCEPT
 {
     return to_floored_bytes(entropy_bits(words));
 }
 
-size_t mnemonic::word_count(const data_slice& entropy) noexcept
+size_t mnemonic::word_count(const data_slice& entropy) NOEXCEPT
 {
     return (entropy_bits(entropy) + checksum_bits(entropy)) / index_bits;
 }
@@ -156,7 +156,7 @@ size_t mnemonic::word_count(const data_slice& entropy) noexcept
 // ----------------------------------------------------------------------------
 
 bool mnemonic::is_ambiguous(const string_list& words, language requested,
-    language derived) noexcept
+    language derived) NOEXCEPT
 {
     // HACK: There are 100 same words in en/fr, all with distinct indexes.
     // If matches en and unspecified then check fr, since en is searched first.
@@ -170,23 +170,23 @@ bool mnemonic::is_ambiguous(const string_list& words, language requested,
 // ----------------------------------------------------------------------------
 
 language mnemonic::contained_by(const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     return dictionaries_.contains(words, identifier);
 }
 
-bool mnemonic::is_valid_dictionary(language identifier) noexcept
+bool mnemonic::is_valid_dictionary(language identifier) NOEXCEPT
 {
     return dictionaries_.exists(identifier);
 }
 
-bool mnemonic::is_valid_entropy_size(size_t size) noexcept
+bool mnemonic::is_valid_entropy_size(size_t size) NOEXCEPT
 {
     return (is_zero(size % entropy_multiple) &&
         size >= entropy_minimum && size <= entropy_maximum);
 }
 
-bool mnemonic::is_valid_word_count(size_t count) noexcept
+bool mnemonic::is_valid_word_count(size_t count) NOEXCEPT
 {
     return (is_zero(count % word_multiple) &&
         count >= word_minimum && count <= word_maximum);
@@ -195,34 +195,34 @@ bool mnemonic::is_valid_word_count(size_t count) noexcept
 // construction
 // ----------------------------------------------------------------------------
 
-mnemonic::mnemonic() noexcept
+mnemonic::mnemonic() NOEXCEPT
   : languages()
 {
 }
 
-////mnemonic::mnemonic(const mnemonic& other) noexcept
+////mnemonic::mnemonic(const mnemonic& other) NOEXCEPT
 ////  : languages(other)
 ////{
 ////}
 
-mnemonic::mnemonic(const std::string& sentence, language identifier) noexcept
+mnemonic::mnemonic(const std::string& sentence, language identifier) NOEXCEPT
   : mnemonic(split(sentence, identifier), identifier)
 {
 }
 
-mnemonic::mnemonic(const string_list& words, language identifier) noexcept
+mnemonic::mnemonic(const string_list& words, language identifier) NOEXCEPT
   : mnemonic(from_words(words, identifier))
 {
 }
 
-mnemonic::mnemonic(const data_chunk& entropy, language identifier) noexcept
+mnemonic::mnemonic(const data_chunk& entropy, language identifier) NOEXCEPT
   : mnemonic(from_entropy(entropy, identifier))
 {
 }
 
 // protected
 mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
   : languages(entropy, words, identifier)
 {
 }
@@ -231,7 +231,7 @@ mnemonic::mnemonic(const data_chunk& entropy, const string_list& words,
 // ----------------------------------------------------------------------------
 
 mnemonic mnemonic::from_entropy(const data_chunk& entropy,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     if (!is_valid_entropy_size(entropy.size()))
         return {};
@@ -244,7 +244,7 @@ mnemonic mnemonic::from_entropy(const data_chunk& entropy,
 }
 
 mnemonic mnemonic::from_words(const string_list& words,
-    language identifier) noexcept
+    language identifier) NOEXCEPT
 {
     if (!is_valid_word_count(words.size()))
         return {};
@@ -276,7 +276,7 @@ mnemonic mnemonic::from_words(const string_list& words,
 // public methods
 // ----------------------------------------------------------------------------
 
-long_hash mnemonic::to_seed(const std::string& passphrase) const noexcept
+long_hash mnemonic::to_seed(const std::string& passphrase) const NOEXCEPT
 {
     if (!(*this))
         return {};
@@ -285,7 +285,7 @@ long_hash mnemonic::to_seed(const std::string& passphrase) const noexcept
 }
 
 hd_private mnemonic::to_key(const std::string& passphrase,
-    const context& context) const noexcept
+    const context& context) const NOEXCEPT
 {
     if (!(*this))
         return {};

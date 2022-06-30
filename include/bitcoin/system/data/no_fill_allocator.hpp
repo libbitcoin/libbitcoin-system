@@ -22,6 +22,7 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -44,8 +45,8 @@ public:
     using Allocator::Allocator;
 
     template <typename T>
-    void construct(T* ptr)
-        noexcept(std::is_nothrow_default_constructible<T>::value)
+    void construct(T* ptr) noexcept(
+        std::is_nothrow_default_constructible<T>::value)
     {
         // en.cppreference.com/w/cpp/memory/allocator
         // Base class (std::allocator) owns memory deallocation.
@@ -53,8 +54,8 @@ public:
     }
 
     template <typename T, typename...Args>
-    void construct(T* ptr, Args&&... args)
-        noexcept(std::is_nothrow_default_constructible<Allocator>::value)
+    void construct(T* ptr, Args&&... args) noexcept(
+        std::is_nothrow_default_constructible<Allocator>::value)
     {
         std::allocator_traits<Allocator>::construct(
             static_cast<Allocator&>(*this), ptr, std::forward<Args>(args)...);

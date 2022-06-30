@@ -285,11 +285,7 @@ BOOST_AUTO_TEST_CASE(literals__negative__1_ni8__expected)
 
 // Literal exception tests.
 // ----------------------------------------------------------------------------
-// #define BC_NO_THROW false
-// This must be set before <bitcoin/system> inclusion by test.
-// Otherwise exceptions are trapped and the process is terminated.
-// Exceptions are not thrown during constexpr evaluation, but serve to preclude
-// constexpr evaluation when the exceptional condition is reached.
+// Exceptions are not thrown during constexpr evaluation.
 
 #if defined(TEST_LITERAL_EXCEPTIONS)
 

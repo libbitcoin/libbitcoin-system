@@ -32,8 +32,8 @@ namespace config {
 
 /// Shorthand for property declarations in parameter class.
 #define BC_PROPERTY(type, name) \
-    public: virtual type name() const noexcept { return name##_; } \
-    public: virtual void set_##name(type value) noexcept { name##_ = value; } \
+    public: virtual type name() const NOEXCEPT { return name##_; } \
+    public: virtual void set_##name(type value) NOEXCEPT { name##_ = value; } \
     private: type name##_
 
 /// A tuple to represent a positional argument name count.
@@ -75,14 +75,14 @@ public:
     /// The character used to prefix command line options.
     static const char option_prefix_char;
 
-    virtual ~parameter() noexcept;
+    virtual ~parameter() NOEXCEPT;
 
      /// Populate with normalized parameter data.
     /// option     The metadata of the option to test.
     /// arguments  The list of supported positional arguments.
     virtual void initialize(
         const boost::program_options::option_description& option,
-        const argument_list& arguments) noexcept;
+        const argument_list& arguments) NOEXCEPT;
 
     /// Determine if the option is an argument by testing for it by name in the
     /// positional options collection and if so return the position.
@@ -91,7 +91,7 @@ public:
     /// return     Relative position or -1 if not positional.
     virtual int position(
         const boost::program_options::option_description& option,
-        const argument_list& arguments) const noexcept;
+        const argument_list& arguments) const NOEXCEPT;
 
     /// Get the value for the args_limit property.
     /// position   The option's position (or -1 of arg).
@@ -99,13 +99,13 @@ public:
     /// return     The arguments limit value for the option.
     unsigned arguments_limit(int position,
         const boost::program_options::option_description& option,
-        const argument_list& arguments) const noexcept;
+        const argument_list& arguments) const NOEXCEPT;
 
     /// Get the option's short name character or zero.
     /// option  The metadata of the option to test.
     /// return  The short name character or null character.
     virtual char short_name(
-        const boost::program_options::option_description& option) const noexcept;
+        const boost::program_options::option_description& option) const NOEXCEPT;
 
     /// Virtual property declarations.
     BC_PROPERTY(int, position);

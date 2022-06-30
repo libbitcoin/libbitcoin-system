@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_ADDITION_HPP
 
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -31,7 +32,7 @@ template <typename Result, typename Left, typename Right,
     if_not_lesser_width<Result, Left> = true,
     if_not_lesser_width<Result, Right> = true,
     if_same_signed_integer<Left, Right> = true>
-constexpr Result add(Left left, Right right) noexcept;
+constexpr Result add(Left left, Right right) NOEXCEPT;
 
 /// left - right after cast of each to Result type.
 /// Result type bit width must not be lesser than either operand.
@@ -40,7 +41,7 @@ template <typename Result, typename Left, typename Right,
     if_not_lesser_width<Result, Left> = true,
     if_not_lesser_width<Result, Right> = true,
     if_same_signed_integer<Left, Right> = true>
-constexpr Result subtract(Left left, Right right) noexcept;
+constexpr Result subtract(Left left, Right right) NOEXCEPT;
 
 /// The term 'overflow' is used here to describe a sum that is above the
 /// maximum or below the minimum of the integer domain. Similarly, 'underflow'
@@ -50,35 +51,35 @@ constexpr Result subtract(Left left, Right right) noexcept;
 
 /// True if add would overflow.
 template <typename Integer, if_signed_integer<Integer> = true>
-constexpr bool overflows(Integer left, Integer right) noexcept;
+constexpr bool overflows(Integer left, Integer right) NOEXCEPT;
 
 /// True if add would overflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr bool overflows(Integer left, Integer right) noexcept;
+constexpr bool overflows(Integer left, Integer right) NOEXCEPT;
 
 /// True if subtract would underflow.
 template <typename Integer, if_signed_integer<Integer> = true>
-constexpr bool underflows(Integer left, Integer right) noexcept;
+constexpr bool underflows(Integer left, Integer right) NOEXCEPT;
 
 /// True if subtract would underflow.
 template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr bool underflows(Integer left, Integer right) noexcept;
+constexpr bool underflows(Integer left, Integer right) NOEXCEPT;
 
 /// Integer maximum if would overflow, otherwise the sum.
 template <typename Integer, if_signed_integer<Integer> = true>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept;
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT;
 
 /// Integer maximum if would overflow, otherwise the sum.
 template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr Integer ceilinged_add(Integer left, Integer right) noexcept;
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT;
 
 /// Integer minimum if would underflow, otherwise the difference.
 template <typename Integer, if_signed_integer<Integer> = true>
-constexpr Integer floored_subtract(Integer left, Integer right) noexcept;
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT;
 
 /// Integer minimum (0) if would underflow, otherwise the difference.
 template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr Integer floored_subtract(Integer left, Integer right) noexcept;
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

@@ -55,21 +55,21 @@ namespace system {
 
 template <typename Integer,
     if_one_byte<Integer> = true>
-inline Integer from_big_chunk(size_t, const data_slice& data) noexcept
+inline Integer from_big_chunk(size_t, const data_slice& data) NOEXCEPT
 {
     return data.empty() ? 0 : data.front();
 }
 
 template <typename Integer,
     if_one_byte<Integer> = true>
-inline Integer from_little_chunk(size_t, const data_slice& data) noexcept
+inline Integer from_little_chunk(size_t, const data_slice& data) NOEXCEPT
 {
     return data.empty() ? 0 : data.front();
 }
 
 template <typename Data, typename Integer,
     if_one_byte<Integer> = true>
-constexpr Data to_big(Data&& bytes, Integer value) noexcept
+constexpr Data to_big(Data&& bytes, Integer value) NOEXCEPT
 {
     if (!bytes.empty())
         bytes.front() = possible_sign_cast<uint8_t>(value);
@@ -79,7 +79,7 @@ constexpr Data to_big(Data&& bytes, Integer value) noexcept
 
 template <typename Data, typename Integer,
     if_one_byte<Integer> = true>
-constexpr Data to_little(Data&& bytes, Integer value) noexcept
+constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
 {
     if (!bytes.empty())
         bytes.front() = possible_sign_cast<uint8_t>(value);
@@ -96,7 +96,7 @@ constexpr Data to_little(Data&& bytes, Integer value) noexcept
 // for constexpr uintx_t.
 template <typename Integer, size_t Size,
     if_non_integral_integer<Integer> = true>
-constexpr Integer from_big_array(const data_array<Size>& data) noexcept
+constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
 {
     Integer value{ 0 };
 
@@ -112,7 +112,7 @@ constexpr Integer from_big_array(const data_array<Size>& data) noexcept
 // for constexpr uintx_t.
 template <typename Integer, size_t Size,
     if_non_integral_integer<Integer> = true>
-constexpr Integer from_little_array(const data_array<Size>& data) noexcept
+constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
 {
     Integer value{ 0 };
 
@@ -129,7 +129,7 @@ constexpr Integer from_little_array(const data_array<Size>& data) noexcept
 
 template <typename Integer,
     if_not_one_byte<Integer> = true>
-inline Integer from_big_chunk(size_t size, const data_slice& data) noexcept
+inline Integer from_big_chunk(size_t size, const data_slice& data) NOEXCEPT
 {
     // read msb (forward), shift in the byte (no shift on first)
     // data[0] is most significant
@@ -156,7 +156,7 @@ inline Integer from_big_chunk(size_t size, const data_slice& data) noexcept
 
 template <typename Integer,
     if_not_one_byte<Integer> = true>
-inline Integer from_little_chunk(size_t size, const data_slice& data) noexcept
+inline Integer from_little_chunk(size_t size, const data_slice& data) NOEXCEPT
 {
     // read msb (reverse), shift in the byte (no shift on first)
     // data[0] is least significant
@@ -183,7 +183,7 @@ inline Integer from_little_chunk(size_t size, const data_slice& data) noexcept
 
 template <typename Data, typename Integer,
     if_not_one_byte<Integer> = true>
-constexpr Data to_big(Data&& bytes, Integer value) noexcept
+constexpr Data to_big(Data&& bytes, Integer value) NOEXCEPT
 {
     // read and shift out lsb, set byte in reverse order
     // data[0] is most significant
@@ -204,7 +204,7 @@ constexpr Data to_big(Data&& bytes, Integer value) noexcept
 
 template <typename Data, typename Integer,
     if_not_one_byte<Integer> = true>
-constexpr Data to_little(Data&& bytes, Integer value) noexcept
+constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
 {
     // read and shift out lsb, set byte in forward order
     // data[0] is least significant
@@ -230,7 +230,7 @@ constexpr Data to_little(Data&& bytes, Integer value) noexcept
 #ifdef BUFFERED_STREAM
 
 template <typename Integer, if_integral_integer<Integer>>
-inline Integer from_big_endian(std::istream& stream) noexcept
+inline Integer from_big_endian(std::istream& stream) NOEXCEPT
 {
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
@@ -239,7 +239,7 @@ inline Integer from_big_endian(std::istream& stream) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline Integer from_little_endian(std::istream& stream) noexcept
+inline Integer from_little_endian(std::istream& stream) NOEXCEPT
 {
     std::vector<char> buffer(sizeof(Integer));
     stream.read(buffer.data(), sizeof(Integer));
@@ -248,14 +248,14 @@ inline Integer from_little_endian(std::istream& stream) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline void to_big_endian(std::ostream& stream, Integer value) noexcept
+inline void to_big_endian(std::ostream& stream, Integer value) NOEXCEPT
 {
     stream.write(reinterpret_cast<const char*>(
         to_big_endian(value).data()), sizeof(Integer));
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline void to_little_endian(std::ostream& stream, Integer value) noexcept
+inline void to_little_endian(std::ostream& stream, Integer value) NOEXCEPT
 {
     stream.write(reinterpret_cast<const char*>(
         to_little_endian(value).data()), sizeof(Integer));
@@ -264,7 +264,7 @@ inline void to_little_endian(std::ostream& stream, Integer value) noexcept
 #else // BUFFERED_STREAM
 
 template <typename Integer, if_integral_integer<Integer>>
-inline Integer from_big_endian(std::istream& stream) noexcept
+inline Integer from_big_endian(std::istream& stream) NOEXCEPT
 {
     Integer value(0);
     constexpr auto bytes = sizeof(Integer);
@@ -284,7 +284,7 @@ inline Integer from_big_endian(std::istream& stream) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline Integer from_little_endian(std::istream& stream) noexcept
+inline Integer from_little_endian(std::istream& stream) NOEXCEPT
 {
     // TODO: byte_swap_intrinsic (when fully implemented).
     // Stream invalidated if read past end (and Integer is unspecified).
@@ -292,7 +292,7 @@ inline Integer from_little_endian(std::istream& stream) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline void to_big_endian(std::ostream& stream, Integer value) noexcept
+inline void to_big_endian(std::ostream& stream, Integer value) NOEXCEPT
 {
     constexpr auto bytes = sizeof(Integer);
 
@@ -308,7 +308,7 @@ inline void to_big_endian(std::ostream& stream, Integer value) noexcept
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline void to_little_endian(std::ostream& stream, Integer value) noexcept
+inline void to_little_endian(std::ostream& stream, Integer value) NOEXCEPT
 {
     // TODO: byte_swap_intrinsic (when fully implemented).
     to_big_endian(stream, byteswap(value));
@@ -321,19 +321,19 @@ inline void to_little_endian(std::ostream& stream, Integer value) noexcept
 // These allocate the to-endian outgoing buffer and forward the call.
 
 template <size_t Size, typename Integer, if_integer<Integer>>
-constexpr data_array<Size> to_big_endian_size(Integer value) noexcept
+constexpr data_array<Size> to_big_endian_size(Integer value) NOEXCEPT
 {
     return to_big(data_array<Size>{}, value);
 }
 
 template <size_t Size, typename Integer, if_integer<Integer>>
-constexpr data_array<Size> to_little_endian_size(Integer value) noexcept
+constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT
 {
     return to_little(data_array<Size>{}, value);
 }
 
 template <typename Integer, if_integer<Integer>>
-inline data_chunk to_big_endian_size(Integer value, size_t excess) noexcept
+inline data_chunk to_big_endian_size(Integer value, size_t excess) NOEXCEPT
 {
     // Zero value returns empty chunk.
     const auto size = byte_width(value);
@@ -345,7 +345,7 @@ inline data_chunk to_big_endian_size(Integer value, size_t excess) noexcept
 }
 
 template <typename Integer, if_integer<Integer>>
-inline data_chunk to_little_endian_size(Integer value, size_t excess) noexcept
+inline data_chunk to_little_endian_size(Integer value, size_t excess) NOEXCEPT
 {
     // Zero value returns empty chunk.
     const auto size = byte_width(value);
@@ -360,25 +360,25 @@ inline data_chunk to_little_endian_size(Integer value, size_t excess) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename Integer, if_integral_integer<Integer>>
-inline Integer from_big_endian(const data_slice& data) noexcept
+inline Integer from_big_endian(const data_slice& data) NOEXCEPT
 {
     return from_big_chunk<Integer>(sizeof(Integer), data);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-inline Integer from_little_endian(const data_slice& data) noexcept
+inline Integer from_little_endian(const data_slice& data) NOEXCEPT
 {
     return from_little_chunk<Integer>(sizeof(Integer), data);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-constexpr data_array<sizeof(Integer)> to_big_endian(Integer value) noexcept
+constexpr data_array<sizeof(Integer)> to_big_endian(Integer value) NOEXCEPT
 {
     return to_big_endian_size<sizeof(Integer)>(value);
 }
 
 template <typename Integer, if_integral_integer<Integer>>
-constexpr data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
+constexpr data_array<sizeof(Integer)> to_little_endian(Integer value) NOEXCEPT
 {
     return to_little_endian_size<sizeof(Integer)>(value);
 }
@@ -391,25 +391,25 @@ constexpr data_array<sizeof(Integer)> to_little_endian(Integer value) noexcept
 // data_chunk size determined by uintx (vs. type).
 
 template <typename Integer, if_base_of<Integer, uintx>>
-inline Integer from_big_endian(const data_slice& data) noexcept
+inline Integer from_big_endian(const data_slice& data) NOEXCEPT
 {
     return from_big_chunk<uintx>(data.size(), data);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
-inline Integer from_little_endian(const data_slice& data) noexcept
+inline Integer from_little_endian(const data_slice& data) NOEXCEPT
 {
     return from_little_chunk<uintx>(data.size(), data);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
-inline data_chunk to_big_endian(const Integer& value) noexcept
+inline data_chunk to_big_endian(const Integer& value) NOEXCEPT
 {
     return to_big_endian_size(value);
 }
 
 template <typename Integer, if_base_of<Integer, uintx>>
-inline data_chunk to_little_endian(const Integer& value) noexcept
+inline data_chunk to_little_endian(const Integer& value) NOEXCEPT
 {
     return to_little_endian_size(value);
 }
@@ -422,42 +422,42 @@ inline data_chunk to_little_endian(const Integer& value) noexcept
 
 template <size_t Bytes>
 inline uintx_t<to_bits<uint32_t>(Bytes)>
-uintx_from_big_endian_chunk(const data_slice& data) noexcept
+uintx_from_big_endian_chunk(const data_slice& data) NOEXCEPT
 {
     return from_big_chunk<uintx_t<to_bits(Bytes)>>(Bytes, data);
 }
 
 template <size_t Bytes>
 inline uintx_t<to_bits<uint32_t>(Bytes)>
-uintx_from_little_endian_chunk(const data_slice& data) noexcept
+uintx_from_little_endian_chunk(const data_slice& data) NOEXCEPT
 {
     return from_little_chunk<uintx_t<to_bits<uint32_t>(Bytes)>>(Bytes, data);
 }
 
 template <size_t Bytes>
 constexpr uintx_t<to_bits<uint32_t>(Bytes)>
-uintx_from_big_endian_array(const data_array<Bytes>& data) noexcept
+uintx_from_big_endian_array(const data_array<Bytes>& data) NOEXCEPT
 {
     return from_big_array<uintx_t<to_bits<uint32_t>(Bytes)>, Bytes>(data);
 }
 
 template <size_t Bytes>
 constexpr uintx_t<to_bits<uint32_t>(Bytes)>
-uintx_from_little_endian_array(const data_array<Bytes>& data) noexcept
+uintx_from_little_endian_array(const data_array<Bytes>& data) NOEXCEPT
 {
     return from_little_array<uintx_t<to_bits(Bytes)>, Bytes>(data);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
 constexpr data_array<Bytes>
-to_big_endian(const Integer& value) noexcept
+to_big_endian(const Integer& value) NOEXCEPT
 {
     return to_big_endian_size<Bytes>(value);
 }
 
 template <size_t Bytes, typename Integer, if_integer<Integer>>
 constexpr data_array<Bytes>
-to_little_endian(const Integer& value) noexcept
+to_little_endian(const Integer& value) NOEXCEPT
 {
     return to_little_endian_size<Bytes>(value);
 }
@@ -466,13 +466,13 @@ to_little_endian(const Integer& value) noexcept
 // size is unguarded.
 
 template <typename Integer, typename Iterator, if_integral_integer<Integer>>
-constexpr Integer from_big_endian_unchecked(const Iterator& data) noexcept
+constexpr Integer from_big_endian_unchecked(const Iterator& data) NOEXCEPT
 {
     return from_big_endian<Integer>({ data, std::next(data, sizeof(Integer)) });
 }
 
 template <typename Integer, typename Iterator, if_integral_integer<Integer>>
-constexpr Integer from_little_endian_unchecked(const Iterator& data) noexcept
+constexpr Integer from_little_endian_unchecked(const Iterator& data) NOEXCEPT
 {
     return from_little_endian<Integer>({ data, std::next(data, sizeof(Integer)) });
 }
@@ -484,13 +484,13 @@ constexpr Integer from_little_endian_unchecked(const Iterator& data) noexcept
 
 template <size_t Count, typename Integer, if_integral_integer<Integer>>
 constexpr void from_big_endian(Integer to[Count],
-    const uint8_t from[Count * sizeof(Integer)]) noexcept
+    const uint8_t from[Count * sizeof(Integer)]) NOEXCEPT
 {
     typedef data_array<sizeof(Integer)> data;
     const auto in = pointer_cast<const data>(from);
 
     /// C++17: Parallel policy for std::transform.
-    std::transform(in, std::next(in, Count), to, [](const data& value) noexcept
+    std::transform(in, std::next(in, Count), to, [](const data& value) NOEXCEPT
     {
         return from_big_endian<Integer>(value);
     });
@@ -498,13 +498,13 @@ constexpr void from_big_endian(Integer to[Count],
 
 template <size_t Count, typename Integer, if_integral_integer<Integer>>
 constexpr void from_little_endian(Integer to[Count],
-    const uint8_t from[Count * sizeof(Integer)]) noexcept
+    const uint8_t from[Count * sizeof(Integer)]) NOEXCEPT
 {
     typedef data_array<sizeof(Integer)> data;
     const auto in = pointer_cast<const data>(from);
 
     /// C++17: Parallel policy for std::transform.
-    std::transform(in, std::next(in, Count), to, [](const data& value) noexcept
+    std::transform(in, std::next(in, Count), to, [](const data& value) NOEXCEPT
     {
         return from_little_endian<Integer>(value);
     });
@@ -512,13 +512,13 @@ constexpr void from_little_endian(Integer to[Count],
 
 template <size_t Count, typename Integer, if_integral_integer<Integer>>
 constexpr void to_big_endian(uint8_t to[Count * sizeof(Integer)],
-    const Integer from[Count]) noexcept
+    const Integer from[Count]) NOEXCEPT
 {
     typedef data_array<sizeof(Integer)> data;
     const auto out = pointer_cast<data>(to);
 
     /// C++17: Parallel policy for std::transform.
-    std::transform(from, std::next(from, Count), out, [](Integer value) noexcept
+    std::transform(from, std::next(from, Count), out, [](Integer value) NOEXCEPT
     {
         return to_big_endian<Integer>(value);
     });
@@ -526,13 +526,13 @@ constexpr void to_big_endian(uint8_t to[Count * sizeof(Integer)],
 
 template <size_t Count, typename Integer, if_integral_integer<Integer>>
 constexpr void to_little_endian(uint8_t to[Count * sizeof(Integer)],
-    const Integer from[Count]) noexcept
+    const Integer from[Count]) NOEXCEPT
 {
     typedef data_array<sizeof(Integer)> data;
     const auto out = pointer_cast<data>(to);
 
     /// C++17: Parallel policy for std::transform.
-    std::transform(from, std::next(from, Count), out, [](Integer value) noexcept
+    std::transform(from, std::next(from, Count), out, [](Integer value) NOEXCEPT
     {
         return to_little_endian<Integer>(value);
     });

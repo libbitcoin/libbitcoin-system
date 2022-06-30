@@ -41,7 +41,7 @@ template <typename Type, if_default_constructible<Type> = true>
 class external_ptr
 {
 public:
-    inline external_ptr() noexcept
+    inline external_ptr() NOEXCEPT
       : pointer_(get_unassigned())
     {
     }
@@ -56,17 +56,17 @@ public:
     /// External ownership is required.
     inline external_ptr(Type&&) = delete;
 
-    inline explicit external_ptr(const Type& instance) noexcept
+    inline explicit external_ptr(const Type& instance) NOEXCEPT
       : external_ptr(&instance)
     {
     }
 
-    inline external_ptr(const Type* pointer) noexcept
+    inline external_ptr(const Type* pointer) NOEXCEPT
       : pointer_(is_null(pointer) ? get_unassigned() : pointer)
     {
     }
 
-    inline external_ptr(const std::shared_ptr<const Type>& shared) noexcept
+    inline external_ptr(const std::shared_ptr<const Type>& shared) NOEXCEPT
       : pointer_(shared ? shared.get() : get_unassigned())
     {
     }
@@ -77,32 +77,32 @@ public:
         return *this;
     }
 
-    inline operator bool() const noexcept
+    inline operator bool() const NOEXCEPT
     {
         return pointer_ != get_unassigned();
     }
 
-    inline const Type& operator*() const noexcept
+    inline const Type& operator*() const NOEXCEPT
     {
         return *get();
     }
 
-    inline const Type* operator->() const noexcept
+    inline const Type* operator->() const NOEXCEPT
     {
         return get();
     }
 
-    inline const Type* operator[](size_t index) const noexcept
+    inline const Type* operator[](size_t index) const NOEXCEPT
     {
         return std::next(get(), index);
     }
 
-    inline const Type* get() const noexcept
+    inline const Type* get() const NOEXCEPT
     {
         return pointer_;
     }
 
-    inline void reset() const noexcept
+    inline void reset() const NOEXCEPT
     {
         pointer_ = get_unassigned();
     }
@@ -110,7 +110,7 @@ public:
 private:
     const Type* pointer_{};
 
-    inline const Type* get_unassigned() const noexcept
+    inline const Type* get_unassigned() const NOEXCEPT
     {
         static Type unassigned{};
         return &unassigned;
@@ -119,14 +119,14 @@ private:
 
 template <typename Type, if_default_constructible<Type> = true>
 inline bool operator==(const external_ptr<Type>& left,
-    const external_ptr<Type>& right) noexcept
+    const external_ptr<Type>& right) NOEXCEPT
 {
     return *left == *right;
 }
 
 template <typename Type, if_default_constructible<Type> = true>
 inline bool operator!=(const external_ptr<Type>& left,
-    const external_ptr<Type>& right) noexcept
+    const external_ptr<Type>& right) NOEXCEPT
 {
     return !(left == right);
 }
@@ -138,7 +138,7 @@ using tether = std::vector<std::shared_ptr<Type>>;
 /// Move instance to shared_ptr external ownership and return external_ptr.
 template <typename Type, if_default_constructible<Type> = true>
 inline external_ptr<Type> make_external(Type&& instance,
-    tether<Type>& external) noexcept
+    tether<Type>& external) NOEXCEPT
 {
     external.push_back(std::make_shared<Type>(std::forward<Type>(instance)));
     return { external.back().get() };
@@ -146,14 +146,14 @@ inline external_ptr<Type> make_external(Type&& instance,
 
 /// Same as external_ptr{}.
 template <typename Type, if_default_constructible<Type> = true>
-inline external_ptr<Type> make_external() noexcept
+inline external_ptr<Type> make_external() NOEXCEPT
 {
     return {};
 }
 
 /// Same as external_ptr{ pointer }.
 template <typename Type, if_default_constructible<Type> = true>
-inline external_ptr<Type> make_external(const Type* pointer) noexcept
+inline external_ptr<Type> make_external(const Type* pointer) NOEXCEPT
 {
     return { pointer };
 }

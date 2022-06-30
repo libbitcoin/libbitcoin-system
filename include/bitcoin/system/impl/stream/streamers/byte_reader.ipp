@@ -43,7 +43,7 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-byte_reader<IStream>::byte_reader(IStream& source) noexcept
+byte_reader<IStream>::byte_reader(IStream& source) NOEXCEPT
   : stream_(source), remaining_(system::maximum<size_t>())
 {
     ////BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
@@ -55,26 +55,26 @@ byte_reader<IStream>::byte_reader(IStream& source) noexcept
 
 template <typename IStream>
 template <typename Integer, if_integer<Integer>>
-Integer byte_reader<IStream>::read_big_endian() noexcept
+Integer byte_reader<IStream>::read_big_endian() NOEXCEPT
 {
     // Call into virtual reader (vs. stream) so derived class can reuse.
     return from_big_endian<Integer>(read_bytes(sizeof(Integer)));
 }
 
 template <typename IStream>
-uint16_t byte_reader<IStream>::read_2_bytes_big_endian() noexcept
+uint16_t byte_reader<IStream>::read_2_bytes_big_endian() NOEXCEPT
 {
     return read_big_endian<uint16_t>();
 }
 
 template <typename IStream>
-uint32_t byte_reader<IStream>::read_4_bytes_big_endian() noexcept
+uint32_t byte_reader<IStream>::read_4_bytes_big_endian() NOEXCEPT
 {
     return read_big_endian<uint32_t>();
 }
 
 template <typename IStream>
-uint64_t byte_reader<IStream>::read_8_bytes_big_endian() noexcept
+uint64_t byte_reader<IStream>::read_8_bytes_big_endian() NOEXCEPT
 {
     return read_big_endian<uint64_t>();
 }
@@ -84,32 +84,32 @@ uint64_t byte_reader<IStream>::read_8_bytes_big_endian() noexcept
 
 template <typename IStream>
 template <typename Integer, if_integer<Integer>>
-Integer byte_reader<IStream>::read_little_endian() noexcept
+Integer byte_reader<IStream>::read_little_endian() NOEXCEPT
 {
     // Call into virtual reader (vs. stream) so derived class can reuse.
     return from_little_endian<Integer>(read_bytes(sizeof(Integer)));
 }
 
 template <typename IStream>
-uint16_t byte_reader<IStream>::read_2_bytes_little_endian() noexcept
+uint16_t byte_reader<IStream>::read_2_bytes_little_endian() NOEXCEPT
 {
     return read_little_endian<uint16_t>();
 }
 
 template <typename IStream>
-uint32_t byte_reader<IStream>::read_4_bytes_little_endian() noexcept
+uint32_t byte_reader<IStream>::read_4_bytes_little_endian() NOEXCEPT
 {
     return read_little_endian<uint32_t>();
 }
 
 template <typename IStream>
-uint64_t byte_reader<IStream>::read_8_bytes_little_endian() noexcept
+uint64_t byte_reader<IStream>::read_8_bytes_little_endian() NOEXCEPT
 {
     return read_little_endian<uint64_t>();
 }
 
 template <typename IStream>
-uint64_t byte_reader<IStream>::read_variable() noexcept
+uint64_t byte_reader<IStream>::read_variable() NOEXCEPT
 {
     const auto value = read_byte();
 
@@ -127,7 +127,7 @@ uint64_t byte_reader<IStream>::read_variable() noexcept
 }
 
 template <typename IStream>
-size_t byte_reader<IStream>::read_size(size_t limit) noexcept
+size_t byte_reader<IStream>::read_size(size_t limit) NOEXCEPT
 {
     const auto size = read_variable();
 
@@ -143,7 +143,7 @@ size_t byte_reader<IStream>::read_size(size_t limit) noexcept
 }
 
 template <typename IStream>
-code byte_reader<IStream>::read_error_code() noexcept
+code byte_reader<IStream>::read_error_code() NOEXCEPT
 {
     const auto value = read_little_endian<uint32_t>();
     return code(static_cast<error::error_t>(value));
@@ -154,7 +154,7 @@ code byte_reader<IStream>::read_error_code() noexcept
 
 template <typename IStream>
 template <size_t Size>
-data_array<Size> byte_reader<IStream>::read_forward() noexcept
+data_array<Size> byte_reader<IStream>::read_forward() NOEXCEPT
 {
     // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
@@ -165,13 +165,13 @@ data_array<Size> byte_reader<IStream>::read_forward() noexcept
 
 template <typename IStream>
 template <size_t Size>
-data_array<Size> byte_reader<IStream>::read_reverse() noexcept
+data_array<Size> byte_reader<IStream>::read_reverse() NOEXCEPT
 {
     return system::reverse(read_forward<Size>());
 }
 
 template <typename IStream>
-std::ostream& byte_reader<IStream>::read(std::ostream& out) noexcept
+std::ostream& byte_reader<IStream>::read(std::ostream& out) NOEXCEPT
 {
     // This creates an intermediate buffer the size of the stream.
     // This is presumed to be more optimal than looping individual bytes.
@@ -180,37 +180,37 @@ std::ostream& byte_reader<IStream>::read(std::ostream& out) noexcept
 }
 
 template <typename IStream>
-mini_hash byte_reader<IStream>::read_mini_hash() noexcept
+mini_hash byte_reader<IStream>::read_mini_hash() NOEXCEPT
 {
     return read_forward<mini_hash_size>();
 }
 
 template <typename IStream>
-short_hash byte_reader<IStream>::read_short_hash() noexcept
+short_hash byte_reader<IStream>::read_short_hash() NOEXCEPT
 {
     return read_forward<short_hash_size>();
 }
 
 template <typename IStream>
-hash_digest byte_reader<IStream>::read_hash() noexcept
+hash_digest byte_reader<IStream>::read_hash() NOEXCEPT
 {
     return read_forward<hash_size>();
 }
 
 template <typename IStream>
-long_hash byte_reader<IStream>::read_long_hash() noexcept
+long_hash byte_reader<IStream>::read_long_hash() NOEXCEPT
 {
     return read_forward<long_hash_size>();
 }
 
 template <typename IStream>
-uint8_t byte_reader<IStream>::peek_byte() noexcept
+uint8_t byte_reader<IStream>::peek_byte() NOEXCEPT
 {
     return do_peek_byte();
 }
 
 template <typename IStream>
-uint8_t byte_reader<IStream>::read_byte() noexcept
+uint8_t byte_reader<IStream>::read_byte() NOEXCEPT
 {
     uint8_t value = pad();
     do_read_bytes(&value, one);
@@ -218,7 +218,7 @@ uint8_t byte_reader<IStream>::read_byte() noexcept
 }
 
 template <typename IStream>
-data_chunk byte_reader<IStream>::read_bytes() noexcept
+data_chunk byte_reader<IStream>::read_bytes() NOEXCEPT
 {
     // Isolating get_exhausted to first call is an optimization (must clear).
     if (get_exhausted())
@@ -236,7 +236,7 @@ data_chunk byte_reader<IStream>::read_bytes() noexcept
 }
 
 template <typename IStream>
-data_chunk byte_reader<IStream>::read_bytes(size_t size) noexcept
+data_chunk byte_reader<IStream>::read_bytes(size_t size) NOEXCEPT
 {
     if (is_zero(size))
         return {};
@@ -251,7 +251,7 @@ data_chunk byte_reader<IStream>::read_bytes(size_t size) noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::read_bytes(uint8_t* buffer, size_t size) noexcept
+void byte_reader<IStream>::read_bytes(uint8_t* buffer, size_t size) NOEXCEPT
 {
     do_read_bytes(buffer, size);
 }
@@ -260,13 +260,13 @@ void byte_reader<IStream>::read_bytes(uint8_t* buffer, size_t size) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-std::string byte_reader<IStream>::read_string(size_t limit) noexcept
+std::string byte_reader<IStream>::read_string(size_t limit) NOEXCEPT
 {
     return read_string_buffer(read_size(limit));
 }
 
 template <typename IStream>
-std::string byte_reader<IStream>::read_string_buffer(size_t size) noexcept
+std::string byte_reader<IStream>::read_string_buffer(size_t size) NOEXCEPT
 {
     // Isolating get_exhausted to first call is an optimization (must clear).
     if (get_exhausted())
@@ -291,31 +291,31 @@ std::string byte_reader<IStream>::read_string_buffer(size_t size) noexcept
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-void byte_reader<IStream>::skip_byte() noexcept
+void byte_reader<IStream>::skip_byte() NOEXCEPT
 {
     do_skip_bytes(one);
 }
 
 template <typename IStream>
-void byte_reader<IStream>::skip_bytes(size_t size) noexcept
+void byte_reader<IStream>::skip_bytes(size_t size) NOEXCEPT
 {
     do_skip_bytes(size);
 }
 
 template <typename IStream>
-void byte_reader<IStream>::rewind_byte() noexcept
+void byte_reader<IStream>::rewind_byte() NOEXCEPT
 {
     do_rewind_bytes(one);
 }
 
 template <typename IStream>
-void byte_reader<IStream>::rewind_bytes(size_t size) noexcept
+void byte_reader<IStream>::rewind_bytes(size_t size) NOEXCEPT
 {
     do_rewind_bytes(size);
 }
 
 template <typename IStream>
-void byte_reader<IStream>::set_position(size_t absolute) noexcept
+void byte_reader<IStream>::set_position(size_t absolute) NOEXCEPT
 {
     // Clear a presumed error state following a read overflow.
     clear();
@@ -333,7 +333,7 @@ void byte_reader<IStream>::set_position(size_t absolute) noexcept
 }
 
 template <typename IStream>
-bool byte_reader<IStream>::is_exhausted() const noexcept
+bool byte_reader<IStream>::is_exhausted() const NOEXCEPT
 {
     // True if invalid or if no bytes remain in the stream.
     return get_exhausted();
@@ -344,26 +344,26 @@ bool byte_reader<IStream>::is_exhausted() const noexcept
 // These only call non-virtual (private) methods.
 
 template <typename IStream>
-size_t byte_reader<IStream>::get_position() noexcept
+size_t byte_reader<IStream>::get_position() NOEXCEPT
 {
     return getter();
 }
 
 template <typename IStream>
-void byte_reader<IStream>::set_limit(size_t size) noexcept
+void byte_reader<IStream>::set_limit(size_t size) NOEXCEPT
 {
     limit(size);
 }
 
 template <typename IStream>
-void byte_reader<IStream>::invalidate() noexcept
+void byte_reader<IStream>::invalidate() NOEXCEPT
 {
     // Permanently invalidate the stream/reader.
     invalid();
 }
 
 template <typename IStream>
-byte_reader<IStream>::operator bool() const noexcept
+byte_reader<IStream>::operator bool() const NOEXCEPT
 {
     // True if any call created an error state, even if there have been
     // subsequent calls, or if any error state preexists on the stream.
@@ -372,7 +372,7 @@ byte_reader<IStream>::operator bool() const noexcept
 
 // This should not be necessary with bool() defined, but it is.
 template <typename IStream>
-bool byte_reader<IStream>::operator!() const noexcept
+bool byte_reader<IStream>::operator!() const NOEXCEPT
 {
     return !valid();
 }
@@ -381,12 +381,12 @@ bool byte_reader<IStream>::operator!() const noexcept
 // ----------------------------------------------------------------------------
 // These may only call non-virtual (private) methods (due to overriding).
 
-// Suppress istream members may throw inside noexcept.
+// Suppress istream members may throw inside NOEXCEPT.
 // The intended behavior in this case is program abort.
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 template <typename IStream>
-uint8_t byte_reader<IStream>::do_peek_byte() noexcept
+uint8_t byte_reader<IStream>::do_peek_byte() NOEXCEPT
 {
     if (limiter(one))
         return pad();
@@ -403,7 +403,7 @@ uint8_t byte_reader<IStream>::do_peek_byte() noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
+void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT
 {
     // Limited reads are not partially filled or padded.
     if (limiter(size))
@@ -424,7 +424,7 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
+void byte_reader<IStream>::do_skip_bytes(size_t size) NOEXCEPT
 {
     if (limiter(size))
         return;
@@ -435,7 +435,7 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
+void byte_reader<IStream>::do_rewind_bytes(size_t size) NOEXCEPT
 {
     // Given that the stream size is unknown to the reader, the limit may be
     // arbitrarily high. This prevents an overflow if sum exceeds max_size_t.
@@ -449,7 +449,7 @@ void byte_reader<IStream>::do_rewind_bytes(size_t size) noexcept
 }
 
 template <typename IStream>
-bool byte_reader<IStream>::get_exhausted() const noexcept
+bool byte_reader<IStream>::get_exhausted() const NOEXCEPT
 {
     if (is_zero(remaining_))
         return true;
@@ -481,14 +481,14 @@ bool byte_reader<IStream>::get_exhausted() const noexcept
 // These may only call other private methods (due to overriding).
 
 template <typename IStream>
-bool byte_reader<IStream>::valid() const noexcept
+bool byte_reader<IStream>::valid() const NOEXCEPT
 {
     // zero is the istream documented flag for no error.
     return stream_.rdstate() == IStream::goodbit;
 }
 
 template <typename IStream>
-void byte_reader<IStream>::invalid() noexcept
+void byte_reader<IStream>::invalid() NOEXCEPT
 {
     // If eofbit is set, failbit is generally set on all operations.
     // badbit is unrecoverable, set the others to ensure consistency.
@@ -496,7 +496,7 @@ void byte_reader<IStream>::invalid() noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::validate() noexcept
+void byte_reader<IStream>::validate() NOEXCEPT
 {
     // Ensure that any failure in the call fully invalidates the stream/reader.
     // Some errors are recoverable, so a sequence of operations without testing
@@ -507,14 +507,14 @@ void byte_reader<IStream>::validate() noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::clear() noexcept
+void byte_reader<IStream>::clear() NOEXCEPT
 {
     // Does not reset the current position.
     stream_.clear();
 }
 
 template <typename IStream>
-size_t byte_reader<IStream>::getter() noexcept
+size_t byte_reader<IStream>::getter() NOEXCEPT
 {
     static const auto failure = typename IStream::pos_type(-1);
     typename IStream::pos_type position;
@@ -540,13 +540,13 @@ size_t byte_reader<IStream>::getter() noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::limit(size_t size) noexcept
+void byte_reader<IStream>::limit(size_t size) NOEXCEPT
 {
     remaining_ = size;
 }
 
 template <typename IStream>
-bool byte_reader<IStream>::limiter(size_t size) noexcept
+bool byte_reader<IStream>::limiter(size_t size) NOEXCEPT
 {
     if (size > remaining_)
     {
@@ -560,7 +560,7 @@ bool byte_reader<IStream>::limiter(size_t size) noexcept
 }
 
 template <typename IStream>
-void byte_reader<IStream>::seeker(typename IStream::pos_type offset) noexcept
+void byte_reader<IStream>::seeker(typename IStream::pos_type offset) NOEXCEPT
 {
     // Force these to be consistent by treating zero seek as a no-op.
     // boost/istringstream both succeed on non-empty zero seek.

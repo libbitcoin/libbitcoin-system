@@ -28,7 +28,7 @@ namespace system {
 unicode_ostream::unicode_ostream(
 #ifdef _MSC_VER
     std::ostream&, std::wostream& wide_stream,
-    size_t wide_buffer_size) noexcept(false)
+    size_t wide_buffer_size) THROWS
 #else
     std::ostream& narrow_stream, std::wostream&, size_t)
 #endif
@@ -40,7 +40,7 @@ unicode_ostream::unicode_ostream(
 {
 }
 
-unicode_ostream::~unicode_ostream() noexcept
+unicode_ostream::~unicode_ostream() NOEXCEPT
 {
 #ifdef _MSC_VER
     delete rdbuf();

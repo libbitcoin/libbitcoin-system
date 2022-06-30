@@ -34,10 +34,10 @@ class BC_API unicode_istream
 public:
     /// Construct instance of a conditionally-narrowing input stream.
     unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream,
-        size_t wide_buffer_size) noexcept(false);
+        size_t wide_buffer_size) THROWS;
 
     /// Delete the unicode_streambuf that wraps wide_stream.
-    virtual ~unicode_istream() noexcept;
+    virtual ~unicode_istream() NOEXCEPT;
 };
 
 } // namespace system

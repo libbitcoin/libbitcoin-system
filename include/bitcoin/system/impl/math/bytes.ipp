@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
 #include <bitcoin/system/math/log.hpp>
 #include <bitcoin/system/math/safe.hpp>
@@ -35,7 +36,7 @@ namespace system {
 
 // Called by chain::compact (for validation).
 template <typename Value, if_unsigned_integer<Value>>
-constexpr size_t byte_width(Value value) noexcept
+constexpr size_t byte_width(Value value) NOEXCEPT
 {
     // (zero-based position of msb) + 7 / 8.
     // (bit_width(value) + 7) / 8
@@ -45,7 +46,7 @@ constexpr size_t byte_width(Value value) noexcept
 
 // Called by machine::number (for little-endian chunk sizing).
 template <typename Value, if_signed_integer<Value>>
-constexpr size_t byte_width(Value value) noexcept
+constexpr size_t byte_width(Value value) NOEXCEPT
 {
     return is_negative(value) ? sizeof(Value) : byte_width(to_unsigned(value));
 }
@@ -55,28 +56,28 @@ constexpr size_t byte_width(Value value) noexcept
 
 template <typename Integer,
     if_big_endian_integral_integer<Integer>>
-constexpr Integer to_big_end(Integer from) noexcept
+constexpr Integer to_big_end(Integer from) NOEXCEPT
 {
     return from;
 }
 
 template <typename Integer,
     if_little_endian_integral_integer<Integer>>
-constexpr Integer to_big_end(Integer from) noexcept
+constexpr Integer to_big_end(Integer from) NOEXCEPT
 {
     return byteswap(from);
 }
 
 template <typename Integer,
     if_big_endian_integral_integer<Integer>>
-constexpr Integer to_little_end(Integer from) noexcept
+constexpr Integer to_little_end(Integer from) NOEXCEPT
 {
     return byteswap(from);
 }
 
 template <typename Integer,
     if_little_endian_integral_integer<Integer>>
-constexpr Integer to_little_end(Integer from) noexcept
+constexpr Integer to_little_end(Integer from) NOEXCEPT
 {
     return from;
 }
@@ -90,7 +91,7 @@ template <typename Integer,
     if_integral_integer<Integer>,
     if_size_of<Integer, sizeof(uint8_t)>,
     if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) noexcept
+constexpr Integer byteswap(Integer value) NOEXCEPT
 {
     // no-op for calling consistency across all integral integer types.
     return value;
@@ -100,7 +101,7 @@ template <typename Integer,
     if_integral_integer<Integer>,
     if_size_of<Integer, sizeof(uint16_t)>,
     if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) noexcept
+constexpr Integer byteswap(Integer value) NOEXCEPT
 {
     // Compiles away to direct API call for non-constexpr.
     return std::is_constant_evaluated() ?
@@ -112,7 +113,7 @@ template <typename Integer,
     if_integral_integer<Integer>,
     if_size_of<Integer, sizeof(uint32_t)>,
     if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) noexcept
+constexpr Integer byteswap(Integer value) NOEXCEPT
 {
     // Compiles away to direct API call for non-constexpr.
     return std::is_constant_evaluated() ?
@@ -124,7 +125,7 @@ template <typename Integer,
     if_integral_integer<Integer>,
     if_size_of<Integer, sizeof(uint64_t)>,
     if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) noexcept
+constexpr Integer byteswap(Integer value) NOEXCEPT
 {
     // Compiles away to direct API call for non-constexpr.
     return std::is_constant_evaluated() ?
@@ -136,19 +137,19 @@ constexpr Integer byteswap(Integer value) noexcept
 // ----------------------------------------------------------------------------
 
 template <size_t Bits, if_bytes_width<Bits>>
-constexpr size_t to_bytes() noexcept
+constexpr size_t to_bytes() NOEXCEPT
 {
     return Bits / byte_bits;
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer to_ceilinged_bytes(Integer bits) noexcept
+constexpr Integer to_ceilinged_bytes(Integer bits) NOEXCEPT
 {
     return ceilinged_divide(bits, byte_bits);
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer to_floored_bytes(Integer bits) noexcept
+constexpr Integer to_floored_bytes(Integer bits) NOEXCEPT
 {
     return floored_divide(bits, byte_bits);
 }
@@ -160,20 +161,20 @@ constexpr Integer to_floored_bytes(Integer bits) noexcept
 // ****************************************************************************
 
 template <typename Integer, if_integer<Integer>>
-constexpr bool is_negated(Integer value) noexcept
+constexpr bool is_negated(Integer value) NOEXCEPT
 {
     // Guard precludes zero appearing negated: ((0 % 8) + 1) == 1.
     return is_nonzero(value) && add1(bit_width(value) % byte_bits) == one;
 };
 
 template <typename Integer, if_integer<Integer>>
-constexpr Integer to_negated(Integer value) noexcept
+constexpr Integer to_negated(Integer value) NOEXCEPT
 {
     return set_left(value);
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer to_unnegated(Integer value) noexcept
+constexpr Integer to_unnegated(Integer value) NOEXCEPT
 {
     // negate(minimum) is undefined behavior, but precluded by clearing a bit.
     return !is_negated(value) ? value : negate(

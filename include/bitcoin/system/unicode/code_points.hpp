@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace system {
 
-void aes256_encrypt(aes_block& block, const aes_secret& key) noexcept
+void aes256_encrypt(aes_block& block, const aes_secret& key) NOEXCEPT
 {
     aes256_context context;
     aes256_init(&context, key.data());
@@ -34,7 +34,7 @@ void aes256_encrypt(aes_block& block, const aes_secret& key) noexcept
     aes256_done(&context);
 }
 
-void aes256_decrypt(aes_block& block, const aes_secret& key) noexcept
+void aes256_decrypt(aes_block& block, const aes_secret& key) NOEXCEPT
 {
     aes256_context context;
     aes256_init(&context, key.data());

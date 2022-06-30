@@ -41,7 +41,7 @@ constexpr uint64_t max_encoded_byte_count = (1 << byte_bits);
 
 // C++14: can make constexpr.
 static void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
-    uint64_t& v3) noexcept
+    uint64_t& v3) NOEXCEPT
 {
     v0 += v1;
     v2 += v3;
@@ -64,7 +64,7 @@ static void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
 
 // C++14: can make constexpr.
 static void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
-    uint64_t& v3, uint64_t word) noexcept
+    uint64_t& v3, uint64_t word) NOEXCEPT
 {
     v3 ^= word;
     sip_round(v0, v1, v2, v3);
@@ -72,12 +72,12 @@ static void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     v0 ^= word;
 }
 
-uint64_t siphash(const half_hash& hash, const data_slice& message) noexcept
+uint64_t siphash(const half_hash& hash, const data_slice& message) NOEXCEPT
 {
     return siphash(to_siphash_key(hash), message);
 }
 
-uint64_t siphash(const siphash_key& key, const data_slice& message) noexcept
+uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
 {
     uint64_t v0 = siphash_magic_0 ^ std::get<0>(key);
     uint64_t v1 = siphash_magic_1 ^ std::get<1>(key);
@@ -107,7 +107,7 @@ uint64_t siphash(const siphash_key& key, const data_slice& message) noexcept
     return v0 ^ v1 ^ v2 ^ v3;
 }
 
-siphash_key to_siphash_key(const half_hash& hash) noexcept
+siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT
 {
     const auto part = split(hash);
     const auto hi = from_little_endian<uint64_t>(part.first);

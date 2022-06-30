@@ -22,6 +22,7 @@
 #include <iterator>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/device.hpp>
 
@@ -43,7 +44,7 @@ public:
     {
     };
 
-    push_sink(Container& data) noexcept
+    push_sink(Container& data) NOEXCEPT
       : device<Container>(limit<typename device<Container>::size_type>(
           data.max_size() - data.size())),
         container_(data)
@@ -60,13 +61,13 @@ protected:
     const typename device<Container>::size_type default_buffer_size = 1024;
 
     void do_write(const typename device<Container>::value_type* from,
-        typename device<Container>::size_type size) noexcept override
+        typename device<Container>::size_type size) NOEXCEPT override
     {
         container_.insert(container_.end(), from, std::next(from, size));
     }
 
     typename device<Container>::size_type do_optimal_buffer_size()
-        const noexcept override
+        const NOEXCEPT override
     {
         // This is only called at stream construct.
         // The compiler determines capacity, so this may be unreliable to test.

@@ -39,7 +39,7 @@ class make_streamer
   : public Streamer
 {
 public:
-    make_streamer(typename Device::container device) noexcept
+    make_streamer(typename Device::container device) NOEXCEPT
       : stream_(device), Streamer(stream_)
     {
     }

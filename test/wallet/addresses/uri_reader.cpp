@@ -33,48 +33,48 @@ static bitcoin_uri parse(const std::string& uri, bool strict=true)
 struct custom_reader
   : public uri_reader
 {
-    custom_reader() noexcept
+    custom_reader() NOEXCEPT
       : strict_(true), authority_(false)
     {
     }
 
-    bool is_valid() const noexcept
+    bool is_valid() const NOEXCEPT
     {
         return !myscheme.empty() && !authority_;
     }
 
-    void set_strict(bool strict) noexcept
+    void set_strict(bool strict) NOEXCEPT
     {
         strict_ = strict;
     }
 
-    virtual bool set_scheme(const std::string& scheme) noexcept
+    virtual bool set_scheme(const std::string& scheme) NOEXCEPT
     {
         myscheme = scheme;
         return true;
     }
 
-    virtual bool set_authority(const std::string& /* authority */) noexcept
+    virtual bool set_authority(const std::string& /* authority */) NOEXCEPT
     {
         // This URI doesn't support an authority component.
         authority_ = true;
         return false;
     }
 
-    virtual bool set_path(const std::string& path) noexcept
+    virtual bool set_path(const std::string& path) NOEXCEPT
     {
         mypath = path;
         return true;
     }
 
-    virtual bool set_fragment(const std::string& fragment) noexcept
+    virtual bool set_fragment(const std::string& fragment) NOEXCEPT
     {
         myfragment = boost::in_place(fragment);
         return true;
     }
 
     virtual bool set_parameter(const std::string& key,
-        const std::string& value) noexcept
+        const std::string& value) NOEXCEPT
     {
         if (key == "myparam1")
             myparam1 = boost::in_place(value);

@@ -113,7 +113,7 @@ static_assert(compact::compress(to_uintx(base16_hash("0000abcdefaabbccddeeff0011
 static_assert(compact::compress(to_uintx(base16_hash("00abcdefaabbccddeeff00112233445566778899aabbccddeeff001122334455"))) == 0x2000abcdul);
 static_assert(compact::compress(to_uintx(base16_hash("abcdefaabbccddeeff00112233445566778899aabbccddeeff00112233445566"))) == 0x2100abcdul);
 
-constexpr uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantissa) noexcept
+constexpr uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantissa) NOEXCEPT
 {
     return ((logical_exponent + 3) << 24) | ((negative ? 1 : 0) << 23) | mantissa;
 }

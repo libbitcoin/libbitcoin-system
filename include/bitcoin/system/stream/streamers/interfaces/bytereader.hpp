@@ -27,6 +27,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 
 namespace libbitcoin {
@@ -37,81 +38,81 @@ class bytereader
 {
 public:
     /// Read big endian (explicit specializations of read_big_endian).
-    virtual uint16_t read_2_bytes_big_endian() noexcept = 0;
-    virtual uint32_t read_4_bytes_big_endian() noexcept = 0;
-    virtual uint64_t read_8_bytes_big_endian() noexcept = 0;
+    virtual uint16_t read_2_bytes_big_endian() NOEXCEPT = 0;
+    virtual uint32_t read_4_bytes_big_endian() NOEXCEPT = 0;
+    virtual uint64_t read_8_bytes_big_endian() NOEXCEPT = 0;
 
     /// Little endian integer readers (specializations of read_little_endian).
-    virtual uint16_t read_2_bytes_little_endian() noexcept = 0;
-    virtual uint32_t read_4_bytes_little_endian() noexcept = 0;
-    virtual uint64_t read_8_bytes_little_endian() noexcept = 0;
+    virtual uint16_t read_2_bytes_little_endian() NOEXCEPT = 0;
+    virtual uint32_t read_4_bytes_little_endian() NOEXCEPT = 0;
+    virtual uint64_t read_8_bytes_little_endian() NOEXCEPT = 0;
 
     /// Read Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
-    virtual uint64_t read_variable() noexcept = 0;
+    virtual uint64_t read_variable() NOEXCEPT = 0;
 
     /// Cast read_variable to size_t, facilitates read_bytes(read_size()).
     /// Returns zero and invalidates stream if would exceed read limit.
-    virtual size_t read_size(size_t limit=max_size_t) noexcept = 0;
+    virtual size_t read_size(size_t limit=max_size_t) NOEXCEPT = 0;
 
     /// Convert read_4_bytes_little_endian to an error code.
-    virtual code read_error_code() noexcept = 0;
+    virtual code read_error_code() NOEXCEPT = 0;
 
     /// Read into stream until buffer is exhausted.
-    virtual std::ostream& read(std::ostream& out) noexcept = 0;
+    virtual std::ostream& read(std::ostream& out) NOEXCEPT = 0;
 
     /// Read hash (explicit specializations of read_forward).
-    virtual mini_hash read_mini_hash() noexcept = 0;
-    virtual short_hash read_short_hash() noexcept = 0;
-    virtual hash_digest read_hash() noexcept = 0;
-    virtual long_hash read_long_hash() noexcept = 0;
+    virtual mini_hash read_mini_hash() NOEXCEPT = 0;
+    virtual short_hash read_short_hash() NOEXCEPT = 0;
+    virtual hash_digest read_hash() NOEXCEPT = 0;
+    virtual long_hash read_long_hash() NOEXCEPT = 0;
 
     /// Read/peek one byte (invalidates an empty stream).
-    virtual uint8_t peek_byte() noexcept = 0;
-    virtual uint8_t read_byte() noexcept = 0;
+    virtual uint8_t peek_byte() NOEXCEPT = 0;
+    virtual uint8_t read_byte() NOEXCEPT = 0;
 
     /// Read all remaining bytes.
-    virtual data_chunk read_bytes() noexcept = 0;
+    virtual data_chunk read_bytes() NOEXCEPT = 0;
 
     /// Read size bytes, return size is guaranteed.
-    virtual data_chunk read_bytes(size_t size) noexcept = 0;
-    virtual void read_bytes(uint8_t* buffer, size_t size) noexcept = 0;
+    virtual data_chunk read_bytes(size_t size) NOEXCEPT = 0;
+    virtual void read_bytes(uint8_t* buffer, size_t size) NOEXCEPT = 0;
 
     /// Read Bitcoin length-prefixed string.
     /// Returns empty and invalidates stream if would exceed read limit.
-    virtual std::string read_string(size_t limit=max_size_t) noexcept = 0;
+    virtual std::string read_string(size_t limit=max_size_t) NOEXCEPT = 0;
 
     /// Read string, truncated at size or first null.
     /// This is only used for reading Bitcoin heading command text.
-    virtual std::string read_string_buffer(size_t size) noexcept = 0;
+    virtual std::string read_string_buffer(size_t size) NOEXCEPT = 0;
 
     /// Advance the iterator.
-    virtual void skip_byte() noexcept = 0;
-    virtual void skip_bytes(size_t size) noexcept = 0;
+    virtual void skip_byte() NOEXCEPT = 0;
+    virtual void skip_bytes(size_t size) NOEXCEPT = 0;
 
     /// Rewind the iterator.
-    virtual void rewind_byte() noexcept = 0;
-    virtual void rewind_bytes(size_t size) noexcept = 0;
+    virtual void rewind_byte() NOEXCEPT = 0;
+    virtual void rewind_bytes(size_t size) NOEXCEPT = 0;
 
     /// The stream is empty (or invalid).
-    virtual bool is_exhausted() const noexcept = 0;
+    virtual bool is_exhausted() const NOEXCEPT = 0;
 
     /// Get the current absolute position.
-    virtual size_t get_position() noexcept = 0;
+    virtual size_t get_position() NOEXCEPT = 0;
 
     /// Clear invalid state and set absolute position.
-    virtual void set_position(size_t absolute) noexcept = 0;
+    virtual void set_position(size_t absolute) NOEXCEPT = 0;
 
     /// Limit stream upper bound to current position plus size (default resets).
-    virtual void set_limit(size_t size=max_size_t) noexcept = 0;
+    virtual void set_limit(size_t size=max_size_t) NOEXCEPT = 0;
 
     /// Invalidate the stream.
-    virtual void invalidate() noexcept = 0;
+    virtual void invalidate() NOEXCEPT = 0;
 
     /// The stream is valid.
-    virtual operator bool() const noexcept = 0;
+    virtual operator bool() const NOEXCEPT = 0;
 
     /// The stream is invalid.
-    virtual bool operator!() const noexcept = 0;
+    virtual bool operator!() const NOEXCEPT = 0;
 };
 
 } // namespace system

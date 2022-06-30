@@ -45,7 +45,7 @@ alignas(__m128i) const uint8_t init1[16] =
 };
 
 void inline QuadRound(__m128i& state0, __m128i& state1, uint64_t k1,
-    uint64_t k0) noexcept
+    uint64_t k0) NOEXCEPT
 {
     const __m128i msg = _mm_set_epi64x(k1, k0);
     state1 = _mm_sha256rnds2_epu32(state1, state0, msg);
@@ -53,30 +53,30 @@ void inline QuadRound(__m128i& state0, __m128i& state1, uint64_t k1,
 }
 
 void inline QuadRound(__m128i& state0, __m128i& state1, __m128i m, uint64_t k1,
-    uint64_t k0) noexcept
+    uint64_t k0) NOEXCEPT
 {
     const __m128i msg = _mm_add_epi32(m, _mm_set_epi64x(k1, k0));
     state1 = _mm_sha256rnds2_epu32(state1, state0, msg);
     state0 = _mm_sha256rnds2_epu32(state0, state1, _mm_shuffle_epi32(msg, 0x0e));
 }
 
-void inline ShiftMessageA(__m128i& m0, __m128i m1) noexcept
+void inline ShiftMessageA(__m128i& m0, __m128i m1) NOEXCEPT
 {
     m0 = _mm_sha256msg1_epu32(m0, m1);
 }
 
-void inline ShiftMessageC(__m128i& m0, __m128i m1, __m128i& m2) noexcept
+void inline ShiftMessageC(__m128i& m0, __m128i m1, __m128i& m2) NOEXCEPT
 {
     m2 = _mm_sha256msg2_epu32(_mm_add_epi32(m2, _mm_alignr_epi8(m1, m0, 4)), m1);
 }
 
-void inline ShiftMessageB(__m128i& m0, __m128i m1, __m128i& m2) noexcept
+void inline ShiftMessageB(__m128i& m0, __m128i m1, __m128i& m2) NOEXCEPT
 {
     ShiftMessageC(m0, m1, m2);
     ShiftMessageA(m0, m1);
 }
 
-void inline Shuffle(__m128i& s0, __m128i& s1) noexcept
+void inline Shuffle(__m128i& s0, __m128i& s1) NOEXCEPT
 {
     const __m128i t1 = _mm_shuffle_epi32(s0, 0xb1);
     const __m128i t2 = _mm_shuffle_epi32(s1, 0x1b);
@@ -84,7 +84,7 @@ void inline Shuffle(__m128i& s0, __m128i& s1) noexcept
     s1 = _mm_blend_epi16(t2, t1, 0xf0);
 }
 
-void inline Unshuffle(__m128i& s0, __m128i& s1) noexcept
+void inline Unshuffle(__m128i& s0, __m128i& s1) NOEXCEPT
 {
     const __m128i t1 = _mm_shuffle_epi32(s0, 0x1b);
     const __m128i t2 = _mm_shuffle_epi32(s1, 0xb1);
@@ -92,20 +92,20 @@ void inline Unshuffle(__m128i& s0, __m128i& s1) noexcept
     s1 = _mm_alignr_epi8(t2, t1, 0x08);
 }
 
-__m128i inline Load(const uint8_t* in) noexcept
+__m128i inline Load(const uint8_t* in) NOEXCEPT
 {
     return _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)in),
         _mm_load_si128((const __m128i*)flip_mask));
 }
 
-void inline Save(uint8_t* out, __m128i s) noexcept
+void inline Save(uint8_t* out, __m128i s) NOEXCEPT
 {
     _mm_storeu_si128((__m128i*)out,
         _mm_shuffle_epi8(s, _mm_load_si128((const __m128i*)flip_mask)));
 }
 
 // Iterate over N blocks, two lanes per block.
-void sha256_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
+void sha256_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) NOEXCEPT
 {
     __m128i m0, m1, m2, m3, s0, s1, so0, so1;
 
@@ -171,18 +171,18 @@ void sha256_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) noexcept
 }
 
 // One block in two lanes.
-void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) noexcept
+void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
     return sha256_shani(state, block, 1);
 }
 
-////void sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) noexcept
+////void sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
 ////{
 ////    // TODO: two blocks in two lanes. 
 ////}
 
 // One block in two lanes, doubled.
-void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) noexcept
+void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
     auto buffer = sha256x2_buffer;
 
@@ -197,7 +197,7 @@ void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) noexcept
 }
 
 // Two blocks in two lanes, doubled.
-void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) noexcept
+void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
 {
     __m128i am0, am1, am2, am3, as0, as1, aso0, aso1;
     __m128i bm0, bm1, bm2, bm3, bs0, bs1, bso0, bso1;

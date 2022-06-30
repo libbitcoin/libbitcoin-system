@@ -40,21 +40,21 @@ public:
     ~transaction() = default;
 
     /// Constructors.
-    transaction() noexcept;
-    transaction(chain::transaction&& value) noexcept;
-    transaction(const chain::transaction& value) noexcept;
-    transaction(const std::string& base16) noexcept(false);
+    transaction() NOEXCEPT;
+    transaction(chain::transaction&& value) NOEXCEPT;
+    transaction(const chain::transaction& value) NOEXCEPT;
+    transaction(const std::string& base16) THROWS;
 
-    ////std::string to_string() const noexcept;
+    ////std::string to_string() const NOEXCEPT;
 
     /// Operators.
 
-    operator const chain::transaction&() const noexcept;
+    operator const chain::transaction&() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
-        transaction& argument) noexcept(false);
+        transaction& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
-        const transaction& argument) noexcept;
+        const transaction& argument) NOEXCEPT;
 
 private:
     chain::transaction value_;

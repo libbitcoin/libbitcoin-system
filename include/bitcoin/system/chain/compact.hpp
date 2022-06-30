@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -43,11 +44,11 @@ struct compact
 public:
     /// A zero value implies an invalid (including zero) parameter.
     /// Non-minimal exponent encoding allowed only for mantissa sign bug.
-    static constexpr span_type expand(small_type exponential) noexcept;
+    static constexpr span_type expand(small_type exponential) NOEXCEPT;
 
     /// (m * 256^e) bit-encoded as [0eeeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
     /// Uses non-minimal exponent encoding to avoid mantissa sign (bug).
-    static constexpr small_type compress(const span_type& number) noexcept;
+    static constexpr small_type compress(const span_type& number) NOEXCEPT;
 
 protected:
     using exponent_type = unsigned_type<e_bytes>;
@@ -59,8 +60,8 @@ protected:
         small_type mantissa;
     };
 
-    static constexpr parse to_compact(small_type small) noexcept;
-    static constexpr small_type from_compact(const parse& compact) noexcept;
+    static constexpr parse to_compact(small_type small) NOEXCEPT;
+    static constexpr small_type from_compact(const parse& compact) NOEXCEPT;
 };
 
 } // namespace chain
