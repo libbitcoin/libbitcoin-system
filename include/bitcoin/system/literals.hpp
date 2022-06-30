@@ -36,7 +36,6 @@ namespace libbitcoin {
 namespace system {
 namespace literals {
 
-/// en.cppreference.com/w/cpp/language/user_literal
 
 /// This uses no libbitcoin utilities, so that it may have few dependencies and
 /// therefore be useful everywhere in the library. It is also important that it
@@ -49,6 +48,9 @@ namespace literals {
 // It is consteval where available.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+
+/// en.cppreference.com/w/cpp/language/user_literal
+using integer_type = unsigned long long int;
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
@@ -84,7 +86,7 @@ CONSTEVAL std::make_unsigned_t<Integer> upper() NOEXCEPT
 
 template <typename Domain, std::enable_if_t<
     std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain positive(uint64_t value) THROWS
+CONSTEVAL Domain positive(integer_type value) THROWS
 {
     typedef std::make_unsigned_t<Domain> narrow, limit;
 
@@ -97,7 +99,7 @@ CONSTEVAL Domain positive(uint64_t value) THROWS
 
 template <typename Domain, std::enable_if_t<
     std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain negative(uint64_t value) THROWS
+CONSTEVAL Domain negative(integer_type value) THROWS
 {
     using limit = std::make_signed_t<Domain>;
     using narrow = std::make_unsigned_t<Domain>;
@@ -113,7 +115,7 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 
 #define DECLARE_LITERAL(name, type, sign) \
-CONSTEVAL type operator "" name(uint64_t value) THROWS \
+CONSTEVAL type operator "" name(integer_type value) THROWS \
 { return sign<type>(value); }
 
 /// Supported represenations.
