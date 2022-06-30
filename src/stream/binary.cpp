@@ -73,6 +73,7 @@ binary binary::from_data(size_t bits, data_chunk&& data) NOEXCEPT
 {
     data.resize(ceilinged_divide(bits, byte_bits), pad);
 
+    // TODO: absolute unsafe, review.
     if (!data.empty())
         mask_right_into(data.back(),
             absolute(ceilinged_modulo(bits, byte_bits)));

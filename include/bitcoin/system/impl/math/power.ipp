@@ -58,6 +58,7 @@ constexpr Value power(Base base, Exponent exponent) NOEXCEPT
     if (is_zero(exponent))
         return 1;
 
+    // TODO: absolute unsafe, review.
     if (is_negative(exponent))
         return absolute(base) > 1 ? 0 :
             (is_odd(exponent) && is_negative(base) ? -1 : 1);

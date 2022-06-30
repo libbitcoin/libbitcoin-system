@@ -694,6 +694,7 @@ op_abs() NOEXCEPT
     if (!state::pop_signed32(number))
         return error::op_abs;
 
+    // TODO: absolute unsafe, review.
     state::push_signed64(absolute(number));
     return error::op_success;
 }

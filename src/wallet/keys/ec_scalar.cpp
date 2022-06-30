@@ -108,6 +108,7 @@ ec_scalar ec_scalar::from_int64(int64_t value) NOEXCEPT
         secret.end()
     });
 
+    // TODO: absolute unsafe, review.
     // All hashes and secrets are stored as big-endian by convention.
     writer.write_8_bytes_big_endian(absolute(value));
 
