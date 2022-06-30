@@ -20,6 +20,7 @@ jobs:
           - os: ubuntu-latest
             cxx: "clang++"
             link: "dynamic"
+            optimization: "size"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -32,6 +33,7 @@ jobs:
           - os: ubuntu-latest
             cxx: "clang++"
             link: "static"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -44,6 +46,7 @@ jobs:
           - os: ubuntu-latest
             cxx: "g++"
             link: "dynamic"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -56,6 +59,7 @@ jobs:
           - os: ubuntu-latest
             cxx: "g++"
             link: "static"
+            optimization: "debug"
             assert: "ndebug"
             coverage: "cov"
             boost: "--build-boost"
@@ -68,6 +72,7 @@ jobs:
           - os: macos-latest
             cxx: "clang++"
             link: "dynamic"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -80,6 +85,7 @@ jobs:
           - os: macos-latest
             cxx: "clang++"
             link: "static"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -88,6 +94,7 @@ jobs:
             flags: "-Os -fvisibility=hidden -fPIE"
             packager: "brew"
             packages: ""
+
 
     runs-on: ${{ matrix.os }}
 
@@ -195,6 +202,12 @@ jobs:
         run: |
           DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
 
+      - name: Failure display pkgconfig
+        if: ${{ failure() }}
+        run: |
+          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
+          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+
   cmake:
 
     strategy:
@@ -205,6 +218,7 @@ jobs:
           - os: ubuntu-latest
             cxx: "clang++"
             link: "dynamic"
+            optimization: "size"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -217,6 +231,7 @@ jobs:
           - os: ubuntu-latest
             cxx: "clang++"
             link: "static"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -229,6 +244,7 @@ jobs:
           - os: ubuntu-latest
             cxx: "g++"
             link: "dynamic"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -238,9 +254,23 @@ jobs:
             packager: "apt"
             packages: ""
 
+          - os: ubuntu-latest
+            cxx: "g++"
+            link: "static"
+            optimization: "debug"
+            assert: "ndebug"
+            coverage: "nocov"
+            boost: "--build-boost"
+            icu: "--build-icu --with-icu"
+            cc: "gcc"
+            flags: "-Og -fPIE"
+            packager: "apt"
+            packages: ""
+
           - os: macos-latest
             cxx: "clang++"
             link: "dynamic"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -253,6 +283,7 @@ jobs:
           - os: macos-latest
             cxx: "clang++"
             link: "static"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
@@ -261,6 +292,7 @@ jobs:
             flags: "-Os -fvisibility=hidden -fPIE"
             packager: "brew"
             packages: ""
+
 
     runs-on: ${{ matrix.os }}
 
@@ -329,18 +361,63 @@ jobs:
           path-to-lcov: "./coverage.info"
           github-token: ${{ secrets.github_token }}
 
-      - name: Failure Display cmake test output
-        if: ${{failure() }}
+      - name: Failure display available binaries
+        if: ${{ failure() }}
         run: |
-          gcc -v
+          ls -la /usr/bin
+
+      - name: Failure display selected compiler version
+        if: ${{ failure() }}
+        run: |
+          ${CC} -v
+          ${CXX} -v
+
+      - name: Failure display default compiler version
+        if: ${{ failure() }}
+        run: |
           clang -v
-          echo "--- ENVIRONMENT ---"
+          gcc -v
+
+      - name: Failure display env
+        if: ${{ failure() }}
+        run: |
           env
-          echo "--- END ENVIRONMENT ---"
-          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
+
+      - name: Failure list libdir
+        if: ${{ failure() }}
+        run: |
+          ls -la ${{ github.workspace }}/prefixenv/lib
+
+      - name: Failure display boost bootstrap.log [--build-boost]
+        if: ${{ failure() && (matrix.boost == '--build-boost') }}
+        run: |
+          cat ${{ github.workspace }}/build/build-*/bootstrap.log
+
+      - name: Failure display otool output
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
+          otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
+
+      - name: Failure display DYLD_PRINT_LIBRARIES
+        if: ${{ failure() && (matrix.os == 'macos-latest') }}
+        run: |
+          DYLD_PRINT_LIBRARIES=1 ${{ github.workspace }}/test/.libs/libbitcoin-system-test
+
+      - name: Failure display pkgconfig
+        if: ${{ failure() }}
+        run: |
           ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
           cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+
+      - name: Failure display cmake specific libraries
+        if: ${{ failure() }}
+        run: |
           ls ${{ github.workspace }}/prefixenv/lib/cmake
+
+      - name: Failure display cmake LastTest.log
+        if: ${{ failure() }}
+        run: |
+          cat ${{ github.workspace }}/Testing/Temporary/LastTest.log
 
   msbuild:
     strategy:
