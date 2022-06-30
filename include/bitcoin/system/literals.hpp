@@ -27,7 +27,7 @@
 #include <bitcoin/system/exceptions.hpp>
 
 // May be used to exclude test evaluation.
-// Remove this when all platforms suppoty consteval.
+// Remove this when all platforms support consteval.
 #if !defined(HAVE_CONSTEVAL)
     #define RUNTIME_LITERALS
 #endif
@@ -35,7 +35,6 @@
 namespace libbitcoin {
 namespace system {
 namespace literals {
-
 
 /// This uses no libbitcoin utilities, so that it may have few dependencies and
 /// therefore be useful everywhere in the library. It is also important that it
