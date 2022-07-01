@@ -181,7 +181,7 @@ constexpr To* integer_pointer_cast(From value) NOEXCEPT
 BC_PUSH_WARNING(THROW_FROM_NOEXCEPT)
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer safe_multiply(Integer left, Integer right) NOEXCEPT
+constexpr Integer safe_multiply(Integer left, Integer right) THROWS
 {
     if (is_zero(left) || is_zero(right))
         return 0;
@@ -193,7 +193,7 @@ constexpr Integer safe_multiply(Integer left, Integer right) NOEXCEPT
 }
 
 template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer safe_add(Integer left, Integer right) NOEXCEPT
+constexpr Integer safe_add(Integer left, Integer right) THROWS
 {
     if (left > (std::numeric_limits<Integer>::max() - right))
         throw overflow_exception("safe addition overflow");
@@ -202,7 +202,7 @@ constexpr Integer safe_add(Integer left, Integer right) NOEXCEPT
 }
 
 template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer safe_negate(Integer value) NOEXCEPT
+constexpr Integer safe_negate(Integer value) THROWS
 {
     // TODO: review full codebase.
     ////if (value == std::numeric_limits<Integer>::min())

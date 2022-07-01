@@ -22,11 +22,7 @@
 #include <iostream>
 #include <new>
 #include <streambuf>
-// DELETEMENOW
-
-#ifdef HAVE_MSC
-    #include <windows.h>
-#endif
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {

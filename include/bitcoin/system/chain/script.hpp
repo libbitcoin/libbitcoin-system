@@ -526,8 +526,10 @@ private:
     ////bool roller_{ false };
 
 public:
+    using iterator = operations::const_iterator;
+
     /// Public mutable metadata access, not copied or compared for equality.
-    mutable operations::const_iterator offset;
+    mutable iterator offset;
 };
 
 typedef std::vector<script> scripts;

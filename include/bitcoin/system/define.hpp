@@ -35,6 +35,10 @@
 // Pulls chains in all /system headers (except settings.hpp).
 #include <bitcoin/system/constraints.hpp>
 
+#if defined(HAVE_MSC)
+    #include <windows.h>
+#endif
+
 // Create bc namespace alias.
 namespace libbitcoin {
 namespace system {
@@ -90,11 +94,11 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-#if defined(HAVE_MSC) && !defined(BC_VS2022)
+#if defined(HAVE_MSC) && !defined(HAVE_VS2022)
     static_assert(false, "Visual Studio 2022 minimum required.");
 #endif
 
-#if !defined(BC_CPP_20)
+#if !defined(HAVE_CPP20)
     static_assert(false, "C++20 minimum required.");
 #endif
 
@@ -115,8 +119,17 @@ namespace bc = libbitcoin;
 
 #define THROWS noexcept(false)
 
-// Define so we can have better visibility of lcov exclusion ranges.
-#define LCOV_EXCL_START(text)
+// These are defined in the GUI for VS builds and by command line for others.
+// But overriding these here for VS builds to keep tests active.
+#if !defined(HAVE_PORTABLE) && defined(HAVE_MSC) && defined(HAVE_X64)
+    #define WITH_AVX2
+    #define WITH_SSE41
+    #define WITH_SSE4
+    #define WITH_SHANI
+#endif
+
+// LCOV code coverage exclusion ranges.
+#define LCOV_EXCL_START(comment)
 #define LCOV_EXCL_STOP()
 
 #endif

@@ -20,15 +20,8 @@
 #define LIBBITCOIN_SYSTEM_SERIAL_ENDIAN_IPP
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <iostream>
 #include <iterator>
-#include <string>
 #include <utility>
-// DELETEMENOW
-// DELETEMENOW
-// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

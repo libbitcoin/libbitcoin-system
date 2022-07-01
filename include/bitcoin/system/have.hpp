@@ -43,45 +43,45 @@
 
 // ISO predefined constant for C++ version.
 #if __cplusplus >= 199711L
-    #define BC_CPP_03
+    #define HAVE_CPP03
 #endif
 #if __cplusplus >= 201103L
-    #define BC_CPP_11
+    #define HAVE_CPP11
 #endif
 #if __cplusplus >= 201402L
-    #define BC_CPP_14
+    #define HAVE_CPP14
 #endif
 #if __cplusplus >= 201703L
-    #define BC_CPP_17
+    #define HAVE_CPP17
 #endif
 #if __cplusplus >= 202002L
-    #define BC_CPP_20
+    #define HAVE_CPP20
 #endif
 
 // MSFT predefined constant for VS version.
 #if MSC_VERSION >= 1800
-    #define BC_VS2013
+    #define HAVE_VS2013
 #endif
 #if MSC_VERSION >= 1900
-    #define BC_VS2015
+    #define HAVE_VS2015
 #endif
 #if MSC_VERSION >= 1910
-    #define BC_VS2017
+    #define HAVE_VS2017
 #endif
 #if MSC_VERSION >= 1920
-    #define BC_VS2019
+    #define HAVE_VS2019
 #endif
 #if MSC_VERSION >= 1930
-    #define BC_VS2022
+    #define HAVE_VS2022
 #endif
 
 // ISO predefined constant for targeted CPU architecture.
 #if defined _M_IX86
-    #define BC_X86_BUILD
+    #define HAVE_X86
 #elif defined _M_X64
-    #define BC_X64_BUILD
+    #define HAVE_X64
 #elif defined _M_IA64
-    #define BC_ITANIUM_BUILD
+    #define HAVE_ITANIUM
 #endif
 
  // Things we are missing on other platforms.
@@ -98,5 +98,8 @@
 
 // deprecated is noisy, turn on to find dependencies.
 ////#define HAVE_DEPRECATED
+
+// have a portable build (no intrinsics).
+////#define HAVE_PORTABLE
 
 #endif

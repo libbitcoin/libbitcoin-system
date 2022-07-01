@@ -292,16 +292,9 @@ void script::to_data(writer& sink, bool prefix) const NOEXCEPT
     if (prefix)
         sink.write_variable(serialized_size(false));
 
-    const auto stop = ops().end();
-
-    // The iterator must be copied.
-    BC_PUSH_WARNING(USE_REFERENCE)
-
     // Data serialization is affected by offset metadata.
-    for (auto op = offset; op != stop; ++op)
+    for (iterator op{ offset }; op != ops().end(); ++op)
         op->to_data(sink);
-
-    BC_POP_WARNING()
 }
 
 std::string script::to_string(uint32_t active_forks) const NOEXCEPT

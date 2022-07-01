@@ -122,15 +122,15 @@ constexpr To* integer_pointer_cast(From value) NOEXCEPT;
 
 /// Throws overflow_exception on overflow (2 uses in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
-DEPRECATED constexpr Integer safe_multiply(Integer left, Integer right) NOEXCEPT;
+DEPRECATED constexpr Integer safe_multiply(Integer left, Integer right) THROWS;
 
 /// Throws overflow_exception on overflow (1 use in libbitcoin).
 template <typename Integer, if_unsigned_integer<Integer> = true>
-DEPRECATED constexpr Integer safe_add(Integer left, Integer right) NOEXCEPT;
+DEPRECATED constexpr Integer safe_add(Integer left, Integer right) THROWS;
 
 /// Throws overflow_exception on negate signed minimum (several uses).
 template <typename Integer, if_signed_integer<Integer> = true>
-DEPRECATED constexpr Integer safe_negate(Integer value) NOEXCEPT;
+DEPRECATED constexpr Integer safe_negate(Integer value) THROWS;
 
 } // namespace system
 } // namespace libbitcoin

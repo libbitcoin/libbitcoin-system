@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_EVERYWHERE_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UTF8_EVERYWHERE_HPP
 
-#include <iostream>
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>

@@ -34,12 +34,8 @@
     #include <fcntl.h>
     #include <io.h>
     #include <shlobj.h>
-    #include <windows.h>
 #endif
-// DELETEMENOW
-// DELETEMENOW
 #include <bitcoin/system/define.hpp>
-// DELETEMENOW
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>

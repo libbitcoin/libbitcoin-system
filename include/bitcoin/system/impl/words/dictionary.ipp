@@ -37,7 +37,7 @@ namespace words {
 // C++20: deprecated.
 // en.cppreference.com/w/cpp/named_req/PODType
 // Ensure that dictionary word lists remain POD types.
-#ifndef BC_CPP_20
+#if !defined(HAVE_CPP20)
 static_assert(std::is_pod<dictionary<1>::words>(), "performance");
 #endif
 

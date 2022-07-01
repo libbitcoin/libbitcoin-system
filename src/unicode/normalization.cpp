@@ -24,14 +24,10 @@
 #include <string>
 #ifdef HAVE_MSC
     #include <limits>
-    #include <windows.h>
 #else
     #include <mutex>
 #endif
-// DELETEMENOW
-// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
-// DELETEMENOW
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
