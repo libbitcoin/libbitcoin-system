@@ -877,7 +877,7 @@ build_all()
     create_from_github libbitcoin secp256k1 version7
     build_from_github secp256k1 "$PARALLEL" false "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
     if [[ ! ($CI == true) ]]; then
-        create_from_github pmienk libbitcoin-system install-cmake-v3
+        create_from_github libbitcoin libbitcoin-system version3
         build_from_github_cmake libbitcoin-system "$PARALLEL" true "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
