@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_IPP
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
-// DELETEMENOW
-////// DELETEMENOW
+/// DELETEMENOW
+/////// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/wallet/message.hpp>
 
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

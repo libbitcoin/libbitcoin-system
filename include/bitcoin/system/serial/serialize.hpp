@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_HPP
 
 #include <array>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iostream>
 #include <string>
 #include <vector>

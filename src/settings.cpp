@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/settings.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

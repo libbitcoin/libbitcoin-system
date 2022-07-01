@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_FUNCLETS_HPP
 #define LIBBITCOIN_SYSTEM_FUNCLETS_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <type_traits>
 #include <bitcoin/system/literals.hpp>
 

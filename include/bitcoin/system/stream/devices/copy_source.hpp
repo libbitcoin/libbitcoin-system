@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICES_COPY_SOURCE_HPP
 
 #include <utility>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

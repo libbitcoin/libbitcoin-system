@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_ADDITION_IPP
 #define LIBBITCOIN_SYSTEM_MATH_ADDITION_IPP
 
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/safe.hpp>

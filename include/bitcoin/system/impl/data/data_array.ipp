@@ -20,12 +20,12 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_ARRAY_IPP
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
 #include <utility>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>

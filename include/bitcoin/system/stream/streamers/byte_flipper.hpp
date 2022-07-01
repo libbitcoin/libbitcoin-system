@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_FLIPPER_HPP
 
 #include <iostream>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>

@@ -19,12 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/operation.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>

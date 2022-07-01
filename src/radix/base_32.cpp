@@ -19,9 +19,9 @@
 #include <bitcoin/system/radix/base_32.hpp>
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
-// DELETEMENOW
+/// DELETECSTDDEF
+/// DELETECSTDINT
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>

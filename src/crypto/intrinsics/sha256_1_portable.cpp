@@ -26,8 +26,8 @@
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
 #include <algorithm>
-#include <cstdint>
-#include <cstddef>
+/// DELETECSTDINT
+/// DELETECSTDDEF
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 

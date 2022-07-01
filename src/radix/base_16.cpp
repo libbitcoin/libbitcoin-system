@@ -19,10 +19,10 @@
 #include <bitcoin/system/radix/base_16.hpp>
 
 #include <algorithm>
-#include <cstdint>
+/// DELETECSTDINT
 #include <string>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 
 // base16 (hexidecimal):

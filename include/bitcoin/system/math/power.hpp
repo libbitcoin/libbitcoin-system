@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 #define LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 
-#include <cstddef>
-// DELETEMENOW
+/// DELETECSTDDEF
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

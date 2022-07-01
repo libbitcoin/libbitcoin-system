@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_RECEIVER_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_RECEIVER_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

@@ -19,15 +19,15 @@
 #include <bitcoin/system/chain/transaction.hpp>
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
 #include <memory>
 #include <numeric>
 #include <type_traits>
 #include <utility>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/header.hpp>
@@ -35,7 +35,7 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>

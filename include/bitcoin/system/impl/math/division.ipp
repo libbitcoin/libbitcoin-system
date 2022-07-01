@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_MATH_DIVISION_IPP
 
 #include <type_traits>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/sign.hpp>
 

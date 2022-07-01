@@ -22,10 +22,10 @@
 #include <exception>
 #include <limits>
 #include <type_traits>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 
 namespace libbitcoin {
 namespace system {

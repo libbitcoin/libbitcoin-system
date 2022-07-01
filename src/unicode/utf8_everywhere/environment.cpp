@@ -19,7 +19,7 @@
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <cstdlib>
 #include <cstring>
 #include <cwchar>

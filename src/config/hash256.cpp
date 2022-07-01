@@ -23,7 +23,7 @@
 #include <string>
 #include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {

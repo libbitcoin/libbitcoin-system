@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_HASH_IPP
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/serial/serial.hpp>

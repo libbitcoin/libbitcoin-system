@@ -22,7 +22,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/define.hpp>
 

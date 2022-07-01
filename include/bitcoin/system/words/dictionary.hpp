@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_WORDS_DICTIONARY_HPP
 
 #include <array>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <string>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

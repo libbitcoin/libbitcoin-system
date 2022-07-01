@@ -19,12 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>

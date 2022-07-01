@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
 #include <list>
 #include <type_traits>

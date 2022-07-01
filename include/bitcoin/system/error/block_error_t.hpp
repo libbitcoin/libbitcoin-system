@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_ERROR_BLOCK_ERROR_T_HPP
 #define LIBBITCOIN_SYSTEM_ERROR_BLOCK_ERROR_T_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/macros.hpp>
 

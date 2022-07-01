@@ -18,8 +18,8 @@
  */
 #include <bitcoin/system/chain/context.hpp>
 
-#include <cstdint>
-// DELETEMENOW
+/// DELETECSTDINT
+/// DELETEMENOW
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 

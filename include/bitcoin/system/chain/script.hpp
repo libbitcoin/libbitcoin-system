@@ -19,20 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <string>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/operation.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

@@ -21,8 +21,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

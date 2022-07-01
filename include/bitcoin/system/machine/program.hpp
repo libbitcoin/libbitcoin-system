@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <unordered_map>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>

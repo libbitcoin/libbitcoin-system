@@ -18,12 +18,12 @@
  */
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>
 
-#include <cstdint>
-#include <cstddef>
+/// DELETECSTDINT
+/// DELETECSTDDEF
 #include <algorithm>
 #include <stdexcept>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

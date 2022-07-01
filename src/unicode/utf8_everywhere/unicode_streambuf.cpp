@@ -19,12 +19,12 @@
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <cstring>
 #include <iostream>
 #include <streambuf>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/unicode/conversion.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 

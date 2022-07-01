@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
 #include <chrono>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <memory>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>

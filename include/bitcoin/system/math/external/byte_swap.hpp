@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_EXTERNAL_BYTE_SWAP_HPP
 #define LIBBITCOIN_SYSTEM_MATH_EXTERNAL_BYTE_SWAP_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <bitcoin/system/define.hpp>
 
 // Shift left is undefined for negative value.

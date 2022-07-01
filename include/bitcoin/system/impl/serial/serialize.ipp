@@ -21,8 +21,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iostream>
 #include <sstream>
 #include <string>

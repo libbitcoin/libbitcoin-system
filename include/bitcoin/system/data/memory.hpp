@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_MEMORY_HPP
 #define LIBBITCOIN_SYSTEM_DATA_MEMORY_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <memory>
 #include <utility>
 #include <vector>

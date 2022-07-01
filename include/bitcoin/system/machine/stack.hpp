@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_STACK_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_HPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <list>
 #include <type_traits>
 #include <variant>

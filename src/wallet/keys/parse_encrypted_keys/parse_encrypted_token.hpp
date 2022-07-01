@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_TOKEN_HPP
 #define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_TOKEN_HPP
 
-#include <cstdint>
-#include <cstddef>
+/// DELETECSTDINT
+/// DELETECSTDDEF
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>

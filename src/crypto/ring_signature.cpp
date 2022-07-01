@@ -23,7 +23,7 @@
 #include <numeric>
 #include <vector>
 #include <secp256k1.h>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/keys/hd_private.hpp>

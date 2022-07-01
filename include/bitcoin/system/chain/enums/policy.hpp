@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_POLICIES_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_POLICIES_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

@@ -19,12 +19,12 @@
 #include <bitcoin/system/serial/props.hpp>
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <initializer_list>
 #include <string>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/stream.hpp>

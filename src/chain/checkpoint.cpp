@@ -18,11 +18,11 @@
  */
 #include <bitcoin/system/chain/checkpoint.hpp>
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <iostream>
 #include <string>
 #include <utility>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/radix/radix.hpp>

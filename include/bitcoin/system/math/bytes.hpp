@@ -19,8 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BYTES_HPP
 #define LIBBITCOIN_SYSTEM_MATH_BYTES_HPP
 
-#include <cstdint>
-// DELETEMENOW
+/// DELETECSTDINT
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <limits>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/safe.hpp>

@@ -20,7 +20,7 @@
 
 #include <algorithm>
 #include <string>
-// DELETEMENOW
+/// DELETEMENOW
 
 namespace libbitcoin {
 namespace system {

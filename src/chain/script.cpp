@@ -19,14 +19,14 @@
 #include <bitcoin/system/chain/script.hpp>
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
 #include <memory>
 #include <numeric>
 #include <sstream>
 #include <utility>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>

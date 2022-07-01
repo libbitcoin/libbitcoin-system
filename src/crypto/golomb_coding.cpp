@@ -22,11 +22,11 @@
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 
 #include <algorithm>
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <iterator>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 
 // Avoid in header, circular dependency with stream to crypto.

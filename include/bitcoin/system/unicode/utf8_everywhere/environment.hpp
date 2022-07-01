@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_ENVIRONMENT_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_ENVIRONMENT_HPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <filesystem>
 #include <iostream>
 #include <string>

@@ -22,8 +22,8 @@
 // Standard includes (do not include directly).
 // All except <array> are included here by include ancestory.
 #include <array>
-#include <cstddef>
-#include <cstdint>
+#include <cstddef>  // purged
+#include <cstdint>  // purged
 #include <exception>
 #include <iostream>
 #include <limits>

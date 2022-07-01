@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_QRENCODE_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_QRENCODE_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <string>
 #include <bitcoin/system/data/data.hpp>

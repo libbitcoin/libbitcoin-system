@@ -20,12 +20,12 @@
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_WITNESS_ADDRESS_HPP
 
 #include <iostream>
-#include <cstdint>
+/// DELETECSTDINT
 #include <memory>
 #include <string>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

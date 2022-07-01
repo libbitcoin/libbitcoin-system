@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_DATA_COLLECTION_HPP
 
 #include <array>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <iterator>
 #include <memory>
 #include <utility>

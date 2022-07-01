@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_ERROR_MACROS_HPP
 #define LIBBITCOIN_SYSTEM_ERROR_MACROS_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <functional>
 #include <string>
 #include <system_error>

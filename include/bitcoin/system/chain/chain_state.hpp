@@ -19,14 +19,14 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <memory>
 #include <deque>
 #include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

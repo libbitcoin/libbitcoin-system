@@ -19,12 +19,12 @@
 #include <bitcoin/system/chain/header.hpp>
 
 #include <chrono>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <utility>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

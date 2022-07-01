@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 #define LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/log.hpp>
 #include <bitcoin/system/math/safe.hpp>

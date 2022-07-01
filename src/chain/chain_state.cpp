@@ -20,8 +20,8 @@
 
 #include <algorithm>
 #include <chrono>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
@@ -32,7 +32,7 @@
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 #include <bitcoin/system/chain/script.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/settings.hpp>

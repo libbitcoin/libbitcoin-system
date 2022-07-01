@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_TEST_MNEMONIC_HPP
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <string>
 #include <vector>
 #include <bitcoin/system.hpp>

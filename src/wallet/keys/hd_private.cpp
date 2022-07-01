@@ -18,15 +18,15 @@
  */
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <string>
 #include <utility>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/stream.hpp>

@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {

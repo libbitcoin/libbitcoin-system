@@ -20,9 +20,9 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
 
 
-#include <cstddef>
-#include <cstdint>
-////// DELETEMENOW
+/// DELETECSTDDEF
+/// DELETECSTDINT
+/////// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_HD_PRIVATE_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_KEYS_HD_PRIVATE_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <string>
 #include <bitcoin/system/crypto/crypto.hpp>

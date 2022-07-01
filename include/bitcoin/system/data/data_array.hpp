@@ -20,12 +20,12 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_ARRAY_HPP
 
 #include <array>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <utility>
 #include <vector>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>

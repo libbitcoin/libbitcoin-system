@@ -19,7 +19,7 @@
 #include "secp256k1_initializer.hpp"
 
 #include <secp256k1.h>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

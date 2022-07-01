@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PRIVATE_HPP
 #define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PRIVATE_HPP
 
-#include <cstdint>
-#include <cstddef>
+/// DELETECSTDINT
+/// DELETECSTDDEF
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include "parse_encrypted_key.hpp"

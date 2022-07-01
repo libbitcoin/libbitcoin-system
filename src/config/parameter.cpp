@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/config/parameter.hpp>
 
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 
 namespace po = boost::program_options;

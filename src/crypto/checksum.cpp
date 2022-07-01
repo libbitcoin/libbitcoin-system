@@ -19,7 +19,7 @@
 #include <bitcoin/system/crypto/checksum.hpp>
 
 #include <utility>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/radix/radix.hpp>

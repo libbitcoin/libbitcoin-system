@@ -22,9 +22,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_INTERFACES_BITWRITER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_INTERFACES_BITWRITER_HPP
 
-#include <cstddef>
-#include <cstdint>
-// DELETEMENOW
+/// DELETECSTDDEF
+/// DELETECSTDINT
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
 

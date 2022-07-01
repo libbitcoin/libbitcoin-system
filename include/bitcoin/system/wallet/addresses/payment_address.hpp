@@ -21,7 +21,7 @@
 
 
 #include <iostream>
-#include <cstdint>
+/// DELETECSTDINT
 #include <memory>
 #include <string>
 #include <vector>

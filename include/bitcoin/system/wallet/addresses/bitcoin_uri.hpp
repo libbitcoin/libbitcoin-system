@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_BITCOIN_URI_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_BITCOIN_URI_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <map>
 #include <string>

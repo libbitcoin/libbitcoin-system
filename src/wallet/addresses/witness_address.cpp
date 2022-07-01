@@ -19,13 +19,13 @@
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
 
 #include <algorithm>
-#include <cstdint>
+/// DELETECSTDINT
 #include <string>
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_COMPACT_NUMBER_IPP
 #define LIBBITCOIN_SYSTEM_CHAIN_COMPACT_NUMBER_IPP
 
-#include <cstdint>
-// DELETEMENOW
+/// DELETECSTDINT
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

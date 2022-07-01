@@ -23,7 +23,7 @@
 #include <iterator>
 #include <string>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {

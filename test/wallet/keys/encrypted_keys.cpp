@@ -18,7 +18,7 @@
  */
 #include "../../test.hpp"
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <string>
 
 BOOST_AUTO_TEST_SUITE(encrypted_tests)

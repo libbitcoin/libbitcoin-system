@@ -22,9 +22,9 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
-#include <cstdint>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETECSTDINT
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

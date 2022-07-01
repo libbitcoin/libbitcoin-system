@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CONSTRAINTS_HPP
 #define LIBBITCOIN_SYSTEM_CONSTRAINTS_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <string>
 #include <type_traits>
 #include <vector>

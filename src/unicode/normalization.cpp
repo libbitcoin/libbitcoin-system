@@ -19,7 +19,7 @@
 #include <bitcoin/system/unicode/normalization.hpp>
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <mutex>
 #include <string>
 #ifdef HAVE_MSC

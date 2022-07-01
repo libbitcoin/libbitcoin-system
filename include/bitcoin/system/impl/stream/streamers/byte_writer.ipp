@@ -20,14 +20,14 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_WRITER_IPP
 
 #include <algorithm>
-#include <cstdint>
-#include <cstddef>
+/// DELETECSTDINT
+/// DELETECSTDDEF
 #include <ios>
 #include <ostream>
 #include <string>
 #include <utility>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>

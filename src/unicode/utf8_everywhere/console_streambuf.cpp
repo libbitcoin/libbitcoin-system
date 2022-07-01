@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <iostream>
 #include <new>
 #include <streambuf>

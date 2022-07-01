@@ -22,8 +22,8 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_INTERFACES_BITREADER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_INTERFACES_BITREADER_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytereader.hpp>
 

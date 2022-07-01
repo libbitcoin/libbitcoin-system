@@ -19,11 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_BINARY_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_BINARY_HPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <functional>
 #include <iostream>
 #include <string>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>

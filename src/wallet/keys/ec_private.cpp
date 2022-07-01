@@ -18,13 +18,13 @@
  */
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <string>
 #include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>

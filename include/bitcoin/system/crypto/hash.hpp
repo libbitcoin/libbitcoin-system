@@ -19,11 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_HASH_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_HASH_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <memory>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

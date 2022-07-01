@@ -24,10 +24,10 @@
 
 #include <bitcoin/system/stream/streamers/bit_reader.hpp>
 
-#include <cstddef>
-#include <cstdint>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETECSTDDEF
+/// DELETECSTDINT
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>

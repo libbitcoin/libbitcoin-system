@@ -24,7 +24,7 @@
 #include <utility>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/config/base16.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {

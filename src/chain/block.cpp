@@ -19,7 +19,7 @@
 #include <bitcoin/system/chain/block.hpp>
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <cfenv>
 #include <iterator>
 #include <memory>
@@ -28,15 +28,15 @@
 #include <unordered_set>
 #include <utility>
 #include <unordered_map>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>

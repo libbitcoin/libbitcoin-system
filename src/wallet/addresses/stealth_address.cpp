@@ -19,12 +19,12 @@
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 
 #include <algorithm>
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/stream.hpp>

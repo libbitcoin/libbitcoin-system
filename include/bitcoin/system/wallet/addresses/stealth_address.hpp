@@ -19,11 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_ADDRESS_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_ADDRESS_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

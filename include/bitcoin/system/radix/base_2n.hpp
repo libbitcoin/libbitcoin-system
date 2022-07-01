@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_2N_HPP
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_2N_HPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

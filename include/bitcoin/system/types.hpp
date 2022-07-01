@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPES_HPP
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <type_traits>
 #include <bitcoin/system/exceptions.hpp>
 

@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_CHUNK_HPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_CHUNK_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <memory>
 #include <vector>
 #include <bitcoin/system/data/data_slice.hpp>

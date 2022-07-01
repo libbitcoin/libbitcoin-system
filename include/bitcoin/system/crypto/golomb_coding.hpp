@@ -22,7 +22,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_GOLOMB_CODING
 #define LIBBITCOIN_SYSTEM_CRYPTO_GOLOMB_CODING
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <istream>
 #include <ostream>
 #include <bitcoin/system/data/data.hpp>

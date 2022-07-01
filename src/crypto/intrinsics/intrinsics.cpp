@@ -19,8 +19,8 @@
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
 #include <array>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <immintrin.h>
 
 #ifdef HAVE_MSC
@@ -28,7 +28,7 @@
 #endif // HAVE_MSC
 
 #include <iterator>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/external/sha256.h>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/define.hpp>

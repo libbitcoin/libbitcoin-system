@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_MNEMONIC_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_MNEMONIC_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

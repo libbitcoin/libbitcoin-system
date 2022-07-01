@@ -19,7 +19,7 @@
 #include <bitcoin/system/wallet/points_value.hpp>
 
 #include <numeric>
-#include <cstdint>
+/// DELETECSTDINT
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>
 

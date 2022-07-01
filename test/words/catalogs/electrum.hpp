@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_TEST_CATALOGS_ELECTRUM_HPP
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <bitcoin/system.hpp>
 
 // Avoid using namespace in shared headers, but okay here.

@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_ENCRYPTION_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_ENCRYPTION_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

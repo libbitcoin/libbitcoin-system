@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_WORDS_DICTIONARIES_IPP
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
 #include <string>
 #include <bitcoin/system/data/data.hpp>

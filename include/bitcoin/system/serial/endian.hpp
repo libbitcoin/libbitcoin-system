@@ -19,10 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_SERIAL_ENDIAN_HPP
 #define LIBBITCOIN_SYSTEM_SERIAL_ENDIAN_HPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <iostream>
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

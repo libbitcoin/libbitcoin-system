@@ -25,7 +25,7 @@
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/serial/deserialize.hpp>
 
 namespace libbitcoin {

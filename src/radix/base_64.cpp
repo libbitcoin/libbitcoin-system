@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/radix/base_64.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 

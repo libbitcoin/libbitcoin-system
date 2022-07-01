@@ -20,12 +20,12 @@
 #include <bitcoin/system/chain/operation.hpp>
 
 #include <algorithm>
-#include <cstdint>
+/// DELETECSTDINT
 #include <memory>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/machine.hpp>

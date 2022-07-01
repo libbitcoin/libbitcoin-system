@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_ELLIPTIC_CURVE_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_ELLIPTIC_CURVE_HPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

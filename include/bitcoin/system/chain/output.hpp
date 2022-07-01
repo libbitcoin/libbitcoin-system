@@ -19,12 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>

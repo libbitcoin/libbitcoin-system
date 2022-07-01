@@ -20,12 +20,12 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLICE_HPP
 
 #include <array>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <initializer_list>
 #include <string>
 #include <vector>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

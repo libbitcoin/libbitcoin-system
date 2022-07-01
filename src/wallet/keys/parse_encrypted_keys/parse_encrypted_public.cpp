@@ -18,8 +18,8 @@
  */
 #include "parse_encrypted_public.hpp"
 
-#include <cstdint>
-#include <cstddef>
+/// DELETECSTDINT
+/// DELETECSTDDEF
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>

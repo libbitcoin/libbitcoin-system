@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UNICODE_ISTREAM_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_UNICODE_ISTREAM_HPP
 
-#include <cstddef> 
+/// DELETECSTDDEF 
 #include <iostream>
 #include <bitcoin/system/define.hpp>
 

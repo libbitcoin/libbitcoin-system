@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include <cstddef>
+/// DELETECSTDDEF
 
 // Suppress C4310: cast truncates constant value (intended behavior).
 BC_PUSH_WARNING(TRUNCATED_CONSTANT)

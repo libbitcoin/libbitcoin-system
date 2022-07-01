@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/wallet/point_value.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <utility>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>

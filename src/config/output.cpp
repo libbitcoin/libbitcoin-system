@@ -18,7 +18,7 @@
  */
 #include <bitcoin/system/config/output.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -26,7 +26,7 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/serial/deserialize.hpp>
 
 namespace libbitcoin {

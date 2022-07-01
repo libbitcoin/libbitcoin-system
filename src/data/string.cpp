@@ -19,11 +19,11 @@
 #include <bitcoin/system/data/string.hpp>
 
 #include <algorithm>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <iterator>
 #include <sstream>
 #include <string>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 

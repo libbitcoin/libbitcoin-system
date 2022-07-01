@@ -19,13 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <iterator>
 #include <utility>
 #include <variant>
 #include <bitcoin/system/chain/chain.hpp>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

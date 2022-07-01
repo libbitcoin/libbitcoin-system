@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_MATH_LOG_IPP
 
 #include <bit>
-#include <cstddef>
+/// DELETECSTDDEF
 #include <type_traits>
-// DELETEMENOW
-// DELETEMENOW
-// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/safe.hpp>

@@ -21,9 +21,9 @@
 
 #include <bitcoin/system/crypto/siphash.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
 #include <tuple>
-// DELETEMENOW
+/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>

@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_LITERALS_HPP
 #define LIBBITCOIN_SYSTEM_LITERALS_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <limits>
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
