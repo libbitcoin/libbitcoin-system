@@ -29,7 +29,7 @@
 
 // These are defined in the GUI for VS builds and by command line for others.
 // But overriding these here for VS builds to keep tests active.
-#if defined(_MSC_VER) && defined(BC_X64_BUILD) && !defined(BC_PORTABLE)
+#if defined(HAVE_MSC) && defined(BC_X64_BUILD) && !defined(BC_PORTABLE)
     #define WITH_AVX2
     #define WITH_SSE41
     #define WITH_SSE4

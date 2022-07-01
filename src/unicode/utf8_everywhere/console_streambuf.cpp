@@ -24,14 +24,14 @@
 #include <streambuf>
 // DELETEMENOW
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     #include <windows.h>
 #endif
 
 namespace libbitcoin {
 namespace system {
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 // Get Windows input handle.
 static LPVOID get_input_handle() THROWS

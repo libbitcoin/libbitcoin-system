@@ -30,7 +30,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     #include <fcntl.h>
     #include <io.h>
     #include <shlobj.h>
@@ -54,7 +54,7 @@ namespace system {
 
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 static void set_utf8_stdio(FILE* file) THROWS
 {
@@ -68,7 +68,7 @@ static void set_binary_stdio(FILE* file) THROWS
         throw runtime_exception("Could not set STDIO to binary mode.");
 }
 
-#else // _MSC_VER
+#else // HAVE_MSC
 
 static void set_utf8_stdio(FILE*) THROWS
 {
@@ -224,7 +224,7 @@ size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     return chars > to_chars ? 0 : chars;
 }
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 // Stream utilities.
 // ----------------------------------------------------------------------------
@@ -262,7 +262,7 @@ std::ostream& cerr_stream() THROWS
 // Stream utilities.
 // ----------------------------------------------------------------------------
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 static std::string windows_config_directory() NOEXCEPT
 {
     wchar_t directory[MAX_PATH];
@@ -276,7 +276,7 @@ std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT
 {
     static const std::string directory =
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
         windows_config_directory();
 #else
         SYSCONFDIR;
@@ -426,15 +426,15 @@ std::wstring to_fully_qualified_path(
     return { directory.begin(), std::next(directory.begin(), size) };
 }
 
-#endif // _MSC_VER
+#endif // HAVE_MSC
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 // TODO: update comments for std::filesystem conversion.
-// Use to_extended_path with APIs that compile to wide with _MSC_VER defined
-// and to UTF8 with _MSC_VER undefined. This includes some boost APIs - such as
+// Use to_extended_path with APIs that compile to wide with HAVE_MSC defined
+// and to UTF8 with HAVE_MSC undefined. This includes some boost APIs - such as
 // filesystem::remove, remove_all, and create_directories, as well as some
 // Win32 API extensions to std libs - such as std::ofstream and std::ifstream.
-// Otherwise use in any Win32 (W) APIs with _MSC_VER defined, such as we do in 
+// Otherwise use in any Win32 (W) APIs with HAVE_MSC defined, such as we do in 
 // interprocess_lock::open_file -> CreateFileW, since the boost wrapper only
 // calls CreateFileA. The length extension prefix requires Win32 (W) APIs.
 std::wstring to_extended_path(const std::filesystem::path& path) NOEXCEPT
@@ -450,7 +450,7 @@ std::string to_extended_path(const std::filesystem::path& path) NOEXCEPT
 {
     return path.string();
 }
-#endif // _MSC_VER
+#endif // HAVE_MSC
 
 } // namespace system
 } // namespace libbitcoin

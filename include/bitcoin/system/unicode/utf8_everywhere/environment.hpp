@@ -73,7 +73,7 @@ BC_API size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
 BC_API size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes) NOEXCEPT;
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 // For standard I/O.
 BC_API std::istream& cin_stream() THROWS;
@@ -88,7 +88,7 @@ BC_API int call_utf8_main(int argc, wchar_t* argv[],
     int(*main)(int argc, char* argv[])) NOEXCEPT;
 #endif
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 // Not thread safe.
 BC_API std::wstring to_extended_path(
     const std::filesystem::path& path) NOEXCEPT;

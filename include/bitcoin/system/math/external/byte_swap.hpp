@@ -55,39 +55,39 @@ constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
          (value >> 56));
 }
 
-#if defined(_MSC_VER)
+#if defined(HAVE_MSC)
     // docs.microsoft.com/en-us/cpp/c-runtime-library/reference/
     // byteswap-uint64-byteswap-ulong-byteswap-ushort?view=msvc-170
     #include <stdlib.h>
     #define byte_swap16(value) _byteswap_ushort(value)
     #define byte_swap32(value) _byteswap_ulong(value)
     #define byte_swap64(value) _byteswap_uint64(value)
-#elif defined(__linux__)
+#elif defined(HAVE_LINUX)
     // man7.org/linux/man-pages/man3/bswap.3.html
     #include <byteswap.h>
     #define byte_swap16(value) bswap_16(value)
     #define byte_swap32(value) bswap_32(value)
     #define byte_swap64(value) bswap_64(value)
-#elif defined(__APPLE__)
+#elif defined(HAVE_APPLE)
     // opensource.apple.com/source/xnu/xnu-344.2/libkern/libkern/
     // OSByteOrder.h.auto.html
     #include <libkern/OSByteOrder.h>
     #define byte_swap16(value) OSSwapInt16(value)
     #define byte_swap32(value) OSSwapInt32(value)
     #define byte_swap64(value) OSSwapInt64(value)
-#elif defined(__FreeBSD__)
+#elif defined(HAVE_FREEBSD)
     #include <sys/endian.h>
     // www.freebsd.org/cgi/man.cgi?query=bswap64
     #define byte_swap16(value) bswap16(value)
     #define byte_swap32(value) bswap32(value)
     #define byte_swap64(value) bswap64(value)
-#elif defined(__OpenBSD__)
+#elif defined(HAVE_OPENBSD)
     // man.openbsd.org/swap64
     #include <sys/types.h>
     #define byte_swap16(value) swap16(value)
     #define byte_swap32(value) swap32(value)
     #define byte_swap64(value) swap64(value)
-#elif defined(__NetBSD__)
+#elif defined(HAVE_NETBSD)
     // man.netbsd.org/bswap
     #include <sys/types.h>
     #include <machine/bswap.h>

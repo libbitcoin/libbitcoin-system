@@ -250,7 +250,7 @@ BOOST_AUTO_TEST_CASE(conversion__to_utf16__utf8_and_utf16_japanese_literals_roun
     const auto widened = to_utf16(utf8);
     const auto narrowed = to_utf8(utf16);
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     // This confirms that the L prefix does not work with non-ascii text when
     // the source file does not have a BOM (which we avoid for other reasons).
     BOOST_REQUIRE_NE(widened.c_str(), utf16);

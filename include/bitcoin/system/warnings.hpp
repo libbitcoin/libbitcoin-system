@@ -19,38 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_WARNINGS_HPP
 #define LIBBITCOIN_SYSTEM_WARNINGS_HPP
 
-#include <bitcoin/system/version.hpp>
-
-#ifdef _MSC_VER
-    // vs2017 and earlier do not support _Pragma (ISO).
-    #ifdef BC_VS2019
-        #define PRAGMA(pragma) _Pragma(#pragma)
-        #define BC_DISABLE_WARNING(value) \
-            PRAGMA(warning(disable:value))
-        #define BC_PUSH_WARNING(value) \
-            PRAGMA(warning(push)) \
-            PRAGMA(warning(disable:value))
-        #define BC_POP_WARNING() \
-            PRAGMA(warning(pop))
-    // Degrade to broader non-standard exclusion in vs2017.
-    #else
-        #define BC_DISABLE_WARNING(value) \
-            __pragma(warning(disable:value))
-        #define BC_PUSH_WARNING(value) \
-            __pragma(warning(push)) \
-            __pragma(warning(disable:value))
-        #define BC_POP_WARNING() \
-            __pragma(warning(pop))
-    #endif
-#else
-    #define BC_PUSH_WARNING(value)
-    #define BC_POP_WARNING()
-#endif
+#include <bitcoin/system/have.hpp>
 
 // These are explicit TODO items.
 #define BC_PUSH_WARNING_UNGUARDED(value) BC_PUSH_WARNING(value)
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     // Test only (see test.hpp).
     #define CONSTANT_CONDITIONAL 4127
     #define NARROWING_CONVERSION 4244
@@ -86,7 +60,7 @@
 ////#define NO_USE_OF_MOVED_FROM_OBJECT 26800
 #endif
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     // Suppress C4706: assignment within conditional expression (we allow).
     BC_DISABLE_WARNING(ASSIGNMENT_WITHIN_CONDITIONAL)
 

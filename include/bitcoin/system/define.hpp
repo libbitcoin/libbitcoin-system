@@ -60,20 +60,18 @@ namespace bc = libbitcoin;
 
 // Generic helper definitions for shared library support
 // GNU visibilty attribute overrides compiler flag `fvisibility`.
-#if defined _MSC_VER || defined __CYGWIN__
+#if defined(HAVE_MSC) || defined(HAVE_CYGWIN)
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
     #define BC_HELPER_DLL_LOCAL
+#elif defined(HAVE_GNUC)
+    #define BC_HELPER_DLL_IMPORT __attribute__((visibility("default")))
+    #define BC_HELPER_DLL_EXPORT __attribute__((visibility("default")))
+    #define BC_HELPER_DLL_LOCAL  __attribute__((visibility("internal")))
 #else
-    #if __GNUC__ >= 4
-        #define BC_HELPER_DLL_IMPORT __attribute__((visibility("default")))
-        #define BC_HELPER_DLL_EXPORT __attribute__((visibility("default")))
-        #define BC_HELPER_DLL_LOCAL  __attribute__((visibility("internal")))
-    #else
-        #define BC_HELPER_DLL_IMPORT
-        #define BC_HELPER_DLL_EXPORT
-        #define BC_HELPER_DLL_LOCAL
-    #endif
+    #define BC_HELPER_DLL_IMPORT
+    #define BC_HELPER_DLL_EXPORT
+    #define BC_HELPER_DLL_LOCAL
 #endif
 
 // Now we use the generic helper definitions above to define BC_API
@@ -92,71 +90,19 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-// Tag to deprecate functions and methods.
-// Gives a compiler warning when they are used.
-#if defined _MSC_VER || defined __CYGWIN__
-    #define BC_DEPRECATED __declspec(deprecated)
-#else
-    #if __GNUC__ >= 4
-        #define BC_DEPRECATED __attribute__((deprecated))
-    #else
-        #define BC_DEPRECATED
-    #endif
-#endif
-
-// ISO predefined constant for targeted CPU architecture.
-#if defined _M_IX86
-    #define BC_X86_BUILD
-#elif defined _M_X64
-    #define BC_X64_BUILD
-#elif defined _M_IA64
-    #define BC_ITANIUM_BUILD
-#endif
-
-// ISO predefined constant for C++ version.
-#if __cplusplus >= 199711L
-    #define BC_CPP_03
-#endif
-#if __cplusplus >= 201103L
-    #define BC_CPP_11
-#endif
-#if __cplusplus >= 201402L
-    #define BC_CPP_14
-#endif
-#if __cplusplus >= 201703L
-    #define BC_CPP_17
-#endif
-#if __cplusplus >= 202002L
-    #define BC_CPP_20
+#if defined(HAVE_MSC) && !defined(BC_VS2022)
+    static_assert(false, "Visual Studio 2022 minimum required.");
 #endif
 
 #if !defined(BC_CPP_20)
     static_assert(false, "C++20 minimum required.");
 #endif
-
-// MSFT predefined constant for VS version.
-#if _MSC_VER >= 1800
-    #define BC_VS2013
-#endif
-#if _MSC_VER >= 1900
-    #define BC_VS2015
-#endif
-#if _MSC_VER >= 1910
-    #define BC_VS2017
-#endif
-#if _MSC_VER >= 1920
-    #define BC_VS2019
-#endif
-#if _MSC_VER >= 1930
-    #define BC_VS2022
-#endif
-
-#if defined(_MSC_VER) && !defined(BC_VS2022)
-    static_assert(false, "Visual Studio 2022 minimum required.");
-#endif
-
-#define NOEXCEPT noexcept
-#define THROWS noexcept(false)
+    
+// deprecated is noisy, turn on to find dependencies.
+#define DEPRECATED
+////#define DEPRECATED [[deprecated]]
+#define NODISCARD [[nodiscard]]
+#define FALLTHROUGH [[fallthrough]]
 
 // Define so we can have better visibility of lcov exclusion ranges.
 #define LCOV_EXCL_START(text)

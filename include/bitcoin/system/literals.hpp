@@ -25,16 +25,6 @@
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
 
-// clang does not yet have consteval.
-// Remove this when all platforms support consteval.
-// RUNTIME_LITERALS may be used to exclude test evaluation (until consteval).
-#ifdef _MSC_VER
-    #define CONSTEVAL consteval
-#else
-    #define CONSTEVAL constexpr
-    #define RUNTIME_LITERALS
-#endif
-
 namespace libbitcoin {
 namespace system {
 namespace literals {

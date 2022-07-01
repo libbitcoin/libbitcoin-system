@@ -121,6 +121,7 @@ inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
     if (is_zero(vary))
         return {};
 
+    // absolute is unsafe but this is guarded by stack int32_t limitation.
     const auto value = absolute(vary);
     const auto negated = is_negated(value);
     const auto negative = is_negative(vary);

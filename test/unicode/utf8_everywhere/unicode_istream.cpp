@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(unicode_istream__conditional__test)
     std::string result;
     input >> result;
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE_EQUAL(result, "windows");
 #else
     BOOST_REQUIRE_EQUAL(result, "linux");

@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_SUITE_END()
 // ----------------------------------------------------------------------------
 
 // stdlib object sizes are subjsct to implementation (including debug builds).
-#if defined(_MSC_VER) && defined(NDEBUG)
+#if defined(HAVE_MSC) && defined(NDEBUG)
 
 // std::vector<uint8_t> requires 3 pointers (front/back/size).
 constexpr auto a1_ = sizeof(std::vector<uint8_t>*);

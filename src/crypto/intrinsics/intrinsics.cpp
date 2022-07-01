@@ -23,9 +23,9 @@
 #include <cstdint>
 #include <immintrin.h>
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     #include <intrin.h> // __cpuidex
-#endif // _MSC_VER
+#endif // HAVE_MSC
 
 #include <iterator>
 // DELETEMENOW

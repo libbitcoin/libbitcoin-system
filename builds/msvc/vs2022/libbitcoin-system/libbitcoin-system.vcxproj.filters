@@ -890,6 +890,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\literals.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>

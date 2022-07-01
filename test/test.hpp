@@ -36,12 +36,12 @@
 #define TEST_PATH \
     TEST_DIRECTORY + "/" + TEST_NAME
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     #define NO_GLOBAL_INIT_CALLS 26426
     #define NO_UNUSED_LOCAL_SMART_PTR 26414
 #endif
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BC_DISABLE_WARNING(USE_GSL_AT)
     BC_DISABLE_WARNING(NO_GLOBAL_INIT_CALLS)
     BC_DISABLE_WARNING(NO_UNUSED_LOCAL_SMART_PTR)
@@ -88,7 +88,7 @@ namespace test {
 
 // Common directory for all test file creations.
 // Subdirectories and/or files must be differentiated (i.e. by TEST_NAME).
-// Total path length cannot exceed MAX_PATH in _MSC_VER builds.
+// Total path length cannot exceed MAX_PATH in HAVE_MSC builds.
 extern const std::string directory;
 
 bool clear(const std::filesystem::path& directory) NOEXCEPT;

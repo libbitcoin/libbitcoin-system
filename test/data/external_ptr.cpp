@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 
 // stdlib object sizes are subjsct to implementation (including debug builds).
-#if defined(_MSC_VER) && defined(NDEBUG)
+#if defined(HAVE_MSC) && defined(NDEBUG)
 
 // std::unique_ptr owns storage, deleting the referenced object on destruct.
 static_assert(sizeof(std::unique_ptr<std::vector<uint8_t>>) == 1 * sizeof(size_t));
@@ -44,4 +44,4 @@ static_assert(sizeof(std::weak_ptr<std::vector<uint8_t>>) == 2 * sizeof(size_t))
 // external_ptr is safer and more flexible than a raw pointer, at same cost.
 static_assert(sizeof(external_ptr<std::vector<uint8_t>>) == 1 * sizeof(size_t));
 
-#endif // _MSC_VER && NDEBUG
+#endif // HAVE_MSC && NDEBUG

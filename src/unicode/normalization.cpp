@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <mutex>
 #include <string>
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     #include <limits>
     #include <windows.h>
 #else
@@ -52,7 +52,7 @@ constexpr bool is_contained(char32_t value,
     return interval.first <= value && value <= interval.second;
 }
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 // Workarounds for lack of Windows ICU support in boost-locale packages.
 // The ICU library was first added to Windows 10 in [10.0.15063].
@@ -161,7 +161,7 @@ bool to_upper(std::string& out, const std::string& in) NOEXCEPT
     return true;
 }
 
-#else // _MSC_VER
+#else // HAVE_MSC
 
 constexpr auto icu_backend_name = "icu";
 constexpr auto utf8_locale_name = "en_US.UTF8";
@@ -240,7 +240,7 @@ bool to_upper(std::string& out, const std::string& in) NOEXCEPT
     return true;
 }
 
-#endif // _MSC_VER
+#endif // HAVE_MSC
 
 // ICU dependency (ascii supported, otherwise false if WITH_ICU not defined).
 // ----------------------------------------------------------------------------

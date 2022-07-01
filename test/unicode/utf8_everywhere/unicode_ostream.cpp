@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__conditional__test)
     output << "ascii";
     output.flush();
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(narrow_stream.str().empty());
     BOOST_REQUIRE(wide_stream.str() == L"ascii");
 #else
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__non_ascii__test)
     output << utf8;
     output.flush();
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(narrow_stream.str().empty());
     BOOST_REQUIRE(wide_stream.str() == utf16);
 #else
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__overflow__test)
     output << utf8_1800_bytes;
     output.flush();
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(narrow_stream.str().empty());
     BOOST_REQUIRE(wide_stream.str() == utf16_600_chars);
 #else

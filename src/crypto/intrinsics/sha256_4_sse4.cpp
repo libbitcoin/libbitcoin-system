@@ -66,7 +66,7 @@ namespace intrinsics {
 // Iterate over N blocks, four lanes per block.
 void sha256_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
 {
-    // TODO: define assembly for _MSC_VER.
+    // TODO: define assembly for HAVE_MSC.
     // TODO: this is currently disabled by try_sse4().
 }
 

@@ -388,6 +388,7 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
     include/bitcoin/system/funclets.hpp \
+    include/bitcoin/system/have.hpp \
     include/bitcoin/system/literals.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/typelets.hpp \

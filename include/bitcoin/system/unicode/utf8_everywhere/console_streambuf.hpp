@@ -52,7 +52,7 @@ protected:
     /// Alternate console read.
     virtual std::wstreambuf::int_type underflow() THROWS;
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 private:
     // These are not thread safe.
 

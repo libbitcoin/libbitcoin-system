@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation2__ex
 
 // BC_USE_LIBBITCOIN_MAIN
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 // allocate_environment (vars) / free_environment
 
@@ -369,6 +369,6 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_extended_path16__always__expected)
     ////std::wstring to_extended_path16(const std::string& path);
 }
 
-#endif // _MSC_VER
+#endif // HAVE_MSC
 
 BOOST_AUTO_TEST_SUITE_END()

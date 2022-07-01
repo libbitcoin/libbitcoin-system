@@ -209,7 +209,7 @@
 ////
 ////// TODO: gcc/clang warnings on literal string length.
 ////// msvc errors on length of string containing hex encoded block, tests made conditional.
-////#ifndef _MSC_VER
+////#ifndef HAVE_MSC
 ////BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
 ////{
 ////    auto raw_block = base16_chunk(

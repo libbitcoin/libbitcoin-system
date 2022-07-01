@@ -98,7 +98,7 @@
 namespace libbitcoin {
 namespace system {
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 #define BC_USE_LIBBITCOIN_MAIN \
     namespace libbitcoin \

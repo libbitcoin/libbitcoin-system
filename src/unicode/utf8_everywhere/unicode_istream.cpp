@@ -26,13 +26,13 @@ namespace libbitcoin {
 namespace system {
 
 unicode_istream::unicode_istream(
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     std::istream&, std::wistream& wide_stream,
         size_t wide_buffer_size) THROWS
 #else
     std::istream& narrow_stream, std::wistream&, size_t)
 #endif
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
   : std::istream(new unicode_streambuf(wide_stream.rdbuf(), wide_buffer_size))
 #else
   : std::istream(narrow_stream.rdbuf())
@@ -42,7 +42,7 @@ unicode_istream::unicode_istream(
 
 unicode_istream::~unicode_istream() NOEXCEPT
 {
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     delete rdbuf();
 #endif
 }

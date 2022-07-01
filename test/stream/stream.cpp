@@ -48,7 +48,7 @@ constexpr bool is_set(int state, int flag)
 // no error, standardized.
 static_assert(std::ios_base::goodbit == 0);
 
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
 
 // associated input sequence has reached eof, implementation-defined.
 static_assert(std::ios_base::eofbit == 1);
@@ -59,7 +59,7 @@ static_assert(std::ios_base::failbit == 2);
 // irrecoverable stream error, implementation-defined.
 static_assert(std::ios_base::badbit == 4);
 
-#endif // _MSC_VER
+#endif // HAVE_MSC
 
 #ifdef STREAM_ISTREAM
 
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(istream__get__empty__inconsistent)
     BOOST_REQUIRE(istream);
 
     // zero on msvc, -1 on other platforms.
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE_EQUAL(istream.get(), 0x00);
     BOOST_REQUIRE(!istream);
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE(istream__peek__empty__inconsistent)
     BOOST_REQUIRE(istream);
 
     // zero on msvc, -1 on other platforms.
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE_EQUAL(istream.peek(), 0x00);
     BOOST_REQUIRE(!istream);
     BOOST_REQUIRE(!is_set(istream.rdstate(), std::istream::eofbit));
@@ -590,7 +590,7 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_begin__inconsistent)
     // Throws on msvc(prior to 2022).
     const std::string source{ "*" };
     stream::in::copy istream(source);
-#if defined(_MSC_VER) && (_MSC_VER < 1931)
+#if defined(HAVE_MSC) && (MSC_VERSION < 1931)
     BOOST_REQUIRE_THROW(istream.seekg(-2, std::istream::cur), std::istream::failure);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
@@ -614,7 +614,7 @@ BOOST_AUTO_TEST_CASE(istream__seekg__past_end__inconsistent)
     // Throws on msvc prior to 2022.
     const std::string source{ "*" };
     stream::in::copy istream(source);
-#if defined(_MSC_VER) && (_MSC_VER < 1931)
+#if defined(HAVE_MSC) && (HAVE_MSC < 1931)
     BOOST_REQUIRE_THROW(istream.seekg(2, std::istream::cur), std::istream::failure);
     BOOST_REQUIRE(istream);
     BOOST_REQUIRE_EQUAL(istream.rdstate(), std::istream::goodbit);
@@ -720,7 +720,7 @@ BOOST_AUTO_TEST_CASE(ostream__put__failbit_empty__inconsistent)
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::badbit));
 #endif
 
@@ -745,7 +745,7 @@ BOOST_AUTO_TEST_CASE(ostream__put__failbit_empty__inconsistent)
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::badbit));
 #endif
 }
@@ -857,7 +857,7 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(is_set(osstream.rdstate(), std::ostringstream::badbit));
 #endif
     BOOST_REQUIRE(osstream.str().empty());
@@ -873,7 +873,7 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(is_set(ostream.rdstate(), std::ostream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(is_set(ostream.rdstate(), std::ostream::badbit));
 #endif
     BOOST_REQUIRE_EQUAL(sink, expected);
@@ -889,7 +889,7 @@ BOOST_AUTO_TEST_CASE(ostream__write__failbit__failbit_badbit)
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::failbit));
 
     // badbit on msvc, not on other platforms.
-#ifdef _MSC_VER
+#ifdef HAVE_MSC
     BOOST_REQUIRE(is_set(tstream.rdstate(), std::ostream::badbit));
 #endif
     BOOST_REQUIRE(text.empty());
