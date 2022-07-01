@@ -25,8 +25,6 @@
 #include <type_traits>
 #include <bitcoin/system/funclets.hpp>
 
-// TODO: convert from constexpr fn to value using std::conjunction/disjunction.
-
 namespace libbitcoin {
 
 /// Simple functions over type argument(s).
