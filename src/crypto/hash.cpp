@@ -143,7 +143,7 @@ hash_digest hmac_sha256_hash(const data_slice& data,
 }
 
 data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length)noexcept
+    const data_slice& salt, size_t iterations, size_t length) NOEXCEPT
 {
     data_chunk hash(length, no_fill_byte_allocator);
     pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),

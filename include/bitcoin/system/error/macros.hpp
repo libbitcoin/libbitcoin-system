@@ -44,7 +44,7 @@ struct is_error_condition_enum<cat##_condition_t> \
 }; \
 template<> struct hash<cat##_t> \
 { \
-    size_t operator()(const cat##_t& value) const NOEXCEPT \
+    size_t operator()(const cat##_t& value) const noexcept \
     { \
         return std::hash<uint8_t>()(static_cast<uint8_t>(value)); \
     } \
@@ -60,12 +60,12 @@ class BC_API cat##_category \
     static const message_map<cat##_t> messages; \
 public: \
     static const cat##_category singleton; \
-    virtual const char* name() const NOEXCEPT; \
-    virtual std::string message(int condition) const NOEXCEPT; \
-    virtual std::error_condition default_error_condition(int value) const NOEXCEPT; \
+    virtual const char* name() const noexcept; \
+    virtual std::string message(int condition) const noexcept; \
+    virtual std::error_condition default_error_condition(int value) const noexcept; \
 }; \
-std::error_code make_error_code(cat##_t value) NOEXCEPT; \
-std::error_condition make_error_condition(cat##_t value) NOEXCEPT
+std::error_code make_error_code(cat##_t value) noexcept; \
+std::error_condition make_error_condition(cat##_t value) noexcept
 
 // This adds equivalent() to DECLARE_ERROR_T_CODE_CATEGORY, which requires the
 // corresponding DEFINE_ERROR_T_EQUIVALENCE. For use of codes with conditions.
@@ -77,34 +77,34 @@ class BC_API cat##_category \
     static const message_map<cat##_t> messages; \
 public: \
     static const cat##_category singleton; \
-    virtual const char* name() const NOEXCEPT; \
-    virtual std::string message(int condition) const NOEXCEPT; \
-    virtual std::error_condition default_error_condition(int value) const NOEXCEPT; \
-    virtual bool equivalent(const std::error_code& value, int condition) const NOEXCEPT; \
+    virtual const char* name() const noexcept; \
+    virtual std::string message(int condition) const noexcept; \
+    virtual std::error_condition default_error_condition(int value) const noexcept; \
+    virtual bool equivalent(const std::error_code& value, int condition) const noexcept; \
 }; \
-std::error_code make_error_code(cat##_t value) NOEXCEPT; \
-std::error_condition make_error_condition(cat##_t value) NOEXCEPT
+std::error_code make_error_code(cat##_t value) noexcept; \
+std::error_condition make_error_condition(cat##_t value) noexcept
 
 #define DEFINE_ERROR_T_CATEGORY(cat, category_name, unmapped) \
 const cat##_category cat##_category::singleton; \
-const char* cat##_category::name() const NOEXCEPT \
+const char* cat##_category::name() const noexcept \
 { \
     return category_name; \
 } \
-std::string cat##_category::message(int condition) const NOEXCEPT \
+std::string cat##_category::message(int condition) const noexcept \
 { \
     const auto message = messages.find(static_cast<cat##_t>(condition)); \
     return message == messages.end() ? unmapped : message->second; \
 } \
-std::error_condition cat##_category::default_error_condition(int code) const NOEXCEPT \
+std::error_condition cat##_category::default_error_condition(int code) const noexcept \
 { \
     return std::error_condition(code, *this); \
 } \
-std::error_code make_error_code(cat##_t value) NOEXCEPT \
+std::error_code make_error_code(cat##_t value) noexcept \
 { \
     return std::error_code(value, cat##_category::singleton); \
 } \
-std::error_condition make_error_condition(cat##_t value) NOEXCEPT \
+std::error_condition make_error_condition(cat##_t value) noexcept \
 { \
     return std::error_condition(value, cat##_category::singleton); \
 }
@@ -113,7 +113,7 @@ std::error_condition make_error_condition(cat##_t value) NOEXCEPT \
 // Despite registration of condition, it is never evaluated without equivalence.
 // Define enumeration equivalence (if declared), return code.satisfies(condition).
 #define DEFINE_ERROR_T_EQUIVALENCE(cat, code, condition) \
-bool cat##_category::equivalent(const std::error_code& code, int condition) const NOEXCEPT
+bool cat##_category::equivalent(const std::error_code& code, int condition) const noexcept
 
 // Define enumeration mapping (always) to message text.
 #define DEFINE_ERROR_T_MESSAGE_MAP(cat) \
