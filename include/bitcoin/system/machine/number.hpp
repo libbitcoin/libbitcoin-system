@@ -22,7 +22,7 @@
 
 #include <cstddef>
 #include <cstdint>
-////#include <bitcoin/system/constraints.hpp>
+////// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -50,7 +50,7 @@ protected:
 private:
     // TODO: .ipp class type constraint syntax.
     static_assert(Size <= sizeof(int64_t), "guards from_little_endian");
-    static_assert(is_signed<Integer>(), "stack integrals are signed");
+    static_assert(is_signed<Integer>, "stack integrals are signed");
 };
 
 class BC_API chunk

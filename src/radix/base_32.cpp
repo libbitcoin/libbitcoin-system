@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>

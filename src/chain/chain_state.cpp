@@ -32,7 +32,7 @@
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/settings.hpp>

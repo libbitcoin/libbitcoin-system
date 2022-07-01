@@ -24,7 +24,7 @@
 #include <istream>
 #include <memory>
 #include <vector>
-#include <bitcoin/system/boost.hpp>
+// DELETEMENOW
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

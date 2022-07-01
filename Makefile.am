@@ -36,6 +36,7 @@ src_libbitcoin_system_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPP
 src_libbitcoin_system_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_system_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_json_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_system_la_SOURCES = \
+    src/define.cpp \
     src/settings.cpp \
     src/chain/block.cpp \
     src/chain/chain_state.cpp \
@@ -386,6 +387,8 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/integrals.hpp \
     include/bitcoin/system/literals.hpp \
     include/bitcoin/system/settings.hpp \
+    include/bitcoin/system/types.hpp \
+    include/bitcoin/system/values.hpp \
     include/bitcoin/system/version.hpp \
     include/bitcoin/system/warnings.hpp
 

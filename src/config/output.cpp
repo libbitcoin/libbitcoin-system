@@ -26,7 +26,7 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>
-#include <bitcoin/system/exceptions.hpp>
+// DELETEMENOW
 #include <bitcoin/system/serial/deserialize.hpp>
 
 namespace libbitcoin {

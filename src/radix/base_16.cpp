@@ -21,8 +21,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
-#include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 
 // base16 (hexidecimal):

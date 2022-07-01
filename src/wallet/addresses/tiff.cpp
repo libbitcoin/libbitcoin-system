@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <iostream>
 #include <cmath>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/stream/stream.hpp>

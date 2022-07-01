@@ -20,34 +20,40 @@
 #define LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 
 #include <cstddef>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Obtain the integer power of given base for given exponent.
+/// Obtain the integer power of given base for given unsigned exponent.
 /// Returns zero if all undefined operations (base < 2 or value < 1).
 
 // Constexpr dispatches to optimal overload.
-template <size_t Base, typename Value = size_t, typename Exponent>
+template <size_t Base, typename Value = size_t, typename Exponent,
+    if_unsigned_integer<Exponent> = true>
 constexpr Value power(Exponent exponent) NOEXCEPT;
 
-// Normal form, for all integer types.
+// Normal form, limited to unsigned exponent.
 template <typename Value = size_t, typename Base, typename Exponent,
     if_integer<Value> = true,
-    if_integer<Base> = true,
-    if_integer<Exponent> = true>
+    if_unsigned_integer<Base> = true,
+    if_unsigned_integer<Exponent> = true>
+constexpr Value power(Base base, Exponent exponent) NOEXCEPT;
+template <typename Value = signed_size_t, typename Base, typename Exponent,
+    if_integer<Value> = true,
+    if_signed_integer<Base> = true,
+    if_unsigned_integer<Exponent> = true>
 constexpr Value power(Base base, Exponent exponent) NOEXCEPT;
 
 /// Optimizations for power(2, Exponent).
 template <typename Value = size_t, typename Exponent,
     if_integral_integer<Value> = true,
-    if_integer<Exponent> = true>
+    if_unsigned_integer<Exponent> = true>
 constexpr Value power2(Exponent exponent) NOEXCEPT;
 template <typename Value = size_t, typename Exponent,
     if_non_integral_integer<Value> = true,
-    if_integer<Exponent> = true>
+    if_unsigned_integer<Exponent> = true>
 constexpr Value power2(Exponent exponent) NOEXCEPT;
 
 } // namespace system

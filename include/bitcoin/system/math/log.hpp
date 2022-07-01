@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_MATH_LOG_HPP
 
 #include <cstddef>
-#include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

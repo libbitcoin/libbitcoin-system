@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

@@ -26,8 +26,8 @@
 #include <cstdint>
 #include <iterator>
 #include <utility>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -103,7 +103,7 @@ void bit_writer<OStream>::write_bit(bool value) NOEXCEPT
 template <typename OStream>
 void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) NOEXCEPT
 {
-    bits = lesser<size_t>(width(value), bits);
+    bits = lesser<size_t>(bc::bits<uint64_t>, bits);
 
     // 'bits' refers to the count of the rightmost bits in 'value'.
     // Those bits are read from left to right using a right-relative offset.

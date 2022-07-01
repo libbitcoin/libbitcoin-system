@@ -33,7 +33,7 @@ namespace system {
 namespace wallet {
 
 /// A constant used in key derivation.
-static constexpr auto hd_first_hardened_key = bit_hi<uint32_t>();
+static constexpr auto hd_first_hardened_key = bit_hi<uint32_t>;
 
 /// An hd key chain code.
 static constexpr size_t hd_chain_code_size = 32;

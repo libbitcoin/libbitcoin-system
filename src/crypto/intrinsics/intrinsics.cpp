@@ -28,7 +28,7 @@
 #endif // _MSC_VER
 
 #include <iterator>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/crypto/external/sha256.h>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/define.hpp>

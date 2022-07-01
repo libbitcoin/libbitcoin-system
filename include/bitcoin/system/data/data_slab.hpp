@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 

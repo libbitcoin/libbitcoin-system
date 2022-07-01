@@ -28,10 +28,10 @@
 #else
     #include <mutex>
 #endif
-#include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/exceptions.hpp>
+// DELETEMENOW
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>

@@ -24,7 +24,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
 

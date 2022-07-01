@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -124,9 +124,9 @@ static_assert((1625 * 1) + (1625 * 1626) + (1625 * 1626 * 1626ll) ==
 // ----------------------------------------------------------------------------
 
 constexpr auto size = electrum_v1::dictionary::size();
-constexpr auto size0 = power<size, int64_t>(0);
-constexpr auto size1 = power<size, int64_t>(1);
-constexpr auto size2 = power<size, int64_t>(2);
+constexpr auto size0 = power<size, int64_t>(0u);
+constexpr auto size1 = power<size, int64_t>(1u);
+constexpr auto size2 = power<size, int64_t>(2u);
 
 // private static
 // ----------------------------------------------------------------------------

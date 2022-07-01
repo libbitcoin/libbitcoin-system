@@ -278,6 +278,7 @@ add_definitions(
 # Define ${CANONICAL_LIB_NAME} project.
 #------------------------------------------------------------------------------
 add_library( ${CANONICAL_LIB_NAME}
+    "../../src/define.cpp"
     "../../src/settings.cpp"
     "../../src/chain/block.cpp"
     "../../src/chain/chain_state.cpp"

@@ -27,7 +27,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

@@ -24,7 +24,7 @@
 #include <iomanip>
 #include <iterator>
 #include <sstream>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/serial/deserialize.hpp>

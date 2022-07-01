@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_WARNINGS_HPP
 #define LIBBITCOIN_SYSTEM_WARNINGS_HPP
 
+#include <bitcoin/system/version.hpp>
+
 #ifdef _MSC_VER
     // vs2017 and earlier do not support _Pragma (ISO).
     #ifdef BC_VS2019

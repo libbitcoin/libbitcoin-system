@@ -21,7 +21,7 @@
 
 #include <filesystem>
 #include <string>
-#include <bitcoin/system/boost.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

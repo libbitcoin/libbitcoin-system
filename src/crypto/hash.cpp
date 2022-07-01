@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/crypto/external/crypto_scrypt.h>
 #include <bitcoin/system/crypto/external/hmac_sha256.h>
 #include <bitcoin/system/crypto/external/hmac_sha512.h>

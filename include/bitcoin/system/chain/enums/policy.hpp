@@ -35,7 +35,7 @@ enum policy : uint32_t
     no_policy = 0,
 
     /// Mask to set all rule bits.
-    all_policy = bit_all<uint32_t>()
+    all_policy = bit_all<uint32_t>
 };
 
 } // namespace chain

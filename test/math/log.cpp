@@ -203,9 +203,9 @@ static_assert(ceilinged_log2((1 << 30) + 1) == 31u);
 static_assert(ceilinged_log2((1ll << 31) + 0) == 32u);
 static_assert(ceilinged_log2((1ll << 31) + 1) == 32u);
 
-static_assert(ceilinged_log2<int>(power2(15)) == 15 + 1);
+static_assert(ceilinged_log2<int>(power2(15u)) == 15 + 1);
 static_assert(ceilinged_log2<unsigned>(power2(15u)) == 15u + 1u);
-static_assert(ceilinged_log2<int>(power(2, 15)) == 15 + 1);
+static_assert(ceilinged_log2<int>(power(2, 15u)) == 15 + 1);
 static_assert(ceilinged_log2<unsigned>(power(2u, 15u)) == 15u + 1u);
 
 // Also mixing in signed and unsigned types.
@@ -418,10 +418,10 @@ static_assert(floored_log2((1 << 30) + 1) == 30u);
 static_assert(floored_log2((1ll << 31) + 0) == 31u);
 static_assert(floored_log2((1ll << 31) + 1) == 31u);
 
-static_assert(floored_log2<int>(power2(15)) == 15);
+static_assert(floored_log2<int>(power2(15u)) == 15);
 static_assert(floored_log2<unsigned>(power2(15u)) == 15u);
 
-static_assert(floored_log2<int>(power(2, 15)) == 15);
+static_assert(floored_log2<int>(power(2, 15u)) == 15);
 static_assert(floored_log2<unsigned>(power(2u, 15u)) == 15u);
 
 // Third case (2) is redundant with second (2).
@@ -572,13 +572,13 @@ BOOST_AUTO_TEST_CASE(log__ceilinged_log2_uintx__powers_of_2__expected)
 
 BOOST_AUTO_TEST_CASE(log__ceilinged_log2_uintx__pow2__identity)
 {
-    BOOST_REQUIRE_EQUAL(ceilinged_log2<int>(uintx(power2(15))), 15 + 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2<int>(uintx(power2(15u))), 15 + 1);
     BOOST_REQUIRE_EQUAL(ceilinged_log2<unsigned>(uintx(power2(15u))), 15u + 1u);
 }
 
 BOOST_AUTO_TEST_CASE(log__ceilinged_log2_uintx__power_2__identity)
 {
-    BOOST_REQUIRE_EQUAL(ceilinged_log2<int>(uintx(power(2, 15))), 15 + 1);
+    BOOST_REQUIRE_EQUAL(ceilinged_log2<int>(uintx(power(2, 15u))), 15 + 1);
     BOOST_REQUIRE_EQUAL(ceilinged_log2<unsigned>(uintx(power(2u, 15u))), 15u + 1u);
 }
 
@@ -602,13 +602,13 @@ BOOST_AUTO_TEST_CASE(log__floored_log2_uintx__powers_of_2__expected)
 
 BOOST_AUTO_TEST_CASE(log__floored_log2_uintx__pow2__identity)
 {
-    BOOST_REQUIRE_EQUAL(floored_log2<int>(uintx(power2(15))), 15);
+    BOOST_REQUIRE_EQUAL(floored_log2<int>(uintx(power2(15u))), 15);
     BOOST_REQUIRE_EQUAL(floored_log2<unsigned>(uintx(power2(15u))), 15u);
 }
 
 BOOST_AUTO_TEST_CASE(log__floored_log2_uintx__power_2__identity)
 {
-    BOOST_REQUIRE_EQUAL(floored_log2<int>(uintx(power(2, 15))), 15);
+    BOOST_REQUIRE_EQUAL(floored_log2<int>(uintx(power(2, 15u))), 15);
     BOOST_REQUIRE_EQUAL(floored_log2<unsigned>(uintx(power(2u, 15u))), 15u);
 }
 

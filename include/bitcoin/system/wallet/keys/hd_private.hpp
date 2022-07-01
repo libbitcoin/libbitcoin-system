@@ -46,13 +46,13 @@ public:
 
     static constexpr uint32_t to_prefix(uint64_t prefixes) NOEXCEPT
     {
-        return narrow_cast<uint32_t>(shift_right(prefixes, width<uint32_t>()));
+        return narrow_cast<uint32_t>(shift_right(prefixes, bits<uint32_t>));
     }
 
     static constexpr uint64_t to_prefixes(uint32_t private_prefix,
         uint32_t public_prefix) NOEXCEPT
     {
-        return shift_left<uint64_t>(private_prefix, width<uint32_t>()) |
+        return shift_left<uint64_t>(private_prefix, bits<uint32_t>) |
             public_prefix;
     }
 

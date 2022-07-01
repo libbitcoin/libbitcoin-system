@@ -24,7 +24,7 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -85,7 +85,7 @@ props props::from_number(int64_t number) NOEXCEPT
 {
     // datatracker.ietf.org/doc/html/rfc7159#section-6
     // limit to [-(2**53) + 1, (2**53) - 1] for interoperability.
-    constexpr auto power = power2<int64_t>(53);
+    constexpr auto power = power2<int64_t>(53u);
 
     if (number <= -add1(power) || number >= sub1(power))
         return { type::invalid_ };

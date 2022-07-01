@@ -20,7 +20,7 @@
 
 #include <filesystem>
 #include <fstream>
-#include <bitcoin/system/boost.hpp>
+// DELETEMENOW
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 namespace libbitcoin {

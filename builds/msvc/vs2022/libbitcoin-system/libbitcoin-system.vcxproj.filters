@@ -199,6 +199,9 @@
     <Filter Include="src\words\catalogs">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\math">
+      <UniqueIdentifier>{7ee4b97e-9a48-4b02-8e86-0d33daf11f45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
@@ -392,6 +395,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\string.cpp">
       <Filter>src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\define.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\error\block_error_t.cpp">
       <Filter>src\error</Filter>
@@ -605,6 +611,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\words\languages.cpp">
       <Filter>src\words</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\math.cpp">
+      <Filter>src\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1055,6 +1064,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streams.hpp">
       <Filter>include\bitcoin\system\stream</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\types.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ascii.hpp">
       <Filter>include\bitcoin\system\unicode</Filter>
     </ClInclude>
@@ -1093,6 +1105,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_everywhere.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\values.hpp">
+      <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp">
       <Filter>include\bitcoin\system</Filter>

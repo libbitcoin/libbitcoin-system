@@ -22,7 +22,7 @@
 #include <iostream>
 #include <new>
 #include <streambuf>
-#include <bitcoin/system/exceptions.hpp>
+// DELETEMENOW
 
 #ifdef _MSC_VER
     #include <windows.h>

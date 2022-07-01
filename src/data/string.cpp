@@ -23,7 +23,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 

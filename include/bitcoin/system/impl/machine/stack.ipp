@@ -187,7 +187,7 @@ inline const stack_variant& stack<Container>::peek(size_t index) const NOEXCEPT
 // Chunk to integer conversions are constrained by caller (4 or 5 bytes).
 template <typename Container>
 template<size_t Bytes, typename Integer,
-    if_not_greater<Bytes, sizeof(Integer)>,
+    if_not_lesser<sizeof(Integer), Bytes>,
     if_signed_integral_integer<Integer>>
 inline bool stack<Container>::peek_signed(Integer& value) const NOEXCEPT
 {

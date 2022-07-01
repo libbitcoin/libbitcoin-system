@@ -25,7 +25,7 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

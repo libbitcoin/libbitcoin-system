@@ -19,9 +19,21 @@
 #ifndef LIBBITCOIN_SYSTEM_DEFINE_HPP
 #define LIBBITCOIN_SYSTEM_DEFINE_HPP
 
-// Other #define declarations here.
-#include <bitcoin/system/version.hpp>
-#include <bitcoin/system/warnings.hpp>
+// Standard includes (do not include directly).
+// All except <array> are included here by include ancestory.
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <exception>
+#include <iostream>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <type_traits>
+
+// Pulls chains in all /system headers (except settings.hpp).
+#include <bitcoin/system/constraints.hpp>
 
 // Create bc namespace alias.
 namespace libbitcoin {
@@ -141,14 +153,6 @@ namespace bc = libbitcoin;
 
 #if defined(_MSC_VER) && !defined(BC_VS2022)
     static_assert(false, "Visual Studio 2022 minimum required.");
-#endif
-
-// clang does not yet have consteval.
-#if defined(BC_VS2022) && defined(BC_CPP_20)
-    #define CONSTEVAL consteval
-    #define HAVE_CONSTEVAL
-#else
-    #define CONSTEVAL constexpr
 #endif
 
 #define NOEXCEPT noexcept

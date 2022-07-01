@@ -22,6 +22,8 @@
 #include <bitcoin/system/integrals.hpp>
 #include <bitcoin/system/literals.hpp>
 #include <bitcoin/system/settings.hpp>
+#include <bitcoin/system/types.hpp>
+#include <bitcoin/system/values.hpp>
 #include <bitcoin/system/version.hpp>
 #include <bitcoin/system/warnings.hpp>
 #include <bitcoin/system/chain/block.hpp>

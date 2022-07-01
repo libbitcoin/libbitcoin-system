@@ -22,8 +22,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
-#include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/sign.hpp>

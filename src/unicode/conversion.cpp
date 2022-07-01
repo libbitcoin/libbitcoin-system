@@ -20,7 +20,7 @@
 
 #include <algorithm>
 #include <string>
-#include <bitcoin/system/boost.hpp>
+// DELETEMENOW
 
 namespace libbitcoin {
 namespace system {

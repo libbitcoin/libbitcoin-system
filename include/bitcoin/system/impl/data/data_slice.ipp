@@ -21,8 +21,8 @@
 
 #include <array>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

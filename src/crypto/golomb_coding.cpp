@@ -26,7 +26,7 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 
 // Avoid in header, circular dependency with stream to crypto.
@@ -61,7 +61,7 @@ inline uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     const siphash_key& key) NOEXCEPT
 {
     const auto product = uint128_t(siphash(key, item)) * uint128_t(bound);
-    return (product >> width<uint64_t>()).convert_to<uint64_t>();
+    return (product >> bits<uint64_t>).convert_to<uint64_t>();
 }
 
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,

@@ -23,12 +23,15 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/values.hpp>
 
-// May be used to exclude test evaluation.
+// clang does not yet have consteval.
 // Remove this when all platforms support consteval.
-#if !defined(HAVE_CONSTEVAL)
+// RUNTIME_LITERALS may be used to exclude test evaluation (until consteval).
+#ifdef _MSC_VER
+    #define CONSTEVAL consteval
+#else
+    #define CONSTEVAL constexpr
     #define RUNTIME_LITERALS
 #endif
 
@@ -53,31 +56,33 @@ using integer_type = unsigned long long int;
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer lower() NOEXCEPT
+CONSTEVAL Integer lower() noexcept(true)
 {
     return std::numeric_limits<Integer>::min();
 }
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer upper() NOEXCEPT
+CONSTEVAL Integer upper() noexcept(true)
 {
     return std::numeric_limits<Integer>::max();
 }
 
 template <typename Integer, std::enable_if_t<
     std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> lower() NOEXCEPT
+CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept(true)
 {
-    return Integer{1} + static_cast<
+    // unsigned(|signed_min|) = unsigned(signed_min) + 1.
+    return static_cast<
         std::make_unsigned_t<Integer>>(
-            std::numeric_limits<Integer>::max());
+            std::numeric_limits<Integer>::max()) + 1u;
 }
 
 template <typename Integer, std::enable_if_t<
     std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> upper() NOEXCEPT
+CONSTEVAL std::make_unsigned_t<Integer> upper() noexcept(true)
 {
+    // unsigned(|signed_max|) = unsigned(signed_max).
     return static_cast<
         std::make_unsigned_t<Integer>>(
             std::numeric_limits<Integer>::max());
@@ -85,20 +90,24 @@ CONSTEVAL std::make_unsigned_t<Integer> upper() NOEXCEPT
 
 template <typename Domain, std::enable_if_t<
     std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain positive(integer_type value) THROWS
+CONSTEVAL Domain positive(integer_type value) noexcept(false)
 {
-    typedef std::make_unsigned_t<Domain> narrow, limit;
+    using limit = std::make_unsigned_t<Domain>;
+    using narrow = std::make_unsigned_t<Domain>;
 
     if (value > upper<limit>())
         throw overflow_exception{ "literal overflow" };
 
+    // Cast to unsigned width of domain.
     const auto narrowed = static_cast<narrow>(value);
+
+    // Cast to sign of domain.
     return static_cast<Domain>(narrowed);
 }
 
 template <typename Domain, std::enable_if_t<
     std::numeric_limits<Domain>::is_integer, bool> = true>
-CONSTEVAL Domain negative(integer_type value) THROWS
+CONSTEVAL Domain negative(integer_type value) noexcept(false)
 {
     using limit = std::make_signed_t<Domain>;
     using narrow = std::make_unsigned_t<Domain>;
@@ -106,15 +115,18 @@ CONSTEVAL Domain negative(integer_type value) THROWS
     if (value > lower<limit>())
         throw overflow_exception{ "literal overflow" };
 
+    // Cast to unsigned width of domain.
     const auto narrowed = static_cast<narrow>(value);
+
+    // Invert sign in the unsigned domain (safe) and cast to sign of domain.
     return static_cast<Domain>(~narrowed + narrow{1});
 }
 
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-#define DECLARE_LITERAL(name, type, sign) \
-CONSTEVAL type operator "" name(integer_type value) THROWS \
+#define DECLARE_LITERAL(name, sign, type) \
+CONSTEVAL type operator "" name(integer_type value) noexcept(false) \
 { return sign<type>(value); }
 
 /// Supported represenations.
@@ -129,38 +141,38 @@ CONSTEVAL type operator "" name(integer_type value) THROWS \
 /// suffix, and there would be no reason to.
 
 /// positive signed integer
-DECLARE_LITERAL(_i08, int8_t,  positive)
-DECLARE_LITERAL(_i16, int16_t, positive)
-DECLARE_LITERAL(_i32, int32_t, positive)
-DECLARE_LITERAL(_i64, int64_t, positive)
+DECLARE_LITERAL(_i08, positive, int8_t)
+DECLARE_LITERAL(_i16, positive, int16_t)
+DECLARE_LITERAL(_i32, positive, int32_t)
+DECLARE_LITERAL(_i64, positive, int64_t)
 
 /// positive unsigned integer
-DECLARE_LITERAL(_u08, uint8_t,  positive)
-DECLARE_LITERAL(_u16, uint16_t, positive)
-DECLARE_LITERAL(_u32, uint32_t, positive)
-DECLARE_LITERAL(_u64, uint64_t, positive)
+DECLARE_LITERAL(_u08, positive, uint8_t)
+DECLARE_LITERAL(_u16, positive, uint16_t)
+DECLARE_LITERAL(_u32, positive, uint32_t)
+DECLARE_LITERAL(_u64, positive, uint64_t)
 
 /// negative signed integer
-DECLARE_LITERAL(_ni08, int8_t,  negative)
-DECLARE_LITERAL(_ni16, int16_t, negative)
-DECLARE_LITERAL(_ni32, int32_t, negative)
-DECLARE_LITERAL(_ni64, int64_t, negative)
+DECLARE_LITERAL(_ni08, negative, int8_t)
+DECLARE_LITERAL(_ni16, negative, int16_t)
+DECLARE_LITERAL(_ni32, negative, int32_t)
+DECLARE_LITERAL(_ni64, negative, int64_t)
 
 /// negative unsigned integer
-DECLARE_LITERAL(_nu08, uint8_t,  negative)
-DECLARE_LITERAL(_nu16, uint16_t, negative)
-DECLARE_LITERAL(_nu32, uint32_t, negative)
-DECLARE_LITERAL(_nu64, uint64_t, negative)
+DECLARE_LITERAL(_nu08, negative, uint8_t)
+DECLARE_LITERAL(_nu16, negative, uint16_t)
+DECLARE_LITERAL(_nu32, negative, uint32_t)
+DECLARE_LITERAL(_nu64, negative, uint64_t)
+
+/// aliases (preferred)
+DECLARE_LITERAL(_i8,  positive, int8_t)
+DECLARE_LITERAL(_u8,  positive, uint8_t)
+DECLARE_LITERAL(_ni8, negative, int8_t)
+DECLARE_LITERAL(_nu8, negative, uint8_t)
 
 /// size_t
-DECLARE_LITERAL(_size,  size_t, positive)
-DECLARE_LITERAL(_nsize, size_t, negative)
-
-/// aliases (preferred unless vertical alignment is helpful)
-DECLARE_LITERAL(_i8,  int8_t,  positive)
-DECLARE_LITERAL(_u8,  uint8_t, positive)
-DECLARE_LITERAL(_ni8, int8_t,  negative)
-DECLARE_LITERAL(_nu8, uint8_t, negative)
+DECLARE_LITERAL(_size, positive, size_t)
+DECLARE_LITERAL(_nsize, negative, signed_size_t)
 
 /// ---------------------------------------------------------------------------
 

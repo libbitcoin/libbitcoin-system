@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -70,12 +70,12 @@ public:
 
     static constexpr uint8_t to_wif_version(uint16_t versions) NOEXCEPT
     {
-        return narrow_cast<uint8_t>(shift_right(versions, width<uint8_t>()));
+        return narrow_cast<uint8_t>(shift_right(versions, bits<uint8_t>));
     }
 
     static constexpr uint16_t to_versions(uint8_t address, uint8_t wif) NOEXCEPT
     {
-        return shift_left<uint16_t>(wif, width<uint8_t>()) | address;
+        return shift_left<uint16_t>(wif, bits<uint8_t>) | address;
     }
 
     /// Constructors.

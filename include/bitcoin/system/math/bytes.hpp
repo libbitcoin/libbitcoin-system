@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_BYTES_HPP
 
 #include <cstdint>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -92,9 +92,6 @@ constexpr Integer byteswap(Integer value) NOEXCEPT;
 
 /// Bits to bytes utilities.
 /// ---------------------------------------------------------------------------
-
-template <size_t Bits, if_bytes_width<Bits> = true>
-constexpr size_t to_bytes() NOEXCEPT;
 
 template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr Integer to_ceilinged_bytes(Integer bits) NOEXCEPT;

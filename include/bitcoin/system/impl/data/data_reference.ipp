@@ -21,7 +21,7 @@
 
 #include <array>
 #include <vector>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>

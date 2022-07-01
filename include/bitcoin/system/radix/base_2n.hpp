@@ -20,8 +20,6 @@
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_2N_HPP
 
 #include <cstddef>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -98,10 +96,10 @@ protected:
 
 private:
     // Parameter constraints (these preclude mantissa padding).
-    static_assert(is_bytes_width(Span));
-    static_assert(is_bytes_width(base));
-    static_assert(is_bytes_width(precision));
-    static_assert(is_integral<small_type>());
+    static_assert(is_byte_sized(Span));
+    static_assert(is_byte_sized(base));
+    static_assert(is_byte_sized(precision));
+    static_assert(is_integral<small_type>);
     static_assert(precision <= e_max);
 };
 

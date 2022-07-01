@@ -20,8 +20,6 @@
 #define LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 
 #include <cstddef>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/log.hpp>
 #include <bitcoin/system/math/safe.hpp>
@@ -48,7 +46,7 @@ constexpr size_t bit_width(Value value) NOEXCEPT
 template <typename Value, if_signed_integer<Value>>
 constexpr size_t bit_width(Value value) NOEXCEPT
 {
-    return is_negative(value) ? width<Value>() : bit_width(to_unsigned(value));
+    return is_negative(value) ? bits<Value> : bit_width(to_unsigned(value));
 }
 
 // Bitwise logical operations.
@@ -65,6 +63,7 @@ constexpr Value bit_not(Value value) NOEXCEPT
 template <typename Value, if_integer<Value>>
 constexpr Value bit_and(Value left, Value right) NOEXCEPT
 {
+    // Promotion is safe as leading zeros are truncated.
     // Revert sign and/or domain promotion for < 32 bit values.
     return possible_narrow_and_sign_cast<Value>(left & right);
 }
@@ -73,6 +72,7 @@ constexpr Value bit_and(Value left, Value right) NOEXCEPT
 template <typename Value, if_integer<Value>>
 constexpr Value bit_or(Value left, Value right) NOEXCEPT
 {
+    // Promotion is safe as leading zeros are truncated.
     // Revert sign and/or domain promotion for < 32 bit Value.
     return possible_narrow_and_sign_cast<Value>(left | right);
 }
@@ -81,31 +81,13 @@ constexpr Value bit_or(Value left, Value right) NOEXCEPT
 template <typename Value, if_integer<Value>>
 constexpr Value bit_xor(Value left, Value right) NOEXCEPT
 {
+    // Promotion is safe as leading zeros are truncated.
     // Revert sign and/or domain promotion for < 32 bit Value.
     return possible_narrow_and_sign_cast<Value>(left ^ right);
 }
 
 // Value factories.
 // ----------------------------------------------------------------------------
-
-template <typename Value, if_integer<Value>>
-constexpr Value bit_all() NOEXCEPT
-{
-    return bit_not<Value>(0);
-}
-
-template <typename Value, if_integral_integer<Value>>
-constexpr Value bit_hi() NOEXCEPT
-{
-    // a << b is undefined for negative a, but shift into a negative is valid.
-    return shift_left(to_int<Value>(true), sub1(width<Value>()));
-}
-
-template <typename Value, if_integer<Value>>
-constexpr Value bit_lo() NOEXCEPT
-{
-    return to_int<Value>(true);
-}
 
 template <typename Value, if_integral_integer<Value>>
 constexpr Value bit_left(size_t offset) NOEXCEPT
@@ -118,8 +100,8 @@ constexpr Value bit_left(size_t offset) NOEXCEPT
 
     // Subtraction is between size_t operands and guarded.
     // This converts the left offset to a right offset, overflow true.
-    return offset >= width<Value>() ? 0 :
-        bit_right<Value>(sub1(width<Value>() - offset));
+    return offset >= bits<Value> ? 0 :
+        bit_right<Value>(sub1(bits<Value> - offset));
 }
 
 template <typename Value, if_integral_integer<Value>>
@@ -130,7 +112,7 @@ constexpr Value bit_right(size_t offset) NOEXCEPT
     // version of the return type, then that value, converted to signed, is the
     // value of a << b (this makes it legal to create INT_MIN as 1<<31)."
     // en.cppreference.com/w/cpp/language/operator_arithmetic
-    return shift_left(bit_lo<Value>(), offset);
+    return shift_left(bit_lo<Value>, offset);
 }
 
 // Get (a bit).
@@ -192,7 +174,7 @@ constexpr void set_right_into(Value& target, size_t offset, bool state) NOEXCEPT
 template <typename Value, if_integral_integer<Value>>
 constexpr Value mask_left(size_t bits) NOEXCEPT
 {
-    return shift_right(bit_all<Value>(), bits, true);
+    return shift_right(bit_all<Value>, bits, true);
 }
 
 template <typename Value, if_integral_integer<Value>>
@@ -210,7 +192,7 @@ constexpr void mask_left_into(Value& value, size_t bits) NOEXCEPT
 template <typename Value, if_integral_integer<Value>>
 constexpr Value mask_right(size_t bits) NOEXCEPT
 {
-    return shift_left(bit_all<Value>(), bits, true);
+    return shift_left(bit_all<Value>, bits, true);
 }
 
 template <typename Value, if_integral_integer<Value>>
@@ -280,14 +262,14 @@ constexpr void unmask_right_into(Value& value, size_t bits) NOEXCEPT
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value shift_left(Value value, size_t shift, bool overflow) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     return overflow && shift >= span ? 0 : depromote<Value>(
         value << (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void shift_left_into(Value& value, size_t shift, bool overflow) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     overflow && shift >= span ? value = 0 :
         value <<= (shift % span);
 }
@@ -296,7 +278,7 @@ constexpr void shift_left_into(Value& value, size_t shift, bool overflow) NOEXCE
 template <typename Value, if_signed_integral_integer<Value>>
 constexpr Value shift_left(Value value, size_t shift, bool overflow) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     return overflow && shift >= span ? 0 : depromote<Value>(
         to_signed(to_unsigned(value) << (shift % span)));
 }
@@ -311,14 +293,14 @@ constexpr void shift_left_into(Value& value, size_t shift, bool overflow) NOEXCE
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value shift_right(Value value, size_t shift, bool overflow) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     return overflow && shift >= span ? 0 : depromote<Value>(
         value >> (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void shift_right_into(Value& value, size_t shift, bool overflow) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     overflow && shift >= span ? value = 0 : depromote<Value>(
         value >>= (shift % span));
 }
@@ -327,7 +309,7 @@ constexpr void shift_right_into(Value& value, size_t shift, bool overflow) NOEXC
 template <typename Value, if_signed_integral_integer<Value>>
 constexpr Value shift_right(Value value, size_t shift, bool overflow) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     return overflow && shift >= span ? 0 : depromote<Value>(
         to_signed(to_unsigned(value) >> (shift % span)));
 }
@@ -350,7 +332,7 @@ constexpr void shift_right_into(Value& value, size_t shift,
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value rotate_left(Value value, size_t shift) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     return bit_or(shift_left(value, shift % span),
         shift_right(value, span - (shift % span)));
 }
@@ -358,7 +340,7 @@ constexpr Value rotate_left(Value value, size_t shift) NOEXCEPT
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void rotate_left_into(Value& value, size_t shift) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     value = bit_or(shift_left(value, shift % span),
         shift_right(value, span - (shift % span)));
 }
@@ -366,7 +348,7 @@ constexpr void rotate_left_into(Value& value, size_t shift) NOEXCEPT
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr Value rotate_right(Value value, size_t shift) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     return bit_or(shift_right(value, shift % span),
         shift_left(value, span - (shift % span)));
 }
@@ -374,7 +356,7 @@ constexpr Value rotate_right(Value value, size_t shift) NOEXCEPT
 template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void rotate_right_into(Value& value, size_t shift) NOEXCEPT
 {
-    constexpr auto span = width<Value>();
+    constexpr auto span = bits<Value>;
     value = bit_or(shift_right(value, shift % span),
         shift_left(value, span - (shift % span)));
 }

@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/data/data_slice.hpp>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 
 namespace libbitcoin {
 namespace system {

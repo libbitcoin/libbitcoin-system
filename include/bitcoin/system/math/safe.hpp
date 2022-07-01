@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 #define LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

@@ -36,10 +36,10 @@
     #include <shlobj.h>
     #include <windows.h>
 #endif
-#include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/exceptions.hpp>
+// DELETEMENOW
 #include <bitcoin/system/unicode/ascii.hpp>
 #include <bitcoin/system/unicode/conversion.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>

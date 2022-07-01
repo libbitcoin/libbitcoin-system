@@ -498,6 +498,12 @@
     <ClCompile Include="..\..\..\..\test\words\languages.cpp">
       <Filter>src\words</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\types.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\values.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">

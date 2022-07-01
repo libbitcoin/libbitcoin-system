@@ -89,12 +89,12 @@ public:
 
 private:
     template<size_t Bytes, typename Integer,
-        if_not_greater<Bytes, sizeof(Integer)> = true,
+        if_not_lesser<sizeof(Integer), Bytes> = true,
         if_signed_integral_integer<Integer> = true>
     inline bool peek_signed(Integer& value) const NOEXCEPT;
 
-    static constexpr auto linked_ = is_same<Container, linked_stack>();
-    static constexpr auto vector_ = is_same<Container, contiguous_stack>();
+    static constexpr auto linked_ = is_same_type<Container, linked_stack>;
+    static constexpr auto vector_ = is_same_type<Container, contiguous_stack>;
     static_assert(linked_ || vector_, "unsupported stack container");
 
     Container container_;

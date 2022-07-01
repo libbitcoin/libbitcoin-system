@@ -26,9 +26,9 @@
 #include <iterator>
 #include <string>
 #include <utility>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -82,7 +82,8 @@ template <typename Data, typename Integer,
 constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
 {
     if (!bytes.empty())
-        bytes.front() = possible_sign_cast<uint8_t>(value);
+        // TODO: split into integral and non-integral, use bytecasting for integrals.
+        bytes.front() = static_cast<uint8_t>(value);
 
     return std::move(bytes);
 }
@@ -103,7 +104,8 @@ constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
     for (size_t byte = 0; byte < Size; ++byte)
     {
         value <<= byte_bits;
-        value |= possible_sign_cast<Integer>(data[byte]);
+        // TODO: split into integral and non-integral, use bytecasting for integrals.
+        value |= static_cast<Integer>(data[byte]);
     }
 
     return value;
@@ -119,13 +121,14 @@ constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
     for (auto byte = Size; byte > 0; --byte)
     {
         value <<= byte_bits;
-        value |= possible_sign_cast<Integer>(data[sub1(byte)]);
+
+        // TODO: split into integral and non-integral, use bytecasting for integrals.
+        value |= static_cast<Integer>(data[sub1(byte)]);
     }
 
     return value;
 }
 
-// TODO: split into integral and non-integral, use bytecasting for integrals.
 
 template <typename Integer,
     if_not_one_byte<Integer> = true>
@@ -147,7 +150,8 @@ inline Integer from_big_chunk(size_t size, const data_slice& data) NOEXCEPT
         value <<= byte_bits;
 
         BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_sign_cast<Integer>(data[byte]);
+        // TODO: split into integral and non-integral, use bytecasting for integrals.
+        value |= static_cast<Integer>(data[byte]);
         BC_POP_WARNING()
     }
 
@@ -174,7 +178,8 @@ inline Integer from_little_chunk(size_t size, const data_slice& data) NOEXCEPT
         value <<= byte_bits;
 
         BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_sign_cast<Integer>(data[sub1(byte)]);
+        // TODO: split into integral and non-integral, use bytecasting for integrals.
+        value |= static_cast<Integer>(data[sub1(byte)]);
         BC_POP_WARNING()
     }
 
@@ -195,7 +200,8 @@ constexpr Data to_big(Data&& bytes, Integer value) NOEXCEPT
 
     for (auto& byte: views_reverse(bytes))
     {
-        byte = possible_sign_narrow_cast<uint8_t>(value);
+        // TODO: split into integral and non-integral, use bytecasting for integrals.
+        byte = static_cast<uint8_t>(value);
         value >>= byte_bits;
     }
 
@@ -216,7 +222,8 @@ constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
 
     for (auto& byte: bytes)
     {
-        byte = possible_sign_narrow_cast<uint8_t>(value);
+        // TODO: split into integral and non-integral, use bytecasting for integrals.
+        byte = static_cast<uint8_t>(value);
         value >>= byte_bits;
     }
 

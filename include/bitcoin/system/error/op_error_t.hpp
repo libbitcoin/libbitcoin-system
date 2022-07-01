@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_ERROR_OP_ERROR_T_HPP
 
 #include <cstdint>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/macros.hpp>
 #include <bitcoin/system/error/script_error_t.hpp>

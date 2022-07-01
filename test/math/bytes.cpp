@@ -77,7 +77,7 @@ static_assert(byte_width(0x00000000000000ff01000000_i64) == 5);
 static_assert(byte_width(0x000000000000ff0000000000_i64) == 6);
 static_assert(byte_width(0x0000000000ff010000000000_i64) == 7);
 static_assert(byte_width(0x00000000ff00000000000000_i64) == 8);
-static_assert(std::is_same<decltype(byte_width<int8_t>(0)), size_t>::value);
+static_assert(is_same_type<decltype(byte_width<int8_t>(0)), size_t>);
 
 // is_negated (negated signed values)
 static_assert(is_negated(0x80_i8));
@@ -130,7 +130,7 @@ static_assert(!is_negated(0x01000000000042_i64));
 static_assert(!is_negated(0x0f000000000042_i64));
 static_assert(!is_negated(0x7f000000000042_i64));
 static_assert(!is_negated(0x7f000000000042_i64));
-static_assert(std::is_same<decltype(is_negated<int32_t>(0)), bool>::value);
+static_assert(is_same_type<decltype(is_negated<int32_t>(0)), bool>);
 
 // is_negated (non-negated unsigned values)
 static_assert(!is_negated(0x00_u8));
@@ -167,7 +167,7 @@ static_assert(!is_negated(0x01000000000042_u64));
 static_assert(!is_negated(0x0f000000000042_u64));
 static_assert(!is_negated(0x7f000000000042_u64));
 static_assert(!is_negated(0x7f000000000042_u64));
-static_assert(std::is_same<decltype(is_negated<uint32_t>(0)), bool>::value);
+static_assert(is_same_type<decltype(is_negated<uint32_t>(0)), bool>);
 
 // to_negated
 static_assert(to_negated(0x00_i8) == 0x80_i8);
@@ -181,7 +181,7 @@ static_assert(to_negated(0x7f000000_i32) == 0xff000000_i32);
 static_assert(to_negated(0x8f000000_i32) == 0x8f000000_i32);
 static_assert(to_negated(0x7f00000000000000_i64) == 0xff00000000000000_i64);
 static_assert(to_negated(0x000000000000007f_i64) == 0x800000000000007f_i64);
-static_assert(std::is_same<decltype(to_negated<int32_t>(0)), int32_t>::value);
+static_assert(is_same_type<decltype(to_negated<int32_t>(0)), int32_t>);
 
 // to_unnegated
 static_assert(to_unnegated(0x00_i8) == 0x00_i8);
@@ -196,34 +196,21 @@ static_assert(to_unnegated(0x7f000000_i32) == 0x7f000000_i32);
 static_assert(to_unnegated(0x8f000000_i32) == 0x0f000000_ni32);
 static_assert(to_unnegated(0x7f00000000000000_i64) == 0x7f00000000000000_i64);
 static_assert(to_unnegated(0x000000000000007f_i64) == 0x000000000000007f_i64);
-static_assert(std::is_same<decltype(to_unnegated<int32_t>(0)), int32_t>::value);
-
-// to_bytes
-static_assert(to_bytes<8u>() == 1u);
-static_assert(to_bytes<16u>() == 2u);
-static_assert(to_bytes<24u>() == 3u);
-static_assert(to_bytes<32u>() == 4u);
-static_assert(to_bytes<40u>() == 5u);
-static_assert(to_bytes<48u>() == 6u);
-static_assert(to_bytes<56u>() == 7u);
-static_assert(to_bytes<64u>() == 8u);
-static_assert(to_bytes<128u>() == 16u);
-static_assert(to_bytes<256u>() == 32u);
-static_assert(std::is_same<decltype(to_bytes<8u>()), size_t>::value);
+static_assert(is_same_type<decltype(to_unnegated<int32_t>(0)), int32_t>);
 
 // to_ceilinged_bytes
 static_assert(to_ceilinged_bytes(0u) == 0u);
 static_assert(to_ceilinged_bytes(1u) == 1u);
 static_assert(to_ceilinged_bytes(42u) == (42u + 7u) / 8u);
 static_assert(to_ceilinged_bytes(0xffu) == (0xff + 7u) / 8u);
-static_assert(std::is_same<decltype(to_ceilinged_bytes<uint16_t>(0)), uint16_t>::value);
+static_assert(is_same_type<decltype(to_ceilinged_bytes<uint16_t>(0)), uint16_t>);
 
 // to_floored_bytes
 static_assert(to_floored_bytes(0u) == 0u);
 static_assert(to_floored_bytes(1u) == 0u);
 static_assert(to_floored_bytes(42u) == 42u / 8u);
 static_assert(to_floored_bytes(0xffu) == 0xff / 8u);
-static_assert(std::is_same<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>::value);
+static_assert(is_same_type<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>);
 
 // to_big_end (constexpr)
 // Beware of type promotion (use explicit types).

@@ -164,7 +164,7 @@ enum forks : uint32_t
     /// TODO: rules that use taproot-style activation.
 
     /// Mask to set all rule bits.
-    all_rules = bit_all<uint32_t>()
+    all_rules = bit_all<uint32_t>
 };
 
 } // namespace chain

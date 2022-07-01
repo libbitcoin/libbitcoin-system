@@ -23,7 +23,6 @@
 #include <exception>
 #include <stdexcept>
 #include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -66,11 +65,6 @@ using range_exception = std::range_error;
 using ostream_exception = std::iostream::failure;
 using istream_exception = boost::program_options::invalid_option_value;
 using ifstream_exception = boost::program_options::reading_file;
-
-class BC_API end_of_stream
-  : std::exception
-{
-};
 
 } // namespace system
 } // namespace libbitcoin

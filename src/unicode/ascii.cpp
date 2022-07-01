@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <string>
 #include <iterator>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 

@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_HPP
 
 #include <type_traits>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

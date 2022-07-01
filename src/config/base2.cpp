@@ -22,7 +22,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include <bitcoin/system/exceptions.hpp>
+// DELETEMENOW
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

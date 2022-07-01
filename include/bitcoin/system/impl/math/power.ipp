@@ -19,10 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_POWER_IPP
 #define LIBBITCOIN_SYSTEM_MATH_POWER_IPP
 
-#include <cstddef>
-#include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/safe.hpp>
@@ -34,7 +30,8 @@ namespace system {
 namespace mp = boost::multiprecision;
 
 // dispatch
-template <size_t Base, typename Value, typename Exponent>
+template <size_t Base, typename Value, typename Exponent,
+    if_unsigned_integer<Exponent>>
 constexpr Value power(Exponent exponent) NOEXCEPT
 {
     if constexpr (Base == 2u)
@@ -47,10 +44,10 @@ constexpr Value power(Exponent exponent) NOEXCEPT
 // Called by bc::base85 (for number coding).
 // Called by wallet::electrum_v1 (for number coding).
 template <typename Value, typename Base, typename Exponent,
-    if_integer<Value>,
-    if_integer<Base>,
-    if_integer<Exponent>>
-constexpr Value power(Base base, Exponent exponent) NOEXCEPT
+    if_integer<Value> = true,
+    if_integer<Base> = true,
+    if_unsigned_integer<Exponent> = true>
+constexpr Value power_(Base base, Exponent exponent) NOEXCEPT
 {
     if (is_zero(base))
         return 0;
@@ -58,21 +55,34 @@ constexpr Value power(Base base, Exponent exponent) NOEXCEPT
     if (is_zero(exponent))
         return 1;
 
-    // TODO: absolute unsafe, review.
-    if (is_negative(exponent))
-        return absolute(base) > 1 ? 0 :
-            (is_odd(exponent) && is_negative(base) ? -1 : 1);
-
     auto value = possible_narrow_and_sign_cast<Value>(base);
 
     // Overflow is allowed behavior as this models a mathematical operator.
     BC_PUSH_WARNING(NARROWING_CONVERSION)
     BC_PUSH_WARNING(SIZE_NARROWING_CONVERSION)
-    while (--exponent > 0) { value *= base; }
+    while (--exponent > 0u) { value *= base; }
     BC_POP_WARNING();
     BC_POP_WARNING();
 
     return value;
+}
+
+template <typename Value, typename Base, typename Exponent,
+    if_integer<Value>,
+    if_signed_integer<Base>,
+    if_unsigned_integer<Exponent>>
+constexpr Value power(Base base, Exponent exponent) NOEXCEPT
+{
+    return power_<Value>(base, exponent);
+}
+
+template <typename Value, typename Base, typename Exponent,
+    if_integer<Value>,
+    if_unsigned_integer<Base>,
+    if_unsigned_integer<Exponent>>
+constexpr Value power(Base base, Exponent exponent) NOEXCEPT
+{
+    return power_<Value>(base, exponent);
 }
 
 // optimizations
@@ -81,23 +91,17 @@ constexpr Value power(Base base, Exponent exponent) NOEXCEPT
 // Called by chain::number (for limits::minimum/maximum).
 template <typename Value, typename Exponent,
     if_integral_integer<Value>,
-    if_integer<Exponent>>
+    if_unsigned_integer<Exponent>>
 constexpr Value power2(Exponent exponent) NOEXCEPT
 {
-    if (is_negative(exponent))
-        return 0;
-
     return shift_left<Value>(1u, to_unsigned(exponent));
 }
 
 template <typename Value, typename Exponent,
     if_non_integral_integer<Value>,
-    if_integer<Exponent>>
+    if_unsigned_integer<Exponent>>
 constexpr Value power2(Exponent exponent) NOEXCEPT
 {
-    if (is_negative(exponent))
-        return 0;
-
     Value value{};
     return mp::bit_set(value,
         possible_narrow_and_sign_cast<unsigned>(exponent));

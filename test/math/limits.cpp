@@ -50,12 +50,12 @@ static_assert(limit< int32_t>(max_uint64) == max_int32);
 static_assert(limit<uint32_t>(max_uint64) == max_uint32);
 static_assert(limit< int64_t>(max_uint64) == max_int64);
 static_assert(limit<uint64_t>(max_uint64) == max_uint64);
-static_assert(std::is_same<decltype(limit<uint8_t>(0)), uint8_t>::value);
+static_assert(is_same_type<decltype(limit<uint8_t>(0)), uint8_t>);
 
 static_assert(limit(size_t(0), size_t(0)) == size_t(0));
 static_assert(limit(size_t(25), size_t(60)) == size_t(25));
 static_assert(limit(size_t(75), size_t(60)) == size_t(60));
-static_assert(std::is_same<decltype(limit<uint8_t>(0, 0)), uint8_t>::value);
+static_assert(is_same_type<decltype(limit<uint8_t>(0, 0)), uint8_t>);
 
 static_assert(limit(size_t(0),   size_t(0), size_t(0))  == size_t(0));
 static_assert(limit(size_t(25), size_t(50), size_t(60)) == size_t(50));
@@ -91,7 +91,7 @@ static_assert(limit(-50, -60, 50) == -50);
 static_assert(limit(-55, -60, 50) == -55);
 static_assert(limit(-60, -60, 50) == -60);
 static_assert(limit(-75, -60, 50) == -60);
-static_assert(std::is_same<decltype(is_limited<uint8_t>(0, 0, 0)), bool>::value);
+static_assert(is_same_type<decltype(is_limited<uint8_t>(0, 0, 0)), bool>);
 
 // is_limited
 
@@ -123,12 +123,12 @@ static_assert(is_limited< int32_t>(max_uint64));
 static_assert(is_limited<uint32_t>(max_uint64));
 static_assert(is_limited< int64_t>(max_uint64));
 static_assert(!is_limited<uint64_t>(max_uint64));
-static_assert(std::is_same<decltype(is_limited<uint8_t>(0)), bool>::value);
+static_assert(is_same_type<decltype(is_limited<uint8_t>(0)), bool>);
 
 static_assert(!is_limited(size_t(0), size_t(0)));
 static_assert(!is_limited(size_t(25), size_t(60)));
 static_assert(is_limited(size_t(75), size_t(60)));
-static_assert(std::is_same<decltype(is_limited<uint8_t>(0, 0)), bool>::value);
+static_assert(is_same_type<decltype(is_limited<uint8_t>(0, 0)), bool>);
 
 static_assert(!is_limited(size_t(0),  size_t(0),  size_t(0)));
 static_assert( is_limited(size_t(25), size_t(50), size_t(60)));
@@ -164,7 +164,7 @@ static_assert(!is_limited(-50, -60, 50));
 static_assert(!is_limited(-55, -60, 50));
 static_assert(!is_limited(-60, -60, 50));
 static_assert( is_limited(-75, -60, 50));
-static_assert(std::is_same<decltype(is_limited<uint8_t>(0, 0, 0)), bool>::value);
+static_assert(is_same_type<decltype(is_limited<uint8_t>(0, 0, 0)), bool>);
 
 // minimum<T>
 
@@ -176,7 +176,7 @@ static_assert(minimum<uint8_t >() == min_uint8);
 static_assert(minimum<uint16_t>() == min_uint16);
 static_assert(minimum<uint32_t>() == min_uint32);
 static_assert(minimum<uint64_t>() == min_uint64);
-static_assert(std::is_same<decltype(maximum<int64_t>()), int64_t>::value);
+static_assert(is_same_type<decltype(maximum<int64_t>()), int64_t>);
 
 // maximum<T>
 
@@ -188,14 +188,14 @@ static_assert(maximum<uint8_t >() == max_uint8);
 static_assert(maximum<uint16_t>() == max_uint16);
 static_assert(maximum<uint32_t>() == max_uint32);
 static_assert(maximum<uint64_t>() == max_uint64);
-static_assert(std::is_same<decltype(maximum<int16_t>()), int16_t>::value);
+static_assert(is_same_type<decltype(maximum<int16_t>()), int16_t>);
 
 // absolute_minimum<T>
 
-static_assert(absolute_minimum<int8_t >() == power2(sub1(width<int8_t>())));
-static_assert(absolute_minimum<int16_t>() == power2(sub1(width<int16_t>())));
-static_assert(absolute_minimum<int32_t>() == power2(sub1(width<int32_t>())));
-static_assert(absolute_minimum<int64_t>() == power2<uint128_t>(sub1(width<int64_t>())));
+static_assert(absolute_minimum<int8_t >() == power2(sub1(bits<int8_t>)));
+static_assert(absolute_minimum<int16_t>() == power2(sub1(bits<int16_t>)));
+static_assert(absolute_minimum<int32_t>() == power2(sub1(bits<int32_t>)));
+static_assert(absolute_minimum<int64_t>() == power2<uint128_t>(sub1(bits<int64_t>)));
 static_assert(absolute_minimum<int8_t >() == add1(absolute(add1(min_int8))));
 static_assert(absolute_minimum<int16_t>() == add1(absolute(add1(min_int16))));
 static_assert(absolute_minimum<int32_t>() == add1(absolute(add1(min_int32))));
@@ -204,14 +204,14 @@ static_assert(absolute_minimum<uint8_t>()  == min_uint8);
 static_assert(absolute_minimum<uint16_t>() == min_uint16);
 static_assert(absolute_minimum<uint32_t>() == min_uint32);
 static_assert(absolute_minimum<uint64_t>() == min_uint64);
-static_assert(std::is_same<decltype(maximum<int64_t>()), int64_t>::value);
+static_assert(is_same_type<decltype(maximum<int64_t>()), int64_t>);
 
 // unsigned_maximum<T>
 
-static_assert(unsigned_maximum<int8_t >() == sub1(to_half(power2(width<int8_t>()))));
-static_assert(unsigned_maximum<int16_t>() == sub1(to_half(power2(width<int16_t>()))));
-static_assert(unsigned_maximum<int32_t>() == sub1(to_half(power2<int64_t>(width<int32_t>()))));
-static_assert(unsigned_maximum<int64_t>() == sub1(to_half(power2<uint128_t>(width<int64_t>()))));
+static_assert(unsigned_maximum<int8_t >() == sub1(to_half(power2(bits<int8_t>))));
+static_assert(unsigned_maximum<int16_t>() == sub1(to_half(power2(bits<int16_t>))));
+static_assert(unsigned_maximum<int32_t>() == sub1(to_half(power2<int64_t>(bits<int32_t>))));
+static_assert(unsigned_maximum<int64_t>() == sub1(to_half(power2<uint128_t>(bits<int64_t>))));
 static_assert(unsigned_maximum<int8_t >() == to_unsigned(max_int8));
 static_assert(unsigned_maximum<int16_t>() == to_unsigned(max_int16));
 static_assert(unsigned_maximum<int32_t>() == to_unsigned(max_int32));
@@ -220,7 +220,7 @@ static_assert(unsigned_maximum<uint8_t >() == max_uint8);
 static_assert(unsigned_maximum<uint16_t>() == max_uint16);
 static_assert(unsigned_maximum<uint32_t>() == max_uint32);
 static_assert(unsigned_maximum<uint64_t>() == max_uint64);
-static_assert(std::is_same<decltype(maximum<int16_t>()), int16_t>::value);
+static_assert(is_same_type<decltype(maximum<int16_t>()), int16_t>);
 
 // min/max bytes expecations
 constexpr auto max_int24 = sub1(0x00000000800000_i32);
@@ -242,7 +242,7 @@ static_assert(minimum<5>() == min_int40);
 static_assert(minimum<6>() == min_int48);
 static_assert(minimum<7>() == min_int56);
 static_assert(minimum<8>() == min_int64);
-static_assert(std::is_same<decltype(minimum<2>()), int16_t>::value);
+static_assert(is_same_type<decltype(minimum<2>()), int16_t>);
 
 // maximum<Bytes>
 
@@ -254,7 +254,7 @@ static_assert(maximum<5>() == max_int40);
 static_assert(maximum<6>() == max_int48);
 static_assert(maximum<7>() == max_int56);
 static_assert(maximum<8>() == max_int64);
-static_assert(std::is_same<decltype(maximum<1>()), int8_t>::value);
+static_assert(is_same_type<decltype(maximum<1>()), int8_t>);
 
 // bitcoin_min<Bytes>
 
@@ -266,7 +266,7 @@ static_assert(bitcoin_min<5>() == add1(min_int40));
 static_assert(bitcoin_min<6>() == add1(min_int48));
 static_assert(bitcoin_min<7>() == add1(min_int56));
 static_assert(bitcoin_min<8>() == add1(min_int64));
-static_assert(std::is_same<decltype(bitcoin_min<8>()), int64_t>::value);
+static_assert(is_same_type<decltype(bitcoin_min<8>()), int64_t>);
 
 // bitcoin_max<Bytes>
 
@@ -278,7 +278,7 @@ static_assert(bitcoin_max<5>() == max_int40);
 static_assert(bitcoin_max<6>() == max_int48);
 static_assert(bitcoin_max<7>() == max_int56);
 static_assert(bitcoin_max<8>() == max_int64);
-static_assert(std::is_same<decltype(bitcoin_max<4>()), int32_t>::value);
+static_assert(is_same_type<decltype(bitcoin_max<4>()), int32_t>);
 
 /// Bitcoin serialization imposes the following domain constraint on integers.
 /// The domains are constrained by one less negative value than C++ integrals.

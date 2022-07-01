@@ -19,10 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BITS_HPP
 #define LIBBITCOIN_SYSTEM_MATH_BITS_HPP
 
-#include <cstddef>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/safe.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -35,7 +33,7 @@ namespace system {
     
 /// Same as std::bit_width (C++20) except this supports signed and unitx.
 /// See constants.hpp for width<>(), which provides the integral bit domain.
-/// A negative value always returns width<Value>().
+/// A negative value always returns bits<Value>.
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr size_t bit_width(Value value) NOEXCEPT;
 template <typename Value, if_signed_integer<Value> = true>
@@ -64,17 +62,14 @@ constexpr Value bit_xor(Value left, Value right) NOEXCEPT;
 // Value factories.
 // ---------------------------------------------------------------------------
 
-/// All bits set (maximum value for signed, minimum value for unsigned).
 template <typename Value, if_integer<Value> = true>
-constexpr Value bit_all() NOEXCEPT;
+constexpr Value bit_all = bit_not<Value>(0);
 
-/// An instance of value with only the high order bit set (0x8...0).
+template <typename Value, if_integer<Value> = true>
+constexpr Value bit_lo = to_int<Value>(true);
+
 template <typename Value, if_integral_integer<Value> = true>
-constexpr Value bit_hi() NOEXCEPT;
-
-/// An instance of value with only the low order bit set (0x0...1).
-template <typename Value, if_integer<Value> = true>
-constexpr Value bit_lo() NOEXCEPT;
+constexpr Value bit_hi = depromote<Value>(bit_lo<Value> << sub1(bits<Value>));
 
 /// A single bit bitmask, offset relative to highest order bit.
 template <typename Value, if_integral_integer<Value> = true>

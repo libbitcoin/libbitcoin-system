@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_BYTES_IPP
 
 #include <cstdint>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
 #include <bitcoin/system/math/log.hpp>
@@ -135,12 +135,6 @@ constexpr Integer byteswap(Integer value) NOEXCEPT
 
 // Bits to bytes utilities.
 // ----------------------------------------------------------------------------
-
-template <size_t Bits, if_bytes_width<Bits>>
-constexpr size_t to_bytes() NOEXCEPT
-{
-    return Bits / byte_bits;
-}
 
 template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer to_ceilinged_bytes(Integer bits) NOEXCEPT

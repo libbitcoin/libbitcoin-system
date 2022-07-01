@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_PREVOUT_HPP
 
 #include <memory>
-#include <bitcoin/system/boost.hpp>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/chain/output.hpp>
 

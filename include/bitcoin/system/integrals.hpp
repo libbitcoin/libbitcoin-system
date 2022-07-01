@@ -19,73 +19,134 @@
 #ifndef LIBBITCOIN_SYSTEM_INTEGRALS_HPP
 #define LIBBITCOIN_SYSTEM_INTEGRALS_HPP
 
-#include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <type_traits>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/literals.hpp>
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
-    
-/// Type alias for unsigned size_t.
+
+/// signed_size_t
+/// ---------------------------------------------------------------------------
+
 using signed_size_t = std::make_signed_t<size_t>;
 
-/// C++20: all signed types require two's complement negative representation.
+/// Size-based type selectors.
+/// ---------------------------------------------------------------------------
 
-/// Integral value limits.
+/// Signed integral type selection by byte width and sign.
+template <size_t Bytes = 0u,
+    std::enable_if_t<!(Bytes > sizeof(int64_t)), bool> = true>
+using signed_type =
+    std::conditional_t<Bytes == 0u, signed_size_t,
+        std::conditional_t<Bytes == sizeof(int8_t), int8_t,
+            std::conditional_t<Bytes == sizeof(int16_t), int16_t,
+                std::conditional_t<Bytes <= sizeof(int32_t), int32_t,
+                    int64_t>>>>;
 
-/// Signed max.
-constexpr auto max_signed_size_t = std::numeric_limits<signed_size_t>::max();
-constexpr auto max_int64 = std::numeric_limits<int64_t>::max();
-constexpr auto max_int32 = std::numeric_limits<int32_t>::max();
-constexpr auto max_int16 = std::numeric_limits<int16_t>::max();
-constexpr auto max_int8 = std::numeric_limits<int8_t>::max();
+/// Unsigned integral type selection by byte width and sign.
+template <size_t Bytes = 0u,
+    std::enable_if_t<!(Bytes > sizeof(uint64_t)), bool> = true>
+using unsigned_type =
+    std::conditional_t<Bytes == 0u, size_t,
+        std::conditional_t<Bytes == sizeof(uint8_t), uint8_t,
+            std::conditional_t<Bytes == sizeof(uint16_t), uint16_t,
+                std::conditional_t<Bytes <= sizeof(uint32_t), uint32_t,
+                    uint64_t>>>>;
 
-/// Signed min.
-constexpr auto min_signed_size_t = std::numeric_limits<signed_size_t>::min();
-constexpr auto min_int64 = std::numeric_limits<int64_t>::min();
-constexpr auto min_int32 = std::numeric_limits<int32_t>::min();
-constexpr auto min_int16 = std::numeric_limits<int16_t>::min();
-constexpr auto min_int8 = std::numeric_limits<int8_t>::min();
+/// Sign-based type selectors.
+/// ---------------------------------------------------------------------------
 
-/// Unsigned max.
-constexpr auto max_size_t = std::numeric_limits<size_t>::max();
-constexpr auto max_uint64 = std::numeric_limits<uint64_t>::max();
-constexpr auto max_uint32 = std::numeric_limits<uint32_t>::max();
-constexpr auto max_uint16 = std::numeric_limits<uint16_t>::max();
-constexpr auto max_uint8 = std::numeric_limits<uint8_t>::max();
+template <typename Type>
+using to_signed_type = std::make_signed_t<Type>;
 
-/// Unsigned min.
-constexpr auto min_size_t = std::numeric_limits<size_t>::min();
-constexpr auto min_uint64 = std::numeric_limits<uint64_t>::min();
-constexpr auto min_uint32 = std::numeric_limits<uint32_t>::min();
-constexpr auto min_uint16 = std::numeric_limits<uint16_t>::min();
-constexpr auto min_uint8 = std::numeric_limits<uint8_t>::min();
+template <typename Type>
+using to_unsigned_type = std::make_unsigned_t<Type>;
 
-/// Use zero, one, two when the unsigned value is required.
-/// Literals are used below to prevent sign (unsigned) promotion.
-constexpr size_t zero = 0;
-constexpr size_t one = 1;
-constexpr size_t two = 2;
+////template <typename Type>
+////using to_size_type = std::conditional_t<std::is_signed_v<Type>,
+////    signed_size_t, size_t>;
 
-/// The number of bits in a byte (uint8_t).
-constexpr uint8_t byte_bits = 8;
+/// Promotion-based type selectors.
+/// ---------------------------------------------------------------------------
 
-/// Use negative_one when returning negative as a sentinel value.
-constexpr int32_t negative_one = -1;
+/// Alias for -> decltype(Left [op] Right), resulting integral promotion type.
+template <typename Left, typename Right>
+using to_common_type = std::common_type<Left, Right>::type;
 
-/// Variable integer prefix sentinels.
-constexpr uint8_t varint_two_bytes = 0xfd;
-constexpr uint8_t varint_four_bytes = 0xfe;
-constexpr uint8_t varint_eight_bytes = 0xff;
+/// Not possible with std::common_type.
+/// Alias for -> decltype([op] Unary), resulting integral promotion type.
+/// This provides a type constraint for depromotion of native operator results.
+template <typename Unary>
+using to_common_sized_type = decltype(+Unary{});
 
-/// Endianness.
-constexpr auto is_big_endian = std::endian::native == std::endian::big;
-constexpr auto is_little_endian = std::endian::native == std::endian::little;
-constexpr auto is_unknown_endian = !is_big_endian && !is_little_endian;
-static_assert(!is_unknown_endian, "unsupported integer representation");
+/// uintx_t
+/// ---------------------------------------------------------------------------
+
+/// Template for constructing uintx types.
+/// There is no dynamic memory allocation when minBits == maxBits.
+template <uint32_t Bits> // <= uint32_t
+using uintx_t = boost::multiprecision::number<
+    boost::multiprecision::cpp_int_backend<Bits, Bits,
+    boost::multiprecision::unsigned_magnitude,
+    boost::multiprecision::unchecked, void>>;
+
+/// Cannot generalize because no boost support for unsigned arbitrary precision.
+/// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types
+/// but is not a base type. Use of signed types here would also not generalize
+/// as boost uses a different allocator for arbitrary precision. So we are stuck
+/// with this seam, requiring template specialization for uintx.
+typedef boost::multiprecision::cpp_int uintx;
+
+/// C++11: use std::integral_constant (up to primitives limit).
+/// These are predefined due to use in the library, but any width is valid.
+typedef uintx_t<5u> uint5_t;
+typedef uintx_t<11u> uint11_t;
+typedef uintx_t<48u> uint48_t;
+typedef uintx_t<128u> uint128_t;
+typedef uintx_t<160u> uint160_t;
+typedef uintx_t<256u> uint256_t;
+typedef uintx_t<512u> uint512_t;
+
+/// No integral type rounding, all types exact byte size.
+/// Prefers the exact integral type and falls back to uintx_t.
+template <size_t Bytes>
+using unsigned_exact_type =
+    std::conditional_t<Bytes == 0u, size_t,
+        std::conditional_t<Bytes == sizeof(uint8_t), uint8_t,
+            std::conditional_t<Bytes == sizeof(uint16_t), uint16_t,
+                std::conditional_t<Bytes == sizeof(uint32_t), uint32_t,
+                    std::conditional_t<Bytes == sizeof(uint64_t), uint64_t,
+                        uintx_t<Bytes * 8u>>>>>>;
+
+/// Guard type assumptions within the codebase.
+/// ---------------------------------------------------------------------------
+
+// signed_size_t is not the same type, despite having the same size.
+// In which case long and int are both 32 bit types, but are not the same type.
+////static_assert(
+////    is_same_type<signed_size_t, int32_t> ||
+////    is_same_type<signed_size_t, int64_t>);
+
+// This relies on the construction of signed_size_t using std::make_signed_t<size_t>,
+// as this is how the to_signed_type/to_unsigned_type conversions also work.
+static_assert(
+    std::is_same_v<to_signed_type<size_t>, signed_size_t> &&
+    std::is_same_v<to_unsigned_type<signed_size_t>, size_t>);
+
+// This are design limitations, and not a matter of C++ specification.
+static_assert(sizeof(char) == 1u);
+static_assert(
+    sizeof(size_t) == sizeof(uint32_t) ||
+    sizeof(size_t) == sizeof(uint64_t));
+
+// This tests that signed_size_t confirms to the design limitation.
+static_assert(
+    sizeof(signed_size_t) == sizeof(int32_t) ||
+    sizeof(signed_size_t) == sizeof(int64_t));
+
+// This is expected.
+static_assert(sizeof(size_t) == sizeof(signed_size_t));
 
 } // namespace libbitcoin
 

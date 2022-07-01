@@ -19,7 +19,7 @@
 #include <bitcoin/system/radix/base_58.hpp>
 
 #include <algorithm>
-#include <bitcoin/system/constants.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 // base58

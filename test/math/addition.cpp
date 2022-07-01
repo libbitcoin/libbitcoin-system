@@ -43,7 +43,7 @@ static_assert(add<int64_t>(pos_int32, neg_int32) == (int64_t)pos_int32 + (int64_
 static_assert(add<int32_t>(neg_int32, pos_int32) == (int32_t)neg_int32 + (int32_t)pos_int32);
 static_assert(add<int64_t>(pos_int32, min_int32) == (int64_t)pos_int32 + (int64_t)min_int32);
 static_assert(add<int32_t>(min_int32, pos_int32) == (int32_t)min_int32 + (int32_t)pos_int32);
-static_assert(std::is_same<decltype(add<uint64_t>(0, 0)), uint64_t>::value);
+static_assert(is_same_type<decltype(add<uint64_t>(0, 0)), uint64_t>);
 
 // subtract
 static_assert(subtract<int64_t>(min_uint32, min_uint32) == (int64_t)min_uint32 - (int64_t)min_uint32);
@@ -60,7 +60,7 @@ static_assert(subtract<int32_t>(min_int32, neg_int32) == (int32_t)min_int32 - (i
 static_assert(subtract<int64_t>(pos_int32, neg_int32) == (int64_t)pos_int32 - (int64_t)neg_int32);
 static_assert(subtract<int32_t>(neg_int32, pos_int32) == (int32_t)neg_int32 - (int32_t)pos_int32);
 static_assert(subtract<int64_t>(pos_int32, min_int32) == (int64_t)pos_int32 - (int64_t)min_int32);
-static_assert(std::is_same<decltype(subtract<uint64_t>(0, 0)), uint64_t>::value);
+static_assert(is_same_type<decltype(subtract<uint64_t>(0, 0)), uint64_t>);
 
 constexpr uint16_t unsigned_min = 0;
 constexpr uint16_t unsigned_max = max_uint16;
@@ -125,7 +125,7 @@ static_assert(ceilinged_add(signed_max, signed_max) == signed_max);
 static_assert(ceilinged_add(signed_max, signed_half) == signed_max);
 static_assert(ceilinged_add(signed_half, signed_max) == signed_max);
 static_assert(ceilinged_add(signed_half, signed_half) == sub1(signed_max));
-static_assert(std::is_same<decltype(ceilinged_add<uint16_t>(0, 0)), uint16_t>::value);
+static_assert(is_same_type<decltype(ceilinged_add<uint16_t>(0, 0)), uint16_t>);
 
 // ceilinged_add (unsigned)
 static_assert(ceilinged_add(unsigned_min, unsigned_min) == unsigned_min);
@@ -135,7 +135,7 @@ static_assert(ceilinged_add(unsigned_max, unsigned_max) == unsigned_max);
 static_assert(ceilinged_add(unsigned_max, unsigned_half) == unsigned_max);
 static_assert(ceilinged_add(unsigned_half, unsigned_max) == unsigned_max);
 static_assert(ceilinged_add(unsigned_half, unsigned_half) == sub1(unsigned_max));
-static_assert(std::is_same<decltype(ceilinged_add<uint16_t>(0, 0)), uint16_t>::value);
+static_assert(is_same_type<decltype(ceilinged_add<uint16_t>(0, 0)), uint16_t>);
 
 // floor_subtract (signed)
 static_assert(floored_subtract(signed_zero, signed_zero) == signed_zero);
@@ -149,7 +149,7 @@ static_assert(floored_subtract(signed_max, signed_max) == 0);
 static_assert(floored_subtract(signed_max, signed_half) == add1(+signed_half));
 static_assert(floored_subtract(signed_half, signed_max) == sub1(-signed_half));
 static_assert(floored_subtract(signed_half, signed_half) == 0);
-static_assert(std::is_same<decltype(floored_subtract<int16_t>(0, 0)), int16_t>::value);
+static_assert(is_same_type<decltype(floored_subtract<int16_t>(0, 0)), int16_t>);
 
 // floor_subtract (unsigned)
 static_assert(floored_subtract(unsigned_min, unsigned_min) == unsigned_min);
@@ -159,6 +159,6 @@ static_assert(floored_subtract(unsigned_max, unsigned_max) == unsigned_min);
 static_assert(floored_subtract(unsigned_max, unsigned_half) == add1(unsigned_half));
 static_assert(floored_subtract(unsigned_half, unsigned_max) == unsigned_min);
 static_assert(floored_subtract(unsigned_half, unsigned_half) == unsigned_min);
-static_assert(std::is_same<decltype(floored_subtract<uint16_t>(0, 0)), uint16_t>::value);
+static_assert(is_same_type<decltype(floored_subtract<uint16_t>(0, 0)), uint16_t>);
 
 BC_POP_WARNING()

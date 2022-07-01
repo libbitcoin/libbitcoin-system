@@ -26,8 +26,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
@@ -63,7 +63,7 @@ template <typename IStream>
 uint64_t bit_reader<IStream>::read_bits(size_t bits) NOEXCEPT
 {
     uint64_t out = 0;
-    bits = lesser<size_t>(width(out), bits);
+    bits = lesser<size_t>(bc::bits<uint64_t>, bits);
 
     // 'bits' refers to the count of the rightmost bits in 'out'.
     // Those bits are written from left to right using a right-relative offset.

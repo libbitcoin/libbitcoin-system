@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 
-#include <bitcoin/system/constraints.hpp>
+// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/safe.hpp>
 

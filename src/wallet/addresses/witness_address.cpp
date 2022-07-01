@@ -25,7 +25,7 @@
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/exceptions.hpp>
+// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

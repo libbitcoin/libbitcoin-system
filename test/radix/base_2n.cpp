@@ -152,5 +152,5 @@ static_assert(base256e::compress(minimum4) == compressed4);
 constexpr auto exponent5 = 32u;
 constexpr auto mantissa5 = 0x00ffffffu;
 constexpr auto compressed5 = (exponent5 << 24u) | mantissa5;
-constexpr auto maximum5 = bit_all<uint256_t>();
+constexpr auto maximum5 = bit_all<uint256_t>;
 static_assert(base256e::compress(maximum5) == compressed5);

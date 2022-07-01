@@ -111,7 +111,7 @@ static_assert(ones_complement<uint8_t>(0xfe) == 1u);
 static_assert(ones_complement<uint8_t>(0xfd) == 2u);
 static_assert(ones_complement<uint8_t>(0xfc) == 3u);
 static_assert(ones_complement(ones_complement(0x12345678)) == 0x12345678);
-static_assert(std::is_same<decltype(ones_complement<int8_t>(0)), int8_t>::value);
+static_assert(is_same_type<decltype(ones_complement<int8_t>(0)), int8_t>);
 
 // twos_complement
 // similar to but different than absolute (~n+1)
@@ -134,7 +134,7 @@ static_assert(twos_complement(0xfffffffe_u32) == 2_u32);
 static_assert(twos_complement(0xfffffffffffffffd_u64) == 3_u64);
 static_assert(twos_complement(0xfffffffffffffffc_u64) == 4_u64);
 static_assert(twos_complement(twos_complement(0x12345678)) == 0x12345678);
-static_assert(std::is_same<decltype(twos_complement<int8_t>(0)), int8_t>::value);
+static_assert(is_same_type<decltype(twos_complement<int8_t>(0)), int8_t>);
 
 // signed
 static_assert(negate(max_int8)  == -max_int8);          // rhs size/sign promotion (expected result)
