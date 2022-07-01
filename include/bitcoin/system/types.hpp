@@ -21,53 +21,132 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <type_traits>
-#include <bitcoin/system/constants.hpp>
-
-// TODO: convert from constexpr fn to value using std::conjunction/disjunction.
+#include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
 
-/// Simple functions over type argument(s).
+/// signed_size_t
+/// ---------------------------------------------------------------------------
 
-/// Same size and signedness, independent of const and volatility.
+using signed_size_t = std::make_signed_t<size_t>;
+
+/// Size-based type selectors.
+/// ---------------------------------------------------------------------------
+
+/// Signed integral type selection by byte width and sign.
+template <size_t Bytes = 0u,
+    std::enable_if_t<!(Bytes > sizeof(int64_t)), bool> = true>
+using signed_type =
+    std::conditional_t<Bytes == 0u, signed_size_t,
+        std::conditional_t<Bytes == sizeof(int8_t), int8_t,
+            std::conditional_t<Bytes == sizeof(int16_t), int16_t,
+                std::conditional_t<Bytes <= sizeof(int32_t), int32_t,
+                    int64_t>>>>;
+
+/// Unsigned integral type selection by byte width and sign.
+template <size_t Bytes = 0u,
+    std::enable_if_t<!(Bytes > sizeof(uint64_t)), bool> = true>
+using unsigned_type =
+    std::conditional_t<Bytes == 0u, size_t,
+        std::conditional_t<Bytes == sizeof(uint8_t), uint8_t,
+            std::conditional_t<Bytes == sizeof(uint16_t), uint16_t,
+                std::conditional_t<Bytes <= sizeof(uint32_t), uint32_t,
+                    uint64_t>>>>;
+
+/// Sign-based type selectors.
+/// ---------------------------------------------------------------------------
+
+template <typename Type>
+using to_signed_type = std::make_signed_t<Type>;
+
+template <typename Type>
+using to_unsigned_type = std::make_unsigned_t<Type>;
+
+////template <typename Type>
+////using to_size_type = std::conditional_t<std::is_signed_v<Type>,
+////    signed_size_t, size_t>;
+
+/// Promotion-based type selectors.
+/// ---------------------------------------------------------------------------
+
+/// Alias for -> decltype(Left [op] Right), resulting integral promotion type.
 template <typename Left, typename Right>
-constexpr bool is_same_type = std::is_same_v<Left, Right>;
+using to_common_type = std::common_type_t<Left, Right>;
 
-/// bool is unsigned: bool(-1) < bool(0). w/char sign unspecified.
-/// w/charxx_t types are unsigned. iostream relies on w/char.
-template <typename Type>
-constexpr bool is_signed = std::is_signed_v<Type>;
+/// Not possible with std::common_type.
+/// Alias for -> decltype([op] Unary), resulting integral promotion type.
+/// This provides a type constraint for depromotion of native operator results.
+template <typename Unary>
+using to_common_sized_type = decltype(+Unary{});
 
-/// numeric_limits may be specialized by non-integrals (such as uintx).
-template <typename Type>
-constexpr bool is_integer = std::numeric_limits<Type>::is_integer &&
-    !is_same_type<Type, bool>;
+/// uintx_t
+/// ---------------------------------------------------------------------------
 
-/// sizeof(Left) == sizeof(Right).
-template <typename Left, typename Right>
-constexpr bool is_same_size = (sizeof(Left) == sizeof(Right));
+/// Template for constructing uintx types.
+/// There is no dynamic memory allocation when minBits == maxBits.
+template <uint32_t Bits> // <= uint32_t
+using uintx_t = boost::multiprecision::number<
+    boost::multiprecision::cpp_int_backend<Bits, Bits,
+    boost::multiprecision::unsigned_magnitude,
+    boost::multiprecision::unchecked, void>>;
 
-/// Future-proofing against larger integrals or language features that
-/// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
-template <typename Type>
-constexpr bool is_integral_size = is_integral_sized(sizeof(Type));
+/// Cannot generalize because no boost support for unsigned arbitrary precision.
+/// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types
+/// but is not a base type. Use of signed types here would also not generalize
+/// as boost uses a different allocator for arbitrary precision. So we are stuck
+/// with this seam, requiring template specialization for uintx.
+typedef boost::multiprecision::cpp_int uintx;
 
-/// bool is a c++ integral, but excluded here.
-/// Type is s/u int8, int16, int32, int64 (including all aliases).
-template <typename Type>
-constexpr bool is_integral = std::is_integral_v<Type> &&
-    is_integral_size<Type> && !is_same_type<Type, bool>;
+/// C++11: use std::integral_constant (up to primitives limit).
+/// These are predefined due to use in the library, but any width is valid.
+typedef uintx_t<5u> uint5_t;
+typedef uintx_t<11u> uint11_t;
+typedef uintx_t<48u> uint48_t;
+typedef uintx_t<128u> uint128_t;
+typedef uintx_t<160u> uint160_t;
+typedef uintx_t<256u> uint256_t;
+typedef uintx_t<512u> uint512_t;
 
-/// Constrained to is_integral types.
-template <typename Type, std::enable_if_t<is_integral_size<Type>, bool> = true>
-constexpr size_t bits = to_bits(sizeof(Type));
+/// No integral type rounding, all types exact byte size.
+/// Prefers the exact integral type and falls back to uintx_t.
+template <size_t Bytes>
+using unsigned_exact_type =
+    std::conditional_t<Bytes == 0u, size_t,
+        std::conditional_t<Bytes == sizeof(uint8_t), uint8_t,
+            std::conditional_t<Bytes == sizeof(uint16_t), uint16_t,
+                std::conditional_t<Bytes == sizeof(uint32_t), uint32_t,
+                    std::conditional_t<Bytes == sizeof(uint64_t), uint64_t,
+                        uintx_t<Bytes * 8u>>>>>>;
 
-/// Limited to is_nonzero(Bits) && is_zero(Bits % 8).
-/// Use to_ceilinged_bytes/to_floored_bytes for non-aligned conversions. 
-template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
-constexpr size_t bytes = Bits / byte_bits;
+/// Guard type assumptions within the codebase.
+/// ---------------------------------------------------------------------------
+
+// signed_size_t is not the same type, despite having the same size.
+// In which case long and int are both 32 bit types, but are not the same type.
+////static_assert(
+////    is_same_type<signed_size_t, int32_t> ||
+////    is_same_type<signed_size_t, int64_t>);
+
+// This relies on the construction of signed_size_t using std::make_signed_t<size_t>,
+// as this is how the to_signed_type/to_unsigned_type conversions also work.
+static_assert(
+    std::is_same_v<to_signed_type<size_t>, signed_size_t> &&
+    std::is_same_v<to_unsigned_type<signed_size_t>, size_t>);
+
+// This are design limitations, and not a matter of C++ specification.
+static_assert(sizeof(char) == 1u);
+static_assert(
+    sizeof(size_t) == sizeof(uint32_t) ||
+    sizeof(size_t) == sizeof(uint64_t));
+
+// This tests that signed_size_t confirms to the design limitation.
+static_assert(
+    sizeof(signed_size_t) == sizeof(int32_t) ||
+    sizeof(signed_size_t) == sizeof(int64_t));
+
+// This is expected.
+static_assert(sizeof(size_t) == sizeof(signed_size_t));
 
 } // namespace libbitcoin
 

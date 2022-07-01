@@ -24,7 +24,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
-#include <bitcoin/system/types.hpp>
+#include <bitcoin/system/typelets.hpp>
 
 namespace libbitcoin {
 namespace system {

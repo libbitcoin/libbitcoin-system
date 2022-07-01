@@ -32,7 +32,7 @@
 // constants      : types
 // literals       : constants   [for types]
 // funclets       : literals    [for constants]
-// typelets       : constants
+// typelets       : funclets
 // constraints    : typelets
 // define         : constraints [for all]
 

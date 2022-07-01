@@ -108,6 +108,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/op_error_t.cpp \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
+    src/math/math.cpp \
     src/radix/base_10.cpp \
     src/radix/base_16.cpp \
     src/radix/base_2048.cpp \
@@ -223,6 +224,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/settings.cpp \
     test/test.cpp \
     test/test.hpp \
+    test/types.cpp \
+    test/values.cpp \
     test/chain/block.cpp \
     test/chain/chain_state.cpp \
     test/chain/checkpoint.cpp \
@@ -384,11 +387,11 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/constraints.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
-    include/bitcoin/system/integrals.hpp \
+    include/bitcoin/system/funclets.hpp \
     include/bitcoin/system/literals.hpp \
     include/bitcoin/system/settings.hpp \
+    include/bitcoin/system/typelets.hpp \
     include/bitcoin/system/types.hpp \
-    include/bitcoin/system/values.hpp \
     include/bitcoin/system/version.hpp \
     include/bitcoin/system/warnings.hpp
 

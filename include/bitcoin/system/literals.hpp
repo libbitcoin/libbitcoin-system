@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <limits>
 #include <type_traits>
-#include <bitcoin/system/values.hpp>
+#include <bitcoin/system/constants.hpp>
 
 // clang does not yet have consteval.
 // Remove this when all platforms support consteval.

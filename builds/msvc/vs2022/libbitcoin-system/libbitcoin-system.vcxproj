@@ -346,7 +346,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\transaction_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\integrals.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\literals.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\interpreter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\machine.hpp" />
@@ -405,6 +405,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\sha256_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\sha256x2_writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streams.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\typelets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\types.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\ascii.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\code_points.hpp" />
@@ -419,7 +420,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\utf8_everywhere.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\values.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\bitcoin_uri.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\addresses\checked.hpp" />
