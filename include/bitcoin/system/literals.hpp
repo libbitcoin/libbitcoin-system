@@ -25,6 +25,14 @@
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
 
+// RUNTIME_LITERALS may be used to exclude test evaluation (until consteval).
+#if defined(HAVE_CONSTEVAL)
+    #define CONSTEVAL consteval
+#else
+    #define CONSTEVAL constexpr
+    #define RUNTIME_LITERALS
+#endif
+
 namespace libbitcoin {
 namespace system {
 namespace literals {

@@ -21,13 +21,9 @@
 
 #include <bitcoin/system/version.hpp>
 
-// Things we have.
-
+// What we are.
 #ifdef _MSC_VER
     #define HAVE_MSC
-    #define HAVE_NOEXCEPT
-    #define HAVE_CONSTEVAL
-    #define HAVE_PRAGMA_WARNING
     #define MSC_VERSION _MSC_VER
 #elif defined(__GNUC__)
     #define HAVE_GNUC
@@ -44,24 +40,6 @@
 #elif defined(__NetBSD__)
     #define HAVE_NETBSD
 #endif
-
-// clang does not yet have consteval.
-// Remove this when all platforms support consteval.
-// RUNTIME_LITERALS may be used to exclude test evaluation (until consteval).
-#if defined(HAVE_CONSTEVAL)
-    #define CONSTEVAL consteval
-#else
-    #define CONSTEVAL constexpr
-    #define RUNTIME_LITERALS
-#endif
-
-#if defined(HAVE_NOEXCEPT)
-    #define NOEXCEPT noexcept
-#else
-    #define NOEXCEPT
-#endif
-
-#define THROWS noexcept(false)
 
 // ISO predefined constant for C++ version.
 #if __cplusplus >= 199711L
@@ -97,19 +75,6 @@
     #define BC_VS2022
 #endif
 
-#if defined(HAVE_PRAGMA_WARNING)
-    #define BC_DISABLE_WARNING(value) \
-        __pragma(warning(disable:value))
-    #define BC_PUSH_WARNING(value) \
-        __pragma(warning(push)) \
-        __pragma(warning(disable:value))
-    #define BC_POP_WARNING() \
-        __pragma(warning(pop))
-#else
-    #define BC_PUSH_WARNING(value)
-    #define BC_POP_WARNING()
-#endif
-
 // ISO predefined constant for targeted CPU architecture.
 #if defined _M_IX86
     #define BC_X86_BUILD
@@ -118,5 +83,20 @@
 #elif defined _M_IA64
     #define BC_ITANIUM_BUILD
 #endif
+
+ // Things we are missing on other platforms.
+#ifdef HAVE_MSC
+    #define HAVE_RANGES
+    #define HAVE_CONSTEVAL
+    #define HAVE_PRAGMA_WARNING
+#endif
+
+// Things we configure to have.
+
+// disable noexcept to capture stack trace.
+#define HAVE_NOEXCEPT
+
+// deprecated is noisy, turn on to find dependencies.
+////#define HAVE_DEPRECATED
 
 #endif

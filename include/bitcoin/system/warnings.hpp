@@ -21,12 +21,20 @@
 
 #include <bitcoin/system/have.hpp>
 
-// These are explicit TODO items.
-#define BC_PUSH_WARNING_UNGUARDED(value) BC_PUSH_WARNING(value)
+#if defined(HAVE_PRAGMA_WARNING)
+    #define BC_DISABLE_WARNING(value) \
+        __pragma(warning(disable:value))
+    #define BC_PUSH_WARNING(value) \
+        __pragma(warning(push)) \
+        __pragma(warning(disable:value))
+    #define BC_POP_WARNING() \
+        __pragma(warning(pop))
+#else
+    #define BC_PUSH_WARNING(value)
+    #define BC_POP_WARNING()
+#endif
 
 #ifdef HAVE_MSC
-    // Test only (see test.hpp).
-    #define CONSTANT_CONDITIONAL 4127
     #define NARROWING_CONVERSION 4244
     #define DIAMOND_INHERITANCE 4250
     #define SIZE_NARROWING_CONVERSION 4267
@@ -65,8 +73,7 @@
     BC_DISABLE_WARNING(ASSIGNMENT_WITHIN_CONDITIONAL)
 
     // Suppress C4459: declaration of 'one' hides global declaration.
-    // This arises from boost templates  defining 'one' as a local variable,
-    // in their own namespaces. Have found no narrower way to exclude it.
+    // This arises from boost templates  defining 'one' as a public variable.
     BC_DISABLE_WARNING(LOCAL_HIDES_GLOBAL)
 #endif
 

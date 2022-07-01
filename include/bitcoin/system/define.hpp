@@ -97,12 +97,23 @@ namespace bc = libbitcoin;
 #if !defined(BC_CPP_20)
     static_assert(false, "C++20 minimum required.");
 #endif
-    
-// deprecated is noisy, turn on to find dependencies.
-#define DEPRECATED
-////#define DEPRECATED [[deprecated]]
+
 #define NODISCARD [[nodiscard]]
 #define FALLTHROUGH [[fallthrough]]
+    
+#if defined(HAVE_DEPRECATED)
+    #define DEPRECATED [[deprecated]]
+#else
+    #define DEPRECATED
+#endif
+
+#if defined(HAVE_NOEXCEPT)
+    #define NOEXCEPT noexcept
+#else
+    #define NOEXCEPT
+#endif
+
+#define THROWS noexcept(false)
 
 // Define so we can have better visibility of lcov exclusion ranges.
 #define LCOV_EXCL_START(text)
