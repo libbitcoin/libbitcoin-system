@@ -43,17 +43,22 @@
 // /error         : define
 // /unicode       : define
 // /math          : define
-// /data          : /math, /unicode
+// /data          : /math /unicode
+// /endian        : /data
 // /words         : /data
 // /radix         : /words
 // /serial        : /radix
-// /crypto        : /radix
-// /stream        : /crypto, /serial, /error
-// /chain         : /stream, [/settings]
+// /crypto        : /radix {TODO: /endian -> /math}
+// /stream        : /crypto /endian /error
+// /chain         : /stream [/settings]
 // settings       : /chain
 // /machine       : /chain
 // /config        : /chain
 // /wallet        : /chain
+
+// All /crypto/external can be made cpp/constexpr except the lax
+// parser, which wraps libsecp256k1 (as with elliptic_curve).
+// TODO: convert and move to /system/hash/ directory along with hash.hpp.
 
 namespace libbitcoin {
 namespace system {

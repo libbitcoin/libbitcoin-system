@@ -19,19 +19,15 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_IPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <ios>
 #include <istream>
 #include <limits>
 #include <string>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
 namespace libbitcoin {

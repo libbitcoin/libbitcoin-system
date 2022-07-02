@@ -21,12 +21,10 @@
 
 #include <bitcoin/system/crypto/siphash.hpp>
 
-/// DELETECSTDINT
 #include <tuple>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/serial/serial.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -92,7 +90,7 @@ uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
         compression_round(v0, v1, v2, v3,
             source.read_8_bytes_little_endian());
 
-    auto last = is_zero(bytes % eight) ? 0ll :
+    auto last = is_zero(bytes % eight) ? 0_u64 :
         source.read_8_bytes_little_endian();
 
     last ^= ((bytes % max_encoded_byte_count) << to_bits(sub1(eight)));

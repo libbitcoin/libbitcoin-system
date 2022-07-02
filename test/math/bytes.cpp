@@ -212,28 +212,6 @@ static_assert(to_floored_bytes(42u) == 42u / 8u);
 static_assert(to_floored_bytes(0xffu) == 0xff / 8u);
 static_assert(is_same_type<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>);
 
-// to_big_end (constexpr)
-// Beware of type promotion (use explicit types).
-static_assert(to_big_end(0x01_i8) == 0x01);
-static_assert(to_big_end(0x0102_i16) == 0x0201);
-static_assert(to_big_end(0x01020304_i32) == 0x04030201);
-static_assert(to_big_end(0x0102030405060708_i64) == 0x0807060504030201);
-static_assert(to_big_end(0x01_u8) == 0x01);
-static_assert(to_big_end(0x0102_u16) == 0x0201);
-static_assert(to_big_end(0x01020304_u32) == 0x04030201);
-static_assert(to_big_end(0x0102030405060708_u64) == 0x0807060504030201);
-
-// to_little_end (constexpr)
-// Beware of type promotion (use explicit types).
-static_assert(to_little_end(0x01_i8) == 0x01);
-static_assert(to_little_end(0x0102_i16) == 0x0102);
-static_assert(to_little_end(0x01020304_i32) == 0x01020304);
-static_assert(to_little_end(0x0102030405060708_i64) == 0x0102030405060708);
-static_assert(to_little_end(0x01_u8) == 0x01);
-static_assert(to_little_end(0x0102_u16) == 0x0102);
-static_assert(to_little_end(0x01020304_u32) == 0x01020304);
-static_assert(to_little_end(0x0102030405060708_u64) == 0x0102030405060708);
-
 // byteswap (constexpr)
 // Beware of type promotion (use explicit types).
 static_assert(byteswap(0x01_i8) == 0x01);
@@ -245,47 +223,38 @@ static_assert(byteswap(0x0102_u16) == 0x0201);
 static_assert(byteswap(0x01020304_u32) == 0x04030201);
 static_assert(byteswap(0x0102030405060708_u64) == 0x0807060504030201);
 
-// TODO: verify endians aren't reversed.
+template <typename Integer>
+constexpr auto native(Integer value)
+{
+    if constexpr (is_big_endian)
+        return byteswap(value);
+
+    return value;
+}
+
+// to_big_end (constexpr)
+// Beware of type promotion (use explicit types).
+static_assert(native_to_big_end(native(0x01_i8)) == 0x01);
+static_assert(native_to_big_end(native(0x0102_i16)) == 0x0201);
+static_assert(native_to_big_end(native(0x01020304_i32)) == 0x04030201);
+static_assert(native_to_big_end(native(0x0102030405060708_i64)) == 0x0807060504030201);
+static_assert(native_to_big_end(native(0x01_u8)) == 0x01);
+static_assert(native_to_big_end(native(0x0102_u16)) == 0x0201);
+static_assert(native_to_big_end(native(0x01020304_u32)) == 0x04030201);
+static_assert(native_to_big_end(native(0x0102030405060708_u64)) == 0x0807060504030201);
+
+// to_little_end (constexpr)
+// Beware of type promotion (use explicit types).
+static_assert(native_to_little_end(native(0x01_i8)) == 0x01);
+static_assert(native_to_little_end(native(0x0102_i16)) == 0x0102);
+static_assert(native_to_little_end(native(0x01020304_i32)) == 0x01020304);
+static_assert(native_to_little_end(native(0x0102030405060708_i64)) == 0x0102030405060708);
+static_assert(native_to_little_end(native(0x01_u8)) == 0x01);
+static_assert(native_to_little_end(native(0x0102_u16)) == 0x0102);
+static_assert(native_to_little_end(native(0x01020304_u32)) == 0x01020304);
+static_assert(native_to_little_end(native(0x0102030405060708_u64)) == 0x0102030405060708);
 
 BOOST_AUTO_TEST_SUITE(bytes_tests)
-
-// to_big_end (not constexpr)
-
-BOOST_AUTO_TEST_CASE(bytes__to_big_end__not_constant_evaluated_signed__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_big_end(0x01_i8), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x0102_i16), 0x0201_i16);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x01020304_i32), 0x04030201_i32);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x0102030405060708_i64), 0x0807060504030201_i64);
-}
-
-BOOST_AUTO_TEST_CASE(bytes__to_big_end__not_constant_evaluated_unsigned__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_big_end(0x01_u8), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x0102_u16), 0x0201_u16);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x01020304_u32), 0x04030201_u32);
-    BOOST_REQUIRE_EQUAL(to_big_end(0x0102030405060708_u64), 0x0807060504030201_u64);
-}
-
-// to_little_end (not constexpr)
-
-BOOST_AUTO_TEST_CASE(bytes__bytes__to_little_end__not_constant_evaluated_signed__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_little_end(0x01_i8), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x0102_i16), 0x0102_i16);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x01020304_i32), 0x01020304_i32);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x0102030405060708_i64), 0x0102030405060708_i64);
-}
-
-BOOST_AUTO_TEST_CASE(bytes__to_little_end__not_constant_evaluated_unsigned__expected)
-{
-    BOOST_REQUIRE_EQUAL(to_little_end(0x01_u8), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x0102_u16), 0x0102_u16);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x01020304_u32), 0x01020304_u32);
-    BOOST_REQUIRE_EQUAL(to_little_end(0x0102030405060708_u64), 0x0102030405060708_u64);
-}
-
-// byteswap (not constexpr)
 
 BOOST_AUTO_TEST_CASE(bytes__byteswap__not_constant_evaluated_signed__swapped)
 {
@@ -301,6 +270,39 @@ BOOST_AUTO_TEST_CASE(bytes__byteswap__not_constant_evaluated_unsigned__swapped)
     BOOST_REQUIRE_EQUAL(byteswap(0x0102_u16), 0x0201_u16);
     BOOST_REQUIRE_EQUAL(byteswap(0x01020304_u32), 0x04030201_u32);
     BOOST_REQUIRE_EQUAL(byteswap(0x0102030405060708_u64), 0x0807060504030201_u64);
+}
+
+BOOST_AUTO_TEST_CASE(bytes__to_big_end__not_constant_evaluated_signed__expected)
+{
+
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x01_i8)), 0x01_i8);
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x0102_i16)), 0x0201_i16);
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x01020304_i32)), 0x04030201_i32);
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x0102030405060708_i64)), 0x0807060504030201_i64);
+}
+
+BOOST_AUTO_TEST_CASE(bytes__to_big_end__not_constant_evaluated_unsigned__expected)
+{
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x01_u8)), 0x01_u8);
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x0102_u16)), 0x0201_u16);
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x01020304_u32)), 0x04030201_u32);
+    BOOST_REQUIRE_EQUAL(native_to_big_end(native(0x0102030405060708_u64)), 0x0807060504030201_u64);
+}
+
+BOOST_AUTO_TEST_CASE(bytes__bytes__to_little_end__not_constant_evaluated_signed__expected)
+{
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x01_i8)), 0x01_i8);
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x0102_i16)), 0x0102_i16);
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x01020304_i32)), 0x01020304_i32);
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x0102030405060708_i64)), 0x0102030405060708_i64);
+}
+
+BOOST_AUTO_TEST_CASE(bytes__to_little_end__not_constant_evaluated_unsigned__expected)
+{
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x01_u8)), 0x01_u8);
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x0102_u16)), 0x0102_u16);
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x01020304_u32)), 0x01020304_u32);
+    BOOST_REQUIRE_EQUAL(native_to_little_end(native(0x0102030405060708_u64)), 0x0102030405060708_u64);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

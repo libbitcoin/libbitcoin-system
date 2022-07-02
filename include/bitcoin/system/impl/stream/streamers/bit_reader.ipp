@@ -24,13 +24,9 @@
 
 #include <bitcoin/system/stream/streamers/bit_reader.hpp>
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {

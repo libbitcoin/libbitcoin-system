@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SERIAL_SERIAL_HPP
-#define LIBBITCOIN_SYSTEM_SERIAL_SERIAL_HPP
+#include <bitcoin/system/endian/endian.hpp>
 
-#include <bitcoin/system/serial/deserialize.hpp>
-#include <bitcoin/system/serial/props.hpp>
-#include <bitcoin/system/serial/serialize.hpp>
+// This is a maintainer file to force rebuild of /system/endian only.
 
-#endif
+namespace libbitcoin {
+namespace system {
+
+} // namespace system
+} // namespace libbitcoin

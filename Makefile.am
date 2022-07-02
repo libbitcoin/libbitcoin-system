@@ -103,6 +103,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/data/data_slab.cpp \
     src/data/data_slice.cpp \
     src/data/string.cpp \
+    src/endian/endian.cpp \
     src/error/block_error_t.cpp \
     src/error/error_t.cpp \
     src/error/op_error_t.cpp \
@@ -273,6 +274,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/memory.cpp \
     test/data/no_fill_allocator.cpp \
     test/data/string.cpp \
+    test/endian/endian.cpp \
     test/error/block_error_t.cpp \
     test/error/error.cpp \
     test/error/error_t.cpp \
@@ -300,7 +302,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/radix/base_64.cpp \
     test/radix/base_85.cpp \
     test/serial/deserialize.cpp \
-    test/serial/endian.cpp \
     test/serial/props.cpp \
     test/serial/serialize.cpp \
     test/stream/binary.cpp \
@@ -494,6 +495,17 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/no_fill_allocator.hpp \
     include/bitcoin/system/data/string.hpp
 
+include_bitcoin_system_endiandir = ${includedir}/bitcoin/system/endian
+include_bitcoin_system_endian_HEADERS = \
+    include/bitcoin/system/endian/collection.hpp \
+    include/bitcoin/system/endian/endian.hpp \
+    include/bitcoin/system/endian/minimal.hpp \
+    include/bitcoin/system/endian/nominal.hpp \
+    include/bitcoin/system/endian/stream.hpp \
+    include/bitcoin/system/endian/uintx.hpp \
+    include/bitcoin/system/endian/uintx_t.hpp \
+    include/bitcoin/system/endian/unchecked.hpp
+
 include_bitcoin_system_errordir = ${includedir}/bitcoin/system/error
 include_bitcoin_system_error_HEADERS = \
     include/bitcoin/system/error/block_error_t.hpp \
@@ -523,6 +535,16 @@ include_bitcoin_system_impl_data_HEADERS = \
     include/bitcoin/system/impl/data/external_ptr.ipp \
     include/bitcoin/system/impl/data/memory.ipp
 
+include_bitcoin_system_impl_endiandir = ${includedir}/bitcoin/system/impl/endian
+include_bitcoin_system_impl_endian_HEADERS = \
+    include/bitcoin/system/impl/endian/collection.ipp \
+    include/bitcoin/system/impl/endian/minimal.ipp \
+    include/bitcoin/system/impl/endian/nominal.ipp \
+    include/bitcoin/system/impl/endian/stream.ipp \
+    include/bitcoin/system/impl/endian/uintx.ipp \
+    include/bitcoin/system/impl/endian/uintx_t.ipp \
+    include/bitcoin/system/impl/endian/unchecked.ipp
+
 include_bitcoin_system_impl_machinedir = ${includedir}/bitcoin/system/impl/machine
 include_bitcoin_system_impl_machine_HEADERS = \
     include/bitcoin/system/impl/machine/interpreter.ipp \
@@ -551,7 +573,6 @@ include_bitcoin_system_impl_radix_HEADERS = \
 include_bitcoin_system_impl_serialdir = ${includedir}/bitcoin/system/impl/serial
 include_bitcoin_system_impl_serial_HEADERS = \
     include/bitcoin/system/impl/serial/deserialize.ipp \
-    include/bitcoin/system/impl/serial/endian.ipp \
     include/bitcoin/system/impl/serial/serialize.ipp
 
 include_bitcoin_system_impl_streamdir = ${includedir}/bitcoin/system/impl/stream
@@ -616,7 +637,6 @@ include_bitcoin_system_radix_HEADERS = \
 include_bitcoin_system_serialdir = ${includedir}/bitcoin/system/serial
 include_bitcoin_system_serial_HEADERS = \
     include/bitcoin/system/serial/deserialize.hpp \
-    include/bitcoin/system/serial/endian.hpp \
     include/bitcoin/system/serial/props.hpp \
     include/bitcoin/system/serial/serial.hpp \
     include/bitcoin/system/serial/serialize.hpp

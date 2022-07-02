@@ -22,16 +22,11 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_WRITER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_WRITER_IPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
-#include <iterator>
 #include <utility>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {

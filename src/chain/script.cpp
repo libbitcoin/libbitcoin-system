@@ -42,7 +42,6 @@
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/radix/radix.hpp>
-#include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

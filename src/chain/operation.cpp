@@ -20,16 +20,14 @@
 #include <bitcoin/system/chain/operation.hpp>
 
 #include <algorithm>
-/// DELETECSTDINT
 #include <memory>
-/// DELETEMENOW
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {

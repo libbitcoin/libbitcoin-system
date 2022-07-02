@@ -16,11 +16,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/// DELETECSTDINT
 #include <sstream>
 #include "../test.hpp"
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
+
+// Templates must match uintx_t<uint32> vs. uintx_t<size_t>.
+BOOST_AUTO_TEST_CASE(endian__to_array__zero__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_array(uint5_t{ 1 }), data_array<1>{ 1 });
+    BOOST_REQUIRE_EQUAL(to_array(uint11_t{ 0 }), data_array<2>{});
+    BOOST_REQUIRE_EQUAL(to_array(uint48_t{ 0 }), data_array<6>{});
+    BOOST_REQUIRE_EQUAL(to_array(uint128_t{ 0 }), data_array<16>{});
+    BOOST_REQUIRE_EQUAL(to_array(uint160_t{ 0 }), data_array<20>{});
+    BOOST_REQUIRE_EQUAL(to_array(uint256_t{ 0 }), data_array<32>{});
+    BOOST_REQUIRE_EQUAL(to_array(uint512_t{ 0 }), data_array<64>{});
+}
+
+// Templates must match uintx_t<uint32> vs. uintx_t<size_t>.
+BOOST_AUTO_TEST_CASE(endian__to_uintx__zero__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<1>{ 1 }), uint5_t{ 1 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<2>{}), uint11_t{ 0 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<6>{}), uint48_t{ 0 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<16>{}), uint128_t{ 0 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<20>{}), uint160_t{ 0 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<32>{}), uint256_t{ 0 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<64>{}), uint512_t{ 0 });
+}
 
 #define ENDIAN_BYTE
 #define ENDIAN_NEGATIVE
@@ -146,24 +169,24 @@ const data_chunk data_reverse{ 0x04, 0x03, 0x02, 0x01 };
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__chunk_to_integer__expected)
 {
-    BOOST_REQUIRE(from_big_endian<uintx>(data_forward) == value32);
+    BOOST_REQUIRE(from_big_endian(data_forward) == value32);
 }
 
 BOOST_AUTO_TEST_CASE(endian__from_little_endian__chunk_to_integer__expected)
 {
-    BOOST_REQUIRE(from_little_endian<uintx>(data_reverse) == value32);
+    BOOST_REQUIRE(from_little_endian(data_reverse) == value32);
 }
 
 // These are now restricted by bit_width in a type constraint.
 
 ////BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_chunk__expected)
 ////{
-////    BOOST_REQUIRE_EQUAL(to_big_endian<uintx>(value32), data_forward);
+////    BOOST_REQUIRE_EQUAL(to_big_endian(value32), data_forward);
 ////}
 
 ////BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_chunk__expected)
 ////{
-////    BOOST_REQUIRE_EQUAL(to_little_endian<uintx>(value32), data_reverse);
+////    BOOST_REQUIRE_EQUAL(to_little_endian(value32), data_reverse);
 ////}
 
 // short data
@@ -261,13 +284,13 @@ constexpr uint64_t value_alpha64 = 0x424954434f494e21;
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__stream_to_integer__expected)
 {
-    std::stringstream stream{ alpha_forward };
+    std::stringstream stream{ alpha_reverse };
     BOOST_REQUIRE_EQUAL(from_big_endian<uint64_t>(stream), value_alpha64);
 }
 
 BOOST_AUTO_TEST_CASE(endian__from_little_endian__stream_to_integer__expected)
 {
-    std::stringstream stream{ alpha_reverse };
+    std::stringstream stream{ alpha_forward };
     BOOST_REQUIRE_EQUAL(from_little_endian<uint64_t>(stream), value_alpha64);
 }
 
@@ -275,14 +298,14 @@ BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_stream__expected)
 {
     std::stringstream stream;
     to_big_endian(stream, value_alpha64);
-    BOOST_REQUIRE_EQUAL(stream.str(), alpha_forward);
+    BOOST_REQUIRE_EQUAL(stream.str(), alpha_reverse);
 }
 
 BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_stream__expected)
 {
     std::stringstream stream;
     to_little_endian(stream, value_alpha64);
-    BOOST_REQUIRE_EQUAL(stream.str(), alpha_reverse);
+    BOOST_REQUIRE_EQUAL(stream.str(), alpha_forward);
 }
 
 #endif // ENDIAN_STREAM_INTEGER

@@ -54,30 +54,61 @@ constexpr size_t byte_width(Value value) NOEXCEPT
 
 template <typename Integer,
     if_big_endian_integral_integer<Integer>>
-constexpr Integer to_big_end(Integer from) NOEXCEPT
+constexpr Integer native_to_big_end(Integer big) NOEXCEPT
 {
-    return from;
+    return big;
 }
 
 template <typename Integer,
     if_little_endian_integral_integer<Integer>>
-constexpr Integer to_big_end(Integer from) NOEXCEPT
+constexpr Integer native_to_big_end(Integer little) NOEXCEPT
 {
-    return byteswap(from);
+    return byteswap(little);
 }
 
 template <typename Integer,
     if_little_endian_integral_integer<Integer>>
-constexpr Integer to_little_end(Integer from) NOEXCEPT
+constexpr Integer native_to_little_end(Integer little) NOEXCEPT
 {
-    return from;
+    return little;
 }
 
 template <typename Integer,
     if_big_endian_integral_integer<Integer>>
-constexpr Integer to_little_end(Integer from) NOEXCEPT
+constexpr Integer native_to_little_end(Integer big) NOEXCEPT
 {
-    return byteswap(from);
+    return byteswap(big);
+}
+
+// Endianness (specified to native).
+// ----------------------------------------------------------------------------
+
+template <typename Integer,
+    if_big_endian_integral_integer<Integer>>
+constexpr Integer native_from_big_end(Integer big) NOEXCEPT
+{
+    return big;
+}
+
+template <typename Integer,
+    if_little_endian_integral_integer<Integer>>
+constexpr Integer native_from_big_end(Integer big) NOEXCEPT
+{
+    return byteswap(big);
+}
+
+template <typename Integer,
+    if_little_endian_integral_integer<Integer>>
+constexpr Integer native_from_little_end(Integer little) NOEXCEPT
+{
+    return little;
+}
+
+template <typename Integer,
+    if_big_endian_integral_integer<Integer>>
+constexpr Integer native_from_little_end(Integer little) NOEXCEPT
+{
+    return byteswap(little);
 }
 
 // Byteswap (platform independent byte reversal).

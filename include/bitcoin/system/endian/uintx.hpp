@@ -16,11 +16,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_SERIAL_SERIAL_HPP
-#define LIBBITCOIN_SYSTEM_SERIAL_SERIAL_HPP
+#ifndef LIBBITCOIN_SYSTEM_ENDIAN_UINTX_HPP
+#define LIBBITCOIN_SYSTEM_ENDIAN_UINTX_HPP
 
-#include <bitcoin/system/serial/deserialize.hpp>
-#include <bitcoin/system/serial/props.hpp>
-#include <bitcoin/system/serial/serialize.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+/// data -> uintx (inferred size), uintx -> data_chunk (inferred size)
+
+// uintx      from_big|little_endian(data_slice)
+// data_chunk   to_big|little_endian(uintx)
+
+// uintx is not constexpr.
+
+inline uintx from_big_endian(const data_chunk& data) NOEXCEPT;
+inline uintx from_little_endian(const data_chunk& data) NOEXCEPT;
+inline data_chunk to_big_endian(const uintx& value) NOEXCEPT;
+inline data_chunk to_little_endian(const uintx& value) NOEXCEPT;
+
+} // namespace system
+} // namespace libbitcoin
+
+#include <bitcoin/system/impl/endian/uintx.ipp>
 
 #endif

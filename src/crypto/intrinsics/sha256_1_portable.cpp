@@ -26,10 +26,10 @@
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
 #include <algorithm>
-/// DELETECSTDINT
-/// DELETECSTDDEF
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/serial/serial.hpp>
+
+// TODO: move endian collection to math and drop /endian dependency.
 
 // C-style functions, all usage verified.
 BC_PUSH_WARNING(USE_GSL_AT)
@@ -84,6 +84,7 @@ void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
     uint32_t W[block_size];
     uint32_t S[state_size];
 
+    // TODO: move endian collection to math and drop /endian dependency.
     from_big_endian<16>(W, block);
 
     Wi(W, 16);

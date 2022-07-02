@@ -168,6 +168,7 @@
     <ClCompile Include="..\..\..\..\src\data\data_slice.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
     <ClCompile Include="..\..\..\..\src\define.cpp" />
+    <ClCompile Include="..\..\..\..\src\endian\endian.cpp" />
     <ClCompile Include="..\..\..\..\src\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp" />
@@ -338,6 +339,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\no_fill_allocator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\collection.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\endian.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\minimal.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\nominal.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\stream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx_t.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\unchecked.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\block_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_t.hpp" />
@@ -375,7 +384,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_85.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\radix.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\deserialize.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\endian.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\props.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serial.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serialize.hpp" />
@@ -492,6 +500,13 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\external_ptr.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\memory.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\collection.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\minimal.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\nominal.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\stream.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx_t.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\unchecked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp" />
@@ -509,7 +524,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_58.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\deserialize.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\serial\endian.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\serialize.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\device.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\bit_reader.ipp" />

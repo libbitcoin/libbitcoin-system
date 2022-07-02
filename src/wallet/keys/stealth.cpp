@@ -21,10 +21,9 @@
 #include <algorithm>
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/serial/serial.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 
 namespace libbitcoin {
 namespace system {

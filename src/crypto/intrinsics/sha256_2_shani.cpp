@@ -14,7 +14,10 @@
 
 #include <stdint.h>
 #include <immintrin.h>
-#include <bitcoin/system/serial/serial.hpp>
+////#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/endian/endian.hpp>
+
+// TODO: move endian collection to math and drop /endian dependency.
 
 namespace libbitcoin {
 namespace system {
@@ -185,6 +188,8 @@ void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
     auto buffer = sha256x2_buffer;
+
+    // TODO: move endian collection to math and drop /endian dependency.
 
     auto state = sha256_initial;
     sha256_x1_shani(state.data(), in);

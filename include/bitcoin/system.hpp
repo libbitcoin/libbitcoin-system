@@ -104,6 +104,14 @@
 #include <bitcoin/system/data/memory.hpp>
 #include <bitcoin/system/data/no_fill_allocator.hpp>
 #include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/endian/collection.hpp>
+#include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/endian/minimal.hpp>
+#include <bitcoin/system/endian/nominal.hpp>
+#include <bitcoin/system/endian/stream.hpp>
+#include <bitcoin/system/endian/uintx.hpp>
+#include <bitcoin/system/endian/uintx_t.hpp>
+#include <bitcoin/system/endian/unchecked.hpp>
 #include <bitcoin/system/error/block_error_t.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/error/error_t.hpp>
@@ -137,7 +145,6 @@
 #include <bitcoin/system/radix/base_85.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/serial/deserialize.hpp>
-#include <bitcoin/system/serial/endian.hpp>
 #include <bitcoin/system/serial/props.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/serial/serialize.hpp>

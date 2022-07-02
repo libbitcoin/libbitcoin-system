@@ -19,23 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <string>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/operation.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -103,7 +100,6 @@ public:
     //*************************************************************************
     static inline bool is_commitment_pattern(const operations& ops) NOEXCEPT
     {
-        // TODO: constexpr to_big_endian
         static const auto header = to_big_endian(chain::witness_head);
 
         // C++14: remove && ops[1].data().size() >= header.size() guard.
