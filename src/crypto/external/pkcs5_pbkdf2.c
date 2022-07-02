@@ -22,6 +22,8 @@
 #include <string.h>
 #include "../../../include/bitcoin/system/crypto/external/hmac_sha512.h"
 
+ // TODO: make constexpr (cpp).
+
 int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     size_t iterations)

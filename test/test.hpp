@@ -50,7 +50,6 @@
 
 using namespace bc;
 using namespace bc::system;
-using namespace bc::system::literals;
 
 namespace std {
 

@@ -28,6 +28,9 @@
 #include <string.h>
 #include <stdint.h>
 
+// TODO: make constexpr (cpp) and use /math/bytes endians.
+
+// from_big_end
 static uint64_t be64dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const*)pp;
@@ -38,6 +41,7 @@ static uint64_t be64dec(const void* pp)
         ((uint64_t)(p[1]) << 48) + ((uint64_t)(p[0]) << 56));
 }
 
+// to_big_end
 static void be64enc(void *pp, uint64_t x)
 {
     uint8_t* p = (uint8_t*)pp;

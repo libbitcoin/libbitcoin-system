@@ -19,11 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_HASH_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_HASH_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <memory>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -112,14 +109,6 @@ constexpr long_hash null_long_hash
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     }
 };
-
-/// Hash conversions of corresponding integers.
-template <uint32_t Bits, size_t Bytes = to_ceilinged_bytes(Bits)>
-constexpr data_array<Bytes> to_hash(const uintx_t<Bits>& value) NOEXCEPT;
-
-/// Integer conversions of corresponding hashes.
-template <size_t Bytes, uint32_t Bits = to_bits<uint32_t>(Bytes)>
-constexpr uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) NOEXCEPT;
 
 /// Generate a scrypt hash to fill a byte array.
 /// Memory required (bytes) = 2 * 64 * work * resources.

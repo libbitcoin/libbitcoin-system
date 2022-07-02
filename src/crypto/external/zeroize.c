@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+// TODO: make/use constexpr (cpp).
+
 void fill(void* const buffer, size_t length, uint8_t value)
 {
 /*

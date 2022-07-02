@@ -34,8 +34,6 @@
 #endif
 
 namespace libbitcoin {
-namespace system {
-namespace literals {
 
 /// This uses no libbitcoin utilities, so that it may have few dependencies and
 /// therefore be useful everywhere in the library. It is also important that it
@@ -176,8 +174,6 @@ DECLARE_LITERAL(_nsize, negative, signed_size_t)
 
 #undef DECLARE_LITERAL
 
-} // namespace literals
-} // namespace system
 } // namespace libbitcoin
 
 #endif

@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+ // TODO: make constexpr (cpp).
+
 #define F(x) (((x) << 1) ^ (((x) >> 7) & 1) * 0x1b)
 #define FD(x) (((x) >> 1) ^ (((x) & 1) ? 0x8d : 0))
 

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_IPP
 
-/// DELETECSTDINT
-/// DELETECSTDDEF
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -40,6 +38,7 @@ sha256_writer<OStream>::sha256_writer(OStream& sink) NOEXCEPT
   : byte_writer<OStream>(sink),
     context_{ intrinsics::sha256_initial }
 {
+    // context_ initialized on construct.
     ////intrinsics::sha256_initialize(context_);
 }
 

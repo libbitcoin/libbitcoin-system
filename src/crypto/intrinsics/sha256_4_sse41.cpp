@@ -15,11 +15,13 @@
 
 #include <stdint.h>
 #include <immintrin.h>
-////#include <bitcoin/system/serial/serial.hpp>
+////#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace intrinsics {
+
+// TODO: move use math/bytes conversion.
 
 inline uint32_t from_little_endian(const uint8_t data[4]) NOEXCEPT
 {

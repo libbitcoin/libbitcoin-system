@@ -27,7 +27,6 @@
 #include <bitcoin/system/typelets.hpp>
 
 namespace libbitcoin {
-namespace system {
 
 template <bool Expression>
 using bool_if = std::enable_if_t<Expression, bool>;
@@ -194,7 +193,6 @@ template <typename Integer>
 using if_little_endian_integral_integer = bool_if<
     is_integral<Integer> && is_integer<Integer> && is_little_endian>;
 
-} // namespace system
 } // namespace libbitcoin
 
 #endif

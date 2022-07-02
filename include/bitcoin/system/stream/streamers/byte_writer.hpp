@@ -19,13 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_WRITER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_WRITER_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iostream>
 #include <limits>
 #include <string>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>

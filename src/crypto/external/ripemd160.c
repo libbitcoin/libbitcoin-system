@@ -10,6 +10,8 @@
 
 #include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
+// TODO: make constexpr (cpp).
+
 /* collect four bytes into one word: */
 #define BYTES_TO_DWORD(bytes) \
    (((uint32_t)*((bytes) + 3) << 24) | \

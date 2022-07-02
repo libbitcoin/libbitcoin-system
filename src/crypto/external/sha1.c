@@ -35,6 +35,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+// TODO: make constexpr (cpp).
+
 #define SHIFT(bits, word) \
     (((word) << (bits)) | ((word) >> (32 - (bits))))
 

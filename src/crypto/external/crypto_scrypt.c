@@ -41,6 +41,8 @@ static void blockmix_salsa8(uint8_t*, uint8_t*, size_t);
 static uint64_t integerify(uint8_t*, size_t);
 static void smix(uint8_t* , size_t, uint64_t, uint8_t*, uint8_t*);
 
+// TODO: make constexpr (cpp) and use /math/bytes endians.
+
 static inline uint32_t le32dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const*)pp;
@@ -48,6 +50,7 @@ static inline uint32_t le32dec(const void* pp)
            ((uint32_t)(p[2]) << 16) + ((uint32_t)(p[3]) << 24));
 }
 
+// to_little_end
 static inline void le32enc(void* pp, uint32_t x)
 {
     uint8_t* p = (uint8_t*)pp;
@@ -57,6 +60,7 @@ static inline void le32enc(void* pp, uint32_t x)
     p[3] = (x >> 24) & 0xff;
 }
 
+// from_little_end
 static inline uint64_t le64dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const*)pp;
@@ -66,7 +70,6 @@ static inline uint64_t le64dec(const void* pp)
            ((uint64_t)(p[4]) << 32) + ((uint64_t)(p[5]) << 40) +
            ((uint64_t)(p[6]) << 48) + ((uint64_t)(p[7]) << 56));
 }
-
 
 static void blkcpy(uint8_t* dest, uint8_t* src, size_t len)
 {

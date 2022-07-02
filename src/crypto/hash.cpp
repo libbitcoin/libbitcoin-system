@@ -18,10 +18,7 @@
  */
 #include <bitcoin/system/crypto/hash.hpp>
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/crypto/external/crypto_scrypt.h>
 #include <bitcoin/system/crypto/external/hmac_sha256.h>
 #include <bitcoin/system/crypto/external/hmac_sha512.h>

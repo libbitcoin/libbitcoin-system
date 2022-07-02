@@ -46,16 +46,17 @@ public:
 
     template <typename T>
     void construct(T* ptr) noexcept(
-        std::is_nothrow_default_constructible<T>::value)
+        std::is_nothrow_default_constructible_v<T>)
     {
         // en.cppreference.com/w/cpp/memory/allocator
         // Base class (std::allocator) owns memory deallocation.
+        // This makes the C++20 allocation non-constexpr.
         ::new(static_cast<void*>(ptr)) T;
     }
 
     template <typename T, typename...Args>
     void construct(T* ptr, Args&&... args) noexcept(
-        std::is_nothrow_default_constructible<Allocator>::value)
+        std::is_nothrow_default_constructible_v<Allocator>)
     {
         std::allocator_traits<Allocator>::construct(
             static_cast<Allocator&>(*this), ptr, std::forward<Args>(args)...);

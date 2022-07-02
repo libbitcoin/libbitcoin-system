@@ -30,6 +30,8 @@
 #include "../../../include/bitcoin/system/crypto/external/sha256.h"
 #include "../../../include/bitcoin/system/crypto/external/zeroize.h"
 
+ // TODO: make constexpr (cpp).
+
 void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
     size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH])
 {

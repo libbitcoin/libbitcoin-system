@@ -20,25 +20,11 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_HASH_IPP
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-template <uint32_t Bits, size_t Bytes>
-constexpr data_array<Bytes> to_hash(const uintx_t<Bits>& value) NOEXCEPT
-{
-    return to_little_endian_size<Bytes>(value);
-}
-
-template <size_t Bytes, uint32_t Bits>
-constexpr uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) NOEXCEPT
-{
-    return uintx_from_little_endian_array<Bytes>(hash);
-}
 
 template<size_t Size>
 inline data_array<Size> scrypt(const data_slice& data, const data_slice& salt,

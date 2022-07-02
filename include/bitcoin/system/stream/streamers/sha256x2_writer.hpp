@@ -19,8 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_HPP
 
-/// DELETECSTDINT
-/// DELETECSTDDEF
+#include <iostream>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

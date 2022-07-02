@@ -84,14 +84,19 @@
     #define HAVE_ITANIUM
 #endif
 
- // Things we are missing on other platforms.
-#ifdef HAVE_MSC
+// Other platforms not as far with C++ 20.
+#if defined(HAVE_MSC) && defined(HAVE_CPP20)
     #define HAVE_RANGES
     #define HAVE_CONSTEVAL
+    #define HAVE_VECTOR_CONSTEXPR
+#endif
+
+// TODO: define warning suppressions for other platforms.
+#if defined(HAVE_MSC)
     #define HAVE_PRAGMA_WARNING
 #endif
 
-// Things we configure to have.
+// Things we configure to have (available on all platforms).
 
 // disable noexcept to capture stack trace.
 #define HAVE_NOEXCEPT
@@ -101,5 +106,8 @@
 
 // have a portable build (no intrinsics).
 ////#define HAVE_PORTABLE
+
+// TODO: performance analysis on endian stream buffer impact.
+#define HAVE_BUFFERED_STREAM
 
 #endif

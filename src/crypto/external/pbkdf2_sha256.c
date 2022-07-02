@@ -32,6 +32,8 @@
 #include <sys/types.h>
 #include "../../../include/bitcoin/system/crypto/external/hmac_sha256.h"
 
+ // TODO: make constexpr (cpp) and use /math/bytes endians.
+
 static void to_big_endian(uint8_t data[sizeof(uint32_t)], uint32_t value)
 {
     data[3] = (value >> 0) & 0xff;

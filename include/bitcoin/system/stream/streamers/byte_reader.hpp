@@ -19,13 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iostream>
 #include <limits>
 #include <string>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

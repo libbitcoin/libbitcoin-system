@@ -22,7 +22,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SIPHASH
 #define LIBBITCOIN_SYSTEM_CRYPTO_SIPHASH
 
-/// DELETECSTDINT
 #include <tuple>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>

@@ -20,10 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICE_IPP
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <iterator>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/sign.hpp>

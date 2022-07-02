@@ -28,6 +28,9 @@
 #include <stdint.h>
 #include <string.h>
 
+// TODO: make constexpr (cpp) and use /math/bytes endians.
+
+// from_big_end
 static uint32_t from_big_endian(const void* data)
 {
     const uint8_t* byte = (uint8_t const*)data;
@@ -39,6 +42,7 @@ static uint32_t from_big_endian(const void* data)
         (((uint32_t)byte[0]) << 24);
 }
 
+// to_big_end
 static void to_big_endian(void* data, uint32_t value)
 {
     uint8_t* byte = (uint8_t*)data;

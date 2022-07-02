@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BYTES_IPP
 #define LIBBITCOIN_SYSTEM_MATH_BYTES_IPP
 
-/// DELETECSTDINT
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
 #include <bitcoin/system/math/log.hpp>

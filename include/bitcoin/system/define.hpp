@@ -117,6 +117,12 @@ namespace bc = libbitcoin;
     #define NOEXCEPT
 #endif
 
+#if defined(HAVE_VECTOR_CONSTEXPR)
+    #define VCONSTEXPR constexpr
+#else
+    #define VCONSTEXPR inline
+#endif
+
 #define THROWS noexcept(false)
 
 // These are defined in the GUI for VS builds and by command line for others.
