@@ -31,21 +31,23 @@ namespace system {
 // integral   from_big|little_endian(data_slice)
 // data_array   to_big|little_endian(integral)
 
+// matched size data (no argument required).
 template <size_t Size>
-constexpr unsigned_type<bytes<Size>> from_big_endian(
+constexpr unsigned_type<Size> from_big_endian(
     const data_array<Size>& data) NOEXCEPT;
 
+// matched size data (no argument required).
 template <size_t Size>
-constexpr unsigned_type<bytes<Size>> from_little_endian(
+constexpr unsigned_type<Size> from_little_endian(
     const data_array<Size>& data) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true>
-constexpr Integral from_big_endian(const data_chunk& data) NOEXCEPT;
+constexpr Integral from_big_endian(const data_slice& data) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true>
-constexpr Integral from_little_endian(const data_chunk& data) NOEXCEPT;
+constexpr Integral from_little_endian(const data_slice& data) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true>
