@@ -120,6 +120,26 @@ truncated_modulo(Dividend dividend, Divisor divisor) NOEXCEPT
     return dividend % divisor;
 }
 
+template <typename Value, if_integer<Value>>
+constexpr bool
+is_multiple(Value product, Value value) NOEXCEPT
+{
+    if (is_zero(value))
+        return is_zero(product);
+
+    return is_zero(product % value);
+}
+
+template <typename Value, if_integer<Value>>
+constexpr bool
+is_product(Value value, Value left, Value right) NOEXCEPT
+{
+    if (is_zero(left) || is_zero(right))
+        return is_zero(value);
+
+    return is_zero(value % left) && ((value / left) == right);
+}
+
 } // namespace system
 } // namespace libbitcoin
 

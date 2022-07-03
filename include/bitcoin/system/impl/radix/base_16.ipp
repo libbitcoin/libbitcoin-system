@@ -22,11 +22,17 @@
 #include <algorithm>
 #include <string>
 #include <string_view>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
+
+// base16 (hexidecimal):
+// Base 16 is an ascii data encoding with a domain of 16 symbols (characters).
+// 16 is 2^4 so base16 is a 4<=>4 bit mapping.
+// Invalid padding in byte packing is not detectable as it is byte-aligned.
+// So this implementation is limited to an 8<=>8 bit mapping.
+// There is no need for bit streaming or padding, and both sides are
+// authoritative. Therefore base16 is our canonical byte encoding.
 
 namespace libbitcoin {
 namespace system {
@@ -58,6 +64,9 @@ constexpr uint8_t from_base16_characters(char high, char low) NOEXCEPT
         from_base16_digit(low);
 }
 
+// published
+// ============================================================================
+
 // The C standard library function 'isxdigit' is more trouble than it is worth.
 // "Some implementations (e.g. Microsoft in 1252 codepage) may classify
 // additional single-byte characters as digits...To use these functions safely
@@ -74,11 +83,78 @@ constexpr bool is_base16(Byte character) NOEXCEPT
         (is_between(possible_sign_cast<uint8_t>(character), 'A', 'F'));
 }
 
+// Unspecified (but safe/defined) behavior if characters are not base16. 
+constexpr uint8_t encode_octet(
+    const char(&string)[add1(octet_width)]) NOEXCEPT
+{
+    return from_base16_characters(string[0], string[1]);
+}
+
+// Encoding of data_slice to hex string.
+// ----------------------------------------------------------------------------
+
+SCONSTEXPR std::string encode_base16(const data_slice& data) NOEXCEPT
+{
+    std::string out;
+    out.resize(data.size() * octet_width);
+    auto digit = out.begin();
+
+    for (const auto byte: data)
+    {
+        *digit++ = to_base16_character(shift_right(byte, to_half(byte_bits)));
+        *digit++ = to_base16_character(bit_and(byte, 0x0f_u8));
+    }
+
+    return out;
+}
+
+// std::string is SCONSTEXPR
+SRCONSTEXPR std::string encode_hash(const data_slice& hash) NOEXCEPT
+{
+    std::string out;
+    out.resize(hash.size() * octet_width);
+    auto digit = out.begin();
+
+    // views_reverse is RCONSTEXPR
+    for (const auto byte: views_reverse(hash))
+    {
+        *digit++ = to_base16_character(shift_right(byte, to_half(byte_bits)));
+        *digit++ = to_base16_character(bit_and(byte, 0x0f_u8));
+    }
+
+    return out;
+}
+
+// Decoding of hex string to data_array or data_chunk.
+// ----------------------------------------------------------------------------
+
+VCONSTEXPR bool decode_base16(data_chunk& out,
+    const std::string& in) NOEXCEPT
+{
+    if (!is_multiple(in.size(), octet_width))
+        return false;
+
+    if (!std::all_of(in.begin(), in.end(), is_base16<char>))
+        return false;
+
+    out.resize(in.size() / octet_width);
+    auto data = out.begin();
+
+    for (auto digit = in.begin(); digit != in.end();)
+    {
+        const auto hi = *digit++;
+        const auto lo = *digit++;
+        *data++ = from_base16_characters(hi, lo);
+    }
+
+    return true;
+}
+
 template <size_t Size>
 constexpr bool decode_base16(data_array<Size>& out,
     const std::string_view& in) NOEXCEPT
 {
-    if (in.size() != Size * octet_width)
+    if (!is_product(in.size(), octet_width, Size))
         return false;
 
     if (!std::all_of(in.begin(), in.end(), is_base16<char>))
@@ -118,14 +194,17 @@ constexpr bool decode_hash(data_array<Size>& out,
     return true;
 }
 
+// Literal decodings of hex string, errors reflected as zero-filled data.
+// ----------------------------------------------------------------------------
+
 template <size_t Size, if_odd<Size>>
-inline std::string base16_string(const char(&string)[Size]) NOEXCEPT
+SVCONSTEXPR std::string base16_string(const char(&string)[Size]) NOEXCEPT
 {
     return to_string(base16_chunk(string));
 }
 
 template <size_t Size, if_odd<Size>>
-inline data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT
+VCONSTEXPR data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT
 {
     data_chunk out;
     decode_base16(out, string);

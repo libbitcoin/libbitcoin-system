@@ -77,6 +77,16 @@ template <typename Dividend, typename Divisor,
 constexpr to_common_type<Dividend, Divisor>
 truncated_modulo(Dividend dividend, Divisor divisor) NOEXCEPT;
 
+/// Safely determines whether value is a factor of product.
+template <typename Value, if_integer<Value> = true>
+constexpr bool
+is_multiple(Value product, Value value) NOEXCEPT;
+
+/// Safely determines whether value is the product of left * right.
+template <typename Value, if_integer<Value> = true>
+constexpr bool
+is_product(Value value, Value left, Value right) NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 
