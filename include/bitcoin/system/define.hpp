@@ -117,6 +117,30 @@ namespace bc = libbitcoin;
     #define NOEXCEPT
 #endif
 
+#if defined(HAVE_RANGES)
+    #define RCONSTEXPR constexpr
+#else
+    #define RCONSTEXPR inline
+#endif
+
+#if defined(HAVE_STRING_CONSTEXPR)
+    #define SCONSTEXPR constexpr
+#else
+    #define SCONSTEXPR inline
+#endif
+
+#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
+    #define SRCONSTEXPR constexpr
+#else
+    #define SRCONSTEXPR inline
+#endif
+
+#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
+    #define SVCONSTEXPR constexpr
+#else
+    #define SVCONSTEXPR inline
+#endif
+
 #if defined(HAVE_VECTOR_CONSTEXPR)
     #define VCONSTEXPR constexpr
 #else

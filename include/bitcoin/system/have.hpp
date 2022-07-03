@@ -88,6 +88,7 @@
 #if defined(HAVE_MSC) && defined(HAVE_CPP20)
     #define HAVE_RANGES
     #define HAVE_CONSTEVAL
+    #define HAVE_STRING_CONSTEXPR
     #define HAVE_VECTOR_CONSTEXPR
 #endif
 
