@@ -36,32 +36,32 @@ namespace system {
 
 template <data_slice::size_type Size>
 constexpr data_slice::data_slice(const char(&bytes)[Size]) NOEXCEPT
-  : data_slice(from_literal(bytes))
+  : data_slice(data_slice::from_literal(bytes))
 {
 }
 
 template <data_slice::size_type Size, typename Byte, if_one_byte<Byte>>
 constexpr data_slice::data_slice(const std::array<Byte, Size>& data) NOEXCEPT
-  : data_slice(from_size(data.begin(), Size))
+  : data_slice(data_slice::from_size(data.begin(), Size))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
 constexpr data_slice::data_slice(const std::vector<Byte>& data) NOEXCEPT
-  : data_slice(from_size(data.begin(), data.size()))
+  : data_slice(data_slice::from_size(data.begin(), data.size()))
 {
 }
 
 template <typename Iterator>
 constexpr data_slice::data_slice(const Iterator& begin,
     const Iterator& end) NOEXCEPT
-  : data_slice(from_iterators(begin, end))
+  : data_slice(data_slice::from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
 constexpr data_slice::data_slice(const Byte* begin, const Byte* end) NOEXCEPT
-  : data_slice(from_iterators(begin, end))
+  : data_slice(data_slice::from_iterators(begin, end))
 {
 }
     
@@ -71,13 +71,13 @@ constexpr data_slice::data_slice() NOEXCEPT
 }
 
 constexpr data_slice::data_slice(const std::string& text) NOEXCEPT
-  : data_slice(from_size(text.begin(), text.size()))
+  : data_slice(data_slice::from_size(text.begin(), text.size()))
 {
 }
 
 constexpr data_slice::data_slice(
     std::initializer_list<value_type> bytes) NOEXCEPT
-  : data_slice(from_size(bytes.begin(), bytes.size()))
+  : data_slice(data_slice::from_size(bytes.begin(), bytes.size()))
 {
 }
 

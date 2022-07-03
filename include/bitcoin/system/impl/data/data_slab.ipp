@@ -32,26 +32,26 @@ namespace system {
 
 template <data_slab::size_type Size, typename Byte, if_one_byte<Byte>>
 constexpr data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
-  : data_slab(from_size(data.begin(), Size))
+  : data_slab(data_slab::from_size(data.begin(), Size))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
 constexpr data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
-  : data_slab(from_size(data.begin(), data.size()))
+  : data_slab(data_slab::from_size(data.begin(), data.size()))
 {
 }
 
 template <typename Iterator>
 constexpr data_slab::data_slab(const Iterator& begin,
     const Iterator& end) NOEXCEPT
-  : data_slab(from_iterators(begin, end))
+  : data_slab(data_slab::from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
 constexpr data_slab::data_slab(const Byte* begin, const Byte* end) NOEXCEPT
-  : data_slab(from_iterators(begin, end))
+  : data_slab(data_slab::from_iterators(begin, end))
 {
 }
 
@@ -61,7 +61,7 @@ constexpr data_slab::data_slab() NOEXCEPT
 }
 
 constexpr data_slab::data_slab(std::string& text) NOEXCEPT
-  : data_slab(from_size(text.begin(), text.size()))
+  : data_slab(data_slab::from_size(text.begin(), text.size()))
 {
 }
 
