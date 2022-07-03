@@ -43,36 +43,36 @@ namespace intrinsics {
 namespace cpu1_0
 {
 #if defined(WITH_AVX2) || defined(WITH_SSE41) || defined(WITH_SSE4) || defined(WITH_SHANI)
-    constexpr uint32_t leaf = 1;
-    constexpr uint32_t subleaf = 0;
-    constexpr size_t sse4_ecx_bit = 19;
+    constexpr auto leaf = 1_u32;
+    constexpr auto subleaf = 0_u32;
+    constexpr auto sse4_ecx_bit = 19_size;
 #endif
 #if defined(WITH_AVX2)
-    constexpr size_t xsave_ecx_bit = 27;
-    constexpr size_t avx_ecx_bit = 28;
+    constexpr auto xsave_ecx_bit = 27_size;
+    constexpr auto avx_ecx_bit = 28_size;
 #endif
 }
 
 namespace cpu7_0
 {
 #if defined(WITH_AVX2) || defined(WITH_SHANI)
-    constexpr uint32_t leaf = 7;
-    constexpr uint32_t subleaf = 0;
+    constexpr auto leaf = 7_u32;
+    constexpr auto subleaf = 0_u32;
 #endif
 #if defined(WITH_AVX2)
-    constexpr size_t avx2_ebx_bit = 5;
+    constexpr auto avx2_ebx_bit = 5_size;
 #endif
 #if defined(WITH_SHANI)
-    constexpr size_t shani_ebx_bit = 29;
+    constexpr auto shani_ebx_bit = 29_size;
 #endif
 }
 
 namespace xcr0
 {
 #if defined(WITH_AVX2)
-    constexpr uint32_t feature = 0;
-    constexpr size_t sse_bit = 1;
-    constexpr size_t avx_bit = 2;
+    constexpr auto feature = 0_u32;
+    constexpr auto sse_bit = 1_size;
+    constexpr auto avx_bit = 2_size;
 #endif
 }
 
@@ -88,7 +88,7 @@ static bool xgetbv(uint64_t& value, uint32_t index) NOEXCEPT
     ////value = _xgetbv(index);
     uint32_t a, d;
     __asm__("xgetbv" : "=a"(a), "=d"(d) : "c"(index));
-    value = shift_left<uint64_t>(d, 32) | a;
+    value = shift_left<uint64_t>(d, 32_size) | a;
     return true;
 #elif defined(_M_X64) || defined(_M_AMD64)  || defined(_M_IX86)
     value = _xgetbv(index);
@@ -285,100 +285,104 @@ void sha256_single(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 void sha256_paired_double(uint8_t out[], const uint8_t in[],
     size_t blocks) NOEXCEPT
 {
-    constexpr auto block_size = 64;
+    constexpr auto block_size = 64_size;
 
 #ifdef WITH_SHANI
     if (have_shani())
     {
-        while (blocks >= 2)
+        while (blocks >= 2_size)
         {
             double_sha256_x2_shani(out, in);
-            std::advance(out, hash_size * 2);
-            std::advance(in, block_size * 2);
-            blocks -= 2;
+            std::advance(out, hash_size * 2_size);
+            std::advance(in, block_size * 2_size);
+            blocks -= 2_size;
         }
 
-        while (blocks >= 1)
+        while (blocks >= 1_size)
         {
             double_sha256_x1_shani(out, in);
-            std::advance(out, hash_size * 1);
-            std::advance(in, block_size * 1);
-            blocks -= 1;
+            std::advance(out, hash_size * 1_size);
+            std::advance(in, block_size * 1_size);
+            blocks -= 1_size;
         }
     }
 #endif
 #ifdef WITH_AVX2
     if (have_avx2())
     {
-        while (blocks >= 8)
+        while (blocks >= 8_size)
         {
             double_sha256_x8_avx2(out, in);
-            std::advance(out, hash_size * 8);
-            std::advance(in, block_size * 8);
-            blocks -= 8;
+            std::advance(out, hash_size * 8_size);
+            std::advance(in, block_size * 8_size);
+            blocks -= 8_size;
         }
     }
 #endif
 #ifdef WITH_SSE41
     if (have_sse41())
     {
-        while (blocks >= 4)
+        while (blocks >= 4_size)
         {
             // BUGBUG: throws on 32 bit builds.
             double_sha256_x4_sse41(out, in);
-            std::advance(out, hash_size * 4);
-            std::advance(in, block_size * 4);
-            blocks -= 4;
+            std::advance(out, hash_size * 4_size);
+            std::advance(in, block_size * 4_size);
+            blocks -= 4_size;
         }
     }
 #endif
 #ifdef WITH_NEON
     if (have_neon())
     {
-        while (blocks >= 1)
+        while (blocks >= 1_size)
         {
             double_sha256_x1_neon(out, in);
-            std::advance(out, hash_size * 1);
-            std::advance(in, block_size * 1);
-            blocks -= 1;
+            std::advance(out, hash_size * 1_size);
+            std::advance(in, block_size * 1_size);
+            blocks -= 1_size;
         }
     }
 #endif
 #ifdef WITH_SSE4
     if (have_sse4())
     {
-        while (blocks >= 1)
+        while (blocks >= 1_size)
         {
             double_sha256_x1_sse4(out, in);
-            std::advance(out, hash_size * 1);
-            std::advance(in, block_size * 1);
-            blocks -= 1;
+            std::advance(out, hash_size * 1_size);
+            std::advance(in, block_size * 1_size);
+            blocks -= 1_size;
         }
     }
 #endif
-    while (blocks >= 1)
+    while (blocks >= 1_size)
     {
         double_sha256_x1_portable(out, in);
-        std::advance(out, hash_size * 1);
-        std::advance(in, block_size * 1);
-        blocks -= 1;
+        std::advance(out, hash_size * 1_size);
+        std::advance(in, block_size * 1_size);
+        blocks -= 1_size;
     }
 }
 
 void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) NOEXCEPT
 {
+    constexpr auto state_size = 32_size / sizeof(uint32_t);
+    constexpr auto count = state_size / sizeof(uint32_t);
     auto buffer = sha256x2_buffer;
-
-    // TODO: move endian collection to math and drop /endian dependency.
 
     auto state = sha256_initial;
     sha256_x1_portable(state.data(), in);
     sha256_x1_portable(state.data(), sha256x2_padding.data());
-    to_big_endian<8>(buffer.data(), state.data());
+    to_big_endian(
+        *pointer_cast<numbers<count>>(buffer.data()),
+        *pointer_cast<const numbers<count>>(state.data()));
 
     state = sha256_initial;
     sha256_x1_portable(state.data(), buffer.data());
-    to_big_endian<8>(out, state.data());
+    to_big_endian(
+        *pointer_cast<numbers<count>>(out),
+        *pointer_cast<const numbers<count>>(buffer.data()));
 }
 
 } // namespace intrinsics

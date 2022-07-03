@@ -55,7 +55,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-////#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 
 namespace libbitcoin {
@@ -1040,6 +1040,9 @@ void sha256_x1_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
 
 #endif
 
+// C-style functions, all usage verified.
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+
 // One block in four lanes.
 void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
@@ -1054,24 +1057,29 @@ void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 // One block in four lanes, doubled.
 void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
+    constexpr auto count = 32_size / sizeof(uint32_t);
     auto buffer = sha256x2_buffer;
-
-    // TODO: move endian collection to math and drop /endian dependency.
 
     auto state = sha256_initial;
     sha256_x1_sse4(state.data(), in);
     sha256_x1_sse4(state.data(), sha256x2_padding.data());
-    to_big_endian<8>(buffer.data(), state.data());
+    to_big_endian(
+        *pointer_cast<numbers<count>>(buffer.data()),
+        *pointer_cast<const numbers<count>>(state.data()));
 
     state = sha256_initial;
     sha256_x1_sse4(state.data(), buffer.data());
-    to_big_endian<8>(out, state.data());
+    to_big_endian(
+        *pointer_cast<numbers<count>>(out),
+        *pointer_cast<const numbers<count>>(state.data()));
 }
 
 ////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 ////{
 ////    // TODO: four blocks in four lanes, doubled.
 ////}
+
+BC_POP_WARNING()
 
 } // namespace intrinsics
 } // namespace system
