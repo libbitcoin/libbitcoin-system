@@ -19,40 +19,53 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_COLLECTION_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_COLLECTION_HPP
 
+#include <array>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// data[] -> integral[] (explicit size)
-// integral[] -> data[] (explicit size)
-
-// This is just a collection-based byteswap.
-// void from_big|little_endian(data[], integral[])
-// void   to_big|little_endian(data[], integral[])
-
-// TODO: change to std::array& args and move to /math/bytes/.
-// TODO: change parameterization for in-place update.
-
-template <size_t Count, typename Integral,
+/// Hack: pointer_cast fools transform into accepting a C-style array. This is
+/// safe because std::array must have only the C-style array non-static member.
+template <size_t Size, typename Integral = uint32_t,
     if_integral_integer<Integral> = true>
-constexpr void from_big_endian(Integral to[Count],
-    const uint8_t from[Count * sizeof(Integral)]) NOEXCEPT;
+using numbers = std::array<Integral, Size>;
 
-template <size_t Count, typename Integral,
-    if_integral_integer<Integral> = true>
-constexpr void from_little_endian(Integral to[Count],
-    const uint8_t from[Count * sizeof(Integral)]) NOEXCEPT;
+// return value
 
-template <size_t Count, typename Integral,
-    if_integral_integer<Integral> = true>
-constexpr void to_big_endian(uint8_t to[Count * sizeof(Integral)],
-    const Integral from[Count]) NOEXCEPT;
+template <size_t Size>
+constexpr numbers<Size> from_big_endian(
+    const numbers<Size>& in) NOEXCEPT;
 
-template <size_t Count, typename Integral,
-    if_integral_integer<Integral> = true>
-constexpr void to_little_endian(uint8_t to[Count * sizeof(Integral)],
-    const Integral from[Count]) NOEXCEPT;
+template <size_t Size>
+constexpr numbers<Size> from_little_endian(
+    const numbers<Size>& in) NOEXCEPT;
+
+template <size_t Size>
+constexpr numbers<Size> to_big_endian(
+    const numbers<Size>& in) NOEXCEPT;
+
+template <size_t Size>
+constexpr numbers<Size> to_little_endian(
+    const numbers<Size>& in) NOEXCEPT;
+
+// out parameter
+
+template <size_t Size>
+constexpr void from_big_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT;
+
+template <size_t Size>
+constexpr void from_little_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT;
+
+template <size_t Size>
+constexpr void to_big_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT;
+
+template <size_t Size>
+constexpr void to_little_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

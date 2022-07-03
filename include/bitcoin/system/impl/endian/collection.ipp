@@ -20,75 +20,96 @@
 #define LIBBITCOIN_SYSTEM_ENDIAN_COLLECTION_IPP
 
 #include <algorithm>
-#include <iterator>
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/nominal.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// TODO: change to std::array& args and move to /math/bytes/.
-// By moving the pointer_cast to intrinsics this can become constexpr.
-// TODO: change parameterization for in-place update.
 // C++17: Parallel policy for std::transform.
 
-// void (data[] <=> integral[])
-/// ---------------------------------------------------------------------------
-// Hack: pointer_cast fools transform into accepting a C-style array. This is
-// safe because std::array must have only the C-style array non-static member.
+// return value
 
-template <size_t Count, typename Integral,
-    if_integral_integer<Integral>>
-constexpr void from_big_endian(Integral to[Count],
-    const uint8_t from[Count * sizeof(Integral)]) NOEXCEPT
+template <size_t Size>
+constexpr numbers<Size> from_big_endian(
+    const numbers<Size>& in) NOEXCEPT
 {
-    typedef data_array<sizeof(Integral)> data;
-    const auto in = pointer_cast<const data>(from);
-    std::transform(in, std::next(in, Count), to, [](const data& value) NOEXCEPT
-    {
-        return from_big_endian(value);
-    });
+    numbers<Size> out{};
+    from_big_endian(out, in);
+    return out;
 }
 
-template <size_t Count, typename Integral,
-    if_integral_integer<Integral>>
-constexpr void from_little_endian(Integral to[Count],
-    const uint8_t from[Count * sizeof(Integral)]) NOEXCEPT
+template <size_t Size>
+constexpr numbers<Size> from_little_endian(
+    const numbers<Size>& in) NOEXCEPT
 {
-    typedef data_array<sizeof(Integral)> data;
-    const auto in = pointer_cast<const data>(from);
-    std::transform(in, std::next(in, Count), to, [](const data& value) NOEXCEPT
-    {
-        return from_little_endian<Integral>(value);
-    });
+    numbers<Size> out{};
+    from_little_endian(out, in);
+    return out;
 }
 
-template <size_t Count, typename Integral,
-    if_integral_integer<Integral>>
-constexpr void to_big_endian(uint8_t to[Count * sizeof(Integral)],
-    const Integral from[Count]) NOEXCEPT
+template <size_t Size>
+constexpr numbers<Size> to_big_endian(
+    const numbers<Size>& in) NOEXCEPT
 {
-    typedef data_array<sizeof(Integral)> data;
-    const auto out = pointer_cast<data>(to);
-    std::transform(from, std::next(from, Count), out, [](Integral value) NOEXCEPT
-    {
-        return to_big_endian<Integral>(value);
-    });
+    numbers<Size> out{};
+    to_big_endian(out, in);
+    return out;
 }
 
-template <size_t Count, typename Integral,
-    if_integral_integer<Integral>>
-constexpr void to_little_endian(uint8_t to[Count * sizeof(Integral)],
-    const Integral from[Count]) NOEXCEPT
+template <size_t Size>
+constexpr numbers<Size> to_little_endian(
+    const numbers<Size>& in) NOEXCEPT
 {
-    typedef data_array<sizeof(Integral)> data;
-    const auto out = pointer_cast<data>(to);
-    std::transform(from, std::next(from, Count), out, [](Integral value) NOEXCEPT
-    {
-        return to_little_endian<Integral>(value);
-    });
+    numbers<Size> out{};
+    to_little_endian(out, in);
+    return out;
+}
+
+// out parameter
+
+template <size_t Size>
+constexpr void from_big_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT
+{
+    std::transform(in.begin(), in.end(), out.begin(),
+        [](const auto& integral) NOEXCEPT
+        {
+            return native_from_big_end(integral);
+        });
+}
+
+template <size_t Size>
+constexpr void from_little_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT
+{
+    std::transform(in.begin(), in.end(), out.begin(),
+        [](const uint32_t& chunk) NOEXCEPT
+        {
+            return native_from_little_end(chunk);
+        });
+}
+
+template <size_t Size>
+constexpr void to_big_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT
+{
+    std::transform(in.begin(), in.end(), out.begin(),
+        [](const auto& value) NOEXCEPT
+        {
+            return native_to_big_end(value);
+        });
+}
+
+template <size_t Size>
+constexpr void to_little_endian(numbers<Size>& out,
+    const numbers<Size>& in) NOEXCEPT
+{
+    std::transform(in.begin(), in.end(), out.begin(),
+        [](const auto& value) NOEXCEPT
+        {
+            return native_to_little_end(value);
+        });
 }
 
 } // namespace system

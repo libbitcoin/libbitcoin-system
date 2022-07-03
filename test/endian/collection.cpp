@@ -18,110 +18,79 @@
  */
 #include "../test.hpp"
 
+// constexpr
+
+template <size_t Size>
+constexpr numbers<Size> normalize(const numbers<Size>& little,
+    const numbers<Size>& big)
+{
+    if constexpr (is_big_endian)
+        return big;
+
+    return little;
+}
+
+constexpr auto size = 8;
+constexpr auto native = numbers<size>
+{
+    0x04030201_u32,
+    0x08070605_u32,
+    0x0c0b0a09_u32,
+    0x000f0e0d_u32,
+    0x04030201_u32,
+    0x08070605_u32,
+    0x0c0b0a09_u32,
+    0x000f0e0d_u32
+};
+constexpr auto reversed = numbers<size>
+{
+    0x01020304_u32,
+    0x05060708_u32,
+    0x090a0b0c_u32,
+    0x0d0e0f00_u32,
+    0x01020304_u32,
+    0x05060708_u32,
+    0x090a0b0c_u32,
+    0x0d0e0f00_u32
+};
+
+// This is the perspective of a little-endian machine.
+// The normalize() helper reverses the expecation on a big-endian machine.
+static_assert(to_big_endian(native) == normalize(reversed, native));
+static_assert(from_big_endian(reversed) == normalize(native, reversed));
+static_assert(to_little_endian(native) == normalize(native, reversed));
+static_assert(from_little_endian(native) == normalize(native, reversed));
+
+// inline
+
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
-BOOST_AUTO_TEST_CASE(from_big_endian__parallel__always__expected)
+BOOST_AUTO_TEST_CASE(collection__to_big_endian__always__expected)
 {
-    uint32_t to[4];
-    const uint8_t from[16] =
-    {
-        0x01, 0x02, 0x03, 0x04,
-        0x05, 0x06, 0x07, 0x08,
-        0x09, 0x0a, 0x0b, 0x0c,
-        0x0d, 0x0e, 0x0f, 0x00
-    };
-
-    from_big_endian<4>(to, from);
-    BOOST_REQUIRE_EQUAL(to[0], 0x01020304u);
-    BOOST_REQUIRE_EQUAL(to[1], 0x05060708u);
-    BOOST_REQUIRE_EQUAL(to[2], 0x090a0b0cu);
-    BOOST_REQUIRE_EQUAL(to[3], 0x0d0e0f00u);
+    numbers<size> out{};
+    to_big_endian(out, native);
+    BOOST_REQUIRE_EQUAL(out, normalize(reversed, native));
 }
 
-BOOST_AUTO_TEST_CASE(from_little_endian__parallel__always__expected)
+BOOST_AUTO_TEST_CASE(collection__from_big_endian__always__expected)
 {
-    uint32_t to[4];
-    const uint8_t from[16] =
-    {
-        0x01, 0x02, 0x03, 0x04,
-        0x05, 0x06, 0x07, 0x08,
-        0x09, 0x0a, 0x0b, 0x0c,
-        0x0d, 0x0e, 0x0f, 0x00
-    };
-
-    from_little_endian<4>(to, from);
-    BOOST_REQUIRE_EQUAL(to[0], 0x04030201u);
-    BOOST_REQUIRE_EQUAL(to[1], 0x08070605u);
-    BOOST_REQUIRE_EQUAL(to[2], 0x0c0b0a09u);
-    BOOST_REQUIRE_EQUAL(to[3], 0x000f0e0du);
+    numbers<size> out{};
+    from_big_endian(out, reversed);
+    BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(to_big_endian__parallel__always__expected)
+BOOST_AUTO_TEST_CASE(collection__to_little_endian__always__expected)
 {
-    uint8_t to[16];
-    const uint32_t from[4] =
-    {
-        0x01020304,
-        0x05060708,
-        0x090a0b0c,
-        0x0d0e0f00
-    };
-
-    to_big_endian<4>(to, from);
-
-    BOOST_REQUIRE_EQUAL(to[0], 0x01u);
-    BOOST_REQUIRE_EQUAL(to[1], 0x02u);
-    BOOST_REQUIRE_EQUAL(to[2], 0x03u);
-    BOOST_REQUIRE_EQUAL(to[3], 0x04u);
-
-    BOOST_REQUIRE_EQUAL(to[4], 0x05u);
-    BOOST_REQUIRE_EQUAL(to[5], 0x06u);
-    BOOST_REQUIRE_EQUAL(to[6], 0x07u);
-    BOOST_REQUIRE_EQUAL(to[7], 0x08u);
-
-    BOOST_REQUIRE_EQUAL(to[8], 0x09u);
-    BOOST_REQUIRE_EQUAL(to[9], 0x0au);
-    BOOST_REQUIRE_EQUAL(to[10], 0x0bu);
-    BOOST_REQUIRE_EQUAL(to[11], 0x0cu);
-
-    BOOST_REQUIRE_EQUAL(to[12], 0x0du);
-    BOOST_REQUIRE_EQUAL(to[13], 0x0eu);
-    BOOST_REQUIRE_EQUAL(to[14], 0x0fu);
-    BOOST_REQUIRE_EQUAL(to[15], 0x00u);
+    numbers<size> out{};
+    to_little_endian(out, native);
+    BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(to_little_endian__parallel__always__expected)
+BOOST_AUTO_TEST_CASE(collection__from_little_endian__always__expected)
 {
-    uint8_t to[16];
-    const uint32_t from[4] =
-    {
-        0x01020304,
-        0x05060708,
-        0x090a0b0c,
-        0x0d0e0f00
-    };
-
-    to_little_endian<4>(to, from);
-
-    BOOST_REQUIRE_EQUAL(to[0], 0x04u);
-    BOOST_REQUIRE_EQUAL(to[1], 0x03u);
-    BOOST_REQUIRE_EQUAL(to[2], 0x02u);
-    BOOST_REQUIRE_EQUAL(to[3], 0x01u);
-
-    BOOST_REQUIRE_EQUAL(to[4], 0x08u);
-    BOOST_REQUIRE_EQUAL(to[5], 0x07u);
-    BOOST_REQUIRE_EQUAL(to[6], 0x06u);
-    BOOST_REQUIRE_EQUAL(to[7], 0x05u);
-
-    BOOST_REQUIRE_EQUAL(to[8], 0x0cu);
-    BOOST_REQUIRE_EQUAL(to[9], 0x0bu);
-    BOOST_REQUIRE_EQUAL(to[10], 0x0au);
-    BOOST_REQUIRE_EQUAL(to[11], 0x09u);
-
-    BOOST_REQUIRE_EQUAL(to[12], 0x00u);
-    BOOST_REQUIRE_EQUAL(to[13], 0x0fu);
-    BOOST_REQUIRE_EQUAL(to[14], 0x0eu);
-    BOOST_REQUIRE_EQUAL(to[15], 0x0du);
+    numbers<size> out{};
+    from_little_endian(out, native);
+    BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
