@@ -63,9 +63,9 @@ using to_signed_type = std::make_signed_t<Type>;
 template <typename Type>
 using to_unsigned_type = std::make_unsigned_t<Type>;
 
-////template <typename Type>
-////using to_size_type = std::conditional_t<std::is_signed_v<Type>,
-////    signed_size_t, size_t>;
+template <typename Type>
+using to_size_type = std::conditional_t<std::is_signed_v<Type>,
+    signed_size_t, size_t>;
 
 /// Promotion-based type selectors.
 /// ---------------------------------------------------------------------------
@@ -79,6 +79,12 @@ using to_common_type = std::common_type_t<Left, Right>;
 /// This provides a type constraint for depromotion of native operator results.
 template <typename Unary>
 using to_common_sized_type = decltype(+Unary{});
+
+/// Promotion to larger of two types, independent of sign.
+/// This must prefer the Left over right, so that left controls explicit sign.
+template <typename Left, typename Right>
+using to_greater_type = std::conditional_t<
+    (sizeof(Left) >= sizeof(Right)), Left, Right>;
 
 /// uintx_t
 /// ---------------------------------------------------------------------------
@@ -119,34 +125,12 @@ using unsigned_exact_type =
                     std::conditional_t<Bytes == sizeof(uint64_t), uint64_t,
                         uintx_t<Bytes * 8u>>>>>>;
 
-/// Guard type assumptions within the codebase.
+/// Argument placeholders.
 /// ---------------------------------------------------------------------------
 
-// signed_size_t is not the same type, despite having the same size.
-// In which case long and int are both 32 bit types, but are not the same type.
-////static_assert(
-////    is_same_type<signed_size_t, int32_t> ||
-////    is_same_type<signed_size_t, int64_t>);
-
-// This relies on the construction of signed_size_t using std::make_signed_t<size_t>,
-// as this is how the to_signed_type/to_unsigned_type conversions also work.
-static_assert(
-    std::is_same_v<to_signed_type<size_t>, signed_size_t> &&
-    std::is_same_v<to_unsigned_type<signed_size_t>, size_t>);
-
-// This are design limitations, and not a matter of C++ specification.
-static_assert(sizeof(char) == 1u);
-static_assert(
-    sizeof(size_t) == sizeof(uint32_t) ||
-    sizeof(size_t) == sizeof(uint64_t));
-
-// This tests that signed_size_t confirms to the design limitation.
-static_assert(
-    sizeof(signed_size_t) == sizeof(int32_t) ||
-    sizeof(signed_size_t) == sizeof(int64_t));
-
-// This is expected.
-static_assert(sizeof(size_t) == sizeof(signed_size_t));
+struct place1 {};
+struct place2 {};
+struct place3 {};
 
 } // namespace libbitcoin
 

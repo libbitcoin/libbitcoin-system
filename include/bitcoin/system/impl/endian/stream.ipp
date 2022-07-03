@@ -81,7 +81,7 @@ inline void to_reverse_stream(OStream& stream, Integral value) NOEXCEPT
 // still requires a byte swap, just as does the buffered read.
 template <typename Integral, typename IStream,
     if_integral_integer<Integral>,
-    if_same_width<typename IStream::char_type, uint8_t>>
+    if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_big_endian(IStream& stream) NOEXCEPT
 {
     return native_from_big_end(from_forward_stream<Integral>(stream));
@@ -90,7 +90,7 @@ inline Integral from_big_endian(IStream& stream) NOEXCEPT
 // This avoids a byteswap in exchange for a non-atomic write.
 template <typename Integral, typename IStream,
     if_integral_integer<Integral>,
-    if_same_width<typename IStream::char_type, uint8_t>>
+    if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_little_endian(IStream& stream) NOEXCEPT
 {
     return native_from_little_end(from_forward_stream<Integral>(stream));
@@ -99,7 +99,7 @@ inline Integral from_little_endian(IStream& stream) NOEXCEPT
 // This avoids a byteswap in exchange for a non-atomic write.
 template <typename Integral, typename OStream,
     if_integral_integer<Integral>,
-    if_same_width<typename OStream::char_type, uint8_t>>
+    if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 {
     to_reverse_stream(stream, native_to_little_end(value));
@@ -109,7 +109,7 @@ inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 // still requires a byte swap, just as does the buffered write.
 template <typename Integral, typename OStream,
     if_integral_integer<Integral>,
-    if_same_width<typename OStream::char_type, uint8_t>>
+    if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
 {
     to_reverse_stream(stream, native_to_big_end(value));
@@ -123,7 +123,7 @@ inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
 // TODO: bytecast.
 template <typename Integral, typename IStream = std::istream,
     if_integral_integer<Integral>,
-    if_same_width<typename IStream::char_type, uint8_t>>
+    if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_big_endian(IStream& stream) NOEXCEPT
 {
     constexpr auto size = sizeof(Integral);
@@ -138,7 +138,7 @@ inline Integral from_big_endian(IStream& stream) NOEXCEPT
 // TODO: bytecast, from_little_endian should be a no-op.
 template <typename Integral, typename IStream = std::istream,
     if_integral_integer<Integral>,
-    if_same_width<typename IStream::char_type, uint8_t>>
+    if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_little_endian(IStream& stream) NOEXCEPT
 {
     constexpr auto size = sizeof(Integral);
@@ -153,7 +153,7 @@ inline Integral from_little_endian(IStream& stream) NOEXCEPT
 // TODO: bytecast.
 template <typename Integral, typename OStream = std::ostream,
     if_integral_integer<Integral>,
-    if_same_width<typename OStream::char_type, uint8_t>>
+    if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 {
     constexpr auto size = sizeof(Integral);
@@ -168,7 +168,7 @@ inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 // TODO: bytecast, to_little_endian should be a no-op.
 template <typename Integral, typename OStream = std::ostream,
     if_integral_integer<Integral>,
-    if_same_width<typename OStream::char_type, uint8_t>>
+    if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
 {
     constexpr auto size = sizeof(Integral);

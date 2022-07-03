@@ -18,174 +18,174 @@
  */
 #include "test.hpp"
 
-class base {};
-class not_derived {};
-class derived : base {};
+// Guard type assumptions within the codebase.
 
-// These are implementation defined.
-////static_assert(is_same_type<unsigned char, uint8_t>);
-////static_assert(is_same_type<signed char, int8_t>);
-////static_assert(is_same_type<int, int32_t>);
-////static_assert(is_same_type<unsigned int, uint32_t>);
-////static_assert(!is_same_type<char, int8_t>);
+// size_t
 
-static_assert(is_same_type<uint8_t, uint8_t>);
-static_assert(!is_same_type<int8_t, uint8_t>);
-static_assert(!is_same_type<uint8_t, int8_t>);
-static_assert(!is_same_type<uint16_t, int8_t>);
-static_assert(!is_same_type<uint32_t, int8_t>);
-static_assert(!is_same_type<uint64_t, int8_t>);
-static_assert(!is_same_type<size_t, int8_t>);
-static_assert(!is_same_type<int32_t, int8_t>);
-static_assert(!is_same_type<int32_t, int8_t>);
-static_assert(!is_same_type<int64_t, int8_t>);
-static_assert(!is_same_type<char, int8_t>);
-static_assert(!is_same_type<wchar_t, int8_t>);
-static_assert(!is_same_type<bool, int8_t>);
-static_assert(!is_same_type<std::string, int8_t>);
-static_assert(!is_same_type<std::string, int>);
-static_assert(!is_same_type<base, derived>);
-static_assert(!is_same_type<base, not_derived>);
-static_assert(is_same_type<decltype(is_same_type<int32_t, int32_t>), const bool>);
+// This are design limitations, and not a matter of C++ specification.
+static_assert(sizeof(char) == one);
+static_assert(
+    is_same_size<size_t, uint32_t> ||
+    is_same_size<size_t, uint64_t>);
 
-static_assert(is_same_size<bool, bool>);
-static_assert(is_same_size<int8_t, uint8_t>);
-static_assert(is_same_size<int16_t, uint16_t>);
-static_assert(is_same_size<int32_t, int32_t>);
-static_assert(is_same_size<signed char, signed char>);
-static_assert(is_same_size<uint8_t, uint8_t>);
-static_assert(is_same_size<uint16_t, uint16_t>);
-static_assert(is_same_size<uint32_t, uint32_t>);
-static_assert(is_same_size<uint64_t, uint64_t>);
+// signed_size_t
+
+// This tests that signed_size_t conforms to the design limitation.
+static_assert(
+    is_same_size<signed_size_t, int32_t> ||
+    is_same_size<signed_size_t, int64_t>);
+
+// Depends on construction of signed_size_t using std::make_signed_t<size_t>,
+// as this is how the to_signed_type/to_unsigned_type conversions also work.
+static_assert(
+    is_same_type<to_signed_type<size_t>, signed_size_t>&&
+    is_same_type<to_unsigned_type<signed_size_t>, size_t>);
+
+// This is implied by above.
 static_assert(is_same_size<size_t, signed_size_t>);
-static_assert(!is_same_size<wchar_t, bool>);
-static_assert(!is_same_size<std::string, bool>);
-static_assert(!is_same_size<int16_t, uint256_t>);
-static_assert(is_same_type<decltype(is_same_size<int32_t, int32_t>), const bool>);
 
-// These are implementation defined.
-////static_assert(is_signed<char>);
-////static_assert(!is_signed<wchar_t>);
+// signed_size_t may not be the same type as either, despite having same size.
+// For example, long and int may both be 32 bit types, but not the same type.
+////static_assert(
+////    is_same_type<signed_size_t, int32_t> ||
+////    is_same_type<signed_size_t, int64_t>);
+#ifdef HAVE_MSC
+static_assert(is_same_size<long, int>); // not assured on all platforms.
+#endif
+static_assert(!is_same_type<long, int>); // but always different types.
 
-// bool is arithmetic:
-static_assert(int{ true } == 1 && int{ false } == 0);
+static_assert(is_same_type<signed_type<>, signed_size_t>);
+static_assert(is_same_type<signed_type<0>, signed_size_t>);
+static_assert(is_same_type<signed_type<1>, int8_t>);
+static_assert(is_same_type<signed_type<2>, int16_t>);
+static_assert(is_same_type<signed_type<3>, int32_t>);
+static_assert(is_same_type<signed_type<4>, int32_t>);
+static_assert(is_same_type<signed_type<5>, int64_t>);
+static_assert(is_same_type<signed_type<6>, int64_t>);
+static_assert(is_same_type<signed_type<7>, int64_t>);
+static_assert(is_same_type<signed_type<8>, int64_t>);
 
-// and bool is not signed, because:
-////static_assert(!(bool{ -1 } < bool{ 0 }));
+static_assert(is_same_type<unsigned_type<>, size_t>);
+static_assert(is_same_type<unsigned_type<0>, size_t>);
+static_assert(is_same_type<unsigned_type<1>, uint8_t>);
+static_assert(is_same_type<unsigned_type<2>, uint16_t>);
+static_assert(is_same_type<unsigned_type<3>, uint32_t>);
+static_assert(is_same_type<unsigned_type<4>, uint32_t>);
+static_assert(is_same_type<unsigned_type<5>, uint64_t>);
+static_assert(is_same_type<unsigned_type<6>, uint64_t>);
+static_assert(is_same_type<unsigned_type<7>, uint64_t>);
+static_assert(is_same_type<unsigned_type<8>, uint64_t>);
 
-static_assert(!is_signed<bool>);
-static_assert(is_signed<int8_t>);
-static_assert(is_signed<int16_t>);
-static_assert(is_signed<int32_t>);
-static_assert(is_signed<int64_t>);
-static_assert(is_signed<signed char>);
-static_assert(!is_signed<unsigned char>);
-static_assert(!is_signed<uint8_t>);
-static_assert(!is_signed<uint16_t>);
-static_assert(!is_signed<uint32_t>);
-static_assert(!is_signed<uint64_t>);
-static_assert(!is_signed<size_t>);
-static_assert(!is_signed<std::string>);
-static_assert(is_same_type<decltype(is_signed<int32_t>), const bool>);
+static_assert(is_same_type<to_signed_type<uint8_t>, int8_t>);
+static_assert(is_same_type<to_signed_type<uint16_t>, int16_t>);
+static_assert(is_same_type<to_signed_type<uint32_t>, int32_t>);
+static_assert(is_same_type<to_signed_type<uint64_t>, int64_t>);
+static_assert(is_same_type<to_signed_type<int8_t>, int8_t>);
+static_assert(is_same_type<to_signed_type<int16_t>, int16_t>);
+static_assert(is_same_type<to_signed_type<int32_t>, int32_t>);
+static_assert(is_same_type<to_signed_type<int64_t>, int64_t>);
+////static_assert(is_same_type<to_signed_type<unsigned char>, signed char>);
+////static_assert(is_same_type<to_signed_type<unsigned short>, signed short>);
+////static_assert(is_same_type<to_signed_type<unsigned int>, signed int>);
+////static_assert(is_same_type<to_signed_type<unsigned long>, signed long>);
+////static_assert(is_same_type<to_signed_type<unsigned long long>, signed long long>);
 
-static_assert(is_integer<uint8_t>);
-static_assert(is_integer<uint16_t>);
-static_assert(is_integer<uint32_t>);
-static_assert(is_integer<uint64_t>);
-static_assert(is_integer<size_t>);
-static_assert(is_integer<int8_t>);
-static_assert(is_integer<int16_t>);
-static_assert(is_integer<int32_t>);
-static_assert(is_integer<int64_t>);
-static_assert(is_integer<char>);
-static_assert(is_integer<wchar_t>);
-static_assert(!is_integer<bool>);
-static_assert(!is_integer<std::string>);
-static_assert(is_same_type<decltype(is_integer<int32_t>), const bool>);
+static_assert(is_same_type<to_unsigned_type<int8_t>, uint8_t>);
+static_assert(is_same_type<to_unsigned_type<int16_t>, uint16_t>);
+static_assert(is_same_type<to_unsigned_type<int32_t>, uint32_t>);
+static_assert(is_same_type<to_unsigned_type<int64_t>, uint64_t>);
+static_assert(is_same_type<to_unsigned_type<uint8_t>, uint8_t>);
+static_assert(is_same_type<to_unsigned_type<uint16_t>, uint16_t>);
+static_assert(is_same_type<to_unsigned_type<uint32_t>, uint32_t>);
+static_assert(is_same_type<to_unsigned_type<uint64_t>, uint64_t>);
+static_assert(is_same_type<to_unsigned_type<size_t>, size_t>);
+////static_assert(is_same_type<to_signed_type<signed char>, unsigned char>);
+////static_assert(is_same_type<to_signed_type<signed short>, unsigned short>);
+////static_assert(is_same_type<to_signed_type<signed int>, unsigned int>);
+////static_assert(is_same_type<to_signed_type<signed long>, unsigned long>);
+////static_assert(is_same_type<to_signed_type<signed long long>, unsigned long long>);
 
-struct two_bytes { uint8_t foo; uint8_t bar; };
-union four_bytes { uint32_t foo; uint8_t bar; };
+static_assert(is_same_type<to_size_type<uint8_t>, size_t>);
+static_assert(is_same_type<to_size_type<uint16_t>, size_t>);
+static_assert(is_same_type<to_size_type<uint32_t>, size_t>);
+static_assert(is_same_type<to_size_type<uint64_t>, size_t>);
+static_assert(is_same_type<to_size_type<unsigned char>, size_t>);
+static_assert(is_same_type<to_size_type<int8_t>, signed_size_t>);
+static_assert(is_same_type<to_size_type<int16_t>, signed_size_t>);
+static_assert(is_same_type<to_size_type<int32_t>, signed_size_t>);
+static_assert(is_same_type<to_size_type<int64_t>, signed_size_t>);
+static_assert(is_same_type<to_size_type<signed char>, signed_size_t>);
 
-static_assert(is_integral_size<uint8_t>);
-static_assert(is_integral_size<uint16_t>);
-static_assert(is_integral_size<uint32_t>);
-static_assert(is_integral_size<uint64_t>);
-static_assert(is_integral_size<two_bytes>);
-static_assert(is_integral_size<four_bytes>);
-static_assert(!is_integral_size<uint128_t>);
-static_assert(!is_integral_size<uint256_t>);
-static_assert(!is_integral_size<uint512_t>);
-static_assert(is_same_type<decltype(is_integral_size<int>), const bool>);
+static_assert(is_same_type<to_common_type<bool, int>, int>);
+static_assert(is_same_type<to_common_type<int, bool>, int>);
+static_assert(is_same_type<to_common_type<uint8_t, int>, int>);
+static_assert(is_same_type<to_common_type<uint16_t, int>, int>);
+static_assert(is_same_type<to_common_type<uint32_t, int>, uint32_t>);
+static_assert(is_same_type<to_common_type<int, uint32_t>, uint32_t>);
+static_assert(is_same_type<to_common_type<uint32_t, int>, uint32_t>);
+static_assert(is_same_type<to_common_type<uint32_t, uint64_t>, uint64_t>);
+static_assert(is_same_type<to_common_type<uint32_t, int64_t>, int64_t>);
+static_assert(is_same_type<to_common_type<uint32_t, uint64_t>, uint64_t>);
 
-static_assert(is_integral<uint8_t>);
-static_assert(is_integral<uint16_t>);
-static_assert(is_integral<uint32_t>);
-static_assert(is_integral<uint64_t>);
-static_assert(is_integral<size_t>);
-static_assert(is_integral<int8_t>);
-static_assert(is_integral<int16_t>);
-static_assert(is_integral<int32_t>);
-static_assert(is_integral<int64_t>);
-static_assert(is_integral<char>);
-static_assert(is_integral<wchar_t>);
-static_assert(!is_integral<bool>);
-static_assert(!is_integral<std::string>);
-static_assert(is_same_type<decltype(is_integral<int32_t>), const bool>);
+static_assert(is_same_type<to_common_sized_type<bool>, int>);
+static_assert(is_same_type<to_common_sized_type<int8_t>, int>);
+static_assert(is_same_type<to_common_sized_type<int16_t>, int>);
+static_assert(is_same_type<to_common_sized_type<int32_t>, int32_t>);
+static_assert(is_same_type<to_common_sized_type<int64_t>, int64_t>);
+static_assert(is_same_type<to_common_sized_type<uint8_t>, int>);
+static_assert(is_same_type<to_common_sized_type<uint16_t>, int>);
+static_assert(is_same_type<to_common_sized_type<uint32_t>, uint32_t>);
+static_assert(is_same_type<to_common_sized_type<uint64_t>, uint64_t>);
 
-// These may be unexpected, which is why we generally avoid them.
-static_assert(sizeof(bool) >= 1u);
-////static_assert(bits<bool> >= 1u);
-static_assert(bits<char> >= 8u);
-static_assert(bits<signed char> >= 8u);
-static_assert(bits<unsigned char> >= 8u);
-static_assert(bits<wchar_t> >= 16u);
-static_assert(bits<short> >= 16u);
-static_assert(bits<signed short> >= 16u);
-static_assert(bits<unsigned short> >= 16u);
-static_assert(bits<int> >= 16u);
-static_assert(bits<signed int> >= 16u);
-static_assert(bits<unsigned int> >= 16u);
-static_assert(bits<long> >= 32u);
-static_assert(bits<signed long> >= 32u);
-static_assert(bits<unsigned long> >= 32u);
-static_assert(bits<long long> >= 64);
-static_assert(bits<signed long long> >= 64u);
-static_assert(bits<unsigned long long> >= 64u);
-static_assert(bits<int_fast8_t> >= 8u);
-static_assert(bits<uint_fast8_t> >= 8u);
-static_assert(bits<int_fast16_t> >= 16u);
-static_assert(bits<uint_fast16_t> >= 16u);
-static_assert(bits<int_fast32_t> >= 32u);
-static_assert(bits<uint_fast32_t> >= 32u);
-static_assert(bits<int_fast64_t> >= 64u);
-static_assert(bits<uint_fast64_t> >= 64u);
-static_assert(bits<int_least8_t> >= 8u);
-static_assert(bits<uint_least8_t> >= 8u);
-static_assert(bits<int_least16_t> >= 16u);
-static_assert(bits<uint_least16_t> >= 16u);
-static_assert(bits<int_least32_t> >= 32u);
-static_assert(bits<uint_least32_t> >= 32u);
-static_assert(bits<int_least64_t> >= 64u);
-static_assert(bits<uint_least64_t> >= 64u);
+static_assert(is_same_type<to_greater_type<uint8_t, int64_t>, int64_t>);
+static_assert(is_same_type<to_greater_type<uint8_t, int16_t>, int16_t>);
+static_assert(is_same_type<to_greater_type<uint8_t, int32_t>, int32_t>);
+static_assert(is_same_type<to_greater_type<uint8_t, int64_t>, int64_t>);
+static_assert(is_same_type<to_greater_type<uint8_t, uint8_t>, uint8_t>);
+static_assert(is_same_type<to_greater_type<uint16_t, uint8_t>, uint16_t>);
+static_assert(is_same_type<to_greater_type<uint32_t, uint8_t>, uint32_t>);
 
-static_assert(bits<int8_t> == 8u);
-static_assert(bits<uint8_t> == 8u);
-static_assert(bits<int16_t> == 16u);
-static_assert(bits<uint16_t> == 16u);
-static_assert(bits<int32_t> == 32u);
-static_assert(bits<uint32_t> == 32u);
-static_assert(bits<int64_t> == 64u);
-static_assert(bits<uint64_t> == 64u);
-static_assert(is_same_type<decltype(bits<int8_t>), const size_t>);
+// Must prefer left over right in the case of same size.
+static_assert(is_same_type<to_greater_type<int8_t, uint8_t>, int8_t>);
+static_assert(is_same_type<to_greater_type<uint8_t, int8_t>, uint8_t>);
+static_assert(is_same_type<to_greater_type<int16_t, uint16_t>, int16_t>);
+static_assert(is_same_type<to_greater_type<uint16_t, int16_t>, uint16_t>);
+static_assert(is_same_type<to_greater_type<int32_t, uint32_t>, int32_t>);
+static_assert(is_same_type<to_greater_type<uint32_t, int32_t>, uint32_t>);
+static_assert(is_same_type<to_greater_type<int64_t, uint64_t>, int64_t>);
+static_assert(is_same_type<to_greater_type<uint64_t, int64_t>, uint64_t>);
+static_assert(is_same_type<to_greater_type<size_t, signed_size_t>, size_t>);
+static_assert(is_same_type<to_greater_type<signed_size_t, size_t>, signed_size_t>);
 
-static_assert(bytes<8u> == 1u);
-static_assert(bytes<16u> == 2u);
-static_assert(bytes<24u> == 3u);
-static_assert(bytes<32u> == 4u);
-static_assert(bytes<40u> == 5u);
-static_assert(bytes<48u> == 6u);
-static_assert(bytes<56u> == 7u);
-static_assert(bytes<64u> == 8u);
-static_assert(bytes<128u> == 16u);
-static_assert(bytes<256u> == 32u);
-static_assert(is_same_type<decltype(bytes<8u>), const size_t>);
+static_assert(is_same_type<uintx_t<5u>, uint5_t>);
+static_assert(is_same_type<uintx_t<11u>, uint11_t>);
+static_assert(is_same_type<uintx_t<48u>, uint48_t>);
+static_assert(is_same_type<uintx_t<128u>, uint128_t>);
+static_assert(is_same_type<uintx_t<160u>, uint160_t>);
+static_assert(is_same_type<uintx_t<256u>, uint256_t>);
+static_assert(is_same_type<uintx_t<512u>, uint512_t>);
+
+static_assert(is_same_type<uintx,
+    boost::multiprecision::cpp_int>);
+static_assert(is_same_type<uintx_t<1u>,
+    boost::multiprecision::number<
+    boost::multiprecision::cpp_int_backend<1u, 1u,
+    boost::multiprecision::unsigned_magnitude,
+    boost::multiprecision::unchecked, void>>>);
+
+static_assert(is_same_type<unsigned_exact_type<0>, size_t>);
+static_assert(is_same_type<unsigned_exact_type<1>, uint8_t>);
+static_assert(is_same_type<unsigned_exact_type<2>, uint16_t>);
+static_assert(is_same_type<unsigned_exact_type<3>, uintx_t<to_bits(3u)>>);
+static_assert(is_same_type<unsigned_exact_type<4>, uint32_t>);
+static_assert(is_same_type<unsigned_exact_type<5>, uintx_t<to_bits(5u)>>);
+static_assert(is_same_type<unsigned_exact_type<6>, uintx_t<to_bits(6u)>>);
+static_assert(is_same_type<unsigned_exact_type<7>, uintx_t<to_bits(7u)>>);
+static_assert(is_same_type<unsigned_exact_type<8>, uint64_t>);
+static_assert(is_same_type<unsigned_exact_type<9>, uintx_t<to_bits(9u)>>);
+static_assert(is_same_type<unsigned_exact_type<10>, uintx_t<to_bits(10u)>>);
+static_assert(is_same_type<unsigned_exact_type<32>, uintx_t<to_bits(32u)>>);
+static_assert(is_same_type<unsigned_exact_type<256>, uintx_t<to_bits(256u)>>);
+static_assert(is_same_type<unsigned_exact_type<512>, uintx_t<to_bits(512u)>>);
+static_assert(is_same_type<unsigned_exact_type<1024>, uintx_t<to_bits(1024u)>>);
+static_assert(is_same_type<unsigned_exact_type<2048>, uintx_t<to_bits(2048u)>>);

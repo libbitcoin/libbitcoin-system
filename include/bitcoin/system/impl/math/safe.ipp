@@ -22,10 +22,7 @@
 #include <exception>
 #include <limits>
 #include <type_traits>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
-/// DELETEMENOW
 
 namespace libbitcoin {
 namespace system {
@@ -34,7 +31,7 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename Restored, typename Common,
-    if_not_lesser_width<to_common_sized_type<Restored>, Restored>,
+    if_not_lesser_size<to_common_sized_type<Restored>, Restored>,
     if_integral_integer<Restored>,
     if_integral_integer<Common>>
 constexpr Restored depromote(Common value) NOEXCEPT
@@ -47,7 +44,7 @@ constexpr Restored depromote(Common value) NOEXCEPT
 }
 
 template <typename To, typename From,
-    if_lesser_width<To, From>,
+    if_lesser_size<To, From>,
     if_integral_integer<To>,
     if_integral_integer<From>,
     if_same_signed_integer<To, From>>
@@ -59,7 +56,7 @@ constexpr To narrow_cast(From value) NOEXCEPT
 }
 
 template <typename To, typename From,
-    if_not_lesser_width<To, From>,
+    if_not_lesser_size<To, From>,
     if_integral_integer<To>,
     if_integral_integer<From>,
     if_not_same_signed_integer<To, From>>
@@ -71,7 +68,7 @@ constexpr To sign_cast(From value) NOEXCEPT
 }
 
 template <typename To, typename From,
-    if_lesser_width<To, From>,
+    if_lesser_size<To, From>,
     if_integral_integer<To>,
     if_integral_integer<From>,
     if_not_same_signed_integer<To, From>>
@@ -83,7 +80,7 @@ constexpr To narrow_sign_cast(From value) NOEXCEPT
 }
 
 template <typename To, typename From,
-    if_lesser_width<From, To>,
+    if_lesser_size<From, To>,
     if_same_signed_integer<To, From>>
 constexpr To wide_cast(From value) NOEXCEPT
 {
@@ -103,7 +100,7 @@ constexpr To possible_narrow_cast(From value) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename To, typename From, if_not_lesser_width<To, From>>
+template <typename To, typename From, if_not_lesser_size<To, From>>
 constexpr To possible_sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -119,7 +116,7 @@ constexpr To possible_narrow_sign_cast(From value) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename To, typename From, if_lesser_width<To, From>>
+template <typename To, typename From, if_lesser_size<To, From>>
 constexpr To possible_sign_narrow_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)

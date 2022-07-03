@@ -35,14 +35,14 @@ namespace system {
 /// This should not be used except in the case of integral only promotion as
 /// its use will preclude non-integral template matching.
 template <typename Restored, typename Common,
-    if_not_lesser_width<to_common_sized_type<Restored>, Restored> = true,
+    if_not_lesser_size<to_common_sized_type<Restored>, Restored> = true,
     if_integral_integer<Restored> = true,
     if_integral_integer<Common> = true>
 constexpr Restored depromote(Common value) NOEXCEPT;
 
 /// Cast integral to integral of narrower bit width.
 template <typename To, typename From,
-    if_lesser_width<To, From> = true,
+    if_lesser_size<To, From> = true,
     if_integral_integer<To> = true,
     if_integral_integer<From> = true,
     if_same_signed_integer<To, From> = true>
@@ -50,7 +50,7 @@ constexpr To narrow_cast(From value) NOEXCEPT;
 
 /// Cast integral sign (non-narrowing).
 template <typename To, typename From,
-    if_not_lesser_width<To, From> = true,
+    if_not_lesser_size<To, From> = true,
     if_integral_integer<To> = true,
     if_integral_integer<From> = true,
     if_not_same_signed_integer<To, From> = true>
@@ -58,7 +58,7 @@ constexpr To sign_cast(From value) NOEXCEPT;
 
 /// Cast integral sign to integral of narrower bit width.
 template <typename To, typename From,
-    if_lesser_width<To, From> = true,
+    if_lesser_size<To, From> = true,
     if_integral_integer<To> = true,
     if_integral_integer<From> = true,
     if_not_same_signed_integer<To, From> = true>
@@ -66,7 +66,7 @@ constexpr To narrow_sign_cast(From value) NOEXCEPT;
 
 /// Cast integral to integral of wider bit width (precludes reassignment).
 template <typename To, typename From,
-    if_lesser_width<From, To> = true,
+    if_lesser_size<From, To> = true,
     if_same_signed_integer<To, From> = true>
 constexpr To wide_cast(From value) NOEXCEPT;
 
@@ -80,7 +80,7 @@ constexpr To possible_narrow_cast(From value) NOEXCEPT;
 
 /// Possible sign cast without narrowing.
 template <typename To, typename From,
-    if_not_lesser_width<To, From> = true>
+    if_not_lesser_size<To, From> = true>
 constexpr To possible_sign_cast(From value) NOEXCEPT;
 
 /// Possible narrowing with sign cast.
@@ -90,7 +90,7 @@ constexpr To possible_narrow_sign_cast(From value) NOEXCEPT;
 
 /// Possible sign cast with narrowing.
 template <typename To, typename From,
-    if_lesser_width<To, From> = true>
+    if_lesser_size<To, From> = true>
 constexpr To possible_sign_narrow_cast(From value) NOEXCEPT;
 
 /// Possible narrowing and possible sign cast (unrestricted).

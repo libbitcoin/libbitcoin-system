@@ -47,6 +47,14 @@ constexpr bool is_integer = std::numeric_limits<Type>::is_integer &&
 template <typename Left, typename Right>
 constexpr bool is_same_size = (sizeof(Left) == sizeof(Right));
 
+/// sizeof(Left)< sizeof(Right).
+template <typename Left, typename Right>
+constexpr bool is_lesser_size = (sizeof(Left) < sizeof(Right));
+
+/// sizeof(Left) > sizeof(Right).
+template <typename Left, typename Right>
+constexpr bool is_greater_size = (sizeof(Left) > sizeof(Right));
+
 /// Future-proofing against larger integrals or language features that
 /// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
 template <typename Type>

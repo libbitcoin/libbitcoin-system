@@ -89,11 +89,11 @@ using if_not_same = bool_if<
 
 template <typename Type>
 using if_one_byte = bool_if<
-    sizeof(Type) == sizeof(uint8_t)>;
+    is_same_size<Type, uint8_t>>;
 
 template <typename Type>
 using if_not_one_byte = bool_if<
-    sizeof(Type) != sizeof(uint8_t)>;
+    !is_same_size<Type, uint8_t>>;
 
 template <typename Type, size_t Size>
 using if_size_of = bool_if<
@@ -111,20 +111,21 @@ template <typename Base, typename Type>
 using if_base_of = bool_if<
     std::is_base_of<Base, Type>::value>;
 
-/// bits is limited to integrals.
 template <typename Left, typename Right>
-using if_same_width = bool_if<
-    bits<Left> == bits<Right>>;
+using if_same_size = bool_if<
+    is_same_size<Left, Right>>;
 
-/// bits is limited to integrals.
 template <typename Left, typename Right>
-using if_lesser_width = bool_if<
-    bits<Left> < bits<Right>>;
+using if_not_same_size = bool_if<
+    !is_same_size<Left, Right>>;
 
-/// bits is limited to integrals.
 template <typename Left, typename Right>
-using if_not_lesser_width = bool_if<
-    bits<Left> >= bits<Right>>;
+using if_lesser_size = bool_if<
+    is_lesser_size<Left, Right>>;
+
+template <typename Left, typename Right>
+using if_not_lesser_size = bool_if<
+    !is_lesser_size<Left, Right>>;
 
 template <typename Type>
 using if_default_constructible = bool_if<
