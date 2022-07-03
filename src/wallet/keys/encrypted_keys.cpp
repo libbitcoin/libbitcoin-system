@@ -63,14 +63,14 @@ static bool address_salt(ek_salt& salt,
 static bool address_salt(ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed) NOEXCEPT
 {
-    payment_address address(ec_public{ point, compressed }, version);
+    const payment_address address(ec_public{ point, compressed }, version);
     return address ? address_salt(salt, address) : false;
 }
 
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed) NOEXCEPT
 {
-    payment_address address({ secret, version, compressed });
+    const payment_address address({ secret, version, compressed });
     return address ? address_salt(salt, address) : false;
 }
 
@@ -84,14 +84,14 @@ static bool address_validate(const ek_salt& salt,
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed) NOEXCEPT
 {
-    payment_address address(ec_public{ point, compressed }, version);
+    const payment_address address(ec_public{ point, compressed }, version);
     return address ? address_validate(salt, address) : false;
 }
 
 static bool address_validate(const ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed) NOEXCEPT
 {
-    payment_address address({ secret, version, compressed });
+    const payment_address address({ secret, version, compressed });
     return address ? address_validate(salt, address) : false;
 }
 
@@ -145,7 +145,7 @@ static long_hash scrypt_private(const data_slice& data,
 // set_flags
 // ----------------------------------------------------------------------------
 
-static one_byte set_flags(bool compressed, bool lot_sequence,
+constexpr one_byte set_flags(bool compressed, bool lot_sequence,
     bool multiplied) NOEXCEPT
 {
     uint8_t byte = 0;
@@ -284,7 +284,7 @@ bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
 // This call requires an ICU build, the other excluded calls are dependencies.
 static data_chunk normal(const std::string& passphrase) NOEXCEPT
 {
-    auto copy = passphrase;
+    std::string copy{ passphrase };
 
     LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
     return to_canonical_composition(copy) ? to_chunk(copy) : data_chunk{};
@@ -396,12 +396,12 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     const auto salt_entropy = splice(parse.salt(), parse.entropy());
     const auto derived = split(scrypt_pair(point, salt_entropy));
 
-    auto encrypt1 = parse.data1();
+    const auto encrypt1 = parse.data1();
     auto encrypt2 = parse.data2();
 
     aes256_decrypt(encrypt2, derived.second);
     const auto decrypt2 = xor_offset<half, 0, half>(encrypt2, derived.first);
-    auto part = split(decrypt2);
+    const auto part = split(decrypt2);
     auto extended = splice(encrypt1, part.first);
 
     aes256_decrypt(extended, derived.second);
@@ -486,7 +486,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
         return false;
 
     const auto salt_entropy = splice(parse.salt(), parse.entropy());
-    auto derived = split(scrypt_pair(point, salt_entropy));
+    const auto derived = split(scrypt_pair(point, salt_entropy));
     auto encrypt = split(parse.data());
 
     aes256_decrypt(encrypt.first, derived.second);
