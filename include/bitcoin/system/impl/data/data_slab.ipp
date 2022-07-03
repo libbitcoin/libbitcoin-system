@@ -213,7 +213,7 @@ std::array<data_slab::value_type, Size>() const NOEXCEPT
     return to_array<Size>();
 }
 
-constexpr data_slab::operator
+VCONSTEXPR data_slab::operator
 std::vector<data_slab::value_type>() const NOEXCEPT
 {
     return data_slab::to_chunk();

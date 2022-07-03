@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace system {
 
-#if !defined(HAVE_BUFFERED_STREAM)
+#if defined(HAVE_BUFFERED_STREAM)
 
 // non-buffered stream locals
 // ----------------------------------------------------------------------------
@@ -126,11 +126,11 @@ template <typename Integral, typename IStream,
     if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_big_endian(IStream& stream) NOEXCEPT
 {
+    using character = typename IStream::char_type;
     constexpr auto size = sizeof(Integral);
-    using char_type = typename IStream::char_type;
-    std::array<char_type, size> buffer{};
+    std::array<character, size> buffer{};
 
-    // nominal
+    // nominal, data_slice accepts any byte-sized data.
     stream.read(buffer.data(), size);
     return from_big_endian<Integral>(buffer);
 }
@@ -141,11 +141,11 @@ template <typename Integral, typename IStream,
     if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_little_endian(IStream& stream) NOEXCEPT
 {
+    using character = typename IStream::char_type;
     constexpr auto size = sizeof(Integral);
-    using char_type = typename IStream::char_type;
-    std::array<char_type, size> buffer{};
+    std::array<character, size> buffer{};
 
-    // nominal
+    // nominal, data_slice accepts any byte-sized data.
     stream.read(buffer.data(), size);
     return from_little_endian<Integral>(buffer);
 }
@@ -156,13 +156,12 @@ template <typename Integral, typename OStream,
     if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 {
+    using character = typename OStream::char_type;
     constexpr auto size = sizeof(Integral);
-    using char_cptr = const typename OStream::char_type*;
-    const auto& big_buffer = possible_pointer_cast<char_cptr>(
-        to_big_endian(value).data());
+    const auto buffer = to_big_endian(value);
 
     // nominal
-    stream.write(big_buffer, size);
+    stream.write(possible_pointer_cast<const character*>(buffer.data()), size);
 }
 
 // TODO: bytecast, to_little_endian should be a no-op.
@@ -171,13 +170,12 @@ template <typename Integral, typename OStream,
     if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
 {
+    using character = typename OStream::char_type;
     constexpr auto size = sizeof(Integral);
-    using char_cptr = const typename OStream::char_type*;
-    const auto& little_buffer = possible_pointer_cast<char_cptr>(
-        to_little_endian(value).data());
+    const auto buffer = to_little_endian(value);
 
     // nominal
-    stream.write(little_buffer, size);
+    stream.write(possible_pointer_cast<const character*>(buffer.data()), size);
 }
 
 #endif // HAVE_BUFFERED_STREAM
