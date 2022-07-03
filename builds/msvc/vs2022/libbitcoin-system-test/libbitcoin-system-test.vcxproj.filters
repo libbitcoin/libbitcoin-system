@@ -240,7 +240,7 @@
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\integrals.cpp">
+    <ClCompile Include="..\..\..\..\test\funclets.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\literals.cpp">
@@ -370,6 +370,9 @@
       <Filter>src\stream\streamers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\test.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\typelets.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\types.cpp">

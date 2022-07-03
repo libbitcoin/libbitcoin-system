@@ -163,9 +163,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\data_reference.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_slab.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\data_slice.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
     <ClCompile Include="..\..\..\..\src\define.cpp" />
     <ClCompile Include="..\..\..\..\src\endian\endian.cpp" />
@@ -176,7 +174,6 @@
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\math\math.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
-    <ClCompile Include="..\..\..\..\src\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_32.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_58.cpp" />

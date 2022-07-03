@@ -99,9 +99,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/intrinsics/sha256_4_sse41.cpp \
     src/crypto/intrinsics/sha256_8_avx2.cpp \
     src/data/data_chunk.cpp \
-    src/data/data_reference.cpp \
     src/data/data_slab.cpp \
-    src/data/data_slice.cpp \
     src/data/string.cpp \
     src/endian/endian.cpp \
     src/error/block_error_t.cpp \
@@ -111,7 +109,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/transaction_error_t.cpp \
     src/math/math.cpp \
     src/radix/base_10.cpp \
-    src/radix/base_16.cpp \
     src/radix/base_2048.cpp \
     src/radix/base_32.cpp \
     src/radix/base_58.cpp \
@@ -219,12 +216,13 @@ test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_f
 test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
-    test/integrals.cpp \
+    test/funclets.cpp \
     test/literals.cpp \
     test/main.cpp \
     test/settings.cpp \
     test/test.cpp \
     test/test.hpp \
+    test/typelets.cpp \
     test/types.cpp \
     test/values.cpp \
     test/chain/block.cpp \

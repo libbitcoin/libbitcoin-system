@@ -393,13 +393,7 @@
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\data_reference.cpp">
-      <Filter>src\data</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data_slab.cpp">
-      <Filter>src\data</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\data_slice.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\string.cpp">
@@ -430,9 +424,6 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp">
-      <Filter>src\radix</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\radix\base_16.cpp">
       <Filter>src\radix</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp">

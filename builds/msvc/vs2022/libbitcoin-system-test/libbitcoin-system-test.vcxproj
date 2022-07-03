@@ -129,7 +129,7 @@
     <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
-    <ClCompile Include="..\..\..\..\test\integrals.cpp" />
+    <ClCompile Include="..\..\..\..\test\funclets.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
@@ -173,6 +173,7 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
+    <ClCompile Include="..\..\..\..\test\typelets.cpp" />
     <ClCompile Include="..\..\..\..\test\types.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />
