@@ -122,7 +122,7 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 
 #define DECLARE_LITERAL(name, sign, type) \
-CONSTEVAL type operator "" name(integer_type value) noexcept(false) \
+CONSTEVAL type operator "" name(integer_type value) noexcept \
 { return sign<type>(value); }
 
 /// Supported represenations.
