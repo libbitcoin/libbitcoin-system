@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_ADDITION_IPP
 #define LIBBITCOIN_SYSTEM_MATH_ADDITION_IPP
 
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/safe.hpp>
@@ -27,83 +26,242 @@
 
 namespace libbitcoin {
 namespace system {
+    
+// add
+// ----------------------------------------------------------------------------
 
-// TODO: test with uintx.
-
-template <typename Result, typename Left, typename Right,
-    if_not_lesser_width<Result, Left>,
-    if_not_lesser_width<Result, Right>,
-    if_same_signed_integer<Left, Right>>
-constexpr Result add(Left left, Right right) NOEXCEPT
+// Single type.
+template <place1, typename Integer,
+    if_integral_integer<Integer>>
+constexpr Integer add(Integer left, Integer right) NOEXCEPT
 {
-    return possible_sign_cast<Result>(left) +
-        possible_sign_cast<Result>(right);
+    // overflows() can be used to guard this addition.
+    return depromote<Integer>(left + right);
 }
 
-template <typename Result, typename Left, typename Right,
-    if_not_lesser_width<Result, Left>,
-    if_not_lesser_width<Result, Right>,
-    if_same_signed_integer<Left, Right>>
-constexpr Result subtract(Left left, Right right) NOEXCEPT
+// Single type explicit, possibly narrowing and/or sign changing.
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer>>
+constexpr Explicit add(Integer left, Integer right) NOEXCEPT
 {
-    return possible_sign_cast<Result>(left) -
-        possible_sign_cast<Result>(right);
+    return add<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
 }
 
-template <typename Integer, if_signed_integer<Integer>>
+// Implicit type (defaulted to larger operand, same signs).
+template <place2, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr to_greater_type<Left, Right> add(Left left, Right right) NOEXCEPT
+{
+    using greater = to_greater_type<Left, Right>;
+    return add<place1{}, greater >(
+        possible_wide_cast<greater>(left),
+        possible_wide_cast<greater>(right));
+}
+
+// Explicit type, possibly narrowing and/or sign changing.
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr Explicit add(Left left, Right right) NOEXCEPT
+{
+    return add<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
+}
+
+// subtract
+// ----------------------------------------------------------------------------
+
+// Single type.
+template <place1, typename Integer,
+    if_integral_integer<Integer>>
+constexpr Integer subtract(Integer left, Integer right) NOEXCEPT
+{
+    // underflows() can be used to guard this subtraction.
+    return depromote<Integer>(left - right);
+}
+
+// Single type explicit, possibly narrowing and/or sign changing.
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer>>
+constexpr Explicit subtract(Integer left, Integer right) NOEXCEPT
+{
+    return subtract<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
+}
+
+// Implicit type (defaulted to larger operand, same signs).
+template <place2, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr to_greater_type<Left, Right> subtract(Left left, Right right) NOEXCEPT
+{
+    using greater = to_greater_type<Left, Right>;
+    return subtract<place1{}, greater>(
+        possible_wide_cast<greater>(left),
+        possible_wide_cast<greater>(right));
+}
+
+// Explicit type <Result>, possibly narrowing and/or sign changing.
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr Explicit subtract(Left left, Right right) NOEXCEPT
+{
+    return subtract<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
+}
+
+// ceilinged_add
+// ----------------------------------------------------------------------------
+
+template <place1, typename Integer,
+    if_signed_integral_integer<Integer>>
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
+{
+    return overflows(left, right) ? (is_negative(right) ?
+        minimum<Integer>() : maximum<Integer>()) : add(left, right);
+}
+
+template <place1, typename Integer,
+    if_unsigned_integral_integer<Integer>>
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
+{
+    return overflows(left, right) ? maximum<Integer>() : add(left, right);
+}
+
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer>>
+constexpr Explicit ceilinged_add(Integer left, Integer right) NOEXCEPT
+{
+    return ceilinged_add<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
+}
+
+template <place2, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr to_greater_type<Left, Right> ceilinged_add(Left left,
+    Right right) NOEXCEPT
+{
+    using greater = to_greater_type<Left, Right>;
+    return ceilinged_add<place1{}, greater>(
+        possible_wide_cast<greater>(left),
+        possible_wide_cast<greater>(right));
+}
+
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr Explicit ceilinged_add(Left left, Right right) NOEXCEPT
+{
+    return ceilinged_add<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
+}
+
+// floored_subtract
+// ----------------------------------------------------------------------------
+
+template <place1, typename Integer,
+    if_signed_integral_integer<Integer>>
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
+{
+    return underflows(left, right) ? (is_negative(right) ?
+        maximum<Integer>() : minimum<Integer>()) : subtract(left, right);
+}
+
+template <place1, typename Integer,
+    if_unsigned_integral_integer<Integer>>
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
+{
+    return underflows(left, right) ? minimum<Integer>() : subtract(left, right);
+}
+
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer>>
+constexpr Explicit floored_subtract(Integer left, Integer right) NOEXCEPT
+{
+    return floored_subtract<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
+}
+
+template <place2, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr to_greater_type<Left, Right> floored_subtract(Left left,
+    Right right) NOEXCEPT
+{
+    using greater = to_greater_type<Left, Right>;
+    return floored_subtract<place1{}, greater>(
+        possible_wide_cast<greater>(left),
+        possible_wide_cast<greater>(right));
+}
+
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right>,
+    if_integral_integer<Left>,
+    if_integral_integer<Right>>
+constexpr Explicit floored_subtract(Left left, Right right) NOEXCEPT
+{
+    return floored_subtract<place1{}, Explicit>(
+        possible_narrow_and_sign_cast<Explicit>(left),
+        possible_narrow_and_sign_cast<Explicit>(right));
+}
+
+// overflows
+// ----------------------------------------------------------------------------
+
+template <typename Integer,
+    if_signed_integral_integer<Integer>>
 constexpr bool overflows(Integer left, Integer right) NOEXCEPT
 {
     const auto negative_right = is_negative(right);
+
     return !is_zero(right) &&
-        (!negative_right || (left < minimum<Integer>() - right)) &&
-        (negative_right  || (left > maximum<Integer>() - right));
+        (!negative_right || (left < (minimum<Integer>() - right))) &&
+        (negative_right  || (left > (maximum<Integer>() - right)));
 }
 
-template <typename Integer, if_unsigned_integer<Integer>>
+template <typename Integer,
+    if_unsigned_integral_integer<Integer>>
 constexpr bool overflows(Integer left, Integer right) NOEXCEPT
 {
     return right > (maximum<Integer>() - left);
 }
 
-template <typename Integer, if_signed_integer<Integer>>
+// underflows
+
+template <typename Integer,
+    if_signed_integral_integer<Integer>>
 constexpr bool underflows(Integer left, Integer right) NOEXCEPT
 {
     const auto negative_right = is_negative(right);
+
     return !is_zero(right) &&
-        (!negative_right || (left > maximum<Integer>() + right)) &&
-        (negative_right  || (left < minimum<Integer>() + right));
+        (!negative_right || (left > (maximum<Integer>() + right))) &&
+        (negative_right  || (left < (minimum<Integer>() + right)));
 }
 
-template <typename Integer, if_unsigned_integer<Integer>>
+template <typename Integer,
+    if_unsigned_integral_integer<Integer>>
 constexpr bool underflows(Integer left, Integer right) NOEXCEPT
 {
     return right > left;
-}
-
-template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
-{
-    return overflows(left, right) ? (is_negative(right) ?
-        minimum<Integer>() : maximum<Integer>()) : (left + right);
-}
-
-template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
-{
-    return overflows(left, right) ? maximum<Integer>() : (left + right);
-}
-
-template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
-{
-    return underflows(left, right) ? (is_negative(right) ?
-        maximum<Integer>() : minimum<Integer>()) : (left - right);
-}
-
-template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
-{
-    return underflows(left, right) ? minimum<Integer>() : (left - right);
 }
 
 } // namespace system

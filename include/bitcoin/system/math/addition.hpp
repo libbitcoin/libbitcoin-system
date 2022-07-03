@@ -19,29 +19,96 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_ADDITION_HPP
 #define LIBBITCOIN_SYSTEM_MATH_ADDITION_HPP
 
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// left + right after cast of each to Result type.
-/// Result type bit width must not be lesser than either operand.
+/// left + right after cast of each to Explicit type.
+/// Result defaults to greater of operand types.
+/// Result size must not be lesser than either operand.
 /// Use overflows<Result>(left, right) to guard.
-template <typename Result, typename Left, typename Right,
-    if_not_lesser_width<Result, Left> = true,
-    if_not_lesser_width<Result, Right> = true,
-    if_same_signed_integer<Left, Right> = true>
-constexpr Result add(Left left, Right right) NOEXCEPT;
+template <place1 = place1{}, typename Integer,
+    if_integral_integer<Integer> = true>
+constexpr Integer add(Integer left, Integer right) NOEXCEPT;
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer> = true>
+constexpr Explicit add(Integer left, Integer right) NOEXCEPT;
+template <place2 = place2{}, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr to_greater_type<Left, Right> add(Left left, Right right) NOEXCEPT;
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr Explicit add(Left left, Right right) NOEXCEPT;
 
-/// left - right after cast of each to Result type.
-/// Result type bit width must not be lesser than either operand.
+/// left - right after cast of each to Explicit type.
+/// Result defaults to greater of operand types.
+/// Result size must not be lesser than either operand.
 /// Use underflows<Result>(left, right) to guard.
-template <typename Result, typename Left, typename Right,
-    if_not_lesser_width<Result, Left> = true,
-    if_not_lesser_width<Result, Right> = true,
-    if_same_signed_integer<Left, Right> = true>
-constexpr Result subtract(Left left, Right right) NOEXCEPT;
+template <place1 = place1{}, typename Integer,
+    if_integral_integer<Integer> = true >
+constexpr Integer subtract(Integer left, Integer right) NOEXCEPT;
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer> = true>
+constexpr Explicit subtract(Integer left, Integer right) NOEXCEPT;
+template <place2 = place2{}, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr to_greater_type<Left, Right> subtract(Left left, Right right) NOEXCEPT;
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr Explicit subtract(Left left, Right right) NOEXCEPT;
+
+/// Integer maximum if would overflow, otherwise the sum.
+template <place1 = place1{}, typename Integer,
+    if_signed_integral_integer<Integer> = true >
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT;
+template <place1 = place1{}, typename Integer,
+    if_unsigned_integral_integer<Integer> = true >
+constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT;
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer> = true>
+constexpr Explicit ceilinged_add(Integer left, Integer right) NOEXCEPT;
+template <place2 = place2{}, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr to_greater_type<Left, Right> ceilinged_add(Left left,
+    Right right) NOEXCEPT;
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr Explicit ceilinged_add(Left left, Right right) NOEXCEPT;
+
+/// Integer minimum if would underflow, otherwise the difference.
+template <place1 = place1{}, typename Integer,
+    if_signed_integral_integer<Integer> = true >
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT;
+template <place1 = place1{}, typename Integer,
+    if_unsigned_integral_integer<Integer> = true >
+constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT;
+template <typename Explicit, typename Integer,
+    if_integral_integer<Integer> = true>
+constexpr Explicit floored_subtract(Integer left, Integer right) NOEXCEPT;
+template <place2 = place2{}, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true >
+constexpr to_greater_type<Left, Right> floored_subtract(Left left,
+    Right right) NOEXCEPT;
+template <typename Explicit, typename Left, typename Right,
+    if_not_same<Left, Right> = true,
+    if_integral_integer<Left> = true,
+    if_integral_integer<Right> = true>
+constexpr Explicit floored_subtract(Left left, Right right) NOEXCEPT;
 
 /// The term 'overflow' is used here to describe a sum that is above the
 /// maximum or below the minimum of the integer domain. Similarly, 'underflow'
@@ -50,36 +117,24 @@ constexpr Result subtract(Left left, Right right) NOEXCEPT;
 /// subtract underflows.
 
 /// True if add would overflow.
-template <typename Integer, if_signed_integer<Integer> = true>
+template <typename Integer,
+    if_signed_integral_integer<Integer> = true>
 constexpr bool overflows(Integer left, Integer right) NOEXCEPT;
 
 /// True if add would overflow.
-template <typename Integer, if_unsigned_integer<Integer> = true>
+template <typename Integer,
+    if_unsigned_integral_integer<Integer> = true>
 constexpr bool overflows(Integer left, Integer right) NOEXCEPT;
 
 /// True if subtract would underflow.
-template <typename Integer, if_signed_integer<Integer> = true>
+template <typename Integer,
+    if_signed_integral_integer<Integer> = true>
 constexpr bool underflows(Integer left, Integer right) NOEXCEPT;
 
 /// True if subtract would underflow.
-template <typename Integer, if_unsigned_integer<Integer> = true>
+template <typename Integer,
+    if_unsigned_integral_integer<Integer> = true>
 constexpr bool underflows(Integer left, Integer right) NOEXCEPT;
-
-/// Integer maximum if would overflow, otherwise the sum.
-template <typename Integer, if_signed_integer<Integer> = true>
-constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT;
-
-/// Integer maximum if would overflow, otherwise the sum.
-template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT;
-
-/// Integer minimum if would underflow, otherwise the difference.
-template <typename Integer, if_signed_integer<Integer> = true>
-constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT;
-
-/// Integer minimum (0) if would underflow, otherwise the difference.
-template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

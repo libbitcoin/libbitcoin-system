@@ -337,15 +337,18 @@ uint32_t chain_state::work_required(const data& values, uint32_t forks,
 uint32_t chain_state::retarget_timespan(const data& values,
     uint32_t minimum_timespan, uint32_t maximum_timespan) NOEXCEPT
 {
-    const auto high = timestamp_high(values);
-    const auto retarget = values.timestamp.retarget;
+    //*************************************************************************
+    // CONSENSUS: "Subtract unsigned 32 bit numbers in signed 64 bit space".
+    // This is done order to prevent underflow before applying the range
+    // constraint. This is properly just a floored subtraction in 32 bit space.
+    //*************************************************************************
+    const auto timespan = floored_subtract(timestamp_high(values),
+        values.timestamp.retarget);
 
     //*************************************************************************
-    // CONSENSUS: subtract unsigned 32 bit numbers in signed 64 bit space in
-    // order to prevent underflow before applying the range constraint.
+    // CONSENSUS: Constrain the timespan to the configured consensus limits.
     //*************************************************************************
-    const auto timespan = subtract<int64_t>(high, retarget);
-    return limit<uint32_t>(timespan, minimum_timespan, maximum_timespan);
+    return limit(timespan, minimum_timespan, maximum_timespan);
 }
 
 static inline bool patch_timewarp(uint32_t forks, const uint256_t& limit,
@@ -376,15 +379,15 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
 }
 
 inline uint32_t easy_time_limit(const chain_state::data& values,
-    int64_t spacing) NOEXCEPT
+    uint32_t spacing) NOEXCEPT
 {
-    const int64_t high = timestamp_high(values);
-
     //*************************************************************************
-    // CONSENSUS: add signed 32 bit numbers in signed 64 bit space in
-    // order to prevent overflow before applying the domain constraint.
+    // CONSENSUS: "Add signed 32 bit numbers in signed 64 bit space."
+    // This is done in order to prevent overflow before applying the domain
+    // constraint. This is properly just a ceilinged addition in 32 bit space.
+    // Bitcoin time values are positive/unsigned 32 bit integers.
     //*************************************************************************
-    return limit<uint32_t>(add<int64_t>(high, spacing));
+    return ceilinged_add(timestamp_high(values), spacing);
 }
 
 // A retarget height, or a block that does not have proof_of_work_limit bits.
@@ -404,7 +407,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     BC_ASSERT(!is_zero(values.height));
 
     // Overflow allowed here since supported coins would not do so.
-    const auto easy_spacing_seconds = block_spacing_seconds << 1;
+    const auto easy_spacing_seconds = shift_left(block_spacing_seconds);
 
     // If the time limit has passed allow a minimum difficulty block.
     if (values.timestamp.self > easy_time_limit(values, easy_spacing_seconds))
@@ -764,7 +767,7 @@ inline uint64_t zulu_time_seconds() NOEXCEPT
 bool chain_state::is_stale() const NOEXCEPT
 {
     return !is_zero(stale_seconds_) && data_.timestamp.self <
-        floored_subtract<uint64_t>(zulu_time_seconds(), stale_seconds_);
+        floored_subtract(zulu_time_seconds(), stale_seconds_);
 }
 
 // Semantic invalidity can also arise from too many/few values in the arrays.
