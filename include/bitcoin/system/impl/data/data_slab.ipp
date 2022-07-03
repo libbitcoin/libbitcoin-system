@@ -21,8 +21,6 @@
 
 #include <array>
 #include <vector>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -33,26 +31,44 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <data_slab::size_type Size, typename Byte, if_one_byte<Byte>>
-data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
+constexpr data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
   : data_slab(from_size(data.begin(), Size))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
-data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
+constexpr data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
   : data_slab(from_size(data.begin(), data.size()))
 {
 }
 
 template <typename Iterator>
-data_slab::data_slab(const Iterator& begin, const Iterator& end) NOEXCEPT
+constexpr data_slab::data_slab(const Iterator& begin,
+    const Iterator& end) NOEXCEPT
   : data_slab(from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
-data_slab::data_slab(const Byte* begin, const Byte* end) NOEXCEPT
+constexpr data_slab::data_slab(const Byte* begin, const Byte* end) NOEXCEPT
   : data_slab(from_iterators(begin, end))
+{
+}
+
+constexpr data_slab::data_slab() NOEXCEPT
+  : data_slab(nullptr, nullptr, zero)
+{
+}
+
+constexpr data_slab::data_slab(std::string& text) NOEXCEPT
+  : data_slab(from_size(text.begin(), text.size()))
+{
+}
+
+// private
+constexpr data_slab::data_slab(const pointer begin, const pointer end,
+    size_type size) NOEXCEPT
+  : begin_(begin), end_(end), size_(size)
 {
 }
 
@@ -61,7 +77,7 @@ data_slab::data_slab(const Byte* begin, const Byte* end) NOEXCEPT
 
 // static
 template <typename Iterator>
-data_slab data_slab::from_iterators(const Iterator& begin,
+constexpr data_slab data_slab::from_iterators(const Iterator& begin,
     const Iterator& end) NOEXCEPT
 {
     // An end iterator can be anything, so convert to size.
@@ -77,7 +93,8 @@ data_slab data_slab::from_iterators(const Iterator& begin,
 
 // static
 template <typename Pointer>
-data_slab data_slab::from_size(const Pointer begin, size_type size) NOEXCEPT
+constexpr data_slab data_slab::from_size(const Pointer begin,
+    size_type size) NOEXCEPT
 {
     // Guard 0 because &begin[0] is undefined if size is zero.
     if (is_zero(size))
@@ -91,12 +108,45 @@ data_slab data_slab::from_size(const Pointer begin, size_type size) NOEXCEPT
 
     return { start, std::next(start, size), size };
 }
+// methods
+// ----------------------------------------------------------------------------
+
+VCONSTEXPR std::vector<data_slab::value_type> data_slab::to_chunk() const NOEXCEPT
+{
+    return { begin_, end_ };
+}
+
+constexpr data_slice data_slab::to_slice() const NOEXCEPT
+{
+    return { begin_, end_ };
+}
+
+SCONSTEXPR std::string data_slab::to_string() const NOEXCEPT
+{
+    return { begin_, end_ };
+}
+
+////// Cannot provide a "decode" factory since the data is not owned.
+////SCONSTEXPR std::string data_slab::encoded() const NOEXCEPT
+////{
+////    return to_slice().encoded();
+////}
+
+constexpr bool data_slab::resize(size_t size) NOEXCEPT
+{
+    if (size >= size_)
+        return false;
+
+    end_ = std::next(begin_, size);
+    size_ = size;
+    return true;
+}
 
 // properties
 // ----------------------------------------------------------------------------
 
 template <data_slab::size_type Size>
-std::array<typename data_slab::value_type, Size>
+constexpr std::array<data_slab::value_type, Size>
 data_slab::to_array() const NOEXCEPT
 {
     std::array<data_slab::value_type, Size> out;
@@ -113,14 +163,83 @@ data_slab::to_array() const NOEXCEPT
     return out;
 }
 
+// Undefined to dereference >= end.
+constexpr data_slab::pointer data_slab::data() const NOEXCEPT
+{
+    return begin_;
+}
+
+// Undefined to dereference >= end.
+constexpr data_slab::pointer data_slab::begin() const NOEXCEPT
+{
+    return begin_;
+}
+
+// Undefined to dereference >= end.
+constexpr data_slab::pointer data_slab::end() const NOEXCEPT
+{
+    return end_;
+}
+
+constexpr data_slab::value_type data_slab::front() const NOEXCEPT
+{
+    // Guard against end overrun (return zero).
+    return empty() ? 0x00 : *begin_;
+}
+
+constexpr data_slab::value_type data_slab::back() const NOEXCEPT
+{
+    // Guard against begin underrun (return zero).
+    return empty() ? 0x00 : *std::prev(end_);
+}
+
+constexpr data_slab::size_type data_slab::size() const NOEXCEPT
+{
+    return size_;
+}
+
+constexpr bool data_slab::empty() const NOEXCEPT
+{
+    return is_zero(size_);
+}
+
 // operators
 // ----------------------------------------------------------------------------
 
 template <data_slab::size_type Size>
-data_slab::operator
-std::array<typename data_slab::value_type, Size>() const NOEXCEPT
+constexpr data_slab::operator
+std::array<data_slab::value_type, Size>() const NOEXCEPT
 {
     return to_array<Size>();
+}
+
+constexpr data_slab::operator
+std::vector<data_slab::value_type>() const NOEXCEPT
+{
+    return data_slab::to_chunk();
+}
+
+constexpr data_slab::
+operator data_slice() const NOEXCEPT
+{
+    return data_slab::to_slice();
+}
+
+constexpr data_slab::value_type data_slab::
+operator[](size_type index) const NOEXCEPT
+{
+    // Guard against end overrun (return zero).
+    return index < size_ ? *std::next(begin_, index) : 0x00;
+}
+
+constexpr bool operator==(const data_slab& left, const data_slab& right) NOEXCEPT
+{
+    return left.to_slice() == right.to_slice();
+}
+
+constexpr bool operator!=(const data_slab& left, const data_slab& right) NOEXCEPT
+{
+    return !(left == right);
 }
 
 } // namespace system

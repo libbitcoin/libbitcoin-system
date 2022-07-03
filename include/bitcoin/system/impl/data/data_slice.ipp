@@ -146,7 +146,7 @@ constexpr data_slice data_slice::from_size(Pointer begin,
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size>
-std::array<typename data_slice::value_type, Size>
+std::array<data_slice::value_type, Size>
 constexpr data_slice::to_array() const NOEXCEPT
 {
     std::array<data_slice::value_type, Size> out;
@@ -214,13 +214,13 @@ constexpr data_slice::pointer data_slice::end() const NOEXCEPT
 constexpr data_slice::value_type data_slice::front() const NOEXCEPT
 {
     // Guard against end overrun (return zero).
-    return empty() ? 0x00 : *begin_;
+    return empty() ? 0_u8 : *begin_;
 }
 
 constexpr data_slice::value_type data_slice::back() const NOEXCEPT
 {
     // Guard against begin underrun (return zero).
-    return empty() ? 0x00 : *std::prev(end_);
+    return empty() ? 0_u8 : *std::prev(end_);
 }
 
 constexpr data_slice::size_type data_slice::size() const NOEXCEPT
@@ -238,13 +238,13 @@ constexpr bool data_slice::empty() const NOEXCEPT
 
 template <data_slice::size_type Size>
 constexpr data_slice::
-operator std::array<typename data_slice::value_type, Size>() const NOEXCEPT
+operator std::array<data_slice::value_type, Size>() const NOEXCEPT
 {
     return to_array<Size>();
 }
 
 
-constexpr data_slice::
+VCONSTEXPR data_slice::
 operator std::vector<data_slice::value_type>() const NOEXCEPT
 {
     return data_slice::to_chunk();
@@ -254,7 +254,7 @@ constexpr data_slice::value_type data_slice::
 operator[](size_type index) const NOEXCEPT
 {
     // Guard against end overrun (return zero).
-    return index < size_ ? *std::next(begin_, index) : 0x00;
+    return index < size_ ? *std::next(begin_, index) : 0_u8;
 }
 
 constexpr bool
@@ -264,9 +264,14 @@ operator==(const data_slice& left, const data_slice& right) NOEXCEPT
         return false;
 
     // std::vector performs value comparison, so this does too.
+
     for (data_slice::size_type index = 0; index < left.size(); ++index)
-        if (left[index] != right[index])
-            return false;
+    {
+        // Indexation is guarded above.
+        BC_PUSH_WARNING(USE_GSL_AT)
+        if (left[index] != right[index]) return false;
+        BC_POP_WARNING()
+    }
 
     return true;
 }

@@ -45,7 +45,7 @@ namespace system {
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
 /// [] iteration past end is safe and returns zeros.
 /// Negative size construction yields a valid empty object.
-class BC_API data_reference
+class data_reference
   : public data_slice
 {
 public:
@@ -63,10 +63,10 @@ public:
     constexpr data_reference(const data_slice& data) NOEXCEPT;
 
     /// std::string constructor (casts char to uint8_t).
-    SCONSTEXPR data_reference(const std::string& text) NOEXCEPT;
+    constexpr data_reference(const std::string& text) NOEXCEPT;
 
     /// data_chunk constructor.
-    VCONSTEXPR data_reference(const data_chunk& data) NOEXCEPT;
+    constexpr data_reference(const data_chunk& data) NOEXCEPT;
 
     /// data_array constructor.
     template <size_type Size>
@@ -78,7 +78,7 @@ public:
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    VCONSTEXPR data_reference(const std::vector<Byte>& data) NOEXCEPT;
+    constexpr data_reference(const std::vector<Byte>& data) NOEXCEPT;
 
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>

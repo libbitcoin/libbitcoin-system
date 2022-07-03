@@ -39,12 +39,12 @@ constexpr data_reference::data_reference(const data_slice& data) NOEXCEPT
 {
 }
 
-SCONSTEXPR data_reference::data_reference(const std::string& text) NOEXCEPT
+constexpr data_reference::data_reference(const std::string& text) NOEXCEPT
   : data_slice(text)
 {
 }
 
-VCONSTEXPR data_reference::data_reference(const data_chunk& data) NOEXCEPT
+constexpr data_reference::data_reference(const data_chunk& data) NOEXCEPT
   : data_slice(data)
 {
 }
@@ -65,7 +65,7 @@ constexpr data_reference::data_reference(const std::array<Byte, Size>& data) NOE
 
 /// Byte vector constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-VCONSTEXPR data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
+constexpr data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
   : data_slice(data)
 {
 }

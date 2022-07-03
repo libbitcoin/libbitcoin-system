@@ -43,7 +43,7 @@ namespace system {
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
 /// [] iteration past end is safe and returns zeros.
 /// Negative size construction yields a valid empty object.
-class BC_API data_slab
+class data_slab
 {
 public:
     typedef size_t size_type;
@@ -58,87 +58,90 @@ public:
     /// Constructors.
 
     /// Empty slab.
-    data_slab() NOEXCEPT;
+    constexpr data_slab() NOEXCEPT;
 
     /// Defaults.
-    data_slab(data_slab&&) = default;
-    data_slab(const data_slab&) = default;
-    data_slab& operator=(data_slab&&) = default;
-    data_slab& operator=(const data_slab&) = default;
-    ~data_slab() = default;
+    constexpr data_slab(data_slab&&) = default;
+    constexpr data_slab(const data_slab&) = default;
+    constexpr data_slab& operator=(data_slab&&) = default;
+    constexpr data_slab& operator=(const data_slab&) = default;
+    constexpr ~data_slab() = default;
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_one_byte<Byte> = true>
-    data_slab(std::array<Byte, Size>& data) NOEXCEPT;
+    constexpr data_slab(std::array<Byte, Size>& data) NOEXCEPT;
 
     // TODO: test.
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_slab(std::vector<Byte>& data) NOEXCEPT;
+    constexpr data_slab(std::vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-non-const references.
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>
-    data_slab(const Iterator& begin, const Iterator& end) NOEXCEPT;
+    constexpr data_slab(const Iterator& begin, const Iterator& end) NOEXCEPT;
 
     // TODO: change to begin/size construction.
     /// Byte pointer to non-const constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_slab(const Byte* begin, const Byte* end) NOEXCEPT;
+    constexpr data_slab(const Byte* begin, const Byte* end) NOEXCEPT;
 
     // TODO: test.
     /// String constructor (casts char to uint8_t).
-    data_slab(std::string& text) NOEXCEPT;
+    constexpr data_slab(std::string& text) NOEXCEPT;
 
     /// Methods.
 
     /// Copy data to an array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
-    std::array<value_type, Size> to_array() const NOEXCEPT;
+    constexpr std::array<value_type, Size> to_array() const NOEXCEPT;
 
     /// Copy data to a vector.
-    std::vector<value_type> to_chunk() const NOEXCEPT;
+    constexpr std::vector<value_type> to_chunk() const NOEXCEPT;
 
     /// Cast buffer to a data_slice.
-    data_slice to_slice() const NOEXCEPT;
+    constexpr data_slice to_slice() const NOEXCEPT;
 
     /// Convert data to a string (casts uint8_t to char).
-    std::string to_string() const NOEXCEPT;
+    SCONSTEXPR std::string to_string() const NOEXCEPT;
 
+    // dependency ordering
     /////// Convert data to a base16 string.
-    ////std::string encoded() const NOEXCEPT;
+    ////SCONSTEXPR std::string encoded() const NOEXCEPT;
 
     /// Resize the slab by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slab.
     /// Returns true if the size was reduced (expansion is not allowed).
-    bool resize(size_t size) NOEXCEPT;
+    constexpr bool resize(size_t size) NOEXCEPT;
 
     /// Properties.
-    pointer data() const NOEXCEPT;
-    pointer begin() const NOEXCEPT;
-    pointer end() const NOEXCEPT;
-    value_type front() const NOEXCEPT;
-    value_type back() const NOEXCEPT;
-    size_type size() const NOEXCEPT;
-    bool empty() const NOEXCEPT;
+    constexpr pointer data() const NOEXCEPT;
+    constexpr pointer begin() const NOEXCEPT;
+    constexpr pointer end() const NOEXCEPT;
+    constexpr value_type front() const NOEXCEPT;
+    constexpr value_type back() const NOEXCEPT;
+    constexpr size_type size() const NOEXCEPT;
+    constexpr bool empty() const NOEXCEPT;
 
     /// Unary operators.
     template<size_type Size>
-    operator std::array<value_type, Size>() const NOEXCEPT;
-    operator std::vector<value_type>() const NOEXCEPT;
-    operator data_slice() const NOEXCEPT;
-    value_type operator[](size_type index) const NOEXCEPT;
+    constexpr operator std::array<value_type, Size>() const NOEXCEPT;
+    VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
+    constexpr operator data_slice() const NOEXCEPT;
+    constexpr value_type operator[](size_type index) const NOEXCEPT;
 
 private:
-    data_slab(const pointer begin, const pointer end, size_type size) NOEXCEPT;
+    constexpr data_slab(const pointer begin, const pointer end,
+        size_type size) NOEXCEPT;
 
     template <typename Iterator>
-    static data_slab from_iterators(const Iterator& begin,
+    static constexpr data_slab from_iterators(const Iterator& begin,
         const Iterator& end) NOEXCEPT;
 
     template <typename Pointer>
-    static data_slab from_size(const Pointer begin, size_type size) NOEXCEPT;
+    static constexpr data_slab from_size(const Pointer begin,
+        size_type size) NOEXCEPT;
 
     pointer begin_;
     pointer end_;
@@ -146,8 +149,8 @@ private:
 };
 
 /// Binary operators.
-BC_API bool operator==(const data_slab& left, const data_slab& right) NOEXCEPT;
-BC_API bool operator!=(const data_slab& left, const data_slab& right) NOEXCEPT;
+constexpr bool operator==(const data_slab& left, const data_slab& right) NOEXCEPT;
+constexpr bool operator!=(const data_slab& left, const data_slab& right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
