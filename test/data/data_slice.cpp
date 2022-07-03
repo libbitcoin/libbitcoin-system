@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
     BOOST_REQUIRE_EQUAL(slice.back(), 0x00u);
 
     // methods
-    BOOST_REQUIRE_EQUAL(slice.encoded(), "");
+    ////BOOST_REQUIRE_EQUAL(slice.encoded(), "");
     BOOST_REQUIRE_EQUAL(slice.to_string(), "");
     BOOST_REQUIRE_EQUAL(slice.to_chunk(), data_chunk{});
     BOOST_REQUIRE_EQUAL(slice.to_array<0>(), data_array<0>{});
@@ -125,7 +125,7 @@ const data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
 const data_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 const std::vector<char> char_vector{ 'f', 'o', 'o', 'b', 'a', 'r' };
 const std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
-const auto encoded = encode_base16(string);
+////const auto encoded = encode_base16(string);
 
 
 // copy construct/assigment
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
     BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).back(), 'r');
 
     // methods
-    BOOST_REQUIRE_EQUAL(slice.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice.encoded(), encoded);
     BOOST_REQUIRE_EQUAL(slice.to_string(), string);
     BOOST_REQUIRE_EQUAL(slice.to_chunk(), data);
     BOOST_REQUIRE_EQUAL(slice.to_array<size>(), byte);
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
     const data_slice slice1{ "foobar" };
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
-    BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
     // Invalid, use:
     // data_slice slice("foobar");
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
     const data_slice slice3 = { "foobar" };
     BOOST_REQUIRE(!slice3.empty());
     BOOST_REQUIRE_EQUAL(slice3.size(), size);
-    BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
@@ -294,13 +294,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
     const data_slice slice0(byte);
     BOOST_REQUIRE(!slice0.empty());
     BOOST_REQUIRE_EQUAL(slice0.size(), size);
-    BOOST_REQUIRE_EQUAL(slice0.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice0.encoded(), encoded);
 
     // construct(data_array)
     const data_slice slice1{ byte };
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
-    BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
     // Deleted function, use:
     // data_slice slice(byte);
@@ -316,13 +316,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__array__expected)
     const data_slice slice3({ byte });
     BOOST_REQUIRE(!slice3.empty());
     BOOST_REQUIRE_EQUAL(slice3.size(), size);
-    BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
 
     // construct(char_array)
     const data_slice slice4(char_array);
     BOOST_REQUIRE(!slice4.empty());
     BOOST_REQUIRE_EQUAL(slice4.size(), size);
-    BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice4.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
@@ -337,13 +337,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
     const data_slice slice1{ 'f', 'o', 'o', 'b', 'a', 'r' };
     BOOST_WARN(!slice1.empty());
     BOOST_WARN_EQUAL(slice1.size(), size);
-    BOOST_WARN_EQUAL(slice1.encoded(), encoded);
+    ////BOOST_WARN_EQUAL(slice1.encoded(), encoded);
 
     // construct(initializer - data)
     const data_slice slice2 = { 'f', 'o', 'o', 'b', 'a', 'r' };
     BOOST_WARN(!slice2.empty());
     BOOST_WARN_EQUAL(slice2.size(), size);
-    BOOST_WARN_EQUAL(slice2.encoded(), encoded);
+    ////BOOST_WARN_EQUAL(slice2.encoded(), encoded);
 
     // Invalid construction
     ////const data_slice slice3(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
@@ -355,20 +355,20 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
     const data_slice slice4{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     BOOST_WARN(!slice4.empty());
     BOOST_WARN_EQUAL(slice4.size(), 10u);
-    BOOST_WARN_EQUAL(slice4.encoded(), "00010203040506070809");
+    ////BOOST_WARN_EQUAL(slice4.encoded(), "00010203040506070809");
 
     // construct(initializer - data)
     const data_slice slice5 = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     BOOST_WARN(!slice5.empty());
     BOOST_WARN_EQUAL(slice5.size(), 10u);
-    BOOST_WARN_EQUAL(slice5.encoded(), "00010203040506070809");
+    ////BOOST_WARN_EQUAL(slice5.encoded(), "00010203040506070809");
 
     // construct(initializer - data)
     // The non-char terminator causes the data initializer to be picked up.
     const data_slice slice6({ 'f', 'o', 'o', 'b', 'a', 'r', 0 });
     BOOST_WARN(!slice6.empty());
     BOOST_WARN_EQUAL(slice6.size(), add1(size));
-    BOOST_WARN_EQUAL(slice6.encoded(), encoded + "00");
+    ////BOOST_WARN_EQUAL(slice6.encoded(), encoded + "00");
 
     // construct(initializer - text)
     // All characters is picked up by the char array initializer.
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__initializer__expected)
     const data_slice slice7({ 'f', 'o', 'o', 'b', 'a', 'r', '\0' });
     BOOST_WARN(!slice7.empty());
     BOOST_WARN_EQUAL(slice7.size(), size);
-    BOOST_WARN_EQUAL(slice7.encoded(), encoded);
+    ////BOOST_WARN_EQUAL(slice7.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__string__expected)
@@ -387,13 +387,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__string__expected)
     const data_slice slice0(string);
     BOOST_REQUIRE(!slice0.empty());
     BOOST_REQUIRE_EQUAL(slice0.size(), size);
-    BOOST_REQUIRE_EQUAL(slice0.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice0.encoded(), encoded);
 
     // construct(string)
     const data_slice slice1{ string };
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
-    BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
     // Deleted function, use:
     // data_slice slice(string);
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__string__expected)
     const data_slice slice3 = { string };
     BOOST_REQUIRE(!slice3.empty());
     BOOST_REQUIRE_EQUAL(slice3.size(), size);
-    BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
 
     // Ambiguous, use:
     // data_slice slice(string);
@@ -425,7 +425,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__vector__expected)
     const data_slice slice1(data);
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
-    BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
     // Deleted function, use:
     // data_slice slice(data);
@@ -439,7 +439,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__vector__expected)
     const data_slice slice3 = { data };
     BOOST_REQUIRE(!slice3.empty());
     BOOST_REQUIRE_EQUAL(slice3.size(), size);
-    BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice3.encoded(), encoded);
 
     // Ambiguous, use:
     // data_slice slice(data);
@@ -454,7 +454,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__vector__expected)
     const data_slice slice5(char_vector);
     BOOST_REQUIRE(!slice5.empty());
     BOOST_REQUIRE_EQUAL(slice5.size(), size);
-    BOOST_REQUIRE_EQUAL(slice5.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice5.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__pointers__expected)
@@ -463,13 +463,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__pointers__expected)
     const data_slice slice1(byte.data(), std::next(byte.data(), size));
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
-    BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
     // construct(pointers)
     const data_slice slice2 = { byte.data(), std::next(byte.data(), size) };
     BOOST_REQUIRE(!slice2.empty());
     BOOST_REQUIRE_EQUAL(slice2.size(), size);
-    BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
 
     // Ambiguous, use:
     // data_slice slice(byte.data(), std::next(byte.data(), size));
@@ -487,13 +487,13 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__iterators__expected)
     const data_slice slice1(string.begin(), string.end());
     BOOST_REQUIRE(!slice1.empty());
     BOOST_REQUIRE_EQUAL(slice1.size(), size);
-    BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice1.encoded(), encoded);
 
     // construct(iterators)
     const data_slice slice2 = { string.begin(), string.end() };
     BOOST_REQUIRE(!slice2.empty());
     BOOST_REQUIRE_EQUAL(slice2.size(), size);
-    BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
+    ////BOOST_REQUIRE_EQUAL(slice2.encoded(), encoded);
 
     // Ambiguous, use:
     // data_slice slice(string.substr(,));

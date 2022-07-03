@@ -30,11 +30,6 @@
 namespace libbitcoin {
 namespace system {
 
-std::string to_string(const data_slice& bytes) NOEXCEPT
-{
-    return bytes.to_string();
-}
-
 std::string join(const string_list& tokens,
     const std::string& delimiter) NOEXCEPT
 {

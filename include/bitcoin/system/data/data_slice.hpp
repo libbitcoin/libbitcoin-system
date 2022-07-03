@@ -20,12 +20,9 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLICE_HPP
 
 #include <array>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <initializer_list>
 #include <string>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -58,7 +55,7 @@ namespace system {
 /// Accepts any sizeof(T) == 1 type as a "byte" and emits uint8_t.
 /// [] iteration past end is safe and returns zeros.
 /// Negative size construction yields a valid empty object.
-class BC_API data_slice
+class data_slice
 {
 public:
     typedef size_t size_type;
@@ -73,92 +70,93 @@ public:
     /// Constructors.
 
     /// Empty slice.
-    data_slice() NOEXCEPT;
+    constexpr data_slice() NOEXCEPT;
 
     /// Defaults.
-    data_slice(data_slice&&) = default;
-    data_slice(const data_slice&) = default;
-    data_slice& operator=(data_slice&&) = default;
-    data_slice& operator=(const data_slice&) = default;
-    ~data_slice() = default;
+    constexpr data_slice(data_slice&&) = default;
+    constexpr data_slice(const data_slice&) = default;
+    constexpr data_slice& operator=(data_slice&&) = default;
+    constexpr data_slice& operator=(const data_slice&) = default;
+    constexpr ~data_slice() = default;
 
     /// Literal bytes constructor.
     /// Integral null terminator is not indexed.
     template <size_type Size>
-    data_slice(const char(&text)[Size]) NOEXCEPT;
+    constexpr data_slice(const char(&text)[Size]) NOEXCEPT;
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_one_byte<Byte> = true>
-    data_slice(const std::array<Byte, Size>& data) NOEXCEPT;
+    constexpr data_slice(const std::array<Byte, Size>& data) NOEXCEPT;
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_slice(const std::vector<Byte>& data) NOEXCEPT;
+    VCONSTEXPR data_slice(const std::vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-const references.
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>
-    data_slice(const Iterator& begin, const Iterator& end) NOEXCEPT;
+    constexpr data_slice(const Iterator& begin, const Iterator& end) NOEXCEPT;
 
     // TODO: change to begin/size construction.
     /// Byte pointer to const constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_slice(const Byte* begin, const Byte* end) NOEXCEPT;
+    constexpr data_slice(const Byte* begin, const Byte* end) NOEXCEPT;
 
     /// String constructor (casts char to uint8_t).
-    data_slice(const std::string& text) NOEXCEPT;
+    SCONSTEXPR data_slice(const std::string& text) NOEXCEPT;
 
     /// Byte initializer list constructor.
-    data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
+    constexpr data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
 
     /// Methods.
 
     /// Copy data to an array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
-    std::array<value_type, Size> to_array() const NOEXCEPT;
+    constexpr std::array<value_type, Size> to_array() const NOEXCEPT;
 
     /// Copy data to a vector.
-    std::vector<value_type> to_chunk() const NOEXCEPT;
+    VCONSTEXPR std::vector<value_type> to_chunk() const NOEXCEPT;
 
     /// Convert data to a string (casts uint8_t to char).
-    std::string to_string() const NOEXCEPT;
+    SCONSTEXPR std::string to_string() const NOEXCEPT;
 
-    /// Convert data to a base16 string.
-    std::string encoded() const NOEXCEPT;
+    // dependency ordering
+    /////// Convert data to a base16 string.
+    ////SCONSTEXPR std::string encoded() const NOEXCEPT;
 
     /// Resize the slice by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slice.
     /// Returns true if the size was reduced (expansion is not allowed).
-    bool resize(size_t size) NOEXCEPT;
+    constexpr bool resize(size_t size) NOEXCEPT;
 
     /// Properties.
-    pointer data() const NOEXCEPT;
-    pointer begin() const NOEXCEPT;
-    pointer end() const NOEXCEPT;
-    value_type front() const NOEXCEPT;
-    value_type back() const NOEXCEPT;
-    size_type size() const NOEXCEPT;
-    bool empty() const NOEXCEPT;
+    constexpr pointer data() const NOEXCEPT;
+    constexpr pointer begin() const NOEXCEPT;
+    constexpr pointer end() const NOEXCEPT;
+    constexpr value_type front() const NOEXCEPT;
+    constexpr value_type back() const NOEXCEPT;
+    constexpr size_type size() const NOEXCEPT;
+    constexpr bool empty() const NOEXCEPT;
 
     /// Operators.
     template<size_type Size>
-    operator std::array<value_type, Size>() const NOEXCEPT;
-    operator std::vector<value_type>() const NOEXCEPT;
-    value_type operator[](size_type index) const NOEXCEPT;
+    constexpr operator std::array<value_type, Size>() const NOEXCEPT;
+    VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
+    constexpr value_type operator[](size_type index) const NOEXCEPT;
 
 private:
-    data_slice(pointer begin, pointer end, size_type size) NOEXCEPT;
+    constexpr data_slice(pointer begin, pointer end, size_type size) NOEXCEPT;
 
     template <size_type Size, typename Byte>
-    static data_slice from_literal(const Byte(&text)[Size]) NOEXCEPT;
+    constexpr static data_slice from_literal(const Byte(&text)[Size]) NOEXCEPT;
 
     template <typename Iterator>
-    static data_slice from_iterators(const Iterator& begin,
+    constexpr static data_slice from_iterators(const Iterator& begin,
         const Iterator& end) NOEXCEPT;
 
     template <typename Pointer>
-    static data_slice from_size(Pointer begin, size_type size) NOEXCEPT;
+    constexpr static data_slice from_size(Pointer begin, size_type size) NOEXCEPT;
 
     pointer begin_;
     pointer end_;
@@ -166,8 +164,8 @@ private:
 };
 
 /// Binary operators.
-BC_API bool operator==(const data_slice& left, const data_slice& right) NOEXCEPT;
-BC_API bool operator!=(const data_slice& left, const data_slice& right) NOEXCEPT;
+constexpr bool operator==(const data_slice& left, const data_slice& right) NOEXCEPT;
+constexpr bool operator!=(const data_slice& left, const data_slice& right) NOEXCEPT;
 
 typedef std::initializer_list<data_slice> data_loaf;
 

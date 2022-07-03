@@ -20,8 +20,8 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_REFERENCE_IPP
 
 #include <array>
+#include <string>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
@@ -29,30 +29,50 @@
 namespace libbitcoin {
 namespace system {
 
+constexpr data_reference::data_reference() NOEXCEPT
+  : data_slice()
+{
+}
+
+constexpr data_reference::data_reference(const data_slice& data) NOEXCEPT
+  : data_slice(data)
+{
+}
+
+SCONSTEXPR data_reference::data_reference(const std::string& text) NOEXCEPT
+  : data_slice(text)
+{
+}
+
+VCONSTEXPR data_reference::data_reference(const data_chunk& data) NOEXCEPT
+  : data_slice(data)
+{
+}
+
 /// data_array constructor.
 template <data_reference::size_type Size>
-data_reference::data_reference(const data_array<Size>& data) NOEXCEPT
+constexpr data_reference::data_reference(const data_array<Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 /// Byte array constructor (casts Byte to uint8_t).
 template <data_reference::size_type Size, typename Byte, if_one_byte<Byte>>
-data_reference::data_reference(const std::array<Byte, Size>& data) NOEXCEPT
+constexpr data_reference::data_reference(const std::array<Byte, Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 /// Byte vector constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
+VCONSTEXPR data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 /// Byte iterators constructor (casts to uint8_t).
 template <typename Iterator>
-data_reference::data_reference(const Iterator& begin,
+constexpr data_reference::data_reference(const Iterator& begin,
     const Iterator& end) NOEXCEPT
   : data_slice(begin, end)
 {
@@ -60,7 +80,7 @@ data_reference::data_reference(const Iterator& begin,
 
 /// Byte pointer to const constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-data_reference::data_reference(const Byte* begin, const Byte* end) NOEXCEPT
+constexpr data_reference::data_reference(const Byte* begin, const Byte* end) NOEXCEPT
   : data_slice(begin, end)
 {
 }

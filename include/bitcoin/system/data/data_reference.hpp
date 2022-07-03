@@ -22,7 +22,6 @@
 #include <array>
 #include <string>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
@@ -51,43 +50,43 @@ class BC_API data_reference
 {
 public:
     /// Empty reference.
-    data_reference() NOEXCEPT;
+    constexpr data_reference() NOEXCEPT;
 
     /// Defaults.
-    data_reference(data_reference&&) = default;
-    data_reference(const data_reference&) = default;
-    data_reference& operator=(data_reference&&) = default;
-    data_reference& operator=(const data_reference&) = default;
-    ~data_reference() = default;
+    constexpr data_reference(data_reference&&) = default;
+    constexpr data_reference(const data_reference&) = default;
+    constexpr data_reference& operator=(data_reference&&) = default;
+    constexpr data_reference& operator=(const data_reference&) = default;
+    constexpr ~data_reference() = default;
 
     /// data_slice construction.
-    data_reference(const data_slice& data) NOEXCEPT;
+    constexpr data_reference(const data_slice& data) NOEXCEPT;
 
     /// std::string constructor (casts char to uint8_t).
-    data_reference(const std::string& text) NOEXCEPT;
+    SCONSTEXPR data_reference(const std::string& text) NOEXCEPT;
 
     /// data_chunk constructor.
-    data_reference(const data_chunk& data) NOEXCEPT;
+    VCONSTEXPR data_reference(const data_chunk& data) NOEXCEPT;
 
     /// data_array constructor.
     template <size_type Size>
-    data_reference(const data_array<Size>& data) NOEXCEPT;
+    constexpr data_reference(const data_array<Size>& data) NOEXCEPT;
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_one_byte<Byte> = true>
-    data_reference(const std::array<Byte, Size>& data) NOEXCEPT;
+    constexpr data_reference(const std::array<Byte, Size>& data) NOEXCEPT;
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_reference(const std::vector<Byte>& data) NOEXCEPT;
+    VCONSTEXPR data_reference(const std::vector<Byte>& data) NOEXCEPT;
 
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>
-    data_reference(const Iterator& begin, const Iterator& end) NOEXCEPT;
+    constexpr data_reference(const Iterator& begin, const Iterator& end) NOEXCEPT;
 
     /// Byte pointer to const constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    data_reference(const Byte* begin, const Byte* end) NOEXCEPT;
+    constexpr data_reference(const Byte* begin, const Byte* end) NOEXCEPT;
 };
 
 } // namespace system

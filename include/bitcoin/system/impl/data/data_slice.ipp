@@ -20,11 +20,13 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLICE_IPP
 
 #include <array>
+#include <initializer_list>
+#include <iterator>
+#include <string>
 #include <vector>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
+////#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -33,32 +35,56 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size>
-data_slice::data_slice(const char(&bytes)[Size]) NOEXCEPT
+constexpr data_slice::data_slice(const char(&bytes)[Size]) NOEXCEPT
   : data_slice(from_literal(bytes))
 {
 }
 
 template <data_slice::size_type Size, typename Byte, if_one_byte<Byte>>
-data_slice::data_slice(const std::array<Byte, Size>& data) NOEXCEPT
+constexpr data_slice::data_slice(const std::array<Byte, Size>& data) NOEXCEPT
   : data_slice(from_size(data.begin(), Size))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
-data_slice::data_slice(const std::vector<Byte>& data) NOEXCEPT
+constexpr data_slice::data_slice(const std::vector<Byte>& data) NOEXCEPT
   : data_slice(from_size(data.begin(), data.size()))
 {
 }
 
 template <typename Iterator>
-data_slice::data_slice(const Iterator& begin, const Iterator& end) NOEXCEPT
+constexpr data_slice::data_slice(const Iterator& begin,
+    const Iterator& end) NOEXCEPT
   : data_slice(from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
-data_slice::data_slice(const Byte* begin, const Byte* end) NOEXCEPT
+constexpr data_slice::data_slice(const Byte* begin, const Byte* end) NOEXCEPT
   : data_slice(from_iterators(begin, end))
+{
+}
+    
+constexpr data_slice::data_slice() NOEXCEPT
+  : data_slice(nullptr, nullptr, zero)
+{
+}
+
+constexpr data_slice::data_slice(const std::string& text) NOEXCEPT
+  : data_slice(from_size(text.begin(), text.size()))
+{
+}
+
+constexpr data_slice::data_slice(
+    std::initializer_list<value_type> bytes) NOEXCEPT
+  : data_slice(from_size(bytes.begin(), bytes.size()))
+{
+}
+
+// private
+constexpr data_slice::data_slice(pointer begin, pointer end,
+    size_type size) NOEXCEPT
+  : begin_(begin), end_(end), size_(size)
 {
 }
 
@@ -66,7 +92,7 @@ data_slice::data_slice(const Byte* begin, const Byte* end) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size, typename Byte>
-data_slice data_slice::from_literal(const Byte(&bytes)[Size]) NOEXCEPT
+constexpr data_slice data_slice::from_literal(const Byte(&bytes)[Size]) NOEXCEPT
 {
     // Guard 0 for lack of null terminator (see below).
     if (is_zero(Size))
@@ -81,7 +107,7 @@ data_slice data_slice::from_literal(const Byte(&bytes)[Size]) NOEXCEPT
 
 // static
 template <typename Iterator>
-data_slice data_slice::from_iterators(const Iterator& begin,
+constexpr data_slice data_slice::from_iterators(const Iterator& begin,
     const Iterator& end) NOEXCEPT
 {
     // An end iterator can be anything, so convert to size.
@@ -98,11 +124,10 @@ data_slice data_slice::from_iterators(const Iterator& begin,
     BC_POP_WARNING()
 }
 
-
-
 // static
 template <typename Pointer>
-data_slice data_slice::from_size(Pointer begin, size_type size) NOEXCEPT
+constexpr data_slice data_slice::from_size(Pointer begin,
+    size_type size) NOEXCEPT
 {
     // Guard 0 because &begin[0] is undefined if size is zero.
     if (is_zero(size))
@@ -117,14 +142,12 @@ data_slice data_slice::from_size(Pointer begin, size_type size) NOEXCEPT
     return { start, std::next(start, size), size };
 }
 
-
-// properties
+// methods
 // ----------------------------------------------------------------------------
-
 
 template <data_slice::size_type Size>
 std::array<typename data_slice::value_type, Size>
-data_slice::to_array() const NOEXCEPT
+constexpr data_slice::to_array() const NOEXCEPT
 {
     std::array<data_slice::value_type, Size> out;
 
@@ -139,15 +162,129 @@ data_slice::to_array() const NOEXCEPT
     return out;
 }
 
+VCONSTEXPR std::vector<data_slice::value_type> data_slice::
+to_chunk() const NOEXCEPT
+{
+    return { begin_, end_ };
+}
+
+SCONSTEXPR std::string data_slice::to_string() const NOEXCEPT
+{
+    return { begin_, end_ };
+}
+
+// dependency ordering
+////// Cannot provide a "decode" factory since the data is not owned.
+////SCONSTEXPR std::string data_slice::encoded() const NOEXCEPT
+////{
+////    return encode_base16(to_chunk());
+////}
+
+constexpr bool data_slice::resize(size_t size) NOEXCEPT
+{
+    if (size >= size_)
+        return false;
+
+    end_ = std::next(begin_, size);
+    size_ = size;
+    return true;
+}
+
+// properties
+// ----------------------------------------------------------------------------
+
+// Undefined to dereference >= end.
+constexpr data_slice::pointer data_slice::data() const NOEXCEPT
+{
+    return begin_;
+}
+
+// Undefined to dereference >= end.
+constexpr data_slice::pointer data_slice::begin() const NOEXCEPT
+{
+    return begin_;
+}
+
+// Undefined to dereference >= end.
+constexpr data_slice::pointer data_slice::end() const NOEXCEPT
+{
+    return end_;
+}
+
+constexpr data_slice::value_type data_slice::front() const NOEXCEPT
+{
+    // Guard against end overrun (return zero).
+    return empty() ? 0x00 : *begin_;
+}
+
+constexpr data_slice::value_type data_slice::back() const NOEXCEPT
+{
+    // Guard against begin underrun (return zero).
+    return empty() ? 0x00 : *std::prev(end_);
+}
+
+constexpr data_slice::size_type data_slice::size() const NOEXCEPT
+{
+    return size_;
+}
+
+constexpr bool data_slice::empty() const NOEXCEPT
+{
+    return is_zero(size_);
+}
+
 // operators
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size>
-data_slice::operator
-std::array<typename data_slice::value_type, Size>() const NOEXCEPT
+constexpr data_slice::
+operator std::array<typename data_slice::value_type, Size>() const NOEXCEPT
 {
     return to_array<Size>();
 }
+
+
+constexpr data_slice::
+operator std::vector<data_slice::value_type>() const NOEXCEPT
+{
+    return data_slice::to_chunk();
+}
+
+constexpr data_slice::value_type data_slice::
+operator[](size_type index) const NOEXCEPT
+{
+    // Guard against end overrun (return zero).
+    return index < size_ ? *std::next(begin_, index) : 0x00;
+}
+
+constexpr bool
+operator==(const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    if (left.size() != right.size())
+        return false;
+
+    // std::vector performs value comparison, so this does too.
+    for (data_slice::size_type index = 0; index < left.size(); ++index)
+        if (left[index] != right[index])
+            return false;
+
+    return true;
+}
+
+constexpr bool
+operator!=(const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    return !(left == right);
+}
+
+////constexpr data_slice& data_slice::
+////operator=(const data_slice& other)
+////{
+////    begin_ = other.begin_;
+////    end_ = other.end_;
+////    size_ = other.size_;
+////    return *this;
+////}
 
 } // namespace system
 } // namespace libbitcoin

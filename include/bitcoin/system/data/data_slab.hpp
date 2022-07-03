@@ -20,11 +20,8 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLAB_HPP
 
 #include <array>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <string>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -109,8 +106,8 @@ public:
     /// Convert data to a string (casts uint8_t to char).
     std::string to_string() const NOEXCEPT;
 
-    /// Convert data to a base16 string.
-    std::string encoded() const NOEXCEPT;
+    /////// Convert data to a base16 string.
+    ////std::string encoded() const NOEXCEPT;
 
     /// Resize the slab by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slab.

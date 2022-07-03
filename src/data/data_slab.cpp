@@ -65,11 +65,11 @@ std::string data_slab::to_string() const NOEXCEPT
     return { begin_, end_ };
 }
 
-// Cannot provide a "decode" factory since the data is not owned.
-std::string data_slab::encoded() const NOEXCEPT
-{
-    return to_slice().encoded();
-}
+////// Cannot provide a "decode" factory since the data is not owned.
+////std::string data_slab::encoded() const NOEXCEPT
+////{
+////    return to_slice().encoded();
+////}
 
 bool data_slab::resize(size_t size) NOEXCEPT
 {

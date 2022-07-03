@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_DATA_STRING_HPP
 
 #include <string>
-/// DELETEMENOW
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>
@@ -32,7 +31,10 @@ namespace system {
 /// Casts bytes directly into the string member.
 /// to_string(to_chunk(string)) == string.
 /// to_string(to_array(string)) == string.
-BC_API std::string to_string(const data_slice& bytes) NOEXCEPT;
+SCONSTEXPR std::string to_string(const data_slice& bytes) NOEXCEPT
+{
+    return bytes.to_string();
+}
 
 /// Join tokens by the specified delimiter.
 BC_API std::string join(const string_list& tokens,
