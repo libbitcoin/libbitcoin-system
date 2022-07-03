@@ -108,6 +108,7 @@ constexpr data_slab data_slab::from_size(const Pointer begin,
 
     return { start, std::next(start, size), size };
 }
+
 // methods
 // ----------------------------------------------------------------------------
 
@@ -116,12 +117,12 @@ VCONSTEXPR std::vector<data_slab::value_type> data_slab::to_chunk() const NOEXCE
     return { begin_, end_ };
 }
 
-constexpr data_slice data_slab::to_slice() const NOEXCEPT
+SCONSTEXPR std::string data_slab::to_string() const NOEXCEPT
 {
     return { begin_, end_ };
 }
 
-SCONSTEXPR std::string data_slab::to_string() const NOEXCEPT
+constexpr data_slice data_slab::to_slice() const NOEXCEPT
 {
     return { begin_, end_ };
 }
