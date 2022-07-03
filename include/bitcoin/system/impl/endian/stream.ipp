@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace system {
 
-#if defined(HAVE_BUFFERED_STREAM)
+#if !defined(HAVE_BUFFERED_STREAM)
 
 // non-buffered stream locals
 // ----------------------------------------------------------------------------
