@@ -94,61 +94,6 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-#if defined(HAVE_MSC) && !defined(HAVE_VS2022)
-    static_assert(false, "Visual Studio 2022 minimum required.");
-#endif
-
-#if !defined(HAVE_CPP20)
-    static_assert(false, "C++20 minimum required.");
-#endif
-
-#define NODISCARD [[nodiscard]]
-#define FALLTHROUGH [[fallthrough]]
-    
-#if defined(HAVE_DEPRECATED)
-    #define DEPRECATED [[deprecated]]
-#else
-    #define DEPRECATED
-#endif
-
-#if defined(HAVE_NOEXCEPT)
-    #define NOEXCEPT noexcept
-#else
-    #define NOEXCEPT
-#endif
-
-#if defined(HAVE_RANGES)
-    #define RCONSTEXPR constexpr
-#else
-    #define RCONSTEXPR inline
-#endif
-
-#if defined(HAVE_STRING_CONSTEXPR)
-    #define SCONSTEXPR constexpr
-#else
-    #define SCONSTEXPR inline
-#endif
-
-#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
-    #define SRCONSTEXPR constexpr
-#else
-    #define SRCONSTEXPR inline
-#endif
-
-#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
-    #define SVCONSTEXPR constexpr
-#else
-    #define SVCONSTEXPR inline
-#endif
-
-#if defined(HAVE_VECTOR_CONSTEXPR)
-    #define VCONSTEXPR constexpr
-#else
-    #define VCONSTEXPR inline
-#endif
-
-#define THROWS noexcept(false)
-
 // These are defined in the GUI for VS builds and by command line for others.
 // But overriding these here for VS builds to keep tests active.
 #if !defined(HAVE_PORTABLE) && defined(HAVE_MSC) && defined(HAVE_X64)
@@ -161,5 +106,70 @@ namespace bc = libbitcoin;
 // LCOV code coverage exclusion ranges.
 #define LCOV_EXCL_START(comment)
 #define LCOV_EXCL_STOP()
+
+#if defined(HAVE_MSC) && !defined(HAVE_VS2022)
+    static_assert(false, "Visual Studio 2022 minimum required.");
+#endif
+
+#if !defined(HAVE_CPP20)
+    static_assert(false, "C++20 minimum required.");
+#endif
+
+// C++11 (full)
+#if defined(HAVE_NOEXCEPT)
+    #define NOEXCEPT noexcept
+    #define THROWS noexcept(false)
+#else
+    #define NOEXCEPT
+    #define THROWS
+#endif
+
+// C++14 (full)
+#if defined(HAVE_DEPRECATED)
+    #define DEPRECATED [[deprecated]]
+#else
+    #define DEPRECATED
+#endif
+
+// C++17 (full)
+#define NODISCARD [[nodiscard]]
+
+// C++17 (full)
+#define FALLTHROUGH [[fallthrough]]
+
+// C++20 (partial)
+#if defined(HAVE_RANGES)
+    #define RCONSTEXPR constexpr
+#else
+    #define RCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR)
+    #define SCONSTEXPR constexpr
+#else
+    #define SCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
+    #define SRCONSTEXPR constexpr
+#else
+    #define SRCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_VECTOR_CONSTEXPR)
+    #define VCONSTEXPR constexpr
+#else
+    #define VCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
+    #define SVCONSTEXPR constexpr
+#else
+    #define SVCONSTEXPR inline
+#endif
 
 #endif
