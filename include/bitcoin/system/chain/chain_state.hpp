@@ -19,14 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <memory>
 #include <deque>
 #include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -237,13 +234,13 @@ private:
     static data to_block(const chain_state& pool, const block& block,
         const checkpoint& bip9_bit0_active_checkpoint,
         const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
-    data to_header(const chain_state& parent, const header& header,
+    static data to_header(const chain_state& parent, const header& header,
         const system::settings& settings) NOEXCEPT;
 
     static uint32_t work_required_retarget(const data& values, uint32_t forks,
         uint32_t proof_of_work_limit, uint32_t minimum_timespan,
         uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) NOEXCEPT;
-    static uint32_t retarget_timespan(const chain_state::data& values,
+    static uint32_t retarget_timespan(const data& values,
         uint32_t minimum_timespan, uint32_t maximum_timespan) NOEXCEPT;
     static uint32_t easy_work_required(const data& values,
         size_t retargeting_interval, uint32_t proof_of_work_limit,

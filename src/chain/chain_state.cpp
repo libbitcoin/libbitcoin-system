@@ -20,8 +20,6 @@
 
 #include <algorithm>
 #include <chrono>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iterator>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
@@ -32,7 +30,6 @@
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 #include <bitcoin/system/chain/script.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/settings.hpp>
@@ -351,7 +348,7 @@ uint32_t chain_state::retarget_timespan(const data& values,
     return limit(timespan, minimum_timespan, maximum_timespan);
 }
 
-static inline bool patch_timewarp(uint32_t forks, const uint256_t& limit,
+constexpr bool patch_timewarp(uint32_t forks, const uint256_t& limit,
     const uint256_t& target) NOEXCEPT
 {
     return script::is_enabled(forks, forks::retarget_overflow_patch) &&
@@ -378,18 +375,6 @@ uint32_t chain_state::work_required_retarget(const data& values, uint32_t forks,
     return target > limit ? proof_of_work_limit : compact::compress(target);
 }
 
-inline uint32_t easy_time_limit(const chain_state::data& values,
-    uint32_t spacing) NOEXCEPT
-{
-    //*************************************************************************
-    // CONSENSUS: "Add signed 32 bit numbers in signed 64 bit space."
-    // This is done in order to prevent overflow before applying the domain
-    // constraint. This is properly just a ceilinged addition in 32 bit space.
-    // Bitcoin time values are positive/unsigned 32 bit integers.
-    //*************************************************************************
-    return ceilinged_add(timestamp_high(values), spacing);
-}
-
 // A retarget height, or a block that does not have proof_of_work_limit bits.
 constexpr bool is_retarget_or_non_limit(size_t height, uint32_t bits,
     size_t retargeting_interval, uint32_t proof_of_work_limit) NOEXCEPT
@@ -410,7 +395,8 @@ uint32_t chain_state::easy_work_required(const data& values,
     const auto easy_spacing_seconds = shift_left(block_spacing_seconds);
 
     // If the time limit has passed allow a minimum difficulty block.
-    if (values.timestamp.self > easy_time_limit(values, easy_spacing_seconds))
+    if (values.timestamp.self > ceilinged_add(timestamp_high(values),
+        easy_spacing_seconds))
         return proof_of_work_limit;
 
     auto height = values.height;
