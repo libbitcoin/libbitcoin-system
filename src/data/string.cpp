@@ -19,12 +19,11 @@
 #include <bitcoin/system/data/string.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <iterator>
 #include <sstream>
 #include <string>
-/// DELETEMENOW
 #include <bitcoin/system/data/data_slice.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {
@@ -38,6 +37,8 @@ std::string join(const string_list& tokens,
 
     // Start with the first token.
     std::ostringstream sentence;
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     sentence << tokens.front();
 
     // Add remaining tokens preceded by delimiters.
@@ -45,6 +46,7 @@ std::string join(const string_list& tokens,
         sentence << delimiter << *token;
 
     return sentence.str();
+    BC_POP_WARNING()
 }
 
 void reduce(string_list& tokens, const string_list& trim_tokens,
@@ -69,7 +71,7 @@ void reduce(string_list& tokens, const string_list& trim_tokens,
 string_list reduce_copy(const string_list& tokens,
     const string_list& trim_tokens, bool compress) NOEXCEPT
 {
-    auto copy = tokens;
+    string_list copy{ tokens };
     reduce(copy, trim_tokens, compress);
     return copy;
 }
@@ -77,7 +79,7 @@ string_list reduce_copy(const string_list& tokens,
 size_t replace(std::string& text, const std::string& from,
     const std::string& to) NOEXCEPT
 {
-    size_t count = 0;
+    auto count = zero;
 
     for (auto position = text.find(from);
         position != std::string::npos;
@@ -93,7 +95,7 @@ size_t replace(std::string& text, const std::string& from,
 std::string replace_copy(const std::string& text, const std::string& from,
     const std::string& to) NOEXCEPT
 {
-    auto copy = text;
+    std::string copy{ text };
     replace(copy, from, to);
     return copy;
 }
@@ -101,7 +103,7 @@ std::string replace_copy(const std::string& text, const std::string& from,
 static string_list splitter(const std::string& text, const std::string& delimiter,
     const string_list& trim_tokens, bool compress) NOEXCEPT
 {
-    size_t start = 0;
+    auto start = zero;
     string_list tokens;
 
     // Push all but the last token.
@@ -162,7 +164,7 @@ bool trim_left(std::string& text, const std::string& token) NOEXCEPT
     while (starts_with(text, token))
     {
         found = true;
-        text.erase(0, length);
+        text.erase(zero, length);
     }
     text.shrink_to_fit();
     return found;
@@ -183,7 +185,7 @@ bool trim_right(std::string& text, const std::string& token) NOEXCEPT
 
 bool trim_left(std::string& text, const string_list& trim_tokens) NOEXCEPT
 {
-    bool found;
+    bool found{};
     do
     {
         found = false;
@@ -197,7 +199,7 @@ bool trim_left(std::string& text, const string_list& trim_tokens) NOEXCEPT
 
 bool trim_right(std::string& text, const string_list& trim_tokens) NOEXCEPT
 {
-    bool found;
+    bool found{};
     do
     {
         found = false;
@@ -218,7 +220,7 @@ void trim(std::string& text, const string_list& trim_tokens) NOEXCEPT
 std::string trim_left_copy(const std::string& text,
     const string_list& trim_tokens) NOEXCEPT
 {
-    auto copy = text;
+    std::string copy{ text };
     trim_left(copy, trim_tokens);
     return copy;
 }
@@ -226,7 +228,7 @@ std::string trim_left_copy(const std::string& text,
 std::string trim_right_copy(const std::string& text,
     const string_list& trim_tokens) NOEXCEPT
 {
-    auto copy = text;
+    std::string copy{ text };
     trim_right(copy, trim_tokens);
     return copy;
 }
@@ -234,7 +236,7 @@ std::string trim_right_copy(const std::string& text,
 std::string trim_copy(const std::string& text,
     const string_list& trim_tokens) NOEXCEPT
 {
-    auto copy = text;
+    std::string copy{ text };
     trim(copy, trim_tokens);
     return copy;
 }

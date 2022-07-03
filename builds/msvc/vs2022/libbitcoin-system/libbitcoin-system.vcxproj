@@ -163,7 +163,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
-    <ClCompile Include="..\..\..\..\src\data\data_slab.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
     <ClCompile Include="..\..\..\..\src\define.cpp" />
     <ClCompile Include="..\..\..\..\src\endian\endian.cpp" />

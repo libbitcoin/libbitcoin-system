@@ -40,7 +40,7 @@ namespace system {
 
 hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
-    return scrypt<hash_size>(data, data, 1024u, 1u, 1u);
+    return scrypt<hash_size>(data, data, 1024_u64, 1_u32, 1_u32);
 }
 
 hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT
@@ -180,7 +180,7 @@ data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
     size_t length) NOEXCEPT
 {
     data_chunk hash(no_fill_byte_allocator);
-    data_chunk out(length, 0x00);
+    data_chunk out(length, 0_u8);
     crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), work,
         resources, parallelism, out.data(), out.size());
 
@@ -193,11 +193,11 @@ data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
 size_t djb2_hash(const data_slice& data) NOEXCEPT
 {
     // Nothing special here except that it tested well against collisions.
-    size_t hash = 5381;
+    auto hash = 5381_size;
 
     // Efficient sum of ((hash * 33) + byte) for all bytes.
     for (const auto byte: data)
-        hash = ((hash << 5) + hash) + byte;
+        hash = (shift_left(hash, 5_size) + hash) + byte;
 
     return hash;
 }

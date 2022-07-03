@@ -21,8 +21,6 @@
 
 #include <algorithm>
 #include <array>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -37,11 +35,6 @@ typedef struct
     uint32_t count[2];
     uint8_t buffer[64];
 } sha256_context;
-
-////extern const std::array<uint32_t, 8> sha256_initial;
-////extern const std::array<uint8_t, 64> sha256_padding;
-////extern const std::array<uint8_t, 64> sha256x2_padding;
-////extern const std::array<uint8_t, 64> sha256x2_buffer;
 
 constexpr std::array<uint32_t, 8> sha256_initial
 {

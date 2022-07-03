@@ -393,9 +393,6 @@
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\data\data_slab.cpp">
-      <Filter>src\data</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>

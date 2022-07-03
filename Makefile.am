@@ -99,7 +99,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/intrinsics/sha256_4_sse41.cpp \
     src/crypto/intrinsics/sha256_8_avx2.cpp \
     src/data/data_chunk.cpp \
-    src/data/data_slab.cpp \
     src/data/string.cpp \
     src/endian/endian.cpp \
     src/error/block_error_t.cpp \
