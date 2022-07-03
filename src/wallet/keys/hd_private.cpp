@@ -138,7 +138,7 @@ hd_private hd_private::from_entropy(const data_slice& entropy,
 hd_private hd_private::from_key(const hd_key& key,
     uint32_t public_prefix) NOEXCEPT
 {
-    const auto prefix = from_big_endian<uint32_t>(key);
+    const auto prefix = from_big_endian(slice<zero, bits<uint32_t>>(key));
     return from_key(key, to_prefixes(prefix, public_prefix));
 }
 

@@ -101,7 +101,7 @@ hd_public hd_public::from_secret(const ec_secret& secret,
 
 hd_public hd_public::from_key(const hd_key& key) NOEXCEPT
 {
-    return from_key(key, from_big_endian<uint32_t>(key));
+    return from_key(key, from_big_endian(slice<zero, bits<uint32_t>>(key)));
 }
 
 hd_public hd_public::from_string(const std::string& encoded) NOEXCEPT
@@ -240,7 +240,7 @@ hd_public hd_public::derive_public(uint32_t index) const NOEXCEPT
 
 uint32_t hd_public::fingerprint() const NOEXCEPT
 {
-    return from_big_endian<uint32_t>(bitcoin_short_hash(point_));
+    return from_big_endian(bitcoin_short_hash(point_));
 }
 
 // Operators.

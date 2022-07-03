@@ -36,8 +36,10 @@
 
 // STACK NUMBER DECODE / UTILITY
 // Nominal (<Integer>): [todo: constexpr]
-// inline     Integral                     from_big_endian<Integral>([[data_slice]]);
-// inline     Integral                     from_little_endian<Integral>([[data_slice]]);
+// constexpr  unsigned_type<Size>          from_big_endian(data_array<Size>);
+// constexpr  unsigned_type<Size>          from_little_endian(data_array<Size>);
+// constexpr  Integral                     from_big_endian<Integral>(data_chunk);
+// constexpr  Integral                     from_little_endian<Integral>(data_chunk);
 // constexpr  data_array<sizeof(Integral)> to_big_endian{integral}(Integral);
 // constexpr  data_array<sizeof(Integral)> to_little_endian{integral}(Integral);
 

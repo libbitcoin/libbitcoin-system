@@ -217,20 +217,33 @@ constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
 // TODO: all can be constexpr and called from constexpr or otherwise.
 // TODO: expect single byte shift to be precluded by integral bytecasting.
 
+template <size_t Size>
+constexpr unsigned_type<bytes<Size>> from_big_endian(
+    const data_array<Size>& data) NOEXCEPT
+{
+    return from_big_chunk<unsigned_type<bytes<Size>>>(Size, data);
+}
+
+template <size_t Size>
+constexpr unsigned_type<bytes<Size>> from_little_endian(
+    const data_array<Size>& data) NOEXCEPT
+{
+    return from_little_chunk<unsigned_type<bytes<Size>>>(Size, data);
+}
+
 template <typename Integral,
     if_integral_integer<Integral>>
-inline Integral from_big_endian(const data_slice& data) NOEXCEPT
+constexpr Integral from_big_endian(const data_chunk& data) NOEXCEPT
 {
     return from_big_chunk<Integral>(sizeof(Integral), data);
 }
 
 template <typename Integral,
     if_integral_integer<Integral>>
-inline Integral from_little_endian(const data_slice& data) NOEXCEPT
+constexpr Integral from_little_endian(const data_chunk& data) NOEXCEPT
 {
     return from_little_chunk<Integral>(sizeof(Integral), data);
 }
-
 template <typename Integral,
     if_integral_integer<Integral>>
 constexpr data_array<sizeof(Integral)> to_big_endian(Integral value) NOEXCEPT

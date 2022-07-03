@@ -34,7 +34,7 @@ namespace system {
 
 static uint32_t bitcoin_checksum(const data_slice& data) NOEXCEPT
 {
-    return from_little_endian<uint32_t>(bitcoin_hash(data));
+    return from_little_endian(bitcoin_hash(data));
 }
 
 data_chunk append_checksum(const data_loaf& slices) NOEXCEPT

@@ -57,7 +57,10 @@ template <typename Integer,
 VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
-    BC_ASSERT(!overflows(value, excess));
+    if constexpr (is_integral<Integer>)
+    {
+        BC_ASSERT(!overflows(value, excess));
+    }
 
     // TODO: machine::number should be able to predict excess.
     // Vector capacity is never reduced when resizing to smaller size.
@@ -75,7 +78,10 @@ template <typename Integer,
 VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
-    BC_ASSERT(!overflows(value, excess));
+    if constexpr (is_integral<Integer>)
+    {
+        BC_ASSERT(!overflows(value, excess));
+    }
 
     // TODO: machine::number should be able to predict excess.
     // Vector capacity is never reduced when resizing to smaller size.

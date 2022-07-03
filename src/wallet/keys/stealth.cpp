@@ -45,7 +45,7 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script) NOEXCEPT
     // A stealth filter is a leftmost substring of the stealth prefix.
 
     const auto script_hash = bitcoin_hash(script.to_data(false));
-    out_prefix = from_little_endian<uint32_t>(script_hash);
+    out_prefix = from_little_endian(script_hash);
     return true;
 }
 

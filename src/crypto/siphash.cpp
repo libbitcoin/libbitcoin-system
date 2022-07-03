@@ -108,8 +108,8 @@ uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
 siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT
 {
     const auto part = split(hash);
-    const auto hi = from_little_endian<uint64_t>(part.first);
-    const auto lo = from_little_endian<uint64_t>(part.second);
+    const auto hi = from_little_endian(part.first);
+    const auto lo = from_little_endian(part.second);
     return std::make_tuple(hi, lo);
 }
 

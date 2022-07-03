@@ -48,7 +48,7 @@ constexpr void from_big_endian(Integral to[Count],
     const auto in = pointer_cast<const data>(from);
     std::transform(in, std::next(in, Count), to, [](const data& value) NOEXCEPT
     {
-        return from_big_endian<Integral>(value);
+        return from_big_endian(value);
     });
 }
 
