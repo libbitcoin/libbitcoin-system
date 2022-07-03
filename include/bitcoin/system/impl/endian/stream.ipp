@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace system {
 
-#if defined(HAVE_BUFFERED_STREAM)
+#if !defined(HAVE_BUFFERED_STREAM)
 
 // non-buffered stream locals
 // ----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
 // if stream.gcount() != size there should be a stream error.
 
 // TODO: bytecast.
-template <typename Integral, typename IStream = std::istream,
+template <typename Integral, typename IStream,
     if_integral_integer<Integral>,
     if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_big_endian(IStream& stream) NOEXCEPT
@@ -136,7 +136,7 @@ inline Integral from_big_endian(IStream& stream) NOEXCEPT
 }
 
 // TODO: bytecast, from_little_endian should be a no-op.
-template <typename Integral, typename IStream = std::istream,
+template <typename Integral, typename IStream,
     if_integral_integer<Integral>,
     if_same_size<typename IStream::char_type, uint8_t>>
 inline Integral from_little_endian(IStream& stream) NOEXCEPT
@@ -151,7 +151,7 @@ inline Integral from_little_endian(IStream& stream) NOEXCEPT
 }
 
 // TODO: bytecast.
-template <typename Integral, typename OStream = std::ostream,
+template <typename Integral, typename OStream,
     if_integral_integer<Integral>,
     if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
@@ -166,7 +166,7 @@ inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 }
 
 // TODO: bytecast, to_little_endian should be a no-op.
-template <typename Integral, typename OStream = std::ostream,
+template <typename Integral, typename OStream,
     if_integral_integer<Integral>,
     if_same_size<typename OStream::char_type, uint8_t>>
 inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
