@@ -382,7 +382,7 @@ void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) NOEXCEPT
     sha256_x1_portable(state.data(), buffer.data());
     to_big_endian(
         *pointer_cast<numbers<count>>(out),
-        *pointer_cast<const numbers<count>>(buffer.data()));
+        *pointer_cast<const numbers<count>>(state.data()));
 }
 
 } // namespace intrinsics
