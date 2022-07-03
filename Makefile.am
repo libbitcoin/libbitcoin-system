@@ -272,7 +272,12 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/memory.cpp \
     test/data/no_fill_allocator.cpp \
     test/data/string.cpp \
-    test/endian/endian.cpp \
+    test/endian/collection.cpp \
+    test/endian/nominal.cpp \
+    test/endian/stream.cpp \
+    test/endian/uintx.cpp \
+    test/endian/uintx_t.cpp \
+    test/endian/unchecked.cpp \
     test/error/block_error_t.cpp \
     test/error/error.cpp \
     test/error/error_t.cpp \

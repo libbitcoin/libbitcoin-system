@@ -219,7 +219,22 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endian\endian.cpp">
+    <ClCompile Include="..\..\..\..\test\endian\collection.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\nominal.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\uintx.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\unchecked.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp">

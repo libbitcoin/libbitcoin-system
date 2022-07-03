@@ -111,7 +111,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
-    <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\collection.cpp">
+      <ObjectFileName>$(IntDir)test_data_collection.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\data_array.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_chunk.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_reference.cpp" />
@@ -122,7 +124,16 @@
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\endian.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\collection.cpp">
+      <ObjectFileName>$(IntDir)test_endian_collection.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
+      <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\uintx.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\unchecked.cpp" />
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error_t.cpp" />
@@ -162,7 +173,9 @@
     <ClCompile Include="..\..\..\..\test\stream\devices\copy_source.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\flip_sink.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\push_sink.cpp" />
-    <ClCompile Include="..\..\..\..\test\stream\stream.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\stream.cpp">
+      <ObjectFileName>$(IntDir)test_stream_stream.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\streamers.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\bit_flipper.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\bit_reader.cpp" />

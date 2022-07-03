@@ -33,7 +33,6 @@
 // High order bits are ignored when write (to) is insufficient.
 // uintx return can handle values of arbitrary size.
 
-
 // STACK NUMBER DECODE / UTILITY
 // Nominal (<Integer>/inferred):
 // constexpr  unsigned_type<Size>          from_big_endian(data_array<Size>);
