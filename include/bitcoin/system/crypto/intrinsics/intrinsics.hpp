@@ -81,8 +81,6 @@ constexpr std::array<uint8_t, 64> sha256x2_buffer
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00
 };
 
-// TODO: change these to std::array& parameters.
-
 BC_API void sha256_initialize(sha256_context& context) NOEXCEPT;
 BC_API void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) NOEXCEPT;
 BC_API void sha256_update(sha256_context& context, const uint8_t input[], size_t size) NOEXCEPT;
