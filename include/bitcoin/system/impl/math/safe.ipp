@@ -167,7 +167,7 @@ inline To* possible_pointer_cast(From* value) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Integral,
-    typename if_integral_integer<Integral>>
+    if_integral_integer<Integral>>
 constexpr std::array<uint8_t, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT
 {
@@ -175,7 +175,7 @@ byte_cast(Integral& value) NOEXCEPT
 }
 
 template <typename Integral,
-    typename if_integral_integer<Integral>>
+    if_integral_integer<Integral>>
 constexpr const std::array<uint8_t, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT
 {
@@ -183,7 +183,7 @@ byte_cast(const Integral& value) NOEXCEPT
 }
 
 template <size_t Size,
-    typename if_integral_size<Size>>
+    if_integral_size<Size>>
 constexpr unsigned_type<Size>&
 byte_cast(std::array<uint8_t, Size>& value) NOEXCEPT
 {
@@ -191,7 +191,7 @@ byte_cast(std::array<uint8_t, Size>& value) NOEXCEPT
 }
 
 template <size_t Size,
-    typename if_integral_size<Size>>
+    if_integral_size<Size>>
 constexpr const unsigned_type<Size>&
 byte_cast(const std::array<uint8_t, Size>& value) NOEXCEPT
 {

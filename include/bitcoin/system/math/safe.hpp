@@ -118,25 +118,25 @@ inline To* possible_pointer_cast(From* value) NOEXCEPT;
 
 /// Cast integral& to a data array& with byte length of the integral.
 template <typename Integral,
-    typename if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true>
 constexpr std::array<uint8_t, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT;
 
 /// Cast const integral& to a const data array& with byte length of the integral.
 template <typename Integral,
-    typename if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true>
 constexpr const std::array<uint8_t, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT;
 
 /// Cast data array& to unsigned integral& of same byte length.
 template <size_t Size,
-    typename if_integral_size<Size> = true>
+    if_integral_size<Size> = true>
 constexpr unsigned_type<Size>&
 byte_cast(std::array<uint8_t, Size>& value) NOEXCEPT;
 
 /// Cast const data array& to const unsigned integral& of same byte length.
 template <size_t Size,
-    typename if_integral_size<Size> = true>
+    if_integral_size<Size> = true>
 constexpr const unsigned_type<Size>&
 byte_cast(const std::array<uint8_t, Size>& value) NOEXCEPT;
 
