@@ -72,7 +72,7 @@
     BC_DISABLE_WARNING(ASSIGNMENT_WITHIN_CONDITIONAL)
 
     // Suppress C4459: declaration of 'one' hides global declaration.
-    // This arises from boost templates  defining 'one' as a public variable.
+    // This arises from boost templates defining 'one' as a public variable.
     BC_DISABLE_WARNING(LOCAL_HIDES_GLOBAL)
 #endif
 
