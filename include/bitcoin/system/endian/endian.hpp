@@ -113,7 +113,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Hash conversions of corresponding integers.
-template <size_t Bits>
+template <uintx_size_t Bits>
 constexpr data_array<to_ceilinged_bytes(Bits)>
 from_uintx(const uintx_t<Bits>& value) NOEXCEPT
 {
@@ -122,7 +122,7 @@ from_uintx(const uintx_t<Bits>& value) NOEXCEPT
 
 /// Integer conversions of corresponding hashes.
 template <size_t Bytes>
-constexpr uintx_t<to_bits(Bytes)>
+constexpr uintx_t<to_bits<uintx_size_t>(Bytes)>
 to_uintx(const data_array<Bytes>& hash) NOEXCEPT
 {
     return uintx_from_little_endian_array<Bytes>(hash);
