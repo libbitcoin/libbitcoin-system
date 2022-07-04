@@ -106,7 +106,7 @@ public:
     SCONSTEXPR data_slice(const std::string& text) NOEXCEPT;
 
     /// Byte initializer list constructor.
-    constexpr data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
+    SVCONSTEXPR data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
 
     /// Methods.
 

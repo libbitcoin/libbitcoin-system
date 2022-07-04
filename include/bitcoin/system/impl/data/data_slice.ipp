@@ -77,9 +77,9 @@ SCONSTEXPR data_slice::data_slice(const std::string& text) NOEXCEPT
 {
 }
 
-constexpr data_slice::data_slice(
+SVCONSTEXPR data_slice::data_slice(
     std::initializer_list<value_type> bytes) NOEXCEPT
-  : data_slice(from_size(bytes.begin(), bytes.size()))
+  : data_slice(from_size_(bytes.begin(), bytes.size()))
 {
 }
 
