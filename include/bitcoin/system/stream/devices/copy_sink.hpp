@@ -58,9 +58,9 @@ protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
         return std::make_pair(
-            integer_pointer_cast<typename device<Container>::char_type>(
+            possible_pointer_cast<typename device<Container>::char_type>(
                 container_.begin()),
-            integer_pointer_cast<typename device<Container>::char_type>(
+            possible_pointer_cast<typename device<Container>::char_type>(
                 container_.end()));
     }
 

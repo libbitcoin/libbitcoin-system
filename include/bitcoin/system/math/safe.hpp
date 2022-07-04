@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 #define LIBBITCOIN_SYSTEM_MATH_SAFE_HPP
 
-/// DELETEMENOW
+#include <array>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -101,20 +101,101 @@ constexpr To possible_narrow_and_sign_cast(From value) NOEXCEPT;
 template <typename To, typename From, if_same_signed_integer<To, From> = true>
 constexpr To possible_wide_cast(From value) NOEXCEPT;
 
-/// Explicit pointer casts.
+/// Explicit pointer casts (reiterpret_cast is not constexpr).
 /// ---------------------------------------------------------------------------
 
 /// Cast of pointer.
 template <typename To, typename From>
-constexpr To* pointer_cast(From* value) NOEXCEPT;
+inline To* pointer_cast(From* value) NOEXCEPT;
 
 /// Possible cast of pointer.
 template <typename To, typename From>
-constexpr To* possible_pointer_cast(From* value) NOEXCEPT;
+inline To* possible_pointer_cast(From* value) NOEXCEPT;
 
-/// Cast integer to pointer.
-template <typename To, typename From>
-constexpr To* integer_pointer_cast(From value) NOEXCEPT;
+/// Byte casts (require pointer_cast, not constexpr).
+/// ---------------------------------------------------------------------------
+/// C++20: std::bit_cast is a copy, not a cast, these are true casts.
+
+/// Cast integral& to a data array& with byte length of the integral.
+template <typename Integral,
+    typename if_integral_integer<Integral> = true>
+constexpr std::array<uint8_t, sizeof(Integral)>&
+byte_cast(Integral& value) NOEXCEPT;
+
+/// Cast const integral& to a const data array& with byte length of the integral.
+template <typename Integral,
+    typename if_integral_integer<Integral> = true>
+constexpr const std::array<uint8_t, sizeof(Integral)>&
+byte_cast(const Integral& value) NOEXCEPT;
+
+/// Cast data array& to unsigned integral& of same byte length.
+template <size_t Size,
+    typename if_integral_size<Size> = true>
+constexpr unsigned_type<Size>&
+byte_cast(std::array<uint8_t, Size>& value) NOEXCEPT;
+
+/// Cast const data array& to const unsigned integral& of same byte length.
+template <size_t Size,
+    typename if_integral_size<Size> = true>
+constexpr const unsigned_type<Size>&
+byte_cast(const std::array<uint8_t, Size>& value) NOEXCEPT;
+
+/// Array casts (require pointer_cast, not constexpr).
+/// ---------------------------------------------------------------------------
+
+/// Cast array& of integrals to same-sized array& of integrals.
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true,
+    if_not_lesser<max_size_t / sizeof(From), Size> = true>
+constexpr std::array<To, (Size * sizeof(From)) / sizeof(To)>&
+array_cast(std::array<From, Size>& values) NOEXCEPT;
+
+/// Cast const array& of integrals to same-sized const array& of integrals.
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true,
+    if_not_lesser<max_size_t / sizeof(From), Size> = true>
+constexpr const std::array<To, (Size * sizeof(From)) / sizeof(To)>&
+array_cast(const std::array<From, Size>& values) NOEXCEPT;
+
+/// Cast array& of integrals to lesser-sized array& of integrals.
+/// Use array_cast for non-narrowing array cast.
+template <typename To, size_t ToSize, typename From, size_t FromSize,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true,
+    if_not_lesser<max_size_t / sizeof(To), ToSize> = true,
+    if_not_lesser<max_size_t / sizeof(From), FromSize> = true,
+    if_lesser<ToSize * sizeof(To), FromSize * sizeof(From)> = true>
+constexpr std::array<To, ToSize>&
+narrowing_array_cast(std::array<From, FromSize>& values) NOEXCEPT;
+
+/// Cast const array& of integrals to lesser-sized const array& of integrals.
+/// Use array_cast for non-narrowing array cast.
+template <typename To, size_t ToSize, typename From, size_t FromSize,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true,
+    if_not_lesser<max_size_t / sizeof(To), ToSize> = true,
+    if_not_lesser<max_size_t / sizeof(From), FromSize> = true,
+    if_lesser<ToSize * sizeof(To), FromSize * sizeof(From)> = true>
+constexpr const std::array<To, ToSize>&
+narrowing_array_cast(const std::array<From, FromSize>& values) NOEXCEPT;
+
+/// Cast contiguous integral buffer to array& of integrals.
+/// Safe if byte count (size) is correct.
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true>
+constexpr std::array<To, Size>&
+unsafe_array_cast(From bytes[]) NOEXCEPT;
+
+/// Cast contiguous const integral buffer to const array& of integrals.
+/// Safe if byte count (size) is correct.
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true>
+constexpr const std::array<To, Size>&
+unsafe_array_cast(const From bytes[]) NOEXCEPT;
 
 /// Overflows.
 /// ---------------------------------------------------------------------------

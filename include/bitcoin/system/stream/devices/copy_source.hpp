@@ -68,8 +68,8 @@ protected:
         BC_POP_WARNING()
 
         return std::make_pair(
-            integer_pointer_cast<typename device<Container>::char_type>(begin),
-            integer_pointer_cast<typename device<Container>::char_type>(end));
+            possible_pointer_cast<typename device<Container>::char_type>(begin),
+            possible_pointer_cast<typename device<Container>::char_type>(end));
     }
 
 private:

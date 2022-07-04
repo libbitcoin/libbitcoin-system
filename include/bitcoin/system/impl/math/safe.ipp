@@ -146,7 +146,7 @@ constexpr To possible_wide_cast(From value) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename To, typename From>
-constexpr To* pointer_cast(From* value) NOEXCEPT
+inline To* pointer_cast(From* value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_REINTERPRET_CAST)
     return reinterpret_cast<To*>(value);
@@ -154,7 +154,7 @@ constexpr To* pointer_cast(From* value) NOEXCEPT
 }
 
 template <typename To, typename From>
-constexpr To* possible_pointer_cast(From* value) NOEXCEPT
+inline To* possible_pointer_cast(From* value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_IDENTITY_CAST)
     BC_PUSH_WARNING(NO_REINTERPRET_CAST)
@@ -163,12 +163,114 @@ constexpr To* possible_pointer_cast(From* value) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename To, typename From>
-constexpr To* integer_pointer_cast(From value) NOEXCEPT
+// Byte casts.
+// ----------------------------------------------------------------------------
+
+template <typename Integral,
+    typename if_integral_integer<Integral>>
+constexpr std::array<uint8_t, sizeof(Integral)>&
+byte_cast(Integral& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_REINTERPRET_CAST)
-    return reinterpret_cast<To*>(value);
-    BC_POP_WARNING()
+    return *pointer_cast<std::array<uint8_t, sizeof(Integral)>>(&value);
+}
+
+template <typename Integral,
+    typename if_integral_integer<Integral>>
+constexpr const std::array<uint8_t, sizeof(Integral)>&
+byte_cast(const Integral& value) NOEXCEPT
+{
+    return *pointer_cast<const std::array<uint8_t, sizeof(Integral)>>(&value);
+}
+
+template <size_t Size,
+    typename if_integral_size<Size>>
+constexpr unsigned_type<Size>&
+byte_cast(std::array<uint8_t, Size>& value) NOEXCEPT
+{
+    return *pointer_cast<unsigned_type<Size>>(&value);
+}
+
+template <size_t Size,
+    typename if_integral_size<Size>>
+constexpr const unsigned_type<Size>&
+byte_cast(const std::array<uint8_t, Size>& value) NOEXCEPT
+{
+    return *pointer_cast<const unsigned_type<Size>>(&value);
+}
+
+// Array casts.
+// ----------------------------------------------------------------------------
+
+// So passing an empty std::array is allowed.
+// nullptr reinterpret_cast (at array size zero) is safe.
+static_assert(std::array<uint8_t, 0>{}.data() == nullptr);
+
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From>,
+    if_integral_integer<To>,
+    if_not_lesser<max_size_t / sizeof(From), Size>>
+constexpr std::array<To, (Size * sizeof(From)) / sizeof(To)>&
+array_cast(std::array<From, Size>& values) NOEXCEPT
+{
+    using to = std::array<To, (Size * sizeof(From)) / sizeof(To)>;
+    return *pointer_cast<to>(values.data());
+}
+
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From>,
+    if_integral_integer<To>,
+    if_not_lesser<max_size_t / sizeof(From), Size>>
+constexpr const std::array<To, (Size * sizeof(From)) / sizeof(To)>&
+array_cast(const std::array<From, Size>& values) NOEXCEPT
+{
+    using to = std::array<To, (Size * sizeof(From)) / sizeof(To)>;
+    return *pointer_cast<const to>(values.data());
+}
+
+template <typename To, size_t ToSize, typename From, size_t FromSize,
+    if_integral_integer<From>,
+    if_integral_integer<To>,
+    if_not_lesser<max_size_t / sizeof(To), ToSize>,
+    if_not_lesser<max_size_t / sizeof(From), FromSize>,
+    if_lesser<ToSize * sizeof(To), FromSize * sizeof(From)>>
+constexpr std::array<To, ToSize>&
+narrowing_array_cast(std::array<From, FromSize>& values) NOEXCEPT
+{
+    using to = std::array<To, ToSize>;
+    return *pointer_cast<to>(values.data());
+}
+
+template <typename To, size_t ToSize, typename From, size_t FromSize,
+    if_integral_integer<From>,
+    if_integral_integer<To>,
+    if_not_lesser<max_size_t / sizeof(To), ToSize>,
+    if_not_lesser<max_size_t / sizeof(From), FromSize>,
+    if_lesser<ToSize * sizeof(To), FromSize * sizeof(From)>>
+constexpr const std::array<To, ToSize>&
+narrowing_array_cast(const std::array<From, FromSize>& values) NOEXCEPT
+{
+    using to = std::array<To, ToSize>;
+    return *pointer_cast<const to>(values.data());
+}
+
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From>,
+    if_integral_integer<To>>
+constexpr std::array<To, Size>&
+unsafe_array_cast(From bytes[]) NOEXCEPT
+{
+    return *pointer_cast<std::array<To, Size>>(&bytes[0]);
+}
+
+// nullptr reinterpret_cast (at array size zero) is safe.
+// &bytes[0] is undefined, so zero size is excluded.
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From>,
+    if_integral_integer<To>>
+constexpr const std::array<To, Size>&
+unsafe_array_cast(const From bytes[]) NOEXCEPT
+{
+    return *pointer_cast<const std::array<To, Size>>(&bytes[0]);
 }
 
 // Overflows.
