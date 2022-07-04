@@ -89,25 +89,18 @@ using to_greater_type = std::conditional_t<
 /// ---------------------------------------------------------------------------
 
 /// Boost changed the Bits type from unsigned to size_t in v1.79.
-/// In some compilers the template binding fails if size_t is used but
-/// boost <1.79 and build is 32 bit (unsigned vs. unsigned long).
-/// So we derive type cpp_int_size_type and then hide it in uintx_t.
-using cpp_int_size_type = decltype(
+using uintx_size_t = decltype(
     boost::multiprecision::cpp_int_backend<8u, 8u,
     boost::multiprecision::unsigned_magnitude,
     boost::multiprecision::unchecked, void>{}.size());
 
-/// Template for constructing uintx types (on Size_t).
+/// Template for constructing uintx types.
 /// There is no dynamic memory allocation when minBits == maxBits.
-BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-template <size_t Bits>
+template <uintx_size_t Bits> // <== uintx_size_t
 using uintx_t = boost::multiprecision::number<
-    boost::multiprecision::cpp_int_backend<
-        static_cast<cpp_int_size_type>(Bits),
-        static_cast<cpp_int_size_type>(Bits),
+    boost::multiprecision::cpp_int_backend<Bits, Bits,
     boost::multiprecision::unsigned_magnitude,
     boost::multiprecision::unchecked, void>>;
-BC_POP_WARNING()
 
 /// Cannot generalize because no boost support for unsigned arbitrary precision.
 /// Otherwise uintx_t<0> would suffice. uintx can construct from uintx_t types

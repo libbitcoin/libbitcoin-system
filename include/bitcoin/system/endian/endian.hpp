@@ -107,22 +107,23 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 /// Hash conversions of corresponding integers.
-template <size_t Bits,
-    size_t Bytes = to_ceilinged_bytes(Bits)>
-constexpr data_array<Bytes> to_array(const uintx_t<Bits>& value) NOEXCEPT
+template <size_t Bits>
+constexpr data_array<to_ceilinged_bytes(Bits)>
+from_uintx(const uintx_t<Bits>& value) NOEXCEPT
 {
-    return to_little_endian_size<Bytes>(value);
+    return to_little_endian_size<to_ceilinged_bytes(Bits)>(value);
 }
 
 /// Integer conversions of corresponding hashes.
-template <size_t Bytes,
-    size_t Bits = to_bits<size_t>(Bytes)>
-constexpr uintx_t<Bits> to_uintx(const data_array<Bytes>& hash) NOEXCEPT
+template <size_t Bytes>
+constexpr uintx_t<to_bits(Bytes)>
+to_uintx(const data_array<Bytes>& hash) NOEXCEPT
 {
     return uintx_from_little_endian_array<Bytes>(hash);
 }
