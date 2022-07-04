@@ -95,7 +95,7 @@ constexpr data_slab data_slab::from_iterators(const Iterator& begin,
 
 // static
 template <typename Pointer>
-constexpr data_slab data_slab::from_size(const Pointer begin,
+SVCONSTEXPR data_slab data_slab::from_size(const Pointer begin,
     size_type size) NOEXCEPT
 {
     // Guard 0 because &begin[0] is undefined if size is zero.

@@ -128,7 +128,7 @@ constexpr data_slice data_slice::from_iterators(const Iterator& begin,
 
 // static
 template <typename Pointer>
-constexpr data_slice data_slice::from_size(Pointer begin,
+SVCONSTEXPR data_slice data_slice::from_size(Pointer begin,
     size_type size) NOEXCEPT
 {
     // Guard 0 because &begin[0] is undefined if size is zero.

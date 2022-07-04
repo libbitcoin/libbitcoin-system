@@ -149,14 +149,14 @@ private:
     constexpr data_slice(pointer begin, pointer end, size_type size) NOEXCEPT;
 
     template <size_type Size, typename Byte>
-    constexpr static data_slice from_literal(const Byte(&text)[Size]) NOEXCEPT;
+    static constexpr data_slice from_literal(const Byte(&text)[Size]) NOEXCEPT;
 
     template <typename Iterator>
-    constexpr static data_slice from_iterators(const Iterator& begin,
+    static constexpr data_slice from_iterators(const Iterator& begin,
         const Iterator& end) NOEXCEPT;
 
     template <typename Pointer>
-    constexpr static data_slice from_size(Pointer begin, size_type size) NOEXCEPT;
+    static SVCONSTEXPR data_slice from_size(Pointer begin, size_type size) NOEXCEPT;
 
     pointer begin_;
     pointer end_;

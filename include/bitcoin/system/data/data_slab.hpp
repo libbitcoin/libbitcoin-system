@@ -140,7 +140,7 @@ private:
         const Iterator& end) NOEXCEPT;
 
     template <typename Pointer>
-    static constexpr data_slab from_size(const Pointer begin,
+    static SVCONSTEXPR data_slab from_size(const Pointer begin,
         size_type size) NOEXCEPT;
 
     pointer begin_;
