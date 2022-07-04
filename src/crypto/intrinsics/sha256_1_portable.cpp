@@ -26,6 +26,7 @@
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 
 #include <algorithm>
+#include <array>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -35,7 +36,6 @@ BC_PUSH_WARNING(USE_NOT_NULL)
 BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 
 namespace libbitcoin {
 namespace system {
@@ -66,20 +66,19 @@ namespace intrinsics {
 #define Wi(W, i) \
     W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16]
 
-// For constructor init use sha256_context context{ sha256_initial }.
-void sha256_initialize(sha256_context& context) NOEXCEPT
-{
-    context.state = sha256_initial;
-    context.count[0] = 0;
-    context.count[1] = 0;
-}
-
 void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
     constexpr auto count = 64_size / sizeof(uint32_t);
+    std::array<uint32_t, 64> W;
+
+    // uint32_t<64> to uint32_t<16> (narrowing array cast)
+    // uint8_t[64]  as uint32_t<16> (unsafe array cast)
+    to_big_endian(
+        narrowing_array_cast<uint32_t, count>(W),
+        unsafe_array_cast<uint32_t, count>(&block[0]));
+
     uint32_t t0, t1;
-    uint32_t W[64];
-    uint32_t S[]
+    std::array<uint32_t, 8> S
     {
         state[0],
         state[1],
@@ -90,10 +89,6 @@ void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
         state[6],
         state[7]
     };
-
-    from_big_endian(
-        *pointer_cast<numbers<count>>(W),
-        *pointer_cast<const numbers<count>>(block));
 
     Wi(W, 16);
     Wi(W, 17);
@@ -225,13 +220,13 @@ void sha256_update(sha256_context& context, const uint8_t input[],
     size_t size) NOEXCEPT
 {
     constexpr auto block_size = 64_size;
-    const uint32_t bit_length[]
+    const std::array<uint32_t, 2> bit_length
     {
-        possible_narrow_cast<uint32_t>(shift_right(size, 29)),
-        possible_narrow_cast<uint32_t>(shift_left(size, 3))
+        possible_narrow_cast<uint32_t>(size >> 29u),
+        possible_narrow_cast<uint32_t>(size << 3u)
     };
 
-    const auto r = bit_and<uint32_t>(shift_right(context.count[1], 3), 0x3f);
+    const auto r = (context.count[1] >> 3u) & 0x3f;
 
     if (((context.count[1] += bit_length[1])) < bit_length[1])
         context.count[0]++;
@@ -245,7 +240,7 @@ void sha256_update(sha256_context& context, const uint8_t input[],
     }
 
     std::copy_n(input, block_size - r, &context.buffer[r]);
-    sha256_single(context.state.data(), context.buffer);
+    sha256_single(context.state.data(), &context.buffer[0]);
 
     input += (block_size - r);
     size -= (block_size - r);
@@ -257,39 +252,33 @@ void sha256_update(sha256_context& context, const uint8_t input[],
         size -= block_size;
     }
 
-    std::copy_n(input, size, context.buffer);
+    std::copy_n(input, size, &context.buffer[0]);
 }
 
 void sha256_pad(sha256_context& context) NOEXCEPT
 {
-    constexpr auto count = 8_size / sizeof(uint32_t);
-    uint8_t size[8];
+    const auto size = to_big_endian(context.count);
+    constexpr auto count = size.size() * sizeof(uint32_t);
+
     uint32_t r, psize;
-
-    to_big_endian(
-        *pointer_cast<numbers<count>>(size),
-        *pointer_cast<const numbers<count>>(context.count));
-
-    r = (context.count[1] >> 3) & 0x3f;
+    r = (context.count[1] >> 3_size) & 0x3f;
     psize = (r < 56) ? (56 - r) : (120 - r);
 
     sha256_update(context, sha256_padding.data(), psize);
-    sha256_update(context, size, 8);
+    sha256_update(context, array_cast<uint8_t>(size).data(), count);
 }
 
 void sha256_finalize(sha256_context& context, uint8_t digest[32]) NOEXCEPT
 {
     constexpr auto count = 32_size / sizeof(uint32_t);
-    sha256_pad(context);
 
-    to_big_endian(
-        *pointer_cast<numbers<count>>(digest),
-        *pointer_cast<const numbers<count>>(context.state.data()));
+    sha256_pad(context);
+    to_big_endian(unsafe_array_cast<uint32_t, count>(&digest[0]), context.state);
 }
 
 void sha256(const uint8_t input[], size_t size, uint8_t digest[32]) NOEXCEPT
 {
-    sha256_context context{ sha256_initial };
+    sha256_context context{};
     sha256_update(context, input, size);
     sha256_finalize(context, digest);
 }
@@ -298,7 +287,6 @@ void sha256(const uint8_t input[], size_t size, uint8_t digest[32]) NOEXCEPT
 } // namespace system
 } // namespace libbitcoin
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

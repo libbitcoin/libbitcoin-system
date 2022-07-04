@@ -26,51 +26,51 @@
 namespace libbitcoin {
 namespace system {
 
-// C++17: Parallel policy for std::transform.
-
 // return value
-
-template <size_t Size>
-constexpr numbers<Size> from_big_endian(
-    const numbers<Size>& in) NOEXCEPT
+    
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> from_big_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT
 {
-    numbers<Size> out{};
-    from_big_endian(out, in);
+    std::array<Integral, Count> out{};
+    from_big_endian(out, values);
     return out;
 }
 
-template <size_t Size>
-constexpr numbers<Size> from_little_endian(
-    const numbers<Size>& in) NOEXCEPT
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> from_little_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT
 {
-    numbers<Size> out{};
-    from_little_endian(out, in);
+    std::array<Integral, Count> out{};
+    from_little_endian(out, values);
     return out;
 }
 
-template <size_t Size>
-constexpr numbers<Size> to_big_endian(
-    const numbers<Size>& in) NOEXCEPT
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> to_big_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT
 {
-    numbers<Size> out{};
-    to_big_endian(out, in);
+    std::array<Integral, Count> out{};
+    to_big_endian(out, values);
     return out;
 }
 
-template <size_t Size>
-constexpr numbers<Size> to_little_endian(
-    const numbers<Size>& in) NOEXCEPT
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> to_little_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT
 {
-    numbers<Size> out{};
-    to_little_endian(out, in);
+    std::array<Integral, Count> out{};
+    to_little_endian(out, values);
     return out;
 }
 
 // out parameter
 
-template <size_t Size>
-constexpr void from_big_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT
+// C++17: Parallel policy for std::transform.
+
+template <typename Integral, size_t Count>
+constexpr void from_big_endian(std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT
 {
     std::transform(in.begin(), in.end(), out.begin(),
         [](const auto& integral) NOEXCEPT
@@ -79,9 +79,9 @@ constexpr void from_big_endian(numbers<Size>& out,
         });
 }
 
-template <size_t Size>
-constexpr void from_little_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT
+template <typename Integral, size_t Count>
+constexpr void from_little_endian(std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT
 {
     std::transform(in.begin(), in.end(), out.begin(),
         [](const uint32_t& chunk) NOEXCEPT
@@ -90,9 +90,9 @@ constexpr void from_little_endian(numbers<Size>& out,
         });
 }
 
-template <size_t Size>
-constexpr void to_big_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT
+template <typename Integral, size_t Count>
+constexpr void to_big_endian(std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT
 {
     std::transform(in.begin(), in.end(), out.begin(),
         [](const auto& value) NOEXCEPT
@@ -101,9 +101,9 @@ constexpr void to_big_endian(numbers<Size>& out,
         });
 }
 
-template <size_t Size>
-constexpr void to_little_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT
+template <typename Integral, size_t Count>
+constexpr void to_little_endian(std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT
 {
     std::transform(in.begin(), in.end(), out.begin(),
         [](const auto& value) NOEXCEPT

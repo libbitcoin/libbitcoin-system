@@ -25,47 +25,47 @@
 namespace libbitcoin {
 namespace system {
 
-/// Hack: pointer_cast fools transform into accepting a C-style array. This is
-/// safe because std::array must have only the C-style array non-static member.
-template <size_t Size, typename Integral = uint32_t,
-    if_integral_integer<Integral> = true>
-using numbers = std::array<Integral, Size>;
-
 // return value
 
-template <size_t Size>
-constexpr numbers<Size> from_big_endian(
-    const numbers<Size>& in) NOEXCEPT;
+// TODO: implement in-place conversion.
+    
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> from_big_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT;
 
-template <size_t Size>
-constexpr numbers<Size> from_little_endian(
-    const numbers<Size>& in) NOEXCEPT;
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> from_little_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT;
 
-template <size_t Size>
-constexpr numbers<Size> to_big_endian(
-    const numbers<Size>& in) NOEXCEPT;
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> to_big_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT;
 
-template <size_t Size>
-constexpr numbers<Size> to_little_endian(
-    const numbers<Size>& in) NOEXCEPT;
+template <typename Integral, size_t Count>
+constexpr std::array<Integral, Count> to_little_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT;
 
 // out parameter
 
-template <size_t Size>
-constexpr void from_big_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT;
+template <typename Integral, size_t Count>
+constexpr void from_big_endian(
+    std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT;
 
-template <size_t Size>
-constexpr void from_little_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT;
+template <typename Integral, size_t Count>
+constexpr void from_little_endian(
+    std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT;
 
-template <size_t Size>
-constexpr void to_big_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT;
+template <typename Integral, size_t Count>
+constexpr void to_big_endian(
+    std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT;
 
-template <size_t Size>
-constexpr void to_little_endian(numbers<Size>& out,
-    const numbers<Size>& in) NOEXCEPT;
+template <typename Integral, size_t Count>
+constexpr void to_little_endian(
+    std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

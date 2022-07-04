@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 #include <immintrin.h>
-////#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {

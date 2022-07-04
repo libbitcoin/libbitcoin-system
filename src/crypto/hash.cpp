@@ -124,7 +124,7 @@ hash_digest sha256_hash(const data_slice& first,
     using namespace intrinsics;
 
     hash_digest hash;
-    sha256_context context{ sha256_initial };
+    sha256_context context{};
     sha256_update(context, first.data(), first.size());
     sha256_update(context, second.data(), second.size());
     sha256_finalize(context, hash.data());

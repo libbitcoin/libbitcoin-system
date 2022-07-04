@@ -17,11 +17,14 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_C_STYLE_CASTS)
+
 namespace libbitcoin {
 namespace system {
 namespace intrinsics {
 
-alignas(__m128i) const uint8_t flip_mask[16] =
+alignas(__m128i) constexpr uint8_t flip_mask[16]
 {
     0x03, 0x02, 0x01, 0x00, // 0x00010203ul
     0x07, 0x06, 0x05, 0x04, // 0x04050607ul
@@ -29,7 +32,7 @@ alignas(__m128i) const uint8_t flip_mask[16] =
     0x0f, 0x0e, 0x0d, 0x0c  // 0x0c0d0e0ful
 };
 
-alignas(__m128i) const uint8_t init0[16] =
+alignas(__m128i) constexpr uint8_t init0[16]
 {
     0x8c, 0x68, 0x05, 0x9b, // 0x9b05688cul
     0x7f, 0x52, 0x0e, 0x51, // 0x510e527ful
@@ -37,7 +40,7 @@ alignas(__m128i) const uint8_t init0[16] =
     0x67, 0xe6, 0x09, 0x6a  // 0x6a09e667ul
 };
 
-alignas(__m128i) const uint8_t init1[16] =
+alignas(__m128i) constexpr uint8_t init1[16]
 {
     0x19, 0xcd, 0xe0, 0x5b, // 0x5be0cd19ul
     0xab, 0xd9, 0x83, 0x1f, // 0x1f83d9abul
@@ -96,13 +99,13 @@ void inline Unshuffle(__m128i& s0, __m128i& s1) NOEXCEPT
 __m128i inline Load(const uint8_t* in) NOEXCEPT
 {
     return _mm_shuffle_epi8(_mm_loadu_si128((const __m128i*)in),
-        _mm_load_si128((const __m128i*)flip_mask));
+        _mm_load_si128((const __m128i*)(&flip_mask[0])));
 }
 
 void inline Save(uint8_t* out, __m128i s) NOEXCEPT
 {
     _mm_storeu_si128((__m128i*)out,
-        _mm_shuffle_epi8(s, _mm_load_si128((const __m128i*)flip_mask)));
+        _mm_shuffle_epi8(s, _mm_load_si128((const __m128i*)(&flip_mask[0]))));
 }
 
 // Iterate over N blocks, two lanes per block.
@@ -171,13 +174,10 @@ void sha256_shani(uint32_t* state, const uint8_t* chunk, size_t blocks) NOEXCEPT
     _mm_storeu_si128((__m128i*)(state + 4), s1);
 }
 
-// C-style functions, all usage verified.
-BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
-
 // One block in two lanes.
 void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
-    return sha256_shani(state, block, 1);
+    return sha256_shani(&state[0], &block[0], 1);
 }
 
 ////void sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
@@ -189,20 +189,16 @@ void sha256_x1_shani(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 void double_sha256_x1_shani(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
     constexpr auto count = 32_size / sizeof(uint32_t);
-    auto buffer = sha256x2_buffer;
 
     auto state = sha256_initial;
-    sha256_x1_shani(state.data(), in);
+    auto buffer = sha256x2_buffer;
+    sha256_x1_shani(state.data(), &in[0]);
     sha256_x1_shani(state.data(), sha256x2_padding.data());
-    to_big_endian(
-        *pointer_cast<numbers<count>>(buffer.data()),
-        *pointer_cast<const numbers<count>>(state.data()));
+    to_big_endian(narrowing_array_cast<uint32_t, count>(buffer), state);
 
     state = sha256_initial;
     sha256_x1_shani(state.data(), buffer.data());
-    to_big_endian(
-        *pointer_cast<numbers<count>>(out),
-        *pointer_cast<const numbers<count>>(state.data()));
+    to_big_endian(unsafe_array_cast<uint32_t, count>(out), state);
 }
 
 // Two blocks in two lanes, doubled.
@@ -212,26 +208,26 @@ void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
     __m128i bm0, bm1, bm2, bm3, bs0, bs1, bso0, bso1;
 
     /* Transform 1 */
-    bs0 = as0 = _mm_load_si128((const __m128i*)init0);
-    bs1 = as1 = _mm_load_si128((const __m128i*)init1);
-    am0 = Load(in);
-    bm0 = Load(in + 64);
+    bs0 = as0 = _mm_load_si128((const __m128i*)(&init0[0]));
+    bs1 = as1 = _mm_load_si128((const __m128i*)(&init1[0]));
+    am0 = Load(&in[0]);
+    bm0 = Load(&in[0] + 64);
     QuadRound(as0, as1, am0, 0xe9b5dba5b5c0fbcfull, 0x71374491428a2f98ull);
     QuadRound(bs0, bs1, bm0, 0xe9b5dba5b5c0fbcfull, 0x71374491428a2f98ull);
-    am1 = Load(in + 16);
-    bm1 = Load(in + 80);
+    am1 = Load(&in[0] + 16);
+    bm1 = Load(&in[0] + 80);
     QuadRound(as0, as1, am1, 0xab1c5ed5923f82a4ull, 0x59f111f13956c25bull);
     QuadRound(bs0, bs1, bm1, 0xab1c5ed5923f82a4ull, 0x59f111f13956c25bull);
     ShiftMessageA(am0, am1);
     ShiftMessageA(bm0, bm1);
-    am2 = Load(in + 32);
-    bm2 = Load(in + 96);
+    am2 = Load(&in[0] + 32);
+    bm2 = Load(&in[0] + 96);
     QuadRound(as0, as1, am2, 0x550c7dc3243185beull, 0x12835b01d807aa98ull);
     QuadRound(bs0, bs1, bm2, 0x550c7dc3243185beull, 0x12835b01d807aa98ull);
     ShiftMessageA(am1, am2);
     ShiftMessageA(bm1, bm2);
-    am3 = Load(in + 48);
-    bm3 = Load(in + 112);
+    am3 = Load(&in[0] + 48);
+    bm3 = Load(&in[0] + 112);
     QuadRound(as0, as1, am3, 0xc19bf1749bdc06a7ull, 0x80deb1fe72be5d74ull);
     QuadRound(bs0, bs1, bm3, 0xc19bf1749bdc06a7ull, 0x80deb1fe72be5d74ull);
     ShiftMessageB(am2, am3, am0);
@@ -282,10 +278,10 @@ void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
     ShiftMessageC(bm1, bm2, bm3);
     QuadRound(as0, as1, am3, 0xc67178f2bef9A3f7ull, 0xa4506ceb90befffaull);
     QuadRound(bs0, bs1, bm3, 0xc67178f2bef9A3f7ull, 0xa4506ceb90befffaull);
-    as0 = _mm_add_epi32(as0, _mm_load_si128((const __m128i*)init0));
-    bs0 = _mm_add_epi32(bs0, _mm_load_si128((const __m128i*)init0));
-    as1 = _mm_add_epi32(as1, _mm_load_si128((const __m128i*)init1));
-    bs1 = _mm_add_epi32(bs1, _mm_load_si128((const __m128i*)init1));
+    as0 = _mm_add_epi32(as0, _mm_load_si128((const __m128i*)(&init0[0])));
+    bs0 = _mm_add_epi32(bs0, _mm_load_si128((const __m128i*)(&init0[0])));
+    as1 = _mm_add_epi32(as1, _mm_load_si128((const __m128i*)(&init1[0])));
+    bs1 = _mm_add_epi32(bs1, _mm_load_si128((const __m128i*)(&init1[0])));
 
     /* Transform 2 */
     aso0 = as0;
@@ -338,8 +334,8 @@ void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
     bm1 = bs1;
 
     /* Transform 3 */
-    bs0 = as0 = _mm_load_si128((const __m128i*)init0);
-    bs1 = as1 = _mm_load_si128((const __m128i*)init1);
+    bs0 = as0 = _mm_load_si128((const __m128i*)(&init0[0]));
+    bs1 = as1 = _mm_load_si128((const __m128i*)(&init1[0]));
     QuadRound(as0, as1, am0, 0xe9b5dba5B5c0fbcfull, 0x71374491428a2f98ull);
     QuadRound(bs0, bs1, bm0, 0xe9b5dba5B5c0fbcfull, 0x71374491428a2f98ull);
     QuadRound(as0, as1, am1, 0xab1c5ed5923f82a4ull, 0x59f111f13956c25bull);
@@ -402,10 +398,10 @@ void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
     ShiftMessageC(bm1, bm2, bm3);
     QuadRound(as0, as1, am3, 0xc67178f2bef9a3f7ull, 0xa4506ceb90befffaull);
     QuadRound(bs0, bs1, bm3, 0xc67178f2bef9a3f7ull, 0xa4506ceb90befffaull);
-    as0 = _mm_add_epi32(as0, _mm_load_si128((const __m128i*)init0));
-    bs0 = _mm_add_epi32(bs0, _mm_load_si128((const __m128i*)init0));
-    as1 = _mm_add_epi32(as1, _mm_load_si128((const __m128i*)init1));
-    bs1 = _mm_add_epi32(bs1, _mm_load_si128((const __m128i*)init1));
+    as0 = _mm_add_epi32(as0, _mm_load_si128((const __m128i*)(&init0[0])));
+    bs0 = _mm_add_epi32(bs0, _mm_load_si128((const __m128i*)(&init0[0])));
+    as1 = _mm_add_epi32(as1, _mm_load_si128((const __m128i*)(&init1[0])));
+    bs1 = _mm_add_epi32(bs1, _mm_load_si128((const __m128i*)(&init1[0])));
 
     /* Extract hash into out */
     Unshuffle(as0, as1);
@@ -416,10 +412,11 @@ void double_sha256_x2_shani(uint8_t* out, const uint8_t in[2 * 64]) NOEXCEPT
     Save(out + 48, bs1);
 }
 
-BC_POP_WARNING()
-
 } // namespace intrinsics
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 #endif // WITH_SHANI

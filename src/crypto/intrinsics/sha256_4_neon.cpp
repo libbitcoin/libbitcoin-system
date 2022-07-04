@@ -9,10 +9,10 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-////#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 
-// TODO: move endian collection to math and drop /endian dependency.
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_C_STYLE_CASTS)
 
 #if defined(_MSC_VER)
 #include <intrin.h>
@@ -41,9 +41,9 @@ namespace system {
 namespace intrinsics {
 
 // Iterate over N blocks, four lanes per block.
-void sha256_neon(uint32_t* state, const uint8_t* data, uint32_t blocks)
+void sha256_neon(uint32_t* state, const uint8_t* data, uint32_t blocks) NOEXCEPT
 {
-    static constexpr uint32_t K[] =
+    constexpr uint32_t K[]
     {
         0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
         0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -237,18 +237,17 @@ void sha256_x1_neon(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 // One block in four lanes, doubled.
 void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
-    auto buffer = sha256x2_buffer;
-
-    // TODO: move endian collection to math and drop /endian dependency.
+    constexpr auto count = 32_size / sizeof(uint32_t);
 
     auto state = sha256_initial;
-    sha256_x1_neon(state.data(), in);
+    auto buffer = sha256x2_buffer;
+    sha256_x1_neon(state.data(), &in[0]);
     sha256_x1_neon(state.data(), sha256x2_padding.data());
-    to_big_endian<8>(buffer.data(), state.data());
+    to_big_endian(narrowing_array_cast<uint32_t, count>(buffer), state);
 
     state = sha256_initial;
     sha256_x1_neon(state.data(), buffer.data());
-    to_big_endian<8>(out, state.data());
+    to_big_endian(unsafe_array_cast<uint32_t, count>(out), state);
 }
 
 ////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
@@ -259,5 +258,8 @@ void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 } // namespace intrinsics
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 #endif // WITH_NEON

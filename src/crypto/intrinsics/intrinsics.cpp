@@ -33,9 +33,6 @@
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
- // C-style functions, all usage verified.
-BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
-
 namespace libbitcoin {
 namespace system {
 namespace intrinsics {
@@ -369,24 +366,22 @@ void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) NOEXCEPT
 {
     constexpr auto state_size = 32_size / sizeof(uint32_t);
     constexpr auto count = state_size / sizeof(uint32_t);
-    auto buffer = sha256x2_buffer;
 
     auto state = sha256_initial;
+    auto buffer = sha256x2_buffer;
     sha256_x1_portable(state.data(), in);
     sha256_x1_portable(state.data(), sha256x2_padding.data());
     to_big_endian(
-        *pointer_cast<numbers<count>>(buffer.data()),
-        *pointer_cast<const numbers<count>>(state.data()));
+        narrowing_array_cast<uint32_t, count>(buffer),
+        narrowing_array_cast<uint32_t, count>(state));
 
     state = sha256_initial;
     sha256_x1_portable(state.data(), buffer.data());
     to_big_endian(
-        *pointer_cast<numbers<count>>(out),
-        *pointer_cast<const numbers<count>>(state.data()));
+        unsafe_array_cast<uint32_t, count>(&out[0]),
+        narrowing_array_cast<uint32_t, count>(state));
 }
 
 } // namespace intrinsics
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()

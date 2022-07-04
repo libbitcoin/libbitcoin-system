@@ -76,7 +76,7 @@ void sha256_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
 // Iterate over N blocks, four lanes per block.
 void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) NOEXCEPT
 {
-    static const uint32_t K256 alignas(16) [] =
+    constexpr uint32_t K256 alignas(16) []
     {
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
         0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -96,17 +96,17 @@ void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) NOEXCEPT
         0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
     };
 
-    static const uint32_t FLIP_MASK alignas(16) [] =
+    constexpr uint32_t FLIP_MASK alignas(16) []
     {
         0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f
     };
 
-    static const uint32_t SHUF_00BA alignas(16) [] =
+    constexpr uint32_t SHUF_00BA alignas(16) []
     {
         0x03020100, 0x0b0a0908, 0xffffffff, 0xffffffff
     };
 
-    static const uint32_t SHUF_DC00 alignas(16) [] =
+    constexpr uint32_t SHUF_DC00 alignas(16) []
     {
         0xffffffff, 0xffffffff, 0x03020100, 0x0b0a0908
     };
@@ -1040,9 +1040,6 @@ void sha256_x1_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
 
 #endif
 
-// C-style functions, all usage verified.
-BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
-
 // One block in four lanes.
 void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 {
@@ -1058,28 +1055,22 @@ void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
 {
     constexpr auto count = 32_size / sizeof(uint32_t);
-    auto buffer = sha256x2_buffer;
 
     auto state = sha256_initial;
+    auto buffer = sha256x2_buffer;
     sha256_x1_sse4(state.data(), in);
     sha256_x1_sse4(state.data(), sha256x2_padding.data());
-    to_big_endian(
-        *pointer_cast<numbers<count>>(buffer.data()),
-        *pointer_cast<const numbers<count>>(state.data()));
+    to_big_endian(narrowing_array_cast<uint32_t, count>(buffer), state);
 
     state = sha256_initial;
     sha256_x1_sse4(state.data(), buffer.data());
-    to_big_endian(
-        *pointer_cast<numbers<count>>(out),
-        *pointer_cast<const numbers<count>>(state.data()));
+    to_big_endian(unsafe_array_cast<uint32_t, count>(out), state);
 }
 
 ////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 ////{
 ////    // TODO: four blocks in four lanes, doubled.
 ////}
-
-BC_POP_WARNING()
 
 } // namespace intrinsics
 } // namespace system

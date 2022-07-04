@@ -35,11 +35,8 @@ namespace system {
 
 template <typename OStream>
 sha256_writer<OStream>::sha256_writer(OStream& sink) NOEXCEPT
-  : byte_writer<OStream>(sink),
-    context_{ intrinsics::sha256_initial }
+  : byte_writer<OStream>(sink)
 {
-    // context_ initialized on construct.
-    ////intrinsics::sha256_initialize(context_);
 }
 
 template <typename OStream>
