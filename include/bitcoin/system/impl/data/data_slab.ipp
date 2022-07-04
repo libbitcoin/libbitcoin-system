@@ -39,7 +39,7 @@ constexpr data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
 // std::vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
 VCONSTEXPR data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
-  : data_slab(from_size(data.begin(), data.size()))
+  : data_slab(from_size_(data.begin(), data.size()))
 {
 }
 
@@ -63,7 +63,7 @@ constexpr data_slab::data_slab() NOEXCEPT
 
 // std::string.begin not constexpr (need full C++20).
 SCONSTEXPR data_slab::data_slab(std::string& text) NOEXCEPT
-  : data_slab(from_size(text.begin(), text.size()))
+  : data_slab(from_size_(text.begin(), text.size()))
 {
 }
 
@@ -95,7 +95,7 @@ constexpr data_slab data_slab::from_iterators(const Iterator& begin,
 
 // static
 template <typename Pointer>
-SVCONSTEXPR data_slab data_slab::from_size(const Pointer begin,
+constexpr data_slab data_slab::from_size(const Pointer begin,
     size_type size) NOEXCEPT
 {
     // Guard 0 because &begin[0] is undefined if size is zero.
@@ -109,6 +109,14 @@ SVCONSTEXPR data_slab data_slab::from_size(const Pointer begin,
     BC_POP_WARNING()
 
     return { start, std::next(start, size), size };
+}
+
+// static
+template <typename Pointer>
+SVCONSTEXPR data_slab data_slab::from_size_(const Pointer begin,
+    size_type size) NOEXCEPT
+{
+    return from_size(begin, size);
 }
 
 // methods

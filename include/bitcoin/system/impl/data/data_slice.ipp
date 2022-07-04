@@ -49,7 +49,7 @@ constexpr data_slice::data_slice(const std::array<Byte, Size>& data) NOEXCEPT
 // std::vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
 VCONSTEXPR data_slice::data_slice(const std::vector<Byte>& data) NOEXCEPT
-  : data_slice(from_size(data.begin(), data.size()))
+  : data_slice(from_size_(data.begin(), data.size()))
 {
 }
 
@@ -73,7 +73,7 @@ constexpr data_slice::data_slice() NOEXCEPT
 
 // std::string.begin not constexpr (need full C++20).
 SCONSTEXPR data_slice::data_slice(const std::string& text) NOEXCEPT
-  : data_slice(from_size(text.begin(), text.size()))
+  : data_slice(from_size_(text.begin(), text.size()))
 {
 }
 
@@ -128,7 +128,7 @@ constexpr data_slice data_slice::from_iterators(const Iterator& begin,
 
 // static
 template <typename Pointer>
-SVCONSTEXPR data_slice data_slice::from_size(Pointer begin,
+constexpr data_slice data_slice::from_size(Pointer begin,
     size_type size) NOEXCEPT
 {
     // Guard 0 because &begin[0] is undefined if size is zero.
@@ -142,6 +142,14 @@ SVCONSTEXPR data_slice data_slice::from_size(Pointer begin,
     BC_POP_WARNING()
 
     return { start, std::next(start, size), size };
+}
+
+// static
+template <typename Pointer>
+SVCONSTEXPR data_slice data_slice::from_size_(Pointer begin,
+    size_type size) NOEXCEPT
+{
+    return from_size(begin, size);
 }
 
 // methods

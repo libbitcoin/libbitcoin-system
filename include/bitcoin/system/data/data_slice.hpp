@@ -156,7 +156,12 @@ private:
         const Iterator& end) NOEXCEPT;
 
     template <typename Pointer>
-    static SVCONSTEXPR data_slice from_size(Pointer begin, size_type size) NOEXCEPT;
+    static constexpr data_slice from_size(
+        Pointer begin, size_type size) NOEXCEPT;
+
+    template <typename Pointer>
+    static SVCONSTEXPR data_slice from_size_(
+        Pointer begin, size_type size) NOEXCEPT;
 
     pointer begin_;
     pointer end_;
