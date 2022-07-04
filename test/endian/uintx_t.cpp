@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
-// Templates must match uintx_t<uint32> vs. uintx_t<size_t>.
+// Templates must match uintx_t<unsigned> vs. uintx_t<size_t>.
 BOOST_AUTO_TEST_CASE(endian__to_array__zero__expected)
 {
     BOOST_REQUIRE_EQUAL(to_array(uint5_t{ 1 }), data_array<1>{ 1 });
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(endian__to_array__zero__expected)
     BOOST_REQUIRE_EQUAL(to_array(uint512_t{ 0 }), data_array<64>{});
 }
 
-// Templates must match uintx_t<uint32> vs. uintx_t<size_t>.
+// Templates must match uintx_t<unsigned> vs. uintx_t<size_t>.
 BOOST_AUTO_TEST_CASE(endian__to_uintx__zero__expected)
 {
     BOOST_REQUIRE_EQUAL(to_uintx(data_array<1>{ 1 }), uint5_t{ 1 });

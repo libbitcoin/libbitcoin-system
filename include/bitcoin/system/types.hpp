@@ -90,7 +90,7 @@ using to_greater_type = std::conditional_t<
 
 /// Template for constructing uintx types.
 /// There is no dynamic memory allocation when minBits == maxBits.
-template <uint32_t Bits> // <= uint32_t
+template <unsigned Bits> // <= unsigned
 using uintx_t = boost::multiprecision::number<
     boost::multiprecision::cpp_int_backend<Bits, Bits,
     boost::multiprecision::unsigned_magnitude,
