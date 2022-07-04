@@ -19,8 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPES_HPP
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
+#include <array>
 #include <type_traits>
 #include <bitcoin/system/exceptions.hpp>
 
@@ -31,10 +30,10 @@ namespace libbitcoin {
 
 using signed_size_t = std::make_signed_t<size_t>;
 
-/// Size-based type selectors.
+/// signed_type<Bytes>, unsigned_type<Bytes>
+/// Integral integer type selection by byte width and sign.
 /// ---------------------------------------------------------------------------
 
-/// Signed integral type selection by byte width and sign.
 template <size_t Bytes = 0u,
     std::enable_if_t<!(Bytes > sizeof(int64_t)), bool> = true>
 using signed_type =
@@ -44,7 +43,7 @@ using signed_type =
                 std::conditional_t<Bytes <= sizeof(int32_t), int32_t,
                     int64_t>>>>;
 
-/// Unsigned integral type selection by byte width and sign.
+
 template <size_t Bytes = 0u,
     std::enable_if_t<!(Bytes > sizeof(uint64_t)), bool> = true>
 using unsigned_type =

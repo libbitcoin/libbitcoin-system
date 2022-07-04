@@ -20,7 +20,8 @@
 
 // Guard type assumptions within the codebase.
 
-// size_t
+// size_t/signed_size_t
+// ----------------------------------------------------------------------------
 
 // This are design limitations, and not a matter of C++ specification.
 static_assert(sizeof(char) == one);
@@ -54,6 +55,9 @@ static_assert(is_same_size<long, int>); // not assured on all platforms.
 #endif
 static_assert(!is_same_type<long, int>); // but always different types.
 
+// signed_type/unsigned_type
+// ----------------------------------------------------------------------------
+
 static_assert(is_same_type<signed_type<>, signed_size_t>);
 static_assert(is_same_type<signed_type<0>, signed_size_t>);
 static_assert(is_same_type<signed_type<1>, int8_t>);
@@ -75,6 +79,9 @@ static_assert(is_same_type<unsigned_type<5>, uint64_t>);
 static_assert(is_same_type<unsigned_type<6>, uint64_t>);
 static_assert(is_same_type<unsigned_type<7>, uint64_t>);
 static_assert(is_same_type<unsigned_type<8>, uint64_t>);
+
+// to_[]_type
+// ----------------------------------------------------------------------------
 
 static_assert(is_same_type<to_signed_type<uint8_t>, int8_t>);
 static_assert(is_same_type<to_signed_type<uint16_t>, int16_t>);
@@ -156,6 +163,9 @@ static_assert(is_same_type<to_greater_type<int64_t, uint64_t>, int64_t>);
 static_assert(is_same_type<to_greater_type<uint64_t, int64_t>, uint64_t>);
 static_assert(is_same_type<to_greater_type<size_t, signed_size_t>, size_t>);
 static_assert(is_same_type<to_greater_type<signed_size_t, size_t>, signed_size_t>);
+
+// uintx_t<>
+// ----------------------------------------------------------------------------
 
 static_assert(is_same_type<uintx_t<5u>, uint5_t>);
 static_assert(is_same_type<uintx_t<11u>, uint11_t>);

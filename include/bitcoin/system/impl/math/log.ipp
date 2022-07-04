@@ -20,11 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_LOG_IPP
 
 #include <bit>
-/// DELETECSTDDEF
 #include <type_traits>
-/// DELETEMENOW
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/safe.hpp>
@@ -59,15 +55,15 @@ constexpr Exponent ceilinged_log(Base base, Value value) NOEXCEPT
     if (base < 2 || value < 1)
         return 0;
 
-    auto factor = possible_narrow_and_sign_cast<Value>(base);
-
-    // Allow constexpr ceilinged_log(0).
-    if (std::is_constant_evaluated() && is_zero(factor))
+    // Delinting constexpr ceilinged_log(0).
+    if (std::is_constant_evaluated() && is_zero(base))
     {
         return 0;
     }
     else
     {
+        const auto factor = possible_narrow_and_sign_cast<Value>(base);
+
         Exponent exponent = 0;
         while (value > 0) { ++exponent; value /= factor; }
         return exponent;
@@ -176,15 +172,15 @@ constexpr Exponent floored_log(Base base, Value value) NOEXCEPT
     if (base < 2 || value < 1)
         return 0;
 
-    auto factor = possible_narrow_and_sign_cast<Value>(base);
-
-    // Allow constexpr floored_log(0).
-    if (std::is_constant_evaluated() && is_zero(factor))
+    // Delinting constexpr floored_log(0).
+    if (std::is_constant_evaluated() && is_zero(base))
     {
         return 0;
     }
     else
     {
+        const auto factor = possible_narrow_and_sign_cast<Value>(base);
+
         Exponent exponent = 0;
         while (((value /= factor)) > 0) { ++exponent; }
         return exponent;
