@@ -23,6 +23,7 @@
 /// DELETECSTDINT
 #include <limits>
 #include <bitcoin/system/types.hpp>
+#include <bit>
 
 namespace libbitcoin {
 
