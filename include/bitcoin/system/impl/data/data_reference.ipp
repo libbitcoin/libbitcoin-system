@@ -39,38 +39,41 @@ constexpr data_reference::data_reference(const data_slice& data) NOEXCEPT
 {
 }
 
-constexpr data_reference::data_reference(const std::string& text) NOEXCEPT
+// data_slice(std::string) is SCONSTEXPR.
+SCONSTEXPR data_reference::data_reference(const std::string& text) NOEXCEPT
   : data_slice(text)
 {
 }
 
-constexpr data_reference::data_reference(const data_chunk& data) NOEXCEPT
+// data_slice(std::vector) is VCONSTEXPR.
+VCONSTEXPR data_reference::data_reference(const data_chunk& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
-/// data_array constructor.
+// data_array constructor.
 template <data_reference::size_type Size>
 constexpr data_reference::data_reference(const data_array<Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
-/// Byte array constructor (casts Byte to uint8_t).
+// Byte array constructor (casts Byte to uint8_t).
 template <data_reference::size_type Size, typename Byte, if_one_byte<Byte>>
 constexpr data_reference::data_reference(const std::array<Byte, Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
-/// Byte vector constructor (casts Byte to uint8_t).
+// data_slice(std::vector) is VCONSTEXPR.
+// Byte vector constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-constexpr data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
+VCONSTEXPR data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
-/// Byte iterators constructor (casts to uint8_t).
+// Byte iterators constructor (casts to uint8_t).
 template <typename Iterator>
 constexpr data_reference::data_reference(const Iterator& begin,
     const Iterator& end) NOEXCEPT
@@ -78,7 +81,7 @@ constexpr data_reference::data_reference(const Iterator& begin,
 {
 }
 
-/// Byte pointer to const constructor (casts Byte to uint8_t).
+// Byte pointer to const constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
 constexpr data_reference::data_reference(const Byte* begin, const Byte* end) NOEXCEPT
   : data_slice(begin, end)
