@@ -32,27 +32,27 @@ namespace system {
 
 template <data_slab::size_type Size, typename Byte, if_one_byte<Byte>>
 constexpr data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
-  : data_slab(data_slab::from_size(data.begin(), Size))
+  : data_slab(from_size(data.begin(), Size))
 {
 }
 
 // std::vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
 VCONSTEXPR data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
-  : data_slab(data_slab::from_size(data.begin(), data.size()))
+  : data_slab(from_size(data.begin(), data.size()))
 {
 }
 
 template <typename Iterator>
 constexpr data_slab::data_slab(const Iterator& begin,
     const Iterator& end) NOEXCEPT
-  : data_slab(data_slab::from_iterators(begin, end))
+  : data_slab(from_iterators(begin, end))
 {
 }
 
 template <typename Byte, if_one_byte<Byte>>
 constexpr data_slab::data_slab(const Byte* begin, const Byte* end) NOEXCEPT
-  : data_slab(data_slab::from_iterators(begin, end))
+  : data_slab(from_iterators(begin, end))
 {
 }
 
@@ -63,7 +63,7 @@ constexpr data_slab::data_slab() NOEXCEPT
 
 // std::string.begin not constexpr (need full C++20).
 SCONSTEXPR data_slab::data_slab(std::string& text) NOEXCEPT
-  : data_slab(data_slab::from_size(text.begin(), text.size()))
+  : data_slab(from_size(text.begin(), text.size()))
 {
 }
 

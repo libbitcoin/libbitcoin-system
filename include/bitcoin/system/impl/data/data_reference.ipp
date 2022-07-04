@@ -34,33 +34,38 @@ constexpr data_reference::data_reference() NOEXCEPT
 {
 }
 
-constexpr data_reference::data_reference(const data_slice& data) NOEXCEPT
+constexpr data_reference::data_reference(
+    const data_slice& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 // data_slice(std::string) is SCONSTEXPR.
-SCONSTEXPR data_reference::data_reference(const std::string& text) NOEXCEPT
+SCONSTEXPR data_reference::data_reference(
+    const std::string& text) NOEXCEPT
   : data_slice(text)
 {
 }
 
 // data_slice(std::vector) is VCONSTEXPR.
-VCONSTEXPR data_reference::data_reference(const data_chunk& data) NOEXCEPT
+VCONSTEXPR data_reference::data_reference(
+    const data_chunk& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 // data_array constructor.
 template <data_reference::size_type Size>
-constexpr data_reference::data_reference(const data_array<Size>& data) NOEXCEPT
+constexpr data_reference::data_reference(
+    const data_array<Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 // Byte array constructor (casts Byte to uint8_t).
 template <data_reference::size_type Size, typename Byte, if_one_byte<Byte>>
-constexpr data_reference::data_reference(const std::array<Byte, Size>& data) NOEXCEPT
+constexpr data_reference::data_reference(
+    const std::array<Byte, Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }
@@ -68,7 +73,8 @@ constexpr data_reference::data_reference(const std::array<Byte, Size>& data) NOE
 // data_slice(std::vector) is VCONSTEXPR.
 // Byte vector constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-VCONSTEXPR data_reference::data_reference(const std::vector<Byte>& data) NOEXCEPT
+VCONSTEXPR data_reference::data_reference(
+    const std::vector<Byte>& data) NOEXCEPT
   : data_slice(data)
 {
 }
@@ -83,7 +89,8 @@ constexpr data_reference::data_reference(const Iterator& begin,
 
 // Byte pointer to const constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-constexpr data_reference::data_reference(const Byte* begin, const Byte* end) NOEXCEPT
+constexpr data_reference::data_reference(const Byte* begin,
+    const Byte* end) NOEXCEPT
   : data_slice(begin, end)
 {
 }
