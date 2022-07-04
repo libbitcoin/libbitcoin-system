@@ -303,11 +303,8 @@ constexpr Integer safe_add(Integer left, Integer right) THROWS
 template <typename Integer, if_signed_integer<Integer>>
 constexpr Integer safe_negate(Integer value) THROWS
 {
-    // TODO: review full codebase.
-    ////if (value == std::numeric_limits<Integer>::min())
-    ////    throw overflow_exception("safe negate overflow");
-    BC_ASSERT_MSG(value != std::numeric_limits<Integer>::min(),
-        "negation overflow");
+    if (value == std::numeric_limits<Integer>::min())
+        throw overflow_exception("safe negate overflow");
 
     return possible_narrow_and_sign_cast<Integer>(-value);
 }

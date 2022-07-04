@@ -59,7 +59,7 @@ namespace system {
 
 // unsafe
 template <typename Integer, typename Result, if_signed_integer<Integer>>
-DEPRECATED constexpr Result absolute(Integer value) NOEXCEPT
+constexpr Result absolute(Integer value) NOEXCEPT
 {
     return to_unsigned(is_negative(value) ? negate(value) : value);
 }
@@ -72,7 +72,7 @@ constexpr Integer absolute(Integer value) NOEXCEPT
 
 // unsafe
 template <typename Integer, if_signed_integer<Integer>>
-DEPRECATED constexpr Integer negate(Integer value) NOEXCEPT
+constexpr Integer negate(Integer value) NOEXCEPT
 {
     return safe_negate(value);
 }

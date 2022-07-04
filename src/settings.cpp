@@ -264,12 +264,10 @@ uint64_t settings::max_money() const NOEXCEPT
 {
     std::function<uint64_t(uint64_t)> total = [&](uint64_t subsidy) NOEXCEPT
     {
-        // DEPRECATED: safe_add.
         // Guarded by parameterization (config).
         return is_zero(subsidy) ? 0 : safe_add(subsidy, total(subsidy >> 1));
     };
 
-    // DEPRECATED: safe_multiply.
     // Guarded by parameterization (config).
     return safe_multiply(total(initial_subsidy()), subsidy_interval_blocks);
 }
@@ -277,7 +275,6 @@ uint64_t settings::max_money() const NOEXCEPT
 // Used to initialize initial subsidy setting.
 uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
 {
-    // DEPRECATED: safe_multiply.
     // Guarded by parameterization (config).
     return safe_multiply(value, chain::satoshi_per_bitcoin);
 }

@@ -201,15 +201,15 @@ unsafe_array_cast(const From bytes[]) NOEXCEPT;
 /// ---------------------------------------------------------------------------
 /// Avoid structured exception handling, use only to cause program abort.
 
-/// Throws overflow_exception on overflow (2 uses in libbitcoin).
+/// Throws overflow_exception on overflow (2 uses in libbitcoin (settings)).
 template <typename Integer, if_unsigned_integer<Integer> = true>
 DEPRECATED constexpr Integer safe_multiply(Integer left, Integer right) THROWS;
 
-/// Throws overflow_exception on overflow (1 use in libbitcoin).
+/// Throws overflow_exception on overflow (1 use in libbitcoin (settings)).
 template <typename Integer, if_unsigned_integer<Integer> = true>
 DEPRECATED constexpr Integer safe_add(Integer left, Integer right) THROWS;
 
-/// Throws overflow_exception on negate signed minimum (several uses).
+/// Throws overflow_exception on negate signed minimum (1 use in libbitcoin).
 template <typename Integer, if_signed_integer<Integer> = true>
 DEPRECATED constexpr Integer safe_negate(Integer value) THROWS;
 
