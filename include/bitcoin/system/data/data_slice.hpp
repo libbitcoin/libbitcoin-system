@@ -90,7 +90,7 @@ public:
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    constexpr data_slice(const std::vector<Byte>& data) NOEXCEPT;
+    VCONSTEXPR data_slice(const std::vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-const references.
     /// Byte iterators constructor (casts to uint8_t).
@@ -103,7 +103,7 @@ public:
     constexpr data_slice(const Byte* begin, const Byte* end) NOEXCEPT;
 
     /// String constructor (casts char to uint8_t).
-    constexpr data_slice(const std::string& text) NOEXCEPT;
+    SCONSTEXPR data_slice(const std::string& text) NOEXCEPT;
 
     /// Byte initializer list constructor.
     constexpr data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;

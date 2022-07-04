@@ -36,8 +36,9 @@ constexpr data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
 {
 }
 
+// std::vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
-constexpr data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
+VCONSTEXPR data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
   : data_slab(data_slab::from_size(data.begin(), data.size()))
 {
 }
@@ -60,7 +61,8 @@ constexpr data_slab::data_slab() NOEXCEPT
 {
 }
 
-constexpr data_slab::data_slab(std::string& text) NOEXCEPT
+// std::string.begin not constexpr (need full C++20).
+SCONSTEXPR data_slab::data_slab(std::string& text) NOEXCEPT
   : data_slab(data_slab::from_size(text.begin(), text.size()))
 {
 }

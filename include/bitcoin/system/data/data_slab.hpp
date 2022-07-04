@@ -74,7 +74,7 @@ public:
     // TODO: test.
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    constexpr data_slab(std::vector<Byte>& data) NOEXCEPT;
+    VCONSTEXPR data_slab(std::vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-non-const references.
     /// Byte iterators constructor (casts to uint8_t).
@@ -88,7 +88,7 @@ public:
 
     // TODO: test.
     /// String constructor (casts char to uint8_t).
-    constexpr data_slab(std::string& text) NOEXCEPT;
+    SCONSTEXPR data_slab(std::string& text) NOEXCEPT;
 
     /// Methods.
 
