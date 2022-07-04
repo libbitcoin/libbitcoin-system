@@ -21,13 +21,11 @@
 
 #include <algorithm>
 #include <array>
-/// DELETECSTDDEF
 #include <iterator>
 #include <memory>
 #include <type_traits>
 #include <utility>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

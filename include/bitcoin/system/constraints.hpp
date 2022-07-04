@@ -168,7 +168,7 @@ using if_not_same_signed_integer = bool_if<
     (is_integer<Left> && is_integer<Right>) &&
     (is_signed<Left> != is_signed<Right>)>;
 
-/// Integral integer types (native, non-floating math, non-bool).
+/// Integral integer types (native, non-floating point, non-bool).
 
 template <typename Type>
 using if_integral_integer = bool_if<

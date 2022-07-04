@@ -100,7 +100,8 @@ namespace bc = libbitcoin;
     #define WITH_AVX2
     #define WITH_SSE41
     #define WITH_SSE4
-    #define WITH_SHANI
+    ////#define WITH_NEON  // no test yet for ARM Neon.
+    ////#define WITH_SHANI // untested
 #endif
 
 // LCOV code coverage exclusion ranges.
