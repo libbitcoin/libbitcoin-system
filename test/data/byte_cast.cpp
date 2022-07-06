@@ -34,7 +34,7 @@ using array8x256 = std::array<uint8_t, 256>;
 using array8x255 = std::array<uint8_t, 255>; // cannot match either 127 or 128.
 using array8x254 = std::array<uint8_t, 254>;
 constexpr array8x256 data8x256{};
-constexpr array8x255 data8x255{};
+////constexpr array8x255 data8x255{};
 constexpr array8x254 data8x254{};
 static_assert(is_same_type<decltype(array_cast<uint16_t>(data8x256)), const array16x128&>);
 ////static_assert(is_same_type<decltype(array_cast<uint16_t>(data8x255)), const array16x128&>);
