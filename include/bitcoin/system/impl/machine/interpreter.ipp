@@ -19,12 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/operation.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -682,6 +679,7 @@ op_negate() NOEXCEPT
     if (!state::pop_signed32(number))
         return error::op_negate;
 
+    // negate(minimum) overflow precluded by domain increase.
     state::push_signed64(negate<int64_t>(number));
     return error::op_success;
 }
@@ -694,8 +692,8 @@ op_abs() NOEXCEPT
     if (!state::pop_signed32(number))
         return error::op_abs;
 
-    // TODO: absolute unsafe, review.
-    state::push_signed64(absolute(number));
+    // absolute(minimum) overflow precluded by domain increase.
+    state::push_signed64(absolute<int64_t>(number));
     return error::op_success;
 }
 
@@ -732,6 +730,7 @@ op_add() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_add;
 
+    // addition overflow precluded by domain increase.
     state::push_signed64(add<int64_t>(left, right));
     return error::op_success;
 }
@@ -744,6 +743,7 @@ op_sub() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_sub;
 
+    // subtraction overflow precluded by domain increase.
     state::push_signed64(subtract<int64_t>(left, right));
     return error::op_success;
 }
@@ -866,7 +866,7 @@ op_less_than() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_less_than;
 
-    state::push_bool(left < right);
+    state::push_bool(is_lesser(left, right));
     return error::op_success;
 }
 
@@ -878,7 +878,7 @@ op_greater_than() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_greater_than;
 
-    state::push_bool(left > right);
+    state::push_bool(is_greater(left, right));
     return error::op_success;
 }
 
@@ -890,7 +890,7 @@ op_less_than_or_equal() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_less_than_or_equal;
 
-    state::push_bool(left <= right);
+    state::push_bool(!is_greater(left, right));
     return error::op_success;
 }
 
@@ -902,7 +902,7 @@ op_greater_than_or_equal() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_greater_than_or_equal;
 
-    state::push_bool(left >= right);
+    state::push_bool(!is_lesser(left, right));
     return error::op_success;
 }
 
@@ -914,7 +914,7 @@ op_min() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_min;
 
-    state::push_signed64(lesser<int64_t>(left, right));
+    state::push_signed64(lesser(left, right));
     return error::op_success;
 }
 
@@ -926,7 +926,7 @@ op_max() NOEXCEPT
     if (!state::pop_binary32(left, right))
         return error::op_max;
 
-    state::push_signed64(greater<int64_t>(left, right));
+    state::push_signed64(greater(left, right));
     return error::op_success;
 }
 
@@ -938,7 +938,7 @@ op_within() NOEXCEPT
     if (!state::pop_ternary32(upper, lower, value))
         return error::op_within;
 
-    state::push_bool((lower <= value) && (value < upper));
+    state::push_bool(!is_lesser(value, lower) && is_lesser(value, upper));
     return error::op_success;
 }
 

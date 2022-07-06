@@ -95,16 +95,25 @@ template <typename Left, typename Right,
     if_signed_integer<Right> = true>
 constexpr bool is_lesser(Left left, Right right) NOEXCEPT;
 
-/// Return the greater of the two values, cast to the Result type.
-template<typename Result, typename Left, typename Right,
-    if_integer<Left> = true,
-    if_integer<Right> = true>
-constexpr Result greater(Left left, Right right) NOEXCEPT;
+/// Return greater/lesser of two same-signed integrals, as the wider type.
+template <place1 = place1{}, typename Left, typename Right,
+    if_same_signed_integer<Left, Right> = true>
+constexpr to_greater_type<Left, Right> greater(Left left, Right right) NOEXCEPT;
+template <place1 = place1{}, typename Left, typename Right,
+    if_same_signed_integer<Left, Right> = true>
+constexpr to_greater_type<Left, Right> lesser(Left left, Right right) NOEXCEPT;
 
-/// Return the lesser of the two values, cast to the Result type.
+/// Return greater/lesser of two opposite-sign integers, cast to the Result.
+/// Result type may not be of lesser size than either operand (non-narrowing).
 template<typename Result, typename Left, typename Right,
-    if_integer<Left> = true,
-    if_integer<Right> = true>
+    if_not_lesser_size<Result, Left> = true,
+    if_not_lesser_size<Result, Right> = true,
+    if_not_same_signed_integer<Left, Right> = true>
+constexpr Result greater(Left left, Right right) NOEXCEPT;
+template<typename Result, typename Left, typename Right,
+    if_not_lesser_size<Result, Left> = true,
+    if_not_lesser_size<Result, Right> = true,
+    if_not_same_signed_integer<Left, Right> = true>
 constexpr Result lesser(Left left, Right right) NOEXCEPT;
 
 } // namespace system

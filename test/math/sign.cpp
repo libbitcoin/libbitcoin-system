@@ -209,37 +209,37 @@ static_assert(is_lesser(-1, 0));
 
 // greater
 
-static_assert(greater<signed>(1, 0) == 1);
-static_assert(greater<signed>(0, 1) == 1);
-static_assert(greater<signed>(1u, 0u) == 1);
-static_assert(greater<signed>(0u, 1u) == 1);
+static_assert(greater(1, 0) == 1);
+static_assert(greater(0, 1) == 1);
+static_assert(greater(1u, 0u) == 1u);
+static_assert(greater(0u, 1u) == 1u);
 static_assert(greater<signed>(1, 0u) == 1);
 static_assert(greater<signed>(0, 1u) == 1);
 static_assert(greater<signed>(1u, 0) == 1);
 static_assert(greater<signed>(0u, 1) == 1);
 
-static_assert(greater<signed>(0, 0) == 0);
-static_assert(greater<signed>(1, 1) == 1);
-static_assert(greater<signed>(0u, 0u) == 0);
-static_assert(greater<signed>(1u, 1u) == 1);
+static_assert(greater(0, 0) == 0);
+static_assert(greater(1, 1) == 1);
+static_assert(greater(0u, 0u) == 0u);
+static_assert(greater(1u, 1u) == 1u);
 static_assert(greater<signed>(0u, 0) == 0);
 static_assert(greater<signed>(1u, 1) == 1);
 static_assert(greater<signed>(0, 0u) == 0);
 static_assert(greater<signed>(1, 1u) == 1);
 
-static_assert(greater<unsigned>(1, 0) == 1u);
-static_assert(greater<unsigned>(0, 1) == 1u);
-static_assert(greater<unsigned>(1u, 0u) == 1u);
-static_assert(greater<unsigned>(0u, 1u) == 1u);
+static_assert(greater(1, 0) == 1u);
+static_assert(greater(0, 1) == 1u);
+static_assert(greater(1u, 0u) == 1u);
+static_assert(greater(0u, 1u) == 1u);
 static_assert(greater<unsigned>(1, 0u) == 1u);
 static_assert(greater<unsigned>(0, 1u) == 1u);
 static_assert(greater<unsigned>(1u, 0) == 1u);
 static_assert(greater<unsigned>(0u, 1) == 1u);
 
-static_assert(greater<unsigned>(0, 0) == 0u);
-static_assert(greater<unsigned>(1, 1) == 1u);
-static_assert(greater<unsigned>(0u, 0u) == 0u);
-static_assert(greater<unsigned>(1u, 1u) == 1u);
+static_assert(greater(0, 0) == 0u);
+static_assert(greater(1, 1) == 1u);
+static_assert(greater(0u, 0u) == 0u);
+static_assert(greater(1u, 1u) == 1u);
 static_assert(greater<unsigned>(0u, 0) == 0u);
 static_assert(greater<unsigned>(1u, 1) == 1u);
 static_assert(greater<unsigned>(0, 0u) == 0u);
@@ -247,37 +247,37 @@ static_assert(greater<unsigned>(1, 1u) == 1u);
 
 // lesser
 
-static_assert(lesser<signed>(1, 0) == 0);
-static_assert(lesser<signed>(0, 1) == 0);
-static_assert(lesser<signed>(1u, 0u) == 0);
-static_assert(lesser<signed>(0u, 1u) == 0);
+static_assert(lesser(1, 0) == 0);
+static_assert(lesser(0, 1) == 0);
+static_assert(lesser(1u, 0u) == 0u);
+static_assert(lesser(0u, 1u) == 0u);
 static_assert(lesser<signed>(1, 0u) == 0);
 static_assert(lesser<signed>(0, 1u) == 0);
 static_assert(lesser<signed>(1u, 0) == 0);
 static_assert(lesser<signed>(0u, 1) == 0);
 
-static_assert(lesser<signed>(0, 0) == 0);
-static_assert(lesser<signed>(1, 1) == 1);
-static_assert(lesser<signed>(0u, 0u) == 0);
-static_assert(lesser<signed>(1u, 1u) == 1);
+static_assert(lesser(0, 0) == 0);
+static_assert(lesser(1, 1) == 1);
+static_assert(lesser(0u, 0u) == 0u);
+static_assert(lesser(1u, 1u) == 1u);
 static_assert(lesser<signed>(0u, 0) == 0);
 static_assert(lesser<signed>(1u, 1) == 1);
 static_assert(lesser<signed>(0, 0u) == 0);
 static_assert(lesser<signed>(1, 1u) == 1);
 
-static_assert(lesser<unsigned>(1, 0) == 0u);
-static_assert(lesser<unsigned>(0, 1) == 0u);
-static_assert(lesser<unsigned>(1u, 0u) == 0u);
-static_assert(lesser<unsigned>(0u, 1u) == 0u);
+static_assert(lesser(1, 0) == 0);
+static_assert(lesser(0, 1) == 0);
+static_assert(lesser(1u, 0u) == 0u);
+static_assert(lesser(0u, 1u) == 0u);
 static_assert(lesser<unsigned>(1, 0u) == 0u);
 static_assert(lesser<unsigned>(0, 1u) == 0u);
 static_assert(lesser<unsigned>(1u, 0) == 0u);
 static_assert(lesser<unsigned>(0u, 1) == 0u);
 
-static_assert(lesser<unsigned>(0, 0) == 0u);
-static_assert(lesser<unsigned>(1, 1) == 1u);
-static_assert(lesser<unsigned>(0u, 0u) == 0u);
-static_assert(lesser<unsigned>(1u, 1u) == 1u);
+static_assert(lesser(1, 0) == 0);
+static_assert(lesser(1, 1) == 1);
+static_assert(lesser(0u, 0u) == 0u);
+static_assert(lesser(1u, 1u) == 1u);
 static_assert(lesser<unsigned>(0u, 0) == 0u);
 static_assert(lesser<unsigned>(1u, 1) == 1u);
 static_assert(lesser<unsigned>(0, 0u) == 0u);

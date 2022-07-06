@@ -42,7 +42,7 @@ namespace system {
 // Coversions.
 // ----------------------------------------------------------------------------
 
-// unsafe (aborts on minimum<Signed>)
+// overflows
 template <typename Signed, if_signed_integer<Signed>>
 constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT
 {
@@ -56,12 +56,10 @@ constexpr Unsigned absolute(Unsigned value) NOEXCEPT
     return value;
 }
 
-// unsafe (aborts on minimum<Signed>)
+// overflows
 template <typename Signed, if_signed_integer<Signed>>
 constexpr Signed negate(Signed value) NOEXCEPT
 {
-    // Preclude overflows.
-    ////return safe_negate(value);
     return -value;
 }
 
@@ -147,19 +145,37 @@ constexpr bool is_lesser(Left left, Right right) NOEXCEPT
     return !is_negative(right) && (to_unsigned(right) > left);
 }
 
-template<typename Result, typename Left, typename Right,
-    if_integer<Left>, if_integer<Right>>
+// Types cannot be cast by first argument.
+template <place1, typename Left, typename Right,
+    if_same_signed_integer<Left, Right>>
+constexpr to_greater_type<Left, Right> greater(Left left, Right right) NOEXCEPT
+{
+    return is_greater(left, right) ? left : right;
+}
+
+// Types cannot be cast by first argument.
+template <place1, typename Left, typename Right,
+    if_same_signed_integer<Left, Right>>
+constexpr to_greater_type<Left, Right> lesser(Left left, Right right) NOEXCEPT
+{
+    return is_lesser(left, right) ? left : right;
+}
+
+template <typename Result, typename Left, typename Right,
+    if_not_lesser_size<Result, Left>,
+    if_not_lesser_size<Result, Right>,
+    if_not_same_signed_integer<Left, Right>>
 constexpr Result greater(Left left, Right right) NOEXCEPT
 {
-    // Precludes Result narrower than either operand.
     return possible_sign_cast<Result>(is_greater(left, right) ? left : right);
 }
 
-template<typename Result, typename Left, typename Right,
-    if_integer<Left>, if_integer<Right>>
+template <typename Result, typename Left, typename Right,
+    if_not_lesser_size<Result, Left>,
+    if_not_lesser_size<Result, Right>,
+    if_not_same_signed_integer<Left, Right>>
 constexpr Result lesser(Left left, Right right) NOEXCEPT
 {
-    // Precludes Result narrower than either operand.
     return possible_sign_cast<Result>(is_lesser(left, right) ? left : right);
 }
 
