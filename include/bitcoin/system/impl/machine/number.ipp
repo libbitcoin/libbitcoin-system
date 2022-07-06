@@ -104,7 +104,6 @@ inline bool integer<Size>::is_overflow(int64_t value) NOEXCEPT
 // chunk
 // ----------------------------------------------------------------------------
 // Minimally-sized byte encoding, with extra allocated byte if negated.
-// absolute(minimum<int64_t>) is guarded by the presumption of int32 ops.
 
 inline data_chunk chunk::from_bool(bool vary) NOEXCEPT
 {
@@ -113,11 +112,13 @@ inline data_chunk chunk::from_bool(bool vary) NOEXCEPT
 
 inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
 {
+    // absolute(minimum<int64_t>) guarded by the presumption of int32 ops.
+    BC_ASSERT(!is_negate_overflow(vary));
+
     // Just an optimization.
     if (is_zero(vary))
         return {};
 
-    // absolute is unsafe but this is guarded by stack int32_t limitation.
     const auto value = absolute(vary);
     const auto negated = is_negated(value);
     const auto negative = is_negative(vary);
