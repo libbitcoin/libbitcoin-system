@@ -45,7 +45,7 @@ void pseudo_random::fill(data_chunk& out) NOEXCEPT
 
 uint8_t pseudo_random::next() NOEXCEPT
 {
-    return next(minimum<uint8_t>(), maximum<uint8_t>());
+    return next(minimum<uint8_t>, maximum<uint8_t>);
 }
 
 uint8_t pseudo_random::next(uint8_t begin, uint8_t end) NOEXCEPT

@@ -29,9 +29,9 @@
 #include <iterator>
 #include <bitcoin/system/crypto/external/sha256.h>
 #include <bitcoin/system/crypto/hash.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {

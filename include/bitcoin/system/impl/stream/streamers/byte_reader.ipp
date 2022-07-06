@@ -40,7 +40,7 @@ namespace system {
 
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source) NOEXCEPT
-  : stream_(source), remaining_(system::maximum<size_t>())
+  : stream_(source), remaining_(system::maximum<size_t>)
 {
     ////BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
     ////    "Input stream must not be configured to throw exceptions.");
@@ -412,7 +412,7 @@ void byte_reader<IStream>::do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT
     // invalid if the stream is get past end, including when empty.
 
     // Read past stream end invalidates stream unless size exceeds maximum.
-    BC_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum);
     stream_.read(pointer_cast<char>(buffer),
         possible_narrow_and_sign_cast<typename IStream::pos_type>(size));
 
@@ -426,7 +426,7 @@ void byte_reader<IStream>::do_skip_bytes(size_t size) NOEXCEPT
         return;
 
     // Skip past stream end invalidates stream unless size exceeds maximum.
-    BC_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum);
     seeker(possible_narrow_and_sign_cast<typename IStream::pos_type>(size));
 }
 
@@ -440,7 +440,7 @@ void byte_reader<IStream>::do_rewind_bytes(size_t size) NOEXCEPT
     remaining_ = ceilinged_add(remaining_, size);
 
     // Rewind past stream start invalidates stream unless size exceeds maximum.
-    BC_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum);
     seeker(-possible_narrow_and_sign_cast<typename IStream::pos_type>(size));
 }
 

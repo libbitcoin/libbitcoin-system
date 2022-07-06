@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\collection.cpp">
       <ObjectFileName>$(IntDir)test_data_collection.obj</ObjectFileName>
     </ClCompile>
@@ -149,11 +150,12 @@
     <ClCompile Include="..\..\..\..\test\math\addition.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bytes.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\cast.cpp" />
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\log.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\logarithm.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\overflow.cpp" />
     <ClCompile Include="..\..\..\..\test\math\power.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\safe.cpp" />
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />

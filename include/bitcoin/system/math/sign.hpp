@@ -26,54 +26,35 @@
 namespace libbitcoin {
 namespace system {
 
+/// If negate/absolute is called with the domain minimum value, this aborts the
+/// process, as this is undefinable behavior in twos complement representation.
+
 /// Conversions.
 /// ---------------------------------------------------------------------------
-/// signed absolute and negate are inherently unsafe.
-/// Passing the domain minimum value to either of these is undefined behavior.
-/// The magnitude of a negative integer domain is one greater than positive.
 
-/// Signed absolute value (unsafe).
-/// absolute(minimum) asserts debug builds, calls std::terminate in constexpr.
-template <typename Integer,
-    typename Result = to_unsigned_type<Integer>,
-    if_signed_integer<Integer> = true>
-constexpr Result absolute(Integer value) NOEXCEPT;
+/// Signed absolute value (unsafe), converts to unsigned.
+template <typename Signed, if_signed_integer<Signed> = true>
+constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT;
 
-/// Unsigned absolute value (no-op) (safe).
-template <typename Integer,
-    if_unsigned_integer<Integer> = true>
-constexpr Integer absolute(Integer value) NOEXCEPT;
+/// Unsigned absolute value (no-op).
+template <typename Unsigned, if_unsigned_integer<Unsigned> = true>
+constexpr Unsigned absolute(Unsigned value) NOEXCEPT;
 
-/// Signed integer negation (unsafe).
-/// negate(minimum) asserts debug builds, calls std::terminate in constexpr.
-template <typename Integer,
-    if_signed_integer<Integer> = true>
-constexpr Integer negate(Integer value) NOEXCEPT;
+/// Signed integer negation (unsafe), does not invert sign.
+template <typename Signed, if_signed_integer<Signed> = true>
+constexpr Signed negate(Signed value) NOEXCEPT;
 
 /// Unsigned integer two's complement (safe).
-template <typename Integer,
-    if_unsigned_integer<Integer> = true>
-constexpr Integer negate(Integer value) NOEXCEPT;
+template <typename Unsigned, if_unsigned_integer<Unsigned> = true>
+constexpr Unsigned negate(Unsigned value) NOEXCEPT;
 
 /// Ones complement, alias for bit_not (safe).
-template <typename Value,
-    if_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value ones_complement(Value value) NOEXCEPT;
 
 /// Twos complement, overflows from minimum to zero (safe).
-template <typename Value,
-    if_integer<Value> = true>
+template <typename Value, if_integer<Value> = true>
 constexpr Value twos_complement(Value value) NOEXCEPT;
-
-/// Cast to signed type of corresponding size (bit cast).
-template <typename Integer,
-    typename Signed = to_signed_type<Integer>, if_integer<Integer> = true>
-constexpr Signed to_signed(Integer value) NOEXCEPT;
-
-/// Cast to unsigned type of corresponding size (bit cast).
-template <typename Integer,
-    typename Unsigned = to_unsigned_type<Integer>, if_integer<Integer> = true>
-constexpr Unsigned to_unsigned(Integer value) NOEXCEPT;
 
 /// Comparisons.
 /// ---------------------------------------------------------------------------
@@ -92,10 +73,12 @@ template <typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr bool is_greater(Left left, Right right) NOEXCEPT;
 template <typename Left, typename Right,
-    if_unsigned_integer<Left> = true, if_signed_integer<Right> = true>
+    if_unsigned_integer<Left> = true,
+    if_signed_integer<Right> = true>
 constexpr bool is_greater(Left left, Right right) NOEXCEPT;
 template <typename Left, typename Right,
-    if_signed_integer<Left> = true, if_unsigned_integer<Right> = true>
+    if_signed_integer<Left> = true,
+    if_unsigned_integer<Right> = true>
 constexpr bool is_greater(Left left, Right right) NOEXCEPT;
 
 /// Use !is_greater(left, right) for (left <= right).
@@ -104,20 +87,24 @@ template <typename Left, typename Right,
     if_same_signed_integer<Left, Right> = true>
 constexpr bool is_lesser(Left left, Right right) NOEXCEPT;
 template <typename Left, typename Right,
-    if_signed_integer<Left> = true, if_unsigned_integer<Right> = true>
+    if_signed_integer<Left> = true,
+    if_unsigned_integer<Right> = true>
 constexpr bool is_lesser(Left left, Right right) NOEXCEPT;
 template <typename Left, typename Right,
-    if_unsigned_integer<Left> = true, if_signed_integer<Right> = true>
+    if_unsigned_integer<Left> = true,
+    if_signed_integer<Right> = true>
 constexpr bool is_lesser(Left left, Right right) NOEXCEPT;
 
 /// Return the greater of the two values, cast to the Result type.
 template<typename Result, typename Left, typename Right,
-    if_integer<Left> = true, if_integer<Right> = true>
+    if_integer<Left> = true,
+    if_integer<Right> = true>
 constexpr Result greater(Left left, Right right) NOEXCEPT;
 
 /// Return the lesser of the two values, cast to the Result type.
 template<typename Result, typename Left, typename Right,
-    if_integer<Left> = true, if_integer<Right> = true>
+    if_integer<Left> = true,
+    if_integer<Right> = true>
 constexpr Result lesser(Left left, Right right) NOEXCEPT;
 
 } // namespace system

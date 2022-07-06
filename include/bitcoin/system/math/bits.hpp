@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_BITS_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/cast.hpp>
 
 namespace libbitcoin {
 namespace system {

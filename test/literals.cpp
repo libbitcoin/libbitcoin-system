@@ -455,7 +455,7 @@ static_assert(sizeof(0xffff'ffff'ffff'ffff) >= sizeof(int64_t));
 // ----------------------------------------------------------------------------
 
 // Boost is not catching these thrown exceptions.
-#if !defined(UNDEFINED) && defined(RUNTIME_LITERALS)
+#if defined(ENABLED) && defined(RUNTIME_LITERALS)
 
 #define LITERAL_OVERFLOW(value, name) \
 BOOST_AUTO_TEST_CASE(literals__##name##__##value##__throws_overflow_exception) \

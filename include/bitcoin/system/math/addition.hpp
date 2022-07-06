@@ -27,7 +27,7 @@ namespace system {
 /// left + right after cast of each to Explicit type.
 /// Result defaults to greater of operand types.
 /// Result size must not be lesser than either operand.
-/// Use overflows<Result>(left, right) to guard.
+/// Use is_overflow<Explicit>(left, right) to guard.
 template <place1 = place1{}, typename Integer,
     if_integral_integer<Integer> = true>
 constexpr Integer add(Integer left, Integer right) NOEXCEPT;
@@ -48,7 +48,7 @@ constexpr Explicit add(Left left, Right right) NOEXCEPT;
 /// left - right after cast of each to Explicit type.
 /// Result defaults to greater of operand types.
 /// Result size must not be lesser than either operand.
-/// Use underflows<Result>(left, right) to guard.
+/// Use is_underflow<Explicit>(left, right) to guard.
 template <place1 = place1{}, typename Integer,
     if_integral_integer<Integer> = true >
 constexpr Integer subtract(Integer left, Integer right) NOEXCEPT;
@@ -109,32 +109,6 @@ template <typename Explicit, typename Left, typename Right,
     if_integral_integer<Left> = true,
     if_integral_integer<Right> = true>
 constexpr Explicit floored_subtract(Left left, Right right) NOEXCEPT;
-
-/// The term 'overflow' is used here to describe a sum that is above the
-/// maximum or below the minimum of the integer domain. Similarly, 'underflow'
-/// is used here to describe a difference that is above the maximum or below
-/// the minimum of the integer domain. In other words, add overflows and
-/// subtract underflows.
-
-/// True if add would overflow.
-template <typename Integer,
-    if_signed_integral_integer<Integer> = true>
-constexpr bool overflows(Integer left, Integer right) NOEXCEPT;
-
-/// True if add would overflow.
-template <typename Integer,
-    if_unsigned_integral_integer<Integer> = true>
-constexpr bool overflows(Integer left, Integer right) NOEXCEPT;
-
-/// True if subtract would underflow.
-template <typename Integer,
-    if_signed_integral_integer<Integer> = true>
-constexpr bool underflows(Integer left, Integer right) NOEXCEPT;
-
-/// True if subtract would underflow.
-template <typename Integer,
-    if_unsigned_integral_integer<Integer> = true>
-constexpr bool underflows(Integer left, Integer right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

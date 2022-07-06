@@ -260,6 +260,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/crypto/siphash.cpp \
     test/crypto/siphash.hpp \
     test/crypto/intrinsics/intrinsics.cpp \
+    test/data/byte_cast.cpp \
     test/data/collection.cpp \
     test/data/data_array.cpp \
     test/data/data_chunk.cpp \
@@ -289,11 +290,12 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/addition.cpp \
     test/math/bits.cpp \
     test/math/bytes.cpp \
+    test/math/cast.cpp \
     test/math/division.cpp \
     test/math/limits.cpp \
-    test/math/log.cpp \
+    test/math/logarithm.cpp \
+    test/math/overflow.cpp \
     test/math/power.cpp \
-    test/math/safe.cpp \
     test/math/sign.cpp \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
@@ -485,6 +487,7 @@ include_bitcoin_system_crypto_intrinsics_HEADERS = \
 
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
 include_bitcoin_system_data_HEADERS = \
+    include/bitcoin/system/data/byte_cast.hpp \
     include/bitcoin/system/data/collection.hpp \
     include/bitcoin/system/data/data.hpp \
     include/bitcoin/system/data/data_array.hpp \
@@ -529,6 +532,7 @@ include_bitcoin_system_impl_crypto_HEADERS = \
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \
+    include/bitcoin/system/impl/data/byte_cast.ipp \
     include/bitcoin/system/impl/data/collection.ipp \
     include/bitcoin/system/impl/data/data_array.ipp \
     include/bitcoin/system/impl/data/data_reference.ipp \
@@ -559,11 +563,12 @@ include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/addition.ipp \
     include/bitcoin/system/impl/math/bits.ipp \
     include/bitcoin/system/impl/math/bytes.ipp \
+    include/bitcoin/system/impl/math/cast.ipp \
     include/bitcoin/system/impl/math/division.ipp \
     include/bitcoin/system/impl/math/limits.ipp \
-    include/bitcoin/system/impl/math/log.ipp \
+    include/bitcoin/system/impl/math/logarithm.ipp \
+    include/bitcoin/system/impl/math/overflow.ipp \
     include/bitcoin/system/impl/math/power.ipp \
-    include/bitcoin/system/impl/math/safe.ipp \
     include/bitcoin/system/impl/math/sign.ipp
 
 include_bitcoin_system_impl_radixdir = ${includedir}/bitcoin/system/impl/radix
@@ -612,12 +617,13 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/addition.hpp \
     include/bitcoin/system/math/bits.hpp \
     include/bitcoin/system/math/bytes.hpp \
+    include/bitcoin/system/math/cast.hpp \
     include/bitcoin/system/math/division.hpp \
     include/bitcoin/system/math/limits.hpp \
-    include/bitcoin/system/math/log.hpp \
+    include/bitcoin/system/math/logarithm.hpp \
     include/bitcoin/system/math/math.hpp \
+    include/bitcoin/system/math/overflow.hpp \
     include/bitcoin/system/math/power.hpp \
-    include/bitcoin/system/math/safe.hpp \
     include/bitcoin/system/math/sign.hpp
 
 include_bitcoin_system_math_externaldir = ${includedir}/bitcoin/system/math/external

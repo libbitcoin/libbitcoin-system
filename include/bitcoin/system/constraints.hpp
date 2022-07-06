@@ -28,6 +28,7 @@
 
 namespace libbitcoin {
 
+// TODO: if_bool<>
 template <bool Expression>
 using bool_if = std::enable_if_t<Expression, bool>;
 
@@ -126,6 +127,18 @@ using if_lesser_size = bool_if<
 template <typename Left, typename Right>
 using if_not_lesser_size = bool_if<
     !is_lesser_size<Left, Right>>;
+
+template <typename Left, typename Right>
+using if_greater_size = bool_if<
+    is_greater_size<Left, Right>>;
+
+template <typename Left, typename Right>
+using if_not_greater_size = bool_if<
+    !is_greater_size<Left, Right>>;
+
+template <typename Type>
+using if_common = bool_if<
+    is_common_size<Type>>;
 
 template <typename Type>
 using if_default_constructible = bool_if<

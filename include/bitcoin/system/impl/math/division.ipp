@@ -19,50 +19,44 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_DIVISION_IPP
 #define LIBBITCOIN_SYSTEM_MATH_DIVISION_IPP
 
-#include <type_traits>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// helpers
+// unpublished
 // ----------------------------------------------------------------------------
 
 template <typename Factor1, typename Factor2,
     if_integer<Factor1> = true, if_integer<Factor2> = true>
-constexpr bool is_negative(Factor1 factor1, Factor2 factor2) NOEXCEPT
+constexpr bool is_negative_(Factor1 factor1, Factor2 factor2) NOEXCEPT
 {
     return is_negative(factor1) != is_negative(factor2);
 }
 
-// local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr bool no_remainder(Dividend dividend, Divisor divisor) NOEXCEPT
+constexpr bool no_remainder_(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return is_zero(dividend % divisor);
 }
 
-// local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr bool is_ceilinged(Dividend dividend, Divisor divisor) NOEXCEPT
+constexpr bool is_ceilinged_(Dividend dividend, Divisor divisor) NOEXCEPT
 {
-    return is_negative(dividend, divisor) || no_remainder(dividend, divisor);
+    return is_negative_(dividend, divisor) || no_remainder_(dividend, divisor);
 }
 
-// local
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
-constexpr bool is_floored(Dividend dividend, Divisor divisor) NOEXCEPT
+constexpr bool is_floored_(Dividend dividend, Divisor divisor) NOEXCEPT
 {
-    return !is_negative(dividend, divisor) || no_remainder(dividend, divisor);
+    return !is_negative_(dividend, divisor) || no_remainder_(dividend, divisor);
 }
 
-// operations
+// published
 // ----------------------------------------------------------------------------
 
 template <typename Dividend, typename Divisor,
@@ -71,7 +65,7 @@ constexpr to_common_type<Dividend, Divisor>
 ceilinged_divide(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_divide(dividend, divisor) + 
-        (is_ceilinged(dividend, divisor) ? 0 : 1);
+        (is_ceilinged_(dividend, divisor) ? 0 : 1);
 }
 
 // The native % operator is truncated and the common type is unsigned.
@@ -82,7 +76,7 @@ constexpr to_signed_type<to_common_type<Dividend, Divisor>>
 ceilinged_modulo(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_modulo(dividend, divisor) -
-        (is_ceilinged(dividend, divisor) ? 0 : divisor);
+        (is_ceilinged_(dividend, divisor) ? 0 : divisor);
 }
 
 template <typename Dividend, typename Divisor,
@@ -91,7 +85,7 @@ constexpr to_common_type<Dividend, Divisor>
 floored_divide(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_divide(dividend, divisor) -
-        (is_floored(dividend, divisor) ? 0 : 1);
+        (is_floored_(dividend, divisor) ? 0 : 1);
 }
 
 // Always positive result.
@@ -101,7 +95,7 @@ constexpr to_common_type<Dividend, Divisor>
 floored_modulo(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return truncated_modulo(dividend, divisor) +
-        (is_floored(dividend, divisor) ? 0 : divisor);
+        (is_floored_(dividend, divisor) ? 0 : divisor);
 }
 
 template <typename Dividend, typename Divisor,
@@ -118,26 +112,6 @@ constexpr to_common_type<Dividend, Divisor>
 truncated_modulo(Dividend dividend, Divisor divisor) NOEXCEPT
 {
     return dividend % divisor;
-}
-
-template <typename Value, if_integer<Value>>
-constexpr bool
-is_multiple(Value product, Value value) NOEXCEPT
-{
-    if (is_zero(value))
-        return is_zero(product);
-
-    return is_zero(product % value);
-}
-
-template <typename Value, if_integer<Value>>
-constexpr bool
-is_product(Value value, Value left, Value right) NOEXCEPT
-{
-    if (is_zero(left) || is_zero(right))
-        return is_zero(value);
-
-    return is_zero(value % left) && ((value / left) == right);
 }
 
 } // namespace system

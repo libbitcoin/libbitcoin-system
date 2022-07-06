@@ -827,6 +827,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\byte_cast.hpp">
+      <Filter>include\bitcoin\system\data</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\collection.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
@@ -944,6 +947,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\bytes.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\cast.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\division.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
@@ -953,16 +959,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\log.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\logarithm.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\overflow.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\safe.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp">
@@ -1321,6 +1327,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp">
+      <Filter>include\bitcoin\system\impl\data</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
@@ -1384,19 +1393,22 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bytes.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\cast.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\division.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\limits.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\math\log.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\logarithm.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\overflow.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp">
-      <Filter>include\bitcoin\system\impl\math</Filter>
-    </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\math\safe.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp">

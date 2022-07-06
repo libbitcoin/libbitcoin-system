@@ -19,22 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 #define LIBBITCOIN_SYSTEM_MATH_POWER_HPP
 
-/// DELETECSTDDEF
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
+
+/// These functions manage type promotion but do not manage overflow.
 
 namespace libbitcoin {
 namespace system {
-
+    
 /// Obtain the integer power of given base for given unsigned exponent.
-/// Returns zero if all undefined operations (base < 2 or value < 1).
+/// Returns 0 if all undefined operations (base < 2 or value < 1).
 
-// Constexpr dispatches to optimal overload.
+/// power(Base, Exponent).
 template <size_t Base, typename Value = size_t, typename Exponent,
     if_unsigned_integer<Exponent> = true>
 constexpr Value power(Exponent exponent) NOEXCEPT;
-
-// Normal form, limited to unsigned exponent.
 template <typename Value = size_t, typename Base, typename Exponent,
     if_integer<Value> = true,
     if_unsigned_integer<Base> = true,

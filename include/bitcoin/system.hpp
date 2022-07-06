@@ -93,6 +93,7 @@
 #include <bitcoin/system/crypto/external/sha512.h>
 #include <bitcoin/system/crypto/external/zeroize.h>
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/data/data_array.hpp>
@@ -127,12 +128,13 @@
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/bytes.hpp>
+#include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/math/log.hpp>
+#include <bitcoin/system/math/logarithm.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/power.hpp>
-#include <bitcoin/system/math/safe.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
 #include <bitcoin/system/radix/base_10.hpp>

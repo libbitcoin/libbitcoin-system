@@ -55,6 +55,10 @@ constexpr bool is_lesser_size = (sizeof(Left) < sizeof(Right));
 template <typename Left, typename Right>
 constexpr bool is_greater_size = (sizeof(Left) > sizeof(Right));
 
+/// Type is the possible result of a common operation (see std::common_type)
+template <typename Type>
+constexpr bool is_common_size = (sizeof(Type) >= sizeof(int));
+
 /// Future-proofing against larger integrals or language features that
 /// promote 3, 5, 6, 7 byte-sized types to integral (see std::is_integral).
 template <typename Type>

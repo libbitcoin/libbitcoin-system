@@ -19,12 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 
-/// DELETECSTDINT
 #include <limits>
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/power.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -37,14 +34,14 @@ template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
 constexpr bool is_limited(Integer value) NOEXCEPT
 {
-    return is_limited(value, maximum<By>());
+    return is_limited(value, maximum<By>);
 }
 
 template <typename By, typename Integer,
     if_integer<By>, if_integer<Integer>>
 constexpr bool is_limited(Integer value, By maximum) NOEXCEPT
 {
-    return is_limited(value, minimum<By>(), maximum);
+    return is_limited(value, minimum<By>, maximum);
 }
 
 template <typename By, typename Integer,
@@ -60,14 +57,14 @@ template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
 constexpr Result limit(Integer value) NOEXCEPT
 {
-    return limit(value, maximum<Result>());
+    return limit(value, maximum<Result>);
 }
 
 template <typename Result, typename Integer,
     if_integer<Result>, if_integer<Integer>>
 constexpr Result limit(Integer value, Result maximum) NOEXCEPT
 {
-    return limit(value, minimum<Result>(), maximum);
+    return limit(value, minimum<Result>, maximum);
 }
 
 template <typename Result, typename Integer,
@@ -79,80 +76,32 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) NOEXCEPT
             possible_narrow_and_sign_cast<Result>(value));
 }
 
-// Integral bounds.
+// Integral bounds (dispatch for absolute_min/unsigned_max).
 // ----------------------------------------------------------------------------
 
-template <typename Integer,
-    if_integral_integer<Integer>>
-constexpr Integer minimum() NOEXCEPT
-{
-    return std::numeric_limits<Integer>::min();
-}
-
-template <typename Integer,
-    if_integral_integer<Integer>>
-constexpr Integer maximum() NOEXCEPT
-{
-    return std::numeric_limits<Integer>::max();
-}
-
-template <typename Integer, typename Absolute,
-    if_signed_integral_integer<Integer>>
-constexpr Absolute absolute_minimum() NOEXCEPT
+template <typename Signed, if_signed_integral_integer<Signed>>
+constexpr to_unsigned_type<Signed> absolute_minimum() NOEXCEPT
 {
     // Avoids calling negate(minimum), which is undefined.
-    return add1(to_unsigned(maximum<Integer>()));
+    return add1(to_unsigned(maximum<Signed>));
 }
 
-template <typename Integer,
-    if_unsigned_integral_integer<Integer>>
-constexpr Integer absolute_minimum() NOEXCEPT
+template <typename Unsigned, if_unsigned_integral_integer<Unsigned>>
+constexpr Unsigned absolute_minimum() NOEXCEPT
 {
-    return minimum<Integer>();
+    return minimum<Unsigned>;
 }
 
-template <typename Integer, typename Unsigned,
-    if_signed_integral_integer<Integer>>
+template <typename Signed, if_signed_integral_integer<Signed>>
+constexpr to_unsigned_type<Signed> unsigned_maximum() NOEXCEPT
+{
+    return to_unsigned(maximum<Signed>);
+}
+
+template <typename Unsigned, if_unsigned_integral_integer<Unsigned>>
 constexpr Unsigned unsigned_maximum() NOEXCEPT
 {
-    return to_unsigned(maximum<Integer>());
-}
-
-template <typename Integer,
-    if_unsigned_integral_integer<Integer>>
-constexpr Integer unsigned_maximum() NOEXCEPT
-{
-    return maximum<Integer>();
-}
-
-// byte-based minimum/maximum
-
-template <size_t Bytes, typename Return>
-constexpr Return minimum() NOEXCEPT
-{
-    return ones_complement(maximum<Bytes>());
-}
-
-template <size_t Bytes, typename Return>
-constexpr Return maximum() NOEXCEPT
-{
-    using result = to_unsigned_type<Return>;
-    constexpr auto bit = sub1(to_bits(Bytes));
-    return to_signed(sub1(power2<result>(bit)));
-}
-
-// bitcoin minimum/maximum (stack_number)
-
-template <size_t Bytes, typename Return>
-constexpr Return bitcoin_min() NOEXCEPT
-{
-    return twos_complement(bitcoin_max<Bytes>());
-}
-
-template <size_t Bytes, typename Return>
-constexpr Return bitcoin_max() NOEXCEPT
-{
-    return maximum<Bytes>();
+    return maximum<Unsigned>;
 }
 
 } // namespace system

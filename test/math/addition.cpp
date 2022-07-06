@@ -17,10 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-/// DELETECSTDDEF
 
-// Suppress C4310: cast truncates constant value (intended behavior).
-BC_PUSH_WARNING(TRUNCATED_CONSTANT)
+ // creates addition_tests namespace
+BOOST_AUTO_TEST_SUITE(addition_tests)
 
 constexpr uint32_t pos_uint32 = 42;
 constexpr  int32_t pos_int32 = 42;
@@ -30,6 +29,7 @@ constexpr  int32_t neg_int32 = -42;
 // add
 // ----------------------------------------------------------------------------
 
+BC_PUSH_WARNING(TRUNCATED_CONSTANT)
 static_assert(add(min_uint32, min_uint32) == (int64_t)min_uint32 + (int64_t)min_uint32);
 static_assert(add(min_uint32, max_uint32) == (int32_t)min_uint32 + (int32_t)max_uint32);
 static_assert(add(pos_uint32, pos_uint32) == (int64_t)pos_uint32 + (int64_t)pos_uint32);
@@ -45,6 +45,11 @@ static_assert(add(pos_int32, neg_int32) == (int64_t)pos_int32 + (int64_t)neg_int
 static_assert(add(neg_int32, pos_int32) == (int32_t)neg_int32 + (int32_t)pos_int32);
 static_assert(add(pos_int32, min_int32) == (int64_t)pos_int32 + (int64_t)min_int32);
 static_assert(add(min_int32, pos_int32) == (int32_t)min_int32 + (int32_t)pos_int32);
+BC_POP_WARNING()
+
+// Unsigned overflow (signed overflow fails constexpr evaluation).
+static_assert(add(max_uint32, max_uint32) == sub1(max_uint32));
+static_assert(is_add_overflow(max_uint32, max_uint32));
 
 // TODO: value tests for default and explicit typing.
 
@@ -111,6 +116,7 @@ static_assert(is_same_type<decltype(add<uint8_t>(0_u8, 0_i64)), uint8_t>);
 // subtract
 // ----------------------------------------------------------------------------
 
+BC_PUSH_WARNING(TRUNCATED_CONSTANT)
 static_assert(subtract(min_uint32, min_uint32) == (int64_t)min_uint32 - (int64_t)min_uint32);
 static_assert(subtract(min_uint32, max_uint32) == (int32_t)min_uint32 - (int32_t)max_uint32);
 static_assert(subtract(pos_uint32, pos_uint32) == (int64_t)pos_uint32 - (int64_t)pos_uint32);
@@ -125,6 +131,11 @@ static_assert(subtract(min_int32, neg_int32) == (int32_t)min_int32 - (int32_t)ne
 static_assert(subtract(pos_int32, neg_int32) == (int64_t)pos_int32 - (int64_t)neg_int32);
 static_assert(subtract(neg_int32, pos_int32) == (int32_t)neg_int32 - (int32_t)pos_int32);
 static_assert(subtract<int64_t>(pos_int32, min_int32) == (int64_t)pos_int32 - (int64_t)min_int32);
+BC_POP_WARNING()
+
+// Unsigned underflow (signed underflow fails constexpr evaluation).
+static_assert(subtract(min_uint32, max_uint32) == one);
+static_assert(is_subtract_overflow(min_uint32, max_uint32));
 
 // TODO: value tests for default and explicit typing.
 
@@ -254,55 +265,4 @@ static_assert(floored_subtract(unsigned_half, unsigned_max) == unsigned_min);
 static_assert(floored_subtract(unsigned_half, unsigned_half) == unsigned_min);
 static_assert(is_same_type<decltype(floored_subtract<uint16_t>(0, 0)), uint16_t>);
 
-// TODO: value/types tests for default and explicit typing.
-
-// overflows
-// ----------------------------------------------------------------------------
-
-// overflows (signed)
-static_assert(!overflows(signed_zero, signed_zero));
-static_assert(!overflows(signed_min, signed_zero));
-static_assert(!overflows(signed_zero, signed_min));
-static_assert(overflows(signed_min, signed_min));
-static_assert(!overflows(signed_min, signed_max));
-static_assert(!overflows(signed_max, signed_min));
-static_assert(overflows(signed_max, signed_max));
-static_assert(overflows(signed_max, signed_half));
-static_assert(overflows(signed_half, signed_max));
-static_assert(!overflows(signed_half, signed_half));
-
-// overflows (unsigned)
-static_assert(!overflows(unsigned_min, unsigned_min));
-static_assert(!overflows(unsigned_min, unsigned_max));
-static_assert(!overflows(unsigned_max, unsigned_min));
-static_assert(overflows(unsigned_max, unsigned_max));
-static_assert(overflows(unsigned_max, unsigned_half));
-static_assert(overflows(unsigned_half, unsigned_max));
-static_assert(!overflows(unsigned_half, unsigned_half));
-
-// underflows
-// ----------------------------------------------------------------------------
-
-// underflows (signed)
-static_assert(!underflows(signed_zero, signed_zero));
-static_assert(!underflows(signed_min, signed_zero));
-static_assert(underflows(signed_zero, signed_min));
-static_assert(!underflows(signed_min, signed_zero));
-static_assert(!underflows(signed_min, signed_min));
-static_assert(underflows(signed_max, signed_min));
-static_assert(underflows(signed_min, signed_max));
-static_assert(!underflows(signed_max, signed_max));
-static_assert(!underflows(signed_max, signed_half));
-static_assert(!underflows(signed_half, signed_max));
-static_assert(!underflows(signed_half, signed_half));
-
-// underflows (unsigned)
-static_assert(!underflows(unsigned_min, unsigned_min));
-static_assert(!underflows(unsigned_max, unsigned_min));
-static_assert(underflows(unsigned_min, unsigned_max));
-static_assert(!underflows(unsigned_max, unsigned_max));
-static_assert(!underflows(unsigned_max, unsigned_half));
-static_assert(underflows(unsigned_half, unsigned_max));
-static_assert(!underflows(unsigned_half, unsigned_half));
-
-BC_POP_WARNING()
+BOOST_AUTO_TEST_SUITE_END()

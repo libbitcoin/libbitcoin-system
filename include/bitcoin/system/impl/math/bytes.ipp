@@ -20,9 +20,9 @@
 #define LIBBITCOIN_SYSTEM_MATH_BYTES_IPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/external/byte_swap.hpp>
-#include <bitcoin/system/math/log.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/logarithm.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {

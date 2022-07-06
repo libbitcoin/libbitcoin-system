@@ -135,6 +135,21 @@ static_assert(is_greater_size<uint32_t, uint16_t>);
 static_assert(is_greater_size<uint16_t, uint8_t>);
 static_assert(is_same_type<decltype(is_greater_size<int32_t, int32_t>), const bool>);
 
+static_assert(is_common_size<int>);
+static_assert(is_common_size<signed int>);
+static_assert(is_common_size<unsigned int>);
+static_assert(is_common_size<int32_t>);
+static_assert(is_common_size<uint32_t>);
+static_assert(is_common_size<int64_t>);
+static_assert(is_common_size<uint64_t>);
+static_assert(is_common_size<size_t>);
+static_assert(is_common_size<signed_size_t>);
+////static_assert(!is_common_size<int8_t>);
+////static_assert(!is_common_size<uint8_t>);
+////static_assert(!is_common_size<int16_t>);
+////static_assert(!is_common_size<uint16_t>);
+static_assert(is_same_type<decltype(is_common_size<int>), const bool>);
+
 struct two_bytes { uint8_t foo; uint8_t bar; };
 union four_bytes { uint32_t foo; uint8_t bar; };
 

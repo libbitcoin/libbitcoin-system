@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_LIMITS_HPP
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_HPP
 
-/// DELETECSTDDEF
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/power.hpp>
+#include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -64,47 +64,48 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) NOEXCEPT;
 /// Integral bounds.
 /// ---------------------------------------------------------------------------
 
-/// The minimum value of a integral integer type (std::numeric_limits).
-template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer minimum() NOEXCEPT;
+/// The maximum value of a integral integer.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral maximum = std::numeric_limits<Integral>::max();
 
-/// The maximum value of a integral integer type (std::numeric_limits).
-template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer maximum() NOEXCEPT;
+/// The minimum value of a integral integer.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral minimum = std::numeric_limits<Integral>::min();
 
-/// The absolute value of minimum value of a integral integer type.
-template <typename Integer,
-    typename Absolute = to_unsigned_type<Integer>,
-    if_signed_integral_integer<Integer> = true>
-constexpr Absolute absolute_minimum() NOEXCEPT;
-template <typename Integer,
-    if_unsigned_integral_integer<Integer> = true>
-constexpr Integer absolute_minimum() NOEXCEPT;
-
-/// The maximum value of a integral integer type (unsigned).
-template <typename Integer,
-    typename Unsigned = to_unsigned_type<Integer>,
-    if_signed_integral_integer<Integer> = true>
+// dispatch for absolute_min/unsigned_max
+template <typename Signed, if_signed_integral_integer<Signed> = true>
+constexpr to_unsigned_type<Signed> absolute_minimum() NOEXCEPT;
+template <typename Signed, if_signed_integral_integer<Signed> = true>
+constexpr to_unsigned_type<Signed> unsigned_maximum() NOEXCEPT;
+template <typename Unsigned, if_unsigned_integral_integer<Unsigned> = true>
+constexpr Unsigned absolute_minimum() NOEXCEPT;
+template <typename Unsigned, if_unsigned_integral_integer<Unsigned> = true>
 constexpr Unsigned unsigned_maximum() NOEXCEPT;
-template <typename Integer,
-    if_unsigned_integral_integer<Integer> = true>
-constexpr Integer unsigned_maximum() NOEXCEPT;
 
-/// The minimum value of a type by byte size (1-8 bytes).
-template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return minimum() NOEXCEPT;
+/// The maximum value of a integral integer.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr auto unsigned_max = unsigned_maximum<Integral>();
 
-/// The maximum value of a type by byte size (1-8 bytes).
-template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return maximum() NOEXCEPT;
+/// The absolute value of minimum value of a integral integer.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr auto absolute_min = absolute_minimum<Integral>();
 
-/// The minimum value of a bitcoin integer by byte size (1-8 bytes).
-template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return bitcoin_min() NOEXCEPT;
+/// The maximum value of a byte-sized domain (1-8 bytes).
+template <size_t Bytes>
+constexpr signed_type<Bytes> domain_max = to_signed(
+    sub1(power2<unsigned_type<Bytes>>(sub1(to_bits(Bytes)))));
+
+/// The minimum value of a byte-sized domain (1-8 bytes).
+template <size_t Bytes>
+constexpr signed_type<Bytes> domain_min = ones_complement(domain_max<Bytes>);
 
 /// The maximum value of a bitcoin integer by byte size (1-8 bytes).
-template <size_t Bytes, typename Return = signed_type<Bytes>>
-constexpr Return bitcoin_max() NOEXCEPT;
+template <size_t Bytes>
+constexpr auto bitcoin_max = domain_max<Bytes>;
+
+/// The minimum value of a bitcoin integer by byte size (1-8 bytes).
+template <size_t Bytes>
+constexpr auto bitcoin_min = twos_complement(bitcoin_max<Bytes>);
 
 } // namespace system
 } // namespace libbitcoin

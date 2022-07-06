@@ -19,9 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/cast.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -30,63 +29,54 @@ namespace system {
 //
 // Unsigned to signed is of the same size is non-narrowing, but signed to
 // unsigned of the same size is narrowing. The minimum signed value cannot be
-// represented in the unsigned domain of the same bit width. Fundamentally this
+// represented in the unsigned domain of the same bit width. Simply put, this
 // is because there is not a negative zero, allowing space for one more value.
 //
 // This is the nature of twos complement vs. ones complement. In ones
 // complement, all bits in the positive domain are inverted to obtained the
 // corresponding negative value. This results in a negative zero. By adding one
 // to the ones complement, twos complement consumes this negative zero value,
-// and therefore has a magnitude of one more than the unsigned domain (which
-// retains the zero representation).
-
-// C++20: requires twos complement integer representation.
-// This makes negate<signed> twos_complement, and negate<unsigned> is defined
-// as twos_complement. So these are conceptually identical at C++20 (required).
-// This library implements twos complement with safe overflow behavior.
-
-// if negate or absolute is called with the domain minimum value, this aborts
-// the process, as this is undefined behavior. terminate_minimum is elided as a
-// no-op in non-constexpr and non-debug builds.
-
-// std::abs is signed types only and not constexpr until C++23 (avoid).
-// All operations below support signed and unsigned integer parameters.
-// Use depromote only for integral constrained functions.
-// Unary operators do not promote sign.
+// and therefore has a negative range of one more than its positive range
+// (which retains the zero representation).
 
 // Coversions.
 // ----------------------------------------------------------------------------
 
-// unsafe
-template <typename Integer, typename Result, if_signed_integer<Integer>>
-constexpr Result absolute(Integer value) NOEXCEPT
+// unsafe (aborts on minimum<Signed>)
+template <typename Signed, if_signed_integer<Signed>>
+constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT
 {
+    // std::abs is signed types only and not constexpr until C++23 (avoid).
     return to_unsigned(is_negative(value) ? negate(value) : value);
 }
 
-template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer absolute(Integer value) NOEXCEPT
+template <typename Unsigned, if_unsigned_integer<Unsigned>>
+constexpr Unsigned absolute(Unsigned value) NOEXCEPT
 {
     return value;
 }
 
-// unsafe
-template <typename Integer, if_signed_integer<Integer>>
-constexpr Integer negate(Integer value) NOEXCEPT
+// unsafe (aborts on minimum<Signed>)
+template <typename Signed, if_signed_integer<Signed>>
+constexpr Signed negate(Signed value) NOEXCEPT
 {
-    return safe_negate(value);
+    // Preclude overflows.
+    ////return safe_negate(value);
+    return -value;
 }
 
-template <typename Integer, if_unsigned_integer<Integer>>
-constexpr Integer negate(Integer value) NOEXCEPT
+// C++20: requires twos complement integer representation.
+// So negate<unsigned> is now the same as twos_complement.
+template <typename Unsigned, if_unsigned_integer<Unsigned>>
+constexpr Unsigned negate(Unsigned value) NOEXCEPT
 {
-    return add1(ones_complement(value));
+    return twos_complement(value);
 }
 
 template <typename Value, if_integer<Value>>
 constexpr Value twos_complement(Value value) NOEXCEPT
 {
-    // Overflows from minimum to ~minimum (-1) to +1 => zero.
+    // Flows from minimum to ~minimum (-1) to +1 => zero.
     return add1(ones_complement(value));
 }
 
@@ -94,19 +84,8 @@ template <typename Value, if_integer<Value>>
 constexpr Value ones_complement(Value value) NOEXCEPT
 {
     // Alias for bit_not.
+    // TODO: Unary operators do not promote sign (?).
     return possible_narrow_and_sign_cast<Value>(~value);
-}
-
-template <typename Integer, typename Signed, if_integer<Integer>>
-constexpr Signed to_signed(Integer value) NOEXCEPT
-{
-    return possible_sign_cast<Signed>(value);
-}
-
-template <typename Integer, typename Unsigned, if_integer<Integer>>
-constexpr Unsigned to_unsigned(Integer value) NOEXCEPT
-{
-    return possible_sign_cast<Unsigned>(value);
 }
 
 // Comparisons.

@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MATH_LOG_IPP
-#define LIBBITCOIN_SYSTEM_MATH_LOG_IPP
+#ifndef LIBBITCOIN_SYSTEM_MATH_LOGARITHM_IPP
+#define LIBBITCOIN_SYSTEM_MATH_LOGARITHM_IPP
 
 #include <bit>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/division.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -31,28 +31,16 @@ namespace system {
 
 namespace mp = boost::multiprecision;
 
-// Ceilinged logarithms.
+// unpublished (normal forms)
 // ----------------------------------------------------------------------------
-// Use depromote only for integral constrained functions.
 
-// dispatch
-template <size_t Base, typename Exponent, typename Value>
-constexpr Exponent ceilinged_log(Value value) NOEXCEPT
-{
-    if constexpr (Base == 2u)
-        return ceilinged_log2<Exponent>(value);
-    else if constexpr (Base == 256u)
-        return ceilinged_log256<Exponent>(value);
-    else
-        return ceilinged_log<Exponent>(Base, value);
-}
-
-// normal form
 template <typename Exponent, typename Base, typename Value,
-    if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
-constexpr Exponent ceilinged_log(Base base, Value value) NOEXCEPT
+    if_integer<Exponent> = true,
+    if_integer<Base> = true,
+    if_integer<Value> = true>
+constexpr Exponent ceilinged_log_(Base base, Value value) NOEXCEPT
 {
-    if (base < 2 || value < 1)
+    if (is_log_overflow(base, value))
         return 0;
 
     // Delinting constexpr ceilinged_log(0).
@@ -70,106 +58,13 @@ constexpr Exponent ceilinged_log(Base base, Value value) NOEXCEPT
     }
 }
 
-// optimizations
-
-// Called by bc::bit_width.
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_integral_integer<Value>>
-constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
-{
-    if (value < 1)
-        return 0;
-
-    return possible_narrow_and_sign_cast<Exponent>(
-        std::bit_width(to_unsigned(value)));
-}
-
-// Called by bc::bit_width.
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_non_integral_integer<Value>>
-constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
-{
-    if (value < 1)
-        return 0;
-
-    return possible_narrow_and_sign_cast<Exponent>(
-        add1(mp::msb(value)));
-}
-
-// Called by bc::byte_width.
-// Called by bc::base256 (constexpr uint32_t, for shift).
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_integral_integer<Value>>
-constexpr Exponent ceilinged_log256(Value value) NOEXCEPT
-{
-    if (value < 1)
-        return 0;
-
-    constexpr auto size = sizeof(Value);
-    const auto compare = to_unsigned(value);
-
-    if constexpr (size == sizeof(uint64_t))
-    {
-        if (compare > 0x00ffffffffffffffull) return 8;
-        if (compare > 0x0000ffffffffffffull) return 7;
-        if (compare > 0x000000ffffffffffull) return 6;
-        if (compare > 0x00000000ffffffffull) return 5;
-    }
-
-    if constexpr (size >= sizeof(uint32_t))
-    {
-        if (compare > 0x00fffffful) return 4;
-        if (compare > 0x0000fffful) return 3;
-    }
-
-    if constexpr (size >= sizeof(uint16_t))
-    {
-        if (compare > 0x00ffu) return 2;
-    }
-
-    return (compare > 0x00u) ? 1 : 0;
-}
-
-// Called by bc::byte_width.
-template <typename Exponent, typename Value,
-    if_integer<Exponent>,
-    if_non_integral_integer<Value>>
-constexpr Exponent ceilinged_log256(Value value) NOEXCEPT
-{
-    if (value < 1)
-        return 0;
-
-    return possible_narrow_and_sign_cast<Exponent>(
-        ceilinged_divide(ceilinged_log2<Exponent>(value), 8u));
-}
-
-// Floored logarithms.
-// ----------------------------------------------------------------------------
-// Use depromote only for integral constrained functions.
-
-// dispatch
-template <size_t Base, typename Exponent, typename Value>
-constexpr Exponent floored_log(Value value) NOEXCEPT
-{
-    if constexpr (Base == 2u)
-        return floored_log2<Exponent>(value);
-    else if constexpr (Base == 256u)
-        return floored_log256<Exponent>(value);
-    else
-        return floored_log<Exponent>(Base, value);
-}
-
-// normal form
 template <typename Exponent, typename Base, typename Value,
-    if_integer<Exponent>,
-    if_integer<Base>,
-    if_integer<Value>>
-constexpr Exponent floored_log(Base base, Value value) NOEXCEPT
+    if_integer<Exponent> = true,
+    if_integer<Base> = true,
+    if_integer<Value> = true>
+constexpr Exponent floored_log_(Base base, Value value) NOEXCEPT
 {
-    if (base < 2 || value < 1)
+    if (is_log_overflow(base, value))
         return 0;
 
     // Delinting constexpr floored_log(0).
@@ -187,6 +82,131 @@ constexpr Exponent floored_log(Base base, Value value) NOEXCEPT
     }
 }
 
+// published (ceilinged)
+// ----------------------------------------------------------------------------
+
+// dispatch
+template <size_t Base, typename Exponent, typename Value>
+constexpr Exponent ceilinged_log(Value value) NOEXCEPT
+{
+    if constexpr (Base == 2_size)
+        return ceilinged_log2<Exponent>(value);
+    else if constexpr (Base == 256_size)
+        return ceilinged_log256<Exponent>(value);
+    else
+        return ceilinged_log<Exponent>(Base, value);
+}
+
+template <typename Exponent, typename Base, typename Value,
+    if_integer<Exponent>, if_integer<Base>, if_integer<Value>>
+constexpr Exponent ceilinged_log(Base base, Value value) NOEXCEPT
+{
+    return ceilinged_log_<Exponent>(base, value);
+}
+
+// Called by bc::bit_width.
+template <typename Exponent, typename Value,
+    if_integer<Exponent>,
+    if_integral_integer<Value>>
+constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
+{
+    if (is_log_overflow<2>(value))
+        return 0;
+
+    // base2 integral optimization over normal form.
+    return possible_narrow_and_sign_cast<Exponent>(
+        std::bit_width(to_unsigned(value)));
+}
+
+// Called by bc::bit_width.
+template <typename Exponent, typename Value,
+    if_integer<Exponent>,
+    if_non_integral_integer<Value>>
+constexpr Exponent ceilinged_log2(Value value) NOEXCEPT
+{
+    if (is_log_overflow<2>(value))
+        return 0;
+
+    // base2 uintx optimization over normal form.
+    return possible_narrow_and_sign_cast<Exponent>(
+        add1(mp::msb(value)));
+}
+
+// Called by bc::byte_width.
+// Called by bc::base256 (constexpr uint32_t, for shift).
+template <typename Exponent, typename Value,
+    if_integer<Exponent>,
+    if_integral_integer<Value>>
+constexpr Exponent ceilinged_log256(Value value) NOEXCEPT
+{
+    if (is_log_overflow<256>(value))
+        return 0;
+
+    // base2 integral optimization over normal form.
+
+    constexpr auto size = sizeof(Value);
+    const auto compare = to_unsigned(value);
+
+    if constexpr (size == sizeof(uint64_t))
+    {
+        if (compare > 0x00ffffffffffffff_u64) return 8;
+        if (compare > 0x0000ffffffffffff_u64) return 7;
+        if (compare > 0x000000ffffffffff_u64) return 6;
+        if (compare > 0x00000000ffffffff_u64) return 5;
+    }
+
+    if constexpr (size >= sizeof(uint32_t))
+    {
+        if (compare > 0x00ffffff_u32) return 4;
+        if (compare > 0x0000ffff_u32) return 3;
+    }
+
+    if constexpr (size >= sizeof(uint16_t))
+    {
+        if (compare > 0x00ff_u16) return 2;
+    }
+
+    return (compare > 0x00_u8) ? 1 : 0;
+}
+
+// Called by bc::byte_width.
+template <typename Exponent, typename Value,
+    if_integer<Exponent>,
+    if_non_integral_integer<Value>>
+constexpr Exponent ceilinged_log256(Value value) NOEXCEPT
+{
+    if (is_log_overflow<256>(value))
+        return 0;
+
+    // base2 uintx optimization over normal form.
+    return possible_narrow_and_sign_cast<Exponent>(
+        ceilinged_divide(ceilinged_log2<Exponent>(value), 8u));
+}
+
+// published (floored)
+// ----------------------------------------------------------------------------
+
+// dispatch
+template <size_t Base, typename Exponent, typename Value>
+constexpr Exponent floored_log(Value value) NOEXCEPT
+{
+    if constexpr (Base == 2_size)
+        return floored_log2<Exponent>(value);
+    else if constexpr (Base == 256_size)
+        return floored_log256<Exponent>(value);
+    else
+        return floored_log<Exponent>(Base, value);
+}
+
+template <typename Exponent, typename Base, typename Value,
+    if_integer<Exponent>,
+    if_integer<Base>,
+    if_integer<Value>>
+constexpr Exponent floored_log(Base base, Value value) NOEXCEPT
+{
+    return floored_log_<Exponent>(base, value);
+}
+
 // optimizations
 
 // Called by bc::base2n (for sizing).
@@ -196,9 +216,10 @@ template <typename Exponent, typename Value,
     if_integral_integer<Value>>
 constexpr Exponent floored_log2(Value value) NOEXCEPT
 {
-    if (value < 1)
+    if (is_log_overflow<2>(value))
         return 0;
 
+    // base2 integral optimization over normal form.
     return possible_narrow_and_sign_cast<Exponent>(
         sub1(std::bit_width(to_unsigned(value))));
 }
@@ -209,9 +230,10 @@ template <typename Exponent, typename Value,
     if_non_integral_integer<Value>>
 constexpr Exponent floored_log2(Value value) NOEXCEPT
 {
-    if (value < 1)
+    if (is_log_overflow<2>(value))
         return 0;
 
+    // base2 uintx optimization over normal form.
     return possible_narrow_and_sign_cast<Exponent>(
         mp::msb(value));
 }
@@ -222,31 +244,33 @@ template <typename Exponent, typename Value,
     if_integral_integer<Value>>
 constexpr Exponent floored_log256(Value value) NOEXCEPT
 {
-    if (value < 1)
+    if (is_log_overflow<256>(value))
         return 0;
+
+    // base2 integral optimization over normal form.
 
     constexpr auto size = sizeof(Value);
     const auto compare = to_unsigned(value);
 
     if constexpr (size == sizeof(uint64_t))
     {
-        if (compare > 0x00ffffffffffffffull) return 7;
-        if (compare > 0x0000ffffffffffffull) return 6;
-        if (compare > 0x000000ffffffffffull) return 5;
+        if (compare > 0x00ffffffffffffff_u64) return 7;
+        if (compare > 0x0000ffffffffffff_u64) return 6;
+        if (compare > 0x000000ffffffffff_u64) return 5;
     }
 
     if constexpr (size >= sizeof(uint32_t))
     {
-        if (compare > 0x00fffffffful) return 4;
-        if (compare > 0x0000fffffful) return 3;
+        if (compare > 0x00ffffffff_u32) return 4;
+        if (compare > 0x0000ffffff_u32) return 3;
     }
 
     if constexpr (size >= sizeof(uint16_t))
     {
-        if (compare > 0xffffu) return 2;
+        if (compare > 0xffff_u16) return 2;
     }
 
-    return (compare > 0xffu) ? 1 : 0;
+    return (compare > 0xff_u8) ? 1 : 0;
 }
 
 // Called by test only (for library consistency).
@@ -255,9 +279,10 @@ template <typename Exponent, typename Value,
     if_non_integral_integer<Value>>
 constexpr Exponent floored_log256(Value value) NOEXCEPT
 {
-    if (value < 1)
+    if (is_log_overflow<256>(value))
         return 0;
 
+    // base2 uintx optimization over normal form.
     return possible_narrow_and_sign_cast<Exponent>(
         floored_divide(floored_log2<Exponent>(value), 8u));
 }

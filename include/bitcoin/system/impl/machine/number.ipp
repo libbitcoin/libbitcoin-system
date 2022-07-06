@@ -98,7 +98,7 @@ inline bool integer<Size>::is_overflow(const data_chunk& vary) NOEXCEPT
 template <size_t Size>
 inline bool integer<Size>::is_overflow(int64_t value) NOEXCEPT
 {
-    return is_limited(value, bitcoin_min<Size>(), bitcoin_max<Size>());
+    return is_limited(value, bitcoin_min<Size>, bitcoin_max<Size>);
 }
 
 // chunk

@@ -587,7 +587,7 @@ inline void program<Stack>::
 begin_if(bool value) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(value || !overflows(negative_condition_count_, one));
+    BC_ASSERT(value || !is_overflow(negative_condition_count_, one));
 
     negative_condition_count_ += (value ? 0 : 1);
     condition_.push_back(value);
@@ -608,7 +608,7 @@ else_if_() NOEXCEPT
     BC_ASSERT(!is_balanced());
 
     // Addition is safe due to script size constraint.
-    BC_ASSERT(condition_.back() || !overflows(negative_condition_count_, one));
+    BC_ASSERT(condition_.back() || !is_overflow(negative_condition_count_, one));
 
     negative_condition_count_ += (condition_.back() ? 1 : -1);
     condition_.back() = !condition_.back();
@@ -669,7 +669,7 @@ inline bool program<Stack>::
 ops_increment(const operation& op) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(!overflows(operation_count_, one));
+    BC_ASSERT(!is_overflow(operation_count_, one));
 
     if (operation::is_counted(op.code()))
         ++operation_count_;
@@ -682,7 +682,7 @@ inline bool program<Stack>::
 ops_increment(size_t public_keys) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(!overflows(operation_count_, public_keys));
+    BC_ASSERT(!is_overflow(operation_count_, public_keys));
 
     operation_count_ += public_keys;
     return !operation_count_exceeded(operation_count_);

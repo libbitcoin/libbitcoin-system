@@ -61,7 +61,7 @@ class BC_API pseudo_random
     template<typename Type, if_integer<Type> = true>
     static Type next() NOEXCEPT
     {
-        return next(minimum<Type>(), maximum<Type>());
+        return next(minimum<Type>, maximum<Type>);
     }
 
     /// Generate a pseudo random integer value within [begin, end].

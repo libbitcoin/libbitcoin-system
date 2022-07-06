@@ -143,10 +143,7 @@ protected:
     // Should be defined on IStream::pos_type, however that is implementation
     // defined and is not an integer domain. Could rely on std::streamsize,
     // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
-    static constexpr size_t maximum() NOEXCEPT
-    {
-        return system::maximum<size_t>();
-    };
+    static constexpr size_t maximum = system::maximum<size_t>;
 
     virtual uint8_t do_peek_byte() NOEXCEPT;
     virtual void do_read_bytes(uint8_t* buffer, size_t size) NOEXCEPT;

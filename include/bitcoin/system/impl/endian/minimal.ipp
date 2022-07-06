@@ -60,7 +60,7 @@ VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     // TODO: overflows requires common type.
     ////if constexpr (is_integral<Integer>)
     ////{
-    ////    BC_ASSERT(!overflows(value, excess));
+    ////    BC_ASSERT(!is_overflow(value, excess));
     ////}
 
     // TODO: machine::number should be able to predict excess.
@@ -82,7 +82,7 @@ VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     // TODO: overflows requires common type.
     ////if constexpr (is_integral<Integer>)
     ////{
-    ////    BC_ASSERT(!overflows(value, excess));
+    ////    BC_ASSERT(!is_overflow(value, excess));
     ////}
 
     // TODO: machine::number should be able to predict excess.

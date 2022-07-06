@@ -18,77 +18,54 @@
  */
 #include "../test.hpp"
 
-// Test helpers to verify output signedness.
-template <typename Integer, if_signed_integer<Integer> = true>
-constexpr bool is_unsigned(Integer) { return false; }
-template <typename Integer, if_unsigned_integer<Integer> = true>
-constexpr bool is_unsigned(Integer) { return true; }
+// negate (signedness and [absolue] value do not change, sign to inverted)
+static_assert(negate(0_i32)   == 0_i32);
+static_assert(negate(0_u32)   == 0_u32);
+static_assert(negate(1_i32)   == 1_ni32);
+static_assert(negate(1_u32)   == 1_nu32);
+static_assert(negate(1_ni32)  == 1_i32);
+static_assert(negate(42_i32)  == 42_ni32);
+static_assert(negate(42_u32)  == 42_nu32);
+static_assert(negate(42_ni32) == 42_i32);
+static_assert(is_same_type<decltype(negate(-1)), signed>);
+static_assert(is_same_type<decltype(negate(0)),  signed>);
+static_assert(is_same_type<decltype(negate(0u)), unsigned>);
+static_assert(is_same_type<decltype(negate(1u)), unsigned>);
 
-// to_signed
-static_assert(to_signed(-2) == -2);
-static_assert(to_signed(-1) == -1);
-static_assert(to_signed(0) == 0);
-static_assert(to_signed(0u) == 0);
-static_assert(to_signed(1) == 1);
-static_assert(to_signed(1u) == 1);
-static_assert(to_signed(2u) == 2);
-static_assert(!is_unsigned(to_signed(-1)));
-static_assert(!is_unsigned(to_signed(0)));
-static_assert(!is_unsigned(to_signed(0u)));
-static_assert(!is_unsigned(to_signed(1)));
-static_assert(!is_unsigned(to_signed(1u)));
+// negate(minimum<integral>) is undefined (cannot represent in positive range).
+////static_assert(negate(min_int8) == add1(max_int8));
+////static_assert(negate(min_int16) == add1(max_int16));
+////static_assert(negate(min_int32) == add1(max_int32));
+////static_assert(negate(min_int64) == add1(max_int64));
 
-// to_unsigned
-static_assert(to_unsigned(-2) == 0xfffffffe);
-static_assert(to_unsigned(-1) == 0xffffffff);
-static_assert(to_unsigned(0) == 0u);
-static_assert(to_unsigned(0u) == 0u);
-static_assert(to_unsigned(1) == 1u);
-static_assert(to_unsigned(1u) == 1u);
-static_assert(to_unsigned(2u) == 2u);
-static_assert(is_unsigned(to_unsigned(-1)));
-static_assert(is_unsigned(to_unsigned(0)));
-static_assert(is_unsigned(to_unsigned(0u)));
-static_assert(is_unsigned(to_unsigned(1)));
-static_assert(is_unsigned(to_unsigned(1u)));
+// absolute ([absolue] value does not change, signedness to unsigned, sign to positive)
+static_assert(absolute(0_i32)   == 0_u32);
+static_assert(absolute(0_u32)   == 0_u32);
+static_assert(absolute(1_i32)   == 1_u32);
+static_assert(absolute(1_u32)   == 1_u32);
+static_assert(absolute(1_ni32)  == 1_u32);
+static_assert(absolute(42_i32)  == 42_u32);
+static_assert(absolute(42_u32)  == 42_u32);
+static_assert(absolute(42_ni32) == 42_u32);
+static_assert(absolute(min_uint32) == zero);
+static_assert(absolute(max_uint32) == max_uint32);
+static_assert(absolute(max_int32) == max_int32);
+static_assert(absolute(add1(min_int32)) == max_int32);
+static_assert(is_same_type<decltype(absolute(-1)), unsigned>);
+static_assert(is_same_type<decltype(absolute(0)),  unsigned>);
+static_assert(is_same_type<decltype(absolute(0u)), unsigned>);
+static_assert(is_same_type<decltype(absolute(1u)), unsigned>);
 
-// absolute
-static_assert(absolute(-1) == 1u);
-static_assert(absolute(-42) == 42u);
-static_assert(absolute(0) == 0u);
-static_assert(absolute(0u) == 0u);
-static_assert(absolute(1) == 1u);
-static_assert(absolute(1u) == 1u);
-static_assert(absolute(42) == 42);
-static_assert(absolute(42u) == 42);
-static_assert(absolute(min_uint32)       == zero);
-static_assert(absolute(max_uint32)       == max_uint32);
-static_assert(absolute(max_int32)        == max_int32);
-static_assert(absolute(add1(min_int32))  == max_int32);
-static_assert(is_unsigned(absolute(-1)));
-static_assert(is_unsigned(absolute(0)));
-static_assert(is_unsigned(absolute(1u)));
-
-// abs(minimum<integral>) is undefined (cannot add1 to the domain maximum and get a positive).
-////static_assert(absolute(min_int32) == add1(max_int8));
-////static_assert(absolute(min_int64) == add1(max_int8));
+// negate(absolute<integral>) is undefined (cannot represent in positive range).
 ////static_assert(absolute(min_int8)  == add1(max_int8));
 ////static_assert(absolute(min_int16) == add1(max_int16));
+////static_assert(absolute(min_int32) == add1(max_int32));
+////static_assert(absolute(min_int64) == add1(max_int64));
 
 // These can be mitigated using explicit domain promotion (except for uint64_t).
 static_assert(absolute<int16_t>(min_int8)  == add1<uint16_t>(max_int8));
 static_assert(absolute<int32_t>(min_int16) == add1<uint32_t>(max_int16));
 static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
-
-// negate (unconstrained by type)
-static_assert(negate(0)   ==  0);
-static_assert(negate(0u)  ==  0);
-static_assert(negate(1)   == -1);
-static_assert(negate(1u)  == -1);
-static_assert(negate(-1)  ==  1);
-static_assert(negate(42)  == -42);
-static_assert(negate(-42) ==  42);
-static_assert(negate(42u) == -42);
 
 // ones_complement
 // alias for bit_not (~n)

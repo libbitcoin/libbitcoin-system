@@ -278,7 +278,7 @@ void byte_writer<OStream>::do_write_bytes(const uint8_t* data,
     // It is not generally more efficient to call stream_.put() for one byte.
 
     // Write past stream start invalidates stream unless size exceeds maximum.
-    BC_ASSERT(size <= maximum());
+    BC_ASSERT(size <= maximum);
     stream_.write(pointer_cast<const char>(data),
         possible_narrow_and_sign_cast<typename OStream::pos_type>(size));
 

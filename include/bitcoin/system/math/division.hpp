@@ -19,18 +19,17 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_DIVISION_HPP
 #define LIBBITCOIN_SYSTEM_MATH_DIVISION_HPP
 
-#include <type_traits>
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
+
+/// These functions do not manage type promotion or division by zero.
+/// With the exception of ceilinged_modulo these return the common type of the
+/// native operators. The native modulo operator is truncated, resulting in a
+/// positive common type. However ceilinged modulo is naturally negative, so
+/// the modulo common type is converted to signed, as otherwise the result
+/// would be the unsigned twos compliment of the intended value.
 
 namespace libbitcoin {
 namespace system {
-
-/// All operations below support signed and unsigned parameters.
-/// github.com/libbitcoin/libbitcoin-system/wiki/Integer-Division-Unraveled
-
-/// These are subject to domain promotion and sign change. With the exception
-/// of ceilinged_modulo these return the common type of the native operators.
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to C++ % for negative quotients.
@@ -41,9 +40,6 @@ ceilinged_divide(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 /// Obtain the ceilinged (rounded up) integer modulo quotient.
 /// This is equivalent to C++ % for negative quotients.
-/// The native modulo operator is truncated, resulting in a positive common
-/// type. However ceilinged modulo is naturally negative, so the modulo common
-/// type is converted to signed, as otherwise the two's compliment is returned.
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_signed_type<to_common_type<Dividend, Divisor>>
@@ -76,16 +72,6 @@ template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr to_common_type<Dividend, Divisor>
 truncated_modulo(Dividend dividend, Divisor divisor) NOEXCEPT;
-
-/// Safely determines whether value is a factor of product.
-template <typename Value, if_integer<Value> = true>
-constexpr bool
-is_multiple(Value product, Value value) NOEXCEPT;
-
-/// Safely determines whether value is the product of left * right.
-template <typename Value, if_integer<Value> = true>
-constexpr bool
-is_product(Value value, Value left, Value right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

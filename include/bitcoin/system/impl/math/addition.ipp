@@ -21,7 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/limits.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
@@ -35,7 +35,7 @@ template <place1, typename Integer,
     if_integral_integer<Integer>>
 constexpr Integer add(Integer left, Integer right) NOEXCEPT
 {
-    // overflows() can be used to guard this addition.
+    // is_overflow() can be used to guard this addition.
     return depromote<Integer>(left + right);
 }
 
@@ -82,7 +82,7 @@ template <place1, typename Integer,
     if_integral_integer<Integer>>
 constexpr Integer subtract(Integer left, Integer right) NOEXCEPT
 {
-    // underflows() can be used to guard this subtraction.
+    // is_underflow() can be used to guard this subtraction.
     return depromote<Integer>(left - right);
 }
 
@@ -128,15 +128,15 @@ template <place1, typename Integer,
     if_signed_integral_integer<Integer>>
 constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
 {
-    return overflows(left, right) ? (is_negative(right) ?
-        minimum<Integer>() : maximum<Integer>()) : add(left, right);
+    return is_add_overflow(left, right) ? (is_negative(right) ?
+        minimum<Integer> : maximum<Integer>) : add(left, right);
 }
 
 template <place1, typename Integer,
     if_unsigned_integral_integer<Integer>>
 constexpr Integer ceilinged_add(Integer left, Integer right) NOEXCEPT
 {
-    return overflows(left, right) ? maximum<Integer>() : add(left, right);
+    return is_add_overflow(left, right) ? maximum<Integer> : add(left, right);
 }
 
 template <typename Explicit, typename Integer,
@@ -179,15 +179,16 @@ template <place1, typename Integer,
     if_signed_integral_integer<Integer>>
 constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
 {
-    return underflows(left, right) ? (is_negative(right) ?
-        maximum<Integer>() : minimum<Integer>()) : subtract(left, right);
+    return is_subtract_overflow(left, right) ? (is_negative(right) ?
+        maximum<Integer> : minimum<Integer>) : subtract(left, right);
 }
 
 template <place1, typename Integer,
     if_unsigned_integral_integer<Integer>>
 constexpr Integer floored_subtract(Integer left, Integer right) NOEXCEPT
 {
-    return underflows(left, right) ? minimum<Integer>() : subtract(left, right);
+    return is_subtract_overflow(left, right) ? minimum<Integer> :
+        subtract(left, right);
 }
 
 template <typename Explicit, typename Integer,
@@ -221,47 +222,6 @@ constexpr Explicit floored_subtract(Left left, Right right) NOEXCEPT
     return floored_subtract<place1{}, Explicit>(
         possible_narrow_and_sign_cast<Explicit>(left),
         possible_narrow_and_sign_cast<Explicit>(right));
-}
-
-// overflows
-// ----------------------------------------------------------------------------
-
-template <typename Integer,
-    if_signed_integral_integer<Integer>>
-constexpr bool overflows(Integer left, Integer right) NOEXCEPT
-{
-    const auto negative_right = is_negative(right);
-
-    return !is_zero(right) &&
-        (!negative_right || (left < (minimum<Integer>() - right))) &&
-        (negative_right  || (left > (maximum<Integer>() - right)));
-}
-
-template <typename Integer,
-    if_unsigned_integral_integer<Integer>>
-constexpr bool overflows(Integer left, Integer right) NOEXCEPT
-{
-    return right > (maximum<Integer>() - left);
-}
-
-// underflows
-
-template <typename Integer,
-    if_signed_integral_integer<Integer>>
-constexpr bool underflows(Integer left, Integer right) NOEXCEPT
-{
-    const auto negative_right = is_negative(right);
-
-    return !is_zero(right) &&
-        (!negative_right || (left > (maximum<Integer>() + right))) &&
-        (negative_right  || (left < (minimum<Integer>() + right)));
-}
-
-template <typename Integer,
-    if_unsigned_integral_integer<Integer>>
-constexpr bool underflows(Integer left, Integer right) NOEXCEPT
-{
-    return right > left;
 }
 
 } // namespace system

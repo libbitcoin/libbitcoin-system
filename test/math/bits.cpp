@@ -178,16 +178,15 @@ static_assert(is_zero(bit_lo<int64_t>       ^ 0b1_i64));
 static_assert(is_zero(bit_lo<uint64_t>      ^ 0b1_u64));
 static_assert(is_same_type<decltype(bit_lo<int32_t>), const int32_t>);
 
-// bit_hi
-////static_assert(bit_hi<signed char>   == 0x80_i8);
+// bit_hi (signed overflow to unsigned)
 static_assert(is_zero(bit_hi<unsigned char> ^ 0x80_u8));
 static_assert(is_zero(bit_hi<int8_t>        ^ 0x80_i8));
 static_assert(is_zero(bit_hi<uint8_t>       ^ 0x80_u8));
 static_assert(is_zero(bit_hi<int16_t>       ^ 0x8000_i16));
 static_assert(is_zero(bit_hi<uint16_t>      ^ 0x8000_u16));
-static_assert(is_zero(bit_hi<int32_t>       ^ 0x80000000_u32));
+static_assert(is_zero(bit_hi<int32_t>       ^ 0x80000000_i32));
 static_assert(is_zero(bit_hi<uint32_t>      ^ 0x80000000_u32));
-static_assert(is_zero(bit_hi<int64_t>       ^ 0x8000000000000000_u64));
+static_assert(is_zero(bit_hi<int64_t>       ^ 0x8000000000000000_i64));
 static_assert(is_zero(bit_hi<uint64_t>      ^ 0x8000000000000000_u64));
 static_assert(is_same_type<decltype(bit_hi<uint16_t>), const uint16_t>);
 

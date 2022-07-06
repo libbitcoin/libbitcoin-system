@@ -17,8 +17,6 @@
  * along with this program.  If not == see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-/// DELETECSTDDEF
-/// DELETECSTDINT
 
 // limit
 
@@ -168,59 +166,59 @@ static_assert(is_same_type<decltype(is_limited<uint8_t>(0, 0, 0)), bool>);
 
 // minimum<T>
 
-static_assert(minimum<int8_t >() == min_int8);
-static_assert(minimum<int16_t>() == min_int16);
-static_assert(minimum<int32_t>() == min_int32);
-static_assert(minimum<int64_t>() == min_int64);
-static_assert(minimum<uint8_t >() == min_uint8);
-static_assert(minimum<uint16_t>() == min_uint16);
-static_assert(minimum<uint32_t>() == min_uint32);
-static_assert(minimum<uint64_t>() == min_uint64);
-static_assert(is_same_type<decltype(maximum<int64_t>()), int64_t>);
+static_assert(minimum<int8_t > == min_int8);
+static_assert(minimum<int16_t> == min_int16);
+static_assert(minimum<int32_t> == min_int32);
+static_assert(minimum<int64_t> == min_int64);
+static_assert(minimum<uint8_t > == min_uint8);
+static_assert(minimum<uint16_t> == min_uint16);
+static_assert(minimum<uint32_t> == min_uint32);
+static_assert(minimum<uint64_t> == min_uint64);
+static_assert(is_same_type<decltype(minimum<int64_t>), const int64_t>);
 
 // maximum<T>
 
-static_assert(maximum<int8_t >() == max_int8);
-static_assert(maximum<int16_t>() == max_int16);
-static_assert(maximum<int32_t>() == max_int32);
-static_assert(maximum<int64_t>() == max_int64);
-static_assert(maximum<uint8_t >() == max_uint8);
-static_assert(maximum<uint16_t>() == max_uint16);
-static_assert(maximum<uint32_t>() == max_uint32);
-static_assert(maximum<uint64_t>() == max_uint64);
-static_assert(is_same_type<decltype(maximum<int16_t>()), int16_t>);
+static_assert(maximum<int8_t > == max_int8);
+static_assert(maximum<int16_t> == max_int16);
+static_assert(maximum<int32_t> == max_int32);
+static_assert(maximum<int64_t> == max_int64);
+static_assert(maximum<uint8_t > == max_uint8);
+static_assert(maximum<uint16_t> == max_uint16);
+static_assert(maximum<uint32_t> == max_uint32);
+static_assert(maximum<uint64_t> == max_uint64);
+static_assert(is_same_type<decltype(maximum<int16_t>), const int16_t>);
 
-// absolute_minimum<T>
+// absolute_min<T>
 
-static_assert(absolute_minimum<int8_t >() == power2(sub1(bits<int8_t>)));
-static_assert(absolute_minimum<int16_t>() == power2(sub1(bits<int16_t>)));
-static_assert(absolute_minimum<int32_t>() == power2(sub1(bits<int32_t>)));
-static_assert(absolute_minimum<int64_t>() == power2<uint128_t>(sub1(bits<int64_t>)));
-static_assert(absolute_minimum<int8_t >() == add1(absolute(add1(min_int8))));
-static_assert(absolute_minimum<int16_t>() == add1(absolute(add1(min_int16))));
-static_assert(absolute_minimum<int32_t>() == add1(absolute(add1(min_int32))));
-static_assert(absolute_minimum<int64_t>() == add1(absolute(add1(min_int64))));
-static_assert(absolute_minimum<uint8_t>()  == min_uint8);
-static_assert(absolute_minimum<uint16_t>() == min_uint16);
-static_assert(absolute_minimum<uint32_t>() == min_uint32);
-static_assert(absolute_minimum<uint64_t>() == min_uint64);
-static_assert(is_same_type<decltype(maximum<int64_t>()), int64_t>);
+static_assert(absolute_min<int8_t > == power2(sub1(bits<int8_t>)));
+static_assert(absolute_min<int16_t> == power2(sub1(bits<int16_t>)));
+static_assert(absolute_min<int32_t> == power2(sub1(bits<int32_t>)));
+static_assert(absolute_min<int64_t> == power2<uint128_t>(sub1(bits<int64_t>)));
+static_assert(absolute_min<int8_t > == add1(absolute(add1(min_int8))));
+static_assert(absolute_min<int16_t> == add1(absolute(add1(min_int16))));
+static_assert(absolute_min<int32_t> == add1(absolute(add1(min_int32))));
+static_assert(absolute_min<int64_t> == add1(absolute(add1(min_int64))));
+static_assert(absolute_min<uint8_t>  == min_uint8);
+static_assert(absolute_min<uint16_t> == min_uint16);
+static_assert(absolute_min<uint32_t> == min_uint32);
+static_assert(absolute_min<uint64_t> == min_uint64);
+static_assert(is_same_type<decltype(absolute_min<int64_t>), const uint64_t>);
 
-// unsigned_maximum<T>
+// unsigned_max<T>
 
-static_assert(unsigned_maximum<int8_t >() == sub1(to_half(power2(bits<int8_t>))));
-static_assert(unsigned_maximum<int16_t>() == sub1(to_half(power2(bits<int16_t>))));
-static_assert(unsigned_maximum<int32_t>() == sub1(to_half(power2<int64_t>(bits<int32_t>))));
-static_assert(unsigned_maximum<int64_t>() == sub1(to_half(power2<uint128_t>(bits<int64_t>))));
-static_assert(unsigned_maximum<int8_t >() == to_unsigned(max_int8));
-static_assert(unsigned_maximum<int16_t>() == to_unsigned(max_int16));
-static_assert(unsigned_maximum<int32_t>() == to_unsigned(max_int32));
-static_assert(unsigned_maximum<int64_t>() == to_unsigned(max_int64));
-static_assert(unsigned_maximum<uint8_t >() == max_uint8);
-static_assert(unsigned_maximum<uint16_t>() == max_uint16);
-static_assert(unsigned_maximum<uint32_t>() == max_uint32);
-static_assert(unsigned_maximum<uint64_t>() == max_uint64);
-static_assert(is_same_type<decltype(maximum<int16_t>()), int16_t>);
+static_assert(unsigned_max<int8_t > == sub1(to_half(power2(bits<int8_t>))));
+static_assert(unsigned_max<int16_t> == sub1(to_half(power2(bits<int16_t>))));
+static_assert(unsigned_max<int32_t> == sub1(to_half(power2<int64_t>(bits<int32_t>))));
+static_assert(unsigned_max<int64_t> == sub1(to_half(power2<uint128_t>(bits<int64_t>))));
+static_assert(unsigned_max<int8_t > == to_unsigned(max_int8));
+static_assert(unsigned_max<int16_t> == to_unsigned(max_int16));
+static_assert(unsigned_max<int32_t> == to_unsigned(max_int32));
+static_assert(unsigned_max<int64_t> == to_unsigned(max_int64));
+static_assert(unsigned_max<uint8_t > == max_uint8);
+static_assert(unsigned_max<uint16_t> == max_uint16);
+static_assert(unsigned_max<uint32_t> == max_uint32);
+static_assert(unsigned_max<uint64_t> == max_uint64);
+static_assert(is_same_type<decltype(unsigned_max<int16_t>), const uint16_t>);
 
 // min/max bytes expecations
 constexpr auto max_int24 = sub1(0x00000000800000_i32);
@@ -234,51 +232,51 @@ constexpr auto min_int56 = negate(0x80000000000000_i64);
 
 // minimum<Bytes>
 
-static_assert(minimum<1>() == min_int8);
-static_assert(minimum<2>() == min_int16);
-static_assert(minimum<3>() == min_int24);
-static_assert(minimum<4>() == min_int32);
-static_assert(minimum<5>() == min_int40);
-static_assert(minimum<6>() == min_int48);
-static_assert(minimum<7>() == min_int56);
-static_assert(minimum<8>() == min_int64);
-static_assert(is_same_type<decltype(minimum<2>()), int16_t>);
+static_assert(domain_min<1> == min_int8);
+static_assert(domain_min<2> == min_int16);
+static_assert(domain_min<3> == min_int24);
+static_assert(domain_min<4> == min_int32);
+static_assert(domain_min<5> == min_int40);
+static_assert(domain_min<6> == min_int48);
+static_assert(domain_min<7> == min_int56);
+static_assert(domain_min<8> == min_int64);
+static_assert(is_same_type<decltype(domain_min<2>), const int16_t>);
 
 // maximum<Bytes>
 
-static_assert(maximum<1>() == max_int8);
-static_assert(maximum<2>() == max_int16);
-static_assert(maximum<3>() == max_int24);
-static_assert(maximum<4>() == max_int32);
-static_assert(maximum<5>() == max_int40);
-static_assert(maximum<6>() == max_int48);
-static_assert(maximum<7>() == max_int56);
-static_assert(maximum<8>() == max_int64);
-static_assert(is_same_type<decltype(maximum<1>()), int8_t>);
+static_assert(domain_max<1> == max_int8);
+static_assert(domain_max<2> == max_int16);
+static_assert(domain_max<3> == max_int24);
+static_assert(domain_max<4> == max_int32);
+static_assert(domain_max<5> == max_int40);
+static_assert(domain_max<6> == max_int48);
+static_assert(domain_max<7> == max_int56);
+static_assert(domain_max<8> == max_int64);
+static_assert(is_same_type<decltype(domain_max<1>), const int8_t>);
 
 // bitcoin_min<Bytes>
 
-static_assert(bitcoin_min<1>() == add1(min_int8));
-static_assert(bitcoin_min<2>() == add1(min_int16));
-static_assert(bitcoin_min<3>() == add1(min_int24));
-static_assert(bitcoin_min<4>() == add1(min_int32));
-static_assert(bitcoin_min<5>() == add1(min_int40));
-static_assert(bitcoin_min<6>() == add1(min_int48));
-static_assert(bitcoin_min<7>() == add1(min_int56));
-static_assert(bitcoin_min<8>() == add1(min_int64));
-static_assert(is_same_type<decltype(bitcoin_min<8>()), int64_t>);
+static_assert(bitcoin_min<1> == add1(min_int8));
+static_assert(bitcoin_min<2> == add1(min_int16));
+static_assert(bitcoin_min<3> == add1(min_int24));
+static_assert(bitcoin_min<4> == add1(min_int32));
+static_assert(bitcoin_min<5> == add1(min_int40));
+static_assert(bitcoin_min<6> == add1(min_int48));
+static_assert(bitcoin_min<7> == add1(min_int56));
+static_assert(bitcoin_min<8> == add1(min_int64));
+static_assert(is_same_type<decltype(bitcoin_min<8>), const int64_t>);
 
 // bitcoin_max<Bytes>
 
-static_assert(bitcoin_max<1>() == max_int8);
-static_assert(bitcoin_max<2>() == max_int16);
-static_assert(bitcoin_max<3>() == max_int24);
-static_assert(bitcoin_max<4>() == max_int32);
-static_assert(bitcoin_max<5>() == max_int40);
-static_assert(bitcoin_max<6>() == max_int48);
-static_assert(bitcoin_max<7>() == max_int56);
-static_assert(bitcoin_max<8>() == max_int64);
-static_assert(is_same_type<decltype(bitcoin_max<4>()), int32_t>);
+static_assert(bitcoin_max<1> == max_int8);
+static_assert(bitcoin_max<2> == max_int16);
+static_assert(bitcoin_max<3> == max_int24);
+static_assert(bitcoin_max<4> == max_int32);
+static_assert(bitcoin_max<5> == max_int40);
+static_assert(bitcoin_max<6> == max_int48);
+static_assert(bitcoin_max<7> == max_int56);
+static_assert(bitcoin_max<8> == max_int64);
+static_assert(is_same_type<decltype(bitcoin_max<4>), const int32_t>);
 
 /// Bitcoin serialization imposes the following domain constraint on integers.
 /// The domains are constrained by one less negative value than C++ integrals.
@@ -292,8 +290,8 @@ static_assert(is_same_type<decltype(bitcoin_max<4>()), int32_t>);
 /// 7 bytes:[-2^55+1...2^55-1]
 /// 8 bytes:[-2^63+1...2^63-1]
 
-static_assert(bitcoin_min<4>() == add1(minimum<4>()));
-static_assert(bitcoin_min<5>() == add1(minimum<5>()));
+static_assert(bitcoin_min<4> == add1(domain_min<4>));
+static_assert(bitcoin_min<5> == add1(domain_min<5>));
 static_assert(ones_complement(max_uint8) == min_uint8);
 static_assert(ones_complement(max_uint16) == min_uint16);
 static_assert(ones_complement(max_uint32) == min_uint32);

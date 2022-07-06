@@ -323,6 +323,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\byte_cast.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_array.hpp" />
@@ -362,13 +363,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\addition.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\bits.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\bytes.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\cast.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\division.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\external\byte_swap.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\limits.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\log.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\logarithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\overflow.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\safe.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
@@ -489,6 +491,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_array.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_reference.ipp" />
@@ -510,11 +513,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bits.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bytes.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\division.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\limits.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\math\log.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\logarithm.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\overflow.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\math\safe.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />

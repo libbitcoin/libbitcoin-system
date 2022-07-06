@@ -21,26 +21,16 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/bits.hpp>
-#include <bitcoin/system/math/safe.hpp>
+#include <bitcoin/system/math/cast.hpp>
+#include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-namespace mp = boost::multiprecision;
+// unpublished (normal form)
+// ----------------------------------------------------------------------------
 
-// dispatch
-template <size_t Base, typename Value, typename Exponent,
-    if_unsigned_integer<Exponent>>
-constexpr Value power(Exponent exponent) NOEXCEPT
-{
-    if constexpr (Base == 2u)
-        return power2<Value>(exponent);
-    else
-        return power<Value>(Base, exponent);
-}
-
-// normal form
 // Called by bc::base85 (for number coding).
 // Called by wallet::electrum_v1 (for number coding).
 template <typename Value, typename Base, typename Exponent,
@@ -49,7 +39,7 @@ template <typename Value, typename Base, typename Exponent,
     if_unsigned_integer<Exponent> = true>
 constexpr Value power_(Base base, Exponent exponent) NOEXCEPT
 {
-    if (is_zero(base))
+    if (is_power_overflow(base, exponent))
         return 0;
 
     if (is_zero(exponent))
@@ -65,6 +55,20 @@ constexpr Value power_(Base base, Exponent exponent) NOEXCEPT
     BC_POP_WARNING();
 
     return value;
+}
+
+// published
+// ----------------------------------------------------------------------------
+
+// dispatch
+template <size_t Base, typename Value, typename Exponent,
+    if_unsigned_integer<Exponent>>
+constexpr Value power(Exponent exponent) NOEXCEPT
+{
+    if constexpr (Base == 2u)
+        return power2<Value>(exponent);
+    else
+        return power<Value>(Base, exponent);
 }
 
 template <typename Value, typename Base, typename Exponent,
@@ -85,8 +89,6 @@ constexpr Value power(Base base, Exponent exponent) NOEXCEPT
     return power_<Value>(base, exponent);
 }
 
-// optimizations
-
 // Called by bc::props (for json number limits).
 // Called by chain::number (for limits::minimum/maximum).
 template <typename Value, typename Exponent,
@@ -94,7 +96,8 @@ template <typename Value, typename Exponent,
     if_unsigned_integer<Exponent>>
 constexpr Value power2(Exponent exponent) NOEXCEPT
 {
-    return shift_left<Value>(1u, to_unsigned(exponent));
+    // base2 integral optimization over normal form.
+    return shift_left<Value>(1u, to_unsigned(exponent), true);
 }
 
 template <typename Value, typename Exponent,
@@ -103,7 +106,9 @@ template <typename Value, typename Exponent,
 constexpr Value power2(Exponent exponent) NOEXCEPT
 {
     Value value{};
-    return mp::bit_set(value,
+
+    // base2 uintx optimization over normal form.
+    return boost::multiprecision::bit_set(value,
         possible_narrow_and_sign_cast<unsigned>(exponent));
 }
 
