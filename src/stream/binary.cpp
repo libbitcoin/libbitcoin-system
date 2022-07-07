@@ -73,9 +73,10 @@ binary binary::from_data(size_t bits, data_chunk&& data) NOEXCEPT
 {
     data.resize(ceilinged_divide(bits, byte_bits), pad);
 
+    // absolute cannot overflow as magnitude is limited to sub1(byte_bits).
     if (!data.empty())
         mask_right_into(data.back(),
-            to_unsigned(ceilinged_modulo(bits, byte_bits)));
+            absolute(ceilinged_modulo(bits, byte_bits)));
 
     return { std::move(data), bits };
 }

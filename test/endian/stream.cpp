@@ -26,6 +26,20 @@ constexpr uint64_t value_alpha64 = 0x424954434f494e21;
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__stream_to_integer__expected)
 {
+    ////using character = typename std::ostream::char_type;
+    ////stream::out::copy writer1{};
+
+    ////const data_array<42> bytes{};
+    ////const auto& data1 = bytes.data();
+    ////writer1.write(reinterpret_cast<const character*>(data1), 42u);
+
+    ////const auto data2 = to_little_endian<uint32_t>(42_u32);
+    ////writer1.write(reinterpret_cast<const character*>(data2.data()), 42u);
+
+    ////std::stringstream writer2{};
+    ////using character2 = typename std::stringstream::char_type;
+    ////writer2.write(reinterpret_cast<const character2*>(data2.data()), 42u);
+
     std::stringstream stream{ alpha_reverse };
     BOOST_REQUIRE_EQUAL(from_big_endian<uint64_t>(stream), value_alpha64);
 }
