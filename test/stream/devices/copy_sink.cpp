@@ -30,30 +30,39 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 // stream_tests/copy_sink__output_sequence__empty__empty:
 // critical check first == sequence.first has failed.
 //
-// Also XCode, with additional message:
+// Additional detail on above Clang error from XCode:
+//
+// Platform: Mac OS
+// Compiler: Clang version 13.0.0 (clang-1300.0.29.30)
+// STL     : libc++ version 12000
+// Boost   : 1.78.0 [debug and ndebug]
 // unknown location:0: fatal error:
 // stream_tests/copy_sink__output_sequence__empty__empty:
 // memory access violation at address: 0x00000000: no mapping at fault address
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
 {
-    data_chunk sink;
+    // sink.data() is nullptr, and should be reflected in sequence.first
+    // and sequence.second, as sink.size() is zero.
+    constexpr data_chunk chunk{};
+    static_assert(chunk.data() == nullptr);
+
+    data_chunk sink{};
     copy_sink<data_slab> instance(sink);
-
     const auto sequence = instance.output_sequence();
-    const auto first = pointer_cast<char>(sink.data());
-    BOOST_REQUIRE_EQUAL(first, sequence.first);
-
-    const auto second = std::next(first, sink.size());
-    BOOST_REQUIRE_EQUAL(second, sequence.second);
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 0);
+    BOOST_REQUIRE(sequence.first == nullptr);
+    BOOST_REQUIRE(sequence.second == nullptr);
+    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), ptrdiff_t{ 0 });
 }
 
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__not_empty__expected)
 {
-    data_chunk sink(42, 0x00);
+    constexpr auto size = 42u;
+    data_chunk sink(size, 0x00);
     copy_sink<data_slab> instance(sink);
     const auto sequence = instance.output_sequence();
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 42);
+    BOOST_REQUIRE(reinterpret_cast<uint8_t*>(sequence.first) == &sink[0]);
+    BOOST_REQUIRE(reinterpret_cast<uint8_t*>(std::prev(sequence.second)) == &sink[sub1(size)]);
+    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), ptrdiff_t{ size });
 }
 
 // write() is not required for direct devices.
