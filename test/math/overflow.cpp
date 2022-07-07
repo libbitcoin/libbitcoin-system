@@ -133,74 +133,198 @@ static_assert(is_divide_overflow(42u, unsigned_min));
 // is_multiple
 // ----------------------------------------------------------------------------
 
-// TODO: test signed/unsigned and pos/neg variations.
+static_assert(is_multiple(-1, 1));
+static_assert(is_multiple(-2, 1));
+static_assert(is_multiple(-3, 1));
+static_assert(is_multiple(-4, 1));
 
-static_assert(is_multiple(0, 0)); // <=
+static_assert(is_multiple(1, -1));
+static_assert(is_multiple(2, -1));
+static_assert(is_multiple(3, -1));
+static_assert(is_multiple(4, -1));
+
+static_assert(is_multiple(-1, -1));
+static_assert(is_multiple(-2, -1));
+static_assert(is_multiple(-3, -1));
+static_assert(is_multiple(-4, -1));
+
+static_assert(!is_multiple(-1, 2));
+static_assert( is_multiple(-2, 2)); // <=
+static_assert(!is_multiple(-3, 2));
+static_assert( is_multiple(-4, 2)); // <=
+
+static_assert(!is_multiple(1, -2));
+static_assert( is_multiple(2, -2)); // <=
+static_assert(!is_multiple(3, -2));
+static_assert( is_multiple(4, -2)); // <=
+
+static_assert(!is_multiple(-1, -2));
+static_assert( is_multiple(-2, -2)); // <=
+static_assert(!is_multiple(-3, -2));
+static_assert( is_multiple(-4, -2)); // <=
+
+static_assert(!is_multiple(-1, 3));
+static_assert(!is_multiple(-2, 3));
+static_assert( is_multiple(-3, 3)); // <=
+static_assert(!is_multiple(-4, 3));
+
+static_assert(!is_multiple(1, -3));
+static_assert(!is_multiple(2, -3));
+static_assert( is_multiple(3, -3)); // <=
+static_assert(!is_multiple(4, -3));
+
+static_assert(!is_multiple(-1, -3));
+static_assert(!is_multiple(-2, -3));
+static_assert( is_multiple(-3, -3)); // <=
+static_assert(!is_multiple(-4, -3));
+
+static_assert(!is_multiple(-1, 4));
+static_assert(!is_multiple(-2, 4));
+static_assert(!is_multiple(-3, 4));
+static_assert( is_multiple(-4, 4)); // <=
+
+static_assert(!is_multiple(1, -4));
+static_assert(!is_multiple(2, -4));
+static_assert(!is_multiple(3, -4));
+static_assert( is_multiple(4, -4)); // <=
+
+static_assert(!is_multiple(-1, -4));
+static_assert(!is_multiple(-2, -4));
+static_assert(!is_multiple(-3, -4));
+static_assert( is_multiple(-4, -4)); // <=
+
+static_assert( is_multiple(0, 0)); // <=
 static_assert(!is_multiple(1, 0));
 static_assert(!is_multiple(2, 0));
 static_assert(!is_multiple(3, 0));
+static_assert(!is_multiple(4, 0));
 
 static_assert(is_multiple(0, 1));
 static_assert(is_multiple(1, 1));
 static_assert(is_multiple(2, 1));
 static_assert(is_multiple(3, 1));
+static_assert(is_multiple(4, 1));
 
-static_assert(is_multiple(0, 2)); // <=
+static_assert( is_multiple(0, 2)); // <=
 static_assert(!is_multiple(1, 2));
-static_assert(is_multiple(2, 2)); // <=
+static_assert( is_multiple(2, 2)); // <=
 static_assert(!is_multiple(3, 2));
+static_assert( is_multiple(4, 2)); // <=
 
-static_assert(is_multiple(0, 3)); // <=
+static_assert( is_multiple(0, 3)); // <=
 static_assert(!is_multiple(1, 3));
 static_assert(!is_multiple(2, 3));
-static_assert(is_multiple(3, 3)); // <=
+static_assert( is_multiple(3, 3)); // <=
+static_assert(!is_multiple(4, 3));
 
-static_assert(is_multiple(0_u8, max_uint8)); // <=
+static_assert( is_multiple(0_u8, max_uint8)); // <=
 static_assert(!is_multiple(1_u8, max_uint8));
 static_assert(!is_multiple(2_u8, max_uint8));
 static_assert(!is_multiple(3_u8, max_uint8));
 static_assert(!is_multiple(max_uint8, 8_u8));
 static_assert(!is_multiple(max_uint8, min_uint8));
-static_assert(is_multiple(max_uint8, max_uint8)); // <=
-static_assert(is_multiple(min_uint8, max_uint8)); // <=
-static_assert(is_multiple(subtract<uint8_t>(max_uint8, sub1(byte_bits)), 8_u8)); // <=
+static_assert( is_multiple(max_uint8, max_uint8)); // <=
+static_assert( is_multiple(min_uint8, max_uint8)); // <=
+static_assert( is_multiple(subtract<uint8_t>(max_uint8, sub1(byte_bits)), 8_u8)); // <=
 
 // is_product
 // ----------------------------------------------------------------------------
 
-// TODO: test signed/unsigned and pos/neg variations.
-
 // 0
 
-static_assert(is_product(0, 0, 0)); // <=
-static_assert(is_product(0, 0, 1)); // <=
-static_assert(is_product(0, 0, 2)); // <=
-static_assert(is_product(0, 0, 3)); // <=
-static_assert(is_product(0, 0, 4)); // <=
+static_assert( is_product(0, 0, 0)); // <=
+static_assert( is_product(0, 0, 1)); // <=
+static_assert( is_product(0, 0, 2)); // <=
+static_assert( is_product(0, 0, 3)); // <=
+static_assert( is_product(0, 0, 4)); // <=
 
-static_assert(is_product(0, 1, 0)); // <=
+static_assert( is_product(0, 1, 0)); // <=
 static_assert(!is_product(0, 1, 1));
 static_assert(!is_product(0, 1, 2));
 static_assert(!is_product(0, 1, 3));
 static_assert(!is_product(0, 1, 4));
 
-static_assert(is_product(0, 2, 0)); // <=
+static_assert( is_product(0, 2, 0)); // <=
 static_assert(!is_product(0, 2, 1));
 static_assert(!is_product(0, 2, 2));
 static_assert(!is_product(0, 2, 3));
 static_assert(!is_product(0, 2, 4));
 
-static_assert(is_product(0, 3, 0)); // <=
+static_assert( is_product(0, 3, 0)); // <=
 static_assert(!is_product(0, 3, 1));
 static_assert(!is_product(0, 3, 2));
 static_assert(!is_product(0, 3, 3));
 static_assert(!is_product(0, 3, 4));
 
-static_assert(is_product(0, 4, 0)); // <=
+static_assert( is_product(0, 4, 0)); // <=
 static_assert(!is_product(0, 4, 1));
 static_assert(!is_product(0, 4, 2));
 static_assert(!is_product(0, 4, 3));
 static_assert(!is_product(0, 4, 4));
+
+static_assert( is_product(0, -1, 0)); // <=
+static_assert(!is_product(0, -1, 1));
+static_assert(!is_product(0, -1, 2));
+static_assert(!is_product(0, -1, 3));
+static_assert(!is_product(0, -1, 4));
+
+static_assert( is_product(0, -2, 0)); // <=
+static_assert(!is_product(0, -2, 1));
+static_assert(!is_product(0, -2, 2));
+static_assert(!is_product(0, -2, 3));
+static_assert(!is_product(0, -2, 4));
+
+static_assert( is_product(0, -3, 0)); // <=
+static_assert(!is_product(0, -3, 1));
+static_assert(!is_product(0, -3, 2));
+static_assert(!is_product(0, -3, 3));
+static_assert(!is_product(0, -3, 4));
+
+static_assert( is_product(0, -4, 0)); // <=
+static_assert(!is_product(0, -4, 1));
+static_assert(!is_product(0, -4, 2));
+static_assert(!is_product(0, -4, 3));
+static_assert(!is_product(0, -4, 4));
+
+static_assert(!is_product(0, 1, -1));
+static_assert(!is_product(0, 1, -2));
+static_assert(!is_product(0, 1, -3));
+static_assert(!is_product(0, 1, -4));
+
+static_assert(!is_product(0, 2, -1));
+static_assert(!is_product(0, 2, -2));
+static_assert(!is_product(0, 2, -3));
+static_assert(!is_product(0, 2, -4));
+
+static_assert(!is_product(0, 3, -1));
+static_assert(!is_product(0, 3, -2));
+static_assert(!is_product(0, 3, -3));
+static_assert(!is_product(0, 3, -4));
+
+static_assert(!is_product(0, 4, -1));
+static_assert(!is_product(0, 4, -2));
+static_assert(!is_product(0, 4, -3));
+static_assert(!is_product(0, 4, -4));
+
+static_assert(!is_product(0, -1, -1));
+static_assert(!is_product(0, -1, -2));
+static_assert(!is_product(0, -1, -3));
+static_assert(!is_product(0, -1, -4));
+
+static_assert(!is_product(0, -2, -1));
+static_assert(!is_product(0, -2, -2));
+static_assert(!is_product(0, -2, -3));
+static_assert(!is_product(0, -2, -4));
+
+static_assert(!is_product(0, -3, -1));
+static_assert(!is_product(0, -3, -2));
+static_assert(!is_product(0, -3, -3));
+static_assert(!is_product(0, -3, -4));
+
+static_assert(!is_product(0, -4, -1));
+static_assert(!is_product(0, -4, -2));
+static_assert(!is_product(0, -4, -3));
+static_assert(!is_product(0, -4, -4));
 
 // 1
 
@@ -211,7 +335,7 @@ static_assert(!is_product(1, 0, 3));
 static_assert(!is_product(1, 0, 4));
 
 static_assert(!is_product(1, 1, 0));
-static_assert(is_product(1, 1, 1)); // <=
+static_assert( is_product(1, 1, 1)); // <=
 static_assert(!is_product(1, 1, 2));
 static_assert(!is_product(1, 1, 3));
 static_assert(!is_product(1, 1, 4));
@@ -234,6 +358,94 @@ static_assert(!is_product(1, 4, 2));
 static_assert(!is_product(1, 4, 3));
 static_assert(!is_product(1, 4, 4));
 
+static_assert(!is_product(-1, 1, 0));
+static_assert(!is_product(-1, 1, 1));
+static_assert(!is_product(-1, 1, 2));
+static_assert(!is_product(-1, 1, 3));
+static_assert(!is_product(-1, 1, 4));
+
+static_assert(!is_product(-1, 2, 0));
+static_assert(!is_product(-1, 2, 1));
+static_assert(!is_product(-1, 2, 2));
+static_assert(!is_product(-1, 2, 3));
+static_assert(!is_product(-1, 2, 4));
+
+static_assert(!is_product(-1, 3, 0));
+static_assert(!is_product(-1, 3, 1));
+static_assert(!is_product(-1, 3, 2));
+static_assert(!is_product(-1, 3, 3));
+static_assert(!is_product(-1, 3, 4));
+
+static_assert(!is_product(-1, 4, 0));
+static_assert(!is_product(-1, 4, 1));
+static_assert(!is_product(-1, 4, 2));
+static_assert(!is_product(-1, 4, 3));
+static_assert(!is_product(-1, 4, 4));
+
+static_assert(!is_product(-1, -1, 0));
+static_assert( is_product(-1, -1, 1)); // <=
+static_assert(!is_product(-1, -1, 2));
+static_assert(!is_product(-1, -1, 3));
+static_assert(!is_product(-1, -1, 4));
+
+static_assert(!is_product(-1, -2, 0));
+static_assert(!is_product(-1, -2, 1));
+static_assert(!is_product(-1, -2, 2));
+static_assert(!is_product(-1, -2, 3));
+static_assert(!is_product(-1, -2, 4));
+
+static_assert(!is_product(-1, -3, 0));
+static_assert(!is_product(-1, -3, 1));
+static_assert(!is_product(-1, -3, 2));
+static_assert(!is_product(-1, -3, 3));
+static_assert(!is_product(-1, -3, 4));
+
+static_assert(!is_product(-1, -4, 0));
+static_assert(!is_product(-1, -4, 1));
+static_assert(!is_product(-1, -4, 2));
+static_assert(!is_product(-1, -4, 3));
+static_assert(!is_product(-1, -4, 4));
+
+static_assert(!is_product(-1, -1, -1));
+static_assert(!is_product(-1, -1, -2));
+static_assert(!is_product(-1, -1, -3));
+static_assert(!is_product(-1, -1, -4));
+
+static_assert(!is_product(-1, -2, -1));
+static_assert(!is_product(-1, -2, -2));
+static_assert(!is_product(-1, -2, -3));
+static_assert(!is_product(-1, -2, -4));
+
+static_assert(!is_product(-1, -3, -1));
+static_assert(!is_product(-1, -3, -2));
+static_assert(!is_product(-1, -3, -3));
+static_assert(!is_product(-1, -3, -4));
+
+static_assert(!is_product(-1, -4, -1));
+static_assert(!is_product(-1, -4, -2));
+static_assert(!is_product(-1, -4, -3));
+static_assert(!is_product(-1, -4, -4));
+
+static_assert( is_product(1, -1, -1)); // <=
+static_assert(!is_product(1, -1, -2));
+static_assert(!is_product(1, -1, -3));
+static_assert(!is_product(1, -1, -4));
+
+static_assert(!is_product(1, -2, -1));
+static_assert(!is_product(1, -2, -2));
+static_assert(!is_product(1, -2, -3));
+static_assert(!is_product(1, -2, -4));
+
+static_assert(!is_product(1, -3, -1));
+static_assert(!is_product(1, -3, -2));
+static_assert(!is_product(1, -3, -3));
+static_assert(!is_product(1, -3, -4));
+
+static_assert(!is_product(1, -4, -1));
+static_assert(!is_product(1, -4, -2));
+static_assert(!is_product(1, -4, -3));
+static_assert(!is_product(1, -4, -4));
+
 // 2
 
 static_assert(!is_product(2, 0, 0));
@@ -244,12 +456,12 @@ static_assert(!is_product(2, 0, 4));
 
 static_assert(!is_product(2, 1, 0));
 static_assert(!is_product(2, 1, 1));
-static_assert(is_product(2, 1, 2)); // <=
+static_assert( is_product(2, 1, 2)); // <=
 static_assert(!is_product(2, 1, 3));
 static_assert(!is_product(2, 1, 4));
 
 static_assert(!is_product(2, 2, 0));
-static_assert(is_product(2, 2, 1)); // <=
+static_assert( is_product(2, 2, 1)); // <=
 static_assert(!is_product(2, 2, 2));
 static_assert(!is_product(2, 2, 3));
 static_assert(!is_product(2, 2, 4));
@@ -266,6 +478,80 @@ static_assert(!is_product(2, 4, 2));
 static_assert(!is_product(2, 4, 3));
 static_assert(!is_product(2, 4, 4));
 
+static_assert(!is_product(-2, 0, 1));
+static_assert(!is_product(-2, 0, 2));
+static_assert(!is_product(-2, 0, 3));
+static_assert(!is_product(-2, 0, 4));
+
+static_assert(!is_product(-2, -1, 0));
+static_assert(!is_product(-2, -1, 1));
+static_assert( is_product(-2, -1, 2)); // <=
+static_assert(!is_product(-2, -1, 3));
+static_assert(!is_product(-2, -1, 4));
+
+static_assert(!is_product(-2, -2, 0));
+static_assert( is_product(-2, -2, 1)); // <=
+static_assert(!is_product(-2, -2, 2));
+static_assert(!is_product(-2, -2, 3));
+static_assert(!is_product(-2, -2, 4));
+
+static_assert(!is_product(-2, -3, 0));
+static_assert(!is_product(-2, -3, 1));
+static_assert(!is_product(-2, -3, 2));
+static_assert(!is_product(-2, -3, 3));
+static_assert(!is_product(-2, -3, 4));
+
+static_assert(!is_product(-2, -4, 0));
+static_assert(!is_product(-2, -4, 1));
+static_assert(!is_product(-2, -4, 2));
+static_assert(!is_product(-2, -4, 3));
+static_assert(!is_product(-2, -4, 4));
+
+static_assert(!is_product(-2, 0, -1));
+static_assert(!is_product(-2, 0, -2));
+static_assert(!is_product(-2, 0, -3));
+static_assert(!is_product(-2, 0, -4));
+
+static_assert(!is_product(-2, -1, -1));
+static_assert(!is_product(-2, -1, -2));
+static_assert(!is_product(-2, -1, -3));
+static_assert(!is_product(-2, -1, -4));
+
+static_assert(!is_product(-2, -2, -1));
+static_assert(!is_product(-2, -2, -2));
+static_assert(!is_product(-2, -2, -3));
+static_assert(!is_product(-2, -2, -4));
+
+static_assert(!is_product(-2, -3, -1));
+static_assert(!is_product(-2, -3, -2));
+static_assert(!is_product(-2, -3, -3));
+static_assert(!is_product(-2, -3, -4));
+
+static_assert(!is_product(-2, -4, -1));
+static_assert(!is_product(-2, -4, -2));
+static_assert(!is_product(-2, -4, -3));
+static_assert(!is_product(-2, -4, -4));
+
+static_assert(!is_product(-2, 1, -1));
+static_assert( is_product(-2, 1, -2)); // <=
+static_assert(!is_product(-2, 1, -3));
+static_assert(!is_product(-2, 1, -4));
+
+static_assert( is_product(-2, 2, -1)); // <=
+static_assert(!is_product(-2, 2, -2));
+static_assert(!is_product(-2, 2, -3));
+static_assert(!is_product(-2, 2, -4));
+
+static_assert(!is_product(-2, 3, -1));
+static_assert(!is_product(-2, 3, -2));
+static_assert(!is_product(-2, 3, -3));
+static_assert(!is_product(-2, 3, -4));
+
+static_assert(!is_product(-2, 4, -1));
+static_assert(!is_product(-2, 4, -2));
+static_assert(!is_product(-2, 4, -3));
+static_assert(!is_product(-2, 4, -4));
+
 // 3
 
 static_assert(!is_product(3, 0, 0));
@@ -277,7 +563,7 @@ static_assert(!is_product(3, 0, 4));
 static_assert(!is_product(3, 1, 0));
 static_assert(!is_product(3, 1, 1));
 static_assert(!is_product(3, 1, 2));
-static_assert(is_product(3, 1, 3)); // <=
+static_assert( is_product(3, 1, 3)); // <=
 static_assert(!is_product(3, 1, 4));
 
 static_assert(!is_product(3, 2, 0));
@@ -287,7 +573,7 @@ static_assert(!is_product(3, 2, 3));
 static_assert(!is_product(3, 2, 4));
 
 static_assert(!is_product(3, 3, 0));
-static_assert(is_product(3, 3, 1)); // <=
+static_assert( is_product(3, 3, 1)); // <=
 static_assert(!is_product(3, 3, 2));
 static_assert(!is_product(3, 3, 3));
 static_assert(!is_product(3, 3, 4));
@@ -310,11 +596,11 @@ static_assert(!is_product(4, 1, 0));
 static_assert(!is_product(4, 1, 1));
 static_assert(!is_product(4, 1, 2));
 static_assert(!is_product(4, 1, 3));
-static_assert(is_product(4, 1, 4)); // <=
+static_assert( is_product(4, 1, 4)); // <=
 
 static_assert(!is_product(4, 2, 0));
 static_assert(!is_product(4, 2, 1));
-static_assert(is_product(4, 2, 2)); // <=
+static_assert( is_product(4, 2, 2)); // <=
 static_assert(!is_product(4, 2, 3));
 static_assert(!is_product(4, 2, 4));
 
@@ -325,12 +611,12 @@ static_assert(!is_product(4, 3, 3));
 static_assert(!is_product(4, 3, 4));
 
 static_assert(!is_product(4, 4, 0));
-static_assert(is_product(4, 4, 1)); // <=
+static_assert( is_product(4, 4, 1)); // <=
 static_assert(!is_product(4, 4, 2));
 static_assert(!is_product(4, 4, 3));
 static_assert(!is_product(4, 4, 4));
 
-static_assert(is_product(0_u8, 0_u8, max_uint8)); // <=
+static_assert( is_product(0_u8, 0_u8, max_uint8)); // <=
 static_assert(!is_product(1_u8, 1_u8, max_uint8));
 static_assert(!is_product(2_u8, 2_u8, max_uint8));
 static_assert(!is_product(3_u8, 2_u8, max_uint8));
