@@ -66,6 +66,11 @@ template <typename Type>
 using to_size_type = std::conditional_t<std::is_signed_v<Type>,
     signed_size_t, size_t>;
 
+template <typename Type,
+    std::enable_if_t<std::is_integral_v<Type>, bool> = true>
+using to_maximal_type =
+    std::conditional_t<std::is_signed_v<Type>, int64_t, uint64_t>;
+
 /// Promotion-based type selectors.
 /// ---------------------------------------------------------------------------
 

@@ -164,6 +164,19 @@ static_assert(is_same_type<to_greater_type<uint64_t, int64_t>, uint64_t>);
 static_assert(is_same_type<to_greater_type<size_t, signed_size_t>, size_t>);
 static_assert(is_same_type<to_greater_type<signed_size_t, size_t>, signed_size_t>);
 
+static_assert(is_same_type<to_maximal_type<int>, int64_t>);
+static_assert(is_same_type<to_maximal_type<unsigned int>, uint64_t>);
+static_assert(is_same_type<to_maximal_type<int8_t>, int64_t>);
+static_assert(is_same_type<to_maximal_type<int16_t>, int64_t>);
+static_assert(is_same_type<to_maximal_type<int32_t>, int64_t>);
+static_assert(is_same_type<to_maximal_type<int64_t>, int64_t>);
+static_assert(is_same_type<to_maximal_type<signed_size_t>, int64_t>);
+static_assert(is_same_type<to_maximal_type<uint8_t>, uint64_t>);
+static_assert(is_same_type<to_maximal_type<uint16_t>, uint64_t>);
+static_assert(is_same_type<to_maximal_type<uint32_t>, uint64_t>);
+static_assert(is_same_type<to_maximal_type<uint64_t>, uint64_t>);
+static_assert(is_same_type<to_maximal_type<size_t>, uint64_t>);
+
 // uintx_t<>
 // ----------------------------------------------------------------------------
 
