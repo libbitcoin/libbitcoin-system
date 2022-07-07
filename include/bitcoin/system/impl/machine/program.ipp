@@ -19,13 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iterator>
 #include <utility>
 #include <variant>
 #include <bitcoin/system/chain/chain.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -390,6 +387,7 @@ pop_index32(size_t& index) NOEXCEPT
 
     if (is_negative(value))
         return false;
+
     // Cast guarded by stack size.
     index = limit<size_t>(value);
 
