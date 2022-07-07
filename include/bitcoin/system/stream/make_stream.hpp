@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAM_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAM_HPP
 
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/device.hpp>
 
 namespace libbitcoin {

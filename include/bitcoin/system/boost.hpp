@@ -47,7 +47,7 @@
 // Include boost in cpp files only from here, so exception disable works.
 // Avoid format.hpp here due to warning repetition (include in printer.cpp).
 #include <boost/algorithm/string.hpp>
-////#include <boost/format.hpp>
+////#include <boost/format.hpp> // /config/printer.cpp
 #include <boost/iostreams/stream.hpp>
 #include <boost/json.hpp>
 #include <boost/locale.hpp>

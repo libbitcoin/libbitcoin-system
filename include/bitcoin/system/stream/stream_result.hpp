@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_STREAM_STREAM_RESULT_HPP
 
 #include <iostream>
+#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
