@@ -827,6 +827,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp">
+      <Filter>include\bitcoin\system\data</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\byte_cast.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
@@ -1326,6 +1329,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp">
+      <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>

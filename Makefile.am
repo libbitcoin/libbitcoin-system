@@ -260,6 +260,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/crypto/siphash.cpp \
     test/crypto/siphash.hpp \
     test/crypto/intrinsics/intrinsics.cpp \
+    test/data/array_cast.cpp \
     test/data/byte_cast.cpp \
     test/data/collection.cpp \
     test/data/data_array.cpp \
@@ -487,6 +488,7 @@ include_bitcoin_system_crypto_intrinsics_HEADERS = \
 
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
 include_bitcoin_system_data_HEADERS = \
+    include/bitcoin/system/data/array_cast.hpp \
     include/bitcoin/system/data/byte_cast.hpp \
     include/bitcoin/system/data/collection.hpp \
     include/bitcoin/system/data/data.hpp \
@@ -532,6 +534,7 @@ include_bitcoin_system_impl_crypto_HEADERS = \
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \
+    include/bitcoin/system/impl/data/array_cast.ipp \
     include/bitcoin/system/impl/data/byte_cast.ipp \
     include/bitcoin/system/impl/data/collection.ipp \
     include/bitcoin/system/impl/data/data_array.ipp \

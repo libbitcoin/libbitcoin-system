@@ -563,6 +563,7 @@ if (with-tests)
         "../../test/crypto/siphash.cpp"
         "../../test/crypto/siphash.hpp"
         "../../test/crypto/intrinsics/intrinsics.cpp"
+        "../../test/data/array_cast.cpp"
         "../../test/data/byte_cast.cpp"
         "../../test/data/collection.cpp"
         "../../test/data/data_array.cpp"

@@ -93,6 +93,7 @@
 #include <bitcoin/system/crypto/external/sha512.h>
 #include <bitcoin/system/crypto/external/zeroize.h>
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data.hpp>

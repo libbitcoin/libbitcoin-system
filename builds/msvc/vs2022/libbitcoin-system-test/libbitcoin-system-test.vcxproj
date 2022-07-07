@@ -111,6 +111,7 @@
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\collection.cpp">
       <ObjectFileName>$(IntDir)test_data_collection.obj</ObjectFileName>
