@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
 {
     // sink.data() is nullptr, and should be reflected in sequence.first
     // and sequence.second, as sink.size() is zero.
-    constexpr data_chunk chunk{};
-    static_assert(chunk.data() == nullptr);
+    const data_chunk chunk{};
+    BOOST_REQUIRE(chunk.data() == nullptr);
 
     data_chunk sink{};
     copy_sink<data_slab> instance(sink);
