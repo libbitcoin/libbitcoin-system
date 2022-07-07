@@ -27,31 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Byte casts (require pointer_cast, not constexpr).
-/// ---------------------------------------------------------------------------
-/// C++20: std::bit_cast is a copy, not a cast, these are true casts.
-
-/// Cast integral& to a data array& with byte length of the integral.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)>&
-byte_cast(Integral& value) NOEXCEPT;
-
-/// Cast const integral& to a const data array& with byte length of the integral.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr const data_array<sizeof(Integral)>&
-byte_cast(const Integral& value) NOEXCEPT;
-
-/// Cast data array& to unsigned integral& of same byte length.
-template <size_t Size, if_integral_size<Size> = true>
-constexpr unsigned_type<Size>&
-byte_cast(data_array<Size>& value) NOEXCEPT;
-
-/// Cast const data array& to const unsigned integral& of same byte length.
-template <size_t Size, if_integral_size<Size> = true>
-constexpr const unsigned_type<Size>&
-byte_cast(const data_array<Size>& value) NOEXCEPT;
-
-/// Array casts (require pointer_cast, not constexpr).
+/// Array casting utilities.
 /// ---------------------------------------------------------------------------
 
 template <typename Left, typename Right,
@@ -75,6 +51,9 @@ constexpr bool is_portional(size_t left_count, size_t right_count) NOEXCEPT;
 
 template <size_t LeftCount, typename Left, size_t RightCount, typename Right>
 using if_portional = bool_if<is_portional<Left, Right>(LeftCount, RightCount)>;
+
+/// Array casts (require pointer_cast, not constexpr).
+/// ---------------------------------------------------------------------------
 
 /// Cast array& of integrals to same-sized array& of integrals.
 template <typename To, size_t Count, typename From,
@@ -123,6 +102,30 @@ template <typename To, size_t Size, typename From,
     if_integral_integer<To> = true>
 constexpr const std::array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT;
+
+/// Byte casts (require pointer_cast, not constexpr).
+/// ---------------------------------------------------------------------------
+/// C++20: std::bit_cast is a copy, not a cast, these are true casts.
+
+/// Cast integral& to a data array& with byte length of the integral.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr data_array<sizeof(Integral)>&
+byte_cast(Integral& value) NOEXCEPT;
+
+/// Cast const integral& to a const data array& with byte length of the integral.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr const data_array<sizeof(Integral)>&
+byte_cast(const Integral& value) NOEXCEPT;
+
+/// Cast data array& to unsigned integral& of same byte length.
+template <size_t Size, if_integral_size<Size> = true>
+constexpr unsigned_type<Size>&
+byte_cast(data_array<Size>& value) NOEXCEPT;
+
+/// Cast const data array& to const unsigned integral& of same byte length.
+template <size_t Size, if_integral_size<Size> = true>
+constexpr const unsigned_type<Size>&
+byte_cast(const data_array<Size>& value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

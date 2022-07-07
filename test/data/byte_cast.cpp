@@ -20,6 +20,9 @@
 
 BOOST_AUTO_TEST_SUITE(byte_cast_tests)
 
+// utilities
+// ----------------------------------------------------------------------------
+
 template <typename>
 constexpr bool is_defined = true;
 
@@ -137,11 +140,6 @@ static_assert(is_defined<if_portional<8u, uint64_t, 9u, uint64_t>>);
 ////static_assert(!is_defined<if_portional<9u, uint16_t, 2u, uint64_t>>);
 ////static_assert(!is_defined<if_portional<9u, uint32_t, 4u, uint64_t>>);
 ////static_assert(!is_defined<if_portional<9u, uint64_t, 8u, uint64_t>>);
-
-// byte_cast
-// ----------------------------------------------------------------------------
-
-// TODO: tests.
 
 // array_cast
 // ----------------------------------------------------------------------------
@@ -358,7 +356,15 @@ BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__non_const__expected)
     BOOST_REQUIRE_EQUAL(data8x8[7], 0xf0_u8);
 }
 
+// byte_cast
+// ----------------------------------------------------------------------------
+
+// TODO: tests.
+
 BOOST_AUTO_TEST_SUITE_END()
+
+// These don't verify library behavior.
+#if defined(DISABLED)
 
 // Verify compiler "usual arithmetic conversion" expectations.
 // ----------------------------------------------------------------------------
@@ -626,3 +632,5 @@ static_assert(is_same_type<decltype(int16_t{0}  % uint8_t{1}),  int>,      "prom
 static_assert(is_same_type<decltype(int32_t{0}  % uint16_t{1}), int32_t>,  "widest   (one >=32)");
 static_assert(is_same_type<decltype(int64_t{0}  % uint32_t{1}), int64_t>,  "unsigned (two >=32, s%u)");
 static_assert(is_same_type<decltype(uint32_t{0} % int64_t{1}),  int64_t>,  "unsigned (two >=32, u%s)");
+
+#endif // DISABLED

@@ -27,37 +27,6 @@
 namespace libbitcoin {
 namespace system {
 
-// Byte casts.
-// ----------------------------------------------------------------------------
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr data_array<sizeof(Integral)>&
-byte_cast(Integral& value) NOEXCEPT
-{
-    return *pointer_cast<data_array<sizeof(Integral)>>(&value);
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr const data_array<sizeof(Integral)>&
-byte_cast(const Integral& value) NOEXCEPT
-{
-    return *pointer_cast<const data_array<sizeof(Integral)>>(&value);
-}
-
-template <size_t Size, if_integral_size<Size>>
-constexpr unsigned_type<Size>&
-byte_cast(data_array<Size>& value) NOEXCEPT
-{
-    return *pointer_cast<unsigned_type<Size>>(&value);
-}
-
-template <size_t Size, if_integral_size<Size>>
-constexpr const unsigned_type<Size>&
-byte_cast(const data_array<Size>& value) NOEXCEPT
-{
-    return *pointer_cast<const unsigned_type<Size>>(&value);
-}
-
 // Array casts.
 // ----------------------------------------------------------------------------
 
@@ -140,6 +109,37 @@ constexpr const std::array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT
 {
     return *pointer_cast<const std::array<To, Size>>(bytes);
+}
+
+// Byte casts.
+// ----------------------------------------------------------------------------
+
+template <typename Integral, if_integral_integer<Integral>>
+constexpr data_array<sizeof(Integral)>&
+byte_cast(Integral& value) NOEXCEPT
+{
+    return *pointer_cast<data_array<sizeof(Integral)>>(&value);
+}
+
+template <typename Integral, if_integral_integer<Integral>>
+constexpr const data_array<sizeof(Integral)>&
+byte_cast(const Integral& value) NOEXCEPT
+{
+    return *pointer_cast<const data_array<sizeof(Integral)>>(&value);
+}
+
+template <size_t Size, if_integral_size<Size>>
+constexpr unsigned_type<Size>&
+byte_cast(data_array<Size>& value) NOEXCEPT
+{
+    return *pointer_cast<unsigned_type<Size>>(&value);
+}
+
+template <size_t Size, if_integral_size<Size>>
+constexpr const unsigned_type<Size>&
+byte_cast(const data_array<Size>& value) NOEXCEPT
+{
+    return *pointer_cast<const unsigned_type<Size>>(&value);
 }
 
 } // namespace system
