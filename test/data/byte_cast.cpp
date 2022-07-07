@@ -132,6 +132,8 @@ static_assert(is_defined<if_portional<8u, uint64_t, 9u, uint64_t>>);
 // byte_cast
 // ----------------------------------------------------------------------------
 
+// TODO: tests.
+
 // array_cast
 // ----------------------------------------------------------------------------
 
@@ -172,7 +174,7 @@ static_assert(is_same_type<decltype(array_cast<uint8_t>(const_data16x1)), const 
 static_assert(is_same_type<decltype(array_cast<uint16_t>(const_data16x1)), const array16x1&>);
 
 // Since _u8 data is cast into integrals its above order is preserved.
-// The endianness of the _u32 integrals affects their bytewise interpretation.
+// The endianness of the _u32 integrals affects their numerical interpretation.
 BOOST_AUTO_TEST_CASE(cast__array_cast__const__expected)
 {
     constexpr data_array<2> data8x2{ 0x01_u8, 0x02_u8 };
@@ -186,7 +188,7 @@ BOOST_AUTO_TEST_CASE(cast__array_cast__const__expected)
 }
 
 // Since _u8 data is cast into integrals its above order is preserved.
-// The endianness of the _u32 integrals affects their bytewise interpretation.
+// The endianness of the _u32 integrals affects their numerical interpretation.
 BOOST_AUTO_TEST_CASE(cast__array_cast__non_const__expected)
 {
     data_array<2> data8x2{ 0x01_u8, 0x02_u8 };
