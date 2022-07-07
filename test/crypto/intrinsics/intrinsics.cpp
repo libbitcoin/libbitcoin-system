@@ -24,6 +24,7 @@ BOOST_AUTO_TEST_SUITE(intrinsics_tests)
 using namespace bc::system::intrinsics;
 
 // "try" tests not reliable across platforms.
+// These have all been moved into cpp (no longer public).
 
 ////BOOST_AUTO_TEST_CASE(intrinsics__try_avx2__always__expected)
 ////{
@@ -61,9 +62,9 @@ BOOST_AUTO_TEST_CASE(intrinsics__sha256_paired_double__vs_sha256x2__same)
 {
     for (int i = 0; i <= 32; ++i)
     {
-        uint8_t in[64 * 32];
-        uint8_t out1[32 * 32];
-        uint8_t out2[32 * 32];
+        uint8_t in[64 * 32]{};
+        uint8_t out1[32 * 32]{};
+        uint8_t out2[32 * 32]{};
         const auto to = [&](int j) { return out1 + 32 * j; };
         const auto from = [&](int j) { return in + 64 * j; };
 
