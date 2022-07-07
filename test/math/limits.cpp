@@ -209,7 +209,7 @@ static_assert(is_same_type<decltype(absolute_min<int64_t>), const uint64_t>);
 static_assert(unsigned_max<int8_t > == sub1(to_half(power2(bits<int8_t>))));
 static_assert(unsigned_max<int16_t> == sub1(to_half(power2(bits<int16_t>))));
 static_assert(unsigned_max<int32_t> == sub1(to_half(power2<int64_t>(bits<int32_t>))));
-static_assert(unsigned_max<int64_t> == ((power2<uint128_t>(bits<int64_t>) / 2u)) - 1u);
+static_assert(unsigned_max<int64_t> == sub1(to_half(power2<uint128_t>(bits<int64_t>))));
 static_assert(unsigned_max<int8_t > == to_unsigned(max_int8));
 static_assert(unsigned_max<int16_t> == to_unsigned(max_int16));
 static_assert(unsigned_max<int32_t> == to_unsigned(max_int32));
