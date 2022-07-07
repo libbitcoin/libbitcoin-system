@@ -34,10 +34,10 @@ static_assert(is_same_type<decltype(negate(1u)), unsigned>);
 
 // negate(minimum<integral>) overflows the integral domain.
 // Cannot be represented in 64 bit constexpr.
-static_assert(negate(min_int8)  == to_signed(add1(to_unsigned(max_int8))));
-static_assert(negate(min_int16) == to_signed(add1(to_unsigned(max_int16))));
-static_assert(negate(min_int32) == add1(to_unsigned(max_int32)));
-////static_assert(negate(min_int64) == to_signed(add1(to_unsigned(max_int64))));
+static_assert(to_unsigned(negate(min_int8))  == add1(to_unsigned(max_int8)));
+static_assert(to_unsigned(negate(min_int16)) == add1(to_unsigned(max_int16)));
+static_assert(to_unsigned(negate(min_int32)) == add1(to_unsigned(max_int32)));
+////static_assert(to_unsigned(negate(min_int64)) == add1(to_unsigned(max_int64)));
 
 // absolute ([absolue] value does not change, signedness to unsigned, sign to positive)
 static_assert(absolute(0_i32)   == 0_u32);
