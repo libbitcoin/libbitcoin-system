@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(cast__array_cast__non_const__expected)
     // Demonstrate that this is a cast, not a copy.
     value8x2[0] = 0x42_u8;
     value8x2[1] = 0x24_u8;
-    BOOST_REQUIRE_EQUAL(value16x1[0], native_to_little_end(0x4224_u16));
+    BOOST_REQUIRE_EQUAL(value16x1[0], native_to_little_end(0x2442_u16));
 }
 
 // narrowing_array_cast
