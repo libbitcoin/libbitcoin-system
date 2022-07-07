@@ -554,3 +554,6 @@ static_assert(is_defined<if_not_same_signed_integral_integer<int, size_t>>);
 ////static_assert(!is_defined<if_not_same_signed_integral_integer<int32_t, int>>);
 ////static_assert(!is_defined<if_not_same_signed_integral_integer<int64_t, int>>);
 ////static_assert(!is_defined<if_not_same_signed_integral_integer<base, int>>);
+
+////static_assert(is_defined<if_big_endian_integral_integer<uint8_t>>);
+////static_assert(is_defined<if_little_endian_integral_integer<uint8_t>>);
