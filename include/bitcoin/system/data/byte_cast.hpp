@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_HPP
 #define LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_HPP
 
-#include <bitcoin/system/data/data_array.hpp>
+#include <array>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -31,24 +31,32 @@ namespace system {
 /// C++20: std::bit_cast is a copy, not a cast, these are true casts.
 
 /// Cast integral& to a data array& with byte length of the integral.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)>&
+template <typename Byte = uint8_t, typename Integral,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true>
+constexpr std::array<Byte, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT;
 
 /// Cast const integral& to a const data array& with byte length of the integral.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr const data_array<sizeof(Integral)>&
+template <typename Byte = uint8_t, typename Integral,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true>
+constexpr const std::array<Byte, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT;
 
 /// Cast data array& to unsigned integral& of same byte length.
-template <size_t Size, if_integral_size<Size> = true>
+template <typename Byte, size_t Size,
+    if_one_byte<Byte> = true,
+    if_integral_size<Size> = true>
 constexpr unsigned_type<Size>&
-byte_cast(data_array<Size>& value) NOEXCEPT;
+byte_cast(std::array<Byte, Size>& value) NOEXCEPT;
 
 /// Cast const data array& to const unsigned integral& of same byte length.
-template <size_t Size, if_integral_size<Size> = true>
+template <typename Byte, size_t Size,
+    if_one_byte<Byte> = true,
+    if_integral_size<Size> = true>
 constexpr const unsigned_type<Size>&
-byte_cast(const data_array<Size>& value) NOEXCEPT;
+byte_cast(const std::array<Byte, Size>& value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

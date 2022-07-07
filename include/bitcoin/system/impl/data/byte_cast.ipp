@@ -19,40 +19,48 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_IPP
 #define LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_IPP
 
+#include <array>
 #include <bitcoin/system/data/array_cast.hpp>
-#include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-template <typename Integral, if_integral_integer<Integral>>
-constexpr data_array<sizeof(Integral)>&
+template <typename Byte, typename Integral,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+constexpr std::array<Byte, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT
 {
     // Safe because passing sizeof(value).
-    return unsafe_array_cast<uint8_t, sizeof(Integral)>(&value);
+    return unsafe_array_cast<Byte, sizeof(Integral)>(&value);
 }
 
-template <typename Integral, if_integral_integer<Integral>>
-constexpr const data_array<sizeof(Integral)>&
+template <typename Byte, typename Integral,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+constexpr const std::array<Byte, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT
 {
     // Safe because passing sizeof(value).
-    return unsafe_array_cast<uint8_t, sizeof(Integral)>(&value);
+    return unsafe_array_cast<Byte, sizeof(Integral)>(&value);
 }
 
-template <size_t Size, if_integral_size<Size>>
+template <typename Byte, size_t Size,
+    if_one_byte<Byte>,
+    if_integral_size<Size>>
 constexpr unsigned_type<Size>&
-byte_cast(data_array<Size>& value) NOEXCEPT
+byte_cast(std::array<Byte, Size>& value) NOEXCEPT
 {
     return *pointer_cast<unsigned_type<Size>>(&value);
 }
 
-template <size_t Size, if_integral_size<Size>>
+template <typename Byte, size_t Size,
+    if_one_byte<Byte>,
+    if_integral_size<Size>>
 constexpr const unsigned_type<Size>&
-byte_cast(const data_array<Size>& value) NOEXCEPT
+byte_cast(const std::array<Byte, Size>& value) NOEXCEPT
 {
     return *pointer_cast<const unsigned_type<Size>>(&value);
 }

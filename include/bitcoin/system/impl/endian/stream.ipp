@@ -19,166 +19,63 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_STREAM_IPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_STREAM_IPP
 
-#include <array>
 #include <iostream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/nominal.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-#if !defined(HAVE_BUFFERED_STREAM)
-
-// non-buffered stream locals
-// ----------------------------------------------------------------------------
-// These are necessitated by the stream reader inside the iteration.
-
-// This avoids a byteswap in exchange for a non-atomic write.
-template <typename Integral, typename IStream>
-inline Integral from_forward_stream(IStream& stream) NOEXCEPT
-{
-    using char_type = typename IStream::char_type;
-    Integral value(0);
-    constexpr auto bytes = sizeof(Integral);
-
-    // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (size_t byte = 0; byte < bytes; ++byte)
-    {
-        value <<= bits<char_type>;
-
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        value |= possible_narrow_and_sign_cast<Integral>(stream.get());
-        BC_POP_WARNING()
-    }
-
-    // Stream invalidated if read past end (and Integral is unspecified).
-    return value;
-}
-
-// This avoids a byteswap in exchange for a non-atomic write.
-template <typename Integral, typename OStream>
-inline void to_reverse_stream(OStream& stream, Integral value) NOEXCEPT
-{
-    using char_type = typename OStream::char_type;
-    constexpr auto bytes = sizeof(Integral);
-
-    // TODO: flatten loop using if constexpr (or rely on compiler to do it).
-    for (size_t byte = 0; byte < bytes; ++byte)
-    {
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        stream.put(possible_sign_narrow_cast<char_type>(value));
-        BC_POP_WARNING()
-
-        value >>= bits<char_type>;
-    }
-}
-
-// stream public
-// ----------------------------------------------------------------------------
-
-// Buffered stream should be more efficient, as the read is atomic and this
-// still requires a byte swap, just as does the buffered read.
-template <typename Integral, typename IStream,
-    if_integral_integer<Integral>,
-    if_same_size<typename IStream::char_type, uint8_t>>
-inline Integral from_big_endian(IStream& stream) NOEXCEPT
-{
-    return native_from_big_end(from_forward_stream<Integral>(stream));
-}
-
-// This avoids a byteswap in exchange for a non-atomic write.
-template <typename Integral, typename IStream,
-    if_integral_integer<Integral>,
-    if_same_size<typename IStream::char_type, uint8_t>>
-inline Integral from_little_endian(IStream& stream) NOEXCEPT
-{
-    return native_from_little_end(from_forward_stream<Integral>(stream));
-}
-
-// This avoids a byteswap in exchange for a non-atomic write.
-template <typename Integral, typename OStream,
-    if_integral_integer<Integral>,
-    if_same_size<typename OStream::char_type, uint8_t>>
-inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
-{
-    to_reverse_stream(stream, native_to_little_end(value));
-}
-
-// Buffered stream should be more efficient, as the write is atomic and this
-// still requires a byte swap, just as does the buffered write.
-template <typename Integral, typename OStream,
-    if_integral_integer<Integral>,
-    if_same_size<typename OStream::char_type, uint8_t>>
-inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
-{
-    to_reverse_stream(stream, native_to_big_end(value));
-}
-
-#else // HAVE_BUFFERED_STREAM
-
 // iostreams are not costexpr.
 // if stream.gcount() != size there should be a stream error.
 
-// TODO: bytecast.
 template <typename Integral, typename IStream,
     if_integral_integer<Integral>,
-    if_same_size<typename IStream::char_type, uint8_t>>
+    if_base_of<std::istream, IStream>,
+    if_one_byte<typename IStream::char_type>>
 inline Integral from_big_endian(IStream& stream) NOEXCEPT
 {
+    Integral value{};
     using character = typename IStream::char_type;
-    constexpr auto size = sizeof(Integral);
-    std::array<character, size> buffer{};
-
-    // nominal, data_slice accepts any byte-sized data.
-    stream.read(buffer.data(), size);
-    return from_big_endian<Integral>(buffer);
+    auto& cast = byte_cast<character>(value);
+    stream.read(cast.data(), cast.size());
+    return native_from_big_end(value);
 }
 
-// TODO: bytecast, from_little_endian should be a no-op.
 template <typename Integral, typename IStream,
     if_integral_integer<Integral>,
-    if_same_size<typename IStream::char_type, uint8_t>>
+    if_base_of<std::istream, IStream>,
+    if_one_byte<typename IStream::char_type>>
 inline Integral from_little_endian(IStream& stream) NOEXCEPT
 {
+    Integral value{};
     using character = typename IStream::char_type;
-    constexpr auto size = sizeof(Integral);
-    std::array<character, size> buffer{};
-
-    // nominal, data_slice accepts any byte-sized data.
-    stream.read(buffer.data(), size);
-    return from_little_endian<Integral>(buffer);
+    auto& cast = byte_cast<character>(value);
+    stream.read(cast.data(), cast.size());
+    return native_from_little_end(value);
 }
 
-// TODO: bytecast.
 template <typename Integral, typename OStream,
     if_integral_integer<Integral>,
-    if_same_size<typename OStream::char_type, uint8_t>>
+    if_base_of<std::ostream, OStream>,
+    if_one_byte<typename OStream::char_type>>
 inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 {
     using character = typename OStream::char_type;
-    constexpr auto size = sizeof(Integral);
-    const auto buffer = to_big_endian(value);
-
-    // nominal
-    stream.write(possible_pointer_cast<const character*>(buffer.data()), size);
+    const auto& cast = byte_cast<character>(native_to_big_end(value));
+    stream.write(cast.data(), cast.size());
 }
 
-// TODO: bytecast, to_little_endian should be a no-op.
 template <typename Integral, typename OStream,
     if_integral_integer<Integral>,
-    if_same_size<typename OStream::char_type, uint8_t>>
+    if_base_of<std::ostream, OStream>,
+    if_one_byte<typename OStream::char_type>>
 inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
 {
     using character = typename OStream::char_type;
-    constexpr auto size = sizeof(Integral);
-    const auto buffer = to_little_endian(value);
-
-    // nominal
-    stream.write(possible_pointer_cast<const character*>(buffer.data()), size);
+    const auto& cast = byte_cast<character>(native_to_little_end(value));
+    stream.write(cast.data(), cast.size());
 }
-
-#endif // HAVE_BUFFERED_STREAM
 
 } // namespace system
 } // namespace libbitcoin

@@ -42,7 +42,7 @@
 // constexpr  data_array<sizeof(Integral)> to_big_endian{integral}(Integral);
 // constexpr  data_array<sizeof(Integral)> to_little_endian{integral}(Integral);
 
-// NETWORK [[NEXT]]
+// NETWORK [[COMPLETE]]
 // Stream (<Integer>/stream):
 // inline     Integral                     from_big_endian<Integral>{IStream}(IStream&);
 // inline     Integral                     from_little_endian<Integral>{IStream}(IStream&);

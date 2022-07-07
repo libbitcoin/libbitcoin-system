@@ -25,30 +25,28 @@
 namespace libbitcoin {
 namespace system {
 
-// stream -> integral (explicit type)
-// integral -> stream (implicit size)
-
-// integral from_big|little_endian(istream)
-// void       to_big|little_endian(ostream)
-    
 template <typename Integral, typename IStream = std::istream,
     if_integral_integer<Integral> = true,
-    if_same_size<typename IStream::char_type, uint8_t> = true>
+    if_base_of<std::istream, IStream> = true,
+    if_one_byte<typename IStream::char_type> = true>
 inline Integral from_big_endian(IStream& stream) NOEXCEPT;
 
 template <typename Integral, typename IStream = std::istream,
     if_integral_integer<Integral> = true,
-    if_same_size<typename IStream::char_type, uint8_t> = true>
+    if_base_of<std::istream, IStream> = true,
+    if_one_byte<typename IStream::char_type> = true>
 inline Integral from_little_endian(IStream& stream) NOEXCEPT;
 
 template <typename Integral, typename OStream = std::ostream,
     if_integral_integer<Integral> = true,
-    if_same_size<typename OStream::char_type, uint8_t> = true>
+    if_base_of<std::ostream, OStream> = true,
+    if_one_byte<typename OStream::char_type> = true>
 inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT;
 
 template <typename Integral, typename OStream = std::ostream,
     if_integral_integer<Integral> = true,
-    if_same_size<typename OStream::char_type, uint8_t> = true>
+    if_base_of<std::ostream, OStream> = true,
+    if_one_byte<typename OStream::char_type> = true>
 inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT;
 
 } // namespace system

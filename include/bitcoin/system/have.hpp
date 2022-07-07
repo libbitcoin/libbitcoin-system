@@ -108,7 +108,4 @@
 // have a portable build (no intrinsics).
 ////#define HAVE_PORTABLE
 
-// TODO: performance analysis on endian stream buffer impact.
-////#define HAVE_BUFFERED_STREAM
-
 #endif
