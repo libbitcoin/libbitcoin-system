@@ -150,6 +150,7 @@ constexpr bool is_log_overflow(Base base, Value value) NOEXCEPT
 // ----------------------------------------------------------------------------
 // TODO: power/log do not require safe calls as they are type-constrained
 // TODO: against domain overflow and return zero when undefined.
+// TODO: use maximal_cast for all operations (will limit to integrals).
 
 // Signed only, since unsigned is always safe, limit requires integral.
 template <typename Signed, if_signed_integral_integer<Signed>>

@@ -24,6 +24,8 @@
 #include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
+// TODO: use maximal_cast for all operations.
+
 namespace libbitcoin {
 namespace system {
     

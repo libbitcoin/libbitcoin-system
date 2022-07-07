@@ -43,6 +43,8 @@ namespace system {
 // Coversions.
 // ----------------------------------------------------------------------------
 
+// TODO: use of maximal_cast limits these to integrals.
+
 // absolute(minimum<Signed>) overflows to add1(maximum<Signed>) for all types.
 template <typename Signed, if_signed_integer<Signed>>
 constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT
