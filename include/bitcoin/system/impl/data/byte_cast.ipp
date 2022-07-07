@@ -66,8 +66,7 @@ template <typename Left, typename Right,
     if_integral_integer<Right>>
 constexpr bool is_proportional(size_t left_count) NOEXCEPT
 {
-    // TODO: replace (1) !with is_multiply_overflow when it supports signed.
-    return (left_count <= (max_size_t / sizeof(Left)))
+    return !is_multiply_overflow(left_count, sizeof(Left))
         && is_multiple(left_count * sizeof(Left), sizeof(Right));
 }
 
@@ -76,9 +75,8 @@ template <typename Left, typename Right,
     if_integral_integer<Right>>
 constexpr bool is_portional(size_t left_count, size_t right_count) NOEXCEPT
 {
-    // TODO: replace (2) with !is_multiply_overflow when it supports signed.
-    return (left_count  <= (max_size_t / sizeof(Left)))
-        && (right_count <= (max_size_t / sizeof(Right)))
+    return !is_multiply_overflow(left_count, sizeof(Left))
+        && !is_multiply_overflow(right_count, sizeof(Right))
         && (right_count * sizeof(Right) > left_count * sizeof(Left));
 }
 

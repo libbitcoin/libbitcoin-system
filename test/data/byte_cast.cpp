@@ -35,6 +35,8 @@ static_assert( is_proportional<uint16_t, uint64_t>(8u)); // n = 2
 static_assert( is_proportional<uint32_t, uint64_t>(8u)); // n = 4
 static_assert( is_proportional<uint64_t, uint64_t>(8u)); // n = 8
 
+static_assert(!is_proportional<uint8_t, uint64_t>(max_size_t)); // overflow
+
 // if_proportional<size_t, Integral, Integral>
 static_assert( is_defined<if_proportional<1, uint8_t,  uint8_t >>); // n = 1
 static_assert( is_defined<if_proportional<1, uint16_t, uint8_t >>); // n = 2
@@ -47,7 +49,8 @@ static_assert( is_defined<if_proportional<8, uint32_t, uint64_t>>); // n = 4
 static_assert( is_defined<if_proportional<8, uint64_t, uint64_t>>); // n = 8
 
 // proportion<size_t, Integral, Integral>
-// proportion is necessarily rounded, so must be guarded by if_proportional<>.
+// proportion is necessarily rounded (and overflows),
+// so must be guarded by if_proportional<>.
 static_assert(proportion<1, uint8_t,  uint8_t > == 1u); // n = 1
 static_assert(proportion<1, uint16_t, uint8_t > == 2u); // n = 2
 static_assert(proportion<1, uint8_t,  uint16_t> == 0u); // n = 0.5 (0)
@@ -82,6 +85,11 @@ static_assert(is_portional<uint8_t,  uint64_t>(8u, 2u));
 static_assert(is_portional<uint16_t, uint64_t>(8u, 3u));
 static_assert(is_portional<uint32_t, uint64_t>(8u, 5u));
 static_assert(is_portional<uint64_t, uint64_t>(8u, 9u));
+
+static_assert( is_portional<uint64_t, uint8_t >(1u, max_size_t));               // maximum  Right
+static_assert(!is_portional<uint64_t, uint16_t>(1u, max_size_t));               // overflow Right
+static_assert( is_portional<uint8_t,  uint8_t >(sub1(max_size_t), max_size_t)); // maximum  Left
+static_assert(!is_portional<uint8_t,  uint8_t >(max_size_t, max_size_t));       // overflow Left
 
 // greater proportions (not portional)
 static_assert(!is_portional<uint8_t,  uint8_t >(2u, 1u));
