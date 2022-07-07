@@ -97,7 +97,7 @@ ec_scalar& ec_scalar::operator=(const ec_secret& secret) NOEXCEPT
 // private
 ec_scalar ec_scalar::from_int64(int64_t value) NOEXCEPT
 {
-    // Shortcircuit writing a zero.
+    // Short-circuit writing a zero.
     if (is_zero(value))
         return {};
 
@@ -108,8 +108,8 @@ ec_scalar ec_scalar::from_int64(int64_t value) NOEXCEPT
         secret.end()
     });
 
-    // TODO: absolute unsafe, review.
     // All hashes and secrets are stored as big-endian by convention.
+    // absolute(minimum<int64_t>) overflows to zero, intended behavior.
     writer.write_8_bytes_big_endian(absolute(value));
 
     return value > 0 ? ec_scalar{ secret } : -ec_scalar{ secret };
