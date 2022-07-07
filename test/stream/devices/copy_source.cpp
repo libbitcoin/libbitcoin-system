@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(copy_source__input_sequence__not_empty__expected)
 }
 
 // read() is not required for direct devices.
-#ifdef UNDEFINED
+#if defined(DISABLED)
 
 // read
 
@@ -128,6 +128,6 @@ BOOST_AUTO_TEST_CASE(copy_source__read__multiple__correct_tracking)
     BOOST_REQUIRE_EQUAL(instance.read(to0.data(), 42), 0);
 }
 
-#endif // UNDEFINED
+#endif // DISABLED
 
 BOOST_AUTO_TEST_SUITE_END()

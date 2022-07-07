@@ -22,14 +22,23 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // output_sequence
 
+// Platform: linux
+// Compiler: Clang version 14.0.0 
+// STL     : GNU libstdc++ version 20220324
+// Boost   : 1.78.0
+// test/stream/devices/copy_sink.cpp(32): fatal error:
+// stream_tests/copy_sink__output_sequence__empty__empty:
+// critical check first == sequence.first has failed.
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
 {
     data_chunk sink;
     copy_sink<data_slab> instance(sink);
+
     const auto sequence = instance.output_sequence();
-    const auto first = reinterpret_cast<char*>(sink.data());
-    const auto second = std::next(first, sink.size());
+    const auto first = pointer_cast<char>(sink.data());
     BOOST_REQUIRE_EQUAL(first, sequence.first);
+
+    const auto second = std::next(first, sink.size());
     BOOST_REQUIRE_EQUAL(second, sequence.second);
     BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 0);
 }
@@ -43,7 +52,7 @@ BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__not_empty__expected)
 }
 
 // write() is not required for direct devices.
-#ifdef UNDEFINED
+#if defined(DISABLED)
 
 // write
 
@@ -115,6 +124,6 @@ BOOST_AUTO_TEST_CASE(copy_sink__write__multiple__correct_tracking)
     BOOST_REQUIRE_EQUAL(instance.write(&from[6], 42), 0);
 }
 
-#endif // UNDEFINED
+#endif // DISABLED
 
 BOOST_AUTO_TEST_SUITE_END()

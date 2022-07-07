@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__output_sequence__not_empty__expected)
 }
 
 // read() and write() are not required for direct devices.
-#ifdef UNDEFINED
+#if defined(DISABLED)
 
 // read (reading from the sink)
 
@@ -255,6 +255,6 @@ BOOST_AUTO_TEST_CASE(flip_sink__read_write__write_first__expected)
     BOOST_REQUIRE_EQUAL(sink[2], 'c');
 }
 
-#endif // UNDEFINED
+#endif // DISABLED
 
 BOOST_AUTO_TEST_SUITE_END()
