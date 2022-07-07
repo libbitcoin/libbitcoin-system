@@ -43,9 +43,7 @@ constexpr Restored depromote(Common value) NOEXCEPT
 
 template <typename To, typename From,
     if_lesser_size<To, From>,
-    if_integral_integer<To>,
-    if_integral_integer<From>,
-    if_same_signed_integer<To, From>>
+    if_same_signed_integral_integer<To, From>>
 constexpr To narrow_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -55,9 +53,7 @@ constexpr To narrow_cast(From value) NOEXCEPT
 
 template <typename To, typename From,
     if_not_lesser_size<To, From>,
-    if_integral_integer<To>,
-    if_integral_integer<From>,
-    if_not_same_signed_integer<To, From>>
+    if_not_same_signed_integral_integer<To, From>>
 constexpr To sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -67,9 +63,7 @@ constexpr To sign_cast(From value) NOEXCEPT
 
 template <typename To, typename From,
     if_lesser_size<To, From>,
-    if_integral_integer<To>,
-    if_integral_integer<From>,
-    if_not_same_signed_integer<To, From>>
+    if_not_same_signed_integral_integer<To, From>>
 constexpr To narrow_sign_cast(From value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
@@ -78,27 +72,22 @@ constexpr To narrow_sign_cast(From value) NOEXCEPT
 }
 
 template <typename To, typename From,
-    if_lesser_size<From, To>,
-    if_same_signed_integer<To, From>>
+    if_greater_size<To, From>,
+    if_same_signed_integral_integer<To, From>>
 constexpr To wide_cast(From value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<To>(value);
-    BC_POP_WARNING()
+    return value;
+}
+
+template <typename From,
+    if_integral_integer<From>>
+constexpr to_maximal_type<From> maximal_cast(From value) NOEXCEPT
+{
+    return value;
 }
 
 // Possible integer casts.
 // ----------------------------------------------------------------------------
-
-template <typename To, typename From, if_same_signed_integer<To, From>>
-constexpr To possible_wide_cast(From value) NOEXCEPT
-{
-    BC_PUSH_WARNING(NO_IDENTITY_CAST)
-    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
-    return static_cast<To>(value);
-    BC_POP_WARNING()
-    BC_POP_WARNING()
-}
 
 template <typename To, typename From, if_same_signed_integer<To, From>>
 constexpr To possible_narrow_cast(From value) NOEXCEPT
@@ -138,6 +127,14 @@ constexpr To possible_narrow_and_sign_cast(From value) NOEXCEPT
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<To>(value);
     BC_POP_WARNING()
+}
+
+template <typename To, typename From,
+    if_not_lesser_size<To, From>,
+    if_same_signed_integer<To, From>>
+constexpr To possible_wide_cast(From value) NOEXCEPT
+{
+    return value;
 }
 
 // Explicit pointer casts.

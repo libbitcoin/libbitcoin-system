@@ -22,12 +22,16 @@
 // narrow_cast
 // sign_cast
 // narrow_sign_cast
+// wide_cast
+// maximal_cast
+//
 // possible_narrow_cast
 // possible_sign_cast
 // possible_narrow_sign_cast
 // possible_sign_narrow_cast
 // possible_narrow_and_sign_cast
 // possible_wide_cast
+//
 // pointer_cast
 // possible_pointer_cast
 

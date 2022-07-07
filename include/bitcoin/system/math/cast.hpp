@@ -40,39 +40,34 @@ constexpr Restored depromote(Common value) NOEXCEPT;
 /// Cast integral to integral of narrower bit width.
 template <typename To, typename From,
     if_lesser_size<To, From> = true,
-    if_integral_integer<To> = true,
-    if_integral_integer<From> = true,
-    if_same_signed_integer<To, From> = true>
+    if_same_signed_integral_integer<To, From> = true>
 constexpr To narrow_cast(From value) NOEXCEPT;
 
 /// Cast integral sign (non-narrowing).
 template <typename To, typename From,
     if_not_lesser_size<To, From> = true,
-    if_integral_integer<To> = true,
-    if_integral_integer<From> = true,
-    if_not_same_signed_integer<To, From> = true>
+    if_not_same_signed_integral_integer<To, From> = true>
 constexpr To sign_cast(From value) NOEXCEPT;
 
 /// Cast integral sign to integral of narrower bit width.
 template <typename To, typename From,
     if_lesser_size<To, From> = true,
-    if_integral_integer<To> = true,
-    if_integral_integer<From> = true,
-    if_not_same_signed_integer<To, From> = true>
+    if_not_same_signed_integral_integer<To, From> = true>
 constexpr To narrow_sign_cast(From value) NOEXCEPT;
 
-/// Cast integral to integral of wider bit width (precludes reassignment).
+/// Promote integral to integral of wider bit width.
 template <typename To, typename From,
-    if_lesser_size<From, To> = true,
-    if_same_signed_integer<To, From> = true>
+    if_greater_size<To, From> = true,
+    if_same_signed_integral_integer<To, From> = true>
 constexpr To wide_cast(From value) NOEXCEPT;
+
+/// Promote integral to integral of widest bit width.
+template <typename From,
+    if_integral_integer<From> = true>
+constexpr to_maximal_type<From> maximal_cast(From value) NOEXCEPT;
 
 /// Possible integer casts.
 /// ---------------------------------------------------------------------------
-
-/// Possible widening without sign cast.
-template <typename To, typename From, if_same_signed_integer<To, From> = true>
-constexpr To possible_wide_cast(From value) NOEXCEPT;
 
 /// Possible narrowing without sign cast.
 template <typename To, typename From,
@@ -97,6 +92,12 @@ constexpr To possible_sign_narrow_cast(From value) NOEXCEPT;
 /// Possible narrowing and possible sign cast (unrestricted).
 template <typename To, typename From>
 constexpr To possible_narrow_and_sign_cast(From value) NOEXCEPT;
+
+/// Possible promotion (without sign change).
+template <typename To, typename From,
+    if_not_lesser_size<To, From> = true,
+    if_same_signed_integer<To, From> = true>
+constexpr To possible_wide_cast(From value) NOEXCEPT;
 
 /// Explicit pointer casts.
 /// ---------------------------------------------------------------------------
