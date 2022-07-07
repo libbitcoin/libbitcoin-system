@@ -176,6 +176,9 @@ static_assert(is_same_type<to_maximal_type<uint16_t>, uint64_t>);
 static_assert(is_same_type<to_maximal_type<uint32_t>, uint64_t>);
 static_assert(is_same_type<to_maximal_type<uint64_t>, uint64_t>);
 static_assert(is_same_type<to_maximal_type<size_t>, uint64_t>);
+static_assert(is_same_type<to_maximal_type<uintx>, uintx>);
+static_assert(is_same_type<to_maximal_type<uint128_t>, uint128_t>);
+static_assert(is_same_type<to_maximal_type<uint256_t>, uint256_t>);
 
 // uintx_t<>
 // ----------------------------------------------------------------------------
