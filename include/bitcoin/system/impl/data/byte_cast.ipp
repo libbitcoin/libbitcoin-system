@@ -128,9 +128,9 @@ template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
 constexpr std::array<To, Size>&
-unsafe_array_cast(From bytes[]) NOEXCEPT
+unsafe_array_cast(From* bytes) NOEXCEPT
 {
-    return *pointer_cast<std::array<To, Size>>(&bytes[0]);
+    return *pointer_cast<std::array<To, Size>>(bytes);
 }
 
 // nullptr reinterpret_cast (at array size zero) is safe.
@@ -139,9 +139,9 @@ template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
 constexpr const std::array<To, Size>&
-unsafe_array_cast(const From bytes[]) NOEXCEPT
+unsafe_array_cast(const From* bytes) NOEXCEPT
 {
-    return *pointer_cast<const std::array<To, Size>>(&bytes[0]);
+    return *pointer_cast<const std::array<To, Size>>(bytes);
 }
 
 } // namespace system

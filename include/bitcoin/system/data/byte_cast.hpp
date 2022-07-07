@@ -114,7 +114,7 @@ template <typename To, size_t Size, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
 constexpr std::array<To, Size>&
-unsafe_array_cast(From bytes[]) NOEXCEPT;
+unsafe_array_cast(From* bytes) NOEXCEPT;
 
 /// Cast contiguous const integral buffer to const array& of integrals.
 /// Safe if byte count (size) is correct.
@@ -122,7 +122,7 @@ template <typename To, size_t Size, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
 constexpr const std::array<To, Size>&
-unsafe_array_cast(const From bytes[]) NOEXCEPT;
+unsafe_array_cast(const From* bytes) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
