@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_IPP
 
+#include <limits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
 
@@ -42,7 +43,7 @@ namespace system {
 // Coversions.
 // ----------------------------------------------------------------------------
 
-// overflows
+// absolute(minimum<Signed>) overflows to add1(maximum<Signed>) for all types.
 template <typename Signed, if_signed_integer<Signed>>
 constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT
 {
@@ -56,11 +57,11 @@ constexpr Unsigned absolute(Unsigned value) NOEXCEPT
     return value;
 }
 
-// overflows
+// negate(minimum<Signed>) overflows to add1(maximum<Signed>) for all types.
 template <typename Signed, if_signed_integer<Signed>>
 constexpr Signed negate(Signed value) NOEXCEPT
 {
-    return -value;
+    return possible_narrow_and_sign_cast<Signed>(-maximal_cast(value));
 }
 
 // C++20: requires twos complement integer representation.
@@ -82,8 +83,7 @@ template <typename Value, if_integer<Value>>
 constexpr Value ones_complement(Value value) NOEXCEPT
 {
     // Alias for bit_not.
-    // TODO: Unary operators do not promote sign (?).
-    return possible_narrow_and_sign_cast<Value>(~value);
+    return possible_narrow_and_sign_cast<Value>(~maximal_cast(value));
 }
 
 // Comparisons.

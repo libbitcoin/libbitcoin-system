@@ -32,11 +32,12 @@ static_assert(is_same_type<decltype(negate(0)),  signed>);
 static_assert(is_same_type<decltype(negate(0u)), unsigned>);
 static_assert(is_same_type<decltype(negate(1u)), unsigned>);
 
-// negate(minimum<integral>) is undefined (cannot represent in positive range).
-////static_assert(negate(min_int8) == add1(max_int8));
-////static_assert(negate(min_int16) == add1(max_int16));
-////static_assert(negate(min_int32) == add1(max_int32));
-////static_assert(negate(min_int64) == add1(max_int64));
+// negate(minimum<integral>) overflows the integral domain.
+// Cannot be represented in 64 bit constexpr.
+static_assert(negate(min_int8)  == to_signed(add1(to_unsigned(max_int8))));
+static_assert(negate(min_int16) == to_signed(add1(to_unsigned(max_int16))));
+static_assert(negate(min_int32) == add1(to_unsigned(max_int32)));
+////static_assert(negate(min_int64) == to_signed(add1(to_unsigned(max_int64))));
 
 // absolute ([absolue] value does not change, signedness to unsigned, sign to positive)
 static_assert(absolute(0_i32)   == 0_u32);
@@ -56,16 +57,12 @@ static_assert(is_same_type<decltype(absolute(0)),  unsigned>);
 static_assert(is_same_type<decltype(absolute(0u)), unsigned>);
 static_assert(is_same_type<decltype(absolute(1u)), unsigned>);
 
-// negate(absolute<integral>) is undefined (cannot represent in positive range).
-////static_assert(absolute(min_int8)  == add1(max_int8));
-////static_assert(absolute(min_int16) == add1(max_int16));
-////static_assert(absolute(min_int32) == add1(max_int32));
-////static_assert(absolute(min_int64) == add1(max_int64));
-
-// These can be mitigated using explicit domain promotion (except for uint64_t).
-static_assert(absolute<int16_t>(min_int8)  == add1<uint16_t>(max_int8));
-static_assert(absolute<int32_t>(min_int16) == add1<uint32_t>(max_int16));
-static_assert(absolute<int64_t>(min_int32) == add1<uint64_t>(max_int32));
+// absolute(minimum<integral>) overflows the integral domain.
+// Cannot be represented in 64 bit constexpr.
+static_assert(absolute(min_int8)  == add1(to_unsigned(max_int8)));
+static_assert(absolute(min_int16) == add1(to_unsigned(max_int16)));
+static_assert(absolute(min_int32) == add1(to_unsigned(max_int32)));
+////static_assert(absolute(min_int64) == add1(to_unsigned(max_int64)));
 
 // ones_complement
 // alias for bit_not (~n)
