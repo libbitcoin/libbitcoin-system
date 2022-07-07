@@ -34,28 +34,28 @@ namespace system {
 template <typename Byte = uint8_t, typename Integral,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-constexpr std::array<Byte, sizeof(Integral)>&
+inline std::array<Byte, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT;
 
 /// Cast const integral& to a const data array& with byte length of the integral.
 template <typename Byte = uint8_t, typename Integral,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-constexpr const std::array<Byte, sizeof(Integral)>&
+inline const std::array<Byte, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT;
 
 /// Cast data array& to unsigned integral& of same byte length.
 template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_size<Size> = true>
-constexpr unsigned_type<Size>&
+inline unsigned_type<Size>&
 byte_cast(std::array<Byte, Size>& value) NOEXCEPT;
 
 /// Cast const data array& to const unsigned integral& of same byte length.
 template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_size<Size> = true>
-constexpr const unsigned_type<Size>&
+inline const unsigned_type<Size>&
 byte_cast(const std::array<Byte, Size>& value) NOEXCEPT;
 
 } // namespace system

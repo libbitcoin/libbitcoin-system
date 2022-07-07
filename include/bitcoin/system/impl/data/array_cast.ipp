@@ -48,7 +48,7 @@ constexpr bool is_portional(size_t left_count, size_t right_count) NOEXCEPT
 template <typename To, size_t Count, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-constexpr std::array<To, proportion<Count, From, To>>&
+inline std::array<To, proportion<Count, From, To>>&
 array_cast(std::array<From, Count>& values) NOEXCEPT
 {
     using to = std::array<To, proportion<Count, From, To>>;
@@ -58,7 +58,7 @@ array_cast(std::array<From, Count>& values) NOEXCEPT
 template <typename To, size_t Count, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-constexpr const std::array<To, proportion<Count, From, To>>&
+inline const std::array<To, proportion<Count, From, To>>&
 array_cast(const std::array<From, Count>& values) NOEXCEPT
 {
     using to = std::array<To, proportion<Count, From, To>>;
@@ -69,7 +69,7 @@ template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_integral_integer<From>,
     if_integral_integer<To>,
     if_portional<ToCount, To, FromCount, From>>
-constexpr std::array<To, ToCount>&
+inline std::array<To, ToCount>&
 narrowing_array_cast(std::array<From, FromCount>& values) NOEXCEPT
 {
     using to = std::array<To, ToCount>;
@@ -80,7 +80,7 @@ template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_integral_integer<From>,
     if_integral_integer<To>,
     if_portional<ToCount, To, FromCount, From>>
-constexpr const std::array<To, ToCount>&
+inline const std::array<To, ToCount>&
 narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT
 {
     using to = std::array<To, ToCount>;
@@ -90,18 +90,16 @@ narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-constexpr std::array<To, Size>&
+inline std::array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT
 {
     return *pointer_cast<std::array<To, Size>>(bytes);
 }
 
-// nullptr reinterpret_cast (at array size zero) is safe.
-// &bytes[0] is undefined, so zero size is excluded.
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-constexpr const std::array<To, Size>&
+inline const std::array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT
 {
     return *pointer_cast<const std::array<To, Size>>(bytes);

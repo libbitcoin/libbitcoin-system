@@ -58,14 +58,14 @@ using if_portional = bool_if<is_portional<Left, Right>(LeftCount, RightCount)>;
 template <typename To, size_t Count, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
-constexpr std::array<To, proportion<Count, From, To>>&
+inline std::array<To, proportion<Count, From, To>>&
 array_cast(std::array<From, Count>& values) NOEXCEPT;
 
 /// Cast const array& of integrals to same-sized const array& of integrals.
 template <typename To, size_t Count, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
-constexpr const std::array<To, proportion<Count, From, To>>&
+inline const std::array<To, proportion<Count, From, To>>&
 array_cast(const std::array<From, Count>& values) NOEXCEPT;
 
 /// Cast array& of integrals to lesser-sized array& of integrals.
@@ -74,7 +74,7 @@ template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true,
     if_portional<ToCount, To, FromCount, From> = true>
-constexpr std::array<To, ToCount>&
+inline std::array<To, ToCount>&
 narrowing_array_cast(std::array<From, FromCount>& values) NOEXCEPT;
 
 /// Cast const array& of integrals to lesser-sized const array& of integrals.
@@ -83,7 +83,7 @@ template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true,
     if_portional<ToCount, To, FromCount, From> = true>
-constexpr const std::array<To, ToCount>&
+inline const std::array<To, ToCount>&
 narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT;
 
 /// Cast contiguous integral buffer to array& of integrals.
@@ -91,7 +91,7 @@ narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT;
 template <typename To, size_t Size, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
-constexpr std::array<To, Size>&
+inline std::array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT;
 
 /// Cast contiguous const integral buffer to const array& of integrals.
@@ -99,7 +99,7 @@ unsafe_array_cast(From* bytes) NOEXCEPT;
 template <typename To, size_t Size, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
-constexpr const std::array<To, Size>&
+inline const std::array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT;
 
 } // namespace system

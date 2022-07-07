@@ -30,7 +30,7 @@ namespace system {
 template <typename Byte, typename Integral,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-constexpr std::array<Byte, sizeof(Integral)>&
+inline std::array<Byte, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT
 {
     // Safe because passing sizeof(value).
@@ -40,7 +40,7 @@ byte_cast(Integral& value) NOEXCEPT
 template <typename Byte, typename Integral,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-constexpr const std::array<Byte, sizeof(Integral)>&
+inline const std::array<Byte, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT
 {
     // Safe because passing sizeof(value).
@@ -50,7 +50,7 @@ byte_cast(const Integral& value) NOEXCEPT
 template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
-constexpr unsigned_type<Size>&
+inline unsigned_type<Size>&
 byte_cast(std::array<Byte, Size>& value) NOEXCEPT
 {
     return *pointer_cast<unsigned_type<Size>>(&value);
@@ -59,7 +59,7 @@ byte_cast(std::array<Byte, Size>& value) NOEXCEPT
 template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
-constexpr const unsigned_type<Size>&
+inline const unsigned_type<Size>&
 byte_cast(const std::array<Byte, Size>& value) NOEXCEPT
 {
     return *pointer_cast<const unsigned_type<Size>>(&value);
