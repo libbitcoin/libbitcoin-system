@@ -57,11 +57,13 @@ protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
         using char_type = typename device<Container>::char_type;
+        const auto first = reinterpret_cast<char_type*>(&(*container_.begin()));
+        const auto last = std::next(first, container_.size());
 
         BC_PUSH_WARNING(NO_REINTERPRET_CAST)
         return std::make_pair(
-            reinterpret_cast<char_type*>(container_.begin()),
-            reinterpret_cast<char_type*>(container_.end()));
+            reinterpret_cast<char_type*>(first),
+            reinterpret_cast<char_type*>(last));
         BC_POP_WARNING()
     }
 

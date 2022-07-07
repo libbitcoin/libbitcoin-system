@@ -63,14 +63,14 @@ protected:
         // ptrs, but the data member is const, so we must cast it for direct
         // devices. As a source the buffer should/must never be mutated.
         BC_PUSH_WARNING(NO_CONST_CAST)
-        const auto begin = const_cast<value_type*>(container_.begin());
-        const auto end = const_cast<value_type*>(container_.end());
+        auto first = const_cast<value_type*>(&(*container_.begin()));
+        auto last = std::next(first, container_.size());
         BC_POP_WARNING()
-            
+
         BC_PUSH_WARNING(NO_REINTERPRET_CAST)
         return std::make_pair(
-            reinterpret_cast<char_type*>(begin),
-            reinterpret_cast<char_type*>(end));
+            reinterpret_cast<char_type*>(first),
+            reinterpret_cast<char_type*>(last));
         BC_POP_WARNING()
     }
 

@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(device__optimal_buffer_size__always__expected)
 
 // input_sequence
 
-BOOST_AUTO_TEST_CASE(device__input_sequence__not_empty__empty)
+BOOST_AUTO_TEST_CASE(device__input_sequence__empty__nullptrs)
 {
     device_accessor instance;
     const auto sequence = instance.input_sequence();
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(device__input_sequence__not_empty__empty)
 
 // output_sequence
 
-BOOST_AUTO_TEST_CASE(device__output_sequence__not_empty__empty)
+BOOST_AUTO_TEST_CASE(device__output_sequence__empty__nullptrs)
 {
     device_accessor instance;
     const auto sequence = instance.output_sequence();

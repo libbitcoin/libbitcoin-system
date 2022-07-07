@@ -24,22 +24,22 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 BOOST_AUTO_TEST_CASE(flip_sink__input_sequence__empty__empty)
 {
-    data_chunk sink;
+    data_chunk sink(0u);
     flip_sink<data_slab> instance(sink);
-    const auto sequence = instance.input_sequence();
-    const auto first = reinterpret_cast<char*>(sink.data());
-    const auto second = std::next(first, sink.size());
-    BOOST_REQUIRE_EQUAL(first, sequence.first);
-    BOOST_REQUIRE_EQUAL(second, sequence.second);
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 0);
+    const auto sequence = instance.output_sequence();
+    BOOST_REQUIRE(sequence.first == nullptr);
+    BOOST_REQUIRE(sequence.second == nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(flip_sink__input_sequence__not_empty__expected)
 {
-    data_chunk sink(42, 0x00);
+    constexpr auto size = 42u;
+    data_chunk sink(size);
     flip_sink<data_slab> instance(sink);
-    const auto sequence = instance.input_sequence();
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), 42);
+    const auto sequence = instance.output_sequence();
+    using char_type = typename device<data_chunk>::char_type;
+    BOOST_REQUIRE(sequence.first == reinterpret_cast<char_type*>(&(*sink.begin())));
+    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
 }
 
 // output_sequence

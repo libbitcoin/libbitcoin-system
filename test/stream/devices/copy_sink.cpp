@@ -22,52 +22,24 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // output_sequence
 
-// CLang boost does not provide expected output_sequence for empty copy_sink.
-// However it does for empty copy_source.
-// 
-// Platform: linux
-// Compiler: Clang version 14.0.0 
-// STL     : GNU libstdc++ version 20220324
-// Boost   : 1.78.0 [debug and ndebug]
-// test/stream/devices/copy_sink.cpp(32): fatal error:
-// stream_tests/copy_sink__output_sequence__empty__empty:
-// critical check first == sequence.first has failed.
-//
-// Additional detail on above Clang error from XCode:
-//
-// Platform: Mac OS
-// Compiler: Clang version 13.0.0 (clang-1300.0.29.30)
-// STL     : libc++ version 12000
-// Boost   : 1.78.0 [debug and ndebug]
-// unknown location:0: fatal error:
-// stream_tests/copy_sink__output_sequence__empty__empty:
-// memory access violation at address: 0x00000000: no mapping at fault address
-#if defined(HAVE_MSC)
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
 {
-    // sink.data() is nullptr, and should be reflected in sequence.first
-    // and sequence.second, as sink.size() is zero.
-    const data_chunk chunk{};
-    BOOST_REQUIRE(chunk.data() == nullptr);
-
-    data_chunk sink{};
+    data_chunk sink(0u);
     copy_sink<data_slab> instance(sink);
     const auto sequence = instance.output_sequence();
     BOOST_REQUIRE(sequence.first == nullptr);
     BOOST_REQUIRE(sequence.second == nullptr);
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), ptrdiff_t{ 0 });
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__not_empty__expected)
 {
     constexpr auto size = 42u;
-    data_chunk sink(size, 0x00);
+    data_chunk sink(size);
     copy_sink<data_slab> instance(sink);
     const auto sequence = instance.output_sequence();
-    BOOST_REQUIRE(reinterpret_cast<uint8_t*>(sequence.first) == &sink[0]);
-    BOOST_REQUIRE(reinterpret_cast<uint8_t*>(std::prev(sequence.second)) == &sink[sub1(size)]);
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), ptrdiff_t{ size });
+    using char_type = typename device<data_chunk>::char_type;
+    BOOST_REQUIRE(sequence.first == reinterpret_cast<char_type*>(&(*sink.begin())));
+    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
 }
 
 // write() is not required for direct devices.

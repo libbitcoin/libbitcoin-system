@@ -24,28 +24,22 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 BOOST_AUTO_TEST_CASE(copy_source__input_sequence__empty__empty)
 {
-    // source.data() is nullptr, and should be reflected in sequence.first
-    // and sequence.second, as source.size() is zero.
-    const data_chunk chunk{};
-    BOOST_REQUIRE(chunk.data() == nullptr);
-
-    const data_chunk source{};
+    const data_chunk source(0u);
     copy_source<data_reference> instance(source);
     const auto sequence = instance.output_sequence();
     BOOST_REQUIRE(sequence.first == nullptr);
     BOOST_REQUIRE(sequence.second == nullptr);
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), ptrdiff_t{ 0 });
 }
 
 BOOST_AUTO_TEST_CASE(copy_source__input_sequence__not_empty__expected)
 {
     constexpr auto size = 42u;
-    const data_chunk source(size, 0x00);
+    const data_chunk source(size);
     copy_source<data_reference> instance(source);
     const auto sequence = instance.output_sequence();
-    BOOST_REQUIRE(reinterpret_cast<uint8_t*>(sequence.first) == &source[0]);
-    BOOST_REQUIRE(reinterpret_cast<uint8_t*>(std::prev(sequence.second)) == &source[sub1(size)]);
-    BOOST_REQUIRE_EQUAL(std::distance(sequence.first, sequence.second), ptrdiff_t{ size });
+    using char_type = typename device<data_chunk>::char_type;
+    BOOST_REQUIRE(sequence.first == reinterpret_cast<const char_type*>(&(*source.begin())));
+    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
 }
 
 // read() is not required for direct devices.

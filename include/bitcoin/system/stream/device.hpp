@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <utility>
-/// DELETEMENOW
 
 namespace libbitcoin {
 namespace system {
