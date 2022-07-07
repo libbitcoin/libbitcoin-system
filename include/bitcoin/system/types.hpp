@@ -53,6 +53,12 @@ using unsigned_type =
                 std::conditional_t<Bytes <= sizeof(uint32_t), uint32_t,
                     uint64_t>>>>;
 
+////// TODO: test.
+////template <typename Integer, size_t Bytes>
+////using same_signed_type =
+////    std::conditional_t<std::is_signed_v<Integer>,
+////        signed_type<Bytes>, unsigned_type<Bytes>>;
+
 /// Sign-based type selectors.
 /// ---------------------------------------------------------------------------
 
