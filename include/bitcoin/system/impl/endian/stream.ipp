@@ -38,7 +38,9 @@ inline Integral from_big_endian(IStream& stream) NOEXCEPT
     Integral value{};
     using character = typename IStream::char_type;
     auto& cast = byte_cast<character>(value);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream.read(cast.data(), cast.size());
+    BC_POP_WARNING()
     return native_from_big_end(value);
 }
 
@@ -51,7 +53,9 @@ inline Integral from_little_endian(IStream& stream) NOEXCEPT
     Integral value{};
     using character = typename IStream::char_type;
     auto& cast = byte_cast<character>(value);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream.read(cast.data(), cast.size());
+    BC_POP_WARNING()
     return native_from_little_end(value);
 }
 
@@ -63,7 +67,9 @@ inline void to_big_endian(OStream& stream, Integral value) NOEXCEPT
 {
     using character = typename OStream::char_type;
     const auto& cast = byte_cast<character>(native_to_big_end(value));
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream.write(cast.data(), cast.size());
+    BC_POP_WARNING()
 }
 
 template <typename Integral, typename OStream,
@@ -74,7 +80,9 @@ inline void to_little_endian(OStream& stream, Integral value) NOEXCEPT
 {
     using character = typename OStream::char_type;
     const auto& cast = byte_cast<character>(native_to_little_end(value));
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream.write(cast.data(), cast.size());
+    BC_POP_WARNING()
 }
 
 } // namespace system
