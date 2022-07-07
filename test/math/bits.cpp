@@ -18,6 +18,8 @@
  */
 #include "../test.hpp"
 
+// TODO: missing signed/negative tests on shifts.
+
 // bit_width (unsigned/positive)
 // unsigned are always value width.
 static_assert(bit_width(0u) == 0u);
@@ -666,44 +668,74 @@ static_assert(shift_right<uint8_t>(0x80, 9, false) == 0x40u);
 static_assert(is_same_type<decltype(shift_left<uint8_t>(0, 0, true)), uint8_t>);
 
 // rotate_right
-static_assert(rotate_right<uint8_t>(0x00, 0) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00, 1) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00, 2) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00, 3) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00, 5) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00, 6) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00, 7) == 0x00u);
-static_assert(rotate_right<uint8_t>(0x00, 8) == 0x00u);
-static_assert(rotate_right<uint8_t>(0xff, 0) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff, 1) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff, 2) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff, 3) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff, 5) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff, 6) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff, 7) == 0xffu);
-static_assert(rotate_right<uint8_t>(0xff, 8) == 0xffu);
-static_assert(rotate_right<uint8_t>(0x81, 0) == 0x81u);
-static_assert(rotate_right<uint8_t>(0x81) == 0xc0u);
-static_assert(rotate_right<uint8_t>(0x81, 1) == 0xc0u);
-static_assert(rotate_right<uint8_t>(0x81, 2) == 0x60u);
-static_assert(rotate_right<uint8_t>(0x81, 3) == 0x30u);
-static_assert(rotate_right<uint8_t>(0x81, 4) == 0x18u);
-static_assert(rotate_right<uint8_t>(0x81, 5) == 0x0cu);
-static_assert(rotate_right<uint8_t>(0x81, 6) == 0x06u);
-static_assert(rotate_right<uint8_t>(0x81, 7) == 0x03u);
-static_assert(rotate_right<uint8_t>(0x81, 8) == 0x81u);
+static_assert(rotate_right<uint8_t>(0x00, 0) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00)    == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00, 1) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00, 2) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00, 3) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00, 5) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00, 6) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00, 7) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0x00, 8) == 0x00_u8);
+static_assert(rotate_right<uint8_t>(0xff, 0) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff)    == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff, 1) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff, 2) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff, 3) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff, 5) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff, 6) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff, 7) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0xff, 8) == 0xff_u8);
+static_assert(rotate_right<uint8_t>(0x81, 0) == 0b10000001_u8);
+static_assert(rotate_right<uint8_t>(0b10000001)    == 0b11000000_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 1) == 0b11000000_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 2) == 0b01100000_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 3) == 0b00110000_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 4) == 0b00011000_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 5) == 0b00001100_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 6) == 0b00000110_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 7) == 0b00000011_u8);
+static_assert(rotate_right<uint8_t>(0b10000001, 8) == 0b10000001_u8);
 static_assert(is_same_type<decltype(rotate_right<uint8_t>(0, 0)), uint8_t>);
 
+static_assert(rotate_right<int8_t>(0_i8, 0) == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8)    == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8, 1) == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8, 2) == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8, 3) == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8, 5) == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8, 6) == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8, 7) == 0_i8);
+static_assert(rotate_right<int8_t>(0_i8, 8) == 0_i8);
+static_assert(rotate_right<int8_t>(1_ni8, 0) == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8)    == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8, 1) == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8, 2) == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8, 3) == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8, 5) == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8, 6) == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8, 7) == 1_ni8);
+static_assert(rotate_right<int8_t>(1_ni8, 8) == 1_ni8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 0) == 0b10000001_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8)    == 0b11000000_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 1) == 0b11000000_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 2) == 0b01100000_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 3) == 0b00110000_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 4) == 0b00011000_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 5) == 0b00001100_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 6) == 0b00000110_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 7) == 0b00000011_i8);
+static_assert(rotate_right<int8_t>(0b10000001_i8, 8) == 0b10000001_i8);
+static_assert(is_same_type<decltype(rotate_right<int8_t>(0, 0)), int8_t>);
+
 // en.cppreference.com/w/cpp/numeric/rotr
-static_assert(rotate_right<uint8_t>(0x1d, 0) == 0x1d);
-static_assert(rotate_right<uint8_t>(0x1d, 1) == 0x8e);
-static_assert(rotate_right<uint8_t>(0x1d, 9) == 0x8e);
+static_assert(rotate_right<uint8_t>(0x1d, 0) == 0x1d_u8);
+static_assert(rotate_right<uint8_t>(0x1d, 1) == 0x8e_u8);
+static_assert(rotate_right<uint8_t>(0x1d, 9) == 0x8e_u8);
 
 // rotate_left
 static_assert(rotate_left<uint8_t>(0x00, 0) == 0x00u);
-static_assert(rotate_left<uint8_t>(0x00) == 0x00u);
+static_assert(rotate_left<uint8_t>(0x00)    == 0x00u);
 static_assert(rotate_left<uint8_t>(0x00, 1) == 0x00u);
 static_assert(rotate_left<uint8_t>(0x00, 2) == 0x00u);
 static_assert(rotate_left<uint8_t>(0x00, 3) == 0x00u);
@@ -712,7 +744,7 @@ static_assert(rotate_left<uint8_t>(0x00, 6) == 0x00u);
 static_assert(rotate_left<uint8_t>(0x00, 7) == 0x00u);
 static_assert(rotate_left<uint8_t>(0x00, 8) == 0x00u);
 static_assert(rotate_left<uint8_t>(0xff, 0) == 0xffu);
-static_assert(rotate_left<uint8_t>(0xff) == 0xffu);
+static_assert(rotate_left<uint8_t>(0xff)    == 0xffu);
 static_assert(rotate_left<uint8_t>(0xff, 1) == 0xffu);
 static_assert(rotate_left<uint8_t>(0xff, 2) == 0xffu);
 static_assert(rotate_left<uint8_t>(0xff, 3) == 0xffu);
@@ -720,19 +752,49 @@ static_assert(rotate_left<uint8_t>(0xff, 5) == 0xffu);
 static_assert(rotate_left<uint8_t>(0xff, 6) == 0xffu);
 static_assert(rotate_left<uint8_t>(0xff, 7) == 0xffu);
 static_assert(rotate_left<uint8_t>(0xff, 8) == 0xffu);
-static_assert(rotate_left<uint8_t>(0x81, 0) == 0x81u);
-static_assert(rotate_left<uint8_t>(0x81) == 0x03u);
-static_assert(rotate_left<uint8_t>(0x81, 1) == 0x03u);
-static_assert(rotate_left<uint8_t>(0x81, 2) == 0x06u);
-static_assert(rotate_left<uint8_t>(0x81, 3) == 0x0cu);
-static_assert(rotate_left<uint8_t>(0x81, 4) == 0x18u);
-static_assert(rotate_left<uint8_t>(0x81, 5) == 0x30u);
-static_assert(rotate_left<uint8_t>(0x81, 6) == 0x60u);
-static_assert(rotate_left<uint8_t>(0x81, 7) == 0xc0u);
-static_assert(rotate_left<uint8_t>(0x81, 8) == 0x81u);
+static_assert(rotate_left<uint8_t>(0x81, 0) == 0b10000001u);
+static_assert(rotate_left<uint8_t>(0b10000001)    == 0b00000011u);
+static_assert(rotate_left<uint8_t>(0b10000001, 1) == 0b00000011u);
+static_assert(rotate_left<uint8_t>(0b10000001, 2) == 0b00000110u);
+static_assert(rotate_left<uint8_t>(0b10000001, 3) == 0b00001100u);
+static_assert(rotate_left<uint8_t>(0b10000001, 4) == 0b00011000u);
+static_assert(rotate_left<uint8_t>(0b10000001, 5) == 0b00110000u);
+static_assert(rotate_left<uint8_t>(0b10000001, 6) == 0b01100000u);
+static_assert(rotate_left<uint8_t>(0b10000001, 7) == 0b11000000u);
+static_assert(rotate_left<uint8_t>(0b10000001, 8) == 0b10000001u);
 static_assert(is_same_type<decltype(rotate_left<uint8_t>(0, 0)), uint8_t>);
 
+static_assert(rotate_left<int8_t>(0x00, 0) == 0_i8);
+static_assert(rotate_left<int8_t>(0x00)    == 0_i8);
+static_assert(rotate_left<int8_t>(0x00, 1) == 0_i8);
+static_assert(rotate_left<int8_t>(0x00, 2) == 0_i8);
+static_assert(rotate_left<int8_t>(0x00, 3) == 0_i8);
+static_assert(rotate_left<int8_t>(0x00, 5) == 0_i8);
+static_assert(rotate_left<int8_t>(0x00, 6) == 0_i8);
+static_assert(rotate_left<int8_t>(0x00, 7) == 0_i8);
+static_assert(rotate_left<int8_t>(0x00, 8) == 0_i8);
+static_assert(rotate_left<int8_t>(1_ni8, 0) == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8)    == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8, 1) == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8, 2) == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8, 3) == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8, 5) == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8, 6) == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8, 7) == 1_ni8);
+static_assert(rotate_left<int8_t>(1_ni8, 8) == 1_ni8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 0) == 0b10000001_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8)    == 0b00000011_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 1) == 0b00000011_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 2) == 0b00000110_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 3) == 0b00001100_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 4) == 0b00011000_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 5) == 0b00110000_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 6) == 0b01100000_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 7) == 0b11000000_i8);
+static_assert(rotate_left<int8_t>(0b10000001_i8, 8) == 0b10000001_i8);
+static_assert(is_same_type<decltype(rotate_left<int8_t>(0, 0)), int8_t>);
+
 // en.cppreference.com/w/cpp/numeric/rotl
-static_assert(rotate_left<uint8_t>(0x1d, 0) == 0x1d);
-static_assert(rotate_left<uint8_t>(0x1d, 1) == 0x3a);
-static_assert(rotate_left<uint8_t>(0x1d, 9) == 0x3a);
+static_assert(rotate_left<uint8_t>(0x1d, 0) == 0x1d_u8);
+static_assert(rotate_left<uint8_t>(0x1d, 1) == 0x3a_u8);
+static_assert(rotate_left<uint8_t>(0x1d, 9) == 0x3a_u8);

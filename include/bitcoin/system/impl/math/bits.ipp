@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 #define LIBBITCOIN_SYSTEM_MATH_BITS_IPP
 
+#include <bit>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/logarithm.hpp>
@@ -322,39 +323,54 @@ constexpr void shift_right_into(Value& value, size_t shift,
 
 // Rotate (left/right).
 // ----------------------------------------------------------------------------
+// C++20: std::rotl/rotr unsigned is not defined (at least for msvc).
+// std lib should call through to intrinsic implementation.
 
-// C++20: std::rotl/rotr can replace rotate_left/rotate_right.
-// C++20: std::rotl/rotr can replace rotate_left/rotate_right.
-// Subtraction is between size_t operands and guarded by modulo.
-// Shift left/right of negative is undefined/unspecified, so these are unsigned.
-
-template <typename Value, if_unsigned_integral_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value rotate_left(Value value, size_t shift) NOEXCEPT
 {
+    if constexpr (!is_signed<Value>)
+        return std::rotl(value, possible_narrow_sign_cast<int>(shift));
+
     constexpr auto span = bits<Value>;
     return bit_or(shift_left(value, shift % span),
         shift_right(value, span - (shift % span)));
 }
 
-template <typename Value, if_unsigned_integral_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void rotate_left_into(Value& value, size_t shift) NOEXCEPT
 {
+    if constexpr (!is_signed<Value>)
+    {
+        value = std::rotl(value, possible_narrow_sign_cast<int>(shift));
+        return;
+    }
+
     constexpr auto span = bits<Value>;
     value = bit_or(shift_left(value, shift % span),
         shift_right(value, span - (shift % span)));
 }
 
-template <typename Value, if_unsigned_integral_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr Value rotate_right(Value value, size_t shift) NOEXCEPT
 {
+    if constexpr (!is_signed<Value>)
+        return std::rotr(value, possible_narrow_sign_cast<int>(shift));
+
     constexpr auto span = bits<Value>;
     return bit_or(shift_right(value, shift % span),
         shift_left(value, span - (shift % span)));
 }
 
-template <typename Value, if_unsigned_integral_integer<Value>>
+template <typename Value, if_integral_integer<Value>>
 constexpr void rotate_right_into(Value& value, size_t shift) NOEXCEPT
 {
+    if constexpr (!is_signed<Value>)
+    {
+        value = std::rotr(value, possible_narrow_sign_cast<int>(shift));
+        return;
+    }
+
     constexpr auto span = bits<Value>;
     value = bit_or(shift_right(value, shift % span),
         shift_left(value, span - (shift % span)));

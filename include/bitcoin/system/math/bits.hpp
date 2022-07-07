@@ -181,19 +181,20 @@ constexpr void shift_right_into(Value& value, size_t shift=one,
 
 /// Rotate (left/right).
 /// ---------------------------------------------------------------------------
+/// A negative rotation is a positive shift of the corresponding function.
 
 /// Bitwise left rotation of value by shift.
 /// Rotation by any shift behaves as a continuous rotation.
-template <typename Value, if_unsigned_integral_integer<Value> = true>
+template <typename Value, if_integral_integer<Value> = true>
 constexpr Value rotate_left(Value value, size_t shift=one) NOEXCEPT;
-template <typename Value, if_unsigned_integral_integer<Value> = true>
+template <typename Value, if_integral_integer<Value> = true>
 constexpr void rotate_left_into(Value& value, size_t shift=one) NOEXCEPT;
 
 /// Bitwise right rotation of value by shift.
 /// Rotation by any shift behaves as a continuous rotation.
-template <typename Value, if_unsigned_integral_integer<Value> = true>
+template <typename Value, if_integral_integer<Value> = true>
 constexpr Value rotate_right(Value value, size_t shift=one) NOEXCEPT;
-template <typename Value, if_unsigned_integral_integer<Value> = true>
+template <typename Value, if_integral_integer<Value> = true>
 constexpr void rotate_right_into(Value& value, size_t shift=one) NOEXCEPT;
 
 } // namespace system
