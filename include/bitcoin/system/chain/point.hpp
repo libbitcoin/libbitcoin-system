@@ -19,11 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_POINT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_POINT_HPP
 
-/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

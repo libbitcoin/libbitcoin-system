@@ -231,6 +231,9 @@ constexpr unsigned_type<Size> from_little_endian(
     return from_little_chunk<unsigned_type<Size>>(Size, data);
 }
 
+// integral   from_big|little_endian(data_slice)
+// data_array   to_big|little_endian(integral)
+
 template <typename Integral,
     if_integral_integer<Integral>>
 constexpr Integral from_big_endian(const data_slice& data) NOEXCEPT

@@ -28,9 +28,6 @@ namespace system {
 // data -> integral (inferred type)
 // integral -> array (implicit size)
 
-// integral   from_big|little_endian(data_slice)
-// data_array   to_big|little_endian(integral)
-
 // matched size data (no argument required).
 template <size_t Size>
 constexpr unsigned_type<Size> from_big_endian(
@@ -40,6 +37,9 @@ constexpr unsigned_type<Size> from_big_endian(
 template <size_t Size>
 constexpr unsigned_type<Size> from_little_endian(
     const data_array<Size>& data) NOEXCEPT;
+
+// integral   from_big|little_endian(data_slice)
+// data_array   to_big|little_endian(integral)
 
 template <typename Integral,
     if_integral_integer<Integral> = true>
