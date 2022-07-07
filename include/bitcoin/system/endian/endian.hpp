@@ -42,19 +42,23 @@
 // constexpr  data_array<sizeof(Integral)> to_big_endian{integral}(Integral);
 // constexpr  data_array<sizeof(Integral)> to_little_endian{integral}(Integral);
 
-// NETWORK
+// NETWORK [[NEXT]]
 // Stream (<Integer>/stream):
 // inline     Integral                     from_big_endian<Integral>{IStream}(IStream&);
 // inline     Integral                     from_little_endian<Integral>{IStream}(IStream&);
 // inline     void                         to_big_endian{OStream}(OStream&, Integer);
 // inline     void                         to_little_endian{OStream}(OStream&, Integer);
 
-// MERKLE
+// MERKLE [[COMPLETE]]
 // Collection ([]):
-// constexpr  void                         from_big_endian{[]}(Integer[], const uint8_t[]);
-// constexpr  void                         from_little_endian{[]}(Integer[], const uint8_t[]);
-// constexpr  void                         to_big_endian{[]}(uint8_t[], const Integer[]);
-// constexpr  void                         to_little_endian{[]}(uint8_t[], const Integer[]);
+// constexpr  void                         Integer[] from_big_endian{[]}(const Integer[]&);
+// constexpr  void                         Integer[] from_little_endian{[]}(const Integer[]&);
+// constexpr  void                         Integer[] to_big_endian{[]}(const Integer[]&);
+// constexpr  void                         Integer[] to_little_endian{[]}(const Integer[]&);
+// constexpr  void                         from_big_endian{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         from_little_endian{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         to_big_endian{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         to_little_endian{[]}(Integer[]&, const Integer[]&);
 
 // LIBRARY
 // Uintx (dynamic int/data sizing): [uintx not constexpr]

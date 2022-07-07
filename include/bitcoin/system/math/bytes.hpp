@@ -38,50 +38,23 @@ template <typename Value,
     if_signed_integer<Value> = true>
 constexpr size_t byte_width(Value value) NOEXCEPT;
 
-/// Endianness (native to specified).
+/// Endianness.
 /// ---------------------------------------------------------------------------
 
 /// Convert a native integral integer to big-endian.
-template <typename Integer,
-    if_big_endian_integral_integer<Integer> = true>
+template <typename Integer, if_integral_integer<Integer> = true>
 constexpr Integer native_to_big_end(Integer big) NOEXCEPT;
 
-/// Convert a native integral integer to big-endian.
-template <typename Integer,
-    if_little_endian_integral_integer<Integer> = true>
-constexpr Integer native_to_big_end(Integer little) NOEXCEPT;
-
 /// Convert a native integral integer to little-endian.
-template <typename Integer,
-    if_big_endian_integral_integer<Integer> = true>
+template <typename Integer, if_integral_integer<Integer> = true>
 constexpr Integer native_to_little_end(Integer big) NOEXCEPT;
 
-/// Convert a native integral integer to little-endian.
-template <typename Integer,
-    if_little_endian_integral_integer<Integer> = true>
-constexpr Integer native_to_little_end(Integer little) NOEXCEPT;
-
-/// Endianness (specified to native).
-/// ---------------------------------------------------------------------------
-
 /// Convert a big-endian integral integer to native.
-template <typename Integer,
-    if_big_endian_integral_integer<Integer> = true>
-constexpr Integer native_from_big_end(Integer big) NOEXCEPT;
-
-/// Convert a big-endian integral integer to native.
-template <typename Integer,
-    if_little_endian_integral_integer<Integer> = true>
+template <typename Integer, if_integral_integer<Integer> = true>
 constexpr Integer native_from_big_end(Integer big) NOEXCEPT;
 
 /// Convert a little-endian integral integer to native.
-template <typename Integer,
-    if_big_endian_integral_integer<Integer> = true>
-constexpr Integer native_from_little_end(Integer little) NOEXCEPT;
-
-/// Convert a little-endian integral integer to native.
-template <typename Integer,
-    if_little_endian_integral_integer<Integer> = true>
+template <typename Integer, if_integral_integer<Integer> = true>
 constexpr Integer native_from_little_end(Integer little) NOEXCEPT;
 
 /// Byteswap (platform independent byte reversal).

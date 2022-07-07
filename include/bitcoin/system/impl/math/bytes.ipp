@@ -49,66 +49,37 @@ constexpr size_t byte_width(Value value) NOEXCEPT
     return is_negative(value) ? sizeof(Value) : byte_width(to_unsigned(value));
 }
 
-// Endianness (native to specified).
+// Endianness.
 // ----------------------------------------------------------------------------
 
-template <typename Integer,
-    if_big_endian_integral_integer<Integer>>
+template <typename Integer, if_integral_integer<Integer>>
 constexpr Integer native_to_big_end(Integer big) NOEXCEPT
 {
-    return big;
+    if constexpr (is_little_endian)
+        return byteswap(big);
+    else
+        return big;
 }
 
-template <typename Integer,
-    if_little_endian_integral_integer<Integer>>
-constexpr Integer native_to_big_end(Integer little) NOEXCEPT
-{
-    return byteswap(little);
-}
-
-template <typename Integer,
-    if_little_endian_integral_integer<Integer>>
+template <typename Integer, if_integral_integer<Integer>>
 constexpr Integer native_to_little_end(Integer little) NOEXCEPT
 {
-    return little;
+    if constexpr (is_big_endian)
+        return byteswap(little);
+    else
+        return little;
 }
 
-template <typename Integer,
-    if_big_endian_integral_integer<Integer>>
-constexpr Integer native_to_little_end(Integer big) NOEXCEPT
-{
-    return byteswap(big);
-}
-
-// Endianness (specified to native).
-// ----------------------------------------------------------------------------
-
-template <typename Integer,
-    if_big_endian_integral_integer<Integer>>
+template <typename Integer, if_integral_integer<Integer>>
 constexpr Integer native_from_big_end(Integer big) NOEXCEPT
 {
-    return big;
+    return native_to_big_end(big);
 }
 
-template <typename Integer,
-    if_little_endian_integral_integer<Integer>>
-constexpr Integer native_from_big_end(Integer big) NOEXCEPT
-{
-    return byteswap(big);
-}
-
-template <typename Integer,
-    if_little_endian_integral_integer<Integer>>
+template <typename Integer, if_integral_integer<Integer>>
 constexpr Integer native_from_little_end(Integer little) NOEXCEPT
 {
-    return little;
-}
-
-template <typename Integer,
-    if_big_endian_integral_integer<Integer>>
-constexpr Integer native_from_little_end(Integer little) NOEXCEPT
-{
-    return byteswap(little);
+    return native_to_little_end(little);
 }
 
 // Byteswap (platform independent byte reversal).

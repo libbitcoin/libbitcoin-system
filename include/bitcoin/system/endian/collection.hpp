@@ -24,46 +24,54 @@
 
 namespace libbitcoin {
 namespace system {
-
-// return value
-
-// TODO: implement in-place conversion.
     
-template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> from_big_endian(
-    const std::array<Integral, Count>& values) NOEXCEPT;
+/// Endian array conversion (return by value).
+/// ---------------------------------------------------------------------------
 
-template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> from_little_endian(
-    const std::array<Integral, Count>& values) NOEXCEPT;
-
+/// Copy an array of native integral integers to big-endian.
 template <typename Integral, size_t Count>
 constexpr std::array<Integral, Count> to_big_endian(
     const std::array<Integral, Count>& values) NOEXCEPT;
 
+/// Copy an array of native integral integers to little-endian.
 template <typename Integral, size_t Count>
 constexpr std::array<Integral, Count> to_little_endian(
     const std::array<Integral, Count>& values) NOEXCEPT;
 
-// out parameter
-
+/// Copy an array of big-endian integral integers to native.
 template <typename Integral, size_t Count>
-constexpr void from_big_endian(
-    std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT;
+constexpr std::array<Integral, Count> from_big_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT;
 
+/// Copy an array of little-endian integral integers to native.
 template <typename Integral, size_t Count>
-constexpr void from_little_endian(
-    std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT;
+constexpr std::array<Integral, Count> from_little_endian(
+    const std::array<Integral, Count>& values) NOEXCEPT;
 
+/// Endian array conversion (return by reference).
+/// ---------------------------------------------------------------------------
+
+/// Copy an array of native integral integers to big-endian.
 template <typename Integral, size_t Count>
 constexpr void to_big_endian(
     std::array<Integral, Count>& out,
     const std::array<Integral, Count>& in) NOEXCEPT;
 
+/// Copy an array of native integral integers to little-endian.
 template <typename Integral, size_t Count>
 constexpr void to_little_endian(
+    std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT;
+
+/// Copy an array of big-endian integral integers to native.
+template <typename Integral, size_t Count>
+constexpr void from_big_endian(
+    std::array<Integral, Count>& out,
+    const std::array<Integral, Count>& in) NOEXCEPT;
+
+/// Copy an array of little-endian integral integers to native.
+template <typename Integral, size_t Count>
+constexpr void from_little_endian(
     std::array<Integral, Count>& out,
     const std::array<Integral, Count>& in) NOEXCEPT;
 

@@ -32,84 +32,100 @@ template <typename Integral, size_t Count>
 constexpr std::array<Integral, Count> from_big_endian(
     const std::array<Integral, Count>& values) NOEXCEPT
 {
-    std::array<Integral, Count> out{};
-    from_big_endian(out, values);
-    return out;
+    if constexpr (is_little_endian)
+    {
+        std::array<Integral, Count> out{};
+        from_big_endian(out, values);
+        return out;
+    }
+    else
+    {
+        return values;
+    }
 }
 
 template <typename Integral, size_t Count>
 constexpr std::array<Integral, Count> from_little_endian(
     const std::array<Integral, Count>& values) NOEXCEPT
 {
-    std::array<Integral, Count> out{};
-    from_little_endian(out, values);
-    return out;
+    if constexpr (is_big_endian)
+    {
+        std::array<Integral, Count> out{};
+        from_little_endian(out, values);
+        return out;
+    }
+    else
+    {
+        return values;
+    }
 }
 
 template <typename Integral, size_t Count>
 constexpr std::array<Integral, Count> to_big_endian(
     const std::array<Integral, Count>& values) NOEXCEPT
 {
-    std::array<Integral, Count> out{};
-    to_big_endian(out, values);
-    return out;
+    return from_big_endian(values);
 }
 
 template <typename Integral, size_t Count>
 constexpr std::array<Integral, Count> to_little_endian(
     const std::array<Integral, Count>& values) NOEXCEPT
 {
-    std::array<Integral, Count> out{};
-    to_little_endian(out, values);
-    return out;
+    return from_little_endian(values);
 }
 
 // out parameter
-
-// C++17: Parallel policy for std::transform.
 
 template <typename Integral, size_t Count>
 constexpr void from_big_endian(std::array<Integral, Count>& out,
     const std::array<Integral, Count>& in) NOEXCEPT
 {
-    std::transform(in.begin(), in.end(), out.begin(),
-        [](const auto& integral) NOEXCEPT
-        {
-            return native_from_big_end(integral);
-        });
+    if constexpr (is_little_endian)
+    {
+        // C++17: Parallel policy for std::transform.
+        std::transform(in.begin(), in.end(), out.begin(),
+            [](const auto& value) NOEXCEPT
+            {
+                return native_from_big_end(value);
+            });
+    }
+    else
+    {
+        out = in;
+    }
 }
 
 template <typename Integral, size_t Count>
 constexpr void from_little_endian(std::array<Integral, Count>& out,
     const std::array<Integral, Count>& in) NOEXCEPT
 {
-    std::transform(in.begin(), in.end(), out.begin(),
-        [](const uint32_t& chunk) NOEXCEPT
-        {
-            return native_from_little_end(chunk);
-        });
+    if constexpr (is_big_endian)
+    {
+        // C++17: Parallel policy for std::transform.
+        std::transform(in.begin(), in.end(), out.begin(),
+            [](const uint32_t& value) NOEXCEPT
+            {
+                return native_from_little_end(value);
+            });
+    }
+    else
+    {
+        out = in;
+    }
 }
 
 template <typename Integral, size_t Count>
 constexpr void to_big_endian(std::array<Integral, Count>& out,
     const std::array<Integral, Count>& in) NOEXCEPT
 {
-    std::transform(in.begin(), in.end(), out.begin(),
-        [](const auto& value) NOEXCEPT
-        {
-            return native_to_big_end(value);
-        });
+    from_big_endian(out, in);
 }
 
 template <typename Integral, size_t Count>
 constexpr void to_little_endian(std::array<Integral, Count>& out,
     const std::array<Integral, Count>& in) NOEXCEPT
 {
-    std::transform(in.begin(), in.end(), out.begin(),
-        [](const auto& value) NOEXCEPT
-        {
-            return native_to_little_end(value);
-        });
+    from_little_endian(out, in);
 }
 
 } // namespace system
