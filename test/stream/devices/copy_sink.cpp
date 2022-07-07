@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 // unknown location:0: fatal error:
 // stream_tests/copy_sink__output_sequence__empty__empty:
 // memory access violation at address: 0x00000000: no mapping at fault address
-#if defined(HAVE_GNUC) || defined(HAVE_MSC)
+#if defined(HAVE_MSC)
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
 {
     // sink.data() is nullptr, and should be reflected in sequence.first
