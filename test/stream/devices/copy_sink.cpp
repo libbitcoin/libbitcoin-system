@@ -22,23 +22,23 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // output_sequence
 
-// Platform: linux
-// Compiler: Clang version 14.0.0 
-// STL     : GNU libstdc++ version 20220324
-// Boost   : 1.78.0 [debug and ndebug]
-// test/stream/devices/copy_sink.cpp(32): fatal error:
-// stream_tests/copy_sink__output_sequence__empty__empty:
-// critical check first == sequence.first has failed.
-//
-// Additional detail on above Clang error from XCode:
-//
-// Platform: Mac OS
-// Compiler: Clang version 13.0.0 (clang-1300.0.29.30)
-// STL     : libc++ version 12000
-// Boost   : 1.78.0 [debug and ndebug]
-// unknown location:0: fatal error:
-// stream_tests/copy_sink__output_sequence__empty__empty:
-// memory access violation at address: 0x00000000: no mapping at fault address
+//// Platform: linux
+//// Compiler: Clang version 14.0.0 
+//// STL     : GNU libstdc++ version 20220324
+//// Boost   : 1.78.0 [debug and ndebug]
+//// test/stream/devices/copy_sink.cpp(32): fatal error:
+//// stream_tests/copy_sink__output_sequence__empty__empty:
+//// critical check first == sequence.first has failed.
+////
+//// Additional detail on above Clang error from XCode:
+////
+//// Platform: Mac OS
+//// Compiler: Clang version 13.0.0 (clang-1300.0.29.30)
+//// STL     : libc++ version 12000
+//// Boost   : 1.78.0 [debug and ndebug]
+//// unknown location:0: fatal error:
+//// stream_tests/copy_sink__output_sequence__empty__empty:
+//// memory access violation at address: 0x00000000: no mapping at fault address
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
 {
     // sink.data() is nullptr, and should be reflected in sequence.first
