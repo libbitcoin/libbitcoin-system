@@ -18,12 +18,13 @@
  */
 #include "../test.hpp"
 
+// promote
 // depromote
+
 // narrow_cast
 // sign_cast
 // narrow_sign_cast
 // wide_cast
-// maximal_cast
 //
 // possible_narrow_cast
 // possible_sign_cast

@@ -66,10 +66,11 @@ template <typename Type>
 using to_size_type = std::conditional_t<std::is_signed_v<Type>,
     signed_size_t, size_t>;
 
+/// This creates suboptimality in x86 vs. x64 builds.
 template <typename Type>
-using to_maximal_type = 
-    std::conditional_t<!std::is_integral_v<Type>, Type,
-        std::conditional_t<std::is_signed_v<Type>, int64_t, uint64_t>>;
+using to_promoted_type =
+std::conditional_t<!std::is_integral_v<Type>, Type,
+    std::conditional_t<std::is_signed_v<Type>, int64_t, uint64_t>>;
 
 /// Promotion-based type selectors.
 /// ---------------------------------------------------------------------------

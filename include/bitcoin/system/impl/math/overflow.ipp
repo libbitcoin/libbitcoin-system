@@ -150,7 +150,6 @@ constexpr bool is_log_overflow(Base base, Value value) NOEXCEPT
 // ----------------------------------------------------------------------------
 // TODO: power/log do not require safe calls as they are type-constrained
 // TODO: against domain overflow and return zero when undefined.
-// TODO: use maximal_cast for all operations (will limit to integrals).
 
 // Signed only, since unsigned is always safe, limit requires integral.
 template <typename Signed, if_signed_integral_integer<Signed>>
@@ -159,8 +158,7 @@ constexpr Signed safe_negate(Signed value) THROWS
     if (is_negate_overflow(value))
         throw overflow_exception("negation overflow");
 
-    // TODO: Unary operators do not promote sign (?).
-    return depromote<Signed>(-value);
+    return depromote<Signed>(-promote(value));
 }
 
 // Unsigned only, since using native operator, limit requires integral.
@@ -173,7 +171,7 @@ constexpr Integral safe_add(Integral left, Integral right) THROWS
         throw overflow_exception("addition overflow");
 
     // TODO: generalize is_add_overflow so can use add<>() here.
-    return depromote<Integral>(left + right);
+    return depromote<Integral>(promote(left) + promote(right));
 }
 
 // Unsigned only, since using native operator, limit requires integral.
@@ -186,7 +184,7 @@ constexpr Integral safe_subtract(Integral left, Integral right) THROWS
         throw overflow_exception("subtraction overflow");
 
     // TODO: generalize is_subtract_overflow so can use add<>() here.
-    return depromote<Integral>(left - right);
+    return depromote<Integral>(promote(left) - promote(right));
 }
 
 // Unsigned only, since using native operator, limit requires integral.
@@ -198,7 +196,7 @@ constexpr Unsigned safe_multiply(Unsigned left, Unsigned right) THROWS
         
     // TODO: create type-generalized multiply<>().
     // TODO: generalize is_multiply_overflow so can use multiply<>() here.
-    return depromote<Unsigned>(left * right);
+    return depromote<Unsigned>(promote(left) * promote(right));
 }
 
 // Integers, since only checking for zero.
@@ -211,7 +209,7 @@ constexpr Dividend safe_divide(Dividend dividend, Divisor divisor) THROWS
 
     // TODO: create type-generalized divide<>().
     // TODO: generalize is_divide_overflow so can use divide<>() here.
-    return depromote<Dividend>(dividend / divisor);
+    return depromote<Dividend>(promote(dividend) / promote(divisor));
 }
 
 // Integers, since only checking for zero.
@@ -224,7 +222,7 @@ constexpr Dividend safe_modulo(Dividend dividend, Divisor divisor) THROWS
 
     // TODO: create type-generalized modulo<>().
     // TODO: generalize is_divide_overflow so can use modulo<>() here.
-    return depromote<Dividend>(dividend % divisor);
+    return depromote<Dividend>(promote(dividend) % promote(divisor));
 }
 
 } // namespace system

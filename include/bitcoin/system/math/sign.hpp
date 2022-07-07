@@ -49,12 +49,12 @@ template <typename Unsigned, if_unsigned_integer<Unsigned> = true>
 constexpr Unsigned negate(Unsigned value) NOEXCEPT;
 
 /// Ones complement, alias for bit_not (safe).
-template <typename Value, if_integer<Value> = true>
-constexpr Value ones_complement(Value value) NOEXCEPT;
+template <typename Integer, if_integer<Integer> = true>
+constexpr Integer ones_complement(Integer value) NOEXCEPT;
 
 /// Twos complement, overflows from minimum to zero (safe).
-template <typename Value, if_integer<Value> = true>
-constexpr Value twos_complement(Value value) NOEXCEPT;
+template <typename Integer, if_integer<Integer> = true>
+constexpr Integer twos_complement(Integer value) NOEXCEPT;
 
 /// Comparisons.
 /// ---------------------------------------------------------------------------

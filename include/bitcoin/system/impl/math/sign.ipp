@@ -43,8 +43,6 @@ namespace system {
 // Coversions.
 // ----------------------------------------------------------------------------
 
-// TODO: use of maximal_cast limits these to integrals.
-
 // absolute(minimum<Signed>) overflows to add1(maximum<Signed>) for all types.
 template <typename Signed, if_signed_integer<Signed>>
 constexpr to_unsigned_type<Signed> absolute(Signed value) NOEXCEPT
@@ -63,7 +61,7 @@ constexpr Unsigned absolute(Unsigned value) NOEXCEPT
 template <typename Signed, if_signed_integer<Signed>>
 constexpr Signed negate(Signed value) NOEXCEPT
 {
-    return possible_narrow_and_sign_cast<Signed>(-maximal_cast(value));
+    return depromote<Signed>(-promote(value));
 }
 
 // C++20: requires twos complement integer representation.
@@ -74,18 +72,17 @@ constexpr Unsigned negate(Unsigned value) NOEXCEPT
     return twos_complement(value);
 }
 
-template <typename Value, if_integer<Value>>
-constexpr Value twos_complement(Value value) NOEXCEPT
+template <typename Integer, if_integer<Integer>>
+constexpr Integer twos_complement(Integer value) NOEXCEPT
 {
-    // Flows from minimum to ~minimum (-1) to +1 => zero.
     return add1(ones_complement(value));
 }
 
-template <typename Value, if_integer<Value>>
-constexpr Value ones_complement(Value value) NOEXCEPT
+template <typename Integer, if_integer<Integer>>
+constexpr Integer ones_complement(Integer value) NOEXCEPT
 {
     // Alias for bit_not.
-    return possible_narrow_and_sign_cast<Value>(~maximal_cast(value));
+    return depromote<Integer>(~promote(value));
 }
 
 // Comparisons.
@@ -147,7 +144,7 @@ constexpr bool is_lesser(Left left, Right right) NOEXCEPT
     return !is_negative(right) && (to_unsigned(right) > left);
 }
 
-// Types cannot be cast by first argument.
+// Prevents left type alone from being cast by first argument.
 template <place1, typename Left, typename Right,
     if_same_signed_integer<Left, Right>>
 constexpr to_greater_type<Left, Right> greater(Left left, Right right) NOEXCEPT
@@ -155,7 +152,7 @@ constexpr to_greater_type<Left, Right> greater(Left left, Right right) NOEXCEPT
     return is_greater(left, right) ? left : right;
 }
 
-// Types cannot be cast by first argument.
+// Prevents left type alone from being cast by first argument.
 template <place1, typename Left, typename Right,
     if_same_signed_integer<Left, Right>>
 constexpr to_greater_type<Left, Right> lesser(Left left, Right right) NOEXCEPT

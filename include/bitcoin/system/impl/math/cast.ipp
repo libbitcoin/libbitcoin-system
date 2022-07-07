@@ -25,8 +25,14 @@
 namespace libbitcoin {
 namespace system {
 
-// Explicit integral casts.
+// Promotion of native operators.
 // ----------------------------------------------------------------------------
+
+template <typename From, if_integer<From>>
+constexpr to_promoted_type<From> promote(From value) NOEXCEPT
+{
+    return value;
+}
 
 template <typename Restored, typename Common,
     if_common<Common>,
@@ -40,6 +46,19 @@ constexpr Restored depromote(Common value) NOEXCEPT
     BC_POP_WARNING()
     BC_POP_WARNING()
 }
+
+template <typename Restored, typename Common,
+    if_integer<Restored>,
+    if_non_integral_integer<Common> >
+constexpr Restored depromote(Common value) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_IDENTITY_CAST)
+    return static_cast<Restored>(value);
+    BC_POP_WARNING()
+}
+
+// Explicit integral casts.
+// ----------------------------------------------------------------------------
 
 template <typename To, typename From,
     if_lesser_size<To, From>,
@@ -73,15 +92,8 @@ constexpr To narrow_sign_cast(From value) NOEXCEPT
 
 template <typename To, typename From,
     if_greater_size<To, From>,
-    if_same_signed_integral_integer<To, From>>
+    if_same_signed_integer<To, From>>
 constexpr To wide_cast(From value) NOEXCEPT
-{
-    return value;
-}
-
-template <typename From,
-    if_integral_integer<From>>
-constexpr to_maximal_type<From> maximal_cast(From value) NOEXCEPT
 {
     return value;
 }

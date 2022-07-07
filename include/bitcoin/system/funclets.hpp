@@ -102,27 +102,27 @@ constexpr bool is_integral_sized(size_t bytes) noexcept
 /// overflow, but 32 (and 64) do. Forcing promotion to 64 bit makes this
 /// unexpected behavior more consistent, producing overflow only at the
 /// maximal integral domain (64), as opposed to 32/64 but not 8/16.
-/// See also: bc::system::maximal_cast.
+/// See also: bc::system::promote.
 
 template <typename Type>
 constexpr Type add1(Type value) noexcept
 {
     static_assert(static_cast<Type>(0) + 1 == 1);
-    return static_cast<Type>(value + to_maximal_type<Type>{1});
+    return static_cast<Type>(value + to_promoted_type<Type>{1});
 }
 
 template <typename Type>
 constexpr Type sub1(Type value) noexcept
 {
     static_assert(static_cast<Type>(1) - 1 == 0);
-    return static_cast<Type>(value - to_maximal_type<Type>{1});
+    return static_cast<Type>(value - to_promoted_type<Type>{1});
 }
 
 template <typename Type>
 constexpr Type to_bits(Type bytes) noexcept
 {
     static_assert(static_cast<Type>(1) * 8 == 8);
-    return static_cast<Type>(bytes * to_maximal_type<Type>{8});
+    return static_cast<Type>(bytes * to_promoted_type<Type>{8});
 }
 
 constexpr uint8_t to_byte(char value) noexcept
@@ -135,7 +135,7 @@ constexpr uint8_t to_byte(char value) noexcept
 template <typename Type>
 constexpr Type to_half(Type value) noexcept
 {
-    return static_cast<Type>(value / to_maximal_type<Type>{2});
+    return static_cast<Type>(value / to_promoted_type<Type>{2});
 }
 
 template <typename Type = int>

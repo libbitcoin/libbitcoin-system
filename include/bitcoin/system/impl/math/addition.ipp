@@ -24,8 +24,6 @@
 #include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
-// TODO: use maximal_cast for all operations.
-
 namespace libbitcoin {
 namespace system {
     
@@ -33,12 +31,13 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 // Single type.
+// Prevents left type alone from being cast by first argument.
 template <place1, typename Integer,
     if_integral_integer<Integer>>
 constexpr Integer add(Integer left, Integer right) NOEXCEPT
 {
     // is_overflow() can be used to guard this addition.
-    return depromote<Integer>(left + right);
+    return depromote<Integer>(promote(left) + promote(right));
 }
 
 // Single type explicit, possibly narrowing and/or sign changing.
@@ -46,9 +45,7 @@ template <typename Explicit, typename Integer,
     if_integral_integer<Integer>>
 constexpr Explicit add(Integer left, Integer right) NOEXCEPT
 {
-    return add<place1{}, Explicit>(
-        possible_narrow_and_sign_cast<Explicit>(left),
-        possible_narrow_and_sign_cast<Explicit>(right));
+    return add<place1{}, Explicit>(left, right);
 }
 
 // Implicit type (defaulted to larger operand, same signs).
@@ -59,7 +56,7 @@ template <place2, typename Left, typename Right,
 constexpr to_greater_type<Left, Right> add(Left left, Right right) NOEXCEPT
 {
     using greater = to_greater_type<Left, Right>;
-    return add<place1{}, greater >(
+    return add<place1{}, greater>(
         possible_wide_cast<greater>(left),
         possible_wide_cast<greater>(right));
 }
@@ -85,7 +82,7 @@ template <place1, typename Integer,
 constexpr Integer subtract(Integer left, Integer right) NOEXCEPT
 {
     // is_underflow() can be used to guard this subtraction.
-    return depromote<Integer>(left - right);
+    return depromote<Integer>(promote(left) - promote(right));
 }
 
 // Single type explicit, possibly narrowing and/or sign changing.
@@ -93,9 +90,7 @@ template <typename Explicit, typename Integer,
     if_integral_integer<Integer>>
 constexpr Explicit subtract(Integer left, Integer right) NOEXCEPT
 {
-    return subtract<place1{}, Explicit>(
-        possible_narrow_and_sign_cast<Explicit>(left),
-        possible_narrow_and_sign_cast<Explicit>(right));
+    return subtract<place1{}, Explicit>(left, right);
 }
 
 // Implicit type (defaulted to larger operand, same signs).
@@ -145,9 +140,7 @@ template <typename Explicit, typename Integer,
     if_integral_integer<Integer>>
 constexpr Explicit ceilinged_add(Integer left, Integer right) NOEXCEPT
 {
-    return ceilinged_add<place1{}, Explicit>(
-        possible_narrow_and_sign_cast<Explicit>(left),
-        possible_narrow_and_sign_cast<Explicit>(right));
+    return ceilinged_add<place1{}, Explicit>(left, right);
 }
 
 template <place2, typename Left, typename Right,
@@ -197,9 +190,7 @@ template <typename Explicit, typename Integer,
     if_integral_integer<Integer>>
 constexpr Explicit floored_subtract(Integer left, Integer right) NOEXCEPT
 {
-    return floored_subtract<place1{}, Explicit>(
-        possible_narrow_and_sign_cast<Explicit>(left),
-        possible_narrow_and_sign_cast<Explicit>(right));
+    return floored_subtract<place1{}, Explicit>(left, right);
 }
 
 template <place2, typename Left, typename Right,

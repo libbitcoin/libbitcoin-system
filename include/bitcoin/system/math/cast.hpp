@@ -25,17 +25,31 @@
 namespace libbitcoin {
 namespace system {
 
-/// Explicit integral casts.
+/// Promotion of native operators.
 /// ---------------------------------------------------------------------------
+
+/// Promote integral to integral of widest bit width (no-op for non-integrals).
+/// This is used to promote to 64 bit before native operation, which moves the
+/// overflow limit from 32 bit (baesd on promotion) to 64 bit (maximum domain).
+template <typename From, if_integer<From> = true>
+constexpr to_promoted_type<From> promote(From value) NOEXCEPT;
 
 /// Sign may be changed on promotion by binary operators.
 /// Sign will not (?) be changed by unary ops (-) unless size is also promoted.
-/// This is a narrowing cast to restore Restored type after a native operation
+/// This is a narrowing cast to restore Restored type after a native operation.
+/// Also used as a narrowing cast after use of promote.
 template <typename Restored, typename Common,
     if_common<Common> = true,
     if_integral_integer<Restored> = true,
     if_integral_integer<Common> = true>
 constexpr Restored depromote(Common value) NOEXCEPT;
+template <typename Restored, typename Common,
+    if_integer<Restored> = true,
+    if_non_integral_integer<Common> = true>
+constexpr Restored depromote(Common value) NOEXCEPT;
+
+/// Explicit integral casts.
+/// ---------------------------------------------------------------------------
 
 /// Cast integral to integral of narrower bit width.
 template <typename To, typename From,
@@ -55,16 +69,11 @@ template <typename To, typename From,
     if_not_same_signed_integral_integer<To, From> = true>
 constexpr To narrow_sign_cast(From value) NOEXCEPT;
 
-/// Promote integral to integral of wider bit width.
+/// Promote integer to integer of wider bit width.
 template <typename To, typename From,
     if_greater_size<To, From> = true,
-    if_same_signed_integral_integer<To, From> = true>
+    if_same_signed_integer<To, From> = true>
 constexpr To wide_cast(From value) NOEXCEPT;
-
-/// Promote integral to integral of widest bit width.
-template <typename From,
-    if_integral_integer<From> = true>
-constexpr to_maximal_type<From> maximal_cast(From value) NOEXCEPT;
 
 /// Possible integer casts.
 /// ---------------------------------------------------------------------------
