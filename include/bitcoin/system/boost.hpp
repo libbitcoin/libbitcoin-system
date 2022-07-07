@@ -52,6 +52,7 @@
 #include <boost/json.hpp>
 #include <boost/locale.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+////#include <boost/predef.h> // platform identifications
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
 
