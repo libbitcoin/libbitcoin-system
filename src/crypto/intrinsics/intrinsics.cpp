@@ -364,8 +364,7 @@ void sha256_paired_double(uint8_t out[], const uint8_t in[],
 
 void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) NOEXCEPT
 {
-    constexpr auto state_size = 32_size / sizeof(uint32_t);
-    constexpr auto count = state_size / sizeof(uint32_t);
+    constexpr auto count = 32_size / sizeof(uint32_t);
 
     auto state = sha256_initial;
     auto buffer = sha256x2_buffer;
@@ -373,13 +372,13 @@ void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) NOEXCEPT
     sha256_x1_portable(state.data(), sha256x2_padding.data());
     to_big_endian(
         narrowing_array_cast<uint32_t, count>(buffer),
-        narrowing_array_cast<uint32_t, count>(state));
+        array_cast<uint32_t, count>(state));
 
     state = sha256_initial;
     sha256_x1_portable(state.data(), buffer.data());
     to_big_endian(
         unsafe_array_cast<uint32_t, count>(&out[0]),
-        narrowing_array_cast<uint32_t, count>(state));
+        array_cast<uint32_t, count>(state));
 }
 
 } // namespace intrinsics
