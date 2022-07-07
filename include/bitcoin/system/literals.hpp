@@ -136,6 +136,10 @@ CONSTEVAL type operator "" name(integer_type value) noexcept \
 /// digit separators. A built-in suffix cannot be used with a user-defined
 /// suffix, and there would be no reason to.
 
+/// Literals suppress exception, causing runtime abort if !defined(CONSTEVAL).
+/// This precludes unnecessary warning on each literal in noexcept functions.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 /// positive signed integer
 DECLARE_LITERAL(_i08, positive, int8_t)
 DECLARE_LITERAL(_i16, positive, int16_t)
@@ -169,6 +173,8 @@ DECLARE_LITERAL(_nu8, negative, uint8_t)
 /// size_t
 DECLARE_LITERAL(_size, positive, size_t)
 DECLARE_LITERAL(_nsize, negative, signed_size_t)
+
+BC_POP_WARNING()
 
 /// ---------------------------------------------------------------------------
 
