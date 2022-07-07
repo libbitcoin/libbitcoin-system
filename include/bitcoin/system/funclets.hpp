@@ -104,6 +104,8 @@ constexpr bool is_integral_sized(size_t bytes) noexcept
 /// maximal integral domain (64), as opposed to 32/64 but not 8/16.
 /// See also: bc::system::maximal_cast.
 
+// TODO: provide overloads for non-integrals.
+
 template <typename Type>
 constexpr Type add1(Type value) noexcept
 {
