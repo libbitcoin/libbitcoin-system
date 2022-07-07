@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_IPP
 #define LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_IPP
 
+#include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -30,14 +31,16 @@ template <typename Integral, if_integral_integer<Integral>>
 constexpr data_array<sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT
 {
-    return *pointer_cast<data_array<sizeof(Integral)>>(&value);
+    // Safe because passing sizeof(value).
+    return unsafe_array_cast<uint8_t, sizeof(Integral)>(&value);
 }
 
 template <typename Integral, if_integral_integer<Integral>>
 constexpr const data_array<sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT
 {
-    return *pointer_cast<const data_array<sizeof(Integral)>>(&value);
+    // Safe because passing sizeof(value).
+    return unsafe_array_cast<uint8_t, sizeof(Integral)>(&value);
 }
 
 template <size_t Size, if_integral_size<Size>>
