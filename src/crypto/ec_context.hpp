@@ -41,6 +41,7 @@ public:
 protected:
     ec_context(int flags) NOEXCEPT;
 
+    // This unpublished header hides this external symbol.
     secp256k1_context* context_;
 };
 
