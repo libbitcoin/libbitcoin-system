@@ -19,12 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
-#include <chrono>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <memory>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
