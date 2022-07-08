@@ -107,28 +107,28 @@ uint8_t rj_xtime(uint8_t x)
 
 void aes_subBytes(uint8_t *buf)
 {
-    register uint8_t i = 16;
+    uint8_t i = 16;
     while (i--)
         buf[i] = rj_sbox(buf[i]);
 }
 
 void aes_subBytes_inv(uint8_t* buf)
 {
-    register uint8_t i = 16;
+    uint8_t i = 16;
     while (i--)
         buf[i] = rj_sbox_inv(buf[i]);
 }
 
 void aes_addRoundKey(uint8_t* buf, uint8_t* key)
 {
-    register uint8_t i = 16;
+    uint8_t i = 16;
     while (i--)
         buf[i] ^= key[i];
 }
 
 void aes_addRoundKey_cpy(uint8_t* buf, uint8_t* key, uint8_t* cpk)
 {
-    register uint8_t i = 16;
+    uint8_t i = 16;
     while (i--)
     {
         buf[i] ^= (cpk[i] = key[i]);
@@ -138,7 +138,7 @@ void aes_addRoundKey_cpy(uint8_t* buf, uint8_t* key, uint8_t* cpk)
 
 void aes_shiftRows(uint8_t* buf)
 {
-    register uint8_t i, j;
+    uint8_t i, j;
 
     i = buf[1];
     buf[1] = buf[5];
@@ -164,7 +164,7 @@ void aes_shiftRows(uint8_t* buf)
 
 void aes_shiftRows_inv(uint8_t* buf)
 {
-    register uint8_t i, j;
+    uint8_t i, j;
 
     i = buf[1];
     buf[1] = buf[13];
@@ -190,7 +190,7 @@ void aes_shiftRows_inv(uint8_t* buf)
 
 void aes_mixColumns(uint8_t* buf)
 {
-    register uint8_t i, a, b, c, d, e;
+    uint8_t i, a, b, c, d, e;
 
     for (i = 0; i < 16; i += 4)
     {
@@ -209,7 +209,7 @@ void aes_mixColumns(uint8_t* buf)
 
 void aes_mixColumns_inv(uint8_t* buf)
 {
-    register uint8_t i, a, b, c, d, e, x, y, z;
+    uint8_t i, a, b, c, d, e, x, y, z;
 
     for (i = 0; i < 16; i += 4)
     {
@@ -232,7 +232,7 @@ void aes_mixColumns_inv(uint8_t* buf)
 
 void aes_expandEncKey(uint8_t* k, uint8_t* rc) 
 {
-    register uint8_t i;
+    uint8_t i;
 
     k[0] ^= rj_sbox(k[29]) ^ (*rc);
     k[1] ^= rj_sbox(k[30]);
@@ -297,7 +297,7 @@ void aes_expandDecKey(uint8_t* k, uint8_t* rc)
 void aes256_init(aes256_context* context, const uint8_t key[AES256_KEY_LENGTH])
 {
     uint8_t rcon = 1;
-    register uint8_t i;
+    uint8_t i;
 
     for (i = 0; i < sizeof(context->key); i++)
         context->enckey[i] = context->deckey[i] = key[i];
@@ -308,7 +308,7 @@ void aes256_init(aes256_context* context, const uint8_t key[AES256_KEY_LENGTH])
 
 void aes256_done(aes256_context* context)
 {
-    register uint8_t i;
+    uint8_t i;
 
     for (i = 0; i < sizeof(context->key); i++) 
         context->key[i] = context->enckey[i] = context->deckey[i] = 0;
