@@ -22,8 +22,7 @@
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/nominal.hpp>
-#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/endian/algorithm.hpp>
 
 #define BUFFERED_STREAM
 
