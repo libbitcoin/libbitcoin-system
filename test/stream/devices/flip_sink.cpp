@@ -22,16 +22,16 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // input_sequence
 
-BOOST_AUTO_TEST_CASE(flip_sink__input_sequence__empty__empty)
-{
-    constexpr auto size = 0u;
-    data_chunk sink(size);
-    flip_sink<data_slab> instance(sink);
-    const auto sequence = instance.input_sequence();
-    using char_type = typename device<data_chunk>::char_type;
-    BOOST_REQUIRE(sequence.first == pointer_cast<char_type>(&(*sink.begin())));
-    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
-}
+////BOOST_AUTO_TEST_CASE(flip_sink__input_sequence__empty__empty)
+////{
+////    constexpr auto size = 0u;
+////    data_chunk sink(size);
+////    flip_sink<data_slab> instance(sink);
+////    const auto sequence = instance.input_sequence();
+////    using char_type = typename device<data_chunk>::char_type;
+////    BOOST_REQUIRE(sequence.first == pointer_cast<char_type>(&(*sink.begin())));
+////    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
+////}
 
 BOOST_AUTO_TEST_CASE(flip_sink__input_sequence__not_empty__expected)
 {
@@ -46,16 +46,16 @@ BOOST_AUTO_TEST_CASE(flip_sink__input_sequence__not_empty__expected)
 
 // output_sequence
 
-BOOST_AUTO_TEST_CASE(flip_sink__output_sequence__empty__empty)
-{
-    constexpr auto size = 0u;
-    data_chunk sink(size);
-    flip_sink<data_slab> instance(sink);
-    const auto sequence = instance.output_sequence();
-    using char_type = typename device<data_chunk>::char_type;
-    BOOST_REQUIRE(sequence.first == pointer_cast<char_type>(&(*sink.begin())));
-    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
-}
+////BOOST_AUTO_TEST_CASE(flip_sink__output_sequence__empty__empty)
+////{
+////    constexpr auto size = 0u;
+////    data_chunk sink(size);
+////    flip_sink<data_slab> instance(sink);
+////    const auto sequence = instance.output_sequence();
+////    using char_type = typename device<data_chunk>::char_type;
+////    BOOST_REQUIRE(sequence.first == pointer_cast<char_type>(&(*sink.begin())));
+////    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
+////}
 
 BOOST_AUTO_TEST_CASE(flip_sink__output_sequence__not_empty__expected)
 {

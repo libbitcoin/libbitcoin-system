@@ -22,16 +22,16 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 // output_sequence
 
-BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
-{
-    constexpr auto size = 0u;
-    data_chunk sink(size);
-    copy_sink<data_slab> instance(sink);
-    const auto sequence = instance.output_sequence();
-    using char_type = typename device<data_chunk>::char_type;
-    BOOST_REQUIRE(sequence.first == reinterpret_cast<char_type*>(&(*sink.begin())));
-    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
-}
+////BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__empty__empty)
+////{
+////    constexpr auto size = 0u;
+////    data_chunk sink(size);
+////    copy_sink<data_slab> instance(sink);
+////    const auto sequence = instance.output_sequence();
+////    using char_type = typename device<data_chunk>::char_type;
+////    BOOST_REQUIRE(sequence.first == reinterpret_cast<char_type*>(&(*sink.begin())));
+////    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
+////}
 
 BOOST_AUTO_TEST_CASE(copy_sink__output_sequence__not_empty__expected)
 {
