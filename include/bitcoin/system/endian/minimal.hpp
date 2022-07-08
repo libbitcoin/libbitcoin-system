@@ -36,23 +36,19 @@ namespace system {
 // for chunk, _size suffix refers to minimal length of return.
 // TODO: _endian_size -> _endian_minimal?
 
-template <size_t Size, typename Integer,
-    if_integer<Integer> = true>
+template <size_t Size, typename Integer, if_integer<Integer> = true>
 constexpr data_array<Size> to_big_endian_size(Integer value) NOEXCEPT;
 
-template <size_t Size, typename Integer,
-    if_integer<Integer> = true>
+template <size_t Size, typename Integer, if_integer<Integer> = true>
 constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT;
 
 /// Use excess to reserve the specified number of bytes beyond return size.
-template <typename Integer,
-    if_integer<Integer> = true>
+template <typename Integer, if_integer<Integer> = true>
 VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     size_t excess=zero) NOEXCEPT;
 
 /// Use excess to reserve the specified number of bytes beyond return size.
-template <typename Integer,
-    if_integer<Integer> = true>
+template <typename Integer, if_integer<Integer> = true>
 VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     size_t excess=zero) NOEXCEPT;
 
