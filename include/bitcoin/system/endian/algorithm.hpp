@@ -33,48 +33,48 @@ namespace system {
 /// Native endianness integer to data.
 /// ---------------------------------------------------------------------------
 
-// to_big_data()
-template <typename Data, typename Integer>
-constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT;
+// Data to_big_data(Data&&, Integer)
+template <typename Data, typename Integer, if_integer<Integer> = true>
+constexpr Data to_big_data(Data&& bytes, Integer value) NOEXCEPT;
 
-// to_little_data()
-template <typename Data, typename Integer>
-constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT;
+// Data to_little_data(Data&&, Integer)
+template <typename Data, typename Integer, if_integer<Integer> = true>
+constexpr Data to_little_data(Data&& bytes, Integer value) NOEXCEPT;
 
 /// Native endianness integer from big-endian data.
 /// ---------------------------------------------------------------------------
 
-// from_big_array()
-template <typename Integer, size_t Size>
+// Integer from_big_array<Integer>(data_array)
+template <typename Integer, size_t Size, if_integer<Integer> = true>
 constexpr Integer from_big_array(
     const data_array<Size>& data) NOEXCEPT;
 
-// from_big_array<length>()
-template <typename Integer, size_t Size>
-constexpr Integer from_big_chunk(size_t size,
+// Integer from_big_array<Integer>(length, data_array)
+template <typename Integer, size_t Size, if_integer<Integer> = true>
+constexpr Integer from_big_array(size_t length,
     const data_array<Size>& data) NOEXCEPT;
 
-// from_big_chunk<length>()
-template <typename Integer>
-VCONSTEXPR Integer from_big_chunk(size_t size,
+// Integer from_big_chunk<Integer>(length, data_chunk)
+template <typename Integer, if_integer<Integer> = true>
+VCONSTEXPR Integer from_big_chunk(size_t length,
     const data_chunk& data) NOEXCEPT;
 
 /// Native endianness integer from little-endian data.
 /// ---------------------------------------------------------------------------
 
-// from_little_array()
-template <typename Integer, size_t Size>
+// Integer from_little_array<Integer>(data_array)
+template <typename Integer, size_t Size, if_integer<Integer> = true>
 constexpr Integer from_little_array(
     const data_array<Size>& data) NOEXCEPT;
 
-// from_little_array<length>()
-template <typename Integer, size_t Size>
-constexpr Integer from_little_chunk(size_t size,
+// Integer from_little_array<Integer>(length, data_array)
+template <typename Integer, size_t Size, if_integer<Integer> = true>
+constexpr Integer from_little_array(size_t length,
     const data_array<Size>& data) NOEXCEPT;
 
-// from_little_chunk<length>()
-template <typename Integer>
-VCONSTEXPR Integer from_little_chunk(size_t size,
+// Integer from_little_chunk<Integer>(length, data_chunk)
+template <typename Integer, if_integer<Integer> = true>
+VCONSTEXPR Integer from_little_chunk(size_t length,
     const data_chunk& data) NOEXCEPT;
 
 /// Native endianness integer to/from big/little endianness integer (byteswap).

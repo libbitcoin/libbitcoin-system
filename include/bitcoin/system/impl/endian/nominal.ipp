@@ -35,13 +35,13 @@ namespace system {
 template <size_t Size>
 constexpr unsigned_type<Size> from_big_endian(const data_array<Size>& data) NOEXCEPT
 {
-    return from_big_chunk<unsigned_type<Size>>(Size, data);
+    return from_big_array<unsigned_type<Size>>(Size, data);
 }
 
 template <size_t Size>
 constexpr unsigned_type<Size> from_little_endian(const data_array<Size>& data) NOEXCEPT
 {
-    return from_little_chunk<unsigned_type<Size>>(Size, data);
+    return from_little_array<unsigned_type<Size>>(Size, data);
 }
 
 // integral   from_big|little_endian(data_slice)
@@ -68,11 +68,11 @@ constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return from_big_chunk<Integral>(sizeof(Integral), data);
+        return from_big_array<Integral>(sizeof(Integral), data);
     }
     else
     {
-        return from_big_chunk<Integral>(sizeof(Integral), data);
+        return from_big_array<Integral>(sizeof(Integral), data);
         ////return native_from_big_end(byte_cast(data));
     }
 }
@@ -82,11 +82,11 @@ constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        return from_little_chunk<Integral>(sizeof(Integral), data);
+        return from_little_array<Integral>(sizeof(Integral), data);
     }
     else
     {
-        return from_little_chunk<Integral>(sizeof(Integral), data);
+        return from_little_array<Integral>(sizeof(Integral), data);
         ////return native_from_little_end(byte_cast(data));
     }
 }
@@ -97,7 +97,7 @@ constexpr data_array<sizeof(Integral)> to_big_endian(Integral value) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        return to_big_chunk(data_array<sizeof(Integral)>{}, value);
+        return to_big_data(data_array<sizeof(Integral)>{}, value);
     }
     else
     {
@@ -112,7 +112,7 @@ constexpr data_array<sizeof(Integral)> to_little_endian(Integral value) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        return to_little_chunk(data_array<sizeof(Integral)>{}, value);
+        return to_little_data(data_array<sizeof(Integral)>{}, value);
     }
     else
     {

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_UINTX_IPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_UINTX_IPP
 
-#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/minimal.hpp>
@@ -37,25 +36,20 @@ namespace system {
 
 inline uintx from_big_endian(const data_chunk& data) NOEXCEPT
 {
-    // base (data is sliced).
-    return from_big_chunk<uintx>(std::size(data), data);
+    return from_big_chunk<uintx>(data.size(), data);
 }
 
 inline uintx from_little_endian(const data_chunk& data) NOEXCEPT
 {
-    // base (data is sliced).
-    return from_little_chunk<uintx>(std::size(data), data);
+    return from_little_chunk<uintx>(data.size(), data);
 }
 
-// TODO: conversion needs to be able to support Data type.
 inline data_chunk to_big_endian(const uintx& value) NOEXCEPT
 {
     // minimal (chunk - required by unitx variable size).
     // to_big_endian_size<> implies array, otherwise chunk.
     return to_big_endian_size(value);
 }
-
-// TODO: conversion needs to be able to support Data type.
 
 inline data_chunk to_little_endian(const uintx& value) NOEXCEPT
 {
