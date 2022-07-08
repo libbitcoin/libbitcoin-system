@@ -155,6 +155,7 @@ private:
     static constexpr data_slice from_iterators(const Iterator& begin,
         const Iterator& end) NOEXCEPT;
 
+    // TODO: not constexpr (reinterpret_cast).
     template <typename Pointer>
     static constexpr data_slice from_size(
         Pointer begin, size_type size) NOEXCEPT;

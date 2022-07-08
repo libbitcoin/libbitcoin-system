@@ -126,6 +126,7 @@ constexpr data_slice data_slice::from_iterators(const Iterator& begin,
     BC_POP_WARNING()
 }
 
+// TODO: not constexpr (reinterpret_cast).
 // static
 template <typename Pointer>
 constexpr data_slice data_slice::from_size(Pointer begin,
