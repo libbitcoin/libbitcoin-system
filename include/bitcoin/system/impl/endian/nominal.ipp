@@ -37,37 +37,41 @@ namespace system {
 // integers. This also presents a performance optimization for byte conversion,
 // which is close to a no-op. Empty vector returns zero and zero returns empty.
 
-template <typename Integer,
-    if_one_byte<Integer> = true>
-inline Integer from_big_chunk(size_t, const data_slice& data) NOEXCEPT
+template <typename Integer, if_one_byte<Integer> = true>
+VCONSTEXPR Integer from_big_chunk(size_t, const data_chunk& data) NOEXCEPT
 {
     return data.empty() ? 0 : data.front();
 }
 
-template <typename Integer,
-    if_one_byte<Integer> = true>
-inline Integer from_little_chunk(size_t, const data_slice& data) NOEXCEPT
+template <typename Integer, size_t Size, if_one_byte<Integer> = true>
+constexpr Integer from_big_chunk(size_t, const data_array<Size>& data) NOEXCEPT
 {
     return data.empty() ? 0 : data.front();
 }
 
-template <typename Data, typename Integer,
-    if_one_byte<Integer> = true>
+template <typename Integer, if_one_byte<Integer> = true>
+VCONSTEXPR Integer from_little_chunk(size_t, const data_chunk& data) NOEXCEPT
+{
+    return data.empty() ? 0 : data.front();
+}
+
+template <typename Integer, size_t Size, if_one_byte<Integer> = true>
+constexpr Integer from_little_chunk(size_t, const data_array<Size>& data) NOEXCEPT
+{
+    return data.empty() ? 0 : data.front();
+}
+
+template <typename Data, typename Integer, if_one_byte<Integer> = true>
 constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
-    if (!bytes.empty())
-        bytes.front() = static_cast<uint8_t>(value);
-
+    if (!bytes.empty()) { bytes.front() = static_cast<uint8_t>(value); }
     return std::move(bytes);
 }
 
-template <typename Data, typename Integer,
-    if_one_byte<Integer> = true>
+template <typename Data, typename Integer, if_one_byte<Integer> = true>
 constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
-    if (!bytes.empty())
-        bytes.front() = static_cast<uint8_t>(value);
-
+    if (!bytes.empty()) { bytes.front() = static_cast<uint8_t>(value); }
     return std::move(bytes);
 }
 
@@ -79,8 +83,7 @@ constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
 // -1 of any integer width will produce "1" bits, indefinitely.
 
 // for constexpr uintx_t.
-template <typename Integer, size_t Size,
-    if_non_integral_integer<Integer> = true>
+template <typename Integer, size_t Size, if_non_integral_integer<Integer> = true>
 constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
 {
     Integer value{ 0 };
@@ -95,8 +98,7 @@ constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
 }
 
 // for constexpr uintx_t.
-template <typename Integer, size_t Size,
-    if_non_integral_integer<Integer> = true>
+template <typename Integer, size_t Size, if_non_integral_integer<Integer> = true>
 constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
 {
     Integer value{ 0 };
@@ -110,9 +112,8 @@ constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
     return value;
 }
 
-template <typename Integer,
-    if_not_one_byte<Integer> = true>
-inline Integer from_big_chunk(size_t size, const data_slice& data) NOEXCEPT
+template <typename Integer, if_not_one_byte<Integer> = true>
+VCONSTEXPR Integer from_big_chunk(size_t size, const data_chunk& data) NOEXCEPT
 {
     Integer value(0);
     const auto bytes = std::min(size, data.size());
@@ -129,9 +130,26 @@ inline Integer from_big_chunk(size_t size, const data_slice& data) NOEXCEPT
     return value;
 }
 
-template <typename Integer,
-    if_not_one_byte<Integer> = true>
-inline Integer from_little_chunk(size_t size, const data_slice& data) NOEXCEPT
+template <typename Integer, size_t Size, if_not_one_byte<Integer> = true>
+constexpr Integer from_big_chunk(size_t size, const data_array<Size>& data) NOEXCEPT
+{
+    Integer value(0);
+    const auto bytes = std::min(size, data.size());
+
+    for (size_t byte = 0; byte < bytes; ++byte)
+    {
+        value <<= byte_bits;
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= static_cast<Integer>(data[byte]);
+        BC_POP_WARNING()
+    }
+
+    return value;
+}
+
+template <typename Integer, if_not_one_byte<Integer> = true>
+VCONSTEXPR Integer from_little_chunk(size_t size, const data_chunk& data) NOEXCEPT
 {
     Integer value(0);
     const auto bytes = std::min(size, data.size());
@@ -148,8 +166,25 @@ inline Integer from_little_chunk(size_t size, const data_slice& data) NOEXCEPT
     return value;
 }
 
-template <typename Data, typename Integer,
-    if_not_one_byte<Integer> = true>
+template <typename Integer, size_t Size, if_not_one_byte<Integer> = true>
+constexpr Integer from_little_chunk(size_t size, const data_array<Size>& data) NOEXCEPT
+{
+    Integer value(0);
+    const auto bytes = std::min(size, data.size());
+
+    for (auto byte = bytes; byte > 0; --byte)
+    {
+        value <<= byte_bits;
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= static_cast<Integer>(data[sub1(byte)]);
+        BC_POP_WARNING()
+    }
+
+    return value;
+}
+
+template <typename Data, typename Integer, if_not_one_byte<Integer> = true>
 constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
     for (auto& byte: views_reverse(bytes))
@@ -161,8 +196,7 @@ constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT
     return std::move(bytes);
 }
 
-template <typename Data, typename Integer,
-    if_not_one_byte<Integer> = true>
+template <typename Data, typename Integer, if_not_one_byte<Integer> = true>
 constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
     for (auto& byte: bytes)
@@ -179,15 +213,13 @@ constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <size_t Size>
-constexpr unsigned_type<Size> from_big_endian(
-    const data_array<Size>& data) NOEXCEPT
+constexpr unsigned_type<Size> from_big_endian(const data_array<Size>& data) NOEXCEPT
 {
     return from_big_chunk<unsigned_type<Size>>(Size, data);
 }
 
 template <size_t Size>
-constexpr unsigned_type<Size> from_little_endian(
-    const data_array<Size>& data) NOEXCEPT
+constexpr unsigned_type<Size> from_little_endian(const data_array<Size>& data) NOEXCEPT
 {
     return from_little_chunk<unsigned_type<Size>>(Size, data);
 }
@@ -196,22 +228,47 @@ constexpr unsigned_type<Size> from_little_endian(
 // data_array   to_big|little_endian(integral)
 // ----------------------------------------------------------------------------
 
-template <typename Integral,
-    if_integral_integer<Integral>>
-constexpr Integral from_big_endian(const data_slice& data) NOEXCEPT
+template <typename Integral, if_integral_integer<Integral>>
+VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT
 {
-    // TODO: factor out data_slice parameterization.
-    // Variable sizing and non-array format, go with native.
+    // Variably sized non-array format, stay with native/constexpr.
     return from_big_chunk<Integral>(sizeof(Integral), data);
 }
 
-template <typename Integral,
-    if_integral_integer<Integral>>
-constexpr Integral from_little_endian(const data_slice& data) NOEXCEPT
+template <typename Integral, if_integral_integer<Integral>>
+VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT
 {
-    // TODO: factor out data_slice parameterization.
-    // Variable sizing and non-array format, go with native.
+    // Variably sized non-array format, stay with native/constexpr.
     return from_little_chunk<Integral>(sizeof(Integral), data);
+}
+
+template <typename Integral, size_t Size, if_integral_integer<Integral>>
+constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT
+{
+
+    if (std::is_constant_evaluated())
+    {
+        return from_big_chunk<Integral>(sizeof(Integral), data);
+    }
+    else
+    {
+        return from_big_chunk<Integral>(sizeof(Integral), data);
+        ////return native_from_big_end(byte_cast(data));
+    }
+}
+
+template <typename Integral, size_t Size, if_integral_integer<Integral>>
+constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        return from_little_chunk<Integral>(sizeof(Integral), data);
+    }
+    else
+    {
+        return from_little_chunk<Integral>(sizeof(Integral), data);
+        ////return native_from_little_end(byte_cast(data));
+    }
 }
 
 template <typename Integral,
@@ -224,6 +281,7 @@ constexpr data_array<sizeof(Integral)> to_big_endian(Integral value) NOEXCEPT
     }
     else
     {
+        // inline
         return byte_cast(native_to_big_end(value));
     }
 }
@@ -238,7 +296,8 @@ constexpr data_array<sizeof(Integral)> to_little_endian(Integral value) NOEXCEPT
     }
     else
     {
-        return byte_cast(native_to_big_end(value));
+        // inline
+        return byte_cast(native_to_little_end(value));
     }
 }
 

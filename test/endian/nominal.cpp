@@ -20,30 +20,56 @@
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
-// single byte (specialized)
+constexpr data_array<9> bytes{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
+static_assert(from_big_endian<uint8_t >(bytes) == 0x01_u8);
+static_assert(from_big_endian<uint16_t>(bytes) == 0x0102_u16);
+static_assert(from_big_endian<uint32_t>(bytes) == 0x01020304_u32);
+static_assert(from_big_endian<uint64_t>(bytes) == 0x0102030405060708_u64);
+static_assert(from_big_endian< int8_t >(bytes) == 0x01_i8);
+static_assert(from_big_endian< int16_t>(bytes) == 0x0102_i16);
+static_assert(from_big_endian< int32_t>(bytes) == 0x01020304_i32);
+static_assert(from_big_endian< int64_t>(bytes) == 0x0102030405060708_i64);
+static_assert(from_little_endian<uint8_t >(bytes) == 0x01_u8);
+static_assert(from_little_endian<uint16_t>(bytes) == 0x0201_u16);
+static_assert(from_little_endian<uint32_t>(bytes) == 0x04030201_u32);
+static_assert(from_little_endian<uint64_t>(bytes) == 0x0807060504030201_u64);
+static_assert(from_little_endian< int8_t >(bytes) == 0x01_i8);
+static_assert(from_little_endian< int16_t>(bytes) == 0x0201_i16);
+static_assert(from_little_endian< int32_t>(bytes) == 0x04030201_i32);
+static_assert(from_little_endian< int64_t>(bytes) == 0x0807060504030201_i64);
+
+const data_chunk chunk{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
 
 BOOST_AUTO_TEST_CASE(from_big_endian__single_byte__chunk__expected)
 {
-    const data_chunk data{ 0x42, 0xff };
-    BOOST_REQUIRE_EQUAL(from_big_endian<uint8_t>(data), data[0]);
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint8_t >(chunk), 0x01_u8);
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint16_t>(chunk), 0x0102_u16);
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint32_t>(chunk), 0x01020304_u32);
+    BOOST_REQUIRE_EQUAL(from_big_endian<uint64_t>(chunk), 0x0102030405060708_u64);
 }
 
 BOOST_AUTO_TEST_CASE(from_little_endian__single_byte__chunk___expected)
 {
-    const data_chunk data{ 0x42, 0xff };
-    BOOST_REQUIRE_EQUAL(from_little_endian<uint8_t>(data), data[0]);
+    BOOST_REQUIRE_EQUAL(from_big_endian<int8_t >(chunk), 0x01_i8);
+    BOOST_REQUIRE_EQUAL(from_big_endian<int16_t>(chunk), 0x0102_i16);
+    BOOST_REQUIRE_EQUAL(from_big_endian<int32_t>(chunk), 0x01020304_i32);
+    BOOST_REQUIRE_EQUAL(from_big_endian<int64_t>(chunk), 0x0102030405060708_i64);
 }
 
 BOOST_AUTO_TEST_CASE(to_big_endian__single_byte__array__expected)
 {
-    const data_array<1> data{ { 0x42 } };
-    BOOST_REQUIRE_EQUAL(to_big_endian(data[0]), data);
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint8_t >(chunk), 0x01_u8);
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint16_t>(chunk), 0x0201_u16);
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint32_t>(chunk), 0x04030201_u32);
+    BOOST_REQUIRE_EQUAL(from_little_endian<uint64_t>(chunk), 0x0807060504030201_u64);
 }
 
 BOOST_AUTO_TEST_CASE(to_little_endian__single_byte__array__expected)
 {
-    const data_array<1> data{ { 0x42 } };
-    BOOST_REQUIRE_EQUAL(to_little_endian(data[0]), data);
+    BOOST_REQUIRE_EQUAL(from_little_endian<int8_t >(chunk), 0x01_i8);
+    BOOST_REQUIRE_EQUAL(from_little_endian<int16_t>(chunk), 0x0201_i16);
+    BOOST_REQUIRE_EQUAL(from_little_endian<int32_t>(chunk), 0x04030201_i32);
+    BOOST_REQUIRE_EQUAL(from_little_endian<int64_t>(chunk), 0x0807060504030201_i64);
 }
 
 // negatives
@@ -143,7 +169,7 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian__chunk_to_integer_long__expected
 const data_array<4> array_forward{ { 0x01, 0x02, 0x03, 0x04 } };
 const data_array<4> array_reverse{ { 0x04, 0x03, 0x02, 0x01 } };
 
-// matched data
+// same data
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__array_to_integer__expected)
 {
@@ -165,7 +191,7 @@ BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_array__expected)
     BOOST_REQUIRE_EQUAL(to_little_endian(value32), array_reverse);
 }
 
-// short data
+// less data
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__array_to_integer_short__expected)
 {
@@ -179,7 +205,7 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian__array_to_integer_short__expecte
     BOOST_REQUIRE_EQUAL(from_little_endian<uint64_t>(array_reverse), value32);
 }
 
-// long data
+// more data
 
 BOOST_AUTO_TEST_CASE(endian__from_big_endian__array_to_integer_long__expected)
 {
