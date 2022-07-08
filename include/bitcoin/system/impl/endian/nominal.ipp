@@ -37,8 +37,6 @@ namespace system {
 // integers. This also presents a performance optimization for byte conversion,
 // which is close to a no-op. Empty vector returns zero and zero returns empty.
 
-// TODO: split into integral and non-integral, use bytecasting for integrals.
-
 template <typename Integer,
     if_one_byte<Integer> = true>
 inline Integer from_big_chunk(size_t, const data_slice& data) NOEXCEPT
@@ -55,7 +53,7 @@ inline Integer from_little_chunk(size_t, const data_slice& data) NOEXCEPT
 
 template <typename Data, typename Integer,
     if_one_byte<Integer> = true>
-constexpr Data to_big(Data&& bytes, Integer value) NOEXCEPT
+constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
     if (!bytes.empty())
         bytes.front() = static_cast<uint8_t>(value);
@@ -65,7 +63,7 @@ constexpr Data to_big(Data&& bytes, Integer value) NOEXCEPT
 
 template <typename Data, typename Integer,
     if_one_byte<Integer> = true>
-constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
+constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
     if (!bytes.empty())
         bytes.front() = static_cast<uint8_t>(value);
@@ -116,14 +114,6 @@ template <typename Integer,
     if_not_one_byte<Integer> = true>
 inline Integer from_big_chunk(size_t size, const data_slice& data) NOEXCEPT
 {
-    // read msb (forward), shift in the byte (no shift on first)
-    // data[0] is most significant
-    // { 0x01, 0x02 } => 0x0102
-    // 0x0000 << 8 => 0x0000
-    // 0x0001 << 8 => 0x0100
-    // 0x0000 |= 0x01[0] => 0x0001
-    // 0x0100 |= 0x02[1] => 0x0102
-
     Integer value(0);
     const auto bytes = std::min(size, data.size());
 
@@ -143,14 +133,6 @@ template <typename Integer,
     if_not_one_byte<Integer> = true>
 inline Integer from_little_chunk(size_t size, const data_slice& data) NOEXCEPT
 {
-    // read msb (reverse), shift in the byte (no shift on first)
-    // data[0] is least significant
-    // { 0x01, 0x02 } => 0x0201
-    // 0x0000 << 8 => 0x0000
-    // 0x0002 << 8 => 0x0200
-    // 0x0000 |= 0x02[1] => 0x0002
-    // 0x0200 |= 0x01[0] => 0x0201
-
     Integer value(0);
     const auto bytes = std::min(size, data.size());
 
@@ -168,16 +150,8 @@ inline Integer from_little_chunk(size_t size, const data_slice& data) NOEXCEPT
 
 template <typename Data, typename Integer,
     if_not_one_byte<Integer> = true>
-constexpr Data to_big(Data&& bytes, Integer value) NOEXCEPT
+constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
-    // read and shift out lsb, set byte in reverse order
-    // data[0] is most significant
-    // 0x0102 => { 0x01, 0x02 }
-    // (uint8_t)0x0102 => 0x02[1]
-    // (uint8_t)0x0001 => 0x01[0]
-    // 0x0102 >> 8 => 0x0001
-    // 0x0001 >> 8 => 0x0000
-
     for (auto& byte: views_reverse(bytes))
     {
         byte = static_cast<uint8_t>(value);
@@ -189,16 +163,8 @@ constexpr Data to_big(Data&& bytes, Integer value) NOEXCEPT
 
 template <typename Data, typename Integer,
     if_not_one_byte<Integer> = true>
-constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
+constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
-    // read and shift out lsb, set byte in forward order
-    // data[0] is least significant
-    // 0x0102 => { 0x02, 0x01 }
-    // (uint8_t)0x0102 => 0x02[0]
-    // (uint8_t)0x0001 => 0x01[1]
-    // 0x0102 >> 8 => 0x0001
-    // 0x0001 >> 8 => 0x0000
-
     for (auto& byte: bytes)
     {
         byte = static_cast<uint8_t>(value);
@@ -211,11 +177,6 @@ constexpr Data to_little(Data&& bytes, Integer value) NOEXCEPT
 // data => integral
 // integral => byte_array
 // ----------------------------------------------------------------------------
-
-// TODO: reduce locals to four implementations, for all integer.
-// TODO: templatize for any Data, allowing public wrappers to constrain.
-// TODO: all can be constexpr and called from constexpr or otherwise.
-// TODO: expect single byte shift to be precluded by integral bytecasting.
 
 template <size_t Size>
 constexpr unsigned_type<Size> from_big_endian(
@@ -233,11 +194,14 @@ constexpr unsigned_type<Size> from_little_endian(
 
 // integral   from_big|little_endian(data_slice)
 // data_array   to_big|little_endian(integral)
+// ----------------------------------------------------------------------------
 
 template <typename Integral,
     if_integral_integer<Integral>>
 constexpr Integral from_big_endian(const data_slice& data) NOEXCEPT
 {
+    // TODO: factor out data_slice parameterization.
+    // Variable sizing and non-array format, go with native.
     return from_big_chunk<Integral>(sizeof(Integral), data);
 }
 
@@ -245,6 +209,8 @@ template <typename Integral,
     if_integral_integer<Integral>>
 constexpr Integral from_little_endian(const data_slice& data) NOEXCEPT
 {
+    // TODO: factor out data_slice parameterization.
+    // Variable sizing and non-array format, go with native.
     return from_little_chunk<Integral>(sizeof(Integral), data);
 }
 
@@ -252,14 +218,28 @@ template <typename Integral,
     if_integral_integer<Integral>>
 constexpr data_array<sizeof(Integral)> to_big_endian(Integral value) NOEXCEPT
 {
-    return to_big(data_array<sizeof(Integral)>{}, value);
+    if (std::is_constant_evaluated())
+    {
+        return to_big_chunk(data_array<sizeof(Integral)>{}, value);
+    }
+    else
+    {
+        return byte_cast(native_to_big_end(value));
+    }
 }
 
 template <typename Integral,
     if_integral_integer<Integral>>
 constexpr data_array<sizeof(Integral)> to_little_endian(Integral value) NOEXCEPT
 {
-    return to_little(data_array<sizeof(Integral)>{}, value);
+    if (std::is_constant_evaluated())
+    {
+        return to_little_chunk(data_array<sizeof(Integral)>{}, value);
+    }
+    else
+    {
+        return byte_cast(native_to_big_end(value));
+    }
 }
 
 } // namespace system

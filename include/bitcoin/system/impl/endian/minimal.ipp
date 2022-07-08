@@ -39,7 +39,7 @@ template <size_t Size, typename Integer,
 constexpr data_array<Size> to_big_endian_size(Integer value) NOEXCEPT
 {
     // Cannot bytecast because non-integral.
-    return to_big(data_array<Size>{}, value);
+    return to_big_chunk(data_array<Size>{}, value);
 }
 
 // stack allocation/constexpr.
@@ -48,7 +48,7 @@ template <size_t Size, typename Integer,
 constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT
 {
     // Cannot bytecast because non-integral.
-    return to_little(data_array<Size>{}, value);
+    return to_little_chunk(data_array<Size>{}, value);
 }
 
 // constexpr (C++20).
@@ -70,7 +70,7 @@ VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     chunk.resize(size);
 
     // Cannot bytecast because non-integral.
-    return to_big(std::move(chunk), value);
+    return to_big_chunk(std::move(chunk), value);
 }
 
 // constexpr (C++20).
@@ -92,7 +92,7 @@ VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     chunk.resize(size);
 
     // Cannot bytecast because non-integral.
-    return to_little(std::move(chunk), value);
+    return to_little_chunk(std::move(chunk), value);
 }
 
 } // namespace system
