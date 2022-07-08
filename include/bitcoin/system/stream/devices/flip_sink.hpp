@@ -39,10 +39,7 @@ public:
     {
     };
 
-    flip_sink(const Container& data) NOEXCEPT
-      : copy_sink<Container>(data)
-    {
-    }
+    using copy_sink<Container>::copy_sink;
     
     flip_sink(flip_sink&&) = default;
     flip_sink(const flip_sink&) = default;
