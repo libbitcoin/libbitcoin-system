@@ -22,6 +22,7 @@
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/device.hpp>
 
 namespace libbitcoin {
@@ -57,14 +58,8 @@ protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
         using char_type = typename device<Container>::char_type;
-        const auto first = reinterpret_cast<char_type*>(&(*container_.begin()));
-        const auto last = std::next(first, container_.size());
-
-        BC_PUSH_WARNING(NO_REINTERPRET_CAST)
-        return std::make_pair(
-            reinterpret_cast<char_type*>(first),
-            reinterpret_cast<char_type*>(last));
-        BC_POP_WARNING()
+        const auto first = pointer_cast<char_type>(&(*container_.begin()));
+        return std::make_pair(first, std::next(first, container_.size()));
     }
 
 private:

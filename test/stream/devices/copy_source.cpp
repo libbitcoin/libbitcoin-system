@@ -24,11 +24,13 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 BOOST_AUTO_TEST_CASE(copy_source__input_sequence__empty__empty)
 {
-    const data_chunk source(0u);
+    constexpr auto size = 0u;
+    const data_chunk source(size);
     copy_source<data_reference> instance(source);
-    const auto sequence = instance.output_sequence();
-    BOOST_REQUIRE(sequence.first == nullptr);
-    BOOST_REQUIRE(sequence.second == nullptr);
+    const auto sequence = instance.input_sequence();
+    using char_type = typename device<data_chunk>::char_type;
+    BOOST_REQUIRE(sequence.first == reinterpret_cast<const char_type*>(&(*source.begin())));
+    BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
 }
 
 BOOST_AUTO_TEST_CASE(copy_source__input_sequence__not_empty__expected)
@@ -36,7 +38,7 @@ BOOST_AUTO_TEST_CASE(copy_source__input_sequence__not_empty__expected)
     constexpr auto size = 42u;
     const data_chunk source(size);
     copy_source<data_reference> instance(source);
-    const auto sequence = instance.output_sequence();
+    const auto sequence = instance.input_sequence();
     using char_type = typename device<data_chunk>::char_type;
     BOOST_REQUIRE(sequence.first == reinterpret_cast<const char_type*>(&(*source.begin())));
     BOOST_REQUIRE(sequence.second == std::next(sequence.first, size));
