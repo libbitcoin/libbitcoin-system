@@ -135,6 +135,7 @@
       <ObjectFileName>$(IntDir)src_config_transaction.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\encryption.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\external\aes256.cpp" />
@@ -159,7 +160,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\intrinsics\sha256_8_avx2.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
@@ -470,7 +470,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\language.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\languages.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\words.hpp" />
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1_initializer.hpp" />
+    <ClInclude Include="..\..\..\..\src\crypto\ec_context.hpp" />
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.h" />
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mask.h" />
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\mmask.h" />

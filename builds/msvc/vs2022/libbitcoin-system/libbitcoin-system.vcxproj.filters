@@ -309,6 +309,9 @@
     <ClCompile Include="..\..\..\..\src\crypto\checksum.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\elliptic_curve.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -379,9 +382,6 @@
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\secp256k1_initializer.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\siphash.cpp">
@@ -1268,7 +1268,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\words\words.hpp">
       <Filter>include\bitcoin\system\words</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\crypto\secp256k1_initializer.hpp">
+    <ClInclude Include="..\..\..\..\src\crypto\ec_context.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\addresses\qrencode\bitstream.h">

@@ -70,14 +70,14 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/script.cpp \
     src/config/transaction.cpp \
     src/crypto/checksum.cpp \
+    src/crypto/ec_context.cpp \
+    src/crypto/ec_context.hpp \
     src/crypto/elliptic_curve.cpp \
     src/crypto/encryption.cpp \
     src/crypto/golomb_coding.cpp \
     src/crypto/hash.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
-    src/crypto/secp256k1_initializer.cpp \
-    src/crypto/secp256k1_initializer.hpp \
     src/crypto/siphash.cpp \
     src/crypto/external/aes256.cpp \
     src/crypto/external/crypto_scrypt.cpp \

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "secp256k1_initializer.hpp"
+#include "ec_context.hpp"
 
 #include <secp256k1.h>
 #include <bitcoin/system/define.hpp>
@@ -24,15 +24,15 @@
 namespace libbitcoin {
 namespace system {
 
-// Protected base class constructor (must be derived).
-secp256k1_initializer::secp256k1_initializer(int flags) NOEXCEPT
+// Protected base class constructor.
+ec_context::ec_context(int flags) NOEXCEPT
   : context_(secp256k1_context_create(flags))
 {
     BC_ASSERT(context_ != nullptr);
 }
 
 // Clean up the context on destruct.
-secp256k1_initializer::~secp256k1_initializer() NOEXCEPT
+ec_context::~ec_context() NOEXCEPT
 {
     BC_ASSERT(context_ != nullptr);
 
@@ -41,27 +41,27 @@ secp256k1_initializer::~secp256k1_initializer() NOEXCEPT
 }
 
 // Concrete type for signing init.
-secp256k1_signing::secp256k1_signing() NOEXCEPT
-  : secp256k1_initializer(SECP256K1_CONTEXT_SIGN)
+ec_context_sign::ec_context_sign() NOEXCEPT
+  : ec_context(SECP256K1_CONTEXT_SIGN)
 {
 }
 
-secp256k1_context* secp256k1_signing::context() NOEXCEPT
+const secp256k1_context* ec_context_sign::context() NOEXCEPT
 {
-    static secp256k1_signing instance;
+    static ec_context_sign instance;
     static auto context = instance.context_;
     return context;
 }
 
 // Concrete type for verification init.
-secp256k1_verification::secp256k1_verification() NOEXCEPT
-  : secp256k1_initializer(SECP256K1_CONTEXT_VERIFY)
+ec_context_verify::ec_context_verify() NOEXCEPT
+  : ec_context(SECP256K1_CONTEXT_VERIFY)
 {
 }
 
-secp256k1_context* secp256k1_verification::context() NOEXCEPT
+const secp256k1_context* ec_context_verify::context() NOEXCEPT
 {
-    static secp256k1_verification instance;
+    static ec_context_verify instance;
     static auto context = instance.context_;
     return context;
 }

@@ -16,50 +16,54 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_INITIALIZER_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_INITIALIZER_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EC_CONTEXT_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EC_CONTEXT_HPP
 
 #include <secp256k1.h>
 #include <bitcoin/system/define.hpp>
-
- // TODO: rename to ec_initializer
 
 namespace libbitcoin {
 namespace system {
 
 /// Base class for secp256k1 singleton context management.
-class BC_API secp256k1_initializer
+class BC_API ec_context
 {
 public:
+    /// Deletes.
+    ec_context(ec_context&&) = delete;
+    ec_context(const ec_context&) = delete;
+    ec_context& operator=(ec_context&&) = delete;
+    ec_context& operator=(const ec_context&) = delete;
+
     /// Free the context if successfully initialized.
-    virtual ~secp256k1_initializer() NOEXCEPT;
+    virtual ~ec_context() NOEXCEPT;
 
 protected:
-    secp256k1_initializer(int flags) NOEXCEPT;
+    ec_context(int flags) NOEXCEPT;
 
     secp256k1_context* context_;
 };
 
 /// A signing context singleton initializer.
-class BC_API secp256k1_signing
-  : public secp256k1_initializer
+class BC_API ec_context_sign
+  : public ec_context
 {
 public:
-    static secp256k1_context* context() NOEXCEPT;
+    static const secp256k1_context* context() NOEXCEPT;
 
 protected:
-    secp256k1_signing() NOEXCEPT;
+    ec_context_sign() NOEXCEPT;
 };
 
 /// A verification context singleton initializer.
-class BC_API secp256k1_verification
-  : public secp256k1_initializer
+class BC_API ec_context_verify
+  : public ec_context
 {
 public:
-    static secp256k1_context* context() NOEXCEPT;
+    static const secp256k1_context* context() NOEXCEPT;
 
 protected:
-    secp256k1_verification() NOEXCEPT;
+    ec_context_verify() NOEXCEPT;
 };
 
 } // namespace system
