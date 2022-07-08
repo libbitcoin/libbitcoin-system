@@ -28,61 +28,59 @@ namespace system {
 /// ---------------------------------------------------------------------------
 
 /// The number of bytes required to store value (zero returns zero).
-template <typename Value,
-    if_unsigned_integer<Value> = true>
-constexpr size_t byte_width(Value value) NOEXCEPT;
+template <typename Integer, if_unsigned_integer<Integer> = true>
+constexpr size_t byte_width(Integer value) NOEXCEPT;
 
 /// The number of bytes required to store value.
 /// Negative value always returns sizeof Value (zero returns zero).
-template <typename Value,
-    if_signed_integer<Value> = true>
-constexpr size_t byte_width(Value value) NOEXCEPT;
+template <typename Integer, if_signed_integer<Integer> = true>
+constexpr size_t byte_width(Integer value) NOEXCEPT;
 
 /// Endianness.
 /// ---------------------------------------------------------------------------
 
 /// Convert a native integral integer to big-endian.
-template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer native_to_big_end(Integer big) NOEXCEPT;
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_to_big_end(Integral big) NOEXCEPT;
 
 /// Convert a native integral integer to little-endian.
-template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer native_to_little_end(Integer big) NOEXCEPT;
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_to_little_end(Integral big) NOEXCEPT;
 
 /// Convert a big-endian integral integer to native.
-template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer native_from_big_end(Integer big) NOEXCEPT;
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_from_big_end(Integral big) NOEXCEPT;
 
 /// Convert a little-endian integral integer to native.
-template <typename Integer, if_integral_integer<Integer> = true>
-constexpr Integer native_from_little_end(Integer little) NOEXCEPT;
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
 
 /// Byteswap (platform independent byte reversal).
 /// ---------------------------------------------------------------------------
 
-template <typename Integer,
-    if_integral_integer<Integer> = true,
-    if_size_of<Integer, sizeof(uint8_t)> = true,
-    if_unique_object_representations<Integer> = true>
-constexpr Integer byteswap(Integer value) NOEXCEPT;
+template <typename Integral,
+    if_integral_integer<Integral> = true,
+    if_size_of<Integral, sizeof(uint8_t)> = true,
+    if_unique_object_representations<Integral> = true>
+constexpr Integral byteswap(Integral value) NOEXCEPT;
 
-template <typename Integer,
-    if_integral_integer<Integer> = true,
-    if_size_of<Integer, sizeof(uint16_t)> = true,
-    if_unique_object_representations<Integer> = true>
-constexpr Integer byteswap(Integer value) NOEXCEPT;
+template <typename Integral,
+    if_integral_integer<Integral> = true,
+    if_size_of<Integral, sizeof(uint16_t)> = true,
+    if_unique_object_representations<Integral> = true>
+constexpr Integral byteswap(Integral value) NOEXCEPT;
 
-template <typename Integer,
-    if_integral_integer<Integer> = true,
-    if_size_of<Integer, sizeof(uint32_t)> = true,
-    if_unique_object_representations<Integer> = true>
-constexpr Integer byteswap(Integer value) NOEXCEPT;
+template <typename Integral,
+    if_integral_integer<Integral> = true,
+    if_size_of<Integral, sizeof(uint32_t)> = true,
+    if_unique_object_representations<Integral> = true>
+constexpr Integral byteswap(Integral value) NOEXCEPT;
 
-template <typename Integer,
-    if_integral_integer<Integer> = true,
-    if_size_of<Integer, sizeof(uint64_t)> = true,
-    if_unique_object_representations<Integer> = true>
-constexpr Integer byteswap(Integer value) NOEXCEPT;
+template <typename Integral,
+    if_integral_integer<Integral> = true,
+    if_size_of<Integral, sizeof(uint64_t)> = true,
+    if_unique_object_representations<Integral> = true>
+constexpr Integral byteswap(Integral value) NOEXCEPT;
 
 /// Bits to bytes utilities.
 /// ---------------------------------------------------------------------------

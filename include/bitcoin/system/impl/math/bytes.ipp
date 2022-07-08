@@ -33,8 +33,8 @@ namespace system {
 // See also std::bit_width (C++20).
 
 // Called by chain::compact (for validation).
-template <typename Value, if_unsigned_integer<Value>>
-constexpr size_t byte_width(Value value) NOEXCEPT
+template <typename Integral, if_unsigned_integer<Integral>>
+constexpr size_t byte_width(Integral value) NOEXCEPT
 {
     // (zero-based position of msb) + 7 / 8.
     // (bit_width(value) + 7) / 8
@@ -43,17 +43,18 @@ constexpr size_t byte_width(Value value) NOEXCEPT
 }
 
 // Called by machine::number (for little-endian chunk sizing).
-template <typename Value, if_signed_integer<Value>>
-constexpr size_t byte_width(Value value) NOEXCEPT
+template <typename Integral, if_signed_integer<Integral>>
+constexpr size_t byte_width(Integral value) NOEXCEPT
 {
-    return is_negative(value) ? sizeof(Value) : byte_width(to_unsigned(value));
+    return is_negative(value) ? sizeof(Integral) :
+        byte_width(to_unsigned(value));
 }
 
 // Endianness.
 // ----------------------------------------------------------------------------
 
-template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer native_to_big_end(Integer big) NOEXCEPT
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_to_big_end(Integral big) NOEXCEPT
 {
     if constexpr (is_little_endian)
         return byteswap(big);
@@ -61,8 +62,8 @@ constexpr Integer native_to_big_end(Integer big) NOEXCEPT
         return big;
 }
 
-template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer native_to_little_end(Integer little) NOEXCEPT
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_to_little_end(Integral little) NOEXCEPT
 {
     if constexpr (is_big_endian)
         return byteswap(little);
@@ -70,14 +71,14 @@ constexpr Integer native_to_little_end(Integer little) NOEXCEPT
         return little;
 }
 
-template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer native_from_big_end(Integer big) NOEXCEPT
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_from_big_end(Integral big) NOEXCEPT
 {
     return native_to_big_end(big);
 }
 
-template <typename Integer, if_integral_integer<Integer>>
-constexpr Integer native_from_little_end(Integer little) NOEXCEPT
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_from_little_end(Integral little) NOEXCEPT
 {
     return native_to_little_end(little);
 }
@@ -87,50 +88,50 @@ constexpr Integer native_from_little_end(Integer little) NOEXCEPT
 // If wrong overload is selected (such as for a literal) result is unexpected.
 // C++23 std::byteswap does not support signed integrals.
 
-template <typename Integer,
-    if_integral_integer<Integer>,
-    if_size_of<Integer, sizeof(uint8_t)>,
-    if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) NOEXCEPT
+template <typename Integral,
+    if_integral_integer<Integral>,
+    if_size_of<Integral, sizeof(uint8_t)>,
+    if_unique_object_representations<Integral>>
+constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // no-op for calling consistency across all integral integer types.
     return value;
 }
 
-template <typename Integer,
-    if_integral_integer<Integer>,
-    if_size_of<Integer, sizeof(uint16_t)>,
-    if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) NOEXCEPT
+template <typename Integral,
+    if_integral_integer<Integral>,
+    if_size_of<Integral, sizeof(uint16_t)>,
+    if_unique_object_representations<Integral>>
+constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to direct API call for non-constexpr.
     return std::is_constant_evaluated() ?
-        possible_sign_cast<Integer>(byte_swap16_native(to_unsigned(value))) :
-        possible_sign_cast<Integer>(byte_swap16(to_unsigned(value)));
+        possible_sign_cast<Integral>(byte_swap16_native(to_unsigned(value))) :
+        possible_sign_cast<Integral>(byte_swap16(to_unsigned(value)));
 }
 
-template <typename Integer,
-    if_integral_integer<Integer>,
-    if_size_of<Integer, sizeof(uint32_t)>,
-    if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) NOEXCEPT
+template <typename Integral,
+    if_integral_integer<Integral>,
+    if_size_of<Integral, sizeof(uint32_t)>,
+    if_unique_object_representations<Integral>>
+constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to direct API call for non-constexpr.
     return std::is_constant_evaluated() ?
-        possible_sign_cast<Integer>(byte_swap32_native(to_unsigned(value))) :
-        possible_sign_cast<Integer>(byte_swap32(to_unsigned(value)));
+        possible_sign_cast<Integral>(byte_swap32_native(to_unsigned(value))) :
+        possible_sign_cast<Integral>(byte_swap32(to_unsigned(value)));
 }
 
-template <typename Integer,
-    if_integral_integer<Integer>,
-    if_size_of<Integer, sizeof(uint64_t)>,
-    if_unique_object_representations<Integer>>
-constexpr Integer byteswap(Integer value) NOEXCEPT
+template <typename Integral,
+    if_integral_integer<Integral>,
+    if_size_of<Integral, sizeof(uint64_t)>,
+    if_unique_object_representations<Integral>>
+constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to direct API call for non-constexpr.
     return std::is_constant_evaluated() ?
-        possible_sign_cast<Integer>(byte_swap64_native(to_unsigned(value))) :
-        possible_sign_cast<Integer>(byte_swap64(to_unsigned(value)));
+        possible_sign_cast<Integral>(byte_swap64_native(to_unsigned(value))) :
+        possible_sign_cast<Integral>(byte_swap64(to_unsigned(value)));
 }
 
 // Bits to bytes utilities.
