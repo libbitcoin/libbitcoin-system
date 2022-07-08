@@ -53,8 +53,12 @@ template <typename IStream>
 template <typename Integer, if_integer<Integer>>
 Integer byte_reader<IStream>::read_big_endian() NOEXCEPT
 {
+    Integer value{};
+    auto& bytes = byte_cast(value);
+
     // Call into virtual reader (vs. stream) so derived class can reuse.
-    return from_big_endian<Integer>(read_bytes(sizeof(Integer)));
+    read_bytes(bytes.data(), bytes.size());
+    return native_from_big_end(value);
 }
 
 template <typename IStream>
@@ -82,8 +86,12 @@ template <typename IStream>
 template <typename Integer, if_integer<Integer>>
 Integer byte_reader<IStream>::read_little_endian() NOEXCEPT
 {
+    Integer value{};
+    auto& bytes = byte_cast(value);
+
     // Call into virtual reader (vs. stream) so derived class can reuse.
-    return from_little_endian<Integer>(read_bytes(sizeof(Integer)));
+    read_bytes(bytes.data(), bytes.size());
+    return native_from_little_end(value);
 }
 
 template <typename IStream>

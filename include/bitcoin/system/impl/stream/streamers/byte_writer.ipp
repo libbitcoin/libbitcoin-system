@@ -84,12 +84,10 @@ template <typename OStream>
 template <typename Integer, if_integer<Integer>>
 void byte_writer<OStream>::write_big_endian(Integer value) NOEXCEPT
 {
-    // TODO: reimplement on derived classes and change to this here:
-    ////to_big_endian<Integer>(stream_, value);
+    const auto& bytes = byte_cast(native_to_big_end(value));
 
     // Call into virtual writer (vs. stream) so derived class can reuse.
-    // This creates a copy that could be avoided by using stream overload.
-    write_bytes(to_big_endian<Integer>(value));
+    write_bytes(bytes.data(), bytes.size());
 }
 
 template <typename OStream>
@@ -117,12 +115,10 @@ template <typename OStream>
 template <typename Integer, if_integer<Integer>>
 void byte_writer<OStream>::write_little_endian(Integer value) NOEXCEPT
 {
-    // TODO: reimplement on derived classes and change to this here:
-    ////to_little_endian<Integer>(stream_, value);
+    const auto& bytes = byte_cast(native_to_little_end(value));
 
     // Call into virtual writer (vs. stream) so derived class can reuse.
-    // This creates a copy that could be avoided by using stream overload.
-    write_bytes(to_little_endian<Integer>(value));
+    write_bytes(bytes.data(), bytes.size());
 }
 
 template <typename OStream>
