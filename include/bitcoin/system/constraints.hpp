@@ -26,7 +26,6 @@
 
 namespace libbitcoin {
 
-// TODO: if_bool<>
 template <bool Expression>
 using bool_if = std::enable_if_t<Expression, bool>;
 
@@ -163,59 +162,68 @@ using if_integer = bool_if<
 
 template <typename Type>
 using if_signed_integer = bool_if<
-    is_integer<Type> && is_signed<Type>>;
+    is_integer<Type> &&
+    is_signed<Type>>;
 
 template <typename Type>
 using if_unsigned_integer = bool_if<
-    is_integer<Type> && !is_signed<Type>>;
+    is_integer<Type> &&
+    !is_signed<Type>>;
 
 template <typename Left, typename Right>
 using if_same_signed_integer = bool_if<
-    (is_integer<Left> && is_integer<Right>) &&
+    is_integer<Left> &&
+    is_integer<Right> &&
     (is_signed<Left> == is_signed<Right>)>;
 
 template <typename Left, typename Right>
 using if_not_same_signed_integer = bool_if<
-    (is_integer<Left> && is_integer<Right>) &&
+    is_integer<Left> &&
+    is_integer<Right> &&
     (is_signed<Left> != is_signed<Right>)>;
 
 /// Integral integer types (native, non-floating point, non-bool).
 
 template <typename Type>
 using if_integral_integer = bool_if<
-    is_integer<Type> && is_integral<Type>>;
+    is_integral_integer<Type>>;
 
 template <typename Type>
 using if_non_integral_integer = bool_if<
-    is_integer<Type> && !is_integral<Type>>;
+    is_integer<Type> &&
+    !is_integral<Type>>;
 
 template <typename Type>
 using if_signed_integral_integer = bool_if<
-    is_integer<Type> && is_integral<Type> && is_signed<Type>>;
+    is_integral_integer<Type> &&
+    is_signed<Type>>;
 
 template <typename Type>
 using if_unsigned_integral_integer = bool_if<
-    is_integer<Type> && is_integral<Type> && !is_signed<Type>>;
+    is_integral_integer<Type> &&
+    !is_signed<Type>>;
 
 template <typename Left, typename Right>
 using if_same_signed_integral_integer = bool_if<
-    (is_integral<Left>&& is_integral<Right>) &&
-    (is_integer<Left> && is_integer<Right>) &&
+    is_integral_integer<Left> &&
+    is_integral_integer<Right> &&
     (is_signed<Left> == is_signed<Right>)>;
 
 template <typename Left, typename Right>
 using if_not_same_signed_integral_integer = bool_if<
-    (is_integral<Left> && is_integral<Right>) &&
-    (is_integer<Left> && is_integer<Right>) &&
+    is_integral_integer<Left>&&
+    is_integral_integer<Right> &&
     (is_signed<Left> != is_signed<Right>)>;
 
 template <typename Integer>
 using if_big_endian_integral_integer = bool_if<
-    is_integral<Integer> && is_integer<Integer> && is_big_endian>;
+    is_integral_integer<Integer> &&
+    is_big_endian>;
 
 template <typename Integer>
 using if_little_endian_integral_integer = bool_if<
-    is_integral<Integer> && is_integer<Integer> && is_little_endian>;
+    is_integral_integer<Integer> &&
+    is_little_endian>;
 
 } // namespace libbitcoin
 

@@ -38,11 +38,6 @@ constexpr bool is_same_type = std::is_same_v<Left, Right>;
 template <typename Type>
 constexpr bool is_signed = std::is_signed_v<Type>;
 
-/// numeric_limits may be specialized by non-integrals (such as uintx).
-template <typename Type>
-constexpr bool is_integer = std::numeric_limits<Type>::is_integer &&
-    !is_same_type<Type, bool>;
-
 /// sizeof(Left) == sizeof(Right).
 template <typename Left, typename Right>
 constexpr bool is_same_size = (sizeof(Left) == sizeof(Right));
@@ -70,13 +65,24 @@ template <typename Type>
 constexpr bool is_integral = std::is_integral_v<Type> &&
     is_integral_size<Type> && !is_same_type<Type, bool>;
 
+/// numeric_limits may be specialized by non-integrals (such as uintx).
+template <typename Type>
+constexpr bool is_integer = std::numeric_limits<Type>::is_integer &&
+    !is_same_type<Type, bool>;
+
+/// Excludes non-integral integers (such as uintx).
+template <typename Type>
+constexpr bool is_integral_integer = is_integral<Type> && is_integer<Type>;
+
 /// Constrained to is_integral types.
-template <typename Type, std::enable_if_t<is_integral_size<Type>, bool> = true>
+template <typename Type,
+    std::enable_if_t<is_integral_size<Type>, bool> = true>
 constexpr size_t bits = to_bits(sizeof(Type));
 
 /// Limited to is_nonzero(Bits) && is_zero(Bits % 8).
 /// Use to_ceilinged_bytes/to_floored_bytes for non-aligned conversions. 
-template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
+template <size_t Bits,
+    std::enable_if_t<is_byte_sized(Bits), bool> = true>
 constexpr size_t bytes = Bits / byte_bits;
 
 } // namespace libbitcoin
