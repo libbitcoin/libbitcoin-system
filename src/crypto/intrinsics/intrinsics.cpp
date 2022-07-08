@@ -370,13 +370,13 @@ void double_sha256_x1_portable(uint8_t out[], const uint8_t in[1 * 64]) NOEXCEPT
     auto buffer = sha256x2_buffer;
     sha256_x1_portable(state.data(), in);
     sha256_x1_portable(state.data(), sha256x2_padding.data());
-    to_big_endian(
+    to_big_endian_set(
         narrowing_array_cast<uint32_t, count>(buffer),
         array_cast<uint32_t, count>(state));
 
     state = sha256_initial;
     sha256_x1_portable(state.data(), buffer.data());
-    to_big_endian(
+    to_big_endian_set(
         unsafe_array_cast<uint32_t, count>(&out[0]),
         array_cast<uint32_t, count>(state));
 }

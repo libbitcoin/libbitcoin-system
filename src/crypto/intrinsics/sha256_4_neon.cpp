@@ -243,11 +243,11 @@ void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
     auto buffer = sha256x2_buffer;
     sha256_x1_neon(state.data(), &in[0]);
     sha256_x1_neon(state.data(), sha256x2_padding.data());
-    to_big_endian(narrowing_array_cast<uint32_t, count>(buffer), state);
+    to_big_endian_set(narrowing_array_cast<uint32_t, count>(buffer), state);
 
     state = sha256_initial;
     sha256_x1_neon(state.data(), buffer.data());
-    to_big_endian(unsafe_array_cast<uint32_t, count>(out), state);
+    to_big_endian_set(unsafe_array_cast<uint32_t, count>(out), state);
 }
 
 ////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT

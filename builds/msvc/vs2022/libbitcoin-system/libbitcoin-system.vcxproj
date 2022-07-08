@@ -337,10 +337,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\no_fill_allocator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\endian.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\minimal.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\nominal.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\set.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\stream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx_t.hpp" />
@@ -501,9 +501,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\data_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\external_ptr.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\memory.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\minimal.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\nominal.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\set.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\stream.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx_t.ipp" />

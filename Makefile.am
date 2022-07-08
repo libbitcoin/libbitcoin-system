@@ -273,8 +273,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/memory.cpp \
     test/data/no_fill_allocator.cpp \
     test/data/string.cpp \
-    test/endian/collection.cpp \
     test/endian/nominal.cpp \
+    test/endian/set.cpp \
     test/endian/stream.cpp \
     test/endian/uintx.cpp \
     test/endian/uintx_t.cpp \
@@ -504,10 +504,10 @@ include_bitcoin_system_data_HEADERS = \
 
 include_bitcoin_system_endiandir = ${includedir}/bitcoin/system/endian
 include_bitcoin_system_endian_HEADERS = \
-    include/bitcoin/system/endian/collection.hpp \
     include/bitcoin/system/endian/endian.hpp \
     include/bitcoin/system/endian/minimal.hpp \
     include/bitcoin/system/endian/nominal.hpp \
+    include/bitcoin/system/endian/set.hpp \
     include/bitcoin/system/endian/stream.hpp \
     include/bitcoin/system/endian/uintx.hpp \
     include/bitcoin/system/endian/uintx_t.hpp \
@@ -546,9 +546,9 @@ include_bitcoin_system_impl_data_HEADERS = \
 
 include_bitcoin_system_impl_endiandir = ${includedir}/bitcoin/system/impl/endian
 include_bitcoin_system_impl_endian_HEADERS = \
-    include/bitcoin/system/impl/endian/collection.ipp \
     include/bitcoin/system/impl/endian/minimal.ipp \
     include/bitcoin/system/impl/endian/nominal.ipp \
+    include/bitcoin/system/impl/endian/set.ipp \
     include/bitcoin/system/impl/endian/stream.ipp \
     include/bitcoin/system/impl/endian/uintx.ipp \
     include/bitcoin/system/impl/endian/uintx_t.ipp \

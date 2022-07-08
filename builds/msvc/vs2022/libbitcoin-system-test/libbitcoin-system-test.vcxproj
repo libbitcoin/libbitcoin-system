@@ -113,9 +113,7 @@
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
-    <ClCompile Include="..\..\..\..\test\data\collection.cpp">
-      <ObjectFileName>$(IntDir)test_data_collection.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_array.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_chunk.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_reference.cpp" />
@@ -126,10 +124,8 @@
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\collection.cpp">
-      <ObjectFileName>$(IntDir)test_endian_collection.obj</ObjectFileName>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\set.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>

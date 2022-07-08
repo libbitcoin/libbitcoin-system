@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 
-#include <bitcoin/system/endian/collection.hpp>
+#include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/minimal.hpp>
 #include <bitcoin/system/endian/nominal.hpp>
 #include <bitcoin/system/endian/stream.hpp>
@@ -50,15 +50,15 @@
 // inline     void                         to_little_endian{OStream}(OStream&, Integer);
 
 // MERKLE [[COMPLETE]]
-// Collection ([]):
-// constexpr  void                         Integer[] from_big_endian{[]}(const Integer[]&);
-// constexpr  void                         Integer[] from_little_endian{[]}(const Integer[]&);
-// constexpr  void                         Integer[] to_big_endian{[]}(const Integer[]&);
-// constexpr  void                         Integer[] to_little_endian{[]}(const Integer[]&);
-// constexpr  void                         from_big_endian{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         from_little_endian{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         to_big_endian{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         to_little_endian{[]}(Integer[]&, const Integer[]&);
+// Set ([]):
+// constexpr  void                         Integer[] from_big_endian_set{[]}(const Integer[]&);
+// constexpr  void                         Integer[] from_little_endian_set{[]}(const Integer[]&);
+// constexpr  void                         Integer[] to_big_endian_set{[]}(const Integer[]&);
+// constexpr  void                         Integer[] to_little_endian_set{[]}(const Integer[]&);
+// constexpr  void                         from_big_endian_set{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         from_little_endian_set{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         to_big_endian_set{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         to_little_endian_set{[]}(Integer[]&, const Integer[]&);
 
 // LIBRARY
 // Uintx (dynamic int/data sizing): [uintx not constexpr]

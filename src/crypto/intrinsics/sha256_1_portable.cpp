@@ -73,7 +73,7 @@ void sha256_x1_portable(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
 
     // uint32_t<64> to uint32_t<16> (narrowing array cast)
     // uint8_t[64]  as uint32_t<16> (unsafe array cast)
-    to_big_endian(
+    to_big_endian_set(
         narrowing_array_cast<uint32_t, count>(W),
         unsafe_array_cast<uint32_t, count>(&block[0]));
 
@@ -257,7 +257,7 @@ void sha256_update(sha256_context& context, const uint8_t input[],
 
 void sha256_pad(sha256_context& context) NOEXCEPT
 {
-    const auto size = to_big_endian(context.count);
+    const auto size = to_big_endian_set(context.count);
     constexpr auto count = size.size() * sizeof(uint32_t);
 
     uint32_t r, psize;
@@ -273,7 +273,8 @@ void sha256_finalize(sha256_context& context, uint8_t digest[32]) NOEXCEPT
     constexpr auto count = 32_size / sizeof(uint32_t);
 
     sha256_pad(context);
-    to_big_endian(unsafe_array_cast<uint32_t, count>(&digest[0]), context.state);
+    to_big_endian_set(
+        unsafe_array_cast<uint32_t, count>(&digest[0]), context.state);
 }
 
 void sha256(const uint8_t input[], size_t size, uint8_t digest[32]) NOEXCEPT

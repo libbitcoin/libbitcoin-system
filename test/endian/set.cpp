@@ -59,40 +59,40 @@ constexpr auto reversed = numbers<size>
 
 // This is the perspective of a little-endian machine.
 // The normalize() helper reverses the expecation on a big-endian machine.
-static_assert(to_big_endian(native) == normalize(reversed, native));
-static_assert(from_big_endian(reversed) == normalize(native, reversed));
-static_assert(to_little_endian(native) == normalize(native, reversed));
-static_assert(from_little_endian(native) == normalize(native, reversed));
+static_assert(to_big_endian_set(native) == normalize(reversed, native));
+static_assert(from_big_endian_set(reversed) == normalize(native, reversed));
+static_assert(to_little_endian_set(native) == normalize(native, reversed));
+static_assert(from_little_endian_set(native) == normalize(native, reversed));
 
 // inline
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
-BOOST_AUTO_TEST_CASE(collection__to_big_endian__always__expected)
+BOOST_AUTO_TEST_CASE(collection__to_big_endian_set__always__expected)
 {
     numbers<size> out{};
-    to_big_endian(out, native);
+    to_big_endian_set(out, native);
     BOOST_REQUIRE_EQUAL(out, normalize(reversed, native));
 }
 
-BOOST_AUTO_TEST_CASE(collection__from_big_endian__always__expected)
+BOOST_AUTO_TEST_CASE(collection__from_big_endian_set__always__expected)
 {
     numbers<size> out{};
-    from_big_endian(out, reversed);
+    from_big_endian_set(out, reversed);
     BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(collection__to_little_endian__always__expected)
+BOOST_AUTO_TEST_CASE(collection__to_little_endian_set__always__expected)
 {
     numbers<size> out{};
-    to_little_endian(out, native);
+    to_little_endian_set(out, native);
     BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(collection__from_little_endian__always__expected)
+BOOST_AUTO_TEST_CASE(collection__from_little_endian_set__always__expected)
 {
     numbers<size> out{};
-    from_little_endian(out, native);
+    from_little_endian_set(out, native);
     BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
