@@ -25,7 +25,7 @@ inline unsigned_type<Size> byte_swap_slow(const data_array<Size>& data) NOEXCEPT
 {
     uint32_t value{};
     auto& cast = byte_cast<uint8_t>(value);
-    std::memcpy(cast.data(), data.data(), Size);
+    std::copy_n(data.data(), Size, cast.data());
 
     if constexpr (Size == sizeof(uint16_t))
     {
@@ -55,7 +55,7 @@ inline unsigned_type<Size> byte_swap_medium(const data_array<Size>& data) NOEXCE
 {
     uint32_t value{};
     auto& cast = byte_cast<uint8_t>(value);
-    std::memcpy(cast.data(), data.data(), Size);
+    std::copy_n(data.data(), Size, cast.data());
 
     // Compare medium (bitwise).
     return byte_swap32_native(to_unsigned(value));
@@ -66,7 +66,7 @@ inline unsigned_type<Size> byte_swap_fast(const data_array<Size>& data) NOEXCEPT
 {
     uint32_t value{};
     auto& cast = byte_cast<uint8_t>(value);
-    std::memcpy(cast.data(), data.data(), Size);
+    std::copy_n(data.data(), Size, cast.data());
 
     // Compare fast (intrinsic).
     return byte_swap32(to_unsigned(value));
