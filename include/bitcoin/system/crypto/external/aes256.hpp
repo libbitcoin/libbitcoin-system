@@ -17,18 +17,13 @@
  *   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef LIBBITCOIN_SYSTEM_AES256_H
-#define LIBBITCOIN_SYSTEM_AES256_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_AES256_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_AES256_HPP
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <bitcoin/system/define.hpp>
 
 #define AES256_KEY_LENGTH 32U
 #define AES256_BLOCK_LENGTH 16U
-
-#ifdef __cplusplus
-extern "C" { 
-#endif
 
 typedef struct
 {
@@ -47,9 +42,5 @@ void aes256_encrypt_ecb(aes256_context* context,
 
 void aes256_decrypt_ecb(aes256_context* context,
     uint8_t cypher_text[AES256_BLOCK_LENGTH]);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

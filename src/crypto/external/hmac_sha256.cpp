@@ -23,12 +23,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "../../../include/bitcoin/system/crypto/external/hmac_sha256.h"
+#include <bitcoin/system/crypto/external/hmac_sha256.hpp>
 
-#include <stdint.h>
-#include <string.h>
-#include "../../../include/bitcoin/system/crypto/external/sha256.h"
-#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
+#include <utility>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/external/sha256.hpp>
 
  // TODO: make constexpr (cpp).
 
@@ -71,14 +70,14 @@ void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
     }
 
     SHA256Init(&context->ictx);
-    fill(pad, SHA256_BLOCK_LENGTH, 0x36);
+    std::fill_n(pad, SHA256_BLOCK_LENGTH, uint8_t{ 0x36 });
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];
 
     SHA256Update(&context->ictx, pad, SHA256_BLOCK_LENGTH);
     SHA256Init(&context->octx);
-    fill(pad, SHA256_BLOCK_LENGTH, 0x5c);
+    std::fill_n(pad, SHA256_BLOCK_LENGTH, uint8_t{ 0x5c });
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];

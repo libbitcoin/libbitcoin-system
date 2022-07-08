@@ -19,15 +19,7 @@
 #include <bitcoin/system/crypto/hash.hpp>
 
 #include <vector>
-#include <bitcoin/system/crypto/external/crypto_scrypt.h>
-#include <bitcoin/system/crypto/external/hmac_sha256.h>
-#include <bitcoin/system/crypto/external/hmac_sha512.h>
-#include <bitcoin/system/crypto/external/pbkdf2_sha256.h>
-#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.h>
-#include <bitcoin/system/crypto/external/ripemd160.h>
-#include <bitcoin/system/crypto/external/sha1.h>
-////#include <bitcoin/system/crypto/external/sha256.h>
-#include <bitcoin/system/crypto/external/sha512.h>
+#include <bitcoin/system/crypto/external/external.hpp>
 #include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>

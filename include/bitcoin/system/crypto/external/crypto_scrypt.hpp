@@ -1,5 +1,5 @@
 /**
- * Copyright 2005,2007,2009 Colin Percival
+ * Copyright 2009 Colin Percival
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,29 +23,25 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: src/lib/libmd/sha256.h,v 1.2 2006/01/17 15:35:56 phk Exp $
+ * This file was originally written by Colin Percival as part of the Tarsnap
+ * online backup system.
  */
-#ifndef LIBBITCOIN_SYSTEM_PBKDF2SHA256_H
-#define LIBBITCOIN_SYSTEM_PBKDF2SHA256_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SCRYPT_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SCRYPT_HPP
 
-#include <sys/types.h>
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <bitcoin/system/define.hpp>
 
 /**
- * pbkdf2_sha256(passphrase, passphrase_length, salt, salt_length, c, buf, dk_length):
- * Compute pbkdf2(passwd, salt, c, dkLen) using hmac_sha256 as the PRF, and
- * write the output to buf.  The value dkLen must be at most 32 * (2^32 - 1).
+ * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
+ * Compute scrypt(passwd[0 .. passwdlen - 1], salt[0 .. saltlen - 1], N, r,
+ * p, buflen) and write the result into buf.  The parameters r, p, and buflen
+ * must satisfy r * p < 2^30 and buflen <= (2^32 - 1) * 32.  The parameter N
+ * must be a power of 2 greater than 1.
+ *
+ * Return 0 on success; or -1 on error.
  */
-void pbkdf2_sha256(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint64_t c, uint8_t* buf,
-    size_t dk_length);
+int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
+    const uint8_t* salt, size_t salt_length, uint64_t N, uint32_t r,
+    uint32_t p, uint8_t* buf, size_t buf_length);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* !_CRYPTO_SCRYPT_H_ */

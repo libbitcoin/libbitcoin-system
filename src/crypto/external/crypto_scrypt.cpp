@@ -26,13 +26,10 @@
  * This file was originally written by Colin Percival as part of the Tarsnap
  * online backup system.
  */
-#include "../../../include/bitcoin/system/crypto/external/crypto_scrypt.h"
+#include <bitcoin/system/crypto/external/crypto_scrypt.hpp>
 
-#include <errno.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include "../../../include/bitcoin/system/crypto/external/pbkdf2_sha256.h"
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/external/pbkdf2_sha256.hpp>
 
 static void blkcpy(uint8_t*, uint8_t*, size_t);
 static void blkxor(uint8_t*, uint8_t*, size_t);
@@ -280,11 +277,13 @@ int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
     }
 
     /* Allocate memory. */
-    if ((B = malloc(128 * r * p)) == NULL)
+    if ((B = reinterpret_cast<uint8_t*>(malloc(128 * r * p))) == nullptr)
         goto err0;
-    if ((XY = malloc(256 * r)) == NULL)
+
+    if ((XY = reinterpret_cast<uint8_t*>(malloc(256 * r))) == nullptr)
         goto err1;
-    if ((V = malloc(128 * r * (size_t)N)) == NULL)
+
+    if ((V = reinterpret_cast<uint8_t*>(malloc(128 * r * (size_t)N))) == nullptr)
         goto err2;
 
     /* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */

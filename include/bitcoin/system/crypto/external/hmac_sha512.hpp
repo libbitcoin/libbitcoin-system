@@ -23,19 +23,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef LIBBITCOIN_SYSTEM_HMACSHA512_H
-#define LIBBITCOIN_SYSTEM_HMACSHA512_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMACSHA512_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMACSHA512_HPP
 
-#include <stdint.h>
-#include <stddef.h>
-#include "sha512.h"
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/external/sha512.hpp>
 
 #define HMACSHA512_DIGEST_LENGTH 64U
-
-#ifdef __cplusplus
-extern "C" 
-{
-#endif
 
 typedef struct HMACSHA512CTX
 {
@@ -54,9 +48,5 @@ void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
 
 void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
     size_t length);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -6,9 +6,10 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#include "../../../include/bitcoin/system/crypto/external/ripemd160.h"
+#include <bitcoin/system/crypto/external/ripemd160.hpp>
 
-#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
+#include <utility>
+#include <bitcoin/system/define.hpp>
 
 // TODO: make constexpr (cpp).
 
@@ -360,7 +361,7 @@ void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length)
     const uint32_t lo_length = (uint32_t)length;
     const uint32_t hi_length = (uint32_t)(((uint64_t)length) >> 32);
 
-    zeroize(chunk, RMD160_CHUNK_LENGTH * sizeof(uint32_t));
+    std::fill_n(chunk, RMD160_CHUNK_LENGTH, uint32_t{ 0u });
 
     for (i = 0; i < (lo_length & 63); i++)
     {
@@ -372,7 +373,7 @@ void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length)
     if ((lo_length & 63) > 55)
     {
         RMDcompress(context);
-        zeroize(chunk, RMD160_CHUNK_LENGTH * sizeof(uint32_t));
+        std::fill_n(chunk, RMD160_CHUNK_LENGTH, uint32_t{ 0u });
     }
 
     chunk[14] = lo_length << 3;

@@ -1,4 +1,4 @@
-/* libsodium: crypto_hash_sha256.h, v0.4.5 2014/04/16 */
+/* libsodium: crypto_hash_sha512.h, v0.4.5 2014/04/16 */
 /**
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
@@ -23,39 +23,29 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef LIBBITCOIN_SYSTEM_SHA256_H
-#define LIBBITCOIN_SYSTEM_SHA256_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SHA512_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SHA512_HPP
 
 #include <stdint.h>
 #include <stddef.h>
 
-#define SHA256_STATE_LENGTH 8U
-#define SHA256_COUNT_LENGTH 2U
-#define SHA256_BLOCK_LENGTH 64U
-#define SHA256_DIGEST_LENGTH 32U
+#define SHA512_STATE_LENGTH 8U
+#define SHA512_COUNT_LENGTH 2U
+#define SHA512_BLOCK_LENGTH 128U
+#define SHA512_DIGEST_LENGTH 64U
 
-#ifdef __cplusplus
-extern "C" 
+typedef struct SHA512CTX 
 {
-#endif
+    uint64_t state[SHA512_STATE_LENGTH];
+    uint64_t count[SHA512_COUNT_LENGTH];
+    uint8_t buf[SHA512_BLOCK_LENGTH];
+} SHA512CTX;
 
-typedef struct SHA256CTX
-{
-    uint32_t state[SHA256_STATE_LENGTH];
-    uint32_t count[SHA256_COUNT_LENGTH];
-    uint8_t buffer[SHA256_BLOCK_LENGTH];
-} SHA256CTX;
+void SHA512(const uint8_t* input, size_t length,
+    uint8_t digest[SHA512_DIGEST_LENGTH]);
 
-void SHA256(const uint8_t* input, size_t length,
-    uint8_t digest[SHA256_DIGEST_LENGTH]);
-
-void SHA256Init(SHA256CTX* context);
-void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length);
-void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length);
-void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH]);
-
-#ifdef __cplusplus
-}
-#endif
+void SHA512Init(SHA512CTX* context);
+void SHA512Update(SHA512CTX* context, const uint8_t* input, size_t length);
+void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH]);
 
 #endif

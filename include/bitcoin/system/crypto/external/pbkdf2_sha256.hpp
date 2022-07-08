@@ -1,6 +1,6 @@
-/* libsodium: crypto_hash_sha512.h, v0.4.5 2014/04/16 */
 /**
- * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
+ * Copyright 2005,2007,2009 Colin Percival
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,39 +22,21 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
+ *
+ * $FreeBSD: src/lib/libmd/sha256.h,v 1.2 2006/01/17 15:35:56 phk Exp $
  */
-#ifndef LIBBITCOIN_SYSTEM_SHA512_H
-#define LIBBITCOIN_SYSTEM_SHA512_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_PBKDF2SHA256_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_PBKDF2SHA256_HPP
 
-#include <stdint.h>
-#include <stddef.h>
+#include <bitcoin/system/define.hpp>
 
-#define SHA512_STATE_LENGTH 8U
-#define SHA512_COUNT_LENGTH 2U
-#define SHA512_BLOCK_LENGTH 128U
-#define SHA512_DIGEST_LENGTH 64U
-
-#ifdef __cplusplus
-extern "C" 
-{
-#endif
-
-typedef struct SHA512CTX 
-{
-    uint64_t state[SHA512_STATE_LENGTH];
-    uint64_t count[SHA512_COUNT_LENGTH];
-    uint8_t buf[SHA512_BLOCK_LENGTH];
-} SHA512CTX;
-
-void SHA512(const uint8_t* input, size_t length,
-    uint8_t digest[SHA512_DIGEST_LENGTH]);
-
-void SHA512Init(SHA512CTX* context);
-void SHA512Update(SHA512CTX* context, const uint8_t* input, size_t length);
-void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH]);
-
-#ifdef __cplusplus
-}
-#endif
+/**
+ * pbkdf2_sha256(passphrase, passphrase_length, salt, salt_length, c, buf, dk_length):
+ * Compute pbkdf2(passwd, salt, c, dkLen) using hmac_sha256 as the PRF, and
+ * write the output to buf.  The value dkLen must be at most 32 * (2^32 - 1).
+ */
+void pbkdf2_sha256(const uint8_t* passphrase, size_t passphrase_length,
+    const uint8_t* salt, size_t salt_length, uint64_t c, uint8_t* buf,
+    size_t dk_length);
 
 #endif

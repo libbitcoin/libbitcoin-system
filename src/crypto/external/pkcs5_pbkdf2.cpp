@@ -14,13 +14,11 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "../../../include/bitcoin/system/crypto/external/pkcs5_pbkdf2.h"
+#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include "../../../include/bitcoin/system/crypto/external/hmac_sha512.h"
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/external/hmac_sha512.hpp>
+#include <bitcoin/system/math/math.hpp>
 
  // TODO: make constexpr (cpp).
 
@@ -42,7 +40,7 @@ int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     if (salt_length > SIZE_MAX - 4)
         return -1;
     asalt_size = salt_length + 4;
-    asalt = malloc(asalt_size);
+    asalt = bc::system::pointer_cast<uint8_t>(malloc(asalt_size));
     if (asalt == NULL)
         return -1;
 

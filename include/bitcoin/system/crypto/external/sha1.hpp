@@ -15,8 +15,8 @@
  * Adapted:
  *      by Libbitcoin Developers on 7 September 2016
  */
-#ifndef LIBBITCOIN_SYSTEM_SHA1_H
-#define LIBBITCOIN_SYSTEM_SHA1_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SHA1_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SHA1_HPP
 
 #include <stdint.h>
 #include <stddef.h>
@@ -24,11 +24,6 @@
 #define SHA1_STATE_LENGTH 5U
 #define SHA1_BLOCK_LENGTH 64U
 #define SHA1_DIGEST_LENGTH 20U
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 typedef struct SHA1CTX
 {
@@ -44,9 +39,5 @@ void SHA1(const uint8_t* message, size_t length,
 void SHA1Init(SHA1CTX* context);
 void SHA1Update(SHA1CTX* context, const uint8_t* message, size_t length);
 void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH]);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

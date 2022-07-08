@@ -1,6 +1,6 @@
+/* libsodium: hmac_hmacsha512.c, v0.4.5 2014/04/16 */
 /**
- * Copyright 2009 Colin Percival
- * All rights reserved.
+ * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,36 +22,32 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * This file was originally written by Colin Percival as part of the Tarsnap
- * online backup system.
  */
-#ifndef LIBBITCOIN_SYSTEM_SCRYPT_H
-#define LIBBITCOIN_SYSTEM_SCRYPT_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMACSHA256_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMACSHA256_HPP
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/external/sha256.hpp>
 
-#ifdef __cplusplus
-extern "C" 
+#define HMACSHA256_DIGEST_LENGTH 32U
+
+typedef struct HMACSHA256CTX
 {
+    SHA256CTX ctx;
+    SHA256CTX ictx;
+    SHA256CTX octx;
+} HMACSHA256CTX;
+
+void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
+    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
+
+void HMACSHA256Final(HMACSHA256CTX* context,
+    uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
+
+void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
+    size_t key_length);
+
+void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
+    size_t length);
+
 #endif
-
-/**
- * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
- * Compute scrypt(passwd[0 .. passwdlen - 1], salt[0 .. saltlen - 1], N, r,
- * p, buflen) and write the result into buf.  The parameters r, p, and buflen
- * must satisfy r * p < 2^30 and buflen <= (2^32 - 1) * 32.  The parameter N
- * must be a power of 2 greater than 1.
- *
- * Return 0 on success; or -1 on error.
- */
-int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint64_t N, uint32_t r,
-    uint32_t p, uint8_t* buf, size_t buf_length);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* !_CRYPTO_SCRYPT_H_ */

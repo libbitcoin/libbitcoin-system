@@ -16,31 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/crypto/encryption.hpp>
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_EXTERNAL_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_EXTERNAL_HPP
 
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/crypto/elliptic_curve.hpp>
-#include <bitcoin/system/crypto/external/external.hpp>
-#include <bitcoin/system/crypto/hash.hpp>
+#include <bitcoin/system/crypto/external/aes256.hpp>
+#include <bitcoin/system/crypto/external/crypto_scrypt.hpp>
+#include <bitcoin/system/crypto/external/hmac_sha256.hpp>
+#include <bitcoin/system/crypto/external/hmac_sha512.hpp>
+#include <bitcoin/system/crypto/external/lax_der_parsing.hpp>
+#include <bitcoin/system/crypto/external/pbkdf2_sha256.hpp>
+#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
+#include <bitcoin/system/crypto/external/ripemd160.hpp>
+#include <bitcoin/system/crypto/external/sha1.hpp>
+#include <bitcoin/system/crypto/external/sha256.hpp>
+#include <bitcoin/system/crypto/external/sha512.hpp>
 
-namespace libbitcoin {
-namespace system {
-
-void aes256_encrypt(aes_block& block, const aes_secret& key) NOEXCEPT
-{
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_encrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
-
-void aes256_decrypt(aes_block& block, const aes_secret& key) NOEXCEPT
-{
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_decrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
-
-} // namespace system
-} // namespace libbitcoin
+#endif

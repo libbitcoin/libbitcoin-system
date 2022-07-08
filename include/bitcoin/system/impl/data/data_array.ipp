@@ -20,12 +20,8 @@
 #define LIBBITCOIN_SYSTEM_DATA_DATA_ARRAY_IPP
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iterator>
 #include <utility>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/collection.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
@@ -74,7 +70,7 @@ constexpr data_array<Size> build_array(const data_loaf& slices) NOEXCEPT
 
     // C++17: Parallel policy for std::fill.
     // Pad any unfilled remainder of the array with zeros.
-    std::fill(position, out.end(), uint8_t{ 0x00 });
+    std::fill(position, out.end(), 0_u8);
     return out;
 }
 

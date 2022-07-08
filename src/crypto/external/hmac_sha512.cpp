@@ -23,12 +23,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "../../../include/bitcoin/system/crypto/external/hmac_sha512.h"
+#include <bitcoin/system/crypto/external/hmac_sha512.hpp>
 
-#include <stdint.h>
-#include <string.h>
-#include "../../../include/bitcoin/system/crypto/external/sha512.h"
-#include "../../../include/bitcoin/system/crypto/external/zeroize.h"
+#include <utility>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/external/sha512.hpp>
 
  // TODO: make constexpr (cpp).
 
@@ -71,14 +70,14 @@ void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
     }
 
     SHA512Init(&context->ictx);
-    fill(pad, SHA512_BLOCK_LENGTH, 0x36);
+    std::fill_n(pad, SHA512_BLOCK_LENGTH, uint8_t{ 0x36 });
 
     for (i = 0; i < key_length; i++)
         pad[i] ^= key[i];
 
     SHA512Update(&context->ictx, pad, SHA512_BLOCK_LENGTH);
     SHA512Init(&context->octx);
-    fill(pad, SHA512_BLOCK_LENGTH, 0x5c);
+    std::fill_n(pad, SHA512_BLOCK_LENGTH, uint8_t{ 0x5c });
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];

@@ -79,18 +79,17 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/secp256k1_initializer.cpp \
     src/crypto/secp256k1_initializer.hpp \
     src/crypto/siphash.cpp \
-    src/crypto/external/aes256.c \
-    src/crypto/external/crypto_scrypt.c \
-    src/crypto/external/hmac_sha256.c \
-    src/crypto/external/hmac_sha512.c \
-    src/crypto/external/lax_der_parsing.c \
-    src/crypto/external/pbkdf2_sha256.c \
-    src/crypto/external/pkcs5_pbkdf2.c \
-    src/crypto/external/ripemd160.c \
-    src/crypto/external/sha1.c \
-    src/crypto/external/sha256.c \
-    src/crypto/external/sha512.c \
-    src/crypto/external/zeroize.c \
+    src/crypto/external/aes256.cpp \
+    src/crypto/external/crypto_scrypt.cpp \
+    src/crypto/external/hmac_sha256.cpp \
+    src/crypto/external/hmac_sha512.cpp \
+    src/crypto/external/lax_der_parsing.cpp \
+    src/crypto/external/pbkdf2_sha256.cpp \
+    src/crypto/external/pkcs5_pbkdf2.cpp \
+    src/crypto/external/ripemd160.cpp \
+    src/crypto/external/sha1.cpp \
+    src/crypto/external/sha256.cpp \
+    src/crypto/external/sha512.cpp \
     src/crypto/intrinsics/intrinsics.cpp \
     src/crypto/intrinsics/sha256_1_portable.cpp \
     src/crypto/intrinsics/sha256_2_shani.cpp \
@@ -470,18 +469,18 @@ include_bitcoin_system_crypto_HEADERS = \
 
 include_bitcoin_system_crypto_externaldir = ${includedir}/bitcoin/system/crypto/external
 include_bitcoin_system_crypto_external_HEADERS = \
-    include/bitcoin/system/crypto/external/aes256.h \
-    include/bitcoin/system/crypto/external/crypto_scrypt.h \
-    include/bitcoin/system/crypto/external/hmac_sha256.h \
-    include/bitcoin/system/crypto/external/hmac_sha512.h \
-    include/bitcoin/system/crypto/external/lax_der_parsing.h \
-    include/bitcoin/system/crypto/external/pbkdf2_sha256.h \
-    include/bitcoin/system/crypto/external/pkcs5_pbkdf2.h \
-    include/bitcoin/system/crypto/external/ripemd160.h \
-    include/bitcoin/system/crypto/external/sha1.h \
-    include/bitcoin/system/crypto/external/sha256.h \
-    include/bitcoin/system/crypto/external/sha512.h \
-    include/bitcoin/system/crypto/external/zeroize.h
+    include/bitcoin/system/crypto/external/aes256.hpp \
+    include/bitcoin/system/crypto/external/crypto_scrypt.hpp \
+    include/bitcoin/system/crypto/external/external.hpp \
+    include/bitcoin/system/crypto/external/hmac_sha256.hpp \
+    include/bitcoin/system/crypto/external/hmac_sha512.hpp \
+    include/bitcoin/system/crypto/external/lax_der_parsing.hpp \
+    include/bitcoin/system/crypto/external/pbkdf2_sha256.hpp \
+    include/bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp \
+    include/bitcoin/system/crypto/external/ripemd160.hpp \
+    include/bitcoin/system/crypto/external/sha1.hpp \
+    include/bitcoin/system/crypto/external/sha256.hpp \
+    include/bitcoin/system/crypto/external/sha512.hpp
 
 include_bitcoin_system_crypto_intrinsicsdir = ${includedir}/bitcoin/system/crypto/intrinsics
 include_bitcoin_system_crypto_intrinsics_HEADERS = \

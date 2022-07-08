@@ -23,10 +23,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "../../../include/bitcoin/system/crypto/external/sha256.h"
+#include <bitcoin/system/crypto/external/sha256.hpp>
 
-#include <stdint.h>
-#include <string.h>
+#include <bitcoin/system/define.hpp>
 
 // TODO: make constexpr (cpp) and use /math/bytes endians.
 

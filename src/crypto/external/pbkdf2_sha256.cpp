@@ -23,14 +23,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "../../../include/bitcoin/system/crypto/external/pbkdf2_sha256.h"
+#include <bitcoin/system/crypto/external/pbkdf2_sha256.hpp>
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include "../../../include/bitcoin/system/crypto/external/hmac_sha256.h"
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/external/hmac_sha256.hpp>
 
  // TODO: make constexpr (cpp) and use /math/bytes endians.
 

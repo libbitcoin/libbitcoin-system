@@ -17,21 +17,14 @@
  *   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "../../../include/bitcoin/system/crypto/external/aes256.h"
+#include <bitcoin/system/crypto/external/aes256.hpp>
 
-#include <errno.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include <bitcoin/system/define.hpp>
 
- // TODO: make constexpr (cpp).
+// TODO: make constexpr (cpp).
 
 #define F(x) (((x) << 1) ^ (((x) >> 7) & 1) * 0x1b)
 #define FD(x) (((x) >> 1) ^ (((x) & 1) ? 0x8d : 0))
-
-#define BACK_TO_TABLES
-
-#ifdef BACK_TO_TABLES
 
 const uint8_t sbox[256] =
 {
@@ -106,78 +99,6 @@ const uint8_t sboxinv[256] =
 
 #define rj_sbox(x)     sbox[(x)]
 #define rj_sbox_inv(x) sboxinv[(x)]
-
-#else /* tableless subroutines */
-
-uint8_t gf_alog(uint8_t x) /* calculate anti-logarithm gen 3 */
-{
-    uint8_t atb = 1, z;
-
-    while (x--)
-    {
-        z = atb;
-        atb <<= 1;
-
-        if (z & 0x80)
-            atb^= 0x1b;
-
-        atb ^= z;
-    }
-
-    return atb;
-} /* gf_alog */
-
-uint8_t gf_log(uint8_t x) /* calculate logarithm gen 3 */
-{
-    uint8_t atb = 1, i = 0, z;
-
-    do
-    {
-        if (atb == x)
-            break;
-
-        z = atb;
-        atb <<= 1;
-
-        if (z & 0x80)
-            atb^= 0x1b;
-
-        atb ^= z;
-    }
-    while (++i > 0);
-
-    return i;
-} /* gf_log */
-
-
-uint8_t gf_mulinv(uint8_t x) /* calculate multiplicative inverse */
-{
-    return (x) ? gf_alog(255 - gf_log(x)) : 0;
-} /* gf_mulinv */
-
-uint8_t rj_sbox(uint8_t x)
-{
-    uint8_t y, sb;
-
-    sb = y = gf_mulinv(x);
-    y = (y << 1) | (y >> 7); sb ^= y;  y = (y << 1) | (y >> 7); sb ^= y; 
-    y = (y << 1) | (y >> 7); sb ^= y;  y = (y << 1) | (y >> 7); sb ^= y;
-
-    return (sb ^ 0x63);
-}
-
-uint8_t rj_sbox_inv(uint8_t x)
-{
-    uint8_t y, sb;
-
-    y = x ^ 0x63;
-    sb = y = (y << 1) | (y >> 7);
-    y = (y << 2) | (y >> 6); sb ^= y; y = (y << 3) | (y >> 5); sb ^= y;
-
-    return gf_mulinv(sb);
-}
-
-#endif
 
 uint8_t rj_xtime(uint8_t x) 
 {

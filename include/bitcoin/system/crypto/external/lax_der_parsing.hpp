@@ -48,14 +48,11 @@
  *   8.3.1.
  */
 
-#ifndef SECP256K1_CONTRIB_LAX_DER_PARSING_H
-#define SECP256K1_CONTRIB_LAX_DER_PARSING_H
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_LAX_DER_PARSING_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_LAX_DER_PARSING_HPP
 
 #include <secp256k1.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <bitcoin/system/define.hpp>
 
 /** Parse a signature in "lax DER" format
  *
@@ -83,9 +80,5 @@ int ecdsa_signature_parse_der_lax(
     const unsigned char *input,
     size_t inputlen
 ) SECP256K1_ARG_NONNULL(1) SECP256K1_ARG_NONNULL(2) SECP256K1_ARG_NONNULL(3);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* SECP256K1_CONTRIB_LAX_DER_PARSING_H */

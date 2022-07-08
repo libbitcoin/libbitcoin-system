@@ -1,7 +1,6 @@
-/* libsodium: utils.c, v0.4.5 2014/04/16 */
+/* OpenBSD: pkcs5_pbkdf2.c, v 1.9 2015/02/05 12:59:57 millert */
 /**
- * Copyright (c) 2013-2014
- * Frank Denis <j at pureftpd dot org>
+ * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,22 +14,18 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#ifndef LIBBITCOIN_SYSTEM_ZEROIZE_HPP
-#define LIBBITCOIN_SYSTEM_ZEROIZE_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_PKCS5PBKDF2_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_PKCS5PBKDF2_HPP
 
-#include <stddef.h>
-#include <stdint.h>
+#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
 
-#ifdef __cplusplus
-extern "C" 
-{
-#endif
+#include <bitcoin/system/define.hpp>
 
-void fill(void* const buffer, size_t length, uint8_t value);
-void zeroize(void* const buffer, size_t length);
-
-#ifdef __cplusplus
-}
-#endif
+/* Password-Based Key Derivation Function 2 (PKCS #5 v2.0). */
+/* Code based on IEEE Std 802.11-2007, Annex H.4.2. */
+/* returns 0 if successful. */
+int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
+    const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
+    size_t iterations);
 
 #endif

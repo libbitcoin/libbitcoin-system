@@ -30,10 +30,9 @@
  * Adapted:
  *      by Libbitcoin Developers on 7 September 2016
  */
-#include "../../../include/bitcoin/system/crypto/external/sha1.h"
+#include <bitcoin/system/crypto/external/sha1.hpp>
 
-#include <stdint.h>
-#include <stddef.h>
+#include <bitcoin/system/define.hpp>
 
 // TODO: make constexpr (cpp).
 
