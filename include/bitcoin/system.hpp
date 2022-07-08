@@ -106,6 +106,7 @@
 #include <bitcoin/system/data/memory.hpp>
 #include <bitcoin/system/data/no_fill_allocator.hpp>
 #include <bitcoin/system/data/string.hpp>
+#include <bitcoin/system/endian/algorithm.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/endian/minimal.hpp>
 #include <bitcoin/system/endian/nominal.hpp>

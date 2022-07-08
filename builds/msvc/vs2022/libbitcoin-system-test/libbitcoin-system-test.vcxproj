@@ -124,6 +124,7 @@
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\algorithm.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\set.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">

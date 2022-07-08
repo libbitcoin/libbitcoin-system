@@ -869,6 +869,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\algorithm.hpp">
+      <Filter>include\bitcoin\system\endian</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\endian.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
@@ -1356,6 +1359,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\memory.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\algorithm.ipp">
+      <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\minimal.ipp">
       <Filter>include\bitcoin\system\impl\endian</Filter>

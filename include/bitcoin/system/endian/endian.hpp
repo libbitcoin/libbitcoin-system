@@ -19,9 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 
-#include <bitcoin/system/endian/set.hpp>
+#include <bitcoin/system/endian/algorithm.hpp>
 #include <bitcoin/system/endian/minimal.hpp>
 #include <bitcoin/system/endian/nominal.hpp>
+#include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/stream.hpp>
 #include <bitcoin/system/endian/uintx.hpp>
 #include <bitcoin/system/endian/uintx_t.hpp>

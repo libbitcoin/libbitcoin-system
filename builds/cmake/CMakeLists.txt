@@ -576,6 +576,7 @@ if (with-tests)
         "../../test/data/memory.cpp"
         "../../test/data/no_fill_allocator.cpp"
         "../../test/data/string.cpp"
+        "../../test/endian/algorithm.cpp"
         "../../test/endian/nominal.cpp"
         "../../test/endian/set.cpp"
         "../../test/endian/stream.cpp"

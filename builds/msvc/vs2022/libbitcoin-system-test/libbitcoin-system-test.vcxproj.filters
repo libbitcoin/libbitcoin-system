@@ -225,6 +225,9 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\algorithm.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
