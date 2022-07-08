@@ -32,35 +32,35 @@ namespace system {
 
 // data_slice is not constexpr.
 
-template <size_t Size, typename Return>
-inline Return uintx_from_big_endian_chunk(
-    const data_slice& data) NOEXCEPT
+template <size_t Size>
+inline uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
+    const data_chunk& data) NOEXCEPT
 {
-    return from_big_array<Return>(Size, data);
+    return from_big_chunk<uintx_t<to_bits(Size)>>(Size, data);
 }
 
-template <size_t Size, typename Return>
-inline Return uintx_from_little_endian_chunk(
-    const data_slice& data) NOEXCEPT
+template <size_t Size>
+inline uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
+    const data_chunk& data) NOEXCEPT
 {
-    return from_little_array<Return>(Size, data);
+    return from_little_chunk<uintx_t<to_bits(Size)>>(Size, data);
 }
 
 // TODO: recombine and rename when data_slice is constexpr.
 // data_array and data_chunk split from data_slice for constexpr support.
 
-template <size_t Size, typename Return>
-constexpr Return uintx_from_big_endian_array(
+template <size_t Size>
+constexpr uintx_t<to_bits(Size)> uintx_from_big_endian_array(
     const data_array<Size>& data) NOEXCEPT
 {
-    return from_big_array<Return>(data);
+    return from_big_array<uintx_t<to_bits(Size)>>(data);
 }
 
-template <size_t Size, typename Return>
-constexpr Return uintx_from_little_endian_array(
+template <size_t Size>
+constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_array(
     const data_array<Size>& data) NOEXCEPT
 {
-    return from_little_array<Return>(data);
+    return from_little_array<uintx_t<to_bits(Size)>>(data);
 }
 
 // Explicit sizing, from any integer type.

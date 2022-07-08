@@ -35,20 +35,20 @@ namespace system {
 // TODO: this affects current test expectations.
 ////template <size_t Size, typename Return = unsigned_exact_type<Size>>
 
-template <size_t Size, typename Return = uintx_t<to_bits(Size)>>
-inline Return uintx_from_big_endian_chunk(
-    const data_slice& data) NOEXCEPT;
+template <size_t Size>
+inline uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
+    const data_chunk& data) NOEXCEPT;
 
-template <size_t Size, typename Return = uintx_t<to_bits(Size)>>
-inline Return uintx_from_little_endian_chunk(
-    const data_slice& data) NOEXCEPT;
+template <size_t Size>
+inline uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
+    const data_chunk& data) NOEXCEPT;
 
-template <size_t Size, typename Return = uintx_t<to_bits(Size)>>
-constexpr Return uintx_from_big_endian_array(
+template <size_t Size>
+constexpr uintx_t<to_bits(Size)> uintx_from_big_endian_array(
     const data_array<Size>& data) NOEXCEPT;
 
-template <size_t Size, typename Return = uintx_t<to_bits(Size)>>
-constexpr Return uintx_from_little_endian_array(
+template <size_t Size>
+constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_array(
     const data_array<Size>& data) NOEXCEPT;
 
 // Explicit sizing, from any integer type.
