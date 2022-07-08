@@ -31,8 +31,6 @@
 namespace libbitcoin {
 namespace system {
 
-using namespace boost;
-
 static constexpr uint8_t compressed_even = 0x02;
 static constexpr uint8_t compressed_odd = 0x03;
 static constexpr uint8_t uncompressed = 0x04;
@@ -381,7 +379,7 @@ bool parse_signature(ec_signature& out, const data_slice& der_signature,
             der_signature.data(), der_signature.size()) == ec_success;
 
     return ecdsa_signature_parse_der_lax(context, parsed,
-        der_signature.data(), der_signature.size()) == ec_success;
+        der_signature.data(), der_signature.size());
 }
 
 bool encode_signature(der_signature& out,
@@ -409,7 +407,7 @@ bool encode_signature(der_signature& out,
 bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT
 {
-    auto const* context = secp256k1_signing::context();
+    const auto context = secp256k1_signing::context();
     const auto signature = pointer_cast<secp256k1_ecdsa_signature>(
         out.data());
 
@@ -422,7 +420,7 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
-    auto const* context = secp256k1_verification::context();
+    const auto context = secp256k1_verification::context();
 
     return parse(context, pubkey, point) &&
         verify_signature(context, pubkey, hash, signature);
@@ -456,14 +454,14 @@ bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
 bool recover_public(ec_compressed& out,
     const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
 {
-    auto const* context = secp256k1_verification::context();
+    const auto context = secp256k1_verification::context();
     return recover_public(context, out, recoverable, hash);
 }
 
 bool recover_public(ec_uncompressed& out,
     const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
 {
-    auto const* context = secp256k1_verification::context();
+    const auto context = secp256k1_verification::context();
     return recover_public(context, out, recoverable, hash);
 }
 

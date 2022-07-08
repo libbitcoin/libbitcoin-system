@@ -22,7 +22,7 @@
 #include <secp256k1.h>
 #include <bitcoin/system/define.hpp>
 
- // TODO: rename to elliptic_curve_initializer
+ // TODO: rename to ec_initializer
 
 namespace libbitcoin {
 namespace system {
