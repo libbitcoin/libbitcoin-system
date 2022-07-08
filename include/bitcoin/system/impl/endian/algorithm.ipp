@@ -37,13 +37,20 @@ namespace system {
 // C++ standard: "Right-shift on signed integral types is an arithmetic right
 // shift, which performs sign-extension". In other words, repeatedly shifting
 // -1 of any integer width will produce "1" bits, indefinitely.
-    
+
+// To big/little data.
+// ----------------------------------------------------------------------------
+// Fills Data to its preallocated size.
+
+// to_big_data()
 template <typename Data, typename Integer>
 constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
     {
-        if (!bytes.empty()) { bytes.front() = static_cast<uint8_t>(value); }
+        if (!bytes.empty())
+            bytes.front() = possible_sign_cast<uint8_t>(value);
+
         return std::move(bytes);
     }
 
@@ -56,12 +63,15 @@ constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT
     return std::move(bytes);
 }
 
+// to_little_data()
 template <typename Data, typename Integer>
 constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
     {
-        if (!bytes.empty()) { bytes.front() = static_cast<uint8_t>(value); }
+        if (!bytes.empty())
+            bytes.front() = possible_sign_cast<uint8_t>(value);
+
         return std::move(bytes);
     }
 
@@ -74,6 +84,11 @@ constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT
     return std::move(bytes);
 }
 
+// From big data.
+// ----------------------------------------------------------------------------
+// Shifts all data bytes into Integer.
+
+// Integer from_big_array(data_array)
 template <typename Integer, size_t Size>
 constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
 {
@@ -85,12 +100,63 @@ constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
     for (size_t byte = 0; byte < Size; ++byte)
     {
         value <<= byte_bits;
-        value |= static_cast<Integer>(data[byte]);
+        value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
     }
 
     return value;
 }
 
+// Integer from_big_array<length>(data_array)
+template <typename Integer, size_t Size>
+constexpr Integer from_big_chunk(size_t size,
+    const data_array<Size>& data) NOEXCEPT
+{
+    if constexpr (is_one(sizeof(Integer)))
+        return data.empty() ? 0 : data.front();
+
+    Integer value(0);
+    const auto bytes = std::min(size, data.size());
+
+    for (size_t byte = 0; byte < bytes; ++byte)
+    {
+        value <<= byte_bits;
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
+        BC_POP_WARNING()
+    }
+
+    return value;
+}
+
+// Integer from_big_chunk<length>(data_chunk)
+template <typename Integer>
+VCONSTEXPR Integer from_big_chunk(size_t size,
+    const data_chunk& data) NOEXCEPT
+{
+    if constexpr (is_one(sizeof(Integer)))
+        return data.empty() ? 0 : data.front();
+
+    Integer value(0);
+    const auto bytes = std::min(size, data.size());
+
+    for (size_t byte = 0; byte < bytes; ++byte)
+    {
+        value <<= byte_bits;
+
+        BC_PUSH_WARNING(USE_GSL_AT)
+        value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
+        BC_POP_WARNING()
+    }
+
+    return value;
+}
+
+// From little data.
+// ----------------------------------------------------------------------------
+// Shifts all data bytes into Integer.
+
+// Integer from_little_array(data_array)
 template <typename Integer, size_t Size>
 constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
 {
@@ -102,56 +168,16 @@ constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
     for (auto byte = Size; byte > 0; --byte)
     {
         value <<= byte_bits;
-        value |= static_cast<Integer>(data[sub1(byte)]);
+        value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
     }
 
     return value;
 }
 
+// Integer from_little_array<length>(Integer)
 template <typename Integer, size_t Size>
-constexpr Integer from_big_chunk(size_t size, const data_array<Size>& data) NOEXCEPT
-{
-    if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value(0);
-    const auto bytes = std::min(size, data.size());
-
-    for (size_t byte = 0; byte < bytes; ++byte)
-    {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= static_cast<Integer>(data[byte]);
-        BC_POP_WARNING()
-    }
-
-    return value;
-}
-
-template <typename Integer>
-VCONSTEXPR Integer from_big_chunk(size_t size, const data_chunk& data) NOEXCEPT
-{
-    if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value(0);
-    const auto bytes = std::min(size, data.size());
-
-    for (size_t byte = 0; byte < bytes; ++byte)
-    {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= static_cast<Integer>(data[byte]);
-        BC_POP_WARNING()
-    }
-
-    return value;
-}
-
-template <typename Integer, size_t Size>
-constexpr Integer from_little_chunk(size_t size, const data_array<Size>& data) NOEXCEPT
+constexpr Integer from_little_chunk(size_t size,
+    const data_array<Size>& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
         return data.empty() ? 0 : data.front();
@@ -164,15 +190,17 @@ constexpr Integer from_little_chunk(size_t size, const data_array<Size>& data) N
         value <<= byte_bits;
 
         BC_PUSH_WARNING(USE_GSL_AT)
-        value |= static_cast<Integer>(data[sub1(byte)]);
+        value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
         BC_POP_WARNING()
     }
 
     return value;
 }
 
+// Integer from_little_chunk<length>(Integer)
 template <typename Integer>
-VCONSTEXPR Integer from_little_chunk(size_t size, const data_chunk& data) NOEXCEPT
+VCONSTEXPR Integer from_little_chunk(size_t size,
+    const data_chunk& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
         return data.empty() ? 0 : data.front();
@@ -185,11 +213,45 @@ VCONSTEXPR Integer from_little_chunk(size_t size, const data_chunk& data) NOEXCE
         value <<= byte_bits;
 
         BC_PUSH_WARNING(USE_GSL_AT)
-        value |= static_cast<Integer>(data[sub1(byte)]);
+        value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
         BC_POP_WARNING()
     }
 
     return value;
+}
+
+// To/from integral.
+// ----------------------------------------------------------------------------
+// Very efficient byteswap, or passthru.
+
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_to_big_end(Integral big) NOEXCEPT
+{
+    if constexpr (is_little_endian)
+        return byteswap(big);
+    else
+        return big;
+}
+
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_to_little_end(Integral little) NOEXCEPT
+{
+    if constexpr (is_big_endian)
+        return byteswap(little);
+    else
+        return little;
+}
+
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_from_big_end(Integral big) NOEXCEPT
+{
+    return native_to_big_end(big);
+}
+
+template <typename Integral, if_integral_integer<Integral>>
+constexpr Integral native_from_little_end(Integral little) NOEXCEPT
+{
+    return native_to_little_end(little);
 }
 
 } // namespace system

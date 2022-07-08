@@ -24,38 +24,77 @@
 
 namespace libbitcoin {
 namespace system {
+    
+/// Integer size (apart from single byte guard) is not considered.
+/// Data size is not required to match Integer size, zero-padding applied.
+/// Use "data" convertors for constexpr, misaligned size and non-integrals.
+/// Use "native" convertors for best efficiency integral endianness alignment.
+
+/// Native endianness integer to data.
+/// ---------------------------------------------------------------------------
 
 // to_big_data()
 template <typename Data, typename Integer>
 constexpr Data to_big_chunk(Data&& bytes, Integer value) NOEXCEPT;
 
-// to_big_data()
+// to_little_data()
 template <typename Data, typename Integer>
 constexpr Data to_little_chunk(Data&& bytes, Integer value) NOEXCEPT;
 
+/// Native endianness integer from big-endian data.
+/// ---------------------------------------------------------------------------
+
 // from_big_array()
 template <typename Integer, size_t Size>
-constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT;
-
-// from_little_array()
-template <typename Integer, size_t Size>
-constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT;
+constexpr Integer from_big_array(
+    const data_array<Size>& data) NOEXCEPT;
 
 // from_big_array<length>()
 template <typename Integer, size_t Size>
-constexpr Integer from_big_chunk(size_t size, const data_array<Size>& data) NOEXCEPT;
+constexpr Integer from_big_chunk(size_t size,
+    const data_array<Size>& data) NOEXCEPT;
 
 // from_big_chunk<length>()
 template <typename Integer>
-VCONSTEXPR Integer from_big_chunk(size_t size, const data_chunk& data) NOEXCEPT;
+VCONSTEXPR Integer from_big_chunk(size_t size,
+    const data_chunk& data) NOEXCEPT;
+
+/// Native endianness integer from little-endian data.
+/// ---------------------------------------------------------------------------
+
+// from_little_array()
+template <typename Integer, size_t Size>
+constexpr Integer from_little_array(
+    const data_array<Size>& data) NOEXCEPT;
 
 // from_little_array<length>()
 template <typename Integer, size_t Size>
-constexpr Integer from_little_chunk(size_t size, const data_array<Size>& data) NOEXCEPT;
+constexpr Integer from_little_chunk(size_t size,
+    const data_array<Size>& data) NOEXCEPT;
 
 // from_little_chunk<length>()
 template <typename Integer>
-VCONSTEXPR Integer from_little_chunk(size_t size, const data_chunk& data) NOEXCEPT;
+VCONSTEXPR Integer from_little_chunk(size_t size,
+    const data_chunk& data) NOEXCEPT;
+
+/// Native endianness integer to/from big/little endianness integer (byteswap).
+/// ---------------------------------------------------------------------------
+
+/// Convert a native integral integer to big-endian.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_to_big_end(Integral big) NOEXCEPT;
+
+/// Convert a native integral integer to little-endian.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_to_little_end(Integral big) NOEXCEPT;
+
+/// Convert a big-endian integral integer to native.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_from_big_end(Integral big) NOEXCEPT;
+
+/// Convert a little-endian integral integer to native.
+template <typename Integral, if_integral_integer<Integral> = true>
+constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

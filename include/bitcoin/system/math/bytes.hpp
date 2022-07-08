@@ -36,25 +36,6 @@ constexpr size_t byte_width(Integer value) NOEXCEPT;
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr size_t byte_width(Integer value) NOEXCEPT;
 
-/// Endianness.
-/// ---------------------------------------------------------------------------
-
-/// Convert a native integral integer to big-endian.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_to_big_end(Integral big) NOEXCEPT;
-
-/// Convert a native integral integer to little-endian.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_to_little_end(Integral big) NOEXCEPT;
-
-/// Convert a big-endian integral integer to native.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_from_big_end(Integral big) NOEXCEPT;
-
-/// Convert a little-endian integral integer to native.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
-
 /// Byteswap (platform independent byte reversal).
 /// ---------------------------------------------------------------------------
 

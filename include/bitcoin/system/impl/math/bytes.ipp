@@ -50,39 +50,6 @@ constexpr size_t byte_width(Integral value) NOEXCEPT
         byte_width(to_unsigned(value));
 }
 
-// Endianness.
-// ----------------------------------------------------------------------------
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_to_big_end(Integral big) NOEXCEPT
-{
-    if constexpr (is_little_endian)
-        return byteswap(big);
-    else
-        return big;
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_to_little_end(Integral little) NOEXCEPT
-{
-    if constexpr (is_big_endian)
-        return byteswap(little);
-    else
-        return little;
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_from_big_end(Integral big) NOEXCEPT
-{
-    return native_to_big_end(big);
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_from_little_end(Integral little) NOEXCEPT
-{
-    return native_to_little_end(little);
-}
-
 // Byteswap (platform independent byte reversal).
 // ----------------------------------------------------------------------------
 // If wrong overload is selected (such as for a literal) result is unexpected.
