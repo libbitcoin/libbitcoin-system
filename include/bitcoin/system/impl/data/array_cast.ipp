@@ -65,6 +65,16 @@ array_cast(const std::array<From, Count>& values) NOEXCEPT
     return *pointer_cast<const to>(values.data());
 }
 
+// Avoids cast of rvalue to reference, which would dangle.
+template <typename To, size_t Count, typename From,
+    if_integral_integer<From>,
+    if_integral_integer<To>>
+inline std::array<To, proportion<Count, From, To>>
+array_cast(std::array<From, Count>&& values) NOEXCEPT
+{
+    return array_cast<To>(unmove(values));
+}
+
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_integral_integer<From>,
     if_integral_integer<To>,
@@ -85,6 +95,17 @@ narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT
 {
     using to = std::array<To, ToCount>;
     return *pointer_cast<const to>(values.data());
+}
+
+// Avoids cast of rvalue to reference, which would dangle.
+template <typename To, size_t ToCount, typename From, size_t FromCount,
+    if_integral_integer<From>,
+    if_integral_integer<To>,
+    if_portional<ToCount, To, FromCount, From>>
+inline std::array<To, ToCount>
+narrowing_array_cast(std::array<From, FromCount>&& values) NOEXCEPT
+{
+    return narrowing_array_cast<To, ToCount>(unmove(values));
 }
 
 template <typename To, size_t Size, typename From,

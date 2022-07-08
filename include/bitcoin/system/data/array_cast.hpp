@@ -68,6 +68,13 @@ template <typename To, size_t Count, typename From,
 inline const std::array<To, proportion<Count, From, To>>&
 array_cast(const std::array<From, Count>& values) NOEXCEPT;
 
+/// Cast array&& of integrals to same-sized const array of integrals.
+template <typename To, size_t Count, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true>
+inline std::array<To, proportion<Count, From, To>>
+array_cast(std::array<From, Count>&& values) NOEXCEPT;
+
 /// Cast array& of integrals to lesser-sized array& of integrals.
 /// Use array_cast for non-narrowing array cast.
 template <typename To, size_t ToCount, typename From, size_t FromCount,
@@ -85,6 +92,15 @@ template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From> = true>
 inline const std::array<To, ToCount>&
 narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT;
+
+/// Cast array&& of integrals to lesser-sized array of integrals.
+/// Use array_cast for non-narrowing array cast.
+template <typename To, size_t ToCount, typename From, size_t FromCount,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true,
+    if_portional<ToCount, To, FromCount, From> = true>
+inline std::array<To, ToCount>
+narrowing_array_cast(std::array<From, FromCount>&& values) NOEXCEPT;
 
 /// Cast contiguous integral buffer to array& of integrals.
 /// Safe if byte count (size) is correct.

@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_IPP
 
 #include <array>
+#include <utility>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -47,6 +48,16 @@ byte_cast(const Integral& value) NOEXCEPT
     return unsafe_array_cast<Byte, sizeof(Integral)>(&value);
 }
 
+// Avoids cast of rvalue to reference, which would dangle.
+template <typename Byte, typename Integral,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+inline std::array<Byte, sizeof(Integral)>
+byte_cast(Integral&& value) NOEXCEPT
+{
+    return byte_cast<Byte>(unmove(value));
+}
+
 template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
@@ -63,6 +74,16 @@ inline const unsigned_type<Size>&
 byte_cast(const std::array<Byte, Size>& value) NOEXCEPT
 {
     return *pointer_cast<const unsigned_type<Size>>(&value);
+}
+
+// Avoids cast of rvalue to reference, which would dangle.
+template <typename Byte, size_t Size,
+    if_one_byte<Byte>,
+    if_integral_size<Size>>
+inline unsigned_type<Size>
+byte_cast(std::array<Byte, Size>&& value) NOEXCEPT
+{
+    return byte_cast(unmove(value));
 }
 
 } // namespace system

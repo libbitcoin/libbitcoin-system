@@ -30,33 +30,47 @@ namespace system {
 /// ---------------------------------------------------------------------------
 /// C++20: std::bit_cast is a copy, not a cast, these are true casts.
 
-/// Cast integral& to a data array& with byte length of the integral.
+/// Cast integral& to a byte array& with byte length of the integral.
 template <typename Byte = uint8_t, typename Integral,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
 inline std::array<Byte, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT;
 
-/// Cast const integral& to a const data array& with byte length of the integral.
+/// Cast const integral& to const byte array& with byte length of the integral.
 template <typename Byte = uint8_t, typename Integral,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
 inline const std::array<Byte, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT;
 
-/// Cast data array& to unsigned integral& of same byte length.
+/// Cast integral&& to byte array with byte length of the integral.
+template <typename Byte = uint8_t, typename Integral,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true>
+inline std::array<Byte, sizeof(Integral)>
+byte_cast(Integral&& value) NOEXCEPT;
+
+/// Cast byte array& to unsigned integral& of same byte length.
 template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_size<Size> = true>
 inline unsigned_type<Size>&
 byte_cast(std::array<Byte, Size>& value) NOEXCEPT;
 
-/// Cast const data array& to const unsigned integral& of same byte length.
+/// Cast const byte array& to const unsigned integral& of same byte length.
 template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_size<Size> = true>
 inline const unsigned_type<Size>&
 byte_cast(const std::array<Byte, Size>& value) NOEXCEPT;
+
+/// Cast byte array&& to unsigned integral of same byte length.
+template <typename Byte, size_t Size,
+    if_one_byte<Byte> = true,
+    if_integral_size<Size> = true>
+inline unsigned_type<Size>
+byte_cast(std::array<Byte, Size>&& value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
