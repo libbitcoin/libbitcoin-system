@@ -31,7 +31,7 @@ const auto combinings_es = 334;
 const auto combinings_fr = 366;
 const auto combinings_ja = 644;
 
-#ifdef WITH_ICU
+#ifdef HAVE_ICU
 const auto abnormals_es = 334;
 const auto abnormals_ja = 644;
 const auto divergences_es = 334;
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 // This verifies the number of abnormals in the two divergent dictionaries.
 BOOST_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
 {
-    // The result is definitive only when WITH_ICU is defined.
+    // The result is definitive only when HAVE_ICU is defined.
     BOOST_REQUIRE_EQUAL(abnormals(electrum_es), abnormals_es);
     BOOST_REQUIRE_EQUAL(abnormals(electrum_ja), abnormals_ja);
 }

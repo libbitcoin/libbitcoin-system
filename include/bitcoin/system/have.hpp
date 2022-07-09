@@ -97,6 +97,11 @@
     #define HAVE_PRAGMA_WARNING
 #endif
 
+// Build configured (always available on msvc).
+#if defined(HAVE_MSC) || defined(WITH_ICU)
+    #define HAVE_ICU
+#endif
+
 // Things we configure to have (available on all platforms).
 
 // disable noexcept to capture stack trace.
@@ -107,5 +112,8 @@
 
 // have a portable build (no intrinsics).
 ////#define HAVE_PORTABLE
+
+// have slow test execution.
+////#define HAVE_SLOW_TESTS
 
 #endif

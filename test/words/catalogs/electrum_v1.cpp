@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__sorted__unsorted__false)
 // This also removes the ICU dependency for these languages.
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__normal__normal_words__true)
 {
-    // The result is definitive only when WITH_ICU is defined.
+    // The result is definitive only when HAVE_ICU is defined.
     BOOST_REQUIRE(!abnormal(electrum_v1::en));
     BOOST_REQUIRE(!abnormal(electrum_v1::pt));
 }

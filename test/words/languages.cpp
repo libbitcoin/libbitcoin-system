@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(languages__try_normalize__padded_mixed_ascii__lowered_trimm
     BOOST_REQUIRE_EQUAL(accessor::try_normalize(words), expected);
 }
 
-#ifdef WITH_ICU
+#ifdef HAVE_ICU
 
 BOOST_AUTO_TEST_CASE(languages__try_normalize__with_icu__lowered_normalized)
 {

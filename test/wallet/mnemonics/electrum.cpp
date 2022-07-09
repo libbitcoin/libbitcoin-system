@@ -340,10 +340,10 @@ BOOST_AUTO_TEST_CASE(electrum__grinder__prefix_none__not_found)
 
 BOOST_AUTO_TEST_CASE(electrum__seeder__non_ascii_passphrase__expected)
 {
-#ifdef WITH_ICU
+#ifdef HAVE_ICU
     BOOST_REQUIRE_NE(accessor::seeder(split(vectors[8].mnemonic), "なのか ひろい しなん"), null_long_hash);
 #else
-    // WITH_ICU undefined with non-ascii words is the only seeder failure condition.
+    // HAVE_ICU undefined with non-ascii words is the only seeder failure condition.
     BOOST_REQUIRE_EQUAL(accessor::seeder(split(vectors[8].mnemonic), "なのか ひろい しなん"), null_long_hash);
 #endif
 }
@@ -670,7 +670,7 @@ BOOST_AUTO_TEST_CASE(electrum__from_words__mismatched_language__false)
 
 BOOST_AUTO_TEST_CASE(electrum__from_words__uppercase_standard_italian__true)
 {
-    // WITH_ICU not required for ascii case normalization.
+    // HAVE_ICU not required for ascii case normalization.
     const auto instance = accessor::from_words(split(ascii_to_upper(mnemonic_standard)), language::it);
     BOOST_REQUIRE(instance);
     BOOST_REQUIRE(instance.prefix() == prefix::standard);
@@ -1384,7 +1384,7 @@ BOOST_AUTO_TEST_CASE(electrum__verify_vectors__denormalization__expected)
 {
     const ptrdiff_t abnormal_vectors = 0;
 
-    // When WITH_ICU is undefined normalization cannot be verified.
+    // When HAVE_ICU is undefined normalization cannot be verified.
     BOOST_REQUIRE_EQUAL(abnormals(vectors, ascii_space), abnormal_vectors);
 }
 
@@ -1412,12 +1412,12 @@ BOOST_AUTO_TEST_CASE(electrum__verify_vectors__strings__match_chunks)
 // Electrum test vector mnemonics just happen to be prenormalized, even though
 // the Electrum repo dictionaries are not all normalized. But our dictionaries
 // are fully-normalized, so construction from mnemonics succeeds even without
-// WITH_ICU defined. However non-ascii passhrases always require WITH_ICU, so
+// HAVE_ICU defined. However non-ascii passhrases always require HAVE_ICU, so
 // those checks are conditionally excluded below.
 
 BOOST_AUTO_TEST_CASE(electrum__construct_entropy__to_key__expected)
 {
-#ifdef WITH_ICU
+#ifdef HAVE_ICU
     const auto& vector_names = all_vector_names;
 #else
     const auto& vector_names = ascii_passphrase_vector_names;

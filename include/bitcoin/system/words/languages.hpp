@@ -96,7 +96,7 @@ protected:
         language identifier) NOEXCEPT;
 
     // Normalizes ascii whitespace and attempts nfkd and case lowering.
-    // Both nfkd and case lowering are skipped if WITH_ICU undefined.
+    // Both nfkd and case lowering are skipped if HAVE_ICU undefined.
     // This is only used to improve the chance of wordlist matching.
     static string_list try_normalize(const string_list& words) NOEXCEPT;
 

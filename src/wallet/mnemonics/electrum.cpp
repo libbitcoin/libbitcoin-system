@@ -167,10 +167,10 @@ long_hash electrum::seeder(const string_list& words,
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "electrum";
 
-    // Passphrase is limited to ascii (normal) if WITH_ICU undefined.
+    // Passphrase is limited to ascii (normal) if HAVE_ICU undefined.
     auto phrase = passphrase;
 
-    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
+    LCOV_EXCL_START("Always succeeds unless HAVE_ICU undefined.")
 
     // TODO: replace the ICU lib dependency with Python's unicodedata. 
     // Conforms to the Unicode Standard for nfkd and case lowering (ICU lib).
@@ -178,7 +178,7 @@ long_hash electrum::seeder(const string_list& words,
     // seed = unicodedata.normalize('NFKD', seed)
     // seed = seed.lower()
     // ------------------------------------------------------------------------
-    // These can only return false if non-ascii phrase and WITH_ICU undefined.
+    // These can only return false if non-ascii phrase and HAVE_ICU undefined.
     if (!to_compatibility_decomposition(phrase) || !to_lower(phrase))
         return {};
 

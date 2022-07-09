@@ -22,9 +22,9 @@
 
 BOOST_AUTO_TEST_SUITE(normalization_tests)
 
-#ifdef WITH_ICU
+#ifdef HAVE_ICU
 
-// Non-ASCII test cases without WITH_ICU defined
+// Non-ASCII test cases without HAVE_ICU defined
 // ----------------------------------------------------------------------------
 
 // casing
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__bip38__expec
 
 #else
 
-// Non-ASCII test cases without WITH_ICU defined.
+// Non-ASCII test cases without HAVE_ICU defined.
 // ----------------------------------------------------------------------------
 
 // casing
@@ -119,9 +119,9 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__non_ascii__f
     BOOST_REQUIRE(!to_compatibility_decomposition(non_ascii));
 }
 
-#endif // WITH_ICU
+#endif // HAVE_ICU
 
-// ASCII test cases (valid with or without WITH_ICU defined).
+// ASCII test cases (valid with or without HAVE_ICU defined).
 // ----------------------------------------------------------------------------
 
 // to_lower
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(normalization__to_compatibility_decomposition__ascii__uncha
     BOOST_REQUIRE_EQUAL(value, expected);
 }
 
-#ifdef WITH_ICU
+#ifdef HAVE_ICU
 BOOST_AUTO_TEST_CASE(dictionaries_mnemonic__normalize__ideographic_space_sentence__ascii_space)
 {
     // The ideographic_space normalizes to ascii_space.

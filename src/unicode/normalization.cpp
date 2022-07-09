@@ -78,7 +78,7 @@ static NORM_FORM to_win32_normal_form(norm_type form) NOEXCEPT
 static bool normal_form(std::string& out, const std::string& in,
     norm_type form) NOEXCEPT
 {
-#ifndef WITH_ICU
+#ifndef HAVE_ICU
     return false;
 #endif
 
@@ -111,7 +111,7 @@ static bool normal_form(std::string& out, const std::string& in,
 
 bool to_lower(std::string& out, const std::string& in) NOEXCEPT
 {
-#ifndef WITH_ICU
+#ifndef HAVE_ICU
     return false;
 #endif
 
@@ -135,7 +135,7 @@ bool to_lower(std::string& out, const std::string& in) NOEXCEPT
 
 bool to_upper(std::string& out, const std::string& in) NOEXCEPT
 {
-#ifndef WITH_ICU
+#ifndef HAVE_ICU
     return false;
 #endif
 
@@ -190,7 +190,7 @@ static bool get_backend_manager(localization_backend_manager& out) NOEXCEPT
 static bool normal_form(std::string& out, const std::string& in,
     norm_type form) NOEXCEPT
 {
-#ifndef WITH_ICU
+#ifndef HAVE_ICU
     return false;
 #endif
 
@@ -206,7 +206,7 @@ static bool normal_form(std::string& out, const std::string& in,
 
 bool to_lower(std::string& out, const std::string& in) NOEXCEPT
 {
-#ifndef WITH_ICU
+#ifndef HAVE_ICU
     return false;
 #endif
 
@@ -222,7 +222,7 @@ bool to_lower(std::string& out, const std::string& in) NOEXCEPT
 
 bool to_upper(std::string& out, const std::string& in) NOEXCEPT
 {
-#ifndef WITH_ICU
+#ifndef HAVE_ICU
     return false;
 #endif
 
@@ -238,7 +238,7 @@ bool to_upper(std::string& out, const std::string& in) NOEXCEPT
 
 #endif // HAVE_MSC
 
-// ICU dependency (ascii supported, otherwise false if WITH_ICU not defined).
+// ICU dependency (ascii supported, otherwise false if HAVE_ICU not defined).
 // ----------------------------------------------------------------------------
 
 bool to_lower(std::string& value) NOEXCEPT

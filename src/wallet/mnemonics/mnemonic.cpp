@@ -94,10 +94,10 @@ long_hash mnemonic::seeder(const string_list& words,
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "mnemonic";
 
-    // Passphrase is limited to ascii (normal) if WITH_ICU undefind.
+    // Passphrase is limited to ascii (normal) if HAVE_ICU undefind.
     auto phrase = passphrase;
 
-    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
+    LCOV_EXCL_START("Always succeeds unless HAVE_ICU undefined.")
 
     // Unlike Electrum, BIP39 does not perform any further normalization.
     if (!to_compatibility_decomposition(phrase))

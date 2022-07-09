@@ -286,7 +286,7 @@ static data_chunk normal(const std::string& passphrase) NOEXCEPT
 {
     std::string copy{ passphrase };
 
-    LCOV_EXCL_START("Always succeeds unless WITH_ICU undefined.")
+    LCOV_EXCL_START("Always succeeds unless HAVE_ICU undefined.")
     return to_canonical_composition(copy) ? to_chunk(copy) : data_chunk{};
     LCOV_EXCL_STOP()
 }
