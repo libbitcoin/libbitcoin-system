@@ -273,6 +273,7 @@ static_assert(bit_right<uint64_t>(63) == 0x8000000000000000ull);
 static_assert(is_same_type<decltype(bit_right<int8_t>(0)), int8_t>);
 
 // get_left
+static_assert(!get_left(0xff)); // int
 static_assert(get_left<uint8_t>(0xff));
 static_assert(get_left<uint8_t>(0xff, 1));
 static_assert(get_left<uint8_t>(0xff, 2));
@@ -294,6 +295,8 @@ static_assert(get_left<uint8_t>(0x08, 4));
 static_assert(get_left<uint8_t>(0x10, 3));
 static_assert(get_left<uint8_t>(0x20, 2));
 static_assert(get_left<uint8_t>(0x40, 1));
+static_assert(get_left<uint8_t>(0x80));
+static_assert(!get_left(0x80)); // int
 static_assert(get_left<uint8_t>(0x80));
 static_assert(get_left<uint8_t>(0x80, 0));
 static_assert(get_left<uint16_t>(0x0100, 7));
@@ -339,7 +342,7 @@ static_assert(!get_left<uint64_t>(0x8000000000000000ll, 24));
 static_assert(is_same_type<decltype(get_left<int8_t>(0, 0)), bool>);
 
 // get_right
-static_assert(get_right<uint8_t>(0xff));
+static_assert(get_right(0xff));
 static_assert(get_right<uint8_t>(0xff, 1));
 static_assert(get_right<uint8_t>(0xff, 2));
 static_assert(get_right<uint8_t>(0xff, 3));
@@ -353,7 +356,7 @@ static_assert(get_right<uint32_t>(0xffffffffl, 16));
 static_assert(get_right<uint32_t>(0xffffffffl, 31));
 static_assert(get_right<uint64_t>(0xffffffffffffffffll, 32));
 static_assert(get_right<uint64_t>(0xffffffffffffffffll, 63));
-static_assert(get_right<uint8_t>(0x01));
+static_assert(get_right(0x01));
 static_assert(get_right<uint8_t>(0x01, 0));
 static_assert(get_right<uint8_t>(0x02, 1));
 static_assert(get_right<uint8_t>(0x04, 2));
