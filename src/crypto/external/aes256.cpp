@@ -71,7 +71,7 @@ constexpr std::array<uint8_t, to_bits(secret_size)> sbox
     0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
 
-constexpr std::array<uint8_t, to_bits(secret_size)> sbox_inv
+constexpr std::array<uint8_t, to_bits(secret_size)> sbox_inverse
 {
     0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38,
     0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
@@ -127,11 +127,11 @@ constexpr void sub_bytes(block& bytes) NOEXCEPT
         bytes[i] = sbox[bytes[i]];
 }
 
-constexpr void sub_bytes_inv(block& bytes) NOEXCEPT
+constexpr void sub_bytes_inverse(block& bytes) NOEXCEPT
 {
     auto i = block_size;
     while (to_bool(i--))
-        bytes[i] = sbox_inv[bytes[i]];
+        bytes[i] = sbox_inverse[bytes[i]];
 }
 
 constexpr void add_round_key_lower(block& bytes, secret& key) NOEXCEPT
@@ -186,7 +186,7 @@ constexpr void shift_rows(block& bytes) NOEXCEPT
     bytes[ 6] = j;
 }
 
-constexpr void shift_rows_inv(block& bytes) NOEXCEPT
+constexpr void shift_rows_inverse(block& bytes) NOEXCEPT
 {
     uint8_t i, j;
 
@@ -230,7 +230,7 @@ constexpr void mix_columns(block& bytes) NOEXCEPT
     }
 }
 
-constexpr void mix_columns_inv(block& bytes) NOEXCEPT
+constexpr void mix_columns_inverse(block& bytes) NOEXCEPT
 {
     uint8_t a, b, c, d, e, x, y, z;
 
@@ -283,7 +283,7 @@ constexpr void expand_key(secret& key, uint8_t& round) NOEXCEPT
     }
 }
 
-constexpr void expand_key_inv(secret& key, uint8_t& round) NOEXCEPT
+constexpr void expand_key_inverse(secret& key, uint8_t& round) NOEXCEPT
 {
     for (size_t i = 28; i > 16_size; i -= 4_size)
     {
@@ -358,15 +358,15 @@ constexpr void decrypt_block(aes256::context& context, block& bytes) NOEXCEPT
 {
     add_round_key_copy(bytes, context.deckey, context.key);
 
-    shift_rows_inv(bytes);
-    sub_bytes_inv(bytes);
+    shift_rows_inverse(bytes);
+    sub_bytes_inverse(bytes);
 
     auto round = bit_hi<uint8_t>;
     for (size_t i = 0; i < sub1(rounds); ++i)
     {
         if (is_even(i))
         {
-            expand_key_inv(context.key, round);
+            expand_key_inverse(context.key, round);
             add_round_key_upper(bytes, context.key);
         }
         else
@@ -374,9 +374,9 @@ constexpr void decrypt_block(aes256::context& context, block& bytes) NOEXCEPT
             add_round_key_lower(bytes, context.key);
         }
 
-        mix_columns_inv(bytes);
-        shift_rows_inv(bytes);
-        sub_bytes_inv(bytes);
+        mix_columns_inverse(bytes);
+        shift_rows_inverse(bytes);
+        sub_bytes_inverse(bytes);
     }
 
     add_round_key_lower(bytes, context.key);
