@@ -53,14 +53,16 @@ constexpr Data to_big_data(Data&& bytes, Integer value) NOEXCEPT
 
         return std::move(bytes);
     }
-
-    for (auto& byte: views_reverse(bytes))
+    else
     {
-        byte = possible_narrow_and_sign_cast<uint8_t>(value);
-        value >>= byte_bits;
-    }
+        for (auto& byte: views_reverse(bytes))
+        {
+            byte = possible_narrow_and_sign_cast<uint8_t>(value);
+            value >>= byte_bits;
+        }
 
-    return std::move(bytes);
+        return std::move(bytes);
+    }
 }
 
 // Data to_little_data(Data&&, Integer)
@@ -74,14 +76,16 @@ constexpr Data to_little_data(Data&& bytes, Integer value) NOEXCEPT
 
         return std::move(bytes);
     }
-
-    for (auto& byte: bytes)
+    else
     {
-        byte = possible_narrow_and_sign_cast<uint8_t>(value);
-        value >>= byte_bits;
-    }
+        for (auto& byte: bytes)
+        {
+            byte = possible_narrow_and_sign_cast<uint8_t>(value);
+            value >>= byte_bits;
+        }
 
-    return std::move(bytes);
+        return std::move(bytes);
+    }
 }
 
 // From big data.
@@ -93,17 +97,21 @@ template <typename Integer, size_t Size, if_integer<Integer>>
 constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value{ 0 };
-
-    for (size_t byte = 0; byte < Size; ++byte)
     {
-        value <<= byte_bits;
-        value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
+        return data.empty() ? 0 : data.front();
     }
+    else
+    {
+        Integer value{ 0 };
 
-    return value;
+        for (size_t byte = 0; byte < Size; ++byte)
+        {
+            value <<= byte_bits;
+            value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
+        }
+
+        return value;
+    }
 }
 
 // Integer from_big_array<Integer>(length, data_array)
@@ -112,21 +120,25 @@ constexpr Integer from_big_array(size_t length,
     const data_array<Size>& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value(0);
-    const auto bytes = std::min(length, data.size());
-
-    for (size_t byte = 0; byte < bytes; ++byte)
     {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
-        BC_POP_WARNING()
+        return data.empty() ? 0 : data.front();
     }
+    else
+    {
+        Integer value(0);
+        const auto bytes = std::min(length, data.size());
 
-    return value;
+        for (size_t byte = 0; byte < bytes; ++byte)
+        {
+            value <<= byte_bits;
+
+            BC_PUSH_WARNING(USE_GSL_AT)
+            value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
+            BC_POP_WARNING()
+        }
+
+        return value;
+    }
 }
 
 // Integer from_big_chunk<Integer>(length, data_chunk)
@@ -135,21 +147,25 @@ VCONSTEXPR Integer from_big_chunk(size_t length,
     const data_chunk& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value(0);
-    const auto bytes = std::min(length, data.size());
-
-    for (size_t byte = 0; byte < bytes; ++byte)
     {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
-        BC_POP_WARNING()
+        return data.empty() ? 0 : data.front();
     }
+    else
+    {
+        Integer value(0);
+        const auto bytes = std::min(length, data.size());
 
-    return value;
+        for (size_t byte = 0; byte < bytes; ++byte)
+        {
+            value <<= byte_bits;
+
+            BC_PUSH_WARNING(USE_GSL_AT)
+            value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
+            BC_POP_WARNING()
+        }
+
+        return value;
+    }
 }
 
 // From little data.
@@ -161,17 +177,21 @@ template <typename Integer, size_t Size, if_integer<Integer>>
 constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value{ 0 };
-
-    for (auto byte = Size; byte > 0; --byte)
     {
-        value <<= byte_bits;
-        value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
+        return data.empty() ? 0 : data.front();
     }
+    else
+    {
+        Integer value{ 0 };
 
-    return value;
+        for (auto byte = Size; byte > 0; --byte)
+        {
+            value <<= byte_bits;
+            value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
+        }
+
+        return value;
+    }
 }
 
 // Integer from_little_array<Integer>(length, data_array)
@@ -180,21 +200,25 @@ constexpr Integer from_little_array(size_t length,
     const data_array<Size>& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value(0);
-    const auto bytes = std::min(length, data.size());
-
-    for (auto byte = bytes; byte > 0; --byte)
     {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
-        BC_POP_WARNING()
+        return data.empty() ? 0 : data.front();
     }
+    else
+    {
+        Integer value(0);
+        const auto bytes = std::min(length, data.size());
 
-    return value;
+        for (auto byte = bytes; byte > 0; --byte)
+        {
+            value <<= byte_bits;
+
+            BC_PUSH_WARNING(USE_GSL_AT)
+            value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
+            BC_POP_WARNING()
+        }
+
+        return value;
+    }
 }
 
 // Integer from_little_chunk<Integer>(length, data_chunk)
@@ -203,21 +227,25 @@ VCONSTEXPR Integer from_little_chunk(size_t length,
     const data_chunk& data) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
-        return data.empty() ? 0 : data.front();
-
-    Integer value(0);
-    const auto bytes = std::min(length, data.size());
-
-    for (auto byte = bytes; byte > 0; --byte)
     {
-        value <<= byte_bits;
-
-        BC_PUSH_WARNING(USE_GSL_AT)
-        value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
-        BC_POP_WARNING()
+        return data.empty() ? 0 : data.front();
     }
+    else
+    {
+        Integer value(0);
+        const auto bytes = std::min(length, data.size());
 
-    return value;
+        for (auto byte = bytes; byte > 0; --byte)
+        {
+            value <<= byte_bits;
+
+            BC_PUSH_WARNING(USE_GSL_AT)
+            value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
+            BC_POP_WARNING()
+        }
+
+        return value;
+    }
 }
 
 // To/from integral.
