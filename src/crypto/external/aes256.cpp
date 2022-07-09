@@ -20,13 +20,22 @@
 #include <bitcoin/system/crypto/external/aes256.hpp>
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+namespace libbitcoin {
+namespace system {
+namespace aes256 {
 
-#define F(x) (((x) << 1) ^ (((x) >> 7) & 1) * 0x1b)
-#define FD(x) (((x) >> 1) ^ (((x) & 1) ? 0x8d : 0))
+struct context
+{
+    secret key;
+    secret enckey;
+    secret deckey;
+};
 
-constexpr uint8_t sbox[256]
+constexpr size_t rounds = 14;
+
+constexpr std::array<uint8_t, to_bits(secret_size)> sbox
 {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5,
     0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -62,7 +71,7 @@ constexpr uint8_t sbox[256]
     0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
 
-constexpr uint8_t sboxinv[256]
+constexpr std::array<uint8_t, to_bits(secret_size)> sbox_inv
 {
     0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38,
     0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
@@ -98,277 +107,307 @@ constexpr uint8_t sboxinv[256]
     0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
 };
 
-#define rj_sbox(x)     sbox[(x)]
-#define rj_sbox_inv(x) sboxinv[(x)]
-
-uint8_t rj_xtime(uint8_t x) 
+constexpr uint8_t f_enc_key(uint8_t byte) NOEXCEPT
 {
-    return (x & 0x80) ? ((x << 1) ^ 0x1b) : (x << 1);
+    return shift_left(byte) ^ (get_left(byte) ? 0b0001'1011_u8 : zero);
 }
 
-void aes_subBytes(uint8_t *buf)
+constexpr uint8_t f_dec_key(uint8_t byte) NOEXCEPT
 {
-    uint8_t i = 16;
-    while (i--)
-        buf[i] = rj_sbox(buf[i]);
+    return shift_right(byte) ^ (get_right(byte) ? 0b1000'1101_u8 : zero);
 }
 
-void aes_subBytes_inv(uint8_t* buf)
+BC_PUSH_WARNING(USE_GSL_AT)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+
+constexpr void sub_bytes(block& bytes) NOEXCEPT
 {
-    uint8_t i = 16;
-    while (i--)
-        buf[i] = rj_sbox_inv(buf[i]);
+    auto i = block_size;
+    while (to_bool(i--))
+        bytes[i] = sbox[bytes[i]];
 }
 
-void aes_addRoundKey(uint8_t* buf, uint8_t* key)
+constexpr void sub_bytes_inv(block& bytes) NOEXCEPT
 {
-    uint8_t i = 16;
-    while (i--)
-        buf[i] ^= key[i];
+    auto i = block_size;
+    while (to_bool(i--))
+        bytes[i] = sbox_inv[bytes[i]];
 }
 
-void aes_addRoundKey_cpy(uint8_t* buf, uint8_t* key, uint8_t* cpk)
+constexpr void add_round_key_lower(block& bytes, secret& key) NOEXCEPT
 {
-    uint8_t i = 16;
-    while (i--)
+    auto i = block_size;
+    while (to_bool(i--))
+        bytes[i] ^= key[i];
+}
+
+constexpr void add_round_key_upper(block& bytes, secret& key) NOEXCEPT
+{
+    auto i = block_size;
+    while (to_bool(i--))
+        bytes[i] ^= key[i + block_size];
+}
+
+constexpr void add_round_key_copy(block& bytes, secret& key,
+    secret& copy) NOEXCEPT
+{
+    auto i = block_size;
+    while (to_bool(i--))
     {
-        buf[i] ^= (cpk[i] = key[i]);
-        cpk[16 + i] = key[16 + i];
+        const auto j = i + block_size;
+        copy[j] = key[j];
+        copy[i] = key[i];
+        bytes[i] ^= key[i];
     }
 }
 
-void aes_shiftRows(uint8_t* buf)
+constexpr void shift_rows(block& bytes) NOEXCEPT
 {
     uint8_t i, j;
 
-    i = buf[1];
-    buf[1] = buf[5];
-    buf[5] = buf[9];
-    buf[9] = buf[13];
-    buf[13] = i;
+    i = bytes[1];
+    bytes[ 1] = bytes[5];
+    bytes[ 5] = bytes[9];
+    bytes[ 9] = bytes[13];
+    bytes[13] = i;
 
-    i = buf[10];
-    buf[10] = buf[2];
-    buf[2] = i;
+    i = bytes[10];
+    bytes[10] = bytes[2];
+    bytes[ 2] = i;
 
-    j = buf[3];
-    buf[3] = buf[15];
-    buf[15] = buf[11];
-    buf[11] = buf[7];
-    buf[7] = j;
+    j = bytes[3];
+    bytes[ 3] = bytes[15];
+    bytes[15] = bytes[11];
+    bytes[11] = bytes[7];
+    bytes[ 7] = j;
 
-    j = buf[14];
-    buf[14] = buf[6];
-    buf[6] = j;
-
+    j = bytes[14];
+    bytes[14] = bytes[6];
+    bytes[ 6] = j;
 }
 
-void aes_shiftRows_inv(uint8_t* buf)
+constexpr void shift_rows_inv(block& bytes) NOEXCEPT
 {
     uint8_t i, j;
 
-    i = buf[1];
-    buf[1] = buf[13];
-    buf[13] = buf[9];
-    buf[9] = buf[5];
-    buf[5] = i;
+    i = bytes[1];
+    bytes[ 1] = bytes[13];
+    bytes[13] = bytes[9];
+    bytes[ 9] = bytes[5];
+    bytes[ 5] = i;
 
-    i = buf[2];
-    buf[2] = buf[10];
-    buf[10] = i;
+    i = bytes[2];
+    bytes[ 2] = bytes[10];
+    bytes[10] = i;
 
-    j = buf[3];
-    buf[3] = buf[7];
-    buf[7] = buf[11];
-    buf[11] = buf[15];
-    buf[15] = j;
+    j = bytes[3];
+    bytes[ 3] = bytes[7];
+    bytes[ 7] = bytes[11];
+    bytes[11] = bytes[15];
+    bytes[15] = j;
 
-    j = buf[6];
-    buf[6] = buf[14];
-    buf[14] = j;
-
+    j = bytes[6];
+    bytes[ 6] = bytes[14];
+    bytes[14] = j;
 }
 
-void aes_mixColumns(uint8_t* buf)
+constexpr void mix_columns(block& bytes) NOEXCEPT
 {
-    uint8_t i, a, b, c, d, e;
+    uint8_t a, b, c, d, e;
 
-    for (i = 0; i < 16; i += 4)
+    for (size_t i = 0; i < block_size; i += 4_size)
     {
-        a = buf[i+0];
-        b = buf[i+1];
-        c = buf[i+2];
-        d = buf[i+3];
+        a = bytes[i + 0];
+        b = bytes[i + 1];
+        c = bytes[i + 2];
+        d = bytes[i + 3];
 
         e = a ^ b ^ c ^ d;
-        buf[i+0] ^= e ^ rj_xtime(a^b);
-        buf[i+1] ^= e ^ rj_xtime(b^c);
-        buf[i+2] ^= e ^ rj_xtime(c^d);
-        buf[i+3] ^= e ^ rj_xtime(d^a);
+        bytes[i + 0] ^= e ^ f_enc_key(a ^ b);
+        bytes[i + 1] ^= e ^ f_enc_key(b ^ c);
+        bytes[i + 2] ^= e ^ f_enc_key(c ^ d);
+        bytes[i + 3] ^= e ^ f_enc_key(d ^ a);
     }
 }
 
-void aes_mixColumns_inv(uint8_t* buf)
+constexpr void mix_columns_inv(block& bytes) NOEXCEPT
 {
-    uint8_t i, a, b, c, d, e, x, y, z;
+    uint8_t a, b, c, d, e, x, y, z;
 
-    for (i = 0; i < 16; i += 4)
+    for (size_t i = 0; i < block_size; i += 4_size)
     {
-        a = buf[i+0];
-        b = buf[i+1];
-        c = buf[i+2];
-        d = buf[i+3];
+        a = bytes[i + 0];
+        b = bytes[i + 1];
+        c = bytes[i + 2];
+        d = bytes[i + 3];
 
         e = a ^ b ^ c ^ d;
-        z = rj_xtime(e);
-        x = e ^ rj_xtime(rj_xtime(z ^ a ^ c));
-        y = e ^ rj_xtime(rj_xtime(z ^ b ^ d));
+        z = f_enc_key(e);
+        x = e ^ f_enc_key(f_enc_key(z ^ a ^ c));
+        y = e ^ f_enc_key(f_enc_key(z ^ b ^ d));
 
-        buf[i+0] ^= x ^ rj_xtime(a ^ b);
-        buf[i+1] ^= y ^ rj_xtime(b ^ c);
-        buf[i+2] ^= x ^ rj_xtime(c ^ d);
-        buf[i+3] ^= y ^ rj_xtime(d ^ a);
+        bytes[i + 0] ^= x ^ f_enc_key(a ^ b);
+        bytes[i + 1] ^= y ^ f_enc_key(b ^ c);
+        bytes[i + 2] ^= x ^ f_enc_key(c ^ d);
+        bytes[i + 3] ^= y ^ f_enc_key(d ^ a);
     }
 }
 
-void aes_expandEncKey(uint8_t* k, uint8_t* rc) 
+constexpr void expand_key(secret& key, uint8_t& round) NOEXCEPT
 {
-    uint8_t i;
+    key[0] ^= sbox[key[29]] ^ round;
+    key[1] ^= sbox[key[30]];
+    key[2] ^= sbox[key[31]];
+    key[3] ^= sbox[key[28]];
+    round = f_enc_key(round);
 
-    k[0] ^= rj_sbox(k[29]) ^ (*rc);
-    k[1] ^= rj_sbox(k[30]);
-    k[2] ^= rj_sbox(k[31]);
-    k[3] ^= rj_sbox(k[28]);
-    *rc = F(*rc);
-
-    for(i = 4; i < 16; i += 4)
+    for (size_t i = 4; i < 16_size; i += 4_size)
     {
-        k[i + 0] ^= k[i - 4];
-        k[i + 1] ^= k[i - 3];
-        k[i + 2] ^= k[i - 2];
-        k[i + 3] ^= k[i - 1];
+        key[i + 0] ^= key[i - 4];
+        key[i + 1] ^= key[i - 3];
+        key[i + 2] ^= key[i - 2];
+        key[i + 3] ^= key[i - 1];
     }
 
-    k[16] ^= rj_sbox(k[12]);
-    k[17] ^= rj_sbox(k[13]);
-    k[18] ^= rj_sbox(k[14]);
-    k[19] ^= rj_sbox(k[15]);
+    key[16] ^= sbox[key[12]];
+    key[17] ^= sbox[key[13]];
+    key[18] ^= sbox[key[14]];
+    key[19] ^= sbox[key[15]];
 
-    for(i = 20; i < 32; i += 4)
+    for (size_t i = 20; i < 32_size; i += 4_size)
     {
-        k[i+0] ^= k[i-4];
-        k[i+1] ^= k[i-3];
-        k[i+2] ^= k[i-2];
-        k[i+3] ^= k[i-1];
+        key[i + 0] ^= key[i - 4];
+        key[i + 1] ^= key[i - 3];
+        key[i + 2] ^= key[i - 2];
+        key[i + 3] ^= key[i - 1];
     }
 }
 
-void aes_expandDecKey(uint8_t* k, uint8_t* rc) 
+constexpr void expand_key_inv(secret& key, uint8_t& round) NOEXCEPT
 {
-    uint8_t i;
-
-    for(i = 28; i > 16; i -= 4)
+    for (size_t i = 28; i > 16_size; i -= 4_size)
     {
-        k[i+0] ^= k[i-4];
-        k[i+1] ^= k[i-3];
-        k[i+2] ^= k[i-2];
-        k[i+3] ^= k[i-1];
+        key[i + 0] ^= key[i - 4];
+        key[i + 1] ^= key[i - 3];
+        key[i + 2] ^= key[i - 2];
+        key[i + 3] ^= key[i - 1];
     }
 
-    k[16] ^= rj_sbox(k[12]);
-    k[17] ^= rj_sbox(k[13]);
-    k[18] ^= rj_sbox(k[14]);
-    k[19] ^= rj_sbox(k[15]);
+    key[16] ^= sbox[key[12]];
+    key[17] ^= sbox[key[13]];
+    key[18] ^= sbox[key[14]];
+    key[19] ^= sbox[key[15]];
 
-    for(i = 12; i > 0; i -= 4)
+    for (size_t i = 12; i > 0_size; i -= 4_size)
     {
-        k[i+0] ^= k[i-4];
-        k[i+1] ^= k[i-3];
-        k[i+2] ^= k[i-2];
-        k[i+3] ^= k[i-1];
+        key[i + 0] ^= key[i - 4];
+        key[i + 1] ^= key[i - 3];
+        key[i + 2] ^= key[i - 2];
+        key[i + 3] ^= key[i - 1];
     }
 
-    *rc = FD(*rc);
-    k[0] ^= rj_sbox(k[29]) ^ (*rc);
-    k[1] ^= rj_sbox(k[30]);
-    k[2] ^= rj_sbox(k[31]);
-    k[3] ^= rj_sbox(k[28]);
-}
-
-void aes256_init(aes256_context* context, const uint8_t key[AES256_KEY_LENGTH])
-{
-    uint8_t rcon = 1;
-    uint8_t i;
-
-    for (i = 0; i < sizeof(context->key); i++)
-        context->enckey[i] = context->deckey[i] = key[i];
-
-    for (i = 8;--i;)
-        aes_expandEncKey(context->deckey, &rcon);
-}
-
-void aes256_done(aes256_context* context)
-{
-    uint8_t i;
-
-    for (i = 0; i < sizeof(context->key); i++) 
-        context->key[i] = context->enckey[i] = context->deckey[i] = 0;
-}
-
-void aes256_encrypt_ecb(aes256_context* context, uint8_t buf[AES256_BLOCK_LENGTH])
-{
-    uint8_t i, rcon;
-    aes_addRoundKey_cpy(buf, context->enckey, context->key);
-
-    for(i = 1, rcon = 1; i < 14; ++i)
-    {
-        aes_subBytes(buf);
-        aes_shiftRows(buf);
-        aes_mixColumns(buf);
-
-        if (i & 1)
-        {
-            aes_addRoundKey(buf, &context->key[16]);
-        }
-        else
-        {
-            aes_expandEncKey(context->key, &rcon);
-            aes_addRoundKey(buf, context->key);
-        }
-    }
-
-    aes_subBytes(buf);
-    aes_shiftRows(buf);
-    aes_expandEncKey(context->key, &rcon); 
-    aes_addRoundKey(buf, context->key);
-}
-
-void aes256_decrypt_ecb(aes256_context* context, uint8_t buf[AES256_BLOCK_LENGTH])
-{
-    uint8_t i, rcon;
-
-    aes_addRoundKey_cpy(buf, context->deckey, context->key);
-    aes_shiftRows_inv(buf);
-    aes_subBytes_inv(buf);
-
-    for (i = 14, rcon = 0x80; --i;)
-    {
-        if (i & 1)           
-        {
-            aes_expandDecKey(context->key, &rcon);
-            aes_addRoundKey(buf, &context->key[16]);
-        }
-        else
-        {
-            aes_addRoundKey(buf, context->key);
-        }
-
-        aes_mixColumns_inv(buf);
-        aes_shiftRows_inv(buf);
-        aes_subBytes_inv(buf);
-    }
-
-    aes_addRoundKey( buf, context->key); 
+    round = f_dec_key(round);
+    key[0] ^= sbox[key[29]] ^ round;
+    key[1] ^= sbox[key[30]];
+    key[2] ^= sbox[key[31]];
+    key[3] ^= sbox[key[28]];
 }
 
 BC_POP_WARNING()
+BC_POP_WARNING()
+
+constexpr void initialize(aes256::context& context, const secret& key) NOEXCEPT
+{
+    context.deckey = key;
+    context.enckey = key;
+
+    auto round = bit_lo<uint8_t>;
+    for (size_t i = 0; i < sub1(bits<uint8_t>); ++i)
+        expand_key(context.deckey, round);
+}
+
+constexpr void encrypt_block(aes256::context& context, block& bytes) NOEXCEPT
+{
+    add_round_key_copy(bytes, context.enckey, context.key);
+
+    auto round = bit_lo<uint8_t>;
+    for (size_t i = 0; i < sub1(rounds); ++i)
+    {
+        sub_bytes(bytes);
+        shift_rows(bytes);
+        mix_columns(bytes);
+
+        if (is_even(i))
+        {
+            add_round_key_upper(bytes, context.key);
+        }
+        else
+        {
+            expand_key(context.key, round);
+            add_round_key_lower(bytes, context.key);
+        }
+    }
+
+    sub_bytes(bytes);
+    shift_rows(bytes);
+    expand_key(context.key, round);
+    add_round_key_lower(bytes, context.key);
+}
+
+constexpr void decrypt_block(aes256::context& context, block& bytes) NOEXCEPT
+{
+    add_round_key_copy(bytes, context.deckey, context.key);
+
+    shift_rows_inv(bytes);
+    sub_bytes_inv(bytes);
+
+    auto round = bit_hi<uint8_t>;
+    for (size_t i = 0; i < sub1(rounds); ++i)
+    {
+        if (is_even(i))
+        {
+            expand_key_inv(context.key, round);
+            add_round_key_upper(bytes, context.key);
+        }
+        else
+        {
+            add_round_key_lower(bytes, context.key);
+        }
+
+        mix_columns_inv(bytes);
+        shift_rows_inv(bytes);
+        sub_bytes_inv(bytes);
+    }
+
+    add_round_key_lower(bytes, context.key);
+}
+
+////constexpr void zeroize(aes256::context& context) NOEXCEPT
+////{
+////    context.key.fill(0);
+////    context.enckey.fill(0);
+////    context.deckey.fill(0);
+////}
+
+// published
+// ----------------------------------------------------------------------------
+
+void encrypt(block& bytes, const secret& key) NOEXCEPT
+{
+    aes256::context context;
+    initialize(context, key);
+    encrypt_block(context, bytes);
+    ////zeroize(context);
+}
+
+void decrypt(block& bytes, const secret& key) NOEXCEPT
+{
+    aes256::context context;
+    initialize(context, key);
+    decrypt_block(context, bytes);
+    ////zeroize(context);
+}
+
+} // namespace aes256
+} // namespace system
+} // namespace libbitcoin

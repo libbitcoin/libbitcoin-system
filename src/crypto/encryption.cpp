@@ -18,29 +18,8 @@
  */
 #include <bitcoin/system/crypto/encryption.hpp>
 
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/crypto/elliptic_curve.hpp>
-#include <bitcoin/system/crypto/external/external.hpp>
-#include <bitcoin/system/crypto/hash.hpp>
-
 namespace libbitcoin {
 namespace system {
-
-void aes256_encrypt(aes_block& block, const aes_secret& key) NOEXCEPT
-{
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_encrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
-
-void aes256_decrypt(aes_block& block, const aes_secret& key) NOEXCEPT
-{
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_decrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
 
 } // namespace system
 } // namespace libbitcoin

@@ -19,26 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_ENCRYPTION_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_ENCRYPTION_HPP
 
-/// DELETECSTDINT
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-/// The secret for aes256 block cypher.
-constexpr uint8_t aes256_key_size = 32;
-typedef data_array<aes256_key_size> aes_secret;
-
-/// The data block for use with aes256 block cypher.
-constexpr uint8_t aes256_block_size = 16;
-typedef data_array<aes256_block_size> aes_block;
-
-/// Perform aes256 encryption on the specified data block.
-BC_API void aes256_encrypt(aes_block& block, const aes_secret& key) NOEXCEPT;
-
-/// Perform aes256 decryption on the specified data block.
-BC_API void aes256_decrypt(aes_block& block, const aes_secret& key) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

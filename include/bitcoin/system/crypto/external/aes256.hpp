@@ -20,27 +20,29 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_AES256_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_AES256_HPP
 
+#include <array>
 #include <bitcoin/system/define.hpp>
 
-#define AES256_KEY_LENGTH 32U
-#define AES256_BLOCK_LENGTH 16U
+namespace libbitcoin {
+namespace system {
+namespace aes256 {
+    
+/// This is an implementation of AES256.
+/// NIST selected three members of the Rijndael family, each with a block
+/// size of 128 bits, but three different key lengths: 128, 192 and 256 bits.
 
-typedef struct
-{
-    uint8_t key[AES256_KEY_LENGTH];
-    uint8_t enckey[AES256_KEY_LENGTH];
-    uint8_t deckey[AES256_KEY_LENGTH];
-} aes256_context; 
+constexpr size_t block_size = bytes<128>;
+typedef std::array<uint8_t, block_size> block;
 
-void aes256_init(aes256_context* context, 
-    const uint8_t key[AES256_KEY_LENGTH]);
+constexpr size_t secret_size = bytes<256>;
+typedef std::array<uint8_t, secret_size> secret;
 
-void aes256_done(aes256_context* context);
+/// Perform aes256 encryption/decryption on a data block.
+void encrypt(block& bytes, const secret& key) NOEXCEPT;
+void decrypt(block& bytes, const secret& key) NOEXCEPT;
 
-void aes256_encrypt_ecb(aes256_context* context,
-    uint8_t plain_text[AES256_BLOCK_LENGTH]);
-
-void aes256_decrypt_ecb(aes256_context* context,
-    uint8_t cypher_text[AES256_BLOCK_LENGTH]);
+} // namespace aes256
+} // namespace system
+} // namespace libbitcoin
 
 #endif
