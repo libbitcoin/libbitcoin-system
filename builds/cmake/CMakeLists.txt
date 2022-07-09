@@ -555,6 +555,7 @@ if (with-tests)
         "../../test/config/printer.cpp"
         "../../test/crypto/checksum.cpp"
         "../../test/crypto/elliptic_curve.cpp"
+        "../../test/crypto/encryption.cpp"
         "../../test/crypto/hash.cpp"
         "../../test/crypto/hash.hpp"
         "../../test/crypto/pseudo_random.cpp"

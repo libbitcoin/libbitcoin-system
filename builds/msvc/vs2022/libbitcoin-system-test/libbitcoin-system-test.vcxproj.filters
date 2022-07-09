@@ -171,6 +171,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\encryption.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\hash.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
