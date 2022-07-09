@@ -132,7 +132,7 @@ constexpr Integer from_big_array(size_t length,
         {
             value <<= byte_bits;
 
-            BC_PUSH_WARNING(USE_GSL_AT)
+            BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
             value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
             BC_POP_WARNING()
         }
@@ -159,7 +159,7 @@ VCONSTEXPR Integer from_big_chunk(size_t length,
         {
             value <<= byte_bits;
 
-            BC_PUSH_WARNING(USE_GSL_AT)
+            BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
             value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
             BC_POP_WARNING()
         }
@@ -212,7 +212,7 @@ constexpr Integer from_little_array(size_t length,
         {
             value <<= byte_bits;
 
-            BC_PUSH_WARNING(USE_GSL_AT)
+            BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
             value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
             BC_POP_WARNING()
         }
@@ -239,7 +239,7 @@ VCONSTEXPR Integer from_little_chunk(size_t length,
         {
             value <<= byte_bits;
 
-            BC_PUSH_WARNING(USE_GSL_AT)
+            BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
             value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
             BC_POP_WARNING()
         }

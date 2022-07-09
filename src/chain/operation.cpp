@@ -296,7 +296,7 @@ operation operation::from_string(const std::string& mnemonic) NOEXCEPT
             // Extract operation using explicit data size decoding.
 
             // More efficient [] dereference is guarded above.
-            BC_PUSH_WARNING(USE_GSL_AT)
+            BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
             valid = decode_base16(chunk, parts[1]) &&
                 opcode_from_data_prefix(code, parts[0], chunk);
             BC_POP_WARNING()

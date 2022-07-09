@@ -121,7 +121,7 @@ constexpr data_slice data_slice::from_iterators(const Iterator& begin,
         return {};
 
     // Indexation is guarded above.
-    BC_PUSH_WARNING(USE_GSL_AT)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
     return from_size(&begin[0], possible_narrow_sign_cast<size_type>(size));
     BC_POP_WARNING()
 }
@@ -138,7 +138,7 @@ constexpr data_slice data_slice::from_size(Pointer begin,
 
     // Indexation is guarded above.
     // Pointer may be char* or uin8_t*, or iterator type (cast not required).
-    BC_PUSH_WARNING(USE_GSL_AT)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
     const auto start = possible_pointer_cast<const value_type>(&begin[0]);
     BC_POP_WARNING()
 
@@ -279,7 +279,7 @@ operator==(const data_slice& left, const data_slice& right) NOEXCEPT
     for (data_slice::size_type index = 0; index < left.size(); ++index)
     {
         // Indexation is guarded above.
-        BC_PUSH_WARNING(USE_GSL_AT)
+        BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
         if (left[index] != right[index]) return false;
         BC_POP_WARNING()
     }

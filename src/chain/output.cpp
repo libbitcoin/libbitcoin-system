@@ -196,7 +196,7 @@ bool output::committed_hash(hash_digest& out) const NOEXCEPT
     // The four byte offset for the witness commitment hash (bip141).
 
     // More efficient [] dereference is guarded above.
-    BC_PUSH_WARNING(USE_GSL_AT)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
     const auto start = std::next(ops[1].data().begin(), sizeof(witness_head));
     BC_POP_WARNING()
 

@@ -104,7 +104,7 @@ constexpr data_slab data_slab::from_size(const Pointer begin,
 
     // Indexation is guarded above.
     // Pointer may be char* or uin8_t*, or iterator type (cast not required).
-    BC_PUSH_WARNING(USE_GSL_AT)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
     const auto start = possible_pointer_cast<value_type>(&begin[0]);
     BC_POP_WARNING()
 
