@@ -19,12 +19,9 @@
 #include <bitcoin/system/chain/output.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iterator>
 #include <memory>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -119,7 +116,7 @@ output output::from_data(reader& source) NOEXCEPT
     {
         source.read_8_bytes_little_endian(),
 
-        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         to_shared(new chain::script{ source, true }),
         BC_POP_WARNING()

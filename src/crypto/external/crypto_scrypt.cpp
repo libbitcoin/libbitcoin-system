@@ -28,8 +28,9 @@
  */
 #include <bitcoin/system/crypto/external/crypto_scrypt.hpp>
 
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/crypto/external/pbkdf2_sha256.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 
 static void blkcpy(uint8_t*, uint8_t*, size_t);
 static void blkxor(uint8_t*, uint8_t*, size_t);

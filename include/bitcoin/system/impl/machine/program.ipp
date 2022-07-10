@@ -751,7 +751,7 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 
     // Create new script from stripped copy of subscript operations.
     // Prefail is not copied to the subscript, used only for signature hash.
-    BC_PUSH_WARNING(NO_NEW_DELETE)
+    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return to_shared(new script{ difference<operations>(offset, stop, strip) });
     BC_POP_WARNING()

@@ -19,7 +19,6 @@
 #include <bitcoin/system/chain/block.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <cfenv>
 #include <iterator>
 #include <memory>
@@ -28,15 +27,12 @@
 #include <unordered_set>
 #include <utility>
 #include <unordered_map>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -137,7 +133,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)
         {
-            BC_PUSH_WARNING(NO_NEW_DELETE)
+            BC_PUSH_WARNING(NO_NEW_OR_DELETE)
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
             txs->emplace_back(new transaction{ source, witness });
             BC_POP_WARNING()
@@ -149,7 +145,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 
     return
     {
-        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         to_shared(new chain::header{ source }),
         BC_POP_WARNING()

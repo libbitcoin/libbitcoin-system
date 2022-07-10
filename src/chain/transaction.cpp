@@ -19,15 +19,12 @@
 #include <bitcoin/system/chain/transaction.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iterator>
 #include <memory>
 #include <numeric>
 #include <type_traits>
 #include <utility>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/header.hpp>
@@ -35,7 +32,6 @@
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -217,7 +213,7 @@ read_puts(Source& source) NOEXCEPT
 
     for (auto put = zero; put < puts->capacity(); ++put)
     {
-        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         puts->emplace_back(new Put{ source });
         BC_POP_WARNING()
@@ -263,7 +259,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
                 const auto setter = const_cast<chain::input*>(input.get());
 
                 // Use of pointer forward here avoids move construction.
-                BC_PUSH_WARNING(NO_NEW_DELETE)
+                BC_PUSH_WARNING(NO_NEW_OR_DELETE)
                 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
                 setter->witness_ = to_shared(new chain::witness{ source, true });
                 BC_POP_WARNING()
@@ -742,7 +738,7 @@ void transaction::initialize_hash_cache() const NOEXCEPT
     // the same criteria applied by satoshi.
     if (segregated_)
     {
-        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         cache_.reset(new hash_cache
         {

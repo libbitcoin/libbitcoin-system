@@ -40,9 +40,10 @@ namespace libbitcoin {
 /// ---------------------------------------------------------------------------
 /// These should be consteval for safety, but waiting on clang++20 to catch up.
 
-// Casting is the whole point.
-// It is consteval where available.
+// Functions are consteval where available (bogus warning).
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
+
+// Casting arithmetic expressions is the whole point here.
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
 /// en.cppreference.com/w/cpp/language/user_literal
@@ -126,13 +127,13 @@ CONSTEVAL type operator "" name(integer_type value) noexcept \
 /// Supported represenations.
 /// ---------------------------------------------------------------------------
 /// All integer literals are positive, so this is what there is to customize.
+/// Literals do not have negative signs, and applying the negative operator to
+/// a literal creates an aritmetic expression which promotes the literal type.
 /// To achieve negative representation we use a positive domain with the
-/// magnitide of the negative domain with all values entered as absolute.
-/// Integrals do not have negative signs, and applying the negative operator
-/// to a literal changes it to an operation, which promotes the type. All
+/// magnitide of the negative domain, and all values entered as absolute. All
 /// numeric representations are possible (binary, octal, hex, decimal) as are
 /// digit separators. A built-in suffix cannot be used with a user-defined
-/// suffix, and there would be no reason to.
+/// suffix, and there would be no reason to do so.
 
 /// Literals suppress exception, causing runtime abort if !defined(CONSTEVAL).
 /// This precludes unnecessary warning on each literal in noexcept functions.

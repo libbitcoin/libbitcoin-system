@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(hash__sha1_hash__sha1_tests__expected)
     }
 }
 
-BOOST_AUTO_TEST_CASE(hash__sripemd160_hash__ripemd_tests__expected)
+BOOST_AUTO_TEST_CASE(hash__ripemd160_hash__ripemd_tests__expected)
 {
     for (const auto& result: ripemd_tests)
     {
