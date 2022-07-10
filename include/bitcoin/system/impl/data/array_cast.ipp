@@ -126,6 +126,24 @@ unsafe_array_cast(const From* bytes) NOEXCEPT
     return *pointer_cast<const std::array<To, Size>>(bytes);
 }
 
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From>,
+    if_integral_integer_std_array<To>>
+inline std::array<To, Size>&
+unsafe_array_cast(From* bytes) NOEXCEPT
+{
+    return *pointer_cast<std::array<To, Size>>(bytes);
+}
+
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From>,
+    if_integral_integer_std_array<To>>
+inline const std::array<To, Size>&
+unsafe_array_cast(const From* bytes) NOEXCEPT
+{
+    return *pointer_cast<const std::array<To, Size>>(bytes);
+}
+
 } // namespace system
 } // namespace libbitcoin
 

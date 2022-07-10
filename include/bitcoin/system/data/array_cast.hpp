@@ -77,7 +77,7 @@ array_cast(std::array<From, Count>&& values) NOEXCEPT;
 
 /// Cast array& of integrals to lesser-sized array& of integrals.
 /// Use array_cast for non-narrowing array cast.
-template <typename To, size_t ToCount, typename From, size_t FromCount,
+template <typename To, size_t ToCount = one, typename From, size_t FromCount,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true,
     if_portional<ToCount, To, FromCount, From> = true>
@@ -86,7 +86,7 @@ narrowing_array_cast(std::array<From, FromCount>& values) NOEXCEPT;
 
 /// Cast const array& of integrals to lesser-sized const array& of integrals.
 /// Use array_cast for non-narrowing array cast.
-template <typename To, size_t ToCount, typename From, size_t FromCount,
+template <typename To, size_t ToCount = one, typename From, size_t FromCount,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true,
     if_portional<ToCount, To, FromCount, From> = true>
@@ -95,7 +95,7 @@ narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT;
 
 /// Cast array&& of integrals to lesser-sized array of integrals.
 /// Use array_cast for non-narrowing array cast.
-template <typename To, size_t ToCount, typename From, size_t FromCount,
+template <typename To, size_t ToCount = one, typename From, size_t FromCount,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true,
     if_portional<ToCount, To, FromCount, From> = true>
@@ -104,7 +104,7 @@ narrowing_array_cast(std::array<From, FromCount>&& values) NOEXCEPT;
 
 /// Cast contiguous integral buffer to array& of integrals.
 /// Safe if byte count (size) is correct.
-template <typename To, size_t Size, typename From,
+template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
 inline std::array<To, Size>&
@@ -112,9 +112,25 @@ unsafe_array_cast(From* bytes) NOEXCEPT;
 
 /// Cast contiguous const integral buffer to const array& of integrals.
 /// Safe if byte count (size) is correct.
-template <typename To, size_t Size, typename From,
+template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
+inline const std::array<To, Size>&
+unsafe_array_cast(const From* bytes) NOEXCEPT;
+
+/// Cast contiguous integral buffer to array& of array of integrals.
+/// Safe if byte count (size) is correct.
+template <typename To, size_t Size = one, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer_std_array<To> = true>
+inline std::array<To, Size>&
+unsafe_array_cast(From* bytes) NOEXCEPT;
+
+/// Cast contiguous const integral buffer to const array& of array of integrals.
+/// Safe if byte count (size) is correct.
+template <typename To, size_t Size = one, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer_std_array<To> = true>
 inline const std::array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT;
 

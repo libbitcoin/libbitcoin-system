@@ -356,4 +356,39 @@ BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__non_const__expected)
     BOOST_REQUIRE_EQUAL(data8x8[7], 0xf0_u8);
 }
 
+// unsafe_array_cast (array of arrays of integrals)
+// ----------------------------------------------------------------------------
+
+// 3 lls to 3 arrays of 4 shorts (std::array<std::array<uint16_t, 4>, 3>)
+constexpr auto longs = 3_size;
+constexpr uint64_t value64x3[longs]{ 0x0102030405060708_u64, 0x1122334455667788_u64, 0xabcdef1234567890_u64 };
+using inner = std::array<uint16_t, 4>;
+using outer = decltype(unsafe_array_cast<inner, 3>(value64x3));
+static_assert(is_same_type<outer, const std::array<inner, 3>&>);
+
+BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__inner_array__expected)
+{
+    constexpr auto longs = 3_size;
+    constexpr uint64_t value64x3[longs]
+    {
+        native_to_big_end(0x0102030405060708_u64),
+        native_to_big_end(0x1122334455667788_u64),
+        native_to_big_end(0xabcdef1234567890_u64)
+    };
+
+    auto& value16x4x3 = unsafe_array_cast<std::array<uint16_t, 4>, 3>(&value64x3[0]);
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][0], native_to_big_end(0x0102_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][1], native_to_big_end(0x0304_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][2], native_to_big_end(0x0506_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][3], native_to_big_end(0x0708_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][0], native_to_big_end(0x1122_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][1], native_to_big_end(0x3344_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][2], native_to_big_end(0x5566_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][3], native_to_big_end(0x7788_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][0], native_to_big_end(0xabcd_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][1], native_to_big_end(0xef12_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][2], native_to_big_end(0x3456_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][3], native_to_big_end(0x7890_u16));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
