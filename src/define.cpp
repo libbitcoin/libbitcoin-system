@@ -26,10 +26,11 @@
 
 // version        : <generated>
 // have           : version
-// warnings       : have        [for all]
-// boost          : warnings    [for suppression]
+// warnings       : have
+// intrinsics     : warnings    [for haves (inclusion)]
+// boost          : intrinsics  [for warnings (suppression)]
 // exceptions     : boost
-// types          : exceptions  [for boost]
+// types          : exceptions  [for boost (uintx/t)]
 // constants      : types
 // literals       : constants   [for types]
 // funclets       : literals    [for constants]

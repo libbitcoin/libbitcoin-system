@@ -78,6 +78,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/hash.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
+    src/crypto/sha256.cpp \
     src/crypto/siphash.cpp \
     src/crypto/external/aes256.cpp \
     src/crypto/external/crypto_scrypt.cpp \
@@ -88,15 +89,13 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/external/pkcs5_pbkdf2.cpp \
     src/crypto/external/ripemd160.cpp \
     src/crypto/external/sha1.cpp \
-    src/crypto/external/sha256.cpp \
     src/crypto/external/sha512.cpp \
-    src/crypto/intrinsics/intrinsics.cpp \
-    src/crypto/intrinsics/sha256_1_portable.cpp \
-    src/crypto/intrinsics/sha256_2_shani.cpp \
-    src/crypto/intrinsics/sha256_4_neon.cpp \
-    src/crypto/intrinsics/sha256_4_sse4.cpp \
-    src/crypto/intrinsics/sha256_4_sse41.cpp \
-    src/crypto/intrinsics/sha256_8_avx2.cpp \
+    src/crypto/sha256/sha256_1_portable.cpp \
+    src/crypto/sha256/sha256_2_shani.cpp \
+    src/crypto/sha256/sha256_4_neon.cpp \
+    src/crypto/sha256/sha256_4_sse4.cpp \
+    src/crypto/sha256/sha256_4_sse41.cpp \
+    src/crypto/sha256/sha256_8_avx2.cpp \
     src/data/data_chunk.cpp \
     src/data/string.cpp \
     src/endian/endian.cpp \
@@ -215,6 +214,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
     test/funclets.cpp \
+    test/intrinsics.cpp \
     test/literals.cpp \
     test/main.cpp \
     test/settings.cpp \
@@ -257,9 +257,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/crypto/hash.hpp \
     test/crypto/pseudo_random.cpp \
     test/crypto/ring_signature.cpp \
+    test/crypto/sha256.cpp \
     test/crypto/siphash.cpp \
     test/crypto/siphash.hpp \
-    test/crypto/intrinsics/intrinsics.cpp \
     test/data/array_cast.cpp \
     test/data/byte_cast.cpp \
     test/data/collection.cpp \
@@ -396,6 +396,7 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/exceptions.hpp \
     include/bitcoin/system/funclets.hpp \
     include/bitcoin/system/have.hpp \
+    include/bitcoin/system/intrinsics.hpp \
     include/bitcoin/system/literals.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/typelets.hpp \
@@ -466,6 +467,7 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/hash.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
     include/bitcoin/system/crypto/ring_signature.hpp \
+    include/bitcoin/system/crypto/sha256.hpp \
     include/bitcoin/system/crypto/siphash.hpp
 
 include_bitcoin_system_crypto_externaldir = ${includedir}/bitcoin/system/crypto/external
@@ -480,12 +482,7 @@ include_bitcoin_system_crypto_external_HEADERS = \
     include/bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp \
     include/bitcoin/system/crypto/external/ripemd160.hpp \
     include/bitcoin/system/crypto/external/sha1.hpp \
-    include/bitcoin/system/crypto/external/sha256.hpp \
     include/bitcoin/system/crypto/external/sha512.hpp
-
-include_bitcoin_system_crypto_intrinsicsdir = ${includedir}/bitcoin/system/crypto/intrinsics
-include_bitcoin_system_crypto_intrinsics_HEADERS = \
-    include/bitcoin/system/crypto/intrinsics/intrinsics.hpp
 
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
 include_bitcoin_system_data_HEADERS = \

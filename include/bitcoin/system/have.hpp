@@ -21,7 +21,7 @@
 
 #include <bitcoin/system/version.hpp>
 
-// What we are.
+// Compiler and standard libraries.
 #ifdef _MSC_VER
     #define HAVE_MSC
     #define MSC_VERSION _MSC_VER
@@ -39,6 +39,35 @@
     #define HAVE_OPENBSD
 #elif defined(__NetBSD__)
     #define HAVE_NETBSD
+#endif
+
+// ISO constants for targeted CPU architecture.
+#if defined _M_IX86
+    #define HAVE_X86
+#elif defined _M_X64
+    #define HAVE_X64
+#elif defined _M_IA64
+    #define HAVE_ITANIUM
+#endif
+
+// Will use __asm__ for Intel intrinsics if non-ISO interface.
+#if defined(HAVE_X86) || defined(HAVE_X64)  || defined(HAVE_ITANIUM)
+    #define HAVE_ISO_INTEL
+#endif
+#if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
+    #define HAVE_GNU_INTEL
+#endif
+
+// ARM CPU architecture.
+#if defined(__arm__) || defined(__arm64__) || defined(_M_ARM)
+    #define HAVE_ARM
+#endif
+
+// Neon intrinsics for ARM.
+#if defined(HAVE_ARM)
+#if defined(HAVE_GNUC) || defined(__ARM_NEON) || defined(HAVE_MSC)
+    #define HAVE_NEON
+#endif
 #endif
 
 // ISO predefined constant for C++ version.
@@ -73,15 +102,6 @@
 #endif
 #if MSC_VERSION >= 1930
     #define HAVE_VS2022
-#endif
-
-// ISO predefined constant for targeted CPU architecture.
-#if defined _M_IX86
-    #define HAVE_X86
-#elif defined _M_X64
-    #define HAVE_X64
-#elif defined _M_IA64
-    #define HAVE_ITANIUM
 #endif
 
 // Other platforms not as far with C++ 20.

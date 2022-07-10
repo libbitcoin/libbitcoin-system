@@ -21,16 +21,16 @@
 
 // Standard includes (do not include directly).
 // All except <array> are included here by include ancestory.
-#include <array>
-#include <cstddef>  // purged
-#include <cstdint>  // purged
-#include <exception>
-#include <iostream>
-#include <limits>
-#include <stdexcept>
-#include <string>
-#include <vector>
-#include <type_traits>
+#include <array>            // TODO: purge
+#include <cstddef>          // purged
+#include <cstdint>          // purged
+#include <exception>        // TODO: purge
+#include <iostream>         // TODO: purge
+#include <limits>           // TODO: purge
+#include <stdexcept>        // TODO: purge
+#include <string>           // TODO: purge
+#include <type_traits>      // TODO: purge
+#include <vector>           // TODO: purge
 
 // Pulls chains in all /system headers (except settings.hpp).
 #include <bitcoin/system/constraints.hpp>
@@ -94,26 +94,21 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-// These are defined in the GUI for VS builds and by command line for others.
-// But overriding these here for VS builds to keep tests active.
-#if !defined(HAVE_PORTABLE) && defined(HAVE_MSC) && defined(HAVE_X64)
-    #define WITH_AVX2
-    #define WITH_SSE41
-    #define WITH_SSE4
-    ////#define WITH_NEON  // no test yet for ARM Neon.
-    ////#define WITH_SHANI // untested
-#endif
-
 // LCOV code coverage exclusion ranges.
 #define LCOV_EXCL_START(comment)
 #define LCOV_EXCL_STOP()
+
+#if !defined(HAVE_CPP20)
+    static_assert(false, "C++20 minimum required.");
+#endif
 
 #if defined(HAVE_MSC) && !defined(HAVE_VS2022)
     static_assert(false, "Visual Studio 2022 minimum required.");
 #endif
 
-#if !defined(HAVE_CPP20)
-    static_assert(false, "C++20 minimum required.");
+// Required to access ARM intrinsics in msvc.
+#if defined(HAVE_MSC) && defined(HAVE_NEON)
+    #define _ARM_USE_NEW_NEON_INTRINSICS
 #endif
 
 // C++11 (full)

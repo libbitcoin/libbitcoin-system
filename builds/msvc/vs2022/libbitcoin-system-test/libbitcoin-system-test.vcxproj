@@ -108,9 +108,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\encryption.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\hash.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\intrinsics\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\sha256.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\funclets.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />

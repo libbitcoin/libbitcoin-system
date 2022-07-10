@@ -16,8 +16,9 @@
  */
 #include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
 
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/crypto/external/hmac_sha512.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
  // TODO: make constexpr (cpp).

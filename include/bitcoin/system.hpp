@@ -21,6 +21,7 @@
 #include <bitcoin/system/exceptions.hpp>
 #include <bitcoin/system/funclets.hpp>
 #include <bitcoin/system/have.hpp>
+#include <bitcoin/system/intrinsics.hpp>
 #include <bitcoin/system/literals.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/typelets.hpp>
@@ -79,6 +80,7 @@
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/siphash.hpp>
 #include <bitcoin/system/crypto/external/aes256.hpp>
 #include <bitcoin/system/crypto/external/crypto_scrypt.hpp>
@@ -90,9 +92,7 @@
 #include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
 #include <bitcoin/system/crypto/external/sha1.hpp>
-#include <bitcoin/system/crypto/external/sha256.hpp>
 #include <bitcoin/system/crypto/external/sha512.hpp>
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>
 #include <bitcoin/system/data/collection.hpp>

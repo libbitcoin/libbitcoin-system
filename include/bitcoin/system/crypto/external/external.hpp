@@ -28,7 +28,6 @@
 #include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
 #include <bitcoin/system/crypto/external/sha1.hpp>
-#include <bitcoin/system/crypto/external/sha256.hpp>
 #include <bitcoin/system/crypto/external/sha512.hpp>
 
 #endif

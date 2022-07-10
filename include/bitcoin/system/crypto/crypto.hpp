@@ -25,9 +25,9 @@
 #include <bitcoin/system/crypto/elliptic_curve.hpp>
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/siphash.hpp>
 
 #endif

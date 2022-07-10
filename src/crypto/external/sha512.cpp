@@ -26,6 +26,7 @@
 #include <bitcoin/system/crypto/external/sha512.hpp>
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 
 // TODO: make constexpr (cpp) and use /math/bytes endians.
 
