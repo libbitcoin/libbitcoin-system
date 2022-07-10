@@ -202,6 +202,11 @@ static_assert(!is_integral_integer<bool>);
 static_assert(!is_integral_integer<std::string>);
 static_assert(is_same_type<decltype(is_integral_integer<int32_t>), const bool>);
 
+static_assert(is_std_array<std::array<uint8_t, 0>>);
+static_assert(is_std_array<std::array<base, 0>>);
+static_assert(!is_std_array<uint8_t>);
+static_assert(is_same_type<decltype(is_std_array<std::array<uint8_t, 0>>), const bool>);
+
 // These may be unexpected, which is why we generally avoid them.
 static_assert(sizeof(bool) >= 1u);
 ////static_assert(bits<bool> >= 1u);

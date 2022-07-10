@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPELETS_HPP
 #define LIBBITCOIN_SYSTEM_TYPELETS_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <limits>
 #include <type_traits>
 #include <bitcoin/system/funclets.hpp>
@@ -73,6 +71,14 @@ constexpr bool is_integer = std::numeric_limits<Type>::is_integer &&
 /// Excludes non-integral integers (such as uintx).
 template <typename Type>
 constexpr bool is_integral_integer = is_integral<Type> && is_integer<Type>;
+
+/// Type is a std::array.
+template<typename>
+struct is_std_array_t : std::false_type {};
+template<typename Type, size_t Size>
+struct is_std_array_t<std::array<Type, Size>> : std::true_type {};
+template<typename Type>
+constexpr bool is_std_array = is_std_array_t<Type>::value;
 
 /// Constrained to is_integral types.
 template <typename Type,
