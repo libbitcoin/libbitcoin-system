@@ -324,17 +324,21 @@ constexpr void shift_right_into(Value& value, size_t shift,
 // Rotate (left/right).
 // ----------------------------------------------------------------------------
 // C++20: std::rotl/rotr unsigned is not defined (at least for msvc).
-// std lib should call through to intrinsic implementation.
+// std lib should pass to intrinsic implementation (optimal).
 
 template <typename Value, if_integral_integer<Value>>
 constexpr Value rotate_left(Value value, size_t shift) NOEXCEPT
 {
     if constexpr (!is_signed<Value>)
+    {
         return std::rotl(value, possible_narrow_sign_cast<int>(shift));
-
-    constexpr auto span = bits<Value>;
-    return bit_or(shift_left(value, shift % span),
-        shift_right(value, span - (shift % span)));
+    }
+    else
+    {
+        constexpr auto span = bits<Value>;
+        return bit_or(shift_left(value, shift % span),
+            shift_right(value, span - (shift % span)));
+    }
 }
 
 template <typename Value, if_integral_integer<Value>>
@@ -345,21 +349,27 @@ constexpr void rotate_left_into(Value& value, size_t shift) NOEXCEPT
         value = std::rotl(value, possible_narrow_sign_cast<int>(shift));
         return;
     }
-
-    constexpr auto span = bits<Value>;
-    value = bit_or(shift_left(value, shift % span),
-        shift_right(value, span - (shift % span)));
+    else
+    {
+        constexpr auto span = bits<Value>;
+        value = bit_or(shift_left(value, shift % span),
+            shift_right(value, span - (shift % span)));
+    }
 }
 
 template <typename Value, if_integral_integer<Value>>
 constexpr Value rotate_right(Value value, size_t shift) NOEXCEPT
 {
     if constexpr (!is_signed<Value>)
+    {
         return std::rotr(value, possible_narrow_sign_cast<int>(shift));
-
-    constexpr auto span = bits<Value>;
-    return bit_or(shift_right(value, shift % span),
-        shift_left(value, span - (shift % span)));
+    }
+    else
+    {
+        constexpr auto span = bits<Value>;
+        return bit_or(shift_right(value, shift % span),
+            shift_left(value, span - (shift % span)));
+    }
 }
 
 template <typename Value, if_integral_integer<Value>>
@@ -370,10 +380,12 @@ constexpr void rotate_right_into(Value& value, size_t shift) NOEXCEPT
         value = std::rotr(value, possible_narrow_sign_cast<int>(shift));
         return;
     }
-
-    constexpr auto span = bits<Value>;
-    value = bit_or(shift_right(value, shift % span),
-        shift_left(value, span - (shift % span)));
+    else
+    {
+        constexpr auto span = bits<Value>;
+        value = bit_or(shift_right(value, shift % span),
+            shift_left(value, span - (shift % span)));
+    }
 }
 
 } // namespace system
