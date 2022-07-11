@@ -84,7 +84,7 @@ public:
     }
 
     // More efficient [] dereferences are all guarded here.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
     //*************************************************************************
     // CONSENSUS: BIP34 requires coinbase input script to begin with one byte
@@ -298,7 +298,7 @@ public:
             && is_public_key(ops[1].data());
     }
 
-    BC_POP_WARNING(/*NO_ARRAY_INDEXATION*/)
+    BC_POP_WARNING(/*NO_ARRAY_INDEXING*/)
 
     // C++20 constexpr.
     // Ambiguous with is_sign_key_hash when second/last op is a public key.

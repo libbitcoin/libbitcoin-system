@@ -372,7 +372,7 @@ const data_chunk& script::witness_program() const NOEXCEPT
 {
     static const data_chunk empty;
 
-    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     return is_witness_program_pattern(ops()) ? ops()[1].data() : empty;
     BC_POP_WARNING()
 }

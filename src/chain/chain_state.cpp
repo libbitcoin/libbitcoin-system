@@ -505,7 +505,7 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
     // This differs from arithmetic median which averages two middle values.
 
     // times[] indexation is guarded.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     return times.empty() ? 0 : times[to_half(times.size())];
     BC_POP_WARNING()
 }

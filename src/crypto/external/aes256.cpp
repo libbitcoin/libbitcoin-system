@@ -117,7 +117,7 @@ constexpr uint8_t f_dec_key(uint8_t byte) NOEXCEPT
     return shift_right(byte) ^ (get_right(byte) ? 0b1000'1101_u8 : zero);
 }
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 constexpr void sub_bytes(block& bytes) NOEXCEPT
