@@ -27,12 +27,15 @@
 
 #include <utility>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/crypto/external/sha256.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
+#include <bitcoin/system/crypto/sha256_context.hpp>
 
- // TODO: make constexpr (cpp).
+using namespace bc;
+using namespace bc::system;
+using namespace bc::system::sha256;
 
 void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH])
+    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT
 {
     HMACSHA256CTX context;
     HMACSHA256Init(&context, key, key_length);
@@ -40,56 +43,55 @@ void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
     HMACSHA256Final(&context, digest);
 }
 
-void HMACSHA256Final(HMACSHA256CTX* context, 
-    uint8_t digest[HMACSHA256_DIGEST_LENGTH])
+void HMACSHA256Final(HMACSHA256CTX* context,
+    uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT
 {
     uint8_t hash[HMACSHA256_DIGEST_LENGTH];
+    finalize(context->ictx, hash);
+    update(context->octx, HMACSHA256_DIGEST_LENGTH, hash);
+    finalize(context->octx, digest);
 
-    SHA256Final(&context->ictx, hash);
-    SHA256Update(&context->octx, hash, HMACSHA256_DIGEST_LENGTH);
-    SHA256Final(&context->octx, digest);
-
-    /* This is unnecessary, as the context is not reusable. */
-    /* zeroize((void*)hash, sizeof hash); */
+    // This is unnecessary, as the context is not reusable.
+    // zeroize((void*)hash, sizeof hash);
 }
 
-void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key, 
-    size_t key_length)
+void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
+    size_t key_length) NOEXCEPT
 {
     size_t i;
-    uint8_t pad[SHA256_BLOCK_LENGTH];
-    uint8_t key_hash[SHA256_DIGEST_LENGTH];
+    uint8_t pad[block_size];
+    uint8_t key_hash[hash_size];
 
-    if (key_length > SHA256_BLOCK_LENGTH)
+    if (key_length > block_size)
     {
-        SHA256Init(&context->ictx);
-        SHA256Update(&context->ictx, key, key_length);
-        SHA256Final(&context->ictx, key_hash);
+        context->ictx.reset();
+        update(context->ictx, key_length, key);
+        finalize(context->ictx, key_hash);
         key = key_hash;
-        key_length = SHA256_DIGEST_LENGTH;
+        key_length = hash_size;
     }
 
-    SHA256Init(&context->ictx);
-    std::fill_n(pad, SHA256_BLOCK_LENGTH, uint8_t{ 0x36 });
+    context->ictx.reset();
+    std::fill_n(pad, block_size, 0x36_u8);
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];
 
-    SHA256Update(&context->ictx, pad, SHA256_BLOCK_LENGTH);
-    SHA256Init(&context->octx);
-    std::fill_n(pad, SHA256_BLOCK_LENGTH, uint8_t{ 0x5c });
+    update(context->ictx, block_size, pad);
+    context->octx.reset();
+    std::fill_n(pad, block_size, 0x5c_u8);
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];
 
-    SHA256Update(&context->octx, pad, SHA256_BLOCK_LENGTH);
+    update(context->octx, block_size, pad);
 
-    /* This is unnecessary, as the local is going out of scope. */
-    /* zeroize((void*)key_hash, sizeof key_hash); */
+    // This is unnecessary, as the local is going out of scope.
+    // zeroize((void*)key_hash, sizeof key_hash);
 }
 
 void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
-    size_t length)
+    size_t length) NOEXCEPT
 {
-    SHA256Update(&context->ictx, input, length);
+    update(context->ictx, length, input);
 }

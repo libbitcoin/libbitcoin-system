@@ -81,6 +81,7 @@
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/sha256.hpp>
+#include <bitcoin/system/crypto/sha256_context.hpp>
 #include <bitcoin/system/crypto/siphash.hpp>
 #include <bitcoin/system/crypto/external/aes256.hpp>
 #include <bitcoin/system/crypto/external/crypto_scrypt.hpp>

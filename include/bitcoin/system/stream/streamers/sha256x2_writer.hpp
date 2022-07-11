@@ -55,7 +55,7 @@ protected:
 private:
     void flusher() NOEXCEPT;
 
-    intrinsics::sha256_context context_{};
+    sha256::context context_{};
 };
 
 } // namespace system

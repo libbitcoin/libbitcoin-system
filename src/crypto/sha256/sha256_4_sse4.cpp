@@ -49,32 +49,34 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 
-#ifdef WITH_SSE4
-
-#include <stdint.h>
-#include <stdlib.h>
-#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace intrinsics {
+namespace sha256 {
 
-#if defined(_M_X64) || defined(_M_AMD64)  || defined(_M_IX86)
+#if defined(HAVE_MSC)
 
-// Iterate over N blocks, four lanes per block.
-void sha256_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
+void single_sse4(state&, const block1&) NOEXCEPT
 {
-    // TODO: define assembly for HAVE_MSC.
-    // TODO: this is currently disabled by try_sse4().
+    BC_ASSERT_MSG(false, "single_sse4 undefined");
 }
 
-#elif (defined(__x86_64__) || defined(__amd64__) || defined(__i386__))
+void double_sse4(hash1&, const block1&) NOEXCEPT
+{
+    BC_ASSERT_MSG(false, "double_sse4 undefined");
+}
 
-// Iterate over N blocks, four lanes per block.
-void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) NOEXCEPT
+#else
+
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+
+////void single_sse4(state& state, const blocks& blocks) NOEXCEPT;
+void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
 {
     constexpr uint32_t K256 alignas(16) []
     {
@@ -1025,55 +1027,44 @@ void sha256_sse4(uint32_t* state, const uint8_t* chunk, size_t blocks) NOEXCEPT
 
         "Ldone_hash_%=:"
 
-        : "+r"(state), "+r"(chunk), "+r"(blocks), "=r"(a), "=r"(b), "=r"(c), "=r"(d), /* e = chunk */ "=r"(f), "=r"(g), "=r"(h), "=r"(y0), "=r"(y1), "=r"(y2), "=r"(tbl), "+m"(inp_end), "+m"(inp), "+m"(xfer)
+        : "+r"(state), "+r"(data), "+r"(blocks), "=r"(a), "=r"(b), "=r"(c), "=r"(d), /* e = chunk */ "=r"(f), "=r"(g), "=r"(h), "=r"(y0), "=r"(y1), "=r"(y2), "=r"(tbl), "+m"(inp_end), "+m"(inp), "+m"(xfer)
         : "m"(K256), "m"(FLIP_MASK), "m"(SHUF_00BA), "m"(SHUF_DC00)
         : "cc", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12"
    );
 }
 
-#else
+BC_POP_WARNING()
 
-void sha256_x1_sse4(uint32_t*, const uint8_t*, size_t) NOEXCEPT
+#endif // HAVE_MSC
+
+#if !defined(HAVE_MSC)
+
+void single_sse4(state& state, const block& block) NOEXCEPT
 {
-    // have_sse4() is false in this context, so this doesn't ever execute.
+    return single_sse4(state.data(), block.data(), one);
 }
 
-#endif
+// ----------------------------------------------------------------------------
 
-// One block in four lanes.
-void sha256_x1_sse4(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
+void single_sse4(state& state, const block1& blocks) NOEXCEPT
 {
-    return sha256_sse4(state, block, 1);
+    return single_sse4(state, blocks[0]);
 }
 
-////void sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
-////{
-////    // TODO: four blocks in four lanes. 
-////}
-
-// One block in four lanes, doubled.
-void double_sha256_x1_sse4(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
+void double_sse4(hash1& out, const block1& blocks) NOEXCEPT
 {
-    constexpr auto count = 32_size / sizeof(uint32_t);
-
-    auto state = sha256_initial;
-    auto buffer = sha256x2_buffer;
-    sha256_x1_sse4(state.data(), in);
-    sha256_x1_sse4(state.data(), sha256x2_padding.data());
-    to_big_endian_set(narrowing_array_cast<uint32_t, count>(buffer), state);
-
-    state = sha256_initial;
-    sha256_x1_sse4(state.data(), buffer.data());
-    to_big_endian_set(unsafe_array_cast<uint32_t, count>(out), state);
+    auto state = sha256::initial;
+    single_sse4(state, blocks);
+    single_sse4(state, sha256::double_pad);
+    auto data = sha256::double_buffer;
+    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(data), state);
+    state = sha256::initial;
+    single_sse4(state, data);
+    to_big_endian_set(array_cast<uint32_t>(out[0]), state);
 }
 
-////void double_sha256_x4_sse4(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
-////{
-////    // TODO: four blocks in four lanes, doubled.
-////}
+#endif // HAVE_MSC
 
-} // namespace intrinsics
+} // namespace sha256
 } // namespace system
 } // namespace libbitcoin
-
-#endif // WITH_SSE4

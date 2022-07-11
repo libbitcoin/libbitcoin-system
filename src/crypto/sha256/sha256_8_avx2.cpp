@@ -2,19 +2,21 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 
-#ifdef WITH_AVX2
-
-#include <stdint.h>
 #include <immintrin.h>
+#include <stdint.h>
+#include <bitcoin/system/define.hpp>
+////#include <bitcoin/system/endian/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace intrinsics {
-
-// TODO: move use math/bytes conversion.
+namespace sha256 {
+    
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 
 inline uint32_t from_little_endian(const uint8_t data[4]) NOEXCEPT
 {
@@ -33,8 +35,8 @@ inline void to_little_endian(uint8_t data[4], uint32_t value) NOEXCEPT
     data[3] = (value >> 24) & 0xff;
 }
 
+#ifndef VISUAL
 __m256i inline K(uint32_t x) NOEXCEPT { return _mm256_set1_epi32(x); }
-
 __m256i inline Add(__m256i x, __m256i y) NOEXCEPT { return _mm256_add_epi32(x, y); }
 __m256i inline Add(__m256i x, __m256i y, __m256i z) NOEXCEPT { return Add(Add(x, y), z); }
 __m256i inline Add(__m256i x, __m256i y, __m256i z, __m256i w) NOEXCEPT { return Add(Add(x, y), Add(z, w)); }
@@ -48,7 +50,6 @@ __m256i inline Or(__m256i x, __m256i y) NOEXCEPT { return _mm256_or_si256(x, y);
 __m256i inline And(__m256i x, __m256i y) NOEXCEPT { return _mm256_and_si256(x, y); }
 __m256i inline ShR(__m256i x, int n) NOEXCEPT { return _mm256_srli_epi32(x, n); }
 __m256i inline ShL(__m256i x, int n) NOEXCEPT { return _mm256_slli_epi32(x, n); }
-
 __m256i inline Ch(__m256i x, __m256i y, __m256i z) NOEXCEPT { return Xor(z, And(x, Xor(y, z))); }
 __m256i inline Maj(__m256i x, __m256i y, __m256i z) NOEXCEPT { return Or(And(x, y), And(z, Or(x, y))); }
 __m256i inline Sigma0(__m256i x) NOEXCEPT { return Xor(Or(ShR(x, 2), ShL(x, 30)), Or(ShR(x, 13), ShL(x, 19)), Or(ShR(x, 22), ShL(x, 10))); }
@@ -59,23 +60,23 @@ __m256i inline sigma1(__m256i x) NOEXCEPT { return Xor(Or(ShR(x, 17), ShL(x, 15)
 // One round of SHA-256.
 void inline Round(__m256i a, __m256i b, __m256i c, __m256i& d, __m256i e, __m256i f, __m256i g, __m256i& h, __m256i k) NOEXCEPT
 {
-    __m256i t1 = Add(h, Sigma1(e), Ch(e, f, g), k);
-    __m256i t2 = Add(Sigma0(a), Maj(a, b, c));
+    const __m256i t1 = Add(h, Sigma1(e), Ch(e, f, g), k);
+    const __m256i t2 = Add(Sigma0(a), Maj(a, b, c));
     d = Add(d, t1);
     h = Add(t1, t2);
 }
 
-__m256i inline Read8(const uint8_t* chunk, int offset) NOEXCEPT
+__m256i inline Read8(const block8& blocks, int offset) NOEXCEPT
 {
-    __m256i ret = _mm256_set_epi32(
-        from_little_endian(chunk + 0 + offset),
-        from_little_endian(chunk + 64 + offset),
-        from_little_endian(chunk + 128 + offset),
-        from_little_endian(chunk + 192 + offset),
-        from_little_endian(chunk + 256 + offset),
-        from_little_endian(chunk + 320 + offset),
-        from_little_endian(chunk + 384 + offset),
-        from_little_endian(chunk + 448 + offset));
+    const __m256i ret = _mm256_set_epi32(
+        from_little_endian(&blocks[0][offset]),
+        from_little_endian(&blocks[1][offset]),
+        from_little_endian(&blocks[2][offset]),
+        from_little_endian(&blocks[3][offset]),
+        from_little_endian(&blocks[4][offset]),
+        from_little_endian(&blocks[5][offset]),
+        from_little_endian(&blocks[6][offset]),
+        from_little_endian(&blocks[7][offset]));
 
     return _mm256_shuffle_epi8(ret, _mm256_set_epi32(
         0x0c0d0e0ful,
@@ -88,7 +89,7 @@ __m256i inline Read8(const uint8_t* chunk, int offset) NOEXCEPT
         0x00010203ul));
 }
 
-void inline Write8(uint8_t* out, int offset, __m256i v) NOEXCEPT
+void inline Write8(hash8& hashes, int offset, __m256i v) NOEXCEPT
 {
     v = _mm256_shuffle_epi8(v, _mm256_set_epi32(
         0x0c0d0e0ful,
@@ -100,42 +101,19 @@ void inline Write8(uint8_t* out, int offset, __m256i v) NOEXCEPT
         0x04050607ul,
         0x00010203ul));
 
-    to_little_endian(out + 0 + offset, _mm256_extract_epi32(v, 7));
-    to_little_endian(out + 32 + offset, _mm256_extract_epi32(v, 6));
-    to_little_endian(out + 64 + offset, _mm256_extract_epi32(v, 5));
-    to_little_endian(out + 96 + offset, _mm256_extract_epi32(v, 4));
-    to_little_endian(out + 128 + offset, _mm256_extract_epi32(v, 3));
-    to_little_endian(out + 160 + offset, _mm256_extract_epi32(v, 2));
-    to_little_endian(out + 192 + offset, _mm256_extract_epi32(v, 1));
-    to_little_endian(out + 224 + offset, _mm256_extract_epi32(v, 0));
+    to_little_endian(&hashes[0][offset], _mm256_extract_epi32(v, 7));
+    to_little_endian(&hashes[1][offset], _mm256_extract_epi32(v, 6));
+    to_little_endian(&hashes[2][offset], _mm256_extract_epi32(v, 5));
+    to_little_endian(&hashes[3][offset], _mm256_extract_epi32(v, 4));
+    to_little_endian(&hashes[4][offset], _mm256_extract_epi32(v, 3));
+    to_little_endian(&hashes[5][offset], _mm256_extract_epi32(v, 2));
+    to_little_endian(&hashes[6][offset], _mm256_extract_epi32(v, 1));
+    to_little_endian(&hashes[7][offset], _mm256_extract_epi32(v, 0));
 }
+#endif
 
-////void sha256_avx2(uint32_t* state, const uint8_t* data, uint32_t blocks)
-void sha256_avx2(uint32_t*, const uint8_t*, uint32_t)
-{
-    BC_ASSERT_MSG(false, "not implemented");
-    // TODO: iterate over N blocks, eight lanes per block.
-    // TODO: this is currently disabled in single_sha256.
-}
-
-// One block in eight lanes.
-void sha256_x1_avx2(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
-{
-    return sha256_avx2(state, block, 1);
-}
-
-////void sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) NOEXCEPT
-////{
-////    // TODO: eight blocks in eight lanes. 
-////}
-
-////void double_sha256_x1_avx2(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
-////{
-////    // TODO: one block in eight lanes, doubled.
-////}
-
-// eight blocks in eight lanes, doubled.
-void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) NOEXCEPT
+// Eight blocks in eight lanes, doubled.
+void double_avx2(hash8& out, const block8& blocks) NOEXCEPT
 {
     // Transform 1
     __m256i a = K(0x6a09e667ul);
@@ -149,22 +127,22 @@ void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) NOEXCEPT
 
     __m256i w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15;
 
-    Round(a, b, c, d, e, f, g, h, Add(K(0x428a2f98ul), w0 = Read8(in, 0)));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x71374491ul), w1 = Read8(in, 4)));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xb5c0fbcful), w2 = Read8(in, 8)));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xe9b5dba5ul), w3 = Read8(in, 12)));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x3956c25bul), w4 = Read8(in, 16)));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x59f111f1ul), w5 = Read8(in, 20)));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x923f82a4ul), w6 = Read8(in, 24)));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xab1c5ed5ul), w7 = Read8(in, 28)));
-    Round(a, b, c, d, e, f, g, h, Add(K(0xd807aa98ul), w8 = Read8(in, 32)));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x12835b01ul), w9 = Read8(in, 36)));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x243185beul), w10 = Read8(in, 40)));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x550c7dc3ul), w11 = Read8(in, 44)));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x72be5d74ul), w12 = Read8(in, 48)));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x80deb1feul), w13 = Read8(in, 52)));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x9bdc06a7ul), w14 = Read8(in, 56)));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xc19bf174ul), w15 = Read8(in, 60)));
+    Round(a, b, c, d, e, f, g, h, Add(K(0x428a2f98ul), w0 = Read8(blocks, 0)));
+    Round(h, a, b, c, d, e, f, g, Add(K(0x71374491ul), w1 = Read8(blocks, 4)));
+    Round(g, h, a, b, c, d, e, f, Add(K(0xb5c0fbcful), w2 = Read8(blocks, 8)));
+    Round(f, g, h, a, b, c, d, e, Add(K(0xe9b5dba5ul), w3 = Read8(blocks, 12)));
+    Round(e, f, g, h, a, b, c, d, Add(K(0x3956c25bul), w4 = Read8(blocks, 16)));
+    Round(d, e, f, g, h, a, b, c, Add(K(0x59f111f1ul), w5 = Read8(blocks, 20)));
+    Round(c, d, e, f, g, h, a, b, Add(K(0x923f82a4ul), w6 = Read8(blocks, 24)));
+    Round(b, c, d, e, f, g, h, a, Add(K(0xab1c5ed5ul), w7 = Read8(blocks, 28)));
+    Round(a, b, c, d, e, f, g, h, Add(K(0xd807aa98ul), w8 = Read8(blocks, 32)));
+    Round(h, a, b, c, d, e, f, g, Add(K(0x12835b01ul), w9 = Read8(blocks, 36)));
+    Round(g, h, a, b, c, d, e, f, Add(K(0x243185beul), w10 = Read8(blocks, 40)));
+    Round(f, g, h, a, b, c, d, e, Add(K(0x550c7dc3ul), w11 = Read8(blocks, 44)));
+    Round(e, f, g, h, a, b, c, d, Add(K(0x72be5d74ul), w12 = Read8(blocks, 48)));
+    Round(d, e, f, g, h, a, b, c, Add(K(0x80deb1feul), w13 = Read8(blocks, 52)));
+    Round(c, d, e, f, g, h, a, b, Add(K(0x9bdc06a7ul), w14 = Read8(blocks, 56)));
+    Round(b, c, d, e, f, g, h, a, Add(K(0xc19bf174ul), w15 = Read8(blocks, 60)));
     Round(a, b, c, d, e, f, g, h, Add(K(0xe49b69c1ul), Inc(w0, sigma1(w14), w9, sigma0(w1))));
     Round(h, a, b, c, d, e, f, g, Add(K(0xefbe4786ul), Inc(w1, sigma1(w15), w10, sigma0(w2))));
     Round(g, h, a, b, c, d, e, f, Add(K(0x0fc19dc6ul), Inc(w2, sigma1(w0), w11, sigma0(w3))));
@@ -223,7 +201,7 @@ void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) NOEXCEPT
     g = Add(g, K(0x1f83d9abul));
     h = Add(h, K(0x5be0cd19ul));
 
-    __m256i t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
+    const __m256i t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
 
     // Transform 2
     Round(a, b, c, d, e, f, g, h, K(0xc28a2f98ul));
@@ -386,8 +364,11 @@ void double_sha256_x8_avx2(uint8_t* out, const uint8_t in[8 * 64]) NOEXCEPT
     Write8(out, 28, Add(h, K(0x5be0cd19ul)));
 }
 
-} // namespace intrinsics
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
+} // namespace sha256
 } // namespace system
 } // namespace libbitcoin
-
-#endif // WITH_AVX2

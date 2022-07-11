@@ -53,7 +53,7 @@ template <typename OStream>
 void sha256_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
-    sha256_update(context_, data, size);
+    sha256::update(context_, size, data);
 }
 
 template <typename OStream>
@@ -72,7 +72,7 @@ void sha256_writer<OStream>::flusher() NOEXCEPT
     hash_digest hash;
     BC_POP_WARNING()
 
-    intrinsics::sha256_finalize(context_, hash.data());
+    sha256::finalize(context_, hash.data());
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }

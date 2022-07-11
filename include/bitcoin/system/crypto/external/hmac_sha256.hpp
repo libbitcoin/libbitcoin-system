@@ -27,27 +27,27 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMACSHA256_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/crypto/external/sha256.hpp>
+#include <bitcoin/system/crypto/sha256_context.hpp>
 
 #define HMACSHA256_DIGEST_LENGTH 32U
 
 typedef struct HMACSHA256CTX
 {
-    SHA256CTX ctx;
-    SHA256CTX ictx;
-    SHA256CTX octx;
+    bc::system::sha256::context ctx;
+    bc::system::sha256::context ictx;
+    bc::system::sha256::context octx;
 } HMACSHA256CTX;
 
 void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
+    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT;
 
 void HMACSHA256Final(HMACSHA256CTX* context,
-    uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
+    uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT;
 
 void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
-    size_t key_length);
+    size_t key_length) NOEXCEPT;
 
 void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
-    size_t length);
+    size_t length) NOEXCEPT;
 
 #endif

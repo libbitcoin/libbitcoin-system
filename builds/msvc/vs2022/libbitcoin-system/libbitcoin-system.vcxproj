@@ -319,6 +319,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256_context.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\byte_cast.hpp" />
@@ -491,6 +492,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\sha256_context.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />

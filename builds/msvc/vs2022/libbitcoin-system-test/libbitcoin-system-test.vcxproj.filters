@@ -183,6 +183,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\sha256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>

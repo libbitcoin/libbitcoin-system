@@ -258,6 +258,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/crypto/pseudo_random.cpp \
     test/crypto/ring_signature.cpp \
     test/crypto/sha256.cpp \
+    test/crypto/sha256_context.cpp \
     test/crypto/siphash.cpp \
     test/crypto/siphash.hpp \
     test/data/array_cast.cpp \
@@ -468,6 +469,7 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/pseudo_random.hpp \
     include/bitcoin/system/crypto/ring_signature.hpp \
     include/bitcoin/system/crypto/sha256.hpp \
+    include/bitcoin/system/crypto/sha256_context.hpp \
     include/bitcoin/system/crypto/siphash.hpp
 
 include_bitcoin_system_crypto_externaldir = ${includedir}/bitcoin/system/crypto/external
@@ -529,7 +531,8 @@ include_bitcoin_system_impl_chain_HEADERS = \
 include_bitcoin_system_impl_cryptodir = ${includedir}/bitcoin/system/impl/crypto
 include_bitcoin_system_impl_crypto_HEADERS = \
     include/bitcoin/system/impl/crypto/checksum.ipp \
-    include/bitcoin/system/impl/crypto/hash.ipp
+    include/bitcoin/system/impl/crypto/hash.ipp \
+    include/bitcoin/system/impl/crypto/sha256_context.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \

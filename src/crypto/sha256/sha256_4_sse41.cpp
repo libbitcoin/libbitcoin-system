@@ -8,20 +8,21 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 
-#ifdef WITH_SSE41
-
-#include <stdint.h>
 #include <immintrin.h>
-////#include <bitcoin/system/math/math.hpp>
+#include <stdint.h>
+#include <bitcoin/system/define.hpp>
+////#include <bitcoin/system/endian/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace intrinsics {
-
-// TODO: move use math/bytes conversion.
+namespace sha256 {
+    
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 
 inline uint32_t from_little_endian(const uint8_t data[4]) NOEXCEPT
 {
@@ -40,6 +41,7 @@ inline void to_little_endian(uint8_t data[4], uint32_t value) NOEXCEPT
     data[3] = (value >> 24) & 0xff;
 }
 
+#ifndef VISUAL
 __m128i inline K(uint32_t x) NOEXCEPT { return _mm_set1_epi32(x); }
 
 __m128i inline Add(__m128i x, __m128i y) NOEXCEPT { return _mm_add_epi32(x, y); }
@@ -66,19 +68,19 @@ __m128i inline sigma1(__m128i x) NOEXCEPT { return Xor(Or(ShR(x, 17), ShL(x, 15)
 // One round of SHA-256.
 void inline Round(__m128i a, __m128i b, __m128i c, __m128i& d, __m128i e, __m128i f, __m128i g, __m128i& h, __m128i k) NOEXCEPT
 {
-    __m128i t1 = Add(h, Sigma1(e), Ch(e, f, g), k);
-    __m128i t2 = Add(Sigma0(a), Maj(a, b, c));
+    const __m128i t1 = Add(h, Sigma1(e), Ch(e, f, g), k);
+    const __m128i t2 = Add(Sigma0(a), Maj(a, b, c));
     d = Add(d, t1);
     h = Add(t1, t2);
 }
 
-__m128i inline Read4(const uint8_t* chunk, int offset) NOEXCEPT
+__m128i inline Read4(const block4& blocks, int offset) NOEXCEPT
 {
-    __m128i ret = _mm_set_epi32(
-        from_little_endian(chunk + 0 + offset),
-        from_little_endian(chunk + 64 + offset),
-        from_little_endian(chunk + 128 + offset),
-        from_little_endian(chunk + 192 + offset));
+    const __m128i ret = _mm_set_epi32(
+        from_little_endian(&blocks[0][offset]),
+        from_little_endian(&blocks[1][offset]),
+        from_little_endian(&blocks[2][offset]),
+        from_little_endian(&blocks[3][offset]));
 
     return _mm_shuffle_epi8(ret, _mm_set_epi32(
         0x0c0d0e0ful,
@@ -87,7 +89,7 @@ __m128i inline Read4(const uint8_t* chunk, int offset) NOEXCEPT
         0x00010203ul));
 }
 
-void inline Write4(uint8_t* out, int offset, __m128i v) NOEXCEPT
+void inline Write4(hash4& hashes, int offset, __m128i v) NOEXCEPT
 {
     v = _mm_shuffle_epi8(v, _mm_set_epi32(
         0x0c0d0e0ful,
@@ -95,38 +97,15 @@ void inline Write4(uint8_t* out, int offset, __m128i v) NOEXCEPT
         0x04050607ul,
         0x00010203ul));
 
-    to_little_endian(out + 0 + offset, _mm_extract_epi32(v, 3));
-    to_little_endian(out + 32 + offset, _mm_extract_epi32(v, 2));
-    to_little_endian(out + 64 + offset, _mm_extract_epi32(v, 1));
-    to_little_endian(out + 96 + offset, _mm_extract_epi32(v, 0));
+    to_little_endian(&hashes[0][offset], _mm_extract_epi32(v, 3));
+    to_little_endian(&hashes[1][offset], _mm_extract_epi32(v, 2));
+    to_little_endian(&hashes[2][offset], _mm_extract_epi32(v, 1));
+    to_little_endian(&hashes[3][offset], _mm_extract_epi32(v, 0));
 }
+#endif
 
-////void sha256_sse41(uint32_t* state, const uint8_t* data, uint32_t blocks)
-void sha256_sse41(uint32_t*, const uint8_t*, uint32_t)
-{
-    BC_ASSERT_MSG(false, "not implemented");
-    // TODO: iterate over N blocks, four lanes per block.
-    // TODO: this is currently disabled in single_sha256.
-}
-
-// One block in four lanes.
-void sha256_x1_sse41(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
-{
-    return sha256_sse41(state, block, 1);
-}
-
-////void sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
-////{
-////    // TODO: four blocks in four lanes. 
-////}
-
-////void double_sha256_x1_sse41(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
-////{
-////    // TODO: one block in four lanes, doubled.
-////}
-
-// four blocks in four lanes, doubled.
-void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
+// Four blocks in four lanes, doubled.
+void double_sse41(hash4& out, const block4& blocks) NOEXCEPT
 {
     // Transform 1
     __m128i a = K(0x6a09e667ul);
@@ -140,22 +119,22 @@ void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
 
     __m128i w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15;
 
-    Round(a, b, c, d, e, f, g, h, Add(K(0x428a2f98ul), w0 = Read4(in, 0)));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x71374491ul), w1 = Read4(in, 4)));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xb5c0fbcful), w2 = Read4(in, 8)));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xe9b5dba5ul), w3 = Read4(in, 12)));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x3956c25bul), w4 = Read4(in, 16)));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x59f111f1ul), w5 = Read4(in, 20)));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x923f82a4ul), w6 = Read4(in, 24)));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xab1c5ed5ul), w7 = Read4(in, 28)));
-    Round(a, b, c, d, e, f, g, h, Add(K(0xd807aa98ul), w8 = Read4(in, 32)));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x12835b01ul), w9 = Read4(in, 36)));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x243185beul), w10 = Read4(in, 40)));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x550c7dc3ul), w11 = Read4(in, 44)));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x72be5d74ul), w12 = Read4(in, 48)));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x80deb1feul), w13 = Read4(in, 52)));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x9bdc06a7ul), w14 = Read4(in, 56)));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xc19bf174ul), w15 = Read4(in, 60)));
+    Round(a, b, c, d, e, f, g, h, Add(K(0x428a2f98ul), w0 = Read4(blocks, 0)));
+    Round(h, a, b, c, d, e, f, g, Add(K(0x71374491ul), w1 = Read4(blocks, 4)));
+    Round(g, h, a, b, c, d, e, f, Add(K(0xb5c0fbcful), w2 = Read4(blocks, 8)));
+    Round(f, g, h, a, b, c, d, e, Add(K(0xe9b5dba5ul), w3 = Read4(blocks, 12)));
+    Round(e, f, g, h, a, b, c, d, Add(K(0x3956c25bul), w4 = Read4(blocks, 16)));
+    Round(d, e, f, g, h, a, b, c, Add(K(0x59f111f1ul), w5 = Read4(blocks, 20)));
+    Round(c, d, e, f, g, h, a, b, Add(K(0x923f82a4ul), w6 = Read4(blocks, 24)));
+    Round(b, c, d, e, f, g, h, a, Add(K(0xab1c5ed5ul), w7 = Read4(blocks, 28)));
+    Round(a, b, c, d, e, f, g, h, Add(K(0xd807aa98ul), w8 = Read4(blocks, 32)));
+    Round(h, a, b, c, d, e, f, g, Add(K(0x12835b01ul), w9 = Read4(blocks, 36)));
+    Round(g, h, a, b, c, d, e, f, Add(K(0x243185beul), w10 = Read4(blocks, 40)));
+    Round(f, g, h, a, b, c, d, e, Add(K(0x550c7dc3ul), w11 = Read4(blocks, 44)));
+    Round(e, f, g, h, a, b, c, d, Add(K(0x72be5d74ul), w12 = Read4(blocks, 48)));
+    Round(d, e, f, g, h, a, b, c, Add(K(0x80deb1feul), w13 = Read4(blocks, 52)));
+    Round(c, d, e, f, g, h, a, b, Add(K(0x9bdc06a7ul), w14 = Read4(blocks, 56)));
+    Round(b, c, d, e, f, g, h, a, Add(K(0xc19bf174ul), w15 = Read4(blocks, 60)));
     Round(a, b, c, d, e, f, g, h, Add(K(0xe49b69c1ul), Inc(w0, sigma1(w14), w9, sigma0(w1))));
     Round(h, a, b, c, d, e, f, g, Add(K(0xefbe4786ul), Inc(w1, sigma1(w15), w10, sigma0(w2))));
     Round(g, h, a, b, c, d, e, f, Add(K(0x0fc19dc6ul), Inc(w2, sigma1(w0), w11, sigma0(w3))));
@@ -214,7 +193,7 @@ void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
     g = Add(g, K(0x1f83d9abul));
     h = Add(h, K(0x5be0cd19ul));
 
-    __m128i t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
+    const __m128i t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
 
     // Transform 2
     Round(a, b, c, d, e, f, g, h, K(0xc28a2f98ul));
@@ -377,8 +356,11 @@ void double_sha256_x4_sse41(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
     Write4(out, 28, Add(h, K(0x5be0cd19ul)));
 }
 
-} // namespace intrinsics
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
+} // namespace sha256
 } // namespace system
 } // namespace libbitcoin
-
-#endif // WITH_SSE41

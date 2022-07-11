@@ -20,7 +20,7 @@
 
 #include <vector>
 #include <bitcoin/system/crypto/external/external.hpp>
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -54,11 +54,9 @@ bool hash_reduce(std::vector<hash_digest>& hashes) NOEXCEPT
     if (is_odd(size))
         return false;
 
-    // std::vector<std::array<uint8_t, N>>.data() is size * N contiguous bytes.
+    // buffer is [64 * size/2] contiguous bytes, transformed in place.
     auto buffer = hashes.front().data();
-
-    // Buffer is transformed in place.
-    intrinsics::sha256_paired_double(buffer, buffer, to_half(size));
+    sha256::sha256_double(buffer, to_half(size), buffer);
     hashes.resize(to_half(size));
     return true;
 }
@@ -99,27 +97,26 @@ data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT
 hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
     hash_digest hash;
-    intrinsics::sha256(data.data(), data.size(), hash.data());
+    sha256::sha256_single(hash.data(), data.size(), data.data());
     return hash;
 }
 
 data_chunk sha256_hash_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(hash_size, no_fill_byte_allocator);
-    intrinsics::sha256(data.data(), data.size(), hash.data());
+    sha256::sha256_single(hash.data(), data.size(), data.data());
     return hash;
 }
 
+// This overload precludes the need to concatenate first + second.
 hash_digest sha256_hash(const data_slice& first,
     const data_slice& second) NOEXCEPT
 {
-    using namespace intrinsics;
-
     hash_digest hash;
-    sha256_context context{};
-    sha256_update(context, first.data(), first.size());
-    sha256_update(context, second.data(), second.size());
-    sha256_finalize(context, hash.data());
+    sha256::context context{};
+    sha256::update(context, first.size(), first.data());
+    sha256::update(context, second.size(), second.data());
+    sha256::finalize(context, hash.data());
     return hash;
 }
 
@@ -158,7 +155,9 @@ long_hash hmac_sha512_hash(const data_slice& data,
 long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations) NOEXCEPT
 {
-    auto hash = null_long_hash;
+    long_hash hash{};
+
+    // Hash must be null-initialized (?).
     pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
         salt.data(), salt.size(), hash.data(), hash.size(), iterations);
 

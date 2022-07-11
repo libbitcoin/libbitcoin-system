@@ -119,7 +119,7 @@ hash_digest to_merkle_root(const hash_list& hashes)
     if (hashes.empty())
         return {};
 
-    auto merkle = hashes;
+    hash_list merkle{ hashes };
 
     while (!is_one(merkle.size()))
     {

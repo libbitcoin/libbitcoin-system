@@ -812,6 +812,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256_context.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
@@ -1322,6 +1325,9 @@
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\sha256_context.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp">

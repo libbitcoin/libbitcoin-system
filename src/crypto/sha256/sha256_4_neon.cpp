@@ -3,45 +3,41 @@
 /*   Based on code from ARM, and by Johannes Schneiders, Skip */
 /*   Hovsmith and Barry O'Rourke for the mbedTLS project.     */
 
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 
-#ifdef WITH_NEON
-
+#if defined(HAVE_NEON)
+    #include <arm_neon.h>
+#endif
 #include <stdint.h>
 #include <stdlib.h>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
-
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-BC_PUSH_WARNING(NO_C_STYLE_CASTS)
-
-#if defined(_MSC_VER)
-#include <intrin.h>
-#define _M_ARM
-#define _ARM_USE_NEW_NEON_INTRINSICS
-#endif // _MSC_VER
-
-#if defined(__arm__) || defined(__aarch32__) || defined(__arm64__) || defined(__aarch64__) || defined(_M_ARM)
-# if defined(__GNUC__)
-#  include <stdint.h>
-# endif
-# if defined(__ARM_NEON) || defined(_MSC_VER) || defined(__GNUC__)
-#  include <arm_neon.h>
-# endif
-
-// GCC and LLVM Clang, but not Apple Clang
-# if defined(__GNUC__) && !defined(__apple_build_version__)
-#  if defined(__ARM_ACLE) || defined(__ARM_FEATURE_CRYPTO)
-#   include <arm_acle.h>
-#  endif
-# endif
-#endif // ARM Headers
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace intrinsics {
+namespace sha256 {
 
-// Iterate over N blocks, four lanes per block.
-void sha256_neon(uint32_t* state, const uint8_t* data, uint32_t blocks) NOEXCEPT
+BC_PUSH_WARNING(NO_C_STYLE_CASTS)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+
+#if !defined(HAVE_NEON)
+
+void single_neon(state&, const block1&) NOEXCEPT
+{
+    BC_ASSERT_MSG(false, "single_neon undefined");
+}
+
+void double_neon(hash1&, const block1&) NOEXCEPT
+{
+    BC_ASSERT_MSG(false, "double_neon undefined");
+}
+
+#else
+
+////void single_neon(state& state, const blocks& blocks) NOEXCEPT;
+void single_neon(uint32_t* state, const uint8_t* data, uint32_t blocks) NOEXCEPT
 {
     constexpr uint32_t K[]
     {
@@ -222,44 +218,40 @@ void sha256_neon(uint32_t* state, const uint8_t* data, uint32_t blocks) NOEXCEPT
     vst1q_u32(&state[0], STATE0);
     vst1q_u32(&state[4], STATE1);
 }
+#endif // HAVE_NEON
 
-// One block in four lanes.
-void sha256_x1_neon(uint32_t state[8], const uint8_t block[64]) NOEXCEPT
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
+#if defined(HAVE_NEON)
+
+void single_neon(state& state, const block& block) NOEXCEPT
 {
-    return sha256_neon(state, block, 1);
+    return single_neon(state.data(), block.data(), one);
 }
 
-////void sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
-////{
-////    // TODO: four blocks in four lanes. 
-////}
+// ----------------------------------------------------------------------------
 
-// One block in four lanes, doubled.
-void double_sha256_x1_neon(uint8_t* out, const uint8_t in[1 * 64]) NOEXCEPT
+void single_neon(state& state, const block1& blocks) NOEXCEPT
 {
-    constexpr auto count = 32_size / sizeof(uint32_t);
-
-    auto state = sha256_initial;
-    auto buffer = sha256x2_buffer;
-    sha256_x1_neon(state.data(), &in[0]);
-    sha256_x1_neon(state.data(), sha256x2_padding.data());
-    to_big_endian_set(narrowing_array_cast<uint32_t, count>(buffer), state);
-
-    state = sha256_initial;
-    sha256_x1_neon(state.data(), buffer.data());
-    to_big_endian_set(unsafe_array_cast<uint32_t, count>(out), state);
+    return single_neon(state, blocks[0]);
 }
 
-////void double_sha256_x4_neon(uint8_t* out, const uint8_t in[4 * 64]) NOEXCEPT
-////{
-////    // TODO: four blocks in four lanes, doubled.
-////}
+void double_neon(hash1& out, const block1& blocks) NOEXCEPT
+{
+    auto state = sha256::initial;
+    single_neon(state, blocks);
+    single_neon(state, sha256::double_pad);
+    auto data = sha256::double_buffer;
+    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(data), state);
+    state = sha256::initial;
+    single_neon(state, data);
+    to_big_endian_set(array_cast<uint32_t>(out[0]), state);
+}
 
-} // namespace intrinsics
+#endif // HAVE_NEON
+
+} // namespace sha256
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
-BC_POP_WARNING()
-
-#endif // WITH_NEON

@@ -564,6 +564,7 @@ if (with-tests)
         "../../test/crypto/pseudo_random.cpp"
         "../../test/crypto/ring_signature.cpp"
         "../../test/crypto/sha256.cpp"
+        "../../test/crypto/sha256_context.cpp"
         "../../test/crypto/siphash.cpp"
         "../../test/crypto/siphash.hpp"
         "../../test/data/array_cast.cpp"
