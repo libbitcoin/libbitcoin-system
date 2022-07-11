@@ -23,6 +23,7 @@
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
 # --disable-shared         Disables shared library builds.
 # --disable-static         Disables static library builds.
+# --verbose                Display verbose output (defaults to quiet on called tooling).
 # --help                   Display usage, overriding script execution.
 #
 # Verified on Ubuntu 14.04, requires gcc-4.8 or newer.
@@ -156,12 +157,17 @@ make_jobs()
     local JOBS=$1
     shift 1
 
+    VERBOSITY=""
+    if [[ DISPLAY_VERBOSE ]]; then
+        VERBOSITY="VERBOSE=1"
+    fi
+
     SEQUENTIAL=1
     # Avoid setting -j1 (causes problems on single threaded systems [TRAVIS]).
     if [[ $JOBS > $SEQUENTIAL ]]; then
-        make -j"$JOBS" "$@"
+        make -j"$JOBS" "$@" $VERBOSITY
     else
-        make "$@"
+        make "$@" $VERBOSITY
     fi
 }
 
@@ -245,6 +251,7 @@ parse_command_line_options()
         case $OPTION in
             # Standard script options.
             (--help)                DISPLAY_HELP="yes";;
+            (--verbose)             DISPLAY_VERBOSE="yes";;
 
             # Standard build options.
             (--prefix=*)            PREFIX="${OPTION#*=}";;
@@ -509,9 +516,18 @@ extract_from_tarball()
     push_directory "$TARGET_DIR"
 
     # Extract the source locally.
-    wget --output-document "$ARCHIVE" "$URL"
-    tar --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
+    WGET="wget --quiet"
+    TAR="tar"
 
+    if [[ $DISPLAY_VERBOSE ]]; then
+        WGET="wget --verbose"
+        TAR="tar --verbose"
+    fi
+
+    $WGET --output-document "$ARCHIVE" "$URL"
+    $TAR --extract --file "$ARCHIVE" "--$COMPRESSION" --strip-components=1
+
+    display_message "Completed download and extraction successfully."
     pop_directory
 }
 

@@ -45,9 +45,6 @@ add_compile_options( "-Wall" )
 # Warn on extra stuff.
 add_compile_options( "-Wextra" )
 
-# Be really annoying.
-add_compile_options( "-Wpedantic" )
-
 # Disallow warning on style order of declarations.
 add_compile_options( "-Wno-reorder" )
 
@@ -112,6 +109,12 @@ endif()
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
     add_definitions( -DBOOST_ALL_DYN_LINK )
+endif()
+
+if (BUILD_SHARED_LIBS)
+    set( Boost_USE_STATIC_LIBS "off" )
+else()
+    set( Boost_USE_STATIC_LIBS "on" )
 endif()
 
 # Find boost

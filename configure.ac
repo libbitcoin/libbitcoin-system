@@ -342,22 +342,6 @@ AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wextra],
         [CXXFLAGS="$CXXFLAGS -Wextra"])])
 
-# Be really annoying.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*],
-    [AX_CHECK_COMPILE_FLAG([-Wpedantic],
-        [CFLAGS="$CFLAGS -Wpedantic"],
-        [AX_CHECK_COMPILE_FLAG([-pedantic],
-            [CFLAGS="$CFLAGS -pedantic"])])])
-
-# Be really annoying.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*],
-    [AX_CHECK_COMPILE_FLAG([-Wpedantic],
-        [CXXFLAGS="$CXXFLAGS -Wpedantic"],
-        [AX_CHECK_COMPILE_FLAG([-pedantic],
-            [CXXFLAGS="$CXXFLAGS -pedantic"])])])
-
 # Disallow warning on style order of declarations.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
