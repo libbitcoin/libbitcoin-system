@@ -87,7 +87,7 @@ constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
         #define byte_swap16(value) bswap16(value)
         #define byte_swap32(value) bswap32(value)
         #define byte_swap64(value) bswap64(value)
-    #elif defined(HAVE_MSC) || defined(HAVE_CYGWIN)
+    #elif defined(HAVE_MSC)
         // docs.microsoft.com/en-us/cpp/c-runtime-library/reference/
         // byteswap-uint64-byteswap-ulong-byteswap-ushort
         #include <intrin.h>
