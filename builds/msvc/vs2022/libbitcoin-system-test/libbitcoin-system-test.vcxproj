@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\..\..\test\math\addition.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bytes.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\byteswap.cpp" />
     <ClCompile Include="..\..\..\..\test\math\cast.cpp" />
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
@@ -305,11 +306,6 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets'))" />
   </Target>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
-    <PostBuildEvent>
-      <Command>"$(TargetPath)" --run_test=sha256_tests --show_progress=no --build_info=yes</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

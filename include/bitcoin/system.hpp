@@ -131,6 +131,7 @@
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/bytes.hpp>
+#include <bitcoin/system/math/byteswap.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
@@ -139,7 +140,6 @@
 #include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/sign.hpp>
-#include <bitcoin/system/math/external/byte_swap.hpp>
 #include <bitcoin/system/radix/base_10.hpp>
 #include <bitcoin/system/radix/base_16.hpp>
 #include <bitcoin/system/radix/base_2048.hpp>

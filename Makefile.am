@@ -293,6 +293,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/addition.cpp \
     test/math/bits.cpp \
     test/math/bytes.cpp \
+    test/math/byteswap.cpp \
     test/math/cast.cpp \
     test/math/division.cpp \
     test/math/limits.cpp \
@@ -569,6 +570,7 @@ include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/addition.ipp \
     include/bitcoin/system/impl/math/bits.ipp \
     include/bitcoin/system/impl/math/bytes.ipp \
+    include/bitcoin/system/impl/math/byteswap.ipp \
     include/bitcoin/system/impl/math/cast.ipp \
     include/bitcoin/system/impl/math/division.ipp \
     include/bitcoin/system/impl/math/limits.ipp \
@@ -623,6 +625,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/addition.hpp \
     include/bitcoin/system/math/bits.hpp \
     include/bitcoin/system/math/bytes.hpp \
+    include/bitcoin/system/math/byteswap.hpp \
     include/bitcoin/system/math/cast.hpp \
     include/bitcoin/system/math/division.hpp \
     include/bitcoin/system/math/limits.hpp \
@@ -631,10 +634,6 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/overflow.hpp \
     include/bitcoin/system/math/power.hpp \
     include/bitcoin/system/math/sign.hpp
-
-include_bitcoin_system_math_externaldir = ${includedir}/bitcoin/system/math/external
-include_bitcoin_system_math_external_HEADERS = \
-    include/bitcoin/system/math/external/byte_swap.hpp
 
 include_bitcoin_system_radixdir = ${includedir}/bitcoin/system/radix
 include_bitcoin_system_radix_HEADERS = \

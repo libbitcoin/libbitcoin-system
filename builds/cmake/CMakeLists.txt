@@ -599,6 +599,7 @@ if (with-tests)
         "../../test/math/addition.cpp"
         "../../test/math/bits.cpp"
         "../../test/math/bytes.cpp"
+        "../../test/math/byteswap.cpp"
         "../../test/math/cast.cpp"
         "../../test/math/division.cpp"
         "../../test/math/limits.cpp"

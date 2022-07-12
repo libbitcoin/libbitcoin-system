@@ -36,33 +36,6 @@ constexpr size_t byte_width(Integer value) NOEXCEPT;
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr size_t byte_width(Integer value) NOEXCEPT;
 
-/// Byteswap (platform independent byte reversal).
-/// ---------------------------------------------------------------------------
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint8_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint16_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint32_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint64_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
 /// Bits to bytes utilities.
 /// ---------------------------------------------------------------------------
 
