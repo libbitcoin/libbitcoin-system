@@ -116,9 +116,9 @@ void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
     };
 
     uint32_t a, b, c, d, f, g, h, y0, y1, y2;
-    uint64_t tbl;
-    uint64_t inp_end, inp;
-    alignas(16) uint32_t xfer[4];
+    uint64_t table;
+    uint64_t input_end, input;
+    alignas(16) uint32_t transfer[4];
 
     __asm__ __volatile__(
         "shl    $0x6,%2;"
@@ -1029,7 +1029,7 @@ void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
 
         "Ldone_hash_%=:"
 
-        : "+r"(state), "+r"(data), "+r"(blocks), "=r"(a), "=r"(b), "=r"(c), "=r"(d), /* e = chunk */ "=r"(f), "=r"(g), "=r"(h), "=r"(y0), "=r"(y1), "=r"(y2), "=r"(tbl), "+m"(inp_end), "+m"(inp), "+m"(xfer)
+        : "+r"(state), "+r"(data), "+r"(blocks), "=r"(a), "=r"(b), "=r"(c), "=r"(d), /* e = chunk */ "=r"(f), "=r"(g), "=r"(h), "=r"(y0), "=r"(y1), "=r"(y2), "=r"(table), "+m"(input_end), "+m"(input), "+m"(transfer)
         : "m"(k256), "m"(flip_mask), "m"(shuffle_00ba), "m"(shuffle_dc00)
         : "cc", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12"
    );
