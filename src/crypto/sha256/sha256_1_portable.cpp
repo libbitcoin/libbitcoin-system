@@ -1,3 +1,4 @@
+// Based on:
 /* libsodium: hash_sha256_.c, v0.4.5 2014/04/16 */
 /**
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
@@ -37,28 +38,41 @@ namespace sha256 {
 #ifndef VISUAL
 // movable-type.co.uk/scripts/sha256.html
 
-#define shr(x, n)         (x >> n)
+// TODO: use std::rotr (intrinsic/inline).
 #define rotr(x, n)        ((x >> n) | (x << (32 - n)))
+
+// TODO: eliminate macros and (constexpr).
+#define shr(x, n)         (x >> n)
 #define choice(x, y, z)   ((x & (y ^ z)) ^ z)
 #define majority(x, y, z) ((x & (y | z)) | (y & z))
+
+// TODO: eliminate macros (inline).
 #define SIGMA0(x)    (rotr(x,  2) ^ rotr(x, 13) ^ rotr(x, 22))
 #define SIGMA1(x)    (rotr(x,  6) ^ rotr(x, 11) ^ rotr(x, 25))
 #define sigma0(x)    (rotr(x,  7) ^ rotr(x, 18) ^  shr(x,  3))
 #define sigma1(x)    (rotr(x, 17) ^ rotr(x, 19) ^  shr(x, 10))
 
+// TODO: eliminate macros (inline). d&, h&
 #define round(a, b, c, d, e, f, g, h, k) \
     t0 = h + SIGMA1(e) + choice(e, f, g) + k;  \
     t1 =     SIGMA0(a) + majority(a, b, c); \
     d += t0; \
     h = t0 + t1;
-
+    
+// TODO: eliminate macros and normalize case (inline). S&, <i>
 #define RNDr(S, W, i, k) \
-    round(S[(64 - i) % 8], S[(65 - i) % 8], \
-    S[(66 - i) % 8], S[(67 - i) % 8], \
-    S[(68 - i) % 8], S[(69 - i) % 8], \
-    S[(70 - i) % 8], S[(71 - i) % 8], \
-    W[i] + k)
+    round( \
+        S[(64 - i) % 8], \
+        S[(65 - i) % 8], \
+        S[(66 - i) % 8], \
+        S[(67 - i) % 8], \
+        S[(68 - i) % 8], \
+        S[(69 - i) % 8], \
+        S[(70 - i) % 8], \
+        S[(71 - i) % 8], \
+        W[i] + k)
 
+// TODO: eliminate macros and normalize case (inline). W&, <i>
 #define Wi(W, i) \
     W[i] = sigma1(W[i - 2]) + W[i - 7] + sigma0(W[i - 15]) + W[i - 16]
 #endif
@@ -76,11 +90,14 @@ void single_hash(state& state, const block& block) NOEXCEPT
     uint32_t t0, t1;
     sha256::state S{ state };
     std::array<uint32_t, block_size> W;
+
+    // Populates W[0..15] with block integers (16 X 4 = 64).
     to_big_endian_set(
         narrowing_array_cast<uint32_t, integers>(W),
         array_cast<uint32_t>(block));
 
 #ifndef VISUAL
+    // Computes W[16..63].
     Wi(W, 16);
     Wi(W, 17);
     Wi(W, 18);
@@ -130,6 +147,7 @@ void single_hash(state& state, const block& block) NOEXCEPT
     Wi(W, 62);
     Wi(W, 63);
 
+    // 64 rounds.
     RNDr(S, W, 0, 0x428a2f98);
     RNDr(S, W, 1, 0x71374491);
     RNDr(S, W, 2, 0xb5c0fbcf);
