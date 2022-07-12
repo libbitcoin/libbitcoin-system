@@ -20,8 +20,6 @@
 
 BOOST_AUTO_TEST_SUITE(intrinsics_tests)
 
-// "try" tests not reliable across platforms.
-
 // Local get_bit<> utility.
 static_assert(!get_bit<0>(0));
 static_assert( get_bit<0>(1));
@@ -38,6 +36,7 @@ static_assert( get_bit<31>(0x80000000_u32));
 static_assert( get_bit<15>(0x8000_u16));
 static_assert( get_bit< 7>(0x80_u8));
 
+// "try" tests not reliable across platforms.
 #if defined(DISABLED)
 
 BOOST_AUTO_TEST_CASE(intrinsics__try_avx2__always__expected)
@@ -83,12 +82,10 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_shani__always__expected)
 
 #endif
 
-BOOST_AUTO_TEST_CASE(intrinsics__try_neon__always__true_if_have_arm)
+BOOST_AUTO_TEST_CASE(intrinsics__try_neon__always__true_if_have_neon)
 {
 #if defined (HAVE_NEON)
     BOOST_REQUIRE(try_neon());
-#else
-    BOOST_REQUIRE(!try_neon());
 #endif
 }
 

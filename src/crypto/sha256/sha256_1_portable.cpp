@@ -33,41 +33,44 @@
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
-    
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 #ifndef VISUAL
-#define Ch(x, y, z)  ((x & (y ^ z)) ^ z)
-#define Maj(x, y, z) ((x & (y | z)) | (y & z))
-#define SHR(x, n)    (x >> n)
-#define ROTR(x, n)   ((x >> n) | (x << (32 - n)))
-#define S0(x)        (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-#define S1(x)        (ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
-#define s0(x)        (ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3))
-#define s1(x)        (ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10))
+// movable-type.co.uk/scripts/sha256.html
 
-#define RND(a, b, c, d, e, f, g, h, k) \
-    t0 = h + S1(e) + Ch(e, f, g) + k;  \
-    t1 = S0(a) + Maj(a, b, c); \
+#define shr(x, n)         (x >> n)
+#define rotr(x, n)        ((x >> n) | (x << (32 - n)))
+#define choice(x, y, z)   ((x & (y ^ z)) ^ z)
+#define majority(x, y, z) ((x & (y | z)) | (y & z))
+#define SIGMA0(x)    (rotr(x,  2) ^ rotr(x, 13) ^ rotr(x, 22))
+#define SIGMA1(x)    (rotr(x,  6) ^ rotr(x, 11) ^ rotr(x, 25))
+#define sigma0(x)    (rotr(x,  7) ^ rotr(x, 18) ^  shr(x,  3))
+#define sigma1(x)    (rotr(x, 17) ^ rotr(x, 19) ^  shr(x, 10))
+
+#define round(a, b, c, d, e, f, g, h, k) \
+    t0 = h + SIGMA1(e) + choice(e, f, g) + k;  \
+    t1 =     SIGMA0(a) + majority(a, b, c); \
     d += t0; \
     h = t0 + t1;
 
 #define RNDr(S, W, i, k) \
-    RND(S[(64 - i) % 8], S[(65 - i) % 8], \
+    round(S[(64 - i) % 8], S[(65 - i) % 8], \
     S[(66 - i) % 8], S[(67 - i) % 8], \
     S[(68 - i) % 8], S[(69 - i) % 8], \
     S[(70 - i) % 8], S[(71 - i) % 8], \
     W[i] + k)
 
 #define Wi(W, i) \
-    W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16]
+    W[i] = sigma1(W[i - 2]) + W[i - 7] + sigma0(W[i - 15]) + W[i - 16]
 #endif
-
+    
+////void single_hash(state& state, const blocks& blocks) NOEXCEPT;
 void single_hash(state& state, const block& block) NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+
     constexpr auto integers = block_size / sizeof(uint32_t);
 
     uint32_t t0, t1;
@@ -201,30 +204,30 @@ void single_hash(state& state, const block& block) NOEXCEPT
     state[5] += S[5];
     state[6] += S[6];
     state[7] += S[7];
-}
 
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+}
 
 // ----------------------------------------------------------------------------
 
 void single_hash(state& state, const block1& blocks) NOEXCEPT
 {
-    single_hash(state, blocks[0]);
+    single_hash(state, blocks.front());
 }
 
 void double_hash(hash1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_hash(state, blocks);
-    single_hash(state, sha256::double_pad);
-    auto data = sha256::double_buffer;
-    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(data), state);
+    single_hash(state, sha256::pad_64);
+    auto buffer = sha256::padded_32;
+    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_hash(state, data);
-    to_big_endian_set(array_cast<uint32_t>(out[0]), state);
+    single_hash(state, buffer);
+    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
 }
 
 } // namespace sha256

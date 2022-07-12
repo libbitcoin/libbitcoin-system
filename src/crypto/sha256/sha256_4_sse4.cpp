@@ -43,7 +43,7 @@
 //;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 //; This code schedules 1 blocks at a time, with 4 lanes per block
 //;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+//
 // Port to inline assembly provided by:
 // Copyright (c) 2017-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
@@ -59,7 +59,7 @@ namespace libbitcoin {
 namespace system {
 namespace sha256 {
 
-#if defined(HAVE_MSC)
+#if !defined(HAVE_INTEL_ASM)
 
 void single_sse4(state&, const block1&) NOEXCEPT
 {
@@ -73,12 +73,14 @@ void double_sse4(hash1&, const block1&) NOEXCEPT
 
 #else
 
-BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+#ifndef VISUAL
 
 ////void single_sse4(state& state, const blocks& blocks) NOEXCEPT;
 void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
 {
-    constexpr uint32_t K256 alignas(16) []
+    BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+
+    constexpr alignas(16) uint32_t k256[]
     {
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
         0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -98,17 +100,17 @@ void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
         0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
     };
 
-    constexpr uint32_t FLIP_MASK alignas(16) []
+    constexpr alignas(16) uint32_t flip_mask[]
     {
         0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f
     };
 
-    constexpr uint32_t SHUF_00BA alignas(16) []
+    constexpr alignas(16) uint32_t shuffle_00ba[]
     {
         0x03020100, 0x0b0a0908, 0xffffffff, 0xffffffff
     };
 
-    constexpr uint32_t SHUF_DC00 alignas(16) []
+    constexpr alignas(16) uint32_t shuffle_dc00[]
     {
         0xffffffff, 0xffffffff, 0x03020100, 0x0b0a0908
     };
@@ -116,7 +118,7 @@ void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
     uint32_t a, b, c, d, f, g, h, y0, y1, y2;
     uint64_t tbl;
     uint64_t inp_end, inp;
-    uint32_t xfer alignas(16) [4];
+    alignas(16) uint32_t xfer[4];
 
     __asm__ __volatile__(
         "shl    $0x6,%2;"
@@ -1028,16 +1030,14 @@ void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
         "Ldone_hash_%=:"
 
         : "+r"(state), "+r"(data), "+r"(blocks), "=r"(a), "=r"(b), "=r"(c), "=r"(d), /* e = chunk */ "=r"(f), "=r"(g), "=r"(h), "=r"(y0), "=r"(y1), "=r"(y2), "=r"(tbl), "+m"(inp_end), "+m"(inp), "+m"(xfer)
-        : "m"(K256), "m"(FLIP_MASK), "m"(SHUF_00BA), "m"(SHUF_DC00)
+        : "m"(k256), "m"(flip_mask), "m"(shuffle_00ba), "m"(shuffle_dc00)
         : "cc", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12"
    );
+
+   BC_POP_WARNING()
 }
 
-BC_POP_WARNING()
-
-#endif // HAVE_MSC
-
-#if !defined(HAVE_MSC)
+#endif // VISUAL
 
 void single_sse4(state& state, const block& block) NOEXCEPT
 {
@@ -1048,22 +1048,22 @@ void single_sse4(state& state, const block& block) NOEXCEPT
 
 void single_sse4(state& state, const block1& blocks) NOEXCEPT
 {
-    return single_sse4(state, blocks[0]);
+    return single_sse4(state, blocks.front());
 }
 
 void double_sse4(hash1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_sse4(state, blocks);
-    single_sse4(state, sha256::double_pad);
-    auto data = sha256::double_buffer;
-    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(data), state);
+    single_sse4(state, sha256::pad_64);
+    auto buffer = sha256::padded_32;
+    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_sse4(state, data);
-    to_big_endian_set(array_cast<uint32_t>(out[0]), state);
+    single_sse4(state, buffer);
+    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
 }
 
-#endif // HAVE_MSC
+#endif // HAVE_INTEL_ASM
 
 } // namespace sha256
 } // namespace system

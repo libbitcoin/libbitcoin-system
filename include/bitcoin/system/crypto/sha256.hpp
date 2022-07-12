@@ -20,32 +20,32 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_INTRINSICS_INTRINSICS_HPP
 
 #include <array>
+#include <vector>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
     
-constexpr size_t state_size = 8;
 constexpr size_t hash_size  = 32;
 constexpr size_t block_size = 64;
+constexpr size_t state_size = 8;
 
-using state = std::array<uint32_t, state_size>;
 using hash  = std::array<uint8_t, hash_size>;
 using block = std::array<uint8_t, block_size>;
-
-using block1 = std::array<block, 1>;
-using block2 = std::array<block, 2>;
-using block4 = std::array<block, 4>;
-using block8 = std::array<block, 8>;
+using state = std::array<uint32_t, state_size>;
 
 using hash1 = std::array<hash, 1>;
 using hash2 = std::array<hash, 2>;
 using hash4 = std::array<hash, 4>;
 using hash8 = std::array<hash, 8>;
 
-template <size_t Blocks>
-using blocks = std::array<block, Blocks>;
+using block1 = std::array<block, 1>;
+using block2 = std::array<block, 2>;
+using block4 = std::array<block, 4>;
+using block8 = std::array<block, 8>;
+
+using blocks = std::vector<block>;
 
 constexpr state initial
 {
@@ -55,9 +55,10 @@ constexpr state initial
     0x1f83d9ab_u32, 0x5be0cd19_u32
 };
 
-/// General purpose pad, the counter will always fill the last 8 bytes of the
-/// final block, so the last row here is never used.
-constexpr block pad
+/// Padding for any size hash round (truncated to fill block).
+/// The count will be applied to any position after the first byte of padding,
+/// which is the 0x80 sentinel byte. As such the last row is never padding.
+constexpr block pad_any
 {
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // <= pad start
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -67,12 +68,12 @@ constexpr block pad
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // <= row unused.
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff // <= row unused.
 };
 
-/// Padding for double hash first round. Since doubling supports only single
-/// full blocks there is always a full block of padding with count of 512 bits.
-constexpr block double_pad
+/// Padding for full block hash round (64 bytes of pad/count).
+/// The buffer is prefilled with padding and a count of 256 bits.
+constexpr block pad_64
 {
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // <= pad start
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -85,14 +86,14 @@ constexpr block double_pad
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00  // <= 512 bits
 };
 
-/// Padding for double has second round. Since the second round always hashes
-/// a half block, the buffer is prefilled with padding and a count of 256 bits.
-constexpr block double_buffer
+/// Padding for a half block hash round (32 bytes of pad/count).
+/// The buffer is prefilled with padding and a count of 256 bits.
+constexpr block padded_32
 {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // <= final hash target
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // <= hash target
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // <= pad start
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

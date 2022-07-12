@@ -1,373 +1,345 @@
-// Copyright (c) 2017-2019 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// Based on:
+// sha256-x86.c - Intel SHA extensions using C intrinsics
+// Written and place in public domain by Jeffrey Walton
+// Based on code from Intel, and by Sean Gulley for the miTLS project.
 
 #include <bitcoin/system/crypto/sha256.hpp>
 
+#if defined(HAVE_INTEL)
 #include <immintrin.h>
+#endif
 #include <stdint.h>
 #include <bitcoin/system/define.hpp>
-////#include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
-    
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 
-inline uint32_t from_little_endian(const uint8_t data[4]) NOEXCEPT
+#if !defined(HAVE_INTEL)
+
+void double_avx2(hash8& out, const block8& blocks) NOEXCEPT
 {
-    return
-        (static_cast<uint32_t>(data[0]) << 0) |
-        (static_cast<uint32_t>(data[1]) << 8) |
-        (static_cast<uint32_t>(data[2]) << 16) |
-        (static_cast<uint32_t>(data[3]) << 24);
+    BC_ASSERT_MSG(false, "double_avx2 undefined");
 }
 
-inline void to_little_endian(uint8_t data[4], uint32_t value) NOEXCEPT
+#else
+
+using namespace i256;
+
+mint256_t inline SIGMA0(mint256_t x) NOEXCEPT { return exc(dis(shr(x,  2), shl(x, 30)), dis(shr(x, 13), shl(x, 19)), dis(shr(x, 22), shl(x, 10))); }
+mint256_t inline SIGMA1(mint256_t x) NOEXCEPT { return exc(dis(shr(x,  6), shl(x, 26)), dis(shr(x, 11), shl(x, 21)), dis(shr(x, 25), shl(x, 7))); }
+mint256_t inline sigma0(mint256_t x) NOEXCEPT { return exc(dis(shr(x,  7), shl(x, 25)), dis(shr(x, 18), shl(x, 14)), shr(x, 3)); }
+mint256_t inline sigma1(mint256_t x) NOEXCEPT { return exc(dis(shr(x, 17), shl(x, 15)), dis(shr(x, 19), shl(x, 13)), shr(x, 10)); }
+mint256_t inline choice(  mint256_t x, mint256_t y, mint256_t z) NOEXCEPT { return exc(z, con(x, exc(y, z))); }
+mint256_t inline majority(mint256_t x, mint256_t y, mint256_t z) NOEXCEPT { return dis(con(x, y), con(z, dis(x, y))); }
+
+void inline round(mint256_t a, mint256_t b, mint256_t c, mint256_t& d,
+    mint256_t e, mint256_t f, mint256_t g, mint256_t& h, mint256_t k) NOEXCEPT
 {
-    data[0] = (value >> 0) & 0xff;
-    data[1] = (value >> 8) & 0xff;
-    data[2] = (value >> 16) & 0xff;
-    data[3] = (value >> 24) & 0xff;
+    const auto t1 = sum(h, SIGMA1(e), choice(e, f, g), k);
+    const auto t2 = sum(   SIGMA0(a), majority(a, b, c));
+    d = sum(d,  t1);
+    h = sum(t1, t2);
 }
 
-#ifndef VISUAL
-__m256i inline K(uint32_t x) NOEXCEPT { return _mm256_set1_epi32(x); }
-__m256i inline Add(__m256i x, __m256i y) NOEXCEPT { return _mm256_add_epi32(x, y); }
-__m256i inline Add(__m256i x, __m256i y, __m256i z) NOEXCEPT { return Add(Add(x, y), z); }
-__m256i inline Add(__m256i x, __m256i y, __m256i z, __m256i w) NOEXCEPT { return Add(Add(x, y), Add(z, w)); }
-__m256i inline Add(__m256i x, __m256i y, __m256i z, __m256i w, __m256i v) NOEXCEPT { return Add(Add(x, y, z), Add(w, v)); }
-__m256i inline Inc(__m256i& x, __m256i y) NOEXCEPT { x = Add(x, y); return x; }
-__m256i inline Inc(__m256i& x, __m256i y, __m256i z) NOEXCEPT { x = Add(x, y, z); return x; }
-__m256i inline Inc(__m256i& x, __m256i y, __m256i z, __m256i w) NOEXCEPT { x = Add(x, y, z, w); return x; }
-__m256i inline Xor(__m256i x, __m256i y) NOEXCEPT { return _mm256_xor_si256(x, y); }
-__m256i inline Xor(__m256i x, __m256i y, __m256i z) NOEXCEPT { return Xor(Xor(x, y), z); }
-__m256i inline Or(__m256i x, __m256i y) NOEXCEPT { return _mm256_or_si256(x, y); }
-__m256i inline And(__m256i x, __m256i y) NOEXCEPT { return _mm256_and_si256(x, y); }
-__m256i inline ShR(__m256i x, int n) NOEXCEPT { return _mm256_srli_epi32(x, n); }
-__m256i inline ShL(__m256i x, int n) NOEXCEPT { return _mm256_slli_epi32(x, n); }
-__m256i inline Ch(__m256i x, __m256i y, __m256i z) NOEXCEPT { return Xor(z, And(x, Xor(y, z))); }
-__m256i inline Maj(__m256i x, __m256i y, __m256i z) NOEXCEPT { return Or(And(x, y), And(z, Or(x, y))); }
-__m256i inline Sigma0(__m256i x) NOEXCEPT { return Xor(Or(ShR(x, 2), ShL(x, 30)), Or(ShR(x, 13), ShL(x, 19)), Or(ShR(x, 22), ShL(x, 10))); }
-__m256i inline Sigma1(__m256i x) NOEXCEPT { return Xor(Or(ShR(x, 6), ShL(x, 26)), Or(ShR(x, 11), ShL(x, 21)), Or(ShR(x, 25), ShL(x, 7))); }
-__m256i inline sigma0(__m256i x) NOEXCEPT { return Xor(Or(ShR(x, 7), ShL(x, 25)), Or(ShR(x, 18), ShL(x, 14)), ShR(x, 3)); }
-__m256i inline sigma1(__m256i x) NOEXCEPT { return Xor(Or(ShR(x, 17), ShL(x, 15)), Or(ShR(x, 19), ShL(x, 13)), ShR(x, 10)); }
-
-// One round of SHA-256.
-void inline Round(__m256i a, __m256i b, __m256i c, __m256i& d, __m256i e, __m256i f, __m256i g, __m256i& h, __m256i k) NOEXCEPT
+mint256_t inline read8(const block8& blocks, int offset) NOEXCEPT
 {
-    const __m256i t1 = Add(h, Sigma1(e), Ch(e, f, g), k);
-    const __m256i t2 = Add(Sigma0(a), Maj(a, b, c));
-    d = Add(d, t1);
-    h = Add(t1, t2);
+    constexpr auto four = sizeof(uint32_t);
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+    const auto value = set(
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[0][offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[1][offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[2][offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[3][offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[4][offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[5][offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[6][offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[7][offset])));
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+
+    return shuffle(value, set(
+        0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul,  0x00010203ul,
+        0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
 }
 
-__m256i inline Read8(const block8& blocks, int offset) NOEXCEPT
+void inline write8(hash8& hashes, int offset, mint256_t value) NOEXCEPT
 {
-    const __m256i ret = _mm256_set_epi32(
-        from_little_endian(&blocks[0][offset]),
-        from_little_endian(&blocks[1][offset]),
-        from_little_endian(&blocks[2][offset]),
-        from_little_endian(&blocks[3][offset]),
-        from_little_endian(&blocks[4][offset]),
-        from_little_endian(&blocks[5][offset]),
-        from_little_endian(&blocks[6][offset]),
-        from_little_endian(&blocks[7][offset]));
+    value = shuffle(value, set(
+        0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul,
+        0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
 
-    return _mm256_shuffle_epi8(ret, _mm256_set_epi32(
-        0x0c0d0e0ful,
-        0x08090a0bul,
-        0x04050607ul,
-        0x00010203ul,
-        0x0c0d0e0ful,
-        0x08090a0bul,
-        0x04050607ul,
-        0x00010203ul));
+    constexpr auto four = sizeof(uint32_t);
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+    unsafe_array_cast<uint8_t, four>(&hashes[0][offset]) = to_little_endian(get<7>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[1][offset]) = to_little_endian(get<6>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[2][offset]) = to_little_endian(get<5>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[3][offset]) = to_little_endian(get<4>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[4][offset]) = to_little_endian(get<3>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[5][offset]) = to_little_endian(get<2>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[6][offset]) = to_little_endian(get<1>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[7][offset]) = to_little_endian(get<0>(value));
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 }
-
-void inline Write8(hash8& hashes, int offset, __m256i v) NOEXCEPT
-{
-    v = _mm256_shuffle_epi8(v, _mm256_set_epi32(
-        0x0c0d0e0ful,
-        0x08090a0bul,
-        0x04050607ul,
-        0x00010203ul,
-        0x0c0d0e0ful,
-        0x08090a0bul,
-        0x04050607ul,
-        0x00010203ul));
-
-    to_little_endian(&hashes[0][offset], _mm256_extract_epi32(v, 7));
-    to_little_endian(&hashes[1][offset], _mm256_extract_epi32(v, 6));
-    to_little_endian(&hashes[2][offset], _mm256_extract_epi32(v, 5));
-    to_little_endian(&hashes[3][offset], _mm256_extract_epi32(v, 4));
-    to_little_endian(&hashes[4][offset], _mm256_extract_epi32(v, 3));
-    to_little_endian(&hashes[5][offset], _mm256_extract_epi32(v, 2));
-    to_little_endian(&hashes[6][offset], _mm256_extract_epi32(v, 1));
-    to_little_endian(&hashes[7][offset], _mm256_extract_epi32(v, 0));
-}
-#endif
 
 // Eight blocks in eight lanes, doubled.
 void double_avx2(hash8& out, const block8& blocks) NOEXCEPT
 {
-    // Transform 1
-    __m256i a = K(0x6a09e667ul);
-    __m256i b = K(0xbb67ae85ul);
-    __m256i c = K(0x3c6ef372ul);
-    __m256i d = K(0xa54ff53aul);
-    __m256i e = K(0x510e527ful);
-    __m256i f = K(0x9b05688cul);
-    __m256i g = K(0x1f83d9abul);
-    __m256i h = K(0x5be0cd19ul);
+    // Transform 1.
+    auto a = set(0x6a09e667ul);
+    auto b = set(0xbb67ae85ul);
+    auto c = set(0x3c6ef372ul);
+    auto d = set(0xa54ff53aul);
+    auto e = set(0x510e527ful);
+    auto f = set(0x9b05688cul);
+    auto g = set(0x1f83d9abul);
+    auto h = set(0x5be0cd19ul);
 
-    __m256i w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13, w14, w15;
+    mint256_t w00, w01, w02, w03, w04, w05, w06, w07;
+    mint256_t w08, w09, w10, w11, w12, w13, w14, w15;
 
-    Round(a, b, c, d, e, f, g, h, Add(K(0x428a2f98ul), w0 = Read8(blocks, 0)));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x71374491ul), w1 = Read8(blocks, 4)));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xb5c0fbcful), w2 = Read8(blocks, 8)));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xe9b5dba5ul), w3 = Read8(blocks, 12)));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x3956c25bul), w4 = Read8(blocks, 16)));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x59f111f1ul), w5 = Read8(blocks, 20)));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x923f82a4ul), w6 = Read8(blocks, 24)));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xab1c5ed5ul), w7 = Read8(blocks, 28)));
-    Round(a, b, c, d, e, f, g, h, Add(K(0xd807aa98ul), w8 = Read8(blocks, 32)));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x12835b01ul), w9 = Read8(blocks, 36)));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x243185beul), w10 = Read8(blocks, 40)));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x550c7dc3ul), w11 = Read8(blocks, 44)));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x72be5d74ul), w12 = Read8(blocks, 48)));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x80deb1feul), w13 = Read8(blocks, 52)));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x9bdc06a7ul), w14 = Read8(blocks, 56)));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xc19bf174ul), w15 = Read8(blocks, 60)));
-    Round(a, b, c, d, e, f, g, h, Add(K(0xe49b69c1ul), Inc(w0, sigma1(w14), w9, sigma0(w1))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0xefbe4786ul), Inc(w1, sigma1(w15), w10, sigma0(w2))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x0fc19dc6ul), Inc(w2, sigma1(w0), w11, sigma0(w3))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x240ca1ccul), Inc(w3, sigma1(w1), w12, sigma0(w4))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x2de92c6ful), Inc(w4, sigma1(w2), w13, sigma0(w5))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x4a7484aaul), Inc(w5, sigma1(w3), w14, sigma0(w6))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x5cb0a9dcul), Inc(w6, sigma1(w4), w15, sigma0(w7))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x76f988daul), Inc(w7, sigma1(w5), w0, sigma0(w8))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x983e5152ul), Inc(w8, sigma1(w6), w1, sigma0(w9))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0xa831c66dul), Inc(w9, sigma1(w7), w2, sigma0(w10))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xb00327c8ul), Inc(w10, sigma1(w8), w3, sigma0(w11))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xbf597fc7ul), Inc(w11, sigma1(w9), w4, sigma0(w12))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0xc6e00bf3ul), Inc(w12, sigma1(w10), w5, sigma0(w13))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0xd5a79147ul), Inc(w13, sigma1(w11), w6, sigma0(w14))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x06ca6351ul), Inc(w14, sigma1(w12), w7, sigma0(w15))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x14292967ul), Inc(w15, sigma1(w13), w8, sigma0(w0))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x27b70a85ul), Inc(w0, sigma1(w14), w9, sigma0(w1))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x2e1b2138ul), Inc(w1, sigma1(w15), w10, sigma0(w2))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x4d2c6dfcul), Inc(w2, sigma1(w0), w11, sigma0(w3))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x53380d13ul), Inc(w3, sigma1(w1), w12, sigma0(w4))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x650a7354ul), Inc(w4, sigma1(w2), w13, sigma0(w5))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x766a0abbul), Inc(w5, sigma1(w3), w14, sigma0(w6))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x81c2c92eul), Inc(w6, sigma1(w4), w15, sigma0(w7))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x92722c85ul), Inc(w7, sigma1(w5), w0, sigma0(w8))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0xa2bfe8a1ul), Inc(w8, sigma1(w6), w1, sigma0(w9))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0xa81a664bul), Inc(w9, sigma1(w7), w2, sigma0(w10))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xc24b8b70ul), Inc(w10, sigma1(w8), w3, sigma0(w11))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xc76c51a3ul), Inc(w11, sigma1(w9), w4, sigma0(w12))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0xd192e819ul), Inc(w12, sigma1(w10), w5, sigma0(w13))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0xd6990624ul), Inc(w13, sigma1(w11), w6, sigma0(w14))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0xf40e3585ul), Inc(w14, sigma1(w12), w7, sigma0(w15))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x106aa070ul), Inc(w15, sigma1(w13), w8, sigma0(w0))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x19a4c116ul), Inc(w0, sigma1(w14), w9, sigma0(w1))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x1e376c08ul), Inc(w1, sigma1(w15), w10, sigma0(w2))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x2748774cul), Inc(w2, sigma1(w0), w11, sigma0(w3))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x34b0bcb5ul), Inc(w3, sigma1(w1), w12, sigma0(w4))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x391c0cb3ul), Inc(w4, sigma1(w2), w13, sigma0(w5))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x4ed8aa4aul), Inc(w5, sigma1(w3), w14, sigma0(w6))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x5b9cca4ful), Inc(w6, sigma1(w4), w15, sigma0(w7))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x682e6ff3ul), Inc(w7, sigma1(w5), w0, sigma0(w8))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x748f82eeul), Inc(w8, sigma1(w6), w1, sigma0(w9))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x78a5636ful), Inc(w9, sigma1(w7), w2, sigma0(w10))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x84c87814ul), Inc(w10, sigma1(w8), w3, sigma0(w11))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x8cc70208ul), Inc(w11, sigma1(w9), w4, sigma0(w12))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x90befffaul), Inc(w12, sigma1(w10), w5, sigma0(w13))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0xa4506cebul), Inc(w13, sigma1(w11), w6, sigma0(w14))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0xbef9a3f7ul), Inc(w14, sigma1(w12), w7, sigma0(w15))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xc67178f2ul), Inc(w15, sigma1(w13), w8, sigma0(w0))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x428a2f98ul), w00 = read8(blocks, 0)));
+    round(h, a, b, c, d, e, f, g, sum(set(0x71374491ul), w01 = read8(blocks, 4)));
+    round(g, h, a, b, c, d, e, f, sum(set(0xb5c0fbcful), w02 = read8(blocks, 8)));
+    round(f, g, h, a, b, c, d, e, sum(set(0xe9b5dba5ul), w03 = read8(blocks, 12)));
+    round(e, f, g, h, a, b, c, d, sum(set(0x3956c25bul), w04 = read8(blocks, 16)));
+    round(d, e, f, g, h, a, b, c, sum(set(0x59f111f1ul), w05 = read8(blocks, 20)));
+    round(c, d, e, f, g, h, a, b, sum(set(0x923f82a4ul), w06 = read8(blocks, 24)));
+    round(b, c, d, e, f, g, h, a, sum(set(0xab1c5ed5ul), w07 = read8(blocks, 28)));
+    round(a, b, c, d, e, f, g, h, sum(set(0xd807aa98ul), w08 = read8(blocks, 32)));
+    round(h, a, b, c, d, e, f, g, sum(set(0x12835b01ul), w09 = read8(blocks, 36)));
+    round(g, h, a, b, c, d, e, f, sum(set(0x243185beul), w10 = read8(blocks, 40)));
+    round(f, g, h, a, b, c, d, e, sum(set(0x550c7dc3ul), w11 = read8(blocks, 44)));
+    round(e, f, g, h, a, b, c, d, sum(set(0x72be5d74ul), w12 = read8(blocks, 48)));
+    round(d, e, f, g, h, a, b, c, sum(set(0x80deb1feul), w13 = read8(blocks, 52)));
+    round(c, d, e, f, g, h, a, b, sum(set(0x9bdc06a7ul), w14 = read8(blocks, 56)));
+    round(b, c, d, e, f, g, h, a, sum(set(0xc19bf174ul), w15 = read8(blocks, 60)));
+    round(a, b, c, d, e, f, g, h, sum(set(0xe49b69c1ul), inc(w00, sigma1(w14), w09, sigma0(w01))));
+    round(h, a, b, c, d, e, f, g, sum(set(0xefbe4786ul), inc(w01, sigma1(w15), w10, sigma0(w02))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x0fc19dc6ul), inc(w02, sigma1(w00), w11, sigma0(w03))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x240ca1ccul), inc(w03, sigma1(w01), w12, sigma0(w04))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x2de92c6ful), inc(w04, sigma1(w02), w13, sigma0(w05))));
+    round(d, e, f, g, h, a, b, c, sum(set(0x4a7484aaul), inc(w05, sigma1(w03), w14, sigma0(w06))));
+    round(c, d, e, f, g, h, a, b, sum(set(0x5cb0a9dcul), inc(w06, sigma1(w04), w15, sigma0(w07))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x76f988daul), inc(w07, sigma1(w05), w00, sigma0(w08))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x983e5152ul), inc(w08, sigma1(w06), w01, sigma0(w09))));
+    round(h, a, b, c, d, e, f, g, sum(set(0xa831c66dul), inc(w09, sigma1(w07), w02, sigma0(w10))));
+    round(g, h, a, b, c, d, e, f, sum(set(0xb00327c8ul), inc(w10, sigma1(w08), w03, sigma0(w11))));
+    round(f, g, h, a, b, c, d, e, sum(set(0xbf597fc7ul), inc(w11, sigma1(w09), w04, sigma0(w12))));
+    round(e, f, g, h, a, b, c, d, sum(set(0xc6e00bf3ul), inc(w12, sigma1(w10), w05, sigma0(w13))));
+    round(d, e, f, g, h, a, b, c, sum(set(0xd5a79147ul), inc(w13, sigma1(w11), w06, sigma0(w14))));
+    round(c, d, e, f, g, h, a, b, sum(set(0x06ca6351ul), inc(w14, sigma1(w12), w07, sigma0(w15))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x14292967ul), inc(w15, sigma1(w13), w08, sigma0(w00))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x27b70a85ul), inc(w00, sigma1(w14), w09, sigma0(w01))));
+    round(h, a, b, c, d, e, f, g, sum(set(0x2e1b2138ul), inc(w01, sigma1(w15), w10, sigma0(w02))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x4d2c6dfcul), inc(w02, sigma1(w00), w11, sigma0(w03))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x53380d13ul), inc(w03, sigma1(w01), w12, sigma0(w04))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x650a7354ul), inc(w04, sigma1(w02), w13, sigma0(w05))));
+    round(d, e, f, g, h, a, b, c, sum(set(0x766a0abbul), inc(w05, sigma1(w03), w14, sigma0(w06))));
+    round(c, d, e, f, g, h, a, b, sum(set(0x81c2c92eul), inc(w06, sigma1(w04), w15, sigma0(w07))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x92722c85ul), inc(w07, sigma1(w05), w00, sigma0(w08))));
+    round(a, b, c, d, e, f, g, h, sum(set(0xa2bfe8a1ul), inc(w08, sigma1(w06), w01, sigma0(w09))));
+    round(h, a, b, c, d, e, f, g, sum(set(0xa81a664bul), inc(w09, sigma1(w07), w02, sigma0(w10))));
+    round(g, h, a, b, c, d, e, f, sum(set(0xc24b8b70ul), inc(w10, sigma1(w08), w03, sigma0(w11))));
+    round(f, g, h, a, b, c, d, e, sum(set(0xc76c51a3ul), inc(w11, sigma1(w09), w04, sigma0(w12))));
+    round(e, f, g, h, a, b, c, d, sum(set(0xd192e819ul), inc(w12, sigma1(w10), w05, sigma0(w13))));
+    round(d, e, f, g, h, a, b, c, sum(set(0xd6990624ul), inc(w13, sigma1(w11), w06, sigma0(w14))));
+    round(c, d, e, f, g, h, a, b, sum(set(0xf40e3585ul), inc(w14, sigma1(w12), w07, sigma0(w15))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x106aa070ul), inc(w15, sigma1(w13), w08, sigma0(w00))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x19a4c116ul), inc(w00, sigma1(w14), w09, sigma0(w01))));
+    round(h, a, b, c, d, e, f, g, sum(set(0x1e376c08ul), inc(w01, sigma1(w15), w10, sigma0(w02))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x2748774cul), inc(w02, sigma1(w00), w11, sigma0(w03))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x34b0bcb5ul), inc(w03, sigma1(w01), w12, sigma0(w04))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x391c0cb3ul), inc(w04, sigma1(w02), w13, sigma0(w05))));
+    round(d, e, f, g, h, a, b, c, sum(set(0x4ed8aa4aul), inc(w05, sigma1(w03), w14, sigma0(w06))));
+    round(c, d, e, f, g, h, a, b, sum(set(0x5b9cca4ful), inc(w06, sigma1(w04), w15, sigma0(w07))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x682e6ff3ul), inc(w07, sigma1(w05), w00, sigma0(w08))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x748f82eeul), inc(w08, sigma1(w06), w01, sigma0(w09))));
+    round(h, a, b, c, d, e, f, g, sum(set(0x78a5636ful), inc(w09, sigma1(w07), w02, sigma0(w10))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x84c87814ul), inc(w10, sigma1(w08), w03, sigma0(w11))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x8cc70208ul), inc(w11, sigma1(w09), w04, sigma0(w12))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x90befffaul), inc(w12, sigma1(w10), w05, sigma0(w13))));
+    round(d, e, f, g, h, a, b, c, sum(set(0xa4506cebul), inc(w13, sigma1(w11), w06, sigma0(w14))));
+    round(c, d, e, f, g, h, a, b, sum(set(0xbef9a3f7ul), inc(w14, sigma1(w12), w07, sigma0(w15))));
+    round(b, c, d, e, f, g, h, a, sum(set(0xc67178f2ul), inc(w15, sigma1(w13), w08, sigma0(w00))));
 
-    a = Add(a, K(0x6a09e667ul));
-    b = Add(b, K(0xbb67ae85ul));
-    c = Add(c, K(0x3c6ef372ul));
-    d = Add(d, K(0xa54ff53aul));
-    e = Add(e, K(0x510e527ful));
-    f = Add(f, K(0x9b05688cul));
-    g = Add(g, K(0x1f83d9abul));
-    h = Add(h, K(0x5be0cd19ul));
+    a = sum(a, set(0x6a09e667ul));
+    b = sum(b, set(0xbb67ae85ul));
+    c = sum(c, set(0x3c6ef372ul));
+    d = sum(d, set(0xa54ff53aul));
+    e = sum(e, set(0x510e527ful));
+    f = sum(f, set(0x9b05688cul));
+    g = sum(g, set(0x1f83d9abul));
+    h = sum(h, set(0x5be0cd19ul));
 
-    const __m256i t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
+    const mint256_t t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
 
-    // Transform 2
-    Round(a, b, c, d, e, f, g, h, K(0xc28a2f98ul));
-    Round(h, a, b, c, d, e, f, g, K(0x71374491ul));
-    Round(g, h, a, b, c, d, e, f, K(0xb5c0fbcful));
-    Round(f, g, h, a, b, c, d, e, K(0xe9b5dba5ul));
-    Round(e, f, g, h, a, b, c, d, K(0x3956c25bul));
-    Round(d, e, f, g, h, a, b, c, K(0x59f111f1ul));
-    Round(c, d, e, f, g, h, a, b, K(0x923f82a4ul));
-    Round(b, c, d, e, f, g, h, a, K(0xab1c5ed5ul));
-    Round(a, b, c, d, e, f, g, h, K(0xd807aa98ul));
-    Round(h, a, b, c, d, e, f, g, K(0x12835b01ul));
-    Round(g, h, a, b, c, d, e, f, K(0x243185beul));
-    Round(f, g, h, a, b, c, d, e, K(0x550c7dc3ul));
-    Round(e, f, g, h, a, b, c, d, K(0x72be5d74ul));
-    Round(d, e, f, g, h, a, b, c, K(0x80deb1feul));
-    Round(c, d, e, f, g, h, a, b, K(0x9bdc06a7ul));
-    Round(b, c, d, e, f, g, h, a, K(0xc19bf374ul));
-    Round(a, b, c, d, e, f, g, h, K(0x649b69c1ul));
-    Round(h, a, b, c, d, e, f, g, K(0xf0fe4786ul));
-    Round(g, h, a, b, c, d, e, f, K(0x0fe1edc6ul));
-    Round(f, g, h, a, b, c, d, e, K(0x240cf254ul));
-    Round(e, f, g, h, a, b, c, d, K(0x4fe9346ful));
-    Round(d, e, f, g, h, a, b, c, K(0x6cc984beul));
-    Round(c, d, e, f, g, h, a, b, K(0x61b9411eul));
-    Round(b, c, d, e, f, g, h, a, K(0x16f988faul));
-    Round(a, b, c, d, e, f, g, h, K(0xf2c65152ul));
-    Round(h, a, b, c, d, e, f, g, K(0xa88e5a6dul));
-    Round(g, h, a, b, c, d, e, f, K(0xb019fc65ul));
-    Round(f, g, h, a, b, c, d, e, K(0xb9d99ec7ul));
-    Round(e, f, g, h, a, b, c, d, K(0x9a1231c3ul));
-    Round(d, e, f, g, h, a, b, c, K(0xe70eeaa0ul));
-    Round(c, d, e, f, g, h, a, b, K(0xfdb1232bul));
-    Round(b, c, d, e, f, g, h, a, K(0xc7353eb0ul));
-    Round(a, b, c, d, e, f, g, h, K(0x3069bad5ul));
-    Round(h, a, b, c, d, e, f, g, K(0xcb976d5ful));
-    Round(g, h, a, b, c, d, e, f, K(0x5a0f118ful));
-    Round(f, g, h, a, b, c, d, e, K(0xdc1eeefdul));
-    Round(e, f, g, h, a, b, c, d, K(0x0a35b689ul));
-    Round(d, e, f, g, h, a, b, c, K(0xde0b7a04ul));
-    Round(c, d, e, f, g, h, a, b, K(0x58f4ca9dul));
-    Round(b, c, d, e, f, g, h, a, K(0xe15d5b16ul));
-    Round(a, b, c, d, e, f, g, h, K(0x007f3e86ul));
-    Round(h, a, b, c, d, e, f, g, K(0x37088980ul));
-    Round(g, h, a, b, c, d, e, f, K(0xa507ea32ul));
-    Round(f, g, h, a, b, c, d, e, K(0x6fab9537ul));
-    Round(e, f, g, h, a, b, c, d, K(0x17406110ul));
-    Round(d, e, f, g, h, a, b, c, K(0x0d8cd6f1ul));
-    Round(c, d, e, f, g, h, a, b, K(0xcdaa3b6dul));
-    Round(b, c, d, e, f, g, h, a, K(0xc0bbbe37ul));
-    Round(a, b, c, d, e, f, g, h, K(0x83613bdaul));
-    Round(h, a, b, c, d, e, f, g, K(0xdb48a363ul));
-    Round(g, h, a, b, c, d, e, f, K(0x0b02e931ul));
-    Round(f, g, h, a, b, c, d, e, K(0x6fd15ca7ul));
-    Round(e, f, g, h, a, b, c, d, K(0x521afacaul));
-    Round(d, e, f, g, h, a, b, c, K(0x31338431ul));
-    Round(c, d, e, f, g, h, a, b, K(0x6ed41a95ul));
-    Round(b, c, d, e, f, g, h, a, K(0x6d437890ul));
-    Round(a, b, c, d, e, f, g, h, K(0xc39c91f2ul));
-    Round(h, a, b, c, d, e, f, g, K(0x9eccabbdul));
-    Round(g, h, a, b, c, d, e, f, K(0xb5c9a0e6ul));
-    Round(f, g, h, a, b, c, d, e, K(0x532fb63cul));
-    Round(e, f, g, h, a, b, c, d, K(0xd2c741c6ul));
-    Round(d, e, f, g, h, a, b, c, K(0x07237ea3ul));
-    Round(c, d, e, f, g, h, a, b, K(0xa4954b68ul));
-    Round(b, c, d, e, f, g, h, a, K(0x4c191d76ul));
+    // Transform 2.
+    round(a, b, c, d, e, f, g, h, set(0xc28a2f98ul));
+    round(h, a, b, c, d, e, f, g, set(0x71374491ul));
+    round(g, h, a, b, c, d, e, f, set(0xb5c0fbcful));
+    round(f, g, h, a, b, c, d, e, set(0xe9b5dba5ul));
+    round(e, f, g, h, a, b, c, d, set(0x3956c25bul));
+    round(d, e, f, g, h, a, b, c, set(0x59f111f1ul));
+    round(c, d, e, f, g, h, a, b, set(0x923f82a4ul));
+    round(b, c, d, e, f, g, h, a, set(0xab1c5ed5ul));
+    round(a, b, c, d, e, f, g, h, set(0xd807aa98ul));
+    round(h, a, b, c, d, e, f, g, set(0x12835b01ul));
+    round(g, h, a, b, c, d, e, f, set(0x243185beul));
+    round(f, g, h, a, b, c, d, e, set(0x550c7dc3ul));
+    round(e, f, g, h, a, b, c, d, set(0x72be5d74ul));
+    round(d, e, f, g, h, a, b, c, set(0x80deb1feul));
+    round(c, d, e, f, g, h, a, b, set(0x9bdc06a7ul));
+    round(b, c, d, e, f, g, h, a, set(0xc19bf374ul));
+    round(a, b, c, d, e, f, g, h, set(0x649b69c1ul));
+    round(h, a, b, c, d, e, f, g, set(0xf0fe4786ul));
+    round(g, h, a, b, c, d, e, f, set(0x0fe1edc6ul));
+    round(f, g, h, a, b, c, d, e, set(0x240cf254ul));
+    round(e, f, g, h, a, b, c, d, set(0x4fe9346ful));
+    round(d, e, f, g, h, a, b, c, set(0x6cc984beul));
+    round(c, d, e, f, g, h, a, b, set(0x61b9411eul));
+    round(b, c, d, e, f, g, h, a, set(0x16f988faul));
+    round(a, b, c, d, e, f, g, h, set(0xf2c65152ul));
+    round(h, a, b, c, d, e, f, g, set(0xa88e5a6dul));
+    round(g, h, a, b, c, d, e, f, set(0xb019fc65ul));
+    round(f, g, h, a, b, c, d, e, set(0xb9d99ec7ul));
+    round(e, f, g, h, a, b, c, d, set(0x9a1231c3ul));
+    round(d, e, f, g, h, a, b, c, set(0xe70eeaa0ul));
+    round(c, d, e, f, g, h, a, b, set(0xfdb1232bul));
+    round(b, c, d, e, f, g, h, a, set(0xc7353eb0ul));
+    round(a, b, c, d, e, f, g, h, set(0x3069bad5ul));
+    round(h, a, b, c, d, e, f, g, set(0xcb976d5ful));
+    round(g, h, a, b, c, d, e, f, set(0x5a0f118ful));
+    round(f, g, h, a, b, c, d, e, set(0xdc1eeefdul));
+    round(e, f, g, h, a, b, c, d, set(0x0a35b689ul));
+    round(d, e, f, g, h, a, b, c, set(0xde0b7a04ul));
+    round(c, d, e, f, g, h, a, b, set(0x58f4ca9dul));
+    round(b, c, d, e, f, g, h, a, set(0xe15d5b16ul));
+    round(a, b, c, d, e, f, g, h, set(0x007f3e86ul));
+    round(h, a, b, c, d, e, f, g, set(0x37088980ul));
+    round(g, h, a, b, c, d, e, f, set(0xa507ea32ul));
+    round(f, g, h, a, b, c, d, e, set(0x6fab9537ul));
+    round(e, f, g, h, a, b, c, d, set(0x17406110ul));
+    round(d, e, f, g, h, a, b, c, set(0x0d8cd6f1ul));
+    round(c, d, e, f, g, h, a, b, set(0xcdaa3b6dul));
+    round(b, c, d, e, f, g, h, a, set(0xc0bbbe37ul));
+    round(a, b, c, d, e, f, g, h, set(0x83613bdaul));
+    round(h, a, b, c, d, e, f, g, set(0xdb48a363ul));
+    round(g, h, a, b, c, d, e, f, set(0x0b02e931ul));
+    round(f, g, h, a, b, c, d, e, set(0x6fd15ca7ul));
+    round(e, f, g, h, a, b, c, d, set(0x521afacaul));
+    round(d, e, f, g, h, a, b, c, set(0x31338431ul));
+    round(c, d, e, f, g, h, a, b, set(0x6ed41a95ul));
+    round(b, c, d, e, f, g, h, a, set(0x6d437890ul));
+    round(a, b, c, d, e, f, g, h, set(0xc39c91f2ul));
+    round(h, a, b, c, d, e, f, g, set(0x9eccabbdul));
+    round(g, h, a, b, c, d, e, f, set(0xb5c9a0e6ul));
+    round(f, g, h, a, b, c, d, e, set(0x532fb63cul));
+    round(e, f, g, h, a, b, c, d, set(0xd2c741c6ul));
+    round(d, e, f, g, h, a, b, c, set(0x07237ea3ul));
+    round(c, d, e, f, g, h, a, b, set(0xa4954b68ul));
+    round(b, c, d, e, f, g, h, a, set(0x4c191d76ul));
 
-    w0 = Add(t0, a);
-    w1 = Add(t1, b);
-    w2 = Add(t2, c);
-    w3 = Add(t3, d);
-    w4 = Add(t4, e);
-    w5 = Add(t5, f);
-    w6 = Add(t6, g);
-    w7 = Add(t7, h);
+    w00 = sum(t0, a);
+    w01 = sum(t1, b);
+    w02 = sum(t2, c);
+    w03 = sum(t3, d);
+    w04 = sum(t4, e);
+    w05 = sum(t5, f);
+    w06 = sum(t6, g);
+    w07 = sum(t7, h);
 
-    // Transform 3
-    a = K(0x6a09e667ul);
-    b = K(0xbb67ae85ul);
-    c = K(0x3c6ef372ul);
-    d = K(0xa54ff53aul);
-    e = K(0x510e527ful);
-    f = K(0x9b05688cul);
-    g = K(0x1f83d9abul);
-    h = K(0x5be0cd19ul);
+    // Transform 3.
+    a = set(0x6a09e667ul);
+    b = set(0xbb67ae85ul);
+    c = set(0x3c6ef372ul);
+    d = set(0xa54ff53aul);
+    e = set(0x510e527ful);
+    f = set(0x9b05688cul);
+    g = set(0x1f83d9abul);
+    h = set(0x5be0cd19ul);
 
-    Round(a, b, c, d, e, f, g, h, Add(K(0x428a2f98ul), w0));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x71374491ul), w1));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xb5c0fbcful), w2));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xe9b5dba5ul), w3));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x3956c25bul), w4));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x59f111f1ul), w5));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x923f82a4ul), w6));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xab1c5ed5ul), w7));
-    Round(a, b, c, d, e, f, g, h, K(0x5807aa98ul));
-    Round(h, a, b, c, d, e, f, g, K(0x12835b01ul));
-    Round(g, h, a, b, c, d, e, f, K(0x243185beul));
-    Round(f, g, h, a, b, c, d, e, K(0x550c7dc3ul));
-    Round(e, f, g, h, a, b, c, d, K(0x72be5d74ul));
-    Round(d, e, f, g, h, a, b, c, K(0x80deb1feul));
-    Round(c, d, e, f, g, h, a, b, K(0x9bdc06a7ul));
-    Round(b, c, d, e, f, g, h, a, K(0xc19bf274ul));
-    Round(a, b, c, d, e, f, g, h, Add(K(0xe49b69c1ul), Inc(w0, sigma0(w1))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0xefbe4786ul), Inc(w1, K(0xa00000ul), sigma0(w2))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x0fc19dc6ul), Inc(w2, sigma1(w0), sigma0(w3))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x240ca1ccul), Inc(w3, sigma1(w1), sigma0(w4))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x2de92c6ful), Inc(w4, sigma1(w2), sigma0(w5))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x4a7484aaul), Inc(w5, sigma1(w3), sigma0(w6))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x5cb0a9dcul), Inc(w6, sigma1(w4), K(0x100ul), sigma0(w7))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x76f988daul), Inc(w7, sigma1(w5), w0, K(0x11002000ul))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x983e5152ul), w8 = Add(K(0x80000000ul), sigma1(w6), w1)));
-    Round(h, a, b, c, d, e, f, g, Add(K(0xa831c66dul), w9 = Add(sigma1(w7), w2)));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xb00327c8ul), w10 = Add(sigma1(w8), w3)));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xbf597fc7ul), w11 = Add(sigma1(w9), w4)));
-    Round(e, f, g, h, a, b, c, d, Add(K(0xc6e00bf3ul), w12 = Add(sigma1(w10), w5)));
-    Round(d, e, f, g, h, a, b, c, Add(K(0xd5a79147ul), w13 = Add(sigma1(w11), w6)));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x06ca6351ul), w14 = Add(sigma1(w12), w7, K(0x400022ul))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x14292967ul), w15 = Add(K(0x100ul), sigma1(w13), w8, sigma0(w0))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x27b70a85ul), Inc(w0, sigma1(w14), w9, sigma0(w1))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x2e1b2138ul), Inc(w1, sigma1(w15), w10, sigma0(w2))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x4d2c6dfcul), Inc(w2, sigma1(w0), w11, sigma0(w3))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x53380d13ul), Inc(w3, sigma1(w1), w12, sigma0(w4))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x650a7354ul), Inc(w4, sigma1(w2), w13, sigma0(w5))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x766a0abbul), Inc(w5, sigma1(w3), w14, sigma0(w6))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x81c2c92eul), Inc(w6, sigma1(w4), w15, sigma0(w7))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x92722c85ul), Inc(w7, sigma1(w5), w0, sigma0(w8))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0xa2bfe8a1ul), Inc(w8, sigma1(w6), w1, sigma0(w9))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0xa81a664bul), Inc(w9, sigma1(w7), w2, sigma0(w10))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0xc24b8b70ul), Inc(w10, sigma1(w8), w3, sigma0(w11))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0xc76c51a3ul), Inc(w11, sigma1(w9), w4, sigma0(w12))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0xd192e819ul), Inc(w12, sigma1(w10), w5, sigma0(w13))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0xd6990624ul), Inc(w13, sigma1(w11), w6, sigma0(w14))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0xf40e3585ul), Inc(w14, sigma1(w12), w7, sigma0(w15))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x106aa070ul), Inc(w15, sigma1(w13), w8, sigma0(w0))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x19a4c116ul), Inc(w0, sigma1(w14), w9, sigma0(w1))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x1e376c08ul), Inc(w1, sigma1(w15), w10, sigma0(w2))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x2748774cul), Inc(w2, sigma1(w0), w11, sigma0(w3))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x34b0bcb5ul), Inc(w3, sigma1(w1), w12, sigma0(w4))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x391c0cb3ul), Inc(w4, sigma1(w2), w13, sigma0(w5))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0x4ed8aa4aul), Inc(w5, sigma1(w3), w14, sigma0(w6))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0x5b9cca4ful), Inc(w6, sigma1(w4), w15, sigma0(w7))));
-    Round(b, c, d, e, f, g, h, a, Add(K(0x682e6ff3ul), Inc(w7, sigma1(w5), w0, sigma0(w8))));
-    Round(a, b, c, d, e, f, g, h, Add(K(0x748f82eeul), Inc(w8, sigma1(w6), w1, sigma0(w9))));
-    Round(h, a, b, c, d, e, f, g, Add(K(0x78a5636ful), Inc(w9, sigma1(w7), w2, sigma0(w10))));
-    Round(g, h, a, b, c, d, e, f, Add(K(0x84c87814ul), Inc(w10, sigma1(w8), w3, sigma0(w11))));
-    Round(f, g, h, a, b, c, d, e, Add(K(0x8cc70208ul), Inc(w11, sigma1(w9), w4, sigma0(w12))));
-    Round(e, f, g, h, a, b, c, d, Add(K(0x90befffaul), Inc(w12, sigma1(w10), w5, sigma0(w13))));
-    Round(d, e, f, g, h, a, b, c, Add(K(0xa4506cebul), Inc(w13, sigma1(w11), w6, sigma0(w14))));
-    Round(c, d, e, f, g, h, a, b, Add(K(0xbef9a3f7ul), w14, sigma1(w12), w7, sigma0(w15)));
-    Round(b, c, d, e, f, g, h, a, Add(K(0xc67178f2ul), w15, sigma1(w13), w8, sigma0(w0)));
+    round(a, b, c, d, e, f, g, h, sum(set(0x428a2f98ul), w00));
+    round(h, a, b, c, d, e, f, g, sum(set(0x71374491ul), w01));
+    round(g, h, a, b, c, d, e, f, sum(set(0xb5c0fbcful), w02));
+    round(f, g, h, a, b, c, d, e, sum(set(0xe9b5dba5ul), w03));
+    round(e, f, g, h, a, b, c, d, sum(set(0x3956c25bul), w04));
+    round(d, e, f, g, h, a, b, c, sum(set(0x59f111f1ul), w05));
+    round(c, d, e, f, g, h, a, b, sum(set(0x923f82a4ul), w06));
+    round(b, c, d, e, f, g, h, a, sum(set(0xab1c5ed5ul), w07));
+    round(a, b, c, d, e, f, g, h, set(0x5807aa98ul));
+    round(h, a, b, c, d, e, f, g, set(0x12835b01ul));
+    round(g, h, a, b, c, d, e, f, set(0x243185beul));
+    round(f, g, h, a, b, c, d, e, set(0x550c7dc3ul));
+    round(e, f, g, h, a, b, c, d, set(0x72be5d74ul));
+    round(d, e, f, g, h, a, b, c, set(0x80deb1feul));
+    round(c, d, e, f, g, h, a, b, set(0x9bdc06a7ul));
+    round(b, c, d, e, f, g, h, a, set(0xc19bf274ul));
+    round(a, b, c, d, e, f, g, h, sum(set(0xe49b69c1ul), inc(w00, sigma0(w01))));
+    round(h, a, b, c, d, e, f, g, sum(set(0xefbe4786ul), inc(w01, set(0xa00000ul), sigma0(w02))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x0fc19dc6ul), inc(w02, sigma1(w00), sigma0(w03))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x240ca1ccul), inc(w03, sigma1(w01), sigma0(w04))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x2de92c6ful), inc(w04, sigma1(w02), sigma0(w05))));
+    round(d, e, f, g, h, a, b, c, sum(set(0x4a7484aaul), inc(w05, sigma1(w03), sigma0(w06))));
+    round(c, d, e, f, g, h, a, b, sum(set(0x5cb0a9dcul), inc(w06, sigma1(w04), set(0x100ul), sigma0(w07))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x76f988daul), inc(w07, sigma1(w05), w00, set(0x11002000ul))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x983e5152ul), w08 = sum(set(0x80000000ul), sigma1(w06), w01)));
+    round(h, a, b, c, d, e, f, g, sum(set(0xa831c66dul), w09 = sum(sigma1(w07), w02)));
+    round(g, h, a, b, c, d, e, f, sum(set(0xb00327c8ul), w10 = sum(sigma1(w08), w03)));
+    round(f, g, h, a, b, c, d, e, sum(set(0xbf597fc7ul), w11 = sum(sigma1(w09), w04)));
+    round(e, f, g, h, a, b, c, d, sum(set(0xc6e00bf3ul), w12 = sum(sigma1(w10), w05)));
+    round(d, e, f, g, h, a, b, c, sum(set(0xd5a79147ul), w13 = sum(sigma1(w11), w06)));
+    round(c, d, e, f, g, h, a, b, sum(set(0x06ca6351ul), w14 = sum(sigma1(w12), w07, set(0x400022ul))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x14292967ul), w15 = sum(set(0x100ul), sigma1(w13), w08, sigma0(w00))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x27b70a85ul), inc(w00, sigma1(w14), w09, sigma0(w01))));
+    round(h, a, b, c, d, e, f, g, sum(set(0x2e1b2138ul), inc(w01, sigma1(w15), w10, sigma0(w02))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x4d2c6dfcul), inc(w02, sigma1(w00), w11, sigma0(w03))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x53380d13ul), inc(w03, sigma1(w01), w12, sigma0(w04))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x650a7354ul), inc(w04, sigma1(w02), w13, sigma0(w05))));
+    round(d, e, f, g, h, a, b, c, sum(set(0x766a0abbul), inc(w05, sigma1(w03), w14, sigma0(w06))));
+    round(c, d, e, f, g, h, a, b, sum(set(0x81c2c92eul), inc(w06, sigma1(w04), w15, sigma0(w07))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x92722c85ul), inc(w07, sigma1(w05), w00, sigma0(w08))));
+    round(a, b, c, d, e, f, g, h, sum(set(0xa2bfe8a1ul), inc(w08, sigma1(w06), w01, sigma0(w09))));
+    round(h, a, b, c, d, e, f, g, sum(set(0xa81a664bul), inc(w09, sigma1(w07), w02, sigma0(w10))));
+    round(g, h, a, b, c, d, e, f, sum(set(0xc24b8b70ul), inc(w10, sigma1(w08), w03, sigma0(w11))));
+    round(f, g, h, a, b, c, d, e, sum(set(0xc76c51a3ul), inc(w11, sigma1(w09), w04, sigma0(w12))));
+    round(e, f, g, h, a, b, c, d, sum(set(0xd192e819ul), inc(w12, sigma1(w10), w05, sigma0(w13))));
+    round(d, e, f, g, h, a, b, c, sum(set(0xd6990624ul), inc(w13, sigma1(w11), w06, sigma0(w14))));
+    round(c, d, e, f, g, h, a, b, sum(set(0xf40e3585ul), inc(w14, sigma1(w12), w07, sigma0(w15))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x106aa070ul), inc(w15, sigma1(w13), w08, sigma0(w00))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x19a4c116ul), inc(w00, sigma1(w14), w09, sigma0(w01))));
+    round(h, a, b, c, d, e, f, g, sum(set(0x1e376c08ul), inc(w01, sigma1(w15), w10, sigma0(w02))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x2748774cul), inc(w02, sigma1(w00), w11, sigma0(w03))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x34b0bcb5ul), inc(w03, sigma1(w01), w12, sigma0(w04))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x391c0cb3ul), inc(w04, sigma1(w02), w13, sigma0(w05))));
+    round(d, e, f, g, h, a, b, c, sum(set(0x4ed8aa4aul), inc(w05, sigma1(w03), w14, sigma0(w06))));
+    round(c, d, e, f, g, h, a, b, sum(set(0x5b9cca4ful), inc(w06, sigma1(w04), w15, sigma0(w07))));
+    round(b, c, d, e, f, g, h, a, sum(set(0x682e6ff3ul), inc(w07, sigma1(w05), w00, sigma0(w08))));
+    round(a, b, c, d, e, f, g, h, sum(set(0x748f82eeul), inc(w08, sigma1(w06), w01, sigma0(w09))));
+    round(h, a, b, c, d, e, f, g, sum(set(0x78a5636ful), inc(w09, sigma1(w07), w02, sigma0(w10))));
+    round(g, h, a, b, c, d, e, f, sum(set(0x84c87814ul), inc(w10, sigma1(w08), w03, sigma0(w11))));
+    round(f, g, h, a, b, c, d, e, sum(set(0x8cc70208ul), inc(w11, sigma1(w09), w04, sigma0(w12))));
+    round(e, f, g, h, a, b, c, d, sum(set(0x90befffaul), inc(w12, sigma1(w10), w05, sigma0(w13))));
+    round(d, e, f, g, h, a, b, c, sum(set(0xa4506cebul), inc(w13, sigma1(w11), w06, sigma0(w14))));
+    round(c, d, e, f, g, h, a, b, sum(set(0xbef9a3f7ul),     w14, sigma1(w12), w07, sigma0(w15)));
+    round(b, c, d, e, f, g, h, a, sum(set(0xc67178f2ul),     w15, sigma1(w13), w08, sigma0(w00)));
 
-    // Output
-    Write8(out, 0, Add(a, K(0x6a09e667ul)));
-    Write8(out, 4, Add(b, K(0xbb67ae85ul)));
-    Write8(out, 8, Add(c, K(0x3c6ef372ul)));
-    Write8(out, 12, Add(d, K(0xa54ff53aul)));
-    Write8(out, 16, Add(e, K(0x510e527ful)));
-    Write8(out, 20, Add(f, K(0x9b05688cul)));
-    Write8(out, 24, Add(g, K(0x1f83d9abul)));
-    Write8(out, 28, Add(h, K(0x5be0cd19ul)));
+    // Output.
+    write8(out,  0, sum(a, set(0x6a09e667ul)));
+    write8(out,  4, sum(b, set(0xbb67ae85ul)));
+    write8(out,  8, sum(c, set(0x3c6ef372ul)));
+    write8(out, 12, sum(d, set(0xa54ff53aul)));
+    write8(out, 16, sum(e, set(0x510e527ful)));
+    write8(out, 20, sum(f, set(0x9b05688cul)));
+    write8(out, 24, sum(g, set(0x1f83d9abul)));
+    write8(out, 28, sum(h, set(0x5be0cd19ul)));
 }
 
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
+#endif // HAVE_INTEL
 
 } // namespace sha256
 } // namespace system

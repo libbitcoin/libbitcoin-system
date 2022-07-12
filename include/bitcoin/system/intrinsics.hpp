@@ -20,63 +20,33 @@
 #define LIBBITCOIN_SYSTEM_INTRINSICS_HPP
 
 #include <cstdint>
-#include <immintrin.h>
 #include <bitcoin/system/warnings.hpp>
 
-// Nonstandard intrinsics header.
-#if defined(HAVE_MSC)
-    #include <intrin.h>
+#if defined(HAVE_NEON)
+    #include <arm_neon.h>
 #endif
 
-// CPU instructions (xgetbv, cpuid_count) required to test for intrinsics.
-// ----------------------------------------------------------------------------
-// Given ISO define, intrinsics always compile, however on other platforms this
-// support is inconsistent, so revert to the lowest common interface (assembly).
-// MSVC provides ISO definitions and doesn't define __asm__, so this correlates.
+#if defined(HAVE_INTEL)
+    #include <immintrin.h>
+
+    // Nonstandard header.
+    #if defined(HAVE_MSC)
+        #include <intrin.h>
+    #endif
+#endif
+
+/// CPU instructions (xgetbv, cpuid_count) required to test for intrinsics.
+/// ---------------------------------------------------------------------------
+/// Given ISO define, intrinsics always compile, however on other platforms this
+/// support is inconsistent, so revert to the lowest common interface (assembly).
+/// MSVC has ISO definitions but not x64 inline assembly, so this correlates.
 
 namespace libbitcoin {
 
-static bool xgetbv(uint64_t& value, uint32_t index) noexcept
-{
-#if defined(HAVE_GNU_INTEL)
-    // Compile error: built-in _xgetbv requires target feature xsave.
-    // But xsave can only be determined at run time, so must use assembly.
-    ////value = _xgetbv(index);
-    uint32_t a{}, d{};
-    __asm__("xgetbv" : "=a"(a), "=d"(d) : "c"(index));
-    value = (static_cast<uint64_t>(d) << 32) | a;
-    return true;
-#elif defined(HAVE_ISO_INTEL)
-    value = _xgetbv(index);
-    return true;
-#else
-    return false;
-#endif
-}
-
-static bool cpuid_count(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
-    uint32_t leaf, uint32_t subleaf) noexcept
-{
-#if defined(HAVE_GNU_INTEL)
-    // __cpuid_count too commonly undefined, so just always use assembly.
-    ////__cpuid_count(leaf, subleaf, a, b, c, d);
-    __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
-    return true;
-#elif defined(HAVE_ISO_INTEL)
-    int out[4]{};
-    __cpuidex(&out[0], leaf, subleaf);
-    a = out[0];
-    b = out[1];
-    c = out[2];
-    d = out[3];
-    return true;
-#else
-    return false;
-#endif
-}
-
-// Runtime checks for intrinsics.
-// ----------------------------------------------------------------------------
+/// Local checks for Intel and ARM Neon intrinsics.
+/// ---------------------------------------------------------------------------
+    
+#if defined (HAVE_INTEL)
 
 namespace cpu1_0
 {
@@ -102,12 +72,50 @@ namespace xcr0
     constexpr auto avx_bit = 2;
 }
 
-// Try helper, tested.
 template <size_t Bit, typename Value>
 constexpr bool get_bit(Value value) noexcept
 {
-    constexpr auto mask = (Value{1} << Bit);
+    constexpr auto mask = (Value{ 1 } << Bit);
     return (value & mask) != 0;
+}
+
+static bool xgetbv(uint64_t& value, uint32_t index) noexcept
+{
+#if defined(HAVE_INTEL_ASM)
+    // Compile error: built-in _xgetbv requires target feature xsave.
+    // But xsave can only be determined at run time, so must use assembly.
+    ////value = _xgetbv(index);
+    uint32_t a{}, d{};
+    __asm__("xgetbv" : "=a"(a), "=d"(d) : "c"(index));
+    value = (static_cast<uint64_t>(d) << 32) | a;
+    return true;
+#elif defined(HAVE_ISO_INTEL)
+    value = _xgetbv(index);
+    return true;
+#else
+    return false;
+#endif
+}
+
+static bool cpuid_count(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+    uint32_t leaf, uint32_t subleaf) noexcept
+{
+#if defined(HAVE_INTEL_ASM)
+    // __cpuid_count too commonly undefined, so just always use assembly.
+    ////__cpuid_count(leaf, subleaf, a, b, c, d);
+    __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
+    return true;
+#elif defined(HAVE_ISO_INTEL)
+    int out[4]{};
+    __cpuidex(&out[0], leaf, subleaf);
+    a = out[0];
+    b = out[1];
+    c = out[2];
+    d = out[3];
+    return true;
+#else
+    return false;
+#endif
 }
 
 inline bool try_avx2() noexcept
@@ -149,18 +157,21 @@ inline bool try_shani() noexcept
         && get_bit<cpu7_0::shani_ebx_bit>(ebx);
 }
 
-// TODO: test for ARM Neon.
-inline bool try_neon() noexcept
-{
+#endif // HAVE_INTEL
+
 #if defined (HAVE_NEON)
-    return true;
-#else
+
+constexpr bool try_neon() noexcept
+{
     return false;
-#endif
 }
 
-// Call to test for intrinsic availability.
-// ----------------------------------------------------------------------------
+#endif // HAVE_NEON
+
+/// Published tests for Intel and ARM Neon intrinsics availability.
+/// ---------------------------------------------------------------------------
+
+#if defined (HAVE_INTEL)
 
 inline bool have_avx2() noexcept
 {
@@ -176,13 +187,14 @@ inline bool have_sse41() noexcept
 
 // TODO: sse4 is not yet implemented for msvc (currently requires __asm__), so
 // TODO: while try_sse4 may succeed, a call to sha256::sse4 will fail on msvc.
+// TODO: so this mut return false in the case of not HAVE_INTEL_ASM. 
 inline bool have_sse4() noexcept
 {
-#if defined (HAVE_MSC)
-    return false;
-#else
+#if defined(HAVE_INTEL_ASM)
     static auto enable = try_sse4();
     return enable;
+#else
+    return false;
 #endif
 }
 
@@ -192,11 +204,275 @@ inline bool have_shani() noexcept
     return enable;
 }
 
+#else
+
+constexpr bool have_avx2() noexcept
+{
+    return false;
+}
+
+constexpr bool have_sse41() noexcept
+{
+    return false;
+}
+
+constexpr bool have_sse4() noexcept
+{
+    return false;
+}
+
+constexpr bool have_shani() noexcept
+{
+    return false;
+}
+
+#endif // HAVE_INTEL
+
+#if defined(HAVE_NEON)
+
 inline bool have_neon() noexcept
 {
     static auto enable = try_neon();
     return enable;
 }
+
+#else
+
+constexpr bool have_neon() noexcept
+{
+    return false;
+}
+
+#endif // HAVE_NEON
+
+/// SIMD (single instruction multiple data) types.
+/// ---------------------------------------------------------------------------
+/// intel.com/content/www/us/en/docs/intrinsics-guide/index.html
+
+#if defined (HAVE_INTEL)
+
+namespace i128 {
+
+using mint128_t = __m128i;
+
+template <uint32_t Offset>
+uint32_t inline get(mint128_t a) noexcept
+{
+    return _mm_extract_epi32(a, Offset);
+}
+
+mint128_t inline set(uint32_t a) noexcept
+{
+    return _mm_set1_epi32(a);
+}
+
+mint128_t inline set(uint64_t a, uint64_t b) noexcept
+{
+    return _mm_set_epi64x(a, b);
+}
+
+mint128_t inline set(uint32_t a, uint32_t b, uint32_t c, uint32_t d) noexcept
+{
+    return _mm_set_epi32(a, b, c, d);
+}
+
+mint128_t inline sum(mint128_t a, mint128_t b) noexcept
+{
+    return _mm_add_epi32(a, b);
+}
+
+mint128_t inline sum(mint128_t a, mint128_t b, mint128_t c) noexcept
+{
+    
+    return sum(sum(a, b), c);
+}
+
+mint128_t inline sum(mint128_t a, mint128_t b, mint128_t c,
+    mint128_t d) noexcept
+{
+    return sum(sum(a, b), sum(c, d));
+}
+
+mint128_t inline sum(mint128_t a, mint128_t b, mint128_t c, mint128_t d,
+    mint128_t e) noexcept
+{
+    return sum(sum(a, b, c), sum(d, e));
+}
+
+mint128_t inline inc(mint128_t& outa, mint128_t b) noexcept
+{
+    return ((outa = sum(outa, b)));
+}
+
+mint128_t inline inc(mint128_t& outa, mint128_t b, mint128_t c) noexcept
+{
+    return ((outa = sum(outa, b, c)));
+}
+
+mint128_t inline inc(mint128_t& outa, mint128_t b, mint128_t c,
+    mint128_t d) noexcept
+{
+    return ((outa = sum(outa, b, c, d)));
+}
+
+mint128_t inline exc(mint128_t a, mint128_t b) noexcept
+{
+    return _mm_xor_si128(a, b);
+}
+
+mint128_t inline exc(mint128_t a, mint128_t b, mint128_t c) noexcept
+{
+    return exc(exc(a, b), c);
+}
+
+mint128_t inline dis(mint128_t a, mint128_t b) noexcept
+{
+    return _mm_or_si128(a, b);
+}
+
+mint128_t inline con(mint128_t a, mint128_t b) noexcept
+{
+    return _mm_and_si128(a, b);
+}
+
+mint128_t inline shr(mint128_t a, uint32_t bits) noexcept
+{
+    return _mm_srli_epi32(a, bits);
+}
+
+mint128_t inline shl(mint128_t a, uint32_t bits) noexcept
+{
+    return _mm_slli_epi32(a, bits);
+}
+
+/// Concatenate two 16-byte blocks into a 32-byte temporary result, shift the 
+/// result right by Shift bytes, and return the low 16 bytes.
+template <uint32_t Shift>
+mint128_t inline align_right(mint128_t a, mint128_t b) noexcept
+{
+    return _mm_alignr_epi8(a, b, Shift);
+}
+
+/// Blend two packed 16-bit integers using Mask.
+template <uint32_t Mask>
+mint128_t inline blend(mint128_t a, mint128_t b) noexcept
+{
+    return _mm_blend_epi16(a, b, Mask);
+}
+
+/// Shuffle 32-bit integers using Control.
+template <uint32_t Control>
+mint128_t inline shuffle(mint128_t a) noexcept
+{
+    return _mm_shuffle_epi32(a, Control);
+}
+
+/// Shuffle packed 8-bit integers in a according to shuffle control mask in the
+/// corresponding 8-bit element of b.
+mint128_t inline shuffle(mint128_t a, mint128_t b) noexcept
+{
+    return _mm_shuffle_epi8(a, b);
+}
+
+} // namespace i128
+
+namespace i256 {
+    
+using mint256_t = __m256i;
+
+template <uint32_t Offset>
+uint32_t inline get(mint256_t a) noexcept
+{
+    return _mm256_extract_epi32(a, Offset);
+}
+
+mint256_t inline set(uint32_t a) noexcept 
+{
+    return _mm256_set1_epi32(a);
+}
+
+mint256_t inline set(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+    uint32_t e, uint32_t f, uint32_t g, uint32_t h) noexcept
+{
+    return _mm256_set_epi32(a, b, c, d, e, f, g, h);
+}
+
+mint256_t inline shuffle(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_shuffle_epi8(a, b);
+}
+
+mint256_t inline sum(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_add_epi32(a, b);
+}
+
+mint256_t inline sum(mint256_t a, mint256_t b, mint256_t c) noexcept
+{
+    return sum(sum(a, b), c);
+}
+
+mint256_t inline sum(mint256_t a, mint256_t b, mint256_t c,
+    mint256_t d) noexcept
+{
+    return sum(sum(a, b), sum(c, d));
+}
+
+mint256_t inline sum(mint256_t a, mint256_t b, mint256_t c, mint256_t d,
+    mint256_t e) noexcept
+{
+    return sum(sum(a, b, c), sum(d, e));
+}
+
+mint256_t inline inc(mint256_t& outa, mint256_t b) noexcept
+{
+    return ((outa = sum(outa, b)));
+}
+
+mint256_t inline inc(mint256_t& outa, mint256_t b, mint256_t c) noexcept
+{
+    return ((outa = sum(outa, b, c)));
+}
+
+mint256_t inline inc(mint256_t& outa, mint256_t b, mint256_t c,
+    mint256_t d) noexcept
+{
+    return ((outa = sum(outa, b, c, d)));
+}
+
+mint256_t inline exc(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_xor_si256(a, b);
+}
+
+mint256_t inline exc(mint256_t a, mint256_t b, mint256_t c) noexcept
+{
+    return exc(exc(a, b), c);
+}
+
+mint256_t inline dis(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_or_si256(a, b);
+}
+
+mint256_t inline con(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_and_si256(a, b);
+}
+
+mint256_t inline shr(mint256_t a, uint32_t bits) noexcept
+{
+    return _mm256_srli_epi32(a, bits);
+}
+
+mint256_t inline shl(mint256_t a, uint32_t bits) noexcept
+{
+    return _mm256_slli_epi32(a, bits);
+}
+
+} // namespace i256
+
+#endif
 
 } // namespace libbitcoin
 

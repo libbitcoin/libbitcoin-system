@@ -24,6 +24,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/algorithm.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -72,8 +73,9 @@ constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT
     }
     else
     {
-        return from_big_array<Integral>(sizeof(Integral), data);
+        // TODO:
         ////return native_from_big_end(byte_cast(data));
+        return from_big_array<Integral>(sizeof(Integral), data);
     }
 }
 
@@ -86,8 +88,9 @@ constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT
     }
     else
     {
-        return from_little_array<Integral>(sizeof(Integral), data);
+        // TODO:
         ////return native_from_little_end(byte_cast(data));
+        return from_little_array<Integral>(sizeof(Integral), data);
     }
 }
 

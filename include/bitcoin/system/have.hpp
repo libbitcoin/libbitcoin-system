@@ -58,6 +58,18 @@
     #define HAVE_GNU_INTEL
 #endif
 
+// __m128i/__m256i are not defined on non-Intel processors.
+#if defined(HAVE_ISO_INTEL) || defined(HAVE_GNU_INTEL)
+    #define HAVE_INTEL
+#endif
+
+// MSC inline assembly (via __asm, no __asm__ support) does not support ARM and x64.
+// Since we cross compile to x64 we consider this lack of support prohibitive for __asm.
+// github.com/MicrosoftDocs/cpp-docs/blob/main/docs/assembler/inline/inline-assembler.md
+#if defined(HAVE_INTEL) && !defined(HAVE_MSC)
+    #define HAVE_INTEL_ASM
+#endif
+
 // ARM CPU architecture.
 #if defined(__arm__) || defined(__arm64__) || defined(_M_ARM)
     #define HAVE_ARM
@@ -131,7 +143,7 @@
 ////#define HAVE_DEPRECATED
 
 // have a portable build (no intrinsics).
-////#define HAVE_PORTABLE
+#define HAVE_PORTABLE
 
 // have slow test execution.
 ////#define HAVE_SLOW_TESTS

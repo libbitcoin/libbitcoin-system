@@ -70,7 +70,7 @@ void double_hash(hash1& out, const block1& block) NOEXCEPT;
 // Finalization is performed within each implementation.
 void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 {
-#if defined(HAVE_PORTABLE)
+#if !defined(HAVE_PORTABLE)
 
     if (have_avx2())
     {
@@ -182,12 +182,13 @@ void single_hash(state& state, const block1& block) NOEXCEPT;
 
 void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 {
-#if defined(HAVE_PORTABLE)
+#if !defined(HAVE_PORTABLE)
 
     if (have_neon())
     {
         while (!is_zero(blocks--))
         {
+            // TODO: use single_neon(state, blocks{ in }) for all.
             single_neon(state, unsafe_array_cast<block>(in));
             std::advance(in, block_size);
         }
@@ -199,6 +200,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (!is_zero(blocks--))
         {
+            // TODO: use single_shani(state, blocks{ in }) for all.
             single_shani(state, unsafe_array_cast<block>(in));
             std::advance(in, block_size);
         }
@@ -210,6 +212,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (!is_zero(blocks--))
         {
+            // TODO: use single_sse4(state, blocks{ in }) for all.
             single_sse4(state, unsafe_array_cast<block>(in));
             std::advance(in, block_size);
         }
@@ -221,6 +224,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 
     while (!is_zero(blocks--))
     {
+        // TODO: use single_hash(state, blocks{ in }) for all [generalize first].
         single_hash(state, unsafe_array_cast<block>(in));
         std::advance(in, block_size);
     }
@@ -256,7 +260,7 @@ void update(context& context, size_t size, const uint8_t* in) NOEXCEPT
 
 void finalize(context& context, uint8_t* out) NOEXCEPT
 {
-    update(context, context.pad_size(), pad.data());
+    update(context, context.pad_size(), pad_any.data());
     update(context, context::counter_size, context.serialize_counter().data());
     context.serialize_state(unsafe_array_cast<uint8_t, hash_size>(out));
 }
@@ -266,6 +270,79 @@ void sha256_single(uint8_t* out, size_t size, const uint8_t* in) NOEXCEPT
     sha256::context context{};
     update(context, size, in);
     finalize(context, out);
+}
+
+// This is the implementation above, but cannot be generalized in the same
+// manner because avx2 and sse41 incorporate padding into the hash function.
+// As such portable, shani, neon, and sse4 doubling externally incorporate
+// padding as wrapper functions, which generalizes the implementation.
+////void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT;
+
+// TODO: non-streaming hashes:
+// TODO: Make generalized template for hash of any size < block_size - 8.
+// TODO: Generate pad from size, where size +1 is sentinel and pad-8 is count.
+// TODO: Copy data into pad, transform, and emit big endian state as bytes.
+// TODO: Generalize to any size by transforming size/block_size blocks and then
+// TODO: applying above to the remaining bytes. size % block_size = 0 implies a
+// TODO: full block of pad/count. Can also apply double variant of this model.
+
+// 64 byte hashes
+// ----------------------------------------------------------------------------
+
+// This is equivalent to sha256_single(*, 1, *) and more efficient.
+// It avoids allocation of context buffer and computation/serialize of counter.
+void sha256_single(hash& out, const block& in) NOEXCEPT
+{
+    // Transform into state.
+    auto state = sha256::initial;
+    transform(state, one, in.data());
+
+    // Transform pad/count and emit state to out.
+    transform(state, one, sha256::pad_64.data());
+    to_big_endian_set(array_cast<uint32_t>(out), state);
+}
+
+// This is equivalent to sha256_double(*, 1, *) and trivially more efficient.
+void sha256_double(hash& out, const block& in) NOEXCEPT
+{
+    // Emit sha256_single(block) into pad/count buffer.
+    auto buffer = sha256::padded_32;
+    sha256_single(narrowing_array_cast<uint8_t, hash_size>(buffer), in);
+
+    // Transform result and emit state to out.
+    auto state = sha256::initial;
+    transform(state, one, buffer.data());
+    to_big_endian_set(array_cast<uint32_t>(out), state);
+}
+
+// 32 byte hashes
+// ----------------------------------------------------------------------------
+
+// This is equivalent to sha256_single(*, 1, *) and more efficient.
+// It avoids allocation of context buffer and computation/serialize of counter.
+void sha256_single(hash& out, const hash& in) NOEXCEPT
+{
+    // Copy hash into pad/count buffer for transform.
+    auto buffer = sha256::padded_32;
+    std::copy(in.begin(), in.end(), buffer.begin());
+
+    // Transform and emit state to out.
+    auto state = sha256::initial;
+    transform(state, one, buffer.data());
+    to_big_endian_set(array_cast<uint32_t>(out), state);
+}
+
+// This is not supported by sha256_double(*, n, *) as it is blocks only.
+void sha256_double(hash& out, const hash& in) NOEXCEPT
+{
+    // Emit sha256_single(hash) into pad/count buffer.
+    auto buffer = sha256::padded_32;
+    sha256_single(narrowing_array_cast<uint8_t, hash_size>(buffer), in);
+
+    // Transform result and emit state to out.
+    auto state = sha256::initial;
+    transform(state, one, buffer.data());
+    to_big_endian_set(array_cast<uint32_t>(out), state);
 }
 
 } // namespace sha256

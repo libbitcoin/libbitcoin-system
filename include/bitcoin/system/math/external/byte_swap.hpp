@@ -54,14 +54,7 @@ constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
          (value >> 56));
 }
 
-#if defined(HAVE_MSC)
-    // docs.microsoft.com/en-us/cpp/c-runtime-library/reference/
-    // byteswap-uint64-byteswap-ulong-byteswap-ushort?view=msvc-170
-    #include <stdlib.h>
-    #define byte_swap16(value) _byteswap_ushort(value)
-    #define byte_swap32(value) _byteswap_ulong(value)
-    #define byte_swap64(value) _byteswap_uint64(value)
-#elif defined(HAVE_LINUX)
+#if defined(HAVE_LINUX)
     // man7.org/linux/man-pages/man3/bswap.3.html
     #include <byteswap.h>
     #define byte_swap16(value) bswap_16(value)
@@ -93,6 +86,13 @@ constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
     #define byte_swap16(value) bswap16(value)
     #define byte_swap32(value) bswap32(value)
     #define byte_swap64(value) bswap64(value)
+#elif defined(HAVE_MSC) || defined(HAVE_CYGWIN)
+    // docs.microsoft.com/en-us/cpp/c-runtime-library/reference/
+    // byteswap-uint64-byteswap-ulong-byteswap-ushort
+    #include <intrin.h>
+    #define byte_swap16(value) _byteswap_ushort(value)
+    #define byte_swap32(value) _byteswap_ulong(value)
+    #define byte_swap64(value) _byteswap_uint64(value)
 #else
     // Native implementation.
     #define byte_swap16(value) byte_swap16_native(value)
