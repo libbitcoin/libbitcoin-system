@@ -153,7 +153,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\sha256.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_1_portable.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_1_native.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_2_shani.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_4_neon.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_4_sse4.cpp" />

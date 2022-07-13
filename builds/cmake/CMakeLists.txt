@@ -335,7 +335,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/crypto/external/ripemd160.cpp"
     "../../src/crypto/external/sha1.cpp"
     "../../src/crypto/external/sha512.cpp"
-    "../../src/crypto/sha256/sha256_1_portable.cpp"
+    "../../src/crypto/sha256/sha256_1_native.cpp"
     "../../src/crypto/sha256/sha256_2_shani.cpp"
     "../../src/crypto/sha256/sha256_4_neon.cpp"
     "../../src/crypto/sha256/sha256_4_sse4.cpp"

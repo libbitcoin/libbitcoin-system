@@ -53,8 +53,6 @@ void double_hash(digest1& out, const block1& block) NOEXCEPT;
 // Transformation is finalized (counter is incorporated).
 void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 {
-#if !defined(HAVE_PORTABLE)
-
     if (have_avx2())
     {
         while (blocks >= 8u)
@@ -81,6 +79,8 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
             blocks -= 4;
         }
     }
+
+#if defined(UNVERIFIED)
 
     if (have_shani())
     {
@@ -133,7 +133,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
         return;
     }
 
-#endif
+#endif // UNVERIFIED
 
     while (to_bool(blocks--))
     {
@@ -175,7 +175,7 @@ void merkle_root(digests& hashes) NOEXCEPT
 // Transformation is unfinalized (counter not incorporated, result in state).
 void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 {
-#if !defined(HAVE_PORTABLE)
+#if defined(UNVERIFIED)
 
     if (have_neon())
     {
@@ -213,7 +213,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
         return;
     }
 
-#endif
+#endif // UNVERIFIED
 
     while (to_bool(blocks--))
     {

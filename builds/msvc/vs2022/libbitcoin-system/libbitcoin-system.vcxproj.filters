@@ -357,7 +357,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\sha256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_1_portable.cpp">
+    <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_1_native.cpp">
       <Filter>src\crypto\sha256</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_2_shani.cpp">
