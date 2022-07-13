@@ -402,13 +402,13 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
 
     // This is an out parameter.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
     to_data(sink, witness);
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Methods.
@@ -459,49 +459,49 @@ chain::points transaction::points() const NOEXCEPT
 hash_digest transaction::outputs_hash() const NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     const auto& outs = *outputs_;
     for (const auto& output: outs)
         output->to_data(sink);
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 hash_digest transaction::points_hash() const NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
         input->point().to_data(sink);
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 hash_digest transaction::sequences_hash() const NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
         sink.write_4_bytes_little_endian(input->sequence());
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Signing (unversioned).
@@ -695,10 +695,10 @@ hash_digest transaction::unversioned_signature_hash(
 
     // Create hash writer.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     switch (flag)
     {
@@ -724,7 +724,7 @@ hash_digest transaction::unversioned_signature_hash(
     }
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Signing (version 0).
@@ -763,13 +763,13 @@ hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
         return null_hash;
 
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
     outputs_->at(index)->to_data(sink);
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // private
@@ -791,10 +791,10 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
 
     // Create hash writer.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     // Create signature hash.
     sink.write_little_endian(version_);
@@ -831,7 +831,7 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     sink.write_4_bytes_little_endian(flags);
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Signing (unversioned and version 0).

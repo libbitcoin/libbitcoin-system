@@ -225,11 +225,11 @@ uint32_t header::nonce() const NOEXCEPT
 // computed
 hash_digest header::hash() const NOEXCEPT
 {
-    hash_digest sha256{};
-    hash::sha256::copy sink(sha256);
+    hash_digest digest{};
+    hash::sha256x2::copy sink(digest);
     to_data(sink);
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // static/private
