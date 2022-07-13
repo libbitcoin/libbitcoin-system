@@ -114,19 +114,25 @@ BOOST_AUTO_TEST_CASE(hash__djb2_hash__01234567890abcdefghijklmnopqrstuvwxyz__0xe
 
 // hash_reduce
 
+// single hash 
 hash_digest to_merkle_root(const hash_list& hashes)
 {
     if (hashes.empty())
         return {};
 
+    hash_list update;
     hash_list merkle{ hashes };
 
-    while (!is_one(merkle.size()))
+    while (merkle.size() > one)
     {
         if (is_odd(merkle.size()))
             merkle.push_back(merkle.back());
 
-        hash_reduce(merkle);
+        for (auto it = merkle.begin(); it != merkle.end(); it += two)
+            update.push_back(bitcoin_hash(splice(it[0], it[1])));
+
+        std::swap(merkle, update);
+        update.clear();
     }
 
     return merkle.front();
@@ -142,6 +148,7 @@ BOOST_AUTO_TEST_CASE(hash__hash_reduce__one_pair__expected)
 
     const auto root = bitcoin_hash(hashes[0], hashes[1]);
 
+    // shani1, neon, sse4, portable  (1 block)
     BOOST_REQUIRE(hash_reduce(hashes));
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
@@ -158,7 +165,10 @@ BOOST_AUTO_TEST_CASE(hash__hash_reduce__two_pair__expected)
 
     const auto root = to_merkle_root(hashes);
 
+    // shani2 (2 blocks)
     BOOST_REQUIRE(hash_reduce(hashes));
+
+    // shani1, neon, sse4, portable  (1 block)
     BOOST_REQUIRE(hash_reduce(hashes));
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
@@ -180,13 +190,19 @@ BOOST_AUTO_TEST_CASE(hash__hash_reduce__four_pair__expected)
 
     const auto root = to_merkle_root(hashes);
 
+    // sse41 (4 blocks)
     BOOST_REQUIRE(hash_reduce(hashes));
+
+    // shani2 (2 blocks)
     BOOST_REQUIRE(hash_reduce(hashes));
+
+    // shani1, neon, sse4, portable  (1 block)
     BOOST_REQUIRE(hash_reduce(hashes));
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__eight_pair__expected)
+// TODO: This should throw if above throws, unless bug is integer alignment.
+BOOST_AUTO_TEST_CASE(hash__hash_reduce__eight_pair__expected)
 {
     hash_list hashes
     {
@@ -210,9 +226,16 @@ BOOST_AUTO_TEST_CASE(intrinsics__hash_reduce__eight_pair__expected)
 
     const auto root = to_merkle_root(hashes);
 
+    // avx2 (8 blocks)
     BOOST_REQUIRE(hash_reduce(hashes));
+
+    // sse41 (4 blocks)
     BOOST_REQUIRE(hash_reduce(hashes));
+
+    // shani2 (2 blocks)
     BOOST_REQUIRE(hash_reduce(hashes));
+
+    // shani1, neon, sse4, portable  (1 block)
     BOOST_REQUIRE(hash_reduce(hashes));
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
