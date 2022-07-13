@@ -42,41 +42,34 @@
     #define HAVE_MSC
 #endif
 
-/// ISO defines for targeted CPU architecture.
-#if defined _M_IX86
+/// GNU/MSC defines for targeted CPU architecture.
+#if defined(__i386__) || defined(_M_IX86)
     #define HAVE_X86
-#elif defined _M_X64
+#elif defined(__x86_64__) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
     #define HAVE_X64
-#elif defined _M_IA64
+#elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM)
+    #define HAVE_ARM
+#elif defined(__ia64__) || defined(_M_IA64)
     #define HAVE_ITANIUM
 #endif
 
-/// Use intrinsics for Intel CPU features with ISO defines.
-#if defined(HAVE_X86) || defined(HAVE_X64)  || defined(HAVE_ITANIUM)
-    #define HAVE_ISO_INTEL
-#endif
-
-/// Use __asm__ for Intel CPU features if non-ISO interface.
-#if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
-    #define HAVE_GNU_INTEL
-#endif
-
 /// Intel CPU architecture (__m128i/__m256i defined).
-#if defined(HAVE_ISO_INTEL) || defined(HAVE_GNU_INTEL)
+#if defined(HAVE_X86) || defined(HAVE_X64)
     #define HAVE_INTEL
 #endif
 
+/// Use intrinsics for Intel CPU features with MSC defines.
+#if defined(_M_IX86) || defined(_M_X64)  || defined(_M_IA64)
+    #define HAVE_INTEL_INTRINSICS
+#endif
+
+/// Use __asm__ for Intel CPU features if GNU interface.
 /// MSC inline assembly (via __asm, no __asm__ support) does not support ARM
 /// and x64. Since we cross compile to x64 we consider this lack of support
 /// prohibitive for __asm. github.com/MicrosoftDocs/cpp-docs/blob/main/docs/
 /// assembler/inline/inline-assembler.md
-#if defined(HAVE_INTEL) && !defined(HAVE_MSC)
-    #define HAVE_INTEL_ASM
-#endif
-
-/// ARM CPU architecture.
-#if defined(__arm__) || defined(__arm64__) || defined(_M_ARM)
-    #define HAVE_ARM
+#if defined(HAVE_GNUC) && defined(HAVE_INTEL)
+    #define HAVE_INTEL_INLINE_ASSEMBLY
 #endif
 
 /// ARM Neon intrinsics defined.

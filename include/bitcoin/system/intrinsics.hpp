@@ -82,16 +82,16 @@ constexpr bool get_bit(Value value) noexcept
 
 static bool xgetbv(uint64_t& value, uint32_t index) noexcept
 {
-#if defined(HAVE_INTEL_ASM)
+#if defined(HAVE_INTEL_INTRINSICS)
+    value = _xgetbv(index);
+    return true;
+#elif defined(HAVE_INTEL_INLINE_ASSEMBLY)
     // Compile error: built-in _xgetbv requires target feature xsave.
     // But xsave can only be determined at run time, so must use assembly.
     ////value = _xgetbv(index);
     uint32_t a{}, d{};
     __asm__("xgetbv" : "=a"(a), "=d"(d) : "c"(index));
     value = (static_cast<uint64_t>(d) << 32) | a;
-    return true;
-#elif defined(HAVE_ISO_INTEL)
-    value = _xgetbv(index);
     return true;
 #else
     return false;
@@ -101,18 +101,18 @@ static bool xgetbv(uint64_t& value, uint32_t index) noexcept
 static bool cpuid_count(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     uint32_t leaf, uint32_t subleaf) noexcept
 {
-#if defined(HAVE_INTEL_ASM)
-    // __cpuid_count too commonly undefined, so just always use assembly.
-    ////__cpuid_count(leaf, subleaf, a, b, c, d);
-    __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
-    return true;
-#elif defined(HAVE_ISO_INTEL)
+#if defined(HAVE_INTEL_INTRINSICS)
     int out[4]{};
     __cpuidex(&out[0], leaf, subleaf);
     a = out[0];
     b = out[1];
     c = out[2];
     d = out[3];
+    return true;
+#elif defined(HAVE_INTEL_INLINE_ASSEMBLY)
+    // __cpuid_count too commonly undefined, so just always use assembly.
+    ////__cpuid_count(leaf, subleaf, a, b, c, d);
+    __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
     return true;
 #else
     return false;
@@ -185,18 +185,23 @@ inline bool have_avx2() noexcept
     return enable;
 }
 
+// TODO: sse41 throws on x86 builds, so disabled here.
 inline bool have_sse41() noexcept
 {
+#if defined(HAVE_X64)
     static auto enable = try_sse41();
     return enable;
+#else
+    return false;
+#endif
 }
 
 // TODO: sse4 is not yet implemented for msvc (currently requires __asm__), so
 // TODO: while try_sse4 may succeed, a call to sha256::sse4 will fail on msvc.
-// TODO: so this must return false in the case of not HAVE_INTEL_ASM. 
+// TODO: so this must return false if HAVE_INTEL_INLINE_ASSEMBLY undefined. 
 inline bool have_sse4() noexcept
 {
-#if defined(HAVE_INTEL_ASM)
+#if defined(HAVE_INTEL_INLINE_ASSEMBLY)
     static auto enable = try_sse4();
     return enable;
 #else

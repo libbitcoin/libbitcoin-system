@@ -70,7 +70,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (blocks >= 4u)
         {
-            // BUGBUG: throws on 32 bit builds.
+            // BUGBUG: throws on x86 builds (disabled in have_sse41()).
             double_sse41(
                 unsafe_array_cast<digest, 4>(out),
                 unsafe_array_cast<block, 4>(in));

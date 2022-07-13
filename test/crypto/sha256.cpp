@@ -205,8 +205,8 @@ BOOST_AUTO_TEST_CASE(hash__to_merkle_root__two_blocks__expected)
     BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
 
-// BUGBUG: throws on 32 bit builds.
-BOOST_AUTO_TEST_CASE(hash__hto_merkle_root__four_blocks__expected)
+// BUGBUG: throws on x86 builds.
+BOOST_AUTO_TEST_CASE(hash__to_merkle_root__four_blocks__expected)
 {
     hash_list hashes
     {
