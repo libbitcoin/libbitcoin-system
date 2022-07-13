@@ -66,6 +66,33 @@ void double_neon(hash1& out, const block1& block) NOEXCEPT;
 void double_sse4(hash1& out, const block1& block) NOEXCEPT;
 void double_hash(hash1& out, const block1& block) NOEXCEPT;
 
+// TODO: publish.
+using hashes = std::vector<hash>;
+void merkle_hash(hashes& hashes) NOEXCEPT
+{
+    if (hashes.empty())
+    {
+        hashes.push_back({});
+        return;
+    }
+
+    if (is_one(hashes.size()))
+        return;
+
+    if (is_odd(hashes.size()))
+        hashes.push_back(hashes.back());
+
+    while (is_even(hashes.size()))
+    {
+        const auto half = to_half(hashes.size());
+        sha256_double(
+            pointer_cast<uint8_t>(hashes.data()), half,
+            pointer_cast<const uint8_t>(hashes.data()));
+        hashes.resize(half);
+    }
+}
+
+// TODO: make local.
 // Specialized for independently hashing each block and rehashing each result.
 // Finalization is performed within each implementation.
 void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
@@ -111,7 +138,7 @@ void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
             blocks -= 2;
         }
 
-        while (!is_zero(blocks--))
+        while (to_bool(blocks--))
         {
             double_shani(
                 unsafe_array_cast<hash>(out),
@@ -125,7 +152,7 @@ void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 
     if (have_neon())
     {
-        while (!is_zero(blocks--))
+        while (to_bool(blocks--))
         {
             double_neon(
                 unsafe_array_cast<hash>(out),
@@ -139,7 +166,7 @@ void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 
     if (have_sse4())
     {
-        while (!is_zero(blocks--))
+        while (to_bool(blocks--))
         {
             double_sse4(unsafe_array_cast<hash>(out),
                 unsafe_array_cast<block>(in));
@@ -152,7 +179,7 @@ void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 
 #endif
 
-    while (!is_zero(blocks--))
+    while (to_bool(blocks--))
     {
         double_hash(
             unsafe_array_cast<hash>(out),
@@ -186,7 +213,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 
     if (have_neon())
     {
-        while (!is_zero(blocks--))
+        while (to_bool(blocks--))
         {
             // TODO: use single_neon(state, blocks{ in }) for all.
             single_neon(state, unsafe_array_cast<block>(in));
@@ -198,7 +225,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 
     if (have_shani())
     {
-        while (!is_zero(blocks--))
+        while (to_bool(blocks--))
         {
             // TODO: use single_shani(state, blocks{ in }) for all.
             single_shani(state, unsafe_array_cast<block>(in));
@@ -210,7 +237,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 
     if (have_sse4())
     {
-        while (!is_zero(blocks--))
+        while (to_bool(blocks--))
         {
             // TODO: use single_sse4(state, blocks{ in }) for all.
             single_sse4(state, unsafe_array_cast<block>(in));
@@ -222,7 +249,7 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 
 #endif
 
-    while (!is_zero(blocks--))
+    while (to_bool(blocks--))
     {
         // TODO: use single_hash(state, blocks{ in }) for all [generalize first].
         single_hash(state, unsafe_array_cast<block>(in));
@@ -260,8 +287,11 @@ void update(context& context, size_t size, const uint8_t* in) NOEXCEPT
 
 void finalize(context& context, uint8_t* out) NOEXCEPT
 {
+    // Save the counter serialization before calling update(pad).
+    const auto counter = context.serialize_counter();
+
     update(context, context.pad_size(), pad_any.data());
-    update(context, context::counter_size, context.serialize_counter().data());
+    update(context, context::counter_size, counter.data());
     context.serialize_state(unsafe_array_cast<uint8_t, hash_size>(out));
 }
 
