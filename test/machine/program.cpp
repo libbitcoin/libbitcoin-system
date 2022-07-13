@@ -118,7 +118,7 @@ static_assert(a11 == 2 * sizeof(int64_t));
 constexpr auto a0 = sizeof(std::weak_ptr<data_chunk>);
 static_assert(a0 == 2 * sizeof(size_t));
 
-#endif // MSC_VER_ && NDEBUG
+#endif // HAVE_MSC && NDEBUG
 
 // copy/move restrictions of unique_ptr:
 ////auto foo()
