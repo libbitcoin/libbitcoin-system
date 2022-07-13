@@ -120,29 +120,36 @@ BOOST_AUTO_TEST_CASE(sha256__transform2__vs_sha256x2_writer__same)
 {
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
-    for (int i = 0; i <= 32; ++i)
+    using namespace sha256;
+    for (size_t i = 0; i <= digest_size; ++i)
     {
-        uint8_t in[64 * 32]{};
-        uint8_t out1[32 * 32]{};
-        uint8_t out2[32 * 32]{};
-        const auto to = [&](int j) { return out1 + 32 * j; };
-        const auto from = [&](int j) { return in + 64 * j; };
+        uint8_t in  [block_size  * digest_size]{};
+        uint8_t out1[digest_size * digest_size]{};
+        uint8_t out2[digest_size * digest_size]{};
 
         // arbitrary fill
-        for (int j = 0; j < 64 * i; ++j)
+        for (size_t j = 0; j < block_size * i; ++j)
             in[j] = 42;
 
         // streaming double hash
-        for (int j = 0; j < i; ++j)
+        for (size_t j = 0; j < i; ++j)
         {
-            hash::sha256x2::copy sink({ to(j), to(j) + 32 });
-            sink.write_bytes({ from(j), from(j) + 64 });
+            hash::sha256x2::copy sink(
+            {
+                &out1[digest_size * j],
+                &out1[digest_size * add1(j)]
+            });
+            sink.write_bytes(
+            {
+                &in[block_size * j],
+                &in[block_size * add1(j)]
+            });
             sink.flush();
         }
 
         // in place double hash
-        sha256::transform(&out2[0], i, &in[0]);
-        BOOST_REQUIRE_EQUAL(memcmp(&out1[0], &out2[0], 32 * i), 0);
+        transform(&out2[0], i, &in[0]);
+        BOOST_REQUIRE_EQUAL(std::memcmp(&out1[0], &out2[0], i * digest_size), 0);
     }
 
     BC_POP_WARNING()
