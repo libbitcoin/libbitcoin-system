@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(sha256__transform2__vs_bitcoin_hash_two_blocks__same)
     const auto blocks = to_half(hashes.size());
     auto buffer = doubled.front().data();
     sha256::transform(buffer, blocks, buffer);
-    doubled.resize(one);
+    doubled.resize(two);
 
     BOOST_REQUIRE_EQUAL(doubled[0], first);
     BOOST_REQUIRE_EQUAL(doubled[1], second);
