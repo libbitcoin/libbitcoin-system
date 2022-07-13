@@ -54,13 +54,13 @@ BOOST_AUTO_TEST_CASE(sha256__transform2__vs_bitcoin_hash_one_block__same)
     hash_digest once{};
     hash_list doubled{ hashes };
 
-    // Hashed single 2 x hash.
+    // Hashed single 2 x 0/1 hash.
     sha256::context context{};
     sha256::update(context, hashes.size() * hash_size, hashes[0].data());
     sha256::finalize(context, once.data());
     const auto two = sha256_hash(once);
 
-    // Hashed single hash x 2.
+    // Hashed single 0/1 hash x 2.
     context.reset();
     sha256::update(context, hash_size, hashes[0].data());
     sha256::update(context, hash_size, hashes[1].data());
@@ -90,14 +90,14 @@ BOOST_AUTO_TEST_CASE(sha256__transform2__vs_bitcoin_hash_two_blocks__same)
     hash_digest once{};
     hash_list doubled{ hashes };
 
-    // Hashed single 4 x hash.
+    // Hashed single 0/1 hash x 2.
     sha256::context context{};
     sha256::update(context, hash_size, hashes[0].data());
     sha256::update(context, hash_size, hashes[1].data());
     sha256::finalize(context, once.data());
     const auto first = sha256_hash(once);
 
-    // Hashed single hash x 4.
+    // Hashed single 2/3 hash x 2.
     context.reset();
     sha256::update(context, hash_size, hashes[2].data());
     sha256::update(context, hash_size, hashes[3].data());
