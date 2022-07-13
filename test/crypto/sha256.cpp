@@ -20,13 +20,16 @@
 
 BOOST_AUTO_TEST_SUITE(sha256_tests)
 
+// Compares single to expectation.
 BOOST_AUTO_TEST_CASE(sha256__sha256_hash__less_than_one_block__expected)
 {
+    hash_digest hash{};
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
-    const auto hash = sha256_hash(chunk);
-    BOOST_REQUIRE_EQUAL(encode_base16(hash), "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
+    sha256::sha256_single(hash.data(), chunk.size(), chunk.data());
+    BOOST_REQUIRE_EQUAL(hash, base16_array("3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"));
 }
 
+// Compares double to single.
 BOOST_AUTO_TEST_CASE(sha256__sha256_double__vs_bitcoin_hash_one_block__same)
 {
     const hash_list hashes
@@ -60,6 +63,7 @@ BOOST_AUTO_TEST_CASE(sha256__sha256_double__vs_bitcoin_hash_one_block__same)
     BOOST_REQUIRE_EQUAL(doubled.front(), twice);
 }
 
+// Compares double to single.
 BOOST_AUTO_TEST_CASE(sha256__sha256_double__vs_bitcoin_hash_two_blocks__same)
 {
     const hash_list hashes
@@ -98,6 +102,7 @@ BOOST_AUTO_TEST_CASE(sha256__sha256_double__vs_bitcoin_hash_two_blocks__same)
 }
 
 // satoshi test case
+// Compares double to single.
 BOOST_AUTO_TEST_CASE(sha256__sha256_double__vs_sha256x2_writer__same)
 {
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
