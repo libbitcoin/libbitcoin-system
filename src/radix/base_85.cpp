@@ -48,10 +48,7 @@
 
 #include <bitcoin/system/radix/base_85.hpp>
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <string>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
