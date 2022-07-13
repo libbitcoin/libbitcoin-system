@@ -72,8 +72,14 @@ void sha256x2_writer<OStream>::flusher() NOEXCEPT
     hash_digest hash;
     BC_POP_WARNING()
 
+    // Finalize streaming hash.
     sha256::finalize(context_, hash.data());
-    byte_writer<OStream>::do_write_bytes(sha256_hash(hash).data(), hash_size);
+
+    // Hash the result of the streaming hash.
+    context_.reset();
+    sha256::update(context_, hash_size, hash.data());
+    sha256::finalize(context_, hash.data());
+    byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }
 
