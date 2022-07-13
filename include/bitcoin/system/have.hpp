@@ -21,6 +21,10 @@
 
 #include <bitcoin/system/version.hpp>
 
+///////////////////////////////////////////////////////////////////////////////
+// Maintainers: update corresponding diagnostic HAVE emissions in define.cpp.
+///////////////////////////////////////////////////////////////////////////////
+
 /// Plaform: architecture, compiler, and standard libraries.
 /// ---------------------------------------------------------------------------
 
@@ -79,29 +83,25 @@
 #endif
 #endif
 
-/// MSC predefined constant for Visual Studio version.
+/// MSC predefined constant for Visual Studio version (exclusive).
 #if defined(HAVE_MSC)
-    #if _MSC_VER >= 1800
-        #define HAVE_VS2013
-    #endif
-    #if _MSC_VER >= 1900
-        #define HAVE_VS2015
-    #endif
-    #if _MSC_VER >= 1910
-        #define HAVE_VS2017
-    #endif
-    #if _MSC_VER >= 1920
-        #define HAVE_VS2019
-    #endif
-    #if _MSC_VER >= 1930
+    #if   _MSC_VER >= 1930
         #define HAVE_VS2022
+    #elif _MSC_VER >= 1920
+        #define HAVE_VS2019
+    #elif _MSC_VER >= 1910
+        #define HAVE_VS2017
+    #elif _MSC_VER >= 1900
+        #define HAVE_VS2015
+    #elif _MSC_VER >= 1800
+        #define HAVE_VS2013
     #endif
 #endif
 
 /// C/C++ language and support by platform.
 /// ---------------------------------------------------------------------------
 
-/// ISO predefined constant for C++ version.
+/// ISO predefined constant for C++ version (inclusive).
 #if __cplusplus >= 199711L
     #define HAVE_CPP03
 #endif

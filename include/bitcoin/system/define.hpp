@@ -19,8 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_DEFINE_HPP
 #define LIBBITCOIN_SYSTEM_DEFINE_HPP
 
-// Standard includes (do not include directly).
-// All except <array> are included here by include ancestory.
+/// Standard includes (do not include directly).
+/// All except <array> are included here by include ancestory.
 #include <array>            // TODO: purge
 #include <cstddef>          // purged
 #include <cstdint>          // purged
@@ -39,15 +39,18 @@
     #include <windows.h>
 #endif
 
-// Create bc namespace alias.
-namespace libbitcoin {
-namespace system {
-} // namespace system
-} // namespace libbitcoin
-
+/// Create bc namespace alias.
+namespace libbitcoin{ namespace system {} }
 namespace bc = libbitcoin;
 
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
+
+/// Emit messages from .cpp during compilation.
+#if defined(HAVE_MSC)
+    #define DEFINED(text) __pragma(message("defined: " text))
+#else defined(HAVE_GNUC)
+    #define DEFINED(text) _Pragma("message defined: " text)
+#endif
 
 #ifdef NDEBUG
     #define BC_ASSERT(expression)
@@ -62,8 +65,8 @@ namespace bc = libbitcoin;
 
 // See gcc.gnu.org/wiki/Visibility
 
-// Generic helper definitions for shared library support
-// GNU visibilty attribute overrides compiler flag `fvisibility`.
+/// Generic helper definitions for shared library support
+/// GNU visibilty attribute overrides compiler flag `fvisibility`.
 #if defined(HAVE_MSC) || defined(HAVE_CYGWIN)
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
@@ -78,11 +81,10 @@ namespace bc = libbitcoin;
     #define BC_HELPER_DLL_LOCAL
 #endif
 
-// Now we use the generic helper definitions above to define BC_API
-// and BC_INTERNAL. BC_API is used for the public API symbols. It either DLL
-// imports or DLL exports (or does nothing for static build) BC_INTERNAL is
-// used for non-api symbols.
-
+/// Now we use the generic helper definitions above to define BC_API
+/// and BC_INTERNAL. BC_API is used for the public API symbols. It either DLL
+/// imports or DLL exports (or does nothing for static build) BC_INTERNAL is
+/// used for non-api symbols.
 #if defined BC_STATIC
     #define BC_API
     #define BC_INTERNAL
@@ -94,7 +96,7 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-// LCOV code coverage exclusion ranges.
+/// LCOV code coverage exclusion ranges.
 #define LCOV_EXCL_START(comment)
 #define LCOV_EXCL_STOP()
 
@@ -106,12 +108,12 @@ namespace bc = libbitcoin;
     static_assert(false, "Visual Studio 2022 minimum required.");
 #endif
 
-// Required to access ARM intrinsics in msvc.
+/// Required to access ARM intrinsics in msvc.
 #if defined(HAVE_MSC) && defined(HAVE_NEON_INTRINSICS)
     #define _ARM_USE_NEW_NEON_INTRINSICS
 #endif
 
-// C++11 (full)
+/// C++11 (full)
 #if defined(HAVE_NOEXCEPT)
     #define NOEXCEPT noexcept
     #define THROWS noexcept(false)
@@ -120,48 +122,48 @@ namespace bc = libbitcoin;
     #define THROWS
 #endif
 
-// C++14 (full)
+/// C++14 (full)
 #if defined(HAVE_DEPRECATED)
     #define DEPRECATED [[deprecated]]
 #else
     #define DEPRECATED
 #endif
 
-// C++17 (full)
+/// C++17 (full)
 #define NODISCARD [[nodiscard]]
 
-// C++17 (full)
+/// C++17 (full)
 #define FALLTHROUGH [[fallthrough]]
 
-// C++20 (partial)
+/// C++20 (partial)
 #if defined(HAVE_RANGES)
     #define RCONSTEXPR constexpr
 #else
     #define RCONSTEXPR inline
 #endif
 
-// C++20 (partial)
+/// C++20 (partial)
 #if defined(HAVE_STRING_CONSTEXPR)
     #define SCONSTEXPR constexpr
 #else
     #define SCONSTEXPR inline
 #endif
 
-// C++20 (partial)
+/// C++20 (partial)
 #if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
     #define SRCONSTEXPR constexpr
 #else
     #define SRCONSTEXPR inline
 #endif
 
-// C++20 (partial)
+/// C++20 (partial)
 #if defined(HAVE_VECTOR_CONSTEXPR)
     #define VCONSTEXPR constexpr
 #else
     #define VCONSTEXPR inline
 #endif
 
-// C++20 (partial)
+/// C++20 (partial)
 #if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
     #define SVCONSTEXPR constexpr
 #else

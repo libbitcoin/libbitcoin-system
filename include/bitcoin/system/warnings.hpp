@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/have.hpp>
 
+// TODO: other platforms.
 #if defined(HAVE_PRAGMA_WARNING)
     #define BC_DISABLE_WARNING(value) \
         __pragma(warning(disable:value))

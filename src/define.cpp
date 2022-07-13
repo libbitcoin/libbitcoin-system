@@ -61,8 +61,117 @@
 // parser, which wraps libsecp256k1 (as with elliptic_curve).
 // TODO: convert and move to /system/hash/ directory along with hash.hpp.
 
-namespace libbitcoin {
-namespace system {
+DEFINED("Version " LIBBITCOIN_SYSTEM_VERSION)
 
-} // namespace system
-} // namespace libbitcoin
+#ifdef HAVE_GNUC
+DEFINED("HAVE_GNUC")
+#endif
+#ifdef HAVE_LINUX
+DEFINED("HAVE_LINUX")
+#endif
+#ifdef HAVE_APPLE
+DEFINED("HAVE_APPLE")
+#endif
+#ifdef HAVE_FREEBSD
+DEFINED("HAVE_FREEBSD")
+#endif
+#ifdef HAVE_OPENBSD
+DEFINED("HAVE_OPENBSD")
+#endif
+#ifdef HAVE_NETBSD
+DEFINED("HAVE_NETBSD")
+#endif
+#ifdef HAVE_CYGWIN
+DEFINED("HAVE_CYGWIN")
+#endif
+#ifdef HAVE_MSC
+DEFINED("HAVE_MSC")
+#endif
+
+#ifdef HAVE_X86
+DEFINED("HAVE_X86")
+#endif
+#ifdef HAVE_X64
+DEFINED("HAVE_X64")
+#endif
+#ifdef HAVE_ARM
+DEFINED("HAVE_ARM")
+#endif
+#ifdef HAVE_ITANIUM
+DEFINED("HAVE_ITANIUM")
+#endif
+
+#ifdef HAVE_INTEL
+DEFINED("HAVE_INTEL")
+#endif
+#ifdef HAVE_INTEL_INTRINSICS
+DEFINED("HAVE_INTEL_INTRINSICS")
+#endif
+#ifdef HAVE_INTEL_INLINE_ASSEMBLY
+DEFINED("HAVE_INTEL_INLINE_ASSEMBLY")
+#endif
+#ifdef HAVE_NEON_INTRINSICS
+DEFINED("HAVE_NEON_INTRINSICS")
+#endif
+
+#ifdef HAVE_VS2013
+DEFINED("HAVE_VS2013")
+#endif
+#ifdef HAVE_VS2015
+DEFINED("HAVE_VS2015")
+#endif
+#ifdef HAVE_VS2017
+DEFINED("HAVE_VS2017")
+#endif
+#ifdef HAVE_VS2019
+DEFINED("HAVE_VS2019")
+#endif
+#ifdef HAVE_VS2022
+DEFINED("HAVE_VS2022")
+#endif
+
+#ifdef HAVE_CPP03
+DEFINED("HAVE_CPP03")
+#endif
+#ifdef HAVE_CPP11
+DEFINED("HAVE_CPP11")
+#endif
+#ifdef HAVE_CPP14
+DEFINED("HAVE_CPP14")
+#endif
+#ifdef HAVE_CPP17
+DEFINED("HAVE_CPP17")
+#endif
+#ifdef HAVE_CPP20
+DEFINED("HAVE_CPP20")
+#endif
+
+#ifdef HAVE_RANGES
+DEFINED("HAVE_RANGES")
+#endif
+#ifdef HAVE_CONSTEVAL
+DEFINED("HAVE_CONSTEVAL")
+#endif
+#ifdef HAVE_STRING_CONSTEXPR
+DEFINED("HAVE_STRING_CONSTEXPR")
+#endif
+#ifdef HAVE_VECTOR_CONSTEXPR
+DEFINED("HAVE_VECTOR_CONSTEXPR")
+#endif
+
+#ifdef HAVE_ICU
+DEFINED("HAVE_ICU")
+#endif
+#ifdef HAVE_NOEXCEPT
+DEFINED("HAVE_NOEXCEPT")
+#endif
+
+#ifdef HAVE_DEPRECATED
+DEFINED("HAVE_DEPRECATED")
+#endif
+#ifdef HAVE_SLOW_TESTS
+DEFINED("HAVE_SLOW_TESTS")
+#endif
+
+// Force compilation of this unit.
+namespace libbitcoin {}
