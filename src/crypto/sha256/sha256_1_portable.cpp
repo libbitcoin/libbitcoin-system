@@ -78,7 +78,7 @@ namespace sha256 {
 #endif
     
 ////void single_hash(state& state, const blocks& blocks) NOEXCEPT;
-void single_hash(state& state, const block& block) NOEXCEPT
+static void single_hash(state& state, const block& block) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
@@ -236,7 +236,7 @@ void single_hash(state& state, const block1& blocks) NOEXCEPT
     single_hash(state, blocks.front());
 }
 
-void double_hash(hash1& out, const block1& blocks) NOEXCEPT
+void double_hash(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_hash(state, blocks);

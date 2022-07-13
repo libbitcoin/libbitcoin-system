@@ -18,7 +18,7 @@ namespace sha256 {
 
 #if !defined(HAVE_INTEL)
 
-void double_sse41(hash4& out, const block4& blocks) NOEXCEPT
+void double_sse41(digest4& out, const block4& blocks) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "double_sse41 undefined");
 }
@@ -60,7 +60,7 @@ mint128_t inline read4(const block4& blocks, size_t offset) NOEXCEPT
         0x0c0d0e0ful, 0x08090a0bul,  0x04050607ul, 0x00010203ul));
 }
 
-void inline write4(hash4& hashes, size_t offset, mint128_t value) NOEXCEPT
+void inline write4(digest4& hashes, size_t offset, mint128_t value) NOEXCEPT
 {
     value = shuffle(value, set(
         0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
@@ -77,7 +77,7 @@ void inline write4(hash4& hashes, size_t offset, mint128_t value) NOEXCEPT
 }
 
 // Four blocks in four lanes, doubled.
-void double_sse41(hash4& out, const block4& blocks) NOEXCEPT
+void double_sse41(digest4& out, const block4& blocks) NOEXCEPT
 {
     // Transform 1.
     auto a = set(0x6a09e667ul);

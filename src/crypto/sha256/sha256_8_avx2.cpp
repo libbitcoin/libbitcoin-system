@@ -18,7 +18,7 @@ namespace sha256 {
 
 #if !defined(HAVE_INTEL)
 
-void double_avx2(hash8& out, const block8& blocks) NOEXCEPT
+void double_avx2(digest8& out, const block8& blocks) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "double_avx2 undefined");
 }
@@ -65,7 +65,7 @@ mint256_t inline read8(const block8& blocks, int offset) NOEXCEPT
         0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
 }
 
-void inline write8(hash8& hashes, int offset, mint256_t value) NOEXCEPT
+void inline write8(digest8& hashes, int offset, mint256_t value) NOEXCEPT
 {
     value = shuffle(value, set(
         0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul,
@@ -87,7 +87,7 @@ void inline write8(hash8& hashes, int offset, mint256_t value) NOEXCEPT
 }
 
 // Eight blocks in eight lanes, doubled.
-void double_avx2(hash8& out, const block8& blocks) NOEXCEPT
+void double_avx2(digest8& out, const block8& blocks) NOEXCEPT
 {
     // Transform 1.
     auto a = set(0x6a09e667ul);

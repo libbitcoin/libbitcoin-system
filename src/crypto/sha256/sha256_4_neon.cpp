@@ -26,7 +26,7 @@ void single_neon(state&, const block1&) NOEXCEPT
     BC_ASSERT_MSG(false, "single_neon undefined");
 }
 
-void double_neon(hash1&, const block1&) NOEXCEPT
+void double_neon(digest1&, const block1&) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "double_neon undefined");
 }
@@ -34,7 +34,8 @@ void double_neon(hash1&, const block1&) NOEXCEPT
 #else
 
 ////void single_neon(state& state, const blocks& blocks) NOEXCEPT;
-void single_neon(uint32_t* state, const uint8_t* data, uint32_t blocks) NOEXCEPT
+static void single_neon(uint32_t* state, const uint8_t* data,
+    uint32_t blocks) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_C_STYLE_CASTS)
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
@@ -228,7 +229,7 @@ void single_neon(uint32_t* state, const uint8_t* data, uint32_t blocks) NOEXCEPT
 
 #if defined(HAVE_NEON)
 
-void single_neon(state& state, const block& block) NOEXCEPT
+static void single_neon(state& state, const block& block) NOEXCEPT
 {
     return single_neon(state.data(), block.data(), one);
 }
@@ -240,7 +241,7 @@ void single_neon(state& state, const block1& blocks) NOEXCEPT
     return single_neon(state, blocks.front());
 }
 
-void double_neon(hash1& out, const block1& blocks) NOEXCEPT
+void double_neon(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_neon(state, blocks);

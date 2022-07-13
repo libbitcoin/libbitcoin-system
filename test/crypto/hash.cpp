@@ -21,6 +21,33 @@
 
 BOOST_AUTO_TEST_SUITE(hash_tests)
 
+// to_merkle_root
+// see sha256:: for 1/2/4/8/32 blocks test suite.
+
+BOOST_AUTO_TEST_CASE(hash__to_merkle_root__empty__null_hash)
+{
+    std::vector<hash_digest> hashes{};
+    to_merkle_root(hashes);
+    BOOST_REQUIRE_EQUAL(hashes.front(), null_hash);
+}
+
+BOOST_AUTO_TEST_CASE(hash__to_merkle_root__one_hash__one_hash)
+{
+    std::vector<hash_digest> hashes{ one_hash };
+    to_merkle_root(hashes);
+    BOOST_REQUIRE_EQUAL(hashes.front(), one_hash);
+}
+
+BOOST_AUTO_TEST_CASE(hash__scrypt_hash__scrypt_hash_tests__expected)
+{
+    for (const auto& result: scrypt_hash_tests)
+    {
+        data_chunk data;
+        BOOST_REQUIRE(decode_base16(data, result.input));
+        BOOST_REQUIRE_EQUAL(encode_base16(scrypt_hash(data)), result.result);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(hash__sha1_hash__sha1_tests__expected)
 {
     for (const auto& result: sha1_tests)
@@ -45,6 +72,24 @@ BOOST_AUTO_TEST_CASE(hash__ripemd160_hash__ripemd_tests__expected)
 
     const auto ripemd_hash2 = bitcoin_short_hash(base16_array("020641fde3a85beb8321033516de7ec01c35de96e945bf76c3768784a905471986"));
     BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash2), "c23e37c6fad06deab545f952992c8f28cb02bbe5");
+}
+
+BOOST_AUTO_TEST_CASE(hash__hpkcs5_pbkdf2_hmac_sha512__pkcs5_pbkdf2_hmac_sha512_tests__expected)
+{
+    for (const auto& result: pkcs5_pbkdf2_hmac_sha512_tests)
+    {
+        const auto hash = pkcs5_pbkdf2_hmac_sha512(result.passphrase, result.salt, result.iterations);
+        BOOST_REQUIRE_EQUAL(encode_base16(hash), result.result);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(hash__pbkdf2_hmac_sha256_chunk__pbkdf2_hmac_sha256_tests__expected)
+{
+    for (const auto& result: pbkdf2_hmac_sha256_tests)
+    {
+        const auto data = pbkdf2_hmac_sha256_chunk(result.passphrase, result.salt, result.iterations, result.length);
+        BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(hash__sha256_hash__data__expected)
@@ -77,167 +122,11 @@ BOOST_AUTO_TEST_CASE(hash__hmac_sha512_hash__data_key__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(long_hash), "3c5953a18f7303ec653ba170ae334fafa08e3846f2efe317b87efce82376253cb52a8c31ddcde5a3a2eee183c2b34cb91f85e64ddbc325f7692b199473579c58");
 }
 
-BOOST_AUTO_TEST_CASE(hash__hpkcs5_pbkdf2_hmac_sha512__pkcs5_pbkdf2_hmac_sha512_tests__expected)
-{
-    for (const auto& result: pkcs5_pbkdf2_hmac_sha512_tests)
-    {
-        const auto hash = pkcs5_pbkdf2_hmac_sha512(result.passphrase, result.salt, result.iterations);
-        BOOST_REQUIRE_EQUAL(encode_base16(hash), result.result);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(hash__pbkdf2_hmac_sha256_chunk__pbkdf2_hmac_sha256_tests__expected)
-{
-    for (const auto& result: pbkdf2_hmac_sha256_tests)
-    {
-        const auto data = pbkdf2_hmac_sha256_chunk(result.passphrase, result.salt, result.iterations, result.length);
-        BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(hash__scrypt_hash__scrypt_hash_tests__expected)
-{
-    for (const auto& result: scrypt_hash_tests)
-    {
-        data_chunk data;
-        BOOST_REQUIRE(decode_base16(data, result.input));
-        BOOST_REQUIRE_EQUAL(encode_base16(scrypt_hash(data)), result.result);
-    }
-}
-
 BOOST_AUTO_TEST_CASE(hash__djb2_hash__01234567890abcdefghijklmnopqrstuvwxyz__0xe1669c01)
 {
     // djb2_hash is size_t so cast for consistent test expectation.
     const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
     BOOST_REQUIRE_EQUAL(static_cast<uint32_t>(hash), 0xe1669c01);
-}
-
-// hash_reduce
-
-// single hash 
-hash_digest to_merkle_root(const hash_list& hashes)
-{
-    if (hashes.empty())
-        return {};
-
-    hash_list update;
-    hash_list merkle{ hashes };
-
-    while (merkle.size() > one)
-    {
-        if (is_odd(merkle.size()))
-            merkle.push_back(merkle.back());
-
-        for (auto it = merkle.begin(); it != merkle.end(); it += two)
-            update.push_back(bitcoin_hash(splice(it[0], it[1])));
-
-        std::swap(merkle, update);
-        update.clear();
-    }
-
-    return merkle.front();
-}
-
-BOOST_AUTO_TEST_CASE(hash__hash_reduce__one_pair__expected)
-{
-    hash_list hashes
-    {
-        hash_digest{ 0 },
-        hash_digest{ 1 }
-    };
-
-    const auto root = bitcoin_hash(hashes[0], hashes[1]);
-
-    // shani1, neon, sse4, portable  (1 block)
-    BOOST_REQUIRE(hash_reduce(hashes));
-    BOOST_REQUIRE_EQUAL(hashes.front(), root);
-}
-
-BOOST_AUTO_TEST_CASE(hash__hash_reduce__two_pair__expected)
-{
-    hash_list hashes
-    {
-        hash_digest{ 0 },
-        hash_digest{ 1 },
-        hash_digest{ 2 },
-        hash_digest{ 3 }
-    };
-
-    const auto root = to_merkle_root(hashes);
-
-    // shani2 (2 blocks)
-    BOOST_REQUIRE(hash_reduce(hashes));
-
-    // shani1, neon, sse4, portable  (1 block)
-    BOOST_REQUIRE(hash_reduce(hashes));
-    BOOST_REQUIRE_EQUAL(hashes.front(), root);
-}
-
-// BUGBUG: throws on 32 bit builds.
-BOOST_AUTO_TEST_CASE(hash__hash_reduce__four_pair__expected)
-{
-    hash_list hashes
-    {
-        hash_digest{ 0 },
-        hash_digest{ 1 },
-        hash_digest{ 2 },
-        hash_digest{ 3 },
-        hash_digest{ 4 },
-        hash_digest{ 5 },
-        hash_digest{ 6 },
-        hash_digest{ 7 }
-    };
-
-    const auto root = to_merkle_root(hashes);
-
-    // sse41 (4 blocks)
-    BOOST_REQUIRE(hash_reduce(hashes));
-
-    // shani2 (2 blocks)
-    BOOST_REQUIRE(hash_reduce(hashes));
-
-    // shani1, neon, sse4, portable  (1 block)
-    BOOST_REQUIRE(hash_reduce(hashes));
-    BOOST_REQUIRE_EQUAL(hashes.front(), root);
-}
-
-// TODO: This should throw if above throws, unless bug is integer alignment.
-BOOST_AUTO_TEST_CASE(hash__hash_reduce__eight_pair__expected)
-{
-    hash_list hashes
-    {
-        hash_digest{ 0 },
-        hash_digest{ 1 },
-        hash_digest{ 2 },
-        hash_digest{ 3 },
-        hash_digest{ 4 },
-        hash_digest{ 5 },
-        hash_digest{ 6 },
-        hash_digest{ 7 },
-        hash_digest{ 8 },
-        hash_digest{ 9 },
-        hash_digest{ 10 },
-        hash_digest{ 11 },
-        hash_digest{ 12 },
-        hash_digest{ 13 },
-        hash_digest{ 14 },
-        hash_digest{ 15 }
-    };
-
-    const auto root = to_merkle_root(hashes);
-
-    // avx2 (8 blocks)
-    BOOST_REQUIRE(hash_reduce(hashes));
-
-    // sse41 (4 blocks)
-    BOOST_REQUIRE(hash_reduce(hashes));
-
-    // shani2 (2 blocks)
-    BOOST_REQUIRE(hash_reduce(hashes));
-
-    // shani1, neon, sse4, portable  (1 block)
-    BOOST_REQUIRE(hash_reduce(hashes));
-    BOOST_REQUIRE_EQUAL(hashes.front(), root);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

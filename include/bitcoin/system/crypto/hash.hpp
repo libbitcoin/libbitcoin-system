@@ -116,6 +116,10 @@ template <size_t Size>
 inline data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
     uint64_t work, uint32_t resources, uint32_t parallelism) NOEXCEPT;
 
+/// Reduce a set of bitcoin hashes by bitcoin-hashing pairs in place.
+/// Always returns a single element (null_hash if hashes is empty).
+BC_API void to_merkle_root(std::vector<hash_digest>& hashes) NOEXCEPT;
+
 /// Generate a scrypt hash.
 BC_API hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
 
@@ -126,9 +130,6 @@ BC_API hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT;
 /// This hash function is used in merkle root generation.
 BC_API hash_digest bitcoin_hash(const data_slice& first,
     const data_slice& second) NOEXCEPT;
-
-/// Reduce a set of bitcoin hashes by bitcoin-hashing pairs in place.
-BC_API bool hash_reduce(std::vector<hash_digest>& hashes) NOEXCEPT;
 
 /// Generate a bitcoin short hash.
 BC_API short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT;

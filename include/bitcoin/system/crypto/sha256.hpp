@@ -27,25 +27,26 @@ namespace libbitcoin {
 namespace system {
 namespace sha256 {
     
-constexpr size_t hash_size  = 32;
-constexpr size_t block_size = 64;
-constexpr size_t state_size = 8;
+constexpr size_t state_size  = 8;
+constexpr size_t block_size  = 64;
+constexpr size_t digest_size = 32;
 
-using hash  = std::array<uint8_t, hash_size>;
-using block = std::array<uint8_t, block_size>;
-using state = std::array<uint32_t, state_size>;
-
-using hash1 = std::array<hash, 1>;
-using hash2 = std::array<hash, 2>;
-using hash4 = std::array<hash, 4>;
-using hash8 = std::array<hash, 8>;
+using state  = std::array<uint32_t, state_size>;
+using block  = std::array<uint8_t,  block_size>;
+using digest = std::array<uint8_t,  digest_size>;
 
 using block1 = std::array<block, 1>;
 using block2 = std::array<block, 2>;
 using block4 = std::array<block, 4>;
 using block8 = std::array<block, 8>;
 
-using blocks = std::vector<block>;
+using digest1 = std::array<digest, 1>;
+using digest2 = std::array<digest, 2>;
+using digest4 = std::array<digest, 4>;
+using digest8 = std::array<digest, 8>;
+
+using blocks  = std::vector<block>;
+using digests = std::vector<digest>;
 
 constexpr state initial
 {
@@ -101,13 +102,16 @@ constexpr block padded_32
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00  // <= 256 bits
 };
 
-/// Single hash of data of any size.
-/// out[] is populated to 32 bytes, and and can be the same buffer as in[].
-BC_API void sha256_single(uint8_t* out, size_t size, const uint8_t* in) NOEXCEPT;
+/// Compute the merkle root of any collection of hashes (in place).
+/// Resulting hash vector is always one element (empty returns null_hash).
+BC_API void merkle_root(digests& hashes) NOEXCEPT;
 
-/// Double hash 64 byte blocks of data, such as pairs of hashes.
+/// Single hash a count of 64 byte blocks of data into state (unfinalized).
+BC_API void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT;
+
+/// Double hash a count of 2x32 byte pairs of data, such as hashes (finalized).
 /// out[] is populated to half the size of in[], and can be the same buffer.
-BC_API void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT;
+BC_API void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT;
 
 } // namespace sha256
 } // namespace system

@@ -66,7 +66,7 @@ void single_sse4(state&, const block1&) NOEXCEPT
     BC_ASSERT_MSG(false, "single_sse4 undefined");
 }
 
-void double_sse4(hash1&, const block1&) NOEXCEPT
+void double_sse4(digest1&, const block1&) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "double_sse4 undefined");
 }
@@ -76,7 +76,8 @@ void double_sse4(hash1&, const block1&) NOEXCEPT
 #ifndef VISUAL
 
 ////void single_sse4(state& state, const blocks& blocks) NOEXCEPT;
-void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
+static void single_sse4(uint32_t* state, const uint8_t* data,
+    size_t blocks) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 
@@ -1039,7 +1040,7 @@ void single_sse4(uint32_t* state, const uint8_t* data, size_t blocks) NOEXCEPT
 
 #endif // VISUAL
 
-void single_sse4(state& state, const block& block) NOEXCEPT
+static void single_sse4(state& state, const block& block) NOEXCEPT
 {
     return single_sse4(state.data(), block.data(), one);
 }
@@ -1051,7 +1052,7 @@ void single_sse4(state& state, const block1& blocks) NOEXCEPT
     return single_sse4(state, blocks.front());
 }
 
-void double_sse4(hash1& out, const block1& blocks) NOEXCEPT
+void double_sse4(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_sse4(state, blocks);

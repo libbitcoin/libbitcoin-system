@@ -81,7 +81,7 @@ struct context
     inline data_array<counter_size> serialize_counter() const NOEXCEPT;
 
     /// Normalize state as the final hash value.
-    inline void serialize_state(hash& out) const NOEXCEPT;
+    inline void serialize_state(digest& out) const NOEXCEPT;
 
 protected:
     /// Update the context for the added data.
@@ -97,10 +97,14 @@ private:
     static constexpr size_t to_over = subtract(bc::bits<integral>, to_bits);
 };
 
-/// Defined in sha256.cpp (declaring here avoids context& circularity).
-/// Published for support of streaming, use with context{} and context.reset().
+/// Finalized sha256 hash of any sized data.
+BC_API void hash(uint8_t* out32, size_t size, const uint8_t* in) NOEXCEPT;
+
+/// Construct a default context and use this to iterate over data.
 BC_API void update(context& context, size_t size, const uint8_t* in) NOEXCEPT;
-BC_API void finalize(context& context, uint8_t* out) NOEXCEPT;
+
+/// Finalize after last call to update, out32 is hash result.
+BC_API void finalize(context& context, uint8_t* out32) NOEXCEPT;
 
 } // namespace sha256
 } // namespace system

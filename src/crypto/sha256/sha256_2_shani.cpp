@@ -25,12 +25,12 @@ void single_shani(state&, const block1&) NOEXCEPT
     BC_ASSERT_MSG(false, "single_shani undefined");
 }
 
-void double_shani(hash1&, const block1&) NOEXCEPT
+void double_shani(digest1&, const block1&) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "double_shani[1] undefined");
 }
 
-void double_shani(hash2&, const block2&) NOEXCEPT
+void double_shani(digest2&, const block2&) NOEXCEPT
 {
     BC_ASSERT_MSG(false, "double_shani[2] undefined");
 }
@@ -136,7 +136,8 @@ void inline shift_message(mint128_t m0, mint128_t m1, mint128_t& out) NOEXCEPT
     out = _mm_sha256msg2_epu32(sum(out, align_right<shift>(m1, m0)), m1);
 }
 
-void inline shift_messages(mint128_t& out0, mint128_t m, mint128_t& out1) NOEXCEPT
+void inline shift_messages(mint128_t& out0, mint128_t m,
+    mint128_t& out1) NOEXCEPT
 {
     shift_message(out0, m, out1);
     shift_message(out0, m);
@@ -165,7 +166,8 @@ void inline unshuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
 
 ////void single_shani(state& state, const blocks& blocks) NOEXCEPT;
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-void single_shani(uint32_t* state, const uint8_t* data, uint32_t blocks) NOEXCEPT
+static void single_shani(uint32_t* state, const uint8_t* data,
+    uint32_t blocks) NOEXCEPT
 BC_POP_WARNING()
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -236,7 +238,7 @@ BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
-void single_shani(state& state, const block& block) NOEXCEPT
+static void single_shani(state& state, const block& block) NOEXCEPT
 {
     // single_shani can iterate over multiple blocks, but this is not a material
     // optimization and is a denormlization, so we don't use it.
@@ -250,7 +252,7 @@ void single_shani(state& state, const block1& blocks) NOEXCEPT
     return single_shani(state, blocks.front());
 }
 
-void double_shani(hash1& out, const block1& blocks) NOEXCEPT
+void double_shani(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_shani(state, blocks);
@@ -262,7 +264,7 @@ void double_shani(hash1& out, const block1& blocks) NOEXCEPT
     to_big_endian_set(array_cast<uint32_t>(out.front()), state);
 }
 
-void double_shani(hash2& out, const block2& block) NOEXCEPT
+void double_shani(digest2& out, const block2& block) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 

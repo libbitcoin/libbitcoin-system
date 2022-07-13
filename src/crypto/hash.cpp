@@ -30,6 +30,11 @@ namespace system {
 // Hash generators.
 // ----------------------------------------------------------------------------
 
+void to_merkle_root(std::vector<hash_digest>& hashes) NOEXCEPT
+{
+    sha256::merkle_root(hashes);
+}
+
 hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
     return scrypt<hash_size>(data, data, 1024_u64, 1_u32, 1_u32);
@@ -44,21 +49,6 @@ hash_digest bitcoin_hash(const data_slice& first,
     const data_slice& second) NOEXCEPT
 {
     return sha256_hash(sha256_hash(first, second));
-}
-
-bool hash_reduce(std::vector<hash_digest>& hashes) NOEXCEPT
-{
-    const auto size = hashes.size();
-
-    // Buffer must be a multiple of 64 (two * hash_size).
-    if (is_odd(size))
-        return false;
-
-    // buffer is [64 * size/2] contiguous bytes, transformed in place.
-    auto buffer = hashes.front().data();
-    sha256::sha256_double(buffer, to_half(size), buffer);
-    hashes.resize(to_half(size));
-    return true;
 }
 
 short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
@@ -105,14 +95,14 @@ data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT
 hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
     hash_digest hash;
-    sha256::sha256_single(hash.data(), data.size(), data.data());
+    sha256::hash(hash.data(), data.size(), data.data());
     return hash;
 }
 
 data_chunk sha256_hash_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(hash_size, no_fill_byte_allocator);
-    sha256::sha256_single(hash.data(), data.size(), data.data());
+    sha256::hash(hash.data(), data.size(), data.data());
     return hash;
 }
 

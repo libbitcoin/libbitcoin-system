@@ -60,7 +60,7 @@ void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
 {
     size_t i;
     uint8_t pad[block_size];
-    uint8_t key_hash[hash_size];
+    uint8_t key_hash[digest_size];
 
     if (key_length > block_size)
     {
@@ -68,7 +68,7 @@ void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
         update(context->ictx, key_length, key);
         finalize(context->ictx, key_hash);
         key = key_hash;
-        key_length = hash_size;
+        key_length = digest_size;
     }
 
     context->ictx.reset();

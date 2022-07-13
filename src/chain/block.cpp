@@ -358,23 +358,8 @@ bool block::is_internal_double_spend() const NOEXCEPT
 // private
 hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
-    if (txs_->empty())
-        return null_hash;
-
     auto merkle = transaction_hashes(witness);
-
-    // Reduce to a single hash (each iteration divides list size in half).
-    while (!is_one(merkle.size()))
-    {
-        // If number of hashes is odd, duplicate the last hash in the list.
-        if (is_odd(merkle.size()))
-            merkle.push_back(merkle.back());
-
-        // Hash all pairs of tx hashes in place, resizes vector to half.
-        hash_reduce(merkle);
-    }
-
-    // There is now only one item in the list.
+    to_merkle_root(merkle);
     return merkle.front();
 }
 

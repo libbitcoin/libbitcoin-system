@@ -66,7 +66,7 @@ constexpr void context::set_data(size_t size, const uint8_t* bytes) NOEXCEPT
     set_size(possible_narrow_cast<integral>(size));
 }
 
-// Cop gguarded byte_get_size (modulo block_size) and fill (< block_size).
+// Copy guarded byte_get_size (modulo block_size) and fill (< block_size).
 BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
@@ -112,13 +112,11 @@ BC_POP_WARNING()
 inline data_array<context::counter_size>
 context::serialize_counter() const NOEXCEPT
 {
-    // array_cast uses reinterpret_cast, not constexpr
     return array_cast<uint8_t>(to_big_endian_set(counter));
 }
 
-inline void context::serialize_state(hash& out) const NOEXCEPT
+inline void context::serialize_state(digest& out) const NOEXCEPT
 {
-    // array_cast uses reinterpret_cast, not constexpr
     to_big_endian_set(array_cast<uint32_t>(out), state);
 }
 
