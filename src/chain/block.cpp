@@ -216,11 +216,8 @@ hash_list block::transaction_hashes(bool witness) const NOEXCEPT
     static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
     const auto count = txs_->size();
 
-    // Addition is guarded by block size limit.
-    const auto space = count + (is_odd(count) && !is_one(count) ? one : zero);
-
-    // Excess reservation accounts for generate_merkle_root addition.
-    hash_list out(space, no_fill_hash_allocator);
+    // Excess reservation accounts for possible generate_merkle_root addition.
+    hash_list out(add1(count), no_fill_hash_allocator);
 
     // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
