@@ -22,22 +22,12 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 
 // sha256::hash
 
-// Compares sha256::sha256_single to data < block expectation.
-BOOST_AUTO_TEST_CASE(sha256__hash__less_than_one_block__expected)
+BOOST_AUTO_TEST_CASE(sha256__hash__fractional_block__expected)
 {
     hash_digest hash{};
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
     sha256::hash(hash.data(), chunk.size(), chunk.data());
     BOOST_REQUIRE_EQUAL(hash, base16_array("3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7"));
-}
-
-// Compares sha256::sha256_single data > block to expectation.
-BOOST_AUTO_TEST_CASE(sha256__hash__more_than_one_block__expected)
-{
-    hash_digest hash{};
-    const auto data = base16_array("6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b73a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b73a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
-    sha256::hash(hash.data(), data.size(), data.data());
-    BOOST_REQUIRE_EQUAL(hash, base16_array("cec2696f81dc7448039064e1d4668018853441169bd5bf7d9c5041d28369b63d"));
 }
 
 // sha256::transform[2]
