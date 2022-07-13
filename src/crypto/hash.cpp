@@ -69,28 +69,36 @@ short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
 short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash;
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     RMD160(data.data(), data.size(), hash.data());
+    BC_POP_WARNING()
     return hash;
 }
 
 data_chunk ripemd160_hash_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     RMD160(data.data(), data.size(), hash.data());
+    BC_POP_WARNING()
     return hash;
 }
 
 short_hash sha1_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash;
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     SHA1(data.data(), data.size(), hash.data());
+    BC_POP_WARNING()
     return hash;
 }
 
 data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     SHA1(data.data(), data.size(), hash.data());
+    BC_POP_WARNING()
     return hash;
 }
 
@@ -132,15 +140,19 @@ data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length) NOEXCEPT
 {
     data_chunk hash(length, no_fill_byte_allocator);
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
         salt.size(), iterations, hash.data(), length);
+    BC_POP_WARNING()
     return hash;
 }
 
 long_hash sha512_hash(const data_slice& data) NOEXCEPT
 {
     long_hash hash;
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     SHA512(data.data(), data.size(), hash.data());
+    BC_POP_WARNING()
     return hash;
 }
 
@@ -148,21 +160,23 @@ long_hash hmac_sha512_hash(const data_slice& data,
     const data_slice& key) NOEXCEPT
 {
     long_hash hash;
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.data());
+    BC_POP_WARNING()
     return hash;
 }
 
 long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations) NOEXCEPT
 {
-    long_hash hash{};
-
-    // Hash must be null-initialized (?).
-    pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
-        salt.data(), salt.size(), hash.data(), hash.size(), iterations);
-
     // If pkcs5_pbkdf2 returns != 0 then hash will be zeroized.
     // This can only be caused by out-of-memory or invalid parameterization.
+    long_hash hash{};
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
+        salt.data(), salt.size(), hash.data(), hash.size(), iterations);
+    BC_POP_WARNING()
     return hash;
 }
 
@@ -170,14 +184,15 @@ data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
     uint64_t work, uint32_t resources, uint32_t parallelism,
     size_t length) NOEXCEPT
 {
-    data_chunk hash(no_fill_byte_allocator);
-    data_chunk out(length, 0_u8);
-    crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), work,
-        resources, parallelism, out.data(), out.size());
-
     // If crypto_scrypt returns != 0 then out will be zeroized.
     // This can only be caused by out-of-memory or invalid parameterization.
-    return out;
+    data_chunk hash(length, 0_u8);
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), work,
+        resources, parallelism, hash.data(), hash.size());
+    BC_POP_WARNING()
+    return hash;
 }
 
 // Objectives: deterministic, uniform distribution, efficient computation.
