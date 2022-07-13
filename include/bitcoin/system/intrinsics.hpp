@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <bitcoin/system/warnings.hpp>
 
-#if defined(HAVE_NEON)
+#if defined(HAVE_ARM)
     #include <arm_neon.h>
 #endif
 
@@ -35,16 +35,17 @@
     #endif
 #endif
 
-/// CPU instructions (xgetbv, cpuid_count) required to test for intrinsics.
+/// General CPU instructions (xgetbv, cpuid_count) used to locate CPU features.
 /// ---------------------------------------------------------------------------
 /// Given ISO define, intrinsics always compile, however on other platforms this
-/// support is inconsistent, so revert to the lowest common interface (assembly).
+/// support is inconsistent, so revert to lowest common interface (assembly).
 /// MSVC has ISO definitions but not x64 inline assembly, so this correlates.
 
 namespace libbitcoin {
 
-/// Local checks for Intel and ARM Neon intrinsics.
+/// Runtime checks for Intel SIMD and ARM Neon availability.
 /// ---------------------------------------------------------------------------
+/// Verifying feature support at runtime ensures build portability.
     
 #if defined (HAVE_INTEL)
 
@@ -159,16 +160,21 @@ inline bool try_shani() noexcept
 
 #endif // HAVE_INTEL
 
-#if defined (HAVE_NEON)
+#if defined (HAVE_ARM)
 
+// TODO: not implemented.
 constexpr bool try_neon() noexcept
 {
+#if defined(HAVE_NEON_INTRINSICS)
     return false;
+#else
+    return false;
+#endif
 }
 
-#endif // HAVE_NEON
+#endif // HAVE_ARM
 
-/// Published tests for Intel and ARM Neon intrinsics availability.
+/// Published tests for Intel SIMD, and ARM SIMD (Neon) availability.
 /// ---------------------------------------------------------------------------
 
 #if defined (HAVE_INTEL)
@@ -187,7 +193,7 @@ inline bool have_sse41() noexcept
 
 // TODO: sse4 is not yet implemented for msvc (currently requires __asm__), so
 // TODO: while try_sse4 may succeed, a call to sha256::sse4 will fail on msvc.
-// TODO: so this mut return false in the case of not HAVE_INTEL_ASM. 
+// TODO: so this must return false in the case of not HAVE_INTEL_ASM. 
 inline bool have_sse4() noexcept
 {
 #if defined(HAVE_INTEL_ASM)
@@ -228,7 +234,7 @@ constexpr bool have_shani() noexcept
 
 #endif // HAVE_INTEL
 
-#if defined(HAVE_NEON)
+#if defined(HAVE_ARM)
 
 inline bool have_neon() noexcept
 {
@@ -243,7 +249,7 @@ constexpr bool have_neon() noexcept
     return false;
 }
 
-#endif // HAVE_NEON
+#endif // HAVE_ARM
 
 /// SIMD (single instruction multiple data) types.
 /// ---------------------------------------------------------------------------

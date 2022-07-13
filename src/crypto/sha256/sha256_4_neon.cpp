@@ -6,7 +6,7 @@
 
 #include <bitcoin/system/crypto/sha256.hpp>
 
-#if defined(HAVE_NEON)
+#if defined(HAVE_ARM)
 #include <arm_neon.h>
 #endif
 #include <stdint.h>
@@ -19,7 +19,7 @@ namespace libbitcoin {
 namespace system {
 namespace sha256 {
 
-#if !defined(HAVE_NEON)
+#if !defined(HAVE_ARM)
 
 void single_neon(state&, const block1&) NOEXCEPT
 {
@@ -225,9 +225,9 @@ static void single_neon(uint32_t* state, const uint8_t* data,
     BC_POP_WARNING()
 }
 
-#endif // HAVE_NEON
+#endif // HAVE_ARM
 
-#if defined(HAVE_NEON)
+#if defined(HAVE_ARM)
 
 static void single_neon(state& state, const block& block) NOEXCEPT
 {
@@ -253,7 +253,7 @@ void double_neon(digest1& out, const block1& blocks) NOEXCEPT
     to_big_endian_set(array_cast<uint32_t>(out.front()), state);
 }
 
-#endif // HAVE_NEON
+#endif // HAVE_ARM
 
 } // namespace sha256
 } // namespace system

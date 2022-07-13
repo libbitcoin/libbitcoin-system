@@ -42,7 +42,7 @@
     #define HAVE_MSC
 #endif
 
-/// ISO constants for targeted CPU architecture.
+/// ISO defines for targeted CPU architecture.
 #if defined _M_IX86
     #define HAVE_X86
 #elif defined _M_X64
@@ -51,15 +51,17 @@
     #define HAVE_ITANIUM
 #endif
 
-/// Use __asm__ for Intel intrinsics if non-ISO interface.
+/// Use intrinsics for Intel CPU features with ISO defines.
 #if defined(HAVE_X86) || defined(HAVE_X64)  || defined(HAVE_ITANIUM)
     #define HAVE_ISO_INTEL
 #endif
+
+/// Use __asm__ for Intel CPU features if non-ISO interface.
 #if defined(__x86_64__) || defined(__amd64__) || defined(__i386__)
     #define HAVE_GNU_INTEL
 #endif
 
-/// __m128i/__m256i are not defined on non-Intel processors.
+/// Intel CPU architecture (__m128i/__m256i defined).
 #if defined(HAVE_ISO_INTEL) || defined(HAVE_GNU_INTEL)
     #define HAVE_INTEL
 #endif
@@ -77,10 +79,10 @@
     #define HAVE_ARM
 #endif
 
-/// Neon intrinsics for ARM.
+/// ARM Neon intrinsics defined.
 #if defined(HAVE_ARM)
 #if defined(HAVE_GNUC) || defined(__ARM_NEON) || defined(HAVE_MSC)
-    #define HAVE_NEON
+    #define HAVE_NEON_INTRINSICS
 #endif
 #endif
 
@@ -136,6 +138,14 @@
     #define HAVE_PRAGMA_WARNING
 #endif
 
+/// WITH_ indicates build symbol.
+/// ---------------------------------------------------------------------------
+
+/// Build configured (always available on msvc).
+#if defined(HAVE_MSC) || defined(WITH_ICU)
+    #define HAVE_ICU
+#endif
+
 /// These are manually configured here.
 /// ---------------------------------------------------------------------------
 
@@ -147,21 +157,5 @@
 
 /// Have slow test execution (scrypt is slow by design).
 ////#define HAVE_SLOW_TESTS
-
-/// Build configured (always available on msvc).
-#if defined(HAVE_MSC) || defined(WITH_ICU)
-    #define HAVE_ICU
-#endif
-
-/// WITH_ indicates build symbol.
-/// ---------------------------------------------------------------------------
-
-/// TODO: integrate into build configuration.
-#define WITH_PORTABLE
-
-/// Have a portable build (no intrinsics).
-#if defined(WITH_PORTABLE)
-    #define HAVE_PORTABLE
-#endif
 
 #endif
