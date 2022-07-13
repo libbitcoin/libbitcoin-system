@@ -50,10 +50,8 @@ using digests = std::vector<digest>;
 
 constexpr state initial
 {
-    0x6a09e667_u32, 0xbb67ae85_u32,
-    0x3c6ef372_u32, 0xa54ff53a_u32,
-    0x510e527f_u32, 0x9b05688c_u32,
-    0x1f83d9ab_u32, 0x5be0cd19_u32
+    0x6a09e667_u32, 0xbb67ae85_u32, 0x3c6ef372_u32, 0xa54ff53a_u32,
+    0x510e527f_u32, 0x9b05688c_u32, 0x1f83d9ab_u32, 0x5be0cd19_u32
 };
 
 /// Padding for any size hash round (truncated to fill block).
@@ -74,7 +72,7 @@ constexpr block pad_any
 
 /// Padding for full block hash round (64 bytes of pad/count).
 /// The buffer is prefilled with padding and a count of 256 bits.
-constexpr block pad_64
+constexpr alignas(16) block pad_64
 {
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // <= pad start
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -89,7 +87,7 @@ constexpr block pad_64
 
 /// Padding for a half block hash round (32 bytes of pad/count).
 /// The buffer is prefilled with padding and a count of 256 bits.
-constexpr block padded_32
+constexpr alignas(16) block padded_32
 {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // <= hash target
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
