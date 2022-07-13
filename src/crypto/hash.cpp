@@ -92,6 +92,13 @@ data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT
     return hash;
 }
 
+// TODO: non-streaming hash optimizations:
+// TODO: sha256 hashes of arrays can be optimized by computing the padding
+// TODO: bytes (including count value) at compile time using constexpr.
+// TODO: overloads for common sizes, such as 32 and 64 bytes, can do the same.
+// TODO: this affects all double hashes (including that in the sha256x2 writer)
+// TODO: as the second hash is always 32 bytes. Soo comments in sha256.cpp.
+
 hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
     hash_digest hash;
