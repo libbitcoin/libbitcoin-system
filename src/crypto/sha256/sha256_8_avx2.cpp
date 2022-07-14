@@ -40,21 +40,20 @@ void inline round(mint256_t a, mint256_t b, mint256_t c, mint256_t& d,
     h = sum(t1, t2);
 }
 
-mint256_t inline read8(const block8& blocks, int offset) NOEXCEPT
+template <size_t Offset>
+mint256_t inline read8(const block8& blocks) NOEXCEPT
 {
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
     const auto value = set(
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[0][offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[1][offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[2][offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[3][offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[4][offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[5][offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[6][offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[7][offset])));
-    BC_POP_WARNING()
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[0][Offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[1][Offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[2][Offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[3][Offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[4][Offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[5][Offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[6][Offset])),
+        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[7][Offset])));
     BC_POP_WARNING()
 
     return shuffle(value, set(
@@ -62,7 +61,8 @@ mint256_t inline read8(const block8& blocks, int offset) NOEXCEPT
         0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
 }
 
-void inline write8(digest8& hashes, int offset, mint256_t value) NOEXCEPT
+template <size_t Offset>
+void inline write8(digest8& hashes, mint256_t value) NOEXCEPT
 {
     value = shuffle(value, set(
         0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul,
@@ -70,16 +70,14 @@ void inline write8(digest8& hashes, int offset, mint256_t value) NOEXCEPT
 
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-    unsafe_array_cast<uint8_t, four>(&hashes[0][offset]) = to_little_endian(get<7>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[1][offset]) = to_little_endian(get<6>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[2][offset]) = to_little_endian(get<5>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[3][offset]) = to_little_endian(get<4>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[4][offset]) = to_little_endian(get<3>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[5][offset]) = to_little_endian(get<2>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[6][offset]) = to_little_endian(get<1>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[7][offset]) = to_little_endian(get<0>(value));
-    BC_POP_WARNING()
+    unsafe_array_cast<uint8_t, four>(&hashes[0][Offset]) = to_little_endian(get<7>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[1][Offset]) = to_little_endian(get<6>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[2][Offset]) = to_little_endian(get<5>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[3][Offset]) = to_little_endian(get<4>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[4][Offset]) = to_little_endian(get<3>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[5][Offset]) = to_little_endian(get<2>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[6][Offset]) = to_little_endian(get<1>(value));
+    unsafe_array_cast<uint8_t, four>(&hashes[7][Offset]) = to_little_endian(get<0>(value));
     BC_POP_WARNING()
 }
 
@@ -99,22 +97,22 @@ void double_avx2(digest8& out, const block8& blocks) NOEXCEPT
     mint256_t w00, w01, w02, w03, w04, w05, w06, w07;
     mint256_t w08, w09, w10, w11, w12, w13, w14, w15;
 
-    round(a, b, c, d, e, f, g, h, sum(set(0x428a2f98ul), w00 = read8(blocks, 0)));
-    round(h, a, b, c, d, e, f, g, sum(set(0x71374491ul), w01 = read8(blocks, 4)));
-    round(g, h, a, b, c, d, e, f, sum(set(0xb5c0fbcful), w02 = read8(blocks, 8)));
-    round(f, g, h, a, b, c, d, e, sum(set(0xe9b5dba5ul), w03 = read8(blocks, 12)));
-    round(e, f, g, h, a, b, c, d, sum(set(0x3956c25bul), w04 = read8(blocks, 16)));
-    round(d, e, f, g, h, a, b, c, sum(set(0x59f111f1ul), w05 = read8(blocks, 20)));
-    round(c, d, e, f, g, h, a, b, sum(set(0x923f82a4ul), w06 = read8(blocks, 24)));
-    round(b, c, d, e, f, g, h, a, sum(set(0xab1c5ed5ul), w07 = read8(blocks, 28)));
-    round(a, b, c, d, e, f, g, h, sum(set(0xd807aa98ul), w08 = read8(blocks, 32)));
-    round(h, a, b, c, d, e, f, g, sum(set(0x12835b01ul), w09 = read8(blocks, 36)));
-    round(g, h, a, b, c, d, e, f, sum(set(0x243185beul), w10 = read8(blocks, 40)));
-    round(f, g, h, a, b, c, d, e, sum(set(0x550c7dc3ul), w11 = read8(blocks, 44)));
-    round(e, f, g, h, a, b, c, d, sum(set(0x72be5d74ul), w12 = read8(blocks, 48)));
-    round(d, e, f, g, h, a, b, c, sum(set(0x80deb1feul), w13 = read8(blocks, 52)));
-    round(c, d, e, f, g, h, a, b, sum(set(0x9bdc06a7ul), w14 = read8(blocks, 56)));
-    round(b, c, d, e, f, g, h, a, sum(set(0xc19bf174ul), w15 = read8(blocks, 60)));
+    round(a, b, c, d, e, f, g, h, sum(set(0x428a2f98ul), w00 = read8< 0>(blocks)));
+    round(h, a, b, c, d, e, f, g, sum(set(0x71374491ul), w01 = read8< 4>(blocks)));
+    round(g, h, a, b, c, d, e, f, sum(set(0xb5c0fbcful), w02 = read8< 8>(blocks)));
+    round(f, g, h, a, b, c, d, e, sum(set(0xe9b5dba5ul), w03 = read8<12>(blocks)));
+    round(e, f, g, h, a, b, c, d, sum(set(0x3956c25bul), w04 = read8<16>(blocks)));
+    round(d, e, f, g, h, a, b, c, sum(set(0x59f111f1ul), w05 = read8<20>(blocks)));
+    round(c, d, e, f, g, h, a, b, sum(set(0x923f82a4ul), w06 = read8<24>(blocks)));
+    round(b, c, d, e, f, g, h, a, sum(set(0xab1c5ed5ul), w07 = read8<28>(blocks)));
+    round(a, b, c, d, e, f, g, h, sum(set(0xd807aa98ul), w08 = read8<32>(blocks)));
+    round(h, a, b, c, d, e, f, g, sum(set(0x12835b01ul), w09 = read8<36>(blocks)));
+    round(g, h, a, b, c, d, e, f, sum(set(0x243185beul), w10 = read8<40>(blocks)));
+    round(f, g, h, a, b, c, d, e, sum(set(0x550c7dc3ul), w11 = read8<44>(blocks)));
+    round(e, f, g, h, a, b, c, d, sum(set(0x72be5d74ul), w12 = read8<48>(blocks)));
+    round(d, e, f, g, h, a, b, c, sum(set(0x80deb1feul), w13 = read8<52>(blocks)));
+    round(c, d, e, f, g, h, a, b, sum(set(0x9bdc06a7ul), w14 = read8<56>(blocks)));
+    round(b, c, d, e, f, g, h, a, sum(set(0xc19bf174ul), w15 = read8<60>(blocks)));
     round(a, b, c, d, e, f, g, h, sum(set(0xe49b69c1ul), inc(w00, sigma1(w14), w09, sigma0(w01))));
     round(h, a, b, c, d, e, f, g, sum(set(0xefbe4786ul), inc(w01, sigma1(w15), w10, sigma0(w02))));
     round(g, h, a, b, c, d, e, f, sum(set(0x0fc19dc6ul), inc(w02, sigma1(w00), w11, sigma0(w03))));
@@ -326,14 +324,14 @@ void double_avx2(digest8& out, const block8& blocks) NOEXCEPT
     round(b, c, d, e, f, g, h, a, sum(set(0xc67178f2ul),     w15, sigma1(w13), w08, sigma0(w00)));
 
     // Output.
-    write8(out,  0, sum(a, set(0x6a09e667ul)));
-    write8(out,  4, sum(b, set(0xbb67ae85ul)));
-    write8(out,  8, sum(c, set(0x3c6ef372ul)));
-    write8(out, 12, sum(d, set(0xa54ff53aul)));
-    write8(out, 16, sum(e, set(0x510e527ful)));
-    write8(out, 20, sum(f, set(0x9b05688cul)));
-    write8(out, 24, sum(g, set(0x1f83d9abul)));
-    write8(out, 28, sum(h, set(0x5be0cd19ul)));
+    write8< 0>(out, sum(a, set(0x6a09e667ul)));
+    write8< 4>(out, sum(b, set(0xbb67ae85ul)));
+    write8< 8>(out, sum(c, set(0x3c6ef372ul)));
+    write8<12>(out, sum(d, set(0xa54ff53aul)));
+    write8<16>(out, sum(e, set(0x510e527ful)));
+    write8<20>(out, sum(f, set(0x9b05688cul)));
+    write8<24>(out, sum(g, set(0x1f83d9abul)));
+    write8<28>(out, sum(h, set(0x5be0cd19ul)));
 }
 
 #endif // HAVE_XCPU
