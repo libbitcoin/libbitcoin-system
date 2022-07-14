@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,7 +19,25 @@
 #ifndef LIBBITCOIN_SYSTEM_DEFINE_HPP
 #define LIBBITCOIN_SYSTEM_DEFINE_HPP
 
-#include <bitcoin/system/compat.hpp>
+// Standard includes (do not include directly).
+// All except <array> are included here by include ancestory.
+#include <array>
+#include <cstddef>  // purged
+#include <cstdint>  // purged
+#include <exception>
+#include <iostream>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <type_traits>
+
+// Pulls chains in all /system headers (except settings.hpp).
+#include <bitcoin/system/constraints.hpp>
+
+#if defined(HAVE_MSC)
+    #include <windows.h>
+#endif
 
 // Create bc namespace alias.
 namespace libbitcoin {
@@ -29,24 +47,35 @@ namespace system {
 
 namespace bc = libbitcoin;
 
-// See http://gcc.gnu.org/wiki/Visibility
+#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
+
+#ifdef NDEBUG
+    #define BC_ASSERT(expression)
+    #define BC_ASSERT_MSG(expression, text)
+    #define BC_DEBUG_ONLY(expression)
+#else
+    #include <cassert>
+    #define BC_ASSERT(expression) assert(expression)
+    #define BC_ASSERT_MSG(expression, text) assert((expression)&&(text))
+    #define BC_DEBUG_ONLY(expression) expression
+#endif
+
+// See gcc.gnu.org/wiki/Visibility
 
 // Generic helper definitions for shared library support
 // GNU visibilty attribute overrides compiler flag `fvisibility`.
-#if defined _MSC_VER || defined __CYGWIN__
+#if defined(HAVE_MSC) || defined(HAVE_CYGWIN)
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
     #define BC_HELPER_DLL_LOCAL
+#elif defined(HAVE_GNUC)
+    #define BC_HELPER_DLL_IMPORT __attribute__((visibility("default")))
+    #define BC_HELPER_DLL_EXPORT __attribute__((visibility("default")))
+    #define BC_HELPER_DLL_LOCAL  __attribute__((visibility("internal")))
 #else
-    #if __GNUC__ >= 4
-        #define BC_HELPER_DLL_IMPORT __attribute__((visibility("default")))
-        #define BC_HELPER_DLL_EXPORT __attribute__((visibility("default")))
-        #define BC_HELPER_DLL_LOCAL  __attribute__((visibility("internal")))
-    #else
-        #define BC_HELPER_DLL_IMPORT
-        #define BC_HELPER_DLL_EXPORT
-        #define BC_HELPER_DLL_LOCAL
-    #endif
+    #define BC_HELPER_DLL_IMPORT
+    #define BC_HELPER_DLL_EXPORT
+    #define BC_HELPER_DLL_LOCAL
 #endif
 
 // Now we use the generic helper definitions above to define BC_API
@@ -65,26 +94,83 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-// Tag to deprecate functions and methods.
-// Gives a compiler warning when they are used.
-#if defined _MSC_VER || defined __CYGWIN__
-    #define BC_DEPRECATED __declspec(deprecated)
-#else
-    #if __GNUC__ >= 4
-        #define BC_DEPRECATED __attribute__((deprecated))
-    #else
-        #define BC_DEPRECATED
-    #endif
+// These are defined in the GUI for VS builds and by command line for others.
+// But overriding these here for VS builds to keep tests active.
+#if !defined(HAVE_PORTABLE) && defined(HAVE_MSC) && defined(HAVE_X64)
+    #define WITH_AVX2
+    #define WITH_SSE41
+    #define WITH_SSE4
+    ////#define WITH_NEON  // no test yet for ARM Neon.
+    ////#define WITH_SHANI // untested
 #endif
 
-// Avoid namespace conflict between boost::placeholders and std::placeholders.
-// This arises when including <functional>, which declares std::placeholders.
-// This results in an declared symbol when boost includes use placeholders.
-// So bracket those includes with an undefine and redefine of this symbol.
-#define BOOST_BIND_NO_PLACEHOLDERS
-
-// Define so we can have better visibility of lcov exclusion ranges.
-#define LCOV_EXCL_START(text)
+// LCOV code coverage exclusion ranges.
+#define LCOV_EXCL_START(comment)
 #define LCOV_EXCL_STOP()
+
+#if defined(HAVE_MSC) && !defined(HAVE_VS2022)
+    static_assert(false, "Visual Studio 2022 minimum required.");
+#endif
+
+#if !defined(HAVE_CPP20)
+    static_assert(false, "C++20 minimum required.");
+#endif
+
+// C++11 (full)
+#if defined(HAVE_NOEXCEPT)
+    #define NOEXCEPT noexcept
+    #define THROWS noexcept(false)
+#else
+    #define NOEXCEPT
+    #define THROWS
+#endif
+
+// C++14 (full)
+#if defined(HAVE_DEPRECATED)
+    #define DEPRECATED [[deprecated]]
+#else
+    #define DEPRECATED
+#endif
+
+// C++17 (full)
+#define NODISCARD [[nodiscard]]
+
+// C++17 (full)
+#define FALLTHROUGH [[fallthrough]]
+
+// C++20 (partial)
+#if defined(HAVE_RANGES)
+    #define RCONSTEXPR constexpr
+#else
+    #define RCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR)
+    #define SCONSTEXPR constexpr
+#else
+    #define SCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
+    #define SRCONSTEXPR constexpr
+#else
+    #define SRCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_VECTOR_CONSTEXPR)
+    #define VCONSTEXPR constexpr
+#else
+    #define VCONSTEXPR inline
+#endif
+
+// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
+    #define SVCONSTEXPR constexpr
+#else
+    #define SVCONSTEXPR inline
+#endif
 
 #endif

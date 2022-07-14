@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,37 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/system.hpp>
+#include "../test.hpp"
 
-using namespace bc::system;
-
-// TODO: move this into the tests by source file organization.
 BOOST_AUTO_TEST_SUITE(satoshi_words)
 
 BOOST_AUTO_TEST_CASE(satoshi_words_mainnet)
 {
-    // Create mainnet genesis block (contains a single coinbase transaction).
-    const chain::block block = settings(config::settings::mainnet)
-        .genesis_block;
-    const auto& transactions = block.transactions();
-    BOOST_REQUIRE_EQUAL(transactions.size(), 1u);
-
-    // Coinbase tx (first in block) has a single input.
-    const auto& coinbase_tx = transactions[0];
-    const auto& coinbase_inputs = coinbase_tx.inputs();
-    BOOST_REQUIRE_EQUAL(coinbase_inputs.size(), 1u);
-
-    // Convert the input script to its raw format.
-    const auto& coinbase_input = coinbase_inputs[0];
-    const auto raw_message = coinbase_input.script().to_data(false);
-    BOOST_REQUIRE_GT(raw_message.size(), 8u);
-
-    // Convert to a string after removing the 8 byte checksum.
-    std::string message;
-    message.resize(raw_message.size() - 8);
-    std::copy(raw_message.begin() + 8, raw_message.end(), message.begin());
-
+    const auto block = settings(chain::selection::mainnet).genesis_block;
+    const auto message = to_string((*(*block.transactions_ptr())[0]->inputs_ptr())[0]->script().ops()[2].data());
     BOOST_REQUIRE_EQUAL(message, "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks");
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,157 +19,206 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
-#include <cstdint>
-#include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/chain/transaction.hpp>
-#include <bitcoin/system/constants.hpp>
+/// DELETECSTDDEF
+/// DELETECSTDINT
+#include <unordered_map>
+#include <vector>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/machine/number.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/operation.hpp>
-#include <bitcoin/system/machine/script_version.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/machine/stack.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace machine {
 
-class BC_API program
+/// A set of three stacks (primary, alternate, conditional) for script state.
+/// Primary stack is optimized by peekable, swappable, and eraseable elements.
+template <typename Stack>
+class program
 {
 public:
-    typedef data_stack::value_type value_type;
-    typedef operation::iterator op_iterator;
+    typedef chain::operations::const_iterator op_iterator;
+    typedef chain::input_cptrs::const_iterator input_iterator;
+    typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
 
-    // Older libstdc++ does not allow erase with const iterator.
-    // This is a bug that requires we up the minimum compiler version.
-    // So presently stack_iterator is a non-const iterator.
-    ////typedef data_stack::const_iterator stack_iterator;
-    typedef data_stack::iterator stack_iterator;
+    /// Input script run (default/empty stack).
+    inline program(const chain::transaction& transaction,
+        const input_iterator& input, uint32_t forks) NOEXCEPT;
 
-    /// Create an instance that does not expect to verify signatures.
-    /// This is useful for script utilities but not with input metadata.
-    /// This can only run individual operations via run(op, program).
-    program();
+    /// Legacy p2sh or prevout script run (copied input stack).
+    inline program(const program& other,
+        const chain::script::cptr& script) NOEXCEPT;
 
-    /// Create an instance that does not expect to verify signatures.
-    /// This is useful for script utilities but not with input metadata.
-    /// This can run ops via run(op, program) or the script via run(program).
-    program(const chain::script& script);
+    /// Legacy p2sh or prevout script run (moved input stack).
+    inline program(program&& other,
+        const chain::script::cptr& script) NOEXCEPT;
 
-    /// Create an instance with empty stacks, value unused/max (input run).
-    program(const chain::script& script, const chain::transaction& transaction,
-        uint32_t input_index, uint32_t forks);
+    /// Witness script run (witness-initialized stack).
+    inline program(const chain::transaction& transaction,
+        const input_iterator& input, const chain::script::cptr& script,
+        uint32_t forks, chain::script_version version,
+        const chunk_cptrs_ptr& stack) NOEXCEPT;
 
-    /// Create an instance with initialized stack (witness run, v0 by default).
-    program(const chain::script& script, const chain::transaction& transaction,
-        uint32_t input_index, uint32_t forks, data_stack&& stack,
-        uint64_t value, script_version version=script_version::zero);
+    /// Defaults.
+    program(program&&) = delete;
+    program(const program&) = delete;
+    program& operator=(program&&) = delete;
+    program& operator=(const program&) = delete;
+    inline ~program() = default;
 
-    /// Create using copied tx, input, forks, value, stack (prevout run).
-    program(const chain::script& script, const program& other);
+    /// Program result.
+    inline bool is_true(bool clean) const NOEXCEPT;
 
-    /// Create using copied tx, input, forks, value and moved stack (p2sh run).
-    program(const chain::script& script, program&& other, bool move);
+    /// Transaction must pop top input stack element (bip16).
+    inline const data_chunk& pop() NOEXCEPT;
 
-    /// Utilities.
-    bool is_invalid() const;
+protected:
+    static inline bool equal_chunks(const stack_variant& left,
+        const stack_variant& right) NOEXCEPT;
 
-    /// Constant registers.
-    uint32_t forks() const;
-    uint32_t input_index() const;
-    uint64_t value() const;
-    script_version version() const;
-    const chain::transaction& transaction() const;
+    /// Constants.
+    /// -----------------------------------------------------------------------
 
-    /// Program registers.
-    op_iterator begin() const;
-    op_iterator jump() const;
-    op_iterator end() const;
-    size_t operation_count() const;
+    inline bool is_prefail() const NOEXCEPT;
+    inline op_iterator begin() const NOEXCEPT;
+    inline op_iterator end() const NOEXCEPT;
+    inline const chain::input& input() const NOEXCEPT;
+    inline const chain::transaction& transaction() const NOEXCEPT;
+    inline bool is_enabled(chain::forks rule) const NOEXCEPT;
+    inline error::script_error_t validate() const NOEXCEPT;
 
-    /// Instructions.
-    code evaluate();
-    code evaluate(const operation& op);
-    bool increment_operation_count(const operation& op);
-    bool increment_operation_count(int32_t public_keys);
-    bool set_jump_register(const operation& op, int32_t offset);
+    /// Primary stack.
+    /// -----------------------------------------------------------------------
 
-    // Primary stack.
-    //-------------------------------------------------------------------------
+    /// Primary stack (push).
+    inline void push_chunk(data_chunk&& datum) NOEXCEPT;
+    inline void push_chunk(const chunk_cptr& datum) NOEXCEPT;
+    inline void push_bool(bool value) NOEXCEPT;
+    inline void push_signed64(int64_t value) NOEXCEPT;
+    inline void push_length(size_t value) NOEXCEPT;
 
-    /// Primary push.
-    void push(bool value);
-    void push_move(value_type&& item);
-    void push_copy(const value_type& item);
+    /// Primary stack (pop).
+    inline chunk_xptr pop_chunk_() NOEXCEPT;
+    inline bool pop_bool_() NOEXCEPT;
+    inline bool pop_strict_bool_() NOEXCEPT;
+    inline bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
+    inline bool pop_signed32(int32_t& value) NOEXCEPT;
+    inline bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
+    inline bool pop_ternary32(int32_t& upper, int32_t& lower,
+        int32_t& value) NOEXCEPT;
+    inline bool pop_index32(size_t& index) NOEXCEPT;
 
-    /// Primary pop.
-    data_chunk pop();
-    bool pop(int32_t& out_value);
-    bool pop(number& out_number, size_t maxiumum_size=max_number_size);
-    bool pop_binary(number& first, number& second);
-    bool pop_ternary(number& first, number& second, number& third);
-    bool pop_position(stack_iterator& out_position);
-    bool pop(data_stack& section, size_t count);
+    /// Primary stack (peek).
+    inline bool peek_bool_() const NOEXCEPT;
+    inline bool peek_unsigned32(uint32_t& value) const NOEXCEPT;
+    inline bool peek_unsigned40(uint64_t& value) const NOEXCEPT;
 
-    /// Primary push/pop optimizations (active).
-    void duplicate(size_t index);
-    void swap(size_t index_left, size_t index_right);
-    void erase(const stack_iterator& position);
-    void erase(const stack_iterator& first, const stack_iterator& last);
+    /// Primary stack (variant - index).
+    inline void swap_(size_t left_index, size_t right_index) NOEXCEPT;
+    inline void erase_(size_t index) NOEXCEPT;
+    inline const stack_variant& peek_() const NOEXCEPT;
+    inline const stack_variant& peek_(size_t index) const NOEXCEPT;
 
-    /// Primary push/pop optimizations (passive).
-    bool empty() const;
-    bool stack_true(bool clean) const;
-    bool stack_result(bool clean) const;
-    bool is_stack_overflow() const;
-    bool if_(const operation& op) const;
-    const value_type& item(size_t index) /*const*/;
-    bool top(number& out_number, size_t maxiumum_size=max_number_size) /*const*/;
-    stack_iterator position(size_t index) /*const*/;
-    operation::list subscript() const;
-    size_t size() const;
+    /// Primary stack (variant - top).
+    inline void drop_() NOEXCEPT;
+    inline void push_variant(const stack_variant& vary) NOEXCEPT;
+    inline stack_variant pop_() NOEXCEPT;
 
-    // Alternate stack.
-    //-------------------------------------------------------------------------
+    /// Primary stack state (untyped).
+    inline size_t stack_size() const NOEXCEPT;
+    inline bool is_stack_empty() const NOEXCEPT;
+    inline bool is_stack_overflow() const NOEXCEPT;
 
-    bool empty_alternate() const;
-    void push_alternate(value_type&& value);
-    value_type pop_alternate();
+    /// Alternate stack.
+    /// -----------------------------------------------------------------------
 
-    // Conditional stack.
-    //-------------------------------------------------------------------------
+    inline bool is_alternate_empty() const NOEXCEPT;
+    inline void push_alternate(stack_variant&& vary) NOEXCEPT;
+    inline stack_variant pop_alternate_() NOEXCEPT;
 
-    void open(bool value);
-    void negate();
-    void close();
-    bool closed() const;
-    bool succeeded() const;
+    /// Conditional stack.
+    /// -----------------------------------------------------------------------
+
+    inline void begin_if(bool value) NOEXCEPT;
+    inline void else_if_() NOEXCEPT;
+    inline void end_if_() NOEXCEPT;
+    inline bool is_balanced() const NOEXCEPT;
+    inline bool is_succeess() const NOEXCEPT;
+    inline bool if_(const chain::operation& op) const NOEXCEPT;
+
+    /// Accumulator.
+    /// -----------------------------------------------------------------------
+
+    inline bool ops_increment(const chain::operation& op) NOEXCEPT;
+    inline bool ops_increment(size_t public_keys) NOEXCEPT;
+
+    /// Signature validation helpers.
+    /// -----------------------------------------------------------------------
+
+    /// Set subscript position to next op.
+    inline bool set_subscript(const op_iterator& op) NOEXCEPT;
+
+    /// Strip endorsement and code_separator opcodes from returned subscript.
+    inline chain::script::cptr subscript(
+        const chunk_xptrs& endorsements) const NOEXCEPT;
+
+    /// Prepare signature (enables generalized signing).
+    inline bool prepare(ec_signature& signature, const data_chunk& key,
+        hash_digest& hash, const chunk_xptr& endorsement) const NOEXCEPT;
+
+    /// Prepare signature, with caching for multisig with same flags.
+    inline bool prepare(ec_signature& signature, const data_chunk& key,
+        hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
+        const chain::script& sub) const NOEXCEPT;
 
 private:
-    // A space-efficient dynamic bitset (specialized).
-    typedef std::vector<bool> bool_stack;
+    using primary_stack = stack<Stack>;
 
-    bool stack_to_bool(bool clean) const;
+    // Private stack helpers.
+    template<size_t Bytes, typename Integer,
+        if_signed_integer<Integer> = true,
+        if_integral_integer<Integer> = true,
+        if_not_greater<Bytes, sizeof(Integer)> = true>
+    inline bool peek_signed_(Integer& value) const NOEXCEPT;
+    inline void push_chunk(const chunk_xptr& datum) NOEXCEPT;
+    inline bool pop_signed32_(int32_t& value) NOEXCEPT;
+    inline chunk_xptr peek_chunk_() const NOEXCEPT;
+    inline bool peek_signed32_(int32_t& value) const NOEXCEPT;
+    inline bool peek_signed40_(int64_t& value) const NOEXCEPT;
+    inline bool is_stack_clean() const NOEXCEPT;
 
-    const chain::script& script_;
+    // Signature hashing.
+    inline hash_digest signature_hash(const chain::script& sub,
+        uint8_t flags) const NOEXCEPT;
+    inline void signature_hash(hash_cache& cache, const chain::script& sub,
+        uint8_t flags) const NOEXCEPT;
+
+    // Constants.
     const chain::transaction& transaction_;
-    const uint32_t input_index_;
+    const input_iterator input_;
+    const chain::script::cptr script_;
     const uint32_t forks_;
     const uint64_t value_;
-    const script_version version_;
+    const chain::script_version version_;
+    const chunk_cptrs_ptr witness_;
 
-    size_t negative_count_;
-    size_t operation_count_;
-    op_iterator jump_;
-    data_stack primary_;
-    data_stack alternate_;
-    bool_stack condition_;
+    // Three stacks.
+    primary_stack primary_;
+    alternate_stack alternate_{};
+    condition_stack condition_{};
+
+    // Accumulator.
+    size_t operation_count_{};
+
+    // Condition stack optimization.
+    size_t negative_condition_count_{};
 };
 
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
-
 
 #include <bitcoin/system/impl/machine/program.ipp>
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,63 +18,57 @@
  */
 #include <bitcoin/system/config/base64.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
-#include <bitcoin/system/formats/base_64.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <utility>
+#include <bitcoin/system/data/data.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-base64::base64()
+base64::base64() NOEXCEPT
 {
 }
 
-base64::base64(const std::string& base64)
+base64::base64(data_chunk&& value) NOEXCEPT
+  : value_(std::move(value))
 {
-    std::stringstream(base64) >> *this;
 }
 
-base64::base64(const data_chunk& value)
+base64::base64(const data_chunk& value) NOEXCEPT
   : value_(value)
 {
 }
 
-base64::base64(const base64& other)
-  : base64(other.value_)
+base64::base64(const std::string& base64) THROWS
 {
+    std::istringstream(base64) >> *this;
 }
 
-base64::operator const data_chunk&() const
-{
-    return value_;
-}
-
-base64::operator data_slice() const
+base64::operator const data_chunk&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base64& argument)
+std::istream& operator>>(std::istream& stream, base64& argument) THROWS
 {
     std::string base64;
-    input >> base64;
+    stream >> base64;
 
     if (!decode_base64(argument.value_, base64))
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(base64));
-    }
+        throw istream_exception(base64);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base64& argument)
+std::ostream& operator<<(std::ostream& stream, const base64& argument) NOEXCEPT
 {
-    output << encode_base64(argument.value_);
-    return output;
+    stream << encode_base64(argument.value_);
+    return stream;
 }
 
 } // namespace config

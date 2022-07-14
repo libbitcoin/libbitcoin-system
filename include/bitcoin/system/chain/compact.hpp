@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,46 +19,55 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_COMPACT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_COMPACT_HPP
 
-#include <cstdint>
+/// DELETECSTDINT
+/// DELETEMENOW
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// A signed but zero-floored scientific notation in 32 bits.
-class BC_API compact
+/// A base 256 exponential form representation of 32 byte (uint256_t) values.
+/// The zero value is used as an invalid value sentinel. Otherwise it is not
+/// possible to create an invalid compact form from 32 bytes. The compression
+/// loses all but the highest 24 (or 23) significant bits of precision. The
+/// extra bit of precision loss is the only reason for this wrapper, as opposed
+/// to a normal form base256 exponential representation. This implementation
+/// imposes a stricter, (than satoshi) yet consensus-compliant, validation of
+/// the exponential form.
+
+struct compact
+  : public base256e
 {
 public:
-    /// Construct a normal form compact number from a 32 bit compact number.
-    explicit compact(uint32_t compact);
+    /// A zero value implies an invalid (including zero) parameter.
+    /// Non-minimal exponent encoding allowed only for mantissa sign bug.
+    static constexpr span_type expand(small_type exponential) NOEXCEPT;
 
-    /// Construct a normal form compact number from a 256 bit number
-    explicit compact(const uint256_t& big);
+    /// (m * 256^e) bit-encoded as [0eeeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].
+    /// Uses non-minimal exponent encoding to avoid mantissa sign (bug).
+    static constexpr small_type compress(const span_type& number) NOEXCEPT;
 
-    /// True if construction overflowed.
-    bool is_overflowed() const;
+protected:
+    using exponent_type = unsigned_type<e_bytes>;
 
-    /// Consensus-normalized compact number value.
-    /// This is derived from the construction parameter.
-    uint32_t normal() const;
+    struct parse
+    {
+        bool negative;
+        exponent_type exponent;
+        small_type mantissa;
+    };
 
-    /// Big number that the compact number represents.
-    /// This is either saved or generated from the construction parameter.
-    operator const uint256_t&() const;
-
-private:
-    static bool from_compact(uint256_t& out, uint32_t compact);
-    static uint32_t from_big(const uint256_t& big);
-
-    uint256_t big_;
-    uint32_t normal_;
-    bool overflowed_;
+    static constexpr parse to_compact(small_type small) NOEXCEPT;
+    static constexpr small_type from_compact(const parse& compact) NOEXCEPT;
 };
 
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/chain/compact.ipp>
 
 #endif

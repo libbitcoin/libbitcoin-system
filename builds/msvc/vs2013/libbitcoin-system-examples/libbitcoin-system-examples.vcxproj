@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- |  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
+ |  Copyright (c) 2014-2021 libbitcoin-system developers (see COPYING).
  |
  |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
  |
@@ -85,14 +85,13 @@
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets" Condition="Exists('$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets')" />
-    <Import Project="$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets')" />
-    <Import Project="$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets')" />
-    <Import Project="$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets')" />
@@ -104,14 +103,13 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets'))" />
@@ -122,5 +120,8 @@
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\debug.natvis" />
   </ItemGroup>
 </Project>

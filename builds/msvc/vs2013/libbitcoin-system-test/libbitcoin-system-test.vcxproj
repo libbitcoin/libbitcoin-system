@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- |  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
+ |  Copyright (c) 2014-2021 libbitcoin-system developers (see COPYING).
  |
  |         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
  |
@@ -73,149 +73,169 @@
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <ObjectFileName>$(IntDir)test_chain_block.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\block_filter.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\compact.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\header.cpp">
-      <ObjectFileName>$(IntDir)test_chain_header.obj</ObjectFileName>
+    <ClCompile Include="..\..\..\..\test\chain\context.cpp">
+      <ObjectFileName>$(IntDir)test_chain_context.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\enums\opcode.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\output_point.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\payment_record.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\point_value.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\points_value.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\stealth_record.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
-      <ObjectFileName>$(IntDir)test_chain_transaction.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\witness.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base2.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base32.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base58.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base64.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base85.cpp" />
     <ClCompile Include="..\..\..\..\test\config\block.cpp">
       <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\config\compact_filter.cpp">
-      <ObjectFileName>$(IntDir)test_config_compact_filter.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base_10.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base_16.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base_32.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base_58.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base_64.cpp" />
-    <ClCompile Include="..\..\..\..\test\formats\base_85.cpp" />
+    <ClCompile Include="..\..\..\..\test\constants.cpp" />
+    <ClCompile Include="..\..\..\..\test\constraints.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\intrinsics\intrinsics.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\data_array.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\data_chunk.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\data_reference.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\data_slab.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\integer.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\string.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\error.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
-    <ClCompile Include="..\..\..\..\test\machine\opcode.cpp" />
-    <ClCompile Include="..\..\..\..\test\machine\operation.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\ec_point.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\ec_scalar.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\elliptic_curve.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\addition.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\bits.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\ring_signature.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\siphash.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\stealth.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\uint256.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\alert.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\block.cpp">
-      <ObjectFileName>$(IntDir)test_message_block.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\block_transactions.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\compact_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\compact_filter.cpp">
-      <ObjectFileName>$(IntDir)test_message_compact_filter.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\compact_filter_checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\compact_filter_headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\fee_filter.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\filter_add.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\filter_clear.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\filter_load.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_block_transactions.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_compact_filter_headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_compact_filters.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_data.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\header.cpp">
-      <ObjectFileName>$(IntDir)test_message_header.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\heading.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\inventory.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\memory_pool.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\messages.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\network_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\not_found.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\ping.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\pong.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\prefilled_transaction.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\reject.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\send_compact.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\send_headers.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\transaction.cpp">
-      <ObjectFileName>$(IntDir)test_message_transaction.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\version.cpp" />
-    <ClCompile Include="..\..\..\..\test\overloads.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\power.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\safe.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_32.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_58.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_64.cpp" />
+    <ClCompile Include="..\..\..\..\test\radix\base_85.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\deserialize.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\endian.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\props.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial\serialize.cpp" />
     <ClCompile Include="..\..\..\..\test\settings.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\binary.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\bit_stream.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\collection.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\neutrino_filter.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\property_tree.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\pseudo_random.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\thread.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\tiff.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\ec_private.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\ec_public.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\electrum.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\hd_private.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\hd_public.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\binary.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\device.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\devices\copy_sink.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\devices\copy_source.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\devices\flip_sink.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\devices\push_sink.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\stream.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\bit_flipper.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\bit_reader.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\bit_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\byte_flipper.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\byte_reader.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\byte_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\test.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\normalization.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\environment.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\ifstream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\ofstream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_ostream.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\checked.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\payment_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\qr_code.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_receiver.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\stealth_sender.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\tiff.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\uri.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\uri_reader.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\addresses\witness_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\context.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_context.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\keys\ec_point.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\ec_private.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\ec_public.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\ec_scalar.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\encrypted_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\hd_private.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\hd_public.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\mini_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\keys\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\mnemonic.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\qr_code.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\select_outputs.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\stealth_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\stealth_receiver.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\stealth_sender.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\uri.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\uri_reader.cpp" />
-    <ClCompile Include="..\..\..\..\test\wallet\witness_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\electrum.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_mnemonics_electrum.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_mnemonics_electrum_v1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
+      <ObjectFileName>$(IntDir)test_wallet_mnemonics_mnemonic.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\neutrino_filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\point_value.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\points_value.cpp" />
+    <ClCompile Include="..\..\..\..\test\words\catalogs\electrum.cpp">
+      <ObjectFileName>$(IntDir)test_words_catalogs_electrum.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\catalogs\electrum_v1.cpp">
+      <ObjectFileName>$(IntDir)test_words_catalogs_electrum_v1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\catalogs\mnemonic.cpp">
+      <ObjectFileName>$(IntDir)test_words_catalogs_mnemonic.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\words\dictionaries.cpp" />
+    <ClCompile Include="..\..\..\..\test\words\dictionary.cpp" />
+    <ClCompile Include="..\..\..\..\test\words\languages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\hash.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\machine\number.hpp" />
-    <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\math\siphash.hpp" />
-    <ClInclude Include="..\..\..\..\test\overloads.hpp" />
-    <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
+    <ClInclude Include="..\..\..\..\test\test.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\mnemonics\mnemonic.hpp" />
+    <ClInclude Include="..\..\..\..\test\words\catalogs\electrum.hpp" />
+    <ClInclude Include="..\..\..\..\test\words\catalogs\electrum_v1.hpp" />
+    <ClInclude Include="..\..\..\..\test\words\catalogs\mnemonic.hpp" />
+    <ClInclude Include="..\..\..\..\test\words\dictionaries.hpp" />
+    <ClInclude Include="..\..\..\..\test\words\dictionary.hpp" />
+    <ClInclude Include="..\..\..\..\test\words\languages.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -224,14 +244,13 @@
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets" Condition="Exists('$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets')" />
-    <Import Project="$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets')" />
+    <Import Project="$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets')" />
-    <Import Project="$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets')" />
-    <Import Project="$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets" Condition="Exists('$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets')" />
@@ -244,14 +263,13 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost.1.57.0.0\build\native\boost.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_atomic-vc120.1.57.0.0\build\native\boost_atomic-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_chrono-vc120.1.57.0.0\build\native\boost_chrono-vc120.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_container-vc120.1.57.0.0\build\native\boost_container-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_date_time-vc120.1.57.0.0\build\native\boost_date_time-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_filesystem-vc120.1.57.0.0\build\native\boost_filesystem-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_iostreams-vc120.1.57.0.0\build\native\boost_iostreams-vc120.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_json-vc120.1.57.0.0\build\native\boost_json-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_locale-vc120.1.57.0.0\build\native\boost_locale-vc120.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_log_setup-vc120.1.57.0.0\build\native\boost_log_setup-vc120.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_log-vc120.1.57.0.0\build\native\boost_log-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_program_options-vc120.1.57.0.0\build\native\boost_program_options-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_regex-vc120.1.57.0.0\build\native\boost_regex-vc120.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_system-vc120.1.57.0.0\build\native\boost_system-vc120.targets'))" />
@@ -263,5 +281,8 @@
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\debug.natvis" />
   </ItemGroup>
 </Project>

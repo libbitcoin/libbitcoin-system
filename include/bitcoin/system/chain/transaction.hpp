@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,26 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <istream>
 #include <memory>
-#include <string>
 #include <vector>
-#include <boost/optional.hpp>
-#include <bitcoin/system/chain/chain_state.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/error.hpp>
-#include <bitcoin/system/math/elliptic_curve.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/rule_fork.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -47,210 +41,222 @@ namespace chain {
 class BC_API transaction
 {
 public:
-    typedef std::vector<transaction> list;
-
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    struct validation
-    {
-        /// This is a non-consensus sentinel value.
-        static const uint64_t unlinked;
-
-        /// Set by node transaction in protocol.
-        uint64_t originator = 0;
-
-        /// Set by blockchain tx organizer.
-        chain_state::ptr state = nullptr;
-
-        /// Derived from hash table or block reference.
-        /// Tx currently exists at the link (in any state).
-        uint64_t link = unlinked;
-
-        /// False if read from wire and not found in store.
-        /// Tx existed before being written (in the current pass).
-        bool existed = false;
-
-        /// Stored on transaction.
-        /// Tx is in a candidate chain block (and valid there).
-        bool candidate = false;
-
-        /// Derived from tx position (non-sentinel).
-        /// Tx is in a confirmed chain block at given height (and valid there).
-        bool confirmed = false;
-
-        /// Derived from tx position (non-sentinel).
-        /// Tx is not unconfirmed, i.e. has been confirmed once even
-        /// if is deconfirmed now.
-        bool cataloged = false;
-        
-        /// Derived from height (when not confirmed).
-        /// There is no distiction between a tx that can be valid under some
-        /// forks and one that cannot be valid under any forks. The only
-        /// criteria for storage is deserialization and DoS protection. The
-        /// latter is provided by pool validation or containing block PoW.
-        /// This results in revalidation in the case where the tx may be 
-        // confirmed again. If true tx is validated relative to fork point.
-        bool verified = false;
-    };
+    typedef std::shared_ptr<const transaction> cptr;
+    typedef input_cptrs::const_iterator input_iterator;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    transaction();
+    /// Default transaction is an invalid object.
+    transaction() NOEXCEPT;
+    ~transaction() NOEXCEPT;
 
-    transaction(transaction&& other);
-    transaction(const transaction& other);
+    /// Metadata is defaulted on copy/assign.
+    transaction(transaction&& other) NOEXCEPT;
+    transaction(const transaction& other) NOEXCEPT;
 
-    transaction(uint32_t version, uint32_t locktime, input::list&& inputs,
-        output::list&& outputs);
-    transaction(uint32_t version, uint32_t locktime, const input::list& inputs,
-        const output::list& outputs);
+    transaction(uint32_t version, chain::inputs&& inputs,
+        chain::outputs&& outputs, uint32_t locktime) NOEXCEPT;
+    transaction(uint32_t version, const chain::inputs& inputs,
+        const chain::outputs& outputs, uint32_t locktime) NOEXCEPT;
+    transaction(uint32_t version, const inputs_cptr& inputs,
+        const outputs_cptr& outputs, uint32_t locktime) NOEXCEPT;
+    
+    transaction(const data_slice& data, bool witness) NOEXCEPT;
+    transaction(std::istream&& stream, bool witness) NOEXCEPT;
+    transaction(std::istream& stream, bool witness) NOEXCEPT;
+    transaction(reader&& source, bool witness) NOEXCEPT;
+    transaction(reader& source, bool witness) NOEXCEPT;
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    transaction& operator=(transaction&& other);
-    transaction& operator=(const transaction& other);
+    /// Metadata is defaulted on copy/assign.
+    transaction& operator=(transaction&& other) NOEXCEPT;
+    transaction& operator=(const transaction& other) NOEXCEPT;
 
-    bool operator==(const transaction& other) const;
-    bool operator!=(const transaction& other) const;
-
-    // Deserialization.
-    //-------------------------------------------------------------------------
-
-    static transaction factory(const data_chunk& data, bool wire=true, bool witness=false);
-    static transaction factory(std::istream& stream, bool wire=true, bool witness=false);
-    static transaction factory(reader& source, bool wire=true, bool witness=false);
-
-    // Non-wire store deserializations to preserve hash.
-    static transaction factory(reader& source, hash_digest&& hash,bool wire=true, bool witness=false);
-    static transaction factory(reader& source, const hash_digest& hash,bool wire=true, bool witness=false);
-
-    bool from_data(const data_chunk& data, bool wire=true, bool witness=false);
-    bool from_data(std::istream& stream, bool wire=true, bool witness=false);
-    bool from_data(reader& source, bool wire=true, bool witness=false);
-
-    // Non-wire store deserializations to preserve hash.
-    bool from_data(reader& source, hash_digest&& hash, bool wire=true, bool witness=false);
-    bool from_data(reader& source, const hash_digest& hash, bool wire=true, bool witness=false);
-
-    bool is_valid() const;
+    bool operator==(const transaction& other) const NOEXCEPT;
+    bool operator!=(const transaction& other) const NOEXCEPT;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true, bool witness=false) const;
-    void to_data(std::ostream& stream, bool wire=true, bool witness=false) const;
-    void to_data(writer& sink, bool wire=true, bool witness=false) const;
+    data_chunk to_data(bool witness) const NOEXCEPT;
+    void to_data(std::ostream& stream, bool witness) const NOEXCEPT;
+    void to_data(writer& sink, bool witness) const NOEXCEPT;
 
-    // Properties (size, accessors, cache).
-    //-------------------------------------------------------------------------
+    // Properties.
+    // ------------------------------------------------------------------------
 
-    static size_t maximum_size(bool is_coinbase);
-    size_t serialized_size(bool wire=true, bool witness=false) const;
+    /// Native properties.
+    bool is_valid() const NOEXCEPT;
+    uint32_t version() const NOEXCEPT;
+    const inputs_cptr& inputs_ptr() const NOEXCEPT;
+    const outputs_cptr& outputs_ptr() const NOEXCEPT;
+    uint32_t locktime() const NOEXCEPT;
 
-    uint32_t version() const;
-    void set_version(uint32_t value);
+    /// Computed properties.
+    size_t weight() const NOEXCEPT;
+    uint64_t fee() const NOEXCEPT;
+    uint64_t claim() const NOEXCEPT;
+    uint64_t value() const NOEXCEPT;
+    hash_digest hash(bool witness) const NOEXCEPT;
+    bool is_coinbase() const NOEXCEPT;
+    bool is_segregated() const NOEXCEPT;
+    size_t serialized_size(bool witness) const NOEXCEPT;
 
-    uint32_t locktime() const;
-    void set_locktime(uint32_t value);
+    // Methods.
+    // ------------------------------------------------------------------------
 
-    // Deprecated (unsafe).
-    input::list& inputs();
+    bool is_dusty(uint64_t minimum_output_value) const NOEXCEPT;
+    size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
+    chain::points points() const NOEXCEPT;
+    hash_digest outputs_hash() const NOEXCEPT;
+    hash_digest points_hash() const NOEXCEPT;
+    hash_digest sequences_hash() const NOEXCEPT;
 
-    const input::list& inputs() const;
-    void set_inputs(const input::list& value);
-    void set_inputs(input::list&& value);
+    // signature_hash exposed for op_check_multisig caching.
+    hash_digest signature_hash(const input_iterator& input, const script& sub,
+        uint64_t value, uint8_t flags, script_version version,
+        bool bip143) const NOEXCEPT;
 
-    // Deprecated (unsafe).
-    output::list& outputs();
+    bool check_signature(const ec_signature& signature,
+        const data_slice& public_key, const script& sub, uint32_t index,
+        uint64_t value, uint8_t flags, script_version version,
+        bool bip143) const NOEXCEPT;
 
-    const output::list& outputs() const;
-    void set_outputs(const output::list& value);
-    void set_outputs(output::list&& value);
+    bool create_endorsement(endorsement& out, const ec_secret& secret,
+        const script& sub, uint32_t index, uint64_t value, uint8_t flags,
+        script_version version, bool bip143) const NOEXCEPT;
 
-    hash_digest outputs_hash() const;
-    hash_digest inpoints_hash() const;
-    hash_digest sequences_hash() const;
-    hash_digest hash(bool witness=false) const;
+    // Guards (for tx pool without compact blocks).
+    // ------------------------------------------------------------------------
 
-    // Utilities.
-    //-------------------------------------------------------------------------
+    code guard() const NOEXCEPT;
+    code guard(const context& state) const NOEXCEPT;
 
-    /// Clear witness from all inputs (does not change default hash).
-    void strip_witness();
+    // Validation (consensus checks).
+    // ------------------------------------------------------------------------
 
-    // Validation.
-    //-------------------------------------------------------------------------
-
-    uint64_t fees() const;
-    point::list previous_outputs() const;
-    point::list missing_previous_outputs() const;
-    hash_list missing_previous_transactions() const;
-    uint64_t total_input_value() const;
-    uint64_t total_output_value() const;
-    size_t signature_operations() const;
-    size_t signature_operations(bool bip16, bool bip141) const;
-    size_t weight() const;
-
-    bool is_coinbase() const;
-    bool is_null_non_coinbase() const;
-    bool is_oversized_coinbase() const;
-    bool is_mature(size_t height) const;
-    bool is_overspent() const;
-    bool is_internal_double_spend() const;
-    bool is_confirmed_double_spend() const;
-    bool is_dusty(uint64_t minimum_output_value) const;
-    bool is_missing_previous_outputs() const;
-    bool is_final(size_t block_height, uint32_t block_time) const;
-    bool is_locked(size_t block_height, uint32_t median_time_past) const;
-    bool is_locktime_conflict() const;
-    bool is_segregated() const;
-
-    code check(uint64_t max_money, bool transaction_pool=true) const;
-    code accept(bool transaction_pool=true) const;
-    code accept(const chain_state& state, bool transaction_pool=true) const;
-    code connect() const;
-    code connect(const chain_state& state) const;
-    code connect_input(const chain_state& state, size_t input_index) const;
-
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation metadata;
+    code check() const NOEXCEPT;
+    code accept(const context& state) const NOEXCEPT;
+    code connect(const context& state) const NOEXCEPT;
 
 protected:
-    void reset();
-    void invalidate_cache() const;
-    bool all_inputs_final() const;
+    transaction(uint32_t version, const chain::inputs_cptr& inputs,
+        const chain::outputs_cptr& outputs, uint32_t locktime, bool segregated,
+        bool valid) NOEXCEPT;
+
+    // Guard (context free).
+    // ------------------------------------------------------------------------
+
+    ////bool is_coinbase() const NOEXCEPT;
+    bool is_internal_double_spend() const NOEXCEPT;
+    bool is_oversized() const NOEXCEPT;
+
+    // Guard (contextual).
+    // ------------------------------------------------------------------------
+
+    ////bool is_segregated() const NOEXCEPT;
+    bool is_overweight() const NOEXCEPT;
+
+    // prevouts required
+    ////bool is_missing_prevouts() const NOEXCEPT;
+    bool is_signature_operations_limit(bool bip16, bool bip141) const NOEXCEPT;
+
+    // Check (context free).
+    // ------------------------------------------------------------------------
+
+    bool is_empty() const NOEXCEPT;
+    bool is_null_non_coinbase() const NOEXCEPT;
+    bool is_invalid_coinbase_size() const NOEXCEPT;
+
+    // Accept (contextual).
+    // ------------------------------------------------------------------------
+
+    bool is_non_final(size_t height, uint32_t timestamp,
+        uint32_t median_time_past, bool bip113) const NOEXCEPT;
+
+    // prevouts required
+    bool is_missing_prevouts() const NOEXCEPT;
+    bool is_overspent() const NOEXCEPT;
+    bool is_immature(size_t height) const NOEXCEPT;
+    bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
+
+    // prevout confirmation state required
+    bool is_unconfirmed_spend(size_t height) const NOEXCEPT;
+    bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
+
 
 private:
-    typedef std::shared_ptr<hash_digest> hash_ptr;
-    typedef boost::optional<uint64_t> optional_value;
+    static transaction from_data(reader& source, bool witness) NOEXCEPT;
+    static bool segregated(const chain::inputs& inputs) NOEXCEPT;
+    static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;
+    ////static size_t maximum_size(bool coinbase) NOEXCEPT;
 
-    hash_ptr hash_cache() const;
-    optional_value total_input_value_cache() const;
-    optional_value total_output_value_cache() const;
+    // signature hash
+    hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
+    input_iterator input_at(uint32_t index) const NOEXCEPT;
+    uint32_t input_index(const input_iterator& input) const NOEXCEPT;
+    void signature_hash_single(writer& sink, const input_iterator& input,
+        const script& sub, uint8_t flags) const NOEXCEPT;
+    void signature_hash_none(writer& sink, const input_iterator& input,
+        const script& sub, uint8_t flags) const NOEXCEPT;
+    void signature_hash_all(writer& sink, const input_iterator& input,
+        const script& sub, uint8_t flags) const NOEXCEPT;
+    hash_digest unversioned_signature_hash(const input_iterator& input,
+        const script& sub, uint8_t flags) const NOEXCEPT;
+    hash_digest version_0_signature_hash(const input_iterator& input,
+        const script& sub, uint64_t value, uint8_t flags,
+        bool bip143) const NOEXCEPT;
 
+    // Transaction should be stored as shared (adds 16 bytes).
+    // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
     uint32_t version_;
+    chain::inputs_cptr inputs_;
+    chain::outputs_cptr outputs_;
     uint32_t locktime_;
-    input::list inputs_;
-    output::list outputs_;
 
-    // These share a mutex as they are not expected to contend.
-    mutable hash_ptr hash_;
-    mutable hash_ptr witness_hash_;
-    mutable hash_ptr outputs_hash_;
-    mutable hash_ptr inpoints_hash_;
-    mutable hash_ptr sequences_hash_;
-    mutable upgrade_mutex hash_mutex_;
+    // TODO: pack these flags.
+    bool segregated_;
+    bool valid_;
 
-    // These share a mutex as they are not expected to contend.
-    mutable optional_value total_input_value_;
-    mutable optional_value total_output_value_;
-    mutable boost::optional<bool> segregated_;
-    mutable upgrade_mutex mutex_;
+private:
+    typedef struct
+    {
+        hash_digest outputs;
+        hash_digest points;
+        hash_digest sequences;
+    } hash_cache;
+
+    void initialize_hash_cache() const NOEXCEPT;
+
+    // Witness transaction signature caching.
+    mutable std::unique_ptr<hash_cache> cache_;
 };
+
+typedef std::vector<transaction> transactions;
+typedef std::vector<transaction::cptr> transaction_ptrs;
+typedef std::shared_ptr<const transaction_ptrs> transactions_cptr;
+
+DECLARE_JSON_VALUE_CONVERTORS(transaction);
+DECLARE_JSON_VALUE_CONVERTORS(transaction::cptr);
 
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+namespace std
+{
+template<>
+struct hash<bc::system::chain::transaction>
+{
+    size_t operator()(const bc::system::chain::transaction& value) const NOEXCEPT
+    {
+        // Witness coinbases will collide (null_hash).
+        return std::hash<bc::system::hash_digest>{}(value.hash(true));
+    }
+};
+} // namespace std
 
 #endif

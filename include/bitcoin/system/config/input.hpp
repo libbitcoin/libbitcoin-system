@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,84 +16,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INPUT_HPP
-#define LIBBITCOIN_SYSTEM_INPUT_HPP
+#ifndef LIBBITCOIN_SYSTEM_CONFIG_INPUT_HPP
+#define LIBBITCOIN_SYSTEM_CONFIG_INPUT_HPP
 
 #include <iostream>
 #include <string>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/input.hpp>
-#include <bitcoin/system/chain/input_point.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper stub for chain::input.
- */
+/// Serialization helper for chain::input.
 class BC_API input
 {
 public:
+    /// Defaults.
+    input(input&&) = default;
+    input(const input&) = default;
+    input& operator=(input&&) = default;
+    input& operator=(const input&) = default;
+    ~input() = default;
 
-    /**
-     * Default constructor.
-     */
-    input();
+    /// Constructors.
+    input() NOEXCEPT;
+    input(chain::input&& value) NOEXCEPT;
+    input(const chain::input& value) NOEXCEPT;
+    input(const std::string& tuple) THROWS;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  tuple  The value to initialize with.
-     */
-    input(const std::string& tuple);
+    ////std::string to_string() const NOEXCEPT;
 
-    /**
-     * Initialization constructor. Only the point is retained.
-     * @param[in]  value  The value to initialize with.
-     */
-    input(const chain::input& value);
+    /// Operators.
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    input(const input& other);
+    operator const chain::input&() const NOEXCEPT;
 
-    /**
-     * Initialization constructor. Aspects of the input other than the point
-     * are defaulted.
-     * @param[in]  value  The value to initialize with.
-     */
-    input(const chain::input_point& value);
-
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
-    operator const chain::input&() const;
-
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& stream, input& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
-    friend std::ostream& operator<<(std::ostream& output,
-        const input& argument);
+    friend std::istream& operator>>(std::istream& stream,
+        input& argument) THROWS;
+    friend std::ostream& operator<<(std::ostream& stream,
+        const input& argument) NOEXCEPT;
 
 private:
-
-    /**
-     * The state of this object.
-     */
     chain::input value_;
 };
 

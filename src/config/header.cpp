@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,11 +18,14 @@
  */
 #include <bitcoin/system/config/header.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
+#include <utility>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/config/base16.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -30,51 +33,53 @@ namespace config {
 
 using namespace boost::program_options;
 
-header::header()
+header::header() NOEXCEPT
   : value_()
 {
 }
 
-header::header(const std::string& hexcode)
-  : value_()
+header::header(chain::header&& value) NOEXCEPT
+  : value_(std::move(value))
 {
-    std::stringstream(hexcode) >> *this;
 }
 
-header::header(const chain::header& value)
+header::header(const chain::header& value) NOEXCEPT
   : value_(value)
 {
 }
 
-header::header(const header& other)
-  : header(other.value_)
+header::header(const std::string& hexcode) THROWS
+  : value_()
 {
+    std::istringstream(hexcode) >> *this;
 }
 
-header::operator const chain::header&() const
+header::operator const chain::header&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, header& argument)
+std::istream& operator>>(std::istream& stream, header& argument) THROWS
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base16;
+    stream >> base16;
 
-    if (!argument.value_.from_data(base16(hexcode)))
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
-    }
+    data_chunk bytes;
+    if (!decode_base16(bytes, base16))
+        throw istream_exception(base16);
 
-    return input;
+    argument.value_ = chain::header{ bytes };
+
+    if (!argument.value_.is_valid())
+        throw istream_exception(base16);
+
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const header& argument)
+std::ostream& operator<<(std::ostream& stream, const header& argument) NOEXCEPT
 {
-    const auto bytes = argument.value_.to_data();
-
-    output << base16(bytes);
-    return output;
+    stream << encode_base16(argument.value_.to_data());
+    return stream;
 }
 
 } // namespace config

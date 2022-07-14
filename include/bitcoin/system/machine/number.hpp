@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,120 +19,66 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
 
-#include <cstddef>
+
+/// DELETECSTDDEF
+/// DELETECSTDINT
+/////// DELETEMENOW
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace machine {
+namespace number {
 
-/**
- * Numeric opcodes (OP_1ADD, etc) are restricted to operating on
- * 4-byte integers. The semantics are subtle, though: operands must be
- * in the range [-2^31 +1...2^31 -1], but results may overflow (and are
- * valid as long as they are not used in a subsequent numeric operation).
- *
- * number enforces those semantics by storing results as
- * an int64 and allowing out-of-range values to be returned as a vector of
- * bytes but throwing an exception if arithmetic is done or the result is
- * interpreted as an integer.
- */
-class BC_API number
+template <size_t Size>
+class integer
 {
 public:
-    static const uint8_t negative_1;
-    static const uint8_t positive_0;
-    static const uint8_t positive_1;
-    static const uint8_t positive_2;
-    static const uint8_t positive_3;
-    static const uint8_t positive_4;
-    static const uint8_t positive_5;
-    static const uint8_t positive_6;
-    static const uint8_t positive_7;
-    static const uint8_t positive_8;
-    static const uint8_t positive_9;
-    static const uint8_t positive_10;
-    static const uint8_t positive_11;
-    static const uint8_t positive_12;
-    static const uint8_t positive_13;
-    static const uint8_t positive_14;
-    static const uint8_t positive_15;
-    static const uint8_t positive_16;
-    static const uint8_t negative_sign;
+    typedef signed_type<Size> Integer;
 
-    /// Construct with zero value.
-    number();
+    static inline bool from_integer(Integer& out, int64_t vary) NOEXCEPT;
+    static inline bool from_chunk(Integer& out,
+        const data_chunk& vary) NOEXCEPT;
 
-    /// Construct with specified value.
-    explicit number(int64_t value);
-
-    /// Replace the value derived from a byte vector with LSB first ordering.
-    bool set_data(const data_chunk& data, size_t max_size);
-
-    // Properties
-    //-------------------------------------------------------------------------
-
-    /// Return the value as a byte vector with LSB first ordering.
-    data_chunk data() const;
-
-    /// Return the value bounded by the limits of int32.
-    int32_t int32() const;
-
-    /// Return the unbounded value.
-    int64_t int64() const;
-
-    // Stack Helpers
-    //-------------------------------------------------------------------------
-
-    /// Return value as stack boolean (nonzero is true).
-    bool is_true() const;
-
-    /// Return value as stack boolean (zero is false).
-    bool is_false() const;
-
-    // Operators
-    //-------------------------------------------------------------------------
-
-    //*************************************************************************
-    // CONSENSUS: script::number implements consensus critical overflow
-    // behavior for all operators, specifically [-, +, +=, -=].
-    //*************************************************************************
-
-    bool operator>(int64_t value) const;
-    bool operator<(int64_t value) const;
-    bool operator>=(int64_t value) const;
-    bool operator<=(int64_t value) const;
-    bool operator==(int64_t value) const;
-    bool operator!=(int64_t value) const;
-
-    bool operator>(const number& other) const;
-    bool operator<(const number& other) const;
-    bool operator>=(const number& other) const;
-    bool operator<=(const number& other) const;
-    bool operator==(const number& other) const;
-    bool operator!=(const number& other) const;
-
-    number operator+() const;
-    number operator-() const;
-    number operator+(int64_t value) const;
-    number operator-(int64_t value) const;
-    number operator+(const number& other) const;
-    number operator-(const number& other) const;
-
-    number& operator+=(int64_t value);
-    number& operator-=(int64_t value);
-    number& operator+=(const number& other);
-    number& operator-=(const number& other);
+protected:
+    static inline bool strict_zero(const data_chunk& vary) NOEXCEPT;
+    static inline bool is_overflow(const data_chunk& vary) NOEXCEPT;
+    static inline bool is_overflow(int64_t value) NOEXCEPT;
 
 private:
-    int64_t value_;
+    // TODO: .ipp class type constraint syntax.
+    static_assert(Size <= sizeof(int64_t), "guards from_little_endian");
+    static_assert(is_signed<Integer>, "stack integrals are signed");
 };
 
+class BC_API chunk
+{
+public:
+    static inline data_chunk from_bool(bool vary) NOEXCEPT;
+    static inline data_chunk from_integer(int64_t vary) NOEXCEPT;
+};
+
+class BC_API boolean
+{
+public:
+    template <size_t Size = sizeof(int64_t)>
+    static inline signed_type<Size> to_integer(bool vary) NOEXCEPT;
+
+    static inline bool from_chunk(const data_chunk& vary) NOEXCEPT;
+    static inline bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool to_bool(int64_t vary) NOEXCEPT;
+
+protected:
+    static inline bool strict_false(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
+};
+
+} // namespace number
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
-
 
 #include <bitcoin/system/impl/machine/number.ipp>
 

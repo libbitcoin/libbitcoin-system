@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,457 +19,304 @@
 #include <bitcoin/system/chain/input.hpp>
 
 #include <algorithm>
+#include <memory>
+#include <utility>
+/// DELETEMENOW
+#include <bitcoin/system/chain/context.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/point.hpp>
+#include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
-#include <bitcoin/system/wallet/payment_address.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-using namespace bc::system::wallet;
-using namespace bc::system::machine;
-
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-input::input()
-  : previous_output_{},
-    script_{},
-    sequence_(0)
+// Default point is null_hash and point::null_index. 
+// Default prevout (metadata) is spent, invalid, max_size_t value. 
+input::input() NOEXCEPT
+  : input(
+      to_shared<chain::point>(),
+      to_shared<chain::script>(),
+      to_shared<chain::witness>(), 0, false,
+      to_shared<chain::prevout>())
 {
 }
 
-input::input(input&& other)
-  : addresses_(other.addresses_cache()),
-    previous_output_(std::move(other.previous_output_)),
-    script_(std::move(other.script_)),
-    witness_(std::move(other.witness_)),
-    sequence_(other.sequence_)
+input::input(chain::point&& point, chain::script&& script,
+    uint32_t sequence) NOEXCEPT
+  : input(
+      to_shared(std::move(point)),
+      to_shared(std::move(script)),
+      to_shared<chain::witness>(), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
-input::input(const input& other)
-  : addresses_(other.addresses_cache()),
-    previous_output_(other.previous_output_),
-    script_(std::move(other.script_)),
-    witness_(other.witness_),
-    sequence_(other.sequence_)
+input::input(const chain::point& point, const chain::script& script,
+    uint32_t sequence) NOEXCEPT
+  : input(
+      to_shared(point),
+      to_shared(script),
+      to_shared<chain::witness>(), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
-input::input(output_point&& previous_output, chain::script&& script,
-    uint32_t sequence)
-  : previous_output_(std::move(previous_output)),
-    script_(std::move(script)),
-    sequence_(sequence)
+input::input(const chain::point::cptr& point,
+    const chain::script::cptr& script, uint32_t sequence) NOEXCEPT
+  : input(
+      point ? point : to_shared<chain::point>(),
+      script ? script : to_shared<chain::script>(),
+      to_shared<chain::witness>(), sequence, true,
+      to_shared<chain::prevout>())
 {
 }
 
-input::input(const output_point& previous_output, const chain::script& script,
-    uint32_t sequence)
-  : previous_output_(previous_output),
+input::input(chain::point&& point, chain::script&& script,
+    chain::witness&& witness, uint32_t sequence) NOEXCEPT
+  : input(
+      to_shared(std::move(point)),
+      to_shared(std::move(script)),
+      to_shared(std::move(witness)), sequence, true,
+      to_shared<chain::prevout>())
+{
+}
+
+input::input(const chain::point& point, const chain::script& script,
+    const chain::witness& witness, uint32_t sequence) NOEXCEPT
+  : input(
+      to_shared(point),
+      to_shared(script),
+      to_shared(witness), sequence, true,
+      to_shared<chain::prevout>())
+{
+}
+
+input::input(const chain::point::cptr& point, const chain::script::cptr& script,
+    const chain::witness::cptr& witness, uint32_t sequence) NOEXCEPT
+  : input(point, script, witness, sequence, true, to_shared<chain::prevout>())
+{
+}
+
+input::input(const data_slice& data) NOEXCEPT
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+  : input(stream::in::copy(data))
+    BC_POP_WARNING()
+{
+}
+
+input::input(std::istream&& stream) NOEXCEPT
+  : input(read::bytes::istream(stream))
+{
+}
+
+input::input(std::istream& stream) NOEXCEPT
+  : input(read::bytes::istream(stream))
+{
+}
+
+input::input(reader&& source) NOEXCEPT
+  : input(from_data(source))
+{
+}
+
+input::input(reader& source) NOEXCEPT
+  : input(from_data(source))
+{
+}
+
+// protected
+input::input(const chain::point::cptr& point, const chain::script::cptr& script,
+    const chain::witness::cptr& witness, uint32_t sequence, bool valid,
+    const chain::prevout::cptr& prevout) NOEXCEPT
+  : point_(point),
     script_(script),
-    sequence_(sequence)
-{
-}
-
-// Private cache access for copy/move construction.
-input::addresses_ptr input::addresses_cache() const
-{
-    shared_lock lock(mutex_);
-    return addresses_;
-}
-
-input::input(output_point&& previous_output, chain::script&& script,
-    chain::witness&& witness, uint32_t sequence)
-  : previous_output_(std::move(previous_output)), script_(std::move(script)),
-    witness_(std::move(witness)), sequence_(sequence)
-{
-}
-
-input::input(const output_point& previous_output, const chain::script& script,
-    const chain::witness& witness, uint32_t sequence)
-  : previous_output_(previous_output), script_(script), witness_(witness),
-    sequence_(sequence)
+    witness_(witness),
+    sequence_(sequence),
+    valid_(valid),
+    prevout(prevout)
 {
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-input& input::operator=(input&& other)
-{
-    addresses_ = other.addresses_cache();
-    previous_output_ = std::move(other.previous_output_);
-    script_ = std::move(other.script_);
-    witness_ = std::move(other.witness_);
-    sequence_ = other.sequence_;
-    return *this;
-}
-
-input& input::operator=(const input& other)
-{
-    addresses_ = other.addresses_cache();
-    previous_output_ = other.previous_output_;
-    script_ = other.script_;
-    witness_ = other.witness_;
-    sequence_ = other.sequence_;
-    return *this;
-}
-
-bool input::operator==(const input& other) const
+bool input::operator==(const input& other) const NOEXCEPT
 {
     return (sequence_ == other.sequence_)
-        && (previous_output_ == other.previous_output_)
-        && (script_ == other.script_)
-        && (witness_ == other.witness_);
+        && (point_ == other.point_ || *point_ == *other.point_)
+        && (script_ == other.script_ || *script_ == *other.script_)
+        && (witness_ == other.witness_ || *witness_ == *other.witness_);
 }
 
-bool input::operator!=(const input& other) const
+bool input::operator!=(const input& other) const NOEXCEPT
 {
     return !(*this == other);
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-input input::factory(const data_chunk& data, bool wire, bool witness)
+// static/private
+input input::from_data(reader& source) NOEXCEPT
 {
-    input instance;
-    instance.from_data(data, wire, witness);
-    return instance;
-}
+    // Witness is deserialized by transaction.
+    return
+    {
+        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+        to_shared(new chain::point{ source }),
+        to_shared(new chain::script{ source, true }),
+        BC_POP_WARNING()
+        BC_POP_WARNING()
 
-input input::factory(std::istream& stream, bool wire, bool witness)
-{
-    input instance;
-    instance.from_data(stream, wire, witness);
-    return instance;
-}
-
-input input::factory(reader& source, bool wire, bool witness)
-{
-    input instance;
-    instance.from_data(source, wire, witness);
-    return instance;
-}
-
-bool input::from_data(const data_chunk& data, bool wire, bool witness)
-{
-    data_source istream(data);
-    return from_data(istream, wire, witness);
-}
-
-bool input::from_data(std::istream& stream, bool wire, bool witness)
-{
-    istream_reader source(stream);
-    return from_data(source, wire, witness);
-}
-
-bool input::from_data(reader& source, bool wire, bool witness)
-{
-    // Always write witness to store so that we know how to read it.
-    witness |= !wire;
-
-    reset();
-
-    if (!previous_output_.from_data(source, wire))
-        return false;
-
-    script_.from_data(source, true);
-
-    // Transaction from_data handles the discontiguous wire witness decoding.
-    if (witness && !wire)
-        witness_.from_data(source, true);
-
-    sequence_ = source.read_4_bytes_little_endian();
-
-    if (!source)
-        reset();
-
-    return source;
-}
-
-void input::reset()
-{
-    previous_output_.reset();
-    script_.reset();
-    witness_.reset();
-    sequence_ = 0;
-}
-
-// Since empty scripts and zero sequence are valid this relies on the prevout.
-bool input::is_valid() const
-{
-    return sequence_ != 0 || previous_output_.is_valid() ||
-        script_.is_valid() || witness_.is_valid();
+        to_shared<chain::witness>(),
+        source.read_4_bytes_little_endian(),
+        source,
+        to_shared<chain::prevout>()
+    };
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-data_chunk input::to_data(bool wire, bool witness) const
+data_chunk input::to_data() const NOEXCEPT
 {
-    data_chunk data;
-    const auto size = serialized_size(wire, witness);
-    data.reserve(size);
-    data_sink ostream(data);
-    to_data(ostream, wire, witness);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
+    data_chunk data(serialized_size(false), no_fill_byte_allocator);
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
+    to_data(ostream);
     return data;
 }
 
-void input::to_data(std::ostream& stream, bool wire, bool witness) const
+void input::to_data(std::ostream& stream) const NOEXCEPT
 {
-    ostream_writer sink(stream);
-    to_data(sink, wire, witness);
+    write::bytes::ostream out(stream);
+    to_data(out);
 }
 
-void input::to_data(writer& sink, bool wire, bool witness) const
+// Witness is serialized by transaction.
+void input::to_data(writer& sink) const NOEXCEPT
 {
-    // Always write witness to store so that we know how to read it.
-    witness |= !wire;
-
-    previous_output_.to_data(sink, wire);
-    script_.to_data(sink, true);
-
-    // Transaction to_data handles the discontiguous wire witness encoding.
-    if (witness && !wire)
-        witness_.to_data(sink, true);
-
+    point_->to_data(sink);
+    script_->to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
 }
 
-// Size.
-//-----------------------------------------------------------------------------
-
-size_t input::serialized_size(bool wire, bool witness) const
+size_t input::serialized_size(bool witness) const NOEXCEPT
 {
-    // Always write witness to store so that we know how to read it.
-    witness |= !wire;
-
-    // Witness size added in both contexts despite that tx writes wire witness.
-    // Prefix is written for both wire and store/other contexts.
-    return previous_output_.serialized_size(wire)
-        + script_.serialized_size(true)
-        + (witness ? witness_.serialized_size(true) : 0)
+    // input.serialized_size(witness) provides sizing for witness, however
+    // witnesses are serialized by the transaction. This is an ugly hack as a
+    // consequence of bip144 not serializing witnesses as part of inputs, which
+    // is logically the proper association.
+    return point_->serialized_size()
+        + script_->serialized_size(true)
+        + (witness ? witness_->serialized_size(true) : zero)
         + sizeof(sequence_);
 }
 
-// Accessors.
-//-----------------------------------------------------------------------------
+// Properties.
+// ----------------------------------------------------------------------------
 
-output_point& input::previous_output()
+bool input::is_valid() const NOEXCEPT
 {
-    return previous_output_;
+    return valid_;
 }
 
-const output_point& input::previous_output() const
+const point& input::point() const NOEXCEPT
 {
-    return previous_output_;
+    return *point_;
 }
 
-void input::set_previous_output(const output_point& value)
+const chain::script& input::script() const NOEXCEPT
 {
-    previous_output_ = value;
+    return *script_;
 }
 
-void input::set_previous_output(output_point&& value)
+const chain::witness& input::witness() const NOEXCEPT
 {
-    previous_output_ = std::move(value);
+    return *witness_;
 }
 
-const chain::script& input::script() const
+const point::cptr& input::point_ptr() const NOEXCEPT
+{
+    return point_;
+}
+
+const chain::script::cptr& input::script_ptr() const NOEXCEPT
 {
     return script_;
 }
 
-void input::set_script(const chain::script& value)
-{
-    script_ = value;
-    invalidate_cache();
-}
-
-void input::set_script(chain::script&& value)
-{
-    script_ = std::move(value);
-    invalidate_cache();
-}
-
-const chain::witness& input::witness() const
+const chain::witness::cptr& input::witness_ptr() const NOEXCEPT
 {
     return witness_;
 }
 
-void input::set_witness(const chain::witness& value)
-{
-    witness_ = value;
-    invalidate_cache();
-}
-
-void input::set_witness(chain::witness&& value)
-{
-    witness_ = std::move(value);
-    invalidate_cache();
-}
-
-uint32_t input::sequence() const
+uint32_t input::sequence() const NOEXCEPT
 {
     return sequence_;
 }
 
-void input::set_sequence(uint32_t value)
-{
-    sequence_ = value;
-}
+// Methods.
+// ----------------------------------------------------------------------------
 
-// protected
-void input::invalidate_cache() const
-{
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    mutex_.lock_upgrade();
-
-    if (addresses_)
-    {
-        mutex_.unlock_upgrade_and_lock();
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        addresses_.reset();
-        //---------------------------------------------------------------------
-        mutex_.unlock_and_lock_upgrade();
-    }
-
-    mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-}
-
-payment_address input::address() const
-{
-    const auto value = addresses();
-    return value.empty() ? payment_address{} : value.front();
-}
-
-payment_address::list input::addresses() const
-{
-    ///////////////////////////////////////////////////////////////////////////
-    // Critical Section
-    mutex_.lock_upgrade();
-
-    if (!addresses_)
-    {
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        mutex_.unlock_upgrade_and_lock();
-
-        // TODO: expand to include segregated witness address extraction.
-        addresses_ = std::make_shared<payment_address::list>(
-            payment_address::extract_input(script_));
-        mutex_.unlock_and_lock_upgrade();
-        //---------------------------------------------------------------------
-    }
-
-    const auto addresses = *addresses_;
-    mutex_.unlock_upgrade();
-    ///////////////////////////////////////////////////////////////////////////
-
-    return addresses;
-}
-
-// Utilities.
-//-----------------------------------------------------------------------------
-
-void input::strip_witness()
-{
-    witness_.clear();
-}
-
-// Validation helpers.
-//-----------------------------------------------------------------------------
-
-bool input::is_final() const
+bool input::is_final() const NOEXCEPT
 {
     return sequence_ == max_input_sequence;
 }
 
-bool input::is_segregated() const
+bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
 {
-    // If no block tx is has witness data the commitment is optional (bip141).
-    return !witness_.empty();
-}
-
-bool input::is_locked(size_t block_height, uint32_t median_time_past) const
-{
-    if ((sequence_ & relative_locktime_disabled) != 0)
+    // BIP68: if bit 31 is set then no consensus meaning is applied.
+    if (get_right(sequence_, relative_locktime_disabled_bit))
         return false;
 
-    // bip68: a minimum block-height constraint over the input's age.
-    const auto minimum = (sequence_ & relative_locktime_mask);
-    const auto& prevout = previous_output_.metadata;
+    // BIP68: the low 16 bits of the sequence apply to relative lock-time.
+    const auto blocks = mask_left(sequence_, relative_locktime_mask_left);
 
-    if ((sequence_ & relative_locktime_time_locked) != 0)
+    // BIP68: bit 22 determines if relative lock is time or block based.
+    if (get_right(sequence_, relative_locktime_time_locked_bit))
     {
-        // Median time past must be monotonically-increasing by block.
-        BITCOIN_ASSERT(median_time_past >= prevout.median_time_past);
-        const auto age_seconds = median_time_past - prevout.median_time_past;
-        return age_seconds < (minimum << relative_locktime_seconds_shift);
+        // BIP68: change sequence to seconds by shifting up by 9 bits (x 512).
+        auto time = shift_left(blocks, relative_locktime_seconds_shift_left);
+        auto age = floored_subtract(median_time_past, prevout->median_time_past);
+        return age < time;
     }
 
-    BITCOIN_ASSERT(block_height >= prevout.height);
-    const auto age_blocks = block_height - prevout.height;
-    return age_blocks < minimum;
+    auto age = floored_subtract(height, prevout->height);
+    return age < blocks;
 }
 
-// This requires that previous outputs have been populated.
-// This cannot overflow because each total is limited by max ops.
-size_t input::signature_operations(bool bip16, bool bip141) const
+bool input::reserved_hash(hash_digest& out) const NOEXCEPT
 {
-    chain::script witness, embedded;
-    const auto& prevout = previous_output_.metadata.cache.script();
+    if (!witness::is_reserved_pattern(witness_->stack()))
+        return false;
 
-    // Penalize quadratic signature operations (bip141).
-    const auto sigops_factor = bip141 ? fast_sigops_factor : 1u;
-
-    // Count heavy sigops in the input script.
-    auto sigops = script_.sigops(false) * sigops_factor;
-
-    if (bip141 && witness_.extract_sigop_script(witness, prevout))
-    {
-        // Add sigops in the witness script (bip141).
-        return sigops + witness.sigops(true);
-    }
-
-    if (bip16 && extract_embedded_script(embedded))
-    {
-        if (bip141 && witness_.extract_sigop_script(witness, embedded))
-        {
-            // Add sigops in the embedded witness script (bip141).
-            return sigops + witness.sigops(true);
-        }
-        else
-        {
-            // Add heavy sigops in the embedded script (bip16).
-            return sigops + embedded.sigops(true) * sigops_factor;
-        }
-    }
-
-    return sigops;
+    std::copy_n(witness_->stack().front()->begin(), hash_size, out.begin());
+    return true;
 }
 
-// This requires that previous outputs have been populated.
-bool input::extract_embedded_script(chain::script& out) const
+// private
+bool input::embedded_script(chain::script& out) const NOEXCEPT
 {
-    ////BITCOIN_ASSERT(previous_output_.is_valid());
-    const auto& ops = script_.operations();
-    const auto& prevout_script = previous_output_.metadata.cache.script();
+    const auto& ops = script_->ops();
+    const auto& script = prevout->script();
 
     // There are no embedded sigops when the prevout script is not p2sh.
-    if (!prevout_script.is_pay_to_script_hash(rule_fork::bip16_rule))
+    if (!script::is_pay_script_hash_pattern(script.ops()))
         return false;
 
     // There are no embedded sigops when the input script is not push only.
@@ -479,19 +326,106 @@ bool input::extract_embedded_script(chain::script& out) const
 
     // Parse the embedded script from the last input script item (data).
     // This cannot fail because there is no prefix to invalidate the length.
-    return out.from_data(ops.back().data(), false);
-}
-
-bool input::extract_reserved_hash(hash_digest& out) const
-{
-    const auto& stack = witness_.stack();
-
-    if (!witness::is_reserved_pattern(stack))
-        return false;
-
-    std::copy_n(stack.front().begin(), hash_size, out.begin());
+    out = { ops.back().data(), false };
     return true;
 }
+
+// Product overflows guarded by script size limit.
+static_assert(max_script_size < 
+    max_size_t / multisig_default_sigops / heavy_sigops_factor,
+    "input sigop overflow guard");
+
+// TODO: Prior to block 79400 sigops were limited only by policy.
+// TODO: Create legacy sigops fork flag and pass here, return 0 if false.
+// TODO: this was an unbipped flag day soft fork, prior to BIP16/141.
+// TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
+size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
+{
+    if (bip141 && !prevout->is_valid())
+        return max_size_t;
+
+    chain::script witness, embedded;
+
+    // Penalize quadratic signature operations (bip141).
+    const auto factor = bip141 ? heavy_sigops_factor : one;
+
+    // Count heavy sigops in the input script.
+    const auto sigops = script_->sigops(false) * factor;
+
+    if (bip141 && witness_->extract_sigop_script(witness, prevout->script()))
+    {
+        // Add sigops in the witness script (bip141).
+        return ceilinged_add(sigops, witness.sigops(true));
+    }
+
+    if (bip16 && embedded_script(embedded))
+    {
+        if (bip141 && witness_->extract_sigop_script(witness, embedded))
+        {
+            // Add sigops in the embedded witness script (bip141).
+            return ceilinged_add(sigops, witness.sigops(true));
+        }
+        else
+        {
+            // Add heavy sigops in the embedded script (bip16).
+            return ceilinged_add(sigops, embedded.sigops(true) * factor);
+        }
+    }
+
+    return sigops;
+}
+
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
+input tag_invoke(json::value_to_tag<input>, const json::value& value) NOEXCEPT
+{
+    return
+    {
+        json::value_to<chain::point>(value.at("point")),
+        json::value_to<chain::script>(value.at("script")),
+        json::value_to<chain::witness>(value.at("witness")),
+        value.at("sequence").to_number<uint32_t>()
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const input& input) NOEXCEPT
+{
+    value =
+    {
+        { "point", input.point() },
+        { "script", input.script() },
+        { "witness", input.witness() },
+        { "sequence", input.sequence() }
+    };
+}
+
+BC_POP_WARNING()
+
+input::cptr tag_invoke(json::value_to_tag<input::cptr>,
+    const json::value& value) NOEXCEPT
+{
+    return to_shared(tag_invoke(json::value_to_tag<input>{}, value));
+}
+
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const input::cptr& input) NOEXCEPT
+{
+    tag_invoke(tag, value, *input);
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

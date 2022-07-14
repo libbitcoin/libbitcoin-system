@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,79 +19,42 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE2_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_BASE2_HPP
 
-#include <cstddef>
 #include <iostream>
 #include <string>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/binary.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper for base2 encoded data.
- */
+/// Serialization helper for base2 encoded data.
 class BC_API base2
 {
 public:
+    /// Defaults.
+    base2(base2&&) = default;
+    base2(const base2&) = default;
+    base2& operator=(base2&&) = default;
+    base2& operator=(const base2&) = default;
+    ~base2() = default;
 
-    /**
-     * Default constructor.
-     */
-    base2();
+    /// Constructors.
+    base2() NOEXCEPT;
+    base2(binary&& value) NOEXCEPT;
+    base2(const binary& value) NOEXCEPT;
+    base2(const std::string& binary) THROWS;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  bin  The value to initialize with.
-     */
-    base2(const std::string& binary);
+    /// Operators.
 
-    /**
-     * @param[in]  value  The value to initialize with.
-     */
-    base2(const binary& value);
+    operator const binary&() const NOEXCEPT;
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    base2(const base2& other);
-
-    /**
-     * Get number of bits in value.
-     */
-    size_t size() const;
-
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type reference.
-     */
-    operator const binary&() const;
-
-    /**
-     * Overload stream in. If input is invalid sets no bytes in argument.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& input,
-        base2& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
-    friend std::ostream& operator<<(std::ostream& output,
-        const base2& argument);
+    friend std::istream& operator>>(std::istream& stream,
+        base2& argument) THROWS;
+    friend std::ostream& operator<<(std::ostream& stream,
+        const base2& argument) NOEXCEPT;
 
 private:
-
-    /**
-     * The state of this object.
-     */
     binary value_;
 };
 

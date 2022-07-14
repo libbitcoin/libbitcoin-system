@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_PARSER_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_PARSER_HPP
 
+#include <filesystem>
 #include <string>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
+/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -39,37 +39,42 @@ namespace config {
 #define PROPERTY(type, property) \
     value<type>()->notifier([&](type value) { property(value); })
 
+/// Abstract base class, thread safe.
 /// Parse configurable values from environment variables, settings file, and
 /// command line positional and non-positional options.
 class BC_API parser
 {
 public:
-    static std::string format_invalid_parameter(const std::string& message);
-    static bool get_option(variables_map& variables, const std::string& name);
-    static boost::filesystem::path get_config_option(variables_map& variables,
-        const std::string& name);
+    static std::string format_invalid_parameter(
+        const std::string& message) NOEXCEPT;
+    static bool get_option(variables_map& variables,
+        const std::string& name) NOEXCEPT;
+    static std::filesystem::path get_config_option(variables_map& variables,
+        const std::string& name) NOEXCEPT;
+
+    virtual ~parser() NOEXCEPT;
 
     /// Load command line options (named).
-    virtual options_metadata load_options() = 0;
+    virtual options_metadata load_options() THROWS = 0;
 
     /// Load command line arguments (positional).
-    virtual arguments_metadata load_arguments() = 0;
+    virtual arguments_metadata load_arguments() THROWS = 0;
 
     /// Load environment variable settings.
-    virtual options_metadata load_environment() = 0;
+    virtual options_metadata load_environment() THROWS = 0;
 
     /// Load configuration file settings.
-    virtual options_metadata load_settings() = 0;
+    virtual options_metadata load_settings() THROWS = 0;
 
 protected:
     virtual void load_command_variables(variables_map& variables,
-        int argc, const char* argv[]);
+        int argc, const char* argv[]) THROWS;
 
     virtual bool load_configuration_variables(variables_map& variables,
-        const std::string& option_name);
+        const std::string& option_name) THROWS;
 
     virtual void load_environment_variables(variables_map& variables,
-        const std::string& prefix);
+        const std::string& prefix) THROWS;
 };
 
 } // namespace config

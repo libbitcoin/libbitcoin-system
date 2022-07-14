@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,65 +16,48 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_OUTPUT_HPP
-#define LIBBITCOIN_SYSTEM_OUTPUT_HPP
+#ifndef LIBBITCOIN_SYSTEM_CONFIG_OUTPUT_HPP
+#define LIBBITCOIN_SYSTEM_CONFIG_OUTPUT_HPP
 
-#include <cstdint>
 #include <iostream>
 #include <string>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper to convert between a base58-string:number and
- * a vector of chain::output.
- */
+/// Serialization helper for chain::output.
 class BC_API output
 {
 public:
+    /// Defaults.
+    output(output&&) = default;
+    output(const output&) = default;
+    output& operator=(output&&) = default;
+    output& operator=(const output&) = default;
+    ~output() = default;
 
-    /**
-     * Default constructor.
-     */
-    output();
+    /// Constructors.
+    output() NOEXCEPT;
+    output(chain::output&& value) NOEXCEPT;
+    output(const chain::output& value) NOEXCEPT;
+    output(const std::string& tuple) THROWS;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  tuple  The value to initialize with.
-     */
-    output(const std::string& tuple);
+    ////std::string to_string() const NOEXCEPT;
 
-    /// Parsed properties
-    bool is_stealth() const;
-    uint64_t amount() const;
-    uint8_t version() const;
-    const chain::script& script() const;
-    const short_hash& pay_to_hash() const;
+    /// Operators.
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& input, output& argument);
+    operator const chain::output&() const NOEXCEPT;
+
+    friend std::istream& operator>>(std::istream& stream,
+        output& argument) THROWS;
+    friend std::ostream& operator<<(std::ostream& stream,
+        const output& argument) NOEXCEPT;
 
 private:
-
-    /**
-     * The transaction output state of this object.
-     * This data is translated to an output given expected version information.
-     */
-    bool is_stealth_;
-    uint64_t amount_;
-    uint8_t version_;
-    chain::script script_;
-    short_hash pay_to_hash_;
+    chain::output value_;
 };
 
 } // namespace config

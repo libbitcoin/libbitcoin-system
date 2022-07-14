@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,25 +18,29 @@
  */
 #include <bitcoin/system/config/parser.hpp>
 
+#include <filesystem>
 #include <string>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-#include <boost/throw_exception.hpp>
-#include <bitcoin/system/unicode/ifstream.hpp>
+/// DELETEMENOW
+/// DELETEMENOW
+#include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace boost::filesystem;
+using namespace std::filesystem;
 using namespace boost::program_options;
 using namespace boost::system;
 
+parser::~parser() NOEXCEPT
+{
+}
+
 // The error is obtained from boost, which circumvents our localization.
 // English-only hack to patch missing arg name in boost exception message.
-std::string parser::format_invalid_parameter(const std::string& message)
+std::string parser::format_invalid_parameter(
+    const std::string& message) NOEXCEPT
 {
     std::string clean_message(message);
     boost::replace_all(clean_message, "for option is invalid", "is invalid");
@@ -44,7 +48,7 @@ std::string parser::format_invalid_parameter(const std::string& message)
 }
 
 path parser::get_config_option(variables_map& variables,
-    const std::string& name)
+    const std::string& name) NOEXCEPT
 {
     // read config from the map so we don't require an early notify
     const auto& config = variables[name];
@@ -56,7 +60,8 @@ path parser::get_config_option(variables_map& variables,
     return config.as<path>();
 }
 
-bool parser::get_option(variables_map& variables, const std::string& name)
+bool parser::get_option(variables_map& variables,
+    const std::string& name) NOEXCEPT
 {
     // Read settings from the map so we don't require an early notify call.
     const auto& variable = variables[name];
@@ -69,7 +74,7 @@ bool parser::get_option(variables_map& variables, const std::string& name)
 }
 
 void parser::load_command_variables(variables_map& variables, int argc,
-    const char* argv[])
+    const char* argv[]) THROWS
 {
     const auto options = load_options();
     const auto arguments = load_arguments();
@@ -79,7 +84,7 @@ void parser::load_command_variables(variables_map& variables, int argc,
 }
 
 void parser::load_environment_variables(variables_map& variables,
-    const std::string& prefix)
+    const std::string& prefix) THROWS
 {
     const auto& environment_variables = load_environment();
     const auto environment = parse_environment(environment_variables, prefix);
@@ -87,7 +92,7 @@ void parser::load_environment_variables(variables_map& variables,
 }
 
 bool parser::load_configuration_variables(variables_map& variables,
-    const std::string& option_name)
+    const std::string& option_name) THROWS
 {
     const auto config_settings = load_settings();
     const auto config_path = get_config_option(variables, option_name);
@@ -100,9 +105,7 @@ bool parser::load_configuration_variables(variables_map& variables,
         ifstream file(path);
 
         if (!file.good())
-        {
-            BOOST_THROW_EXCEPTION(reading_file(path.c_str()));
-        }
+            throw ifstream_exception(path.c_str());
 
         const auto config = parse_config_file(file, config_settings);
         store(config, variables);
@@ -110,7 +113,7 @@ bool parser::load_configuration_variables(variables_map& variables,
     }
 
     // Loading from an empty stream causes the defaults to populate.
-    std::stringstream stream;
+    std::istringstream stream;
     const auto config = parse_config_file(stream, config_settings);
     store(config, variables);
     return false;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -21,78 +21,40 @@
 
 #include <iostream>
 #include <string>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/data.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper for base58 encoded text.
- */
+/// Serialization helper for base58 encoded text.
 class BC_API base58
 {
 public:
+    /// Defaults.
+    base58(base58&&) = default;
+    base58(const base58&) = default;
+    base58& operator=(base58&&) = default;
+    base58& operator=(const base58&) = default;
+    ~base58() = default;
 
-    /**
-     * Default constructor.
-     */
-    base58();
+    /// Constructors.
+    base58() NOEXCEPT;
+    base58(data_chunk&& value) NOEXCEPT;
+    base58(const data_chunk& value) NOEXCEPT;
+    base58(const std::string& base58) THROWS;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  base58  The value to initialize with.
-     */
-    base58(const std::string& base58);
+    /// Operators.
 
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The value to initialize with.
-     */
-    base58(const data_chunk& value);
+    operator const data_chunk&() const NOEXCEPT;
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    base58(const base58& other);
-
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type reference.
-     */
-    operator const data_chunk&() const;
-
-    /**
-     * Overload cast to generic data reference.
-     * @return  This object's value cast to a generic data.
-     */
-    operator data_slice() const;
-
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& input,
-        base58& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
-    friend std::ostream& operator<<(std::ostream& output,
-        const base58& argument);
+    friend std::istream& operator>>(std::istream& stream,
+        base58& argument) THROWS;
+    friend std::ostream& operator<<(std::ostream& stream,
+        const base58& argument) NOEXCEPT;
 
 private:
-
-    /**
-     * The state of this object.
-     */
     data_chunk value_;
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -21,84 +21,42 @@
 
 #include <iostream>
 #include <string>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper for a bitcoin 256 bit hash.
- */
+/// Serialization helper for a bitcoin 256 bit hash.
 class BC_API hash256
 {
 public:
-    /**
-     * A list of bitcoin 256 bit hashes.
-     * This must provide operator<< for ostream in order to be used as a
-     * boost::program_options default_value.
-     */
     typedef std::vector<hash256> list;
 
-    /**
-     * Default constructor.
-     */
-    hash256();
+    /// Defaults.
+    hash256(hash256&&) = default;
+    hash256(const hash256&) = default;
+    hash256& operator=(hash256&&) = default;
+    hash256& operator=(const hash256&) = default;
+    ~hash256() = default;
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    hash256(const hash256& other);
+    /// Constructors.
+    hash256() NOEXCEPT;
+    hash256(hash_digest&& value) NOEXCEPT;
+    hash256(const hash_digest& value) NOEXCEPT;
+    hash256(const std::string& base16) THROWS;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  hexcode  The hash value in string hexidecimal form.
-     */
-    hash256(const std::string& hexcode);
+    std::string to_string() const NOEXCEPT;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The hash value to initialize with.
-     */
-    hash256(const hash_digest& value);
+    /// Operators.
 
-    /**
-     * Get the hash as a string.
-     * @return The hash in the string hexidecimal form.
-     */
-    std::string to_string() const;
+    operator const hash_digest&() const NOEXCEPT;
 
-    /**
-     * Override the equality operator.
-     * @param[in]  other  The other object with which to compare.
-     */
-    bool operator==(const hash256& other) const;
-
-    /**
-     * Cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
-    operator const hash_digest&() const;
-
-    /**
-     * Define stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& input,
-        hash256& argument);
-
-    /**
-     * Define stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
-    friend std::ostream& operator<<(std::ostream& output,
-        const hash256& argument);
+    friend std::istream& operator>>(std::istream& stream,
+        hash256& argument) THROWS;
+    friend std::ostream& operator<<(std::ostream& stream,
+        const hash256& argument) NOEXCEPT;
 
 private:
     hash_digest value_;

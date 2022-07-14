@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,363 +19,276 @@
 #include <bitcoin/system/chain/witness.hpp>
 
 #include <algorithm>
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <istream>
+#include <memory>
 #include <numeric>
 #include <string>
 #include <utility>
-#include <boost/algorithm/string.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/error.hpp>
-#include <bitcoin/system/machine/operation.hpp>
-#include <bitcoin/system/machine/program.hpp>
-#include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/assert.hpp>
-#include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/machine/machine.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-using namespace bc::system::machine;
+using namespace system::machine;
 static const auto checksig_script = script{ { opcode::checksig } };
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-// A default instance is invalid (until modified).
-witness::witness()
-  : valid_(false)
+witness::witness() NOEXCEPT
+  : witness(chunk_cptrs{}, false)
 {
 }
 
-witness::witness(witness&& other)
-  : stack_(std::move(other.stack_)), valid_(other.valid_)
+witness::witness(data_stack&& stack) NOEXCEPT
+  : witness(*to_shareds(std::move(stack)), true)
 {
 }
 
-witness::witness(const witness& other)
-  : stack_(other.stack_), valid_(other.valid_)
+witness::witness(const data_stack& stack) NOEXCEPT
+  : witness(*to_shareds(stack), true)
 {
 }
 
-witness::witness(const data_stack& stack)
+witness::witness(chunk_cptrs&& stack) NOEXCEPT
+  : witness(std::move(stack), true)
 {
-    stack_ = stack;
 }
 
-witness::witness(data_stack&& stack)
+witness::witness(const chunk_cptrs& stack) NOEXCEPT
+  : witness(stack, true)
 {
-    stack_ = std::move(stack);
 }
 
-witness::witness(data_chunk&& encoded, bool prefix)
+witness::witness(const data_slice& data, bool prefix) NOEXCEPT
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+  : witness(stream::in::copy(data), prefix)
+    BC_POP_WARNING()
 {
-    from_data(encoded, prefix);
 }
 
-witness::witness(const data_chunk& encoded, bool prefix)
+witness::witness(std::istream&& stream, bool prefix) NOEXCEPT
+  : witness(read::bytes::istream(stream), prefix)
 {
-    from_data(encoded, prefix);
+}
+
+witness::witness(std::istream& stream, bool prefix) NOEXCEPT
+  : witness(read::bytes::istream(stream), prefix)
+{
+}
+
+witness::witness(reader&& source, bool prefix) NOEXCEPT
+  : witness(from_data(source, prefix))
+{
+}
+
+witness::witness(reader& source, bool prefix) NOEXCEPT
+  : witness(from_data(source, prefix))
+{
+}
+
+witness::witness(const std::string& mnemonic) NOEXCEPT
+  : witness(from_string(mnemonic))
+{
+}
+
+// protected
+witness::witness(chunk_cptrs&& stack, bool valid) NOEXCEPT
+  : stack_(std::move(stack)), valid_(valid)
+{
+}
+
+// protected
+witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
+  : stack_(stack), valid_(valid)
+{
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-witness& witness::operator=(witness&& other)
+bool witness::operator==(const witness& other) const NOEXCEPT
 {
-    reset();
-    stack_ = std::move(other.stack_);
-    valid_ = other.valid_;
-    return *this;
+    return deep_equal(stack_, other.stack_);
 }
 
-witness& witness::operator=(const witness& other)
-{
-    reset();
-    stack_ = other.stack_;
-    valid_ = other.valid_;
-    return *this;
-}
-
-bool witness::operator==(const witness& other) const
-{
-    return stack_ == other.stack_;
-}
-
-bool witness::operator!=(const witness& other) const
+bool witness::operator!=(const witness& other) const NOEXCEPT
 {
     return !(*this == other);
 }
 
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-// static
-witness witness::factory(const data_chunk& encoded, bool prefix)
+static data_chunk read_element(reader& source) NOEXCEPT
 {
-    witness instance;
-    instance.from_data(encoded, prefix);
-    return instance;
+    // Each witness encoded as variable integer prefixed byte array (bip144).
+    return source.read_bytes(source.read_size(max_block_weight));
 }
 
-// static
-witness witness::factory(std::istream& stream, bool prefix)
+// static/private
+witness witness::from_data(reader& source, bool prefix) NOEXCEPT
 {
-    witness instance;
-    instance.from_data(stream, prefix);
-    return instance;
-}
+    chunk_cptrs stack;
 
-// static
-witness witness::factory(reader& source, bool prefix)
-{
-    witness instance;
-    instance.from_data(source, prefix);
-    return instance;
-}
-
-bool witness::from_data(const data_chunk& encoded, bool prefix)
-{
-    data_source istream(encoded);
-    return from_data(istream, prefix);
-}
-
-bool witness::from_data(std::istream& stream, bool prefix)
-{
-    istream_reader source(stream);
-    return from_data(source, prefix);
-}
-
-// Prefixed data assumed valid here though caller may confirm with is_valid.
-bool witness::from_data(reader& source, bool prefix)
-{
-    reset();
-    valid_ = true;
-
-    const auto read_element = [](reader& source)
-    {
-        // Tokens encoded as variable integer prefixed byte array (bip144).
-        const auto size = source.read_size_little_endian();
-
-        // The max_script_size and max_push_data_size constants limit
-        // evaluation, but not all stacks evaluate, so use max_block_weight
-        // to guard memory allocation here.
-        if (size > max_block_weight)
-        {
-            source.invalidate();
-            return data_chunk{};
-        }
-
-        return source.read_bytes(size);
-    };
-
-    // TODO: optimize store serialization to avoid loop, reading data directly.
     if (prefix)
     {
-        // Witness prefix is an element count, not byte length (unlike script).
-        // On wire each witness is prefixed with number of elements (bip144).
-        for (auto count = source.read_size_little_endian(); count > 0; --count)
-             stack_.push_back(read_element(source));
+        // Each witness is prefixed with number of elements (bip144).
+        // Witness prefix is an element count, not byte length.
+        stack.reserve(source.read_size(max_block_weight));
+
+        for (size_t element = 0; element < stack.capacity(); ++element)
+            stack.push_back(to_shared<data_chunk>(read_element(source)));
     }
     else
     {
         while (!source.is_exhausted())
-            stack_.push_back(read_element(source));
+            stack.push_back(to_shared<data_chunk>(read_element(source)));
     }
 
-    if (!source)
-        reset();
-
-    return source;
+    return { stack, source };
 }
 
-// private/static
-size_t witness::serialized_size(const data_stack& stack)
+inline bool is_push_token(const std::string& token) NOEXCEPT
 {
-    const auto sum = [](size_t total, const data_chunk& element)
+    return token.size() > one && token.front() == '[' && token.back() == ']';
+}
+
+inline std::string remove_token_delimiters(const std::string& token) NOEXCEPT
+{
+    BC_ASSERT(token.size() > one);
+    return std::string(std::next(token.begin()), std::prev(token.end()));
+}
+
+// static/private
+witness witness::from_string(const std::string& mnemonic) NOEXCEPT
+{
+    // There is always one data element per non-empty string token.
+    auto tokens = split(mnemonic);
+
+    // Split always returns at least one token, and when trimming it will be
+    // empty only if there was nothing but whitespace in the mnemonic.
+    if (tokens.front().empty())
+        tokens.clear();
+
+    data_stack stack(tokens.size());
+    auto data = stack.begin();
+
+    // Create data stack from the split tokens.
+    for (const auto& token: tokens)
     {
-        // Tokens encoded as variable integer prefixed byte array (bip144).
-        const auto size = element.size();
-        return total + message::variable_uint_size(size) + size;
-    };
+        if (!is_push_token(token) ||
+            !decode_base16(*data++, remove_token_delimiters(token)))
+            return {};
+    }
 
-    return std::accumulate(stack.begin(), stack.end(), size_t(0), sum);
-}
-
-// protected
-void witness::reset()
-{
-    valid_ = false;
-    stack_.clear();
-    stack_.shrink_to_fit();
-}
-
-bool witness::is_valid() const
-{
-    // Witness validity is consistent with stack validity (unlike script).
-    return valid_;
+    return { std::move(stack) };
 }
 
 // Serialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-data_chunk witness::to_data(bool prefix) const
+data_chunk witness::to_data(bool prefix) const NOEXCEPT
 {
-    data_chunk data;
-    const auto size = serialized_size(prefix);
-    data.reserve(size);
-    data_sink ostream(data);
+    data_chunk data(serialized_size(prefix), no_fill_byte_allocator);
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
     to_data(ostream, prefix);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
     return data;
 }
 
-void witness::to_data(std::ostream& stream, bool prefix) const
+void witness::to_data(std::ostream& stream, bool prefix) const NOEXCEPT
 {
-    ostream_writer sink(stream);
-    to_data(sink, prefix);
+    write::bytes::ostream out(stream);
+    to_data(out, prefix);
 }
 
-void witness::to_data(writer& sink, bool prefix) const
+void witness::to_data(writer& sink, bool prefix) const NOEXCEPT
 {
     // Witness prefix is an element count, not byte length (unlike script).
     if (prefix)
-        sink.write_variable_little_endian(stack_.size());
+        sink.write_variable(stack_.size());
 
-    const auto serialize = [&sink](const data_chunk& element)
+    // Tokens encoded as variable integer prefixed byte array (bip144).
+    for (const auto& element: stack_)
     {
-        // Tokens encoded as variable integer prefixed byte array (bip144).
-        sink.write_variable_little_endian(element.size());
-        sink.write_bytes(element);
-    };
-
-    // TODO: optimize store serialization to avoid loop, writing data directly.
-    std::for_each(stack_.begin(), stack_.end(), serialize);
+        sink.write_variable(element->size());
+        sink.write_bytes(*element);
+    }
 }
 
-std::string witness::to_string() const
+std::string witness::to_string() const NOEXCEPT
 {
     if (!valid_)
-        return "<invalid>";
+        return "(?)";
 
     std::string text;
-    const auto serialize = [&text](const data_chunk& element)
-    {
-        text += "[" + encode_base16(element) + "] ";
-    };
+    for (const auto& element: stack_)
+        text += "[" + encode_base16(*element) + "] ";
 
-    std::for_each(stack_.begin(), stack_.end(), serialize);
-    return boost::trim_copy(text);
-}
-
-// Iteration.
-//-----------------------------------------------------------------------------
-// These are syntactic sugar that allow the caller to iterate stack directly.
-
-void witness::clear()
-{
-    reset();
-}
-
-bool witness::empty() const
-{
-    return stack_.empty();
-}
-
-size_t witness::size() const
-{
-    return stack_.size();
-}
-
-const data_chunk& witness::front() const
-{
-    BITCOIN_ASSERT(!stack_.empty());
-    return stack_.front();
-}
-
-const data_chunk& witness::back() const
-{
-    BITCOIN_ASSERT(!stack_.empty());
-    return stack_.back();
-}
-
-const data_chunk& witness::operator[](size_t index) const
-{
-    BITCOIN_ASSERT(index < stack_.size());
-    return stack_[index];
-}
-
-witness::iterator witness::begin() const
-{
-    return stack_.begin();
-}
-
-witness::iterator witness::end() const
-{
-    return stack_.end();
+    trim_right(text);
+    return text;
 }
 
 // Properties.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-size_t witness::serialized_size(bool prefix) const
+bool witness::is_valid() const NOEXCEPT
 {
-    // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? message::variable_uint_size(stack_.size()) : 0u) +
-        serialized_size(stack_);
+    return valid_;
 }
 
-const data_stack& witness::stack() const
+const chunk_cptrs& witness::stack() const NOEXCEPT
 {
     return stack_;
 }
 
-// Utilities.
-//-----------------------------------------------------------------------------
-
-inline data_chunk top_element(const data_stack stack)
+// private
+size_t witness::serialized_size() const NOEXCEPT
 {
-    return stack.empty() ? data_chunk{} : stack.back();
-}
-
-// static
-bool witness::is_push_size(const data_stack& stack)
-{
-    const auto push_size = [](const data_chunk& element)
+    const auto sum = [](size_t total, const chunk_cptr& element) NOEXCEPT
     {
-        return element.size() <= max_push_data_size;
+        // Tokens encoded as variable integer prefixed byte array (bip144).
+        const auto size = element->size();
+        return total + variable_size(size) + size;
     };
 
-    return std::all_of(stack.begin(), stack.end(), push_size);
+    return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
 }
 
-// static
-// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-bool witness::is_reserved_pattern(const data_stack& stack)
+size_t witness::serialized_size(bool prefix) const NOEXCEPT
 {
-    return stack.size() == 1 &&
-        stack[0].size() == hash_size;
+    // Witness prefix is an element count, not a byte length (unlike script).
+    return (prefix ? variable_size(stack_.size()) : zero) + serialized_size();
 }
 
-// private
+// Utilities.
+// ----------------------------------------------------------------------------
+
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-operation::list witness::to_pay_key_hash(data_chunk&& program)
+inline operations to_pay_key_hash(data_chunk&& program) NOEXCEPT
 {
-    BITCOIN_ASSERT(program.size() == short_hash_size);
+    BC_ASSERT(program.size() == short_hash_size);
 
-    return operation::list
+    return operations
     {
         { opcode::dup },
         { opcode::hash160 },
-        { std::move(program) },
+        { std::move(program), true },
         { opcode::equalverify },
         { opcode::checksig }
     };
@@ -383,10 +296,10 @@ operation::list witness::to_pay_key_hash(data_chunk&& program)
 
 // The return script is only useful only for sigop counting.
 bool witness::extract_sigop_script(script& out_script,
-    const script& program_script) const
+    const script& program_script) const NOEXCEPT
 {
     // Caller may recycle script parameter.
-    out_script.clear();
+    out_script = {};
 
     switch (program_script.version())
     {
@@ -401,7 +314,9 @@ bool witness::extract_sigop_script(script& out_script,
 
                 // p2wsh sigops are counted as before for p2sh (bip141).
                 case hash_size:
-                    out_script.from_data(top_element(stack_), false);
+                    if (!stack_.empty())
+                        out_script = { *stack_.back(), false };
+
                     return true;
 
                 // Undefined v0 witness script, will not validate.
@@ -422,11 +337,12 @@ bool witness::extract_sigop_script(script& out_script,
 }
 
 // Extract script and initial execution stack.
-bool witness::extract_script(script& out_script,
-    data_stack& out_stack, const script& program_script) const
+bool witness::extract_script(script::cptr& out_script,
+    chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
-    auto program = program_script.witness_program();
-    out_stack = stack_;
+    // Copy stack of shared const pointers for use as mutable witness stack.
+    out_stack = std::make_shared<chunk_cptrs>(stack_);
+    data_chunk program{ program_script.witness_program() };
 
     switch (program_script.version())
     {
@@ -440,15 +356,14 @@ bool witness::extract_script(script& out_script,
                 // output script : <0> <20-byte-hash-of-public-key>
                 case short_hash_size:
                 {
-                    // Stack must be 2 elements (bip141).
-                    if (out_stack.size() != 2)
-                        return false;
-
                     // Create a pay-to-key-hash input script from the program.
                     // The hash160 of public key must match program (bip141).
-                    out_script.from_operations(to_pay_key_hash(
-                        std::move(program)));
-                    return true;
+                    out_script = to_shared(script{ to_pay_key_hash(
+                        std::move(program)) });
+
+                    // Stack must be 2 elements (bip141).
+                    // Fail la
+                    return out_stack->size() == two;
                 }
 
                 // p2wsh
@@ -458,15 +373,15 @@ bool witness::extract_script(script& out_script,
                 case hash_size:
                 {
                     // The stack must consist of at least 1 element (bip141).
-                    if (out_stack.empty())
+                    if (out_stack->empty())
                         return false;
 
                     // Input script is popped from the stack (bip141).
-                    out_script.from_data(pop(out_stack), false);
+                    out_script = to_shared(script{ *pop(*out_stack), false });
 
                     // The sha256 of popped script must match program (bip141).
                     return std::equal(program.begin(), program.end(),
-                        sha256_hash(out_script.to_data(false)).begin());
+                        out_script->hash().begin());
                 }
 
                 // The witness extraction is invalid for v0.
@@ -486,48 +401,46 @@ bool witness::extract_script(script& out_script,
     }
 }
 
-// Validation.
-//-----------------------------------------------------------------------------
+// JSON value convertors.
+// ----------------------------------------------------------------------------
 
-// static
-// The program script is either a prevout script or an embedded script.
-// It validates this witness, from which the witness script is derived.
-code witness::verify(const transaction& tx, uint32_t input_index,
-    uint32_t forks, const script& program_script, uint64_t value) const
+namespace json = boost::json;
+
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
+witness tag_invoke(json::value_to_tag<witness>,
+    const json::value& value) NOEXCEPT
 {
-    code ec;
-    script script;
-    data_stack stack;
-    const auto version = program_script.version();
-
-    switch (version)
-    {
-        // Version 0 (bip141).
-        case script_version::zero:
-        {
-            if (!extract_script(script, stack, program_script))
-                return error::invalid_witness;
-
-            program witness(script, tx, input_index, forks, std::move(stack),
-                value, version);
-
-            if ((ec = witness.evaluate()))
-                return ec;
-
-            // A v0 script must succeed with a clean true stack (bip141).
-            return witness.stack_result(true) ? error::success :
-                error::stack_false;
-        }
-
-        // These versions are reserved for future extensions (bip141).
-        case script_version::reserved:
-            return error::success;
-
-        case script_version::unversioned:
-        default:
-            return error::operation_failed;
-    }
+    return witness{ std::string(value.get_string().c_str()) };
 }
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const witness& witness) NOEXCEPT
+{
+    value = witness.to_string();
+}
+
+BC_POP_WARNING()
+
+witness::cptr tag_invoke(json::value_to_tag<witness::cptr>,
+    const json::value& value) NOEXCEPT
+{
+    return to_shared(tag_invoke(json::value_to_tag<witness>{}, value));
+}
+
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const witness::cptr& output) NOEXCEPT
+{
+    tag_invoke(tag, value, *output);
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

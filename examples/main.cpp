@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -48,14 +48,8 @@ int bc::system::main(int argc, char* argv[])
 #endif
 
     // Extracting Satoshi's words from genesis block.
-    const chain::block block = settings(config::settings::mainnet)
-        .genesis_block;
-    const auto& coinbase = block.transactions().front();
-    const auto& input = coinbase.inputs().front();
-    BITCOIN_ASSERT_MSG(input.script().size() > 2u, "unexpected genesis");
-
-    const auto headline = input.script()[2].data();
-    std::string message(headline.begin(), headline.end());
+    const auto block = settings(chain::selection::mainnet).genesis_block;
+    const auto message = to_string((*(*block.transactions_ptr())[0]->inputs_ptr())[0]->script().ops()[2].data());
     system::cout << message << std::endl;
 
     return EXIT_SUCCESS;

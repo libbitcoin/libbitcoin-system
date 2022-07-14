@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,4 +18,3 @@
  */
 #define BOOST_TEST_MODULE libbitcoin_test
 #include <boost/test/unit_test.hpp>
-

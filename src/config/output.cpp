@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,16 +18,16 @@
  */
 #include <bitcoin/system/config/output.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
+#include <utility>
+#include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/config/point.hpp>
 #include <bitcoin/system/config/script.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/math/stealth.hpp>
-#include <bitcoin/system/utility/string.hpp>
-#include <bitcoin/system/wallet/stealth_address.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/serial/deserialize.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -35,117 +35,78 @@ namespace config {
 
 using namespace boost::program_options;
 
-output::output()
-  : is_stealth_(false), amount_(0), version_(0), script_(),
-    pay_to_hash_(null_short_hash)
+// Outputs format is currently private to bx:
+// "script:value"
+
+static bool decode_output(chain::output& output,
+    const std::string& tuple) THROWS
+{
+    const auto tokens = split(tuple, point::delimiter);
+    if (tokens.size() != 2)
+        return false;
+
+    uint64_t value;
+    if (!!deserialize(value, tokens[1]))
+        return false;
+
+    // Throws istream_exception.
+    output = chain::output
+    {
+        value,
+        script{ tokens[0] }
+    };
+
+    return true;
+}
+
+static std::string encode_output(const chain::output& output) NOEXCEPT
+{
+    std::ostringstream result;
+    result << script(output.script()) << point::delimiter << output.value();
+    return result.str();
+}
+
+output::output() NOEXCEPT
+  : value_()
 {
 }
 
-output::output(const std::string& tuple)
+output::output(chain::output&& value) NOEXCEPT
+  : value_(std::move(value))
+{
+}
+
+output::output(const chain::output& value) NOEXCEPT
+  : value_(value)
+{
+}
+
+output::output(const std::string& tuple) THROWS
   : output()
 {
-    std::stringstream(tuple) >> *this;
+    std::istringstream(tuple) >> *this;
 }
 
-bool output::is_stealth() const
+output::operator const chain::output&() const NOEXCEPT
 {
-    return is_stealth_;
+    return value_;
 }
 
-uint64_t output::amount() const
-{
-    return amount_;
-}
-
-uint8_t output::version() const
-{
-    return version_;
-}
-
-const chain::script& output::script() const
-{
-    return script_;
-}
-
-const short_hash& output::pay_to_hash() const
-{
-    return pay_to_hash_;
-}
-
-std::istream& operator>>(std::istream& input, output& argument)
+std::istream& operator>>(std::istream& stream, output& argument) THROWS
 {
     std::string tuple;
-    input >> tuple;
+    stream >> tuple;
 
-    const auto tokens = split(tuple, point::delimiter);
-    if (tokens.size() < 2 || tokens.size() > 3)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-    }
+    if (!decode_output(argument.value_, tuple))
+        throw istream_exception(tuple);
 
-    uint64_t amount;
-    deserialize(amount, tokens[1], true);
+    return stream;
+}
 
-    argument.amount_ = amount;
-    const auto& target = tokens.front();
-
-    // Is the target a payment address?
-    const wallet::payment_address payment(target);
-    if (payment)
-    {
-        argument.version_ = payment.version();
-        argument.pay_to_hash_ = payment.hash();
-        return input;
-    }
-
-    // Is the target a stealth address?
-    const wallet::stealth_address stealth(target);
-    if (stealth)
-    {
-        // TODO: finish stealth multisig implemetation (p2sh and !p2sh).
-
-        if (stealth.spend_keys().size() != 1 || tokens.size() != 3)
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
-
-        data_chunk seed;
-        if (!decode_base16(seed, tokens[2]) || seed.size() < minimum_seed_size)
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
-
-        ec_secret ephemeral_secret;
-        if (!create_stealth_data(argument.script_, ephemeral_secret,
-            stealth.filter(), seed))
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
-
-        ec_compressed stealth_key;
-        if (!uncover_stealth(stealth_key, stealth.scan_key(), ephemeral_secret,
-            stealth.spend_keys().front()))
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(tuple));
-        }
-
-        argument.is_stealth_ = true;
-        argument.pay_to_hash_ = bitcoin_short_hash(stealth_key);
-        argument.version_ = stealth.version();
-        return input;
-    }
-
-    // The target must be a serialized script.
-    // Note that it is possible for a base16 encoded script to be interpreted
-    // as an address above. That is unlikely but considered intended behavior.
-    data_chunk decoded;
-    if (!decode_base16(decoded, target))
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(target));
-    }
-
-    argument.script_ = script(decoded);
-    return input;
+std::ostream& operator<<(std::ostream& stream, const output& argument) NOEXCEPT
+{
+    stream << encode_output(argument.value_);
+    return stream;
 }
 
 } // namespace config

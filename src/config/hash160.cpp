@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,59 +18,58 @@
  */
 #include <bitcoin/system/config/hash160.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
-#include <bitcoin/system/math/hash.hpp>
+#include <utility>
+#include <bitcoin/system/crypto/crypto.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-hash160::hash160()
+hash160::hash160() NOEXCEPT
   : value_(null_short_hash)
 {
 }
 
-hash160::hash160(const std::string& hexcode)
-{
-    std::stringstream(hexcode) >> *this;
-}
-
-hash160::hash160(const short_hash& value)
-  : value_(value)
+hash160::hash160(short_hash&& value) NOEXCEPT
+  : value_(std::move(value))
 {
 }
 
-hash160::hash160(const hash160& other)
-  : hash160(other.value_)
+hash160::hash160(const short_hash& value) NOEXCEPT
+    : value_(value)
 {
 }
 
-hash160::operator const short_hash&() const
+hash160::hash160(const std::string& base16) THROWS
+{
+    std::istringstream(base16) >> *this;
+}
+
+hash160::operator const short_hash&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, hash160& argument)
+std::istream& operator>>(std::istream& stream, hash160& argument) THROWS
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base16;
+    stream >> base16;
 
-    if (!decode_base16(argument.value_, hexcode))
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
-    }
+    if (!decode_base16(argument.value_, base16))
+        throw istream_exception(base16);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const hash160& argument)
+std::ostream& operator<<(std::ostream& stream, const hash160& argument) NOEXCEPT
 {
-    output << encode_base16(argument.value_);
-    return output;
+    stream << encode_base16(argument.value_);
+    return stream;
 }
 
 } // namespace config

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,18 +19,15 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <istream>
 #include <memory>
-#include <string>
 #include <vector>
+/// DELETEMENOW
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/writer.hpp>
-#include <bitcoin/system/wallet/payment_address.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -39,119 +36,101 @@ namespace chain {
 class BC_API output
 {
 public:
-    typedef std::vector<output> list;
+    typedef std::shared_ptr<const output> cptr;
 
-    /// This is a sentinel used in .value to indicate not found/populated.
     /// This is a consensus value required by script::generate_signature_hash.
     static const uint64_t not_found;
 
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    struct validation
-    {
-        /// These are non-consensus sentinel values.
-        static const uint32_t not_spent;
-        static const uint8_t candidate_spent_true;
-        static const uint8_t candidate_spent_false;
-
-        /// Stored on output.
-        /// The output is spent by a candidate block.
-        bool candidate_spent = false;
-
-        /// Stored on output.
-        /// The output is spent by a confirmed block at the given height.
-        uint32_t confirmed_spent_height = not_spent;
-    };
-
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    output();
+    /// Default output is an invalid object (input.prevout relies on this).
+    output() NOEXCEPT;
 
-    output(output&& other);
-    output(const output& other);
+    /// Defaults.
+    output(output&&) = default;
+    output(const output&) = default;
+    output& operator=(output&&) = default;
+    output& operator=(const output&) = default;
+    ~output() = default;
 
-    output(uint64_t value, chain::script&& script);
-    output(uint64_t value, const chain::script& script);
+    output(uint64_t value, chain::script&& script) NOEXCEPT;
+    output(uint64_t value, const chain::script& script) NOEXCEPT;
+    output(uint64_t value, const chain::script::cptr& script) NOEXCEPT;
+
+    output(const data_slice& data) NOEXCEPT;
+    output(std::istream&& stream) NOEXCEPT;
+    output(std::istream& stream) NOEXCEPT;
+    output(reader&& source) NOEXCEPT;
+    output(reader& source) NOEXCEPT;
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    output& operator=(output&& other);
-    output& operator=(const output& other);
-
-    bool operator==(const output& other) const;
-    bool operator!=(const output& other) const;
-
-    // Deserialization.
-    //-------------------------------------------------------------------------
-
-    static output factory(const data_chunk& data, bool wire=true);
-    static output factory(std::istream& stream, bool wire=true);
-    static output factory(reader& source, bool wire=true);
-
-    bool from_data(const data_chunk& data, bool wire=true);
-    bool from_data(std::istream& stream, bool wire=true);
-    bool from_data(reader& source, bool wire=true, bool unused=false);
-
-    bool is_valid() const;
+    bool operator==(const output& other) const NOEXCEPT;
+    bool operator!=(const output& other) const NOEXCEPT;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true) const;
-    void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire=true, bool unused=false) const;
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
-    // Properties (size, accessors, cache).
-    //-------------------------------------------------------------------------
+    // Properties.
+    // ------------------------------------------------------------------------
 
-    size_t serialized_size(bool wire=true) const;
+    /// Native properties.
+    bool is_valid() const NOEXCEPT;
+    uint64_t value() const NOEXCEPT;
+    const chain::script& script() const NOEXCEPT;
+    const chain::script::cptr& script_ptr() const NOEXCEPT;
 
-    uint64_t value() const;
-    void set_value(uint64_t value);
+    /// Computed properties.
+    size_t serialized_size() const NOEXCEPT;
 
-    const chain::script& script() const;
-    void set_script(const chain::script& value);
-    void set_script(chain::script&& value);
+    // Methods.
+    // ------------------------------------------------------------------------
 
-    /// The first payment address extracted (may be invalid).
-    wallet::payment_address address(
-        uint8_t p2kh_version=wallet::payment_address::mainnet_p2kh,
-        uint8_t p2sh_version=wallet::payment_address::mainnet_p2sh) const;
-
-    /// The payment addresses extracted from this output as a standard script.
-    wallet::payment_address::list addresses(
-        uint8_t p2kh_version=wallet::payment_address::mainnet_p2kh,
-        uint8_t p2sh_version=wallet::payment_address::mainnet_p2sh) const;
-
-    // Validation.
-    //-------------------------------------------------------------------------
-
-    size_t signature_operations(bool bip141) const;
-    bool is_dust(uint64_t minimum_output_value) const;
-    bool extract_committed_hash(hash_digest& out) const;
-
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation metadata;
+    bool committed_hash(hash_digest& out) const NOEXCEPT;
+    size_t signature_operations(bool bip141) const NOEXCEPT;
+    bool is_dust(uint64_t minimum_output_value) const NOEXCEPT;
 
 protected:
-    void reset();
-    void invalidate_cache() const;
+    output(uint64_t value, const chain::script::cptr& script,
+        bool valid) NOEXCEPT;
 
 private:
-    typedef std::shared_ptr<wallet::payment_address::list> addresses_ptr;
+    static output from_data(reader& source) NOEXCEPT;
 
-    addresses_ptr addresses_cache() const;
-
-    mutable upgrade_mutex mutex_;
-    mutable addresses_ptr addresses_;
-
+    // Output should be stored as shared (adds 16 bytes).
+    // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).
     uint64_t value_;
-    chain::script script_;
+    chain::script::cptr script_;
+    bool valid_;
 };
+
+typedef std::vector<output> outputs;
+typedef std::vector<output::cptr> output_cptrs;
+typedef std::shared_ptr<const output_cptrs> outputs_cptr;
+
+DECLARE_JSON_VALUE_CONVERTORS(output);
+DECLARE_JSON_VALUE_CONVERTORS(output::cptr);
 
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+namespace std
+{
+template<>
+struct hash<bc::system::chain::output>
+{
+    size_t operator()(const bc::system::chain::output& value) const NOEXCEPT
+    {
+        return std::hash<bc::system::data_chunk>{}(value.to_data());
+    }
+};
+} // namespace std
 
 #endif

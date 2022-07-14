@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,63 +18,57 @@
  */
 #include <bitcoin/system/config/base58.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
-#include <bitcoin/system/formats/base_58.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <utility>
+#include <bitcoin/system/data/data.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-base58::base58()
+base58::base58() NOEXCEPT
 {
 }
 
-base58::base58(const std::string& base58)
+base58::base58(data_chunk&& value) NOEXCEPT
+  : value_(std::move(value))
 {
-    std::stringstream(base58) >> *this;
 }
 
-base58::base58(const data_chunk& value)
+base58::base58(const data_chunk& value) NOEXCEPT
   : value_(value)
 {
 }
 
-base58::base58(const base58& other)
-  : base58(other.value_)
+base58::base58(const std::string& base58) THROWS
 {
+    std::istringstream(base58) >> *this;
 }
 
-base58::operator const data_chunk&() const
-{
-    return value_;
-}
-
-base58::operator data_slice() const
+base58::operator const data_chunk&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base58& argument)
+std::istream& operator>>(std::istream& stream, base58& argument) THROWS
 {
     std::string base58;
-    input >> base58;
+    stream >> base58;
 
     if (!decode_base58(argument.value_, base58))
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(base58));
-    }
+        throw istream_exception(base58);
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base58& argument)
+std::ostream& operator<<(std::ostream& stream, const base58& argument) NOEXCEPT
 {
-    output << encode_base58(argument.value_);
-    return output;
+    stream << encode_base58(argument.value_);
+    return stream;
 }
 
 } // namespace config

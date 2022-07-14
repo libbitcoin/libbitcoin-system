@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -21,61 +21,62 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
-#include <bitcoin/system/formats/base_16.hpp>
-#include <bitcoin/system/utility/data.hpp>
+#include <utility>
+#include <bitcoin/system/data/data.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-base16::base16()
+base16::base16() NOEXCEPT
 {
 }
 
-base16::base16(const std::string& hexcode)
+base16::base16(data_chunk&& value) NOEXCEPT
+  : value_(std::move(value))
 {
-    std::stringstream(hexcode) >> *this;
 }
 
-base16::base16(const data_chunk& value)
+base16::base16(const data_chunk& value) NOEXCEPT
   : value_(value)
 {
 }
 
-base16::base16(const base16& other)
-  : base16(other.value_)
+base16::base16(const std::string& base16) THROWS
 {
+    std::istringstream(base16) >> *this;
 }
 
-base16::operator const data_chunk&() const
+base16::operator const data_chunk&() const NOEXCEPT
 {
     return value_;
 }
 
-base16::operator data_slice() const
-{
-    return value_;
-}
+////base16::operator data_slice() const NOEXCEPT
+////{
+////    return { value_.begin(), value_.end() };
+////}
 
-std::istream& operator>>(std::istream& input, base16& argument)
+std::istream& operator>>(std::istream& stream, base16& argument) THROWS
 {
-    std::string hexcode;
-    input >> hexcode;
+    std::string base16;
+    stream >> base16;
 
-    if (!decode_base16(argument.value_, hexcode))
+    if (!decode_base16(argument.value_, base16))
     {
         using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
+        throw istream_exception(base16);
     }
 
-    return input;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base16& argument)
+std::ostream& operator<<(std::ostream& stream, const base16& argument) NOEXCEPT
 {
-    output << encode_base16(argument.value_);
-    return output;
+    stream << encode_base16(argument.value_);
+    return stream;
 }
 
 } // namespace config

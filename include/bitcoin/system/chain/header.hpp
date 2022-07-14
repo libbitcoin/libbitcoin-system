@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,21 +19,17 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_HEADER_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_HEADER_HPP
 
-#include <cstddef>
-#include <cstdint>
+/// DELETECSTDDEF
+/// DELETECSTDINT
 #include <istream>
-#include <string>
 #include <memory>
 #include <vector>
-#include <bitcoin/system/chain/block_filter.hpp>
+/// DELETEMENOW
 #include <bitcoin/system/chain/chain_state.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/error.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -45,166 +41,140 @@ namespace chain {
 class BC_API header
 {
 public:
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    struct validation
+    typedef std::shared_ptr<const header> cptr;
+
+    static constexpr size_t serialized_size() NOEXCEPT
     {
-        uint64_t originator = 0;
-        chain_state::ptr state = nullptr;
-
-        /// Stored in checksum field stored on header (when invalid).
-        /// The block validation error code (if validated).
-        code error = error::success;
-
-        // Stored on header.
-        /// Height also always exists, but we always pass it explicitly.
-        /// The median time past of the header, derived from its ancestry.
-        uint32_t median_time_past = 0;
-
-        /// False if not found in store.
-        /// Header exists, in any state (do not download it).
-        bool exists = false;
-
-        /// Derived from header transaction count (non-zero).
-        /// Block transactions are populated (do not download block/txs).
-        bool populated = false;
-
-        /// Derived from state stored on header (valid or failed).
-        /// Block has been validated (do not revalidate).
-        bool validated = false;
-
-        /// Derived from state stored on header.
-        /// Header is in candidate state and referenced by the candidate index.
-        bool candidate = false;
-
-        /// Derived from state stored on header (no fork point considered).
-        /// Block is in confirmed state and referenced by the confirmed index.
-        bool confirmed = false;
-
-        // Neutrino filter.
-        block_filter::ptr neutrino_filter;
-    };
+        return sizeof(version_)
+            + hash_size
+            + hash_size
+            + sizeof(timestamp_)
+            + sizeof(bits_)
+            + sizeof(nonce_);
+    }
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    header();
+    /// Default header is an invalid object.
+    header() NOEXCEPT;
 
-    header(header&& other);
-    header(const header& other);
+    /// Defaults.
+    header(header&&) = default;
+    header(const header&) = default;
+    header& operator=(header&&) = default;
+    header& operator=(const header&) = default;
+    ~header() = default;
 
-    header(uint32_t version, const hash_digest& previous_block_hash,
-        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
-        uint32_t nonce);
+        uint32_t nonce) NOEXCEPT;
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce) NOEXCEPT;
+
+    header(const data_slice& data) NOEXCEPT;
+    header(std::istream&& stream) NOEXCEPT;
+    header(std::istream& stream) NOEXCEPT;
+    header(reader&& source) NOEXCEPT;
+    header(reader& source) NOEXCEPT;
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    header& operator=(header&& other);
-    header& operator=(const header& other);
-
-    bool operator==(const header& other) const;
-    bool operator!=(const header& other) const;
-
-    // Deserialization.
-    //-------------------------------------------------------------------------
-
-    static header factory(const data_chunk& data, bool wire=true);
-    static header factory(std::istream& stream, bool wire=true);
-    static header factory(reader& source, bool wire=true);
-    static header factory(reader& source, hash_digest&& hash, bool wire=true);
-    static header factory(reader& source, const hash_digest& hash,
-        bool wire=true);
-
-    bool from_data(const data_chunk& data, bool wire=true);
-    bool from_data(std::istream& stream, bool wire=true);
-    bool from_data(reader& source, bool wire=true);
-    bool from_data(reader& source, hash_digest&& hash, bool wire=true);
-    bool from_data(reader& source, const hash_digest& hash, bool wire=true);
-
-    bool is_valid() const;
+    bool operator==(const header& other) const NOEXCEPT;
+    bool operator!=(const header& other) const NOEXCEPT;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true) const;
-    void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire=true) const;
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
-    // Properties (size, accessors, cache).
-    //-------------------------------------------------------------------------
 
-    static size_t satoshi_fixed_size();
-    size_t serialized_size(bool wire=true) const;
+    // Properties.
+    // ------------------------------------------------------------------------
+    /// Native properties.
+    bool is_valid() const NOEXCEPT;
+    uint32_t version() const NOEXCEPT;
+    const hash_digest& previous_block_hash() const NOEXCEPT;
+    const hash_digest& merkle_root() const NOEXCEPT;
+    uint32_t timestamp() const NOEXCEPT;
+    uint32_t bits() const NOEXCEPT;
+    uint32_t nonce() const NOEXCEPT;
 
-    uint32_t version() const;
-    void set_version(uint32_t value);
-
-    const hash_digest& previous_block_hash() const;
-    void set_previous_block_hash(const hash_digest& value);
-    void set_previous_block_hash(hash_digest&& value);
-
-    /// This may not match the computed value, validation compares them.
-    const hash_digest& merkle_root() const;
-    void set_merkle_root(const hash_digest& value);
-    void set_merkle_root(hash_digest&& value);
-
-    uint32_t timestamp() const;
-    void set_timestamp(uint32_t value);
-
-    uint32_t bits() const;
-    void set_bits(uint32_t value);
-
-    uint32_t nonce() const;
-    void set_nonce(uint32_t value);
-
-    hash_digest hash() const;
+    /// Computed properties.
+    hash_digest hash() const NOEXCEPT;
+    uint256_t difficulty() const NOEXCEPT;
 
     // Validation.
-    //-------------------------------------------------------------------------
-
-    uint256_t proof() const;
-    static uint256_t proof(uint32_t bits);
-
-    bool is_valid_timestamp(uint32_t timestamp_limit_seconds) const;
-    bool is_valid_proof_of_work(uint32_t proof_of_work_limit,
-        bool scrypt=false) const;
+    // ------------------------------------------------------------------------
 
     code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
-        bool scrypt=false) const;
-    code accept() const;
-    code accept(const chain_state& state) const;
+        bool scrypt=false) const NOEXCEPT;
 
-    // THIS IS FOR LIBRARY USE ONLY, DO NOT CREATE A DEPENDENCY ON IT.
-    mutable validation metadata;
+    code accept(const chain_state& state) const NOEXCEPT;
 
 protected:
-    // So that block may call reset from its own.
-    friend class block;
+    header(uint32_t version, hash_digest&& previous_block_hash,
+        hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, bool valid) NOEXCEPT;
+    header(uint32_t version, const hash_digest& previous_block_hash,
+        const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
+        uint32_t nonce, bool valid) NOEXCEPT;
 
-    void reset();
-    void invalidate_cache() const;
+    // Check (context free).
+    // ------------------------------------------------------------------------
+
+    bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
+        bool scrypt=false) const NOEXCEPT;
+    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
+
+    // Accept (relative to chain_state).
+    // ------------------------------------------------------------------------
+
+    // error::checkpoints_failed
+    // error::invalid_block_version
+    // error::timestamp_too_early
+    // error::incorrect_proof_of_work
 
 private:
-    typedef std::shared_ptr<hash_digest> hash_ptr;
+    static header from_data(reader& source) NOEXCEPT;
+    static uint256_t difficulty(uint32_t bits) NOEXCEPT;
 
-    hash_ptr hash_cache() const;
-
-    mutable hash_ptr hash_;
-    mutable upgrade_mutex mutex_;
-
+    // Header should be stored as shared (adds 16 bytes).
+    // copy: 4 * 32 + 2 * 256 + 1 = 81 bytes (vs. 16 when shared).
     uint32_t version_;
     hash_digest previous_block_hash_;
     hash_digest merkle_root_;
     uint32_t timestamp_;
     uint32_t bits_;
     uint32_t nonce_;
+    bool valid_;
 };
+
+typedef std::vector<header> headers;
+typedef std::vector<header::cptr> header_cptrs;
+typedef std::shared_ptr<const header_cptrs> headers_cptr;
+
+DECLARE_JSON_VALUE_CONVERTORS(header);
+DECLARE_JSON_VALUE_CONVERTORS(header::cptr);
 
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+namespace std
+{
+template<>
+struct hash<bc::system::chain::header>
+{
+    size_t operator()(const bc::system::chain::header& value) const NOEXCEPT
+    {
+        return std::hash<bc::system::hash_digest>{}(value.hash());
+    }
+};
+} // namespace std
 
 #endif

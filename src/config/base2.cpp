@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,64 +18,57 @@
  */
 #include <bitcoin/system/config/base2.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
-#include <bitcoin/system/utility/binary.hpp>
+#include <utility>
+/// DELETEMENOW
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-base2::base2()
+base2::base2() NOEXCEPT
 {
 }
 
-base2::base2(const std::string& binary)
+base2::base2(binary&& value) NOEXCEPT
+  : value_(std::move(value))
 {
-    std::stringstream(binary) >> *this;
 }
 
-base2::base2(const binary& value)
+base2::base2(const binary& value) NOEXCEPT
   : value_(value)
 {
 }
 
-base2::base2(const base2& other)
-  : base2(other.value_)
+base2::base2(const std::string& binary) THROWS
 {
+    std::istringstream(binary) >> *this;
 }
 
-size_t base2::size() const
-{
-    return value_.size();
-}
-
-base2::operator const binary&() const
+base2::operator const binary&() const NOEXCEPT
 {
     return value_;
 }
 
-std::istream& operator>>(std::istream& input, base2& argument)
+std::istream& operator>>(std::istream& stream, base2& argument) THROWS
 {
     std::string binary;
-    input >> binary;
+    stream >> binary;
 
     if (!binary::is_base2(binary))
-    {
-        using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(binary));
-    }
+        throw istream_exception(binary);
 
-    std::stringstream(binary) >> argument.value_;
-
-    return input;
+    std::istringstream(binary) >> argument.value_;
+    return stream;
 }
 
-std::ostream& operator<<(std::ostream& output, const base2& argument)
+std::ostream& operator<<(std::ostream& stream, const base2& argument) NOEXCEPT
 {
-    output << argument.value_;
-    return output;
+    stream << argument.value_;
+    return stream;
 }
 
 } // namespace config

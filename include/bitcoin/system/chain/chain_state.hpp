@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,16 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 
-#include <cstddef>
-#include <cstdint>
 #include <memory>
 #include <deque>
-#include <bitcoin/system/config/checkpoint.hpp>
-#include <bitcoin/system/constants.hpp>
+#include <bitcoin/system/chain/checkpoint.hpp>
+#include <bitcoin/system/chain/context.hpp>
+#include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/machine/opcode.hpp>
-#include <bitcoin/system/machine/rule_fork.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -36,7 +33,7 @@ namespace system {
 class settings;
 
 namespace chain {
-
+    
 class block;
 class header;
 
@@ -49,7 +46,6 @@ public:
     typedef struct { size_t count; size_t high; } range;
 
     typedef std::shared_ptr<chain_state> ptr;
-    typedef config::checkpoint::list checkpoints;
 
     /// Heights used to identify construction requirements.
     /// All values are lower-bounded by the genesis block height.
@@ -127,61 +123,78 @@ public:
         } timestamp;
     };
 
+    static constexpr uint32_t minimum_timespan(
+        uint32_t retargeting_interval_seconds,
+        uint32_t retargeting_factor) NOEXCEPT
+    {
+        return retargeting_interval_seconds / retargeting_factor;
+    }
+
+    static constexpr uint32_t maximum_timespan(
+        uint32_t retargeting_interval_seconds,
+        uint32_t retargeting_factor) NOEXCEPT
+    {
+        return retargeting_interval_seconds * retargeting_factor;
+    }
+
+    static constexpr uint32_t retargeting_interval(
+        uint32_t retargeting_interval_seconds,
+        uint32_t block_spacing_seconds) NOEXCEPT
+    {
+        return retargeting_interval_seconds / block_spacing_seconds;
+    }
+
     /// Checkpoints must be ordered by height with greatest at back.
     static map get_map(size_t height, const checkpoints& checkpoints,
         uint32_t forks, size_t retargeting_interval, size_t activation_sample,
-        const config::checkpoint& bip9_bit0_active_checkpoint,
-        const config::checkpoint& bip9_bit1_active_checkpoint);
+        const checkpoint& bip9_bit0_active_checkpoint,
+        const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
 
     static uint32_t signal_version(uint32_t forks,
-        const system::settings& settings);
-
-    static uint32_t minimum_timespan(uint32_t retargeting_interval_seconds,
-        uint32_t retargeting_factor);
-    static uint32_t maximum_timespan(uint32_t retargeting_interval_seconds,
-        uint32_t retargeting_factor);
-    static uint32_t retargeting_interval(uint32_t retargeting_interval_seconds,
-        uint32_t block_spacing_seconds);
+        const system::settings& settings) NOEXCEPT;
 
     /// Create pool state from top chain top block state.
-    chain_state(const chain_state& top, const system::settings& settings);
+    chain_state(const chain_state& top,
+        const system::settings& settings) NOEXCEPT;
 
     /// Create block state from tx pool chain state of same height.
     chain_state(const chain_state& pool, const chain::block& block,
-        const system::settings& settings);
+        const system::settings& settings) NOEXCEPT;
 
     /// Create header state from header pool chain state of parent block.
     chain_state(const chain_state& parent, const chain::header& header,
-        const system::settings& settings);
+        const system::settings& settings) NOEXCEPT;
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
     chain_state(data&& values, const checkpoints& checkpoints, uint32_t forks,
-        uint32_t stale_seconds, const system::settings& settings);
+        uint32_t stale_seconds, const system::settings& settings) NOEXCEPT;
 
     /// Properties.
-    const hash_digest& hash() const;
-    size_t height() const;
-    uint32_t enabled_forks() const;
-    uint32_t minimum_block_version() const;
-    uint32_t maximum_transaction_version() const;
-    uint32_t median_time_past() const;
-    uint32_t work_required() const;
+    const hash_digest& hash() const NOEXCEPT;
+    uint32_t minimum_block_version() const NOEXCEPT;
+    uint32_t maximum_transaction_version() const NOEXCEPT;
+    uint32_t work_required() const NOEXCEPT;
+
+    /// Context retains forks, policy, height, and median_time_past.
+    chain::context context() const NOEXCEPT;
+    uint32_t timestamp() const NOEXCEPT;
+    uint32_t median_time_past() const NOEXCEPT;
+    uint32_t policy() const NOEXCEPT;
+    uint32_t forks() const NOEXCEPT;
+    size_t height() const NOEXCEPT;
 
     /// Construction with zero height or any empty array causes invalid state.
-    bool is_valid() const;
+    bool is_valid() const NOEXCEPT;
 
     /// Determine if the represented block is stale (top block for pool state).
-    bool is_stale() const;
-
-    /// Determine if the fork is set for this block.
-    bool is_enabled(machine::rule_fork fork) const;
+    bool is_stale() const NOEXCEPT;
 
     /// Determine if this block hash fails a checkpoint at this height.
-    bool is_checkpoint_conflict(const hash_digest& hash) const;
+    bool is_checkpoint_conflict(const hash_digest& hash) const NOEXCEPT;
 
     /// This block height is less than or equal to that of the top checkpoint.
-    bool is_under_checkpoint() const;
+    bool is_under_checkpoint() const NOEXCEPT;
 
 protected:
     struct activations
@@ -197,48 +210,41 @@ protected:
     };
 
     static activations activation(const data& values, uint32_t forks,
-        const system::settings& settings);
-    static uint32_t median_time_past(const data& values, uint32_t forks);
+        const system::settings& settings) NOEXCEPT;
+    static uint32_t median_time_past(const data& values,
+        uint32_t forks) NOEXCEPT;
     static uint32_t work_required(const data& values, uint32_t forks,
-        const system::settings& settings);
+        const system::settings& settings) NOEXCEPT;
 
 private:
     static size_t bits_count(size_t height, uint32_t forks,
-        size_t retargeting_interval);
+        size_t retargeting_interval) NOEXCEPT;
     static size_t version_count(size_t height, uint32_t forks,
-        size_t activation_sample);
-    static size_t timestamp_count(size_t height, uint32_t forks);
+        size_t activation_sample) NOEXCEPT;
+    static size_t timestamp_count(size_t height, uint32_t forks) NOEXCEPT;
     static size_t retarget_height(size_t height, uint32_t forks,
-        size_t retargeting_interval);
+        size_t retargeting_interval) NOEXCEPT;
     static size_t bip9_bit0_height(size_t height,
-        const config::checkpoint& bip9_bit0_active_checkpoint);
+        const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT;
     static size_t bip9_bit1_height(size_t height,
-        const config::checkpoint& bip9_bit1_active_checkpoint);
+        const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
 
     static data to_pool(const chain_state& top,
-        const system::settings& settings);
+        const system::settings& settings) NOEXCEPT;
     static data to_block(const chain_state& pool, const block& block,
-        const config::checkpoint& bip9_bit0_active_checkpoint,
-        const config::checkpoint& bip9_bit1_active_checkpoint);
-    data to_header(const chain_state& parent, const header& header,
-        const system::settings& settings);
+        const checkpoint& bip9_bit0_active_checkpoint,
+        const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
+    static data to_header(const chain_state& parent, const header& header,
+        const system::settings& settings) NOEXCEPT;
 
     static uint32_t work_required_retarget(const data& values, uint32_t forks,
         uint32_t proof_of_work_limit, uint32_t minimum_timespan,
-        uint32_t maximum_timespan, uint32_t retargeting_interval_seconds);
-    static uint32_t retarget_timespan(const chain_state::data& values,
-        uint32_t minimum_timespan, uint32_t maximum_timespan);
-
-    // easy blocks
+        uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) NOEXCEPT;
+    static uint32_t retarget_timespan(const data& values,
+        uint32_t minimum_timespan, uint32_t maximum_timespan) NOEXCEPT;
     static uint32_t easy_work_required(const data& values,
         size_t retargeting_interval, uint32_t proof_of_work_limit,
-        uint32_t block_spacing_seconds);
-    static uint32_t easy_time_limit(const chain_state::data& values,
-        int64_t spacing);
-    static bool is_retarget_or_non_limit(size_t height, uint32_t bits,
-        size_t retargeting_interval, uint32_t proof_of_work_limit);
-    static bool is_retarget_height(size_t height, size_t retargeting_interval);
-    static size_t retarget_distance(size_t height, size_t retargeting_interval);
+        uint32_t block_spacing_seconds) NOEXCEPT;
 
     // This is retained as an optimization for other constructions.
     // A similar height clone can be partially computed, reducing query cost.
@@ -251,7 +257,7 @@ private:
     const uint32_t stale_seconds_;
 
     // Checkpoints do not affect the data that is collected or promoted.
-    const config::checkpoint::list& checkpoints_;
+    const checkpoints& checkpoints_;
 
     // These are computed on construct from sample and checkpoints.
     const activations active_;

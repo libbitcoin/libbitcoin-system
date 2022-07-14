@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,16 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_POINT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_POINT_HPP
 
-#include <cstdint>
 #include <istream>
-#include <string>
+#include <memory>
 #include <vector>
-#include <boost/functional/hash.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/hash.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -37,92 +34,103 @@ namespace chain {
 class BC_API point
 {
 public:
+    typedef std::shared_ptr<const point> cptr;
+
     /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
     /// This value is serialized and defined by consensus, not implementation.
     static const uint32_t null_index;
 
-    typedef std::vector<point> list;
-    typedef std::vector<uint32_t> indexes;
+    static constexpr size_t serialized_size() NOEXCEPT
+    {
+        return hash_size + sizeof(uint32_t);
+    }
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    point();
+    /// Default point is an invalid null point (null_hash/null_index) object.
+    point() NOEXCEPT;
 
-    point(point&& other);
-    point(const point& other);
+    /// Defaults.
+    point(point&&) = default;
+    point(const point&) = default;
+    point& operator=(point&&) = default;
+    point& operator=(const point&) = default;
+    ~point() = default;
 
-    point(hash_digest&& hash, uint32_t index);
-    point(const hash_digest& hash, uint32_t index);
+    point(hash_digest&& hash, uint32_t index) NOEXCEPT;
+    point(const hash_digest& hash, uint32_t index) NOEXCEPT;
+
+    point(const data_slice& data) NOEXCEPT;
+    point(std::istream&& stream) NOEXCEPT;
+    point(std::istream& stream) NOEXCEPT;
+    point(reader&& source) NOEXCEPT;
+    point(reader& source) NOEXCEPT;
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
-    point& operator=(point&& other);
-    point& operator=(const point& other);
-
-    bool operator<(const point& other) const;
-    bool operator==(const point& other) const;
-    bool operator!=(const point& other) const;
-
-    // Deserialization.
-    //-------------------------------------------------------------------------
-
-    static point factory(const data_chunk& data, bool wire=true);
-    static point factory(std::istream& stream, bool wire=true);
-    static point factory(reader& source, bool wire=true);
-
-    bool from_data(const data_chunk& data, bool wire=true);
-    bool from_data(std::istream& stream, bool wire=true);
-    bool from_data(reader& source, bool wire=true);
-
-    bool is_valid() const;
+    bool operator==(const point& other) const NOEXCEPT;
+    bool operator!=(const point& other) const NOEXCEPT;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool wire=true) const;
-    void to_data(std::ostream& stream, bool wire=true) const;
-    void to_data(writer& sink, bool wire=true) const;
+    data_chunk to_data() const NOEXCEPT;
+    void to_data(std::ostream& stream) const NOEXCEPT;
+    void to_data(writer& sink) const NOEXCEPT;
 
-    // Properties (size, accessors, cache).
-    //-------------------------------------------------------------------------
+    // Properties.
+    // ------------------------------------------------------------------------
 
-    static size_t satoshi_fixed_size(bool wire=true);
-    size_t serialized_size(bool wire=true) const;
+    /// Native properties.
+    bool is_valid() const NOEXCEPT;
+    const hash_digest& hash() const NOEXCEPT;
+    uint32_t index() const NOEXCEPT;
 
-    const hash_digest& hash() const;
-    void set_hash(hash_digest&& value);
-    void set_hash(const hash_digest& value);
-
-    uint32_t index() const;
-    void set_index(uint32_t value);
-
-    // Utilities.
-    //-------------------------------------------------------------------------
-
-    /// This is for client-server, not related to consensus or p2p networking.
-    uint64_t checksum() const;
-
-    // Validation.
-    //-------------------------------------------------------------------------
-
-    bool is_null() const;
+    /// Computed properties.
+    bool is_null() const NOEXCEPT;
 
 protected:
-    point(hash_digest&& hash, uint32_t index, bool valid);
-    point(const hash_digest& hash, uint32_t index, bool valid);
-    void reset();
+    point(hash_digest&& hash, uint32_t index, bool valid) NOEXCEPT;
+    point(const hash_digest& hash, uint32_t index, bool valid) NOEXCEPT;
 
 private:
+    static point from_data(reader& source) NOEXCEPT;
+
+    // The index is consensus-serialized as a fixed 4 bytes, however it is
+    // effectively bound to 2^17 by the block byte size limit.
+
+    // Point should be stored as shared (adds 16 bytes).
+    // copy: 256 + 32 + 1 = 37 bytes (vs. 16 when shared).
     hash_digest hash_;
     uint32_t index_;
     bool valid_;
 };
 
+/// Arbitrary compare, for uniqueness sorting.
+bool operator<(const point& left, const point& right) NOEXCEPT;
+
+typedef std::vector<point> points;
+
+DECLARE_JSON_VALUE_CONVERTORS(point);
+DECLARE_JSON_VALUE_CONVERTORS(point::cptr);
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+namespace std
+{
+template<>
+struct hash<bc::system::chain::point>
+{
+    size_t operator()(const bc::system::chain::point& value) const NOEXCEPT
+    {
+        return bc::system::hash_combine(
+            std::hash<bc::system::hash_digest>{}(value.hash()), value.index());
+    }
+};
+} // namespace std
 
 #endif

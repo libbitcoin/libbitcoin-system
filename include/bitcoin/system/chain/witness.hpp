@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,127 +19,144 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 
-#include <cstddef>
+/// DELETECSTDDEF
 #include <istream>
+#include <memory>
 #include <string>
+#include <vector>
+/// DELETEMENOW
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/machine/operation.hpp>
-#include <bitcoin/system/utility/data.hpp>
-#include <bitcoin/system/utility/reader.hpp>
-#include <bitcoin/system/utility/thread.hpp>
-#include <bitcoin/system/utility/writer.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
+    
+class transaction;
 
 class BC_API witness
 {
 public:
-    typedef machine::operation operation;
-    typedef data_stack::const_iterator iterator;
+    typedef std::shared_ptr<const witness> cptr;
 
     // Constructors.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    witness();
+    /// Default witness is an invalid empty stack object.
+    witness() NOEXCEPT;
 
-    witness(witness&& other);
-    witness(const witness& other);
+    /// Defaults.
+    witness(witness&&) = default;
+    witness(const witness&) = default;
+    witness& operator=(witness&&) = default;
+    witness& operator=(const witness&) = default;
+    ~witness() = default;
 
-    witness(data_stack&& stack);
-    witness(const data_stack& stack);
+    witness(data_stack&& stack) NOEXCEPT;
+    witness(const data_stack& stack) NOEXCEPT;
 
-    witness(data_chunk&& encoded, bool prefix);
-    witness(const data_chunk& encoded, bool prefix);
+    witness(chunk_cptrs&& stack) NOEXCEPT;
+    witness(const chunk_cptrs& stack) NOEXCEPT;
+
+    witness(const data_slice& data, bool prefix) NOEXCEPT;
+    witness(std::istream&& stream, bool prefix) NOEXCEPT;
+    witness(std::istream& stream, bool prefix) NOEXCEPT;
+    witness(reader&& source, bool prefix) NOEXCEPT;
+    witness(reader& source, bool prefix) NOEXCEPT;
+
+    // TODO: move to config serialization wrapper.
+    witness(const std::string& mnemonic) NOEXCEPT;
 
     // Operators.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
-    witness& operator=(witness&& other);
-    witness& operator=(const witness& other);
-
-    bool operator==(const witness& other) const;
-    bool operator!=(const witness& other) const;
-
-    // Deserialization (from witness stack).
-    //-------------------------------------------------------------------------
-    // Prefixed data assumed valid here though caller may confirm with is_valid.
-
-    static witness factory(const data_chunk& encoded, bool prefix);
-    static witness factory(std::istream& stream, bool prefix);
-    static witness factory(reader& source, bool prefix);
-
-    /// Deserialization invalidates the iterator.
-    bool from_data(const data_chunk& encoded, bool prefix);
-    bool from_data(std::istream& stream, bool prefix);
-    bool from_data(reader& source, bool prefix);
-
-    /// The witness deserialized according to count and size prefixing.
-    bool is_valid() const;
+    bool operator==(const witness& other) const NOEXCEPT;
+    bool operator!=(const witness& other) const NOEXCEPT;
 
     // Serialization.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    data_chunk to_data(bool prefix) const;
-    void to_data(std::ostream& stream, bool prefix) const;
-    void to_data(writer& sink, bool prefix) const;
+    data_chunk to_data(bool prefix) const NOEXCEPT;
+    void to_data(std::ostream& stream, bool prefix) const NOEXCEPT;
+    void to_data(writer& sink, bool prefix) const NOEXCEPT;
 
-    std::string to_string() const;
+    // TODO: move to config serialization wrapper.
+    std::string to_string() const NOEXCEPT;
 
-    // Iteration.
-    //-------------------------------------------------------------------------
+    // Properties.
+    // ------------------------------------------------------------------------
 
-    void clear();
-    bool empty() const;
-    size_t size() const;
-    const data_chunk& front() const;
-    const data_chunk& back() const;
-    iterator begin() const;
-    iterator end() const;
-    const data_chunk& operator[](size_t index) const;
+    /// Native properties.
+    bool is_valid() const NOEXCEPT;
+    const chunk_cptrs& stack() const NOEXCEPT;
 
-    // Properties (size, accessors, cache).
-    //-------------------------------------------------------------------------
-
-    size_t serialized_size(bool prefix) const;
-    const data_stack& stack() const;
+    /// Computed properties.
+    size_t serialized_size(bool prefix) const NOEXCEPT;
 
     // Utilities.
-    //-------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
 
-    static bool is_push_size(const data_stack& stack);
-    static bool is_reserved_pattern(const data_stack& stack);
+    // C++20: constexpr.
+    static inline bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
+    {
+        // C++17: parallel policy for std::all_of.
+        return std::all_of(stack.begin(), stack.end(),
+            [](const auto& element) NOEXCEPT
+            {
+                return element->size() <= max_push_data_size;
+            });
+    }
+
+    // C++20: constexpr.
+    // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
+    static inline bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
+    {
+        return stack.size() == one && stack.front()->size() == hash_size;
+    }
 
     bool extract_sigop_script(script& out_script,
-        const script& program_script) const;
-    bool extract_script(script& out_script, data_stack& out_stack,
-        const script& program_script) const;
-
-    // Validation.
-    //-------------------------------------------------------------------------
-
-    code verify(const transaction& tx, uint32_t input_index, uint32_t forks,
-        const script& program_script, uint64_t value) const;
-
-protected:
-    // So that input may call reset from its own.
-    friend class input;
-
-    void reset();
+        const script& program_script) const NOEXCEPT;
+    bool extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
+        const script& program_script) const NOEXCEPT;
 
 private:
-    static size_t serialized_size(const data_stack& stack);
-    static operation::list to_pay_key_hash(data_chunk&& program);
+    // TODO: move to config serialization wrapper.
+    static witness from_string(const std::string& mnemonic) NOEXCEPT;
+    static witness from_data(reader& source, bool prefix) NOEXCEPT;
+    size_t serialized_size() const NOEXCEPT;
 
+    witness(chunk_cptrs&& stack, bool valid) NOEXCEPT;
+    witness(const chunk_cptrs& stack, bool valid) NOEXCEPT;
+
+    // Witness should be stored as shared.
+    chunk_cptrs stack_;
     bool valid_;
-    data_stack stack_;
 };
+
+typedef std::vector<witness> witnesses;
+
+DECLARE_JSON_VALUE_CONVERTORS(witness);
+DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);
 
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+namespace std
+{
+template<>
+struct hash<bc::system::chain::witness>
+{
+    size_t operator()(const bc::system::chain::witness& value) const NOEXCEPT
+    {
+        // Witness coinbases will collide (null_hash).
+        return std::hash<bc::system::data_chunk>{}(value.to_data(true));
+    }
+};
+} // namespace std
 
 #endif

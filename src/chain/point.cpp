@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,15 +18,15 @@
  */
 #include <bitcoin/system/chain/point.hpp>
 
-#include <cstdint>
+/// DELETECSTDINT
+#include <memory>
 #include <utility>
-#include <bitcoin/system/constants.hpp>
-#include <bitcoin/system/message/messages.hpp>
-#include <bitcoin/system/utility/assert.hpp>
-#include <bitcoin/system/utility/container_sink.hpp>
-#include <bitcoin/system/utility/container_source.hpp>
-#include <bitcoin/system/utility/istream_reader.hpp>
-#include <bitcoin/system/utility/ostream_writer.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -36,284 +36,202 @@ namespace chain {
 const uint32_t point::null_index = no_previous_output;
 
 // Constructors.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-// A default instance is invalid (until modified).
-point::point()
-  : hash_(null_hash),
-    index_(0),
-    valid_(false)
+// Invalid default used in signature hashing.
+point::point() NOEXCEPT
+  : point(null_hash, point::null_index, false)
 {
 }
 
-point::point(const hash_digest& hash, uint32_t index)
-  : hash_(hash),
-    index_(index),
-    valid_(true)
+point::point(hash_digest&& hash, uint32_t index) NOEXCEPT
+  : point(std::move(hash), index, true)
 {
 }
 
-point::point(hash_digest&& hash, uint32_t index)
-  : hash_(std::move(hash)),
-    index_(index),
-    valid_(true)
+point::point(const hash_digest& hash, uint32_t index) NOEXCEPT
+  : point(hash, index, true)
+{
+}
+
+point::point(const data_slice& data) NOEXCEPT
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+  : point(stream::in::copy(data))
+    BC_POP_WARNING()
+{
+}
+
+point::point(std::istream&& stream) NOEXCEPT
+  : point(read::bytes::istream(stream))
+{
+}
+
+point::point(std::istream& stream) NOEXCEPT
+  : point(read::bytes::istream(stream))
+{
+}
+
+point::point(reader&& source) NOEXCEPT
+  : point(from_data(source))
+{
+}
+
+point::point(reader& source) NOEXCEPT
+  : point(from_data(source))
 {
 }
 
 // protected
-point::point(const hash_digest& hash, uint32_t index, bool valid)
-  : hash_(hash),
-    index_(index),
-    valid_(valid)
+point::point(hash_digest&& hash, uint32_t index, bool valid) NOEXCEPT
+  : hash_(std::move(hash)), index_(index), valid_(valid)
 {
 }
 
 // protected
-point::point(hash_digest&& hash, uint32_t index, bool valid)
-  : hash_(std::move(hash)),
-    index_(index),
-    valid_(valid)
-{
-}
-
-point::point(const point& other)
-  : point(other.hash_, other.index_, other.valid_)
-{
-}
-
-point::point(point&& other)
-  : point(std::move(other.hash_), other.index_, other.valid_)
+point::point(const hash_digest& hash, uint32_t index, bool valid) NOEXCEPT
+  : hash_(hash), index_(index), valid_(valid)
 {
 }
 
 // Operators.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-point& point::operator=(point&& other)
+bool point::operator==(const point& other) const NOEXCEPT
 {
-    hash_ = std::move(other.hash_);
-    index_ = other.index_;
-    return *this;
+    return (hash_ == other.hash_)
+        && (index_ == other.index_);
 }
 
-point& point::operator=(const point& other)
-{
-    hash_ = other.hash_;
-    index_ = other.index_;
-    return *this;
-}
-
-// This arbitrary order is produced to support set uniqueness determinations.
-bool point::operator<(const point& other) const
-{
-    // The index is primary only because its comparisons are simpler.
-    return index_ == other.index_ ? hash_ < other.hash_ :
-        index_ < other.index_;
-}
-
-bool point::operator==(const point& other) const
-{
-    return (hash_ == other.hash_) && (index_ == other.index_);
-}
-
-bool point::operator!=(const point& other) const
+bool point::operator!=(const point& other) const NOEXCEPT
 {
     return !(*this == other);
 }
 
+bool operator<(const point& left, const point& right) NOEXCEPT
+{
+    // Arbitrary compare, for uniqueness sorting.
+    return left.index() == right.index() ?
+        left.hash() < right.hash() : left.index() < right.index();
+}
+
 // Deserialization.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-// static
-point point::factory(const data_chunk& data, bool wire)
+// static/private
+point point::from_data(reader& source) NOEXCEPT
 {
-    point instance;
-    instance.from_data(data, wire);
-    return instance;
-}
-
-// static
-point point::factory(std::istream& stream, bool wire)
-{
-    point instance;
-    instance.from_data(stream, wire);
-    return instance;
-}
-
-// static
-point point::factory(reader& source, bool wire)
-{
-    point instance;
-    instance.from_data(source, wire);
-    return instance;
-}
-
-bool point::from_data(const data_chunk& data, bool wire)
-{
-    data_source istream(data);
-    return from_data(istream, wire);
-}
-
-bool point::from_data(std::istream& stream, bool wire)
-{
-    istream_reader source(stream);
-    return from_data(source, wire);
-}
-
-bool point::from_data(reader& source, bool wire)
-{
-    reset();
-
-    valid_ = true;
-    hash_ = source.read_hash();
-
-    if (wire)
+    return
     {
-        index_ = source.read_4_bytes_little_endian();
-    }
-    else
-    {
-        index_ = source.read_2_bytes_little_endian();
-
-        // Convert 16 bit sentinel to 32 bit sentinel.
-        if (index_ == max_uint16)
-            index_ = null_index;
-    }
-
-    if (!source)
-        reset();
-
-    return source;
+        source.read_hash(),
+        source.read_4_bytes_little_endian(),
+        source
+    };
 }
 
-// protected
-void point::reset()
+// Serialization.
+// ----------------------------------------------------------------------------
+
+data_chunk point::to_data() const NOEXCEPT
 {
-    valid_ = false;
-    hash_ = null_hash;
-    index_ = 0;
+    data_chunk data(serialized_size(), no_fill_byte_allocator);
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    stream::out::copy ostream(data);
+    BC_POP_WARNING()
+
+    to_data(ostream);
+    return data;
 }
 
-bool point::is_valid() const
+void point::to_data(std::ostream& stream) const NOEXCEPT
+{
+    write::bytes::ostream out(stream);
+    to_data(out);
+}
+
+void point::to_data(writer& sink) const NOEXCEPT
+{
+    sink.write_bytes(hash_);
+    sink.write_4_bytes_little_endian(index_);
+}
+
+// Properties.
+// ----------------------------------------------------------------------------
+
+bool point::is_valid() const NOEXCEPT
 {
     return valid_;
 }
 
-// Serialization.
-//-----------------------------------------------------------------------------
-
-data_chunk point::to_data(bool wire) const
-{
-    data_chunk data;
-    const auto size = serialized_size(wire);
-    data.reserve(size);
-    data_sink ostream(data);
-    to_data(ostream, wire);
-    ostream.flush();
-    BITCOIN_ASSERT(data.size() == size);
-    return data;
-}
-
-void point::to_data(std::ostream& stream, bool wire) const
-{
-    ostream_writer sink(stream);
-    to_data(sink, wire);
-}
-
-void point::to_data(writer& sink, bool wire) const
-{
-    sink.write_hash(hash_);
-
-    if (wire)
-    {
-        sink.write_4_bytes_little_endian(index_);
-    }
-    else
-    {
-        BITCOIN_ASSERT(index_ == null_index || index_ < max_uint16);
-
-        // Convert 32 bit sentinel to 16 bit sentinel.
-        const auto index = (index_ == null_index) ? max_uint16 :
-            static_cast<uint16_t>(index_);
-
-        sink.write_2_bytes_little_endian(index);
-    }
-}
-
-// Properties.
-//-----------------------------------------------------------------------------
-
-size_t point::satoshi_fixed_size(bool wire)
-{
-    return hash_size + (wire ? sizeof(uint32_t) : sizeof(uint16_t));
-}
-
-size_t point::serialized_size(bool wire) const
-{
-    return satoshi_fixed_size(wire);
-}
-
-const hash_digest& point::hash() const
+const hash_digest& point::hash() const NOEXCEPT
 {
     return hash_;
 }
 
-void point::set_hash(const hash_digest& value)
-{
-    // This is no longer a default instance, so valid.
-    valid_ = true;
-    hash_ = value;
-}
-
-void point::set_hash(hash_digest&& value)
-{
-    // This is no longer a default instance, so valid.
-    valid_ = true;
-    hash_ = std::move(value);
-}
-
-uint32_t point::index() const
+uint32_t point::index() const NOEXCEPT
 {
     return index_;
 }
 
-void point::set_index(uint32_t value)
-{
-    // This is no longer a default instance, so valid.
-    valid_ = true;
-    index_ = value;
-}
-
-// Utilities.
-//-----------------------------------------------------------------------------
-
-// Changed in v3.0 and again in v3.1 (3.0 was unmasked, lots of collisions).
-// This is used with output_point identification within a set of history rows
-// of the same address. Collision will result in miscorrelation of points by
-// client callers. This is stored in database. This is NOT a bitcoin checksum.
-uint64_t point::checksum() const
-{
-    // Reserve 49 bits for the tx hash and 15 bits (32768) for the input index.
-    static constexpr uint64_t mask = 0xffffffffffff8000;
-
-    // Use an offset to the middle of the hash to avoid coincidental mining
-    // of values into the front or back of tx hash (not a security feature).
-    // Use most possible bits of tx hash to make intentional collision hard.
-    const auto tx = from_little_endian_unsafe<uint64_t>(hash_.begin() + 12);
-    const auto index = static_cast<uint64_t>(index_);
-
-    const auto tx_upper_49_bits = tx & mask;
-    const auto index_lower_15_bits = index & ~mask;
-    return tx_upper_49_bits | index_lower_15_bits;
-}
-
 // Validation.
-//-----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-bool point::is_null() const
+bool point::is_null() const NOEXCEPT
 {
     return (index_ == null_index) && (hash_ == null_hash);
 }
+
+// JSON value convertors.
+// ----------------------------------------------------------------------------
+
+namespace json = boost::json;
+
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
+point tag_invoke(json::value_to_tag<point>, const json::value& value) NOEXCEPT
+{
+    hash_digest hash;
+    if (!decode_hash(hash, value.at("hash").get_string().c_str()))
+        return {};
+
+    return
+    {
+        hash,
+        value.at("index").to_number<uint32_t>()
+    };
+}
+
+void tag_invoke(json::value_from_tag, json::value& value,
+    const point& point) NOEXCEPT
+{
+    value =
+    {
+        { "hash", encode_hash(point.hash()) },
+        { "index", point.index() }
+    };
+}
+
+BC_POP_WARNING()
+
+point::cptr tag_invoke(json::value_to_tag<point::cptr>,
+    const json::value& value) NOEXCEPT
+{
+    return to_shared(tag_invoke(json::value_to_tag<point>{}, value));
+}
+
+// Shared pointer overload is required for navigation.
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+
+void tag_invoke(json::value_from_tag tag, json::value& value,
+    const point::cptr& output) NOEXCEPT
+{
+    tag_invoke(tag, value, *output);
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system

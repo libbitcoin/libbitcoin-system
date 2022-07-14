@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,11 +18,14 @@
  */
 #include <bitcoin/system/config/transaction.hpp>
 
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/program_options.hpp>
+#include <utility>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/config/base16.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -30,53 +33,54 @@ namespace config {
 
 using namespace boost::program_options;
 
-transaction::transaction()
+transaction::transaction() NOEXCEPT
   : value_()
 {
 }
 
-transaction::transaction(const std::string& hexcode)
+transaction::transaction(chain::transaction&& value) NOEXCEPT
+  : value_(std::move(value))
 {
-    std::stringstream(hexcode) >> *this;
 }
 
-transaction::transaction(const chain::transaction& value)
+transaction::transaction(const chain::transaction& value) NOEXCEPT
   : value_(value)
 {
 }
 
-transaction::transaction(const transaction& other)
-  : transaction(other.value_)
+transaction::transaction(const std::string& base16) THROWS
 {
+    std::istringstream(base16) >> *this;
 }
 
-chain::transaction& transaction::data()
+transaction::operator const chain::transaction&() const NOEXCEPT
 {
     return value_;
 }
 
-transaction::operator const chain::transaction&() const
+std::istream& operator>>(std::istream& stream,
+    transaction& argument) THROWS
 {
-    return value_;
+    std::string base16;
+    stream >> base16;
+
+    data_chunk bytes;
+    if (!decode_base16(bytes, base16))
+        throw istream_exception(base16);
+
+    argument.value_ = chain::transaction{ bytes, true };
+
+    if (!argument.value_.is_valid())
+        throw istream_exception(base16);
+
+    return stream;
 }
 
-std::istream& operator>>(std::istream& input, transaction& argument)
+std::ostream& operator<<(std::ostream& stream,
+    const transaction& argument) NOEXCEPT
 {
-    std::string hexcode;
-    input >> hexcode;
-
-    if (!argument.value_.from_data(base16(hexcode)))
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(hexcode));
-    }
-
-    return input;
-}
-
-std::ostream& operator<<(std::ostream& output, const transaction& argument)
-{
-    output << base16(argument.value_.to_data());
-    return output;
+    stream << encode_base16(argument.value_.to_data(true));
+    return stream;
 }
 
 } // namespace config

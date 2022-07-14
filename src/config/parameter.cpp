@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,9 +18,8 @@
  */
 #include <bitcoin/system/config/parameter.hpp>
 
-#include <boost/program_options.hpp>
-#include <bitcoin/system/utility/collection.hpp>
-#include <bitcoin/system/utility/string.hpp>
+/// DELETEMENOW
+#include <bitcoin/system/data/data.hpp>
 
 namespace po = boost::program_options;
 using namespace libbitcoin::system::config;
@@ -29,7 +28,7 @@ const int parameter::not_positional = -1;
 const char parameter::no_short_name = 0x00;
 const char parameter::option_prefix_char = '-';
 
-parameter::~parameter()
+parameter::~parameter() NOEXCEPT
 {
 }
 
@@ -37,7 +36,7 @@ parameter::~parameter()
 // A required argument may only be preceded by required arguments.
 // Requiredness may be in error if the metadata is inconsistent.
 void parameter::initialize(const po::option_description& option,
-    const argument_list& arguments)
+    const argument_list& arguments) NOEXCEPT
 {
     set_position(position(option, arguments));
     set_args_limit(arguments_limit(position(), option, arguments));
@@ -51,21 +50,17 @@ void parameter::initialize(const po::option_description& option,
 
 // 100% component coverage, all three scenarios (long, short, both)
 int parameter::position(const po::option_description& option,
-    const argument_list& arguments) const
+    const argument_list& arguments) const NOEXCEPT
 {
-    return find_pair_position(arguments, option.long_name());
+    return static_cast<int>(find_pair_position(arguments, option.long_name()));
 }
 
 // 100% unit coverage, all three scenarios (long, short, both)
-char parameter::short_name(const po::option_description& option) const
+char parameter::short_name(const po::option_description& option) const NOEXCEPT
 {
-    // This call requires boost 1.50, don't use it.
-    //auto name = option.canonical_display_name(
-    //    search_options::dashed_short_prefer_short);
-
-    // This is a substitute that allows us to use boost 1.49 for libbitcoin.
-    const auto name = split(option.format_name()).front();
-    const auto is_short_name = name[0] == option_prefix_char &&
+    std::string name{ split(option.format_name()).front() };
+    const auto is_short_name = 
+        name[0] == option_prefix_char &&
         name[1] != option_prefix_char;
 
     return is_short_name ? name[1] : no_short_name;
@@ -73,7 +68,8 @@ char parameter::short_name(const po::option_description& option) const
 
 // 100% component coverage
 unsigned parameter::arguments_limit(int position,
-    const po::option_description& option, const argument_list& arguments) const
+    const po::option_description& option,
+    const argument_list& arguments) const NOEXCEPT
 {
     if (position == parameter::not_positional)
         return option.semantic()->max_tokens();

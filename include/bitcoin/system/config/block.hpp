@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -21,96 +21,46 @@
 
 #include <iostream>
 #include <string>
+#include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/block.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-/**
- * Serialization helper to convert between serialized and deserialized satoshi
- * block.
- */
+/// Serialization helper for chain::block.
 class BC_API block
 {
 public:
+    /// Defaults.
+    block(block&&) = default;
+    block(const block&) = default;
+    block& operator=(block&&) = default;
+    block& operator=(const block&) = default;
+    ~block() = default;
 
-    /**
-     * Default constructor.
-     */
-    block();
+    /// Constructors.
+    block() NOEXCEPT;
+    block(chain::block&& value) NOEXCEPT;
+    block(const chain::block& value) NOEXCEPT;
+    block(const std::string& base16) THROWS;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  hexcode  The value to initialize with.
-     */
-    block(const std::string& hexcode);
+    std::string to_string() const NOEXCEPT;
 
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The value to initialize with.
-     */
-    block(const chain::block& value);
+    /// Operators.
 
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
-    block(const block& other);
+    block& operator=(chain::block&& value) NOEXCEPT;
+    block& operator=(const chain::block& value) NOEXCEPT;
+    bool operator==(const block& other) const NOEXCEPT;
 
-    /**
-     * Copy assignment operator.
-     * @param[in]  other  The object to copy into self on assignment.
-     */
-    block& operator=(const block& other);
+    operator const chain::block&() const NOEXCEPT;
 
-    /**
-     * Move assignment operator.
-     * @param[in]  other  The object to move into self on assignment.
-     */
-    block& operator=(chain::block&& other);
-
-    /**
-     * Override the equality operator.
-     * @param[in]  other  The other object with which to compare.
-     */
-    bool operator==(const block& other) const;
-
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
-    operator const chain::block&() const;
-
-    /**
-     * Get the block as a string.
-     * @return hex string of block.
-     */
-    std::string to_string() const;
-
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& input, block& argument);
-
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
-    friend std::ostream& operator<<(std::ostream& output,
-        const block& argument);
+    friend std::istream& operator>>(std::istream& stream,
+        block& argument) THROWS;
+    friend std::ostream& operator<<(std::ostream& stream,
+        const block& argument) NOEXCEPT;
 
 private:
-
-    /**
-     * The state of this object's block data.
-     */
     chain::block value_;
 };
 

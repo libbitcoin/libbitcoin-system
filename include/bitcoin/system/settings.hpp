@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2019 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,38 +19,38 @@
 #ifndef LIBBITCOIN_SYSTEM_SETTINGS_HPP
 #define LIBBITCOIN_SYSTEM_SETTINGS_HPP
 
-#include <cstdint>
-#include <cstddef>
+/// DELETECSTDINT
+/// DELETECSTDDEF
 #include <string>
-#include <bitcoin/system/config/block.hpp>
-#include <bitcoin/system/config/settings.hpp>
+#include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Common database configuration settings, properties not thread safe.
+/// Common database configuration settings, not thread safe.
 class BC_API settings
 {
 public:
-    settings();
-    settings(config::settings context);
-
-    // Computed properties.
-    //--------------------------------------------------------------------------
-
-    uint64_t max_money() const;
-    uint64_t initial_subsidy() const;
-    uint32_t minimum_timespan() const;
-    uint32_t maximum_timespan() const;
-    size_t retargeting_interval() const;
+    settings() NOEXCEPT;
+    settings(chain::selection context) NOEXCEPT;
 
     // Utilities.
-    //-------------------------------------------------------------------------
-    uint64_t bitcoin_to_satoshi(uint64_t value) const;
+    // ------------------------------------------------------------------------
+    uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
+
+    // Computed properties.
+    // -------------------------------------------------------------------------
+
+    uint64_t max_money() const NOEXCEPT;
+    uint64_t initial_subsidy() const NOEXCEPT;
+    uint32_t minimum_timespan() const NOEXCEPT;
+    uint32_t maximum_timespan() const NOEXCEPT;
+    size_t retargeting_interval() const NOEXCEPT;
 
     // Consensus settings.
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     uint32_t retargeting_factor;
     uint32_t retargeting_interval_seconds;
@@ -59,10 +59,12 @@ public:
     uint32_t proof_of_work_limit;
     uint64_t initial_subsidy_bitcoin;
     uint64_t subsidy_interval_blocks;
-    config::block genesis_block;
+
+    // TODO: make serialiable (see config::chain).
+    chain::block genesis_block;
 
     // Fork settings.
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     // Consensus rule change activation and enforcement parameters (opaque).
     uint32_t first_version;
@@ -89,13 +91,13 @@ public:
     uint32_t bip16_activation_time;
 
     // bip90 stops checking unspent duplicates above this bip34 activation.
-    config::checkpoint bip34_active_checkpoint;
+    chain::checkpoint bip34_active_checkpoint;
 
     // This cannot be reactivated in a future branch due to window expiration.
-    config::checkpoint bip9_bit0_active_checkpoint;
+    chain::checkpoint bip9_bit0_active_checkpoint;
 
     // This cannot be reactivated in a future branch due to window expiration.
-    config::checkpoint bip9_bit1_active_checkpoint;
+    chain::checkpoint bip9_bit1_active_checkpoint;
 };
 
 } // namespace system

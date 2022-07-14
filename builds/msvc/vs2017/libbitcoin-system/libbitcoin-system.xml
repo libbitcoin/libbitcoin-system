@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
-  <Rule Name="libbitcoin-system-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Options" SwitchPrefix="/" Order="1">
-  </Rule>
-</ProjectSchemaDefinitions>
