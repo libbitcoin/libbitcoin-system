@@ -113,12 +113,14 @@ static void single_hash(state& state, const block& block) NOEXCEPT
 {
     constexpr auto integers = block_size / sizeof(uint32_t);
     std::array<uint32_t, block_size> buffer;
-    const sha256::state copy{ state };
 
     // Set buffer[0..15] with all block big-endian integers (16 X 4 = 64 bytes).
     to_big_endian_set(
         narrowing_array_cast<uint32_t, integers>(buffer),
         array_cast<uint32_t>(block));
+
+    // Iterate over N blocks starting here (to end).
+    const sha256::state copy{ state };
 
     // Set buffer[16..63].
     set<16>(buffer);
@@ -250,11 +252,13 @@ static void single_hash(state& state, const block& block) NOEXCEPT
 
 // ----------------------------------------------------------------------------
 
+// TODO: implement iteration within single_hash to bypass endian conversions.
 void single_hash(state& state, const block1& blocks) NOEXCEPT
 {
     single_hash(state, blocks.front());
 }
 
+// TODO: implement natively above without this overhead.
 void double_hash(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;

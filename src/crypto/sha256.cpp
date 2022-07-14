@@ -33,18 +33,18 @@ namespace system {
 namespace sha256 { 
 
 // Forward declarations for each transform implementation.
-void single_neon(state& state, const block1& block) NOEXCEPT;
 void single_shani(state& state, const block1& block) NOEXCEPT;
 void single_sse4(state& state, const block1& block) NOEXCEPT;
+void single_neon(state& state, const block1& block) NOEXCEPT;
 void single_hash(state& state, const block1& block) NOEXCEPT;
 
 // Forward declarations for each double sha56 implementation.
-void double_avx2(digest8& out, const block8& block) NOEXCEPT;
-void double_sse41(digest4& out, const block4& block) NOEXCEPT;
 void double_shani(digest2& out, const block2& block) NOEXCEPT;
 void double_shani(digest1& out, const block1& block) NOEXCEPT;
-void double_neon(digest1& out, const block1& block) NOEXCEPT;
+void double_avx2(digest8& out, const block8& block) NOEXCEPT;
+void double_sse41(digest4& out, const block4& block) NOEXCEPT;
 void double_sse4(digest1& out, const block1& block) NOEXCEPT;
+void double_neon(digest1& out, const block1& block) NOEXCEPT;
 void double_hash(digest1& out, const block1& block) NOEXCEPT;
 
 // merkle_root (transform exposed for test).
@@ -53,35 +53,7 @@ void double_hash(digest1& out, const block1& block) NOEXCEPT;
 // Transformation is finalized (counter is incorporated).
 void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 {
-    if (have_avx2())
-    {
-        while (blocks >= 8u)
-        {
-            double_avx2(
-                unsafe_array_cast<digest, 8>(out),
-                unsafe_array_cast<block, 8>(in));
-            std::advance(out, digest_size * 8);
-            std::advance(in, block_size * 8);
-            blocks -= 8;
-        }
-    }
-
-    if (have_sse41())
-    {
-        while (blocks >= 4u)
-        {
-            // BUGBUG: throws on x86 builds (disabled in have_sse41()).
-            double_sse41(
-                unsafe_array_cast<digest, 4>(out),
-                unsafe_array_cast<block, 4>(in));
-            std::advance(out, digest_size * 4);
-            std::advance(in, block_size * 4);
-            blocks -= 4;
-        }
-    }
-
-#if defined(UNVERIFIED)
-
+    // sha256 acceleration (optimum).
     if (have_shani())
     {
         while (blocks >= 2u)
@@ -106,18 +78,30 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
         return;
     }
 
-    if (have_neon())
+    if (have_avx2())
     {
-        while (to_bool(blocks--))
+        while (blocks >= 8u)
         {
-            double_neon(
-                unsafe_array_cast<digest>(out),
-                unsafe_array_cast<block>(in));
-            std::advance(out, digest_size);
-            std::advance(in, block_size);
+            double_avx2(
+                unsafe_array_cast<digest, 8>(out),
+                unsafe_array_cast<block, 8>(in));
+            std::advance(out, digest_size * 8);
+            std::advance(in, block_size * 8);
+            blocks -= 8;
         }
+    }
 
-        return;
+    if (have_sse41())
+    {
+        while (blocks >= 4u)
+        {
+            double_sse41(
+                unsafe_array_cast<digest, 4>(out),
+                unsafe_array_cast<block, 4>(in));
+            std::advance(out, digest_size * 4);
+            std::advance(in, block_size * 4);
+            blocks -= 4;
+        }
     }
 
     if (have_sse4())
@@ -133,7 +117,19 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
         return;
     }
 
-#endif // UNVERIFIED
+    if (have_neon())
+    {
+        while (to_bool(blocks--))
+        {
+            double_neon(
+                unsafe_array_cast<digest>(out),
+                unsafe_array_cast<block>(in));
+            std::advance(out, digest_size);
+            std::advance(in, block_size);
+        }
+
+        return;
+    }
 
     while (to_bool(blocks--))
     {
@@ -175,20 +171,7 @@ void merkle_root(digests& hashes) NOEXCEPT
 // Transformation is unfinalized (counter not incorporated, result in state).
 void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 {
-#if defined(UNVERIFIED)
-
-    if (have_neon())
-    {
-        while (to_bool(blocks--))
-        {
-            // TODO: use single_neon(state, blocks{ in }) for all.
-            single_neon(state, unsafe_array_cast<block>(in));
-            std::advance(in, block_size);
-        }
-
-        return;
-    }
-
+    // sha256 acceleration (optimum).
     if (have_shani())
     {
         while (to_bool(blocks--))
@@ -213,7 +196,17 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
         return;
     }
 
-#endif // UNVERIFIED
+    if (have_neon())
+    {
+        while (to_bool(blocks--))
+        {
+            // TODO: use single_neon(state, blocks{ in }) for all.
+            single_neon(state, unsafe_array_cast<block>(in));
+            std::advance(in, block_size);
+        }
+
+        return;
+    }
 
     while (to_bool(blocks--))
     {

@@ -252,6 +252,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\assembly.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain.hpp" />

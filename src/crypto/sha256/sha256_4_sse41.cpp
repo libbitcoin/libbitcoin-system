@@ -5,9 +5,6 @@
 
 #include <bitcoin/system/crypto/sha256.hpp>
 
-#if defined(HAVE_INTEL)
-#include <immintrin.h>
-#endif
 #include <stdint.h>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -16,7 +13,7 @@ namespace libbitcoin {
 namespace system {
 namespace sha256 {
 
-#if !defined(HAVE_INTEL)
+#if !defined(HAVE_XCPU)
 
 void double_sse41(digest4& out, const block4& blocks) NOEXCEPT
 {
@@ -329,7 +326,7 @@ void double_sse41(digest4& out, const block4& blocks) NOEXCEPT
     write4(out, 28, sum(h, set(0x5be0cd19ul)));
 }
 
-#endif // HAVE_INTEL
+#endif // HAVE_XCPU
 
 } // namespace sha256
 } // namespace system

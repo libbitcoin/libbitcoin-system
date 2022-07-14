@@ -6,9 +6,6 @@
 
 #include <bitcoin/system/crypto/sha256.hpp>
 
-#if defined(HAVE_ARM)
-#include <arm_neon.h>
-#endif
 #include <stdint.h>
 #include <stdlib.h>
 #include <bitcoin/system/define.hpp>
@@ -224,10 +221,6 @@ static void single_neon(uint32_t* state, const uint8_t* data,
     BC_POP_WARNING()
     BC_POP_WARNING()
 }
-
-#endif // HAVE_ARM
-
-#if defined(HAVE_ARM)
 
 static void single_neon(state& state, const block& block) NOEXCEPT
 {

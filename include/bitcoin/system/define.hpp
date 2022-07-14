@@ -109,7 +109,7 @@ namespace bc = libbitcoin;
 #endif
 
 /// Required to access ARM intrinsics in msvc.
-#if defined(HAVE_MSC) && defined(HAVE_NEON_INTRINSICS)
+#if defined(HAVE_MSC) && defined(HAVE_NEON)
     #define _ARM_USE_NEW_NEON_INTRINSICS
 #endif
 

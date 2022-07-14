@@ -608,6 +608,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\assembly.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>

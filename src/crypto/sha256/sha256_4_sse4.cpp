@@ -59,7 +59,7 @@ namespace libbitcoin {
 namespace system {
 namespace sha256 {
 
-#if !defined(HAVE_INTEL_ASM)
+#if !defined(HAVE_XASSEMBLY)
 
 void single_sse4(state&, const block1&) NOEXCEPT
 {
@@ -1064,7 +1064,7 @@ void double_sse4(digest1& out, const block1& blocks) NOEXCEPT
     to_big_endian_set(array_cast<uint32_t>(out.front()), state);
 }
 
-#endif // HAVE_INTEL_ASM
+#endif // HAVE_XASSEMBLY
 
 } // namespace sha256
 } // namespace system

@@ -42,7 +42,7 @@
 // Apply any warning suppressions to boost.
 // Any boost includes within headers will not benefit from suppression, as the
 // warnings are included by define.hpp which follows boost includes.
-#include <bitcoin/system/intrinsics.hpp>
+#include <bitcoin/system/warnings.hpp>
 
 // Include boost in cpp files only from here, so exception disable works.
 // Avoid format.hpp here due to warning repetition (include in printer.cpp).

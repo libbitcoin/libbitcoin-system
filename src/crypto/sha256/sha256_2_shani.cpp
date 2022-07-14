@@ -5,9 +5,6 @@
 
 #include <bitcoin/system/crypto/sha256.hpp>
 
-#if defined(HAVE_INTEL)
-#include <immintrin.h>
-#endif
 #include <iterator>
 #include <stdint.h>
 #include <bitcoin/system/define.hpp>
@@ -18,7 +15,7 @@ namespace libbitcoin {
 namespace system {
 namespace sha256 {
 
-#if !defined(HAVE_INTEL)
+#if !defined(HAVE_XCPU)
 
 void single_shani(state&, const block1&) NOEXCEPT
 {
@@ -238,32 +235,6 @@ BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
-static void single_shani(state& state, const block& block) NOEXCEPT
-{
-    // single_shani can iterate over multiple blocks, but this is not a material
-    // optimization and is a denormlization, so we don't use it.
-    return single_shani(state.data(), block.data(), one);
-}
-
-// ----------------------------------------------------------------------------
-
-void single_shani(state& state, const block1& blocks) NOEXCEPT
-{
-    return single_shani(state, blocks.front());
-}
-
-void double_shani(digest1& out, const block1& blocks) NOEXCEPT
-{
-    auto state = sha256::initial;
-    single_shani(state, blocks);
-    single_shani(state, sha256::pad_64);
-    auto buffer = sha256::padded_32;
-    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
-    state = sha256::initial;
-    single_shani(state, buffer);
-    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
-}
-
 void double_shani(digest2& out, const block2& block) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -480,7 +451,31 @@ void double_shani(digest2& out, const block2& block) NOEXCEPT
     BC_POP_WARNING()
 }
 
-#endif // HAVE_INTEL
+static void single_shani(state& state, const block& block) NOEXCEPT
+{
+    return single_shani(state.data(), block.data(), one);
+}
+
+// ----------------------------------------------------------------------------
+
+void single_shani(state& state, const block1& blocks) NOEXCEPT
+{
+    return single_shani(state, blocks.front());
+}
+
+void double_shani(digest1& out, const block1& blocks) NOEXCEPT
+{
+    auto state = sha256::initial;
+    single_shani(state, blocks);
+    single_shani(state, sha256::pad_64);
+    auto buffer = sha256::padded_32;
+    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
+    state = sha256::initial;
+    single_shani(state, buffer);
+    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
+}
+
+#endif // HAVE_XCPU
 
 } // namespace sha256
 } // namespace system

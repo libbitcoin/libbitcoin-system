@@ -47,40 +47,42 @@
 #endif
 
 /// GNU/MSC defines for targeted CPU architecture.
+/// HAVE_ITANIUM is defined but not used (no optimizations).
+/// sourceforge.net/p/predef/wiki/Architectures
+/// docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros
 #if defined(__i386__) || defined(_M_IX86)
-    #define HAVE_X86
-#elif defined(__x86_64__) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
+    #define HAVE_X32
+#elif defined(__amd64__) || defined(_M_AMD64)
     #define HAVE_X64
-#elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM)
-    #define HAVE_ARM
 #elif defined(__ia64__) || defined(_M_IA64)
     #define HAVE_ITANIUM
+#elif defined(__arm__) || defined(_M_ARM)
+    #define HAVE_ARM32
+#elif defined(__aarch64__) || defined(_M_ARM64)
+    #define HAVE_ARM64
 #endif
 
-/// Intel CPU architecture (__m128i/__m256i defined).
-#if defined(HAVE_X86) || defined(HAVE_X64)
-    #define HAVE_INTEL
+/// Common CPU architecture (XCPU).
+#if defined(HAVE_X32) || defined(HAVE_X64)
+    #define HAVE_XCPU
 #endif
 
-/// Use intrinsics for Intel CPU features with MSC defines.
-#if defined(_M_IX86) || defined(_M_X64)  || defined(_M_IA64)
-    #define HAVE_INTEL_INTRINSICS
+/// XCPU architecture inline assembly.
+#if defined(HAVE_XCPU) && !defined(HAVE_MSC)
+    #define HAVE_XASSEMBLY
 #endif
 
-/// Use __asm__ for Intel CPU features if GNU interface.
-/// MSC inline assembly (via __asm, no __asm__ support) does not support ARM
-/// and x64. Since we cross compile to x64 we consider this lack of support
-/// prohibitive for __asm. github.com/MicrosoftDocs/cpp-docs/blob/main/docs/
-/// assembler/inline/inline-assembler.md
-#if defined(HAVE_GNUC) && defined(HAVE_INTEL)
-    #define HAVE_INTEL_INLINE_ASSEMBLY
+/// MSC, GCC11, Clang15(?)
+/// XCPU architecture intrinsic _xgetbv and __cpuidex.
+#if defined(HAVE_XCPU) && (defined(HAVE_MSC) || defined(HAVE_GNUC))
+    #define HAVE_XCPUID
 #endif
 
-/// ARM Neon intrinsics defined.
+/// ARM Neon intrinsics.
 #if defined(HAVE_ARM)
-#if defined(HAVE_GNUC) || defined(__ARM_NEON) || defined(HAVE_MSC)
-    #define HAVE_NEON_INTRINSICS
-#endif
+    #if defined(HAVE_GNUC) || defined(__ARM_NEON) || defined(HAVE_MSC)
+        #define HAVE_NEON
+    #endif
 #endif
 
 /// MSC predefined constant for Visual Studio version (exclusive).

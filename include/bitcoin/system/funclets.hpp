@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_FUNCLETS_HPP
 
 #include <type_traits>
-#include <bitcoin/system/literals.hpp>
+#include <bitcoin/system/intrinsics.hpp>
 
 /// Simple type safe functions over value parameter.
 /// All values converted and specified domain and reconverted to domain.

@@ -27,16 +27,17 @@
 // version        : <generated>
 // have           : version
 // warnings       : have
-// intrinsics     : warnings    [for haves (inclusion)]
-// boost          : intrinsics  [for warnings (suppression)]
+// boost          : warnings
 // exceptions     : boost
-// types          : exceptions  [for boost (uintx/t)]
+// types          : exceptions
 // constants      : types
-// literals       : constants   [for types]
-// funclets       : literals    [for constants]
+// literals       : constants
+// assembly       : literals
+// intrinsics     : assembly
+// funclets       : intrinsics
 // typelets       : funclets
 // constraints    : typelets
-// define         : constraints [for all]
+// define         : constraints
 
 // Other directory common includes are not internally chained.
 // Each headers include only its required common headers.
@@ -88,30 +89,33 @@ DEFINED("HAVE_CYGWIN")
 DEFINED("HAVE_MSC")
 #endif
 
-#ifdef HAVE_X86
-DEFINED("HAVE_X86")
+#ifdef HAVE_X32
+DEFINED("HAVE_X32")
 #endif
 #ifdef HAVE_X64
 DEFINED("HAVE_X64")
 #endif
-#ifdef HAVE_ARM
-DEFINED("HAVE_ARM")
-#endif
 #ifdef HAVE_ITANIUM
 DEFINED("HAVE_ITANIUM")
 #endif
+#ifdef HAVE_ARM32
+DEFINED("HAVE_ARM32")
+#endif
+#ifdef HAVE_ARM64
+DEFINED("HAVE_ARM64")
+#endif
 
-#ifdef HAVE_INTEL
-DEFINED("HAVE_INTEL")
+#ifdef HAVE_XCPU
+DEFINED("HAVE_XCPU")
 #endif
-#ifdef HAVE_INTEL_INTRINSICS
-DEFINED("HAVE_INTEL_INTRINSICS")
+#ifdef HAVE_XASSEMBLY
+DEFINED("HAVE_XASSEMBLY")
 #endif
-#ifdef HAVE_INTEL_INLINE_ASSEMBLY
-DEFINED("HAVE_INTEL_INLINE_ASSEMBLY")
+#ifdef HAVE_XCPUID
+DEFINED("HAVE_XCPUID")
 #endif
-#ifdef HAVE_NEON_INTRINSICS
-DEFINED("HAVE_NEON_INTRINSICS")
+#ifdef HAVE_NEON
+DEFINED("HAVE_NEON")
 #endif
 
 #ifdef HAVE_VS2013
