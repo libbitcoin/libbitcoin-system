@@ -26,52 +26,55 @@
  */
 #include <bitcoin/system/crypto/sha256.hpp>
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+// sha256: movable-type.co.uk/scripts/sha256.html
+
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
 
-// movable-type.co.uk/scripts/sha256.html
+constexpr auto block16 = block_size / sizeof(uint32_t);
 
-constexpr auto choice(auto x, auto y, auto z) noexcept
+constexpr auto choice(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & (y ^ z)) ^ z;
 }
 
-constexpr auto majority(auto x, auto y, auto z) noexcept
+constexpr auto majority(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & (y | z)) | (y & z);
 }
 
-// use inline vs. constexpr for intrinsic std::rotr.
+// Using inline vs. constexpr to obtain intrinsic std::rotr.
 
-inline auto SIGMA0(auto x) noexcept
+inline auto SIGMA0(auto x) NOEXCEPT
 {
     return std::rotr(x, 2) ^ std::rotr(x, 13) ^ std::rotr(x, 22);
 }
 
-inline auto SIGMA1(auto x) noexcept
+inline auto SIGMA1(auto x) NOEXCEPT
 {
     return std::rotr(x, 6) ^ std::rotr(x, 11) ^ std::rotr(x, 25);
 }
 
-inline auto sigma0(auto x) noexcept
+inline auto sigma0(auto x) NOEXCEPT
 {
     return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3);
 }
 
-inline auto sigma1(auto x) noexcept
+inline auto sigma1(auto x) NOEXCEPT
 {
     return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10);
 }
 
 inline void round(auto a, auto b, auto c, auto& out_d, auto e, auto f, auto g,
-    auto& out_h, auto k) noexcept
+    auto& out_h, auto k) NOEXCEPT
 {
     const auto t0 = SIGMA1(e) + choice(e, f, g) + out_h + k;
     const auto t1 = SIGMA0(a) + majority(a, b, c);
@@ -79,50 +82,40 @@ inline void round(auto a, auto b, auto c, auto& out_d, auto e, auto f, auto g,
     out_h = t0 + t1;
 }
 
-template<uint8_t Offset, uint32_t K>
-constexpr void round(auto& state, const auto& buffer) noexcept
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+// Translate state from Round to variables.
+template<uint8_t Round, uint32_t K,
+    if_lesser<Round, block_size> = true>
+constexpr void round(auto& state, const auto& buffer) NOEXCEPT
 {
-    static_assert(Offset < 64u);
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     round(
-        state[(64 - Offset) % 8],
-        state[(65 - Offset) % 8],
-        state[(66 - Offset) % 8],
-        state[(67 - Offset) % 8], // in/out
-        state[(68 - Offset) % 8],
-        state[(69 - Offset) % 8],
-        state[(70 - Offset) % 8],
-        state[(71 - Offset) % 8], // in/out
-        buffer[Offset] + K);
-    BC_POP_WARNING()
+        state[(block_size + 0 - Round) % state_size],
+        state[(block_size + 1 - Round) % state_size],
+        state[(block_size + 2 - Round) % state_size],
+        state[(block_size + 3 - Round) % state_size], // in/out
+        state[(block_size + 4 - Round) % state_size],
+        state[(block_size + 5 - Round) % state_size],
+        state[(block_size + 6 - Round) % state_size],
+        state[(block_size + 7 - Round) % state_size], // in/out
+        buffer[Round] + K);
 }
 
-template<uint8_t Offset>
-inline void set(auto& buffer) noexcept
+// Populate working words from first 16 data words, and store in buffer offset.
+template<uint8_t Offset,
+    if_lesser<Offset, block_size> = true,
+    if_not_lesser<Offset, block16> = true>
+inline void set(auto& buffer) NOEXCEPT
 {
-    static_assert(Offset < 64u);
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     buffer[Offset] =
         sigma1(buffer[Offset -  2]) + buffer[Offset -  7] +
         sigma0(buffer[Offset - 15]) + buffer[Offset - 16];
-    BC_POP_WARNING()
 }
-    
-////void single_hash(state& state, const blocks& blocks) NOEXCEPT;
-static void single_hash(state& state, const block& block) NOEXCEPT
+
+// Matrix increments computation (by 48).
+inline void expand48(auto& buffer) NOEXCEPT
 {
-    constexpr auto integers = block_size / sizeof(uint32_t);
-    std::array<uint32_t, block_size> buffer;
-
-    // Set buffer[0..15] with all block big-endian integers (16 X 4 = 64 bytes).
-    to_big_endian_set(
-        narrowing_array_cast<uint32_t, integers>(buffer),
-        array_cast<uint32_t>(block));
-
-    // Iterate over N blocks starting here (to end).
-    const sha256::state copy{ state };
-
-    // Set buffer[16..63].
+    // Loop unrolled.
     set<16>(buffer);
     set<17>(buffer);
     set<18>(buffer);
@@ -171,8 +164,12 @@ static void single_hash(state& state, const block& block) NOEXCEPT
     set<61>(buffer);
     set<62>(buffer);
     set<63>(buffer);
+}
 
-    // 64 rounds.
+// Matrix hash (by 64).
+inline void rounds64(auto& state, auto& buffer) NOEXCEPT
+{
+    // Loop unrolled (K values).
     round< 0, 0x428a2f98>(state, buffer);
     round< 1, 0x71374491>(state, buffer);
     round< 2, 0xb5c0fbcf>(state, buffer);
@@ -237,38 +234,122 @@ static void single_hash(state& state, const block& block) NOEXCEPT
     round<61, 0xa4506ceb>(state, buffer);
     round<62, 0xbef9a3f7>(state, buffer);
     round<63, 0xc67178f2>(state, buffer);
-    
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    state[0] += copy[0];
-    state[1] += copy[1];
-    state[2] += copy[2];
-    state[3] += copy[3];
-    state[4] += copy[4];
-    state[5] += copy[5];
-    state[6] += copy[6];
-    state[7] += copy[7];
-    BC_POP_WARNING()
 }
 
-// ----------------------------------------------------------------------------
+// Matrix increment of a by b (by 8).
+inline void increment8(auto& a, const auto& b) NOEXCEPT
+{
+    // Loop unrolled.
+    a[0] += b[0];
+    a[1] += b[1];
+    a[2] += b[2];
+    a[3] += b[3];
+    a[4] += b[4];
+    a[5] += b[5];
+    a[6] += b[6];
+    a[7] += b[7];
+}
 
-// TODO: implement iteration within single_hash to bypass endian conversions.
+// Matrix assignment of b to a (by 8).
+inline void assign8(auto& a, const auto& b) NOEXCEPT
+{
+    // Loop unrolled.
+    a[0] = b[0];
+    a[1] = b[1];
+    a[2] = b[2];
+    a[3] = b[3];
+    a[4] = b[4];
+    a[5] = b[5];
+    a[6] = b[6];
+    a[7] = b[7];
+}
+
+template <size_t Offset,
+    if_not_greater<Offset, block16> = true>
+void constexpr pad(auto& buffer) NOEXCEPT
+{
+    // These native-to-native integer assignments, no conversion required.
+    constexpr auto sentinel = bit_hi<uint32_t>;
+    constexpr auto bitcount = possible_narrow_cast<uint32_t>(
+        (block16 - Offset) * bits<uint32_t>);
+
+    buffer[Offset] = sentinel;
+    buffer[sub1(block16)] = bitcount;
+    std::fill(&buffer[add1(Offset)], &buffer[sub1(sub1(block16))], 0);
+}
+
+BC_POP_WARNING()
+
+// This requires 32 more words of memory than use of variables.
+// Endian conversions are not currently loop unrolled (can do in templates).
+// Otherwise it is identical, with an advantage in the use of intrinsic rotr.
 void single_hash(state& state, const block1& blocks) NOEXCEPT
 {
-    single_hash(state, blocks.front());
+    std::array<uint32_t, block_size> buffer;
+
+    for (auto& block: blocks)
+    {
+        const sha256::state start{ state };
+        from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
+            array_cast<uint32_t>(block));
+        expand48(buffer);
+        rounds64(state, buffer);
+        increment8(state, start);
+    }
 }
 
-// TODO: implement natively above without this overhead.
+// Pad and state (hash) are endian aligned during transitions.
+// TODO: expand(pad_64) can be precomputed and assigned to buffer[16..63].
+// Tradeoffs for full generalization and simplicity:
+// This requires 32 more words of memory than use of variables.
+// Endian conversions are not currently loop unrolled (can do in templates).
+// This copies 48 additional contiguous words to buffer (pad expand).
+// This computes 8 more sigmas (but uses intrinsic rotr, so currently better).
+// This assigns 4 more values, and zeroizes ~1.5 blocks in two calls, but
+// avoids a net 6 additions (call that even).
+void double_hashX(digest1& out, const block1& blocks) NOEXCEPT
+{
+    std::array<uint32_t, block_size> buffer;
+    from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
+        array_cast<uint32_t>(blocks.front()));
+
+    auto state = sha256::initial;
+    expand48(buffer);
+    rounds64(state, buffer);
+    increment8(state, sha256::initial);
+
+    // Second transform (hash pad_64 as next block), completes first hash.
+    // ========================================================================
+    pad<zero>(buffer);
+
+    const sha256::state start{ state };
+    expand48(buffer);
+    rounds64(state, buffer);
+    increment8(state, start);
+
+    // Third transform (hash hashes with pad_32), completes second hash.
+    // ========================================================================
+    assign8(buffer, state);
+    pad<state_size>(buffer);
+
+    state = sha256::initial;
+    expand48(buffer);
+    rounds64(state, buffer);
+    increment8(state, sha256::initial);
+
+    to_big_endians(array_cast<uint32_t>(out.front()), state);
+}
+
 void double_hash(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_hash(state, blocks);
-    single_hash(state, sha256::pad_64);
-    auto buffer = sha256::padded_32;
-    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
+    single_hash(state, array_cast(sha256::pad_64));
+    auto buffer = sha256::pad_32;
+    to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_hash(state, buffer);
-    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
+    single_hash(state, array_cast(buffer));
+    to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 
 } // namespace sha256

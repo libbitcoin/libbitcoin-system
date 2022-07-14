@@ -52,14 +52,14 @@
 
 // MERKLE [[COMPLETE]]
 // Set ([]):
-// constexpr  void                         Integer[] from_big_endian_set{[]}(const Integer[]&);
-// constexpr  void                         Integer[] from_little_endian_set{[]}(const Integer[]&);
-// constexpr  void                         Integer[] to_big_endian_set{[]}(const Integer[]&);
-// constexpr  void                         Integer[] to_little_endian_set{[]}(const Integer[]&);
-// constexpr  void                         from_big_endian_set{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         from_little_endian_set{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         to_big_endian_set{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         to_little_endian_set{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         Integer[] from_big_endians{[]}(const Integer[]&);
+// constexpr  void                         Integer[] from_little_endians{[]}(const Integer[]&);
+// constexpr  void                         Integer[] to_big_endians{[]}(const Integer[]&);
+// constexpr  void                         Integer[] to_little_endians{[]}(const Integer[]&);
+// constexpr  void                         from_big_endians{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         from_little_endians{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         to_big_endians{[]}(Integer[]&, const Integer[]&);
+// constexpr  void                         to_little_endians{[]}(Integer[]&, const Integer[]&);
 
 // LIBRARY
 // Uintx (dynamic int/data sizing): [uintx not constexpr]

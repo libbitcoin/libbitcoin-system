@@ -73,14 +73,8 @@ void double_sse4(digest1&, const block1&) NOEXCEPT
 
 #else
 
-#ifndef VISUAL
-
-////void single_sse4(state& state, const blocks& blocks) NOEXCEPT;
-static void single_sse4(uint32_t* state, const uint8_t* data,
-    size_t blocks) NOEXCEPT
+void single_sse4(state& state, const block1& blocks) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
-
     constexpr alignas(16) uint32_t k256[]
     {
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
@@ -120,7 +114,10 @@ static void single_sse4(uint32_t* state, const uint8_t* data,
     uint64_t table;
     uint64_t input_end, input;
     alignas(16) uint32_t transfer[4];
+    auto state_integers = pointer_cast<uint32_t>(&state);
+    const auto data_bytes = pointer_cast<uint8_t>(blocks.data());
 
+#ifndef VISUAL
     __asm__ __volatile__(
         "shl    $0x6,%2;"
         "je     Ldone_hash_%=;"
@@ -1028,40 +1025,26 @@ static void single_sse4(uint32_t* state, const uint8_t* data,
         "cmp    %14,%1;"
         "jne    Lloop0_%=;"
 
+#endif // VISUAL
+
         "Ldone_hash_%=:"
 
-        : "+r"(state), "+r"(data), "+r"(blocks), "=r"(a), "=r"(b), "=r"(c), "=r"(d), /* e = chunk */ "=r"(f), "=r"(g), "=r"(h), "=r"(y0), "=r"(y1), "=r"(y2), "=r"(table), "+m"(input_end), "+m"(input), "+m"(transfer)
+        : "+r"(state_integers), "+r"(data_bytes), "+r"(blocks), "=r"(a), "=r"(b), "=r"(c), "=r"(d), /* e = chunk */ "=r"(f), "=r"(g), "=r"(h), "=r"(y0), "=r"(y1), "=r"(y2), "=r"(table), "+m"(input_end), "+m"(input), "+m"(transfer)
         : "m"(k256), "m"(flip_mask), "m"(shuffle_00ba), "m"(shuffle_dc00)
         : "cc", "memory", "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9", "xmm10", "xmm11", "xmm12"
    );
-
-   BC_POP_WARNING()
-}
-
-#endif // VISUAL
-
-static void single_sse4(state& state, const block& block) NOEXCEPT
-{
-    return single_sse4(state.data(), block.data(), one);
-}
-
-// ----------------------------------------------------------------------------
-
-void single_sse4(state& state, const block1& blocks) NOEXCEPT
-{
-    return single_sse4(state, blocks.front());
 }
 
 void double_sse4(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_sse4(state, blocks);
-    single_sse4(state, sha256::pad_64);
-    auto buffer = sha256::padded_32;
-    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
+    single_sse4(state, array_cast(sha256::pad_64));
+    auto buffer = sha256::pad_32;
+    to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_sse4(state, buffer);
-    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
+    single_sse4(state, array_cast(buffer));
+    to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 
 #endif // HAVE_XASSEMBLY

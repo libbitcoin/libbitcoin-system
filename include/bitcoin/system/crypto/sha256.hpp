@@ -87,7 +87,7 @@ constexpr alignas(16) block pad_64
 
 /// Padding for a half block hash round (32 bytes of pad/count).
 /// The buffer is prefilled with padding and a count of 256 bits.
-constexpr alignas(16) block padded_32
+constexpr alignas(16) block pad_32
 {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // <= hash target
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,

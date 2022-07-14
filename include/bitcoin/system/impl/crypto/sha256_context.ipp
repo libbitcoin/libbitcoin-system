@@ -112,12 +112,12 @@ BC_POP_WARNING()
 inline data_array<context::counter_size>
 context::serialize_counter() const NOEXCEPT
 {
-    return array_cast<uint8_t>(to_big_endian_set(counter));
+    return array_cast<uint8_t>(to_big_endians(counter));
 }
 
 inline void context::serialize_state(digest& out) const NOEXCEPT
 {
-    to_big_endian_set(array_cast<uint32_t>(out), state);
+    to_big_endians(array_cast<uint32_t>(out), state);
 }
 
 } // namespace sha256

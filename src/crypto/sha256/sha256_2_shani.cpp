@@ -71,7 +71,7 @@ mint128_t inline load08x16a(const uint8_t& bytes) NOEXCEPT
     return _mm_load_si128(pointer_cast<const mint128_t>(&bytes));
 }
 
-mint128_t inline load08x16u(const uint8_t& bytes) NOEXCEPT
+mint128_t inline load08x16u(const uint32_t& bytes) NOEXCEPT
 {
     return _mm_loadu_si128(pointer_cast<const mint128_t>(&bytes));
 }
@@ -162,13 +162,9 @@ void inline unshuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
 #endif
 
 ////void single_shani(state& state, const blocks& blocks) NOEXCEPT;
-BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-static void single_shani(uint32_t* state, const uint8_t* data,
-    uint32_t blocks) NOEXCEPT
-BC_POP_WARNING()
+void single_shani(state& state, const block1& blocks) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
     mint128_t m0, m1, m2, m3, so0, so1;
 
@@ -176,23 +172,27 @@ BC_POP_WARNING()
     auto s1 = load32x4u(state[4]);
     shuffle(s0, s1);
 
+    // TODO: array_cast blocks into array of mint128_t.
+    // TODO: this is currently precluded by an integral integer constraint.
+    // TODO: this will eliminate pointer casts in load(block[n]).
+
     // One block in two lanes.
-    while (!is_zero(blocks--))
+    for (auto& block: blocks)
     {
         // Remember old state.
         so0 = s0;
         so1 = s1;
 
         // load data and transform.
-        m0 = load(data[0]);
+        m0 = load(block[0]);
         round(s0, s1, m0, 0xe9b5dba5b5c0fbcfull, 0x71374491428a2f98ull);
-        m1 = load(data[16]);
+        m1 = load(block[16]);
         round(s0, s1, m1, 0xab1c5ed5923f82a4ull, 0x59f111f13956c25bull);
         shift_message(m0, m1);
-        m2 = load(data[32]);
+        m2 = load(block[32]);
         round(s0, s1, m2, 0x550c7dc3243185beull, 0x12835b01d807aa98ull);
         shift_message(m1, m2);
-        m3 = load(data[48]);
+        m3 = load(block[48]);
         round(s0, s1, m3, 0xc19bf1749bdc06a7ull, 0x80deb1fe72be5d74ull);
         shift_messages(m2, m3, m0);
         round(s0, s1, m0, 0x240ca1cc0fc19dc6ull, 0xefbe4786E49b69c1ull);
@@ -222,16 +222,12 @@ BC_POP_WARNING()
         // Combine with old state.
         s0 = sum(s0, so0);
         s1 = sum(s1, so1);
-
-        // Advance block.
-        std::advance(data, block_size);
     }
 
     unshuffle(s0, s1);
     store32x4u(state[0], s0);
     store32x4u(state[4], s1);
 
-    BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
@@ -451,28 +447,16 @@ void double_shani(digest2& out, const block2& block) NOEXCEPT
     BC_POP_WARNING()
 }
 
-static void single_shani(state& state, const block& block) NOEXCEPT
-{
-    return single_shani(state.data(), block.data(), one);
-}
-
-// ----------------------------------------------------------------------------
-
-void single_shani(state& state, const block1& blocks) NOEXCEPT
-{
-    return single_shani(state, blocks.front());
-}
-
 void double_shani(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_shani(state, blocks);
-    single_shani(state, sha256::pad_64);
-    auto buffer = sha256::padded_32;
-    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
+    single_shani(state, array_cast(sha256::pad_64));
+    auto buffer = sha256::pad_32;
+    to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_shani(state, buffer);
-    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
+    single_shani(state, array_cast(buffer));
+    to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 
 #endif // HAVE_XCPU

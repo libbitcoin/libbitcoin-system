@@ -75,6 +75,21 @@ template <typename To, size_t Count, typename From,
 inline std::array<To, proportion<Count, From, To>>
 array_cast(std::array<From, Count>&& values) NOEXCEPT;
 
+/// Cast array& of integrals to single element array& of the array.
+template <size_t Count, typename From, if_integral_integer<From> = true>
+inline std::array<std::array<From, Count>, one>&
+array_cast(std::array<From, Count>& values) NOEXCEPT;
+
+/// Cast const array& of integrals to single element const array& of the array.
+template <size_t Count, typename From, if_integral_integer<From> = true>
+inline const std::array<std::array<From, Count>, one>&
+array_cast(const std::array<From, Count>& values) NOEXCEPT;
+
+/// Cast array& of integrals to single element array of the array.
+template <size_t Count, typename From, if_integral_integer<From> = true>
+inline std::array<std::array<From, Count>, one>
+array_cast(std::array<From, Count>&& values) NOEXCEPT;
+
 /// Cast array& of integrals to lesser-sized array& of integrals.
 /// Use array_cast for non-narrowing array cast.
 template <typename To, size_t ToCount = one, typename From, size_t FromCount,

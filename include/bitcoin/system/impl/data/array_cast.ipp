@@ -75,6 +75,34 @@ array_cast(std::array<From, Count>&& values) NOEXCEPT
     return array_cast<To>(unmove(values));
 }
 
+// TODO: test.
+template <size_t Count, typename From, if_integral_integer<From>>
+inline std::array<std::array<From, Count>, one>&
+array_cast(std::array<From, Count>& values) NOEXCEPT
+{
+    using to = std::array<std::array<From, Count>, one>;
+    return *pointer_cast<to>(values.data());
+}
+
+// TODO: test.
+template <size_t Count, typename From, if_integral_integer<From>>
+inline const std::array<std::array<From, Count>, one>&
+array_cast(const std::array<From, Count>& values) NOEXCEPT
+{
+    using to = std::array<std::array<From, Count>, one>;
+    return *pointer_cast<const to>(values.data());
+}
+
+// TODO: test.
+// Avoids cast of rvalue to reference, which would dangle.
+template <size_t Count, typename From, if_integral_integer<From>>
+inline std::array<std::array<From, Count>, one>
+array_cast(std::array<From, Count>&& values) NOEXCEPT
+{
+    using to = std::array<std::array<From, Count>, one>;
+    return array_cast<to>(unmove(values));
+}
+
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_integral_integer<From>,
     if_integral_integer<To>,

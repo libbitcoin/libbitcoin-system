@@ -163,7 +163,7 @@ hash_digest merkle_root_expectation(const hash_list& hashes)
             merkle.push_back(merkle.back());
 
         for (auto it = merkle.begin(); it != merkle.end(); it += two)
-            update.push_back(bitcoin_hash(splice(it[0], it[1])));
+            update.push_back(bitcoin_hash(it[0], it[1]));
 
         std::swap(merkle, update);
         update.clear();
@@ -176,8 +176,8 @@ BOOST_AUTO_TEST_CASE(hash__to_merkle_root__one_block__expected)
 {
     hash_list hashes
     {
-        hash_digest{ 0 },
-        hash_digest{ 1 }
+        hash_digest{ 1 },
+        hash_digest{ 2 }
     };
 
     const auto root = merkle_root_expectation(hashes);

@@ -168,6 +168,7 @@ void merkle_root(digests& hashes) NOEXCEPT
 // sha256_context.hpp declares hash/update/finalize (transform for test).
 // ----------------------------------------------------------------------------
 
+// TODO: move all iteration into implementations.
 // Transformation is unfinalized (counter not incorporated, result in state).
 void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 {
@@ -329,20 +330,20 @@ void sha256_single(digest& out, const block& in) NOEXCEPT
 
     // Transform pad/count and emit state to out.
     transform(state, one, sha256::pad_64.data());
-    to_big_endian_set(array_cast<uint32_t>(out), state);
+    to_big_endians(array_cast<uint32_t>(out), state);
 }
 
 // This is equivalent to sha256_double(*, 1, *) and trivially more efficient.
 void sha256_double(digest& out, const block& in) NOEXCEPT
 {
     // Emit sha256_single(block) into pad/count buffer.
-    auto buffer = sha256::padded_32;
+    auto buffer = sha256::pad_32;
     sha256_single(narrowing_array_cast<uint8_t, digest_size>(buffer), in);
 
     // Transform result and emit state to out.
     auto state = sha256::initial;
     transform(state, one, buffer.data());
-    to_big_endian_set(array_cast<uint32_t>(out), state);
+    to_big_endians(array_cast<uint32_t>(out), state);
 }
 
 // 32 byte hashes
@@ -353,26 +354,26 @@ void sha256_double(digest& out, const block& in) NOEXCEPT
 void sha256_single(digest& out, const digest& in) NOEXCEPT
 {
     // Copy hash into pad/count buffer for transform.
-    auto buffer = sha256::padded_32;
+    auto buffer = sha256::pad_32;
     std::copy(in.begin(), in.end(), buffer.begin());
 
     // Transform and emit state to out.
     auto state = sha256::initial;
     transform(state, one, buffer.data());
-    to_big_endian_set(array_cast<uint32_t>(out), state);
+    to_big_endians(array_cast<uint32_t>(out), state);
 }
 
 // This is not supported by sha256_double(*, n, *) as it is blocks only.
 void sha256_double(digest& out, const digest& in) NOEXCEPT
 {
     // Emit sha256_single(hash) into pad/count buffer.
-    auto buffer = sha256::padded_32;
+    auto buffer = sha256::pad_32;
     sha256_single(narrowing_array_cast<uint8_t, digest_size>(buffer), in);
 
     // Transform result and emit state to out.
     auto state = sha256::initial;
     transform(state, one, buffer.data());
-    to_big_endian_set(array_cast<uint32_t>(out), state);
+    to_big_endians(array_cast<uint32_t>(out), state);
 }
 
 #endif // VISUAL

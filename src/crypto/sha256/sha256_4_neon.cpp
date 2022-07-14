@@ -30,13 +30,9 @@ void double_neon(digest1&, const block1&) NOEXCEPT
 
 #else
 
-////void single_neon(state& state, const blocks& blocks) NOEXCEPT;
-static void single_neon(uint32_t* state, const uint8_t* data,
-    uint32_t blocks) NOEXCEPT
+void single_neon(state& state, const block1& blocks) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_C_STYLE_CASTS)
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
     constexpr uint32_t k[]
     {
@@ -66,18 +62,22 @@ static void single_neon(uint32_t* state, const uint8_t* data,
     state0 = vld1q_u32(&state[0]);
     state1 = vld1q_u32(&state[4]);
 
+    // TODO: array_cast blocks into array of uint32x4_t.
+    // TODO: this is currently precluded by an integral integer constraint.
+    // TODO: this will eliminate pointer casts for vld1q_u32(block[n]).
+
     // One block in four lanes.
-    while (!is_zero(blocks--))
+    for (auto& block: blocks)
     {
         // Save state.
         abef_save = state0;
         cdgh_save = state1;
 
         // Load message.
-        message0 = vld1q_u32((const uint32_t *)(data +  0));
-        message1 = vld1q_u32((const uint32_t *)(data + 16));
-        message2 = vld1q_u32((const uint32_t *)(data + 32));
-        message3 = vld1q_u32((const uint32_t *)(data + 48));
+        message0 = vld1q_u32(pointer_cast<const uint32_t>(&block[0]));
+        message1 = vld1q_u32(pointer_cast<const uint32_t>(&block[16]));
+        message2 = vld1q_u32(pointer_cast<const uint32_t>(&block[32]));
+        message3 = vld1q_u32(pointer_cast<const uint32_t>(&block[48]));
 
         // Reverse for little endian.
         message0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(message0)));
@@ -209,8 +209,6 @@ static void single_neon(uint32_t* state, const uint8_t* data,
         // Combine state.
         state0 = vaddq_u32(state0, abef_save);
         state1 = vaddq_u32(state1, cdgh_save);
-
-        data += 64;
     }
 
     // Save state.
@@ -218,32 +216,18 @@ static void single_neon(uint32_t* state, const uint8_t* data,
     vst1q_u32(&state[4], state1);
 
     BC_POP_WARNING()
-    BC_POP_WARNING()
-    BC_POP_WARNING()
-}
-
-static void single_neon(state& state, const block& block) NOEXCEPT
-{
-    return single_neon(state.data(), block.data(), one);
-}
-
-// ----------------------------------------------------------------------------
-
-void single_neon(state& state, const block1& blocks) NOEXCEPT
-{
-    return single_neon(state, blocks.front());
 }
 
 void double_neon(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
     single_neon(state, blocks);
-    single_neon(state, sha256::pad_64);
-    auto buffer = sha256::padded_32;
-    to_big_endian_set(narrowing_array_cast<uint32_t, state_size>(buffer), state);
+    single_neon(state, array_cast(sha256::pad_64));
+    auto buffer = sha256::pad_32;
+    to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_neon(state, buffer);
-    to_big_endian_set(array_cast<uint32_t>(out.front()), state);
+    single_neon(state, array_cast(buffer));
+    to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 
 #endif // HAVE_ARM
