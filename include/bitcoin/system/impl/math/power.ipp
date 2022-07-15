@@ -51,8 +51,8 @@ constexpr Value power_(Base base, Exponent exponent) NOEXCEPT
     BC_PUSH_WARNING(NARROWING_CONVERSION)
     BC_PUSH_WARNING(SIZE_NARROWING_CONVERSION)
     while (--exponent > 0u) { value *= base; }
-    BC_POP_WARNING();
-    BC_POP_WARNING();
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 
     return value;
 }
