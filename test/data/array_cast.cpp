@@ -141,7 +141,7 @@ static_assert(is_defined<if_portional<8u, uint64_t, 9u, uint64_t>>);
 ////static_assert(!is_defined<if_portional<9u, uint32_t, 4u, uint64_t>>);
 ////static_assert(!is_defined<if_portional<9u, uint64_t, 8u, uint64_t>>);
 
-// array_cast
+// array_cast (array to array)
 // ----------------------------------------------------------------------------
 
 // rule out rounding in type constraint.
@@ -213,6 +213,11 @@ BOOST_AUTO_TEST_CASE(cast__array_cast__non_const__expected)
     BOOST_REQUIRE_EQUAL(value16x1[0], native_to_little_end(0x2442_u16));
 }
 
+// array_cast (array to array<array, 1>)
+// ----------------------------------------------------------------------------
+
+// TODO
+
 // narrowing_array_cast
 // ----------------------------------------------------------------------------
 
@@ -275,7 +280,7 @@ BOOST_AUTO_TEST_CASE(cast__narrowing_array_cast__non_const__expected)
     BOOST_REQUIRE_EQUAL(data8x2[0], 0x42_u8);
 }
 
-// unsafe_array_cast
+// unsafe_array_cast (array of integrals)
 // ----------------------------------------------------------------------------
 
 // 3 lls to 12 shorts
@@ -309,12 +314,12 @@ static_assert(!is_same_type<const_array32, const std::array<uint32_t, ints32 * 2
 
 // But, a data buffer of any size can be cast to an array of any size.
 // This is the unsafe nature of a reinterpret_cast (and why it cannot be constexpr).
-// ----------------------------------------------------------------------------
+// ============================================================================
 // 1 byte to 1 int (out of bounds)
 constexpr uint8_t data1[1]{ 1_u8 };
 using const_array1 = decltype(unsafe_array_cast<uint32_t, 1>(data1));
 static_assert(is_same_type<const_array1, const std::array<uint32_t, 1>&>);
-// ----------------------------------------------------------------------------
+// ============================================================================
 
 // Values cannot be tested here, as reinterpret_cast is not constexpr.
 uint8_t non_const_data32[bytes32]{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
@@ -322,24 +327,20 @@ using non_const_array32 = decltype(unsafe_array_cast<uint32_t, ints32>(non_const
 static_assert(is_same_type<non_const_array32, std::array<uint32_t, ints32>&>);
 static_assert(!is_same_type<non_const_array32, const std::array<uint32_t, ints32>&>);
 
-// Since _u8 data is cast into integrals its above byte order is preserved.
-// The endianness of the _u32 integrals affects their numerical interpretation.
 BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__const__expected)
 {
-    constexpr uint8_t data8x8[8]{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
+    constexpr data_array<8> data8x8{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
 
-    const auto& value32x2 = unsafe_array_cast<uint32_t, 2>(&data8x8[0]);
+    const auto& value32x2 = unsafe_array_cast<uint32_t, 2>(data8x8.data());
     BOOST_REQUIRE_EQUAL(value32x2[0], native_to_little_end(0x04030201_u32));
     BOOST_REQUIRE_EQUAL(value32x2[1], native_to_little_end(0x08070605_u32));
 }
 
-// Since _u8 data is cast into integrals its above byte order is preserved.
-// The endianness of the _u32 integrals affects their numerical interpretation.
 BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__non_const__expected)
 {
-    uint8_t data8x8[8]{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
+    data_array<8> data8x8{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
 
-    auto& value32x2 = unsafe_array_cast<uint32_t, 2>(&data8x8[0]);
+    auto& value32x2 = unsafe_array_cast<uint32_t, 2>(data8x8.data());
     BOOST_REQUIRE_EQUAL(value32x2[0], native_to_little_end(0x04030201_u32));
     BOOST_REQUIRE_EQUAL(value32x2[1], native_to_little_end(0x08070605_u32));
 
@@ -366,17 +367,17 @@ using inner = std::array<uint16_t, 4>;
 using outer = decltype(unsafe_array_cast<inner, 3>(value64x3));
 static_assert(is_same_type<outer, const std::array<inner, 3>&>);
 
-BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__inner_array__expected)
+BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__const_array__expected)
 {
     constexpr auto longs = 3_size;
-    constexpr uint64_t value64x3[longs]
+    constexpr std::array<uint64_t, longs> value64x3
     {
         native_to_big_end(0x0102030405060708_u64),
         native_to_big_end(0x1122334455667788_u64),
         native_to_big_end(0xabcdef1234567890_u64)
     };
 
-    auto& value16x4x3 = unsafe_array_cast<std::array<uint16_t, 4>, 3>(&value64x3[0]);
+    auto& value16x4x3 = unsafe_array_cast<std::array<uint16_t, 4>, 3>(value64x3.data());
     BOOST_REQUIRE_EQUAL(value16x4x3[0][0], native_to_big_end(0x0102_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[0][1], native_to_big_end(0x0304_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[0][2], native_to_big_end(0x0506_u16));
@@ -389,6 +390,58 @@ BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__inner_array__expected)
     BOOST_REQUIRE_EQUAL(value16x4x3[2][1], native_to_big_end(0xef12_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[2][2], native_to_big_end(0x3456_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[2][3], native_to_big_end(0x7890_u16));
+}
+
+BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__non_const_array__expected)
+{
+    constexpr auto longs = 3_size;
+    std::array<uint64_t, longs> value64x3
+    {
+        native_to_big_end(0x0102030405060708_u64),
+        native_to_big_end(0x1122334455667788_u64),
+        native_to_big_end(0xabcdef1234567890_u64)
+    };
+
+    auto& value16x4x3 = unsafe_array_cast<std::array<uint16_t, 4>, 3>(value64x3.data());
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][0], native_to_big_end(0x0102_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][1], native_to_big_end(0x0304_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][2], native_to_big_end(0x0506_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[0][3], native_to_big_end(0x0708_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][0], native_to_big_end(0x1122_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][1], native_to_big_end(0x3344_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][2], native_to_big_end(0x5566_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[1][3], native_to_big_end(0x7788_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][0], native_to_big_end(0xabcd_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][1], native_to_big_end(0xef12_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][2], native_to_big_end(0x3456_u16));
+    BOOST_REQUIRE_EQUAL(value16x4x3[2][3], native_to_big_end(0x7890_u16));
+
+    // Demonstrate that this is a cast, not a copy.
+    value16x4x3[0] = std::array<uint16_t, 4>
+    {
+        native_to_big_end(1_u16),
+        native_to_big_end(2_u16),
+        native_to_big_end(3_u16),
+        native_to_big_end(4_u16),
+    };
+    value16x4x3[1] = std::array<uint16_t, 4>
+    {
+        native_to_big_end(5_u16),
+        native_to_big_end(6_u16),
+        native_to_big_end(7_u16),
+        native_to_big_end(8_u16),
+    };
+    value16x4x3[2] = std::array<uint16_t, 4>
+    {
+        native_to_big_end(9_u16),
+        native_to_big_end(10_u16),
+        native_to_big_end(11_u16),
+        native_to_big_end(12_u16),
+    };
+
+    BOOST_REQUIRE_EQUAL(value64x3[0], native_to_big_end(0x0001000200030004_u64));
+    BOOST_REQUIRE_EQUAL(value64x3[1], native_to_big_end(0x0005000600070008_u64));
+    BOOST_REQUIRE_EQUAL(value64x3[2], native_to_big_end(0x0009000a000b000c_u64));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
