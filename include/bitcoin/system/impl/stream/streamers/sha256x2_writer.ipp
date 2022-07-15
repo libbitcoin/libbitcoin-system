@@ -53,6 +53,8 @@ template <typename OStream>
 void sha256x2_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
+    // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
+    // The stream could be invalidated, but writers shouldn't have to check it.
     sha256::update(context_, size, data);
 }
 
@@ -65,6 +67,8 @@ void sha256x2_writer<OStream>::do_flush() NOEXCEPT
 // private
 // ----------------------------------------------------------------------------
 
+// Only hash overflow returns update false, which requires (2^64-8)/8 bytes.
+// The stream could invalidate, but writers shouldn't have to check this.
 template <typename OStream>
 void sha256x2_writer<OStream>::flusher() NOEXCEPT
 {
@@ -75,7 +79,7 @@ void sha256x2_writer<OStream>::flusher() NOEXCEPT
     // Finalize streaming hash.
     sha256::finalize(context_, hash.data());
 
-    // Hash the result of the streaming hash.
+    // Hash the result of the streaming hash (update cannot overflow).
     context_.reset();
     sha256::update(context_, hash_size, hash.data());
     sha256::finalize(context_, hash.data());
