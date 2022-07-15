@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <array>
 #include <iterator>
+#include <utility>
 #include <bitcoin/system/crypto/sha256_context.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -47,10 +48,9 @@ void double_sse4(digest1& out, const block1& block) NOEXCEPT;
 void double_neon(digest1& out, const block1& block) NOEXCEPT;
 void double_hash(digest1& out, const block1& block) NOEXCEPT;
 
-// merkle_root (transform exposed for test).
+// merkle_root (double hashed and finalized set of blocks)
 // ----------------------------------------------------------------------------
 
-// Transformation is finalized (counter is incorporated).
 void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 {
     // sha256 acceleration (optimum).
@@ -141,16 +141,13 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
     }
 }
 
-void merkle_root(digests& hashes) NOEXCEPT
+digest merkle_root(digests&& hashes) NOEXCEPT
 {
     if (hashes.empty())
-    {
-        hashes.push_back({});
-        return;
-    }
+        return {};
 
     if (is_one(hashes.size()))
-        return;
+        return std::move(hashes.front());
 
     if (is_odd(hashes.size()))
         hashes.push_back(hashes.back());
@@ -163,9 +160,11 @@ void merkle_root(digests& hashes) NOEXCEPT
             pointer_cast<const uint8_t>(hashes.data()));
         hashes.resize(half);
     }
+
+    return std::move(hashes.front());
 }
 
-// sha256_context.hpp declares hash/update/finalize (transform for test).
+// Hash (unfinalized blocks transformation).
 // ----------------------------------------------------------------------------
 
 // TODO: move all iteration into implementations.
@@ -217,49 +216,15 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
     }
 }
 
-void update(context& context, size_t size, const uint8_t* in) NOEXCEPT
-{
-    // Avoid retransforming the buffer in the case where gap is also zero.
-    if (is_zero(size))
-        return;
-
-    // Count of bytes unfilled in the block buffer before set_data.
-    const auto gap = context.gap_size();
-
-    // Update counter and fill gap if possible.
-    context.set_data(size, in);
-
-    // Block buffer is still unfilled, so no transformation on this update.
-    if (size < gap)
-        return;
-
-    // Cannot add this to iteration because non-contiguous.
-    transform(context.state, one, context.buffer.data());
-    std::advance(in, gap);
-    size -= gap;
-
-    // Iterate over remaining whole blocks.
-    transform(context.state, size / block_size, in);
-
-    // Add the remaining partial block to the empty block buffer.
-    context.add_data(size % block_size, in);
-}
-
-void finalize(context& context, uint8_t* out32) NOEXCEPT
-{
-    // Save the counter serialization before calling update(pad).
-    const auto counter = context.serialize_counter();
-
-    update(context, context.pad_size(), pad_any.data());
-    update(context, context::counter_size, counter.data());
-    context.serialize_state(unsafe_array_cast<uint8_t, digest_size>(out32));
-}
-
-void hash(uint8_t* out32, size_t size, const uint8_t* in) NOEXCEPT
+// False only on hash function overflow: (2^64-8)/8 bytes written.
+bool hash(uint8_t* out32, size_t size, const uint8_t* in) NOEXCEPT
 {
     sha256::context context{};
-    update(context, size, in);
+    if (!update(context, size, in))
+        return false;
+
     finalize(context, out32);
+    return true;
 }
 
 #ifdef DISABLED

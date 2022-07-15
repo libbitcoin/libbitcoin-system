@@ -21,23 +21,6 @@
 
 BOOST_AUTO_TEST_SUITE(hash_tests)
 
-// to_merkle_root
-// see sha256:: for 1/2/4/8/32 blocks test suite.
-
-BOOST_AUTO_TEST_CASE(hash__to_merkle_root__empty__null_hash)
-{
-    std::vector<hash_digest> hashes{};
-    to_merkle_root(hashes);
-    BOOST_REQUIRE_EQUAL(hashes.front(), null_hash);
-}
-
-BOOST_AUTO_TEST_CASE(hash__to_merkle_root__one_hash__one_hash)
-{
-    std::vector<hash_digest> hashes{ one_hash };
-    to_merkle_root(hashes);
-    BOOST_REQUIRE_EQUAL(hashes.front(), one_hash);
-}
-
 BOOST_AUTO_TEST_CASE(hash__scrypt_hash__scrypt_hash_tests__expected)
 {
     for (const auto& result: scrypt_hash_tests)

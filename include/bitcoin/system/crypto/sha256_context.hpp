@@ -29,28 +29,13 @@ namespace libbitcoin {
 namespace system {
 namespace sha256 {
 
-// byte/array casting requires reinterpret_cast, so those are not constexpr.
-// On a big-endian machine, no operations or copies are made by serializations.
-// On a little-endian machine a set of integers (two or eight) is byte-swapped.
+/// Streaming hash context.
 struct context
 {
-    using integral = uint32_t;
-    static constexpr size_t counts = 2;
-    static constexpr size_t counter_size = counts * sizeof(integral);
-    using count = std::array<integral, counts>;
+    static constexpr auto counter_size = sizeof(uint64_t);
+    using counter = data_array<counter_size>;
 
-    /// Counters are hashed on finalize, identifying a unique data size.
-    count counter;
-
-    /// State maintains the current hash result.
-    state state;
-
-    /// The buffer is temporary storage for fractional blocks.
-    /// It accumulates bytes until full and is then transformed.
-    /// Full blocks (64 bytes) are never populated to the buffer.
-    block buffer;
-
-    /// Construction creates initial context.
+    /// Creates initial context.
     constexpr context() NOEXCEPT;
 
     /// Defaults.
@@ -60,51 +45,57 @@ struct context
     context& operator=(const context&) = default;
     ~context() = default;
 
-    /// Reset to initial context.
+    /// Reset to initial context (for another hash round).
     constexpr void reset() NOEXCEPT;
 
-    /// Bytes remaining in the buffer.
-    constexpr size_t gap_size() const NOEXCEPT;
+    /// Clear buffer after transforming state.
+    constexpr void clear() NOEXCEPT;
+
+    /// Increment the counter for unbuffered transforms.
+    constexpr bool increment(size_t blocks) NOEXCEPT;
+
+    /// Transform if buffer is full.
+    constexpr bool is_full() NOEXCEPT;
 
     /// Reserves space for counter serialization.
     constexpr size_t pad_size() const NOEXCEPT;
 
-    /// Append up to block_size bytes to buffer and update counter.
-    /// Counter resets to zero if size is sufficient to fill the buffer.
-    /// Use gap_size prior to set_data to determine whether block will be full.
-    constexpr void set_data(size_t size, const uint8_t* bytes) NOEXCEPT;
+    /// Append up to block_size bytes to buffer (fills gap if possible).
+    constexpr size_t add_data(size_t bytes, const uint8_t* data) NOEXCEPT;
 
-    /// Append up to block_size bytes to buffer, does not affect counter.
-    constexpr void add_data(size_t size, const uint8_t* bytes) NOEXCEPT;
+    /// State reference for transformation.
+    constexpr state& state() NOEXCEPT;
 
-    /// Normalize counter for incorporation into the final hash.
-    inline data_array<counter_size> serialize_counter() const NOEXCEPT;
+    /// Buffer const reference for transformation.
+    inline const block& buffer() const NOEXCEPT;
+
+    /// Serialize the hashed bit count for finalization
+    inline counter serialize_counter() const NOEXCEPT;
 
     /// Normalize state as the final hash value.
     inline void serialize_state(digest& out) const NOEXCEPT;
 
 protected:
-    /// Update the context for the added data.
-    constexpr void set_size(integral size) NOEXCEPT;
+    /// Bytes remaining until buffer is full.
+    constexpr size_t gap() const NOEXCEPT;
 
-    /// Get the buffer byte size from context.
-    constexpr size_t get_size() const NOEXCEPT;
+    /// SHA256 is limited to max_uint64 - to_bits(counter_size) hashed bits.
+    constexpr bool is_buffer_overflow(size_t bytes) NOEXCEPT;
 
 private:
-    static constexpr size_t over = 0;
-    static constexpr size_t bits = 1;
-    static constexpr size_t to_bits = floored_log2(byte_bits);
-    static constexpr size_t to_over = subtract(bc::bits<integral>, to_bits);
+    block buffer_;
+    size_t size_{};
+    uint64_t bits_{};
+    sha256::state state_{ sha256::initial };
 };
 
-/// Finalized sha256 hash of any sized data.
-BC_API void hash(uint8_t* out32, size_t size, const uint8_t* in) NOEXCEPT;
+// TODO: move these functions into class as sha256_accumulator.
 
 /// Construct a default context and use this to iterate over data.
-BC_API void update(context& context, size_t size, const uint8_t* in) NOEXCEPT;
+inline bool update(context& context, size_t size, const uint8_t* in) NOEXCEPT;
 
 /// Finalize after last call to update, out32 is hash result.
-BC_API void finalize(context& context, uint8_t* out32) NOEXCEPT;
+inline void finalize(context& context, uint8_t* out32) NOEXCEPT;
 
 } // namespace sha256
 } // namespace system

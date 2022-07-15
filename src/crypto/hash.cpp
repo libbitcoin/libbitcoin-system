@@ -30,11 +30,6 @@ namespace system {
 // Hash generators.
 // ----------------------------------------------------------------------------
 
-void to_merkle_root(std::vector<hash_digest>& hashes) NOEXCEPT
-{
-    sha256::merkle_root(hashes);
-}
-
 hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
     return scrypt<hash_size>(data, data, 1024_u64, 1_u32, 1_u32);

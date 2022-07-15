@@ -55,9 +55,7 @@ constexpr state initial
 };
 
 /// Padding for any size hash round (truncated to fill block).
-/// The count will be applied to any position after the first byte of padding,
-/// which is the 0x80 sentinel byte. As such the last row is never padding.
-constexpr block pad_any
+constexpr block pad_stream
 {
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // <= pad start
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -67,11 +65,11 @@ constexpr block pad_any
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // <= row unused.
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 /// Padding for full block hash round (64 bytes of pad/count).
-/// The buffer is prefilled with padding and a count of 256 bits.
+/// The buffer is prefilled with padding and a count of 512 bits.
 constexpr alignas(16) block pad_64
 {
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // <= pad start
@@ -100,9 +98,11 @@ constexpr alignas(16) block pad_32
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00  // <= 256 bits
 };
 
-/// Compute the merkle root of any collection of hashes (in place).
-/// Resulting hash vector is always one element (empty returns null_hash).
-BC_API void merkle_root(digests& hashes) NOEXCEPT;
+/// Finalized sha256 hash of any sized data, out32 must be at least 32 bytes.
+BC_API bool hash(uint8_t* out32, size_t size, const uint8_t* in) NOEXCEPT;
+
+/// Compute the merkle root of any rvalue collection of hashes.
+BC_API digest merkle_root(digests&& hashes) NOEXCEPT;
 
 /// Single hash a count of 64 byte blocks of data into state (unfinalized).
 BC_API void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT;

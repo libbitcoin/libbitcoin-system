@@ -358,9 +358,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
 // private
 hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
-    auto merkle = transaction_hashes(witness);
-    to_merkle_root(merkle);
-    return merkle.front();
+    return sha256::merkle_root(transaction_hashes(witness));
 }
 
 bool block::is_invalid_merkle_root() const NOEXCEPT

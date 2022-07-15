@@ -299,7 +299,7 @@ void single_hash(state& state, const block1& blocks) NOEXCEPT
 // This computes 8 more sigmas (but uses intrinsic rotr, so currently better).
 // This assigns 4 more values, and zeroizes ~1.5 blocks in two calls, but
 // avoids a net 6 additions (call that even).
-void double_hashX(digest1& out, const block1& blocks) NOEXCEPT
+void double_hash_______________(digest1& out, const block1& blocks) NOEXCEPT
 {
     std::array<uint32_t, block_size> buffer;
     from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
