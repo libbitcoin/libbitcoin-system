@@ -31,11 +31,14 @@ using namespace sha256;
 namespace hmac = hmac_sha256;
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-void sha256(const uint8_t* passphrase, size_t passphrase_size,
+bool sha256(const uint8_t* passphrase, size_t passphrase_size,
     const uint8_t* salt, size_t salt_size, uint64_t interations,
     uint8_t* buffer, size_t buffer_size) NOEXCEPT
 BC_POP_WARNING()
 {
+    if (buffer_size > pbkdf2::maximum_size)
+        return false;
+
     hmac::hmac_sha256_context salted;
     hmac::initialize(salted, passphrase, passphrase_size);
     hmac::update(salted, salt, salt_size);
@@ -78,6 +81,8 @@ BC_POP_WARNING()
         BC_POP_WARNING()
         BC_POP_WARNING()
     }
+
+    return true;
 }
 
 } // namespace sha256
