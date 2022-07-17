@@ -21,13 +21,14 @@
 BOOST_AUTO_TEST_SUITE(array_cast_tests)
 
 // utilities
-// ----------------------------------------------------------------------------
 
 template <typename>
 constexpr bool is_defined = true;
 
 // is_proportional<Left, Right>(left_count)
+// ----------------------------------------------------------------------------
 // (left_count * Left) == (n * Right)
+
 static_assert( is_proportional<uint8_t,  uint8_t >(1u)); // n = 1
 static_assert( is_proportional<uint16_t, uint8_t >(1u)); // n = 2
 static_assert(!is_proportional<uint8_t,  uint16_t>(1u)); // n = 0.5
@@ -41,6 +42,8 @@ static_assert( is_proportional<uint64_t, uint64_t>(8u)); // n = 8
 static_assert(!is_proportional<uint8_t, uint64_t>(max_size_t)); // overflow
 
 // if_proportional<size_t, Integral, Integral>
+// ----------------------------------------------------------------------------
+
 static_assert( is_defined<if_proportional<1, uint8_t,  uint8_t >>); // n = 1
 static_assert( is_defined<if_proportional<1, uint16_t, uint8_t >>); // n = 2
 ////static_assert(!is_defined<if_proportional<1, uint8_t,  uint16_t>>); // n = 0.5
@@ -52,7 +55,9 @@ static_assert( is_defined<if_proportional<8, uint32_t, uint64_t>>); // n = 4
 static_assert( is_defined<if_proportional<8, uint64_t, uint64_t>>); // n = 8
 
 // proportion<size_t, Integral, Integral>
+// ----------------------------------------------------------------------------
 // proportion is guarded by if_proportional type constraint.
+
 static_assert( proportion<1, uint8_t,  uint8_t > == 1u); // n = 1
 static_assert( proportion<1, uint16_t, uint8_t > == 2u); // n = 2
 ////static_assert(!proportion<1, uint8_t,  uint16_t> == 0u); // n = 0.5 (0)
@@ -65,19 +70,39 @@ static_assert( proportion<8, uint16_t, uint64_t> == 2u); // n = 2
 static_assert( proportion<8, uint32_t, uint64_t> == 4u); // n = 4
 static_assert( proportion<8, uint64_t, uint64_t> == 8u); // n = 8
 
-// is_portional<Integral, Integral>(size_t, size_t)
-// (left_count * Left) < (right_count * Right)
+static_assert(proportion<0, std_array<uint8_t,   0>, std_array<uint8_t,   1>> == 0);
+static_assert(proportion<1, std_array<uint8_t,   1>, std_array<uint8_t,   1>> == 1);
+static_assert(proportion<0, std_array<uint8_t, 128>, std_array<uint8_t,  64>> == 0);
+static_assert(proportion<1, std_array<uint8_t, 128>, std_array<uint8_t,  64>> == 2);
+static_assert(proportion<2, std_array<uint8_t, 128>, std_array<uint8_t,  64>> == 4);
+static_assert(proportion<3, std_array<uint8_t, 128>, std_array<uint8_t,  64>> == 6);
+static_assert(proportion<4, std_array<uint8_t,  64>, std_array<uint8_t, 128>> == 2);
+static_assert(proportion<6, std_array<uint8_t,  64>, std_array<uint8_t, 128>> == 3);
+static_assert(proportion<8, std_array<uint8_t,  64>, std_array<uint8_t, 128>> == 4);
 
-// equal proportions (not portional)
-static_assert(!is_portional<uint8_t,  uint8_t >(1u, 1u));
-static_assert(!is_portional<uint16_t, uint8_t >(1u, 2u));
-static_assert(!is_portional<uint8_t,  uint16_t>(1u, 0u));
-static_assert(!is_portional<uint8_t,  uint16_t>(2u, 1u));
-static_assert(!is_portional<uint8_t,  uint16_t>(3u, 1u));
-static_assert(!is_portional<uint8_t,  uint64_t>(8u, 1u));
-static_assert(!is_portional<uint16_t, uint64_t>(8u, 2u));
-static_assert(!is_portional<uint32_t, uint64_t>(8u, 4u));
-static_assert(!is_portional<uint64_t, uint64_t>(8u, 8u));
+// is_portional<Integral, Integral>(size_t, size_t)
+// ----------------------------------------------------------------------------
+// (left_count * Left) <= (right_count * Right)
+
+static_assert(is_portional<uint8_t,  uint8_t>(0, 0));
+static_assert(is_portional<uint8_t,  uint8_t>(1, 1));
+static_assert(is_portional<uint8_t,  uint8_t>(1, 2));
+static_assert(is_portional<uint8_t,  uint8_t>(2, 4));
+static_assert(is_portional<uint8_t, uint16_t>(0, 0));
+static_assert(is_portional<uint8_t, uint16_t>(1, 1));
+static_assert(is_portional<uint8_t, uint16_t>(2, 1));
+static_assert(is_portional<uint8_t, uint16_t>(2, 2));
+static_assert(is_portional<uint8_t, uint16_t>(2, 3));
+static_assert(is_portional<uint8_t, uint16_t>(3, 3));
+
+// equal proportions (portional)
+static_assert(is_portional<uint8_t,  uint8_t >(1u, 1u));
+static_assert(is_portional<uint16_t, uint8_t >(1u, 2u));
+static_assert(is_portional<uint8_t,  uint16_t>(2u, 1u));
+static_assert(is_portional<uint8_t,  uint64_t>(8u, 1u));
+static_assert(is_portional<uint16_t, uint64_t>(8u, 2u));
+static_assert(is_portional<uint32_t, uint64_t>(8u, 4u));
+static_assert(is_portional<uint64_t, uint64_t>(8u, 8u));
 
 // lesser proportions (portional)
 static_assert(is_portional<uint8_t,  uint8_t >(1u, 2u));
@@ -90,11 +115,6 @@ static_assert(is_portional<uint16_t, uint64_t>(8u, 3u));
 static_assert(is_portional<uint32_t, uint64_t>(8u, 5u));
 static_assert(is_portional<uint64_t, uint64_t>(8u, 9u));
 
-static_assert( is_portional<uint64_t, uint8_t >(1u, max_size_t));               // maximum  Right
-static_assert(!is_portional<uint64_t, uint16_t>(1u, max_size_t));               // overflow Right
-static_assert( is_portional<uint8_t,  uint8_t >(sub1(max_size_t), max_size_t)); // maximum  Left
-static_assert(!is_portional<uint8_t,  uint8_t >(max_size_t, max_size_t));       // overflow Left
-
 // greater proportions (not portional)
 static_assert(!is_portional<uint8_t,  uint8_t >(2u, 1u));
 static_assert(!is_portional<uint16_t, uint8_t >(2u, 2u));
@@ -106,18 +126,62 @@ static_assert(!is_portional<uint16_t, uint64_t>(9u, 2u));
 static_assert(!is_portional<uint32_t, uint64_t>(9u, 4u));
 static_assert(!is_portional<uint64_t, uint64_t>(9u, 8u));
 
-// if_portional<size_t, size_t, Integral, Integral>
+// arrays
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  1>>(0, 0));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  1>>(1, 1));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  1>>(1, 2));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  1>>(2, 4));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 1>>(0, 0));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 1>>(1, 1));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 1>>(2, 1));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 1>>(2, 2));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 1>>(2, 3));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 1>>(3, 3));
 
-// equal proportions (not portional)
-////static_assert(!is_defined<if_portional<1u, uint8_t,  1u, uint8_t>>);
-////static_assert(!is_defined<if_portional<1u, uint16_t, 2u, uint8_t >>);
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  4>>(0, 0));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  4>>(1, 1));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  4>>(1, 2));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint8_t,  4>>(2, 4));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 4>>(0, 0));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 4>>(1, 1));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 4>>(2, 1));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 4>>(2, 2));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 4>>(2, 3));
+static_assert( is_portional<std_array<uint8_t, 1>, std_array<uint16_t, 4>>(3, 3));
+
+static_assert( is_portional<std_array<uint8_t, 4>, std_array<uint8_t,  1>>(0, 0));
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint8_t,  1>>(1, 1));
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint8_t,  1>>(1, 2));
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint8_t,  1>>(2, 4));
+static_assert( is_portional<std_array<uint8_t, 4>, std_array<uint16_t, 1>>(0, 0));
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint16_t, 1>>(1, 1));
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint16_t, 1>>(2, 1));
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint16_t, 1>>(2, 2));
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint16_t, 1>>(2, 3)); 
+static_assert(!is_portional<std_array<uint8_t, 4>, std_array<uint16_t, 1>>(3, 3));
+static_assert( is_portional<std_array<uint8_t, 4>, std_array<uint16_t, 1>>(2, 4));
+
+// overflows
+static_assert( is_portional<uint8_t,  uint8_t >(1u, max_size_t));         // maximum Right
+static_assert(!is_portional<uint8_t,  uint8_t >(max_size_t, 1u));         // maximum Left (not portional)
+static_assert( is_portional<uint8_t,  uint8_t >(max_size_t, max_size_t)); // maximum both
+static_assert(!is_portional<uint16_t, uint16_t>(1u, max_size_t));         // overflow Right
+static_assert(!is_portional<uint16_t, uint16_t>(max_size_t, 1u));         // overflow Left
+static_assert(!is_portional<uint16_t, uint16_t>(max_size_t, max_size_t)); // overflow both
+
+// if_portional<size_t, size_t, Integral, Integral>
+// ----------------------------------------------------------------------------
+
+// equal proportions (portional)
+static_assert(is_defined<if_portional<1u, uint8_t,  1u, uint8_t>>);
+static_assert(is_defined<if_portional<1u, uint16_t, 2u, uint8_t >>);
 ////static_assert(!is_defined<if_portional<1u, uint8_t,  0u, uint16_t>>);
-////static_assert(!is_defined<if_portional<2u, uint8_t,  1u, uint16_t>>);
+static_assert(is_defined<if_portional<2u, uint8_t,  1u, uint16_t>>);
 ////static_assert(!is_defined<if_portional<3u, uint8_t,  1u, uint16_t>>);
-////static_assert(!is_defined<if_portional<8u, uint8_t,  1u, uint64_t>>);
-////static_assert(!is_defined<if_portional<8u, uint16_t, 2u, uint64_t>>);
-////static_assert(!is_defined<if_portional<8u, uint32_t, 4u, uint64_t>>);
-////static_assert(!is_defined<if_portional<8u, uint64_t, 8u, uint64_t>>);
+static_assert(is_defined<if_portional<8u, uint8_t,  1u, uint64_t>>);
+static_assert(is_defined<if_portional<8u, uint16_t, 2u, uint64_t>>);
+static_assert(is_defined<if_portional<8u, uint32_t, 4u, uint64_t>>);
+static_assert(is_defined<if_portional<8u, uint64_t, 8u, uint64_t>>);
 
 // lesser proportions (portional)
 static_assert(is_defined<if_portional<1u, uint8_t,  2u, uint8_t>>);

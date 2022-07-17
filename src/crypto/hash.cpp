@@ -174,7 +174,7 @@ long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
 
 hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
-    return scrypt::hash<hash_size, 1024, 1, 1>(data, data);
+    return scrypt<1024, 1, 1, true>::hash<hash_size>(data, data);
 }
 
 // Objectives: deterministic, uniform distribution, efficient computation.

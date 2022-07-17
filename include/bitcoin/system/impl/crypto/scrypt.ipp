@@ -19,51 +19,115 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_IPP
 
+#include <atomic>
+#include <algorithm>
 #include <bit>
+#include <cstdlib>
+#include <execution>
+#include <memory>
 #include <bitcoin/system/crypto/pbkdf2_sha256.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace scrypt {
-    
-constexpr auto block1 = power2(6u);
-constexpr auto block2 = power2(7u);
-constexpr auto count = block1 / sizeof(uint32_t);
-using integers = std::array<uint32_t, count>;
 
-BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 
+#define TEMPLATE \
+template<size_t W, size_t R, size_t P, bool Concurrent, \
+    bool_if<is_scrypt_args<W, R, P>> If>
+
+TEMPLATE
+constexpr auto scrypt<W, R, P, Concurrent, If>::
+parallel() NOEXCEPT
+{
+    if constexpr (Concurrent)
+        return std::execution::par_unseq;
+    else
+        return std::execution::seq;
+}
+
+TEMPLATE
+template<typename Block>
+inline auto scrypt<W, R, P, Concurrent, If>::
+allocate() NOEXCEPT
+{
+    return std::shared_ptr<Block>(new Block);
+}
+
+TEMPLATE
 template<size_t Size>
-constexpr void assign(uint8_t* to, const uint8_t* from) NOEXCEPT
+constexpr void scrypt<W, R, P, Concurrent, If>::
+set(uint8_t* to, const uint8_t* from) NOEXCEPT
 {
     for (size_t i = 0; i < Size; ++i)
         to[i] = from[i];
 }
 
+TEMPLATE
 template<size_t Size>
-constexpr void increment(integers& to, const integers& from) NOEXCEPT
-{
-    for (size_t i = 0; i < Size; ++i)
-        to[i] += from[i];
-}
-
-template<size_t Size>
-constexpr void xors(uint8_t* to, const uint8_t* from) NOEXCEPT
+constexpr void scrypt<W, R, P, Concurrent, If>::
+exc(uint8_t* to, const uint8_t* from) NOEXCEPT
 {
     for (size_t i = 0; i < Size; ++i)
         to[i] ^= from[i];
 }
 
-inline uint8_t* salsa20_8(uint8_t* p) NOEXCEPT
+TEMPLATE
+constexpr void scrypt<W, R, P, Concurrent, If>::
+add(integers& to, const integers& from) NOEXCEPT
 {
-    auto words = from_little_endians(unsafe_array_cast<uint32_t, count>(p));
+    to[0]  += from[0];
+    to[1]  += from[1];
+    to[2]  += from[2];
+    to[3]  += from[3];
+    to[4]  += from[4];
+    to[5]  += from[5];
+    to[6]  += from[6];
+    to[7]  += from[7];
+    to[8]  += from[8];
+    to[9]  += from[9];
+    to[10] += from[10];
+    to[11] += from[11];
+    to[12] += from[12];
+    to[13] += from[13];
+    to[14] += from[14];
+    to[15] += from[15];
+}
+
+TEMPLATE
+constexpr size_t scrypt<W, R, P, Concurrent, If>::
+offset(auto a, auto b, auto c) NOEXCEPT
+{
+    return ((a << b) + c) * block_size;
+};
+
+TEMPLATE
+constexpr uint8_t* scrypt<W, R, P, Concurrent, If>::
+get(uint8_t* p) NOEXCEPT
+{
+    return &p[offset(R, 1, -1)];
+}
+
+TEMPLATE
+inline uint64_t scrypt<W, R, P, Concurrent, If>::
+get64(uint8_t* p) NOEXCEPT
+{
+    return native_from_little_end(unsafe_byte_cast<uint64_t>(get(p)));
+}
+
+TEMPLATE
+scrypt<W, R, P, Concurrent, If>::block_type& scrypt<W, R, P, Concurrent, If>::
+salsa_1(block_type& block) NOEXCEPT
+{
+    // [2 x 64] bytes stack allocated for each P (may be concurrent).
+    auto words = from_little_endians(array_cast<uint32_t>(block));
     const integers copy{ words };
 
     for (size_t i = 0; i < to_half(count); i += two)
@@ -105,97 +169,99 @@ inline uint8_t* salsa20_8(uint8_t* p) NOEXCEPT
         words[15] ^= std::rotl(words[14] + words[13], 18);
     }
 
-    increment<count>(words, copy);
-    to_little_endians(unsafe_array_cast<uint32_t, count>(p), words);
-    return p;
+    add(words, copy);
+    to_little_endians(array_cast<uint32_t>(block), words);
+    return block;
 }
 
-template<size_t R>
-constexpr uint8_t* get(uint8_t* p) NOEXCEPT
+TEMPLATE
+bool scrypt<W, R, P, Concurrent, If>::
+salsa_p(uint8_t* p) NOEXCEPT
 {
-    return &p[(sub1(R << one)) * block1];
-}
-
-template<size_t R>
-inline uint64_t get64(uint8_t* p) NOEXCEPT
-{
-    return native_from_little_end(unsafe_byte_cast<uint64_t>(get<R>(p)));
-}
-
-template<size_t R>
-inline void block_salsa(uint8_t* p) NOEXCEPT
-{
-    constexpr auto r128 = R * block2;
-    data_array<block1> y{ unsafe_array_cast<uint8_t, block1>(get<R>(p)) };
-
-    // No need for double working space (xy), just overload p.
-    data_array<r128> x;
+    // [(R * 128) + 64] bytes stack allocated for each P (may be concurrent).
+    block_type block{ unsafe_array_cast<uint8_t, block_size>(get(p)) };
+    const auto x_ptr = allocate<rblock_type>();
+    if (!x_ptr) return false;
+    auto& x = *x_ptr;
 
     for (size_t i = 0; i < (R << 1); ++i)
     {
-        xors<block1>(y.data(), &p[i * block1]);
-        assign<block1>(&x[i * block1], salsa20_8(y.data()));
+        exc<block_size>(block.data(), &p[offset(i, 0, 0)]);
+        set<block_size>(&x[offset(i, 0, 0)], salsa_1(block).data());
     }
 
     for (size_t i = 0; i < (R << 0); ++i)
     {
-        assign<block1>(&p[(i + 0) * block1], &x[((i << one) + 0) * block1]);
-        assign<block1>(&p[(i + R) * block1], &x[((i << one) + 1) * block1]);
+        set<block_size>(&p[offset(i, 0, 0)], &x[offset(i, 1, 0)]);
+        set<block_size>(&p[offset(i, 0, R)], &x[offset(i, 1, 1)]);
     }
-}
-
-template<size_t W, size_t R>
-inline void mix(uint8_t* p) NOEXCEPT
-{
-    constexpr auto r128 = R * block2;
-    data_array<W * r128> w;
-
-    for (size_t i = 0; i < W; ++i)
-    {
-        assign<r128>(&w[i * r128], p);
-        block_salsa<R>(p);
-    }
-
-    for (size_t i = 0; i < W; ++i)
-    {
-        xors<r128>(p, &w[(get64<R>(p) % W) * r128]);
-        block_salsa<R>(p);
-    }
-}
-
-template<size_t W, size_t R, size_t P,
-    bool_if<
-        ((W > one) && (power2(floored_log2(W)) == W)) &&
-        (safe_multiply(R, P) < power2<uint32_t>(30u))>>
-inline bool hash(const data_slice& phrase, const data_slice& salt,
-    uint8_t* buffer, size_t size) NOEXCEPT
-{
-    // TODO: move this guard into pbkdf2::sha256.
-    if (size > sub1(power2<uint64_t>(32u)) * power2<uint64_t>(5u))
-        return false;
-
-    constexpr auto r128 = R * block2;
-    data_array<P * r128> p;
-
-    pbkdf2::sha256(phrase.data(), phrase.size(),
-        salt.data(), salt.size(), one, p.data(), P * r128);
-
-    for (size_t i = 0; i < P; ++i)
-        mix<W, R>(&p[i * r128]);
-
-    pbkdf2::sha256(phrase.data(), phrase.size(),
-        p.data(), P * r128, one, buffer, size);
 
     return true;
 }
 
-BC_POP_WARNING()
+TEMPLATE
+bool scrypt<W, R, P, Concurrent, If>::
+mix(uint8_t* p) NOEXCEPT
+{
+    // [W * (R * 128)] bytes heap allocated for each P (may be concurrent).
+    const auto w_ptr = allocate<wblock_type>();
+    if (!w_ptr) return false;
+    auto& w = *w_ptr;
+
+    for (size_t i = 0; i < W; ++i)
+    {
+        const auto offset = i * rblock;
+        set<rblock>(&w[offset], p);
+        if (!salsa_p(p)) return false;
+    }
+
+    for (size_t i = 0; i < W; ++i)
+    {
+        const auto offset = (get64(p) % W) * rblock;
+        exc<rblock>(p, &w[offset]);
+        if (!salsa_p(p)) return false;
+    }
+
+    return true;
+}
+
+TEMPLATE
+bool scrypt<W, R, P, Concurrent, If>::
+hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
+    size_t size) NOEXCEPT
+{
+    // First pbkdf2 cannot fail because [P * rblock] is guarded to be less
+    // than power2<uint32_t>(30u) which is less than pbkdf2::maximum_size.
+    static_assert(power2<uint32_t>(30u) < pbkdf2::maximum_size);
+
+    // [P * (R * 128)] bytes heap allocated.
+    const auto p_ptr = allocate<pblock_type>();
+    if (!p_ptr) return false;
+    auto& p = *p_ptr;
+
+    pbkdf2::sha256(phrase.data(), phrase.size(),
+        salt.data(), salt.size(), one, p.data(), p.size());
+
+    // Parallel conditionally enables parallel execution (blows up memory).
+    std::atomic_bool success{ true };
+    auto& blocks = array_cast<rblock_type>(p);
+    std::for_each(parallel(), blocks.begin(), blocks.end(), [&](auto& block)
+    {
+        success = success && mix(block.data());
+    });
+
+    // False if mix failed or size > pbkdf2::maximum_size.
+    return success && pbkdf2::sha256(phrase.data(), phrase.size(),
+        p.data(), p.size(), one, buffer, size);
+}
+
+#undef TEMPLATE
+
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-} // namespace scrypt
 } // namespace system
 } // namespace libbitcoin
 

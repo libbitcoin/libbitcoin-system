@@ -25,151 +25,120 @@
 
 namespace libbitcoin {
 namespace system {
-
-template <typename Left, typename Right,
-    if_integral_integer<Left>,
-    if_integral_integer<Right>>
-constexpr bool is_proportional(size_t left_count) NOEXCEPT
+    
+template <typename To, typename From>
+constexpr bool is_portional(size_t to_count, size_t from_count) NOEXCEPT
 {
-    return !is_multiply_overflow(left_count, sizeof(Left))
-        && is_multiple(left_count * sizeof(Left), sizeof(Right));
+    // Guards against the protion being greater than available.
+    return !is_multiply_overflow(to_count, size_of<To>())
+        && !is_multiply_overflow(from_count, size_of<From>())
+        && (to_count * size_of<To>() <= from_count * size_of<From>());
 }
 
-template <typename Left, typename Right,
-    if_integral_integer<Left>,
-    if_integral_integer<Right>>
-constexpr bool is_portional(size_t left_count, size_t right_count) NOEXCEPT
+template <typename From, typename To>
+constexpr bool is_proportional(size_t from_count) NOEXCEPT
 {
-    return !is_multiply_overflow(left_count, sizeof(Left))
-        && !is_multiply_overflow(right_count, sizeof(Right))
-        && (right_count * sizeof(Right) > left_count * sizeof(Left));
+    return !is_multiply_overflow(from_count, size_of<From>())
+        && is_multiple(from_count * size_of<From>(), size_of<To>());
 }
 
-template <typename To, size_t Count, typename From,
-    if_integral_integer<From>,
-    if_integral_integer<To>>
-inline std::array<To, proportion<Count, From, To>>&
-array_cast(std::array<From, Count>& values) NOEXCEPT
+// Cast array(T1) to same-sized array(T2).
+// ----------------------------------------------------------------------------
+
+template <typename To, size_t Count, typename From>
+inline std_array<To, proportion<Count, From, To>>&
+array_cast(std_array<From, Count>& values) NOEXCEPT
 {
-    using to = std::array<To, proportion<Count, From, To>>;
+    using to = std_array<To, proportion<Count, From, To>>;
     return *pointer_cast<to>(values.data());
 }
 
-template <typename To, size_t Count, typename From,
-    if_integral_integer<From>,
-    if_integral_integer<To>>
-inline const std::array<To, proportion<Count, From, To>>&
-array_cast(const std::array<From, Count>& values) NOEXCEPT
+template <typename To, size_t Count, typename From>
+inline const std_array<To, proportion<Count, From, To>>&
+array_cast(const std_array<From, Count>& values) NOEXCEPT
 {
-    using to = std::array<To, proportion<Count, From, To>>;
+    using to = std_array<To, proportion<Count, From, To>>;
     return *pointer_cast<const to>(values.data());
 }
 
 // Avoids cast of rvalue to reference, which would dangle.
-template <typename To, size_t Count, typename From,
-    if_integral_integer<From>,
-    if_integral_integer<To>>
-inline std::array<To, proportion<Count, From, To>>
-array_cast(std::array<From, Count>&& values) NOEXCEPT
+template <typename To, size_t Count, typename From>
+inline std_array<To, proportion<Count, From, To>>
+array_cast(std_array<From, Count>&& values) NOEXCEPT
 {
     return array_cast<To>(unmove(values));
 }
 
-// TODO: test.
-template <size_t Count, typename From, if_integral_integer<From>>
-inline std::array<std::array<From, Count>, one>&
-array_cast(std::array<From, Count>& values) NOEXCEPT
-{
-    using to = std::array<std::array<From, Count>, one>;
-    return *pointer_cast<to>(values.data());
-}
-
-// TODO: test.
-template <size_t Count, typename From, if_integral_integer<From>>
-inline const std::array<std::array<From, Count>, one>&
-array_cast(const std::array<From, Count>& values) NOEXCEPT
-{
-    using to = std::array<std::array<From, Count>, one>;
-    return *pointer_cast<const to>(values.data());
-}
-
-// TODO: test.
-// Avoids cast of rvalue to reference, which would dangle.
-template <size_t Count, typename From, if_integral_integer<From>>
-inline std::array<std::array<From, Count>, one>
-array_cast(std::array<From, Count>&& values) NOEXCEPT
-{
-    using to = std::array<std::array<From, Count>, one>;
-    return array_cast<to>(unmove(values));
-}
+// Cast array(T1) to not-greater-sized array(T2).
+// ----------------------------------------------------------------------------
 
 template <typename To, size_t ToCount, typename From, size_t FromCount,
-    if_integral_integer<From>,
-    if_integral_integer<To>,
     if_portional<ToCount, To, FromCount, From>>
-inline std::array<To, ToCount>&
-narrowing_array_cast(std::array<From, FromCount>& values) NOEXCEPT
+inline std_array<To, ToCount>&
+narrowing_array_cast(std_array<From, FromCount>& values) NOEXCEPT
 {
-    using to = std::array<To, ToCount>;
+    using to = std_array<To, ToCount>;
     return *pointer_cast<to>(values.data());
 }
 
 template <typename To, size_t ToCount, typename From, size_t FromCount,
-    if_integral_integer<From>,
-    if_integral_integer<To>,
     if_portional<ToCount, To, FromCount, From>>
-inline const std::array<To, ToCount>&
-narrowing_array_cast(const std::array<From, FromCount>& values) NOEXCEPT
+inline const std_array<To, ToCount>&
+narrowing_array_cast(const std_array<From, FromCount>& values) NOEXCEPT
 {
-    using to = std::array<To, ToCount>;
+    using to = std_array<To, ToCount>;
     return *pointer_cast<const to>(values.data());
 }
 
 // Avoids cast of rvalue to reference, which would dangle.
 template <typename To, size_t ToCount, typename From, size_t FromCount,
-    if_integral_integer<From>,
-    if_integral_integer<To>,
     if_portional<ToCount, To, FromCount, From>>
-inline std::array<To, ToCount>
-narrowing_array_cast(std::array<From, FromCount>&& values) NOEXCEPT
+inline std_array<To, ToCount>
+narrowing_array_cast(std_array<From, FromCount>&& values) NOEXCEPT
 {
     return narrowing_array_cast<To, ToCount>(unmove(values));
 }
 
+// Cast Integral1* to array(Integral2).
+// ----------------------------------------------------------------------------
+
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-inline std::array<To, Size>&
+inline std_array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT
 {
-    return *pointer_cast<std::array<To, Size>>(bytes);
+    return *pointer_cast<std_array<To, Size>>(bytes);
 }
 
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer<To>>
-inline const std::array<To, Size>&
+inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT
 {
-    return *pointer_cast<const std::array<To, Size>>(bytes);
+    return *pointer_cast<const std_array<To, Size>>(bytes);
+}
+
+// Cast Integral1* to array(array(Integral2), Size).
+// ----------------------------------------------------------------------------
+
+template <typename To, size_t Size, typename From,
+    if_integral_integer<From>,
+    if_integral_integer_std_array<To>>
+inline std_array<To, Size>&
+unsafe_array_cast(From* bytes) NOEXCEPT
+{
+    return *pointer_cast<std_array<To, Size>>(bytes);
 }
 
 template <typename To, size_t Size, typename From,
     if_integral_integer<From>,
     if_integral_integer_std_array<To>>
-inline std::array<To, Size>&
-unsafe_array_cast(From* bytes) NOEXCEPT
-{
-    return *pointer_cast<std::array<To, Size>>(bytes);
-}
-
-template <typename To, size_t Size, typename From,
-    if_integral_integer<From>,
-    if_integral_integer_std_array<To>>
-inline const std::array<To, Size>&
+inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT
 {
-    return *pointer_cast<const std::array<To, Size>>(bytes);
+    return *pointer_cast<const std_array<To, Size>>(bytes);
 }
 
 } // namespace system
