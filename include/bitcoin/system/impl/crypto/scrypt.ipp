@@ -22,7 +22,6 @@
 #include <atomic>
 #include <algorithm>
 #include <bit>
-#include <cstdlib>
 #include <execution>
 #include <memory>
 #include <bitcoin/system/crypto/pbkdf2_sha256.hpp>

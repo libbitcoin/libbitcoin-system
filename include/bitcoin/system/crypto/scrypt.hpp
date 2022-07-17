@@ -49,17 +49,17 @@ public:
 
     /// Peak memory consumption for non-concurrent execution.
     static constexpr auto minimum_memory =
-        (3 * block_size) +
-        (1 * (2 * R * block_size)) +
-        (W * (2 * R * block_size)) +
-        (P * (2 * R * block_size));
+        (3 * (1 * 1 * block_size)) +
+        (1 * (2 * R * block_size))+
+        (P * (2 * R * block_size)) +
+        (W * (2 * R * block_size));
 
     /// Peak memory consumption for fully-concurrent execution.
     static constexpr auto maximum_memory =
-        (3 * P * block_size) +
+        (3 * P * (1 * 1 * block_size)) +
         (1 * P * (2 * R * block_size)) +
-        (W * P * (2 * R * block_size)) +
-        (P * (2 * R * block_size));
+        (1 * P * (2 * R * block_size)) +
+        (W * P * (2 * R * block_size));
 
     /// False if out of memory or size > pbkdf2::maximum_size.
     static bool hash(const data_slice& phrase, const data_slice& salt,
@@ -80,12 +80,12 @@ private:
     static constexpr auto rblock = R * block_size * two;
     static constexpr auto count = block_size / sizeof(uint32_t);
 
-    using integers = std_array<uint32_t, count>;
+    using integers    = std_array<uint32_t, count>;
     using block_type  = data_array<block_size>;
     using rblock_type = data_array<1 * rblock>;
-    using wblock_type = data_array<W * rblock>;
     using pblock_type = data_array<P * rblock>;
-    using wblock_ptr = std::shared_ptr<wblock_type>;
+    using wblock_type = data_array<W * rblock>;
+    using wblock_ptr  = std::shared_ptr<wblock_type>;
 
     template<size_t Size>
     static constexpr void set(uint8_t* to, const uint8_t* from) NOEXCEPT;
@@ -107,16 +107,16 @@ private:
 };
 
 /// Litecoin/BIP38 scrypt arguments.
-static_assert(is_scrypt_args<1024, 1, 1>);
+static_assert(is_scrypt_args< 1024, 1, 1>);
 static_assert(is_scrypt_args<16384, 8, 8>);
 
 /// words.filippo.io/the-scrypt-parameters
 /// Litecoin/BIP38 minimum peak memory consumption.
-static_assert(scrypt<1024,  1, 1>::minimum_memory == 131'520);
+static_assert(scrypt< 1024, 1, 1>::minimum_memory == 131'520);
 static_assert(scrypt<16384, 8, 8>::minimum_memory == 16'786'624);
 
 /// Litecoin/BIP38 minimum peak memory consumption.
-static_assert(scrypt<1024,  1, 1>::maximum_memory == 131'520);
+static_assert(scrypt< 1024, 1, 1>::maximum_memory == 131'520);
 static_assert(scrypt<16384, 8, 8>::maximum_memory == 134'235'648);
 
 } // namespace system
