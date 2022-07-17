@@ -17,7 +17,7 @@
  *   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include <bitcoin/system/crypto/external/aes256.hpp>
+#include <bitcoin/system/crypto/aes256.hpp>
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

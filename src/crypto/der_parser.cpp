@@ -3,7 +3,7 @@
  * Distributed under the MIT software license, see the accompanying    *
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
-#include <bitcoin/system/crypto/external/lax_der_parsing.hpp>
+#include <bitcoin/system/crypto/der_parser.hpp>
 
 #include <secp256k1.h>
 #include <bitcoin/system/define.hpp>

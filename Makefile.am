@@ -69,23 +69,22 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/printer.cpp \
     src/config/script.cpp \
     src/config/transaction.cpp \
+    src/crypto/aes256.cpp \
     src/crypto/checksum.cpp \
+    src/crypto/der_parser.cpp \
     src/crypto/ec_context.cpp \
     src/crypto/ec_context.hpp \
     src/crypto/elliptic_curve.cpp \
     src/crypto/encryption.cpp \
     src/crypto/golomb_coding.cpp \
     src/crypto/hash.cpp \
+    src/crypto/hmac_sha256.cpp \
+    src/crypto/pbkdf2_sha256.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
     src/crypto/sha256.cpp \
     src/crypto/siphash.cpp \
-    src/crypto/external/aes256.cpp \
-    src/crypto/external/crypto_scrypt.cpp \
-    src/crypto/external/hmac_sha256.cpp \
     src/crypto/external/hmac_sha512.cpp \
-    src/crypto/external/lax_der_parsing.cpp \
-    src/crypto/external/pbkdf2_sha256.cpp \
     src/crypto/external/pkcs5_pbkdf2.cpp \
     src/crypto/external/ripemd160.cpp \
     src/crypto/external/sha1.cpp \
@@ -463,27 +462,27 @@ include_bitcoin_system_config_HEADERS = \
 
 include_bitcoin_system_cryptodir = ${includedir}/bitcoin/system/crypto
 include_bitcoin_system_crypto_HEADERS = \
+    include/bitcoin/system/crypto/aes256.hpp \
     include/bitcoin/system/crypto/checksum.hpp \
     include/bitcoin/system/crypto/crypto.hpp \
+    include/bitcoin/system/crypto/der_parser.hpp \
     include/bitcoin/system/crypto/elliptic_curve.hpp \
     include/bitcoin/system/crypto/encryption.hpp \
     include/bitcoin/system/crypto/golomb_coding.hpp \
     include/bitcoin/system/crypto/hash.hpp \
+    include/bitcoin/system/crypto/hmac_sha256.hpp \
+    include/bitcoin/system/crypto/pbkdf2_sha256.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
     include/bitcoin/system/crypto/ring_signature.hpp \
+    include/bitcoin/system/crypto/scrypt.hpp \
     include/bitcoin/system/crypto/sha256.hpp \
     include/bitcoin/system/crypto/sha256_context.hpp \
     include/bitcoin/system/crypto/siphash.hpp
 
 include_bitcoin_system_crypto_externaldir = ${includedir}/bitcoin/system/crypto/external
 include_bitcoin_system_crypto_external_HEADERS = \
-    include/bitcoin/system/crypto/external/aes256.hpp \
-    include/bitcoin/system/crypto/external/crypto_scrypt.hpp \
     include/bitcoin/system/crypto/external/external.hpp \
-    include/bitcoin/system/crypto/external/hmac_sha256.hpp \
     include/bitcoin/system/crypto/external/hmac_sha512.hpp \
-    include/bitcoin/system/crypto/external/lax_der_parsing.hpp \
-    include/bitcoin/system/crypto/external/pbkdf2_sha256.hpp \
     include/bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp \
     include/bitcoin/system/crypto/external/ripemd160.hpp \
     include/bitcoin/system/crypto/external/sha1.hpp \
@@ -535,6 +534,7 @@ include_bitcoin_system_impl_cryptodir = ${includedir}/bitcoin/system/impl/crypto
 include_bitcoin_system_impl_crypto_HEADERS = \
     include/bitcoin/system/impl/crypto/checksum.ipp \
     include/bitcoin/system/impl/crypto/hash.ipp \
+    include/bitcoin/system/impl/crypto/scrypt.ipp \
     include/bitcoin/system/impl/crypto/sha256_context.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data

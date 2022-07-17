@@ -300,7 +300,13 @@
     <ClCompile Include="..\..\..\..\src\config\transaction.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\checksum.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp">
@@ -312,22 +318,7 @@
     <ClCompile Include="..\..\..\..\src\crypto\encryption.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\external\aes256.cpp">
-      <Filter>src\crypto\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\external\crypto_scrypt.cpp">
-      <Filter>src\crypto\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\external\hmac_sha256.cpp">
-      <Filter>src\crypto\external</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\external\hmac_sha512.cpp">
-      <Filter>src\crypto\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\external\lax_der_parsing.cpp">
-      <Filter>src\crypto\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\external\pbkdf2_sha256.cpp">
       <Filter>src\crypto\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\external\pkcs5_pbkdf2.cpp">
@@ -346,6 +337,12 @@
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\hash.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\hmac_sha256.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\pbkdf2_sha256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp">
@@ -752,10 +749,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\checksum.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\elliptic_curve.hpp">
@@ -764,25 +767,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\encryption.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\aes256.hpp">
-      <Filter>include\bitcoin\system\crypto\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\crypto_scrypt.hpp">
-      <Filter>include\bitcoin\system\crypto\external</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\external.hpp">
       <Filter>include\bitcoin\system\crypto\external</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\hmac_sha256.hpp">
-      <Filter>include\bitcoin\system\crypto\external</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\hmac_sha512.hpp">
-      <Filter>include\bitcoin\system\crypto\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\lax_der_parsing.hpp">
-      <Filter>include\bitcoin\system\crypto\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\pbkdf2_sha256.hpp">
       <Filter>include\bitcoin\system\crypto\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\external\pkcs5_pbkdf2.hpp">
@@ -803,10 +791,19 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\hash.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\hmac_sha256.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pbkdf2_sha256.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\scrypt.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256.hpp">
@@ -1325,6 +1322,9 @@
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\hash.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\scrypt.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\sha256_context.ipp">

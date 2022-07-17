@@ -16,13 +16,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_EXTERNAL_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_EXTERNAL_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_PBKDF2_SHA256_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_PBKDF2_SHA256_HPP
 
-#include <bitcoin/system/crypto/external/hmac_sha512.hpp>
-#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
-#include <bitcoin/system/crypto/external/ripemd160.hpp>
-#include <bitcoin/system/crypto/external/sha1.hpp>
-#include <bitcoin/system/crypto/external/sha512.hpp>
+#include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
+namespace pbkdf2 {
+
+/// buffer_size <= [32 * (2^32 - 1)].
+void sha256(const uint8_t* passphrase, size_t passphrase_size,
+    const uint8_t* salt, size_t salt_size, uint64_t interations,
+    uint8_t* buffer, size_t buffer_size) NOEXCEPT;
+
+} // namespace sha256
+} // namespace system
+} // namespace libbitcoin
 
 #endif

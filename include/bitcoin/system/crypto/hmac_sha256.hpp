@@ -16,25 +16,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_HMAC_SHA256_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_HMAC_SHA256_HPP
 
-#include <bitcoin/system/crypto/aes256.hpp>
-#include <bitcoin/system/crypto/checksum.hpp>
-#include <bitcoin/system/crypto/der_parser.hpp>
-#include <bitcoin/system/crypto/elliptic_curve.hpp>
-#include <bitcoin/system/crypto/encryption.hpp>
-#include <bitcoin/system/crypto/external/external.hpp>
-#include <bitcoin/system/crypto/golomb_coding.hpp>
-#include <bitcoin/system/crypto/hash.hpp>
-#include <bitcoin/system/crypto/hmac_sha256.hpp>
-#include <bitcoin/system/crypto/pbkdf2_sha256.hpp>
-#include <bitcoin/system/crypto/pseudo_random.hpp>
-#include <bitcoin/system/crypto/ring_signature.hpp>
-#include <bitcoin/system/crypto/scrypt.hpp>
 #include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/sha256_context.hpp>
-#include <bitcoin/system/crypto/siphash.hpp>
+#include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
+namespace hmac_sha256 {
+
+struct hmac_sha256_context
+{
+    sha256::context in;
+    sha256::context out;
+};
+
+void hash(const uint8_t* data, size_t size, const uint8_t* key,
+    size_t key_size, uint8_t* digest) NOEXCEPT;
+
+void initialize(hmac_sha256_context& context, const uint8_t* key,
+    size_t size) NOEXCEPT;
+
+void update(hmac_sha256_context& context, const uint8_t* data,
+    size_t size) NOEXCEPT;
+
+void finalize(hmac_sha256_context& context, uint8_t* digest) NOEXCEPT;
+
+} // namespace hmac_sha256
+} // namespace system
+} // namespace libbitcoin
 
 #endif
-
