@@ -48,7 +48,7 @@ namespace bc = libbitcoin;
 /// Emit messages from .cpp during compilation.
 #if defined(HAVE_MSC)
     #define DEFINED(text) __pragma(message("defined: " text))
-#else defined(HAVE_GNUC)
+#elif defined(HAVE_GNUC)
     #define DEFINED(text) _Pragma("message defined: " text)
 #endif
 
