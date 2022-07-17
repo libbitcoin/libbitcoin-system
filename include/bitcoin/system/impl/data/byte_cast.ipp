@@ -27,6 +27,9 @@
 
 namespace libbitcoin {
 namespace system {
+    
+// byte_cast (integral to std::array<Byte>)
+// ----------------------------------------------------------------------------
 
 template <typename Byte, typename Integral,
     if_one_byte<Byte>,
@@ -58,6 +61,9 @@ byte_cast(Integral&& value) NOEXCEPT
     return byte_cast<Byte>(unmove(value));
 }
 
+// byte_cast (std::array<Byte> to integral)
+// ----------------------------------------------------------------------------
+
 template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
@@ -85,6 +91,9 @@ byte_cast(std::array<Byte, Size>&& bytes) NOEXCEPT
 {
     return byte_cast(unmove(bytes));
 }
+
+// unsafe_byte_cast (byte* to integral)
+// ----------------------------------------------------------------------------
 
 template <typename Integral, typename Byte,
     if_one_byte<Byte>,

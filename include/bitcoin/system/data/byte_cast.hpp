@@ -23,12 +23,18 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+/// C++20: std::bit_cast is a copy, not a cast, these are true casts.
+/// True casts (not projections) of bytes arrays to/from integrals with size
+/// constraints to preclude referencing fractional elements. A const reference
+/// parameter returns a const reference, non-const returns a non-const
+/// reference, and an rvalue parameter returns a cast instance. These enable
+/// C/pointer-style performance (no copies) with full type safety.
+
 namespace libbitcoin {
 namespace system {
-
-/// Byte casts (require pointer_cast, not constexpr).
+    
+/// Cast Integral& to same-sized array& of Byte.
 /// ---------------------------------------------------------------------------
-/// C++20: std::bit_cast is a copy, not a cast, these are true casts.
 
 /// Cast integral& to a byte array& with byte length of the integral.
 template <typename Byte = uint8_t, typename Integral,
@@ -51,6 +57,9 @@ template <typename Byte = uint8_t, typename Integral,
 inline std::array<Byte, sizeof(Integral)>
 byte_cast(Integral&& value) NOEXCEPT;
 
+/// Cast array& of Byte to same-sized Integral&.
+/// ---------------------------------------------------------------------------
+
 /// Cast byte array& to unsigned integral& of same byte length.
 template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
@@ -72,13 +81,15 @@ template <typename Byte, size_t Size,
 inline unsigned_type<Size>
 byte_cast(std::array<Byte, Size>&& bytes) NOEXCEPT;
 
-/// Cast byte* to integral&.
+/// Cast Byte* to Integral&.
+/// ---------------------------------------------------------------------------
+/// Safe if Byte count matches Integral size.
+
 template <typename Integral, typename Byte,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
 inline Integral& unsafe_byte_cast(Byte* bytes) NOEXCEPT;
 
-/// Cast const byte* to const integral&.
 template <typename Integral, typename Byte,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
