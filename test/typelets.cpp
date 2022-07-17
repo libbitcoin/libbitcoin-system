@@ -202,11 +202,6 @@ static_assert(!is_integral_integer<bool>);
 static_assert(!is_integral_integer<std::string>);
 static_assert(is_same_type<decltype(is_integral_integer<int32_t>), const bool>);
 
-static_assert(is_std_array<std::array<uint8_t, 0>>);
-static_assert(is_std_array<std::array<base, 0>>);
-static_assert(!is_std_array<uint8_t>);
-static_assert(is_same_type<decltype(is_std_array<std::array<uint8_t, 0>>), const bool>);
-
 // These may be unexpected, which is why we generally avoid them.
 static_assert(sizeof(bool) >= 1u);
 ////static_assert(bits<bool> >= 1u);
@@ -264,3 +259,30 @@ static_assert(bytes<64u> == 8u);
 static_assert(bytes<128u> == 16u);
 static_assert(bytes<256u> == 32u);
 static_assert(is_same_type<decltype(bytes<8u>), const size_t>);
+
+static_assert(is_std_array<std::array<uint8_t, 0>>);
+static_assert(is_std_array<std::array<base, 0>>);
+static_assert(!is_std_array<uint8_t>);
+static_assert(is_same_type<decltype(is_std_array<std::array<uint8_t, 0>>), const bool>);
+
+static_assert(array_count<std_array<uint8_t, 42>> == 42);
+static_assert(array_count<std_array<std_array<uint32_t, 42>, 24>> == 24);
+
+static_assert(std_array<uint8_t, 42>{}.size() == 42);
+static_assert(std_array<std_array<uint32_t, 42>, 24>{}.size() == 24);
+static_assert(std_array<std_array<std_array<uint32_t, 42>, 24>, 8>{}.size() == 8);
+
+static_assert(size_of<uint32_t>() == sizeof(uint32_t));
+static_assert(size_of<std_array<uint32_t, 42>>() == sizeof(uint32_t) * 42);
+static_assert(size_of<std_array<std_array<uint32_t, 42>, 24>>() == sizeof(uint32_t) * 42 * 24);
+static_assert(size_of<std_array<std_array<std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
+
+// std_array fails on "negative subscript"
+////static_assert(size_of<std_array<uint8_t, max_size_t>>() == sizeof(uint8_t) * max_size_t);
+////static_assert(size_of<std_array<uint16_t, max_size_t>>() == sizeof(uint16_t) * max_size_t);
+
+// multiply overlow
+////static_assert(size_of<std_array<uint16_t, to_half(max_size_t)>>() == sizeof(uint16_t) * to_half(max_size_t));
+
+// TODO: This is not currently restricted (is_std_array || !is_std_array).
+////static_assert(size_of<uintx>() == 24);

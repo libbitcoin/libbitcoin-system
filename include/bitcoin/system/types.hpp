@@ -20,10 +20,20 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <array>
+#include <vector>
 #include <type_traits>
 #include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
+    
+/// Single toke aliases for std::array and std::vector.
+/// ---------------------------------------------------------------------------
+// TODO: test.
+
+template <typename Type, size_t Size>
+using std_array = std::array<Type, Size>;
+template <typename Type>
+using std_vector = std::vector<Type>;
 
 /// signed_size_t
 /// ---------------------------------------------------------------------------

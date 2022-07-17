@@ -26,6 +26,7 @@
 namespace libbitcoin {
 
 /// Simple functions over type argument(s).
+/// ---------------------------------------------------------------------------
 
 /// Same size and signedness, independent of const and volatility.
 template <typename Left, typename Right>
@@ -72,24 +73,44 @@ constexpr bool is_integer = std::numeric_limits<Type>::is_integer &&
 template <typename Type>
 constexpr bool is_integral_integer = is_integral<Type> && is_integer<Type>;
 
-/// Type is a std::array.
-template<typename>
-struct is_std_array_t : std::false_type {};
-template<typename Type, size_t Size>
-struct is_std_array_t<std::array<Type, Size>> : std::true_type {};
-template<typename Type>
-constexpr bool is_std_array = is_std_array_t<Type>::value;
-
 /// Constrained to is_integral types.
-template <typename Type,
-    std::enable_if_t<is_integral_size<Type>, bool> = true>
+template <typename Type, std::enable_if_t<is_integral_size<Type>, bool> = true>
 constexpr size_t bits = to_bits(sizeof(Type));
 
 /// Limited to is_nonzero(Bits) && is_zero(Bits % 8).
 /// Use to_ceilinged_bytes/to_floored_bytes for non-aligned conversions. 
-template <size_t Bits,
-    std::enable_if_t<is_byte_sized(Bits), bool> = true>
+template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
 constexpr size_t bytes = Bits / byte_bits;
+
+/// std::array.
+/// ---------------------------------------------------------------------------
+
+template<typename>
+struct is_std_array_t : std::false_type {};
+template<typename Type, size_t Size>
+struct is_std_array_t<std_array<Type, Size>> : std::true_type {};
+template<typename Type>
+constexpr bool is_std_array = is_std_array_t<Type>::value;
+
+template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
+constexpr size_t array_count = Type{}.size();
+
+template <typename Type, std::enable_if_t<!is_std_array<Type>, bool> = true>
+constexpr size_t size_of() noexcept { return sizeof(Type); }
+
+template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
+constexpr size_t size_of() noexcept(false)
+{
+    // Recurse array to integral type.
+    constexpr auto size = size_of<typename Type::value_type>();
+    constexpr auto count = array_count<Type>;
+
+    // Type constraint fails to match as throw is not constexpr.
+    if (count > (std::numeric_limits<size_t>::max() / size))
+        throw overflow_exception("type contraint violated");
+
+    return size * count;
+}
 
 } // namespace libbitcoin
 
