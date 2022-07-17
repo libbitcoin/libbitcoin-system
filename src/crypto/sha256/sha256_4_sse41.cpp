@@ -15,9 +15,9 @@ namespace sha256 {
 
 #if !defined(HAVE_XCPU)
 
-void double_sse41(digest4& out, const block4& blocks) NOEXCEPT
+void merkle_sse41(digest4& out, const block4& blocks) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "double_sse41 undefined");
+    BC_ASSERT_MSG(false, "merkle_sse41 undefined");
 }
 
 #else
@@ -72,7 +72,7 @@ void inline write4(digest4& hashes, mint128_t value) NOEXCEPT
 }
 
 // Four blocks in four lanes, doubled.
-void double_sse41(digest4& out, const block4& blocks) NOEXCEPT
+void merkle_sse41(digest4& out, const block4& blocks) NOEXCEPT
 {
     // Transform 1.
     auto a = set(0x6a09e667ul);

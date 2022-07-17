@@ -26,22 +26,40 @@
  * This file was originally written by Colin Percival as part of the Tarsnap
  * online backup system.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SCRYPT_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SCRYPT_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/data/data.hpp>
 
-/**
- * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
- * Compute scrypt(passwd[0 .. passwdlen - 1], salt[0 .. saltlen - 1], N, r,
- * p, buflen) and write the result into buf.  The parameters r, p, and buflen
- * must satisfy r * p < 2^30 and buflen <= (2^32 - 1) * 32.  The parameter N
- * must be a power of 2 greater than 1.
- *
- * Return 0 on success; or -1 on error.
- */
-int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint64_t N, uint32_t r,
-    uint32_t p, uint8_t* buf, size_t buf_length);
+namespace libbitcoin {
+namespace system {
+namespace scrypt {
 
-#endif /* !_CRYPTO_SCRYPT_H_ */
+/// [W]ork must be a power of 2 greater than 1.
+/// [R]esources and [P]arallelism must satisfy [(R * P) < 2^30].
+/// buffer size must not exceed [sub1(2^32) * 2^5].
+/// Memory required in bytes = [add1(W + P) * R * 2^7].
+/// If scrypt::hash returns false then out will remain zeroized.
+/// This can only be caused by out-of-memory or invalid parameterization.
+bool hash(size_t W, size_t R, size_t P, 
+    const uint8_t* phrase, size_t phrase_size, const uint8_t* salt,
+    size_t salt_size, uint8_t* buffer, size_t size) NOEXCEPT;
+
+// TODO: Add type contraints based on below limits (also in implementation).
+// TODO: This just requires moving from .cpp to .ipp source implementation.
+template<size_t Size, size_t W, size_t R, size_t P>
+inline data_array<Size> hash(const data_slice& phrase,
+    const data_slice& salt) NOEXCEPT
+{
+    data_array<Size> hash{};
+    scrypt::hash(W, R, P, phrase.data(), phrase.size(), salt.data(),
+        salt.size(), hash.data(), Size);
+    return hash;
+}
+
+} // namespace scrypt
+} // namespace system
+} // namespace libbitcoin
+
+#endif

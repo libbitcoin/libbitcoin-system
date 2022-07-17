@@ -61,19 +61,19 @@ namespace sha256 {
 
 #if !defined(HAVE_XASSEMBLY)
 
-void single_sse4(state&, const block1&) NOEXCEPT
+void hash_sse4(state&, const block1&) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "single_sse4 undefined");
+    BC_ASSERT_MSG(false, "hash_sse4 undefined");
 }
 
-void double_sse4(digest1&, const block1&) NOEXCEPT
+void merkle_sse4(digest1&, const block1&) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "double_sse4 undefined");
+    BC_ASSERT_MSG(false, "merkle_sse4 undefined");
 }
 
 #else
 
-void single_sse4(state& state, const block1& blocks) NOEXCEPT
+void hash_sse4(state& state, const block1& blocks) NOEXCEPT
 {
     constexpr alignas(16) uint32_t k256[]
     {
@@ -1035,15 +1035,15 @@ void single_sse4(state& state, const block1& blocks) NOEXCEPT
    );
 }
 
-void double_sse4(digest1& out, const block1& blocks) NOEXCEPT
+void merkle_sse4(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
-    single_sse4(state, blocks);
-    single_sse4(state, array_cast(sha256::pad_64));
+    hash_sse4(state, blocks);
+    hash_sse4(state, array_cast(sha256::pad_64));
     auto buffer = sha256::pad_32;
     to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_sse4(state, array_cast(buffer));
+    hash_sse4(state, array_cast(buffer));
     to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 

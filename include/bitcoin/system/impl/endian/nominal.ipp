@@ -73,7 +73,8 @@ constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT
     }
     else
     {
-        // TODO:
+        // TODO: have to guard against undersize to cast a partial.
+        // TODO: it's a possible narrowing or non-narrowing array cast.
         ////return native_from_big_end(byte_cast(data));
         return from_big_array<Integral>(sizeof(Integral), data);
     }
@@ -88,7 +89,8 @@ constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT
     }
     else
     {
-        // TODO:
+        // TODO: have to guard against undersize to cast a partial.
+        // TODO: it's a possible narrowing or non-narrowing array cast.
         ////return native_from_little_end(byte_cast(data));
         return from_little_array<Integral>(sizeof(Integral), data);
     }

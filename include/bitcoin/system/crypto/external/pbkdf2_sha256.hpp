@@ -25,18 +25,22 @@
  *
  * $FreeBSD: src/lib/libmd/sha256.h,v 1.2 2006/01/17 15:35:56 phk Exp $
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_PBKDF2SHA256_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_PBKDF2SHA256_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_PBKDF2SHA256_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_PBKDF2SHA256_HPP
 
 #include <bitcoin/system/define.hpp>
 
-/**
- * pbkdf2_sha256(passphrase, passphrase_length, salt, salt_length, c, buf, dk_length):
- * Compute pbkdf2(passwd, salt, c, dkLen) using hmac_sha256 as the PRF, and
- * write the output to buf.  The value dkLen must be at most 32 * (2^32 - 1).
- */
-void pbkdf2_sha256(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint64_t c, uint8_t* buf,
-    size_t dk_length);
+namespace libbitcoin {
+namespace system {
+namespace pbkdf2 {
+
+/// buffer_size <= [32 * (2^32 - 1)].
+void sha256(const uint8_t* passphrase, size_t passphrase_size,
+    const uint8_t* salt, size_t salt_size, uint64_t interations,
+    uint8_t* buffer, size_t buffer_size) NOEXCEPT;
+
+} // namespace sha256
+} // namespace system
+} // namespace libbitcoin
 
 #endif

@@ -23,31 +23,36 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMACSHA256_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMACSHA256_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_HMACSHA256_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_HMACSHA256_HPP
 
-#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/sha256_context.hpp>
+#include <bitcoin/system/define.hpp>
 
-#define HMACSHA256_DIGEST_LENGTH 32U
+namespace libbitcoin {
+namespace system {
+namespace hmac_sha256 {
 
-typedef struct HMACSHA256CTX
+struct hmac_sha256_context
 {
-    bc::system::sha256::context ctx;
-    bc::system::sha256::context ictx;
-    bc::system::sha256::context octx;
-} HMACSHA256CTX;
+    sha256::context in;
+    sha256::context out;
+};
 
-void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT;
+void hash(const uint8_t* data, size_t size, const uint8_t* key,
+    size_t key_size, uint8_t* digest) NOEXCEPT;
 
-void HMACSHA256Final(HMACSHA256CTX* context,
-    uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT;
+void initialize(hmac_sha256_context& context, const uint8_t* key,
+    size_t size) NOEXCEPT;
 
-void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
-    size_t key_length) NOEXCEPT;
+void update(hmac_sha256_context& context, const uint8_t* data,
+    size_t size) NOEXCEPT;
 
-void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
-    size_t length) NOEXCEPT;
+void finalize(hmac_sha256_context& context, uint8_t* digest) NOEXCEPT;
+
+} // namespace hmac_sha256
+} // namespace system
+} // namespace libbitcoin
 
 #endif

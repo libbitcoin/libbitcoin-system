@@ -17,19 +17,19 @@ namespace sha256 {
 
 #if !defined(HAVE_XCPU)
 
-void single_shani(state&, const block1&) NOEXCEPT
+void hash_shani(state&, const block1&) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "single_shani undefined");
+    BC_ASSERT_MSG(false, "hash_shani undefined");
 }
 
-void double_shani(digest1&, const block1&) NOEXCEPT
+void merkle_shani(digest1&, const block1&) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "double_shani[1] undefined");
+    BC_ASSERT_MSG(false, "merkle_shani[1] undefined");
 }
 
-void double_shani(digest2&, const block2&) NOEXCEPT
+void merkle_shani(digest2&, const block2&) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "double_shani[2] undefined");
+    BC_ASSERT_MSG(false, "merkle_shani[2] undefined");
 }
 
 #else
@@ -161,8 +161,8 @@ void inline unshuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
 
 #endif
 
-////void single_shani(state& state, const blocks& blocks) NOEXCEPT;
-void single_shani(state& state, const block1& blocks) NOEXCEPT
+////void hash_shani(state& state, const blocks& blocks) NOEXCEPT;
+void hash_shani(state& state, const block1& blocks) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
@@ -231,7 +231,7 @@ void single_shani(state& state, const block1& blocks) NOEXCEPT
     BC_POP_WARNING()
 }
 
-void double_shani(digest2& out, const block2& block) NOEXCEPT
+void merkle_shani(digest2& out, const block2& block) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
@@ -447,15 +447,15 @@ void double_shani(digest2& out, const block2& block) NOEXCEPT
     BC_POP_WARNING()
 }
 
-void double_shani(digest1& out, const block1& blocks) NOEXCEPT
+void merkle_shani(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
-    single_shani(state, blocks);
-    single_shani(state, array_cast(sha256::pad_64));
+    hash_shani(state, blocks);
+    hash_shani(state, array_cast(sha256::pad_64));
     auto buffer = sha256::pad_32;
     to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_shani(state, array_cast(buffer));
+    hash_shani(state, array_cast(buffer));
     to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 

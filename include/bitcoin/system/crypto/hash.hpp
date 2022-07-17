@@ -28,13 +28,13 @@
 namespace libbitcoin {
 namespace system {
 
-/// Common bitcoin hash container sizes.
-static constexpr size_t hash_size = 32;
-static constexpr size_t half_hash_size = hash_size / 2;
-static constexpr size_t quarter_hash_size = half_hash_size / 2;
-static constexpr size_t long_hash_size = 2 * hash_size;
-static constexpr size_t short_hash_size = 20;
-static constexpr size_t mini_hash_size = 6;
+/// Common bitcoin hash container sizes by bit length.
+static constexpr size_t long_hash_size = bytes<512>;
+static constexpr size_t hash_size = bytes<256>;
+static constexpr size_t short_hash_size = bytes<160>;
+static constexpr size_t half_hash_size = bytes<128>;
+static constexpr size_t quarter_hash_size = bytes<64>;
+static constexpr size_t mini_hash_size = bytes<48>;
 
 /// Common bitcoin hash containers.
 typedef data_array<mini_hash_size> mini_hash;
@@ -109,21 +109,10 @@ constexpr long_hash null_long_hash
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     }
 };
-
-/// Generate a scrypt hash to fill a byte array.
-/// Memory required (bytes) = 2 * 64 * work * resources.
-template <size_t Size>
-inline data_array<Size> scrypt(const data_slice& data, const data_slice& salt,
-    uint64_t work, uint32_t resources, uint32_t parallelism) NOEXCEPT;
-
-/// Generate a scrypt hash.
-BC_API hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
-
 /// Generate a bitcoin hash.
 BC_API hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT;
 
 /// Generate a bitcoin hash of first + second concatenation.
-/// This hash function is used in merkle root generation.
 BC_API hash_digest bitcoin_hash(const data_slice& first,
     const data_slice& second) NOEXCEPT;
 
@@ -165,10 +154,8 @@ BC_API long_hash hmac_sha512_hash(const data_slice& data,
 BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations) NOEXCEPT;
 
-/// Generate a scrypt hash of specified length.
-BC_API data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
-    uint64_t work, uint32_t resources, uint32_t parallelism,
-    size_t length) NOEXCEPT;
+/// Generate a scrypt hash.
+BC_API hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
 
 /// DJB2 hash key algorithm by Dan Bernstein.
 BC_API size_t djb2_hash(const data_slice& data) NOEXCEPT;

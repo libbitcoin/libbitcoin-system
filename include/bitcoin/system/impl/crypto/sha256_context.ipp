@@ -26,17 +26,14 @@
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-// Copy/array are guarded, buffer initialization is not required.
-BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
-
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
-
+    
+// Buffer initialization is not required due to logical sizing.
+BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
 constexpr context::context() NOEXCEPT
+BC_POP_WARNING()
 {
 }
 
@@ -52,21 +49,24 @@ constexpr void context::reset() NOEXCEPT
     state_ = initial;
 }
 
-constexpr bool context::increment(size_t blocks) NOEXCEPT
+constexpr size_t context::gap() const NOEXCEPT
 {
-    const auto bytes = blocks * block_size;
-    if (is_buffer_overflow(bytes))
-        return false;
-
-    // This is always a no-op (zero).
-    ////size_ += bytes % block_size;
-    bits_ += to_bits(bytes);
-    return true;
+    BC_ASSERT_MSG(!is_subtract_overflow(block_size, size_), "unexpected size");
+    return block_size - size_;
 }
 
 constexpr bool context::is_full() NOEXCEPT
 {
     return is_zero(gap());
+}
+
+constexpr bool context::is_buffer_overflow(size_t bytes) NOEXCEPT
+{
+    BC_ASSERT_MSG(is_zero(bits_ % byte_bits), "unexpected bit count");
+
+    const auto used = to_floored_bytes(bits_);
+    return is_add_overflow<uint64_t>(used, bytes) ||
+        is_add_overflow<uint64_t>(counter_size, add(used, bytes));
 }
 
 constexpr size_t context::pad_size() const NOEXCEPT
@@ -78,8 +78,13 @@ constexpr size_t context::pad_size() const NOEXCEPT
     return size_ < singled ? singled - size_ : doubled - size_;
 }
 
+// Copy and array index are guarded.
+BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 constexpr size_t context::add_data(size_t bytes, const uint8_t* data) NOEXCEPT
 {
+    // This is public because so extremely unlikely, but also guarded below.
     BC_ASSERT_MSG(!is_buffer_overflow(bytes), "hash function overflow");
 
     // No bytes accepted on overflow or uncleared buffer.
@@ -92,50 +97,34 @@ constexpr size_t context::add_data(size_t bytes, const uint8_t* data) NOEXCEPT
     bits_ += to_bits(accepted);
     return accepted;
 }
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
 
-constexpr sha256::state& context::state() NOEXCEPT
+constexpr void context::increment(size_t blocks) NOEXCEPT
 {
-    return state_;
-}
+    BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_size), "unexpected size");
 
-inline const sha256::block& context::buffer() const NOEXCEPT
-{
-    return buffer_;
+    bits_ += to_bits(blocks * block_size);
 }
 
 inline context::counter context::serialize_counter() const NOEXCEPT
 {
+    // Bit count is encoded into message block as 64 bit big-endian.
+    // This is conventional and not subject to platform endianness.
     return to_big_endian(bits_);
 }
 
 inline void context::serialize_state(digest& out) const NOEXCEPT
 {
-    to_big_endians(array_cast<uint32_t>(out), state_);
+    finalize(state_, array_cast<uint8_t>(out).data());
 }
 
-// private
-constexpr size_t context::gap() const NOEXCEPT
-{
-    BC_ASSERT_MSG(!is_subtract_overflow(block_size, size_), "unexpected size");
-    return block_size - size_;
-}
-
-// private
-constexpr bool context::is_buffer_overflow(size_t bytes) NOEXCEPT
-{
-    // bits is always a multiple of 8 (set only by to_bits(accepted)).
-    BC_ASSERT_MSG(is_zero(bits_ % byte_bits), "unexpected bit count");
-
-    const auto used = to_floored_bytes(bits_);
-    return is_add_overflow<uint64_t>(used, bytes) ||
-        is_add_overflow<uint64_t>(counter_size, add(used, bytes));
-}
-
-// sha256::accumulator.write()
-inline bool update(context& context, size_t size, const uint8_t* in) NOEXCEPT
+// public
+inline bool context::write(size_t size, const uint8_t* in) NOEXCEPT
 {
     // Fill gap if possible and update counter.
-    const auto accepted = context.add_data(size, in);
+    const auto accepted = add_data(size, in);
 
     // Buffer overflow, no bytes were accepted (or size was zero).
     // If accepted is non-zero then the full size value is acceptable.
@@ -143,13 +132,13 @@ inline bool update(context& context, size_t size, const uint8_t* in) NOEXCEPT
         return is_zero(size);
 
     // No transformation on this update unless buffer is full.
-    if (!context.is_full())
+    if (!is_full())
         return true;
 
     // Transform and clear the buffer.
-    transform(context.state(), one, context.buffer().data());
+    update(state_, one, buffer_.data());
     std::advance(in, accepted);
-    context.clear();
+    clear();
 
     // No more bytes to process.
     if (is_zero((size -= accepted)))
@@ -159,32 +148,28 @@ inline bool update(context& context, size_t size, const uint8_t* in) NOEXCEPT
     const auto blocks = size / block_size;
     const auto remain = size % block_size;
 
-    transform(context.state(), blocks, in);
+    update(state_, blocks, in);
     std::advance(in, size - remain);
-    context.increment(blocks);
+    increment(blocks);
 
     // Add the remaining partial block to the empty block buffer.
-    context.add_data(remain, in);
+    add_data(remain, in);
     return true;
 }
 
-// sha256::accumulator.flush()
-inline void finalize(context& context, uint8_t* out32) NOEXCEPT
+// public
+inline void context::flush(uint8_t* out32) NOEXCEPT
 {
-    const auto counter = context.serialize_counter();
+    const auto counter = serialize_counter();
 
-    update(context, context.pad_size(), pad_stream.data());
-    update(context, context::counter_size, counter.data());
-    context.serialize_state(unsafe_array_cast<uint8_t, digest_size>(out32));
+    write(pad_size(), pad_stream.data());
+    write(counter_size, counter.data());
+    serialize_state(unsafe_array_cast<uint8_t, digest_size>(out32));
+    reset();
 }
 
 } // namespace sha256
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
 
 #endif

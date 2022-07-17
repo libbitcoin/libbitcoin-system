@@ -170,23 +170,22 @@ BOOST_AUTO_TEST_CASE(sha256__transform2__vs_bitcoin_hash_one_block__same)
     hash_list doubled{ hashes };
 
     // Hashed single 2 x 0/1 hash.
-    sha256::context context{};
-    sha256::update(context, hashes.size() * hash_size, hashes[0].data());
-    sha256::finalize(context, once.data());
+    sha256::context context;
+    context.write(hashes.size() * hash_size, hashes[0].data());
+    context.flush(once.data());
     const auto two = sha256_hash(once);
 
     // Hashed single 0/1 hash x 2.
-    context.reset();
-    sha256::update(context, hash_size, hashes[0].data());
-    sha256::update(context, hash_size, hashes[1].data());
-    sha256::finalize(context, once.data());
+    context.write(hash_size, hashes[0].data());
+    context.write(hash_size, hashes[1].data());
+    context.flush(once.data());
     const auto twice = sha256_hash(once);
     BOOST_REQUIRE_EQUAL(twice, two);
 
     // Doubled hash.
     const auto blocks = to_half(hashes.size());
     auto buffer = doubled.front().data();
-    sha256::transform(buffer, blocks, buffer);
+    sha256::merkle_hash(buffer, blocks, buffer);
     doubled.resize(one);
     BOOST_REQUIRE_EQUAL(doubled.front(), twice);
 }
@@ -206,23 +205,22 @@ BOOST_AUTO_TEST_CASE(sha256__transform2__vs_bitcoin_hash_two_blocks__same)
     hash_list doubled{ hashes };
 
     // Hashed single 0/1 hash x 2.
-    sha256::context context{};
-    sha256::update(context, hash_size, hashes[0].data());
-    sha256::update(context, hash_size, hashes[1].data());
-    sha256::finalize(context, once.data());
+    sha256::context context;
+    context.write(hash_size, hashes[0].data());
+    context.write(hash_size, hashes[1].data());
+    context.flush(once.data());
     const auto first = sha256_hash(once);
 
     // Hashed single 2/3 hash x 2.
-    context.reset();
-    sha256::update(context, hash_size, hashes[2].data());
-    sha256::update(context, hash_size, hashes[3].data());
-    sha256::finalize(context, once.data());
+    context.write(hash_size, hashes[2].data());
+    context.write(hash_size, hashes[3].data());
+    context.flush(once.data());
     const auto second = sha256_hash(once);
 
     // Doubled hash.
     const auto blocks = to_half(hashes.size());
     auto buffer = doubled.front().data();
-    sha256::transform(buffer, blocks, buffer);
+    sha256::merkle_hash(buffer, blocks, buffer);
     doubled.resize(two);
 
     BOOST_REQUIRE_EQUAL(doubled[0], first);
@@ -263,11 +261,127 @@ BOOST_AUTO_TEST_CASE(sha256__transform2__vs_sha256x2_writer__same)
         }
 
         // in place double hash
-        transform(&out2[0], i, &in[0]);
+        merkle_hash(&out2[0], i, &in[0]);
         BOOST_REQUIRE_EQUAL(std::memcmp(&out1[0], &out2[0], i * digest_size), 0);
     }
 
     BC_POP_WARNING()
 }
+
+#ifdef DISABLED
+
+////void single_avx2(state& state, const block8& block) NOEXCEPT;
+////void single_avx2(state& state, const block4& block) NOEXCEPT;
+////void single_avx2(state& state, const block2& block) NOEXCEPT;
+////void single_avx2(state& state, const block1& block) NOEXCEPT;
+////void hash_sse41(state& state, const block4& block) NOEXCEPT;
+////void hash_sse41(state& state, const block2& block) NOEXCEPT;
+////void hash_sse41(state& state, const block1& block) NOEXCEPT;
+////void hash_sse4(state& state, const block4& block) NOEXCEPT;
+////void hash_sse4(state& state, const block2& block) NOEXCEPT;
+////void hash_neon(state& state, const block4& block) NOEXCEPT;
+////void hash_neon(state& state, const block2& block) NOEXCEPT;
+////void hash_shani(state& state, const block2& block) NOEXCEPT;
+
+////void merkle_avx2(digest4& out, const block4& block) NOEXCEPT;
+////void merkle_avx2(digest2& out, const block2& block) NOEXCEPT;
+////void merkle_avx2(digest1& out, const block1& block) NOEXCEPT;
+////void merkle_sse41(digest2& out, const block2& block) NOEXCEPT;
+////void merkle_sse41(digest1& out, const block1& block) NOEXCEPT;
+////void merkle_neon(digest4& out, const block4& block) NOEXCEPT;
+////void merkle_neon(digest2& out, const block2& block) NOEXCEPT;
+////void merkle_sse4(digest4& out, const block4& block) NOEXCEPT;
+////void merkle_sse4(digest2& out, const block2& block) NOEXCEPT;
+
+// TODO: The fill transform could be consolidated with full blocks.
+// TODO: This would allow it to be parallelized to the maximum extent.
+// TODO: But because bytes have been copied to buffer they are not
+// TODO: contiguous with input. This also implies that a streaming
+// TODO: hash will be denied the optimization of multi-lane hashing.
+// TODO: This can be mitigated in the stream writer using an accumulator
+// TODO: of 1/2/4/8 * 64 bytes. It would be suboptimal in other contexts.
+// TODO: The writer can be initialized with a buffer multiple, which can be
+// TODO: informed by the available lane optimizations.
+
+// TODO: Change transform to pass blocks and create blocks overloads.
+// TODO: This implies a template implementation of each for up to lane blocks.
+// TODO: Transform should otherwise iterate over all of the blocks, handling
+// TODO: 1, 2, 4, or 8 at a time as applicable. This is the same approach as
+// TODO: used in the double hash dispatch.
+
+// This is the implementation above, but cannot be generalized in the same
+// manner because avx2 and sse41 incorporate padding into the hash function.
+// As such portable, shani, neon, and sse4 doubling externally incorporate
+// padding as wrapper functions, which generalizes the implementation.
+////void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT;
+
+// TODO: non-streaming hashes:
+// TODO: Make generalized template for hash of any size < block_size - 8.
+// TODO: Generate pad from size, where size +1 is sentinel and pad-8 is count.
+// TODO: Copy data into pad, transform, and emit big endian state as bytes.
+// TODO: Generalize to any size by transforming size/block_size blocks and then
+// TODO: applying above to the remaining bytes. size % block_size = 0 implies a
+// TODO: full block of pad/count. Can also apply double variant of this model.
+
+// 64 byte hashes
+// ----------------------------------------------------------------------------
+
+// This is equivalent to sha256_single(*, 1, *) and more efficient.
+// It avoids allocation of context buffer and computation/serialize of counter.
+void sha256_single(digest& out, const block& in) NOEXCEPT
+{
+    // Transform into state.
+    auto state = sha256::initial;
+    transform(state, one, in.data());
+
+    // Transform pad/count and emit state to out.
+    transform(state, one, sha256::pad_64.data());
+    to_big_endians(array_cast<uint32_t>(out), state);
+}
+
+// This is equivalent to sha256_double(*, 1, *) and trivially more efficient.
+void sha256_double(digest& out, const block& in) NOEXCEPT
+{
+    // Emit sha256_single(block) into pad/count buffer.
+    auto buffer = sha256::pad_32;
+    sha256_single(narrowing_array_cast<uint8_t, digest_size>(buffer), in);
+
+    // Transform result and emit state to out.
+    auto state = sha256::initial;
+    transform(state, one, buffer.data());
+    to_big_endians(array_cast<uint32_t>(out), state);
+}
+
+// 32 byte hashes
+// ----------------------------------------------------------------------------
+
+// This is equivalent to sha256_single(*, 1, *) and more efficient.
+// It avoids allocation of context buffer and computation/serialize of counter.
+void sha256_single(digest& out, const digest& in) NOEXCEPT
+{
+    // Copy hash into pad/count buffer for transform.
+    auto buffer = sha256::pad_32;
+    std::copy(in.begin(), in.end(), buffer.begin());
+
+    // Transform and emit state to out.
+    auto state = sha256::initial;
+    transform(state, one, buffer.data());
+    to_big_endians(array_cast<uint32_t>(out), state);
+}
+
+// This is not supported by sha256_double(*, n, *) as it is blocks only.
+void sha256_double(digest& out, const digest& in) NOEXCEPT
+{
+    // Emit sha256_single(hash) into pad/count buffer.
+    auto buffer = sha256::pad_32;
+    sha256_single(narrowing_array_cast<uint8_t, digest_size>(buffer), in);
+
+    // Transform result and emit state to out.
+    auto state = sha256::initial;
+    transform(state, one, buffer.data());
+    to_big_endians(array_cast<uint32_t>(out), state);
+}
+
+#endif // DISABLED
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -30,11 +30,6 @@ namespace system {
 // Hash generators.
 // ----------------------------------------------------------------------------
 
-hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
-{
-    return scrypt<hash_size>(data, data, 1024_u64, 1_u32, 1_u32);
-}
-
 hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT
 {
     return sha256_hash(sha256_hash(data));
@@ -92,7 +87,7 @@ data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT
 // TODO: bytes (including count value) at compile time using constexpr.
 // TODO: overloads for common sizes, such as 32 and 64 bytes, can do the same.
 // TODO: this affects all double hashes (including that in the sha256x2 writer)
-// TODO: as the second hash is always 32 bytes. Soo comments in sha256.cpp.
+// TODO: as the second hash is always 32 bytes. See comments in sha256.cpp.
 
 hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
@@ -113,10 +108,10 @@ hash_digest sha256_hash(const data_slice& first,
     const data_slice& second) NOEXCEPT
 {
     hash_digest hash;
-    sha256::context context{};
-    sha256::update(context, first.size(), first.data());
-    sha256::update(context, second.size(), second.data());
-    sha256::finalize(context, hash.data());
+    sha256::context context;
+    context.write(first.size(), first.data());
+    context.write(second.size(), second.data());
+    context.flush(hash.data());
     return hash;
 }
 
@@ -124,7 +119,8 @@ hash_digest hmac_sha256_hash(const data_slice& data,
     const data_slice& key) NOEXCEPT
 {
     hash_digest hash;
-    HMACSHA256(data.data(), data.size(), key.data(), key.size(), hash.data());
+    hmac_sha256::hash(data.data(), data.size(), key.data(), key.size(),
+        hash.data());
     return hash;
 }
 
@@ -133,7 +129,7 @@ data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
 {
     data_chunk hash(length, no_fill_byte_allocator);
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    pbkdf2_sha256(passphrase.data(), passphrase.size(), salt.data(),
+    pbkdf2::sha256(passphrase.data(), passphrase.size(), salt.data(),
         salt.size(), iterations, hash.data(), length);
     BC_POP_WARNING()
     return hash;
@@ -172,19 +168,9 @@ long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     return hash;
 }
 
-data_chunk scrypt_chunk(const data_slice& data, const data_slice& salt,
-    uint64_t work, uint32_t resources, uint32_t parallelism,
-    size_t length) NOEXCEPT
+hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
-    // If crypto_scrypt returns != 0 then out will be zeroized.
-    // This can only be caused by out-of-memory or invalid parameterization.
-    data_chunk hash(length, 0_u8);
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(), work,
-        resources, parallelism, hash.data(), hash.size());
-    BC_POP_WARNING()
-    return hash;
+    return scrypt::hash<hash_size, 1024, 1, 1>(data, data);
 }
 
 // Objectives: deterministic, uniform distribution, efficient computation.

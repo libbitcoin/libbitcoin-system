@@ -45,57 +45,48 @@ struct context
     context& operator=(const context&) = default;
     ~context() = default;
 
-    /// Reset to initial context (for another hash round).
-    constexpr void reset() NOEXCEPT;
+    /// Write data to the context.
+    inline bool write(size_t size, const uint8_t* in) NOEXCEPT;
 
-    /// Clear buffer after transforming state.
-    constexpr void clear() NOEXCEPT;
-
-    /// Increment the counter for unbuffered transforms.
-    constexpr bool increment(size_t blocks) NOEXCEPT;
-
-    /// Transform if buffer is full.
-    constexpr bool is_full() NOEXCEPT;
-
-    /// Reserves space for counter serialization.
-    constexpr size_t pad_size() const NOEXCEPT;
-
-    /// Append up to block_size bytes to buffer (fills gap if possible).
-    constexpr size_t add_data(size_t bytes, const uint8_t* data) NOEXCEPT;
-
-    /// State reference for transformation.
-    constexpr state& state() NOEXCEPT;
-
-    /// Buffer const reference for transformation.
-    inline const block& buffer() const NOEXCEPT;
-
-    /// Serialize the hashed bit count for finalization
-    inline counter serialize_counter() const NOEXCEPT;
-
-    /// Normalize state as the final hash value.
-    inline void serialize_state(digest& out) const NOEXCEPT;
-
-protected:
-    /// Bytes remaining until buffer is full.
-    constexpr size_t gap() const NOEXCEPT;
-
-    /// SHA256 is limited to max_uint64 - to_bits(counter_size) hashed bits.
-    constexpr bool is_buffer_overflow(size_t bytes) NOEXCEPT;
+    /// Flush context to out32 (must be at least 32 bytes), resets context.
+    inline void flush(uint8_t* out32) NOEXCEPT;
 
 private:
+    // Clear buffer after transforming state.
+    constexpr void clear() NOEXCEPT;
+
+    // Reset to initial context after flushing.
+    constexpr void reset() NOEXCEPT;
+
+    // Bytes remaining until buffer is full.
+    constexpr size_t gap() const NOEXCEPT;
+
+    // Transform if buffer is full.
+    constexpr bool is_full() NOEXCEPT;
+
+    // SHA256 is limited to max_uint64 - to_bits(counter_size) hashed bits.
+    constexpr bool is_buffer_overflow(size_t bytes) NOEXCEPT;
+
+    // Reserves space for counter serialization.
+    constexpr size_t pad_size() const NOEXCEPT;
+
+    // Append up to block_size bytes to buffer (fills gap if possible).
+    constexpr size_t add_data(size_t bytes, const uint8_t* data) NOEXCEPT;
+
+    // Increment the counter for unbuffered transforms.
+    constexpr void increment(size_t blocks) NOEXCEPT;
+
+    // Serialize the hashed bit count for finalization
+    inline counter serialize_counter() const NOEXCEPT;
+
+    // Normalize state as the final hash value.
+    inline void serialize_state(digest& out) const NOEXCEPT;
+
     block buffer_;
     size_t size_{};
     uint64_t bits_{};
     sha256::state state_{ sha256::initial };
 };
-
-// TODO: move these functions into class as sha256_accumulator.
-
-/// Construct a default context and use this to iterate over data.
-inline bool update(context& context, size_t size, const uint8_t* in) NOEXCEPT;
-
-/// Finalize after last call to update, out32 is hash result.
-inline void finalize(context& context, uint8_t* out32) NOEXCEPT;
 
 } // namespace sha256
 } // namespace system

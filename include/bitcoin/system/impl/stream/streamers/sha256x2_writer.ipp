@@ -55,7 +55,7 @@ void sha256x2_writer<OStream>::do_write_bytes(const uint8_t* data,
 {
     // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
     // The stream could be invalidated, but writers shouldn't have to check it.
-    sha256::update(context_, size, data);
+    context_.write(size, data);
 }
 
 template <typename OStream>
@@ -77,12 +77,11 @@ void sha256x2_writer<OStream>::flusher() NOEXCEPT
     BC_POP_WARNING()
 
     // Finalize streaming hash.
-    sha256::finalize(context_, hash.data());
+    context_.flush(hash.data());
 
     // Hash the result of the streaming hash (update cannot overflow).
-    context_.reset();
-    sha256::update(context_, hash_size, hash.data());
-    sha256::finalize(context_, hash.data());
+    context_.write(hash_size, hash.data());
+    context_.flush(hash.data());
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }

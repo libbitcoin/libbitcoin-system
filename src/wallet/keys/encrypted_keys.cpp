@@ -125,21 +125,21 @@ static hash_digest scrypt_token(const data_slice& data,
     const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<hash_size>(data, salt, 16384, 8, 8);
+    return scrypt::hash<hash_size, 16384, 8, 8>(data, salt);
 }
 
 static long_hash scrypt_pair(const data_slice& data,
     const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<long_hash_size>(data, salt, 1024, 1, 1);
+    return scrypt::hash<long_hash_size, 1024, 1, 1>(data, salt);
 }
 
 static long_hash scrypt_private(const data_slice& data,
     const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<long_hash_size>(data, salt, 16384, 8, 8);
+    return scrypt::hash<long_hash_size, 16384, 8, 8>(data, salt);
 }
 
 // set_flags

@@ -28,293 +28,234 @@
  */
 #include <bitcoin/system/crypto/external/crypto_scrypt.hpp>
 
+#include <bit>
 #include <bitcoin/system/crypto/external/pbkdf2_sha256.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/math/math.hpp>
 
-static void blkcpy(uint8_t*, uint8_t*, size_t);
-static void blkxor(uint8_t*, uint8_t*, size_t);
-static void salsa20_8(uint8_t[64]);
-static void blockmix_salsa8(uint8_t*, uint8_t*, size_t);
-static uint64_t integerify(uint8_t*, size_t);
-static void smix(uint8_t* , size_t, uint64_t, uint8_t*, uint8_t*);
+BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 
-// TODO: make constexpr (cpp) and use /math/bytes endians.
+namespace libbitcoin {
+namespace system {
+namespace scrypt {
+    
+constexpr auto block1 = power2(6u);
+constexpr auto block2 = power2(7u);
+constexpr auto count = block1 / sizeof(uint32_t);
+using integers = std::array<uint32_t, count>;
 
-static inline uint32_t le32dec(const void* pp)
+// TODO: goes away with constexpr R.
+constexpr void assign(size_t size, uint8_t* to, const uint8_t* from) NOEXCEPT
 {
-    const uint8_t* p = (uint8_t const*)pp;
-    return ((uint32_t)(p[0]) + ((uint32_t)(p[1]) << 8) +
-           ((uint32_t)(p[2]) << 16) + ((uint32_t)(p[3]) << 24));
+    for (size_t i = 0; i < size; ++i)
+        to[i] = from[i];
 }
 
-// to_little_end
-static inline void le32enc(void* pp, uint32_t x)
+// TODO: goes away with constexpr R.
+constexpr void xors(size_t size, uint8_t* to, const uint8_t* from) NOEXCEPT
 {
-    uint8_t* p = (uint8_t*)pp;
-    p[0] = x & 0xff;
-    p[1] = (x >> 8) & 0xff;
-    p[2] = (x >> 16) & 0xff;
-    p[3] = (x >> 24) & 0xff;
+    for (size_t i = 0; i < size; ++i)
+        to[i] ^= from[i];
 }
 
-// from_little_end
-static inline uint64_t le64dec(const void* pp)
+template<size_t Size>
+constexpr void assign(uint8_t* to, const uint8_t* from) NOEXCEPT
 {
-    const uint8_t* p = (uint8_t const*)pp;
-
-    return ((uint64_t)(p[0]) + ((uint64_t)(p[1]) << 8) +
-           ((uint64_t)(p[2]) << 16) + ((uint64_t)(p[3]) << 24) +
-           ((uint64_t)(p[4]) << 32) + ((uint64_t)(p[5]) << 40) +
-           ((uint64_t)(p[6]) << 48) + ((uint64_t)(p[7]) << 56));
+    for (size_t i = 0; i < Size; ++i)
+        to[i] = from[i];
 }
 
-static void blkcpy(uint8_t* dest, uint8_t* src, size_t len)
+template<size_t Size>
+constexpr void increment(integers& to, const integers& from) NOEXCEPT
 {
-    size_t i;
-
-    for (i = 0; i < len; i++)
-        dest[i] = src[i];
+    for (size_t i = 0; i < Size; ++i)
+        to[i] += from[i];
 }
 
-static void blkxor(uint8_t* dest, uint8_t* src, size_t len)
+template<size_t Size>
+constexpr void xors(uint8_t* to, const uint8_t* from) NOEXCEPT
 {
-    size_t i;
-
-    for (i = 0; i < len; i++)
-        dest[i] ^= src[i];
+    for (size_t i = 0; i < Size; ++i)
+        to[i] ^= from[i];
 }
 
-/**
- * salsa20_8(B):
- * Apply the salsa20/8 core to the provided block.
- */
-static void salsa20_8(uint8_t B[64])
+uint8_t* salsa20_8(uint8_t* p) NOEXCEPT
 {
-    uint32_t B32[16];
-    uint32_t x[16];
-    size_t i;
+    auto words = from_little_endians(unsafe_array_cast<uint32_t, count>(p));
+    const integers copy{ words };
 
-    /* Convert little-endian values in. */
-    for (i = 0; i < 16; i++)
-        B32[i] = le32dec(&B[i * 4]);
-
-    /* Compute x = doubleround^4(B32). */
-    for (i = 0; i < 16; i++)
-        x[i] = B32[i];
-
-    for (i = 0; i < 8; i += 2)
+    for (size_t i = 0; i < to_half(count); i += two)
     {
-#define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
-        /* Operate on columns. */
-        x[ 4] ^= R(x[ 0]+x[12], 7);  x[ 8] ^= R(x[ 4]+x[ 0], 9);
-        x[12] ^= R(x[ 8]+x[ 4],13);  x[ 0] ^= R(x[12]+x[ 8],18);
+        // columns
+        words[ 4] ^= std::rotl(words[ 0] + words[12],  7);
+        words[ 8] ^= std::rotl(words[ 4] + words[ 0],  9);
+        words[12] ^= std::rotl(words[ 8] + words[ 4], 13);
+        words[ 0] ^= std::rotl(words[12] + words[ 8], 18);
+        words[ 9] ^= std::rotl(words[ 5] + words[ 1],  7);
+        words[13] ^= std::rotl(words[ 9] + words[ 5],  9);
+        words[ 1] ^= std::rotl(words[13] + words[ 9], 13);
+        words[ 5] ^= std::rotl(words[ 1] + words[13], 18);
+        words[14] ^= std::rotl(words[10] + words[ 6],  7);
+        words[ 2] ^= std::rotl(words[14] + words[10],  9);
+        words[ 6] ^= std::rotl(words[ 2] + words[14], 13);
+        words[10] ^= std::rotl(words[ 6] + words[ 2], 18);
+        words[ 3] ^= std::rotl(words[15] + words[11],  7);
+        words[ 7] ^= std::rotl(words[ 3] + words[15],  9);
+        words[11] ^= std::rotl(words[ 7] + words[ 3], 13);
+        words[15] ^= std::rotl(words[11] + words[ 7], 18);
 
-        x[ 9] ^= R(x[ 5]+x[ 1], 7);  x[13] ^= R(x[ 9]+x[ 5], 9);
-        x[ 1] ^= R(x[13]+x[ 9],13);  x[ 5] ^= R(x[ 1]+x[13],18);
-
-        x[14] ^= R(x[10]+x[ 6], 7);  x[ 2] ^= R(x[14]+x[10], 9);
-        x[ 6] ^= R(x[ 2]+x[14],13);  x[10] ^= R(x[ 6]+x[ 2],18);
-
-        x[ 3] ^= R(x[15]+x[11], 7);  x[ 7] ^= R(x[ 3]+x[15], 9);
-        x[11] ^= R(x[ 7]+x[ 3],13);  x[15] ^= R(x[11]+x[ 7],18);
-
-        /* Operate on rows. */
-        x[ 1] ^= R(x[ 0]+x[ 3], 7);  x[ 2] ^= R(x[ 1]+x[ 0], 9);
-        x[ 3] ^= R(x[ 2]+x[ 1],13);  x[ 0] ^= R(x[ 3]+x[ 2],18);
-
-        x[ 6] ^= R(x[ 5]+x[ 4], 7);  x[ 7] ^= R(x[ 6]+x[ 5], 9);
-        x[ 4] ^= R(x[ 7]+x[ 6],13);  x[ 5] ^= R(x[ 4]+x[ 7],18);
-
-        x[11] ^= R(x[10]+x[ 9], 7);  x[ 8] ^= R(x[11]+x[10], 9);
-        x[ 9] ^= R(x[ 8]+x[11],13);  x[10] ^= R(x[ 9]+x[ 8],18);
-
-        x[12] ^= R(x[15]+x[14], 7);  x[13] ^= R(x[12]+x[15], 9);
-        x[14] ^= R(x[13]+x[12],13);  x[15] ^= R(x[14]+x[13],18);
-#undef R
+        // rows
+        words[ 1] ^= std::rotl(words[ 0] + words[ 3],  7);
+        words[ 2] ^= std::rotl(words[ 1] + words[ 0],  9);
+        words[ 3] ^= std::rotl(words[ 2] + words[ 1], 13);
+        words[ 0] ^= std::rotl(words[ 3] + words[ 2], 18);
+        words[ 6] ^= std::rotl(words[ 5] + words[ 4],  7);
+        words[ 7] ^= std::rotl(words[ 6] + words[ 5],  9);
+        words[ 4] ^= std::rotl(words[ 7] + words[ 6], 13);
+        words[ 5] ^= std::rotl(words[ 4] + words[ 7], 18);
+        words[11] ^= std::rotl(words[10] + words[ 9],  7);
+        words[ 8] ^= std::rotl(words[11] + words[10],  9);
+        words[ 9] ^= std::rotl(words[ 8] + words[11], 13);
+        words[10] ^= std::rotl(words[ 9] + words[ 8], 18);
+        words[12] ^= std::rotl(words[15] + words[14],  7);
+        words[13] ^= std::rotl(words[12] + words[15],  9);
+        words[14] ^= std::rotl(words[13] + words[12], 13);
+        words[15] ^= std::rotl(words[14] + words[13], 18);
     }
 
-    /* Compute B32 = B32 + x. */
-    for (i = 0; i < 16; i++)
-        B32[i] += x[i];
-
-    /* Convert little-endian values out. */
-    for (i = 0; i < 16; i++)
-        le32enc(&B[4 * i], B32[i]);
+    increment<count>(words, copy);
+    to_little_endians(unsafe_array_cast<uint32_t, count>(p), words);
+    return p;
 }
 
-/**
- * blockmix_salsa8(B, Y, r):
- * Compute B = BlockMix_{salsa20/8, r}(B).  The input B must be 128r bytes in
- * length; the temporary space Y must also be the same size.
- */
-static void blockmix_salsa8(uint8_t* B, uint8_t* Y, size_t r)
+////template<size_t R>
+constexpr uint8_t* get(size_t R,
+    uint8_t* p) NOEXCEPT
 {
-    uint8_t X[64];
-    size_t i;
-
-    /* 1: X <-- B_{2r - 1} */
-    blkcpy(X, &B[(2 * r - 1) * 64], 64);
-
-    /* 2: for i = 0 to 2r - 1 do */
-    for (i = 0; i < 2 * r; i++)
-    {
-        /* 3: X <-- H(X \xor B_i) */
-        blkxor(X, &B[i * 64], 64);
-        salsa20_8(X);
-
-        /* 4: Y_i <-- X */
-        blkcpy(&Y[i * 64], X, 64);
-    }
-
-    /* 6: B' <-- (Y_0, Y_2 ... Y_{2r-2}, Y_1, Y_3 ... Y_{2r-1}) */
-
-    for (i = 0; i < r; i++)
-        blkcpy(&B[i * 64], &Y[(i * 2) * 64], 64);
-
-    for (i = 0; i < r; i++)
-        blkcpy(&B[(i + r) * 64], &Y[(i * 2 + 1) * 64], 64);
+    return &p[(sub1(R << one)) * block1];
 }
 
-/**
- * integerify(B, r):
- * Return the result of parsing B_{2r-1} as a little-endian integer.
- */
-static uint64_t integerify(uint8_t* B, size_t r)
+////template<size_t R>
+inline uint64_t get64(size_t R,
+    uint8_t* p) NOEXCEPT
 {
-    uint8_t* X = &B[(2 * r - 1) * 64];
-    return (le64dec(X));
+    return native_from_little_end(unsafe_byte_cast<uint64_t>(get(R, p)));
 }
 
-/**
- * smix(B, r, N, V, XY):
- * Compute B = SMix_r(B, N).  The input B must be 128r bytes in length; the
- * temporary storage V must be 128rN bytes in length; the temporary storage
- * XY must be 256r bytes in length.  The value N must be a power of 2.
- */
-static void smix(uint8_t* B, size_t r,
-    uint64_t N, uint8_t* V, uint8_t* XY)
+////template<size_t R>
+void block_salsa(size_t R,
+    uint8_t* p, uint8_t* y) NOEXCEPT
 {
-    uint8_t* X = XY;
-    uint8_t* Y = &XY[128 * r];
-    uint64_t i;
-    uint64_t j;
+    data_array<block1> X{ unsafe_array_cast<uint8_t, block1>(get(R, p)) };
 
-    /* 1: X <-- B */
-    blkcpy(X, B, 128 * r);
-
-    /* 2: for i = 0 to N - 1 do */
-    for (i = 0; i < N; i++)
+    for (size_t i = 0; i < (R << 1); ++i)
     {
-        /* 3: V_i <-- X */
-        blkcpy(&V[i * (128 * r)], X, 128 * r);
-
-        /* 4: X <-- H(X) */
-        blockmix_salsa8(X, Y, r);
+        xors<block1>(X.data(), &p[i * block1]);
+        assign<block1>(&y[i * block1], salsa20_8(X.data()));
     }
 
-    /* 6: for i = 0 to N - 1 do */
-    for (i = 0; i < N; i++)
+    for (size_t i = 0; i < (R << 0); ++i)
     {
-        /* 7: j <-- Integerify(X) mod N */
-        j = integerify(X, r) & (N - 1);
-
-        /* 8: X <-- H(X \xor V_j) */
-        blkxor(X, &V[j * (128 * r)], 128 * r);
-        blockmix_salsa8(X, Y, r);
+        assign<block1>(&p[(i + 0) * block1], &y[((i << one) + 0) * block1]);
+        assign<block1>(&p[(i + R) * block1], &y[((i << one) + 1) * block1]);
     }
-
-    /* 10: B' <-- X */
-    blkcpy(B, X, 128 * r);
 }
 
-/**
- * crypto_scrypt(passwd, passwdlen, salt, saltlen, N, r, p, buf, buflen):
- * Compute scrypt(passwd[0 .. passwdlen - 1], salt[0 .. saltlen - 1], N, r,
- * p, buflen) and write the result into buf.  The parameters r, p, and buflen
- * must satisfy r * p < 2^30 and buflen <= (2^32 - 1) * 32.  The parameter N
- * must be a power of 2.
- *
- * Return 0 on success; or -1 on error.
- */
-int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint64_t N,
-    uint32_t r, uint32_t p, uint8_t* buf, size_t buf_length)
+////template<size_t W, size_t R>
+void mix(size_t W, size_t R,
+    uint8_t* p, uint8_t* w, uint8_t* x) NOEXCEPT
 {
-    uint8_t* B;
-    uint8_t* V;
-    uint8_t* XY;
-    uint32_t i;
+    // There is no need to double x (xy) for working space, just overload p.
+    // TODO: with r128 constexpr use assign/xors templates and use data_array.
+    const auto r128 = R * block2;
+    ////data_array<r128> x;
 
-    /* Sanity-check parameters. */
-#if SIZE_MAX > UINT32_MAX
-    if (buf_length > (((uint64_t)(1) << 32) - 1) * 32)
+    for (size_t i = 0; i < W; ++i)
     {
-        errno = EFBIG;
-        goto err0;
-    }
-#endif
-
-    if ((uint64_t)(r) * (uint64_t)(p) >= (1 << 30))
-    {
-        errno = EFBIG;
-        goto err0;
+        assign(r128, &w[i * r128], p);
+        block_salsa(R, p, x);
     }
 
-    if (((N & (N - 1)) != 0) || (N == 0))
+    for (size_t i = 0; i < W; ++i)
     {
-        errno = EINVAL;
-        goto err0;
+        xors(r128, p, &w[(get64(R, p) % W) * r128]);
+        block_salsa(R, p, x);
     }
-
-    if ((r > SIZE_MAX / 128 / p) ||
-#if SIZE_MAX / 256 <= UINT32_MAX
-        (r > SIZE_MAX / 256) ||
-#endif
-        (N > SIZE_MAX / 128 / r))
-    {
-        errno = ENOMEM;
-        goto err0;
-    }
-
-    /* Allocate memory. */
-    if ((B = reinterpret_cast<uint8_t*>(malloc(128 * r * p))) == nullptr)
-        goto err0;
-
-    if ((XY = reinterpret_cast<uint8_t*>(malloc(256 * r))) == nullptr)
-        goto err1;
-
-    if ((V = reinterpret_cast<uint8_t*>(malloc(128 * r * (size_t)N))) == nullptr)
-        goto err2;
-
-    /* 1: (B_0 ... B_{p-1}) <-- PBKDF2(P, S, 1, p * MFLen) */
-    pbkdf2_sha256(passphrase, passphrase_length,
-        salt, salt_length, 1, B, p * 128 * r);
-
-    /* 2: for i = 0 to p - 1 do */
-    for (i = 0; i < p; i++)
-    {
-        /* 3: B_i <-- MF(B_i, N) */
-        smix(&B[i * 128 * r], r, N, V, XY);
-    }
-
-    /* 5: DK <-- PBKDF2(P, B, 1, dkLen) */
-    pbkdf2_sha256(passphrase, passphrase_length,
-        B, p * 128 * r, 1, buf, buf_length);
-
-    /* Free memory. */
-    free(V);
-    free(XY);
-    free(B);
-
-    /* Success! */
-    return (0);
-
-  err2:
-    free(XY);
-  err1:
-    free(B);
-  err0:
-    /* Failure! */
-    return (-1);
 }
+
+////template<size_t W, uint32_t R, uint32_t P>
+bool hash(size_t W, size_t R, size_t P,
+    const uint8_t* phrase, size_t phrase_size, const uint8_t* salt,
+    size_t salt_size, uint8_t* buffer, size_t size) NOEXCEPT
+{
+    // Validate parameters (move to template contraints for constexpr eval).
+    // ------------------------------------------------------------------------
+
+    // [W]ork must be a power of 2 greater than 1.
+    if (!(W > one) || !(power2(floored_log2(W)) == W))
+        return false;
+
+    // [R]esources and [P]arallelism must satisfy [(R * P) < 2^30].
+    if (is_multiply_overflow(R, P) || !((R * P) < power2<uint32_t>(30u)))
+        return false;
+
+    // buffer size must not exceed pbkdf2::sha256 limit of [sub1(2^32) * 2^5].
+    if (size > sub1(power2<uint64_t>(32u)) * power2<uint64_t>(5u))
+        return false;
+
+    const auto r128 = R * block2;
+
+    uint8_t* p;
+    uint8_t* w;
+    uint8_t* x;
+
+    // TODO: with P, W, R constexpr use data_array (stack allocation).
+    ////data_array<P * r128> p;
+    ////data_array<W * r128> w;
+
+    if (is_null((p = pointer_cast<uint8_t>(std::malloc(P * r128)))))
+    {
+        return false;
+    }
+
+    if (is_null((w = pointer_cast<uint8_t>(std::malloc(W * r128)))))
+    {
+        std::free(p);
+        return false;
+    }
+
+    // There is no need to double this (XY) for working space.
+    if (is_null((x = pointer_cast<uint8_t>(std::malloc(r128)))))
+    {
+        std::free(w);
+        std::free(p);
+        return false;
+    }
+
+    pbkdf2::sha256(phrase, phrase_size, salt, salt_size, one, p, P * r128);
+
+    for (size_t i = 0; i < P; ++i)
+        mix(W, R, &p[i * r128], w, x);
+
+    pbkdf2::sha256(phrase, phrase_size, p, P * r128, one, buffer, size);
+
+    std::free(x);
+    std::free(w);
+    std::free(p);
+    return true;
+}
+
+} // namespace scrypt
+} // namespace system
+} // namespace libbitcoin
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()

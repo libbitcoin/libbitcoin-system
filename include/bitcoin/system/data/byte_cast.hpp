@@ -56,21 +56,33 @@ template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_size<Size> = true>
 inline unsigned_type<Size>&
-byte_cast(std::array<Byte, Size>& value) NOEXCEPT;
+byte_cast(std::array<Byte, Size>& bytes) NOEXCEPT;
 
 /// Cast const byte array& to const unsigned integral& of same byte length.
 template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_size<Size> = true>
 inline const unsigned_type<Size>&
-byte_cast(const std::array<Byte, Size>& value) NOEXCEPT;
+byte_cast(const std::array<Byte, Size>& bytes) NOEXCEPT;
 
 /// Cast byte array&& to unsigned integral of same byte length.
 template <typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_size<Size> = true>
 inline unsigned_type<Size>
-byte_cast(std::array<Byte, Size>&& value) NOEXCEPT;
+byte_cast(std::array<Byte, Size>&& bytes) NOEXCEPT;
+
+/// Cast byte* to integral&.
+template <typename Integral, typename Byte,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true>
+inline Integral& unsafe_byte_cast(Byte* bytes) NOEXCEPT;
+
+/// Cast const byte* to const integral&.
+template <typename Integral, typename Byte,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true>
+inline const Integral& unsafe_byte_cast(const Byte* bytes) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

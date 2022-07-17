@@ -15,9 +15,9 @@ namespace sha256 {
 
 #if !defined(HAVE_XCPU)
 
-void double_avx2(digest8& out, const block8& blocks) NOEXCEPT
+void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "double_avx2 undefined");
+    BC_ASSERT_MSG(false, "merkle_avx2 undefined");
 }
 
 #else
@@ -82,7 +82,7 @@ void inline write8(digest8& hashes, mint256_t value) NOEXCEPT
 }
 
 // Eight blocks in eight lanes, doubled.
-void double_avx2(digest8& out, const block8& blocks) NOEXCEPT
+void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
 {
     // Transform 1.
     auto a = set(0x6a09e667ul);

@@ -83,7 +83,7 @@ constexpr void from_big_endians(std::array<Integral, Count>& out,
     if constexpr (is_little_endian)
     {
         // C++17: Parallel policy for std::transform.
-        std::transform(in.begin(), in.end(), out.begin(),
+        std::transform(in.cbegin(), in.cend(), out.begin(),
             [](const auto& value) NOEXCEPT
             {
                 return native_from_big_end(value);
@@ -102,7 +102,7 @@ constexpr void from_little_endians(std::array<Integral, Count>& out,
     if constexpr (is_big_endian)
     {
         // C++17: Parallel policy for std::transform.
-        std::transform(in.begin(), in.end(), out.begin(),
+        std::transform(in.cbegin(), in.cend(), out.begin(),
             [](const uint32_t& value) NOEXCEPT
             {
                 return native_from_little_end(value);

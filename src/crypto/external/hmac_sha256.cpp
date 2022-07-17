@@ -25,73 +25,80 @@
  */
 #include <bitcoin/system/crypto/external/hmac_sha256.hpp>
 
-#include <utility>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/sha256_context.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 
-using namespace bc;
-using namespace bc::system;
+namespace libbitcoin {
+namespace system {
+namespace hmac_sha256 {
+
 using namespace bc::system::sha256;
 
-void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT
+constexpr void xor_n(uint8_t* to, const uint8_t* from, size_t size) NOEXCEPT
 {
-    HMACSHA256CTX context;
-    HMACSHA256Init(&context, key, key_length);
-    HMACSHA256Update(&context, input, length);
-    HMACSHA256Final(&context, digest);
+    for (size_t i = 0; i < size; ++i)
+        to[i] ^= from[i];
 }
 
-void HMACSHA256Final(HMACSHA256CTX* context,
-    uint8_t digest[HMACSHA256_DIGEST_LENGTH]) NOEXCEPT
+void hash(const uint8_t* data, size_t length, const uint8_t* key,
+    size_t key_size, uint8_t* digest) NOEXCEPT
 {
-    uint8_t hash[HMACSHA256_DIGEST_LENGTH];
-    finalize(context->ictx, hash);
-    update(context->octx, HMACSHA256_DIGEST_LENGTH, hash);
-    finalize(context->octx, digest);
-
-    // This is unnecessary, as the context is not reusable.
-    // zeroize((void*)hash, sizeof hash);
+    hmac_sha256_context context;
+    initialize(context, key, key_size);
+    update(context, data, length);
+    finalize(context, digest);
 }
 
-void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
-    size_t key_length) NOEXCEPT
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+void initialize(hmac_sha256_context& context, const uint8_t* key,
+    size_t size) NOEXCEPT
+BC_POP_WARNING()
 {
-    size_t i;
-    uint8_t pad[block_size];
-    uint8_t key_hash[digest_size];
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    data_array<block_size> pad;
+    data_array<digest_size> key_hash;
+    BC_POP_WARNING()
 
-    if (key_length > block_size)
+    if (size > block_size)
     {
-        context->ictx.reset();
-        update(context->ictx, key_length, key);
-        finalize(context->ictx, key_hash);
-        key = key_hash;
-        key_length = digest_size;
+        context.in.write(size, key);
+        context.in.flush(key_hash.data());
+        key = key_hash.data();
+        size = digest_size;
     }
+    
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
-    context->ictx.reset();
-    std::fill_n(pad, block_size, 0x36_u8);
+    pad.fill(0x36_u8);
+    xor_n(&pad[0], key, size);
+    context.in.write(block_size, pad.data());
+    pad.fill(0x5c_u8);
+    xor_n(&pad[0], key, size);
 
-    for (i = 0; i < key_length; i++) 
-        pad[i] ^= key[i];
+    BC_POP_WARNING()
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 
-    update(context->ictx, block_size, pad);
-    context->octx.reset();
-    std::fill_n(pad, block_size, 0x5c_u8);
-
-    for (i = 0; i < key_length; i++) 
-        pad[i] ^= key[i];
-
-    update(context->octx, block_size, pad);
-
-    // This is unnecessary, as the local is going out of scope.
-    // zeroize((void*)key_hash, sizeof key_hash);
+    context.out.write(block_size, pad.data());
 }
 
-void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
-    size_t length) NOEXCEPT
+void update(hmac_sha256_context& context, const uint8_t* data,
+    size_t size) NOEXCEPT
 {
-    update(context->ictx, length, input);
+    context.in.write(size, data);
 }
+
+void finalize(hmac_sha256_context& context, uint8_t* digest) NOEXCEPT
+{
+    context.in.flush(digest);
+    context.out.write(digest_size, digest);
+    context.out.flush(digest);
+}
+
+} // namespace hmac_sha256
+} // namespace system
+} // namespace libbitcoin

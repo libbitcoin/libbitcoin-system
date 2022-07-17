@@ -43,26 +43,54 @@ constexpr auto majority(auto x, auto y, auto z) NOEXCEPT
     return (x & (y | z)) | (y & z);
 }
 
+#define NORMAL_FORM
+
 // Using inline vs. constexpr to obtain intrinsic std::rotr.
 
-inline auto SIGMA0(auto x) NOEXCEPT
+template <size_t Bits>
+inline auto rotate(auto a) NOEXCEPT
 {
-    return std::rotr(x, 2) ^ std::rotr(x, 13) ^ std::rotr(x, 22);
+#ifdef NORMAL_FORM
+    return std::rotr(a, Bits);
+#else
+    if constexpr (is_big_endian)
+        return std::rotr(a, Bits);
+    else
+        return std::rotl(a, Bits);
+#endif
 }
 
-inline auto SIGMA1(auto x) NOEXCEPT
+template <size_t Bits>
+constexpr auto shift(auto a) NOEXCEPT
 {
-    return std::rotr(x, 6) ^ std::rotr(x, 11) ^ std::rotr(x, 25);
+#ifdef NORMAL_FORM
+    return a >> Bits;
+#else
+    if constexpr (is_big_endian)
+        return a >> Bits;
+    else
+        return a >> Bits;
+#endif
 }
 
-inline auto sigma0(auto x) NOEXCEPT
+inline auto SIGMA0(auto a) NOEXCEPT
 {
-    return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3);
+    return rotate<2>(a) ^ rotate<13>(a) ^ rotate<22>(a);
 }
 
-inline auto sigma1(auto x) NOEXCEPT
+inline auto SIGMA1(auto a) NOEXCEPT
 {
-    return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10);
+    return rotate<6>(a) ^ rotate<11>(a) ^ rotate<25>(a);
+}
+
+inline auto sigma0(auto a) NOEXCEPT
+{
+    return rotate<7>(a) ^ rotate<18>(a) ^ shift<3>(a);
+}
+
+inline auto sigma1(auto a) NOEXCEPT
+{
+    return rotate<17>(a) ^ rotate<19>(a) ^ shift<10>(a);
 }
 
 inline void round(auto a, auto b, auto c, auto& out_d, auto e, auto f, auto g,
@@ -260,10 +288,16 @@ template <size_t Offset,
     if_not_greater<Offset, block16> = true>
 void constexpr pad(auto& buffer) NOEXCEPT
 {
-    // These native-to-native integer assignments, no conversion required.
-    constexpr auto sentinel = bit_hi<uint32_t>;
-    constexpr auto bitcount = possible_narrow_cast<uint32_t>(
-        (block16 - Offset) * bits<uint32_t>);
+    // These are mapped to message as big-endian by convension. But the message
+    // is then converted from big-endian to native-endian. Since in this
+    // optimization these are injected after that conversion, they must be
+    // encoded as big-endian. On a BE platform this is a nop, resulting in
+    // untranslated representation in the integer array. On a LE platform this
+    // results in translated encoding in the integer array, just as it would
+    // in the normal form algorithm.
+    constexpr auto sentinel = native_to_big_end(bit_hi<uint32_t>);
+    constexpr auto bitcount = native_to_big_end(possible_narrow_cast<uint32_t>(
+        (block16 - Offset) * bits<uint32_t>));
 
     buffer[Offset] = sentinel;
     buffer[sub1(block16)] = bitcount;
@@ -275,19 +309,31 @@ BC_POP_WARNING()
 // This requires 32 more words of memory than use of variables.
 // Endian conversions are not currently loop unrolled (can do in templates).
 // Otherwise it is identical, with an advantage in the use of intrinsic rotr.
-void single_hash(state& state, const block1& blocks) NOEXCEPT
+void hash_native(state& state, const block1& blocks) NOEXCEPT
 {
     std::array<uint32_t, block_size> buffer;
 
     for (auto& block: blocks)
     {
         const sha256::state start{ state };
-        from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
-            array_cast<uint32_t>(block));
+#ifdef NORMAL_FORM
+        from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer), array_cast<uint32_t>(block));
+#else
+        assign8(narrowing_array_cast<uint32_t, block16>(buffer), array_cast<uint32_t>(block));
+#endif
         expand48(buffer);
         rounds64(state, buffer);
         increment8(state, start);
     }
+}
+
+void hash_finalize(digest& out, const state& state) NOEXCEPT
+{
+#ifdef NORMAL_FORM
+    to_big_endians(array_cast<uint32_t>(out), state);
+#else
+    assign8(array_cast<uint32_t>(out), state);
+#endif
 }
 
 // Pad and state (hash) are endian aligned during transitions.
@@ -299,7 +345,7 @@ void single_hash(state& state, const block1& blocks) NOEXCEPT
 // This computes 8 more sigmas (but uses intrinsic rotr, so currently better).
 // This assigns 4 more values, and zeroizes ~1.5 blocks in two calls, but
 // avoids a net 6 additions (call that even).
-void double_hash_______________(digest1& out, const block1& blocks) NOEXCEPT
+void merkle_hashXXX(digest1& out, const block1& blocks) NOEXCEPT
 {
     std::array<uint32_t, block_size> buffer;
     from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
@@ -332,15 +378,15 @@ void double_hash_______________(digest1& out, const block1& blocks) NOEXCEPT
     to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 
-void double_hash(digest1& out, const block1& blocks) NOEXCEPT
+void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
-    single_hash(state, blocks);
-    single_hash(state, array_cast(sha256::pad_64));
+    hash_native(state, blocks);
+    hash_native(state, array_cast(sha256::pad_64));
     auto buffer = sha256::pad_32;
     to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
-    single_hash(state, array_cast(buffer));
+    hash_native(state, array_cast(buffer));
     to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 

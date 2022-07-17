@@ -28,61 +28,65 @@
 #include <bitcoin/system/crypto/external/hmac_sha256.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/math/math.hpp>
 
- // TODO: make constexpr (cpp) and use /math/bytes endians.
+namespace libbitcoin {
+namespace system {
+namespace pbkdf2 {
 
-static void to_big_endian(uint8_t data[sizeof(uint32_t)], uint32_t value)
+using namespace sha256;
+namespace hmac = hmac_sha256;
+
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+void sha256(const uint8_t* passphrase, size_t passphrase_size,
+    const uint8_t* salt, size_t salt_size, uint64_t interations,
+    uint8_t* buffer, size_t buffer_size) NOEXCEPT
+BC_POP_WARNING()
 {
-    data[3] = (value >> 0) & 0xff;
-    data[2] = (value >> 8) & 0xff;
-    data[1] = (value >> 16) & 0xff;
-    data[0] = (value >> 24) & 0xff;
-}
+    hmac::hmac_sha256_context salted;
+    hmac::initialize(salted, passphrase, passphrase_size);
+    hmac::update(salted, salt, salt_size);
+    
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    digest U;
+    BC_POP_WARNING()
 
-/**
- * pbkdf2_sha256(passphrase, passphrase_length, salt, salt_length, c, buf, dk_length):
- * Compute pbkdf2(passwd, salt, c, dkLen) using hmac_sha256 as the PRF, and
- * write the output to buf.  The value dkLen must be at most 32 * (2^32 - 1).
- */
-void pbkdf2_sha256(const uint8_t passphrase[], size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint64_t c,
-    uint8_t* buf, size_t dk_length)
-{
-    uint8_t ivec[4];
-    uint8_t U[32], T[32];
-    size_t i, j, k, clen;
-    HMACSHA256CTX PShctx, hctx;
-
-    HMACSHA256Init(&PShctx, passphrase, passphrase_length);
-    HMACSHA256Update(&PShctx, salt, salt_length);
-
-    for (i = 0; i * 32 < dk_length; i++)
+    for (uint32_t i = 0; i * digest_size < buffer_size; ++i)
     {
-        to_big_endian(ivec, (uint32_t)(i + 1));
-        memcpy(&hctx, &PShctx, sizeof(HMACSHA256CTX));
-        HMACSHA256Update(&hctx, ivec, 4);
-        HMACSHA256Final(&hctx, U);
-        memcpy(T, U, 32);
+        constexpr auto size = sizeof(uint32_t);
 
-        for (j = 2; j <= c; j++)
+        auto context = salted;
+        hmac::update(context, to_big_endian(add1(i)).data(), size);
+        hmac::finalize(context, U.data());
+        auto T = U;
+
+        for (size_t j = one; j < interations; ++j)
         {
-            HMACSHA256Init(&hctx, passphrase, passphrase_length);
-            HMACSHA256Update(&hctx, U, 32);
-            HMACSHA256Final(&hctx, U);
-
-            for (k = 0; k < 32; k++)
-            {
+            hmac::initialize(context, passphrase, passphrase_size);
+            hmac::update(context, U.data(), digest_size);
+            hmac::finalize(context, U.data());
+            
+            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+            BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+            for (size_t k = 0; k < digest_size; ++k)
                 T[k] ^= U[k];
-            }
+            BC_POP_WARNING()
+            BC_POP_WARNING()
         }
 
-        clen = dk_length - i * 32;
+        const auto offset = i * digest_size;
+        const auto length = limit(buffer_size - offset, digest_size);
 
-        if (clen > 32)
-        {
-            clen = 32;
-        }
-
-        memcpy(&buf[i * 32], T, clen);
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+        BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+        std::memcpy(&buffer[offset], T.data(), length);
+        BC_POP_WARNING()
+        BC_POP_WARNING()
+        BC_POP_WARNING()
     }
 }
+
+} // namespace sha256
+} // namespace system
+} // namespace libbitcoin

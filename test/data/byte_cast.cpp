@@ -20,71 +20,12 @@
 
 BOOST_AUTO_TEST_SUITE(byte_cast_tests)
 
-template <size_t Size, if_integral_size<Size> = true>
-inline unsigned_type<Size> byte_swap_slow(const data_array<Size>& data) NOEXCEPT
-{
-    uint32_t value{};
-    auto& cast = byte_cast<uint8_t>(value);
-    std::copy_n(data.data(), Size, cast.data());
+constexpr auto size4 = sizeof(uint32_t);
+constexpr auto value4 = native_to_big_end(0x01020304_u32);
+constexpr data_array<size4> bytes4{ 0x01_u8, 0x02_u8, 0x03_u8, 0x04_u8 };
 
-    if constexpr (Size == sizeof(uint16_t))
-    {
-        std::swap(cast[0], cast[1]);
-    }
-
-    if constexpr (Size == sizeof(uint32_t))
-    {
-        // Compare slow (bytewise).
-        std::swap(cast[0], cast[3]);
-        std::swap(cast[1], cast[2]);
-    }
-
-    if constexpr (Size == sizeof(uint64_t))
-    {
-        std::swap(cast[0], cast[7]);
-        std::swap(cast[1], cast[6]);
-        std::swap(cast[2], cast[5]);
-        std::swap(cast[3], cast[4]);
-    }
-
-    return value;
-}
-
-template <size_t Size, if_integral_size<Size> = true>
-inline unsigned_type<Size> byte_swap_medium(const data_array<Size>& data) NOEXCEPT
-{
-    uint32_t value{};
-    auto& cast = byte_cast<uint8_t>(value);
-    std::copy_n(data.data(), Size, cast.data());
-
-    // Compare medium (bitwise).
-    return byte_swap32_native(to_unsigned(value));
-}
-
-template <size_t Size, if_integral_size<Size> = true>
-inline unsigned_type<Size> byte_swap_fast(const data_array<Size>& data) NOEXCEPT
-{
-    uint32_t value{};
-    auto& cast = byte_cast<uint8_t>(value);
-    std::copy_n(data.data(), Size, cast.data());
-
-    // Compare fast (intrinsic).
-    return byte_swap32(to_unsigned(value));
-}
-
-BOOST_AUTO_TEST_CASE(byte_cast__byte_swap__disassembly__comparison)
-{
-    constexpr auto expected = 0x01020304_u32;
-    constexpr data_array<sizeof(uint32_t)> bytes{ 0x01_u8, 0x02_u8, 0x03_u8, 0x04_u8 };
-
-    const auto fast = byte_swap_fast(bytes);
-    const auto medi = byte_swap_medium(bytes);
-    const auto slow = byte_swap_slow(bytes);
-
-    BOOST_REQUIRE_EQUAL(fast, expected);
-    BOOST_REQUIRE_EQUAL(medi, expected);
-    BOOST_REQUIRE_EQUAL(slow, expected);
-}
+// from integral to bytes
+// ----------------------------------------------------------------------------
 
 template <size_t Index, typename Byte, typename Integral,
     if_one_byte<Byte> = true,
@@ -104,28 +45,114 @@ inline void set_byte(Integral& value, Byte set) NOEXCEPT
     byte_cast<Byte>(value)[Index] = set;
 }
 
-BOOST_AUTO_TEST_CASE(byte_cast__get_byte__always__expected)
+template <size_t Index, typename Byte, typename Integral,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true,
+    if_lesser<Index, sizeof(Integral)> = true>
+inline Byte move_byte(Integral&& value) NOEXCEPT
 {
-    constexpr auto value = native_to_little_end(0x01020304_u32);
-    const auto byte0 = get_byte<0, uint8_t>(value);
-    const auto byte1 = get_byte<1,  int8_t>(value);
-    const auto byte2 = get_byte<2, uint8_t>(value);
-    const auto byte3 = get_byte<3,  int8_t>(value);
-    BOOST_REQUIRE_EQUAL(byte0, 0x04_u8);
-    BOOST_REQUIRE_EQUAL(byte1, 0x03_u8);
-    BOOST_REQUIRE_EQUAL(byte2, 0x02_u8);
-    BOOST_REQUIRE_EQUAL(byte3, 0x01_u8);
+    return byte_cast<Byte>(value)[Index];
 }
 
-BOOST_AUTO_TEST_CASE(byte_cast__set_byte__always__expected)
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_const_ref_integral__always__expected)
 {
-    constexpr auto expected = native_to_little_end(0x01020304_u32);
-    auto value = native_to_little_end(0xaabbccdd_u32);
-    set_byte<0,  int8_t>(value, 0x04);
-    set_byte<1, uint8_t>(value, 0x03);
-    set_byte<2,  int8_t>(value, 0x02);
-    set_byte<3, uint8_t>(value, 0x01);
-    BOOST_REQUIRE_EQUAL(value, expected);
+    const auto byte0 = get_byte<0, uint8_t>(value4);
+    const auto byte1 = get_byte<1, int8_t>(value4);
+    const auto byte2 = get_byte<2, uint8_t>(value4);
+    const auto byte3 = get_byte<3, int8_t>(value4);
+    BOOST_REQUIRE_EQUAL(byte0, 0x01_u8);
+    BOOST_REQUIRE_EQUAL(byte1, 0x02_u8);
+    BOOST_REQUIRE_EQUAL(byte2, 0x03_u8);
+    BOOST_REQUIRE_EQUAL(byte3, 0x04_u8);
+}
+
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_non_const_ref_integral__always__expected)
+{
+    // demonstrate assignment through the cast
+    auto value = 0xaabbccdd_u32;
+    set_byte<0, int8_t>(value, 0x01);
+    set_byte<1, uint8_t>(value, 0x02);
+    set_byte<2, int8_t>(value, 0x03);
+    set_byte<3, uint8_t>(value, 0x04);
+    BOOST_REQUIRE_EQUAL(value, value4);
+}
+
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_rvalue_integral__always__expected)
+{
+    const auto byte0 = move_byte<0, uint8_t>(native_to_big_end(0x01020304_u32));
+    const auto byte1 = move_byte<1, int8_t>(native_to_big_end(0x01020304_u32));
+    const auto byte2 = move_byte<2, uint8_t>(native_to_big_end(0x01020304_u32));
+    const auto byte3 = move_byte<3, int8_t>(native_to_big_end(0x01020304_u32));
+    BOOST_REQUIRE_EQUAL(byte0, 0x01_u8);
+    BOOST_REQUIRE_EQUAL(byte1, 0x02_u8);
+    BOOST_REQUIRE_EQUAL(byte2, 0x03_u8);
+    BOOST_REQUIRE_EQUAL(byte3, 0x04_u8);
+}
+
+// from byte array to integral
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_const_ref_bytes__always__expected)
+{
+    auto& value = byte_cast(bytes4);
+    BOOST_REQUIRE_EQUAL(value, value4);
+
+    // byte_cast(non-const) produces non-const inferred unsigned integral type.
+    static_assert(is_same_type<decltype(value), const unsigned_type<size4>&>);
+}
+
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_non_const_ref_bytes__always__expected)
+{
+    std::array<int8_t, size4> bytes{ 0x01_i8, 0x02_i8, 0x03_i8, 0x04_i8 };
+    auto& value = byte_cast(bytes);
+    BOOST_REQUIRE_EQUAL(value, value4);
+
+    // byte_cast(non-const) produces non-const inferred unsigned integral type.
+    static_assert(is_same_type<decltype(value), unsigned_type<size4>&>);
+
+    // demonstrate assignment through the cast
+    value = native_to_big_end(0xaabbccdd_u32);
+    BOOST_REQUIRE_EQUAL(bytes[0], 0xaa_i8);
+    BOOST_REQUIRE_EQUAL(bytes[1], 0xbb_i8);
+    BOOST_REQUIRE_EQUAL(bytes[2], 0xcc_i8);
+    BOOST_REQUIRE_EQUAL(bytes[3], 0xdd_i8);
+}
+
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_rvalue_bytes__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(byte_cast(data_array<size4>{ 0x01_u8, 0x02_u8, 0x03_u8, 0x04_u8 }), value4);
+}
+
+// from byte* to integral
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_const_byte_ptr__always__expected)
+{
+    const auto bytes4_ptr = bytes4.data();
+    auto& value = unsafe_byte_cast<uint32_t>(bytes4_ptr);
+
+    // byte_cast(const) produces const specified integral type.
+    static_assert(is_same_type<decltype(value), const uint32_t&>);
+
+    BOOST_REQUIRE_EQUAL(value, value4);
+}
+
+BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_non_const_byte_ptr__always__expected)
+{
+    std::array<int8_t, size4> bytes{ 0x01_i8, 0x02_i8, 0x03_i8, 0x04_i8 };
+    auto bytes_ptr = bytes.data();
+    auto& value = unsafe_byte_cast<uint32_t, int8_t>(bytes_ptr);
+    BOOST_REQUIRE_EQUAL(value, value4);
+
+    // byte_cast(non-const) produces non-const specified integral type.
+    static_assert(is_same_type<decltype(value), uint32_t&>);
+
+    // demonstrate assignment through the cast
+    value = native_to_big_end(0xaabbccdd_u32);
+    BOOST_REQUIRE_EQUAL(bytes[0], 0xaa_i8);
+    BOOST_REQUIRE_EQUAL(bytes[1], 0xbb_i8);
+    BOOST_REQUIRE_EQUAL(bytes[2], 0xcc_i8);
+    BOOST_REQUIRE_EQUAL(bytes[3], 0xdd_i8);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

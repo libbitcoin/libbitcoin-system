@@ -26,7 +26,6 @@
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -34,31 +33,31 @@ namespace system {
 namespace sha256 { 
 
 // Forward declarations for each transform implementation.
-void single_shani(state& state, const block1& block) NOEXCEPT;
-void single_sse4(state& state, const block1& block) NOEXCEPT;
-void single_neon(state& state, const block1& block) NOEXCEPT;
-void single_hash(state& state, const block1& block) NOEXCEPT;
+void hash_shani(state& state, const block1& block) NOEXCEPT;
+void hash_sse4(state& state, const block1& block) NOEXCEPT;
+void hash_neon(state& state, const block1& block) NOEXCEPT;
+void hash_native(state& state, const block1& block) NOEXCEPT;
 
 // Forward declarations for each double sha56 implementation.
-void double_shani(digest2& out, const block2& block) NOEXCEPT;
-void double_shani(digest1& out, const block1& block) NOEXCEPT;
-void double_avx2(digest8& out, const block8& block) NOEXCEPT;
-void double_sse41(digest4& out, const block4& block) NOEXCEPT;
-void double_sse4(digest1& out, const block1& block) NOEXCEPT;
-void double_neon(digest1& out, const block1& block) NOEXCEPT;
-void double_hash(digest1& out, const block1& block) NOEXCEPT;
+void merkle_shani(digest2& out, const block2& block) NOEXCEPT;
+void merkle_shani(digest1& out, const block1& block) NOEXCEPT;
+void merkle_avx2(digest8& out, const block8& block) NOEXCEPT;
+void merkle_sse41(digest4& out, const block4& block) NOEXCEPT;
+void merkle_sse4(digest1& out, const block1& block) NOEXCEPT;
+void merkle_neon(digest1& out, const block1& block) NOEXCEPT;
+void merkle_hash(digest1& out, const block1& block) NOEXCEPT;
 
-// merkle_root (double hashed and finalized set of blocks)
+// merkle (finalized merkle)
 // ----------------------------------------------------------------------------
 
-void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
+void merkle_hash(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 {
     // sha256 acceleration (optimum).
     if (have_shani())
     {
         while (blocks >= 2u)
         {
-            double_shani(
+            merkle_shani(
                 unsafe_array_cast<digest, 2>(out),
                 unsafe_array_cast<block, 2>(in));
             std::advance(out, digest_size * 2);
@@ -68,7 +67,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 
         while (to_bool(blocks--))
         {
-            double_shani(
+            merkle_shani(
                 unsafe_array_cast<digest>(out),
                 unsafe_array_cast<block>(in));
             std::advance(out, digest_size);
@@ -82,7 +81,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (blocks >= 8u)
         {
-            double_avx2(
+            merkle_avx2(
                 unsafe_array_cast<digest, 8>(out),
                 unsafe_array_cast<block, 8>(in));
             std::advance(out, digest_size * 8);
@@ -95,7 +94,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (blocks >= 4u)
         {
-            double_sse41(
+            merkle_sse41(
                 unsafe_array_cast<digest, 4>(out),
                 unsafe_array_cast<block, 4>(in));
             std::advance(out, digest_size * 4);
@@ -108,7 +107,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (to_bool(blocks--))
         {
-            double_sse4(unsafe_array_cast<digest>(out),
+            merkle_sse4(unsafe_array_cast<digest>(out),
                 unsafe_array_cast<block>(in));
             std::advance(out, digest_size);
             std::advance(in, block_size);
@@ -121,7 +120,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (to_bool(blocks--))
         {
-            double_neon(
+            merkle_neon(
                 unsafe_array_cast<digest>(out),
                 unsafe_array_cast<block>(in));
             std::advance(out, digest_size);
@@ -133,7 +132,7 @@ void transform(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT
 
     while (to_bool(blocks--))
     {
-        double_hash(
+        merkle_hash(
             unsafe_array_cast<digest>(out),
             unsafe_array_cast<block>(in));
         std::advance(out, digest_size);
@@ -154,8 +153,10 @@ digest merkle_root(digests&& hashes) NOEXCEPT
 
     while (is_even(hashes.size()))
     {
+        // N blocks in, N/2 hashes out.
         const auto half = to_half(hashes.size());
-        transform(
+
+        merkle_hash(
             pointer_cast<uint8_t>(hashes.data()), half,
             pointer_cast<const uint8_t>(hashes.data()));
         hashes.resize(half);
@@ -164,20 +165,19 @@ digest merkle_root(digests&& hashes) NOEXCEPT
     return std::move(hashes.front());
 }
 
-// Hash (unfinalized blocks transformation).
+// hash (unfinalized blocks)
 // ----------------------------------------------------------------------------
 
-// TODO: move all iteration into implementations.
 // Transformation is unfinalized (counter not incorporated, result in state).
-void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
+void update(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
 {
     // sha256 acceleration (optimum).
     if (have_shani())
     {
         while (to_bool(blocks--))
         {
-            // TODO: use single_shani(state, blocks{ in }) for all.
-            single_shani(state, unsafe_array_cast<block>(in));
+            // TODO: use hash_shani(state, blocks{ in }) for all.
+            hash_shani(state, unsafe_array_cast<block>(in));
             std::advance(in, block_size);
         }
 
@@ -188,8 +188,8 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (to_bool(blocks--))
         {
-            // TODO: use single_sse4(state, blocks{ in }) for all.
-            single_sse4(state, unsafe_array_cast<block>(in));
+            // TODO: use hash_sse4(state, blocks{ in }) for all.
+            hash_sse4(state, unsafe_array_cast<block>(in));
             std::advance(in, block_size);
         }
 
@@ -200,8 +200,8 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
     {
         while (to_bool(blocks--))
         {
-            // TODO: use single_neon(state, blocks{ in }) for all.
-            single_neon(state, unsafe_array_cast<block>(in));
+            // TODO: use hash_neon(state, blocks{ in }) for all.
+            hash_neon(state, unsafe_array_cast<block>(in));
             std::advance(in, block_size);
         }
 
@@ -211,137 +211,30 @@ void transform(state& state, size_t blocks, const uint8_t* in) NOEXCEPT
     while (to_bool(blocks--))
     {
         // TODO: use single_hash(state, blocks{ in }) for all [generalize first].
-        single_hash(state, unsafe_array_cast<block>(in));
+        hash_native(state, unsafe_array_cast<block>(in));
         std::advance(in, block_size);
     }
+}
+
+// TODO: implemented for all in native (for NORMAL_FORM localization).
+void hash_finalize(digest& out, const state& state) NOEXCEPT;
+void finalize(const state& state, uint8_t* out32) NOEXCEPT
+{
+    // TODO: This is called for all, but currently hash endianness is only
+    // TODO: unreversed for native. So cannot be use for shani/sse4/neon yet.
+    hash_finalize(unsafe_array_cast<uint8_t, digest_size>(out32), state);
 }
 
 // False only on hash function overflow: (2^64-8)/8 bytes written.
 bool hash(uint8_t* out32, size_t size, const uint8_t* in) NOEXCEPT
 {
-    sha256::context context{};
-    if (!update(context, size, in))
+    sha256::context context;
+    if (!context.write(size, in))
         return false;
 
-    finalize(context, out32);
+    context.flush(out32);
     return true;
 }
-
-#ifdef DISABLED
-
-////void single_avx2(state& state, const block8& block) NOEXCEPT;
-////void single_avx2(state& state, const block4& block) NOEXCEPT;
-////void single_avx2(state& state, const block2& block) NOEXCEPT;
-////void single_avx2(state& state, const block1& block) NOEXCEPT;
-////void single_sse41(state& state, const block4& block) NOEXCEPT;
-////void single_sse41(state& state, const block2& block) NOEXCEPT;
-////void single_sse41(state& state, const block1& block) NOEXCEPT;
-////void single_sse4(state& state, const block4& block) NOEXCEPT;
-////void single_sse4(state& state, const block2& block) NOEXCEPT;
-////void single_neon(state& state, const block4& block) NOEXCEPT;
-////void single_neon(state& state, const block2& block) NOEXCEPT;
-////void single_shani(state& state, const block2& block) NOEXCEPT;
-
-////void double_avx2(digest4& out, const block4& block) NOEXCEPT;
-////void double_avx2(digest2& out, const block2& block) NOEXCEPT;
-////void double_avx2(digest1& out, const block1& block) NOEXCEPT;
-////void double_sse41(digest2& out, const block2& block) NOEXCEPT;
-////void double_sse41(digest1& out, const block1& block) NOEXCEPT;
-////void double_neon(digest4& out, const block4& block) NOEXCEPT;
-////void double_neon(digest2& out, const block2& block) NOEXCEPT;
-////void double_sse4(digest4& out, const block4& block) NOEXCEPT;
-////void double_sse4(digest2& out, const block2& block) NOEXCEPT;
-
-// TODO: The fill transform could be consolidated with full blocks.
-// TODO: This would allow it to be parallelized to the maximum extent.
-// TODO: But because bytes have been copied to buffer they are not
-// TODO: contiguous with input. This also implies that a streaming
-// TODO: hash will be denied the optimization of multi-lane hashing.
-// TODO: This can be mitigated in the stream writer using an accumulator
-// TODO: of 1/2/4/8 * 64 bytes. It would be suboptimal in other contexts.
-// TODO: The writer can be initialized with a buffer multiple, which can be
-// TODO: informed by the available lane optimizations.
-
-// TODO: Change transform to pass blocks and create blocks overloads.
-// TODO: This implies a template implementation of each for up to lane blocks.
-// TODO: Transform should otherwise iterate over all of the blocks, handling
-// TODO: 1, 2, 4, or 8 at a time as applicable. This is the same approach as
-// TODO: used in the double hash dispatch.
-
-// This is the implementation above, but cannot be generalized in the same
-// manner because avx2 and sse41 incorporate padding into the hash function.
-// As such portable, shani, neon, and sse4 doubling externally incorporate
-// padding as wrapper functions, which generalizes the implementation.
-////void sha256_double(uint8_t* out, size_t blocks, const uint8_t* in) NOEXCEPT;
-
-// TODO: non-streaming hashes:
-// TODO: Make generalized template for hash of any size < block_size - 8.
-// TODO: Generate pad from size, where size +1 is sentinel and pad-8 is count.
-// TODO: Copy data into pad, transform, and emit big endian state as bytes.
-// TODO: Generalize to any size by transforming size/block_size blocks and then
-// TODO: applying above to the remaining bytes. size % block_size = 0 implies a
-// TODO: full block of pad/count. Can also apply double variant of this model.
-
-// 64 byte hashes
-// ----------------------------------------------------------------------------
-
-// This is equivalent to sha256_single(*, 1, *) and more efficient.
-// It avoids allocation of context buffer and computation/serialize of counter.
-void sha256_single(digest& out, const block& in) NOEXCEPT
-{
-    // Transform into state.
-    auto state = sha256::initial;
-    transform(state, one, in.data());
-
-    // Transform pad/count and emit state to out.
-    transform(state, one, sha256::pad_64.data());
-    to_big_endians(array_cast<uint32_t>(out), state);
-}
-
-// This is equivalent to sha256_double(*, 1, *) and trivially more efficient.
-void sha256_double(digest& out, const block& in) NOEXCEPT
-{
-    // Emit sha256_single(block) into pad/count buffer.
-    auto buffer = sha256::pad_32;
-    sha256_single(narrowing_array_cast<uint8_t, digest_size>(buffer), in);
-
-    // Transform result and emit state to out.
-    auto state = sha256::initial;
-    transform(state, one, buffer.data());
-    to_big_endians(array_cast<uint32_t>(out), state);
-}
-
-// 32 byte hashes
-// ----------------------------------------------------------------------------
-
-// This is equivalent to sha256_single(*, 1, *) and more efficient.
-// It avoids allocation of context buffer and computation/serialize of counter.
-void sha256_single(digest& out, const digest& in) NOEXCEPT
-{
-    // Copy hash into pad/count buffer for transform.
-    auto buffer = sha256::pad_32;
-    std::copy(in.begin(), in.end(), buffer.begin());
-
-    // Transform and emit state to out.
-    auto state = sha256::initial;
-    transform(state, one, buffer.data());
-    to_big_endians(array_cast<uint32_t>(out), state);
-}
-
-// This is not supported by sha256_double(*, n, *) as it is blocks only.
-void sha256_double(digest& out, const digest& in) NOEXCEPT
-{
-    // Emit sha256_single(hash) into pad/count buffer.
-    auto buffer = sha256::pad_32;
-    sha256_single(narrowing_array_cast<uint8_t, digest_size>(buffer), in);
-
-    // Transform result and emit state to out.
-    auto state = sha256::initial;
-    transform(state, one, buffer.data());
-    to_big_endians(array_cast<uint32_t>(out), state);
-}
-
-#endif // VISUAL
 
 } // namespace sha256
 } // namespace system
