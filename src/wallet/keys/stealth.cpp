@@ -62,7 +62,7 @@ bool create_ephemeral_key(ec_secret& out_secret,
     for (uint8_t nonce = 0; nonce < max_uint8; ++nonce)
     {
         nonced_seed[0] = nonce;
-        out_secret = hmac_sha256_hash(nonced_seed, "Stealth seed");
+        out_secret = hmac_sha256(nonced_seed, "Stealth seed");
 
         if (secret_to_public(point, out_secret) && is_even_key(point))
             return true;

@@ -30,7 +30,7 @@
  * Adapted:
  *      by Libbitcoin Developers on 7 September 2016
  */
-#include <bitcoin/system/crypto/external/sha1.hpp>
+#include <bitcoin/system/crypto/external/sha160.hpp>
 
 #include <bitcoin/system/define.hpp>
 
@@ -39,11 +39,11 @@
 #define SHIFT(bits, word) \
     (((word) << (bits)) | ((word) >> (32 - (bits))))
 
-void SHA1PadMessage(SHA1CTX* context);
-void SHA1ProcessMessageBlock(SHA1CTX* context);
+void SHA1PadMessage(SHA1CTX* context) NOEXCEPT;
+void SHA1ProcessMessageBlock(SHA1CTX* context) NOEXCEPT;
 
 void SHA1(const uint8_t* message, size_t length,
-    uint8_t digest[SHA1_DIGEST_LENGTH])
+    uint8_t digest[SHA1_DIGEST_LENGTH]) NOEXCEPT
 {
     SHA1CTX context;
     SHA1Init(&context);
@@ -51,7 +51,7 @@ void SHA1(const uint8_t* message, size_t length,
     SHA1Final(&context, digest);
 }
 
-void SHA1Init(SHA1CTX* context)
+void SHA1Init(SHA1CTX* context) NOEXCEPT
 {
     context->state[0] = 0x67452301;
     context->state[1] = 0xEFCDAB89;
@@ -62,7 +62,7 @@ void SHA1Init(SHA1CTX* context)
     context->index = 0;
 }
 
-void SHA1Update(SHA1CTX* context, const uint8_t* message, size_t length)
+void SHA1Update(SHA1CTX* context, const uint8_t* message, size_t length) NOEXCEPT
 {
     /* Guard against overflow in while loop (returns digest of empty message). */
     if (length > SIZE_MAX / 8)
@@ -82,7 +82,7 @@ void SHA1Update(SHA1CTX* context, const uint8_t* message, size_t length)
     }
 }
 
-void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH])
+void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH]) NOEXCEPT
 {
     size_t i;
 
@@ -101,7 +101,7 @@ void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH])
 
 /* Local */
 
-void SHA1ProcessMessageBlock(SHA1CTX* context)
+void SHA1ProcessMessageBlock(SHA1CTX* context) NOEXCEPT
 {
     const uint32_t K[] =
     {
@@ -184,7 +184,7 @@ void SHA1ProcessMessageBlock(SHA1CTX* context)
     context->index = 0;
 }
 
-void SHA1PadMessage(SHA1CTX* context)
+void SHA1PadMessage(SHA1CTX* context) NOEXCEPT
 {
     uint32_t lo_length;
     uint32_t hi_length;

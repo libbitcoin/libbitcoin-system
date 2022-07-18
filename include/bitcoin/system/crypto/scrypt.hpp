@@ -21,7 +21,7 @@
 
 #include <memory>
 #include <bitcoin/system/crypto/sha256.hpp>
-#include <bitcoin/system/crypto/pbkdf2_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -38,8 +38,7 @@ constexpr auto is_scrypt_args =
     ((W > one) && (power2(floored_log2(W)) == W)) &&
     (safe_multiply(R, P) < power2<uint32_t>(30u));
 
-/// Concurrent increases memory consumption from peak minimum as a tradeoff for
-/// decreased processing time. Memory is heap allocated 
+/// Concurrent increases memory consumption from minimum to maximum.
 template<size_t W, size_t R, size_t P, bool Concurrent = false,
     bool_if<is_scrypt_args<W, R, P>> If = true>
 class scrypt
@@ -67,7 +66,7 @@ public:
 
     /// Returns null hash if out of memory.
     template<size_t Size,
-        if_not_greater<Size, pbkdf2::maximum_size> = true>
+        if_not_greater<Size, pbkd::sha256::maximum_size> = true>
     static data_array<Size> hash(const data_slice& phrase,
         const data_slice& salt) NOEXCEPT
     {

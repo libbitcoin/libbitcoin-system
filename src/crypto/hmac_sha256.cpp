@@ -25,41 +25,45 @@
 
 namespace libbitcoin {
 namespace system {
-namespace hmac_sha256 {
-
-using namespace bc::system::sha256;
-
+namespace hmac {
+namespace sha256 {
+    
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 constexpr void xor_n(uint8_t* to, const uint8_t* from, size_t size) NOEXCEPT
+BC_POP_WARNING()
 {
     for (size_t i = 0; i < size; ++i)
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         to[i] ^= from[i];
+        BC_POP_WARNING()
+    }
 }
 
 void hash(const uint8_t* data, size_t length, const uint8_t* key,
     size_t key_size, uint8_t* digest) NOEXCEPT
 {
-    hmac_sha256_context context;
+    context context;
     initialize(context, key, key_size);
     update(context, data, length);
     finalize(context, digest);
 }
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-void initialize(hmac_sha256_context& context, const uint8_t* key,
-    size_t size) NOEXCEPT
+void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT
 BC_POP_WARNING()
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    data_array<block_size> pad;
-    data_array<digest_size> key_hash;
+    data_array<system::sha256::block_size> pad;
+    data_array<system::sha256::digest_size> key_hash;
     BC_POP_WARNING()
 
-    if (size > block_size)
+    if (size > system::sha256::block_size)
     {
         context.in.write(size, key);
         context.in.flush(key_hash.data());
         key = key_hash.data();
-        size = digest_size;
+        size = system::sha256::digest_size;
     }
     
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -68,7 +72,7 @@ BC_POP_WARNING()
 
     pad.fill(0x36_u8);
     xor_n(&pad[0], key, size);
-    context.in.write(block_size, pad.data());
+    context.in.write(system::sha256::block_size, pad.data());
     pad.fill(0x5c_u8);
     xor_n(&pad[0], key, size);
 
@@ -76,22 +80,22 @@ BC_POP_WARNING()
     BC_POP_WARNING()
     BC_POP_WARNING()
 
-    context.out.write(block_size, pad.data());
+    context.out.write(system::sha256::block_size, pad.data());
 }
 
-void update(hmac_sha256_context& context, const uint8_t* data,
-    size_t size) NOEXCEPT
+void update(context& context, const uint8_t* data, size_t size) NOEXCEPT
 {
     context.in.write(size, data);
 }
 
-void finalize(hmac_sha256_context& context, uint8_t* digest) NOEXCEPT
+void finalize(context& context, uint8_t* digest) NOEXCEPT
 {
     context.in.flush(digest);
-    context.out.write(digest_size, digest);
+    context.out.write(system::sha256::digest_size, digest);
     context.out.flush(digest);
 }
 
-} // namespace hmac_sha256
+} // namespace sha256
+} // namespace hmac
 } // namespace system
 } // namespace libbitcoin

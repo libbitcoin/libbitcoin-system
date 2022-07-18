@@ -24,7 +24,7 @@
 #include <bit>
 #include <execution>
 #include <memory>
-#include <bitcoin/system/crypto/pbkdf2_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -229,16 +229,16 @@ bool scrypt<W, R, P, Concurrent, If>::
 hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
     size_t size) NOEXCEPT
 {
-    // First pbkdf2 cannot fail because [P * rblock] is guarded to be less
-    // than power2<uint32_t>(30u) which is less than pbkdf2::maximum_size.
-    static_assert(power2<uint32_t>(30u) < pbkdf2::maximum_size);
+    // First pbkdf2 cannot fail because [P * rblock] is guarded to be less than
+    // power2<uint32_t>(30u) which is less than pbkd::sha256::maximum_size.
+    static_assert(power2<uint32_t>(30u) < pbkd::sha256::maximum_size);
 
     // [P * (R * 128)] bytes heap allocated.
     const auto p_ptr = allocate<pblock_type>();
     if (!p_ptr) return false;
     auto& p = *p_ptr;
 
-    pbkdf2::sha256(phrase.data(), phrase.size(),
+    pbkd::sha256::hash(phrase.data(), phrase.size(),
         salt.data(), salt.size(), one, p.data(), p.size());
 
     // Parallel conditionally enables parallel execution (blows up memory).
@@ -249,8 +249,8 @@ hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
         success = success && mix(block.data());
     });
 
-    // False if mix failed or size > pbkdf2::maximum_size.
-    return success && pbkdf2::sha256(phrase.data(), phrase.size(),
+    // False if mix failed or size > pbkd::sha256::maximum_size.
+    return success && pbkd::sha256::hash(phrase.data(), phrase.size(),
         p.data(), p.size(), one, buffer, size);
 }
 

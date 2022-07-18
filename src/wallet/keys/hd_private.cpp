@@ -130,7 +130,7 @@ hd_private hd_private::from_entropy(const data_slice& entropy,
 {
     // This is a magic constant from BIP32.
     static const auto magic = to_chunk("Bitcoin seed");
-    const auto intermediate = split(hmac_sha512_hash(entropy, magic));
+    const auto intermediate = split(hmac_sha512(entropy, magic));
 
     return hd_private(intermediate.first, intermediate.second, prefixes);
 }
@@ -247,7 +247,7 @@ hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
         splice(to_array(depth), secret_, to_big_endian(index)) :
         splice(point_, to_big_endian(index));
 
-    const auto intermediate = split(hmac_sha512_hash(data, chain_));
+    const auto intermediate = split(hmac_sha512(data, chain_));
 
     // The child key ki is (parse256(IL) + kpar) mod n:
     auto child = secret_;

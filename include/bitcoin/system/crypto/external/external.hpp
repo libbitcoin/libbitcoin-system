@@ -20,9 +20,9 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_EXTERNAL_HPP
 
 #include <bitcoin/system/crypto/external/hmac_sha512.hpp>
-#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
+#include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
-#include <bitcoin/system/crypto/external/sha1.hpp>
+#include <bitcoin/system/crypto/external/sha160.hpp>
 #include <bitcoin/system/crypto/external/sha512.hpp>
 
 #endif

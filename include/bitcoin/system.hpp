@@ -82,7 +82,7 @@
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/crypto/hmac_sha256.hpp>
-#include <bitcoin/system/crypto/pbkdf2_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/scrypt.hpp>
@@ -91,9 +91,9 @@
 #include <bitcoin/system/crypto/siphash.hpp>
 #include <bitcoin/system/crypto/external/external.hpp>
 #include <bitcoin/system/crypto/external/hmac_sha512.hpp>
-#include <bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp>
+#include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
-#include <bitcoin/system/crypto/external/sha1.hpp>
+#include <bitcoin/system/crypto/external/sha160.hpp>
 #include <bitcoin/system/crypto/external/sha512.hpp>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/byte_cast.hpp>

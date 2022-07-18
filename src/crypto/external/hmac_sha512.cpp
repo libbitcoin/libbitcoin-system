@@ -32,7 +32,7 @@
  // TODO: make constexpr (cpp).
 
 void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH])
+    size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH]) NOEXCEPT
 {
     HMACSHA512CTX context;
     HMACSHA512Init(&context, key, key_length);
@@ -41,7 +41,7 @@ void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
 }
 
 void HMACSHA512Final(HMACSHA512CTX* context, 
-    uint8_t digest[HMACSHA512_DIGEST_LENGTH])
+    uint8_t digest[HMACSHA512_DIGEST_LENGTH]) NOEXCEPT
 {
     uint8_t hash[HMACSHA512_DIGEST_LENGTH];
 
@@ -54,7 +54,7 @@ void HMACSHA512Final(HMACSHA512CTX* context,
 }
 
 void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key, 
-    size_t key_length)
+    size_t key_length) NOEXCEPT
 {
     size_t i;
     uint8_t pad[SHA512_BLOCK_LENGTH];
@@ -89,7 +89,7 @@ void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
 }
 
 void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
-    size_t length)
+    size_t length) NOEXCEPT
 {
     SHA512Update(&context->ictx, input, length);
 }

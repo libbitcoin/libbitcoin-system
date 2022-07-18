@@ -19,11 +19,8 @@
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <string>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -221,7 +218,7 @@ hash_digest electrum_v1::strecher(const data_chunk& seed_entropy) NOEXCEPT
 
     data_chunk streched{ seed_entropy };
     for (size_t count = 0; count < hash_iterations; ++count)
-        streched = sha256_hash_chunk(splice(streched, seed_entropy));
+        streched = sha256_chunk(splice(streched, seed_entropy));
 
     return to_array<hash_size>(streched);
 }

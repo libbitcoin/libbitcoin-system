@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-/// DELETECSTDINT
 
 BOOST_AUTO_TEST_SUITE(checksum_tests)
 
@@ -34,13 +33,13 @@ const auto bip173_testnet_p2wsh = "qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccef
 const auto bip173_ec_compressed = base16_array("0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
 
 // BIP141: The HASH160 of the pubkey in witness must match the 20 byte witness program.
-const auto bip173_p2wkh_program = ripemd160_hash_chunk(sha256_hash(bip173_ec_compressed));
+const auto bip173_p2wkh_program = ripemd160_chunk(sha256_hash(bip173_ec_compressed));
 
 // BIP173: The P2WSH examples use key OP_CHECKSIG (to_pay_public_key_pattern) as script.
 const auto bip173_p2wsh_opcodes = chain::script::to_pay_public_key_pattern(bip173_ec_compressed);
 
 // BIP141: The SHA256 of the script must match the 32 byte witness program.
-const auto bip173_p2wsh_program = sha256_hash_chunk(chain::script(bip173_p2wsh_opcodes).to_data(false));
+const auto bip173_p2wsh_program = sha256_chunk(chain::script(bip173_p2wsh_opcodes).to_data(false));
 
 // insert_checksum
 

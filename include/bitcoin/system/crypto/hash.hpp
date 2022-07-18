@@ -23,6 +23,7 @@
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -37,121 +38,77 @@ static constexpr size_t quarter_hash_size = bytes<64>;
 static constexpr size_t mini_hash_size = bytes<48>;
 
 /// Common bitcoin hash containers.
-typedef data_array<mini_hash_size> mini_hash;
+typedef data_array<long_hash_size> long_hash;
+typedef data_array<hash_size> hash_digest;
+typedef data_array<short_hash_size> short_hash;
 typedef data_array<quarter_hash_size> quarter_hash;
 typedef data_array<half_hash_size> half_hash;
-typedef data_array<short_hash_size> short_hash;
-typedef data_array<hash_size> hash_digest;
-typedef data_array<long_hash_size> long_hash;
+typedef data_array<mini_hash_size> mini_hash;
 typedef std::shared_ptr<hash_digest> hash_ptr;
 
 /// Lists of common bitcoin hashes.
-typedef std::vector<mini_hash> mini_hash_list;
-typedef std::vector<quarter_hash> quarter_hash_list;
-typedef std::vector<half_hash> half_hash_list;
-typedef std::vector<short_hash> short_hash_list;
-typedef std::vector<hash_digest> hash_list;
 typedef std::vector<long_hash> long_hash_list;
+typedef std::vector<hash_digest> hash_list;
+typedef std::vector<short_hash> short_hash_list;
+typedef std::vector<half_hash> half_hash_list;
+typedef std::vector<quarter_hash> quarter_hash_list;
+typedef std::vector<mini_hash> mini_hash_list;
 
 /// Null-valued common hashes.
+constexpr long_hash null_long_hash{};
+constexpr hash_digest null_hash{};
+constexpr short_hash null_short_hash{};
+constexpr half_hash null_half_hash{};
+constexpr quarter_hash null_quarter_hash{};
+constexpr mini_hash null_mini_hash{};
 
-constexpr mini_hash null_mini_hash
-{
-    {
-        0, 0, 0, 0, 0, 0
-    }
-};
+// Consensus sentinel hash.
+constexpr hash_digest one_hash = from_uintx(uint256_t(one));
 
-constexpr quarter_hash null_quarter_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-constexpr half_hash null_half_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-constexpr short_hash null_short_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-constexpr hash_digest null_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-// Consensus sentinel.
-constexpr hash_digest one_hash
-{
-    {
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-
-constexpr long_hash null_long_hash
-{
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    }
-};
-/// Generate a bitcoin hash.
+/// Generate a bitcoin hash (sha256(sha256)).
 BC_API hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT;
 
-/// Generate a bitcoin hash of first + second concatenation.
-BC_API hash_digest bitcoin_hash(const data_slice& first,
-    const data_slice& second) NOEXCEPT;
+/// Generate a bitcoin hash (sha256(sha256)) of left + right concatenation.
+BC_API hash_digest bitcoin_hash(const data_slice& left,
+    const data_slice& right) NOEXCEPT;
 
-/// Generate a bitcoin short hash.
+/// Generate a bitcoin short hash (ripemd160(sha256)).
 BC_API short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT;
 
 /// Generate a ripemd160 hash.
 BC_API short_hash ripemd160_hash(const data_slice& data) NOEXCEPT;
-BC_API data_chunk ripemd160_hash_chunk(const data_slice& data) NOEXCEPT;
+BC_API data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT;
 
-/// Generate a sha1 hash.
+/// Generate a sha1 (160 bit) hash.
 BC_API short_hash sha1_hash(const data_slice& data) NOEXCEPT;
-BC_API data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT;
+BC_API data_chunk sha1_chunk(const data_slice& data) NOEXCEPT;
 
 /// Generate a sha256 hash.
 BC_API hash_digest sha256_hash(const data_slice& data) NOEXCEPT;
-BC_API data_chunk sha256_hash_chunk(const data_slice& data) NOEXCEPT;
+BC_API data_chunk sha256_chunk(const data_slice& data) NOEXCEPT;
 
-/// Generate a sha256 hash of first + second concatenation.
+/// Generate a sha256 hash of left + right concatenation.
 /// This hash function is used in electrum seed stretching.
-BC_API hash_digest sha256_hash(const data_slice& first,
-    const data_slice& second) NOEXCEPT;
+BC_API hash_digest sha256_hash(const data_slice& left,
+    const data_slice& right) NOEXCEPT;
+
 // Generate a hmac sha256 hash.
-BC_API hash_digest hmac_sha256_hash(const data_slice& data,
+BC_API hash_digest hmac_sha256(const data_slice& data,
     const data_slice& key) NOEXCEPT;
 
-/// Generate a pbkdf2 hmac sha256 hash.
-BC_API data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
+/// Generate a pkcs5 pbkdf2 hmac sha256 hash.
+BC_API data_chunk pbkd_sha256(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length) NOEXCEPT;
 
 /// Generate a sha512 hash.
 BC_API long_hash sha512_hash(const data_slice& data) NOEXCEPT;
 
 /// Generate a hmac sha512 hash.
-BC_API long_hash hmac_sha512_hash(const data_slice& data,
+BC_API long_hash hmac_sha512(const data_slice& data,
     const data_slice& key) NOEXCEPT;
 
 /// Generate a pkcs5 pbkdf2 hmac sha512 hash.
-BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
+BC_API long_hash pbkd_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations) NOEXCEPT;
 
 /// Generate a scrypt hash.

@@ -28,7 +28,7 @@
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/crypto/hmac_sha256.hpp>
-#include <bitcoin/system/crypto/pbkdf2_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/scrypt.hpp>

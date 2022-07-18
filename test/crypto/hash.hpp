@@ -28,7 +28,7 @@ struct hash_result
     std::string result;
 };
 
-struct pkcs5_pbkdf2_hmac_sha512_result
+struct pbkd_sha512_result
 {
     std::string passphrase;
     std::string salt;
@@ -46,7 +46,7 @@ struct pbkdf2_hmac_sha256_result
 };
 
 typedef std::vector<hash_result> hash_result_list;
-typedef std::vector<pkcs5_pbkdf2_hmac_sha512_result> pkcs5_pbkdf2_hmac_sha512_result_list;
+typedef std::vector<pbkd_sha512_result> pbkd_sha512_result_list;
 typedef std::vector<pbkdf2_hmac_sha256_result> pbkdf2_hmac_sha256_result_list;
 
 hash_result_list sha1_tests{{
@@ -145,7 +145,7 @@ hash_result_list ripemd_tests{{
     {"59ce28d8016e7ebb1dedbfef16686735ed65", "0a71887812c3d5c241bcd651a736a0fe9baa86fd"}
 }};
 
-pkcs5_pbkdf2_hmac_sha512_result_list pkcs5_pbkdf2_hmac_sha512_tests
+pbkd_sha512_result_list pbkd_sha512_tests
 {{
     {"password", "salt", 1, "867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce"},
     {"password", "salt", 2, "e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e"},

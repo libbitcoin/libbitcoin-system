@@ -26,8 +26,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SHA512_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_SHA512_HPP
 
-#include <stdint.h>
-#include <stddef.h>
+#include <bitcoin/system/define.hpp>
 
 #define SHA512_STATE_LENGTH 8U
 #define SHA512_COUNT_LENGTH 2U
@@ -42,10 +41,10 @@ typedef struct SHA512CTX
 } SHA512CTX;
 
 void SHA512(const uint8_t* input, size_t length,
-    uint8_t digest[SHA512_DIGEST_LENGTH]);
+    uint8_t digest[SHA512_DIGEST_LENGTH]) NOEXCEPT;
 
-void SHA512Init(SHA512CTX* context);
-void SHA512Update(SHA512CTX* context, const uint8_t* input, size_t length);
-void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH]);
+void SHA512Init(SHA512CTX* context) NOEXCEPT;
+void SHA512Update(SHA512CTX* context, const uint8_t* input, size_t length) NOEXCEPT;
+void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH]) NOEXCEPT;
 
 #endif

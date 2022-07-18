@@ -106,7 +106,7 @@ long_hash mnemonic::seeder(const string_list& words,
     LCOV_EXCL_STOP()
 
     // Words are in normal (lower, nfkd) form, even without ICU.
-    return pkcs5_pbkdf2_hmac_sha512(system::join(words),
+    return pbkd_sha512(system::join(words),
         passphrase_prefix + phrase, hmac_iterations);
 }
 

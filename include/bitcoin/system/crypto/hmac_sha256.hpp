@@ -25,26 +25,26 @@
 
 namespace libbitcoin {
 namespace system {
-namespace hmac_sha256 {
+namespace hmac {
+namespace sha256 {
 
-struct hmac_sha256_context
+struct context
 {
-    sha256::context in;
-    sha256::context out;
+    system::sha256::context in;
+    system::sha256::context out;
 };
 
+/// Single hash.
 void hash(const uint8_t* data, size_t size, const uint8_t* key,
     size_t key_size, uint8_t* digest) NOEXCEPT;
 
-void initialize(hmac_sha256_context& context, const uint8_t* key,
-    size_t size) NOEXCEPT;
+// Streaming hash.
+void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT;
+void update(context& context, const uint8_t* data, size_t size) NOEXCEPT;
+void finalize(context& context, uint8_t* digest) NOEXCEPT;
 
-void update(hmac_sha256_context& context, const uint8_t* data,
-    size_t size) NOEXCEPT;
-
-void finalize(hmac_sha256_context& context, uint8_t* digest) NOEXCEPT;
-
-} // namespace hmac_sha256
+} // namespace sha256
+} // namespace hmac
 } // namespace system
 } // namespace libbitcoin
 

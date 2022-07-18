@@ -154,7 +154,7 @@ bool electrum::validator(const string_list& words, seed_prefix prefix) NOEXCEPT
     sentence = to_non_combining_form(sentence);
     sentence = to_compressed_form(sentence);
 
-    const auto seed = encode_base16(hmac_sha512_hash(sentence, "Seed version"));
+    const auto seed = encode_base16(hmac_sha512(sentence, "Seed version"));
     return starts_with(seed, to_version(prefix));
 }
 
@@ -217,7 +217,7 @@ long_hash electrum::seeder(const string_list& words,
 
     const auto data = to_chunk(sentence);
     const auto salt = to_chunk(passphrase_prefix + phrase);
-    return pkcs5_pbkdf2_hmac_sha512(data, salt, hmac_iterations);
+    return pbkd_sha512(data, salt, hmac_iterations);
 }
 
 // protected static (sizers)

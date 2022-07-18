@@ -9,8 +9,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_RIPEMD160_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_RIPEMD160_HPP
 
-#include <stdint.h>
-#include <stddef.h>
+#include <bitcoin/system/define.hpp>
 
 #define RMD160_STATE_LENGTH 5U
 #define RMD160_CHUNK_LENGTH 16U
@@ -24,10 +23,10 @@ typedef struct RMD160CTX
 } RMD160CTX;
 
 void RMD160(const uint8_t* message, size_t length,
-    uint8_t digest[RMD160_DIGEST_LENGTH]);
+    uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT;
 
-void RMDInit(RMD160CTX* context);
-void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length);
-void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]);
+void RMDInit(RMD160CTX* context) NOEXCEPT;
+void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT;
+void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT;
 
 #endif

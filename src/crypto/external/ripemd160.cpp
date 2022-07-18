@@ -93,11 +93,11 @@
     (c) = ROL((c), 10); \
 }
 
-void RMDcompress(RMD160CTX* context);
-void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length);
+void RMDcompress(RMD160CTX* context) NOEXCEPT;
+void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT;
 
 void RMD160(const uint8_t* message, size_t length,
-    uint8_t digest[RMD160_DIGEST_LENGTH])
+    uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT
 {
     RMD160CTX context;
     RMDInit(&context);
@@ -105,7 +105,7 @@ void RMD160(const uint8_t* message, size_t length,
     RMDFinal(&context, digest);
 }
 
-void RMDInit(RMD160CTX* context)
+void RMDInit(RMD160CTX* context) NOEXCEPT
 {
     context->state[0] = 0x67452301UL;
     context->state[1] = 0xefcdab89UL;
@@ -114,7 +114,7 @@ void RMDInit(RMD160CTX* context)
     context->state[4] = 0xc3d2e1f0UL;
 }
 
-void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length)
+void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT
 {
     size_t i;
     size_t byte;
@@ -133,7 +133,7 @@ void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length)
     RMDfinish(context, message, length);
 }
 
-void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
+void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT
 {
     size_t i;
 
@@ -148,7 +148,7 @@ void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
 
 /* Local */
 
-void RMDcompress(RMD160CTX* context)
+void RMDcompress(RMD160CTX* context) NOEXCEPT
 {
     uint32_t* state = context->state;
     uint32_t* chunk = context->chunk;
@@ -354,7 +354,7 @@ void RMDcompress(RMD160CTX* context)
     state[0] = ddd;
 }
 
-void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length)
+void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT
 {
     uint32_t i;
     uint32_t* chunk = context->chunk;

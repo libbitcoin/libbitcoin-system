@@ -79,15 +79,15 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/golomb_coding.cpp \
     src/crypto/hash.cpp \
     src/crypto/hmac_sha256.cpp \
-    src/crypto/pbkdf2_sha256.cpp \
+    src/crypto/pbkd_sha256.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
     src/crypto/sha256.cpp \
     src/crypto/siphash.cpp \
     src/crypto/external/hmac_sha512.cpp \
-    src/crypto/external/pkcs5_pbkdf2.cpp \
+    src/crypto/external/pbkd_sha512.cpp \
     src/crypto/external/ripemd160.cpp \
-    src/crypto/external/sha1.cpp \
+    src/crypto/external/sha160.cpp \
     src/crypto/external/sha512.cpp \
     src/crypto/sha256/sha256_1_native.cpp \
     src/crypto/sha256/sha256_2_shani.cpp \
@@ -471,7 +471,7 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/golomb_coding.hpp \
     include/bitcoin/system/crypto/hash.hpp \
     include/bitcoin/system/crypto/hmac_sha256.hpp \
-    include/bitcoin/system/crypto/pbkdf2_sha256.hpp \
+    include/bitcoin/system/crypto/pbkd_sha256.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
     include/bitcoin/system/crypto/ring_signature.hpp \
     include/bitcoin/system/crypto/scrypt.hpp \
@@ -483,9 +483,9 @@ include_bitcoin_system_crypto_externaldir = ${includedir}/bitcoin/system/crypto/
 include_bitcoin_system_crypto_external_HEADERS = \
     include/bitcoin/system/crypto/external/external.hpp \
     include/bitcoin/system/crypto/external/hmac_sha512.hpp \
-    include/bitcoin/system/crypto/external/pkcs5_pbkdf2.hpp \
+    include/bitcoin/system/crypto/external/pbkd_sha512.hpp \
     include/bitcoin/system/crypto/external/ripemd160.hpp \
-    include/bitcoin/system/crypto/external/sha1.hpp \
+    include/bitcoin/system/crypto/external/sha160.hpp \
     include/bitcoin/system/crypto/external/sha512.hpp
 
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data

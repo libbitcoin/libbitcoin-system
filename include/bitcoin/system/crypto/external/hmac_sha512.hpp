@@ -38,15 +38,15 @@ typedef struct HMACSHA512CTX
 } HMACSHA512CTX;
 
 void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH]);
+    size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH]) NOEXCEPT;
 
 void HMACSHA512Final(HMACSHA512CTX* context,
-    uint8_t digest[HMACSHA512_DIGEST_LENGTH]);
+    uint8_t digest[HMACSHA512_DIGEST_LENGTH]) NOEXCEPT;
 
 void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
-    size_t key_length);
+    size_t key_length) NOEXCEPT;
 
 void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
-    size_t length);
+    size_t length) NOEXCEPT;
 
 #endif

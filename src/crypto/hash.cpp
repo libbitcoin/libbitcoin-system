@@ -20,13 +20,18 @@
 
 #include <vector>
 #include <bitcoin/system/crypto/aes256.hpp>
-#include <bitcoin/system/crypto/external/external.hpp>
 #include <bitcoin/system/crypto/hmac_sha256.hpp>
-#include <bitcoin/system/crypto/pbkdf2_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/scrypt.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
+
+#include <bitcoin/system/crypto/external/external.hpp>
+////#include <bitcoin/system/crypto/hmac_sha512.hpp>
+////#include <bitcoin/system/crypto/pbkd_sha512.hpp>
+////#include <bitcoin/system/crypto/sha512.hpp>
+
 
 namespace libbitcoin {
 namespace system {
@@ -39,10 +44,10 @@ hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT
     return sha256_hash(sha256_hash(data));
 }
 
-hash_digest bitcoin_hash(const data_slice& first,
-    const data_slice& second) NOEXCEPT
+hash_digest bitcoin_hash(const data_slice& left,
+    const data_slice& right) NOEXCEPT
 {
-    return sha256_hash(sha256_hash(first, second));
+    return sha256_hash(sha256_hash(left, right));
 }
 
 short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
@@ -53,36 +58,28 @@ short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
 short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash;
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     RMD160(data.data(), data.size(), hash.data());
-    BC_POP_WARNING()
     return hash;
 }
 
-data_chunk ripemd160_hash_chunk(const data_slice& data) NOEXCEPT
+data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     RMD160(data.data(), data.size(), hash.data());
-    BC_POP_WARNING()
     return hash;
 }
 
 short_hash sha1_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash;
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     SHA1(data.data(), data.size(), hash.data());
-    BC_POP_WARNING()
     return hash;
 }
 
-data_chunk sha1_hash_chunk(const data_slice& data) NOEXCEPT
+data_chunk sha1_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     SHA1(data.data(), data.size(), hash.data());
-    BC_POP_WARNING()
     return hash;
 }
 
@@ -100,75 +97,64 @@ hash_digest sha256_hash(const data_slice& data) NOEXCEPT
     return hash;
 }
 
-data_chunk sha256_hash_chunk(const data_slice& data) NOEXCEPT
+data_chunk sha256_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(hash_size, no_fill_byte_allocator);
     sha256::hash(hash.data(), data.size(), data.data());
     return hash;
 }
 
-// This overload precludes the need to concatenate first + second.
-hash_digest sha256_hash(const data_slice& first,
-    const data_slice& second) NOEXCEPT
+// This overload precludes the need to concatenate left + right.
+hash_digest sha256_hash(const data_slice& left,
+    const data_slice& right) NOEXCEPT
 {
     hash_digest hash;
     sha256::context context;
-    context.write(first.size(), first.data());
-    context.write(second.size(), second.data());
+    context.write(left.size(), left.data());
+    context.write(right.size(), right.data());
     context.flush(hash.data());
     return hash;
 }
 
-hash_digest hmac_sha256_hash(const data_slice& data,
+hash_digest hmac_sha256(const data_slice& data,
     const data_slice& key) NOEXCEPT
 {
     hash_digest hash;
-    hmac_sha256::hash(data.data(), data.size(), key.data(), key.size(),
+    hmac::sha256::hash(data.data(), data.size(), key.data(), key.size(),
         hash.data());
     return hash;
 }
 
-data_chunk pbkdf2_hmac_sha256_chunk(const data_slice& passphrase,
+data_chunk pbkd_sha256(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length) NOEXCEPT
 {
     data_chunk hash(length, no_fill_byte_allocator);
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    pbkdf2::sha256(passphrase.data(), passphrase.size(), salt.data(),
+    pbkd::sha256::hash(passphrase.data(), passphrase.size(), salt.data(),
         salt.size(), iterations, hash.data(), length);
-    BC_POP_WARNING()
     return hash;
 }
 
 long_hash sha512_hash(const data_slice& data) NOEXCEPT
 {
     long_hash hash;
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     SHA512(data.data(), data.size(), hash.data());
-    BC_POP_WARNING()
     return hash;
 }
 
-long_hash hmac_sha512_hash(const data_slice& data,
+long_hash hmac_sha512(const data_slice& data,
     const data_slice& key) NOEXCEPT
 {
     long_hash hash;
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.data());
-    BC_POP_WARNING()
     return hash;
 }
 
-long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
+long_hash pbkd_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations) NOEXCEPT
 {
-    // If pkcs5_pbkdf2 returns != 0 then hash will be zeroized.
-    // This can only be caused by out-of-memory or invalid parameterization.
     long_hash hash{};
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
+    PBKDSHA512(passphrase.data(), passphrase.size(),
         salt.data(), salt.size(), hash.data(), hash.size(), iterations);
-    BC_POP_WARNING()
     return hash;
 }
 

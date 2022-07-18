@@ -60,19 +60,19 @@ BOOST_AUTO_TEST_CASE(hash__sha256_hash__data__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(hash), "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
 }
 
-BOOST_AUTO_TEST_CASE(hash__hmac_sha256_hash__data_key__expected)
+BOOST_AUTO_TEST_CASE(hash__hmac_sha256__data_key__expected)
 {
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
     const data_chunk key{ 'k', 'e', 'y' };
-    const auto hash = hmac_sha256_hash(chunk, key);
+    const auto hash = hmac_sha256(chunk, key);
     BOOST_REQUIRE_EQUAL(encode_base16(hash), "5031fe3d989c6d1537a013fa6e739da23463fdaec3b70137d828e36ace221bd0");
 }
 
-BOOST_AUTO_TEST_CASE(hash__pbkdf2_hmac_sha256_chunk__pbkdf2_hmac_sha256_tests__expected)
+BOOST_AUTO_TEST_CASE(hash__pbkd_sha256__pbkdf2_hmac_sha256_tests__expected)
 {
     for (const auto& result: pbkdf2_hmac_sha256_tests)
     {
-        const auto data = pbkdf2_hmac_sha256_chunk(result.passphrase, result.salt, result.iterations, result.length);
+        const auto data = pbkd_sha256(result.passphrase, result.salt, result.iterations, result.length);
         BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
     }
 }
@@ -86,19 +86,19 @@ BOOST_AUTO_TEST_CASE(hash__sha512_hash__data__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(long_hash), "77c7ce9a5d86bb386d443bb96390faa120633158699c8844c30b13ab0bf92760b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876");
 }
 
-BOOST_AUTO_TEST_CASE(hash__hmac_sha512_hash__data_key__expected)
+BOOST_AUTO_TEST_CASE(hash__hmac_sha512__data_key__expected)
 {
     const data_chunk chunk{ 'd', 'a', 't', 'a' };
     const data_chunk key{ 'k', 'e', 'y' };
-    const auto long_hash = hmac_sha512_hash(chunk, key);
+    const auto long_hash = hmac_sha512(chunk, key);
     BOOST_REQUIRE_EQUAL(encode_base16(long_hash), "3c5953a18f7303ec653ba170ae334fafa08e3846f2efe317b87efce82376253cb52a8c31ddcde5a3a2eee183c2b34cb91f85e64ddbc325f7692b199473579c58");
 }
 
-BOOST_AUTO_TEST_CASE(hash__hpkcs5_pbkdf2_hmac_sha512__pkcs5_pbkdf2_hmac_sha512_tests__expected)
+BOOST_AUTO_TEST_CASE(hash__hpbkd_sha512__pbkd_sha512_tests__expected)
 {
-    for (const auto& result: pkcs5_pbkdf2_hmac_sha512_tests)
+    for (const auto& result: pbkd_sha512_tests)
     {
-        const auto hash = pkcs5_pbkdf2_hmac_sha512(result.passphrase, result.salt, result.iterations);
+        const auto hash = pbkd_sha512(result.passphrase, result.salt, result.iterations);
         BOOST_REQUIRE_EQUAL(encode_base16(hash), result.result);
     }
 }

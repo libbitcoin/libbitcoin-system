@@ -949,7 +949,7 @@ op_ripemd160() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_ripemd160;
 
-    state::push_chunk(ripemd160_hash_chunk(*state::pop_chunk_()));
+    state::push_chunk(ripemd160_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 
@@ -960,7 +960,7 @@ op_sha1() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_sha1;
 
-    state::push_chunk(sha1_hash_chunk(*state::pop_chunk_()));
+    state::push_chunk(sha1_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 
@@ -971,7 +971,7 @@ op_sha256() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_sha256;
 
-    state::push_chunk(sha256_hash_chunk(*state::pop_chunk_()));
+    state::push_chunk(sha256_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 
@@ -982,7 +982,7 @@ op_hash160() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_hash160;
 
-    state::push_chunk(ripemd160_hash_chunk(sha256_hash(*state::pop_chunk_())));
+    state::push_chunk(ripemd160_chunk(sha256_hash(*state::pop_chunk_())));
     return error::op_success;
 }
 
@@ -993,7 +993,7 @@ op_hash256() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_hash256;
 
-    state::push_chunk(sha256_hash_chunk(sha256_hash(*state::pop_chunk_())));
+    state::push_chunk(sha256_chunk(sha256_hash(*state::pop_chunk_())));
     return error::op_success;
 }
 
