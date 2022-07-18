@@ -162,7 +162,7 @@ inline void context::flush(uint8_t* out32) NOEXCEPT
 {
     const auto counter = serialize_counter();
 
-    write(pad_size(), pad_stream.data());
+    write(pad_size(), stream_pad.data());
     write(counter_size, counter.data());
     serialize_state(unsafe_array_cast<uint8_t, digest_size>(out32));
     reset();

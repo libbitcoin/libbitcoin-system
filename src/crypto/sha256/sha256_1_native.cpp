@@ -19,8 +19,8 @@
 #include <bitcoin/system/crypto/sha256.hpp>
 
 #include <algorithm>
-#include <array>
 #include <bit>
+#include <iterator>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -31,8 +31,6 @@
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
-
-constexpr auto block16 = block_size / sizeof(uint32_t);
 
 constexpr auto choice(auto x, auto y, auto z) NOEXCEPT
 {
@@ -73,274 +71,272 @@ inline void round(auto a, auto b, auto c, auto& out_d, auto e, auto f, auto g,
     out_h = t0 + t1;
 }
 
-// Translate state from Round to variables.
 template<uint8_t Round, uint32_t K,
     if_lesser<Round, block_size> = true>
-constexpr void round(auto& state, const auto& buffer) NOEXCEPT
+constexpr void round(state& out, const buffer& in) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     round(
-        state[(block_size + 0 - Round) % state_size],
-        state[(block_size + 1 - Round) % state_size],
-        state[(block_size + 2 - Round) % state_size],
-        state[(block_size + 3 - Round) % state_size], // in/out
-        state[(block_size + 4 - Round) % state_size],
-        state[(block_size + 5 - Round) % state_size],
-        state[(block_size + 6 - Round) % state_size],
-        state[(block_size + 7 - Round) % state_size], // in/out
-        buffer[Round] + K);
+        out[(block_size + 0 - Round) % state_size],
+        out[(block_size + 1 - Round) % state_size],
+        out[(block_size + 2 - Round) % state_size],
+        out[(block_size + 3 - Round) % state_size], // in/out
+        out[(block_size + 4 - Round) % state_size],
+        out[(block_size + 5 - Round) % state_size],
+        out[(block_size + 6 - Round) % state_size],
+        out[(block_size + 7 - Round) % state_size], // in/out
+        in[Round] + K);
     BC_POP_WARNING()
 }
 
-// Populate working words from first 16 data words, and store in buffer offset.
 template<uint8_t Offset,
     if_lesser<Offset, block_size> = true,
-    if_not_lesser<Offset, block16> = true>
-inline void set(auto& buffer) NOEXCEPT
+    if_not_lesser<Offset, block_size / sizeof(uint32_t)> = true>
+inline void set(buffer& out) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    buffer[Offset] =
-        sigma1(buffer[Offset -  2]) + buffer[Offset -  7] +
-        sigma0(buffer[Offset - 15]) + buffer[Offset - 16];
+    out[Offset] =
+        sigma1(out[Offset -  2]) + out[Offset -  7] +
+        sigma0(out[Offset - 15]) + out[Offset - 16];
     BC_POP_WARNING()
 }
 
-// Matrix increments computation (by 48).
-inline void expand48(auto& buffer) NOEXCEPT
+inline void expand48(buffer& out) NOEXCEPT
 {
-    // Loop unrolled.
-    set<16>(buffer);
-    set<17>(buffer);
-    set<18>(buffer);
-    set<19>(buffer);
-    set<20>(buffer);
-    set<21>(buffer);
-    set<22>(buffer);
-    set<23>(buffer);
-    set<24>(buffer);
-    set<25>(buffer);
-    set<26>(buffer);
-    set<27>(buffer);
-    set<28>(buffer);
-    set<29>(buffer);
-    set<30>(buffer);
-    set<31>(buffer);
-    set<32>(buffer);
-    set<33>(buffer);
-    set<34>(buffer);
-    set<35>(buffer);
-    set<36>(buffer);
-    set<37>(buffer);
-    set<38>(buffer);
-    set<39>(buffer);
-    set<40>(buffer);
-    set<41>(buffer);
-    set<42>(buffer);
-    set<43>(buffer);
-    set<44>(buffer);
-    set<45>(buffer);
-    set<46>(buffer);
-    set<47>(buffer);
-    set<48>(buffer);
-    set<49>(buffer);
-    set<50>(buffer);
-    set<51>(buffer);
-    set<52>(buffer);
-    set<53>(buffer);
-    set<54>(buffer);
-    set<55>(buffer);
-    set<56>(buffer);
-    set<57>(buffer);
-    set<58>(buffer);
-    set<59>(buffer);
-    set<60>(buffer);
-    set<61>(buffer);
-    set<62>(buffer);
-    set<63>(buffer);
+    set<16>(out);
+    set<17>(out);
+    set<18>(out);
+    set<19>(out);
+    set<20>(out);
+    set<21>(out);
+    set<22>(out);
+    set<23>(out);
+    set<24>(out);
+    set<25>(out);
+    set<26>(out);
+    set<27>(out);
+    set<28>(out);
+    set<29>(out);
+    set<30>(out);
+    set<31>(out);
+    set<32>(out);
+    set<33>(out);
+    set<34>(out);
+    set<35>(out);
+    set<36>(out);
+    set<37>(out);
+    set<38>(out);
+    set<39>(out);
+    set<40>(out);
+    set<41>(out);
+    set<42>(out);
+    set<43>(out);
+    set<44>(out);
+    set<45>(out);
+    set<46>(out);
+    set<47>(out);
+    set<48>(out);
+    set<49>(out);
+    set<50>(out);
+    set<51>(out);
+    set<52>(out);
+    set<53>(out);
+    set<54>(out);
+    set<55>(out);
+    set<56>(out);
+    set<57>(out);
+    set<58>(out);
+    set<59>(out);
+    set<60>(out);
+    set<61>(out);
+    set<62>(out);
+    set<63>(out);
 }
 
-// Matrix hash (by 64).
-inline void rounds64(auto& state, auto& buffer) NOEXCEPT
+inline void rounds64(state& out, const buffer& in) NOEXCEPT
 {
-    // Loop unrolled (K values).
-    round< 0, 0x428a2f98>(state, buffer);
-    round< 1, 0x71374491>(state, buffer);
-    round< 2, 0xb5c0fbcf>(state, buffer);
-    round< 3, 0xe9b5dba5>(state, buffer);
-    round< 4, 0x3956c25b>(state, buffer);
-    round< 5, 0x59f111f1>(state, buffer);
-    round< 6, 0x923f82a4>(state, buffer);
-    round< 7, 0xab1c5ed5>(state, buffer);
-    round< 8, 0xd807aa98>(state, buffer);
-    round< 9, 0x12835b01>(state, buffer);
-    round<10, 0x243185be>(state, buffer);
-    round<11, 0x550c7dc3>(state, buffer);
-    round<12, 0x72be5d74>(state, buffer);
-    round<13, 0x80deb1fe>(state, buffer);
-    round<14, 0x9bdc06a7>(state, buffer);
-    round<15, 0xc19bf174>(state, buffer);
-    round<16, 0xe49b69c1>(state, buffer);
-    round<17, 0xefbe4786>(state, buffer);
-    round<18, 0x0fc19dc6>(state, buffer);
-    round<19, 0x240ca1cc>(state, buffer);
-    round<20, 0x2de92c6f>(state, buffer);
-    round<21, 0x4a7484aa>(state, buffer);
-    round<22, 0x5cb0a9dc>(state, buffer);
-    round<23, 0x76f988da>(state, buffer);
-    round<24, 0x983e5152>(state, buffer);
-    round<25, 0xa831c66d>(state, buffer);
-    round<26, 0xb00327c8>(state, buffer);
-    round<27, 0xbf597fc7>(state, buffer);
-    round<28, 0xc6e00bf3>(state, buffer);
-    round<29, 0xd5a79147>(state, buffer);
-    round<30, 0x06ca6351>(state, buffer);
-    round<31, 0x14292967>(state, buffer);
-    round<32, 0x27b70a85>(state, buffer);
-    round<33, 0x2e1b2138>(state, buffer);
-    round<34, 0x4d2c6dfc>(state, buffer);
-    round<35, 0x53380d13>(state, buffer);
-    round<36, 0x650a7354>(state, buffer);
-    round<37, 0x766a0abb>(state, buffer);
-    round<38, 0x81c2c92e>(state, buffer);
-    round<39, 0x92722c85>(state, buffer);
-    round<40, 0xa2bfe8a1>(state, buffer);
-    round<41, 0xa81a664b>(state, buffer);
-    round<42, 0xc24b8b70>(state, buffer);
-    round<43, 0xc76c51a3>(state, buffer);
-    round<44, 0xd192e819>(state, buffer);
-    round<45, 0xd6990624>(state, buffer);
-    round<46, 0xf40e3585>(state, buffer);
-    round<47, 0x106aa070>(state, buffer);
-    round<48, 0x19a4c116>(state, buffer);
-    round<49, 0x1e376c08>(state, buffer);
-    round<50, 0x2748774c>(state, buffer);
-    round<51, 0x34b0bcb5>(state, buffer);
-    round<52, 0x391c0cb3>(state, buffer);
-    round<53, 0x4ed8aa4a>(state, buffer);
-    round<54, 0x5b9cca4f>(state, buffer);
-    round<55, 0x682e6ff3>(state, buffer);
-    round<56, 0x748f82ee>(state, buffer);
-    round<57, 0x78a5636f>(state, buffer);
-    round<58, 0x84c87814>(state, buffer);
-    round<59, 0x8cc70208>(state, buffer);
-    round<60, 0x90befffa>(state, buffer);
-    round<61, 0xa4506ceb>(state, buffer);
-    round<62, 0xbef9a3f7>(state, buffer);
-    round<63, 0xc67178f2>(state, buffer);
+    round< 0, 0x428a2f98>(out, in);
+    round< 1, 0x71374491>(out, in);
+    round< 2, 0xb5c0fbcf>(out, in);
+    round< 3, 0xe9b5dba5>(out, in);
+    round< 4, 0x3956c25b>(out, in);
+    round< 5, 0x59f111f1>(out, in);
+    round< 6, 0x923f82a4>(out, in);
+    round< 7, 0xab1c5ed5>(out, in);
+    round< 8, 0xd807aa98>(out, in);
+    round< 9, 0x12835b01>(out, in);
+    round<10, 0x243185be>(out, in);
+    round<11, 0x550c7dc3>(out, in);
+    round<12, 0x72be5d74>(out, in);
+    round<13, 0x80deb1fe>(out, in);
+    round<14, 0x9bdc06a7>(out, in);
+    round<15, 0xc19bf174>(out, in);
+    round<16, 0xe49b69c1>(out, in);
+    round<17, 0xefbe4786>(out, in);
+    round<18, 0x0fc19dc6>(out, in);
+    round<19, 0x240ca1cc>(out, in);
+    round<20, 0x2de92c6f>(out, in);
+    round<21, 0x4a7484aa>(out, in);
+    round<22, 0x5cb0a9dc>(out, in);
+    round<23, 0x76f988da>(out, in);
+    round<24, 0x983e5152>(out, in);
+    round<25, 0xa831c66d>(out, in);
+    round<26, 0xb00327c8>(out, in);
+    round<27, 0xbf597fc7>(out, in);
+    round<28, 0xc6e00bf3>(out, in);
+    round<29, 0xd5a79147>(out, in);
+    round<30, 0x06ca6351>(out, in);
+    round<31, 0x14292967>(out, in);
+    round<32, 0x27b70a85>(out, in);
+    round<33, 0x2e1b2138>(out, in);
+    round<34, 0x4d2c6dfc>(out, in);
+    round<35, 0x53380d13>(out, in);
+    round<36, 0x650a7354>(out, in);
+    round<37, 0x766a0abb>(out, in);
+    round<38, 0x81c2c92e>(out, in);
+    round<39, 0x92722c85>(out, in);
+    round<40, 0xa2bfe8a1>(out, in);
+    round<41, 0xa81a664b>(out, in);
+    round<42, 0xc24b8b70>(out, in);
+    round<43, 0xc76c51a3>(out, in);
+    round<44, 0xd192e819>(out, in);
+    round<45, 0xd6990624>(out, in);
+    round<46, 0xf40e3585>(out, in);
+    round<47, 0x106aa070>(out, in);
+    round<48, 0x19a4c116>(out, in);
+    round<49, 0x1e376c08>(out, in);
+    round<50, 0x2748774c>(out, in);
+    round<51, 0x34b0bcb5>(out, in);
+    round<52, 0x391c0cb3>(out, in);
+    round<53, 0x4ed8aa4a>(out, in);
+    round<54, 0x5b9cca4f>(out, in);
+    round<55, 0x682e6ff3>(out, in);
+    round<56, 0x748f82ee>(out, in);
+    round<57, 0x78a5636f>(out, in);
+    round<58, 0x84c87814>(out, in);
+    round<59, 0x8cc70208>(out, in);
+    round<60, 0x90befffa>(out, in);
+    round<61, 0xa4506ceb>(out, in);
+    round<62, 0xbef9a3f7>(out, in);
+    round<63, 0xc67178f2>(out, in);
 }
 
-// Matrix increment of a by b (by 8).
-inline void increment8(auto& a, const auto& b) NOEXCEPT
+inline void summary8(state& out, const state& in) NOEXCEPT
 {
-    // Loop unrolled.
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    a[0] += b[0];
-    a[1] += b[1];
-    a[2] += b[2];
-    a[3] += b[3];
-    a[4] += b[4];
-    a[5] += b[5];
-    a[6] += b[6];
-    a[7] += b[7];
+    out[0] += in[0];
+    out[1] += in[1];
+    out[2] += in[2];
+    out[3] += in[3];
+    out[4] += in[4];
+    out[5] += in[5];
+    out[6] += in[6];
+    out[7] += in[7];
     BC_POP_WARNING()
 }
 
-// Matrix assignment of b to a (by 8).
-inline void assign8(auto& a, const auto& b) NOEXCEPT
+inline void copying8(buffer& out, const state& in) NOEXCEPT
 {
-    // Loop unrolled.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    a[0] = b[0];
-    a[1] = b[1];
-    a[2] = b[2];
-    a[3] = b[3];
-    a[4] = b[4];
-    a[5] = b[5];
-    a[6] = b[6];
-    a[7] = b[7];
-    BC_POP_WARNING()
+    auto& to = narrowing_array_cast<uint32_t, state_size>(out);
+    to = in;
 }
 
-// This requires 32 more words of memory than use of variables.
-// Endian conversions are not currently loop unrolled (can do in templates).
-// Otherwise it is identical, with an advantage in the use of intrinsic rotr.
+inline void copyin64(buffer& out, const buffer& in) NOEXCEPT
+{
+    out = in;
+}
+
+inline void bigend16(buffer& out, const block& in) NOEXCEPT
+{
+    constexpr auto size = block_size / sizeof(uint32_t);
+    auto& from = array_cast<uint32_t>(in);
+    auto& to = narrowing_array_cast<uint32_t, size>(out);
+    from_big_endians(to, from);
+}
+
+inline void bigend8(digest& out, const state& in) NOEXCEPT
+{
+    auto& to = array_cast<uint32_t>(out);
+    to_big_endians(to, in);
+}
+
+inline void padding8(buffer& out) NOEXCEPT
+{
+    // TODO: safe offsetting array cast.
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    auto& to = unsafe_array_cast<uint32_t, state_size>(&out[state_size]);
+    BC_POP_WARNING()
+
+    to = pad32;
+}
+
+// This requires 32 more words of memory than a circular variables buffer.
+// According to FIP180 this is more performant given no memory constraint.
+void hash_native(state& state, const block& block) NOEXCEPT
+{
+    buffer words;
+    const sha256::state start{ state };
+    bigend16(words, block);
+    expand48(words);
+    rounds64(state, words);
+    summary8(state, start);
+}
+
+// TODO: template with sized array of blocks.
 void hash_native(state& state, const block1& blocks) NOEXCEPT
 {
-    std::array<uint32_t, block_size> buffer;
+    buffer words;
 
     for (auto& block: blocks)
     {
         const sha256::state start{ state };
-        from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
-            array_cast<uint32_t>(block));
-        expand48(buffer);
-        rounds64(state, buffer);
-        increment8(state, start);
+        bigend16(words, block);
+        expand48(words);
+        rounds64(state, words);
+        summary8(state, start);
     }
 }
 
-void hash_finalize(digest& out, const state& state) NOEXCEPT
+void hash_finalize(digest& digest, const state& state) NOEXCEPT
 {
-    to_big_endians(array_cast<uint32_t>(out), state);
+    bigend8(digest, state);
 }
 
 #ifndef NORMALIZED_NATIVE_MERKLE
 
-template <size_t Offset,
-    if_not_greater<Offset, block16> = true>
-void constexpr pad(auto& buffer) NOEXCEPT
+// TODO: template with equally-sized arrays of blocks/digests.
+// This is an optimization for merkle root computation.
+// It leverages fixed message size to avoid padding computations.
+// It leverages fixed iteration count to avoid internal endian conversions.
+// It leverages a common buffer to avoid stack calls and buffer allocations.
+// expanded_pad64 is the output of expand48(pad64).
+void merkle_hash(digest1& digest, const block1& blocks) NOEXCEPT
 {
-    constexpr auto sentinel = bit_hi<uint32_t>;
-    constexpr auto bitcount = possible_narrow_cast<uint32_t>(
-        (block16 - Offset) * bits<uint32_t>);
+    buffer words;
+    auto out = digest.begin();
 
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    buffer[Offset] = sentinel;
-    buffer[sub1(block16)] = bitcount;
-    std::fill(&buffer[add1(Offset)], &buffer[sub1(block16)], 0);
-    BC_POP_WARNING()
-}
+    for (auto& block: blocks)
+    {
+        bigend16(words, block);
+        expand48(words);
+        auto state = sha256::initial;
+        rounds64(state, words);
+        summary8(state, sha256::initial);
 
-// Pad and state (hash) are endian aligned during transitions.
-// TODO: expand(pad_64) can be precomputed and assigned to buffer[16..63].
-// Tradeoffs for full generalization and simplicity:
-// This requires 32 more words of memory than use of variables.
-// Endian conversions are not currently loop unrolled (can do in templates).
-// This copies 48 additional contiguous words to buffer (pad expand).
-// This computes 8 more sigmas (but uses intrinsic rotr, so currently better).
-// This assigns 4 more values, and zeroizes ~1.5 blocks in two calls, but
-// avoids a net 6 additions (call that even).
-void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
-{
-    std::array<uint32_t, block_size> buffer;
-    from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
-        array_cast<uint32_t>(blocks.front()));
+        copyin64(words, expanded_pad64);
+        const auto save = state;
+        rounds64(state, words);
+        summary8(state, save);
 
-    auto state = sha256::initial;
-    expand48(buffer);
-    rounds64(state, buffer);
-    increment8(state, sha256::initial);
+        copying8(words, state);
+        padding8(words);
+        expand48(words);
+        state = sha256::initial;
+        rounds64(state, words);
+        summary8(state, sha256::initial);
 
-    // Second transform (hash pad_64 as next block), completes first hash.
-    // ========================================================================
-    pad<zero>(buffer);
-
-    const sha256::state start{ state };
-    expand48(buffer);
-    rounds64(state, buffer);
-    increment8(state, start);
-
-    // Third transform (hash hashes with pad_32), completes second hash.
-    // ========================================================================
-    assign8(buffer, state);
-    pad<state_size>(buffer);
-
-    state = sha256::initial;
-    expand48(buffer);
-    rounds64(state, buffer);
-    increment8(state, sha256::initial);
-
-    to_big_endians(array_cast<uint32_t>(out.front()), state);
+        bigend8(*(out++), state);
+    }
 }
 
 #else
@@ -355,6 +351,22 @@ void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
     hash_native(state, array_cast<block>(buffer));
     to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
+
+////// Specialized for single block padding.
+////template <size_t Offset,
+////    if_not_greater<Offset, integers> = true>
+////void constexpr pad(auto& buffer) NOEXCEPT
+////{
+////    constexpr auto sentinel = bit_hi<uint32_t>;
+////    constexpr auto bitcount = possible_narrow_cast<uint32_t>(
+////        (integers - Offset) * bits<uint32_t>);
+////
+////    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+////    buffer[Offset] = sentinel;
+////    buffer[sub1(integers)] = bitcount;
+////    std::fill(&buffer[add1(Offset)], &buffer[sub1(integers)], 0);
+////    BC_POP_WARNING()
+////}
 #endif // NORMALIZED_NATIVE_MERKLE
 
 } // namespace sha256
