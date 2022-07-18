@@ -71,8 +71,7 @@ inline void round(auto a, auto b, auto c, auto& out_d, auto e, auto f, auto g,
     out_h = t0 + t1;
 }
 
-template<uint8_t Round, uint32_t K,
-    if_lesser<Round, block_size> = true>
+template<uint8_t Round, uint32_t K>
 constexpr void round(state& out, const buffer& in) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -89,9 +88,7 @@ constexpr void round(state& out, const buffer& in) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template<uint8_t Offset,
-    if_lesser<Offset, block_size> = true,
-    if_not_lesser<Offset, block_size / sizeof(uint32_t)> = true>
+template<uint8_t Offset>
 inline void set(buffer& out) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -254,7 +251,7 @@ inline void bigend16(buffer& out, const block& in) NOEXCEPT
     from_big_endians(to, from);
 }
 
-inline void bigend8(digest& out, const state& in) NOEXCEPT
+inline void bigend08(digest& out, const state& in) NOEXCEPT
 {
     auto& to = array_cast<uint32_t>(out);
     to_big_endians(to, in);
@@ -299,7 +296,7 @@ void hash_native(state& state, const block1& blocks) NOEXCEPT
 
 void hash_finalize(digest& digest, const state& state) NOEXCEPT
 {
-    bigend8(digest, state);
+    bigend08(digest, state);
 }
 
 #ifndef NORMALIZED_NATIVE_MERKLE
@@ -335,7 +332,7 @@ void merkle_hash(digest1& digest, const block1& blocks) NOEXCEPT
         rounds64(state, words);
         summary8(state, sha256::initial);
 
-        bigend8(*(out++), state);
+        bigend08(*(out++), state);
     }
 }
 
