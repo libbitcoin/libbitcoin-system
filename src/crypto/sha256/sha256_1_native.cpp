@@ -73,13 +73,12 @@ inline void round(auto a, auto b, auto c, auto& out_d, auto e, auto f, auto g,
     out_h = t0 + t1;
 }
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-
 // Translate state from Round to variables.
 template<uint8_t Round, uint32_t K,
     if_lesser<Round, block_size> = true>
 constexpr void round(auto& state, const auto& buffer) NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     round(
         state[(block_size + 0 - Round) % state_size],
         state[(block_size + 1 - Round) % state_size],
@@ -90,6 +89,7 @@ constexpr void round(auto& state, const auto& buffer) NOEXCEPT
         state[(block_size + 6 - Round) % state_size],
         state[(block_size + 7 - Round) % state_size], // in/out
         buffer[Round] + K);
+    BC_POP_WARNING()
 }
 
 // Populate working words from first 16 data words, and store in buffer offset.
@@ -98,9 +98,11 @@ template<uint8_t Offset,
     if_not_lesser<Offset, block16> = true>
 inline void set(auto& buffer) NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     buffer[Offset] =
         sigma1(buffer[Offset -  2]) + buffer[Offset -  7] +
         sigma0(buffer[Offset - 15]) + buffer[Offset - 16];
+    BC_POP_WARNING()
 }
 
 // Matrix increments computation (by 48).
@@ -231,6 +233,7 @@ inline void rounds64(auto& state, auto& buffer) NOEXCEPT
 inline void increment8(auto& a, const auto& b) NOEXCEPT
 {
     // Loop unrolled.
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     a[0] += b[0];
     a[1] += b[1];
     a[2] += b[2];
@@ -239,12 +242,14 @@ inline void increment8(auto& a, const auto& b) NOEXCEPT
     a[5] += b[5];
     a[6] += b[6];
     a[7] += b[7];
+    BC_POP_WARNING()
 }
 
 // Matrix assignment of b to a (by 8).
 inline void assign8(auto& a, const auto& b) NOEXCEPT
 {
     // Loop unrolled.
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     a[0] = b[0];
     a[1] = b[1];
     a[2] = b[2];
@@ -253,29 +258,8 @@ inline void assign8(auto& a, const auto& b) NOEXCEPT
     a[5] = b[5];
     a[6] = b[6];
     a[7] = b[7];
+    BC_POP_WARNING()
 }
-
-template <size_t Offset,
-    if_not_greater<Offset, block16> = true>
-void constexpr pad(auto& buffer) NOEXCEPT
-{
-    // These are mapped to message as big-endian by convension. But the message
-    // is then converted from big-endian to native-endian. Since in this
-    // optimization these are injected after that conversion, they must be
-    // encoded as big-endian. On a BE platform this is a nop, resulting in
-    // untranslated representation in the integer array. On a LE platform this
-    // results in translated encoding in the integer array, just as it would
-    // in the normal form algorithm.
-    constexpr auto sentinel = native_to_big_end(bit_hi<uint32_t>);
-    constexpr auto bitcount = native_to_big_end(possible_narrow_cast<uint32_t>(
-        (block16 - Offset) * bits<uint32_t>));
-
-    buffer[Offset] = sentinel;
-    buffer[sub1(block16)] = bitcount;
-    std::fill(&buffer[add1(Offset)], &buffer[sub1(sub1(block16))], 0);
-}
-
-BC_POP_WARNING()
 
 // This requires 32 more words of memory than use of variables.
 // Endian conversions are not currently loop unrolled (can do in templates).
@@ -287,7 +271,8 @@ void hash_native(state& state, const block1& blocks) NOEXCEPT
     for (auto& block: blocks)
     {
         const sha256::state start{ state };
-        from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer), array_cast<uint32_t>(block));
+        from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
+            array_cast<uint32_t>(block));
         expand48(buffer);
         rounds64(state, buffer);
         increment8(state, start);
@@ -299,6 +284,23 @@ void hash_finalize(digest& out, const state& state) NOEXCEPT
     to_big_endians(array_cast<uint32_t>(out), state);
 }
 
+#ifndef NORMALIZED_NATIVE_MERKLE
+
+template <size_t Offset,
+    if_not_greater<Offset, block16> = true>
+void constexpr pad(auto& buffer) NOEXCEPT
+{
+    constexpr auto sentinel = bit_hi<uint32_t>;
+    constexpr auto bitcount = possible_narrow_cast<uint32_t>(
+        (block16 - Offset) * bits<uint32_t>);
+
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    buffer[Offset] = sentinel;
+    buffer[sub1(block16)] = bitcount;
+    std::fill(&buffer[add1(Offset)], &buffer[sub1(block16)], 0);
+    BC_POP_WARNING()
+}
+
 // Pad and state (hash) are endian aligned during transitions.
 // TODO: expand(pad_64) can be precomputed and assigned to buffer[16..63].
 // Tradeoffs for full generalization and simplicity:
@@ -308,7 +310,7 @@ void hash_finalize(digest& out, const state& state) NOEXCEPT
 // This computes 8 more sigmas (but uses intrinsic rotr, so currently better).
 // This assigns 4 more values, and zeroizes ~1.5 blocks in two calls, but
 // avoids a net 6 additions (call that even).
-void merkle_hashXXX(digest1& out, const block1& blocks) NOEXCEPT
+void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
 {
     std::array<uint32_t, block_size> buffer;
     from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer),
@@ -341,6 +343,7 @@ void merkle_hashXXX(digest1& out, const block1& blocks) NOEXCEPT
     to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
 
+#else
 void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
 {
     auto state = sha256::initial;
@@ -352,6 +355,7 @@ void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
     hash_native(state, array_cast<block>(buffer));
     to_big_endians(array_cast<uint32_t>(out.front()), state);
 }
+#endif // NORMALIZED_NATIVE_MERKLE
 
 } // namespace sha256
 } // namespace system
