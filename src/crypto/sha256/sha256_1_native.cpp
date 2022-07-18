@@ -26,6 +26,7 @@
 #include <bitcoin/system/math/math.hpp>
 
 // sha256: movable-type.co.uk/scripts/sha256.html
+// Use inline vs. constexpr to obtain intrinsic std::rotr.
 
 namespace libbitcoin {
 namespace system {
@@ -43,54 +44,24 @@ constexpr auto majority(auto x, auto y, auto z) NOEXCEPT
     return (x & (y | z)) | (y & z);
 }
 
-#define NORMAL_FORM
-
-// Using inline vs. constexpr to obtain intrinsic std::rotr.
-
-template <size_t Bits>
-inline auto rotate(auto a) NOEXCEPT
-{
-#ifdef NORMAL_FORM
-    return std::rotr(a, Bits);
-#else
-    if constexpr (is_big_endian)
-        return std::rotr(a, Bits);
-    else
-        return std::rotl(a, Bits);
-#endif
-}
-
-template <size_t Bits>
-constexpr auto shift(auto a) NOEXCEPT
-{
-#ifdef NORMAL_FORM
-    return a >> Bits;
-#else
-    if constexpr (is_big_endian)
-        return a >> Bits;
-    else
-        return a >> Bits;
-#endif
-}
-
 inline auto SIGMA0(auto a) NOEXCEPT
 {
-    return rotate<2>(a) ^ rotate<13>(a) ^ rotate<22>(a);
+    return std::rotr(a, 2) ^ std::rotr(a, 13) ^ std::rotr(a, 22);
 }
 
 inline auto SIGMA1(auto a) NOEXCEPT
 {
-    return rotate<6>(a) ^ rotate<11>(a) ^ rotate<25>(a);
+    return std::rotr(a, 6) ^ std::rotr(a, 11) ^ std::rotr(a, 25);
 }
 
 inline auto sigma0(auto a) NOEXCEPT
 {
-    return rotate<7>(a) ^ rotate<18>(a) ^ shift<3>(a);
+    return std::rotr(a, 7) ^ std::rotr(a, 18) ^ (a >> 3);
 }
 
 inline auto sigma1(auto a) NOEXCEPT
 {
-    return rotate<17>(a) ^ rotate<19>(a) ^ shift<10>(a);
+    return std::rotr(a, 17) ^ std::rotr(a, 19) ^ (a >> 10);
 }
 
 inline void round(auto a, auto b, auto c, auto& out_d, auto e, auto f, auto g,
@@ -316,11 +287,7 @@ void hash_native(state& state, const block1& blocks) NOEXCEPT
     for (auto& block: blocks)
     {
         const sha256::state start{ state };
-#ifdef NORMAL_FORM
         from_big_endians(narrowing_array_cast<uint32_t, block16>(buffer), array_cast<uint32_t>(block));
-#else
-        assign8(narrowing_array_cast<uint32_t, block16>(buffer), array_cast<uint32_t>(block));
-#endif
         expand48(buffer);
         rounds64(state, buffer);
         increment8(state, start);
@@ -329,11 +296,7 @@ void hash_native(state& state, const block1& blocks) NOEXCEPT
 
 void hash_finalize(digest& out, const state& state) NOEXCEPT
 {
-#ifdef NORMAL_FORM
     to_big_endians(array_cast<uint32_t>(out), state);
-#else
-    assign8(array_cast<uint32_t>(out), state);
-#endif
 }
 
 // Pad and state (hash) are endian aligned during transitions.
