@@ -19,61 +19,56 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_SET_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_SET_HPP
 
-#include <array>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
     
-/// Endian array conversion (return by value).
+/// Array endian conversion (return by value).
 /// ---------------------------------------------------------------------------
 
 /// Copy an array of native integral integers to big-endian.
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> to_big_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT;
+constexpr std_array<Integral, Count> to_big_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT;
 
 /// Copy an array of native integral integers to little-endian.
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> to_little_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT;
+constexpr std_array<Integral, Count> to_little_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT;
 
 /// Copy an array of big-endian integral integers to native.
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> from_big_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT;
+constexpr std_array<Integral, Count> from_big_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT;
 
 /// Copy an array of little-endian integral integers to native.
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> from_little_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT;
+constexpr std_array<Integral, Count> from_little_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT;
 
-/// Endian array conversion (return by reference).
+/// Array endian conversion (return by reference).
 /// ---------------------------------------------------------------------------
 
 /// Copy an array of native integral integers to big-endian.
 template <typename Integral, size_t Count>
-constexpr void to_big_endians(
-    std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT;
+constexpr void to_big_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT;
 
 /// Copy an array of native integral integers to little-endian.
 template <typename Integral, size_t Count>
-constexpr void to_little_endians(
-    std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT;
+constexpr void to_little_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT;
 
 /// Copy an array of big-endian integral integers to native.
 template <typename Integral, size_t Count>
-constexpr void from_big_endians(
-    std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT;
+constexpr void from_big_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT;
 
 /// Copy an array of little-endian integral integers to native.
 template <typename Integral, size_t Count>
-constexpr void from_little_endians(
-    std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT;
+constexpr void from_little_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

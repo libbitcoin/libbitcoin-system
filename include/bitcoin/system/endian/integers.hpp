@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ENDIAN_ALGORITHM_HPP
-#define LIBBITCOIN_SYSTEM_ENDIAN_ALGORITHM_HPP
+#ifndef LIBBITCOIN_SYSTEM_ENDIAN_INTEGERS_HPP
+#define LIBBITCOIN_SYSTEM_ENDIAN_INTEGERS_HPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -25,10 +25,9 @@
 namespace libbitcoin {
 namespace system {
     
+/// Use for misaligned size and non-integral integers.
 /// Integer size (apart from single byte guard) is not considered.
 /// Data size is not required to match Integer size, zero-padding applied.
-/// Use "data" convertors for constexpr, misaligned size and non-integrals.
-/// Use "native" convertors for best efficiency integral endianness alignment.
 
 /// Native endianness integer to data.
 /// ---------------------------------------------------------------------------
@@ -77,28 +76,9 @@ template <typename Integer, if_integer<Integer> = true>
 VCONSTEXPR Integer from_little_chunk(size_t length,
     const data_chunk& data) NOEXCEPT;
 
-/// Native endianness integer to/from big/little endianness integer (byteswap).
-/// ---------------------------------------------------------------------------
-
-/// Convert a native integral integer to big-endian.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_to_big_end(Integral big) NOEXCEPT;
-
-/// Convert a native integral integer to little-endian.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_to_little_end(Integral big) NOEXCEPT;
-
-/// Convert a big-endian integral integer to native.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_from_big_end(Integral big) NOEXCEPT;
-
-/// Convert a little-endian integral integer to native.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
-
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/endian/algorithm.ipp>
+#include <bitcoin/system/impl/endian/integers.ipp>
 
 #endif

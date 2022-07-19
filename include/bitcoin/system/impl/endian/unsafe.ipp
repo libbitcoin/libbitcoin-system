@@ -16,31 +16,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ENDIAN_UNCHECKED_HPP
-#define LIBBITCOIN_SYSTEM_ENDIAN_UNCHECKED_HPP
+#ifndef LIBBITCOIN_SYSTEM_ENDIAN_UNSAFE_IPP
+#define LIBBITCOIN_SYSTEM_ENDIAN_UNSAFE_IPP
 
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/swaps.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// iterator (unknown size) -> integral (implicit size)
-/// Must be guarded by the caller, use when passing end would be redundant.
+template <typename Integral, typename Iterator, if_integral_integer<Integral>>
+inline Integral unsafe_from_big_endian(const Iterator& data) NOEXCEPT
+{
+    return native_from_big_end(byte_cast<Integral>(data));
+}
 
-// Integral from_big|little_endian_unchecked(Iterator)
-// Integral   to_big|little_endian_unchecked(Iterator)
-
-template <typename Integral, typename Iterator,
-    if_integral_integer<Integral> = true>
-inline Integral from_big_endian_unchecked(const Iterator& data) NOEXCEPT;
-
-template <typename Integral, typename Iterator,
-    if_integral_integer<Integral> = true>
-inline Integral from_little_endian_unchecked(const Iterator& data) NOEXCEPT;
+template <typename Integral, typename Iterator, if_integral_integer<Integral>>
+inline Integral unsafe_from_little_endian(const Iterator& data) NOEXCEPT
+{
+    return native_from_little_end(byte_cast<Integral>(data));
+}
 
 } // namespace system
 } // namespace libbitcoin
-
-#include <bitcoin/system/impl/endian/unchecked.ipp>
 
 #endif

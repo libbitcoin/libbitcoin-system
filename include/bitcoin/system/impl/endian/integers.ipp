@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ENDIAN_ALGORITHM_IPP
-#define LIBBITCOIN_SYSTEM_ENDIAN_ALGORITHM_IPP
+#ifndef LIBBITCOIN_SYSTEM_ENDIAN_INTEGERS_IPP
+#define LIBBITCOIN_SYSTEM_ENDIAN_INTEGERS_IPP
 
 #include <algorithm>
 #include <utility>
@@ -36,7 +36,7 @@ namespace system {
 
 // C++ standard: "Right-shift on signed integral types is an arithmetic right
 // shift, which performs sign-extension". In other words, repeatedly shifting
-// -1 of any integer width will produce "1" bits, indefinitely.
+// -1 of any integer width will perpetually produce "1" bits.
 
 // To big/little data.
 // ----------------------------------------------------------------------------
@@ -246,40 +246,6 @@ VCONSTEXPR Integer from_little_chunk(size_t length,
 
         return value;
     }
-}
-
-// To/from integral.
-// ----------------------------------------------------------------------------
-// Very efficient byteswap, or passthru.
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_to_big_end(Integral big) NOEXCEPT
-{
-    if constexpr (is_little_endian)
-        return byteswap(big);
-    else
-        return big;
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_to_little_end(Integral little) NOEXCEPT
-{
-    if constexpr (is_big_endian)
-        return byteswap(little);
-    else
-        return little;
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_from_big_end(Integral big) NOEXCEPT
-{
-    return native_to_big_end(big);
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_from_little_end(Integral little) NOEXCEPT
-{
-    return native_to_little_end(little);
 }
 
 } // namespace system

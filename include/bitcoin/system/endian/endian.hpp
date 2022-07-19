@@ -19,121 +19,25 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 
-#include <bitcoin/system/endian/algorithm.hpp>
+#include <bitcoin/system/endian/integers.hpp>
+#include <bitcoin/system/endian/integrals.hpp>
 #include <bitcoin/system/endian/minimal.hpp>
 #include <bitcoin/system/endian/nominal.hpp>
 #include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/stream.hpp>
+#include <bitcoin/system/endian/swaps.hpp>
 #include <bitcoin/system/endian/uintx.hpp>
 #include <bitcoin/system/endian/uintx_t.hpp>
-#include <bitcoin/system/endian/unchecked.hpp>
+#include <bitcoin/system/endian/unsafe.hpp>
 
-// These conversions are efficient, performing no buffer copies or reversals.
-// array/uintx_t sizes are inferred by type, and vector/uintx by value.
-// High order bits are padded when read (from) is insufficient.
-// High order bits are ignored when write (to) is insufficient.
-// uintx return can handle values of arbitrary size.
-
-// STACK NUMBER DECODE / UTILITY
-// Nominal (<Integer>/inferred):
-// constexpr  unsigned_type<Size>          from_big_endian(data_array<Size>);
-// constexpr  unsigned_type<Size>          from_little_endian(data_array<Size>);
-// constexpr  Integral                     from_big_endian<Integral>(data_slice);
-// constexpr  Integral                     from_little_endian<Integral>(data_slice);
-// constexpr  data_array<sizeof(Integral)> to_big_endian{integral}(Integral);
-// constexpr  data_array<sizeof(Integral)> to_little_endian{integral}(Integral);
-
-// NETWORK [[COMPLETE]]
-// Stream (<Integer>/stream):
-// inline     Integral                     from_big_endian<Integral>{IStream}(IStream&);
-// inline     Integral                     from_little_endian<Integral>{IStream}(IStream&);
-// inline     void                         to_big_endian{OStream}(OStream&, Integer);
-// inline     void                         to_little_endian{OStream}(OStream&, Integer);
-
-// MERKLE [[COMPLETE]]
-// Set ([]):
-// constexpr  void                         Integer[] from_big_endians{[]}(const Integer[]&);
-// constexpr  void                         Integer[] from_little_endians{[]}(const Integer[]&);
-// constexpr  void                         Integer[] to_big_endians{[]}(const Integer[]&);
-// constexpr  void                         Integer[] to_little_endians{[]}(const Integer[]&);
-// constexpr  void                         from_big_endians{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         from_little_endians{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         to_big_endians{[]}(Integer[]&, const Integer[]&);
-// constexpr  void                         to_little_endians{[]}(Integer[]&, const Integer[]&);
-
-// LIBRARY
-// Uintx (dynamic int/data sizing): [uintx not constexpr]
-// inline     uintx                        from_big_endian(data_chunk);
-// inline     uintx                        from_little_endian(data_chunk);
-// inline     data_chunk                   to_big_endian{uintx}(uintx);
-// inline     data_chunk                   to_little_endian{uintx}(uintx);
-
-// UNUSED
-// Unchecked (Iterator): [database?]
-// inline     Integral                     from_big_endian_unchecked<Integral>{}(Iterator);
-// inline     Integral                     from_little_endian_unchecked<Integral>{}(Iterator);
-
-// STACK NUMBER (chunk)
-// Minimal (Size array / byte_width chunk): make integral for bytecast?
-// constexpr  data_array<Size>             to_big_endian[_size]<Size>(Integer); %%
-// constexpr  data_array<Size>             to_little_endian[_size]<Size>(Integer); %%
-// VCONSTEXPR data_chunk(byte_width)       to_big_endian[[_chunk]_size](Integer); **
-// VCONSTEXPR data_chunk(byte_width)       to_little_endian[[_chunk]_size](Integer); **
-
-// POW
-// Uintx_t (<Size>/array<Size>): [todo: constexpr]
-// inline     exact_type<Size>             [uintx_]from_big_endian_chunk<Size>(data_slice); **
-// inline     exact_type<Size>             [uintx_]from_little_endian_chunk<Size>(data_slice); **
-// constexpr  exact_type<Size>             [uintx_]from_big_endian[_array]{Size}(data_array<Size>); %%
-// constexpr  exact_type<Size>             [uintx_]from_little_endian[_array]{Size}(data_array<Size>); %%
-// constexpr  data_array<Size>             to_big_endian<Size>(Integer); %%
-// constexpr  data_array<Size>             to_little_endian<Size>(Integer); %%
-
-// TODO:
-// ------------------------------------------------------------------------------------------------
-//
-// STACK NUMBER ENCODE
-// Chunked (<Size>/byte_width):
-// inline     exact_type<Size>             from_big_endian_chunk<Size>([[data_slice]]);
-// inline     exact_type<Size>             from_little_endian_chunk<Size>([[data_slice]]);
-// VCONSTEXPR data_chunk(byte_width)       to_big_endian_chunk(Integer);
-// VCONSTEXPR data_chunk(byte_width)       to_little_endian_chunk(Integer);
-//
-// POW
-// Sized (<Size>): non-integrals:
-// constexpr  exact_type<Size>             from_big_endian{Size}(data_array<Size>);
-// constexpr  exact_type<Size>             from_little_endian{Size}(data_array<Size>);
-// constexpr  data_array<Size>             to_big_endian<Size>(Integer);
-// constexpr  data_array<Size>             to_little_endian<Size>(Integer);
-// constexpr  data_array<Size>             to_big_endian<Size>(Integer);
-// constexpr  data_array<Size>             to_little_endian<Size>(Integer);
-
-// These are just aliases, move to the appropriate header.
-
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/math/math.hpp>
-
-namespace libbitcoin {
-namespace system {
-
-/// Hash conversions of corresponding integers.
-template <uintx_size_t Bits>
-constexpr data_array<to_ceilinged_bytes(Bits)>
-from_uintx(const uintx_t<Bits>& value) NOEXCEPT
-{
-    return to_little_endian_size<to_ceilinged_bytes(Bits)>(value);
-}
-
-/// Integer conversions of corresponding hashes.
-template <size_t Bytes>
-constexpr uintx_t<to_bits<uintx_size_t>(Bytes)>
-to_uintx(const data_array<Bytes>& hash) NOEXCEPT
-{
-    return uintx_from_little_endian_array<Bytes>(hash);
-}
-
-} // namespace system
-} // namespace libbitcoin
+// integers ->
+// minimal  -> integers
+// nominal  -> integers, integrals, swaps
+// set      -> swaps
+// stream   -> swaps
+// swaps    ->
+// uintx_t  -> nominal, minimal
+// uintx    ->
+// unsafe   -> swaps
 
 #endif

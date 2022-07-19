@@ -18,20 +18,15 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_tests)
+BOOST_AUTO_TEST_SUITE(endian_integers_tests)
 
-constexpr uint32_t value32 = 0x01020304;
-const data_chunk data_forward{ 0x01, 0x02, 0x03, 0x04 };
-const data_chunk data_reverse{ 0x04, 0x03, 0x02, 0x01 };
-
-BOOST_AUTO_TEST_CASE(endian__from_big_endian_unchecked__iterator_to_integer__expected)
-{
-    BOOST_REQUIRE_EQUAL(from_big_endian_unchecked<uint32_t>(data_forward.begin()), value32);
-}
-
-BOOST_AUTO_TEST_CASE(endian__from_little_endian_unchecked__iterator_to_integer__expected)
-{
-    BOOST_REQUIRE_EQUAL(from_little_endian_unchecked<uint32_t>(data_reverse.begin()), value32);
-}
+// Data to_big_data(Data&&, Integer)
+// Data to_little_data(Data&&, Integer)
+// Integer from_big_array<Integer>(data_array)
+// Integer from_big_array<Integer>(length, data_array)
+// Integer from_big_chunk<Integer>(length, data_chunk)
+// Integer from_little_array<Integer>(data_array)
+// Integer from_little_array<Integer>(length, data_array)
+// Integer from_little_chunk<Integer>(length, data_chunk)
 
 BOOST_AUTO_TEST_SUITE_END()

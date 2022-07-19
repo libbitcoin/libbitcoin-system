@@ -19,23 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_UINTX_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_UINTX_HPP
 
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-/// data -> uintx (inferred size), uintx -> data_chunk (inferred size)
-
-// uintx      from_big|little_endian(data_slice)
-// data_chunk   to_big|little_endian(uintx)
-
-// uintx is not constexpr.
-
-inline uintx from_big_endian(const data_chunk& data) NOEXCEPT;
-inline uintx from_little_endian(const data_chunk& data) NOEXCEPT;
-inline data_chunk to_big_endian(const uintx& value) NOEXCEPT;
-inline data_chunk to_little_endian(const uintx& value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

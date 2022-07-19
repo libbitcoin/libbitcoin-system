@@ -18,6 +18,8 @@
  */
 #include "../test.hpp"
 
+BOOST_AUTO_TEST_SUITE(endian_set_tests)
+
 // constexpr
 
 template <size_t Count, typename Integral = uint32_t>
@@ -66,30 +68,28 @@ static_assert(from_little_endians(native) == normalize(native, reversed));
 
 // inline
 
-BOOST_AUTO_TEST_SUITE(endian_tests)
-
-BOOST_AUTO_TEST_CASE(collection__to_big_endians__always__expected)
+BOOST_AUTO_TEST_CASE(endian__to_big_endians__always__expected)
 {
     numbers<size> out{};
     to_big_endians(out, native);
     BOOST_REQUIRE_EQUAL(out, normalize(reversed, native));
 }
 
-BOOST_AUTO_TEST_CASE(collection__from_big_endians__always__expected)
+BOOST_AUTO_TEST_CASE(endian__from_big_endians__always__expected)
 {
     numbers<size> out{};
     from_big_endians(out, reversed);
     BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(collection__to_little_endians__always__expected)
+BOOST_AUTO_TEST_CASE(endian__to_little_endians__always__expected)
 {
     numbers<size> out{};
     to_little_endians(out, native);
     BOOST_REQUIRE_EQUAL(out, normalize(native, reversed));
 }
 
-BOOST_AUTO_TEST_CASE(collection__from_little_endians__always__expected)
+BOOST_AUTO_TEST_CASE(endian__from_little_endians__always__expected)
 {
     numbers<size> out{};
     from_little_endians(out, native);

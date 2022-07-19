@@ -21,13 +21,13 @@
 
 #include <iostream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/algorithm.hpp>
+#include <bitcoin/system/endian/swaps.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// iostreams are not costexpr.
+// iostreams are not constexpr.
 // if stream.gcount() != size there should be a stream error.
 
 template <typename Integral, typename IStream,

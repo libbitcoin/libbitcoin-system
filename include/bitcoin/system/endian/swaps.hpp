@@ -16,52 +16,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ENDIAN_NOMINAL_HPP
-#define LIBBITCOIN_SYSTEM_ENDIAN_NOMINAL_HPP
+#ifndef LIBBITCOIN_SYSTEM_ENDIAN_SWAPS_HPP
+#define LIBBITCOIN_SYSTEM_ENDIAN_SWAPS_HPP
 
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Implicitly typed/sized return.
+/// Native endianness integer to/from big/little endianness integer (byteswap).
 /// ---------------------------------------------------------------------------
+/// The "from" functions are merely convenience aliases for the "to" functions.
 
-template <size_t Size>
-constexpr unsigned_type<Size>
-from_big_endian(const data_array<Size>& data) NOEXCEPT;
-
-template <size_t Size>
-constexpr unsigned_type<Size>
-from_little_endian(const data_array<Size>& data) NOEXCEPT;
-
+/// Convert a native integral integer to big-endian.
 template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)>
-to_big_endian(Integral value) NOEXCEPT;
+constexpr Integral native_to_big_end(Integral big) NOEXCEPT;
 
+/// Convert a native integral integer to little-endian.
 template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)>
-to_little_endian(Integral value) NOEXCEPT;
+constexpr Integral native_to_little_end(Integral big) NOEXCEPT;
 
-/// Variably-sized input returns specified integral (padded or truncated).
-/// ---------------------------------------------------------------------------
-
-template <typename Integral, size_t Size, if_integral_integer<Integral> = true>
-constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT;
-
-template <typename Integral, size_t Size, if_integral_integer<Integral> = true>
-constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT;
-
+/// Convert a big-endian integral integer to native.
 template <typename Integral, if_integral_integer<Integral> = true>
-VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT;
+constexpr Integral native_from_big_end(Integral big) NOEXCEPT;
 
+/// Convert a little-endian integral integer to native.
 template <typename Integral, if_integral_integer<Integral> = true>
-VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT;
+constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/endian/nominal.ipp>
+#include <bitcoin/system/impl/endian/swaps.ipp>
 
 #endif

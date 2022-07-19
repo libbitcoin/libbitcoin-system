@@ -100,7 +100,7 @@ public:
     //*************************************************************************
     static inline bool is_commitment_pattern(const operations& ops) NOEXCEPT
     {
-        static const auto header = to_big_endian(chain::witness_head);
+        constexpr auto header = to_big_endian(chain::witness_head);
 
         // C++14: remove && ops[1].data().size() >= header.size() guard.
         // Bytes after commitment optional with no consensus meaning (bip141).

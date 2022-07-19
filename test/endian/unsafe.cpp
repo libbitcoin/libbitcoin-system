@@ -18,32 +18,20 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_tests)
+BOOST_AUTO_TEST_SUITE(endian_unsafe_tests)
 
 constexpr uint32_t value32 = 0x01020304;
 const data_chunk data_forward{ 0x01, 0x02, 0x03, 0x04 };
 const data_chunk data_reverse{ 0x04, 0x03, 0x02, 0x01 };
 
-BOOST_AUTO_TEST_CASE(endian__from_big_endian__chunk_to_integer__expected)
-{
-    BOOST_REQUIRE(from_big_endian(data_forward) == value32);
-}
-
-BOOST_AUTO_TEST_CASE(endian__from_little_endian__chunk_to_integer__expected)
-{
-    BOOST_REQUIRE(from_little_endian(data_reverse) == value32);
-}
-
-////// Now restricted by bit_width in a type constraint.
-////BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_chunk__expected)
+////BOOST_AUTO_TEST_CASE(endian__unsafe_from_big_endian__always__expected)
 ////{
-////    BOOST_REQUIRE_EQUAL(to_big_endian(value32), data_forward);
+////    BOOST_REQUIRE_EQUAL(unsafe_from_big_endian<uint32_t>(data_forward.begin()), value32);
 ////}
 ////
-////// Now restricted by bit_width in a type constraint.
-////BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_chunk__expected)
+////BOOST_AUTO_TEST_CASE(endian__unsafe_from_little_endian__always__expected)
 ////{
-////    BOOST_REQUIRE_EQUAL(to_little_endian(value32), data_reverse);
+////    BOOST_REQUIRE_EQUAL(unsafe_from_little_endian<uint32_t>(data_reverse.begin()), value32);
 ////}
 
 BOOST_AUTO_TEST_SUITE_END()

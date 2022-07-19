@@ -21,68 +21,73 @@
 
 #include <algorithm>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/algorithm.hpp>
+#include <bitcoin/system/endian/swaps.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// return value
+// C++17: Parallel policy for std::transform.
+
+// Return by value.
+// ----------------------------------------------------------------------------
     
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> from_big_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT
+constexpr std_array<Integral, Count> from_big_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT
 {
     if constexpr (is_little_endian)
     {
-        std::array<Integral, Count> out{};
+        std_array<Integral, Count> out{};
         from_big_endians(out, values);
         return out;
     }
     else
     {
+        // short-circuit no-op.
         return values;
     }
 }
 
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> from_little_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT
+constexpr std_array<Integral, Count> from_little_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT
 {
     if constexpr (is_big_endian)
     {
-        std::array<Integral, Count> out{};
+        std_array<Integral, Count> out{};
         from_little_endians(out, values);
         return out;
     }
     else
     {
+        // short-circuit no-op.
         return values;
     }
 }
 
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> to_big_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT
+constexpr std_array<Integral, Count> to_big_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT
 {
     return from_big_endians(values);
 }
 
 template <typename Integral, size_t Count>
-constexpr std::array<Integral, Count> to_little_endians(
-    const std::array<Integral, Count>& values) NOEXCEPT
+constexpr std_array<Integral, Count> to_little_endians(
+    const std_array<Integral, Count>& values) NOEXCEPT
 {
     return from_little_endians(values);
 }
 
-// out parameter
+// Return by reference.
+// ----------------------------------------------------------------------------
 
 template <typename Integral, size_t Count>
-constexpr void from_big_endians(std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT
+constexpr void from_big_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT
 {
     if constexpr (is_little_endian)
     {
-        // C++17: Parallel policy for std::transform.
         std::transform(in.cbegin(), in.cend(), out.begin(),
             [](const auto& value) NOEXCEPT
             {
@@ -91,17 +96,17 @@ constexpr void from_big_endians(std::array<Integral, Count>& out,
     }
     else
     {
+        // short-circuit no-op.
         out = in;
     }
 }
 
 template <typename Integral, size_t Count>
-constexpr void from_little_endians(std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT
+constexpr void from_little_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT
 {
     if constexpr (is_big_endian)
     {
-        // C++17: Parallel policy for std::transform.
         std::transform(in.cbegin(), in.cend(), out.begin(),
             [](const uint32_t& value) NOEXCEPT
             {
@@ -110,20 +115,21 @@ constexpr void from_little_endians(std::array<Integral, Count>& out,
     }
     else
     {
+        // short-circuit no-op.
         out = in;
     }
 }
 
 template <typename Integral, size_t Count>
-constexpr void to_big_endians(std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT
+constexpr void to_big_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT
 {
     from_big_endians(out, in);
 }
 
 template <typename Integral, size_t Count>
-constexpr void to_little_endians(std::array<Integral, Count>& out,
-    const std::array<Integral, Count>& in) NOEXCEPT
+constexpr void to_little_endians(std_array<Integral, Count>& out,
+    const std_array<Integral, Count>& in) NOEXCEPT
 {
     from_little_endians(out, in);
 }

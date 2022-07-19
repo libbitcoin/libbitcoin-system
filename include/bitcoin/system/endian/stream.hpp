@@ -25,6 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
+// std::iostreams are not constexpr.
+
 template <typename Integral, typename IStream = std::istream,
     if_integral_integer<Integral> = true,
     if_base_of<std::istream, IStream> = true,

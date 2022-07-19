@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_tests)
+BOOST_AUTO_TEST_SUITE(endian_swaps_tests)
 
 template <typename Integer>
 constexpr auto normalize(Integer value)
@@ -75,7 +75,7 @@ static_assert(native_from_little_end(normalize(0x0102030405060708_u64)) == 0x010
 
 // to_big_end
 
-BOOST_AUTO_TEST_CASE(algorithm__native_to_big_end__not_constant_evaluated_signed__expected)
+BOOST_AUTO_TEST_CASE(endian__native_to_big_end__not_constant_evaluated_signed__expected)
 {
     BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x01_i8)), 0x01_i8);
     BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102_i16)), 0x0201_i16);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(algorithm__native_to_big_end__not_constant_evaluated_signed
     BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102030405060708_i64)), 0x0807060504030201_i64);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__native_to_big_end__not_constant_evaluated_unsigned__expected)
+BOOST_AUTO_TEST_CASE(endian__native_to_big_end__not_constant_evaluated_unsigned__expected)
 {
     BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x01_u8)), 0x01_u8);
     BOOST_REQUIRE_EQUAL(native_to_big_end(normalize(0x0102_u16)), 0x0201_u16);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(algorithm__native_to_big_end__not_constant_evaluated_unsign
 
 // to_big_end
 
-BOOST_AUTO_TEST_CASE(algorithm__native_to_little_end__not_constant_evaluated_signed__expected)
+BOOST_AUTO_TEST_CASE(endian__native_to_little_end__not_constant_evaluated_signed__expected)
 {
     BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x01_i8)), 0x01_i8);
     BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102_i16)), 0x0102_i16);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(algorithm__native_to_little_end__not_constant_evaluated_sig
     BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102030405060708_i64)), 0x0102030405060708_i64);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__native_to_little_end__not_constant_evaluated_unsigned__expected)
+BOOST_AUTO_TEST_CASE(endian__native_to_little_end__not_constant_evaluated_unsigned__expected)
 {
     BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x01_u8)), 0x01_u8);
     BOOST_REQUIRE_EQUAL(native_to_little_end(normalize(0x0102_u16)), 0x0102_u16);
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(algorithm__native_to_little_end__not_constant_evaluated_uns
 
 // from ends
 
-BOOST_AUTO_TEST_CASE(algorithm__native_from_big_end__not_constant_evaluated_signed__expected)
+BOOST_AUTO_TEST_CASE(endian__native_from_big_end__not_constant_evaluated_signed__expected)
 {
     BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x01_i8)), 0x01_i8);
     BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102_i16)), 0x0201_i16);
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(algorithm__native_from_big_end__not_constant_evaluated_sign
     BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102030405060708_i64)), 0x0807060504030201_i64);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__native_from_big_end__not_constant_evaluated_unsigned__expected)
+BOOST_AUTO_TEST_CASE(endian__native_from_big_end__not_constant_evaluated_unsigned__expected)
 {
     BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x01_u8)), 0x01_u8);
     BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102_u16)), 0x0201_u16);
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(algorithm__native_from_big_end__not_constant_evaluated_unsi
     BOOST_REQUIRE_EQUAL(native_from_big_end(normalize(0x0102030405060708_u64)), 0x0807060504030201_u64);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__native_from_little_end__not_constant_evaluated_signed__expected)
+BOOST_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_signed__expected)
 {
     BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x01_i8)), 0x01_i8);
     BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102_i16)), 0x0102_i16);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(algorithm__native_from_little_end__not_constant_evaluated_s
     BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102030405060708_i64)), 0x0102030405060708_i64);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__native_from_little_end__not_constant_evaluated_unsigned__expected)
+BOOST_AUTO_TEST_CASE(endian__native_from_little_end__not_constant_evaluated_unsigned__expected)
 {
     BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x01_u8)), 0x01_u8);
     BOOST_REQUIRE_EQUAL(native_from_little_end(normalize(0x0102_u16)), 0x0102_u16);

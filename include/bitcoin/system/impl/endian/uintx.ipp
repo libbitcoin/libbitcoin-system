@@ -19,44 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_UINTX_IPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_UINTX_IPP
 
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/minimal.hpp>
-#include <bitcoin/system/endian/nominal.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-// data => uintx
-// uintx => data_chunk
-
-// Overload for uintx, as from_big_endian<0> reads zero bytes and uintx is a
-// signed type (though otherwise would be declared as uintx_t<0>).
-// data size determined by uintx (vs. type).
-
-inline uintx from_big_endian(const data_chunk& data) NOEXCEPT
-{
-    return from_big_chunk<uintx>(data.size(), data);
-}
-
-inline uintx from_little_endian(const data_chunk& data) NOEXCEPT
-{
-    return from_little_chunk<uintx>(data.size(), data);
-}
-
-inline data_chunk to_big_endian(const uintx& value) NOEXCEPT
-{
-    // minimal (chunk - required by unitx variable size).
-    // to_big_endian_size<> implies array, otherwise chunk.
-    return to_big_endian_size(value);
-}
-
-inline data_chunk to_little_endian(const uintx& value) NOEXCEPT
-{
-    // minimal (chunk - required by unitx variable size).
-    // to_little_endian_size<> implies array, otherwise chunk.
-    return to_little_endian_size(value);
-}
 
 } // namespace system
 } // namespace libbitcoin

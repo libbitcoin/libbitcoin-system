@@ -19,111 +19,114 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_NOMINAL_IPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_NOMINAL_IPP
 
-#include <algorithm>
-#include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/algorithm.hpp>
+#include <bitcoin/system/endian/integers.hpp>
+#include <bitcoin/system/endian/integrals.hpp>
+#include <bitcoin/system/endian/swaps.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// data => integral
-// integral => byte_array
+// Implicitly typed/sized return (nominal conversions).
 // ----------------------------------------------------------------------------
 
 template <size_t Size>
-constexpr unsigned_type<Size> from_big_endian(const data_array<Size>& data) NOEXCEPT
+constexpr unsigned_type<Size>
+from_big_endian(const data_array<Size>& data) NOEXCEPT
 {
-    return from_big_array<unsigned_type<Size>>(Size, data);
+    if (std::is_constant_evaluated())
+    {
+        // integral, zero offset.
+        return from_big<unsigned_type<Size>>(data);
+    }
+    else
+    {
+        // cast/swap.
+        return native_from_big_end(byte_cast(data));
+    }
 }
 
 template <size_t Size>
-constexpr unsigned_type<Size> from_little_endian(const data_array<Size>& data) NOEXCEPT
+constexpr unsigned_type<Size>
+from_little_endian(const data_array<Size>& data) NOEXCEPT
 {
-    return from_little_array<unsigned_type<Size>>(Size, data);
+    if (std::is_constant_evaluated())
+    {
+        // integral, zero offset.
+        return from_little<unsigned_type<Size>>(data);
+    }
+    else
+    {
+        // cast/swap.
+        return native_from_little_end(byte_cast(data));
+    }
 }
 
-// integral   from_big|little_endian(data_slice)
-// data_array   to_big|little_endian(integral)
+template <typename Integral, if_integral_integer<Integral>>
+constexpr data_array<sizeof(Integral)>
+to_big_endian(Integral value) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        // integral, zero offset.
+        return to_big(value);
+    }
+    else
+    {
+        // swap/cast.
+        return byte_cast(native_to_big_end(value));
+    }
+}
+
+template <typename Integral, if_integral_integer<Integral>>
+constexpr data_array<sizeof(Integral)>
+to_little_endian(Integral value) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        // integral, zero offset.
+        return to_little(value);
+    }
+    else
+    {
+        // swap/cast.
+        return byte_cast(native_to_little_end(value));
+    }
+}
+
+// Variably-sized input returns specified integral (padded or truncated).
 // ----------------------------------------------------------------------------
+// Any-sized data input, requires integer (shift loop) conversion.
+// TODO: move to minimal (variably-sized)?
+
+template <typename Integral, size_t Size, if_integral_integer<Integral>>
+constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT
+{
+    // integer.
+    return from_big_array<Integral>(sizeof(Integral), data);
+}
+
+template <typename Integral, size_t Size, if_integral_integer<Integral>>
+constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT
+{
+    // integer.
+    return from_little_array<Integral>(sizeof(Integral), data);
+}
 
 template <typename Integral, if_integral_integer<Integral>>
 VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT
 {
-    // Variably sized non-array format, stay with native/constexpr.
+    // integer.
     return from_big_chunk<Integral>(sizeof(Integral), data);
 }
 
 template <typename Integral, if_integral_integer<Integral>>
 VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT
 {
-    // Variably sized non-array format, stay with native/constexpr.
+    // integer.
     return from_little_chunk<Integral>(sizeof(Integral), data);
-}
-
-template <typename Integral, size_t Size, if_integral_integer<Integral>>
-constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT
-{
-
-    if (std::is_constant_evaluated())
-    {
-        return from_big_array<Integral>(sizeof(Integral), data);
-    }
-    else
-    {
-        // TODO: have to guard against undersize to cast a partial.
-        // TODO: it's a possible narrowing or non-narrowing array cast.
-        ////return native_from_big_end(byte_cast(data));
-        return from_big_array<Integral>(sizeof(Integral), data);
-    }
-}
-
-template <typename Integral, size_t Size, if_integral_integer<Integral>>
-constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        return from_little_array<Integral>(sizeof(Integral), data);
-    }
-    else
-    {
-        // TODO: have to guard against undersize to cast a partial.
-        // TODO: it's a possible narrowing or non-narrowing array cast.
-        ////return native_from_little_end(byte_cast(data));
-        return from_little_array<Integral>(sizeof(Integral), data);
-    }
-}
-
-template <typename Integral,
-    if_integral_integer<Integral>>
-constexpr data_array<sizeof(Integral)> to_big_endian(Integral value) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        return to_big_data(data_array<sizeof(Integral)>{}, value);
-    }
-    else
-    {
-        // inline
-        return byte_cast(native_to_big_end(value));
-    }
-}
-
-template <typename Integral,
-    if_integral_integer<Integral>>
-constexpr data_array<sizeof(Integral)> to_little_endian(Integral value) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        return to_little_data(data_array<sizeof(Integral)>{}, value);
-    }
-    else
-    {
-        // inline
-        return byte_cast(native_to_little_end(value));
-    }
 }
 
 } // namespace system
