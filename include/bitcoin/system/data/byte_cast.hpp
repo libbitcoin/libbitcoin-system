@@ -28,7 +28,8 @@
 /// constraints to preclude referencing fractional elements. A const reference
 /// parameter returns a const reference, non-const returns a non-const
 /// reference, and an rvalue parameter returns a cast instance. These enable
-/// C/pointer-style performance (no copies) with full type safety.
+/// C/pointer-style performance (no copies) with full type safety at no cost
+/// (reinterpret_cast does not compile to any CPU instructions).
 
 namespace libbitcoin {
 namespace system {

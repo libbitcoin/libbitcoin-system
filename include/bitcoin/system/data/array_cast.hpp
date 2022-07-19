@@ -29,7 +29,8 @@
 /// reference parameter returns a const array reference, non-const returns
 /// a non-const array reference, and an rvalue array parameter returns a cast
 /// instance. These enable C/pointer-style performance (no copies) with full
-/// type safety.
+/// type safety at no cost (reinterpret_cast does not compile to any CPU
+/// instructions).
 
 /// Only arrays of integrals (or arrays of arrays of integrals) may currently
 /// be cast (constrained by the size_of() typelet). Overloads to this function
