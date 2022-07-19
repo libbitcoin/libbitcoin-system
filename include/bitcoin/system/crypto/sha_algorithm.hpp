@@ -30,11 +30,13 @@ namespace sha {
 constexpr size_t digest_size = 32;
 constexpr size_t block_size  = 64;
 constexpr size_t state_size  = 8;
+constexpr size_t padding_size = block_size / sizeof(uint32_t);
 
-using digest = std_array<uint8_t,  digest_size>;
-using block  = std_array<uint8_t,  block_size>;
-using state  = std_array<uint32_t, state_size>;
-using buffer = std_array<uint32_t, block_size>;
+using digest  = std_array<uint8_t,  digest_size>;
+using block   = std_array<uint8_t,  block_size>;
+using state   = std_array<uint32_t, state_size>;
+using buffer  = std_array<uint32_t, block_size>;
+using padding = std_array<uint32_t, padding_size>;
 
 using digests = std_vector<digest>;
 using blocks = std_vector<std::reference_wrapper<const block>>;
@@ -49,6 +51,14 @@ constexpr state pad32
 {
     0x80000000, 0x00000000, 0x00000000, 0x00000000,
     0x00000000, 0x00000000, 0x00000000, 0x00000100
+};
+
+constexpr padding pad64
+{
+    0x80000000, 0x00000000, 0x00000000, 0x00000000,
+    0x00000000, 0x00000000, 0x00000000, 0x00000000,
+    0x00000000, 0x00000000, 0x00000000, 0x00000000,
+    0x00000000, 0x00000000, 0x00000000, 0x00000200
 };
 
 constexpr buffer expanded_pad64

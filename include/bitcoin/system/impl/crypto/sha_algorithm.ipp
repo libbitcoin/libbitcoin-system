@@ -282,12 +282,41 @@ constexpr void padding8(buffer& out) NOEXCEPT
     }
     else
     {
-        // TODO: safe offsetting array cast.
+        // TODO: make safe offsetting array cast.
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         auto& to = unsafe_array_cast<uint32_t, state_size>(&out[state_size]);
         BC_POP_WARNING()
         to = pad32;
     }
+}
+
+constexpr void paddin16(buffer& out, size_t blocks) NOEXCEPT
+{
+    const auto bits = to_bits<uint64_t>(blocks * block_size);
+
+    if (std::is_constant_evaluated())
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        out[0] = pad64[0];
+        out[1] = pad64[1];
+        out[2] = pad64[2];
+        out[3] = pad64[3];
+        out[4] = pad64[4];
+        out[5] = pad64[5];
+        ////out[6] = pad64[6];
+        ////out[7] = pad64[7];
+        BC_POP_WARNING()
+    }
+    else
+    {
+        auto& to = narrowing_array_cast<uint32_t, padding_size>(out);
+        to = pad64;
+    }
+
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    out[6] = narrow_cast<uint32_t>(bits >> bc::bits<uint32_t>);
+    out[7] = narrow_cast<uint32_t>(bits);
+    BC_POP_WARNING()
 }
 
 constexpr void bigend16(buffer& out, const block& in) NOEXCEPT
@@ -411,22 +440,44 @@ constexpr digest finalize(const state& state) NOEXCEPT
 // Finalized single hash functions.
 // ---------------------------------------------------------------------------
 
-constexpr digest hash(const block& data) NOEXCEPT
+constexpr digest hash(const blocks& data) NOEXCEPT
 {
+    // process N blocks in accumulator loop.
     auto state = sha::initial;
     accumulate(state, data);
+
+    // full pad block for N blocks (pre-endianed, size added).
+    buffer words{};
+    paddin16(words, data.size());
+    expand48(words);
+    const auto save = state;
+    rounds64(state, words);
+    summary8(state, save);
     return finalize(state);
 }
 
-constexpr digest hash(const blocks& data) NOEXCEPT
+constexpr digest hash(const block& data) NOEXCEPT
 {
+    buffer words{};
+
+    // process 1 block in (avoid accumulate to reuse buffer).
     auto state = sha::initial;
-    accumulate(state, data);
+    bigend16(words, data);
+    expand48(words);
+    rounds64(state, words);
+    summary8(state, sha::initial);
+
+    // full pad block for 1 block (pre-sized/endianed/expanded).
+    copyin64(words, expanded_pad64);
+    const auto save = state;
+    rounds64(state, words);
+    summary8(state, save);
     return finalize(state);
 }
 
 constexpr digest hash(const digest& data) NOEXCEPT
 {
+    // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
     buffer words{};
     bigend08(words, data);
     padding8(words);
