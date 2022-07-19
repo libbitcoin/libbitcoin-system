@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_ARRAY_CAST_HPP
 #define LIBBITCOIN_SYSTEM_DATA_ARRAY_CAST_HPP
 
-#include <array>
+#include <functional>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -124,6 +124,21 @@ template <typename To, size_t Size = one, typename From,
     if_integral_integer_std_array<To> = true>
 inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT;
+
+/// Cast Integral1* to a vector(array(Integral)&, count).
+/// ---------------------------------------------------------------------------
+
+template <typename To, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer_std_array<To> = true>
+inline std_vector<std::reference_wrapper<To>>
+unsafe_vector_cast(From* bytes, size_t count) NOEXCEPT;
+
+template <typename To, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer_std_array<To> = true>
+inline std_vector<std::reference_wrapper<const To>>
+unsafe_vector_cast(const From* bytes, size_t count) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

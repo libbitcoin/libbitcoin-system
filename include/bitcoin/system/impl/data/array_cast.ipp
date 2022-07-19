@@ -19,7 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_ARRAY_CAST_IPP
 #define LIBBITCOIN_SYSTEM_DATA_ARRAY_CAST_IPP
 
-#include <array>
+#include <functional>
+#include <iterator>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -139,6 +140,49 @@ inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT
 {
     return *pointer_cast<const std_array<To, Size>>(bytes);
+}
+
+// Cast Integral1* to a vector(array(Integral)&, count).
+// ----------------------------------------------------------------------------
+
+template <typename To, typename From,
+    if_integral_integer<From>,
+    if_integral_integer_std_array<To>>
+inline std_vector<std::reference_wrapper<To>>
+ unsafe_vector_cast(From* bytes, size_t count) NOEXCEPT
+{
+    using inner_type = array_element<To>;
+    constexpr auto inner_count = array_count<To>;
+    std_vector<std::reference_wrapper<To>> out{};
+    out.reserve(count);
+
+    for (size_t element = 0; element < count; ++element)
+    {
+        out.emplace_back(unsafe_array_cast<inner_type, inner_count>(bytes));
+        std::advance(bytes, size_of<To>());
+    }
+
+    return out;
+}
+
+template <typename To, typename From,
+    if_integral_integer<From>,
+    if_integral_integer_std_array<To>>
+inline std_vector<std::reference_wrapper<const To>>
+unsafe_vector_cast(const From* bytes, size_t count) NOEXCEPT
+{
+    using inner_type = array_element<To>;
+    constexpr auto inner_count = array_count<To>;
+    std_vector<std::reference_wrapper<const To>> out{};
+    out.reserve(count);
+
+    for (size_t element = 0; element < count; ++element)
+    {
+        out.emplace_back(unsafe_array_cast<inner_type, inner_count>(bytes));
+        std::advance(bytes, size_of<To>());
+    }
+
+    return out;
 }
 
 } // namespace system

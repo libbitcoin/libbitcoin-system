@@ -431,7 +431,7 @@ using inner = std::array<uint16_t, 4>;
 using outer = decltype(unsafe_array_cast<inner, 3>(value64x3));
 static_assert(is_same_type<outer, const std::array<inner, 3>&>);
 
-BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__const_array__expected)
+BOOST_AUTO_TEST_CASE(array_cast__unsafe_array_cast__const_array__expected)
 {
     constexpr auto longs = 3_size;
     constexpr std::array<uint64_t, longs> value64x3
@@ -456,7 +456,7 @@ BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__const_array__expected)
     BOOST_REQUIRE_EQUAL(value16x4x3[2][3], native_to_big_end(0x7890_u16));
 }
 
-BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__non_const_array__expected)
+BOOST_AUTO_TEST_CASE(array_cast__unsafe_array_cast__non_const_array__expected)
 {
     constexpr auto longs = 3_size;
     std::array<uint64_t, longs> value64x3
@@ -506,6 +506,107 @@ BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__non_const_array__expected)
     BOOST_REQUIRE_EQUAL(value64x3[0], native_to_big_end(0x0001000200030004_u64));
     BOOST_REQUIRE_EQUAL(value64x3[1], native_to_big_end(0x0005000600070008_u64));
     BOOST_REQUIRE_EQUAL(value64x3[2], native_to_big_end(0x0009000a000b000c_u64));
+}
+
+// unsafe_vector_cast (vector of array references cast from bytes)
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(array_cast__unsafe_vector_cast__const_data__expected)
+{
+    using data_t  = data_array<sizeof(uint16_t) * 2 * 3>;
+    using inner_t = std_array<uint16_t, 2>;
+    using outer_t = std_vector<std::reference_wrapper<const inner_t>>;
+    const data_t bytes
+    {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c
+    };
+
+    // All inner const as expected.
+    using function_t  = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one));
+    using reference_t = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one)[0]);
+    using array_t     = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one)[0].get());
+    using value_t     = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one)[0].get()[0]);
+    static_assert(is_same_type<function_t, outer_t>);
+    static_assert(is_same_type<reference_t, std::reference_wrapper<const inner_t>&>);
+    static_assert(is_same_type<array_t, const inner_t&>);
+    static_assert(is_same_type<value_t, const uint16_t&>);
+
+    // Cast 12 bytes into vector of 3 const 4 byte (2 x 2) array references.
+    const auto values32x3 = unsafe_vector_cast<inner_t>(bytes.data(), 3);
+
+    BOOST_CHECK_EQUAL(values32x3[0].get()[0], native_to_big_end(0x0102_u16));
+    BOOST_CHECK_EQUAL(values32x3[0].get()[1], native_to_big_end(0x0304_u16));
+    BOOST_CHECK_EQUAL(values32x3[1].get()[0], native_to_big_end(0x0506_u16));
+    BOOST_CHECK_EQUAL(values32x3[1].get()[1], native_to_big_end(0x0708_u16));
+    BOOST_CHECK_EQUAL(values32x3[2].get()[0], native_to_big_end(0x090a_u16));
+    BOOST_CHECK_EQUAL(values32x3[2].get()[1], native_to_big_end(0x0b0c_u16));
+
+    // Cast from reference_wrapper also works.
+    BOOST_CHECK_EQUAL(((inner_t)values32x3[0])[0], native_to_big_end(0x0102_u16));
+    BOOST_CHECK_EQUAL(((inner_t)values32x3[0])[1], native_to_big_end(0x0304_u16));
+    BOOST_CHECK_EQUAL(((inner_t)values32x3[1])[0], native_to_big_end(0x0506_u16));
+    BOOST_CHECK_EQUAL(((inner_t)values32x3[1])[1], native_to_big_end(0x0708_u16));
+    BOOST_CHECK_EQUAL(((inner_t)values32x3[2])[0], native_to_big_end(0x090a_u16));
+    BOOST_CHECK_EQUAL(((inner_t)values32x3[2])[1], native_to_big_end(0x0b0c_u16));
+}
+
+BOOST_AUTO_TEST_CASE(array_cast__unsafe_vector_cast__non_const_data__expected)
+{
+    using data_t  = data_array<sizeof(uint16_t) * 2 * 3>;
+    using inner_t = std_array<uint16_t, 2>;
+    using outer_t = std_vector<std::reference_wrapper<inner_t>>;
+    data_t bytes
+    {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c
+    };
+
+    // All innner non-const as expected.
+    using function_t  = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one));
+    using reference_t = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one)[0]);
+    using array_t     = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one)[0].get());
+    using value_t     = decltype(unsafe_vector_cast<inner_t>(bytes.data(), one)[0].get()[0]);
+    static_assert(is_same_type<function_t, outer_t>);
+    static_assert(is_same_type<reference_t, std::reference_wrapper<inner_t>&>);
+    static_assert(is_same_type<array_t, inner_t&>);
+    static_assert(is_same_type<value_t, uint16_t&>);
+
+    // Cast 12 bytes into vector of 3 non-const 4 byte (2 x 2) array references.
+    auto values32x3 = unsafe_vector_cast<std_array<uint16_t, 2>>(bytes.data(), 3);
+
+    BOOST_CHECK_EQUAL(values32x3[0].get()[0], native_to_big_end(0x0102_u16));
+    BOOST_CHECK_EQUAL(values32x3[0].get()[1], native_to_big_end(0x0304_u16));
+    BOOST_CHECK_EQUAL(values32x3[1].get()[0], native_to_big_end(0x0506_u16));
+    BOOST_CHECK_EQUAL(values32x3[1].get()[1], native_to_big_end(0x0708_u16));
+    BOOST_CHECK_EQUAL(values32x3[2].get()[0], native_to_big_end(0x090a_u16));
+    BOOST_CHECK_EQUAL(values32x3[2].get()[1], native_to_big_end(0x0b0c_u16));
+
+    // Demonstrate that it is a set of references to a cast, by writing forward.
+    bytes =
+    {
+        0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xa1, 0xb2, 0xc3, 0xd4
+    };
+
+    BOOST_CHECK_EQUAL(values32x3[0].get()[0], native_to_big_end(0xabcd_u16));
+    BOOST_CHECK_EQUAL(values32x3[0].get()[1], native_to_big_end(0xef01_u16));
+    BOOST_CHECK_EQUAL(values32x3[1].get()[0], native_to_big_end(0x2345_u16));
+    BOOST_CHECK_EQUAL(values32x3[1].get()[1], native_to_big_end(0x6789_u16));
+    BOOST_CHECK_EQUAL(values32x3[2].get()[0], native_to_big_end(0xa1b2_u16));
+    BOOST_CHECK_EQUAL(values32x3[2].get()[1], native_to_big_end(0xc3d4_u16));
+
+    // Demonstrate that it is a set of references to a cast, by writing backward.
+    values32x3[0].get()[0] = native_to_big_end(0xa000_u16);
+    values32x3[0].get()[1] = native_to_big_end(0xb001_u16);
+    values32x3[1].get()[0] = native_to_big_end(0xc002_u16);
+    values32x3[1].get()[1] = native_to_big_end(0xd003_u16);
+    values32x3[2].get()[0] = native_to_big_end(0xe004_u16);
+    values32x3[2].get()[1] = native_to_big_end(0xf004_u16);
+
+    constexpr data_t expected
+    {
+        0xa0, 0x00, 0xb0, 0x01, 0xc0, 0x02, 0xd0, 0x03, 0xe0, 0x04, 0xf0, 0x04
+    };
+
+    BOOST_CHECK_EQUAL(bytes, expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
