@@ -95,6 +95,9 @@ constexpr bool is_std_array = is_std_array_t<Type>::value;
 template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
 constexpr size_t array_count = Type{}.size();
 
+template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
+using array_element = typename Type::value_type;
+
 template <typename Type, std::enable_if_t<!is_std_array<Type>, bool> = true>
 constexpr size_t size_of() noexcept { return sizeof(Type); }
 

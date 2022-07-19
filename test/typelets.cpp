@@ -268,6 +268,10 @@ static_assert(is_same_type<decltype(is_std_array<std::array<uint8_t, 0>>), const
 static_assert(array_count<std_array<uint8_t, 42>> == 42);
 static_assert(array_count<std_array<std_array<uint32_t, 42>, 24>> == 24);
 
+static_assert(is_same_type<array_element<std_array<uint32_t, 42>>, uint32_t>);
+static_assert(is_same_type<array_element<std_array<derived, 42>>, derived>);
+static_assert(!is_same_type<array_element<std_array<base, 42>>, derived>);
+
 static_assert(std_array<uint8_t, 42>{}.size() == 42);
 static_assert(std_array<std_array<uint32_t, 42>, 24>{}.size() == 24);
 static_assert(std_array<std_array<std_array<uint32_t, 42>, 24>, 8>{}.size() == 8);
