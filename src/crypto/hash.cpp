@@ -27,11 +27,11 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-#include <bitcoin/system/crypto/external/external.hpp>
-////#include <bitcoin/system/crypto/hmac_sha512.hpp>
-////#include <bitcoin/system/crypto/pbkd_sha512.hpp>
-////#include <bitcoin/system/crypto/sha512.hpp>
-
+#include <bitcoin/system/crypto/external/hmac_sha512.hpp>
+#include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
+#include <bitcoin/system/crypto/external/ripemd160.hpp>
+#include <bitcoin/system/crypto/external/sha160.hpp>
+#include <bitcoin/system/crypto/external/sha512.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_CHECKSUM_IPP
 
 #include <algorithm>
-/// DELETECSTDINT
 #include <utility>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
