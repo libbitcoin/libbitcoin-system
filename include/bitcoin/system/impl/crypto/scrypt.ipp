@@ -241,9 +241,10 @@ hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
     pbkd::sha256::hash(phrase.data(), phrase.size(),
         salt.data(), salt.size(), one, p.data(), p.size());
 
-    // Parallel conditionally enables parallel execution (blows up memory).
     std::atomic_bool success{ true };
     auto& blocks = array_cast<rblock_type>(p);
+
+    // parallel() conditionally enables concurrent execution (blows up memory).
     std::for_each(parallel(), blocks.begin(), blocks.end(), [&](auto& block)
     {
         success = success && mix(block.data());
