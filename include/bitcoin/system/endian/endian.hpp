@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 
-#include <bitcoin/system/endian/set.hpp>
+#include <bitcoin/system/endian/batch.hpp>
 #include <bitcoin/system/endian/integers.hpp>
 #include <bitcoin/system/endian/integrals.hpp>
 #include <bitcoin/system/endian/minimal.hpp>

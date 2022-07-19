@@ -129,11 +129,11 @@
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\batch.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integers.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integrals.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\minimal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\set.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>

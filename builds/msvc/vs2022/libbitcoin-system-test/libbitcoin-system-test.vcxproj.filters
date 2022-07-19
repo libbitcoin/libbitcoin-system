@@ -237,6 +237,9 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\batch.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\integers.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
@@ -247,9 +250,6 @@
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp">
-      <Filter>src\endian</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endian\set.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
