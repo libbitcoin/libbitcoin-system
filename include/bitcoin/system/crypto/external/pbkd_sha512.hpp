@@ -19,9 +19,9 @@
 
 #include <bitcoin/system/define.hpp>
 
-/* Password-Based Key Derivation Function 2 (PKCS #5 v2.0). */
-/* Code based on IEEE Std 802.11-2007, Annex H.4.2. */
-/* returns 0 if successful. */
+// Password-Based Key Derivation Function 2 (PKCS #5 v2.0).
+// Code based on IEEE Std 802.11-2007, Annex H.4.2.
+// returns 0 if successful
 bool PBKDSHA512(const uint8_t* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     size_t iterations) NOEXCEPT;
