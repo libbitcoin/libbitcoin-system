@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-// Byte widths.
+// Byte width.
 // ----------------------------------------------------------------------------
 // See also std::bit_width (C++20).
 
@@ -49,7 +49,7 @@ constexpr size_t byte_width(Integral value) NOEXCEPT
         byte_width(to_unsigned(value));
 }
 
-// Bits to bytes utilities.
+// Bit count to byte count.
 // ----------------------------------------------------------------------------
 
 template <typename Integer, if_unsigned_integer<Integer>>
@@ -62,6 +62,20 @@ template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer to_floored_bytes(Integer bits) NOEXCEPT
 {
     return floored_divide(bits, byte_bits);
+}
+
+// Byte of integral by logical index.
+// ----------------------------------------------------------------------------
+
+template <size_t Index, typename Byte, typename Integral,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>,
+    if_lesser<Index, sizeof(Integral)>>
+constexpr Byte byte(Integral value) NOEXCEPT
+{
+    constexpr auto byte_mask = unmask_right<Integral>(byte_bits);
+    const auto byte = bit_and(shift_right(value, to_bits(Index)), byte_mask);
+    return possible_narrow_and_sign_cast<Byte>(byte);
 }
 
 // Byte Negation.

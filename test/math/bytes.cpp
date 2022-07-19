@@ -81,6 +81,55 @@ static_assert(byte_width(0x0000000000ff010000000000_i64) == 7);
 static_assert(byte_width(0x00000000ff00000000000000_i64) == 8);
 static_assert(is_same_type<decltype(byte_width<int8_t>(0)), size_t>);
 
+// byte
+static_assert(byte<0>(0x01_u8) == 0x01_u8);
+static_assert(byte<0>(0x0102_u16) == 0x02_u8);
+static_assert(byte<1>(0x0102_u16) == 0x01_u8);
+static_assert(byte<0>(0x01020304_u32) == 0x04_u8);
+static_assert(byte<1>(0x01020304_u32) == 0x03_u8);
+static_assert(byte<2>(0x01020304_u32) == 0x02_u8);
+static_assert(byte<3>(0x01020304_u32) == 0x01_u8);
+static_assert(byte<0>(0x0102030405060708_u64) == 0x08_u8);
+static_assert(byte<1>(0x0102030405060708_u64) == 0x07_u8);
+static_assert(byte<2>(0x0102030405060708_u64) == 0x06_u8);
+static_assert(byte<3>(0x0102030405060708_u64) == 0x05_u8);
+static_assert(byte<4>(0x0102030405060708_u64) == 0x04_u8);
+static_assert(byte<5>(0x0102030405060708_u64) == 0x03_u8);
+static_assert(byte<6>(0x0102030405060708_u64) == 0x02_u8);
+static_assert(byte<7>(0x0102030405060708_u64) == 0x01_u8);
+
+static_assert(byte<0, uint8_t>(0x01_u8) == 0x01_u8);
+static_assert(byte<0, uint8_t>(0x0102_u16) == 0x02_u8);
+static_assert(byte<1, uint8_t>(0x0102_u16) == 0x01_u8);
+static_assert(byte<0, uint8_t>(0x01020304_u32) == 0x04_u8);
+static_assert(byte<1, uint8_t>(0x01020304_u32) == 0x03_u8);
+static_assert(byte<2, uint8_t>(0x01020304_u32) == 0x02_u8);
+static_assert(byte<3, uint8_t>(0x01020304_u32) == 0x01_u8);
+static_assert(byte<0, uint8_t>(0x0102030405060708_u64) == 0x08_u8);
+static_assert(byte<1, uint8_t>(0x0102030405060708_u64) == 0x07_u8);
+static_assert(byte<2, uint8_t>(0x0102030405060708_u64) == 0x06_u8);
+static_assert(byte<3, uint8_t>(0x0102030405060708_u64) == 0x05_u8);
+static_assert(byte<4, uint8_t>(0x0102030405060708_u64) == 0x04_u8);
+static_assert(byte<5, uint8_t>(0x0102030405060708_u64) == 0x03_u8);
+static_assert(byte<6, uint8_t>(0x0102030405060708_u64) == 0x02_u8);
+static_assert(byte<7, uint8_t>(0x0102030405060708_u64) == 0x01_u8);
+
+static_assert(byte<0, int8_t>(0x01_u8) == 0x01_i8);
+static_assert(byte<0, int8_t>(0x0102_u16) == 0x02_i8);
+static_assert(byte<1, int8_t>(0x0102_u16) == 0x01_i8);
+static_assert(byte<0, int8_t>(0x01020304_u32) == 0x04_i8);
+static_assert(byte<1, int8_t>(0x01020304_u32) == 0x03_i8);
+static_assert(byte<2, int8_t>(0x01020304_u32) == 0x02_i8);
+static_assert(byte<3, int8_t>(0x01020304_u32) == 0x01_i8);
+static_assert(byte<0, int8_t>(0x0102030405060708_i64) == 0x08_i8);
+static_assert(byte<1, int8_t>(0x0102030405060708_i64) == 0x07_i8);
+static_assert(byte<2, int8_t>(0x0102030405060708_i64) == 0x06_i8);
+static_assert(byte<3, int8_t>(0x0102030405060708_i64) == 0x05_i8);
+static_assert(byte<4, int8_t>(0x0102030405060708_i64) == 0x04_i8);
+static_assert(byte<5, int8_t>(0x0102030405060708_i64) == 0x03_i8);
+static_assert(byte<6, int8_t>(0x0102030405060708_i64) == 0x02_i8);
+static_assert(byte<7, int8_t>(0x0102030405060708_i64) == 0x01_i8);
+
 // is_negated (negated signed values)
 static_assert(is_negated(0x80_i8));
 static_assert(is_negated(0xff_i8));
