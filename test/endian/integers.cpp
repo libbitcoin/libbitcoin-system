@@ -20,6 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(endian_integers_tests)
 
+// These are fully covered as dependencies for other endian functions.
 // Data to_big_data(Data&&, Integer)
 // Data to_little_data(Data&&, Integer)
 // Integer from_big_array<Integer>(data_array)

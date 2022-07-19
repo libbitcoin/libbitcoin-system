@@ -19,24 +19,24 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_ENDIAN_HPP
 
+#include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/integers.hpp>
 #include <bitcoin/system/endian/integrals.hpp>
 #include <bitcoin/system/endian/minimal.hpp>
 #include <bitcoin/system/endian/nominal.hpp>
-#include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/stream.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
 #include <bitcoin/system/endian/uintx_t.hpp>
 #include <bitcoin/system/endian/unsafe.hpp>
 
-// integers ->
+// integers  ->
 // integrals ->
-// minimal  -> integers
-// nominal  -> integers, integrals, swaps
-// set      -> swaps
-// stream   -> swaps
-// swaps    ->
-// uintx_t  -> nominal, minimal
-// unsafe   -> swaps
+// swaps     ->
+// stream    -> swaps
+// unsafe    -> swaps
+// batch     -> swaps
+// nominal   -> swaps, integers, integrals,
+// uintx_t   -> nominal, minimal
+// minimal   -> integers
 
 #endif
