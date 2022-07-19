@@ -223,8 +223,8 @@ constexpr void from_little(Integral& value,
 
 template<typename Integral, size_t Offset, typename Byte, size_t Size,
     if_one_byte<Byte>,
-    if_integral_integer<Integral>,
-    if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
+    if_integral_integer<Integral>>
+    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT
 {
     Integral out{};
@@ -243,21 +243,23 @@ constexpr Integral from_little(const std_array<Byte, Size>& data) NOEXCEPT
     return out;
 }
 
-////template<typename Byte, size_t Size, if_one_byte<Byte>>
-////constexpr unsigned_type<Size> from_big(const std_array<Byte, Size>& data) NOEXCEPT
-////{
-////    unsigned_type<Size> out{};
-////    from_big(out, data);
-////    return out;
-////}
-////
-////template<typename Byte, size_t Size, if_one_byte<Byte>>
-////constexpr unsigned_type<Size> from_little(const std_array<Byte, Size>& data) NOEXCEPT
-////{
-////    unsigned_type<Size> out{};
-////    from_little(out, data);
-////    return out;
-////}
+template<place1, typename Byte, size_t Size, if_one_byte<Byte >>
+constexpr unsigned_type<Size> from_big(
+    const std_array<Byte, Size>& data) NOEXCEPT
+{
+    unsigned_type<Size> out{};
+    from_big<zero>(out, data);
+    return out;
+}
+
+template<place1, typename Byte, size_t Size, if_one_byte<Byte>>
+constexpr unsigned_type<Size> from_little(
+    const std_array<Byte, Size>& data) NOEXCEPT
+{
+    unsigned_type<Size> out{};
+    from_little<zero>(out, data);
+    return out;
+}
 
 } // namespace system
 } // namespace libbitcoin

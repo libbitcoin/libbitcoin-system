@@ -55,6 +55,7 @@ constexpr data_array<sizeof(Integral)> to_little(Integral value) NOEXCEPT;
 
 /// from_big/from_little.
 /// ---------------------------------------------------------------------------
+// place1 avoids ambiguity with explicit byte argument for other overload.
 
 template <size_t Offset = zero, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
@@ -72,8 +73,8 @@ constexpr void from_little(Integral& value,
 
 template<typename Integral, size_t Offset = zero, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
-    if_integral_integer<Integral> = true,
-    if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
+    if_integral_integer<Integral> = true>
+    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT;
 
 template<typename Integral, size_t Offset = zero, typename Byte, size_t Size,
@@ -82,13 +83,13 @@ template<typename Integral, size_t Offset = zero, typename Byte, size_t Size,
     ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr Integral from_little(const std_array<Byte, Size>& data) NOEXCEPT;
 
-////template<typename Byte, size_t Size, if_one_byte<Byte> = true>
-////constexpr unsigned_type<Size> from_big(
-////    const std_array<Byte, Size>& data) NOEXCEPT;
-////
-////template<typename Byte, size_t Size, if_one_byte<Byte> = true>
-////constexpr unsigned_type<Size> from_little(
-////    const std_array<Byte, Size>& data) NOEXCEPT;
+template<place1 = place1{}, typename Byte, size_t Size, if_one_byte<Byte> = true>
+constexpr unsigned_type<Size> from_big(
+    const std_array<Byte, Size>& data) NOEXCEPT;
+
+template<place1 = place1{}, typename Byte, size_t Size, if_one_byte<Byte> = true>
+constexpr unsigned_type<Size> from_little(
+    const std_array<Byte, Size>& data) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

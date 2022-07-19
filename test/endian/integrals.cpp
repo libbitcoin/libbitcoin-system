@@ -58,14 +58,14 @@ static_assert(to_big_test<1>   (0x0102030405060708_u64) == data_array<9>{ 0, 1, 
 static_assert(to_little_test<1>(0x0102030405060708_u64) == data_array<9>{ 0, 8, 7, 6, 5, 4, 3, 2, 1 });
 
 // Test both return and out parameter with no offset, using inferred integral type.
-////static_assert(from_big   (data_array<1>{ 1 }) == 0x01_u8);
-////static_assert(from_little(data_array<1>{ 1 }) == 0x01_u8);
-////static_assert(from_big   (data_array<2>{ 1, 2 }) == 0x0102_u16);
-////static_assert(from_little(data_array<2>{ 2, 1 }) == 0x0102_u16);
-////static_assert(from_big   (data_array<4>{ 1, 2, 3, 4 }) == 0x01020304_u32);
-////static_assert(from_little(data_array<4>{ 4, 3, 2, 1 }) == 0x01020304_u32);
-////static_assert(from_big   (data_array<8>{ 1, 2, 3, 4, 5, 6, 7, 8 }) == 0x0102030405060708_u64);
-////static_assert(from_little(data_array<8>{ 8, 7, 6, 5, 4, 3, 2, 1 }) == 0x0102030405060708_u64);
+static_assert(from_big   (data_array<1>{ 1 }) == 0x01_u8);
+static_assert(from_little(data_array<1>{ 1 }) == 0x01_u8);
+static_assert(from_big   (data_array<2>{ 1, 2 }) == 0x0102_u16);
+static_assert(from_little(data_array<2>{ 2, 1 }) == 0x0102_u16);
+static_assert(from_big   (data_array<4>{ 1, 2, 3, 4 }) == 0x01020304_u32);
+static_assert(from_little(data_array<4>{ 4, 3, 2, 1 }) == 0x01020304_u32);
+static_assert(from_big   (data_array<8>{ 1, 2, 3, 4, 5, 6, 7, 8 }) == 0x0102030405060708_u64);
+static_assert(from_little(data_array<8>{ 8, 7, 6, 5, 4, 3, 2, 1 }) == 0x0102030405060708_u64);
 
 // Test both return and out parameter with no offset.
 static_assert(from_big   <uint8_t >(data_array<1>{ 1 }) == 0x01_u8);
