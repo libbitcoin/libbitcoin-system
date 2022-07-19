@@ -259,6 +259,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/crypto/ring_signature.cpp \
     test/crypto/sha256.cpp \
     test/crypto/sha256_context.cpp \
+    test/crypto/sha_accumulator.cpp \
+    test/crypto/sha_algorithm.cpp \
     test/crypto/siphash.cpp \
     test/crypto/siphash.hpp \
     test/data/array_cast.cpp \
@@ -274,13 +276,15 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/memory.cpp \
     test/data/no_fill_allocator.cpp \
     test/data/string.cpp \
-    test/endian/algorithm.cpp \
+    test/endian/integers.cpp \
+    test/endian/integrals.cpp \
     test/endian/nominal.cpp \
     test/endian/set.cpp \
     test/endian/stream.cpp \
+    test/endian/swaps.cpp \
     test/endian/uintx.cpp \
     test/endian/uintx_t.cpp \
-    test/endian/unchecked.cpp \
+    test/endian/unsafe.cpp \
     test/error/block_error_t.cpp \
     test/error/error.cpp \
     test/error/error_t.cpp \
@@ -477,6 +481,8 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/scrypt.hpp \
     include/bitcoin/system/crypto/sha256.hpp \
     include/bitcoin/system/crypto/sha256_context.hpp \
+    include/bitcoin/system/crypto/sha_accumulator.hpp \
+    include/bitcoin/system/crypto/sha_algorithm.hpp \
     include/bitcoin/system/crypto/siphash.hpp
 
 include_bitcoin_system_crypto_externaldir = ${includedir}/bitcoin/system/crypto/external
@@ -506,15 +512,17 @@ include_bitcoin_system_data_HEADERS = \
 
 include_bitcoin_system_endiandir = ${includedir}/bitcoin/system/endian
 include_bitcoin_system_endian_HEADERS = \
-    include/bitcoin/system/endian/algorithm.hpp \
     include/bitcoin/system/endian/endian.hpp \
+    include/bitcoin/system/endian/integers.hpp \
+    include/bitcoin/system/endian/integrals.hpp \
     include/bitcoin/system/endian/minimal.hpp \
     include/bitcoin/system/endian/nominal.hpp \
     include/bitcoin/system/endian/set.hpp \
     include/bitcoin/system/endian/stream.hpp \
+    include/bitcoin/system/endian/swaps.hpp \
     include/bitcoin/system/endian/uintx.hpp \
     include/bitcoin/system/endian/uintx_t.hpp \
-    include/bitcoin/system/endian/unchecked.hpp
+    include/bitcoin/system/endian/unsafe.hpp
 
 include_bitcoin_system_errordir = ${includedir}/bitcoin/system/error
 include_bitcoin_system_error_HEADERS = \
@@ -535,7 +543,9 @@ include_bitcoin_system_impl_crypto_HEADERS = \
     include/bitcoin/system/impl/crypto/checksum.ipp \
     include/bitcoin/system/impl/crypto/hash.ipp \
     include/bitcoin/system/impl/crypto/scrypt.ipp \
-    include/bitcoin/system/impl/crypto/sha256_context.ipp
+    include/bitcoin/system/impl/crypto/sha256_context.ipp \
+    include/bitcoin/system/impl/crypto/sha_accumulator.ipp \
+    include/bitcoin/system/impl/crypto/sha_algorithm.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \
@@ -551,14 +561,16 @@ include_bitcoin_system_impl_data_HEADERS = \
 
 include_bitcoin_system_impl_endiandir = ${includedir}/bitcoin/system/impl/endian
 include_bitcoin_system_impl_endian_HEADERS = \
-    include/bitcoin/system/impl/endian/algorithm.ipp \
+    include/bitcoin/system/impl/endian/integers.ipp \
+    include/bitcoin/system/impl/endian/integrals.ipp \
     include/bitcoin/system/impl/endian/minimal.ipp \
     include/bitcoin/system/impl/endian/nominal.ipp \
     include/bitcoin/system/impl/endian/set.ipp \
     include/bitcoin/system/impl/endian/stream.ipp \
+    include/bitcoin/system/impl/endian/swaps.ipp \
     include/bitcoin/system/impl/endian/uintx.ipp \
     include/bitcoin/system/impl/endian/uintx_t.ipp \
-    include/bitcoin/system/impl/endian/unchecked.ipp
+    include/bitcoin/system/impl/endian/unsafe.ipp
 
 include_bitcoin_system_impl_machinedir = ${includedir}/bitcoin/system/impl/machine
 include_bitcoin_system_impl_machine_HEADERS = \

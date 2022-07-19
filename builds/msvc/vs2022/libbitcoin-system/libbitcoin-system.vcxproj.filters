@@ -812,6 +812,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256_context.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha_accumulator.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha_algorithm.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
@@ -857,10 +863,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\define.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\algorithm.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\endian.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\endian.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\integers.hpp">
+      <Filter>include\bitcoin\system\endian</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\integrals.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\minimal.hpp">
@@ -875,13 +884,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\stream.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\swaps.hpp">
+      <Filter>include\bitcoin\system\endian</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx_t.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\unchecked.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\unsafe.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\block_error_t.hpp">
@@ -1330,6 +1342,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\sha256_context.ipp">
       <Filter>include\bitcoin\system\impl\crypto</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\sha_accumulator.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\crypto\sha_algorithm.ipp">
+      <Filter>include\bitcoin\system\impl\crypto</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
@@ -1357,7 +1375,10 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\memory.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\algorithm.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\integers.ipp">
+      <Filter>include\bitcoin\system\impl\endian</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\integrals.ipp">
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\minimal.ipp">
@@ -1372,13 +1393,16 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\stream.ipp">
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\swaps.ipp">
+      <Filter>include\bitcoin\system\impl\endian</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx.ipp">
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx_t.ipp">
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\unchecked.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\unsafe.ipp">
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">

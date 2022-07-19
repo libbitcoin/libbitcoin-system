@@ -189,6 +189,12 @@
     <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\sha_accumulator.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\sha_algorithm.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -231,7 +237,10 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endian\algorithm.cpp">
+    <ClCompile Include="..\..\..\..\test\endian\integers.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\integrals.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp">
@@ -243,13 +252,16 @@
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endian\uintx.cpp">
+    <ClCompile Include="..\..\..\..\test\endian\swaps.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\minimal.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endian\unchecked.cpp">
+    <ClCompile Include="..\..\..\..\test\endian\unsafe.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp">
