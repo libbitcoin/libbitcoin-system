@@ -25,26 +25,36 @@
 namespace libbitcoin {
 namespace system {
 
-/// array: size suffix refers to caller control over return size, where
-///        return returned data is truncated or zero-padded as required.
-/// chunk: size suffix refers to minimized (variable) size of return.
-/// Use "excess" to reserve the specified number of bytes beyond return size.
+/// From integer (including uintx) to explicit array size.
+/// ---------------------------------------------------------------------------
 
-template <size_t Size, typename Integer, if_integer<Integer> = true>
+template <size_t Size, typename Integer,
+    if_integer<Integer> = true>
 constexpr data_array<Size> to_big_endian_size(Integer value) NOEXCEPT;
 
-template <size_t Size, typename Integer, if_integer<Integer> = true>
+template <size_t Size, typename Integer,
+    if_integer<Integer> = true>
 constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT;
 
-template <typename Integer, if_integer<Integer> = true>
+/// From integer (including uintx) to chunk.
+/// ---------------------------------------------------------------------------
+/// Chunk size infered from integer value bit width (not type size).
+/// Use "excess" to reserve the specified number of bytes beyond return size.
+
+template <typename Integer,
+    if_integer<Integer> = true>
 VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     size_t excess=zero) NOEXCEPT;
 
-template <typename Integer, if_integer<Integer> = true>
+template <typename Integer,
+    if_integer<Integer> = true>
 VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     size_t excess=zero) NOEXCEPT;
 
-/// uintx (in contrast to uintx_t) is not constexpr.
+/// From chunk to uintx.
+/// ---------------------------------------------------------------------------
+/// uintx size infered from data value bit width (not vector size).
+
 inline uintx from_big_endian(const data_chunk& data) NOEXCEPT;
 inline uintx from_little_endian(const data_chunk& data) NOEXCEPT;
 

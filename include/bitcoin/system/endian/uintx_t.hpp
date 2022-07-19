@@ -25,9 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// Explicitly (chunk) or implicitly (array) construct uintx_t from data.
-// ----------------------------------------------------------------------------
-/// Size is not required to match data size or Integer type implicit size.
+/// Convenience wrappers.
+/// ---------------------------------------------------------------------------
 
 template <uintx_size_t Bits>
 constexpr data_array<to_ceilinged_bytes(Bits)>
@@ -36,6 +35,10 @@ from_uintx(const uintx_t<Bits>& value) NOEXCEPT;
 template <size_t Bytes>
 constexpr uintx_t<to_bits<uintx_size_t>(Bytes)>
 to_uintx(const data_array<Bytes>& hash) NOEXCEPT;
+
+/// Explicitly (chunk) or implicitly (array) construct uintx_t from data.
+/// ---------------------------------------------------------------------------
+/// Size is not required to match data size or Integer type implicit size.
 
 template <size_t Size>
 constexpr uintx_t<to_bits(Size)> uintx_from_big_endian_array(
@@ -52,16 +55,6 @@ VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
 template <size_t Size>
 VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
     const data_chunk& data) NOEXCEPT;
-
-/////// Explicit sizing, from any integer.
-/////// ---------------------------------------------------------------------------
-////// TODO: remove (redundant with to_big_endian_size/to_little_endian_size).
-////
-////template <size_t Size, typename Integer, if_integer<Integer> = true>
-////constexpr data_array<Size> to_big_endian(const Integer& value) NOEXCEPT;
-////
-////template <size_t Size, typename Integer, if_integer<Integer> = true>
-////constexpr data_array<Size> to_little_endian(const Integer& value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

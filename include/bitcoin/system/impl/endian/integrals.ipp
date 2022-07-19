@@ -31,13 +31,13 @@
 namespace libbitcoin {
 namespace system {
 
-// to_big/to_little.
+// to_big/to_little (by reference, implicit, offsettable).
 // ----------------------------------------------------------------------------
+// TODO: if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 
 template <size_t Offset, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 constexpr void to_big(std_array<Byte, Size>& data, Integral value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -77,7 +77,6 @@ constexpr void to_big(std_array<Byte, Size>& data, Integral value) NOEXCEPT
 template <size_t Offset, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 constexpr void to_little(std_array<Byte, Size>& data, Integral value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -114,29 +113,12 @@ constexpr void to_little(std_array<Byte, Size>& data, Integral value) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename Integral, if_integral_integer<Integral>>
-constexpr data_array<sizeof(Integral)> to_big(Integral value) NOEXCEPT
-{
-    data_array<sizeof(Integral)> out{};
-    to_big<zero>(out, value);
-    return out;
-}
-
-template <typename Integral, if_integral_integer<Integral>>
-constexpr data_array<sizeof(Integral)> to_little(Integral value) NOEXCEPT
-{
-    data_array<sizeof(Integral)> out{};
-    to_little<zero>(out, value);
-    return out;
-}
-
-// from_big/from_little.
+//  from_big/from_little (by reference, implicit, offsettable).
 // ----------------------------------------------------------------------------
 
 template <size_t Offset, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 constexpr void from_big(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT
 {
@@ -180,7 +162,6 @@ constexpr void from_big(Integral& value,
 template <size_t Offset, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 constexpr void from_little(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT
 {
@@ -221,10 +202,12 @@ constexpr void from_little(Integral& value,
     BC_POP_WARNING()
 }
 
+// from_big/from_little (by value, explicit, offsettable).
+// ----------------------------------------------------------------------------
+
 template<typename Integral, size_t Offset, typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT
 {
     Integral out{};
@@ -235,7 +218,6 @@ constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT
 template<typename Integral, size_t Offset, typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size>>
 constexpr Integral from_little(const std_array<Byte, Size>& data) NOEXCEPT
 {
     Integral out{};
@@ -243,7 +225,33 @@ constexpr Integral from_little(const std_array<Byte, Size>& data) NOEXCEPT
     return out;
 }
 
-template<place1, typename Byte, size_t Size, if_one_byte<Byte >>
+// to_big/to_little (by value, implicit).
+// ----------------------------------------------------------------------------
+
+template <typename Integral,
+    if_integral_integer<Integral>>
+constexpr data_array<sizeof(Integral)> to_big(Integral value) NOEXCEPT
+{
+    data_array<sizeof(Integral)> out{};
+    to_big<zero>(out, value);
+    return out;
+}
+
+template <typename Integral,
+    if_integral_integer<Integral>>
+constexpr data_array<sizeof(Integral)> to_little(Integral value) NOEXCEPT
+{
+    data_array<sizeof(Integral)> out{};
+    to_little<zero>(out, value);
+    return out;
+}
+
+// from_big/from_little (by value, implicit).
+// ----------------------------------------------------------------------------
+// place1 avoids ambiguity with explicit byte argument for other overload.
+
+template<place1, typename Byte, size_t Size,
+    if_one_byte<Byte >>
 constexpr unsigned_type<Size> from_big(
     const std_array<Byte, Size>& data) NOEXCEPT
 {
@@ -252,7 +260,8 @@ constexpr unsigned_type<Size> from_big(
     return out;
 }
 
-template<place1, typename Byte, size_t Size, if_one_byte<Byte>>
+template<place1, typename Byte, size_t Size,
+    if_one_byte<Byte>>
 constexpr unsigned_type<Size> from_little(
     const std_array<Byte, Size>& data) NOEXCEPT
 {

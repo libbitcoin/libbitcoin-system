@@ -25,17 +25,25 @@
 
 namespace libbitcoin {
 namespace system {
+    
+// Unguarded endian read from byte pointer.
+// ----------------------------------------------------------------------------
+// byte_cast is not constexpr.
 
-template <typename Integral, typename Iterator, if_integral_integer<Integral>>
-inline Integral unsafe_from_big_endian(const Iterator& data) NOEXCEPT
+template <typename Integral, typename Byte,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+inline Integral unsafe_from_big_endian(const Byte* data) NOEXCEPT
 {
-    return native_from_big_end(byte_cast<Integral>(data));
+    return native_from_big_end(unsafe_byte_cast<Integral>(data));
 }
 
-template <typename Integral, typename Iterator, if_integral_integer<Integral>>
-inline Integral unsafe_from_little_endian(const Iterator& data) NOEXCEPT
+template <typename Integral, typename Byte,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT
 {
-    return native_from_little_end(byte_cast<Integral>(data));
+    return native_from_little_end(unsafe_byte_cast<Integral>(data));
 }
 
 } // namespace system

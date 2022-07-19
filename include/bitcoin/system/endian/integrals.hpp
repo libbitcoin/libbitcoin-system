@@ -25,69 +25,75 @@
 /// These constexpr implementations are more efficient than the integer
 /// functions, as these are limited to integrals. However swaps are more
 /// efficient than these and should be used for non-constexpr evaluation.
-/// These are unique in that the allow for offsetting into the byte array.
-/// This enabled translation to/from an existing data array wtihout needing
+/// These are unique in that they allow for offsetting into the byte array.
+/// This enables translation to/from an existing data array without needing
 /// to array cast (which is not constexpr).
 
 namespace libbitcoin {
 namespace system {
 
-/// to_big/to_little.
+/// to_big/to_little (by reference, implicit, offsettable).
 /// ---------------------------------------------------------------------------
 
 template <size_t Offset = zero, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr void to_big(std_array<Byte, Size>& data, Integral value) NOEXCEPT;
 
 template <size_t Offset = zero, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr void to_little(std_array<Byte, Size>& data, Integral value) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)> to_big(Integral value) NOEXCEPT;
-
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)> to_little(Integral value) NOEXCEPT;
-
-/// from_big/from_little.
+/// from_big/from_little (by reference, implicit, offsettable).
 /// ---------------------------------------------------------------------------
-// place1 avoids ambiguity with explicit byte argument for other overload.
 
 template <size_t Offset = zero, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr void from_big(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT;
 
 template <size_t Offset = zero, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr void from_little(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT;
+
+/// from_big/from_little (by value, explicit, offsettable).
+/// ---------------------------------------------------------------------------
 
 template<typename Integral, size_t Offset = zero, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT;
 
 template<typename Integral, size_t Offset = zero, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-    ////if_lesser<safe_add(Offset, sub1(sizeof(Integral))), Size> = true>
 constexpr Integral from_little(const std_array<Byte, Size>& data) NOEXCEPT;
 
-template<place1 = place1{}, typename Byte, size_t Size, if_one_byte<Byte> = true>
+/// to_big/to_little (by value, implicit).
+/// ---------------------------------------------------------------------------
+
+template <typename Integral,
+    if_integral_integer<Integral> = true>
+constexpr data_array<sizeof(Integral)> to_big(Integral value) NOEXCEPT;
+
+template <typename Integral,
+    if_integral_integer<Integral> = true>
+constexpr data_array<sizeof(Integral)> to_little(Integral value) NOEXCEPT;
+
+/// from_big/from_little (by value, implicit).
+/// ---------------------------------------------------------------------------
+
+template<place1 = place1{}, typename Byte, size_t Size,
+    if_one_byte<Byte> = true>
 constexpr unsigned_type<Size> from_big(
     const std_array<Byte, Size>& data) NOEXCEPT;
 
-template<place1 = place1{}, typename Byte, size_t Size, if_one_byte<Byte> = true>
+template<place1 = place1{}, typename Byte, size_t Size,
+    if_one_byte<Byte> = true>
 constexpr unsigned_type<Size> from_little(
     const std_array<Byte, Size>& data) NOEXCEPT;
 

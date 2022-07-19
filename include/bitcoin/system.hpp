@@ -118,7 +118,6 @@
 #include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/stream.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
-#include <bitcoin/system/endian/uintx.hpp>
 #include <bitcoin/system/endian/uintx_t.hpp>
 #include <bitcoin/system/endian/unsafe.hpp>
 #include <bitcoin/system/error/block_error_t.hpp>

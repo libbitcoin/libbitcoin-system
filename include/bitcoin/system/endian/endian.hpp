@@ -26,18 +26,17 @@
 #include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/stream.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
-#include <bitcoin/system/endian/uintx.hpp>
 #include <bitcoin/system/endian/uintx_t.hpp>
 #include <bitcoin/system/endian/unsafe.hpp>
 
 // integers ->
+// integrals ->
 // minimal  -> integers
 // nominal  -> integers, integrals, swaps
 // set      -> swaps
 // stream   -> swaps
 // swaps    ->
 // uintx_t  -> nominal, minimal
-// uintx    ->
 // unsafe   -> swaps
 
 #endif

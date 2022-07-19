@@ -243,6 +243,9 @@
     <ClCompile Include="..\..\..\..\test\endian\integrals.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\minimal.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
@@ -253,9 +256,6 @@
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\swaps.cpp">
-      <Filter>src\endian</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endian\minimal.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp">

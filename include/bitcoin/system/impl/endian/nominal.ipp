@@ -99,33 +99,32 @@ to_little_endian(Integral value) NOEXCEPT
 // Variably-sized input returns specified integral (padded or truncated).
 // ----------------------------------------------------------------------------
 // Any-sized data input, requires integer (shift loop) conversion.
-// TODO: move to minimal (variably-sized)?
 
-template <typename Integral, size_t Size, if_integral_integer<Integral>>
+template <typename Integral, size_t Size,
+    if_integral_integer<Integral>>
 constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT
 {
-    // integer.
     return from_big_array<Integral>(sizeof(Integral), data);
 }
 
-template <typename Integral, size_t Size, if_integral_integer<Integral>>
+template <typename Integral, size_t Size,
+    if_integral_integer<Integral>>
 constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT
 {
-    // integer.
     return from_little_array<Integral>(sizeof(Integral), data);
 }
 
-template <typename Integral, if_integral_integer<Integral>>
+template <typename Integral,
+    if_integral_integer<Integral>>
 VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT
 {
-    // integer.
     return from_big_chunk<Integral>(sizeof(Integral), data);
 }
 
-template <typename Integral, if_integral_integer<Integral>>
+template <typename Integral,
+    if_integral_integer<Integral>>
 VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT
 {
-    // integer.
     return from_little_chunk<Integral>(sizeof(Integral), data);
 }
 

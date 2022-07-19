@@ -42,7 +42,6 @@ namespace system {
 // ----------------------------------------------------------------------------
 // Fills Data to its preallocated size.
 
-// Data to_big_data(Data&&, Integer)
 template <typename Data, typename Integer, if_integer<Integer>>
 constexpr Data to_big_data(Data&& bytes, Integer value) NOEXCEPT
 {
@@ -65,7 +64,6 @@ constexpr Data to_big_data(Data&& bytes, Integer value) NOEXCEPT
     }
 }
 
-// Data to_little_data(Data&&, Integer)
 template <typename Data, typename Integer, if_integer<Integer>>
 constexpr Data to_little_data(Data&& bytes, Integer value) NOEXCEPT
 {
@@ -92,7 +90,6 @@ constexpr Data to_little_data(Data&& bytes, Integer value) NOEXCEPT
 // ----------------------------------------------------------------------------
 // Shifts all data bytes into Integer.
 
-// Integer from_big_array<Integer>(data_array)
 template <typename Integer, size_t Size, if_integer<Integer>>
 constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
 {
@@ -114,7 +111,6 @@ constexpr Integer from_big_array(const data_array<Size>& data) NOEXCEPT
     }
 }
 
-// Integer from_big_array<Integer>(length, data_array)
 template <typename Integer, size_t Size, if_integer<Integer>>
 constexpr Integer from_big_array(size_t length,
     const data_array<Size>& data) NOEXCEPT
@@ -125,7 +121,7 @@ constexpr Integer from_big_array(size_t length,
     }
     else
     {
-        Integer value(0);
+        Integer value{ 0 };
         const auto bytes = std::min(length, data.size());
 
         for (size_t byte = 0; byte < bytes; ++byte)
@@ -141,7 +137,6 @@ constexpr Integer from_big_array(size_t length,
     }
 }
 
-// Integer from_big_chunk<Integer>(length, data_chunk)
 template <typename Integer, if_integer<Integer>>
 VCONSTEXPR Integer from_big_chunk(size_t length,
     const data_chunk& data) NOEXCEPT
@@ -152,7 +147,7 @@ VCONSTEXPR Integer from_big_chunk(size_t length,
     }
     else
     {
-        Integer value(0);
+        Integer value{ 0 };
         const auto bytes = std::min(length, data.size());
 
         for (size_t byte = 0; byte < bytes; ++byte)
@@ -172,7 +167,6 @@ VCONSTEXPR Integer from_big_chunk(size_t length,
 // ----------------------------------------------------------------------------
 // Shifts all data bytes into Integer.
 
-// Integer from_little_array<Integer>(data_array)
 template <typename Integer, size_t Size, if_integer<Integer>>
 constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
 {
@@ -194,7 +188,6 @@ constexpr Integer from_little_array(const data_array<Size>& data) NOEXCEPT
     }
 }
 
-// Integer from_little_array<Integer>(length, data_array)
 template <typename Integer, size_t Size, if_integer<Integer>>
 constexpr Integer from_little_array(size_t length,
     const data_array<Size>& data) NOEXCEPT
@@ -205,7 +198,7 @@ constexpr Integer from_little_array(size_t length,
     }
     else
     {
-        Integer value(0);
+        Integer value{ 0 };
         const auto bytes = std::min(length, data.size());
 
         for (auto byte = bytes; byte > 0; --byte)
@@ -221,7 +214,6 @@ constexpr Integer from_little_array(size_t length,
     }
 }
 
-// Integer from_little_chunk<Integer>(length, data_chunk)
 template <typename Integer, if_integer<Integer>>
 VCONSTEXPR Integer from_little_chunk(size_t length,
     const data_chunk& data) NOEXCEPT
@@ -232,7 +224,7 @@ VCONSTEXPR Integer from_little_chunk(size_t length,
     }
     else
     {
-        Integer value(0);
+        Integer value{ 0 };
         const auto bytes = std::min(length, data.size());
 
         for (auto byte = bytes; byte > 0; --byte)

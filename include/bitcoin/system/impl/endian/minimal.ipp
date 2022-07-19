@@ -30,24 +30,28 @@
 namespace libbitcoin {
 namespace system {
     
-// Cannot bytecast or swap because Integer is non-integral.
-// These set the buffer or uintx type and forward the call to integer.
-    
-// stack allocation/constexpr.
-template <size_t Size, typename Integer, if_integer<Integer>>
+// From integer (including uintx) to explicit array size.
+// ----------------------------------------------------------------------------
+
+template <size_t Size, typename Integer,
+    if_integer<Integer>>
 constexpr data_array<Size> to_big_endian_size(Integer value) NOEXCEPT
 {
     return to_big_data(data_array<Size>{}, value);
 }
 
-// stack allocation/constexpr.
-template <size_t Size, typename Integer, if_integer<Integer>>
+template <size_t Size, typename Integer,
+    if_integer<Integer>>
 constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT
 {
     return to_little_data(data_array<Size>{}, value);
 }
 
-template <typename Integer, if_integer<Integer>>
+// From integer (including uintx) to chunk.
+// ----------------------------------------------------------------------------
+
+template <typename Integer,
+    if_integer<Integer>>
 VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
@@ -60,7 +64,8 @@ VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     return to_big_data(std::move(chunk), value);
 }
 
-template <typename Integer, if_integer<Integer>>
+template <typename Integer,
+    if_integer<Integer>>
 VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
@@ -73,6 +78,9 @@ VCONSTEXPR data_chunk to_little_endian_size(Integer value,
 
     return to_little_data(std::move(chunk), value);
 }
+
+// From chunk to uintx.
+// ----------------------------------------------------------------------------
 
 inline uintx from_big_endian(const data_chunk& data) NOEXCEPT
 {

@@ -345,7 +345,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\set.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\stream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\swaps.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\uintx_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\unsafe.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\block_error_t.hpp" />
@@ -516,7 +515,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\set.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\stream.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\swaps.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx_t.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\unsafe.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp" />

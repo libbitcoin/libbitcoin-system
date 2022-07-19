@@ -51,7 +51,6 @@ template <size_t Size>
 constexpr uintx_t<to_bits(Size)> uintx_from_big_endian_array(
     const data_array<Size>& data) NOEXCEPT
 {
-    // integer.
     return from_big_array<uintx_t<to_bits(Size)>>(data);
 }
 
@@ -59,7 +58,6 @@ template <size_t Size>
 constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_array(
     const data_array<Size>& data) NOEXCEPT
 {
-    // integer.
     return from_little_array<uintx_t<to_bits(Size)>>(data);
 }
 
@@ -67,7 +65,6 @@ template <size_t Size>
 VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
     const data_chunk& data) NOEXCEPT
 {
-    // integer.
     return from_big_chunk<uintx_t<to_bits(Size)>>(Size, data);
 }
 
@@ -75,27 +72,8 @@ template <size_t Size>
 VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
     const data_chunk& data) NOEXCEPT
 {
-    // integer.
     return from_little_chunk<uintx_t<to_bits(Size)>>(Size, data);
 }
-
-////// Explicit sizing, from any integer type
-////// ----------------------------------------------------------------------------
-////// TODO: remove (redundant with to_big_endian_size/to_little_endian_size).
-////
-////template <size_t Size, typename Integer, if_integer<Integer>>
-////constexpr data_array<Size> to_big_endian(const Integer& value) NOEXCEPT
-////{
-////    // redundant.
-////    return to_big_endian_size<Size>(value);
-////}
-////
-////template <size_t Size, typename Integer, if_integer<Integer>>
-////constexpr data_array<Size> to_little_endian(const Integer& value) NOEXCEPT
-////{
-////    // redundant.
-////    return to_little_endian_size<Size>(value);
-////}
 
 } // namespace system
 } // namespace libbitcoin

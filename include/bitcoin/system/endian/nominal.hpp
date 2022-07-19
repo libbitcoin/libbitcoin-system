@@ -36,27 +36,33 @@ template <size_t Size>
 constexpr unsigned_type<Size>
 from_little_endian(const data_array<Size>& data) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral,
+    if_integral_integer<Integral> = true>
 constexpr data_array<sizeof(Integral)>
 to_big_endian(Integral value) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral,
+    if_integral_integer<Integral> = true>
 constexpr data_array<sizeof(Integral)>
 to_little_endian(Integral value) NOEXCEPT;
 
 /// Variably-sized input returns specified integral (padded or truncated).
 /// ---------------------------------------------------------------------------
 
-template <typename Integral, size_t Size, if_integral_integer<Integral> = true>
+template <typename Integral, size_t Size,
+    if_integral_integer<Integral> = true>
 constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT;
 
-template <typename Integral, size_t Size, if_integral_integer<Integral> = true>
+template <typename Integral, size_t Size,
+    if_integral_integer<Integral> = true>
 constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral,
+    if_integral_integer<Integral> = true>
 VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral,
+    if_integral_integer<Integral> = true>
 VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT;
 
 } // namespace system

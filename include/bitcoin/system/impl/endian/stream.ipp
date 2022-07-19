@@ -27,7 +27,10 @@
 namespace libbitcoin {
 namespace system {
 
-// iostreams are not constexpr.
+// std::iostreams are not constexpr.
+
+// IStream
+// ----------------------------------------------------------------------------
 // if stream.gcount() != size there should be a stream error.
 
 template <typename Integral, typename IStream,
@@ -59,6 +62,9 @@ inline Integral from_little_endian(IStream& stream) NOEXCEPT
     BC_POP_WARNING()
     return native_from_little_end(value);
 }
+
+// OStream
+// ----------------------------------------------------------------------------
 
 template <typename Integral, typename OStream,
     if_integral_integer<Integral>,

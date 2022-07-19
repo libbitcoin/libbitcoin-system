@@ -131,13 +131,13 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integers.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integrals.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\minimal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\set.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\swaps.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\minimal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\unsafe.cpp" />
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />

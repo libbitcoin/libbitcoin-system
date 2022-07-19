@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(endian__round_trip__uint64_big_endian__expected)
     BOOST_REQUIRE_EQUAL(to_big_endian_size<8>(uintx_from_big_endian_array<8>(bytes8)), bytes8);
 
     // This is uint64_t not uintx64!
-    ////BOOST_REQUIRE_EQUAL(to_big_endian_size(from_big_endian<uint64_t>(bytes8)), bytes8);
+    BOOST_REQUIRE_EQUAL(to_big_endian(from_big_endian<uint64_t>(bytes8)), bytes8);
 }
 
 BOOST_AUTO_TEST_CASE(endian__round_trip__uint128_big_endian__expected)

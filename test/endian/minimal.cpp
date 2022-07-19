@@ -117,14 +117,14 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endian__uintx_from_chunk___expected)
 // integer to chunk
 // ----------------------------------------------------------------------------
 
-////BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_chunk__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(to_big_endian(value32), data_forward);
-////}
-////
-////BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_chunk__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(to_little_endian(value32), data_reverse);
-////}
+BOOST_AUTO_TEST_CASE(endian__to_big_endian__integer_to_chunk__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_chunk(to_big_endian(value32)), data_forward);
+}
+
+BOOST_AUTO_TEST_CASE(endian__to_little_endian__integer_to_chunk__expected)
+{
+    BOOST_REQUIRE_EQUAL(to_chunk(to_little_endian(value32)), data_reverse);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

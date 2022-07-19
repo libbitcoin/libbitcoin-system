@@ -16,23 +16,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ENDIAN_UNCHECKED_HPP
-#define LIBBITCOIN_SYSTEM_ENDIAN_UNCHECKED_HPP
+#ifndef LIBBITCOIN_SYSTEM_ENDIAN_UNSAFE_HPP
+#define LIBBITCOIN_SYSTEM_ENDIAN_UNSAFE_HPP
 
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Byte cast is not constexpr.
+/// Unguarded endian read from byte pointer.
+/// ---------------------------------------------------------------------------
 
-template <typename Integral, typename Iterator,
+template <typename Integral, typename Byte,
+    if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-inline Integral unsafe_from_big_endian(const Iterator& data) NOEXCEPT;
+inline Integral unsafe_from_big_endian(const Byte* data) NOEXCEPT;
 
-template <typename Integral, typename Iterator,
+template <typename Integral, typename Byte,
+    if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
-inline Integral unsafe_from_little_endian(const Iterator& data) NOEXCEPT;
+inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

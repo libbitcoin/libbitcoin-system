@@ -278,11 +278,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/string.cpp \
     test/endian/integers.cpp \
     test/endian/integrals.cpp \
+    test/endian/minimal.cpp \
     test/endian/nominal.cpp \
     test/endian/set.cpp \
     test/endian/stream.cpp \
     test/endian/swaps.cpp \
-    test/endian/uintx.cpp \
     test/endian/uintx_t.cpp \
     test/endian/unsafe.cpp \
     test/error/block_error_t.cpp \
@@ -520,7 +520,6 @@ include_bitcoin_system_endian_HEADERS = \
     include/bitcoin/system/endian/set.hpp \
     include/bitcoin/system/endian/stream.hpp \
     include/bitcoin/system/endian/swaps.hpp \
-    include/bitcoin/system/endian/uintx.hpp \
     include/bitcoin/system/endian/uintx_t.hpp \
     include/bitcoin/system/endian/unsafe.hpp
 
@@ -568,7 +567,6 @@ include_bitcoin_system_impl_endian_HEADERS = \
     include/bitcoin/system/impl/endian/set.ipp \
     include/bitcoin/system/impl/endian/stream.ipp \
     include/bitcoin/system/impl/endian/swaps.ipp \
-    include/bitcoin/system/impl/endian/uintx.ipp \
     include/bitcoin/system/impl/endian/uintx_t.ipp \
     include/bitcoin/system/impl/endian/unsafe.ipp
 

@@ -25,7 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
-// Most efficient - byteswap (or no-op).
+// Most efficient endianness functions - byteswap (or no-op).
+// ----------------------------------------------------------------------------
 
 template <typename Integral, if_integral_integer<Integral>>
 constexpr Integral native_to_big_end(Integral big) NOEXCEPT

@@ -24,14 +24,14 @@ constexpr uint32_t value32 = 0x01020304;
 const data_chunk data_forward{ 0x01, 0x02, 0x03, 0x04 };
 const data_chunk data_reverse{ 0x04, 0x03, 0x02, 0x01 };
 
-////BOOST_AUTO_TEST_CASE(endian__unsafe_from_big_endian__always__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(unsafe_from_big_endian<uint32_t>(data_forward.begin()), value32);
-////}
-////
-////BOOST_AUTO_TEST_CASE(endian__unsafe_from_little_endian__always__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(unsafe_from_little_endian<uint32_t>(data_reverse.begin()), value32);
-////}
+BOOST_AUTO_TEST_CASE(endian__unsafe_from_big_endian__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(unsafe_from_big_endian<uint32_t>(data_forward.data()), value32);
+}
+
+BOOST_AUTO_TEST_CASE(endian__unsafe_from_little_endian__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(unsafe_from_little_endian<uint32_t>(data_reverse.data()), value32);
+}
 
 BOOST_AUTO_TEST_SUITE_END()
