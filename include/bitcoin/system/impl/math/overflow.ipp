@@ -49,7 +49,7 @@ constexpr bool is_add_overflow(Signed left, Signed right) NOEXCEPT
 
     return is_nonzero(right) &&
         (!negative_right || (left < (minimum_<Signed> - right))) &&
-        (negative_right  || (left > (maximum_<Signed> - right)));
+        ( negative_right || (left > (maximum_<Signed> - right)));
 }
 
 template <typename Unsigned, if_unsigned_integral_integer<Unsigned>>
@@ -65,7 +65,7 @@ constexpr bool is_subtract_overflow(Signed left, Signed right) NOEXCEPT
 
     return is_nonzero(right) &&
         (!negative_right || (left > (maximum_<Signed> + right))) &&
-        (negative_right  || (left < (minimum_<Signed> + right)));
+        ( negative_right || (left < (minimum_<Signed> + right)));
 }
 
 template <typename Unsigned, if_unsigned_integral_integer<Unsigned>>

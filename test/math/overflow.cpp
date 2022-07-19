@@ -640,6 +640,8 @@ static_assert(safe_negate(add1(min_int32)) == max_int32);
 ////static_assert(safe_negate(min_int32) == (-min_int32));
 
 // safe_add (same-signed only)
+static_assert(safe_add(-1, -1) == -2);
+static_assert(safe_add(1u, 1u) == 2u);
 static_assert(safe_add(minimal, minimal) == minimal);
 static_assert(safe_add(minimal, maximal) == maximal);
 static_assert(safe_add(maximal, minimal) == maximal);
@@ -647,12 +649,15 @@ static_assert(add(maximal, maximal) == sub1(maximal));      // overflow
 ////static_assert(safe_add(maximal, maximal) == sub1(maximal));
 
 // safe_subtract (same-signed only)
+static_assert(safe_subtract(-1, -1) == 0);
+static_assert(safe_subtract(1u, 1u) == 0);
 static_assert(safe_subtract(maximal, minimal) == maximal);
 static_assert(safe_subtract(maximal, maximal) == 0_size);
 static_assert(subtract(minimal, maximal) == add1(minimal)); // overflow
 ////static_assert(safe_subtract(minimal, maximal) == add1(minimal));
 
 // safe_multiply (unsigned only)
+static_assert(safe_multiply(1u, 1u) == 1u);
 static_assert(safe_multiply(minimal, minimal) == minimal);
 static_assert(safe_multiply(minimal, maximal) == minimal);
 static_assert(safe_multiply(maximal, minimal) == minimal);
