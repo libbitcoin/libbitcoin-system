@@ -26,7 +26,8 @@
 // These are euqally-efficient generalizations of the common practice of
 // shifting with or-ing to construct integers from bytes, and shifting with
 // masking to obtain bytes from integers. The byte<offset> template performs
-// integer byte extraction (zero offset is low order byte).
+// integer byte extraction (zero offset is low order byte). These avoid byte
+// casting in order to support constexpr, though byte_cast is more efficient.
 
 namespace libbitcoin {
 namespace system {
