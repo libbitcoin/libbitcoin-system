@@ -65,6 +65,7 @@ template<size_t Size>
 constexpr void scrypt<W, R, P, Concurrent, If>::
 set(uint8_t* to, const uint8_t* from) NOEXCEPT
 {
+    // TODO: loop meta-unroll.
     for (size_t i = 0; i < Size; ++i)
         to[i] = from[i];
 }
@@ -74,6 +75,7 @@ template<size_t Size>
 constexpr void scrypt<W, R, P, Concurrent, If>::
 exc(uint8_t* to, const uint8_t* from) NOEXCEPT
 {
+    // TODO: loop meta-unroll.
     for (size_t i = 0; i < Size; ++i)
         to[i] ^= from[i];
 }
@@ -82,6 +84,7 @@ TEMPLATE
 constexpr void scrypt<W, R, P, Concurrent, If>::
 add(integers& to, const integers& from) NOEXCEPT
 {
+    // TODO: loop meta-unroll.
     to[0]  += from[0];
     to[1]  += from[1];
     to[2]  += from[2];
@@ -129,6 +132,9 @@ salsa_1(block_type& block) NOEXCEPT
     auto words = from_little_endians(array_cast<uint32_t>(block));
     const integers copy{ words };
 
+    // TODO: loop meta-unroll.
+    // TODO: could also consolidate indexation using a lookup table and then
+    // TODO: collapse the inner operations to a loop, and then unroll it.
     for (size_t i = 0; i < to_half(count); i += two)
     {
         // columns
@@ -183,12 +189,14 @@ salsa_p(uint8_t* p) NOEXCEPT
     if (!x_ptr) return false;
     auto& x = *x_ptr;
 
+    // TODO: loop meta-unroll.
     for (size_t i = 0; i < (R << 1); ++i)
     {
         exc<block_size>(block.data(), &p[offset(i, 0, 0)]);
         set<block_size>(&x[offset(i, 0, 0)], salsa_1(block).data());
     }
 
+    // TODO: loop meta-unroll.
     for (size_t i = 0; i < (R << 0); ++i)
     {
         set<block_size>(&p[offset(i, 0, 0)], &x[offset(i, 1, 0)]);
@@ -207,6 +215,7 @@ mix(uint8_t* p) NOEXCEPT
     if (!w_ptr) return false;
     auto& w = *w_ptr;
 
+    // TODO: loop meta-unroll.
     for (size_t i = 0; i < W; ++i)
     {
         const auto offset = i * rblock;
@@ -214,6 +223,7 @@ mix(uint8_t* p) NOEXCEPT
         if (!salsa_p(p)) return false;
     }
 
+    // TODO: loop meta-unroll.
     for (size_t i = 0; i < W; ++i)
     {
         const auto offset = (get64(p) % W) * rblock;
