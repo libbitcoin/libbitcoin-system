@@ -88,6 +88,7 @@ constexpr void from_big_endians(std_array<Integral, Count>& out,
 {
     if constexpr (is_little_endian)
     {
+        // TODO: unroll loop using if constexpr against integral sizes.
         std::transform(in.cbegin(), in.cend(), out.begin(),
             [](const auto& value) NOEXCEPT
             {
@@ -107,6 +108,7 @@ constexpr void from_little_endians(std_array<Integral, Count>& out,
 {
     if constexpr (is_big_endian)
     {
+        // TODO: unroll loop using if constexpr against integral sizes.
         std::transform(in.cbegin(), in.cend(), out.begin(),
             [](const uint32_t& value) NOEXCEPT
             {

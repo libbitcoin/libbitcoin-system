@@ -19,53 +19,62 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SHA_ALGORITHM_IPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SHA_ALGORITHM_IPP
 
-#include <algorithm>
 #include <bit>
-#include <iterator>
+#include <type_traits>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-// sha256: movable-type.co.uk/scripts/sha256.html
-// Use inline vs. constexpr to obtain intrinsic std::rotr.
-
 namespace libbitcoin {
 namespace system {
-
 namespace sha {
 
-constexpr auto choice(auto a, auto b, auto c) NOEXCEPT
+template <typename SHA>
+constexpr auto algorithm<SHA>::
+choice(auto a, auto b, auto c) NOEXCEPT
 {
     return (a & (b ^ c)) ^ c;
 }
 
-constexpr auto majory(auto a, auto b, auto c) NOEXCEPT
+template <typename SHA>
+constexpr auto algorithm<SHA>::
+majory(auto a, auto b, auto c) NOEXCEPT
 {
     return (a & (b | c)) | (b & c);
 }
 
-constexpr auto SIGMA0(auto a) NOEXCEPT
+template <typename SHA>
+constexpr auto algorithm<SHA>::
+SIGMA0(auto a) NOEXCEPT
 {
     return std::rotr(a, 2) ^ std::rotr(a, 13) ^ std::rotr(a, 22);
 }
 
-constexpr auto SIGMA1(auto a) NOEXCEPT
+template <typename SHA>
+constexpr auto algorithm<SHA>::
+SIGMA1(auto a) NOEXCEPT
 {
     return std::rotr(a, 6) ^ std::rotr(a, 11) ^ std::rotr(a, 25);
 }
 
-constexpr auto sigma0(auto a) NOEXCEPT
+template <typename SHA>
+constexpr auto algorithm<SHA>::
+sigma0(auto a) NOEXCEPT
 {
     return std::rotr(a, 7) ^ std::rotr(a, 18) ^ (a >> 3);
 }
 
-constexpr auto sigma1(auto a) NOEXCEPT
+template <typename SHA>
+constexpr auto algorithm<SHA>::
+sigma1(auto a) NOEXCEPT
 {
     return std::rotr(a, 17) ^ std::rotr(a, 19) ^ (a >> 10);
 }
 
-constexpr void round1(auto a, auto b, auto c, auto& d, auto e, auto f, auto g,
+template <typename SHA>
+constexpr void algorithm<SHA>::
+round1(auto a, auto b, auto c, auto& d, auto e, auto f, auto g,
     auto& h, auto k) NOEXCEPT
 {
     const auto x = SIGMA0(a) + majory(a, b, c);
@@ -74,34 +83,40 @@ constexpr void round1(auto a, auto b, auto c, auto& d, auto e, auto f, auto g,
     h  = x + y;
 }
 
-template<uint8_t Round, word_t K>
-constexpr void round(state& out, const buffer& in) NOEXCEPT
+template <typename SHA>
+template<size_t Round>
+constexpr void algorithm<SHA>::
+round(state_t& out, const buffer_t& in) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     round1(
-        out[(block_size + 0 - Round) % state_words],
-        out[(block_size + 1 - Round) % state_words],
-        out[(block_size + 2 - Round) % state_words],
-        out[(block_size + 3 - Round) % state_words], // in/out
-        out[(block_size + 4 - Round) % state_words],
-        out[(block_size + 5 - Round) % state_words],
-        out[(block_size + 6 - Round) % state_words],
-        out[(block_size + 7 - Round) % state_words], // in/out
-        in[Round] + K);
+        out[(block_bytes + 0 - Round) % state_words],
+        out[(block_bytes + 1 - Round) % state_words],
+        out[(block_bytes + 2 - Round) % state_words],
+        out[(block_bytes + 3 - Round) % state_words], // in/out
+        out[(block_bytes + 4 - Round) % state_words],
+        out[(block_bytes + 5 - Round) % state_words],
+        out[(block_bytes + 6 - Round) % state_words],
+        out[(block_bytes + 7 - Round) % state_words], // in/out
+        in[Round] + K::get[Round]);
     BC_POP_WARNING()
 }
 
-template<size_t Index>
-constexpr void expand(buffer& out) NOEXCEPT
+template <typename SHA>
+template<size_t Word>
+constexpr void algorithm<SHA>::
+expand(buffer_t& out) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    out[Index] =
-        sigma1(out[Index -  2]) + out[Index -  7] +
-        sigma0(out[Index - 15]) + out[Index - 16];
+    out[Word] =
+        sigma1(out[Word -  2]) + out[Word -  7] +
+        sigma0(out[Word - 15]) + out[Word - 16];
     BC_POP_WARNING()
 }
 
-constexpr void expand48(buffer& out) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+expand48(buffer_t& out) NOEXCEPT
 {
     expand<16>(out);
     expand<17>(out);
@@ -153,110 +168,101 @@ constexpr void expand48(buffer& out) NOEXCEPT
     expand<63>(out);
 }
 
-// 64 or 80 rounds.
-constexpr void rounds64(state& out, const buffer& in) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+rounds(state_t& out, const buffer_t& in) NOEXCEPT
 {
-    round< 0, 0x428a2f98>(out, in);
-    round< 1, 0x71374491>(out, in);
-    round< 2, 0xb5c0fbcf>(out, in);
-    round< 3, 0xe9b5dba5>(out, in);
-    round< 4, 0x3956c25b>(out, in);
-    round< 5, 0x59f111f1>(out, in);
-    round< 6, 0x923f82a4>(out, in);
-    round< 7, 0xab1c5ed5>(out, in);
-    round< 8, 0xd807aa98>(out, in);
-    round< 9, 0x12835b01>(out, in);
-    round<10, 0x243185be>(out, in);
-    round<11, 0x550c7dc3>(out, in);
-    round<12, 0x72be5d74>(out, in);
-    round<13, 0x80deb1fe>(out, in);
-    round<14, 0x9bdc06a7>(out, in);
-    round<15, 0xc19bf174>(out, in);
-    round<16, 0xe49b69c1>(out, in);
-    round<17, 0xefbe4786>(out, in);
-    round<18, 0x0fc19dc6>(out, in);
-    round<19, 0x240ca1cc>(out, in);
-    round<20, 0x2de92c6f>(out, in);
-    round<21, 0x4a7484aa>(out, in);
-    round<22, 0x5cb0a9dc>(out, in);
-    round<23, 0x76f988da>(out, in);
-    round<24, 0x983e5152>(out, in);
-    round<25, 0xa831c66d>(out, in);
-    round<26, 0xb00327c8>(out, in);
-    round<27, 0xbf597fc7>(out, in);
-    round<28, 0xc6e00bf3>(out, in);
-    round<29, 0xd5a79147>(out, in);
-    round<30, 0x06ca6351>(out, in);
-    round<31, 0x14292967>(out, in);
-    round<32, 0x27b70a85>(out, in);
-    round<33, 0x2e1b2138>(out, in);
-    round<34, 0x4d2c6dfc>(out, in);
-    round<35, 0x53380d13>(out, in);
-    round<36, 0x650a7354>(out, in);
-    round<37, 0x766a0abb>(out, in);
-    round<38, 0x81c2c92e>(out, in);
-    round<39, 0x92722c85>(out, in);
-    round<40, 0xa2bfe8a1>(out, in);
-    round<41, 0xa81a664b>(out, in);
-    round<42, 0xc24b8b70>(out, in);
-    round<43, 0xc76c51a3>(out, in);
-    round<44, 0xd192e819>(out, in);
-    round<45, 0xd6990624>(out, in);
-    round<46, 0xf40e3585>(out, in);
-    round<47, 0x106aa070>(out, in);
-    round<48, 0x19a4c116>(out, in);
-    round<49, 0x1e376c08>(out, in);
-    round<50, 0x2748774c>(out, in);
-    round<51, 0x34b0bcb5>(out, in);
-    round<52, 0x391c0cb3>(out, in);
-    round<53, 0x4ed8aa4a>(out, in);
-    round<54, 0x5b9cca4f>(out, in);
-    round<55, 0x682e6ff3>(out, in);
-    round<56, 0x748f82ee>(out, in);
-    round<57, 0x78a5636f>(out, in);
-    round<58, 0x84c87814>(out, in);
-    round<59, 0x8cc70208>(out, in);
-    round<60, 0x90befffa>(out, in);
-    round<61, 0xa4506ceb>(out, in);
-    round<62, 0xbef9a3f7>(out, in);
-    round<63, 0xc67178f2>(out, in);
+    // At least 64 rounds for both sha256/512.
+    round<0>(out, in);
+    round<1>(out, in);
+    round<2>(out, in);
+    round<3>(out, in);
+    round<4>(out, in);
+    round<5>(out, in);
+    round<6>(out, in);
+    round<7>(out, in);
+    round<8>(out, in);
+    round<9>(out, in);
+    round<10>(out, in);
+    round<11>(out, in);
+    round<12>(out, in);
+    round<13>(out, in);
+    round<14>(out, in);
+    round<15>(out, in);
+    round<16>(out, in);
+    round<17>(out, in);
+    round<18>(out, in);
+    round<19>(out, in);
+    round<20>(out, in);
+    round<21>(out, in);
+    round<22>(out, in);
+    round<23>(out, in);
+    round<24>(out, in);
+    round<25>(out, in);
+    round<26>(out, in);
+    round<27>(out, in);
+    round<28>(out, in);
+    round<29>(out, in);
+    round<30>(out, in);
+    round<31>(out, in);
+    round<32>(out, in);
+    round<33>(out, in);
+    round<34>(out, in);
+    round<35>(out, in);
+    round<36>(out, in);
+    round<37>(out, in);
+    round<38>(out, in);
+    round<39>(out, in);
+    round<40>(out, in);
+    round<41>(out, in);
+    round<42>(out, in);
+    round<43>(out, in);
+    round<44>(out, in);
+    round<45>(out, in);
+    round<46>(out, in);
+    round<47>(out, in);
+    round<48>(out, in);
+    round<49>(out, in);
+    round<50>(out, in);
+    round<51>(out, in);
+    round<52>(out, in);
+    round<53>(out, in);
+    round<54>(out, in);
+    round<55>(out, in);
+    round<56>(out, in);
+    round<57>(out, in);
+    round<58>(out, in);
+    round<59>(out, in);
+    round<60>(out, in);
+    round<61>(out, in);
+    round<62>(out, in);
+    round<63>(out, in);
 
     // 16 more rounds for sha512
-    if constexpr (256u == 512u)
+    if constexpr (K::rounds == 80)
     {
-        round<64, 0x00000000>(out, in);
-        round<65, 0x00000000>(out, in);
-        round<66, 0x00000000>(out, in);
-        round<67, 0x00000000>(out, in);
-        round<68, 0x00000000>(out, in);
-        round<69, 0x00000000>(out, in);
-        round<70, 0x00000000>(out, in);
-        round<71, 0x00000000>(out, in);
-        round<72, 0x00000000>(out, in);
-        round<73, 0x00000000>(out, in);
-        round<74, 0x00000000>(out, in);
-        round<76, 0x00000000>(out, in);
-        round<77, 0x00000000>(out, in);
-        round<78, 0x00000000>(out, in);
-        round<79, 0x00000000>(out, in);
+        round<64>(out, in);
+        round<65>(out, in);
+        round<66>(out, in);
+        round<67>(out, in);
+        round<68>(out, in);
+        round<69>(out, in);
+        round<70>(out, in);
+        round<71>(out, in);
+        round<72>(out, in);
+        round<73>(out, in);
+        round<74>(out, in);
+        round<75>(out, in);
+        round<76>(out, in);
+        round<77>(out, in);
+        round<78>(out, in);
+        round<79>(out, in);
     }
 }
 
-constexpr void summary8(state& out, const state& in) NOEXCEPT
-{
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    out[0] += in[0];
-    out[1] += in[1];
-    out[2] += in[2];
-    out[3] += in[3];
-    out[4] += in[4];
-    out[5] += in[5];
-    out[6] += in[6];
-    out[7] += in[7];
-    BC_POP_WARNING()
-}
-
-constexpr void copying8(buffer& out, const state& in) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+copying8(buffer_t& out, const state_t& in) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -273,67 +279,91 @@ constexpr void copying8(buffer& out, const state& in) NOEXCEPT
     }
     else
     {
-        // TODO: safe offsetting array cast.
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        auto& to = unsafe_array_cast<word_t, state_words>(&out[state_words]);
+        auto& to = narrowing_array_cast<word_t, in.size()>(out);
         BC_POP_WARNING()
         to = in;
     }
 }
 
-constexpr void copyin64(buffer& out, const buffer& in) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+summary8(state_t& out, const state_t& in) NOEXCEPT
 {
-    out = in;
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    out[0] += in[0];
+    out[1] += in[1];
+    out[2] += in[2];
+    out[3] += in[3];
+    out[4] += in[4];
+    out[5] += in[5];
+    out[6] += in[6];
+    out[7] += in[7];
+    BC_POP_WARNING()
 }
 
-constexpr void padding8(buffer& out) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+paddin64(buffer_t& out) NOEXCEPT
+{
+    // SHA::buffer_pad is the output of expand48(SHA::.block_pad).
+    out = SHA::buffer_pad;
+}
+
+template <typename SHA>
+constexpr void algorithm<SHA>::
+padding8(buffer_t& out) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[ 8] = pad32[0];
-        out[ 9] = pad32[1];
-        out[10] = pad32[2];
-        out[11] = pad32[3];
-        out[12] = pad32[4];
-        out[13] = pad32[5];
-        out[14] = pad32[6];
-        out[15] = pad32[7];
+        out[ 8] = SHA::chunk_pad[0];
+        out[ 9] = SHA::chunk_pad[1];
+        out[10] = SHA::chunk_pad[2];
+        out[11] = SHA::chunk_pad[3];
+        out[12] = SHA::chunk_pad[4];
+        out[13] = SHA::chunk_pad[5];
+        out[14] = SHA::chunk_pad[6];
+        out[15] = SHA::chunk_pad[7];
         BC_POP_WARNING()
     }
     else
     {
         // TODO: make safe offsetting array cast.
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        auto& to = unsafe_array_cast<word_t, state_words>(&out[state_words]);
+        constexpr auto pad_size = SHA::chunk_pad.size();
+        auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
         BC_POP_WARNING()
-        to = pad32;
+        to = SHA::chunk_pad;
     }
 }
 
-constexpr void paddin16(buffer& out, size_t blocks) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+paddin16(buffer_t& out, count_t blocks) NOEXCEPT
 {
-    constexpr auto block32 = block_size / sizeof(word_t);
-    const auto bits = to_bits<uint64_t>(blocks * block_size);
 
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[0] = pad64[0];
-        out[1] = pad64[1];
-        out[2] = pad64[2];
-        out[3] = pad64[3];
-        out[4] = pad64[4];
-        out[5] = pad64[5];
-        ////out[6] = pad64[6];
-        ////out[7] = pad64[7];
+        out[0] = SHA::stream_pad[0];
+        out[1] = SHA::stream_pad[1];
+        out[2] = SHA::stream_pad[2];
+        out[3] = SHA::stream_pad[3];
+        out[4] = SHA::stream_pad[4];
+        out[5] = SHA::stream_pad[5];
+        ////out[6] = SHA::stream_pad[6];
+        ////out[7] = SHA::stream_pad[7];
         BC_POP_WARNING()
     }
     else
     {
-        auto& to = narrowing_array_cast<word_t, block32>(out);
-        to = pad64;
+        auto& to = narrowing_array_cast<word_t, SHA::stream_pad.size()>(out);
+        to = SHA::stream_pad;
     }
+
+    // Copy in the streamed bit count (count_t is twice the size of word_t).
+    const auto bits = to_bits<count_t>(blocks * block_size);
 
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     out[6] = narrow_cast<word_t>(bits >> bc::bits<word_t>);
@@ -341,80 +371,79 @@ constexpr void paddin16(buffer& out, size_t blocks) NOEXCEPT
     BC_POP_WARNING()
 }
 
-constexpr void bigend16(buffer& out, const block& in) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+bigend16(buffer_t& out, const block_t& in) NOEXCEPT
 {
-    constexpr auto block32 = block_size / sizeof(word_t);
-
     if (std::is_constant_evaluated())
     {
-        constexpr auto size = sizeof(word_t);
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_big< 0 * size>(out[ 0], in);
-        from_big< 1 * size>(out[ 1], in);
-        from_big< 2 * size>(out[ 2], in);
-        from_big< 3 * size>(out[ 3], in);
-        from_big< 4 * size>(out[ 4], in);
-        from_big< 5 * size>(out[ 5], in);
-        from_big< 6 * size>(out[ 6], in);
-        from_big< 7 * size>(out[ 7], in);
-        from_big< 8 * size>(out[ 8], in);
-        from_big< 9 * size>(out[ 9], in);
-        from_big<10 * size>(out[10], in);
-        from_big<11 * size>(out[11], in);
-        from_big<12 * size>(out[12], in);
-        from_big<13 * size>(out[13], in);
-        from_big<14 * size>(out[14], in);
-        from_big<15 * size>(out[15], in);
+        from_big< 0 * SHA::word_bytes>(out[ 0], in);
+        from_big< 1 * SHA::word_bytes>(out[ 1], in);
+        from_big< 2 * SHA::word_bytes>(out[ 2], in);
+        from_big< 3 * SHA::word_bytes>(out[ 3], in);
+        from_big< 4 * SHA::word_bytes>(out[ 4], in);
+        from_big< 5 * SHA::word_bytes>(out[ 5], in);
+        from_big< 6 * SHA::word_bytes>(out[ 6], in);
+        from_big< 7 * SHA::word_bytes>(out[ 7], in);
+        from_big< 8 * SHA::word_bytes>(out[ 8], in);
+        from_big< 9 * SHA::word_bytes>(out[ 9], in);
+        from_big<10 * SHA::word_bytes>(out[10], in);
+        from_big<11 * SHA::word_bytes>(out[11], in);
+        from_big<12 * SHA::word_bytes>(out[12], in);
+        from_big<13 * SHA::word_bytes>(out[13], in);
+        from_big<14 * SHA::word_bytes>(out[14], in);
+        from_big<15 * SHA::word_bytes>(out[15], in);
         BC_POP_WARNING()
     }
     else
     {
         auto& from = array_cast<word_t>(in);
-        auto& to = narrowing_array_cast<word_t, block32>(out);
+        auto& to = narrowing_array_cast<word_t, block_words>(out);
         from_big_endians(to, from);
     }
 }
 
-constexpr void bigend08(buffer& out, const half& in) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+bigend08(buffer_t& out, const half_t& in) NOEXCEPT
 {
-    constexpr auto block16 = half_size / sizeof(word_t);
-
     if (std::is_constant_evaluated())
     {
-        constexpr auto size = sizeof(word_t);
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_big<0 * size>(out[0], in);
-        from_big<1 * size>(out[1], in);
-        from_big<2 * size>(out[2], in);
-        from_big<3 * size>(out[3], in);
-        from_big<4 * size>(out[4], in);
-        from_big<5 * size>(out[5], in);
-        from_big<6 * size>(out[6], in);
-        from_big<7 * size>(out[7], in);
+        from_big<0 * SHA::word_bytes>(out[0], in);
+        from_big<1 * SHA::word_bytes>(out[1], in);
+        from_big<2 * SHA::word_bytes>(out[2], in);
+        from_big<3 * SHA::word_bytes>(out[3], in);
+        from_big<4 * SHA::word_bytes>(out[4], in);
+        from_big<5 * SHA::word_bytes>(out[5], in);
+        from_big<6 * SHA::word_bytes>(out[6], in);
+        from_big<7 * SHA::word_bytes>(out[7], in);
         BC_POP_WARNING()
     }
     else
     {
         auto& from = array_cast<word_t>(in);
-        auto& to = narrowing_array_cast<word_t, block16>(out);
+        auto& to = narrowing_array_cast<word_t, chunk_words>(out);
         from_big_endians(to, from);
     }
 }
 
-constexpr void bigend08(digest& out, const state& in) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+bigend08(digest_t& out, const state_t& in) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        constexpr auto size = sizeof(word_t);
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        to_big<0 * size>(out, in[0]);
-        to_big<1 * size>(out, in[1]);
-        to_big<2 * size>(out, in[2]);
-        to_big<3 * size>(out, in[3]);
-        to_big<4 * size>(out, in[4]);
-        to_big<5 * size>(out, in[5]);
-        to_big<6 * size>(out, in[6]);
-        to_big<7 * size>(out, in[7]);
+        to_big<0 * SHA::word_bytes>(out, in[0]);
+        to_big<1 * SHA::word_bytes>(out, in[1]);
+        to_big<2 * SHA::word_bytes>(out, in[2]);
+        to_big<3 * SHA::word_bytes>(out, in[3]);
+        to_big<4 * SHA::word_bytes>(out, in[4]);
+        to_big<5 * SHA::word_bytes>(out, in[5]);
+        to_big<6 * SHA::word_bytes>(out, in[6]);
+        to_big<7 * SHA::word_bytes>(out, in[7]);
         BC_POP_WARNING()
     }
     else
@@ -427,121 +456,142 @@ constexpr void bigend08(digest& out, const state& in) NOEXCEPT
 // Streaming hash functions.
 // ---------------------------------------------------------------------------
 
-VCONSTEXPR void accumulate(state& state, const blocks& blocks) NOEXCEPT
+template <typename SHA>
+VCONSTEXPR void algorithm<SHA>::
+accumulate(state_t& state, const blocks& blocks) NOEXCEPT
 {
-    buffer words{};
+    buffer_t words{};
 
     for (auto& block: blocks)
     {
-        const sha::state start{ state };
+        const state_t start{ state };
         bigend16(words, block);
         expand48(words);
-        rounds64(state, words);
+        rounds(state, words);
         summary8(state, start);
     }
 }
 
 // This is a specialization of multiple blocks so that we can have constexpr
 // and avoid the (trivial) overhead of iteration and a vector construction.
-// TODO: once compilers catch up to C++20 vector constexpr this can be folded.
-constexpr void accumulate(state& state, const block& block) NOEXCEPT
+template <typename SHA>
+constexpr void algorithm<SHA>::
+accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
-    buffer words{};
-    const sha::state start{ state };
+    buffer_t words{};
+    const state_t start{ state };
     bigend16(words, block);
     expand48(words);
-    rounds64(state, words);
+    rounds(state, words);
     summary8(state, start);
 }
 
-constexpr digest finalize(const state& state) NOEXCEPT
+template <typename SHA>
+constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
+finalize(const state_t& state) NOEXCEPT
 {
-    digest out{};
+    digest_t out{};
     bigend08(out, state);
     return out;
 }
 
 // Finalized single hash functions.
 // ---------------------------------------------------------------------------
+// Cannot be vectorized as the hash function is cumulative. But with a full
+// block can take advantage of multi-lane single block intrinsics.
 
-constexpr digest hash(const blocks& blocks) NOEXCEPT
+template <typename SHA>
+constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
+hash(const blocks& blocks) NOEXCEPT
 {
     // process N blocks in accumulator loop.
-    auto state = sha::initial;
+    auto state = H::get;
     accumulate(state, blocks);
 
     // full pad block for N blocks (pre-endianed, size added).
-    buffer words{};
-    paddin16(words, blocks.size());
-    expand48(words);
+    buffer space{};
+    paddin16(space, blocks.size());
+    expand48(space);
     const auto save = state;
-    rounds64(state, words);
+    rounds(state, space);
     summary8(state, save);
     return finalize(state);
 }
 
-constexpr digest hash(const block& block) NOEXCEPT
+template <typename SHA>
+constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
+hash(const block_t& block) NOEXCEPT
 {
-    buffer words{};
+    buffer space{};
 
     // process 1 block in (avoid accumulate to reuse buffer).
-    auto state = sha::initial;
-    bigend16(words, block);
-    expand48(words);
-    rounds64(state, words);
-    summary8(state, sha::initial);
+    bigend16(space, block);
+    expand48(space);
+    auto state = H::get;
+    rounds(state, space);
+    summary8(state, H::get);
 
     // full pad block for 1 block (pre-sized/endianed/expanded).
-    copyin64(words, expanded_pad64);
+    paddin64(space);
     const auto save = state;
-    rounds64(state, words);
+    rounds(state, space);
     summary8(state, save);
     return finalize(state);
 }
 
-constexpr digest hash(const half& half) NOEXCEPT
+template <typename SHA>
+constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
+hash(const half_t& half) NOEXCEPT
 {
     // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
-    buffer words{};
-    bigend08(words, half);
-    padding8(words);
-    expand48(words);
-    auto state = sha::initial;
-    rounds64(state, words);
-    summary8(state, sha::initial);
+    buffer space{};
+    bigend08(space, half);
+    padding8(space);
+    expand48(space);
+    auto state = H::get;
+    rounds(state, space);
+    summary8(state, H::get);
     return finalize(state);
 }
 
 // Finalized merkle hash functions.
 // ---------------------------------------------------------------------------
+// TODO: generalize to vectorized single block hash (hash_set).
+// TODO: a second round (double sha) is then just vectorized chunk hash.
+// TODO: a merkle hash is then iteration over vectorized single and second.
+// TODO: current optimizations limit vectorization to specialized CPUs and are
+// TODO: limited to 2/4/8 concurrent blocks, but this can be fully vectorized
+// TODO: on any platform by simply using std::for_each(parallel...). This can
+// TODO: also be layered over CPU specific vectorizations and sha-ni.
 
-VCONSTEXPR digests merkle(const blocks& blocks) NOEXCEPT
+template <typename SHA>
+VCONSTEXPR typename algorithm<SHA>::digests algorithm<SHA>::
+merkle(const blocks& blocks) NOEXCEPT
 {
-    buffer words{};
+    buffer space{};
     digests out{};
     out.reserve(to_half(blocks.size()));
 
     for (auto& block: blocks)
     {
-        bigend16(words, block);
-        expand48(words);
-        auto state = sha::initial;
-        rounds64(state, words);
-        summary8(state, sha::initial);
+        bigend16(space, block);         // hash(block)[part 1]
+        expand48(space);                // hash(block)[part 1]
+        auto state = H::get;            // hash(block)[part 1]
+        rounds(state, space);           // hash(block)[part 1]
+        summary8(state, H::get);        // hash(block)[part 1]
 
-        copyin64(words, expanded_pad64);
-        const auto save = state;
-        rounds64(state, words);
-        summary8(state, save);
+        paddin64(space);                // hash(block)[part 2]
+        const auto save = state;        // hash(block)[part 2]
+        rounds(state, space);           // hash(block)[part 2]
+        summary8(state, save);          // hash(block)[part 2]
 
-        copying8(words, state);
-        padding8(words);
-        expand48(words);
-        state = sha::initial;
-        rounds64(state, words);
-        summary8(state, sha::initial);
-
-        out.push_back(finalize(state));
+        copying8(space, state);         // hash(half)
+        padding8(space);                // hash(half)
+        expand48(space);                // hash(half)
+        state = H::get;                 // hash(half)
+        rounds(state, space);           // hash(half)
+        summary8(state, H::get);        // hash(half)
+        out.push_back(finalize(state)); // hash(half)
     }
 
     return out;
@@ -549,31 +599,30 @@ VCONSTEXPR digests merkle(const blocks& blocks) NOEXCEPT
 
 // This is a specialization of multiple blocks so that we can have constexpr
 // and avoid the (trivial) overhead of iteration and a vector construction.
-// TODO: once compilers catch up to C++20 vector constexpr this can be folded.
-constexpr digest merkle(const block& block) NOEXCEPT
+template <typename SHA>
+constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
+merkle(const block_t& block) NOEXCEPT
 {
-    buffer words{};
+    buffer space{};
 
-    bigend16(words, block);
-    expand48(words);
-    auto state = sha::initial;
-    rounds64(state, words);
-    summary8(state, sha::initial);
+    bigend16(space, block);             // hash(block)[part 1]
+    expand48(space);                    // hash(block)[part 1]
+    auto state = H::get;                // hash(block)[part 1]
+    rounds(state, space);               // hash(block)[part 1]
+    summary8(state, H::get);            // hash(block)[part 1]
 
-    // expanded_pad64 is the output of expand48(sha256::pad_64)
-    copyin64(words, expanded_pad64);
-    const auto save = state;
-    rounds64(state, words);
-    summary8(state, save);
+    paddin64(space);                    // hash(block)[part 2]
+    const auto save = state;            // hash(block)[part 2]
+    rounds(state, space);               // hash(block)[part 2]
+    summary8(state, save);              // hash(block)[part 2]
 
-    copying8(words, state);
-    padding8(words);
-    expand48(words);
-    state = sha::initial;
-    rounds64(state, words);
-    summary8(state, sha::initial);
-
-    return finalize(state);
+    copying8(space, state);             // hash(half)
+    padding8(space);                    // hash(half)
+    expand48(space);                    // hash(half)
+    state = H::get;                     // hash(half)
+    rounds(state, space);               // hash(half)
+    summary8(state, H::get);            // hash(half)
+    return finalize(state);             // hash(half)
 }
 
 #ifdef NORMALIZED_NATIVE_MERKLE
@@ -667,225 +716,6 @@ constexpr digest merkle(const block& block) NOEXCEPT
 ////    BC_POP_WARNING()
 ////}
 #endif // NORMALIZED_NATIVE_MERKLE
-
-#define TEMPLATE \
-template <size_t Strength, size_t Digest, \
-    bool_if<Strength == 256u || Strength == 512u> If>
-
-#define CLASS \
-algorithm<Strength, Digest, If>
-
-TEMPLATE
-constexpr CLASS::state_t CLASS::h() NOEXCEPT
-{
-    if constexpr (digest == strength)
-    {
-        if constexpr (strength == s_256)
-        {
-            return
-            {
-                0x6a09e667,
-                0xbb67ae85,
-                0x3c6ef372,
-                0xa54ff53a,
-                0x510e527f,
-                0x9b05688c,
-                0x1f83d9ab,
-                0x5be0cd19
-            };
-        }
-
-        if constexpr (strength == s_512)
-        {
-            return
-            {
-                0x6a09e667f3bcc908,
-                0xbb67ae8584caa73b,
-                0x3c6ef372fe94f82b,
-                0xa54ff53a5f1d36f1,
-                0x510e527fade682d1,
-                0x9b05688c2b3e6c1f,
-                0x1f83d9abfb41bd6b,
-                0x5be0cd19137e2179
-            };
-        }
-    }
-    else
-    {
-        return {};
-    }
-}
-
-TEMPLATE
-constexpr CLASS::const_t CLASS::k() NOEXCEPT
-{
-    if constexpr (digest == strength)
-    {
-        if constexpr (strength == s_256)
-        {
-            return
-            {
-                0x428a2f98,
-                0x71374491,
-                0xb5c0fbcf,
-                0xe9b5dba5,
-                0x3956c25b,
-                0x59f111f1,
-                0x923f82a4,
-                0xab1c5ed5,
-                0xd807aa98,
-                0x12835b01,
-                0x243185be,
-                0x550c7dc3,
-                0x72be5d74,
-                0x80deb1fe,
-                0x9bdc06a7,
-                0xc19bf174,
-                0xe49b69c1,
-                0xefbe4786,
-                0x0fc19dc6,
-                0x240ca1cc,
-                0x2de92c6f,
-                0x4a7484aa,
-                0x5cb0a9dc,
-                0x76f988da,
-                0x983e5152,
-                0xa831c66d,
-                0xb00327c8,
-                0xbf597fc7,
-                0xc6e00bf3,
-                0xd5a79147,
-                0x06ca6351,
-                0x14292967,
-                0x27b70a85,
-                0x2e1b2138,
-                0x4d2c6dfc,
-                0x53380d13,
-                0x650a7354,
-                0x766a0abb,
-                0x81c2c92e,
-                0x92722c85,
-                0xa2bfe8a1,
-                0xa81a664b,
-                0xc24b8b70,
-                0xc76c51a3,
-                0xd192e819,
-                0xd6990624,
-                0xf40e3585,
-                0x106aa070,
-                0x19a4c116,
-                0x1e376c08,
-                0x2748774c,
-                0x34b0bcb5,
-                0x391c0cb3,
-                0x4ed8aa4a,
-                0x5b9cca4f,
-                0x682e6ff3,
-                0x748f82ee,
-                0x78a5636f,
-                0x84c87814,
-                0x8cc70208,
-                0x90befffa,
-                0xa4506ceb,
-                0xbef9a3f7,
-                0xc67178f2
-            };
-        }
-
-        if constexpr (strength == s_512)
-        {
-            return
-            {
-                0x428a2f98d728ae22,
-                0x7137449123ef65cd,
-                0xb5c0fbcfec4d3b2f,
-                0xe9b5dba58189dbbc,
-                0x3956c25bf348b538,
-                0x59f111f1b605d019,
-                0x923f82a4af194f9b,
-                0xab1c5ed5da6d8118,
-                0xd807aa98a3030242,
-                0x12835b0145706fbe,
-                0x243185be4ee4b28c,
-                0x550c7dc3d5ffb4e2,
-                0x72be5d74f27b896f,
-                0x80deb1fe3b1696b1,
-                0x9bdc06a725c71235,
-                0xc19bf174cf692694,
-                0xe49b69c19ef14ad2,
-                0xefbe4786384f25e3,
-                0x0fc19dc68b8cd5b5,
-                0x240ca1cc77ac9c65,
-                0x2de92c6f592b0275,
-                0x4a7484aa6ea6e483,
-                0x5cb0a9dcbd41fbd4,
-                0x76f988da831153b5,
-                0x983e5152ee66dfab,
-                0xa831c66d2db43210,
-                0xb00327c898fb213f,
-                0xbf597fc7beef0ee4,
-                0xc6e00bf33da88fc2,
-                0xd5a79147930aa725,
-                0x06ca6351e003826f,
-                0x142929670a0e6e70,
-                0x27b70a8546d22ffc,
-                0x2e1b21385c26c926,
-                0x4d2c6dfc5ac42aed,
-                0x53380d139d95b3df,
-                0x650a73548baf63de,
-                0x766a0abb3c77b2a8,
-                0x81c2c92e47edaee6,
-                0x92722c851482353b,
-                0xa2bfe8a14cf10364,
-                0xa81a664bbc423001,
-                0xc24b8b70d0f89791,
-                0xc76c51a30654be30,
-                0xd192e819d6ef5218,
-                0xd69906245565a910,
-                0xf40e35855771202a,
-                0x106aa07032bbd1b8,
-                0x19a4c116b8d2d0c8,
-                0x1e376c085141ab53,
-                0x2748774cdf8eeb99,
-                0x34b0bcb5e19b48a8,
-                0x391c0cb3c5c95a63,
-                0x4ed8aa4ae3418acb,
-                0x5b9cca4f7763e373,
-                0x682e6ff3d6b2b8a3,
-                0x748f82ee5defb2fc,
-                0x78a5636f43172f60,
-                0x84c87814a1f0ab72,
-                0x8cc702081a6439ec,
-                0x90befffa23631e28,
-                0xa4506cebde82bde9,
-                0xbef9a3f7b2c67915,
-                0xc67178f2e372532b,
-                0xca273eceea26619c,
-                0xd186b8c721c0c207,
-                0xeada7dd6cde0eb1e,
-                0xf57d4f7fee6ed178,
-                0x06f067aa72176fba,
-                0x0a637dc5a2c898a6,
-                0x113f9804bef90dae,
-                0x1b710b35131c471b,
-                0x28db77f523047d84,
-                0x32caab7b40c72493,
-                0x3c9ebe0a15c9bebc,
-                0x431d67c49c100d4c,
-                0x4cc5d4becb3e42b6,
-                0x597f299cfc657e2a,
-                0x5fcb6fab3ad6faec,
-                0x6c44198c4a475817
-            };
-        }
-    }
-    else
-    {
-        return {};
-    }
-}
-
-#undef TEMPLATE
 
 } // namespace sha
 } // namespace system
