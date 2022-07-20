@@ -39,7 +39,7 @@
 // overflow  -> sign, cast
 // bits      -> sign, cast,           logarithm (for bit_width(clog2))
 // bytes     -> sign, cast,           logarithm (for byte_width(clog256))
-// limits    -> sign, cast,           power     (for sized domain limits)
+// limits    -> sign, cast,           [power]   (for sized domain limits)
 // power     -> sign, cast, overflow, bits      (for shift optimization)
 // logarithm -> sign, cast, overflow, division  (for ceiling/floor opts)
 // addition  -> sign, cast, overflow, limits    (for ceiling/floor opts)

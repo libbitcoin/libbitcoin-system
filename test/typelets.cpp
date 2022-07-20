@@ -290,3 +290,8 @@ static_assert(size_of<std_array<std_array<std_array<uint32_t, 42>, 24>, 8>>() ==
 
 // TODO: This is not currently restricted (is_std_array || !is_std_array).
 ////static_assert(size_of<uintx>() == 24);
+
+static_assert(is_same_type<ref<base>, std::reference_wrapper<base>>);
+static_assert(!is_same_type<ref<base>, std::reference_wrapper<derived>>);
+static_assert(is_same_type<cref<base>, std::reference_wrapper<const base>>);
+static_assert(!is_same_type<cref<base>, std::reference_wrapper<const derived>>);

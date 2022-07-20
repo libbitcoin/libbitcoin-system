@@ -78,7 +78,7 @@ template <typename Type, std::enable_if_t<is_integral_size<Type>, bool> = true>
 constexpr size_t bits = to_bits(sizeof(Type));
 
 /// Limited to is_nonzero(Bits) && is_zero(Bits % 8).
-/// Use to_ceilinged_bytes/to_floored_bytes for non-aligned conversions. 
+/// Use to_ceilinged_bytes/to_floored_bytes for non-aligned conversions.
 template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
 constexpr size_t bytes = Bits / byte_bits;
 
@@ -114,6 +114,15 @@ constexpr size_t size_of() noexcept(false)
 
     return size * count;
 }
+
+/// std::reference_wrapper.
+/// ---------------------------------------------------------------------------
+
+template <typename Type>
+using ref = std::reference_wrapper<Type>;
+
+template <typename Type>
+using cref = std::reference_wrapper<const Type>;
 
 } // namespace libbitcoin
 
