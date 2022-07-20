@@ -46,10 +46,11 @@ namespace bc = libbitcoin;
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
 
 /// Emit messages from .cpp during compilation.
+#define DO_PRAGMA(text) _Pragma (#text)
 #if defined(HAVE_MSC)
     #define DEFINED(text) __pragma(message("defined: " text))
 #elif defined(HAVE_GNUC)
-    #define DEFINED(text) _Pragma("message defined: " text)
+    #define DEFINED(text) DO_PRAGMA(message ("defined: " #text))
 #endif
 
 #ifdef NDEBUG

@@ -114,7 +114,7 @@ constexpr auto half = to_bits(digest_size) >> byte_bits; // bit count >> 8
 
 /// Padding for full block hash round (64 bytes of pad/count).
 /// The buffer is prefilled with padding and a count of 512 bits.
-constexpr alignas(16) block pad_64
+alignas(16) constexpr block pad_64
 {
     pppp, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -129,7 +129,7 @@ constexpr alignas(16) block pad_64
 
 /// Padding for a half block hash round (32 bytes of pad/count).
 /// The buffer is prefilled with padding and a count of 256 bits.
-constexpr alignas(16) block pad_32
+alignas(16) constexpr block pad_32
 {
     xxxx, xxxx, xxxx, xxxx, xxxx, xxxx, xxxx, xxxx,
     xxxx, xxxx, xxxx, xxxx, xxxx, xxxx, xxxx, xxxx,

@@ -38,7 +38,7 @@ using namespace i128;
 
 #ifndef VISUAL
 
-constexpr alignas(mint128_t) uint8_t mask[sizeof(mint128_t)]
+alignas(mint128_t) constexpr uint8_t mask[sizeof(mint128_t)]
 {
     0x03, 0x02, 0x01, 0x00, // 0x00010203ul
     0x07, 0x06, 0x05, 0x04, // 0x04050607ul
@@ -46,7 +46,7 @@ constexpr alignas(mint128_t) uint8_t mask[sizeof(mint128_t)]
     0x0f, 0x0e, 0x0d, 0x0c  // 0x0c0d0e0ful
 };
 
-constexpr alignas(mint128_t) uint8_t initial0[sizeof(mint128_t)]
+alignas(mint128_t) constexpr uint8_t initial0[sizeof(mint128_t)]
 {
     0x8c, 0x68, 0x05, 0x9b, // 0x9b05688cul
     0x7f, 0x52, 0x0e, 0x51, // 0x510e527ful
@@ -54,7 +54,7 @@ constexpr alignas(mint128_t) uint8_t initial0[sizeof(mint128_t)]
     0x67, 0xe6, 0x09, 0x6a  // 0x6a09e667ul
 };
 
-constexpr alignas(mint128_t) uint8_t initial1[sizeof(mint128_t)]
+alignas(mint128_t) constexpr uint8_t initial1[sizeof(mint128_t)]
 {
     0x19, 0xcd, 0xe0, 0x5b, // 0x5be0cd19ul
     0xab, 0xd9, 0x83, 0x1f, // 0x1f83d9abul
