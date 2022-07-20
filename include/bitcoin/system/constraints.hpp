@@ -30,48 +30,52 @@ template <bool Expression>
 using bool_if = std::enable_if_t<Expression, bool>;
 
 /// Sizes.
+/// These were originally typed to size_t, but this causes implicit narrow
+/// casting from uint64_t when sizeof(size_t) == 32. This results in truncated
+/// constant warnings and unexpected template matching failures. So these are
+/// now typed to the largest integral size, since they do not return values.
 
-template <size_t Value>
+template <uint64_t Value>
 using if_odd = bool_if<
     is_odd(Value)>;
 
-template <size_t Value>
+template <uint64_t Value>
 using if_even = bool_if<
     is_even(Value)>;
 
-template <size_t Value>
+template <uint64_t Value>
 using if_zero = bool_if<
     is_zero(Value)>;
 
-template <size_t Value>
+template <uint64_t Value>
 using if_nonzero = bool_if<
     is_nonzero(Value)>;
 
-template <size_t Left, size_t Right>
+template <uint64_t Left, uint64_t Right>
 using if_equal = bool_if<
     (Left == Right)>;
 
-template <size_t Left, size_t Right>
+template <uint64_t Left, uint64_t Right>
 using if_greater = bool_if<
     (Left > Right)>;
 
-template <size_t Left, size_t Right>
+template <uint64_t Left, uint64_t Right>
 using if_not_greater = bool_if<
     !(Left > Right)>;
 
-template <size_t Left, size_t Right>
+template <uint64_t Left, uint64_t Right>
 using if_lesser = bool_if<
     (Left < Right)>;
 
-template <size_t Left, size_t Right>
+template <uint64_t Left, uint64_t Right>
 using if_not_lesser = bool_if<
     !(Left < Right)>;
 
-template <size_t Bits>
+template <uint64_t Bits>
 using if_bytes_width = bool_if<
     is_byte_sized(Bits)>;
 
-template <size_t Bytes>
+template <uint64_t Bytes>
 using if_integral_size = bool_if<
     is_integral_sized(Bytes)>;
 
@@ -93,7 +97,7 @@ template <typename Type>
 using if_not_one_byte = bool_if<
     !is_same_size<Type, uint8_t>>;
 
-template <typename Type, size_t Size>
+template <typename Type, uint64_t Size>
 using if_size_of = bool_if<
     sizeof(Type) == Size>;
 
