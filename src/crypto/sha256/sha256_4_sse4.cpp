@@ -75,7 +75,7 @@ void merkle_sse4(digest1&, const block1&) NOEXCEPT
 
 void hash_sse4(state& state, const block1& blocks) NOEXCEPT
 {
-    constexpr alignas(16) uint32_t k256[]
+    alignas(16) constexpr uint32_t k256[]
     {
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
         0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -95,17 +95,17 @@ void hash_sse4(state& state, const block1& blocks) NOEXCEPT
         0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
     };
 
-    constexpr alignas(16) uint32_t flip_mask[]
+    alignas(16) constexpr uint32_t flip_mask[]
     {
         0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f
     };
 
-    constexpr alignas(16) uint32_t shuffle_00ba[]
+    alignas(16) constexpr uint32_t shuffle_00ba[]
     {
         0x03020100, 0x0b0a0908, 0xffffffff, 0xffffffff
     };
 
-    constexpr alignas(16) uint32_t shuffle_dc00[]
+    alignas(16) constexpr uint32_t shuffle_dc00[]
     {
         0xffffffff, 0xffffffff, 0x03020100, 0x0b0a0908
     };
