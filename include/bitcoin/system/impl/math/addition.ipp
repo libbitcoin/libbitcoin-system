@@ -36,7 +36,7 @@ template <place1, typename Integer,
     if_integral_integer<Integer>>
 constexpr Integer add(Integer left, Integer right) NOEXCEPT
 {
-    // is_overflow() can be used to guard this addition.
+    // is_add_overflow() can be used to guard this addition.
     return depromote<Integer>(promote(left) + promote(right));
 }
 

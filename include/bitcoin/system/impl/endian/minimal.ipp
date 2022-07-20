@@ -55,7 +55,7 @@ template <typename Integer,
 VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
-    BC_ASSERT(!is_overflow(byte_width(value), excess));
+    BC_ASSERT(!is_add_overflow(byte_width(value), excess));
 
     // Vector capacity is never reduced when resizing to smaller size.
     const auto size = byte_width(value);
@@ -69,7 +69,7 @@ template <typename Integer,
 VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
-    BC_ASSERT(!is_overflow(byte_width(value), excess));
+    BC_ASSERT(!is_add_overflow(byte_width(value), excess));
 
     // Vector capacity is never reduced when resizing to smaller size.
     const auto size = byte_width(value);

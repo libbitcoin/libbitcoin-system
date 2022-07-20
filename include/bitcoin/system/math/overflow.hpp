@@ -26,7 +26,7 @@ namespace system {
     
 /// add/subtract.
 /// ---------------------------------------------------------------------------
-// TODO: generalize is_overflow() and is_underflow() argument types.
+// TODO: generalize is_add_overflow() and is_subtract_overflow() argument types.
 
 template <typename Signed,
     if_signed_integral_integer<Signed> = true>

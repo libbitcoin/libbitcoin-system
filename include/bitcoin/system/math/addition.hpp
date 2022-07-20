@@ -27,7 +27,7 @@ namespace system {
 /// left + right after cast of each to Explicit type.
 /// Result defaults to greater of operand types.
 /// Result size must not be lesser than either operand.
-/// Use is_overflow<Explicit>(left, right) to guard.
+/// Use is_add_overflow<Explicit>(left, right) to guard.
 template <place1 = place1{}, typename Integer,
     if_integral_integer<Integer> = true>
 constexpr Integer add(Integer left, Integer right) NOEXCEPT;
@@ -48,7 +48,7 @@ constexpr Explicit add(Left left, Right right) NOEXCEPT;
 /// left - right after cast of each to Explicit type.
 /// Result defaults to greater of operand types.
 /// Result size must not be lesser than either operand.
-/// Use is_underflow<Explicit>(left, right) to guard.
+/// Use is_subtract_overflow<Explicit>(left, right) to guard.
 template <place1 = place1{}, typename Integer,
     if_integral_integer<Integer> = true >
 constexpr Integer subtract(Integer left, Integer right) NOEXCEPT;
