@@ -256,11 +256,24 @@ static_assert(to_ceilinged_bytes(42u) == (42u + 7u) / 8u);
 static_assert(to_ceilinged_bytes(0xffu) == (0xff + 7u) / 8u);
 static_assert(is_same_type<decltype(to_ceilinged_bytes<uint16_t>(0)), uint16_t>);
 
+static_assert(to_ceilinged_bytes<uint11_t>(0u) == 0u);
+static_assert(to_ceilinged_bytes<uint11_t>(1u) == 1u);
+static_assert(to_ceilinged_bytes<uint11_t>(42u) == (42u + 7u) / 8u);
+static_assert(to_ceilinged_bytes<uint11_t>(0xffu) == (0xff + 7u) / 8u);
+static_assert(to_ceilinged_bytes<uint5_t>(0xffu) == ((0xff & 0b00011111) + 7u) / 8u);
+static_assert(is_same_type<decltype(to_ceilinged_bytes<uint11_t>(0)), uint11_t>);
+
 // to_floored_bytes
 static_assert(to_floored_bytes(0u) == 0u);
 static_assert(to_floored_bytes(1u) == 0u);
 static_assert(to_floored_bytes(42u) == 42u / 8u);
 static_assert(to_floored_bytes(0xffu) == 0xff / 8u);
 static_assert(is_same_type<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>);
+
+static_assert(to_floored_bytes<uint11_t>(0u) == 0u);
+static_assert(to_floored_bytes<uint11_t>(1u) == 0u);
+static_assert(to_floored_bytes<uint11_t>(42u) == 42u / 8u);
+static_assert(to_floored_bytes<uint5_t>(0xffu) == (0xff & 0b00011111) / 8u);
+static_assert(is_same_type<decltype(to_floored_bytes<uint11_t>(0)), uint11_t>);
 
 BOOST_AUTO_TEST_SUITE_END()
