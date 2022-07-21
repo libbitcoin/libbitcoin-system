@@ -226,7 +226,10 @@ mix(uint8_t* p) NOEXCEPT
     // TODO: loop meta-unroll.
     for (size_t i = 0; i < W; ++i)
     {
-        const auto offset = (get64(p) % W) * rblock;
+        // Safe because of modulo W, as w.size() = rblock * W.
+        const auto offset = possible_narrow_cast<size_t>(
+            (get64(p) % W) * rblock);
+
         exc<rblock>(p, &w[offset]);
         if (!salsa_p(p)) return false;
     }
