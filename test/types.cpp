@@ -39,6 +39,9 @@ static_assert(!is_same_type<cref<base>, std::reference_wrapper<const derived>>);
 static_assert(is_same_type<iif<true, base, derived>, base>);
 static_assert(is_same_type<iif<false, base, derived>, derived>);
 
+static_assert(is_same_type<argument<zero, base, derived>, base>);
+static_assert(is_same_type<argument<one, base, derived>, derived>);
+
 // size_t/signed_size_t
 // ----------------------------------------------------------------------------
 

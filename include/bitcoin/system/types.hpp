@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <array>
+#include <tuple>
 #include <vector>
 #include <type_traits>
 #include <bitcoin/system/exceptions.hpp>
@@ -45,6 +46,10 @@ using cref = std::reference_wrapper<const Type>;
 /// Immediate if (iif) type selector.
 template <bool Condition, typename IfTrue, typename IfFalse>
 using iif = std::conditional_t<Condition, IfTrue, IfFalse>;
+
+/// Extract type argument by position in parameter pack.
+template <size_t Position, typename... Args>
+using argument = std::tuple_element_t<Position, std::tuple<Args...>>;
 
 /// Define signed_size_t
 /// ---------------------------------------------------------------------------
