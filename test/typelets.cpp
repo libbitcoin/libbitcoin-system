@@ -289,9 +289,23 @@ static_assert(size_of<std_array<std_array<std_array<uint32_t, 42>, 24>, 8>>() ==
 ////static_assert(size_of<std_array<uint16_t, to_half(max_size_t)>>() == sizeof(uint16_t) * to_half(max_size_t));
 
 // TODO: This is not currently restricted (is_std_array || !is_std_array).
-////static_assert(size_of<uintx>() == 24);
 
-static_assert(is_same_type<ref<base>, std::reference_wrapper<base>>);
-static_assert(!is_same_type<ref<base>, std::reference_wrapper<derived>>);
-static_assert(is_same_type<cref<base>, std::reference_wrapper<const base>>);
-static_assert(!is_same_type<cref<base>, std::reference_wrapper<const derived>>);
+static_assert(is_uintx<uint5_t>);
+static_assert(is_uintx<uint11_t>);
+static_assert(is_uintx<uint48_t>);
+static_assert(is_uintx<uint128_t>);
+static_assert(is_uintx<uint160_t>);
+static_assert(is_uintx<uint256_t>);
+static_assert(is_uintx<uint512_t>);
+static_assert(!is_uintx<uint8_t>);
+static_assert(!is_uintx<uint16_t>);
+static_assert(!is_uintx<uint32_t>);
+static_assert(!is_uintx<uint64_t>);
+static_assert(!is_uintx<size_t>);
+static_assert(!is_uintx<int8_t>);
+static_assert(!is_uintx<int16_t>);
+static_assert(!is_uintx<int32_t>);
+static_assert(!is_uintx<int64_t>);
+static_assert(!is_uintx<signed_size_t>);
+static_assert(!is_uintx<base>);
+static_assert(!is_uintx<std_array<uint8_t, 42>>);

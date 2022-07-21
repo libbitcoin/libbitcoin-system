@@ -28,11 +28,11 @@ namespace libbitcoin {
 /// Simple functions over type argument(s).
 /// ---------------------------------------------------------------------------
 
-/// Same size and signedness, independent of const and volatility.
+/// Alias - same size and signedness, independent of const and volatility.
 template <typename Left, typename Right>
 constexpr bool is_same_type = std::is_same_v<Left, Right>;
 
-/// bool is unsigned: bool(-1) < bool(0). w/char sign unspecified.
+/// Alias - bool is unsigned: bool(-1) < bool(0). w/char sign unspecified.
 /// w/charxx_t types are unsigned. iostream relies on w/char.
 template <typename Type>
 constexpr bool is_signed = std::is_signed_v<Type>;
@@ -115,14 +115,15 @@ constexpr size_t size_of() noexcept(false)
     return size * count;
 }
 
-/// std::reference_wrapper.
+/// uintx_t detection.
 /// ---------------------------------------------------------------------------
 
-template <typename Type>
-using ref = std::reference_wrapper<Type>;
-
-template <typename Type>
-using cref = std::reference_wrapper<const Type>;
+template<typename>
+struct is_uintx_t : std::false_type {};
+template<uintx_size_t Bits>
+struct is_uintx_t<uintx_t<Bits>> : std::true_type {};
+template<typename Type>
+constexpr bool is_uintx = is_uintx_t<Type>::value;
 
 } // namespace libbitcoin
 
