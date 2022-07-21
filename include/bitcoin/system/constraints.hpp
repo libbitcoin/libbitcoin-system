@@ -142,10 +142,6 @@ using if_common = bool_if<
     is_common_size<Type>>;
 
 template <typename Type>
-using if_std_array = bool_if<
-    is_std_array<Type>>;
-
-template <typename Type>
 using if_default_constructible = bool_if<
     std::is_default_constructible<Type>::value>;
 
@@ -223,11 +219,6 @@ using if_not_same_signed_integral_integer = bool_if<
     is_integral_integer<Right> &&
     (is_signed<Left> != is_signed<Right>)>;
 
-template <typename Type>
-using if_integral_integer_std_array = bool_if<
-    is_std_array<Type> &&
-    is_integral_integer<typename Type::value_type>>;
-
 template <typename Integer>
 using if_big_endian_integral_integer = bool_if<
     is_integral_integer<Integer> &&
@@ -237,6 +228,17 @@ template <typename Integer>
 using if_little_endian_integral_integer = bool_if<
     is_integral_integer<Integer> &&
     is_little_endian>;
+
+/// std::array
+
+template <typename Type>
+using if_std_array = bool_if<
+    is_std_array<Type>>;
+
+template <typename Type>
+using if_integral_array = bool_if<
+    is_std_array<Type>&&
+    is_integral_integer<typename Type::value_type>>;
 
 } // namespace libbitcoin
 

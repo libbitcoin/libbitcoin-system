@@ -116,13 +116,13 @@ unsafe_array_cast(const From* bytes) NOEXCEPT;
 
 template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
-    if_integral_integer_std_array<To> = true>
+    if_integral_array<To> = true>
 inline std_array<To, Size>&
 unsafe_array_cast(From* bytes) NOEXCEPT;
 
 template <typename To, size_t Size = one, typename From,
     if_integral_integer<From> = true,
-    if_integral_integer_std_array<To> = true>
+    if_integral_array<To> = true>
 inline const std_array<To, Size>&
 unsafe_array_cast(const From* bytes) NOEXCEPT;
 
@@ -131,13 +131,13 @@ unsafe_array_cast(const From* bytes) NOEXCEPT;
 
 template <typename To, typename From,
     if_integral_integer<From> = true,
-    if_integral_integer_std_array<To> = true>
+    if_integral_array<To> = true>
 inline std_vector<std::reference_wrapper<To>>
 unsafe_vector_cast(From* bytes, size_t count) NOEXCEPT;
 
 template <typename To, typename From,
     if_integral_integer<From> = true,
-    if_integral_integer_std_array<To> = true>
+    if_integral_array<To> = true>
 inline std_vector<std::reference_wrapper<const To>>
 unsafe_vector_cast(const From* bytes, size_t count) NOEXCEPT;
 
