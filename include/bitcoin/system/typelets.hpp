@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_TYPELETS_HPP
 
 #include <limits>
+#include <tuple>
 #include <type_traits>
 #include <bitcoin/system/funclets.hpp>
 
@@ -93,7 +94,7 @@ template<typename Type>
 constexpr bool is_std_array = is_std_array_t<Type>::value;
 
 template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
-constexpr size_t array_count = Type{}.size();
+constexpr size_t array_count = std::tuple_size_v<Type>;
 
 template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
 using array_element = typename Type::value_type;
