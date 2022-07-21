@@ -20,13 +20,19 @@
 
 BOOST_AUTO_TEST_SUITE(intrinsics_tests)
 
+#ifdef LOCAL_TEST
+
 BOOST_AUTO_TEST_CASE(intrinsics__have_all__always__expected)
 {
+#if defined(HAVE_X64)
+    BOOST_REQUIRE(have_avx2());
+    BOOST_REQUIRE(have_sse41());
+#endif
     BOOST_REQUIRE(!have_shani());
-    BOOST_REQUIRE( have_avx2());
-    BOOST_REQUIRE( have_sse41());
     BOOST_REQUIRE(!have_sse4());
     BOOST_REQUIRE(!have_neon());
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
