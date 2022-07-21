@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_SHA_ALGORITHM_HPP
 
 #include <functional>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -35,12 +34,14 @@ template <typename Word, size_t Rounds,
     if_integral_integer<Word> = true>
 struct k
 {
+    /// These are exposed through K on the algorithm.
     static constexpr size_t rounds = Rounds;
     using constants_t = std_array<Word, Rounds>;
 };
 
 struct k160 : public k<uint32_t, 80>
 {
+    /// SHA1 (160) K values are flattened as an optimization/normalization.
     using base = k<uint32_t, 80>;
     static constexpr base::constants_t get
     {
@@ -292,19 +293,26 @@ template <size_t Strength, size_t Digest,
     bool_if<(Strength == 256) || (Strength == 512)> = true>
 struct h
 {
-    static constexpr auto digest     = Digest;
-    static constexpr auto strength   = Strength;
-    static constexpr auto word_bits  = bytes<strength>;
-    static constexpr auto word_bytes = bytes<word_bits>;
-    static constexpr auto state = (Strength == 256) && (Digest == 160) ? 5 : 8;
+    /// Denormalizations are accepted to generalize SHA1 (160).
+    /// It is unque among the SHA family in that it uses a 5 vs. 8 word state
+    /// (and initialization) vector and, despite operating on the same block
+    /// size as the SHA256 group, applies 80 rounds (like SHA512). The Strength
+    /// argument determines the block byte size (not cryptographic strength).
+    using K = iif<Strength == 512, k512, iif<Digest == 160, k160, k256>>;
+    
+    /// These constants are exposed though H on the algorithm.
+    static constexpr auto digest      = Digest;
+    static constexpr auto strength    = Strength;
+    static constexpr auto word_bits   = bytes<strength>;
+    static constexpr auto word_bytes  = bytes<word_bits>;
+    static constexpr auto state_words = Strength == 256 && Digest == 160 ? 5 : 8;
 
+    /// These types are exposed though H on the algorithm (as is K above).
     using word_t   = unsigned_type<word_bytes>;
-    using state_t  = std_array<word_t, state>; // initialization vector
+    using state_t  = std_array<word_t, state_words>;    // IV/state type
     using chunk_t  = std_array<word_t, 8>;  // half block padding optimize
-    using words_t  = std_array<word_t, 16>; // block padding optimize/streaming
+    using words_t  = std_array<word_t, 16>; // block padding optimize/stream
     using buffer_t = std_array<word_t, 64>; // block padding with expansion
-    using K = std::conditional_t<Strength == 512, k512,
-        std::conditional_t<Digest == 160, k160, k256>>;
 };
 
 struct h160
@@ -312,33 +320,39 @@ struct h160
 {
     using base = h<256, 160>;
 
-    static constexpr const base::state_t get
+    struct H
     {
-        0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0
+        static constexpr const base::state_t get
+        {
+            0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0
+        };
     };
 
-    // 256 bits (half block data) pad.
-    static constexpr base::chunk_t chunk_pad
+    struct pad
     {
-        // TODO: populate.
-    };
+        // 256 bits (half block data) pad.
+        static constexpr base::chunk_t chunk
+        {
+            // TODO: populate.
+        };
 
-    // 512 bits (one block data) pad, without expansion.
-    static constexpr base::words_t block_pad
-    {
-        // TODO: populate.
-    };
+        // 512 bits (one block data) pad, without expansion.
+        static constexpr base::words_t block
+        {
+            // TODO: populate.
+        };
 
-    // 512 bits (one block data) pad, with expansion.
-    static constexpr base::buffer_t buffer_pad
-    {
-        // TODO: generate/populate.
-    };
+        // Uncounted block-sized pad, used for streaming.
+        static constexpr base::words_t stream
+        {
+            // TODO: populate.
+        };
 
-    // Uncounted block-sized pad, used for streaming.
-    static constexpr base::words_t stream_pad
-    {
-        // TODO: populate.
+        // 512 bits (one block data) pad, with expansion.
+        static constexpr base::buffer_t buffer
+        {
+            // TODO: generate/populate.
+        };
     };
 };
 
@@ -348,58 +362,64 @@ struct h256
 {
     using base = h<256, Digest>;
 
-    // H values (initial state).
-    static constexpr base::state_t get
+    struct H
     {
-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+        // H values (initial state).
+        static constexpr base::state_t get
+        {
+            0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+            0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+        };
     };
 
-    // 256 bits (half block data) pad.
-    static constexpr base::chunk_t chunk_pad
+    struct pad
     {
-        0x80000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000100,
-    };
+        // 256 bits (half block data) pad.
+        static constexpr base::chunk_t chunk
+        {
+            0x80000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000100,
+        };
 
-    // This is only used for the normalized merkle algorithm.
-    // 512 bits (one block data) pad, without expansion.
-    static constexpr base::words_t block_pad
-    {
-        0x80000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000200
-    };
+        // This is only used for the normalized merkle algorithm.
+        // 512 bits (one block data) pad, without expansion.
+        static constexpr base::words_t block
+        {
+            0x80000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000200
+        };
 
-    // 512 bits (one block data) pad, with expansion.
-    static constexpr base::buffer_t buffer_pad
-    {
-        0x80000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000200,
-        0x80000000, 0x01400000, 0x00205000, 0x00005088,
-        0x22000800, 0x22550014, 0x05089742, 0xa0000020,
-        0x5a880000, 0x005c9400, 0x0016d49d, 0xfa801f00,
-        0xd33225d0, 0x11675959, 0xf6e6bfda, 0xb30c1549,
-        0x08b2b050, 0x9d7c4c27, 0x0ce2a393, 0x88e6e1ea,
-        0xa52b4335, 0x67a16f49, 0xd732016f, 0x4eeb2e91,
-        0x5dbf55e5, 0x8eee2335, 0xe2bc5ec2, 0xa83f4394,
-        0x45ad78f7, 0x36f3d0cd, 0xd99c05e8, 0xb0511dc7,
-        0x69bc7ac4, 0xbd11375b, 0xe3ba71e5, 0x3b209ff2,
-        0x18feee17, 0xe25ad9e7, 0x13375046, 0x0515089d,
-        0x4f0d0f04, 0x2627484e, 0x310128d2, 0xc668b434,
-        0x420841cc, 0x62d311b8, 0xe59ba771, 0x85a7a484
-    };
+        // Uncounted block-sized pad, used for streaming.
+        static constexpr base::words_t stream
+        {
+            0x80000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000000
+        };
 
-    // Uncounted block-sized pad, used for streaming.
-    static constexpr base::words_t stream_pad
-    {
-        0x80000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000000,
-        0x00000000, 0x00000000, 0x00000000, 0x00000000
+        // 512 bits (one block data) pad, with expansion.
+        static constexpr base::buffer_t buffer
+        {
+            0x80000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00000000, 0x00000000, 0x00000200,
+            0x80000000, 0x01400000, 0x00205000, 0x00005088,
+            0x22000800, 0x22550014, 0x05089742, 0xa0000020,
+            0x5a880000, 0x005c9400, 0x0016d49d, 0xfa801f00,
+            0xd33225d0, 0x11675959, 0xf6e6bfda, 0xb30c1549,
+            0x08b2b050, 0x9d7c4c27, 0x0ce2a393, 0x88e6e1ea,
+            0xa52b4335, 0x67a16f49, 0xd732016f, 0x4eeb2e91,
+            0x5dbf55e5, 0x8eee2335, 0xe2bc5ec2, 0xa83f4394,
+            0x45ad78f7, 0x36f3d0cd, 0xd99c05e8, 0xb0511dc7,
+            0x69bc7ac4, 0xbd11375b, 0xe3ba71e5, 0x3b209ff2,
+            0x18feee17, 0xe25ad9e7, 0x13375046, 0x0515089d,
+            0x4f0d0f04, 0x2627484e, 0x310128d2, 0xc668b434,
+            0x420841cc, 0x62d311b8, 0xe59ba771, 0x85a7a484
+        };
     };
 };
 
@@ -409,46 +429,52 @@ struct h512
 {
     using base = h<512, Digest>;
 
-    // H values (initial state).
-    static constexpr base::state_t get
+    struct H
     {
-        0x6a09e667f3bcc908,
-        0xbb67ae8584caa73b,
-        0x3c6ef372fe94f82b,
-        0xa54ff53a5f1d36f1,
-        0x510e527fade682d1,
-        0x9b05688c2b3e6c1f,
-        0x1f83d9abfb41bd6b,
-        0x5be0cd19137e2179
+        // H values (initial state).
+        static constexpr base::state_t get
+        {
+            0x6a09e667f3bcc908,
+            0xbb67ae8584caa73b,
+            0x3c6ef372fe94f82b,
+            0xa54ff53a5f1d36f1,
+            0x510e527fade682d1,
+            0x9b05688c2b3e6c1f,
+            0x1f83d9abfb41bd6b,
+            0x5be0cd19137e2179
+        };
     };
 
-    // 512 bits (half block data) pad.
-    static constexpr base::chunk_t chunk_pad
+    struct pad
     {
-        // TODO: populate.
-    };
+        // 512 bits (half block data) pad.
+        static constexpr base::chunk_t chunk
+        {
+            // TODO: populate.
+        };
 
-    // This is only used for the normalized merkle algorithm.
-    // 1024 bits (one block data) pad, without expansion.
-    static constexpr base::words_t block_pad
-    {
-        // TODO: populate.
-    };
+        // This is only used for the normalized merkle algorithm.
+        // 1024 bits (one block data) pad, without expansion.
+        static constexpr base::words_t block
+        {
+            // TODO: populate.
+        };
 
-    // 1024 bits (one block data) pad, with expansion.
-    static constexpr base::buffer_t buffer_pad
-    {
-        // TODO: generate/populate.
-    };
+        // Uncounted block-sized pad, used for streaming.
+        static constexpr base::words_t stream
+        {
+            // TODO: populate.
+        };
 
-    // Uncounted block-sized pad, used for streaming.
-    static constexpr base::words_t stream_pad
-    {
-        // TODO: populate.
+        // 1024 bits (one block data) pad, with expansion.
+        static constexpr base::buffer_t buffer
+        {
+            // TODO: generate/populate.
+        };
     };
 };
 
-/// FIPS180 SHA256/512
+/// FIPS180 SHA1/SHA256/SHA512 variants.
 using sha160     = h160;
 using sha256_224 = h256<224>;
 using sha256_256 = h256<256>;
@@ -461,6 +487,36 @@ template <typename SHA>
 class algorithm
 {
 public:
+    /// Exposed by SHA
+    /// -------------------------------
+    /// using word_t
+    /// using state_t
+    /// using chunk_t
+    /// using words_t
+    /// using buffer_t
+    /// static constexpr auto digest
+    /// static constexpr auto strength
+    /// static constexpr auto word_bits
+    /// static constexpr auto word_bytes
+    /// static constexpr auto state_words
+
+    /// Exposed by SHA::H
+    /// -------------------------------
+    /// static constexpr base::state_t get
+
+    /// Exposed by SHA::K
+    /// -------------------------------
+    /// using constants_t
+    /// static constexpr size_t rounds
+    /// static constexpr constants_t get
+
+    /// Exposed by SHA::pad
+    /// -------------------------------
+    /// static constexpr chunk_t chunk
+    /// static constexpr words_t block
+    /// static constexpr words_t stream
+    /// static constexpr buffer_t buffer
+
     /// Constants.
     static constexpr auto digest_words = SHA::word_bits / SHA::word_bytes;
     static constexpr auto block_words  = digest_words   * two;
@@ -468,14 +524,11 @@ public:
     static constexpr auto digest_bytes = digest_words   * SHA::word_bytes;
     static constexpr auto block_bytes  = block_words    * SHA::word_bytes;
     static constexpr auto buffer_bytes = buffer_words   * SHA::word_bytes;
-
-    // 64/128 bit counter for 64/128 byte blocks.
     static constexpr auto count_bits  = block_bytes;
     static constexpr auto count_bytes = bytes<count_bits>;
 
     /// Types.
-    using H        = SHA;
-    using K        = SHA::K;
+    /// count_t is 64/128 bit for 64/128 byte blocks (sha512 uses uintx_t).
     using byte_t   = uint8_t;
     using word_t   = SHA::word_t;
     using digest_t = std_array<byte_t, digest_bytes>;
@@ -485,12 +538,12 @@ public:
     using buffer_t = std_array<word_t, buffer_words>;
     using count_t  = unsigned_exact_type<count_bytes>;
 
-    // TODO: bytes<> is limited by size_t so dividing by byte_bits.
     /// Limit incorporates requirement to encode counter in final block.
     static constexpr auto limit_bits = maximum<count_t> - count_bits;
-    static constexpr auto limit_bytes = limit_bits / byte_bits;
+    static constexpr auto limit_bytes = to_floored_bytes(limit_bits);
 
     /// For vectorization optimization.
+    /// Notice that blocks is a vector of cref (use emplace(block)).
     using digests = std_vector<digest_t>;
     using blocks = std_vector<cref<block_t>>;
 
@@ -498,7 +551,7 @@ public:
     static constexpr auto chunk_words = to_half(block_words);
     static constexpr auto chunk_bytes = chunk_words * SHA::word_bytes;
     using chunk_t = std_array<word_t, chunk_words>;
-    using half_t = std_array<uint8_t, chunk_bytes>;
+    using half_t  = std_array<uint8_t, chunk_bytes>;
 
     /// Streaming (any number of full blocks).
     static constexpr  void accumulate(state_t& state, const block_t& block) NOEXCEPT;

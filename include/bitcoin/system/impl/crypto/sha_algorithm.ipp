@@ -98,7 +98,7 @@ round(state_t& out, const buffer_t& in) NOEXCEPT
         out[(block_bytes + 5 - Round) % state_words],
         out[(block_bytes + 6 - Round) % state_words],
         out[(block_bytes + 7 - Round) % state_words], // in/out
-        in[Round] + K::get[Round]);
+        in[Round] + SHA::K::get[Round]);
     BC_POP_WARNING()
 }
 
@@ -118,6 +118,7 @@ template <typename SHA>
 constexpr void algorithm<SHA>::
 expand48(buffer_t& out) NOEXCEPT
 {
+    // TODO: change to meta-unrolled loop.
     expand<16>(out);
     expand<17>(out);
     expand<18>(out);
@@ -172,6 +173,7 @@ template <typename SHA>
 constexpr void algorithm<SHA>::
 rounds(state_t& out, const buffer_t& in) NOEXCEPT
 {
+    // TODO: change to meta-unrolled loop.
     // At least 64 rounds for both sha256/512.
     round<0>(out, in);
     round<1>(out, in);
@@ -239,7 +241,7 @@ rounds(state_t& out, const buffer_t& in) NOEXCEPT
     round<63>(out, in);
 
     // 16 more rounds for sha512
-    if constexpr (K::rounds == 80)
+    if constexpr (SHA::K::rounds == 80)
     {
         round<64>(out, in);
         round<65>(out, in);
@@ -306,8 +308,8 @@ template <typename SHA>
 constexpr void algorithm<SHA>::
 paddin64(buffer_t& out) NOEXCEPT
 {
-    // SHA::buffer_pad is the output of expand48(SHA::.block_pad).
-    out = SHA::buffer_pad;
+    // SHA::pad::buffer is the output of expand48(SHA::pad::block).
+    out = SHA::pad::buffer;
 }
 
 template <typename SHA>
@@ -317,24 +319,24 @@ padding8(buffer_t& out) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[ 8] = SHA::chunk_pad[0];
-        out[ 9] = SHA::chunk_pad[1];
-        out[10] = SHA::chunk_pad[2];
-        out[11] = SHA::chunk_pad[3];
-        out[12] = SHA::chunk_pad[4];
-        out[13] = SHA::chunk_pad[5];
-        out[14] = SHA::chunk_pad[6];
-        out[15] = SHA::chunk_pad[7];
+        out[ 8] = SHA::pad::chunk[0];
+        out[ 9] = SHA::pad::chunk[1];
+        out[10] = SHA::pad::chunk[2];
+        out[11] = SHA::pad::chunk[3];
+        out[12] = SHA::pad::chunk[4];
+        out[13] = SHA::pad::chunk[5];
+        out[14] = SHA::pad::chunk[6];
+        out[15] = SHA::pad::chunk[7];
         BC_POP_WARNING()
     }
     else
     {
         // TODO: make safe offsetting array cast.
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        constexpr auto pad_size = SHA::chunk_pad.size();
+        constexpr auto pad_size = SHA::pad::chunk.size();
         auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
         BC_POP_WARNING()
-        to = SHA::chunk_pad;
+        to = SHA::pad::chunk;
     }
 }
 
@@ -346,20 +348,20 @@ paddin16(buffer_t& out, count_t blocks) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[0] = SHA::stream_pad[0];
-        out[1] = SHA::stream_pad[1];
-        out[2] = SHA::stream_pad[2];
-        out[3] = SHA::stream_pad[3];
-        out[4] = SHA::stream_pad[4];
-        out[5] = SHA::stream_pad[5];
-        ////out[6] = SHA::stream_pad[6];
-        ////out[7] = SHA::stream_pad[7];
+        out[0] = SHA::pad::stream[0];
+        out[1] = SHA::pad::stream[1];
+        out[2] = SHA::pad::stream[2];
+        out[3] = SHA::pad::stream[3];
+        out[4] = SHA::pad::stream[4];
+        out[5] = SHA::pad::stream[5];
+        ////out[6] = SHA::pad::stream[6];
+        ////out[7] = SHA::pad::stream[7];
         BC_POP_WARNING()
     }
     else
     {
-        auto& to = narrowing_array_cast<word_t, SHA::stream_pad.size()>(out);
-        to = SHA::stream_pad;
+        auto& to = narrowing_array_cast<word_t, SHA::pad::stream.size()>(out);
+        to = SHA::pad::stream;
     }
 
     // Copy in the streamed bit count (count_t is twice the size of word_t).
@@ -423,7 +425,7 @@ bigend08(buffer_t& out, const half_t& in) NOEXCEPT
     }
     else
     {
-        auto& from = array_cast<word_t>(in);
+        auto& from = array_cast<SHA::word_t>(in);
         auto& to = narrowing_array_cast<word_t, chunk_words>(out);
         from_big_endians(to, from);
     }
@@ -505,7 +507,7 @@ constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 hash(const blocks& blocks) NOEXCEPT
 {
     // process N blocks in accumulator loop.
-    auto state = H::get;
+    auto state = SHA::H::get;
     accumulate(state, blocks);
 
     // full pad block for N blocks (pre-endianed, size added).
@@ -527,9 +529,9 @@ hash(const block_t& block) NOEXCEPT
     // process 1 block in (avoid accumulate to reuse buffer).
     bigend16(space, block);
     expand48(space);
-    auto state = H::get;
+    auto state = SHA::H::get;
     rounds(state, space);
-    summary8(state, H::get);
+    summary8(state, SHA::H::get);
 
     // full pad block for 1 block (pre-sized/endianed/expanded).
     paddin64(space);
@@ -548,9 +550,9 @@ hash(const half_t& half) NOEXCEPT
     bigend08(space, half);
     padding8(space);
     expand48(space);
-    auto state = H::get;
+    auto state = SHA::H::get;
     rounds(state, space);
-    summary8(state, H::get);
+    summary8(state, SHA::H::get);
     return finalize(state);
 }
 
@@ -576,9 +578,9 @@ merkle(const blocks& blocks) NOEXCEPT
     {
         bigend16(space, block);         // hash(block)[part 1]
         expand48(space);                // hash(block)[part 1]
-        auto state = H::get;            // hash(block)[part 1]
+        auto state = SHA::H::get;            // hash(block)[part 1]
         rounds(state, space);           // hash(block)[part 1]
-        summary8(state, H::get);        // hash(block)[part 1]
+        summary8(state, SHA::H::get);        // hash(block)[part 1]
 
         paddin64(space);                // hash(block)[part 2]
         const auto save = state;        // hash(block)[part 2]
@@ -588,9 +590,9 @@ merkle(const blocks& blocks) NOEXCEPT
         copying8(space, state);         // hash(half)
         padding8(space);                // hash(half)
         expand48(space);                // hash(half)
-        state = H::get;                 // hash(half)
+        state = SHA::H::get;                 // hash(half)
         rounds(state, space);           // hash(half)
-        summary8(state, H::get);        // hash(half)
+        summary8(state, SHA::H::get);        // hash(half)
         out.push_back(finalize(state)); // hash(half)
     }
 
@@ -607,9 +609,9 @@ merkle(const block_t& block) NOEXCEPT
 
     bigend16(space, block);             // hash(block)[part 1]
     expand48(space);                    // hash(block)[part 1]
-    auto state = H::get;                // hash(block)[part 1]
+    auto state = SHA::H::get;                // hash(block)[part 1]
     rounds(state, space);               // hash(block)[part 1]
-    summary8(state, H::get);            // hash(block)[part 1]
+    summary8(state, SHA::H::get);            // hash(block)[part 1]
 
     paddin64(space);                    // hash(block)[part 2]
     const auto save = state;            // hash(block)[part 2]
@@ -619,9 +621,9 @@ merkle(const block_t& block) NOEXCEPT
     copying8(space, state);             // hash(half)
     padding8(space);                    // hash(half)
     expand48(space);                    // hash(half)
-    state = H::get;                     // hash(half)
+    state = SHA::H::get;                     // hash(half)
     rounds(state, space);               // hash(half)
-    summary8(state, H::get);            // hash(half)
+    summary8(state, SHA::H::get);            // hash(half)
     return finalize(state);             // hash(half)
 }
 
