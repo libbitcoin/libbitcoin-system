@@ -584,12 +584,12 @@ protected:
 
     // 64 or 80 rounds.
     template<size_t Round>
-    static constexpr void round(state_t& out, const buffer_t& in) NOEXCEPT;
+    static constexpr void round(auto& out, const auto& in) NOEXCEPT;
     static constexpr void rounds(state_t& out, const buffer_t& in) NOEXCEPT;
 
     // 48 words.
     template<size_t Word>
-    static constexpr void expand(buffer_t& out) NOEXCEPT;
+    static constexpr void expand(auto& out) NOEXCEPT;
     static constexpr void expand48(buffer_t& out) NOEXCEPT;
     static constexpr void copying8(buffer_t& out, const state_t& in) NOEXCEPT;
     static constexpr void summary8(state_t& out, const state_t& in) NOEXCEPT;

@@ -86,7 +86,7 @@ round1(auto a, auto b, auto c, auto& d, auto e, auto f, auto g,
 template <typename SHA>
 template<size_t Round>
 constexpr void algorithm<SHA>::
-round(state_t& out, const buffer_t& in) NOEXCEPT
+round(auto& out, const auto& in) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     round1(
@@ -105,7 +105,7 @@ round(state_t& out, const buffer_t& in) NOEXCEPT
 template <typename SHA>
 template<size_t Word>
 constexpr void algorithm<SHA>::
-expand(buffer_t& out) NOEXCEPT
+expand(auto& out) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     out[Word] =
@@ -118,147 +118,156 @@ template <typename SHA>
 constexpr void algorithm<SHA>::
 expand48(buffer_t& out) NOEXCEPT
 {
-    // TODO: change to meta-unrolled loop.
-    expand<16>(out);
-    expand<17>(out);
-    expand<18>(out);
-    expand<19>(out);
-    expand<20>(out);
-    expand<21>(out);
-    expand<22>(out);
-    expand<23>(out);
-    expand<24>(out);
-    expand<25>(out);
-    expand<26>(out);
-    expand<27>(out);
-    expand<28>(out);
-    expand<29>(out);
-    expand<30>(out);
-    expand<31>(out);
-    expand<32>(out);
-    expand<33>(out);
-    expand<34>(out);
-    expand<35>(out);
-    expand<36>(out);
-    expand<37>(out);
-    expand<38>(out);
-    expand<39>(out);
-    expand<40>(out);
-    expand<41>(out);
-    expand<42>(out);
-    expand<43>(out);
-    expand<44>(out);
-    expand<45>(out);
-    expand<46>(out);
-    expand<47>(out);
-    expand<48>(out);
-    expand<49>(out);
-    expand<50>(out);
-    expand<51>(out);
-    expand<52>(out);
-    expand<53>(out);
-    expand<54>(out);
-    expand<55>(out);
-    expand<56>(out);
-    expand<57>(out);
-    expand<58>(out);
-    expand<59>(out);
-    expand<60>(out);
-    expand<61>(out);
-    expand<62>(out);
-    expand<63>(out);
+    // Templated constants reduce ops/iteration by 35% (using C or std array).
+    // Declared C array reduces ops/iteration by 43% vs. std::array indexing.
+    // Derived pointer is 1 op/iteration increase over declared C array.
+    auto pout = out.data();
+
+    expand<16>(pout);
+    expand<17>(pout);
+    expand<18>(pout);
+    expand<19>(pout);
+    expand<20>(pout);
+    expand<21>(pout);
+    expand<22>(pout);
+    expand<23>(pout);
+    expand<24>(pout);
+    expand<25>(pout);
+    expand<26>(pout);
+    expand<27>(pout);
+    expand<28>(pout);
+    expand<29>(pout);
+    expand<30>(pout);
+    expand<31>(pout);
+    expand<32>(pout);
+    expand<33>(pout);
+    expand<34>(pout);
+    expand<35>(pout);
+    expand<36>(pout);
+    expand<37>(pout);
+    expand<38>(pout);
+    expand<39>(pout);
+    expand<40>(pout);
+    expand<41>(pout);
+    expand<42>(pout);
+    expand<43>(pout);
+    expand<44>(pout);
+    expand<45>(pout);
+    expand<46>(pout);
+    expand<47>(pout);
+    expand<48>(pout);
+    expand<49>(pout);
+    expand<50>(pout);
+    expand<51>(pout);
+    expand<52>(pout);
+    expand<53>(pout);
+    expand<54>(pout);
+    expand<55>(pout);
+    expand<56>(pout);
+    expand<57>(pout);
+    expand<58>(pout);
+    expand<59>(pout);
+    expand<60>(pout);
+    expand<61>(pout);
+    expand<62>(pout);
+    expand<63>(pout);
 }
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
 rounds(state_t& out, const buffer_t& in) NOEXCEPT
 {
-    // TODO: change to meta-unrolled loop.
+    // Templated constants reduce ops/iteration by 35% (using C or std array).
+    // Declared C array reduces ops/iteration by 43% vs. std::array indexing.
+    // Derived pointer is 1 op/iteration increase over declared C array.
+    auto pin = in.data();
+    auto pout = out.data();
+
     // At least 64 rounds for both sha256/512.
-    round<0>(out, in);
-    round<1>(out, in);
-    round<2>(out, in);
-    round<3>(out, in);
-    round<4>(out, in);
-    round<5>(out, in);
-    round<6>(out, in);
-    round<7>(out, in);
-    round<8>(out, in);
-    round<9>(out, in);
-    round<10>(out, in);
-    round<11>(out, in);
-    round<12>(out, in);
-    round<13>(out, in);
-    round<14>(out, in);
-    round<15>(out, in);
-    round<16>(out, in);
-    round<17>(out, in);
-    round<18>(out, in);
-    round<19>(out, in);
-    round<20>(out, in);
-    round<21>(out, in);
-    round<22>(out, in);
-    round<23>(out, in);
-    round<24>(out, in);
-    round<25>(out, in);
-    round<26>(out, in);
-    round<27>(out, in);
-    round<28>(out, in);
-    round<29>(out, in);
-    round<30>(out, in);
-    round<31>(out, in);
-    round<32>(out, in);
-    round<33>(out, in);
-    round<34>(out, in);
-    round<35>(out, in);
-    round<36>(out, in);
-    round<37>(out, in);
-    round<38>(out, in);
-    round<39>(out, in);
-    round<40>(out, in);
-    round<41>(out, in);
-    round<42>(out, in);
-    round<43>(out, in);
-    round<44>(out, in);
-    round<45>(out, in);
-    round<46>(out, in);
-    round<47>(out, in);
-    round<48>(out, in);
-    round<49>(out, in);
-    round<50>(out, in);
-    round<51>(out, in);
-    round<52>(out, in);
-    round<53>(out, in);
-    round<54>(out, in);
-    round<55>(out, in);
-    round<56>(out, in);
-    round<57>(out, in);
-    round<58>(out, in);
-    round<59>(out, in);
-    round<60>(out, in);
-    round<61>(out, in);
-    round<62>(out, in);
-    round<63>(out, in);
+    round<0>(pout, pin);
+    round<1>(pout, pin);
+    round<2>(pout, pin);
+    round<3>(pout, pin);
+    round<4>(pout, pin);
+    round<5>(pout, pin);
+    round<6>(pout, pin);
+    round<7>(pout, pin);
+    round<8>(pout, pin);
+    round<9>(pout, pin);
+    round<10>(pout, pin);
+    round<11>(pout, pin);
+    round<12>(pout, pin);
+    round<13>(pout, pin);
+    round<14>(pout, pin);
+    round<15>(pout, pin);
+    round<16>(pout, pin);
+    round<17>(pout, pin);
+    round<18>(pout, pin);
+    round<19>(pout, pin);
+    round<20>(pout, pin);
+    round<21>(pout, pin);
+    round<22>(pout, pin);
+    round<23>(pout, pin);
+    round<24>(pout, pin);
+    round<25>(pout, pin);
+    round<26>(pout, pin);
+    round<27>(pout, pin);
+    round<28>(pout, pin);
+    round<29>(pout, pin);
+    round<30>(pout, pin);
+    round<31>(pout, pin);
+    round<32>(pout, pin);
+    round<33>(pout, pin);
+    round<34>(pout, pin);
+    round<35>(pout, pin);
+    round<36>(pout, pin);
+    round<37>(pout, pin);
+    round<38>(pout, pin);
+    round<39>(pout, pin);
+    round<40>(pout, pin);
+    round<41>(pout, pin);
+    round<42>(pout, pin);
+    round<43>(pout, pin);
+    round<44>(pout, pin);
+    round<45>(pout, pin);
+    round<46>(pout, pin);
+    round<47>(pout, pin);
+    round<48>(pout, pin);
+    round<49>(pout, pin);
+    round<50>(pout, pin);
+    round<51>(pout, pin);
+    round<52>(pout, pin);
+    round<53>(pout, pin);
+    round<54>(pout, pin);
+    round<55>(pout, pin);
+    round<56>(pout, pin);
+    round<57>(pout, pin);
+    round<58>(pout, pin);
+    round<59>(pout, pin);
+    round<60>(pout, pin);
+    round<61>(pout, pin);
+    round<62>(pout, pin);
+    round<63>(pout, pin);
 
     // 16 more rounds for sha512
     if constexpr (SHA::K::rounds == 80)
     {
-        round<64>(out, in);
-        round<65>(out, in);
-        round<66>(out, in);
-        round<67>(out, in);
-        round<68>(out, in);
-        round<69>(out, in);
-        round<70>(out, in);
-        round<71>(out, in);
-        round<72>(out, in);
-        round<73>(out, in);
-        round<74>(out, in);
-        round<75>(out, in);
-        round<76>(out, in);
-        round<77>(out, in);
-        round<78>(out, in);
-        round<79>(out, in);
+        round<64>(pout, pin);
+        round<65>(pout, pin);
+        round<66>(pout, pin);
+        round<67>(pout, pin);
+        round<68>(pout, pin);
+        round<69>(pout, pin);
+        round<70>(pout, pin);
+        round<71>(pout, pin);
+        round<72>(pout, pin);
+        round<73>(pout, pin);
+        round<74>(pout, pin);
+        round<75>(pout, pin);
+        round<76>(pout, pin);
+        round<77>(pout, pin);
+        round<78>(pout, pin);
+        round<79>(pout, pin);
     }
 }
 
@@ -578,9 +587,9 @@ merkle(const blocks& blocks) NOEXCEPT
     {
         bigend16(space, block);         // hash(block)[part 1]
         expand48(space);                // hash(block)[part 1]
-        auto state = SHA::H::get;            // hash(block)[part 1]
+        auto state = SHA::H::get;       // hash(block)[part 1]
         rounds(state, space);           // hash(block)[part 1]
-        summary8(state, SHA::H::get);        // hash(block)[part 1]
+        summary8(state, SHA::H::get);   // hash(block)[part 1]
 
         paddin64(space);                // hash(block)[part 2]
         const auto save = state;        // hash(block)[part 2]
@@ -590,9 +599,9 @@ merkle(const blocks& blocks) NOEXCEPT
         copying8(space, state);         // hash(half)
         padding8(space);                // hash(half)
         expand48(space);                // hash(half)
-        state = SHA::H::get;                 // hash(half)
+        state = SHA::H::get;            // hash(half)
         rounds(state, space);           // hash(half)
-        summary8(state, SHA::H::get);        // hash(half)
+        summary8(state, SHA::H::get);   // hash(half)
         out.push_back(finalize(state)); // hash(half)
     }
 
@@ -609,9 +618,9 @@ merkle(const block_t& block) NOEXCEPT
 
     bigend16(space, block);             // hash(block)[part 1]
     expand48(space);                    // hash(block)[part 1]
-    auto state = SHA::H::get;                // hash(block)[part 1]
+    auto state = SHA::H::get;           // hash(block)[part 1]
     rounds(state, space);               // hash(block)[part 1]
-    summary8(state, SHA::H::get);            // hash(block)[part 1]
+    summary8(state, SHA::H::get);       // hash(block)[part 1]
 
     paddin64(space);                    // hash(block)[part 2]
     const auto save = state;            // hash(block)[part 2]
@@ -621,9 +630,9 @@ merkle(const block_t& block) NOEXCEPT
     copying8(space, state);             // hash(half)
     padding8(space);                    // hash(half)
     expand48(space);                    // hash(half)
-    state = SHA::H::get;                     // hash(half)
+    state = SHA::H::get;                // hash(half)
     rounds(state, space);               // hash(half)
-    summary8(state, SHA::H::get);            // hash(half)
+    summary8(state, SHA::H::get);       // hash(half)
     return finalize(state);             // hash(half)
 }
 
