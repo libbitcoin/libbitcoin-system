@@ -234,7 +234,7 @@ inline void summary8(state& out, const state& in) NOEXCEPT
 
 inline void copying8(buffer& out, const state& in) NOEXCEPT
 {
-    auto& to = narrowing_array_cast<uint32_t, state_size>(out);
+    auto& to = narrow_array_cast<uint32_t, state_size>(out);
     to = in;
 }
 
@@ -247,7 +247,7 @@ inline void bigend16(buffer& out, const block& in) NOEXCEPT
 {
     constexpr auto size = block_size / sizeof(uint32_t);
     auto& from = array_cast<uint32_t>(in);
-    auto& to = narrowing_array_cast<uint32_t, size>(out);
+    auto& to = narrow_array_cast<uint32_t, size>(out);
     from_big_endians(to, from);
 }
 
@@ -343,7 +343,7 @@ void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
     hash_native(state, blocks);
     hash_native(state, array_cast<block>(sha256::pad_64));
     auto buffer = sha256::pad_32;
-    to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
+    to_big_endians(narrow_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
     hash_native(state, array_cast<block>(buffer));
     to_big_endians(array_cast<uint32_t>(out.front()), state);

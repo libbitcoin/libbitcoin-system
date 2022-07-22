@@ -1041,7 +1041,7 @@ void merkle_sse4(digest1& out, const block1& blocks) NOEXCEPT
     hash_sse4(state, blocks);
     hash_sse4(state, array_cast<block>(sha256::pad_64));
     auto buffer = sha256::pad_32;
-    to_big_endians(narrowing_array_cast<uint32_t, state_size>(buffer), state);
+    to_big_endians(narrow_array_cast<uint32_t, state_size>(buffer), state);
     state = sha256::initial;
     hash_sse4(state, array_cast<block>(buffer));
     to_big_endians(array_cast<uint32_t>(out.front()), state);

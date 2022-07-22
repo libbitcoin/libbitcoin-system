@@ -76,7 +76,7 @@ array_cast(std_array<From, Count>&& values) NOEXCEPT
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From>>
 inline std_array<To, ToCount>&
-narrowing_array_cast(std_array<From, FromCount>& values) NOEXCEPT
+narrow_array_cast(std_array<From, FromCount>& values) NOEXCEPT
 {
     using to = std_array<To, ToCount>;
     return *pointer_cast<to>(values.data());
@@ -85,7 +85,7 @@ narrowing_array_cast(std_array<From, FromCount>& values) NOEXCEPT
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From>>
 inline const std_array<To, ToCount>&
-narrowing_array_cast(const std_array<From, FromCount>& values) NOEXCEPT
+narrow_array_cast(const std_array<From, FromCount>& values) NOEXCEPT
 {
     using to = std_array<To, ToCount>;
     return *pointer_cast<const to>(values.data());
@@ -95,9 +95,9 @@ narrowing_array_cast(const std_array<From, FromCount>& values) NOEXCEPT
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From>>
 inline std_array<To, ToCount>
-narrowing_array_cast(std_array<From, FromCount>&& values) NOEXCEPT
+narrow_array_cast(std_array<From, FromCount>&& values) NOEXCEPT
 {
-    return narrowing_array_cast<To, ToCount>(unmove(values));
+    return narrow_array_cast<To, ToCount>(unmove(values));
 }
 
 // Cast Integral1* to array(Integral2).

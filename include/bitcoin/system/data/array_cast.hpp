@@ -82,17 +82,17 @@ array_cast(std_array<From, Count>&& values) NOEXCEPT;
 template <typename To, size_t ToCount = one, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From> = true>
 inline std_array<To, ToCount>&
-narrowing_array_cast(std_array<From, FromCount>& values) NOEXCEPT;
+narrow_array_cast(std_array<From, FromCount>& values) NOEXCEPT;
 
 template <typename To, size_t ToCount = one, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From> = true>
 inline const std_array<To, ToCount>&
-narrowing_array_cast(const std_array<From, FromCount>& values) NOEXCEPT;
+narrow_array_cast(const std_array<From, FromCount>& values) NOEXCEPT;
 
 template <typename To, size_t ToCount = one, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From> = true>
 inline std_array<To, ToCount>
-narrowing_array_cast(std_array<From, FromCount>&& values) NOEXCEPT;
+narrow_array_cast(std_array<From, FromCount>&& values) NOEXCEPT;
 
 /// Cast Integral1* to array(Integral2)&.
 /// ---------------------------------------------------------------------------

@@ -282,7 +282,7 @@ BOOST_AUTO_TEST_CASE(cast__array_cast__non_const__expected)
 
 // TODO
 
-// narrowing_array_cast
+// narrow_array_cast
 // ----------------------------------------------------------------------------
 
 using array16x5 = std::array<uint16_t, 5>;
@@ -291,52 +291,52 @@ constexpr array16x5 const_data16x5{ 1_u16, 2_u16, 3_u16, 4_u16, 5_u16 };
 constexpr array64x3 const_data64x3{ 1_u64, 2_u64, 3_u64 };
 auto data16x5 = const_data16x5;
 auto data64x3 = const_data64x3;
-static_assert(is_same_type<decltype(narrowing_array_cast<uint16_t, 5>(data64x3)), array16x5&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint16_t, 5>(const_data64x3)), const array16x5&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint16_t, 5>(data64x3)), array16x5&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint16_t, 5>(const_data64x3)), const array16x5&>);
 
 // reinterpret_cast(nullptr) [at array size zero] is safe, so empty array narrowing is allowed.
 static_assert(data_array<0>{}.data() == nullptr);
 
-static_assert(is_same_type<decltype(narrowing_array_cast<uint8_t, 0>(const_data64x3)), const data_array<0>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint8_t, 1>(const_data64x3)), const data_array<1>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint8_t, 16>(const_data64x3)), const data_array<16>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint8_t, 23>(const_data64x3)), const data_array<23>&>);
-////static_assert(is_same_type<decltype(narrowing_array_cast<uint8_t, 24>(const_data64x3)), const data_array<24>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint8_t, 0>(const_data64x3)), const data_array<0>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint8_t, 1>(const_data64x3)), const data_array<1>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint8_t, 16>(const_data64x3)), const data_array<16>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint8_t, 23>(const_data64x3)), const data_array<23>&>);
+////static_assert(is_same_type<decltype(narrow_array_cast<uint8_t, 24>(const_data64x3)), const data_array<24>&>);
 ////static_assert(array_cast<uint8_t>(const_data64x3).size() == 24);
 
-static_assert(is_same_type<decltype(narrowing_array_cast<uint16_t, 0>(const_data64x3)), const std::array<uint16_t, 0>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint16_t, 1>(const_data64x3)), const std::array<uint16_t, 1>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint16_t, 8>(const_data64x3)), const std::array<uint16_t, 8>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint16_t, 11>(const_data64x3)), const std::array<uint16_t, 11>&>);
-////static_assert(is_same_type<decltype(narrowing_array_cast<uint16_t, 12>(const_data64x3)), const std::array<uint16_t, 12>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint16_t, 0>(const_data64x3)), const std::array<uint16_t, 0>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint16_t, 1>(const_data64x3)), const std::array<uint16_t, 1>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint16_t, 8>(const_data64x3)), const std::array<uint16_t, 8>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint16_t, 11>(const_data64x3)), const std::array<uint16_t, 11>&>);
+////static_assert(is_same_type<decltype(narrow_array_cast<uint16_t, 12>(const_data64x3)), const std::array<uint16_t, 12>&>);
 ////static_assert(array_cast<uint16_t>(const_data64x3).size() == 12);
 
-static_assert(is_same_type<decltype(narrowing_array_cast<uint32_t, 0>(const_data64x3)), const std::array<uint32_t, 0>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint32_t, 1>(const_data64x3)), const std::array<uint32_t, 1>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint32_t, 2>(const_data64x3)), const std::array<uint32_t, 2>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint32_t, 5>(const_data64x3)), const std::array<uint32_t, 5>&>);
-////static_assert(is_same_type<decltype(narrowing_array_cast<uint32_t, 6>(const_data64x3)), const std::array<uint32_t, 6>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint32_t, 0>(const_data64x3)), const std::array<uint32_t, 0>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint32_t, 1>(const_data64x3)), const std::array<uint32_t, 1>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint32_t, 2>(const_data64x3)), const std::array<uint32_t, 2>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint32_t, 5>(const_data64x3)), const std::array<uint32_t, 5>&>);
+////static_assert(is_same_type<decltype(narrow_array_cast<uint32_t, 6>(const_data64x3)), const std::array<uint32_t, 6>&>);
 ////static_assert(array_cast<uint32_t>(const_data64x3).size() == 6);
 
-static_assert(is_same_type<decltype(narrowing_array_cast<uint64_t, 0>(const_data64x3)), const std::array<uint64_t, 0>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint64_t, 1>(const_data64x3)), const std::array<uint64_t, 1>&>);
-static_assert(is_same_type<decltype(narrowing_array_cast<uint64_t, 2>(const_data64x3)), const std::array<uint64_t, 2>&>);
-////static_assert(is_same_type<decltype(narrowing_array_cast<uint64_t, 5>(const_data64x3)), const std::array<uint64_t, 3>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint64_t, 0>(const_data64x3)), const std::array<uint64_t, 0>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint64_t, 1>(const_data64x3)), const std::array<uint64_t, 1>&>);
+static_assert(is_same_type<decltype(narrow_array_cast<uint64_t, 2>(const_data64x3)), const std::array<uint64_t, 2>&>);
+////static_assert(is_same_type<decltype(narrow_array_cast<uint64_t, 5>(const_data64x3)), const std::array<uint64_t, 3>&>);
 ////static_assert(array_cast<uint64_t>(const_data64x3).size() == 3);
 
-BOOST_AUTO_TEST_CASE(cast__narrowing_array_cast__const__expected)
+BOOST_AUTO_TEST_CASE(cast__narrow_array_cast__const__expected)
 {
     constexpr data_array<2> data8x2{ 0x01_u8, 0x02_u8 };
 
-    const auto& value8x1 = narrowing_array_cast<uint8_t, 1>(data8x2);
+    const auto& value8x1 = narrow_array_cast<uint8_t, 1>(data8x2);
     BOOST_REQUIRE_EQUAL(value8x1[0], 0x01_u8);
 }
 
-BOOST_AUTO_TEST_CASE(cast__narrowing_array_cast__non_const__expected)
+BOOST_AUTO_TEST_CASE(cast__narrow_array_cast__non_const__expected)
 {
     data_array<2> data8x2{ 0x01_u8, 0x02_u8 };
 
-    auto& value8x1 = narrowing_array_cast<uint8_t, 1>(data8x2);
+    auto& value8x1 = narrow_array_cast<uint8_t, 1>(data8x2);
     BOOST_REQUIRE_EQUAL(value8x1[0], 0x01_u8);
 
     // Demonstrate that this is a cast, not a copy.

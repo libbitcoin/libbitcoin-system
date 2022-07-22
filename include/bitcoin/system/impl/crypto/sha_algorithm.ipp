@@ -291,7 +291,7 @@ copying8(buffer_t& out, const state_t& in) NOEXCEPT
     else
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        auto& to = narrowing_array_cast<word_t, in.size()>(out);
+        auto& to = narrow_array_cast<word_t, in.size()>(out);
         BC_POP_WARNING()
         to = in;
     }
@@ -369,7 +369,7 @@ paddin16(buffer_t& out, count_t blocks) NOEXCEPT
     }
     else
     {
-        auto& to = narrowing_array_cast<word_t, SHA::pad::stream.size()>(out);
+        auto& to = narrow_array_cast<word_t, SHA::pad::stream.size()>(out);
         to = SHA::pad::stream;
     }
 
@@ -410,7 +410,7 @@ bigend16(buffer_t& out, const block_t& in) NOEXCEPT
     else
     {
         auto& from = array_cast<word_t>(in);
-        auto& to = narrowing_array_cast<word_t, block_words>(out);
+        auto& to = narrow_array_cast<word_t, block_words>(out);
         from_big_endians(to, from);
     }
 }
@@ -435,7 +435,7 @@ bigend08(buffer_t& out, const half_t& in) NOEXCEPT
     else
     {
         auto& from = array_cast<SHA::word_t>(in);
-        auto& to = narrowing_array_cast<word_t, chunk_words>(out);
+        auto& to = narrow_array_cast<word_t, chunk_words>(out);
         from_big_endians(to, from);
     }
 }
@@ -694,7 +694,7 @@ constexpr void bigend08(block& out, const state& in) NOEXCEPT
     }
     else
     {
-        auto& to = narrowing_array_cast<uint8_t, digest_size>(out);
+        auto& to = narrow_array_cast<uint8_t, digest_size>(out);
         bigend08(to, in);
     }
 }
