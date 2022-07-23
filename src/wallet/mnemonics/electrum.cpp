@@ -168,7 +168,7 @@ long_hash electrum::seeder(const string_list& words,
     constexpr auto passphrase_prefix = "electrum";
 
     // Passphrase is limited to ascii (normal) if HAVE_ICU undefined.
-    auto phrase = passphrase;
+    std::string phrase{ passphrase };
 
     LCOV_EXCL_START("Always succeeds unless HAVE_ICU undefined.")
 
@@ -217,7 +217,7 @@ long_hash electrum::seeder(const string_list& words,
 
     const auto data = to_chunk(sentence);
     const auto salt = to_chunk(passphrase_prefix + phrase);
-    return pbkd_sha512(data, salt, hmac_iterations);
+    return to_array<64>(pbkd_sha512(data, salt, hmac_iterations, 64));
 }
 
 // protected static (sizers)

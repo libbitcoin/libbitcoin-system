@@ -22,101 +22,116 @@
 BOOST_AUTO_TEST_SUITE(hash_tests)
 
 // ripemd160
+// ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hash__ripemd160_hash__ripemd_tests__expected)
+BOOST_AUTO_TEST_CASE(hash__ripemd160_hash__test_vectors__expected)
 {
-    for (const auto& result : ripemd_tests)
+    for (const auto& test: ripemd_tests)
     {
-        data_chunk data;
-        BOOST_REQUIRE(decode_base16(data, result.input));
-        BOOST_REQUIRE_EQUAL(encode_base16(ripemd160_hash(data)), result.result);
+        const auto hash = ripemd160_hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
-
-    const auto ripemd_hash1 = bitcoin_short_hash(to_array(110));
-    BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash1), "17d040b739d639c729daaf627eaff88cfe4207f4");
-
-    const auto ripemd_hash2 = bitcoin_short_hash(base16_array("020641fde3a85beb8321033516de7ec01c35de96e945bf76c3768784a905471986"));
-    BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash2), "c23e37c6fad06deab545f952992c8f28cb02bbe5");
 }
 
 // sha1 (160)
+// ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hash__sha1_hash__sha1_tests__expected)
+BOOST_AUTO_TEST_CASE(hash__sha1_hash__test_vectors__expected)
 {
-    for (const auto& result: sha1_tests)
+    for (const auto& test: sha1_tests)
     {
-        data_chunk data;
-        BOOST_REQUIRE(decode_base16(data, result.input));
-        BOOST_REQUIRE_EQUAL(encode_base16(sha1_hash(data)), result.result);
+        const auto hash = sha1_hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
 // sha256
+// ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hash__sha256_hash__data__expected)
+BOOST_AUTO_TEST_CASE(hash__sha256_hash__test_vectors__expected)
 {
-    const data_chunk chunk{ 'd', 'a', 't', 'a' };
-    const auto hash = sha256_hash(chunk);
-    BOOST_REQUIRE_EQUAL(encode_base16(hash), "3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
-}
-
-BOOST_AUTO_TEST_CASE(hash__hmac_sha256__data_key__expected)
-{
-    const data_chunk chunk{ 'd', 'a', 't', 'a' };
-    const data_chunk key{ 'k', 'e', 'y' };
-    const auto hash = hmac_sha256(chunk, key);
-    BOOST_REQUIRE_EQUAL(encode_base16(hash), "5031fe3d989c6d1537a013fa6e739da23463fdaec3b70137d828e36ace221bd0");
-}
-
-BOOST_AUTO_TEST_CASE(hash__pbkd_sha256__pbkdf2_hmac_sha256_tests__expected)
-{
-    for (const auto& result: pbkdf2_hmac_sha256_tests)
+    for (const auto& test: sha256_tests)
     {
-        const auto data = pbkd_sha256(result.passphrase, result.salt, result.iterations, result.length);
-        BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
+        const auto hash = sha256_hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(hash__hmac_sha256__test_vectors__expected)
+{
+    for (const auto& test: hmac_sha256_tests)
+    {
+        const auto hash = hmac_sha256(test.text, test.key);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(hash__pbkd_sha256__test_vectors__expected)
+{
+    for (const auto& test: pbkd_sha256_tests)
+    {
+        const auto chunk = pbkd_sha256(test.passphrase, test.salt, test.iterations, test.expected.size());
+        BOOST_REQUIRE_EQUAL(chunk, test.expected);
     }
 }
 
 // sha512
+// ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(hash__sha512_hash__data__expected)
+BOOST_AUTO_TEST_CASE(hash__sha512_hash__test_vectors__expected)
 {
-    const data_chunk chunk{ 'd', 'a', 't', 'a' };
-    const auto long_hash = sha512_hash(chunk);
-    BOOST_REQUIRE_EQUAL(encode_base16(long_hash), "77c7ce9a5d86bb386d443bb96390faa120633158699c8844c30b13ab0bf92760b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876");
-}
-
-BOOST_AUTO_TEST_CASE(hash__hmac_sha512__data_key__expected)
-{
-    const data_chunk chunk{ 'd', 'a', 't', 'a' };
-    const data_chunk key{ 'k', 'e', 'y' };
-    const auto long_hash = hmac_sha512(chunk, key);
-    BOOST_REQUIRE_EQUAL(encode_base16(long_hash), "3c5953a18f7303ec653ba170ae334fafa08e3846f2efe317b87efce82376253cb52a8c31ddcde5a3a2eee183c2b34cb91f85e64ddbc325f7692b199473579c58");
-}
-
-BOOST_AUTO_TEST_CASE(hash__hpbkd_sha512__pbkd_sha512_tests__expected)
-{
-    for (const auto& result: pbkd_sha512_tests)
+    for (const auto& test: sha512_tests)
     {
-        const auto hash = pbkd_sha512(result.passphrase, result.salt, result.iterations);
-        BOOST_REQUIRE_EQUAL(encode_base16(hash), result.result);
+        const auto hash = sha512_hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
-BOOST_AUTO_TEST_CASE(hash__scrypt_hash__scrypt_hash_tests__expected)
+BOOST_AUTO_TEST_CASE(hash__hmac_sha512__test_vectors__expected)
 {
-    data_chunk data;
-    BOOST_REQUIRE(decode_base16(data, scrypt_hash_tests[0].input));
-
-    const auto value = scrypt_hash(data);
-    BOOST_REQUIRE_EQUAL(encode_base16(value), scrypt_hash_tests[0].result);
+    for (const auto& test: hmac_sha512_tests)
+    {
+        const auto hash = hmac_sha512(test.text, test.key);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
 }
 
-BOOST_AUTO_TEST_CASE(hash__djb2_hash__01234567890abcdefghijklmnopqrstuvwxyz__0xe1669c01)
+BOOST_AUTO_TEST_CASE(hash__pbkd_sha512__test_vectors__expected)
 {
-    // djb2_hash is size_t so cast for consistent test expectation.
+    for (const auto& test: pbkd_sha512_tests)
+    {
+        const auto chunk = pbkd_sha512(test.passphrase, test.salt, test.iterations, test.expected.size());
+        BOOST_REQUIRE_EQUAL(chunk, test.expected);
+    }
+}
+
+// scrypt
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hash__scrypt_hash__test_vectors__expected)
+{
+    for (const auto& test: scrypt_tests)
+    {
+        const auto hash = scrypt_hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// djb2
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(hash__djb2_hash__ad_hoc__0xe1669c01)
+{
     const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
-    BOOST_REQUIRE_EQUAL(static_cast<uint32_t>(hash), 0xe1669c01);
+
+    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    {
+        BOOST_REQUIRE_EQUAL(hash, 3781598209_u32);
+    }
+    else
+    {
+        BOOST_REQUIRE_EQUAL(hash, 9646636626660989953_u64);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

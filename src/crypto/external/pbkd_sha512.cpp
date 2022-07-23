@@ -22,8 +22,8 @@
 #include <bitcoin/system/math/math.hpp>
 
 bool PBKDSHA512(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
-    size_t iterations) NOEXCEPT
+    const uint8_t* salt, size_t salt_length, size_t iterations, uint8_t* key,
+    size_t key_length) NOEXCEPT
 {
     uint8_t* asalt;
     size_t asalt_size;

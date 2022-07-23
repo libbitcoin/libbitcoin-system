@@ -106,8 +106,8 @@ long_hash mnemonic::seeder(const string_list& words,
     LCOV_EXCL_STOP()
 
     // Words are in normal (lower, nfkd) form, even without ICU.
-    return pbkd_sha512(system::join(words),
-        passphrase_prefix + phrase, hmac_iterations);
+    return to_array<64>(pbkd_sha512(system::join(words),
+        passphrase_prefix + phrase, hmac_iterations, 64));
 }
 
 uint8_t mnemonic::checksum_byte(const data_slice& entropy) NOEXCEPT

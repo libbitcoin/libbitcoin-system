@@ -47,12 +47,12 @@ typedef data_array<mini_hash_size> mini_hash;
 typedef std::shared_ptr<hash_digest> hash_ptr;
 
 /// Lists of common bitcoin hashes.
-typedef std::vector<long_hash> long_hash_list;
-typedef std::vector<hash_digest> hash_list;
-typedef std::vector<short_hash> short_hash_list;
-typedef std::vector<half_hash> half_hash_list;
-typedef std::vector<quarter_hash> quarter_hash_list;
-typedef std::vector<mini_hash> mini_hash_list;
+typedef std::vector<long_hash> long_hashes;
+typedef std::vector<hash_digest> hashes;
+typedef std::vector<short_hash> short_hashes;
+typedef std::vector<half_hash> half_hashes;
+typedef std::vector<quarter_hash> quarter_hashes;
+typedef std::vector<mini_hash> mini_hashes;
 
 /// Null-valued common hashes.
 constexpr long_hash null_long_hash{};
@@ -69,8 +69,9 @@ constexpr hash_digest one_hash = from_uintx(uint256_t(one));
 BC_API hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT;
 
 /// Generate a bitcoin hash (sha256(sha256)) of left + right concatenation.
-BC_API hash_digest bitcoin_hash(const data_slice& left,
-    const data_slice& right) NOEXCEPT;
+/// Used for generation of witness commitment.
+BC_API hash_digest bitcoin_hash(const hash_digest& left,
+    const hash_digest& right) NOEXCEPT;
 
 /// Generate a bitcoin short hash (ripemd160(sha256)).
 BC_API short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT;
@@ -92,24 +93,25 @@ BC_API data_chunk sha256_chunk(const data_slice& data) NOEXCEPT;
 BC_API hash_digest sha256_hash(const data_slice& left,
     const data_slice& right) NOEXCEPT;
 
-// Generate a hmac sha256 hash.
+// Generate a sha256 hmac.
 BC_API hash_digest hmac_sha256(const data_slice& data,
     const data_slice& key) NOEXCEPT;
 
-/// Generate a pkcs5 pbkdf2 hmac sha256 hash.
+/// Generate a pkcs5 pbkdf2 hmac sha256 chunk.
+/// Used only by scrypt for generation of variably-sized buffer [P * R * 2 * 64].
 BC_API data_chunk pbkd_sha256(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length) NOEXCEPT;
 
 /// Generate a sha512 hash.
 BC_API long_hash sha512_hash(const data_slice& data) NOEXCEPT;
 
-/// Generate a hmac sha512 hash.
+/// Generate a sha512 hmac.
 BC_API long_hash hmac_sha512(const data_slice& data,
     const data_slice& key) NOEXCEPT;
 
-/// Generate a pkcs5 pbkdf2 hmac sha512 hash.
-BC_API long_hash pbkd_sha512(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations) NOEXCEPT;
+/// Generate a pkcs5 pbkdf2 hmac sha512 chunk.
+BC_API data_chunk pbkd_sha512(const data_slice& passphrase,
+    const data_slice& salt, size_t iterations, size_t length) NOEXCEPT;
 
 /// Generate a scrypt hash.
 BC_API hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;

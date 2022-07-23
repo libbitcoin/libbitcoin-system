@@ -211,13 +211,13 @@ const transactions_cptr& block::transactions_ptr() const NOEXCEPT
     return txs_;
 }
 
-hash_list block::transaction_hashes(bool witness) const NOEXCEPT
+hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
     static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
     const auto count = txs_->size();
 
     // Excess reservation accounts for possible generate_merkle_root addition.
-    hash_list out(add1(count), no_fill_hash_allocator);
+    hashes out(add1(count), no_fill_hash_allocator);
 
     // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
@@ -454,8 +454,10 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
         for (const auto& output: views_reverse(outputs))
         {
             if (output->committed_hash(committed))
+            {
                 return committed == bitcoin_hash(generate_merkle_root(true),
                     reserved);
+            }
         }
     }
     
@@ -615,6 +617,7 @@ code block::check() const NOEXCEPT
     if (is_internal_double_spend())
         return error::block_internal_double_spend;
 
+    // TODO: defer to accept (doubles merkle root computation past bip141).
     // Relates height to tx.hash (pool cache tx.hash(false)).
     if (is_invalid_merkle_root())
         return error::merkle_mismatch;

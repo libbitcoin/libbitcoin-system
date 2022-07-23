@@ -46,13 +46,13 @@ BOOST_AUTO_TEST_CASE(sha256__merkle_root__one_hash__one_hash)
 BC_PUSH_WARNING(NO_USE_OF_MOVED_OBJECT)
 
 // shani1, neon, sse4, native  (1 block iteration)
-hash_digest merkle_root_expectation(const hash_list& hashes)
+hash_digest merkle_root_expectation(const hashes& hashes)
 {
     if (hashes.empty())
         return {};
 
-    hash_list update;
-    hash_list merkle{ hashes };
+    system::hashes update;
+    system::hashes merkle{ hashes };
 
     while (merkle.size() > one)
     {
@@ -71,7 +71,7 @@ hash_digest merkle_root_expectation(const hash_list& hashes)
 
 BOOST_AUTO_TEST_CASE(hash__to_merkle_root__one_block__expected)
 {
-    hash_list hashes
+    hashes hashes
     {
         { 0 },
         { 1 }
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(hash__to_merkle_root__one_block__expected)
 
 BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__two_blocks__expected)
 {
-    hash_list hashes
+    hashes hashes
     {
         { 0 },
         { 1 },
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__two_blocks__expected)
 
 BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__four_blocks__expected)
 {
-    hash_list hashes
+    hashes hashes
     {
         { 0 },
         { 1 },
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__four_blocks__expected)
 
 BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__eight_blocks__expected)
 {
-    hash_list hashes
+    hashes hashes
     {
         { 0 },
         { 1 },
@@ -160,14 +160,14 @@ BC_POP_WARNING()
 ////// Compares sha256::transform to single via sha256_hash (one block).
 ////BOOST_AUTO_TEST_CASE(sha256__merkle_hash__vs_bitcoin_hash_one_block__same)
 ////{
-////    const hash_list hashes
+////    const hashes hashes
 ////    {
 ////        { 0 },
 ////        hash_digest{ 1 }
 ////    };
 ////
 ////    hash_digest once{};
-////    hash_list doubled{ hashes };
+////    hashes doubled{ hashes };
 ////
 ////    // Hashed single 2 x 0/1 hash.
 ////    sha256::context context;
@@ -193,7 +193,7 @@ BC_POP_WARNING()
 ////// Compares sha256::transform to single via sha256_hash (two blocks).
 ////BOOST_AUTO_TEST_CASE(sha256__merkle_hash__vs_bitcoin_hash_two_blocks__same)
 ////{
-////    const hash_list hashes
+////    const hashes hashes
 ////    {
 ////        { 0 },
 ////        { 1 },
@@ -202,7 +202,7 @@ BC_POP_WARNING()
 ////    };
 ////
 ////    hash_digest once{};
-////    hash_list doubled{ hashes };
+////    hashes doubled{ hashes };
 ////
 ////    // Hashed single 0/1 hash x 2.
 ////    sha256::context context;
