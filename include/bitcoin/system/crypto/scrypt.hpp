@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_HPP
 
-#include <memory>
-#include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -30,13 +28,17 @@
 namespace libbitcoin {
 namespace system {
 
+/// tools.ietf.org/html/rfc7914
+/// en.wikipedia.org/wiki/Scrypt  [Colin Percival]
+/// en.wikipedia.org/wiki/Salsa20 [Daniel J. Bernstein]
+
 /// scrypt argument constraints.
 /// [W]ork must be a power of 2 greater than 1.
 /// [R]esources and [P]arallelism must satisfy [(R * P) < 2^30].
 template<size_t W, size_t R, size_t P>
 constexpr auto is_scrypt_args =
-    ((W > one) && (power2(floored_log2(W)) == W)) &&
-    (safe_multiply(R, P) < power2<uint32_t>(30u));
+    (W > one) && (power2(floored_log2(W)) == W) &&
+    (safe_multiply(R, P) < power2(30u));
 
 /// Concurrent increases memory consumption from minimum to maximum.
 template<size_t W, size_t R, size_t P, bool Concurrent = false,
@@ -44,21 +46,21 @@ template<size_t W, size_t R, size_t P, bool Concurrent = false,
 class scrypt
 {
 public:
-    static constexpr auto block_size = power2(6u);
+    static constexpr auto block_size = 64_size;
 
     /// Peak memory consumption for non-concurrent execution.
-    static constexpr auto minimum_memory =
-        (3 * (1 * 1 * block_size)) +
-        (1 * (2 * R * block_size))+
-        (P * (2 * R * block_size)) +
-        (W * (2 * R * block_size));
+    static constexpr auto minimum_memory = 1_u64 *
+        (1 * (3 * (1 * 1 * block_size))) +
+        (1 * (1 * (2 * R * block_size))) +
+        (1 * (W * (2 * R * block_size))) +
+        (1 * (P * (2 * R * block_size)));
 
     /// Peak memory consumption for fully-concurrent execution.
-    static constexpr auto maximum_memory =
-        (3 * P * (1 * 1 * block_size)) +
-        (1 * P * (2 * R * block_size)) +
-        (1 * P * (2 * R * block_size)) +
-        (W * P * (2 * R * block_size));
+    static constexpr auto maximum_memory = 1_u64 *
+        (P * (3 * (1 * 1 * block_size))) +
+        (P * (1 * (2 * R * block_size))) +
+        (P * (W * (2 * R * block_size))) +
+        (1 * (P * (2 * R * block_size)));
 
     /// False if out of memory or size > pbkdf2::maximum_size.
     static bool hash(const data_slice& phrase, const data_slice& salt,
@@ -75,34 +77,31 @@ public:
         return out;
     }
 
-private:
-    static constexpr auto rblock = R * block_size * two;
-    static constexpr auto count = block_size / sizeof(uint32_t);
+protected:
+    static_assert(!is_multiply_overflow(R, 1 * block_size * two));
+    static_assert(!is_multiply_overflow(P, R * block_size * two));
+    static_assert(!is_multiply_overflow(W, R * block_size * two));
 
-    using integers    = std_array<uint32_t, count>;
-    using block_type  = data_array<block_size>;
-    using rblock_type = data_array<1 * rblock>;
-    using pblock_type = data_array<P * rblock>;
-    using wblock_type = data_array<W * rblock>;
-    using wblock_ptr  = std::shared_ptr<wblock_type>;
-
-    template<size_t Size>
-    static constexpr void set(uint8_t* to, const uint8_t* from) NOEXCEPT;
-
-    template<size_t Size>
-    static constexpr void exc(uint8_t* to, const uint8_t* from) NOEXCEPT;
+    using word_t    = uint32_t;
+    using words_t   = std_array<word_t,   block_size / sizeof(word_t)>;
+    using block_t   = std_array<uint8_t,  block_size>;
+    using rblock_t  = std_array<block_t,  R * two>;
+    using prblock_t = std_array<rblock_t, P>;
+    using wrblock_t = std_array<rblock_t, W>;
 
     template<typename Block>
     static inline auto allocate() NOEXCEPT;
-
     static constexpr auto parallel() NOEXCEPT;
-    static constexpr void add(integers& to, const integers& from) NOEXCEPT;
-    static constexpr size_t offset(auto a, auto b, auto c) NOEXCEPT;
-    static constexpr uint8_t* get(uint8_t* p) NOEXCEPT;
-    static inline uint64_t get64(uint8_t* p) NOEXCEPT;
-    static block_type& salsa_1(block_type& p) NOEXCEPT;
-    static bool salsa_p(uint8_t* p) NOEXCEPT;
-    static bool mix(uint8_t* p) NOEXCEPT;
+    static constexpr words_t& add(words_t& to, const words_t& from) NOEXCEPT;
+    static constexpr block_t& xor_(block_t& to, const block_t& from) NOEXCEPT;
+    static constexpr rblock_t& xor_(rblock_t& to, const rblock_t& from) NOEXCEPT;
+    static inline size_t index(const rblock_t& rblock) NOEXCEPT;
+
+    template <size_t A, size_t B, size_t C, size_t D>
+    static constexpr void salsa_qr(words_t& words) NOEXCEPT;
+    static block_t& salsa_8(block_t& block) NOEXCEPT;
+    static bool block_mix(rblock_t& rblock) NOEXCEPT;
+    static bool romix(rblock_t& rblock) NOEXCEPT;
 };
 
 /// Litecoin/BIP38 scrypt arguments.
@@ -110,13 +109,11 @@ static_assert(is_scrypt_args< 1024, 1, 1>);
 static_assert(is_scrypt_args<16384, 8, 8>);
 
 /// words.filippo.io/the-scrypt-parameters
-/// Litecoin/BIP38 minimum peak memory consumption.
-static_assert(scrypt< 1024, 1, 1>::minimum_memory == 131'520);
-static_assert(scrypt<16384, 8, 8>::minimum_memory == 16'786'624);
-
-/// Litecoin/BIP38 minimum peak memory consumption.
-static_assert(scrypt< 1024, 1, 1>::maximum_memory == 131'520);
-static_assert(scrypt<16384, 8, 8>::maximum_memory == 134'235'648);
+/// Litecoin/BIP38 minimum/maximum peak memory consumption.
+static_assert(scrypt< 1024, 1, 1>::minimum_memory == 131'520_u64);
+static_assert(scrypt<16384, 8, 8>::minimum_memory == 16'786'624_u64);
+static_assert(scrypt< 1024, 1, 1>::maximum_memory == 131'520_u64);
+static_assert(scrypt<16384, 8, 8>::maximum_memory == 134'235'648_u64);
 
 } // namespace system
 } // namespace libbitcoin

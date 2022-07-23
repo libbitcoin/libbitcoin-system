@@ -33,18 +33,16 @@
 namespace libbitcoin {
 namespace system {
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-
 #define TEMPLATE \
 template<size_t W, size_t R, size_t P, bool Concurrent, \
     bool_if<is_scrypt_args<W, R, P>> If>
+#define CLASS scrypt<W, R, P, Concurrent, If>
+
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 TEMPLATE
-constexpr auto scrypt<W, R, P, Concurrent, If>::
-parallel() NOEXCEPT
+constexpr auto CLASS::parallel() NOEXCEPT
 {
     if constexpr (Concurrent)
         return std::execution::par_unseq;
@@ -54,226 +52,392 @@ parallel() NOEXCEPT
 
 TEMPLATE
 template<typename Block>
-inline auto scrypt<W, R, P, Concurrent, If>::
-allocate() NOEXCEPT
+inline auto CLASS::allocate() NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::shared_ptr<Block>(new Block);
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 }
 
 TEMPLATE
-template<size_t Size>
-constexpr void scrypt<W, R, P, Concurrent, If>::
-set(uint8_t* to, const uint8_t* from) NOEXCEPT
+constexpr CLASS::words_t& CLASS::add(words_t& to,
+    const words_t& from) NOEXCEPT
 {
-    // TODO: loop meta-unroll.
-    for (size_t i = 0; i < Size; ++i)
-        to[i] = from[i];
+    auto pto = to.data();
+    auto pfrom = from.data();
+
+    pto[0] += pfrom[0];
+    pto[1] += pfrom[1];
+    pto[2] += pfrom[2];
+    pto[3] += pfrom[3];
+    pto[4] += pfrom[4];
+    pto[5] += pfrom[5];
+    pto[6] += pfrom[6];
+    pto[7] += pfrom[7];
+    pto[8] += pfrom[8];
+    pto[9] += pfrom[9];
+    pto[10] += pfrom[10];
+    pto[11] += pfrom[11];
+    pto[12] += pfrom[12];
+    pto[13] += pfrom[13];
+    pto[14] += pfrom[14];
+    pto[15] += pfrom[15];
+
+    return to;
 }
 
 TEMPLATE
-template<size_t Size>
-constexpr void scrypt<W, R, P, Concurrent, If>::
-exc(uint8_t* to, const uint8_t* from) NOEXCEPT
+constexpr CLASS::block_t& CLASS::xor_(block_t& to,
+    const block_t& from) NOEXCEPT
 {
-    // TODO: loop meta-unroll.
-    for (size_t i = 0; i < Size; ++i)
-        to[i] ^= from[i];
+    auto pto = to.data();
+    auto pfrom = from.data();
+
+    pto[0] ^= pfrom[0];
+    pto[1] ^= pfrom[1];
+    pto[2] ^= pfrom[2];
+    pto[3] ^= pfrom[3];
+    pto[4] ^= pfrom[4];
+    pto[5] ^= pfrom[5];
+    pto[6] ^= pfrom[6];
+    pto[7] ^= pfrom[7];
+    pto[8] ^= pfrom[8];
+    pto[9] ^= pfrom[9];
+    pto[10] ^= pfrom[10];
+    pto[11] ^= pfrom[11];
+    pto[12] ^= pfrom[12];
+    pto[13] ^= pfrom[13];
+    pto[14] ^= pfrom[14];
+    pto[15] ^= pfrom[15];
+    pto[16] ^= pfrom[16];
+    pto[17] ^= pfrom[17];
+    pto[18] ^= pfrom[18];
+    pto[19] ^= pfrom[19];
+    pto[20] ^= pfrom[20];
+    pto[21] ^= pfrom[21];
+    pto[22] ^= pfrom[22];
+    pto[23] ^= pfrom[23];
+    pto[24] ^= pfrom[24];
+    pto[25] ^= pfrom[25];
+    pto[26] ^= pfrom[26];
+    pto[27] ^= pfrom[27];
+    pto[28] ^= pfrom[28];
+    pto[29] ^= pfrom[29];
+    pto[30] ^= pfrom[30];
+    pto[31] ^= pfrom[31];
+    pto[32] ^= pfrom[32];
+    pto[33] ^= pfrom[33];
+    pto[34] ^= pfrom[34];
+    pto[35] ^= pfrom[35];
+    pto[36] ^= pfrom[36];
+    pto[37] ^= pfrom[37];
+    pto[38] ^= pfrom[38];
+    pto[39] ^= pfrom[39];
+    pto[40] ^= pfrom[40];
+    pto[41] ^= pfrom[41];
+    pto[42] ^= pfrom[42];
+    pto[43] ^= pfrom[43];
+    pto[44] ^= pfrom[44];
+    pto[45] ^= pfrom[45];
+    pto[46] ^= pfrom[46];
+    pto[47] ^= pfrom[47];
+    pto[48] ^= pfrom[48];
+    pto[49] ^= pfrom[49];
+    pto[50] ^= pfrom[50];
+    pto[51] ^= pfrom[51];
+    pto[52] ^= pfrom[52];
+    pto[53] ^= pfrom[53];
+    pto[54] ^= pfrom[54];
+    pto[55] ^= pfrom[55];
+    pto[56] ^= pfrom[56];
+    pto[57] ^= pfrom[57];
+    pto[58] ^= pfrom[58];
+    pto[59] ^= pfrom[59];
+    pto[60] ^= pfrom[60];
+    pto[61] ^= pfrom[61];
+    pto[62] ^= pfrom[62];
+    pto[63] ^= pfrom[63];
+
+    return to;
 }
 
 TEMPLATE
-constexpr void scrypt<W, R, P, Concurrent, If>::
-add(integers& to, const integers& from) NOEXCEPT
+constexpr CLASS::rblock_t& CLASS::xor_(rblock_t& to,
+    const rblock_t& from) NOEXCEPT
 {
-    // TODO: loop meta-unroll.
-    to[0]  += from[0];
-    to[1]  += from[1];
-    to[2]  += from[2];
-    to[3]  += from[3];
-    to[4]  += from[4];
-    to[5]  += from[5];
-    to[6]  += from[6];
-    to[7]  += from[7];
-    to[8]  += from[8];
-    to[9]  += from[9];
-    to[10] += from[10];
-    to[11] += from[11];
-    to[12] += from[12];
-    to[13] += from[13];
-    to[14] += from[14];
-    to[15] += from[15];
+    for (size_t i = 0; i < (R << 1); ++i)
+        xor_(to[i], from[i]);
+
+    return to;
 }
 
 TEMPLATE
-constexpr size_t scrypt<W, R, P, Concurrent, If>::
-offset(auto a, auto b, auto c) NOEXCEPT
+inline size_t CLASS::index(const rblock_t& rblock) NOEXCEPT
 {
-    return ((a << b) + c) * block_size;
-};
-
-TEMPLATE
-constexpr uint8_t* scrypt<W, R, P, Concurrent, If>::
-get(uint8_t* p) NOEXCEPT
-{
-    return &p[offset(R, 1, -1)];
+    // rfc7914
+    // j = Integerify (X) mod N
+    //    where Integerify (B[0] ... B[2 * r - 1]) is defined
+    //    as the result of interpreting B[2 * r - 1] as a
+    //    little-endian integer.
+    return
+        possible_narrow_cast<size_t>(
+            native_from_little_end(
+                unsafe_byte_cast<uint64_t>(
+                    rblock.back().data())) % W);
 }
 
 TEMPLATE
-inline uint64_t scrypt<W, R, P, Concurrent, If>::
-get64(uint8_t* p) NOEXCEPT
+template <size_t A, size_t B, size_t C, size_t D>
+constexpr void CLASS::salsa_qr(words_t& words) NOEXCEPT
 {
-    return native_from_little_end(unsafe_byte_cast<uint64_t>(get(p)));
+    auto pwords = words.data();
+
+    // Salsa20/8 Quarter Round
+    pwords[B] ^= std::rotl(pwords[A] + pwords[D], 7);
+    pwords[C] ^= std::rotl(pwords[B] + pwords[A], 9);
+    pwords[D] ^= std::rotl(pwords[C] + pwords[B], 13);
+    pwords[A] ^= std::rotl(pwords[D] + pwords[C], 18);
 }
 
 TEMPLATE
-scrypt<W, R, P, Concurrent, If>::block_type& scrypt<W, R, P, Concurrent, If>::
-salsa_1(block_type& block) NOEXCEPT
+CLASS::block_t& CLASS::salsa_8(block_t& block) NOEXCEPT
 {
-    // [2 x 64] bytes stack allocated for each P (may be concurrent).
-    auto words = from_little_endians(array_cast<uint32_t>(block));
-    const integers copy{ words };
+    // Save a copy of the block and make a block of working space.
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // [P * (2 * 64)] bytes stack allocated.
+    // rfc7914: #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
+    const auto save = from_little_endians(array_cast<word_t>(block));
+    words_t words{ save };
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    // TODO: loop meta-unroll.
-    // TODO: could also consolidate indexation using a lookup table and then
-    // TODO: collapse the inner operations to a loop, and then unroll it.
-    for (size_t i = 0; i < to_half(count); i += two)
+    // rfc7914: Salsa20/8 Core Function (in two forms)
+
+#ifdef USE_QUARTER_ROUNDS
+    // round 1
+    salsa_qr< 0,  4,  8, 12>(words);
+    salsa_qr< 5,  9, 13,  1>(words);
+    salsa_qr<10, 14,  2,  6>(words);
+    salsa_qr<15,  3,  7, 11>(words);
+
+    // round 2
+    salsa_qr< 0,  1,  2,  3>(words);
+    salsa_qr< 5,  6,  7,  4>(words);
+    salsa_qr<10, 11,  8,  9>(words);
+    salsa_qr<15, 12, 13, 14>(words);
+
+    // round 3
+    salsa_qr< 0,  4,  8, 12>(words);
+    salsa_qr< 5,  9, 13,  1>(words);
+    salsa_qr<10, 14,  2,  6>(words);
+    salsa_qr<15,  3,  7, 11>(words);
+
+    // round 4
+    salsa_qr< 0,  1,  2,  3>(words);
+    salsa_qr< 5,  6,  7,  4>(words);
+    salsa_qr<10, 11,  8,  9>(words);
+    salsa_qr<15, 12, 13, 14>(words);
+    
+    // round 5
+    salsa_qr< 0,  4,  8, 12>(words);
+    salsa_qr< 5,  9, 13,  1>(words);
+    salsa_qr<10, 14,  2,  6>(words);
+    salsa_qr<15,  3,  7, 11>(words);
+    
+    // round 6
+    salsa_qr< 0,  1,  2,  3>(words);
+    salsa_qr< 5,  6,  7,  4>(words);
+    salsa_qr<10, 11,  8,  9>(words);
+    salsa_qr<15, 12, 13, 14>(words);
+
+    // round 7
+    salsa_qr< 0,  4,  8, 12>(words);
+    salsa_qr< 5,  9, 13,  1>(words);
+    salsa_qr<10, 14,  2,  6>(words);
+    salsa_qr<15,  3,  7, 11>(words);
+
+    // round 8
+    salsa_qr< 0,  1,  2,  3>(words);
+    salsa_qr< 5,  6,  7,  4>(words);
+    salsa_qr<10, 11,  8,  9>(words);
+    salsa_qr<15, 12, 13, 14>(words);
+#else
+    auto x = words.data();
+    
+    // salsa20/8 is salsa20 with 8 vs. 20 rounds.
+    for (size_t i = 0; i < 4u; ++i)
     {
         // columns
-        words[ 4] ^= std::rotl(words[ 0] + words[12],  7);
-        words[ 8] ^= std::rotl(words[ 4] + words[ 0],  9);
-        words[12] ^= std::rotl(words[ 8] + words[ 4], 13);
-        words[ 0] ^= std::rotl(words[12] + words[ 8], 18);
-        words[ 9] ^= std::rotl(words[ 5] + words[ 1],  7);
-        words[13] ^= std::rotl(words[ 9] + words[ 5],  9);
-        words[ 1] ^= std::rotl(words[13] + words[ 9], 13);
-        words[ 5] ^= std::rotl(words[ 1] + words[13], 18);
-        words[14] ^= std::rotl(words[10] + words[ 6],  7);
-        words[ 2] ^= std::rotl(words[14] + words[10],  9);
-        words[ 6] ^= std::rotl(words[ 2] + words[14], 13);
-        words[10] ^= std::rotl(words[ 6] + words[ 2], 18);
-        words[ 3] ^= std::rotl(words[15] + words[11],  7);
-        words[ 7] ^= std::rotl(words[ 3] + words[15],  9);
-        words[11] ^= std::rotl(words[ 7] + words[ 3], 13);
-        words[15] ^= std::rotl(words[11] + words[ 7], 18);
-
+        x[ 4] ^= std::rotl(x[ 0] + x[12],  7);
+        x[ 8] ^= std::rotl(x[ 4] + x[ 0],  9);
+        x[12] ^= std::rotl(x[ 8] + x[ 4], 13);
+        x[ 0] ^= std::rotl(x[12] + x[ 8], 18);
+    
+        x[ 9] ^= std::rotl(x[ 5] + x[ 1],  7);
+        x[13] ^= std::rotl(x[ 9] + x[ 5],  9);
+        x[ 1] ^= std::rotl(x[13] + x[ 9], 13);
+        x[ 5] ^= std::rotl(x[ 1] + x[13], 18);
+    
+        x[14] ^= std::rotl(x[10] + x[ 6],  7);
+        x[ 2] ^= std::rotl(x[14] + x[10],  9);
+        x[ 6] ^= std::rotl(x[ 2] + x[14], 13);
+        x[10] ^= std::rotl(x[ 6] + x[ 2], 18);
+    
+        x[ 3] ^= std::rotl(x[15] + x[11],  7);
+        x[ 7] ^= std::rotl(x[ 3] + x[15],  9);
+        x[11] ^= std::rotl(x[ 7] + x[ 3], 13);
+        x[15] ^= std::rotl(x[11] + x[ 7], 18);
+    
         // rows
-        words[ 1] ^= std::rotl(words[ 0] + words[ 3],  7);
-        words[ 2] ^= std::rotl(words[ 1] + words[ 0],  9);
-        words[ 3] ^= std::rotl(words[ 2] + words[ 1], 13);
-        words[ 0] ^= std::rotl(words[ 3] + words[ 2], 18);
-        words[ 6] ^= std::rotl(words[ 5] + words[ 4],  7);
-        words[ 7] ^= std::rotl(words[ 6] + words[ 5],  9);
-        words[ 4] ^= std::rotl(words[ 7] + words[ 6], 13);
-        words[ 5] ^= std::rotl(words[ 4] + words[ 7], 18);
-        words[11] ^= std::rotl(words[10] + words[ 9],  7);
-        words[ 8] ^= std::rotl(words[11] + words[10],  9);
-        words[ 9] ^= std::rotl(words[ 8] + words[11], 13);
-        words[10] ^= std::rotl(words[ 9] + words[ 8], 18);
-        words[12] ^= std::rotl(words[15] + words[14],  7);
-        words[13] ^= std::rotl(words[12] + words[15],  9);
-        words[14] ^= std::rotl(words[13] + words[12], 13);
-        words[15] ^= std::rotl(words[14] + words[13], 18);
+        x[ 1] ^= std::rotl(x[ 0] + x[ 3],  7);
+        x[ 2] ^= std::rotl(x[ 1] + x[ 0],  9);
+        x[ 3] ^= std::rotl(x[ 2] + x[ 1], 13);
+        x[ 0] ^= std::rotl(x[ 3] + x[ 2], 18);
+    
+        x[ 6] ^= std::rotl(x[ 5] + x[ 4],  7);
+        x[ 7] ^= std::rotl(x[ 6] + x[ 5],  9);
+        x[ 4] ^= std::rotl(x[ 7] + x[ 6], 13);
+        x[ 5] ^= std::rotl(x[ 4] + x[ 7], 18);
+    
+        x[11] ^= std::rotl(x[10] + x[ 9],  7);
+        x[ 8] ^= std::rotl(x[11] + x[10],  9);
+        x[ 9] ^= std::rotl(x[ 8] + x[11], 13);
+        x[10] ^= std::rotl(x[ 9] + x[ 8], 18);
+    
+        x[12] ^= std::rotl(x[15] + x[14],  7);
+        x[13] ^= std::rotl(x[12] + x[15],  9);
+        x[14] ^= std::rotl(x[13] + x[12], 13);
+        x[15] ^= std::rotl(x[14] + x[13], 18);
     }
+#endif
 
-    add(words, copy);
-    to_little_endians(array_cast<uint32_t>(block), words);
+    // rfc7914: for (i = 0;i < 16;++i) out[i] = x[i] + in[i];
+    // Add saved words to copy and emit in original form (little-endian).
+    to_little_endians(array_cast<word_t>(block), add(words, save));
     return block;
 }
 
 TEMPLATE
-bool scrypt<W, R, P, Concurrent, If>::
-salsa_p(uint8_t* p) NOEXCEPT
+bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
 {
-    // [(R * 128) + 64] bytes stack allocated for each P (may be concurrent).
-    block_type block{ unsafe_array_cast<uint8_t, block_size>(get(p)) };
-    const auto x_ptr = allocate<rblock_type>();
-    if (!x_ptr) return false;
-    auto& x = *x_ptr;
-
-    // TODO: loop meta-unroll.
-    for (size_t i = 0; i < (R << 1); ++i)
-    {
-        exc<block_size>(block.data(), &p[offset(i, 0, 0)]);
-        set<block_size>(&x[offset(i, 0, 0)], salsa_1(block).data());
-    }
-
-    // TODO: loop meta-unroll.
-    for (size_t i = 0; i < (R << 0); ++i)
-    {
-        set<block_size>(&p[offset(i, 0, 0)], &x[offset(i, 1, 0)]);
-        set<block_size>(&p[offset(i, 0, R)], &x[offset(i, 1, 1)]);
-    }
-
-    return true;
-}
-
-TEMPLATE
-bool scrypt<W, R, P, Concurrent, If>::
-mix(uint8_t* p) NOEXCEPT
-{
-    // [W * (R * 128)] bytes heap allocated for each P (may be concurrent).
-    const auto w_ptr = allocate<wblock_type>();
-    if (!w_ptr) return false;
-    auto& w = *w_ptr;
-
-    // TODO: loop meta-unroll.
-    for (size_t i = 0; i < W; ++i)
-    {
-        const auto offset = i * rblock;
-        set<rblock>(&w[offset], p);
-        if (!salsa_p(p)) return false;
-    }
-
-    // TODO: loop meta-unroll.
-    for (size_t i = 0; i < W; ++i)
-    {
-        // Safe because of modulo W, as w.size() = rblock * W.
-        const auto offset = possible_narrow_cast<size_t>(
-            (get64(p) % W) * rblock);
-
-        exc<rblock>(p, &w[offset]);
-        if (!salsa_p(p)) return false;
-    }
-
-    return true;
-}
-
-TEMPLATE
-bool scrypt<W, R, P, Concurrent, If>::
-hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
-    size_t size) NOEXCEPT
-{
-    // First pbkdf2 cannot fail because [P * rblock] is guarded to be less than
-    // power2<uint32_t>(30u) which is less than pbkd::sha256::maximum_size.
-    static_assert(power2<uint32_t>(30u) < pbkd::sha256::maximum_size);
-
+    // Make one working rblock and a block initialized from rblock.back().
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 128)] bytes heap allocated.
-    const auto p_ptr = allocate<pblock_type>();
-    if (!p_ptr) return false;
-    auto& p = *p_ptr;
+    // [P * (1 *  64)] bytes stack allocated.
+    const auto ptr = allocate<rblock_t>();
+    if (!ptr) return false;
+    auto& yrblock = *ptr;
 
-    pbkd::sha256::hash(phrase.data(), phrase.size(),
-        salt.data(), salt.size(), one, p.data(), p.size());
+    // rfc7914
+    // 1. X = B[2 * r - 1]
+    block_t xblock{ rblock.back() };
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    std::atomic_bool success{ true };
-    auto& blocks = array_cast<rblock_type>(p);
+    // rfc7914
+    // 2. for i = 0 to 2 * r - 1 do
+    //    Y[i] = Salsa (X xor B[i])
+    // end for
+    for (size_t i = 0; i < (R << 1); ++i)
+        yrblock[i] = salsa_8(xor_(xblock, rblock[i]));
 
-    // parallel() conditionally enables concurrent execution (blows up memory).
-    std::for_each(parallel(), blocks.begin(), blocks.end(), [&](auto& block)
-    {
-        success = success && mix(block.data());
-    });
+    // rfc7914
+    // 3a. B' = (Y[0], Y[2], ..., Y[2 * r - 2],...
+    for (size_t i = 0; i < (R << 0); ++i)
+        rblock[i] = yrblock[i << 1];
 
-    // False if mix failed or size > pbkd::sha256::maximum_size.
-    return success && pbkd::sha256::hash(phrase.data(), phrase.size(),
-        p.data(), p.size(), one, buffer, size);
+    // rfc7914
+    // 3b. B' = ...Y[1], Y[3], ..., Y[2 * r - 1])
+    for (size_t i = 0; i < (R << 0); ++i)
+        rblock[i + R] = yrblock[add1(i << 1)];
+
+    return true;
 }
 
-#undef TEMPLATE
+TEMPLATE
+bool CLASS::romix(rblock_t& rblock) NOEXCEPT
+{
+    // Make a working set of W rblocks.
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // [P * (W * (R * 128))] bytes heap allocated.
+    const auto ptr = allocate<wrblock_t>();
+    if (!ptr) return false;
+    auto& wrblocks = *ptr;
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // rfc7914
+    // 1. X = B
+    // 2. for i = 0 to N - 1 do
+    //    V[i] = X
+    //    X = scryptBlockMix (X)
+    // end for
+    for (size_t i = 0; i < W; ++i)
+    {
+        wrblocks[i] = rblock;
+        if (!block_mix(rblock))
+            return false;
+    }
+
+    // rfc7914
+    // 3. for i = 0 to N - 1 do
+    //    j = Integerify (X) mod N
+    //    X = scryptBlockMix (X xor V[j])
+    // end for
+    // 4. B' = X
+    for (size_t i = 0; i < W; ++i)
+        if (!block_mix(xor_(rblock, wrblocks[index(rblock)])))
+            return false;
+
+    return true;
+}
+
+TEMPLATE
+bool CLASS::hash(const data_slice& phrase, const data_slice& salt,
+    uint8_t* buffer, size_t size) NOEXCEPT
+{
+    static_assert(size_of<prblock_t>() <= pbkd::sha256::maximum_size);
+    if (is_null(buffer) || (size > pbkd::sha256::maximum_size))
+        return false;
+
+    // Make a working set of P rblocks.
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // [P * (R * 128)] bytes heap allocated.
+    const auto ptr = allocate<prblock_t>();
+    if (!ptr) return false;
+    auto& prblocks = *ptr;
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // rfc7914
+    // 1. Initialize an array B consisting of p blocks of 128 * r octets each:
+    //    B[0] || B[1] || ... || B[p - 1] =
+    //       PBKDF2-HMAC-SHA256 (P, S, 1, p * 128 * r)
+    auto& b = array_cast<uint8_t>(prblocks);
+    pbkd::sha256::hash(phrase.data(), phrase.size(), salt.data(), salt.size(),
+        one, b.data(), b.size());
+
+    // rfc7914
+    // 2. for i = 0 to p - 1 do
+    //    B[i] = scryptROMix (r, B[i], N)
+    // end for
+    std::atomic_bool success{ true };
+    std::for_each(parallel(), prblocks.begin(), prblocks.end(),
+        [&](rblock_t& rblock) NOEXCEPT
+        {
+            success = success && romix(rblock);
+        });
+
+    // rfc7914
+    // 3. DK = PBKDF2-HMAC-SHA256 (P, B[0] || B[1] || ... || B[p - 1], 1, dkLen)
+    return success &&
+        pbkd::sha256::hash(phrase.data(), phrase.size(), b.data(), b.size(),
+            one, buffer, size);
+}
 
 BC_POP_WARNING()
 BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
+
+#undef CLASS
+#undef TEMPLATE
 
 } // namespace system
 } // namespace libbitcoin
