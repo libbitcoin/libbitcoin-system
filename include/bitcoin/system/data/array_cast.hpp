@@ -42,6 +42,7 @@ namespace system {
 
 /// Array casting helpers.
 /// ---------------------------------------------------------------------------
+/// TODO: allow for offsetting into array, with optional size.
 
 /// portional (for narrowing constraint)
 template <typename To, typename From>

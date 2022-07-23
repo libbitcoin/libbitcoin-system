@@ -36,6 +36,9 @@ namespace system {
     
 /// Cast Integral& to same-sized array& of Byte.
 /// ---------------------------------------------------------------------------
+/// TODO: allow array to be longer than integral, with integral specified.
+/// TODO: allow for offsetting into byte array.
+/// TODO: rename to integral_cast.
 
 /// Cast integral& to a byte array& with byte length of the integral.
 template <typename Byte = uint8_t, typename Integral,
