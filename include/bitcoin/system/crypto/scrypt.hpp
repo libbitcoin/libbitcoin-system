@@ -32,13 +32,15 @@ namespace system {
 /// en.wikipedia.org/wiki/Scrypt  [Colin Percival]
 /// en.wikipedia.org/wiki/Salsa20 [Daniel J. Bernstein]
 
-/// scrypt argument constraints.
 /// [W]ork must be a power of 2 greater than 1.
-/// [R]esources and [P]arallelism must satisfy [(R * P) < 2^30].
+/// [R]esources must be non-zero and <= max_size_t/128.
+/// [P]arallelism must be non-zero.
+/// Implementation constraints as fn(size_t), rfc7914 may be more restrictive.
 template<size_t W, size_t R, size_t P>
 constexpr auto is_scrypt_args =
-    (W > one) && (power2(floored_log2(W)) == W) &&
-    (safe_multiply(R, P) < power2(30u));
+    !is_zero(R) && !is_zero(P) && 
+    !is_multiply_overflow(R, 2_size * 64_size) &&
+    (W > one) && (power2(floored_log2(W)) == W);
 
 /// Concurrent increases memory consumption from minimum to maximum.
 template<size_t W, size_t R, size_t P, bool Concurrent = false,
@@ -78,14 +80,10 @@ public:
     }
 
 protected:
-    static_assert(!is_multiply_overflow(R, 1 * block_size * two));
-    static_assert(!is_multiply_overflow(P, R * block_size * two));
-    static_assert(!is_multiply_overflow(W, R * block_size * two));
-
     using word_t    = uint32_t;
     using words_t   = std_array<word_t,   block_size / sizeof(word_t)>;
     using block_t   = std_array<uint8_t,  block_size>;
-    using rblock_t  = std_array<block_t,  R * two>;
+    using rblock_t  = std_array<block_t,  R * 2_size>;
     using prblock_t = std_array<rblock_t, P>;
     using wrblock_t = std_array<rblock_t, W>;
 
@@ -108,7 +106,6 @@ protected:
 static_assert(is_scrypt_args< 1024, 1, 1>);
 static_assert(is_scrypt_args<16384, 8, 8>);
 
-/// words.filippo.io/the-scrypt-parameters
 /// Litecoin/BIP38 minimum/maximum peak variable memory consumption.
 static_assert(scrypt< 1024, 1, 1>::minimum_memory == 131'392_u64);
 static_assert(scrypt<16384, 8, 8>::minimum_memory == 16'786'048_u64);
