@@ -48,17 +48,17 @@ class scrypt
 public:
     static constexpr auto block_size = 64_size;
 
-    /// Peak memory consumption for non-concurrent execution.
+    /// Peak variable memory consumption for non-concurrent execution.
     static constexpr auto minimum_memory = 1_u64 *
-        (1 * (3 * (1 * 1 * block_size))) +
-        (1 * (1 * (2 * R * block_size))) +
+        (1 * (3 * (1 * 1 * block_size))) + // (denormalizing optimization)
+        (1 * (1 * (2 * R * block_size))) - (1 * (add1(R) * block_size)) +
         (1 * (W * (2 * R * block_size))) +
         (1 * (P * (2 * R * block_size)));
 
-    /// Peak memory consumption for fully-concurrent execution.
+    /// Peak variable memory consumption for fully-concurrent execution.
     static constexpr auto maximum_memory = 1_u64 *
-        (P * (3 * (1 * 1 * block_size))) +
-        (P * (1 * (2 * R * block_size))) +
+        (P * (3 * (1 * 1 * block_size))) + // (denormalizing optimization)
+        (P * (1 * (2 * R * block_size))) - (P * (add1(R) * block_size)) +
         (P * (W * (2 * R * block_size))) +
         (1 * (P * (2 * R * block_size)));
 
@@ -109,11 +109,11 @@ static_assert(is_scrypt_args< 1024, 1, 1>);
 static_assert(is_scrypt_args<16384, 8, 8>);
 
 /// words.filippo.io/the-scrypt-parameters
-/// Litecoin/BIP38 minimum/maximum peak memory consumption.
-static_assert(scrypt< 1024, 1, 1>::minimum_memory == 131'520_u64);
-static_assert(scrypt<16384, 8, 8>::minimum_memory == 16'786'624_u64);
-static_assert(scrypt< 1024, 1, 1>::maximum_memory == 131'520_u64);
-static_assert(scrypt<16384, 8, 8>::maximum_memory == 134'235'648_u64);
+/// Litecoin/BIP38 minimum/maximum peak variable memory consumption.
+static_assert(scrypt< 1024, 1, 1>::minimum_memory == 131'392_u64);
+static_assert(scrypt<16384, 8, 8>::minimum_memory == 16'786'048_u64);
+static_assert(scrypt< 1024, 1, 1>::maximum_memory == 131'392_u64);
+static_assert(scrypt<16384, 8, 8>::maximum_memory == 134'231'040_u64);
 
 } // namespace system
 } // namespace libbitcoin

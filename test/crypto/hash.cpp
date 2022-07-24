@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(hash__scrypt_hash__test_vectors__expected)
 
 template<size_t W, size_t R, size_t P, bool C>
 class scrypt_accessor
-    : public scrypt<W, R, P, C>
+  : public scrypt<W, R, P, C>
 {
 public:
     using base = scrypt<W, R, P, C>;
@@ -179,8 +179,6 @@ BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_1__expected)
     const auto hash = scrypt<16, 1, 1, true>::hash<size>("", "");
     BOOST_REQUIRE_EQUAL(hash, expected);
 }
-
-// Failing with R > 1 (missing part of block_mix).
 
 BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_2__expected)
 {

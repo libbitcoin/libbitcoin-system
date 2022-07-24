@@ -65,9 +65,12 @@ TEMPLATE
 constexpr CLASS::words_t& CLASS::add(words_t& to,
     const words_t& from) NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pto = to.data();
     auto pfrom = from.data();
+    BC_POP_WARNING()
 
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     pto[0] += pfrom[0];
     pto[1] += pfrom[1];
     pto[2] += pfrom[2];
@@ -84,6 +87,7 @@ constexpr CLASS::words_t& CLASS::add(words_t& to,
     pto[13] += pfrom[13];
     pto[14] += pfrom[14];
     pto[15] += pfrom[15];
+    BC_POP_WARNING()
 
     return to;
 }
@@ -92,9 +96,12 @@ TEMPLATE
 constexpr CLASS::block_t& CLASS::xor_(block_t& to,
     const block_t& from) NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pto = to.data();
     auto pfrom = from.data();
-
+    BC_POP_WARNING()
+        
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     pto[0] ^= pfrom[0];
     pto[1] ^= pfrom[1];
     pto[2] ^= pfrom[2];
@@ -159,6 +166,7 @@ constexpr CLASS::block_t& CLASS::xor_(block_t& to,
     pto[61] ^= pfrom[61];
     pto[62] ^= pfrom[62];
     pto[63] ^= pfrom[63];
+    BC_POP_WARNING()
 
     return to;
 }
@@ -192,13 +200,17 @@ TEMPLATE
 template <size_t A, size_t B, size_t C, size_t D>
 constexpr void CLASS::salsa_qr(words_t& words) NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pwords = words.data();
+    BC_POP_WARNING()
 
     // Salsa20/8 Quarter Round
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     pwords[B] ^= std::rotl(pwords[A] + pwords[D], 7);
     pwords[C] ^= std::rotl(pwords[B] + pwords[A], 9);
     pwords[D] ^= std::rotl(pwords[C] + pwords[B], 13);
     pwords[A] ^= std::rotl(pwords[D] + pwords[C], 18);
+    BC_POP_WARNING()
 }
 
 TEMPLATE
@@ -263,11 +275,14 @@ CLASS::block_t& CLASS::salsa_8(block_t& block) NOEXCEPT
     salsa_qr<10, 11,  8,  9>(words);
     salsa_qr<15, 12, 13, 14>(words);
 #else
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto x = words.data();
+    BC_POP_WARNING()
     
     // salsa20/8 is salsa20 with 8 vs. 20 rounds.
     for (size_t i = 0; i < 4u; ++i)
     {
+        BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
         // columns
         x[ 4] ^= std::rotl(x[ 0] + x[12],  7);
         x[ 8] ^= std::rotl(x[ 4] + x[ 0],  9);
@@ -309,6 +324,7 @@ CLASS::block_t& CLASS::salsa_8(block_t& block) NOEXCEPT
         x[13] ^= std::rotl(x[12] + x[15],  9);
         x[14] ^= std::rotl(x[13] + x[12], 13);
         x[15] ^= std::rotl(x[14] + x[13], 18);
+        BC_POP_WARNING()
     }
 #endif
 
@@ -321,17 +337,22 @@ CLASS::block_t& CLASS::salsa_8(block_t& block) NOEXCEPT
 TEMPLATE
 bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
 {
-    // Make one working rblock and a block initialized from rblock.back().
+    // Make a working block initialized from rblock.back().
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // [P * (R * 128)] bytes heap allocated.
     // [P * (1 *  64)] bytes stack allocated.
-    const auto ptr = allocate<rblock_t>();
-    if (!ptr) return false;
-    auto& yrblock = *ptr;
-
     // rfc7914
     // 1. X = B[2 * r - 1]
     block_t xblock{ rblock.back() };
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#if defined(BLOCK_MIX_NORMAL_FORM)
+
+    // Make 2R working blocks (1 rblock).
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // [P * (R * 128)] bytes heap allocated.
+    const auto ptr = allocate<rblock_t>();
+    if (!ptr) return false;
+    auto& yrblock = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     // rfc7914
@@ -343,13 +364,82 @@ bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
 
     // rfc7914
     // 3a. B' = (Y[0], Y[2], ..., Y[2 * r - 2],...
-    for (size_t i = 0; i < (R << 0); ++i)
-        rblock[i] = yrblock[i << 1];
+    for (size_t i = 0, j = 0; i < (R << 1); i += 2)
+        rblock[j++] = yrblock[i];
 
     // rfc7914
     // 3b. B' = ...Y[1], Y[3], ..., Y[2 * r - 1])
+    for (size_t i = 1, j = R; i < (R << 1); i += 2)
+        rblock[j++] = yrblock[i];
+
+#elif defined(BLOCK_MIX_ANOTHER_FORM)
+
+    // Make 2R working blocks (1 rblock).
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // [P * (R * 128)] bytes heap allocated.
+    const auto ptr = allocate<rblock_t>();
+    if (!ptr) return false;
+    auto& yrblock = *ptr;
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    for (size_t i = 0; i < (R << 1); ++i)
+        yrblock[i] = salsa_8(xor_(xblock, rblock[i]));
+
+    for (size_t i = 0; i < (R << 0); ++i)
+        rblock[i] = yrblock[i << 1];
+
     for (size_t i = 0; i < (R << 0); ++i)
         rblock[i + R] = yrblock[add1(i << 1)];
+
+#elif defined(BLOCK_MIX_OPTIMIZED_FORM)
+
+    // Make R working blocks (half rblock).
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // [P * (R * 64)] bytes heap allocated.
+    const auto ptr = allocate<std_array<block_t, R>>();
+    if (!ptr) return false;
+    auto& yblock = *ptr;
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    for (size_t i = 0, j = 0; i < R; ++i)
+    {
+        rblock[i] = salsa_8(xor_(xblock, rblock[j++]));
+        yblock[i] = salsa_8(xor_(xblock, rblock[j++]));
+    }
+
+    for (size_t i = 0, j = R; i < R; ++i)
+        rblock[j++] = yblock[i];
+
+#else // BLOCK_MIX_OPTIMAL_FORM
+
+    // Make R-1 working blocks.
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // [P * (sub1(R) * 64)] bytes heap allocated.
+    const auto ptr = allocate<std_array<block_t, sub1(R)>>();
+    if (!ptr) return false;
+    auto& yblock = *ptr;
+    // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // Compiler should elide both loops and (empty) array allocation when R = 1.
+
+    // Direct copy even blocks, odds (except last) require temporary storage.
+    for (size_t i = 0, j = 0; i < sub1(R); ++i)
+    {
+        rblock[i] = salsa_8(xor_(xblock, rblock[j++]));
+        yblock[i] = salsa_8(xor_(xblock, rblock[j++]));
+    }
+
+    // Last even block here simplifies the first loop.
+    rblock[sub1(R << 0)] = salsa_8(xor_(xblock, rblock[sub1(sub1(R << 1))]));
+
+    // Last (odd) block does not require a temporary, since no block follows.
+    salsa_8(xor_(rblock[sub1(R << 1)], xblock));
+
+    // Relocate odd blocks (except last) to second half of the rblock.
+    for (size_t i = 0, j = R; i < sub1(R); ++i)
+        rblock[j++] = yblock[i];
+
+#endif // BLOCK_MIX_OPTIMAL_FORM
 
     return true;
 }
