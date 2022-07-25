@@ -134,7 +134,6 @@
     <ClCompile Include="..\..\..\..\test\endian\integrals.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\minimal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\set.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>

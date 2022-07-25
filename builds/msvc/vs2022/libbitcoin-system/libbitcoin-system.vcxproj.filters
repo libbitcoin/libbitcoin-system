@@ -881,9 +881,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\nominal.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\set.hpp">
-      <Filter>include\bitcoin\system\endian</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\endian\stream.hpp">
       <Filter>include\bitcoin\system\endian</Filter>
     </ClInclude>
@@ -1388,9 +1385,6 @@
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\nominal.ipp">
-      <Filter>include\bitcoin\system\impl\endian</Filter>
-    </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\endian\set.ipp">
       <Filter>include\bitcoin\system\impl\endian</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\stream.ipp">

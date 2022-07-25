@@ -590,7 +590,6 @@ if (with-tests)
         "../../test/endian/integrals.cpp"
         "../../test/endian/minimal.cpp"
         "../../test/endian/nominal.cpp"
-        "../../test/endian/set.cpp"
         "../../test/endian/stream.cpp"
         "../../test/endian/swaps.cpp"
         "../../test/endian/uintx_t.cpp"
