@@ -517,6 +517,11 @@ public:
     /// static constexpr words_t stream
     /// static constexpr buffer_t buffer
 
+    /// Expose inner constant arrays.
+    using H = SHA::H;
+    using K = SHA::K;
+    using pad = SHA::pad;
+
     /// Constants.
     static constexpr auto digest_words = SHA::word_bits / SHA::word_bytes;
     static constexpr auto block_words  = digest_words   * two;

@@ -165,23 +165,38 @@ static_assert(h512<512>::H::get[7] == 0x5be0cd19137e2179);
 static_assert(sha160::digest == 160);
 static_assert(sha160::strength == 256);
 static_assert(sha160::K::rounds == 80);
+static_assert(sha160::K::get.size() == 80);
 static_assert(sha160::K::get[0] == 0x5a827999);
 static_assert(sha160::K::get[79] == 0xca62c1d6);
+static_assert(sha160::H::get.size() == 5);
+static_assert(sha160::H::get[0] == 0x67452301);
+static_assert(sha160::H::get[4] == 0xc3d2e1f0);
 
 static_assert(sha256_256::digest == 256);
 static_assert(sha256_256::strength == 256);
 static_assert(sha256_256::K::rounds == 64);
+static_assert(sha256_256::K::get.size() == 64);
 static_assert(sha256_256::K::get[0] == 0x428a2f98);
 static_assert(sha256_256::K::get[63] == 0xc67178f2);
+static_assert(sha256_256::H::get.size() == 8);
+static_assert(sha256_256::H::get[0] == 0x6a09e667);
+static_assert(sha256_256::H::get[7] == 0x5be0cd19);
 
 static_assert(sha512_512::digest == 512);
 static_assert(sha512_512::strength == 512);
 static_assert(sha512_512::K::rounds == 80);
+static_assert(sha512_512::K::get.size() == 80);
 static_assert(sha512_512::K::get[0] == 0x428a2f98d728ae22);
 static_assert(sha512_512::K::get[79] == 0x6c44198c4a475817);
+static_assert(sha512_512::H::get.size() == 8);
+static_assert(sha512_512::H::get[0] == 0x6a09e667f3bcc908);
+static_assert(sha512_512::H::get[7] == 0x5be0cd19137e2179);
 
 // algorithm<sha256_256>
 
+static_assert(algorithm<sha256_256>::H::get.size() == 8u);
+static_assert(algorithm<sha256_256>::K::get.size() == 64u);
+static_assert(algorithm<sha256_256>::pad::chunk.size() == 8u);
 static_assert(algorithm<sha256_256>::digest_words == 8u);
 static_assert(algorithm<sha256_256>::digest_bytes == 32u);
 static_assert(algorithm<sha256_256>::block_words == 16u);
@@ -207,6 +222,9 @@ static_assert(is_same_type<decltype(algorithm<sha256_256>::limit_bytes), const u
 
 // algorithm<sha512_512>
 
+static_assert(algorithm<sha512_512>::H::get.size() == 8u);
+static_assert(algorithm<sha512_512>::K::get.size() == 80u);
+static_assert(algorithm<sha512_512>::pad::chunk.size() == 8u);
 static_assert(algorithm<sha512_512>::digest_words == 8u);
 static_assert(algorithm<sha512_512>::digest_bytes == 64u);
 static_assert(algorithm<sha512_512>::block_words == 16u);

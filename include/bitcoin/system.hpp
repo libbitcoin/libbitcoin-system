@@ -116,6 +116,7 @@
 #include <bitcoin/system/endian/integrals.hpp>
 #include <bitcoin/system/endian/minimal.hpp>
 #include <bitcoin/system/endian/nominal.hpp>
+#include <bitcoin/system/endian/set.hpp>
 #include <bitcoin/system/endian/stream.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
 #include <bitcoin/system/endian/uintx_t.hpp>

@@ -189,13 +189,13 @@
     <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\sha_accumulator.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\sha_algorithm.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\temporary.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp">
@@ -250,6 +250,9 @@
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp">
+      <Filter>src\endian</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endian\set.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
@@ -572,6 +575,12 @@
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\temporary.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\temporary_accumulator.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\test.hpp">
       <Filter>src</Filter>
     </ClInclude>
@@ -604,6 +613,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\test\crypto\temporary_accumulator.ipp">
+      <Filter>src\crypto</Filter>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

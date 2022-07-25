@@ -113,9 +113,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha256.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\sha_accumulator.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha_algorithm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\temporary.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
@@ -134,6 +134,7 @@
     <ClCompile Include="..\..\..\..\test\endian\integrals.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\minimal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\set.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>
@@ -260,6 +261,8 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\hash.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\temporary.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\temporary_accumulator.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />
@@ -272,6 +275,7 @@
     <ClInclude Include="..\..\..\..\test\words\languages.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\test\crypto\temporary_accumulator.ipp" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_romix__expected)
     BOOST_REQUIRE_EQUAL(data, base16_array("79ccc193629debca047f0b70604bf6b62ce3dd4a9626e355fafc6198e6ea2b46d58413673b99b029d665c357601fb426a0b2f4bba200ee9f0a43d19b571a9c71ef1142e65d5a266fddca832ce59faa7cac0b9cf1be2bffca300d01ee387619c4ae12fd4438f203a0e4e1c47ec314861f4e9087cb33396a6873e8f9d2539a4b8e"));
 }
 
-BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_1__expected)
+BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_hash_1__expected)
 {
     constexpr auto expected = base16_array("77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906");
     constexpr auto size = size_of<decltype(expected)>();
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_1__expected)
     BOOST_REQUIRE_EQUAL(hash, expected);
 }
 
-BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_2__expected)
+BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_hash_2__expected)
 {
     constexpr auto expected = base16_array("fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640");
     constexpr auto size = size_of<decltype(expected)>();
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_2__expected)
 }
 
 #if defined(HAVE_SLOW_TESTS)
-BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_3__expected)
+BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_hash_3__expected)
 {
     constexpr auto expected = base16_array("7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887");
     constexpr auto size = size_of<decltype(expected)>();
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_3__expected)
     BOOST_REQUIRE_EQUAL(hash, expected);
 }
 
-BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_4__expected)
+BOOST_AUTO_TEST_CASE(hash__scrypt__rfc7914_hash_4__expected)
 {
     constexpr auto expected = base16_array("2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4");
     constexpr auto size = size_of<decltype(expected)>();
