@@ -524,11 +524,12 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Chunk is 1/2 block, not same as state/digest (sha160).
-    static constexpr auto block_bytes  = SHA::block_words * SHA::word_bytes;
-    static constexpr auto chunk_bytes  = SHA::chunk_words * SHA::word_bytes;
-    static constexpr auto digest_bytes = bytes<SHA::digest>;
-    static constexpr auto count_bits   = block_bytes;
-    static constexpr auto count_bytes  = bytes<count_bits>;
+    static constexpr auto block_bytes   = SHA::block_words * SHA::word_bytes;
+    static constexpr auto chunk_bytes   = SHA::chunk_words * SHA::word_bytes;
+    static constexpr auto digest_bytes  = bytes<SHA::digest>;
+    static constexpr auto count_bits    = block_bytes;
+    static constexpr auto count_bytes   = bytes<count_bits>;
+    static constexpr auto big_end_count = true;
 
     /// Blocks is a vector of cref (use emplace(block)).
     /// count_t is 64/128 bit for 64/128 byte blocks (sha512 uses uintx_t).
@@ -873,6 +874,7 @@ static_assert(sha512_512::H::get[0] == 0x6a09e667f3bcc908);
 static_assert(sha512_512::H::get[7] == 0x5be0cd19137e2179);
 
 // algorithm<sha160>
+static_assert(algorithm<sha160>::big_end_count);
 static_assert(algorithm<sha160>::block_bytes == 64u);
 static_assert(algorithm<sha160>::chunk_bytes == 32u);
 static_assert(algorithm<sha160>::digest_bytes == 20u);
@@ -901,6 +903,7 @@ static_assert(is_same_type<decltype(algorithm<sha160>::limit_bits), const uint64
 static_assert(is_same_type<decltype(algorithm<sha160>::limit_bytes), const uint64_t>);
 
 // algorithm<sha256_256>
+static_assert(algorithm<sha256_256>::big_end_count);
 static_assert(algorithm<sha256_256>::block_bytes == 64u);
 static_assert(algorithm<sha256_256>::chunk_bytes == 32u);
 static_assert(algorithm<sha256_256>::digest_bytes == 32u);
@@ -929,6 +932,7 @@ static_assert(is_same_type<decltype(algorithm<sha256_256>::limit_bits), const ui
 static_assert(is_same_type<decltype(algorithm<sha256_256>::limit_bytes), const uint64_t>);
 
 // algorithm<sha512_512>
+static_assert(algorithm<sha512_512>::big_end_count);
 static_assert(algorithm<sha512_512>::block_bytes == 128u);
 static_assert(algorithm<sha512_512>::chunk_bytes == 64u);
 static_assert(algorithm<sha512_512>::digest_bytes == 64u);
