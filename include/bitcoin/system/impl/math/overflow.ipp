@@ -28,21 +28,21 @@ namespace libbitcoin {
 namespace system {
 
 // Avoid circularity with limits.
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral, if_integer<Integral> = true>
 constexpr Integral minimum_ = std::numeric_limits<Integral>::min();
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral, if_integer<Integral> = true>
 constexpr Integral maximum_ = std::numeric_limits<Integral>::max();
 
 // add/subtract
 // ----------------------------------------------------------------------------
 
-template <typename Signed, if_signed_integral_integer<Signed>>
+template <typename Signed, if_signed_integer<Signed>>
 constexpr bool is_negate_overflow(Signed value) NOEXCEPT
 {
     return value == minimum_<Signed>;
 }
 
-template <typename Signed, if_signed_integral_integer<Signed>>
+template <typename Signed, if_signed_integer<Signed>>
 constexpr bool is_add_overflow(Signed left, Signed right) NOEXCEPT
 {
     const auto negative_right = is_negative(right);
@@ -52,13 +52,13 @@ constexpr bool is_add_overflow(Signed left, Signed right) NOEXCEPT
         ( negative_right || (left > (maximum_<Signed> - right)));
 }
 
-template <typename Unsigned, if_unsigned_integral_integer<Unsigned>>
+template <typename Unsigned, if_unsigned_integer<Unsigned>>
 constexpr bool is_add_overflow(Unsigned left, Unsigned right) NOEXCEPT
 {
     return right > (maximum_<Unsigned> - left);
 }
 
-template <typename Signed, if_signed_integral_integer<Signed>>
+template <typename Signed, if_signed_integer<Signed>>
 constexpr bool is_subtract_overflow(Signed left, Signed right) NOEXCEPT
 {
     const auto negative_right = is_negative(right);
@@ -68,7 +68,7 @@ constexpr bool is_subtract_overflow(Signed left, Signed right) NOEXCEPT
         ( negative_right || (left < (minimum_<Signed> + right)));
 }
 
-template <typename Unsigned, if_unsigned_integral_integer<Unsigned>>
+template <typename Unsigned, if_unsigned_integer<Unsigned>>
 constexpr bool is_subtract_overflow(Unsigned left, Unsigned right) NOEXCEPT
 {
     return right > left;
@@ -77,8 +77,7 @@ constexpr bool is_subtract_overflow(Unsigned left, Unsigned right) NOEXCEPT
 // multiply/divide
 // ----------------------------------------------------------------------------
 
-template <typename Unsigned,
-    if_unsigned_integral_integer<Unsigned>>
+template <typename Unsigned, if_unsigned_integer<Unsigned>>
 constexpr bool is_multiply_overflow(Unsigned left, Unsigned right) NOEXCEPT
 {
     return is_nonzero(right) && (left > (maximum_<Unsigned> / right));
@@ -149,8 +148,8 @@ constexpr bool is_log_overflow(Base base, Value value) NOEXCEPT
 // TODO: power/log do not require safe calls as they are type-constrained
 // TODO: against domain overflow and return zero when undefined.
 
-// Signed only, since unsigned is always safe, limit requires integral.
-template <typename Signed, if_signed_integral_integer<Signed>>
+// Signed only, since unsigned is always safe.
+template <typename Signed, if_signed_integer<Signed>>
 constexpr Signed safe_negate(Signed value) THROWS
 {
     if (is_negate_overflow(value))
@@ -159,8 +158,8 @@ constexpr Signed safe_negate(Signed value) THROWS
     return depromote<Signed>(-promote(value));
 }
 
-// Unsigned only, since using native operator, limit requires integral.
-template <typename Integral, if_integral_integer<Integral>>
+// Unsigned only, since using native operator.
+template <typename Integral, if_integer<Integral>>
 constexpr Integral safe_add(Integral left, Integral right) THROWS
 {
     // is_add_overflow handles common types (signed or unsigned).
@@ -172,8 +171,8 @@ constexpr Integral safe_add(Integral left, Integral right) THROWS
     return depromote<Integral>(promote(left) + promote(right));
 }
 
-// Unsigned only, since using native operator, limit requires integral.
-template <typename Integral, if_integral_integer<Integral>>
+// Unsigned only, since using native operator.
+template <typename Integral, if_integer<Integral>>
 constexpr Integral safe_subtract(Integral left, Integral right) THROWS
 {
     // is_subtract_overflow handles common types (signed or unsigned).
@@ -185,8 +184,8 @@ constexpr Integral safe_subtract(Integral left, Integral right) THROWS
     return depromote<Integral>(promote(left) - promote(right));
 }
 
-// Unsigned only, since using native operator, limit requires integral.
-template <typename Unsigned, if_unsigned_integral_integer<Unsigned>>
+// Unsigned only, since using native operator.
+template <typename Unsigned, if_unsigned_integer<Unsigned>>
 constexpr Unsigned safe_multiply(Unsigned left, Unsigned right) THROWS
 {
     if (is_multiply_overflow(left, right))
