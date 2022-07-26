@@ -88,12 +88,50 @@ constexpr void from_big_endians(std_array<Integral, Count>& out,
 {
     if constexpr (is_little_endian)
     {
-        // TODO: unroll loop using if constexpr against integral sizes.
-        std::transform(in.cbegin(), in.cend(), out.begin(),
-            [](const auto& value) NOEXCEPT
-            {
-                return native_from_big_end(value);
-            });
+        // Unroll loop for sha::algorithm (BE 5, 8, 16 words).
+        if constexpr (Count <= 16)
+        {
+            if constexpr (Count > 0)
+                out[0] = native_from_big_end(in[0]);
+            if constexpr (Count > 1)
+                out[1] = native_from_big_end(in[1]);
+            if constexpr (Count > 2)
+                out[2] = native_from_big_end(in[2]);
+            if constexpr (Count > 3)
+                out[3] = native_from_big_end(in[3]);
+            if constexpr (Count > 4)
+                out[4] = native_from_big_end(in[4]);
+            if constexpr (Count > 5)
+                out[5] = native_from_big_end(in[5]);
+            if constexpr (Count > 6)
+                out[6] = native_from_big_end(in[6]);
+            if constexpr (Count > 7)
+                out[7] = native_from_big_end(in[7]);
+            if constexpr (Count > 8)
+                out[8] = native_from_big_end(in[8]);
+            if constexpr (Count > 9)
+                out[9] = native_from_big_end(in[9]);
+            if constexpr (Count > 10)
+                out[10] = native_from_big_end(in[10]);
+            if constexpr (Count > 11)
+                out[11] = native_from_big_end(in[11]);
+            if constexpr (Count > 12)
+                out[12] = native_from_big_end(in[12]);
+            if constexpr (Count > 13)
+                out[13] = native_from_big_end(in[13]);
+            if constexpr (Count > 14)
+                out[14] = native_from_big_end(in[14]);
+            if constexpr (Count > 15)
+                out[15] = native_from_big_end(in[15]);
+        }
+        else
+        {
+            std::transform(in.cbegin(), in.cend(), out.begin(),
+                [](const auto& value) NOEXCEPT
+                {
+                    return native_from_big_end(value);
+                });
+        }
     }
     else
     {
@@ -108,12 +146,50 @@ constexpr void from_little_endians(std_array<Integral, Count>& out,
 {
     if constexpr (is_big_endian)
     {
-        // TODO: unroll loop using if constexpr against integral sizes.
-        std::transform(in.cbegin(), in.cend(), out.begin(),
-            [](const uint32_t& value) NOEXCEPT
-            {
-                return native_from_little_end(value);
-            });
+        // Unroll loop for scrypt (LE 16 words).
+        if constexpr (Count <= 16)
+        {
+            if constexpr (Count > 0)
+                out[0] = native_from_little_end(in[0]);
+            if constexpr (Count > 1)
+                out[1] = native_from_little_end(in[1]);
+            if constexpr (Count > 2)
+                out[2] = native_from_little_end(in[2]);
+            if constexpr (Count > 3)
+                out[3] = native_from_little_end(in[3]);
+            if constexpr (Count > 4)
+                out[4] = native_from_little_end(in[4]);
+            if constexpr (Count > 5)
+                out[5] = native_from_little_end(in[5]);
+            if constexpr (Count > 6)
+                out[6] = native_from_little_end(in[6]);
+            if constexpr (Count > 7)
+                out[7] = native_from_little_end(in[7]);
+            if constexpr (Count > 8)
+                out[8] = native_from_little_end(in[8]);
+            if constexpr (Count > 9)
+                out[9] = native_from_little_end(in[9]);
+            if constexpr (Count > 10)
+                out[10] = native_from_little_end(in[10]);
+            if constexpr (Count > 11)
+                out[11] = native_from_little_end(in[11]);
+            if constexpr (Count > 12)
+                out[12] = native_from_little_end(in[12]);
+            if constexpr (Count > 13)
+                out[13] = native_from_little_end(in[13]);
+            if constexpr (Count > 14)
+                out[14] = native_from_little_end(in[14]);
+            if constexpr (Count > 15)
+                out[15] = native_from_little_end(in[15]);
+        }
+        else
+        {
+            std::transform(in.cbegin(), in.cend(), out.begin(),
+                [](const uint32_t& value) NOEXCEPT
+                {
+                    return native_from_little_end(value);
+                });
+        }
     }
     else
     {

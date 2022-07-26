@@ -142,7 +142,7 @@ is_buffer_overflow(size_t bytes) NOEXCEPT
     }
     else
     {
-        // TODO: uintx_t generalization.
+        // TODO: add uintx_t overloads for add/subtract/overflow.
         return false;
     }
 }
@@ -201,10 +201,11 @@ serialize_counter() const NOEXCEPT
     // Accomodate type distinction between uint64_t and uint128_t.
     if constexpr (is_integral_integer<SHA::count_t>)
     {
-        return to_big_endian(bits_);
+        return to_big_endian<SHA::count_t>(bits_);
     }
     else
     {
+        // TODO: add to_*_endian<integral>(uintx_t) overloads.
         return to_big_endian_size<SHA::count_bytes>(bits_);
     }
 }

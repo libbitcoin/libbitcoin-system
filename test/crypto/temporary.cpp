@@ -19,96 +19,175 @@
 #include "../test.hpp"
 #include "temporary.hpp"
 #include "temporary_accumulator.hpp"
-
+    
 BOOST_AUTO_TEST_SUITE(temporary_tests)
 
+// TODO: integrate sha-ni.
+// TODO: vectorize algorithm (2/4/8/16).
+// TODO: parallelize hash(blocks) and double_hash(blocks).
+
+// 4.1 Functions
+// ---------------------------------------------------------------------------
+
 template <typename SHA>
 constexpr auto algorithm<SHA>::
-choice(auto a, auto b, auto c) NOEXCEPT
+parity(auto x, auto y, auto z) NOEXCEPT
 {
-    return (a & (b ^ c)) ^ c;
+    // 4.1.1 SHA-1 Functions
+    return x ^ y ^ z;
 }
 
 template <typename SHA>
 constexpr auto algorithm<SHA>::
-majory(auto a, auto b, auto c) NOEXCEPT
+choice(auto x, auto y, auto z) NOEXCEPT
 {
-    return (a & (b | c)) | (b & c);
+    // 4.1.1 SHA-1 Functions
+    // 4.1.2 SHA-224 and SHA-256 Functions
+    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
+    // Normal form reduced.
+    ////return (x & y) ^ (~x & z);
+    return (x & (y ^ z)) ^ z;
 }
 
 template <typename SHA>
 constexpr auto algorithm<SHA>::
-SIGMA0(auto a) NOEXCEPT
+majority(auto x, auto y, auto z) NOEXCEPT
 {
-    if constexpr (SHA::K::rounds == 80)
+    // 4.1.1 SHA-1 Functions
+    // 4.1.2 SHA-224 and SHA-256 Functions
+    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
+    // Normal form reduced.
+    ////return (x & y) ^ (x & z) ^ (y & z);
+    return (x & (y | z)) | (y & z);
+}
+
+template <typename SHA>
+template<size_t Round>
+constexpr auto algorithm<SHA>::
+f(auto x, auto y, auto z) NOEXCEPT
+{
+    // 4.1.1 SHA-1 Functions
+    if constexpr (Round >= 0 && Round <= 19)
     {
-        // sha512
-        return std::rotr(a, 28) ^ std::rotr(a, 34) ^ std::rotr(a, 39);
+        return choice(x, y, z);
+    }
+    else if constexpr (Round >= 40 && Round <= 59)
+    {
+        return majority(x, y, z);
     }
     else
     {
-        // sha256
-        return std::rotr(a, 2) ^ std::rotr(a, 13) ^ std::rotr(a, 22);
+        // Round >= 20 && Round <= 39
+        // Round >= 60 && Round <= 79
+        return parity(x, y, z);
     }
 }
 
 template <typename SHA>
 constexpr auto algorithm<SHA>::
-SIGMA1(auto a) NOEXCEPT
+SIGMA0(auto x) NOEXCEPT
 {
-    if constexpr (SHA::K::rounds == 80)
+    // std::rotr is one opcode when !is_constant_evaluated.
+    if constexpr (SHA::rounds == 80)
     {
-        // sha512
-        return std::rotr(a, 14) ^ std::rotr(a, 18) ^ std::rotr(a, 41);
+        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
+        return std::rotr(x, 28) ^ std::rotr(x, 34) ^ std::rotr(x, 39);
     }
     else
     {
-        // sha256
-        return std::rotr(a, 6) ^ std::rotr(a, 11) ^ std::rotr(a, 25);
+        // 4.1.2 SHA-224 and SHA-256 Functions
+        return std::rotr(x, 2) ^ std::rotr(x, 13) ^ std::rotr(x, 22);
     }
 }
 
 template <typename SHA>
 constexpr auto algorithm<SHA>::
-sigma0(auto a) NOEXCEPT
+SIGMA1(auto x) NOEXCEPT
 {
-    if constexpr (SHA::K::rounds == 80)
+    // std::rotr is one opcode when !is_constant_evaluated.
+    if constexpr (SHA::rounds == 80)
     {
-        // sha512
-        return std::rotr(a, 1) ^ std::rotr(a, 8) ^ (a >> 7);
+        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
+        return std::rotr(x, 14) ^ std::rotr(x, 18) ^ std::rotr(x, 41);
     }
     else
     {
-        // sha256
-        return std::rotr(a, 7) ^ std::rotr(a, 18) ^ (a >> 3);
+        // 4.1.2 SHA-224 and SHA-256 Functions
+        return std::rotr(x, 6) ^ std::rotr(x, 11) ^ std::rotr(x, 25);
     }
 }
 
 template <typename SHA>
 constexpr auto algorithm<SHA>::
-sigma1(auto a) NOEXCEPT
+sigma0(auto x) NOEXCEPT
 {
-    if constexpr (SHA::K::rounds == 80)
+    // std::rotr is one opcode when !is_constant_evaluated.
+    if constexpr (SHA::rounds == 80)
     {
-        // sha512
-        return std::rotr(a, 19) ^ std::rotr(a, 61) ^ (a >> 6);
+        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
+        return std::rotr(x, 1) ^ std::rotr(x, 8) ^ (x >> 7);
     }
     else
     {
-        // sha256
-        return std::rotr(a, 17) ^ std::rotr(a, 19) ^ (a >> 10);
+        // 4.1.2 SHA-224 and SHA-256 Functions
+        return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3);
     }
 }
 
 template <typename SHA>
+constexpr auto algorithm<SHA>::
+sigma1(auto x) NOEXCEPT
+{
+    // std::rotr is one opcode when !is_constant_evaluated.
+    if constexpr (SHA::rounds == 80)
+    {
+        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
+        return std::rotr(x, 19) ^ std::rotr(x, 61) ^ (x >> 6);
+    }
+    else
+    {
+        // 4.1.2 SHA-224 and SHA-256 Functions
+        return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10);
+    }
+}
+
+// Rounds
+// ---------------------------------------------------------------------------
+// 6.1.2 SHA-1   Hash Computation (1 to N)
+// 6.2.2 SHA-256 Hash Computation (1 to N)
+// 6.4.2 SHA-512 Hash Computation (1 to N)
+
+template <typename SHA>
+template<size_t Round>
 constexpr void algorithm<SHA>::
-round1(auto a, auto b, auto c, auto& d, auto e, auto f, auto g,
-    auto& h, auto k) NOEXCEPT
+round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
-    const auto x = SIGMA0(a) + majory(a, b, c);
-    const auto y = SIGMA1(e) + choice(e, f, g) + h + k;
-    d += y;
-    h  = x + y;
+    // 4.2.1 SHA-1 Constants
+    constexpr auto k = SHA::K::get[Round];
+
+    // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
+    // std::rotl is one opcode when !is_constant_evaluated.
+    const auto t = std::rotl(a, 5) + f<Round>(b, c, d) + e + k + w;
+    b = /*c =*/ std::rotl(b, 30);
+    e = /*a =*/ t;
+}
+
+template <typename SHA>
+template<size_t Round>
+constexpr void algorithm<SHA>::
+round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g,
+    auto& h, auto w) NOEXCEPT
+{
+    // 4.2.2 SHA-224 and SHA-256 Constants
+    // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
+    constexpr auto k = SHA::K::get[Round];
+
+    // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
+    // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
+    const auto t1 = h + SIGMA1(e) + choice(e, f, g) + k + w;
+    const auto t2 = SIGMA0(a) + majority(a, b, c);
+    d = /*e =*/  d + t1;
+    h = /*a =*/ t1 + t2;
 }
 
 template <typename SHA>
@@ -116,131 +195,54 @@ template<size_t Round>
 constexpr void algorithm<SHA>::
 round(auto& out, const auto& in) NOEXCEPT
 {
+    // All indexes resolved to constants by compile.
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    round1(
-        out[(block_bytes + 0 - Round) % SHA::state_words],
-        out[(block_bytes + 1 - Round) % SHA::state_words],
-        out[(block_bytes + 2 - Round) % SHA::state_words],
-        out[(block_bytes + 3 - Round) % SHA::state_words], // in/out
-        out[(block_bytes + 4 - Round) % SHA::state_words],
-        out[(block_bytes + 5 - Round) % SHA::state_words],
-        out[(block_bytes + 6 - Round) % SHA::state_words],
-        out[(block_bytes + 7 - Round) % SHA::state_words], // in/out
-        in[Round] + SHA::K::get[Round]);
-    BC_POP_WARNING()
-    BC_POP_WARNING()
-}
-
-template <typename SHA>
-template<size_t Word>
-constexpr void algorithm<SHA>::
-expand(auto& out) NOEXCEPT
-{
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-    out[Word] =
-        sigma1(out[Word -  2]) + out[Word -  7] +
-        sigma0(out[Word - 15]) + out[Word - 16];
-    BC_POP_WARNING()
-    BC_POP_WARNING()
-}
-
-template <typename SHA>
-constexpr void algorithm<SHA>::
-expandit(buffer_t& out) NOEXCEPT
-{
-    // Templated constants reduce ops/iteration by 35% (using C or std array).
-    // Declared C array reduces ops/iteration by 43% vs. std::array indexing.
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-    auto pout = out.data();
-    BC_POP_WARNING()
-
-    expand<16>(pout);
-    expand<17>(pout);
-    expand<18>(pout);
-    expand<19>(pout);
-    expand<20>(pout);
-    expand<21>(pout);
-    expand<22>(pout);
-    expand<23>(pout);
-    expand<24>(pout);
-    expand<25>(pout);
-    expand<26>(pout);
-    expand<27>(pout);
-    expand<28>(pout);
-    expand<29>(pout);
-    expand<30>(pout);
-    expand<31>(pout);
-    expand<32>(pout);
-
-    expand<33>(pout);
-    expand<34>(pout);
-    expand<35>(pout);
-    expand<36>(pout);
-    expand<37>(pout);
-    expand<38>(pout);
-    expand<39>(pout);
-    expand<40>(pout);
-    expand<41>(pout);
-    expand<42>(pout);
-    expand<43>(pout);
-    expand<44>(pout);
-    expand<45>(pout);
-    expand<46>(pout);
-    expand<47>(pout);
-    expand<48>(pout);
-
-    expand<49>(pout);
-    expand<50>(pout);
-    expand<51>(pout);
-    expand<52>(pout);
-    expand<53>(pout);
-    expand<54>(pout);
-    expand<55>(pout);
-    expand<56>(pout);
-    expand<57>(pout);
-    expand<58>(pout);
-    expand<59>(pout);
-    expand<60>(pout);
-    expand<61>(pout);
-    expand<62>(pout);
-    expand<63>(pout);
-
-    // 16 more words for sha512
-    if constexpr (SHA::K::rounds == 80)
+    if constexpr (SHA::digest == 160)
     {
-        expand<64>(pout);
-        expand<65>(pout);
-        expand<66>(pout);
-        expand<67>(pout);
-        expand<68>(pout);
-        expand<69>(pout);
-        expand<70>(pout);
-        expand<71>(pout);
-        expand<72>(pout);
-        expand<73>(pout);
-        expand<74>(pout);
-        expand<75>(pout);
-        expand<76>(pout);
-        expand<77>(pout);
-        expand<78>(pout);
-        expand<79>(pout);
+        // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
+        round<Round>(
+            out[(SHA::rounds + 0 - Round) % SHA::state_words],
+            out[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
+            out[(SHA::rounds + 2 - Round) % SHA::state_words],
+            out[(SHA::rounds + 3 - Round) % SHA::state_words],
+            out[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
+            in[Round]);
     }
+    else
+    {
+        // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
+        // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
+        round<Round>(
+            out[(SHA::rounds + 0 - Round) % SHA::state_words],
+            out[(SHA::rounds + 1 - Round) % SHA::state_words],
+            out[(SHA::rounds + 2 - Round) % SHA::state_words],
+            out[(SHA::rounds + 3 - Round) % SHA::state_words], // e->d
+            out[(SHA::rounds + 4 - Round) % SHA::state_words],
+            out[(SHA::rounds + 5 - Round) % SHA::state_words],
+            out[(SHA::rounds + 6 - Round) % SHA::state_words],
+            out[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
+            in[Round]);
+    }
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 }
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
-rounds(state_t& out, const buffer_t& in) NOEXCEPT
+rounding(state_t& out, const buffer_t& in) NOEXCEPT
 {
-    // Templated constants reduce ops/iteration by 35% (using C or std array).
-    // Declared C array reduces ops/iteration by 43% vs. std::array indexing.
+    // Templated constant reduces ops per iteration by 35% (vs. parameter).
+    // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
+    // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pin = in.data();
     auto pout = out.data();
     BC_POP_WARNING()
 
-    // At least 64 rounds for both sha256/512.
+    // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
+    // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
+    // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
     round<0>(pout, pin);
     round<1>(pout, pin);
     round<2>(pout, pin);
@@ -257,6 +259,7 @@ rounds(state_t& out, const buffer_t& in) NOEXCEPT
     round<13>(pout, pin);
     round<14>(pout, pin);
     round<15>(pout, pin);
+
     round<16>(pout, pin);
     round<17>(pout, pin);
     round<18>(pout, pin);
@@ -273,6 +276,7 @@ rounds(state_t& out, const buffer_t& in) NOEXCEPT
     round<29>(pout, pin);
     round<30>(pout, pin);
     round<31>(pout, pin);
+
     round<32>(pout, pin);
     round<33>(pout, pin);
     round<34>(pout, pin);
@@ -289,6 +293,7 @@ rounds(state_t& out, const buffer_t& in) NOEXCEPT
     round<45>(pout, pin);
     round<46>(pout, pin);
     round<47>(pout, pin);
+
     round<48>(pout, pin);
     round<49>(pout, pin);
     round<50>(pout, pin);
@@ -306,8 +311,9 @@ rounds(state_t& out, const buffer_t& in) NOEXCEPT
     round<62>(pout, pin);
     round<63>(pout, pin);
 
-    // 16 more rounds for sha512
-    if constexpr (SHA::K::rounds == 80)
+    // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
+    // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
+    if constexpr (SHA::rounds == 80)
     {
         round<64>(pout, pin);
         round<65>(pout, pin);
@@ -329,56 +335,143 @@ rounds(state_t& out, const buffer_t& in) NOEXCEPT
 }
 
 template <typename SHA>
+template<size_t Word>
 constexpr void algorithm<SHA>::
-copying8(buffer_t& out, const state_t& in) NOEXCEPT
+prepare(auto& out) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
+    // All indexes resolved to constants by compile.
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    if constexpr (SHA::digest == 160)
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[0] = in[0];
-        out[1] = in[1];
-        out[2] = in[2];
-        out[3] = in[3];
-        out[4] = in[4];
-        out[5] = in[5];
-        out[6] = in[6];
-        out[7] = in[7];
-        BC_POP_WARNING()
+        // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
+        out[Word] = std::rotl(
+            out[Word -  3] ^
+            out[Word -  8] ^ 
+            out[Word - 14] ^
+            out[Word - 16], 1);
     }
     else
     {
-        narrow_array_cast<word_t, in.size()>(out) = in;
+        // 6.2.2 SHA-256 Hash Computation (16 <= t <= 63)
+        // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
+        out[Word] =
+            sigma1(out[Word -  2]) +
+                   out[Word -  7]  +
+            sigma0(out[Word - 15]) +
+                   out[Word - 16];
     }
-}
-
-template <typename SHA>
-constexpr void algorithm<SHA>::
-summary8(state_t& out, const state_t& in) NOEXCEPT
-{
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    out[0] += in[0];
-    out[1] += in[1];
-    out[2] += in[2];
-    out[3] += in[3];
-    out[4] += in[4];
-    out[5] += in[5];
-    out[6] += in[6];
-    out[7] += in[7];
+    BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
-paddin64(buffer_t& out) NOEXCEPT
+preparing(buffer_t& out) NOEXCEPT
 {
-    // SHA::pad::buffer is the output of expandit(SHA::pad::block).
+    // Templated constant reduces ops per iteration by 35% (vs. parameter).
+    // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
+    // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+    auto pout = out.data();
+    BC_POP_WARNING()
+
+    // 6.1.2.1 SHA-1   Hash Computation (16 <= t <= 79)
+    // 6.2.2.1 SHA-256 Hash Computation (16 <= t <= 63)
+    // 6.4.2.1 SHA-512 Hash Computation (16 <= t <= 79)
+    prepare<16>(pout);
+    prepare<17>(pout);
+    prepare<18>(pout);
+    prepare<19>(pout);
+    prepare<20>(pout);
+    prepare<21>(pout);
+    prepare<22>(pout);
+    prepare<23>(pout);
+    prepare<24>(pout);
+    prepare<25>(pout);
+    prepare<26>(pout);
+    prepare<27>(pout);
+    prepare<28>(pout);
+    prepare<29>(pout);
+    prepare<30>(pout);
+    prepare<31>(pout);
+    prepare<32>(pout);
+
+    prepare<33>(pout);
+    prepare<34>(pout);
+    prepare<35>(pout);
+    prepare<36>(pout);
+    prepare<37>(pout);
+    prepare<38>(pout);
+    prepare<39>(pout);
+    prepare<40>(pout);
+    prepare<41>(pout);
+    prepare<42>(pout);
+    prepare<43>(pout);
+    prepare<44>(pout);
+    prepare<45>(pout);
+    prepare<46>(pout);
+    prepare<47>(pout);
+    prepare<48>(pout);
+
+    prepare<49>(pout);
+    prepare<50>(pout);
+    prepare<51>(pout);
+    prepare<52>(pout);
+    prepare<53>(pout);
+    prepare<54>(pout);
+    prepare<55>(pout);
+    prepare<56>(pout);
+    prepare<57>(pout);
+    prepare<58>(pout);
+    prepare<59>(pout);
+    prepare<60>(pout);
+    prepare<61>(pout);
+    prepare<62>(pout);
+    prepare<63>(pout);
+
+    // 6.1.2 SHA-1   Hash Computation (16 <= t <= 79)
+    // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
+    if constexpr (SHA::rounds == 80)
+    {
+        prepare<64>(pout);
+        prepare<65>(pout);
+        prepare<66>(pout);
+        prepare<67>(pout);
+        prepare<68>(pout);
+        prepare<69>(pout);
+        prepare<70>(pout);
+        prepare<71>(pout);
+        prepare<72>(pout);
+        prepare<73>(pout);
+        prepare<74>(pout);
+        prepare<75>(pout);
+        prepare<76>(pout);
+        prepare<77>(pout);
+        prepare<78>(pout);
+        prepare<79>(pout);
+    }
+}
+
+// 5.1 Padding the Message
+// ---------------------------------------------------------------------------
+// 5.1.1 SHA-1, SHA-224 and SHA-256
+// 5.1.2 SHA-384, SHA-512, SHA-512/224 and SHA-512/256
+
+template <typename SHA>
+constexpr void algorithm<SHA>::
+pad_one(buffer_t& out) NOEXCEPT
+{
+    // Pad a single whole block.
+    // SHA::pad::buffer is the output of preparing(SHA::pad::block).
     out = SHA::pad::buffer;
 }
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
-padding8(buffer_t& out) NOEXCEPT
+pad_half(buffer_t& out) NOEXCEPT
 {
+    // Pad a half block.
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -395,52 +488,119 @@ padding8(buffer_t& out) NOEXCEPT
     else
     {
         // TODO: make safe offsetting array cast.
+        // Array cast is a runtime no-op.
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        constexpr auto pad_size = SHA::pad::chunk.size();
+        constexpr auto pad_size = array_count<chunk_t>;
         auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
         BC_POP_WARNING()
         to = SHA::pad::chunk;
     }
 }
 
+#ifndef MOVE_TO_BITS
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    bool_if<is_uintx<From>> = true>
+constexpr To hi_word(From value) NOEXCEPT
+{
+    return (value >> bc::bits<To>).convert_to<To>();
+}
+
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    bool_if<is_uintx<From>> = true>
+constexpr To lo_word(From value) NOEXCEPT
+{
+    return value.convert_to<To>();
+}
+
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    bool_if<!is_uintx<From>> = true>
+constexpr To hi_word(From value) NOEXCEPT
+{
+    return narrow_cast<To>(shift_right(value, bc::bits<To>));
+}
+
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    bool_if<!is_uintx<From>> = true>
+constexpr To lo_word(From value) NOEXCEPT
+{
+    return narrow_cast<To>(value);
+}
+
+static_assert(hi_word<uint8_t>(0x0f02_u16) == 0x0f_u8);
+static_assert(lo_word<uint8_t>(0x0f02_u16) == 0x02_u8);
+static_assert(hi_word<uint16_t>(0x0f02a001_u32) == 0x0f02_u16);
+static_assert(lo_word<uint16_t>(0x0f02a001_u32) == 0xa001_u16);
+static_assert(hi_word<uint32_t>(0x0f000002a0000001_u64) == 0x0f000002_u32);
+static_assert(lo_word<uint32_t>(0x0f000002a0000001_u64) == 0xa0000001_u32);
+
+static_assert(hi_word<uint8_t>(uint128_t(0x0f02_u16)) == 0x0f_u8);
+static_assert(lo_word<uint8_t>(uint128_t(0x0f02_u16)) == 0x02_u8);
+static_assert(hi_word<uint16_t>(uint128_t(0x0f02a001_u32)) == 0x0f02_u16);
+static_assert(lo_word<uint16_t>(uint128_t(0x0f02a001_u32)) == 0xa001_u16);
+static_assert(hi_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0x0f000002_u32);
+static_assert(lo_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0xa0000001_u32);
+static_assert(hi_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 0x0f000002a0000001_u64);
+static_assert(lo_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 42_u64);
+#endif
+
 template <typename SHA>
 constexpr void algorithm<SHA>::
-paddin16(buffer_t& out, count_t blocks) NOEXCEPT
+pad_count(buffer_t& out, count_t blocks) NOEXCEPT
 {
-
+    // Pad any number of whole blocks.
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[0] = SHA::pad::stream[0];
-        out[1] = SHA::pad::stream[1];
-        out[2] = SHA::pad::stream[2];
-        out[3] = SHA::pad::stream[3];
-        out[4] = SHA::pad::stream[4];
-        out[5] = SHA::pad::stream[5];
-        ////out[6] = SHA::pad::stream[6];
-        ////out[7] = SHA::pad::stream[7];
+        out[ 0] = SHA::pad::block[0];
+        out[ 1] = SHA::pad::block[1];
+        out[ 2] = SHA::pad::block[2];
+        out[ 3] = SHA::pad::block[3];
+        out[ 4] = SHA::pad::block[4];
+        out[ 5] = SHA::pad::block[5];
+        out[ 6] = SHA::pad::block[6];
+        out[ 7] = SHA::pad::block[7];
+        out[ 8] = SHA::pad::block[8];
+        out[ 9] = SHA::pad::block[9];
+        out[10] = SHA::pad::block[10];
+        out[11] = SHA::pad::block[11];
+        out[12] = SHA::pad::block[12];
+        out[13] = SHA::pad::block[13];
+        ////out[14] = SHA::pad::stream[14]; // overwritten by count
+        ////out[15] = SHA::pad::stream[15]; // overwritten by count
         BC_POP_WARNING()
     }
     else
     {
-        // SHA::pad::block is counted, but count will be overwritten below. 
-        auto& to = narrow_array_cast<word_t, SHA::pad::block.size()>(out);
+        // Array cast is a runtime no-op.
+        // SHA::pad::block is counted, but count will be overwritten below.
+        auto& to = narrow_array_cast<word_t, array_count<words_t>>(out);
         to = SHA::pad::block;
     }
 
-    // Copy in the streamed bit count (count_t is twice the size of word_t).
-    const auto bits = to_bits<count_t>(blocks * block_bytes);
+    // Copy in the streamed bit count.
+    const auto bits = to_bits(blocks * block_bytes);
 
+    // count_t is twice the size of word_t, so split to hi/low words.
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    out[6] = narrow_cast<word_t>(bits >> bc::bits<word_t>);
-    out[7] = narrow_cast<word_t>(bits);
+    out[14] = hi_word<word_t>(bits);
+    out[15] = lo_word<word_t>(bits);
     BC_POP_WARNING()
 }
 
+// 5.2 Parsing the Message
+// ---------------------------------------------------------------------------
+// 5.2.1 SHA-1, SHA-224 and SHA-256
+// 5.2.2 SHA-384, SHA-512, SHA-512/224 and SHA-512/256
+
 template <typename SHA>
 constexpr void algorithm<SHA>::
-bigend16(buffer_t& out, const block_t& in) NOEXCEPT
+big_one(buffer_t& out, const block_t& in) NOEXCEPT
 {
+    // big-endian I/O is conventional.
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -464,16 +624,18 @@ bigend16(buffer_t& out, const block_t& in) NOEXCEPT
     }
     else
     {
+        // Array cast is a runtime no-op, FBE is 1 (or 0) opcode per element.
         auto& from = array_cast<word_t>(in);
-        auto& to = narrow_array_cast<word_t, block_words>(out);
+        auto& to = narrow_array_cast<word_t, SHA::block_words>(out);
         from_big_endians(to, from);
     }
 }
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
-bigend08(buffer_t& out, const half_t& in) NOEXCEPT
+big_half(buffer_t& out, const half_t& in) NOEXCEPT
 {
+    // big-endian I/O is conventional.
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -489,66 +651,204 @@ bigend08(buffer_t& out, const half_t& in) NOEXCEPT
     }
     else
     {
+        // Array cast is a runtime no-op, FBE is 1 (or 0) opcode per element.
         auto& from = array_cast<SHA::word_t>(in);
-        auto& to = narrow_array_cast<word_t, chunk_words>(out);
+        auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
         from_big_endians(to, from);
     }
 }
 
+// State
+// ---------------------------------------------------------------------------
+
 template <typename SHA>
 constexpr void algorithm<SHA>::
-bigend08(digest_t& out, const state_t& in) NOEXCEPT
+pad_state(buffer_t& out) NOEXCEPT
 {
+    // This is a double hash optimization.
+    if (std::is_constant_evaluated())
+    {
+        if constexpr (SHA::digest == 160)
+        {
+            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+            out[ 5] = SHA::pad::chunk[0];
+            out[ 6] = SHA::pad::chunk[1];
+            out[ 7] = SHA::pad::chunk[2];
+            out[ 8] = SHA::pad::chunk[3];
+            out[ 9] = SHA::pad::chunk[4];
+            out[10] = SHA::pad::chunk[5];
+            out[11] = SHA::pad::chunk[6];
+            out[12] = SHA::pad::chunk[7];
+            out[13] = SHA::pad::chunk[8];
+            out[14] = SHA::pad::chunk[9];
+            out[15] = SHA::pad::chunk[10];
+            BC_POP_WARNING()
+        }
+        else
+        {
+            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+            out[ 8] = SHA::pad::chunk[0];
+            out[ 9] = SHA::pad::chunk[1];
+            out[10] = SHA::pad::chunk[2];
+            out[11] = SHA::pad::chunk[3];
+            out[12] = SHA::pad::chunk[4];
+            out[13] = SHA::pad::chunk[5];
+            out[14] = SHA::pad::chunk[6];
+            out[15] = SHA::pad::chunk[7];
+            BC_POP_WARNING()
+        }
+    }
+    else
+    {
+        // Array cast is a runtime no-op.
+        // TODO: make safe offsetting array cast.
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        constexpr auto pad_size = array_count<state_t>;
+        auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
+        BC_POP_WARNING()
+        to = SHA::pad::chunk;
+    }
+}
+
+template <typename SHA>
+constexpr void algorithm<SHA>::
+dup_state(buffer_t& out, const state_t& in) NOEXCEPT
+{
+    // 5.3 Setting the Initial Hash Value
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        to_big<0 * SHA::word_bytes>(out, in[0]);
-        to_big<1 * SHA::word_bytes>(out, in[1]);
-        to_big<2 * SHA::word_bytes>(out, in[2]);
-        to_big<3 * SHA::word_bytes>(out, in[3]);
-        to_big<4 * SHA::word_bytes>(out, in[4]);
-        to_big<5 * SHA::word_bytes>(out, in[5]);
-        to_big<6 * SHA::word_bytes>(out, in[6]);
-        to_big<7 * SHA::word_bytes>(out, in[7]);
+        if constexpr (SHA::digest == 160)
+        {
+            // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
+            out[0] = in[0];
+            out[1] = in[1];
+            out[2] = in[2];
+            out[3] = in[3];
+            out[4] = in[4];
+        }
+        else
+        {
+            // 6.2.2.1 SHA-256 Hash Computation (0 <= t <= 15)
+            // 6.4.2.1 SHA-512 Hash Computation (0 <= t <= 15)
+            out[0] = in[0];
+            out[1] = in[1];
+            out[2] = in[2];
+            out[3] = in[3];
+            out[4] = in[4];
+            out[5] = in[5];
+            out[6] = in[6];
+            out[7] = in[7];
+        }
         BC_POP_WARNING()
     }
     else
     {
+        // Array cast is a runtime no-op.
+        narrow_array_cast<word_t, array_count<state_t>>(out) = in;
+    }
+}
+
+template <typename SHA>
+constexpr void algorithm<SHA>::
+sum_state(state_t& out, const state_t& in) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    if constexpr (SHA::digest == 160)
+    {
+        // 6.1.2.4 SHA-1 Hash Computation
+        out[0] += in[0];
+        out[1] += in[1];
+        out[2] += in[2];
+        out[3] += in[3];
+        out[4] += in[4];
+    }
+    else
+    {
+        // 6.2.2.4 SHA-256 Hash Computation
+        // 6.4.2.4 SHA-512 Hash Computation
+        out[0] += in[0];
+        out[1] += in[1];
+        out[2] += in[2];
+        out[3] += in[3];
+        out[4] += in[4];
+        out[5] += in[5];
+        out[6] += in[6];
+        out[7] += in[7];
+    }
+    BC_POP_WARNING()
+}
+
+template <typename SHA>
+constexpr void algorithm<SHA>::
+big_state(digest_t& out, const state_t& in) NOEXCEPT
+{
+    // 6.1.2 SHA-1   Hash Computation
+    // 6.2.2 SHA-256 Hash Computation
+    // 6.4.2 SHA-512 Hash Computation
+
+    // big-endian I/O is conventional.
+    if (std::is_constant_evaluated())
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        if constexpr (SHA::digest == 160)
+        {
+            to_big<0 * SHA::word_bytes>(out, in[0]);
+            to_big<1 * SHA::word_bytes>(out, in[1]);
+            to_big<2 * SHA::word_bytes>(out, in[2]);
+            to_big<3 * SHA::word_bytes>(out, in[3]);
+            to_big<4 * SHA::word_bytes>(out, in[4]);
+        }
+        else
+        {
+            to_big<0 * SHA::word_bytes>(out, in[0]);
+            to_big<1 * SHA::word_bytes>(out, in[1]);
+            to_big<2 * SHA::word_bytes>(out, in[2]);
+            to_big<3 * SHA::word_bytes>(out, in[3]);
+            to_big<4 * SHA::word_bytes>(out, in[4]);
+            to_big<5 * SHA::word_bytes>(out, in[5]);
+            to_big<6 * SHA::word_bytes>(out, in[6]);
+            to_big<7 * SHA::word_bytes>(out, in[7]);
+        }
+        BC_POP_WARNING()
+    }
+    else
+    {
+        // Array cast is a runtime no-op, TBE is 1 (or 0) opcode per element.
         to_big_endians(array_cast<word_t>(out), in);
     }
 }
 
-// Streaming hash functions.
+// Streaming single hash functions.
 // ---------------------------------------------------------------------------
 
-template <typename SHA>
-VCONSTEXPR void algorithm<SHA>::
-accumulate(state_t& state, const blocks& blocks) NOEXCEPT
-{
-    buffer_t words{};
-
-    for (auto& block: blocks)
-    {
-        const state_t start{ state };
-        bigend16(words, block);
-        expandit(words);
-        rounds(state, words);
-        summary8(state, start);
-    }
-}
-
-// This is a specialization of multiple blocks so that we can have constexpr
-// and avoid the (trivial) overhead of iteration and a vector construction.
 template <typename SHA>
 constexpr void algorithm<SHA>::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
-    buffer_t words{};
+    buffer_t space{};
     const state_t start{ state };
-    bigend16(words, block);
-    expandit(words);
-    rounds(state, words);
-    summary8(state, start);
+    big_one(space, block);
+    preparing(space);
+    rounding(state, space);
+    sum_state(state, start);
+}
+
+template <typename SHA>
+VCONSTEXPR void algorithm<SHA>::
+accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
+{
+    buffer_t space{};
+    state_t start{ state };
+
+    for (auto& block: blocks)
+    {
+        big_one(space, block);
+        preparing(space);
+        rounding(state, space);
+        sum_state(state, start);
+        start = state;
+    }
 }
 
 template <typename SHA>
@@ -556,30 +856,27 @@ constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 finalize(const state_t& state) NOEXCEPT
 {
     digest_t out{};
-    bigend08(out, state);
+    big_state(out, state);
     return out;
 }
 
 // Finalized single hash functions.
 // ---------------------------------------------------------------------------
-// Cannot be vectorized as the hash function is cumulative. But with a full
-// block can take advantage of multi-lane single block intrinsics.
 
 template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
-hash(const blocks& blocks) NOEXCEPT
+hash(const half_t& half) NOEXCEPT
 {
-    // process N blocks in accumulator loop.
-    auto state = SHA::H::get;
-    accumulate(state, blocks);
-
-    // full pad block for N blocks (pre-endianed, size added).
+    // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
     buffer_t space{};
-    paddin16(space, blocks.size());
-    expandit(space);
-    const auto save = state;
-    rounds(state, space);
-    summary8(state, save);
+    big_half(space, half);
+
+    auto state = SHA::H::get;
+    pad_half(space);
+    preparing(space);
+    rounding(state, space);
+    sum_state(state, SHA::H::get);
+
     return finalize(state);
 }
 
@@ -590,117 +887,225 @@ hash(const block_t& block) NOEXCEPT
     buffer_t space{};
 
     // process 1 block in (avoid accumulate to reuse buffer).
-    bigend16(space, block);
-    expandit(space);
     auto state = SHA::H::get;
-    rounds(state, space);
-    summary8(state, SHA::H::get);
+    big_one(space, block);
+    preparing(space);
+    rounding(state, space);
+    sum_state(state, SHA::H::get);
 
     // full pad block for 1 block (pre-sized/endianed/expanded).
-    paddin64(space);
-    const auto save = state;
-    rounds(state, space);
-    summary8(state, save);
+    const auto start = state;
+    pad_one(space);
+    rounding(state, space);
+    sum_state(state, start);
+
     return finalize(state);
 }
 
+// a9b15680fd625f5be3102c6d9e3e181e59be0411
 template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
-hash(const half_t& half) NOEXCEPT
+hash(const blocks_t& blocks) NOEXCEPT
 {
-    // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
     buffer_t space{};
-    bigend08(space, half);
-    padding8(space);
-    expandit(space);
     auto state = SHA::H::get;
-    rounds(state, space);
-    summary8(state, SHA::H::get);
+    auto start = SHA::H::get;
+
+    // process N blocks (inlined accumulator).
+    for (auto& block: blocks)
+    {
+        big_one(space, block);
+        preparing(space);
+        rounding(state, space);
+        sum_state(state, start);
+        start = state;
+    }
+
+    // full pad block for N blocks (pre-endianed, size added).
+    pad_count(space, blocks.size());
+    preparing(space);
+    rounding(state, space);
+    sum_state(state, start);
+
     return finalize(state);
 }
 
-// Finalized merkle hash functions.
+// Finalized double hash functions.
 // ---------------------------------------------------------------------------
 
-// TODO: generalize to vectorized single block hash (hash_set).
-// TODO: a second round (double sha) is then just vectorized chunk hash.
-// TODO: a merkle hash is then iteration over vectorized single and second.
-// TODO: current optimizations limit vectorization to specialized CPUs and are
-// TODO: limited to 2/4/8 concurrent blocks, but this can be fully vectorized
-// TODO: on any platform by simply using std::for_each(parallel...). This can
-// TODO: also be layered over CPU specific vectorizations and sha-ni.
-
 template <typename SHA>
-VCONSTEXPR typename algorithm<SHA>::digests algorithm<SHA>::
-merkle(const blocks& blocks) NOEXCEPT
+VCONSTEXPR typename algorithm<SHA>::digests_t algorithm<SHA>::
+double_hash(const blocks_t& blocks) NOEXCEPT
 {
     buffer_t space{};
-    digests out{};
+    digests_t out{};
     out.reserve(to_half(blocks.size()));
 
     for (auto& block: blocks)
     {
-        bigend16(space, block);         // hash(block)[part 1]
-        expandit(space);                // hash(block)[part 1]
+        big_one(space, block);          // hash(block)[part 1]
+        preparing(space);               // hash(block)[part 1]
         auto state = SHA::H::get;       // hash(block)[part 1]
-        rounds(state, space);           // hash(block)[part 1]
-        summary8(state, SHA::H::get);   // hash(block)[part 1]
+        rounding(state, space);         // hash(block)[part 1]
+        sum_state(state, SHA::H::get);  // hash(block)[part 1]
 
-        paddin64(space);                // hash(block)[part 2]
+        pad_one(space);                 // hash(block)[part 2]
         const auto save = state;        // hash(block)[part 2]
-        rounds(state, space);           // hash(block)[part 2]
-        summary8(state, save);          // hash(block)[part 2]
+        rounding(state, space);         // hash(block)[part 2]
+        sum_state(state, save);         // hash(block)[part 2]
 
-        copying8(space, state);         // hash(half)
-        padding8(space);                // hash(half)
-        expandit(space);                // hash(half)
-        state = SHA::H::get;            // hash(half)
-        rounds(state, space);           // hash(half)
-        summary8(state, SHA::H::get);   // hash(half)
-        out.push_back(finalize(state)); // hash(half)
+        dup_state(space, state);        // hash(state)
+        pad_state(space);               // hash(state)
+        preparing(space);               // hash(state)
+        state = SHA::H::get;            // hash(state)
+        rounding(state, space);         // hash(state)
+        sum_state(state, SHA::H::get);  // hash(state)
+        out.push_back(finalize(state)); // hash(state)
     }
 
     return out;
 }
 
-// This is a specialization of multiple blocks so that we can have constexpr
-// and avoid the (trivial) overhead of iteration and a vector construction.
 template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
-merkle(const block_t& block) NOEXCEPT
+double_hash(const block_t& block) NOEXCEPT
 {
     buffer_t space{};
 
-    bigend16(space, block);             // hash(block)[part 1]
-    expandit(space);                    // hash(block)[part 1]
+    big_one(space, block);              // hash(block)[part 1]
+    preparing(space);                   // hash(block)[part 1]
     auto state = SHA::H::get;           // hash(block)[part 1]
-    rounds(state, space);               // hash(block)[part 1]
-    summary8(state, SHA::H::get);       // hash(block)[part 1]
+    rounding(state, space);             // hash(block)[part 1]
+    sum_state(state, SHA::H::get);      // hash(block)[part 1]
 
-    paddin64(space);                    // hash(block)[part 2]
+    pad_one(space);                     // hash(block)[part 2]
     const auto save = state;            // hash(block)[part 2]
-    rounds(state, space);               // hash(block)[part 2]
-    summary8(state, save);              // hash(block)[part 2]
+    rounding(state, space);             // hash(block)[part 2]
+    sum_state(state, save);             // hash(block)[part 2]
 
-    copying8(space, state);             // hash(half)
-    padding8(space);                    // hash(half)
-    expandit(space);                    // hash(half)
-    state = SHA::H::get;                // hash(half)
-    rounds(state, space);               // hash(half)
-    summary8(state, SHA::H::get);       // hash(half)
-    return finalize(state);             // hash(half)
+    dup_state(space, state);            // hash(state)
+    pad_state(space);                   // hash(state)
+    preparing(space);                   // hash(state)
+    state = SHA::H::get;                // hash(state)
+    rounding(state, space);             // hash(state)
+    sum_state(state, SHA::H::get);      // hash(state)
+    return finalize(state);             // hash(state)
 }
 
-// algorithm
+// TESTS
+// ============================================================================
+
+// sha160
 // ----------------------------------------------------------------------------
-// Fixed size non-streaming hash functions (half, full, and twin block sizes).
+
+using sha_160 = algorithm<h160>;
+using sha_160_accumulator = accumulator<sha_160>;
+
+short_hash sha160_hash(const data_slice& data) NOEXCEPT
+{
+    short_hash hash{};
+    sha_160_accumulator accumulator;
+    accumulator.write(data.size(), data.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
+short_hash sha160_hash(const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    short_hash hash{};
+    sha_160_accumulator accumulator;
+    accumulator.write(left.size(), left.data());
+    accumulator.write(right.size(), right.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
+constexpr auto half160 = sha_160::half_t{};
+constexpr auto full160 = sha_160::block_t{};
+constexpr auto twin160 = std_array<uint8_t, sha_160::block_bytes * 2>{};
+constexpr auto expected_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
+constexpr auto expected_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
+constexpr auto expected_twin160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
+
+// algorithm
+
+BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
+{
+    static_assert(sha_160::hash(half160) == expected_half160);
+    BOOST_CHECK_EQUAL(sha_160::hash(half160), expected_half160);
+    BOOST_CHECK_EQUAL(system::sha1_hash(half160), expected_half160);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__full160_block__null_hash__expected)
+{
+    static_assert(sha_160::hash(full160) == expected_full160);
+    BOOST_CHECK_EQUAL(sha_160::hash(full160), expected_full160);
+    BOOST_CHECK_EQUAL(system::sha1_hash(full160), expected_full160);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__twin160_block__null_hash__expected)
+{
+    const std_vector<cref<sha_160::block_t>> twin{ std::cref(full160), std::cref(full160) };
+    BOOST_CHECK_EQUAL(sha_160::hash(twin), expected_twin160);
+    BOOST_CHECK_EQUAL(system::sha1_hash(twin160), expected_twin160);
+}
+
+// accumulator
+
+BOOST_AUTO_TEST_CASE(accumulator__half160_block__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha160_hash(half160), expected_half160);
+    BOOST_CHECK_EQUAL(system::sha1_hash(half160), expected_half160);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__full160_block__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha160_hash(full160), expected_full160);
+    BOOST_CHECK_EQUAL(system::sha1_hash(full160), expected_full160);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__twin160_block__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha160_hash(full160, full160), expected_twin160);
+    BOOST_CHECK_EQUAL(system::sha1_hash(twin160), expected_twin160);
+}
+
+// double_hash(full160)
+// double_hash(twin160)
+
+// sha256
+// ----------------------------------------------------------------------------
 
 using sha_256 = algorithm<h256<>>;
+using sha_256_accumulator = accumulator<sha_256>;
+
+hash_digest sha256_hash(const data_slice& data) NOEXCEPT
+{
+    hash_digest hash{};
+    sha_256_accumulator accumulator;
+    accumulator.write(data.size(), data.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
+hash_digest sha256_hash(const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    hash_digest hash{};
+    sha_256_accumulator accumulator;
+    accumulator.write(left.size(), left.data());
+    accumulator.write(right.size(), right.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
 constexpr auto half256 = sha_256::half_t{};
 constexpr auto full256 = sha_256::block_t{};
+constexpr auto twin256 = std_array<uint8_t, sha_256::block_bytes * 2>{};
 constexpr auto expected_half256 = base16_array("66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925");
 constexpr auto expected_full256 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b");
 constexpr auto expected_twin256 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
+
+// algorithm
 
 BOOST_AUTO_TEST_CASE(algorithm__half256_block__null_hash__expected)
 {
@@ -718,24 +1123,73 @@ BOOST_AUTO_TEST_CASE(algorithm__full256_block__null_hash__expected)
 
 BOOST_AUTO_TEST_CASE(algorithm__twin256_block__null_hash__expected)
 {
-    // *******************************************
-    // TODO: investigate two block (loop) hashing.
-    // *******************************************
     const std_vector<cref<sha_256::block_t>> twin{ std::cref(full256), std::cref(full256) };
-    BOOST_CHECK_NE(sha_256::hash(twin), expected_twin256);
-    BOOST_CHECK_EQUAL(system::sha256_hash(full256, full256), expected_twin256);
+    BOOST_CHECK_EQUAL(sha_256::hash(twin), expected_twin256);
+    BOOST_CHECK_EQUAL(system::sha256_hash(twin256), expected_twin256);
 }
 
+// accumulator
+
+BOOST_AUTO_TEST_CASE(accumulator__half256_block__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha256_hash(half256), expected_half256);
+    BOOST_CHECK_EQUAL(system::sha256_hash(half256), expected_half256);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__full256_block__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha256_hash(full256), expected_full256);
+    BOOST_CHECK_EQUAL(system::sha256_hash(full256), expected_full256);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__twin256_block__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha256_hash(full256, full256), expected_twin256);
+    BOOST_CHECK_EQUAL(system::sha256_hash(twin256), expected_twin256);
+
+    // dedicated doubler in bc lib for sha256.
+    BOOST_CHECK_EQUAL(system::sha256_hash(full256, full256), system::sha256_hash(twin256));
+}
+
+// double_hash(full256)
+// double_hash(twin256)
+
+// sha512
+// ----------------------------------------------------------------------------
+
 using sha_512 = algorithm<h512<>>;
+using sha_512_accumulator = accumulator<sha_512>;
+
+long_hash sha512_hash(const data_slice& data) NOEXCEPT
+{
+    long_hash hash{};
+    sha_512_accumulator accumulator;
+    accumulator.write(data.size(), data.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
+long_hash sha512_hash(const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    long_hash hash{};
+    sha_512_accumulator accumulator;
+    accumulator.write(left.size(), left.data());
+    accumulator.write(right.size(), right.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
 constexpr auto half512 = sha_512::half_t{};
 constexpr auto full512 = sha_512::block_t{};
+constexpr auto twin512 = std_array<uint8_t, sha_512::block_bytes * 2>{};
 constexpr auto expected_half512 = base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081");
 constexpr auto expected_full512 = base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11");
-////constexpr auto expected_twin512 = base16_array("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+constexpr auto expected_twin512 = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
+
+// algorithm
 
 BOOST_AUTO_TEST_CASE(algorithm__half512_block__null_hash__expected)
 {
-    // TODO: investigate sha512 distinctions from 256.
     static_assert(sha_512::hash(half512) == expected_half512);
     BOOST_CHECK_EQUAL(sha_512::hash(half512), expected_half512);
     BOOST_CHECK_EQUAL(system::sha512_hash(half512), expected_half512);
@@ -748,125 +1202,74 @@ BOOST_AUTO_TEST_CASE(algorithm__full512_block__null_hash__expected)
     BOOST_CHECK_EQUAL(system::sha512_hash(full512), expected_full512);
 }
 
-// no system::sha512_hash(2)
-////BOOST_AUTO_TEST_CASE(algorithm__twin512_block__null_hash__unexpected)
-////{
-////    const std_vector<cref<sha_512::block_t>> twin{ std::cref(full512), std::cref(full512) };
-////    BOOST_REQUIRE_EQUAL(sha_512::hash(twin), expected_twin512);
-////    BOOST_REQUIRE_EQUAL(system::sha512_hash(full512, full512), expected_twin512);
-////}
-
-// accumulator (not constexpr)
-// ----------------------------------------------------------------------------
-// Same test vectors as above, computed by streaming.
-
-using sha_256_accumulator = accumulator<algorithm<h256<>>>;
-
-hash_digest sha256_hash(const data_slice& data) NOEXCEPT
+BOOST_AUTO_TEST_CASE(algorithm__twin512_block__null_hash__expected)
 {
-    hash_digest hash{};
-    sha_256_accumulator accumulator;
-    accumulator.write(data.size(), data.data());
-    accumulator.flush(hash.data());
-    return hash;
+    const std_vector<cref<sha_512::block_t>> twin{ std::cref(full512), std::cref(full512) };
+    BOOST_CHECK_EQUAL(sha_512::hash(twin), expected_twin512);
+    BOOST_CHECK_EQUAL(system::sha512_hash(twin512), expected_twin512);
 }
 
-hash_digest sha256_hash(const data_slice& left,
-    const data_slice& right) NOEXCEPT
-{
-    hash_digest hash{};
-    sha_256_accumulator accumulator;
-    accumulator.write(left.size(), left.data());
-    accumulator.write(right.size(), right.data());
-    accumulator.flush(hash.data());
-    return hash;
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__half256_block__null_hash__expected)
-{
-    BOOST_REQUIRE_EQUAL(sha256_hash(half256), expected_half256);
-    BOOST_REQUIRE_EQUAL(system::sha256_hash(half256), expected_half256);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__full256_block__null_hash__expected)
-{
-    BOOST_REQUIRE_EQUAL(sha256_hash(full256), expected_full256);
-    BOOST_REQUIRE_EQUAL(system::sha256_hash(full256), expected_full256);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__twin256_block__null_hash__expected)
-{
-    BOOST_REQUIRE_EQUAL(sha256_hash(full256, full256), expected_twin256);
-    BOOST_REQUIRE_EQUAL(system::sha256_hash(full256, full256), expected_twin256);
-}
-
-using sha_512_accumulator = accumulator<algorithm<h512<>>>;
-
-long_hash sha512_hash(const data_slice& data) NOEXCEPT
-{
-    long_hash hash{};
-    sha_512_accumulator accumulator;
-    accumulator.write(data.size(), data.data());
-    accumulator.flush(hash.data());
-    return hash;
-}
-
-long_hash sha512_hash(const data_slice& left,
-    const data_slice& right) NOEXCEPT
-{
-    long_hash hash{};
-    sha_512_accumulator accumulator;
-    accumulator.write(left.size(), left.data());
-    accumulator.write(right.size(), right.data());
-    accumulator.flush(hash.data());
-    return hash;
-}
+// accumulator
 
 BOOST_AUTO_TEST_CASE(accumulator__half512_block__null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha512_hash(half512), expected_half512);
     BOOST_CHECK_EQUAL(system::sha512_hash(half512), expected_half512);
 }
+
 BOOST_AUTO_TEST_CASE(accumulator__full512_block__null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha512_hash(full512), expected_full512);
     BOOST_CHECK_EQUAL(system::sha512_hash(full512), expected_full512);
 }
 
-// no system::sha512_hash(2)
-////BOOST_AUTO_TEST_CASE(accumulator__twin512_block__null_hash__expected)
-////{
-////    BOOST_REQUIRE_EQUAL(sha512_hash(full512, full512), expected_twin512);
-////    BOOST_REQUIRE_EQUAL(system::sha512_hash(full512, full512), expected_twin512);
-////}
+BOOST_AUTO_TEST_CASE(accumulator__twin512_block__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha512_hash(full512, full512), expected_twin512);
+    BOOST_CHECK_EQUAL(system::sha512_hash(twin512), expected_twin512);
+}
 
-// merkle(full)
-// merkle(twin)
+// double_hash(full512)
+// double_hash(twin512)
 
-////BOOST_AUTO_TEST_CASE(algorithm__expand256)
-////{
-////    using sha_256 = algorithm<h256<>>;
-////    sha_256::buffer_t space{};
-////    auto& to = narrow_array_cast<sha_256::word_t, sha_256::pad::block.size()>(space);
-////    to = sha_256::pad::block;
-////    sha_256::expandit(space);
-////    std::for_each(space.begin(), space.end(), [](auto& word) noexcept
-////    {
-////        std::cout << "0x" << encode_base16(to_big_endian(word)) << std::endl;
-////    });
-////}
+// Dumper
+// ----------------------------------------------------------------------------
 
-////BOOST_AUTO_TEST_CASE(algorithm__expand512)
+template <typename SHA>
+struct accessor
+  : public algorithm<SHA>
+{
+    using base = algorithm<SHA>;
+    static constexpr void preparing(base::buffer_t& out) NOEXCEPT
+    {
+        base::preparing(out);
+    }
+};
+
+template <typename SHA>
+struct dumper
+{
+    static constexpr void dump(std::ostream& out)
+    {
+        using base = accessor<SHA>;
+
+        typename base::buffer_t space{};
+        constexpr auto size = base::pad::block.size();
+        narrow_array_cast<base::word_t, size>(space) = base::pad::block;
+        base::preparing(space);
+
+        std::for_each(space.begin(), space.end(), [&](auto& word) noexcept
+        {
+            out << "0x" << encode_base16(to_big_endian(word)) << "," << std::endl;
+        });
+    }
+};
+
+////BOOST_AUTO_TEST_CASE(algorithm__dump__expanded_block_pad__to_console)
 ////{
-////    using sha_512 = algorithm<h512<>>;
-////    sha_512::buffer_t space{};
-////    auto& to = narrow_array_cast<sha_512::word_t, sha_512::pad::block.size()>(space);
-////    to = sha_512::pad::block;
-////    sha_512::expandit(space);
-////    std::for_each(space.begin(), space.end(), [](auto& word) noexcept
-////    {
-////        std::cout << "0x" << encode_base16(to_big_endian(word)) << std::endl;
-////    });
+////    dumper<h160>::dump(std::cout);
+////    dumper<h256<>>::dump(std::cout);
+////    dumper<h512<>>::dump(std::cout);
 ////}
 
 BOOST_AUTO_TEST_SUITE_END()
