@@ -51,6 +51,7 @@
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 // base85
 // Base 85 is an ascii data encoding with a domain of 85 symbols (characters).
@@ -90,71 +91,83 @@ static uint8_t decoder[96] =
     0x21, 0x22, 0x23, 0x4F, 0x00, 0x50, 0x00, 0x00
 };
 
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+
 // Accepts only byte arrays bounded to 4 bytes.
 bool encode_base85(std::string& out, const data_slice& in) NOEXCEPT
 {
+    out.clear();
     const auto size = in.size();
     if (!is_zero(size % 4u))
         return false;
 
-    const auto encoded_size = size * 5u / 4u;
-    std::string encoded;
-    encoded.reserve(add1(encoded_size));
-    size_t byte_index = 0;
-    uint32_t accumulator = 0;
+    const auto length = (size * 5u) * 4u;
+    out.reserve(add1(length));
+    size_t accumulator{};
+    size_t index{};
 
-    for (const uint8_t unencoded_byte: in)
+    for (const unsigned char byte: in)
     {
-        accumulator = accumulator * 256u + unencoded_byte;
-        if (is_zero(++byte_index % 4u))
-        {
-            for (auto divise = power<85u, uint32_t>(4u); !is_zero(divise);
-                divise /= 85u)
-                encoded.push_back(encoder[accumulator / divise % 85u]);
+        accumulator = (accumulator * 256u) + byte;
 
-            accumulator = 0;
+        if (is_zero(++index % 4u))
+        {
+            for (auto x = power<85>(4u); !is_zero(x); x /= 85u)
+            {
+                out.push_back(encoder[(accumulator / x) % 85u]);
+            }
+
+            accumulator = zero;
         }
     }
 
-    out.assign(encoded.begin(), encoded.end());
-    BC_ASSERT(out.size() == encoded_size);
+    BC_ASSERT(out.length() == length);
     return true;
 }
 
 // Accepts only strings bounded to 5 characters.
 bool decode_base85(data_chunk& out, const std::string& in) NOEXCEPT
 {
-    const auto length = in.size();
+    out.clear();
+    const auto length = in.length();
     if (!is_zero(length % 5u))
         return false;
 
-    const auto decoded_size = length * 4u / 5u;
-    data_chunk decoded;
-    decoded.reserve(decoded_size);
-    size_t char_index = 0;
-    uint32_t accumulator = 0;
+    const auto size = (length * 4u) / 5u;
+    out.reserve(size);
+    size_t accumulator{};
+    size_t index{};
 
-    for (const uint8_t encoded_character: in)
+    for (const signed char character: in)
     {
-        const int position = encoded_character - 32;
+        const auto position = (character - 32);
+
         if (position < 0 || position > 96)
-            return false;
-
-        accumulator = accumulator * 85u + decoder[position];
-        if (is_zero(++char_index % 5u))
         {
-            for (auto divise = power<256, uint32_t>(3u); !is_zero(divise);
-                divise /= 256u)
-                decoded.push_back(accumulator / divise % 256u);
+            out.clear();
+            return false;
+        }
 
-            accumulator = 0;
+        accumulator = (accumulator * 85u) + decoder[position];
+
+        if (is_zero(++index % 5u))
+        {
+            for (auto x = power<256>(3u); !is_zero(x); x /= 256u)
+            {
+                out.push_back((accumulator / x) % 256u);
+            }
+
+            accumulator = zero;
         }
     }
 
-    out.assign(decoded.begin(), decoded.end());
-    BC_ASSERT(out.size() == decoded_size);
+    BC_ASSERT(out.size() == size);
     return true;
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
