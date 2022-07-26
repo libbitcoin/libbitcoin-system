@@ -20,8 +20,14 @@
 
 BOOST_AUTO_TEST_SUITE(temporary_tests)
 
+#if defined(NDEBUG)
+constexpr auto checked = false;
+#else
+constexpr auto checked = true;
+#endif
+
 /// SHA hash accumulator.
-template <typename SHA>
+template <typename SHA, bool Checked = checked>
 struct accumulator
 {
     /// Creates initial context.
@@ -82,29 +88,26 @@ private:
 
 // implementation
 // ----------------------------------------------------------------------------
-
-// bits_ is either uint64_t or uint128_t
-// So all expressions must support uintx_t (integer).
-// TODO: use uint128_t as alias for intrinsic muint128_t when available.
+// bits_ (count_t) is either uint64_t (SHA-1/256) or uint128_t (SHA512).
 
 // Buffer initialization is not required due to logical sizing.
 BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
-template <typename SHA>
-constexpr accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr accumulator<SHA, Checked>::
 accumulator() NOEXCEPT
 BC_POP_WARNING()
 {
 }
 
-template <typename SHA>
-constexpr void accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr void accumulator<SHA, Checked>::
 clear() NOEXCEPT
 {
     size_ = zero;
 }
 
-template <typename SHA>
-constexpr void accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr void accumulator<SHA, Checked>::
 reset() NOEXCEPT
 {
     size_ = zero;
@@ -112,43 +115,45 @@ reset() NOEXCEPT
     state_ = SHA::H::get;
 }
 
-template <typename SHA>
-constexpr size_t accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr size_t accumulator<SHA, Checked>::
 gap() const NOEXCEPT
 {
     BC_ASSERT_MSG(!is_subtract_overflow(SHA::block_bytes, size_), "size");
     return SHA::block_bytes - size_;
 }
 
-template <typename SHA>
-constexpr bool accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr bool accumulator<SHA, Checked>::
 is_full() NOEXCEPT
 {
     return is_zero(gap());
 }
 
-template <typename SHA>
-constexpr bool accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr bool accumulator<SHA, Checked>::
 is_buffer_overflow(size_t bytes) NOEXCEPT
 {
     BC_ASSERT_MSG(is_zero(bits_ % byte_bits), "unexpected bit count");
 
-    // Accomodate type distinction between uint64_t and uint128_t.
-    if constexpr (is_integral_integer<SHA::count_t>)
+    if constexpr (Checked)
     {
+        // Not worth guarding in Bitcoin scenarios, so off by default in NDEBUG.
+        constexpr auto size = possible_wide_cast<SHA::count_t>(SHA::count_bytes);
+        const auto more = possible_wide_cast<SHA::count_t>(bytes);
         const auto used = to_floored_bytes(bits_);
-        return is_add_overflow<uint64_t>(used, bytes) ||
-            is_add_overflow<uint64_t>(SHA::count_bytes, add(used, bytes));
+        return
+            is_add_overflow<SHA::count_t>(used, more) ||
+            is_add_overflow<SHA::count_t>(size, used + more);
     }
     else
     {
-        // TODO: add uintx_t overloads for add/subtract/overflow.
         return false;
     }
 }
 
-template <typename SHA>
-constexpr size_t accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr size_t accumulator<SHA, Checked>::
 pad_size() const NOEXCEPT
 {
     BC_ASSERT_MSG(!is_limited(size_, SHA::block_bytes), "unexpected size");
@@ -162,11 +167,11 @@ pad_size() const NOEXCEPT
 BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-template <typename SHA>
-constexpr size_t accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr size_t accumulator<SHA, Checked>::
 add_data(size_t bytes, const typename SHA::byte_t* data) NOEXCEPT
 {
-    // This is public because so extremely unlikely, but also guarded below.
+    // This both asserts and returns false.
     BC_ASSERT_MSG(!is_buffer_overflow(bytes), "hash function overflow");
 
     // No bytes accepted on overflow or uncleared buffer.
@@ -183,43 +188,32 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-template <typename SHA>
-constexpr void accumulator<SHA>::
+template <typename SHA, bool Checked>
+constexpr void accumulator<SHA, Checked>::
 increment(size_t blocks) NOEXCEPT
 {
     BC_ASSERT_MSG(!is_buffer_overflow(blocks * SHA::block_bytes), "size");
     bits_ += to_bits(blocks * SHA::block_bytes);
 }
 
-template <typename SHA>
-inline typename accumulator<SHA>::counter accumulator<SHA>::
+template <typename SHA, bool Checked>
+inline typename accumulator<SHA, Checked>::counter accumulator<SHA, Checked>::
 serialize_counter() const NOEXCEPT
 {
     // Bit count is encoded into message block as 64/128 bit big-endian.
-    // This is conventional and not subject to platform endianness.
-
-    // Accomodate type distinction between uint64_t and uint128_t.
-    if constexpr (is_integral_integer<SHA::count_t>)
-    {
-        return to_big_endian<SHA::count_t>(bits_);
-    }
-    else
-    {
-        // TODO: add to_*_endian<integral>(uintx_t) overloads.
-        return to_big_endian_size<SHA::count_bytes>(bits_);
-    }
+    return to_big_endian_size<SHA::count_bytes>(bits_);
 }
 
-template <typename SHA>
-inline void accumulator<SHA>::
+template <typename SHA, bool Checked>
+inline void accumulator<SHA, Checked>::
 serialize_state(typename SHA::digest_t& out) const NOEXCEPT
 {
     out = SHA::finalize(state_);
 }
 
 // public
-template <typename SHA>
-inline bool accumulator<SHA>::
+template <typename SHA, bool Checked>
+inline bool accumulator<SHA, Checked>::
 write(size_t size, const typename SHA::byte_t* in) NOEXCEPT
 {
     // Fill gap if possible and update counter.
@@ -247,7 +241,7 @@ write(size_t size, const typename SHA::byte_t* in) NOEXCEPT
     const auto blocks = size / SHA::block_bytes;
     const auto remain = size % SHA::block_bytes;
 
-    const auto& from = unsafe_vector_cast<typename SHA::block_t>(in, blocks);
+    const auto from = unsafe_vector_cast<typename SHA::block_t>(in, blocks);
     SHA::accumulate(state_, from);
     std::advance(in, size - remain);
     increment(blocks);
@@ -258,17 +252,15 @@ write(size_t size, const typename SHA::byte_t* in) NOEXCEPT
 }
 
 // public
-template <typename SHA>
-inline void accumulator<SHA>::
+template <typename SHA, bool Checked>
+inline void accumulator<SHA, Checked>::
 flush(typename SHA::byte_t* out32) NOEXCEPT
 {
+    using to = typename SHA::byte_t;
     const auto counter = serialize_counter();
-
-    // pads are stored as BE integer, but this wants to write bytes.
     write(pad_size(), SHA::pad::stream.data());
     write(SHA::count_bytes, counter.data());
-    serialize_state(unsafe_array_cast<typename SHA::byte_t,
-        SHA::digest_bytes>(out32));
+    serialize_state(unsafe_array_cast<to, SHA::digest_bytes>(out32));
     reset();
 }
 
