@@ -25,6 +25,16 @@ BOOST_AUTO_TEST_SUITE(temporary_tests)
 // TODO: integrate sha-ni.
 // TODO: vectorize algorithm (2/4/8/16).
 // TODO: parallelize hash(blocks) and double_hash(blocks).
+// TODO: implement 5.3.6 SHA-512/t initial vector derivation.
+// TODO: add/derive SHA-256/224, 512/384, 512/224, 512/256 constants/types.
+// TODO: test double_hash implementations and non-block accumulation.
+// TODO: single/double accumulate and finalize are tested via accumulator.
+// TODO: merge into /crypto directory.
+// TODO: add nist test vectors.
+
+// Implementation based on FIPS PUB 180-4 [Secure Hash Standard (SHS)].
+// All aspects of FIPS180 are supported within the implmentation.
+// nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
 // 4.1 Functions
 // ---------------------------------------------------------------------------
@@ -889,6 +899,32 @@ hash(const blocks_t& blocks) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 template <typename SHA>
+constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
+double_hash(const block_t& block) NOEXCEPT
+{
+    buffer_t space{};
+
+    big_one(space, block);              // hash(block)[part 1]
+    preparing(space);                   // hash(block)[part 1]
+    auto state = SHA::H::get;           // hash(block)[part 1]
+    rounding(state, space);             // hash(block)[part 1]
+    sum_state(state, SHA::H::get);      // hash(block)[part 1]
+
+    pad_one(space);                     // hash(block)[part 2]
+    const auto save = state;            // hash(block)[part 2]
+    rounding(state, space);             // hash(block)[part 2]
+    sum_state(state, save);             // hash(block)[part 2]
+
+    dup_state(space, state);            // hash(state)
+    pad_state(space);                   // hash(state)
+    preparing(space);                   // hash(state)
+    state = SHA::H::get;                // hash(state)
+    rounding(state, space);             // hash(state)
+    sum_state(state, SHA::H::get);      // hash(state)
+    return finalize(state);             // hash(state)
+}
+
+template <typename SHA>
 VCONSTEXPR typename algorithm<SHA>::digests_t algorithm<SHA>::
 double_hash(const blocks_t& blocks) NOEXCEPT
 {
@@ -919,32 +955,6 @@ double_hash(const blocks_t& blocks) NOEXCEPT
     }
 
     return out;
-}
-
-template <typename SHA>
-constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
-double_hash(const block_t& block) NOEXCEPT
-{
-    buffer_t space{};
-
-    big_one(space, block);              // hash(block)[part 1]
-    preparing(space);                   // hash(block)[part 1]
-    auto state = SHA::H::get;           // hash(block)[part 1]
-    rounding(state, space);             // hash(block)[part 1]
-    sum_state(state, SHA::H::get);      // hash(block)[part 1]
-
-    pad_one(space);                     // hash(block)[part 2]
-    const auto save = state;            // hash(block)[part 2]
-    rounding(state, space);             // hash(block)[part 2]
-    sum_state(state, save);             // hash(block)[part 2]
-
-    dup_state(space, state);            // hash(state)
-    pad_state(space);                   // hash(state)
-    preparing(space);                   // hash(state)
-    state = SHA::H::get;                // hash(state)
-    rounding(state, space);             // hash(state)
-    sum_state(state, SHA::H::get);      // hash(state)
-    return finalize(state);             // hash(state)
 }
 
 // TESTS
