@@ -175,8 +175,8 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 template <typename SHA>
 template<size_t Round>
 constexpr void algorithm<SHA>::
-round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g,
-    auto& h, auto w) NOEXCEPT
+round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
+    auto w) NOEXCEPT
 {
     // 4.2.2 SHA-224 and SHA-256 Constants
     // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
@@ -497,56 +497,6 @@ pad_half(buffer_t& out) NOEXCEPT
     }
 }
 
-#ifndef MOVE_TO_BITS
-template <typename To, typename From,
-    if_integral_integer<To> = true,
-    bool_if<is_uintx<From>> = true>
-constexpr To hi_word(From value) NOEXCEPT
-{
-    return (value >> bc::bits<To>).convert_to<To>();
-}
-
-template <typename To, typename From,
-    if_integral_integer<To> = true,
-    bool_if<is_uintx<From>> = true>
-constexpr To lo_word(From value) NOEXCEPT
-{
-    return value.convert_to<To>();
-}
-
-template <typename To, typename From,
-    if_integral_integer<To> = true,
-    bool_if<!is_uintx<From>> = true>
-constexpr To hi_word(From value) NOEXCEPT
-{
-    return narrow_cast<To>(shift_right(value, bc::bits<To>));
-}
-
-template <typename To, typename From,
-    if_integral_integer<To> = true,
-    bool_if<!is_uintx<From>> = true>
-constexpr To lo_word(From value) NOEXCEPT
-{
-    return narrow_cast<To>(value);
-}
-
-static_assert(hi_word<uint8_t>(0x0f02_u16) == 0x0f_u8);
-static_assert(lo_word<uint8_t>(0x0f02_u16) == 0x02_u8);
-static_assert(hi_word<uint16_t>(0x0f02a001_u32) == 0x0f02_u16);
-static_assert(lo_word<uint16_t>(0x0f02a001_u32) == 0xa001_u16);
-static_assert(hi_word<uint32_t>(0x0f000002a0000001_u64) == 0x0f000002_u32);
-static_assert(lo_word<uint32_t>(0x0f000002a0000001_u64) == 0xa0000001_u32);
-
-static_assert(hi_word<uint8_t>(uint128_t(0x0f02_u16)) == 0x0f_u8);
-static_assert(lo_word<uint8_t>(uint128_t(0x0f02_u16)) == 0x02_u8);
-static_assert(hi_word<uint16_t>(uint128_t(0x0f02a001_u32)) == 0x0f02_u16);
-static_assert(lo_word<uint16_t>(uint128_t(0x0f02a001_u32)) == 0xa001_u16);
-static_assert(hi_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0x0f000002_u32);
-static_assert(lo_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0xa0000001_u32);
-static_assert(hi_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 0x0f000002a0000001_u64);
-static_assert(lo_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 42_u64);
-#endif
-
 template <typename SHA>
 constexpr void algorithm<SHA>::
 pad_count(buffer_t& out, count_t blocks) NOEXCEPT
@@ -624,7 +574,8 @@ big_one(buffer_t& out, const block_t& in) NOEXCEPT
     }
     else
     {
-        // Array cast is a runtime no-op, FBE is 1 (or 0) opcode per element.
+        // Array cast is a runtime no-op.
+        // FBE is 1 (or 0) opcode per element and loop-unrolled.
         auto& from = array_cast<word_t>(in);
         auto& to = narrow_array_cast<word_t, SHA::block_words>(out);
         from_big_endians(to, from);
@@ -651,7 +602,8 @@ big_half(buffer_t& out, const half_t& in) NOEXCEPT
     }
     else
     {
-        // Array cast is a runtime no-op, FBE is 1 (or 0) opcode per element.
+        // Array cast is a runtime no-op.
+        // FBE is 1 (or 0) opcode per element and loop-unrolled.
         auto& from = array_cast<SHA::word_t>(in);
         auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
         from_big_endians(to, from);
@@ -670,31 +622,33 @@ pad_state(buffer_t& out) NOEXCEPT
     {
         if constexpr (SHA::digest == 160)
         {
+            // SHA-1 padding of state is 16-5 [11] words.
             BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-            out[ 5] = SHA::pad::chunk[0];
-            out[ 6] = SHA::pad::chunk[1];
-            out[ 7] = SHA::pad::chunk[2];
-            out[ 8] = SHA::pad::chunk[3];
-            out[ 9] = SHA::pad::chunk[4];
-            out[10] = SHA::pad::chunk[5];
-            out[11] = SHA::pad::chunk[6];
-            out[12] = SHA::pad::chunk[7];
-            out[13] = SHA::pad::chunk[8];
-            out[14] = SHA::pad::chunk[9];
-            out[15] = SHA::pad::chunk[10];
+            out[ 5] = SHA::pad::state[0];
+            out[ 6] = SHA::pad::state[1];
+            out[ 7] = SHA::pad::state[2];
+            out[ 8] = SHA::pad::state[3];
+            out[ 9] = SHA::pad::state[4];
+            out[10] = SHA::pad::state[5];
+            out[11] = SHA::pad::state[6];
+            out[12] = SHA::pad::state[7];
+            out[13] = SHA::pad::state[8];
+            out[14] = SHA::pad::state[9];
+            out[15] = SHA::pad::state[10];
             BC_POP_WARNING()
         }
         else
         {
+            // SHA-256/512 padding of state is 16-8 [8] words.
             BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-            out[ 8] = SHA::pad::chunk[0];
-            out[ 9] = SHA::pad::chunk[1];
-            out[10] = SHA::pad::chunk[2];
-            out[11] = SHA::pad::chunk[3];
-            out[12] = SHA::pad::chunk[4];
-            out[13] = SHA::pad::chunk[5];
-            out[14] = SHA::pad::chunk[6];
-            out[15] = SHA::pad::chunk[7];
+            out[ 8] = SHA::pad::state[0];
+            out[ 9] = SHA::pad::state[1];
+            out[10] = SHA::pad::state[2];
+            out[11] = SHA::pad::state[3];
+            out[12] = SHA::pad::state[4];
+            out[13] = SHA::pad::state[5];
+            out[14] = SHA::pad::state[6];
+            out[15] = SHA::pad::state[7];
             BC_POP_WARNING()
         }
     }
@@ -703,10 +657,10 @@ pad_state(buffer_t& out) NOEXCEPT
         // Array cast is a runtime no-op.
         // TODO: make safe offsetting array cast.
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        constexpr auto pad_size = array_count<state_t>;
+        constexpr auto pad_size = array_count<statep_t>;
         auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
         BC_POP_WARNING()
-        to = SHA::pad::chunk;
+        to = SHA::pad::state;
     }
 }
 
@@ -814,7 +768,8 @@ big_state(digest_t& out, const state_t& in) NOEXCEPT
     }
     else
     {
-        // Array cast is a runtime no-op, TBE is 1 (or 0) opcode per element.
+        // Array cast is a runtime no-op.
+        // TBE is 1 (or 0) opcode per element and loop-unrolled.
         to_big_endians(array_cast<word_t>(out), in);
     }
 }
