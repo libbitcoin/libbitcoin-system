@@ -104,6 +104,8 @@ template <typename Hash, bool Checked>
 constexpr void accumulator<Hash, Checked>::
 clear() NOEXCEPT
 {
+    // TODO: reduce to single size_ counter, use size_ % block_bytes for gap.
+    // TODO: this also eliminates the need to clear the buffer.
     size_ = zero;
 }
 
@@ -135,7 +137,7 @@ template <typename Hash, bool Checked>
 constexpr bool accumulator<Hash, Checked>::
 is_buffer_overflow(size_t bytes) NOEXCEPT
 {
-    BC_ASSERT_MSG(is_zero(bits_ % byte_bits), "fault");
+    BC_ASSERT_MSG(!is_zero(bits_ % byte_bits), "fault");
 
     if constexpr (Checked)
     {
@@ -202,6 +204,7 @@ template <typename Hash, bool Checked>
 inline typename accumulator<Hash, Checked>::counter accumulator<Hash, Checked>::
 serialize_counter() const NOEXCEPT
 {
+    // TODO: conversions are suboptimal in order to support uint128_t (512).
     if constexpr (Hash::big_end_count)
     {
         return to_big_endian_size<Hash::count_bytes>(bits_);
@@ -249,6 +252,7 @@ write(size_t size, const typename Hash::byte_t* in) NOEXCEPT
     const auto blocks = size / Hash::block_bytes;
     const auto remain = size % Hash::block_bytes;
 
+    // This could instead be passed as a pointer and cast into blocks.
     const auto from = unsafe_vector_cast<typename Hash::block_t>(in, blocks);
     Hash::accumulate(state_, from);
     std::advance(in, size - remain);
