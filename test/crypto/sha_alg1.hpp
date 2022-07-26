@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(temporary_tests)
+BOOST_AUTO_TEST_SUITE(sha_tests)
 
 template <typename Word, size_t Rounds,
     bool_if<is_same_type<Word, uint32_t> ||

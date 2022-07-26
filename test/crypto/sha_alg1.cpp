@@ -17,10 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include "temporary.hpp"
-#include "temporary_accumulator.hpp"
+#include "sha_alg1.hpp"
+#include "hash_acc1.hpp"
     
-BOOST_AUTO_TEST_SUITE(temporary_tests)
+BOOST_AUTO_TEST_SUITE(sha_tests)
 
 // TODO: integrate sha-ni.
 // TODO: vectorize algorithm (2/4/8/16).

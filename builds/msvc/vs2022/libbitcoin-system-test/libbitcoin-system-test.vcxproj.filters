@@ -183,19 +183,22 @@
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\rmd_alg1.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\sha256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\sha_alg1.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\sha_algorithm.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\temporary.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp">
@@ -569,13 +572,16 @@
     <ClInclude Include="..\..\..\..\test\crypto\hash.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\hash_acc1.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\rmd_alg1.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\crypto\sha_alg1.hpp">
+      <Filter>src\crypto</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp">
-      <Filter>src\crypto</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\crypto\temporary.hpp">
-      <Filter>src\crypto</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\crypto\temporary_accumulator.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\test.hpp">
@@ -610,9 +616,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\test\crypto\temporary_accumulator.ipp">
-      <Filter>src\crypto</Filter>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

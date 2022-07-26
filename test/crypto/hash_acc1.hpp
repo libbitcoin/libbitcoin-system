@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(temporary_tests)
+BOOST_AUTO_TEST_SUITE(sha_tests)
 
 #if defined(NDEBUG)
 constexpr auto checked = false;
