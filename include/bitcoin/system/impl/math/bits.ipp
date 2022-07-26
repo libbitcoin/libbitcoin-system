@@ -388,6 +388,41 @@ constexpr void rotate_right_into(Value& value, size_t shift) NOEXCEPT
     }
 }
 
+// High/Low word extraction.
+// ----------------------------------------------------------------------------
+
+template <typename To, typename From,
+    if_integral_integer<To>,
+    if_uintx<From>>
+constexpr To hi_word(From value) NOEXCEPT
+{
+    return (value >> bits<To>).convert_to<To>();
+}
+
+template <typename To, typename From,
+    if_integral_integer<To>,
+    if_not_uintx<From>>
+constexpr To hi_word(From value) NOEXCEPT
+{
+    return narrow_cast<To>(shift_right(value, bits<To>));
+}
+
+template <typename To, typename From,
+    if_integral_integer<To>,
+    if_uintx<From>>
+constexpr To lo_word(From value) NOEXCEPT
+{
+    return value.convert_to<To>();
+}
+
+template <typename To, typename From,
+    if_integral_integer<To>,
+    if_not_uintx<From>>
+constexpr To lo_word(From value) NOEXCEPT
+{
+    return narrow_cast<To>(value);
+}
+
 } // namespace system
 } // namespace libbitcoin
 

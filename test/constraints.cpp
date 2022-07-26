@@ -454,6 +454,26 @@ static_assert(is_defined<if_not_same_signed_integer<int, size_t>>);
 ////static_assert(!is_defined<if_not_same_signed_integer<int64_t, int>>);
 ////static_assert(!is_defined<if_not_same_signed_integer<base, int>>);
 
+static_assert(is_defined<if_uintx<uint5_t>>);
+static_assert(is_defined<if_uintx<uint11_t>>);
+static_assert(is_defined<if_uintx<uint48_t>>);
+static_assert(is_defined<if_uintx<uint128_t>>);
+static_assert(is_defined<if_uintx<uint160_t>>);
+static_assert(is_defined<if_uintx<uint256_t>>);
+static_assert(is_defined<if_uintx<uint512_t>>);
+////static_assert(!is_defined<if_uintx<uint8_t>>);
+////static_assert(!is_defined<if_uintx<uint16_t>>);
+////static_assert(!is_defined<if_uintx<uint32_t>>);
+////static_assert(!is_defined<if_uintx<uint64_t>>);
+////static_assert(!is_defined<if_uintx<size_t>>);
+////static_assert(!is_defined<if_uintx<int8_t>>);
+////static_assert(!is_defined<if_uintx<int16_t>>);
+////static_assert(!is_defined<if_uintx<int32_t>>);
+////static_assert(!is_defined<if_uintx<int64_t>>);
+////static_assert(!is_defined<if_uintx<signed_size_t>>);
+////static_assert(!is_defined<if_uintx<base>>);
+////static_assert(!is_defined<if_uintx<std_array<uint8_t, 42>>>);
+
 // integral integer types
 
 static_assert(is_defined<if_integral_integer<char>>);

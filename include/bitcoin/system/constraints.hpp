@@ -186,6 +186,14 @@ using if_not_same_signed_integer = bool_if<
     is_integer<Right> &&
     (is_signed<Left> != is_signed<Right>)>;
 
+template <typename Type>
+using if_uintx = bool_if<
+    is_uintx<Type>>;
+
+template <typename Type>
+using if_not_uintx = bool_if<
+    !is_uintx<Type>>;
+
 /// Integral integer types (native, non-floating point, non-bool).
 
 template <typename Type>
