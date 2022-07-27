@@ -17,165 +17,120 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include "hash_acc1.hpp"
 #include "rmd_alg1.hpp"
+#include "hash_acc1.hpp"
+
+// Implementation based on:
+// homes.esat.kuleuven.be/~bosselae/ripemd/rmd128.txt
+// homes.esat.kuleuven.be/~bosselae/ripemd/rmd256.txt
+// homes.esat.kuleuven.be/~bosselae/ripemd/rmd160.txt
+// homes.esat.kuleuven.be/~bosselae/ripemd/rmd320.txt
+// homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
     
 BOOST_AUTO_TEST_SUITE(rmd_tests)
-
-#include <bitcoin/system/crypto/external/ripemd160.hpp>
-
-#include <bit>
-#include <utility>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/math/math.hpp>
-
-// homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
-// [Dobbertin, Bosselaers, Preneel] 18 April 1996.
-
-// Constants.
-// ----------------------------------------------------------------------------
-
-constexpr state_t H
-{
-    0x67452301,
-    0xefcdab89,
-    0x98badcfe,
-    0x10325476,
-    0xc3d2e1f0
-};
-
-constexpr constants_t K
-{
-    0x00000000ul,
-    0x5a827999ul,
-    0x6ed9eba1ul,
-    0x8f1bbcdcul,
-    0xa953fd4eul,
-    0x50a28be6ul,
-    0x5c4dd124ul,
-    0x6d703ef3ul,
-    0x7a6d76e9ul,
-    0x00000000ul
-};
-
-constexpr std_array<size_t, rounds> W
-{
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-    7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5, 2, 14, 11, 8,
-    3, 10, 14, 4, 9, 15, 8, 1, 2, 7, 0, 6, 13, 11, 5, 12,
-    1, 9, 11, 10, 0, 8, 12, 4, 13, 3, 7, 15, 14, 5, 6, 2,
-    4, 0, 5, 9, 7, 12, 2, 10, 14, 1, 3, 8, 11, 6, 15, 13,
-
-    5, 14, 7, 0, 9, 2, 11, 4, 13, 6, 15, 8, 1, 10, 3, 12,
-    6, 11, 3, 7, 0, 13, 5, 10, 14, 15, 8, 12, 4, 9, 1, 2,
-    15, 5, 1, 3, 7, 14, 6, 9, 11, 8, 12, 2, 10, 0, 4, 13,
-    8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14,
-    12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11
-};
-
-
-constexpr std_array<size_t, rounds> R
-{
-    11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
-    7, 6, 8, 13, 11, 9, 7, 15, 7, 12, 15, 9, 11, 7, 13, 12,
-    11, 13, 6, 7, 14, 9, 13, 15, 14, 8, 13, 6, 5, 12, 7, 5,
-    11, 12, 14, 15, 14, 15, 9, 8, 9, 14, 5, 6, 8, 6, 5, 12,
-    9, 15, 5, 11, 6, 8, 13, 12, 5, 12, 13, 14, 11, 8, 5, 6,
-
-    8, 9, 9, 11, 13, 15, 15, 5, 7, 7, 8, 11, 14, 14, 12, 6,
-    9, 13, 15, 7, 12, 8, 9, 11, 7, 7, 12, 7, 6, 15, 13, 11,
-    9, 7, 15, 11, 8, 6, 6, 14, 12, 13, 5, 14, 13, 13, 7, 5,
-    15, 5, 8, 11, 14, 14, 6, 14, 6, 9, 12, 9, 12, 5, 15, 8,
-    8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11,
-};
 
 // Functions.
 // ----------------------------------------------------------------------------
 
-constexpr auto f0(uint32_t x, uint32_t y, uint32_t z) NOEXCEPT
+template <typename RMD>
+constexpr auto algorithm<RMD>::
+f0(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ y ^ z;
 }
 
-constexpr auto f1(uint32_t x, uint32_t y, uint32_t z) NOEXCEPT
+template <typename RMD>
+constexpr auto algorithm<RMD>::
+f1(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & y) | (~x & z);
 }
 
-constexpr auto f2(uint32_t x, uint32_t y, uint32_t z) NOEXCEPT
+template <typename RMD>
+constexpr auto algorithm<RMD>::
+f2(auto x, auto y, auto z) NOEXCEPT
 {
     return (x | ~y) ^ z;
 }
 
-constexpr auto f3(uint32_t x, uint32_t y, uint32_t z) NOEXCEPT
+template <typename RMD>
+constexpr auto algorithm<RMD>::
+f3(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & z) | (y & ~z);
 }
 
-constexpr auto f4(uint32_t x, uint32_t y, uint32_t z) NOEXCEPT
+template <typename RMD>
+constexpr auto algorithm<RMD>::
+f4(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ (y | ~z);
 }
 
+template <typename RMD>
 template<size_t Round>
-constexpr auto functor() NOEXCEPT
+constexpr auto algorithm<RMD>::
+functor() NOEXCEPT
 {
-    constexpr auto functor = (Round / columns) % columns;
+    using self = algorithm<RMD>;
+    constexpr auto fn = (Round / RMD::K::columns) % RMD::K::columns;
 
-    if constexpr      (functor == 0u || functor == 9u)
-        return &f0;
-    else if constexpr (functor == 1u || functor == 8u)
-        return &f1;
-    else if constexpr (functor == 2u || functor == 7u)
-        return &f2;
-    else if constexpr (functor == 3u || functor == 6u)
-        return &f3;
-    else if constexpr (functor == 4u || functor == 5u)
-        return &f4;
+    if constexpr      (fn == 0u || fn == 9u)
+        return &self::f0<uint32_t, uint32_t, uint32_t>;
+    else if constexpr (fn == 1u || fn == 8u)
+        return &self::f1<uint32_t, uint32_t, uint32_t>;
+    else if constexpr (fn == 2u || fn == 7u)
+        return &self::f2<uint32_t, uint32_t, uint32_t>;
+    else if constexpr (fn == 3u || fn == 6u)
+        return &self::f3<uint32_t, uint32_t, uint32_t>;
+    else if constexpr (fn == 4u || fn == 5u)
+        return &self::f4<uint32_t, uint32_t, uint32_t>;
 }
 
 // Rounds
 // ---------------------------------------------------------------------------
 
+template <typename RMD>
 template<size_t Round>
-constexpr auto fn = functor<Round>();
-
-template<size_t Round>
-constexpr auto round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
+constexpr auto algorithm<RMD>::
+round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    constexpr auto f = fn<Round>;
-    constexpr auto r = R[Round];
-    constexpr auto k = K[Round / columns];
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+    constexpr auto f = functor<Round>();
+    constexpr auto r = K::rot[Round];
+    constexpr auto k = K::get[Round / RMD::K::columns];
     BC_POP_WARNING()
     BC_POP_WARNING()
 
     e = /*a =*/ std::rotl(a + f(b, c, d) + w + k, r) + e;
-    b = /*c =*/ std::rotl(c, rows);
+    b = /*c =*/ std::rotl(c, RMD::K::rows);
 }
 
+template <typename RMD>
 template<size_t Round>
-void round(auto& out, const auto& in) NOEXCEPT
+constexpr void algorithm<RMD>::
+round(auto& out, const auto& in) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     round<Round>(
-        out[(rounds + 0 - Round) % state_words],
-        out[(rounds + 1 - Round) % state_words], // c->b
-        out[(rounds + 2 - Round) % state_words],
-        out[(rounds + 3 - Round) % state_words],
-        out[(rounds + 4 - Round) % state_words], // a->e
-        in[W[Round]]);
+        out[(RMD::rounds + 0 - Round) % RMD::state_words],
+        out[(RMD::rounds + 1 - Round) % RMD::state_words], // c->b
+        out[(RMD::rounds + 2 - Round) % RMD::state_words],
+        out[(RMD::rounds + 3 - Round) % RMD::state_words],
+        out[(RMD::rounds + 4 - Round) % RMD::state_words], // a->e
+        in[K::word[Round]]);
     BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
+template <typename RMD>
 template<bool First>
-void batch(state_t& out, const words_t& in) NOEXCEPT
+constexpr void algorithm<RMD>::
+batch(state_t& out, const words_t& in) NOEXCEPT
 {
-    constexpr auto offset = First ? zero : to_half(rounds);
+    constexpr auto offset = First ? zero : to_half(RMD::rounds);
 
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pout = out.data();
@@ -268,7 +223,9 @@ void batch(state_t& out, const words_t& in) NOEXCEPT
     round<offset + 79>(pout, pin);
 }
 
-void sum_state(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
+template <typename RMD>
+constexpr void algorithm<RMD>::
+sum_state(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     out[0] += (in1[0] + in2[0]);
@@ -278,9 +235,13 @@ void sum_state(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
     out[4] += (in1[4] + in2[4]);
     BC_POP_WARNING()
 }
-// The two batches can be vectorized (platform specific) or parallelized.
-void rounding(state_t& state, const words_t& buffer) NOEXCEPT
+
+template <typename RMD>
+constexpr void algorithm<RMD>::
+rounding(state_t& state, const words_t& buffer) NOEXCEPT
 {
+    // This can be vectorized (platform specific) or parallelized.
+
     state_t first{ state };
     batch<true>(first, buffer);
 
@@ -290,132 +251,299 @@ void rounding(state_t& state, const words_t& buffer) NOEXCEPT
     sum_state(state, first, second);
 }
 
-#ifndef TESTS
-static_assert(W[0] == 0);
-static_assert(W[to_half(rounds)] == 5);
-static_assert(W[sub1(rounds)] == 11);
+////template <typename RMD>
+////constexpr void algorithm<RMD>::
+////accumulate(state_t& state, const block_t& block) NOEXCEPT
+////{
+////    // TODO: array_cast not constexpr.
+////    rounding(state, to_little_endians(array_cast<word_t>(block)));
+////}
+////
+////template <typename RMD>
+////constexpr typename algorithm<RMD>::digest_t algorithm<RMD>::
+////finalize(const state_t& state) NOEXCEPT
+////{
+////    // TODO: array_cast not constexpr.
+////    return array_cast<byte_t>(to_little_endians(state));
+////}
+////
+////template <typename RMD>
+////typename algorithm<RMD>::digest_t algorithm<RMD>::
+////hash(size_t, const byte_t*) NOEXCEPT
+////{
+////    const block_t buffer{};
+////    auto state = H;
+////
+////    // loop/pad
+////    accumulate(state, buffer);
+////
+////    return finalize(state);
+////}
 
-static_assert(R[0] == 11);
-static_assert(R[to_half(rounds)] == 8);
-static_assert(R[sub1(rounds)] == 11);
+// Verify indirection.
 
-static_assert(0 / columns == 0);
-static_assert(15 / columns == 0);
-static_assert(16 / columns == 1);
-static_assert(31 / columns == 1);
-static_assert(32 / columns == 2);
-static_assert(47 / columns == 2);
-static_assert(48 / columns == 3);
-static_assert(63 / columns == 3);
-static_assert(64 / columns == 4);
-static_assert(79 / columns == 4);
+// algorithm<rmd128>
+// ----------------------------------------------------------------------------
 
-static_assert(80 / columns == 5);
-static_assert(95 / columns == 5);
-static_assert(96 / columns == 6);
-static_assert(111 / columns == 6);
-static_assert(112 / columns == 7);
-static_assert(127 / columns == 7);
-static_assert(128 / columns == 8);
-static_assert(143 / columns == 8);
-static_assert(144 / columns == 9);
-static_assert(159 / columns == 9);
+using rmd_128 = algorithm<rmd128>;
 
-static_assert(K[0 / columns] == 0x00000000ul);
-static_assert(K[15 / columns] == 0x00000000ul);
-static_assert(K[16 / columns] == 0x5a827999ul);
-static_assert(K[31 / columns] == 0x5a827999ul);
-static_assert(K[32 / columns] == 0x6ed9eba1ul);
-static_assert(K[47 / columns] == 0x6ed9eba1ul);
-static_assert(K[48 / columns] == 0x8f1bbcdcul);
-static_assert(K[63 / columns] == 0x8f1bbcdcul);
-static_assert(K[64 / columns] == 0xa953fd4eul);
-static_assert(K[79 / columns] == 0xa953fd4eul);
+static_assert(rmd_128::K::word[  0] == 0);
+static_assert(rmd_128::K::word[ 64] == 5);
+static_assert(rmd_128::K::word[127] == 14);
 
-static_assert(K[80 / columns] == 0x50a28be6ul);
-static_assert(K[95 / columns] == 0x50a28be6ul);
-static_assert(K[96 / columns] == 0x5c4dd124ul);
-static_assert(K[111 / columns] == 0x5c4dd124ul);
-static_assert(K[112 / columns] == 0x6d703ef3ul);
-static_assert(K[127 / columns] == 0x6d703ef3ul);
-static_assert(K[128 / columns] == 0x7a6d76e9ul);
-static_assert(K[143 / columns] == 0x7a6d76e9ul);
-static_assert(K[144 / columns] == 0x00000000ul);
-static_assert(K[159 / columns] == 0x00000000ul);
+static_assert(rmd_128::K::rot[  0] == 11);
+static_assert(rmd_128::K::rot[ 64] == 8);
+static_assert(rmd_128::K::rot[127] == 8);
 
-static_assert((0 / columns) % columns == 0);
-static_assert((15 / columns) % columns == 0);
-static_assert((16 / columns) % columns == 1);
-static_assert((31 / columns) % columns == 1);
-static_assert((32 / columns) % columns == 2);
-static_assert((47 / columns) % columns == 2);
-static_assert((48 / columns) % columns == 3);
-static_assert((63 / columns) % columns == 3);
-static_assert((64 / columns) % columns == 4);
-static_assert((79 / columns) % columns == 4);
-static_assert((80 / columns) % columns == 5);
-static_assert((95 / columns) % columns == 5);
-static_assert((96 / columns) % columns == 6);
-static_assert((111 / columns) % columns == 6);
-static_assert((112 / columns) % columns == 7);
-static_assert((127 / columns) % columns == 7);
-static_assert((128 / columns) % columns == 8);
-static_assert((143 / columns) % columns == 8);
-static_assert((144 / columns) % columns == 9);
-static_assert((159 / columns) % columns == 9);
+static_assert( 0 / rmd_128::K::columns == 0);
+static_assert(15 / rmd_128::K::columns == 0);
+static_assert(16 / rmd_128::K::columns == 1);
+static_assert(31 / rmd_128::K::columns == 1);
+static_assert(32 / rmd_128::K::columns == 2);
+static_assert(47 / rmd_128::K::columns == 2);
+static_assert(48 / rmd_128::K::columns == 3);
+static_assert(63 / rmd_128::K::columns == 3);
 
-static_assert(fn<0> == &f0);
-static_assert(fn<15> == &f0);
-static_assert(fn<16> == &f1);
-static_assert(fn<31> == &f1);
-static_assert(fn<32> == &f2);
-static_assert(fn<47> == &f2);
-static_assert(fn<48> == &f3);
-static_assert(fn<63> == &f3);
-static_assert(fn<64> == &f4);
-static_assert(fn<79> == &f4);
+static_assert(64 / rmd_128::K::columns == 4);
+static_assert(79 / rmd_128::K::columns == 4);
+static_assert( 80 / rmd_128::K::columns == 5);
+static_assert( 95 / rmd_128::K::columns == 5);
+static_assert( 96 / rmd_128::K::columns == 6);
+static_assert(111 / rmd_128::K::columns == 6);
+static_assert(112 / rmd_128::K::columns == 7);
+static_assert(127 / rmd_128::K::columns == 7);
 
-static_assert(fn<80> == &f4);
-static_assert(fn<95> == &f4);
-static_assert(fn<96> == &f3);
-static_assert(fn<111> == &f3);
-static_assert(fn<112> == &f2);
-static_assert(fn<127> == &f2);
-static_assert(fn<128> == &f1);
-static_assert(fn<143> == &f1);
-static_assert(fn<144> == &f0);
-static_assert(fn<159> == &f0);
-#endif
+static_assert(rmd_128::K::get[ 0 / rmd_128::K::columns] == 0x00000000);
+static_assert(rmd_128::K::get[15 / rmd_128::K::columns] == 0x00000000);
+static_assert(rmd_128::K::get[16 / rmd_128::K::columns] == 0x5a827999);
+static_assert(rmd_128::K::get[31 / rmd_128::K::columns] == 0x5a827999);
+static_assert(rmd_128::K::get[32 / rmd_128::K::columns] == 0x6ed9eba1);
+static_assert(rmd_128::K::get[47 / rmd_128::K::columns] == 0x6ed9eba1);
+static_assert(rmd_128::K::get[48 / rmd_128::K::columns] == 0x8f1bbcdc);
+static_assert(rmd_128::K::get[63 / rmd_128::K::columns] == 0x8f1bbcdc);
 
-void accumulate(state_t& state, const block_t& block) NOEXCEPT
+static_assert(rmd_128::K::get[ 64 / rmd_128::K::columns] == 0x50a28be6);
+static_assert(rmd_128::K::get[ 79 / rmd_128::K::columns] == 0x50a28be6);
+static_assert(rmd_128::K::get[ 80 / rmd_128::K::columns] == 0x5c4dd124);
+static_assert(rmd_128::K::get[ 95 / rmd_128::K::columns] == 0x5c4dd124);
+static_assert(rmd_128::K::get[ 96 / rmd_128::K::columns] == 0x6d703ef3);
+static_assert(rmd_128::K::get[111 / rmd_128::K::columns] == 0x6d703ef3);
+static_assert(rmd_128::K::get[112 / rmd_128::K::columns] == 0x00000000);
+static_assert(rmd_128::K::get[127 / rmd_128::K::columns] == 0x00000000);
+
+static_assert((  0 / rmd_128::K::columns) % rmd_128::K::columns == 0);
+static_assert(( 15 / rmd_128::K::columns) % rmd_128::K::columns == 0);
+static_assert(( 16 / rmd_128::K::columns) % rmd_128::K::columns == 1);
+static_assert(( 31 / rmd_128::K::columns) % rmd_128::K::columns == 1);
+static_assert(( 32 / rmd_128::K::columns) % rmd_128::K::columns == 2);
+static_assert(( 47 / rmd_128::K::columns) % rmd_128::K::columns == 2);
+static_assert(( 48 / rmd_128::K::columns) % rmd_128::K::columns == 3);
+static_assert(( 63 / rmd_128::K::columns) % rmd_128::K::columns == 3);
+
+static_assert(( 64 / rmd_128::K::columns) % rmd_128::K::columns == 4);
+static_assert(( 79 / rmd_128::K::columns) % rmd_128::K::columns == 4);
+static_assert(( 80 / rmd_128::K::columns) % rmd_128::K::columns == 5);
+static_assert(( 95 / rmd_128::K::columns) % rmd_128::K::columns == 5);
+static_assert(( 96 / rmd_128::K::columns) % rmd_128::K::columns == 6);
+static_assert((111 / rmd_128::K::columns) % rmd_128::K::columns == 6);
+static_assert((112 / rmd_128::K::columns) % rmd_128::K::columns == 7);
+static_assert((127 / rmd_128::K::columns) % rmd_128::K::columns == 7);
+
+struct accessor128
+  : public rmd_128
 {
-    // TODO: array_cast not constexpr.
-    rounding(state, to_little_endians(array_cast<word_t>(block)));
-}
+    template<size_t Round>
+    static constexpr auto functor()
+    {
+        return rmd_128::functor<Round>();
+    }
 
-digest_t finalize(const state_t& state) NOEXCEPT
+    static constexpr auto get_f0()
+    {
+        return &rmd_128::f0<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f1()
+    {
+        return &rmd_128::f1<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f2()
+    {
+        return &rmd_128::f2<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f3()
+    {
+        return &rmd_128::f3<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f4()
+    {
+        return &rmd_128::f4<uint32_t, uint32_t, uint32_t>;
+    }
+};
+
+static_assert(accessor128::functor< 0>() == accessor128::get_f0());
+static_assert(accessor128::functor<15>() == accessor128::get_f0());
+static_assert(accessor128::functor<16>() == accessor128::get_f1());
+static_assert(accessor128::functor<31>() == accessor128::get_f1());
+static_assert(accessor128::functor<32>() == accessor128::get_f2());
+static_assert(accessor128::functor<47>() == accessor128::get_f2());
+static_assert(accessor128::functor<48>() == accessor128::get_f3());
+static_assert(accessor128::functor<63>() == accessor128::get_f3());
+static_assert(accessor128::functor<64>() == accessor128::get_f4());
+static_assert(accessor128::functor<79>() == accessor128::get_f4());
+
+static_assert(accessor128::functor< 80>() == accessor128::get_f4());
+static_assert(accessor128::functor< 95>() == accessor128::get_f4());
+static_assert(accessor128::functor< 96>() == accessor128::get_f3());
+static_assert(accessor128::functor<111>() == accessor128::get_f3());
+static_assert(accessor128::functor<112>() == accessor128::get_f2());
+static_assert(accessor128::functor<127>() == accessor128::get_f2());
+static_assert(accessor128::functor<128>() == accessor128::get_f1());
+static_assert(accessor128::functor<143>() == accessor128::get_f1());
+static_assert(accessor128::functor<144>() == accessor128::get_f0());
+static_assert(accessor128::functor<159>() == accessor128::get_f0());
+
+// algorithm<rmd160>
+// ----------------------------------------------------------------------------
+
+using rmd_160 = algorithm<rmd160>;
+
+static_assert(rmd_160::K::word[  0] == 0);
+static_assert(rmd_160::K::word[ 80] == 5);
+static_assert(rmd_160::K::word[159] == 11);
+
+static_assert(rmd_160::K::rot[  0] == 11);
+static_assert(rmd_160::K::rot[ 80] == 8);
+static_assert(rmd_160::K::rot[159] == 11);
+
+static_assert( 0 / rmd_160::K::columns == 0);
+static_assert(15 / rmd_160::K::columns == 0);
+static_assert(16 / rmd_160::K::columns == 1);
+static_assert(31 / rmd_160::K::columns == 1);
+static_assert(32 / rmd_160::K::columns == 2);
+static_assert(47 / rmd_160::K::columns == 2);
+static_assert(48 / rmd_160::K::columns == 3);
+static_assert(63 / rmd_160::K::columns == 3);
+static_assert(64 / rmd_160::K::columns == 4);
+static_assert(79 / rmd_160::K::columns == 4);
+
+static_assert( 80 / rmd_160::K::columns == 5);
+static_assert( 95 / rmd_160::K::columns == 5);
+static_assert( 96 / rmd_160::K::columns == 6);
+static_assert(111 / rmd_160::K::columns == 6);
+static_assert(112 / rmd_160::K::columns == 7);
+static_assert(127 / rmd_160::K::columns == 7);
+static_assert(128 / rmd_160::K::columns == 8);
+static_assert(143 / rmd_160::K::columns == 8);
+static_assert(144 / rmd_160::K::columns == 9);
+static_assert(159 / rmd_160::K::columns == 9);
+
+static_assert(rmd_160::K::get[ 0 / rmd_160::K::columns] == 0x00000000);
+static_assert(rmd_160::K::get[15 / rmd_160::K::columns] == 0x00000000);
+static_assert(rmd_160::K::get[16 / rmd_160::K::columns] == 0x5a827999);
+static_assert(rmd_160::K::get[31 / rmd_160::K::columns] == 0x5a827999);
+static_assert(rmd_160::K::get[32 / rmd_160::K::columns] == 0x6ed9eba1);
+static_assert(rmd_160::K::get[47 / rmd_160::K::columns] == 0x6ed9eba1);
+static_assert(rmd_160::K::get[48 / rmd_160::K::columns] == 0x8f1bbcdc);
+static_assert(rmd_160::K::get[63 / rmd_160::K::columns] == 0x8f1bbcdc);
+static_assert(rmd_160::K::get[64 / rmd_160::K::columns] == 0xa953fd4e);
+static_assert(rmd_160::K::get[79 / rmd_160::K::columns] == 0xa953fd4e);
+
+static_assert(rmd_160::K::get[ 80 / rmd_160::K::columns] == 0x50a28be6);
+static_assert(rmd_160::K::get[ 95 / rmd_160::K::columns] == 0x50a28be6);
+static_assert(rmd_160::K::get[ 96 / rmd_160::K::columns] == 0x5c4dd124);
+static_assert(rmd_160::K::get[111 / rmd_160::K::columns] == 0x5c4dd124);
+static_assert(rmd_160::K::get[112 / rmd_160::K::columns] == 0x6d703ef3);
+static_assert(rmd_160::K::get[127 / rmd_160::K::columns] == 0x6d703ef3);
+static_assert(rmd_160::K::get[128 / rmd_160::K::columns] == 0x7a6d76e9);
+static_assert(rmd_160::K::get[143 / rmd_160::K::columns] == 0x7a6d76e9);
+static_assert(rmd_160::K::get[144 / rmd_160::K::columns] == 0x00000000);
+static_assert(rmd_160::K::get[159 / rmd_160::K::columns] == 0x00000000);
+
+static_assert((  0 / rmd_160::K::columns) % rmd_160::K::columns == 0);
+static_assert(( 15 / rmd_160::K::columns) % rmd_160::K::columns == 0);
+static_assert(( 16 / rmd_160::K::columns) % rmd_160::K::columns == 1);
+static_assert(( 31 / rmd_160::K::columns) % rmd_160::K::columns == 1);
+static_assert(( 32 / rmd_160::K::columns) % rmd_160::K::columns == 2);
+static_assert(( 47 / rmd_160::K::columns) % rmd_160::K::columns == 2);
+static_assert(( 48 / rmd_160::K::columns) % rmd_160::K::columns == 3);
+static_assert(( 63 / rmd_160::K::columns) % rmd_160::K::columns == 3);
+static_assert(( 64 / rmd_160::K::columns) % rmd_160::K::columns == 4);
+static_assert(( 79 / rmd_160::K::columns) % rmd_160::K::columns == 4);
+static_assert(( 80 / rmd_160::K::columns) % rmd_160::K::columns == 5);
+static_assert(( 95 / rmd_160::K::columns) % rmd_160::K::columns == 5);
+static_assert(( 96 / rmd_160::K::columns) % rmd_160::K::columns == 6);
+static_assert((111 / rmd_160::K::columns) % rmd_160::K::columns == 6);
+static_assert((112 / rmd_160::K::columns) % rmd_160::K::columns == 7);
+static_assert((127 / rmd_160::K::columns) % rmd_160::K::columns == 7);
+static_assert((128 / rmd_160::K::columns) % rmd_160::K::columns == 8);
+static_assert((143 / rmd_160::K::columns) % rmd_160::K::columns == 8);
+static_assert((144 / rmd_160::K::columns) % rmd_160::K::columns == 9);
+static_assert((159 / rmd_160::K::columns) % rmd_160::K::columns == 9);
+
+struct accessor160
+  : public rmd_160
 {
-    // TODO: array_cast not constexpr.
-    return array_cast<byte_t>(to_little_endians(state));
-}
+    template<size_t Round>
+    static constexpr auto functor()
+    {
+        return rmd_160::functor<Round>();
+    }
 
-digest_t hash(size_t, const byte_t*) NOEXCEPT
-{
-    const block_t buffer{};
-    auto state = H;
+    static constexpr auto get_f0()
+    {
+        return &rmd_160::f0<uint32_t, uint32_t, uint32_t>;
+    }
 
-    // loop/pad
-    accumulate(state, buffer);
+    static constexpr auto get_f1()
+    {
+        return &rmd_160::f1<uint32_t, uint32_t, uint32_t>;
+    }
 
-    return finalize(state);
-}
+    static constexpr auto get_f2()
+    {
+        return &rmd_160::f2<uint32_t, uint32_t, uint32_t>;
+    }
 
-// Accumulated and padded as SHA1/256 but with LE count.
-// Can create a unique algorithm (RMD) and pass to accumlator<RMD>.
-// Can split out H/K similiarly to SHA for potential RMD128/MD4/5 support.
+    static constexpr auto get_f3()
+    {
+        return &rmd_160::f3<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f4()
+    {
+        return &rmd_160::f4<uint32_t, uint32_t, uint32_t>;
+    }
+};
+
+static_assert(accessor160::functor< 0>() == accessor160::get_f0());
+static_assert(accessor160::functor<15>() == accessor160::get_f0());
+static_assert(accessor160::functor<16>() == accessor160::get_f1());
+static_assert(accessor160::functor<31>() == accessor160::get_f1());
+static_assert(accessor160::functor<32>() == accessor160::get_f2());
+static_assert(accessor160::functor<47>() == accessor160::get_f2());
+static_assert(accessor160::functor<48>() == accessor160::get_f3());
+static_assert(accessor160::functor<63>() == accessor160::get_f3());
+static_assert(accessor160::functor<64>() == accessor160::get_f4());
+static_assert(accessor160::functor<79>() == accessor160::get_f4());
+
+static_assert(accessor160::functor< 80>() == accessor160::get_f4());
+static_assert(accessor160::functor< 95>() == accessor160::get_f4());
+static_assert(accessor160::functor< 96>() == accessor160::get_f3());
+static_assert(accessor160::functor<111>() == accessor160::get_f3());
+static_assert(accessor160::functor<112>() == accessor160::get_f2());
+static_assert(accessor160::functor<127>() == accessor160::get_f2());
+static_assert(accessor160::functor<128>() == accessor160::get_f1());
+static_assert(accessor160::functor<143>() == accessor160::get_f1());
+static_assert(accessor160::functor<144>() == accessor160::get_f0());
+static_assert(accessor160::functor<159>() == accessor160::get_f0());
 
 BOOST_AUTO_TEST_CASE(rmd_test)
 {
+    BOOST_CHECK(true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
