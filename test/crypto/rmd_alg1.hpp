@@ -276,7 +276,7 @@ public:
     /// I/O (local) types.
     /// -----------------------------------------------------------------------
 
-    /// Chunk is 1/2 block, not same as state/digest (sha160).
+    /// Chunk is 1/2 block, not same as state/digest.
     static constexpr auto block_bytes   = RMD::block_words * RMD::word_bytes;
     static constexpr auto chunk_bytes   = RMD::chunk_words * RMD::word_bytes;
     static constexpr auto digest_bytes  = bytes<RMD::digest>;
@@ -285,7 +285,6 @@ public:
     static constexpr auto big_end_count = false;
 
     /// Blocks is a vector of cref (use emplace(block)).
-    /// count_t is 64/128 bit for 64/128 byte blocks (sha512 uses uintx_t).
     using block_t   = std_array<byte_t, block_bytes>;
     using half_t    = std_array<byte_t, chunk_bytes>;
     using digest_t  = std_array<byte_t, digest_bytes>;

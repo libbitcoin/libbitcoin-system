@@ -595,9 +595,6 @@ protected:
     static constexpr digest_t big_state(const state_t& in) NOEXCEPT;
 };
 
-// TESTS
-// ============================================================================
-
 #ifndef TESTS
 
 // k<,>
