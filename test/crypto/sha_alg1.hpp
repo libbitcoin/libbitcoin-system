@@ -579,22 +579,19 @@ protected:
     static constexpr void prepare(auto& out) NOEXCEPT;
     static constexpr void preparing(buffer_t& out) NOEXCEPT;
     static constexpr void summarize(state_t& out, const state_t& in) NOEXCEPT;
+    static constexpr void push_state(buffer_t& out, const state_t& in) NOEXCEPT;
 
     /// Padding
     /// -----------------------------------------------------------------------
     static constexpr void pad_one(buffer_t& out) NOEXCEPT;
     static constexpr void pad_half(buffer_t& out) NOEXCEPT;
+    static constexpr void pad_state(buffer_t& out) NOEXCEPT;
     static constexpr void pad_count(buffer_t& out, count_t blocks) NOEXCEPT;
 
     /// Parsing
     /// -----------------------------------------------------------------------
     static constexpr void big_one(buffer_t& out, const block_t& in) NOEXCEPT;
     static constexpr void big_half(buffer_t& out, const half_t& in) NOEXCEPT;
-
-    /// State
-    /// -----------------------------------------------------------------------
-    static constexpr void pad_state(buffer_t& out) NOEXCEPT;
-    static constexpr void dup_state(buffer_t& out, const state_t& in) NOEXCEPT;
     static constexpr digest_t big_state(const state_t& in) NOEXCEPT;
 };
 

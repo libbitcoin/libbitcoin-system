@@ -501,6 +501,46 @@ summarize(state_t& out, const state_t& in) NOEXCEPT
     BC_POP_WARNING()
 }
 
+template <typename SHA>
+constexpr void algorithm<SHA>::
+push_state(buffer_t& out, const state_t& in) NOEXCEPT
+{
+    // 5.3 Setting the Initial Hash Value
+    // This is a double hash optimization.
+    if (std::is_constant_evaluated())
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        if constexpr (SHA::digest == 160)
+        {
+            // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
+            out[0] = in[0];
+            out[1] = in[1];
+            out[2] = in[2];
+            out[3] = in[3];
+            out[4] = in[4];
+        }
+        else
+        {
+            // 6.2.2.1 SHA-256 Hash Computation (0 <= t <= 15)
+            // 6.4.2.1 SHA-512 Hash Computation (0 <= t <= 15)
+            out[0] = in[0];
+            out[1] = in[1];
+            out[2] = in[2];
+            out[3] = in[3];
+            out[4] = in[4];
+            out[5] = in[5];
+            out[6] = in[6];
+            out[7] = in[7];
+        }
+        BC_POP_WARNING()
+    }
+    else
+    {
+        // Array cast is a runtime no-op.
+        narrow_array_cast<word_t, array_count<state_t>>(out) = in;
+    }
+}
+
 // 5.1 Padding the Message
 // ---------------------------------------------------------------------------
 // 5.1.1 SHA-1, SHA-224 and SHA-256
@@ -547,6 +587,57 @@ pad_half(buffer_t& out) NOEXCEPT
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
+pad_state(buffer_t& out) NOEXCEPT
+{
+    // This is a double hash optimization.
+    if (std::is_constant_evaluated())
+    {
+        if constexpr (SHA::digest == 160)
+        {
+            // SHA-1 padding of state is 16-5 [11] words.
+            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+            out[ 5] = SHA::pad::state[0];
+            out[ 6] = SHA::pad::state[1];
+            out[ 7] = SHA::pad::state[2];
+            out[ 8] = SHA::pad::state[3];
+            out[ 9] = SHA::pad::state[4];
+            out[10] = SHA::pad::state[5];
+            out[11] = SHA::pad::state[6];
+            out[12] = SHA::pad::state[7];
+            out[13] = SHA::pad::state[8];
+            out[14] = SHA::pad::state[9];
+            out[15] = SHA::pad::state[10];
+            BC_POP_WARNING()
+        }
+        else
+        {
+            // SHA-256/512 padding of state is 16-8 [8] words.
+            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+            out[ 8] = SHA::pad::state[0];
+            out[ 9] = SHA::pad::state[1];
+            out[10] = SHA::pad::state[2];
+            out[11] = SHA::pad::state[3];
+            out[12] = SHA::pad::state[4];
+            out[13] = SHA::pad::state[5];
+            out[14] = SHA::pad::state[6];
+            out[15] = SHA::pad::state[7];
+            BC_POP_WARNING()
+        }
+    }
+    else
+    {
+        // Array cast is a runtime no-op.
+        // TODO: make safe offsetting array cast.
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        constexpr auto pad_size = array_count<statep_t>;
+        auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
+        BC_POP_WARNING()
+        to = SHA::pad::state;
+    }
+}
+
+template <typename SHA>
+constexpr void algorithm<SHA>::
 pad_count(buffer_t& out, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
@@ -567,8 +658,8 @@ pad_count(buffer_t& out, count_t blocks) NOEXCEPT
         out[11] = SHA::pad::block[11];
         out[12] = SHA::pad::block[12];
         out[13] = SHA::pad::block[13];
-        ////out[14] = SHA::pad::stream[14]; // overwritten by count
-        ////out[15] = SHA::pad::stream[15]; // overwritten by count
+        ////out[14] = SHA::pad::block[14]; // overwritten by count
+        ////out[15] = SHA::pad::block[15]; // overwritten by count
         BC_POP_WARNING()
     }
     else
@@ -658,99 +749,6 @@ big_half(buffer_t& out, const half_t& in) NOEXCEPT
     }
 }
 
-// State
-// ---------------------------------------------------------------------------
-
-template <typename SHA>
-constexpr void algorithm<SHA>::
-pad_state(buffer_t& out) NOEXCEPT
-{
-    // This is a double hash optimization.
-    if (std::is_constant_evaluated())
-    {
-        if constexpr (SHA::digest == 160)
-        {
-            // SHA-1 padding of state is 16-5 [11] words.
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-            out[ 5] = SHA::pad::state[0];
-            out[ 6] = SHA::pad::state[1];
-            out[ 7] = SHA::pad::state[2];
-            out[ 8] = SHA::pad::state[3];
-            out[ 9] = SHA::pad::state[4];
-            out[10] = SHA::pad::state[5];
-            out[11] = SHA::pad::state[6];
-            out[12] = SHA::pad::state[7];
-            out[13] = SHA::pad::state[8];
-            out[14] = SHA::pad::state[9];
-            out[15] = SHA::pad::state[10];
-            BC_POP_WARNING()
-        }
-        else
-        {
-            // SHA-256/512 padding of state is 16-8 [8] words.
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-            out[ 8] = SHA::pad::state[0];
-            out[ 9] = SHA::pad::state[1];
-            out[10] = SHA::pad::state[2];
-            out[11] = SHA::pad::state[3];
-            out[12] = SHA::pad::state[4];
-            out[13] = SHA::pad::state[5];
-            out[14] = SHA::pad::state[6];
-            out[15] = SHA::pad::state[7];
-            BC_POP_WARNING()
-        }
-    }
-    else
-    {
-        // Array cast is a runtime no-op.
-        // TODO: make safe offsetting array cast.
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        constexpr auto pad_size = array_count<statep_t>;
-        auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
-        BC_POP_WARNING()
-        to = SHA::pad::state;
-    }
-}
-
-template <typename SHA>
-constexpr void algorithm<SHA>::
-dup_state(buffer_t& out, const state_t& in) NOEXCEPT
-{
-    // 5.3 Setting the Initial Hash Value
-    if (std::is_constant_evaluated())
-    {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        if constexpr (SHA::digest == 160)
-        {
-            // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
-            out[0] = in[0];
-            out[1] = in[1];
-            out[2] = in[2];
-            out[3] = in[3];
-            out[4] = in[4];
-        }
-        else
-        {
-            // 6.2.2.1 SHA-256 Hash Computation (0 <= t <= 15)
-            // 6.4.2.1 SHA-512 Hash Computation (0 <= t <= 15)
-            out[0] = in[0];
-            out[1] = in[1];
-            out[2] = in[2];
-            out[3] = in[3];
-            out[4] = in[4];
-            out[5] = in[5];
-            out[6] = in[6];
-            out[7] = in[7];
-        }
-        BC_POP_WARNING()
-    }
-    else
-    {
-        // Array cast is a runtime no-op.
-        narrow_array_cast<word_t, array_count<state_t>>(out) = in;
-    }
-}
-
 template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 big_state(const state_t& in) NOEXCEPT
@@ -762,20 +760,18 @@ big_state(const state_t& in) NOEXCEPT
     // big-endian I/O is conventional.
     if (std::is_constant_evaluated())
     {
+        digest_t out{};
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         if constexpr (SHA::digest == 160)
         {
-            digest_t out{};
             to_big<0 * SHA::word_bytes>(out, in[0]);
             to_big<1 * SHA::word_bytes>(out, in[1]);
             to_big<2 * SHA::word_bytes>(out, in[2]);
             to_big<3 * SHA::word_bytes>(out, in[3]);
             to_big<4 * SHA::word_bytes>(out, in[4]);
-            return out;
         }
         else
         {
-            digest_t out{};
             to_big<0 * SHA::word_bytes>(out, in[0]);
             to_big<1 * SHA::word_bytes>(out, in[1]);
             to_big<2 * SHA::word_bytes>(out, in[2]);
@@ -784,9 +780,9 @@ big_state(const state_t& in) NOEXCEPT
             to_big<5 * SHA::word_bytes>(out, in[5]);
             to_big<6 * SHA::word_bytes>(out, in[6]);
             to_big<7 * SHA::word_bytes>(out, in[7]);
-            return out;
         }
         BC_POP_WARNING()
+        return out;
     }
     else
     {
@@ -905,7 +901,7 @@ double_hash(const block_t& block) NOEXCEPT
     preparing(space);                   // hash(half)
     rounding(state, space);             // hash(half)
 
-    dup_state(space, state);            // hash(state)
+    push_state(space, state);           // hash(state)
     pad_state(space);                   // hash(state)
     preparing(space);                   // hash(state)
     rounding(state, space);             // hash(state)
@@ -931,7 +927,7 @@ double_hash(const blocks_t& blocks) NOEXCEPT
         preparing(space);               // hash(half)
         rounding(state, space);         // hash(half)
 
-        dup_state(space, state);        // hash(state)
+        push_state(space, state);       // hash(state)
         pad_state(space);               // hash(state)
         preparing(space);               // hash(state)
         rounding(state, space);         // hash(state)
