@@ -273,7 +273,7 @@ using rmd160     = h160<>;
 using rmd160_320 = h160<320>;
 
 /// RMD hashing algorithm.
-template <typename RMD>
+template <typename RMD, bool Concurrent = true>
 class algorithm
 {
 public:
@@ -335,11 +335,11 @@ protected:
     static constexpr auto f3(auto x, auto y, auto z) NOEXCEPT;
     static constexpr auto f4(auto x, auto y, auto z) NOEXCEPT;
 
-    template<size_t Round>
-    static constexpr auto functor() NOEXCEPT;
-
     /// Rounds
     /// -----------------------------------------------------------------------
+
+    template<size_t Round>
+    static constexpr auto functor() NOEXCEPT;
 
     template<size_t Round>
     static constexpr auto round(auto a, auto& b, auto c, auto d, auto& e,
@@ -350,66 +350,22 @@ protected:
 
     template<bool First>
     static constexpr void batch(state_t& out, const words_t& in) NOEXCEPT;
-
-    static constexpr void sum_state(state_t& out, const state_t& in1,
-        const state_t& in2) NOEXCEPT;
     static constexpr void rounding(state_t& state, const words_t& buffer) NOEXCEPT;
-    ////static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
-    ////static digest_t finalize(const state_t& state) NOEXCEPT;
-    ////static digest_t hash(size_t size, const byte_t* in) NOEXCEPT;
+    static constexpr void summarize(state_t& out, const state_t& in1,
+        const state_t& in2) NOEXCEPT;
 
-    ////template<size_t Round>
-    ////static constexpr void round(auto a, auto& b, auto c, auto d, auto& e,
-    ////    auto w) NOEXCEPT;
-    ////
-    ////template<size_t Round>
-    ////static constexpr void round(auto a, auto b, auto c, auto& d, auto e,
-    ////    auto f, auto g, auto& h, auto w) NOEXCEPT;
-    ////
-    ////template<size_t Round>
-    ////static constexpr void round(auto& out, const auto& in) NOEXCEPT;
-    ////static constexpr void rounding(state_t& out, const words_t& in) NOEXCEPT;
-    ////
-    ////template<size_t Word>
-    ////static constexpr void prepare(auto& out) NOEXCEPT;
-    ////static constexpr void preparing(words_t& out) NOEXCEPT;
-    ////
-    /////// Padding
-    /////// -----------------------------------------------------------------------
-    ////static constexpr void pad_one(words_t& out) NOEXCEPT;
-    ////static constexpr void pad_half(words_t& out) NOEXCEPT;
-    ////static constexpr void pad_count(words_t& out, count_t blocks) NOEXCEPT;
-    ////
-    /////// Parsing
-    /////// -----------------------------------------------------------------------
-    ////static constexpr void big_one(words_t& out, const block_t& in) NOEXCEPT;
-    ////static constexpr void big_half(words_t& out, const half_t& in) NOEXCEPT;
-    ////
-    /////// State
-    /////// -----------------------------------------------------------------------
-    ////static constexpr void pad_state(words_t& out) NOEXCEPT;
-    ////static constexpr void dup_state(words_t& out, const state_t& in) NOEXCEPT;
-    ////static constexpr void sum_state(state_t& out, const state_t& in) NOEXCEPT;
-    ////static constexpr void big_state(digest_t& out, const state_t& in) NOEXCEPT;
+    /// Padding
+    /// -----------------------------------------------------------------------
+    static constexpr void pad_one(words_t& out) NOEXCEPT;
+    static constexpr void pad_half(words_t& out) NOEXCEPT;
+    static constexpr void pad_count(words_t& out, count_t blocks) NOEXCEPT;
+    
+    /// Parsing
+    /// -----------------------------------------------------------------------
+    static constexpr void little_one(words_t& out, const block_t& in) NOEXCEPT;
+    static constexpr void little_half(words_t& out, const half_t& in) NOEXCEPT;
+    static constexpr void little_state(digest_t& out, const state_t& in) NOEXCEPT;
 };
-
-// TODO: write class for injection to hash accumulator.
-// TODO: may also need count endianness or serialzier.
-// Hash::state_t
-// Hash::byte_t
-// Hash::digest_t
-// Hash::digest_bytes
-// Hash::count_t
-// Hash::count_bytes
-// Hash::block_t
-// Hash::block_bytes
-// Hash::accumulate
-// Hash::H::get
-// Hash::pad::stream
-// Hash::big_end_count
-
-// TESTS
-// ============================================================================
 
 #ifndef TESTS
 static_assert(k<128>::strength == 128);

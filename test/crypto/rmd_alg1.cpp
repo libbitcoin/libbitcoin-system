@@ -32,67 +32,68 @@ BOOST_AUTO_TEST_SUITE(rmd_tests)
 // Functions.
 // ----------------------------------------------------------------------------
 
-template <typename RMD>
-constexpr auto algorithm<RMD>::
+template <typename RMD, bool Concurrent>
+constexpr auto algorithm<RMD, Concurrent>::
 f0(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ y ^ z;
 }
 
-template <typename RMD>
-constexpr auto algorithm<RMD>::
+template <typename RMD, bool Concurrent>
+constexpr auto algorithm<RMD, Concurrent>::
 f1(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & y) | (~x & z);
 }
 
-template <typename RMD>
-constexpr auto algorithm<RMD>::
+template <typename RMD, bool Concurrent>
+constexpr auto algorithm<RMD, Concurrent>::
 f2(auto x, auto y, auto z) NOEXCEPT
 {
     return (x | ~y) ^ z;
 }
 
-template <typename RMD>
-constexpr auto algorithm<RMD>::
+template <typename RMD, bool Concurrent>
+constexpr auto algorithm<RMD, Concurrent>::
 f3(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & z) | (y & ~z);
 }
 
-template <typename RMD>
-constexpr auto algorithm<RMD>::
+template <typename RMD, bool Concurrent>
+constexpr auto algorithm<RMD, Concurrent>::
 f4(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ (y | ~z);
 }
 
-template <typename RMD>
+// Rounds
+// ---------------------------------------------------------------------------
+
+template <typename RMD, bool Concurrent>
 template<size_t Round>
-constexpr auto algorithm<RMD>::
+constexpr auto algorithm<RMD, Concurrent>::
 functor() NOEXCEPT
 {
     using self = algorithm<RMD>;
     constexpr auto fn = (Round / RMD::K::columns) % RMD::K::columns;
 
-    if constexpr      (fn == 0u || fn == 9u)
-        return &self::f0<uint32_t, uint32_t, uint32_t>;
+    // RMD is limited to uint32_t.
+    if      constexpr (fn == 0u || fn == 9u)
+        return &self::template f0<uint32_t, uint32_t, uint32_t>;
     else if constexpr (fn == 1u || fn == 8u)
-        return &self::f1<uint32_t, uint32_t, uint32_t>;
+        return &self::template f1<uint32_t, uint32_t, uint32_t>;
     else if constexpr (fn == 2u || fn == 7u)
-        return &self::f2<uint32_t, uint32_t, uint32_t>;
+        return &self::template f2<uint32_t, uint32_t, uint32_t>;
     else if constexpr (fn == 3u || fn == 6u)
-        return &self::f3<uint32_t, uint32_t, uint32_t>;
+        return &self::template f3<uint32_t, uint32_t, uint32_t>;
     else if constexpr (fn == 4u || fn == 5u)
-        return &self::f4<uint32_t, uint32_t, uint32_t>;
+        return &self::template f4<uint32_t, uint32_t, uint32_t>;
 }
 
-// Rounds
-// ---------------------------------------------------------------------------
-
-template <typename RMD>
+template <typename RMD, bool Concurrent>
 template<size_t Round>
-constexpr auto algorithm<RMD>::
+constexpr auto algorithm<RMD, Concurrent>::
 round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -103,13 +104,14 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
     BC_POP_WARNING()
     BC_POP_WARNING()
 
+    // TODO: std::rotl(c,10) is not in RMD128.
     e = /*a =*/ std::rotl(a + f(b, c, d) + w + k, r) + e;
-    b = /*c =*/ std::rotl(c, RMD::K::rows);
+    b = /*c =*/ std::rotl(c, 10);
 }
 
-template <typename RMD>
+template <typename RMD, bool Concurrent>
 template<size_t Round>
-constexpr void algorithm<RMD>::
+constexpr void algorithm<RMD, Concurrent>::
 round(auto& out, const auto& in) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -125,11 +127,12 @@ round(auto& out, const auto& in) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename RMD>
+template <typename RMD, bool Concurrent>
 template<bool First>
-constexpr void algorithm<RMD>::
+constexpr void algorithm<RMD, Concurrent>::
 batch(state_t& out, const words_t& in) NOEXCEPT
 {
+    // Order of execution is arbitrary.
     constexpr auto offset = First ? zero : to_half(RMD::rounds);
 
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
@@ -223,9 +226,9 @@ batch(state_t& out, const words_t& in) NOEXCEPT
     round<offset + 79>(pout, pin);
 }
 
-template <typename RMD>
-constexpr void algorithm<RMD>::
-sum_state(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
+summarize(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     out[0] += (in1[0] + in2[0]);
@@ -236,19 +239,145 @@ sum_state(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename RMD>
-constexpr void algorithm<RMD>::
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
 rounding(state_t& state, const words_t& buffer) NOEXCEPT
 {
-    // This can be vectorized (platform specific) or parallelized.
+    // Two copies of state (required by RMD) are saved to jobs.
+    std_array<std::pair<bool, state_t>, two> jobs
+    {
+        std::make_pair(true, state),
+        std::make_pair(false, state)
+    };
 
-    state_t first{ state };
-    batch<true>(first, buffer);
+    if (std::is_constant_evaluated())
+    {
+        batch<true>(jobs.front().second, buffer);
+        batch<false>(jobs.back().second, buffer);
+    }
+    else if constexpr (!Concurrent)
+    {
+        batch<true>(jobs.front().second, buffer);
+        batch<false>(jobs.back().second, buffer);
+    }
+    else
+    {
+        // buffer is const, jobs are independent and unsequenced.
+        std::for_each(std::execution::par_unseq, jobs.begin(), jobs.end(),
+            [&buffer](auto& job) NOEXCEPT
+            {
+                if (job.first)
+                    batch<true>(job.second, buffer);
+                else
+                    batch<false>(job.second, buffer);
+            });
+    }
 
-    state_t second{ state };
-    batch<false>(second, buffer);
+    // Add state from both jobs to original state.
+    summarize(state, jobs.front().second, jobs.back().second);
+}
 
-    sum_state(state, first, second);
+// Streaming single hash functions.
+// ---------------------------------------------------------------------------
+
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
+accumulate(state_t& state, const block_t& block) NOEXCEPT
+{
+    words_t space{};
+    const state_t start{ state };
+    ////little_one(space, block);
+    rounding(state, space);
+}
+
+template <typename RMD, bool Concurrent>
+VCONSTEXPR void algorithm<RMD, Concurrent>::
+accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
+{
+    words_t space{};
+
+    for (auto& block: blocks)
+    {
+        ////little_one(space, block);
+        rounding(state, space);
+    }
+}
+
+template <typename RMD, bool Concurrent>
+constexpr typename algorithm<RMD, Concurrent>::digest_t
+algorithm<RMD, Concurrent>::
+finalize(const state_t& state) NOEXCEPT
+{
+    ////return little_state(state);
+    return {};
+}
+
+// Finalized single hash functions.
+// ---------------------------------------------------------------------------
+
+template <typename RMD, bool Concurrent>
+constexpr typename algorithm<RMD, Concurrent>::digest_t
+algorithm<RMD, Concurrent>::
+hash(const half_t& half) NOEXCEPT
+{
+    // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
+    words_t space{};
+    ////little_half(space, half);
+
+    auto state = RMD::H::get;
+    ////pad_half(space);
+    rounding(state, space);
+
+    return finalize(state);
+}
+
+template <typename RMD, bool Concurrent>
+constexpr typename algorithm<RMD, Concurrent>::digest_t
+algorithm<RMD, Concurrent>::
+hash(const block_t& block) NOEXCEPT
+{
+    words_t space{};
+
+    // process 1 block in (avoid accumulate to reuse buffer).
+    auto state = RMD::H::get;
+    ////little_one(space, block);
+    rounding(state, space);
+    summarize(state, RMD::H::get);
+
+    // full pad block for 1 block (pre-sized/endianed/expanded).
+    const auto start = state;
+    ////pad_one(space);
+    rounding(state, space);
+    summarize(state, start);
+
+    return finalize(state);
+}
+
+// a9b15680fd625f5be3102c6d9e3e181e59be0411
+template <typename RMD, bool Concurrent>
+constexpr typename algorithm<RMD, Concurrent>::digest_t
+algorithm<RMD, Concurrent>::
+hash(const blocks_t& blocks) NOEXCEPT
+{
+    words_t space{};
+    auto state = RMD::H::get;
+    auto start = RMD::H::get;
+
+    // process N blocks (inlined accumulator).
+    for (auto& block : blocks)
+    {
+        ////little_one(space, block);
+        rounding(state, space);
+        summarize(state, start);
+        start = state;
+    }
+
+    // full pad block for N blocks (pre-endianed, size added).
+    ////pad_count(space, blocks.size());
+    rounding(state, space);
+    summarize(state, start);
+
+    return finalize(state);
 }
 
 ////template <typename RMD>
@@ -266,20 +395,52 @@ rounding(state_t& state, const words_t& buffer) NOEXCEPT
 ////    // TODO: array_cast not constexpr.
 ////    return array_cast<byte_t>(to_little_endians(state));
 ////}
-////
-////template <typename RMD>
-////typename algorithm<RMD>::digest_t algorithm<RMD>::
-////hash(size_t, const byte_t*) NOEXCEPT
+
+// TESTS
+// ============================================================================
+
+// sha160
+// ----------------------------------------------------------------------------
+
+using rmd_160 = algorithm<h160<>>;
+using rmd_160_accumulator = sha_tests::accumulator<rmd_160>;
+
+short_hash rmd160_hash(const data_slice& data) NOEXCEPT
+{
+    short_hash hash{};
+    rmd_160_accumulator accumulator;
+    accumulator.write(data.size(), data.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
+short_hash rmd160_hash(const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    short_hash hash{};
+    rmd_160_accumulator accumulator;
+    accumulator.write(left.size(), left.data());
+    accumulator.write(right.size(), right.data());
+    accumulator.flush(hash.data());
+    return hash;
+}
+
+constexpr auto half160 = rmd_160::half_t{};
+constexpr auto full160 = rmd_160::block_t{};
+constexpr auto twin160 = std_array<uint8_t, rmd_160::block_bytes * 2>{};
+constexpr auto expected_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
+constexpr auto expected_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
+constexpr auto expected_twin160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
+
+// algorithm
+
+////BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
 ////{
-////    const block_t buffer{};
-////    auto state = H;
-////
-////    // loop/pad
-////    accumulate(state, buffer);
-////
-////    return finalize(state);
+////    static_assert(rmd_160::hash(half160) == expected_half160);
+////    BOOST_CHECK_EQUAL(rmd_160::hash(half160), expected_half160);
+////    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
 ////}
 
+#ifndef TESTS
 // Verify indirection.
 
 // algorithm<rmd128>
@@ -540,10 +701,6 @@ static_assert(accessor160::functor<128>() == accessor160::get_f1());
 static_assert(accessor160::functor<143>() == accessor160::get_f1());
 static_assert(accessor160::functor<144>() == accessor160::get_f0());
 static_assert(accessor160::functor<159>() == accessor160::get_f0());
-
-BOOST_AUTO_TEST_CASE(rmd_test)
-{
-    BOOST_CHECK(true);
-}
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
