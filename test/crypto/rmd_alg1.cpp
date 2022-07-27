@@ -277,6 +277,194 @@ rounding(state_t& state, const words_t& buffer) NOEXCEPT
     summarize(state, jobs.front().second, jobs.back().second);
 }
 
+// Padding
+// ---------------------------------------------------------------------------
+
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
+pad_one(words_t& out) NOEXCEPT
+{
+    // Pad a single whole block.
+    out = RMD::pad::block;
+}
+
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
+pad_half(words_t& out) NOEXCEPT
+{
+    // Pad a half block.
+    if (std::is_constant_evaluated())
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        out[ 8] = RMD::pad::chunk[0];
+        out[ 9] = RMD::pad::chunk[1];
+        out[10] = RMD::pad::chunk[2];
+        out[11] = RMD::pad::chunk[3];
+        out[12] = RMD::pad::chunk[4];
+        out[13] = RMD::pad::chunk[5];
+        out[14] = RMD::pad::chunk[6];
+        out[15] = RMD::pad::chunk[7];
+        BC_POP_WARNING()
+    }
+    else
+    {
+        // TODO: make safe offsetting array cast.
+        // Array cast is a runtime no-op.
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        constexpr auto pad_size = array_count<chunk_t>;
+        auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
+        BC_POP_WARNING()
+        to = RMD::pad::chunk;
+    }
+}
+
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
+pad_count(words_t& out, count_t blocks) NOEXCEPT
+{
+    // Pad any number of whole blocks.
+    if (std::is_constant_evaluated())
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        out[ 0] = RMD::pad::block[0];
+        out[ 1] = RMD::pad::block[1];
+        out[ 2] = RMD::pad::block[2];
+        out[ 3] = RMD::pad::block[3];
+        out[ 4] = RMD::pad::block[4];
+        out[ 5] = RMD::pad::block[5];
+        out[ 6] = RMD::pad::block[6];
+        out[ 7] = RMD::pad::block[7];
+        out[ 8] = RMD::pad::block[8];
+        out[ 9] = RMD::pad::block[9];
+        out[10] = RMD::pad::block[10];
+        out[11] = RMD::pad::block[11];
+        out[12] = RMD::pad::block[12];
+        out[13] = RMD::pad::block[13];
+        ////out[14] = RMD::pad::block[14]; // overwritten by count
+        ////out[15] = RMD::pad::block[15]; // overwritten by count
+        BC_POP_WARNING()
+    }
+    else
+    {
+        // Array cast is a runtime no-op.
+        // RMD::pad::block is counted, but count will be overwritten below.
+        auto& to = narrow_array_cast<word_t, array_count<words_t>>(out);
+        to = RMD::pad::block;
+    }
+
+    // Copy in the streamed bit count.
+    const auto bits = to_bits(blocks * block_bytes);
+
+    // count_t is twice the size of word_t, so split to hi/low words.
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    out[14] = hi_word<word_t>(bits);
+    out[15] = lo_word<word_t>(bits);
+    BC_POP_WARNING()
+}
+
+// Parsing
+// ---------------------------------------------------------------------------
+
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
+little_one(words_t& out, const block_t& in) NOEXCEPT
+{
+    // little-endian I/O is conventional.
+    if (std::is_constant_evaluated())
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        from_big< 0 * RMD::word_bytes>(out[ 0], in);
+        from_big< 1 * RMD::word_bytes>(out[ 1], in);
+        from_big< 2 * RMD::word_bytes>(out[ 2], in);
+        from_big< 3 * RMD::word_bytes>(out[ 3], in);
+        from_big< 4 * RMD::word_bytes>(out[ 4], in);
+        from_big< 5 * RMD::word_bytes>(out[ 5], in);
+        from_big< 6 * RMD::word_bytes>(out[ 6], in);
+        from_big< 7 * RMD::word_bytes>(out[ 7], in);
+        from_big< 8 * RMD::word_bytes>(out[ 8], in);
+        from_big< 9 * RMD::word_bytes>(out[ 9], in);
+        from_big<10 * RMD::word_bytes>(out[10], in);
+        from_big<11 * RMD::word_bytes>(out[11], in);
+        from_big<12 * RMD::word_bytes>(out[12], in);
+        from_big<13 * RMD::word_bytes>(out[13], in);
+        from_big<14 * RMD::word_bytes>(out[14], in);
+        from_big<15 * RMD::word_bytes>(out[15], in);
+        BC_POP_WARNING()
+    }
+    else
+    {
+        // Array cast is a runtime no-op.
+        // FBE is 1 (or 0) opcode per element and loop-unrolled.
+        auto& from = array_cast<word_t>(in);
+        auto& to = narrow_array_cast<word_t, RMD::block_words>(out);
+        from_little_endians(to, from);
+    }
+}
+
+template <typename RMD, bool Concurrent>
+constexpr void algorithm<RMD, Concurrent>::
+little_half(words_t& out, const half_t& in) NOEXCEPT
+{
+    // little-endian I/O is conventional.
+    if (std::is_constant_evaluated())
+    {
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        from_big<0 * RMD::word_bytes>(out[0], in);
+        from_big<1 * RMD::word_bytes>(out[1], in);
+        from_big<2 * RMD::word_bytes>(out[2], in);
+        from_big<3 * RMD::word_bytes>(out[3], in);
+        from_big<4 * RMD::word_bytes>(out[4], in);
+        from_big<5 * RMD::word_bytes>(out[5], in);
+        from_big<6 * RMD::word_bytes>(out[6], in);
+        from_big<7 * RMD::word_bytes>(out[7], in);
+        BC_POP_WARNING()
+    }
+    else
+    {
+        // Array cast is a runtime no-op.
+        // FBE is 1 (or 0) opcode per element and loop-unrolled.
+        auto& from = array_cast<RMD::word_t>(in);
+        auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
+        from_little_endians(to, from);
+    }
+}
+
+template <typename RMD, bool Concurrent>
+constexpr typename algorithm<RMD, Concurrent>::digest_t
+algorithm<RMD, Concurrent>::
+little_state(const state_t& in) NOEXCEPT
+{
+    // little-endian I/O is conventional.
+    if (std::is_constant_evaluated())
+    {
+        digest_t out{};
+        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        if constexpr (RMD::K::strength == 128)
+        {
+            to_big<0 * RMD::word_bytes>(out, in[0]);
+            to_big<1 * RMD::word_bytes>(out, in[1]);
+            to_big<2 * RMD::word_bytes>(out, in[2]);
+            to_big<3 * RMD::word_bytes>(out, in[3]);
+        }
+        else
+        {
+            to_big<0 * RMD::word_bytes>(out, in[0]);
+            to_big<1 * RMD::word_bytes>(out, in[1]);
+            to_big<2 * RMD::word_bytes>(out, in[2]);
+            to_big<3 * RMD::word_bytes>(out, in[3]);
+            to_big<4 * RMD::word_bytes>(out, in[4]);
+        }
+        BC_POP_WARNING()
+        return out;
+    }
+    else
+    {
+        // Array cast is a runtime no-op.
+        // TBE is 1 (or 0) opcode per element and loop-unrolled.
+        return array_cast<byte_t>(to_little_endians(in));
+    }
+}
+
 // Streaming single hash functions.
 // ---------------------------------------------------------------------------
 
@@ -286,7 +474,7 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     words_t space{};
     const state_t start{ state };
-    ////little_one(space, block);
+    little_one(space, block);
     rounding(state, space);
 }
 
@@ -298,7 +486,7 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 
     for (auto& block: blocks)
     {
-        ////little_one(space, block);
+        little_one(space, block);
         rounding(state, space);
     }
 }
@@ -308,8 +496,7 @@ constexpr typename algorithm<RMD, Concurrent>::digest_t
 algorithm<RMD, Concurrent>::
 finalize(const state_t& state) NOEXCEPT
 {
-    ////return little_state(state);
-    return {};
+    return little_state(state);
 }
 
 // Finalized single hash functions.
@@ -322,10 +509,10 @@ hash(const half_t& half) NOEXCEPT
 {
     // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
     words_t space{};
-    ////little_half(space, half);
+    little_half(space, half);
 
     auto state = RMD::H::get;
-    ////pad_half(space);
+    pad_half(space);
     rounding(state, space);
 
     return finalize(state);
@@ -340,20 +527,19 @@ hash(const block_t& block) NOEXCEPT
 
     // process 1 block in (avoid accumulate to reuse buffer).
     auto state = RMD::H::get;
-    ////little_one(space, block);
+    little_one(space, block);
     rounding(state, space);
     summarize(state, RMD::H::get);
 
     // full pad block for 1 block (pre-sized/endianed/expanded).
     const auto start = state;
-    ////pad_one(space);
+    pad_one(space);
     rounding(state, space);
     summarize(state, start);
 
     return finalize(state);
 }
 
-// a9b15680fd625f5be3102c6d9e3e181e59be0411
 template <typename RMD, bool Concurrent>
 constexpr typename algorithm<RMD, Concurrent>::digest_t
 algorithm<RMD, Concurrent>::
@@ -366,14 +552,14 @@ hash(const blocks_t& blocks) NOEXCEPT
     // process N blocks (inlined accumulator).
     for (auto& block : blocks)
     {
-        ////little_one(space, block);
+        little_one(space, block);
         rounding(state, space);
         summarize(state, start);
         start = state;
     }
 
     // full pad block for N blocks (pre-endianed, size added).
-    ////pad_count(space, blocks.size());
+    pad_count(space, blocks.size());
     rounding(state, space);
     summarize(state, start);
 

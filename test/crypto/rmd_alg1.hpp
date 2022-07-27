@@ -160,7 +160,6 @@ struct h
     using state_t  = std_array<word_t, state_words>;  // IV/state
     using words_t  = std_array<word_t, block_words>;  // one block pad
     using chunk_t  = std_array<word_t, chunk_words>;  // half block pad
-    using statep_t = std_array<word_t, block_words - state_words>; // state pad
     using stream_t = std_array<byte_t, block_words * word_bytes>; // stream pad
 };
 
@@ -191,14 +190,6 @@ struct h128
         {
             0x80000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000, 0x00000100
-        };
-
-        /// state (12 [16-4] words)
-        static constexpr base::statep_t state
-        {
-            0x80000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x000000c8
         };
 
         /// block (16 words)
@@ -250,14 +241,6 @@ struct h160
         /// chunk (8 words)
         static constexpr base::chunk_t chunk = h128<>::pad::chunk;
 
-        /// state (11 [16-5] words)
-        static constexpr base::statep_t state
-        {
-            0x80000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x000000fa
-        };
-
         /// block (16 words)
         static constexpr base::words_t block = h128<>::pad::block;
 
@@ -288,7 +271,6 @@ public:
     using state_t  = typename RMD::state_t;
     using chunk_t  = typename RMD::chunk_t;
     using words_t  = typename RMD::words_t;
-    using statep_t = typename RMD::statep_t;
     using stream_t = typename RMD::stream_t;
 
     /// I/O (local) types.
@@ -364,7 +346,7 @@ protected:
     /// -----------------------------------------------------------------------
     static constexpr void little_one(words_t& out, const block_t& in) NOEXCEPT;
     static constexpr void little_half(words_t& out, const half_t& in) NOEXCEPT;
-    static constexpr void little_state(digest_t& out, const state_t& in) NOEXCEPT;
+    static constexpr digest_t little_state(const state_t& in) NOEXCEPT;
 };
 
 #ifndef TESTS
@@ -422,7 +404,6 @@ static_assert(is_same_type<h<k128, 128>::word_t, uint32_t>);
 static_assert(is_same_type<h<k128, 128>::state_t, std_array<uint32_t, 4>>);
 static_assert(is_same_type<h<k128, 128>::chunk_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<h<k128, 128>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<h<k128, 128>::statep_t, std_array<uint32_t, 12>>);
 static_assert(is_same_type<h<k128, 128>::stream_t, std_array<uint8_t, 64>>);
 
 // h<k160,...>
@@ -439,7 +420,6 @@ static_assert(is_same_type<h<k160, 160>::word_t, uint32_t>);
 static_assert(is_same_type<h<k160, 160>::state_t, std_array<uint32_t, 5>>);
 static_assert(is_same_type<h<k160, 160>::chunk_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<h<k160, 160>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<h<k160, 160>::statep_t, std_array<uint32_t, 11>>);
 static_assert(is_same_type<h<k160, 160>::stream_t, std_array<uint8_t, 64>>);
 
 // h128
@@ -456,9 +436,6 @@ static_assert(h128<>::H::get.size() == 4);
 static_assert(h128<>::pad::chunk.size() == 8);
 static_assert(h128<>::pad::chunk[0] == 0x80000000);
 static_assert(h128<>::pad::chunk[7] == 0x00000100);
-static_assert(h128<>::pad::state.size() == 12);
-static_assert(h128<>::pad::state[0] == 0x80000000);
-static_assert(h128<>::pad::state[11] == 0x000000c8);
 static_assert(h128<>::pad::block.size() == 16);
 static_assert(h128<>::pad::block[0] == 0x80000000);
 static_assert(h128<>::pad::block[15] == 0x00000200);
@@ -482,9 +459,6 @@ static_assert(h160<>::H::get.size() == 5);
 static_assert(h160<>::pad::chunk.size() == 8);
 static_assert(h160<>::pad::chunk[0] == 0x80000000);
 static_assert(h160<>::pad::chunk[7] == 0x00000100);
-static_assert(h160<>::pad::state.size() == 11);
-static_assert(h160<>::pad::state[0] == 0x80000000);
-static_assert(h160<>::pad::state[10] == 0x000000fa);
 static_assert(h160<>::pad::block.size() == 16);
 static_assert(h160<>::pad::block[0] == 0x80000000);
 static_assert(h160<>::pad::block[15] == 0x00000200);
@@ -537,7 +511,6 @@ static_assert(is_same_type<algorithm<rmd128>::word_t, uint32_t>);
 static_assert(is_same_type<algorithm<rmd128>::state_t, std_array<uint32_t, 4>>);
 static_assert(is_same_type<algorithm<rmd128>::chunk_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<algorithm<rmd128>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<algorithm<rmd128>::statep_t, std_array<uint32_t, 12>>);
 static_assert(is_same_type<algorithm<rmd128>::stream_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd128>::block_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd128>::half_t, std_array<uint8_t, 32>>);
@@ -565,7 +538,6 @@ static_assert(is_same_type<algorithm<rmd160>::word_t, uint32_t>);
 static_assert(is_same_type<algorithm<rmd160>::state_t, std_array<uint32_t, 5>>);
 static_assert(is_same_type<algorithm<rmd160>::chunk_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<algorithm<rmd160>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<algorithm<rmd160>::statep_t, std_array<uint32_t, 11>>);
 static_assert(is_same_type<algorithm<rmd160>::stream_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd160>::block_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd160>::half_t, std_array<uint8_t, 32>>);
