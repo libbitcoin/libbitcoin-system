@@ -72,28 +72,6 @@ majority(auto x, auto y, auto z) NOEXCEPT
 }
 
 template <typename SHA>
-template<size_t Round>
-constexpr auto algorithm<SHA>::
-f(auto x, auto y, auto z) NOEXCEPT
-{
-    // 4.1.1 SHA-1 Functions
-    if constexpr (Round >= 0 && Round <= 19)
-    {
-        return choice(x, y, z);
-    }
-    else if constexpr (Round >= 40 && Round <= 59)
-    {
-        return majority(x, y, z);
-    }
-    else
-    {
-        // Round >= 20 && Round <= 39
-        // Round >= 60 && Round <= 79
-        return parity(x, y, z);
-    }
-}
-
-template <typename SHA>
 constexpr auto algorithm<SHA>::
 SIGMA0(auto x) NOEXCEPT
 {
@@ -169,15 +147,39 @@ sigma1(auto x) NOEXCEPT
 
 template <typename SHA>
 template<size_t Round>
+constexpr auto algorithm<SHA>::
+functor() NOEXCEPT
+{
+    using self = algorithm<SHA>;
+    constexpr auto fn = (Round / 20u);
+
+    // 4.1.1 SHA-1 Functions (limited to uint32_t)
+    if      constexpr (fn == 0u)
+        return &self::template choice<uint32_t, uint32_t, uint32_t>;
+    else if constexpr (fn == 1u)
+        return &self::template parity<uint32_t, uint32_t, uint32_t>;
+    else if constexpr (fn == 2u)
+        return &self::template majority<uint32_t, uint32_t, uint32_t>;
+    else if constexpr (fn == 3u)
+        return &self::template parity<uint32_t, uint32_t, uint32_t>;
+}
+
+template <typename SHA>
+template<size_t Round>
 constexpr void algorithm<SHA>::
 round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
     // 4.2.1 SHA-1 Constants
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     constexpr auto k = SHA::K::get[Round];
+    constexpr auto f = functor<Round>();
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 
     // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
     // std::rotl is one opcode when !is_constant_evaluated.
-    const auto t = std::rotl(a, 5) + f<Round>(b, c, d) + e + k + w;
+    const auto t = std::rotl(a, 5) + f(b, c, d) + e + k + w;
     b = /*c =*/ std::rotl(b, 30);
     e = /*a =*/ t;
 }
@@ -190,7 +192,9 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 {
     // 4.2.2 SHA-224 and SHA-256 Constants
     // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     constexpr auto k = SHA::K::get[Round];
+    BC_POP_WARNING()
 
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
@@ -242,6 +246,8 @@ template <typename SHA>
 constexpr void algorithm<SHA>::
 rounding(state_t& out, const buffer_t& in) NOEXCEPT
 {
+    const state_t start{ out };
+
     // Templated constant reduces ops per iteration by 35% (vs. parameter).
     // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
     // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
@@ -342,6 +348,8 @@ rounding(state_t& out, const buffer_t& in) NOEXCEPT
         round<78>(pout, pin);
         round<79>(pout, pin);
     }
+
+    summarize(out, start);
 }
 
 template <typename SHA>
@@ -461,6 +469,36 @@ preparing(buffer_t& out) NOEXCEPT
         prepare<78>(pout);
         prepare<79>(pout);
     }
+}
+
+template <typename SHA>
+constexpr void algorithm<SHA>::
+summarize(state_t& out, const state_t& in) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    if constexpr (SHA::digest == 160)
+    {
+        // 6.1.2.4 SHA-1 Hash Computation
+        out[0] += in[0];
+        out[1] += in[1];
+        out[2] += in[2];
+        out[3] += in[3];
+        out[4] += in[4];
+    }
+    else
+    {
+        // 6.2.2.4 SHA-256 Hash Computation
+        // 6.4.2.4 SHA-512 Hash Computation
+        out[0] += in[0];
+        out[1] += in[1];
+        out[2] += in[2];
+        out[3] += in[3];
+        out[4] += in[4];
+        out[5] += in[5];
+        out[6] += in[6];
+        out[7] += in[7];
+    }
+    BC_POP_WARNING()
 }
 
 // 5.1 Padding the Message
@@ -714,38 +752,8 @@ dup_state(buffer_t& out, const state_t& in) NOEXCEPT
 }
 
 template <typename SHA>
-constexpr void algorithm<SHA>::
-sum_state(state_t& out, const state_t& in) NOEXCEPT
-{
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    if constexpr (SHA::digest == 160)
-    {
-        // 6.1.2.4 SHA-1 Hash Computation
-        out[0] += in[0];
-        out[1] += in[1];
-        out[2] += in[2];
-        out[3] += in[3];
-        out[4] += in[4];
-    }
-    else
-    {
-        // 6.2.2.4 SHA-256 Hash Computation
-        // 6.4.2.4 SHA-512 Hash Computation
-        out[0] += in[0];
-        out[1] += in[1];
-        out[2] += in[2];
-        out[3] += in[3];
-        out[4] += in[4];
-        out[5] += in[5];
-        out[6] += in[6];
-        out[7] += in[7];
-    }
-    BC_POP_WARNING()
-}
-
-template <typename SHA>
-constexpr void algorithm<SHA>::
-big_state(digest_t& out, const state_t& in) NOEXCEPT
+constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
+big_state(const state_t& in) NOEXCEPT
 {
     // 6.1.2 SHA-1   Hash Computation
     // 6.2.2 SHA-256 Hash Computation
@@ -757,14 +765,17 @@ big_state(digest_t& out, const state_t& in) NOEXCEPT
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         if constexpr (SHA::digest == 160)
         {
+            digest_t out{};
             to_big<0 * SHA::word_bytes>(out, in[0]);
             to_big<1 * SHA::word_bytes>(out, in[1]);
             to_big<2 * SHA::word_bytes>(out, in[2]);
             to_big<3 * SHA::word_bytes>(out, in[3]);
             to_big<4 * SHA::word_bytes>(out, in[4]);
+            return out;
         }
         else
         {
+            digest_t out{};
             to_big<0 * SHA::word_bytes>(out, in[0]);
             to_big<1 * SHA::word_bytes>(out, in[1]);
             to_big<2 * SHA::word_bytes>(out, in[2]);
@@ -773,6 +784,7 @@ big_state(digest_t& out, const state_t& in) NOEXCEPT
             to_big<5 * SHA::word_bytes>(out, in[5]);
             to_big<6 * SHA::word_bytes>(out, in[6]);
             to_big<7 * SHA::word_bytes>(out, in[7]);
+            return out;
         }
         BC_POP_WARNING()
     }
@@ -780,7 +792,7 @@ big_state(digest_t& out, const state_t& in) NOEXCEPT
     {
         // Array cast is a runtime no-op.
         // TBE is 1 (or 0) opcode per element and loop-unrolled.
-        to_big_endians(array_cast<word_t>(out), in);
+        return array_cast<byte_t>(to_big_endians(in));
     }
 }
 
@@ -792,11 +804,9 @@ constexpr void algorithm<SHA>::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     buffer_t space{};
-    const state_t start{ state };
     big_one(space, block);
     preparing(space);
     rounding(state, space);
-    sum_state(state, start);
 }
 
 template <typename SHA>
@@ -804,15 +814,12 @@ VCONSTEXPR void algorithm<SHA>::
 accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
     buffer_t space{};
-    state_t start{ state };
 
     for (auto& block: blocks)
     {
         big_one(space, block);
         preparing(space);
         rounding(state, space);
-        sum_state(state, start);
-        start = state;
     }
 }
 
@@ -820,9 +827,7 @@ template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 finalize(const state_t& state) NOEXCEPT
 {
-    digest_t out{};
-    big_state(out, state);
-    return out;
+    return big_state(state);
 }
 
 // Finalized single hash functions.
@@ -832,16 +837,14 @@ template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 hash(const half_t& half) NOEXCEPT
 {
-    // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
     buffer_t space{};
-    big_half(space, half);
-
     auto state = SHA::H::get;
+
+    // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
+    big_half(space, half);
     pad_half(space);
     preparing(space);
     rounding(state, space);
-    sum_state(state, SHA::H::get);
-
     return finalize(state);
 }
 
@@ -850,31 +853,24 @@ constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 hash(const block_t& block) NOEXCEPT
 {
     buffer_t space{};
-
-    // process 1 block in (avoid accumulate to reuse buffer).
     auto state = SHA::H::get;
+
+    // process block 1 (avoid accumulate to reuse buffer).
+    // full pad for block 2 (pre-sized/endianed/expanded).
     big_one(space, block);
     preparing(space);
     rounding(state, space);
-    sum_state(state, SHA::H::get);
-
-    // full pad block for 1 block (pre-sized/endianed/expanded).
-    const auto start = state;
     pad_one(space);
     rounding(state, space);
-    sum_state(state, start);
-
     return finalize(state);
 }
 
-// a9b15680fd625f5be3102c6d9e3e181e59be0411
 template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 hash(const blocks_t& blocks) NOEXCEPT
 {
     buffer_t space{};
     auto state = SHA::H::get;
-    auto start = SHA::H::get;
 
     // process N blocks (inlined accumulator).
     for (auto& block: blocks)
@@ -882,16 +878,12 @@ hash(const blocks_t& blocks) NOEXCEPT
         big_one(space, block);
         preparing(space);
         rounding(state, space);
-        sum_state(state, start);
-        start = state;
     }
 
     // full pad block for N blocks (pre-endianed, size added).
     pad_count(space, blocks.size());
     preparing(space);
     rounding(state, space);
-    sum_state(state, start);
-
     return finalize(state);
 }
 
@@ -903,24 +895,20 @@ constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 double_hash(const block_t& block) NOEXCEPT
 {
     buffer_t space{};
+    auto state = SHA::H::get;
 
-    big_one(space, block);              // hash(block)[part 1]
-    preparing(space);                   // hash(block)[part 1]
-    auto state = SHA::H::get;           // hash(block)[part 1]
-    rounding(state, space);             // hash(block)[part 1]
-    sum_state(state, SHA::H::get);      // hash(block)[part 1]
+    big_one(space, block);              // hash(full)
+    preparing(space);                   // hash(full)
+    rounding(state, space);             // hash(full)
 
-    pad_one(space);                     // hash(block)[part 2]
-    const auto save = state;            // hash(block)[part 2]
-    rounding(state, space);             // hash(block)[part 2]
-    sum_state(state, save);             // hash(block)[part 2]
+    pad_one(space);                     // hash(half)
+    preparing(space);                   // hash(half)
+    rounding(state, space);             // hash(half)
 
     dup_state(space, state);            // hash(state)
     pad_state(space);                   // hash(state)
     preparing(space);                   // hash(state)
-    state = SHA::H::get;                // hash(state)
     rounding(state, space);             // hash(state)
-    sum_state(state, SHA::H::get);      // hash(state)
     return finalize(state);             // hash(state)
 }
 
@@ -931,26 +919,22 @@ double_hash(const blocks_t& blocks) NOEXCEPT
     buffer_t space{};
     digests_t out{};
     out.reserve(to_half(blocks.size()));
+    auto state = SHA::H::get;
 
     for (auto& block: blocks)
     {
-        big_one(space, block);          // hash(block)[part 1]
-        preparing(space);               // hash(block)[part 1]
-        auto state = SHA::H::get;       // hash(block)[part 1]
-        rounding(state, space);         // hash(block)[part 1]
-        sum_state(state, SHA::H::get);  // hash(block)[part 1]
+        big_one(space, block);          // hash(full)
+        preparing(space);               // hash(full)
+        rounding(state, space);         // hash(full)
 
-        pad_one(space);                 // hash(block)[part 2]
-        const auto save = state;        // hash(block)[part 2]
-        rounding(state, space);         // hash(block)[part 2]
-        sum_state(state, save);         // hash(block)[part 2]
+        pad_one(space);                 // hash(half)
+        preparing(space);               // hash(half)
+        rounding(state, space);         // hash(half)
 
         dup_state(space, state);        // hash(state)
         pad_state(space);               // hash(state)
         preparing(space);               // hash(state)
-        state = SHA::H::get;            // hash(state)
         rounding(state, space);         // hash(state)
-        sum_state(state, SHA::H::get);  // hash(state)
         out.push_back(finalize(state)); // hash(state)
     }
 
@@ -991,24 +975,32 @@ constexpr auto twin160 = std_array<uint8_t, sha_160::block_bytes * 2>{};
 constexpr auto expected_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
 constexpr auto expected_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
 constexpr auto expected_twin160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
+constexpr auto expected_merk160 = base16_array("a8782546751527a4a1ad999058165d6af22421c8");
 
 // algorithm
 
-BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__merk160_null_hash__expected)
+{
+    static_assert(sha_160::double_hash(full160) != expected_merk160);
+    BOOST_CHECK_NE(sha_160::double_hash(full160), expected_merk160);
+    BOOST_CHECK_EQUAL(system::sha1_hash(system::sha1_hash(full160)), expected_merk160);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__hash__half160_block_null_hash__expected)
 {
     static_assert(sha_160::hash(half160) == expected_half160);
     BOOST_CHECK_EQUAL(sha_160::hash(half160), expected_half160);
     BOOST_CHECK_EQUAL(system::sha1_hash(half160), expected_half160);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__full160_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__hash__full160_block_null_hash__expected)
 {
     static_assert(sha_160::hash(full160) == expected_full160);
     BOOST_CHECK_EQUAL(sha_160::hash(full160), expected_full160);
     BOOST_CHECK_EQUAL(system::sha1_hash(full160), expected_full160);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__twin160_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__hash__twin160_block_null_hash__expected)
 {
     const std_vector<cref<sha_160::block_t>> twin{ std::cref(full160), std::cref(full160) };
     BOOST_CHECK_EQUAL(sha_160::hash(twin), expected_twin160);
@@ -1017,19 +1009,19 @@ BOOST_AUTO_TEST_CASE(algorithm__twin160_block__null_hash__expected)
 
 // accumulator
 
-BOOST_AUTO_TEST_CASE(accumulator__half160_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__half160_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha160_hash(half160), expected_half160);
     BOOST_CHECK_EQUAL(system::sha1_hash(half160), expected_half160);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__full160_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__full160_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha160_hash(full160), expected_full160);
     BOOST_CHECK_EQUAL(system::sha1_hash(full160), expected_full160);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__twin160_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__twin160_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha160_hash(full160, full160), expected_twin160);
     BOOST_CHECK_EQUAL(system::sha1_hash(twin160), expected_twin160);
@@ -1069,24 +1061,32 @@ constexpr auto twin256 = std_array<uint8_t, sha_256::block_bytes * 2>{};
 constexpr auto expected_half256 = base16_array("66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925");
 constexpr auto expected_full256 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b");
 constexpr auto expected_twin256 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
+constexpr auto expected_merk256 = base16_array("e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
 
 // algorithm
 
-BOOST_AUTO_TEST_CASE(algorithm__half256_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__merk256_null_hash__expected)
+{
+    static_assert(sha_256::double_hash(full256) != expected_merk256);
+    BOOST_CHECK_NE(sha_256::double_hash(full256), expected_merk256);
+    BOOST_CHECK_EQUAL(system::sha256_hash(system::sha256_hash(full256)), expected_merk256);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__hash__half256_block_null_hash__expected)
 {
     static_assert(sha_256::hash(half256) == expected_half256);
     BOOST_CHECK_EQUAL(sha_256::hash(half256), expected_half256);
     BOOST_CHECK_EQUAL(system::sha256_hash(half256), expected_half256);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__full256_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__hash__full256_block_null_hash__expected)
 {
     static_assert(sha_256::hash(full256) == expected_full256);
     BOOST_CHECK_EQUAL(sha_256::hash(full256), expected_full256);
     BOOST_CHECK_EQUAL(system::sha256_hash(full256), expected_full256);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__twin256_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__hash__twin256_block_null_hash__expected)
 {
     const std_vector<cref<sha_256::block_t>> twin{ std::cref(full256), std::cref(full256) };
     BOOST_CHECK_EQUAL(sha_256::hash(twin), expected_twin256);
@@ -1095,19 +1095,19 @@ BOOST_AUTO_TEST_CASE(algorithm__twin256_block__null_hash__expected)
 
 // accumulator
 
-BOOST_AUTO_TEST_CASE(accumulator__half256_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__half256_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha256_hash(half256), expected_half256);
     BOOST_CHECK_EQUAL(system::sha256_hash(half256), expected_half256);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__full256_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__full256_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha256_hash(full256), expected_full256);
     BOOST_CHECK_EQUAL(system::sha256_hash(full256), expected_full256);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__twin256_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__twin256_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha256_hash(full256, full256), expected_twin256);
     BOOST_CHECK_EQUAL(system::sha256_hash(twin256), expected_twin256);
@@ -1150,24 +1150,32 @@ constexpr auto twin512 = std_array<uint8_t, sha_512::block_bytes * 2>{};
 constexpr auto expected_half512 = base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081");
 constexpr auto expected_full512 = base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11");
 constexpr auto expected_twin512 = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
+constexpr auto expected_merk512 = base16_array("56d3e5825edf06e467e50dfeb09c1df2d9940121c05d61a162bfcb80aea3aa5fe958d917ac993d76cd3ea86240fedbb79520ce7b9c275793e3c75a82116cc320");
 
 // algorithm
 
-BOOST_AUTO_TEST_CASE(algorithm__half512_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__merk512_null_hash__expected)
+{
+    static_assert(sha_512::double_hash(full512) != expected_merk512);
+    BOOST_CHECK_NE(sha_512::double_hash(full512), expected_merk512);
+    BOOST_CHECK_EQUAL(system::sha512_hash(system::sha512_hash(full512)), expected_merk512);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__hash__half512_block_null_hash__expected)
 {
     static_assert(sha_512::hash(half512) == expected_half512);
     BOOST_CHECK_EQUAL(sha_512::hash(half512), expected_half512);
     BOOST_CHECK_EQUAL(system::sha512_hash(half512), expected_half512);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__full512_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__hash__full512_block_null_hash__expected)
 {
     static_assert(sha_512::hash(full512) == expected_full512);
     BOOST_CHECK_EQUAL(sha_512::hash(full512), expected_full512);
     BOOST_CHECK_EQUAL(system::sha512_hash(full512), expected_full512);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__twin512_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__hash__twin512_block_null_hash__expected)
 {
     const std_vector<cref<sha_512::block_t>> twin{ std::cref(full512), std::cref(full512) };
     BOOST_CHECK_EQUAL(sha_512::hash(twin), expected_twin512);
@@ -1176,19 +1184,19 @@ BOOST_AUTO_TEST_CASE(algorithm__twin512_block__null_hash__expected)
 
 // accumulator
 
-BOOST_AUTO_TEST_CASE(accumulator__half512_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__half512_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha512_hash(half512), expected_half512);
     BOOST_CHECK_EQUAL(system::sha512_hash(half512), expected_half512);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__full512_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__full512_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha512_hash(full512), expected_full512);
     BOOST_CHECK_EQUAL(system::sha512_hash(full512), expected_full512);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__twin512_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(accumulator__hash__twin512_block_null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha512_hash(full512, full512), expected_twin512);
     BOOST_CHECK_EQUAL(system::sha512_hash(twin512), expected_twin512);

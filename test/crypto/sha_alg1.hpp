@@ -552,8 +552,6 @@ protected:
     static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
     static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;
 
-    template<size_t Round>
-    static constexpr auto f(auto x, auto y, auto z) NOEXCEPT;
     static constexpr auto SIGMA0(auto x) NOEXCEPT;
     static constexpr auto SIGMA1(auto x) NOEXCEPT;
     static constexpr auto sigma0(auto x) NOEXCEPT;
@@ -561,6 +559,9 @@ protected:
 
     /// Rounds
     /// -----------------------------------------------------------------------
+
+    template<size_t Round>
+    static constexpr auto functor() NOEXCEPT;
 
     template<size_t Round>
     static constexpr void round(auto a, auto& b, auto c, auto d, auto& e,
@@ -577,6 +578,7 @@ protected:
     template<size_t Word>
     static constexpr void prepare(auto& out) NOEXCEPT;
     static constexpr void preparing(buffer_t& out) NOEXCEPT;
+    static constexpr void summarize(state_t& out, const state_t& in) NOEXCEPT;
 
     /// Padding
     /// -----------------------------------------------------------------------
@@ -593,8 +595,7 @@ protected:
     /// -----------------------------------------------------------------------
     static constexpr void pad_state(buffer_t& out) NOEXCEPT;
     static constexpr void dup_state(buffer_t& out, const state_t& in) NOEXCEPT;
-    static constexpr void sum_state(state_t& out, const state_t& in) NOEXCEPT;
-    static constexpr void big_state(digest_t& out, const state_t& in) NOEXCEPT;
+    static constexpr digest_t big_state(const state_t& in) NOEXCEPT;
 };
 
 // TESTS
