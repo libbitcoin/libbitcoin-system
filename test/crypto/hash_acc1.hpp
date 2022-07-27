@@ -137,7 +137,7 @@ template <typename Hash, bool Checked>
 constexpr bool accumulator<Hash, Checked>::
 is_buffer_overflow(size_t bytes) NOEXCEPT
 {
-    BC_ASSERT_MSG(!is_zero(bits_ % byte_bits), "fault");
+    BC_ASSERT_MSG(is_zero(bits_ % byte_bits), "fault");
 
     if constexpr (Checked)
     {
