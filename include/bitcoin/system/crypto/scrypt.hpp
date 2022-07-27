@@ -38,9 +38,8 @@ namespace system {
 /// Implementation constraints as fn(size_t), rfc7914 may be more restrictive.
 template<size_t W, size_t R, size_t P>
 constexpr auto is_scrypt_args =
-    !is_zero(R) && !is_zero(P) && 
-    !is_multiply_overflow(R, 2_size * 64_size) &&
-    (W > one) && (power2(floored_log2(W)) == W);
+    (R > 0u) && (P > 0u) && (W > 1u) && (W == power2(floored_log2(W))) &&
+    !is_multiply_overflow(R, 128_size);
 
 /// Concurrent increases memory consumption from minimum to maximum.
 template<size_t W, size_t R, size_t P, bool Concurrent = false,
