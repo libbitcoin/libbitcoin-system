@@ -590,6 +590,7 @@ constexpr void algorithm<SHA>::
 pad_state(buffer_t& out) NOEXCEPT
 {
     // This is a double hash optimization.
+    // This is the same as pad_half unless hash is SHA-1.
     if (std::is_constant_evaluated())
     {
         if constexpr (SHA::digest == 160)
@@ -638,7 +639,7 @@ pad_state(buffer_t& out) NOEXCEPT
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
-pad_count(buffer_t& out, count_t blocks) NOEXCEPT
+pad_n(buffer_t& out, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
     if (std::is_constant_evaluated())
@@ -687,7 +688,7 @@ pad_count(buffer_t& out, count_t blocks) NOEXCEPT
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
-big_one(buffer_t& out, const block_t& in) NOEXCEPT
+input(buffer_t& out, const block_t& in) NOEXCEPT
 {
     // big-endian I/O is conventional.
     if (std::is_constant_evaluated())
@@ -723,7 +724,7 @@ big_one(buffer_t& out, const block_t& in) NOEXCEPT
 
 template <typename SHA>
 constexpr void algorithm<SHA>::
-big_half(buffer_t& out, const half_t& in) NOEXCEPT
+input(buffer_t& out, const half_t& in) NOEXCEPT
 {
     // big-endian I/O is conventional.
     if (std::is_constant_evaluated())
@@ -751,7 +752,7 @@ big_half(buffer_t& out, const half_t& in) NOEXCEPT
 
 template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
-big_state(const state_t& in) NOEXCEPT
+output(const state_t& in) NOEXCEPT
 {
     // 6.1.2 SHA-1   Hash Computation
     // 6.2.2 SHA-256 Hash Computation
@@ -800,7 +801,7 @@ constexpr void algorithm<SHA>::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     buffer_t space{};
-    big_one(space, block);
+    input(space, block);
     preparing(space);
     rounding(state, space);
 }
@@ -813,7 +814,7 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 
     for (auto& block: blocks)
     {
-        big_one(space, block);
+        input(space, block);
         preparing(space);
         rounding(state, space);
     }
@@ -823,7 +824,7 @@ template <typename SHA>
 constexpr typename algorithm<SHA>::digest_t algorithm<SHA>::
 finalize(const state_t& state) NOEXCEPT
 {
-    return big_state(state);
+    return output(state);
 }
 
 // Finalized single hash functions.
@@ -837,7 +838,7 @@ hash(const half_t& half) NOEXCEPT
     auto state = SHA::H::get;
 
     // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
-    big_half(space, half);
+    input(space, half);
     pad_half(space);
     preparing(space);
     rounding(state, space);
@@ -853,7 +854,7 @@ hash(const block_t& block) NOEXCEPT
 
     // process block 1 (avoid accumulate to reuse buffer).
     // full pad for block 2 (pre-sized/endianed/expanded).
-    big_one(space, block);
+    input(space, block);
     preparing(space);
     rounding(state, space);
     pad_one(space);
@@ -871,13 +872,13 @@ hash(const blocks_t& blocks) NOEXCEPT
     // process N blocks (inlined accumulator).
     for (auto& block: blocks)
     {
-        big_one(space, block);
+        input(space, block);
         preparing(space);
         rounding(state, space);
     }
 
     // full pad block for N blocks (pre-endianed, size added).
-    pad_count(space, blocks.size());
+    pad_n(space, blocks.size());
     preparing(space);
     rounding(state, space);
     return finalize(state);
@@ -893,7 +894,7 @@ double_hash(const block_t& block) NOEXCEPT
     buffer_t space{};
     auto state = SHA::H::get;
 
-    big_one(space, block);              // hash(full)
+    input(space, block);                // hash(full)
     preparing(space);                   // hash(full)
     rounding(state, space);             // hash(full)
 
@@ -919,7 +920,7 @@ double_hash(const blocks_t& blocks) NOEXCEPT
 
     for (auto& block: blocks)
     {
-        big_one(space, block);          // hash(full)
+        input(space, block);            // hash(full)
         preparing(space);               // hash(full)
         rounding(state, space);         // hash(full)
 

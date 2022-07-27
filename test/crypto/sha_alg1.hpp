@@ -586,13 +586,13 @@ protected:
     static constexpr void pad_one(buffer_t& out) NOEXCEPT;
     static constexpr void pad_half(buffer_t& out) NOEXCEPT;
     static constexpr void pad_state(buffer_t& out) NOEXCEPT;
-    static constexpr void pad_count(buffer_t& out, count_t blocks) NOEXCEPT;
+    static constexpr void pad_n(buffer_t& out, count_t blocks) NOEXCEPT;
 
     /// Parsing
     /// -----------------------------------------------------------------------
-    static constexpr void big_one(buffer_t& out, const block_t& in) NOEXCEPT;
-    static constexpr void big_half(buffer_t& out, const half_t& in) NOEXCEPT;
-    static constexpr digest_t big_state(const state_t& in) NOEXCEPT;
+    static constexpr void input(buffer_t& out, const block_t& in) NOEXCEPT;
+    static constexpr void input(buffer_t& out, const half_t& in) NOEXCEPT;
+    static constexpr digest_t output(const state_t& in) NOEXCEPT;
 };
 
 #ifndef TESTS
