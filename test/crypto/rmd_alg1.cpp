@@ -75,7 +75,7 @@ template<size_t Round>
 constexpr auto algorithm<RMD, Concurrent>::
 functor() NOEXCEPT
 {
-    using self = algorithm<RMD>;
+    using self = algorithm<RMD, Concurrent>;
     constexpr auto fn = (Round / RMD::K::columns) % RMD::K::columns;
 
     // RMD is limited to uint32_t.
@@ -373,22 +373,22 @@ little_one(words_t& out, const block_t& in) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_big< 0 * RMD::word_bytes>(out[ 0], in);
-        from_big< 1 * RMD::word_bytes>(out[ 1], in);
-        from_big< 2 * RMD::word_bytes>(out[ 2], in);
-        from_big< 3 * RMD::word_bytes>(out[ 3], in);
-        from_big< 4 * RMD::word_bytes>(out[ 4], in);
-        from_big< 5 * RMD::word_bytes>(out[ 5], in);
-        from_big< 6 * RMD::word_bytes>(out[ 6], in);
-        from_big< 7 * RMD::word_bytes>(out[ 7], in);
-        from_big< 8 * RMD::word_bytes>(out[ 8], in);
-        from_big< 9 * RMD::word_bytes>(out[ 9], in);
-        from_big<10 * RMD::word_bytes>(out[10], in);
-        from_big<11 * RMD::word_bytes>(out[11], in);
-        from_big<12 * RMD::word_bytes>(out[12], in);
-        from_big<13 * RMD::word_bytes>(out[13], in);
-        from_big<14 * RMD::word_bytes>(out[14], in);
-        from_big<15 * RMD::word_bytes>(out[15], in);
+        from_little< 0 * RMD::word_bytes>(out[ 0], in);
+        from_little< 1 * RMD::word_bytes>(out[ 1], in);
+        from_little< 2 * RMD::word_bytes>(out[ 2], in);
+        from_little< 3 * RMD::word_bytes>(out[ 3], in);
+        from_little< 4 * RMD::word_bytes>(out[ 4], in);
+        from_little< 5 * RMD::word_bytes>(out[ 5], in);
+        from_little< 6 * RMD::word_bytes>(out[ 6], in);
+        from_little< 7 * RMD::word_bytes>(out[ 7], in);
+        from_little< 8 * RMD::word_bytes>(out[ 8], in);
+        from_little< 9 * RMD::word_bytes>(out[ 9], in);
+        from_little<10 * RMD::word_bytes>(out[10], in);
+        from_little<11 * RMD::word_bytes>(out[11], in);
+        from_little<12 * RMD::word_bytes>(out[12], in);
+        from_little<13 * RMD::word_bytes>(out[13], in);
+        from_little<14 * RMD::word_bytes>(out[14], in);
+        from_little<15 * RMD::word_bytes>(out[15], in);
         BC_POP_WARNING()
     }
     else
@@ -409,14 +409,14 @@ little_half(words_t& out, const half_t& in) NOEXCEPT
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_big<0 * RMD::word_bytes>(out[0], in);
-        from_big<1 * RMD::word_bytes>(out[1], in);
-        from_big<2 * RMD::word_bytes>(out[2], in);
-        from_big<3 * RMD::word_bytes>(out[3], in);
-        from_big<4 * RMD::word_bytes>(out[4], in);
-        from_big<5 * RMD::word_bytes>(out[5], in);
-        from_big<6 * RMD::word_bytes>(out[6], in);
-        from_big<7 * RMD::word_bytes>(out[7], in);
+        from_little<0 * RMD::word_bytes>(out[0], in);
+        from_little<1 * RMD::word_bytes>(out[1], in);
+        from_little<2 * RMD::word_bytes>(out[2], in);
+        from_little<3 * RMD::word_bytes>(out[3], in);
+        from_little<4 * RMD::word_bytes>(out[4], in);
+        from_little<5 * RMD::word_bytes>(out[5], in);
+        from_little<6 * RMD::word_bytes>(out[6], in);
+        from_little<7 * RMD::word_bytes>(out[7], in);
         BC_POP_WARNING()
     }
     else
@@ -588,7 +588,7 @@ hash(const blocks_t& blocks) NOEXCEPT
 // sha160
 // ----------------------------------------------------------------------------
 
-using rmd_160 = algorithm<h160<>>;
+using rmd_160 = algorithm<h160<160>, false>;
 using rmd_160_accumulator = sha_tests::accumulator<rmd_160>;
 
 short_hash rmd160_hash(const data_slice& data) NOEXCEPT
@@ -613,18 +613,18 @@ short_hash rmd160_hash(const data_slice& left, const data_slice& right) NOEXCEPT
 constexpr auto half160 = rmd_160::half_t{};
 constexpr auto full160 = rmd_160::block_t{};
 constexpr auto twin160 = std_array<uint8_t, rmd_160::block_bytes * 2>{};
-constexpr auto expected_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
-constexpr auto expected_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
-constexpr auto expected_twin160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
+constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
+constexpr auto expected_full160 = base16_array("0000000000000000000000000000000000000000");
+constexpr auto expected_twin160 = base16_array("0000000000000000000000000000000000000000");
 
 // algorithm
 
-////BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
-////{
-////    static_assert(rmd_160::hash(half160) == expected_half160);
-////    BOOST_CHECK_EQUAL(rmd_160::hash(half160), expected_half160);
-////    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
-////}
+BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
+{
+    static_assert(rmd_160::hash(half160) != expected_half160);
+    BOOST_CHECK_NE(rmd_160::hash(half160), expected_half160);
+    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
+}
 
 #ifndef TESTS
 // Verify indirection.
@@ -632,102 +632,102 @@ constexpr auto expected_twin160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac4
 // algorithm<rmd128>
 // ----------------------------------------------------------------------------
 
-using rmd_128 = algorithm<rmd128>;
+using k_128 = algorithm<rmd128>::K;
 
-static_assert(rmd_128::K::word[  0] == 0);
-static_assert(rmd_128::K::word[ 64] == 5);
-static_assert(rmd_128::K::word[127] == 14);
+static_assert(k_128::word[  0] == 0);
+static_assert(k_128::word[ 64] == 5);
+static_assert(k_128::word[127] == 14);
 
-static_assert(rmd_128::K::rot[  0] == 11);
-static_assert(rmd_128::K::rot[ 64] == 8);
-static_assert(rmd_128::K::rot[127] == 8);
+static_assert(k_128::rot[  0] == 11);
+static_assert(k_128::rot[ 64] == 8);
+static_assert(k_128::rot[127] == 8);
 
-static_assert( 0 / rmd_128::K::columns == 0);
-static_assert(15 / rmd_128::K::columns == 0);
-static_assert(16 / rmd_128::K::columns == 1);
-static_assert(31 / rmd_128::K::columns == 1);
-static_assert(32 / rmd_128::K::columns == 2);
-static_assert(47 / rmd_128::K::columns == 2);
-static_assert(48 / rmd_128::K::columns == 3);
-static_assert(63 / rmd_128::K::columns == 3);
+static_assert( 0 / k_128::columns == 0);
+static_assert(15 / k_128::columns == 0);
+static_assert(16 / k_128::columns == 1);
+static_assert(31 / k_128::columns == 1);
+static_assert(32 / k_128::columns == 2);
+static_assert(47 / k_128::columns == 2);
+static_assert(48 / k_128::columns == 3);
+static_assert(63 / k_128::columns == 3);
 
-static_assert(64 / rmd_128::K::columns == 4);
-static_assert(79 / rmd_128::K::columns == 4);
-static_assert( 80 / rmd_128::K::columns == 5);
-static_assert( 95 / rmd_128::K::columns == 5);
-static_assert( 96 / rmd_128::K::columns == 6);
-static_assert(111 / rmd_128::K::columns == 6);
-static_assert(112 / rmd_128::K::columns == 7);
-static_assert(127 / rmd_128::K::columns == 7);
+static_assert(64 / k_128::columns == 4);
+static_assert(79 / k_128::columns == 4);
+static_assert( 80 / k_128::columns == 5);
+static_assert( 95 / k_128::columns == 5);
+static_assert( 96 / k_128::columns == 6);
+static_assert(111 / k_128::columns == 6);
+static_assert(112 / k_128::columns == 7);
+static_assert(127 / k_128::columns == 7);
 
-static_assert(rmd_128::K::get[ 0 / rmd_128::K::columns] == 0x00000000);
-static_assert(rmd_128::K::get[15 / rmd_128::K::columns] == 0x00000000);
-static_assert(rmd_128::K::get[16 / rmd_128::K::columns] == 0x5a827999);
-static_assert(rmd_128::K::get[31 / rmd_128::K::columns] == 0x5a827999);
-static_assert(rmd_128::K::get[32 / rmd_128::K::columns] == 0x6ed9eba1);
-static_assert(rmd_128::K::get[47 / rmd_128::K::columns] == 0x6ed9eba1);
-static_assert(rmd_128::K::get[48 / rmd_128::K::columns] == 0x8f1bbcdc);
-static_assert(rmd_128::K::get[63 / rmd_128::K::columns] == 0x8f1bbcdc);
+static_assert(k_128::get[ 0 / k_128::columns] == 0x00000000);
+static_assert(k_128::get[15 / k_128::columns] == 0x00000000);
+static_assert(k_128::get[16 / k_128::columns] == 0x5a827999);
+static_assert(k_128::get[31 / k_128::columns] == 0x5a827999);
+static_assert(k_128::get[32 / k_128::columns] == 0x6ed9eba1);
+static_assert(k_128::get[47 / k_128::columns] == 0x6ed9eba1);
+static_assert(k_128::get[48 / k_128::columns] == 0x8f1bbcdc);
+static_assert(k_128::get[63 / k_128::columns] == 0x8f1bbcdc);
 
-static_assert(rmd_128::K::get[ 64 / rmd_128::K::columns] == 0x50a28be6);
-static_assert(rmd_128::K::get[ 79 / rmd_128::K::columns] == 0x50a28be6);
-static_assert(rmd_128::K::get[ 80 / rmd_128::K::columns] == 0x5c4dd124);
-static_assert(rmd_128::K::get[ 95 / rmd_128::K::columns] == 0x5c4dd124);
-static_assert(rmd_128::K::get[ 96 / rmd_128::K::columns] == 0x6d703ef3);
-static_assert(rmd_128::K::get[111 / rmd_128::K::columns] == 0x6d703ef3);
-static_assert(rmd_128::K::get[112 / rmd_128::K::columns] == 0x00000000);
-static_assert(rmd_128::K::get[127 / rmd_128::K::columns] == 0x00000000);
+static_assert(k_128::get[ 64 / k_128::columns] == 0x50a28be6);
+static_assert(k_128::get[ 79 / k_128::columns] == 0x50a28be6);
+static_assert(k_128::get[ 80 / k_128::columns] == 0x5c4dd124);
+static_assert(k_128::get[ 95 / k_128::columns] == 0x5c4dd124);
+static_assert(k_128::get[ 96 / k_128::columns] == 0x6d703ef3);
+static_assert(k_128::get[111 / k_128::columns] == 0x6d703ef3);
+static_assert(k_128::get[112 / k_128::columns] == 0x00000000);
+static_assert(k_128::get[127 / k_128::columns] == 0x00000000);
 
-static_assert((  0 / rmd_128::K::columns) % rmd_128::K::columns == 0);
-static_assert(( 15 / rmd_128::K::columns) % rmd_128::K::columns == 0);
-static_assert(( 16 / rmd_128::K::columns) % rmd_128::K::columns == 1);
-static_assert(( 31 / rmd_128::K::columns) % rmd_128::K::columns == 1);
-static_assert(( 32 / rmd_128::K::columns) % rmd_128::K::columns == 2);
-static_assert(( 47 / rmd_128::K::columns) % rmd_128::K::columns == 2);
-static_assert(( 48 / rmd_128::K::columns) % rmd_128::K::columns == 3);
-static_assert(( 63 / rmd_128::K::columns) % rmd_128::K::columns == 3);
+static_assert((  0 / k_128::columns) % k_128::columns == 0);
+static_assert(( 15 / k_128::columns) % k_128::columns == 0);
+static_assert(( 16 / k_128::columns) % k_128::columns == 1);
+static_assert(( 31 / k_128::columns) % k_128::columns == 1);
+static_assert(( 32 / k_128::columns) % k_128::columns == 2);
+static_assert(( 47 / k_128::columns) % k_128::columns == 2);
+static_assert(( 48 / k_128::columns) % k_128::columns == 3);
+static_assert(( 63 / k_128::columns) % k_128::columns == 3);
 
-static_assert(( 64 / rmd_128::K::columns) % rmd_128::K::columns == 4);
-static_assert(( 79 / rmd_128::K::columns) % rmd_128::K::columns == 4);
-static_assert(( 80 / rmd_128::K::columns) % rmd_128::K::columns == 5);
-static_assert(( 95 / rmd_128::K::columns) % rmd_128::K::columns == 5);
-static_assert(( 96 / rmd_128::K::columns) % rmd_128::K::columns == 6);
-static_assert((111 / rmd_128::K::columns) % rmd_128::K::columns == 6);
-static_assert((112 / rmd_128::K::columns) % rmd_128::K::columns == 7);
-static_assert((127 / rmd_128::K::columns) % rmd_128::K::columns == 7);
+static_assert(( 64 / k_128::columns) % k_128::columns == 4);
+static_assert(( 79 / k_128::columns) % k_128::columns == 4);
+static_assert(( 80 / k_128::columns) % k_128::columns == 5);
+static_assert(( 95 / k_128::columns) % k_128::columns == 5);
+static_assert(( 96 / k_128::columns) % k_128::columns == 6);
+static_assert((111 / k_128::columns) % k_128::columns == 6);
+static_assert((112 / k_128::columns) % k_128::columns == 7);
+static_assert((127 / k_128::columns) % k_128::columns == 7);
 
 struct accessor128
-  : public rmd_128
+  : public algorithm<rmd128>
 {
     template<size_t Round>
     static constexpr auto functor()
     {
-        return rmd_128::functor<Round>();
+        return algorithm<rmd128>::functor<Round>();
     }
 
     static constexpr auto get_f0()
     {
-        return &rmd_128::f0<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f0<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f1()
     {
-        return &rmd_128::f1<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f1<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f2()
     {
-        return &rmd_128::f2<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f2<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f3()
     {
-        return &rmd_128::f3<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f3<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f4()
     {
-        return &rmd_128::f4<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f4<uint32_t, uint32_t, uint32_t>;
     }
 };
 
@@ -756,113 +756,113 @@ static_assert(accessor128::functor<159>() == accessor128::get_f0());
 // algorithm<rmd160>
 // ----------------------------------------------------------------------------
 
-using rmd_160 = algorithm<rmd160>;
+using k_160 = algorithm<rmd160, true>::K;
 
-static_assert(rmd_160::K::word[  0] == 0);
-static_assert(rmd_160::K::word[ 80] == 5);
-static_assert(rmd_160::K::word[159] == 11);
+static_assert(k_160::word[  0] == 0);
+static_assert(k_160::word[ 80] == 5);
+static_assert(k_160::word[159] == 11);
 
-static_assert(rmd_160::K::rot[  0] == 11);
-static_assert(rmd_160::K::rot[ 80] == 8);
-static_assert(rmd_160::K::rot[159] == 11);
+static_assert(k_160::rot[  0] == 11);
+static_assert(k_160::rot[ 80] == 8);
+static_assert(k_160::rot[159] == 11);
 
-static_assert( 0 / rmd_160::K::columns == 0);
-static_assert(15 / rmd_160::K::columns == 0);
-static_assert(16 / rmd_160::K::columns == 1);
-static_assert(31 / rmd_160::K::columns == 1);
-static_assert(32 / rmd_160::K::columns == 2);
-static_assert(47 / rmd_160::K::columns == 2);
-static_assert(48 / rmd_160::K::columns == 3);
-static_assert(63 / rmd_160::K::columns == 3);
-static_assert(64 / rmd_160::K::columns == 4);
-static_assert(79 / rmd_160::K::columns == 4);
+static_assert( 0 / k_160::columns == 0);
+static_assert(15 / k_160::columns == 0);
+static_assert(16 / k_160::columns == 1);
+static_assert(31 / k_160::columns == 1);
+static_assert(32 / k_160::columns == 2);
+static_assert(47 / k_160::columns == 2);
+static_assert(48 / k_160::columns == 3);
+static_assert(63 / k_160::columns == 3);
+static_assert(64 / k_160::columns == 4);
+static_assert(79 / k_160::columns == 4);
 
-static_assert( 80 / rmd_160::K::columns == 5);
-static_assert( 95 / rmd_160::K::columns == 5);
-static_assert( 96 / rmd_160::K::columns == 6);
-static_assert(111 / rmd_160::K::columns == 6);
-static_assert(112 / rmd_160::K::columns == 7);
-static_assert(127 / rmd_160::K::columns == 7);
-static_assert(128 / rmd_160::K::columns == 8);
-static_assert(143 / rmd_160::K::columns == 8);
-static_assert(144 / rmd_160::K::columns == 9);
-static_assert(159 / rmd_160::K::columns == 9);
+static_assert( 80 / k_160::columns == 5);
+static_assert( 95 / k_160::columns == 5);
+static_assert( 96 / k_160::columns == 6);
+static_assert(111 / k_160::columns == 6);
+static_assert(112 / k_160::columns == 7);
+static_assert(127 / k_160::columns == 7);
+static_assert(128 / k_160::columns == 8);
+static_assert(143 / k_160::columns == 8);
+static_assert(144 / k_160::columns == 9);
+static_assert(159 / k_160::columns == 9);
 
-static_assert(rmd_160::K::get[ 0 / rmd_160::K::columns] == 0x00000000);
-static_assert(rmd_160::K::get[15 / rmd_160::K::columns] == 0x00000000);
-static_assert(rmd_160::K::get[16 / rmd_160::K::columns] == 0x5a827999);
-static_assert(rmd_160::K::get[31 / rmd_160::K::columns] == 0x5a827999);
-static_assert(rmd_160::K::get[32 / rmd_160::K::columns] == 0x6ed9eba1);
-static_assert(rmd_160::K::get[47 / rmd_160::K::columns] == 0x6ed9eba1);
-static_assert(rmd_160::K::get[48 / rmd_160::K::columns] == 0x8f1bbcdc);
-static_assert(rmd_160::K::get[63 / rmd_160::K::columns] == 0x8f1bbcdc);
-static_assert(rmd_160::K::get[64 / rmd_160::K::columns] == 0xa953fd4e);
-static_assert(rmd_160::K::get[79 / rmd_160::K::columns] == 0xa953fd4e);
+static_assert(k_160::get[ 0 / k_160::columns] == 0x00000000);
+static_assert(k_160::get[15 / k_160::columns] == 0x00000000);
+static_assert(k_160::get[16 / k_160::columns] == 0x5a827999);
+static_assert(k_160::get[31 / k_160::columns] == 0x5a827999);
+static_assert(k_160::get[32 / k_160::columns] == 0x6ed9eba1);
+static_assert(k_160::get[47 / k_160::columns] == 0x6ed9eba1);
+static_assert(k_160::get[48 / k_160::columns] == 0x8f1bbcdc);
+static_assert(k_160::get[63 / k_160::columns] == 0x8f1bbcdc);
+static_assert(k_160::get[64 / k_160::columns] == 0xa953fd4e);
+static_assert(k_160::get[79 / k_160::columns] == 0xa953fd4e);
 
-static_assert(rmd_160::K::get[ 80 / rmd_160::K::columns] == 0x50a28be6);
-static_assert(rmd_160::K::get[ 95 / rmd_160::K::columns] == 0x50a28be6);
-static_assert(rmd_160::K::get[ 96 / rmd_160::K::columns] == 0x5c4dd124);
-static_assert(rmd_160::K::get[111 / rmd_160::K::columns] == 0x5c4dd124);
-static_assert(rmd_160::K::get[112 / rmd_160::K::columns] == 0x6d703ef3);
-static_assert(rmd_160::K::get[127 / rmd_160::K::columns] == 0x6d703ef3);
-static_assert(rmd_160::K::get[128 / rmd_160::K::columns] == 0x7a6d76e9);
-static_assert(rmd_160::K::get[143 / rmd_160::K::columns] == 0x7a6d76e9);
-static_assert(rmd_160::K::get[144 / rmd_160::K::columns] == 0x00000000);
-static_assert(rmd_160::K::get[159 / rmd_160::K::columns] == 0x00000000);
+static_assert(k_160::get[ 80 / k_160::columns] == 0x50a28be6);
+static_assert(k_160::get[ 95 / k_160::columns] == 0x50a28be6);
+static_assert(k_160::get[ 96 / k_160::columns] == 0x5c4dd124);
+static_assert(k_160::get[111 / k_160::columns] == 0x5c4dd124);
+static_assert(k_160::get[112 / k_160::columns] == 0x6d703ef3);
+static_assert(k_160::get[127 / k_160::columns] == 0x6d703ef3);
+static_assert(k_160::get[128 / k_160::columns] == 0x7a6d76e9);
+static_assert(k_160::get[143 / k_160::columns] == 0x7a6d76e9);
+static_assert(k_160::get[144 / k_160::columns] == 0x00000000);
+static_assert(k_160::get[159 / k_160::columns] == 0x00000000);
 
-static_assert((  0 / rmd_160::K::columns) % rmd_160::K::columns == 0);
-static_assert(( 15 / rmd_160::K::columns) % rmd_160::K::columns == 0);
-static_assert(( 16 / rmd_160::K::columns) % rmd_160::K::columns == 1);
-static_assert(( 31 / rmd_160::K::columns) % rmd_160::K::columns == 1);
-static_assert(( 32 / rmd_160::K::columns) % rmd_160::K::columns == 2);
-static_assert(( 47 / rmd_160::K::columns) % rmd_160::K::columns == 2);
-static_assert(( 48 / rmd_160::K::columns) % rmd_160::K::columns == 3);
-static_assert(( 63 / rmd_160::K::columns) % rmd_160::K::columns == 3);
-static_assert(( 64 / rmd_160::K::columns) % rmd_160::K::columns == 4);
-static_assert(( 79 / rmd_160::K::columns) % rmd_160::K::columns == 4);
-static_assert(( 80 / rmd_160::K::columns) % rmd_160::K::columns == 5);
-static_assert(( 95 / rmd_160::K::columns) % rmd_160::K::columns == 5);
-static_assert(( 96 / rmd_160::K::columns) % rmd_160::K::columns == 6);
-static_assert((111 / rmd_160::K::columns) % rmd_160::K::columns == 6);
-static_assert((112 / rmd_160::K::columns) % rmd_160::K::columns == 7);
-static_assert((127 / rmd_160::K::columns) % rmd_160::K::columns == 7);
-static_assert((128 / rmd_160::K::columns) % rmd_160::K::columns == 8);
-static_assert((143 / rmd_160::K::columns) % rmd_160::K::columns == 8);
-static_assert((144 / rmd_160::K::columns) % rmd_160::K::columns == 9);
-static_assert((159 / rmd_160::K::columns) % rmd_160::K::columns == 9);
+static_assert((  0 / k_160::columns) % k_160::columns == 0);
+static_assert(( 15 / k_160::columns) % k_160::columns == 0);
+static_assert(( 16 / k_160::columns) % k_160::columns == 1);
+static_assert(( 31 / k_160::columns) % k_160::columns == 1);
+static_assert(( 32 / k_160::columns) % k_160::columns == 2);
+static_assert(( 47 / k_160::columns) % k_160::columns == 2);
+static_assert(( 48 / k_160::columns) % k_160::columns == 3);
+static_assert(( 63 / k_160::columns) % k_160::columns == 3);
+static_assert(( 64 / k_160::columns) % k_160::columns == 4);
+static_assert(( 79 / k_160::columns) % k_160::columns == 4);
+static_assert(( 80 / k_160::columns) % k_160::columns == 5);
+static_assert(( 95 / k_160::columns) % k_160::columns == 5);
+static_assert(( 96 / k_160::columns) % k_160::columns == 6);
+static_assert((111 / k_160::columns) % k_160::columns == 6);
+static_assert((112 / k_160::columns) % k_160::columns == 7);
+static_assert((127 / k_160::columns) % k_160::columns == 7);
+static_assert((128 / k_160::columns) % k_160::columns == 8);
+static_assert((143 / k_160::columns) % k_160::columns == 8);
+static_assert((144 / k_160::columns) % k_160::columns == 9);
+static_assert((159 / k_160::columns) % k_160::columns == 9);
 
 struct accessor160
-  : public rmd_160
+  : public algorithm<rmd128>
 {
     template<size_t Round>
     static constexpr auto functor()
     {
-        return rmd_160::functor<Round>();
+        return algorithm<rmd128>::functor<Round>();
     }
 
     static constexpr auto get_f0()
     {
-        return &rmd_160::f0<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f0<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f1()
     {
-        return &rmd_160::f1<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f1<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f2()
     {
-        return &rmd_160::f2<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f2<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f3()
     {
-        return &rmd_160::f3<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f3<uint32_t, uint32_t, uint32_t>;
     }
 
     static constexpr auto get_f4()
     {
-        return &rmd_160::f4<uint32_t, uint32_t, uint32_t>;
+        return &algorithm<rmd128>::f4<uint32_t, uint32_t, uint32_t>;
     }
 };
 
