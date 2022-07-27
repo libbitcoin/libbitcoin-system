@@ -20,21 +20,22 @@
 
 BOOST_AUTO_TEST_SUITE(sha_tests)
 
-template <typename Word, size_t Rounds,
-    bool_if<is_same_type<Word, uint32_t> ||
-            is_same_type<Word, uint64_t>> = true,
-    bool_if<Rounds == 64 || Rounds == 80> = true,
-    if_integral_integer<Word> = true>
+template <size_t Strength, size_t Rounds,
+    bool_if<Strength == 160 || Strength == 256 || Strength == 512> = true,
+    bool_if<Rounds == 64 || Rounds == 80> = true>
 struct k
 {
-    /// These are exposed through K on the algorithm.
+    static constexpr size_t strength = Strength;
     static constexpr size_t rounds = Rounds;
-    using constants_t = std_array<Word, Rounds>;
+    static constexpr size_t size = (Strength == 160 ? 256 : Strength);
+    using constants_t = std_array<iif<Strength == 512, uint64_t, uint32_t>,
+        Rounds>;
 };
 
-struct k160 : public k<uint32_t, 80>
+struct k160
+  : public k<160, 80>
 {
-    using base = k<uint32_t, 80>;
+    using base = k<160, 80>;
 
     /// K values (constants).
     static constexpr base::constants_t get
@@ -66,13 +67,13 @@ struct k160 : public k<uint32_t, 80>
         0xca62c1d6, 0xca62c1d6, 0xca62c1d6, 0xca62c1d6,
         0xca62c1d6, 0xca62c1d6, 0xca62c1d6, 0xca62c1d6,
         0xca62c1d6, 0xca62c1d6, 0xca62c1d6, 0xca62c1d6
-
     };
 };
 
-struct k256 : public k<uint32_t, 64>
+struct k256
+  : public k<256, 64>
 {
-    using base = k<uint32_t, 64>;
+    using base = k<256, 64>;
 
     /// K values (constants).
     static constexpr constants_t get
@@ -103,9 +104,10 @@ struct k256 : public k<uint32_t, 64>
     };
 };
 
-struct k512 : public k<uint64_t, 80>
+struct k512
+  : public k<512, 80>
 {
-    using base = k<uint64_t, 80>;
+    using base = k<512, 80>;
 
     /// K values (constants).
     static constexpr constants_t get
@@ -162,31 +164,24 @@ struct k512 : public k<uint64_t, 80>
     };
 };
 
-template <size_t Strength, size_t Digest,
-    if_not_greater<Digest, Strength> = true,
-    bool_if<(Strength == 256) || (Strength == 512)> = true>
+template <typename Constants, size_t Digest = Constants::strength,
+    if_not_greater<Digest, Constants::size> = true>
 struct h
 {
-    /// Strength implies block byte size (not cryptographic strength).
-    /// Denormalizations are accepted to generalize SHA1 (160).
-    /// It is unque among the SHA family in that it uses a 5 vs. 8 word state
-    /// (and initialization) vector and, despite operating on the same block
-    /// size as the SHA256 group, applies 80 rounds (like SHA512).
-    using K = iif<Strength == 512, k512, iif<Digest == 160, k160, k256>>;
-    
+    using K = Constants;
+
     /// These constants are exposed though H on the algorithm.
     static constexpr auto digest       = Digest;
-    static constexpr auto strength     = Strength;
+    static constexpr auto size         = K::size;
     static constexpr auto rounds       = K::rounds;
-    static constexpr auto word_bits    = bytes<strength>;
+    static constexpr auto word_bits    = bytes<size>;
     static constexpr auto word_bytes   = bytes<word_bits>;
-    static constexpr auto block_words  = (word_bits / word_bytes) << 1;
+    static constexpr auto block_words  = bytes<size> / to_half(word_bytes);
     static constexpr auto chunk_words  = to_half(block_words);
     static constexpr auto buffer_words = rounds;
     static constexpr auto state_words  = Digest == 160 ? 5 : 8;
 
-    /// These types are exposed though H on the algorithm (as is K above).
-    /// Stream is denormalized (as big-endian bytes) as an optimization.
+    /// These types are exposed though H on the algorithm.
     using byte_t   = uint8_t;
     using word_t   = unsigned_type<word_bytes>;
     using state_t  = std_array<word_t, state_words>;  // IV/state
@@ -198,9 +193,9 @@ struct h
 };
 
 struct h160
-  : public h<256, 160>
+  : public h<k160>
 {
-    using base = h<256, 160>;
+    using base = h<k160>;
 
     struct H
     {
@@ -229,7 +224,7 @@ struct h160
         {
             0x80000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x000000a0
+            0x00000000, 0x00000000, 0x000000fa
         };
 
         /// block (16 words)
@@ -290,11 +285,13 @@ struct h160
     };
 };
 
-template <size_t Digest = 256>
+// Digest 224 changes IV and therefore buffer.
+template <size_t Digest = 256,
+    bool_if<Digest == 224 || Digest == 256> = true>
 struct h256
-  : public h<256, Digest>
+  : public h<k256, Digest>
 {
-    using base = h<256, Digest>;
+    using base = h<k256, Digest>;
 
     struct H
     {
@@ -350,11 +347,14 @@ struct h256
     };
 };
 
-template <size_t Digest = 512>
+// Digest 224/256/384 change IV and therefore buffer.
+template <size_t Digest = 512,
+    bool_if<Digest == 224 || Digest == 256 ||
+            Digest == 384 || Digest == 512> = true>
 struct h512
-  : public h<512, Digest>
+  : public h<k512, Digest>
 {
-    using base = h<512, Digest>;
+    using base = h<k512, Digest>;
 
     struct H
     {
@@ -481,9 +481,9 @@ struct h512
 using sha160     = h160;
 using sha256_224 = h256<224>;
 using sha256_256 = h256<>;
-using sha512_384 = h512<384>;
-using sha512_224 = h512<224>;
 using sha512_256 = h512<256>;
+using sha512_224 = h512<224>;
+using sha512_384 = h512<384>;
 using sha512_512 = h512<>;
 
 /// SHA hashing algorithm.
@@ -491,20 +491,6 @@ template <typename SHA>
 class algorithm
 {
 public:
-    /// Exposed by SHA::H
-    /// static constexpr base::state_t get
-
-    /// Exposed by SHA::K
-    /// using constants_t
-    /// static constexpr size_t rounds
-    /// static constexpr constants_t get
-
-    /// Exposed by SHA::pad
-    /// static constexpr chunk_t chunk
-    /// static constexpr words_t block
-    /// static constexpr stream_t stream
-    /// static constexpr buffer_t buffer
-
     /// SHA alises.
     /// -----------------------------------------------------------------------
 
@@ -614,16 +600,26 @@ protected:
 // TESTS
 // ============================================================================
 
+#ifndef TESTS
+
 // k<,>
-static_assert(k<uint32_t, 64>::rounds == 64);
-static_assert(k<uint32_t, 80>::rounds == 80);
-static_assert(k<uint64_t, 80>::rounds == 80);
-static_assert(is_same_type<k<uint32_t, 64>::constants_t, std_array<uint32_t, 64>>);
-static_assert(is_same_type<k<uint32_t, 80>::constants_t, std_array<uint32_t, 80>>);
-static_assert(is_same_type<k<uint64_t, 80>::constants_t, std_array<uint64_t, 80>>);
+static_assert(k<160, 80>::size == 256);
+static_assert(k<256, 64>::size == 256);
+static_assert(k<512, 80>::size == 512);
+static_assert(k<160, 80>::rounds == 80);
+static_assert(k<256, 64>::rounds == 64);
+static_assert(k<512, 80>::rounds == 80);
+static_assert(k<160, 80>::strength == 160);
+static_assert(k<256, 64>::strength == 256);
+static_assert(k<512, 80>::strength == 512);
+static_assert(is_same_type<k<256, 64>::constants_t, std_array<uint32_t, 64>>);
+static_assert(is_same_type<k<160, 80>::constants_t, std_array<uint32_t, 80>>);
+static_assert(is_same_type<k<512, 80>::constants_t, std_array<uint64_t, 80>>);
 
 // k160
+static_assert(k160::size == 256);
 static_assert(k160::rounds == 80);
+static_assert(k160::strength == 160);
 static_assert(k160::get[0] == 0x5a827999);
 static_assert(k160::get[19] == 0x5a827999);
 static_assert(k160::get[20] == 0x6ed9eba1);
@@ -635,149 +631,163 @@ static_assert(k160::get[79] == 0xca62c1d6);
 static_assert(is_same_type<k160::constants_t, std_array<uint32_t, 80>>);
 
 // k256
+static_assert(k256::size == 256);
 static_assert(k256::rounds == 64);
+static_assert(k256::strength == 256);
 static_assert(k256::get[0] == 0x428a2f98);
 static_assert(k256::get[63] == 0xc67178f2);
 static_assert(is_same_type<k256::constants_t, std_array<uint32_t, 64>>);
 
 // k512
+static_assert(k512::size == 512);
 static_assert(k512::rounds == 80);
+static_assert(k512::strength == 512);
 static_assert(k512::get[0] == 0x428a2f98d728ae22);
 static_assert(k512::get[79] == 0x6c44198c4a475817);
 static_assert(is_same_type<k512::constants_t, std_array<uint64_t, 80>>);
 
-// h<256,...>
-static_assert(h<256, 160>::digest == 160);
-static_assert(h<256, 256>::digest == 256);
-static_assert(h<256, 224>::digest == 224);
-static_assert(h<256, 160>::strength == 256);
-static_assert(h<256, 256>::strength == 256);
-static_assert(h<256, 224>::strength == 256);
-static_assert(h<256, 160>::word_bits == 32);
-static_assert(h<256, 256>::word_bits == 32);
-static_assert(h<256, 224>::word_bits == 32);
-static_assert(h<256, 160>::chunk_words == 8);
-static_assert(h<256, 256>::chunk_words == 8);
-static_assert(h<256, 224>::chunk_words == 8);
-static_assert(h<256, 160>::block_words == 16);
-static_assert(h<256, 256>::block_words == 16);
-static_assert(h<256, 224>::block_words == 16);
-static_assert(h<256, 160>::buffer_words == 80);
-static_assert(h<256, 256>::buffer_words == 64);
-static_assert(h<256, 224>::buffer_words == 64);
-static_assert(h<256, 160>::state_words == 5);
-static_assert(h<256, 256>::state_words == 8);
-static_assert(h<256, 224>::state_words == 8);
-static_assert(is_same_type<h<256, 160>::K, k160>);
-static_assert(is_same_type<h<256, 256>::K, k256>);
-static_assert(is_same_type<h<256, 224>::K, k256>);
-static_assert(is_same_type<h<256, 160>::byte_t, uint8_t>);
-static_assert(is_same_type<h<256, 256>::byte_t, uint8_t>);
-static_assert(is_same_type<h<256, 224>::byte_t, uint8_t>);
-static_assert(is_same_type<h<256, 160>::word_t, uint32_t>);
-static_assert(is_same_type<h<256, 256>::word_t, uint32_t>);
-static_assert(is_same_type<h<256, 224>::word_t, uint32_t>);
-static_assert(is_same_type<h<256, 160>::state_t, std_array<uint32_t, 5>>);
-static_assert(is_same_type<h<256, 256>::state_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<256, 224>::state_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<256, 160>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<256, 256>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<256, 224>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<256, 160>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<h<256, 256>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<h<256, 224>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<h<256, 160>::buffer_t, std_array<uint32_t, 80>>);
-static_assert(is_same_type<h<256, 256>::buffer_t, std_array<uint32_t, 64>>);
-static_assert(is_same_type<h<256, 224>::buffer_t, std_array<uint32_t, 64>>);
-static_assert(is_same_type<h<256, 160>::statep_t, std_array<uint32_t, 11>>);
-static_assert(is_same_type<h<256, 256>::statep_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<256, 224>::statep_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<256, 160>::stream_t, std_array<uint8_t, 64>>);
-static_assert(is_same_type<h<256, 256>::stream_t, std_array<uint8_t, 64>>);
-static_assert(is_same_type<h<256, 224>::stream_t, std_array<uint8_t, 64>>);
+// h<k160,...>
+static_assert(h<k160>::size == 256);
+static_assert(h<k160>::digest == 160);
+static_assert(h<k160, 160>::word_bits == 32);
+static_assert(h<k160, 160>::word_bytes == 4);
+static_assert(h<k160, 160>::chunk_words == 8);
+static_assert(h<k160, 160>::block_words == 16);
+static_assert(h<k160, 160>::buffer_words == 80);
+static_assert(h<k160, 160>::state_words == 5);
+static_assert(is_same_type<h<k160, 160>::K, k160>);
+static_assert(is_same_type<h<k160, 160>::byte_t, uint8_t>);
+static_assert(is_same_type<h<k160, 160>::word_t, uint32_t>);
+static_assert(is_same_type<h<k160, 160>::state_t, std_array<uint32_t, 5>>);
+static_assert(is_same_type<h<k160, 160>::chunk_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<h<k160, 160>::words_t, std_array<uint32_t, 16>>);
+static_assert(is_same_type<h<k160, 160>::buffer_t, std_array<uint32_t, 80>>);
+static_assert(is_same_type<h<k160, 160>::statep_t, std_array<uint32_t, 11>>);
+static_assert(is_same_type<h<k160, 160>::stream_t, std_array<uint8_t, 64>>);
 
-// h<512,...>
-static_assert(h<512, 512>::digest == 512);
-static_assert(h<512, 384>::digest == 384);
-static_assert(h<512, 224>::digest == 224);
-static_assert(h<512, 256>::digest == 256);
-static_assert(h<512, 512>::strength == 512);
-static_assert(h<512, 384>::strength == 512);
-static_assert(h<512, 224>::strength == 512);
-static_assert(h<512, 256>::strength == 512);
-static_assert(h<512, 512>::word_bits == 64);
-static_assert(h<512, 384>::word_bits == 64);
-static_assert(h<512, 224>::word_bits == 64);
-static_assert(h<512, 256>::word_bits == 64);
-static_assert(h<512, 512>::chunk_words == 8);
-static_assert(h<512, 384>::chunk_words == 8);
-static_assert(h<512, 224>::chunk_words == 8);
-static_assert(h<512, 256>::chunk_words == 8);
-static_assert(h<512, 512>::block_words == 16);
-static_assert(h<512, 384>::block_words == 16);
-static_assert(h<512, 224>::block_words == 16);
-static_assert(h<512, 256>::block_words == 16);
-static_assert(h<512, 512>::buffer_words == 80);
-static_assert(h<512, 384>::buffer_words == 80);
-static_assert(h<512, 224>::buffer_words == 80);
-static_assert(h<512, 256>::buffer_words == 80);
-static_assert(h<512, 512>::state_words == 8);
-static_assert(h<512, 384>::state_words == 8);
-static_assert(h<512, 224>::state_words == 8);
-static_assert(h<512, 256>::state_words == 8);
-static_assert(is_same_type<h<512, 512>::K, k512>);
-static_assert(is_same_type<h<512, 384>::K, k512>);
-static_assert(is_same_type<h<512, 224>::K, k512>);
-static_assert(is_same_type<h<512, 256>::K, k512>);
-static_assert(is_same_type<h<512, 512>::byte_t, uint8_t>);
-static_assert(is_same_type<h<512, 384>::byte_t, uint8_t>);
-static_assert(is_same_type<h<512, 224>::byte_t, uint8_t>);
-static_assert(is_same_type<h<512, 256>::byte_t, uint8_t>);
-static_assert(is_same_type<h<512, 512>::word_t, uint64_t>);
-static_assert(is_same_type<h<512, 384>::word_t, uint64_t>);
-static_assert(is_same_type<h<512, 224>::word_t, uint64_t>);
-static_assert(is_same_type<h<512, 256>::word_t, uint64_t>);
-static_assert(is_same_type<h<512, 512>::state_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 384>::state_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 224>::state_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 256>::state_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 512>::chunk_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 384>::chunk_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 224>::chunk_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 256>::chunk_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 512>::words_t, std_array<uint64_t, 16>>);
-static_assert(is_same_type<h<512, 384>::words_t, std_array<uint64_t, 16>>);
-static_assert(is_same_type<h<512, 224>::words_t, std_array<uint64_t, 16>>);
-static_assert(is_same_type<h<512, 256>::words_t, std_array<uint64_t, 16>>);
-static_assert(is_same_type<h<512, 512>::buffer_t, std_array<uint64_t, 80>>);
-static_assert(is_same_type<h<512, 384>::buffer_t, std_array<uint64_t, 80>>);
-static_assert(is_same_type<h<512, 224>::buffer_t, std_array<uint64_t, 80>>);
-static_assert(is_same_type<h<512, 256>::buffer_t, std_array<uint64_t, 80>>);
-static_assert(is_same_type<h<512, 512>::statep_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 384>::statep_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 224>::statep_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 256>::statep_t, std_array<uint64_t, 8>>);
-static_assert(is_same_type<h<512, 512>::stream_t, std_array<uint8_t, 128>>);
-static_assert(is_same_type<h<512, 384>::stream_t, std_array<uint8_t, 128>>);
-static_assert(is_same_type<h<512, 224>::stream_t, std_array<uint8_t, 128>>);
-static_assert(is_same_type<h<512, 256>::stream_t, std_array<uint8_t, 128>>);
+// h<k256,...>
+static_assert(h<k256, 256>::size == 256);
+static_assert(h<k256, 224>::size == 256);
+static_assert(h<k256, 256>::digest == 256);
+static_assert(h<k256, 224>::digest == 224);
+static_assert(h<k256, 256>::word_bits == 32);
+static_assert(h<k256, 224>::word_bits == 32);
+static_assert(h<k256, 256>::word_bytes == 4);
+static_assert(h<k256, 224>::word_bytes == 4);
+static_assert(h<k256, 256>::chunk_words == 8);
+static_assert(h<k256, 224>::chunk_words == 8);
+static_assert(h<k256, 256>::block_words == 16);
+static_assert(h<k256, 224>::block_words == 16);
+static_assert(h<k256, 256>::buffer_words == 64);
+static_assert(h<k256, 224>::buffer_words == 64);
+static_assert(h<k256, 256>::state_words == 8);
+static_assert(h<k256, 224>::state_words == 8);
+static_assert(is_same_type<h<k256, 256>::K, k256>);
+static_assert(is_same_type<h<k256, 224>::K, k256>);
+static_assert(is_same_type<h<k256, 256>::byte_t, uint8_t>);
+static_assert(is_same_type<h<k256, 224>::byte_t, uint8_t>);
+static_assert(is_same_type<h<k256, 256>::word_t, uint32_t>);
+static_assert(is_same_type<h<k256, 224>::word_t, uint32_t>);
+static_assert(is_same_type<h<k256, 256>::state_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<h<k256, 224>::state_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<h<k256, 256>::chunk_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<h<k256, 224>::chunk_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<h<k256, 256>::words_t, std_array<uint32_t, 16>>);
+static_assert(is_same_type<h<k256, 224>::words_t, std_array<uint32_t, 16>>);
+static_assert(is_same_type<h<k256, 256>::buffer_t, std_array<uint32_t, 64>>);
+static_assert(is_same_type<h<k256, 224>::buffer_t, std_array<uint32_t, 64>>);
+static_assert(is_same_type<h<k256, 256>::statep_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<h<k256, 224>::statep_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<h<k256, 256>::stream_t, std_array<uint8_t, 64>>);
+static_assert(is_same_type<h<k256, 224>::stream_t, std_array<uint8_t, 64>>);
+
+// h<k512,...>
+static_assert(h<k512, 512>::size == 512);
+static_assert(h<k512, 384>::size == 512);
+static_assert(h<k512, 224>::size == 512);
+static_assert(h<k512, 256>::size == 512);
+static_assert(h<k512, 512>::digest == 512);
+static_assert(h<k512, 384>::digest == 384);
+static_assert(h<k512, 224>::digest == 224);
+static_assert(h<k512, 256>::digest == 256);
+static_assert(h<k512, 512>::word_bits == 64);
+static_assert(h<k512, 384>::word_bits == 64);
+static_assert(h<k512, 224>::word_bits == 64);
+static_assert(h<k512, 256>::word_bits == 64);
+static_assert(h<k512, 512>::word_bytes == 8);
+static_assert(h<k512, 384>::word_bytes == 8);
+static_assert(h<k512, 224>::word_bytes == 8);
+static_assert(h<k512, 256>::word_bytes == 8);
+static_assert(h<k512, 512>::chunk_words == 8);
+static_assert(h<k512, 384>::chunk_words == 8);
+static_assert(h<k512, 224>::chunk_words == 8);
+static_assert(h<k512, 256>::chunk_words == 8);
+static_assert(h<k512, 512>::block_words == 16);
+static_assert(h<k512, 384>::block_words == 16);
+static_assert(h<k512, 224>::block_words == 16);
+static_assert(h<k512, 256>::block_words == 16);
+static_assert(h<k512, 512>::buffer_words == 80);
+static_assert(h<k512, 384>::buffer_words == 80);
+static_assert(h<k512, 224>::buffer_words == 80);
+static_assert(h<k512, 256>::buffer_words == 80);
+static_assert(h<k512, 512>::state_words == 8);
+static_assert(h<k512, 384>::state_words == 8);
+static_assert(h<k512, 224>::state_words == 8);
+static_assert(h<k512, 256>::state_words == 8);
+static_assert(is_same_type<h<k512, 512>::K, k512>);
+static_assert(is_same_type<h<k512, 384>::K, k512>);
+static_assert(is_same_type<h<k512, 224>::K, k512>);
+static_assert(is_same_type<h<k512, 256>::K, k512>);
+static_assert(is_same_type<h<k512, 512>::byte_t, uint8_t>);
+static_assert(is_same_type<h<k512, 384>::byte_t, uint8_t>);
+static_assert(is_same_type<h<k512, 224>::byte_t, uint8_t>);
+static_assert(is_same_type<h<k512, 256>::byte_t, uint8_t>);
+static_assert(is_same_type<h<k512, 512>::word_t, uint64_t>);
+static_assert(is_same_type<h<k512, 384>::word_t, uint64_t>);
+static_assert(is_same_type<h<k512, 224>::word_t, uint64_t>);
+static_assert(is_same_type<h<k512, 256>::word_t, uint64_t>);
+static_assert(is_same_type<h<k512, 512>::state_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 384>::state_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 224>::state_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 256>::state_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 512>::chunk_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 384>::chunk_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 224>::chunk_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 256>::chunk_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 512>::words_t, std_array<uint64_t, 16>>);
+static_assert(is_same_type<h<k512, 384>::words_t, std_array<uint64_t, 16>>);
+static_assert(is_same_type<h<k512, 224>::words_t, std_array<uint64_t, 16>>);
+static_assert(is_same_type<h<k512, 256>::words_t, std_array<uint64_t, 16>>);
+static_assert(is_same_type<h<k512, 512>::buffer_t, std_array<uint64_t, 80>>);
+static_assert(is_same_type<h<k512, 384>::buffer_t, std_array<uint64_t, 80>>);
+static_assert(is_same_type<h<k512, 224>::buffer_t, std_array<uint64_t, 80>>);
+static_assert(is_same_type<h<k512, 256>::buffer_t, std_array<uint64_t, 80>>);
+static_assert(is_same_type<h<k512, 512>::statep_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 384>::statep_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 224>::statep_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 256>::statep_t, std_array<uint64_t, 8>>);
+static_assert(is_same_type<h<k512, 512>::stream_t, std_array<uint8_t, 128>>);
+static_assert(is_same_type<h<k512, 384>::stream_t, std_array<uint8_t, 128>>);
+static_assert(is_same_type<h<k512, 224>::stream_t, std_array<uint8_t, 128>>);
+static_assert(is_same_type<h<k512, 256>::stream_t, std_array<uint8_t, 128>>);
 
 // h160
+static_assert(h160::size == 256);
 static_assert(h160::digest == 160);
-static_assert(h160::strength == 256);
 static_assert(h160::rounds == 80);
 static_assert(h160::K::rounds == 80);
 static_assert(h160::K::get[0] == 0x5a827999);
 static_assert(h160::K::get[79] == 0xca62c1d6);
-static_assert(h160::H::get.size() == 5);
+static_assert(h160::K::get.size() == 80);
 static_assert(h160::H::get[0] == 0x67452301);
 static_assert(h160::H::get[4] == 0xc3d2e1f0);
+static_assert(h160::H::get.size() == 5);
 static_assert(h160::pad::chunk.size() == 8);
 static_assert(h160::pad::chunk[0] == 0x80000000);
 static_assert(h160::pad::chunk[7] == 0x00000100);
 static_assert(h160::pad::state.size() == 11);
 static_assert(h160::pad::state[0] == 0x80000000);
-static_assert(h160::pad::state[10] == 0x000000a0);
+static_assert(h160::pad::state[10] == 0x000000fa);
 static_assert(h160::pad::block.size() == 16);
 static_assert(h160::pad::block[0] == 0x80000000);
 static_assert(h160::pad::block[15] == 0x00000200);
@@ -789,15 +799,16 @@ static_assert(h160::pad::stream[0] == 0x80);
 static_assert(h160::pad::stream[63] == 0x00);
 
 // h256<256>
+static_assert(h256<256>::size == 256);
 static_assert(h256<256>::digest == 256);
-static_assert(h256<256>::strength == 256);
 static_assert(h256<256>::rounds == 64);
 static_assert(h256<256>::K::rounds == 64);
 static_assert(h256<256>::K::get[0] == 0x428a2f98);
 static_assert(h256<256>::K::get[63] == 0xc67178f2);
-static_assert(h256<256>::H::get.size() == 8);
+static_assert(h256<256>::K::get.size() == 64);
 static_assert(h256<256>::H::get[0] == 0x6a09e667);
 static_assert(h256<256>::H::get[7] == 0x5be0cd19);
+static_assert(h256<256>::H::get.size() == 8);
 static_assert(h256<256>::pad::chunk.size() == 8);
 static_assert(h256<256>::pad::chunk[0] == 0x80000000);
 static_assert(h256<256>::pad::chunk[7] == 0x00000100);
@@ -815,15 +826,16 @@ static_assert(h256<256>::pad::stream[0] == 0x80);
 static_assert(h256<256>::pad::stream[63] == 0x00);
 
 // h512<512>
+static_assert(h512<512>::size == 512);
 static_assert(h512<512>::digest == 512);
-static_assert(h512<512>::strength == 512);
 static_assert(h512<512>::rounds == 80);
 static_assert(h512<512>::K::rounds == 80);
 static_assert(h512<512>::K::get[0] == 0x428a2f98d728ae22);
 static_assert(h512<512>::K::get[79] == 0x6c44198c4a475817);
-static_assert(h512<512>::H::get.size() == 8);
+static_assert(h512<512>::K::get.size() == 80);
 static_assert(h512<512>::H::get[0] == 0x6a09e667f3bcc908);
 static_assert(h512<512>::H::get[7] == 0x5be0cd19137e2179);
+static_assert(h512<512>::H::get.size() == 8);
 static_assert(h512<512>::pad::chunk.size() == 8);
 static_assert(h512<512>::pad::chunk[0] == 0x8000000000000000);
 static_assert(h512<512>::pad::chunk[7] == 0x0000000000000200);
@@ -841,8 +853,8 @@ static_assert(h512<512>::pad::stream[0] == 0x80);
 static_assert(h512<512>::pad::stream[127] == 0x00);
 
 // sha160
+static_assert(sha160::size == 256);
 static_assert(sha160::digest == 160);
-static_assert(sha160::strength == 256);
 static_assert(sha160::K::rounds == 80);
 static_assert(sha160::K::get.size() == 80);
 static_assert(sha160::K::get[0] == 0x5a827999);
@@ -852,8 +864,8 @@ static_assert(sha160::H::get[0] == 0x67452301);
 static_assert(sha160::H::get[4] == 0xc3d2e1f0);
 
 // sha256_256
+static_assert(sha256_256::size == 256);
 static_assert(sha256_256::digest == 256);
-static_assert(sha256_256::strength == 256);
 static_assert(sha256_256::K::rounds == 64);
 static_assert(sha256_256::K::get.size() == 64);
 static_assert(sha256_256::K::get[0] == 0x428a2f98);
@@ -863,8 +875,8 @@ static_assert(sha256_256::H::get[0] == 0x6a09e667);
 static_assert(sha256_256::H::get[7] == 0x5be0cd19);
 
 // sha512_512
+static_assert(sha512_512::size == 512);
 static_assert(sha512_512::digest == 512);
-static_assert(sha512_512::strength == 512);
 static_assert(sha512_512::K::rounds == 80);
 static_assert(sha512_512::K::get.size() == 80);
 static_assert(sha512_512::K::get[0] == 0x428a2f98d728ae22);
@@ -872,6 +884,12 @@ static_assert(sha512_512::K::get[79] == 0x6c44198c4a475817);
 static_assert(sha512_512::H::get.size() == 8);
 static_assert(sha512_512::H::get[0] == 0x6a09e667f3bcc908);
 static_assert(sha512_512::H::get[7] == 0x5be0cd19137e2179);
+
+// Truncations.
+static_assert(sha256_224::digest == 224);
+static_assert(sha512_256::digest == 256);
+static_assert(sha512_224::digest == 224);
+static_assert(sha512_384::digest == 384);
 
 // algorithm<sha160>
 static_assert(algorithm<sha160>::big_end_count);
@@ -973,5 +991,6 @@ static_assert(is_same_type<decltype(algorithm<sha512_512>::limit_bytes), const u
 ////using sha_512 = algorithm<h512<>>;
 ////static_assert(sha_512::hash(sha_512::half_t{})  == base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"));
 ////static_assert(sha_512::hash(sha_512::block_t{}) == base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11"));
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
