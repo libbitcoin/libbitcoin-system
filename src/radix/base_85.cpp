@@ -102,7 +102,7 @@ bool encode_base85(std::string& out, const data_slice& in) NOEXCEPT
     if (!is_zero(size % 4u))
         return false;
 
-    const auto length = (size * 5u) * 4u;
+    const auto length = (size * 5u) / 4u;
     out.reserve(add1(length));
     size_t accumulator{};
     size_t index{};
