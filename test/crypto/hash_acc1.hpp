@@ -141,13 +141,8 @@ is_buffer_overflow(size_t bytes) NOEXCEPT
 
     if constexpr (Checked)
     {
-        using count = Hash::count_t;
-        constexpr auto size = possible_wide_cast<count>(Hash::count_bytes);
-        const auto more = possible_wide_cast<count>(bytes);
         const auto used = to_floored_bytes(bits_);
-        return
-            is_add_overflow<count>(used, more) ||
-            is_add_overflow<count>(size, used + more);
+        return bytes > Hash::limit_bytes - used;
     }
     else
     {
