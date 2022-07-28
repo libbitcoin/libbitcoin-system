@@ -86,9 +86,6 @@ protected:
     using prblock_t = std_array<rblock_t, P>;
     using wrblock_t = std_array<rblock_t, W>;
 
-    template<typename Block>
-    static inline auto allocate() NOEXCEPT;
-    static constexpr auto parallel() NOEXCEPT;
     static constexpr words_t& add(words_t& to, const words_t& from) NOEXCEPT;
     static constexpr block_t& xor_(block_t& to, const block_t& from) NOEXCEPT;
     static constexpr rblock_t& xor_(rblock_t& to, const rblock_t& from) NOEXCEPT;
@@ -99,6 +96,11 @@ protected:
     static block_t& salsa_8(block_t& block) NOEXCEPT;
     static bool block_mix(rblock_t& rblock) NOEXCEPT;
     static bool romix(rblock_t& rblock) NOEXCEPT;
+
+private:
+    template<typename Block>
+    static inline auto allocate() NOEXCEPT;
+    static constexpr auto concurrency() NOEXCEPT;
 };
 
 /// Litecoin/BIP38 scrypt arguments.

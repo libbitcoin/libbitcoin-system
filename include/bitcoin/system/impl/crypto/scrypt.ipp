@@ -41,8 +41,11 @@ template<size_t W, size_t R, size_t P, bool Concurrent, \
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
+// private
+// ----------------------------------------------------------------------------
+
 TEMPLATE
-constexpr auto CLASS::parallel() NOEXCEPT
+constexpr auto CLASS::concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
         return std::execution::par_unseq;
@@ -60,6 +63,9 @@ inline auto CLASS::allocate() NOEXCEPT
     BC_POP_WARNING()
     BC_POP_WARNING()
 }
+
+// protected
+// ----------------------------------------------------------------------------
 
 TEMPLATE
 constexpr CLASS::words_t& CLASS::add(words_t& to,
@@ -481,6 +487,9 @@ bool CLASS::romix(rblock_t& rblock) NOEXCEPT
     return true;
 }
 
+// public
+// ----------------------------------------------------------------------------
+
 TEMPLATE
 bool CLASS::hash(const data_slice& phrase, const data_slice& salt,
     uint8_t* buffer, size_t size) NOEXCEPT
@@ -510,7 +519,7 @@ bool CLASS::hash(const data_slice& phrase, const data_slice& salt,
     //    B[i] = scryptROMix (r, B[i], N)
     // end for
     std::atomic_bool success{ true };
-    std::for_each(parallel(), prblocks.begin(), prblocks.end(),
+    std::for_each(concurrency(), prblocks.begin(), prblocks.end(),
         [&](rblock_t& rblock) NOEXCEPT
         {
             success = success && romix(rblock);
