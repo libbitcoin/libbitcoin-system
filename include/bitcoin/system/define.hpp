@@ -53,12 +53,14 @@ namespace bc = libbitcoin;
 /// NDEBUG (conditional exclusion).
 /// ---------------------------------------------------------------------------
 
-#ifdef NDEBUG
+#if defined(NDEBUG)
+    namespace libbitcoin { constexpr auto checked_build = false; };
     #define BC_ASSERT(expression)
     #define BC_ASSERT_MSG(expression, text)
     #define BC_DEBUG_ONLY(expression)
 #else
     #include <cassert>
+    namespace libbitcoin { constexpr auto checked_build = true; };
     #define BC_ASSERT(expression) assert(expression)
     #define BC_ASSERT_MSG(expression, text) assert((expression)&&(text))
     #define BC_DEBUG_ONLY(expression) expression
@@ -109,13 +111,22 @@ namespace bc = libbitcoin;
 
 /// A stronger compiler hint for inlining.
 /// May use prior to 'constexpr' or in place of 'inline'.
-#if defined (HAVE_MSC)
+#if defined(HAVE_MSC)
     #define FORCE_INLINE __forceinline
 #elif defined(HAVE_GNUC)
     #define FORCE_INLINE __attribute__((always_inline))
 #else
     #define FORCE_INLINE inline
 #endif
+
+/// Class helpers
+/// ---------------------------------------------------------------------------
+#define DEFAULT5(class_name) \
+    class_name(class_name&&) = default; \
+    class_name(const class_name&) = default; \
+    class_name& operator=(class_name&&) = default; \
+    class_name& operator=(const class_name&) = default; \
+    ~accumulator() = default
 
 /// Minimums
 /// ---------------------------------------------------------------------------
