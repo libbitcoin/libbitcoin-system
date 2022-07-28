@@ -46,7 +46,8 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 TEMPLATE
 template<typename Block>
-inline auto CLASS::allocate() NOEXCEPT
+inline auto CLASS::
+allocate() NOEXCEPT
 {
     BC_PUSH_WARNING(NO_NEW_OR_DELETE)
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -56,7 +57,8 @@ inline auto CLASS::allocate() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL auto CLASS::concurrency() NOEXCEPT
+CONSTEVAL auto CLASS::
+concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
         return std::execution::par_unseq;
@@ -68,8 +70,8 @@ CONSTEVAL auto CLASS::concurrency() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr CLASS::words_t& CLASS::add(words_t& to,
-    const words_t& from) NOEXCEPT
+constexpr typename CLASS::words_t& CLASS::
+add(words_t& to, const words_t& from) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pto = to.data();
@@ -99,8 +101,8 @@ constexpr CLASS::words_t& CLASS::add(words_t& to,
 }
 
 TEMPLATE
-constexpr CLASS::block_t& CLASS::xor_(block_t& to,
-    const block_t& from) NOEXCEPT
+constexpr typename CLASS::block_t& CLASS::
+xor_(block_t& to, const block_t& from) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pto = to.data();
@@ -178,8 +180,8 @@ constexpr CLASS::block_t& CLASS::xor_(block_t& to,
 }
 
 TEMPLATE
-constexpr CLASS::rblock_t& CLASS::xor_(rblock_t& to,
-    const rblock_t& from) NOEXCEPT
+constexpr typename CLASS::rblock_t& CLASS::
+xor_(rblock_t& to, const rblock_t& from) NOEXCEPT
 {
     for (size_t i = 0; i < (R << 1); ++i)
         xor_(to[i], from[i]);
@@ -204,7 +206,8 @@ inline size_t CLASS::index(const rblock_t& rblock) NOEXCEPT
 
 TEMPLATE
 template <size_t A, size_t B, size_t C, size_t D>
-constexpr void CLASS::salsa_qr(words_t& words) NOEXCEPT
+constexpr void CLASS::
+salsa_qr(words_t& words) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pwords = words.data();
@@ -220,7 +223,8 @@ constexpr void CLASS::salsa_qr(words_t& words) NOEXCEPT
 }
 
 TEMPLATE
-CLASS::block_t& CLASS::salsa_8(block_t& block) NOEXCEPT
+inline typename CLASS::block_t& CLASS::
+salsa_8(block_t& block) NOEXCEPT
 {
     // Save a copy of the block and make a block of working space.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -341,7 +345,8 @@ CLASS::block_t& CLASS::salsa_8(block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-inline bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
+inline bool CLASS::
+block_mix(rblock_t& rblock) NOEXCEPT
 {
     // Make a working block initialized from rblock.back().
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -451,7 +456,8 @@ inline bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
 }
 
 TEMPLATE
-inline bool CLASS::romix(rblock_t& rblock) NOEXCEPT
+inline bool CLASS::
+romix(rblock_t& rblock) NOEXCEPT
 {
     // Make a working set of W rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -491,8 +497,9 @@ inline bool CLASS::romix(rblock_t& rblock) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-bool CLASS::hash(const data_slice& phrase, const data_slice& salt,
-    uint8_t* buffer, size_t size) NOEXCEPT
+bool CLASS::
+hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
+    size_t size) NOEXCEPT
 {
     static_assert(size_of<prblock_t>() <= pbkd::sha256::maximum_size);
     if (is_null(buffer) || (size > pbkd::sha256::maximum_size))

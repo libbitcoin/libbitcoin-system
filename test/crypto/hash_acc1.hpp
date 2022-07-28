@@ -97,38 +97,44 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
 
 TEMPLATE
-constexpr CLASS::accumulator() NOEXCEPT
+constexpr CLASS::
+accumulator() NOEXCEPT
   : size_{ zero }, state_{ Algorithm::H::get }
 {
 }
 
 TEMPLATE
-constexpr CLASS::accumulator(size_t blocks, const state_t& state) NOEXCEPT
+constexpr CLASS::
+accumulator(size_t blocks, const state_t& state) NOEXCEPT
   : size_{ blocks }, state_{ state }
 {
 }
 
 TEMPLATE
-constexpr void CLASS::reset() NOEXCEPT
+constexpr void CLASS::
+reset() NOEXCEPT
 {
     size_ = zero;
     state_ = Algorithm::H::get;
 }
 
 TEMPLATE
-constexpr size_t CLASS::next() const NOEXCEPT
+constexpr size_t CLASS::
+next() const NOEXCEPT
 {
     return size_ % block_size;
 }
 
 TEMPLATE
-constexpr size_t CLASS::gap() const NOEXCEPT
+constexpr size_t CLASS::
+gap() const NOEXCEPT
 {
     return block_size - next();
 }
 
 TEMPLATE
-constexpr bool CLASS::is_buffer_overflow(size_t bytes) NOEXCEPT
+constexpr bool CLASS::
+is_buffer_overflow(size_t bytes) NOEXCEPT
 {
     if constexpr (Checked)
     {
@@ -147,7 +153,8 @@ constexpr bool CLASS::is_buffer_overflow(size_t bytes) NOEXCEPT
 }
 
 TEMPLATE
-constexpr size_t CLASS::add_data(size_t bytes, const byte_t* data) NOEXCEPT
+constexpr size_t CLASS::
+add_data(size_t bytes, const byte_t* data) NOEXCEPT
 {
     // No bytes accepted on overflow (if checked) or uncleared buffer.
     if (is_buffer_overflow(bytes) || is_zero(gap()))
@@ -160,7 +167,8 @@ constexpr size_t CLASS::add_data(size_t bytes, const byte_t* data) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::increment(size_t blocks) NOEXCEPT
+constexpr void CLASS::
+increment(size_t blocks) NOEXCEPT
 {
     BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_size), "overflow");
     BC_ASSERT_MSG(!is_multiply_overflow(blocks, block_size), "overflow");
@@ -171,7 +179,8 @@ constexpr void CLASS::increment(size_t blocks) NOEXCEPT
 }
 
 TEMPLATE
-constexpr size_t CLASS::pad_size() const NOEXCEPT
+constexpr size_t CLASS::
+pad_size() const NOEXCEPT
 {
     constexpr auto singled = block_size - count_size;
     constexpr auto doubled = block_size + singled;
@@ -181,8 +190,8 @@ constexpr size_t CLASS::pad_size() const NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::counter
-CLASS::serialize(size_t bytes) NOEXCEPT
+constexpr typename CLASS::counter CLASS::
+serialize(size_t bytes) NOEXCEPT
 {
     if constexpr (Algorithm::big_end_count)
     {
@@ -198,7 +207,8 @@ CLASS::serialize(size_t bytes) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-inline bool CLASS::write(const data_slice& data) NOEXCEPT
+inline bool CLASS::
+write(const data_slice& data) NOEXCEPT
 {
     auto size = data.size();
     auto pdata = data.data();
@@ -244,13 +254,15 @@ inline bool CLASS::write(const data_slice& data) NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::block_t CLASS::stream_pad() NOEXCEPT
+CONSTEVAL typename CLASS::block_t CLASS::
+stream_pad() NOEXCEPT
 {
     return { bit_hi<byte_t> };
 }
 
 TEMPLATE
-constexpr CLASS::digest_t CLASS::flush() NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+flush() NOEXCEPT
 {
     constexpr auto pad = stream_pad();
 
@@ -261,14 +273,16 @@ constexpr CLASS::digest_t CLASS::flush() NOEXCEPT
 }
 
 TEMPLATE
-inline bool CLASS::write(size_t size, const byte_t* data) NOEXCEPT
+inline bool CLASS::
+write(size_t size, const byte_t* data) NOEXCEPT
 {
     // TODO: data_slice pointer/size overload.
     return write(data_slice(data, std::next(data, size)));
 }
 
 TEMPLATE
-inline void CLASS::flush(byte_t* digest) NOEXCEPT
+inline void CLASS::
+flush(byte_t* digest) NOEXCEPT
 {
     // TODO: could also provide a data_slab overload.
     unsafe_array_cast<byte_t, array_count<digest_t>>(digest) = flush();

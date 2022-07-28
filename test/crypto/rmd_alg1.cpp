@@ -42,7 +42,8 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-CONSTEVAL auto CLASS::concurrency() NOEXCEPT
+CONSTEVAL auto CLASS::
+concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
         return std::execution::par_unseq;
@@ -52,7 +53,8 @@ CONSTEVAL auto CLASS::concurrency() NOEXCEPT
 
 
 TEMPLATE
-CONSTEVAL CLASS::chunk_t CLASS::chunk_pad() NOEXCEPT
+CONSTEVAL typename CLASS::chunk_t CLASS::
+chunk_pad() NOEXCEPT
 {
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
 
@@ -63,7 +65,8 @@ CONSTEVAL CLASS::chunk_t CLASS::chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::words_t CLASS::block_pad() NOEXCEPT
+CONSTEVAL typename CLASS::words_t CLASS::
+block_pad() NOEXCEPT
 {
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
 
@@ -74,7 +77,8 @@ CONSTEVAL CLASS::words_t CLASS::block_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::blocks_pad_t CLASS::blocks_pad() NOEXCEPT
+CONSTEVAL typename CLASS::blocks_pad_t CLASS::
+blocks_pad() NOEXCEPT
 {
     blocks_pad_t out{};
     out.front() = bit_hi<word_t>;
@@ -85,31 +89,36 @@ CONSTEVAL CLASS::blocks_pad_t CLASS::blocks_pad() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr auto CLASS::f0(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+f0(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ y ^ z;
 }
 
 TEMPLATE
-constexpr auto CLASS::f1(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+f1(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & y) | (~x & z);
 }
 
 TEMPLATE
-constexpr auto CLASS::f2(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+f2(auto x, auto y, auto z) NOEXCEPT
 {
     return (x | ~y) ^ z;
 }
 
 TEMPLATE
-constexpr auto CLASS::f3(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+f3(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & z) | (y & ~z);
 }
 
 TEMPLATE
-constexpr auto CLASS::f4(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+f4(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ (y | ~z);
 }
@@ -119,7 +128,8 @@ constexpr auto CLASS::f4(auto x, auto y, auto z) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-CONSTEVAL auto CLASS::functor() NOEXCEPT
+CONSTEVAL auto CLASS::
+functor() NOEXCEPT
 {
     using self = CLASS;
     constexpr auto fn = Round / RMD::K::columns;
@@ -152,8 +162,8 @@ CONSTEVAL auto CLASS::functor() NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr auto CLASS::round(auto a, auto& b, auto c, auto d, auto& e,
-    auto w) NOEXCEPT
+FORCE_INLINE constexpr auto CLASS::
+round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
     constexpr auto r = K::rot[Round];
     constexpr auto k = K::get[Round / RMD::K::columns];
@@ -167,7 +177,8 @@ FORCE_INLINE constexpr auto CLASS::round(auto a, auto& b, auto c, auto d, auto& 
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::
+round(auto& out, const auto& in) NOEXCEPT
 {
     constexpr auto words  = RMD::state_words;
     constexpr auto rounds = RMD::rounds;
@@ -183,7 +194,8 @@ FORCE_INLINE constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
 
 TEMPLATE
 template<bool First>
-constexpr void CLASS::batch(state_t& out, const words_t& in) NOEXCEPT
+constexpr void CLASS::
+batch(state_t& out, const words_t& in) NOEXCEPT
 {
     // Order of execution is arbitrary.
     constexpr auto offset = First ? zero : to_half(RMD::rounds);
@@ -288,7 +300,8 @@ constexpr void CLASS::batch(state_t& out, const words_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::rounding(state_t& state, const words_t& buffer) NOEXCEPT
+constexpr void CLASS::
+rounding(state_t& state, const words_t& buffer) NOEXCEPT
 {
     // Two copies of state (required by RMD) are saved to jobs.
     std_array<std::pair<bool, state_t>, two> jobs
@@ -320,8 +333,8 @@ constexpr void CLASS::rounding(state_t& state, const words_t& buffer) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::summarize(state_t& out, const state_t& in1,
-    const state_t& in2) NOEXCEPT
+constexpr void CLASS::
+summarize(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
 {
     out[0] += (in1[0] + in2[0]);
     out[1] += (in1[1] + in2[1]);
@@ -334,7 +347,8 @@ constexpr void CLASS::summarize(state_t& out, const state_t& in1,
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr void CLASS::pad_one(words_t& out) NOEXCEPT
+constexpr void CLASS::
+pad_one(words_t& out) NOEXCEPT
 {
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
@@ -343,7 +357,8 @@ constexpr void CLASS::pad_one(words_t& out) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::pad_half(words_t& out) NOEXCEPT
+constexpr void CLASS::
+pad_half(words_t& out) NOEXCEPT
 {
     // Pad a half block.
     constexpr auto pad = chunk_pad();
@@ -367,7 +382,8 @@ constexpr void CLASS::pad_half(words_t& out) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::pad_n(words_t& out, count_t blocks) NOEXCEPT
+constexpr void CLASS::
+pad_n(words_t& out, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
     constexpr auto pad = blocks_pad();
@@ -407,7 +423,8 @@ constexpr void CLASS::pad_n(words_t& out, count_t blocks) NOEXCEPT
 // little-endian I/O is conventional for RMD.
 
 TEMPLATE
-constexpr void CLASS::input(words_t& out, const block_t& in) NOEXCEPT
+constexpr void CLASS::
+input(words_t& out, const block_t& in) NOEXCEPT
 {
     constexpr auto size = RMD::word_bytes;
 
@@ -437,7 +454,8 @@ constexpr void CLASS::input(words_t& out, const block_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::input(words_t& out, const half_t& in) NOEXCEPT
+constexpr void CLASS::
+input(words_t& out, const half_t& in) NOEXCEPT
 {
     constexpr auto size = RMD::word_bytes;
 
@@ -460,8 +478,8 @@ constexpr void CLASS::input(words_t& out, const half_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::output(const state_t& in) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+output(const state_t& in) NOEXCEPT
 {
     constexpr auto size = RMD::word_bytes;
 
@@ -497,8 +515,8 @@ CLASS::output(const state_t& in) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr void
-CLASS::accumulate(state_t& state, const block_t& block) NOEXCEPT
+constexpr void CLASS::
+accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     words_t space{};
     input(space, block);
@@ -506,8 +524,8 @@ CLASS::accumulate(state_t& state, const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-VCONSTEXPR void
-CLASS::accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
+VCONSTEXPR void CLASS::
+accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
     words_t space{};
 
@@ -519,8 +537,8 @@ CLASS::accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::finalize(const state_t& state) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+finalize(const state_t& state) NOEXCEPT
 {
     return output(state);
 }
@@ -529,8 +547,8 @@ CLASS::finalize(const state_t& state) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::hash(const half_t& half) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+hash(const half_t& half) NOEXCEPT
 {
     words_t space{};
     auto state = H::get;
@@ -542,8 +560,8 @@ CLASS::hash(const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::hash(const block_t& block) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+hash(const block_t& block) NOEXCEPT
 {
     words_t space{};
     auto state = H::get;
@@ -557,8 +575,8 @@ CLASS::hash(const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::hash(const blocks_t& blocks) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+hash(const blocks_t& blocks) NOEXCEPT
 {
     words_t space{};
     auto state = H::get;

@@ -49,7 +49,8 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-CONSTEVAL auto CLASS::concurrency() NOEXCEPT
+CONSTEVAL auto CLASS::
+concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
         return std::execution::par_unseq;
@@ -58,7 +59,8 @@ CONSTEVAL auto CLASS::concurrency() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::chunk_t CLASS::chunk_pad() NOEXCEPT
+CONSTEVAL typename CLASS::chunk_t CLASS::
+chunk_pad() NOEXCEPT
 {
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
 
@@ -69,7 +71,8 @@ CONSTEVAL CLASS::chunk_t CLASS::chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::state_pad_t CLASS::state_pad() NOEXCEPT
+CONSTEVAL typename CLASS::state_pad_t CLASS::
+state_pad() NOEXCEPT
 {
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<digest_t>);
 
@@ -80,7 +83,8 @@ CONSTEVAL CLASS::state_pad_t CLASS::state_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::blocks_pad_t CLASS::blocks_pad() NOEXCEPT
+CONSTEVAL typename CLASS::blocks_pad_t CLASS::
+blocks_pad() NOEXCEPT
 {
     blocks_pad_t out{};
     out.front() = bit_hi<word_t>;
@@ -88,7 +92,8 @@ CONSTEVAL CLASS::blocks_pad_t CLASS::blocks_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::buffer_t CLASS::block_pad() NOEXCEPT
+CONSTEVAL typename CLASS::buffer_t CLASS::
+block_pad() NOEXCEPT
 {
     constexpr auto index = sub1(array_count<words_t>);
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
@@ -104,14 +109,16 @@ CONSTEVAL CLASS::buffer_t CLASS::block_pad() NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr auto CLASS::parity(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+parity(auto x, auto y, auto z) NOEXCEPT
 {
     // 4.1.1 SHA-1 Functions
     return x ^ y ^ z;
 }
 
 TEMPLATE
-constexpr auto CLASS::choice(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+choice(auto x, auto y, auto z) NOEXCEPT
 {
     // 4.1.1 SHA-1 Functions
     // 4.1.2 SHA-224 and SHA-256 Functions
@@ -122,7 +129,8 @@ constexpr auto CLASS::choice(auto x, auto y, auto z) NOEXCEPT
 }
 
 TEMPLATE
-constexpr auto CLASS::majority(auto x, auto y, auto z) NOEXCEPT
+constexpr auto CLASS::
+majority(auto x, auto y, auto z) NOEXCEPT
 {
     // 4.1.1 SHA-1 Functions
     // 4.1.2 SHA-224 and SHA-256 Functions
@@ -133,7 +141,8 @@ constexpr auto CLASS::majority(auto x, auto y, auto z) NOEXCEPT
 }
 
 TEMPLATE
-constexpr auto CLASS::SIGMA0(auto x) NOEXCEPT
+constexpr auto CLASS::
+SIGMA0(auto x) NOEXCEPT
 {
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
@@ -144,7 +153,8 @@ constexpr auto CLASS::SIGMA0(auto x) NOEXCEPT
 }
 
 TEMPLATE
-constexpr auto CLASS::SIGMA1(auto x) NOEXCEPT
+constexpr auto CLASS::
+SIGMA1(auto x) NOEXCEPT
 {
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
@@ -155,7 +165,8 @@ constexpr auto CLASS::SIGMA1(auto x) NOEXCEPT
 }
 
 TEMPLATE
-constexpr auto CLASS::sigma0(auto x) NOEXCEPT
+constexpr auto CLASS::
+sigma0(auto x) NOEXCEPT
 {
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
@@ -166,7 +177,8 @@ constexpr auto CLASS::sigma0(auto x) NOEXCEPT
 }
 
 TEMPLATE
-constexpr auto CLASS::sigma1(auto x) NOEXCEPT
+constexpr auto CLASS::
+sigma1(auto x) NOEXCEPT
 {
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
@@ -184,7 +196,8 @@ constexpr auto CLASS::sigma1(auto x) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-CONSTEVAL auto CLASS::functor() NOEXCEPT
+CONSTEVAL auto CLASS::
+functor() NOEXCEPT
 {
     using self = CLASS;
     constexpr auto fn = (Round / 20u);
@@ -202,8 +215,8 @@ CONSTEVAL auto CLASS::functor() NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::round(auto a, auto& b, auto c, auto d,
-    auto& e, auto w) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::
+round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
     // 4.2.1 SHA-1 Constants
     constexpr auto k = K::get[Round];
@@ -217,8 +230,9 @@ FORCE_INLINE constexpr void CLASS::round(auto a, auto& b, auto c, auto d,
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::round(auto a, auto b, auto c, auto& d, auto e, auto f,
-    auto g, auto& h, auto w) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::
+round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
+    auto w) NOEXCEPT
 {
     // 4.2.2 SHA-224 and SHA-256 Constants
     // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
@@ -234,7 +248,8 @@ FORCE_INLINE constexpr void CLASS::round(auto a, auto b, auto c, auto& d, auto e
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::
+round(auto& out, const auto& in) NOEXCEPT
 {
     constexpr auto words  = SHA::state_words;
     constexpr auto rounds = SHA::rounds;
@@ -268,7 +283,8 @@ FORCE_INLINE constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::rounding(state_t& out, const buffer_t& in) NOEXCEPT
+constexpr void CLASS::
+rounding(state_t& out, const buffer_t& in) NOEXCEPT
 {
     const state_t start{ out };
 
@@ -376,7 +392,8 @@ constexpr void CLASS::rounding(state_t& out, const buffer_t& in) NOEXCEPT
 
 TEMPLATE
 template<size_t Word>
-FORCE_INLINE constexpr void CLASS::prepare(auto& out) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::
+prepare(auto& out) NOEXCEPT
 {
     if constexpr (SHA::digest == 160)
     {
@@ -400,7 +417,8 @@ FORCE_INLINE constexpr void CLASS::prepare(auto& out) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::preparing(buffer_t& out) NOEXCEPT
+constexpr void CLASS::
+preparing(buffer_t& out) NOEXCEPT
 {
     auto pout = out.data();
 
@@ -482,7 +500,8 @@ constexpr void CLASS::preparing(buffer_t& out) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::summarize(state_t& out, const state_t& in) NOEXCEPT
+constexpr void CLASS::
+summarize(state_t& out, const state_t& in) NOEXCEPT
 {
     if constexpr (SHA::digest == 160)
     {
@@ -509,7 +528,8 @@ constexpr void CLASS::summarize(state_t& out, const state_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::input(buffer_t& out, const state_t& in) NOEXCEPT
+constexpr void CLASS::
+input(buffer_t& out, const state_t& in) NOEXCEPT
 {
     // 5.3 Setting the Initial Hash Value
 
@@ -551,7 +571,8 @@ constexpr void CLASS::input(buffer_t& out, const state_t& in) NOEXCEPT
 // 5.1.2 SHA-384, SHA-512, SHA-512/224 and SHA-512/256
 
 TEMPLATE
-constexpr void CLASS::pad_one(buffer_t& out) NOEXCEPT
+constexpr void CLASS::
+pad_one(buffer_t& out) NOEXCEPT
 {
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
@@ -560,7 +581,8 @@ constexpr void CLASS::pad_one(buffer_t& out) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::pad_half(buffer_t& out) NOEXCEPT
+constexpr void CLASS::
+pad_half(buffer_t& out) NOEXCEPT
 {
     // Pad a half block.
     constexpr auto pad = chunk_pad();
@@ -584,7 +606,8 @@ constexpr void CLASS::pad_half(buffer_t& out) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::pad_state(buffer_t& out) NOEXCEPT
+constexpr void CLASS::
+pad_state(buffer_t& out) NOEXCEPT
 {
     // Pad state as buffer input.
     // This is a double hash optimization.
@@ -629,7 +652,8 @@ constexpr void CLASS::pad_state(buffer_t& out) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::pad_n(buffer_t& out, count_t blocks) NOEXCEPT
+constexpr void CLASS::
+pad_n(buffer_t& out, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
     constexpr auto pad = blocks_pad();
@@ -671,7 +695,8 @@ constexpr void CLASS::pad_n(buffer_t& out, count_t blocks) NOEXCEPT
 // big-endian I/O is conventional for SHA.
 
 TEMPLATE
-constexpr void CLASS::input(buffer_t& out, const block_t& in) NOEXCEPT
+constexpr void CLASS::
+input(buffer_t& out, const block_t& in) NOEXCEPT
 {
     constexpr auto size = SHA::word_bytes;
 
@@ -702,7 +727,8 @@ constexpr void CLASS::input(buffer_t& out, const block_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::input1(buffer_t& out, const half_t& in) NOEXCEPT
+constexpr void CLASS::
+input1(buffer_t& out, const half_t& in) NOEXCEPT
 {
     constexpr auto size = SHA::word_bytes;
 
@@ -725,7 +751,8 @@ constexpr void CLASS::input1(buffer_t& out, const half_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::input2(buffer_t& out, const half_t& in) NOEXCEPT
+constexpr void CLASS::
+input2(buffer_t& out, const half_t& in) NOEXCEPT
 {
     constexpr auto size = SHA::word_bytes;
 
@@ -749,7 +776,8 @@ constexpr void CLASS::input2(buffer_t& out, const half_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::output(const state_t& in) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+output(const state_t& in) NOEXCEPT
 {
     // 6.1.2 SHA-1   Hash Computation
     // 6.2.2 SHA-256 Hash Computation
@@ -792,8 +820,8 @@ constexpr typename CLASS::digest_t CLASS::output(const state_t& in) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::hash(const half_t& half) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+hash(const half_t& half) NOEXCEPT
 {
     buffer_t space{};
     auto state = H::get;
@@ -806,8 +834,8 @@ CLASS::hash(const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::hash(const block_t& block) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+hash(const block_t& block) NOEXCEPT
 {
     buffer_t space{};
     auto state = H::get;
@@ -823,8 +851,8 @@ CLASS::hash(const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::hash(const set_t& blocks) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+hash(const set_t& blocks) NOEXCEPT
 {
     buffer_t space{};
     auto state = H::get;
@@ -847,8 +875,8 @@ CLASS::hash(const set_t& blocks) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::double_hash(const block_t& block) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const block_t& block) NOEXCEPT
 {
     buffer_t space{};
 
@@ -880,8 +908,8 @@ CLASS::double_hash(const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::double_hash(const digest_t& left, const digest_t& right) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const digest_t& left, const digest_t& right) NOEXCEPT
 {
     buffer_t space{};
     auto state = H::get;
@@ -904,8 +932,8 @@ CLASS::double_hash(const digest_t& left, const digest_t& right) NOEXCEPT
 
 // TODO: test.
 TEMPLATE
-VCONSTEXPR typename CLASS::digests_t
-CLASS::double_hash(const set_t& blocks) NOEXCEPT
+VCONSTEXPR typename CLASS::digests_t CLASS::
+double_hash(const set_t& blocks) NOEXCEPT
 {
     digests_t digests(blocks.size());
 
@@ -937,8 +965,8 @@ CLASS::double_hash(const set_t& blocks) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr void
-CLASS::accumulate(state_t& state, const block_t& block) NOEXCEPT
+constexpr void CLASS::
+accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     buffer_t space{};
     input(space, block);
@@ -947,8 +975,8 @@ CLASS::accumulate(state_t& state, const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-VCONSTEXPR void
-CLASS::accumulate(state_t& state, const set_t& blocks) NOEXCEPT
+VCONSTEXPR void CLASS::
+accumulate(state_t& state, const set_t& blocks) NOEXCEPT
 {
     buffer_t space{};
 
@@ -963,8 +991,8 @@ CLASS::accumulate(state_t& state, const set_t& blocks) NOEXCEPT
 // TODO: test.
 TEMPLATE
 template <size_t Size>
-VCONSTEXPR typename CLASS::states_t
-CLASS::accumulate(const sets_t<Size>& sets) NOEXCEPT
+VCONSTEXPR typename CLASS::states_t CLASS::
+accumulate(const sets_t<Size>& sets) NOEXCEPT
 {
     states_t states(sets.size());
 
@@ -991,8 +1019,8 @@ CLASS::accumulate(const sets_t<Size>& sets) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t
-CLASS::finalize(const state_t& state) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+finalize(const state_t& state) NOEXCEPT
 {
     return output(state);
 }
