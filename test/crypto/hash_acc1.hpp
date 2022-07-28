@@ -20,256 +20,268 @@
 
 BOOST_AUTO_TEST_SUITE(sha_tests)
 
-#if defined(NDEBUG)
-constexpr auto checked = false;
-#else
-constexpr auto checked = true;
-#endif
-
-/// Hash accumulator.
-template <typename Hash, bool Checked = checked>
+/// Accumulator for SHA/RMD/MD# streaming hash algorithms.
+template <typename Hash, bool Checked = checked_build>
 struct accumulator
 {
-    /// Creates initial context.
+    DEFAULT5(accumulator);
+    using byte_t = typename Hash::byte_t;
+    using state_t = typename Hash::state_t;
+    using digest_t = typename Hash::digest_t;
+
+    /// Sets initial state to Hash initialization vector.
     constexpr accumulator() NOEXCEPT;
 
-    /// Defaults.
-    accumulator(accumulator&&) = default;
-    accumulator(const accumulator&) = default;
-    accumulator& operator=(accumulator&&) = default;
-    accumulator& operator=(const accumulator&) = default;
-    ~accumulator() = default;
+    /// Accepts an initial state and count of blocks it has accumulated.
+    constexpr accumulator(size_t blocks, const state_t& state) NOEXCEPT;
 
-    /// Write data to the context.
-    inline bool write(size_t size, const typename Hash::byte_t* in) NOEXCEPT;
+    /// Write data to accumulator.
+    inline bool write(const data_slice& data) NOEXCEPT;
+    inline bool write(size_t size, const byte_t* data) NOEXCEPT;
 
-    /// Flush context to out32 (must be at least 32 bytes), resets context.
-    inline void flush(typename Hash::byte_t* out32) NOEXCEPT;
+    /// Flush accumulator state to digest.
+    constexpr digest_t flush() NOEXCEPT;
+    inline void flush(byte_t* digest) NOEXCEPT;
+
+    // Reset accumulator to initial state (to reuse after flushing).
+    constexpr void reset() NOEXCEPT;
 
 private:
+    using block_t = typename Hash::block_t;
     using counter = data_array<Hash::count_bytes>;
 
-    // Clear buffer after transforming state.
-    constexpr void clear() NOEXCEPT;
-
-    // Reset to initial context after flushing.
-    constexpr void reset() NOEXCEPT;
+    // Position of next write in the buffer.
+    constexpr size_t next() const NOEXCEPT;
 
     // Bytes remaining until buffer is full.
     constexpr size_t gap() const NOEXCEPT;
 
-    // Transform if buffer is full.
-    constexpr bool is_full() NOEXCEPT;
-
-    // SHA512 limited to [max_uint128 - 128] hashed bits.
-    // SHA1/256/RMD limited to [max_uint64 - 64] hashed bits.
+    // SHA512 limited to [max_uint128/8 - 16] hashed bytes.
+    // SHA1/256/RMD limited to [max_uint64/8 - 8] hashed bytes.
     constexpr bool is_buffer_overflow(size_t bytes) NOEXCEPT;
 
-    // Reserves space for counter serialization.
-    constexpr size_t pad_size() const NOEXCEPT;
-
     // Append up to block_size bytes to buffer.
-    constexpr size_t add_data(size_t bytes,
-        const typename Hash::byte_t* data) NOEXCEPT;
+    constexpr size_t add_data(size_t bytes, const byte_t* data) NOEXCEPT;
 
     // Increment the counter for unbuffered transforms.
     constexpr void increment(size_t blocks) NOEXCEPT;
 
-    // Serialize the hashed bit count for finalization
-    inline counter serialize_counter() const NOEXCEPT;
+    // Reserves space for counter serialization.
+    constexpr size_t pad_size() const NOEXCEPT;
 
-    // Normalize state as the final hash value.
-    inline void serialize_state(typename Hash::digest_t& out) const NOEXCEPT;
+    // Serialize the hashed byte count for finalization
+    static constexpr counter serialize(size_t bytes) NOEXCEPT;
 
-    size_t size_{};
-    typename Hash::count_t bits_{};
-    typename Hash::block_t buffer_;
-    typename Hash::state_t state_{ Hash::H::get };
+    // Precomputed streaming pad buffer.
+    static CONSTEVAL block_t stream_pad() NOEXCEPT;
+
+    // Number of bytes in a block.
+    static constexpr auto block_bytes = array_count<block_t>;
+
+    size_t size_;
+    state_t state_;
+    block_t buffer_;
 };
 
-// implementation
+// private
 // ----------------------------------------------------------------------------
-// bits_ (count_t) is either uint64_t (SHA-1/256) or uint128_t (SHA).
 
+#define TEMPLATE template <typename Hash, bool Checked>
+#define CLASS accumulator<Hash, Checked>
+
+// Copy and array index are guarded.
 // Buffer initialization is not required due to logical sizing.
+BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
-template <typename Hash, bool Checked>
-constexpr accumulator<Hash, Checked>::
-accumulator() NOEXCEPT
-BC_POP_WARNING()
+
+TEMPLATE
+constexpr CLASS::accumulator() NOEXCEPT
+  : size_{ zero }, state_{ Hash::H::get }
 {
 }
 
-template <typename Hash, bool Checked>
-constexpr void accumulator<Hash, Checked>::
-clear() NOEXCEPT
+TEMPLATE
+constexpr CLASS::accumulator(size_t blocks, const state_t& state) NOEXCEPT
+  : size_{ blocks }, state_{ state }
 {
-    // TODO: reduce to single size_ counter, use size_ % block_bytes for gap.
-    // TODO: this also eliminates the need to clear the buffer.
-    size_ = zero;
 }
 
-template <typename Hash, bool Checked>
-constexpr void accumulator<Hash, Checked>::
-reset() NOEXCEPT
+TEMPLATE
+constexpr void CLASS::reset() NOEXCEPT
 {
     size_ = zero;
-    bits_ = zero;
     state_ = Hash::H::get;
 }
 
-template <typename Hash, bool Checked>
-constexpr size_t accumulator<Hash, Checked>::
-gap() const NOEXCEPT
+TEMPLATE
+constexpr size_t CLASS::next() const NOEXCEPT
 {
-    BC_ASSERT_MSG(!is_subtract_overflow(Hash::block_bytes, size_), "fault");
-    return Hash::block_bytes - size_;
+    return size_ % block_bytes;
 }
 
-template <typename Hash, bool Checked>
-constexpr bool accumulator<Hash, Checked>::
-is_full() NOEXCEPT
+TEMPLATE
+constexpr size_t CLASS::gap() const NOEXCEPT
 {
-    return is_zero(gap());
+    return block_bytes - next();
 }
 
-template <typename Hash, bool Checked>
-constexpr bool accumulator<Hash, Checked>::
-is_buffer_overflow(size_t bytes) NOEXCEPT
+TEMPLATE
+constexpr bool CLASS::is_buffer_overflow(size_t bytes) NOEXCEPT
 {
-    BC_ASSERT_MSG(is_zero(bits_ % byte_bits), "fault");
-
     if constexpr (Checked)
     {
-        const auto used = to_floored_bytes(bits_);
-        return bytes > Hash::limit_bytes - used;
+        return bytes > (Hash::limit_bytes - size_);
     }
     else
     {
-        // SHA512 limited to [max_uint128 - 128] hashed bits.
-        // SHA1/256/RMD limited to [max_uint64 - 64] hashed bits.
-        // This is over 2M TB with a 64 bit counter, so it is not worth
-        // guarding in Bitcoin scenarios. Checked is off by default in NDEBUG.
+        // using count_t = typename Hash::count_t;
+        // count_t is either uint64_t (SHA1/256/RMD) or uint128_t (SHA512).
+        // It is not used in the accumulator, as a performance optimization.
+        // This limits the accumulator to [max_size_t/8 - 8|16] hashed bytes.
+        // This is over 2M TB, so not worth guarding in Bitcoin scenarios.
+        // Checked is on by default in checked builds (NDEBUG) only.
         return false;
     }
 }
 
-template <typename Hash, bool Checked>
-constexpr size_t accumulator<Hash, Checked>::
-pad_size() const NOEXCEPT
+TEMPLATE
+constexpr size_t CLASS::add_data(size_t bytes, const byte_t* data) NOEXCEPT
 {
-    BC_ASSERT_MSG(!is_limited(size_, Hash::block_bytes), "fault");
-    constexpr auto singled = Hash::block_bytes - Hash::count_bytes;
-    constexpr auto doubled = Hash::block_bytes + singled;
-    return size_ < singled ? singled - size_ : doubled - size_;
-}
-
-// Copy and array index are guarded.
-BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-template <typename Hash, bool Checked>
-constexpr size_t accumulator<Hash, Checked>::
-add_data(size_t bytes, const typename Hash::byte_t* data) NOEXCEPT
-{
-    // No bytes accepted on overflow or uncleared buffer.
+    // No bytes accepted on overflow (if checked) or uncleared buffer.
     if (is_buffer_overflow(bytes) || is_zero(gap()))
         return zero;
 
     const auto accepted = std::min(gap(), bytes);
-    std::copy_n(data, accepted, &buffer_[size_]);
+    std::copy_n(data, accepted, &buffer_[next()]);
     size_ += accepted;
-    bits_ += to_bits(accepted);
     return accepted;
 }
-BC_POP_WARNING()
-BC_POP_WARNING()
-BC_POP_WARNING()
 
-template <typename Hash, bool Checked>
-constexpr void accumulator<Hash, Checked>::
-increment(size_t blocks) NOEXCEPT
+TEMPLATE
+constexpr void CLASS::increment(size_t blocks) NOEXCEPT
 {
-    // This is guarded by proper response to prior call to add_data.
-    BC_ASSERT_MSG(!is_buffer_overflow(blocks * Hash::block_bytes), "overflow");
-    bits_ += to_bits(blocks * Hash::block_bytes);
+    BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_bytes), "overflow");
+    BC_ASSERT_MSG(!is_multiply_overflow(blocks, block_bytes), "overflow");
+
+    // Guarded by proper (protected) response to preceding add_data call.
+    // Caller must not increment more blocks than implied by add_data result.
+    size_ += (blocks * block_bytes);
 }
 
-template <typename Hash, bool Checked>
-inline typename accumulator<Hash, Checked>::counter accumulator<Hash, Checked>::
-serialize_counter() const NOEXCEPT
+TEMPLATE
+constexpr size_t CLASS::pad_size() const NOEXCEPT
 {
-    // TODO: conversions are suboptimal in order to support uint128_t (512).
+    constexpr auto singled = block_bytes - Hash::count_bytes;
+    constexpr auto doubled = block_bytes + singled;
+    const auto used = next();
+
+    // Requires that counter is computed after padding is added.
+    return (used < singled ? singled - used : doubled - used);
+}
+
+TEMPLATE
+constexpr typename CLASS::counter
+CLASS::serialize(size_t bytes) NOEXCEPT
+{
     if constexpr (Hash::big_end_count)
     {
-        return to_big_endian_size<Hash::count_bytes>(bits_);
+        return to_big_endian_size<Hash::count_bytes>(to_bits(bytes));
     }
     else
     {
-        return to_little_endian_size<Hash::count_bytes>(bits_);
+        return to_little_endian_size<Hash::count_bytes>(to_bits(bytes));
     }
 }
 
-template <typename Hash, bool Checked>
-inline void accumulator<Hash, Checked>::
-serialize_state(typename Hash::digest_t& out) const NOEXCEPT
-{
-    out = Hash::finalize(state_);
-}
-
 // public
-template <typename Hash, bool Checked>
-inline bool accumulator<Hash, Checked>::
-write(size_t size, const typename Hash::byte_t* in) NOEXCEPT
-{
-    // Fill gap if possible and update counter.
-    const auto accepted = add_data(size, in);
+// ----------------------------------------------------------------------------
 
-    // Buffer overflow, no bytes were accepted (or size was zero).
+TEMPLATE
+inline bool CLASS::write(const data_slice& data) NOEXCEPT
+{
+    auto size = data.size();
+    auto pdata = data.data();
+
+    // Fill gap if possible and update counter.
+    const auto accepted = add_data(size, pdata);
+
+    // No bytes accepted: buffer overflow (if checked) or size is zero.
     // If accepted is non-zero then the full size value is acceptable.
     if (is_zero(accepted))
         return is_zero(size);
 
-    // No transformation on this update unless buffer is full.
-    if (!is_full())
+    // No transformation on this write unless buffer is full.
+    if (!is_zero(next()))
         return true;
 
-    // Transform and clear the buffer.
+    // Transform (updates state and clears buffer).
     Hash::accumulate(state_, buffer_);
-    std::advance(in, accepted);
-    clear();
+    std::advance(pdata, accepted);
 
     // No more bytes to process.
     if (is_zero((size -= accepted)))
         return true;
 
-    // Transform all whole blocks and save remainder to empty buffer.
-    const auto blocks = size / Hash::block_bytes;
-    const auto remain = size % Hash::block_bytes;
+    // Get count of whole blocks and remaining bytes.
+    const auto count = size / block_bytes;
+    const auto bytes = size % block_bytes;
 
-    // This could instead be passed as a pointer and cast into blocks.
-    const auto from = unsafe_vector_cast<typename Hash::block_t>(in, blocks);
-    Hash::accumulate(state_, from);
-    std::advance(in, size - remain);
-    increment(blocks);
+    // write is inline vs constexpr because of this cast. This could instead
+    // be passed as a pointer, but then Hash (algorithm) would have to cast.
+    // Vector cast constructs a vector holding a ref (ponter) to each block.
+    const auto blocks = unsafe_vector_cast<block_t>(pdata, count);
 
-    // Add the remaining partial block to the empty block buffer.
-    add_data(remain, in);
+    // Transform all whole blocks and save remainder to cleared buffer.
+    Hash::accumulate(state_, blocks);
+    std::advance(pdata, size - bytes);
+    increment(count);
+
+    // Add the remaining partial block to the cleared block buffer.
+    // There is no point in testing the add_data return value here.
+    add_data(bytes, pdata);
     return true;
 }
 
-// public
-template <typename Hash, bool Checked>
-inline void accumulator<Hash, Checked>::
-flush(typename Hash::byte_t* out32) NOEXCEPT
+TEMPLATE
+CONSTEVAL CLASS::block_t CLASS::stream_pad() NOEXCEPT
 {
-    using to = typename Hash::byte_t;
-    const auto counter = serialize_counter();
-    write(pad_size(), Hash::pad::stream.data());
-    write(Hash::count_bytes, counter.data());
-    serialize_state(unsafe_array_cast<to, Hash::digest_bytes>(out32));
-    reset();
+    return { bit_hi<byte_t> };
 }
+
+TEMPLATE
+constexpr CLASS::digest_t CLASS::flush() NOEXCEPT
+{
+    constexpr auto pad = stream_pad();
+
+    const auto size = size_;
+    write(pad_size(), pad.data());
+    write(Hash::count_bytes, serialize(size).data());
+    return Hash::finalize(state_);
+}
+
+TEMPLATE
+inline bool CLASS::write(size_t size, const byte_t* data) NOEXCEPT
+{
+    // TODO: data_slice pointer/size overload.
+    return write(data_slice(data, std::next(data, size)));
+}
+
+TEMPLATE
+inline void CLASS::flush(byte_t* digest) NOEXCEPT
+{
+    // TODO: could also provide a data_slab overload.
+    unsafe_array_cast<byte_t, array_count<digest_t>>(digest) = flush();
+}
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
+#undef CLASS
+#undef TEMPLATE
 
 BOOST_AUTO_TEST_SUITE_END()
 
