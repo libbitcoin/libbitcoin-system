@@ -29,40 +29,50 @@
     
 BOOST_AUTO_TEST_SUITE(rmd_tests)
 
+#define TEMPLATE template <typename RMD, bool Concurrent>
+#define CLASS algorithm<RMD, Concurrent>
+
+// private
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+constexpr auto CLASS::concurrency() NOEXCEPT
+{
+    if constexpr (Concurrent)
+        return std::execution::par_unseq;
+    else
+        return std::execution::seq;
+}
+
 // Functions.
 // ----------------------------------------------------------------------------
 
-template <typename RMD, bool Concurrent>
-constexpr auto algorithm<RMD, Concurrent>::
-f0(auto x, auto y, auto z) NOEXCEPT
+TEMPLATE
+constexpr auto CLASS::f0(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ y ^ z;
 }
 
-template <typename RMD, bool Concurrent>
-constexpr auto algorithm<RMD, Concurrent>::
-f1(auto x, auto y, auto z) NOEXCEPT
+TEMPLATE
+constexpr auto CLASS::f1(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & y) | (~x & z);
 }
 
-template <typename RMD, bool Concurrent>
-constexpr auto algorithm<RMD, Concurrent>::
-f2(auto x, auto y, auto z) NOEXCEPT
+TEMPLATE
+constexpr auto CLASS::f2(auto x, auto y, auto z) NOEXCEPT
 {
     return (x | ~y) ^ z;
 }
 
-template <typename RMD, bool Concurrent>
-constexpr auto algorithm<RMD, Concurrent>::
-f3(auto x, auto y, auto z) NOEXCEPT
+TEMPLATE
+constexpr auto CLASS::f3(auto x, auto y, auto z) NOEXCEPT
 {
     return (x & z) | (y & ~z);
 }
 
-template <typename RMD, bool Concurrent>
-constexpr auto algorithm<RMD, Concurrent>::
-f4(auto x, auto y, auto z) NOEXCEPT
+TEMPLATE
+constexpr auto CLASS::f4(auto x, auto y, auto z) NOEXCEPT
 {
     return x ^ (y | ~z);
 }
@@ -70,31 +80,43 @@ f4(auto x, auto y, auto z) NOEXCEPT
 // Rounds
 // ---------------------------------------------------------------------------
 
-template <typename RMD, bool Concurrent>
+TEMPLATE
 template<size_t Round>
-constexpr auto algorithm<RMD, Concurrent>::
-functor() NOEXCEPT
+constexpr auto CLASS::functor() NOEXCEPT
 {
-    using self = algorithm<RMD, Concurrent>;
-    constexpr auto fn = (Round / RMD::K::columns) % RMD::K::columns;
+    using self = CLASS;
+    constexpr auto fn = Round / RMD::K::columns;
 
-    // RMD is limited to uint32_t.
-    if      constexpr (fn == 0u || fn == 9u)
-        return &self::template f0<uint32_t, uint32_t, uint32_t>;
-    else if constexpr (fn == 1u || fn == 8u)
-        return &self::template f1<uint32_t, uint32_t, uint32_t>;
-    else if constexpr (fn == 2u || fn == 7u)
-        return &self::template f2<uint32_t, uint32_t, uint32_t>;
-    else if constexpr (fn == 3u || fn == 6u)
-        return &self::template f3<uint32_t, uint32_t, uint32_t>;
-    else if constexpr (fn == 4u || fn == 5u)
-        return &self::template f4<uint32_t, uint32_t, uint32_t>;
+    if constexpr (RMD::rounds == 160)
+    {
+        if      constexpr (fn == 0u || fn == 9u)
+            return &self::template f0<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 1u || fn == 8u)
+            return &self::template f1<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 2u || fn == 7u)
+            return &self::template f2<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 3u || fn == 6u)
+            return &self::template f3<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 4u || fn == 5u)
+            return &self::template f4<uint32_t, uint32_t, uint32_t>;
+    }
+    else
+    {
+        if      constexpr (fn == 0u || fn == 7u)
+            return &self::template f0<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 1u || fn == 6u)
+            return &self::template f1<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 2u || fn == 5u)
+            return &self::template f2<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 3u || fn == 4u)
+            return &self::template f3<uint32_t, uint32_t, uint32_t>;
+    }
 }
 
-template <typename RMD, bool Concurrent>
+TEMPLATE
 template<size_t Round>
-constexpr auto algorithm<RMD, Concurrent>::
-round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
+constexpr auto CLASS::round(auto a, auto& b, auto c, auto d, auto& e,
+    auto w) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
@@ -109,10 +131,9 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
     b = /*c =*/ std::rotl(c, 10);
 }
 
-template <typename RMD, bool Concurrent>
+TEMPLATE
 template<size_t Round>
-constexpr void algorithm<RMD, Concurrent>::
-round(auto& out, const auto& in) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
@@ -127,10 +148,9 @@ round(auto& out, const auto& in) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename RMD, bool Concurrent>
+TEMPLATE
 template<bool First>
-constexpr void algorithm<RMD, Concurrent>::
-batch(state_t& out, const words_t& in) NOEXCEPT
+constexpr void CLASS::batch(state_t& out, const words_t& in) NOEXCEPT
 {
     // Order of execution is arbitrary.
     constexpr auto offset = First ? zero : to_half(RMD::rounds);
@@ -140,6 +160,7 @@ batch(state_t& out, const words_t& in) NOEXCEPT
     auto pin = in.data();
     BC_POP_WARNING()
 
+    // RMD256:f0/f4, RMD128:f0/f3
     round<offset + 0>(pout, pin);
     round<offset + 1>(pout, pin);
     round<offset + 2>(pout, pin);
@@ -157,6 +178,7 @@ batch(state_t& out, const words_t& in) NOEXCEPT
     round<offset + 14>(pout, pin);
     round<offset + 15>(pout, pin);
 
+    // RMD256:f1/f3, RMD128:f1/f2
     round<offset + 16>(pout, pin);
     round<offset + 17>(pout, pin);
     round<offset + 18>(pout, pin);
@@ -174,6 +196,7 @@ batch(state_t& out, const words_t& in) NOEXCEPT
     round<offset + 30>(pout, pin);
     round<offset + 31>(pout, pin);
 
+    // RMD256:f2/f2, RMD128:f2/f1
     round<offset + 32>(pout, pin);
     round<offset + 33>(pout, pin);
     round<offset + 34>(pout, pin);
@@ -191,6 +214,7 @@ batch(state_t& out, const words_t& in) NOEXCEPT
     round<offset + 46>(pout, pin);
     round<offset + 47>(pout, pin);
 
+    // RMD256:f3/f1, RMD128:f3/f0
     round<offset + 48>(pout, pin);
     round<offset + 49>(pout, pin);
     round<offset + 50>(pout, pin);
@@ -204,30 +228,36 @@ batch(state_t& out, const words_t& in) NOEXCEPT
     round<offset + 58>(pout, pin);
     round<offset + 59>(pout, pin);
     round<offset + 60>(pout, pin);
+
+    // msvc++ (/O2/Ob2/Ot) inlining stops here without __forceinline.
     round<offset + 61>(pout, pin);
     round<offset + 62>(pout, pin);
     round<offset + 63>(pout, pin);
 
-    round<offset + 64>(pout, pin);
-    round<offset + 65>(pout, pin);
-    round<offset + 66>(pout, pin);
-    round<offset + 67>(pout, pin);
-    round<offset + 68>(pout, pin);
-    round<offset + 69>(pout, pin);
-    round<offset + 70>(pout, pin);
-    round<offset + 71>(pout, pin);
-    round<offset + 72>(pout, pin);
-    round<offset + 73>(pout, pin);
-    round<offset + 74>(pout, pin);
-    round<offset + 75>(pout, pin);
-    round<offset + 76>(pout, pin);
-    round<offset + 77>(pout, pin);
-    round<offset + 78>(pout, pin);
-    round<offset + 79>(pout, pin);
+    // RMD256:f4/f0
+    if constexpr (RMD::rounds == 160)
+    {
+        round<offset + 64>(pout, pin);
+        round<offset + 65>(pout, pin);
+        round<offset + 66>(pout, pin);
+        round<offset + 67>(pout, pin);
+        round<offset + 68>(pout, pin);
+        round<offset + 69>(pout, pin);
+        round<offset + 70>(pout, pin);
+        round<offset + 71>(pout, pin);
+        round<offset + 72>(pout, pin);
+        round<offset + 73>(pout, pin);
+        round<offset + 74>(pout, pin);
+        round<offset + 75>(pout, pin);
+        round<offset + 76>(pout, pin);
+        round<offset + 77>(pout, pin);
+        round<offset + 78>(pout, pin);
+        round<offset + 79>(pout, pin);
+    }
 }
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
+TEMPLATE
+constexpr void CLASS::
 summarize(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -239,9 +269,8 @@ summarize(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
     BC_POP_WARNING()
 }
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
-rounding(state_t& state, const words_t& buffer) NOEXCEPT
+TEMPLATE
+constexpr void CLASS::rounding(state_t& state, const words_t& buffer) NOEXCEPT
 {
     // Two copies of state (required by RMD) are saved to jobs.
     std_array<std::pair<bool, state_t>, two> jobs
@@ -255,15 +284,10 @@ rounding(state_t& state, const words_t& buffer) NOEXCEPT
         batch<true>(jobs.front().second, buffer);
         batch<false>(jobs.back().second, buffer);
     }
-    else if constexpr (!Concurrent)
-    {
-        batch<true>(jobs.front().second, buffer);
-        batch<false>(jobs.back().second, buffer);
-    }
     else
     {
         // buffer is const, jobs are independent and unsequenced.
-        std::for_each(std::execution::par_unseq, jobs.begin(), jobs.end(),
+        std::for_each(concurrency(), jobs.begin(), jobs.end(),
             [&buffer](auto& job) NOEXCEPT
             {
                 if (job.first)
@@ -280,17 +304,15 @@ rounding(state_t& state, const words_t& buffer) NOEXCEPT
 // Padding
 // ---------------------------------------------------------------------------
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
-pad_one(words_t& out) NOEXCEPT
+TEMPLATE
+constexpr void CLASS::pad_one(words_t& out) NOEXCEPT
 {
     // Pad a single whole block.
     out = RMD::pad::block;
 }
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
-pad_half(words_t& out) NOEXCEPT
+TEMPLATE
+constexpr void CLASS::pad_half(words_t& out) NOEXCEPT
 {
     // Pad a half block.
     if (std::is_constant_evaluated())
@@ -318,9 +340,8 @@ pad_half(words_t& out) NOEXCEPT
     }
 }
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
-pad_count(words_t& out, count_t blocks) NOEXCEPT
+TEMPLATE
+constexpr void CLASS::pad_n(words_t& out, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
     if (std::is_constant_evaluated())
@@ -347,6 +368,7 @@ pad_count(words_t& out, count_t blocks) NOEXCEPT
     else
     {
         // Array cast is a runtime no-op.
+        // TODO: shave two words from RMD::pad::block using narrow_cast.
         // RMD::pad::block is counted, but count will be overwritten below.
         auto& to = narrow_array_cast<word_t, array_count<words_t>>(out);
         to = RMD::pad::block;
@@ -364,12 +386,11 @@ pad_count(words_t& out, count_t blocks) NOEXCEPT
 
 // Parsing
 // ---------------------------------------------------------------------------
+// little-endian I/O is conventional for RMD.
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
-little_one(words_t& out, const block_t& in) NOEXCEPT
+TEMPLATE
+constexpr void CLASS::input(words_t& out, const block_t& in) NOEXCEPT
 {
-    // little-endian I/O is conventional.
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -401,11 +422,9 @@ little_one(words_t& out, const block_t& in) NOEXCEPT
     }
 }
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
-little_half(words_t& out, const half_t& in) NOEXCEPT
+TEMPLATE
+constexpr void CLASS::input(words_t& out, const half_t& in) NOEXCEPT
 {
-    // little-endian I/O is conventional.
     if (std::is_constant_evaluated())
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -429,12 +448,10 @@ little_half(words_t& out, const half_t& in) NOEXCEPT
     }
 }
 
-template <typename RMD, bool Concurrent>
-constexpr typename algorithm<RMD, Concurrent>::digest_t
-algorithm<RMD, Concurrent>::
-little_state(const state_t& in) NOEXCEPT
+TEMPLATE
+constexpr typename CLASS::digest_t
+CLASS::output(const state_t& in) NOEXCEPT
 {
-    // little-endian I/O is conventional.
     if (std::is_constant_evaluated())
     {
         digest_t out{};
@@ -468,119 +485,86 @@ little_state(const state_t& in) NOEXCEPT
 // Streaming single hash functions.
 // ---------------------------------------------------------------------------
 
-template <typename RMD, bool Concurrent>
-constexpr void algorithm<RMD, Concurrent>::
-accumulate(state_t& state, const block_t& block) NOEXCEPT
+TEMPLATE
+constexpr void
+CLASS::accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     words_t space{};
-    const state_t start{ state };
-    little_one(space, block);
+    input(space, block);
     rounding(state, space);
 }
 
-template <typename RMD, bool Concurrent>
-VCONSTEXPR void algorithm<RMD, Concurrent>::
-accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
+TEMPLATE
+VCONSTEXPR void
+CLASS::accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
     words_t space{};
 
     for (auto& block: blocks)
     {
-        little_one(space, block);
+        input(space, block);
         rounding(state, space);
     }
 }
 
-template <typename RMD, bool Concurrent>
-constexpr typename algorithm<RMD, Concurrent>::digest_t
-algorithm<RMD, Concurrent>::
-finalize(const state_t& state) NOEXCEPT
+TEMPLATE
+constexpr typename CLASS::digest_t
+CLASS::finalize(const state_t& state) NOEXCEPT
 {
-    return little_state(state);
+    return output(state);
 }
 
 // Finalized single hash functions.
 // ---------------------------------------------------------------------------
 
-template <typename RMD, bool Concurrent>
-constexpr typename algorithm<RMD, Concurrent>::digest_t
-algorithm<RMD, Concurrent>::
-hash(const half_t& half) NOEXCEPT
+TEMPLATE
+constexpr typename CLASS::digest_t
+CLASS::hash(const half_t& half) NOEXCEPT
 {
-    // process 1/2 data block with 1/2 pad block (pre-sized/endianed).
     words_t space{};
-    little_half(space, half);
-
     auto state = RMD::H::get;
+
+    input(space, half);
     pad_half(space);
     rounding(state, space);
-
     return finalize(state);
 }
 
-template <typename RMD, bool Concurrent>
-constexpr typename algorithm<RMD, Concurrent>::digest_t
-algorithm<RMD, Concurrent>::
-hash(const block_t& block) NOEXCEPT
+TEMPLATE
+constexpr typename CLASS::digest_t
+CLASS::hash(const block_t& block) NOEXCEPT
 {
     words_t space{};
-
-    // process 1 block in (avoid accumulate to reuse buffer).
     auto state = RMD::H::get;
-    little_one(space, block);
-    rounding(state, space);
-    summarize(state, RMD::H::get);
 
-    // full pad block for 1 block (pre-sized/endianed/expanded).
-    const auto start = state;
+    input(space, block);
+    rounding(state, space);
+
     pad_one(space);
     rounding(state, space);
-    summarize(state, start);
-
     return finalize(state);
 }
 
-template <typename RMD, bool Concurrent>
-constexpr typename algorithm<RMD, Concurrent>::digest_t
-algorithm<RMD, Concurrent>::
-hash(const blocks_t& blocks) NOEXCEPT
+TEMPLATE
+constexpr typename CLASS::digest_t
+CLASS::hash(const blocks_t& blocks) NOEXCEPT
 {
     words_t space{};
     auto state = RMD::H::get;
-    auto start = RMD::H::get;
 
-    // process N blocks (inlined accumulator).
-    for (auto& block : blocks)
+    for (auto& block: blocks)
     {
-        little_one(space, block);
+        input(space, block);
         rounding(state, space);
-        summarize(state, start);
-        start = state;
     }
 
-    // full pad block for N blocks (pre-endianed, size added).
-    pad_count(space, blocks.size());
+    pad_n(space, blocks.size());
     rounding(state, space);
-    summarize(state, start);
-
     return finalize(state);
 }
 
-////template <typename RMD>
-////constexpr void algorithm<RMD>::
-////accumulate(state_t& state, const block_t& block) NOEXCEPT
-////{
-////    // TODO: array_cast not constexpr.
-////    rounding(state, to_little_endians(array_cast<word_t>(block)));
-////}
-////
-////template <typename RMD>
-////constexpr typename algorithm<RMD>::digest_t algorithm<RMD>::
-////finalize(const state_t& state) NOEXCEPT
-////{
-////    // TODO: array_cast not constexpr.
-////    return array_cast<byte_t>(to_little_endians(state));
-////}
+#undef CLASS
+#undef TEMPLATE
 
 // TESTS
 // ============================================================================
@@ -622,8 +606,11 @@ constexpr auto expected_twin160 = base16_array("00000000000000000000000000000000
 BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
 {
     static_assert(rmd_160::hash(half160) != expected_half160);
-    BOOST_CHECK_NE(rmd_160::hash(half160), expected_half160);
-    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
+
+    // Use const to prevent compiler from preevaluating as constexpr.
+    const auto half = half160;
+    BOOST_CHECK_NE(rmd_160::hash(half), expected_half160);
+    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
 }
 
 #ifndef TESTS
@@ -633,68 +620,6 @@ BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
 // ----------------------------------------------------------------------------
 
 using k_128 = algorithm<rmd128>::K;
-
-static_assert(k_128::word[  0] == 0);
-static_assert(k_128::word[ 64] == 5);
-static_assert(k_128::word[127] == 14);
-
-static_assert(k_128::rot[  0] == 11);
-static_assert(k_128::rot[ 64] == 8);
-static_assert(k_128::rot[127] == 8);
-
-static_assert( 0 / k_128::columns == 0);
-static_assert(15 / k_128::columns == 0);
-static_assert(16 / k_128::columns == 1);
-static_assert(31 / k_128::columns == 1);
-static_assert(32 / k_128::columns == 2);
-static_assert(47 / k_128::columns == 2);
-static_assert(48 / k_128::columns == 3);
-static_assert(63 / k_128::columns == 3);
-
-static_assert(64 / k_128::columns == 4);
-static_assert(79 / k_128::columns == 4);
-static_assert( 80 / k_128::columns == 5);
-static_assert( 95 / k_128::columns == 5);
-static_assert( 96 / k_128::columns == 6);
-static_assert(111 / k_128::columns == 6);
-static_assert(112 / k_128::columns == 7);
-static_assert(127 / k_128::columns == 7);
-
-static_assert(k_128::get[ 0 / k_128::columns] == 0x00000000);
-static_assert(k_128::get[15 / k_128::columns] == 0x00000000);
-static_assert(k_128::get[16 / k_128::columns] == 0x5a827999);
-static_assert(k_128::get[31 / k_128::columns] == 0x5a827999);
-static_assert(k_128::get[32 / k_128::columns] == 0x6ed9eba1);
-static_assert(k_128::get[47 / k_128::columns] == 0x6ed9eba1);
-static_assert(k_128::get[48 / k_128::columns] == 0x8f1bbcdc);
-static_assert(k_128::get[63 / k_128::columns] == 0x8f1bbcdc);
-
-static_assert(k_128::get[ 64 / k_128::columns] == 0x50a28be6);
-static_assert(k_128::get[ 79 / k_128::columns] == 0x50a28be6);
-static_assert(k_128::get[ 80 / k_128::columns] == 0x5c4dd124);
-static_assert(k_128::get[ 95 / k_128::columns] == 0x5c4dd124);
-static_assert(k_128::get[ 96 / k_128::columns] == 0x6d703ef3);
-static_assert(k_128::get[111 / k_128::columns] == 0x6d703ef3);
-static_assert(k_128::get[112 / k_128::columns] == 0x00000000);
-static_assert(k_128::get[127 / k_128::columns] == 0x00000000);
-
-static_assert((  0 / k_128::columns) % k_128::columns == 0);
-static_assert(( 15 / k_128::columns) % k_128::columns == 0);
-static_assert(( 16 / k_128::columns) % k_128::columns == 1);
-static_assert(( 31 / k_128::columns) % k_128::columns == 1);
-static_assert(( 32 / k_128::columns) % k_128::columns == 2);
-static_assert(( 47 / k_128::columns) % k_128::columns == 2);
-static_assert(( 48 / k_128::columns) % k_128::columns == 3);
-static_assert(( 63 / k_128::columns) % k_128::columns == 3);
-
-static_assert(( 64 / k_128::columns) % k_128::columns == 4);
-static_assert(( 79 / k_128::columns) % k_128::columns == 4);
-static_assert(( 80 / k_128::columns) % k_128::columns == 5);
-static_assert(( 95 / k_128::columns) % k_128::columns == 5);
-static_assert(( 96 / k_128::columns) % k_128::columns == 6);
-static_assert((111 / k_128::columns) % k_128::columns == 6);
-static_assert((112 / k_128::columns) % k_128::columns == 7);
-static_assert((127 / k_128::columns) % k_128::columns == 7);
 
 struct accessor128
   : public algorithm<rmd128>
@@ -724,13 +649,90 @@ struct accessor128
     {
         return &algorithm<rmd128>::f3<uint32_t, uint32_t, uint32_t>;
     }
-
-    static constexpr auto get_f4()
-    {
-        return &algorithm<rmd128>::f4<uint32_t, uint32_t, uint32_t>;
-    }
 };
 
+// Selection on round/columns (16) boundary yields the following indexes.
+// batch1
+static_assert( 0 / k_128::columns == 0);
+static_assert(15 / k_128::columns == 0);
+static_assert(16 / k_128::columns == 1);
+static_assert(31 / k_128::columns == 1);
+static_assert(32 / k_128::columns == 2);
+static_assert(47 / k_128::columns == 2);
+static_assert(48 / k_128::columns == 3);
+static_assert(63 / k_128::columns == 3);
+// batch2
+static_assert( 64 / k_128::columns == 4);
+static_assert( 79 / k_128::columns == 4);
+static_assert( 80 / k_128::columns == 5);
+static_assert( 95 / k_128::columns == 5);
+static_assert( 96 / k_128::columns == 6);
+static_assert(111 / k_128::columns == 6);
+static_assert(112 / k_128::columns == 7);
+static_assert(127 / k_128::columns == 7);
+
+// Word index selection is on round boundary.
+// batch1
+static_assert(k_128::word[ 0] == 0);
+static_assert(k_128::word[15] == 15);
+static_assert(k_128::word[16] == 7);
+static_assert(k_128::word[31] == 8);
+static_assert(k_128::word[32] == 3);
+static_assert(k_128::word[47] == 12);
+static_assert(k_128::word[48] == 1);
+static_assert(k_128::word[63] == 2);
+// batch2
+static_assert(k_128::word[ 64] == 5);
+static_assert(k_128::word[ 79] == 12);
+static_assert(k_128::word[ 80] == 6);
+static_assert(k_128::word[ 95] == 2);
+static_assert(k_128::word[ 96] == 15);
+static_assert(k_128::word[111] == 13);
+static_assert(k_128::word[112] == 8);
+static_assert(k_128::word[127] == 14);
+
+// Rotation selection is on round boundary.
+// batch1
+static_assert(k_128::rot[ 0] == 11);
+static_assert(k_128::rot[15] == 8);
+static_assert(k_128::rot[16] == 7);
+static_assert(k_128::rot[31] == 12);
+static_assert(k_128::rot[32] == 11);
+static_assert(k_128::rot[47] == 5);
+static_assert(k_128::rot[48] == 11);
+static_assert(k_128::rot[63] == 12);
+// batch2
+static_assert(k_128::rot[ 64] == 8);
+static_assert(k_128::rot[ 79] == 6);
+static_assert(k_128::rot[ 80] == 9);
+static_assert(k_128::rot[ 95] == 11);
+static_assert(k_128::rot[ 96] == 9);
+static_assert(k_128::rot[111] == 5);
+static_assert(k_128::rot[112] == 15);
+static_assert(k_128::rot[127] == 8);
+
+// Constant selection is on round/columns boundary.
+// batch1
+static_assert(k_128::get[ 0 / k_128::columns] == 0x00000000);
+static_assert(k_128::get[15 / k_128::columns] == 0x00000000);
+static_assert(k_128::get[16 / k_128::columns] == 0x5a827999);
+static_assert(k_128::get[31 / k_128::columns] == 0x5a827999);
+static_assert(k_128::get[32 / k_128::columns] == 0x6ed9eba1);
+static_assert(k_128::get[47 / k_128::columns] == 0x6ed9eba1);
+static_assert(k_128::get[48 / k_128::columns] == 0x8f1bbcdc);
+static_assert(k_128::get[63 / k_128::columns] == 0x8f1bbcdc);
+// batch2
+static_assert(k_128::get[ 64 / k_128::columns] == 0x50a28be6);
+static_assert(k_128::get[ 79 / k_128::columns] == 0x50a28be6);
+static_assert(k_128::get[ 80 / k_128::columns] == 0x5c4dd124);
+static_assert(k_128::get[ 95 / k_128::columns] == 0x5c4dd124);
+static_assert(k_128::get[ 96 / k_128::columns] == 0x6d703ef3);
+static_assert(k_128::get[111 / k_128::columns] == 0x6d703ef3);
+static_assert(k_128::get[112 / k_128::columns] == 0x00000000);
+static_assert(k_128::get[127 / k_128::columns] == 0x00000000);
+
+// Functor selection is on round/columns boundary.
+// batch1
 static_assert(accessor128::functor< 0>() == accessor128::get_f0());
 static_assert(accessor128::functor<15>() == accessor128::get_f0());
 static_assert(accessor128::functor<16>() == accessor128::get_f1());
@@ -739,33 +741,58 @@ static_assert(accessor128::functor<32>() == accessor128::get_f2());
 static_assert(accessor128::functor<47>() == accessor128::get_f2());
 static_assert(accessor128::functor<48>() == accessor128::get_f3());
 static_assert(accessor128::functor<63>() == accessor128::get_f3());
-static_assert(accessor128::functor<64>() == accessor128::get_f4());
-static_assert(accessor128::functor<79>() == accessor128::get_f4());
-
-static_assert(accessor128::functor< 80>() == accessor128::get_f4());
-static_assert(accessor128::functor< 95>() == accessor128::get_f4());
-static_assert(accessor128::functor< 96>() == accessor128::get_f3());
-static_assert(accessor128::functor<111>() == accessor128::get_f3());
-static_assert(accessor128::functor<112>() == accessor128::get_f2());
-static_assert(accessor128::functor<127>() == accessor128::get_f2());
-static_assert(accessor128::functor<128>() == accessor128::get_f1());
-static_assert(accessor128::functor<143>() == accessor128::get_f1());
-static_assert(accessor128::functor<144>() == accessor128::get_f0());
-static_assert(accessor128::functor<159>() == accessor128::get_f0());
+// batch1
+static_assert(accessor128::functor< 64>() == accessor128::get_f3());
+static_assert(accessor128::functor< 79>() == accessor128::get_f3());
+static_assert(accessor128::functor< 80>() == accessor128::get_f2());
+static_assert(accessor128::functor< 95>() == accessor128::get_f2());
+static_assert(accessor128::functor< 96>() == accessor128::get_f1());
+static_assert(accessor128::functor<111>() == accessor128::get_f1());
+static_assert(accessor128::functor<112>() == accessor128::get_f0());
+static_assert(accessor128::functor<127>() == accessor128::get_f0());
 
 // algorithm<rmd160>
 // ----------------------------------------------------------------------------
 
 using k_160 = algorithm<rmd160, true>::K;
 
-static_assert(k_160::word[  0] == 0);
-static_assert(k_160::word[ 80] == 5);
-static_assert(k_160::word[159] == 11);
+struct accessor160
+  : public algorithm<rmd160>
+{
+    template<size_t Round>
+    static constexpr auto functor()
+    {
+        return algorithm<rmd160>::functor<Round>();
+    }
 
-static_assert(k_160::rot[  0] == 11);
-static_assert(k_160::rot[ 80] == 8);
-static_assert(k_160::rot[159] == 11);
+    static constexpr auto get_f0()
+    {
+        return &algorithm<rmd160>::f0<uint32_t, uint32_t, uint32_t>;
+    }
 
+    static constexpr auto get_f1()
+    {
+        return &algorithm<rmd160>::f1<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f2()
+    {
+        return &algorithm<rmd160>::f2<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f3()
+    {
+        return &algorithm<rmd160>::f3<uint32_t, uint32_t, uint32_t>;
+    }
+
+    static constexpr auto get_f4()
+    {
+        return &algorithm<rmd160>::f4<uint32_t, uint32_t, uint32_t>;
+    }
+};
+
+// Selection on round/columns (16) boundary yields the following indexes.
+// batch1
 static_assert( 0 / k_160::columns == 0);
 static_assert(15 / k_160::columns == 0);
 static_assert(16 / k_160::columns == 1);
@@ -776,7 +803,7 @@ static_assert(48 / k_160::columns == 3);
 static_assert(63 / k_160::columns == 3);
 static_assert(64 / k_160::columns == 4);
 static_assert(79 / k_160::columns == 4);
-
+// batch2
 static_assert( 80 / k_160::columns == 5);
 static_assert( 95 / k_160::columns == 5);
 static_assert( 96 / k_160::columns == 6);
@@ -788,6 +815,56 @@ static_assert(143 / k_160::columns == 8);
 static_assert(144 / k_160::columns == 9);
 static_assert(159 / k_160::columns == 9);
 
+// Word index selection is on round boundary.
+// batch1
+static_assert(k_160::word[ 0] == 0);
+static_assert(k_160::word[15] == 15);
+static_assert(k_160::word[16] == 7);
+static_assert(k_160::word[31] == 8);
+static_assert(k_160::word[32] == 3);
+static_assert(k_160::word[47] == 12);
+static_assert(k_160::word[48] == 1);
+static_assert(k_160::word[63] == 2);
+static_assert(k_160::word[64] == 4);
+static_assert(k_160::word[79] == 13);
+// batch2
+static_assert(k_160::word[ 80] == 5);
+static_assert(k_160::word[ 95] == 12);
+static_assert(k_160::word[ 96] == 6);
+static_assert(k_160::word[111] == 2);
+static_assert(k_160::word[112] == 15);
+static_assert(k_160::word[127] == 13);
+static_assert(k_160::word[128] == 8);
+static_assert(k_160::word[143] == 14);
+static_assert(k_160::word[144] == 12);
+static_assert(k_160::word[159] == 11);
+
+// Rotation selection is on round boundary.
+// batch1
+static_assert(k_160::rot[ 0] == 11);
+static_assert(k_160::rot[15] == 8);
+static_assert(k_160::rot[16] == 7);
+static_assert(k_160::rot[31] == 12);
+static_assert(k_160::rot[32] == 11);
+static_assert(k_160::rot[47] == 5);
+static_assert(k_160::rot[48] == 11);
+static_assert(k_160::rot[63] == 12);
+static_assert(k_160::rot[64] == 9);
+static_assert(k_160::rot[79] == 6);
+// batch2
+static_assert(k_160::rot[ 80] == 8);
+static_assert(k_160::rot[ 95] == 6);
+static_assert(k_160::rot[ 96] == 9);
+static_assert(k_160::rot[111] == 11);
+static_assert(k_160::rot[112] == 9);
+static_assert(k_160::rot[127] == 5);
+static_assert(k_160::rot[128] == 15);
+static_assert(k_160::rot[143] == 8);
+static_assert(k_160::rot[144] == 8);
+static_assert(k_160::rot[159] == 11);
+
+// Constant selection is on round/columns boundary.
+// batch1
 static_assert(k_160::get[ 0 / k_160::columns] == 0x00000000);
 static_assert(k_160::get[15 / k_160::columns] == 0x00000000);
 static_assert(k_160::get[16 / k_160::columns] == 0x5a827999);
@@ -798,7 +875,7 @@ static_assert(k_160::get[48 / k_160::columns] == 0x8f1bbcdc);
 static_assert(k_160::get[63 / k_160::columns] == 0x8f1bbcdc);
 static_assert(k_160::get[64 / k_160::columns] == 0xa953fd4e);
 static_assert(k_160::get[79 / k_160::columns] == 0xa953fd4e);
-
+// batch2
 static_assert(k_160::get[ 80 / k_160::columns] == 0x50a28be6);
 static_assert(k_160::get[ 95 / k_160::columns] == 0x50a28be6);
 static_assert(k_160::get[ 96 / k_160::columns] == 0x5c4dd124);
@@ -810,62 +887,8 @@ static_assert(k_160::get[143 / k_160::columns] == 0x7a6d76e9);
 static_assert(k_160::get[144 / k_160::columns] == 0x00000000);
 static_assert(k_160::get[159 / k_160::columns] == 0x00000000);
 
-static_assert((  0 / k_160::columns) % k_160::columns == 0);
-static_assert(( 15 / k_160::columns) % k_160::columns == 0);
-static_assert(( 16 / k_160::columns) % k_160::columns == 1);
-static_assert(( 31 / k_160::columns) % k_160::columns == 1);
-static_assert(( 32 / k_160::columns) % k_160::columns == 2);
-static_assert(( 47 / k_160::columns) % k_160::columns == 2);
-static_assert(( 48 / k_160::columns) % k_160::columns == 3);
-static_assert(( 63 / k_160::columns) % k_160::columns == 3);
-static_assert(( 64 / k_160::columns) % k_160::columns == 4);
-static_assert(( 79 / k_160::columns) % k_160::columns == 4);
-static_assert(( 80 / k_160::columns) % k_160::columns == 5);
-static_assert(( 95 / k_160::columns) % k_160::columns == 5);
-static_assert(( 96 / k_160::columns) % k_160::columns == 6);
-static_assert((111 / k_160::columns) % k_160::columns == 6);
-static_assert((112 / k_160::columns) % k_160::columns == 7);
-static_assert((127 / k_160::columns) % k_160::columns == 7);
-static_assert((128 / k_160::columns) % k_160::columns == 8);
-static_assert((143 / k_160::columns) % k_160::columns == 8);
-static_assert((144 / k_160::columns) % k_160::columns == 9);
-static_assert((159 / k_160::columns) % k_160::columns == 9);
-
-struct accessor160
-  : public algorithm<rmd128>
-{
-    template<size_t Round>
-    static constexpr auto functor()
-    {
-        return algorithm<rmd128>::functor<Round>();
-    }
-
-    static constexpr auto get_f0()
-    {
-        return &algorithm<rmd128>::f0<uint32_t, uint32_t, uint32_t>;
-    }
-
-    static constexpr auto get_f1()
-    {
-        return &algorithm<rmd128>::f1<uint32_t, uint32_t, uint32_t>;
-    }
-
-    static constexpr auto get_f2()
-    {
-        return &algorithm<rmd128>::f2<uint32_t, uint32_t, uint32_t>;
-    }
-
-    static constexpr auto get_f3()
-    {
-        return &algorithm<rmd128>::f3<uint32_t, uint32_t, uint32_t>;
-    }
-
-    static constexpr auto get_f4()
-    {
-        return &algorithm<rmd128>::f4<uint32_t, uint32_t, uint32_t>;
-    }
-};
-
+// Functor selection is on round/columns boundary.
+// batch1
 static_assert(accessor160::functor< 0>() == accessor160::get_f0());
 static_assert(accessor160::functor<15>() == accessor160::get_f0());
 static_assert(accessor160::functor<16>() == accessor160::get_f1());
@@ -876,7 +899,7 @@ static_assert(accessor160::functor<48>() == accessor160::get_f3());
 static_assert(accessor160::functor<63>() == accessor160::get_f3());
 static_assert(accessor160::functor<64>() == accessor160::get_f4());
 static_assert(accessor160::functor<79>() == accessor160::get_f4());
-
+// batch2
 static_assert(accessor160::functor< 80>() == accessor160::get_f4());
 static_assert(accessor160::functor< 95>() == accessor160::get_f4());
 static_assert(accessor160::functor< 96>() == accessor160::get_f3());

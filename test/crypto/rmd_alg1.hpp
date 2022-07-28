@@ -292,19 +292,20 @@ public:
     using blocks_t  = std_vector<cref<block_t>>;
     using digests_t = std_vector<digest_t>;
 
+    // TODO: change limits to bytes and incorporate this into hash accumulator.
     /// Limits incorporate requirement to encode counter in final block.
     static constexpr auto limit_bits = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes = to_floored_bytes(limit_bits);
 
     /// Streaming (single hash, one/multiple full blocks).
-    static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
+    static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
 
     /// Finalized single hash (one half block or one/multiple full blocks).
-    static constexpr digest_t hash(const half_t& half) NOEXCEPT;
-    static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static VCONSTEXPR digest_t hash(const blocks_t& blocks) NOEXCEPT;
+    static constexpr digest_t hash(const block_t& block) NOEXCEPT;
+    static constexpr digest_t hash(const half_t& half) NOEXCEPT;
 
 protected:
     /// Functions
@@ -339,31 +340,40 @@ protected:
     /// -----------------------------------------------------------------------
     static constexpr void pad_one(words_t& out) NOEXCEPT;
     static constexpr void pad_half(words_t& out) NOEXCEPT;
-    static constexpr void pad_count(words_t& out, count_t blocks) NOEXCEPT;
+    static constexpr void pad_n(words_t& out, count_t blocks) NOEXCEPT;
     
     /// Parsing
     /// -----------------------------------------------------------------------
-    static constexpr void little_one(words_t& out, const block_t& in) NOEXCEPT;
-    static constexpr void little_half(words_t& out, const half_t& in) NOEXCEPT;
-    static constexpr digest_t little_state(const state_t& in) NOEXCEPT;
+    static constexpr void input(words_t& out, const block_t& in) NOEXCEPT;
+    static constexpr void input(words_t& out, const half_t& in) NOEXCEPT;
+    static constexpr digest_t output(const state_t& in) NOEXCEPT;
+
+private:
+    static constexpr auto concurrency() NOEXCEPT;
 };
 
 #ifndef TESTS
 static_assert(k<128>::strength == 128);
 static_assert(k<128>::rounds == 128);
 static_assert(k<128>::size == 256);
+static_assert(k<128>::columns == 16);
+static_assert(k<128>::rows == 8);
 static_assert(is_same_type<k<128>::constants_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<k<128>::rounds_t, std_array<size_t, 128>>);
 
 static_assert(k<160>::strength == 160);
 static_assert(k<160>::rounds == 160);
 static_assert(k<160>::size == 256);
+static_assert(k<160>::columns == 16);
+static_assert(k<160>::rows == 10);
 static_assert(is_same_type<k<160>::constants_t, std_array<uint32_t, 10>>);
 static_assert(is_same_type<k<160>::rounds_t, std_array<size_t, 160>>);
 
 static_assert(k128::strength == 128);
 static_assert(k128::rounds == 128);
 static_assert(k128::size == 256);
+static_assert(k128::columns == 16);
+static_assert(k128::rows == 8);
 static_assert(k128::get[0] == 0x00000000);
 static_assert(k128::get[3] == 0x8f1bbcdc);
 static_assert(k128::get[4] == 0x50a28be6);
@@ -378,6 +388,8 @@ static_assert(is_same_type<k128::rounds_t, std_array<size_t, 128>>);
 static_assert(k160::strength == 160);
 static_assert(k160::rounds == 160);
 static_assert(k160::size == 256);
+static_assert(k160::columns == 16);
+static_assert(k160::rows == 10);
 static_assert(k160::get[0] == 0x00000000);
 static_assert(k160::get[4] == 0xa953fd4e);
 static_assert(k160::get[5] == 0x50a28be6);
