@@ -248,16 +248,14 @@ template <typename SHA, bool Concurrent = true>
 class algorithm
 {
 public:
-    /// Alises from contained type.
+    /// Types.
     /// -----------------------------------------------------------------------
 
-    using H        = typename SHA;
-    using K        = typename SHA::K;
-    using word_t   = typename SHA::word_t;
-    using state_t  = typename SHA::state_t;
-
-    /// Local types.
-    /// -----------------------------------------------------------------------
+    /// Aliases.
+    using H         = typename SHA;
+    using K         = typename SHA::K;
+    using word_t    = typename SHA::word_t;
+    using state_t   = typename SHA::state_t;
 
     /// Word-based types.
     using chunk_t   = std_array<word_t, SHA::chunk_words>;
@@ -277,7 +275,7 @@ public:
     using states_t  = std_vector<state_t>;
     using digests_t = std_vector<digest_t>;
 
-    /// Local constants.
+    /// Constants (and count_t).
     /// -----------------------------------------------------------------------
 
     /// count_t is 64 or 128 bit (sha512 is 128 bit and uses uint128_t).
