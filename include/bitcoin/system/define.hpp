@@ -45,13 +45,13 @@ namespace bc = libbitcoin;
 
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
 
-/// Emit messages from .cpp during compilation.
-#define DO_PRAGMA(text) _Pragma (#text)
-#if defined(HAVE_MSC)
-    #define DEFINED(text) __pragma(message("defined: " text))
-#elif defined(HAVE_GNUC)
-    #define DEFINED(text) DO_PRAGMA(message ("defined: " #text))
-#endif
+/// LCOV (known symbols for code coverage exclusion).
+/// ---------------------------------------------------------------------------
+#define LCOV_EXCL_START(comment)
+#define LCOV_EXCL_STOP()
+
+/// NDEBUG (conditional exclusion).
+/// ---------------------------------------------------------------------------
 
 #ifdef NDEBUG
     #define BC_ASSERT(expression)
@@ -64,8 +64,18 @@ namespace bc = libbitcoin;
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
-// See gcc.gnu.org/wiki/Visibility
+/// Attributes (for platform independence).
+/// ---------------------------------------------------------------------------
 
+/// Emit messages from .cpp during compilation.
+#define DO_PRAGMA(text) _Pragma (#text)
+#if defined(HAVE_MSC)
+    #define DEFINED(text) __pragma(message("defined: " text))
+#elif defined(HAVE_GNUC)
+    #define DEFINED(text) DO_PRAGMA(message ("defined: " #text))
+#endif
+
+/// See gcc.gnu.org/wiki/Visibility
 /// Generic helper definitions for shared library support
 /// GNU visibilty attribute overrides compiler flag `fvisibility`.
 #if defined(HAVE_MSC) || defined(HAVE_CYGWIN)
@@ -97,9 +107,18 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-/// LCOV code coverage exclusion ranges.
-#define LCOV_EXCL_START(comment)
-#define LCOV_EXCL_STOP()
+/// A stronger compiler hint for inlining.
+/// May use prior to 'constexpr' or in place of 'inline'.
+#if defined (HAVE_MSC)
+    #define FORCE_INLINE __forceinline
+#elif defined(HAVE_GNUC)
+    #define FORCE_INLINE __attribute__((always_inline))
+#else
+    #define FORCE_INLINE inline
+#endif
+
+/// Minimums
+/// ---------------------------------------------------------------------------
 
 #if !defined(HAVE_CPP20)
     static_assert(false, "C++20 minimum required.");

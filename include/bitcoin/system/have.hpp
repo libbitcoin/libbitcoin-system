@@ -28,9 +28,7 @@
 /// Plaform: architecture, compiler, and standard libraries.
 /// ---------------------------------------------------------------------------
 
-#if defined(__GNUC__)
-    #define HAVE_GNUC
-#elif defined(__linux__)
+#if defined(__linux__)
     #define HAVE_LINUX
 #elif defined(__APPLE__)
     #define HAVE_APPLE
@@ -42,7 +40,12 @@
     #define HAVE_NETBSD
 #elif defined(__CYGWIN__)
     #define HAVE_CYGWIN
-#elif defined(_MSC_VER)
+#endif
+
+#if defined(__GNUC__)
+    #define HAVE_GNUC
+#endif
+#if defined(_MSC_VER)
     #define HAVE_MSC
 #endif
 
