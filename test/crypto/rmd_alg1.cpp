@@ -32,16 +32,53 @@ BOOST_AUTO_TEST_SUITE(rmd_tests)
 #define TEMPLATE template <typename RMD, bool Concurrent>
 #define CLASS algorithm<RMD, Concurrent>
 
+// Bogus warning suggests constexpr when declared consteval.
+BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
 // private
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr auto CLASS::concurrency() NOEXCEPT
+CONSTEVAL auto CLASS::concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
         return std::execution::par_unseq;
     else
         return std::execution::seq;
+}
+
+
+TEMPLATE
+CONSTEVAL CLASS::chunk_t CLASS::chunk_pad() NOEXCEPT
+{
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
+
+    chunk_t out{};
+    out.front() = bit_hi<word_t>;
+    out.back() = to_bits(bytes);
+    return out;
+}
+
+TEMPLATE
+CONSTEVAL CLASS::words_t CLASS::block_pad() NOEXCEPT
+{
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
+
+    words_t out{};
+    out.front() = bit_hi<word_t>;
+    out.back() = to_bits(bytes);
+    return out;
+}
+
+TEMPLATE
+CONSTEVAL CLASS::blocks_pad_t CLASS::blocks_pad() NOEXCEPT
+{
+    blocks_pad_t out{};
+    out.front() = bit_hi<word_t>;
+    return out;
 }
 
 // Functions.
@@ -82,14 +119,25 @@ constexpr auto CLASS::f4(auto x, auto y, auto z) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-constexpr auto CLASS::functor() NOEXCEPT
+CONSTEVAL auto CLASS::functor() NOEXCEPT
 {
     using self = CLASS;
     constexpr auto fn = Round / RMD::K::columns;
 
-    if constexpr (RMD::rounds == 160)
+    if constexpr (RMD::rounds == 128)
     {
-        if      constexpr (fn == 0u || fn == 9u)
+        if constexpr (fn == 0u || fn == 7u)
+            return &self::template f0<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 1u || fn == 6u)
+            return &self::template f1<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 2u || fn == 5u)
+            return &self::template f2<uint32_t, uint32_t, uint32_t>;
+        else if constexpr (fn == 3u || fn == 4u)
+            return &self::template f3<uint32_t, uint32_t, uint32_t>;
+    }
+    else
+    {
+        if constexpr (fn == 0u || fn == 9u)
             return &self::template f0<uint32_t, uint32_t, uint32_t>;
         else if constexpr (fn == 1u || fn == 8u)
             return &self::template f1<uint32_t, uint32_t, uint32_t>;
@@ -100,31 +148,16 @@ constexpr auto CLASS::functor() NOEXCEPT
         else if constexpr (fn == 4u || fn == 5u)
             return &self::template f4<uint32_t, uint32_t, uint32_t>;
     }
-    else
-    {
-        if      constexpr (fn == 0u || fn == 7u)
-            return &self::template f0<uint32_t, uint32_t, uint32_t>;
-        else if constexpr (fn == 1u || fn == 6u)
-            return &self::template f1<uint32_t, uint32_t, uint32_t>;
-        else if constexpr (fn == 2u || fn == 5u)
-            return &self::template f2<uint32_t, uint32_t, uint32_t>;
-        else if constexpr (fn == 3u || fn == 4u)
-            return &self::template f3<uint32_t, uint32_t, uint32_t>;
-    }
 }
 
 TEMPLATE
 template<size_t Round>
-constexpr auto CLASS::round(auto a, auto& b, auto c, auto d, auto& e,
+FORCE_INLINE constexpr auto CLASS::round(auto a, auto& b, auto c, auto d, auto& e,
     auto w) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     constexpr auto f = functor<Round>();
     constexpr auto r = K::rot[Round];
     constexpr auto k = K::get[Round / RMD::K::columns];
-    BC_POP_WARNING()
-    BC_POP_WARNING()
 
     // TODO: std::rotl(c,10) is not in RMD128.
     e = /*a =*/ std::rotl(a + f(b, c, d) + w + k, r) + e;
@@ -135,17 +168,16 @@ TEMPLATE
 template<size_t Round>
 FORCE_INLINE constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    constexpr auto words  = RMD::state_words;
+    constexpr auto rounds = RMD::rounds;
+
     round<Round>(
-        out[(RMD::rounds + 0 - Round) % RMD::state_words],
-        out[(RMD::rounds + 1 - Round) % RMD::state_words], // c->b
-        out[(RMD::rounds + 2 - Round) % RMD::state_words],
-        out[(RMD::rounds + 3 - Round) % RMD::state_words],
-        out[(RMD::rounds + 4 - Round) % RMD::state_words], // a->e
+        out[(rounds + 0 - Round) % words],
+        out[(rounds + 1 - Round) % words], // c->b
+        out[(rounds + 2 - Round) % words],
+        out[(rounds + 3 - Round) % words],
+        out[(rounds + 4 - Round) % words], // a->e
         in[K::word[Round]]);
-    BC_POP_WARNING()
-    BC_POP_WARNING()
 }
 
 TEMPLATE
@@ -155,10 +187,8 @@ constexpr void CLASS::batch(state_t& out, const words_t& in) NOEXCEPT
     // Order of execution is arbitrary.
     constexpr auto offset = First ? zero : to_half(RMD::rounds);
 
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pout = out.data();
     auto pin = in.data();
-    BC_POP_WARNING()
 
     // RMD256:f0/f4, RMD128:f0/f3
     round<offset + 0>(pout, pin);
@@ -257,19 +287,6 @@ constexpr void CLASS::batch(state_t& out, const words_t& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
-summarize(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
-{
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    out[0] += (in1[0] + in2[0]);
-    out[1] += (in1[1] + in2[1]);
-    out[2] += (in1[2] + in2[2]);
-    out[3] += (in1[3] + in2[3]);
-    out[4] += (in1[4] + in2[4]);
-    BC_POP_WARNING()
-}
-
-TEMPLATE
 constexpr void CLASS::rounding(state_t& state, const words_t& buffer) NOEXCEPT
 {
     // Two copies of state (required by RMD) are saved to jobs.
@@ -301,42 +318,50 @@ constexpr void CLASS::rounding(state_t& state, const words_t& buffer) NOEXCEPT
     summarize(state, jobs.front().second, jobs.back().second);
 }
 
+TEMPLATE
+constexpr void CLASS::summarize(state_t& out, const state_t& in1,
+    const state_t& in2) NOEXCEPT
+{
+    out[0] += (in1[0] + in2[0]);
+    out[1] += (in1[1] + in2[1]);
+    out[2] += (in1[2] + in2[2]);
+    out[3] += (in1[3] + in2[3]);
+    out[4] += (in1[4] + in2[4]);
+}
+
 // Padding
 // ---------------------------------------------------------------------------
 
 TEMPLATE
 constexpr void CLASS::pad_one(words_t& out) NOEXCEPT
 {
-    // Pad a single whole block.
-    out = RMD::pad::block;
+    // Pad a single whole block with pre-prepared buffer.
+    constexpr auto pad = block_pad();
+
+    out = pad;
 }
 
 TEMPLATE
 constexpr void CLASS::pad_half(words_t& out) NOEXCEPT
 {
     // Pad a half block.
+    constexpr auto pad = chunk_pad();
+
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[ 8] = RMD::pad::chunk[0];
-        out[ 9] = RMD::pad::chunk[1];
-        out[10] = RMD::pad::chunk[2];
-        out[11] = RMD::pad::chunk[3];
-        out[12] = RMD::pad::chunk[4];
-        out[13] = RMD::pad::chunk[5];
-        out[14] = RMD::pad::chunk[6];
-        out[15] = RMD::pad::chunk[7];
-        BC_POP_WARNING()
+        out.at(8)  = pad.at(0);
+        out.at(9)  = pad.at(1);
+        out.at(10) = pad.at(2);
+        out.at(11) = pad.at(3);
+        out.at(12) = pad.at(4);
+        out.at(13) = pad.at(5);
+        out.at(14) = pad.at(6);
+        out.at(15) = pad.at(7);
     }
     else
     {
-        // TODO: make safe offsetting array cast.
-        // Array cast is a runtime no-op.
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        constexpr auto pad_size = array_count<chunk_t>;
-        auto& to = unsafe_array_cast<word_t, pad_size>(&out[pad_size]);
-        BC_POP_WARNING()
-        to = RMD::pad::chunk;
+        constexpr auto size = array_count<chunk_t>;
+        unsafe_array_cast<word_t, size>(&out[size]) = pad;
     }
 }
 
@@ -344,44 +369,36 @@ TEMPLATE
 constexpr void CLASS::pad_n(words_t& out, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
+    constexpr auto pad = blocks_pad();
+    const auto bits = to_bits(blocks * array_count<block_t>);
+
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        out[ 0] = RMD::pad::block[0];
-        out[ 1] = RMD::pad::block[1];
-        out[ 2] = RMD::pad::block[2];
-        out[ 3] = RMD::pad::block[3];
-        out[ 4] = RMD::pad::block[4];
-        out[ 5] = RMD::pad::block[5];
-        out[ 6] = RMD::pad::block[6];
-        out[ 7] = RMD::pad::block[7];
-        out[ 8] = RMD::pad::block[8];
-        out[ 9] = RMD::pad::block[9];
-        out[10] = RMD::pad::block[10];
-        out[11] = RMD::pad::block[11];
-        out[12] = RMD::pad::block[12];
-        out[13] = RMD::pad::block[13];
-        ////out[14] = RMD::pad::block[14]; // overwritten by count
-        ////out[15] = RMD::pad::block[15]; // overwritten by count
-        BC_POP_WARNING()
+        out.at(0)  = pad.at(0);
+        out.at(1)  = pad.at(1);
+        out.at(2)  = pad.at(2);
+        out.at(3)  = pad.at(3);
+        out.at(4)  = pad.at(4);
+        out.at(5)  = pad.at(5);
+        out.at(6)  = pad.at(6);
+        out.at(7)  = pad.at(7);
+        out.at(8)  = pad.at(8);
+        out.at(9)  = pad.at(9);
+        out.at(10) = pad.at(10);
+        out.at(11) = pad.at(11);
+        out.at(12) = pad.at(12);
+        out.at(13) = pad.at(13);
+        out.at(14) = hi_word<word_t>(bits);
+        out.at(15) = lo_word<word_t>(bits);
     }
     else
     {
-        // Array cast is a runtime no-op.
-        // TODO: shave two words from RMD::pad::block using narrow_cast.
-        // RMD::pad::block is counted, but count will be overwritten below.
-        auto& to = narrow_array_cast<word_t, array_count<words_t>>(out);
-        to = RMD::pad::block;
+        narrow_array_cast<word_t, array_count<blocks_pad_t>>(out) = pad;
+
+        // Split count into hi/low words and assign end of padded buffer.
+        out[14] = hi_word<word_t>(bits);
+        out[15] = lo_word<word_t>(bits);
     }
-
-    // Copy in the streamed bit count.
-    const auto bits = to_bits(blocks * block_bytes);
-
-    // count_t is twice the size of word_t, so split to hi/low words.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    out[14] = hi_word<word_t>(bits);
-    out[15] = lo_word<word_t>(bits);
-    BC_POP_WARNING()
 }
 
 // Parsing
@@ -391,60 +408,53 @@ constexpr void CLASS::pad_n(words_t& out, count_t blocks) NOEXCEPT
 TEMPLATE
 constexpr void CLASS::input(words_t& out, const block_t& in) NOEXCEPT
 {
+    constexpr auto size = RMD::word_bytes;
+
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_little< 0 * RMD::word_bytes>(out[ 0], in);
-        from_little< 1 * RMD::word_bytes>(out[ 1], in);
-        from_little< 2 * RMD::word_bytes>(out[ 2], in);
-        from_little< 3 * RMD::word_bytes>(out[ 3], in);
-        from_little< 4 * RMD::word_bytes>(out[ 4], in);
-        from_little< 5 * RMD::word_bytes>(out[ 5], in);
-        from_little< 6 * RMD::word_bytes>(out[ 6], in);
-        from_little< 7 * RMD::word_bytes>(out[ 7], in);
-        from_little< 8 * RMD::word_bytes>(out[ 8], in);
-        from_little< 9 * RMD::word_bytes>(out[ 9], in);
-        from_little<10 * RMD::word_bytes>(out[10], in);
-        from_little<11 * RMD::word_bytes>(out[11], in);
-        from_little<12 * RMD::word_bytes>(out[12], in);
-        from_little<13 * RMD::word_bytes>(out[13], in);
-        from_little<14 * RMD::word_bytes>(out[14], in);
-        from_little<15 * RMD::word_bytes>(out[15], in);
-        BC_POP_WARNING()
+        from_little< 0 * size>(out[ 0], in);
+        from_little< 1 * size>(out[ 1], in);
+        from_little< 2 * size>(out[ 2], in);
+        from_little< 3 * size>(out[ 3], in);
+        from_little< 4 * size>(out[ 4], in);
+        from_little< 5 * size>(out[ 5], in);
+        from_little< 6 * size>(out[ 6], in);
+        from_little< 7 * size>(out[ 7], in);
+        from_little< 8 * size>(out[ 8], in);
+        from_little< 9 * size>(out[ 9], in);
+        from_little<10 * size>(out[10], in);
+        from_little<11 * size>(out[11], in);
+        from_little<12 * size>(out[12], in);
+        from_little<13 * size>(out[13], in);
+        from_little<14 * size>(out[14], in);
+        from_little<15 * size>(out[15], in);
     }
     else
     {
-        // Array cast is a runtime no-op.
-        // FBE is 1 (or 0) opcode per element and loop-unrolled.
-        auto& from = array_cast<word_t>(in);
-        auto& to = narrow_array_cast<word_t, RMD::block_words>(out);
-        from_little_endians(to, from);
+        from_little_endians(out, array_cast<word_t>(in));
     }
 }
 
 TEMPLATE
 constexpr void CLASS::input(words_t& out, const half_t& in) NOEXCEPT
 {
+    constexpr auto size = RMD::word_bytes;
+
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_little<0 * RMD::word_bytes>(out[0], in);
-        from_little<1 * RMD::word_bytes>(out[1], in);
-        from_little<2 * RMD::word_bytes>(out[2], in);
-        from_little<3 * RMD::word_bytes>(out[3], in);
-        from_little<4 * RMD::word_bytes>(out[4], in);
-        from_little<5 * RMD::word_bytes>(out[5], in);
-        from_little<6 * RMD::word_bytes>(out[6], in);
-        from_little<7 * RMD::word_bytes>(out[7], in);
-        BC_POP_WARNING()
+        from_little<0 * size>(out[0], in);
+        from_little<1 * size>(out[1], in);
+        from_little<2 * size>(out[2], in);
+        from_little<3 * size>(out[3], in);
+        from_little<4 * size>(out[4], in);
+        from_little<5 * size>(out[5], in);
+        from_little<6 * size>(out[6], in);
+        from_little<7 * size>(out[7], in);
     }
     else
     {
-        // Array cast is a runtime no-op.
-        // FBE is 1 (or 0) opcode per element and loop-unrolled.
-        auto& from = array_cast<RMD::word_t>(in);
         auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
-        from_little_endians(to, from);
+        from_little_endians(to, array_cast<RMD::word_t>(in));
     }
 }
 
@@ -452,32 +462,32 @@ TEMPLATE
 constexpr typename CLASS::digest_t
 CLASS::output(const state_t& in) NOEXCEPT
 {
+    constexpr auto size = RMD::word_bytes;
+
     if (std::is_constant_evaluated())
     {
         digest_t out{};
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
         if constexpr (RMD::K::strength == 128)
         {
-            to_big<0 * RMD::word_bytes>(out, in[0]);
-            to_big<1 * RMD::word_bytes>(out, in[1]);
-            to_big<2 * RMD::word_bytes>(out, in[2]);
-            to_big<3 * RMD::word_bytes>(out, in[3]);
+            to_little<0 * size>(out, in[0]);
+            to_little<1 * size>(out, in[1]);
+            to_little<2 * size>(out, in[2]);
+            to_little<3 * size>(out, in[3]);
         }
         else
         {
-            to_big<0 * RMD::word_bytes>(out, in[0]);
-            to_big<1 * RMD::word_bytes>(out, in[1]);
-            to_big<2 * RMD::word_bytes>(out, in[2]);
-            to_big<3 * RMD::word_bytes>(out, in[3]);
-            to_big<4 * RMD::word_bytes>(out, in[4]);
+            to_little<0 * size>(out, in[0]);
+            to_little<1 * size>(out, in[1]);
+            to_little<2 * size>(out, in[2]);
+            to_little<3 * size>(out, in[3]);
+            to_little<4 * size>(out, in[4]);
         }
-        BC_POP_WARNING()
+
         return out;
     }
     else
     {
-        // Array cast is a runtime no-op.
-        // TBE is 1 (or 0) opcode per element and loop-unrolled.
         return array_cast<byte_t>(to_little_endians(in));
     }
 }
@@ -522,7 +532,7 @@ constexpr typename CLASS::digest_t
 CLASS::hash(const half_t& half) NOEXCEPT
 {
     words_t space{};
-    auto state = RMD::H::get;
+    auto state = H::get;
 
     input(space, half);
     pad_half(space);
@@ -535,7 +545,7 @@ constexpr typename CLASS::digest_t
 CLASS::hash(const block_t& block) NOEXCEPT
 {
     words_t space{};
-    auto state = RMD::H::get;
+    auto state = H::get;
 
     input(space, block);
     rounding(state, space);
@@ -550,7 +560,7 @@ constexpr typename CLASS::digest_t
 CLASS::hash(const blocks_t& blocks) NOEXCEPT
 {
     words_t space{};
-    auto state = RMD::H::get;
+    auto state = H::get;
 
     for (auto& block: blocks)
     {
@@ -563,57 +573,102 @@ CLASS::hash(const blocks_t& blocks) NOEXCEPT
     return finalize(state);
 }
 
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
 #undef CLASS
 #undef TEMPLATE
 
-// TESTS
-// ============================================================================
+#ifndef TESTS
+
+using rmd_128 = algorithm<h128<>, false>;
+using rmd_160 = algorithm<h160<>, false>;
+
+template <typename Algorithm>
+typename sha_tests::accumulator<Algorithm>::digest_t accumulated(
+    const data_slice& data) NOEXCEPT
+{
+    sha_tests::accumulator<Algorithm> accumulator{};
+    accumulator.write(data.size(), data.data());
+    return accumulator.flush();
+}
+
+template <typename Algorithm>
+typename sha_tests::accumulator<Algorithm>::digest_t accumulated(
+    const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    sha_tests::accumulator<Algorithm> accumulator{};
+    accumulator.write(left.size(), left.data());
+    accumulator.write(right.size(), right.data());
+    return accumulator.flush();
+}
+
+// sha128
+// ----------------------------------------------------------------------------
 
 // sha160
 // ----------------------------------------------------------------------------
 
-using rmd_160 = algorithm<h160<160>, false>;
-using rmd_160_accumulator = sha_tests::accumulator<rmd_160>;
-
-short_hash rmd160_hash(const data_slice& data) NOEXCEPT
-{
-    short_hash hash{};
-    rmd_160_accumulator accumulator;
-    accumulator.write(data.size(), data.data());
-    accumulator.flush(hash.data());
-    return hash;
-}
-
-short_hash rmd160_hash(const data_slice& left, const data_slice& right) NOEXCEPT
-{
-    short_hash hash{};
-    rmd_160_accumulator accumulator;
-    accumulator.write(left.size(), left.data());
-    accumulator.write(right.size(), right.data());
-    accumulator.flush(hash.data());
-    return hash;
-}
-
 constexpr auto half160 = rmd_160::half_t{};
 constexpr auto full160 = rmd_160::block_t{};
-constexpr auto twin160 = std_array<uint8_t, rmd_160::block_bytes * 2>{};
+constexpr auto pair160 = std_array<uint8_t, array_count<rmd_160::block_t> * two>{};
 constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
-constexpr auto expected_full160 = base16_array("0000000000000000000000000000000000000000");
-constexpr auto expected_twin160 = base16_array("0000000000000000000000000000000000000000");
+constexpr auto expected_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
+constexpr auto expected_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
 
 // algorithm
 
-BOOST_AUTO_TEST_CASE(algorithm__half160_block__null_hash__expected)
+BOOST_AUTO_TEST_CASE(algorithm__hash_half160__null_hash__expected)
 {
     static_assert(rmd_160::hash(half160) != expected_half160);
-
-    // Use const to prevent compiler from preevaluating as constexpr.
-    const auto half = half160;
-    BOOST_CHECK_NE(rmd_160::hash(half), expected_half160);
-    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
+    BOOST_CHECK_NE(rmd_160::hash(half160), expected_half160);
+    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
 }
 
+BOOST_AUTO_TEST_CASE(algorithm__hash_full160__null_hash__expected)
+{
+    static_assert(rmd_160::hash(full160) != expected_full160);
+    BOOST_CHECK_NE(rmd_160::hash(full160), expected_full160);
+    BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__hash_blocks160__null_hash__expected)
+{
+    const std_vector<cref<rmd_160::block_t>> pair
+    {
+        std::cref(full160), std::cref(full160)
+    };
+
+    BOOST_CHECK_NE(rmd_160::hash(pair), expected_pair160);
+    BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
+}
+
+// accumulator
+
+BOOST_AUTO_TEST_CASE(accumulator__hash_half160__null_hashes__expected)
+{
+    BOOST_CHECK_NE(accumulated<rmd_160>(half160), expected_half160);
+    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__hash_one160__null_hashes__expected)
+{
+    BOOST_CHECK_NE(accumulated<rmd_160>(full160), expected_full160);
+    BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__hash_two160__null_hashes__expected)
+{
+    BOOST_CHECK_NE(accumulated<rmd_160>(full160, full160), expected_pair160);
+    BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
+}
+
+#endif // TESTS
+
 #ifndef TESTS
+
 // Verify indirection.
 
 // algorithm<rmd128>
@@ -910,6 +965,6 @@ static_assert(accessor160::functor<128>() == accessor160::get_f1());
 static_assert(accessor160::functor<143>() == accessor160::get_f1());
 static_assert(accessor160::functor<144>() == accessor160::get_f0());
 static_assert(accessor160::functor<159>() == accessor160::get_f0());
-#endif
+#endif // TESTS
 
 BOOST_AUTO_TEST_SUITE_END()

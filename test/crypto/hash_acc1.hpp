@@ -21,13 +21,13 @@
 BOOST_AUTO_TEST_SUITE(sha_tests)
 
 /// Accumulator for SHA/RMD/MD# streaming hash algorithms.
-template <typename Hash, bool Checked = checked_build>
+template <typename Algorithm, bool Checked = checked_build>
 struct accumulator
 {
     DEFAULT5(accumulator);
-    using byte_t = typename Hash::byte_t;
-    using state_t = typename Hash::state_t;
-    using digest_t = typename Hash::digest_t;
+    using byte_t = typename Algorithm::byte_t;
+    using state_t = typename Algorithm::state_t;
+    using digest_t = typename Algorithm::digest_t;
 
     /// Sets initial state to Hash initialization vector.
     constexpr accumulator() NOEXCEPT;
@@ -47,8 +47,8 @@ struct accumulator
     constexpr void reset() NOEXCEPT;
 
 private:
-    using block_t = typename Hash::block_t;
-    using counter = data_array<Hash::count_bytes>;
+    using block_t = typename Algorithm::block_t;
+    using counter = data_array<Algorithm::count_bytes>;
 
     // Position of next write in the buffer.
     constexpr size_t next() const NOEXCEPT;
@@ -56,8 +56,7 @@ private:
     // Bytes remaining until buffer is full.
     constexpr size_t gap() const NOEXCEPT;
 
-    // SHA512 limited to [max_uint128/8 - 16] hashed bytes.
-    // SHA1/256/RMD limited to [max_uint64/8 - 8] hashed bytes.
+    // Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
     constexpr bool is_buffer_overflow(size_t bytes) NOEXCEPT;
 
     // Append up to block_size bytes to buffer.
@@ -66,7 +65,7 @@ private:
     // Increment the counter for unbuffered transforms.
     constexpr void increment(size_t blocks) NOEXCEPT;
 
-    // Reserves space for counter serialization.
+    // Compute pad size, reserves space for counter serialization.
     constexpr size_t pad_size() const NOEXCEPT;
 
     // Serialize the hashed byte count for finalization
@@ -75,8 +74,9 @@ private:
     // Precomputed streaming pad buffer.
     static CONSTEVAL block_t stream_pad() NOEXCEPT;
 
-    // Number of bytes in a block.
-    static constexpr auto block_bytes = array_count<block_t>;
+    // Number of bytes in a block and in counter.
+    static constexpr auto block_size = array_count<block_t>;
+    static constexpr auto count_size = array_count<counter>;
 
     size_t size_;
     state_t state_;
@@ -86,8 +86,8 @@ private:
 // private
 // ----------------------------------------------------------------------------
 
-#define TEMPLATE template <typename Hash, bool Checked>
-#define CLASS accumulator<Hash, Checked>
+#define TEMPLATE template <typename Algorithm, bool Checked>
+#define CLASS accumulator<Algorithm, Checked>
 
 // Copy and array index are guarded.
 // Buffer initialization is not required due to logical sizing.
@@ -98,7 +98,7 @@ BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
 
 TEMPLATE
 constexpr CLASS::accumulator() NOEXCEPT
-  : size_{ zero }, state_{ Hash::H::get }
+  : size_{ zero }, state_{ Algorithm::H::get }
 {
 }
 
@@ -112,19 +112,19 @@ TEMPLATE
 constexpr void CLASS::reset() NOEXCEPT
 {
     size_ = zero;
-    state_ = Hash::H::get;
+    state_ = Algorithm::H::get;
 }
 
 TEMPLATE
 constexpr size_t CLASS::next() const NOEXCEPT
 {
-    return size_ % block_bytes;
+    return size_ % block_size;
 }
 
 TEMPLATE
 constexpr size_t CLASS::gap() const NOEXCEPT
 {
-    return block_bytes - next();
+    return block_size - next();
 }
 
 TEMPLATE
@@ -132,11 +132,11 @@ constexpr bool CLASS::is_buffer_overflow(size_t bytes) NOEXCEPT
 {
     if constexpr (Checked)
     {
-        return bytes > (Hash::limit_bytes - size_);
+        return bytes > (Algorithm::limit_bytes - size_);
     }
     else
     {
-        // using count_t = typename Hash::count_t;
+        // using count_t = typename Algorithm::count_t;
         // count_t is either uint64_t (SHA1/256/RMD) or uint128_t (SHA512).
         // It is not used in the accumulator, as a performance optimization.
         // This limits the accumulator to [max_size_t/8 - 8|16] hashed bytes.
@@ -162,22 +162,21 @@ constexpr size_t CLASS::add_data(size_t bytes, const byte_t* data) NOEXCEPT
 TEMPLATE
 constexpr void CLASS::increment(size_t blocks) NOEXCEPT
 {
-    BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_bytes), "overflow");
-    BC_ASSERT_MSG(!is_multiply_overflow(blocks, block_bytes), "overflow");
+    BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_size), "overflow");
+    BC_ASSERT_MSG(!is_multiply_overflow(blocks, block_size), "overflow");
 
     // Guarded by proper (protected) response to preceding add_data call.
     // Caller must not increment more blocks than implied by add_data result.
-    size_ += (blocks * block_bytes);
+    size_ += (blocks * block_size);
 }
 
 TEMPLATE
 constexpr size_t CLASS::pad_size() const NOEXCEPT
 {
-    constexpr auto singled = block_bytes - Hash::count_bytes;
-    constexpr auto doubled = block_bytes + singled;
-    const auto used = next();
+    constexpr auto singled = block_size - count_size;
+    constexpr auto doubled = block_size + singled;
 
-    // Requires that counter is computed after padding is added.
+    const auto used = next();
     return (used < singled ? singled - used : doubled - used);
 }
 
@@ -185,13 +184,13 @@ TEMPLATE
 constexpr typename CLASS::counter
 CLASS::serialize(size_t bytes) NOEXCEPT
 {
-    if constexpr (Hash::big_end_count)
+    if constexpr (Algorithm::big_end_count)
     {
-        return to_big_endian_size<Hash::count_bytes>(to_bits(bytes));
+        return to_big_endian_size<count_size>(to_bits(bytes));
     }
     else
     {
-        return to_little_endian_size<Hash::count_bytes>(to_bits(bytes));
+        return to_little_endian_size<count_size>(to_bits(bytes));
     }
 }
 
@@ -217,7 +216,7 @@ inline bool CLASS::write(const data_slice& data) NOEXCEPT
         return true;
 
     // Transform (updates state and clears buffer).
-    Hash::accumulate(state_, buffer_);
+    Algorithm::accumulate(state_, buffer_);
     std::advance(pdata, accepted);
 
     // No more bytes to process.
@@ -225,8 +224,8 @@ inline bool CLASS::write(const data_slice& data) NOEXCEPT
         return true;
 
     // Get count of whole blocks and remaining bytes.
-    const auto count = size / block_bytes;
-    const auto bytes = size % block_bytes;
+    const auto count = size / block_size;
+    const auto bytes = size % block_size;
 
     // write is inline vs constexpr because of this cast. This could instead
     // be passed as a pointer, but then Hash (algorithm) would have to cast.
@@ -234,7 +233,7 @@ inline bool CLASS::write(const data_slice& data) NOEXCEPT
     const auto blocks = unsafe_vector_cast<block_t>(pdata, count);
 
     // Transform all whole blocks and save remainder to cleared buffer.
-    Hash::accumulate(state_, blocks);
+    Algorithm::accumulate(state_, blocks);
     std::advance(pdata, size - bytes);
     increment(count);
 
@@ -257,8 +256,8 @@ constexpr CLASS::digest_t CLASS::flush() NOEXCEPT
 
     const auto size = size_;
     write(pad_size(), pad.data());
-    write(Hash::count_bytes, serialize(size).data());
-    return Hash::finalize(state_);
+    write(count_size, serialize(size).data());
+    return Algorithm::finalize(state_);
 }
 
 TEMPLATE

@@ -62,6 +62,7 @@ BC_POP_WARNING()
     {
         context.in.write(size, key);
         context.in.flush(key_hash.data());
+        ////context.in.reset();
         key = key_hash.data();
         size = system::sha256::digest_size;
     }

@@ -93,14 +93,14 @@ protected:
 
     template <size_t A, size_t B, size_t C, size_t D>
     static constexpr void salsa_qr(words_t& words) NOEXCEPT;
-    static block_t& salsa_8(block_t& block) NOEXCEPT;
-    static bool block_mix(rblock_t& rblock) NOEXCEPT;
-    static bool romix(rblock_t& rblock) NOEXCEPT;
+    static inline block_t& salsa_8(block_t& block) NOEXCEPT;
+    static inline bool block_mix(rblock_t& rblock) NOEXCEPT;
+    static inline bool romix(rblock_t& rblock) NOEXCEPT;
 
 private:
     template<typename Block>
     static inline auto allocate() NOEXCEPT;
-    static constexpr auto concurrency() NOEXCEPT;
+    static CONSTEVAL auto concurrency() NOEXCEPT;
 };
 
 /// Litecoin/BIP38 scrypt arguments.

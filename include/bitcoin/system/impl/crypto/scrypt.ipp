@@ -45,15 +45,6 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr auto CLASS::concurrency() NOEXCEPT
-{
-    if constexpr (Concurrent)
-        return std::execution::par_unseq;
-    else
-        return std::execution::seq;
-}
-
-TEMPLATE
 template<typename Block>
 inline auto CLASS::allocate() NOEXCEPT
 {
@@ -62,6 +53,15 @@ inline auto CLASS::allocate() NOEXCEPT
     return std::shared_ptr<Block>(new Block);
     BC_POP_WARNING()
     BC_POP_WARNING()
+}
+
+TEMPLATE
+CONSTEVAL auto CLASS::concurrency() NOEXCEPT
+{
+    if constexpr (Concurrent)
+        return std::execution::par_unseq;
+    else
+        return std::execution::seq;
 }
 
 // protected
@@ -341,7 +341,7 @@ CLASS::block_t& CLASS::salsa_8(block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
+inline bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
 {
     // Make a working block initialized from rblock.back().
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -451,7 +451,7 @@ bool CLASS::block_mix(rblock_t& rblock) NOEXCEPT
 }
 
 TEMPLATE
-bool CLASS::romix(rblock_t& rblock) NOEXCEPT
+inline bool CLASS::romix(rblock_t& rblock) NOEXCEPT
 {
     // Make a working set of W rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

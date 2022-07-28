@@ -29,7 +29,7 @@ struct k
     static constexpr auto rounds = strength;
     static constexpr auto size = 256_size;
     static constexpr auto columns = 16_size;
-    static constexpr auto rows = Strength / columns;
+    static constexpr auto rows = strength / columns;
     using constants_t = std_array<uint32_t, rows>;
     using rounds_t = std_array<size_t, rounds>;
 };
@@ -37,10 +37,7 @@ struct k
 struct k128
   : public k<128>
 {
-    using base = k<128>;
-
-    /// K values (constants).
-    static constexpr base::constants_t get
+    static constexpr constants_t get
     {
         0x00000000,
         0x5a827999,
@@ -52,7 +49,7 @@ struct k128
         0x00000000,
     };
 
-    static constexpr base::rounds_t word
+    static constexpr rounds_t word
     {
         // parallel one
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -67,7 +64,7 @@ struct k128
         8, 6, 4, 1, 3, 11, 15, 0, 5, 12, 2, 13, 9, 7, 10, 14
     };
 
-    static constexpr base::rounds_t rot
+    static constexpr rounds_t rot
     {
         // parallel one
         11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
@@ -86,10 +83,7 @@ struct k128
 struct k160
   : public k<160>
 {
-    using base = k<160>;
-
-    /// K values (constants).
-    static constexpr base::constants_t get
+    static constexpr constants_t get
     {
         0x00000000,
         0x5a827999,
@@ -103,7 +97,7 @@ struct k160
         0x00000000
     };
 
-    static constexpr base::rounds_t word
+    static constexpr rounds_t word
     {
         // parallel one
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
@@ -120,7 +114,7 @@ struct k160
         12, 15, 10, 4, 1, 5, 8, 7, 6, 2, 13, 14, 0, 3, 9, 11
     };
 
-    static constexpr base::rounds_t rot
+    static constexpr rounds_t rot
     {
         // parallel one
         11, 14, 15, 12, 5, 8, 7, 9, 11, 13, 14, 15, 6, 7, 9, 8,
@@ -143,7 +137,6 @@ struct h
 {
     using K = Constants;
 
-    /// These constants are exposed though H on the algorithm.
     static constexpr auto digest       = Digest;
     static constexpr auto size         = K::size;
     static constexpr auto rounds       = K::rounds;
@@ -151,161 +144,111 @@ struct h
     static constexpr auto word_bytes   = bytes<word_bits>;
     static constexpr auto block_words  = bytes<size> / to_half(word_bytes);
     static constexpr auto chunk_words  = to_half(block_words);
-    static constexpr auto buffer_words = rounds;
     static constexpr auto state_words  = Digest == 128 ? 4 : 5;
 
-    /// These types are exposed though H on the algorithm.
-    using byte_t   = uint8_t;
-    using word_t   = unsigned_type<word_bytes>;
-    using state_t  = std_array<word_t, state_words>;  // IV/state
-    using words_t  = std_array<word_t, block_words>;  // one block pad
-    using chunk_t  = std_array<word_t, chunk_words>;  // half block pad
-    using stream_t = std_array<byte_t, block_words * word_bytes>; // stream pad
+    using word_t  = unsigned_type<word_bytes>;
+    using state_t = std_array<word_t, state_words>;
 };
 
-// Digest 256 changes IV.
+// Digest 256 changes IV (specialize template).
 template <size_t Digest = 128,
     bool_if<Digest == 128 || Digest == 256> = true>
 struct h128
   : public h<k128, Digest>
 {
-    using base = h<k128, Digest>;
-
-    struct H
+    static constexpr const h<k128, Digest>::state_t get
     {
-        /// H values (initial state).
-        static constexpr const base::state_t get
-        {
-            0x67452301,
-            0xefcdab89,
-            0x98badcfe,
-            0x10325476
-        };
-    };
-
-    struct pad
-    {
-        /// chunk (8 words)
-        static constexpr base::chunk_t chunk
-        {
-            0x80000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x00000100
-        };
-
-        /// block (16 words)
-        static constexpr base::words_t block
-        {
-            0x80000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x00000200
-        };
-
-        /// block (64 bytes)
-        static constexpr base::stream_t stream
-        {
-            0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        };
+        0x67452301,
+        0xefcdab89,
+        0x98badcfe,
+        0x10325476
     };
 };
 
-// Digest 256 changes IV.
-template <size_t Digest = 160>
+// Digest 320 changes IV (specialize template).
+template <size_t Digest = 160,
+    bool_if<Digest == 160 || Digest == 320> = true>
 struct h160
   : public h<k160, Digest>
 {
-    using base = h<k160, Digest>;
-
-    struct H
+    static constexpr const h<k160, Digest>::state_t get
     {
-        /// H values (initial state).
-        static constexpr const base::state_t get
-        {
-            0x67452301,
-            0xefcdab89,
-            0x98badcfe,
-            0x10325476,
-            0xc3d2e1f0
-        };
-    };
-
-    struct pad
-    {
-        /// chunk (8 words)
-        static constexpr base::chunk_t chunk = h128<>::pad::chunk;
-
-        /// block (16 words)
-        static constexpr base::words_t block = h128<>::pad::block;
-
-        /// block (64 bytes)
-        static constexpr base::stream_t stream = h128<>::pad::stream;
+        0x67452301,
+        0xefcdab89,
+        0x98badcfe,
+        0x10325476,
+        0xc3d2e1f0
     };
 };
 
 /// RIPEMD 128/160/256/320 variants.
 using rmd128     = h128<>;
-using rmd128_256 = h128<256>;
+using rmd128_256 = h128<256>; // not fully implemented
 using rmd160     = h160<>;
-using rmd160_320 = h160<320>;
+using rmd160_320 = h160<320>; // not fully implemented
 
 /// RMD hashing algorithm.
 template <typename RMD, bool Concurrent = true>
 class algorithm
 {
 public:
-    /// RMD alises.
+    /// Alises from contained type.
     /// -----------------------------------------------------------------------
 
-    using H        = typename RMD::H;
+    using H        = typename RMD;
     using K        = typename RMD::K;
-    using pad      = typename RMD::pad;
-    using byte_t   = typename RMD::byte_t;
     using word_t   = typename RMD::word_t;
     using state_t  = typename RMD::state_t;
-    using chunk_t  = typename RMD::chunk_t;
-    using words_t  = typename RMD::words_t;
-    using stream_t = typename RMD::stream_t;
 
-    /// I/O (local) types.
+    /// Local types.
     /// -----------------------------------------------------------------------
 
-    /// Chunk is 1/2 block, not same as state/digest.
-    static constexpr auto block_bytes   = RMD::block_words * RMD::word_bytes;
-    static constexpr auto chunk_bytes   = RMD::chunk_words * RMD::word_bytes;
-    static constexpr auto digest_bytes  = bytes<RMD::digest>;
-    static constexpr auto count_bits    = block_bytes;
-    static constexpr auto count_bytes   = bytes<count_bits>;
-    static constexpr auto big_end_count = false;
+    /// Word-based types.
+    using chunk_t   = std_array<word_t, RMD::chunk_words>;
+    using words_t   = std_array<word_t, RMD::block_words>;
+    using buffer_t  = std_array<word_t, K::rounds>;
 
-    /// Blocks is a vector of cref (use emplace(block)).
-    using block_t   = std_array<byte_t, block_bytes>;
-    using half_t    = std_array<byte_t, chunk_bytes>;
-    using digest_t  = std_array<byte_t, digest_bytes>;
-    using count_t   = unsigned_exact_type<count_bytes>;
+    /// Byte-based types.
+    using byte_t    = uint8_t;
+    using half_t    = std_array<byte_t, RMD::chunk_words * RMD::word_bytes>;
+    using block_t   = std_array<byte_t, RMD::block_words * RMD::word_bytes>;
+    using digest_t  = std_array<byte_t, bytes<RMD::digest>>;
+
+    /// Vectorization types (blocks_t is cref).
     using blocks_t  = std_vector<cref<block_t>>;
+    using states_t  = std_vector<state_t>;
     using digests_t = std_vector<digest_t>;
 
-    // TODO: change limits to bytes and incorporate this into hash accumulator.
+    /// Local constants.
+    /// -----------------------------------------------------------------------
+
+    /// count_t is 64 or 128 bit (sha512 is 128 bit and uses uint128_t).
+    static constexpr auto count_bits    = RMD::block_words * RMD::word_bytes;
+    static constexpr auto count_bytes   = bytes<count_bits>;
+    using count_t = unsigned_exact_type<bytes<count_bits>>;
+
     /// Limits incorporate requirement to encode counter in final block.
-    static constexpr auto limit_bits = maximum<count_t> - count_bits;
-    static constexpr auto limit_bytes = to_floored_bytes(limit_bits);
+    static constexpr auto limit_bits    = maximum<count_t> - count_bits;
+    static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
+    static constexpr auto big_end_count = false;
 
-    /// Streaming (single hash, one/multiple full blocks).
-    static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
-    static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
-    static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
+    /// Hashing (finalized).
+    /// -----------------------------------------------------------------------
 
-    /// Finalized single hash (one half block or one/multiple full blocks).
+    /// Finalized single hash.
     static VCONSTEXPR digest_t hash(const blocks_t& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
+
+    /// Streaming (unfinalized).
+    /// -----------------------------------------------------------------------
+
+    /// One or more dependent blocks produces one state.
+    static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
+    static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
+    
+    /// Finalize streaming state (converts to little-endian bytes).
+    static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions
@@ -321,14 +264,14 @@ protected:
     /// -----------------------------------------------------------------------
 
     template<size_t Round>
-    static constexpr auto functor() NOEXCEPT;
+    static CONSTEVAL auto functor() NOEXCEPT;
 
     template<size_t Round>
-    static constexpr auto round(auto a, auto& b, auto c, auto d, auto& e,
-        auto w) NOEXCEPT;
+    FORCE_INLINE static constexpr auto round(auto a, auto& b, auto c, auto d,
+        auto& e, auto w) NOEXCEPT;
 
     template<size_t Round>
-    static constexpr void round(auto& out, const auto& in) NOEXCEPT;
+    FORCE_INLINE static constexpr void round(auto& out, const auto& in) NOEXCEPT;
 
     template<bool First>
     static constexpr void batch(state_t& out, const words_t& in) NOEXCEPT;
@@ -349,26 +292,35 @@ protected:
     static constexpr digest_t output(const state_t& in) NOEXCEPT;
 
 private:
-    static constexpr auto concurrency() NOEXCEPT;
+    // Specialized padding type.
+    using blocks_pad_t = std_array<word_t, subtract(RMD::block_words,
+        count_bytes / RMD::word_bytes)>;
+
+    static CONSTEVAL auto concurrency() NOEXCEPT;
+    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
+    static CONSTEVAL words_t block_pad() NOEXCEPT;
+    static CONSTEVAL blocks_pad_t blocks_pad() NOEXCEPT;
 };
 
 #ifndef TESTS
+
+// k<>
 static_assert(k<128>::strength == 128);
 static_assert(k<128>::rounds == 128);
 static_assert(k<128>::size == 256);
 static_assert(k<128>::columns == 16);
 static_assert(k<128>::rows == 8);
-static_assert(is_same_type<k<128>::constants_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<k<128>::rounds_t, std_array<size_t, 128>>);
-
 static_assert(k<160>::strength == 160);
 static_assert(k<160>::rounds == 160);
 static_assert(k<160>::size == 256);
 static_assert(k<160>::columns == 16);
 static_assert(k<160>::rows == 10);
+static_assert(is_same_type<k<128>::constants_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<k<160>::constants_t, std_array<uint32_t, 10>>);
+static_assert(is_same_type<k<128>::rounds_t, std_array<size_t, 128>>);
 static_assert(is_same_type<k<160>::rounds_t, std_array<size_t, 160>>);
 
+// k128
 static_assert(k128::strength == 128);
 static_assert(k128::rounds == 128);
 static_assert(k128::size == 256);
@@ -385,6 +337,7 @@ static_assert(k128::rot[127] == 8u);
 static_assert(is_same_type<k128::constants_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<k128::rounds_t, std_array<size_t, 128>>);
 
+// k160
 static_assert(k160::strength == 160);
 static_assert(k160::rounds == 160);
 static_assert(k160::size == 256);
@@ -410,12 +363,8 @@ static_assert(h<k128, 128>::chunk_words == 8);
 static_assert(h<k128, 128>::block_words == 16);
 static_assert(h<k128, 128>::state_words == 4);
 static_assert(is_same_type<h<k128, 128>::K, k128>);
-static_assert(is_same_type<h<k128, 128>::byte_t, uint8_t>);
 static_assert(is_same_type<h<k128, 128>::word_t, uint32_t>);
 static_assert(is_same_type<h<k128, 128>::state_t, std_array<uint32_t, 4>>);
-static_assert(is_same_type<h<k128, 128>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<k128, 128>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<h<k128, 128>::stream_t, std_array<uint8_t, 64>>);
 
 // h<k160,...>
 static_assert(h<k160>::size == 256);
@@ -426,95 +375,67 @@ static_assert(h<k160, 160>::chunk_words == 8);
 static_assert(h<k160, 160>::block_words == 16);
 static_assert(h<k160, 160>::state_words == 5);
 static_assert(is_same_type<h<k160, 160>::K, k160>);
-static_assert(is_same_type<h<k160, 160>::byte_t, uint8_t>);
 static_assert(is_same_type<h<k160, 160>::word_t, uint32_t>);
 static_assert(is_same_type<h<k160, 160>::state_t, std_array<uint32_t, 5>>);
-static_assert(is_same_type<h<k160, 160>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<h<k160, 160>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<h<k160, 160>::stream_t, std_array<uint8_t, 64>>);
 
-// h128
+// h128<>
 static_assert(h128<>::size == 256);
 static_assert(h128<>::digest == 128);
 static_assert(h128<>::rounds == 128);
+static_assert(h128<>::get[0] == 0x67452301);
+static_assert(h128<>::get[3] == 0x10325476);
+static_assert(h128<>::get.size() == 4);
 static_assert(h128<>::K::rounds == 128);
 static_assert(h128<>::K::get[0] == 0x00000000);
 static_assert(h128<>::K::get[7] == 0x00000000);
 static_assert(h128<>::K::get.size() == 8);
-static_assert(h128<>::H::get[0] == 0x67452301);
-static_assert(h128<>::H::get[3] == 0x10325476);
-static_assert(h128<>::H::get.size() == 4);
-static_assert(h128<>::pad::chunk.size() == 8);
-static_assert(h128<>::pad::chunk[0] == 0x80000000);
-static_assert(h128<>::pad::chunk[7] == 0x00000100);
-static_assert(h128<>::pad::block.size() == 16);
-static_assert(h128<>::pad::block[0] == 0x80000000);
-static_assert(h128<>::pad::block[15] == 0x00000200);
-static_assert(h128<>::pad::stream.size() == 64);
-static_assert(h128<>::pad::stream[0] == 0x80);
-static_assert(h128<>::pad::stream[63] == 0x00);
 
-// h160
+// h160<>
 static_assert(h160<>::size == 256);
 static_assert(h160<>::digest == 160);
 static_assert(h160<>::rounds == 160);
+static_assert(h160<>::get[0] == 0x67452301);
+static_assert(h160<>::get[4] == 0xc3d2e1f0);
+static_assert(h160<>::get.size() == 5);
 static_assert(h160<>::K::rounds == 160);
 static_assert(h160<>::K::get[0] == 0x00000000);
 static_assert(h160<>::K::get[4] == 0xa953fd4e);
 static_assert(h160<>::K::get[5] == 0x50a28be6);
 static_assert(h160<>::K::get[9] == 0x00000000);
 static_assert(h160<>::K::get.size() == 10);
-static_assert(h160<>::H::get[0] == 0x67452301);
-static_assert(h160<>::H::get[4] == 0xc3d2e1f0);
-static_assert(h160<>::H::get.size() == 5);
-static_assert(h160<>::pad::chunk.size() == 8);
-static_assert(h160<>::pad::chunk[0] == 0x80000000);
-static_assert(h160<>::pad::chunk[7] == 0x00000100);
-static_assert(h160<>::pad::block.size() == 16);
-static_assert(h160<>::pad::block[0] == 0x80000000);
-static_assert(h160<>::pad::block[15] == 0x00000200);
-static_assert(h160<>::pad::stream.size() == 64);
-static_assert(h160<>::pad::stream[0] == 0x80);
-static_assert(h160<>::pad::stream[63] == 0x00);
 
 // rmd128
 static_assert(rmd128::size == 256);
 static_assert(rmd128::digest == 128);
+static_assert(rmd128::get.size() == 4);
+static_assert(rmd128::get[0] == 0x67452301);
+static_assert(rmd128::get[3] == 0x10325476);
 static_assert(rmd128::K::rounds == 128);
 static_assert(rmd128::K::get.size() == 8);
 static_assert(rmd128::K::get[0] == 0x00000000);
 static_assert(rmd128::K::get[7] == 0x00000000);
-static_assert(rmd128::H::get.size() == 4);
-static_assert(rmd128::H::get[0] == 0x67452301);
-static_assert(rmd128::H::get[3] == 0x10325476);
 
 // rmd160
 static_assert(rmd160::size == 256);
 static_assert(rmd160::digest == 160);
+static_assert(rmd160::get.size() == 5);
+static_assert(rmd160::get[0] == 0x67452301);
+static_assert(rmd160::get[4] == 0xc3d2e1f0);
 static_assert(rmd160::K::rounds == 160);
 static_assert(rmd160::K::get.size() == 10);
 static_assert(rmd160::K::get[0] == 0x00000000);
 static_assert(rmd160::K::get[9] == 0x00000000);
-static_assert(rmd160::H::get.size() == 5);
-static_assert(rmd160::H::get[0] == 0x67452301);
-static_assert(rmd160::H::get[4] == 0xc3d2e1f0);
 
 // Expansions.
-static_assert(rmd128::digest == 128);
 static_assert(rmd128_256::digest == 256);
-static_assert(rmd160::digest == 160);
 static_assert(rmd160_320::digest == 320);
 
 // algorithm<rmd128>
 static_assert(!algorithm<rmd128>::big_end_count);
-static_assert(algorithm<rmd128>::block_bytes == 64u);
-static_assert(algorithm<rmd128>::chunk_bytes == 32u);
-static_assert(algorithm<rmd128>::digest_bytes == 16u);
 static_assert(algorithm<rmd128>::count_bits == 64u);
 static_assert(algorithm<rmd128>::count_bytes == 8u);
 static_assert(algorithm<rmd128>::H::get.size() == 4u);
 static_assert(algorithm<rmd128>::K::get.size() == 8u);
-static_assert(algorithm<rmd128>::pad::chunk.size() == 8u);
 static_assert(algorithm<rmd128>::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
 static_assert(algorithm<rmd128>::limit_bytes == algorithm<rmd128>::limit_bits / byte_bits);
 static_assert(is_same_type<algorithm<rmd128>::byte_t, uint8_t>);
@@ -522,7 +443,6 @@ static_assert(is_same_type<algorithm<rmd128>::word_t, uint32_t>);
 static_assert(is_same_type<algorithm<rmd128>::state_t, std_array<uint32_t, 4>>);
 static_assert(is_same_type<algorithm<rmd128>::chunk_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<algorithm<rmd128>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<algorithm<rmd128>::stream_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd128>::block_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd128>::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<algorithm<rmd128>::digest_t, std_array<uint8_t, 16>>);
@@ -534,14 +454,10 @@ static_assert(is_same_type<decltype(algorithm<rmd128>::limit_bytes), const uint6
 
 // algorithm<rmd160>
 static_assert(!algorithm<rmd160>::big_end_count);
-static_assert(algorithm<rmd160>::block_bytes == 64u);
-static_assert(algorithm<rmd160>::chunk_bytes == 32u);
-static_assert(algorithm<rmd160>::digest_bytes == 20u);
 static_assert(algorithm<rmd160>::count_bits == 64u);
 static_assert(algorithm<rmd160>::count_bytes == 8u);
 static_assert(algorithm<rmd160>::H::get.size() == 5u);
 static_assert(algorithm<rmd160>::K::get.size() == 10u);
-static_assert(algorithm<rmd160>::pad::chunk.size() == 8u);
 static_assert(algorithm<rmd160>::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
 static_assert(algorithm<rmd160>::limit_bytes == algorithm<rmd160>::limit_bits / byte_bits);
 static_assert(is_same_type<algorithm<rmd160>::byte_t, uint8_t>);
@@ -549,7 +465,6 @@ static_assert(is_same_type<algorithm<rmd160>::word_t, uint32_t>);
 static_assert(is_same_type<algorithm<rmd160>::state_t, std_array<uint32_t, 5>>);
 static_assert(is_same_type<algorithm<rmd160>::chunk_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<algorithm<rmd160>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<algorithm<rmd160>::stream_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd160>::block_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<algorithm<rmd160>::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<algorithm<rmd160>::digest_t, std_array<uint8_t, 20>>);
@@ -558,6 +473,7 @@ static_assert(is_same_type<algorithm<rmd160>::blocks_t, std_vector<cref<std_arra
 static_assert(is_same_type<algorithm<rmd160>::digests_t, std_vector<std_array<uint8_t, 20>>>);
 static_assert(is_same_type<decltype(algorithm<rmd160>::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(algorithm<rmd160>::limit_bytes), const uint64_t>);
-#endif
+
+#endif // TESTS
 
 BOOST_AUTO_TEST_SUITE_END()

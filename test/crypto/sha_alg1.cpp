@@ -39,11 +39,14 @@ BOOST_AUTO_TEST_SUITE(sha_tests)
 #define TEMPLATE template <typename SHA, bool Concurrent>
 #define CLASS algorithm<SHA, Concurrent>
 
-// private
-// ---------------------------------------------------------------------------
-
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+// private
+// ---------------------------------------------------------------------------
 
 TEMPLATE
 CONSTEVAL auto CLASS::concurrency() NOEXCEPT
@@ -66,13 +69,21 @@ CONSTEVAL CLASS::chunk_t CLASS::chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL CLASS::statep_t CLASS::state_pad() NOEXCEPT
+CONSTEVAL CLASS::state_pad_t CLASS::state_pad() NOEXCEPT
 {
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<digest_t>);
 
-    statep_t out{};
+    state_pad_t out{};
     out.front() = bit_hi<word_t>;
     out.back() = to_bits(bytes);
+    return out;
+}
+
+TEMPLATE
+CONSTEVAL CLASS::blocks_pad_t CLASS::blocks_pad() NOEXCEPT
+{
+    blocks_pad_t out{};
+    out.front() = bit_hi<word_t>;
     return out;
 }
 
@@ -88,16 +99,6 @@ CONSTEVAL CLASS::buffer_t CLASS::block_pad() NOEXCEPT
     preparing(out);
     return out;
 }
-
-TEMPLATE
-CONSTEVAL CLASS::blocks_pad_t CLASS::blocks_pad() NOEXCEPT
-{
-    blocks_pad_t out{};
-    out.front() = bit_hi<word_t>;
-    return out;
-}
-
-BC_POP_WARNING()
 
 // 4.1 Functions
 // ---------------------------------------------------------------------------
@@ -134,65 +135,45 @@ constexpr auto CLASS::majority(auto x, auto y, auto z) NOEXCEPT
 TEMPLATE
 constexpr auto CLASS::SIGMA0(auto x) NOEXCEPT
 {
-    // std::rotr is one opcode when !is_constant_evaluated.
+    // 4.1.2 SHA-224 and SHA-256 Functions
+    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
-    {
-        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
         return std::rotr(x, 28) ^ std::rotr(x, 34) ^ std::rotr(x, 39);
-    }
     else
-    {
-        // 4.1.2 SHA-224 and SHA-256 Functions
-        return std::rotr(x, 2) ^ std::rotr(x, 13) ^ std::rotr(x, 22);
-    }
+        return std::rotr(x,  2) ^ std::rotr(x, 13) ^ std::rotr(x, 22);
 }
 
 TEMPLATE
 constexpr auto CLASS::SIGMA1(auto x) NOEXCEPT
 {
-    // std::rotr is one opcode when !is_constant_evaluated.
+    // 4.1.2 SHA-224 and SHA-256 Functions
+    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
-    {
-        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
         return std::rotr(x, 14) ^ std::rotr(x, 18) ^ std::rotr(x, 41);
-    }
     else
-    {
-        // 4.1.2 SHA-224 and SHA-256 Functions
-        return std::rotr(x, 6) ^ std::rotr(x, 11) ^ std::rotr(x, 25);
-    }
+        return std::rotr(x,  6) ^ std::rotr(x, 11) ^ std::rotr(x, 25);
 }
 
 TEMPLATE
 constexpr auto CLASS::sigma0(auto x) NOEXCEPT
 {
-    // std::rotr is one opcode when !is_constant_evaluated.
+    // 4.1.2 SHA-224 and SHA-256 Functions
+    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
-    {
-        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
-        return std::rotr(x, 1) ^ std::rotr(x, 8) ^ (x >> 7);
-    }
+        return std::rotr(x, 1) ^ std::rotr(x,  8) ^ (x >> 7);
     else
-    {
-        // 4.1.2 SHA-224 and SHA-256 Functions
         return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3);
-    }
 }
 
 TEMPLATE
 constexpr auto CLASS::sigma1(auto x) NOEXCEPT
 {
-    // std::rotr is one opcode when !is_constant_evaluated.
+    // 4.1.2 SHA-224 and SHA-256 Functions
+    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
-    {
-        // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
-        return std::rotr(x, 19) ^ std::rotr(x, 61) ^ (x >> 6);
-    }
+        return std::rotr(x, 19) ^ std::rotr(x, 61) ^ (x >>  6);
     else
-    {
-        // 4.1.2 SHA-224 and SHA-256 Functions
         return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10);
-    }
 }
 
 // Rounds
@@ -203,13 +184,13 @@ constexpr auto CLASS::sigma1(auto x) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-constexpr auto CLASS::functor() NOEXCEPT
+CONSTEVAL auto CLASS::functor() NOEXCEPT
 {
     using self = CLASS;
     constexpr auto fn = (Round / 20u);
 
     // 4.1.1 SHA-1 Functions (limited to uint32_t)
-    if      constexpr (fn == 0u)
+    if constexpr (fn == 0u)
         return &self::template choice<uint32_t, uint32_t, uint32_t>;
     else if constexpr (fn == 1u)
         return &self::template parity<uint32_t, uint32_t, uint32_t>;
@@ -221,19 +202,14 @@ constexpr auto CLASS::functor() NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-constexpr void CLASS::round(auto a, auto& b, auto c, auto d, auto& e,
-    auto w) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::round(auto a, auto& b, auto c, auto d,
+    auto& e, auto w) NOEXCEPT
 {
     // 4.2.1 SHA-1 Constants
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-    constexpr auto k = SHA::K::get[Round];
+    constexpr auto k = K::get[Round];
     constexpr auto f = functor<Round>();
-    BC_POP_WARNING()
-    BC_POP_WARNING()
 
     // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
-    // std::rotl is one opcode when !is_constant_evaluated.
     const auto t = std::rotl(a, 5) + f(b, c, d) + e + k + w;
     b = /*c =*/ std::rotl(b, 30);
     e = /*a =*/ t;
@@ -241,14 +217,12 @@ constexpr void CLASS::round(auto a, auto& b, auto c, auto d, auto& e,
 
 TEMPLATE
 template<size_t Round>
-constexpr void CLASS::round(auto a, auto b, auto c, auto& d, auto e, auto f,
+FORCE_INLINE constexpr void CLASS::round(auto a, auto b, auto c, auto& d, auto e, auto f,
     auto g, auto& h, auto w) NOEXCEPT
 {
     // 4.2.2 SHA-224 and SHA-256 Constants
     // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    constexpr auto k = SHA::K::get[Round];
-    BC_POP_WARNING()
+    constexpr auto k = K::get[Round];
 
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
@@ -260,20 +234,20 @@ constexpr void CLASS::round(auto a, auto b, auto c, auto& d, auto e, auto f,
 
 TEMPLATE
 template<size_t Round>
-constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
 {
-    // All indexes resolved to constants by compile.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+    constexpr auto words  = SHA::state_words;
+    constexpr auto rounds = SHA::rounds;
+
     if constexpr (SHA::digest == 160)
     {
         // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
         round<Round>(
-            out[(SHA::rounds + 0 - Round) % SHA::state_words],
-            out[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
-            out[(SHA::rounds + 2 - Round) % SHA::state_words],
-            out[(SHA::rounds + 3 - Round) % SHA::state_words],
-            out[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
+            out[(rounds + 0 - Round) % words],
+            out[(rounds + 1 - Round) % words], // c->b
+            out[(rounds + 2 - Round) % words],
+            out[(rounds + 3 - Round) % words],
+            out[(rounds + 4 - Round) % words], // a->e
             in[Round]);
     }
     else
@@ -281,18 +255,16 @@ constexpr void CLASS::round(auto& out, const auto& in) NOEXCEPT
         // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
         // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
         round<Round>(
-            out[(SHA::rounds + 0 - Round) % SHA::state_words],
-            out[(SHA::rounds + 1 - Round) % SHA::state_words],
-            out[(SHA::rounds + 2 - Round) % SHA::state_words],
-            out[(SHA::rounds + 3 - Round) % SHA::state_words], // e->d
-            out[(SHA::rounds + 4 - Round) % SHA::state_words],
-            out[(SHA::rounds + 5 - Round) % SHA::state_words],
-            out[(SHA::rounds + 6 - Round) % SHA::state_words],
-            out[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
+            out[(rounds + 0 - Round) % words],
+            out[(rounds + 1 - Round) % words],
+            out[(rounds + 2 - Round) % words],
+            out[(rounds + 3 - Round) % words], // e->d
+            out[(rounds + 4 - Round) % words],
+            out[(rounds + 5 - Round) % words],
+            out[(rounds + 6 - Round) % words],
+            out[(rounds + 7 - Round) % words], // a->h
             in[Round]);
     }
-    BC_POP_WARNING()
-    BC_POP_WARNING()
 }
 
 TEMPLATE
@@ -303,10 +275,8 @@ constexpr void CLASS::rounding(state_t& out, const buffer_t& in) NOEXCEPT
     // Templated constant reduces ops per iteration by 35% (vs. parameter).
     // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
     // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pin = in.data();
     auto pout = out.data();
-    BC_POP_WARNING()
 
     // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
@@ -406,11 +376,8 @@ constexpr void CLASS::rounding(state_t& out, const buffer_t& in) NOEXCEPT
 
 TEMPLATE
 template<size_t Word>
-constexpr void CLASS::prepare(auto& out) NOEXCEPT
+FORCE_INLINE constexpr void CLASS::prepare(auto& out) NOEXCEPT
 {
-    // All indexes resolved to constants by compile.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     if constexpr (SHA::digest == 160)
     {
         // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
@@ -430,19 +397,12 @@ constexpr void CLASS::prepare(auto& out) NOEXCEPT
             sigma0(out[Word - 15]) +
                    out[Word - 16];
     }
-    BC_POP_WARNING()
-    BC_POP_WARNING()
 }
 
 TEMPLATE
 constexpr void CLASS::preparing(buffer_t& out) NOEXCEPT
 {
-    // Templated constant reduces ops per iteration by 35% (vs. parameter).
-    // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
-    // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pout = out.data();
-    BC_POP_WARNING()
 
     // 6.1.2.1 SHA-1   Hash Computation (16 <= t <= 79)
     // 6.2.2.1 SHA-256 Hash Computation (16 <= t <= 63)
@@ -524,7 +484,6 @@ constexpr void CLASS::preparing(buffer_t& out) NOEXCEPT
 TEMPLATE
 constexpr void CLASS::summarize(state_t& out, const state_t& in) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     if constexpr (SHA::digest == 160)
     {
         // 6.1.2.4 SHA-1 Hash Computation
@@ -547,17 +506,16 @@ constexpr void CLASS::summarize(state_t& out, const state_t& in) NOEXCEPT
         out[6] += in[6];
         out[7] += in[7];
     }
-    BC_POP_WARNING()
 }
 
 TEMPLATE
 constexpr void CLASS::input(buffer_t& out, const state_t& in) NOEXCEPT
 {
     // 5.3 Setting the Initial Hash Value
+
     // This is a double hash optimization.
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         if constexpr (SHA::digest == 160)
         {
             // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
@@ -580,11 +538,9 @@ constexpr void CLASS::input(buffer_t& out, const state_t& in) NOEXCEPT
             out[6] = in[6];
             out[7] = in[7];
         }
-        BC_POP_WARNING()
     }
     else
     {
-        // Array cast is a runtime no-op.
         narrow_array_cast<word_t, array_count<state_t>>(out) = in;
     }
 }
@@ -623,12 +579,7 @@ constexpr void CLASS::pad_half(buffer_t& out) NOEXCEPT
     else
     {
         constexpr auto size = array_count<chunk_t>;
-
-        // Array cast is a runtime no-op.
-        // TODO: make safe offsetting array cast.
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         unsafe_array_cast<word_t, size>(&out[size]) = pad;
-        BC_POP_WARNING()
     }
 }
 
@@ -673,12 +624,7 @@ constexpr void CLASS::pad_state(buffer_t& out) NOEXCEPT
     else
     {
         constexpr auto size = SHA::block_words - SHA::state_words;
-
-        // Array cast is a runtime no-op.
-        // TODO: make safe offsetting array cast.
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         unsafe_array_cast<word_t, size>(&out[SHA::state_words]) = pad;
-        BC_POP_WARNING()
     }
 }
 
@@ -687,8 +633,6 @@ constexpr void CLASS::pad_n(buffer_t& out, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
     constexpr auto pad = blocks_pad();
-
-    // Count of bits in the number of blocks.
     const auto bits = to_bits(blocks * array_count<block_t>);
 
     if (std::is_constant_evaluated())
@@ -712,108 +656,95 @@ constexpr void CLASS::pad_n(buffer_t& out, count_t blocks) NOEXCEPT
     }
     else
     {
-        // Array cast is a runtime no-op.
         narrow_array_cast<word_t, array_count<blocks_pad_t>>(out) = pad;
 
         // Split count into hi/low words and assign end of padded buffer.
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         out[14] = hi_word<word_t>(bits);
         out[15] = lo_word<word_t>(bits);
-        BC_POP_WARNING()
     }
 }
 
 // 5.2 Parsing the Message
 // ---------------------------------------------------------------------------
-// big-endian I/O is conventional for SHA.
 // 5.2.1 SHA-1, SHA-224 and SHA-256
 // 5.2.2 SHA-384, SHA-512, SHA-512/224 and SHA-512/256
+// big-endian I/O is conventional for SHA.
 
 TEMPLATE
 constexpr void CLASS::input(buffer_t& out, const block_t& in) NOEXCEPT
 {
+    constexpr auto size = SHA::word_bytes;
+
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_big< 0 * SHA::word_bytes>(out[ 0], in);
-        from_big< 1 * SHA::word_bytes>(out[ 1], in);
-        from_big< 2 * SHA::word_bytes>(out[ 2], in);
-        from_big< 3 * SHA::word_bytes>(out[ 3], in);
-        from_big< 4 * SHA::word_bytes>(out[ 4], in);
-        from_big< 5 * SHA::word_bytes>(out[ 5], in);
-        from_big< 6 * SHA::word_bytes>(out[ 6], in);
-        from_big< 7 * SHA::word_bytes>(out[ 7], in);
-        from_big< 8 * SHA::word_bytes>(out[ 8], in);
-        from_big< 9 * SHA::word_bytes>(out[ 9], in);
-        from_big<10 * SHA::word_bytes>(out[10], in);
-        from_big<11 * SHA::word_bytes>(out[11], in);
-        from_big<12 * SHA::word_bytes>(out[12], in);
-        from_big<13 * SHA::word_bytes>(out[13], in);
-        from_big<14 * SHA::word_bytes>(out[14], in);
-        from_big<15 * SHA::word_bytes>(out[15], in);
-        BC_POP_WARNING()
+        from_big< 0 * size>(out[ 0], in);
+        from_big< 1 * size>(out[ 1], in);
+        from_big< 2 * size>(out[ 2], in);
+        from_big< 3 * size>(out[ 3], in);
+        from_big< 4 * size>(out[ 4], in);
+        from_big< 5 * size>(out[ 5], in);
+        from_big< 6 * size>(out[ 6], in);
+        from_big< 7 * size>(out[ 7], in);
+        from_big< 8 * size>(out[ 8], in);
+        from_big< 9 * size>(out[ 9], in);
+        from_big<10 * size>(out[10], in);
+        from_big<11 * size>(out[11], in);
+        from_big<12 * size>(out[12], in);
+        from_big<13 * size>(out[13], in);
+        from_big<14 * size>(out[14], in);
+        from_big<15 * size>(out[15], in);
     }
     else
     {
-        // Array cast is a runtime no-op.
-        // FBE is 1 (or 0) opcode per element and loop-unrolled.
-        auto& from = array_cast<word_t>(in);
         auto& to = narrow_array_cast<word_t, SHA::block_words>(out);
-        from_big_endians(to, from);
+        from_big_endians(to, array_cast<word_t>(in));
     }
 }
 
 TEMPLATE
 constexpr void CLASS::input1(buffer_t& out, const half_t& in) NOEXCEPT
 {
+    constexpr auto size = SHA::word_bytes;
+
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_big<0 * SHA::word_bytes>(out[0], in);
-        from_big<1 * SHA::word_bytes>(out[1], in);
-        from_big<2 * SHA::word_bytes>(out[2], in);
-        from_big<3 * SHA::word_bytes>(out[3], in);
-        from_big<4 * SHA::word_bytes>(out[4], in);
-        from_big<5 * SHA::word_bytes>(out[5], in);
-        from_big<6 * SHA::word_bytes>(out[6], in);
-        from_big<7 * SHA::word_bytes>(out[7], in);
-        BC_POP_WARNING()
+        from_big<0 * size>(out[0], in);
+        from_big<1 * size>(out[1], in);
+        from_big<2 * size>(out[2], in);
+        from_big<3 * size>(out[3], in);
+        from_big<4 * size>(out[4], in);
+        from_big<5 * size>(out[5], in);
+        from_big<6 * size>(out[6], in);
+        from_big<7 * size>(out[7], in);
     }
     else
     {
-        // Array cast is a runtime no-op.
-        // FBE is 1 (or 0) opcode per element and loop-unrolled.
-        auto& from = array_cast<SHA::word_t>(in);
         auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
-        from_big_endians(to, from);
+        from_big_endians(to, array_cast<SHA::word_t>(in));
     }
 }
 
 TEMPLATE
 constexpr void CLASS::input2(buffer_t& out, const half_t& in) NOEXCEPT
 {
+    constexpr auto size = SHA::word_bytes;
+
     if (std::is_constant_evaluated())
     {
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        from_big< 8 * SHA::word_bytes>(out[8], in);
-        from_big< 9 * SHA::word_bytes>(out[9], in);
-        from_big<10 * SHA::word_bytes>(out[10], in);
-        from_big<11 * SHA::word_bytes>(out[11], in);
-        from_big<12 * SHA::word_bytes>(out[12], in);
-        from_big<13 * SHA::word_bytes>(out[13], in);
-        from_big<14 * SHA::word_bytes>(out[14], in);
-        from_big<15 * SHA::word_bytes>(out[15], in);
-        BC_POP_WARNING()
+        from_big< 8 * size>(out[8], in);
+        from_big< 9 * size>(out[9], in);
+        from_big<10 * size>(out[10], in);
+        from_big<11 * size>(out[11], in);
+        from_big<12 * size>(out[12], in);
+        from_big<13 * size>(out[13], in);
+        from_big<14 * size>(out[14], in);
+        from_big<15 * size>(out[15], in);
     }
     else
     {
-        // TODO: make safe offsetting array cast.
-        // Array cast is a runtime no-op.
-        // FBE is 1 (or 0) opcode per element and loop-unrolled.
         constexpr auto size = SHA::state_words;
-        auto& from = array_cast<SHA::word_t>(in);
         auto& to = unsafe_array_cast<word_t, size>(&out[size]);
-        from_big_endians(to, from);
+        from_big_endians(to, array_cast<SHA::word_t>(in));
     }
 }
 
@@ -823,37 +754,36 @@ constexpr typename CLASS::digest_t CLASS::output(const state_t& in) NOEXCEPT
     // 6.1.2 SHA-1   Hash Computation
     // 6.2.2 SHA-256 Hash Computation
     // 6.4.2 SHA-512 Hash Computation
+    constexpr auto size = SHA::word_bytes;
 
     if (std::is_constant_evaluated())
     {
         digest_t out{};
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
         if constexpr (SHA::digest == 160)
         {
-            to_big<0 * SHA::word_bytes>(out, in[0]);
-            to_big<1 * SHA::word_bytes>(out, in[1]);
-            to_big<2 * SHA::word_bytes>(out, in[2]);
-            to_big<3 * SHA::word_bytes>(out, in[3]);
-            to_big<4 * SHA::word_bytes>(out, in[4]);
+            to_big<0 * size>(out, in[0]);
+            to_big<1 * size>(out, in[1]);
+            to_big<2 * size>(out, in[2]);
+            to_big<3 * size>(out, in[3]);
+            to_big<4 * size>(out, in[4]);
         }
         else
         {
-            to_big<0 * SHA::word_bytes>(out, in[0]);
-            to_big<1 * SHA::word_bytes>(out, in[1]);
-            to_big<2 * SHA::word_bytes>(out, in[2]);
-            to_big<3 * SHA::word_bytes>(out, in[3]);
-            to_big<4 * SHA::word_bytes>(out, in[4]);
-            to_big<5 * SHA::word_bytes>(out, in[5]);
-            to_big<6 * SHA::word_bytes>(out, in[6]);
-            to_big<7 * SHA::word_bytes>(out, in[7]);
+            to_big<0 * size>(out, in[0]);
+            to_big<1 * size>(out, in[1]);
+            to_big<2 * size>(out, in[2]);
+            to_big<3 * size>(out, in[3]);
+            to_big<4 * size>(out, in[4]);
+            to_big<5 * size>(out, in[5]);
+            to_big<6 * size>(out, in[6]);
+            to_big<7 * size>(out, in[7]);
         }
-        BC_POP_WARNING()
+
         return out;
     }
     else
     {
-        // Array cast is a runtime no-op.
-        // TBE is 1 (or 0) opcode per element and loop-unrolled.
         return array_cast<byte_t>(to_big_endians(in));
     }
 }
@@ -866,7 +796,7 @@ constexpr typename CLASS::digest_t
 CLASS::hash(const half_t& half) NOEXCEPT
 {
     buffer_t space{};
-    auto state = SHA::H::get;
+    auto state = H::get;
 
     input1(space, half);
     pad_half(space);
@@ -880,7 +810,7 @@ constexpr typename CLASS::digest_t
 CLASS::hash(const block_t& block) NOEXCEPT
 {
     buffer_t space{};
-    auto state = SHA::H::get;
+    auto state = H::get;
 
     input(space, block);
     preparing(space);
@@ -897,7 +827,7 @@ constexpr typename CLASS::digest_t
 CLASS::hash(const set_t& blocks) NOEXCEPT
 {
     buffer_t space{};
-    auto state = SHA::H::get;
+    auto state = H::get;
 
     // The set is ordered (accumulated).
     for (auto& block: blocks)
@@ -924,7 +854,7 @@ CLASS::double_hash(const block_t& block) NOEXCEPT
 
     // first hash
     // --------------------
-    auto state = SHA::H::get;
+    auto state = H::get;
 
     // hash one block
     input(space, block);
@@ -940,7 +870,7 @@ CLASS::double_hash(const block_t& block) NOEXCEPT
 
     // second hash
     // --------------------
-    state = SHA::H::get;
+    state = H::get;
 
     // hash padded state
     pad_state(space);
@@ -954,7 +884,7 @@ constexpr typename CLASS::digest_t
 CLASS::double_hash(const digest_t& left, const digest_t& right) NOEXCEPT
 {
     buffer_t space{};
-    auto state = SHA::H::get;
+    auto state = H::get;
 
     input1(space, left);
     input2(space, right);
@@ -965,7 +895,7 @@ CLASS::double_hash(const digest_t& left, const digest_t& right) NOEXCEPT
     rounding(state, space);
     input(space, state);
 
-    state = SHA::H::get;
+    state = H::get;
     pad_state(space);
     preparing(space);
     rounding(state, space);
@@ -985,7 +915,7 @@ CLASS::double_hash(const set_t& blocks) NOEXCEPT
         {
             buffer_t space{};
 
-            auto state = SHA::H::get;
+            auto state = H::get;
             input(space, block);
             preparing(space);
             rounding(state, space);
@@ -993,7 +923,7 @@ CLASS::double_hash(const set_t& blocks) NOEXCEPT
             rounding(state, space);
             input(space, state);
 
-            state = SHA::H::get;
+            state = H::get;
             pad_state(space);
             preparing(space);
             rounding(state, space);
@@ -1043,7 +973,7 @@ CLASS::accumulate(const sets_t<Size>& sets) NOEXCEPT
         [&](const set_t& blocks)
         {
             buffer_t space{};
-            auto state = SHA::H::get;
+            auto state = H::get;
 
             // Each set is ordered (accumulated).
             for (auto& block: blocks)
@@ -1067,12 +997,15 @@ CLASS::finalize(const state_t& state) NOEXCEPT
     return output(state);
 }
 
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
 #undef CLASS
 #undef TEMPLATE
 
-// TESTS
-// ============================================================================
-// TODO: move accumulator tests to accumulator once merged.
+#ifndef TESTS
 
 using sha_160 = algorithm<h160>;
 using sha_256 = algorithm<h256<>>;
@@ -1090,23 +1023,19 @@ template <typename Algorithm>
 typename accumulator<Algorithm>::digest_t accumulated(
     const data_slice& data) NOEXCEPT
 {
-    typename accumulator<Algorithm>::digest_t hash{};
     accumulator<Algorithm> accumulator{};
     accumulator.write(data.size(), data.data());
-    accumulator.flush(hash.data());
-    return hash;
+    return accumulator.flush();
 }
 
 template <typename Algorithm>
 typename accumulator<Algorithm>::digest_t accumulated(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
-    typename accumulator<Algorithm>::digest_t hash{};
     accumulator<Algorithm> accumulator{};
     accumulator.write(left.size(), left.data());
     accumulator.write(right.size(), right.data());
-    accumulator.flush(hash.data());
-    return hash;
+    return accumulator.flush();
 }
 
 // sha160
@@ -1138,7 +1067,11 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full160__null_hash__expected)
 
 BOOST_AUTO_TEST_CASE(algorithm__hash_blocks160__null_hash__expected)
 {
-    const std_vector<cref<sha_160::block_t>> pair{ std::cref(full160), std::cref(full160) };
+    const std_vector<cref<sha_160::block_t>> pair
+    {
+        std::cref(full160), std::cref(full160)
+    };
+
     BOOST_CHECK_EQUAL(sha_160::hash(pair), expected_pair160);
     BOOST_CHECK_EQUAL(system::sha1_hash(pair160), expected_pair160);
 }
@@ -1152,7 +1085,7 @@ BOOST_AUTO_TEST_CASE(algorithm__double_hash160__null_hash__expected)
 
 BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks160__null_hash__expected)
 {
-    const auto expected = sha_160::digests_t
+    const sha_160::digests_t expected
     {
         expected_merk160, expected_merk160
     };
@@ -1214,7 +1147,11 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full256__null_hash__expected)
 
 BOOST_AUTO_TEST_CASE(algorithm__hash_blocks256__null_hash__expected)
 {
-    const std_vector<cref<sha_256::block_t>> pair{ std::cref(full256), std::cref(full256) };
+    const std_vector<cref<sha_256::block_t>> pair
+    {
+        std::cref(full256), std::cref(full256)
+    };
+
     BOOST_CHECK_EQUAL(sha_256::hash(pair), expected_pair256);
     BOOST_CHECK_EQUAL(system::sha256_hash(pair256), expected_pair256);
 }
@@ -1228,7 +1165,7 @@ BOOST_AUTO_TEST_CASE(algorithm__double_hash256__null_hash__expected)
 
 BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks256__null_hash__expected)
 {
-    const auto expected = sha_256::digests_t
+    const sha_256::digests_t expected
     {
         expected_merk256, expected_merk256
     };
@@ -1293,7 +1230,11 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full512__null_hash__expected)
 
 BOOST_AUTO_TEST_CASE(algorithm__hash_blocks512__null_hashes__expected)
 {
-    const std_vector<cref<sha_512::block_t>> pair{ std::cref(full512), std::cref(full512) };
+    const std_vector<cref<sha_512::block_t>> pair
+    {
+        std::cref(full512), std::cref(full512)
+    };
+
     BOOST_CHECK_EQUAL(sha_512::hash(pair), expected_pair512);
     BOOST_CHECK_EQUAL(system::sha512_hash(pair512), expected_pair512);
 }
@@ -1307,7 +1248,7 @@ BOOST_AUTO_TEST_CASE(algorithm__double_hash512__null_hash__expected)
 
 BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks512__null_hashes__expected)
 {
-    const auto expected = sha_512::digests_t
+    const sha_512::digests_t expected
     {
         expected_merk512, expected_merk512
     };
@@ -1339,5 +1280,7 @@ BOOST_AUTO_TEST_CASE(accumulator__hash_two512__null_hashes__expected)
     BOOST_CHECK_EQUAL(accumulated<sha_512>(full512, full512), expected_pair512);
     BOOST_CHECK_EQUAL(system::sha512_hash(pair512), expected_pair512);
 }
+
+#endif // TESTS
 
 BOOST_AUTO_TEST_SUITE_END()
