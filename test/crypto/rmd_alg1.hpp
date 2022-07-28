@@ -156,7 +156,9 @@ template <size_t Digest = 128,
 struct h128
   : public h<k128, Digest>
 {
-    static constexpr const h<k128, Digest>::state_t get
+    using state_t = typename h<k128, Digest>::state_t;
+
+    static constexpr state_t get
     {
         0x67452301,
         0xefcdab89,
@@ -171,7 +173,9 @@ template <size_t Digest = 160,
 struct h160
   : public h<k160, Digest>
 {
-    static constexpr const h<k160, Digest>::state_t get
+    using state_t = typename h<k160, Digest>::state_t;
+
+    static constexpr state_t get
     {
         0x67452301,
         0xefcdab89,
