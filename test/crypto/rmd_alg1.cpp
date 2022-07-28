@@ -155,13 +155,14 @@ template<size_t Round>
 FORCE_INLINE constexpr auto CLASS::round(auto a, auto& b, auto c, auto d, auto& e,
     auto w) NOEXCEPT
 {
-    constexpr auto f = functor<Round>();
     constexpr auto r = K::rot[Round];
     constexpr auto k = K::get[Round / RMD::K::columns];
+    constexpr auto f = functor<Round>();
 
     // TODO: std::rotl(c,10) is not in RMD128.
-    e = /*a =*/ std::rotl(a + f(b, c, d) + w + k, r) + e;
+    const auto t = std::rotl(a + f(b, c, d) + k + w, r) + e;
     b = /*c =*/ std::rotl(c, 10);
+    e = /*a =*/ t;
 }
 
 TEMPLATE
@@ -187,8 +188,8 @@ constexpr void CLASS::batch(state_t& out, const words_t& in) NOEXCEPT
     // Order of execution is arbitrary.
     constexpr auto offset = First ? zero : to_half(RMD::rounds);
 
-    auto pout = out.data();
     auto pin = in.data();
+    auto pout = out.data();
 
     // RMD256:f0/f4, RMD128:f0/f3
     round<offset + 0>(pout, pin);
