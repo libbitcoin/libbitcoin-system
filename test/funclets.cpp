@@ -139,10 +139,10 @@ static_assert(!to_bool(0));
 static_assert(is_same_type<decltype(to_bool<int16_t>(0)), bool>);
 
 static_assert(variable_size(zero) == 1u);
-static_assert(variable_size(1) == 1u);
-static_assert(variable_size(0xfe) == 3u);
-static_assert(variable_size(0x10000) == 5u);
-static_assert(variable_size(0x100000000) == 9u);
+static_assert(variable_size(1u) == 1u);
+static_assert(variable_size(0xfeu) == 3u);
+static_assert(variable_size(0x10000u) == 5u);
+static_assert(variable_size(0x100000000u) == 9u);
 static_assert(variable_size(max_uint8) == 3u);
 static_assert(variable_size(max_uint16) == 3u);
 static_assert(variable_size(max_uint32) == 5u);

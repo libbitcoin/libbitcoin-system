@@ -153,8 +153,9 @@ constexpr bool to_bool(Type value) noexcept
 }
 
 /// Determine the bitcoin variable-serialized size of a given value.
-template <typename Integer>
-constexpr size_t variable_size(Integer value) noexcept
+template <typename Unsigned,
+    std::enable_if_t<std::is_unsigned_v<Unsigned>, bool> = true>
+constexpr size_t variable_size(Unsigned value) noexcept
 {
     if (value < varint_two_bytes)
         return sizeof(uint8_t);
