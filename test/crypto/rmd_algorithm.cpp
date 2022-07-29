@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half128__null_hash__expected)
 BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
 {
     ////static_assert(rmd_128::hash(full128) != expected_full128);
-    ////BOOST_CHECK_NE(rmd_128::hash(full128), expected_full128);
+    BOOST_CHECK_NE(rmd_128::hash(full128), expected_full128);
     ////BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
 }
 

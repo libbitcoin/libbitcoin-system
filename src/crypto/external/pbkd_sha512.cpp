@@ -1,72 +1,89 @@
-/* OpenBSD: pkcs5_pbkdf2.c, v 1.9 2015/02/05 12:59:57 millert */
 /**
- * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
+ * Copyright (c) 2011-2022 libbitcoin developers (see AUTHORS)
  *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
+ * This file is part of libbitcoin.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
 
 #include <bitcoin/system/crypto/external/hmac_sha512.hpp>
+#include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-bool PBKDSHA512(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, size_t iterations, uint8_t* key,
-    size_t key_length) NOEXCEPT
+namespace libbitcoin {
+namespace system {
+namespace pbkd {
+namespace sha512 {
+    
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+using algorithm = sha::algorithm<sha::sha512>;
+constexpr auto digest_size = array_count<algorithm::digest_t>;
+
+bool hash(const uint8_t* passphrase, size_t passphrase_size,
+    const uint8_t* salt, size_t salt_size, uint64_t iterations,
+    uint8_t* buffer, size_t buffer_size) NOEXCEPT
 {
-    uint8_t* asalt;
-    size_t asalt_size;
-    size_t count, index, iteration, length;
-    uint8_t buffer[HMACSHA512_DIGEST_LENGTH];
-    uint8_t digest1[HMACSHA512_DIGEST_LENGTH];
-    uint8_t digest2[HMACSHA512_DIGEST_LENGTH];
-
-    if (salt_length > SIZE_MAX - 4)
+    if (buffer_size > maximum_size)
         return false;
 
-    asalt_size = salt_length + 4;
+    hmac::sha512::context salted{};
+    hmac::sha512::initialize(salted, passphrase, passphrase_size);
+    hmac::sha512::update(salted, salt, salt_size);
+    algorithm::digest_t U{};
 
-    asalt = bc::system::pointer_cast<uint8_t>(std::malloc(asalt_size));
-    if (asalt == NULL)
-        return false;
-
-    std::memcpy(asalt, salt, salt_length);
-    for (count = 1; key_length > 0; count++)
+    // uint32_t not word_t
+    for (uint32_t i = 0; i * digest_size < buffer_size; ++i)
     {
-        asalt[salt_length + 0] = (count >> 24) & 0xff;
-        asalt[salt_length + 1] = (count >> 16) & 0xff;
-        asalt[salt_length + 2] = (count >> 8) & 0xff;
-        asalt[salt_length + 3] = (count >> 0) & 0xff;
+        // uint32_t not word_t
+        constexpr auto size = sizeof(uint32_t);
 
-        HMACSHA512(asalt, asalt_size, passphrase, passphrase_length, digest1);
-        std::memcpy(buffer, digest1, sizeof(buffer));
+        auto context = salted;
+        hmac::sha512::update(context, to_big_endian(add1(i)).data(), size);
+        hmac::sha512::finalize(context, U.data());
+        auto T = U;
 
-        for (iteration = 1; iteration < iterations; iteration++)
+        for (size_t j = one; j < iterations; ++j)
         {
-            HMACSHA512(digest1, sizeof(digest1), passphrase, passphrase_length, digest2);
-            std::memcpy(digest1, digest2, sizeof(digest1));
-
-            for (index = 0; index < sizeof(buffer); index++)
-                buffer[index] ^= digest1[index];
+            hmac::sha512::initialize(context, passphrase, passphrase_size);
+            hmac::sha512::update(context, U.data(), digest_size);
+            hmac::sha512::finalize(context, U.data());
+            
+            for (size_t k = 0; k < digest_size; ++k)
+                T[k] ^= U[k];
         }
 
-        length = (key_length < sizeof(buffer) ? key_length : sizeof(buffer));
-        memcpy(key, buffer, length);
-        key += length;
-        key_length -= length;
-    };
+        const auto offset = i * digest_size;
+        const auto length = limit(buffer_size - offset, digest_size);
+        std::memcpy(&buffer[offset], T.data(), length);
+    }
 
-    std::free(asalt);
     return true;
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+
+} // namespace sha512
+} // namespace pbkd
+} // namespace system
+} // namespace libbitcoin

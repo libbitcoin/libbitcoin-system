@@ -27,8 +27,9 @@ namespace system {
 namespace hmac {
 namespace sha256 {
 
-constexpr auto block_size = 64_size;
-    
+constexpr auto block_size = array_count<algorithm::block_t>;
+constexpr auto digest_size = array_count<algorithm::digest_t>;
+
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 constexpr void xor_n(uint8_t* to, const uint8_t* from, size_t size) NOEXCEPT
 BC_POP_WARNING()
@@ -58,11 +59,8 @@ BC_POP_WARNING()
 {
     context.out.reset();
     context.in.reset();
-
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    data_array<block_size> pad;
-    data_array<hash_size> key_hash;
-    BC_POP_WARNING()
+    data_array<block_size> pad{};
+    data_array<digest_size> key_hash{};
 
     if (size > block_size)
     {
@@ -70,7 +68,7 @@ BC_POP_WARNING()
         context.in.flush(key_hash.data());
         context.in.reset();
         key = key_hash.data();
-        size = hash_size;
+        size = digest_size;
     }
     
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -98,7 +96,7 @@ void update(context& context, const uint8_t* data, size_t size) NOEXCEPT
 void finalize(context& context, uint8_t* digest) NOEXCEPT
 {
     context.in.flush(digest);
-    context.out.write(hash_size, digest);
+    context.out.write(digest_size, digest);
     context.out.flush(digest);
     context.out.reset();
     context.in.reset();

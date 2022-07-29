@@ -18,12 +18,24 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_PBKD_SHA512_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
-// Password-Based Key Derivation Function 2 (PKCS #5 v2.0).
-// Code based on IEEE Std 802.11-2007, Annex H.4.2.
-// returns 0 if successful
-bool PBKDSHA512(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, size_t iterations,
-    uint8_t* key, size_t key_length) NOEXCEPT;
+namespace libbitcoin {
+namespace system {
+namespace pbkd {
+namespace sha512 {
+
+/// pbkdf2::sha512 size limited to [sub1(2^64) * 2^5] (?verify).
+constexpr auto maximum_size = sub1(power2<uint64_t>(64u)) * power2<uint64_t>(5u);
+
+/// False if buffer_size > pbkdf2::maximum_size.
+bool hash(const uint8_t* passphrase, size_t passphrase_size,
+    const uint8_t* salt, size_t salt_size, uint64_t iterations,
+    uint8_t* buffer, size_t buffer_size) NOEXCEPT;
+
+} // namespace sha512
+} // namespace pbkd
+} // namespace system
+} // namespace libbitcoin
 
 #endif

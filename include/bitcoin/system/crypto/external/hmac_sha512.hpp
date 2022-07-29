@@ -27,26 +27,33 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_HMAC_SHA512_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/crypto/external/sha512.hpp>
+#include <bitcoin/system/crypto/accumulator.hpp>
+#include <bitcoin/system/crypto/sha_algorithm.hpp>
 
-#define HMACSHA512_DIGEST_LENGTH 64U
-
-typedef struct HMACSHA512CTX
+namespace libbitcoin {
+namespace system {
+namespace hmac {
+namespace sha512 {
+    
+using algorithm = sha::algorithm<sha::sha512>;
+struct context
 {
-    SHA512CTX ictx;
-    SHA512CTX octx;
-} HMACSHA512CTX;
+    system::accumulator<algorithm> in{};
+    system::accumulator<algorithm> out{};
+};
 
-void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH]) NOEXCEPT;
+/// Single hash.
+void hash(const uint8_t* data, size_t size, const uint8_t* key,
+    size_t key_size, uint8_t* digest) NOEXCEPT;
 
-void HMACSHA512Final(HMACSHA512CTX* context,
-    uint8_t digest[HMACSHA512_DIGEST_LENGTH]) NOEXCEPT;
+// Streaming hash.
+void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT;
+void update(context& context, const uint8_t* data, size_t size) NOEXCEPT;
+void finalize(context& context, uint8_t* digest) NOEXCEPT;
 
-void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
-    size_t key_length) NOEXCEPT;
-
-void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
-    size_t length) NOEXCEPT;
+} // namespace sha512
+} // namespace hmac
+} // namespace system
+} // namespace libbitcoin
 
 #endif

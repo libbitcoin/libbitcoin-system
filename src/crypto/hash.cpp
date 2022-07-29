@@ -32,8 +32,6 @@
 #include <bitcoin/system/crypto/external/hmac_sha512.hpp>
 #include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
-#include <bitcoin/system/crypto/external/sha160.hpp>
-#include <bitcoin/system/crypto/external/sha512.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -126,20 +124,17 @@ data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT
 
 short_hash sha1_hash(const data_slice& data) NOEXCEPT
 {
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    short_hash hash;
-    BC_POP_WARNING()
-
-    // TODO: return hash/chunk.
-    SHA1(data.data(), data.size(), hash.data());
-    return hash;
+    system::accumulator<sha::algorithm<sha::sha160>> context{};
+    context.write(data);
+    return context.flush();
 }
 
 data_chunk sha1_chunk(const data_slice& data) NOEXCEPT
 {
-    // TODO: return hash/chunk.
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
-    SHA1(data.data(), data.size(), hash.data());
+    system::accumulator<sha::algorithm<sha::sha160>> context{};
+    context.write(data);
+    context.flush(hash.data());
     return hash;
 }
 
@@ -200,13 +195,9 @@ data_chunk pbkd_sha256(const data_slice& passphrase,
 
 long_hash sha512_hash(const data_slice& data) NOEXCEPT
 {
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    long_hash hash;
-    BC_POP_WARNING()
-        
-    // TODO: return hash/chunk.
-    SHA512(data.data(), data.size(), hash.data());
-    return hash;
+    system::accumulator<sha::algorithm<sha::sha512>> context{};
+    context.write(data);
+    return context.flush();
 }
 
 long_hash hmac_sha512(const data_slice& data,
@@ -217,7 +208,7 @@ long_hash hmac_sha512(const data_slice& data,
     BC_POP_WARNING()
         
     // TODO: return hash/chunk.
-    HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.data());
+    hmac::sha512::hash(data.data(), data.size(), key.data(), key.size(), hash.data());
     return hash;
 }
 
@@ -225,7 +216,7 @@ data_chunk pbkd_sha512(const data_slice& passphrase,
     const data_slice& salt, size_t iterations, size_t length) NOEXCEPT
 {
     data_chunk chunk(length, no_fill_byte_allocator);
-    PBKDSHA512(passphrase.data(), passphrase.size(),
+    pbkd::sha512::hash(passphrase.data(), passphrase.size(),
         salt.data(), salt.size(), iterations, chunk.data(), chunk.size());
     return chunk;
 }

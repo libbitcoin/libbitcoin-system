@@ -19,19 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_HMAC_SHA256_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_HMAC_SHA256_HPP
 
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/crypto/accumulator.hpp>
 #include <bitcoin/system/crypto/sha_algorithm.hpp>
-#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace hmac {
 namespace sha256 {
-
+    
+using algorithm = sha::algorithm<sha::sha256>;
 struct context
 {
-    system::accumulator<sha::algorithm<sha::sha256>> in{};
-    system::accumulator<sha::algorithm<sha::sha256>> out{};
+    system::accumulator<algorithm> in{};
+    system::accumulator<algorithm> out{};
 };
 
 /// Single hash.

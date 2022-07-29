@@ -30,10 +30,16 @@ namespace pbkd {
 namespace sha256 {
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+using algorithm = sha::algorithm<sha::sha256>;
+constexpr auto digest_size = array_count<algorithm::digest_t>;
+
 bool hash(const uint8_t* passphrase, size_t passphrase_size,
     const uint8_t* salt, size_t salt_size, uint64_t iterations,
     uint8_t* buffer, size_t buffer_size) NOEXCEPT
-BC_POP_WARNING()
 {
     if (buffer_size > maximum_size)
         return false;
@@ -41,13 +47,12 @@ BC_POP_WARNING()
     hmac::sha256::context salted{};
     hmac::sha256::initialize(salted, passphrase, passphrase_size);
     hmac::sha256::update(salted, salt, salt_size);
-    
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest U;
-    BC_POP_WARNING()
+    algorithm::digest_t U{};
 
-    for (uint32_t i = 0; i * hash_size < buffer_size; ++i)
+    // uint32_t not word_t
+    for (uint32_t i = 0; i * digest_size < buffer_size; ++i)
     {
+        // uint32_t not word_t
         constexpr auto size = sizeof(uint32_t);
 
         auto context = salted;
@@ -58,31 +63,25 @@ BC_POP_WARNING()
         for (size_t j = one; j < iterations; ++j)
         {
             hmac::sha256::initialize(context, passphrase, passphrase_size);
-            hmac::sha256::update(context, U.data(), hash_size);
+            hmac::sha256::update(context, U.data(), digest_size);
             hmac::sha256::finalize(context, U.data());
-            
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-            BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-            for (size_t k = 0; k < hash_size; ++k)
+
+            for (size_t k = 0; k < digest_size; ++k)
                 T[k] ^= U[k];
-            BC_POP_WARNING()
-            BC_POP_WARNING()
         }
 
-        const auto offset = i * hash_size;
-        const auto length = limit(buffer_size - offset, hash_size);
-
-        BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-        BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-        BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+        const auto offset = i * digest_size;
+        const auto length = limit(buffer_size - offset, digest_size);
         std::memcpy(&buffer[offset], T.data(), length);
-        BC_POP_WARNING()
-        BC_POP_WARNING()
-        BC_POP_WARNING()
     }
 
     return true;
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace sha256
 } // namespace pbkd
