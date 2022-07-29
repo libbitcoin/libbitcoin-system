@@ -243,7 +243,7 @@ struct accessor
         return base::pad_size();
     }
 
-    static constexpr typename base::counter serialize_(size_t bytes) NOEXCEPT
+    static RCONSTEXPR typename base::counter serialize_(size_t bytes) NOEXCEPT
     {
         return base::serialize(bytes);
     }
@@ -258,15 +258,6 @@ using checked = accessor<true>;
 using unchecked = accessor<false>;
 constexpr auto block_size = array_count<algorithm::block_t>;
 constexpr auto count_size = algorithm::count_bytes;
-
-// serialize
-constexpr auto count = 42u;
-constexpr auto count_bits = to_bits<uint16_t>(count);
-constexpr auto count_lo = lo_word<algorithm::byte_t>(count_bits);
-constexpr auto count_hi = hi_word<algorithm::byte_t>(count_bits);
-using counter_t = std_array<algorithm::byte_t, algorithm::count_bytes>;
-constexpr auto expected_counter = counter_t{ 0, 0, 0, 0, 0, 0, count_hi, count_lo };
-static_assert(checked::serialize_(count) == expected_counter);
 
 // stream_pad
 constexpr auto expected_pad = algorithm::block_t{ bit_hi<algorithm::byte_t> };
@@ -290,6 +281,18 @@ BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
     BOOST_REQUIRE_EQUAL(writer.next_(), zero);
     BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
     BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
+}
+
+// serialize conditionally constexpr (reverse views).
+BOOST_AUTO_TEST_CASE(accumulator__serialize__default__initial)
+{
+    constexpr auto count = 42u;
+    constexpr auto count_bits = to_bits<uint16_t>(count);
+    constexpr auto count_lo = lo_word<algorithm::byte_t>(count_bits);
+    constexpr auto count_hi = hi_word<algorithm::byte_t>(count_bits);
+    using counter_t = std_array<algorithm::byte_t, algorithm::count_bytes>;
+    constexpr auto expected_counter = counter_t{ 0, 0, 0, 0, 0, 0, count_hi, count_lo };
+    BOOST_REQUIRE_EQUAL(checked::serialize_(count), expected_counter);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
