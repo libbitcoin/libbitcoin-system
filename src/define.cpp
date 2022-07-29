@@ -62,7 +62,7 @@
 // parser, which wraps libsecp256k1 (as with elliptic_curve).
 // TODO: convert and move to /system/hash/ directory along with hash.hpp.
 
-DEFINED("Version " LIBBITCOIN_SYSTEM_VERSION)
+DEFINED(LIBBITCOIN_SYSTEM_VERSION)
 
 #ifdef HAVE_LINUX
 DEFINED("HAVE_LINUX")
