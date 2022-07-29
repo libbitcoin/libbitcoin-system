@@ -38,8 +38,10 @@ template<size_t W, size_t R, size_t P, bool Concurrent, \
     bool_if<is_scrypt_args<W, R, P>> If>
 #define CLASS scrypt<W, R, P, Concurrent, If>
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // private
 // ----------------------------------------------------------------------------
@@ -73,12 +75,9 @@ TEMPLATE
 constexpr typename CLASS::words_t& CLASS::
 add(words_t& to, const words_t& from) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pto = to.data();
     auto pfrom = from.data();
-    BC_POP_WARNING()
 
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     pto[0] += pfrom[0];
     pto[1] += pfrom[1];
     pto[2] += pfrom[2];
@@ -95,7 +94,6 @@ add(words_t& to, const words_t& from) NOEXCEPT
     pto[13] += pfrom[13];
     pto[14] += pfrom[14];
     pto[15] += pfrom[15];
-    BC_POP_WARNING()
 
     return to;
 }
@@ -104,12 +102,9 @@ TEMPLATE
 constexpr typename CLASS::block_t& CLASS::
 xor_(block_t& to, const block_t& from) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pto = to.data();
     auto pfrom = from.data();
-    BC_POP_WARNING()
-        
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+
     pto[0] ^= pfrom[0];
     pto[1] ^= pfrom[1];
     pto[2] ^= pfrom[2];
@@ -174,7 +169,6 @@ xor_(block_t& to, const block_t& from) NOEXCEPT
     pto[61] ^= pfrom[61];
     pto[62] ^= pfrom[62];
     pto[63] ^= pfrom[63];
-    BC_POP_WARNING()
 
     return to;
 }
@@ -209,17 +203,13 @@ template <size_t A, size_t B, size_t C, size_t D>
 constexpr void CLASS::
 salsa_qr(words_t& words) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto pwords = words.data();
-    BC_POP_WARNING()
 
     // Salsa20/8 Quarter Round
-    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
     pwords[B] ^= std::rotl(pwords[A] + pwords[D], 7);
     pwords[C] ^= std::rotl(pwords[B] + pwords[A], 9);
     pwords[D] ^= std::rotl(pwords[C] + pwords[B], 13);
     pwords[A] ^= std::rotl(pwords[D] + pwords[C], 18);
-    BC_POP_WARNING()
 }
 
 TEMPLATE
@@ -285,14 +275,11 @@ salsa_8(block_t& block) NOEXCEPT
     salsa_qr<10, 11,  8,  9>(words);
     salsa_qr<15, 12, 13, 14>(words);
 #else
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
     auto x = words.data();
-    BC_POP_WARNING()
     
     // salsa20/8 is salsa20 with 8 vs. 20 rounds.
     for (size_t i = 0; i < 4u; ++i)
     {
-        BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
         // columns
         x[ 4] ^= std::rotl(x[ 0] + x[12],  7);
         x[ 8] ^= std::rotl(x[ 4] + x[ 0],  9);
@@ -334,7 +321,6 @@ salsa_8(block_t& block) NOEXCEPT
         x[13] ^= std::rotl(x[12] + x[15],  9);
         x[14] ^= std::rotl(x[13] + x[12], 13);
         x[15] ^= std::rotl(x[14] + x[13], 18);
-        BC_POP_WARNING()
     }
 #endif
 
@@ -539,6 +525,8 @@ hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
             one, buffer, size);
 }
 
+BC_POP_WARNING()
+BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 
