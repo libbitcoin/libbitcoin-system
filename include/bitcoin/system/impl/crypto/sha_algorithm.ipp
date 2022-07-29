@@ -748,7 +748,7 @@ input1(buffer_t& out, const half_t& in) NOEXCEPT
     else
     {
         auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
-        from_big_endians(to, array_cast<SHA::word_t>(in));
+        from_big_endians(to, array_cast<word_t>(in));
     }
 }
 
@@ -773,7 +773,7 @@ input2(buffer_t& out, const half_t& in) NOEXCEPT
     {
         constexpr auto size = SHA::state_words;
         auto& to = unsafe_array_cast<word_t, size>(&out[size]);
-        from_big_endians(to, array_cast<SHA::word_t>(in));
+        from_big_endians(to, array_cast<word_t>(in));
     }
 }
 

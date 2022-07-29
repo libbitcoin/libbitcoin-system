@@ -175,9 +175,8 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
     constexpr auto f = functor<Round>();
 
     // TODO: std::rotl(c,10) is not in RMD128.
-    const auto t = std::rotl(a + f(b, c, d) + k + w, r) + e;
+    e = /*a =*/ std::rotl(a + f(b, c, d) + k + w, r) + e;
     b = /*c =*/ std::rotl(c, 10);
-    e = /*a =*/ t;
 }
 
 TEMPLATE
@@ -478,7 +477,7 @@ input(words_t& out, const half_t& in) NOEXCEPT
     else
     {
         auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
-        from_little_endians(to, array_cast<RMD::word_t>(in));
+        from_little_endians(to, array_cast<word_t>(in));
     }
 }
 
