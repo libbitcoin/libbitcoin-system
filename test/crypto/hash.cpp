@@ -126,8 +126,8 @@ class scrypt_accessor
 {
 public:
     using base = scrypt<W, R, P, C>;
-    using block_t = base::block_t;
-    using rblock_t = base::rblock_t;
+    using block_t = typename base::block_t;
+    using rblock_t = typename base::rblock_t;
 
     static void salsa_8(base::block_t& block) NOEXCEPT
     {
