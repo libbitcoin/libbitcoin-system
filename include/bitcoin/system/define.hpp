@@ -77,12 +77,15 @@ namespace bc = libbitcoin;
         // TODO: This is not working.
         ////#define DO_PRAGMA(text) _Pragma (#text)
         ////#define DEFINED(text) DO_PRAGMA(message (#text))
+        #define DEFINED(text)
     #elif defined(HAVE_CLANG)
         // TODO: implement.
         #define DEFINED(text)
     #else
         #define DEFINED(text)
     #endif
+#else
+    #define DEFINED(text)
 #endif
 
 /// See gcc.gnu.org/wiki/Visibility
