@@ -49,41 +49,42 @@ struct accumulator
     constexpr digest_t flush() NOEXCEPT;
     inline void flush(byte_t* digest) NOEXCEPT;
 
-    // Reset accumulator to initial state (to reuse after flushing).
+    /// Reset accumulator to initial state (to reuse after flushing).
     constexpr void reset() NOEXCEPT;
 
-private:
+protected:
     using block_t = typename Algorithm::block_t;
     using counter = data_array<Algorithm::count_bytes>;
 
-    // Position of next write in the buffer.
+    /// Position of next write in the buffer.
     constexpr size_t next() const NOEXCEPT;
 
-    // Bytes remaining until buffer is full.
+    /// Bytes remaining until buffer is full.
     constexpr size_t gap() const NOEXCEPT;
 
-    // Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
-    constexpr bool is_buffer_overflow(size_t bytes) NOEXCEPT;
+    /// Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
+    constexpr bool is_buffer_overflow(size_t bytes) const NOEXCEPT;
 
-    // Append up to block_size bytes to buffer.
+    /// Append up to block_size bytes to buffer.
     constexpr size_t add_data(size_t bytes, const byte_t* data) NOEXCEPT;
 
-    // Increment the counter for unbuffered transforms.
+    /// Increment the counter for unbuffered transforms.
     constexpr void increment(size_t blocks) NOEXCEPT;
 
-    // Compute pad size, reserves space for counter serialization.
+    /// Compute pad size, reserves space for counter serialization.
     constexpr size_t pad_size() const NOEXCEPT;
 
-    // Serialize the hashed byte count for finalization
+    /// Serialize the hashed byte count for finalization
     static constexpr counter serialize(size_t bytes) NOEXCEPT;
 
-    // Precomputed streaming pad buffer.
+    /// Precomputed streaming pad buffer.
     static CONSTEVAL block_t stream_pad() NOEXCEPT;
 
-    // Number of bytes in a block and in counter.
+    /// Number of bytes in a block and in counter.
     static constexpr auto block_size = array_count<block_t>;
     static constexpr auto count_size = array_count<counter>;
 
+private:
     size_t size_;
     state_t state_;
     block_t buffer_;

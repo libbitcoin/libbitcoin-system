@@ -106,6 +106,7 @@
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\cpuid.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\accumulator.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\accumulator1.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\encryption.cpp" />
@@ -114,7 +115,6 @@
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\rmd_algorithm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha256.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha_algorithm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />

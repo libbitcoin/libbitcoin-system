@@ -252,6 +252,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/parameter.cpp \
     test/config/printer.cpp \
     test/crypto/accumulator.cpp \
+    test/crypto/accumulator1.cpp \
     test/crypto/checksum.cpp \
     test/crypto/elliptic_curve.cpp \
     test/crypto/encryption.cpp \
@@ -261,7 +262,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/crypto/ring_signature.cpp \
     test/crypto/rmd_algorithm.cpp \
     test/crypto/sha256.cpp \
-    test/crypto/sha256_context.cpp \
     test/crypto/sha_algorithm.cpp \
     test/crypto/siphash.cpp \
     test/crypto/siphash.hpp \

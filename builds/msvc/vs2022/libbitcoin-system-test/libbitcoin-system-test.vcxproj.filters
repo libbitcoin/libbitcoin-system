@@ -168,6 +168,9 @@
     <ClCompile Include="..\..\..\..\test\crypto\accumulator.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\crypto\accumulator1.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -190,9 +193,6 @@
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\sha256.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\sha_algorithm.cpp">

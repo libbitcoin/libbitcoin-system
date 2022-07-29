@@ -65,7 +65,7 @@ gap() const NOEXCEPT
 
 TEMPLATE
 constexpr bool CLASS::
-is_buffer_overflow(size_t bytes) NOEXCEPT
+is_buffer_overflow(size_t bytes) const NOEXCEPT
 {
     if constexpr (Checked)
     {
