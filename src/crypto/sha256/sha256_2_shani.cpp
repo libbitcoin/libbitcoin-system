@@ -65,39 +65,39 @@ alignas(mint128_t) constexpr uint8_t initial1[sizeof(mint128_t)]
 // load/store i128
 // ----------------------------------------------------------------------------
 
-mint128_t inline load08x16a(const uint8_t& bytes) NOEXCEPT
+mint128_t load08x16a(const uint8_t& bytes) NOEXCEPT
 {
     // Aligned only, do not use with unaligned values.
     return _mm_load_si128(pointer_cast<const mint128_t>(&bytes));
 }
 
-mint128_t inline load08x16u(const uint32_t& bytes) NOEXCEPT
+mint128_t load08x16u(const uint32_t& bytes) NOEXCEPT
 {
     return _mm_loadu_si128(pointer_cast<const mint128_t>(&bytes));
 }
 
-mint128_t inline load32x4u(const uint32_t& bytes) NOEXCEPT
+mint128_t load32x4u(const uint32_t& bytes) NOEXCEPT
 {
     return _mm_loadu_si128(pointer_cast<const mint128_t>(&bytes));
 }
 
-void inline store8x16u(uint8_t& bytes, mint128_t value) NOEXCEPT
+void store8x16u(uint8_t& bytes, mint128_t value) NOEXCEPT
 {
     _mm_storeu_si128(pointer_cast<mint128_t>(&bytes), value);
 }
 
-void inline store32x4u(uint32_t& bytes, mint128_t value) NOEXCEPT
+void store32x4u(uint32_t& bytes, mint128_t value) NOEXCEPT
 {
     _mm_storeu_si128(pointer_cast<mint128_t>(&bytes), value);
 }
 
-mint128_t inline load(const uint8_t& data) NOEXCEPT
+mint128_t load(const uint8_t& data) NOEXCEPT
 {
     static const auto flipper = load08x16a(mask[0]);
     return i128::shuffle(load08x16u(data), flipper);
 }
 
-void inline store(uint8_t& out, mint128_t value) NOEXCEPT
+void store(uint8_t& out, mint128_t value) NOEXCEPT
 {
     static const auto flipper = load08x16a(mask[0]);
     store8x16u(out, i128::shuffle(value, flipper));
@@ -106,7 +106,7 @@ void inline store(uint8_t& out, mint128_t value) NOEXCEPT
 // sha256
 // ----------------------------------------------------------------------------
 
-void inline round(mint128_t& s0, mint128_t& s1, uint64_t k1,
+void round(mint128_t& s0, mint128_t& s1, uint64_t k1,
     uint64_t k0) NOEXCEPT
 {
     const auto value = set(k1, k0);
@@ -114,7 +114,7 @@ void inline round(mint128_t& s0, mint128_t& s1, uint64_t k1,
     s0 = _mm_sha256rnds2_epu32(s0, s1, i128::shuffle<0x0e>(value));
 }
 
-void inline round(mint128_t& s0, mint128_t& s1, mint128_t m, uint64_t k1,
+void round(mint128_t& s0, mint128_t& s1, mint128_t m, uint64_t k1,
     uint64_t k0) NOEXCEPT
 {
     const auto value = sum(m, set(k1, k0));
@@ -122,18 +122,18 @@ void inline round(mint128_t& s0, mint128_t& s1, mint128_t m, uint64_t k1,
     s0 = _mm_sha256rnds2_epu32(s0, s1, i128::shuffle<0x0e>(value));
 }
 
-void inline shift_message(mint128_t& out, mint128_t m) NOEXCEPT
+void shift_message(mint128_t& out, mint128_t m) NOEXCEPT
 {
     out = _mm_sha256msg1_epu32(out, m);
 }
 
-void inline shift_message(mint128_t m0, mint128_t m1, mint128_t& out) NOEXCEPT
+void shift_message(mint128_t m0, mint128_t m1, mint128_t& out) NOEXCEPT
 {
     constexpr auto shift = sizeof(uint32_t);
     out = _mm_sha256msg2_epu32(sum(out, align_right<shift>(m1, m0)), m1);
 }
 
-void inline shift_messages(mint128_t& out0, mint128_t m,
+void shift_messages(mint128_t& out0, mint128_t m,
     mint128_t& out1) NOEXCEPT
 {
     shift_message(out0, m, out1);
@@ -143,7 +143,7 @@ void inline shift_messages(mint128_t& out0, mint128_t m,
 // endianness
 // ----------------------------------------------------------------------------
 
-void inline shuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
+void shuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
 {
     const auto t1 = i128::shuffle<0xb1>(s0);
     const auto t2 = i128::shuffle<0x1b>(s1);
@@ -151,7 +151,7 @@ void inline shuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
     s1 = blend<15>(t2, t1);
 }
 
-void inline unshuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
+void unshuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
 {
     const mint128_t t1 = i128::shuffle<0x1b>(s0);
     const mint128_t t2 = i128::shuffle<0xb1>(s1);

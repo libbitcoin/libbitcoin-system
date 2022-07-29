@@ -160,91 +160,91 @@ namespace i128 {
 using mint128_t = __m128i;
 
 template <uint32_t Offset>
-uint32_t inline get(mint128_t a) noexcept
+uint32_t get(mint128_t a) noexcept
 {
     return _mm_extract_epi32(a, Offset);
 }
 
-mint128_t inline set(uint32_t a) noexcept
+mint128_t set(uint32_t a) noexcept
 {
     return _mm_set1_epi32(a);
 }
 
-mint128_t inline set(uint64_t a, uint64_t b) noexcept
+mint128_t set(uint64_t a, uint64_t b) noexcept
 {
     return _mm_set_epi64x(a, b);
 }
 
-mint128_t inline set(uint32_t a, uint32_t b, uint32_t c, uint32_t d) noexcept
+mint128_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d) noexcept
 {
     return _mm_set_epi32(a, b, c, d);
 }
 
-mint128_t inline sum(mint128_t a, mint128_t b) noexcept
+mint128_t sum(mint128_t a, mint128_t b) noexcept
 {
     return _mm_add_epi32(a, b);
 }
 
-mint128_t inline sum(mint128_t a, mint128_t b, mint128_t c) noexcept
+mint128_t sum(mint128_t a, mint128_t b, mint128_t c) noexcept
 {
     
     return sum(sum(a, b), c);
 }
 
-mint128_t inline sum(mint128_t a, mint128_t b, mint128_t c,
+mint128_t sum(mint128_t a, mint128_t b, mint128_t c,
     mint128_t d) noexcept
 {
     return sum(sum(a, b), sum(c, d));
 }
 
-mint128_t inline sum(mint128_t a, mint128_t b, mint128_t c, mint128_t d,
+mint128_t sum(mint128_t a, mint128_t b, mint128_t c, mint128_t d,
     mint128_t e) noexcept
 {
     return sum(sum(a, b, c), sum(d, e));
 }
 
-mint128_t inline inc(mint128_t& outa, mint128_t b) noexcept
+mint128_t inc(mint128_t& outa, mint128_t b) noexcept
 {
     return ((outa = sum(outa, b)));
 }
 
-mint128_t inline inc(mint128_t& outa, mint128_t b, mint128_t c) noexcept
+mint128_t inc(mint128_t& outa, mint128_t b, mint128_t c) noexcept
 {
     return ((outa = sum(outa, b, c)));
 }
 
-mint128_t inline inc(mint128_t& outa, mint128_t b, mint128_t c,
+mint128_t inc(mint128_t& outa, mint128_t b, mint128_t c,
     mint128_t d) noexcept
 {
     return ((outa = sum(outa, b, c, d)));
 }
 
-mint128_t inline exc(mint128_t a, mint128_t b) noexcept
+mint128_t exc(mint128_t a, mint128_t b) noexcept
 {
     return _mm_xor_si128(a, b);
 }
 
-mint128_t inline exc(mint128_t a, mint128_t b, mint128_t c) noexcept
+mint128_t exc(mint128_t a, mint128_t b, mint128_t c) noexcept
 {
     return exc(exc(a, b), c);
 }
 
-mint128_t inline dis(mint128_t a, mint128_t b) noexcept
+mint128_t dis(mint128_t a, mint128_t b) noexcept
 {
     return _mm_or_si128(a, b);
 }
 
-mint128_t inline con(mint128_t a, mint128_t b) noexcept
+mint128_t con(mint128_t a, mint128_t b) noexcept
 {
     return _mm_and_si128(a, b);
 }
 
-mint128_t inline shr(mint128_t a, uint32_t bits) noexcept
+mint128_t shr(mint128_t a, uint32_t bits) noexcept
 {
     return _mm_srli_epi32(a, bits);
 }
 
-mint128_t inline shl(mint128_t a, uint32_t bits) noexcept
+mint128_t shl(mint128_t a, uint32_t bits) noexcept
 {
     return _mm_slli_epi32(a, bits);
 }
@@ -253,31 +253,31 @@ mint128_t inline shl(mint128_t a, uint32_t bits) noexcept
 /// Concatenate two 16-byte blocks into a 32-byte temporary result, shift the 
 /// result right by Shift bytes, and return the low 16 bytes.
 template <uint32_t Shift>
-mint128_t inline align_right(mint128_t a, mint128_t b) noexcept
+mint128_t align_right(mint128_t a, mint128_t b) noexcept
 {
     return _mm_alignr_epi8(a, b, Shift);
 }
 
 /// Blend two packed 16-bit integers using Mask.
 template <uint32_t Mask>
-mint128_t inline blend(mint128_t a, mint128_t b) noexcept
+mint128_t blend(mint128_t a, mint128_t b) noexcept
 {
     return _mm_blend_epi16(a, b, Mask);
 }
 
 /// Shuffle 32-bit integers using Control.
 template <uint32_t Control>
-mint128_t inline shuffle(mint128_t a) noexcept
+mint128_t shuffle(mint128_t a) noexcept
 {
     return _mm_shuffle_epi32(a, Control);
 }
 
-// Clang13: always_inline function '_mm_shuffle_epi8' requires target feature
+// Clang13: always_function '_mm_shuffle_epi8' requires target feature
 // 'ssse3', but would be inlined into function 'shuffle' that is compiled
 // without support for 'ssse3'.
 /// Shuffle packed 8-bit integers in a according to shuffle control mask in the
 /// corresponding 8-bit element of b.
-mint128_t inline shuffle(mint128_t a, mint128_t b) noexcept
+mint128_t shuffle(mint128_t a, mint128_t b) noexcept
 {
     return _mm_shuffle_epi8(a, b);
 }
@@ -289,7 +289,7 @@ namespace i256 {
 using mint256_t = __m256i;
 
 template <uint32_t Offset>
-uint32_t inline get(mint256_t a) noexcept
+uint32_t get(mint256_t a) noexcept
 {
     return _mm256_extract_epi32(a, Offset);
 }
@@ -297,86 +297,86 @@ uint32_t inline get(mint256_t a) noexcept
 // GCC:
 // warning: AVX vector return without AVX enabled changes the ABI [-Wpsabi]
 // This should be harmless as long as runtime support is executed.
-mint256_t inline set(uint32_t a) noexcept 
+mint256_t set(uint32_t a) noexcept 
 {
     return _mm256_set1_epi32(a);
 }
 
-mint256_t inline set(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+mint256_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
     uint32_t e, uint32_t f, uint32_t g, uint32_t h) noexcept
 {
     return _mm256_set_epi32(a, b, c, d, e, f, g, h);
 }
 
-mint256_t inline shuffle(mint256_t a, mint256_t b) noexcept
+mint256_t shuffle(mint256_t a, mint256_t b) noexcept
 {
     return _mm256_shuffle_epi8(a, b);
 }
 
-mint256_t inline sum(mint256_t a, mint256_t b) noexcept
+mint256_t sum(mint256_t a, mint256_t b) noexcept
 {
     return _mm256_add_epi32(a, b);
 }
 
-mint256_t inline sum(mint256_t a, mint256_t b, mint256_t c) noexcept
+mint256_t sum(mint256_t a, mint256_t b, mint256_t c) noexcept
 {
     return sum(sum(a, b), c);
 }
 
-mint256_t inline sum(mint256_t a, mint256_t b, mint256_t c,
+mint256_t sum(mint256_t a, mint256_t b, mint256_t c,
     mint256_t d) noexcept
 {
     return sum(sum(a, b), sum(c, d));
 }
 
-mint256_t inline sum(mint256_t a, mint256_t b, mint256_t c, mint256_t d,
+mint256_t sum(mint256_t a, mint256_t b, mint256_t c, mint256_t d,
     mint256_t e) noexcept
 {
     return sum(sum(a, b, c), sum(d, e));
 }
 
-mint256_t inline inc(mint256_t& outa, mint256_t b) noexcept
+mint256_t inc(mint256_t& outa, mint256_t b) noexcept
 {
     return ((outa = sum(outa, b)));
 }
 
-mint256_t inline inc(mint256_t& outa, mint256_t b, mint256_t c) noexcept
+mint256_t inc(mint256_t& outa, mint256_t b, mint256_t c) noexcept
 {
     return ((outa = sum(outa, b, c)));
 }
 
-mint256_t inline inc(mint256_t& outa, mint256_t b, mint256_t c,
+mint256_t inc(mint256_t& outa, mint256_t b, mint256_t c,
     mint256_t d) noexcept
 {
     return ((outa = sum(outa, b, c, d)));
 }
 
-mint256_t inline exc(mint256_t a, mint256_t b) noexcept
+mint256_t exc(mint256_t a, mint256_t b) noexcept
 {
     return _mm256_xor_si256(a, b);
 }
 
-mint256_t inline exc(mint256_t a, mint256_t b, mint256_t c) noexcept
+mint256_t exc(mint256_t a, mint256_t b, mint256_t c) noexcept
 {
     return exc(exc(a, b), c);
 }
 
-mint256_t inline dis(mint256_t a, mint256_t b) noexcept
+mint256_t dis(mint256_t a, mint256_t b) noexcept
 {
     return _mm256_or_si256(a, b);
 }
 
-mint256_t inline con(mint256_t a, mint256_t b) noexcept
+mint256_t con(mint256_t a, mint256_t b) noexcept
 {
     return _mm256_and_si256(a, b);
 }
 
-mint256_t inline shr(mint256_t a, uint32_t bits) noexcept
+mint256_t shr(mint256_t a, uint32_t bits) noexcept
 {
     return _mm256_srli_epi32(a, bits);
 }
 
-mint256_t inline shl(mint256_t a, uint32_t bits) noexcept
+mint256_t shl(mint256_t a, uint32_t bits) noexcept
 {
     return _mm256_slli_epi32(a, bits);
 }
