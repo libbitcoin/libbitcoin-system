@@ -853,7 +853,7 @@ hash(const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
+VCONSTEXPR typename CLASS::digest_t CLASS::
 hash(const set_t& blocks) NOEXCEPT
 {
     buffer_t space{};
