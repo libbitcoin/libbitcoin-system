@@ -33,7 +33,7 @@ namespace system {
 /// ---------------------------------------------------------------------------
 
 template <typename Data, typename Integer, if_integer<Integer> = true>
-constexpr Data to_big_data(Data&& bytes, Integer value) NOEXCEPT;
+RCONSTEXPR Data to_big_data(Data&& bytes, Integer value) NOEXCEPT;
 
 template <typename Data, typename Integer, if_integer<Integer> = true>
 constexpr Data to_little_data(Data&& bytes, Integer value) NOEXCEPT;

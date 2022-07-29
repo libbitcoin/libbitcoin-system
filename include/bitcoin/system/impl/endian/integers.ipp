@@ -43,7 +43,7 @@ namespace system {
 // Fills Data to its preallocated size.
 
 template <typename Data, typename Integer, if_integer<Integer>>
-constexpr Data to_big_data(Data&& bytes, Integer value) NOEXCEPT
+RCONSTEXPR Data to_big_data(Data&& bytes, Integer value) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
     {
@@ -54,6 +54,7 @@ constexpr Data to_big_data(Data&& bytes, Integer value) NOEXCEPT
     }
     else
     {
+        // views_reverse is RCONSTEXPR.
         for (auto& byte: views_reverse(bytes))
         {
             byte = possible_narrow_and_sign_cast<uint8_t>(value);

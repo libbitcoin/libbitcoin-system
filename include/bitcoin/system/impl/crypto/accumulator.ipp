@@ -126,6 +126,7 @@ serialize(size_t bytes) NOEXCEPT
 {
     if constexpr (Algorithm::big_end_count)
     {
+        // to_big_endian_size is RCONSTEXPR.
         return to_big_endian_size<count_size>(to_bits(bytes));
     }
     else

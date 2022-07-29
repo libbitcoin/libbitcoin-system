@@ -61,6 +61,7 @@
     #include <ranges>
     #define views_reverse std::views::reverse
 #else
+    // boost::adaptors::reverse is not constexpr.
     #include <boost/range/adaptor/reversed.hpp>
     #define views_reverse boost::adaptors::reverse
 #endif
