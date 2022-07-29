@@ -147,8 +147,17 @@ accumulator() NOEXCEPT
 TEMPLATE
 constexpr CLASS::
 accumulator(size_t blocks, const state_t& state) NOEXCEPT
-  : size_{ blocks }, state_{ state }
+  : size_{ blocks * block_size }, state_{ state }
 {
+    if constexpr (Checked)
+    {
+        BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_size), "overflow");
+        BC_ASSERT_MSG(!is_multiply_overflow(blocks, block_size), "overflow");
+
+        if (is_buffer_overflow(blocks * block_size) ||
+            is_multiply_overflow(blocks, block_size))
+            reset();
+    }
 }
 
 TEMPLATE
