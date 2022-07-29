@@ -86,25 +86,13 @@ inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
 inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     uint32_t leaf, uint32_t subleaf) noexcept
 {
-#if defined(HAVE_X__CPUIDEX)
+#if defined(HAVE_XCPUIDEX)
     int out[4]{};
     __cpuidex(&out[0], leaf, subleaf);
     a = out[0];
     b = out[1];
     c = out[2];
     d = out[3];
-    return true;
-// TESTING THIS OUT (CLANG):
-#elif defined(HAVE_XCPUIDEX)
-    int out[4]{};
-    cpuidex(&out[0], leaf, subleaf);
-    a = out[0];
-    b = out[1];
-    c = out[2];
-    d = out[3];
-    return true;
-#elif defined(HAVE_XCPUID_COUNT)
-    cpuid_count(leaf, subleaf, a, b, c, d);
     return true;
 #elif defined(HAVE_XASSEMBLY)
     // __cpuid_count commonly undefined.
