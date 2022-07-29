@@ -46,11 +46,10 @@ CONSTEVAL auto CLASS::
 concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
-        return std::execution::par_unseq;
+        return bc::par_unseq;
     else
-        return std::execution::seq;
+        return bc::seq;
 }
-
 
 TEMPLATE
 CONSTEVAL typename CLASS::chunk_t CLASS::

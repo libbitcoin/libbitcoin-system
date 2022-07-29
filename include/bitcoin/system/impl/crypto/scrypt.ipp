@@ -22,7 +22,6 @@
 #include <atomic>
 #include <algorithm>
 #include <bit>
-#include <execution>
 #include <memory>
 #include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -63,9 +62,9 @@ CONSTEVAL auto CLASS::
 concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
-        return std::execution::par_unseq;
+        return bc::par_unseq;
     else
-        return std::execution::seq;
+        return bc::seq;
 }
 
 // protected
