@@ -261,7 +261,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\crypto\rmd_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />

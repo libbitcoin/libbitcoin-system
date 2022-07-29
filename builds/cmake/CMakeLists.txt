@@ -566,7 +566,6 @@ if (with-tests)
         "../../test/crypto/pseudo_random.cpp"
         "../../test/crypto/ring_signature.cpp"
         "../../test/crypto/rmd_algorithm.cpp"
-        "../../test/crypto/rmd_algorithm.hpp"
         "../../test/crypto/sha256.cpp"
         "../../test/crypto/sha256_context.cpp"
         "../../test/crypto/sha_algorithm.cpp"

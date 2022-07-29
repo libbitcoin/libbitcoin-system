@@ -575,9 +575,6 @@
     <ClInclude Include="..\..\..\..\test\crypto\hash.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\crypto\rmd_algorithm.hpp">
-      <Filter>src\crypto</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp">
       <Filter>src\crypto</Filter>
     </ClInclude>
