@@ -129,17 +129,17 @@ public:
     using block_t = typename base::block_t;
     using rblock_t = typename base::rblock_t;
 
-    static void salsa_8(base::block_t& block) NOEXCEPT
+    static void salsa_8(block_t& block) NOEXCEPT
     {
         base::salsa_8(block);
     }
 
-    static bool block_mix(base::rblock_t& rblock) NOEXCEPT
+    static bool block_mix(rblock_t& rblock) NOEXCEPT
     {
         return base::block_mix(rblock);
     }
 
-    static bool romix(base::rblock_t& rblock) NOEXCEPT
+    static bool romix(rblock_t& rblock) NOEXCEPT
     {
         return base::romix(rblock);
     }
