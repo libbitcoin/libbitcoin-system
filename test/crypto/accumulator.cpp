@@ -260,7 +260,7 @@ constexpr auto block_size = array_count<algorithm::block_t>;
 constexpr auto count_size = algorithm::count_bytes;
 
 // serialize
-constexpr auto count = 42_size;
+constexpr auto count = 42u;
 constexpr auto count_bits = to_bits<uint16_t>(count);
 constexpr auto count_lo = lo_word<algorithm::byte_t>(count_bits);
 constexpr auto count_hi = hi_word<algorithm::byte_t>(count_bits);
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(accumulator__construct__default__initial)
 
 BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
 {
-    constexpr auto blocks = 2;
+    constexpr auto blocks = 2u;
     constexpr algorithm::state_t state{};
 
     const checked writer{ blocks, state };
@@ -301,8 +301,8 @@ BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
 
 BOOST_AUTO_TEST_CASE(accumulator__write__nonzero__expected)
 {
-    constexpr auto bytes = 42;
-    constexpr auto blocks = 2;
+    constexpr auto bytes = 42u;
+    constexpr auto blocks = 2u;
     constexpr data_array<bytes> data{};
     constexpr algorithm::state_t state{};
 
@@ -318,14 +318,14 @@ BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
 {
     const checked writer{};
     BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
-    BOOST_REQUIRE(writer.is_buffer_overflow_(max_uint64));
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(max_size_t));
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___unchecked__false)
 {
     const unchecked writer{};
     BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
-    BOOST_REQUIRE(!writer.is_buffer_overflow_(max_uint64));
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(max_size_t));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
