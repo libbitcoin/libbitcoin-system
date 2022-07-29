@@ -380,7 +380,7 @@ private:
     using blocks_pad_t = std_array<word_t, subtract(SHA::block_words,
         count_bytes / SHA::word_bytes)>;
 
-    static CONSTEVAL auto concurrency() NOEXCEPT;
+    static CONSTEVAL auto& concurrency() NOEXCEPT;
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL buffer_t block_pad() NOEXCEPT;
     static CONSTEVAL state_pad_t state_pad() NOEXCEPT;

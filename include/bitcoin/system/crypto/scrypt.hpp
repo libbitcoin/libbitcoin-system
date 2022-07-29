@@ -100,7 +100,7 @@ protected:
 private:
     template<typename Block>
     static inline auto allocate() NOEXCEPT;
-    static CONSTEVAL auto concurrency() NOEXCEPT;
+    static CONSTEVAL auto& concurrency() NOEXCEPT;
 };
 
 /// Litecoin/BIP38 scrypt arguments.

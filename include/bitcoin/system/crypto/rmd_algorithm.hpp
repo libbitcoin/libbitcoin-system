@@ -304,7 +304,7 @@ private:
     using blocks_pad_t = std_array<word_t, subtract(RMD::block_words,
         count_bytes / RMD::word_bytes)>;
 
-    static CONSTEVAL auto concurrency() NOEXCEPT;
+    static CONSTEVAL auto& concurrency() NOEXCEPT;
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL words_t block_pad() NOEXCEPT;
     static CONSTEVAL blocks_pad_t blocks_pad() NOEXCEPT;

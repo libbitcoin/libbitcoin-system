@@ -58,7 +58,7 @@ allocate() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL auto CLASS::
+CONSTEVAL auto& CLASS::
 concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
