@@ -206,7 +206,7 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Aliases.
-    using H         = typename RMD;
+    using H         = RMD;
     using K         = typename RMD::K;
     using word_t    = typename RMD::word_t;
     using state_t   = typename RMD::state_t;

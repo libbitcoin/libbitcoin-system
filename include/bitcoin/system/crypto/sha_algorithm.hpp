@@ -258,7 +258,7 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Aliases.
-    using H         = typename SHA;
+    using H         = SHA;
     using K         = typename SHA::K;
     using word_t    = typename SHA::word_t;
     using state_t   = typename SHA::state_t;
