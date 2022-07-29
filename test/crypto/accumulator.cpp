@@ -203,4 +203,129 @@ BOOST_AUTO_TEST_CASE(accumulator__sha_hash_two512__null_hashes__expected)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+using algorithm = sha::algorithm<sha::sha256>;
+
+template <bool Checked>
+struct accessor
+  : accumulator<algorithm, Checked>
+{
+    using base = accumulator<algorithm, Checked>;
+    using base::base;
+
+    constexpr size_t next_() const NOEXCEPT
+    {
+        return base::next();
+    }
+
+    constexpr size_t gap_() const NOEXCEPT
+    {
+        return base::gap();
+    }
+
+    constexpr bool is_buffer_overflow_(size_t bytes) const NOEXCEPT
+    {
+        return base::is_buffer_overflow(bytes);
+    }
+
+    constexpr size_t add_data_(size_t bytes,
+        const typename base::byte_t* data) NOEXCEPT
+    {
+        return base::add_data(bytes, data);
+    }
+
+    constexpr void increment_(size_t blocks) NOEXCEPT
+    {
+        return base::increment(blocks);
+    }
+
+    constexpr size_t pad_size_() const NOEXCEPT
+    {
+        return base::pad_size();
+    }
+
+    static constexpr typename base::counter serialize_(size_t bytes) NOEXCEPT
+    {
+        return base::serialize(bytes);
+    }
+
+    static CONSTEVAL typename base::block_t stream_pad_() NOEXCEPT
+    {
+        return base::stream_pad();
+    }
+};
+
+using checked = accessor<true>;
+using unchecked = accessor<false>;
+constexpr auto block_size = array_count<algorithm::block_t>;
+constexpr auto count_size = algorithm::count_bytes;
+
+// serialize
+constexpr auto count = 42_size;
+constexpr auto count_bits = to_bits<uint16_t>(count);
+constexpr auto count_lo = lo_word<algorithm::byte_t>(count_bits);
+constexpr auto count_hi = hi_word<algorithm::byte_t>(count_bits);
+using counter_t = std_array<algorithm::byte_t, algorithm::count_bytes>;
+constexpr auto expected_counter = counter_t{ 0, 0, 0, 0, 0, 0, count_hi, count_lo };
+static_assert(checked::serialize_(count) == expected_counter);
+
+// stream_pad
+constexpr auto expected_pad = algorithm::block_t{ bit_hi<algorithm::byte_t> };
+static_assert(checked::stream_pad_() == expected_pad);
+
+// construct/next/gap/pad_size
+BOOST_AUTO_TEST_CASE(accumulator__construct__default__initial)
+{
+    const checked writer{};
+    BOOST_REQUIRE_EQUAL(writer.next_(), zero);
+    BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
+    BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
+{
+    constexpr auto blocks = 2;
+    constexpr algorithm::state_t state{};
+
+    const checked writer{ blocks, state };
+    BOOST_REQUIRE_EQUAL(writer.next_(), zero);
+    BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
+    BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
+{
+    constexpr data_array<0> data{};
+    checked writer{};
+    BOOST_REQUIRE(writer.write(data));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__write__nonzero__expected)
+{
+    constexpr auto bytes = 42;
+    constexpr auto blocks = 2;
+    constexpr data_array<bytes> data{};
+    constexpr algorithm::state_t state{};
+
+    checked writer{ blocks, state };
+    BOOST_REQUIRE(writer.write(data));
+    BOOST_REQUIRE_EQUAL(writer.next_(), bytes);
+    BOOST_REQUIRE_EQUAL(writer.gap_(), block_size - bytes);
+    BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - bytes - algorithm::count_bytes);
+    BOOST_REQUIRE_EQUAL(writer.flush(), base16_array("729e145a50396134c294aaf8e2daea0b7c89bb617cd58379ba4c2abdec2d1da7"));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
+{
+    const checked writer{};
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
+    BOOST_REQUIRE(writer.is_buffer_overflow_(max_uint64));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___unchecked__false)
+{
+    const unchecked writer{};
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(max_uint64));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

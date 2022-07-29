@@ -106,7 +106,6 @@
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\cpuid.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\accumulator.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\accumulator1.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\encryption.cpp" />

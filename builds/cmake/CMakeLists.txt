@@ -558,7 +558,6 @@ if (with-tests)
         "../../test/config/parameter.cpp"
         "../../test/config/printer.cpp"
         "../../test/crypto/accumulator.cpp"
-        "../../test/crypto/accumulator1.cpp"
         "../../test/crypto/checksum.cpp"
         "../../test/crypto/elliptic_curve.cpp"
         "../../test/crypto/encryption.cpp"
