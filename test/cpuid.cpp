@@ -20,9 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(cpuid_tests)
 
-#if defined(HAVE_XCPU)
-
-// Local get_bit<> utility.
+// cpuid includes a local get_bit<> utility.
 static_assert(!get_bit<0>(0));
 static_assert( get_bit<0>(1));
 static_assert(!get_bit<0>(2));
@@ -38,49 +36,6 @@ static_assert( get_bit<31>(0x80000000_u32));
 static_assert( get_bit<15>(0x8000_u16));
 static_assert( get_bit< 7>(0x80_u8));
 
-BOOST_AUTO_TEST_CASE(cpuid__try_shani__always__expected)
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf));
-    BOOST_CHECK(get_right(ecx, cpu1_0::sse4_ecx_bit));
-    BOOST_CHECK(get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf));
-
-    // False on my machine - ekv.
-    BOOST_CHECK(!get_right(ebx, cpu7_0::shani_ebx_bit));
-}
-
-// Succeeds, but APIs fail on some 32 bit.
-BOOST_AUTO_TEST_CASE(cpuid__try_avx2__always__expected)
-{
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf));
-    BOOST_CHECK(get_right(ecx, cpu1_0::sse4_ecx_bit));
-    BOOST_CHECK(get_right(ecx, cpu1_0::xsave_ecx_bit));
-    BOOST_CHECK(get_right(ecx, cpu1_0::avx_ecx_bit));
-    BOOST_CHECK(get_xcr(extended, xcr0::feature));
-    BOOST_CHECK(get_right(extended, xcr0::sse_bit));
-    BOOST_CHECK(get_right(extended, xcr0::avx_bit));
-    BOOST_CHECK(get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf));
-    BOOST_CHECK(get_right(ebx, cpu7_0::avx2_ebx_bit));
-}
-
-// Succeeds, but APIs fail on some 32 bit.
-BOOST_AUTO_TEST_CASE(cpuid__try_sse41__always__expected)
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf));
-    BOOST_CHECK(get_right(ecx, cpu1_0::sse4_ecx_bit));
-}
-
-// same as try_sse41
-BOOST_AUTO_TEST_CASE(cpuid__try_sse4__always__expected)
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK(get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf));
-    BOOST_CHECK(get_right(ecx, cpu1_0::sse4_ecx_bit));
-}
-
-#endif
+// get_cpu/get_xcr tested in intrinsics.cpp.
 
 BOOST_AUTO_TEST_SUITE_END()

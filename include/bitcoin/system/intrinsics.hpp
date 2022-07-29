@@ -32,6 +32,7 @@
     #endif
 #endif
 
+ // TODO: ARM is unverified.
 #if defined(HAVE_ARM)
     #include <arm_acle.h>
     #if defined(HAVE_NEON)
@@ -44,7 +45,7 @@ namespace libbitcoin {
 /// Runtime checks for Intel SIMD and ARM Neon availability.
 /// ---------------------------------------------------------------------------
 
-// 1 or 2 blocks, sha256 (optimum).
+// 1 lane integral sha
 inline bool try_shani() noexcept
 {
 // TODO: shani is unverified.
@@ -60,7 +61,7 @@ inline bool try_shani() noexcept
 #endif
 }
 
-// 8 blocks, 8 lanes (next optimum for 8 blocks).
+// 8 lanes
 inline bool try_avx2() noexcept
 {
 #if defined(HAVE_X64)
@@ -80,23 +81,23 @@ inline bool try_avx2() noexcept
 #endif
 }
 
-// 4 blocks, 4 lanes (next optimum for 4 blocks).
+// 4 lanes (next optimum for 4 blocks).
 inline bool try_sse41() noexcept
 {
-// bc::sha256 sse41 faulting on x64 32bit build.
+// TODO: sse41 faulting on HAVE_X32.
 #if defined(HAVE_X64)
     uint32_t eax, ebx, ecx, edx;
     return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-        && get_bit<cpu1_0::sse4_ecx_bit>(ecx); // SSE4.1
+        && get_bit<cpu1_0::sse4_ecx_bit>(ecx);  // SSE4.1
 #else
     return false;
 #endif
 }
 
-// 1 block, 4 lanes (nex optimum for 1 block, requires inline assembly - port).
+// 4 lanes
 inline bool try_sse4() noexcept
 {
-// bc::sha256 sse4 requires 64 bit build, implemented as inline assembly.
+// sse4 is sse41 but requires X64 build (inline assembly).
 #if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
     return try_sse41();
 #else
@@ -104,10 +105,10 @@ inline bool try_sse4() noexcept
 #endif
 }
 
-// 1 block, 4 lanes  (optimum for neon).
+// 4 lanes
 constexpr bool try_neon() noexcept
 {
-// TODO: neon is unverified.
+// TODO: ARM/Neon is unverified.
 #if defined(HAVE_NEON)
     return true;
 #else
@@ -248,6 +249,7 @@ mint128_t inline shl(mint128_t a, uint32_t bits) noexcept
     return _mm_slli_epi32(a, bits);
 }
 
+// Clang13: '__builtin_ia32_palignr128' needs target feature ssse3.
 /// Concatenate two 16-byte blocks into a 32-byte temporary result, shift the 
 /// result right by Shift bytes, and return the low 16 bytes.
 template <uint32_t Shift>
@@ -270,6 +272,9 @@ mint128_t inline shuffle(mint128_t a) noexcept
     return _mm_shuffle_epi32(a, Control);
 }
 
+// Clang13: always_inline function '_mm_shuffle_epi8' requires target feature
+// 'ssse3', but would be inlined into function 'shuffle' that is compiled
+// without support for 'ssse3'.
 /// Shuffle packed 8-bit integers in a according to shuffle control mask in the
 /// corresponding 8-bit element of b.
 mint128_t inline shuffle(mint128_t a, mint128_t b) noexcept
