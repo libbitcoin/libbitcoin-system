@@ -120,7 +120,6 @@ constexpr auto pair160 = std_array<uint8_t, array_count<sha_160::block_t> * two>
 constexpr auto expected_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
 constexpr auto expected_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
 constexpr auto expected_pair160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
-constexpr auto expected_merk160 = base16_array("a8782546751527a4a1ad999058165d6af22421c8");
 
 BOOST_AUTO_TEST_CASE(accumulator__sha_hash_half160__null_hashes__expected)
 {
@@ -149,7 +148,6 @@ constexpr auto pair256 = std_array<uint8_t, array_count<sha_256::block_t> * two>
 constexpr auto expected_half256 = base16_array("66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925");
 constexpr auto expected_full256 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b");
 constexpr auto expected_pair256 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
-constexpr auto expected_merk256 = base16_array("e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
 
 BOOST_AUTO_TEST_CASE(accumulator__sha_hash_half256__null_hashes__expected)
 {
@@ -181,7 +179,6 @@ constexpr auto pair512 = std_array<uint8_t, array_count<sha_512::block_t> * two>
 constexpr auto expected_half512 = base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081");
 constexpr auto expected_full512 = base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11");
 constexpr auto expected_pair512 = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
-constexpr auto expected_merk512 = base16_array("56d3e5825edf06e467e50dfeb09c1df2d9940121c05d61a162bfcb80aea3aa5fe958d917ac993d76cd3ea86240fedbb79520ce7b9c275793e3c75a82116cc320");
 
 BOOST_AUTO_TEST_CASE(accumulator__sha_hash__half512__null_hash__expected)
 {
