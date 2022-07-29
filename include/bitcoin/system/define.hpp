@@ -70,21 +70,29 @@ namespace bc = libbitcoin;
 /// ---------------------------------------------------------------------------
 
 /// Emit messages from .cpp during compilation.
-#define DO_PRAGMA(text) _Pragma (#text)
-#if defined(HAVE_MSC)
-    #define DEFINED(text) __pragma(message("defined: " text))
-#elif defined(HAVE_GNUC)
-    #define DEFINED(text) DO_PRAGMA(message ("defined: " #text))
+#if defined(HAVE_MESSAGES)
+    #if defined(HAVE_MSC)
+        #define DEFINED(text) __pragma(message(text))
+    #elif defined(HAVE_GNUC)
+        // TODO: This is not working.
+        ////#define DO_PRAGMA(text) _Pragma (#text)
+        ////#define DEFINED(text) DO_PRAGMA(message (#text))
+    #elif defined(HAVE_CLANG)
+        // TODO: implement.
+        #define DEFINED(text)
+    #else
+        #define DEFINED(text)
+    #endif
 #endif
 
 /// See gcc.gnu.org/wiki/Visibility
 /// Generic helper definitions for shared library support
 /// GNU visibilty attribute overrides compiler flag `fvisibility`.
-#if defined(HAVE_MSC) || defined(HAVE_CYGWIN)
+#if defined(HAVE_WINDOWS_LIBS)
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
     #define BC_HELPER_DLL_LOCAL
-#elif defined(HAVE_GNUC)
+#elif defined(HAVE_NX_LIBS)
     #define BC_HELPER_DLL_IMPORT __attribute__((visibility("default")))
     #define BC_HELPER_DLL_EXPORT __attribute__((visibility("default")))
     #define BC_HELPER_DLL_LOCAL  __attribute__((visibility("internal")))

@@ -289,6 +289,9 @@ uint32_t inline get(mint256_t a) noexcept
     return _mm256_extract_epi32(a, Offset);
 }
 
+// GCC:
+// warning: AVX vector return without AVX enabled changes the ABI [-Wpsabi]
+// This should be harmless as long as runtime support is executed.
 mint256_t inline set(uint32_t a) noexcept 
 {
     return _mm256_set1_epi32(a);

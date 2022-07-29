@@ -42,11 +42,26 @@
     #define HAVE_CYGWIN
 #endif
 
-#if defined(__GNUC__)
+/// stackoverflow.com/questions/38499462/how-to-tell-clang-to-stop-pretending-
+/// to-be-other-compilers
+#if defined(__clang__)
+    #define HAVE_CLANG
+#endif
+#if defined(__APPLE__) && defined(HAVE_CLANG)
+    #define HAVE_XCODE
+#endif
+#if defined(__GNUC__) && !defined(HAVE_CLANG)
     #define HAVE_GNUC
 #endif
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(HAVE_CLANG)
     #define HAVE_MSC
+#endif
+
+/// Determines linker defines (Windows vs. Unix/Linux).
+#if defined(HAVE_CLANG) || defined(HAVE_GNUC)
+    #define HAVE_NX_LIBS
+#elif defined(_MSC_VER) || defined(__CYGWIN__)
+    #define HAVE_WINDOWS_LIBS
 #endif
 
 /// GNU/MSC defines for targeted CPU architecture.
@@ -70,15 +85,31 @@
     #define HAVE_XCPU
 #endif
 
+/// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
+/// MSVC: __cpuidex/_cpuid/_xgetbv.
+/// docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex
+/// docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list
+/// GCC11: __cpuidex/_cpuid/_xgetbv.
+/// gcc.gnu.org/bugzilla/show_bug.cgi?id=95973
+/// Clang15: __cpuid_count/_cpuid/_xgetbv.
+/// clang.llvm.org/doxygen/cpuid_8h_source.html
+#if defined(HAVE_XCPU)
+    #define HAVE_XGETBV
+    #define HAVE_XCPUID
+    #if defined(HAVE_MSC)
+        #define HAVE_XCPUIDEX
+    #endif
+    #if defined(HAVE_CLANG)
+        #define HAVE_XCPUID_COUNT
+    #endif
+    #if defined(HAVE_GNUC)
+        // TODO: gcc11 __cpuidex not defined.
+    #endif
+#endif
+
 /// XCPU architecture inline assembly.
 #if defined(HAVE_XCPU) && !defined(HAVE_MSC)
     #define HAVE_XASSEMBLY
-#endif
-
-/// MSC, GCC11, Clang15(?)
-/// XCPU architecture intrinsic _xgetbv and __cpuidex.
-#if defined(HAVE_XCPU) && (defined(HAVE_MSC) || defined(HAVE_GNUC))
-    #define HAVE_XCPUID
 #endif
 
 /// ARM Neon intrinsics.
@@ -136,11 +167,6 @@
     #define HAVE_EXECUTION
 #endif
 
-/// TODO: define warning suppressions for other platforms.
-#if defined(HAVE_MSC)
-    #define HAVE_PRAGMA_WARNING
-#endif
-
 /// WITH_ indicates build symbol.
 /// ---------------------------------------------------------------------------
 
@@ -152,8 +178,17 @@
 /// These are manually configured here.
 /// ---------------------------------------------------------------------------
 
+/// Disable to suppress pragma messages.
+#define HAVE_MESSAGES
+
+/// Disable to unsuppress warnings.
+#define HAVE_SUPPRESSION
+
 /// Disable noexcept to capture stack trace.
 #define HAVE_NOEXCEPT
+
+/// Disable to emit all suppressed warnings.
+#define HAVE_WARNINGS
 
 // Deprecated is noisy, turn on to find dependencies.
 ////#define HAVE_DEPRECATED

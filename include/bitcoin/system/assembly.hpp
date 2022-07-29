@@ -26,12 +26,7 @@
 #include <cstdint>
 #include <immintrin.h>
 
-/// General CPU instructions (xgetbv, cpuid_count) used to locate CPU features.
-
-// TODO: GCC11 and Clang (15?) now both have __cpuidex/_cpuid and _xgetbv,
-// TODO: so should be able to eliminate this distinction once verified.
-// gcc.gnu.org/bugzilla/show_bug.cgi?id=95973
-// clang.llvm.org/doxygen/cpuid_8h_source.html
+/// Common CPU instructions used to locate CPU features.
 
 // MSC inline assembly (via __asm, no __asm__ support) does not support ARM
 // and x64. Since we cross compile to x64 we consider this lack of support
@@ -73,13 +68,12 @@ constexpr bool get_bit(Value value) noexcept
 
 inline bool xgetbv(uint64_t& value, uint32_t index) noexcept
 {
-#if defined(HAVE_XCPUID)
+#if defined(HAVE_XGETBV)
     value = _xgetbv(index);
     return true;
 #elif defined(HAVE_XASSEMBLY)
     // Compile error: built-in _xgetbv requires target feature xsave.
-    // But xsave can only be determined at run time, so must use assembly.
-    ////value = _xgetbv(index);
+    // But xsave can only be determined at run time.
     uint32_t a{}, d{};
     __asm__("xgetbv" : "=a"(a), "=d"(d) : "c"(index));
     value = (static_cast<uint64_t>(d) << 32) | a;
@@ -92,7 +86,7 @@ inline bool xgetbv(uint64_t& value, uint32_t index) noexcept
 inline bool cpuid_count(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     uint32_t leaf, uint32_t subleaf) noexcept
 {
-#if defined(HAVE_XCPUID)
+#if defined(HAVE_XCPUIDEX)
     int out[4]{};
     __cpuidex(&out[0], leaf, subleaf);
     a = out[0];
@@ -100,9 +94,11 @@ inline bool cpuid_count(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     c = out[2];
     d = out[3];
     return true;
+#elif defined(HAVE_XCPUID_COUNT)
+    __cpuid_count(leaf, subleaf, a, b, c, d);
+    return true;
 #elif defined(HAVE_XASSEMBLY)
-    // __cpuid_count too commonly undefined, so just always use assembly.
-    ////__cpuid_count(leaf, subleaf, a, b, c, d);
+    // __cpuid_count commonly undefined.
     __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
     return true;
 #else
