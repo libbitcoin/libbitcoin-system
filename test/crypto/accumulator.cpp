@@ -42,66 +42,66 @@ typename system::accumulator<Algorithm>::digest_t accumulated(
 BOOST_AUTO_TEST_SUITE(rmd_accumulator_tests)
 
 // Concurrency off for debug testing.
-using rmd_128 = rmd::algorithm<rmd::h128<>, false>;
-using rmd_160 = rmd::algorithm<rmd::h160<>, false>;
+////using rmd_128 = rmd::algorithm<rmd::h128<>, false>;
+////using rmd_160 = rmd::algorithm<rmd::h160<>, false>;
 
 // rmd128
 // ----------------------------------------------------------------------------
-constexpr auto half128 = rmd_128::half_t{};
-constexpr auto full128 = rmd_128::block_t{};
-constexpr auto pair128 = std_array<uint8_t, array_count<rmd_128::block_t>* two>{};
-constexpr auto expected_half128 = base16_array("00000000000000000000000000000000");
-constexpr auto expected_full128 = base16_array("00000000000000000000000000000000");
-constexpr auto expected_pair128 = base16_array("00000000000000000000000000000000");
-
-BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half128__null_hashes__expected)
-{
-    // no baseline ripemd128_hash function.
-    ////BOOST_CHECK_NE(accumulated<rmd_128>(half128), expected_half128);
-    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(half128), expected_half128);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one128__null_hashes__expected)
-{
-    // no baseline ripemd128_hash function.
-    ////BOOST_CHECK_NE(accumulated<rmd_128>(full128), expected_full128);
-    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two128__null_hashes__expected)
-{
-    // no baseline ripemd128_hash function.
-    ////BOOST_CHECK_NE(accumulated<rmd_128>(full128, full128), expected_pair128);
-    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(pair128), expected_pair128);
-}
+////constexpr auto half128 = rmd_128::half_t{};
+////constexpr auto full128 = rmd_128::block_t{};
+////constexpr auto pair128 = std_array<uint8_t, array_count<rmd_128::block_t>* two>{};
+////constexpr auto expected_half128 = base16_array("00000000000000000000000000000000");
+////constexpr auto expected_full128 = base16_array("00000000000000000000000000000000");
+////constexpr auto expected_pair128 = base16_array("00000000000000000000000000000000");
+////
+////BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half128__null_hashes__expected)
+////{
+////    // no baseline ripemd128_hash function.
+////    ////BOOST_CHECK_NE(accumulated<rmd_128>(half128), expected_half128);
+////    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(half128), expected_half128);
+////}
+////
+////BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one128__null_hashes__expected)
+////{
+////    // no baseline ripemd128_hash function.
+////    ////BOOST_CHECK_NE(accumulated<rmd_128>(full128), expected_full128);
+////    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
+////}
+////
+////BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two128__null_hashes__expected)
+////{
+////    // no baseline ripemd128_hash function.
+////    ////BOOST_CHECK_NE(accumulated<rmd_128>(full128, full128), expected_pair128);
+////    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(pair128), expected_pair128);
+////}
 
 // rmd160
 // ----------------------------------------------------------------------------
 
-constexpr auto half160 = rmd_160::half_t{};
-constexpr auto full160 = rmd_160::block_t{};
-constexpr auto pair160 = std_array<uint8_t, array_count<rmd_160::block_t>* two>{};
-constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
-constexpr auto expected_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
-constexpr auto expected_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
-
-BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half160__null_hashes__expected)
-{
-    ////BOOST_CHECK_NE(accumulated<rmd_160>(half160), expected_half160);
-    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one160__null_hashes__expected)
-{
-    ////BOOST_CHECK_NE(accumulated<rmd_160>(full160), expected_full160);
-    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two160__null_hashes__expected)
-{
-    ////BOOST_CHECK_NE(accumulated<rmd_160>(full160, full160), expected_pair160);
-    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
-}
+////constexpr auto half160 = rmd_160::half_t{};
+////constexpr auto full160 = rmd_160::block_t{};
+////constexpr auto pair160 = std_array<uint8_t, array_count<rmd_160::block_t>* two>{};
+////constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
+////constexpr auto expected_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
+////constexpr auto expected_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
+////
+////BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half160__null_hashes__expected)
+////{
+////    ////BOOST_CHECK_NE(accumulated<rmd_160>(half160), expected_half160);
+////    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
+////}
+////
+////BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one160__null_hashes__expected)
+////{
+////    ////BOOST_CHECK_NE(accumulated<rmd_160>(full160), expected_full160);
+////    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
+////}
+////
+////BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two160__null_hashes__expected)
+////{
+////    ////BOOST_CHECK_NE(accumulated<rmd_160>(full160, full160), expected_pair160);
+////    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
+////}
 
 BOOST_AUTO_TEST_SUITE_END()
 
