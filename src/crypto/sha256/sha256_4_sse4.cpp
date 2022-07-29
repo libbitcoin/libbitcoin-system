@@ -49,8 +49,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <bitcoin/system/crypto/sha256.hpp>
-
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -58,6 +56,8 @@
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
+
+#if defined (DISABLED)
 
 #if !defined(HAVE_XASSEMBLY)
 
@@ -1048,6 +1048,8 @@ void merkle_sse4(digest1& out, const block1& blocks) NOEXCEPT
 }
 
 #endif // HAVE_XASSEMBLY
+
+#endif
 
 } // namespace sha256
 } // namespace system

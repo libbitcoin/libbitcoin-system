@@ -76,6 +76,9 @@ BC_API hash_digest bitcoin_hash(const hash_digest& left,
 /// Generate a bitcoin short hash (ripemd160(sha256)).
 BC_API short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT;
 
+/// Generate a bitcoin merkle root from an ordered set of hashes.
+BC_API hash_digest merkle_root(hashes&& set) NOEXCEPT;
+
 /// Generate a ripemd160 hash.
 BC_API short_hash ripemd160_hash(const data_slice& data) NOEXCEPT;
 BC_API data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT;

@@ -22,138 +22,138 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 
 // hash (see also hash.cpp)
 
-BOOST_AUTO_TEST_CASE(sha256__hash__fractional_block__expected)
-{
-    constexpr auto expected = base16_array("3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
-    hash_digest hash{};
-    const data_chunk chunk{ 'd', 'a', 't', 'a' };
-    sha256::hash(hash.data(), chunk.size(), chunk.data());
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-
-// merkle_root
-
-BOOST_AUTO_TEST_CASE(sha256__merkle_root__empty__null_hash)
-{
-    BOOST_REQUIRE_EQUAL(sha256::merkle_root(sha256::digests{}), null_hash);
-}
-
-BOOST_AUTO_TEST_CASE(sha256__merkle_root__one_hash__one_hash)
-{
-    BOOST_REQUIRE_EQUAL(sha256::merkle_root(sha256::digests{ one_hash }), one_hash);
-}
-
-BC_PUSH_WARNING(NO_USE_OF_MOVED_OBJECT)
-
-// shani1, neon, sse4, native  (1 block iteration)
-hash_digest merkle_root_expectation(const hashes& hashes)
-{
-    if (hashes.empty())
-        return {};
-
-    system::hashes update;
-    system::hashes merkle{ hashes };
-
-    while (merkle.size() > one)
-    {
-        if (is_odd(merkle.size()))
-            merkle.push_back(merkle.back());
-
-        for (auto it = merkle.begin(); it != merkle.end(); it += two)
-            update.push_back(bitcoin_hash(it[0], it[1]));
-
-        std::swap(merkle, update);
-        update.clear();
-    }
-
-    return merkle.front();
-}
-
-BOOST_AUTO_TEST_CASE(hash__to_merkle_root__one_block__expected)
-{
-    hashes hashes
-    {
-        { 0 },
-        { 1 }
-    };
-
-    const auto root = merkle_root_expectation(hashes);
-
-    // shani1, neon, sse4, native  (1 block)
-    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
-}
-
-BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__two_blocks__expected)
-{
-    hashes hashes
-    {
-        { 0 },
-        { 1 },
-        { 2 },
-        { 3 }
-    };
-
-    const auto root = merkle_root_expectation(hashes);
-
-    // shani2 (2 blocks)
-    // shani1, neon, sse4, native  (1 block)
-    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
-}
-
-BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__four_blocks__expected)
-{
-    hashes hashes
-    {
-        { 0 },
-        { 1 },
-        { 2 },
-        { 3 },
-        { 4 },
-        { 5 },
-        { 6 },
-        { 7 }
-    };
-
-    const auto root = merkle_root_expectation(hashes);
-
-    // sse41 (4 blocks)
-    // shani2 (2 blocks)
-    // shani1, neon, sse4, native  (1 block)
-    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
-}
-
-BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__eight_blocks__expected)
-{
-    hashes hashes
-    {
-        { 0 },
-        { 1 },
-        { 2 },
-        { 3 },
-        { 4 },
-        { 5 },
-        { 6 },
-        { 7 },
-        { 8 },
-        { 9 },
-        { 10 },
-        { 11 },
-        { 12 },
-        { 13 },
-        { 14 },
-        { 15 }
-    };
-
-    const auto root = merkle_root_expectation(hashes);
-
-    // avx2 (8 blocks)
-    // sse41 (4 blocks)
-    // shani2 (2 blocks)
-    // shani1, neon, sse4, native  (1 block)
-    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
-}
-
-BC_POP_WARNING()
+////BOOST_AUTO_TEST_CASE(sha256__hash__fractional_block__expected)
+////{
+////    constexpr auto expected = base16_array("3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
+////    hash_digest hash{};
+////    const data_chunk chunk{ 'd', 'a', 't', 'a' };
+////    sha256::hash(hash.data(), chunk.size(), chunk.data());
+////    BOOST_REQUIRE_EQUAL(hash, expected);
+////}
+////
+////// merkle_root
+////
+////BOOST_AUTO_TEST_CASE(sha256__merkle_root__empty__null_hash)
+////{
+////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(sha256::digests{}), null_hash);
+////}
+////
+////BOOST_AUTO_TEST_CASE(sha256__merkle_root__one_hash__one_hash)
+////{
+////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(sha256::digests{ one_hash }), one_hash);
+////}
+////
+////BC_PUSH_WARNING(NO_USE_OF_MOVED_OBJECT)
+////
+////// shani1, neon, sse4, native  (1 block iteration)
+////hash_digest merkle_root_expectation(const hashes& hashes)
+////{
+////    if (hashes.empty())
+////        return {};
+////
+////    system::hashes update;
+////    system::hashes merkle{ hashes };
+////
+////    while (merkle.size() > one)
+////    {
+////        if (is_odd(merkle.size()))
+////            merkle.push_back(merkle.back());
+////
+////        for (auto it = merkle.begin(); it != merkle.end(); it += two)
+////            update.push_back(bitcoin_hash(it[0], it[1]));
+////
+////        std::swap(merkle, update);
+////        update.clear();
+////    }
+////
+////    return merkle.front();
+////}
+////
+////BOOST_AUTO_TEST_CASE(hash__to_merkle_root__one_block__expected)
+////{
+////    hashes hashes
+////    {
+////        { 0 },
+////        { 1 }
+////    };
+////
+////    const auto root = merkle_root_expectation(hashes);
+////
+////    // shani1, neon, sse4, native  (1 block)
+////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
+////}
+////
+////BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__two_blocks__expected)
+////{
+////    hashes hashes
+////    {
+////        { 0 },
+////        { 1 },
+////        { 2 },
+////        { 3 }
+////    };
+////
+////    const auto root = merkle_root_expectation(hashes);
+////
+////    // shani2 (2 blocks)
+////    // shani1, neon, sse4, native  (1 block)
+////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
+////}
+////
+////BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__four_blocks__expected)
+////{
+////    hashes hashes
+////    {
+////        { 0 },
+////        { 1 },
+////        { 2 },
+////        { 3 },
+////        { 4 },
+////        { 5 },
+////        { 6 },
+////        { 7 }
+////    };
+////
+////    const auto root = merkle_root_expectation(hashes);
+////
+////    // sse41 (4 blocks)
+////    // shani2 (2 blocks)
+////    // shani1, neon, sse4, native  (1 block)
+////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
+////}
+////
+////BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__eight_blocks__expected)
+////{
+////    hashes hashes
+////    {
+////        { 0 },
+////        { 1 },
+////        { 2 },
+////        { 3 },
+////        { 4 },
+////        { 5 },
+////        { 6 },
+////        { 7 },
+////        { 8 },
+////        { 9 },
+////        { 10 },
+////        { 11 },
+////        { 12 },
+////        { 13 },
+////        { 14 },
+////        { 15 }
+////    };
+////
+////    const auto root = merkle_root_expectation(hashes);
+////
+////    // avx2 (8 blocks)
+////    // sse41 (4 blocks)
+////    // shani2 (2 blocks)
+////    // shani1, neon, sse4, native  (1 block)
+////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
+////}
+////
+////BC_POP_WARNING()
 
 // merkle_hash (now private to merkle_root implementation)
 

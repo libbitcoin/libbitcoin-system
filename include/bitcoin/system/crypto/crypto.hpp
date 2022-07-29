@@ -45,7 +45,6 @@
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
 #include <bitcoin/system/crypto/external/sha160.hpp>
 #include <bitcoin/system/crypto/external/sha512.hpp>
-#include <bitcoin/system/crypto/sha256.hpp>
 
 // vectorization intrinsics into algorithms using math templates.
 // sha-ni intrinsics into sha algorithm using shani math template.

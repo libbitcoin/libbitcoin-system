@@ -351,9 +351,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\sha256.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_1_native.cpp">
       <Filter>src\crypto\sha256</Filter>
     </ClCompile>
@@ -810,9 +807,6 @@
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\scrypt.hpp">
-      <Filter>include\bitcoin\system\crypto</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha_algorithm.hpp">

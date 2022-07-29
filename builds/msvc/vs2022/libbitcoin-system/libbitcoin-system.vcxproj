@@ -151,7 +151,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\pbkd_sha256.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\sha256.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_1_native.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_2_shani.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\sha256\sha256_4_neon.cpp" />
@@ -320,7 +319,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\rmd_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\scrypt.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\sha_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp" />

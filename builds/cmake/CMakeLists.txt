@@ -327,7 +327,6 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/crypto/pbkd_sha256.cpp"
     "../../src/crypto/pseudo_random.cpp"
     "../../src/crypto/ring_signature.cpp"
-    "../../src/crypto/sha256.cpp"
     "../../src/crypto/siphash.cpp"
     "../../src/crypto/external/hmac_sha512.cpp"
     "../../src/crypto/external/pbkd_sha512.cpp"

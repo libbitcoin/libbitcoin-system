@@ -88,7 +88,6 @@
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/rmd_algorithm.hpp>
 #include <bitcoin/system/crypto/scrypt.hpp>
-#include <bitcoin/system/crypto/sha256.hpp>
 #include <bitcoin/system/crypto/sha_algorithm.hpp>
 #include <bitcoin/system/crypto/siphash.hpp>
 #include <bitcoin/system/crypto/external/external.hpp>

@@ -4,8 +4,6 @@
 // Based on code from ARM, and by Johannes Schneiders, Skip
 // Hovsmith and Barry O'Rourke for the mbedTLS project.
 
-#include <bitcoin/system/crypto/sha256.hpp>
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <bitcoin/system/define.hpp>
@@ -15,6 +13,8 @@
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
+
+#if defined (DISABLED)
 
 #if !defined(HAVE_ARM)
 
@@ -231,6 +231,8 @@ void merkle_neon(digest1& out, const block1& blocks) NOEXCEPT
 }
 
 #endif // HAVE_ARM
+
+#endif
 
 } // namespace sha256
 } // namespace system

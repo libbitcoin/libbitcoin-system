@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/crypto/sha256.hpp>
-
 #include <algorithm>
 #include <bit>
 #include <iterator>
@@ -31,6 +29,8 @@
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
+
+#if defined (DISABLED)
 
 constexpr auto choice(auto x, auto y, auto z) NOEXCEPT
 {
@@ -365,6 +365,8 @@ void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
 ////    BC_POP_WARNING()
 ////}
 #endif // NORMALIZED_NATIVE_MERKLE
+
+#endif
 
 } // namespace sha256
 } // namespace system

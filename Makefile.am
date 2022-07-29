@@ -82,7 +82,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/pbkd_sha256.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
-    src/crypto/sha256.cpp \
     src/crypto/siphash.cpp \
     src/crypto/external/hmac_sha512.cpp \
     src/crypto/external/pbkd_sha512.cpp \
@@ -482,7 +481,6 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/ring_signature.hpp \
     include/bitcoin/system/crypto/rmd_algorithm.hpp \
     include/bitcoin/system/crypto/scrypt.hpp \
-    include/bitcoin/system/crypto/sha256.hpp \
     include/bitcoin/system/crypto/sha_algorithm.hpp \
     include/bitcoin/system/crypto/siphash.hpp
 

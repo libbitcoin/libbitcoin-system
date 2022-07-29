@@ -3,8 +3,6 @@
 // Written and place in public domain by Jeffrey Walton
 // Based on code from Intel, and by Sean Gulley for the miTLS project.
 
-#include <bitcoin/system/crypto/sha256.hpp>
-
 #include <iterator>
 #include <stdint.h>
 #include <bitcoin/system/define.hpp>
@@ -14,6 +12,8 @@
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
+
+#if defined (DISABLED)
 
 #if !defined(HAVE_XCPU)
 
@@ -460,6 +460,8 @@ void merkle_shani(digest1& out, const block1& blocks) NOEXCEPT
 }
 
 #endif // HAVE_XCPU
+
+#endif
 
 } // namespace sha256
 } // namespace system

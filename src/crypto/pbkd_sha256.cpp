@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/crypto/pbkd_sha256.hpp>
 
+#include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/crypto/hmac_sha256.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -42,10 +43,10 @@ BC_POP_WARNING()
     hmac::sha256::update(salted, salt, salt_size);
     
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    system::sha256::digest U;
+    hash_digest U;
     BC_POP_WARNING()
 
-    for (uint32_t i = 0; i * system::sha256::digest_size < buffer_size; ++i)
+    for (uint32_t i = 0; i * hash_size < buffer_size; ++i)
     {
         constexpr auto size = sizeof(uint32_t);
 
@@ -57,19 +58,19 @@ BC_POP_WARNING()
         for (size_t j = one; j < iterations; ++j)
         {
             hmac::sha256::initialize(context, passphrase, passphrase_size);
-            hmac::sha256::update(context, U.data(), system::sha256::digest_size);
+            hmac::sha256::update(context, U.data(), hash_size);
             hmac::sha256::finalize(context, U.data());
             
             BC_PUSH_WARNING(NO_ARRAY_INDEXING)
             BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-            for (size_t k = 0; k < system::sha256::digest_size; ++k)
+            for (size_t k = 0; k < hash_size; ++k)
                 T[k] ^= U[k];
             BC_POP_WARNING()
             BC_POP_WARNING()
         }
 
-        const auto offset = i * system::sha256::digest_size;
-        const auto length = limit(buffer_size - offset, system::sha256::digest_size);
+        const auto offset = i * hash_size;
+        const auto length = limit(buffer_size - offset, hash_size);
 
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
         BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)

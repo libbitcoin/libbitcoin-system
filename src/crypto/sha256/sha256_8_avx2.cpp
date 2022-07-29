@@ -3,8 +3,6 @@
 // Written and place in public domain by Jeffrey Walton
 // Based on code from Intel, and by Sean Gulley for the miTLS project.
 
-#include <bitcoin/system/crypto/sha256.hpp>
-
 #include <stdint.h>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -12,6 +10,8 @@
 namespace libbitcoin {
 namespace system {
 namespace sha256 {
+
+#if defined (DISABLED)
 
 #if !defined(HAVE_XCPU)
 
@@ -21,6 +21,105 @@ void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
 }
 
 #else
+
+namespace i256 {
+
+using mint256_t = __m256i;
+
+template <uint32_t Offset>
+uint32_t get(mint256_t a) noexcept
+{
+    return _mm256_extract_epi32(a, Offset);
+}
+
+// GCC:
+// warning: AVX vector return without AVX enabled changes the ABI [-Wpsabi]
+// This should be harmless as long as runtime support is executed.
+mint256_t set(uint32_t a) noexcept 
+{
+    return _mm256_set1_epi32(a);
+}
+
+mint256_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+    uint32_t e, uint32_t f, uint32_t g, uint32_t h) noexcept
+{
+    return _mm256_set_epi32(a, b, c, d, e, f, g, h);
+}
+
+mint256_t shuffle(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_shuffle_epi8(a, b);
+}
+
+mint256_t sum(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_add_epi32(a, b);
+}
+
+mint256_t sum(mint256_t a, mint256_t b, mint256_t c) noexcept
+{
+    return sum(sum(a, b), c);
+}
+
+mint256_t sum(mint256_t a, mint256_t b, mint256_t c,
+    mint256_t d) noexcept
+{
+    return sum(sum(a, b), sum(c, d));
+}
+
+mint256_t sum(mint256_t a, mint256_t b, mint256_t c, mint256_t d,
+    mint256_t e) noexcept
+{
+    return sum(sum(a, b, c), sum(d, e));
+}
+
+mint256_t inc(mint256_t& outa, mint256_t b) noexcept
+{
+    return ((outa = sum(outa, b)));
+}
+
+mint256_t inc(mint256_t& outa, mint256_t b, mint256_t c) noexcept
+{
+    return ((outa = sum(outa, b, c)));
+}
+
+mint256_t inc(mint256_t& outa, mint256_t b, mint256_t c,
+    mint256_t d) noexcept
+{
+    return ((outa = sum(outa, b, c, d)));
+}
+
+mint256_t exc(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_xor_si256(a, b);
+}
+
+mint256_t exc(mint256_t a, mint256_t b, mint256_t c) noexcept
+{
+    return exc(exc(a, b), c);
+}
+
+mint256_t dis(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_or_si256(a, b);
+}
+
+mint256_t con(mint256_t a, mint256_t b) noexcept
+{
+    return _mm256_and_si256(a, b);
+}
+
+mint256_t shr(mint256_t a, uint32_t bits) noexcept
+{
+    return _mm256_srli_epi32(a, bits);
+}
+
+mint256_t shl(mint256_t a, uint32_t bits) noexcept
+{
+    return _mm256_slli_epi32(a, bits);
+}
+
+} // namespace i256
 
 using namespace i256;
 
@@ -335,6 +434,8 @@ void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
 }
 
 #endif // HAVE_XCPU
+
+#endif
 
 } // namespace sha256
 } // namespace system
