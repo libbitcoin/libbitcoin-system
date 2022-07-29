@@ -19,19 +19,17 @@
 #include <bitcoin/system/crypto/hash.hpp>
 
 #include <vector>
+#include <bitcoin/system/crypto/accumulator.hpp>
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/hmac_sha256.hpp>
+#include <bitcoin/system/crypto/hmac_sha512.hpp>
 #include <bitcoin/system/crypto/pbkd_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha512.hpp>
+#include <bitcoin/system/crypto/ripemd160.hpp>
 #include <bitcoin/system/crypto/scrypt.hpp>
+#include <bitcoin/system/crypto/sha_algorithm.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
-
-#include <bitcoin/system/crypto/accumulator.hpp>
-#include <bitcoin/system/crypto/sha_algorithm.hpp>
-
-#include <bitcoin/system/crypto/external/hmac_sha512.hpp>
-#include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
-#include <bitcoin/system/crypto/external/ripemd160.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -105,18 +103,13 @@ hash_digest merkle_root(hashes&& set) NOEXCEPT
 
 short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    short_hash hash;
-    BC_POP_WARNING()
-        
-    // TODO: return hash/chunk.
+    short_hash hash{};
     RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
 
 data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT
 {
-    // TODO: return hash/chunk.
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
     RMD160(data.data(), data.size(), hash.data());
     return hash;
@@ -137,13 +130,6 @@ data_chunk sha1_chunk(const data_slice& data) NOEXCEPT
     context.flush(hash.data());
     return hash;
 }
-
-// TODO: non-streaming hash optimizations:
-// TODO: sha256 hashes of arrays can be optimized by computing the padding
-// TODO: bytes (including count value) at compile time using constexpr.
-// TODO: overloads for common sizes, such as 32 and 64 bytes, can do the same.
-// TODO: this affects all double hashes (including that in the sha256x2 writer)
-// TODO: as the second hash is always 32 bytes. See comments in sha256.cpp.
 
 hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
@@ -174,11 +160,7 @@ hash_digest sha256_hash(const data_slice& left,
 hash_digest hmac_sha256(const data_slice& data,
     const data_slice& key) NOEXCEPT
 {
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest hash;
-    BC_POP_WARNING()
-        
-    // TODO: return hash/chunk.
+    hash_digest hash{};
     hmac::sha256::hash(data.data(), data.size(), key.data(), key.size(),
         hash.data());
     return hash;
@@ -203,12 +185,9 @@ long_hash sha512_hash(const data_slice& data) NOEXCEPT
 long_hash hmac_sha512(const data_slice& data,
     const data_slice& key) NOEXCEPT
 {
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    long_hash hash;
-    BC_POP_WARNING()
-        
-    // TODO: return hash/chunk.
-    hmac::sha512::hash(data.data(), data.size(), key.data(), key.size(), hash.data());
+    long_hash hash{};
+    hmac::sha512::hash(data.data(), data.size(), key.data(), key.size(),
+        hash.data());
     return hash;
 }
 
@@ -223,6 +202,7 @@ data_chunk pbkd_sha512(const data_slice& passphrase,
 
 hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
+    // Litecoin parameters, with concurrency.
     return scrypt<1024, 1, 1, true>::hash<hash_size>(data, data);
 }
 

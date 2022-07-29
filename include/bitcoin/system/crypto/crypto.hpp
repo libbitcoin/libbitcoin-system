@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 
+#include <bitcoin/system/crypto/accumulator.hpp>
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/checksum.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
@@ -26,25 +27,17 @@
 #include <bitcoin/system/crypto/encryption.hpp>
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
+#include <bitcoin/system/crypto/hmac_sha256.hpp>
+#include <bitcoin/system/crypto/hmac_sha512.hpp>
+#include <bitcoin/system/crypto/pbkd_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha512.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
-#include <bitcoin/system/crypto/scrypt.hpp>
-#include <bitcoin/system/crypto/siphash.hpp>
-
-#include <bitcoin/system/crypto/accumulator.hpp>
+#include <bitcoin/system/crypto/ripemd160.hpp>
 #include <bitcoin/system/crypto/rmd_algorithm.hpp>
+#include <bitcoin/system/crypto/scrypt.hpp>
 #include <bitcoin/system/crypto/sha_algorithm.hpp>
-
- // TODO: below.
-#include <bitcoin/system/crypto/external/hmac_sha512.hpp>
-#include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
-#include <bitcoin/system/crypto/hmac_sha256.hpp>
-#include <bitcoin/system/crypto/pbkd_sha256.hpp>
-
-// TODO: obsolete.
-#include <bitcoin/system/crypto/external/ripemd160.hpp>
-#include <bitcoin/system/crypto/external/sha160.hpp>
-#include <bitcoin/system/crypto/external/sha512.hpp>
+#include <bitcoin/system/crypto/siphash.hpp>
 
 // vectorization intrinsics into algorithms using math templates.
 // sha-ni intrinsics into sha algorithm using shani math template.

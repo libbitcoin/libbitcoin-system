@@ -6,10 +6,13 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_RIPEMD160_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_RIPEMD160_HPP
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_RIPEMD160_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_RIPEMD160_HPP
 
 #include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
 
 #define RMD160_STATE_LENGTH 5U
 #define RMD160_CHUNK_LENGTH 16U
@@ -28,5 +31,8 @@ void RMD160(const uint8_t* message, size_t length,
 void RMDInit(RMD160CTX* context) NOEXCEPT;
 void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT;
 void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT;
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif

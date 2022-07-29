@@ -6,10 +6,13 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#include <bitcoin/system/crypto/external/ripemd160.hpp>
+#include <bitcoin/system/crypto/ripemd160.hpp>
 
 #include <utility>
 #include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
 
 // TODO: make constexpr (cpp).
 
@@ -380,3 +383,6 @@ void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCE
     chunk[15] = (lo_length >> 29) | (hi_length << 3);
     RMDcompress(context);
 }
+
+} // namespace system
+} // namespace libbitcoin
