@@ -50,10 +50,10 @@ inline bool try_shani() noexcept
 // TODO: shani is unverified.
 #if defined(HAVE_X64)
     uint32_t eax, ebx, ecx, edx;
-    return cpuid_count(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse4_ecx_bit>(ecx)  // SSE4.1
-        //// && (eax >= cpu7_0::leaf)
-        && cpuid_count(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && (eax >= cpu7_0::leaf)
+        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::shani_ebx_bit>(ebx); // SHA-NI
 #else
     return false;
@@ -64,16 +64,16 @@ inline bool try_shani() noexcept
 inline bool try_avx2() noexcept
 {
 #if defined(HAVE_X64)
-    ////uint64_t extended;
+    uint64_t extended;
     uint32_t eax, ebx, ecx, edx;
-    return cpuid_count(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse4_ecx_bit>(ecx)  // SSE4.1
         && get_bit<cpu1_0::xsave_ecx_bit>(ecx) // XSAVE
         && get_bit<cpu1_0::avx_ecx_bit>(ecx)   // AVX
-        ////&& xgetbv(extended, xcr0::feature)
-        ////&& get_bit<xcr0::sse_bit>(extended)
-        ////&& get_bit<xcr0::avx_bit>(extended)
-        && cpuid_count(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_xcr(extended, xcr0::feature)
+        && get_bit<xcr0::sse_bit>(extended)
+        && get_bit<xcr0::avx_bit>(extended)
+        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
         && get_bit<cpu7_0::avx2_ebx_bit>(ebx);  // AVX2
 #else
     return false;
@@ -86,7 +86,7 @@ inline bool try_sse41() noexcept
 // bc::sha256 sse41 faulting on x64 32bit build.
 #if defined(HAVE_X64)
     uint32_t eax, ebx, ecx, edx;
-    return cpuid_count(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
         && get_bit<cpu1_0::sse4_ecx_bit>(ecx); // SSE4.1
 #else
     return false;

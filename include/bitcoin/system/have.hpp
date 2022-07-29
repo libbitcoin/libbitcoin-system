@@ -97,13 +97,13 @@
     #define HAVE_XGETBV
     #define HAVE_XCPUID
     #if defined(HAVE_MSC)
+        #define HAVE_X__CPUIDEX
+    #endif
+    #if defined(HAVE_GNUC)
         #define HAVE_XCPUIDEX
     #endif
     #if defined(HAVE_CLANG)
         #define HAVE_XCPUID_COUNT
-    #endif
-    #if defined(HAVE_GNUC)
-        // TODO: gcc11 __cpuidex not defined.
     #endif
 #endif
 
@@ -162,8 +162,8 @@
     #define HAVE_VECTOR_CONSTEXPR
 #endif
 
-/// No std::execution on macos clang (C++17).
-#if defined(HAVE_CPP17) && !defined(HAVE_APPLE)
+/// No std::execution on clang (C++17).
+#if defined(HAVE_CPP17) && !defined(HAVE_CLANG)
     #define HAVE_EXECUTION
 #endif
 
