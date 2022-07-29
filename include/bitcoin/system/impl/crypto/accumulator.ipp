@@ -121,7 +121,7 @@ pad_size() const NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::counter CLASS::
+RCONSTEXPR typename CLASS::counter CLASS::
 serialize(size_t bytes) NOEXCEPT
 {
     if constexpr (Algorithm::big_end_count)
