@@ -316,9 +316,10 @@ BOOST_AUTO_TEST_CASE(accumulator__write__nonzero__expected)
 
 BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
 {
+    constexpr auto overflow = is_same_type<size_t, uint64_t>;
     const checked writer{};
     BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
-    BOOST_REQUIRE(!writer.is_buffer_overflow_(max_size_t));
+    BOOST_REQUIRE_EQUAL(writer.is_buffer_overflow_(max_size_t), overflow);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___unchecked__false)
