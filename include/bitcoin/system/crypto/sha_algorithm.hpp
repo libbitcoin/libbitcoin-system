@@ -535,7 +535,7 @@ public:
     /// Types.
     /// count_t is 64/128 bit for 64/128 byte blocks (sha512 uses uintx_t).
     using byte_t   = uint8_t;
-    using word_t   = SHA::word_t;
+    using word_t   = typename SHA::word_t;
     using digest_t = std_array<byte_t, digest_bytes>;
     using block_t  = std_array<byte_t, block_bytes>;
     using state_t  = std_array<word_t, digest_words>;
