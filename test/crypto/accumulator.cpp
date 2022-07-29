@@ -57,21 +57,21 @@ constexpr auto expected_pair128 = base16_array("00000000000000000000000000000000
 BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half128__null_hashes__expected)
 {
     // no baseline ripemd128_hash function.
-    BOOST_CHECK_NE(accumulated<rmd_128>(half128), expected_half128);
+    ////BOOST_CHECK_NE(accumulated<rmd_128>(half128), expected_half128);
     ////BOOST_CHECK_EQUAL(system::ripemd128_hash(half128), expected_half128);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one128__null_hashes__expected)
 {
     // no baseline ripemd128_hash function.
-    BOOST_CHECK_NE(accumulated<rmd_128>(full128), expected_full128);
+    ////BOOST_CHECK_NE(accumulated<rmd_128>(full128), expected_full128);
     ////BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two128__null_hashes__expected)
 {
     // no baseline ripemd128_hash function.
-    BOOST_CHECK_NE(accumulated<rmd_128>(full128, full128), expected_pair128);
+    ////BOOST_CHECK_NE(accumulated<rmd_128>(full128, full128), expected_pair128);
     ////BOOST_CHECK_EQUAL(system::ripemd128_hash(pair128), expected_pair128);
 }
 
@@ -87,20 +87,20 @@ constexpr auto expected_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half160__null_hashes__expected)
 {
-    BOOST_CHECK_NE(accumulated<rmd_160>(half160), expected_half160);
-    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
+    ////BOOST_CHECK_NE(accumulated<rmd_160>(half160), expected_half160);
+    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one160__null_hashes__expected)
 {
-    BOOST_CHECK_NE(accumulated<rmd_160>(full160), expected_full160);
-    BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
+    ////BOOST_CHECK_NE(accumulated<rmd_160>(full160), expected_full160);
+    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two160__null_hashes__expected)
 {
-    BOOST_CHECK_NE(accumulated<rmd_160>(full160, full160), expected_pair160);
-    BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
+    ////BOOST_CHECK_NE(accumulated<rmd_160>(full160, full160), expected_pair160);
+    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

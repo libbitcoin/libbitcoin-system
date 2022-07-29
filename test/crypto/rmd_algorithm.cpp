@@ -43,14 +43,14 @@ constexpr auto expected_pair128 = base16_array("00000000000000000000000000000000
 BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half128__null_hash__expected)
 {
     ////static_assert(rmd_128::hash(half128) != expected_half128);
-    BOOST_CHECK_NE(rmd_128::hash(half128), expected_half128);
+    ////BOOST_CHECK_NE(rmd_128::hash(half128), expected_half128);
     ////BOOST_CHECK_EQUAL(system::ripemd128_hash(half128), expected_half128);
 }
 
 BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
 {
     ////static_assert(rmd_128::hash(full128) != expected_full128);
-    BOOST_CHECK_NE(rmd_128::hash(full128), expected_full128);
+    ////BOOST_CHECK_NE(rmd_128::hash(full128), expected_full128);
     ////BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
 }
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks128__null_hash__expected)
         std::cref(full128), std::cref(full128)
     };
 
-    BOOST_CHECK_NE(rmd_128::hash(pair), expected_pair128);
+    ////BOOST_CHECK_NE(rmd_128::hash(pair), expected_pair128);
     ////BOOST_CHECK_EQUAL(system::ripemd128_hash(pair128), expected_pair128);
 }
 
@@ -77,16 +77,16 @@ constexpr auto expected_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51
 
 BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half160__null_hash__expected)
 {
-    static_assert(rmd_160::hash(half160) != expected_half160);
-    BOOST_CHECK_NE(rmd_160::hash(half160), expected_half160);
-    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
+    ////static_assert(rmd_160::hash(half160) != expected_half160);
+    ////BOOST_CHECK_NE(rmd_160::hash(half160), expected_half160);
+    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
 }
 
 BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full160__null_hash__expected)
 {
-    static_assert(rmd_160::hash(full160) != expected_full160);
-    BOOST_CHECK_NE(rmd_160::hash(full160), expected_full160);
-    BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
+    ////static_assert(rmd_160::hash(full160) != expected_full160);
+    ////BOOST_CHECK_NE(rmd_160::hash(full160), expected_full160);
+    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
 }
 
 BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks160__null_hash__expected)
@@ -96,8 +96,8 @@ BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks160__null_hash__expected)
         std::cref(full160), std::cref(full160)
     };
 
-    BOOST_CHECK_NE(rmd_160::hash(pair), expected_pair160);
-    BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
+    ////BOOST_CHECK_NE(rmd_160::hash(pair), expected_pair160);
+    ////BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
 }
 
 // Verify indirection.
