@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_ASSEMBLY_HPP
-#define LIBBITCOIN_SYSTEM_ASSEMBLY_HPP
+#ifndef LIBBITCOIN_SYSTEM_CPUID_HPP
+#define LIBBITCOIN_SYSTEM_CPUID_HPP
 
 #include <bitcoin/system/literals.hpp>
 

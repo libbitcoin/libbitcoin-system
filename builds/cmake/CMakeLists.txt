@@ -516,9 +516,9 @@ endif()
 #------------------------------------------------------------------------------
 if (with-tests)
     add_executable( libbitcoin-system-test
-        "../../test/assembly.cpp"
         "../../test/constants.cpp"
         "../../test/constraints.cpp"
+        "../../test/cpuid.cpp"
         "../../test/funclets.cpp"
         "../../test/intrinsics.cpp"
         "../../test/literals.cpp"

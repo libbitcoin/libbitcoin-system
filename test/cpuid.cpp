@@ -18,7 +18,7 @@
  */
 #include "test.hpp"
 
-BOOST_AUTO_TEST_SUITE(assembly_tests)
+BOOST_AUTO_TEST_SUITE(cpuid_tests)
 
 #if defined(HAVE_XCPU)
 
@@ -38,7 +38,7 @@ static_assert(get_bit<31>(0x80000000_u32));
 static_assert(get_bit<15>(0x8000_u16));
 static_assert(get_bit< 7>(0x80_u8));
 
-BOOST_AUTO_TEST_CASE(assembly__try_shani__always__expected)
+BOOST_AUTO_TEST_CASE(cpuid__try_shani__always__expected)
 {
     uint32_t eax, ebx, ecx, edx;
     BOOST_REQUIRE(cpuid_count(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf));
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(assembly__try_shani__always__expected)
 }
 
 // Succeeds, but APIs fail on some 32 bit.
-BOOST_AUTO_TEST_CASE(assembly__try_avx2__always__expected)
+BOOST_AUTO_TEST_CASE(cpuid__try_avx2__always__expected)
 {
     uint64_t extended;
     uint32_t eax, ebx, ecx, edx;
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(assembly__try_avx2__always__expected)
 }
 
 // Succeeds, but APIs fail on some 32 bit.
-BOOST_AUTO_TEST_CASE(assembly__try_sse41__always__expected)
+BOOST_AUTO_TEST_CASE(cpuid__try_sse41__always__expected)
 {
     uint32_t eax, ebx, ecx, edx;
     BOOST_REQUIRE(cpuid_count(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf));
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(assembly__try_sse41__always__expected)
 }
 
 // same as try_sse41
-BOOST_AUTO_TEST_CASE(assembly__try_sse4__always__expected)
+BOOST_AUTO_TEST_CASE(cpuid__try_sse4__always__expected)
 {
     uint32_t eax, ebx, ecx, edx;
     BOOST_REQUIRE(cpuid_count(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf));

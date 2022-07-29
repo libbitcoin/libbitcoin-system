@@ -605,9 +605,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\assembly.hpp">
-      <Filter>include\bitcoin\system</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
@@ -747,6 +744,9 @@
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\cpuid.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp">

@@ -251,7 +251,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\assembly.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain.hpp" />
@@ -299,6 +298,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\constraints.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\cpuid.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp" />

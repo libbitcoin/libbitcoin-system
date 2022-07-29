@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_INTRINSICS_HPP
 
 #include <cstdint>
-#include <bitcoin/system/assembly.hpp>
+#include <bitcoin/system/cpuid.hpp>
 
 #if defined(HAVE_XCPU)
     #include <immintrin.h>

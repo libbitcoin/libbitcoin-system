@@ -210,9 +210,9 @@ test_libbitcoin_system_test_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_
 test_libbitcoin_system_test_LDFLAGS = ${boost_LDFLAGS}
 test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_json_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_system_test_SOURCES = \
-    test/assembly.cpp \
     test/constants.cpp \
     test/constraints.cpp \
+    test/cpuid.cpp \
     test/funclets.cpp \
     test/intrinsics.cpp \
     test/literals.cpp \
@@ -399,10 +399,10 @@ include_bitcoin_HEADERS = \
 
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
-    include/bitcoin/system/assembly.hpp \
     include/bitcoin/system/boost.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
+    include/bitcoin/system/cpuid.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
     include/bitcoin/system/funclets.hpp \
