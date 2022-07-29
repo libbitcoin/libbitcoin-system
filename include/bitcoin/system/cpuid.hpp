@@ -72,8 +72,6 @@ inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
     value = _xgetbv(index);
     return true;
 #elif defined(HAVE_XASSEMBLY)
-    // Compile error: built-in _xgetbv requires target feature xsave.
-    // But xsave can only be determined at run time.
     uint32_t a{}, d{};
     __asm__("xgetbv" : "=a"(a), "=d"(d) : "c"(index));
     value = (static_cast<uint64_t>(d) << 32) | a;
@@ -95,7 +93,6 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     d = out[3];
     return true;
 #elif defined(HAVE_XASSEMBLY)
-    // __cpuid_count commonly undefined.
     __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
     return true;
 #else

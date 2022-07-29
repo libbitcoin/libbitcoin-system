@@ -86,17 +86,21 @@
 #endif
 
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
-/// MSVC: __cpuidex/_cpuid/_xgetbv.
-/// docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex
-/// docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list
-/// GCC11: __cpuidex/_cpuid/_xgetbv (but __cpuidex doesn't work).
-/// gcc.gnu.org/bugzilla/show_bug.cgi?id=95973
-/// Clang15: __cpuid_count/_cpuid/_xgetbv (but __cpuid_count doesn't work).
-/// clang.llvm.org/doxygen/cpuid_8h_source.html
 #if defined(HAVE_XCPU)
-    #define HAVE_XGETBV
-    #define HAVE_XCPUID
+    #if defined(HAVE_CLANG)
+        // Clang13: __cpuid_count/_cpuid/_xgetbv (but __cpuid_count no work).
+        // Clang13: error: '__builtin_ia32_xgetbv' needs target feature xsave.
+        // clang.llvm.org/doxygen/cpuid_8h_source.html
+    #endif
+    #if defined(HAVE_GNUC)
+        // GCC11: __cpuidex/_cpuid/_xgetbv (but __cpuidex no work).
+        // gcc.gnu.org/bugzilla/show_bug.cgi?id=95973
+        #define HAVE_XGETBV
+    #endif
     #if defined(HAVE_MSC)
+        // docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex
+        // docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list
+        #define HAVE_XGETBV
         #define HAVE_XCPUIDEX
     #endif
 #endif
