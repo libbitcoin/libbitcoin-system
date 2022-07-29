@@ -526,7 +526,7 @@ hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
     //    B[i] = scryptROMix (r, B[i], N)
     // end for
     std::atomic_bool success{ true };
-    std::for_each(concurrency(), prblocks.begin(), prblocks.end(),
+    std_for_each(concurrency(), prblocks.begin(), prblocks.end(),
         [&](rblock_t& rblock) NOEXCEPT
         {
             success = success && romix(rblock);

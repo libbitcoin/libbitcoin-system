@@ -318,7 +318,7 @@ rounding(state_t& state, const words_t& buffer) NOEXCEPT
     else
     {
         // buffer is const, jobs are independent and unsequenced.
-        std::for_each(concurrency(), jobs.begin(), jobs.end(),
+        std_for_each(concurrency(), jobs.begin(), jobs.end(),
             [&buffer](auto& job) NOEXCEPT
             {
                 if (job.first)

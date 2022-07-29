@@ -123,12 +123,17 @@
     #define HAVE_CPP20
 #endif
 
-/// Other platforms not as far with C++ 20.
-#if defined(HAVE_MSC) && defined(HAVE_CPP20)
+/// Other platforms not as far along (C++20).
+#if defined(HAVE_CPP20) && defined(HAVE_MSC)
     #define HAVE_RANGES
     #define HAVE_CONSTEVAL
     #define HAVE_STRING_CONSTEXPR
     #define HAVE_VECTOR_CONSTEXPR
+#endif
+
+/// No std::execution on macos clang (C++17).
+#if defined(HAVE_CPP17) && !defined(HAVE_APPLE)
+    #define HAVE_EXECUTION
 #endif
 
 /// TODO: define warning suppressions for other platforms.

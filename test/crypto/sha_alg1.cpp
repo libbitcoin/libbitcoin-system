@@ -938,7 +938,7 @@ double_hash(const set_t& blocks) NOEXCEPT
     digests_t digests(blocks.size());
 
     // A double_hash set is independent blocks (vectorizable).
-    std::transform(concurrency(), blocks.begin(), blocks.end(), digests.begin(),
+    std_transform(concurrency(), blocks.begin(), blocks.end(), digests.begin(),
         [&](const block_t& block)
         {
             buffer_t space{};
@@ -997,7 +997,7 @@ accumulate(const sets_t<Size>& sets) NOEXCEPT
     states_t states(sets.size());
 
     // The set of sets is independent (vectorizable).
-    std::transform(concurrency(), sets.begin(), sets.end(), states.begin(),
+    std_transform(concurrency(), sets.begin(), sets.end(), states.begin(),
         [&](const set_t& blocks)
         {
             buffer_t space{};

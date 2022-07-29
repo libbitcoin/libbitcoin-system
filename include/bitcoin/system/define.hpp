@@ -144,6 +144,9 @@ namespace bc = libbitcoin;
     #define _ARM_USE_NEW_NEON_INTRINSICS
 #endif
 
+/// Workarounds for C++ noncompliance.
+/// ---------------------------------------------------------------------------
+
 /// C++11 (full)
 #if defined(HAVE_NOEXCEPT)
     #define NOEXCEPT noexcept
@@ -165,6 +168,15 @@ namespace bc = libbitcoin;
 
 /// C++17 (full)
 #define FALLTHROUGH [[fallthrough]]
+
+/// C++17 (partial)
+#if defined(HAVE_EXECUTION)
+    #define std_for_each(p, b, e, l) std::for_each(p, b, e, l)
+    #define std_transform(p, b, e, t, l) std::transform(p, b, e, t, l)
+#else
+    #define std_for_each(p, b, e, l) std::for_each(b, e, l)
+    #define std_transform(p, b, e, t, l) std::transform(b, e, t, l)
+#endif
 
 /// C++20 (partial)
 #if defined(HAVE_RANGES)
