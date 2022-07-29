@@ -67,8 +67,6 @@ BOOST_AUTO_TEST_CASE(endian__to_uintx__zero__expected)
 // ----------------------------------------------------------------------------
 
 constexpr uint32_t value32 = 0x01020304;
-constexpr data_array<4> array_forward{ { 0x01, 0x02, 0x03, 0x04 } };
-constexpr data_array<4> array_reverse{ { 0x04, 0x03, 0x02, 0x01 } };
 const data_chunk data_forward{ 0x01, 0x02, 0x03, 0x04 };
 const data_chunk data_reverse{ 0x04, 0x03, 0x02, 0x01 };
 
