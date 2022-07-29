@@ -396,7 +396,7 @@ template <typename To, typename From,
     if_uintx<From>>
 constexpr To hi_word(From value) NOEXCEPT
 {
-    return (value >> bits<To>).convert_to<To>();
+    return (value >> bits<To>).template convert_to<To>();
 }
 
 template <typename To, typename From,
@@ -412,7 +412,7 @@ template <typename To, typename From,
     if_uintx<From>>
 constexpr To lo_word(From value) NOEXCEPT
 {
-    return value.convert_to<To>();
+    return value.template convert_to<To>();
 }
 
 template <typename To, typename From,

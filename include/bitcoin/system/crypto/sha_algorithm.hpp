@@ -43,7 +43,7 @@ struct k160 : public k<uint32_t, 80>
 {
     /// SHA1 (160) K values are flattened as an optimization/normalization.
     using base = k<uint32_t, 80>;
-    static constexpr base::constants_t get
+    static constexpr typename base::constants_t get
     {
         0x5a827999, // rounds 0..19
         0x5a827999,
@@ -322,7 +322,7 @@ struct h160
 
     struct H
     {
-        static constexpr const base::state_t get
+        static constexpr typename base::state_t get
         {
             0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0
         };
@@ -331,25 +331,25 @@ struct h160
     struct pad
     {
         // 256 bits (half block data) pad.
-        static constexpr base::chunk_t chunk
+        static constexpr typename base::chunk_t chunk
         {
             // TODO: populate.
         };
 
         // 512 bits (one block data) pad, without expansion.
-        static constexpr base::words_t block
+        static constexpr typename base::words_t block
         {
             // TODO: populate.
         };
 
         // Uncounted block-sized pad, used for streaming.
-        static constexpr base::words_t stream
+        static constexpr typename base::words_t stream
         {
             // TODO: populate.
         };
 
         // 512 bits (one block data) pad, with expansion.
-        static constexpr base::buffer_t buffer
+        static constexpr typename base::buffer_t buffer
         {
             // TODO: generate/populate.
         };
@@ -365,7 +365,7 @@ struct h256
     struct H
     {
         // H values (initial state).
-        static constexpr base::state_t get
+        static constexpr typename base::state_t get
         {
             0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
@@ -375,7 +375,7 @@ struct h256
     struct pad
     {
         // 256 bits (half block data) pad.
-        static constexpr base::chunk_t chunk
+        static constexpr typename base::chunk_t chunk
         {
             0x80000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000, 0x00000100,
@@ -383,7 +383,7 @@ struct h256
 
         // This is only used for the normalized merkle algorithm.
         // 512 bits (one block data) pad, without expansion.
-        static constexpr base::words_t block
+        static constexpr typename base::words_t block
         {
             0x80000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -392,7 +392,7 @@ struct h256
         };
 
         // Uncounted block-sized pad, used for streaming.
-        static constexpr base::words_t stream
+        static constexpr typename base::words_t stream
         {
             0x80000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -401,7 +401,7 @@ struct h256
         };
 
         // 512 bits (one block data) pad, with expansion.
-        static constexpr base::buffer_t buffer
+        static constexpr typename base::buffer_t buffer
         {
             0x80000000, 0x00000000, 0x00000000, 0x00000000,
             0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -432,7 +432,7 @@ struct h512
     struct H
     {
         // H values (initial state).
-        static constexpr base::state_t get
+        static constexpr typename base::state_t get
         {
             0x6a09e667f3bcc908,
             0xbb67ae8584caa73b,
@@ -448,26 +448,26 @@ struct h512
     struct pad
     {
         // 512 bits (half block data) pad.
-        static constexpr base::chunk_t chunk
+        static constexpr typename base::chunk_t chunk
         {
             // TODO: populate.
         };
 
         // This is only used for the normalized merkle algorithm.
         // 1024 bits (one block data) pad, without expansion.
-        static constexpr base::words_t block
+        static constexpr typename base::words_t block
         {
             // TODO: populate.
         };
 
         // Uncounted block-sized pad, used for streaming.
-        static constexpr base::words_t stream
+        static constexpr typename base::words_t stream
         {
             // TODO: populate.
         };
 
         // 1024 bits (one block data) pad, with expansion.
-        static constexpr base::buffer_t buffer
+        static constexpr typename base::buffer_t buffer
         {
             // TODO: generate/populate.
         };
@@ -502,7 +502,7 @@ public:
 
     /// Exposed by SHA::H
     /// -------------------------------
-    /// static constexpr base::state_t get
+    /// static constexpr typename base::state_t get
 
     /// Exposed by SHA::K
     /// -------------------------------
@@ -518,9 +518,9 @@ public:
     /// static constexpr buffer_t buffer
 
     /// Expose inner constant arrays.
-    using H = SHA::H;
-    using K = SHA::K;
-    using pad = SHA::pad;
+    using H   = typename SHA::H;
+    using K   = typename SHA::K;
+    using pad = typename SHA::pad;
 
     /// Constants.
     static constexpr auto digest_words = SHA::word_bits / SHA::word_bytes;
@@ -529,8 +529,8 @@ public:
     static constexpr auto digest_bytes = digest_words   * SHA::word_bytes;
     static constexpr auto block_bytes  = block_words    * SHA::word_bytes;
     static constexpr auto buffer_bytes = buffer_words   * SHA::word_bytes;
-    static constexpr auto count_bits  = block_bytes;
-    static constexpr auto count_bytes = bytes<count_bits>;
+    static constexpr auto count_bits   = block_bytes;
+    static constexpr auto count_bytes  = bytes<count_bits>;
 
     /// Types.
     /// count_t is 64/128 bit for 64/128 byte blocks (sha512 uses uintx_t).
@@ -544,7 +544,7 @@ public:
     using count_t  = unsigned_exact_type<count_bytes>;
 
     /// Limit incorporates requirement to encode counter in final block.
-    static constexpr auto limit_bits = maximum<count_t> - count_bits;
+    static constexpr auto limit_bits  = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes = to_floored_bytes(limit_bits);
 
     /// For vectorization optimization.
