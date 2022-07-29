@@ -76,6 +76,8 @@ void sha256_writer<OStream>::flusher() NOEXCEPT
 
     // Finalize streaming hash.
     context_.flush(hash.data());
+    context_.reset();
+
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }

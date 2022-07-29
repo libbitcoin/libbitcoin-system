@@ -37,7 +37,7 @@ BC_POP_WARNING()
     if (buffer_size > maximum_size)
         return false;
 
-    hmac::sha256::context salted;
+    hmac::sha256::context salted{};
     hmac::sha256::initialize(salted, passphrase, passphrase_size);
     hmac::sha256::update(salted, salt, salt_size);
     

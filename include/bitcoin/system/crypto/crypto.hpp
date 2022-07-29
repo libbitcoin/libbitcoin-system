@@ -26,34 +26,41 @@
 #include <bitcoin/system/crypto/encryption.hpp>
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
-#include <bitcoin/system/crypto/hmac_sha256.hpp>
-#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/scrypt.hpp>
-#include <bitcoin/system/crypto/sha_accumulator.hpp>
-#include <bitcoin/system/crypto/sha_algorithm.hpp>
-#include <bitcoin/system/crypto/sha256.hpp>
-#include <bitcoin/system/crypto/sha256_context.hpp>
 #include <bitcoin/system/crypto/siphash.hpp>
 
-// TODO: move internal.
+#include <bitcoin/system/crypto/accumulator.hpp>
+#include <bitcoin/system/crypto/rmd_algorithm.hpp>
+#include <bitcoin/system/crypto/sha_algorithm.hpp>
+
+ // TODO: below.
 #include <bitcoin/system/crypto/external/hmac_sha512.hpp>
 #include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
+#include <bitcoin/system/crypto/hmac_sha256.hpp>
+#include <bitcoin/system/crypto/pbkd_sha256.hpp>
+
+// TODO: obsolete.
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
 #include <bitcoin/system/crypto/external/sha160.hpp>
 #include <bitcoin/system/crypto/external/sha512.hpp>
+#include <bitcoin/system/crypto/sha256.hpp>
 
+// vectorization intrinsics into algorithms using math templates.
+// sha-ni intrinsics into sha algorithm using shani math template.
+
+// sha    (algorithm)
+// ripemd (algorithm)
+// accumulator<algorithm>
+// hmac<accumulator<algorithm>>
+// pbkd<hmac<accumulator<algorithm>>>
+
+// scrypt          -> hash
 // checksum        -> hash
 // elliptic_curve  -> hash
 // siphash         -> hash
 // golomb_coding   -> siphash
-// hmac_sha512     -> sha512
-// hmac_sha256     -> sha256, sha256_context
 // ring_signature  -> elliptic_curve, hash
-// scrypt          -> sha256, pbkd_sha256
-// sha_accumulator -> sha_algorithm
-// sha256_context  -> sha256
 
 #endif
-

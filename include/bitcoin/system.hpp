@@ -73,6 +73,7 @@
 #include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/crypto/accumulator.hpp>
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/checksum.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
@@ -85,10 +86,9 @@
 #include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
+#include <bitcoin/system/crypto/rmd_algorithm.hpp>
 #include <bitcoin/system/crypto/scrypt.hpp>
 #include <bitcoin/system/crypto/sha256.hpp>
-#include <bitcoin/system/crypto/sha256_context.hpp>
-#include <bitcoin/system/crypto/sha_accumulator.hpp>
 #include <bitcoin/system/crypto/sha_algorithm.hpp>
 #include <bitcoin/system/crypto/siphash.hpp>
 #include <bitcoin/system/crypto/external/external.hpp>

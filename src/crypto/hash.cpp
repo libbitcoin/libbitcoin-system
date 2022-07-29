@@ -27,6 +27,9 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+#include <bitcoin/system/crypto/accumulator.hpp>
+#include <bitcoin/system/crypto/sha_algorithm.hpp>
+
 #include <bitcoin/system/crypto/external/hmac_sha512.hpp>
 #include <bitcoin/system/crypto/external/pbkd_sha512.hpp>
 #include <bitcoin/system/crypto/external/ripemd160.hpp>
@@ -132,7 +135,7 @@ hash_digest sha256_hash(const data_slice& left,
     BC_POP_WARNING()
         
     // TODO: return hash/chunk.
-    sha256::context context;
+    system::accumulator<sha::algorithm<sha::sha256>> context{};
     context.write(left.size(), left.data());
     context.write(right.size(), right.data());
     context.flush(hash.data());

@@ -78,10 +78,13 @@ void sha256x2_writer<OStream>::flusher() NOEXCEPT
 
     // Finalize streaming hash.
     context_.flush(hash.data());
+    context_.reset();
 
     // Hash the result of the streaming hash (update cannot overflow).
     context_.write(hash_size, hash.data());
     context_.flush(hash.data());
+    context_.reset();
+
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }

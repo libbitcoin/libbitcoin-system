@@ -19,7 +19,6 @@
 #include <bitcoin/system/crypto/hmac_sha256.hpp>
 
 #include <bitcoin/system/crypto/sha256.hpp>
-#include <bitcoin/system/crypto/sha256_context.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -35,7 +34,9 @@ BC_POP_WARNING()
     for (size_t i = 0; i < size; ++i)
     {
         BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+        BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
         to[i] ^= from[i];
+        BC_POP_WARNING()
         BC_POP_WARNING()
     }
 }
@@ -43,7 +44,7 @@ BC_POP_WARNING()
 void hash(const uint8_t* data, size_t length, const uint8_t* key,
     size_t key_size, uint8_t* digest) NOEXCEPT
 {
-    context context;
+    context context{};
     initialize(context, key, key_size);
     update(context, data, length);
     finalize(context, digest);
@@ -53,6 +54,9 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT
 BC_POP_WARNING()
 {
+    context.out.reset();
+    context.in.reset();
+
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     data_array<system::sha256::block_size> pad;
     data_array<system::sha256::digest_size> key_hash;
@@ -62,7 +66,7 @@ BC_POP_WARNING()
     {
         context.in.write(size, key);
         context.in.flush(key_hash.data());
-        ////context.in.reset();
+        context.in.reset();
         key = key_hash.data();
         size = system::sha256::digest_size;
     }
@@ -94,6 +98,8 @@ void finalize(context& context, uint8_t* digest) NOEXCEPT
     context.in.flush(digest);
     context.out.write(system::sha256::digest_size, digest);
     context.out.flush(digest);
+    context.out.reset();
+    context.in.reset();
 }
 
 } // namespace sha256

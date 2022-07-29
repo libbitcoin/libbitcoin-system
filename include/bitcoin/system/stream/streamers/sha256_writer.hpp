@@ -55,7 +55,7 @@ protected:
 private:
     void flusher() NOEXCEPT;
 
-    sha256::context context_{};
+    system::accumulator<sha::algorithm<sha::sha256>> context_{};
 };
 
 } // namespace system

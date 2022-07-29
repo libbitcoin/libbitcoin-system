@@ -22,7 +22,8 @@
 #include <array>
 #include <iterator>
 #include <utility>
-#include <bitcoin/system/crypto/sha256_context.hpp>
+#include <bitcoin/system/crypto/accumulator.hpp>
+#include <bitcoin/system/crypto/sha_algorithm.hpp>
 #include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -228,7 +229,7 @@ void finalize(const state& state, uint8_t* out32) NOEXCEPT
 // False only on hash function overflow: (2^64-8)/8 bytes written.
 bool hash(uint8_t* out32, size_t size, const uint8_t* in) NOEXCEPT
 {
-    sha256::context context;
+    system::accumulator<sha::algorithm<sha::sha256>> context{};
     if (!context.write(size, in))
         return false;
 

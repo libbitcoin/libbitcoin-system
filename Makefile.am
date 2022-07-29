@@ -214,6 +214,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/constraints.cpp \
     test/cpuid.cpp \
     test/funclets.cpp \
+    test/hacks.cpp \
     test/intrinsics.cpp \
     test/literals.cpp \
     test/main.cpp \
@@ -250,20 +251,18 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
     test/config/printer.cpp \
+    test/crypto/accumulator.cpp \
     test/crypto/checksum.cpp \
     test/crypto/elliptic_curve.cpp \
     test/crypto/encryption.cpp \
     test/crypto/hash.cpp \
     test/crypto/hash.hpp \
-    test/crypto/hash_acc1.hpp \
     test/crypto/pseudo_random.cpp \
     test/crypto/ring_signature.cpp \
-    test/crypto/rmd_alg1.cpp \
-    test/crypto/rmd_alg1.hpp \
+    test/crypto/rmd_algorithm.cpp \
+    test/crypto/rmd_algorithm.hpp \
     test/crypto/sha256.cpp \
     test/crypto/sha256_context.cpp \
-    test/crypto/sha_alg1.cpp \
-    test/crypto/sha_alg1.hpp \
     test/crypto/sha_algorithm.cpp \
     test/crypto/siphash.cpp \
     test/crypto/siphash.hpp \
@@ -470,6 +469,7 @@ include_bitcoin_system_config_HEADERS = \
 
 include_bitcoin_system_cryptodir = ${includedir}/bitcoin/system/crypto
 include_bitcoin_system_crypto_HEADERS = \
+    include/bitcoin/system/crypto/accumulator.hpp \
     include/bitcoin/system/crypto/aes256.hpp \
     include/bitcoin/system/crypto/checksum.hpp \
     include/bitcoin/system/crypto/crypto.hpp \
@@ -482,10 +482,9 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/pbkd_sha256.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
     include/bitcoin/system/crypto/ring_signature.hpp \
+    include/bitcoin/system/crypto/rmd_algorithm.hpp \
     include/bitcoin/system/crypto/scrypt.hpp \
     include/bitcoin/system/crypto/sha256.hpp \
-    include/bitcoin/system/crypto/sha256_context.hpp \
-    include/bitcoin/system/crypto/sha_accumulator.hpp \
     include/bitcoin/system/crypto/sha_algorithm.hpp \
     include/bitcoin/system/crypto/siphash.hpp
 
@@ -543,11 +542,11 @@ include_bitcoin_system_impl_chain_HEADERS = \
 
 include_bitcoin_system_impl_cryptodir = ${includedir}/bitcoin/system/impl/crypto
 include_bitcoin_system_impl_crypto_HEADERS = \
+    include/bitcoin/system/impl/crypto/accumulator.ipp \
     include/bitcoin/system/impl/crypto/checksum.ipp \
     include/bitcoin/system/impl/crypto/hash.ipp \
+    include/bitcoin/system/impl/crypto/rmd_algorithm.ipp \
     include/bitcoin/system/impl/crypto/scrypt.ipp \
-    include/bitcoin/system/impl/crypto/sha256_context.ipp \
-    include/bitcoin/system/impl/crypto/sha_accumulator.ipp \
     include/bitcoin/system/impl/crypto/sha_algorithm.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data

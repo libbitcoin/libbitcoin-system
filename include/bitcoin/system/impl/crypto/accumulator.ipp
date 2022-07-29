@@ -16,75 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_ACCUMULATOR_IPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_ACCUMULATOR_IPP
 
-BOOST_AUTO_TEST_SUITE(sha_tests)
+#include <algorithm>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/math/math.hpp>
 
-/// Accumulator for SHA/RMD/MD# streaming hash algorithms.
-template <typename Algorithm, bool Checked = checked_build>
-struct accumulator
-{
-    DEFAULT5(accumulator);
-    using byte_t = typename Algorithm::byte_t;
-    using state_t = typename Algorithm::state_t;
-    using digest_t = typename Algorithm::digest_t;
-
-    /// Sets initial state to Hash initialization vector.
-    constexpr accumulator() NOEXCEPT;
-
-    /// Accepts an initial state and count of blocks it has accumulated.
-    constexpr accumulator(size_t blocks, const state_t& state) NOEXCEPT;
-
-    /// Write data to accumulator.
-    inline bool write(const data_slice& data) NOEXCEPT;
-    inline bool write(size_t size, const byte_t* data) NOEXCEPT;
-
-    /// Flush accumulator state to digest.
-    constexpr digest_t flush() NOEXCEPT;
-    inline void flush(byte_t* digest) NOEXCEPT;
-
-    // Reset accumulator to initial state (to reuse after flushing).
-    constexpr void reset() NOEXCEPT;
-
-private:
-    using block_t = typename Algorithm::block_t;
-    using counter = data_array<Algorithm::count_bytes>;
-
-    // Position of next write in the buffer.
-    constexpr size_t next() const NOEXCEPT;
-
-    // Bytes remaining until buffer is full.
-    constexpr size_t gap() const NOEXCEPT;
-
-    // Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
-    constexpr bool is_buffer_overflow(size_t bytes) NOEXCEPT;
-
-    // Append up to block_size bytes to buffer.
-    constexpr size_t add_data(size_t bytes, const byte_t* data) NOEXCEPT;
-
-    // Increment the counter for unbuffered transforms.
-    constexpr void increment(size_t blocks) NOEXCEPT;
-
-    // Compute pad size, reserves space for counter serialization.
-    constexpr size_t pad_size() const NOEXCEPT;
-
-    // Serialize the hashed byte count for finalization
-    static constexpr counter serialize(size_t bytes) NOEXCEPT;
-
-    // Precomputed streaming pad buffer.
-    static CONSTEVAL block_t stream_pad() NOEXCEPT;
-
-    // Number of bytes in a block and in counter.
-    static constexpr auto block_size = array_count<block_t>;
-    static constexpr auto count_size = array_count<counter>;
-
-    size_t size_;
-    state_t state_;
-    block_t buffer_;
-};
-
-// private
-// ----------------------------------------------------------------------------
+namespace libbitcoin {
+namespace system {
 
 #define TEMPLATE template <typename Algorithm, bool Checked>
 #define CLASS accumulator<Algorithm, Checked>
@@ -96,19 +38,8 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
 
-TEMPLATE
-constexpr CLASS::
-accumulator() NOEXCEPT
-  : size_{ zero }, state_{ Algorithm::H::get }
-{
-}
-
-TEMPLATE
-constexpr CLASS::
-accumulator(size_t blocks, const state_t& state) NOEXCEPT
-  : size_{ blocks }, state_{ state }
-{
-}
+// private
+// ----------------------------------------------------------------------------
 
 TEMPLATE
 constexpr void CLASS::
@@ -207,6 +138,20 @@ serialize(size_t bytes) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
+constexpr CLASS::
+accumulator() NOEXCEPT
+  : size_{ zero }, state_{ Algorithm::H::get }
+{
+}
+
+TEMPLATE
+constexpr CLASS::
+accumulator(size_t blocks, const state_t& state) NOEXCEPT
+  : size_{ blocks }, state_{ state }
+{
+}
+
+TEMPLATE
 inline bool CLASS::
 write(const data_slice& data) NOEXCEPT
 {
@@ -296,6 +241,7 @@ BC_POP_WARNING()
 #undef CLASS
 #undef TEMPLATE
 
-BOOST_AUTO_TEST_SUITE_END()
+} // namespace system
+} // namespace libbitcoin
 
-////#include "temporary_accumulator.ipp"
+#endif

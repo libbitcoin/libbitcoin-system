@@ -105,16 +105,16 @@
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\cpuid.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\encryption.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\rmd_alg1.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\rmd_algorithm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha256.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha256_context.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\sha_alg1.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\sha_algorithm.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
@@ -148,6 +148,7 @@
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\funclets.cpp" />
+    <ClCompile Include="..\..\..\..\test\hacks.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
@@ -260,9 +261,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\crypto\hash_acc1.hpp" />
-    <ClInclude Include="..\..\..\..\test\crypto\rmd_alg1.hpp" />
-    <ClInclude Include="..\..\..\..\test\crypto\sha_alg1.hpp" />
+    <ClInclude Include="..\..\..\..\test\crypto\rmd_algorithm.hpp" />
     <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />

@@ -20,7 +20,8 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_HMAC_SHA256_HPP
 
 #include <bitcoin/system/crypto/sha256.hpp>
-#include <bitcoin/system/crypto/sha256_context.hpp>
+#include <bitcoin/system/crypto/accumulator.hpp>
+#include <bitcoin/system/crypto/sha_algorithm.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -30,8 +31,8 @@ namespace sha256 {
 
 struct context
 {
-    system::sha256::context in;
-    system::sha256::context out;
+    system::accumulator<sha::algorithm<sha::sha256>> in{};
+    system::accumulator<sha::algorithm<sha::sha256>> out{};
 };
 
 /// Single hash.
