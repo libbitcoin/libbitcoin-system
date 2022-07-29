@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_sse41__always__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__try_sse4__always__expected)
 {
-    const auto tryit = try_sse4();
+    const auto tryit = try_sse41a();
 
 #if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
     uint32_t eax{}, ebx{}, ecx{}, edx{};
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_sse4__always__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__try_neon__always__expected)
 {
-    const auto tryit = try_neon();
+    constexpr auto tryit = try_neon();
 
 #if defined(HAVE_NEON)
     uint32_t eax{}, ebx{}, ecx{}, edx{};
@@ -101,20 +101,23 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_neon__always__expected)
 #endif
 }
 
-#ifndef LOCAL_TEST
+// This currently assumes always have sse41/avx2 on X64 (and never on X32),
+// never have shani/neon, and only have sse41a on MSX/X64. Update with CI.
 BOOST_AUTO_TEST_CASE(intrinsics__have_all__always__expected)
 {
 #if defined(HAVE_X64)
     BOOST_REQUIRE(have_avx2());
     BOOST_REQUIRE(have_sse41());
+    #if defined (HAVE_XASSEMBLY)
+        BOOST_REQUIRE(have_sse41a());
+    #endif
 #else
     BOOST_REQUIRE(!have_avx2());
     BOOST_REQUIRE(!have_sse41());
+    BOOST_REQUIRE(!have_sse41a());
 #endif
     BOOST_REQUIRE(!have_shani());
-    BOOST_REQUIRE(!have_sse4());
     BOOST_REQUIRE(!have_neon());
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

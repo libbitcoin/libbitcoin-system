@@ -95,7 +95,7 @@ inline bool try_sse41() noexcept
 }
 
 // 4 lanes
-inline bool try_sse4() noexcept
+inline bool try_sse41a() noexcept
 {
 // sse4 is sse41 but requires X64 build (inline assembly).
 #if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
@@ -137,9 +137,9 @@ inline bool have_sse41() noexcept
     return enable;
 }
 
-inline bool have_sse4() noexcept
+inline bool have_sse41a() noexcept
 {
-    static auto enable = try_sse4();
+    static auto enable = try_sse41a();
     return enable;
 }
 

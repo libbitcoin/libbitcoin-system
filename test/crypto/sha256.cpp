@@ -277,8 +277,8 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 ////void hash_sse41(state& state, const block4& block) NOEXCEPT;
 ////void hash_sse41(state& state, const block2& block) NOEXCEPT;
 ////void hash_sse41(state& state, const block1& block) NOEXCEPT;
-////void hash_sse4(state& state, const block4& block) NOEXCEPT;
-////void hash_sse4(state& state, const block2& block) NOEXCEPT;
+////void hash_sse41a(state& state, const block4& block) NOEXCEPT;
+////void hash_sse41a(state& state, const block2& block) NOEXCEPT;
 ////void hash_neon(state& state, const block4& block) NOEXCEPT;
 ////void hash_neon(state& state, const block2& block) NOEXCEPT;
 ////void hash_shani(state& state, const block2& block) NOEXCEPT;
@@ -290,8 +290,8 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 ////void merkle_sse41(digest1& out, const block1& block) NOEXCEPT;
 ////void merkle_neon(digest4& out, const block4& block) NOEXCEPT;
 ////void merkle_neon(digest2& out, const block2& block) NOEXCEPT;
-////void merkle_sse4(digest4& out, const block4& block) NOEXCEPT;
-////void merkle_sse4(digest2& out, const block2& block) NOEXCEPT;
+////void merkle_sse41a(digest4& out, const block4& block) NOEXCEPT;
+////void merkle_sse41a(digest2& out, const block2& block) NOEXCEPT;
 
 // TODO: The fill transform could be consolidated with full blocks.
 // TODO: This would allow it to be parallelized to the maximum extent.
