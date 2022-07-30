@@ -89,13 +89,13 @@
 #if defined(HAVE_XCPU)
     #if defined(HAVE_CLANG)
         // Clang13: __cpuid_count/_cpuid/_xgetbv (but __cpuid_count no work).
-        // Clang13: error: '__builtin_ia32_xgetbv' needs target feature xsave.
         // clang.llvm.org/doxygen/cpuid_8h_source.html
+        // _xgetbv requires the -mxsave compiler option, so just use assembly.
     #endif
     #if defined(HAVE_GNUC)
         // GCC11: __cpuidex/_cpuid/_xgetbv (but __cpuidex no work).
         // gcc.gnu.org/bugzilla/show_bug.cgi?id=95973
-        #define HAVE_XGETBV
+        // _xgetbv requires the -mxsave compiler option, so just use assembly.
     #endif
     #if defined(HAVE_MSC)
         // docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex
