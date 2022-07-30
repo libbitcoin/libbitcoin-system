@@ -73,11 +73,10 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/der_parser.cpp \
     src/crypto/ec_context.cpp \
     src/crypto/ec_context.hpp \
-    src/crypto/elliptic_curve.cpp \
-    src/crypto/encryption.cpp \
     src/crypto/golomb_coding.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
+    src/crypto/secp256k1.cpp \
     src/data/data_chunk.cpp \
     src/data/string.cpp \
     src/endian/endian.cpp \
@@ -248,8 +247,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
     test/config/printer.cpp \
+    test/crypto/aes256.cpp \
     test/crypto/elliptic_curve.cpp \
-    test/crypto/encryption.cpp \
     test/crypto/pseudo_random.cpp \
     test/crypto/ring_signature.cpp \
     test/data/array_cast.cpp \
@@ -467,11 +466,10 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/aes256.hpp \
     include/bitcoin/system/crypto/crypto.hpp \
     include/bitcoin/system/crypto/der_parser.hpp \
-    include/bitcoin/system/crypto/elliptic_curve.hpp \
-    include/bitcoin/system/crypto/encryption.hpp \
     include/bitcoin/system/crypto/golomb_coding.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
-    include/bitcoin/system/crypto/ring_signature.hpp
+    include/bitcoin/system/crypto/ring_signature.hpp \
+    include/bitcoin/system/crypto/secp256k1.hpp
 
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
 include_bitcoin_system_data_HEADERS = \

@@ -137,11 +137,10 @@
     <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\elliptic_curve.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\encryption.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\golomb_coding.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1.cpp" />
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp" />
     <ClCompile Include="..\..\..\..\src\data\string.cpp" />
     <ClCompile Include="..\..\..\..\src\define.cpp" />
@@ -299,11 +298,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\elliptic_curve.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\encryption.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\golomb_coding.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\byte_cast.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\collection.hpp" />

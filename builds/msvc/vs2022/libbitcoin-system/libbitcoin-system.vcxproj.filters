@@ -309,12 +309,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\elliptic_curve.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\crypto\encryption.cpp">
-      <Filter>src\crypto</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\golomb_coding.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -322,6 +316,9 @@
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp">
+      <Filter>src\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\crypto\secp256k1.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\data\data_chunk.cpp">
@@ -749,12 +746,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\elliptic_curve.hpp">
-      <Filter>include\bitcoin\system\crypto</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\encryption.hpp">
-      <Filter>include\bitcoin\system\crypto</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\golomb_coding.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
@@ -762,6 +753,9 @@
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp">
+      <Filter>include\bitcoin\system\crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp">
       <Filter>include\bitcoin\system\crypto</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\array_cast.hpp">

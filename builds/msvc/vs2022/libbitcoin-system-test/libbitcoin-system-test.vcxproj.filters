@@ -168,10 +168,10 @@
     <ClCompile Include="..\..\..\..\test\cpuid.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp">
+    <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\crypto\encryption.cpp">
+    <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp">

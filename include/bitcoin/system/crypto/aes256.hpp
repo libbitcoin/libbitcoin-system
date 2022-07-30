@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_AES256_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_AES256_HPP
 
-#include <array>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -31,10 +31,10 @@ namespace aes256 {
 /// size of 128 bits, but three different key lengths: 128, 192 and 256 bits.
 
 constexpr size_t block_size = bytes<128>;
-typedef std::array<uint8_t, block_size> block;
+typedef data_array<block_size> block;
 
 constexpr size_t secret_size = bytes<256>;
-typedef std::array<uint8_t, secret_size> secret;
+typedef data_array<secret_size> secret;
 
 /// Perform aes256 encryption/decryption on a data block.
 void encrypt(block& bytes, const secret& key) NOEXCEPT;

@@ -21,10 +21,9 @@
 
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
-#include <bitcoin/system/crypto/elliptic_curve.hpp>
-#include <bitcoin/system/crypto/encryption.hpp>
 #include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
+#include <bitcoin/system/crypto/secp256k1.hpp>
 
 #endif
