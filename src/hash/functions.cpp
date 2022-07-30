@@ -103,14 +103,14 @@ hash_digest merkle_root(hashes&& set) NOEXCEPT
 short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash{};
-    RMD160(data.data(), data.size(), hash.data());
+    ripemd160::hash(data.data(), data.size(), hash.data());
     return hash;
 }
 
 data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
-    RMD160(data.data(), data.size(), hash.data());
+    ripemd160::hash(data.data(), data.size(), hash.data());
     return hash;
 }
 

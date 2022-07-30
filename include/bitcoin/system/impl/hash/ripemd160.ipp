@@ -6,35 +6,31 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#include <bitcoin/system/hash/ripemd160.hpp>
+#ifndef LIBBITCOIN_SYSTEM_HASH_RIPEMD160_IPP
+#define LIBBITCOIN_SYSTEM_HASH_RIPEMD160_IPP
 
-#include <utility>
+#include <algorithm>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
+namespace ripemd160 {
 
-// TODO: make constexpr (cpp).
-
-/* collect four bytes into one word: */
+#if !defined(HIDDEN)
 #define BYTES_TO_DWORD(bytes) \
    (((uint32_t)*((bytes) + 3) << 24) | \
     ((uint32_t)*((bytes) + 2) << 16) | \
     ((uint32_t)*((bytes) + 1) <<  8) | \
     ((uint32_t)*((bytes) + 0) <<  0))
 
-/* ROL(x, n) cyclically rotates x over n bits to the left */
-/* x must be of an unsigned 32 bits type and 0 <= n < 32. */
 #define ROL(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
-/* the five basic functions F(), G() and H() */
 #define F(x, y, z) ((x) ^ (y) ^ (z)) 
 #define G(x, y, z) (((x) & (y)) | (~(x) & (z))) 
 #define H(x, y, z) (((x) | ~(y)) ^ (z))
 #define I(x, y, z) (((x) & (z)) | ((y) & ~(z))) 
 #define J(x, y, z) ((x) ^ ((y) | ~(z)))
   
-/* the ten basic operations FF() through III() */
 #define FF(a, b, c, d, e, x, s) \
 { \
     (a) += F((b), (c), (d)) + (x); \
@@ -95,66 +91,69 @@ namespace system {
     (a) = ROL((a), (s)) + (e); \
     (c) = ROL((c), 10); \
 }
+#endif
 
-void RMDcompress(RMD160CTX* context) NOEXCEPT;
-void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT;
+inline void compress(context& context) NOEXCEPT;
+inline void finish(context& context, const uint8_t* message,
+    size_t length) NOEXCEPT;
 
-void RMD160(const uint8_t* message, size_t length,
-    uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT
+inline void hash(const uint8_t* message, size_t length,
+    uint8_t* digest) NOEXCEPT
 {
-    RMD160CTX context;
-    RMDInit(&context);
-    RMDUpdate(&context, message, length);
-    RMDFinal(&context, digest);
+    context context;
+    initialize(context);
+    update(context, message, length);
+    finalize(context, digest);
 }
 
-void RMDInit(RMD160CTX* context) NOEXCEPT
+inline void initialize(context& context) NOEXCEPT
 {
-    context->state[0] = 0x67452301UL;
-    context->state[1] = 0xefcdab89UL;
-    context->state[2] = 0x98badcfeUL;
-    context->state[3] = 0x10325476UL;
-    context->state[4] = 0xc3d2e1f0UL;
+    context.state[0] = 0x67452301UL;
+    context.state[1] = 0xefcdab89UL;
+    context.state[2] = 0x98badcfeUL;
+    context.state[3] = 0x10325476UL;
+    context.state[4] = 0xc3d2e1f0UL;
 }
 
-void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT
+inline void update(context& context, const uint8_t* message,
+    size_t length) NOEXCEPT
 {
     size_t i;
     size_t byte;
 
-    for (byte = length; byte > 63; byte -= 64)
+    for (byte = length; byte > 63; byte -= block_size)
     {
         for (i = 0; i < 16; i++)
         {
-            context->chunk[i] = BYTES_TO_DWORD(message);
+            context.chunk[i] = BYTES_TO_DWORD(message);
             message += 4;
         }
 
-        RMDcompress(context);
+        compress(context);
     }
 
-    RMDfinish(context, message, length);
+    finish(context, message, length);
 }
 
-void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT
+inline void finalize(context& context, uint8_t* digest) NOEXCEPT
 {
     size_t i;
 
-    for (i = 0; i < RMD160_DIGEST_LENGTH; i += 4)
+    for (i = 0; i < digest_size; i += 4)
     {
-        digest[i + 0] = (uint8_t)(context->state[i >> 2] >> 0);
-        digest[i + 1] = (uint8_t)(context->state[i >> 2] >> 8);
-        digest[i + 2] = (uint8_t)(context->state[i >> 2] >> 16);
-        digest[i + 3] = (uint8_t)(context->state[i >> 2] >> 24);
+        digest[i + 0] = (uint8_t)(context.state[i >> 2] >> 0);
+        digest[i + 1] = (uint8_t)(context.state[i >> 2] >> 8);
+        digest[i + 2] = (uint8_t)(context.state[i >> 2] >> 16);
+        digest[i + 3] = (uint8_t)(context.state[i >> 2] >> 24);
     }
 }
 
-/* Local */
+// Local
 
-void RMDcompress(RMD160CTX* context) NOEXCEPT
+inline void compress(context& context) NOEXCEPT
 {
-    uint32_t* state = context->state;
-    uint32_t* chunk = context->chunk;
+    uint32_t* state = context.state;
+    uint32_t* chunk = context.chunk;
 
     uint32_t aa = state[0];
     uint32_t bb = state[1];
@@ -357,14 +356,15 @@ void RMDcompress(RMD160CTX* context) NOEXCEPT
     state[0] = ddd;
 }
 
-void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT
+inline void finish(context& context, const uint8_t* message,
+    size_t length) NOEXCEPT
 {
     uint32_t i;
-    uint32_t* chunk = context->chunk;
+    uint32_t* chunk = context.chunk;
     const uint32_t lo_length = (uint32_t)length;
     const uint32_t hi_length = (uint32_t)(((uint64_t)length) >> 32);
 
-    std::fill_n(chunk, RMD160_CHUNK_LENGTH, uint32_t{ 0u });
+    std::fill_n(chunk, chunk_size, uint32_t{ 0u });
 
     for (i = 0; i < (lo_length & 63); i++)
     {
@@ -375,14 +375,35 @@ void RMDfinish(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCE
 
     if ((lo_length & 63) > 55)
     {
-        RMDcompress(context);
-        std::fill_n(chunk, RMD160_CHUNK_LENGTH, uint32_t{ 0u });
+        compress(context);
+        std::fill_n(chunk, chunk_size, uint32_t{ 0u });
     }
 
     chunk[14] = lo_length << 3;
     chunk[15] = (lo_length >> 29) | (hi_length << 3);
-    RMDcompress(context);
+    compress(context);
 }
 
+#undef F
+#undef G
+#undef H
+#undef I
+#undef J
+#undef FF
+#undef GG
+#undef HH
+#undef II
+#undef JJ
+#undef FFF
+#undef GGG
+#undef HHH
+#undef III
+#undef JJJ
+#undef ROL
+#undef BYTES_TO_DWORD
+
+} // namespace ripemd160
 } // namespace system
 } // namespace libbitcoin
+
+#endif

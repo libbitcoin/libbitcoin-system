@@ -73,6 +73,7 @@
     <Import Project="$(ProjectDir)$(ProjectName).props" />
   </ImportGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\include\bitcoin\system\impl\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <ObjectFileName>$(IntDir)src_chain_block.obj</ObjectFileName>
     </ClCompile>
@@ -152,18 +153,12 @@
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\functions.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\hmac_sha256.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\hmac_sha512.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\pbkd_sha256.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\pbkd_sha512.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\ripemd160.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_1_native.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_2_shani.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_4_neon.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_4_sse4.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_4_sse41.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_8_avx2.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_1_native.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_2_shani.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_neon.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_sse4.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_sse41.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_8_avx2.cpp" />
     <ClCompile Include="..\..\..\..\src\math\math.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
@@ -506,6 +501,11 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\accumulator.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\functions.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\hmac_sha256.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\hmac_sha512.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\pbkd_sha256.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\pbkd_sha512.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\ripemd160.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd_algorithm.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\scrypt.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha_algorithm.ipp" />

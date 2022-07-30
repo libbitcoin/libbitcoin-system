@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/hash/hmac_sha256.hpp>
+#ifndef LIBBITCOIN_SYSTEM_HASH_HMAC_SHA256_IPP
+#define LIBBITCOIN_SYSTEM_HASH_HMAC_SHA256_IPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -44,7 +45,7 @@ BC_POP_WARNING()
     }
 }
 
-void hash(const uint8_t* data, size_t length, const uint8_t* key,
+inline void hash(const uint8_t* data, size_t length, const uint8_t* key,
     size_t key_size, uint8_t* digest) NOEXCEPT
 {
     context context{};
@@ -54,7 +55,7 @@ void hash(const uint8_t* data, size_t length, const uint8_t* key,
 }
 
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT
+inline void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT
 BC_POP_WARNING()
 {
     context.out.reset();
@@ -88,12 +89,12 @@ BC_POP_WARNING()
     context.out.write(block_size, pad.data());
 }
 
-void update(context& context, const uint8_t* data, size_t size) NOEXCEPT
+inline void update(context& context, const uint8_t* data, size_t size) NOEXCEPT
 {
     context.in.write(size, data);
 }
 
-void finalize(context& context, uint8_t* digest) NOEXCEPT
+inline void finalize(context& context, uint8_t* digest) NOEXCEPT
 {
     context.in.flush(digest);
     context.out.write(digest_size, digest);
@@ -106,3 +107,5 @@ void finalize(context& context, uint8_t* digest) NOEXCEPT
 } // namespace hmac
 } // namespace system
 } // namespace libbitcoin
+
+#endif

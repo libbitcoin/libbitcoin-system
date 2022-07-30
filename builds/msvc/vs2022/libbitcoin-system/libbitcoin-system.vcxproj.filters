@@ -160,7 +160,7 @@
     <Filter Include="src\hash">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\hash\sha256">
+    <Filter Include="src\hash\vectorization">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000001}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\math">
@@ -207,6 +207,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\include\bitcoin\system\impl\hash\siphash.cpp">
+      <Filter>include\bitcoin\system\impl\hash</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -354,41 +357,23 @@
     <ClCompile Include="..\..\..\..\src\hash\functions.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\hmac_sha256.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_1_native.cpp">
+      <Filter>src\hash\vectorization</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\hmac_sha512.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_2_shani.cpp">
+      <Filter>src\hash\vectorization</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\pbkd_sha256.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_neon.cpp">
+      <Filter>src\hash\vectorization</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\pbkd_sha512.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_sse4.cpp">
+      <Filter>src\hash\vectorization</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\ripemd160.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_sse41.cpp">
+      <Filter>src\hash\vectorization</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_1_native.cpp">
-      <Filter>src\hash\sha256</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_2_shani.cpp">
-      <Filter>src\hash\sha256</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_4_neon.cpp">
-      <Filter>src\hash\sha256</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_4_sse4.cpp">
-      <Filter>src\hash\sha256</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_4_sse41.cpp">
-      <Filter>src\hash\sha256</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\sha256\sha256_8_avx2.cpp">
-      <Filter>src\hash\sha256</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\hash\siphash.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_8_avx2.cpp">
+      <Filter>src\hash\vectorization</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\math.cpp">
       <Filter>src\math</Filter>
@@ -1364,6 +1349,21 @@
       <Filter>include\bitcoin\system\impl\hash</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\functions.ipp">
+      <Filter>include\bitcoin\system\impl\hash</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\hmac_sha256.ipp">
+      <Filter>include\bitcoin\system\impl\hash</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\hmac_sha512.ipp">
+      <Filter>include\bitcoin\system\impl\hash</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\pbkd_sha256.ipp">
+      <Filter>include\bitcoin\system\impl\hash</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\pbkd_sha512.ipp">
+      <Filter>include\bitcoin\system\impl\hash</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\ripemd160.ipp">
       <Filter>include\bitcoin\system\impl\hash</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd_algorithm.ipp">

@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/hash/pbkd_sha256.hpp>
+#ifndef LIBBITCOIN_SYSTEM_HASH_PBKD_SHA256_IPP
+#define LIBBITCOIN_SYSTEM_HASH_PBKD_SHA256_IPP
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -37,7 +38,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 using algorithm = sha::algorithm<sha::sha256>;
 constexpr auto digest_size = array_count<algorithm::digest_t>;
 
-bool hash(const uint8_t* passphrase, size_t passphrase_size,
+inline bool hash(const uint8_t* passphrase, size_t passphrase_size,
     const uint8_t* salt, size_t salt_size, uint64_t iterations,
     uint8_t* buffer, size_t buffer_size) NOEXCEPT
 {
@@ -87,3 +88,5 @@ BC_POP_WARNING()
 } // namespace pbkd
 } // namespace system
 } // namespace libbitcoin
+
+#endif

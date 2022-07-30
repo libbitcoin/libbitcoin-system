@@ -31,7 +31,7 @@ namespace sha512 {
 constexpr auto maximum_size = sub1(power2<uint64_t>(64u)) * power2<uint64_t>(5u);
 
 /// False if buffer_size > pbkdf2::maximum_size.
-bool hash(const uint8_t* passphrase, size_t passphrase_size,
+inline bool hash(const uint8_t* passphrase, size_t passphrase_size,
     const uint8_t* salt, size_t salt_size, uint64_t iterations,
     uint8_t* buffer, size_t buffer_size) NOEXCEPT;
 
@@ -39,5 +39,7 @@ bool hash(const uint8_t* passphrase, size_t passphrase_size,
 } // namespace pbkd
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/hash/pbkd_sha512.ipp>
 
 #endif

@@ -36,17 +36,19 @@ struct context
 };
 
 /// Single hash.
-void hash(const uint8_t* data, size_t size, const uint8_t* key,
+inline void hash(const uint8_t* data, size_t size, const uint8_t* key,
     size_t key_size, uint8_t* digest) NOEXCEPT;
 
 // Streaming hash.
-void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT;
-void update(context& context, const uint8_t* data, size_t size) NOEXCEPT;
-void finalize(context& context, uint8_t* digest) NOEXCEPT;
+inline void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT;
+inline void update(context& context, const uint8_t* data, size_t size) NOEXCEPT;
+inline void finalize(context& context, uint8_t* digest) NOEXCEPT;
 
 } // namespace sha512
 } // namespace hmac
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/hash/hmac_sha512.ipp>
 
 #endif

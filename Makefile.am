@@ -87,18 +87,12 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/transaction_error_t.cpp \
     src/hash/checksum.cpp \
     src/hash/functions.cpp \
-    src/hash/hmac_sha256.cpp \
-    src/hash/hmac_sha512.cpp \
-    src/hash/pbkd_sha256.cpp \
-    src/hash/pbkd_sha512.cpp \
-    src/hash/ripemd160.cpp \
-    src/hash/siphash.cpp \
-    src/hash/sha256/sha256_1_native.cpp \
-    src/hash/sha256/sha256_2_shani.cpp \
-    src/hash/sha256/sha256_4_neon.cpp \
-    src/hash/sha256/sha256_4_sse4.cpp \
-    src/hash/sha256/sha256_4_sse41.cpp \
-    src/hash/sha256/sha256_8_avx2.cpp \
+    src/hash/vectorization/sha256_1_native.cpp \
+    src/hash/vectorization/sha256_2_shani.cpp \
+    src/hash/vectorization/sha256_4_neon.cpp \
+    src/hash/vectorization/sha256_4_sse4.cpp \
+    src/hash/vectorization/sha256_4_sse41.cpp \
+    src/hash/vectorization/sha256_8_avx2.cpp \
     src/math/math.cpp \
     src/radix/base_10.cpp \
     src/radix/base_2048.cpp \
@@ -559,6 +553,11 @@ include_bitcoin_system_impl_hash_HEADERS = \
     include/bitcoin/system/impl/hash/accumulator.ipp \
     include/bitcoin/system/impl/hash/checksum.ipp \
     include/bitcoin/system/impl/hash/functions.ipp \
+    include/bitcoin/system/impl/hash/hmac_sha256.ipp \
+    include/bitcoin/system/impl/hash/hmac_sha512.ipp \
+    include/bitcoin/system/impl/hash/pbkd_sha256.ipp \
+    include/bitcoin/system/impl/hash/pbkd_sha512.ipp \
+    include/bitcoin/system/impl/hash/ripemd160.ipp \
     include/bitcoin/system/impl/hash/rmd_algorithm.ipp \
     include/bitcoin/system/impl/hash/scrypt.ipp \
     include/bitcoin/system/impl/hash/sha_algorithm.ipp

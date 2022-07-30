@@ -13,26 +13,29 @@
 
 namespace libbitcoin {
 namespace system {
+namespace ripemd160 {
 
-#define RMD160_STATE_LENGTH 5U
-#define RMD160_CHUNK_LENGTH 16U
-#define RMD160_BLOCK_LENGTH 64U
-#define RMD160_DIGEST_LENGTH 20U
+constexpr size_t state_size = 5;
+constexpr size_t chunk_size = 16;
+constexpr size_t block_size = 64;
+constexpr size_t digest_size = 20;
 
-typedef struct RMD160CTX
+struct context
 {
-    uint32_t state[RMD160_STATE_LENGTH];
-    uint32_t chunk[RMD160_CHUNK_LENGTH];
-} RMD160CTX;
+    uint32_t state[state_size];
+    uint32_t chunk[chunk_size];
+};
 
-void RMD160(const uint8_t* message, size_t length,
-    uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT;
+inline void hash(const uint8_t* message, size_t length, uint8_t* digest) NOEXCEPT;
 
-void RMDInit(RMD160CTX* context) NOEXCEPT;
-void RMDUpdate(RMD160CTX* context, const uint8_t* message, size_t length) NOEXCEPT;
-void RMDFinal(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]) NOEXCEPT;
+inline void initialize(context& context) NOEXCEPT;
+inline void update(context& context, const uint8_t* message, size_t length) NOEXCEPT;
+inline void finalize(context& context, uint8_t* digest) NOEXCEPT;
 
+} // namespace ripemd160
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/hash/ripemd160.ipp>
 
 #endif
