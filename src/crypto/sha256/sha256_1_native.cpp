@@ -268,7 +268,7 @@ inline void padding8(buffer& out) NOEXCEPT
 }
 
 // This requires 32 more words of memory than a circular variables buffer.
-// According to FIP180 this is more performant given no memory constraint.
+// According to FIPS180 this is more performant given no memory constraint.
 void hash_native(state& state, const block& block) NOEXCEPT
 {
     buffer words;
@@ -298,73 +298,6 @@ void hash_finalize(digest& digest, const state& state) NOEXCEPT
 {
     bigend08(digest, state);
 }
-
-#ifndef NORMALIZED_NATIVE_MERKLE
-
-// TODO: template with equally-sized arrays of blocks/digests.
-// This is an optimization for merkle root computation.
-// It leverages fixed message size to avoid padding computations.
-// It leverages fixed iteration count to avoid internal endian conversions.
-// It leverages a common buffer to avoid stack calls and buffer allocations.
-// expanded_pad64 is the output of expand48(pad64).
-void merkle_hash(digest1& digest, const block1& blocks) NOEXCEPT
-{
-    buffer words;
-    auto out = digest.begin();
-
-    for (auto& block: blocks)
-    {
-        bigend16(words, block);
-        expand48(words);
-        auto state = sha256::initial;
-        rounds64(state, words);
-        summary8(state, sha256::initial);
-
-        copyin64(words, expanded_pad64);
-        const auto save = state;
-        rounds64(state, words);
-        summary8(state, save);
-
-        copying8(words, state);
-        padding8(words);
-        expand48(words);
-        state = sha256::initial;
-        rounds64(state, words);
-        summary8(state, sha256::initial);
-
-        bigend08(*(out++), state);
-    }
-}
-
-#else
-void merkle_hash(digest1& out, const block1& blocks) NOEXCEPT
-{
-    auto state = sha256::initial;
-    hash_native(state, blocks);
-    hash_native(state, array_cast<block>(sha256::pad_64));
-    auto buffer = sha256::pad_32;
-    to_big_endians(narrow_array_cast<uint32_t, state_size>(buffer), state);
-    state = sha256::initial;
-    hash_native(state, array_cast<block>(buffer));
-    to_big_endians(array_cast<uint32_t>(out.front()), state);
-}
-
-////// Specialized for single block padding.
-////template <size_t Offset,
-////    if_not_greater<Offset, integers> = true>
-////void constexpr pad(auto& buffer) NOEXCEPT
-////{
-////    constexpr auto sentinel = bit_hi<uint32_t>;
-////    constexpr auto bitcount = possible_narrow_cast<uint32_t>(
-////        (integers - Offset) * bits<uint32_t>);
-////
-////    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-////    buffer[Offset] = sentinel;
-////    buffer[sub1(integers)] = bitcount;
-////    std::fill(&buffer[add1(Offset)], &buffer[sub1(integers)], 0);
-////    BC_POP_WARNING()
-////}
-#endif // NORMALIZED_NATIVE_MERKLE
 
 #endif
 

@@ -34,6 +34,7 @@ void merkle_shani(digest2&, const block2&) NOEXCEPT
 
 #else
 
+// See sse41 for defines.
 using namespace i128;
 
 #ifndef VISUAL
@@ -46,69 +47,76 @@ alignas(mint128_t) constexpr uint8_t mask[sizeof(mint128_t)]
     0x0f, 0x0e, 0x0d, 0x0c  // 0x0c0d0e0ful
 };
 
+// Half of little endian IV.
 alignas(mint128_t) constexpr uint8_t initial0[sizeof(mint128_t)]
 {
-    0x8c, 0x68, 0x05, 0x9b, // 0x9b05688cul
-    0x7f, 0x52, 0x0e, 0x51, // 0x510e527ful
-    0x85, 0xae, 0x67, 0xbb, // 0xbb67ae85ul
-    0x67, 0xe6, 0x09, 0x6a  // 0x6a09e667ul
+    0x8c, 0x68, 0x05, 0x9b, // 0x9b05688cul [5]
+    0x7f, 0x52, 0x0e, 0x51, // 0x510e527ful [4]
+    0x85, 0xae, 0x67, 0xbb, // 0xbb67ae85ul [1]
+    0x67, 0xe6, 0x09, 0x6a  // 0x6a09e667ul [0]
 };
 
+// Half of little endian IV.
 alignas(mint128_t) constexpr uint8_t initial1[sizeof(mint128_t)]
 {
-    0x19, 0xcd, 0xe0, 0x5b, // 0x5be0cd19ul
-    0xab, 0xd9, 0x83, 0x1f, // 0x1f83d9abul
-    0x3a, 0xf5, 0x4f, 0xa5, // 0xa54ff53aul
-    0x72, 0xf3, 0x6e, 0x3c  // 0x3c6ef372ul
+    0x19, 0xcd, 0xe0, 0x5b, // 0x5be0cd19ul [7]
+    0xab, 0xd9, 0x83, 0x1f, // 0x1f83d9abul [6]
+    0x3a, 0xf5, 0x4f, 0xa5, // 0xa54ff53aul [3]
+    0x72, 0xf3, 0x6e, 0x3c  // 0x3c6ef372ul [2]
 };
 
 // load/store i128
 // ----------------------------------------------------------------------------
 
-mint128_t load08x16a(const uint8_t& bytes) NOEXCEPT
-{
-    // Aligned only, do not use with unaligned values.
-    return _mm_load_si128(pointer_cast<const mint128_t>(&bytes));
-}
+// Loading is just an array_cast into the buffer.
 
-mint128_t load08x16u(const uint32_t& bytes) NOEXCEPT
+// Aligned only, do not use with unaligned values.
+mint128_t load32x4a(const uint8_t& bytes) NOEXCEPT
 {
-    return _mm_loadu_si128(pointer_cast<const mint128_t>(&bytes));
+    return _mm_load_si128(pointer_cast<const mint128_t>(&bytes));
 }
 
 mint128_t load32x4u(const uint32_t& bytes) NOEXCEPT
 {
     return _mm_loadu_si128(pointer_cast<const mint128_t>(&bytes));
 }
-
-void store8x16u(uint8_t& bytes, mint128_t value) NOEXCEPT
+void store32x4u(uint8_t& bytes, mint128_t value) NOEXCEPT
 {
     _mm_storeu_si128(pointer_cast<mint128_t>(&bytes), value);
 }
 
-void store32x4u(uint32_t& bytes, mint128_t value) NOEXCEPT
-{
-    _mm_storeu_si128(pointer_cast<mint128_t>(&bytes), value);
-}
-
+// Aligned but for public data?
 mint128_t load(const uint8_t& data) NOEXCEPT
 {
-    static const auto flipper = load08x16a(mask[0]);
-    return i128::shuffle(load08x16u(data), flipper);
+    static const auto flipper = load32x4a(mask[0]);
+    return i128::shuffle(load32x4a(data), flipper);
 }
 
+// Aligned but for public data?
 void store(uint8_t& out, mint128_t value) NOEXCEPT
 {
-    static const auto flipper = load08x16a(mask[0]);
+    static const auto flipper = load32x4a(mask[0]);
     store8x16u(out, i128::shuffle(value, flipper));
 }
 
 // sha256
 // ----------------------------------------------------------------------------
+// intel.com/content/www/us/en/developer/articles/technical/intel-sha-extensions.html
+// intel.com/content/dam/develop/external/us/en/documents/intel-sha-extensions-white-paper.pdf
 
+// _mm_sha256rnds2_epu32 is power of sha-ni, round reduction to 4 lane native.
+// But this needs to be applied to preparation as well, to retain that model.
+// Otherwise the round dispath must be modified to use the circular var queue.
+// And this changes the size of buffer_t (to words_t).
+// _mm_sha1rnds4_epu32 is provided for sha160. This would optimize only script
+// evaluation of the uncommon opcode, but will be almost free to implement.
+
+// _mm_sha256rnds2_epu32 performs two rounds, so this is four.
 void round(mint128_t& s0, mint128_t& s1, uint64_t k1,
     uint64_t k0) NOEXCEPT
 {
+    // Simplified for first 16 sha rounds (no buffer expansion).
+    // This is making two calls with distinct constant and var rotation.
     const auto value = set(k1, k0);
     s1 = _mm_sha256rnds2_epu32(s1, s0, value);
     s0 = _mm_sha256rnds2_epu32(s0, s1, i128::shuffle<0x0e>(value));
@@ -121,6 +129,9 @@ void round(mint128_t& s0, mint128_t& s1, mint128_t m, uint64_t k1,
     s1 = _mm_sha256rnds2_epu32(s1, s0, value);
     s0 = _mm_sha256rnds2_epu32(s0, s1, i128::shuffle<0x0e>(value));
 }
+
+// Shifting is eliminated by preparing the expanded buffer.
+// Since preparation is on mint128_t as well, no efficiency is lost.
 
 void shift_message(mint128_t& out, mint128_t m) NOEXCEPT
 {
@@ -142,6 +153,9 @@ void shift_messages(mint128_t& out0, mint128_t m,
 
 // endianness
 // ----------------------------------------------------------------------------
+
+// Endianness of the buffer/digest should be computed outside of hash function.
+// Given the full mutable buffer, can be parallallized and vectorized in place.
 
 void shuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
 {
@@ -166,16 +180,18 @@ void hash_shani(state& state, const block1& blocks) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
+    // TODO: expand vs. shuffle.
     mint128_t m0, m1, m2, m3, so0, so1;
 
+    // From aligned (public).
     auto s0 = load32x4u(state[0]);
     auto s1 = load32x4u(state[4]);
+
+    // Why change state endianness?
+    // Must be maintaining state as digest.
     shuffle(s0, s1);
 
-    // TODO: array_cast blocks into array of mint128_t.
-    // TODO: this is currently precluded by an integral integer constraint.
-    // TODO: this will eliminate pointer casts in load(block[n]).
-
+    // Each round is four sha rounds.
     // One block in two lanes.
     for (auto& block: blocks)
     {
@@ -224,19 +240,26 @@ void hash_shani(state& state, const block1& blocks) NOEXCEPT
         s1 = sum(s1, so1);
     }
 
+    // Why change state endianness?
+    // Must be maintaining state as digest.
     unshuffle(s0, s1);
+
+    // To not aligned.
     store32x4u(state[0], s0);
     store32x4u(state[4], s1);
 
     BC_POP_WARNING()
 }
 
+// There are twice the loading, rounds, and summation here, so the two
+// blocks can be just as efficiently processed sequentially using hash_shani.
 void merkle_shani(digest2& out, const block2& block) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-    static const auto init0 = load08x16a(initial0[0]);
-    static const auto init1 = load08x16a(initial1[0]);
+    // Aligned (constant initial state).
+    static const auto init0 = load32x4a(initial0[0]);
+    static const auto init1 = load32x4a(initial1[0]);
 
     // Transform 1.
     auto as0 = init0;
@@ -316,6 +339,9 @@ void merkle_shani(digest2& out, const block2& block) NOEXCEPT
     as1 = sum(as1, init1);
     bs1 = sum(bs1, init1);
 
+    // No endianness state change (no-op).
+    // K from precomputed padding buffer.
+
     // Transform 2.
     const auto aso0 = as0;
     const auto bso0 = bs0;
@@ -365,6 +391,8 @@ void merkle_shani(digest2& out, const block2& block) NOEXCEPT
     bm0 = bs0;
     am1 = as1;
     bm1 = bs1;
+
+    // Half padding buffer woven into K.
 
     // Transform 3.
     bs0 = as0 = init0;
@@ -447,21 +475,9 @@ void merkle_shani(digest2& out, const block2& block) NOEXCEPT
     BC_POP_WARNING()
 }
 
-void merkle_shani(digest1& out, const block1& blocks) NOEXCEPT
-{
-    auto state = sha256::initial;
-    hash_shani(state, blocks);
-    hash_shani(state, array_cast<block>(sha256::pad_64));
-    auto buffer = sha256::pad_32;
-    to_big_endians(narrow_array_cast<uint32_t, state_size>(buffer), state);
-    state = sha256::initial;
-    hash_shani(state, array_cast<block>(buffer));
-    to_big_endians(array_cast<uint32_t>(out.front()), state);
-}
-
 #endif // HAVE_XCPU
 
-#endif
+#endif // DISABLED
 
 } // namespace sha256
 } // namespace system

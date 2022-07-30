@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <bitcoin/system/cpuid.hpp>
 
+// -msse4 -mavx2 -msha (gcc/clang)
 #if defined(HAVE_XCPU)
     #include <immintrin.h>
     #if defined(HAVE_X64)
@@ -32,7 +33,9 @@
     #endif
 #endif
 
- // TODO: ARM is unverified.
+// TODO: ARM is unverified.
+// -march=armv8-a+crc+crypto (gcc/clang)
+// -arch arm64 -isysroot... (xcode)
 #if defined(HAVE_ARM)
     #include <arm_acle.h>
     #if defined(HAVE_NEON)

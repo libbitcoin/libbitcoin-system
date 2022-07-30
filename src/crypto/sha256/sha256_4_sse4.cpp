@@ -63,12 +63,12 @@ namespace sha256 {
 
 void hash_sse41a(state&, const block1&) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "hash_sse4 undefined");
+    BC_ASSERT_MSG(false, "hash_sse4a undefined");
 }
 
 void merkle_sse41a(digest1&, const block1&) NOEXCEPT
 {
-    BC_ASSERT_MSG(false, "merkle_sse4 undefined");
+    BC_ASSERT_MSG(false, "merkle_sse4a undefined");
 }
 
 #else
@@ -1035,21 +1035,9 @@ void hash_sse41a(state& state, const block1& blocks) NOEXCEPT
    );
 }
 
-void merkle_sse41a(digest1& out, const block1& blocks) NOEXCEPT
-{
-    auto state = sha256::initial;
-    hash_sse41a(state, blocks);
-    hash_sse41a(state, array_cast<block>(sha256::pad_64));
-    auto buffer = sha256::pad_32;
-    to_big_endians(narrow_array_cast<uint32_t, state_size>(buffer), state);
-    state = sha256::initial;
-    hash_sse41a(state, array_cast<block>(buffer));
-    to_big_endians(array_cast<uint32_t>(out.front()), state);
-}
-
 #endif // HAVE_XASSEMBLY
 
-#endif
+#endif // DISABLED
 
 } // namespace sha256
 } // namespace system

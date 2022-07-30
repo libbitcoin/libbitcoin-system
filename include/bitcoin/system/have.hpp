@@ -88,13 +88,11 @@
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
 #if defined(HAVE_XCPU)
     #if defined(HAVE_CLANG)
-        // Clang13: __cpuid_count/_cpuid/_xgetbv (but __cpuid_count no work).
-        // clang.llvm.org/doxygen/cpuid_8h_source.html
+        // Clang13: __cpuid_count/_cpuid/_xgetbv.
         // _xgetbv requires the -mxsave compiler option, so just use assembly.
     #endif
     #if defined(HAVE_GNUC)
-        // GCC11: __cpuidex/_cpuid/_xgetbv (but __cpuidex no work).
-        // gcc.gnu.org/bugzilla/show_bug.cgi?id=95973
+        // GCC11: __cpuidex/_cpuid/_xgetbv.
         // _xgetbv requires the -mxsave compiler option, so just use assembly.
     #endif
     #if defined(HAVE_MSC)

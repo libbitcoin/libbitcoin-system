@@ -32,9 +32,6 @@ uint32_t get(mint256_t a) noexcept
     return _mm256_extract_epi32(a, Offset);
 }
 
-// GCC:
-// warning: AVX vector return without AVX enabled changes the ABI [-Wpsabi]
-// This should be harmless as long as runtime support is executed.
 mint256_t set(uint32_t a) noexcept 
 {
     return _mm256_set1_epi32(a);
@@ -435,7 +432,7 @@ void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
 
 #endif // HAVE_XCPU
 
-#endif
+#endif // DISABLED
 
 } // namespace sha256
 } // namespace system

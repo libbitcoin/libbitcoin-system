@@ -225,9 +225,19 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
     constexpr auto f = functor<Round>();
 
     // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
-    const auto t = std::rotl(a, 5) + f(b, c, d) + e + k + w;
+    e = /*a =*/ std::rotl(a, 5) + f(b, c, d) + e + k + w;
     b = /*c =*/ std::rotl(b, 30);
-    e = /*a =*/ t;
+
+    // SHA-NI
+    // Four rounds (total rounds 80/4).
+    // First round is add(e, w), then sha1nexte(e, w).
+    // fk is round-based enumeration implying f selection and k value.
+    //     e1 = sha1nexte(e0, w);
+    //     abcd = sha1rnds4(abcd, e0, fk);
+    // NEON
+    // f is implied by k in wk.
+    //     e1 = vsha1h(vgetq_lane(abcd, 0);
+    //     vsha1cq(abcd, e0, vaddq(w, k));
 }
 
 TEMPLATE
@@ -246,6 +256,24 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     const auto t2 = SIGMA0(a) + majority(a, b, c);
     d = /*e =*/  d + t1;
     h = /*a =*/ t1 + t2;
+
+    // Rounds can be cut in half and this round doubled (intel paper).
+    // Avoids the need for a temporary variable and aligns with SHA-NI.
+    // Removing the temporary eliminates 2x64 instructions from the assembly.
+    // h = /*a =*/ SIGMA0(a) + SIGMA1(e) + majority(a, b, c) +
+    //             choice(e, f, g) + (k + w) + h;
+    // d = /*e =*/ SIGMA1(e) + choice(e, f, g) + (k + w) + h + d;
+    //
+    // Each call is 2 rounds, 4 rounds total.
+    // s, w and k are 128 (4 words each, s1/s2 is 8 word state).
+    // SHA-NI
+    //     const auto value = add(w, k);
+    //     abcd = sha256rnds2(abcd, efgh, value);
+    //     efgh = sha256rnds2(efgh, abcd, shuffle(value));
+    // NEON
+    //     const auto value = vaddq(w, k);
+    //     abcd = vsha256hq(abcd, efgh, value);
+    //     efgh = vsha256h2q(efgh, abcd, value);
 }
 
 TEMPLATE
@@ -266,6 +294,10 @@ round(auto& out, const auto& in) NOEXCEPT
             out[(rounds + 3 - Round) % words],
             out[(rounds + 4 - Round) % words], // a->e
             in[Round]);
+
+        // SNA-NI/NEON
+        // State packs in 128 (one state variable), reduces above to 1 out[].
+        // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
     else
     {
@@ -281,6 +313,10 @@ round(auto& out, const auto& in) NOEXCEPT
             out[(rounds + 6 - Round) % words],
             out[(rounds + 7 - Round) % words], // a->h
             in[Round]);
+
+        // SHA-NI/NEON
+        // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
+        // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
 }
 
@@ -288,6 +324,7 @@ TEMPLATE
 constexpr void CLASS::
 rounding(state_t& out, const buffer_t& in) NOEXCEPT
 {
+    // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
     const state_t start{ out };
 
     // Templated constant reduces ops per iteration by 35% (vs. parameter).
@@ -401,20 +438,45 @@ prepare(auto& out) NOEXCEPT
     {
         // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
         out[Word] = std::rotl(
-            out[Word -  3] ^
-            out[Word -  8] ^ 
-            out[Word - 14] ^
-            out[Word - 16], 1);
+            out[Word - 16] ^ out[Word - 14] ^
+            out[Word -  8] ^ out[Word -  3], 1);
+
+        // SHA-NI
+        //     out[Word] = sha1msg2 // xor and rotl1
+        //     (
+        //         xor              // not using sha1msg1
+        //         (
+        //             sha1msg1     // xor (why not xor?)
+        //             (
+        //                 out[Word - 16],
+        //                 out[Word - 14]
+        //             ),
+        //             out[Word -  8]
+        //          ),
+        //          out[Word -  3]
+        //     );
+        // NEON
+        //     vsha1su1q/vsha1su0q
     }
     else
     {
         // 6.2.2 SHA-256 Hash Computation (16 <= t <= 63)
         // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
         out[Word] =
-            sigma1(out[Word -  2]) +
-                   out[Word -  7]  +
-            sigma0(out[Word - 15]) +
-                   out[Word - 16];
+            out[Word - 16] + sigma0(out[Word - 15]) +
+            out[Word -  7] + sigma1(out[Word -  2]);
+
+        // Each word is 128, buffer goes from 64 to 16 words.
+        // SHA-NI
+        // out[Word] =
+        //     sha256msg1(out[Word - 16], out[Word - 15]) +
+        //     sha256msg2(out[Word -  7], out[Word -  2]);
+        // NEON
+        // Not sure about these indexes.
+        // mijailovic.net/2018/06/06/sha256-armv8
+        // out[Word] =
+        //     vsha256su0q(out[Word - 13], out[Word - 9])
+        //     vsha256su1q(out[Word - 13], out[Word - 5], out[Word - 1]);
     }
 }
 

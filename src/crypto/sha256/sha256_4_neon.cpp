@@ -62,10 +62,6 @@ void hash_neon(state& state, const block1& blocks) NOEXCEPT
     state0 = vld1q_u32(&state[0]);
     state1 = vld1q_u32(&state[4]);
 
-    // TODO: array_cast blocks into array of uint32x4_t.
-    // TODO: this is currently precluded by an integral integer constraint.
-    // TODO: this will eliminate pointer casts for vld1q_u32(block[n]).
-
     // One block in four lanes.
     for (auto& block: blocks)
     {
@@ -218,21 +214,9 @@ void hash_neon(state& state, const block1& blocks) NOEXCEPT
     BC_POP_WARNING()
 }
 
-void merkle_neon(digest1& out, const block1& blocks) NOEXCEPT
-{
-    auto state = sha256::initial;
-    hash_neon(state, blocks);
-    hash_neon(state, array_cast<block>(sha256::pad_64));
-    auto buffer = sha256::pad_32;
-    to_big_endians(narrow_array_cast<uint32_t, state_size>(buffer), state);
-    state = sha256::initial;
-    hash_neon(state, array_cast<block>(buffer));
-    to_big_endians(array_cast<uint32_t>(out.front()), state);
-}
-
 #endif // HAVE_ARM
 
-#endif
+#endif // DISABLED
 
 } // namespace sha256
 } // namespace system

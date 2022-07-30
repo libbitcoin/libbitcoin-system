@@ -116,7 +116,6 @@ mint128_t shl(mint128_t a, uint32_t bits) noexcept
     return _mm_slli_epi32(a, bits);
 }
 
-// Clang13: '__builtin_ia32_palignr128' needs target feature ssse3.
 /// Concatenate two 16-byte blocks into a 32-byte temporary result, shift the 
 /// result right by Shift bytes, and return the low 16 bytes.
 template <uint32_t Shift>
@@ -139,9 +138,6 @@ mint128_t shuffle(mint128_t a) noexcept
     return _mm_shuffle_epi32(a, Control);
 }
 
-// Clang13: always_function '_mm_shuffle_epi8' requires target feature
-// 'ssse3', but would be inlined into function 'shuffle' that is compiled
-// without support for 'ssse3'.
 /// Shuffle packed 8-bit integers in a according to shuffle control mask in the
 /// corresponding 8-bit element of b.
 mint128_t shuffle(mint128_t a, mint128_t b) noexcept
@@ -455,7 +451,7 @@ void merkle_sse41(digest4& out, const block4& blocks) NOEXCEPT
 
 #endif // HAVE_XCPU
 
-#endif
+#endif // DISABLED
 
 } // namespace sha256
 } // namespace system
