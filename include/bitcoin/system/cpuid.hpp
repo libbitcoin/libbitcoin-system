@@ -69,7 +69,10 @@ constexpr bool get_bit(Value value) noexcept
 inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
 {
 #if defined(HAVE_XGETBV)
-    value = _xgetbv(index);
+    // GCC requires: long long int _xgetbv(unsigned int).
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    value = static_cast<long long int>(_xgetbv(static_cast<unsigned int>(index)));
+    BC_POP_WARNING()
     return true;
 #elif defined(HAVE_XASSEMBLY)
     uint32_t a{}, d{};
