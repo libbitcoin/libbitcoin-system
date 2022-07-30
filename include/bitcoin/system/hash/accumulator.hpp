@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_ACCUMULATOR_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_ACCUMULATOR_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_ACCUMULATOR_HPP
+#define LIBBITCOIN_SYSTEM_HASH_ACCUMULATOR_HPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -93,6 +93,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/crypto/accumulator.ipp>
+#include <bitcoin/system/impl/hash/accumulator.ipp>
 
 #endif

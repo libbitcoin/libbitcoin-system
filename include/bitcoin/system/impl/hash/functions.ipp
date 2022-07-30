@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_HASH_IPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_HASH_IPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_HASH_IPP
+#define LIBBITCOIN_SYSTEM_HASH_HASH_IPP
 
 namespace libbitcoin {
 namespace system {

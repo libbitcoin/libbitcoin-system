@@ -24,7 +24,7 @@
 #include <tuple>
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
 #include <bitcoin/system/wallet/keys/ec_public.hpp>

@@ -18,12 +18,10 @@
  */
 #include <bitcoin/system/wallet/mnemonics/electrum.hpp>
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <string>
-/// DELETEMENOW
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>

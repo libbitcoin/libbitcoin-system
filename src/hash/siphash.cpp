@@ -19,7 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/crypto/siphash.hpp>
+#include <bitcoin/system/hash/siphash.hpp>
 
 #include <tuple>
 #include <bitcoin/system/data/data.hpp>

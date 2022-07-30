@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SHA_ALGORITHM_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_SHA_ALGORITHM_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_HPP
+#define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_HPP
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -391,6 +391,6 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/crypto/sha_algorithm.ipp>
+#include <bitcoin/system/impl/hash/sha_algorithm.ipp>
 
 #endif

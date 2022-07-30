@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_CHECKED_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_CHECKED_HPP
 
-/// DELETECSTDDEF
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

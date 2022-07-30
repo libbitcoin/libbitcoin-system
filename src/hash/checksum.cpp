@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/crypto/checksum.hpp>
+#include <bitcoin/system/hash/checksum.hpp>
 
 #include <utility>
 #include <bitcoin/system/data/data.hpp>

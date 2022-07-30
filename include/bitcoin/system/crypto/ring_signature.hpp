@@ -21,9 +21,9 @@
 
 #include <vector>
 #include <bitcoin/system/crypto/elliptic_curve.hpp>
-#include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

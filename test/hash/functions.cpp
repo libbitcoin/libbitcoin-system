@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include "hash.hpp"
+#include "functions.hpp"
 
 BOOST_AUTO_TEST_SUITE(hash_tests)
 

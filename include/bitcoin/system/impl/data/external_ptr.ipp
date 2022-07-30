@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_EXTERNAL_POINTER_IPP
 #define LIBBITCOIN_SYSTEM_DATA_EXTERNAL_POINTER_IPP
 
-/// DELETECSTDINT
 #include <memory>
 #include <vector>
 #include <bitcoin/system/define.hpp>

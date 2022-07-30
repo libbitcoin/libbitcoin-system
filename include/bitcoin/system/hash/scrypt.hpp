@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_SCRYPT_HPP
+#define LIBBITCOIN_SYSTEM_HASH_SCRYPT_HPP
 
-#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/pbkd_sha256.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -116,6 +116,6 @@ static_assert(scrypt<16384, 8, 8>::maximum_memory == 134'231'040_u64);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/crypto/scrypt.ipp>
+#include <bitcoin/system/impl/hash/scrypt.ipp>
 
 #endif

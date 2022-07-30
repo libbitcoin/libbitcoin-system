@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/keys/ec_point.hpp>
 
-/// DELETECSTDINT
 #include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/radix/radix.hpp>

@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/addresses/stealth_sender.hpp>
 
-/// DELETECSTDINT
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

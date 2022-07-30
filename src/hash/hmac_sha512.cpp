@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/crypto/hmac_sha512.hpp>
+#include <bitcoin/system/hash/hmac_sha512.hpp>
 
-#include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/functions.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -70,28 +70,14 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/script.cpp \
     src/config/transaction.cpp \
     src/crypto/aes256.cpp \
-    src/crypto/checksum.cpp \
     src/crypto/der_parser.cpp \
     src/crypto/ec_context.cpp \
     src/crypto/ec_context.hpp \
     src/crypto/elliptic_curve.cpp \
     src/crypto/encryption.cpp \
     src/crypto/golomb_coding.cpp \
-    src/crypto/hash.cpp \
-    src/crypto/hmac_sha256.cpp \
-    src/crypto/hmac_sha512.cpp \
-    src/crypto/pbkd_sha256.cpp \
-    src/crypto/pbkd_sha512.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
-    src/crypto/ripemd160.cpp \
-    src/crypto/siphash.cpp \
-    src/crypto/sha256/sha256_1_native.cpp \
-    src/crypto/sha256/sha256_2_shani.cpp \
-    src/crypto/sha256/sha256_4_neon.cpp \
-    src/crypto/sha256/sha256_4_sse4.cpp \
-    src/crypto/sha256/sha256_4_sse41.cpp \
-    src/crypto/sha256/sha256_8_avx2.cpp \
     src/data/data_chunk.cpp \
     src/data/string.cpp \
     src/endian/endian.cpp \
@@ -100,6 +86,20 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/op_error_t.cpp \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
+    src/hash/checksum.cpp \
+    src/hash/functions.cpp \
+    src/hash/hmac_sha256.cpp \
+    src/hash/hmac_sha512.cpp \
+    src/hash/pbkd_sha256.cpp \
+    src/hash/pbkd_sha512.cpp \
+    src/hash/ripemd160.cpp \
+    src/hash/siphash.cpp \
+    src/hash/sha256/sha256_1_native.cpp \
+    src/hash/sha256/sha256_2_shani.cpp \
+    src/hash/sha256/sha256_4_neon.cpp \
+    src/hash/sha256/sha256_4_sse4.cpp \
+    src/hash/sha256/sha256_4_sse41.cpp \
+    src/hash/sha256/sha256_8_avx2.cpp \
     src/math/math.cpp \
     src/radix/base_10.cpp \
     src/radix/base_2048.cpp \
@@ -248,19 +248,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
     test/config/printer.cpp \
-    test/crypto/accumulator.cpp \
-    test/crypto/checksum.cpp \
     test/crypto/elliptic_curve.cpp \
     test/crypto/encryption.cpp \
-    test/crypto/hash.cpp \
-    test/crypto/hash.hpp \
     test/crypto/pseudo_random.cpp \
     test/crypto/ring_signature.cpp \
-    test/crypto/rmd_algorithm.cpp \
-    test/crypto/sha256.cpp \
-    test/crypto/sha_algorithm.cpp \
-    test/crypto/siphash.cpp \
-    test/crypto/siphash.hpp \
     test/data/array_cast.cpp \
     test/data/byte_cast.cpp \
     test/data/collection.cpp \
@@ -289,6 +280,15 @@ test_libbitcoin_system_test_SOURCES = \
     test/error/op_error_t.cpp \
     test/error/script_error_t.cpp \
     test/error/transaction_error_t.cpp \
+    test/hash/accumulator.cpp \
+    test/hash/checksum.cpp \
+    test/hash/functions.cpp \
+    test/hash/functions.hpp \
+    test/hash/rmd_algorithm.cpp \
+    test/hash/sha256.cpp \
+    test/hash/sha_algorithm.cpp \
+    test/hash/siphash.cpp \
+    test/hash/siphash.hpp \
     test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/program.cpp \
@@ -464,26 +464,14 @@ include_bitcoin_system_config_HEADERS = \
 
 include_bitcoin_system_cryptodir = ${includedir}/bitcoin/system/crypto
 include_bitcoin_system_crypto_HEADERS = \
-    include/bitcoin/system/crypto/accumulator.hpp \
     include/bitcoin/system/crypto/aes256.hpp \
-    include/bitcoin/system/crypto/checksum.hpp \
     include/bitcoin/system/crypto/crypto.hpp \
     include/bitcoin/system/crypto/der_parser.hpp \
     include/bitcoin/system/crypto/elliptic_curve.hpp \
     include/bitcoin/system/crypto/encryption.hpp \
     include/bitcoin/system/crypto/golomb_coding.hpp \
-    include/bitcoin/system/crypto/hash.hpp \
-    include/bitcoin/system/crypto/hmac_sha256.hpp \
-    include/bitcoin/system/crypto/hmac_sha512.hpp \
-    include/bitcoin/system/crypto/pbkd_sha256.hpp \
-    include/bitcoin/system/crypto/pbkd_sha512.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
-    include/bitcoin/system/crypto/ring_signature.hpp \
-    include/bitcoin/system/crypto/ripemd160.hpp \
-    include/bitcoin/system/crypto/rmd_algorithm.hpp \
-    include/bitcoin/system/crypto/scrypt.hpp \
-    include/bitcoin/system/crypto/sha_algorithm.hpp \
-    include/bitcoin/system/crypto/siphash.hpp
+    include/bitcoin/system/crypto/ring_signature.hpp
 
 include_bitcoin_system_datadir = ${includedir}/bitcoin/system/data
 include_bitcoin_system_data_HEADERS = \
@@ -524,18 +512,25 @@ include_bitcoin_system_error_HEADERS = \
     include/bitcoin/system/error/script_error_t.hpp \
     include/bitcoin/system/error/transaction_error_t.hpp
 
+include_bitcoin_system_hashdir = ${includedir}/bitcoin/system/hash
+include_bitcoin_system_hash_HEADERS = \
+    include/bitcoin/system/hash/accumulator.hpp \
+    include/bitcoin/system/hash/checksum.hpp \
+    include/bitcoin/system/hash/functions.hpp \
+    include/bitcoin/system/hash/hash.hpp \
+    include/bitcoin/system/hash/hmac_sha256.hpp \
+    include/bitcoin/system/hash/hmac_sha512.hpp \
+    include/bitcoin/system/hash/pbkd_sha256.hpp \
+    include/bitcoin/system/hash/pbkd_sha512.hpp \
+    include/bitcoin/system/hash/ripemd160.hpp \
+    include/bitcoin/system/hash/rmd_algorithm.hpp \
+    include/bitcoin/system/hash/scrypt.hpp \
+    include/bitcoin/system/hash/sha_algorithm.hpp \
+    include/bitcoin/system/hash/siphash.hpp
+
 include_bitcoin_system_impl_chaindir = ${includedir}/bitcoin/system/impl/chain
 include_bitcoin_system_impl_chain_HEADERS = \
     include/bitcoin/system/impl/chain/compact.ipp
-
-include_bitcoin_system_impl_cryptodir = ${includedir}/bitcoin/system/impl/crypto
-include_bitcoin_system_impl_crypto_HEADERS = \
-    include/bitcoin/system/impl/crypto/accumulator.ipp \
-    include/bitcoin/system/impl/crypto/checksum.ipp \
-    include/bitcoin/system/impl/crypto/hash.ipp \
-    include/bitcoin/system/impl/crypto/rmd_algorithm.ipp \
-    include/bitcoin/system/impl/crypto/scrypt.ipp \
-    include/bitcoin/system/impl/crypto/sha_algorithm.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \
@@ -560,6 +555,15 @@ include_bitcoin_system_impl_endian_HEADERS = \
     include/bitcoin/system/impl/endian/swaps.ipp \
     include/bitcoin/system/impl/endian/uintx_t.ipp \
     include/bitcoin/system/impl/endian/unsafe.ipp
+
+include_bitcoin_system_impl_hashdir = ${includedir}/bitcoin/system/impl/hash
+include_bitcoin_system_impl_hash_HEADERS = \
+    include/bitcoin/system/impl/hash/accumulator.ipp \
+    include/bitcoin/system/impl/hash/checksum.ipp \
+    include/bitcoin/system/impl/hash/functions.ipp \
+    include/bitcoin/system/impl/hash/rmd_algorithm.ipp \
+    include/bitcoin/system/impl/hash/scrypt.ipp \
+    include/bitcoin/system/impl/hash/sha_algorithm.ipp
 
 include_bitcoin_system_impl_machinedir = ${includedir}/bitcoin/system/impl/machine
 include_bitcoin_system_impl_machine_HEADERS = \

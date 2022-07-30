@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_IPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_SCRYPT_IPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_SCRYPT_IPP
+#define LIBBITCOIN_SYSTEM_HASH_SCRYPT_IPP
 
 #include <atomic>
 #include <algorithm>
 #include <bit>
 #include <memory>
-#include <bitcoin/system/crypto/pbkd_sha256.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/hash/pbkd_sha256.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {

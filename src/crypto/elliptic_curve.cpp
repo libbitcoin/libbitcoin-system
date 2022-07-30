@@ -23,8 +23,8 @@
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
 #include <bitcoin/system/crypto/der_parser.hpp>
-#include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include "ec_context.hpp"
 

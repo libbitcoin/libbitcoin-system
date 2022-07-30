@@ -33,28 +33,28 @@ using rmd_160 = rmd::algorithm<rmd::h160<>, false>;
 // rmd128
 // ----------------------------------------------------------------------------
 
-////constexpr auto half128 = rmd_128::half_t{};
-////constexpr auto full128 = rmd_128::block_t{};
-////constexpr auto pair128 = std_array<uint8_t, array_count<rmd_128::block_t>* two>{};
-////constexpr auto expected_half128 = base16_array("00000000000000000000000000000000");
-////constexpr auto expected_full128 = base16_array("00000000000000000000000000000000");
-////constexpr auto expected_pair128 = base16_array("00000000000000000000000000000000");
-////
+constexpr auto half128 = rmd_128::half_t{};
+constexpr auto full128 = rmd_128::block_t{};
+constexpr auto pair128 = std_array<uint8_t, array_count<rmd_128::block_t>* two>{};
+constexpr auto expected_half128 = base16_array("00000000000000000000000000000000");
+constexpr auto expected_full128 = base16_array("00000000000000000000000000000000");
+constexpr auto expected_pair128 = base16_array("00000000000000000000000000000000");
+
 ////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half128__null_hash__expected)
 ////{
 ////    static_assert(rmd_128::hash(half128) != expected_half128);
 ////    BOOST_CHECK_NE(rmd_128::hash(half128), expected_half128);
 ////    BOOST_CHECK_EQUAL(system::ripemd128_hash(half128), expected_half128);
 ////}
-////
-////// Stack overflow in debug builds.
-////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
-////{
-////    static_assert(rmd_128::hash(full128) != expected_full128);
-////    BOOST_CHECK_NE(rmd_128::hash(full128), expected_full128);
-////    BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
-////}
-////
+
+// Stack overflow in debug builds.
+BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
+{
+    ////static_assert(rmd_128::hash(full128) != expected_full128);
+    BOOST_CHECK_NE(rmd_128::hash(full128), expected_full128);
+    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
+}
+
 ////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks128__null_hash__expected)
 ////{
 ////    const std_vector<cref<rmd_128::block_t>> pair

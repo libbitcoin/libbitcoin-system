@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_HASH_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_HASH_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
+#define LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
 
 #include <memory>
 #include <vector>
@@ -177,6 +177,6 @@ struct hash<bc::system::data_array<Size>>
 };
 } // namespace boost
 
-#include <bitcoin/system/impl/crypto/hash.ipp>
+#include <bitcoin/system/impl/hash/functions.ipp>
 
 #endif

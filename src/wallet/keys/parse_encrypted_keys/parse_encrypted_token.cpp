@@ -18,10 +18,9 @@
  */
 #include "parse_encrypted_token.hpp"
 
-/// DELETECSTDINT
-/// DELETECSTDDEF
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>
 #include "parse_encrypted_prefix.hpp"
 

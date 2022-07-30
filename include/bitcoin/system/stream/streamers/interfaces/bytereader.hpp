@@ -21,9 +21,10 @@
 
 #include <iostream>
 #include <string>
-#include <bitcoin/system/crypto/crypto.hpp>
+
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/error/error.hpp>
 
 namespace libbitcoin {

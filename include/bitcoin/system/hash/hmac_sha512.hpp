@@ -16,19 +16,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_HMAC_SHA256_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_HMAC_SHA256_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_HMAC_SHA512_HPP
+#define LIBBITCOIN_SYSTEM_HASH_HMAC_SHA512_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/crypto/accumulator.hpp>
-#include <bitcoin/system/crypto/sha_algorithm.hpp>
+#include <bitcoin/system/hash/accumulator.hpp>
+#include <bitcoin/system/hash/sha_algorithm.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace hmac {
-namespace sha256 {
+namespace sha512 {
     
-using algorithm = sha::algorithm<sha::sha256>;
+using algorithm = sha::algorithm<sha::sha512>;
 struct context
 {
     system::accumulator<algorithm> in{};
@@ -44,7 +44,7 @@ void initialize(context& context, const uint8_t* key, size_t size) NOEXCEPT;
 void update(context& context, const uint8_t* data, size_t size) NOEXCEPT;
 void finalize(context& context, uint8_t* digest) NOEXCEPT;
 
-} // namespace sha256
+} // namespace sha512
 } // namespace hmac
 } // namespace system
 } // namespace libbitcoin

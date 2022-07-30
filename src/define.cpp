@@ -45,18 +45,19 @@
 // /error         : define
 // /unicode       : define
 // /math          : define
-// /data          : /math /unicode
+// /data          : /math
 // /endian        : /data
 // /words         : /data
 // /radix         : /words
 // /serial        : /radix
-// /crypto        : /radix {TODO: /endian -> /math}
+// /hash          : /radix
+// /crypto        : /hash
 // /stream        : /crypto /endian /error
 // /chain         : /stream [/settings]
-// settings       : /chain
 // /machine       : /chain
 // /config        : /chain
 // /wallet        : /chain
+// settings       : /chain
 
 // All /crypto/external can be made cpp/constexpr except the lax
 // parser, which wraps libsecp256k1 (as with elliptic_curve).

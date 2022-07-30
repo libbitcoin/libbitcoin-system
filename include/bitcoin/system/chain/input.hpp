@@ -19,19 +19,16 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_INPUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_INPUT_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/witness.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

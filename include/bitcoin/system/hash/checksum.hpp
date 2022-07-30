@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_CHECKSUM_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_CHECKSUM_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_CHECKSUM_HPP
+#define LIBBITCOIN_SYSTEM_HASH_CHECKSUM_HPP
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -90,6 +90,6 @@ BC_API bool bech32_verify_checked(uint8_t& out_version,
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/crypto/checksum.ipp>
+#include <bitcoin/system/impl/hash/checksum.ipp>
 
 #endif

@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_ELLIPTIC_CURVE_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_ELLIPTIC_CURVE_HPP
 
-#include <bitcoin/system/crypto/hash.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
