@@ -19,12 +19,9 @@
 #include <bitcoin/system/radix/base_10.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iomanip>
 #include <iterator>
 #include <sstream>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/serial/deserialize.hpp>

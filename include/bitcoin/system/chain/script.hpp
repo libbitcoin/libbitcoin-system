@@ -34,6 +34,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -84,7 +85,7 @@ public:
     }
 
     // More efficient [] dereferences are all guarded here.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
     //*************************************************************************
     // CONSENSUS: BIP34 requires coinbase input script to begin with one byte
@@ -100,7 +101,7 @@ public:
     //*************************************************************************
     static inline bool is_commitment_pattern(const operations& ops) NOEXCEPT
     {
-        static const auto header = to_big_endian(chain::witness_head);
+        constexpr auto header = to_big_endian(chain::witness_head);
 
         // C++14: remove && ops[1].data().size() >= header.size() guard.
         // Bytes after commitment optional with no consensus meaning (bip141).
@@ -298,7 +299,7 @@ public:
             && is_public_key(ops[1].data());
     }
 
-    BC_POP_WARNING(/*NO_ARRAY_INDEXATION*/)
+    BC_POP_WARNING(/*NO_ARRAY_INDEXING*/)
 
     // C++20 constexpr.
     // Ambiguous with is_sign_key_hash when second/last op is a public key.

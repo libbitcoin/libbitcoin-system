@@ -19,14 +19,11 @@
 #include <bitcoin/system/chain/script.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iterator>
 #include <memory>
 #include <numeric>
 #include <sstream>
 #include <utility>
-/// DELETEMENOW
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
@@ -36,10 +33,10 @@
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -372,7 +369,7 @@ const data_chunk& script::witness_program() const NOEXCEPT
 {
     static const data_chunk empty;
 
-    BC_PUSH_WARNING(NO_ARRAY_INDEXATION)
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     return is_witness_program_pattern(ops()) ? ops()[1].data() : empty;
     BC_POP_WARNING()
 }

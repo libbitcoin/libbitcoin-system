@@ -19,12 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_ELECTRUM_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_MNEMONICS_ELECTRUM_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <string>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(endian_tests)
+BOOST_AUTO_TEST_SUITE(endian_stream_tests)
 
 const auto alpha_forward = "BITCOIN!";
 const auto alpha_reverse = "!NIOCTIB";

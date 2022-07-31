@@ -23,6 +23,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 namespace libbitcoin {

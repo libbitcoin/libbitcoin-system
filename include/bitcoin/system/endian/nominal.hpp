@@ -25,41 +25,45 @@
 namespace libbitcoin {
 namespace system {
 
-// data -> integral (inferred type)
-// integral -> array (implicit size)
+/// Implicitly typed/sized return.
+/// ---------------------------------------------------------------------------
 
-// matched size data (no argument required).
 template <size_t Size>
-constexpr unsigned_type<Size> from_big_endian(
-    const data_array<Size>& data) NOEXCEPT;
+constexpr unsigned_type<Size>
+from_big_endian(const data_array<Size>& data) NOEXCEPT;
 
-// matched size data (no argument required).
 template <size_t Size>
-constexpr unsigned_type<Size> from_little_endian(
-    const data_array<Size>& data) NOEXCEPT;
+constexpr unsigned_type<Size>
+from_little_endian(const data_array<Size>& data) NOEXCEPT;
 
-// integral   from_big|little_endian(data_slice)
-// data_array   to_big|little_endian(integral)
+template <typename Integral,
+    if_integral_integer<Integral> = true>
+constexpr data_array<sizeof(Integral)>
+to_big_endian(Integral value) NOEXCEPT;
 
+template <typename Integral,
+    if_integral_integer<Integral> = true>
+constexpr data_array<sizeof(Integral)>
+to_little_endian(Integral value) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
-VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT;
+/// Variably-sized input returns specified integral (padded or truncated).
+/// ---------------------------------------------------------------------------
 
-template <typename Integral, if_integral_integer<Integral> = true>
-VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT;
-
-
-template <typename Integral, size_t Size, if_integral_integer<Integral> = true>
+template <typename Integral, size_t Size,
+    if_integral_integer<Integral> = true>
 constexpr Integral from_big_endian(const data_array<Size>& data) NOEXCEPT;
 
-template <typename Integral, size_t Size, if_integral_integer<Integral> = true>
+template <typename Integral, size_t Size,
+    if_integral_integer<Integral> = true>
 constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)> to_big_endian(Integral value) NOEXCEPT;
+template <typename Integral,
+    if_integral_integer<Integral> = true>
+VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT;
 
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr data_array<sizeof(Integral)> to_little_endian(Integral value) NOEXCEPT;
+template <typename Integral,
+    if_integral_integer<Integral> = true>
+VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

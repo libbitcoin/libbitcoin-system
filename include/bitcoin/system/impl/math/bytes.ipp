@@ -21,14 +21,13 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
-#include <bitcoin/system/math/external/byte_swap.hpp>
 #include <bitcoin/system/math/logarithm.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// Byte widths.
+// Byte width.
 // ----------------------------------------------------------------------------
 // See also std::bit_width (C++20).
 
@@ -50,58 +49,7 @@ constexpr size_t byte_width(Integral value) NOEXCEPT
         byte_width(to_unsigned(value));
 }
 
-// Byteswap (platform independent byte reversal).
-// ----------------------------------------------------------------------------
-// If wrong overload is selected (such as for a literal) result is unexpected.
-// C++23 std::byteswap does not support signed integrals.
-
-template <typename Integral,
-    if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint8_t)>,
-    if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
-{
-    // no-op for calling consistency across all integral integer types.
-    return value;
-}
-
-template <typename Integral,
-    if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint16_t)>,
-    if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
-{
-    // Compiles away to direct API call for non-constexpr.
-    return std::is_constant_evaluated() ?
-        possible_sign_cast<Integral>(byte_swap16_native(to_unsigned(value))) :
-        possible_sign_cast<Integral>(byte_swap16(to_unsigned(value)));
-}
-
-template <typename Integral,
-    if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint32_t)>,
-    if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
-{
-    // Compiles away to direct API call for non-constexpr.
-    return std::is_constant_evaluated() ?
-        possible_sign_cast<Integral>(byte_swap32_native(to_unsigned(value))) :
-        possible_sign_cast<Integral>(byte_swap32(to_unsigned(value)));
-}
-
-template <typename Integral,
-    if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint64_t)>,
-    if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
-{
-    // Compiles away to direct API call for non-constexpr.
-    return std::is_constant_evaluated() ?
-        possible_sign_cast<Integral>(byte_swap64_native(to_unsigned(value))) :
-        possible_sign_cast<Integral>(byte_swap64(to_unsigned(value)));
-}
-
-// Bits to bytes utilities.
+// Bit count to byte count.
 // ----------------------------------------------------------------------------
 
 template <typename Integer, if_unsigned_integer<Integer>>
@@ -114,6 +62,20 @@ template <typename Integer, if_unsigned_integer<Integer>>
 constexpr Integer to_floored_bytes(Integer bits) NOEXCEPT
 {
     return floored_divide(bits, byte_bits);
+}
+
+// Byte of integral by logical index.
+// ----------------------------------------------------------------------------
+
+template <size_t Index, typename Byte, typename Integral,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>,
+    if_lesser<Index, sizeof(Integral)>>
+constexpr Byte byte(Integral value) NOEXCEPT
+{
+    constexpr auto byte_mask = unmask_right<Integral>(byte_bits);
+    const auto byte = bit_and(shift_right(value, to_bits(Index)), byte_mask);
+    return possible_narrow_and_sign_cast<Byte>(byte);
 }
 
 // Byte Negation.

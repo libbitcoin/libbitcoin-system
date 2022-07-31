@@ -19,8 +19,6 @@
 #include <bitcoin/system/radix/base_2048.hpp>
 
 #include <algorithm>
-/// DELETECSTDINT
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>

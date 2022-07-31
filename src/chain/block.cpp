@@ -19,7 +19,6 @@
 #include <bitcoin/system/chain/block.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <cfenv>
 #include <iterator>
 #include <memory>
@@ -28,15 +27,12 @@
 #include <unordered_set>
 #include <utility>
 #include <unordered_map>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/script.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -137,7 +133,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)
         {
-            BC_PUSH_WARNING(NO_NEW_DELETE)
+            BC_PUSH_WARNING(NO_NEW_OR_DELETE)
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
             txs->emplace_back(new transaction{ source, witness });
             BC_POP_WARNING()
@@ -149,7 +145,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 
     return
     {
-        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         to_shared(new chain::header{ source }),
         BC_POP_WARNING()
@@ -215,16 +211,13 @@ const transactions_cptr& block::transactions_ptr() const NOEXCEPT
     return txs_;
 }
 
-hash_list block::transaction_hashes(bool witness) const NOEXCEPT
+hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
     static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
     const auto count = txs_->size();
 
-    // Addition is guarded by block size limit.
-    const auto space = count + (is_odd(count) && !is_one(count) ? one : zero);
-
-    // Excess reservation accounts for generate_merkle_root addition.
-    hash_list out(space, no_fill_hash_allocator);
+    // Excess reservation accounts for possible generate_merkle_root addition.
+    hashes out(add1(count), no_fill_hash_allocator);
 
     // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
@@ -365,24 +358,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
 // private
 hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
-    if (txs_->empty())
-        return null_hash;
-
-    auto merkle = transaction_hashes(witness);
-
-    // Reduce to a single hash (each iteration divides list size in half).
-    while (!is_one(merkle.size()))
-    {
-        // If number of hashes is odd, duplicate the last hash in the list.
-        if (is_odd(merkle.size()))
-            merkle.push_back(merkle.back());
-
-        // Hash all pairs of tx hashes in place, resizes vector to half.
-        hash_reduce(merkle);
-    }
-
-    // There is now only one item in the list.
-    return merkle.front();
+    return merkle_root(transaction_hashes(witness));
 }
 
 bool block::is_invalid_merkle_root() const NOEXCEPT
@@ -478,8 +454,10 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
         for (const auto& output: views_reverse(outputs))
         {
             if (output->committed_hash(committed))
+            {
                 return committed == bitcoin_hash(generate_merkle_root(true),
                     reserved);
+            }
         }
     }
     
@@ -639,6 +617,7 @@ code block::check() const NOEXCEPT
     if (is_internal_double_spend())
         return error::block_internal_double_spend;
 
+    // TODO: defer to accept (doubles merkle root computation past bip141).
     // Relates height to tx.hash (pool cache tx.hash(false)).
     if (is_invalid_merkle_root())
         return error::merkle_mismatch;

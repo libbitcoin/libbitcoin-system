@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_FUNCLETS_HPP
 
 #include <type_traits>
-#include <bitcoin/system/literals.hpp>
+#include <bitcoin/system/intrinsics.hpp>
 
 /// Simple type safe functions over value parameter.
 /// All values converted and specified domain and reconverted to domain.
@@ -152,10 +152,10 @@ constexpr bool to_bool(Type value) noexcept
     return is_nonzero(value);
 }
 
-// TODO: templatize.
-
 /// Determine the bitcoin variable-serialized size of a given value.
-constexpr size_t variable_size(uint64_t value) noexcept
+template <typename Unsigned,
+    std::enable_if_t<std::is_unsigned_v<Unsigned>, bool> = true>
+constexpr size_t variable_size(Unsigned value) noexcept
 {
     if (value < varint_two_bytes)
         return sizeof(uint8_t);

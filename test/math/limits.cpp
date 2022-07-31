@@ -174,6 +174,7 @@ static_assert(minimum<uint8_t > == min_uint8);
 static_assert(minimum<uint16_t> == min_uint16);
 static_assert(minimum<uint32_t> == min_uint32);
 static_assert(minimum<uint64_t> == min_uint64);
+static_assert(minimum<uintx_t<42>> == zero);
 static_assert(is_same_type<decltype(minimum<int64_t>), const int64_t>);
 
 // maximum<T>
@@ -186,6 +187,7 @@ static_assert(maximum<uint8_t > == max_uint8);
 static_assert(maximum<uint16_t> == max_uint16);
 static_assert(maximum<uint32_t> == max_uint32);
 static_assert(maximum<uint64_t> == max_uint64);
+static_assert(maximum<uintx_t<42>> == sub1(power2<uintx_t<42>>(42u)));
 static_assert(is_same_type<decltype(maximum<int16_t>), const int16_t>);
 
 // absolute_min<T>

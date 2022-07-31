@@ -104,14 +104,11 @@
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\cpuid.cpp" />
+    <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\encryption.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\hash.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\intrinsics\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\ring_signature.cpp" />
-    <ClCompile Include="..\..\..\..\test\crypto\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\data\array_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\byte_cast.cpp" />
     <ClCompile Include="..\..\..\..\test\data\collection.cpp" />
@@ -125,15 +122,17 @@
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\algorithm.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\batch.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\integers.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\integrals.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\minimal.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\nominal.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\set.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\stream.cpp">
       <ObjectFileName>$(IntDir)test_endian_stream.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endian\uintx.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\swaps.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\uintx_t.cpp" />
-    <ClCompile Include="..\..\..\..\test\endian\unchecked.cpp" />
+    <ClCompile Include="..\..\..\..\test\endian\unsafe.cpp" />
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error_t.cpp" />
@@ -141,6 +140,19 @@
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\funclets.cpp" />
+    <ClCompile Include="..\..\..\..\test\hacks.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
+      <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\algorithm.cpp">
+      <ObjectFileName>$(IntDir)test_hash_sha_algorithm.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
@@ -149,6 +161,7 @@
     <ClCompile Include="..\..\..\..\test\math\addition.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bytes.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\byteswap.cpp" />
     <ClCompile Include="..\..\..\..\test\math\cast.cpp" />
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
@@ -250,8 +263,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
-    <ClInclude Include="..\..\..\..\test\crypto\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\crypto\siphash.hpp" />
+    <ClInclude Include="..\..\..\..\test\hash\functions.hpp" />
+    <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />

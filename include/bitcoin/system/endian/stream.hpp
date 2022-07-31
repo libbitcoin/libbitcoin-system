@@ -25,6 +25,9 @@
 namespace libbitcoin {
 namespace system {
 
+/// IStream (stream error set on read past end)
+/// ---------------------------------------------------------------------------
+
 template <typename Integral, typename IStream = std::istream,
     if_integral_integer<Integral> = true,
     if_base_of<std::istream, IStream> = true,
@@ -36,6 +39,9 @@ template <typename Integral, typename IStream = std::istream,
     if_base_of<std::istream, IStream> = true,
     if_one_byte<typename IStream::char_type> = true>
 inline Integral from_little_endian(IStream& stream) NOEXCEPT;
+
+/// OStream (stream error set on write past end)
+/// ---------------------------------------------------------------------------
 
 template <typename Integral, typename OStream = std::ostream,
     if_integral_integer<Integral> = true,

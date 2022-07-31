@@ -24,8 +24,8 @@
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/config/hash256.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 
 namespace libbitcoin {

@@ -27,6 +27,9 @@
 
 namespace libbitcoin {
 namespace system {
+    
+// byte_cast (integral to std::array<Byte>)
+// ----------------------------------------------------------------------------
 
 template <typename Byte, typename Integral,
     if_one_byte<Byte>,
@@ -58,22 +61,25 @@ byte_cast(Integral&& value) NOEXCEPT
     return byte_cast<Byte>(unmove(value));
 }
 
+// byte_cast (std::array<Byte> to integral)
+// ----------------------------------------------------------------------------
+
 template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
 inline unsigned_type<Size>&
-byte_cast(std::array<Byte, Size>& value) NOEXCEPT
+byte_cast(std::array<Byte, Size>& bytes) NOEXCEPT
 {
-    return *pointer_cast<unsigned_type<Size>>(&value);
+    return *pointer_cast<unsigned_type<Size>>(&bytes);
 }
 
 template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
 inline const unsigned_type<Size>&
-byte_cast(const std::array<Byte, Size>& value) NOEXCEPT
+byte_cast(const std::array<Byte, Size>& bytes) NOEXCEPT
 {
-    return *pointer_cast<const unsigned_type<Size>>(&value);
+    return *pointer_cast<const unsigned_type<Size>>(&bytes);
 }
 
 // Avoids cast of rvalue to reference, which would dangle.
@@ -81,9 +87,28 @@ template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
 inline unsigned_type<Size>
-byte_cast(std::array<Byte, Size>&& value) NOEXCEPT
+byte_cast(std::array<Byte, Size>&& bytes) NOEXCEPT
 {
-    return byte_cast(unmove(value));
+    return byte_cast(unmove(bytes));
+}
+
+// unsafe_byte_cast (byte* to integral)
+// ----------------------------------------------------------------------------
+
+template <typename Integral, typename Byte,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+inline Integral& unsafe_byte_cast(Byte* bytes) NOEXCEPT
+{
+    return *pointer_cast<Integral>(bytes);
+}
+
+template <typename Integral, typename Byte,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+inline const Integral& unsafe_byte_cast(const Byte* bytes) NOEXCEPT
+{
+    return *pointer_cast<const Integral>(bytes);
 }
 
 } // namespace system

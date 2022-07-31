@@ -21,13 +21,16 @@
 
 #include <iostream>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/algorithm.hpp>
+#include <bitcoin/system/endian/swaps.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// iostreams are not costexpr.
+// std::iostreams are not constexpr.
+
+// IStream
+// ----------------------------------------------------------------------------
 // if stream.gcount() != size there should be a stream error.
 
 template <typename Integral, typename IStream,
@@ -59,6 +62,9 @@ inline Integral from_little_endian(IStream& stream) NOEXCEPT
     BC_POP_WARNING()
     return native_from_little_end(value);
 }
+
+// OStream
+// ----------------------------------------------------------------------------
 
 template <typename Integral, typename OStream,
     if_integral_integer<Integral>,

@@ -26,30 +26,30 @@ namespace system {
     
 /// add/subtract.
 /// ---------------------------------------------------------------------------
-// TODO: generalize is_overflow() and is_underflow() argument types.
+// TODO: generalize is_add_overflow() and is_subtract_overflow() argument types.
 
 template <typename Signed,
-    if_signed_integral_integer<Signed> = true>
+    if_signed_integer<Signed> = true>
 constexpr bool is_negate_overflow(Signed value) NOEXCEPT;
 
 /// True if add would overflow Integer domain.
 template <typename Signed,
-    if_signed_integral_integer<Signed> = true>
+    if_signed_integer<Signed> = true>
 constexpr bool is_add_overflow(Signed left, Signed right) NOEXCEPT;
 
 /// True if add would overflow Integer domain.
 template <typename Unsigned,
-    if_unsigned_integral_integer<Unsigned> = true>
+    if_unsigned_integer<Unsigned> = true>
 constexpr bool is_add_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// True if subtract would underflow Integer domain.
 template <typename Signed,
-    if_signed_integral_integer<Signed> = true>
+    if_signed_integer<Signed> = true>
 constexpr bool is_subtract_overflow(Signed left, Signed right) NOEXCEPT;
 
 /// True if subtract would underflow Integer domain.
 template <typename Unsigned,
-    if_unsigned_integral_integer<Unsigned> = true>
+    if_unsigned_integer<Unsigned> = true>
 constexpr bool is_subtract_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// multiply/divide.
@@ -58,7 +58,7 @@ constexpr bool is_subtract_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// True if multiply would overflow Integer domain.
 template <typename Unsigned,
-    if_unsigned_integral_integer<Unsigned> = true>
+    if_unsigned_integer<Unsigned> = true>
 constexpr bool is_multiply_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// True if divide (or modulo) implies division-by-zero.
@@ -110,21 +110,21 @@ constexpr bool is_log_overflow(Base base, Value value) NOEXCEPT;
 // TODO: generalize safe_add/subtract/multiply argument types.
 
 /// Throws overflow_exception on negate signed minimum (1 use in bc).
-template <typename Signed, if_signed_integral_integer<Signed> = true>
+template <typename Signed, if_signed_integer<Signed> = true>
 DEPRECATED constexpr Signed safe_negate(Signed value) THROWS;
 
 /// Throws overflow_exception on sum overflow (1 use in bc).
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral, if_integer<Integral> = true>
 DEPRECATED constexpr Integral safe_add(Integral left,
     Integral right) THROWS;
 
 /// Throws overflow_exception on difference underflow (0 use in bc).
-template <typename Integral, if_integral_integer<Integral> = true>
+template <typename Integral, if_integer<Integral> = true>
 DEPRECATED constexpr Integral safe_subtract(Integral left,
     Integral right) THROWS;
 
 /// Throws overflow_exception on product overflow (2 uses in bc (settings)).
-template <typename Unsigned, if_unsigned_integral_integer<Unsigned> = true>
+template <typename Unsigned, if_unsigned_integer<Unsigned> = true>
 DEPRECATED constexpr Unsigned safe_multiply(Unsigned left,
     Unsigned right) THROWS;
 

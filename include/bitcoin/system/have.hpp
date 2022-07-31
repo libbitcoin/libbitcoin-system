@@ -21,15 +21,14 @@
 
 #include <bitcoin/system/version.hpp>
 
-// What we are.
-#ifdef _MSC_VER
-    #define HAVE_MSC
-    #define MSC_VERSION _MSC_VER
-#elif defined(__GNUC__)
-    #define HAVE_GNUC
-#elif defined(__CYGWIN__)
-    #define HAVE_CYGWIN
-#elif defined(__linux__)
+///////////////////////////////////////////////////////////////////////////////
+// Maintainers: update corresponding diagnostic HAVE emissions in define.cpp.
+///////////////////////////////////////////////////////////////////////////////
+
+/// Plaform: architecture, compiler, and standard libraries.
+/// ---------------------------------------------------------------------------
+
+#if defined(__linux__)
     #define HAVE_LINUX
 #elif defined(__APPLE__)
     #define HAVE_APPLE
@@ -39,9 +38,102 @@
     #define HAVE_OPENBSD
 #elif defined(__NetBSD__)
     #define HAVE_NETBSD
+#elif defined(__CYGWIN__)
+    #define HAVE_CYGWIN
 #endif
 
-// ISO predefined constant for C++ version.
+/// stackoverflow.com/questions/38499462/how-to-tell-clang-to-stop-pretending-
+/// to-be-other-compilers
+#if defined(__clang__)
+    #define HAVE_CLANG
+#endif
+#if defined(__APPLE__) && defined(HAVE_CLANG)
+    #define HAVE_XCODE
+#endif
+#if defined(__GNUC__) && !defined(HAVE_CLANG)
+    #define HAVE_GNUC
+#endif
+#if defined(_MSC_VER) && !defined(HAVE_CLANG)
+    #define HAVE_MSC
+#endif
+
+/// Determines linker defines (Windows vs. Unix/Linux).
+#if defined(HAVE_CLANG) || defined(HAVE_GNUC)
+    #define HAVE_NX_LIBS
+#elif defined(_MSC_VER) || defined(__CYGWIN__)
+    #define HAVE_WINDOWS_LIBS
+#endif
+
+/// GNU/MSC defines for targeted CPU architecture.
+/// HAVE_ITANIUM is defined but not used (no optimizations).
+/// sourceforge.net/p/predef/wiki/Architectures
+/// docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros
+#if defined(__i386__) || defined(_M_IX86)
+    #define HAVE_X32
+#elif defined(__amd64__) || defined(_M_AMD64)
+    #define HAVE_X64
+#elif defined(__ia64__) || defined(_M_IA64)
+    #define HAVE_ITANIUM
+#elif defined(__arm__) || defined(_M_ARM)
+    #define HAVE_ARM32
+#elif defined(__aarch64__) || defined(_M_ARM64)
+    #define HAVE_ARM64
+#endif
+
+/// Common CPU architecture (XCPU).
+#if defined(HAVE_X32) || defined(HAVE_X64)
+    #define HAVE_XCPU
+#endif
+
+/// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
+#if defined(HAVE_XCPU)
+    #if defined(HAVE_CLANG)
+        // Clang13: __cpuid_count/_cpuid/_xgetbv.
+        // _xgetbv requires the -mxsave compiler option, so just use assembly.
+    #endif
+    #if defined(HAVE_GNUC)
+        // GCC11: __cpuidex/_cpuid/_xgetbv.
+        // _xgetbv requires the -mxsave compiler option, so just use assembly.
+    #endif
+    #if defined(HAVE_MSC)
+        // docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex
+        // docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list
+        #define HAVE_XGETBV
+        #define HAVE_XCPUIDEX
+    #endif
+#endif
+
+/// XCPU architecture inline assembly.
+#if defined(HAVE_XCPU) && !defined(HAVE_MSC)
+    #define HAVE_XASSEMBLY
+#endif
+
+/// ARM Neon intrinsics.
+#if defined(HAVE_ARM)
+    #if defined(HAVE_GNUC) || defined(__ARM_NEON) || defined(HAVE_MSC)
+        #define HAVE_NEON
+    #endif
+#endif
+
+/// MSC predefined constant for Visual Studio version (exclusive).
+#if defined(HAVE_MSC)
+    #if   _MSC_VER >= 1930
+        #define HAVE_VS2022
+    #elif _MSC_VER >= 1920
+        #define HAVE_VS2019
+    #elif _MSC_VER >= 1910
+        #define HAVE_VS2017
+    #elif _MSC_VER >= 1900
+        #define HAVE_VS2015
+    #elif _MSC_VER >= 1800
+        #define HAVE_VS2013
+    #endif
+#endif
+
+/// C/C++ language and support by platform.
+/// ---------------------------------------------------------------------------
+
+/// ISO predefined constant for C++ version (inclusive).
 #if __cplusplus >= 199711L
     #define HAVE_CPP03
 #endif
@@ -58,62 +150,46 @@
     #define HAVE_CPP20
 #endif
 
-// MSFT predefined constant for VS version.
-#if MSC_VERSION >= 1800
-    #define HAVE_VS2013
-#endif
-#if MSC_VERSION >= 1900
-    #define HAVE_VS2015
-#endif
-#if MSC_VERSION >= 1910
-    #define HAVE_VS2017
-#endif
-#if MSC_VERSION >= 1920
-    #define HAVE_VS2019
-#endif
-#if MSC_VERSION >= 1930
-    #define HAVE_VS2022
-#endif
-
-// ISO predefined constant for targeted CPU architecture.
-#if defined _M_IX86
-    #define HAVE_X86
-#elif defined _M_X64
-    #define HAVE_X64
-#elif defined _M_IA64
-    #define HAVE_ITANIUM
-#endif
-
-// Other platforms not as far with C++ 20.
-#if defined(HAVE_MSC) && defined(HAVE_CPP20)
+/// Other platforms not as far along (C++20).
+#if defined(HAVE_CPP20) && defined(HAVE_MSC)
     #define HAVE_RANGES
     #define HAVE_CONSTEVAL
     #define HAVE_STRING_CONSTEXPR
     #define HAVE_VECTOR_CONSTEXPR
 #endif
 
-// TODO: define warning suppressions for other platforms.
-#if defined(HAVE_MSC)
-    #define HAVE_PRAGMA_WARNING
+/// No std::execution on clang (C++17).
+#if defined(HAVE_CPP17) && !defined(HAVE_CLANG)
+    #define HAVE_EXECUTION
 #endif
 
-// Build configured (always available on msvc).
+/// WITH_ indicates build symbol.
+/// ---------------------------------------------------------------------------
+
+/// Build configured (always available on msvc).
 #if defined(HAVE_MSC) || defined(WITH_ICU)
     #define HAVE_ICU
 #endif
 
-// Things we configure to have (available on all platforms).
+/// These are manually configured here.
+/// ---------------------------------------------------------------------------
 
-// disable noexcept to capture stack trace.
+/// Disable to suppress pragma messages.
+#define HAVE_MESSAGES
+
+/// Disable to unsuppress warnings.
+#define HAVE_SUPPRESSION
+
+/// Disable noexcept to capture stack trace.
 #define HAVE_NOEXCEPT
 
-// deprecated is noisy, turn on to find dependencies.
+/// Disable to emit all suppressed warnings.
+#define HAVE_WARNINGS
+
+// Deprecated is noisy, turn on to find dependencies.
 ////#define HAVE_DEPRECATED
 
-// have a portable build (no intrinsics).
-////#define HAVE_PORTABLE
-
-// have slow test execution.
+/// Have slow test execution (scrypt is slow by design).
 ////#define HAVE_SLOW_TESTS
 
 #endif

@@ -22,6 +22,7 @@
 #include <bitcoin/system/math/addition.hpp>
 #include <bitcoin/system/math/bits.hpp>
 #include <bitcoin/system/math/bytes.hpp>
+#include <bitcoin/system/math/byteswap.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/math/limits.hpp>
@@ -33,11 +34,12 @@
 // Inclusion dependencies:
 // cast      ->
 // sign      -> cast
+// byteswap  -> cast
 // division  -> sign
 // overflow  -> sign, cast
 // bits      -> sign, cast,           logarithm (for bit_width(clog2))
 // bytes     -> sign, cast,           logarithm (for byte_width(clog256))
-// limits    -> sign, cast,           power     (for sized domain limits)
+// limits    -> sign, cast,           [power]   (for sized domain limits)
 // power     -> sign, cast, overflow, bits      (for shift optimization)
 // logarithm -> sign, cast, overflow, division  (for ceiling/floor opts)
 // addition  -> sign, cast, overflow, limits    (for ceiling/floor opts)

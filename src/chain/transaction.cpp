@@ -19,26 +19,22 @@
 #include <bitcoin/system/chain/transaction.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iterator>
 #include <memory>
 #include <numeric>
 #include <type_traits>
 #include <utility>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -217,7 +213,7 @@ read_puts(Source& source) NOEXCEPT
 
     for (auto put = zero; put < puts->capacity(); ++put)
     {
-        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         puts->emplace_back(new Put{ source });
         BC_POP_WARNING()
@@ -263,7 +259,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
                 const auto setter = const_cast<chain::input*>(input.get());
 
                 // Use of pointer forward here avoids move construction.
-                BC_PUSH_WARNING(NO_NEW_DELETE)
+                BC_PUSH_WARNING(NO_NEW_OR_DELETE)
                 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
                 setter->witness_ = to_shared(new chain::witness{ source, true });
                 BC_POP_WARNING()
@@ -406,13 +402,13 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
 
     // This is an out parameter.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
     to_data(sink, witness);
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Methods.
@@ -463,49 +459,49 @@ chain::points transaction::points() const NOEXCEPT
 hash_digest transaction::outputs_hash() const NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     const auto& outs = *outputs_;
     for (const auto& output: outs)
         output->to_data(sink);
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 hash_digest transaction::points_hash() const NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
         input->point().to_data(sink);
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 hash_digest transaction::sequences_hash() const NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
         sink.write_4_bytes_little_endian(input->sequence());
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Signing (unversioned).
@@ -699,10 +695,10 @@ hash_digest transaction::unversioned_signature_hash(
 
     // Create hash writer.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     switch (flag)
     {
@@ -728,7 +724,7 @@ hash_digest transaction::unversioned_signature_hash(
     }
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Signing (version 0).
@@ -742,7 +738,7 @@ void transaction::initialize_hash_cache() const NOEXCEPT
     // the same criteria applied by satoshi.
     if (segregated_)
     {
-        BC_PUSH_WARNING(NO_NEW_DELETE)
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         cache_.reset(new hash_cache
         {
@@ -767,13 +763,13 @@ hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
         return null_hash;
 
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
     outputs_->at(index)->to_data(sink);
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // private
@@ -795,10 +791,10 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
 
     // Create hash writer.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest sha256;
+    hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256::copy sink(sha256);
+    hash::sha256x2::copy sink(digest);
 
     // Create signature hash.
     sink.write_little_endian(version_);
@@ -835,7 +831,7 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     sink.write_4_bytes_little_endian(flags);
 
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // Signing (unversioned and version 0).

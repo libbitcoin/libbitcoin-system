@@ -27,27 +27,25 @@
 namespace libbitcoin {
 namespace system {
 
-// data => uintx_t<to_bits(Bytes)>
-// uintx_t (or other integer) => data_array
+// data<Bytes> <=> uintx_t<Bits>
+// ----------------------------------------------------------------------------
 
-// data_slice is not constexpr.
-
-template <size_t Size>
-inline uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
-    const data_chunk& data) NOEXCEPT
+template <uintx_size_t Bits>
+constexpr data_array<to_ceilinged_bytes(Bits)>
+from_uintx(const uintx_t<Bits>& value) NOEXCEPT
 {
-    return from_big_chunk<uintx_t<to_bits(Size)>>(Size, data);
+    return to_little_endian_size<to_ceilinged_bytes(Bits)>(value);
 }
 
-template <size_t Size>
-inline uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
-    const data_chunk& data) NOEXCEPT
+template <size_t Bytes>
+constexpr uintx_t<to_bits<uintx_size_t>(Bytes)>
+to_uintx(const data_array<Bytes>& hash) NOEXCEPT
 {
-    return from_little_chunk<uintx_t<to_bits(Size)>>(Size, data);
+    return uintx_from_little_endian_array<Bytes>(hash);
 }
 
-// TODO: recombine and rename when data_slice is constexpr.
-// data_array and data_chunk split from data_slice for constexpr support.
+// data<Bytes> => uintx_t<to_bits(Bytes)>
+// ----------------------------------------------------------------------------
 
 template <size_t Size>
 constexpr uintx_t<to_bits(Size)> uintx_from_big_endian_array(
@@ -63,20 +61,18 @@ constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_array(
     return from_little_array<uintx_t<to_bits(Size)>>(data);
 }
 
-// Explicit sizing, from any integer type.
-
-template <size_t Size, typename Integer, if_integer<Integer>>
-constexpr data_array<Size> to_big_endian(const Integer& value) NOEXCEPT
+template <size_t Size>
+VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
+    const data_chunk& data) NOEXCEPT
 {
-    // minimal
-    return to_big_endian_size<Size>(value);
+    return from_big_chunk<uintx_t<to_bits(Size)>>(Size, data);
 }
 
-template <size_t Size, typename Integer, if_integer<Integer>>
-constexpr data_array<Size> to_little_endian(const Integer& value) NOEXCEPT
+template <size_t Size>
+VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
+    const data_chunk& data) NOEXCEPT
 {
-    // minimal
-    return to_little_endian_size<Size>(value);
+    return from_little_chunk<uintx_t<to_bits(Size)>>(Size, data);
 }
 
 } // namespace system

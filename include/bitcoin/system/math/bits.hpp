@@ -197,6 +197,29 @@ constexpr Value rotate_right(Value value, size_t shift=one) NOEXCEPT;
 template <typename Value, if_integral_integer<Value> = true>
 constexpr void rotate_right_into(Value& value, size_t shift=one) NOEXCEPT;
 
+/// High/Low word extraction.
+/// ---------------------------------------------------------------------------
+
+/// Extract the high sizeof(To) bits from From.
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    if_uintx<From> = true>
+constexpr To hi_word(From value) NOEXCEPT;
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    if_not_uintx<From> = true>
+constexpr To hi_word(From value) NOEXCEPT;
+
+/// Extract the low sizeof(To) bits from From.
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    if_uintx<From> = true>
+constexpr To lo_word(From value) NOEXCEPT;
+template <typename To, typename From,
+    if_integral_integer<To> = true,
+    if_not_uintx<From> = true>
+constexpr To lo_word(From value) NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 

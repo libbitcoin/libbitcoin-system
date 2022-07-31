@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/radix/base_64.hpp>
 
-/// DELETECSTDINT
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 
@@ -159,4 +158,3 @@ bool decode_base64(data_chunk& out, const std::string& in) NOEXCEPT
 
 } // namespace system
 } // namespace libbitcoin
-

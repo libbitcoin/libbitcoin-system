@@ -64,13 +64,13 @@ constexpr Result limit(Integer value, Result minimum, Result maximum) NOEXCEPT;
 /// Integral bounds.
 /// ---------------------------------------------------------------------------
 
-/// The maximum value of a integral integer.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral maximum = std::numeric_limits<Integral>::max();
+/// The maximum value of an integer.
+template <typename Integer, if_integer<Integer> = true>
+constexpr Integer maximum = std::numeric_limits<Integer>::max();
 
 /// The minimum value of a integral integer.
-template <typename Integral, if_integral_integer<Integral> = true>
-constexpr Integral minimum = std::numeric_limits<Integral>::min();
+template <typename Integer, if_integer<Integer> = true>
+constexpr Integer minimum = std::numeric_limits<Integer>::min();
 
 // dispatch for absolute_min/unsigned_max
 template <typename Signed, if_signed_integral_integer<Signed> = true>

@@ -21,8 +21,8 @@
 #include <iostream>
 #include <string>
 #include <utility>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/stream.hpp>

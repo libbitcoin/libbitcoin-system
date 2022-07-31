@@ -19,16 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 
-#include <bitcoin/system/crypto/checksum.hpp>
-#include <bitcoin/system/crypto/encryption.hpp>
-#include <bitcoin/system/crypto/external/external.hpp>
-#include <bitcoin/system/crypto/elliptic_curve.hpp>
+#include <bitcoin/system/crypto/aes256.hpp>
+#include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/crypto/golomb_coding.hpp>
-#include <bitcoin/system/crypto/hash.hpp>
-#include <bitcoin/system/crypto/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
-#include <bitcoin/system/crypto/siphash.hpp>
+#include <bitcoin/system/crypto/secp256k1.hpp>
 
 #endif
-

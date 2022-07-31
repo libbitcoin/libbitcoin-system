@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_SENDER_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_STEALTH_SENDER_HPP
 
-/// DELETECSTDINT
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

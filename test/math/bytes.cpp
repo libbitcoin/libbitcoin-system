@@ -81,6 +81,55 @@ static_assert(byte_width(0x0000000000ff010000000000_i64) == 7);
 static_assert(byte_width(0x00000000ff00000000000000_i64) == 8);
 static_assert(is_same_type<decltype(byte_width<int8_t>(0)), size_t>);
 
+// byte
+static_assert(byte<0>(0x01_u8) == 0x01_u8);
+static_assert(byte<0>(0x0102_u16) == 0x02_u8);
+static_assert(byte<1>(0x0102_u16) == 0x01_u8);
+static_assert(byte<0>(0x01020304_u32) == 0x04_u8);
+static_assert(byte<1>(0x01020304_u32) == 0x03_u8);
+static_assert(byte<2>(0x01020304_u32) == 0x02_u8);
+static_assert(byte<3>(0x01020304_u32) == 0x01_u8);
+static_assert(byte<0>(0x0102030405060708_u64) == 0x08_u8);
+static_assert(byte<1>(0x0102030405060708_u64) == 0x07_u8);
+static_assert(byte<2>(0x0102030405060708_u64) == 0x06_u8);
+static_assert(byte<3>(0x0102030405060708_u64) == 0x05_u8);
+static_assert(byte<4>(0x0102030405060708_u64) == 0x04_u8);
+static_assert(byte<5>(0x0102030405060708_u64) == 0x03_u8);
+static_assert(byte<6>(0x0102030405060708_u64) == 0x02_u8);
+static_assert(byte<7>(0x0102030405060708_u64) == 0x01_u8);
+
+static_assert(byte<0, uint8_t>(0x01_u8) == 0x01_u8);
+static_assert(byte<0, uint8_t>(0x0102_u16) == 0x02_u8);
+static_assert(byte<1, uint8_t>(0x0102_u16) == 0x01_u8);
+static_assert(byte<0, uint8_t>(0x01020304_u32) == 0x04_u8);
+static_assert(byte<1, uint8_t>(0x01020304_u32) == 0x03_u8);
+static_assert(byte<2, uint8_t>(0x01020304_u32) == 0x02_u8);
+static_assert(byte<3, uint8_t>(0x01020304_u32) == 0x01_u8);
+static_assert(byte<0, uint8_t>(0x0102030405060708_u64) == 0x08_u8);
+static_assert(byte<1, uint8_t>(0x0102030405060708_u64) == 0x07_u8);
+static_assert(byte<2, uint8_t>(0x0102030405060708_u64) == 0x06_u8);
+static_assert(byte<3, uint8_t>(0x0102030405060708_u64) == 0x05_u8);
+static_assert(byte<4, uint8_t>(0x0102030405060708_u64) == 0x04_u8);
+static_assert(byte<5, uint8_t>(0x0102030405060708_u64) == 0x03_u8);
+static_assert(byte<6, uint8_t>(0x0102030405060708_u64) == 0x02_u8);
+static_assert(byte<7, uint8_t>(0x0102030405060708_u64) == 0x01_u8);
+
+static_assert(byte<0, int8_t>(0x01_u8) == 0x01_i8);
+static_assert(byte<0, int8_t>(0x0102_u16) == 0x02_i8);
+static_assert(byte<1, int8_t>(0x0102_u16) == 0x01_i8);
+static_assert(byte<0, int8_t>(0x01020304_u32) == 0x04_i8);
+static_assert(byte<1, int8_t>(0x01020304_u32) == 0x03_i8);
+static_assert(byte<2, int8_t>(0x01020304_u32) == 0x02_i8);
+static_assert(byte<3, int8_t>(0x01020304_u32) == 0x01_i8);
+static_assert(byte<0, int8_t>(0x0102030405060708_i64) == 0x08_i8);
+static_assert(byte<1, int8_t>(0x0102030405060708_i64) == 0x07_i8);
+static_assert(byte<2, int8_t>(0x0102030405060708_i64) == 0x06_i8);
+static_assert(byte<3, int8_t>(0x0102030405060708_i64) == 0x05_i8);
+static_assert(byte<4, int8_t>(0x0102030405060708_i64) == 0x04_i8);
+static_assert(byte<5, int8_t>(0x0102030405060708_i64) == 0x03_i8);
+static_assert(byte<6, int8_t>(0x0102030405060708_i64) == 0x02_i8);
+static_assert(byte<7, int8_t>(0x0102030405060708_i64) == 0x01_i8);
+
 // is_negated (negated signed values)
 static_assert(is_negated(0x80_i8));
 static_assert(is_negated(0xff_i8));
@@ -207,6 +256,13 @@ static_assert(to_ceilinged_bytes(42u) == (42u + 7u) / 8u);
 static_assert(to_ceilinged_bytes(0xffu) == (0xff + 7u) / 8u);
 static_assert(is_same_type<decltype(to_ceilinged_bytes<uint16_t>(0)), uint16_t>);
 
+static_assert(to_ceilinged_bytes<uint11_t>(0u) == 0u);
+static_assert(to_ceilinged_bytes<uint11_t>(1u) == 1u);
+static_assert(to_ceilinged_bytes<uint11_t>(42u) == (42u + 7u) / 8u);
+static_assert(to_ceilinged_bytes<uint11_t>(0xffu) == (0xff + 7u) / 8u);
+static_assert(to_ceilinged_bytes<uint5_t>(0xffu) == ((0xff & 0b00011111) + 7u) / 8u);
+static_assert(is_same_type<decltype(to_ceilinged_bytes<uint11_t>(0)), uint11_t>);
+
 // to_floored_bytes
 static_assert(to_floored_bytes(0u) == 0u);
 static_assert(to_floored_bytes(1u) == 0u);
@@ -214,31 +270,10 @@ static_assert(to_floored_bytes(42u) == 42u / 8u);
 static_assert(to_floored_bytes(0xffu) == 0xff / 8u);
 static_assert(is_same_type<decltype(to_floored_bytes<uint16_t>(0)), uint16_t>);
 
-// byteswap (constexpr)
-// Beware of type promotion (use explicit types).
-static_assert(byteswap(0x01_i8) == 0x01);
-static_assert(byteswap(0x0102_i16) == 0x0201);
-static_assert(byteswap(0x01020304_i32) == 0x04030201);
-static_assert(byteswap(0x0102030405060708_i64) == 0x0807060504030201);
-static_assert(byteswap(0x01_u8) == 0x01);
-static_assert(byteswap(0x0102_u16) == 0x0201);
-static_assert(byteswap(0x01020304_u32) == 0x04030201);
-static_assert(byteswap(0x0102030405060708_u64) == 0x0807060504030201);
-
-BOOST_AUTO_TEST_CASE(bytes__byteswap__not_constant_evaluated_signed__swapped)
-{
-    BOOST_REQUIRE_EQUAL(byteswap(0x01_i8), 0x01_i8);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102_i16), 0x0201_i16);
-    BOOST_REQUIRE_EQUAL(byteswap(0x01020304_i32), 0x04030201_i32);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102030405060708_i64), 0x0807060504030201_i64);
-}
-
-BOOST_AUTO_TEST_CASE(bytes__byteswap__not_constant_evaluated_unsigned__swapped)
-{
-    BOOST_REQUIRE_EQUAL(byteswap(0x01_u8), 0x01_u8);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102_u16), 0x0201_u16);
-    BOOST_REQUIRE_EQUAL(byteswap(0x01020304_u32), 0x04030201_u32);
-    BOOST_REQUIRE_EQUAL(byteswap(0x0102030405060708_u64), 0x0807060504030201_u64);
-}
+static_assert(to_floored_bytes<uint11_t>(0u) == 0u);
+static_assert(to_floored_bytes<uint11_t>(1u) == 0u);
+static_assert(to_floored_bytes<uint11_t>(42u) == 42u / 8u);
+static_assert(to_floored_bytes<uint5_t>(0xffu) == (0xff & 0b00011111) / 8u);
+static_assert(is_same_type<decltype(to_floored_bytes<uint11_t>(0)), uint11_t>);
 
 BOOST_AUTO_TEST_SUITE_END()

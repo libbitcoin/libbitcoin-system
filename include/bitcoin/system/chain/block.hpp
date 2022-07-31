@@ -87,7 +87,7 @@ public:
     const chain::header& header() const NOEXCEPT;
     const chain::header::cptr header_ptr() const NOEXCEPT;
     const transactions_cptr& transactions_ptr() const NOEXCEPT;
-    hash_list transaction_hashes(bool witness) const NOEXCEPT;
+    hashes transaction_hashes(bool witness) const NOEXCEPT;
 
     /// Computed properties.
     size_t weight() const NOEXCEPT;

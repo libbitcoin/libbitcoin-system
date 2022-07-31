@@ -20,10 +20,10 @@
 #define LIBBITCOIN_SYSTEM_CRYPTO_RING_SIGNATURE_HPP
 
 #include <vector>
-#include <bitcoin/system/crypto/elliptic_curve.hpp>
-#include <bitcoin/system/crypto/hash.hpp>
+#include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

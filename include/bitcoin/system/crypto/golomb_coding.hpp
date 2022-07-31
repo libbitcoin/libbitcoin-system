@@ -22,12 +22,11 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_GOLOMB_CODING
 #define LIBBITCOIN_SYSTEM_CRYPTO_GOLOMB_CODING
 
-/// DELETECSTDINT
 #include <istream>
 #include <ostream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/crypto/siphash.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

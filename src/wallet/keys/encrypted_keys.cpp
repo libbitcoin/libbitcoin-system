@@ -50,7 +50,7 @@ static_assert(quarter == to_half(aes256::block_size));
 
 static hash_digest address_hash(const payment_address& address) NOEXCEPT
 {
-    return bitcoin_hash(to_chunk(address.encoded()));
+    return sha256_hash(sha256_hash(address.encoded()));
 }
 
 static bool address_salt(ek_salt& salt,
@@ -125,21 +125,21 @@ static hash_digest scrypt_token(const data_slice& data,
     const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<hash_size>(data, salt, 16384, 8, 8);
+    return scrypt<16384, 8, 8, true>::hash<hash_size>(data, salt);
 }
 
 static long_hash scrypt_pair(const data_slice& data,
     const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<long_hash_size>(data, salt, 1024, 1, 1);
+    return scrypt<1024, 1, 1, true>::hash<long_hash_size>(data, salt);
 }
 
 static long_hash scrypt_private(const data_slice& data,
     const data_slice& salt) NOEXCEPT
 {
     // Arbitrary scrypt parameters from BIP38.
-    return scrypt<long_hash_size>(data, salt, 16384, 8, 8);
+    return scrypt<16384, 8, 8, true>::hash<long_hash_size>(data, salt);
 }
 
 // set_flags
@@ -246,7 +246,7 @@ bool create_key_pair(encrypted_private& out_private,
 
     const auto point = splice(parse.sign(), parse.data());
     auto point_copy = point;
-    const auto factor = bitcoin_hash(seed);
+    const auto factor = sha256_hash(sha256_hash(seed));
     if (!ec_multiply(point_copy, factor))
         return false;
 
@@ -303,7 +303,7 @@ static bool create_token(encrypted_token& out_token,
     auto factor = scrypt_token(normal(passphrase), owner_salt);
 
     if (lot_sequence)
-        factor = bitcoin_hash(factor, owner_entropy);
+        factor = sha256_hash(sha256_hash(factor, owner_entropy));
 
     ec_compressed point;
     if (!secret_to_public(point, factor))
@@ -387,7 +387,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     auto secret = scrypt_token(normal(passphrase), parse.owner_salt());
 
     if (parse.lot_sequence())
-        secret = bitcoin_hash(secret, parse.entropy());
+        secret = sha256_hash(sha256_hash(secret, parse.entropy()));
 
     ec_compressed point;
     if (!secret_to_public(point, secret))
@@ -406,7 +406,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
 
     aes256::decrypt(extended, derived.second);
     const auto decrypt1 = xor_data<half>(extended, derived.first);
-    const auto factor = bitcoin_hash(decrypt1, part.second);
+    const auto factor = sha256_hash(sha256_hash(decrypt1, part.second));
     if (!ec_multiply(secret, factor))
         return false;
 
@@ -479,7 +479,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     auto factor = scrypt_token(normal(passphrase), parse.owner_salt());
 
     if (lot_sequence)
-        factor = bitcoin_hash(factor, parse.entropy());
+        factor = sha256_hash(sha256_hash(factor, parse.entropy()));
 
     ec_compressed point;
     if (!secret_to_public(point, factor))

@@ -22,10 +22,8 @@
 #include <bitcoin/system/wallet/neutrino_filter.hpp>
 
 #include <algorithm>
-/// DELETECSTDINT
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/define.hpp>
 

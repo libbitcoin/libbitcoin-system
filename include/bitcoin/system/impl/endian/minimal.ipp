@@ -22,76 +22,74 @@
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/algorithm.hpp>
+#include <bitcoin/system/endian/integers.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 #define BUFFERED_STREAM
 
 namespace libbitcoin {
 namespace system {
-
-// integer => data (value-sized) or array (explicit size)
-// These allocate the to-endian outgoing buffer and forward the call.
     
-// stack allocation/constexpr.
+// From integer (including uintx) to explicit array size.
+// ----------------------------------------------------------------------------
+
 template <size_t Size, typename Integer,
     if_integer<Integer>>
-constexpr data_array<Size> to_big_endian_size(Integer value) NOEXCEPT
+RCONSTEXPR data_array<Size> to_big_endian_size(Integer value) NOEXCEPT
 {
-    // Cannot bytecast because non-integral.
     return to_big_data(data_array<Size>{}, value);
 }
 
-// stack allocation/constexpr.
 template <size_t Size, typename Integer,
     if_integer<Integer>>
 constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT
 {
-    // Cannot bytecast because non-integral.
     return to_little_data(data_array<Size>{}, value);
 }
 
-// constexpr (C++20).
+// From integer (including uintx) to chunk.
+// ----------------------------------------------------------------------------
+
 template <typename Integer,
     if_integer<Integer>>
 VCONSTEXPR data_chunk to_big_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
-    // TODO: overflows requires common type.
-    ////if constexpr (is_integral<Integer>)
-    ////{
-    ////    BC_ASSERT(!is_overflow(value, excess));
-    ////}
+    BC_ASSERT(!is_add_overflow(byte_width(value), excess));
 
-    // TODO: machine::number should be able to predict excess.
     // Vector capacity is never reduced when resizing to smaller size.
     const auto size = byte_width(value);
     data_chunk chunk(size + excess);
     chunk.resize(size);
-
-    // Cannot bytecast because non-integral.
     return to_big_data(std::move(chunk), value);
 }
 
-// constexpr (C++20).
 template <typename Integer,
     if_integer<Integer>>
 VCONSTEXPR data_chunk to_little_endian_size(Integer value,
     size_t excess) NOEXCEPT
 {
-    // TODO: overflows requires common type.
-    ////if constexpr (is_integral<Integer>)
-    ////{
-    ////    BC_ASSERT(!is_overflow(value, excess));
-    ////}
+    BC_ASSERT(!is_add_overflow(byte_width(value), excess));
 
-    // TODO: machine::number should be able to predict excess.
     // Vector capacity is never reduced when resizing to smaller size.
     const auto size = byte_width(value);
     data_chunk chunk(size + excess);
     chunk.resize(size);
 
-    // Cannot bytecast because non-integral.
     return to_little_data(std::move(chunk), value);
+}
+
+// From chunk to uintx.
+// ----------------------------------------------------------------------------
+
+inline uintx from_big_endian(const data_chunk& data) NOEXCEPT
+{
+    return from_big_chunk<uintx>(data.size(), data);
+}
+
+inline uintx from_little_endian(const data_chunk& data) NOEXCEPT
+{
+    return from_little_chunk<uintx>(data.size(), data);
 }
 
 } // namespace system

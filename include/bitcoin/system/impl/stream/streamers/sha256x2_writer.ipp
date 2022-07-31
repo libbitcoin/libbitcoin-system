@@ -19,9 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_IPP
 
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
@@ -53,7 +53,9 @@ template <typename OStream>
 void sha256x2_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
-    intrinsics::sha256_update(context_, data, size);
+    // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
+    // The stream could be invalidated, but writers shouldn't have to check it.
+    context_.write(size, data);
 }
 
 template <typename OStream>
@@ -65,6 +67,8 @@ void sha256x2_writer<OStream>::do_flush() NOEXCEPT
 // private
 // ----------------------------------------------------------------------------
 
+// Only hash overflow returns update false, which requires (2^64-8)/8 bytes.
+// The stream could invalidate, but writers shouldn't have to check this.
 template <typename OStream>
 void sha256x2_writer<OStream>::flusher() NOEXCEPT
 {
@@ -72,8 +76,16 @@ void sha256x2_writer<OStream>::flusher() NOEXCEPT
     hash_digest hash;
     BC_POP_WARNING()
 
-    intrinsics::sha256_finalize(context_, hash.data());
-    byte_writer<OStream>::do_write_bytes(sha256_hash(hash).data(), hash_size);
+    // Finalize streaming hash.
+    context_.flush(hash.data());
+    context_.reset();
+
+    // Hash the result of the streaming hash (update cannot overflow).
+    context_.write(hash_size, hash.data());
+    context_.flush(hash.data());
+    context_.reset();
+
+    byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
     byte_writer<OStream>::do_flush();
 }
 

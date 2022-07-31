@@ -801,3 +801,19 @@ static_assert(is_same_type<decltype(rotate_left<int8_t>(0, 0)), int8_t>);
 static_assert(rotate_left<uint8_t>(0x1d, 0) == 0x1d_u8);
 static_assert(rotate_left<uint8_t>(0x1d, 1) == 0x3a_u8);
 static_assert(rotate_left<uint8_t>(0x1d, 9) == 0x3a_u8);
+
+static_assert(hi_word<uint8_t>(0x0f02_u16) == 0x0f_u8);
+static_assert(lo_word<uint8_t>(0x0f02_u16) == 0x02_u8);
+static_assert(hi_word<uint16_t>(0x0f02a001_u32) == 0x0f02_u16);
+static_assert(lo_word<uint16_t>(0x0f02a001_u32) == 0xa001_u16);
+static_assert(hi_word<uint32_t>(0x0f000002a0000001_u64) == 0x0f000002_u32);
+static_assert(lo_word<uint32_t>(0x0f000002a0000001_u64) == 0xa0000001_u32);
+
+static_assert(hi_word<uint8_t>(uint128_t(0x0f02_u16)) == 0x0f_u8);
+static_assert(lo_word<uint8_t>(uint128_t(0x0f02_u16)) == 0x02_u8);
+static_assert(hi_word<uint16_t>(uint128_t(0x0f02a001_u32)) == 0x0f02_u16);
+static_assert(lo_word<uint16_t>(uint128_t(0x0f02a001_u32)) == 0xa001_u16);
+static_assert(hi_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0x0f000002_u32);
+static_assert(lo_word<uint32_t>(uint128_t(0x0f000002a0000001_u64)) == 0xa0000001_u32);
+static_assert(hi_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 0x0f000002a0000001_u64);
+static_assert(lo_word<uint64_t>((uint128_t(0x0f000002a0000001_u64) << 64u) + 42u) == 42_u64);

@@ -19,15 +19,12 @@
 #include <bitcoin/system/chain/header.hpp>
 
 #include <chrono>
-/// DELETECSTDDEF
 #include <utility>
-/// DELETEMENOW
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/compact.hpp>
-/// DELETEMENOW
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -225,11 +222,11 @@ uint32_t header::nonce() const NOEXCEPT
 // computed
 hash_digest header::hash() const NOEXCEPT
 {
-    hash_digest sha256{};
-    hash::sha256::copy sink(sha256);
+    hash_digest digest{};
+    hash::sha256x2::copy sink(digest);
     to_data(sink);
     sink.flush();
-    return sha256_hash(sha256);
+    return digest;
 }
 
 // static/private

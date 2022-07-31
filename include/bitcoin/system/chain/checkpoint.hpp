@@ -19,17 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHECKPOINT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHECKPOINT_HPP
 
-/// DELETECSTDDEF
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
-/// DELETEMENOW
-/// DELETEMENOW
-/// DELETEMENOW
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 
 namespace libbitcoin {
 namespace system {

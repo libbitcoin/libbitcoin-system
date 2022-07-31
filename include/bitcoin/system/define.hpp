@@ -19,18 +19,18 @@
 #ifndef LIBBITCOIN_SYSTEM_DEFINE_HPP
 #define LIBBITCOIN_SYSTEM_DEFINE_HPP
 
-// Standard includes (do not include directly).
-// All except <array> are included here by include ancestory.
-#include <array>
-#include <cstddef>  // purged
-#include <cstdint>  // purged
-#include <exception>
-#include <iostream>
-#include <limits>
-#include <stdexcept>
-#include <string>
-#include <vector>
-#include <type_traits>
+/// Standard includes (do not include directly).
+/// All except <array> are included here by include ancestory.
+#include <array>            // TODO: purge
+#include <cstddef>          // purged
+#include <cstdint>          // purged
+#include <exception>        // TODO: purge
+#include <iostream>         // TODO: purge
+#include <limits>           // TODO: purge
+#include <stdexcept>        // TODO: purge
+#include <string>           // TODO: purge
+#include <type_traits>      // TODO: purge
+#include <vector>           // TODO: purge
 
 // Pulls chains in all /system headers (except settings.hpp).
 #include <bitcoin/system/constraints.hpp>
@@ -39,36 +39,63 @@
     #include <windows.h>
 #endif
 
-// Create bc namespace alias.
-namespace libbitcoin {
-namespace system {
-} // namespace system
-} // namespace libbitcoin
-
+/// Create bc namespace alias.
+namespace libbitcoin{ namespace system {} }
 namespace bc = libbitcoin;
 
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
 
-#ifdef NDEBUG
+/// LCOV (known symbols for code coverage exclusion).
+/// ---------------------------------------------------------------------------
+#define LCOV_EXCL_START(comment)
+#define LCOV_EXCL_STOP()
+
+/// NDEBUG (conditional exclusion).
+/// ---------------------------------------------------------------------------
+
+#if defined(NDEBUG)
+    namespace libbitcoin { constexpr auto checked_build = false; };
     #define BC_ASSERT(expression)
     #define BC_ASSERT_MSG(expression, text)
     #define BC_DEBUG_ONLY(expression)
 #else
     #include <cassert>
+    namespace libbitcoin { constexpr auto checked_build = true; };
     #define BC_ASSERT(expression) assert(expression)
     #define BC_ASSERT_MSG(expression, text) assert((expression)&&(text))
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
-// See gcc.gnu.org/wiki/Visibility
+/// Attributes (for platform independence).
+/// ---------------------------------------------------------------------------
 
-// Generic helper definitions for shared library support
-// GNU visibilty attribute overrides compiler flag `fvisibility`.
-#if defined(HAVE_MSC) || defined(HAVE_CYGWIN)
+/// Emit messages from .cpp during compilation.
+#if defined(HAVE_MESSAGES)
+    #if defined(HAVE_MSC)
+        #define DEFINED(text) __pragma(message(text))
+    #elif defined(HAVE_GNUC)
+        // TODO: This is not working.
+        ////#define DO_PRAGMA(text) _Pragma (#text)
+        ////#define DEFINED(text) DO_PRAGMA(message (#text))
+        #define DEFINED(text)
+    #elif defined(HAVE_CLANG)
+        // TODO: implement.
+        #define DEFINED(text)
+    #else
+        #define DEFINED(text)
+    #endif
+#else
+    #define DEFINED(text)
+#endif
+
+/// See gcc.gnu.org/wiki/Visibility
+/// Generic helper definitions for shared library support
+/// GNU visibilty attribute overrides compiler flag `fvisibility`.
+#if defined(HAVE_WINDOWS_LIBS)
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
     #define BC_HELPER_DLL_LOCAL
-#elif defined(HAVE_GNUC)
+#elif defined(HAVE_NX_LIBS)
     #define BC_HELPER_DLL_IMPORT __attribute__((visibility("default")))
     #define BC_HELPER_DLL_EXPORT __attribute__((visibility("default")))
     #define BC_HELPER_DLL_LOCAL  __attribute__((visibility("internal")))
@@ -78,11 +105,10 @@ namespace bc = libbitcoin;
     #define BC_HELPER_DLL_LOCAL
 #endif
 
-// Now we use the generic helper definitions above to define BC_API
-// and BC_INTERNAL. BC_API is used for the public API symbols. It either DLL
-// imports or DLL exports (or does nothing for static build) BC_INTERNAL is
-// used for non-api symbols.
-
+/// Now we use the generic helper definitions above to define BC_API
+/// and BC_INTERNAL. BC_API is used for the public API symbols. It either DLL
+/// imports or DLL exports (or does nothing for static build) BC_INTERNAL is
+/// used for non-api symbols.
 #if defined BC_STATIC
     #define BC_API
     #define BC_INTERNAL
@@ -94,29 +120,45 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-// These are defined in the GUI for VS builds and by command line for others.
-// But overriding these here for VS builds to keep tests active.
-#if !defined(HAVE_PORTABLE) && defined(HAVE_MSC) && defined(HAVE_X64)
-    #define WITH_AVX2
-    #define WITH_SSE41
-    #define WITH_SSE4
-    ////#define WITH_NEON  // no test yet for ARM Neon.
-    ////#define WITH_SHANI // untested
+/// A stronger compiler hint for inlining.
+/// May use prior to 'constexpr' or in place of 'inline'.
+#if defined(HAVE_MSC)
+    #define FORCE_INLINE __forceinline
+#elif defined(HAVE_GNUC)
+    #define FORCE_INLINE __attribute__((always_inline))
+#else
+    #define FORCE_INLINE inline
 #endif
 
-// LCOV code coverage exclusion ranges.
-#define LCOV_EXCL_START(comment)
-#define LCOV_EXCL_STOP()
+/// Class helpers
+/// ---------------------------------------------------------------------------
+#define DEFAULT5(class_name) \
+    class_name(class_name&&) = default; \
+    class_name(const class_name&) = default; \
+    class_name& operator=(class_name&&) = default; \
+    class_name& operator=(const class_name&) = default; \
+    ~class_name() = default
 
-#if defined(HAVE_MSC) && !defined(HAVE_VS2022)
-    static_assert(false, "Visual Studio 2022 minimum required.");
-#endif
+/// Minimums
+/// ---------------------------------------------------------------------------
 
 #if !defined(HAVE_CPP20)
     static_assert(false, "C++20 minimum required.");
 #endif
 
-// C++11 (full)
+#if defined(HAVE_MSC) && !defined(HAVE_VS2022)
+    static_assert(false, "Visual Studio 2022 minimum required.");
+#endif
+
+/// Required to access ARM intrinsics in msvc.
+#if defined(HAVE_MSC) && defined(HAVE_NEON)
+    #define _ARM_USE_NEW_NEON_INTRINSICS
+#endif
+
+/// Workarounds for C++ noncompliance.
+/// ---------------------------------------------------------------------------
+
+/// C++11 (full)
 #if defined(HAVE_NOEXCEPT)
     #define NOEXCEPT noexcept
     #define THROWS noexcept(false)
@@ -125,48 +167,69 @@ namespace bc = libbitcoin;
     #define THROWS
 #endif
 
-// C++14 (full)
+/// C++14 (full)
 #if defined(HAVE_DEPRECATED)
     #define DEPRECATED [[deprecated]]
 #else
     #define DEPRECATED
 #endif
 
-// C++17 (full)
+/// C++17 (full)
 #define NODISCARD [[nodiscard]]
 
-// C++17 (full)
+/// C++17 (full)
 #define FALLTHROUGH [[fallthrough]]
 
-// C++20 (partial)
+/// C++17 (partial)
+#if defined(HAVE_EXECUTION)
+    #include <execution>
+    #define std_for_each(p, b, e, l) std::for_each(p, b, e, l)
+    #define std_transform(p, b, e, t, l) std::transform(p, b, e, t, l)
+    namespace libbitcoin { constexpr auto par_unseq = std::execution::par_unseq; }
+    namespace libbitcoin { constexpr auto seq = std::execution::seq; }
+#else
+    #define std_for_each(p, b, e, l) std::for_each(b, e, l)
+    #define std_transform(p, b, e, t, l) std::transform(b, e, t, l)
+    namespace libbitcoin { constexpr auto par_unseq = false; }
+    namespace libbitcoin { constexpr auto seq = false; }
+#endif
+
+/// C++20 (partial)
+#if defined(HAVE_CONSTEVAL)
+    #define CONSTEVAL consteval
+#else
+    #define CONSTEVAL constexpr
+#endif
+
+/// C++20 (partial)
 #if defined(HAVE_RANGES)
     #define RCONSTEXPR constexpr
 #else
     #define RCONSTEXPR inline
 #endif
 
-// C++20 (partial)
-#if defined(HAVE_STRING_CONSTEXPR)
-    #define SCONSTEXPR constexpr
-#else
-    #define SCONSTEXPR inline
-#endif
-
-// C++20 (partial)
-#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
-    #define SRCONSTEXPR constexpr
-#else
-    #define SRCONSTEXPR inline
-#endif
-
-// C++20 (partial)
+/// C++20 (partial)
 #if defined(HAVE_VECTOR_CONSTEXPR)
     #define VCONSTEXPR constexpr
 #else
     #define VCONSTEXPR inline
 #endif
 
-// C++20 (partial)
+/// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR)
+    #define SCONSTEXPR constexpr
+#else
+    #define SCONSTEXPR inline
+#endif
+
+/// C++20 (partial)
+#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
+    #define SRCONSTEXPR constexpr
+#else
+    #define SRCONSTEXPR inline
+#endif
+
+/// C++20 (partial)
 #if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
     #define SVCONSTEXPR constexpr
 #else

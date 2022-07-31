@@ -19,10 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PRIVATE_HPP
 #define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PRIVATE_HPP
 
-/// DELETECSTDINT
-/// DELETECSTDDEF
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include "parse_encrypted_key.hpp"
 
 namespace libbitcoin {

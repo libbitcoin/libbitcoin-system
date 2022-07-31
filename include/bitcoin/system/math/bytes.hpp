@@ -24,7 +24,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Byte widths.
+/// Byte width.
 /// ---------------------------------------------------------------------------
 
 /// The number of bytes required to store value (zero returns zero).
@@ -36,34 +36,7 @@ constexpr size_t byte_width(Integer value) NOEXCEPT;
 template <typename Integer, if_signed_integer<Integer> = true>
 constexpr size_t byte_width(Integer value) NOEXCEPT;
 
-/// Byteswap (platform independent byte reversal).
-/// ---------------------------------------------------------------------------
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint8_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint16_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint32_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
-template <typename Integral,
-    if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint64_t)> = true,
-    if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
-
-/// Bits to bytes utilities.
+/// Bit count to byte count.
 /// ---------------------------------------------------------------------------
 
 template <typename Integer, if_unsigned_integer<Integer> = true>
@@ -71,6 +44,15 @@ constexpr Integer to_ceilinged_bytes(Integer bits) NOEXCEPT;
 
 template <typename Integer, if_unsigned_integer<Integer> = true>
 constexpr Integer to_floored_bytes(Integer bits) NOEXCEPT;
+
+/// Byte of integral by logical index (index zero obtains low order byte).
+/// ---------------------------------------------------------------------------
+
+template <size_t Index, typename Byte = uint8_t, typename Integral,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true,
+    if_lesser<Index, sizeof(Integral)> = true>
+constexpr Byte byte(Integral value) NOEXCEPT;
 
 /// Byte Negation.
 /// ---------------------------------------------------------------------------
