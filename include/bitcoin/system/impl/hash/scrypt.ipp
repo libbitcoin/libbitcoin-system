@@ -483,7 +483,7 @@ romix(rblock_t& rblock) NOEXCEPT
 
 TEMPLATE
 template<size_t Size, if_not_greater<Size, scrypt_derivation::maximum_size>>
-static bool
+bool
 CLASS::hash(data_array<Size>& out, const data_slice& password,
     const data_slice& salt) NOEXCEPT
 {
@@ -524,7 +524,7 @@ CLASS::hash(data_array<Size>& out, const data_slice& password,
 
 TEMPLATE
 template<size_t Size, if_not_greater<Size, scrypt_derivation::maximum_size>>
-static data_array<Size>
+data_array<Size>
 CLASS::hash(const data_slice& password, const data_slice& salt) NOEXCEPT
 {
     data_array<Size> out{};
