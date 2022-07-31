@@ -144,9 +144,13 @@
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\rmd_algorithm.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\sha256.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\sha_algorithm.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
+      <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\algorithm.cpp">
+      <ObjectFileName>$(IntDir)test_hash_sha_algorithm.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />

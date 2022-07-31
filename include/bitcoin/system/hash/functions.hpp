@@ -96,25 +96,8 @@ BC_API data_chunk sha256_chunk(const data_slice& data) NOEXCEPT;
 BC_API hash_digest sha256_hash(const data_slice& left,
     const data_slice& right) NOEXCEPT;
 
-// Generate a sha256 hmac.
-BC_API hash_digest hmac_sha256(const data_slice& data,
-    const data_slice& key) NOEXCEPT;
-
-/// Generate a pkcs5 pbkdf2 hmac sha256 chunk.
-/// Used only by scrypt for generation of variably-sized buffer [P * R * 2 * 64].
-BC_API data_chunk pbkd_sha256(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length) NOEXCEPT;
-
 /// Generate a sha512 hash.
 BC_API long_hash sha512_hash(const data_slice& data) NOEXCEPT;
-
-/// Generate a sha512 hmac.
-BC_API long_hash hmac_sha512(const data_slice& data,
-    const data_slice& key) NOEXCEPT;
-
-/// Generate a pkcs5 pbkdf2 hmac sha512 chunk.
-BC_API data_chunk pbkd_sha512(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length) NOEXCEPT;
 
 /// Generate a scrypt hash.
 BC_API hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
@@ -161,7 +144,7 @@ namespace boost
 template <>
 struct hash<bc::system::data_chunk>
 {
-    size_t operator()(const bc::system::data_chunk& data) const  NOEXCEPT
+    size_t operator()(const bc::system::data_chunk& data) const NOEXCEPT
     {
         return bc::system::djb2_hash(data);
     }
@@ -170,7 +153,7 @@ struct hash<bc::system::data_chunk>
 template <size_t Size>
 struct hash<bc::system::data_array<Size>>
 {
-    size_t operator()(const bc::system::data_array<Size>& data) const  NOEXCEPT
+    size_t operator()(const bc::system::data_array<Size>& data) const NOEXCEPT
     {
         return bc::system::djb2_hash(data);
     }

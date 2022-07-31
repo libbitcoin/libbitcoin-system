@@ -36,7 +36,7 @@ namespace wallet {
 // ----------------------------------------------------------------------------
 
 // 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
-static const auto index_bits = static_cast<uint8_t>(
+static const auto index_bits = narrow_cast<uint8_t>(
     system::floored_log2(mnemonic::dictionary::size()));
 
 // private static
@@ -88,11 +88,12 @@ data_chunk mnemonic::decoder(const string_list& words,
 long_hash mnemonic::seeder(const string_list& words,
     const std::string& passphrase) NOEXCEPT
 {
+    using algorithm = sha::algorithm<sha512>;
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "mnemonic";
 
     // Passphrase is limited to ascii (normal) if HAVE_ICU undefind.
-    auto phrase = passphrase;
+    std::string phrase{ passphrase };
 
     LCOV_EXCL_START("Always succeeds unless HAVE_ICU undefined.")
 
@@ -103,8 +104,8 @@ long_hash mnemonic::seeder(const string_list& words,
     LCOV_EXCL_STOP()
 
     // Words are in normal (lower, nfkd) form, even without ICU.
-    return to_array<64>(pbkd_sha512(system::join(words),
-        passphrase_prefix + phrase, hmac_iterations, 64));
+    return pbkd<algorithm>::key<long_hash_size>(system::join(words),
+        passphrase_prefix + phrase, hmac_iterations);
 }
 
 uint8_t mnemonic::checksum_byte(const data_slice& entropy) NOEXCEPT

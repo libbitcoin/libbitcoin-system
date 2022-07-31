@@ -24,6 +24,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -210,11 +211,13 @@ hd_key hd_public::to_hd_key() const NOEXCEPT
 
 hd_public hd_public::derive_public(uint32_t index) const NOEXCEPT
 {
+    using hmacer = hmac<sha::algorithm<sha512>>;
+
     if (index >= hd_first_hardened_key)
         return {};
 
     const auto data = splice(point_, to_big_endian(index));
-    const auto intermediate = split(hmac_sha512(data, chain_));
+    const auto intermediate = split(hmacer::code(data, chain_));
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
     auto child = point_;
@@ -227,7 +230,7 @@ hd_public hd_public::derive_public(uint32_t index) const NOEXCEPT
     const hd_lineage lineage
     {
         lineage_.prefixes,
-        static_cast<uint8_t>(lineage_.depth + 1),
+        add1(lineage_.depth),
         fingerprint(),
         index
     };

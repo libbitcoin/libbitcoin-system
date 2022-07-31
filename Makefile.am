@@ -87,6 +87,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/transaction_error_t.cpp \
     src/hash/checksum.cpp \
     src/hash/functions.cpp \
+    src/hash/siphash.cpp \
     src/hash/vectorization/sha256_1_native.cpp \
     src/hash/vectorization/sha256_2_shani.cpp \
     src/hash/vectorization/sha256_4_neon.cpp \
@@ -277,11 +278,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/checksum.cpp \
     test/hash/functions.cpp \
     test/hash/functions.hpp \
-    test/hash/rmd_algorithm.cpp \
-    test/hash/sha256.cpp \
-    test/hash/sha_algorithm.cpp \
     test/hash/siphash.cpp \
     test/hash/siphash.hpp \
+    test/hash/rmd/algorithm.cpp \
+    test/hash/sha/algorithm.cpp \
+    test/hash/sha/merkle.cpp \
     test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/program.cpp \
@@ -510,15 +511,26 @@ include_bitcoin_system_hash_HEADERS = \
     include/bitcoin/system/hash/checksum.hpp \
     include/bitcoin/system/hash/functions.hpp \
     include/bitcoin/system/hash/hash.hpp \
-    include/bitcoin/system/hash/hmac_sha256.hpp \
-    include/bitcoin/system/hash/hmac_sha512.hpp \
-    include/bitcoin/system/hash/pbkd_sha256.hpp \
-    include/bitcoin/system/hash/pbkd_sha512.hpp \
-    include/bitcoin/system/hash/ripemd160.hpp \
-    include/bitcoin/system/hash/rmd_algorithm.hpp \
+    include/bitcoin/system/hash/hmac.hpp \
+    include/bitcoin/system/hash/pbkd.hpp \
     include/bitcoin/system/hash/scrypt.hpp \
-    include/bitcoin/system/hash/sha_algorithm.hpp \
     include/bitcoin/system/hash/siphash.hpp
+
+include_bitcoin_system_hash_rmddir = ${includedir}/bitcoin/system/hash/rmd
+include_bitcoin_system_hash_rmd_HEADERS = \
+    include/bitcoin/system/hash/rmd/algorithm.hpp \
+    include/bitcoin/system/hash/rmd/ripemd_.hpp \
+    include/bitcoin/system/hash/rmd/rmd.hpp \
+    include/bitcoin/system/hash/rmd/rmd128.hpp \
+    include/bitcoin/system/hash/rmd/rmd160.hpp
+
+include_bitcoin_system_hash_shadir = ${includedir}/bitcoin/system/hash/sha
+include_bitcoin_system_hash_sha_HEADERS = \
+    include/bitcoin/system/hash/sha/algorithm.hpp \
+    include/bitcoin/system/hash/sha/sha.hpp \
+    include/bitcoin/system/hash/sha/sha160.hpp \
+    include/bitcoin/system/hash/sha/sha256.hpp \
+    include/bitcoin/system/hash/sha/sha512.hpp
 
 include_bitcoin_system_impl_chaindir = ${includedir}/bitcoin/system/impl/chain
 include_bitcoin_system_impl_chain_HEADERS = \
@@ -553,14 +565,18 @@ include_bitcoin_system_impl_hash_HEADERS = \
     include/bitcoin/system/impl/hash/accumulator.ipp \
     include/bitcoin/system/impl/hash/checksum.ipp \
     include/bitcoin/system/impl/hash/functions.ipp \
-    include/bitcoin/system/impl/hash/hmac_sha256.ipp \
-    include/bitcoin/system/impl/hash/hmac_sha512.ipp \
-    include/bitcoin/system/impl/hash/pbkd_sha256.ipp \
-    include/bitcoin/system/impl/hash/pbkd_sha512.ipp \
-    include/bitcoin/system/impl/hash/ripemd160.ipp \
-    include/bitcoin/system/impl/hash/rmd_algorithm.ipp \
-    include/bitcoin/system/impl/hash/scrypt.ipp \
-    include/bitcoin/system/impl/hash/sha_algorithm.ipp
+    include/bitcoin/system/impl/hash/hmac.ipp \
+    include/bitcoin/system/impl/hash/pbkd.ipp \
+    include/bitcoin/system/impl/hash/scrypt.ipp
+
+include_bitcoin_system_impl_hash_rmddir = ${includedir}/bitcoin/system/impl/hash/rmd
+include_bitcoin_system_impl_hash_rmd_HEADERS = \
+    include/bitcoin/system/impl/hash/rmd/algorithm.ipp \
+    include/bitcoin/system/impl/hash/rmd/ripemd_.ipp
+
+include_bitcoin_system_impl_hash_shadir = ${includedir}/bitcoin/system/impl/hash/sha
+include_bitcoin_system_impl_hash_sha_HEADERS = \
+    include/bitcoin/system/impl/hash/sha/algorithm.ipp
 
 include_bitcoin_system_impl_machinedir = ${includedir}/bitcoin/system/impl/machine
 include_bitcoin_system_impl_machine_HEADERS = \

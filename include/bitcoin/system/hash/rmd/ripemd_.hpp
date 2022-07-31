@@ -6,8 +6,8 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#ifndef LIBBITCOIN_SYSTEM_HASH_RIPEMD160_HPP
-#define LIBBITCOIN_SYSTEM_HASH_RIPEMD160_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_RMD_RIPEMD__HPP
+#define LIBBITCOIN_SYSTEM_HASH_RMD_RIPEMD__HPP
 
 #include <bitcoin/system/define.hpp>
 
@@ -36,6 +36,6 @@ inline void finalize(context& context, uint8_t* digest) NOEXCEPT;
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/hash/ripemd160.ipp>
+#include <bitcoin/system/impl/hash/rmd/ripemd_.ipp>
 
 #endif

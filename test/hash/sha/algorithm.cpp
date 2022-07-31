@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
+#include "../../test.hpp"
     
 BOOST_AUTO_TEST_SUITE(sha_algorithm_tests)
 
@@ -256,6 +256,7 @@ static_assert(k512::get[79] == 0x6c44198c4a475817);
 static_assert(is_same_type<k512::constants_t, std_array<uint64_t, 80>>);
 
 // h<k160,...>
+////static_assert(h<rmd::k160>::size == 256);
 static_assert(h<k160>::size == 256);
 static_assert(h<k160>::digest == 160);
 static_assert(h<k160, 160>::word_bits == 32);
@@ -379,15 +380,15 @@ static_assert(sha160::K::get[0] == 0x5a827999);
 static_assert(sha160::K::get[79] == 0xca62c1d6);
 
 // sha256 (namespace conflict)
-static_assert(sha::sha256::size == 256);
-static_assert(sha::sha256::digest == 256);
-static_assert(sha::sha256::get.size() == 8);
-static_assert(sha::sha256::get[0] == 0x6a09e667);
-static_assert(sha::sha256::get[7] == 0x5be0cd19);
-static_assert(sha::sha256::K::rounds == 64);
-static_assert(sha::sha256::K::get.size() == 64);
-static_assert(sha::sha256::K::get[0] == 0x428a2f98);
-static_assert(sha::sha256::K::get[63] == 0xc67178f2);
+static_assert(sha256::size == 256);
+static_assert(sha256::digest == 256);
+static_assert(sha256::get.size() == 8);
+static_assert(sha256::get[0] == 0x6a09e667);
+static_assert(sha256::get[7] == 0x5be0cd19);
+static_assert(sha256::K::rounds == 64);
+static_assert(sha256::K::get.size() == 64);
+static_assert(sha256::K::get[0] == 0x428a2f98);
+static_assert(sha256::K::get[63] == 0xc67178f2);
 
 // sha256_256
 static_assert(sha256_256::size == 256);
@@ -430,6 +431,7 @@ static_assert(sha512_224::digest == 224);
 static_assert(sha512_384::digest == 384);
 
 // algorithm<sha160>
+////static_assert(algorithm<rmd160>::big_end_count);
 static_assert(algorithm<sha160>::big_end_count);
 static_assert(algorithm<sha160>::count_bits == 64u);
 static_assert(algorithm<sha160>::count_bytes == 8u);
@@ -453,29 +455,29 @@ static_assert(is_same_type<algorithm<sha160>::sets_t<42>, std_vector<cref<std_ar
 static_assert(is_same_type<decltype(algorithm<sha160>::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(algorithm<sha160>::limit_bytes), const uint64_t>);
 
-// algorithm<sha::sha256>
-static_assert(algorithm<sha::sha256>::big_end_count);
-static_assert(algorithm<sha::sha256>::count_bits == 64u);
-static_assert(algorithm<sha::sha256>::count_bytes == 8u);
-static_assert(algorithm<sha::sha256>::H::get.size() == 8u);
-static_assert(algorithm<sha::sha256>::K::get.size() == 64u);
-static_assert(algorithm<sha::sha256>::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
-static_assert(algorithm<sha::sha256>::limit_bytes == algorithm<sha::sha256>::limit_bits / byte_bits);
-static_assert(is_same_type<algorithm<sha::sha256>::byte_t, uint8_t>);
-static_assert(is_same_type<algorithm<sha::sha256>::word_t, uint32_t>);
-static_assert(is_same_type<algorithm<sha::sha256>::state_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<algorithm<sha::sha256>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<algorithm<sha::sha256>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<algorithm<sha::sha256>::buffer_t, std_array<uint32_t, 64>>);
-static_assert(is_same_type<algorithm<sha::sha256>::block_t, std_array<uint8_t, 64>>);
-static_assert(is_same_type<algorithm<sha::sha256>::half_t, std_array<uint8_t, 32>>);
-static_assert(is_same_type<algorithm<sha::sha256>::digest_t, std_array<uint8_t, 32>>);
-static_assert(is_same_type<algorithm<sha::sha256>::count_t, uint64_t>);
-static_assert(is_same_type<algorithm<sha::sha256>::digests_t, std_vector<std_array<uint8_t, 32>>>);
-static_assert(is_same_type<algorithm<sha::sha256>::set_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-static_assert(is_same_type<algorithm<sha::sha256>::sets_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
-static_assert(is_same_type<decltype(algorithm<sha::sha256>::limit_bits), const uint64_t>);
-static_assert(is_same_type<decltype(algorithm<sha::sha256>::limit_bytes), const uint64_t>);
+// algorithm<sha256>
+static_assert(algorithm<sha256>::big_end_count);
+static_assert(algorithm<sha256>::count_bits == 64u);
+static_assert(algorithm<sha256>::count_bytes == 8u);
+static_assert(algorithm<sha256>::H::get.size() == 8u);
+static_assert(algorithm<sha256>::K::get.size() == 64u);
+static_assert(algorithm<sha256>::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
+static_assert(algorithm<sha256>::limit_bytes == algorithm<sha256>::limit_bits / byte_bits);
+static_assert(is_same_type<algorithm<sha256>::byte_t, uint8_t>);
+static_assert(is_same_type<algorithm<sha256>::word_t, uint32_t>);
+static_assert(is_same_type<algorithm<sha256>::state_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<algorithm<sha256>::chunk_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<algorithm<sha256>::words_t, std_array<uint32_t, 16>>);
+static_assert(is_same_type<algorithm<sha256>::buffer_t, std_array<uint32_t, 64>>);
+static_assert(is_same_type<algorithm<sha256>::block_t, std_array<uint8_t, 64>>);
+static_assert(is_same_type<algorithm<sha256>::half_t, std_array<uint8_t, 32>>);
+static_assert(is_same_type<algorithm<sha256>::digest_t, std_array<uint8_t, 32>>);
+static_assert(is_same_type<algorithm<sha256>::count_t, uint64_t>);
+static_assert(is_same_type<algorithm<sha256>::digests_t, std_vector<std_array<uint8_t, 32>>>);
+static_assert(is_same_type<algorithm<sha256>::set_t, std_vector<cref<std_array<uint8_t, 64>>>>);
+static_assert(is_same_type<algorithm<sha256>::sets_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
+static_assert(is_same_type<decltype(algorithm<sha256>::limit_bits), const uint64_t>);
+static_assert(is_same_type<decltype(algorithm<sha256>::limit_bytes), const uint64_t>);
 
 // algorithm<sha512>
 static_assert(algorithm<sha512>::big_end_count);

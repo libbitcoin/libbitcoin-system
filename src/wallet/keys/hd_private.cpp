@@ -24,6 +24,7 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -128,9 +129,11 @@ hd_private hd_private::from_private(const ec_secret& secret,
 hd_private hd_private::from_entropy(const data_slice& entropy,
     uint64_t prefixes) NOEXCEPT
 {
+    using hmacer = hmac<sha::algorithm<sha512>>;
+
     // This is a magic constant from BIP32.
     static const auto magic = to_chunk("Bitcoin seed");
-    const auto intermediate = split(hmac_sha512(entropy, magic));
+    const auto intermediate = split(hmacer::code(entropy, magic));
 
     return hd_private(intermediate.first, intermediate.second, prefixes);
 }
@@ -241,13 +244,14 @@ hd_public hd_private::to_public() const NOEXCEPT
 
 hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
 {
+    using hmacer = hmac<sha::algorithm<sha512>>;
     constexpr uint8_t depth = 0;
 
     const auto data = (index >= hd_first_hardened_key) ?
         splice(to_array(depth), secret_, to_big_endian(index)) :
         splice(point_, to_big_endian(index));
 
-    const auto intermediate = split(hmac_sha512(data, chain_));
+    const auto intermediate = split(hmacer::code(data, chain_));
 
     // The child key ki is (parse256(IL) + kpar) mod n:
     auto child = secret_;
@@ -260,7 +264,7 @@ hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
     const hd_lineage lineage
     {
         lineage_.prefixes,
-        static_cast<uint8_t>(add1(lineage_.depth)),
+        add1(lineage_.depth),
         fingerprint(),
         index
     };

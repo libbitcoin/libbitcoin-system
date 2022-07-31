@@ -40,7 +40,7 @@
 // define         : constraints
 
 // Other directory common includes are not internally chained.
-// Each headers include only its required common headers.
+// Each header includes only its required common headers.
 
 // /error         : define
 // /unicode       : define
@@ -59,9 +59,8 @@
 // /wallet        : /chain
 // settings       : /chain
 
-// All /crypto/external can be made cpp/constexpr except the lax
-// parser, which wraps libsecp256k1 (as with elliptic_curve).
-// TODO: convert and move to /system/hash/ directory along with hash.hpp.
+// When a symbol is unexplainably undefined, its defining include is probably
+// creating the circularity.
 
 DEFINED(LIBBITCOIN_SYSTEM_VERSION)
 

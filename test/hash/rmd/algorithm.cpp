@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
+#include "../../test.hpp"
     
-BOOST_AUTO_TEST_SUITE(rmd_tests)
+BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
 
 // Concurrency off for debug testing.
 using rmd_128 = rmd::algorithm<rmd::h128<>, false>;
@@ -411,8 +411,8 @@ static_assert(k<160>::columns == 16);
 static_assert(k<160>::rows == 10);
 static_assert(is_same_type<k<128>::constants_t, std_array<uint32_t, 8>>);
 static_assert(is_same_type<k<160>::constants_t, std_array<uint32_t, 10>>);
-static_assert(is_same_type<k<128>::rounds_t, std_array<size_t, 128>>);
-static_assert(is_same_type<k<160>::rounds_t, std_array<size_t, 160>>);
+static_assert(is_same_type<k<128>::schedule_t, std_array<size_t, 128>>);
+static_assert(is_same_type<k<160>::schedule_t, std_array<size_t, 160>>);
 
 // k128
 static_assert(k128::strength == 128);
@@ -429,7 +429,7 @@ static_assert(k128::word[127] == 14u);
 static_assert(k128::rot[0] == 11u);
 static_assert(k128::rot[127] == 8u);
 static_assert(is_same_type<k128::constants_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<k128::rounds_t, std_array<size_t, 128>>);
+static_assert(is_same_type<k128::schedule_t, std_array<size_t, 128>>);
 
 // k160
 static_assert(k160::strength == 160);
@@ -446,7 +446,7 @@ static_assert(k160::word[159] == 11u);
 static_assert(k160::rot[0] == 11u);
 static_assert(k160::rot[159] == 11u);
 static_assert(is_same_type<k160::constants_t, std_array<uint32_t, 10>>);
-static_assert(is_same_type<k160::rounds_t, std_array<size_t, 160>>);
+static_assert(is_same_type<k160::schedule_t, std_array<size_t, 160>>);
 
 // h<k128,...>
 static_assert(h<k128>::size == 256);
@@ -461,6 +461,7 @@ static_assert(is_same_type<h<k128, 128>::word_t, uint32_t>);
 static_assert(is_same_type<h<k128, 128>::state_t, std_array<uint32_t, 4>>);
 
 // h<k160,...>
+////static_assert(h<sha::k160>::size == 256);
 static_assert(h<k160>::size == 256);
 static_assert(h<k160>::digest == 160);
 static_assert(h<k160, 160>::word_bits == 32);
@@ -547,6 +548,7 @@ static_assert(is_same_type<decltype(algorithm<rmd128>::limit_bits), const uint64
 static_assert(is_same_type<decltype(algorithm<rmd128>::limit_bytes), const uint64_t>);
 
 // algorithm<rmd160>
+////static_assert(!algorithm<sha160>::big_end_count);
 static_assert(!algorithm<rmd160>::big_end_count);
 static_assert(algorithm<rmd160>::count_bits == 64u);
 static_assert(algorithm<rmd160>::count_bytes == 8u);

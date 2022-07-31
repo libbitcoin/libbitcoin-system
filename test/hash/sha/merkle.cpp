@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
+#include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(sha256_tests)
+BOOST_AUTO_TEST_SUITE(merkle_tests)
 
 // hash (see also hash.cpp)
 
-////BOOST_AUTO_TEST_CASE(sha256__hash__fractional_block__expected)
+////BOOST_AUTO_TEST_CASE(merkle__hash__fractional_block__expected)
 ////{
 ////    constexpr auto expected = base16_array("3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7");
 ////    hash_digest hash{};
@@ -33,12 +33,12 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 ////
 ////// merkle_root
 ////
-////BOOST_AUTO_TEST_CASE(sha256__merkle_root__empty__null_hash)
+////BOOST_AUTO_TEST_CASE(merkle__merkle_root__empty__null_hash)
 ////{
 ////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(sha256::digests{}), null_hash);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(sha256__merkle_root__one_hash__one_hash)
+////BOOST_AUTO_TEST_CASE(merkle__merkle_root__one_hash__one_hash)
 ////{
 ////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(sha256::digests{ one_hash }), one_hash);
 ////}
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 ////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__two_blocks__expected)
+////BOOST_AUTO_TEST_CASE(merkle__to_merkle_root__two_blocks__expected)
 ////{
 ////    hashes hashes
 ////    {
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 ////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__four_blocks__expected)
+////BOOST_AUTO_TEST_CASE(merkle__to_merkle_root__four_blocks__expected)
 ////{
 ////    hashes hashes
 ////    {
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 ////    BOOST_REQUIRE_EQUAL(sha256::merkle_root(std::move(hashes)), root);
 ////}
 ////
-////BOOST_AUTO_TEST_CASE(sha256__to_merkle_root__eight_blocks__expected)
+////BOOST_AUTO_TEST_CASE(merkle__to_merkle_root__eight_blocks__expected)
 ////{
 ////    hashes hashes
 ////    {
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 // merkle_hash (now private to merkle_root implementation)
 
 ////// Compares sha256::transform to single via sha256_hash (one block).
-////BOOST_AUTO_TEST_CASE(sha256__merkle_hash__vs_bitcoin_hash_one_block__same)
+////BOOST_AUTO_TEST_CASE(merkle__merkle_hash__vs_bitcoin_hash_one_block__same)
 ////{
 ////    const hashes hashes
 ////    {
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 ////}
 
 ////// Compares sha256::transform to single via sha256_hash (two blocks).
-////BOOST_AUTO_TEST_CASE(sha256__merkle_hash__vs_bitcoin_hash_two_blocks__same)
+////BOOST_AUTO_TEST_CASE(merkle__merkle_hash__vs_bitcoin_hash_two_blocks__same)
 ////{
 ////    const hashes hashes
 ////    {
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_SUITE(sha256_tests)
 
 ////// satoshi test case
 ////// Compares sha256::transform to single via sha256_hash (32 blocks).
-////BOOST_AUTO_TEST_CASE(sha256__merkle_hash__vs_sha256x2_writer__same)
+////BOOST_AUTO_TEST_CASE(merkle__merkle_hash__vs_sha256x2_writer__same)
 ////{
 ////    BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 ////

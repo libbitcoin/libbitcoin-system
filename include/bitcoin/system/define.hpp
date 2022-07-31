@@ -137,7 +137,7 @@ namespace bc = libbitcoin;
     class_name(const class_name&) = default; \
     class_name& operator=(class_name&&) = default; \
     class_name& operator=(const class_name&) = default; \
-    ~accumulator() = default
+    ~class_name() = default
 
 /// Minimums
 /// ---------------------------------------------------------------------------

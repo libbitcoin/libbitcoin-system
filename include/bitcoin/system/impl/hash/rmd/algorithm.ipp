@@ -35,8 +35,9 @@ namespace rmd {
 // homes.esat.kuleuven.be/~bosselae/ripemd/rmd320.txt
 // homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
 
-#define TEMPLATE template <typename RMD, bool Concurrent>
-#define CLASS algorithm<RMD, Concurrent>
+#define TEMPLATE template <typename RMD, bool Concurrent, \
+    if_same<typename RMD::T, rmdh_t> If>
+#define CLASS algorithm<RMD, Concurrent, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)

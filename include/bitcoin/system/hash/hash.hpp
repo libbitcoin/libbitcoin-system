@@ -19,29 +19,21 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_HASH_HPP
 #define LIBBITCOIN_SYSTEM_HASH_HASH_HPP
 
-#include <bitcoin/system/hash/accumulator.hpp>
 #include <bitcoin/system/hash/checksum.hpp>
 #include <bitcoin/system/hash/functions.hpp>
-#include <bitcoin/system/hash/hmac_sha256.hpp>
-#include <bitcoin/system/hash/hmac_sha512.hpp>
-#include <bitcoin/system/hash/pbkd_sha256.hpp>
-#include <bitcoin/system/hash/pbkd_sha512.hpp>
-#include <bitcoin/system/hash/ripemd160.hpp>
-#include <bitcoin/system/hash/rmd_algorithm.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
-#include <bitcoin/system/hash/sha_algorithm.hpp>
 #include <bitcoin/system/hash/siphash.hpp>
 
-// vectorization intrinsics into algorithms using math templates.
-// sha-ni intrinsics into sha algorithm using shani math template.
+// TODO: debug.
+#include <bitcoin/system/hash/rmd/algorithm.hpp>
+#include <bitcoin/system/hash/sha/algorithm.hpp>
+#include <bitcoin/system/hash/accumulator.hpp>
+#include <bitcoin/system/hash/hmac.hpp>
 
-// sha    (algorithm)
-// ripemd (algorithm)
-// accumulator<algorithm>
-// hmac<accumulator<algorithm>>
-// pbkd<hmac<accumulator<algorithm>>>
-// scrypt          -> hash
-// checksum        -> hash
-// siphash         -> hash
+// TODO: debug.
+#include <bitcoin/system/hash/pbkd.hpp>
+
+// TODO: delete (after rmd debugged and dependencies updated).
+#include <bitcoin/system/hash/rmd/ripemd_.hpp>
 
 #endif

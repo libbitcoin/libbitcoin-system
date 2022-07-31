@@ -52,7 +52,7 @@ static const auto version_two_factor_authentication_witness = "102";
 static const auto version_none = "none";
 
 // 2^11 = 2048 implies 11 bits exactly indexes every possible dictionary word.
-static const auto index_bits = static_cast<uint8_t>(floored_log2(
+static const auto index_bits = narrow_cast<uint8_t>(floored_log2(
     electrum::dictionary::size()));
 
 // private static
@@ -147,13 +147,15 @@ electrum::grinding electrum::grinder(const data_chunk& entropy,
 // This cannot match electrum_v1 or mnemonic.
 bool electrum::validator(const string_list& words, seed_prefix prefix) NOEXCEPT
 {
+    using hmacer = hmac<sha::algorithm<sha512>>;
+
     // Words are in normal (lower, nfkd) form, even without ICU.
     auto sentence = system::join(words);
     sentence = to_non_combining_form(sentence);
     sentence = to_compressed_form(sentence);
 
-    const auto seed = encode_base16(hmac_sha512(sentence, "Seed version"));
-    return starts_with(seed, to_version(prefix));
+    const auto seed = hmacer::code(sentence, "Seed version");
+    return starts_with(encode_base16(seed), to_version(prefix));
 }
 
 // Electrum uses the same normalization function for words and passphrases.
@@ -162,6 +164,7 @@ bool electrum::validator(const string_list& words, seed_prefix prefix) NOEXCEPT
 long_hash electrum::seeder(const string_list& words,
     const std::string& passphrase) NOEXCEPT
 {
+    using algorithm = sha::algorithm<sha512>;
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "electrum";
 
@@ -215,7 +218,7 @@ long_hash electrum::seeder(const string_list& words,
 
     const auto data = to_chunk(sentence);
     const auto salt = to_chunk(passphrase_prefix + phrase);
-    return to_array<64>(pbkd_sha512(data, salt, hmac_iterations, 64));
+    return pbkd<algorithm>::key<long_hash_size>(data, salt, hmac_iterations);
 }
 
 // protected static (sizers)

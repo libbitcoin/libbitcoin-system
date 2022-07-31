@@ -124,24 +124,6 @@ static const std_array<sha256_test, 21> sha256_tests
     {base16_chunk("a475bc116efb92cde208e19af68dd00e28f62e27836d28cc41ff4571391ee21379069e4632599d75"), base16_array("cc7ef1dd07f26065caeab1a9dbd820db31448812d3cf5d1a592b8b263e493a47")}
 };
 
-// sha512_tests
-// ----------------------------------------------------------------------------
-
-struct sha512_test
-{
-    const std::string data;
-    const long_hash expected;
-};
-
-static const std_array<sha512_test, 1> sha512_tests
-{
-    sha512_test
-    {
-        "data",
-        base16_array("77c7ce9a5d86bb386d443bb96390faa120633158699c8844c30b13ab0bf92760b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876")
-    }
-};
-
 // hmac_sha256_tests
 // ----------------------------------------------------------------------------
 
@@ -159,6 +141,52 @@ static const std_array<hmac_sha256_test, 1> hmac_sha256_tests
         "data",
         "key",
         base16_array("5031fe3d989c6d1537a013fa6e739da23463fdaec3b70137d828e36ace221bd0")
+    }
+};
+
+// pbkd_sha256_tests
+// ----------------------------------------------------------------------------
+
+struct pbkd_sha256_test
+{
+    const std::string passphrase;
+    const std::string salt;
+    const size_t count;
+    const long_hash expected;
+};
+
+static const std_array<pbkd_sha256_test, 2> pbkd_sha256_tests
+{
+    pbkd_sha256_test
+    {
+        "passwd",
+        "salt",
+        1,
+        base16_array("55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783")
+    },
+    {
+        "Password",
+        "NaCl",
+        80000,
+        base16_array("4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176a272bdebba1d078478f62b397f33c8d")
+    }
+};
+
+// sha512_tests
+// ----------------------------------------------------------------------------
+
+struct sha512_test
+{
+    const std::string data;
+    const long_hash expected;
+};
+
+static const std_array<sha512_test, 1> sha512_tests
+{
+    sha512_test
+    {
+        "data",
+        base16_array("77c7ce9a5d86bb386d443bb96390faa120633158699c8844c30b13ab0bf92760b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876")
     }
 };
 
@@ -182,34 +210,6 @@ static const std_array<hmac_sha512_test, 1> hmac_sha512_tests
     }
 };
 
-// pbkd_sha256_tests
-// ----------------------------------------------------------------------------
-
-struct pbkd_sha256_test
-{
-    const std::string passphrase;
-    const std::string salt;
-    const size_t iterations;
-    const data_chunk expected;
-};
-
-static const std_array<pbkd_sha256_test, 2> pbkd_sha256_tests
-{
-    pbkd_sha256_test
-    {
-        "passwd",
-        "salt",
-        1,
-        base16_chunk("55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783")
-    },
-    {
-        "Password",
-        "NaCl",
-        80000,
-        base16_chunk("4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176a272bdebba1d078478f62b397f33c8d")
-    }
-};
-
 // pbkd_sha512_tests
 // ----------------------------------------------------------------------------
 
@@ -217,8 +217,8 @@ struct pbkd_sha512_test
 {
     const std::string passphrase;
     const std::string salt;
-    const size_t iterations;
-    const data_chunk expected;
+    const size_t count;
+    const long_hash expected;
 };
 
 static const std_array<pbkd_sha512_test, 5> pbkd_sha512_tests
@@ -228,31 +228,31 @@ static const std_array<pbkd_sha512_test, 5> pbkd_sha512_tests
         "password",
         "salt",
         1,
-        base16_chunk("867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce")
+        base16_array("867f70cf1ade02cff3752599a3a53dc4af34c7a669815ae5d513554e1c8cf252c02d470a285a0501bad999bfe943c08f050235d7d68b1da55e63f73b60a57fce")
     },
     {
         "password",
         "salt",
         2,
-        base16_chunk("e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e")
+        base16_array("e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e")
     },
     {
         "password",
         "salt",
         4096,
-        base16_chunk("d197b1b33db0143e018b12f3d1d1479e6cdebdcc97c5c0f87f6902e072f457b5143f30602641b3d55cd335988cb36b84376060ecd532e039b742a239434af2d5")
+        base16_array("d197b1b33db0143e018b12f3d1d1479e6cdebdcc97c5c0f87f6902e072f457b5143f30602641b3d55cd335988cb36b84376060ecd532e039b742a239434af2d5")
     },
     {
         "passwordPASSWORDpassword",
         "saltSALTsaltSALTsaltSALTsaltSALTsalt",
         4096,
-        base16_chunk("8c0511f4c6e597c6ac6315d8f0362e225f3c501495ba23b868c005174dc4ee71115b59f9e60cd9532fa33e0f75aefe30225c583a186cd82bd4daea9724a3d3b8")
+        base16_array("8c0511f4c6e597c6ac6315d8f0362e225f3c501495ba23b868c005174dc4ee71115b59f9e60cd9532fa33e0f75aefe30225c583a186cd82bd4daea9724a3d3b8")
     },
     {
         "password",
         "NaCL",
         1,
-        base16_chunk("73decfa58aa2e84f94771a75736bb88bd3c7b38270cfb50cb390ed78b305656af8148e52452b2216b2b8098b761fc6336060a09f76415e9f71ea47f9e9064306")
+        base16_array("73decfa58aa2e84f94771a75736bb88bd3c7b38270cfb50cb390ed78b305656af8148e52452b2216b2b8098b761fc6336060a09f76415e9f71ea47f9e9064306")
     }
 };
 
@@ -261,8 +261,7 @@ static const std_array<pbkd_sha512_test, 5> pbkd_sha512_tests
 
 struct scrypt_test
 {
-    // input data just happens to be hex/80.
-    const data_chunk data;
+    const data_array<80> data;
     const hash_digest expected;
 };
 
@@ -270,23 +269,23 @@ static const std_array<scrypt_test, 5> scrypt_tests
 {
     scrypt_test
     {
-        base16_chunk("020000004c1271c211717198227392b029a64a7971931d351b387bb80db027f270411e398a07046f7d4a08dd815412a8712f874a7ebf0507e3878bd24e20a3b73fd750a667d2f451eac7471b00de6659"),
+        base16_array("020000004c1271c211717198227392b029a64a7971931d351b387bb80db027f270411e398a07046f7d4a08dd815412a8712f874a7ebf0507e3878bd24e20a3b73fd750a667d2f451eac7471b00de6659"),
         base16_array("065898d7ab2daa8235cdda9511d248f3010b5e11f682f80741ef2b0000000000")
     },
     {
-        base16_chunk("0200000011503ee6a855e900c00cfdd98f5f55fffeaee9b6bf55bea9b852d9de2ce35828e204eef76acfd36949ae56d1fbe81c1ac9c0209e6331ad56414f9072506a77f8c6faf551eac7471b00389d01"),
+        base16_array("0200000011503ee6a855e900c00cfdd98f5f55fffeaee9b6bf55bea9b852d9de2ce35828e204eef76acfd36949ae56d1fbe81c1ac9c0209e6331ad56414f9072506a77f8c6faf551eac7471b00389d01"),
         base16_array("94fc881c9ff1da50d235ed28f2bbcfddfeb7084e63ebd5bd110d3a0000000000")
     },
     {
-        base16_chunk("02000000a72c8a177f523946f42f22c3e86b8023221b4105e8007e59e81f6beb013e29aaf635295cb9ac966213fb56e046dc71df5b3f7f67ceaeab24038e743f883aff1aaafaf551eac7471b0166249b"),
+        base16_array("02000000a72c8a177f523946f42f22c3e86b8023221b4105e8007e59e81f6beb013e29aaf635295cb9ac966213fb56e046dc71df5b3f7f67ceaeab24038e743f883aff1aaafaf551eac7471b0166249b"),
         base16_array("81caa81451ddf8659cf2afd8599d2d6c8a724432e188f295f8400b0000000000")
     },
     {
-        base16_chunk("010000007824bc3a8a1b4628485eee3024abd8626721f7f870f8ad4d2f33a27155167f6a4009d1285049603888fe85a84b6c803a53305a8d497965a5e896e1a00568359589faf551eac7471b0065434e"),
+        base16_array("010000007824bc3a8a1b4628485eee3024abd8626721f7f870f8ad4d2f33a27155167f6a4009d1285049603888fe85a84b6c803a53305a8d497965a5e896e1a00568359589faf551eac7471b0065434e"),
         base16_array("fe05e1971818866adc7e8e6e2fd7e8d8991e032349cd91580007300000000000")
     },
     {
-        base16_chunk("0200000050bfd4e4a307a8cb6ef4aef69abc5c0f2d579648bd80d7733e1ccc3fbc90ed664a7f74006cb11bde87785f229ecd366c2d4e44432832580e0608c579e4cb76f383f7f551eac7471b00c36982"),
+        base16_array("0200000050bfd4e4a307a8cb6ef4aef69abc5c0f2d579648bd80d7733e1ccc3fbc90ed664a7f74006cb11bde87785f229ecd366c2d4e44432832580e0608c579e4cb76f383f7f551eac7471b00c36982"),
         base16_array("8cec00384d72c7e74f5b340d73af02fa47cb0c13c7afa426b4f0180000000000")
     }
 };

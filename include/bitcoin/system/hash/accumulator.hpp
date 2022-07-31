@@ -27,16 +27,17 @@ namespace libbitcoin {
 namespace system {
 
 /// Accumulator for SHA/RMD/MD# streaming hash algorithms.
+/// flush() is non-clearing (writes may continue).
 template <typename Algorithm, bool Checked = checked_build>
 struct accumulator
 {
-    DEFAULT5(accumulator);
     using byte_t = typename Algorithm::byte_t;
     using state_t = typename Algorithm::state_t;
     using digest_t = typename Algorithm::digest_t;
 
     /// Sets initial state to Hash initialization vector.
     constexpr accumulator() NOEXCEPT;
+    DEFAULT5(accumulator);
 
     /// Accepts an initial state and count of blocks it has accumulated.
     constexpr accumulator(size_t blocks, const state_t& state) NOEXCEPT;

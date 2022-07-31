@@ -6,8 +6,8 @@
  *  DATE:     1 March 1996       VERSION:  1.0
   * ADAPTED:  by Libbitcoin Developers on 7 September 2016
 \********************************************************************/
-#ifndef LIBBITCOIN_SYSTEM_HASH_RIPEMD160_IPP
-#define LIBBITCOIN_SYSTEM_HASH_RIPEMD160_IPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_RMD_RIPEMD160__IPP
+#define LIBBITCOIN_SYSTEM_HASH_RMD_RIPEMD160__IPP
 
 #include <algorithm>
 #include <bitcoin/system/define.hpp>

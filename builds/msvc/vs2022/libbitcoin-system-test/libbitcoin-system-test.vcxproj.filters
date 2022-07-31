@@ -34,6 +34,12 @@
     <Filter Include="src\hash">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\hash\rmd">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\hash\sha">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\machine">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
@@ -50,34 +56,34 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\devices">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\streamers">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\keys">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\mnemonics">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words\catalogs">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -279,14 +285,14 @@
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\rmd_algorithm.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
+      <Filter>src\hash\rmd</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\sha256.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\test\hash\sha\algorithm.cpp">
+      <Filter>src\hash\sha</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\sha_algorithm.cpp">
-      <Filter>src\hash</Filter>
+    <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp">
+      <Filter>src\hash\sha</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">
       <Filter>src\hash</Filter>

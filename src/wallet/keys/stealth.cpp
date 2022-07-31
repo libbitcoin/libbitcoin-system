@@ -34,7 +34,7 @@ using namespace system::chain;
 bool is_stealth_script(const script& script) NOEXCEPT
 {
     return script::is_pay_null_data_pattern(script.ops()) &&
-        (script.ops()[1].data().size() >= hash_size);
+        (script.ops().at(1).data().size() >= hash_size);
 }
 
 bool to_stealth_prefix(uint32_t& out_prefix, const script& script) NOEXCEPT
@@ -55,6 +55,8 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script) NOEXCEPT
 bool create_ephemeral_key(ec_secret& out_secret,
     const data_chunk& seed) NOEXCEPT
 {
+    using hmacer = hmac<sha::algorithm<sha256>>;
+
     auto nonced_seed = splice({ 0x00 }, seed);
     ec_compressed point;
 
@@ -62,9 +64,8 @@ bool create_ephemeral_key(ec_secret& out_secret,
     // This gives extremely high success probability given even distribution.
     for (uint8_t nonce = 0; nonce < max_uint8; ++nonce)
     {
-        nonced_seed[0] = nonce;
-        out_secret = hmac_sha256(nonced_seed, "Stealth seed");
-
+        nonced_seed.front() = nonce;
+        out_secret = hmacer::code(nonced_seed, "Stealth seed");
         if (secret_to_public(point, out_secret) && is_even_key(point))
             return true;
     }
@@ -147,9 +148,9 @@ bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     // The sign of the ephemeral public key is fixed by convention.
     // This requires the spender to generate a compliant (y-even) key.
     // That requires iteration with probability of 1 in 2 chance of success.
-    out_ephemeral_public_key[0] = ec_even_sign;
+    out_ephemeral_public_key.front() = ec_even_sign;
 
-    const auto& to = script.ops()[1].data();
+    const auto& to = script.ops().at(1).data();
     const auto from = std::next(out_ephemeral_public_key.begin());
     std::copy_n(to.begin(), hash_size, from);
     return true;
@@ -161,7 +162,7 @@ bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
     if (!is_stealth_script(script))
         return false;
 
-    const auto& data = script.ops()[1].data();
+    const auto& data = script.ops().at(1).data();
     std::copy_n(data.begin(), hash_size, out_unsigned_ephemeral_key.begin());
     return true;
 }

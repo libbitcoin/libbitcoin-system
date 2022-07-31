@@ -26,7 +26,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/hash/pbkd_sha256.hpp>
+#include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -482,14 +482,11 @@ romix(rblock_t& rblock) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-bool CLASS::
-hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
-    size_t size) NOEXCEPT
+template<size_t Size, if_not_greater<Size, scrypt_derivation::maximum_size>>
+static bool
+CLASS::hash(data_array<Size>& out, const data_slice& password,
+    const data_slice& salt) NOEXCEPT
 {
-    static_assert(size_of<prblock_t>() <= pbkd::sha256::maximum_size);
-    if (is_null(buffer) || (size > pbkd::sha256::maximum_size))
-        return false;
-
     // Make a working set of P rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 128)] bytes heap allocated.
@@ -498,13 +495,15 @@ hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
     auto& prblocks = *ptr;
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    // key derivation #1 fills prblocks with data derived from password/salt.
+    // key derivation #2 creates hash from password/scrypt-prblocks (as salt).
+    auto& bytes = array_cast<uint8_t>(prblocks);
+
     // rfc7914
     // 1. Initialize an array B consisting of p blocks of 128 * r octets each:
     //    B[0] || B[1] || ... || B[p - 1] =
     //       PBKDF2-HMAC-SHA256 (P, S, 1, p * 128 * r)
-    auto& b = array_cast<uint8_t>(prblocks);
-    pbkd::sha256::hash(phrase.data(), phrase.size(), salt.data(), salt.size(),
-        one, b.data(), b.size());
+    scrypt_derivation::key(bytes, password, salt, one);
 
     // rfc7914
     // 2. for i = 0 to p - 1 do
@@ -519,9 +518,18 @@ hash(const data_slice& phrase, const data_slice& salt, uint8_t* buffer,
 
     // rfc7914
     // 3. DK = PBKDF2-HMAC-SHA256 (P, B[0] || B[1] || ... || B[p - 1], 1, dkLen)
-    return success &&
-        pbkd::sha256::hash(phrase.data(), phrase.size(), b.data(), b.size(),
-            one, buffer, size);
+    scrypt_derivation::key(out, password, bytes, one);
+    return true;
+}
+
+TEMPLATE
+template<size_t Size, if_not_greater<Size, scrypt_derivation::maximum_size>>
+static data_array<Size>
+CLASS::hash(const data_slice& password, const data_slice& salt) NOEXCEPT
+{
+    data_array<Size> out{};
+    if (!hash(out, password, salt)) out.fill(0);
+    return out;
 }
 
 BC_POP_WARNING()

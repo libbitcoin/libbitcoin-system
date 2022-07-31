@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(accumulator__sha_hash_two512__null_hashes__expected)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-using algorithm = sha::algorithm<sha::sha256>;
+using algorithm = sha::algorithm<sha256>;
 
 template <bool Checked>
 struct accessor

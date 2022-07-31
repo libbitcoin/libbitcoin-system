@@ -22,7 +22,8 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/hash/pbkd_sha256.hpp>
+#include <bitcoin/system/hash/pbkd.hpp>
+#include <bitcoin/system/hash/sha/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -31,6 +32,9 @@ namespace system {
 /// tools.ietf.org/html/rfc7914
 /// en.wikipedia.org/wiki/Scrypt  [Colin Percival]
 /// en.wikipedia.org/wiki/Salsa20 [Daniel J. Bernstein]
+
+/// Scrypt uses pkcs5-pbkdf2-hmac-sha256 key derivation.
+using scrypt_derivation = pbkd<sha::algorithm<sha256>>;
 
 /// [W]ork must be a power of 2 greater than 1.
 /// [R]esources must be non-zero and <= max_size_t/128.
@@ -63,20 +67,17 @@ public:
         (P * (W * (2 * R * block_size))) +
         (1 * (P * (2 * R * block_size)));
 
-    /// False if out of memory or size > pbkdf2::maximum_size.
-    static bool hash(const data_slice& phrase, const data_slice& salt,
-        uint8_t* buffer, size_t size) NOEXCEPT;
+    /// Return by reference, false if out of memory.
+    template<size_t Size, if_not_greater<Size,
+        scrypt_derivation::maximum_size> = true>
+    static bool hash(data_array<Size>& out, const data_slice& password,
+        const data_slice& salt) NOEXCEPT;
 
-    /// Returns null hash if out of memory.
-    template<size_t Size,
-        if_not_greater<Size, pbkd::sha256::maximum_size> = true>
-    static data_array<Size> hash(const data_slice& phrase,
-        const data_slice& salt) NOEXCEPT
-    {
-        data_array<Size> out{};
-        hash(phrase, salt, out.data(), Size);
-        return out;
-    }
+    /// Return by value, null hash if out of memory.
+    template<size_t Size, if_not_greater<Size,
+        scrypt_derivation::maximum_size> = true>
+    static data_array<Size> hash(const data_slice& password,
+        const data_slice& salt) NOEXCEPT;
 
 protected:
     using word_t    = uint32_t;
@@ -85,6 +86,7 @@ protected:
     using rblock_t  = std_array<block_t,  R * 2_size>;
     using prblock_t = std_array<rblock_t, P>;
     using wrblock_t = std_array<rblock_t, W>;
+    static_assert(size_of<prblock_t>() <= scrypt_derivation::maximum_size);
 
     static constexpr words_t& add(words_t& to, const words_t& from) NOEXCEPT;
     static constexpr block_t& xor_(block_t& to, const block_t& from) NOEXCEPT;

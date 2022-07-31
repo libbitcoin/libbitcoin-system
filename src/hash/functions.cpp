@@ -21,13 +21,10 @@
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/accumulator.hpp>
-#include <bitcoin/system/hash/hmac_sha256.hpp>
-#include <bitcoin/system/hash/hmac_sha512.hpp>
-#include <bitcoin/system/hash/pbkd_sha256.hpp>
-#include <bitcoin/system/hash/pbkd_sha512.hpp>
-#include <bitcoin/system/hash/ripemd160.hpp>
+#include <bitcoin/system/hash/rmd/ripemd_.hpp>
+#include <bitcoin/system/hash/rmd/algorithm.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
-#include <bitcoin/system/hash/sha_algorithm.hpp>
+#include <bitcoin/system/hash/sha/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -57,7 +54,7 @@ short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
 inline void merkle_hash(uint8_t* out, size_t blocks,
     const uint8_t* in) NOEXCEPT
 {
-    using hasher = sha::algorithm<sha::sha256>;
+    using hasher = sha::algorithm<sha256>;
     constexpr auto digest_size = array_count<hasher::digest_t>;
     constexpr auto block_size = array_count<hasher::block_t>;
 
@@ -116,7 +113,7 @@ data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT
 
 short_hash sha1_hash(const data_slice& data) NOEXCEPT
 {
-    system::accumulator<sha::algorithm<sha::sha160>> context{};
+    system::accumulator<sha::algorithm<sha160>> context{};
     context.write(data);
     return context.flush();
 }
@@ -124,7 +121,7 @@ short_hash sha1_hash(const data_slice& data) NOEXCEPT
 data_chunk sha1_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(short_hash_size, no_fill_byte_allocator);
-    system::accumulator<sha::algorithm<sha::sha160>> context{};
+    system::accumulator<sha::algorithm<sha160>> context{};
     context.write(data);
     context.flush(hash.data());
     return hash;
@@ -132,7 +129,7 @@ data_chunk sha1_chunk(const data_slice& data) NOEXCEPT
 
 hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
-    system::accumulator<sha::algorithm<sha::sha256>> context{};
+    system::accumulator<sha::algorithm<sha256>> context{};
     context.write(data);
     return context.flush();
 }
@@ -140,7 +137,7 @@ hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 data_chunk sha256_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk hash(hash_size, no_fill_byte_allocator);
-    system::accumulator<sha::algorithm<sha::sha256>> context{};
+    system::accumulator<sha::algorithm<sha256>> context{};
     context.write(data);
     context.flush(hash.data());
     return hash;
@@ -150,58 +147,22 @@ data_chunk sha256_chunk(const data_slice& data) NOEXCEPT
 hash_digest sha256_hash(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
-    system::accumulator<sha::algorithm<sha::sha256>> context{};
+    system::accumulator<sha::algorithm<sha256>> context{};
     context.write(left.size(), left.data());
     context.write(right.size(), right.data());
     return context.flush();
 }
 
-hash_digest hmac_sha256(const data_slice& data,
-    const data_slice& key) NOEXCEPT
-{
-    hash_digest hash{};
-    hmac::sha256::hash(data.data(), data.size(), key.data(), key.size(),
-        hash.data());
-    return hash;
-}
-
-data_chunk pbkd_sha256(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length) NOEXCEPT
-{
-    data_chunk chunk(length, no_fill_byte_allocator);
-    pbkd::sha256::hash(passphrase.data(), passphrase.size(), salt.data(),
-        salt.size(), iterations, chunk.data(), chunk.size());
-    return chunk;
-}
-
 long_hash sha512_hash(const data_slice& data) NOEXCEPT
 {
-    system::accumulator<sha::algorithm<sha::sha512>> context{};
+    system::accumulator<sha::algorithm<sha512>> context{};
     context.write(data);
     return context.flush();
 }
 
-long_hash hmac_sha512(const data_slice& data,
-    const data_slice& key) NOEXCEPT
-{
-    long_hash hash{};
-    hmac::sha512::hash(data.data(), data.size(), key.data(), key.size(),
-        hash.data());
-    return hash;
-}
-
-data_chunk pbkd_sha512(const data_slice& passphrase,
-    const data_slice& salt, size_t iterations, size_t length) NOEXCEPT
-{
-    data_chunk chunk(length, no_fill_byte_allocator);
-    pbkd::sha512::hash(passphrase.data(), passphrase.size(),
-        salt.data(), salt.size(), iterations, chunk.data(), chunk.size());
-    return chunk;
-}
-
+// Litecoin parameters, with concurrency.
 hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
-    // Litecoin parameters, with concurrency.
     return scrypt<1024, 1, 1, true>::hash<hash_size>(data, data);
 }
 

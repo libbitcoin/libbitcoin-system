@@ -38,8 +38,9 @@ namespace sha {
 // All aspects of FIPS180 are supported within the implmentation.
 // nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
-#define TEMPLATE template <typename SHA, bool Concurrent>
-#define CLASS algorithm<SHA, Concurrent>
+#define TEMPLATE template <typename SHA, bool Concurrent, \
+    if_same<typename SHA::T, shah_t> If>
+#define CLASS algorithm<SHA, Concurrent, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -114,6 +115,7 @@ TEMPLATE
 constexpr auto CLASS::
 parity(auto x, auto y, auto z) NOEXCEPT
 {
+    // FIPS.180
     // 4.1.1 SHA-1 Functions
     return x ^ y ^ z;
 }
@@ -122,6 +124,7 @@ TEMPLATE
 constexpr auto CLASS::
 choice(auto x, auto y, auto z) NOEXCEPT
 {
+    // FIPS.180
     // 4.1.1 SHA-1 Functions
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
@@ -134,6 +137,7 @@ TEMPLATE
 constexpr auto CLASS::
 majority(auto x, auto y, auto z) NOEXCEPT
 {
+    // FIPS.180
     // 4.1.1 SHA-1 Functions
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
@@ -146,6 +150,7 @@ TEMPLATE
 constexpr auto CLASS::
 SIGMA0(auto x) NOEXCEPT
 {
+    // FIPS.180
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
@@ -158,6 +163,7 @@ TEMPLATE
 constexpr auto CLASS::
 SIGMA1(auto x) NOEXCEPT
 {
+    // FIPS.180
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
@@ -170,6 +176,7 @@ TEMPLATE
 constexpr auto CLASS::
 sigma0(auto x) NOEXCEPT
 {
+    // FIPS.180
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
@@ -182,6 +189,7 @@ TEMPLATE
 constexpr auto CLASS::
 sigma1(auto x) NOEXCEPT
 {
+    // FIPS.180
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
@@ -192,6 +200,7 @@ sigma1(auto x) NOEXCEPT
 
 // Rounds
 // ---------------------------------------------------------------------------
+// FIPS.180
 // 6.1.2 SHA-1   Hash Computation (1 to N)
 // 6.2.2 SHA-256 Hash Computation (1 to N)
 // 6.4.2 SHA-512 Hash Computation (1 to N)
@@ -204,6 +213,7 @@ functor() NOEXCEPT
     using self = CLASS;
     constexpr auto fn = (Round / 20u);
 
+    // FIPS.180
     // 4.1.1 SHA-1 Functions (limited to uint32_t)
     if constexpr (fn == 0u)
         return &self::template choice<uint32_t, uint32_t, uint32_t>;
@@ -220,10 +230,12 @@ template<size_t Round>
 FORCE_INLINE constexpr void CLASS::
 round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
+    // FIPS.180
     // 4.2.1 SHA-1 Constants
     constexpr auto k = K::get[Round];
     constexpr auto f = functor<Round>();
 
+    // FIPS.180
     // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
     e = /*a =*/ std::rotl(a, 5) + f(b, c, d) + e + k + w;
     b = /*c =*/ std::rotl(b, 30);
@@ -246,10 +258,12 @@ FORCE_INLINE constexpr void CLASS::
 round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto w) NOEXCEPT
 {
+    // FIPS.180
     // 4.2.2 SHA-224 and SHA-256 Constants
     // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
     constexpr auto k = K::get[Round];
 
+    // FIPS.180
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
     const auto t1 = h + SIGMA1(e) + choice(e, f, g) + k + w;
@@ -286,6 +300,7 @@ round(auto& out, const auto& in) NOEXCEPT
 
     if constexpr (SHA::digest == 160)
     {
+        // FIPS.180
         // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
         round<Round>(
             out[(rounds + 0 - Round) % words],
@@ -301,6 +316,7 @@ round(auto& out, const auto& in) NOEXCEPT
     }
     else
     {
+        // FIPS.180
         // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
         // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
         round<Round>(
@@ -333,6 +349,7 @@ rounding(state_t& out, const buffer_t& in) NOEXCEPT
     auto pin = in.data();
     auto pout = out.data();
 
+    // FIPS.180
     // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
@@ -404,6 +421,7 @@ rounding(state_t& out, const buffer_t& in) NOEXCEPT
     round<62>(pout, pin);
     round<63>(pout, pin);
 
+    // FIPS.180
     // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
     if constexpr (SHA::rounds == 80)
@@ -436,6 +454,7 @@ prepare(auto& out) NOEXCEPT
 {
     if constexpr (SHA::digest == 160)
     {
+        // FIPS.180
         // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
         out[Word] = std::rotl(
             out[Word - 16] ^ out[Word - 14] ^
@@ -460,6 +479,7 @@ prepare(auto& out) NOEXCEPT
     }
     else
     {
+        // FIPS.180
         // 6.2.2 SHA-256 Hash Computation (16 <= t <= 63)
         // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
         out[Word] =
@@ -486,6 +506,7 @@ preparing(buffer_t& out) NOEXCEPT
 {
     auto pout = out.data();
 
+    // FIPS.180
     // 6.1.2.1 SHA-1   Hash Computation (16 <= t <= 79)
     // 6.2.2.1 SHA-256 Hash Computation (16 <= t <= 63)
     // 6.4.2.1 SHA-512 Hash Computation (16 <= t <= 79)
@@ -540,6 +561,7 @@ preparing(buffer_t& out) NOEXCEPT
     prepare<62>(pout);
     prepare<63>(pout);
 
+    // FIPS.180
     // 6.1.2 SHA-1   Hash Computation (16 <= t <= 79)
     // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
     if constexpr (SHA::rounds == 80)
@@ -569,6 +591,7 @@ summarize(state_t& out, const state_t& in) NOEXCEPT
 {
     if constexpr (SHA::digest == 160)
     {
+        // FIPS.180
         // 6.1.2.4 SHA-1 Hash Computation
         out[0] += in[0];
         out[1] += in[1];
@@ -578,6 +601,7 @@ summarize(state_t& out, const state_t& in) NOEXCEPT
     }
     else
     {
+        // FIPS.180
         // 6.2.2.4 SHA-256 Hash Computation
         // 6.4.2.4 SHA-512 Hash Computation
         out[0] += in[0];
@@ -595,6 +619,7 @@ TEMPLATE
 constexpr void CLASS::
 input(buffer_t& out, const state_t& in) NOEXCEPT
 {
+    // FIPS.180
     // 5.3 Setting the Initial Hash Value
 
     // This is a double hash optimization.
@@ -602,6 +627,7 @@ input(buffer_t& out, const state_t& in) NOEXCEPT
     {
         if constexpr (SHA::digest == 160)
         {
+            // FIPS.180
             // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
             out[0] = in[0];
             out[1] = in[1];
@@ -611,6 +637,7 @@ input(buffer_t& out, const state_t& in) NOEXCEPT
         }
         else
         {
+            // FIPS.180
             // 6.2.2.1 SHA-256 Hash Computation (0 <= t <= 15)
             // 6.4.2.1 SHA-512 Hash Computation (0 <= t <= 15)
             out[0] = in[0];
@@ -629,6 +656,7 @@ input(buffer_t& out, const state_t& in) NOEXCEPT
     }
 }
 
+// FIPS.180
 // 5.1 Padding the Message
 // ---------------------------------------------------------------------------
 // 5.1.1 SHA-1, SHA-224 and SHA-256
@@ -752,6 +780,7 @@ pad_n(buffer_t& out, count_t blocks) NOEXCEPT
     }
 }
 
+// FIPS.180
 // 5.2 Parsing the Message
 // ---------------------------------------------------------------------------
 // 5.2.1 SHA-1, SHA-224 and SHA-256
@@ -843,6 +872,7 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 output(const state_t& in) NOEXCEPT
 {
+    // FIPS.180
     // 6.1.2 SHA-1   Hash Computation
     // 6.2.2 SHA-256 Hash Computation
     // 6.4.2 SHA-512 Hash Computation

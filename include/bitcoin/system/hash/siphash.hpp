@@ -32,11 +32,12 @@ namespace system {
 
 typedef std::tuple<uint64_t, uint64_t> siphash_key;
 
-BC_API siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT;
-BC_API uint64_t siphash(const half_hash& hash,
-    const data_slice& message) NOEXCEPT;
 BC_API uint64_t siphash(const siphash_key& key,
     const data_slice& message) NOEXCEPT;
+BC_API uint64_t siphash(const half_hash& hash,
+    const data_slice& message) NOEXCEPT;
+
+BC_API siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

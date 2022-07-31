@@ -23,8 +23,11 @@
 
 #include <tuple>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+
+// This would be circular a /hash include (must stay in cpp).
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -37,8 +40,8 @@ constexpr uint64_t siphash_magic_3 = 0x7465646279746573;
 constexpr uint64_t finalization = 0x00000000000000ff;
 constexpr uint64_t max_encoded_byte_count = (1 << byte_bits);
 
-// C++14: can make constexpr.
-static void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
+// local
+constexpr void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     uint64_t& v3) NOEXCEPT
 {
     v0 += v1;
@@ -60,8 +63,8 @@ static void sip_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     rotate_left_into(v2, 32);
 }
 
-// C++14: can make constexpr.
-static void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
+// local
+constexpr void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     uint64_t& v3, uint64_t word) NOEXCEPT
 {
     v3 ^= word;
@@ -70,17 +73,13 @@ static void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     v0 ^= word;
 }
 
-uint64_t siphash(const half_hash& hash, const data_slice& message) NOEXCEPT
+uint64_t siphash(const siphash_key& key,
+    const data_slice& message) NOEXCEPT
 {
-    return siphash(to_siphash_key(hash), message);
-}
-
-uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
-{
-    uint64_t v0 = siphash_magic_0 ^ std::get<0>(key);
-    uint64_t v1 = siphash_magic_1 ^ std::get<1>(key);
-    uint64_t v2 = siphash_magic_2 ^ std::get<0>(key);
-    uint64_t v3 = siphash_magic_3 ^ std::get<1>(key);
+    auto v0 = siphash_magic_0 ^ std::get<0>(key);
+    auto v1 = siphash_magic_1 ^ std::get<1>(key);
+    auto v2 = siphash_magic_2 ^ std::get<0>(key);
+    auto v3 = siphash_magic_3 ^ std::get<1>(key);
 
     constexpr auto eight = sizeof(uint64_t);
     const auto bytes = message.size();
@@ -105,6 +104,13 @@ uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
     return v0 ^ v1 ^ v2 ^ v3;
 }
 
+uint64_t siphash(const half_hash& hash,
+    const data_slice& message) NOEXCEPT
+{
+    return siphash(to_siphash_key(hash), message);
+}
+
+// TODO: constexpr
 siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT
 {
     const auto part = split(hash);
