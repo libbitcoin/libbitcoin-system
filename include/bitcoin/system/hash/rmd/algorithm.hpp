@@ -28,6 +28,7 @@
 namespace libbitcoin {
 namespace system {
 
+// TODO: make these aliases algorithms, leaving rmd::hxxx unaliased.
 /// RIPEMD 128/160/256/320 variants.
 using rmd128     = rmd::h128<>;
 using rmd128_256 = rmd::h128<256>; // not fully implemented

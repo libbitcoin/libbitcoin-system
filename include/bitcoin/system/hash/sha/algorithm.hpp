@@ -29,6 +29,7 @@
 namespace libbitcoin {
 namespace system {
 
+// TODO: make these aliases algorithms, leaving sha::hxxx unaliased.
 /// FIPS180 SHA1/SHA256/SHA512 variants.
 using sha160     = sha::h160;
 using sha256_224 = sha::h256<224>; // not fully implemented
