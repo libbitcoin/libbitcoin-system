@@ -35,9 +35,11 @@ namespace system {
 
 #define TEMPLATE template <typename Algorithm>
 #define CLASS pbkd<Algorithm>
-
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+    
+// Bugus use constexpr warning with consteval.
+BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // static/protected
 TEMPLATE
@@ -79,6 +81,7 @@ xor_n(data_array<Length>& to, const data_array<Length>& from) NOEXCEPT
 
 BC_POP_WARNING()
 BC_POP_WARNING()
+BC_POP_WARNING()
 
 // pkcs5 pbkdf2 finalized code
 // ---------------------------------------------------------------------------
@@ -115,7 +118,7 @@ key(data_array<Size>& out, const data_slice& password,
     // rfc8018
     // applied to the password P and the concatenation of the salt S [PS].
     // [salted and unsalted hmac accumulators are saved here for reuse.]
-    hmac<Algorithm> hmac_p(password);
+    const hmac<Algorithm> hmac_p(password);
     auto hmac_ps = hmac_p;
     hmac_ps.write(salt);
 
