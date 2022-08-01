@@ -128,7 +128,10 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 {
     const auto read_transactions = [witness](reader& source) NOEXCEPT
     {
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         auto txs = std::make_shared<transaction_ptrs>();
+        BC_POP_WARNING()
+
         txs->reserve(source.read_size(max_block_size));
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)
