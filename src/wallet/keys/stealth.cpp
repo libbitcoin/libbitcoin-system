@@ -55,8 +55,6 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script) NOEXCEPT
 bool create_ephemeral_key(ec_secret& out_secret,
     const data_chunk& seed) NOEXCEPT
 {
-    using hmacer = hmac<sha::algorithm<sha256>>;
-
     auto nonced_seed = splice({ 0x00 }, seed);
     ec_compressed point;
 
@@ -65,7 +63,7 @@ bool create_ephemeral_key(ec_secret& out_secret,
     for (uint8_t nonce = 0; nonce < max_uint8; ++nonce)
     {
         nonced_seed.front() = nonce;
-        out_secret = hmacer::code(nonced_seed, "Stealth seed");
+        out_secret = hmac<sha256>::code(nonced_seed, "Stealth seed");
         if (secret_to_public(point, out_secret) && is_even_key(point))
             return true;
     }

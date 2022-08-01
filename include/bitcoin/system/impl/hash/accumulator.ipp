@@ -42,14 +42,6 @@ BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr void CLASS::
-reset() NOEXCEPT
-{
-    size_ = zero;
-    state_ = Algorithm::H::get;
-}
-
-TEMPLATE
 constexpr size_t CLASS::
 next() const NOEXCEPT
 {
@@ -135,8 +127,23 @@ serialize(size_t bytes) NOEXCEPT
     }
 }
 
+TEMPLATE
+CONSTEVAL typename CLASS::block_t CLASS::
+stream_pad() NOEXCEPT
+{
+    return { bit_hi<byte_t> };
+}
+
 // public
 // ----------------------------------------------------------------------------
+
+TEMPLATE
+constexpr void CLASS::
+reset() NOEXCEPT
+{
+    size_ = zero;
+    state_ = Algorithm::H::get;
+}
 
 TEMPLATE
 constexpr CLASS::
@@ -162,14 +169,33 @@ accumulator(size_t blocks, const state_t& state) NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Size>
 inline bool CLASS::
-write(const data_slice& data) NOEXCEPT
+write(const std_array<byte_t, Size>& data) NOEXCEPT
 {
-    auto size = data.size();
-    auto pdata = data.data();
+    return write(Size, data.data());
+}
 
+TEMPLATE
+inline bool CLASS::
+write(const data_chunk& data) NOEXCEPT
+{
+    return write(data.size(), data.data());
+}
+
+TEMPLATE
+inline bool CLASS::
+write_slice(const data_slice& data) NOEXCEPT
+{
+    return write(data.size(), data.data());
+}
+
+TEMPLATE
+inline bool CLASS::
+write(size_t size, const byte_t* data) NOEXCEPT
+{
     // Fill gap if possible and update counter.
-    const auto accepted = add_data(size, pdata);
+    const auto accepted = add_data(size, data);
 
     // No bytes accepted: buffer overflow (if checked) or size is zero.
     // If accepted is non-zero then the full size value is acceptable.
@@ -182,7 +208,7 @@ write(const data_slice& data) NOEXCEPT
 
     // Transform (updates state and clears buffer).
     Algorithm::accumulate(state_, buffer_);
-    std::advance(pdata, accepted);
+    std::advance(data, accepted);
 
     // No more bytes to process.
     if (is_zero((size -= accepted)))
@@ -192,27 +218,18 @@ write(const data_slice& data) NOEXCEPT
     const auto count = size / block_size;
     const auto bytes = size % block_size;
 
-    // write is inline vs constexpr because of this cast. This could instead
-    // be passed as a pointer, but then Hash (algorithm) would have to cast.
-    // Vector cast constructs a vector holding a ref (ponter) to each block.
-    const auto blocks = unsafe_vector_cast<block_t>(pdata, count);
+    // Algorithm does not expose pointers.
+    const auto blocks = unsafe_vector_cast<block_t>(data, count);
 
     // Transform all whole blocks and save remainder to cleared buffer.
     Algorithm::accumulate(state_, blocks);
-    std::advance(pdata, size - bytes);
+    std::advance(data, size - bytes);
     increment(count);
 
     // Add the remaining partial block to the cleared block buffer.
     // There is no point in testing the add_data return value here.
-    add_data(bytes, pdata);
+    add_data(bytes, data);
     return true;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::block_t CLASS::
-stream_pad() NOEXCEPT
-{
-    return { bit_hi<byte_t> };
 }
 
 TEMPLATE
@@ -220,7 +237,6 @@ constexpr typename CLASS::digest_t CLASS::
 flush() NOEXCEPT
 {
     constexpr auto pad = stream_pad();
-
     const auto size = size_;
     write(pad_size(), pad.data());
     write(count_size, serialize(size).data());
@@ -228,19 +244,91 @@ flush() NOEXCEPT
 }
 
 TEMPLATE
-inline bool CLASS::
-write(size_t size, const byte_t* data) NOEXCEPT
+inline void CLASS::
+flush(digest_t& digest) NOEXCEPT
 {
-    // TODO: data_slice pointer/size overload.
-    return write(data_slice(data, std::next(data, size)));
+    constexpr auto pad = stream_pad();
+    const auto size = size_;
+    write(pad_size(), pad.data());
+    write(count_size, serialize(size).data());
+    Algorithm::finalize(digest, state_);
 }
 
 TEMPLATE
 inline void CLASS::
 flush(byte_t* digest) NOEXCEPT
 {
-    // TODO: could also provide a data_slab overload.
-    unsafe_array_cast<byte_t, array_count<digest_t>>(digest) = flush();
+    // Algorithm does not expose pointers.
+    flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest));
+}
+
+TEMPLATE
+inline data_chunk& CLASS::
+flush(data_chunk& digest) NOEXCEPT
+{
+    flush(digest.data());
+    return digest;
+}
+
+// Finalized hash of arbitrary data (by value).
+TEMPLATE
+template <size_t Size>
+inline typename CLASS::digest_t CLASS::
+hash(const std_array<byte_t, Size>& data) NOEXCEPT
+{
+    accumulator<Algorithm> context{};
+    context.write(data);
+    return context.flush();
+}
+
+// Finalized hash of arbitrary data (by value).
+TEMPLATE
+inline typename CLASS::digest_t CLASS::
+hash(const data_chunk& data) NOEXCEPT
+{
+    accumulator<Algorithm> context{};
+    context.write(data);
+    return context.flush();
+}
+
+// Finalized hash of arbitrary data (by value).
+TEMPLATE
+inline typename CLASS::digest_t CLASS::
+hash_slice(const data_slice& data) NOEXCEPT
+{
+    accumulator<Algorithm> context{};
+    context.write(data);
+    return context.flush();
+}
+
+// Finalized hash of arbitrary data (by reference).
+TEMPLATE
+inline void CLASS::
+hash(digest_t& digest, const data_slice& data) NOEXCEPT
+{
+    accumulator<Algorithm> context{};
+    context.write(data);
+    context.flush(digest);
+}
+
+// Finalized hash of arbitrary data (by pointer).
+TEMPLATE
+inline void CLASS::
+hash(byte_t* digest, const data_slice& data) NOEXCEPT
+{
+    accumulator<Algorithm> context{};
+    context.write(data);
+    context.flush(digest);
+}
+
+// Finalized hash of arbitrary data (by data_chunk&).
+TEMPLATE
+inline data_chunk& CLASS::
+hash(data_chunk& digest, const data_slice& data) NOEXCEPT
+{
+    accumulator<Algorithm> context{};
+    context.write(data);
+    return context.flush(digest);
 }
 
 BC_POP_WARNING()

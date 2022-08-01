@@ -129,11 +129,9 @@ hd_private hd_private::from_private(const ec_secret& secret,
 hd_private hd_private::from_entropy(const data_slice& entropy,
     uint64_t prefixes) NOEXCEPT
 {
-    using hmacer = hmac<sha::algorithm<sha512>>;
-
     // This is a magic constant from BIP32.
     static const auto magic = to_chunk("Bitcoin seed");
-    const auto intermediate = split(hmacer::code(entropy, magic));
+    const auto intermediate = split(hmac<sha512>::code(entropy, magic));
 
     return hd_private(intermediate.first, intermediate.second, prefixes);
 }
@@ -244,14 +242,13 @@ hd_public hd_private::to_public() const NOEXCEPT
 
 hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
 {
-    using hmacer = hmac<sha::algorithm<sha512>>;
     constexpr uint8_t depth = 0;
 
     const auto data = (index >= hd_first_hardened_key) ?
         splice(to_array(depth), secret_, to_big_endian(index)) :
         splice(point_, to_big_endian(index));
 
-    const auto intermediate = split(hmacer::code(data, chain_));
+    const auto intermediate = split(hmac<sha512>::code(data, chain_));
 
     // The child key ki is (parse256(IL) + kpar) mod n:
     auto child = secret_;

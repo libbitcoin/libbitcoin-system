@@ -19,8 +19,33 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_HASH_IPP
 #define LIBBITCOIN_SYSTEM_HASH_HASH_IPP
 
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
+
 namespace libbitcoin {
 namespace system {
+
+// Value will vary with sizeof(size_t).
+// A DJB variation uses [^ byte] vs. [+ byte].
+// Objectives: deterministic, uniform distribution, efficient computation.
+constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
+{
+    // Nothing special here except that it tested well against collisions.
+    auto hash = 5381_size;
+
+    // Efficient sum of ((hash * 33) + byte) for all bytes.
+    for (const auto byte: data)
+        hash = (shift_left(hash, 5_size) + hash) + byte;
+
+    return hash;
+}
+
+// Combine hash values, such as a pair of djb2_hash outputs.
+constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
+{
+    return left ^ shift_left(right, one);
+}
 
 } // namespace system
 } // namespace libbitcoin

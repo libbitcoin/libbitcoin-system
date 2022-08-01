@@ -982,7 +982,7 @@ op_hash160() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_hash160;
 
-    state::push_chunk(ripemd160_chunk(sha256_hash(*state::pop_chunk_())));
+    state::push_chunk(bitcoin_short_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 
@@ -993,7 +993,7 @@ op_hash256() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_hash256;
 
-    state::push_chunk(sha256_chunk(sha256_hash(*state::pop_chunk_())));
+    state::push_chunk(bitcoin_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 

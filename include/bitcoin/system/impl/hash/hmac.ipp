@@ -53,9 +53,7 @@ hmac(const data_slice& key) NOEXCEPT
 
     // rfc2104
     // H(K) if K is larger than block size.
-    accumulator<Algorithm> accumulator{};
-    accumulator.write(key);
-    xor_key(accumulator.flush().data(), digest_bytes);
+    xor_key(accumulator<Algorithm>::hash(key).data(), digest_bytes);
 }
 
 TEMPLATE
@@ -64,7 +62,7 @@ write(const data_slice& data) NOEXCEPT
 {
     // rfc2104
     // append the stream of data 'text' to the B byte string.
-    inner_.write(data);
+    inner_.write_slice(data);
 }
 
 TEMPLATE

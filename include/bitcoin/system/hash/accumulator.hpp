@@ -29,29 +29,46 @@ namespace system {
 /// Accumulator for SHA/RMD/MD# streaming hash algorithms.
 /// flush() is non-clearing (writes may continue).
 template <typename Algorithm, bool Checked = checked_build>
-struct accumulator
+class accumulator
 {
+public:
+    DEFAULT5(accumulator);
     using byte_t = typename Algorithm::byte_t;
     using state_t = typename Algorithm::state_t;
     using digest_t = typename Algorithm::digest_t;
 
     /// Sets initial state to Hash initialization vector.
     constexpr accumulator() NOEXCEPT;
-    DEFAULT5(accumulator);
 
     /// Accepts an initial state and count of blocks it has accumulated.
     constexpr accumulator(size_t blocks, const state_t& state) NOEXCEPT;
 
+    /// Reset accumulator to initial state (to reuse after flushing).
+    constexpr void reset() NOEXCEPT;
+
     /// Write data to accumulator.
-    inline bool write(const data_slice& data) NOEXCEPT;
+    template <size_t Size>
+    inline bool write(const std_array<byte_t, Size>& data) NOEXCEPT;
+    inline bool write(const data_chunk& data) NOEXCEPT;
     inline bool write(size_t size, const byte_t* data) NOEXCEPT;
+    inline bool write_slice(const data_slice& data) NOEXCEPT;
 
     /// Flush accumulator state to digest.
     constexpr digest_t flush() NOEXCEPT;
+    inline void flush(digest_t& digest) NOEXCEPT;
     inline void flush(byte_t* digest) NOEXCEPT;
+    inline data_chunk& flush(data_chunk& digest) NOEXCEPT;
 
-    /// Reset accumulator to initial state (to reuse after flushing).
-    constexpr void reset() NOEXCEPT;
+    /// Finalized hash of arbitrary data (by value).
+    template <size_t Size>
+    static inline digest_t hash(const std_array<byte_t, Size>& data) NOEXCEPT;
+    static inline digest_t hash(const data_chunk& data) NOEXCEPT;
+    static inline digest_t hash_slice(const data_slice& data) NOEXCEPT;
+
+    /// Finalized hash of arbitrary data (by reference).
+    static inline void hash(digest_t& digest, const data_slice& data) NOEXCEPT;
+    static inline void hash(byte_t* digest, const data_slice& data) NOEXCEPT;
+    static inline data_chunk& hash(data_chunk& digest, const data_slice& data) NOEXCEPT;
 
 protected:
     using block_t = typename Algorithm::block_t;

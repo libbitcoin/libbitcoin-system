@@ -62,28 +62,46 @@ constexpr half_hash null_half_hash{};
 constexpr quarter_hash null_quarter_hash{};
 constexpr mini_hash null_mini_hash{};
 
-// Consensus sentinel hash.
+/// Specialized Bitcoin cryptographic hash functions.
+/// ---------------------------------------------------------------------------
+
+/// Consensus sentinel hash [signature hashing].
 constexpr hash_digest one_hash = from_uintx(uint256_t(one));
 
-/// Generate a bitcoin hash (sha256(sha256)).
-BC_API hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT;
+/// Generate a bitcoin short hash (ripemd160(sha256)) [script].
+BC_API short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT;
+BC_API data_chunk bitcoin_short_chunk(const data_slice& data) NOEXCEPT;
 
-/// Generate a bitcoin hash (sha256(sha256)) of left + right concatenation.
-/// Used for generation of witness commitment.
+/// Generate a bitcoin hash (sha256(sha256)) [script].
+BC_API hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT;
+BC_API data_chunk bitcoin_chunk(const data_slice& data) NOEXCEPT;
+
+/// Generate a bitcoin_hash of concatenate(left, right) [witness commitment].
 BC_API hash_digest bitcoin_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT;
 
-/// Generate a bitcoin short hash (ripemd160(sha256)).
-BC_API short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT;
+/// Generate bitcoin_hash set from an ordered set of ptrs [header commitment].
+BC_API hashes bitcoin_hash(std_vector<uint8_t*>&& set) NOEXCEPT;
 
-/// Generate a bitcoin merkle root from an ordered set of hashes.
+/// Generate a merkle root from a bitcoin_hash set [header commitment].
 BC_API hash_digest merkle_root(hashes&& set) NOEXCEPT;
+
+/// Generate a sha256 hash of concatenate(left, right) [electrum seed stretch].
+BC_API hash_digest sha256_hash(const data_slice& left,
+    const data_slice& right) NOEXCEPT;
+
+/// Generalized cryptographic hash functions.
+/// ---------------------------------------------------------------------------
+
+/// Generate a ripemd128 hash (historical).
+BC_API half_hash ripemd128_hash(const data_slice& data) NOEXCEPT;
+BC_API data_chunk ripemd128_chunk(const data_slice& data) NOEXCEPT;
 
 /// Generate a ripemd160 hash.
 BC_API short_hash ripemd160_hash(const data_slice& data) NOEXCEPT;
 BC_API data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT;
 
-/// Generate a sha1 (160 bit) hash.
+/// Generate a sha1 (sha160) hash.
 BC_API short_hash sha1_hash(const data_slice& data) NOEXCEPT;
 BC_API data_chunk sha1_chunk(const data_slice& data) NOEXCEPT;
 
@@ -91,32 +109,31 @@ BC_API data_chunk sha1_chunk(const data_slice& data) NOEXCEPT;
 BC_API hash_digest sha256_hash(const data_slice& data) NOEXCEPT;
 BC_API data_chunk sha256_chunk(const data_slice& data) NOEXCEPT;
 
-/// Generate a sha256 hash of left + right concatenation.
-/// This hash function is used in electrum seed stretching.
-BC_API hash_digest sha256_hash(const data_slice& left,
-    const data_slice& right) NOEXCEPT;
-
 /// Generate a sha512 hash.
 BC_API long_hash sha512_hash(const data_slice& data) NOEXCEPT;
+BC_API data_chunk sha512_chunk(const data_slice& data) NOEXCEPT;
 
-/// Generate a scrypt hash.
+/// Specialized Litecoin cryptographic hash functions.
+/// ---------------------------------------------------------------------------
+
+/// Generate a litecoin scrypt hash.
 BC_API hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
 
-/// DJB2 hash key algorithm by Dan Bernstein.
-BC_API size_t djb2_hash(const data_slice& data) NOEXCEPT;
+/// Hash table keying.
+/// ---------------------------------------------------------------------------
+
+/// DJB2 hash key algorithm [Daniel J. Bernstein].
+constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT;
 
 /// Combine hash values, such as a pair of djb2_hash outputs.
-constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
-{
-    return left ^ shift_left(right, one);
-}
+constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
 
-// Extend std and boost namespaces with djb2_hash.
-// ----------------------------------------------------------------------------
-// This allows data_array/chunk to be incorporated into std/boost hash tables.
+/// Extend std and boost namespaces with djb2_hash.
+/// ---------------------------------------------------------------------------
+/// This allows data_array/chunk to be incorporated into std/boost hash tables.
 
 namespace std
 {

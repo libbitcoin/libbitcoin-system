@@ -30,45 +30,72 @@
 namespace libbitcoin {
 namespace system {
 
-// Bitcoin doubled-hashes.
+// Specialized Bitcoin cryptographic hash functions.
 // ----------------------------------------------------------------------------
+// TODO: optimize through specialization for array/chunk/slice inputs.
+// TODO: chunk is more efficient than slice and accumulator can optimize for
+// TODO: finalized hashes of fixed (array) sizes.
+
+using sha256_final = accumulator<sha256>;
+
+short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
+{
+    return ripemd160_hash(sha256_final::hash_slice(data));
+}
+
+// moved to interpreter stack xptr.
+data_chunk bitcoin_short_chunk(const data_slice& data) NOEXCEPT
+{
+    return ripemd160_chunk(sha256_final::hash_slice(data));
+}
 
 hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT
 {
-    return sha256_hash(sha256_hash(data));
+    return sha256_final::hash(sha256_final::hash_slice(data));
+}
+
+// moved to interpreter stack xptr.
+data_chunk bitcoin_chunk(const data_slice& data) NOEXCEPT
+{
+    return sha256_chunk(sha256_final::hash_slice(data));
 }
 
 hash_digest bitcoin_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT
 {
-    // TODO: replace inner with single block optimization.
-    return sha256_hash(sha256_hash(left, right));
+    return sha256_final::hash(sha256_hash(left, right));
 }
 
-short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT
+// TODO: create std_vector<uint8_t*> parse_block(data_chunk&).
+// TODO: requires specialized skip-parsing block reader to isolate txs.
+// TODO: merkle_root(bitcoin_hash(parse_block(data_chunk&))).
+hashes bitcoin_hash(std_vector<uint8_t*>&&) NOEXCEPT
 {
-    return ripemd160_hash(sha256_hash(data));
+    // TODO: implement in sha::algorithm.
+    // TODO: each element represents set of independent sha blocks/remainders.
+    // TODO: concurrently hash blocks/remainders across set.
+    // TODO: thread parallelize upon vectorize/sha-ni (as in merkle hashing).
+    return {};
 }
 
 // TODO: move to sha::algorithm and optimize.
 inline void merkle_hash(uint8_t* out, size_t blocks,
     const uint8_t* in) NOEXCEPT
 {
-    using hasher = sha::algorithm<sha256>;
-    constexpr auto digest_size = array_count<hasher::digest_t>;
-    constexpr auto block_size = array_count<hasher::block_t>;
+    constexpr auto digest_size = array_count<sha256::digest_t>;
+    constexpr auto block_size = array_count<sha256::block_t>;
 
+    // TODO: this loop is inherently unordered (independent hash sets).
     while (to_bool(blocks--))
     {
         auto& to = unsafe_array_cast<uint8_t, digest_size>(out);
         auto& from = unsafe_array_cast<uint8_t, block_size>(in);
-        to = hasher::double_hash(from);
+        to = sha256::double_hash(from);
         std::advance(out, hash_size);
         std::advance(in, long_hash_size);
     }
 }
 
-// TODO: move to sha::algorithm and optimize.
 hash_digest merkle_root(hashes&& set) NOEXCEPT
 {
     if (set.empty())
@@ -80,6 +107,8 @@ hash_digest merkle_root(hashes&& set) NOEXCEPT
     if (is_odd(set.size()))
         set.push_back(set.back());
 
+    // TODO: move to sha::algorithm and optimize.
+    // TODO: this loop is inherently ordered (dependent hash sets).
     while (is_even(set.size()))
     {
         // N blocks in, N/2 hashes out.
@@ -94,90 +123,90 @@ hash_digest merkle_root(hashes&& set) NOEXCEPT
     return std::move(set.front());
 }
 
-// Hash generators.
+hash_digest sha256_hash(const data_slice& left,
+    const data_slice& right) NOEXCEPT
+{
+    accumulator<sha256> context{};
+    context.write(left.size(), left.data());
+    context.write(right.size(), right.data());
+    return context.flush();
+}
+
+// Generalized cryptographic hash functions.
 // ----------------------------------------------------------------------------
+// TODO: optimize through specialization for array/chunk/slice inputs.
+// TODO: non-template (array/chunk) should all be inlined.
+
+half_hash ripemd128_hash(const data_slice& data) NOEXCEPT
+{
+    return accumulator<rmd128>::hash(data);
+}
+
+data_chunk ripemd128_chunk(const data_slice& data) NOEXCEPT
+{
+    data_chunk chunk(half_hash_size, no_fill_byte_allocator);
+    return accumulator<rmd128>::hash(chunk, data);
+}
 
 short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash{};
     ripemd160::hash(data.data(), data.size(), hash.data());
     return hash;
+    ////return accumulator<rmd160>::hash(data);
 }
 
+// moved to interpreter stack xptr.
 data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT
 {
-    data_chunk hash(short_hash_size, no_fill_byte_allocator);
-    ripemd160::hash(data.data(), data.size(), hash.data());
-    return hash;
+    data_chunk chunk(short_hash_size, no_fill_byte_allocator);
+    ripemd160::hash(data.data(), data.size(), chunk.data());
+    return chunk;
+    ////return accumulator<rmd160>::hash(chunk, data);
 }
 
 short_hash sha1_hash(const data_slice& data) NOEXCEPT
 {
-    system::accumulator<sha::algorithm<sha160>> context{};
-    context.write(data);
-    return context.flush();
+    return accumulator<sha160>::hash(data);
 }
 
+// moved to interpreter stack xptr.
 data_chunk sha1_chunk(const data_slice& data) NOEXCEPT
 {
-    data_chunk hash(short_hash_size, no_fill_byte_allocator);
-    system::accumulator<sha::algorithm<sha160>> context{};
-    context.write(data);
-    context.flush(hash.data());
-    return hash;
+    data_chunk chunk(short_hash_size, no_fill_byte_allocator);
+    return accumulator<sha160>::hash(chunk, data);
 }
 
 hash_digest sha256_hash(const data_slice& data) NOEXCEPT
 {
-    system::accumulator<sha::algorithm<sha256>> context{};
-    context.write(data);
-    return context.flush();
+    return accumulator<sha256>::hash(data);
 }
 
+// moved to interpreter stack xptr.
 data_chunk sha256_chunk(const data_slice& data) NOEXCEPT
 {
-    data_chunk hash(hash_size, no_fill_byte_allocator);
-    system::accumulator<sha::algorithm<sha256>> context{};
-    context.write(data);
-    context.flush(hash.data());
-    return hash;
-}
-
-// This overload precludes the need to concatenate left + right.
-hash_digest sha256_hash(const data_slice& left,
-    const data_slice& right) NOEXCEPT
-{
-    system::accumulator<sha::algorithm<sha256>> context{};
-    context.write(left.size(), left.data());
-    context.write(right.size(), right.data());
-    return context.flush();
+    data_chunk chunk(hash_size, no_fill_byte_allocator);
+    return accumulator<sha256>::hash(chunk, data);
 }
 
 long_hash sha512_hash(const data_slice& data) NOEXCEPT
 {
-    system::accumulator<sha::algorithm<sha512>> context{};
-    context.write(data);
-    return context.flush();
+    return accumulator<sha512>::hash(data);
 }
 
-// Litecoin parameters, with concurrency.
+data_chunk sha512_chunk(const data_slice& data) NOEXCEPT
+{
+    data_chunk chunk(long_hash_size, no_fill_byte_allocator);
+    return accumulator<sha512>::hash(chunk, data);
+}
+
+// Specialized Litecoin cryptographic hash functions.
+// ----------------------------------------------------------------------------
+
 hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
+    // Litecoin parameters, with concurrency enabled.
     return scrypt<1024, 1, 1, true>::hash<hash_size>(data, data);
-}
-
-// Value will vary with sizeof(size_t).
-// Objectives: deterministic, uniform distribution, efficient computation.
-size_t djb2_hash(const data_slice& data) NOEXCEPT
-{
-    // Nothing special here except that it tested well against collisions.
-    auto hash = 5381_size;
-
-    // Efficient sum of ((hash * 33) + byte) for all bytes.
-    for (const auto byte: data)
-        hash = (shift_left(hash, 5_size) + hash) + byte;
-
-    return hash;
 }
 
 } // namespace system

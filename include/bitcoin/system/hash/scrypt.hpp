@@ -34,7 +34,7 @@ namespace system {
 /// en.wikipedia.org/wiki/Salsa20 [Daniel J. Bernstein]
 
 /// Scrypt uses pkcs5-pbkdf2-hmac-sha256 key derivation.
-using scrypt_derivation = pbkd<sha::algorithm<sha256>>;
+using scrypt_derivation = pbkd<sha256>;
 
 /// [W]ork must be a power of 2 greater than 1.
 /// [R]esources must be non-zero and <= max_size_t/128.

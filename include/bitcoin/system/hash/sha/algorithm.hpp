@@ -28,19 +28,6 @@
 
 namespace libbitcoin {
 namespace system {
-
-// TODO: make these aliases algorithms, leaving sha::hxxx unaliased.
-/// FIPS180 SHA1/SHA256/SHA512 variants.
-using sha160     = sha::h160;
-using sha256_224 = sha::h256<224>; // not fully implemented
-using sha256     = sha::h256<>;
-using sha256_256 = sha::h256<>;
-using sha512_256 = sha::h512<256>; // not fully implemented
-using sha512_224 = sha::h512<224>; // not fully implemented
-using sha512_384 = sha::h512<384>; // not fully implemented
-using sha512     = sha::h512<>;
-using sha512_512 = sha::h512<>;
-
 namespace sha {
 
 /// SHA hashing algorithm.
@@ -117,6 +104,8 @@ public:
 
     /// Finalize streaming state (converts to big-endian bytes).
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
+    static constexpr void finalize(digest_t& digest,
+        const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions
@@ -183,6 +172,16 @@ private:
 };
 
 } // namespace sha
+
+/// bc::system sha algorithm aliases.
+using sha160     = sha::algorithm<sha::h160>;
+using sha256_224 = sha::algorithm<sha::h256<224>>; // not fully implemented
+using sha256     = sha::algorithm<sha::h256<>>;
+using sha512_256 = sha::algorithm<sha::h512<256>>; // not fully implemented
+using sha512_224 = sha::algorithm<sha::h512<224>>; // not fully implemented
+using sha512_384 = sha::algorithm<sha::h512<384>>; // not fully implemented
+using sha512     = sha::algorithm<sha::h512<>>;
+
 } // namespace system
 } // namespace libbitcoin
 

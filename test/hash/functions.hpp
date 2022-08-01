@@ -177,6 +177,7 @@ static const std_array<pbkd_sha256_test, 2> pbkd_sha256_tests
 
 struct sha512_test
 {
+    // use hash_slice()
     const std::string data;
     const long_hash expected;
 };

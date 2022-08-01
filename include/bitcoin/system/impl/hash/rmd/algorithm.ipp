@@ -542,6 +542,13 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
+constexpr void CLASS::
+finalize(digest_t& digest, const state_t& state) NOEXCEPT
+{
+    digest = output(state);
+}
+
+TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 finalize(const state_t& state) NOEXCEPT
 {

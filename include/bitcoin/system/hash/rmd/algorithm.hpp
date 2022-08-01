@@ -27,14 +27,6 @@
 
 namespace libbitcoin {
 namespace system {
-
-// TODO: make these aliases algorithms, leaving rmd::hxxx unaliased.
-/// RIPEMD 128/160/256/320 variants.
-using rmd128     = rmd::h128<>;
-using rmd128_256 = rmd::h128<256>; // not fully implemented
-using rmd160     = rmd::h160<>;
-using rmd160_320 = rmd::h160<320>; // not fully implemented
-
 namespace rmd {
 
 /// RMD hashing algorithm.
@@ -98,6 +90,8 @@ public:
     
     /// Finalize streaming state (converts to little-endian bytes).
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
+    static constexpr void finalize(digest_t& digest,
+        const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions
@@ -152,6 +146,13 @@ private:
 };
 
 } // namespace rmd
+
+/// bc::system rmd algorithm aliases (concurrent).
+using rmd128     = rmd::algorithm<rmd::h128<>,    true>;
+using rmd128_256 = rmd::algorithm<rmd::h128<256>, true>; // not fully implemented
+using rmd160     = rmd::algorithm<rmd::h160<>,    true>;
+using rmd160_320 = rmd::algorithm<rmd::h160<320>, true>; // not fully implemented
+
 } // namespace system
 } // namespace libbitcoin
 
