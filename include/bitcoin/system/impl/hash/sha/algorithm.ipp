@@ -298,6 +298,11 @@ round(auto& out, const auto& in) NOEXCEPT
     constexpr auto words  = SHA::state_words;
     constexpr auto rounds = SHA::rounds;
 
+    // For block/buffer split, in[Round] becomes words[Round] for Round < 16,
+    // and buffer[Round - 16] for Round > 16 (constexpression distinction).
+    // passing the same (templated parameter) for words/buffer here would
+    // just case the index to be reduced by 16 for any index greater than 16.
+
     if constexpr (SHA::digest == 160)
     {
         // FIPS.180
@@ -340,6 +345,10 @@ TEMPLATE
 constexpr void CLASS::
 rounding(state_t& out, const buffer_t& in) NOEXCEPT
 {
+    // For block/buffer split, words_t is required as an independent parameter.
+    // words_t is referenced only in the first 16 rounds, then buffer_t.
+    // this keeps parameter set constant (distinguished by template expansion).
+
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
     const state_t start{ out };
 
@@ -452,6 +461,17 @@ template<size_t Word>
 FORCE_INLINE constexpr void CLASS::
 prepare(auto& out) NOEXCEPT
 {
+    // For block/buffer split, Word is shifted to start at zero but with
+    // an independent words_t for first 16 words (indexes - 16). Above 31
+    // this indexes into itself, with relative undexing same as below.
+    // words_t is required as an independent parameter for first 16 calls.
+    // So create an overload for first block (16 words) and second parameter.
+    // This saves the allocation of one block for each block processed, but
+    // adds a block worth of additional parameterization. Yet in the end two
+    // offsets (from, to) are dereferenced. This just makes them from two
+    // independent arrays. That implies one additional register population for
+    // the first 16 rounds. Parameter remains buffer_t but one block smaller.
+
     if constexpr (SHA::digest == 160)
     {
         // FIPS.180
@@ -505,6 +525,10 @@ constexpr void CLASS::
 preparing(buffer_t& out) NOEXCEPT
 {
     auto pout = out.data();
+
+    // For block/buffer split, indexes shifted to start at zero.
+    // words_t is required as an independent parameter for first 16 calls.
+    // Parameter remains buffer_t but one block smaller.
 
     // FIPS.180
     // 6.1.2.1 SHA-1   Hash Computation (16 <= t <= 79)
@@ -619,6 +643,8 @@ TEMPLATE
 constexpr void CLASS::
 input(buffer_t& out, const state_t& in) NOEXCEPT
 {
+    // For block/buffer split, buffer_t is block_t and this is uncasted assign.
+
     // FIPS.180
     // 5.3 Setting the Initial Hash Value
 
@@ -666,6 +692,9 @@ TEMPLATE
 constexpr void CLASS::
 pad_one(buffer_t& out) NOEXCEPT
 {
+    // For block/buffer split, the block is processed directly over block/pad.
+    // So this is eliminated and the block/pad are used independently.
+
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
 
@@ -676,6 +705,8 @@ TEMPLATE
 constexpr void CLASS::
 pad_half(buffer_t& out) NOEXCEPT
 {
+    // For block/buffer split, buffer_t becomes block_t and this unchanged.
+
     // Pad a half block.
     constexpr auto pad = chunk_pad();
 
@@ -701,6 +732,8 @@ TEMPLATE
 constexpr void CLASS::
 pad_state(buffer_t& out) NOEXCEPT
 {
+    // For block/buffer split, buffer_t becomes block_t and this unchanged.
+
     // Pad state as buffer input.
     // This is a double hash optimization.
     // This is the same as pad_half unless SHA is SHA-1.
@@ -747,6 +780,8 @@ TEMPLATE
 constexpr void CLASS::
 pad_n(buffer_t& out, count_t blocks) NOEXCEPT
 {
+    // For block/buffer split, buffer_t becomes block_t and this unchanged.
+
     // Pad any number of whole blocks.
     constexpr auto pad = blocks_pad();
     const auto bits = to_bits(blocks * array_count<block_t>);
@@ -791,6 +826,22 @@ TEMPLATE
 constexpr void CLASS::
 input(buffer_t& out, const block_t& in) NOEXCEPT
 {
+    // For block/buffer split, buffer_t is smaller and this is unchanged.
+    // But in the case of merkle (owned block&&) we can assign out to in
+    // and save a block allocation. It would also be easy to convert the
+    // entire set of (owned) blocks concurrently. Doing so on an unowned block
+    // would require doubling the block memory allocation as opposed to
+    // converting one each block at a time. However, if the processing is
+    // concurrent, the allocation would peak at the same level. This would then
+    // imply increased efficiency by always allocating and endian converting
+    // the full set of const blocks to be processed, and passing them in as
+    // const& already converted. However distributing the endianness conversion
+    // would be more efficient than holding up all block processing until it is
+    // complete. This implies that passing a const buffer and relying in
+    // individual allocations and conversions is preferred. And in the case of
+    // an owned buffer, we would convert in place (in->out->in) to save the
+    // allocation, but would not convert the entire block set a priori.
+
     constexpr auto size = SHA::word_bytes;
 
     if (std::is_constant_evaluated())
@@ -823,6 +874,8 @@ TEMPLATE
 constexpr void CLASS::
 input1(buffer_t& out, const half_t& in) NOEXCEPT
 {
+    // For block/buffer split, buffer_t is smaller and this is unchanged.
+
     constexpr auto size = SHA::word_bytes;
 
     if (std::is_constant_evaluated())
@@ -847,6 +900,8 @@ TEMPLATE
 constexpr void CLASS::
 input2(buffer_t& out, const half_t& in) NOEXCEPT
 {
+    // For block/buffer split, buffer_t is smaller and this is unchanged.
+
     constexpr auto size = SHA::word_bytes;
 
     if (std::is_constant_evaluated())
@@ -912,6 +967,18 @@ output(const state_t& in) NOEXCEPT
 
 // Single hash functions.
 // ---------------------------------------------------------------------------
+// TODO: when processing full blocks we do not need to copy the block
+// buffer. The expanded buffer can be distinct and the distinction isolated
+// with the round template (round <16 uses block buffer). Half block
+// processing would simply create populated/padded block and pass it here.
+// Prepare indexing would shift by 16, and buffer_t shrinks by one block.
+// This only benefits hashing where we own the block data (merkle) since we
+// can endian convert into the block. Otherwise it's a denormalization and a
+// minor hit on independent allocations and another register for 16 rounds.
+// We end up with a second prepare, and require block/buffer for preparing and
+// rounding calls. One input overload is removed, and the hash functions below
+// own either a fabricated block (partial fill) or pass the const&. endian
+// conversion for each owned (merkle) block can set values into itself.
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::

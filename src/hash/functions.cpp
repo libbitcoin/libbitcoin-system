@@ -75,6 +75,9 @@ hashes bitcoin_hash(std_vector<uint8_t*>&&) NOEXCEPT
     // TODO: each element represents set of independent sha blocks/remainders.
     // TODO: concurrently hash blocks/remainders across set.
     // TODO: thread parallelize upon vectorize/sha-ni (as in merkle hashing).
+    // TODO: individual tx hashing performed concurrently with tx parse.
+    // TODO: block merkle root performed concurrently with block.txs parse.
+    // TODO: these are two independent jobs both requiring the raw tx/s data.
     return {};
 }
 
