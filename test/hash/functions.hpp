@@ -198,30 +198,15 @@ static const std_array<sha512_test, sha_tests> sha512_tests
     { sha_6,base16_array("b47c933421ea2db149ad6e10fce6c7f93d0752380180ffd7f4629a712134831d77be6091b819ed352c2967a2e2d4fa5050723c9630691f1a05a7281dbe6c1086") },
 #endif
     { sha_5,base16_array("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") }
-
 };
 
 // hmac
 // ============================================================================
 
-// hmac_sha160_tests
-// ----------------------------------------------------------------------------
+// test vectors
+// datatracker.ietf.org/doc/html/rfc2202 (sha160)
+// datatracker.ietf.org/doc/html/rfc4231 (sha256/512)
 
-struct hmac_sha160_test
-{
-    const data_chunk key;
-    const data_chunk data;
-    const short_hash expected;
-};
-
-static const std_array<hmac_sha160_test, 0> hmac_sha160_tests
-{
-};
-
-// sha256/512 test vectors
-// datatracker.ietf.org/doc/html/rfc4231
-
-// TODO: 
 static const auto hmac_1k = base16_chunk("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
 static const auto hmac_1d = to_chunk("Hi There");
 static const auto hmac_2k = to_chunk("Jefe");
@@ -237,6 +222,26 @@ static const auto hmac_6d = to_chunk("Test Using Larger Than Block-Size Key - Ha
 static const auto hmac_7k = base16_chunk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 static const auto hmac_7d = to_chunk("This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.");
 constexpr auto hmac_tests = 7;
+
+// hmac_sha160_tests
+// ----------------------------------------------------------------------------
+
+struct hmac_sha160_test
+{
+    const data_chunk key;
+    const data_chunk data;
+    const short_hash expected;
+};
+
+// This is the subset of rfc2202 vectors in common with rfc4231.
+static const std_array<hmac_sha160_test, 4> hmac_sha160_tests
+{
+    hmac_sha160_test
+    { hmac_1k, hmac_1d, base16_array("b617318655057264e28bc0b6fb378c8ef146be00") },
+    { hmac_2k, hmac_2d, base16_array("effcdf6ae5eb2fa2d27416d5f184df9c259a7c79") },
+    { hmac_5k, hmac_5d, base16_array("4c1a03424b55e07fe7f27be1d58bb9324a9a5a04") },
+    { hmac_6k, hmac_6d, base16_array("aa4ae5e15272d00e95705637ce8a3b55ed402112") }
+};
 
 // hmac_sha256_tests
 // ----------------------------------------------------------------------------
