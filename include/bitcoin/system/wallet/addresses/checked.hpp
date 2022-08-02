@@ -36,7 +36,6 @@ namespace wallet {
 template <size_t Prefix, size_t Payload,
     size_t Checksum = checksum_default_size>
 class checked
-  : public data_slice
 {
 public:
     static constexpr size_t value_size = (Prefix + Payload + Checksum);
@@ -78,7 +77,7 @@ private:
     static checked from_payload(const prefix_type& version,
         const payload_type& payload) NOEXCEPT;
 
-    value_type value_{};
+    value_type value_;
 };
 
 /// Comparison operators.
