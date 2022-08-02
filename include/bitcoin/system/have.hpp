@@ -189,7 +189,4 @@
 // Deprecated is noisy, turn on to find dependencies.
 ////#define HAVE_DEPRECATED
 
-/// Have slow test execution (scrypt is slow by design).
-////#define HAVE_SLOW_TESTS
-
 #endif

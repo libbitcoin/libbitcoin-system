@@ -204,9 +204,6 @@ DEFINED("HAVE_NOEXCEPT")
 #ifdef HAVE_DEPRECATED
 DEFINED("HAVE_DEPRECATED")
 #endif
-#ifdef HAVE_SLOW_TESTS
-DEFINED("HAVE_SLOW_TESTS")
-#endif
 
 // Force compilation of this unit.
 namespace libbitcoin {}

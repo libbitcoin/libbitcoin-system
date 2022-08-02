@@ -27,6 +27,9 @@
 #include <filesystem>
 #include <bitcoin/system.hpp>
 
+/// Have slow test execution (scrypt is slow by design).
+////#define HAVE_SLOW_TESTS
+
 #define TEST_NAME \
     boost::unit_test::framework::current_test_case().p_name.get()
 #define SUITE_NAME \
