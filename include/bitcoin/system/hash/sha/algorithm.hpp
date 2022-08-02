@@ -135,28 +135,30 @@ protected:
         auto e, auto f, auto g, auto& h, auto w) NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr void round(auto& out, const auto& in) NOEXCEPT;
-    static constexpr void rounding(state_t& out, const buffer_t& in) NOEXCEPT;
+    FORCE_INLINE static constexpr void round(auto& state,
+        const auto& buffer) NOEXCEPT;
 
-    template<size_t Word>
-    FORCE_INLINE static constexpr void prepare(auto& out) NOEXCEPT;
-    static constexpr void preparing(buffer_t& out) NOEXCEPT;
+    static constexpr void rounding(state_t& state, const buffer_t& buffer) NOEXCEPT;
+
+    template<size_t Round>
+    FORCE_INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
+    static constexpr void preparing(buffer_t& buffer) NOEXCEPT;
     static constexpr void summarize(state_t& out, const state_t& in) NOEXCEPT;
-    static constexpr void input(buffer_t& out, const state_t& in) NOEXCEPT;
+    static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
 
     /// Padding
     /// -----------------------------------------------------------------------
-    static constexpr void pad_one(buffer_t& out) NOEXCEPT;
-    static constexpr void pad_half(buffer_t& out) NOEXCEPT;
-    static constexpr void pad_state(buffer_t& out) NOEXCEPT;
-    static constexpr void pad_n(buffer_t& out, count_t blocks) NOEXCEPT;
+    static constexpr void pad_one(buffer_t& buffer) NOEXCEPT;
+    static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
+    static constexpr void pad_state(buffer_t& buffer) NOEXCEPT;
+    static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
     /// Parsing
     /// -----------------------------------------------------------------------
-    static constexpr void input(buffer_t& out, const block_t& in) NOEXCEPT;
-    static constexpr void input1(buffer_t& out, const half_t& in) NOEXCEPT;
-    static constexpr void input2(buffer_t& out, const half_t& in) NOEXCEPT;
-    static constexpr digest_t output(const state_t& in) NOEXCEPT;
+    static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
+    static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
 private:
     // Specialized padding types.

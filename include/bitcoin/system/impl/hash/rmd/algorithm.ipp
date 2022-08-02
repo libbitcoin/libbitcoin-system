@@ -193,10 +193,9 @@ round(auto& a, auto b, auto& c, auto d, auto e, auto x) NOEXCEPT
     constexpr auto s = K::rot[Round];
     constexpr auto k = K::get[Round / K::columns];
     constexpr auto f = functor<Round, decltype(a)>();
-    constexpr auto magic_number = 10;
 
     a = /*b =*/ std::rotl(a + f(b, c, d) + x + k, s) + e;
-    c = /*d =*/ std::rotl(c, magic_number);
+    c = /*d =*/ std::rotl(c, 10);
 }
 
 TEMPLATE

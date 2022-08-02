@@ -28,11 +28,10 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
-// TODO: integrate sha-ni.
-// TODO: vectorize algorithm (2/4/8/16).
+// TODO: integrate sha-ni/neon.
+// TODO: vectorize (2/4/8/16 lanes).
 // TODO: implement 5.3.6 SHA-512/t initial vector derivation.
-// TODO: add/derive SHA-256/224, 512/384, 512/224, 512/256 constants/types.
-// TODO: add nist test vectors.
+// TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
 
 // Implementation based on FIPS PUB 180-4 [Secure Hash Standard (SHS)].
 // All aspects of FIPS180 are supported within the implmentation.
@@ -296,11 +295,8 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 TEMPLATE
 template<size_t Round>
 FORCE_INLINE constexpr void CLASS::
-round(auto& out, const auto& in) NOEXCEPT
+round(auto& state, const auto& buffer) NOEXCEPT
 {
-    constexpr auto words  = SHA::state_words;
-    constexpr auto rounds = SHA::rounds;
-
     // For block/buffer split, in[Round] becomes words[Round] for Round < 16,
     // and buffer[Round - 16] for Round > 16 (constexpression distinction).
     // passing the same (templated parameter) for words/buffer here would
@@ -311,12 +307,12 @@ round(auto& out, const auto& in) NOEXCEPT
         // FIPS.180
         // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
         round<Round>(
-            out[(rounds + 0 - Round) % words],
-            out[(rounds + 1 - Round) % words], // c->b
-            out[(rounds + 2 - Round) % words],
-            out[(rounds + 3 - Round) % words],
-            out[(rounds + 4 - Round) % words], // a->e
-            in[Round]);
+            state[(SHA::rounds + 0 - Round) % SHA::state_words],
+            state[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
+            state[(SHA::rounds + 2 - Round) % SHA::state_words],
+            state[(SHA::rounds + 3 - Round) % SHA::state_words],
+            state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
+            buffer[Round]);
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -328,15 +324,15 @@ round(auto& out, const auto& in) NOEXCEPT
         // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
         // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
         round<Round>(
-            out[(rounds + 0 - Round) % words],
-            out[(rounds + 1 - Round) % words],
-            out[(rounds + 2 - Round) % words],
-            out[(rounds + 3 - Round) % words], // e->d
-            out[(rounds + 4 - Round) % words],
-            out[(rounds + 5 - Round) % words],
-            out[(rounds + 6 - Round) % words],
-            out[(rounds + 7 - Round) % words], // a->h
-            in[Round]);
+            state[(SHA::rounds + 0 - Round) % SHA::state_words],
+            state[(SHA::rounds + 1 - Round) % SHA::state_words],
+            state[(SHA::rounds + 2 - Round) % SHA::state_words],
+            state[(SHA::rounds + 3 - Round) % SHA::state_words], // e->d
+            state[(SHA::rounds + 4 - Round) % SHA::state_words],
+            state[(SHA::rounds + 5 - Round) % SHA::state_words],
+            state[(SHA::rounds + 6 - Round) % SHA::state_words],
+            state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
+            buffer[Round]);
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -346,124 +342,124 @@ round(auto& out, const auto& in) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-rounding(state_t& out, const buffer_t& in) NOEXCEPT
+rounding(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
     // For block/buffer split, words_t is required as an independent parameter.
     // words_t is referenced only in the first 16 rounds, then buffer_t.
     // this keeps parameter set constant (distinguished by template expansion).
 
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
-    const state_t start{ out };
+    const state_t start{ state };
 
     // Templated constant reduces ops per iteration by 35% (vs. parameter).
     // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
     // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
     // Pointer degradation here (optimization), use auto typing in round().
-    auto pin = in.data();
-    auto pout = out.data();
+    auto pbuffer = buffer.data();
+    auto pstate = state.data();
 
     // FIPS.180
     // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
-    round<0>(pout, pin);
-    round<1>(pout, pin);
-    round<2>(pout, pin);
-    round<3>(pout, pin);
-    round<4>(pout, pin);
-    round<5>(pout, pin);
-    round<6>(pout, pin);
-    round<7>(pout, pin);
-    round<8>(pout, pin);
-    round<9>(pout, pin);
-    round<10>(pout, pin);
-    round<11>(pout, pin);
-    round<12>(pout, pin);
-    round<13>(pout, pin);
-    round<14>(pout, pin);
-    round<15>(pout, pin);
+    round< 0>(pstate, pbuffer);
+    round< 1>(pstate, pbuffer);
+    round< 2>(pstate, pbuffer);
+    round< 3>(pstate, pbuffer);
+    round< 4>(pstate, pbuffer);
+    round< 5>(pstate, pbuffer);
+    round< 6>(pstate, pbuffer);
+    round< 7>(pstate, pbuffer);
+    round< 8>(pstate, pbuffer);
+    round< 9>(pstate, pbuffer);
+    round<10>(pstate, pbuffer);
+    round<11>(pstate, pbuffer);
+    round<12>(pstate, pbuffer);
+    round<13>(pstate, pbuffer);
+    round<14>(pstate, pbuffer);
+    round<15>(pstate, pbuffer);
 
-    round<16>(pout, pin);
-    round<17>(pout, pin);
-    round<18>(pout, pin);
-    round<19>(pout, pin);
-    round<20>(pout, pin);
-    round<21>(pout, pin);
-    round<22>(pout, pin);
-    round<23>(pout, pin);
-    round<24>(pout, pin);
-    round<25>(pout, pin);
-    round<26>(pout, pin);
-    round<27>(pout, pin);
-    round<28>(pout, pin);
-    round<29>(pout, pin);
-    round<30>(pout, pin);
-    round<31>(pout, pin);
+    round<16>(pstate, pbuffer);
+    round<17>(pstate, pbuffer);
+    round<18>(pstate, pbuffer);
+    round<19>(pstate, pbuffer);
+    round<20>(pstate, pbuffer);
+    round<21>(pstate, pbuffer);
+    round<22>(pstate, pbuffer);
+    round<23>(pstate, pbuffer);
+    round<24>(pstate, pbuffer);
+    round<25>(pstate, pbuffer);
+    round<26>(pstate, pbuffer);
+    round<27>(pstate, pbuffer);
+    round<28>(pstate, pbuffer);
+    round<29>(pstate, pbuffer);
+    round<30>(pstate, pbuffer);
+    round<31>(pstate, pbuffer);
 
-    round<32>(pout, pin);
-    round<33>(pout, pin);
-    round<34>(pout, pin);
-    round<35>(pout, pin);
-    round<36>(pout, pin);
-    round<37>(pout, pin);
-    round<38>(pout, pin);
-    round<39>(pout, pin);
-    round<40>(pout, pin);
-    round<41>(pout, pin);
-    round<42>(pout, pin);
-    round<43>(pout, pin);
-    round<44>(pout, pin);
-    round<45>(pout, pin);
-    round<46>(pout, pin);
-    round<47>(pout, pin);
+    round<32>(pstate, pbuffer);
+    round<33>(pstate, pbuffer);
+    round<34>(pstate, pbuffer);
+    round<35>(pstate, pbuffer);
+    round<36>(pstate, pbuffer);
+    round<37>(pstate, pbuffer);
+    round<38>(pstate, pbuffer);
+    round<39>(pstate, pbuffer);
+    round<40>(pstate, pbuffer);
+    round<41>(pstate, pbuffer);
+    round<42>(pstate, pbuffer);
+    round<43>(pstate, pbuffer);
+    round<44>(pstate, pbuffer);
+    round<45>(pstate, pbuffer);
+    round<46>(pstate, pbuffer);
+    round<47>(pstate, pbuffer);
 
-    round<48>(pout, pin);
-    round<49>(pout, pin);
-    round<50>(pout, pin);
-    round<51>(pout, pin);
-    round<52>(pout, pin);
-    round<53>(pout, pin);
-    round<54>(pout, pin);
-    round<55>(pout, pin);
-    round<56>(pout, pin);
-    round<57>(pout, pin);
-    round<58>(pout, pin);
-    round<59>(pout, pin);
-    round<60>(pout, pin);
-    round<61>(pout, pin);
-    round<62>(pout, pin);
-    round<63>(pout, pin);
+    round<48>(pstate, pbuffer);
+    round<49>(pstate, pbuffer);
+    round<50>(pstate, pbuffer);
+    round<51>(pstate, pbuffer);
+    round<52>(pstate, pbuffer);
+    round<53>(pstate, pbuffer);
+    round<54>(pstate, pbuffer);
+    round<55>(pstate, pbuffer);
+    round<56>(pstate, pbuffer);
+    round<57>(pstate, pbuffer);
+    round<58>(pstate, pbuffer);
+    round<59>(pstate, pbuffer);
+    round<60>(pstate, pbuffer);
+    round<61>(pstate, pbuffer);
+    round<62>(pstate, pbuffer);
+    round<63>(pstate, pbuffer);
 
     // FIPS.180
     // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
     if constexpr (SHA::rounds == 80)
     {
-        round<64>(pout, pin);
-        round<65>(pout, pin);
-        round<66>(pout, pin);
-        round<67>(pout, pin);
-        round<68>(pout, pin);
-        round<69>(pout, pin);
-        round<70>(pout, pin);
-        round<71>(pout, pin);
-        round<72>(pout, pin);
-        round<73>(pout, pin);
-        round<74>(pout, pin);
-        round<75>(pout, pin);
-        round<76>(pout, pin);
-        round<77>(pout, pin);
-        round<78>(pout, pin);
-        round<79>(pout, pin);
+        round<64>(pstate, pbuffer);
+        round<65>(pstate, pbuffer);
+        round<66>(pstate, pbuffer);
+        round<67>(pstate, pbuffer);
+        round<68>(pstate, pbuffer);
+        round<69>(pstate, pbuffer);
+        round<70>(pstate, pbuffer);
+        round<71>(pstate, pbuffer);
+        round<72>(pstate, pbuffer);
+        round<73>(pstate, pbuffer);
+        round<74>(pstate, pbuffer);
+        round<75>(pstate, pbuffer);
+        round<76>(pstate, pbuffer);
+        round<77>(pstate, pbuffer);
+        round<78>(pstate, pbuffer);
+        round<79>(pstate, pbuffer);
     }
 
-    summarize(out, start);
+    summarize(state, start);
 }
 
 TEMPLATE
-template<size_t Word>
+template<size_t Round>
 FORCE_INLINE constexpr void CLASS::
-prepare(auto& out) NOEXCEPT
+prepare(auto& buffer) NOEXCEPT
 {
     // For block/buffer split, Word is shifted to start at zero but with
     // an independent words_t for first 16 words (indexes - 16). Above 31
@@ -480,23 +476,23 @@ prepare(auto& out) NOEXCEPT
     {
         // FIPS.180
         // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
-        out[Word] = std::rotl(
-            out[Word - 16] ^ out[Word - 14] ^
-            out[Word -  8] ^ out[Word -  3], 1);
+        buffer[Round] = std::rotl(
+            buffer[Round - 16] ^ buffer[Round - 14] ^
+            buffer[Round -  8] ^ buffer[Round -  3], 1);
 
         // SHA-NI
-        //     out[Word] = sha1msg2 // xor and rotl1
+        //     buffer[Round] = sha1msg2 // xor and rotl1
         //     (
-        //         xor              // not using sha1msg1
+        //         xor                // not using sha1msg1
         //         (
-        //             sha1msg1     // xor (why not xor?)
+        //             sha1msg1       // xor (specialized)
         //             (
-        //                 out[Word - 16],
-        //                 out[Word - 14]
+        //                 buffer[Round - 16],
+        //                 buffer[Round - 14]
         //             ),
-        //             out[Word -  8]
+        //             buffer[Round -  8]
         //          ),
-        //          out[Word -  3]
+        //          buffer[Round -  3]
         //     );
         // NEON
         //     vsha1su1q/vsha1su0q
@@ -506,30 +502,31 @@ prepare(auto& out) NOEXCEPT
         // FIPS.180
         // 6.2.2 SHA-256 Hash Computation (16 <= t <= 63)
         // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
-        out[Word] =
-            out[Word - 16] + sigma0(out[Word - 15]) +
-            out[Word -  7] + sigma1(out[Word -  2]);
+        buffer[Round] =
+            buffer[Round - 16] + sigma0(buffer[Round - 15]) +
+            buffer[Round -  7] + sigma1(buffer[Round -  2]);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
-        // out[Word] =
-        //     sha256msg1(out[Word - 16], out[Word - 15]) +
-        //     sha256msg2(out[Word -  7], out[Word -  2]);
+        // buffer[Round] =
+        //     sha256msg1(buffer[Round - 16], buffer[Round - 15]) +
+        //     sha256msg2(buffer[Round -  7], buffer[Round -  2]);
         // NEON
         // Not sure about these indexes.
         // mijailovic.net/2018/06/06/sha256-armv8
-        // out[Word] =
-        //     vsha256su0q(out[Word - 13], out[Word - 9])
-        //     vsha256su1q(out[Word - 13], out[Word - 5], out[Word - 1]);
+        // buffer[Round] =
+        //     vsha256su0q(buffer[Round - 13], buffer[Round - 9])
+        //     vsha256su1q(buffer[Round - 13], buffer[Round - 5],
+        //                 buffer[Round - 1]);
     }
 }
 
 TEMPLATE
 constexpr void CLASS::
-preparing(buffer_t& out) NOEXCEPT
+preparing(buffer_t& buffer) NOEXCEPT
 {
     // Pointer degradation here (optimization), use auto typing in prepare().
-    auto pout = out.data();
+    auto pbuffer = buffer.data();
 
     // For block/buffer split, indexes shifted to start at zero.
     // words_t is required as an independent parameter for first 16 calls.
@@ -539,78 +536,78 @@ preparing(buffer_t& out) NOEXCEPT
     // 6.1.2.1 SHA-1   Hash Computation (16 <= t <= 79)
     // 6.2.2.1 SHA-256 Hash Computation (16 <= t <= 63)
     // 6.4.2.1 SHA-512 Hash Computation (16 <= t <= 79)
-    prepare<16>(pout);
-    prepare<17>(pout);
-    prepare<18>(pout);
-    prepare<19>(pout);
-    prepare<20>(pout);
-    prepare<21>(pout);
-    prepare<22>(pout);
-    prepare<23>(pout);
-    prepare<24>(pout);
-    prepare<25>(pout);
-    prepare<26>(pout);
-    prepare<27>(pout);
-    prepare<28>(pout);
-    prepare<29>(pout);
-    prepare<30>(pout);
-    prepare<31>(pout);
-    prepare<32>(pout);
+    prepare<16>(pbuffer);
+    prepare<17>(pbuffer);
+    prepare<18>(pbuffer);
+    prepare<19>(pbuffer);
+    prepare<20>(pbuffer);
+    prepare<21>(pbuffer);
+    prepare<22>(pbuffer);
+    prepare<23>(pbuffer);
+    prepare<24>(pbuffer);
+    prepare<25>(pbuffer);
+    prepare<26>(pbuffer);
+    prepare<27>(pbuffer);
+    prepare<28>(pbuffer);
+    prepare<29>(pbuffer);
+    prepare<30>(pbuffer);
+    prepare<31>(pbuffer);
+    prepare<32>(pbuffer);
 
-    prepare<33>(pout);
-    prepare<34>(pout);
-    prepare<35>(pout);
-    prepare<36>(pout);
-    prepare<37>(pout);
-    prepare<38>(pout);
-    prepare<39>(pout);
-    prepare<40>(pout);
-    prepare<41>(pout);
-    prepare<42>(pout);
-    prepare<43>(pout);
-    prepare<44>(pout);
-    prepare<45>(pout);
-    prepare<46>(pout);
-    prepare<47>(pout);
-    prepare<48>(pout);
+    prepare<33>(pbuffer);
+    prepare<34>(pbuffer);
+    prepare<35>(pbuffer);
+    prepare<36>(pbuffer);
+    prepare<37>(pbuffer);
+    prepare<38>(pbuffer);
+    prepare<39>(pbuffer);
+    prepare<40>(pbuffer);
+    prepare<41>(pbuffer);
+    prepare<42>(pbuffer);
+    prepare<43>(pbuffer);
+    prepare<44>(pbuffer);
+    prepare<45>(pbuffer);
+    prepare<46>(pbuffer);
+    prepare<47>(pbuffer);
+    prepare<48>(pbuffer);
 
-    prepare<49>(pout);
-    prepare<50>(pout);
-    prepare<51>(pout);
-    prepare<52>(pout);
-    prepare<53>(pout);
-    prepare<54>(pout);
-    prepare<55>(pout);
-    prepare<56>(pout);
-    prepare<57>(pout);
-    prepare<58>(pout);
-    prepare<59>(pout);
-    prepare<60>(pout);
-    prepare<61>(pout);
-    prepare<62>(pout);
-    prepare<63>(pout);
+    prepare<49>(pbuffer);
+    prepare<50>(pbuffer);
+    prepare<51>(pbuffer);
+    prepare<52>(pbuffer);
+    prepare<53>(pbuffer);
+    prepare<54>(pbuffer);
+    prepare<55>(pbuffer);
+    prepare<56>(pbuffer);
+    prepare<57>(pbuffer);
+    prepare<58>(pbuffer);
+    prepare<59>(pbuffer);
+    prepare<60>(pbuffer);
+    prepare<61>(pbuffer);
+    prepare<62>(pbuffer);
+    prepare<63>(pbuffer);
 
     // FIPS.180
     // 6.1.2 SHA-1   Hash Computation (16 <= t <= 79)
     // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
     if constexpr (SHA::rounds == 80)
     {
-        prepare<64>(pout);
-        prepare<65>(pout);
-        prepare<66>(pout);
-        prepare<67>(pout);
-        prepare<68>(pout);
-        prepare<69>(pout);
-        prepare<70>(pout);
-        prepare<71>(pout);
-        prepare<72>(pout);
-        prepare<73>(pout);
-        prepare<74>(pout);
-        prepare<75>(pout);
-        prepare<76>(pout);
-        prepare<77>(pout);
-        prepare<78>(pout);
-        prepare<79>(pout);
+        prepare<64>(pbuffer);
+        prepare<65>(pbuffer);
+        prepare<66>(pbuffer);
+        prepare<67>(pbuffer);
+        prepare<68>(pbuffer);
+        prepare<69>(pbuffer);
+        prepare<70>(pbuffer);
+        prepare<71>(pbuffer);
+        prepare<72>(pbuffer);
+        prepare<73>(pbuffer);
+        prepare<74>(pbuffer);
+        prepare<75>(pbuffer);
+        prepare<76>(pbuffer);
+        prepare<77>(pbuffer);
+        prepare<78>(pbuffer);
+        prepare<79>(pbuffer);
     }
 }
 
@@ -639,7 +636,7 @@ summarize(state_t& out, const state_t& in) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-input(buffer_t& out, const state_t& in) NOEXCEPT
+input(buffer_t& buffer, const state_t& state) NOEXCEPT
 {
     // For block/buffer split, buffer_t is block_t and this is uncasted assign.
 
@@ -651,25 +648,25 @@ input(buffer_t& out, const state_t& in) NOEXCEPT
     {
         // FIPS.180
         // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
-        out[0] = in[0];
-        out[1] = in[1];
-        out[2] = in[2];
-        out[3] = in[3];
-        out[4] = in[4];
+        buffer[0] = state[0];
+        buffer[1] = state[1];
+        buffer[2] = state[2];
+        buffer[3] = state[3];
+        buffer[4] = state[4];
 
         if constexpr (SHA::digest != 160)
         {
             // FIPS.180
             // 6.2.2.1 SHA-256 Hash Computation (0 <= t <= 15)
             // 6.4.2.1 SHA-512 Hash Computation (0 <= t <= 15)
-            out[5] = in[5];
-            out[6] = in[6];
-            out[7] = in[7];
+            buffer[5] = state[5];
+            buffer[6] = state[6];
+            buffer[7] = state[7];
         }
     }
     else
     {
-        narrow_array_cast<word_t, array_count<state_t>>(out) = in;
+        narrow_array_cast<word_t, array_count<state_t>>(buffer) = state;
     }
 }
 
@@ -681,7 +678,7 @@ input(buffer_t& out, const state_t& in) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-pad_one(buffer_t& out) NOEXCEPT
+pad_one(buffer_t& buffer) NOEXCEPT
 {
     // For block/buffer split, the block is processed directly over block/pad.
     // So this is eliminated and the block/pad are used independently.
@@ -689,12 +686,12 @@ pad_one(buffer_t& out) NOEXCEPT
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
 
-    out = pad;
+    buffer = pad;
 }
 
 TEMPLATE
 constexpr void CLASS::
-pad_half(buffer_t& out) NOEXCEPT
+pad_half(buffer_t& buffer) NOEXCEPT
 {
     // For block/buffer split, buffer_t becomes block_t and this unchanged.
 
@@ -703,25 +700,25 @@ pad_half(buffer_t& out) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        out.at(8)  = pad.at(0);
-        out.at(9)  = pad.at(1);
-        out.at(10) = pad.at(2);
-        out.at(11) = pad.at(3);
-        out.at(12) = pad.at(4);
-        out.at(13) = pad.at(5);
-        out.at(14) = pad.at(6);
-        out.at(15) = pad.at(7);
+        buffer.at(8)  = pad.at(0);
+        buffer.at(9)  = pad.at(1);
+        buffer.at(10) = pad.at(2);
+        buffer.at(11) = pad.at(3);
+        buffer.at(12) = pad.at(4);
+        buffer.at(13) = pad.at(5);
+        buffer.at(14) = pad.at(6);
+        buffer.at(15) = pad.at(7);
     }
     else
     {
         constexpr auto size = array_count<chunk_t>;
-        unsafe_array_cast<word_t, size>(&out[size]) = pad;
+        unsafe_array_cast<word_t, size>(&buffer[size]) = pad;
     }
 }
 
 TEMPLATE
 constexpr void CLASS::
-pad_state(buffer_t& out) NOEXCEPT
+pad_state(buffer_t& buffer) NOEXCEPT
 {
     // For block/buffer split, buffer_t becomes block_t and this unchanged.
 
@@ -735,41 +732,41 @@ pad_state(buffer_t& out) NOEXCEPT
         if constexpr (SHA::digest == 160)
         {
             // SHA-1 padding of state is 16-5 [11] words.
-            out.at(5)  = pad.at(0);
-            out.at(6)  = pad.at(1);
-            out.at(7)  = pad.at(2);
-            out.at(8)  = pad.at(3);
-            out.at(9)  = pad.at(4);
-            out.at(10) = pad.at(5);
-            out.at(11) = pad.at(6);
-            out.at(12) = pad.at(7);
-            out.at(13) = pad.at(8);
-            out.at(14) = pad.at(9);
-            out.at(15) = pad.at(10);
+            buffer.at(5)  = pad.at(0);
+            buffer.at(6)  = pad.at(1);
+            buffer.at(7)  = pad.at(2);
+            buffer.at(8)  = pad.at(3);
+            buffer.at(9)  = pad.at(4);
+            buffer.at(10) = pad.at(5);
+            buffer.at(11) = pad.at(6);
+            buffer.at(12) = pad.at(7);
+            buffer.at(13) = pad.at(8);
+            buffer.at(14) = pad.at(9);
+            buffer.at(15) = pad.at(10);
         }
         else
         {
             // SHA-256/512 padding of state is 16-8 [8] words.
-            out.at(8)  = pad.at(0);
-            out.at(9)  = pad.at(1);
-            out.at(10) = pad.at(2);
-            out.at(11) = pad.at(3);
-            out.at(12) = pad.at(4);
-            out.at(13) = pad.at(5);
-            out.at(14) = pad.at(6);
-            out.at(15) = pad.at(7);
+            buffer.at(8)  = pad.at(0);
+            buffer.at(9)  = pad.at(1);
+            buffer.at(10) = pad.at(2);
+            buffer.at(11) = pad.at(3);
+            buffer.at(12) = pad.at(4);
+            buffer.at(13) = pad.at(5);
+            buffer.at(14) = pad.at(6);
+            buffer.at(15) = pad.at(7);
         }
     }
     else
     {
         constexpr auto size = SHA::block_words - SHA::state_words;
-        unsafe_array_cast<word_t, size>(&out[SHA::state_words]) = pad;
+        unsafe_array_cast<word_t, size>(&buffer[SHA::state_words]) = pad;
     }
 }
 
 TEMPLATE
 constexpr void CLASS::
-pad_n(buffer_t& out, count_t blocks) NOEXCEPT
+pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 {
     // For block/buffer split, buffer_t becomes block_t and this unchanged.
 
@@ -779,30 +776,30 @@ pad_n(buffer_t& out, count_t blocks) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        out.at(0)  = pad.at(0);
-        out.at(1)  = pad.at(1);
-        out.at(2)  = pad.at(2);
-        out.at(3)  = pad.at(3);
-        out.at(4)  = pad.at(4);
-        out.at(5)  = pad.at(5);
-        out.at(6)  = pad.at(6);
-        out.at(7)  = pad.at(7);
-        out.at(8)  = pad.at(8);
-        out.at(9)  = pad.at(9);
-        out.at(10) = pad.at(10);
-        out.at(11) = pad.at(11);
-        out.at(12) = pad.at(12);
-        out.at(13) = pad.at(13);
-        out.at(14) = hi_word<word_t>(bits);
-        out.at(15) = lo_word<word_t>(bits);
+        buffer.at(0)  = pad.at(0);
+        buffer.at(1)  = pad.at(1);
+        buffer.at(2)  = pad.at(2);
+        buffer.at(3)  = pad.at(3);
+        buffer.at(4)  = pad.at(4);
+        buffer.at(5)  = pad.at(5);
+        buffer.at(6)  = pad.at(6);
+        buffer.at(7)  = pad.at(7);
+        buffer.at(8)  = pad.at(8);
+        buffer.at(9)  = pad.at(9);
+        buffer.at(10) = pad.at(10);
+        buffer.at(11) = pad.at(11);
+        buffer.at(12) = pad.at(12);
+        buffer.at(13) = pad.at(13);
+        buffer.at(14) = hi_word<word_t>(bits);
+        buffer.at(15) = lo_word<word_t>(bits);
     }
     else
     {
-        narrow_array_cast<word_t, array_count<blocks_pad_t>>(out) = pad;
+        narrow_array_cast<word_t, array_count<blocks_pad_t>>(buffer) = pad;
 
         // Split count into hi/low words and assign end of padded buffer.
-        out[14] = hi_word<word_t>(bits);
-        out[15] = lo_word<word_t>(bits);
+        buffer[14] = hi_word<word_t>(bits);
+        buffer[15] = lo_word<word_t>(bits);
     }
 }
 
@@ -815,7 +812,7 @@ pad_n(buffer_t& out, count_t blocks) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-input(buffer_t& out, const block_t& in) NOEXCEPT
+input(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
     // For block/buffer split, buffer_t is smaller and this is unchanged.
     // But in the case of merkle (owned block&&) we can assign out to in
@@ -837,34 +834,33 @@ input(buffer_t& out, const block_t& in) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        // TODO: change to at().
-        from_big< 0 * size>(out.at( 0), in);
-        from_big< 1 * size>(out.at( 1), in);
-        from_big< 2 * size>(out.at( 2), in);
-        from_big< 3 * size>(out.at( 3), in);
-        from_big< 4 * size>(out.at( 4), in);
-        from_big< 5 * size>(out.at( 5), in);
-        from_big< 6 * size>(out.at( 6), in);
-        from_big< 7 * size>(out.at( 7), in);
-        from_big< 8 * size>(out.at( 8), in);
-        from_big< 9 * size>(out.at( 9), in);
-        from_big<10 * size>(out.at(10), in);
-        from_big<11 * size>(out.at(11), in);
-        from_big<12 * size>(out.at(12), in);
-        from_big<13 * size>(out.at(13), in);
-        from_big<14 * size>(out.at(14), in);
-        from_big<15 * size>(out.at(15), in);
+        from_big< 0 * size>(buffer.at( 0), block);
+        from_big< 1 * size>(buffer.at( 1), block);
+        from_big< 2 * size>(buffer.at( 2), block);
+        from_big< 3 * size>(buffer.at( 3), block);
+        from_big< 4 * size>(buffer.at( 4), block);
+        from_big< 5 * size>(buffer.at( 5), block);
+        from_big< 6 * size>(buffer.at( 6), block);
+        from_big< 7 * size>(buffer.at( 7), block);
+        from_big< 8 * size>(buffer.at( 8), block);
+        from_big< 9 * size>(buffer.at( 9), block);
+        from_big<10 * size>(buffer.at(10), block);
+        from_big<11 * size>(buffer.at(11), block);
+        from_big<12 * size>(buffer.at(12), block);
+        from_big<13 * size>(buffer.at(13), block);
+        from_big<14 * size>(buffer.at(14), block);
+        from_big<15 * size>(buffer.at(15), block);
     }
     else
     {
-        auto& to = narrow_array_cast<word_t, SHA::block_words>(out);
-        from_big_endians(to, array_cast<word_t>(in));
+        auto& to = narrow_array_cast<word_t, SHA::block_words>(buffer);
+        from_big_endians(to, array_cast<word_t>(block));
     }
 }
 
 TEMPLATE
 constexpr void CLASS::
-input1(buffer_t& out, const half_t& in) NOEXCEPT
+input1(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     // For block/buffer split, buffer_t is smaller and this is unchanged.
 
@@ -872,26 +868,25 @@ input1(buffer_t& out, const half_t& in) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        // TODO: change to at().
-        from_big<0 * size>(out.at(0), in);
-        from_big<1 * size>(out.at(1), in);
-        from_big<2 * size>(out.at(2), in);
-        from_big<3 * size>(out.at(3), in);
-        from_big<4 * size>(out.at(4), in);
-        from_big<5 * size>(out.at(5), in);
-        from_big<6 * size>(out.at(6), in);
-        from_big<7 * size>(out.at(7), in);
+        from_big<0 * size>(buffer.at(0), half);
+        from_big<1 * size>(buffer.at(1), half);
+        from_big<2 * size>(buffer.at(2), half);
+        from_big<3 * size>(buffer.at(3), half);
+        from_big<4 * size>(buffer.at(4), half);
+        from_big<5 * size>(buffer.at(5), half);
+        from_big<6 * size>(buffer.at(6), half);
+        from_big<7 * size>(buffer.at(7), half);
     }
     else
     {
-        auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
-        from_big_endians(to, array_cast<word_t>(in));
+        auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(buffer);
+        from_big_endians(to, array_cast<word_t>(half));
     }
 }
 
 TEMPLATE
 constexpr void CLASS::
-input2(buffer_t& out, const half_t& in) NOEXCEPT
+input2(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     // For block/buffer split, buffer_t is smaller and this is unchanged.
 
@@ -899,27 +894,26 @@ input2(buffer_t& out, const half_t& in) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        // TODO: change to at().
-        from_big< 8 * size>(out.at( 8), in);
-        from_big< 9 * size>(out.at( 9), in);
-        from_big<10 * size>(out.at(10), in);
-        from_big<11 * size>(out.at(11), in);
-        from_big<12 * size>(out.at(12), in);
-        from_big<13 * size>(out.at(13), in);
-        from_big<14 * size>(out.at(14), in);
-        from_big<15 * size>(out.at(15), in);
+        from_big< 8 * size>(buffer.at( 8), half);
+        from_big< 9 * size>(buffer.at( 9), half);
+        from_big<10 * size>(buffer.at(10), half);
+        from_big<11 * size>(buffer.at(11), half);
+        from_big<12 * size>(buffer.at(12), half);
+        from_big<13 * size>(buffer.at(13), half);
+        from_big<14 * size>(buffer.at(14), half);
+        from_big<15 * size>(buffer.at(15), half);
     }
     else
     {
         constexpr auto size = SHA::state_words;
-        auto& to = unsafe_array_cast<word_t, size>(&out[size]);
-        from_big_endians(to, array_cast<word_t>(in));
+        auto& to = unsafe_array_cast<word_t, size>(&buffer[size]);
+        from_big_endians(to, array_cast<word_t>(half));
     }
 }
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
-output(const state_t& in) NOEXCEPT
+output(const state_t& state) NOEXCEPT
 {
     // FIPS.180
     // 6.1.2 SHA-1   Hash Computation
@@ -929,27 +923,26 @@ output(const state_t& in) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        digest_t out{};
+        digest_t digest{};
 
-        // TODO: change to at().
-        to_big<0 * size>(out, in.at(0));
-        to_big<1 * size>(out, in.at(1));
-        to_big<2 * size>(out, in.at(2));
-        to_big<3 * size>(out, in.at(3));
-        to_big<4 * size>(out, in.at(4));
+        to_big<0 * size>(digest, state.at(0));
+        to_big<1 * size>(digest, state.at(1));
+        to_big<2 * size>(digest, state.at(2));
+        to_big<3 * size>(digest, state.at(3));
+        to_big<4 * size>(digest, state.at(4));
 
         if constexpr (SHA::digest != 160)
         {
-            to_big<5 * size>(out, in.at(5));
-            to_big<6 * size>(out, in.at(6));
-            to_big<7 * size>(out, in.at(7));
+            to_big<5 * size>(digest, state.at(5));
+            to_big<6 * size>(digest, state.at(6));
+            to_big<7 * size>(digest, state.at(7));
         }
 
-        return out;
+        return digest;
     }
     else
     {
-        return array_cast<byte_t>(to_big_endians(in));
+        return array_cast<byte_t>(to_big_endians(state));
     }
 }
 
