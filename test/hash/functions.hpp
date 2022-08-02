@@ -19,75 +19,142 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_HASH_HPP
 #define LIBBITCOIN_SYSTEM_TEST_HASH_HPP
 
-// ripemd_tests
+// rmd
+// ============================================================================
+
+// test vectors
+// homes.esat.kuleuven.be/~bosselae/ripemd160.html
+
+static const auto rmd_1 = to_chunk("");
+static const auto rmd_2 = to_chunk("a");
+static const auto rmd_3 = to_chunk("abc");
+static const auto rmd_4 = to_chunk("message digest");
+static const auto rmd_5 = to_chunk("abcdefghijklmnopqrstuvwxyz");
+static const auto rmd_6 = to_chunk("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+static const auto rmd_7 = to_chunk("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+static const auto rmd_8 = to_chunk("12345678901234567890123456789012345678901234567890123456789012345678901234567890");
+static const auto rmd_9 = data_chunk(1'000'000, to_byte('a'));
+
+// rmd128_tests
 // ----------------------------------------------------------------------------
 
-struct ripemd_test
+struct rmd128_test
 {
-    data_chunk data;
-    const short_hash expected;
+    const data_chunk data;
+    const half_hash expected;
 };
 
-static const std_array<ripemd_test, 21> ripemd_tests
+static const std_array<rmd128_test, 9> rmd128_tests
 {
-    ripemd_test
-    {base16_chunk(""), base16_array("9c1185a5c5e9fc54612808977ee8f548b2258d31")},
-    {base16_chunk("d5c2b51c22c73a03f316c980880a4ce564e80ed716d54d54ddc43181c8f0512617492f37894640940b1184e14d"), base16_array("306e7d59121745f5d570c5aef029f521276455ce")},
-    {base16_chunk("327b8d8ec5d615581e334abdc90dc86f647e0e6e0c136015ef7307d83a2d72"), base16_array("cc8e4f0af6057cff56cca797216cf312bb47da73")},
-    {base16_chunk("d3d9a60e3dc1f5ced2a961786f"), base16_array("9b7378b66961a4103fa851ee5533acda4bf27b81")},
-    {base16_chunk("6416828b23c1327ff88f63"), base16_array("5ec8f40f77037a5f1c83368111e31921542b485e")},
-    {base16_chunk("246f84cfc13b53d4cce6229e6b684e16e2450a411d93"), base16_array("7da76c22ee062bd6fd59fade9b723a0051fa15ac")},
-    {base16_chunk("b772474743eca0d41f94ae40cd57b0f9e64a3d51f2c99e473d78de54bfb398057a"), base16_array("6acdbcf1ac21be3c6472a83293404ccda2eb06f7")},
-    {base16_chunk("a33705b8833a535ada"), base16_array("cddf70a264a374513a8ad363a55f79d393de75a2")},
-    {base16_chunk("5e"), base16_array("53b92648727c2ec7f961a961786c1cf83540927d")},
-    {base16_chunk("ab4c1cc2a9ab7815241a29d95dba37b7f3263befaee248c1614832917c18deff9794"), base16_array("ff3c8e53be8fa0c02e08abd0e2e370932859c6ba")},
-    {base16_chunk("138700cef9f6e79c726e905746d0eb3eab4272380086e35c7772a429f2e99de0e4350eaeab56a8ce8596c286fbf572"), base16_array("50416b50b8b581b44624efdde7e7ec50680e8718")},
-    {base16_chunk("0370b2576696fdf206c9d6ae1581a6217d38"), base16_array("5b2984f2cec13c2c4626c78f5612884c73df629c")},
-    {base16_chunk("822ca89d7ad99c51"), base16_array("a34b70f1acaabc02ffeea2f88967a5ee1a1b40a4")},
-    {base16_chunk("9dbc66f727723493d7d462e5697ead73e0b386d8cbb187b7490e87e53525a3399b604c29"), base16_array("d969a802332e3be8c8254c5f24cf80e9e000678a")},
-    {base16_chunk(""), base16_array("9c1185a5c5e9fc54612808977ee8f548b2258d31")},
-    {base16_chunk("2062a5b9648ee5a70b2523311d6188666671ebb28090ef72061ded0cfe006099cd5546dbf7"), base16_array("8d699ff496fb01870c7c877c5f883e98329dba8e")},
-    {base16_chunk("05a33c8c098c03fb14532eaa9538530b938d3b69782c1a89b2c9166e89cf7772228ea2822f3ef06f0f92bd4adaee109f"), base16_array("3c467471ee1c19c93d0bb184dd89c86d9b13174d")},
-    {base16_chunk("b44a1a6a2a9c9b3e82711225372b0cd60e88bf7be9ced35459ea525da0bb6dfc57117fde2566b2606682"), base16_array("6ffd7e4188245ba250677b9c0d876e39ebb04c2b")},
-    {base16_chunk("4fef1cade9f13670c461b32d70e0549bb966b12680fd0ee40ea33fb4b2948a2bd35e195dfb1f69b5c54fe1f5bb1f0d21d0"), base16_array("b55f71c9194073973df18691ebec78a7a2c2c6e1")},
-    {base16_chunk("b96c28c68798081dafff4f274a78f2cc9e3ba4e332bb"), base16_array("22f40e4e4921f6d7eccec5cdc269031f3623e912")},
-    {base16_chunk("59ce28d8016e7ebb1dedbfef16686735ed65"), base16_array("0a71887812c3d5c241bcd651a736a0fe9baa86fd")}
+    rmd128_test
+    { rmd_1, base16_array("cdf26213a150dc3ecb610f18f6b38b46") },
+    { rmd_2, base16_array("86be7afa339d0fc7cfc785e72f578d33") },
+    { rmd_3, base16_array("c14a12199c66e4ba84636b0f69144c77") },
+    { rmd_4, base16_array("9e327b3d6e523062afc1132d7df9d1b8") },
+    { rmd_5, base16_array("fd2aa607f71dc8f510714922b371834e") },
+    { rmd_6, base16_array("a1aa0689d0fafa2ddc22e88b49133a06") },
+    { rmd_7, base16_array("d1e959eb179c911faea4624c60c5c702") },
+    { rmd_8, base16_array("3f45ef194732c2dbb2c4a2c769795fa3") },
+    { rmd_9, base16_array("4a7f5723f954eba1216c9d8f6320431f") }
 };
 
-// sha1_tests
+// rmd160_tests
 // ----------------------------------------------------------------------------
 
-struct sha1_test
+struct rmd160_test
 {
     const data_chunk data;
     const short_hash expected;
 };
 
-static const std_array<sha1_test, 21> sha1_tests
+static const std_array<rmd160_test, 9> rmd160_tests
 {
-    sha1_test
-    {base16_chunk(""), base16_array("da39a3ee5e6b4b0d3255bfef95601890afd80709")},
-    {base16_chunk("27ed20cb2fa1c9093ebf82427b2abff42cbd"), base16_array("6a56c8684a4a5f37fee6d91526696aded7c0aa0a")},
-    {base16_chunk("ddba0a9bc3e53d6ef1c34c11031b54fdce18d54d0c2fb59fc80f0af4314e6916d0b0c5ae9ad8"), base16_array("68e277e7fa9bc9d5ccfbceb08f57cf83fde883c0")},
-    {base16_chunk("aa9224a8e046e5b2"), base16_array("ff409fff25b6ae55ac96994427eab6eaafd67559")},
-    {base16_chunk("14b7ae683c371ccd6436f4742075578dc599dfc3a437ec8b"), base16_array("36759eabb931b80fbbca8e6e533fca72388bd8f2")},
-    {base16_chunk("f9c8eda189222a4e46f65c36a64cae11b26aa531121aa6697fd93504f9aecac893a47dd9"), base16_array("7e619f364df8159ed0e55edeb5008d77cbfb7574")},
-    {base16_chunk("e35af7be6135f20cebee722c6cdbafe8620a7cd796d3fbf6ac1cf81eae17faeebe80"), base16_array("4c8770cb9f6ed23b4603990de3b12f1ec437f1bf")},
-    {base16_chunk("fdac4bc3951ee0ebad89ce3806496468ce495c91b1f2e206822cf18ebe3c8bd1319e1ef87d"), base16_array("abc658273513f036231c3ac93d693e520ba289cf")},
-    {base16_chunk("a04117c5defe8bdc4be999f3c8889f74af9429ef2a6808c462b48c8400a8ac4bf1397ccfcff0e03ebd"), base16_array("f12c13bcc078f864baf9eda3a0f551828006cab9")},
-    {base16_chunk("46bf37cf595b18e6553ee97254734a7a704c6db89833cd5ebe7fdf8659"), base16_array("4840799d2cd8ede95c43e701530c83f84cdbd31c")},
-    {base16_chunk("c158cd2ed7c0dced347c1f9a619d1c8dc382b4e539400cc9aefb97d6083a141c"), base16_array("b3bedc3d40dbd0991d31af668f2bc946fe2cc2b5")},
-    {base16_chunk("1848614e29ff5920e8a7e1ba31fcd2c2c3c7d07b7c"), base16_array("2a5a51e2f2e1c90b303054fe41f57bd25258a13c")},
-    {base16_chunk("b34d4bef16f613861b7ad624ebdebd99517e"), base16_array("9f0cefbc13cd853394c7b02de97f5f436ea3918d")},
-    {base16_chunk("4ee01f8feee0a6ac275f58b85ceab49c603b78ff606703cab57c52fc7617930366a56c5daed2f3e17e0ee2da4ce8b8"), base16_array("17ecd1fb6df59261017650bc1fd8dffb11594d3f")},
-    {base16_chunk("a7afbeb9491d91d679f843c7"), base16_array("d6ad4a2a306137c7851dc6ef9b2fd0af20ecbfd1")},
-    {base16_chunk("821161f3c04b6b11c4d1a4"), base16_array("128a1700ae4590fe7b982a53b16334190f21c4b7")},
-    {base16_chunk("d9cdc2bb692281ea033489ab4cf08a0ea7e934edb4f9b135bcdae7da484c399e463490"), base16_array("7848f419a5da361142fc46646866272bfa7c6552")},
-    {base16_chunk("99a74cb1645b7ed583a5c077a0545586f55cb2629109b7f10dce77a91ef3285c"), base16_array("c5ddea4614c2655844f6597fabb64230e2e8232b")},
-    {base16_chunk("cb9779"), base16_array("33274f991e78de247db476c70d88f889c23cd0eb")},
-    {base16_chunk("0b681b18aa5a44b9a1b245ed10"), base16_array("61e8608b603391ac90a543d3b531662ccef29f16")},
-    {base16_chunk("70206feaa65059d63e2d5807f92b49e3ce183ba3c4185c03944e6a366119409873cf"), base16_array("643ca9c7b4774128514be660c0304d4dec5cc7ca")}
+    rmd160_test
+    { rmd_1, base16_array("9c1185a5c5e9fc54612808977ee8f548b2258d31") },
+    { rmd_2, base16_array("0bdc9d2d256b3ee9daae347be6f4dc835a467ffe") },
+    { rmd_3, base16_array("8eb208f7e05d987a9b044a8e98c6b087f15a0bfc") },
+    { rmd_4, base16_array("5d0689ef49d2fae572b881b123a85ffa21595f36") },
+    { rmd_5, base16_array("f71c27109c692c1b56bbdceb5b9d2865b3708dbc") },
+    { rmd_6, base16_array("12a053384a9c0c88e405a06c27dcf49ada62eb2b") },
+    { rmd_7, base16_array("b0e20b6e3116640286ed3a87a5713079b21f5189") },
+    { rmd_8, base16_array("9b752e45573d4b39f4dbd3323cab82bf63326bfb") },
+    { rmd_9, base16_array("52783243c1697bdbe16d37f97f68f08325dc1528") }
 };
+
+// sha
+// ============================================================================
+
+// test vectors
+// www.di-mgt.com.au/sha_testvectors.html
+
+const auto sha_1 = to_chunk("abc");
+const auto sha_2 = to_chunk("");
+const auto sha_3 = to_chunk("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq");
+const auto sha_4 = to_chunk("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu");
+constexpr auto million = 1'000'000_size;
+static const auto sha_5 = data_chunk(million, to_byte('a'));
+#if defined(HAVE_X64) && defined(HAVE_SLOW_TESTS)
+#define BIG_SHA_TEST
+// requires > uint64_t size_t.
+constexpr auto alpha2_size = 64_size;
+constexpr auto alpha2_count = 16'777'216_size;
+constexpr auto long_alpha_size = alpha2_size * alpha2_count;
+static const auto alpha2 = to_array<alpha2_size>("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
+static const std_vector<long_hash> long_alpha(alpha2_count, alpha2);
+static const auto long_alpha_data = pointer_cast<uint8_t>(long_alpha.front().data());
+static const auto sha_6 = to_chunk(unsafe_array_cast<uint8_t, long_alpha_size>(long_alpha_data));
+constexpr auto sha_tests = 6;
+#else
+constexpr auto sha_tests = 5;
+#endif
+
+// sha160_tests
+// ----------------------------------------------------------------------------
+
+struct sha160_test
+{
+    const data_chunk data;
+    const short_hash expected;
+};
+
+static const std_array<sha160_test, sha_tests> sha160_tests
+{
+    sha160_test
+    { sha_1, base16_array("a9993e364706816aba3e25717850c26c9cd0d89d") },
+    { sha_2, base16_array("da39a3ee5e6b4b0d3255bfef95601890afd80709") },
+    { sha_3, base16_array("84983e441c3bd26ebaae4aa1f95129e5e54670f1") },
+    { sha_4, base16_array("a49b2446a02c645bf419f995b67091253a04a259") },
+#if defined(BIG_SHA_TEST)
+    { sha_6, base16_array("7789f0c9ef7bfc40d93311143dfbe69e2017f592") },
+#endif
+    { sha_5, base16_array("34aa973cd4c4daa4f61eeb2bdbad27316534016f") }
+};
+
+////static const std_array<sha160_test, 21> sha160_tests
+////{
+////    sha160_test
+////    {base16_chunk(""), base16_array("da39a3ee5e6b4b0d3255bfef95601890afd80709")},
+////    {base16_chunk("27ed20cb2fa1c9093ebf82427b2abff42cbd"), base16_array("6a56c8684a4a5f37fee6d91526696aded7c0aa0a")},
+////    {base16_chunk("ddba0a9bc3e53d6ef1c34c11031b54fdce18d54d0c2fb59fc80f0af4314e6916d0b0c5ae9ad8"), base16_array("68e277e7fa9bc9d5ccfbceb08f57cf83fde883c0")},
+////    {base16_chunk("aa9224a8e046e5b2"), base16_array("ff409fff25b6ae55ac96994427eab6eaafd67559")},
+////    {base16_chunk("14b7ae683c371ccd6436f4742075578dc599dfc3a437ec8b"), base16_array("36759eabb931b80fbbca8e6e533fca72388bd8f2")},
+////    {base16_chunk("f9c8eda189222a4e46f65c36a64cae11b26aa531121aa6697fd93504f9aecac893a47dd9"), base16_array("7e619f364df8159ed0e55edeb5008d77cbfb7574")},
+////    {base16_chunk("e35af7be6135f20cebee722c6cdbafe8620a7cd796d3fbf6ac1cf81eae17faeebe80"), base16_array("4c8770cb9f6ed23b4603990de3b12f1ec437f1bf")},
+////    {base16_chunk("fdac4bc3951ee0ebad89ce3806496468ce495c91b1f2e206822cf18ebe3c8bd1319e1ef87d"), base16_array("abc658273513f036231c3ac93d693e520ba289cf")},
+////    {base16_chunk("a04117c5defe8bdc4be999f3c8889f74af9429ef2a6808c462b48c8400a8ac4bf1397ccfcff0e03ebd"), base16_array("f12c13bcc078f864baf9eda3a0f551828006cab9")},
+////    {base16_chunk("46bf37cf595b18e6553ee97254734a7a704c6db89833cd5ebe7fdf8659"), base16_array("4840799d2cd8ede95c43e701530c83f84cdbd31c")},
+////    {base16_chunk("c158cd2ed7c0dced347c1f9a619d1c8dc382b4e539400cc9aefb97d6083a141c"), base16_array("b3bedc3d40dbd0991d31af668f2bc946fe2cc2b5")},
+////    {base16_chunk("1848614e29ff5920e8a7e1ba31fcd2c2c3c7d07b7c"), base16_array("2a5a51e2f2e1c90b303054fe41f57bd25258a13c")},
+////    {base16_chunk("b34d4bef16f613861b7ad624ebdebd99517e"), base16_array("9f0cefbc13cd853394c7b02de97f5f436ea3918d")},
+////    {base16_chunk("4ee01f8feee0a6ac275f58b85ceab49c603b78ff606703cab57c52fc7617930366a56c5daed2f3e17e0ee2da4ce8b8"), base16_array("17ecd1fb6df59261017650bc1fd8dffb11594d3f")},
+////    {base16_chunk("a7afbeb9491d91d679f843c7"), base16_array("d6ad4a2a306137c7851dc6ef9b2fd0af20ecbfd1")},
+////    {base16_chunk("821161f3c04b6b11c4d1a4"), base16_array("128a1700ae4590fe7b982a53b16334190f21c4b7")},
+////    {base16_chunk("d9cdc2bb692281ea033489ab4cf08a0ea7e934edb4f9b135bcdae7da484c399e463490"), base16_array("7848f419a5da361142fc46646866272bfa7c6552")},
+////    {base16_chunk("99a74cb1645b7ed583a5c077a0545586f55cb2629109b7f10dce77a91ef3285c"), base16_array("c5ddea4614c2655844f6597fabb64230e2e8232b")},
+////    {base16_chunk("cb9779"), base16_array("33274f991e78de247db476c70d88f889c23cd0eb")},
+////    {base16_chunk("0b681b18aa5a44b9a1b245ed10"), base16_array("61e8608b603391ac90a543d3b531662ccef29f16")},
+////    {base16_chunk("70206feaa65059d63e2d5807f92b49e3ce183ba3c4185c03944e6a366119409873cf"), base16_array("643ca9c7b4774128514be660c0304d4dec5cc7ca")}
+////};
 
 // sha256_tests
 // ----------------------------------------------------------------------------
@@ -98,54 +165,165 @@ struct sha256_test
     const hash_digest expected;
 };
 
-static const std_array<sha256_test, 21> sha256_tests
+static const std_array<sha256_test, sha_tests> sha256_tests
 {
     sha256_test
-    {base16_chunk(""), base16_array("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")},
-    {base16_chunk("f0d5e1ba902e341a58320a08078af4311e1291dcffd97f00c06988e0e26a071832"), base16_array("1f23e6ce087e16c4f3585fbe89a4be22961b413076eea1621a81fefaf0c33ecc")},
-    {base16_chunk("a5c082e4489c6aa415a961a1e2d0cbf12ed671e5d10d97fb6e63b852b056396670c336d21c75eca4ab0527023b59656a2136"), base16_array("ad794747682bf286993167ba8b46a0c2b3ad888b91f2917e29832bee1261fcf0")},
-    {base16_chunk("c7cbf76a7f875446a32bc8c2a7ce295e1acf85eb10ad66c682b154f08acaa10262ef"), base16_array("997b848f26a6de7efd214c47f0d56dc95b656ec519ebded493f51c2f5166dbb6")},
-    {base16_chunk("2a3333448873620c921c47ae387b1768c7b5227fdb4af5512756a6ba0eab6e84be95da98"), base16_array("15fbe855e1343185950e6d8b6d907c24e3d8f0d769be537d8b8f239ae33c8926")},
-    {base16_chunk("650fb10d5d392f14456bf2f301e8af92bb8a51164b28"), base16_array("e7abad46a85893bf44e464626473b432ca4e87c94b1e462270ba313d16441bf5")},
-    {base16_chunk("0c8fd399"), base16_array("e2d710db0ccb875f2069683862f743312a5ed223d1e209f5ec27becb9821226a")},
-    {base16_chunk("9aa42e8eb0bd"), base16_array("13ed61ce40d00e1c50573392f16170afd77c43c34211e3f601f044059c3377e3")},
-    {base16_chunk("4512b0693593a91b02b06bf0c137"), base16_array("f0b0c8dfdcc4e31e756a820066e61e383c4159da3278baee23aeb4cfb5add765")},
-    {base16_chunk(""), base16_array("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")},
-    {base16_chunk("98d44f8c45db013d5e892af5db3314122bd4ba22a004bd64003de55c8a561e3e98e4de2fc6c90cd6ff63"), base16_array("ad36ae65b0d60df776bd84cb976437ebbe66b1a5c8ebc12958ec67b62113166a")},
-    {base16_chunk("661857e3dbd1903488575f89ad46bc914145b55bf62b3278fc9ce9a691f42fb83011"), base16_array("00c4fe1f581d8c48138c246178b14899bcac98640347a13d28fad5ae9a234a88")},
-    {base16_chunk("4942d8d8625f50d3f6fe973e3456ee67f6439be16b3f98e2bd37730141562f0fb28ac3476bc2e5ff17a1fee447d38058"), base16_array("8a3262616425b9fc15f730fbd74d39abb04bac89812ca41a8c299a703e5e2e61")},
-    {base16_chunk("d12efc20aa76955c10f6fca2e52d80558f"), base16_array("0cddc4a3f09b14c374f7f12ee9b9169e8bde407f46ec85c789c556bd4fbc09a7")},
-    {base16_chunk("a9b2a310ea57fca020d5759d"), base16_array("9daf4a1a21bf3efb018186300e23943d21803707596490578ee7dc69d0ac3b20")},
-    {base16_chunk("baa23f3228e6d0c087f19e31baf04d907f5d"), base16_array("d955f9374fff4141174695791bded97ca9710c2496beee019207d93bc83dd0e0")},
-    {base16_chunk("1b8f20c61ef4b5c82aaac6748e5073c2bd8a2e42bc6079746be3c91804ccad713ffaf2daf940ad63bd"), base16_array("66dbc28bec9a41e79483c96e396c586575c7f6f83c91f50a650c4aa696611646")},
-    {base16_chunk("fb89f0f61023de0f133ad0b18deef86337a8861f2dc50cfb76d2f0f4a4ad3e3edda87198c19452f3c8b1dda58d"), base16_array("044ed06e0272fe15a8f0bb8bf5c817c14880bdd293597d47f1039a4815424f4d")},
-    {base16_chunk("279b6543be0a72dda676c5ff99da02f227637b"), base16_array("f8f7394e8665d30c90870c742363baa529a5053aae1b9438d31c22f5184141a9")},
-    {base16_chunk("26d34b5f6d0e23bc1e4fdf11a00d8c"), base16_array("73b12a2fde6b7d790f7da3eb60f990208f28fabf43380a66cf26b615c7f6f545")},
-    {base16_chunk("a475bc116efb92cde208e19af68dd00e28f62e27836d28cc41ff4571391ee21379069e4632599d75"), base16_array("cc7ef1dd07f26065caeab1a9dbd820db31448812d3cf5d1a592b8b263e493a47")}
+    { sha_1,base16_array("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad") },
+    { sha_2,base16_array("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855") },
+    { sha_3,base16_array("248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1") },
+    { sha_4,base16_array("cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1") },
+#if defined(BIG_SHA_TEST)
+    { sha_6,base16_array("50e72a0e26442fe2552dc3938ac58658228c0cbfb1d2ca872ae435266fcd055e") },
+#endif
+    { sha_5,base16_array("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0") }
 };
+
+// sha512_tests
+// ----------------------------------------------------------------------------
+
+struct sha512_test
+{
+    const data_chunk data;
+    const long_hash expected;
+};
+
+static const std_array<sha512_test, sha_tests> sha512_tests
+{
+    sha512_test
+    { sha_1,base16_array("ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f") },
+    { sha_2,base16_array("cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e") },
+    { sha_3,base16_array("204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596fd15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445") },
+    { sha_4,base16_array("8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909") },
+#if defined(BIG_SHA_TEST)
+    { sha_6,base16_array("b47c933421ea2db149ad6e10fce6c7f93d0752380180ffd7f4629a712134831d77be6091b819ed352c2967a2e2d4fa5050723c9630691f1a05a7281dbe6c1086") },
+#endif
+    { sha_5,base16_array("e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b") }
+
+};
+
+// hmac
+// ============================================================================
+
+// hmac_sha160_tests
+// ----------------------------------------------------------------------------
+
+struct hmac_sha160_test
+{
+    const data_chunk key;
+    const data_chunk data;
+    const short_hash expected;
+};
+
+static const std_array<hmac_sha160_test, 0> hmac_sha160_tests
+{
+};
+
+// sha256/512 test vectors
+// datatracker.ietf.org/doc/html/rfc4231
+
+// TODO: 
+static const auto hmac_1k = base16_chunk("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b");
+static const auto hmac_1d = to_chunk("Hi There");
+static const auto hmac_2k = to_chunk("Jefe");
+static const auto hmac_2d = to_chunk("what do ya want for nothing?");
+static const auto hmac_3k = base16_chunk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+static const auto hmac_3d = base16_chunk("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+static const auto hmac_4k = base16_chunk("0102030405060708090a0b0c0d0e0f10111213141516171819");
+static const auto hmac_4d = base16_chunk("cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd");
+static const auto hmac_5k = base16_chunk("0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c");
+static const auto hmac_5d = to_chunk("Test With Truncation"); // not truncated here.
+static const auto hmac_6k = base16_chunk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+static const auto hmac_6d = to_chunk("Test Using Larger Than Block-Size Key - Hash Key First");
+static const auto hmac_7k = base16_chunk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+static const auto hmac_7d = to_chunk("This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.");
+constexpr auto hmac_tests = 7;
 
 // hmac_sha256_tests
 // ----------------------------------------------------------------------------
 
 struct hmac_sha256_test
 {
-    const std::string text;
-    const std::string key;
+    const data_chunk key;
+    const data_chunk data;
     const hash_digest expected;
 };
 
-static const std_array<hmac_sha256_test, 1> hmac_sha256_tests
+static const std_array<hmac_sha256_test, hmac_tests> hmac_sha256_tests
 {
     hmac_sha256_test
+    { hmac_1k, hmac_1d, base16_array("b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7") },
+    { hmac_2k, hmac_2d, base16_array("5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843") },
+    { hmac_3k, hmac_3d, base16_array("773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe") },
+    { hmac_4k, hmac_4d, base16_array("82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b") },
+    { hmac_5k, hmac_5d, base16_array("a3b6167473100ee06e0c796c2955552bfa6f7c0a6a8aef8b93f860aab0cd20c5") },
+    { hmac_6k, hmac_6d, base16_array("60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54") },
+    { hmac_7k, hmac_7d, base16_array("9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2") }
+};
+
+// hmac_sha512_tests
+// ----------------------------------------------------------------------------
+
+struct hmac_sha512_test
+{
+    const data_chunk key;
+    const data_chunk data;
+    const long_hash expected;
+};
+
+static const std_array<hmac_sha512_test, hmac_tests> hmac_sha512_tests
+{
+    hmac_sha512_test
+    { hmac_1k, hmac_1d, base16_array("87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854") },
+    { hmac_2k, hmac_2d, base16_array("164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea2505549758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737") },
+    { hmac_3k, hmac_3d, base16_array("fa73b0089d56a284efb0f0756c890be9b1b5dbdd8ee81a3655f83e33b2279d39bf3e848279a722c806b485a47e67c807b946a337bee8942674278859e13292fb") },
+    { hmac_4k, hmac_4d, base16_array("b0ba465637458c6990e5a8c5f61d4af7e576d97ff94b872de76f8050361ee3dba91ca5c11aa25eb4d679275cc5788063a5f19741120c4f2de2adebeb10a298dd") },
+    { hmac_5k, hmac_5d, base16_array("415fad6271580a531d4179bc891d87a650188707922a4fbb36663a1eb16da008711c5b50ddd0fc235084eb9d3364a1454fb2ef67cd1d29fe6773068ea266e96b") },
+    { hmac_6k, hmac_6d, base16_array("80b24263c7c1a3ebb71493c1dd7be8b49b46d1f41b4aeec1121b013783f8f3526b56d037e05f2598bd0fd2215d6a1e5295e64f73f63f0aec8b915a985d786598") },
+    { hmac_7k, hmac_7d, base16_array("e37b6a775dc87dbaa4dfa9f96e5e3ffddebd71f8867289865df5a32d20cdc944b6022cac3c4982b10d5eeb55c3e4de15134676fb6de0446065c97440fa8c6a58") }
+
+};
+
+// pbkd
+// ============================================================================
+
+// pbkd_sha160_tests
+// ----------------------------------------------------------------------------
+// www.ietf.org/rfc/rfc6070.txt
+
+struct pbkd_sha160_test
+{
+    const std::string passphrase;
+    const std::string salt;
+    const size_t count;
+    const short_hash expected;
+};
+
+static const std_array<pbkd_sha160_test, 3> pbkd_sha160_tests
+{
+    pbkd_sha160_test
     {
-        "data",
-        "key",
-        base16_array("5031fe3d989c6d1537a013fa6e739da23463fdaec3b70137d828e36ace221bd0")
+        "password",
+        "salt",
+        2,
+        base16_array("ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957")
+    },
+    {
+        "password",
+        "salt",
+        4096,
+        base16_array("4b007901b765489abead49d926f721d065a429c1")
+    },
+    {
+        "password",
+        "salt",
+        16777216,
+        base16_array("eefe3d61cd4da4e4e9945b3d6ba2158c2634e984")
     }
 };
 
 // pbkd_sha256_tests
 // ----------------------------------------------------------------------------
+// www.rfc-editor.org/rfc/rfc7914.txt
 
 struct pbkd_sha256_test
 {
@@ -172,47 +350,9 @@ static const std_array<pbkd_sha256_test, 2> pbkd_sha256_tests
     }
 };
 
-// sha512_tests
-// ----------------------------------------------------------------------------
-
-struct sha512_test
-{
-    // use hash_slice()
-    const std::string data;
-    const long_hash expected;
-};
-
-static const std_array<sha512_test, 1> sha512_tests
-{
-    sha512_test
-    {
-        "data",
-        base16_array("77c7ce9a5d86bb386d443bb96390faa120633158699c8844c30b13ab0bf92760b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876")
-    }
-};
-
-// hmac_sha512_tests
-// ----------------------------------------------------------------------------
-
-struct hmac_sha512_test
-{
-    const std::string text;
-    const std::string key;
-    const long_hash expected;
-};
-
-static const std_array<hmac_sha512_test, 1> hmac_sha512_tests
-{
-    hmac_sha512_test
-    {
-        "data",
-        "key",
-        base16_array("3c5953a18f7303ec653ba170ae334fafa08e3846f2efe317b87efce82376253cb52a8c31ddcde5a3a2eee183c2b34cb91f85e64ddbc325f7692b199473579c58")
-    }
-};
-
 // pbkd_sha512_tests
 // ----------------------------------------------------------------------------
+// github.com/Anti-weakpasswords/PBKDF2-Test-Vectors/releases
 
 struct pbkd_sha512_test
 {
@@ -258,7 +398,8 @@ static const std_array<pbkd_sha512_test, 5> pbkd_sha512_tests
 };
 
 // scrypt_tests
-// ----------------------------------------------------------------------------
+// ============================================================================
+// Also rfc7914 tests inline.
 
 struct scrypt_test
 {

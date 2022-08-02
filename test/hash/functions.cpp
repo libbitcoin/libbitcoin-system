@@ -21,49 +21,38 @@
 
 BOOST_AUTO_TEST_SUITE(functions_tests)
 
-// TODO: move to tests for accumulator/hmac/pbkd.
-// TODO: add singular tests for each wrapper function here.
-// merkle_root [see: /test/sha/sha256.cpp]
-
-// rmd128: (no vectors)
+// rmd
 // ----------------------------------------------------------------------------
 
-////BOOST_AUTO_TEST_CASE(functions__rmd128_hash__test_vectors__expected)
-////{
-////    for (const auto& test: rmd128_tests)
-////    {
-////        const auto hash = accumulator<rmd128>::hash(test.data);
-////        BOOST_REQUIRE_EQUAL(hash, test.expected);
-////    }
-////}
-
-// rmd160: accumulator<rmd160> (no hmac/pbkd vectors)
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE(functions__rmd160_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(functions__rmd128_hash__test_vectors__expected)
 {
-    for (const auto& test: ripemd_tests)
+    for (const auto& test: rmd128_tests)
     {
-        const auto hash = ripemd160_hash(test.data);
-        ////const auto hash = accumulator<rmd160>::hash(test.data);
+        const auto hash = accumulator<rmd128>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 
-// sha1: accumulator<sha160> (no hmac/pbkd vectors)
+BOOST_AUTO_TEST_CASE(functions__rmd160_hash__test_vectors__expected)
+{
+    for (const auto& test: rmd160_tests)
+    {
+        const auto hash = accumulator<rmd160>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// sha
 // ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(functions__sha160_hash__test_vectors__expected)
 {
-    for (const auto& test: sha1_tests)
+    for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha160>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
-
-// sha256: accumulator<sha256>/hmac<sha256>/pbkd<sha256>
-// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(functions__sha256_hash__test_vectors__expected)
 {
@@ -74,27 +63,6 @@ BOOST_AUTO_TEST_CASE(functions__sha256_hash__test_vectors__expected)
     }
 }
 
-BOOST_AUTO_TEST_CASE(functions__hmac_sha256__test_vectors__expected)
-{
-    for (const auto& test: hmac_sha256_tests)
-    {
-        const auto hash = hmac<sha256>::code(test.text, test.key);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(functions__pbkd_sha256__test_vectors__expected)
-{
-    for (const auto& test: pbkd_sha256_tests)
-    {
-        const auto hash = pbkd<sha256>::key<long_hash_size>(test.passphrase, test.salt, test.count);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
-}
-
-// sha512: accumulator<sha512>/hmac<sha512>/pbkd<sha512>
-// ----------------------------------------------------------------------------
-
 BOOST_AUTO_TEST_CASE(functions__sha512_hash__test_vectors__expected)
 {
     for (const auto& test: sha512_tests)
@@ -104,11 +72,54 @@ BOOST_AUTO_TEST_CASE(functions__sha512_hash__test_vectors__expected)
     }
 }
 
+// hmac
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(functions__hmac_sha160__test_vectors__expected)
+{
+    for (const auto& test: hmac_sha160_tests)
+    {
+        const auto hash = hmac<sha160>::code(test.data, test.key);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(functions__hmac_sha256__test_vectors__expected)
+{
+    for (const auto& test: hmac_sha256_tests)
+    {
+        const auto hash = hmac<sha256>::code(test.data, test.key);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
 BOOST_AUTO_TEST_CASE(functions__hmac_sha512__test_vectors__expected)
 {
     for (const auto& test: hmac_sha512_tests)
     {
-        const auto hash = hmac<sha512>::code(test.text, test.key);
+        const auto hash = hmac<sha512>::code(test.data, test.key);
+
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// pbkd
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(functions__pbkd_sha160__test_vectors__expected)
+{
+    for (const auto& test: pbkd_sha160_tests)
+    {
+        const auto hash = pbkd<sha160>::key<short_hash_size>(test.passphrase, test.salt, test.count);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(functions__pbkd_sha256__test_vectors__expected)
+{
+    for (const auto& test: pbkd_sha256_tests)
+    {
+        const auto hash = pbkd<sha256>::key<long_hash_size>(test.passphrase, test.salt, test.count);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
@@ -230,24 +241,6 @@ BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_4__expected)
     BOOST_REQUIRE_EQUAL(hash, expected);
 }
 #endif
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_pbkdf2_hmac_sha256_1__expected)
-{
-    // c=1, dkLen=64
-    constexpr auto expected = base16_array("55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783");
-    constexpr auto size = size_of<decltype(expected)>(); 
-    const auto hash = pbkd<sha256>::key<size>("passwd", "salt", 1);
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_pbkdf2_hmac_sha256_2__expected)
-{
-    // c=80000, dkLen=64
-    constexpr auto expected = base16_array("4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176a272bdebba1d078478f62b397f33c8d");
-    constexpr auto size = size_of<decltype(expected)>();
-    const auto hash = pbkd<sha256>::key<size>("Password", "NaCl", 80000);
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
 
 // djb2
 // ----------------------------------------------------------------------------

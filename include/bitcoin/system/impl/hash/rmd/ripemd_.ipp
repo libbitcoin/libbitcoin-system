@@ -10,7 +10,10 @@
 #define LIBBITCOIN_SYSTEM_HASH_RMD_RIPEMD160__IPP
 
 #include <algorithm>
+#include <iostream>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/radix/radix.hpp>
 
 namespace libbitcoin {
 namespace system {

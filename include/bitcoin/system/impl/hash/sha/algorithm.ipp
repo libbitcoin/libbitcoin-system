@@ -65,6 +65,7 @@ TEMPLATE
 CONSTEVAL typename CLASS::chunk_t CLASS::
 chunk_pad() NOEXCEPT
 {
+    // See comments in accumulator regarding padding endianness.
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
 
     chunk_t out{};
@@ -77,6 +78,7 @@ TEMPLATE
 CONSTEVAL typename CLASS::state_pad_t CLASS::
 state_pad() NOEXCEPT
 {
+    // See comments in accumulator regarding padding endianness.
     constexpr auto bytes = possible_narrow_cast<word_t>(array_count<digest_t>);
 
     state_pad_t out{};
@@ -89,6 +91,7 @@ TEMPLATE
 CONSTEVAL typename CLASS::blocks_pad_t CLASS::
 blocks_pad() NOEXCEPT
 {
+    // See comments in accumulator regarding padding endianness.
     blocks_pad_t out{};
     out.front() = bit_hi<word_t>;
     return out;
@@ -206,23 +209,24 @@ sigma1(auto x) NOEXCEPT
 // 6.4.2 SHA-512 Hash Computation (1 to N)
 
 TEMPLATE
-template<size_t Round>
+template<size_t Round, typename Auto>
 CONSTEVAL auto CLASS::
 functor() NOEXCEPT
 {
     using self = CLASS;
-    constexpr auto fn = (Round / 20u);
+    constexpr auto fn = Round / K::columns;
 
     // FIPS.180
     // 4.1.1 SHA-1 Functions (limited to uint32_t)
+    // Select function by column.
     if constexpr (fn == 0u)
-        return &self::template choice<uint32_t, uint32_t, uint32_t>;
+        return &self::template choice<Auto, Auto, Auto>;
     else if constexpr (fn == 1u)
-        return &self::template parity<uint32_t, uint32_t, uint32_t>;
+        return &self::template parity<Auto, Auto, Auto>;
     else if constexpr (fn == 2u)
-        return &self::template majority<uint32_t, uint32_t, uint32_t>;
+        return &self::template majority<Auto, Auto, Auto>;
     else if constexpr (fn == 3u)
-        return &self::template parity<uint32_t, uint32_t, uint32_t>;
+        return &self::template parity<Auto, Auto, Auto>;
 }
 
 TEMPLATE
@@ -233,7 +237,7 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
     // FIPS.180
     // 4.2.1 SHA-1 Constants
     constexpr auto k = K::get[Round];
-    constexpr auto f = functor<Round>();
+    constexpr auto f = functor<Round, decltype(a)>();
 
     // FIPS.180
     // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
@@ -266,10 +270,9 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     // FIPS.180
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
-    const auto t1 = h + SIGMA1(e) + choice(e, f, g) + k + w;
-    const auto t2 = SIGMA0(a) + majority(a, b, c);
-    d = /*e =*/  d + t1;
-    h = /*a =*/ t1 + t2;
+    const auto t = h + SIGMA1(e) + choice(e, f, g) + k + w;
+    d = /*e =*/ t + d;
+    h = /*a =*/ t + SIGMA0(a) + majority(a, b, c);
 
     // Rounds can be cut in half and this round doubled (intel paper).
     // Avoids the need for a temporary variable and aligns with SHA-NI.
@@ -355,6 +358,7 @@ rounding(state_t& out, const buffer_t& in) NOEXCEPT
     // Templated constant reduces ops per iteration by 35% (vs. parameter).
     // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
     // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
+    // Pointer degradation here (optimization), use auto typing in round().
     auto pin = in.data();
     auto pout = out.data();
 
@@ -524,6 +528,7 @@ TEMPLATE
 constexpr void CLASS::
 preparing(buffer_t& out) NOEXCEPT
 {
+    // Pointer degradation here (optimization), use auto typing in prepare().
     auto pout = out.data();
 
     // For block/buffer split, indexes shifted to start at zero.
@@ -613,26 +618,19 @@ TEMPLATE
 constexpr void CLASS::
 summarize(state_t& out, const state_t& in) NOEXCEPT
 {
-    if constexpr (SHA::digest == 160)
-    {
-        // FIPS.180
-        // 6.1.2.4 SHA-1 Hash Computation
-        out[0] += in[0];
-        out[1] += in[1];
-        out[2] += in[2];
-        out[3] += in[3];
-        out[4] += in[4];
-    }
-    else
+    // FIPS.180
+    // 6.1.2.4 SHA-1 Hash Computation
+    out[0] += in[0];
+    out[1] += in[1];
+    out[2] += in[2];
+    out[3] += in[3];
+    out[4] += in[4];
+
+    if constexpr (SHA::digest != 160)
     {
         // FIPS.180
         // 6.2.2.4 SHA-256 Hash Computation
         // 6.4.2.4 SHA-512 Hash Computation
-        out[0] += in[0];
-        out[1] += in[1];
-        out[2] += in[2];
-        out[3] += in[3];
-        out[4] += in[4];
         out[5] += in[5];
         out[6] += in[6];
         out[7] += in[7];
@@ -651,26 +649,19 @@ input(buffer_t& out, const state_t& in) NOEXCEPT
     // This is a double hash optimization.
     if (std::is_constant_evaluated())
     {
-        if constexpr (SHA::digest == 160)
-        {
-            // FIPS.180
-            // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
-            out[0] = in[0];
-            out[1] = in[1];
-            out[2] = in[2];
-            out[3] = in[3];
-            out[4] = in[4];
-        }
-        else
+        // FIPS.180
+        // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
+        out[0] = in[0];
+        out[1] = in[1];
+        out[2] = in[2];
+        out[3] = in[3];
+        out[4] = in[4];
+
+        if constexpr (SHA::digest != 160)
         {
             // FIPS.180
             // 6.2.2.1 SHA-256 Hash Computation (0 <= t <= 15)
             // 6.4.2.1 SHA-512 Hash Computation (0 <= t <= 15)
-            out[0] = in[0];
-            out[1] = in[1];
-            out[2] = in[2];
-            out[3] = in[3];
-            out[4] = in[4];
             out[5] = in[5];
             out[6] = in[6];
             out[7] = in[7];
@@ -846,22 +837,23 @@ input(buffer_t& out, const block_t& in) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        from_big< 0 * size>(out[ 0], in);
-        from_big< 1 * size>(out[ 1], in);
-        from_big< 2 * size>(out[ 2], in);
-        from_big< 3 * size>(out[ 3], in);
-        from_big< 4 * size>(out[ 4], in);
-        from_big< 5 * size>(out[ 5], in);
-        from_big< 6 * size>(out[ 6], in);
-        from_big< 7 * size>(out[ 7], in);
-        from_big< 8 * size>(out[ 8], in);
-        from_big< 9 * size>(out[ 9], in);
-        from_big<10 * size>(out[10], in);
-        from_big<11 * size>(out[11], in);
-        from_big<12 * size>(out[12], in);
-        from_big<13 * size>(out[13], in);
-        from_big<14 * size>(out[14], in);
-        from_big<15 * size>(out[15], in);
+        // TODO: change to at().
+        from_big< 0 * size>(out.at( 0), in);
+        from_big< 1 * size>(out.at( 1), in);
+        from_big< 2 * size>(out.at( 2), in);
+        from_big< 3 * size>(out.at( 3), in);
+        from_big< 4 * size>(out.at( 4), in);
+        from_big< 5 * size>(out.at( 5), in);
+        from_big< 6 * size>(out.at( 6), in);
+        from_big< 7 * size>(out.at( 7), in);
+        from_big< 8 * size>(out.at( 8), in);
+        from_big< 9 * size>(out.at( 9), in);
+        from_big<10 * size>(out.at(10), in);
+        from_big<11 * size>(out.at(11), in);
+        from_big<12 * size>(out.at(12), in);
+        from_big<13 * size>(out.at(13), in);
+        from_big<14 * size>(out.at(14), in);
+        from_big<15 * size>(out.at(15), in);
     }
     else
     {
@@ -880,14 +872,15 @@ input1(buffer_t& out, const half_t& in) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        from_big<0 * size>(out[0], in);
-        from_big<1 * size>(out[1], in);
-        from_big<2 * size>(out[2], in);
-        from_big<3 * size>(out[3], in);
-        from_big<4 * size>(out[4], in);
-        from_big<5 * size>(out[5], in);
-        from_big<6 * size>(out[6], in);
-        from_big<7 * size>(out[7], in);
+        // TODO: change to at().
+        from_big<0 * size>(out.at(0), in);
+        from_big<1 * size>(out.at(1), in);
+        from_big<2 * size>(out.at(2), in);
+        from_big<3 * size>(out.at(3), in);
+        from_big<4 * size>(out.at(4), in);
+        from_big<5 * size>(out.at(5), in);
+        from_big<6 * size>(out.at(6), in);
+        from_big<7 * size>(out.at(7), in);
     }
     else
     {
@@ -906,14 +899,15 @@ input2(buffer_t& out, const half_t& in) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        from_big< 8 * size>(out[8], in);
-        from_big< 9 * size>(out[9], in);
-        from_big<10 * size>(out[10], in);
-        from_big<11 * size>(out[11], in);
-        from_big<12 * size>(out[12], in);
-        from_big<13 * size>(out[13], in);
-        from_big<14 * size>(out[14], in);
-        from_big<15 * size>(out[15], in);
+        // TODO: change to at().
+        from_big< 8 * size>(out.at( 8), in);
+        from_big< 9 * size>(out.at( 9), in);
+        from_big<10 * size>(out.at(10), in);
+        from_big<11 * size>(out.at(11), in);
+        from_big<12 * size>(out.at(12), in);
+        from_big<13 * size>(out.at(13), in);
+        from_big<14 * size>(out.at(14), in);
+        from_big<15 * size>(out.at(15), in);
     }
     else
     {
@@ -937,24 +931,18 @@ output(const state_t& in) NOEXCEPT
     {
         digest_t out{};
 
-        if constexpr (SHA::digest == 160)
+        // TODO: change to at().
+        to_big<0 * size>(out, in.at(0));
+        to_big<1 * size>(out, in.at(1));
+        to_big<2 * size>(out, in.at(2));
+        to_big<3 * size>(out, in.at(3));
+        to_big<4 * size>(out, in.at(4));
+
+        if constexpr (SHA::digest != 160)
         {
-            to_big<0 * size>(out, in[0]);
-            to_big<1 * size>(out, in[1]);
-            to_big<2 * size>(out, in[2]);
-            to_big<3 * size>(out, in[3]);
-            to_big<4 * size>(out, in[4]);
-        }
-        else
-        {
-            to_big<0 * size>(out, in[0]);
-            to_big<1 * size>(out, in[1]);
-            to_big<2 * size>(out, in[2]);
-            to_big<3 * size>(out, in[3]);
-            to_big<4 * size>(out, in[4]);
-            to_big<5 * size>(out, in[5]);
-            to_big<6 * size>(out, in[6]);
-            to_big<7 * size>(out, in[7]);
+            to_big<5 * size>(out, in.at(5));
+            to_big<6 * size>(out, in.at(6));
+            to_big<7 * size>(out, in.at(7));
         }
 
         return out;

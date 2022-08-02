@@ -116,6 +116,27 @@ TEMPLATE
 RCONSTEXPR typename CLASS::counter CLASS::
 serialize(size_t bytes) NOEXCEPT
 {
+    // block_t (64 bytes), counter_t (64 bits), words_t (32 bits), byte_t (8 bits).
+    // One block bit count (0x0200) in RMD (LE):
+    // as byte_t: { (0x00, 0x20, 0x00, 0x00), (0x00, 0x00, 0x00, 0x00) }
+    // as word_t: { [0x00000200], [0x00000000] }
+    //
+    // block_t (64 bytes), counter_t (64 bits), words_t (32 bits), byte_t (8 bits).
+    // One block bit count (0x0200) in SHA1/SHA256 (BE):
+    // as byte_t: { (0x00, 0x00, 0x00, 0x00), (0x00, 0x00, 0x02, 0x00) }
+    // as word_t: { [0x00000000], [0x00000200] }
+    //
+    // block_t (128 bytes), counter_t (128 bits), words_t (64 bits), byte_t (8 bits).
+    // One block bit count (0x0400) in SHA256 (BE):
+    // as byte_t: { (0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00),
+    //              (0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00) }
+    // as word_t: { [0x0000000000000000], [0x0000000000000400] }
+    //
+    // Below is the generalized form, converting the 64/128 bit integral count_t
+    // directly to BE/LE serialization. This will then be deserialized as word_t
+    // by Algorithm at the start of block processing. Algorithm padding
+    // optimizations set values directly into buffer_t (in the word_t form).
+
     if constexpr (Algorithm::big_end_count)
     {
         // to_big_endian_size is RCONSTEXPR.
@@ -131,6 +152,11 @@ TEMPLATE
 CONSTEVAL typename CLASS::block_t CLASS::
 stream_pad() NOEXCEPT
 {
+    // Specifications call for set of first pad bit in the serialized form,
+    // so as byte_t (for block_t) this is already normalized for endianness.
+    // For RMD (LE) it will deserialize as word_t and represent as 0x00000080.
+    // For SHA (BE) it will deserialize as word_t and represent as 0x80000000.
+
     return { bit_hi<byte_t> };
 }
 

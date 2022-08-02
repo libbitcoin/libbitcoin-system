@@ -67,6 +67,11 @@ hash_digest bitcoin_hash(const hash_digest& left,
 }
 
 // TODO: create std_vector<uint8_t*> parse_block(data_chunk&).
+// TODO: these are not arrays (arbitrary size) and vector cannot be cast.
+// TODO: holding an offset (index) would work, but requires base pointer.
+// TODO: these could be cast into a set of differently sized byte arrays, but
+// TODO: a vector cannot hold distinct types (though could hold arrays union).
+// TODO: cannot use shared pointer because data is unowned, so pointer it is.
 // TODO: requires specialized skip-parsing block reader to isolate txs.
 // TODO: merkle_root(bitcoin_hash(parse_block(data_chunk&))).
 hashes bitcoin_hash(std_vector<uint8_t*>&&) NOEXCEPT

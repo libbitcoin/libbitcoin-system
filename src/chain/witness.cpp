@@ -19,8 +19,6 @@
 #include <bitcoin/system/chain/witness.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <numeric>
@@ -29,7 +27,6 @@
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>

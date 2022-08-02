@@ -37,6 +37,8 @@ struct k
     using T = shak_t;
     static constexpr auto strength = Strength;
     static constexpr auto rounds = Rounds;
+    static constexpr auto columns = 20_size;
+    static constexpr auto rows = strength / columns;
     static constexpr auto size = (strength == 160 ? 256_size : strength);
     using constants_t = std_array<
         iif<strength == 512, uint64_t, uint32_t>, rounds>;

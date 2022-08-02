@@ -36,11 +36,11 @@ struct k
     using T = rmdk_t;
     static constexpr auto strength = Strength;
     static constexpr auto rounds = strength;
-    static constexpr auto size = 256_size;
     static constexpr auto columns = 16_size;
     static constexpr auto rows = strength / columns;
+    static constexpr auto size = 256_size;
     using constants_t = std_array<uint32_t, rows>;
-    using schedule_t = std_array<size_t, rounds>;
+    using schedule_t = std_array<uint32_t, rounds>;
 };
 
 template <typename Constants, size_t Digest = Constants::strength,

@@ -231,7 +231,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
     const auto version = source.read_4_bytes_little_endian();
 
     // Inputs must be non-const so that they may assign the witness.
-    auto inputs = read_puts<chain::input>(source);
+    auto inputs = read_puts<input>(source);
     chain::outputs_cptr outputs;
 
     // Expensive repeated recomputation, so cache segregated state.
@@ -274,7 +274,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
     else
     {
         // Default witness is populated on input construct.
-        outputs = read_puts<const chain::output>(source);
+        outputs = read_puts<const output>(source);
     }
 
     const auto locktime = source.read_4_bytes_little_endian();

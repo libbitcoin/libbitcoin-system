@@ -123,7 +123,7 @@ protected:
     /// Rounds
     /// -----------------------------------------------------------------------
 
-    template<size_t Round>
+    template<size_t Round, typename Auto>
     static CONSTEVAL auto functor() NOEXCEPT;
 
     template<size_t Round>
