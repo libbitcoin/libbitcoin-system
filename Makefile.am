@@ -519,7 +519,6 @@ include_bitcoin_system_hash_HEADERS = \
 include_bitcoin_system_hash_rmddir = ${includedir}/bitcoin/system/hash/rmd
 include_bitcoin_system_hash_rmd_HEADERS = \
     include/bitcoin/system/hash/rmd/algorithm.hpp \
-    include/bitcoin/system/hash/rmd/ripemd_.hpp \
     include/bitcoin/system/hash/rmd/rmd.hpp \
     include/bitcoin/system/hash/rmd/rmd128.hpp \
     include/bitcoin/system/hash/rmd/rmd160.hpp
@@ -571,8 +570,7 @@ include_bitcoin_system_impl_hash_HEADERS = \
 
 include_bitcoin_system_impl_hash_rmddir = ${includedir}/bitcoin/system/impl/hash/rmd
 include_bitcoin_system_impl_hash_rmd_HEADERS = \
-    include/bitcoin/system/impl/hash/rmd/algorithm.ipp \
-    include/bitcoin/system/impl/hash/rmd/ripemd_.ipp
+    include/bitcoin/system/impl/hash/rmd/algorithm.ipp
 
 include_bitcoin_system_impl_hash_shadir = ${includedir}/bitcoin/system/impl/hash/sha
 include_bitcoin_system_impl_hash_sha_HEADERS = \

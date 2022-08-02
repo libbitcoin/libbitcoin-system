@@ -21,7 +21,6 @@
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/accumulator.hpp>
-#include <bitcoin/system/hash/rmd/ripemd_.hpp>
 #include <bitcoin/system/hash/rmd/algorithm.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
 #include <bitcoin/system/hash/sha/algorithm.hpp>
@@ -159,18 +158,14 @@ data_chunk ripemd128_chunk(const data_slice& data) NOEXCEPT
 short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
     short_hash hash{};
-    ripemd160::hash(data.data(), data.size(), hash.data());
-    return hash;
-    ////return accumulator<rmd160>::hash(data);
+    return accumulator<rmd160>::hash(data);
 }
 
-// moved to interpreter stack xptr.
+// output moves to interpreter stack xptr.
 data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk chunk(short_hash_size, no_fill_byte_allocator);
-    ripemd160::hash(data.data(), data.size(), chunk.data());
-    return chunk;
-    ////return accumulator<rmd160>::hash(chunk, data);
+    return accumulator<rmd160>::hash(chunk, data);
 }
 
 short_hash sha1_hash(const data_slice& data) NOEXCEPT
@@ -178,7 +173,7 @@ short_hash sha1_hash(const data_slice& data) NOEXCEPT
     return accumulator<sha160>::hash(data);
 }
 
-// moved to interpreter stack xptr.
+// output moves to interpreter stack xptr.
 data_chunk sha1_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk chunk(short_hash_size, no_fill_byte_allocator);
@@ -190,7 +185,7 @@ hash_digest sha256_hash(const data_slice& data) NOEXCEPT
     return accumulator<sha256>::hash(data);
 }
 
-// moved to interpreter stack xptr.
+// output moves to interpreter stack xptr.
 data_chunk sha256_chunk(const data_slice& data) NOEXCEPT
 {
     data_chunk chunk(hash_size, no_fill_byte_allocator);

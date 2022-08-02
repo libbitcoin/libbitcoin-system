@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
 
 #include <memory>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -47,12 +46,12 @@ typedef data_array<mini_hash_size> mini_hash;
 typedef std::shared_ptr<hash_digest> hash_ptr;
 
 /// Lists of common bitcoin hashes.
-typedef std::vector<long_hash> long_hashes;
-typedef std::vector<hash_digest> hashes;
-typedef std::vector<short_hash> short_hashes;
-typedef std::vector<half_hash> half_hashes;
-typedef std::vector<quarter_hash> quarter_hashes;
-typedef std::vector<mini_hash> mini_hashes;
+typedef std_vector<long_hash> long_hashes;
+typedef std_vector<hash_digest> hashes;
+typedef std_vector<short_hash> short_hashes;
+typedef std_vector<half_hash> half_hashes;
+typedef std_vector<quarter_hash> quarter_hashes;
+typedef std_vector<mini_hash> mini_hashes;
 
 /// Null-valued common hashes.
 constexpr long_hash null_long_hash{};

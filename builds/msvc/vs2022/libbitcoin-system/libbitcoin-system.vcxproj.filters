@@ -875,9 +875,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\algorithm.hpp">
       <Filter>include\bitcoin\system\hash\rmd</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\ripemd_.hpp">
-      <Filter>include\bitcoin\system\hash\rmd</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\rmd.hpp">
       <Filter>include\bitcoin\system\hash\rmd</Filter>
     </ClInclude>
@@ -1385,9 +1382,6 @@
       <Filter>include\bitcoin\system\impl\hash</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd\algorithm.ipp">
-      <Filter>include\bitcoin\system\impl\hash\rmd</Filter>
-    </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd\ripemd_.ipp">
       <Filter>include\bitcoin\system\impl\hash\rmd</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\scrypt.ipp">

@@ -119,7 +119,6 @@
 #include <bitcoin/system/hash/scrypt.hpp>
 #include <bitcoin/system/hash/siphash.hpp>
 #include <bitcoin/system/hash/rmd/algorithm.hpp>
-#include <bitcoin/system/hash/rmd/ripemd_.hpp>
 #include <bitcoin/system/hash/rmd/rmd.hpp>
 #include <bitcoin/system/hash/rmd/rmd128.hpp>
 #include <bitcoin/system/hash/rmd/rmd160.hpp>

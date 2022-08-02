@@ -337,7 +337,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hmac.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\pbkd.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\algorithm.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\ripemd_.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\rmd.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\rmd128.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\rmd\rmd160.hpp" />
@@ -509,7 +508,6 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\hmac.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\pbkd.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd\algorithm.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd\ripemd_.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\scrypt.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp" />
