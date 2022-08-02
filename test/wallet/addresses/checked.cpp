@@ -74,20 +74,6 @@ BOOST_AUTO_TEST_CASE(checked__values_construct__zero__valid)
     BOOST_REQUIRE(long_instance);
 }
 
-// Excluded by type constraints on split.
-//////BOOST_AUTO_TEST_CASE(checked__value_copy_construct__zero__valid)
-//////{
-//////    // Empty checksum and empty value, so no state and always valid.
-//////    const zero_checked instance(zero_valid_value);
-//////    BOOST_REQUIRE(instance);
-//////}
-
-BOOST_AUTO_TEST_CASE(checked__value_copy_construct__mini_invalid__invalid)
-{
-    const mini_checked instance(mini_valid_value);
-    BOOST_REQUIRE(instance);
-}
-
 BOOST_AUTO_TEST_CASE(checked__value_copy_construct__mini__valid)
 {
     const mini_checked instance(mini_valid_value);
@@ -130,22 +116,6 @@ BOOST_AUTO_TEST_CASE(checked__move_assign__short__valid)
     copy = std::move(instance);
     BOOST_REQUIRE(copy);
 }
-
-// Whiney compiler (can't test self-assign).
-////BOOST_AUTO_TEST_CASE(checked__copy_assign_self__short__valid)
-////{
-////    short_checked instance(short_valid_value);
-////    instance = instance;
-////    BOOST_REQUIRE(instance);
-////}
-
-// Whiney compiler (can't test self-assign).
-////BOOST_AUTO_TEST_CASE(checked__move_assign_self__short__valid)
-////{
-////    short_checked instance(short_valid_value);
-////    instance = std::move(instance);
-////    BOOST_REQUIRE(instance);
-////}
 
 BOOST_AUTO_TEST_CASE(checked__properies__zero__expected)
 {
