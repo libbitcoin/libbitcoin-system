@@ -111,14 +111,21 @@ protected:
     /// Functions
     /// -----------------------------------------------------------------------
 
-    static constexpr auto parity(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;
+    template <size_t A, size_t B, size_t C>
+    FORCE_INLINE static constexpr auto sigma(auto x) NOEXCEPT;
+    template <size_t A, size_t B, size_t C>
+    FORCE_INLINE static constexpr auto Sigma(auto x) NOEXCEPT;
+    FORCE_INLINE static constexpr auto parity(auto x, auto y, auto z) NOEXCEPT;
+    FORCE_INLINE static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
+    FORCE_INLINE static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;
 
-    static constexpr auto SIGMA0(auto x) NOEXCEPT;
-    static constexpr auto SIGMA1(auto x) NOEXCEPT;
-    static constexpr auto sigma0(auto x) NOEXCEPT;
-    static constexpr auto sigma1(auto x) NOEXCEPT;
+    /// Wrappers
+    /// -----------------------------------------------------------------------
+
+    FORCE_INLINE static constexpr auto Sigma0(auto x) NOEXCEPT;
+    FORCE_INLINE static constexpr auto Sigma1(auto x) NOEXCEPT;
+    FORCE_INLINE static constexpr auto sigma0(auto x) NOEXCEPT;
+    FORCE_INLINE static constexpr auto sigma1(auto x) NOEXCEPT;
 
     /// Rounds
     /// -----------------------------------------------------------------------
@@ -138,10 +145,10 @@ protected:
     FORCE_INLINE static constexpr void round(auto& state,
         const auto& buffer) NOEXCEPT;
 
-    static constexpr void rounding(state_t& state, const buffer_t& buffer) NOEXCEPT;
-
     template<size_t Round>
     FORCE_INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
+
+    static constexpr void rounding(state_t& state, const buffer_t& buffer) NOEXCEPT;
     static constexpr void preparing(buffer_t& buffer) NOEXCEPT;
     static constexpr void summarize(state_t& out, const state_t& in) NOEXCEPT;
     static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;

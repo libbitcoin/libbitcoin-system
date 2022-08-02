@@ -97,6 +97,46 @@ blocks_pad() NOEXCEPT
     return words;
 }
 
+// Primitives
+// ---------------------------------------------------------------------------
+
+template<auto B>
+constexpr auto rol_(auto a) NOEXCEPT
+{
+    return std::rotl(a, B);
+}
+
+template<auto B>
+constexpr auto add_(auto a) NOEXCEPT
+{
+    return a + B;
+}
+
+constexpr auto add_(auto a, auto b) NOEXCEPT
+{
+    return a + b;
+}
+
+constexpr auto and_(auto a, auto b) NOEXCEPT
+{
+    return a & b;
+}
+
+constexpr auto or_(auto a, auto b) NOEXCEPT
+{
+    return a | b;
+}
+
+constexpr auto xor_(auto a, auto b) NOEXCEPT
+{
+    return a ^ b;
+}
+
+constexpr auto not_(auto a) NOEXCEPT
+{
+    return ~a;
+}
+
 // Functions.
 // ----------------------------------------------------------------------------
 
@@ -104,35 +144,35 @@ TEMPLATE
 constexpr auto CLASS::
 f0(auto x, auto y, auto z) NOEXCEPT
 {
-    return x ^ y ^ z;
+    return xor_(xor_(x, y), z);
 }
 
 TEMPLATE
 constexpr auto CLASS::
 f1(auto x, auto y, auto z) NOEXCEPT
 {
-    return (x & y) | (~x & z);
+    return or_(and_(x, y), and_(not_(x), z));
 }
 
 TEMPLATE
 constexpr auto CLASS::
 f2(auto x, auto y, auto z) NOEXCEPT
 {
-    return (x | ~y) ^ z;
+    return xor_(or_(x, not_(y)), z);
 }
 
 TEMPLATE
 constexpr auto CLASS::
 f3(auto x, auto y, auto z) NOEXCEPT
 {
-    return (x & z) | (y & ~z);
+    return or_(and_(x, z), and_(y, not_(z)));
 }
 
 TEMPLATE
 constexpr auto CLASS::
 f4(auto x, auto y, auto z) NOEXCEPT
 {
-    return x ^ (y | ~z);
+    return xor_(x, or_(y, not_(z)));
 }
 
 // Rounds
@@ -182,7 +222,7 @@ round(auto& a, auto b, auto c, auto d, auto x) NOEXCEPT
     constexpr auto k = K::get[Round / K::columns];
     constexpr auto f = functor<Round, decltype(a)>();
 
-    a = /*b =*/ std::rotl(a + f(b, c, d) + x + k, s);
+    a = /*b =*/ rol_<s>(add_<k>(add_(add_(a, f(b, c, d)), x)));
 }
 
 TEMPLATE
@@ -194,8 +234,8 @@ round(auto& a, auto b, auto& c, auto d, auto e, auto x) NOEXCEPT
     constexpr auto k = K::get[Round / K::columns];
     constexpr auto f = functor<Round, decltype(a)>();
 
-    a = /*b =*/ std::rotl(a + f(b, c, d) + x + k, s) + e;
-    c = /*d =*/ std::rotl(c, 10);
+    a = /*b =*/ add_(rol_<s>(add_<k>(add_(add_(a, f(b, c, d)), x))), e);
+    c = /*d =*/ rol_<10>(c);
 }
 
 TEMPLATE
@@ -373,19 +413,19 @@ summarize(state_t& state, const state_t& batch1,
     if constexpr (RMD::rounds == 128)
     {
         const auto state_0_ = state[0];
-        state[0] = state[1] + batch1[2] + batch2[3];
-        state[1] = state[2] + batch1[3] + batch2[0];
-        state[2] = state[3] + batch1[0] + batch2[1];
-        state[3] = state_0_ + batch1[1] + batch2[2];
+        state[0] = add_(add_(state[1], batch1[2]), batch2[3]);
+        state[1] = add_(add_(state[2], batch1[3]), batch2[0]);
+        state[2] = add_(add_(state[3], batch1[0]), batch2[1]);
+        state[3] = add_(add_(state_0_, batch1[1]), batch2[2]);
     }
     else
     {
         const auto state_0_ = state[0];
-        state[0] = state[1] + batch1[2] + batch2[3];
-        state[1] = state[2] + batch1[3] + batch2[4];
-        state[2] = state[3] + batch1[4] + batch2[0];
-        state[3] = state[4] + batch1[0] + batch2[1];
-        state[4] = state_0_ + batch1[1] + batch2[2];
+        state[0] = add_(add_(state[1], batch1[2]), batch2[3]);
+        state[1] = add_(add_(state[2], batch1[3]), batch2[4]);
+        state[2] = add_(add_(state[3], batch1[4]), batch2[0]);
+        state[3] = add_(add_(state[4], batch1[0]), batch2[1]);
+        state[4] = add_(add_(state_0_, batch1[1]), batch2[2]);
     }
 }
 

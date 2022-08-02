@@ -110,20 +110,67 @@ block_pad() NOEXCEPT
     return out;
 }
 
+// Primitives
+// ---------------------------------------------------------------------------
+
+template<auto B>
+constexpr auto shr_(auto a) NOEXCEPT
+{
+    return a >> B;
+}
+
+template<auto B>
+constexpr auto ror_(auto a) NOEXCEPT
+{
+    return std::rotr(a, B);
+}
+
+template<auto B>
+constexpr auto rol_(auto a) NOEXCEPT
+{
+    return std::rotl(a, B);
+}
+
+template<auto B>
+constexpr auto add_(auto a) NOEXCEPT
+{
+    return a + B;
+}
+
+constexpr auto add_(auto a, auto b) NOEXCEPT
+{
+    return a + b;
+}
+
+constexpr auto and_(auto a, auto b) NOEXCEPT
+{
+    return a & b;
+}
+
+constexpr auto or_(auto a, auto b) NOEXCEPT
+{
+    return a | b;
+}
+
+constexpr auto xor_(auto a, auto b) NOEXCEPT
+{
+    return a ^ b;
+}
+
 // 4.1 Functions
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr auto CLASS::
+FORCE_INLINE constexpr auto CLASS::
 parity(auto x, auto y, auto z) NOEXCEPT
 {
     // FIPS.180
     // 4.1.1 SHA-1 Functions
-    return x ^ y ^ z;
+    return xor_(xor_(x, y), z);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+FORCE_INLINE constexpr auto CLASS::
 choice(auto x, auto y, auto z) NOEXCEPT
 {
     // FIPS.180
@@ -132,11 +179,11 @@ choice(auto x, auto y, auto z) NOEXCEPT
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     // Normal form reduced.
     ////return (x & y) ^ (~x & z);
-    return (x & (y ^ z)) ^ z;
+    return xor_(and_(x, xor_(y, z)), z);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+FORCE_INLINE constexpr auto CLASS::
 majority(auto x, auto y, auto z) NOEXCEPT
 {
     // FIPS.180
@@ -145,59 +192,72 @@ majority(auto x, auto y, auto z) NOEXCEPT
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     // Normal form reduced.
     ////return (x & y) ^ (x & z) ^ (y & z);
-    return (x & (y | z)) | (y & z);
+    return or_(and_(x, or_(y, z)), and_(y, z));
 }
 
 TEMPLATE
-constexpr auto CLASS::
-SIGMA0(auto x) NOEXCEPT
+template <size_t A, size_t B, size_t C>
+FORCE_INLINE constexpr auto CLASS::
+sigma(auto x) NOEXCEPT
 {
     // FIPS.180
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
-    if constexpr (SHA::rounds == 80)
-        return std::rotr(x, 28) ^ std::rotr(x, 34) ^ std::rotr(x, 39);
-    else
-        return std::rotr(x,  2) ^ std::rotr(x, 13) ^ std::rotr(x, 22);
+    return xor_(xor_(ror_<A>(x), ror_<B>(x)), shr_<C>(x));
 }
 
 TEMPLATE
-constexpr auto CLASS::
-SIGMA1(auto x) NOEXCEPT
+template <size_t A, size_t B, size_t C>
+FORCE_INLINE constexpr auto CLASS::
+Sigma(auto x) NOEXCEPT
 {
     // FIPS.180
     // 4.1.2 SHA-224 and SHA-256 Functions
     // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
+    return xor_(xor_(ror_<A>(x), ror_<B>(x)), ror_<C>(x));
+}
+
+// Wrappers
+// ---------------------------------------------------------------------------
+
+TEMPLATE
+FORCE_INLINE constexpr auto CLASS::
+Sigma0(auto x) NOEXCEPT
+{
     if constexpr (SHA::rounds == 80)
-        return std::rotr(x, 14) ^ std::rotr(x, 18) ^ std::rotr(x, 41);
+        return Sigma<28, 34, 39>(x);
     else
-        return std::rotr(x,  6) ^ std::rotr(x, 11) ^ std::rotr(x, 25);
+        return Sigma<2, 13, 22>(x);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+FORCE_INLINE constexpr auto CLASS::
+Sigma1(auto x) NOEXCEPT
+{
+    if constexpr (SHA::rounds == 80)
+        return Sigma<14, 18, 41>(x);
+    else
+        return Sigma<6, 11, 25>(x);
+}
+
+TEMPLATE
+FORCE_INLINE constexpr auto CLASS::
 sigma0(auto x) NOEXCEPT
 {
-    // FIPS.180
-    // 4.1.2 SHA-224 and SHA-256 Functions
-    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
-        return std::rotr(x, 1) ^ std::rotr(x,  8) ^ (x >> 7);
+        return sigma<1, 8, 7>(x);
     else
-        return std::rotr(x, 7) ^ std::rotr(x, 18) ^ (x >> 3);
+        return sigma<7, 18, 3>(x);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+FORCE_INLINE constexpr auto CLASS::
 sigma1(auto x) NOEXCEPT
 {
-    // FIPS.180
-    // 4.1.2 SHA-224 and SHA-256 Functions
-    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     if constexpr (SHA::rounds == 80)
-        return std::rotr(x, 19) ^ std::rotr(x, 61) ^ (x >>  6);
+        return sigma<19, 61, 6>(x);
     else
-        return std::rotr(x, 17) ^ std::rotr(x, 19) ^ (x >> 10);
+        return sigma<17, 19, 10>(x);
 }
 
 // Rounds
@@ -240,8 +300,8 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 
     // FIPS.180
     // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
-    e = /*a =*/ std::rotl(a, 5) + f(b, c, d) + e + k + w;
-    b = /*c =*/ std::rotl(b, 30);
+    e = /*a =*/ add_<k>(add_(add_(add_(rol_<5>(a), f(b, c, d)), e), w));
+    b = /*c =*/ rol_<30>(b);
 
     // SHA-NI
     // Four rounds (total rounds 80/4).
@@ -269,9 +329,9 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     // FIPS.180
     // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
     // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
-    const auto t = h + SIGMA1(e) + choice(e, f, g) + k + w;
-    d = /*e =*/ t + d;
-    h = /*a =*/ t + SIGMA0(a) + majority(a, b, c);
+    const auto t = add_<k>(add_(add_(add_(Sigma1(e), choice(e, f, g)), h), w));
+    d = /*e =*/    add_(t, d);
+    h = /*a =*/    add_(add_(t, Sigma0(a)), majority(a, b, c));
 
     // Rounds can be cut in half and this round doubled (intel paper).
     // Avoids the need for a temporary variable and aligns with SHA-NI.
@@ -476,9 +536,9 @@ prepare(auto& buffer) NOEXCEPT
     {
         // FIPS.180
         // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
-        buffer[Round] = std::rotl(
-            buffer[Round - 16] ^ buffer[Round - 14] ^
-            buffer[Round -  8] ^ buffer[Round -  3], 1);
+        buffer[Round] = rol_<1>(xor_(
+            xor_(buffer[Round - 16], buffer[Round - 14]),
+            xor_(buffer[Round -  8], buffer[Round -  3])));
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -502,9 +562,9 @@ prepare(auto& buffer) NOEXCEPT
         // FIPS.180
         // 6.2.2 SHA-256 Hash Computation (16 <= t <= 63)
         // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
-        buffer[Round] =
-            buffer[Round - 16] + sigma0(buffer[Round - 15]) +
-            buffer[Round -  7] + sigma1(buffer[Round -  2]);
+        buffer[Round] = add_(
+            add_(buffer[Round - 16], sigma0(buffer[Round - 15])),
+            add_(buffer[Round -  7], sigma1(buffer[Round -  2])));
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
@@ -617,20 +677,20 @@ summarize(state_t& out, const state_t& in) NOEXCEPT
 {
     // FIPS.180
     // 6.1.2.4 SHA-1 Hash Computation
-    out[0] += in[0];
-    out[1] += in[1];
-    out[2] += in[2];
-    out[3] += in[3];
-    out[4] += in[4];
+    out[0] = add_(out[0], in[0]);
+    out[1] = add_(out[1], in[1]);
+    out[2] = add_(out[2], in[2]);
+    out[3] = add_(out[3], in[3]);
+    out[4] = add_(out[4], in[4]);
 
     if constexpr (SHA::digest != 160)
     {
         // FIPS.180
         // 6.2.2.4 SHA-256 Hash Computation
         // 6.4.2.4 SHA-512 Hash Computation
-        out[5] += in[5];
-        out[6] += in[6];
-        out[7] += in[7];
+        out[5] = add_(out[5], in[5]);
+        out[6] = add_(out[6], in[6]);
+        out[7] = add_(out[7], in[7]);
     }
 }
 
