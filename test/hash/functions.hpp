@@ -130,32 +130,6 @@ static const std_array<sha160_test, sha_tests> sha160_tests
     { sha_5, base16_array("34aa973cd4c4daa4f61eeb2bdbad27316534016f") }
 };
 
-////static const std_array<sha160_test, 21> sha160_tests
-////{
-////    sha160_test
-////    {base16_chunk(""), base16_array("da39a3ee5e6b4b0d3255bfef95601890afd80709")},
-////    {base16_chunk("27ed20cb2fa1c9093ebf82427b2abff42cbd"), base16_array("6a56c8684a4a5f37fee6d91526696aded7c0aa0a")},
-////    {base16_chunk("ddba0a9bc3e53d6ef1c34c11031b54fdce18d54d0c2fb59fc80f0af4314e6916d0b0c5ae9ad8"), base16_array("68e277e7fa9bc9d5ccfbceb08f57cf83fde883c0")},
-////    {base16_chunk("aa9224a8e046e5b2"), base16_array("ff409fff25b6ae55ac96994427eab6eaafd67559")},
-////    {base16_chunk("14b7ae683c371ccd6436f4742075578dc599dfc3a437ec8b"), base16_array("36759eabb931b80fbbca8e6e533fca72388bd8f2")},
-////    {base16_chunk("f9c8eda189222a4e46f65c36a64cae11b26aa531121aa6697fd93504f9aecac893a47dd9"), base16_array("7e619f364df8159ed0e55edeb5008d77cbfb7574")},
-////    {base16_chunk("e35af7be6135f20cebee722c6cdbafe8620a7cd796d3fbf6ac1cf81eae17faeebe80"), base16_array("4c8770cb9f6ed23b4603990de3b12f1ec437f1bf")},
-////    {base16_chunk("fdac4bc3951ee0ebad89ce3806496468ce495c91b1f2e206822cf18ebe3c8bd1319e1ef87d"), base16_array("abc658273513f036231c3ac93d693e520ba289cf")},
-////    {base16_chunk("a04117c5defe8bdc4be999f3c8889f74af9429ef2a6808c462b48c8400a8ac4bf1397ccfcff0e03ebd"), base16_array("f12c13bcc078f864baf9eda3a0f551828006cab9")},
-////    {base16_chunk("46bf37cf595b18e6553ee97254734a7a704c6db89833cd5ebe7fdf8659"), base16_array("4840799d2cd8ede95c43e701530c83f84cdbd31c")},
-////    {base16_chunk("c158cd2ed7c0dced347c1f9a619d1c8dc382b4e539400cc9aefb97d6083a141c"), base16_array("b3bedc3d40dbd0991d31af668f2bc946fe2cc2b5")},
-////    {base16_chunk("1848614e29ff5920e8a7e1ba31fcd2c2c3c7d07b7c"), base16_array("2a5a51e2f2e1c90b303054fe41f57bd25258a13c")},
-////    {base16_chunk("b34d4bef16f613861b7ad624ebdebd99517e"), base16_array("9f0cefbc13cd853394c7b02de97f5f436ea3918d")},
-////    {base16_chunk("4ee01f8feee0a6ac275f58b85ceab49c603b78ff606703cab57c52fc7617930366a56c5daed2f3e17e0ee2da4ce8b8"), base16_array("17ecd1fb6df59261017650bc1fd8dffb11594d3f")},
-////    {base16_chunk("a7afbeb9491d91d679f843c7"), base16_array("d6ad4a2a306137c7851dc6ef9b2fd0af20ecbfd1")},
-////    {base16_chunk("821161f3c04b6b11c4d1a4"), base16_array("128a1700ae4590fe7b982a53b16334190f21c4b7")},
-////    {base16_chunk("d9cdc2bb692281ea033489ab4cf08a0ea7e934edb4f9b135bcdae7da484c399e463490"), base16_array("7848f419a5da361142fc46646866272bfa7c6552")},
-////    {base16_chunk("99a74cb1645b7ed583a5c077a0545586f55cb2629109b7f10dce77a91ef3285c"), base16_array("c5ddea4614c2655844f6597fabb64230e2e8232b")},
-////    {base16_chunk("cb9779"), base16_array("33274f991e78de247db476c70d88f889c23cd0eb")},
-////    {base16_chunk("0b681b18aa5a44b9a1b245ed10"), base16_array("61e8608b603391ac90a543d3b531662ccef29f16")},
-////    {base16_chunk("70206feaa65059d63e2d5807f92b49e3ce183ba3c4185c03944e6a366119409873cf"), base16_array("643ca9c7b4774128514be660c0304d4dec5cc7ca")}
-////};
-
 // sha256_tests
 // ----------------------------------------------------------------------------
 
