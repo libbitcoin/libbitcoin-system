@@ -53,6 +53,7 @@ public:
     checked(const checked& other) NOEXCEPT;
     checked(value_type&& value) NOEXCEPT;
     checked(const value_type& value) NOEXCEPT;
+    ~checked() = default;
 
     /// Validity is guaranteed from this construction.
     checked(const prefix_type& prefix, const payload_type& payload) NOEXCEPT;
@@ -77,7 +78,7 @@ private:
     static checked from_payload(const prefix_type& version,
         const payload_type& payload) NOEXCEPT;
 
-    value_type value_;
+    value_type value_{};
 };
 
 /// Comparison operators.

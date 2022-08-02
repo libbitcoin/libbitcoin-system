@@ -33,7 +33,7 @@ namespace wallet {
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked() NOEXCEPT
-  : data_slice(value_), value_()
+  : data_slice(value_)
 {
     // This is an invalid instance (unchecked).
 }
@@ -138,7 +138,7 @@ template <size_t Prefix, size_t Payload, size_t Checksum>
 typename checked<Prefix, Payload, Checksum>::prefix_type
 checked<Prefix, Payload, Checksum>::prefix() const NOEXCEPT
 {
-    return slice<0u, Prefix>(value_);
+    return slice<zero, Prefix>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
