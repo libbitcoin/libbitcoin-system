@@ -208,13 +208,11 @@ struct hmac_sha160_test
 };
 
 // This is the subset of rfc2202 vectors in common with rfc4231.
-static const std_array<hmac_sha160_test, 4> hmac_sha160_tests
+static const std_array<hmac_sha160_test, 2> hmac_sha160_tests
 {
     hmac_sha160_test
     { hmac_1k, hmac_1d, base16_array("b617318655057264e28bc0b6fb378c8ef146be00") },
-    { hmac_2k, hmac_2d, base16_array("effcdf6ae5eb2fa2d27416d5f184df9c259a7c79") },
-    { hmac_5k, hmac_5d, base16_array("4c1a03424b55e07fe7f27be1d58bb9324a9a5a04") },
-    { hmac_6k, hmac_6d, base16_array("aa4ae5e15272d00e95705637ce8a3b55ed402112") }
+    { hmac_2k, hmac_2d, base16_array("effcdf6ae5eb2fa2d27416d5f184df9c259a7c79") }
 };
 
 // hmac_sha256_tests
