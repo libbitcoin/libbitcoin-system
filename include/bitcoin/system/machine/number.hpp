@@ -19,10 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
 
-
-/// DELETECSTDDEF
-/// DELETECSTDINT
-/////// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -32,47 +28,47 @@ namespace system {
 namespace machine {
 namespace number {
 
-template <size_t Size>
+// Size constraint guards from_little_endian.
+template <size_t Size,
+    if_not_greater<Size, sizeof(int64_t)> = true>
 class integer
 {
 public:
     typedef signed_type<Size> Integer;
 
-    static inline bool from_integer(Integer& out, int64_t vary) NOEXCEPT;
-    static inline bool from_chunk(Integer& out,
+    INLINE static constexpr bool from_integer(Integer& out,
+        int64_t vary) NOEXCEPT;
+    INLINE static VCONSTEXPR bool from_chunk(Integer& out,
         const data_chunk& vary) NOEXCEPT;
 
 protected:
-    static inline bool strict_zero(const data_chunk& vary) NOEXCEPT;
-    static inline bool is_overflow(const data_chunk& vary) NOEXCEPT;
-    static inline bool is_overflow(int64_t value) NOEXCEPT;
-
-private:
-    // TODO: .ipp class type constraint syntax.
-    static_assert(Size <= sizeof(int64_t), "guards from_little_endian");
-    static_assert(is_signed<Integer>, "stack integrals are signed");
+    INLINE static VCONSTEXPR bool strict_zero(const data_chunk& vary) NOEXCEPT;
+    INLINE static VCONSTEXPR bool is_overflow(const data_chunk& vary) NOEXCEPT;
+    INLINE static constexpr bool is_overflow(int64_t value) NOEXCEPT;
 };
 
 class BC_API chunk
 {
 public:
-    static inline data_chunk from_bool(bool vary) NOEXCEPT;
-    static inline data_chunk from_integer(int64_t vary) NOEXCEPT;
+    INLINE static VCONSTEXPR data_chunk from_bool(bool vary) NOEXCEPT;
+    INLINE static VCONSTEXPR data_chunk from_integer(int64_t vary) NOEXCEPT;
 };
 
 class BC_API boolean
 {
 public:
-    template <size_t Size = sizeof(int64_t)>
-    static inline signed_type<Size> to_integer(bool vary) NOEXCEPT;
+    template <size_t Size = sizeof(int64_t),
+        if_not_greater<Size, sizeof(int64_t)> = true>
+    INLINE static constexpr signed_type<Size> to_integer(bool vary) NOEXCEPT;
 
-    static inline bool from_chunk(const data_chunk& vary) NOEXCEPT;
-    static inline bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
-    static constexpr bool to_bool(int64_t vary) NOEXCEPT;
+    INLINE static VCONSTEXPR bool from_chunk(const data_chunk& vary) NOEXCEPT;
+    INLINE static VCONSTEXPR bool strict_from_chunk(
+        const data_chunk& vary) NOEXCEPT;
+    INLINE static constexpr bool to_bool(int64_t vary) NOEXCEPT;
 
 protected:
-    static inline bool strict_false(const data_chunk& vary) NOEXCEPT;
-    static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
+    INLINE static VCONSTEXPR bool strict_false(const data_chunk& vary) NOEXCEPT;
+    INLINE static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
 };
 
 } // namespace number
