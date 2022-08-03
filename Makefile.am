@@ -86,7 +86,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
     src/hash/checksum.cpp \
-    src/hash/functions.cpp \
     src/hash/siphash.cpp \
     src/hash/vectorization/sha256_1_native.cpp \
     src/hash/vectorization/sha256_2_shani.cpp \
@@ -277,7 +276,12 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/accumulator.cpp \
     test/hash/checksum.cpp \
     test/hash/functions.cpp \
-    test/hash/functions.hpp \
+    test/hash/hash.hpp \
+    test/hash/hmac.cpp \
+    test/hash/pbkd.cpp \
+    test/hash/rmd.cpp \
+    test/hash/scrypt.cpp \
+    test/hash/sha.cpp \
     test/hash/siphash.cpp \
     test/hash/siphash.hpp \
     test/hash/rmd/algorithm.cpp \

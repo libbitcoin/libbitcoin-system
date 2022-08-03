@@ -58,20 +58,23 @@ public:
     /// Flush accumulator state to digest.
     constexpr digest_t flush() NOEXCEPT;
     inline void flush(digest_t& digest) NOEXCEPT;
+    inline void flush(data_chunk& digest) NOEXCEPT;
     inline void flush(byte_t* digest) NOEXCEPT;
-    inline data_chunk& flush(data_chunk& digest) NOEXCEPT;
 
-    /// Finalized hash of arbitrary data (by value).
+    /// Finalized hash of arbitrary data (byte_t* out).
+    static inline void hash(byte_t* digest, const data_slice& data) NOEXCEPT;
+
+    /// Finalized hash of arbitrary data (digest return).
     template <size_t Size>
     static inline digest_t hash(const std_array<byte_t, Size>& data) NOEXCEPT;
     static inline digest_t hash(const data_chunk& data) NOEXCEPT;
-    static inline digest_t hash_slice(const data_slice& data) NOEXCEPT;
+    static inline digest_t hash_digest(const data_slice& data) NOEXCEPT;
 
-    /// Finalized hash of arbitrary data (by reference).
-    static inline void hash(digest_t& digest, const data_slice& data) NOEXCEPT;
-    static inline void hash(byte_t* digest, const data_slice& data) NOEXCEPT;
-    static inline data_chunk& hash(data_chunk& digest,
-        const data_slice& data) NOEXCEPT;
+    /// Finalized hash of arbitrary data (chunk return).
+    template <size_t Size>
+    static inline data_chunk hash_chunk(const std_array<byte_t, Size>& data) NOEXCEPT;
+    static inline data_chunk hash_chunk(const data_chunk& data) NOEXCEPT;
+    ////static inline data_chunk hash_chunk(const data_slice& data) NOEXCEPT;
 
 protected:
     using half_t = typename Algorithm::half_t;

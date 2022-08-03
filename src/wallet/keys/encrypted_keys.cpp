@@ -50,7 +50,7 @@ static_assert(quarter == to_half(aes256::block_size));
 
 static hash_digest address_hash(const payment_address& address) NOEXCEPT
 {
-    return sha256_hash(sha256_hash(address.encoded()));
+    return sha256_hash(sha256_hash_slice(address.encoded()));
 }
 
 static bool address_salt(ek_salt& salt,
@@ -162,12 +162,12 @@ constexpr one_byte set_flags(bool compressed, bool lot_sequence,
     return to_array(byte);
 }
 
-static one_byte set_flags(bool compressed, bool lot_sequence) NOEXCEPT
+static constexpr one_byte set_flags(bool compressed, bool lot_sequence) NOEXCEPT
 {
     return set_flags(compressed, lot_sequence, false);
 }
 
-static one_byte set_flags(bool compressed) NOEXCEPT
+static constexpr one_byte set_flags(bool compressed) NOEXCEPT
 {
     return set_flags(compressed, false);
 }

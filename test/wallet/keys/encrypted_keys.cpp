@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(encrypted_tests)
 using namespace bc::system::wallet;
 
 // 4 seconds of test here.
-#if defined(HAVE_SLOW_TESTS)
+#if !defined(HAVE_SLOW_TESTS)
 
 #if defined(HAVE_ICU)
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__test1_lot_sequence__expected)
 
     // Compute the Bitcoin address (ASCII), and take the first four bytes of SHA256(SHA256()) of it.
     // 4 bytes: SHA256(SHA256(expected_bitcoin_address))[0...3], used both for typo checking and as salt.
-    const auto salt = slice<0, 4>(bitcoin_hash("1Jscj8ALrYu2y9TD8NrpvDBugPedmbj4Yh"));
+    const auto salt = slice<0, 4>(bitcoin_hash_slice("1Jscj8ALrYu2y9TD8NrpvDBugPedmbj4Yh"));
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
     /////BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseaB8feaLQDENqCgr4gKZpmf4VoaT6qdjJNJiv7fsKvjqavcJxvuR1hy25aTu5sX");
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecqNtLBXsF9TH22M7dS5cDEmAcJarBm4Ffq44uitwJCHzdUChma9qhmp5rW6bKB");
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__test2_lot_sequence__expected)
 
     // Compute the Bitcoin address (ASCII), and take the first four bytes of SHA256(SHA256()) of it.
     // 4 bytes: SHA256(SHA256(expected_bitcoin_address))[0...3], used both for typo checking and as salt.
-    const auto salt = slice<0, 4>(bitcoin_hash("1Lurmih3KruL4xDB5FmHof38yawNtP9oGf"));
+    const auto salt = slice<0, 4>(bitcoin_hash_slice("1Lurmih3KruL4xDB5FmHof38yawNtP9oGf"));
     BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, salt, lot, sequence);
     ////BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrased3z9rQJHSyBkNBwTRPkUGNVEVrUAcfAXDyRU1V28ie6hNFbqDwbFBvsTK7yWVK");
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasea1oq5xcU5KtCyVFGn8S9YavhYugJhtMCoGBiKZrPqui13mBfpwZJE3ZxwJgpoT");

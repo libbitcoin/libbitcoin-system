@@ -290,14 +290,22 @@ flush(byte_t* digest) NOEXCEPT
 }
 
 TEMPLATE
-inline data_chunk& CLASS::
+inline void CLASS::
 flush(data_chunk& digest) NOEXCEPT
 {
     flush(digest.data());
     return digest;
 }
 
-// private
+TEMPLATE
+inline void CLASS::
+hash(byte_t* digest, const data_slice& data) NOEXCEPT
+{
+    constexpr auto size = array_count<digest_t>;
+    auto& out = unsafe_array_cast<byte_t, size>(digest);
+    out = shortcut(data.size(), data.data());
+}
+
 TEMPLATE
 template <size_t Size>
 inline typename CLASS::digest_t CLASS::
@@ -306,7 +314,6 @@ hash(const std_array<byte_t, Size>& data) NOEXCEPT
     constexpr auto half = array_count<half_t>;
     constexpr auto full = array_count<block_t>;
 
-    // Bypass accumulator for half and full block finalized hashes (common).
     if constexpr (Size == half || Size == full)
     {
         return Algorithm::hash(data);
@@ -319,7 +326,6 @@ hash(const std_array<byte_t, Size>& data) NOEXCEPT
     }
 }
 
-// Finalized hash of arbitrary data (by value).
 TEMPLATE
 inline typename CLASS::digest_t CLASS::
 hash(const data_chunk& data) NOEXCEPT
@@ -327,42 +333,44 @@ hash(const data_chunk& data) NOEXCEPT
     return shortcut(data.size(), data.data());
 }
 
-// Finalized hash of arbitrary data (by value).
 TEMPLATE
 inline typename CLASS::digest_t CLASS::
-hash_slice(const data_slice& data) NOEXCEPT
+hash_digest(const data_slice& data) NOEXCEPT
 {
     return shortcut(data.size(), data.data());
 }
 
-// Finalized hash of arbitrary data (by reference).
 TEMPLATE
-inline void CLASS::
-hash(digest_t& digest, const data_slice& data) NOEXCEPT
-{
-    digest = shortcut(data.size(), data.data());
-}
-
-// Finalized hash of arbitrary data (by pointer).
-TEMPLATE
-inline void CLASS::
-hash(byte_t* digest, const data_slice& data) NOEXCEPT
+template <size_t Size>
+inline data_chunk CLASS::
+hash_chunk(const std_array<byte_t, Size>& data) NOEXCEPT
 {
     constexpr auto size = array_count<digest_t>;
-    auto& out = unsafe_array_cast<byte_t, size>(digest);
-    out = shortcut(data.size(), data.data());
-}
-
-// Finalized hash of arbitrary data (by data_chunk&).
-TEMPLATE
-inline data_chunk& CLASS::
-hash(data_chunk& digest, const data_slice& data) NOEXCEPT
-{
-    constexpr auto size = array_count<digest_t>;
+    data_chunk digest(size);
     auto& out = unsafe_array_cast<byte_t, size>(digest.data());
-    out = shortcut(data.size(), data.data());
+    out = hash(data);
     return digest;
 }
+
+TEMPLATE
+inline data_chunk CLASS::
+hash_chunk(const data_chunk& data) NOEXCEPT
+{
+    constexpr auto size = array_count<digest_t>;
+    data_chunk digest(size);
+    auto& out = unsafe_array_cast<byte_t, size>(digest.data());
+    out = hash(data);
+    return digest;
+}
+
+////TEMPLATE
+////inline data_chunk CLASS::
+////hash_chunk(const data_slice& data) NOEXCEPT
+////{
+////    data_chunk digest(array_count<digest_t>);
+////    hash(digest.data(), data);
+////    return digest;
+////}
 
 // private
 // ----------------------------------------------------------------------------

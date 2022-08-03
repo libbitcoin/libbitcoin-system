@@ -16,8 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_TEST_HASH_HPP
-#define LIBBITCOIN_SYSTEM_TEST_HASH_HPP
+#include "../test.hpp"
+
+#ifndef LIBBITCOIN_SYSTEM_TEST_HASH_HASH_HPP
+#define LIBBITCOIN_SYSTEM_TEST_HASH_HASH_HPP
 
 // rmd
 // ============================================================================
@@ -34,6 +36,7 @@ static const auto rmd_6 = to_chunk("abcdbcdecdefdefgefghfghighijhijkijkljklmklmn
 static const auto rmd_7 = to_chunk("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 static const auto rmd_8 = to_chunk("12345678901234567890123456789012345678901234567890123456789012345678901234567890");
 static const auto rmd_9 = data_chunk(1'000'000, to_byte('a'));
+constexpr auto rmd_test_count = 9;
 
 // rmd128_tests
 // ----------------------------------------------------------------------------
@@ -44,7 +47,7 @@ struct rmd128_test
     const half_hash expected;
 };
 
-static const std_array<rmd128_test, 9> rmd128_tests
+static const std_array<rmd128_test, rmd_test_count> rmd128_tests
 {
     rmd128_test
     { rmd_1, base16_array("cdf26213a150dc3ecb610f18f6b38b46") },
@@ -67,7 +70,7 @@ struct rmd160_test
     const short_hash expected;
 };
 
-static const std_array<rmd160_test, 9> rmd160_tests
+static const std_array<rmd160_test, rmd_test_count> rmd160_tests
 {
     rmd160_test
     { rmd_1, base16_array("9c1185a5c5e9fc54612808977ee8f548b2258d31") },
@@ -103,9 +106,9 @@ static const auto alpha2 = to_array<alpha2_size>("abcdefghbcdefghicdefghijdefghi
 static const std_vector<long_hash> long_alpha(alpha2_count, alpha2);
 static const auto long_alpha_data = pointer_cast<uint8_t>(long_alpha.front().data());
 static const auto sha_6 = to_chunk(unsafe_array_cast<uint8_t, long_alpha_size>(long_alpha_data));
-constexpr auto sha_tests = 6;
+constexpr auto sha_test_count = 6;
 #else
-constexpr auto sha_tests = 5;
+constexpr auto sha_test_count = 5;
 #endif
 
 // sha160_tests
@@ -117,7 +120,7 @@ struct sha160_test
     const short_hash expected;
 };
 
-static const std_array<sha160_test, sha_tests> sha160_tests
+static const std_array<sha160_test, sha_test_count> sha160_tests
 {
     sha160_test
     { sha_1, base16_array("a9993e364706816aba3e25717850c26c9cd0d89d") },
@@ -139,7 +142,7 @@ struct sha256_test
     const hash_digest expected;
 };
 
-static const std_array<sha256_test, sha_tests> sha256_tests
+static const std_array<sha256_test, sha_test_count> sha256_tests
 {
     sha256_test
     { sha_1,base16_array("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad") },
@@ -161,7 +164,7 @@ struct sha512_test
     const long_hash expected;
 };
 
-static const std_array<sha512_test, sha_tests> sha512_tests
+static const std_array<sha512_test, sha_test_count> sha512_tests
 {
     sha512_test
     { sha_1,base16_array("ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f") },
@@ -195,7 +198,7 @@ static const auto hmac_6k = base16_chunk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 static const auto hmac_6d = to_chunk("Test Using Larger Than Block-Size Key - Hash Key First");
 static const auto hmac_7k = base16_chunk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 static const auto hmac_7d = to_chunk("This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.");
-constexpr auto hmac_tests = 7;
+constexpr auto hmac_test_count = 7;
 
 // hmac_sha160_tests
 // ----------------------------------------------------------------------------
@@ -225,7 +228,7 @@ struct hmac_sha256_test
     const hash_digest expected;
 };
 
-static const std_array<hmac_sha256_test, hmac_tests> hmac_sha256_tests
+static const std_array<hmac_sha256_test, hmac_test_count> hmac_sha256_tests
 {
     hmac_sha256_test
     { hmac_1k, hmac_1d, base16_array("b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7") },
@@ -247,7 +250,7 @@ struct hmac_sha512_test
     const long_hash expected;
 };
 
-static const std_array<hmac_sha512_test, hmac_tests> hmac_sha512_tests
+static const std_array<hmac_sha512_test, hmac_test_count> hmac_sha512_tests
 {
     hmac_sha512_test
     { hmac_1k, hmac_1d, base16_array("87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854") },
@@ -378,15 +381,15 @@ static const std_array<pbkd_sha512_test, 5> pbkd_sha512_tests
 // ============================================================================
 // Also rfc7914 tests inline.
 
-struct scrypt_test
+struct scrypt_hash_test
 {
     const data_array<80> data;
     const hash_digest expected;
 };
 
-static const std_array<scrypt_test, 5> scrypt_tests
+static const std_array<scrypt_hash_test, 5> scrypt_hash_tests
 {
-    scrypt_test
+    scrypt_hash_test
     {
         base16_array("020000004c1271c211717198227392b029a64a7971931d351b387bb80db027f270411e398a07046f7d4a08dd815412a8712f874a7ebf0507e3878bd24e20a3b73fd750a667d2f451eac7471b00de6659"),
         base16_array("065898d7ab2daa8235cdda9511d248f3010b5e11f682f80741ef2b0000000000")

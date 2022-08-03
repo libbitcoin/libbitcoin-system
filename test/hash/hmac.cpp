@@ -17,22 +17,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
+#include "hash.hpp"
 
-BOOST_AUTO_TEST_SUITE(functions_tests)
+BOOST_AUTO_TEST_SUITE(hmac_tests)
 
-// TODO: test all hash utility functions.
-
-BOOST_AUTO_TEST_CASE(functions__djb2_hash__ad_hoc__0xe1669c01)
+BOOST_AUTO_TEST_CASE(hmac__sha160__test_vectors__expected)
 {
-    const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
-
-    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    for (const auto& test: hmac_sha160_tests)
     {
-        BOOST_REQUIRE_EQUAL(hash, 3781598209_u32);
+        const auto hash = hmac<sha160>::code(test.data, test.key);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
-    else
+}
+
+BOOST_AUTO_TEST_CASE(hmac__sha256__test_vectors__expected)
+{
+    for (const auto& test: hmac_sha256_tests)
     {
-        BOOST_REQUIRE_EQUAL(hash, 9646636626660989953_u64);
+        const auto hash = hmac<sha256>::code(test.data, test.key);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(hmac__sha512__test_vectors__expected)
+{
+    for (const auto& test: hmac_sha512_tests)
+    {
+        const auto hash = hmac<sha512>::code(test.data, test.key);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
 

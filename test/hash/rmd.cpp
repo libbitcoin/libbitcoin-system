@@ -16,33 +16,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/wallet/keys/mini_keys.hpp>
+#include "../test.hpp"
+#include "hash.hpp"
 
-#include <string>
-#include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/hash/hash.hpp>
+BOOST_AUTO_TEST_SUITE(rmd_tests)
 
-namespace libbitcoin {
-namespace system {
-namespace wallet {
-
-static bool check_minikey(const std::string& minikey) NOEXCEPT
+BOOST_AUTO_TEST_CASE(rmd__rmd128_hash__test_vectors__expected)
 {
-    // Legacy minikeys are 22 chars long.
-    const auto size = minikey.size();
-    const auto valid = (size == 22u || size == 30u);
-    return valid && sha256_hash_slice(minikey + "?").front() == 0x00;
+    for (const auto& test: rmd128_tests)
+    {
+        const auto hash = accumulator<rmd128>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
 }
 
-bool minikey_to_secret(ec_secret& out_secret, const std::string& key) NOEXCEPT
+BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
 {
-    if (!check_minikey(key))
-        return false;
-
-    out_secret = sha256_hash_slice(key);
-    return true;
+    for (const auto& test: rmd160_tests)
+    {
+        const auto hash = accumulator<rmd160>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
 }
 
-} // namespace wallet
-} // namespace system
-} // namespace libbitcoin
+BOOST_AUTO_TEST_SUITE_END()

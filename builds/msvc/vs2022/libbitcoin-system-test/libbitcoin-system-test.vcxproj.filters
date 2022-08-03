@@ -285,8 +285,23 @@
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\hmac.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\rmd.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <Filter>src\hash\rmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\scrypt.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha.cpp">
+      <Filter>src\hash</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\algorithm.cpp">
       <Filter>src\hash\sha</Filter>
@@ -578,7 +593,7 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">
       <Filter>src\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\hash\functions.hpp">
+    <ClInclude Include="..\..\..\..\test\hash\hash.hpp">
       <Filter>src\hash</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp">
