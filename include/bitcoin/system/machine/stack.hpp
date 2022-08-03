@@ -99,7 +99,7 @@ private:
     mutable tether<data_chunk> tether_;
 };
 
-// For use with std::visit can otherwise be provate to stack<>.
+// For use with std::visit.
 template<class... Overload>
 struct overload : Overload... { using Overload::operator()...; };
 
