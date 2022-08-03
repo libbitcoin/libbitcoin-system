@@ -1690,33 +1690,33 @@ connect(const context& state, const transaction& tx,
             // Validate the non-native script.
             switch (embeded_script->version())
             {
-            case script_version::zero:
-            {
-                script::cptr script;
-                chunk_cptrs_ptr witness_stack;
-                if (!input.witness().extract_script(script, witness_stack,
-                    *embeded_script))
-                    return error::invalid_witness;
+                case script_version::zero:
+                {
+                    script::cptr script;
+                    chunk_cptrs_ptr witness_stack;
+                    if (!input.witness().extract_script(script, witness_stack,
+                        *embeded_script))
+                        return error::invalid_witness;
 
-                // A defined version indicates bip141 is active (not bip143).
-                interpreter witness_program(tx, it, script, state.forks,
-                    embeded_script->version(), witness_stack);
+                    // A defined version indicates bip141 is active (not bip143).
+                    interpreter witness_program(tx, it, script, state.forks,
+                        embeded_script->version(), witness_stack);
 
-                if ((ec = witness_program.run()))
-                    return ec;
+                    if ((ec = witness_program.run()))
+                        return ec;
 
-                // A v0 script must succeed with a clean true stack (bip141).
-                return witness_program.is_true(true) ?
-                    error::script_success : error::stack_false;
-            }
+                    // A v0 script must succeed with a clean true stack (bip141).
+                    return witness_program.is_true(true) ?
+                        error::script_success : error::stack_false;
+                }
 
-            // These versions are reserved for future extensions (bip141).
-            case script_version::reserved:
-                return error::script_success;
+                // These versions are reserved for future extensions (bip141).
+                case script_version::reserved:
+                    return error::script_success;
 
-            case script_version::unversioned:
-            default:
-                return error::unversioned_script;
+                case script_version::unversioned:
+                default:
+                    return error::unversioned_script;
             }
         }
     }

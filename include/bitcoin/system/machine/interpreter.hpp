@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 
-/// DELETECSTDINT
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -36,19 +35,14 @@ class interpreter
   : public program<Stack>
 {
 public:
+    DELETE5(interpreter);
+
     using state = program<Stack>;
     using op_iterator = typename state::op_iterator;
     using input_iterator = typename input_cptrs::const_iterator;
 
     /// Use program constructors.
     using program<Stack>::program;
-
-    /// Defaults.
-    interpreter(interpreter&&) = delete;
-    interpreter(const interpreter&) = delete;
-    interpreter& operator=(interpreter&&) = delete;
-    interpreter& operator=(const interpreter&) = delete;
-    inline ~interpreter() = default;
 
     /// Run a program.
     inline code run() NOEXCEPT;
