@@ -155,7 +155,7 @@ payment_address::operator bool() const NOEXCEPT
 
 std::string payment_address::encoded() const NOEXCEPT
 {
-    return encode_base58(payment_);
+    return encode_base58(payment_.value());
 }
 
 // Properties.
