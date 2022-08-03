@@ -21,9 +21,8 @@
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/accumulator.hpp>
-#include <bitcoin/system/hash/rmd/algorithm.hpp>
+#include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
-#include <bitcoin/system/hash/sha/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {

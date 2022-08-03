@@ -111,6 +111,8 @@
 #include <bitcoin/system/error/script_error_t.hpp>
 #include <bitcoin/system/error/transaction_error_t.hpp>
 #include <bitcoin/system/hash/accumulator.hpp>
+#include <bitcoin/system/hash/algorithm.hpp>
+#include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/hash/checksum.hpp>
 #include <bitcoin/system/hash/functions.hpp>
 #include <bitcoin/system/hash/hash.hpp>

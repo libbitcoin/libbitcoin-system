@@ -331,6 +331,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\accumulator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithm.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithms.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\functions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\hash.hpp" />

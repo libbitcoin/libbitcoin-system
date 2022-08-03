@@ -20,7 +20,10 @@
 #define LIBBITCOIN_SYSTEM_HASH_RMD_ALGORITHM_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
+
+ // This file is a common include for rmd.
 #include <bitcoin/system/hash/rmd/rmd.hpp>
 #include <bitcoin/system/hash/rmd/rmd128.hpp>
 #include <bitcoin/system/hash/rmd/rmd160.hpp>
@@ -32,7 +35,7 @@ namespace rmd {
 /// RMD hashing algorithm.
 template <typename RMD, bool Concurrent = true,
     if_same<typename RMD::T, rmdh_t> = true>
-class algorithm
+class algorithm : algorithm_t
 {
 public:
     /// Types.
@@ -151,13 +154,6 @@ private:
 };
 
 } // namespace rmd
-
-/// bc::system rmd algorithm aliases (concurrent).
-using rmd128     = rmd::algorithm<rmd::h128<>,    true>;
-using rmd128_256 = rmd::algorithm<rmd::h128<256>, true>; // not fully implemented
-using rmd160     = rmd::algorithm<rmd::h160<>,    true>;
-using rmd160_320 = rmd::algorithm<rmd::h160<320>, true>; // not fully implemented
-
 } // namespace system
 } // namespace libbitcoin
 

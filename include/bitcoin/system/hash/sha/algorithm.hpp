@@ -20,7 +20,10 @@
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
+
+ // This file is a common include for sha.
 #include <bitcoin/system/hash/sha/sha.hpp>
 #include <bitcoin/system/hash/sha/sha160.hpp>
 #include <bitcoin/system/hash/sha/sha256.hpp>
@@ -33,7 +36,7 @@ namespace sha {
 /// SHA hashing algorithm.
 template <typename SHA, bool Concurrent = true,
     if_same<typename SHA::T, shah_t> = true>
-class algorithm
+class algorithm : algorithm_t
 {
 public:
     /// Types.
@@ -181,16 +184,6 @@ private:
 };
 
 } // namespace sha
-
-/// bc::system sha algorithm aliases.
-using sha160     = sha::algorithm<sha::h160>;
-using sha256_224 = sha::algorithm<sha::h256<224>>; // not fully implemented
-using sha256     = sha::algorithm<sha::h256<>>;
-using sha512_256 = sha::algorithm<sha::h512<256>>; // not fully implemented
-using sha512_224 = sha::algorithm<sha::h512<224>>; // not fully implemented
-using sha512_384 = sha::algorithm<sha::h512<384>>; // not fully implemented
-using sha512     = sha::algorithm<sha::h512<>>;
-
 } // namespace system
 } // namespace libbitcoin
 

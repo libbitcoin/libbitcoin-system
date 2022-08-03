@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -28,7 +29,8 @@ namespace system {
 
 /// Accumulator for SHA/RMD/MD# streaming hash algorithms.
 /// flush() is non-clearing (writes may continue).
-template <typename Algorithm, bool Checked = checked_build>
+template <typename Algorithm, bool Checked = checked_build,
+    if_base_of<algorithm_t, Algorithm> = true>
 class accumulator
 {
 public:

@@ -857,6 +857,12 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\accumulator.hpp">
       <Filter>include\bitcoin\system\hash</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithm.hpp">
+      <Filter>include\bitcoin\system\hash</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithms.hpp">
+      <Filter>include\bitcoin\system\hash</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\checksum.hpp">
       <Filter>include\bitcoin\system\hash</Filter>
     </ClInclude>

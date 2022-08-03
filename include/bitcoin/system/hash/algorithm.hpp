@@ -16,18 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_HASH_HASH_HPP
-#define LIBBITCOIN_SYSTEM_HASH_HASH_HPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_ALGORITHM_HPP
+#define LIBBITCOIN_SYSTEM_HASH_ALGORITHM_HPP
 
-// algorithms is a group include for /sha and /rmd.
-#include <bitcoin/system/hash/accumulator.hpp>
-#include <bitcoin/system/hash/algorithm.hpp>
-#include <bitcoin/system/hash/algorithms.hpp>
-#include <bitcoin/system/hash/checksum.hpp>
-#include <bitcoin/system/hash/functions.hpp>
-#include <bitcoin/system/hash/hmac.hpp>
-#include <bitcoin/system/hash/pbkd.hpp>
-#include <bitcoin/system/hash/scrypt.hpp>
-#include <bitcoin/system/hash/siphash.hpp>
+namespace libbitcoin {
+namespace system {
+
+/// For algorithm common type constraint.
+struct algorithm_t {};
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif

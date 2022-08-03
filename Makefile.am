@@ -508,6 +508,8 @@ include_bitcoin_system_error_HEADERS = \
 include_bitcoin_system_hashdir = ${includedir}/bitcoin/system/hash
 include_bitcoin_system_hash_HEADERS = \
     include/bitcoin/system/hash/accumulator.hpp \
+    include/bitcoin/system/hash/algorithm.hpp \
+    include/bitcoin/system/hash/algorithms.hpp \
     include/bitcoin/system/hash/checksum.hpp \
     include/bitcoin/system/hash/functions.hpp \
     include/bitcoin/system/hash/hash.hpp \

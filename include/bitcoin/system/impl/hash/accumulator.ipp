@@ -28,8 +28,9 @@
 namespace libbitcoin {
 namespace system {
 
-#define TEMPLATE template <typename Algorithm, bool Checked>
-#define CLASS accumulator<Algorithm, Checked>
+#define TEMPLATE template <typename Algorithm, bool Checked, \
+    if_base_of<algorithm_t, Algorithm> If>
+#define CLASS accumulator<Algorithm, Checked, If>
 
 // Copy and array index are guarded.
 // Buffer initialization is not required due to logical sizing.
