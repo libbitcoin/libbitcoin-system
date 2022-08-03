@@ -58,11 +58,11 @@ gap() const NOEXCEPT
 
 TEMPLATE
 INLINE constexpr bool CLASS::
-is_buffer_overflow(size_t bytes) const NOEXCEPT
+is_buffer_overflow(size_t size) const NOEXCEPT
 {
     if constexpr (Checked)
     {
-        return bytes > (Algorithm::limit_bytes - size_);
+        return size > (Algorithm::limit_bytes - size_);
     }
     else
     {
@@ -78,13 +78,13 @@ is_buffer_overflow(size_t bytes) const NOEXCEPT
 
 TEMPLATE
 INLINE constexpr size_t CLASS::
-add_data(size_t bytes, const byte_t* data) NOEXCEPT
+add_data(size_t size, const byte_t* data) NOEXCEPT
 {
     // No bytes accepted on overflow (if checked) or uncleared buffer.
-    if (is_buffer_overflow(bytes) || is_zero(gap()))
+    if (is_buffer_overflow(size) || is_zero(gap()))
         return zero;
 
-    const auto accepted = std::min(gap(), bytes);
+    const auto accepted = std::min(gap(), size);
     std::copy_n(data, accepted, &buffer_[next()]);
     size_ += accepted;
     return accepted;
@@ -115,7 +115,7 @@ pad_size() const NOEXCEPT
 
 TEMPLATE
 INLINE RCONSTEXPR typename CLASS::counter CLASS::
-serialize(size_t bytes) NOEXCEPT
+serialize(size_t size) NOEXCEPT
 {
     // block_t (64 bytes), counter_t (64 bits), words_t (32 bits), byte_t (8 bits).
     // One block bit count (0x0200) in RMD (LE):
@@ -141,11 +141,11 @@ serialize(size_t bytes) NOEXCEPT
     if constexpr (Algorithm::big_end_count)
     {
         // to_big_endian_size is RCONSTEXPR.
-        return to_big_endian_size<count_size>(to_bits(bytes));
+        return to_big_endian_size<count_size>(to_bits(size));
     }
     else
     {
-        return to_little_endian_size<count_size>(to_bits(bytes));
+        return to_little_endian_size<count_size>(to_bits(size));
     }
 }
 
@@ -297,15 +297,26 @@ flush(data_chunk& digest) NOEXCEPT
     return digest;
 }
 
-// Finalized hash of arbitrary data (by value).
+// private
 TEMPLATE
 template <size_t Size>
 inline typename CLASS::digest_t CLASS::
 hash(const std_array<byte_t, Size>& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write(data);
-    return context.flush();
+    constexpr auto half = array_count<half_t>;
+    constexpr auto full = array_count<block_t>;
+
+    // Bypass accumulator for half and full block finalized hashes (common).
+    if constexpr (Size == half || Size == full)
+    {
+        return Algorithm::hash(data);
+    }
+    else
+    {
+        accumulator<Algorithm> context{};
+        context.write(data);
+        return context.flush();
+    }
 }
 
 // Finalized hash of arbitrary data (by value).
@@ -313,9 +324,7 @@ TEMPLATE
 inline typename CLASS::digest_t CLASS::
 hash(const data_chunk& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write(data);
-    return context.flush();
+    return shortcut(data.size(), data.data());
 }
 
 // Finalized hash of arbitrary data (by value).
@@ -323,9 +332,7 @@ TEMPLATE
 inline typename CLASS::digest_t CLASS::
 hash_slice(const data_slice& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write(data);
-    return context.flush();
+    return shortcut(data.size(), data.data());
 }
 
 // Finalized hash of arbitrary data (by reference).
@@ -333,9 +340,7 @@ TEMPLATE
 inline void CLASS::
 hash(digest_t& digest, const data_slice& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write(data);
-    context.flush(digest);
+    digest = shortcut(data.size(), data.data());
 }
 
 // Finalized hash of arbitrary data (by pointer).
@@ -343,9 +348,9 @@ TEMPLATE
 inline void CLASS::
 hash(byte_t* digest, const data_slice& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write(data);
-    context.flush(digest);
+    constexpr auto size = array_count<digest_t>;
+    auto& out = unsafe_array_cast<byte_t, size>(digest);
+    out = shortcut(data.size(), data.data());
 }
 
 // Finalized hash of arbitrary data (by data_chunk&).
@@ -353,9 +358,35 @@ TEMPLATE
 inline data_chunk& CLASS::
 hash(data_chunk& digest, const data_slice& data) NOEXCEPT
 {
+    constexpr auto size = array_count<digest_t>;
+    auto& out = unsafe_array_cast<byte_t, size>(digest.data());
+    out = shortcut(data.size(), data.data());
+    return digest;
+}
+
+// private
+// ----------------------------------------------------------------------------
+// Bypass accumulator for half and full block finalized hashes (common).
+
+TEMPLATE
+INLINE typename CLASS::digest_t CLASS::
+shortcut(size_t size, const byte_t* data) NOEXCEPT
+{
+    constexpr auto half = array_count<half_t>;
+    constexpr auto full = array_count<block_t>;
+
+    if (size == half)
+    {
+        return Algorithm::hash(unsafe_array_cast<byte_t, half>(data));
+    }
+    else if (size == full)
+    {
+        return Algorithm::hash(unsafe_array_cast<byte_t, full>(data));
+    }
+
     accumulator<Algorithm> context{};
-    context.write(data);
-    return context.flush(digest);
+    context.write(size, data);
+    return context.flush();
 }
 
 BC_POP_WARNING()

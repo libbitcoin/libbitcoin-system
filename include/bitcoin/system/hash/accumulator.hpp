@@ -74,6 +74,7 @@ public:
         const data_slice& data) NOEXCEPT;
 
 protected:
+    using half_t = typename Algorithm::half_t;
     using block_t = typename Algorithm::block_t;
     using counter = data_array<Algorithm::count_bytes>;
 
@@ -84,10 +85,10 @@ protected:
     INLINE constexpr size_t gap() const NOEXCEPT;
 
     /// Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
-    INLINE constexpr bool is_buffer_overflow(size_t bytes) const NOEXCEPT;
+    INLINE constexpr bool is_buffer_overflow(size_t size) const NOEXCEPT;
 
     /// Append up to block_size bytes to buffer.
-    INLINE constexpr size_t add_data(size_t bytes, const byte_t* data) NOEXCEPT;
+    INLINE constexpr size_t add_data(size_t size, const byte_t* data) NOEXCEPT;
 
     /// Increment the counter for unbuffered transforms.
     INLINE constexpr void increment(size_t blocks) NOEXCEPT;
@@ -96,7 +97,7 @@ protected:
     INLINE constexpr size_t pad_size() const NOEXCEPT;
 
     /// Serialize the hashed byte count for finalization
-    INLINE static RCONSTEXPR counter serialize(size_t bytes) NOEXCEPT;
+    INLINE static RCONSTEXPR counter serialize(size_t size) NOEXCEPT;
 
     /// Precomputed streaming pad buffer.
     static CONSTEVAL block_t stream_pad() NOEXCEPT;
@@ -106,6 +107,8 @@ protected:
     static constexpr auto count_size = array_count<counter>;
 
 private:
+    INLINE static digest_t shortcut(size_t size, const byte_t* data) NOEXCEPT;
+
     size_t size_;
     state_t state_;
     block_t buffer_;
