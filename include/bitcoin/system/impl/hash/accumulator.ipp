@@ -294,7 +294,6 @@ inline void CLASS::
 flush(data_chunk& digest) NOEXCEPT
 {
     flush(digest.data());
-    return digest;
 }
 
 TEMPLATE
