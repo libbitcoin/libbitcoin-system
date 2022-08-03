@@ -359,15 +359,15 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__null_terminati
 
 // to_extended_path
 
-BOOST_AUTO_TEST_CASE(utf8_environment__to_extended_path__always__expected)
-{
-    ////std::string to_extended_path(const path& path);
-}
-
-BOOST_AUTO_TEST_CASE(utf8_environment__to_extended_path16__always__expected)
-{
-    ////std::wstring to_extended_path16(const std::string& path);
-}
+////BOOST_AUTO_TEST_CASE(utf8_environment__to_extended_path__always__expected)
+////{
+////    ////std::string to_extended_path(const path& path);
+////}
+////
+////BOOST_AUTO_TEST_CASE(utf8_environment__to_extended_path16__always__expected)
+////{
+////    ////std::wstring to_extended_path16(const std::string& path);
+////}
 
 #endif // HAVE_MSC
 
