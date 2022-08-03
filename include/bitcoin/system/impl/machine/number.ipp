@@ -63,7 +63,7 @@ from_integer(Integer& out, int64_t vary) NOEXCEPT
 }
 
 INTEGER_TEMPLATE
-INLINE VCONSTEXPR bool INTEGER_CLASS::
+INLINE bool INTEGER_CLASS::
 from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT
 {
     out = 0;
@@ -86,7 +86,7 @@ from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT
 
 // protected
 INTEGER_TEMPLATE
-INLINE VCONSTEXPR bool INTEGER_CLASS::
+INLINE bool INTEGER_CLASS::
 strict_zero(const data_chunk& vary) NOEXCEPT
 {
     return vary.empty();
@@ -94,7 +94,7 @@ strict_zero(const data_chunk& vary) NOEXCEPT
 
 // protected
 INTEGER_TEMPLATE
-INLINE VCONSTEXPR bool INTEGER_CLASS::
+INLINE bool INTEGER_CLASS::
 is_overflow(const data_chunk& vary) NOEXCEPT
 {
     return vary.size() > Size;
@@ -112,12 +112,12 @@ is_overflow(int64_t value) NOEXCEPT
 // ----------------------------------------------------------------------------
 // Minimally-sized byte encoding, with extra allocated byte if negated.
 
-INLINE VCONSTEXPR data_chunk chunk::from_bool(bool vary) NOEXCEPT
+INLINE data_chunk chunk::from_bool(bool vary) NOEXCEPT
 {
     return { bc::to_int<uint8_t>(vary) };
 }
 
-INLINE VCONSTEXPR data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
+INLINE data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
 {
     // absolute(minimum<int64_t>) guarded by the presumption of int32 ops.
     BC_ASSERT(!is_negate_overflow(vary));
@@ -158,7 +158,7 @@ INLINE constexpr signed_type<Size> boolean::to_integer(bool vary) NOEXCEPT
     return bc::to_int<signed_type<Size>>(vary);
 }
 
-INLINE VCONSTEXPR bool boolean::from_chunk(const data_chunk& vary) NOEXCEPT
+INLINE bool boolean::from_chunk(const data_chunk& vary) NOEXCEPT
 {
     // An optimization, also guards vector empty.
     if (strict_false(vary))
@@ -178,7 +178,7 @@ INLINE VCONSTEXPR bool boolean::from_chunk(const data_chunk& vary) NOEXCEPT
     ////return bc::to_bool(from_little_endian<uintx>(vary));
 }
 
-INLINE VCONSTEXPR bool boolean::strict_from_chunk(
+INLINE bool boolean::strict_from_chunk(
     const data_chunk& vary) NOEXCEPT
 {
     // Strict bool tests for integral false/zero, or a single empty byte.
@@ -192,7 +192,7 @@ INLINE constexpr bool boolean::to_bool(int64_t vary) NOEXCEPT
 }
 
 // protected
-INLINE VCONSTEXPR bool boolean::strict_false(const data_chunk& vary) NOEXCEPT
+INLINE bool boolean::strict_false(const data_chunk& vary) NOEXCEPT
 {
     return vary.empty();
 }

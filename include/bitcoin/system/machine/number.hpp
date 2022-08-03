@@ -29,6 +29,7 @@ namespace machine {
 namespace number {
 
 // Size constraint guards from_little_endian.
+// data_chunk methods are VCONSTEXPR but cannot also be INLINE (priority).
 template <size_t Size,
     if_not_greater<Size, sizeof(int64_t)> = true>
 class integer
@@ -36,22 +37,20 @@ class integer
 public:
     typedef signed_type<Size> Integer;
 
-    INLINE static constexpr bool from_integer(Integer& out,
-        int64_t vary) NOEXCEPT;
-    INLINE static VCONSTEXPR bool from_chunk(Integer& out,
-        const data_chunk& vary) NOEXCEPT;
+    INLINE static constexpr bool from_integer(Integer& out, int64_t vary) NOEXCEPT;
+    INLINE static bool from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT;
 
 protected:
-    INLINE static VCONSTEXPR bool strict_zero(const data_chunk& vary) NOEXCEPT;
-    INLINE static VCONSTEXPR bool is_overflow(const data_chunk& vary) NOEXCEPT;
+    INLINE static bool strict_zero(const data_chunk& vary) NOEXCEPT;
+    INLINE static bool is_overflow(const data_chunk& vary) NOEXCEPT;
     INLINE static constexpr bool is_overflow(int64_t value) NOEXCEPT;
 };
 
 class BC_API chunk
 {
 public:
-    INLINE static VCONSTEXPR data_chunk from_bool(bool vary) NOEXCEPT;
-    INLINE static VCONSTEXPR data_chunk from_integer(int64_t vary) NOEXCEPT;
+    INLINE static data_chunk from_bool(bool vary) NOEXCEPT;
+    INLINE static data_chunk from_integer(int64_t vary) NOEXCEPT;
 };
 
 class BC_API boolean
@@ -61,13 +60,12 @@ public:
         if_not_greater<Size, sizeof(int64_t)> = true>
     INLINE static constexpr signed_type<Size> to_integer(bool vary) NOEXCEPT;
 
-    INLINE static VCONSTEXPR bool from_chunk(const data_chunk& vary) NOEXCEPT;
-    INLINE static VCONSTEXPR bool strict_from_chunk(
-        const data_chunk& vary) NOEXCEPT;
+    INLINE static bool from_chunk(const data_chunk& vary) NOEXCEPT;
+    INLINE static bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
     INLINE static constexpr bool to_bool(int64_t vary) NOEXCEPT;
 
 protected:
-    INLINE static VCONSTEXPR bool strict_false(const data_chunk& vary) NOEXCEPT;
+    INLINE static bool strict_false(const data_chunk& vary) NOEXCEPT;
     INLINE static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
 };
 
