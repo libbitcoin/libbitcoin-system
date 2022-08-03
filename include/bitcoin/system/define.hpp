@@ -214,35 +214,35 @@ namespace bc = libbitcoin;
 #if defined(HAVE_RANGES)
     #define RCONSTEXPR constexpr
 #else
-    #define RCONSTEXPR inline
+    #define RCONSTEXPR
 #endif
 
 /// C++20 (partial)
 #if defined(HAVE_VECTOR_CONSTEXPR)
     #define VCONSTEXPR constexpr
 #else
-    #define VCONSTEXPR inline
+    #define VCONSTEXPR
 #endif
 
 /// C++20 (partial)
 #if defined(HAVE_STRING_CONSTEXPR)
     #define SCONSTEXPR constexpr
 #else
-    #define SCONSTEXPR inline
+    #define SCONSTEXPR
 #endif
 
 /// C++20 (partial)
 #if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
     #define SRCONSTEXPR constexpr
 #else
-    #define SRCONSTEXPR inline
+    #define SRCONSTEXPR
 #endif
 
 /// C++20 (partial)
 #if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
     #define SVCONSTEXPR constexpr
 #else
-    #define SVCONSTEXPR inline
+    #define SVCONSTEXPR
 #endif
 
 #endif
