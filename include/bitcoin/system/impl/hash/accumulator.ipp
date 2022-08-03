@@ -114,7 +114,7 @@ pad_size() const NOEXCEPT
 }
 
 TEMPLATE
-INLINE RCONSTEXPR typename CLASS::counter CLASS::
+INLINE typename CLASS::counter CLASS::
 serialize(size_t size) NOEXCEPT
 {
     // block_t (64 bytes), counter_t (64 bits), words_t (32 bits), byte_t (8 bits).

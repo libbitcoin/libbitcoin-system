@@ -100,7 +100,7 @@ protected:
     INLINE constexpr size_t pad_size() const NOEXCEPT;
 
     /// Serialize the hashed byte count for finalization
-    INLINE static RCONSTEXPR counter serialize(size_t size) NOEXCEPT;
+    INLINE static counter serialize(size_t size) NOEXCEPT;
 
     /// Precomputed streaming pad buffer.
     static CONSTEVAL block_t stream_pad() NOEXCEPT;
