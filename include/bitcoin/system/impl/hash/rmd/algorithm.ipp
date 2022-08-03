@@ -463,7 +463,7 @@ pad_half(words_t& words) NOEXCEPT
     else
     {
         constexpr auto size = array_count<chunk_t>;
-        narrow_array_cast<word_t, size, size>(words) = pad;
+        array_cast<word_t, size, size>(words) = pad;
     }
 }
 
@@ -496,7 +496,7 @@ pad_n(words_t& words, count_t blocks) NOEXCEPT
     }
     else
     {
-        narrow_array_cast<word_t, array_count<blocks_pad_t>>(words) = pad;
+        array_cast<word_t, array_count<blocks_pad_t>>(words) = pad;
 
         // Split count into hi/low words and assign end of padded buffer (LE).
         words[14] = lo_word<word_t>(bits);
@@ -558,7 +558,7 @@ input(words_t& words, const half_t& half) NOEXCEPT
     }
     else
     {
-        auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(words);
+        auto& to = array_cast<word_t, array_count<chunk_t>>(words);
         from_little_endians(to, array_cast<word_t>(half));
     }
 }

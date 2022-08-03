@@ -344,7 +344,7 @@ void sha256_double(digest& out, const block& in) NOEXCEPT
 {
     // Emit sha256_single(block) into pad/count buffer.
     auto buffer = sha256::pad_32;
-    sha256_single(narrow_array_cast<uint8_t, digest_size>(buffer), in);
+    sha256_single(array_cast<uint8_t, digest_size>(buffer), in);
 
     // Transform result and emit state to out.
     auto state = sha256::initial;
@@ -374,7 +374,7 @@ void sha256_double(digest& out, const digest& in) NOEXCEPT
 {
     // Emit sha256_single(hash) into pad/count buffer.
     auto buffer = sha256::pad_32;
-    sha256_single(narrow_array_cast<uint8_t, digest_size>(buffer), in);
+    sha256_single(array_cast<uint8_t, digest_size>(buffer), in);
 
     // Transform result and emit state to out.
     auto state = sha256::initial;

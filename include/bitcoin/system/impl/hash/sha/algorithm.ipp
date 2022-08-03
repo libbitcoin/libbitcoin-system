@@ -726,7 +726,7 @@ input(buffer_t& buffer, const state_t& state) NOEXCEPT
     }
     else
     {
-        narrow_array_cast<word_t, array_count<state_t>>(buffer) = state;
+        array_cast<word_t, array_count<state_t>>(buffer) = state;
     }
 }
 
@@ -772,7 +772,7 @@ pad_half(buffer_t& buffer) NOEXCEPT
     else
     {
         constexpr auto size = array_count<chunk_t>;
-        narrow_array_cast<word_t, size, size>(buffer) = pad;
+        array_cast<word_t, size, size>(buffer) = pad;
     }
 }
 
@@ -820,7 +820,7 @@ pad_state(buffer_t& buffer) NOEXCEPT
     else
     {
         constexpr auto size = SHA::block_words - SHA::state_words;
-        narrow_array_cast<word_t, size, SHA::state_words>(buffer) = pad;
+        array_cast<word_t, size, SHA::state_words>(buffer) = pad;
     }
 }
 
@@ -855,7 +855,7 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
     }
     else
     {
-        narrow_array_cast<word_t, array_count<blocks_pad_t>>(buffer) = pad;
+        array_cast<word_t, array_count<blocks_pad_t>>(buffer) = pad;
 
         // Split count into hi/low words and assign end of padded buffer.
         buffer[14] = hi_word<word_t>(bits);
@@ -913,7 +913,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else
     {
-        auto& to = narrow_array_cast<word_t, SHA::block_words>(buffer);
+        auto& to = array_cast<word_t, SHA::block_words>(buffer);
         from_big_endians(to, array_cast<word_t>(block));
     }
 }
@@ -939,7 +939,7 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else
     {
-        auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(buffer);
+        auto& to = array_cast<word_t, array_count<chunk_t>>(buffer);
         from_big_endians(to, array_cast<word_t>(half));
     }
 }
@@ -966,7 +966,7 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
     else
     {
         constexpr auto size = SHA::state_words;
-        auto& to = narrow_array_cast<word_t, size, size>(buffer);
+        auto& to = array_cast<word_t, size, size>(buffer);
         from_big_endians(to, array_cast<word_t>(half));
     }
 }

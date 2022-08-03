@@ -171,10 +171,10 @@ mint128_t inline read4(const block4& blocks) NOEXCEPT
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     const auto value = set(
-        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[0])),
-        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[1])),
-        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[2])),
-        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[3])));
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[0])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[1])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[2])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[3])));
     BC_POP_WARNING()
 
     return shuffle(value, set(
@@ -189,10 +189,10 @@ void inline write4(digest4& hashes, mint128_t value) NOEXCEPT
 
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    narrow_array_cast<uint8_t, four, Offset>(hashes[0]) = to_little_endian(get<3>(value));
-    narrow_array_cast<uint8_t, four, Offset>(hashes[1]) = to_little_endian(get<2>(value));
-    narrow_array_cast<uint8_t, four, Offset>(hashes[2]) = to_little_endian(get<1>(value));
-    narrow_array_cast<uint8_t, four, Offset>(hashes[3]) = to_little_endian(get<0>(value));
+    array_cast<uint8_t, four, Offset>(hashes[0]) = to_little_endian(get<3>(value));
+    array_cast<uint8_t, four, Offset>(hashes[1]) = to_little_endian(get<2>(value));
+    array_cast<uint8_t, four, Offset>(hashes[2]) = to_little_endian(get<1>(value));
+    array_cast<uint8_t, four, Offset>(hashes[3]) = to_little_endian(get<0>(value));
     BC_POP_WARNING()
 }
 
