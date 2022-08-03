@@ -43,32 +43,6 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // static/protected
 TEMPLATE
-template <size_t Blocks>
-CONSTEVAL auto CLASS::
-words() NOEXCEPT
-{
-    // Wastes the first element of the array (4 bytes) to get the one-based
-    // indexation aligned and eliminate iterative increment of the offset.
-    // Would have been nicer for the design to call for a zero-based index.
-    using word_t = uint32_t;
-    using big_word = data_array<sizeof(word_t)>;
-    std_array<big_word, add1(Blocks)> big_words{};
-
-    // rfc8018
-    // and the concatenation of [PS] and the block index i: where INT (i)
-    // is a four-octet encoding of the integer i [first index is 1].
-    for (word_t i = 1; i <= Blocks; ++i)
-    {
-        // rfc8018
-        // most significant octet first [big-endian].
-        big_words[i] = to_big_endian(i);
-    }
-
-    return big_words;
-};
-
-// static/protected
-TEMPLATE
 template <size_t Length>
 constexpr auto CLASS::
 xor_n(data_array<Length>& to, const data_array<Length>& from) NOEXCEPT
@@ -108,8 +82,14 @@ key(data_array<Size>& out, const data_slice& password,
     // let r be the number of octets in the last block.
     constexpr auto r = Size - sub1(l) * hlen;
 
-    // Compile-time precomputed big-endianed block indexes.
-    constexpr auto integer = words<l>();
+    // rfc8018
+    // and the concatenation of [PS] and the block index i: where INT (i) is a
+    // four-octet encoding of the integer i [because of the 1-based algorithm,
+    // position 0 is wasted], most significant octet first [big-endian].
+    constexpr auto words = to_big_endians(sequence<uint32_t, add1(l)>);
+
+    // Cast precomputed array of block indexes as an array of 4 byte BE arrays.
+    const auto& index = array_cast<std_array<uint8_t, sizeof(uint32_t)>>(words);
 
     // rfc8018
     // Output the derived key DK.
@@ -133,7 +113,7 @@ key(data_array<Size>& out, const data_slice& password,
 
         // U_1 = PRF (P, S || INT (i))
         auto ps = hmac_ps;
-        ps.write(integer.at(i));
+        ps.write(index.at(i));
         auto u = ps.flush();
         auto t = u;
 
