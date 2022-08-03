@@ -47,38 +47,35 @@ template <typename Container>
 class stack
 {
 public:
-    /// Defaults.
-    inline stack(stack&&) = default;
-    inline stack(const stack&) = default;
-    inline stack& operator=(stack&&) = default;
-    inline stack& operator=(const stack&) = default;
-    inline ~stack() = default;
+    DEFAULT5(stack);
 
     /// Construct.
-    inline stack() NOEXCEPT;
-    inline stack(Container&& container) NOEXCEPT;
+    INLINE stack() NOEXCEPT;
+    INLINE stack(Container&& container) NOEXCEPT;
 
     /// Pure stack abstraction.
-    inline const stack_variant& top() const NOEXCEPT;
-    inline stack_variant pop() NOEXCEPT;
-    inline void drop() NOEXCEPT;
-    inline bool empty() const NOEXCEPT;
-    inline size_t size() const NOEXCEPT;
-    inline void push(data_chunk&& value) NOEXCEPT;
-    inline void push(stack_variant&& value) NOEXCEPT;
-    inline void push(const stack_variant& value) NOEXCEPT;
-    inline void emplace_boolean(bool value) NOEXCEPT;
-    inline void emplace_integer(int64_t value) NOEXCEPT;
-    inline void emplace_chunk(const chunk_xptr& value) NOEXCEPT;
+    INLINE const stack_variant& top() const NOEXCEPT;
+    INLINE stack_variant pop() NOEXCEPT;
+    INLINE void drop() NOEXCEPT;
+    INLINE bool empty() const NOEXCEPT;
+    INLINE size_t size() const NOEXCEPT;
+    INLINE void push(data_chunk&& value) NOEXCEPT;
+    INLINE void push(stack_variant&& value) NOEXCEPT;
+    INLINE void push(const stack_variant& value) NOEXCEPT;
+    INLINE void emplace_boolean(bool value) NOEXCEPT;
+    INLINE void emplace_integer(int64_t value) NOEXCEPT;
+    INLINE void emplace_chunk(const chunk_xptr& value) NOEXCEPT;
 
     /// Positional (stack cheats).
-    inline void erase(size_t index) NOEXCEPT;
-    inline void swap(size_t left_index, size_t right_index) NOEXCEPT;
-    inline const stack_variant& peek(size_t index) const NOEXCEPT;
+    INLINE void erase(size_t index) NOEXCEPT;
+    INLINE void swap(size_t left_index, size_t right_index) NOEXCEPT;
+    INLINE const stack_variant& peek(size_t index) const NOEXCEPT;
+
+    /// Aliases.
+    INLINE bool peek_signed4(int32_t& value) const NOEXCEPT;
+    INLINE bool peek_signed5(int64_t& value) const NOEXCEPT;
 
     /// Variant data conversions.
-    inline bool peek_signed4(int32_t& value) const NOEXCEPT;
-    inline bool peek_signed5(int64_t& value) const NOEXCEPT;
     inline bool peek_bool() const NOEXCEPT;
     inline bool peek_strict_bool() const NOEXCEPT;
     inline chunk_xptr peek_chunk() const NOEXCEPT;

@@ -35,13 +35,13 @@ namespace system {
 namespace machine {
 
 template <typename Container>
-inline stack<Container>::stack() NOEXCEPT
+INLINE stack<Container>::stack() NOEXCEPT
   : container_{}, tether_{}
 {
 }
 
 template <typename Container>
-inline stack<Container>::stack(Container&& container) NOEXCEPT
+INLINE stack<Container>::stack(Container&& container) NOEXCEPT
   : container_(std::move(container)), tether_{}
 {
 }
@@ -50,14 +50,14 @@ inline stack<Container>::stack(Container&& container) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Container>
-inline const stack_variant& stack<Container>::top() const NOEXCEPT
+INLINE const stack_variant& stack<Container>::top() const NOEXCEPT
 {
     BC_ASSERT(!empty());
     return container_.back();
 }
 
 template <typename Container>
-inline stack_variant stack<Container>::pop() NOEXCEPT
+INLINE stack_variant stack<Container>::pop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     stack_variant temporary{ std::move(container_.back()) };
@@ -66,26 +66,26 @@ inline stack_variant stack<Container>::pop() NOEXCEPT
 }
 
 template <typename Container>
-inline void stack<Container>::drop() NOEXCEPT
+INLINE void stack<Container>::drop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     container_.pop_back();
 }
 
 template <typename Container>
-inline bool stack<Container>::empty() const NOEXCEPT
+INLINE bool stack<Container>::empty() const NOEXCEPT
 {
     return container_.empty();
 }
 
 template <typename Container>
-inline size_t stack<Container>::size() const NOEXCEPT
+INLINE size_t stack<Container>::size() const NOEXCEPT
 {
     return container_.size();
 }
 
 template <typename Container>
-inline void stack<Container>::push(data_chunk&& value) NOEXCEPT
+INLINE void stack<Container>::push(data_chunk&& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(make_external(std::move(value), tether_));
@@ -93,7 +93,7 @@ inline void stack<Container>::push(data_chunk&& value) NOEXCEPT
 }
 
 template <typename Container>
-inline void stack<Container>::push(stack_variant&& value) NOEXCEPT
+INLINE void stack<Container>::push(stack_variant&& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(std::move(value));
@@ -101,7 +101,7 @@ inline void stack<Container>::push(stack_variant&& value) NOEXCEPT
 }
 
 template <typename Container>
-inline void stack<Container>::push(const stack_variant& value) NOEXCEPT
+INLINE void stack<Container>::push(const stack_variant& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(value);
@@ -109,7 +109,7 @@ inline void stack<Container>::push(const stack_variant& value) NOEXCEPT
 }
 
 template <typename Container>
-inline void stack<Container>::emplace_boolean(bool value) NOEXCEPT
+INLINE void stack<Container>::emplace_boolean(bool value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
@@ -117,7 +117,7 @@ inline void stack<Container>::emplace_boolean(bool value) NOEXCEPT
 }
 
 template <typename Container>
-inline void stack<Container>::emplace_integer(int64_t value) NOEXCEPT
+INLINE void stack<Container>::emplace_integer(int64_t value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
@@ -125,7 +125,7 @@ inline void stack<Container>::emplace_integer(int64_t value) NOEXCEPT
 }
 
 template <typename Container>
-inline void stack<Container>::emplace_chunk(const chunk_xptr& value) NOEXCEPT
+INLINE void stack<Container>::emplace_chunk(const chunk_xptr& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value.get());
@@ -137,14 +137,14 @@ inline void stack<Container>::emplace_chunk(const chunk_xptr& value) NOEXCEPT
 // These optimizations prevent used of std::stack.
 
 template <typename Container>
-inline void stack<Container>::erase(size_t index) NOEXCEPT
+INLINE void stack<Container>::erase(size_t index) NOEXCEPT
 {
     BC_ASSERT(index < size());
     container_.erase(std::prev(container_.end(), add1(index)));
 }
 
 template <typename Container>
-inline void stack<Container>::swap(size_t left_index,
+INLINE void stack<Container>::swap(size_t left_index,
     size_t right_index) NOEXCEPT
 {
     BC_ASSERT(left_index < size() && right_index < size());
@@ -167,7 +167,7 @@ inline void stack<Container>::swap(size_t left_index,
 }
 
 template <typename Container>
-inline const stack_variant& stack<Container>::peek(size_t index) const NOEXCEPT
+INLINE const stack_variant& stack<Container>::peek(size_t index) const NOEXCEPT
 {
     BC_ASSERT(index < size());
 
@@ -176,6 +176,21 @@ inline const stack_variant& stack<Container>::peek(size_t index) const NOEXCEPT
 
     if constexpr (linked_)
         return *std::prev(container_.end(), add1(index));
+}
+
+// Aliases.
+// ----------------------------------------------------------------------------
+
+template <typename Container>
+INLINE bool stack<Container>::peek_signed4(int32_t& value) const NOEXCEPT
+{
+    return peek_signed<4>(value);
+}
+
+template <typename Container>
+INLINE bool stack<Container>::peek_signed5(int64_t& value) const NOEXCEPT
+{
+    return peek_signed<5>(value);
 }
 
 /// Variant data conversions.
@@ -212,18 +227,6 @@ inline bool stack<Container>::peek_signed(Integer& value) const NOEXCEPT
     }, top());
 
     return result;
-}
-
-template <typename Container>
-inline bool stack<Container>::peek_signed4(int32_t& value) const NOEXCEPT
-{
-    return peek_signed<4>(value);
-}
-
-template <typename Container>
-inline bool stack<Container>::peek_signed5(int64_t& value) const NOEXCEPT
-{
-    return peek_signed<5>(value);
 }
 
 template <typename Container>
