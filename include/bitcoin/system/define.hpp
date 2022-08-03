@@ -123,11 +123,11 @@ namespace bc = libbitcoin;
 /// A stronger compiler hint for inlining.
 /// May use prior to 'constexpr' or in place of 'inline'.
 #if defined(HAVE_MSC)
-    #define FORCE_INLINE __forceinline
+    #define INLINE __forceinline
 #elif defined(HAVE_GNUC)
-    #define FORCE_INLINE __attribute__((always_inline))
+    #define INLINE __attribute__((always_inline))
 #else
-    #define FORCE_INLINE inline
+    #define INLINE inline
 #endif
 
 /// Class helpers

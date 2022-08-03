@@ -101,38 +101,38 @@ blocks_pad() NOEXCEPT
 // ---------------------------------------------------------------------------
 
 template<auto B>
-constexpr auto rol_(auto a) NOEXCEPT
+INLINE constexpr auto rol_(auto a) NOEXCEPT
 {
     return std::rotl(a, B);
 }
 
 template<auto B>
-constexpr auto add_(auto a) NOEXCEPT
+INLINE constexpr auto add_(auto a) NOEXCEPT
 {
     return a + B;
 }
 
-constexpr auto add_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto add_(auto a, auto b) NOEXCEPT
 {
     return a + b;
 }
 
-constexpr auto and_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto and_(auto a, auto b) NOEXCEPT
 {
     return a & b;
 }
 
-constexpr auto or_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto or_(auto a, auto b) NOEXCEPT
 {
     return a | b;
 }
 
-constexpr auto xor_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto xor_(auto a, auto b) NOEXCEPT
 {
     return a ^ b;
 }
 
-constexpr auto not_(auto a) NOEXCEPT
+INLINE constexpr auto not_(auto a) NOEXCEPT
 {
     return ~a;
 }
@@ -141,35 +141,35 @@ constexpr auto not_(auto a) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f0(auto x, auto y, auto z) NOEXCEPT
 {
     return xor_(xor_(x, y), z);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f1(auto x, auto y, auto z) NOEXCEPT
 {
     return or_(and_(x, y), and_(not_(x), z));
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f2(auto x, auto y, auto z) NOEXCEPT
 {
     return xor_(or_(x, not_(y)), z);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f3(auto x, auto y, auto z) NOEXCEPT
 {
     return or_(and_(x, z), and_(y, not_(z)));
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f4(auto x, auto y, auto z) NOEXCEPT
 {
     return xor_(x, or_(y, not_(z)));
@@ -215,7 +215,7 @@ functor() NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 round(auto& a, auto b, auto c, auto d, auto x) NOEXCEPT
 {
     constexpr auto s = K::rot[Round];
@@ -227,7 +227,7 @@ round(auto& a, auto b, auto c, auto d, auto x) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 round(auto& a, auto b, auto& c, auto d, auto e, auto x) NOEXCEPT
 {
     constexpr auto s = K::rot[Round];
@@ -240,7 +240,7 @@ round(auto& a, auto b, auto& c, auto d, auto e, auto x) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::
+INLINE constexpr void CLASS::
 round(auto& state, const auto& words) NOEXCEPT
 {
     if constexpr (RMD::rounds == 128)

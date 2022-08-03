@@ -97,11 +97,11 @@ protected:
     /// Functions
     /// -----------------------------------------------------------------------
     
-    static constexpr auto f0(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f1(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f2(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f3(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f4(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f0(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f1(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f2(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f3(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f4(auto x, auto y, auto z) NOEXCEPT;
 
     /// Rounds
     /// -----------------------------------------------------------------------
@@ -110,15 +110,15 @@ protected:
     static CONSTEVAL auto functor() NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr auto round(auto& a, auto b, auto c, auto d,
+    INLINE static constexpr auto round(auto& a, auto b, auto c, auto d,
         auto x) NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr auto round(auto& a, auto b, auto& c, auto d,
+    INLINE static constexpr auto round(auto& a, auto b, auto& c, auto d,
         auto e, auto x) NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr void round(auto& state,
+    INLINE static constexpr void round(auto& state,
         const auto& words) NOEXCEPT;
 
     template<bool First>

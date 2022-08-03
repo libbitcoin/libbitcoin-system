@@ -114,45 +114,45 @@ block_pad() NOEXCEPT
 // ---------------------------------------------------------------------------
 
 template<auto B>
-constexpr auto shr_(auto a) NOEXCEPT
+INLINE constexpr auto shr_(auto a) NOEXCEPT
 {
     return a >> B;
 }
 
 template<auto B>
-constexpr auto ror_(auto a) NOEXCEPT
+INLINE constexpr auto ror_(auto a) NOEXCEPT
 {
     return std::rotr(a, B);
 }
 
 template<auto B>
-constexpr auto rol_(auto a) NOEXCEPT
+INLINE constexpr auto rol_(auto a) NOEXCEPT
 {
     return std::rotl(a, B);
 }
 
 template<auto B>
-constexpr auto add_(auto a) NOEXCEPT
+INLINE constexpr auto add_(auto a) NOEXCEPT
 {
     return a + B;
 }
 
-constexpr auto add_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto add_(auto a, auto b) NOEXCEPT
 {
     return a + b;
 }
 
-constexpr auto and_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto and_(auto a, auto b) NOEXCEPT
 {
     return a & b;
 }
 
-constexpr auto or_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto or_(auto a, auto b) NOEXCEPT
 {
     return a | b;
 }
 
-constexpr auto xor_(auto a, auto b) NOEXCEPT
+INLINE constexpr auto xor_(auto a, auto b) NOEXCEPT
 {
     return a ^ b;
 }
@@ -161,7 +161,7 @@ constexpr auto xor_(auto a, auto b) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 parity(auto x, auto y, auto z) NOEXCEPT
 {
     // FIPS.180
@@ -170,7 +170,7 @@ parity(auto x, auto y, auto z) NOEXCEPT
 }
 
 TEMPLATE
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 choice(auto x, auto y, auto z) NOEXCEPT
 {
     // FIPS.180
@@ -183,7 +183,7 @@ choice(auto x, auto y, auto z) NOEXCEPT
 }
 
 TEMPLATE
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 majority(auto x, auto y, auto z) NOEXCEPT
 {
     // FIPS.180
@@ -197,7 +197,7 @@ majority(auto x, auto y, auto z) NOEXCEPT
 
 TEMPLATE
 template <size_t A, size_t B, size_t C>
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 sigma(auto x) NOEXCEPT
 {
     // FIPS.180
@@ -208,7 +208,7 @@ sigma(auto x) NOEXCEPT
 
 TEMPLATE
 template <size_t A, size_t B, size_t C>
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 Sigma(auto x) NOEXCEPT
 {
     // FIPS.180
@@ -221,7 +221,7 @@ Sigma(auto x) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 Sigma0(auto x) NOEXCEPT
 {
     if constexpr (SHA::rounds == 80)
@@ -231,7 +231,7 @@ Sigma0(auto x) NOEXCEPT
 }
 
 TEMPLATE
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 Sigma1(auto x) NOEXCEPT
 {
     if constexpr (SHA::rounds == 80)
@@ -241,7 +241,7 @@ Sigma1(auto x) NOEXCEPT
 }
 
 TEMPLATE
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 sigma0(auto x) NOEXCEPT
 {
     if constexpr (SHA::rounds == 80)
@@ -251,7 +251,7 @@ sigma0(auto x) NOEXCEPT
 }
 
 TEMPLATE
-FORCE_INLINE constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 sigma1(auto x) NOEXCEPT
 {
     if constexpr (SHA::rounds == 80)
@@ -290,7 +290,7 @@ functor() NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::
+INLINE constexpr void CLASS::
 round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 {
     // FIPS.180
@@ -317,7 +317,7 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::
+INLINE constexpr void CLASS::
 round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto w) NOEXCEPT
 {
@@ -354,7 +354,7 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::
+INLINE constexpr void CLASS::
 round(auto& state, const auto& buffer) NOEXCEPT
 {
     // For block/buffer split, in[Round] becomes words[Round] for Round < 16,
@@ -518,7 +518,7 @@ rounding(state_t& state, const buffer_t& buffer) NOEXCEPT
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::
+INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
     // For block/buffer split, Word is shifted to start at zero but with

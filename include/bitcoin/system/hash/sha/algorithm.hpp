@@ -112,20 +112,20 @@ protected:
     /// -----------------------------------------------------------------------
 
     template <size_t A, size_t B, size_t C>
-    FORCE_INLINE static constexpr auto sigma(auto x) NOEXCEPT;
+    INLINE static constexpr auto sigma(auto x) NOEXCEPT;
     template <size_t A, size_t B, size_t C>
-    FORCE_INLINE static constexpr auto Sigma(auto x) NOEXCEPT;
-    FORCE_INLINE static constexpr auto parity(auto x, auto y, auto z) NOEXCEPT;
-    FORCE_INLINE static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
-    FORCE_INLINE static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto Sigma(auto x) NOEXCEPT;
+    INLINE static constexpr auto parity(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;
 
     /// Wrappers
     /// -----------------------------------------------------------------------
 
-    FORCE_INLINE static constexpr auto Sigma0(auto x) NOEXCEPT;
-    FORCE_INLINE static constexpr auto Sigma1(auto x) NOEXCEPT;
-    FORCE_INLINE static constexpr auto sigma0(auto x) NOEXCEPT;
-    FORCE_INLINE static constexpr auto sigma1(auto x) NOEXCEPT;
+    INLINE static constexpr auto Sigma0(auto x) NOEXCEPT;
+    INLINE static constexpr auto Sigma1(auto x) NOEXCEPT;
+    INLINE static constexpr auto sigma0(auto x) NOEXCEPT;
+    INLINE static constexpr auto sigma1(auto x) NOEXCEPT;
 
     /// Rounds
     /// -----------------------------------------------------------------------
@@ -134,19 +134,19 @@ protected:
     static CONSTEVAL auto functor() NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr void round(auto a, auto& b, auto c, auto d,
+    INLINE static constexpr void round(auto a, auto& b, auto c, auto d,
         auto& e, auto w) NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr void round(auto a, auto b, auto c, auto& d,
+    INLINE static constexpr void round(auto a, auto b, auto c, auto& d,
         auto e, auto f, auto g, auto& h, auto w) NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr void round(auto& state,
+    INLINE static constexpr void round(auto& state,
         const auto& buffer) NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
+    INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
 
     static constexpr void rounding(state_t& state, const buffer_t& buffer) NOEXCEPT;
     static constexpr void preparing(buffer_t& buffer) NOEXCEPT;
