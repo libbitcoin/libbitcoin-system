@@ -279,14 +279,14 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/hash.hpp \
     test/hash/hmac.cpp \
     test/hash/pbkd.cpp \
-    test/hash/rmd.cpp \
     test/hash/scrypt.cpp \
-    test/hash/sha.cpp \
     test/hash/siphash.cpp \
     test/hash/siphash.hpp \
     test/hash/rmd/algorithm.cpp \
+    test/hash/rmd/rmd.cpp \
     test/hash/sha/algorithm.cpp \
     test/hash/sha/merkle.cpp \
+    test/hash/sha/sha.cpp \
     test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/program.cpp \
