@@ -70,32 +70,33 @@ public:
     /// Finalized hash of arbitrary data (by reference).
     static inline void hash(digest_t& digest, const data_slice& data) NOEXCEPT;
     static inline void hash(byte_t* digest, const data_slice& data) NOEXCEPT;
-    static inline data_chunk& hash(data_chunk& digest, const data_slice& data) NOEXCEPT;
+    static inline data_chunk& hash(data_chunk& digest,
+        const data_slice& data) NOEXCEPT;
 
 protected:
     using block_t = typename Algorithm::block_t;
     using counter = data_array<Algorithm::count_bytes>;
 
     /// Position of next write in the buffer.
-    constexpr size_t next() const NOEXCEPT;
+    INLINE constexpr size_t next() const NOEXCEPT;
 
     /// Bytes remaining until buffer is full.
-    constexpr size_t gap() const NOEXCEPT;
+    INLINE constexpr size_t gap() const NOEXCEPT;
 
     /// Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
-    constexpr bool is_buffer_overflow(size_t bytes) const NOEXCEPT;
+    INLINE constexpr bool is_buffer_overflow(size_t bytes) const NOEXCEPT;
 
     /// Append up to block_size bytes to buffer.
-    constexpr size_t add_data(size_t bytes, const byte_t* data) NOEXCEPT;
+    INLINE constexpr size_t add_data(size_t bytes, const byte_t* data) NOEXCEPT;
 
     /// Increment the counter for unbuffered transforms.
-    constexpr void increment(size_t blocks) NOEXCEPT;
+    INLINE constexpr void increment(size_t blocks) NOEXCEPT;
 
     /// Compute pad size, reserves space for counter serialization.
-    constexpr size_t pad_size() const NOEXCEPT;
+    INLINE constexpr size_t pad_size() const NOEXCEPT;
 
     /// Serialize the hashed byte count for finalization
-    static RCONSTEXPR counter serialize(size_t bytes) NOEXCEPT;
+    INLINE static RCONSTEXPR counter serialize(size_t bytes) NOEXCEPT;
 
     /// Precomputed streaming pad buffer.
     static CONSTEVAL block_t stream_pad() NOEXCEPT;

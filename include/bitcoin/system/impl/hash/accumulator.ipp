@@ -43,21 +43,21 @@ BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr size_t CLASS::
+INLINE constexpr size_t CLASS::
 next() const NOEXCEPT
 {
     return size_ % block_size;
 }
 
 TEMPLATE
-constexpr size_t CLASS::
+INLINE constexpr size_t CLASS::
 gap() const NOEXCEPT
 {
     return block_size - next();
 }
 
 TEMPLATE
-constexpr bool CLASS::
+INLINE constexpr bool CLASS::
 is_buffer_overflow(size_t bytes) const NOEXCEPT
 {
     if constexpr (Checked)
@@ -77,7 +77,7 @@ is_buffer_overflow(size_t bytes) const NOEXCEPT
 }
 
 TEMPLATE
-constexpr size_t CLASS::
+INLINE constexpr size_t CLASS::
 add_data(size_t bytes, const byte_t* data) NOEXCEPT
 {
     // No bytes accepted on overflow (if checked) or uncleared buffer.
@@ -91,7 +91,7 @@ add_data(size_t bytes, const byte_t* data) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 increment(size_t blocks) NOEXCEPT
 {
     BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_size), "overflow");
@@ -103,7 +103,7 @@ increment(size_t blocks) NOEXCEPT
 }
 
 TEMPLATE
-constexpr size_t CLASS::
+INLINE constexpr size_t CLASS::
 pad_size() const NOEXCEPT
 {
     constexpr auto singled = block_size - count_size;
@@ -114,7 +114,7 @@ pad_size() const NOEXCEPT
 }
 
 TEMPLATE
-RCONSTEXPR typename CLASS::counter CLASS::
+INLINE RCONSTEXPR typename CLASS::counter CLASS::
 serialize(size_t bytes) NOEXCEPT
 {
     // block_t (64 bytes), counter_t (64 bits), words_t (32 bits), byte_t (8 bits).
