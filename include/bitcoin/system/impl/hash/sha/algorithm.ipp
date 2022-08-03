@@ -24,6 +24,11 @@
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+// Based on:
+// FIPS PUB 180-4 [Secure Hash Standard (SHS)].
+// All aspects of FIPS180 are supported within the implmentation.
+// nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+
 namespace libbitcoin {
 namespace system {
 namespace sha {
@@ -32,10 +37,6 @@ namespace sha {
 // TODO: vectorize (2/4/8/16 lanes).
 // TODO: implement 5.3.6 SHA-512/t initial vector derivation.
 // TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
-
-// Implementation based on FIPS PUB 180-4 [Secure Hash Standard (SHS)].
-// All aspects of FIPS180 are supported within the implmentation.
-// nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
 #define TEMPLATE template <typename SHA, bool Concurrent, \
     if_same<typename SHA::T, shah_t> If>

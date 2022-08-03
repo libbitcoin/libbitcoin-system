@@ -137,7 +137,6 @@ key(data_array<Size>& out, const data_slice& password,
         auto u = ps.flush();
         auto t = u;
 
-        // [Above flush does not reset the accumulator.]
         for (size_t c = 2; c <= count; ++c)
         {
             // rfc8018

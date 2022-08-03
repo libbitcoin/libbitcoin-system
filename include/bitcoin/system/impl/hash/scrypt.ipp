@@ -29,6 +29,11 @@
 #include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/math/math.hpp>
 
+// Based on:
+// tools.ietf.org/html/rfc7914
+// en.wikipedia.org/wiki/Scrypt  [Colin Percival]
+// en.wikipedia.org/wiki/Salsa20 [Daniel J. Bernstein]
+
 namespace libbitcoin {
 namespace system {
 

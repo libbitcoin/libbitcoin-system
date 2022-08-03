@@ -29,10 +29,6 @@
 namespace libbitcoin {
 namespace system {
 
-/// tools.ietf.org/html/rfc7914
-/// en.wikipedia.org/wiki/Scrypt  [Colin Percival]
-/// en.wikipedia.org/wiki/Salsa20 [Daniel J. Bernstein]
-
 /// Scrypt uses pkcs5-pbkdf2-hmac-sha256 key derivation.
 using scrypt_derivation = pbkd<sha256>;
 

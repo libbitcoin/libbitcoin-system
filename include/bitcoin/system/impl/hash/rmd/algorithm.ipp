@@ -26,13 +26,13 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/radix/radix.hpp>
 
+// Based on:
+// homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
+// [Dobbertin, Bosselaers, Preneel]
+
 namespace libbitcoin {
 namespace system {
 namespace rmd {
-
-// Implementation based on:
-// All aspects of RIPEMD are supported within the implmentation.
-// homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
 
 #define TEMPLATE template <typename RMD, bool Concurrent, \
     if_same<typename RMD::T, rmdh_t> If>
