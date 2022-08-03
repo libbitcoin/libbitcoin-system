@@ -21,11 +21,36 @@
 
 #include <functional>
 #include <iterator>
+#include <utility>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+// Sequence generation.
+// ----------------------------------------------------------------------------
+
+// Suppress bogus warnings to use constexpr when function is consteval.
+BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
+
+// Helper to extract Index parameter pack from std::make_index_sequence<Size>.
+template<typename Integer, size_t Size, size_t... Index>
+CONSTEVAL auto to_array(std::index_sequence<Index...>) NOEXCEPT
+{
+    return std_array<Integer, Size>{ { Index... } };
+}
+
+template<typename Integer, size_t Size>
+CONSTEVAL std_array<Integer, Size> to_sequence() NOEXCEPT
+{
+    return to_array<Integer, Size>(std::make_index_sequence<Size>{});
+}
+
+BC_POP_WARNING()
+
+// Array casting helpers.
+// ----------------------------------------------------------------------------
     
 template <typename To, typename From>
 constexpr bool is_portional(size_t to_count, size_t from_count) NOEXCEPT

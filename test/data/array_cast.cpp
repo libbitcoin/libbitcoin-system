@@ -20,10 +20,18 @@
 
 BOOST_AUTO_TEST_SUITE(array_cast_tests)
 
-// utilities
-
 template <typename>
 constexpr bool is_defined = true;
+
+// sequence
+static_assert(sequence<uint32_t, 42>[41] == 41_u32);
+static_assert(sequence<uint32_t, 42>[0] == 0_u32);
+static_assert(is_same_type<decltype(sequence<uint32_t, 42>), const std_array<uint32_t, 42>>);
+
+// to_sequence
+static_assert(to_sequence<uint32_t, 42>()[0] == 0_u32);
+static_assert(to_sequence<uint32_t, 42>()[41] == 41_u32);
+static_assert(is_same_type<decltype(to_sequence<uint32_t, 42>()), std_array<uint32_t, 42>>);
 
 // is_proportional<Left, Right>(left_count)
 // ----------------------------------------------------------------------------
