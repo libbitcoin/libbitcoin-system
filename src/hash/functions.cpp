@@ -157,7 +157,6 @@ data_chunk ripemd128_chunk(const data_slice& data) NOEXCEPT
 
 short_hash ripemd160_hash(const data_slice& data) NOEXCEPT
 {
-    short_hash hash{};
     return accumulator<rmd160>::hash(data);
 }
 
