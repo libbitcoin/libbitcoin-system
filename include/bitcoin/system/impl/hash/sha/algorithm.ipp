@@ -772,7 +772,7 @@ pad_half(buffer_t& buffer) NOEXCEPT
     else
     {
         constexpr auto size = array_count<chunk_t>;
-        unsafe_array_cast<word_t, size>(&buffer[size]) = pad;
+        narrow_array_cast<word_t, size, size>(buffer) = pad;
     }
 }
 
@@ -820,7 +820,7 @@ pad_state(buffer_t& buffer) NOEXCEPT
     else
     {
         constexpr auto size = SHA::block_words - SHA::state_words;
-        unsafe_array_cast<word_t, size>(&buffer[SHA::state_words]) = pad;
+        narrow_array_cast<word_t, size, SHA::state_words>(buffer) = pad;
     }
 }
 
@@ -966,7 +966,7 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
     else
     {
         constexpr auto size = SHA::state_words;
-        auto& to = unsafe_array_cast<word_t, size>(&buffer[size]);
+        auto& to = narrow_array_cast<word_t, size, size>(buffer);
         from_big_endians(to, array_cast<word_t>(half));
     }
 }

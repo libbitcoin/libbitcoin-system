@@ -73,25 +73,30 @@ array_cast(std_array<From, Count>&& values) NOEXCEPT
 // Cast array(T1) to not-greater-sized array(T2).
 // ----------------------------------------------------------------------------
 
-template <typename To, size_t ToCount, typename From, size_t FromCount,
-    if_portional<ToCount, To, FromCount, From>>
+template <typename To, size_t ToCount, size_t FromOffset, typename From,
+    size_t FromCount,
+    if_lesser<FromOffset, FromCount>,
+    if_portional<ToCount, To, FromCount - FromOffset, From>>
 inline std_array<To, ToCount>&
 narrow_array_cast(std_array<From, FromCount>& values) NOEXCEPT
 {
     using to = std_array<To, ToCount>;
-    return *pointer_cast<to>(values.data());
+    return *pointer_cast<to>(std::next(values.data(), FromOffset));
 }
 
-template <typename To, size_t ToCount, typename From, size_t FromCount,
-    if_portional<ToCount, To, FromCount, From>>
+template <typename To, size_t ToCount, size_t FromOffset, typename From,
+    size_t FromCount,
+    if_lesser<FromOffset, FromCount>,
+    if_portional<ToCount, To, FromCount - FromOffset, From>>
 inline const std_array<To, ToCount>&
 narrow_array_cast(const std_array<From, FromCount>& values) NOEXCEPT
 {
     using to = std_array<To, ToCount>;
-    return *pointer_cast<const to>(values.data());
+    return *pointer_cast<const to>(std::next(values.data(), FromOffset));
 }
 
 // Avoids cast of rvalue to reference, which would dangle.
+// Cannot offset into move assignment as the whole instance must be moved.
 template <typename To, size_t ToCount, typename From, size_t FromCount,
     if_portional<ToCount, To, FromCount, From>>
 inline std_array<To, ToCount>

@@ -259,11 +259,7 @@ inline void bigend08(digest& out, const state& in) NOEXCEPT
 
 inline void padding8(buffer& out) NOEXCEPT
 {
-    // TODO: safe offsetting array cast.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    auto& to = unsafe_array_cast<uint32_t, state_size>(&out[state_size]);
-    BC_POP_WARNING()
-
+    auto& to = narrow_array_cast<uint32_t, state_size, state_size>(out);
     to = pad32;
 }
 

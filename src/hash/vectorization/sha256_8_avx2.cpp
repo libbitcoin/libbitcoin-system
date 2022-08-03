@@ -142,14 +142,14 @@ mint256_t inline read8(const block8& blocks) NOEXCEPT
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     const auto value = set(
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[0][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[1][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[2][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[3][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[4][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[5][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[6][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[7][Offset])));
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[0])),
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[1])),
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[2])),
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[3])),
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[4])),
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[5])),
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[6])),
+        from_little_endian(narrow_array_cast<uint8_t, four, Offset>(blocks[7])));
     BC_POP_WARNING()
 
     return shuffle(value, set(
@@ -166,14 +166,14 @@ void inline write8(digest8& hashes, mint256_t value) NOEXCEPT
 
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    unsafe_array_cast<uint8_t, four>(&hashes[0][Offset]) = to_little_endian(get<7>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[1][Offset]) = to_little_endian(get<6>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[2][Offset]) = to_little_endian(get<5>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[3][Offset]) = to_little_endian(get<4>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[4][Offset]) = to_little_endian(get<3>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[5][Offset]) = to_little_endian(get<2>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[6][Offset]) = to_little_endian(get<1>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[7][Offset]) = to_little_endian(get<0>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[0]) = to_little_endian(get<7>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[1]) = to_little_endian(get<6>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[2]) = to_little_endian(get<5>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[3]) = to_little_endian(get<4>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[4]) = to_little_endian(get<3>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[5]) = to_little_endian(get<2>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[6]) = to_little_endian(get<1>(value));
+    narrow_array_cast<uint8_t, four, Offset>(hashes[7]) = to_little_endian(get<0>(value));
     BC_POP_WARNING()
 }
 

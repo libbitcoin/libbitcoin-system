@@ -463,7 +463,7 @@ pad_half(words_t& words) NOEXCEPT
     else
     {
         constexpr auto size = array_count<chunk_t>;
-        unsafe_array_cast<word_t, size>(&words[size]) = pad;
+        narrow_array_cast<word_t, size, size>(words) = pad;
     }
 }
 

@@ -277,12 +277,7 @@ BOOST_AUTO_TEST_CASE(cast__array_cast__non_const__expected)
     BOOST_REQUIRE_EQUAL(value16x1[0], native_to_little_end(0x2442_u16));
 }
 
-// array_cast (array to array<array, 1>)
-// ----------------------------------------------------------------------------
-
-// TODO
-
-// narrow_array_cast
+// narrow_array_cast (array<integral> to array<integral, size>)
 // ----------------------------------------------------------------------------
 
 using array16x5 = std::array<uint16_t, 5>;
@@ -343,6 +338,15 @@ BOOST_AUTO_TEST_CASE(cast__narrow_array_cast__non_const__expected)
     value8x1[0] = 0x42_u8;
     BOOST_REQUIRE_EQUAL(data8x2[0], 0x42_u8);
 }
+
+// narrow_array_cast (array<integral> to array<integral, size,  offset>)
+// ----------------------------------------------------------------------------
+
+// narrow_array_cast (array<array>    to array<integral, size, [offset]>)
+// ----------------------------------------------------------------------------
+
+// narrow_array_cast (array<integral> to array<array,    size, [offset]>)
+// ----------------------------------------------------------------------------
 
 // unsafe_array_cast (array of integrals)
 // ----------------------------------------------------------------------------
