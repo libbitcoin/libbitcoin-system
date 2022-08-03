@@ -98,10 +98,12 @@ BOOST_AUTO_TEST_CASE(functions__hmac_sha512__test_vectors__expected)
     for (const auto& test: hmac_sha512_tests)
     {
         const auto hash = hmac<sha512>::code(test.data, test.key);
-
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
+
+// 8 seconds of test here.
+#if defined(HAVE_SLOW_TESTS)
 
 // pbkd
 // ----------------------------------------------------------------------------
@@ -133,6 +135,8 @@ BOOST_AUTO_TEST_CASE(functions__pbkd_sha512__test_vectors__expected)
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
+
+#endif // HAVE_SLOW_TESTS
 
 // scrypt_hash (litecoin)
 // ----------------------------------------------------------------------------
@@ -213,7 +217,9 @@ BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_1__expected)
     BOOST_REQUIRE_EQUAL(hash, expected);
 }
 
+// 6 seconds of test here.
 #if defined(HAVE_SLOW_TESTS)
+
 BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_2__expected)
 {
     using test = scrypt<1024, 8, 16, true>;
@@ -240,7 +246,8 @@ BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_4__expected)
     const auto hash = test::hash<size>("pleaseletmein", "SodiumChloride");
     BOOST_REQUIRE_EQUAL(hash, expected);
 }
-#endif
+
+#endif // HAVE_SLOW_TESTS
 
 // djb2
 // ----------------------------------------------------------------------------
