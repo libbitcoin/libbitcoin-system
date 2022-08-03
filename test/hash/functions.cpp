@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(functions_tests)
 
-// TODO: test all hash utility functions.
+// TODO: test all hash wrapper functions.
 
 BOOST_AUTO_TEST_CASE(functions__djb2_hash__ad_hoc__0xe1669c01)
 {

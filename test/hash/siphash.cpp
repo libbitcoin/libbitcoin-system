@@ -22,10 +22,9 @@
 #include "../test.hpp"
 #include "siphash.hpp"
 
-BOOST_AUTO_TEST_SUITE(siphash_tests)
+// This is a lot of tests, not suprisingly very fast execution.
 
-// 6 seconds of test here.
-#if !defined(HAVE_SLOW_TESTS)
+BOOST_AUTO_TEST_SUITE(siphash_tests)
 
 BOOST_AUTO_TEST_CASE(siphash__hash__test_key__expected)
 {
@@ -74,7 +73,5 @@ BOOST_AUTO_TEST_CASE(siphash__key__vectors__expected)
         BOOST_REQUIRE_EQUAL(siphash(key, data), expected);
     }
 }
-
-#endif // HAVE_SLOW_TESTS
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(encrypted_tests)
 using namespace bc::system::wallet;
 
 // 4 seconds of test here.
-#if !defined(HAVE_SLOW_TESTS)
+#if defined(HAVE_SLOW_TESTS)
 
 #if defined(HAVE_ICU)
 

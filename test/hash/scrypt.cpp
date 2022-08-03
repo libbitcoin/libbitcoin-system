@@ -21,15 +21,6 @@
 
 BOOST_AUTO_TEST_SUITE(scrypt_tests)
 
-BOOST_AUTO_TEST_CASE(scrypt__scrypt_hash__test_vectors__expected)
-{
-    for (const auto& test: scrypt_hash_tests)
-    {
-        const auto hash = scrypt_hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
-}
-
 template<size_t W, size_t R, size_t P, bool C>
 class scrypt_accessor
   : public scrypt<W, R, P, C>
@@ -94,8 +85,8 @@ BOOST_AUTO_TEST_CASE(scrypt__rfc7914__hash_1__expected)
     BOOST_REQUIRE_EQUAL(hash, expected);
 }
 
-// 6 seconds of test here.
-#if !defined(HAVE_SLOW_TESTS)
+// 6+ seconds of test here.
+#if defined(HAVE_SLOW_TESTS)
 
 BOOST_AUTO_TEST_CASE(scrypt__rfc7914__hash_2__expected)
 {
@@ -122,6 +113,15 @@ BOOST_AUTO_TEST_CASE(scrypt__rfc7914__hash_4__expected)
     constexpr auto size = size_of<decltype(expected)>();
     const auto hash = test::hash<size>("pleaseletmein", "SodiumChloride");
     BOOST_REQUIRE_EQUAL(hash, expected);
+}
+
+BOOST_AUTO_TEST_CASE(scrypt__scrypt_hash__test_vectors__expected)
+{
+    for (const auto& test: scrypt_hash_tests)
+    {
+        const auto hash = scrypt_hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
 }
 
 #endif // HAVE_SLOW_TESTS

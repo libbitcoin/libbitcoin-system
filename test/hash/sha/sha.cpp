@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
-#include "hash.hpp"
+#include "../../test.hpp"
+#include "../hash.hpp"
 
 BOOST_AUTO_TEST_SUITE(sha_tests)
 

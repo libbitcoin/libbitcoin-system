@@ -21,8 +21,28 @@
 
 BOOST_AUTO_TEST_SUITE(pbkd_tests)
 
-// 8 seconds of test here.
-#if !defined(HAVE_SLOW_TESTS)
+// 8+ seconds of test here.
+#if defined(HAVE_SLOW_TESTS)
+
+BOOST_AUTO_TEST_CASE(pbkd__rmd128__test_vectors__expected)
+{
+    // No test vectors, just exercising.
+    for (const auto& test: pbkd_sha160_tests)
+    {
+        const auto hash = pbkd<rmd128>::key<short_hash_size>(test.passphrase, test.salt, test.count);
+        BOOST_REQUIRE_NE(hash, test.expected);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(pbkd__rmd160__test_vectors__expected)
+{
+    // No test vectors, just exercising.
+    for (const auto& test: pbkd_sha160_tests)
+    {
+        const auto hash = pbkd<rmd160>::key<short_hash_size>(test.passphrase, test.salt, test.count);
+        BOOST_REQUIRE_NE(hash, test.expected);
+    }
+}
 
 BOOST_AUTO_TEST_CASE(pbkd__sha160__test_vectors__expected)
 {
