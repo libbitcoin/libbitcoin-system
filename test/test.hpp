@@ -104,7 +104,7 @@ template <typename Time = std::chrono::milliseconds,
 class timer
 {
 public:
-    ///Returns the duration (in chrono's type system) of the elapsed time.
+    /// Returns the duration (in chrono's type system) of the elapsed time.
     template <typename Function, typename ...Args>
     static Time duration(const Function& func, Args&&... args) noexcept
     {
@@ -113,7 +113,7 @@ public:
         return std::chrono::duration_cast<Time>(Clock::now() - start);
     }
 
-    ///Returns the quantity (count) of the elapsed time as TimeT units.
+    /// Returns the quantity (count) of the elapsed time as TimeT units.
     template <typename Function, typename ...Args>
     static typename Time::rep execution(const Function& func,
         Args&&... args) noexcept
