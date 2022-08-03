@@ -122,10 +122,12 @@ namespace bc = libbitcoin;
 
 /// A stronger compiler hint for inlining.
 /// May use prior to 'constexpr' or in place of 'inline'.
+/// Do not use in conjunction with with XCONSTEXPR macros, as this will result
+/// in a double inline specification in the case of XCONSTEXPR default.
 #if defined(HAVE_MSC)
     #define INLINE __forceinline
-#elif defined(HAVE_GNUC)
-    #define INLINE __attribute__((always_inline))
+#elif defined(HAVE_GNUC) || defined(HAVE_CLANG)
+    #define INLINE __attribute__((always_inline)) inline
 #else
     #define INLINE inline
 #endif
