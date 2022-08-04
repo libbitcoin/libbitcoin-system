@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_DICTIONARIES_HPP
 #define LIBBITCOIN_SYSTEM_TEST_DICTIONARIES_HPP
 
-/// DELETECSTDDEF
 #include <bitcoin/system.hpp>
 
  // Avoid using namespace in shared headers, but okay here.
