@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../test.hpp"
-
 #ifndef LIBBITCOIN_SYSTEM_TEST_HASH_HASH_HPP
 #define LIBBITCOIN_SYSTEM_TEST_HASH_HASH_HPP
+
+#include "../test.hpp"
 
 // rmd
 // ============================================================================
