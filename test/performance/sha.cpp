@@ -21,66 +21,80 @@
 
 #if defined(HAVE_PERFORMANCE_TESTS)
 
-BOOST_AUTO_TEST_SUITE(performance_sha)
+// TODO: parallelize buffer creation and preparation for dependent sha blocks
+// TODO: in sha::algorithm::hash(set). Use Concurrent template arg to
+// TODO: isolate for testing here (conditioned on HAVE_EXECUTION).
 
-using precision = std::chrono::nanoseconds;
-using timer = perf::timer<precision, std::chrono::steady_clock>;
-constexpr auto rounds = 1'000'000_u64;
+BOOST_AUTO_TEST_SUITE(performance_sha_tests)
 
-template <typename P>
-auto total(uint64_t time) noexcept
+BOOST_AUTO_TEST_CASE(performance__sha256)
 {
-    return (1.0f * time) / P::period::den;
-}
+    // test____________: performance__sha256__one_block_array__baseline
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,0,1>
+    // k_rounds________: 500
+    // bytes_per_round_: 1024
+    // concurrent______: 0
+    // vectorized______: 0
+    // intrinsic_______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.24749
+    // ms_per_round____: 0.00649497
+    // ms_per_byte_____: 6.34275e-06
 
-template <typename P>
-auto round(uint64_t time, uint64_t rounds) noexcept
-{
-    return total<P>(time) / rounds;
-}
+    // test____________: performance__sha256__one_block_array__baseline
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,0,1>
+    // k_rounds________: 500
+    // bytes_per_round_: 1024
+    // concurrent______: 0
+    // vectorized______: 0
+    // intrinsic_______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.19064
+    // ms_per_round____: 0.00638128
+    // ms_per_byte_____: 6.23172e-06
 
-template <typename P>
-auto datum(uint64_t time, uint64_t rounds, size_t size) noexcept
-{
-    return round<P>(time, rounds) / size;
-}
+    // test____________: performance__sha256__one_block_array__baseline
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,0,1>
+    // k_rounds________: 500
+    // bytes_per_round_: 1024
+    // concurrent______: 0
+    // vectorized______: 0
+    // intrinsic_______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.1829
+    // ms_per_round____: 0.00636579
+    // ms_per_byte_____: 6.21659e-06
 
-template <typename P>
-void console(std::ostream& out, uint64_t time, size_t size, uint64_t rounds) noexcept
-{
-    std::cout << std::endl
-        << TEST_NAME << std::endl
-        << "   total (sec) : " << serialize(total<P>(time)) << std::endl
-        << "   round (sec) : " << serialize(round<P>(time, rounds)) << std::endl
-        << "   byte  (sec) : " << serialize(datum<P>(time, rounds, size)) << std::endl;
-}
+    // optimize array of nblocks (-.05 .. -.10 sec)
 
-BOOST_AUTO_TEST_CASE(performance__bitcoin_hash__one_block__baseline)
-{
-    uint64_t time{};
-    constexpr auto size = 64_size;
+    // test____________: performance__sha256__one_block_array__baseline
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,0,1>
+    // k_rounds________: 500
+    // bytes_per_round_: 1024
+    // concurrent______: 0
+    // vectorized______: 0
+    // intrinsic_______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.14241
+    // ms_per_round____: 0.00628481
+    // ms_per_byte_____: 6.13751e-06
 
-    for (uint64_t seed = 0; seed < rounds; ++seed)
-    {
-        const auto chunk = perf::get_chunk<size>(seed);
-        time += timer::execution(&bitcoin_hash<size>, chunk);
-    }
+    // .24 sec increase for partial block (double buffering).
 
-    console<precision>(std::cout, time, size, rounds);
-}
+    // test____________: performance__sha256__one_block_array__baseline
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,0,1>
+    // k_rounds________: 500
+    // bytes_per_round_: 1023
+    // concurrent______: 0
+    // vectorized______: 0
+    // intrinsic_______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.38437
+    // ms_per_round____: 0.00676875
+    // ms_per_byte_____: 6.61657e-06
 
-BOOST_AUTO_TEST_CASE(performance__bitcoin_hash__half_block__baseline)
-{
-    uint64_t time{};
-    constexpr auto size = 32_size;
-
-    for (uint64_t seed = 0; seed < rounds; ++seed)
-    {
-        const auto chunk = perf::get_chunk<size>(seed);
-        time += timer::execution(&bitcoin_hash<size>, chunk);
-    }
-
-    console<precision>(std::cout, time, size, rounds);
+    const auto complete = perf::hash<256, 1024>(std::cout);
+    BOOST_CHECK(complete);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -23,22 +23,104 @@
 #include <chrono>
 
 namespace perf {
+    
+// format timing results to ostream
+// ----------------------------------------------------------------------------
 
-template <size_t Size>
-constexpr data_array<Size> get_array(uint64_t seed) noexcept
+// millirounds
+template <size_t Count>
+constexpr auto scale = (1.0f * Count) / std::milli::den;
+
+// seconds
+template <typename Precision>
+constexpr auto total(uint64_t time) noexcept
 {
-    // specified-size array.
-    return to_big_endian_size<Size>(seed);
+    // Divide precision by seconds/precision => seconds.
+    return (1.0f * time) / Precision::period::den;
 }
 
-template <size_t Size>
-constexpr data_chunk get_chunk(uint64_t seed) noexcept
+// milliseconds
+template <typename Precision>
+constexpr auto round(uint64_t time, uint64_t rounds) noexcept
 {
-    // minimally-sized chunk.
-    const auto chunk = to_big_endian_size(seed);
-    chunk.resize(Size);
-    return chunk;
+    return (total<Precision>(time) / rounds) * std::milli::den;
 }
+
+// milliseconds
+template <typename Precision>
+constexpr auto datum(uint64_t time, uint64_t rounds, size_t size) noexcept
+{
+    return round<Precision>(time, rounds) / size;
+}
+
+// Output performance run to given stream.
+template
+<
+    typename Algorithm,
+    typename Precision,
+    size_t Size,
+    size_t Count,
+    bool Concurrent,
+    bool Vectorized,
+    bool Intrinsic,
+    bool Chunked
+>
+void output(std::ostream& out, uint64_t time, bool csv) noexcept
+{
+    const auto delimiter = csv ? "," : "\n";
+    std::string algorithm{ typeid(Algorithm).name() };
+    replace(algorithm, "libbitcoin::system::", "");
+    replace(algorithm, "class ", "");
+    replace(algorithm, "struct ", "");
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    out << "test____________: " << TEST_NAME
+        << delimiter
+        << "algorithm_______: " << algorithm
+        << delimiter
+        << "k_rounds________: " << serialize(scale<Count>)
+        << delimiter
+        << "bytes_per_round_: " << serialize(Size)
+        << delimiter
+        << "concurrent______: " << serialize(Concurrent)
+        << delimiter
+        << "vectorized______: " << serialize(Vectorized)
+        << delimiter
+        << "intrinsic_______: " << serialize(Intrinsic)
+        << delimiter
+        << "chunked_________: " << serialize(Chunked)
+        << delimiter
+        << "seconds_total___: " << serialize(total<Precision>(time))
+        << delimiter
+        << "ms_per_round____: " << serialize(round<Precision>(time, Count))
+        << delimiter
+        << "ms_per_byte_____: " << serialize(datum<Precision>(time, Count, Size))
+        << delimiter;
+    BC_POP_WARNING()
+}
+
+// generate deterministic data from seed
+// ----------------------------------------------------------------------------
+
+template <size_t Size, bool Chunk = false>
+constexpr auto get_data(uint64_t seed) noexcept
+{
+    if constexpr (Chunk)
+    {
+        // minimally-sized chunk.
+        auto chunk = to_big_endian_size(seed);
+        chunk.resize(Size);
+        return chunk;
+    }
+    else
+    {
+        // specified-size array.
+        return to_big_endian_size<Size>(seed);
+    }
+}
+
+// timer utility
+// ----------------------------------------------------------------------------
 
 template <typename Time = std::chrono::milliseconds,
     class Clock = std::chrono::system_clock>
@@ -50,6 +132,7 @@ public:
     static Time duration(const Function& func, Args&&... args) noexcept
     {
         const auto start = Clock::now();
+        
         func(std::forward<Args>(args)...);
         return std::chrono::duration_cast<Time>(Clock::now() - start);
     }
@@ -63,49 +146,97 @@ public:
     }
 };
 
-constexpr auto block_100k = base16_array(
-    "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
-    "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
-    "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"
-    "00000000000000000000000000000000000000000000ffffffff07049d8e2f1b"
-    "0114ffffffff0100f2052a0100000043410437b36a7221bc977dce712728a954"
-    "e3b5d88643ed5aef46660ddcfeeec132724cd950c1fdd008ad4a2dfd354d6af0"
-    "ff155fc17c1ee9ef802062feb07ef1d065f0ac000000000100000001260fd102"
-    "fab456d6b169f6af4595965c03c2296ecf25bfd8790e7aa29b404eff01000000"
-    "8c493046022100c56ad717e07229eb93ecef2a32a42ad041832ffe66bd2e1485"
-    "dc6758073e40af022100e4ba0559a4cebbc7ccb5d14d1312634664bac46f36dd"
-    "d35761edaae20cefb16f01410417e418ba79380f462a60d8dd12dcef8ebfd7ab"
-    "1741c5c907525a69a8743465f063c1d9182eea27746aeb9f1f52583040b1bc34"
-    "1b31ca0388139f2f323fd59f8effffffff0200ffb2081d0000001976a914fc7b"
-    "44566256621affb1541cc9d59f08336d276b88ac80f0fa02000000001976a914"
-    "617f0609c9fabb545105f7898f36b84ec583350d88ac00000000010000000122"
-    "cd6da26eef232381b1a670aa08f4513e9f91a9fd129d912081a3dd138cb01301"
-    "0000008c4930460221009339c11b83f234b6c03ebbc4729c2633cbc8cbd0d157"
-    "74594bfedc45c4f99e2f022100ae0135094a7d651801539df110a028d65459d2"
-    "4bc752d7512bc8a9f78b4ab368014104a2e06c38dc72c4414564f190478e3b0d"
-    "01260f09b8520b196c2f6ec3d06239861e49507f09b7568189efe8d327c3384a"
-    "4e488f8c534484835f8020b3669e5aebffffffff0200ac23fc060000001976a9"
-    "14b9a2c9700ff9519516b21af338d28d53ddf5349388ac00743ba40b00000019"
-    "76a914eb675c349c474bec8dea2d79d12cff6f330ab48788ac00000000");
+// hash selector
+// ----------------------------------------------------------------------------
 
-constexpr auto transaction_2 = base16_array(
-    "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
-    "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
-    "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
-    "9901a34c40f1127e96adc31fac6ae6b11fb4012103893d5a06201d5cf61400e9"
-    "6fa4a7514fc12ab45166ace618d68b8066c9c585f9ffffffff54b755c39207d4"
-    "43fd96a8d12c94446a1c6f66e39c95e894c23418d7501f681b010000006b4830"
-    "4502203267910f55f2297360198fff57a3631be850965344370f732950b47795"
-    "737875022100f7da90b82d24e6e957264b17d3e5042bab8946ee5fc676d15d91"
-    "5da450151d36012103893d5a06201d5cf61400e96fa4a7514fc12ab45166ace6"
-    "18d68b8066c9c585f9ffffffff0aa14d394a1f0eaf0c4496537f8ab9246d9663"
-    "e26acb5f308fccc734b748cc9c010000006c493046022100d64ace8ec2d5feeb"
-    "3e868e82b894202db8cb683c414d806b343d02b7ac679de7022100a2dcd39940"
-    "dd28d4e22cce417a0829c1b516c471a3d64d11f2c5d754108bdc0b012103893d"
-    "5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9ffff"
-    "ffff02c0e1e400000000001976a914884c09d7e1f6420976c40e040c30b2b622"
-    "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
-    "e61e66fe5d88ac00000000");
+template <size_t Strength, bool Concurrent = true>
+using rmd_algorithm = rmd::algorithm<
+    iif<Strength == 160, rmd::h160<>, rmd::h128<>>, Concurrent>;
+
+static_assert(is_same_type<rmd_algorithm<128, true>, rmd128>);
+static_assert(is_same_type<rmd_algorithm<160, true>, rmd160>);
+
+template <size_t Strength, bool Concurrent = true>
+using sha_algorithm = sha::algorithm<
+    iif<Strength == 256, sha::h256<>,
+    iif<Strength == 512, sha::h512<>, sha::h160>>, Concurrent>;
+
+static_assert(is_same_type<sha_algorithm<160, true>, sha160>);
+static_assert(is_same_type<sha_algorithm<256, true>, sha256>);
+static_assert(is_same_type<sha_algorithm<512, true>, sha512>);
+
+template <size_t Strength, bool Concurrent, bool Ripemd,
+    bool_if<
+       (!Ripemd && (Strength == 160 || Strength == 256 || Strength == 512)) ||
+        (Ripemd && (Strength == 128 || Strength == 160))> = true>
+using hash_selector = iif<Ripemd,
+    rmd_algorithm<Strength, Concurrent>,
+    sha_algorithm<Strength, Concurrent>>;
+
+static_assert(is_same_type<hash_selector<128, true, true>, rmd128>);
+static_assert(is_same_type<hash_selector<160, true, true>, rmd160>);
+static_assert(is_same_type<hash_selector<160, true, false>, sha160>);
+static_assert(is_same_type<hash_selector<256, true, false>, sha256>);
+static_assert(is_same_type<hash_selector<512, true, false>, sha512>);
+
+static_assert(hash_selector<128, true, true>::concurrent);
+static_assert(hash_selector<160, true, true>::concurrent);
+static_assert(hash_selector<160, true, false>::concurrent);
+static_assert(hash_selector<256, true, false>::concurrent);
+static_assert(hash_selector<512, true, false>::concurrent);
+
+static_assert(!hash_selector<128, false, true>::concurrent);
+static_assert(!hash_selector<160, false, true>::concurrent);
+static_assert(!hash_selector<160, false, false>::concurrent);
+static_assert(!hash_selector<256, false, false>::concurrent);
+static_assert(!hash_selector<512, false, false>::concurrent);
+
+// Algorithm::hash() test runner.
+// ----------------------------------------------------------------------------
+
+// hash_digest/hash_chunk overloads are not exposed, only check and array.
+// There is no material performance difference between slice and chunk. The
+// meaningful performance distinction is between array and non-array, since
+// array size is resolved at compile time, allowing for various optimizations.
+template<
+    size_t Strength,          // algorithm strength (160/256/512|128/160).
+    size_t Size = zero,       // 0 = full block, 1 = half, otherwise bytes.
+    size_t Count = 500'000,   // test iterations.
+    bool Concurrent = false,  // algorithm concurrency.
+    bool Vectorized = false,  // algorithm vectorization.
+    bool Intrinsic = false,   // intrinsic sha (N/A for rmd).
+    bool Chunked = false,     // false for array data.
+    bool Ripemd = false>      // false for sha algorithm.
+bool hash(std::ostream& out, bool csv = false) noexcept
+{
+    using Clock = std::chrono::steady_clock;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = perf::timer<Precision, Clock>;
+    using Algorithm = perf::hash_selector<Strength, Concurrent, Ripemd>;
+    constexpr auto block_size = array_count<typename Algorithm::block_t>;
+    constexpr auto size = is_zero(Size) ? block_size :
+        is_zero(sub1(Size)) ? to_half(block_size) : Size;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        // Generate a data_chunk or a data_array of specified size.
+        // Each is unique (sequential) to preclude compiler optimization.
+        const auto data = perf::get_data<size, Chunked>(seed);
+
+        time += Timer::execution([&]() noexcept
+        {
+            accumulator<Algorithm>::hash(data);
+        });
+    }
+
+    // Dumping output also precludes compiler removal.
+    perf::output<Algorithm, Precision, size, Count, Concurrent,
+        Vectorized, Intrinsic, Chunked>(out, time, csv);
+
+    // Return value, check to preclude compiler removal if output is bypassed.
+    return true;
+}
 
 } // namespace perf
 
