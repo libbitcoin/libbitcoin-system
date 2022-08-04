@@ -30,6 +30,7 @@
 
 /// Have slow test execution (scrypt is slow by design).
 ////#define HAVE_SLOW_TESTS
+#define HAVE_PERFORMANCE_TESTS
 
 #define TEST_NAME \
     boost::unit_test::framework::current_test_case().p_name.get()
@@ -98,29 +99,6 @@ bool clear(const std::filesystem::path& directory) NOEXCEPT;
 bool create(const std::filesystem::path& file_path) NOEXCEPT;
 bool exists(const std::filesystem::path& file_path) NOEXCEPT;
 bool remove(const std::filesystem::path& file_path) NOEXCEPT;
-
-template <typename Time = std::chrono::milliseconds,
-    class Clock = std::chrono::system_clock>
-class timer
-{
-public:
-    /// Returns the duration (in chrono's type system) of the elapsed time.
-    template <typename Function, typename ...Args>
-    static Time duration(const Function& func, Args&&... args) noexcept
-    {
-        auto start = Clock::now();
-        func(std::forward<Args>(args)...);
-        return std::chrono::duration_cast<Time>(Clock::now() - start);
-    }
-
-    /// Returns the quantity (count) of the elapsed time as TimeT units.
-    template <typename Function, typename ...Args>
-    static typename Time::rep execution(const Function& func,
-        Args&&... args) noexcept
-    {
-        return duration(func, std::forward<Args>(args)...).count();
-    }
-};
 
 } // namespace test
 
