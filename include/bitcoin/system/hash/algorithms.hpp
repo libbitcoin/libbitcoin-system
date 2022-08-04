@@ -33,13 +33,13 @@ using rmd160     = rmd::algorithm<rmd::h160<>,    true>;
 using rmd160_320 = rmd::algorithm<rmd::h160<320>, true>; // not fully implemented
 
 /// bc::system sha algorithm aliases.
-using sha160     = sha::algorithm<sha::h160>;
-using sha256_224 = sha::algorithm<sha::h256<224>>; // not fully implemented
-using sha256     = sha::algorithm<sha::h256<>>;
-using sha512_256 = sha::algorithm<sha::h512<256>>; // not fully implemented
-using sha512_224 = sha::algorithm<sha::h512<224>>; // not fully implemented
-using sha512_384 = sha::algorithm<sha::h512<384>>; // not fully implemented
-using sha512     = sha::algorithm<sha::h512<>>;
+using sha160     = sha::algorithm<sha::h160,      true>;
+using sha256_224 = sha::algorithm<sha::h256<224>, true>; // not fully implemented
+using sha256     = sha::algorithm<sha::h256<>,    true>;
+using sha512_256 = sha::algorithm<sha::h512<256>, true>; // not fully implemented
+using sha512_224 = sha::algorithm<sha::h512<224>, true>; // not fully implemented
+using sha512_384 = sha::algorithm<sha::h512<384>, true>; // not fully implemented
+using sha512     = sha::algorithm<sha::h512<>,    true>;
 
 } // namespace system
 } // namespace libbitcoin

@@ -77,6 +77,7 @@ public:
     /// Limits incorporate requirement to encode counter in final block.
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
+    static constexpr auto concurrent    = Concurrent;
     static constexpr auto big_end_count = true;
 
     /// Hashing (finalized).
