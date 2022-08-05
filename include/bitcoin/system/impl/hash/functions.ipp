@@ -70,6 +70,7 @@ INLINE data_chunk ripemd128_chunk(const data_slice& data) NOEXCEPT
 template <size_t Size>
 INLINE short_hash ripemd160_hash(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
     return accumulator<rmd160>::hash(data);
 }
 INLINE short_hash ripemd160_hash(const data_chunk& data) NOEXCEPT
@@ -83,6 +84,7 @@ INLINE short_hash ripemd160_hash(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE data_chunk ripemd160_chunk(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
     return accumulator<rmd160>::hash_chunk(data);
 }
 INLINE data_chunk ripemd160_chunk(const data_chunk& data) NOEXCEPT
@@ -98,6 +100,7 @@ INLINE data_chunk ripemd160_chunk(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE short_hash sha1_hash(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
     return accumulator<sha160>::hash(data);
 }
 INLINE short_hash sha1_hash(const data_chunk& data) NOEXCEPT
@@ -111,6 +114,7 @@ INLINE short_hash sha1_hash(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE data_chunk sha1_chunk(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
     return accumulator<sha160>::hash_chunk(data);
 }
 INLINE data_chunk sha1_chunk(const data_chunk& data) NOEXCEPT
@@ -126,6 +130,7 @@ INLINE data_chunk sha1_chunk(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE hash_digest sha256_hash(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
     return accumulator<sha256>::hash(data);
 }
 INLINE hash_digest sha256_hash(const data_chunk& data) NOEXCEPT
@@ -139,6 +144,7 @@ INLINE hash_digest sha256_hash_slice(const data_slice& data) NOEXCEPT
 template <size_t Size>
 INLINE data_chunk sha256_chunk(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
     return accumulator<sha256>::hash_chunk(data);
 }
 INLINE data_chunk sha256_chunk(const data_chunk& data) NOEXCEPT
@@ -167,6 +173,7 @@ INLINE data_chunk sha512_chunk(const data_slice& data) NOEXCEPT
 template <size_t Size>
 INLINE short_hash bitcoin_short_hash(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
     return rmd160::hash(accumulator<sha256>::hash(data));
 }
 INLINE short_hash bitcoin_short_hash(const data_chunk& data) NOEXCEPT
@@ -180,10 +187,13 @@ INLINE short_hash bitcoin_short_hash(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE data_chunk bitcoin_short_chunk(const data_array<Size>& data) NOEXCEPT
 {
+    // Accumulator provides half_t and block_t optimization for arrays.
+    // Accumulator provides half_t optimization for second hashes to chunk.
     return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
 }
 INLINE data_chunk bitcoin_short_chunk(const data_chunk& data) NOEXCEPT
 {
+    // Accumulator provides half_t optimization for second hashes to chunk.
     return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
 }
 ////INLINE data_chunk bitcoin_short_chunk_slice(const data_slice& data) NOEXCEPT
@@ -195,7 +205,17 @@ INLINE data_chunk bitcoin_short_chunk(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE hash_digest bitcoin_hash(const data_array<Size>& data) NOEXCEPT
 {
-    return sha256::hash(accumulator<sha256>::hash(data));
+    constexpr auto block_size = array_count<typename sha256::block_t>;
+    if constexpr (Size == block_size)
+    {
+        return sha256::double_hash(data);
+    }
+    else
+    {
+        // Accumulator provides half_t and block_t optimization for arrays,
+        // but not specifically support for optimized double-hashing.
+        return sha256::hash(accumulator<sha256>::hash(data));
+    }
 }
 INLINE hash_digest bitcoin_hash(const data_chunk& data) NOEXCEPT
 {
@@ -208,14 +228,31 @@ INLINE hash_digest bitcoin_hash_slice(const data_slice& data) NOEXCEPT
 template <size_t Size>
 INLINE data_chunk bitcoin_chunk(const data_array<Size>& data) NOEXCEPT
 {
-    return accumulator<sha256>::hash_chunk(accumulator<sha256>::hash(data));
+    constexpr auto block_size = array_count<typename sha256::block_t>;
+    constexpr auto digest_size = array_count<typename sha256::digest_t>;
+    if constexpr (Size == block_size)
+    {
+        // Accumulator does not provide support for double_hash.
+        // Algorithm emits only digest_t as hash results, so cast it here.
+        data_chunk digest(digest_size);
+        auto& out = unsafe_array_cast<uint8_t, digest_size>(digest.data());
+        out = sha256::double_hash(data);
+        return out;
+    }
+    else
+    {
+        // Accumulator provides half_t optimization for second hashes to chunk.
+        return accumulator<sha256>::hash_chunk(accumulator<sha256>::hash(data));
+    }
 }
 INLINE data_chunk bitcoin_chunk(const data_chunk& data) NOEXCEPT
 {
+    // Accumulator provides half_t optimization for second hashes to chunk.
     return accumulator<sha256>::hash_chunk(accumulator<sha256>::hash(data));
 }
 INLINE data_chunk bitcoin_chunk_slice(const data_slice& data) NOEXCEPT
 {
+    // Accumulator provides half_t optimization for second hashes to chunk.
     return accumulator<sha256>::hash_chunk(accumulator<sha256>::hash_digest(data));
 }
 
@@ -223,11 +260,8 @@ INLINE data_chunk bitcoin_chunk_slice(const data_slice& data) NOEXCEPT
 INLINE hash_digest bitcoin_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT
 {
-    // Two assignments bypass more costly accumulator with same assignments.
-    long_hash block{};
-    array_cast<uint8_t, hash_size>(block) = left;
-    array_cast<uint8_t, hash_size, hash_size>(block) = right;
-    return sha256::hash(sha256::hash(block));
+    // Algorithm provides specialized support for this scenario.
+    return sha256::double_hash(left, right);
 }
 
 // Bitcoin hash set from an ordered set of ptrs [header commitment].

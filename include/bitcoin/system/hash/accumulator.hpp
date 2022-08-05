@@ -74,7 +74,6 @@ public:
     template <size_t Size>
     static inline data_chunk hash_chunk(const std_array<byte_t, Size>& data) NOEXCEPT;
     static inline data_chunk hash_chunk(const data_chunk& data) NOEXCEPT;
-    ////static inline data_chunk hash_chunk(const data_slice& data) NOEXCEPT;
 
 protected:
     using half_t = typename Algorithm::half_t;
@@ -87,14 +86,26 @@ protected:
     /// Bytes remaining until buffer is full.
     INLINE constexpr size_t gap() const NOEXCEPT;
 
+    /// True if buffer is full.
+    INLINE constexpr bool is_full() const NOEXCEPT;
+
+    /// True if buffer is empty.
+    INLINE constexpr bool is_empty() const NOEXCEPT;
+
     /// Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
     INLINE constexpr bool is_buffer_overflow(size_t size) const NOEXCEPT;
 
     /// Append up to block_size bytes to buffer.
-    INLINE constexpr size_t add_data(size_t size, const byte_t* data) NOEXCEPT;
+    /// False on overflow, returns accepted count.
+    INLINE constexpr bool add_data(size_t& accepted, size_t size,
+        const byte_t* data) NOEXCEPT;
 
-    /// Increment the counter for unbuffered transforms.
-    INLINE constexpr void increment(size_t blocks) NOEXCEPT;
+    /// Add remainder of data to cleared buffer.
+    // Size determined acceptable by first add_data call.
+    INLINE constexpr void add_data(size_t size, const byte_t* data) NOEXCEPT;
+
+    /// Accumulate a set of blocks and buffer any remainder bytes.
+    INLINE bool accumulate(size_t size, const byte_t* data) NOEXCEPT;
 
     /// Compute pad size, reserves space for counter serialization.
     INLINE constexpr size_t pad_size() const NOEXCEPT;
@@ -110,8 +121,6 @@ protected:
     static constexpr auto count_size = array_count<counter>;
 
 private:
-    INLINE static digest_t shortcut(size_t size, const byte_t* data) NOEXCEPT;
-
     size_t size_;
     state_t state_;
     block_t buffer_;

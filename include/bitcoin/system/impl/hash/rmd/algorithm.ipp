@@ -390,7 +390,7 @@ rounding(state_t& state, const words_t& words) NOEXCEPT
     }
     else
     {
-        // words is const, jobs are independent and unsequenced.
+        // Ripemd consists of two independent hashing jobs.
         std_for_each(concurrency(), jobs.begin(), jobs.end(),
             [&words](auto& job) NOEXCEPT
             {
@@ -591,28 +591,28 @@ output(const state_t& state) NOEXCEPT
     }
 }
 
-// Streaming single hash functions.
+// Streaming single hash functions (used by accumulator).
 // ---------------------------------------------------------------------------
 
 TEMPLATE
 constexpr void CLASS::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
-    words_t space{};
-    input(space, block);
-    rounding(state, space);
+    words_t words{};
+    input(words, block);
+    rounding(state, words);
 }
 
 TEMPLATE
 VCONSTEXPR void CLASS::
 accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
-    words_t space{};
+    words_t words{};
 
     for (auto& block: blocks)
     {
-        input(space, block);
-        rounding(state, space);
+        input(words, block);
+        rounding(state, words);
     }
 }
 
@@ -630,19 +630,19 @@ finalize(const state_t& state) NOEXCEPT
     return output(state);
 }
 
-// Finalized single hash functions.
+// Finalized single hash functions (common functions).
 // ---------------------------------------------------------------------------
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const half_t& half) NOEXCEPT
 {
-    words_t space{};
+    words_t words{};
     auto state = H::get;
 
-    input(space, half);
-    pad_half(space);
-    rounding(state, space);
+    input(words, half);
+    pad_half(words);
+    rounding(state, words);
     return finalize(state);
 }
 
@@ -650,32 +650,34 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const block_t& block) NOEXCEPT
 {
-    words_t space{};
+    words_t words{};
     auto state = H::get;
 
-    input(space, block);
-    rounding(state, space);
+    input(words, block);
+    rounding(state, words);
 
-    pad_one(space);
-    rounding(state, space);
+    pad_one(words);
+    rounding(state, words);
     return finalize(state);
 }
 
+// [uncommon, prob can delete]
 TEMPLATE
 VCONSTEXPR typename CLASS::digest_t CLASS::
 hash(const blocks_t& blocks) NOEXCEPT
 {
-    words_t space{};
+    words_t words{};
     auto state = H::get;
 
+    // Endianness is order independent, but not worth parallelizing.
     for (auto& block: blocks)
     {
-        input(space, block);
-        rounding(state, space);
+        input(words, block);
+        rounding(state, words);
     }
 
-    pad_n(space, blocks.size());
-    rounding(state, space);
+    pad_n(words, blocks.size());
+    rounding(state, words);
     return finalize(state);
 }
 

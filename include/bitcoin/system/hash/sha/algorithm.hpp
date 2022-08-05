@@ -52,6 +52,7 @@ public:
     using chunk_t   = std_array<word_t, SHA::chunk_words>;
     using words_t   = std_array<word_t, SHA::block_words>;
     using buffer_t  = std_array<word_t, K::rounds>;
+    using buffers_t = std_vector<buffer_t>;
 
     /// Byte-based types.
     using byte_t    = uint8_t;
@@ -84,16 +85,14 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Finalized single hash.
-    static VCONSTEXPR digest_t hash(const set_t& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
 
-    /// Finalized double hash (N independent blocks produces N/2 hashes).
-    ////static VCONSTEXPR digest_t merkle_hash(const set_t& blocks) NOEXCEPT;
-    static VCONSTEXPR digests_t double_hash(const set_t& blocks) NOEXCEPT;
+    /// Finalized double hashes (N independent blocks produces N/2 hashes).
+    static VCONSTEXPR digests_t merkle_hash(const set_t& blocks) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
-    static constexpr digest_t double_hash(const digest_t& left,
-        const digest_t& right) NOEXCEPT;
+    static constexpr digest_t double_hash(const half_t& left,
+        const half_t& right) NOEXCEPT;
 
     /// Streaming (unfinalized).
     /// -----------------------------------------------------------------------

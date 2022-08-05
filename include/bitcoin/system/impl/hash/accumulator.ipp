@@ -58,48 +58,53 @@ gap() const NOEXCEPT
 
 TEMPLATE
 INLINE constexpr bool CLASS::
-is_buffer_overflow(size_t size) const NOEXCEPT
+is_full() const NOEXCEPT
 {
-    if constexpr (Checked)
-    {
-        return size > (Algorithm::limit_bytes - size_);
-    }
-    else
-    {
-        // using count_t = typename Algorithm::count_t;
-        // count_t is either uint64_t (SHA1/256/RMD) or uint128_t (SHA512).
-        // It is not used in the accumulator, as a performance optimization.
-        // This limits the accumulator to [max_size_t/8 - 8|16] hashed bytes.
-        // This is over 2M TB, so not worth guarding in Bitcoin scenarios.
-        // Checked is on by default in checked builds (NDEBUG) only.
-        return false;
-    }
+    return is_zero(next());
 }
 
 TEMPLATE
-INLINE constexpr size_t CLASS::
-add_data(size_t size, const byte_t* data) NOEXCEPT
+INLINE constexpr bool CLASS::
+is_empty() const NOEXCEPT
 {
-    // No bytes accepted on overflow (if checked) or uncleared buffer.
-    if (is_buffer_overflow(size) || is_zero(gap()))
-        return zero;
+    // Empty and full are the same, just a matter of caller context.
+    return is_full();
+}
 
-    const auto accepted = std::min(gap(), size);
-    std::copy_n(data, accepted, &buffer_[next()]);
-    size_ += accepted;
-    return accepted;
+TEMPLATE
+INLINE constexpr bool CLASS::
+is_buffer_overflow(size_t size) const NOEXCEPT
+{
+    // using count_t = typename Algorithm::count_t;
+    // count_t is either uint64_t (SHA1/256/RMD) or uint128_t (SHA512).
+    // It is not used in the accumulator, as a performance optimization.
+    // This limits the accumulator to [max_size_t/8 - 8|16] hashed bytes.
+    // This is over 2M TB, so not worth guarding in Bitcoin scenarios.
+    // Checked is on by default in checked builds (NDEBUG) only.
+    if constexpr (Checked)
+        return size > (Algorithm::limit_bytes - size_);
+    else
+        return false;
+}
+
+TEMPLATE
+INLINE constexpr bool CLASS::
+add_data(size_t& accepted, size_t size, const byte_t* data) NOEXCEPT
+{
+    if (is_buffer_overflow(size))
+        return false;
+
+    accepted = std::min(gap(), size);
+    add_data(accepted, data);
+    return true;
 }
 
 TEMPLATE
 INLINE constexpr void CLASS::
-increment(size_t blocks) NOEXCEPT
+add_data(size_t size, const byte_t* data) NOEXCEPT
 {
-    BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_size), "overflow");
-    BC_ASSERT_MSG(!is_multiply_overflow(blocks, block_size), "overflow");
-
-    // Guarded by proper (protected) response to preceding add_data call.
-    // Caller must not increment more blocks than implied by add_data result.
-    size_ += (blocks * block_size);
+    std::copy_n(data, size, &buffer_[next()]);
+    size_ += size;
 }
 
 TEMPLATE
@@ -186,9 +191,6 @@ accumulator(size_t blocks, const state_t& state) NOEXCEPT
 {
     if constexpr (Checked)
     {
-        BC_ASSERT_MSG(!is_buffer_overflow(blocks * block_size), "overflow");
-        BC_ASSERT_MSG(!is_multiply_overflow(blocks, block_size), "overflow");
-
         if (is_buffer_overflow(blocks * block_size) ||
             is_multiply_overflow(blocks, block_size))
             reset();
@@ -221,41 +223,53 @@ TEMPLATE
 inline bool CLASS::
 write(size_t size, const byte_t* data) NOEXCEPT
 {
-    // Fill gap if possible and update counter.
-    const auto accepted = add_data(size, data);
-
-    // No bytes accepted: buffer overflow (if checked) or size is zero.
-    // If accepted is non-zero then the full size value is acceptable.
-    if (is_zero(accepted))
-        return is_zero(size);
-
-    // No transformation on this write unless buffer is full.
-    if (!is_zero(next()))
+    if (is_zero(size))
         return true;
 
-    // Transform (updates state and clears buffer).
+    // With an empty buffer and at least one block, accumulate all.
+    if (accumulate(size, data))
+        return true;
+
+    // False only on overflow.
+    // Accept up to the number of bytes required to fill the buffer.
+    size_t accepted{};
+    if (!add_data(accepted, size, data))
+        return false;
+
+    // Nothing more to do.
+    if (!is_full())
+        return true;
+
+    // Empty the full buffer and advance pointers by amount accepted.
     Algorithm::accumulate(state_, buffer_);
     std::advance(data, accepted);
+    size -= accepted;
 
-    // No more bytes to process.
-    if (is_zero((size -= accepted)))
+    // With at least one block (buffer is empty), accumulate all.
+    if (accumulate(size, data))
         return true;
 
-    // Get count of whole blocks and remaining bytes.
-    const auto count = size / block_size;
-    const auto bytes = size % block_size;
+    add_data(size, data);
+    return true;
+}
 
-    // Algorithm does not expose pointers.
-    const auto blocks = unsafe_vector_cast<block_t>(data, count);
+// private
+TEMPLATE
+inline bool CLASS::
+accumulate(size_t size, const byte_t* data) NOEXCEPT
+{
+    // Only accumulates one or more blocks with an empty buffer.
+    if (!is_empty() || (size < block_size))
+        return false;
 
-    // Transform all whole blocks and save remainder to cleared buffer.
-    Algorithm::accumulate(state_, blocks);
-    std::advance(data, size - bytes);
-    increment(count);
+    const auto blocks = size / block_size;
+    const auto remain = size % block_size;
+    const auto bytes  = size - remain;
+    Algorithm::accumulate(state_, unsafe_vector_cast<block_t>(data, blocks));
 
-    // Add the remaining partial block to the cleared block buffer.
-    // There is no point in testing the add_data return value here.
-    add_data(bytes, data);
+    // Update the counter and add any remaining bytes to the buffer.
+    size_ += bytes;
+    add_data(remain, std::next(data, bytes));
     return true;
 }
 
@@ -285,7 +299,6 @@ TEMPLATE
 inline void CLASS::
 flush(byte_t* digest) NOEXCEPT
 {
-    // Algorithm does not expose pointers.
     flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest));
 }
 
@@ -300,9 +313,9 @@ TEMPLATE
 inline void CLASS::
 hash(byte_t* digest, const data_slice& data) NOEXCEPT
 {
-    constexpr auto size = array_count<digest_t>;
-    auto& out = unsafe_array_cast<byte_t, size>(digest);
-    out = shortcut(data.size(), data.data());
+    accumulator<Algorithm> context{};
+    context.write(data.size(), data.data());
+    context.flush(digest);
 }
 
 TEMPLATE
@@ -329,14 +342,18 @@ TEMPLATE
 inline typename CLASS::digest_t CLASS::
 hash(const data_chunk& data) NOEXCEPT
 {
-    return shortcut(data.size(), data.data());
+    accumulator<Algorithm> context{};
+    context.write(data.size(), data.data());
+    return context.flush();
 }
 
 TEMPLATE
 inline typename CLASS::digest_t CLASS::
 hash_digest(const data_slice& data) NOEXCEPT
 {
-    return shortcut(data.size(), data.data());
+    accumulator<Algorithm> context{};
+    context.write(data.size(), data.data());
+    return context.flush();
 }
 
 TEMPLATE
@@ -360,40 +377,6 @@ hash_chunk(const data_chunk& data) NOEXCEPT
     auto& out = unsafe_array_cast<byte_t, size>(digest.data());
     out = hash(data);
     return digest;
-}
-
-////TEMPLATE
-////inline data_chunk CLASS::
-////hash_chunk(const data_slice& data) NOEXCEPT
-////{
-////    data_chunk digest(array_count<digest_t>);
-////    hash(digest.data(), data);
-////    return digest;
-////}
-
-// private
-// ----------------------------------------------------------------------------
-// Bypass accumulator for half and full block finalized hashes (common).
-
-TEMPLATE
-INLINE typename CLASS::digest_t CLASS::
-shortcut(size_t size, const byte_t* data) NOEXCEPT
-{
-    constexpr auto half = array_count<half_t>;
-    constexpr auto full = array_count<block_t>;
-
-    if (size == half)
-    {
-        return Algorithm::hash(unsafe_array_cast<byte_t, half>(data));
-    }
-    else if (size == full)
-    {
-        return Algorithm::hash(unsafe_array_cast<byte_t, full>(data));
-    }
-
-    accumulator<Algorithm> context{};
-    context.write(size, data);
-    return context.flush();
 }
 
 BC_POP_WARNING()

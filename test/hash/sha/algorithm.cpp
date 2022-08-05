@@ -82,16 +82,16 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full160__null_hash__expected)
     BOOST_CHECK_EQUAL(sha1_hash(full160), expected_full160);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__hash_blocks160__null_hash__expected)
-{
-    const std_vector<cref<sha160::block_t>> pair
-    {
-        std::cref(full160), std::cref(full160)
-    };
-
-    BOOST_CHECK_EQUAL(sha160::hash(pair), expected_pair160);
-    BOOST_CHECK_EQUAL(sha1_hash(pair160), expected_pair160);
-}
+////BOOST_AUTO_TEST_CASE(algorithm__hash_blocks160__null_hash__expected)
+////{
+////    const std_vector<cref<sha160::block_t>> pair
+////    {
+////        std::cref(full160), std::cref(full160)
+////    };
+////
+////    BOOST_CHECK_EQUAL(sha160::hash(pair), expected_pair160);
+////    BOOST_CHECK_EQUAL(sha1_hash(pair160), expected_pair160);
+////}
 
 BOOST_AUTO_TEST_CASE(algorithm__double_hash160__null_hash__expected)
 {
@@ -99,20 +99,20 @@ BOOST_AUTO_TEST_CASE(algorithm__double_hash160__null_hash__expected)
     BOOST_CHECK_EQUAL(sha1_hash(sha1_hash(full160)), expected_merk160);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks160__null_hash__expected)
-{
-    const sha160::digests_t expected
-    {
-        expected_merk160, expected_merk160
-    };
-
-    const sha160::set_t set
-    {
-        std::cref(full160), std::cref(full160)
-    };
-
-    BOOST_CHECK_EQUAL(sha160::double_hash(set), expected);
-}
+////BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks160__null_hash__expected)
+////{
+////    const sha160::digests_t expected
+////    {
+////        expected_merk160, expected_merk160
+////    };
+////
+////    const sha160::set_t set
+////    {
+////        std::cref(full160), std::cref(full160)
+////    };
+////
+////    BOOST_CHECK_EQUAL(sha160::double_hash(set), expected);
+////}
 
 // sha256
 // ----------------------------------------------------------------------------
@@ -129,16 +129,16 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full256__null_hash__expected)
     BOOST_CHECK_EQUAL(sha256_hash(full256), expected_full256);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__hash_blocks256__null_hash__expected)
-{
-    const std_vector<cref<sha256::block_t>> pair
-    {
-        std::cref(full256), std::cref(full256)
-    };
-
-    BOOST_CHECK_EQUAL(sha256::hash(pair), expected_pair256);
-    BOOST_CHECK_EQUAL(sha256_hash(pair256), expected_pair256);
-}
+////BOOST_AUTO_TEST_CASE(algorithm__hash_blocks256__null_hash__expected)
+////{
+////    const std_vector<cref<sha256::block_t>> pair
+////    {
+////        std::cref(full256), std::cref(full256)
+////    };
+////
+////    BOOST_CHECK_EQUAL(sha256::hash(pair), expected_pair256);
+////    BOOST_CHECK_EQUAL(sha256_hash(pair256), expected_pair256);
+////}
 
 BOOST_AUTO_TEST_CASE(algorithm__double_hash256__null_hash__expected)
 {
@@ -146,20 +146,20 @@ BOOST_AUTO_TEST_CASE(algorithm__double_hash256__null_hash__expected)
     BOOST_CHECK_EQUAL(sha256_hash(sha256_hash(full256)), expected_merk256);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks256__null_hash__expected)
-{
-    const sha256::digests_t expected
-    {
-        expected_merk256, expected_merk256
-    };
-
-    const sha256::set_t set
-    {
-        std::cref(full256), std::cref(full256)
-    };
-
-    BOOST_CHECK_EQUAL(sha256::double_hash(set), expected);
-}
+////BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks256__null_hash__expected)
+////{
+////    const sha256::digests_t expected
+////    {
+////        expected_merk256, expected_merk256
+////    };
+////
+////    const sha256::set_t set
+////    {
+////        std::cref(full256), std::cref(full256)
+////    };
+////
+////    BOOST_CHECK_EQUAL(sha256::double_hash(set), expected);
+////}
 
 // sha512
 // ----------------------------------------------------------------------------
@@ -176,16 +176,16 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full512__null_hash__expected)
     BOOST_CHECK_EQUAL(sha512_hash(full512), expected_full512);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__hash_blocks512__null_hashes__expected)
-{
-    const std_vector<cref<sha512::block_t>> pair
-    {
-        std::cref(full512), std::cref(full512)
-    };
-
-    BOOST_CHECK_EQUAL(sha512::hash(pair), expected_pair512);
-    BOOST_CHECK_EQUAL(sha512_hash(pair512), expected_pair512);
-}
+////BOOST_AUTO_TEST_CASE(algorithm__hash_blocks512__null_hashes__expected)
+////{
+////    const std_vector<cref<sha512::block_t>> pair
+////    {
+////        std::cref(full512), std::cref(full512)
+////    };
+////
+////    BOOST_CHECK_EQUAL(sha512::hash(pair), expected_pair512);
+////    BOOST_CHECK_EQUAL(sha512_hash(pair512), expected_pair512);
+////}
 
 BOOST_AUTO_TEST_CASE(algorithm__double_hash512__null_hash__expected)
 {
@@ -193,20 +193,20 @@ BOOST_AUTO_TEST_CASE(algorithm__double_hash512__null_hash__expected)
     BOOST_CHECK_EQUAL(sha512_hash(sha512_hash(full512)), expected_merk512);
 }
 
-BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks512__null_hashes__expected)
-{
-    const sha512::digests_t expected
-    {
-        expected_merk512, expected_merk512
-    };
-
-    const sha512::set_t set
-    {
-        std::cref(full512), std::cref(full512)
-    };
-
-    BOOST_CHECK_EQUAL(sha512::double_hash(set), expected);
-}
+////BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks512__null_hashes__expected)
+////{
+////    const sha512::digests_t expected
+////    {
+////        expected_merk512, expected_merk512
+////    };
+////
+////    const sha512::set_t set
+////    {
+////        std::cref(full512), std::cref(full512)
+////    };
+////
+////    BOOST_CHECK_EQUAL(sha512::double_hash(set), expected);
+////}
 
 #if !defined(INVISIBLE)
 

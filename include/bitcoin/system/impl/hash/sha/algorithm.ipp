@@ -358,11 +358,6 @@ template<size_t Round>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& buffer) NOEXCEPT
 {
-    // For block/buffer split, in[Round] becomes words[Round] for Round < 16,
-    // and buffer[Round - 16] for Round > 16 (constexpression distinction).
-    // passing the same (templated parameter) for words/buffer here would
-    // just case the index to be reduced by 16 for any index greater than 16.
-
     if constexpr (SHA::digest == 160)
     {
         // FIPS.180
@@ -405,10 +400,6 @@ TEMPLATE
 constexpr void CLASS::
 rounding(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
-    // For block/buffer split, words_t is required as an independent parameter.
-    // words_t is referenced only in the first 16 rounds, then buffer_t.
-    // this keeps parameter set constant (distinguished by template expansion).
-
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
     const state_t start{ state };
 
@@ -522,17 +513,6 @@ template<size_t Round>
 INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
-    // For block/buffer split, Word is shifted to start at zero but with
-    // an independent words_t for first 16 words (indexes - 16). Above 31
-    // this indexes into itself, with relative undexing same as below.
-    // words_t is required as an independent parameter for first 16 calls.
-    // So create an overload for first block (16 words) and second parameter.
-    // This saves the allocation of one block for each block processed, but
-    // adds a block worth of additional parameterization. Yet in the end two
-    // offsets (from, to) are dereferenced. This just makes them from two
-    // independent arrays. That implies one additional register population for
-    // the first 16 rounds. Parameter remains buffer_t but one block smaller.
-
     if constexpr (SHA::digest == 160)
     {
         // FIPS.180
@@ -588,10 +568,6 @@ preparing(buffer_t& buffer) NOEXCEPT
 {
     // Pointer degradation here (optimization), use auto typing in prepare().
     auto pbuffer = buffer.data();
-
-    // For block/buffer split, indexes shifted to start at zero.
-    // words_t is required as an independent parameter for first 16 calls.
-    // Parameter remains buffer_t but one block smaller.
 
     // FIPS.180
     // 6.1.2.1 SHA-1   Hash Computation (16 <= t <= 79)
@@ -699,8 +675,6 @@ TEMPLATE
 constexpr void CLASS::
 input(buffer_t& buffer, const state_t& state) NOEXCEPT
 {
-    // For block/buffer split, buffer_t is block_t and this is uncasted assign.
-
     // FIPS.180
     // 5.3 Setting the Initial Hash Value
 
@@ -741,9 +715,6 @@ TEMPLATE
 constexpr void CLASS::
 pad_one(buffer_t& buffer) NOEXCEPT
 {
-    // For block/buffer split, the block is processed directly over block/pad.
-    // So this is eliminated and the block/pad are used independently.
-
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
 
@@ -754,8 +725,6 @@ TEMPLATE
 constexpr void CLASS::
 pad_half(buffer_t& buffer) NOEXCEPT
 {
-    // For block/buffer split, buffer_t becomes block_t and this unchanged.
-
     // Pad a half block.
     constexpr auto pad = chunk_pad();
 
@@ -781,8 +750,6 @@ TEMPLATE
 constexpr void CLASS::
 pad_state(buffer_t& buffer) NOEXCEPT
 {
-    // For block/buffer split, buffer_t becomes block_t and this unchanged.
-
     // Pad state as buffer input.
     // This is a double hash optimization.
     // This is the same as pad_half unless SHA is SHA-1.
@@ -829,8 +796,6 @@ TEMPLATE
 constexpr void CLASS::
 pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 {
-    // For block/buffer split, buffer_t becomes block_t and this unchanged.
-
     // Pad any number of whole blocks.
     constexpr auto pad = blocks_pad();
     const auto bits = to_bits(blocks * array_count<block_t>);
@@ -875,22 +840,6 @@ TEMPLATE
 constexpr void CLASS::
 input(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
-    // For block/buffer split, buffer_t is smaller and this is unchanged.
-    // But in the case of merkle (owned block&&) we can assign out to in
-    // and save a block allocation. It would also be easy to convert the
-    // entire set of (owned) blocks concurrently. Doing so on an unowned block
-    // would require doubling the block memory allocation as opposed to
-    // converting one each block at a time. However, if the processing is
-    // concurrent, the allocation would peak at the same level. This would then
-    // imply increased efficiency by always allocating and endian converting
-    // the full set of const blocks to be processed, and passing them in as
-    // const& already converted. However distributing the endianness conversion
-    // would be more efficient than holding up all block processing until it is
-    // complete. This implies that passing a const buffer and relying in
-    // individual allocations and conversions is preferred. And in the case of
-    // an owned buffer, we would convert in place (in->out->in) to save the
-    // allocation, but would not convert the entire block set a priori.
-
     constexpr auto size = SHA::word_bytes;
 
     if (std::is_constant_evaluated())
@@ -923,8 +872,6 @@ TEMPLATE
 constexpr void CLASS::
 input1(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
-    // For block/buffer split, buffer_t is smaller and this is unchanged.
-
     constexpr auto size = SHA::word_bytes;
 
     if (std::is_constant_evaluated())
@@ -949,8 +896,6 @@ TEMPLATE
 constexpr void CLASS::
 input2(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
-    // For block/buffer split, buffer_t is smaller and this is unchanged.
-
     constexpr auto size = SHA::word_bytes;
 
     if (std::is_constant_evaluated())
@@ -966,8 +911,8 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else
     {
-        constexpr auto size = SHA::state_words;
-        auto& to = array_cast<word_t, size, size>(buffer);
+        constexpr auto words = SHA::state_words;
+        auto& to = array_cast<word_t, words, words>(buffer);
         from_big_endians(to, array_cast<word_t>(half));
     }
 }
@@ -1007,158 +952,132 @@ output(const state_t& state) NOEXCEPT
     }
 }
 
-// Single hash functions.
+// Finalized hash functions.
 // ---------------------------------------------------------------------------
-// TODO: when processing full blocks we do not need to copy the block
-// buffer. The expanded buffer can be distinct and the distinction isolated
-// with the round template (round <16 uses block buffer). Half block
-// processing would simply create populated/padded block and pass it here.
-// Prepare indexing would shift by 16, and buffer_t shrinks by one block.
-// This only benefits hashing where we own the block data (merkle) since we
-// can endian convert into the block. Otherwise it's a denormalization and a
-// minor hit on independent allocations and another register for 16 rounds.
-// We end up with a second prepare, and require block/buffer for preparing and
-// rounding calls. One input overload is removed, and the hash functions below
-// own either a fabricated block (partial fill) or pass the const&. endian
-// conversion for each owned (merkle) block can set values into itself.
 
+// [common (second hash), specialized in functions and accumulator]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const half_t& half) NOEXCEPT
 {
-    buffer_t space{};
+    buffer_t buffer{};
     auto state = H::get;
 
-    input1(space, half);
-    pad_half(space);
-    preparing(space);
-    rounding(state, space);
+    input1(buffer, half);
+    pad_half(buffer);
+    preparing(buffer);
+    rounding(state, buffer);
     return output(state);
 }
 
+// [semi-common, specialized in functions and accumulator]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const block_t& block) NOEXCEPT
 {
-    buffer_t space{};
+    buffer_t buffer{};
     auto state = H::get;
 
-    input(space, block);
-    preparing(space);
-    rounding(state, space);
+    input(buffer, block);
+    preparing(buffer);
+    rounding(state, buffer);
 
     // pad_one is prepared
-    pad_one(space);
-    rounding(state, space);
+    pad_one(buffer);
+    rounding(state, buffer);
     return output(state);
 }
 
-TEMPLATE
-VCONSTEXPR typename CLASS::digest_t CLASS::
-hash(const set_t& blocks) NOEXCEPT
-{
-    buffer_t space{};
-    auto state = H::get;
-
-    // The set is ordered (accumulated).
-    for (auto& block: blocks)
-    {
-        input(space, block);
-        preparing(space);
-        rounding(state, space);
-    }
-
-    pad_n(space, blocks.size());
-    preparing(space);
-    rounding(state, space);
-    return output(state);
-}
-
-// Double hash functions.
+// Finalized double hash functions.
 // ---------------------------------------------------------------------------
-// TODO: provide double hash of half block (common scenario).
 
+// [semi-common, specialized in functions, single tuple merkle]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 double_hash(const block_t& block) NOEXCEPT
 {
-    buffer_t space{};
+    buffer_t buffer{};
 
     // first hash
     // --------------------
     auto state = H::get;
 
     // hash one block
-    input(space, block);
-    preparing(space);
-    rounding(state, space);
+    input(buffer, block);
+    preparing(buffer);
+    rounding(state, buffer);
 
     // pad_one is prepared
     // input state before resetting
     // hash one block of single block padding
-    pad_one(space);
-    rounding(state, space);
-    input(space, state);
+    pad_one(buffer);
+    rounding(state, buffer);
+    input(buffer, state);
 
     // second hash
     // --------------------
     state = H::get;
 
     // hash padded state
-    pad_state(space);
-    preparing(space);
-    rounding(state, space);
+    pad_state(buffer);
+    preparing(buffer);
+    rounding(state, buffer);
     return output(state);
 }
 
+// [witness commitment]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
-double_hash(const digest_t& left, const digest_t& right) NOEXCEPT
+double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
-    buffer_t space{};
+    buffer_t buffer{};
     auto state = H::get;
 
-    input1(space, left);
-    input2(space, right);
-    preparing(space);
-    rounding(state, space);
+    input1(buffer, left);
+    input2(buffer, right);
+    preparing(buffer);
+    rounding(state, buffer);
 
-    pad_one(space);
-    rounding(state, space);
-    input(space, state);
+    pad_one(buffer);
+    rounding(state, buffer);
+    input(buffer, state);
 
     state = H::get;
-    pad_state(space);
-    preparing(space);
-    rounding(state, space);
+    pad_state(buffer);
+    preparing(buffer);
+    rounding(state, buffer);
     return output(state);
 }
 
-// TODO: test.
+// Finalized hash specialization.
+// ---------------------------------------------------------------------------
+
+// [common, finalized single row merkle root]
+// TODO: incomplete, iterate over parallel rows to reduce to digest_t.
 TEMPLATE
 VCONSTEXPR typename CLASS::digests_t CLASS::
-double_hash(const set_t& blocks) NOEXCEPT
+merkle_hash(const set_t& blocks) NOEXCEPT
 {
     digests_t digests(blocks.size());
 
-    // A double_hash set is independent blocks (vectorizable).
-    std_transform(concurrency(), blocks.begin(), blocks.end(), digests.begin(),
-        [&](const block_t& block)
+    // A double_hash set is order independent (e.g. merkle root).
+    std::transform(concurrency(), blocks.begin(), blocks.end(),
+        digests.begin(), [&](const block_t& block)
         {
-            buffer_t space{};
+            buffer_t buffer{};
 
             auto state = H::get;
-            input(space, block);
-            preparing(space);
-            rounding(state, space);
-            pad_one(space);
-            rounding(state, space);
-            input(space, state);
+            input(buffer, block);
+            preparing(buffer);
+            rounding(state, buffer);
+            pad_one(buffer);
+            rounding(state, buffer);
+            input(buffer, state);
 
             state = H::get;
-            pad_state(space);
-            preparing(space);
-            rounding(state, space);
+            pad_state(buffer);
+            preparing(buffer);
+            rounding(state, buffer);
             return output(state);
         });
 
@@ -1168,31 +1087,60 @@ double_hash(const set_t& blocks) NOEXCEPT
 // Streaming hash functions.
 // ---------------------------------------------------------------------------
 
+// [accumulator-1, common accumulated singleton]
 TEMPLATE
 constexpr void CLASS::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
-    buffer_t space{};
-    input(space, block);
-    preparing(space);
-    rounding(state, space);
+    buffer_t buffer{};
+    input(buffer, block);
+    preparing(buffer);
+    rounding(state, buffer);
 }
 
+// [accumulator-N, common accumulated set, parallized input/prep]
 TEMPLATE
 VCONSTEXPR void CLASS::
 accumulate(state_t& state, const set_t& blocks) NOEXCEPT
 {
-    buffer_t space{};
+    buffer_t buffer{};
 
-    for (auto& block: blocks)
+    if constexpr (Concurrent)
     {
-        input(space, block);
-        preparing(space);
-        rounding(state, space);
+        // Due to the memory allocation, avoid when not concurrent.
+        buffers_t buffers(blocks.size());
+
+        // eprint.iacr.org/2012/067.pdf
+        // Message schedules/endianness are order independent.
+        std::transform(concurrency(), blocks.begin(), blocks.end(),
+            buffers.begin(), [](const block_t& block) NOEXCEPT
+            {
+                buffer_t space{};
+                input(space, block);
+                preparing(space);
+                return space;
+            });
+
+        for (auto& space: buffers)
+            rounding(state, space);
+    }
+    else
+    {
+        for (auto& block: blocks)
+        {
+            input(buffer, block);
+            preparing(buffer);
+            rounding(state, buffer);
+        }
     }
 }
 
-// TODO: test.
+// Block.txs skip-parsed hash set.
+// ---------------------------------------------------------------------------
+
+// [block.txs skip-parsed hashing for tx.id as required for merkle root]
+// TODO: incomplete, can parallelize input prep by row and/or coumn.
+// TODO: can parallelize blocks by siblings.
 TEMPLATE
 template <size_t Size>
 VCONSTEXPR typename CLASS::states_t CLASS::
@@ -1200,27 +1148,27 @@ accumulate(const sets_t<Size>& sets) NOEXCEPT
 {
     states_t states(sets.size());
 
-    // The set of sets is independent (vectorizable).
+    // The set of sets is order independent across the sets (vectorizable).
     std_transform(concurrency(), sets.begin(), sets.end(), states.begin(),
         [&](const set_t& blocks)
         {
-            buffer_t space{};
+            buffer_t buffer{};
             auto state = H::get;
 
             // Each set is ordered (accumulated).
             for (auto& block: blocks)
             {
-                input(space, block);
-                preparing(space);
-                rounding(state, space);
+                input(buffer, block);
+                preparing(buffer);
+                rounding(state, buffer);
             }
         });
 
-    // States are not finalized as there may be more data in each set.
-    // For each set use accumulator(blocks.size(), state) to continue, and
-    // then finalize(state) to complete (or just finalize(state) if no more).
     return states;
 }
+
+// Finalizers for accumulators.
+// ---------------------------------------------------------------------------
 
 TEMPLATE
 constexpr void CLASS::
