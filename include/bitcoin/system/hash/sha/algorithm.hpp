@@ -60,10 +60,10 @@ public:
     using block_t   = std_array<byte_t, SHA::block_words * SHA::word_bytes>;
     using digest_t  = std_array<byte_t, bytes<SHA::digest>>;
 
-    /// Vectorization types (set types are cref).
+    /// Vectorization types.
     template <size_t Size>
-    using sets_t    = std_vector<cref<std_array<block_t, Size>>>;
-    using set_t     = std_vector<cref<block_t>>;
+    using set_t     = std_vector<cref<std_array<block_t, Size>>>;
+    using blocks_t  = std_vector<cref<block_t>>;
     using states_t  = std_vector<state_t>;
     using digests_t = std_vector<digest_t>;
 
@@ -87,23 +87,23 @@ public:
     /// Finalized single hash.
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
-
-    /// Finalized double hashes (N independent blocks produces N/2 hashes).
-    static VCONSTEXPR digests_t merkle_hash(const set_t& blocks) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& left,
         const half_t& right) NOEXCEPT;
+
+    /// Finalized double hashes (N independent blocks produces N/2 hashes).
+    static VCONSTEXPR digests_t merkle_hash(const blocks_t& blocks) NOEXCEPT;
 
     /// Streaming (unfinalized).
     /// -----------------------------------------------------------------------
 
     /// N independent blocks produces N independently accumulated states.
     template <size_t Size>
-    static VCONSTEXPR states_t accumulate(const sets_t<Size>& blocks) NOEXCEPT;
+    static VCONSTEXPR states_t accumulate(const set_t<Size>& blocks) NOEXCEPT;
 
     /// One or more dependent blocks produces one state.
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
-    static VCONSTEXPR void accumulate(state_t& state, const set_t& blocks) NOEXCEPT;
+    static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
 
     /// Finalize streaming state (converts to big-endian bytes).
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;

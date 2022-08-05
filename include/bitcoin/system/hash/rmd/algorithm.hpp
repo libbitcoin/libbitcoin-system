@@ -57,11 +57,7 @@ public:
     using half_t    = std_array<byte_t, RMD::chunk_words * RMD::word_bytes>;
     using block_t   = std_array<byte_t, RMD::block_words * RMD::word_bytes>;
     using digest_t  = std_array<byte_t, bytes<RMD::digest>>;
-
-    /// Vectorization types (blocks_t is cref).
     using blocks_t  = std_vector<cref<block_t>>;
-    using states_t  = std_vector<state_t>;
-    using digests_t = std_vector<digest_t>;
 
     /// Constants (and count_t).
     /// -----------------------------------------------------------------------
@@ -81,7 +77,6 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Finalized single hash.
-    static VCONSTEXPR digest_t hash(const blocks_t& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
 

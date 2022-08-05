@@ -51,19 +51,13 @@ BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
 
 constexpr auto half128 = rmd128::half_t{};
 constexpr auto full128 = rmd128::block_t{};
-constexpr auto pair128 = std_array<uint8_t, array_count<rmd128::block_t> * two>{};
-
 constexpr auto half160 = rmd160::half_t{};
 constexpr auto full160 = rmd160::block_t{};
-constexpr auto pair160 = std_array<uint8_t, array_count<rmd160::block_t> * two>{};
 
 constexpr auto expected_half128 = base16_array("c11f675df95fe3f7f00b6825368bce48");
 constexpr auto expected_full128 = base16_array("082bfa9b829ef3a9e220dcc54e4c6383");
-constexpr auto expected_pair128 = base16_array("1b94bc163383151a53fe49dadb7a4f0e");
-
 constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
 constexpr auto expected_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
-constexpr auto expected_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
 
 // RMD aliases are concurrent.
 static_assert(is_same_type<rmd::algorithm<rmd::h128<>, true>,     rmd128>);
@@ -98,17 +92,6 @@ BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full128__null_hash__expected
     BOOST_CHECK_EQUAL(ripemd128_hash(full128), expected_full128);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_blocks128__null_hash__expected)
-{
-    const std_vector<cref<rmd128::block_t>> pair
-    {
-        std::cref(full128), std::cref(full128)
-    };
-
-    BOOST_CHECK_EQUAL(rmd128::hash(pair), expected_pair128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(pair128), expected_pair128);
-}
-
 // rmd160 (concurrent)
 // ----------------------------------------------------------------------------
 
@@ -122,17 +105,6 @@ BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full160__null_hash__expected
 {
     BOOST_CHECK_EQUAL(rmd160::hash(full160), expected_full160);
     BOOST_CHECK_EQUAL(ripemd160_hash(full160), expected_full160);
-}
-
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_blocks160__null_hash__expected)
-{
-    const std_vector<cref<rmd160::block_t>> pair
-    {
-        std::cref(full160), std::cref(full160)
-    };
-
-    BOOST_CHECK_EQUAL(rmd160::hash(pair), expected_pair160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(pair160), expected_pair160);
 }
 
 // rmd128 (non-concurrent)
@@ -153,17 +125,6 @@ BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
     BOOST_CHECK_EQUAL(ripemd128_hash(full128), expected_full128);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks128__null_hash__expected)
-{
-    const std_vector<cref<rmd_128::block_t>> pair
-    {
-        std::cref(full128), std::cref(full128)
-    };
-
-    BOOST_CHECK_EQUAL(rmd_128::hash(pair), expected_pair128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(pair128), expected_pair128);
-}
-
 // rmd160 (non-concurrent)
 // ----------------------------------------------------------------------------
 using rmd_160 = rmd::algorithm<rmd::h160<>, false>;
@@ -180,17 +141,6 @@ BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full160__null_hash__expected)
     static_assert(rmd_160::hash(full160) == expected_full160);
     BOOST_CHECK_EQUAL(rmd_160::hash(full160), expected_full160);
     BOOST_CHECK_EQUAL(ripemd160_hash(full160), expected_full160);
-}
-
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks160__null_hash__expected)
-{
-    const std_vector<cref<rmd_160::block_t>> pair
-    {
-        std::cref(full160), std::cref(full160)
-    };
-
-    BOOST_CHECK_EQUAL(rmd_160::hash(pair), expected_pair160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(pair160), expected_pair160);
 }
 
 // Verify types.
@@ -317,7 +267,6 @@ static_assert(is_same_type<rmd128::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<rmd128::digest_t, std_array<uint8_t, 16>>);
 static_assert(is_same_type<rmd128::count_t, uint64_t>);
 static_assert(is_same_type<rmd128::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-static_assert(is_same_type<rmd128::digests_t, std_vector<std_array<uint8_t, 16>>>);
 static_assert(is_same_type<decltype(rmd128::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(rmd128::limit_bytes), const uint64_t>);
 
@@ -340,7 +289,6 @@ static_assert(is_same_type<rmd160::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<rmd160::digest_t, std_array<uint8_t, 20>>);
 static_assert(is_same_type<rmd160::count_t, uint64_t>);
 static_assert(is_same_type<rmd160::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-static_assert(is_same_type<rmd160::digests_t, std_vector<std_array<uint8_t, 20>>>);
 static_assert(is_same_type<decltype(rmd160::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(rmd160::limit_bytes), const uint64_t>);
 

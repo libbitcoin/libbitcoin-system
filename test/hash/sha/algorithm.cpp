@@ -34,17 +34,17 @@ constexpr auto pair512 = std_array<uint8_t, array_count<sha512::block_t> * two>{
 
 constexpr auto expected_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
 constexpr auto expected_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
-constexpr auto expected_pair160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
+////constexpr auto expected_pair160 = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
 constexpr auto expected_merk160 = base16_array("a8782546751527a4a1ad999058165d6af22421c8");
 
 constexpr auto expected_half256 = base16_array("66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925");
 constexpr auto expected_full256 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b");
-constexpr auto expected_pair256 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
+////constexpr auto expected_pair256 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
 constexpr auto expected_merk256 = base16_array("e2f61c3f71d1defd3fa999dfa36953755c690689799962b48bebd836974e8cf9");
 
 constexpr auto expected_half512 = base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081");
 constexpr auto expected_full512 = base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11");
-constexpr auto expected_pair512 = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
+////constexpr auto expected_pair512 = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
 constexpr auto expected_merk512 = base16_array("56d3e5825edf06e467e50dfeb09c1df2d9940121c05d61a162bfcb80aea3aa5fe958d917ac993d76cd3ea86240fedbb79520ce7b9c275793e3c75a82116cc320");
 
 // SHA aliases.
@@ -82,6 +82,13 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full160__null_hash__expected)
     BOOST_CHECK_EQUAL(sha1_hash(full160), expected_full160);
 }
 
+BOOST_AUTO_TEST_CASE(algorithm__double_hash160__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha160::double_hash(full160), expected_merk160);
+    BOOST_CHECK_EQUAL(sha1_hash(sha1_hash(full160)), expected_merk160);
+}
+
+// needs set expectation.
 ////BOOST_AUTO_TEST_CASE(algorithm__hash_blocks160__null_hash__expected)
 ////{
 ////    const std_vector<cref<sha160::block_t>> pair
@@ -89,29 +96,8 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full160__null_hash__expected)
 ////        std::cref(full160), std::cref(full160)
 ////    };
 ////
-////    BOOST_CHECK_EQUAL(sha160::hash(pair), expected_pair160);
+////    BOOST_CHECK_EQUAL(sha160::merkle_hash(pair), expected_pair160);
 ////    BOOST_CHECK_EQUAL(sha1_hash(pair160), expected_pair160);
-////}
-
-BOOST_AUTO_TEST_CASE(algorithm__double_hash160__null_hash__expected)
-{
-    BOOST_CHECK_EQUAL(sha160::double_hash(full160), expected_merk160);
-    BOOST_CHECK_EQUAL(sha1_hash(sha1_hash(full160)), expected_merk160);
-}
-
-////BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks160__null_hash__expected)
-////{
-////    const sha160::digests_t expected
-////    {
-////        expected_merk160, expected_merk160
-////    };
-////
-////    const sha160::set_t set
-////    {
-////        std::cref(full160), std::cref(full160)
-////    };
-////
-////    BOOST_CHECK_EQUAL(sha160::double_hash(set), expected);
 ////}
 
 // sha256
@@ -129,6 +115,13 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full256__null_hash__expected)
     BOOST_CHECK_EQUAL(sha256_hash(full256), expected_full256);
 }
 
+BOOST_AUTO_TEST_CASE(algorithm__double_hash256__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha256::double_hash(full256), expected_merk256);
+    BOOST_CHECK_EQUAL(sha256_hash(sha256_hash(full256)), expected_merk256);
+}
+
+// needs set expectation.
 ////BOOST_AUTO_TEST_CASE(algorithm__hash_blocks256__null_hash__expected)
 ////{
 ////    const std_vector<cref<sha256::block_t>> pair
@@ -136,29 +129,8 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full256__null_hash__expected)
 ////        std::cref(full256), std::cref(full256)
 ////    };
 ////
-////    BOOST_CHECK_EQUAL(sha256::hash(pair), expected_pair256);
+////    BOOST_CHECK_EQUAL(sha256::merkle_hash(pair), expected_pair256);
 ////    BOOST_CHECK_EQUAL(sha256_hash(pair256), expected_pair256);
-////}
-
-BOOST_AUTO_TEST_CASE(algorithm__double_hash256__null_hash__expected)
-{
-    BOOST_CHECK_EQUAL(sha256::double_hash(full256), expected_merk256);
-    BOOST_CHECK_EQUAL(sha256_hash(sha256_hash(full256)), expected_merk256);
-}
-
-////BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks256__null_hash__expected)
-////{
-////    const sha256::digests_t expected
-////    {
-////        expected_merk256, expected_merk256
-////    };
-////
-////    const sha256::set_t set
-////    {
-////        std::cref(full256), std::cref(full256)
-////    };
-////
-////    BOOST_CHECK_EQUAL(sha256::double_hash(set), expected);
 ////}
 
 // sha512
@@ -176,6 +148,13 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full512__null_hash__expected)
     BOOST_CHECK_EQUAL(sha512_hash(full512), expected_full512);
 }
 
+BOOST_AUTO_TEST_CASE(algorithm__double_hash512__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha512::double_hash(full512), expected_merk512);
+    BOOST_CHECK_EQUAL(sha512_hash(sha512_hash(full512)), expected_merk512);
+}
+
+// needs set expectation.
 ////BOOST_AUTO_TEST_CASE(algorithm__hash_blocks512__null_hashes__expected)
 ////{
 ////    const std_vector<cref<sha512::block_t>> pair
@@ -183,29 +162,8 @@ BOOST_AUTO_TEST_CASE(algorithm__hash_full512__null_hash__expected)
 ////        std::cref(full512), std::cref(full512)
 ////    };
 ////
-////    BOOST_CHECK_EQUAL(sha512::hash(pair), expected_pair512);
+////    BOOST_CHECK_EQUAL(sha512::merkle_hash(pair), expected_pair512);
 ////    BOOST_CHECK_EQUAL(sha512_hash(pair512), expected_pair512);
-////}
-
-BOOST_AUTO_TEST_CASE(algorithm__double_hash512__null_hash__expected)
-{
-    BOOST_CHECK_EQUAL(sha512::double_hash(full512), expected_merk512);
-    BOOST_CHECK_EQUAL(sha512_hash(sha512_hash(full512)), expected_merk512);
-}
-
-////BOOST_AUTO_TEST_CASE(algorithm__double_hash_blocks512__null_hashes__expected)
-////{
-////    const sha512::digests_t expected
-////    {
-////        expected_merk512, expected_merk512
-////    };
-////
-////    const sha512::set_t set
-////    {
-////        std::cref(full512), std::cref(full512)
-////    };
-////
-////    BOOST_CHECK_EQUAL(sha512::double_hash(set), expected);
 ////}
 
 #if !defined(INVISIBLE)
@@ -404,8 +362,8 @@ static_assert(is_same_type<sha160::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<sha160::digest_t, std_array<uint8_t, 20>>);
 static_assert(is_same_type<sha160::count_t, uint64_t>);
 static_assert(is_same_type<sha160::digests_t, std_vector<std_array<uint8_t, 20>>>);
-static_assert(is_same_type<sha160::set_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-static_assert(is_same_type<sha160::sets_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
+static_assert(is_same_type<sha160::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
+static_assert(is_same_type<sha160::set_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
 static_assert(is_same_type<decltype(sha160::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha160::limit_bytes), const uint64_t>);
 
@@ -428,8 +386,8 @@ static_assert(is_same_type<sha256::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<sha256::digest_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<sha256::count_t, uint64_t>);
 static_assert(is_same_type<sha256::digests_t, std_vector<std_array<uint8_t, 32>>>);
-static_assert(is_same_type<sha256::set_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-static_assert(is_same_type<sha256::sets_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
+static_assert(is_same_type<sha256::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
+static_assert(is_same_type<sha256::set_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
 static_assert(is_same_type<decltype(sha256::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha256::limit_bytes), const uint64_t>);
 
@@ -452,8 +410,8 @@ static_assert(is_same_type<sha512::half_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<sha512::digest_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<sha512::count_t, uint128_t>);
 static_assert(is_same_type<sha512::digests_t, std_vector<std_array<uint8_t, 64>>>);
-static_assert(is_same_type<sha512::set_t, std_vector<cref<std_array<uint8_t, 128>>>>);
-static_assert(is_same_type<sha512::sets_t<42>, std_vector<cref<std_array<std_array<uint8_t, 128>, 42>>>>);
+static_assert(is_same_type<sha512::blocks_t, std_vector<cref<std_array<uint8_t, 128>>>>);
+static_assert(is_same_type<sha512::set_t<42>, std_vector<cref<std_array<std_array<uint8_t, 128>, 42>>>>);
 static_assert(is_same_type<decltype(sha512::limit_bits), const uint128_t>);
 static_assert(is_same_type<decltype(sha512::limit_bytes), const uint128_t>);
 

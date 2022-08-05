@@ -204,8 +204,6 @@ BOOST_AUTO_TEST_CASE(accumulator__sha_hash_two256__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulated<sha256>(full256, full256), expected_pair256);
     BOOST_CHECK_EQUAL(sha256_hash(pair256), expected_pair256);
-
-    // dedicated doubler in bc lib for sha256.
     BOOST_CHECK_EQUAL(sha256_hash(full256, full256), sha256_hash(pair256));
 }
 

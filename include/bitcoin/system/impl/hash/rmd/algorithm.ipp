@@ -661,26 +661,6 @@ hash(const block_t& block) NOEXCEPT
     return finalize(state);
 }
 
-// [uncommon, prob can delete]
-TEMPLATE
-VCONSTEXPR typename CLASS::digest_t CLASS::
-hash(const blocks_t& blocks) NOEXCEPT
-{
-    words_t words{};
-    auto state = H::get;
-
-    // Endianness is order independent, but not worth parallelizing.
-    for (auto& block: blocks)
-    {
-        input(words, block);
-        rounding(state, words);
-    }
-
-    pad_n(words, blocks.size());
-    rounding(state, words);
-    return finalize(state);
-}
-
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

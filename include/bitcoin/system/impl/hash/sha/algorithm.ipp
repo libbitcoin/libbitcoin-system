@@ -1056,7 +1056,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 // TODO: incomplete, iterate over parallel rows to reduce to digest_t.
 TEMPLATE
 VCONSTEXPR typename CLASS::digests_t CLASS::
-merkle_hash(const set_t& blocks) NOEXCEPT
+merkle_hash(const blocks_t& blocks) NOEXCEPT
 {
     digests_t digests(blocks.size());
 
@@ -1101,10 +1101,8 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
 // [accumulator-N, common accumulated set, parallized input/prep]
 TEMPLATE
 VCONSTEXPR void CLASS::
-accumulate(state_t& state, const set_t& blocks) NOEXCEPT
+accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
-    buffer_t buffer{};
-
     if constexpr (Concurrent)
     {
         // Due to the memory allocation, avoid when not concurrent.
@@ -1126,6 +1124,8 @@ accumulate(state_t& state, const set_t& blocks) NOEXCEPT
     }
     else
     {
+        buffer_t buffer{};
+
         for (auto& block: blocks)
         {
             input(buffer, block);
@@ -1144,13 +1144,13 @@ accumulate(state_t& state, const set_t& blocks) NOEXCEPT
 TEMPLATE
 template <size_t Size>
 VCONSTEXPR typename CLASS::states_t CLASS::
-accumulate(const sets_t<Size>& sets) NOEXCEPT
+accumulate(const set_t<Size>& sets) NOEXCEPT
 {
     states_t states(sets.size());
 
     // The set of sets is order independent across the sets (vectorizable).
     std_transform(concurrency(), sets.begin(), sets.end(), states.begin(),
-        [&](const set_t& blocks)
+        [&](const blocks_t& blocks)
         {
             buffer_t buffer{};
             auto state = H::get;
