@@ -33,7 +33,7 @@ namespace system {
 namespace rmd {
 
 /// RMD hashing algorithm.
-template <typename RMD, bool Concurrent = true,
+template <typename RMD, bool Concurrent = false,
     if_same<typename RMD::T, rmdh_t> = true>
 class algorithm : algorithm_t
 {
@@ -76,14 +76,12 @@ public:
     /// Hashing (finalized).
     /// -----------------------------------------------------------------------
 
-    /// Finalized single hash.
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
 
     /// Streaming (unfinalized).
     /// -----------------------------------------------------------------------
 
-    /// One or more dependent blocks produces one state.
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     

@@ -67,16 +67,16 @@ constexpr hash_digest one_hash = from_uintx(uint256_t(one));
 /// Hash table keying.
 /// ---------------------------------------------------------------------------
 
-/// DJB2 hash key algorithm [Daniel J. Bernstein].
+/// DJB2 hash key algorithm [Daniel J. Bernstein] [hash tables].
 INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT;
 
-/// Combine hash values, such as a pair of djb2_hash outputs.
+/// Combine hash values, such as a pair of djb2_hash outputs [hash tables].
 INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT;
 
 /// Generalized cryptographic hash functions.
 /// ---------------------------------------------------------------------------
 
-/// ripemd128 (historical).
+/// ripemd128 [historical].
 INLINE half_hash ripemd128_hash(const data_slice& data) NOEXCEPT;
 INLINE data_chunk ripemd128_chunk(const data_slice& data) NOEXCEPT;
 
@@ -106,7 +106,7 @@ INLINE data_chunk sha256_chunk(const data_array<Size>& data) NOEXCEPT;
 INLINE data_chunk sha256_chunk(const data_chunk& data) NOEXCEPT;
 INLINE data_chunk sha256_chunk_slice(const data_slice& data) NOEXCEPT;
 
-/// sha512 hash (wallet).
+/// sha512 hash [wallet].
 INLINE long_hash sha512_hash(const data_slice& data) NOEXCEPT;
 INLINE data_chunk sha512_chunk(const data_slice& data) NOEXCEPT;
 
@@ -134,9 +134,6 @@ INLINE data_chunk bitcoin_chunk_slice(const data_slice& data) NOEXCEPT;
 /// Bitcoin hash of concatenate(left, right) [witness commitment].
 INLINE hash_digest bitcoin_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT;
-
-/// Bitcoin hash set from an ordered set of ptrs [header commitment].
-INLINE hashes bitcoin_hash(std_vector<uint8_t*>&& set) NOEXCEPT;
 
 /// Merkle root from a bitcoin_hash set [header commitment].
 INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT;

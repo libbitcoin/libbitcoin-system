@@ -264,27 +264,6 @@ INLINE hash_digest bitcoin_hash(const hash_digest& left,
     return sha256::double_hash(left, right);
 }
 
-// Bitcoin hash set from an ordered set of ptrs [header commitment].
-INLINE hashes bitcoin_hash(std_vector<uint8_t*>&&) NOEXCEPT
-{
-    // TODO: create std_vector<uint8_t*> parse_block(data_chunk&).
-    // TODO: these are not arrays (arbitrary size) and vector cannot be cast.
-    // TODO: holding an offset (index) would work, but requires base pointer.
-    // TODO: these could be cast into a set of differently sized byte arrays, but
-    // TODO: a vector cannot hold distinct types (though could hold arrays union).
-    // TODO: cannot use shared pointer because data is unowned, so pointer it is.
-    // TODO: requires specialized skip-parsing block reader to isolate txs.
-    // TODO: merkle_root(bitcoin_hash(parse_block(data_chunk&))).
-    // TODO: implement in sha::algorithm.
-    // TODO: each element represents set of independent sha blocks/remainders.
-    // TODO: concurrently hash blocks/remainders across set.
-    // TODO: thread parallelize upon vectorize/sha-ni (as in merkle hashing).
-    // TODO: individual tx hashing performed concurrently with tx parse.
-    // TODO: block merkle root performed concurrently with block.txs parse.
-    // TODO: these are two independent jobs both requiring the raw tx/s data.
-    return {};
-}
-
 // Merkle root from a bitcoin_hash set [header commitment].
 INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT
 {

@@ -155,9 +155,7 @@
       <ObjectFileName>$(IntDir)test_hash_sha_algorithm.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash\sha\sha.cpp">
-      <ObjectFileName>$(IntDir)test_hash_sha_sha.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\sha.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
@@ -176,9 +174,7 @@
     <ClCompile Include="..\..\..\..\test\math\overflow.cpp" />
     <ClCompile Include="..\..\..\..\test\math\power.cpp" />
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
-    <ClCompile Include="..\..\..\..\test\performance\sha.cpp">
-      <ObjectFileName>$(IntDir)test_performance_sha.obj</ObjectFileName>
-    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\performance\performance.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />
@@ -327,6 +323,11 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets'))" />
   </Target>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

@@ -366,7 +366,7 @@
     <ClCompile Include="..\..\..\..\test\math\sign.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\performance\sha.cpp">
+    <ClCompile Include="..\..\..\..\test\performance\performance.cpp">
       <Filter>src\performance</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp">

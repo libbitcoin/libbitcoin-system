@@ -955,7 +955,6 @@ output(const state_t& state) NOEXCEPT
 // Finalized hash functions.
 // ---------------------------------------------------------------------------
 
-// [common (second hash), specialized in functions and accumulator]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const half_t& half) NOEXCEPT
@@ -970,7 +969,6 @@ hash(const half_t& half) NOEXCEPT
     return output(state);
 }
 
-// [semi-common, specialized in functions and accumulator]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const block_t& block) NOEXCEPT
@@ -982,7 +980,7 @@ hash(const block_t& block) NOEXCEPT
     preparing(buffer);
     rounding(state, buffer);
 
-    // pad_one is prepared
+    // pad_one is fully precomputed and buffer prepared.
     pad_one(buffer);
     rounding(state, buffer);
     return output(state);
@@ -991,18 +989,14 @@ hash(const block_t& block) NOEXCEPT
 // Finalized double hash functions.
 // ---------------------------------------------------------------------------
 
-// [semi-common, specialized in functions, single tuple merkle]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 double_hash(const block_t& block) NOEXCEPT
 {
     buffer_t buffer{};
 
-    // first hash
-    // --------------------
-    auto state = H::get;
-
     // hash one block
+    auto state = H::get;
     input(buffer, block);
     preparing(buffer);
     rounding(state, buffer);
@@ -1014,11 +1008,8 @@ double_hash(const block_t& block) NOEXCEPT
     rounding(state, buffer);
     input(buffer, state);
 
-    // second hash
-    // --------------------
-    state = H::get;
-
     // hash padded state
+    state = H::get;
     pad_state(buffer);
     preparing(buffer);
     rounding(state, buffer);
@@ -1033,6 +1024,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     buffer_t buffer{};
     auto state = H::get;
 
+    // Combine halves into buffer.
     input1(buffer, left);
     input2(buffer, right);
     preparing(buffer);
@@ -1049,19 +1041,18 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     return output(state);
 }
 
-// Finalized hash specialization.
+// specialized optimizations
 // ---------------------------------------------------------------------------
 
-// [common, finalized single row merkle root]
-// TODO: incomplete, iterate over parallel rows to reduce to digest_t.
+// TODO: reduce to digest_t.
 TEMPLATE
 VCONSTEXPR typename CLASS::digests_t CLASS::
 merkle_hash(const blocks_t& blocks) NOEXCEPT
 {
     digests_t digests(blocks.size());
 
-    // A double_hash set is order independent (e.g. merkle root).
-    std::transform(concurrency(), blocks.begin(), blocks.end(),
+    // The double_hash set is order independent (e.g. merkle root).
+    std_transform(concurrency(), blocks.begin(), blocks.end(),
         digests.begin(), [&](const block_t& block)
         {
             buffer_t buffer{};
@@ -1084,10 +1075,43 @@ merkle_hash(const blocks_t& blocks) NOEXCEPT
     return digests;
 }
 
+// Block.txs skip-parsed hash set.
+////// Bitcoin hash set from an ordered set of ptrs [header commitment].
+////INLINE hashes bitcoin_hash(std_vector<uint8_t*>&&) NOEXCEPT
+////
+////template <size_t Size>
+////using set_t = std_vector<cref<std_array<block_t, Size>>>;
+////using states_t = std_vector<state_t>;
+////
+////TEMPLATE
+////template <size_t Size>
+////VCONSTEXPR typename CLASS::states_t CLASS::
+////accumulate(const set_t<Size>& sets) NOEXCEPT
+////{
+////    states_t states(sets.size());
+////
+////    // The set of sets is order independent across the sets (vectorizable).
+////    std_transform(concurrency(), sets.begin(), sets.end(), states.begin(),
+////        [&](const blocks_t& blocks)
+////        {
+////            buffer_t buffer{};
+////            auto state = H::get;
+////
+////            // Each set is ordered (accumulated).
+////            for (auto& block: blocks)
+////            {
+////                input(buffer, block);
+////                preparing(buffer);
+////                rounding(state, buffer);
+////            }
+////        });
+////
+////    return states;
+////}
+
 // Streaming hash functions.
 // ---------------------------------------------------------------------------
 
-// [accumulator-1, common accumulated singleton]
 TEMPLATE
 constexpr void CLASS::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
@@ -1098,20 +1122,22 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
     rounding(state, buffer);
 }
 
-// [accumulator-N, common accumulated set, parallized input/prep]
 TEMPLATE
 VCONSTEXPR void CLASS::
 accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
+    // Synchronization cost is prohibitive (material net loss) in all test
+    // scenarios with less than a one GiB buffer (breakeven).
     if constexpr (Concurrent)
     {
         // Due to the memory allocation, avoid when not concurrent.
-        buffers_t buffers(blocks.size());
+        // No measurable difference between heap vs. stack alloc here.
+        auto buffers = std::make_shared<buffers_t>(blocks.size());
 
         // eprint.iacr.org/2012/067.pdf
         // Message schedules/endianness are order independent.
-        std::transform(concurrency(), blocks.begin(), blocks.end(),
-            buffers.begin(), [](const block_t& block) NOEXCEPT
+        std_transform(concurrency(), blocks.begin(), blocks.end(),
+            buffers->begin(), [](const block_t& block) NOEXCEPT
             {
                 buffer_t space{};
                 input(space, block);
@@ -1119,7 +1145,7 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
                 return space;
             });
 
-        for (auto& space: buffers)
+        for (auto& space: *buffers)
             rounding(state, space);
     }
     else
@@ -1134,41 +1160,6 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
         }
     }
 }
-
-// Block.txs skip-parsed hash set.
-// ---------------------------------------------------------------------------
-
-// [block.txs skip-parsed hashing for tx.id as required for merkle root]
-// TODO: incomplete, can parallelize input prep by row and/or coumn.
-// TODO: can parallelize blocks by siblings.
-TEMPLATE
-template <size_t Size>
-VCONSTEXPR typename CLASS::states_t CLASS::
-accumulate(const set_t<Size>& sets) NOEXCEPT
-{
-    states_t states(sets.size());
-
-    // The set of sets is order independent across the sets (vectorizable).
-    std_transform(concurrency(), sets.begin(), sets.end(), states.begin(),
-        [&](const blocks_t& blocks)
-        {
-            buffer_t buffer{};
-            auto state = H::get;
-
-            // Each set is ordered (accumulated).
-            for (auto& block: blocks)
-            {
-                input(buffer, block);
-                preparing(buffer);
-                rounding(state, buffer);
-            }
-        });
-
-    return states;
-}
-
-// Finalizers for accumulators.
-// ---------------------------------------------------------------------------
 
 TEMPLATE
 constexpr void CLASS::

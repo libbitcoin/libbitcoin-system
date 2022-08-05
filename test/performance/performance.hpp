@@ -27,30 +27,34 @@ namespace perf {
 // format timing results to ostream
 // ----------------------------------------------------------------------------
 
-// millirounds
-template <size_t Count>
-constexpr auto scale = (1.0f * Count) / std::milli::den;
-
-// seconds
 template <typename Precision>
-constexpr auto total(uint64_t time) noexcept
+constexpr auto seconds_total(uint64_t time) noexcept
 {
-    // Divide precision by seconds/precision => seconds.
     return (1.0f * time) / Precision::period::den;
 }
 
-// milliseconds
-template <typename Precision>
-constexpr auto round(uint64_t time, uint64_t rounds) noexcept
+template <size_t Count>
+constexpr auto ms_per_round(float seconds) noexcept
 {
-    return (total<Precision>(time) / rounds) * std::milli::den;
+    return (seconds * std::milli::den) / Count;
 }
 
-// milliseconds
-template <typename Precision>
-constexpr auto datum(uint64_t time, uint64_t rounds, size_t size) noexcept
+template <size_t Bytes>
+constexpr auto ms_per_byte(float seconds) noexcept
 {
-    return round<Precision>(time, rounds) / size;
+    return (seconds * std::milli::den) / Bytes;
+}
+
+template <size_t Bytes>
+constexpr auto mib_per_second(float seconds) noexcept
+{
+    return Bytes / seconds / power2(20u);
+}
+
+template <size_t Bytes>
+constexpr auto cycles_per_byte(float seconds, float ghz) noexcept
+{
+    return (seconds * ghz * std::giga::num) / Bytes;
 }
 
 // Output performance run to given stream.
@@ -65,8 +69,10 @@ template
     bool Intrinsic,
     bool Chunked
 >
-void output(std::ostream& out, uint64_t time, bool csv) noexcept
+void output(std::ostream& out, uint64_t time, bool csv, float ghz = 3.0) noexcept
 {
+    constexpr auto bytes = Size * Count;
+    const auto seconds = seconds_total<Precision>(time);
     const auto delimiter = csv ? "," : "\n";
     std::string algorithm{ typeid(Algorithm).name() };
     replace(algorithm, "libbitcoin::system::", "");
@@ -78,7 +84,7 @@ void output(std::ostream& out, uint64_t time, bool csv) noexcept
         << delimiter
         << "algorithm_______: " << algorithm
         << delimiter
-        << "k_rounds________: " << serialize(scale<Count>)
+        << "test_rounds_____: " << serialize(Count)
         << delimiter
         << "bytes_per_round_: " << serialize(Size)
         << delimiter
@@ -90,11 +96,15 @@ void output(std::ostream& out, uint64_t time, bool csv) noexcept
         << delimiter
         << "chunked_________: " << serialize(Chunked)
         << delimiter
-        << "seconds_total___: " << serialize(total<Precision>(time))
+        << "seconds_total___: " << serialize(seconds)
         << delimiter
-        << "ms_per_round____: " << serialize(round<Precision>(time, Count))
+        << "mib_per_second__: " << serialize(mib_per_second<bytes>(seconds))
         << delimiter
-        << "ms_per_byte_____: " << serialize(datum<Precision>(time, Count, Size))
+        << "cycles_per_byte_: " << serialize(cycles_per_byte<bytes>(seconds, ghz))
+        << delimiter
+        << "ms_per_round____: " << serialize(ms_per_round<Count>(seconds))
+        << delimiter
+        << "ms_per_byte_____: " << serialize(ms_per_byte<bytes>(seconds))
         << delimiter;
     BC_POP_WARNING()
 }
@@ -103,19 +113,27 @@ void output(std::ostream& out, uint64_t time, bool csv) noexcept
 // ----------------------------------------------------------------------------
 
 template <size_t Size, bool Chunk = false>
-constexpr auto get_data(uint64_t seed) noexcept
+VCONSTEXPR auto get_data(uint64_t seed) noexcept
 {
+    constexpr auto filler = [](auto seed, auto& data)
+    {
+        std::for_each(data.begin(), data.end(), [&](auto& byte)
+        {
+            byte = narrow_cast<uint8_t>((seed = hash_combine(42u, seed)));
+        });
+    };
+
     if constexpr (Chunk)
     {
-        // minimally-sized chunk.
-        auto chunk = to_big_endian_size(seed);
-        chunk.resize(Size);
-        return chunk;
+        const auto data = std::make_shared<data_chunk>(Size);
+        filler(seed, *data);
+        return data;
     }
     else
     {
-        // specified-size array.
-        return to_big_endian_size<Size>(seed);
+        const auto data = std::make_shared<data_array<Size>>();
+        filler(seed, *data);
+        return data;
     }
 }
 
@@ -149,21 +167,22 @@ public:
 // hash selector
 // ----------------------------------------------------------------------------
 
-template <size_t Strength, bool Concurrent = true>
+#if !defined(VISIBILE)
+template <size_t Strength, bool Concurrent = false>
 using rmd_algorithm = rmd::algorithm<
     iif<Strength == 160, rmd::h160<>, rmd::h128<>>, Concurrent>;
 
-static_assert(is_same_type<rmd_algorithm<128, true>, rmd128>);
-static_assert(is_same_type<rmd_algorithm<160, true>, rmd160>);
+static_assert(is_same_type<rmd_algorithm<128, false>, rmd128>);
+static_assert(is_same_type<rmd_algorithm<160, false>, rmd160>);
 
-template <size_t Strength, bool Concurrent = true>
+template <size_t Strength, bool Concurrent = false>
 using sha_algorithm = sha::algorithm<
     iif<Strength == 256, sha::h256<>,
     iif<Strength == 512, sha::h512<>, sha::h160>>, Concurrent>;
 
-static_assert(is_same_type<sha_algorithm<160, true>, sha160>);
-static_assert(is_same_type<sha_algorithm<256, true>, sha256>);
-static_assert(is_same_type<sha_algorithm<512, true>, sha512>);
+static_assert(is_same_type<sha_algorithm<160, false>, sha160>);
+static_assert(is_same_type<sha_algorithm<256, false>, sha256>);
+static_assert(is_same_type<sha_algorithm<512, false>, sha512>);
 
 template <size_t Strength, bool Concurrent, bool Ripemd,
     bool_if<
@@ -173,11 +192,11 @@ using hash_selector = iif<Ripemd,
     rmd_algorithm<Strength, Concurrent>,
     sha_algorithm<Strength, Concurrent>>;
 
-static_assert(is_same_type<hash_selector<128, true, true>, rmd128>);
-static_assert(is_same_type<hash_selector<160, true, true>, rmd160>);
-static_assert(is_same_type<hash_selector<160, true, false>, sha160>);
-static_assert(is_same_type<hash_selector<256, true, false>, sha256>);
-static_assert(is_same_type<hash_selector<512, true, false>, sha512>);
+static_assert(is_same_type<hash_selector<128, false, true>, rmd128>);
+static_assert(is_same_type<hash_selector<160, false, true>, rmd160>);
+static_assert(is_same_type<hash_selector<160, false, false>, sha160>);
+static_assert(is_same_type<hash_selector<256, false, false>, sha256>);
+static_assert(is_same_type<hash_selector<512, false, false>, sha512>);
 
 static_assert(hash_selector<128, true, true>::concurrent);
 static_assert(hash_selector<160, true, true>::concurrent);
@@ -190,6 +209,7 @@ static_assert(!hash_selector<160, false, true>::concurrent);
 static_assert(!hash_selector<160, false, false>::concurrent);
 static_assert(!hash_selector<256, false, false>::concurrent);
 static_assert(!hash_selector<512, false, false>::concurrent);
+#endif
 
 // Algorithm::hash() test runner.
 // ----------------------------------------------------------------------------
@@ -200,8 +220,8 @@ static_assert(!hash_selector<512, false, false>::concurrent);
 // array size is resolved at compile time, allowing for various optimizations.
 template<
     size_t Strength,          // algorithm strength (160/256/512|128/160).
+    size_t Count = 1'000'000, // test iterations.
     size_t Size = zero,       // 0 = full block, 1 = half, otherwise bytes.
-    size_t Count = 500'000,   // test iterations.
     bool Concurrent = false,  // algorithm concurrency.
     bool Vectorized = false,  // algorithm vectorization.
     bool Intrinsic = false,   // intrinsic sha (N/A for rmd).
@@ -221,12 +241,12 @@ bool hash(std::ostream& out, bool csv = false) noexcept
     for (size_t seed = 0; seed < Count; ++seed)
     {
         // Generate a data_chunk or a data_array of specified size.
-        // Each is unique (sequential) to preclude compiler optimization.
+        // Each is hashed on the seed to preclude compiler/CPU optimization.
         const auto data = perf::get_data<size, Chunked>(seed);
 
         time += Timer::execution([&]() noexcept
         {
-            accumulator<Algorithm>::hash(data);
+            accumulator<Algorithm>::hash(*data);
         });
     }
 

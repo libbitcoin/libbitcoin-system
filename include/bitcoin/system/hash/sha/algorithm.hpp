@@ -34,7 +34,7 @@ namespace system {
 namespace sha {
 
 /// SHA hashing algorithm.
-template <typename SHA, bool Concurrent = true,
+template <typename SHA, bool Concurrent = false,
     if_same<typename SHA::T, shah_t> = true>
 class algorithm : algorithm_t
 {
@@ -61,10 +61,7 @@ public:
     using digest_t  = std_array<byte_t, bytes<SHA::digest>>;
 
     /// Vectorization types.
-    template <size_t Size>
-    using set_t     = std_vector<cref<std_array<block_t, Size>>>;
     using blocks_t  = std_vector<cref<block_t>>;
-    using states_t  = std_vector<state_t>;
     using digests_t = std_vector<digest_t>;
 
     /// Constants (and count_t).
@@ -84,24 +81,18 @@ public:
     /// Hashing (finalized).
     /// -----------------------------------------------------------------------
 
-    /// Finalized single hash.
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& left,
         const half_t& right) NOEXCEPT;
 
-    /// Finalized double hashes (N independent blocks produces N/2 hashes).
+    /// Finalized single row merkle_hash.
     static VCONSTEXPR digests_t merkle_hash(const blocks_t& blocks) NOEXCEPT;
 
     /// Streaming (unfinalized).
     /// -----------------------------------------------------------------------
 
-    /// N independent blocks produces N independently accumulated states.
-    template <size_t Size>
-    static VCONSTEXPR states_t accumulate(const set_t<Size>& blocks) NOEXCEPT;
-
-    /// One or more dependent blocks produces one state.
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
 

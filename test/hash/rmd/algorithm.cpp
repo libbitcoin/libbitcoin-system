@@ -59,17 +59,11 @@ constexpr auto expected_full128 = base16_array("082bfa9b829ef3a9e220dcc54e4c6383
 constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
 constexpr auto expected_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
 
-// RMD aliases are concurrent.
-static_assert(is_same_type<rmd::algorithm<rmd::h128<>, true>,     rmd128>);
-static_assert(is_same_type<rmd::algorithm<rmd::h128<256>, true>,  rmd128_256>);
-static_assert(is_same_type<rmd::algorithm<rmd::h160<>, true>,     rmd160>);
-static_assert(is_same_type<rmd::algorithm<rmd::h160<320>, true>,  rmd160_320>);
-
-// Non-concurrent RMD is not aliased.
-static_assert(!is_same_type<rmd::algorithm<rmd::h128<>, false>,    rmd128>);
-static_assert(!is_same_type<rmd::algorithm<rmd::h160<>, false>,    rmd160>);
-static_assert(!is_same_type<rmd::algorithm<rmd::h160<320>, false>, rmd160_320>);
-static_assert(!is_same_type<rmd::algorithm<rmd::h128<256>, false>, rmd128_256>);
+// RMD aliases are not concurrent.
+static_assert(is_same_type<rmd::algorithm<rmd::h128<>, false>,     rmd128>);
+static_assert(is_same_type<rmd::algorithm<rmd::h128<256>, false>,  rmd128_256>);
+static_assert(is_same_type<rmd::algorithm<rmd::h160<>, false>,     rmd160>);
+static_assert(is_same_type<rmd::algorithm<rmd::h160<320>, false>,  rmd160_320>);
 
 // constexpr for all variants of rmd128/160!
 static_assert(rmd128::hash(half128) == expected_half128);
@@ -77,66 +71,66 @@ static_assert(rmd128::hash(full128) == expected_full128);
 static_assert(rmd160::hash(half160) == expected_half160);
 static_assert(rmd160::hash(full160) == expected_full160);
 
-// rmd128 (concurrent)
+// rmd128 (non-concurrent)
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_half128__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half128__null_hash__expected)
 {
     BOOST_CHECK_EQUAL(rmd128::hash(half128), expected_half128);
     BOOST_CHECK_EQUAL(ripemd128_hash(half128), expected_half128);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full128__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
 {
     BOOST_CHECK_EQUAL(rmd128::hash(full128), expected_full128);
     BOOST_CHECK_EQUAL(ripemd128_hash(full128), expected_full128);
 }
 
-// rmd160 (concurrent)
+// rmd160 (non-concurrent)
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_half160__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half160__null_hash__expected)
 {
     BOOST_CHECK_EQUAL(rmd160::hash(half160), expected_half160);
     BOOST_CHECK_EQUAL(ripemd160_hash(half160), expected_half160);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full160__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full160__null_hash__expected)
 {
     BOOST_CHECK_EQUAL(rmd160::hash(full160), expected_full160);
     BOOST_CHECK_EQUAL(ripemd160_hash(full160), expected_full160);
 }
 
-// rmd128 (non-concurrent)
+// rmd128 (concurrent)
 // ----------------------------------------------------------------------------
-using rmd_128 = rmd::algorithm<rmd::h128<>, false>;
+using rmd_128 = rmd::algorithm<rmd::h128<>, true>;
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half128__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_half128__null_hash__expected)
 {
     static_assert(rmd_128::hash(half128) == expected_half128);
     BOOST_CHECK_EQUAL(rmd_128::hash(half128), expected_half128);
     BOOST_CHECK_EQUAL(ripemd128_hash(half128), expected_half128);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full128__null_hash__expected)
 {
     static_assert(rmd_128::hash(full128) == expected_full128);
     BOOST_CHECK_EQUAL(rmd_128::hash(full128), expected_full128);
     BOOST_CHECK_EQUAL(ripemd128_hash(full128), expected_full128);
 }
 
-// rmd160 (non-concurrent)
+// rmd160 (concurrent)
 // ----------------------------------------------------------------------------
-using rmd_160 = rmd::algorithm<rmd::h160<>, false>;
+using rmd_160 = rmd::algorithm<rmd::h160<>, true>;
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half160__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_half160__null_hash__expected)
 {
     static_assert(rmd_160::hash(half160) == expected_half160);
     BOOST_CHECK_EQUAL(rmd_160::hash(half160), expected_half160);
     BOOST_CHECK_EQUAL(ripemd160_hash(half160), expected_half160);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full160__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full160__null_hash__expected)
 {
     static_assert(rmd_160::hash(full160) == expected_full160);
     BOOST_CHECK_EQUAL(rmd_160::hash(full160), expected_full160);

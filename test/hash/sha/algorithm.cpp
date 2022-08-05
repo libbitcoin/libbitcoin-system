@@ -47,14 +47,14 @@ constexpr auto expected_full512 = base16_array("ab942f526272e456ed68a979f5020290
 ////constexpr auto expected_pair512 = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
 constexpr auto expected_merk512 = base16_array("56d3e5825edf06e467e50dfeb09c1df2d9940121c05d61a162bfcb80aea3aa5fe958d917ac993d76cd3ea86240fedbb79520ce7b9c275793e3c75a82116cc320");
 
-// SHA aliases.
-static_assert(is_same_type<sha::algorithm<sha::h160>,      sha160>);
-static_assert(is_same_type<sha::algorithm<sha::h256<224>>, sha256_224>);
-static_assert(is_same_type<sha::algorithm<sha::h256<>>,    sha256>);
-static_assert(is_same_type<sha::algorithm<sha::h512<256>>, sha512_256>);
-static_assert(is_same_type<sha::algorithm<sha::h512<224>>, sha512_224>);
-static_assert(is_same_type<sha::algorithm<sha::h512<384>>, sha512_384>);
-static_assert(is_same_type<sha::algorithm<sha::h512<>>,    sha512>);
+// RMD aliases are not concurrent.
+static_assert(is_same_type<sha::algorithm<sha::h160,      false>, sha160>);
+static_assert(is_same_type<sha::algorithm<sha::h256<224>, false>, sha256_224>);
+static_assert(is_same_type<sha::algorithm<sha::h256<>,    false>, sha256>);
+static_assert(is_same_type<sha::algorithm<sha::h512<256>, false>, sha512_256>);
+static_assert(is_same_type<sha::algorithm<sha::h512<224>, false>, sha512_224>);
+static_assert(is_same_type<sha::algorithm<sha::h512<384>, false>, sha512_384>);
+static_assert(is_same_type<sha::algorithm<sha::h512<>,    false>, sha512>);
 
 // constexpr for all variants of sha160/256/512!
 static_assert(sha160::hash(half160)        == expected_half160);
@@ -152,6 +152,29 @@ BOOST_AUTO_TEST_CASE(algorithm__double_hash512__null_hash__expected)
 {
     BOOST_CHECK_EQUAL(sha512::double_hash(full512), expected_merk512);
     BOOST_CHECK_EQUAL(sha512_hash(sha512_hash(full512)), expected_merk512);
+}
+
+
+// sha256 (concurrent)
+// ----------------------------------------------------------------------------
+using sha_256 = sha::algorithm<sha::h256<>, true>;
+
+BOOST_AUTO_TEST_CASE(algorithm__concurrent_hash_half256__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha_256::hash(half256), expected_half256);
+    BOOST_CHECK_EQUAL(sha256_hash(half256), expected_half256);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__concurrent_hash_full256__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha_256::hash(full256), expected_full256);
+    BOOST_CHECK_EQUAL(sha256_hash(full256), expected_full256);
+}
+
+BOOST_AUTO_TEST_CASE(algorithm__concurrent_double_hash256__null_hash__expected)
+{
+    BOOST_CHECK_EQUAL(sha_256::double_hash(full256), expected_merk256);
+    BOOST_CHECK_EQUAL(sha256_hash(sha256_hash(full256)), expected_merk256);
 }
 
 // needs set expectation.

@@ -376,33 +376,49 @@ TEMPLATE
 constexpr void CLASS::
 rounding(state_t& state, const words_t& words) NOEXCEPT
 {
-    // Two copies of state (required by RMD) are saved to jobs.
-    std_array<std::pair<bool, state_t>, two> jobs
-    {
-        std::make_pair(true, state),
-        std::make_pair(false, state)
-    };
-
     if (std::is_constant_evaluated())
     {
-        batch<true>(jobs.front().second, words);
-        batch<false>(jobs.back().second, words);
+        state_t left{ state };
+        state_t right{ state };
+        batch<true>(left, words);
+        batch<false>(right, words);
+        summarize(state, left, right);
+        return;
     }
     else
     {
-        // Ripemd consists of two independent hashing jobs.
-        std_for_each(concurrency(), jobs.begin(), jobs.end(),
-            [&words](auto& job) NOEXCEPT
+        // Synchronization cost is prohibitive in all test scenarios.
+        if constexpr (Concurrent)
+        {
+            // Two copies of state (required by RMD) are saved to jobs.
+            std_array<std::pair<bool, state_t>, two> jobs
             {
-                if (job.first)
-                    batch<true>(job.second, words);
-                else
-                    batch<false>(job.second, words);
-            });
-    }
+                std::make_pair(true, state),
+                std::make_pair(false, state)
+            };
 
-    // Add state from both jobs to original state.
-    summarize(state, jobs.front().second, jobs.back().second);
+            // Ripemd consists of two independent hashing jobs.
+            std_for_each(concurrency(), jobs.begin(), jobs.end(),
+                [&words](auto& job) NOEXCEPT
+                {
+                    if (job.first)
+                        batch<true>(job.second, words);
+                    else
+                        batch<false>(job.second, words);
+                });
+
+            // Add state from both jobs to original state.
+            summarize(state, jobs.front().second, jobs.back().second);
+        }
+        else
+        {
+            state_t left{ state };
+            state_t right{ state };
+            batch<true>(left, words);
+            batch<false>(right, words);
+            summarize(state, left, right);
+        }
+    }
 }
 
 TEMPLATE
@@ -591,7 +607,39 @@ output(const state_t& state) NOEXCEPT
     }
 }
 
-// Streaming single hash functions (used by accumulator).
+// Finalized hash functions.
+// ---------------------------------------------------------------------------
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(const half_t& half) NOEXCEPT
+{
+    words_t words{};
+    auto state = H::get;
+
+    input(words, half);
+    pad_half(words);
+    rounding(state, words);
+    return finalize(state);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(const block_t& block) NOEXCEPT
+{
+    words_t words{};
+    auto state = H::get;
+
+    input(words, block);
+    rounding(state, words);
+
+    // pad_one is fully precomputed.
+    pad_one(words);
+    rounding(state, words);
+    return finalize(state);
+}
+
+// Streaming hash functions and finalizers.
 // ---------------------------------------------------------------------------
 
 TEMPLATE
@@ -628,37 +676,6 @@ constexpr typename CLASS::digest_t CLASS::
 finalize(const state_t& state) NOEXCEPT
 {
     return output(state);
-}
-
-// Finalized single hash functions (common functions).
-// ---------------------------------------------------------------------------
-
-TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-hash(const half_t& half) NOEXCEPT
-{
-    words_t words{};
-    auto state = H::get;
-
-    input(words, half);
-    pad_half(words);
-    rounding(state, words);
-    return finalize(state);
-}
-
-TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-hash(const block_t& block) NOEXCEPT
-{
-    words_t words{};
-    auto state = H::get;
-
-    input(words, block);
-    rounding(state, words);
-
-    pad_one(words);
-    rounding(state, words);
-    return finalize(state);
 }
 
 BC_POP_WARNING()

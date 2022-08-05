@@ -301,8 +301,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/overflow.cpp \
     test/math/power.cpp \
     test/math/sign.cpp \
+    test/performance/performance.cpp \
     test/performance/performance.hpp \
-    test/performance/sha.cpp \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
     test/radix/base_2048.cpp \
