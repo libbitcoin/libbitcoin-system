@@ -17,47 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include "../hash.hpp"
     
 BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
-
-// This can be integrated into round() using a [bool Trace = false] template
-// argument. Dumping each round to a normal form provides a common view between
-// the two common implementation approaches (buffer vs. circular queue), as
-// described in FIPS180. This applies to both SHA and MD algorithm families.
-// This may be useful when implementing vectorization and sha-ni/neon, as all
-// reference/example code is implemented using the latter approach.
-////if constexpr (Trace)
-////{
-////    if (!std::is_constant_evaluated())
-////    {
-////        std::cout <<
-////              "0x" << encode_base16(to_big_endian(a)) <<
-////            ", 0x" << encode_base16(to_big_endian(b)) <<
-////            ", 0x" << encode_base16(to_big_endian(c)) <<
-////            ", 0x" << encode_base16(to_big_endian(d)) <<
-////            ", 0x" << encode_base16(to_big_endian(e)) <<
-////            ", 0x" << encode_base16(to_big_endian(x)) <<
-////            ", 0x" << encode_base16(to_big_endian(s)) <<
-////            ", 0x" << encode_base16(to_big_endian(k)) <<
-////            std::endl;
-////    }
-////}
-
-// homes.esat.kuleuven.be/~bosselae/ripemd160.html
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd128.txt
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd256.txt
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd160.txt
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd320.txt
-
-constexpr auto half128 = rmd128::half_t{};
-constexpr auto full128 = rmd128::block_t{};
-constexpr auto half160 = rmd160::half_t{};
-constexpr auto full160 = rmd160::block_t{};
-
-constexpr auto expected_half128 = base16_array("c11f675df95fe3f7f00b6825368bce48");
-constexpr auto expected_full128 = base16_array("082bfa9b829ef3a9e220dcc54e4c6383");
-constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
-constexpr auto expected_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
 
 // RMD aliases are not concurrent.
 static_assert(is_same_type<rmd::algorithm<rmd::h128<>, false>,     rmd128>);
@@ -65,76 +27,77 @@ static_assert(is_same_type<rmd::algorithm<rmd::h128<256>, false>,  rmd128_256>);
 static_assert(is_same_type<rmd::algorithm<rmd::h160<>, false>,     rmd160>);
 static_assert(is_same_type<rmd::algorithm<rmd::h160<320>, false>,  rmd160_320>);
 
-// constexpr for all variants of rmd128/160!
-static_assert(rmd128::hash(half128) == expected_half128);
-static_assert(rmd128::hash(full128) == expected_full128);
-static_assert(rmd160::hash(half160) == expected_half160);
-static_assert(rmd160::hash(full160) == expected_full160);
+static_assert(rmd128::hash(rmd128::half_t{})  == rmd_half128);
+static_assert(rmd128::hash(rmd128::block_t{}) == rmd_full128);
+static_assert(rmd160::hash(rmd160::half_t{})  == rmd_half160);
+static_assert(rmd160::hash(rmd160::block_t{}) == rmd_full160);
 
-// rmd128 (non-concurrent)
+// rmd128
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half128__null_hash__expected)
+// rmd128::hash
+BOOST_AUTO_TEST_CASE(sha__rmd128_hash__null_hash__expected)
 {
-    BOOST_CHECK_EQUAL(rmd128::hash(half128), expected_half128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(half128), expected_half128);
+    // Correlate non-const-evaluated to const-evaluated.
+    BOOST_REQUIRE_EQUAL(rmd128::hash(rmd128::half_t{}), rmd_half128);
+    BOOST_REQUIRE_EQUAL(rmd128::hash(rmd128::block_t{}), rmd_full128);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
+// accumulator<rmd128>::hash
+BOOST_AUTO_TEST_CASE(sha__accumulator_rmd128_hash__test_vectors__expected)
 {
-    BOOST_CHECK_EQUAL(rmd128::hash(full128), expected_full128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(full128), expected_full128);
+    // Verify non-const-evaluated to against public vectors.
+    for (const auto& test: rmd128_tests)
+    {
+        const auto hash = accumulator<rmd128>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
 }
 
-// rmd160 (non-concurrent)
+// accumulator<rmd_128>::hash (concurrent)
+BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_rmd128_hash__test_vectors__expected)
+{
+    using rmd_128 = rmd::algorithm<rmd::h128<>, true>;
+
+    // Verify non-const-evaluated to against public vectors.
+    for (const auto& test: rmd128_tests)
+    {
+        const auto hash = accumulator<rmd_128>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// rmd160
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half160__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__null_hash__expected)
 {
-    BOOST_CHECK_EQUAL(rmd160::hash(half160), expected_half160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(half160), expected_half160);
+    // Correlate non-const-evaluated to const-evaluated.
+    BOOST_REQUIRE_EQUAL(rmd160::hash(rmd160::half_t{}), rmd_half160);
+    BOOST_REQUIRE_EQUAL(rmd160::hash(rmd160::block_t{}), rmd_full160);
 }
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full160__null_hash__expected)
+BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
 {
-    BOOST_CHECK_EQUAL(rmd160::hash(full160), expected_full160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(full160), expected_full160);
+    // Verify non-const-evaluated to against public vectors
+    for (const auto& test: rmd160_tests)
+    {
+        const auto hash = accumulator<rmd160>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
 }
 
-// rmd128 (concurrent)
-// ----------------------------------------------------------------------------
-using rmd_128 = rmd::algorithm<rmd::h128<>, true>;
-
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_half128__null_hash__expected)
+// accumulator<rmd_128>::hash (concurrent)
+BOOST_AUTO_TEST_CASE(rmd__concurrent_rmd160_hash__test_vectors__expected)
 {
-    static_assert(rmd_128::hash(half128) == expected_half128);
-    BOOST_CHECK_EQUAL(rmd_128::hash(half128), expected_half128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(half128), expected_half128);
-}
+    using rmd_160 = rmd::algorithm<rmd::h160<>, true>;
 
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full128__null_hash__expected)
-{
-    static_assert(rmd_128::hash(full128) == expected_full128);
-    BOOST_CHECK_EQUAL(rmd_128::hash(full128), expected_full128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(full128), expected_full128);
-}
-
-// rmd160 (concurrent)
-// ----------------------------------------------------------------------------
-using rmd_160 = rmd::algorithm<rmd::h160<>, true>;
-
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_half160__null_hash__expected)
-{
-    static_assert(rmd_160::hash(half160) == expected_half160);
-    BOOST_CHECK_EQUAL(rmd_160::hash(half160), expected_half160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(half160), expected_half160);
-}
-
-BOOST_AUTO_TEST_CASE(rmd_algorithm__concurrent_hash_full160__null_hash__expected)
-{
-    static_assert(rmd_160::hash(full160) == expected_full160);
-    BOOST_CHECK_EQUAL(rmd_160::hash(full160), expected_full160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(full160), expected_full160);
+    // Verify non-const-evaluated to against public vectors
+    for (const auto& test: rmd160_tests)
+    {
+        const auto hash = accumulator<rmd_160>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
 }
 
 // Verify types.
@@ -294,6 +257,7 @@ static_assert(!rmd160_320::big_end_count);
 // ----------------------------------------------------------------------------
 
 using k_128 = typename rmd128::K;
+using rmd_128 = rmd::algorithm<rmd::h128<>, true>;
 
 struct accessor128
   : public rmd_128
@@ -426,6 +390,7 @@ static_assert(accessor128::functor<112>() == accessor128::get_f0());
 static_assert(accessor128::functor<127>() == accessor128::get_f0());
 
 using k_160 = typename rmd160::K;
+using rmd_160 = rmd::algorithm<rmd::h160<>, true>;
 
 struct accessor160
   : public rmd_160

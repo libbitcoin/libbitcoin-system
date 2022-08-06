@@ -120,7 +120,7 @@ protected:
 
     template<bool First>
     static constexpr void batch(state_t& state, const words_t& words) NOEXCEPT;
-    static constexpr void rounding(state_t& state, const words_t& words) NOEXCEPT;
+    static constexpr void compress(state_t& state, const words_t& words) NOEXCEPT;
     static constexpr void summarize(state_t& out, const state_t& batch1,
         const state_t& batch2) NOEXCEPT;
 

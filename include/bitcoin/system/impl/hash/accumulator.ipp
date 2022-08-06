@@ -245,10 +245,11 @@ write(size_t size, const byte_t* data) NOEXCEPT
     std::advance(data, accepted);
     size -= accepted;
 
-    // With at least one block (buffer is empty), accumulate all.
+    // With at least one block, accumulate all.
     if (accumulate(size, data))
         return true;
 
+    // Buffer the remainder.
     add_data(size, data);
     return true;
 }
@@ -267,7 +268,7 @@ accumulate(size_t size, const byte_t* data) NOEXCEPT
     const auto bytes  = size - remain;
     Algorithm::accumulate(state_, unsafe_vector_cast<block_t>(data, blocks));
 
-    // Update the counter and add any remaining bytes to the buffer.
+    // Update the counter and buffer the remainder.
     size_ += bytes;
     add_data(remain, std::next(data, bytes));
     return true;
@@ -314,7 +315,7 @@ inline void CLASS::
 hash(byte_t* digest, const data_slice& data) NOEXCEPT
 {
     accumulator<Algorithm> context{};
-    context.write(data.size(), data.data());
+    context.write_slice(data);
     context.flush(digest);
 }
 
@@ -343,7 +344,7 @@ inline typename CLASS::digest_t CLASS::
 hash(const data_chunk& data) NOEXCEPT
 {
     accumulator<Algorithm> context{};
-    context.write(data.size(), data.data());
+    context.write(data);
     return context.flush();
 }
 
@@ -352,7 +353,7 @@ inline typename CLASS::digest_t CLASS::
 hash_digest(const data_slice& data) NOEXCEPT
 {
     accumulator<Algorithm> context{};
-    context.write(data.size(), data.data());
+    context.write_slice(data);
     return context.flush();
 }
 

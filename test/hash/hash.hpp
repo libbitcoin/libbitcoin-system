@@ -21,6 +21,67 @@
 
 #include "../test.hpp"
 
+ // null hash vectors.
+constexpr auto rmd_half128 = base16_array("c11f675df95fe3f7f00b6825368bce48");
+constexpr auto rmd_full128 = base16_array("082bfa9b829ef3a9e220dcc54e4c6383");
+constexpr auto rmd_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
+constexpr auto rmd_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
+
+// null hash vectors.
+constexpr auto sha_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
+constexpr auto sha_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
+constexpr auto sha_half256 = base16_array("66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925");
+constexpr auto sha_full256 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b");
+constexpr auto sha_half512 = base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081");
+constexpr auto sha_full512 = base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11");
+
+// constexpr test helper for block construction from two halves.
+template <typename Algorithm>
+constexpr auto block(size_t a, size_t b) noexcept
+{
+    constexpr auto half = array_count<typename Algorithm::half_t>;
+    typename Algorithm::block_t block{};
+    block.at(zero) = narrow_cast<uint8_t>(a);
+    block.at(half) = narrow_cast<uint8_t>(b);
+    return block;
+};
+
+// constexpr helper for merkle_hash with two hashes.
+template <typename Algorithm, size_t A, size_t B>
+constexpr auto merkle_hash(const auto& expected) noexcept
+{
+    typename Algorithm::digests_t digests
+    {
+        { narrow_cast<uint8_t>(A) },
+        { narrow_cast<uint8_t>(B) }
+    };
+
+    Algorithm::merkle_hash(digests);
+    return (digests.size() == one) && (digests.front() == expected);
+};
+
+// constexpr test helper for merkle_hash with four hashes.
+template <typename Algorithm, size_t A, size_t B, size_t C, size_t D>
+constexpr auto merkle_hash(const auto& expected1, const auto& expected2) noexcept
+{
+    typename Algorithm::digests_t digests
+    {
+        { narrow_cast<uint8_t>(A) },
+        { narrow_cast<uint8_t>(B) },
+        { narrow_cast<uint8_t>(C) },
+        { narrow_cast<uint8_t>(D) }
+    };
+
+    const auto result = Algorithm::merkle_hash(digests);
+
+    return (result.size() == two)
+        && (result.front() == expected1)
+        && (result.back() == expected2)
+        && (digests.size() == two)
+        && (digests.front() == expected1)
+        && (digests.back() == expected2);
+};
+
 // rmd
 // ============================================================================
 

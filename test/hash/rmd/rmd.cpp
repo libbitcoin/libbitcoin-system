@@ -17,26 +17,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include "../hash.hpp"
 
-BOOST_AUTO_TEST_SUITE(rmd_tests)
-
-BOOST_AUTO_TEST_CASE(rmd__rmd128_hash__test_vectors__expected)
-{
-    for (const auto& test: rmd128_tests)
-    {
-        const auto hash = accumulator<rmd128>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
-{
-    for (const auto& test: rmd160_tests)
-    {
-        const auto hash = accumulator<rmd160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+// This can be integrated into round() using a [bool Trace = false] template
+// argument. Dumping each round to a normal form provides a common view between
+// the two common implementation approaches (buffer vs. circular queue), as
+// described in FIPS180. This applies to both SHA and MD algorithm families.
+// This may be useful when implementing vectorization and sha-ni/neon, as all
+// reference/example code is implemented using the latter approach.
+////if constexpr (Trace)
+////{
+////    if (!std::is_constant_evaluated())
+////    {
+////        std::cout <<
+////              "0x" << encode_base16(to_big_endian(a)) <<
+////            ", 0x" << encode_base16(to_big_endian(b)) <<
+////            ", 0x" << encode_base16(to_big_endian(c)) <<
+////            ", 0x" << encode_base16(to_big_endian(d)) <<
+////            ", 0x" << encode_base16(to_big_endian(e)) <<
+////            ", 0x" << encode_base16(to_big_endian(x)) <<
+////            ", 0x" << encode_base16(to_big_endian(s)) <<
+////            ", 0x" << encode_base16(to_big_endian(k)) <<
+////            std::endl;
+////    }
+////}

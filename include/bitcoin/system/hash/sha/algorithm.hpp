@@ -78,17 +78,24 @@ public:
     static constexpr auto concurrent    = Concurrent;
     static constexpr auto big_end_count = true;
 
-    /// Hashing (finalized).
+    /// Hashing.
     /// -----------------------------------------------------------------------
 
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
+
+    /// Double Hashing (sha256/512).
+    /// -----------------------------------------------------------------------
+
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& left,
         const half_t& right) NOEXCEPT;
 
-    /// Finalized single row merkle_hash.
-    static VCONSTEXPR digests_t merkle_hash(const blocks_t& blocks) NOEXCEPT;
+    /// Merkle Hashing (sha256/512).
+    /// -----------------------------------------------------------------------
+
+    static VCONSTEXPR digest_t merkle_root(digests_t&& digests) NOEXCEPT;
+    static VCONSTEXPR digests_t& merkle_hash(digests_t& digests) NOEXCEPT;
 
     /// Streaming (unfinalized).
     /// -----------------------------------------------------------------------
@@ -142,8 +149,8 @@ protected:
     template<size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
 
-    static constexpr void rounding(state_t& state, const buffer_t& buffer) NOEXCEPT;
-    static constexpr void preparing(buffer_t& buffer) NOEXCEPT;
+    static constexpr void compress(state_t& state, const buffer_t& buffer) NOEXCEPT;
+    static constexpr void schedule(buffer_t& buffer) NOEXCEPT;
     static constexpr void summarize(state_t& out, const state_t& in) NOEXCEPT;
     static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
 
@@ -151,7 +158,6 @@ protected:
     /// -----------------------------------------------------------------------
     static constexpr void pad_one(buffer_t& buffer) NOEXCEPT;
     static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
-    static constexpr void pad_state(buffer_t& buffer) NOEXCEPT;
     static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
     /// Parsing
@@ -163,14 +169,12 @@ protected:
 
 private:
     // Specialized padding types.
-    using state_pad_t = std_array<word_t, SHA::block_words - SHA::state_words>;
     using blocks_pad_t = std_array<word_t, subtract(SHA::block_words,
         count_bytes / SHA::word_bytes)>;
 
     static CONSTEVAL auto& concurrency() NOEXCEPT;
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL buffer_t block_pad() NOEXCEPT;
-    static CONSTEVAL state_pad_t state_pad() NOEXCEPT;
     static CONSTEVAL blocks_pad_t blocks_pad() NOEXCEPT;
 };
 

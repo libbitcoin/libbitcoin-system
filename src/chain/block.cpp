@@ -361,7 +361,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
 // private
 hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
-    return merkle_root(transaction_hashes(witness));
+    return sha256::merkle_root(transaction_hashes(witness));
 }
 
 bool block::is_invalid_merkle_root() const NOEXCEPT
@@ -458,8 +458,8 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
         {
             if (output->committed_hash(committed))
             {
-                return committed == bitcoin_hash(generate_merkle_root(true),
-                    reserved);
+                return committed == sha256::double_hash(
+                    generate_merkle_root(true), reserved);
             }
         }
     }

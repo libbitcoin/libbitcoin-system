@@ -75,19 +75,6 @@ chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::state_pad_t CLASS::
-state_pad() NOEXCEPT
-{
-    // See comments in accumulator regarding padding endianness.
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<digest_t>);
-
-    state_pad_t out{};
-    out.front() = bit_hi<word_t>;
-    out.back() = to_bits(bytes);
-    return out;
-}
-
-TEMPLATE
 CONSTEVAL typename CLASS::blocks_pad_t CLASS::
 blocks_pad() NOEXCEPT
 {
@@ -107,7 +94,7 @@ block_pad() NOEXCEPT
     buffer_t out{};
     out.front() = bit_hi<word_t>;
     out.at(index) = to_bits(bytes);
-    preparing(out);
+    schedule(out);
     return out;
 }
 
@@ -398,7 +385,7 @@ round(auto& state, const auto& buffer) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-rounding(state_t& state, const buffer_t& buffer) NOEXCEPT
+compress(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
     const state_t start{ state };
@@ -564,7 +551,7 @@ prepare(auto& buffer) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-preparing(buffer_t& buffer) NOEXCEPT
+schedule(buffer_t& buffer) NOEXCEPT
 {
     // Pointer degradation here (optimization), use auto typing in prepare().
     auto pbuffer = buffer.data();
@@ -748,52 +735,6 @@ pad_half(buffer_t& buffer) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-pad_state(buffer_t& buffer) NOEXCEPT
-{
-    // Pad state as buffer input.
-    // This is a double hash optimization.
-    // This is the same as pad_half unless SHA is SHA-1.
-    constexpr auto pad = state_pad();
-
-    if (std::is_constant_evaluated())
-    {
-        if constexpr (SHA::digest == 160)
-        {
-            // SHA-1 padding of state is 16-5 [11] words.
-            buffer.at(5)  = pad.at(0);
-            buffer.at(6)  = pad.at(1);
-            buffer.at(7)  = pad.at(2);
-            buffer.at(8)  = pad.at(3);
-            buffer.at(9)  = pad.at(4);
-            buffer.at(10) = pad.at(5);
-            buffer.at(11) = pad.at(6);
-            buffer.at(12) = pad.at(7);
-            buffer.at(13) = pad.at(8);
-            buffer.at(14) = pad.at(9);
-            buffer.at(15) = pad.at(10);
-        }
-        else
-        {
-            // SHA-256/512 padding of state is 16-8 [8] words.
-            buffer.at(8)  = pad.at(0);
-            buffer.at(9)  = pad.at(1);
-            buffer.at(10) = pad.at(2);
-            buffer.at(11) = pad.at(3);
-            buffer.at(12) = pad.at(4);
-            buffer.at(13) = pad.at(5);
-            buffer.at(14) = pad.at(6);
-            buffer.at(15) = pad.at(7);
-        }
-    }
-    else
-    {
-        constexpr auto size = SHA::block_words - SHA::state_words;
-        array_cast<word_t, size, SHA::state_words>(buffer) = pad;
-    }
-}
-
-TEMPLATE
-constexpr void CLASS::
 pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
@@ -900,14 +841,14 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        from_big< 8 * size>(buffer.at( 8), half);
-        from_big< 9 * size>(buffer.at( 9), half);
-        from_big<10 * size>(buffer.at(10), half);
-        from_big<11 * size>(buffer.at(11), half);
-        from_big<12 * size>(buffer.at(12), half);
-        from_big<13 * size>(buffer.at(13), half);
-        from_big<14 * size>(buffer.at(14), half);
-        from_big<15 * size>(buffer.at(15), half);
+        from_big<0 * size>(buffer.at( 8), half);
+        from_big<1 * size>(buffer.at( 9), half);
+        from_big<2 * size>(buffer.at(10), half);
+        from_big<3 * size>(buffer.at(11), half);
+        from_big<4 * size>(buffer.at(12), half);
+        from_big<5 * size>(buffer.at(13), half);
+        from_big<6 * size>(buffer.at(14), half);
+        from_big<7 * size>(buffer.at(15), half);
     }
     else
     {
@@ -952,7 +893,7 @@ output(const state_t& state) NOEXCEPT
     }
 }
 
-// Finalized hash functions.
+// Hashing.
 // ---------------------------------------------------------------------------
 
 TEMPLATE
@@ -964,8 +905,8 @@ hash(const half_t& half) NOEXCEPT
 
     input1(buffer, half);
     pad_half(buffer);
-    preparing(buffer);
-    rounding(state, buffer);
+    schedule(buffer);
+    compress(state, buffer);
     return output(state);
 }
 
@@ -977,102 +918,114 @@ hash(const block_t& block) NOEXCEPT
     auto state = H::get;
 
     input(buffer, block);
-    preparing(buffer);
-    rounding(state, buffer);
+    schedule(buffer);
+    compress(state, buffer);
 
     // pad_one is fully precomputed and buffer prepared.
     pad_one(buffer);
-    rounding(state, buffer);
+    compress(state, buffer);
     return output(state);
 }
 
-// Finalized double hash functions.
+// Double Hashing.
 // ---------------------------------------------------------------------------
+// No double_hash optimizations for sha160 (double_hash requires half_t).
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 double_hash(const block_t& block) NOEXCEPT
 {
+    static_assert(is_same_type<digest_t, half_t>);
+
     buffer_t buffer{};
 
     // hash one block
     auto state = H::get;
     input(buffer, block);
-    preparing(buffer);
-    rounding(state, buffer);
+    schedule(buffer);
+    compress(state, buffer);
 
     // pad_one is prepared
     // input state before resetting
     // hash one block of single block padding
     pad_one(buffer);
-    rounding(state, buffer);
+    compress(state, buffer);
     input(buffer, state);
 
     // hash padded state
     state = H::get;
-    pad_state(buffer);
-    preparing(buffer);
-    rounding(state, buffer);
+    pad_half(buffer);
+    schedule(buffer);
+    compress(state, buffer);
     return output(state);
 }
 
-// [witness commitment]
+// [witness commitment, merkle root]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
+    static_assert(is_same_type<digest_t, half_t>);
+
     buffer_t buffer{};
     auto state = H::get;
 
     // Combine halves into buffer.
     input1(buffer, left);
     input2(buffer, right);
-    preparing(buffer);
-    rounding(state, buffer);
+    schedule(buffer);
+    compress(state, buffer);
 
     pad_one(buffer);
-    rounding(state, buffer);
+    compress(state, buffer);
     input(buffer, state);
 
     state = H::get;
-    pad_state(buffer);
-    preparing(buffer);
-    rounding(state, buffer);
+    pad_half(buffer);
+    schedule(buffer);
+    compress(state, buffer);
     return output(state);
 }
 
-// specialized optimizations
-// ---------------------------------------------------------------------------
+// Merkle Hashing (sha256/512).
+// ------------------------------------------------------------------------
+// No merkle_hash optimizations for sha160 (double_hash requires half_t).
 
-// TODO: reduce to digest_t.
+// TODO: this is the boundary of vectorization.
+// TODO: this will return lane hashes and increment by lanes.
+// TODO: just need to double hash a range and assign the returned range.
 TEMPLATE
-VCONSTEXPR typename CLASS::digests_t CLASS::
-merkle_hash(const blocks_t& blocks) NOEXCEPT
+VCONSTEXPR typename CLASS::digests_t& CLASS::
+merkle_hash(digests_t& digests) NOEXCEPT
 {
-    digests_t digests(blocks.size());
+    static_assert(is_same_type<digest_t, half_t>);
+    const auto half = to_half(digests.size());
 
-    // The double_hash set is order independent (e.g. merkle root).
-    std_transform(concurrency(), blocks.begin(), blocks.end(),
-        digests.begin(), [&](const block_t& block)
-        {
-            buffer_t buffer{};
+    for (size_t i = 0, j = 0; i < half; ++i, j += 2)
+        digests[i] = double_hash(digests[j], digests[add1(j)]);
 
-            auto state = H::get;
-            input(buffer, block);
-            preparing(buffer);
-            rounding(state, buffer);
-            pad_one(buffer);
-            rounding(state, buffer);
-            input(buffer, state);
-
-            state = H::get;
-            pad_state(buffer);
-            preparing(buffer);
-            rounding(state, buffer);
-            return output(state);
-        });
-
+    digests.resize(half);
     return digests;
+};
+
+TEMPLATE
+VCONSTEXPR typename CLASS::digest_t CLASS::
+merkle_root(digests_t&& digests) NOEXCEPT
+{
+    static_assert(is_same_type<digest_t, half_t>);
+    const auto count = digests.size();
+
+    if (is_zero(count))
+        return {};
+
+    if (is_one(count))
+        return std::move(digests.front());
+
+    if (is_odd(count))
+        digests.push_back(digests.back());
+
+    while (merkle_hash(digests).size() > one);
+    return std::move(digests.front());
 }
 
 // Block.txs skip-parsed hash set.
@@ -1101,7 +1054,7 @@ merkle_hash(const blocks_t& blocks) NOEXCEPT
 ////            for (auto& block: blocks)
 ////            {
 ////                input(buffer, block);
-////                preparing(buffer);
+////                schedule(buffer);
 ////                rounding(state, buffer);
 ////            }
 ////        });
@@ -1109,7 +1062,7 @@ merkle_hash(const blocks_t& blocks) NOEXCEPT
 ////    return states;
 ////}
 
-// Streaming hash functions.
+// Streaming (unfinalized).
 // ---------------------------------------------------------------------------
 
 TEMPLATE
@@ -1118,8 +1071,8 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     buffer_t buffer{};
     input(buffer, block);
-    preparing(buffer);
-    rounding(state, buffer);
+    schedule(buffer);
+    compress(state, buffer);
 }
 
 TEMPLATE
@@ -1141,12 +1094,12 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
             {
                 buffer_t space{};
                 input(space, block);
-                preparing(space);
+                schedule(space);
                 return space;
             });
 
         for (auto& space: *buffers)
-            rounding(state, space);
+            compress(state, space);
     }
     else
     {
@@ -1155,8 +1108,8 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
         for (auto& block: blocks)
         {
             input(buffer, block);
-            preparing(buffer);
-            rounding(state, buffer);
+            schedule(buffer);
+            compress(state, buffer);
         }
     }
 }

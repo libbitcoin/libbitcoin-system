@@ -374,7 +374,7 @@ batch(state_t& state, const words_t& words) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-rounding(state_t& state, const words_t& words) NOEXCEPT
+compress(state_t& state, const words_t& words) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -619,7 +619,7 @@ hash(const half_t& half) NOEXCEPT
 
     input(words, half);
     pad_half(words);
-    rounding(state, words);
+    compress(state, words);
     return finalize(state);
 }
 
@@ -631,11 +631,11 @@ hash(const block_t& block) NOEXCEPT
     auto state = H::get;
 
     input(words, block);
-    rounding(state, words);
+    compress(state, words);
 
     // pad_one is fully precomputed.
     pad_one(words);
-    rounding(state, words);
+    compress(state, words);
     return finalize(state);
 }
 
@@ -648,7 +648,7 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     words_t words{};
     input(words, block);
-    rounding(state, words);
+    compress(state, words);
 }
 
 TEMPLATE
@@ -660,7 +660,7 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
     for (auto& block: blocks)
     {
         input(words, block);
-        rounding(state, words);
+        compress(state, words);
     }
 }
 
