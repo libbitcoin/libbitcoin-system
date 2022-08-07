@@ -53,6 +53,7 @@ struct h
     static constexpr auto digest       = Digest;
     static constexpr auto size         = K::size;
     static constexpr auto rounds       = K::rounds;
+    static constexpr auto strength     = K::strength;
     static constexpr auto word_bits    = bytes<size>;
     static constexpr auto word_bytes   = bytes<word_bits>;
     static constexpr auto block_words  = bytes<size> / to_half(word_bytes);

@@ -21,6 +21,7 @@
     
 BOOST_AUTO_TEST_SUITE(sha_algorithm_tests)
 
+// Other test vectors are dependant upon the correctness of these.
 static_assert(sha160::hash(sha160::half_t{})  == sha_half160);
 static_assert(sha160::hash(sha160::block_t{}) == sha_full160);
 static_assert(sha256::hash(sha256::half_t{})  == sha_half256);
@@ -387,6 +388,7 @@ static_assert(is_same_type<k512::constants_t, std_array<uint64_t, 80>>);
 ////static_assert(h<rmd::k160>::size == 256);
 static_assert(h<k160>::size == 256);
 static_assert(h<k160>::digest == 160);
+static_assert(h<k160>::strength == 160);
 static_assert(h<k160, 160>::word_bits == 32);
 static_assert(h<k160, 160>::word_bytes == 4);
 static_assert(h<k160, 160>::chunk_words == 8);
@@ -401,6 +403,8 @@ static_assert(h<k256, 256>::size == 256);
 static_assert(h<k256, 224>::size == 256);
 static_assert(h<k256, 256>::digest == 256);
 static_assert(h<k256, 224>::digest == 224);
+static_assert(h<k256, 256>::strength == 256);
+static_assert(h<k256, 224>::strength == 256);
 static_assert(h<k256, 256>::word_bits == 32);
 static_assert(h<k256, 224>::word_bits == 32);
 static_assert(h<k256, 256>::word_bytes == 4);
@@ -427,6 +431,10 @@ static_assert(h<k512, 512>::digest == 512);
 static_assert(h<k512, 384>::digest == 384);
 static_assert(h<k512, 224>::digest == 224);
 static_assert(h<k512, 256>::digest == 256);
+static_assert(h<k512, 512>::strength == 512);
+static_assert(h<k512, 384>::strength == 512);
+static_assert(h<k512, 224>::strength == 512);
+static_assert(h<k512, 256>::strength == 512);
 static_assert(h<k512, 512>::word_bits == 64);
 static_assert(h<k512, 384>::word_bits == 64);
 static_assert(h<k512, 224>::word_bits == 64);
@@ -462,8 +470,9 @@ static_assert(is_same_type<h<k512, 256>::state_t, std_array<uint64_t, 8>>);
 
 // h160
 static_assert(h160::size == 256);
-static_assert(h160::digest == 160);
 static_assert(h160::rounds == 80);
+static_assert(h160::digest == 160);
+static_assert(h160::strength == 160);
 static_assert(h160::get[0] == 0x67452301);
 static_assert(h160::get[4] == 0xc3d2e1f0);
 static_assert(h160::get.size() == 5);
@@ -474,8 +483,9 @@ static_assert(h160::K::get.size() == 80);
 
 // h256<>
 static_assert(h256<>::size == 256);
-static_assert(h256<>::digest == 256);
 static_assert(h256<>::rounds == 64);
+static_assert(h256<>::digest == 256);
+static_assert(h256<>::strength == 256);
 static_assert(h256<>::get[0] == 0x6a09e667);
 static_assert(h256<>::get[7] == 0x5be0cd19);
 static_assert(h256<>::get.size() == 8);
@@ -486,8 +496,9 @@ static_assert(h256<>::K::get.size() == 64);
 
 // h512<>
 static_assert(h512<>::size == 512);
-static_assert(h512<>::digest == 512);
 static_assert(h512<>::rounds == 80);
+static_assert(h512<>::digest == 512);
+static_assert(h512<>::strength == 512);
 static_assert(h512<>::get[0] == 0x6a09e667f3bcc908);
 static_assert(h512<>::get[7] == 0x5be0cd19137e2179);
 static_assert(h512<>::get.size() == 8);

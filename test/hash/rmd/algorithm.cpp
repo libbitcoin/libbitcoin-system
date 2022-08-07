@@ -21,6 +21,7 @@
     
 BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
 
+// Other test vectors are dependant upon the correctness of these.
 static_assert(rmd128::hash(rmd128::half_t{})  == rmd_half128);
 static_assert(rmd128::hash(rmd128::block_t{}) == rmd_full128);
 static_assert(rmd160::hash(rmd160::half_t{})  == rmd_half160);
@@ -156,6 +157,7 @@ static_assert(is_same_type<k160::schedule_t, std_array<uint32_t, 160>>);
 // h<k128,...>
 static_assert(h<k128>::size == 256);
 static_assert(h<k128>::digest == 128);
+static_assert(h<k128>::strength == 128);
 static_assert(h<k128, 128>::word_bits == 32);
 static_assert(h<k128, 128>::word_bytes == 4);
 static_assert(h<k128, 128>::chunk_words == 8);
@@ -169,6 +171,7 @@ static_assert(is_same_type<h<k128, 128>::state_t, std_array<uint32_t, 4>>);
 ////static_assert(h<sha::k160>::size == 256);
 static_assert(h<k160>::size == 256);
 static_assert(h<k160>::digest == 160);
+static_assert(h<k160>::strength == 160);
 static_assert(h<k160, 160>::word_bits == 32);
 static_assert(h<k160, 160>::word_bytes == 4);
 static_assert(h<k160, 160>::chunk_words == 8);
@@ -180,8 +183,9 @@ static_assert(is_same_type<h<k160, 160>::state_t, std_array<uint32_t, 5>>);
 
 // h128<>
 static_assert(h128<>::size == 256);
-static_assert(h128<>::digest == 128);
 static_assert(h128<>::rounds == 128);
+static_assert(h128<>::digest == 128);
+static_assert(h128<>::strength == 128);
 static_assert(h128<>::get[0] == 0x67452301);
 static_assert(h128<>::get[3] == 0x10325476);
 static_assert(h128<>::get.size() == 4);
@@ -192,8 +196,9 @@ static_assert(h128<>::K::get.size() == 8);
 
 // h160<>
 static_assert(h160<>::size == 256);
-static_assert(h160<>::digest == 160);
 static_assert(h160<>::rounds == 160);
+static_assert(h160<>::digest == 160);
+static_assert(h160<>::strength == 160);
 static_assert(h160<>::get[0] == 0x67452301);
 static_assert(h160<>::get[4] == 0xc3d2e1f0);
 static_assert(h160<>::get.size() == 5);
