@@ -690,7 +690,7 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 TEMPLATE
 template<size_t Round>
 INLINE constexpr void CLASS::
-round(auto& state, const auto& buffer) NOEXCEPT
+round(auto& state, const auto& wk) NOEXCEPT
 {
     if constexpr (SHA::strength == 160)
     {
@@ -702,7 +702,7 @@ round(auto& state, const auto& buffer) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            buffer[Round]);
+            wk[Round]);
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -722,7 +722,7 @@ round(auto& state, const auto& buffer) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            buffer[Round]);
+            wk[Round]);
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -877,6 +877,9 @@ prepare(auto& w) NOEXCEPT
 
     if constexpr (SHA::strength == 160)
     {
+        // FIPS.180
+        // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
+
         w[r00] = rol_<1>(xor_(
             xor_(w[r16], w[r14]),
             xor_(w[r08], w[r03])));
@@ -909,6 +912,10 @@ prepare(auto& w) NOEXCEPT
     else
     {
         // TODO: if open lanes, vectorize sigma0 and sigma1 (see Intel).
+
+        // FIPS.180
+        // 6.2.2 SHA-256 Hash Computation (16 <= t <= 63)
+        // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
 
         w[r00] = add_(
             add_(w[r16], sigma0(w[r15])),
