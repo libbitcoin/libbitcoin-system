@@ -284,6 +284,36 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // ms_per_round____: 0.00657575
     // ms_per_byte_____: 6.42164e-06
 
+    // After movement of k to schedule and compression (no expected change).
+
+    // test____________: performance__sha256
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+    // test_rounds_____: 1'048'576
+    // bytes_per_round_: 1024
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.72823
+    // mib_per_second__: 152.194
+    // cycles_per_byte_: 18.7985
+    // ms_per_round____: 0.00641654
+    // ms_per_byte_____: 6.26616e-06
+
+    // test____________: performance__sha256
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+    // test_rounds_____: 1'048'576
+    // bytes_per_round_: 1024
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.98735
+    // mib_per_second__: 146.551
+    // cycles_per_byte_: 19.5224
+    // ms_per_round____: 0.00666366
+    // ms_per_byte_____: 6.50748e-06
+
     const auto complete = performance::hash<sha256_optimal>(std::cout);
     BOOST_CHECK(complete);
 }
@@ -513,6 +543,34 @@ BOOST_AUTO_TEST_CASE(performance__rmd160)
     // cycles_per_byte_: 17.825
     // ms_per_round____: 0.00608426
     // ms_per_byte_____: 5.94166e-06
+
+    // test____________: performance__rmd160
+    // algorithm_______: rmd::algorithm<rmd::h160<160,1>,1,0,1>
+    // test_rounds_____: 1'048'576
+    // bytes_per_round_: 1024
+    // compressed______: 0
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.32906
+    // mib_per_second__: 161.793
+    // cycles_per_byte_: 17.6832
+    // ms_per_round____: 0.00603587
+    // ms_per_byte_____: 5.8944e-06
+
+    // test____________: performance__rmd160
+    // algorithm_______: rmd::algorithm<rmd::h160<160,1>,1,0,1>
+    // test_rounds_____: 1'048'576
+    // bytes_per_round_: 1024
+    // compressed______: 0
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.54346
+    // mib_per_second__: 156.492
+    // cycles_per_byte_: 18.2822
+    // ms_per_round____: 0.00624033
+    // ms_per_byte_____: 6.09407e-06
 
     const auto complete = performance::hash<rmd160_optimal>(std::cout);
     BOOST_CHECK(complete);
