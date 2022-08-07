@@ -32,6 +32,7 @@ uint32_t get(mint128_t a) noexcept
     return _mm_extract_epi32(a, Offset);
 }
 
+// Broadcast 32-bit integer a to all elements of dst.
 mint128_t set(uint32_t a) noexcept
 {
     return _mm_set1_epi32(a);
@@ -177,6 +178,7 @@ mint128_t inline read4(const block4& blocks) NOEXCEPT
         from_little_endian(array_cast<uint8_t, four, Offset>(blocks[3])));
     BC_POP_WARNING()
 
+    // bswap_mask
     return shuffle(value, set(
         0x0c0d0e0ful, 0x08090a0bul,  0x04050607ul, 0x00010203ul));
 }
@@ -184,6 +186,7 @@ mint128_t inline read4(const block4& blocks) NOEXCEPT
 template <size_t Offset>
 void inline write4(digest4& hashes, mint128_t value) NOEXCEPT
 {
+    // bswap_mask
     value = shuffle(value, set(
         0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
 

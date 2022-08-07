@@ -96,7 +96,7 @@ mint128_t load(const uint8_t& data) NOEXCEPT
 void store(uint8_t& out, mint128_t value) NOEXCEPT
 {
     static const auto flipper = load32x4a(mask[0]);
-    store8x16u(out, i128::shuffle(value, flipper));
+    store32x4u(out, i128::shuffle(value, flipper));
 }
 
 // sha256
