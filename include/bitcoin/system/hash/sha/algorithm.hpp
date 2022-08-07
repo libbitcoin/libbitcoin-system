@@ -138,11 +138,11 @@ protected:
 
     template<size_t Round>
     INLINE static constexpr void round(auto a, auto& b, auto c, auto d,
-        auto& e, auto w) NOEXCEPT;
+        auto& e, auto wk) NOEXCEPT;
 
     template<size_t Round>
     INLINE static constexpr void round(auto a, auto b, auto c, auto& d,
-        auto e, auto f, auto g, auto& h, auto w) NOEXCEPT;
+        auto e, auto f, auto g, auto& h, auto wk) NOEXCEPT;
 
     template<size_t Round>
     INLINE static constexpr void round(auto& state,
@@ -151,9 +151,9 @@ protected:
     template<size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
 
-    static constexpr void compress(state_t& state, const buffer_t& buffer) NOEXCEPT;
-    static constexpr void schedule(buffer_t& buffer) NOEXCEPT;
-    static constexpr void summarize(state_t& out, const state_t& in) NOEXCEPT;
+    static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
+    static constexpr void schedule(auto& buffer) NOEXCEPT;
+    static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
     static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
 
     /// Padding
@@ -168,6 +168,11 @@ protected:
     static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
     static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
     static constexpr digest_t output(const state_t& state) NOEXCEPT;
+
+    /// Vectorization
+    /// -----------------------------------------------------------------------
+    INLINE static void schedule(buffers_t& buffers,
+        const blocks_t& blocks) NOEXCEPT;
 
 private:
     // Specialized padding types.
