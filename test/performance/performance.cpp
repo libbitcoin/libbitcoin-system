@@ -19,7 +19,7 @@
 #include "../test.hpp"
 #include "performance.hpp"
 
-#if defined(HAVE_PERFORMANCE_TESTS)
+#if !defined(HAVE_PERFORMANCE_TESTS)
 
 BOOST_AUTO_TEST_SUITE(performance_tests)
 
@@ -27,7 +27,7 @@ using namespace performance;
 
 BOOST_AUTO_TEST_CASE(performance__sha256)
 {
-#if defined(VISIBLE)
+#if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
     // --------------------------------------------------------
 
@@ -270,7 +270,21 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // ms_per_byte_____: 1.52886e-05
 #endif
 
-auto complete = performance::hash<sha256_optimal>(std::cout);
+    // test____________: performance__sha256
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+    // test_rounds_____: 1'048'576
+    // bytes_per_round_: 1024
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.89518
+    // mib_per_second__: 148.51
+    // cycles_per_byte_: 19.2649
+    // ms_per_round____: 0.00657575
+    // ms_per_byte_____: 6.42164e-06
+
+    const auto complete = performance::hash<sha256_optimal>(std::cout);
     BOOST_CHECK(complete);
 }
 
@@ -486,7 +500,21 @@ BOOST_AUTO_TEST_CASE(performance__rmd160)
     // ms_per_byte_____: 5.79138e-06
 #endif
 
-auto complete = performance::hash<rmd160_optimal>(std::cout);
+    // test____________: performance__rmd160
+    // algorithm_______: rmd::algorithm<rmd::h160<160,1>,1,0,1>
+    // test_rounds_____: 1'048'576
+    // bytes_per_round_: 1024
+    // compressed______: 0
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.3798
+    // mib_per_second__: 160.506
+    // cycles_per_byte_: 17.825
+    // ms_per_round____: 0.00608426
+    // ms_per_byte_____: 5.94166e-06
+
+    const auto complete = performance::hash<rmd160_optimal>(std::cout);
     BOOST_CHECK(complete);
 }
 

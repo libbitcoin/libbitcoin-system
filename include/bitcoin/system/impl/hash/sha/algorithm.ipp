@@ -1093,16 +1093,26 @@ TEMPLATE
 VCONSTEXPR void CLASS::
 accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
-    // Synchronization cost is prohibitive (material net loss) in all test
-    // scenarios with less than a one GiB buffer (breakeven).
-    // TODO: Replace this transform with vectorization.
-    if constexpr (Concurrent)
+    if constexpr (Vectorized)
+    {
+        // TODO: replace with maximal lane schedule vectorization.
+        buffer_t buffer{};
+        for (auto& block: blocks)
+        {
+            input(buffer, block);
+            schedule(buffer);
+            compress(state, buffer);
+        }
+    }
+    else if constexpr (Concurrent)
     {
         // Due to the memory allocation, avoid when not concurrent.
         // No measurable difference between heap vs. stack alloc here.
         auto buffers = std::make_shared<buffers_t>(blocks.size());
 
         // Message schedules/endianness are order independent.
+        // Concurrency is prohibitive (material net loss) in all test scenarios
+        // with less than a one GiB buffer (where breakeven is achieved).
         std_transform(concurrency(), blocks.begin(), blocks.end(),
             buffers->begin(), [](const block_t& block) NOEXCEPT
             {

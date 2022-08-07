@@ -387,8 +387,8 @@ compress(state_t& state, const words_t& words) NOEXCEPT
     }
     else
     {
-        // TODO: Replace this transform with vectorization.
-        // Synchronization cost is prohibitive in all test scenarios.
+        // Vectorization across batches is precluded by the reverse ordering
+        // of functor selection by round (and rounds are order dependent).
         if constexpr (Concurrent)
         {
             // Two copies of state (required by RMD) are saved to jobs.
@@ -399,6 +399,7 @@ compress(state_t& state, const words_t& words) NOEXCEPT
             };
 
             // Ripemd consists of two independent hashing jobs.
+            // Concurrency cost is prohibitive in all test scenarios.
             std_for_each(concurrency(), jobs.begin(), jobs.end(),
                 [&words](auto& job) NOEXCEPT
                 {

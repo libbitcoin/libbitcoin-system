@@ -51,10 +51,10 @@ constexpr auto mib_per_second(float seconds) noexcept
     return Bytes / seconds / power2(20u);
 }
 
-template <size_t Bytes, float GHz>
-constexpr auto cycles_per_byte(float seconds) noexcept
+template <size_t Bytes>
+constexpr auto cycles_per_byte(float seconds, float ghz) noexcept
 {
-    return (seconds * GHz * std::giga::num) / Bytes;
+    return (seconds * ghz * std::giga::num) / Bytes;
 }
 
 struct parameters
@@ -72,10 +72,9 @@ template <
     typename Parameters,
     size_t Count,
     size_t Size,
-    float GHz,
     typename Algorithm,
     typename Precision>
-void output(std::ostream& out, uint64_t time, bool csv) noexcept
+void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
 {
     using P = Parameters;
     constexpr auto bytes = Size * Count;
@@ -95,7 +94,7 @@ void output(std::ostream& out, uint64_t time, bool csv) noexcept
         << delimiter
         << "bytes_per_round_: " << serialize(Size)
         << delimiter
-        << "compressed_______: " << serialize(P::compressed)
+        << "compressed______: " << serialize(P::compressed)
         << delimiter
         << "vectorized______: " << serialize(P::vectorized)
         << delimiter
@@ -107,7 +106,7 @@ void output(std::ostream& out, uint64_t time, bool csv) noexcept
         << delimiter
         << "mib_per_second__: " << serialize(mib_per_second<bytes>(seconds))
         << delimiter
-        << "cycles_per_byte_: " << serialize(cycles_per_byte<bytes, GHz>(seconds))
+        << "cycles_per_byte_: " << serialize(cycles_per_byte<bytes>(seconds, ghz))
         << delimiter
         << "ms_per_round____: " << serialize(ms_per_round<Count>(seconds))
         << delimiter
@@ -258,13 +257,12 @@ using algorithm = hash_selector<
 // meaningful performance distinction is between array and non-array, since
 // array size is resolved at compile time, allowing for various optimizations.
 
-// Defaults to 1M rounds over 1KiB data.
+// Defaults to 1Mi rounds over 1KiB data (1GiB).
 template<typename Parameters,
-    size_t Count = 1'000'000, // test iterations.
-    size_t Size = 1024,       // bytes per iteration
-    float GHz = 3.0f,         // CPU speed
+    size_t Count = 1024 * 1024, // test iterations (1Mi)
+    size_t Size = 1024,         // bytes per iteration (1KiB)
     if_base_of<parameters, Parameters> = true>
-bool hash(std::ostream& out, bool csv = false) noexcept
+bool hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
 {
     using Precision = std::chrono::nanoseconds;
     using Timer = timer<Precision>;
@@ -283,7 +281,7 @@ bool hash(std::ostream& out, bool csv = false) noexcept
 
     // Dumping output also precludes compiler removal.
     // Return value, check to preclude compiler removal if output is bypassed.
-    output<Parameters, Count, Size, GHz, Algorithm, Precision>(out, time, csv);
+    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
     return true;
 }
 
