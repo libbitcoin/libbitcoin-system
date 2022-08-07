@@ -34,8 +34,8 @@ namespace system {
 namespace sha {
 
 /// SHA hashing algorithm.
-template <typename SHA, bool Concurrent = false,
-    if_same<typename SHA::T, shah_t> = true>
+template <typename SHA, bool Compressed = true, bool Vectorized = true,
+    bool Concurrent = false, if_same<typename SHA::T, shah_t> = true>
 class algorithm : algorithm_t
 {
 public:
@@ -75,6 +75,8 @@ public:
     /// Limits incorporate requirement to encode counter in final block.
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
+    static constexpr auto compressed    = Compressed;
+    static constexpr auto vectorized    = Vectorized;
     static constexpr auto concurrent    = Concurrent;
     static constexpr auto big_end_count = true;
 

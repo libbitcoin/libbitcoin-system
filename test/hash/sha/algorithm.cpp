@@ -21,15 +21,6 @@
     
 BOOST_AUTO_TEST_SUITE(sha_algorithm_tests)
 
-// SHA aliases are not concurrent.
-static_assert(is_same_type<sha::algorithm<sha::h160,      false>, sha160>);
-static_assert(is_same_type<sha::algorithm<sha::h256<224>, false>, sha256_224>);
-static_assert(is_same_type<sha::algorithm<sha::h256<>,    false>, sha256>);
-static_assert(is_same_type<sha::algorithm<sha::h512<256>, false>, sha512_256>);
-static_assert(is_same_type<sha::algorithm<sha::h512<224>, false>, sha512_224>);
-static_assert(is_same_type<sha::algorithm<sha::h512<384>, false>, sha512_384>);
-static_assert(is_same_type<sha::algorithm<sha::h512<>,    false>, sha512>);
-
 static_assert(sha160::hash(sha160::half_t{})  == sha_half160);
 static_assert(sha160::hash(sha160::block_t{}) == sha_full160);
 static_assert(sha256::hash(sha256::half_t{})  == sha_half256);
@@ -39,6 +30,7 @@ static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
 
 // sha160
 // ----------------------------------------------------------------------------
+static_assert(!sha160::concurrent);
 
 // sha160::hash
 BOOST_AUTO_TEST_CASE(sha__sha160_hash__null_hash__expected)
@@ -62,7 +54,8 @@ BOOST_AUTO_TEST_CASE(sha__accumulator_sha160_hash__test_vectors__expected)
 // accumulator<sha160>::hash (concurrent)
 BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_sha160_hash__test_vectors__expected)
 {
-    using sha_160 = sha::algorithm<sha::h160, true>;
+    using sha_160 = sha::algorithm<sha::h160, true, true, true>;
+    static_assert(sha_160::concurrent);
 
     // Verify non-const-evaluated to against public vectors.
     for (const auto& test: sha160_tests)
@@ -74,6 +67,7 @@ BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_sha160_hash__test_vectors__expe
 
 // sha256
 // ----------------------------------------------------------------------------
+static_assert(!sha256::concurrent);
 
 // sha256::hash
 BOOST_AUTO_TEST_CASE(sha__sha256_hash__null_hash__expected)
@@ -97,7 +91,8 @@ BOOST_AUTO_TEST_CASE(sha__accumulator_sha256_hash__test_vectors__expected)
 // accumulator<sha256>::hash (concurrent)
 BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_sha256_hash__test_vectors__expected)
 {
-    using sha_256 = sha::algorithm<sha::h256<>, true>;
+    using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
+    static_assert(sha_256::concurrent);
 
     // Verify non-const-evaluated to against public vectors.
     for (const auto& test: sha256_tests)
@@ -201,6 +196,7 @@ BOOST_AUTO_TEST_CASE(algorithm__sha256_merkle_root__four__expected)
 
 // sha512
 // ----------------------------------------------------------------------------
+static_assert(!sha512::concurrent);
 
 // sha512::hash
 BOOST_AUTO_TEST_CASE(sha__sha512_hash__null_hash__expected)
@@ -224,7 +220,8 @@ BOOST_AUTO_TEST_CASE(sha__accumulator_sha512_hash__test_vectors__expected)
 // accumulator<sha512>::hash (concurrent)
 BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_sha512_hash__test_vectors__expected)
 {
-    using sha_512 = sha::algorithm<sha::h512<>, true>;
+    using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
+    static_assert(sha_512::concurrent);
 
     // Verify non-const-evaluated to against public vectors.
     for (const auto& test: sha512_tests)
@@ -520,7 +517,6 @@ static_assert(is_same_type<sha160::digest_t, std_array<uint8_t, 20>>);
 static_assert(is_same_type<sha160::count_t, uint64_t>);
 static_assert(is_same_type<sha160::digests_t, std_vector<std_array<uint8_t, 20>>>);
 static_assert(is_same_type<sha160::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-////static_assert(is_same_type<sha160::set_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
 static_assert(is_same_type<decltype(sha160::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha160::limit_bytes), const uint64_t>);
 
@@ -544,7 +540,6 @@ static_assert(is_same_type<sha256::digest_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<sha256::count_t, uint64_t>);
 static_assert(is_same_type<sha256::digests_t, std_vector<std_array<uint8_t, 32>>>);
 static_assert(is_same_type<sha256::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-////static_assert(is_same_type<sha256::set_t<42>, std_vector<cref<std_array<std_array<uint8_t, 64>, 42>>>>);
 static_assert(is_same_type<decltype(sha256::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha256::limit_bytes), const uint64_t>);
 
@@ -568,7 +563,6 @@ static_assert(is_same_type<sha512::digest_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<sha512::count_t, uint128_t>);
 static_assert(is_same_type<sha512::digests_t, std_vector<std_array<uint8_t, 64>>>);
 static_assert(is_same_type<sha512::blocks_t, std_vector<cref<std_array<uint8_t, 128>>>>);
-////static_assert(is_same_type<sha512::set_t<42>, std_vector<cref<std_array<std_array<uint8_t, 128>, 42>>>>);
 static_assert(is_same_type<decltype(sha512::limit_bits), const uint128_t>);
 static_assert(is_same_type<decltype(sha512::limit_bytes), const uint128_t>);
 

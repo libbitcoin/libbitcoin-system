@@ -34,9 +34,9 @@ namespace libbitcoin {
 namespace system {
 namespace rmd {
 
-#define TEMPLATE template <typename RMD, bool Concurrent, \
+#define TEMPLATE template <typename RMD, bool Vectorized, bool Concurrent, \
     if_same<typename RMD::T, rmdh_t> If>
-#define CLASS algorithm<RMD, Concurrent, If>
+#define CLASS algorithm<RMD, Vectorized, Concurrent, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -387,6 +387,7 @@ compress(state_t& state, const words_t& words) NOEXCEPT
     }
     else
     {
+        // TODO: Replace this transform with vectorization.
         // Synchronization cost is prohibitive in all test scenarios.
         if constexpr (Concurrent)
         {

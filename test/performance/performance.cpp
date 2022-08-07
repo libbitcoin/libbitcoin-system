@@ -19,13 +19,15 @@
 #include "../test.hpp"
 #include "performance.hpp"
 
-#if !defined(HAVE_PERFORMANCE_TESTS)
+#if defined(HAVE_PERFORMANCE_TESTS)
 
 BOOST_AUTO_TEST_SUITE(performance_tests)
 
+using namespace performance;
+
 BOOST_AUTO_TEST_CASE(performance__sha256)
 {
-
+#if defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
     // --------------------------------------------------------
 
@@ -266,13 +268,15 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // cycles_per_byte_: 45.8659
     // ms_per_round____: 0.0156556
     // ms_per_byte_____: 1.52886e-05
+#endif
 
-    const auto complete = perf::hash<256, 1024*1024, 1024, false>(std::cout);
+auto complete = performance::hash<sha256_optimal>(std::cout);
     BOOST_CHECK(complete);
 }
 
 BOOST_AUTO_TEST_CASE(performance__rmd160)
 {
+#if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
     // --------------------------------------------------------
 
@@ -480,9 +484,9 @@ BOOST_AUTO_TEST_CASE(performance__rmd160)
     // cycles_per_byte_: 17.3741
     // ms_per_round____: 0.00593037
     // ms_per_byte_____: 5.79138e-06
+#endif
 
-    auto complete = perf::hash<160, 1024, 1024*1024, false,
-        false, false, false, true>(std::cout);
+auto complete = performance::hash<rmd160_optimal>(std::cout);
     BOOST_CHECK(complete);
 }
 

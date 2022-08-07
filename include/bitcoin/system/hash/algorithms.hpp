@@ -26,20 +26,20 @@
 namespace libbitcoin {
 namespace system {
 
-/// bc::system rmd algorithm aliases (concurrent).
-using rmd128     = rmd::algorithm<rmd::h128<>,    false>;
-using rmd128_256 = rmd::algorithm<rmd::h128<256>, false>; // not fully implemented
-using rmd160     = rmd::algorithm<rmd::h160<>,    false>;
-using rmd160_320 = rmd::algorithm<rmd::h160<320>, false>; // not fully implemented
+/// bc::system rmd algorithm aliases (vectorized, !concurrent).
+using rmd128     = rmd::algorithm<rmd::h128<>>;
+using rmd128_256 = rmd::algorithm<rmd::h128<256>>; // not fully implemented
+using rmd160     = rmd::algorithm<rmd::h160<>>;
+using rmd160_320 = rmd::algorithm<rmd::h160<320>>; // not fully implemented
 
-/// bc::system sha algorithm aliases.
-using sha160     = sha::algorithm<sha::h160,      false>;
-using sha256_224 = sha::algorithm<sha::h256<224>, false>; // not fully implemented
-using sha256     = sha::algorithm<sha::h256<>,    false>;
-using sha512_256 = sha::algorithm<sha::h512<256>, false>; // not fully implemented
-using sha512_224 = sha::algorithm<sha::h512<224>, false>; // not fully implemented
-using sha512_384 = sha::algorithm<sha::h512<384>, false>; // not fully implemented
-using sha512     = sha::algorithm<sha::h512<>,    false>;
+/// bc::system sha algorithm aliases (compressed, vectorized, !concurrent).
+using sha160     = sha::algorithm<sha::h160>;
+using sha256_224 = sha::algorithm<sha::h256<224>>; // not fully implemented
+using sha256     = sha::algorithm<sha::h256<>>;
+using sha512_256 = sha::algorithm<sha::h512<256>>; // not fully implemented
+using sha512_224 = sha::algorithm<sha::h512<224>>; // not fully implemented
+using sha512_384 = sha::algorithm<sha::h512<384>>; // not fully implemented
+using sha512     = sha::algorithm<sha::h512<>>;
 
 } // namespace system
 } // namespace libbitcoin

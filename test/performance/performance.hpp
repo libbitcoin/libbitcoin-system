@@ -22,7 +22,7 @@
 #include "../test.hpp"
 #include <chrono>
 
-namespace perf {
+namespace performance {
     
 // format timing results to ostream
 // ----------------------------------------------------------------------------
@@ -51,26 +51,33 @@ constexpr auto mib_per_second(float seconds) noexcept
     return Bytes / seconds / power2(20u);
 }
 
-template <size_t Bytes>
-constexpr auto cycles_per_byte(float seconds, float ghz) noexcept
+template <size_t Bytes, float GHz>
+constexpr auto cycles_per_byte(float seconds) noexcept
 {
-    return (seconds * ghz * std::giga::num) / Bytes;
+    return (seconds * GHz * std::giga::num) / Bytes;
 }
 
-// Output performance run to given stream.
-template
-<
-    typename Algorithm,
-    typename Precision,
-    size_t Size,
-    size_t Count,
-    bool Concurrent,
-    bool Vectorized,
-    bool Intrinsic,
-    bool Chunked
->
-void output(std::ostream& out, uint64_t time, bool csv, float ghz = 3.0) noexcept
+struct parameters
 {
+    static constexpr size_t strength{}; // algorithm strength (160/256/512|128/160).
+    static constexpr bool ripemd{};     // false for sha algorithm.
+    static constexpr bool compressed{}; // intrinsic sha (ignored for rmd).
+    static constexpr bool vectorized{}; // algorithm vectorization.
+    static constexpr bool concurrent{}; // algorithm concurrency.
+    static constexpr bool chunked{};    // false for array data.
+};
+
+// Output performance run to given stream.
+template <
+    typename Parameters,
+    size_t Count,
+    size_t Size,
+    float GHz,
+    typename Algorithm,
+    typename Precision>
+void output(std::ostream& out, uint64_t time, bool csv) noexcept
+{
+    using P = Parameters;
     constexpr auto bytes = Size * Count;
     const auto seconds = seconds_total<Precision>(time);
     const auto delimiter = csv ? "," : "\n";
@@ -88,19 +95,19 @@ void output(std::ostream& out, uint64_t time, bool csv, float ghz = 3.0) noexcep
         << delimiter
         << "bytes_per_round_: " << serialize(Size)
         << delimiter
-        << "concurrent______: " << serialize(Concurrent)
+        << "compressed_______: " << serialize(P::compressed)
         << delimiter
-        << "vectorized______: " << serialize(Vectorized)
+        << "vectorized______: " << serialize(P::vectorized)
         << delimiter
-        << "intrinsic_______: " << serialize(Intrinsic)
+        << "concurrent______: " << serialize(P::concurrent)
         << delimiter
-        << "chunked_________: " << serialize(Chunked)
+        << "chunked_________: " << serialize(P::chunked)
         << delimiter
         << "seconds_total___: " << serialize(seconds)
         << delimiter
         << "mib_per_second__: " << serialize(mib_per_second<bytes>(seconds))
         << delimiter
-        << "cycles_per_byte_: " << serialize(cycles_per_byte<bytes>(seconds, ghz))
+        << "cycles_per_byte_: " << serialize(cycles_per_byte<bytes, GHz>(seconds))
         << delimiter
         << "ms_per_round____: " << serialize(ms_per_round<Count>(seconds))
         << delimiter
@@ -111,6 +118,8 @@ void output(std::ostream& out, uint64_t time, bool csv, float ghz = 3.0) noexcep
 
 // generate deterministic data from seed
 // ----------------------------------------------------------------------------
+// Generate a data_chunk or a data_array of specified size.
+// Each is hashed on the seed to preclude compiler/CPU optimization.
 
 template <size_t Size, bool Chunk = false>
 VCONSTEXPR auto get_data(uint64_t seed) noexcept
@@ -140,7 +149,7 @@ VCONSTEXPR auto get_data(uint64_t seed) noexcept
 // timer utility
 // ----------------------------------------------------------------------------
 
-template <typename Time = std::chrono::milliseconds,
+template <typename Time = std::chrono::nanoseconds,
     class Clock = std::chrono::system_clock>
 class timer
 {
@@ -168,96 +177,139 @@ public:
 // ----------------------------------------------------------------------------
 
 #if !defined(VISIBILE)
-template <size_t Strength, bool Concurrent = false>
+template <size_t Strength, bool Vectorized, bool Concurrent>
 using rmd_algorithm = rmd::algorithm<
-    iif<Strength == 160, rmd::h160<>, rmd::h128<>>, Concurrent>;
+    iif<Strength == 160, rmd::h160<>, rmd::h128<>>, Vectorized, Concurrent>;
 
-static_assert(is_same_type<rmd_algorithm<128, false>, rmd128>);
-static_assert(is_same_type<rmd_algorithm<160, false>, rmd160>);
+static_assert(is_same_type<rmd_algorithm<128, true, false>, rmd128>);
+static_assert(is_same_type<rmd_algorithm<160, true, false>, rmd160>);
 
-template <size_t Strength, bool Concurrent = false>
+template <size_t Strength, bool Compressed, bool Vectorized, bool Concurrent>
 using sha_algorithm = sha::algorithm<
     iif<Strength == 256, sha::h256<>,
-    iif<Strength == 512, sha::h512<>, sha::h160>>, Concurrent>;
+    iif<Strength == 512, sha::h512<>, sha::h160>>, Compressed, Vectorized, Concurrent>;
 
-static_assert(is_same_type<sha_algorithm<160, false>, sha160>);
-static_assert(is_same_type<sha_algorithm<256, false>, sha256>);
-static_assert(is_same_type<sha_algorithm<512, false>, sha512>);
+static_assert(is_same_type<sha_algorithm<160, true, true, false>, sha160>);
+static_assert(is_same_type<sha_algorithm<256, true, true, false>, sha256>);
+static_assert(is_same_type<sha_algorithm<512, true, true, false>, sha512>);
 
-template <size_t Strength, bool Concurrent, bool Ripemd,
+template <size_t Strength, bool Compressed, bool Vectorized, bool Concurrent, bool Ripemd,
     bool_if<
        (!Ripemd && (Strength == 160 || Strength == 256 || Strength == 512)) ||
         (Ripemd && (Strength == 128 || Strength == 160))> = true>
 using hash_selector = iif<Ripemd,
-    rmd_algorithm<Strength, Concurrent>,
-    sha_algorithm<Strength, Concurrent>>;
+    rmd_algorithm<Strength, Vectorized, Concurrent>,
+    sha_algorithm<Strength, Compressed, Vectorized, Concurrent>>;
 
-static_assert(is_same_type<hash_selector<128, false, true>, rmd128>);
-static_assert(is_same_type<hash_selector<160, false, true>, rmd160>);
-static_assert(is_same_type<hash_selector<160, false, false>, sha160>);
-static_assert(is_same_type<hash_selector<256, false, false>, sha256>);
-static_assert(is_same_type<hash_selector<512, false, false>, sha512>);
+static_assert(is_same_type<hash_selector<128, true, true, false, true>, rmd128>);
+static_assert(is_same_type<hash_selector<160, true, true, false, true>, rmd160>);
+static_assert(is_same_type<hash_selector<160, true, true, false, false>, sha160>);
+static_assert(is_same_type<hash_selector<256, true, true, false, false>, sha256>);
+static_assert(is_same_type<hash_selector<512, true, true, false, false>, sha512>);
 
-static_assert(hash_selector<128, true, true>::concurrent);
-static_assert(hash_selector<160, true, true>::concurrent);
-static_assert(hash_selector<160, true, false>::concurrent);
-static_assert(hash_selector<256, true, false>::concurrent);
-static_assert(hash_selector<512, true, false>::concurrent);
+// RMD does not provide compression.
+////static_assert(hash_selector< 128, true,  true, true, true >::compressed);
+////static_assert(hash_selector< 160, true,  true, true, true >::compressed);
+static_assert(hash_selector< 160, true,  true, true, false>::compressed);
+static_assert(hash_selector< 256, true,  true, true, false>::compressed);
+static_assert(hash_selector< 512, true,  true, true, false>::compressed);
+////static_assert(!hash_selector<128, false, true, true, true >::compressed);
+////static_assert(!hash_selector<160, false, true, true, true >::compressed);
+static_assert(!hash_selector<160, false, true, true, false>::compressed);
+static_assert(!hash_selector<256, false, true, true, false>::compressed);
+static_assert(!hash_selector<512, false, true, true, false>::compressed);
 
-static_assert(!hash_selector<128, false, true>::concurrent);
-static_assert(!hash_selector<160, false, true>::concurrent);
-static_assert(!hash_selector<160, false, false>::concurrent);
-static_assert(!hash_selector<256, false, false>::concurrent);
-static_assert(!hash_selector<512, false, false>::concurrent);
+static_assert(hash_selector< 128, true, true,  true, true >::vectorized);
+static_assert(hash_selector< 160, true, true,  true, true >::vectorized);
+static_assert(hash_selector< 160, true, true,  true, false>::vectorized);
+static_assert(hash_selector< 256, true, true,  true, false>::vectorized);
+static_assert(hash_selector< 512, true, true,  true, false>::vectorized);
+static_assert(!hash_selector<128, true, false, true, true >::vectorized);
+static_assert(!hash_selector<160, true, false, true, true >::vectorized);
+static_assert(!hash_selector<160, true, false, true, false>::vectorized);
+static_assert(!hash_selector<256, true, false, true, false>::vectorized);
+static_assert(!hash_selector<512, true, false, true, false>::vectorized);
+
+static_assert(hash_selector< 128, true, true, true,  true >::concurrent);
+static_assert(hash_selector< 160, true, true, true,  true >::concurrent);
+static_assert(hash_selector< 160, true, true, true,  false>::concurrent);
+static_assert(hash_selector< 256, true, true, true,  false>::concurrent);
+static_assert(hash_selector< 512, true, true, true,  false>::concurrent);
+static_assert(!hash_selector<128, true, true, false, true >::concurrent);
+static_assert(!hash_selector<160, true, true, false, true >::concurrent);
+static_assert(!hash_selector<160, true, true, false, false>::concurrent);
+static_assert(!hash_selector<256, true, true, false, false>::concurrent);
+static_assert(!hash_selector<512, true, true, false, false>::concurrent);
+
+template <typename Parameters>
+using algorithm = hash_selector<
+    Parameters::strength,
+    Parameters::compressed,
+    Parameters::vectorized,
+    Parameters::concurrent,
+    Parameters::ripemd>;
+
 #endif
 
 // Algorithm::hash() test runner.
 // ----------------------------------------------------------------------------
-
 // hash_digest/hash_chunk overloads are not exposed, only check and array.
 // There is no material performance difference between slice and chunk. The
 // meaningful performance distinction is between array and non-array, since
 // array size is resolved at compile time, allowing for various optimizations.
-template<
-    size_t Strength,          // algorithm strength (160/256/512|128/160).
+
+// Defaults to 1M rounds over 1KiB data.
+template<typename Parameters,
     size_t Count = 1'000'000, // test iterations.
-    size_t Size = zero,       // 0 = full block, 1 = half, otherwise bytes.
-    bool Concurrent = false,  // algorithm concurrency.
-    bool Vectorized = false,  // algorithm vectorization.
-    bool Intrinsic = false,   // intrinsic sha (N/A for rmd).
-    bool Chunked = false,     // false for array data.
-    bool Ripemd = false>      // false for sha algorithm.
+    size_t Size = 1024,       // bytes per iteration
+    float GHz = 3.0f,         // CPU speed
+    if_base_of<parameters, Parameters> = true>
 bool hash(std::ostream& out, bool csv = false) noexcept
 {
-    using Clock = std::chrono::steady_clock;
     using Precision = std::chrono::nanoseconds;
-    using Timer = perf::timer<Precision, Clock>;
-    using Algorithm = perf::hash_selector<Strength, Concurrent, Ripemd>;
-    constexpr auto block_size = array_count<typename Algorithm::block_t>;
-    constexpr auto size = is_zero(Size) ? block_size :
-        is_zero(sub1(Size)) ? to_half(block_size) : Size;
+    using Timer = timer<Precision>;
+    using Algorithm = algorithm<Parameters>;
+    using P = Parameters;
 
     uint64_t time = zero;
     for (size_t seed = 0; seed < Count; ++seed)
     {
-        // Generate a data_chunk or a data_array of specified size.
-        // Each is hashed on the seed to preclude compiler/CPU optimization.
-        const auto data = perf::get_data<size, Chunked>(seed);
-
-        time += Timer::execution([&]() noexcept
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
         {
             accumulator<Algorithm>::hash(*data);
         });
     }
 
     // Dumping output also precludes compiler removal.
-    perf::output<Algorithm, Precision, size, Count, Concurrent,
-        Vectorized, Intrinsic, Chunked>(out, time, csv);
-
     // Return value, check to preclude compiler removal if output is bypassed.
+    output<Parameters, Count, Size, GHz, Algorithm, Precision>(out, time, csv);
     return true;
 }
 
-} // namespace perf
+// Algorithm::hash() test runner parameterization.
+// ----------------------------------------------------------------------------
+
+struct sha256_optimal : parameters
+{
+    static constexpr size_t strength{ 256 };
+    static constexpr bool ripemd{ false };
+    static constexpr bool compressed{ true };
+    static constexpr bool vectorized{ true };
+    static constexpr bool concurrent{ false };
+    static constexpr bool chunked{ false };
+};
+
+struct rmd160_optimal : parameters
+{
+    static constexpr size_t strength{ 160 };
+    static constexpr bool ripemd{ true };
+    static constexpr bool compressed{ false };
+    static constexpr bool vectorized{ true };
+    static constexpr bool concurrent{ false };
+    static constexpr bool chunked{ false };
+};
+
+} // namespace performance
 
 #endif

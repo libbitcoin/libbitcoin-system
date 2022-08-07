@@ -21,12 +21,6 @@
     
 BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
 
-// RMD aliases are not concurrent.
-static_assert(is_same_type<rmd::algorithm<rmd::h128<>, false>,     rmd128>);
-static_assert(is_same_type<rmd::algorithm<rmd::h128<256>, false>,  rmd128_256>);
-static_assert(is_same_type<rmd::algorithm<rmd::h160<>, false>,     rmd160>);
-static_assert(is_same_type<rmd::algorithm<rmd::h160<320>, false>,  rmd160_320>);
-
 static_assert(rmd128::hash(rmd128::half_t{})  == rmd_half128);
 static_assert(rmd128::hash(rmd128::block_t{}) == rmd_full128);
 static_assert(rmd160::hash(rmd160::half_t{})  == rmd_half160);
@@ -34,6 +28,7 @@ static_assert(rmd160::hash(rmd160::block_t{}) == rmd_full160);
 
 // rmd128
 // ----------------------------------------------------------------------------
+static_assert(!rmd128::concurrent);
 
 // rmd128::hash
 BOOST_AUTO_TEST_CASE(sha__rmd128_hash__null_hash__expected)
@@ -57,7 +52,8 @@ BOOST_AUTO_TEST_CASE(sha__accumulator_rmd128_hash__test_vectors__expected)
 // accumulator<rmd_128>::hash (concurrent)
 BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_rmd128_hash__test_vectors__expected)
 {
-    using rmd_128 = rmd::algorithm<rmd::h128<>, true>;
+    using rmd_128 = rmd::algorithm<rmd::h128<>, true, true>;
+    static_assert(rmd_128::concurrent);
 
     // Verify non-const-evaluated to against public vectors.
     for (const auto& test: rmd128_tests)
@@ -69,6 +65,7 @@ BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_rmd128_hash__test_vectors__expe
 
 // rmd160
 // ----------------------------------------------------------------------------
+static_assert(!rmd160::concurrent);
 
 BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__null_hash__expected)
 {
@@ -90,7 +87,8 @@ BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
 // accumulator<rmd_128>::hash (concurrent)
 BOOST_AUTO_TEST_CASE(rmd__concurrent_rmd160_hash__test_vectors__expected)
 {
-    using rmd_160 = rmd::algorithm<rmd::h160<>, true>;
+    using rmd_160 = rmd::algorithm<rmd::h160<>, true, true>;
+    static_assert(rmd_160::concurrent);
 
     // Verify non-const-evaluated to against public vectors
     for (const auto& test: rmd160_tests)
@@ -228,7 +226,6 @@ static_assert(is_same_type<decltype(rmd128::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(rmd128::limit_bytes), const uint64_t>);
 
 // rmd160
-////static_assert(!algorithm<sha160>::big_end_count);
 static_assert(!rmd160::big_end_count);
 static_assert(rmd160::count_bits == 64u);
 static_assert(rmd160::count_bytes == 8u);
@@ -253,7 +250,7 @@ static_assert(is_same_type<decltype(rmd160::limit_bytes), const uint64_t>);
 static_assert(!rmd128_256::big_end_count);
 static_assert(!rmd160_320::big_end_count);
 
-// Verify indirection.
+// Verify indirection (functor and offset selection).
 // ----------------------------------------------------------------------------
 
 using k_128 = typename rmd128::K;

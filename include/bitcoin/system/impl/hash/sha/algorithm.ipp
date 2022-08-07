@@ -38,9 +38,9 @@ namespace sha {
 // TODO: implement 5.3.6 SHA-512/t initial vector derivation.
 // TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
 
-#define TEMPLATE template <typename SHA, bool Concurrent, \
-    if_same<typename SHA::T, shah_t> If>
-#define CLASS algorithm<SHA, Concurrent, If>
+#define TEMPLATE template <typename SHA, bool Compressed, bool Vectorized, \
+    bool Concurrent, if_same<typename SHA::T, shah_t> If>
+#define CLASS algorithm<SHA, Compressed, Vectorized, Concurrent, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -991,9 +991,6 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 // ------------------------------------------------------------------------
 // No merkle_hash optimizations for sha160 (double_hash requires half_t).
 
-// TODO: this is the boundary of vectorization.
-// TODO: this will return lane hashes and increment by lanes.
-// TODO: just need to double hash a range and assign the returned range.
 TEMPLATE
 VCONSTEXPR typename CLASS::digests_t& CLASS::
 merkle_hash(digests_t& digests) NOEXCEPT
@@ -1001,8 +998,25 @@ merkle_hash(digests_t& digests) NOEXCEPT
     static_assert(is_same_type<digest_t, half_t>);
     const auto half = to_half(digests.size());
 
-    for (size_t i = 0, j = 0; i < half; ++i, j += 2)
-        digests[i] = double_hash(digests[j], digests[add1(j)]);
+    // This algorithm shifts results from a pair of digests into preceding
+    // digests. This trades reduced allocation for lack of concurrency. But sha
+    // concurrency tests as net performance loss due to synchronization cost.
+    if (std::is_constant_evaluated())
+    {
+        for (size_t i = 0, j = 0; i < half; ++i, j += two)
+            digests[i] = double_hash(digests[j], digests[add1(j)]);
+    }
+    else if constexpr (!Vectorized)
+    {
+        for (size_t i = 0, j = 0; i < half; ++i, j += two)
+            digests[i] = double_hash(digests[j], digests[add1(j)]);
+    }
+    else
+    {
+        // TODO: Factor the set of digests for optimizal vectorization.
+        for (size_t i = 0, j = 0; i < half; ++i, j += two)
+            digests[i] = double_hash(digests[j], digests[add1(j)]);
+    }
 
     digests.resize(half);
     return digests;
@@ -1081,13 +1095,13 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
     // Synchronization cost is prohibitive (material net loss) in all test
     // scenarios with less than a one GiB buffer (breakeven).
+    // TODO: Replace this transform with vectorization.
     if constexpr (Concurrent)
     {
         // Due to the memory allocation, avoid when not concurrent.
         // No measurable difference between heap vs. stack alloc here.
         auto buffers = std::make_shared<buffers_t>(blocks.size());
 
-        // eprint.iacr.org/2012/067.pdf
         // Message schedules/endianness are order independent.
         std_transform(concurrency(), blocks.begin(), blocks.end(),
             buffers->begin(), [](const block_t& block) NOEXCEPT

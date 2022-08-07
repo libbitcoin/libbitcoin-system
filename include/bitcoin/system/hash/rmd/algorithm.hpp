@@ -33,7 +33,7 @@ namespace system {
 namespace rmd {
 
 /// RMD hashing algorithm.
-template <typename RMD, bool Concurrent = false,
+template <typename RMD, bool Vectorized = true, bool Concurrent = false,
     if_same<typename RMD::T, rmdh_t> = true>
 class algorithm : algorithm_t
 {
@@ -70,6 +70,7 @@ public:
     /// Limits incorporate requirement to encode counter in final block.
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
+    static constexpr auto vectorized    = Vectorized;
     static constexpr auto concurrent    = Concurrent;
     static constexpr auto big_end_count = false;
 
