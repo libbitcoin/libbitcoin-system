@@ -65,28 +65,34 @@ static_assert(!std::numeric_limits<__m128i>::is_integer);
 static_assert(!std::numeric_limits<__m256i>::is_integer);
 static_assert(!std::numeric_limits<__m512i>::is_integer);
 
+// Types work as integrals.
+static_assert(is_same_type<mint128_t, __m128i>);
+static_assert(is_same_type<mint256_t, __m256i>);
+static_assert(is_same_type<mint512_t, __m512i>);
+
 // sizeof() works as expected.
 static_assert(to_bits(sizeof(__m128i)) == 128u);
 static_assert(to_bits(sizeof(__m256i)) == 256u);
 static_assert(to_bits(sizeof(__m512i)) == 512u);
 
-// Constants can be constructed from literals (but not assigned).
-constexpr auto const128 = mint128_t{ 0 };
-constexpr auto const256 = mint256_t{ 0 };
-constexpr auto const512 = mint512_t{ 0 };
-
 // Primitives implement rotr/rotl because these are not available in SIMD.
 // S is required for a non-member ror_/rol_ since there is no way otherwise to
 // know if we are rotating 4/8/16x32 (sha160/256) or 2/4/8x64 (sha512).
 
-// SSE4 primitives.
+// TODO: make all primitives private members with auto parameters.
+// TODO: use sha160/256 to differentiate word_t interally, invoking the
+// TODO: appropriate intrinsic (23/62 bit). Currently these are all 32 bit
+// TODO: except for the natives, which rely on auto and native 32/64 bit ops.
+
+// SSE4 primitives (for 32 bit word_t).
 // ----------------------------------------------------------------------------
 // Intel/AMD is always little-endian, and SHA is always big-endian (swap).
 // load/set instructions are unaligned.
 
 constexpr std_array<uint32_t, 4> bswap_mask
 {
-    0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul
+    0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul     // from simd
+    ////0x00010203ul, 0x04050607ul, 0x08090a0bul, 0x0c0d0e0ful // from sha-ni
 };
 
 INLINE mint128_t byte_swap_mask128() NOEXCEPT
@@ -116,39 +122,42 @@ INLINE void store_big_endian128(uint8_t& data, mint128_t value) NOEXCEPT
     store128(data, _mm_shuffle_epi8(value, byte_swap_mask128()));
 }
 
-template <int B>
+template <unsigned int B>
 INLINE auto shr_(mint128_t a) NOEXCEPT
 {
     return _mm_srli_epi32(a, B);
 }
 
-template <int B>
+template <unsigned int B>
 INLINE auto shl_(mint128_t a) NOEXCEPT
 {
     return _mm_slli_epi32(a, B);
 }
 
-template <int B, int S>
+template <unsigned int B, unsigned int S>
 INLINE auto ror_(mint128_t a) NOEXCEPT
 {
+    // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
 }
 
-template <int B, int S>
+template <unsigned int B, unsigned int S>
 INLINE auto rol_(mint128_t a) NOEXCEPT
 {
+    // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
-}
-
-template <mint128_t B>
-INLINE auto add_(mint128_t a) NOEXCEPT
-{
-    return _mm_add_epi32(a, B);
 }
 
 INLINE auto add_(mint128_t a, mint128_t b) NOEXCEPT
 {
     return _mm_add_epi32(a, b);
+}
+
+template <uint32_t K>
+INLINE auto add_(mint128_t a) NOEXCEPT
+{
+    // Broadcast 32-bit integer to all elements.
+    return add_(a, _mm_set1_epi32(K));
 }
 
 INLINE auto and_(mint128_t a, mint128_t b) NOEXCEPT
@@ -166,7 +175,7 @@ INLINE auto xor_(mint128_t a, mint128_t b) NOEXCEPT
     return _mm_xor_si128(a, b);
 }
 
-// AVX2 primitives.
+// AVX2 primitives (for 32 bit word_t).
 // ----------------------------------------------------------------------------
 
 INLINE mint256_t byte_swap_mask256() NOEXCEPT
@@ -181,6 +190,7 @@ INLINE mint256_t load256(const uint32_t& data) NOEXCEPT
 {
     return _mm256_loadu_epi32(pointer_cast<const mint256_t>(&data));
 }
+
 INLINE void store256(uint8_t& data, mint256_t value) NOEXCEPT
 {
     _mm256_storeu_epi32(pointer_cast<mint256_t>(&data), value);
@@ -196,39 +206,42 @@ INLINE void store_big_endian256(uint8_t& data, mint256_t value) NOEXCEPT
     store256(data, _mm256_shuffle_epi8(value, byte_swap_mask256()));
 }
 
-template <int B>
+template <unsigned int B>
 INLINE auto shr_(mint256_t a) NOEXCEPT
 {
     return _mm256_srli_epi32(a, B);
 }
 
-template <int B>
+template <unsigned int B>
 INLINE auto shl_(mint256_t a) NOEXCEPT
 {
     return _mm256_slli_epi32(a, B);
 }
 
-template <int B, int S>
+template <unsigned int B, unsigned int S>
 INLINE auto ror_(mint256_t a) NOEXCEPT
 {
+    // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
 }
 
-template <int B, int S>
+template <unsigned int B, unsigned int S>
 INLINE auto rol_(mint256_t a) NOEXCEPT
 {
+    // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
-}
-
-template <mint256_t B>
-INLINE auto add_(mint256_t a) NOEXCEPT
-{
-    return _mm256_add_epi32(a, B);
 }
 
 INLINE auto add_(mint256_t a, mint256_t b) NOEXCEPT
 {
     return _mm256_add_epi32(a, b);
+}
+
+template <uint32_t K>
+INLINE auto add_(mint256_t a) NOEXCEPT
+{
+    // Broadcast 32-bit integer to all elements.
+    return add_(a, _mm256_set1_epi32(K));
 }
 
 INLINE auto and_(mint256_t a, mint256_t b) NOEXCEPT
@@ -246,7 +259,7 @@ INLINE auto xor_(mint256_t a, mint256_t b) NOEXCEPT
     return _mm256_xor_si256(a, b);
 }
 
-// AVX512 primitives.
+// AVX512 primitives (for 32 bit word_t).
 // ----------------------------------------------------------------------------
 
 INLINE mint512_t byte_swap_mask512() NOEXCEPT
@@ -263,6 +276,7 @@ INLINE mint512_t load512(const uint32_t& data) NOEXCEPT
 {
     return _mm512_loadu_epi32(pointer_cast<const mint512_t>(&data));
 }
+
 INLINE void store512(uint8_t& data, mint512_t value) NOEXCEPT
 {
     _mm512_storeu_epi32(pointer_cast<mint512_t>(&data), value);
@@ -278,39 +292,42 @@ INLINE void store_big_endian512(uint8_t& data, mint512_t value) NOEXCEPT
     store512(data, _mm512_shuffle_epi8(value, byte_swap_mask512()));
 }
 
-template <int B>
+template <unsigned int B>
 INLINE auto shr_(mint512_t a) NOEXCEPT
 {
     return _mm512_srli_epi32(a, B);
 }
 
-template <int B>
+template <unsigned int B>
 INLINE auto shl_(mint512_t a) NOEXCEPT
 {
     return _mm512_slli_epi32(a, B);
 }
 
-template <int B, int S>
+template <unsigned int B, unsigned int S>
 INLINE auto ror_(mint512_t a) NOEXCEPT
 {
+    // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
 }
 
-template <int B, int S>
+template <unsigned int B, unsigned int S>
 INLINE auto rol_(mint512_t a) NOEXCEPT
 {
+    // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
-}
-
-template <mint512_t B>
-INLINE auto add_(mint512_t a) NOEXCEPT
-{
-    return _mm512_add_epi32(a, B);
 }
 
 INLINE auto add_(mint512_t a, mint512_t b) NOEXCEPT
 {
     return _mm512_add_epi32(a, b);
+}
+
+template <uint32_t K>
+INLINE auto add_(mint512_t a) NOEXCEPT
+{
+    // Broadcast 32-bit integer to all elements.
+    return add_(a, _mm512_set1_epi32(K));
 }
 
 INLINE auto and_(mint512_t a, mint512_t b) NOEXCEPT
@@ -330,10 +347,10 @@ INLINE auto xor_(mint512_t a, mint512_t b) NOEXCEPT
 
 #endif // HAVE_MSC
 
-// Integral primitives.
+// Integral primitives (for 32/64 bit word_t).
 // ----------------------------------------------------------------------------
 
-template <int B, typename Word,
+template <unsigned int B, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto shr_(Word a) NOEXCEPT
 {
@@ -341,21 +358,21 @@ INLINE constexpr auto shr_(Word a) NOEXCEPT
 }
 
 // unused by sha
-template <int B, typename Word,
+template <unsigned int B, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto shl_(Word a) NOEXCEPT
 {
     return a << B;
 }
 
-template <int B, int = 0, typename Word,
+template <unsigned int B, unsigned int = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto ror_(Word a) NOEXCEPT
 {
     return std::rotr(a, B);
 }
 
-template <int B, int = 0, typename Word,
+template <unsigned int B, unsigned int = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto rol_(Word a) NOEXCEPT
 {
@@ -502,20 +519,18 @@ sigma(auto x) NOEXCEPT
     return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), shr_<C>(x));
 }
 
-// intel.com/content/dam/www/public/us/en/documents/white-papers/fast-sha512-implementations-ia-processors-paper.pdf
-// The SIMD SSE instructions for computing parallel bitwise shifts on
-// QWORDs are PSLLQand PSRLQ. Because these instructions are destructive,
-// implementing the below as written would involve a number of register
-// copy operations. On AVX architectures, the VEX-encoded SIMD
-// instructions are nondestructive (below OK for AVX, not SSE4).
+// intel.com/content/dam/www/public/us/en/documents/white-papers/
+// fast-sha512-implementations-ia-processors-paper.pdf
+//
+// AVX optimal (sha512)
+// ------ sigma< 1,  8, 7>(x) ------
+// s0(a) = (a >>>  1) ^ (a >>>  8) ^ (a >> 7)
+// ------ sigma<19, 61, 6>(x) ------
+// s1(e) = (e >>> 19) ^ (e >>> 61) ^ (e >> 6)
 //
 // SSE optimal (sha512)
 // s0(a) = ((((a >>  1) ^ a) >>  6) ^ a) >> 1) ^ ((a <<  7) ^ a) << 56
 // s1(e) = ((((e >> 42) ^ e) >> 13) ^ e) >> 6) ^ ((e << 42) ^ e) << 3
-//
-// AVX optimal (sha512)
-// s0(a) = (a >>  1) ^ (a << 63) ^ (a >>  8) ^ (a << 56) ^ (a >> 7)
-// s1(e) = (e >> 19) ^ (e << 45) ^ (e >> 61) ^ (e <<  3) ^ (e >> 6)
 
 TEMPLATE
 template <size_t A, size_t B, size_t C>
@@ -530,21 +545,16 @@ Sigma(auto x) NOEXCEPT
     return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), ror_<C, s>(x));
 }
 
-// intel.com/content/dam/www/public/us/en/documents/white-papers/sha-256-implementations-paper.pdf
-// One optimization in the round’s calculation is in calculating the sigma
-// functions on the a and e state variables:
+// intel.com/content/dam/www/public/us/en/documents/white-papers/
+// sha-256-implementations-paper.pdf
 //
-// This is what we have natively.
+// AVX optimal (sha512) [probably]
+// ------ Sigma<2, 13, 22>(x) ------
 // S0(a) = (a >>> 2) ^ (a >>> 13) ^ (a >>> 22)
+// ------ Sigma<6, 11, 25>(x) ------
 // S1(e) = (e >>> 6) ^ (e >>> 11) ^ (e >>> 25)
 //
-// Because the ror instruction is destructive (that is, it overwrites the source
-// operand), implementing the above as written would involve a number of
-// register copy operations. If, however, the expressions are rewritten as
-// [follows], then the number of register copies can be minimized. Both S0 and
-// S1 are computed at the same time (in an interleaved manner) to avoid
-// serializing the chain of dependent rotates.
-//
+// SSE optimal (sha256)
 // S0(a) = (((a >>>  9) ^ a) >>> 11) ^ a) >>> 2
 // S1(e) = (((e >>> 14) ^ e) >>>  5) ^ e) >>> 6
 
@@ -835,8 +845,17 @@ compress(auto& state, const auto& buffer) NOEXCEPT
 TEMPLATE
 template<size_t Round>
 INLINE constexpr void CLASS::
-prepare(auto& buffer) NOEXCEPT
+prepare(auto& w) NOEXCEPT
 {
+    constexpr auto r00 = Round;
+    constexpr auto r02 = r00 - 2;
+    constexpr auto r03 = r00 - 3;
+    constexpr auto r07 = r00 - 7;
+    constexpr auto r08 = r00 - 8;
+    constexpr auto r14 = r00 - 14;
+    constexpr auto r15 = r00 - 15;
+    constexpr auto r16 = r00 - 16;
+
     // w[i] has no dependency on w[i-1] (just i-2), which implies we can
     // cut the round count in half and compute w[i]/w[i+1] concurrently.
     // k can be added to the message schedule as opposed to compress rounds.
@@ -846,28 +865,29 @@ prepare(auto& buffer) NOEXCEPT
     // 4.2.1 SHA-1 Constants
     // 4.2.2 SHA-224 and SHA-256 Constants
     // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
+
+    // TODO: K values must be loaded.
+    // TODO: an overloaded constexpr can convert k[i], k[++i] to k[i, ++i]
+    // for sha-ni double round loads. But simd K values are not constexpr.
+    // So add_<k> must internally load k from word_t.
+
     // Round constant is moved here, as this prepare is vectorizable.
-    constexpr auto k0 = K::get[     Round  - SHA::block_words];
-    constexpr auto k1 = K::get[add1(Round) - SHA::block_words];
+    constexpr auto k0 = K::get[r16];
+    constexpr auto k1 = K::get[add1(r16)];
 
     if constexpr (SHA::strength == 160)
     {
-        constexpr auto r03 = Round - 3;
-        constexpr auto r08 = Round - 8;
-        constexpr auto r14 = Round - 14;
-        constexpr auto r16 = Round - 16;
+        w[r00] = rol_<1>(xor_(
+            xor_(w[r16], w[r14]),
+            xor_(w[r08], w[r03])));
 
-        buffer[Round] = rol_<1>(xor_(
-            xor_(buffer[r16], buffer[r14]),
-            xor_(buffer[r08], buffer[r03])));
+        w[r16] = add_<k0>(w[r16]);
 
-        buffer[r16] = add_<k0>(buffer[r16]);
+        w[add1(r00)] = rol_<1>(xor_(
+            xor_(w[add1(r16)], w[add1(r14)]),
+            xor_(w[add1(r08)], w[add1(r03)])));
 
-        buffer[add1(Round)] = rol_<1>(xor_(
-            xor_(buffer[add1(r16)], buffer[add1(r14)]),
-            xor_(buffer[add1(r08)], buffer[add1(r03)])));
-
-        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
+        w[add1(r16)] = add_<k1>(w[add1(r16)]);
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -889,22 +909,18 @@ prepare(auto& buffer) NOEXCEPT
     else
     {
         // TODO: if open lanes, vectorize sigma0 and sigma1 (see Intel).
-        constexpr auto r02 = Round - 2;
-        constexpr auto r07 = Round - 7;
-        constexpr auto r15 = Round - 15;
-        constexpr auto r16 = Round - 16;
 
-        buffer[Round] = add_(
-            add_(buffer[r16], sigma0(buffer[r15])),
-            add_(buffer[r07], sigma1(buffer[r02])));
+        w[r00] = add_(
+            add_(w[r16], sigma0(w[r15])),
+            add_(w[r07], sigma1(w[r02])));
 
-        buffer[r16] = add_<k0>(buffer[r16]);
+        w[r16] = add_<k0>(w[r16]);
 
-        buffer[add1(Round)] = add_(
-            add_(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
-            add_(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
+        w[add1(r00)] = add_(
+            add_(w[add1(r16)], sigma0(w[add1(r15)])),
+            add_(w[add1(r07)], sigma1(w[add1(r02)])));
 
-        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
+        w[add1(r16)] = add_<k1>(w[add1(r16)]);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
@@ -924,23 +940,23 @@ prepare(auto& buffer) NOEXCEPT
     // At this point no schedule rounds remain to depend on the value.
     if constexpr (Round == sub1(sub1(SHA::rounds)))
     {
-        constexpr auto r = SHA::rounds - SHA::block_words;
-        buffer[r +  0] = add_<K::get[r +  0]>(buffer[r +  0]);
-        buffer[r +  1] = add_<K::get[r +  1]>(buffer[r +  1]);
-        buffer[r +  2] = add_<K::get[r +  2]>(buffer[r +  2]);
-        buffer[r +  3] = add_<K::get[r +  3]>(buffer[r +  3]);
-        buffer[r +  4] = add_<K::get[r +  4]>(buffer[r +  4]);
-        buffer[r +  5] = add_<K::get[r +  5]>(buffer[r +  5]);
-        buffer[r +  6] = add_<K::get[r +  6]>(buffer[r +  6]);
-        buffer[r +  7] = add_<K::get[r +  7]>(buffer[r +  7]);
-        buffer[r +  8] = add_<K::get[r +  8]>(buffer[r +  8]);
-        buffer[r +  9] = add_<K::get[r +  9]>(buffer[r +  9]);
-        buffer[r + 10] = add_<K::get[r + 10]>(buffer[r + 10]);
-        buffer[r + 11] = add_<K::get[r + 11]>(buffer[r + 11]);
-        buffer[r + 12] = add_<K::get[r + 12]>(buffer[r + 12]);
-        buffer[r + 13] = add_<K::get[r + 13]>(buffer[r + 13]);
-        buffer[r + 14] = add_<K::get[r + 14]>(buffer[r + 14]);
-        buffer[r + 15] = add_<K::get[r + 15]>(buffer[r + 15]);
+        constexpr auto r = SHA::rounds - 16;
+        w[r +  0] = add_<K::get[r +  0]>(w[r +  0]);
+        w[r +  1] = add_<K::get[r +  1]>(w[r +  1]);
+        w[r +  2] = add_<K::get[r +  2]>(w[r +  2]);
+        w[r +  3] = add_<K::get[r +  3]>(w[r +  3]);
+        w[r +  4] = add_<K::get[r +  4]>(w[r +  4]);
+        w[r +  5] = add_<K::get[r +  5]>(w[r +  5]);
+        w[r +  6] = add_<K::get[r +  6]>(w[r +  6]);
+        w[r +  7] = add_<K::get[r +  7]>(w[r +  7]);
+        w[r +  8] = add_<K::get[r +  8]>(w[r +  8]);
+        w[r +  9] = add_<K::get[r +  9]>(w[r +  9]);
+        w[r + 10] = add_<K::get[r + 10]>(w[r + 10]);
+        w[r + 11] = add_<K::get[r + 11]>(w[r + 11]);
+        w[r + 12] = add_<K::get[r + 12]>(w[r + 12]);
+        w[r + 13] = add_<K::get[r + 13]>(w[r + 13]);
+        w[r + 14] = add_<K::get[r + 14]>(w[r + 14]);
+        w[r + 15] = add_<K::get[r + 15]>(w[r + 15]);
     }
 }
 
@@ -1072,12 +1088,12 @@ pad_one(buffer_t& buffer) NOEXCEPT
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
 
-    ////if constexpr (SHA::strength == 160)
-    ////    static_assert(pad[1] == 0x5a827999);
-    ////else if constexpr (SHA::strength == 256)
-    ////    static_assert(pad[1] == 0x71374491);
-    ////else if constexpr (SHA::strength == 512)
-    ////    static_assert(pad[1] == 0x7137449123ef65cd);
+    if constexpr (SHA::strength == 160)
+        static_assert(pad[1] == 0x5a827999);
+    else if constexpr (SHA::strength == 256)
+        static_assert(pad[1] == 0x71374491);
+    else if constexpr (SHA::strength == 512)
+        static_assert(pad[1] == 0x7137449123ef65cd);
 
     buffer = pad;
 }
@@ -1462,56 +1478,6 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
     schedule(buffer);
     compress(state, buffer);
 }
-
-////// Extract a 32-bit integer from a (selected by offset).
-////template <uint32_t Offset>
-////uint32_t get(mint128_t a) noexcept
-////{
-////    return _mm_extract_epi32(a, Offset);
-////}
-////
-////// Broadcast 32-bit integer a to all elements of dst.
-////mint128_t set(uint32_t a) noexcept
-////{
-////    return _mm_set1_epi32(a);
-////}
-////
-////// Set packed 32-bit integers in dst with the supplied values.
-////mint128_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d) noexcept
-////{
-////    return _mm_set_epi32(a, b, c, d);
-////}
-////
-////// Shuffle packed 8-bit integers in a according to shuffle control mask (b).
-////mint128_t shuffle(mint128_t a, mint128_t b) noexcept
-////{
-////    return _mm_shuffle_epi8(a, b);
-////}
-////
-////template <size_t Offset>
-////mint128_t inline read4(const std_array<std_array<uint8_t, 64>, 4>& blocks) NOEXCEPT
-////{
-////    constexpr auto four = sizeof(uint32_t);
-////    const auto value = set(
-////        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[0])),
-////        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[1])),
-////        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[2])),
-////        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[3])));
-////
-////    return shuffle(value, set(0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
-////}
-////
-////template <size_t Offset>
-////void inline write4(std_array<std_array<uint8_t, 32>, 4>& digests, mint128_t value) NOEXCEPT
-////{
-////    value = shuffle(value, set(0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul));
-////
-////    constexpr auto four = sizeof(uint32_t);
-////    array_cast<uint8_t, four, Offset>(digests[0]) = to_little_endian(get<3>(value));
-////    array_cast<uint8_t, four, Offset>(digests[1]) = to_little_endian(get<2>(value));
-////    array_cast<uint8_t, four, Offset>(digests[2]) = to_little_endian(get<1>(value));
-////    array_cast<uint8_t, four, Offset>(digests[3]) = to_little_endian(get<0>(value));
-////}
 
 TEMPLATE
 INLINE void CLASS::
