@@ -4,7 +4,6 @@
 
 #include "sha256.h"
 #include "common.h"
-#include <assert.h>
 #include <string.h>
 #include "../../../test.hpp"
 
@@ -14,7 +13,7 @@ BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(26496) // USE_CONST
+BC_PUSH_WARNING(USE_CONST)
 
 namespace baseline {
 namespace sha256 {
