@@ -305,15 +305,48 @@ template <bool Compressed, bool Vectorized, bool Concurrent, bool Chunked>
 struct rmd160_parameters : parameters
 {
     static constexpr size_t strength{ 160 };
-    static constexpr bool ripemd{ false };
+    static constexpr bool ripemd{ true };
     static constexpr bool compressed{ Compressed };
     static constexpr bool vectorized{ Vectorized };
     static constexpr bool concurrent{ Concurrent };
     static constexpr bool chunked{ Chunked };
 };
 
-using sha256_optimal = sha256_parameters<true, true, false, false>;
-using rmd160_optimal = rmd160_parameters<true, true, false, false>;
+using sha256_optimal = sha256_parameters<false, false, false, false>;
+using rmd160_optimal = rmd160_parameters<false, false, false, false>;
+
+
+// baseline for performance tests
+// ----------------------------------------------------------------------------
+// The satoshi client hash implementation is the performance test baseline.
+// All script hashing is performed through the accumulator, which always
+// buffers a remainder and/or padding. There is no optimization for full or
+// half block sizes. All data cycles through the stream writer objects.
+
+////case OP_RIPEMD160:
+////case OP_SHA1:
+////case OP_SHA256:
+////case OP_HASH160:
+////case OP_HASH256:
+////{
+////    if (stack.size() < 1)
+////        return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
+////    valtype& vch = stacktop(-1);
+////    valtype vchHash((opcode == OP_RIPEMD160 || opcode == OP_SHA1 || opcode == OP_HASH160) ? 20 : 32);
+////    if (opcode == OP_RIPEMD160)
+////        CRIPEMD160().Write(vch.data(), vch.size()).Finalize(vchHash.data());
+////    else if (opcode == OP_SHA1)
+////        CSHA1().Write(vch.data(), vch.size()).Finalize(vchHash.data());
+////    else if (opcode == OP_SHA256)
+////        CSHA256().Write(vch.data(), vch.size()).Finalize(vchHash.data());
+////    else if (opcode == OP_HASH160)
+////        CHash160().Write(vch).Finalize(vchHash);
+////    else if (opcode == OP_HASH256)
+////        CHash256().Write(vch).Finalize(vchHash);
+////    popstack(stack);
+////    stack.push_back(vchHash);
+////}
+////break;
 
 // Baseline test runner helper.
 // ----------------------------------------------------------------------------
@@ -404,7 +437,7 @@ struct base_default : base_parameters
 {
     static constexpr bool compressed{ false };
     static constexpr bool vectorized{ false };
-    static constexpr bool chunked{ false };
+    static constexpr bool chunked{ true };
 };
 
 // Defaults to 1Mi rounds over 1KiB data (1GiB).
