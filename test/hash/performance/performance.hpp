@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_TEST_PERFORMANCE_PERFORMANCE_HPP
-#define LIBBITCOIN_SYSTEM_TEST_PERFORMANCE_PERFORMANCE_HPP
+#ifndef LIBBITCOIN_SYSTEM_TEST_HASH_PERFORMANCE_PERFORMANCE_HPP
+#define LIBBITCOIN_SYSTEM_TEST_HASH_PERFORMANCE_PERFORMANCE_HPP
 
-#include "../test.hpp"
+#include "../../test.hpp"
 #include <chrono>
 
 namespace performance {
@@ -288,25 +288,31 @@ bool hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
 // Algorithm::hash() test runner parameterization.
 // ----------------------------------------------------------------------------
 
-struct sha256_optimal : parameters
+template <bool Compressed, bool Vectorized, bool Concurrent, bool Chunked>
+struct sha256_parameters : parameters
 {
     static constexpr size_t strength{ 256 };
     static constexpr bool ripemd{ false };
-    static constexpr bool compressed{ true };
-    static constexpr bool vectorized{ true };
-    static constexpr bool concurrent{ false };
-    static constexpr bool chunked{ false };
+    static constexpr bool compressed{ Compressed };
+    static constexpr bool vectorized{ Vectorized };
+    static constexpr bool concurrent{ Concurrent };
+    static constexpr bool chunked{ Chunked };
 };
 
-struct rmd160_optimal : parameters
+template <bool Compressed, bool Vectorized, bool Concurrent, bool Chunked>
+struct rmd160_parameters : parameters
 {
     static constexpr size_t strength{ 160 };
-    static constexpr bool ripemd{ true };
-    static constexpr bool compressed{ false };
-    static constexpr bool vectorized{ true };
-    static constexpr bool concurrent{ false };
-    static constexpr bool chunked{ false };
+    static constexpr bool ripemd{ false };
+    static constexpr bool compressed{ Compressed };
+    static constexpr bool vectorized{ Vectorized };
+    static constexpr bool concurrent{ Concurrent };
+    static constexpr bool chunked{ Chunked };
 };
+
+
+using sha256_optimal = sha256_parameters<true, true, false, false>;
+using rmd160_optimal = rmd160_parameters<true, true, false, false>;
 
 } // namespace performance
 

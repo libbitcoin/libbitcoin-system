@@ -282,6 +282,13 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/scrypt.cpp \
     test/hash/siphash.cpp \
     test/hash/siphash.hpp \
+    test/hash/performance/performance.cpp \
+    test/hash/performance/performance.hpp \
+    test/hash/performance/baseline/byteswap.h \
+    test/hash/performance/baseline/common.h \
+    test/hash/performance/baseline/endian.h \
+    test/hash/performance/baseline/sha256.cpp \
+    test/hash/performance/baseline/sha256.h \
     test/hash/rmd/algorithm.cpp \
     test/hash/rmd/analysis.cpp \
     test/hash/sha/algorithm.cpp \
@@ -300,8 +307,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/overflow.cpp \
     test/math/power.cpp \
     test/math/sign.cpp \
-    test/performance/performance.cpp \
-    test/performance/performance.hpp \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
     test/radix/base_2048.cpp \

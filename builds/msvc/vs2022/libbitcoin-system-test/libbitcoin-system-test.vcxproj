@@ -146,6 +146,8 @@
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\sha256.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <ObjectFileName>$(IntDir)test_hash_rmd_algorithm.obj</ObjectFileName>
     </ClCompile>
@@ -177,7 +179,6 @@
     <ClCompile Include="..\..\..\..\test\math\overflow.cpp" />
     <ClCompile Include="..\..\..\..\test\math\power.cpp" />
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
-    <ClCompile Include="..\..\..\..\test\performance\performance.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_2048.cpp" />
@@ -273,8 +274,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\hash.hpp" />
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\byteswap.h" />
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\common.h" />
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\endian.h" />
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\sha256.h" />
+    <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />
-    <ClInclude Include="..\..\..\..\test\performance\performance.hpp" />
     <ClInclude Include="..\..\..\..\test\test.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\test\wallet\mnemonics\electrum_v1.hpp" />
