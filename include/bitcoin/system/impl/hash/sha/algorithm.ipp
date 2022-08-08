@@ -1410,7 +1410,7 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else
     {
-        // TODO: Factor the set of digests for optimizal vectorization.
+        // TODO: Factor the set of digests for optimal vectorization.
         for (size_t i = 0, j = 0; i < half; ++i, j += two)
             digests[i] = double_hash(digests[j], digests[add1(j)]);
     }
