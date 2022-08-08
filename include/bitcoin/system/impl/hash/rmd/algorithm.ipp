@@ -496,7 +496,24 @@ input(words_t& words, const block_t& block) NOEXCEPT
     }
     else
     {
-        from_little_endians(words, array_cast<word_t>(block));
+        const auto& in = array_cast<word_t>(block);
+        words[0] = native_from_little_end(in[0]);
+        words[1] = native_from_little_end(in[1]);
+        words[2] = native_from_little_end(in[2]);
+        words[3] = native_from_little_end(in[3]);
+        words[4] = native_from_little_end(in[4]);
+        words[5] = native_from_little_end(in[5]);
+        words[6] = native_from_little_end(in[6]);
+        words[7] = native_from_little_end(in[7]);
+        words[8] = native_from_little_end(in[8]);
+        words[9] = native_from_little_end(in[9]);
+        words[10] = native_from_little_end(in[10]);
+        words[11] = native_from_little_end(in[11]);
+        words[12] = native_from_little_end(in[12]);
+        words[13] = native_from_little_end(in[13]);
+        words[14] = native_from_little_end(in[14]);
+        words[15] = native_from_little_end(in[15]);
+        ////from_little_endians(words, array_cast<word_t>(block));
     }
 }
 
@@ -518,9 +535,18 @@ input(words_t& words, const half_t& half) NOEXCEPT
     }
     else
     {
-        from_little_endians(
-            array_cast<word_t, array_count<chunk_t>>(words),
-            array_cast<word_t>(half));
+        const auto& in = array_cast<word_t>(half);
+        words[0] = native_from_little_end(in[0]);
+        words[1] = native_from_little_end(in[1]);
+        words[2] = native_from_little_end(in[2]);
+        words[3] = native_from_little_end(in[3]);
+        words[4] = native_from_little_end(in[4]);
+        words[5] = native_from_little_end(in[5]);
+        words[6] = native_from_little_end(in[6]);
+        words[7] = native_from_little_end(in[7]);
+        ////from_little_endians(
+        ////    array_cast<word_t, array_count<chunk_t>>(words),
+        ////    array_cast<word_t>(half));
     }
 }
 
@@ -528,10 +554,10 @@ TEMPLATE
 INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
+    digest_t digest{};
+
     if (std::is_constant_evaluated())
     {
-        digest_t digest{};
-
         constexpr auto size = RMD::word_bytes;
         to_little<0 * size>(digest, state.at(0));
         to_little<1 * size>(digest, state.at(1));
@@ -542,13 +568,23 @@ output(const state_t& state) NOEXCEPT
         {
             to_little<4 * size>(digest, state.at(4));
         }
-
-        return digest;
     }
     else
     {
-        return array_cast<byte_t>(to_little_endians(state));
+        auto& out = array_cast<word_t>(digest);
+        out[0] = native_to_little_end(state[0]);
+        out[1] = native_to_little_end(state[1]);
+        out[2] = native_to_little_end(state[2]);
+        out[3] = native_to_little_end(state[3]);
+
+        if constexpr (RMD::strength == 160)
+        {
+            out[4] = native_to_little_end(state[4]);
+        }
+        ////return array_cast<byte_t>(to_little_endians(state));
     }
+
+    return digest;
 }
 
 // Finalized hash functions.

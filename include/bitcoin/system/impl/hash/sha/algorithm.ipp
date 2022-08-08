@@ -1087,8 +1087,25 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else
     {
-        from_big_endians(array_cast<word_t, array_count<words_t>>(buffer),
-            array_cast<word_t>(block));
+        const auto& in = array_cast<word_t>(block);
+        buffer[0] = native_from_big_end(in[0]);
+        buffer[1] = native_from_big_end(in[1]);
+        buffer[2] = native_from_big_end(in[2]);
+        buffer[3] = native_from_big_end(in[3]);
+        buffer[4] = native_from_big_end(in[4]);
+        buffer[5] = native_from_big_end(in[5]);
+        buffer[6] = native_from_big_end(in[6]);
+        buffer[7] = native_from_big_end(in[7]);
+        buffer[8] = native_from_big_end(in[8]);
+        buffer[9] = native_from_big_end(in[9]);
+        buffer[10] = native_from_big_end(in[10]);
+        buffer[11] = native_from_big_end(in[11]);
+        buffer[12] = native_from_big_end(in[12]);
+        buffer[13] = native_from_big_end(in[13]);
+        buffer[14] = native_from_big_end(in[14]);
+        buffer[15] = native_from_big_end(in[15]);
+        ////from_big_endians(array_cast<word_t, array_count<words_t>>(buffer),
+        ////    array_cast<word_t>(block));
     }
 }
 
@@ -1110,8 +1127,17 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else
     {
-        from_big_endians(array_cast<word_t, array_count<chunk_t>>(buffer),
-            array_cast<word_t>(half));
+        const auto& in = array_cast<word_t>(half);
+        buffer[0] = native_from_big_end(in[0]);
+        buffer[1] = native_from_big_end(in[1]);
+        buffer[2] = native_from_big_end(in[2]);
+        buffer[3] = native_from_big_end(in[3]);
+        buffer[4] = native_from_big_end(in[4]);
+        buffer[5] = native_from_big_end(in[5]);
+        buffer[6] = native_from_big_end(in[6]);
+        buffer[7] = native_from_big_end(in[7]);
+        ////from_big_endians(array_cast<word_t, array_count<chunk_t>>(buffer),
+        ////    array_cast<word_t>(half));
     }
 }
 
@@ -1133,9 +1159,18 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else
     {
-        constexpr auto chunk = array_count<chunk_t>;
-        from_big_endians(array_cast<word_t, chunk, chunk>(buffer), 
-            array_cast<word_t>(half));
+        const auto& in = array_cast<word_t>(half);
+        buffer[8]  = native_from_big_end(in[0]);
+        buffer[9]  = native_from_big_end(in[1]);
+        buffer[10] = native_from_big_end(in[2]);
+        buffer[11] = native_from_big_end(in[3]);
+        buffer[12] = native_from_big_end(in[4]);
+        buffer[13] = native_from_big_end(in[5]);
+        buffer[14] = native_from_big_end(in[6]);
+        buffer[15] = native_from_big_end(in[7]);
+        ////constexpr auto chunk = array_count<chunk_t>;
+        ////from_big_endians(array_cast<word_t, chunk, chunk>(buffer), 
+        ////    array_cast<word_t>(half));
     }
 }
 
@@ -1143,10 +1178,10 @@ TEMPLATE
 INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
+    digest_t digest{};
+
     if (std::is_constant_evaluated())
     {
-        digest_t digest{};
-
         constexpr auto size = SHA::word_bytes;
         to_big<0 * size>(digest, state.at(0));
         to_big<1 * size>(digest, state.at(1));
@@ -1160,13 +1195,26 @@ output(const state_t& state) NOEXCEPT
             to_big<6 * size>(digest, state.at(6));
             to_big<7 * size>(digest, state.at(7));
         }
-
-        return digest;
     }
     else
     {
-        return array_cast<byte_t>(to_big_endians(state));
+        auto& out = array_cast<word_t>(digest);
+        out[0] = native_to_big_end(state[0]);
+        out[1] = native_to_big_end(state[1]);
+        out[2] = native_to_big_end(state[2]);
+        out[3] = native_to_big_end(state[3]);
+        out[4] = native_to_big_end(state[4]);
+
+        if constexpr (SHA::strength != 160)
+        {
+            out[5] = native_to_big_end(state[5]);
+            out[6] = native_to_big_end(state[6]);
+            out[7] = native_to_big_end(state[7]);
+        }
+        ////return array_cast<byte_t>(to_big_endians(state));
     }
+
+    return digest;
 }
 
 // Hashing.
