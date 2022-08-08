@@ -12,13 +12,13 @@
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 BC_PUSH_WARNING(USE_NOEXCEPT_FOR_FUNCTION)
 
-#define LITTLE_ENDIAN 0x41424344UL 
-#define BIG_ENDIAN    0x44434241UL
+#define LITTLE_END 0x41424344UL 
+#define BIG_END    0x44434241UL
 #define ENDIAN_ORDER  ('ABCD')
 
 namespace baseline {
 
-#if (ENDIAN_ORDER==BIG_ENDIAN)
+#if (ENDIAN_ORDER==BIG_END)
 
 inline uint16_t htobe16(uint16_t host_16bits)
 {
@@ -80,7 +80,7 @@ inline uint64_t le64toh(uint64_t little_endian_64bits)
     return bswap_64(little_endian_64bits);
 }
 
-#elif (ENDIAN_ORDER==LITTLE_ENDIAN)
+#elif (ENDIAN_ORDER==LITTLE_END)
 
 inline uint16_t htobe16(uint16_t host_16bits)
 {
