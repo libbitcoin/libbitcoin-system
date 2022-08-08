@@ -29,7 +29,7 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_to_big_end(Integral big) NOEXCEPT
+INLINE constexpr Integral native_to_big_end(Integral big) NOEXCEPT
 {
     if constexpr (is_little_endian)
         return byteswap(big);
@@ -38,7 +38,7 @@ constexpr Integral native_to_big_end(Integral big) NOEXCEPT
 }
 
 template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_to_little_end(Integral little) NOEXCEPT
+INLINE constexpr Integral native_to_little_end(Integral little) NOEXCEPT
 {
     if constexpr (is_big_endian)
         return byteswap(little);
@@ -47,13 +47,13 @@ constexpr Integral native_to_little_end(Integral little) NOEXCEPT
 }
 
 template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_from_big_end(Integral big) NOEXCEPT
+INLINE constexpr Integral native_from_big_end(Integral big) NOEXCEPT
 {
     return native_to_big_end(big);
 }
 
 template <typename Integral, if_integral_integer<Integral>>
-constexpr Integral native_from_little_end(Integral little) NOEXCEPT
+INLINE constexpr Integral native_from_little_end(Integral little) NOEXCEPT
 {
     return native_to_little_end(little);
 }
