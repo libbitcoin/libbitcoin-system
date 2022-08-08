@@ -145,6 +145,7 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/power.hpp>
+#include <bitcoin/system/math/rotate.hpp>
 #include <bitcoin/system/math/sign.hpp>
 #include <bitcoin/system/radix/base_10.hpp>
 #include <bitcoin/system/radix/base_16.hpp>

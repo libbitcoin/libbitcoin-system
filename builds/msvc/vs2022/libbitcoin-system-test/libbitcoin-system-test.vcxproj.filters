@@ -372,6 +372,9 @@
     <ClCompile Include="..\..\..\..\test\math\power.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\rotate.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\sign.cpp">
       <Filter>src\math</Filter>
     </ClCompile>

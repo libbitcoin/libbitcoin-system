@@ -614,6 +614,7 @@ if (with-tests)
         "../../test/math/logarithm.cpp"
         "../../test/math/overflow.cpp"
         "../../test/math/power.cpp"
+        "../../test/math/rotate.cpp"
         "../../test/math/sign.cpp"
         "../../test/radix/base_10.cpp"
         "../../test/radix/base_16.cpp"

@@ -308,6 +308,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/logarithm.cpp \
     test/math/overflow.cpp \
     test/math/power.cpp \
+    test/math/rotate.cpp \
     test/math/sign.cpp \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
@@ -609,6 +610,7 @@ include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/logarithm.ipp \
     include/bitcoin/system/impl/math/overflow.ipp \
     include/bitcoin/system/impl/math/power.ipp \
+    include/bitcoin/system/impl/math/rotate.ipp \
     include/bitcoin/system/impl/math/sign.ipp
 
 include_bitcoin_system_impl_radixdir = ${includedir}/bitcoin/system/impl/radix
@@ -665,6 +667,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/math.hpp \
     include/bitcoin/system/math/overflow.hpp \
     include/bitcoin/system/math/power.hpp \
+    include/bitcoin/system/math/rotate.hpp \
     include/bitcoin/system/math/sign.hpp
 
 include_bitcoin_system_radixdir = ${includedir}/bitcoin/system/radix

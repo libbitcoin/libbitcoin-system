@@ -29,11 +29,13 @@
 #include <bitcoin/system/math/logarithm.hpp>
 #include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/power.hpp>
+#include <bitcoin/system/math/rotate.hpp>
 #include <bitcoin/system/math/sign.hpp>
 
 // Inclusion dependencies:
 // cast      ->
 // sign      -> cast
+// rotate    -> cast
 // byteswap  -> cast
 // division  -> sign
 // overflow  -> sign, cast

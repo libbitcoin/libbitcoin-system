@@ -367,6 +367,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\overflow.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
@@ -525,6 +526,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\logarithm.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\overflow.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\power.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\rotate.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\sign.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\radix\base_2n.ipp" />
