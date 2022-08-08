@@ -24,32 +24,32 @@
 namespace libbitcoin {
 namespace system {
 
-/// Byteswap (platform independent byte reversal).
+/// Byteswap (platform independent intrinsic byte reversal).
 /// ---------------------------------------------------------------------------
 
 template <typename Integral,
     if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint8_t)> = true,
+    if_same_size<Integral, uint8_t> = true,
     if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint16_t)> = true,
+    if_same_size<Integral, uint16_t> = true,
     if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint32_t)> = true,
+    if_same_size<Integral, uint32_t> = true,
     if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true,
-    if_size_of<Integral, sizeof(uint64_t)> = true,
+    if_same_size<Integral, uint64_t> = true,
     if_unique_object_representations<Integral> = true>
-constexpr Integral byteswap(Integral value) NOEXCEPT;
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

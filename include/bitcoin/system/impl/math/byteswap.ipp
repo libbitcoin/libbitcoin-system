@@ -26,12 +26,12 @@
 // Shift right is implementation-defined for negative value.
 // So these are unsigned though caller may cast from/to signed.
 
-constexpr uint16_t byte_swap16_native(uint16_t value) NOEXCEPT
+INLINE constexpr uint16_t byte_swap16_native(uint16_t value) NOEXCEPT
 {
     return bc::system::depromote<uint16_t>((value << 8u) | (value >> 8u));
 }
 
-constexpr uint32_t byte_swap32_native(uint32_t value) NOEXCEPT
+INLINE constexpr uint32_t byte_swap32_native(uint32_t value) NOEXCEPT
 {
     return
         ((value << 24) |
@@ -40,7 +40,7 @@ constexpr uint32_t byte_swap32_native(uint32_t value) NOEXCEPT
          (value >> 24));
 }
 
-constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
+INLINE constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
 {
     return
         ((value << 56) |
@@ -110,9 +110,9 @@ namespace system {
 
 template <typename Integral,
     if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint8_t)>,
+    if_same_size<Integral, uint8_t>,
     if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // no-op for calling consistency across all integral integer types.
     return value;
@@ -120,9 +120,9 @@ constexpr Integral byteswap(Integral value) NOEXCEPT
 
 template <typename Integral,
     if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint16_t)>,
+    if_same_size<Integral, uint16_t>,
     if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to intrinsic call for non-constexpr.
     return std::is_constant_evaluated() ?
@@ -132,9 +132,9 @@ constexpr Integral byteswap(Integral value) NOEXCEPT
 
 template <typename Integral,
     if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint32_t)>,
+    if_same_size<Integral, uint32_t>,
     if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to intrinsic call for non-constexpr.
     return std::is_constant_evaluated() ?
@@ -144,9 +144,9 @@ constexpr Integral byteswap(Integral value) NOEXCEPT
 
 template <typename Integral,
     if_integral_integer<Integral>,
-    if_size_of<Integral, sizeof(uint64_t)>,
+    if_same_size<Integral, uint64_t>,
     if_unique_object_representations<Integral>>
-constexpr Integral byteswap(Integral value) NOEXCEPT
+INLINE constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to intrinsic call for non-constexpr.
     return std::is_constant_evaluated() ?
