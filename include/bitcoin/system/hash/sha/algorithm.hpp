@@ -90,6 +90,7 @@ public:
     /// -----------------------------------------------------------------------
 
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
+    static constexpr digest_t double_hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& left,
         const half_t& right) NOEXCEPT;
 
@@ -151,23 +152,23 @@ protected:
     template<size_t Round>
     INLINE static constexpr void prepare(auto& wk) NOEXCEPT;
 
-    static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
-    static constexpr void schedule(auto& buffer) NOEXCEPT;
-    static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
-    static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
+    INLINE static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
+    INLINE static constexpr void schedule(auto& buffer) NOEXCEPT;
+    INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
+    INLINE static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
 
     /// Padding
     /// -----------------------------------------------------------------------
-    static constexpr void pad_one(buffer_t& buffer) NOEXCEPT;
-    static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
-    static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
+    INLINE static constexpr void pad_one(buffer_t& buffer) NOEXCEPT;
+    INLINE static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
+    INLINE static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
     /// Parsing
     /// -----------------------------------------------------------------------
-    static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
-    static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
-    static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
-    static constexpr digest_t output(const state_t& state) NOEXCEPT;
+    INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
+    INLINE static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    INLINE static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
     /// Vectorization
     /// -----------------------------------------------------------------------

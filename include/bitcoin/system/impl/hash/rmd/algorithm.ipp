@@ -266,7 +266,7 @@ round(auto& state, const auto& words) NOEXCEPT
 
 TEMPLATE
 template<bool First>
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 batch(state_t& state, const words_t& words) NOEXCEPT
 {
     // Order of execution is arbitrary.
@@ -373,7 +373,7 @@ batch(state_t& state, const words_t& words) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 compress(state_t& state, const words_t& words) NOEXCEPT
 {
     if (std::is_constant_evaluated())
@@ -424,7 +424,7 @@ compress(state_t& state, const words_t& words) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 summarize(state_t& state, const state_t& batch1,
     const state_t& batch2) NOEXCEPT
 {
@@ -451,7 +451,7 @@ summarize(state_t& state, const state_t& batch1,
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 pad_one(words_t& words) NOEXCEPT
 {
     // Pad a single whole block with pre-prepared buffer.
@@ -461,7 +461,7 @@ pad_one(words_t& words) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 pad_half(words_t& words) NOEXCEPT
 {
     // Pad a half block.
@@ -486,7 +486,7 @@ pad_half(words_t& words) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 pad_n(words_t& words, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
@@ -527,7 +527,7 @@ pad_n(words_t& words, count_t blocks) NOEXCEPT
 // little-endian I/O is conventional for RMD.
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 input(words_t& words, const block_t& block) NOEXCEPT
 {
     constexpr auto size = RMD::word_bytes;
@@ -558,7 +558,7 @@ input(words_t& words, const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 input(words_t& words, const half_t& half) NOEXCEPT
 {
     constexpr auto size = RMD::word_bytes;
@@ -582,7 +582,7 @@ input(words_t& words, const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
+INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
     constexpr auto size = RMD::word_bytes;

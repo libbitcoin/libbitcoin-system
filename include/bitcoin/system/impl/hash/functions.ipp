@@ -184,15 +184,14 @@ INLINE data_chunk bitcoin_short_chunk(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE hash_digest bitcoin_hash(const data_array<Size>& data) NOEXCEPT
 {
+    constexpr auto half_size = array_count<typename sha256::half_t>;
     constexpr auto block_size = array_count<typename sha256::block_t>;
-    if constexpr (Size == block_size)
+    if constexpr (Size == half_size || Size == block_size)
     {
         return sha256::double_hash(data);
     }
     else
     {
-        // Accumulator provides half_t and block_t optimization for arrays,
-        // but not specifically support for optimized double-hashing.
         return sha256::hash(accumulator<sha256>::hash(data));
     }
 }
@@ -216,12 +215,11 @@ INLINE hash_digest bitcoin_hash_slice(const data_slice& left,
 template <size_t Size>
 INLINE data_chunk bitcoin_chunk(const data_array<Size>& data) NOEXCEPT
 {
+    constexpr auto half_size = array_count<typename sha256::half_t>;
     constexpr auto block_size = array_count<typename sha256::block_t>;
     constexpr auto digest_size = array_count<typename sha256::digest_t>;
-    if constexpr (Size == block_size)
+    if constexpr (Size == half_size || Size == block_size)
     {
-        // Accumulator does not provide support for double_hash.
-        // Algorithm emits only digest_t as hash results, so cast it here.
         data_chunk digest(digest_size);
         auto& out = unsafe_array_cast<uint8_t, digest_size>(digest.data());
         out = sha256::double_hash(data);

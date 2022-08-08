@@ -120,22 +120,22 @@ protected:
         const auto& words) NOEXCEPT;
 
     template<bool First>
-    static constexpr void batch(state_t& state, const words_t& words) NOEXCEPT;
-    static constexpr void compress(state_t& state, const words_t& words) NOEXCEPT;
-    static constexpr void summarize(state_t& out, const state_t& batch1,
+    INLINE static constexpr void batch(state_t& state, const words_t& words) NOEXCEPT;
+    INLINE static constexpr void compress(state_t& state, const words_t& words) NOEXCEPT;
+    INLINE static constexpr void summarize(state_t& out, const state_t& batch1,
         const state_t& batch2) NOEXCEPT;
 
     /// Padding
     /// -----------------------------------------------------------------------
-    static constexpr void pad_one(words_t& words) NOEXCEPT;
-    static constexpr void pad_half(words_t& words) NOEXCEPT;
-    static constexpr void pad_n(words_t& words, count_t blocks) NOEXCEPT;
+    INLINE static constexpr void pad_one(words_t& words) NOEXCEPT;
+    INLINE static constexpr void pad_half(words_t& words) NOEXCEPT;
+    INLINE static constexpr void pad_n(words_t& words, count_t blocks) NOEXCEPT;
     
     /// Parsing
     /// -----------------------------------------------------------------------
-    static constexpr void input(words_t& words, const block_t& block) NOEXCEPT;
-    static constexpr void input(words_t& words, const half_t& half) NOEXCEPT;
-    static constexpr digest_t output(const state_t& state) NOEXCEPT;
+    INLINE static constexpr void input(words_t& words, const block_t& block) NOEXCEPT;
+    INLINE static constexpr void input(words_t& words, const half_t& half) NOEXCEPT;
+    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
 private:
     // Specialized padding type.

@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_sha256_hash__test_vectors__expe
 BOOST_AUTO_TEST_CASE(algorithm__sha256_double_hash__full_block__expected)
 {
     constexpr auto expected = sha256::hash(sha256::hash(sha256::block_t{ 0 }));
-    static_assert(sha256::double_hash({ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::double_hash({ 0 }), expected);
+    static_assert(sha256::double_hash(sha256::block_t{ 0 }) == expected);
+    BOOST_CHECK_EQUAL(sha256::double_hash(sha256::block_t{ 0 }), expected);
 }
 
 BOOST_AUTO_TEST_CASE(algorithm__sha256_double_hash__half_blocks__expected)
@@ -236,8 +236,8 @@ BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_sha512_hash__test_vectors__expe
 BOOST_AUTO_TEST_CASE(algorithm__sha512_double_hash__full_block__expected)
 {
     constexpr auto expected = sha512::hash(sha512::hash(sha512::block_t{ 0 }));
-    static_assert(sha512::double_hash({ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::double_hash({ 0 }), expected);
+    static_assert(sha512::double_hash(sha512::block_t{ 0 }) == expected);
+    BOOST_CHECK_EQUAL(sha512::double_hash(sha512::block_t{ 0 }), expected);
 }
 
 BOOST_AUTO_TEST_CASE(algorithm__sha512_double_hash__half_blocks__expected)

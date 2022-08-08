@@ -731,7 +731,7 @@ round(auto& state, const auto& wk) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 compress(auto& state, const auto& buffer) NOEXCEPT
 {
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
@@ -968,7 +968,7 @@ prepare(auto& w) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 schedule(auto& buffer) NOEXCEPT
 {
     // Pointer degradation here (optimization), use auto typing in prepare().
@@ -1026,7 +1026,7 @@ schedule(auto& buffer) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 summarize(auto& out, const auto& in) NOEXCEPT
 {
     // FIPS.180
@@ -1049,7 +1049,7 @@ summarize(auto& out, const auto& in) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 input(buffer_t& buffer, const state_t& state) NOEXCEPT
 {
     // FIPS.180
@@ -1089,7 +1089,7 @@ input(buffer_t& buffer, const state_t& state) NOEXCEPT
 // 5.1.2 SHA-384, SHA-512, SHA-512/224 and SHA-512/256
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 pad_one(buffer_t& buffer) NOEXCEPT
 {
     // Pad a single whole block with pre-prepared buffer.
@@ -1106,7 +1106,7 @@ pad_one(buffer_t& buffer) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 pad_half(buffer_t& buffer) NOEXCEPT
 {
     // Pad a half block.
@@ -1131,7 +1131,7 @@ pad_half(buffer_t& buffer) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
@@ -1175,7 +1175,7 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 // big-endian I/O is conventional for SHA.
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 input(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
     constexpr auto size = SHA::word_bytes;
@@ -1207,7 +1207,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 input1(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     constexpr auto size = SHA::word_bytes;
@@ -1231,7 +1231,7 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
+INLINE constexpr void CLASS::
 input2(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     constexpr auto size = SHA::word_bytes;
@@ -1256,7 +1256,7 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
+INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
     // FIPS.180
@@ -1327,6 +1327,30 @@ hash(const block_t& block) NOEXCEPT
 // Double Hashing.
 // ---------------------------------------------------------------------------
 // No double_hash optimizations for sha160 (double_hash requires half_t).
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const half_t& half) NOEXCEPT
+{
+    static_assert(is_same_type<digest_t, half_t>);
+
+    buffer_t buffer{};
+    auto state = H::get;
+    input(buffer, half);
+    pad_half(buffer);
+    schedule(buffer);
+    compress(state, buffer);
+
+    pad_one(buffer);
+    compress(state, buffer);
+    input(buffer, state);
+
+    state = H::get;
+    pad_half(buffer);
+    schedule(buffer);
+    compress(state, buffer);
+    return output(state);
+}
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
@@ -1488,7 +1512,7 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-schedule(buffers_t& buffers, const blocks_t& blocks) NOEXCEPT
+schedule(buffers_t&, const blocks_t&) NOEXCEPT
 {
     // rename all uintx_t to uintx128_t, etc.
     // alias uint128_t, uint256_t, uint512_t as extended intel/arm integrals.
