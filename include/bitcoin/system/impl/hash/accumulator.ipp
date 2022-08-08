@@ -314,9 +314,26 @@ TEMPLATE
 inline void CLASS::
 hash(byte_t* digest, const data_slice& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write_slice(data);
-    context.flush(digest);
+    const auto size = data.size();
+
+    if (size == half_block)
+    {
+        unsafe_array_cast<uint8_t, digest_size>(digest) =
+            Algorithm::hash(unsafe_array_cast<uint8_t,
+                half_block>(data.data()));
+    }
+    else if (size == full_block)
+    {
+        unsafe_array_cast<uint8_t, digest_size>(digest) =
+            Algorithm::hash(unsafe_array_cast<uint8_t,
+                full_block>(data.data()));
+    }
+    else
+    {
+        accumulator<Algorithm> context{};
+        context.write_slice(data);
+        context.flush(digest);
+    }
 }
 
 TEMPLATE
@@ -324,10 +341,7 @@ template <size_t Size>
 inline typename CLASS::digest_t CLASS::
 hash(const std_array<byte_t, Size>& data) NOEXCEPT
 {
-    constexpr auto half = array_count<half_t>;
-    constexpr auto full = array_count<block_t>;
-
-    if constexpr (Size == half || Size == full)
+    if constexpr (Size == half_block || Size == full_block)
     {
         return Algorithm::hash(data);
     }
@@ -343,18 +357,48 @@ TEMPLATE
 inline typename CLASS::digest_t CLASS::
 hash(const data_chunk& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write(data);
-    return context.flush();
+    const auto size = data.size();
+
+    if (size == half_block)
+    {
+        return Algorithm::hash(unsafe_array_cast<uint8_t,
+            half_block>(data.data()));
+    }
+    else if (size == full_block)
+    {
+        return Algorithm::hash(unsafe_array_cast<uint8_t,
+            full_block>(data.data()));
+    }
+    else
+    {
+        accumulator<Algorithm> context{};
+        context.write(data);
+        return context.flush();
+    }
 }
 
 TEMPLATE
 inline typename CLASS::digest_t CLASS::
 hash_digest(const data_slice& data) NOEXCEPT
 {
-    accumulator<Algorithm> context{};
-    context.write_slice(data);
-    return context.flush();
+    const auto size = data.size();
+
+    if (size == half_block)
+    {
+        return Algorithm::hash(unsafe_array_cast<uint8_t,
+            half_block>(data.data()));
+    }
+    else if (size == full_block)
+    {
+        return Algorithm::hash(unsafe_array_cast<uint8_t,
+            full_block>(data.data()));
+    }
+    else
+    {
+        accumulator<Algorithm> context{};
+        context.write_slice(data);
+        return context.flush();
+    }
 }
 
 TEMPLATE
@@ -362,9 +406,8 @@ template <size_t Size>
 inline data_chunk CLASS::
 hash_chunk(const std_array<byte_t, Size>& data) NOEXCEPT
 {
-    constexpr auto size = array_count<digest_t>;
-    data_chunk digest(size);
-    auto& out = unsafe_array_cast<byte_t, size>(digest.data());
+    data_chunk digest(digest_size);
+    auto& out = unsafe_array_cast<byte_t, digest_size>(digest.data());
     out = hash(data);
     return digest;
 }
@@ -373,9 +416,8 @@ TEMPLATE
 inline data_chunk CLASS::
 hash_chunk(const data_chunk& data) NOEXCEPT
 {
-    constexpr auto size = array_count<digest_t>;
-    data_chunk digest(size);
-    auto& out = unsafe_array_cast<byte_t, size>(digest.data());
+    data_chunk digest(digest_size);
+    auto& out = unsafe_array_cast<byte_t, digest_size>(digest.data());
     out = hash(data);
     return digest;
 }

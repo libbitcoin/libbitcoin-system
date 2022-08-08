@@ -121,6 +121,10 @@ protected:
     static constexpr auto count_size = array_count<counter>;
 
 private:
+    static constexpr auto half_block = array_count<half_t>;
+    static constexpr auto full_block = array_count<block_t>;
+    static constexpr auto digest_size = array_count<digest_t>;
+
     size_t size_;
     state_t state_;
     block_t buffer_;
