@@ -16,9 +16,15 @@ namespace baseline {
 
 // Give baseline benefit of intrinsics.
 // native implementation is equivalent.
+#ifndef bswap_16
 #define bswap_16 byte_swap16
+#endif
+#ifndef bswap_32
 #define bswap_32 byte_swap32
+#endif
+#ifndef bswap_64
 #define bswap_64 byte_swap64
+#endif
     
 ////inline uint16_t bswap_16(uint16_t x)
 ////{
