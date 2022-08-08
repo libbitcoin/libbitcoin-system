@@ -1085,7 +1085,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
         from_big<14 * size>(buffer.at(14), block);
         from_big<15 * size>(buffer.at(15), block);
     }
-    else
+    else if constexpr (bc::is_little_endian)
     {
         const auto& in = array_cast<word_t>(block);
         buffer[0] = native_from_big_end(in[0]);
@@ -1104,8 +1104,11 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
         buffer[13] = native_from_big_end(in[13]);
         buffer[14] = native_from_big_end(in[14]);
         buffer[15] = native_from_big_end(in[15]);
-        ////from_big_endians(array_cast<word_t, array_count<words_t>>(buffer),
-        ////    array_cast<word_t>(block));
+    }
+    else
+    {
+        array_cast<word_t, array_count<words_t>>(buffer) =
+            array_cast<word_t>(block);
     }
 }
 
@@ -1125,7 +1128,7 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
         from_big<6 * size>(buffer.at(6), half);
         from_big<7 * size>(buffer.at(7), half);
     }
-    else
+    else if constexpr (bc::is_little_endian)
     {
         const auto& in = array_cast<word_t>(half);
         buffer[0] = native_from_big_end(in[0]);
@@ -1136,8 +1139,11 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
         buffer[5] = native_from_big_end(in[5]);
         buffer[6] = native_from_big_end(in[6]);
         buffer[7] = native_from_big_end(in[7]);
-        ////from_big_endians(array_cast<word_t, array_count<chunk_t>>(buffer),
-        ////    array_cast<word_t>(half));
+    }
+    else
+    {
+        array_cast<word_t, array_count<chunk_t>>(buffer) =
+            array_cast<word_t>(half);
     }
 }
 
@@ -1157,7 +1163,7 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
         from_big<6 * size>(buffer.at(14), half);
         from_big<7 * size>(buffer.at(15), half);
     }
-    else
+    else if constexpr (bc::is_little_endian)
     {
         const auto& in = array_cast<word_t>(half);
         buffer[8]  = native_from_big_end(in[0]);
@@ -1168,9 +1174,12 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
         buffer[13] = native_from_big_end(in[5]);
         buffer[14] = native_from_big_end(in[6]);
         buffer[15] = native_from_big_end(in[7]);
-        ////constexpr auto chunk = array_count<chunk_t>;
-        ////from_big_endians(array_cast<word_t, chunk, chunk>(buffer), 
-        ////    array_cast<word_t>(half));
+    }
+    else
+    {
+        constexpr auto chunk = array_count<chunk_t>;
+        array_cast<word_t, chunk, chunk>(buffer) =
+            array_cast<word_t>(half);
     }
 }
 
@@ -1196,7 +1205,7 @@ output(const state_t& state) NOEXCEPT
             to_big<7 * size>(digest, state.at(7));
         }
     }
-    else
+    else if constexpr (bc::is_little_endian)
     {
         auto& out = array_cast<word_t>(digest);
         out[0] = native_to_big_end(state[0]);
@@ -1211,7 +1220,10 @@ output(const state_t& state) NOEXCEPT
             out[6] = native_to_big_end(state[6]);
             out[7] = native_to_big_end(state[7]);
         }
-        ////return array_cast<byte_t>(to_big_endians(state));
+    }
+    else
+    {
+        array_cast<word_t>(digest) = state;
     }
 
     return digest;

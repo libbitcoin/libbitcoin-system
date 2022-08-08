@@ -494,7 +494,7 @@ input(words_t& words, const block_t& block) NOEXCEPT
         from_little<14 * size>(words.at(14), block);
         from_little<15 * size>(words.at(15), block);
     }
-    else
+    else if constexpr (bc::is_big_endian)
     {
         const auto& in = array_cast<word_t>(block);
         words[0] = native_from_little_end(in[0]);
@@ -513,7 +513,10 @@ input(words_t& words, const block_t& block) NOEXCEPT
         words[13] = native_from_little_end(in[13]);
         words[14] = native_from_little_end(in[14]);
         words[15] = native_from_little_end(in[15]);
-        ////from_little_endians(words, array_cast<word_t>(block));
+    }
+    else
+    {
+        words = array_cast<word_t>(block);
     }
 }
 
@@ -533,7 +536,7 @@ input(words_t& words, const half_t& half) NOEXCEPT
         from_little<6 * size>(words.at(6), half);
         from_little<7 * size>(words.at(7), half);
     }
-    else
+    else if constexpr (bc::is_big_endian)
     {
         const auto& in = array_cast<word_t>(half);
         words[0] = native_from_little_end(in[0]);
@@ -544,9 +547,11 @@ input(words_t& words, const half_t& half) NOEXCEPT
         words[5] = native_from_little_end(in[5]);
         words[6] = native_from_little_end(in[6]);
         words[7] = native_from_little_end(in[7]);
-        ////from_little_endians(
-        ////    array_cast<word_t, array_count<chunk_t>>(words),
-        ////    array_cast<word_t>(half));
+    }
+    else
+    {
+        array_cast<word_t, array_count<chunk_t>>(words) =
+            array_cast<word_t>(half);
     }
 }
 
@@ -569,7 +574,7 @@ output(const state_t& state) NOEXCEPT
             to_little<4 * size>(digest, state.at(4));
         }
     }
-    else
+    else if constexpr (bc::is_big_endian)
     {
         auto& out = array_cast<word_t>(digest);
         out[0] = native_to_little_end(state[0]);
@@ -581,7 +586,10 @@ output(const state_t& state) NOEXCEPT
         {
             out[4] = native_to_little_end(state[4]);
         }
-        ////return array_cast<byte_t>(to_little_endians(state));
+    }
+    else
+    {
+        array_cast<word_t>(digest) = state;
     }
 
     return digest;
