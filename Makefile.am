@@ -287,6 +287,8 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/performance/baseline/byteswap.h \
     test/hash/performance/baseline/common.h \
     test/hash/performance/baseline/endian.h \
+    test/hash/performance/baseline/rmd160.cpp \
+    test/hash/performance/baseline/rmd160.h \
     test/hash/performance/baseline/sha256.cpp \
     test/hash/performance/baseline/sha256.h \
     test/hash/rmd/algorithm.cpp \

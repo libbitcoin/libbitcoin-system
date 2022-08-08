@@ -146,6 +146,7 @@
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\hmac.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\rmd160.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\performance\baseline\sha256.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
@@ -277,6 +278,7 @@
     <ClInclude Include="..\..\..\..\test\hash\performance\baseline\byteswap.h" />
     <ClInclude Include="..\..\..\..\test\hash\performance\baseline\common.h" />
     <ClInclude Include="..\..\..\..\test\hash\performance\baseline\endian.h" />
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\rmd160.h" />
     <ClInclude Include="..\..\..\..\test\hash\performance\baseline\sha256.h" />
     <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp" />
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp" />

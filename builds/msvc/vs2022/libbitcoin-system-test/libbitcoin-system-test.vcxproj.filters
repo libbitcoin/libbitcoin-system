@@ -297,6 +297,9 @@
     <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\rmd160.cpp">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\performance\baseline\sha256.cpp">
       <Filter>src\hash\performance\baseline</Filter>
     </ClCompile>
@@ -612,6 +615,9 @@
       <Filter>src\hash\performance\baseline</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\hash\performance\baseline\endian.h">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\rmd160.h">
       <Filter>src\hash\performance\baseline</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\hash\performance\baseline\sha256.h">

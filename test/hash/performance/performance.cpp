@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include "performance.hpp"
-#include "baseline/sha256.h"
 
 #if !defined(HAVE_PERFORMANCE_TESTS)
 
@@ -29,14 +28,10 @@ using namespace performance;
 BOOST_AUTO_TEST_CASE(performance__baseline__sha256)
 {
 #if !defined(VISIBLE)
-    // 1 round (lowest overhead, best measure of pure hashing)
-    // --------------------------------------------------------
-#endif
-
     // test____________: performance__baseline__sha256
     // algorithm_______: baseline::CSHA256
     // test_rounds_____: 1
-    // bytes_per_round_: 1'073'741'824 [MiB]
+    // bytes_per_round_: 1'073'741'824 [GiB]
     // compressed______: 0
     // vectorized______: 0
     // concurrent______: 0
@@ -50,7 +45,7 @@ BOOST_AUTO_TEST_CASE(performance__baseline__sha256)
     // test____________: performance__baseline__sha256
     // algorithm_______: baseline::CSHA256
     // test_rounds_____: 1024
-    // bytes_per_round_: 1'048'576 [MiB]
+    // bytes_per_round_: 1'048'576 [GiB]
     // compressed______: 0
     // vectorized______: 0
     // concurrent______: 0
@@ -63,7 +58,7 @@ BOOST_AUTO_TEST_CASE(performance__baseline__sha256)
 
     // test____________: performance__baseline__sha256
     // algorithm_______: baseline::CSHA256
-    // test_rounds_____: 1'048'576 [MiB]
+    // test_rounds_____: 1'048'576 [GiB]
     // bytes_per_round_: 1024
     // compressed______: 0
     // vectorized______: 0
@@ -75,11 +70,57 @@ BOOST_AUTO_TEST_CASE(performance__baseline__sha256)
     // ms_per_round____: 0.00603481
     // ms_per_byte_____: 5.89337e-06
 
-    const auto complete = performance::base_hash<base_default, 1024*1024, 1024*1024>(std::cout);
+    // test____________: performance__baseline__sha256
+    // algorithm_______: baseline::CSHA256
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 0
+    // vectorized______: 0
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 5.8362
+    // mib_per_second__: 175.457
+    // cycles_per_byte_: 16.3062
+    // ms_per_round____: 5836.2
+    // ms_per_byte_____: 5.43539e-06
+    // remote compilation unit.
+
+    // test____________: performance__baseline__sha256
+    // algorithm_______: baseline::CSHA256
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 0
+    // vectorized______: 0
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 5.97054
+    // mib_per_second__: 171.509
+    // cycles_per_byte_: 16.6815
+    // ms_per_round____: 5970.54
+    // ms_per_byte_____: 5.5605e-06
+
+    // [Compiler optimizations disabled]
+    // test____________: performance__baseline__sha256
+    // algorithm_______: baseline::CSHA256
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 0
+    // vectorized______: 0
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 17.9835
+    // mib_per_second__: 56.9411
+    // cycles_per_byte_: 50.2453
+    // ms_per_round____: 17983.5
+    // ms_per_byte_____: 1.67484e-05
+#endif
+
+    using namespace performance::base::sha256;
+    const auto complete = test_hash<base_default, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256)
+BOOST_AUTO_TEST_CASE(performance__optimal__sha256)
 {
 #if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
@@ -88,7 +129,7 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // test____________: performance__sha256
     // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1>
     // test_rounds_____: 1
-    // bytes_per_round_: 1'073'741'824 [MiB]
+    // bytes_per_round_: 1'073'741'824 [GiB]
     // concurrent______: 1 [concurrent]
     // vectorized______: 0
     // intrinsic_______: 0
@@ -102,7 +143,7 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // test____________: performance__sha256
     // algorithm_______: sha::algorithm<sha::h256<256,1>,0,1>
     // test_rounds_____: 1
-    // bytes_per_round_: 1'073'741'824 [MiB]
+    // bytes_per_round_: 1'073'741'824 [GiB]
     // concurrent______: 0
     // vectorized______: 0
     // intrinsic_______: 0
@@ -116,7 +157,7 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // test____________: performance__sha256
     // algorithm_______: sha::algorithm<sha::h256<256,1>,0,1>
     // test_rounds_____: 1
-    // bytes_per_round_: 1'048'576 [MiB]
+    // bytes_per_round_: 1'048'576 [GiB]
     // concurrent______: 0
     // vectorized______: 0
     // intrinsic_______: 0
@@ -366,12 +407,14 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // cycles_per_byte_: 19.5224
     // ms_per_round____: 0.00666366
     // ms_per_byte_____: 6.50748e-06
-#endif
+
+    // baselining
+    // ------------------------------------------------------------------------
 
     // test____________: performance__sha256
     // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
     // test_rounds_____: 1
-    // bytes_per_round_: 1'073'741'824 [MiB]
+    // bytes_per_round_: 1'073'741'824 [GiB]
     // compressed______: 1
     // vectorized______: 1
     // concurrent______: 0
@@ -386,7 +429,7 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // test____________: performance__sha256
     // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
     // test_rounds_____: 1024
-    // bytes_per_round_: 1'048'576 [MiB]
+    // bytes_per_round_: 1'048'576 [GiB]
     // compressed______: 1
     // vectorized______: 1
     // concurrent______: 0
@@ -400,7 +443,7 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
 
     // test____________: performance__sha256
     // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
-    // test_rounds_____: 1'048'576 [MiB]
+    // test_rounds_____: 1'048'576 [GiB]
     // bytes_per_round_: 1024
     // compressed______: 1
     // vectorized______: 1
@@ -413,11 +456,111 @@ BOOST_AUTO_TEST_CASE(performance__sha256)
     // ms_per_byte_____: 6.25305e-06
     // 106% of baseline.
 
-    const auto complete = performance::hash<sha256_optimal, 1, 1024*1024*1024>(std::cout);
+    // test____________: performance__optimal__sha256
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.22669
+    // mib_per_second__: 164.453
+    // cycles_per_byte_: 17.3972
+    // ms_per_round____: 6226.69
+    // ms_per_byte_____: 5.79906e-06
+    // 107%
+
+    // test____________: performance__optimal__sha256
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 6.20114
+    // mib_per_second__: 165.131
+    // cycles_per_byte_: 17.3258
+    // ms_per_round____: 6201.14
+    // ms_per_byte_____: 5.77526e-06
+    // 103%
+
+    // [Compiler optimizations disabled]
+    // test____________: performance__optimal__sha256
+    // algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 84.4734
+    // mib_per_second__: 12.1222
+    // cycles_per_byte_: 236.016
+    // ms_per_round____: 84473.4
+    // ms_per_byte_____: 7.86719e-05
+    // 470%
+#endif
+
+    using namespace performance;
+    const auto complete = test_hash<sha256_optimal, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__rmd160)
+BOOST_AUTO_TEST_CASE(performance__baseline__rmd160)
+{
+#if !defined(VISIBLE)
+    // test____________: performance__baseline__rmd160
+    // algorithm_______: baseline::CRIPEMD160
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 0
+    // vectorized______: 0
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.42184
+    // mib_per_second__: 299.254
+    // cycles_per_byte_: 9.56052
+    // ms_per_round____: 3421.84
+    // ms_per_byte_____: 3.18684e-06
+
+    // test____________: performance__baseline__rmd160
+    // algorithm_______: baseline::CRIPEMD160
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 0
+    // vectorized______: 0
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.43346
+    // mib_per_second__: 298.241
+    // cycles_per_byte_: 9.59299
+    // ms_per_round____: 3433.46
+    // ms_per_byte_____: 3.19766e-06
+
+    // [Compiler optimizations disabled]
+    // test____________: performance__baseline__rmd160
+    // algorithm_______: baseline::CRIPEMD160
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 0
+    // vectorized______: 0
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 23.5469
+    // mib_per_second__: 43.4877
+    // cycles_per_byte_: 65.7893
+    // ms_per_round____: 23546.9
+    // ms_per_byte_____: 2.19298e-05
+#endif
+
+    using namespace performance::base::rmd160;
+    const auto complete = test_hash<base_default, 1, 1024*1024*1024>(std::cout);
+    BOOST_CHECK(complete);
+}
+
+BOOST_AUTO_TEST_CASE(performance__optimal__rmd160)
 {
 #if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
@@ -426,7 +569,7 @@ BOOST_AUTO_TEST_CASE(performance__rmd160)
     // test____________: performance__rmd160
     // algorithm_______: rmd::algorithm<rmd::h160<160,1>,1,1>
     // test_rounds_____: 1
-    // bytes_per_round_: 1'073'741'824 [MiB]
+    // bytes_per_round_: 1'073'741'824 [GiB]
     // concurrent______: 1 [concurrent]
     // vectorized______: 0
     // intrinsic_______: 0
@@ -440,7 +583,7 @@ BOOST_AUTO_TEST_CASE(performance__rmd160)
     // test____________: performance__rmd160
     // algorithm_______: rmd::algorithm<rmd::h160<160,1>,0,1>
     // test_rounds_____: 1
-    // bytes_per_round_: 1'073'741'824 [MiB]
+    // bytes_per_round_: 1'073'741'824 [GiB]
     // concurrent______: 0
     // vectorized______: 0
     // intrinsic_______: 0
@@ -454,7 +597,7 @@ BOOST_AUTO_TEST_CASE(performance__rmd160)
     // test____________: performance__rmd160
     // algorithm_______: rmd::algorithm<rmd::h160<160,1>,0,1>
     // test_rounds_____: 1
-    // bytes_per_round_: 10'48'576 [MiB]
+    // bytes_per_round_: 1'048'576 [MiB]
     // concurrent______: 0
     // vectorized______: 0
     // intrinsic_______: 0
@@ -668,9 +811,59 @@ BOOST_AUTO_TEST_CASE(performance__rmd160)
     // cycles_per_byte_: 18.2822
     // ms_per_round____: 0.00624033
     // ms_per_byte_____: 6.09407e-06
+
+    // baselining
+    // ------------------------------------------------------------------------
+
+    // test____________: performance__optimal__rmd160
+    // algorithm_______: sha::algorithm<sha::h160,1,1,0,1>
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.82255
+    // mib_per_second__: 267.884
+    // cycles_per_byte_: 10.6801
+    // ms_per_round____: 3822.55
+    // ms_per_byte_____: 3.56003e-06
+    // 112%
+
+    // test____________: performance__optimal__rmd160
+    // algorithm_______: sha::algorithm<sha::h160,1,1,0,1>
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 3.6967
+    // mib_per_second__: 277.004
+    // cycles_per_byte_: 10.3285
+    // ms_per_round____: 3696.7
+    // ms_per_byte_____: 3.44282e-06
+    // 107.7%
+
+    // [Compiler optimizations disabled]
+    // test____________: performance__optimal__rmd160
+    // algorithm_______: sha::algorithm<sha::h160,1,1,0,1>
+    // test_rounds_____: 1
+    // bytes_per_round_: 1'073'741'824 [GiB]
+    // compressed______: 1
+    // vectorized______: 1
+    // concurrent______: 0
+    // chunked_________: 0
+    // seconds_total___: 48.0132
+    // mib_per_second__: 21.3275
+    // cycles_per_byte_: 134.147
+    // ms_per_round____: 48013.2
+    // ms_per_byte_____: 4.47158e-05
+    // 204% 
 #endif
 
-    const auto complete = performance::hash<rmd160_optimal>(std::cout);
+    using namespace performance;
+    const auto complete = test_hash<rmd160_optimal, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 

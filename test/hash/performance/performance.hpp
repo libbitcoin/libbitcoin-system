@@ -20,6 +20,8 @@
 #define LIBBITCOIN_SYSTEM_TEST_HASH_PERFORMANCE_PERFORMANCE_HPP
 
 #include "../../test.hpp"
+#include "baseline/rmd160.h"
+#include "baseline/sha256.h"
 #include <chrono>
 
 namespace performance {
@@ -262,7 +264,7 @@ template<typename Parameters,
     size_t Count = 1024 * 1024, // test iterations (1Mi)
     size_t Size = 1024,         // bytes per iteration (1KiB)
     if_base_of<parameters, Parameters> = true>
-bool hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
+bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
 {
     using Precision = std::chrono::nanoseconds;
     using Timer = timer<Precision>;
@@ -310,9 +312,133 @@ struct rmd160_parameters : parameters
     static constexpr bool chunked{ Chunked };
 };
 
-
 using sha256_optimal = sha256_parameters<true, true, false, false>;
 using rmd160_optimal = rmd160_parameters<true, true, false, false>;
+
+// Baseline test runner helper.
+// ----------------------------------------------------------------------------
+
+// Equivalent to:
+// hash_digest accumulator<sha256>::hash(data);
+// short_hash accumulator<rmd160>::hash(data);
+template <typename Algorithm>
+inline auto base_accumulator(auto& data) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    std_array<uint8_t, Algorithm::OUTPUT_SIZE> out{};
+    Algorithm hasher{};
+    hasher.Write(data.data(), data.size());
+    hasher.Finalize(out.data());
+    return out;
+    BC_POP_WARNING()
+}
+
+// rmd160 baseline test runner.
+// ----------------------------------------------------------------------------
+
+namespace base {
+namespace rmd160 {
+
+struct base_parameters
+{
+    static constexpr bool compressed{}; // intrinsic sha (ignored for rmd).
+    static constexpr bool vectorized{}; // algorithm vectorization.
+    static constexpr bool chunked{};    // false for array data.
+};
+
+struct base_default : base_parameters
+{
+    static constexpr bool compressed{ false };
+    static constexpr bool vectorized{ false };
+    static constexpr bool chunked{ false };
+};
+
+// Defaults to 1Mi rounds over 1KiB data (1GiB).
+template<typename Parameters,
+    size_t Count = 1024 * 1024, // test iterations (1Mi)
+    size_t Size = 1024,         // bytes per iteration (1KiB)
+    if_base_of<base_parameters, Parameters> = true>
+bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
+{
+    using P = Parameters;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using Algorithm = baseline::CRIPEMD160;
+    using parameters = rmd160_parameters<P::compressed, P::vectorized, false,
+        P::chunked>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            base_accumulator<Algorithm>(*data);
+        });
+    }
+
+    // Dumping output also precludes compiler removal.
+    // Return value, check to preclude compiler removal if output is bypassed.
+    output<parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+} // namespace rmd160
+} // namespace base
+
+// sha256 baseline test runner.
+// ----------------------------------------------------------------------------
+
+namespace base {
+namespace sha256 {
+
+struct base_parameters
+{
+    static constexpr bool compressed{}; // intrinsic sha (ignored for rmd).
+    static constexpr bool vectorized{}; // algorithm vectorization.
+    static constexpr bool chunked{};    // false for array data.
+};
+
+// TODO: parameterize compression and vectorization in baseline.
+struct base_default : base_parameters
+{
+    static constexpr bool compressed{ false };
+    static constexpr bool vectorized{ false };
+    static constexpr bool chunked{ false };
+};
+
+// Defaults to 1Mi rounds over 1KiB data (1GiB).
+template<typename Parameters,
+    size_t Count = 1024 * 1024, // test iterations (1Mi)
+    size_t Size = 1024,         // bytes per iteration (1KiB)
+    if_base_of<base_parameters, Parameters> = true>
+bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
+{
+    using P = Parameters;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using Algorithm = baseline::CSHA256;
+    using parameters = sha256_parameters<P::compressed, P::vectorized, false,
+        P::chunked>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            base_accumulator<Algorithm>(*data);
+        });
+    }
+
+    // Dumping output also precludes compiler removal.
+    // Return value, check to preclude compiler removal if output is bypassed.
+    output<parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+} // namespace sha256
+} // namespace base
 
 } // namespace performance
 
