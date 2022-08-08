@@ -30,16 +30,23 @@ const auto bip173_testnet_p2wkh = "qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx";
 const auto bip173_testnet_p2wsh = "qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7";
 
 // BIP173: All examples use public key:
-const auto bip173_ec_compressed = base16_array("0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
+constexpr auto bip173_ec_compressed = base16_array("0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798");
 
 // BIP141: The HASH160 of the pubkey in witness must match the 20 byte witness program.
-const auto bip173_p2wkh_program = ripemd160_chunk(sha256_hash(bip173_ec_compressed));
-
-// BIP173: The P2WSH examples use key OP_CHECKSIG (to_pay_public_key_pattern) as script.
-const auto bip173_p2wsh_opcodes = chain::script::to_pay_public_key_pattern(bip173_ec_compressed);
+auto bip173_p2wkh_program() NOEXCEPT
+{
+    static const auto program = ripemd160_chunk(sha256_hash(bip173_ec_compressed));
+    return program;
+}
 
 // BIP141: The SHA256 of the script must match the 32 byte witness program.
-const auto bip173_p2wsh_program = sha256_chunk(chain::script(bip173_p2wsh_opcodes).to_data(false));
+auto bip173_p2wsh_program() NOEXCEPT
+{
+    // BIP173: The P2WSH examples use key OP_CHECKSIG (to_pay_public_key_pattern) as script.
+    static const auto bip173_p2wsh_opcodes = chain::script::to_pay_public_key_pattern(bip173_ec_compressed);
+    static const auto program = sha256_chunk(chain::script(bip173_p2wsh_opcodes).to_data(false));
+    return program;
+}
 
 // insert_checksum
 
@@ -244,25 +251,25 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__five_program_bytes__expecte
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wkh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program, bip173_mainnet_prefix);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program(), bip173_mainnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_mainnet_p2wkh);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wkh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program, bip173_testnet_prefix);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wkh_program(), bip173_testnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_testnet_p2wkh);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__mainnet_p2wsh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program, bip173_mainnet_prefix);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program(), bip173_mainnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_mainnet_p2wsh);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_build_checked__testnet_p2wsh__expected)
 {
-    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program, bip173_testnet_prefix);
+    const auto checked = bech32_build_checked(bip173_program_version, bip173_p2wsh_program(), bip173_testnet_prefix);
     BOOST_REQUIRE_EQUAL(encode_base32(checked), bip173_testnet_p2wsh);
 }
 
@@ -305,7 +312,7 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wkh__true_expect
     BOOST_REQUIRE(decode_base32(checked, bip173_mainnet_p2wkh));
     BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
     BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wkh_program);
+    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wkh_program());
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wkh__true_expected_version_and_program)
@@ -313,7 +320,7 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wkh__true_expect
     BOOST_REQUIRE(decode_base32(checked, bip173_testnet_p2wkh));
     BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
     BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wkh_program);
+    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wkh_program());
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wsh__true_expected_version_and_program)
@@ -321,7 +328,7 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__mainnet_p2wsh__true_expect
     BOOST_REQUIRE(decode_base32(checked, bip173_mainnet_p2wsh));
     BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_mainnet_prefix, checked));
     BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wsh_program);
+    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wsh_program());
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wsh__true_expected_version_and_program)
@@ -329,7 +336,7 @@ BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__testnet_p2wsh__true_expect
     BOOST_REQUIRE(decode_base32(checked, bip173_testnet_p2wsh));
     BOOST_REQUIRE(bech32_verify_checked(out_version, out_program, bip173_testnet_prefix, checked));
     BOOST_REQUIRE_EQUAL(out_version, bip173_program_version);
-    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wsh_program);
+    BOOST_REQUIRE_EQUAL(out_program, bip173_p2wsh_program());
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bech32_verify_checked__empty__false)
