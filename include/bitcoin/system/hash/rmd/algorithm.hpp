@@ -119,8 +119,6 @@ protected:
     INLINE static constexpr void round(auto& state,
         const auto& words) NOEXCEPT;
 
-    template<bool First>
-    INLINE static constexpr void batch(state_t& state, const words_t& words) NOEXCEPT;
     INLINE static constexpr void compress(state_t& state, const words_t& words) NOEXCEPT;
     INLINE static constexpr void summarize(state_t& out, const state_t& batch1,
         const state_t& batch2) NOEXCEPT;

@@ -369,14 +369,14 @@ template <unsigned int B, unsigned int = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto ror_(Word a) NOEXCEPT
 {
-    return std::rotr(a, B);
+    return rotr<B>(a);
 }
 
 template <unsigned int B, unsigned int = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto rol_(Word a) NOEXCEPT
 {
-    return std::rotl(a, B);
+    return rotl<B>(a);
 }
 
 // auto in template?
@@ -475,8 +475,6 @@ TEMPLATE
 INLINE constexpr auto CLASS::
 parity(auto x, auto y, auto z) NOEXCEPT
 {
-    // FIPS.180
-    // 4.1.1 SHA-1 Functions
     return xor_(xor_(x, y), z);
 }
 
@@ -484,10 +482,6 @@ TEMPLATE
 INLINE constexpr auto CLASS::
 choice(auto x, auto y, auto z) NOEXCEPT
 {
-    // FIPS.180
-    // 4.1.1 SHA-1 Functions
-    // 4.1.2 SHA-224 and SHA-256 Functions
-    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     // Normal form reduced.
     ////return (x & y) ^ (~x & z);
     return xor_(and_(x, xor_(y, z)), z);
@@ -497,10 +491,6 @@ TEMPLATE
 INLINE constexpr auto CLASS::
 majority(auto x, auto y, auto z) NOEXCEPT
 {
-    // FIPS.180
-    // 4.1.1 SHA-1 Functions
-    // 4.1.2 SHA-224 and SHA-256 Functions
-    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     // Normal form reduced.
     ////return (x & y) ^ (x & z) ^ (y & z);
     return or_(and_(x, or_(y, z)), and_(y, z));
@@ -512,10 +502,6 @@ INLINE constexpr auto CLASS::
 sigma(auto x) NOEXCEPT
 {
     constexpr auto s = SHA::word_bits;
-
-    // FIPS.180
-    // 4.1.2 SHA-224 and SHA-256 Functions
-    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), shr_<C>(x));
 }
 
@@ -523,9 +509,10 @@ sigma(auto x) NOEXCEPT
 // fast-sha512-implementations-ia-processors-paper.pdf
 //
 // AVX optimal (sha512)
-// ------ sigma< 1,  8, 7>(x) ------
+// ------ sigma0< 1,  8, 7>(x) ------
+// ------ sigma1<19, 61, 6>(x) ------
+
 // s0(a) = (a >>>  1) ^ (a >>>  8) ^ (a >> 7)
-// ------ sigma<19, 61, 6>(x) ------
 // s1(e) = (e >>> 19) ^ (e >>> 61) ^ (e >> 6)
 //
 // SSE optimal (sha512)
@@ -538,20 +525,17 @@ INLINE constexpr auto CLASS::
 Sigma(auto x) NOEXCEPT
 {
     constexpr auto s = SHA::word_bits;
-
-    // FIPS.180
-    // 4.1.2 SHA-224 and SHA-256 Functions
-    // 4.1.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Functions
     return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), ror_<C, s>(x));
 }
 
 // intel.com/content/dam/www/public/us/en/documents/white-papers/
 // sha-256-implementations-paper.pdf
 //
-// AVX optimal (sha512) [probably]
-// ------ Sigma<2, 13, 22>(x) ------
+// AVX optimal (sha256) [probably]
+// ------ Sigma0<2, 13, 22>(x) ------
+// ------ Sigma1<6, 11, 25>(x) ------
+
 // S0(a) = (a >>> 2) ^ (a >>> 13) ^ (a >>> 22)
-// ------ Sigma<6, 11, 25>(x) ------
 // S1(e) = (e >>> 6) ^ (e >>> 11) ^ (e >>> 25)
 //
 // SSE optimal (sha256)
@@ -603,10 +587,6 @@ Sigma1(auto x) NOEXCEPT
 
 // Rounds
 // ---------------------------------------------------------------------------
-// FIPS.180
-// 6.1.2 SHA-1   Hash Computation (1 to N)
-// 6.2.2 SHA-256 Hash Computation (1 to N)
-// 6.4.2 SHA-512 Hash Computation (1 to N)
 
 TEMPLATE
 template<size_t Round, typename Auto>
@@ -616,9 +596,6 @@ functor() NOEXCEPT
     using self = CLASS;
     constexpr auto fn = Round / K::columns;
 
-    // FIPS.180
-    // 4.1.1 SHA-1 Functions (limited to uint32_t)
-    // Select function by column.
     if constexpr (fn == 0u)
         return &self::template choice<Auto, Auto, Auto>;
     else if constexpr (fn == 1u)
@@ -635,9 +612,6 @@ INLINE constexpr void CLASS::
 round(auto a, auto& b, auto c, auto d, auto& e, auto wk) NOEXCEPT
 {
     constexpr auto f = functor<Round, decltype(a)>();
-
-    // FIPS.180
-    // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
     e = /*a =*/ add_(add_(add_(rol_<5>(a), f(b, c, d)), e), wk);
     b = /*c =*/ rol_<30>(b);
 
@@ -660,10 +634,6 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto wk) NOEXCEPT
 {
     // TODO: if open lanes, vectorize Sigma0 and Sigma1 (see Intel).
-
-    // FIPS.180
-    // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
-    // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
     const auto t = add_(add_(add_(Sigma1(e), choice(e, f, g)), h), wk);
     d = /*e =*/    add_(d, t);
     h = /*a =*/    add_(add_(Sigma0(a), majority(a, b, c)), t);
@@ -694,8 +664,6 @@ round(auto& state, const auto& wk) NOEXCEPT
 {
     if constexpr (SHA::strength == 160)
     {
-        // FIPS.180
-        // 6.1.2.3 SHA-1 Hash Computation (t=0 to 79)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
@@ -710,9 +678,6 @@ round(auto& state, const auto& wk) NOEXCEPT
     }
     else
     {
-        // FIPS.180
-        // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
-        // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words],
@@ -737,106 +702,92 @@ compress(auto& state, const auto& buffer) NOEXCEPT
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
     const state_t start{ state };
 
-    // Templated constant reduces ops per iteration by 35% (vs. parameter).
-    // Pointer indexing reduces ops per iteration by 43% (vs. std::array[]).
-    // Unrolled/inlined loop reduces ops per iteration by 23% (vs. for loop).
-    // Pointer degradation here (optimization), use auto typing in round().
-    auto pbuffer = buffer.data();
-    auto pstate = state.data();
+    round< 0>(state, buffer);
+    round< 1>(state, buffer);
+    round< 2>(state, buffer);
+    round< 3>(state, buffer);
+    round< 4>(state, buffer);
+    round< 5>(state, buffer);
+    round< 6>(state, buffer);
+    round< 7>(state, buffer);
+    round< 8>(state, buffer);
+    round< 9>(state, buffer);
+    round<10>(state, buffer);
+    round<11>(state, buffer);
+    round<12>(state, buffer);
+    round<13>(state, buffer);
+    round<14>(state, buffer);
+    round<15>(state, buffer);
 
-    // FIPS.180
-    // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
-    // 6.2.2.3 SHA-256 Hash Computation (t=0 to 63)
-    // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
-    round< 0>(pstate, pbuffer);
-    round< 1>(pstate, pbuffer);
-    round< 2>(pstate, pbuffer);
-    round< 3>(pstate, pbuffer);
-    round< 4>(pstate, pbuffer);
-    round< 5>(pstate, pbuffer);
-    round< 6>(pstate, pbuffer);
-    round< 7>(pstate, pbuffer);
-    round< 8>(pstate, pbuffer);
-    round< 9>(pstate, pbuffer);
-    round<10>(pstate, pbuffer);
-    round<11>(pstate, pbuffer);
-    round<12>(pstate, pbuffer);
-    round<13>(pstate, pbuffer);
-    round<14>(pstate, pbuffer);
-    round<15>(pstate, pbuffer);
+    round<16>(state, buffer);
+    round<17>(state, buffer);
+    round<18>(state, buffer);
+    round<19>(state, buffer);
+    round<20>(state, buffer);
+    round<21>(state, buffer);
+    round<22>(state, buffer);
+    round<23>(state, buffer);
+    round<24>(state, buffer);
+    round<25>(state, buffer);
+    round<26>(state, buffer);
+    round<27>(state, buffer);
+    round<28>(state, buffer);
+    round<29>(state, buffer);
+    round<30>(state, buffer);
+    round<31>(state, buffer);
 
-    round<16>(pstate, pbuffer);
-    round<17>(pstate, pbuffer);
-    round<18>(pstate, pbuffer);
-    round<19>(pstate, pbuffer);
-    round<20>(pstate, pbuffer);
-    round<21>(pstate, pbuffer);
-    round<22>(pstate, pbuffer);
-    round<23>(pstate, pbuffer);
-    round<24>(pstate, pbuffer);
-    round<25>(pstate, pbuffer);
-    round<26>(pstate, pbuffer);
-    round<27>(pstate, pbuffer);
-    round<28>(pstate, pbuffer);
-    round<29>(pstate, pbuffer);
-    round<30>(pstate, pbuffer);
-    round<31>(pstate, pbuffer);
+    round<32>(state, buffer);
+    round<33>(state, buffer);
+    round<34>(state, buffer);
+    round<35>(state, buffer);
+    round<36>(state, buffer);
+    round<37>(state, buffer);
+    round<38>(state, buffer);
+    round<39>(state, buffer);
+    round<40>(state, buffer);
+    round<41>(state, buffer);
+    round<42>(state, buffer);
+    round<43>(state, buffer);
+    round<44>(state, buffer);
+    round<45>(state, buffer);
+    round<46>(state, buffer);
+    round<47>(state, buffer);
 
-    round<32>(pstate, pbuffer);
-    round<33>(pstate, pbuffer);
-    round<34>(pstate, pbuffer);
-    round<35>(pstate, pbuffer);
-    round<36>(pstate, pbuffer);
-    round<37>(pstate, pbuffer);
-    round<38>(pstate, pbuffer);
-    round<39>(pstate, pbuffer);
-    round<40>(pstate, pbuffer);
-    round<41>(pstate, pbuffer);
-    round<42>(pstate, pbuffer);
-    round<43>(pstate, pbuffer);
-    round<44>(pstate, pbuffer);
-    round<45>(pstate, pbuffer);
-    round<46>(pstate, pbuffer);
-    round<47>(pstate, pbuffer);
+    round<48>(state, buffer);
+    round<49>(state, buffer);
+    round<50>(state, buffer);
+    round<51>(state, buffer);
+    round<52>(state, buffer);
+    round<53>(state, buffer);
+    round<54>(state, buffer);
+    round<55>(state, buffer);
+    round<56>(state, buffer);
+    round<57>(state, buffer);
+    round<58>(state, buffer);
+    round<59>(state, buffer);
+    round<60>(state, buffer);
+    round<61>(state, buffer);
+    round<62>(state, buffer);
+    round<63>(state, buffer);
 
-    round<48>(pstate, pbuffer);
-    round<49>(pstate, pbuffer);
-    round<50>(pstate, pbuffer);
-    round<51>(pstate, pbuffer);
-    round<52>(pstate, pbuffer);
-    round<53>(pstate, pbuffer);
-    round<54>(pstate, pbuffer);
-    round<55>(pstate, pbuffer);
-    round<56>(pstate, pbuffer);
-    round<57>(pstate, pbuffer);
-    round<58>(pstate, pbuffer);
-    round<59>(pstate, pbuffer);
-    round<60>(pstate, pbuffer);
-    round<61>(pstate, pbuffer);
-    round<62>(pstate, pbuffer);
-    round<63>(pstate, pbuffer);
-
-    // FIPS.180
-    // 6.1.2.3 SHA-1   Hash Computation (t=0 to 79)
-    // 6.4.2.3 SHA-512 Hash Computation (t=0 to 79)
     if constexpr (SHA::rounds == 80)
     {
-        round<64>(pstate, pbuffer);
-        round<65>(pstate, pbuffer);
-        round<66>(pstate, pbuffer);
-        round<67>(pstate, pbuffer);
-        round<68>(pstate, pbuffer);
-        round<69>(pstate, pbuffer);
-        round<70>(pstate, pbuffer);
-        round<71>(pstate, pbuffer);
-        round<72>(pstate, pbuffer);
-        round<73>(pstate, pbuffer);
-        round<74>(pstate, pbuffer);
-        round<75>(pstate, pbuffer);
-        round<76>(pstate, pbuffer);
-        round<77>(pstate, pbuffer);
-        round<78>(pstate, pbuffer);
-        round<79>(pstate, pbuffer);
+        round<64>(state, buffer);
+        round<65>(state, buffer);
+        round<66>(state, buffer);
+        round<67>(state, buffer);
+        round<68>(state, buffer);
+        round<69>(state, buffer);
+        round<70>(state, buffer);
+        round<71>(state, buffer);
+        round<72>(state, buffer);
+        round<73>(state, buffer);
+        round<74>(state, buffer);
+        round<75>(state, buffer);
+        round<76>(state, buffer);
+        round<77>(state, buffer);
+        round<78>(state, buffer);
+        round<79>(state, buffer);
     }
 
     summarize(state, start);
@@ -845,8 +796,9 @@ compress(auto& state, const auto& buffer) NOEXCEPT
 TEMPLATE
 template<size_t Round>
 INLINE constexpr void CLASS::
-prepare(auto& w) NOEXCEPT
+prepare(auto& buffer) NOEXCEPT
 {
+    // K is added to schedule words because schedule is vectorizable.
     constexpr auto r00 = Round;
     constexpr auto r02 = r00 - 2;
     constexpr auto r03 = r00 - 3;
@@ -855,42 +807,22 @@ prepare(auto& w) NOEXCEPT
     constexpr auto r14 = r00 - 14;
     constexpr auto r15 = r00 - 15;
     constexpr auto r16 = r00 - 16;
-
-    // w[i] has no dependency on w[i-1] (just i-2), which implies we can
-    // cut the round count in half and compute w[i]/w[i+1] concurrently.
-    // k can be added to the message schedule as opposed to compress rounds.
-    // These both increase the effectiveness of schedule vectorization.
-
-    // FIPS.180
-    // 4.2.1 SHA-1 Constants
-    // 4.2.2 SHA-224 and SHA-256 Constants
-    // 4.2.3 SHA-384, SHA-512, SHA-512/224 and SHA-512/256 Constants
-
-    // TODO: K values must be loaded.
-    // TODO: an overloaded constexpr can convert k[i], k[++i] to k[i, ++i]
-    // for sha-ni double round loads. But simd K values are not constexpr.
-    // So add_<k> must internally load k from word_t.
-
-    // Round constant is moved here, as this prepare is vectorizable.
     constexpr auto k0 = K::get[r16];
     constexpr auto k1 = K::get[add1(r16)];
 
     if constexpr (SHA::strength == 160)
     {
-        // FIPS.180
-        // 6.1.2 SHA-1 Hash Computation (16 <= t <= 79)
+        buffer[r00] = rol_<1>(xor_(
+            xor_(buffer[r16], buffer[r14]),
+            xor_(buffer[r08], buffer[r03])));
 
-        w[r00] = rol_<1>(xor_(
-            xor_(w[r16], w[r14]),
-            xor_(w[r08], w[r03])));
+        buffer[r16] = add_<k0>(buffer[r16]);
 
-        w[r16] = add_<k0>(w[r16]);
+        buffer[add1(r00)] = rol_<1>(xor_(
+            xor_(buffer[add1(r16)], buffer[add1(r14)]),
+            xor_(buffer[add1(r08)], buffer[add1(r03)])));
 
-        w[add1(r00)] = rol_<1>(xor_(
-            xor_(w[add1(r16)], w[add1(r14)]),
-            xor_(w[add1(r08)], w[add1(r03)])));
-
-        w[add1(r16)] = add_<k1>(w[add1(r16)]);
+        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -912,22 +844,17 @@ prepare(auto& w) NOEXCEPT
     else
     {
         // TODO: if open lanes, vectorize sigma0 and sigma1 (see Intel).
+        buffer[r00] = add_(
+            add_(buffer[r16], sigma0(buffer[r15])),
+            add_(buffer[r07], sigma1(buffer[r02])));
 
-        // FIPS.180
-        // 6.2.2 SHA-256 Hash Computation (16 <= t <= 63)
-        // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
+        buffer[r16] = add_<k0>(buffer[r16]);
 
-        w[r00] = add_(
-            add_(w[r16], sigma0(w[r15])),
-            add_(w[r07], sigma1(w[r02])));
+        buffer[add1(r00)] = add_(
+            add_(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
+            add_(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
 
-        w[r16] = add_<k0>(w[r16]);
-
-        w[add1(r00)] = add_(
-            add_(w[add1(r16)], sigma0(w[add1(r15)])),
-            add_(w[add1(r07)], sigma1(w[add1(r02)])));
-
-        w[add1(r16)] = add_<k1>(w[add1(r16)]);
+        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
@@ -943,27 +870,26 @@ prepare(auto& w) NOEXCEPT
         //                 buffer[Round - 1]);
     }
 
-    // On last round, add round constants to last 16 words of the buffer.
-    // At this point no schedule rounds remain to depend on the value.
+    // Add K to last 16 words.
     if constexpr (Round == sub1(sub1(SHA::rounds)))
     {
-        constexpr auto r = SHA::rounds - 16;
-        w[r +  0] = add_<K::get[r +  0]>(w[r +  0]);
-        w[r +  1] = add_<K::get[r +  1]>(w[r +  1]);
-        w[r +  2] = add_<K::get[r +  2]>(w[r +  2]);
-        w[r +  3] = add_<K::get[r +  3]>(w[r +  3]);
-        w[r +  4] = add_<K::get[r +  4]>(w[r +  4]);
-        w[r +  5] = add_<K::get[r +  5]>(w[r +  5]);
-        w[r +  6] = add_<K::get[r +  6]>(w[r +  6]);
-        w[r +  7] = add_<K::get[r +  7]>(w[r +  7]);
-        w[r +  8] = add_<K::get[r +  8]>(w[r +  8]);
-        w[r +  9] = add_<K::get[r +  9]>(w[r +  9]);
-        w[r + 10] = add_<K::get[r + 10]>(w[r + 10]);
-        w[r + 11] = add_<K::get[r + 11]>(w[r + 11]);
-        w[r + 12] = add_<K::get[r + 12]>(w[r + 12]);
-        w[r + 13] = add_<K::get[r + 13]>(w[r + 13]);
-        w[r + 14] = add_<K::get[r + 14]>(w[r + 14]);
-        w[r + 15] = add_<K::get[r + 15]>(w[r + 15]);
+        constexpr auto r = SHA::rounds - array_count<words_t>;
+        buffer[r + 0] = add_<K::get[r + 0]>(buffer[r + 0]);
+        buffer[r + 1] = add_<K::get[r + 1]>(buffer[r + 1]);
+        buffer[r + 2] = add_<K::get[r + 2]>(buffer[r + 2]);
+        buffer[r + 3] = add_<K::get[r + 3]>(buffer[r + 3]);
+        buffer[r + 4] = add_<K::get[r + 4]>(buffer[r + 4]);
+        buffer[r + 5] = add_<K::get[r + 5]>(buffer[r + 5]);
+        buffer[r + 6] = add_<K::get[r + 6]>(buffer[r + 6]);
+        buffer[r + 7] = add_<K::get[r + 7]>(buffer[r + 7]);
+        buffer[r + 8] = add_<K::get[r + 8]>(buffer[r + 8]);
+        buffer[r + 9] = add_<K::get[r + 9]>(buffer[r + 9]);
+        buffer[r + 10] = add_<K::get[r + 10]>(buffer[r + 10]);
+        buffer[r + 11] = add_<K::get[r + 11]>(buffer[r + 11]);
+        buffer[r + 12] = add_<K::get[r + 12]>(buffer[r + 12]);
+        buffer[r + 13] = add_<K::get[r + 13]>(buffer[r + 13]);
+        buffer[r + 14] = add_<K::get[r + 14]>(buffer[r + 14]);
+        buffer[r + 15] = add_<K::get[r + 15]>(buffer[r + 15]);
     }
 }
 
@@ -971,57 +897,45 @@ TEMPLATE
 INLINE constexpr void CLASS::
 schedule(auto& buffer) NOEXCEPT
 {
-    // Pointer degradation here (optimization), use auto typing in prepare().
-    auto pbuffer = buffer.data();
+    // Schedule preparation rounds are compressed by two.
 
-    // Schedule prep is compressed by two in prepare.
+    prepare<16>(buffer);
+    prepare<18>(buffer);
+    prepare<20>(buffer);
+    prepare<22>(buffer);
+    prepare<24>(buffer);
+    prepare<26>(buffer);
+    prepare<28>(buffer);
+    prepare<30>(buffer);
 
-    // FIPS.180
-    // 6.1.2.1 SHA-1   Hash Computation (0 <= t <= 15)
+    prepare<32>(buffer);
+    prepare<34>(buffer);
+    prepare<36>(buffer);
+    prepare<38>(buffer);
+    prepare<40>(buffer);
+    prepare<42>(buffer);
+    prepare<44>(buffer);
+    prepare<46>(buffer);
 
-    // FIPS.180
-    // 6.2.2.1 SHA-256 Hash Computation (16 <= t <= 63)
-    // 6.4.2.1 SHA-512 Hash Computation (16 <= t <= 79)
-    prepare<16>(pbuffer);
-    prepare<18>(pbuffer);
-    prepare<20>(pbuffer);
-    prepare<22>(pbuffer);
-    prepare<24>(pbuffer);
-    prepare<26>(pbuffer);
-    prepare<28>(pbuffer);
-    prepare<30>(pbuffer);
+    prepare<48>(buffer);
+    prepare<50>(buffer);
+    prepare<52>(buffer);
+    prepare<54>(buffer);
+    prepare<56>(buffer);
+    prepare<58>(buffer);
+    prepare<60>(buffer);
+    prepare<62>(buffer);
 
-    prepare<32>(pbuffer);
-    prepare<34>(pbuffer);
-    prepare<36>(pbuffer);
-    prepare<38>(pbuffer);
-    prepare<40>(pbuffer);
-    prepare<42>(pbuffer);
-    prepare<44>(pbuffer);
-    prepare<46>(pbuffer);
-
-    prepare<48>(pbuffer);
-    prepare<50>(pbuffer);
-    prepare<52>(pbuffer);
-    prepare<54>(pbuffer);
-    prepare<56>(pbuffer);
-    prepare<58>(pbuffer);
-    prepare<60>(pbuffer);
-    prepare<62>(pbuffer);
-
-    // FIPS.180
-    // 6.1.2 SHA-1   Hash Computation (16 <= t <= 79)
-    // 6.4.2 SHA-512 Hash Computation (16 <= t <= 79)
     if constexpr (SHA::rounds == 80)
     {
-        prepare<64>(pbuffer);
-        prepare<66>(pbuffer);
-        prepare<68>(pbuffer);
-        prepare<70>(pbuffer);
-        prepare<72>(pbuffer);
-        prepare<74>(pbuffer);
-        prepare<76>(pbuffer);
-        prepare<78>(pbuffer);
+        prepare<64>(buffer);
+        prepare<66>(buffer);
+        prepare<68>(buffer);
+        prepare<70>(buffer);
+        prepare<72>(buffer);
+        prepare<74>(buffer);
+        prepare<76>(buffer);
+        prepare<78>(buffer);
     }
 }
 
@@ -1029,8 +943,6 @@ TEMPLATE
 INLINE constexpr void CLASS::
 summarize(auto& out, const auto& in) NOEXCEPT
 {
-    // FIPS.180
-    // 6.1.2.4 SHA-1 Hash Computation
     out[0] = add_(out[0], in[0]);
     out[1] = add_(out[1], in[1]);
     out[2] = add_(out[2], in[2]);
@@ -1039,9 +951,6 @@ summarize(auto& out, const auto& in) NOEXCEPT
 
     if constexpr (SHA::strength != 160)
     {
-        // FIPS.180
-        // 6.2.2.4 SHA-256 Hash Computation
-        // 6.4.2.4 SHA-512 Hash Computation
         out[5] = add_(out[5], in[5]);
         out[6] = add_(out[6], in[6]);
         out[7] = add_(out[7], in[7]);
@@ -1052,14 +961,9 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input(buffer_t& buffer, const state_t& state) NOEXCEPT
 {
-    // FIPS.180
-    // 5.3 Setting the Initial Hash Value
-
     // This is a double hash optimization.
     if (std::is_constant_evaluated())
     {
-        // FIPS.180
-        // 6.1.2.1 SHA-1 Hash Computation (0 <= t <= 15)
         buffer[0] = state[0];
         buffer[1] = state[1];
         buffer[2] = state[2];
@@ -1068,9 +972,6 @@ input(buffer_t& buffer, const state_t& state) NOEXCEPT
 
         if constexpr (SHA::strength != 160)
         {
-            // FIPS.180
-            // 6.2.2.1 SHA-256 Hash Computation (0 <= t <= 15)
-            // 6.4.2.1 SHA-512 Hash Computation (0 <= t <= 15)
             buffer[5] = state[5];
             buffer[6] = state[6];
             buffer[7] = state[7];
@@ -1082,11 +983,8 @@ input(buffer_t& buffer, const state_t& state) NOEXCEPT
     }
 }
 
-// FIPS.180
 // 5.1 Padding the Message
 // ---------------------------------------------------------------------------
-// 5.1.1 SHA-1, SHA-224 and SHA-256
-// 5.1.2 SHA-384, SHA-512, SHA-512/224 and SHA-512/256
 
 TEMPLATE
 INLINE constexpr void CLASS::
@@ -1094,14 +992,6 @@ pad_one(buffer_t& buffer) NOEXCEPT
 {
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
-
-    if constexpr (SHA::strength == 160)
-        static_assert(pad[1] == 0x5a827999);
-    else if constexpr (SHA::strength == 256)
-        static_assert(pad[1] == 0x71374491);
-    else if constexpr (SHA::strength == 512)
-        static_assert(pad[1] == 0x7137449123ef65cd);
-
     buffer = pad;
 }
 
@@ -1167,31 +1057,27 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
     }
 }
 
-// FIPS.180
 // 5.2 Parsing the Message
 // ---------------------------------------------------------------------------
-// 5.2.1 SHA-1, SHA-224 and SHA-256
-// 5.2.2 SHA-384, SHA-512, SHA-512/224 and SHA-512/256
 // big-endian I/O is conventional for SHA.
 
 TEMPLATE
 INLINE constexpr void CLASS::
 input(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
-    constexpr auto size = SHA::word_bytes;
-
     if (std::is_constant_evaluated())
     {
-        from_big< 0 * size>(buffer.at( 0), block);
-        from_big< 1 * size>(buffer.at( 1), block);
-        from_big< 2 * size>(buffer.at( 2), block);
-        from_big< 3 * size>(buffer.at( 3), block);
-        from_big< 4 * size>(buffer.at( 4), block);
-        from_big< 5 * size>(buffer.at( 5), block);
-        from_big< 6 * size>(buffer.at( 6), block);
-        from_big< 7 * size>(buffer.at( 7), block);
-        from_big< 8 * size>(buffer.at( 8), block);
-        from_big< 9 * size>(buffer.at( 9), block);
+        constexpr auto size = SHA::word_bytes;
+        from_big< 0 * size>(buffer.at(0), block);
+        from_big< 1 * size>(buffer.at(1), block);
+        from_big< 2 * size>(buffer.at(2), block);
+        from_big< 3 * size>(buffer.at(3), block);
+        from_big< 4 * size>(buffer.at(4), block);
+        from_big< 5 * size>(buffer.at(5), block);
+        from_big< 6 * size>(buffer.at(6), block);
+        from_big< 7 * size>(buffer.at(7), block);
+        from_big< 8 * size>(buffer.at(8), block);
+        from_big< 9 * size>(buffer.at(9), block);
         from_big<10 * size>(buffer.at(10), block);
         from_big<11 * size>(buffer.at(11), block);
         from_big<12 * size>(buffer.at(12), block);
@@ -1201,8 +1087,8 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else
     {
-        auto& to = array_cast<word_t, SHA::block_words>(buffer);
-        from_big_endians(to, array_cast<word_t>(block));
+        from_big_endians(array_cast<word_t, array_count<words_t>>(buffer),
+            array_cast<word_t>(block));
     }
 }
 
@@ -1210,10 +1096,9 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input1(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
-    constexpr auto size = SHA::word_bytes;
-
     if (std::is_constant_evaluated())
     {
+        constexpr auto size = SHA::word_bytes;
         from_big<0 * size>(buffer.at(0), half);
         from_big<1 * size>(buffer.at(1), half);
         from_big<2 * size>(buffer.at(2), half);
@@ -1225,8 +1110,8 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else
     {
-        auto& to = array_cast<word_t, array_count<chunk_t>>(buffer);
-        from_big_endians(to, array_cast<word_t>(half));
+        from_big_endians(array_cast<word_t, array_count<chunk_t>>(buffer),
+            array_cast<word_t>(half));
     }
 }
 
@@ -1234,12 +1119,11 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input2(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
-    constexpr auto size = SHA::word_bytes;
-
     if (std::is_constant_evaluated())
     {
-        from_big<0 * size>(buffer.at( 8), half);
-        from_big<1 * size>(buffer.at( 9), half);
+        constexpr auto size = SHA::word_bytes;
+        from_big<0 * size>(buffer.at(8), half);
+        from_big<1 * size>(buffer.at(9), half);
         from_big<2 * size>(buffer.at(10), half);
         from_big<3 * size>(buffer.at(11), half);
         from_big<4 * size>(buffer.at(12), half);
@@ -1249,9 +1133,9 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else
     {
-        constexpr auto words = SHA::state_words;
-        auto& to = array_cast<word_t, words, words>(buffer);
-        from_big_endians(to, array_cast<word_t>(half));
+        constexpr auto chunk = array_count<chunk_t>;
+        from_big_endians(array_cast<word_t, chunk, chunk>(buffer), 
+            array_cast<word_t>(half));
     }
 }
 
@@ -1259,16 +1143,11 @@ TEMPLATE
 INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
-    // FIPS.180
-    // 6.1.2 SHA-1   Hash Computation
-    // 6.2.2 SHA-256 Hash Computation
-    // 6.4.2 SHA-512 Hash Computation
-    constexpr auto size = SHA::word_bytes;
-
     if (std::is_constant_evaluated())
     {
         digest_t digest{};
 
+        constexpr auto size = SHA::word_bytes;
         to_big<0 * size>(digest, state.at(0));
         to_big<1 * size>(digest, state.at(1));
         to_big<2 * size>(digest, state.at(2));
@@ -1527,11 +1406,11 @@ schedule(buffers_t&, const blocks_t&) NOEXCEPT
 
     ////// TODO: vector cast by lanes.
     ////auto xbuffers = buffers;
-
+    ////
     ////for (auto& block: blocks)
     ////{
     ////}
-
+    ////
     ////// schedule() is auto-typed for vectorization.
     ////schedule(xbuffers);
 }
@@ -1542,9 +1421,8 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
     if constexpr (Compressed)
     {
-        buffer_t buffer{};
-
         // TODO: sha intrinsic schedule/compress compresion.
+        buffer_t buffer{};
         for (auto& block: blocks)
         {
             input(buffer, block);
@@ -1566,39 +1444,38 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
         ////// TODO: size the buffer to min(lanes, blocks.size()) and iterate over
         ////// TODO: the buffers with lane-count sequential compression rounds.
         ////buffers_t buffers(blocks.size());
-
+        ////
         ////// eprint.iacr.org/2012/067.pdf
         ////// Message schedule vectorization across blocks.
         ////// Message schedules/endianness are order independent.
         ////schedule(buffers, blocks);
-
+        ////
         ////for (auto& space: buffers)
         ////    compress(state, space);
     }
-    else if constexpr (Concurrent)
-    {
-        buffers_t buffers(blocks.size());
-
-        // Message schedule concurrency across blocks.
-        // Message schedules/endianness are order independent.
-        // Concurrency is prohibitive (material net loss) in all test scenarios.
-        std_transform(concurrency(), blocks.begin(), blocks.end(),
-            buffers->begin(), [](const block_t& block) NOEXCEPT
-            {
-                buffer_t space{};
-                input(space, block);
-                schedule(space);
-                return space;
-            });
-
-        for (auto& space: buffers)
-            compress(state, space);
-    }
+    ////else if constexpr (Concurrent)
+    ////{
+    ////    buffers_t buffers(blocks.size());
+    ////
+    ////    // Message schedule concurrency across blocks.
+    ////    // Message schedules/endianness are order independent.
+    ////    // Concurrency is prohibitive (material net loss) in all test scenarios.
+    ////    std_transform(concurrency(), blocks.begin(), blocks.end(),
+    ////        buffers->begin(), [](const block_t& block) NOEXCEPT
+    ////        {
+    ////            buffer_t space{};
+    ////            input(space, block);
+    ////            schedule(space);
+    ////            return space;
+    ////        });
+    ////
+    ////    for (auto& space: buffers)
+    ////        compress(state, space);
+    ////}
     else
     {
-        buffer_t buffer{};
-
         // Native sha evaluation (constexpr).
+        buffer_t buffer{};
         for (auto& block: blocks)
         {
             input(buffer, block);

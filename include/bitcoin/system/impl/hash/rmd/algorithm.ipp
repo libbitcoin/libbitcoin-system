@@ -20,11 +20,11 @@
 #define LIBBITCOIN_SYSTEM_HASH_RMD_ALGORITHM_IPP
 
 #include <bit>
+#include <intrin.h>
 #include <iostream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/radix/radix.hpp>
 
 // Based on:
 // homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
@@ -103,7 +103,7 @@ blocks_pad() NOEXCEPT
 template<auto B>
 INLINE constexpr auto rol_(auto a) NOEXCEPT
 {
-    return std::rotl(a, B);
+    return rotl<B>(a);
 }
 
 template<auto B>
@@ -187,7 +187,7 @@ functor() NOEXCEPT
     constexpr auto fn = Round / K::columns;
 
     // Select function by column.
-    if constexpr (RMD::rounds == 128)
+    if constexpr (RMD::strength == 128)
     {
         if constexpr (fn == 0u || fn == 7u)
             return &self::template f0<Auto, Auto, Auto>;
@@ -243,7 +243,7 @@ template<size_t Round>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& words) NOEXCEPT
 {
-    if constexpr (RMD::rounds == 128)
+    if constexpr (RMD::strength == 128)
     {
         round<Round>(
             state[(RMD::rounds + 0 - Round) % RMD::state_words], // b->a
@@ -265,162 +265,108 @@ round(auto& state, const auto& words) NOEXCEPT
 }
 
 TEMPLATE
-template<bool First>
-INLINE constexpr void CLASS::
-batch(state_t& state, const words_t& words) NOEXCEPT
-{
-    // Order of execution is arbitrary.
-    constexpr auto offset = First ? zero : to_half(RMD::rounds);
-
-    // Pointer degradation here (optimization), use auto typing in round().
-    auto pwords = words.data();
-    auto pstate = state.data();
-
-    // RMD256:f0/f4, RMD128:f0/f3
-    round<offset +  0>(pstate, pwords);
-    round<offset +  1>(pstate, pwords);
-    round<offset +  2>(pstate, pwords);
-    round<offset +  3>(pstate, pwords);
-    round<offset +  4>(pstate, pwords);
-    round<offset +  5>(pstate, pwords);
-    round<offset +  6>(pstate, pwords);
-    round<offset +  7>(pstate, pwords);
-    round<offset +  8>(pstate, pwords);
-    round<offset +  9>(pstate, pwords);
-    round<offset + 10>(pstate, pwords);
-    round<offset + 11>(pstate, pwords);
-    round<offset + 12>(pstate, pwords);
-    round<offset + 13>(pstate, pwords);
-    round<offset + 14>(pstate, pwords);
-    round<offset + 15>(pstate, pwords);
-
-    // RMD256:f1/f3, RMD128:f1/f2
-    round<offset + 16>(pstate, pwords);
-    round<offset + 17>(pstate, pwords);
-    round<offset + 18>(pstate, pwords);
-    round<offset + 19>(pstate, pwords);
-    round<offset + 20>(pstate, pwords);
-    round<offset + 21>(pstate, pwords);
-    round<offset + 22>(pstate, pwords);
-    round<offset + 23>(pstate, pwords);
-    round<offset + 24>(pstate, pwords);
-    round<offset + 25>(pstate, pwords);
-    round<offset + 26>(pstate, pwords);
-    round<offset + 27>(pstate, pwords);
-    round<offset + 28>(pstate, pwords);
-    round<offset + 29>(pstate, pwords);
-    round<offset + 30>(pstate, pwords);
-    round<offset + 31>(pstate, pwords);
-
-    // RMD256:f2/f2, RMD128:f2/f1
-    round<offset + 32>(pstate, pwords);
-    round<offset + 33>(pstate, pwords);
-    round<offset + 34>(pstate, pwords);
-    round<offset + 35>(pstate, pwords);
-    round<offset + 36>(pstate, pwords);
-    round<offset + 37>(pstate, pwords);
-    round<offset + 38>(pstate, pwords);
-    round<offset + 39>(pstate, pwords);
-    round<offset + 40>(pstate, pwords);
-    round<offset + 41>(pstate, pwords);
-    round<offset + 42>(pstate, pwords);
-    round<offset + 43>(pstate, pwords);
-    round<offset + 44>(pstate, pwords);
-    round<offset + 45>(pstate, pwords);
-    round<offset + 46>(pstate, pwords);
-    round<offset + 47>(pstate, pwords);
-
-    // RMD256:f3/f1, RMD128:f3/f0
-    round<offset + 48>(pstate, pwords);
-    round<offset + 49>(pstate, pwords);
-    round<offset + 50>(pstate, pwords);
-    round<offset + 51>(pstate, pwords);
-    round<offset + 52>(pstate, pwords);
-    round<offset + 53>(pstate, pwords);
-    round<offset + 54>(pstate, pwords);
-    round<offset + 55>(pstate, pwords);
-    round<offset + 56>(pstate, pwords);
-    round<offset + 57>(pstate, pwords);
-    round<offset + 58>(pstate, pwords);
-    round<offset + 59>(pstate, pwords);
-    round<offset + 60>(pstate, pwords);
-
-    // msvc++ (/O2/Ob2/Ot) inlining stops here without __forceinline.
-    round<offset + 61>(pstate, pwords);
-    round<offset + 62>(pstate, pwords);
-    round<offset + 63>(pstate, pwords);
-
-    // RMD256:f4/f0
-    if constexpr (RMD::rounds == 160)
-    {
-        round<offset + 64>(pstate, pwords);
-        round<offset + 65>(pstate, pwords);
-        round<offset + 66>(pstate, pwords);
-        round<offset + 67>(pstate, pwords);
-        round<offset + 68>(pstate, pwords);
-        round<offset + 69>(pstate, pwords);
-        round<offset + 70>(pstate, pwords);
-        round<offset + 71>(pstate, pwords);
-        round<offset + 72>(pstate, pwords);
-        round<offset + 73>(pstate, pwords);
-        round<offset + 74>(pstate, pwords);
-        round<offset + 75>(pstate, pwords);
-        round<offset + 76>(pstate, pwords);
-        round<offset + 77>(pstate, pwords);
-        round<offset + 78>(pstate, pwords);
-        round<offset + 79>(pstate, pwords);
-    }
-}
-
-TEMPLATE
 INLINE constexpr void CLASS::
 compress(state_t& state, const words_t& words) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
-    {
-        state_t left{ state };
-        state_t right{ state };
-        batch<true>(left, words);
-        batch<false>(right, words);
-        summarize(state, left, right);
-        return;
-    }
-    else
-    {
-        // Vectorization across batches is precluded by the reverse ordering
-        // of functor selection by round (and rounds are order dependent).
-        if constexpr (Concurrent)
-        {
-            // Two copies of state (required by RMD) are saved to jobs.
-            std_array<std::pair<bool, state_t>, two> jobs
-            {
-                std::make_pair(true, state),
-                std::make_pair(false, state)
-            };
+    constexpr auto offset = to_half(RMD::rounds);
 
-            // Ripemd consists of two independent hashing jobs.
-            // Concurrency cost is prohibitive in all test scenarios.
-            std_for_each(concurrency(), jobs.begin(), jobs.end(),
-                [&words](auto& job) NOEXCEPT
-                {
-                    if (job.first)
-                        batch<true>(job.second, words);
-                    else
-                        batch<false>(job.second, words);
-                });
+    state_t left{ state };
+    state_t right{ state };
 
-            // Add state from both jobs to original state.
-            summarize(state, jobs.front().second, jobs.back().second);
-        }
-        else
-        {
-            state_t left{ state };
-            state_t right{ state };
-            batch<true>(left, words);
-            batch<false>(right, words);
-            summarize(state, left, right);
-        }
+    // RMD160:f0/f4, RMD128:f0/f3
+    round< 0>(left, words);	round< 0 + offset>(right, words);
+    round< 1>(left, words);	round< 1 + offset>(right, words);
+    round< 2>(left, words);	round< 2 + offset>(right, words);
+    round< 3>(left, words);	round< 3 + offset>(right, words);
+    round< 4>(left, words);	round< 4 + offset>(right, words);
+    round< 5>(left, words);	round< 5 + offset>(right, words);
+    round< 6>(left, words);	round< 6 + offset>(right, words);
+    round< 7>(left, words);	round< 7 + offset>(right, words);
+    round< 8>(left, words);	round< 8 + offset>(right, words);
+    round< 9>(left, words);	round< 9 + offset>(right, words);
+    round<10>(left, words);	round<10 + offset>(right, words);
+    round<11>(left, words);	round<11 + offset>(right, words);
+    round<12>(left, words);	round<12 + offset>(right, words);
+    round<13>(left, words);	round<13 + offset>(right, words);
+    round<14>(left, words);	round<14 + offset>(right, words);
+    round<15>(left, words);	round<15 + offset>(right, words);
+
+    // RMD160:f1/f3, RMD128:f1/f2
+    round<16>(left, words);	round<16 + offset>(right, words);
+    round<17>(left, words);	round<17 + offset>(right, words);
+    round<18>(left, words);	round<18 + offset>(right, words);
+    round<19>(left, words);	round<19 + offset>(right, words);
+    round<20>(left, words);	round<20 + offset>(right, words);
+    round<21>(left, words);	round<21 + offset>(right, words);
+    round<22>(left, words);	round<22 + offset>(right, words);
+    round<23>(left, words);	round<23 + offset>(right, words);
+    round<24>(left, words);	round<24 + offset>(right, words);
+    round<25>(left, words);	round<25 + offset>(right, words);
+    round<26>(left, words);	round<26 + offset>(right, words);
+    round<27>(left, words);	round<27 + offset>(right, words);
+    round<28>(left, words);	round<28 + offset>(right, words);
+    round<29>(left, words);	round<29 + offset>(right, words);
+    round<30>(left, words);	round<30 + offset>(right, words);
+    round<31>(left, words);	round<31 + offset>(right, words);
+
+    // RMD160:f2/f2, RMD128:f2/f1
+    round<32>(left, words);	round<32 + offset>(right, words);
+    round<33>(left, words);	round<33 + offset>(right, words);
+    round<34>(left, words);	round<34 + offset>(right, words);
+    round<35>(left, words);	round<35 + offset>(right, words);
+    round<36>(left, words);	round<36 + offset>(right, words);
+    round<37>(left, words);	round<37 + offset>(right, words);
+    round<38>(left, words);	round<38 + offset>(right, words);
+    round<39>(left, words);	round<39 + offset>(right, words);
+    round<40>(left, words);	round<40 + offset>(right, words);
+    round<41>(left, words);	round<41 + offset>(right, words);
+    round<42>(left, words);	round<42 + offset>(right, words);
+    round<43>(left, words);	round<43 + offset>(right, words);
+    round<44>(left, words);	round<44 + offset>(right, words);
+    round<45>(left, words);	round<45 + offset>(right, words);
+    round<46>(left, words);	round<46 + offset>(right, words);
+    round<47>(left, words);	round<47 + offset>(right, words);
+
+    // RMD160:f3/f1, RMD128:f3/f0
+    round<48>(left, words);	round<48 + offset>(right, words);
+    round<49>(left, words);	round<49 + offset>(right, words);
+    round<50>(left, words);	round<50 + offset>(right, words);
+    round<51>(left, words);	round<51 + offset>(right, words);
+    round<52>(left, words);	round<52 + offset>(right, words);
+    round<53>(left, words);	round<53 + offset>(right, words);
+    round<54>(left, words);	round<54 + offset>(right, words);
+    round<55>(left, words);	round<55 + offset>(right, words);
+    round<56>(left, words);	round<56 + offset>(right, words);
+    round<57>(left, words);	round<57 + offset>(right, words);
+    round<58>(left, words);	round<58 + offset>(right, words);
+    round<59>(left, words);	round<59 + offset>(right, words);
+    round<60>(left, words);	round<60 + offset>(right, words);
+    round<61>(left, words);	round<61 + offset>(right, words);
+    round<62>(left, words);	round<62 + offset>(right, words);
+    round<63>(left, words);	round<63 + offset>(right, words);
+
+    // RMD160:f4/f0
+    if constexpr (RMD::strength == 160)
+    {
+        round<64>(left, words);	round<64 + offset>(right, words);
+        round<65>(left, words);	round<65 + offset>(right, words);
+        round<66>(left, words);	round<66 + offset>(right, words);
+        round<67>(left, words);	round<67 + offset>(right, words);
+        round<68>(left, words);	round<68 + offset>(right, words);
+        round<69>(left, words);	round<69 + offset>(right, words);
+        round<70>(left, words);	round<70 + offset>(right, words);
+        round<71>(left, words);	round<71 + offset>(right, words);
+        round<72>(left, words);	round<72 + offset>(right, words);
+        round<73>(left, words);	round<73 + offset>(right, words);
+        round<74>(left, words);	round<74 + offset>(right, words);
+        round<75>(left, words);	round<75 + offset>(right, words);
+        round<76>(left, words);	round<76 + offset>(right, words);
+        round<77>(left, words);	round<77 + offset>(right, words);
+        round<78>(left, words);	round<78 + offset>(right, words);
+        round<79>(left, words);	round<79 + offset>(right, words);
     }
+
+    summarize(state, left, right);
 }
 
 TEMPLATE
@@ -428,7 +374,7 @@ INLINE constexpr void CLASS::
 summarize(state_t& state, const state_t& batch1,
     const state_t& batch2) NOEXCEPT
 {
-    if constexpr (RMD::rounds == 128)
+    if constexpr (RMD::strength == 128)
     {
         const auto state_0_ = state[0];
         state[0] = add_(add_(state[1], batch1[2]), batch2[3]);
@@ -456,7 +402,6 @@ pad_one(words_t& words) NOEXCEPT
 {
     // Pad a single whole block with pre-prepared buffer.
     constexpr auto pad = block_pad();
-
     words = pad;
 }
 
@@ -530,10 +475,9 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input(words_t& words, const block_t& block) NOEXCEPT
 {
-    constexpr auto size = RMD::word_bytes;
-
     if (std::is_constant_evaluated())
     {
+        constexpr auto size = RMD::word_bytes;
         from_little< 0 * size>(words.at( 0), block);
         from_little< 1 * size>(words.at( 1), block);
         from_little< 2 * size>(words.at( 2), block);
@@ -561,10 +505,9 @@ TEMPLATE
 INLINE constexpr void CLASS::
 input(words_t& words, const half_t& half) NOEXCEPT
 {
-    constexpr auto size = RMD::word_bytes;
-
     if (std::is_constant_evaluated())
     {
+        constexpr auto size = RMD::word_bytes;
         from_little<0 * size>(words.at(0), half);
         from_little<1 * size>(words.at(1), half);
         from_little<2 * size>(words.at(2), half);
@@ -576,8 +519,9 @@ input(words_t& words, const half_t& half) NOEXCEPT
     }
     else
     {
-        auto& to = array_cast<word_t, array_count<chunk_t>>(words);
-        from_little_endians(to, array_cast<word_t>(half));
+        from_little_endians(
+            array_cast<word_t, array_count<chunk_t>>(words),
+            array_cast<word_t>(half));
     }
 }
 
@@ -585,18 +529,17 @@ TEMPLATE
 INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
-    constexpr auto size = RMD::word_bytes;
-
     if (std::is_constant_evaluated())
     {
         digest_t digest{};
 
+        constexpr auto size = RMD::word_bytes;
         to_little<0 * size>(digest, state.at(0));
         to_little<1 * size>(digest, state.at(1));
         to_little<2 * size>(digest, state.at(2));
         to_little<3 * size>(digest, state.at(3));
 
-        if constexpr (K::strength == 160)
+        if constexpr (RMD::strength == 160)
         {
             to_little<4 * size>(digest, state.at(4));
         }

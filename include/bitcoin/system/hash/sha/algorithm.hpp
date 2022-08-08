@@ -150,7 +150,7 @@ protected:
         const auto& wk) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static constexpr void prepare(auto& wk) NOEXCEPT;
+    INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
 
     INLINE static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
     INLINE static constexpr void schedule(auto& buffer) NOEXCEPT;
