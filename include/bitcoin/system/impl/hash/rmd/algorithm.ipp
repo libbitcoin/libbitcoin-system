@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_HASH_RMD_ALGORITHM_IPP
 
 #include <bit>
-#include <intrin.h>
 #include <iostream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
