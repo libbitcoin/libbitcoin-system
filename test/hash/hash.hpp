@@ -35,6 +35,17 @@ constexpr auto sha_full256 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003
 constexpr auto sha_half512 = base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081");
 constexpr auto sha_full512 = base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11");
 
+// test helper for acccumulated pairs.
+template <typename Algorithm>
+typename accumulator<Algorithm>::digest_t accumulated(
+    const data_slice& left, const data_slice& right) NOEXCEPT
+{
+    accumulator<Algorithm> accumulator{};
+    accumulator.write(left.size(), left.data());
+    accumulator.write(right.size(), right.data());
+    return accumulator.flush();
+}
+
 // constexpr test helper for block construction from two halves.
 template <typename Algorithm>
 constexpr auto block(size_t a, size_t b) noexcept

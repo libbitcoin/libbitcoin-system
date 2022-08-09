@@ -50,16 +50,6 @@ BOOST_AUTO_TEST_CASE(functions__hash_combine__same_values__expected)
     }
 }
 
-template <typename Algorithm>
-typename accumulator<Algorithm>::digest_t accumulated(
-    const data_slice& left, const data_slice& right) NOEXCEPT
-{
-    accumulator<Algorithm> accumulator{};
-    accumulator.write(left.size(), left.data());
-    accumulator.write(right.size(), right.data());
-    return accumulator.flush();
-}
-
 // rmd128
 // ----------------------------------------------------------------------------
 

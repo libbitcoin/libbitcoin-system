@@ -442,7 +442,8 @@ data_chunk CLASS::
 hash_chunk(const data_array<Size>& data) NOEXCEPT
 {
     data_chunk digest(digest_size);
-    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::hash(data);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) =
+        self::hash(data);
     return digest;
 }
 
@@ -451,7 +452,8 @@ data_chunk CLASS::
 hash_chunk(size_t size, const byte_t* data) NOEXCEPT
 {
     data_chunk digest(digest_size);
-    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::hash(size, data);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) =
+        self::hash(size, data);
     return digest;
 }
 
@@ -478,7 +480,8 @@ data_chunk CLASS::
 double_hash_chunk(const data_array<Size>& data) NOEXCEPT
 {
     data_chunk digest(digest_size);
-    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::double_hash(data);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = 
+        self::double_hash(data);
     return digest;
 }
 
@@ -487,7 +490,8 @@ data_chunk CLASS::
 double_hash_chunk(size_t size, const byte_t* data) NOEXCEPT
 {
     data_chunk digest(digest_size);
-    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::double_hash(size, data);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = 
+        self::double_hash(size, data);
     return digest;
 }
 
