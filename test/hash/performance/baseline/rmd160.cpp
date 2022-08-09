@@ -16,7 +16,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(USE_CONST)
 
 namespace baseline {
-namespace ripemd160 {
+namespace rmd160 {
 
 uint32_t inline f1(uint32_t x, uint32_t y, uint32_t z) { return x ^ y ^ z; }
 uint32_t inline f2(uint32_t x, uint32_t y, uint32_t z) { return (x & y) | (~x & z); }
@@ -236,11 +236,11 @@ void Transform(uint32_t* s, const unsigned char* chunk)
     s[4] = t + b1 + c2;
 }
 
-} // namespace ripemd160
+} // namespace rmd160
 
 CRIPEMD160::CRIPEMD160() : bytes(0)
 {
-    ripemd160::Initialize(s);
+    rmd160::Initialize(s);
 }
 
 CRIPEMD160& CRIPEMD160::Write(const unsigned char* data, size_t len)
@@ -251,11 +251,11 @@ CRIPEMD160& CRIPEMD160::Write(const unsigned char* data, size_t len)
         memcpy(buf + bufsize, data, 64 - bufsize);
         bytes += 64 - bufsize;
         data += 64 - bufsize;
-        ripemd160::Transform(s, buf);
+        rmd160::Transform(s, buf);
         bufsize = 0;
     }
     while (end - data >= 64) {
-        ripemd160::Transform(s, data);
+        rmd160::Transform(s, data);
         bytes += 64;
         data += 64;
     }
@@ -283,7 +283,7 @@ void CRIPEMD160::Finalize(unsigned char hash[OUTPUT_SIZE])
 CRIPEMD160& CRIPEMD160::Reset()
 {
     bytes = 0;
-    ripemd160::Initialize(s);
+    rmd160::Initialize(s);
     return *this;
 }
 

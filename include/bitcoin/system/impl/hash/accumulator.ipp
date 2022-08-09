@@ -108,6 +108,25 @@ add_data(size_t size, const byte_t* data) NOEXCEPT
 }
 
 TEMPLATE
+INLINE bool CLASS::
+accumulate(size_t size, const byte_t* data) NOEXCEPT
+{
+    // Only accumulates one or more blocks and only with an empty buffer.
+    if (!is_empty() || (size < block_size))
+        return false;
+
+    const auto blocks = size / block_size;
+    const auto remain = size % block_size;
+    const auto bytes  = size - remain;
+    Algorithm::accumulate(state_, unsafe_vector_cast<block_t>(data, blocks));
+
+    // Update the counter and buffer the remainder.
+    size_ += bytes;
+    add_data(remain, std::next(data, bytes));
+    return true;
+}
+
+TEMPLATE
 INLINE constexpr size_t CLASS::
 pad_size() const NOEXCEPT
 {
@@ -166,7 +185,7 @@ stream_pad() NOEXCEPT
     return { bit_hi<byte_t> };
 }
 
-// public
+// constructors
 // ----------------------------------------------------------------------------
 
 TEMPLATE
@@ -186,7 +205,7 @@ accumulator() NOEXCEPT
 
 TEMPLATE
 constexpr CLASS::
-accumulator(size_t blocks, const state_t& state) NOEXCEPT
+accumulator(const state_t& state, size_t blocks) NOEXCEPT
   : size_{ blocks * block_size }, state_{ state }
 {
     if constexpr (Checked)
@@ -197,30 +216,33 @@ accumulator(size_t blocks, const state_t& state) NOEXCEPT
     }
 }
 
+// writers
+// ----------------------------------------------------------------------------
+
 TEMPLATE
 template <size_t Size>
-inline bool CLASS::
-write(const std_array<byte_t, Size>& data) NOEXCEPT
+bool CLASS::
+write(const data_array<Size>& data) NOEXCEPT
 {
     return write(Size, data.data());
 }
 
 TEMPLATE
-inline bool CLASS::
+bool CLASS::
 write(const data_chunk& data) NOEXCEPT
 {
     return write(data.size(), data.data());
 }
 
 TEMPLATE
-inline bool CLASS::
-write_slice(const data_slice& data) NOEXCEPT
+bool CLASS::
+write(const exclusive_slice& data) NOEXCEPT
 {
     return write(data.size(), data.data());
 }
 
 TEMPLATE
-inline bool CLASS::
+bool CLASS::
 write(size_t size, const byte_t* data) NOEXCEPT
 {
     if (is_zero(size))
@@ -254,25 +276,8 @@ write(size_t size, const byte_t* data) NOEXCEPT
     return true;
 }
 
-// private
-TEMPLATE
-inline bool CLASS::
-accumulate(size_t size, const byte_t* data) NOEXCEPT
-{
-    // Only accumulates one or more blocks with an empty buffer.
-    if (!is_empty() || (size < block_size))
-        return false;
-
-    const auto blocks = size / block_size;
-    const auto remain = size % block_size;
-    const auto bytes  = size - remain;
-    Algorithm::accumulate(state_, unsafe_vector_cast<block_t>(data, blocks));
-
-    // Update the counter and buffer the remainder.
-    size_ += bytes;
-    add_data(remain, std::next(data, bytes));
-    return true;
-}
+// hash finalizers
+// ----------------------------------------------------------------------------
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
@@ -286,7 +291,7 @@ flush() NOEXCEPT
 }
 
 TEMPLATE
-inline void CLASS::
+void CLASS::
 flush(digest_t& digest) NOEXCEPT
 {
     constexpr auto pad = stream_pad();
@@ -297,36 +302,37 @@ flush(digest_t& digest) NOEXCEPT
 }
 
 TEMPLATE
-inline void CLASS::
+void CLASS::
+flush(data_chunk& digest) NOEXCEPT
+{
+    flush(digest);
+}
+
+TEMPLATE
+void CLASS::
 flush(byte_t* digest) NOEXCEPT
 {
     flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest));
 }
 
-TEMPLATE
-inline void CLASS::
-flush(data_chunk& digest) NOEXCEPT
-{
-    flush(digest.data());
-}
+// finalized/optimized hashers
+// ----------------------------------------------------------------------------
 
 TEMPLATE
-inline void CLASS::
+void CLASS::
 hash(byte_t* digest, const data_slice& data) NOEXCEPT
 {
     const auto size = data.size();
 
-    if (size == half_block)
+    if (size == half_size)
     {
         unsafe_array_cast<uint8_t, digest_size>(digest) =
-            Algorithm::hash(unsafe_array_cast<uint8_t,
-                half_block>(data.data()));
+            Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
     }
-    else if (size == full_block)
+    else if (size == block_size)
     {
         unsafe_array_cast<uint8_t, digest_size>(digest) =
-            Algorithm::hash(unsafe_array_cast<uint8_t,
-                full_block>(data.data()));
+            Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
     }
     else
     {
@@ -338,10 +344,10 @@ hash(byte_t* digest, const data_slice& data) NOEXCEPT
 
 TEMPLATE
 template <size_t Size>
-inline typename CLASS::digest_t CLASS::
-hash(const std_array<byte_t, Size>& data) NOEXCEPT
+typename CLASS::digest_t CLASS::
+hash(const data_array<Size>& data) NOEXCEPT
 {
-    if constexpr (Size == half_block || Size == full_block)
+    if constexpr (Size == half_size || Size == block_size)
     {
         return Algorithm::hash(data);
     }
@@ -354,20 +360,18 @@ hash(const std_array<byte_t, Size>& data) NOEXCEPT
 }
 
 TEMPLATE
-inline typename CLASS::digest_t CLASS::
+typename CLASS::digest_t CLASS::
 hash(const data_chunk& data) NOEXCEPT
 {
     const auto size = data.size();
 
-    if (size == half_block)
+    if (size == half_size)
     {
-        return Algorithm::hash(unsafe_array_cast<uint8_t,
-            half_block>(data.data()));
+        return Algorithm::hash(unsafe_array_cast<uint8_t, half_size>(data.data()));
     }
-    else if (size == full_block)
+    else if (size == block_size)
     {
-        return Algorithm::hash(unsafe_array_cast<uint8_t,
-            full_block>(data.data()));
+        return Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
     }
     else
     {
@@ -378,48 +382,104 @@ hash(const data_chunk& data) NOEXCEPT
 }
 
 TEMPLATE
-inline typename CLASS::digest_t CLASS::
-hash_digest(const data_slice& data) NOEXCEPT
+typename CLASS::digest_t CLASS::
+hash(const exclusive_slice& data) NOEXCEPT
 {
     const auto size = data.size();
 
-    if (size == half_block)
+    if (size == half_size)
     {
-        return Algorithm::hash(unsafe_array_cast<uint8_t,
-            half_block>(data.data()));
+        return Algorithm::hash(unsafe_array_cast<uint8_t, half_size>(data.data()));
     }
-    else if (size == full_block)
+    else if (size == block_size)
     {
-        return Algorithm::hash(unsafe_array_cast<uint8_t,
-            full_block>(data.data()));
+        return Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
     }
     else
     {
         accumulator<Algorithm> context{};
-        context.write_slice(data);
+        context.write(data);
         return context.flush();
     }
 }
 
 TEMPLATE
 template <size_t Size>
-inline data_chunk CLASS::
-hash_chunk(const std_array<byte_t, Size>& data) NOEXCEPT
+data_chunk CLASS::
+hash_chunk(const data_array<Size>& data) NOEXCEPT
 {
     data_chunk digest(digest_size);
-    auto& out = unsafe_array_cast<byte_t, digest_size>(digest.data());
-    out = hash(data);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = hash(data);
     return digest;
 }
 
 TEMPLATE
-inline data_chunk CLASS::
+data_chunk CLASS::
 hash_chunk(const data_chunk& data) NOEXCEPT
 {
     data_chunk digest(digest_size);
-    auto& out = unsafe_array_cast<byte_t, digest_size>(digest.data());
-    out = hash(data);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = hash(data);
     return digest;
+}
+
+// finalized/optimized double hashers
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+template <size_t Size>
+typename CLASS::digest_t CLASS::
+double_hash(const data_array<Size>& data) NOEXCEPT
+{
+    if constexpr (Size == half_size || Size == block_size)
+    {
+        return Algorithm::double_hash(data);
+    }
+    else
+    {
+        return Algorithm::hash(accumulator<Algorithm>::hash(data));
+    }
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+double_hash(const data_chunk& data) NOEXCEPT
+{
+    // This can be optimized by removing two endianness conversions.
+    return Algorithm::hash(accumulator<Algorithm>::hash(data));
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+double_hash(const exclusive_slice& data) NOEXCEPT
+{
+    // This can be optimized by removing two endianness conversions.
+    return Algorithm::hash(accumulator<Algorithm>::hash(data));
+}
+
+TEMPLATE
+template <size_t Size>
+data_chunk CLASS::
+double_hash_chunk(const data_array<Size>& data) NOEXCEPT
+{
+    if constexpr (Size == half_size || Size == block_size)
+    {
+        data_chunk digest(digest_size);
+        unsafe_array_cast<uint8_t, digest_size>(digest.data()) = Algorithm::double_hash(data);
+        return digest;
+    }
+    else
+    {
+        // This can be optimized by removing two endianness conversions.
+        return accumulator<Algorithm>::hash_chunk(accumulator<Algorithm>::hash(data));
+    }
+}
+
+TEMPLATE
+data_chunk CLASS::
+double_hash_chunk(const data_chunk& data) NOEXCEPT
+{
+    // This can be optimized by removing two endianness conversions.
+    return accumulator<Algorithm>::hash_chunk(accumulator<Algorithm>::hash(data));
 }
 
 BC_POP_WARNING()

@@ -119,7 +119,7 @@ static bool distinct(const electrum_v1::catalog::words& words)
 
 static hash_digest identity(const electrum_v1::catalog::words& words)
 {
-    return sha256_hash_slice(join(to_string_list(words)));
+    return sha256_hash(join(to_string_list(words)));
 }
 
 } // catalogs_electrum_v1

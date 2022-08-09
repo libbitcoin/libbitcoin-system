@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
     constexpr auto blocks = 2u;
     constexpr algorithm::state_t state{};
 
-    const checked writer{ blocks, state };
+    const checked writer{ state, blocks };
     BOOST_REQUIRE_EQUAL(writer.next_(), zero);
     BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
     BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(accumulator__write__nonzero__expected)
     constexpr data_array<bytes> data{};
     constexpr algorithm::state_t state{};
 
-    checked writer{ blocks, state };
+    checked writer{ state, blocks };
     BOOST_REQUIRE(writer.write(data));
     BOOST_REQUIRE_EQUAL(writer.next_(), bytes);
     BOOST_REQUIRE_EQUAL(writer.gap_(), block_size - bytes);

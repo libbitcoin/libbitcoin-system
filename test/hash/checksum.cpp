@@ -35,7 +35,7 @@ constexpr auto bip173_ec_compressed = base16_array("0279BE667EF9DCBBAC55A06295CE
 // BIP141: The HASH160 of the pubkey in witness must match the 20 byte witness program.
 auto bip173_p2wkh_program() NOEXCEPT
 {
-    static const auto program = ripemd160_chunk(sha256_hash(bip173_ec_compressed));
+    static const auto program = rmd160_chunk(sha256_hash(bip173_ec_compressed));
     return program;
 }
 

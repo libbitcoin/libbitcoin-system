@@ -61,13 +61,12 @@ public:
 
     /// Constants (and count_t).
     /// -----------------------------------------------------------------------
+    /// count_t is always uint64_t for rmd.
 
-    /// count_t is 64 or 128 bit (sha512 is 128 bit and uses uint128_t).
     static constexpr auto count_bits    = RMD::block_words * RMD::word_bytes;
     static constexpr auto count_bytes   = bytes<count_bits>;
     using count_t = unsigned_exact_type<bytes<count_bits>>;
 
-    /// Limits incorporate requirement to encode counter in final block.
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
     static constexpr auto vectorized    = Vectorized;

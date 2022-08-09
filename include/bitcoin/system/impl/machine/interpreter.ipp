@@ -949,7 +949,7 @@ op_ripemd160() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_ripemd160;
 
-    state::push_chunk(ripemd160_chunk(*state::pop_chunk_()));
+    state::push_chunk(rmd160_chunk(*state::pop_chunk_()));
     return error::op_success;
 }
 

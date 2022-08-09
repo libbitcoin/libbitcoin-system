@@ -50,7 +50,7 @@ static_assert(quarter == to_half(aes256::block_size));
 
 static hash_digest address_hash(const payment_address& address) NOEXCEPT
 {
-    return bitcoin_hash_slice(address.encoded());
+    return bitcoin_hash(address.encoded());
 }
 
 static bool address_salt(ek_salt& salt,
@@ -303,7 +303,7 @@ static bool create_token(encrypted_token& out_token,
     auto factor = scrypt_token(normal(passphrase), owner_salt);
 
     if (lot_sequence)
-        factor = bitcoin_hash_slice(factor, owner_entropy);
+        factor = bitcoin_hash2(factor, owner_entropy);
 
     ec_compressed point;
     if (!secret_to_public(point, factor))
@@ -387,7 +387,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     auto secret = scrypt_token(normal(passphrase), parse.owner_salt());
 
     if (parse.lot_sequence())
-        secret = bitcoin_hash_slice(secret, parse.entropy());
+        secret = bitcoin_hash2(secret, parse.entropy());
 
     ec_compressed point;
     if (!secret_to_public(point, secret))
@@ -406,7 +406,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
 
     aes256::decrypt(extended, derived.second);
     const auto decrypt1 = xor_data<half>(extended, derived.first);
-    const auto factor = bitcoin_hash_slice(decrypt1, part.second);
+    const auto factor = bitcoin_hash2(decrypt1, part.second);
     if (!ec_multiply(secret, factor))
         return false;
 
@@ -479,7 +479,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     auto factor = scrypt_token(normal(passphrase), parse.owner_salt());
 
     if (lot_sequence)
-        factor = bitcoin_hash_slice(factor, parse.entropy());
+        factor = bitcoin_hash2(factor, parse.entropy());
 
     ec_compressed point;
     if (!secret_to_public(point, factor))

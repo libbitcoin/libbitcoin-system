@@ -62,7 +62,7 @@ write(const data_slice& data) NOEXCEPT
 {
     // rfc2104
     // append the stream of data 'text' to the B byte string.
-    inner_.write_slice(data);
+    inner_.write(data);
 }
 
 TEMPLATE

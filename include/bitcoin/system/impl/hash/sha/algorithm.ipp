@@ -1257,7 +1257,23 @@ hash(const block_t& block) NOEXCEPT
     schedule(buffer);
     compress(state, buffer);
 
-    // pad_one is fully precomputed and buffer prepared.
+    pad_one(buffer);
+    compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(const half_t& left, const half_t& right) NOEXCEPT
+{
+    buffer_t buffer{};
+    auto state = H::get;
+
+    input1(buffer, left);
+    input2(buffer, right);
+    schedule(buffer);
+    compress(state, buffer);
+
     pad_one(buffer);
     compress(state, buffer);
     return output(state);
@@ -1299,20 +1315,16 @@ double_hash(const block_t& block) NOEXCEPT
 
     buffer_t buffer{};
 
-    // hash one block
     auto state = H::get;
     input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
 
-    // pad_one is prepared
     // input state before resetting
-    // hash one block of single block padding
     pad_one(buffer);
     compress(state, buffer);
     input(buffer, state);
 
-    // hash padded state
     state = H::get;
     pad_half(buffer);
     schedule(buffer);
@@ -1330,7 +1342,6 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     buffer_t buffer{};
     auto state = H::get;
 
-    // Combine halves into buffer.
     input1(buffer, left);
     input2(buffer, right);
     schedule(buffer);

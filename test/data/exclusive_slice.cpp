@@ -36,11 +36,6 @@ BOOST_AUTO_TEST_CASE(exclusive_slice__construct__text_empty__empty)
 ////    BOOST_REQUIRE(exclusive_slice(data_array<0>{}).empty());
 ////}
 
-BOOST_AUTO_TEST_CASE(exclusive_slice__construct__string_empty__empty)
-{
-    BOOST_REQUIRE(exclusive_slice(std::string{}).empty());
-}
-
 // array precluded by design
 ////BOOST_AUTO_TEST_CASE(exclusive_slice__construct__vector_empty__empty)
 ////{

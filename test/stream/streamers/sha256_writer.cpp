@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(sha256_writer__stream__genesis_block__expected)
     genesis.header().to_data(hasher);
     hasher.flush();
     BOOST_REQUIRE(hasher);
-    BOOST_REQUIRE_EQUAL(sha256_hash_slice(hash.str()), genesis.hash());
+    BOOST_REQUIRE_EQUAL(sha256_hash(hash.str()), genesis.hash());
 }
 
 BOOST_AUTO_TEST_CASE(sha256_writer__copy__genesis_block__expected)
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(sha256_writer__text__genesis_block__expected)
     genesis.header().to_data(hasher);
     hasher.flush();
     BOOST_REQUIRE(hasher);
-    BOOST_REQUIRE_EQUAL(sha256_hash_slice(hash), genesis.hash());
+    BOOST_REQUIRE_EQUAL(sha256_hash(hash), genesis.hash());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

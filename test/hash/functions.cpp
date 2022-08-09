@@ -66,13 +66,13 @@ typename accumulator<Algorithm>::digest_t accumulated(
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_half128__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd128>::hash(rmd128::half_t{}), rmd_half128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(rmd128::half_t{}), rmd_half128);
+    BOOST_CHECK_EQUAL(rmd128_hash(rmd128::half_t{}), rmd_half128);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_one128__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd128>::hash(rmd128::block_t{}), rmd_full128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(rmd128::block_t{}), rmd_full128);
+    BOOST_CHECK_EQUAL(rmd128_hash(rmd128::block_t{}), rmd_full128);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two128__null_hashes__expected)
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two128__null_hashes__expec
     constexpr auto pair = std_array<uint8_t, array_count<rmd128::block_t> * two>{};
     constexpr auto sha_pair128 = base16_array("1b94bc163383151a53fe49dadb7a4f0e");
     BOOST_CHECK_EQUAL(accumulated<rmd128>(rmd128::block_t{}, rmd128::block_t{}), sha_pair128);
-    BOOST_CHECK_EQUAL(ripemd128_hash(pair), sha_pair128);
+    BOOST_CHECK_EQUAL(rmd128_hash(pair), sha_pair128);
 }
 
 // rmd160
@@ -89,13 +89,13 @@ BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two128__null_hashes__expec
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_half160__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd160>::hash(rmd160::half_t{}), rmd_half160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(rmd160::half_t{}), rmd_half160);
+    BOOST_CHECK_EQUAL(rmd160_hash(rmd160::half_t{}), rmd_half160);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_one160__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd160>::hash(rmd160::block_t{}), rmd_full160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(rmd160::block_t{}), rmd_full160);
+    BOOST_CHECK_EQUAL(rmd160_hash(rmd160::block_t{}), rmd_full160);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two160__null_hashes__expected)
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two160__null_hashes__expec
     constexpr auto pair = std_array<uint8_t, array_count<rmd160::block_t> * two>{};
     constexpr auto sha_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
     BOOST_CHECK_EQUAL(accumulated<rmd160>(rmd160::block_t{}, rmd160::block_t{}), sha_pair160);
-    BOOST_CHECK_EQUAL(ripemd160_hash(pair), sha_pair160);
+    BOOST_CHECK_EQUAL(rmd160_hash(pair), sha_pair160);
 }
 
 // sha160
@@ -142,6 +142,7 @@ BOOST_AUTO_TEST_CASE(accumulator__sha_hash_one256__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<sha256>::hash(sha256::block_t{}), sha_full256);
     BOOST_CHECK_EQUAL(sha256_hash(sha256::block_t{}), sha_full256);
+    BOOST_CHECK_EQUAL(sha256_hash(sha256::half_t{}, sha256::half_t{}), sha_full256);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__sha_hash_two256__null_hashes__expected)
@@ -150,7 +151,7 @@ BOOST_AUTO_TEST_CASE(accumulator__sha_hash_two256__null_hashes__expected)
     constexpr auto sha_pair256 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
     BOOST_CHECK_EQUAL(accumulated<sha256>(sha256::block_t{}, sha256::block_t{}), sha_pair256);
     BOOST_CHECK_EQUAL(sha256_hash(pair), sha_pair256);
-    BOOST_CHECK_EQUAL(sha256_hash_slice(sha256::block_t{}, sha256::block_t{}), sha256_hash(pair));
+    BOOST_CHECK_EQUAL(sha256_hash2(sha256::block_t{}, sha256::block_t{}), sha256_hash(pair));
 }
 
 // sha512

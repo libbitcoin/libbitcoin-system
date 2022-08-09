@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Accumulator for SHA/RMD/MD# streaming hash algorithms.
-/// flush() is non-clearing (writes may continue).
+/// Provides size/padding optimized finalized hashing utilities.
 template <typename Algorithm, bool Checked = checked_build,
     if_base_of<algorithm_t, Algorithm> = true>
 class accumulator
@@ -39,41 +39,57 @@ public:
     using state_t = typename Algorithm::state_t;
     using digest_t = typename Algorithm::digest_t;
 
+    /// Construct/reset.
+    /// -----------------------------------------------------------------------
+
     /// Sets initial state to Hash initialization vector.
     constexpr accumulator() NOEXCEPT;
 
-    /// Accepts an initial state and count of blocks it has accumulated.
-    constexpr accumulator(size_t blocks, const state_t& state) NOEXCEPT;
+    /// Accepts an initial state and count of blocks accumulated by it.
+    constexpr accumulator(const state_t& state, size_t blocks) NOEXCEPT;
 
     /// Reset accumulator to initial state (to reuse after flushing).
     constexpr void reset() NOEXCEPT;
 
     /// Write data to accumulator.
-    template <size_t Size>
-    inline bool write(const std_array<byte_t, Size>& data) NOEXCEPT;
-    inline bool write(const data_chunk& data) NOEXCEPT;
-    inline bool write(size_t size, const byte_t* data) NOEXCEPT;
-    inline bool write_slice(const data_slice& data) NOEXCEPT;
+    /// -----------------------------------------------------------------------
 
-    /// Flush accumulator state to digest.
+    template <size_t Size>
+    bool write(const data_array<Size>& data) NOEXCEPT;
+    bool write(const data_chunk& data) NOEXCEPT;
+    bool write(const exclusive_slice& data) NOEXCEPT;
+    bool write(size_t size, const byte_t* data) NOEXCEPT;
+
+    /// Flush accumulator state to digest (does not reset accumulator).
+    /// -----------------------------------------------------------------------
+
     constexpr digest_t flush() NOEXCEPT;
-    inline void flush(digest_t& digest) NOEXCEPT;
-    inline void flush(data_chunk& digest) NOEXCEPT;
-    inline void flush(byte_t* digest) NOEXCEPT;
+    void flush(digest_t& digest) NOEXCEPT;
+    void flush(data_chunk& digest) NOEXCEPT;
+    void flush(byte_t* digest) NOEXCEPT;
 
-    /// Finalized hash of arbitrary data (byte_t* out).
-    static inline void hash(byte_t* digest, const data_slice& data) NOEXCEPT;
+    /// Finalized hashes.
+    /// -----------------------------------------------------------------------
 
-    /// Finalized hash of arbitrary data (digest return).
+    static void hash(byte_t* digest, const data_slice& data) NOEXCEPT;
+
     template <size_t Size>
-    static inline digest_t hash(const std_array<byte_t, Size>& data) NOEXCEPT;
-    static inline digest_t hash(const data_chunk& data) NOEXCEPT;
-    static inline digest_t hash_digest(const data_slice& data) NOEXCEPT;
+    static digest_t hash(const data_array<Size>& data) NOEXCEPT;
+    static digest_t hash(const data_chunk& data) NOEXCEPT;
+    static digest_t hash(const exclusive_slice& data) NOEXCEPT;
 
-    /// Finalized hash of arbitrary data (chunk return).
     template <size_t Size>
-    static inline data_chunk hash_chunk(const std_array<byte_t, Size>& data) NOEXCEPT;
-    static inline data_chunk hash_chunk(const data_chunk& data) NOEXCEPT;
+    static data_chunk hash_chunk(const data_array<Size>& data) NOEXCEPT;
+    static data_chunk hash_chunk(const data_chunk& data) NOEXCEPT;
+
+    template <size_t Size>
+    static digest_t double_hash(const data_array<Size>& data) NOEXCEPT;
+    static digest_t double_hash(const data_chunk& data) NOEXCEPT;
+    static digest_t double_hash(const exclusive_slice& data) NOEXCEPT;
+
+    template <size_t Size>
+    static data_chunk double_hash_chunk(const data_array<Size>& data) NOEXCEPT;
+    static data_chunk double_hash_chunk(const data_chunk& data) NOEXCEPT;
 
 protected:
     using half_t = typename Algorithm::half_t;
@@ -121,8 +137,7 @@ protected:
     static constexpr auto count_size = array_count<counter>;
 
 private:
-    static constexpr auto half_block = array_count<half_t>;
-    static constexpr auto full_block = array_count<block_t>;
+    static constexpr auto half_size = array_count<half_t>;
     static constexpr auto digest_size = array_count<digest_t>;
 
     size_t size_;

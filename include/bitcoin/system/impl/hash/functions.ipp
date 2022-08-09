@@ -57,33 +57,33 @@ INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
 // General cryptographic hash functions.
 // ----------------------------------------------------------------------------
 
-// ripemd128 [historical].
-INLINE half_hash ripemd128_hash(const data_slice& data) NOEXCEPT
+// rmd128 [historical].
+INLINE half_hash rmd128_hash(const data_slice& data) NOEXCEPT
 {
-    return accumulator<rmd128>::hash_digest(data);
+    return accumulator<rmd128>::hash(data);
 }
-INLINE data_chunk ripemd128_chunk(const data_slice& data) NOEXCEPT
+INLINE data_chunk rmd128_chunk(const data_slice& data) NOEXCEPT
 {
     return accumulator<rmd128>::hash_chunk(data);
 }
 
-// ripemd160 [script].
+// rmd160 [script].
 template <size_t Size>
-INLINE short_hash ripemd160_hash(const data_array<Size>& data) NOEXCEPT
+INLINE short_hash rmd160_hash(const data_array<Size>& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash(data);
 }
-INLINE short_hash ripemd160_hash(const data_chunk& data) NOEXCEPT
+INLINE short_hash rmd160_hash(const data_chunk& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash(data);
 }
 
 template <size_t Size>
-INLINE data_chunk ripemd160_chunk(const data_array<Size>& data) NOEXCEPT
+INLINE data_chunk rmd160_chunk(const data_array<Size>& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash_chunk(data);
 }
-INLINE data_chunk ripemd160_chunk(const data_chunk& data) NOEXCEPT
+INLINE data_chunk rmd160_chunk(const data_chunk& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash_chunk(data);
 }
@@ -119,11 +119,17 @@ INLINE hash_digest sha256_hash(const data_chunk& data) NOEXCEPT
 {
     return accumulator<sha256>::hash(data);
 }
-INLINE hash_digest sha256_hash_slice(const data_slice& data) NOEXCEPT
+INLINE hash_digest sha256_hash(const exclusive_slice& data) NOEXCEPT
 {
-    return accumulator<sha256>::hash_digest(data);
+    return accumulator<sha256>::hash(data);
 }
-INLINE hash_digest sha256_hash_slice(const data_slice& left,
+
+INLINE hash_digest sha256_hash(const hash_digest& left,
+    const hash_digest& right) NOEXCEPT
+{
+    return sha256::hash(left, right);
+}
+INLINE hash_digest sha256_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
     accumulator<sha256> context{};
@@ -141,7 +147,7 @@ INLINE data_chunk sha256_chunk(const data_chunk& data) NOEXCEPT
 {
     return accumulator<sha256>::hash_chunk(data);
 }
-INLINE data_chunk sha256_chunk_slice(const data_slice& data) NOEXCEPT
+INLINE data_chunk sha256_chunk(const exclusive_slice& data) NOEXCEPT
 {
     return accumulator<sha256>::hash_chunk(data);
 }
@@ -149,7 +155,7 @@ INLINE data_chunk sha256_chunk_slice(const data_slice& data) NOEXCEPT
 // sha512 [wallet].
 INLINE long_hash sha512_hash(const data_slice& data) NOEXCEPT
 {
-    return accumulator<sha512>::hash_digest(data);
+    return accumulator<sha512>::hash(data);
 }
 INLINE data_chunk sha512_chunk(const data_slice& data) NOEXCEPT
 {
@@ -159,7 +165,7 @@ INLINE data_chunk sha512_chunk(const data_slice& data) NOEXCEPT
 // Specialzied bitcoin cryptographic hash functions.
 // ----------------------------------------------------------------------------
 
-// Bitcoin short hash (ripemd160(sha256)) [script].
+// Bitcoin short hash (rmd160(sha256)) [script].
 template <size_t Size>
 INLINE short_hash bitcoin_short_hash(const data_array<Size>& data) NOEXCEPT
 {
@@ -184,28 +190,27 @@ INLINE data_chunk bitcoin_short_chunk(const data_chunk& data) NOEXCEPT
 template <size_t Size>
 INLINE hash_digest bitcoin_hash(const data_array<Size>& data) NOEXCEPT
 {
-    constexpr auto half_size = array_count<typename sha256::half_t>;
-    constexpr auto block_size = array_count<typename sha256::block_t>;
-    if constexpr (Size == half_size || Size == block_size)
-    {
-        return sha256::double_hash(data);
-    }
-    else
-    {
-        return sha256::hash(accumulator<sha256>::hash(data));
-    }
+    return accumulator<sha256>::double_hash(data);
 }
 INLINE hash_digest bitcoin_hash(const data_chunk& data) NOEXCEPT
 {
-    return sha256::hash(accumulator<sha256>::hash(data));
+    return accumulator<sha256>::double_hash(data);
 }
-INLINE hash_digest bitcoin_hash_slice(const data_slice& data) NOEXCEPT
+INLINE hash_digest bitcoin_hash(const exclusive_slice& data) NOEXCEPT
 {
-    return sha256::hash(accumulator<sha256>::hash_digest(data));
+    return accumulator<sha256>::double_hash(data);
 }
-INLINE hash_digest bitcoin_hash_slice(const data_slice& left,
+
+INLINE hash_digest bitcoin_hash(const hash_digest& left,
+    const hash_digest& right) NOEXCEPT
+{
+    return sha256::double_hash(left, right);
+}
+INLINE hash_digest bitcoin_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
+    // This can be optimized by removing two endianness conversions.
+    ////return sha256::hash_state(context.flush_state());
     accumulator<sha256> context{};
     context.write(left);
     context.write(right);
@@ -215,28 +220,21 @@ INLINE hash_digest bitcoin_hash_slice(const data_slice& left,
 template <size_t Size>
 INLINE data_chunk bitcoin_chunk(const data_array<Size>& data) NOEXCEPT
 {
-    constexpr auto half_size = array_count<typename sha256::half_t>;
-    constexpr auto block_size = array_count<typename sha256::block_t>;
-    constexpr auto digest_size = array_count<typename sha256::digest_t>;
-    if constexpr (Size == half_size || Size == block_size)
-    {
-        data_chunk digest(digest_size);
-        auto& out = unsafe_array_cast<uint8_t, digest_size>(digest.data());
-        out = sha256::double_hash(data);
-        return digest;
-    }
-    else
-    {
-        return accumulator<sha256>::hash_chunk(accumulator<sha256>::hash(data));
-    }
+    return accumulator<sha256>::double_hash(data);
 }
 INLINE data_chunk bitcoin_chunk(const data_chunk& data) NOEXCEPT
 {
-    return accumulator<sha256>::hash_chunk(accumulator<sha256>::hash(data));
+    return accumulator<sha256>::double_hash_chunk(data);
 }
-INLINE data_chunk bitcoin_chunk_slice(const data_slice& data) NOEXCEPT
+INLINE data_chunk bitcoin_chunk(const exclusive_slice& data) NOEXCEPT
 {
-    return accumulator<sha256>::hash_chunk(accumulator<sha256>::hash_digest(data));
+    return accumulator<sha256>::double_hash_chunk(data);
+}
+
+/// Merkle root from a bitcoin_hash set [chain].
+INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT
+{
+    return sha256::merkle_root(std::move(set));
 }
 
 // Litecoin scrypt hash [chain].
