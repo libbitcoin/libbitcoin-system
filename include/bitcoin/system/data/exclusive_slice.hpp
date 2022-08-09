@@ -65,7 +65,7 @@ public:
     }
 
     SVCONSTEXPR exclusive_slice(std::initializer_list<value_type> bytes) NOEXCEPT
-      : data_slice(bytes)
+      : data_slice(bytes.begin(), bytes.end())
     {
     }
 };

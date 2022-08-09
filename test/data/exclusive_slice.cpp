@@ -70,17 +70,8 @@ BOOST_AUTO_TEST_CASE(exclusive_slice__initializer_list__ten__expected)
 {
     const exclusive_slice slice{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     BOOST_REQUIRE(!slice.empty());
-    BOOST_REQUIRE_EQUAL(slice.size(), 10u);
-    BOOST_REQUIRE_EQUAL(slice[0], 0u);
-    BOOST_REQUIRE_EQUAL(slice[1], 1u);
-    BOOST_REQUIRE_EQUAL(slice[2], 2u);
-    BOOST_REQUIRE_EQUAL(slice[3], 3u);
-    BOOST_REQUIRE_EQUAL(slice[4], 4u);
-    BOOST_REQUIRE_EQUAL(slice[5], 5u);
-    BOOST_REQUIRE_EQUAL(slice[6], 6u);
-    BOOST_REQUIRE_EQUAL(slice[7], 7u);
-    BOOST_REQUIRE_EQUAL(slice[8], 8u);
-    BOOST_REQUIRE_EQUAL(slice[9], 9u);
+    const auto expected = base16_chunk("00010203040506070809");
+    BOOST_REQUIRE_EQUAL(slice.to_chunk(), expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
