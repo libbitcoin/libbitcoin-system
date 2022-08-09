@@ -79,13 +79,13 @@ public:
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
 
-    /// Streaming (unfinalized).
+    /// Streamed hashing (unfinalized).
     /// -----------------------------------------------------------------------
 
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     
-    /// Finalize streaming state (converts to little-endian bytes).
+    /// Finalize streaming state (converts state to little-endian bytes).
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
     static constexpr void finalize(digest_t& digest,
         const state_t& state) NOEXCEPT;

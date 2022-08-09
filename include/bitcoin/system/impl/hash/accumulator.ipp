@@ -127,6 +127,17 @@ accumulate(size_t size, const byte_t* data) NOEXCEPT
 }
 
 TEMPLATE
+INLINE typename CLASS::state_t CLASS::
+flush_state() NOEXCEPT
+{
+    constexpr auto pad = stream_pad();
+    const auto size = size_;
+    write(pad_size(), pad.data());
+    write(count_size, serialize(size).data());
+    return state_;
+}
+
+TEMPLATE
 INLINE constexpr size_t CLASS::
 pad_size() const NOEXCEPT
 {
@@ -276,36 +287,28 @@ write(size_t size, const byte_t* data) NOEXCEPT
     return true;
 }
 
-// hash finalizers
+// accumulation finalizers
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
+typename CLASS::digest_t CLASS::
 flush() NOEXCEPT
 {
-    constexpr auto pad = stream_pad();
-    const auto size = size_;
-    write(pad_size(), pad.data());
-    write(count_size, serialize(size).data());
-    return Algorithm::finalize(state_);
+    return Algorithm::finalize(flush_state());
 }
 
 TEMPLATE
 void CLASS::
 flush(digest_t& digest) NOEXCEPT
 {
-    constexpr auto pad = stream_pad();
-    const auto size = size_;
-    write(pad_size(), pad.data());
-    write(count_size, serialize(size).data());
-    Algorithm::finalize(digest, state_);
+    Algorithm::finalize(digest, flush_state());
 }
 
 TEMPLATE
 void CLASS::
 flush(data_chunk& digest) NOEXCEPT
 {
-    flush(digest);
+    flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest.data()));
 }
 
 TEMPLATE
@@ -315,32 +318,15 @@ flush(byte_t* digest) NOEXCEPT
     flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest));
 }
 
-// finalized/optimized hashers
-// ----------------------------------------------------------------------------
-
 TEMPLATE
-void CLASS::
-hash(byte_t* digest, const data_slice& data) NOEXCEPT
+typename CLASS::digest_t CLASS::
+double_flush() NOEXCEPT
 {
-    const auto size = data.size();
-
-    if (size == half_size)
-    {
-        unsafe_array_cast<uint8_t, digest_size>(digest) =
-            Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
-    }
-    else if (size == block_size)
-    {
-        unsafe_array_cast<uint8_t, digest_size>(digest) =
-            Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
-    }
-    else
-    {
-        accumulator<Algorithm> context{};
-        context.write_slice(data);
-        context.flush(digest);
-    }
+    return Algorithm::hash(flush_state());
 }
+
+// digest_t returning single hashers
+// ----------------------------------------------------------------------------
 
 TEMPLATE
 template <size_t Size>
@@ -353,8 +339,28 @@ hash(const data_array<Size>& data) NOEXCEPT
     }
     else
     {
-        accumulator<Algorithm> context{};
+        self context{};
         context.write(data);
+        return context.flush();
+    }
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+hash(size_t size, const byte_t* data) NOEXCEPT
+{
+    if (size == half_size)
+    {
+        return self::hash(unsafe_array_cast<uint8_t, half_size>(data));
+    }
+    else if (size == block_size)
+    {
+        return self::hash(unsafe_array_cast<uint8_t, block_size>(data));
+    }
+    else
+    {
+        self context{};
+        context.write(size, data);
         return context.flush();
     }
 }
@@ -363,66 +369,17 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 hash(const data_chunk& data) NOEXCEPT
 {
-    const auto size = data.size();
-
-    if (size == half_size)
-    {
-        return Algorithm::hash(unsafe_array_cast<uint8_t, half_size>(data.data()));
-    }
-    else if (size == block_size)
-    {
-        return Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
-    }
-    else
-    {
-        accumulator<Algorithm> context{};
-        context.write(data);
-        return context.flush();
-    }
+    return self::hash(data.size(), data.data());
 }
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
 hash(const exclusive_slice& data) NOEXCEPT
 {
-    const auto size = data.size();
-
-    if (size == half_size)
-    {
-        return Algorithm::hash(unsafe_array_cast<uint8_t, half_size>(data.data()));
-    }
-    else if (size == block_size)
-    {
-        return Algorithm::hash(unsafe_array_cast<uint8_t, block_size>(data.data()));
-    }
-    else
-    {
-        accumulator<Algorithm> context{};
-        context.write(data);
-        return context.flush();
-    }
+    return self::hash(data.size(), data.data());
 }
 
-TEMPLATE
-template <size_t Size>
-data_chunk CLASS::
-hash_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    data_chunk digest(digest_size);
-    unsafe_array_cast<byte_t, digest_size>(digest.data()) = hash(data);
-    return digest;
-}
-
-TEMPLATE
-data_chunk CLASS::
-hash_chunk(const data_chunk& data) NOEXCEPT
-{
-    data_chunk digest(digest_size);
-    unsafe_array_cast<byte_t, digest_size>(digest.data()) = hash(data);
-    return digest;
-}
-
-// finalized/optimized double hashers
+// digest_t returning double hashers
 // ----------------------------------------------------------------------------
 
 TEMPLATE
@@ -436,7 +393,29 @@ double_hash(const data_array<Size>& data) NOEXCEPT
     }
     else
     {
-        return Algorithm::hash(accumulator<Algorithm>::hash(data));
+        self context{};
+        context.write(data);
+        return context.double_flush();
+    }
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+double_hash(size_t size, const byte_t* data) NOEXCEPT
+{
+    if (size == half_size)
+    {
+        return self::double_hash(unsafe_array_cast<uint8_t, half_size>(data));
+    }
+    else if (size == block_size)
+    {
+        return self::double_hash(unsafe_array_cast<uint8_t, block_size>(data));
+    }
+    else
+    {
+        self context{};
+        context.write(size, data);
+        return context.double_flush();
     }
 }
 
@@ -444,42 +423,86 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 double_hash(const data_chunk& data) NOEXCEPT
 {
-    // This can be optimized by removing two endianness conversions.
-    return Algorithm::hash(accumulator<Algorithm>::hash(data));
+    return self::double_hash(data.size(), data.data());
 }
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
 double_hash(const exclusive_slice& data) NOEXCEPT
 {
-    // This can be optimized by removing two endianness conversions.
-    return Algorithm::hash(accumulator<Algorithm>::hash(data));
+    return self::double_hash(data.size(), data.data());
 }
+
+// data_chunk returning single hashers
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+template <size_t Size>
+data_chunk CLASS::
+hash_chunk(const data_array<Size>& data) NOEXCEPT
+{
+    data_chunk digest(digest_size);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::hash(data);
+    return digest;
+}
+
+TEMPLATE
+data_chunk CLASS::
+hash_chunk(size_t size, const byte_t* data) NOEXCEPT
+{
+    data_chunk digest(digest_size);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::hash(size, data);
+    return digest;
+}
+
+TEMPLATE
+data_chunk CLASS::
+hash_chunk(const data_chunk& data) NOEXCEPT
+{
+    return self::hash_chunk(data.size(), data.data());
+}
+
+TEMPLATE
+data_chunk CLASS::
+hash_chunk(const exclusive_slice& data) NOEXCEPT
+{
+    return self::hash_chunk(data.size(), data.data());
+}
+
+// data_chunk returning double hashers
+// ----------------------------------------------------------------------------
 
 TEMPLATE
 template <size_t Size>
 data_chunk CLASS::
 double_hash_chunk(const data_array<Size>& data) NOEXCEPT
 {
-    if constexpr (Size == half_size || Size == block_size)
-    {
-        data_chunk digest(digest_size);
-        unsafe_array_cast<uint8_t, digest_size>(digest.data()) = Algorithm::double_hash(data);
-        return digest;
-    }
-    else
-    {
-        // This can be optimized by removing two endianness conversions.
-        return accumulator<Algorithm>::hash_chunk(accumulator<Algorithm>::hash(data));
-    }
+    data_chunk digest(digest_size);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::double_hash(data);
+    return digest;
+}
+
+TEMPLATE
+data_chunk CLASS::
+double_hash_chunk(size_t size, const byte_t* data) NOEXCEPT
+{
+    data_chunk digest(digest_size);
+    unsafe_array_cast<byte_t, digest_size>(digest.data()) = self::double_hash(size, data);
+    return digest;
 }
 
 TEMPLATE
 data_chunk CLASS::
 double_hash_chunk(const data_chunk& data) NOEXCEPT
 {
-    // This can be optimized by removing two endianness conversions.
-    return accumulator<Algorithm>::hash_chunk(accumulator<Algorithm>::hash(data));
+    return self::double_hash_chunk(data.size(), data.data());
+}
+
+TEMPLATE
+data_chunk CLASS::
+double_hash_chunk(const exclusive_slice& data) NOEXCEPT
+{
+    return self::double_hash_chunk(data.size(), data.data());
 }
 
 BC_POP_WARNING()

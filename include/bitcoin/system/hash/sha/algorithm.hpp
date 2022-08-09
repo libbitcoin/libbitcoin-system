@@ -79,15 +79,16 @@ public:
     static constexpr auto concurrent    = Concurrent;
     static constexpr auto big_end_count = true;
 
-    /// Hashing.
+    /// Single hashing.
     /// -----------------------------------------------------------------------
 
+    static constexpr digest_t hash(const state_t& state) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t hash(const half_t& left,
         const half_t& right) NOEXCEPT;
 
-    /// Double Hashing (sha256/512).
+    /// Double hashing optimizations (sha256/512).
     /// -----------------------------------------------------------------------
 
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
@@ -95,19 +96,19 @@ public:
     static constexpr digest_t double_hash(const half_t& left,
         const half_t& right) NOEXCEPT;
 
-    /// Merkle Hashing (sha256/512).
+    /// Merkle hashing (sha256/512).
     /// -----------------------------------------------------------------------
 
     static VCONSTEXPR digest_t merkle_root(digests_t&& digests) NOEXCEPT;
     static VCONSTEXPR digests_t& merkle_hash(digests_t& digests) NOEXCEPT;
 
-    /// Streaming (unfinalized).
+    /// Streamed hashing (unfinalized).
     /// -----------------------------------------------------------------------
 
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
 
-    /// Finalize streaming state (converts to big-endian bytes).
+    /// Finalize streaming state (converts state to big-endian bytes).
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
     static constexpr void finalize(digest_t& digest,
         const state_t& state) NOEXCEPT;
@@ -124,7 +125,7 @@ protected:
     INLINE static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
     INLINE static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;
 
-    /// Wrappers
+    /// Aggregate functions
     /// -----------------------------------------------------------------------
 
     INLINE static constexpr auto Sigma0(auto x) NOEXCEPT;
@@ -152,9 +153,8 @@ protected:
 
     template<size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
-
-    INLINE static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
     INLINE static constexpr void schedule(auto& buffer) NOEXCEPT;
+    INLINE static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
     INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
     INLINE static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
 
@@ -177,7 +177,7 @@ protected:
         const blocks_t& blocks) NOEXCEPT;
 
 private:
-    // Specialized padding types.
+    // Specialized padding type.
     using blocks_pad_t = std_array<word_t, subtract(SHA::block_words,
         count_bytes / SHA::word_bytes)>;
 

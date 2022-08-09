@@ -1231,19 +1231,21 @@ output(const state_t& state) NOEXCEPT
 
 // Hashing.
 // ---------------------------------------------------------------------------
+// No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
-hash(const half_t& half) NOEXCEPT
+hash(const state_t& state) NOEXCEPT
 {
-    buffer_t buffer{};
-    auto state = H::get;
+    static_assert(is_same_type<state_t, chunk_t>);
 
-    input1(buffer, half);
+    buffer_t buffer{};
+    auto state2 = H::get;
+    input(buffer, state);
     pad_half(buffer);
     schedule(buffer);
-    compress(state, buffer);
-    return output(state);
+    compress(state2, buffer);
+    return output(state2);
 }
 
 TEMPLATE
@@ -1252,12 +1254,23 @@ hash(const block_t& block) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-
     input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
-
     pad_one(buffer);
+    compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(const half_t& half) NOEXCEPT
+{
+    buffer_t buffer{};
+    auto state = H::get;
+    input1(buffer, half);
+    pad_half(buffer);
+    schedule(buffer);
     compress(state, buffer);
     return output(state);
 }
@@ -1268,12 +1281,10 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-
     input1(buffer, left);
     input2(buffer, right);
     schedule(buffer);
     compress(state, buffer);
-
     pad_one(buffer);
     compress(state, buffer);
     return output(state);
@@ -1281,37 +1292,13 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 
 // Double Hashing.
 // ---------------------------------------------------------------------------
-// No double_hash optimizations for sha160 (double_hash requires half_t).
-
-TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-double_hash(const half_t& half) NOEXCEPT
-{
-    static_assert(is_same_type<digest_t, half_t>);
-
-    buffer_t buffer{};
-    auto state = H::get;
-    input(buffer, half);
-    pad_half(buffer);
-    schedule(buffer);
-    compress(state, buffer);
-
-    pad_one(buffer);
-    compress(state, buffer);
-    input(buffer, state);
-
-    state = H::get;
-    pad_half(buffer);
-    schedule(buffer);
-    compress(state, buffer);
-    return output(state);
-}
+// No double_hash optimizations for sha160 (requires chunk_t/half_t).
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 double_hash(const block_t& block) NOEXCEPT
 {
-    static_assert(is_same_type<digest_t, half_t>);
+    static_assert(is_same_type<state_t, chunk_t>);
 
     buffer_t buffer{};
 
@@ -1332,12 +1319,36 @@ double_hash(const block_t& block) NOEXCEPT
     return output(state);
 }
 
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const half_t& half) NOEXCEPT
+{
+    static_assert(is_same_type<state_t, chunk_t>);
+
+    buffer_t buffer{};
+    auto state = H::get;
+    input1(buffer, half);
+    pad_half(buffer);
+    schedule(buffer);
+    compress(state, buffer);
+
+    pad_one(buffer);
+    compress(state, buffer);
+    input(buffer, state);
+
+    state = H::get;
+    pad_half(buffer);
+    schedule(buffer);
+    compress(state, buffer);
+    return output(state);
+}
+
 // [witness commitment, merkle root]
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
-    static_assert(is_same_type<digest_t, half_t>);
+    static_assert(is_same_type<state_t, chunk_t>);
 
     buffer_t buffer{};
     auto state = H::get;
@@ -1363,10 +1374,30 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 // No merkle_hash optimizations for sha160 (double_hash requires half_t).
 
 TEMPLATE
+VCONSTEXPR typename CLASS::digest_t CLASS::
+merkle_root(digests_t&& digests) NOEXCEPT
+{
+    static_assert(is_same_type<state_t, chunk_t>);
+    const auto count = digests.size();
+
+    if (is_zero(count))
+        return {};
+
+    if (is_one(count))
+        return std::move(digests.front());
+
+    if (is_odd(count))
+        digests.push_back(digests.back());
+
+    while (merkle_hash(digests).size() > one);
+    return std::move(digests.front());
+}
+
+TEMPLATE
 VCONSTEXPR typename CLASS::digests_t& CLASS::
 merkle_hash(digests_t& digests) NOEXCEPT
 {
-    static_assert(is_same_type<digest_t, half_t>);
+    static_assert(is_same_type<state_t, chunk_t>);
     const auto half = to_half(digests.size());
 
     // This algorithm shifts results from a pair of digests into preceding
@@ -1392,26 +1423,6 @@ merkle_hash(digests_t& digests) NOEXCEPT
     digests.resize(half);
     return digests;
 };
-
-TEMPLATE
-VCONSTEXPR typename CLASS::digest_t CLASS::
-merkle_root(digests_t&& digests) NOEXCEPT
-{
-    static_assert(is_same_type<digest_t, half_t>);
-    const auto count = digests.size();
-
-    if (is_zero(count))
-        return {};
-
-    if (is_one(count))
-        return std::move(digests.front());
-
-    if (is_odd(count))
-        digests.push_back(digests.back());
-
-    while (merkle_hash(digests).size() > one);
-    return std::move(digests.front());
-}
 
 // Block.txs skip-parsed hash set.
 ////// Bitcoin hash set from an ordered set of ptrs [header commitment].

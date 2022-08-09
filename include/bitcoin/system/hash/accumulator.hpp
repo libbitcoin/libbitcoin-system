@@ -60,10 +60,12 @@ public:
     bool write(const exclusive_slice& data) NOEXCEPT;
     bool write(size_t size, const byte_t* data) NOEXCEPT;
 
-    /// Flush accumulator state to digest (does not reset accumulator).
+    /// Flush accumulator state to digest (not idempotent, not destructive).
+    /// Flush does not reset the accumulator (writes may continue as in pbkd).
     /// -----------------------------------------------------------------------
 
-    constexpr digest_t flush() NOEXCEPT;
+    digest_t flush() NOEXCEPT;
+    digest_t double_flush() NOEXCEPT;
     void flush(digest_t& digest) NOEXCEPT;
     void flush(data_chunk& digest) NOEXCEPT;
     void flush(byte_t* digest) NOEXCEPT;
@@ -71,30 +73,43 @@ public:
     /// Finalized hashes.
     /// -----------------------------------------------------------------------
 
-    static void hash(byte_t* digest, const data_slice& data) NOEXCEPT;
-
     template <size_t Size>
     static digest_t hash(const data_array<Size>& data) NOEXCEPT;
     static digest_t hash(const data_chunk& data) NOEXCEPT;
     static digest_t hash(const exclusive_slice& data) NOEXCEPT;
+    static digest_t hash(size_t size, const byte_t* data) NOEXCEPT;
 
     template <size_t Size>
     static data_chunk hash_chunk(const data_array<Size>& data) NOEXCEPT;
     static data_chunk hash_chunk(const data_chunk& data) NOEXCEPT;
+    static data_chunk hash_chunk(const exclusive_slice& data) NOEXCEPT;
+    static data_chunk hash_chunk(size_t size, const byte_t* data) NOEXCEPT;
+
+    /// Finalized double hashes (sha256/sha512 only).
+    /// -----------------------------------------------------------------------
 
     template <size_t Size>
     static digest_t double_hash(const data_array<Size>& data) NOEXCEPT;
     static digest_t double_hash(const data_chunk& data) NOEXCEPT;
     static digest_t double_hash(const exclusive_slice& data) NOEXCEPT;
+    static digest_t double_hash(size_t size, const byte_t* data) NOEXCEPT;
 
     template <size_t Size>
     static data_chunk double_hash_chunk(const data_array<Size>& data) NOEXCEPT;
     static data_chunk double_hash_chunk(const data_chunk& data) NOEXCEPT;
+    static data_chunk double_hash_chunk(const exclusive_slice& data) NOEXCEPT;
+    static data_chunk double_hash_chunk(size_t size, const byte_t* data) NOEXCEPT;
 
 protected:
     using half_t = typename Algorithm::half_t;
     using block_t = typename Algorithm::block_t;
     using counter = data_array<Algorithm::count_bytes>;
+    using self = accumulator<Algorithm>;
+
+    static constexpr auto count_size = array_count<counter>;
+    static constexpr auto digest_size = array_count<digest_t>;
+    static constexpr auto block_size = array_count<block_t>;
+    static constexpr auto half_size = array_count<half_t>;
 
     /// Position of next write in the buffer.
     INLINE constexpr size_t next() const NOEXCEPT;
@@ -102,10 +117,10 @@ protected:
     /// Bytes remaining until buffer is full.
     INLINE constexpr size_t gap() const NOEXCEPT;
 
-    /// True if buffer is full.
+    /// True if buffer is full (same as empty).
     INLINE constexpr bool is_full() const NOEXCEPT;
 
-    /// True if buffer is empty.
+    /// True if buffer is empty (same as full).
     INLINE constexpr bool is_empty() const NOEXCEPT;
 
     /// Accumulator is limited to [max_size_t/8 - 8|16] hashed bytes.
@@ -117,13 +132,16 @@ protected:
         const byte_t* data) NOEXCEPT;
 
     /// Add remainder of data to cleared buffer.
-    // Size determined acceptable by first add_data call.
+    /// Size determined acceptable by first add_data call.
     INLINE constexpr void add_data(size_t size, const byte_t* data) NOEXCEPT;
 
     /// Accumulate a set of blocks and buffer any remainder bytes.
     INLINE bool accumulate(size_t size, const byte_t* data) NOEXCEPT;
 
-    /// Compute pad size, reserves space for counter serialization.
+    /// Pad buffer, accumulate and return state (not endian final).
+    INLINE state_t flush_state() NOEXCEPT;
+
+    /// Compute pad size, reserve space for counter serialization.
     INLINE constexpr size_t pad_size() const NOEXCEPT;
 
     /// Serialize the hashed byte count for finalization
@@ -132,14 +150,7 @@ protected:
     /// Precomputed streaming pad buffer.
     static CONSTEVAL block_t stream_pad() NOEXCEPT;
 
-    /// Number of bytes in a block and in counter.
-    static constexpr auto block_size = array_count<block_t>;
-    static constexpr auto count_size = array_count<counter>;
-
 private:
-    static constexpr auto half_size = array_count<half_t>;
-    static constexpr auto digest_size = array_count<digest_t>;
-
     size_t size_;
     state_t state_;
     block_t buffer_;

@@ -66,12 +66,13 @@ BOOST_AUTO_TEST_CASE(exclusive_slice__construct__string_empty__empty)
     BOOST_REQUIRE(exclusive_slice(value).empty());
 }
 
-BOOST_AUTO_TEST_CASE(exclusive_slice__initializer_list__ten__expected)
-{
-    const exclusive_slice slice{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    BOOST_REQUIRE(!slice.empty());
-    const auto expected = base16_chunk("00010203040506070809");
-    BOOST_REQUIRE_EQUAL(slice.to_chunk(), expected);
-}
+// TODO: review.
+////BOOST_AUTO_TEST_CASE(exclusive_slice__initializer_list__ten__expected)
+////{
+////    const exclusive_slice slice{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+////    BOOST_REQUIRE(!slice.empty());
+////    const auto expected = base16_chunk("00010203040506070809");
+////    BOOST_REQUIRE_EQUAL(slice.to_chunk(), expected);
+////}
 
 BOOST_AUTO_TEST_SUITE_END()

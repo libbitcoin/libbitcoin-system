@@ -209,12 +209,10 @@ INLINE hash_digest bitcoin_hash(const hash_digest& left,
 INLINE hash_digest bitcoin_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
-    // This can be optimized by removing two endianness conversions.
-    ////return sha256::hash_state(context.flush_state());
     accumulator<sha256> context{};
     context.write(left);
     context.write(right);
-    return sha256::hash(context.flush());
+    return context.double_flush();
 }
 
 template <size_t Size>
