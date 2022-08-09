@@ -117,6 +117,7 @@
     <ClCompile Include="..\..\..\..\test\data\data_reference.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slab.cpp" />
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp" />
+    <ClCompile Include="..\..\..\..\test\data\exclusive_slice.cpp" />
     <ClCompile Include="..\..\..\..\test\data\external_ptr.cpp" />
     <ClCompile Include="..\..\..\..\test\data\integer.cpp" />
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
@@ -334,11 +335,6 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets'))" />
   </Target>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
-    <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
-    </ClCompile>
-  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

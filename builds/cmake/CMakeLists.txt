@@ -559,6 +559,7 @@ if (with-tests)
         "../../test/data/data_reference.cpp"
         "../../test/data/data_slab.cpp"
         "../../test/data/data_slice.cpp"
+        "../../test/data/exclusive_slice.cpp"
         "../../test/data/external_ptr.cpp"
         "../../test/data/integer.cpp"
         "../../test/data/memory.cpp"
