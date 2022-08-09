@@ -184,13 +184,6 @@ SCONSTEXPR std::string data_slice::to_string() const NOEXCEPT
     return { begin_, end_ };
 }
 
-// dependency ordering
-////// Cannot provide a "decode" factory since the data is not owned.
-////SCONSTEXPR std::string data_slice::encoded() const NOEXCEPT
-////{
-////    return encode_base16(to_chunk());
-////}
-
 constexpr bool data_slice::resize(size_t size) NOEXCEPT
 {
     if (size >= size_)

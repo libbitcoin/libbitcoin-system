@@ -137,12 +137,6 @@ constexpr data_slice data_slab::to_slice() const NOEXCEPT
     return { begin_, end_ };
 }
 
-////// Cannot provide a "decode" factory since the data is not owned.
-////SCONSTEXPR std::string data_slab::encoded() const NOEXCEPT
-////{
-////    return to_slice().encoded();
-////}
-
 constexpr bool data_slab::resize(size_t size) NOEXCEPT
 {
     if (size >= size_)

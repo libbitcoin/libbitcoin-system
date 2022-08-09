@@ -49,15 +49,10 @@ class data_reference
   : public data_slice
 {
 public:
+    DEFAULT5(data_reference);
+
     /// Empty reference.
     constexpr data_reference() NOEXCEPT;
-
-    /// Defaults.
-    constexpr data_reference(data_reference&&) = default;
-    constexpr data_reference(const data_reference&) = default;
-    constexpr data_reference& operator=(data_reference&&) = default;
-    constexpr data_reference& operator=(const data_reference&) = default;
-    constexpr ~data_reference() = default;
 
     /// data_slice construction.
     constexpr data_reference(const data_slice& data) NOEXCEPT;

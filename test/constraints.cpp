@@ -347,13 +347,6 @@ static_assert(is_defined<if_unique_object_representations<size_t>>);
 ////static_assert(!is_defined<if_unique_object_representations<base>>);
 ////static_assert(!is_defined<if_unique_object_representations<derived>>);
 
-static_assert(is_defined<if_byte_insertable<std::string>>);
-static_assert(is_defined<if_byte_insertable<std::vector<uint8_t>>>);
-////static_assert(is_defined<if_byte_insertable<std::array<uint8_t, 42>>>);
-////static_assert(!is_defined<if_byte_insertable<std::u32string>>);
-////static_assert(!is_defined<if_byte_insertable<std::vector<uint32_t>>>);
-////static_assert(!is_defined<if_byte_insertable<uint32_t>>);
-
 // integer types
 
 static_assert(is_defined<if_integer<char>>);
@@ -578,6 +571,8 @@ static_assert(is_defined<if_not_same_signed_integral_integer<int, size_t>>);
 ////static_assert(is_defined<if_big_endian_integral_integer<uint8_t>>);
 ////static_assert(is_defined<if_little_endian_integral_integer<uint8_t>>);
 
+// std::array/std::vector
+
 static_assert(is_defined<if_std_array<std::array<uint8_t, 0>>>);
 static_assert(is_defined<if_std_array<std::array<base, 0>>>);
 ////static_assert(!is_defined<if_std_array<uint8_t>>);
@@ -586,3 +581,10 @@ static_assert(is_defined<if_integral_array<std::array<size_t, 42>>>);
 static_assert(is_defined<if_integral_array<std::array<uint8_t, 0>>>);
 ////static_assert(!is_defined<if_integral_array<std::array<base, 0>>>);
 ////static_assert(!is_defined<if_integral_array<uint8_t>>);
+
+static_assert(is_defined<if_byte_insertable<std::string>>);
+static_assert(is_defined<if_byte_insertable<std::vector<uint8_t>>>);
+////static_assert(is_defined<if_byte_insertable<std::array<uint8_t, 42>>>);
+////static_assert(!is_defined<if_byte_insertable<std::u32string>>);
+////static_assert(!is_defined<if_byte_insertable<std::vector<uint32_t>>>);
+////static_assert(!is_defined<if_byte_insertable<uint32_t>>);

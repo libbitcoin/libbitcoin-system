@@ -58,6 +58,8 @@ namespace system {
 class data_slice
 {
 public:
+    DEFAULT5(data_slice);
+
     typedef size_t size_type;
     typedef uint8_t value_type;
 
@@ -68,16 +70,10 @@ public:
     typedef pointer const_iterator;
 
     /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Empty slice.
     constexpr data_slice() NOEXCEPT;
-
-    /// Defaults.
-    constexpr data_slice(data_slice&&) = default;
-    constexpr data_slice(const data_slice&) = default;
-    constexpr data_slice& operator=(data_slice&&) = default;
-    constexpr data_slice& operator=(const data_slice&) = default;
-    constexpr ~data_slice() = default;
 
     /// Literal bytes constructor.
     /// Integral null terminator is not indexed.
@@ -86,7 +82,7 @@ public:
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_one_byte<Byte> = true>
-    constexpr data_slice(const std::array<Byte, Size>& data) NOEXCEPT;
+    constexpr data_slice(const std_array<Byte, Size>& data) NOEXCEPT;
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
@@ -109,11 +105,12 @@ public:
     SVCONSTEXPR data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
 
     /// Methods.
+    /// -----------------------------------------------------------------------
 
     /// Copy data to an array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
-    constexpr std::array<value_type, Size> to_array() const NOEXCEPT;
+    constexpr std_array<value_type, Size> to_array() const NOEXCEPT;
 
     /// Copy data to a vector.
     VCONSTEXPR std::vector<value_type> to_chunk() const NOEXCEPT;
@@ -121,16 +118,13 @@ public:
     /// Convert data to a string (casts uint8_t to char).
     SCONSTEXPR std::string to_string() const NOEXCEPT;
 
-    // dependency ordering
-    /////// Convert data to a base16 string.
-    ////SCONSTEXPR std::string encoded() const NOEXCEPT;
-
     /// Resize the slice by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slice.
     /// Returns true if the size was reduced (expansion is not allowed).
     constexpr bool resize(size_t size) NOEXCEPT;
 
     /// Properties.
+    /// -----------------------------------------------------------------------
     constexpr pointer data() const NOEXCEPT;
     constexpr pointer begin() const NOEXCEPT;
     constexpr pointer end() const NOEXCEPT;
@@ -140,8 +134,9 @@ public:
     constexpr bool empty() const NOEXCEPT;
 
     /// Operators.
+    /// -----------------------------------------------------------------------
     template<size_type Size>
-    constexpr operator std::array<value_type, Size>() const NOEXCEPT;
+    constexpr operator std_array<value_type, Size>() const NOEXCEPT;
     VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
     constexpr value_type operator[](size_type index) const NOEXCEPT;
 
