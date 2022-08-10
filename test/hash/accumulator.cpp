@@ -71,7 +71,7 @@ struct accessor
         return base::flush_state();
     }
 
-    static typename base::counter serialize_(size_t bytes) NOEXCEPT
+    static constexpr typename base::counter serialize_(size_t bytes) NOEXCEPT
     {
         return base::serialize(bytes);
     }
@@ -165,13 +165,11 @@ BOOST_AUTO_TEST_CASE(accumulator__serialize__default__initial)
     constexpr auto count_hi = hi_word<sha256::byte_t>(count_bits);
     using counter_t = std_array<sha256::byte_t, sha256::count_bytes>;
     constexpr auto expected = counter_t{ 0, 0, 0, 0, 0, 0, count_hi, count_lo };
-
-    // serialize is RCONSTEXPR (reverse views) but not conditionally enabled
-    // as it would complicate the use of INLINE on the same method.
+    static_assert(access::serialize_(count) == expected);
     BOOST_REQUIRE_EQUAL(access::serialize_(count), expected);
 }
 
-// write (captures test of add_data1/2 and accumulate)
+// write (captures test of add_data1/2, accumulate, pad, flush, double_flush)
 // ----------------------------------------------------------------------------
 // write is not constexpr due to unsafe_array_cast, which ensures algorithm
 // remains fully constexpr (by not accepting byte*).
@@ -183,7 +181,7 @@ BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
     BOOST_REQUIRE(writer.write(data));
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__write__nonzero__expected)
+BOOST_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
 {
     // Test expectation limited to sha256.
     using access = accessor<sha256>;
@@ -199,6 +197,20 @@ BOOST_AUTO_TEST_CASE(accumulator__write__nonzero__expected)
     BOOST_REQUIRE_EQUAL(writer.gap_(), size - bytes);
     BOOST_REQUIRE_EQUAL(writer.pad_size_(), size - bytes - sha256::count_bytes);
     BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
+{
+    // Test expectation limited to sha256.
+    using access = accessor<sha256>;
+    constexpr auto expected = base16_array("19b7f210d600599fe35dc4516dac5acb82bb4040f8de6f54e889455fd0b9b106");
+    constexpr auto bytes = 42u;
+    constexpr auto blocks = 2u;
+    constexpr data_array<bytes> data{};
+    constexpr sha256::state_t state{};
+    access writer{ state, blocks };
+    BOOST_REQUIRE(writer.write(data));
+    BOOST_REQUIRE_EQUAL(writer.double_flush(), expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

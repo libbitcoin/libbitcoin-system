@@ -146,7 +146,7 @@ protected:
     INLINE state_t pad() NOEXCEPT;
 
     /// Serialize the hashed byte count for finalization
-    INLINE static counter serialize(size_t size) NOEXCEPT;
+    INLINE static constexpr counter serialize(size_t size) NOEXCEPT;
 
     /// Compute pad size, reserve space for counter serialization.
     INLINE constexpr size_t pad_size() const NOEXCEPT;

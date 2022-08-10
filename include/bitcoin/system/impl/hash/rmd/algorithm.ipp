@@ -685,7 +685,7 @@ finalize(state_t& state, size_t blocks) NOEXCEPT
 }
 
 TEMPLATE
-INLINE constexpr typename CLASS::digest_t CLASS::
+constexpr typename CLASS::digest_t CLASS::
 normalize(const state_t& state) NOEXCEPT
 {
     return output(state);

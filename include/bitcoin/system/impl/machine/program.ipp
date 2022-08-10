@@ -115,7 +115,7 @@ program(const chain::transaction& tx, const input_iterator& input,
 // ----------------------------------------------------------------------------
 
 template <typename Stack>
-INLINE bool program<Stack>::
+inline bool program<Stack>::
 is_true(bool clean_stack) const NOEXCEPT
 {
     return (!clean_stack || is_stack_clean()) && !is_stack_empty() &&
@@ -123,7 +123,7 @@ is_true(bool clean_stack) const NOEXCEPT
 }
 
 template <typename Stack>
-INLINE const data_chunk& program<Stack>::
+inline const data_chunk& program<Stack>::
 pop() NOEXCEPT
 {
     BC_ASSERT_MSG(!is_stack_empty(), "pop from empty stack");

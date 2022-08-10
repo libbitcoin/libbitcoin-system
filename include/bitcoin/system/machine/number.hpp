@@ -37,20 +37,20 @@ class integer
 public:
     typedef signed_type<Size> Integer;
 
-    INLINE static constexpr bool from_integer(Integer& out, int64_t vary) NOEXCEPT;
-    INLINE static bool from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT;
+    inline static constexpr bool from_integer(Integer& out, int64_t vary) NOEXCEPT;
+    inline static bool from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT;
 
 protected:
-    INLINE static bool strict_zero(const data_chunk& vary) NOEXCEPT;
-    INLINE static bool is_overflow(const data_chunk& vary) NOEXCEPT;
-    INLINE static constexpr bool is_overflow(int64_t value) NOEXCEPT;
+    inline static bool strict_zero(const data_chunk& vary) NOEXCEPT;
+    inline static bool is_overflow(const data_chunk& vary) NOEXCEPT;
+    inline static constexpr bool is_overflow(int64_t value) NOEXCEPT;
 };
 
 class BC_API chunk
 {
 public:
-    INLINE static data_chunk from_bool(bool vary) NOEXCEPT;
-    INLINE static data_chunk from_integer(int64_t vary) NOEXCEPT;
+    inline static data_chunk from_bool(bool vary) NOEXCEPT;
+    inline static data_chunk from_integer(int64_t vary) NOEXCEPT;
 };
 
 class BC_API boolean
@@ -58,15 +58,15 @@ class BC_API boolean
 public:
     template <size_t Size = sizeof(int64_t),
         if_not_greater<Size, sizeof(int64_t)> = true>
-    INLINE static constexpr signed_type<Size> to_integer(bool vary) NOEXCEPT;
+    inline static constexpr signed_type<Size> to_integer(bool vary) NOEXCEPT;
 
-    INLINE static bool from_chunk(const data_chunk& vary) NOEXCEPT;
-    INLINE static bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
-    INLINE static constexpr bool to_bool(int64_t vary) NOEXCEPT;
+    inline static bool from_chunk(const data_chunk& vary) NOEXCEPT;
+    inline static bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
+    inline static constexpr bool to_bool(int64_t vary) NOEXCEPT;
 
 protected:
-    INLINE static bool strict_false(const data_chunk& vary) NOEXCEPT;
-    INLINE static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
+    inline static bool strict_false(const data_chunk& vary) NOEXCEPT;
+    inline static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
 };
 
 } // namespace number

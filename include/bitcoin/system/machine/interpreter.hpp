@@ -45,7 +45,7 @@ public:
     using program<Stack>::program;
 
     /// Run a program.
-    inline code run() NOEXCEPT;
+    code run() NOEXCEPT;
 
     /// Connect tx.input[#].script to tx.input[#].prevout.script.
     static code connect(const context& state, const transaction& tx,
@@ -57,7 +57,7 @@ public:
 
 protected:
     /// Operation disatch.
-    inline error::op_error_t run_op(const op_iterator& op) NOEXCEPT;
+    error::op_error_t run_op(const op_iterator& op) NOEXCEPT;
 
     /// Operation handlers.
     inline error::op_error_t op_unevaluated(chain::opcode) const NOEXCEPT;

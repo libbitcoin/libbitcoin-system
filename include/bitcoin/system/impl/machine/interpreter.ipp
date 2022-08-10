@@ -1232,7 +1232,7 @@ op_check_sequence_verify() const NOEXCEPT
 
 // private:
 template <typename Stack>
-inline op_error_t interpreter<Stack>::
+op_error_t interpreter<Stack>::
 run_op(const op_iterator& op) NOEXCEPT
 {
     const auto code = op->code();
@@ -1540,7 +1540,7 @@ run_op(const op_iterator& op) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Stack>
-inline code interpreter<Stack>::
+code interpreter<Stack>::
 run() NOEXCEPT
 {
     error::op_error_t operation_ec;

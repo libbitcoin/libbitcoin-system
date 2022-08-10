@@ -121,7 +121,7 @@ public:
     static constexpr digest_t finalize_double(state_t& state, size_t blocks) NOEXCEPT;
 
     /// Normalize streaming state (big-endian bytes).
-    INLINE static constexpr digest_t normalize(const state_t& state) NOEXCEPT;
+    static constexpr digest_t normalize(const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions

@@ -63,10 +63,10 @@ public:
         const chunk_cptrs_ptr& stack) NOEXCEPT;
 
     /// Program result.
-    INLINE bool is_true(bool clean) const NOEXCEPT;
+    inline bool is_true(bool clean) const NOEXCEPT;
 
     /// Transaction must pop top input stack element (bip16).
-    INLINE const data_chunk& pop() NOEXCEPT;
+    inline const data_chunk& pop() NOEXCEPT;
 
 protected:
     INLINE static bool equal_chunks(const stack_variant& left,

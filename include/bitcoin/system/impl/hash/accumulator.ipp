@@ -136,7 +136,7 @@ pad() NOEXCEPT
 }
 
 TEMPLATE
-INLINE typename CLASS::counter CLASS::
+INLINE constexpr typename CLASS::counter CLASS::
 serialize(size_t size) NOEXCEPT
 {
     // block_t (64 bytes), counter_t (64 bits), words_t (32 bits), byte_t (8 bits).
@@ -161,14 +161,9 @@ serialize(size_t size) NOEXCEPT
     // optimizations set values directly into buffer_t (in the word_t form).
 
     if constexpr (Algorithm::big_end_count)
-    {
-        // to_big_endian_size is RCONSTEXPR.
         return to_big_endian_size<count_size>(to_bits(size));
-    }
     else
-    {
         return to_little_endian_size<count_size>(to_bits(size));
-    }
 }
 
 TEMPLATE
@@ -293,13 +288,9 @@ typename CLASS::digest_t CLASS::
 flush() NOEXCEPT
 {
     if (is_empty())
-    {
         return Algorithm::finalize(state_, size_ / block_size);
-    }
     else
-    {
         return Algorithm::normalize(pad());
-    }
 }
 
 TEMPLATE
@@ -307,13 +298,9 @@ void CLASS::
 flush(digest_t& digest) NOEXCEPT
 {
     if (is_empty())
-    {
         digest = Algorithm::finalize(state_, size_ / block_size);
-    }
     else
-    {
         digest = Algorithm::normalize(pad());
-    }
 }
 
 TEMPLATE
@@ -337,13 +324,9 @@ double_flush() NOEXCEPT
     if constexpr (half_size == digest_size)
     {
         if (is_empty())
-        {
             return Algorithm::finalize_double(state_, size_ / block_size);
-        }
         else
-        {
             return Algorithm::hash(pad());
-        }
     }
     else
     {
@@ -358,13 +341,9 @@ double_flush(digest_t& digest) NOEXCEPT
     if constexpr (half_size == digest_size)
     {
         if (is_empty())
-        {
             digest = Algorithm::finalize_double(state_, size_ / block_size);
-        }
         else
-        {
             digest = Algorithm::hash(pad());
-        }
     }
     else
     {

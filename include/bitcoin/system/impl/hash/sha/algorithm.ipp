@@ -1172,13 +1172,15 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
     // This optimization is saves ~30% in message scheduling for one out of
     // N blocks: (N + 70%)/(N + 100%). So the proportional benefit decreases
     // exponentially with increasing N. For arbitrary data lengths this will
-    // benefit 1/64 hashes on average. So cache size is strictly limited.
+    // benefit 1/64 hashes on average. All array-sized n-block hashes have
+    // precomputed schedules - this benefits only finalized chunk hashing.
+    // Testing shows a 5% performance improvement for 128 byte chunk hashes.
+    // Single (and half) block hashes are optimized in hash functions, passed
+    // as array data to algorithm, thereby bypassing the accumulator. The hash
+    // functions are used exclusively in script processing.
+    // So cache size is limited to 0..4/8/2 blocks for sha160/256/512.
 
     // Get scheduled buffer from cache or generate.
-    // 8KiB of scheduled padding is explicitly cached.
-    // sha160:  9*4*64 bytes
-    // sha256: 17*4*64 bytes
-    // sha512: 3*4*128 bytes
     if constexpr (Cached)
     {
         if constexpr (SHA::strength == 160)
@@ -1190,10 +1192,6 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
                 case 2: schedule_n<2>(buffer); return;
                 case 3: schedule_n<3>(buffer); return;
                 case 4: schedule_n<4>(buffer); return;
-                case 5: schedule_n<5>(buffer); return;
-                case 6: schedule_n<6>(buffer); return;
-                case 7: schedule_n<7>(buffer); return;
-                case 8: schedule_n<8>(buffer); return;
                 default:
                 {
                     pad_n(buffer, blocks);
@@ -1215,14 +1213,6 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
                 case 6: schedule_n<6>(buffer); return;
                 case 7: schedule_n<7>(buffer); return;
                 case 8: schedule_n<8>(buffer); return;
-                case 9: schedule_n<9>(buffer); return;
-                case 10: schedule_n<10>(buffer); return;
-                case 11: schedule_n<11>(buffer); return;
-                case 12: schedule_n<12>(buffer); return;
-                case 13: schedule_n<13>(buffer); return;
-                case 14: schedule_n<14>(buffer); return;
-                case 15: schedule_n<15>(buffer); return;
-                case 16: schedule_n<16>(buffer); return;
                 default:
                 {
                     pad_n(buffer, blocks);
@@ -1736,8 +1726,6 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
     }
 }
 
-// These could all be templatized for precomputation.
-
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 finalize(state_t& state, size_t blocks) NOEXCEPT
@@ -1767,7 +1755,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
 }
 
 TEMPLATE
-INLINE constexpr typename CLASS::digest_t CLASS::
+constexpr typename CLASS::digest_t CLASS::
 normalize(const state_t& state) NOEXCEPT
 {
     return output(state);
