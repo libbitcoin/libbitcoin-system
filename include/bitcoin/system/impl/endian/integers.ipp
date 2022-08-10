@@ -83,7 +83,7 @@ constexpr Data to_little_data(Data&& data, Integer value) NOEXCEPT
         // Avoid pointer aliasing (byte& loop) using const termination.
         const auto size = data.size();
 
-        for (auto byte = 0; byte < size; ++byte)
+        for (size_t byte = 0; byte < size; ++byte)
         {
             data[byte] = possible_narrow_and_sign_cast<uint8_t>(value);
             value >>= byte_bits;
