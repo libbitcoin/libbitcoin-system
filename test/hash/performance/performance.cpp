@@ -39,9 +39,8 @@ BOOST_AUTO_TEST_SUITE(performance_tests)
 using namespace performance;
 using rmd160a          = rmd160_parameters<false>;
 using rmd160c          = rmd160_parameters<true>;
-using sha256a_cached   = sha256_parameters<true, true, true,  false>;
+using sha256a          = sha256_parameters<true, true, true,  false>;
 using sha256c_cached   = sha256_parameters<true, true, true,  true>;
-using sha256a_uncached = sha256_parameters<true, true, false, false>;
 using sha256c_uncached = sha256_parameters<true, true, false, true>;
 
 using namespace baseline;
@@ -50,7 +49,7 @@ using base_rmd160c     = base::parameters<CRIPEMD160, true>;
 using base_sha256a     = base::parameters<CSHA256, false>;
 using base_sha256c     = base::parameters<CSHA256, true>;
 
-BOOST_AUTO_TEST_CASE(performance__base_sha256a)
+BOOST_AUTO_TEST_CASE(performance__base_sha256)
 {
 #if !defined(VISIBLE)
     // test____________: performance__baseline__sha256
@@ -141,14 +140,14 @@ BOOST_AUTO_TEST_CASE(performance__base_sha256a)
 #endif
 
     auto complete = true;
-    complete = base::test_hash<base_sha256a, 1024*1024, 1024>(std::cout);
-    complete = base::test_hash<base_sha256a, 16*1024*1024, 64>(std::cout);
-    complete = base::test_hash<base_sha256a, 32*1024*1024, 32>(std::cout);
-    complete = base::test_hash<base_sha256a, 1, 1024*1024*1024>(std::cout);
+    ////complete = base::test_hash<base_sha256a, 1024*1024, 1024>(std::cout);
+    ////complete = base::test_hash<base_sha256a, 16*1024*1024, 64>(std::cout);
+    ////complete = base::test_hash<base_sha256a, 32*1024*1024, 32>(std::cout);
+    ////complete = base::test_hash<base_sha256a, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_cached)
+BOOST_AUTO_TEST_CASE(performance__sha256)
 {
 #if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
@@ -532,14 +531,14 @@ BOOST_AUTO_TEST_CASE(performance__sha256a_cached)
 #endif
 
     auto complete = true;
-    complete = test_hash<sha256a_cached, 1024*1024, 1024>(std::cout);
-    complete = test_hash<sha256a_cached, 16*1024*1024, 64>(std::cout);
-    complete = test_hash<sha256a_cached, 32*1024*1024, 32>(std::cout);
-    complete = test_hash<sha256a_cached, 1, 1024*1024*1024>(std::cout);
+    ////complete = test_hash<sha256a_cached, 1024*1024, 1024>(std::cout);
+    ////complete = test_hash<sha256a_cached, 16*1024*1024, 64>(std::cout);
+    ////complete = test_hash<sha256a_cached, 32*1024*1024, 32>(std::cout);
+    ////complete = test_hash<sha256a_cached, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__base_rmd160a)
+BOOST_AUTO_TEST_CASE(performance__base_rmd160)
 {
 #if !defined(VISIBLE)
     // test____________: performance__baseline__rmd160
@@ -587,14 +586,14 @@ BOOST_AUTO_TEST_CASE(performance__base_rmd160a)
 #endif
 
     auto complete = true;
-    complete = base::test_hash<base_rmd160a, 1024*1024, 1024>(std::cout);
-    complete = base::test_hash<base_rmd160a, 16*1024*1024, 64>(std::cout);
-    complete = base::test_hash<base_rmd160a, 32*1024*1024, 32>(std::cout);
-    complete = base::test_hash<base_rmd160a, 1, 1024*1024*1024>(std::cout);
+    ////complete = base::test_hash<base_rmd160a, 1024*1024, 1024>(std::cout);
+    ////complete = base::test_hash<base_rmd160a, 16*1024*1024, 64>(std::cout);
+    ////complete = base::test_hash<base_rmd160a, 32*1024*1024, 32>(std::cout);
+    ////complete = base::test_hash<base_rmd160a, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__rmd160a)
+BOOST_AUTO_TEST_CASE(performance__rmd160)
 {
 #if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
@@ -853,16 +852,1879 @@ BOOST_AUTO_TEST_CASE(performance__rmd160a)
 #endif
 
     auto complete = true;
-    complete = test_hash<rmd160a, 1024*1024, 1024>(std::cout);
-    complete = test_hash<rmd160a, 16*1024*1024, 64>(std::cout);
-    complete = test_hash<rmd160a, 32*1024*1024, 32>(std::cout);
-    complete = test_hash<rmd160a, 1, 1024*1024*1024>(std::cout);
+    ////complete = test_hash<rmd160a, 1024*1024, 1024>(std::cout);
+    ////complete = test_hash<rmd160a, 16*1024*1024, 64>(std::cout);
+    ////complete = test_hash<rmd160a, 32*1024*1024, 32>(std::cout);
+    ////complete = test_hash<rmd160a, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 #endif
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.45398
+// mib_per_second__: 87.3463
+// cycles_per_byte_: 32.7549
+// ms_per_round____: 0.00138663
+// ms_per_byte_____: 1.09183e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.35175
+// mib_per_second__: 93.9522
+// cycles_per_byte_: 30.4519
+// ms_per_round____: 0.00128913
+// ms_per_byte_____: 1.01506e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.38433
+// mib_per_second__: 91.741
+// cycles_per_byte_: 31.1859
+// ms_per_round____: 0.0013202
+// ms_per_byte_____: 1.03953e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.38216
+// mib_per_second__: 91.885
+// cycles_per_byte_: 31.137
+// ms_per_round____: 0.00131813
+// ms_per_byte_____: 1.0379e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.36581
+// mib_per_second__: 92.9854
+// cycles_per_byte_: 30.7685
+// ms_per_round____: 0.00130253
+// ms_per_byte_____: 1.02562e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.35759
+// mib_per_second__: 93.5479
+// cycles_per_byte_: 30.5835
+// ms_per_round____: 0.0012947
+// ms_per_byte_____: 1.01945e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.36129
+// mib_per_second__: 93.2938
+// cycles_per_byte_: 30.6668
+// ms_per_round____: 0.00129823
+// ms_per_byte_____: 1.02223e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.35474
+// mib_per_second__: 93.7452
+// cycles_per_byte_: 30.5192
+// ms_per_round____: 0.00129198
+// ms_per_byte_____: 1.01731e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.39473
+// mib_per_second__: 91.0569
+// cycles_per_byte_: 31.4202
+// ms_per_round____: 0.00133012
+// ms_per_byte_____: 1.04734e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.3594
+// mib_per_second__: 93.4232
+// cycles_per_byte_: 30.6243
+// ms_per_round____: 0.00129643
+// ms_per_byte_____: 1.02081e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.34306
+// mib_per_second__: 94.5605
+// cycles_per_byte_: 30.256
+// ms_per_round____: 0.00128084
+// ms_per_byte_____: 1.00853e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.34894
+// mib_per_second__: 94.1479
+// cycles_per_byte_: 30.3886
+// ms_per_round____: 0.00128645
+// ms_per_byte_____: 1.01295e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.35363
+// mib_per_second__: 93.8219
+// cycles_per_byte_: 30.4942
+// ms_per_round____: 0.00129092
+// ms_per_byte_____: 1.01647e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.37152
+// mib_per_second__: 92.598
+// cycles_per_byte_: 30.8973
+// ms_per_round____: 0.00130798
+// ms_per_byte_____: 1.02991e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.36235
+// mib_per_second__: 93.2209
+// cycles_per_byte_: 30.6908
+// ms_per_round____: 0.00129924
+// ms_per_byte_____: 1.02303e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 127
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.34472
+// mib_per_second__: 94.4433
+// cycles_per_byte_: 30.2936
+// ms_per_round____: 0.00128243
+// ms_per_byte_____: 1.00979e-05
+
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.30164
+// mib_per_second__: 98.3376
+// cycles_per_byte_: 29.0939
+// ms_per_round____: 0.00124134
+// ms_per_byte_____: 9.69796e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.27025
+// mib_per_second__: 100.768
+// cycles_per_byte_: 28.3922
+// ms_per_round____: 0.0012114
+// ms_per_byte_____: 9.46407e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.27841
+// mib_per_second__: 100.125
+// cycles_per_byte_: 28.5746
+// ms_per_round____: 0.00121918
+// ms_per_byte_____: 9.52486e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.28144
+// mib_per_second__: 99.8878
+// cycles_per_byte_: 28.6424
+// ms_per_round____: 0.00122207
+// ms_per_byte_____: 9.54746e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.19703
+// mib_per_second__: 106.931
+// cycles_per_byte_: 26.7557
+// ms_per_round____: 0.00114158
+// ms_per_byte_____: 8.91856e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.1794
+// mib_per_second__: 108.53
+// cycles_per_byte_: 26.3616
+// ms_per_round____: 0.00112476
+// ms_per_byte_____: 8.78721e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.18835
+// mib_per_second__: 107.713
+// cycles_per_byte_: 26.5616
+// ms_per_round____: 0.0011333
+// ms_per_byte_____: 8.85387e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.17427
+// mib_per_second__: 109.004
+// cycles_per_byte_: 26.247
+// ms_per_round____: 0.00111987
+// ms_per_byte_____: 8.74898e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.06546
+// mib_per_second__: 120.136
+// cycles_per_byte_: 23.8149
+// ms_per_round____: 0.0010161
+// ms_per_byte_____: 7.9383e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.065
+// mib_per_second__: 120.188
+// cycles_per_byte_: 23.8046
+// ms_per_round____: 0.00101566
+// ms_per_byte_____: 7.93486e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.07715
+// mib_per_second__: 118.832
+// cycles_per_byte_: 24.0763
+// ms_per_round____: 0.00102725
+// ms_per_byte_____: 8.02542e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// 
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 1.08179
+// mib_per_second__: 118.322
+// cycles_per_byte_: 24.1799
+// ms_per_round____: 0.00103168
+// ms_per_byte_____: 8.05998e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.07208
+// mib_per_second__: 119.394
+// cycles_per_byte_: 23.9628
+// ms_per_round____: 0.00102241
+// ms_per_byte_____: 7.98759e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.06894
+// mib_per_second__: 119.745
+// cycles_per_byte_: 23.8926
+// ms_per_round____: 0.00101942
+// ms_per_byte_____: 7.96422e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.0738
+// mib_per_second__: 119.203
+// cycles_per_byte_: 24.0012
+// ms_per_round____: 0.00102405
+// ms_per_byte_____: 8.00041e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.08579
+// mib_per_second__: 117.886
+// cycles_per_byte_: 24.2694
+// ms_per_round____: 0.00103549
+// ms_per_byte_____: 8.08979e-06
+
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.3533
+// mib_per_second__: 94.5837
+// cycles_per_byte_: 30.2486
+// ms_per_round____: 0.00129061
+// ms_per_byte_____: 1.00829e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.30819
+// mib_per_second__: 97.8454
+// cycles_per_byte_: 29.2402
+// ms_per_round____: 0.00124758
+// ms_per_byte_____: 9.74674e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.29516
+// mib_per_second__: 98.8291
+// cycles_per_byte_: 28.9492
+// ms_per_round____: 0.00123517
+// ms_per_byte_____: 9.64973e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 1.29387
+// mib_per_second__: 98.9279
+// cycles_per_byte_: 28.9203
+// ms_per_round____: 0.00123393
+// ms_per_byte_____: 9.64009e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.18615
+// mib_per_second__: 107.912
+// cycles_per_byte_: 26.5126
+// ms_per_round____: 0.00113121
+// ms_per_byte_____: 8.83754e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.19426
+// mib_per_second__: 107.179
+// cycles_per_byte_: 26.6938
+// ms_per_round____: 0.00113894
+// ms_per_byte_____: 8.89795e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.18438
+// mib_per_second__: 108.074
+// cycles_per_byte_: 26.4729
+// ms_per_round____: 0.00112951
+// ms_per_byte_____: 8.8243e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 1.1833
+// mib_per_second__: 108.172
+// cycles_per_byte_: 26.4489
+// ms_per_round____: 0.00112848
+// ms_per_byte_____: 8.81629e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.08361
+// mib_per_second__: 118.123
+// cycles_per_byte_: 24.2206
+// ms_per_round____: 0.00103341
+// ms_per_byte_____: 8.07355e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.086
+// mib_per_second__: 117.864
+// cycles_per_byte_: 24.2739
+// ms_per_round____: 0.00103569
+// ms_per_byte_____: 8.0913e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.17526
+// mib_per_second__: 108.912
+// cycles_per_byte_: 26.2691
+// ms_per_round____: 0.00112082
+// ms_per_byte_____: 8.75637e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 128
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 1.07913
+// mib_per_second__: 118.614
+// cycles_per_byte_: 24.1204
+// ms_per_round____: 0.00102914
+// ms_per_byte_____: 8.04012e-06
+
+// reduced accumulator<->algorithm traffic (cached chunk 1023 bytes).
+// ============================================================================
+
+// test____________: performance__base_sha256
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 1048576
+// bytes_per_round_: 1023
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.6404
+// mib_per_second__: 154.057
+// cycles_per_byte_: 18.5712
+// ms_per_round____: 0.00633278
+// ms_per_byte_____: 6.1904e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1023
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 6.78272
+// mib_per_second__: 150.824
+// cycles_per_byte_: 18.9692
+// ms_per_round____: 0.00646851
+// ms_per_byte_____: 6.32308e-06
+
+// reduced accumulator<->algorithm traffic (cached chunk again).
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 6.64192
+// mib_per_second__: 154.172
+// cycles_per_byte_: 18.5573
+// ms_per_round____: 0.00633423
+// ms_per_byte_____: 6.18577e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 11.3408
+// mib_per_second__: 90.2933
+// cycles_per_byte_: 31.6859
+// ms_per_round____: 0.000675965
+// ms_per_byte_____: 1.0562e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 13.5986
+// mib_per_second__: 75.302
+// cycles_per_byte_: 37.994
+// ms_per_round____: 0.000405269
+// ms_per_byte_____: 1.26647e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 6.07717
+// mib_per_second__: 168.5
+// cycles_per_byte_: 16.9794
+// ms_per_round____: 6077.17
+// ms_per_byte_____: 5.6598e-06
+
+// reduced accumulator<->algorithm traffic (cached chunk).
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 6.65048
+// mib_per_second__: 153.974
+// cycles_per_byte_: 18.5812
+// ms_per_round____: 0.00634239
+// ms_per_byte_____: 6.19374e-06
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 11.3566
+// mib_per_second__: 90.1681
+// cycles_per_byte_: 31.7299
+// ms_per_round____: 0.000676904
+// ms_per_byte_____: 1.05766e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 13.6112
+// mib_per_second__: 75.2323
+// cycles_per_byte_: 38.0292
+// ms_per_round____: 0.000405645
+// ms_per_byte_____: 1.26764e-05
+// 
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 1
+// seconds_total___: 6.31238
+// mib_per_second__: 162.221
+// cycles_per_byte_: 17.6366
+// ms_per_round____: 6312.38
+// ms_per_byte_____: 5.87886e-06
+
+// reduced accumulator<->algorithm traffic (uncached chunk).
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 6.75692
+// mib_per_second__: 151.548
+// cycles_per_byte_: 18.8786
+// ms_per_round____: 0.0064439
+// ms_per_byte_____: 6.29287e-06
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 11.2961
+// mib_per_second__: 90.6509
+// cycles_per_byte_: 31.5609
+// ms_per_round____: 0.000673299
+// ms_per_byte_____: 1.05203e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 13.8728
+// mib_per_second__: 73.8137
+// cycles_per_byte_: 38.76
+// ms_per_round____: 0.00041344
+// ms_per_byte_____: 1.292e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 1
+// seconds_total___: 6.12484
+// mib_per_second__: 167.188
+// cycles_per_byte_: 17.1126
+// ms_per_round____: 6124.84
+// ms_per_byte_____: 5.7042e-06
+
+// reduced accumulator<->algorithm traffic (uncached array).
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.57378
+// mib_per_second__: 155.77
+// cycles_per_byte_: 18.3669
+// ms_per_round____: 0.00626924
+// ms_per_byte_____: 6.12231e-06
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 11.0916
+// mib_per_second__: 92.3223
+// cycles_per_byte_: 30.9895
+// ms_per_round____: 0.000661109
+// ms_per_byte_____: 1.03298e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 13.3102
+// mib_per_second__: 76.9333
+// cycles_per_byte_: 37.1884
+// ms_per_round____: 0.000396676
+// ms_per_byte_____: 1.23961e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.0693
+// mib_per_second__: 168.718
+// cycles_per_byte_: 16.9574
+// ms_per_round____: 6069.3
+// ms_per_byte_____: 5.65248e-06
+
+// limited INLINE, reduced accumulator<->algorithm traffic (cached array).
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 6.7234
+// mib_per_second__: 152.304
+// cycles_per_byte_: 18.785
+// ms_per_round____: 0.00641193
+// ms_per_byte_____: 6.26165e-06
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 11.3385
+// mib_per_second__: 90.3116
+// cycles_per_byte_: 31.6794
+// ms_per_round____: 0.000675828
+// ms_per_byte_____: 1.05598e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 13.4646
+// mib_per_second__: 76.051
+// cycles_per_byte_: 37.6198
+// ms_per_round____: 0.000401278
+// ms_per_byte_____: 1.25399e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 6.06595
+// mib_per_second__: 168.811
+// cycles_per_byte_: 16.9481
+// ms_per_round____: 6065.95
+// ms_per_byte_____: 5.64936e-06
+
+// test____________: performance__rmd160
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 3.88463
+// mib_per_second__: 263.603
+// cycles_per_byte_: 10.8535
+// ms_per_round____: 0.00370467
+// ms_per_byte_____: 3.61784e-06
+
+// test____________: performance__rmd160
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 7.8741
+// mib_per_second__: 130.047
+// cycles_per_byte_: 22
+// ms_per_round____: 0.000469333
+// ms_per_byte_____: 7.33332e-06
+
+// test____________: performance__rmd160
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 8.2876
+// mib_per_second__: 123.558
+// cycles_per_byte_: 23.1553
+// ms_per_round____: 0.00024699
+// ms_per_byte_____: 7.71843e-06
+
+// test____________: performance__rmd160
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 3.89103
+// mib_per_second__: 263.169
+// cycles_per_byte_: 10.8714
+// ms_per_round____: 3891.03
+// ms_per_byte_____: 3.62381e-06
+
+// limited INLINE, reduced accumulator<->algorithm traffic (cached array).
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 6.65019
+// mib_per_second__: 153.981
+// cycles_per_byte_: 18.5804
+// ms_per_round____: 0.00634211
+// ms_per_byte_____: 6.19347e-06
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 11.1633
+// mib_per_second__: 91.7291
+// cycles_per_byte_: 31.1899
+// ms_per_round____: 0.000665385
+// ms_per_byte_____: 1.03966e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 13.3524
+// mib_per_second__: 76.6901
+// cycles_per_byte_: 37.3063
+// ms_per_round____: 0.000397934
+// ms_per_byte_____: 1.24354e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 6.10303
+// mib_per_second__: 167.786
+// cycles_per_byte_: 17.0517
+// ms_per_round____: 6103.03
+// ms_per_byte_____: 5.68389e-06
+
+// limited INLINE, reduced accumulator<->algorithm traffic (uncached array).
+// ============================================================================
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.54914
+// mib_per_second__: 156.356
+// cycles_per_byte_: 18.2981
+// ms_per_round____: 0.00624575
+// ms_per_byte_____: 6.09937e-06
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 11.2738
+// mib_per_second__: 90.8302
+// cycles_per_byte_: 31.4986
+// ms_per_round____: 0.00067197
+// ms_per_byte_____: 1.04995e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 13.4296
+// mib_per_second__: 76.2497
+// cycles_per_byte_: 37.5218
+// ms_per_round____: 0.000400232
+// ms_per_byte_____: 1.25073e-05
+
+// test____________: performance__sha256
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.07874
+// mib_per_second__: 168.456
+// cycles_per_byte_: 16.9838
+// ms_per_round____: 6078.74
+// ms_per_byte_____: 5.66127e-06
+
+// uncached
+// ============================================================================
+
+// test____________: performance__sha256a_uncached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.91051
+// mib_per_second__: 148.18
+// cycles_per_byte_: 19.3077
+// ms_per_round____: 0.00659038
+// ms_per_byte_____: 6.43592e-06
+
+// test____________: performance__sha256a_uncached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 11.4326
+// mib_per_second__: 89.5683
+// cycles_per_byte_: 31.9424
+// ms_per_round____: 0.000681437
+// ms_per_byte_____: 1.06475e-05
+
+// test____________: performance__sha256a_uncached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 13.6847
+// mib_per_second__: 74.8278
+// cycles_per_byte_: 38.2347
+// ms_per_round____: 0.000407837
+// ms_per_byte_____: 1.27449e-05
+
+// test____________: performance__sha256a_uncached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.64356
+// mib_per_second__: 154.134
+// cycles_per_byte_: 18.5619
+// ms_per_round____: 6643.56
+// ms_per_byte_____: 6.1873e-06
+
+// Inline pad()
+// ============================================================================
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 6.87079
+// mib_per_second__: 149.037
+// cycles_per_byte_: 19.1968
+// ms_per_round____: 0.00655249
+// ms_per_byte_____: 6.39892e-06
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 13.406
+// mib_per_second__: 76.3838
+// cycles_per_byte_: 37.4559
+// ms_per_round____: 0.000799059
+// ms_per_byte_____: 1.24853e-05
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 14.154
+// mib_per_second__: 72.3472
+// cycles_per_byte_: 39.5457
+// ms_per_round____: 0.000421821
+// ms_per_byte_____: 1.31819e-05
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 5.97619
+// mib_per_second__: 171.347
+// cycles_per_byte_: 16.6973
+// ms_per_round____: 5976.19
+// ms_per_byte_____: 5.56576e-06
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 7.1516
+// mib_per_second__: 143.185
+// cycles_per_byte_: 19.9813
+// ms_per_round____: 0.0068203
+// ms_per_byte_____: 6.66045e-06
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 11.5329
+// mib_per_second__: 88.7894
+// cycles_per_byte_: 32.2226
+// ms_per_round____: 0.000687415
+// ms_per_byte_____: 1.07409e-05
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 13.8747
+// mib_per_second__: 73.8035
+// cycles_per_byte_: 38.7654
+// ms_per_round____: 0.000413498
+// ms_per_byte_____: 1.29218e-05
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,1,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// cached__________: 1
+// chunked_________: 0
+// seconds_total___: 6.7227
+// mib_per_second__: 152.32
+// cycles_per_byte_: 18.783
+// ms_per_round____: 6722.7
+// ms_per_byte_____: 6.261e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 3.74897
+// mib_per_second__: 273.142
+// cycles_per_byte_: 10.4745
+// ms_per_round____: 0.0035753
+// ms_per_byte_____: 3.4915e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 7.8603
+// mib_per_second__: 130.275
+// cycles_per_byte_: 21.9614
+// ms_per_round____: 0.00046851
+// ms_per_byte_____: 7.32047e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 8.65203
+// mib_per_second__: 118.354
+// cycles_per_byte_: 24.1735
+// ms_per_round____: 0.000257851
+// ms_per_byte_____: 8.05783e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 3.50028
+// mib_per_second__: 292.548
+// cycles_per_byte_: 9.77968
+// ms_per_round____: 3500.28
+// ms_per_byte_____: 3.25989e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 3.81244
+// mib_per_second__: 268.594
+// cycles_per_byte_: 10.6518
+// ms_per_round____: 0.00363583
+// ms_per_byte_____: 3.55061e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 7.18322
+// mib_per_second__: 142.554
+// cycles_per_byte_: 20.0697
+// ms_per_round____: 0.000428153
+// ms_per_byte_____: 6.6899e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 7.92412
+// mib_per_second__: 129.226
+// cycles_per_byte_: 22.1397
+// ms_per_round____: 0.000236157
+// ms_per_byte_____: 7.37991e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// cached__________: 0
+// chunked_________: 0
+// seconds_total___: 3.62443
+// mib_per_second__: 282.527
+// cycles_per_byte_: 10.1266
+// ms_per_round____: 3624.43
+// ms_per_byte_____: 3.37552e-06
+
+// ============================================================================
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 6.49307
+// mib_per_second__: 157.706
+// cycles_per_byte_: 18.1414
+// ms_per_round____: 0.00619228
+// ms_per_byte_____: 6.04715e-06
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 13.0396
+// mib_per_second__: 78.5299
+// cycles_per_byte_: 36.4323
+// ms_per_round____: 0.000777222
+// ms_per_byte_____: 1.21441e-05
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 13.8861
+// mib_per_second__: 73.7428
+// cycles_per_byte_: 38.7973
+// ms_per_round____: 0.000413838
+// ms_per_byte_____: 1.29324e-05
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 5.7499
+// mib_per_second__: 178.09
+// cycles_per_byte_: 16.065
+// ms_per_round____: 5749.9
+// ms_per_byte_____: 5.35501e-06
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 7.1802
+// mib_per_second__: 142.614
+// cycles_per_byte_: 20.0612
+// ms_per_round____: 0.00684757
+// ms_per_byte_____: 6.68708e-06
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 11.6879
+// mib_per_second__: 87.6123
+// cycles_per_byte_: 32.6555
+// ms_per_round____: 0.000696651
+// ms_per_byte_____: 1.08852e-05
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 14.5297
+// mib_per_second__: 70.4762
+// cycles_per_byte_: 40.5956
+// ms_per_round____: 0.000433019
+// ms_per_byte_____: 1.35319e-05
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 6.7963
+// mib_per_second__: 150.67
+// cycles_per_byte_: 18.9886
+// ms_per_round____: 6796.3
+// ms_per_byte_____: 6.32955e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 3.78672
+// mib_per_second__: 270.418
+// cycles_per_byte_: 10.58
+// ms_per_round____: 0.0036113
+// ms_per_byte_____: 3.52666e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 7.57978
+// mib_per_second__: 135.096
+// cycles_per_byte_: 21.1777
+// ms_per_round____: 0.00045179
+// ms_per_byte_____: 7.05922e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 8.42178
+// mib_per_second__: 121.59
+// cycles_per_byte_: 23.5302
+// ms_per_round____: 0.000250988
+// ms_per_byte_____: 7.84339e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 3.36673
+// mib_per_second__: 304.153
+// cycles_per_byte_: 9.40653
+// ms_per_round____: 3366.73
+// ms_per_byte_____: 3.13551e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 3.80081
+// mib_per_second__: 269.416
+// cycles_per_byte_: 10.6193
+// ms_per_round____: 0.00362474
+// ms_per_byte_____: 3.53978e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 7.06472
+// mib_per_second__: 144.946
+// cycles_per_byte_: 19.7386
+// ms_per_round____: 0.00042109
+// ms_per_byte_____: 6.57954e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 7.77977
+// mib_per_second__: 131.623
+// cycles_per_byte_: 21.7364
+// ms_per_round____: 0.000231855
+// ms_per_byte_____: 7.24547e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 1
+// seconds_total___: 3.58456
+// mib_per_second__: 285.67
+// cycles_per_byte_: 10.0151
+// ms_per_round____: 3584.56
+// ms_per_byte_____: 3.33838e-06
+
+// ============================================================================
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 6.55702
+// mib_per_second__: 156.168
+// cycles_per_byte_: 18.3201
+// ms_per_round____: 0.00625326
+// ms_per_byte_____: 6.1067e-06
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 13.7617
+// mib_per_second__: 74.4092
+// cycles_per_byte_: 38.4499
+// ms_per_round____: 0.000820264
+// ms_per_byte_____: 1.28166e-05
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 14.6577
+// mib_per_second__: 69.861
+// cycles_per_byte_: 40.9531
+// ms_per_round____: 0.000436833
+// ms_per_byte_____: 1.3651e-05
+
+// test____________: performance__base_sha256a
+// algorithm_______: baseline::CSHA256
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 5.90218
+// mib_per_second__: 173.495
+// cycles_per_byte_: 16.4905
+// ms_per_round____: 5902.18
+// ms_per_byte_____: 5.49683e-06
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 7.03676
+// mib_per_second__: 145.521
+// cycles_per_byte_: 19.6605
+// ms_per_round____: 0.00671078
+// ms_per_byte_____: 6.5535e-06
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 11.8993
+// mib_per_second__: 86.0555
+// cycles_per_byte_: 33.2463
+// ms_per_round____: 0.000709254
+// ms_per_byte_____: 1.10821e-05
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 14.0086
+// mib_per_second__: 73.0979
+// cycles_per_byte_: 39.1396
+// ms_per_round____: 0.000417489
+// ms_per_byte_____: 1.30465e-05
+
+// test____________: performance__sha256a_cached
+// algorithm_______: sha::algorithm<sha::h256<256,1>,1,1,0,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 1
+// vectorized______: 1
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 6.59546
+// mib_per_second__: 155.258
+// cycles_per_byte_: 18.4275
+// ms_per_round____: 6595.46
+// ms_per_byte_____: 6.1425e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 3.73791
+// mib_per_second__: 273.95
+// cycles_per_byte_: 10.4436
+// ms_per_round____: 0.00356475
+// ms_per_byte_____: 3.4812e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 7.86584
+// mib_per_second__: 130.183
+// cycles_per_byte_: 21.9769
+// ms_per_round____: 0.00046884
+// ms_per_byte_____: 7.32563e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 8.56354
+// mib_per_second__: 119.577
+// cycles_per_byte_: 23.9263
+// ms_per_round____: 0.000255213
+// ms_per_byte_____: 7.97542e-06
+
+// test____________: performance__base_rmd160a
+// algorithm_______: baseline::CRIPEMD160
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 3.42461
+// mib_per_second__: 299.012
+// cycles_per_byte_: 9.56826
+// ms_per_round____: 3424.61
+// ms_per_byte_____: 3.18942e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1048576
+// bytes_per_round_: 1024
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 3.68619
+// mib_per_second__: 277.793
+// cycles_per_byte_: 10.2991
+// ms_per_round____: 0.00351543
+// ms_per_byte_____: 3.43304e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 16777216
+// bytes_per_round_: 64
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 7.06921
+// mib_per_second__: 144.854
+// cycles_per_byte_: 19.7511
+// ms_per_round____: 0.000421358
+// ms_per_byte_____: 6.58371e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 33554432
+// bytes_per_round_: 32
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 7.87631
+// mib_per_second__: 130.01
+// cycles_per_byte_: 22.0062
+// ms_per_round____: 0.000234732
+// ms_per_byte_____: 7.33539e-06
+
+// test____________: performance__rmd160a
+// algorithm_______: rmd::algorithm<rmd::h160<160,1>,1>
+// test_rounds_____: 1
+// bytes_per_round_: 1073741824
+// compressed______: 0
+// vectorized______: 0
+// concurrent______: 0
+// chunked_________: 0
+// seconds_total___: 3.72553
+// mib_per_second__: 274.86
+// cycles_per_byte_: 10.409
+// ms_per_round____: 3725.53
+// ms_per_byte_____: 3.46967e-06
+
+// Old, move to stack order here (top new).
+// ============================================================================
 
 // 1GiB one round (before full inlining)
 // ----------------------------------------------------------------------------

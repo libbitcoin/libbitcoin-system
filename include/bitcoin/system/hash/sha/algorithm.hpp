@@ -114,13 +114,14 @@ public:
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
 
-    /// Pad a number of whole blocks.
-    static constexpr void pad(state_t& state, size_t blocks) NOEXCEPT;
+    /// Finalize streaming state (pad and normalize, updates state).
+    static constexpr digest_t finalize(state_t& state, size_t blocks) NOEXCEPT;
 
-    /// Finalize streaming state (state to big-endian bytes).
-    static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
-    static constexpr void finalize(digest_t& digest,
-        const state_t& state) NOEXCEPT;
+    /// Double finalize streaming state (pad, rehash, and normalize, updates state1).
+    static constexpr digest_t finalize_double(state_t& state, size_t blocks) NOEXCEPT;
+
+    /// Normalize streaming state (big-endian bytes).
+    INLINE static constexpr digest_t normalize(const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions
@@ -157,35 +158,34 @@ protected:
         auto e, auto f, auto g, auto& h, auto wk) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static constexpr void round(auto& state,
-        const auto& wk) NOEXCEPT;
+    INLINE static constexpr void round(auto& state, const auto& wk) NOEXCEPT;
+    INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
+    static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
 
     template<size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
-    INLINE static constexpr void schedule(auto& buffer) NOEXCEPT;
-    INLINE static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
-    INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
-    INLINE static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
-
-    /// Padding
-    /// -----------------------------------------------------------------------
-    template <size_t Blocks>
-    INLINE static constexpr void schedule_n(buffer_t& buffer) NOEXCEPT;
-    INLINE static constexpr void schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT;
-    INLINE static constexpr void schedule_1(buffer_t& buffer) NOEXCEPT;
-    INLINE static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
-    INLINE static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
+    static constexpr void schedule(auto& buffer) NOEXCEPT;
 
     /// Parsing
     /// -----------------------------------------------------------------------
+    INLINE static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
     INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
-    /// Vectorization
+    /// Padding
     /// -----------------------------------------------------------------------
-    INLINE static void schedule(buffers_t& buffers,
+    template <size_t Blocks>
+    static constexpr void schedule_n(buffer_t& buffer) NOEXCEPT;
+    static constexpr void schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT;
+    static constexpr void schedule_1(buffer_t& buffer) NOEXCEPT;
+    static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
+    static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
+
+    /// Vectorization (WIP)
+    /// -----------------------------------------------------------------------
+    static void schedule(buffers_t& buffers,
         const blocks_t& blocks) NOEXCEPT;
 
 private:

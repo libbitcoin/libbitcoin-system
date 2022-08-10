@@ -65,10 +65,14 @@ public:
     /// -----------------------------------------------------------------------
 
     digest_t flush() NOEXCEPT;
-    digest_t double_flush() NOEXCEPT;
     void flush(digest_t& digest) NOEXCEPT;
     void flush(data_chunk& digest) NOEXCEPT;
     void flush(byte_t* digest) NOEXCEPT;
+
+    digest_t double_flush() NOEXCEPT;
+    void double_flush(digest_t& digest) NOEXCEPT;
+    void double_flush(data_chunk& digest) NOEXCEPT;
+    void double_flush(byte_t* digest) NOEXCEPT;
 
     /// Finalized hashes.
     /// -----------------------------------------------------------------------
@@ -138,8 +142,8 @@ protected:
     /// Accumulate a set of blocks and buffer any remainder bytes.
     INLINE bool accumulate(size_t size, const byte_t* data) NOEXCEPT;
 
-    /// Pad buffer, accumulate and return state (not endian final).
-    INLINE state_t flush_state() NOEXCEPT;
+    /// Create and accumulate pad block.
+    INLINE state_t pad() NOEXCEPT;
 
     /// Serialize the hashed byte count for finalization
     INLINE static counter serialize(size_t size) NOEXCEPT;

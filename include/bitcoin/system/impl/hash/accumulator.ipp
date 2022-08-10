@@ -126,23 +126,13 @@ accumulate(size_t size, const byte_t* data) NOEXCEPT
 
 TEMPLATE
 INLINE typename CLASS::state_t CLASS::
-flush_state() NOEXCEPT
+pad() NOEXCEPT
 {
-    if (is_empty())
-    {
-        // Algorithm has whole block padding optimization.
-        Algorithm::pad(state_, size_ / block_size);
-        return state_;
-    }
-    else
-    {
-        // Algorithm does not have partial block padding.
-        constexpr auto pad = stream_pad();
-        const auto size = size_;
-        write(pad_size(), pad.data());
-        write(count_size, serialize(size).data());
-        return state_;
-    }
+    constexpr auto pad = stream_pad();
+    const auto size = size_;
+    write(pad_size(), pad.data());
+    write(count_size, serialize(size).data());
+    return state_;
 }
 
 TEMPLATE
@@ -302,14 +292,28 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 flush() NOEXCEPT
 {
-    return Algorithm::finalize(flush_state());
+    if (is_empty())
+    {
+        return Algorithm::finalize(state_, size_ / block_size);
+    }
+    else
+    {
+        return Algorithm::normalize(pad());
+    }
 }
 
 TEMPLATE
 void CLASS::
 flush(digest_t& digest) NOEXCEPT
 {
-    Algorithm::finalize(digest, flush_state());
+    if (is_empty())
+    {
+        digest = Algorithm::finalize(state_, size_ / block_size);
+    }
+    else
+    {
+        digest = Algorithm::normalize(pad());
+    }
 }
 
 TEMPLATE
@@ -330,7 +334,56 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 double_flush() NOEXCEPT
 {
-    return Algorithm::hash(flush_state());
+    if constexpr (half_size == digest_size)
+    {
+        if (is_empty())
+        {
+            return Algorithm::finalize_double(state_, size_ / block_size);
+        }
+        else
+        {
+            return Algorithm::hash(pad());
+        }
+    }
+    else
+    {
+        return Algorithm::hash(pad());
+    }
+}
+
+TEMPLATE
+void CLASS::
+double_flush(digest_t& digest) NOEXCEPT
+{
+    if constexpr (half_size == digest_size)
+    {
+        if (is_empty())
+        {
+            digest = Algorithm::finalize_double(state_, size_ / block_size);
+        }
+        else
+        {
+            digest = Algorithm::hash(pad());
+        }
+    }
+    else
+    {
+        digest = Algorithm::hash(pad());
+    }
+}
+
+TEMPLATE
+void CLASS::
+double_flush(data_chunk& digest) NOEXCEPT
+{
+    double_flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest.data()));
+}
+
+TEMPLATE
+void CLASS::
+double_flush(byte_t* digest) NOEXCEPT
+{
+    double_flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest));
 }
 
 // digest_t returning single hashers
@@ -404,13 +457,22 @@ template <size_t Size>
 typename CLASS::digest_t CLASS::
 double_hash(const data_array<Size>& data) NOEXCEPT
 {
-    if constexpr (Size == half_size || Size == block_size)
+    if constexpr (half_size == digest_size)
     {
-        return Algorithm::double_hash(data);
-    }
-    else if constexpr (is_multiple(Size, block_size))
-    {
-        return Algorithm::double_hash(array_cast<block_t>(data));
+        if constexpr (Size == half_size || Size == block_size)
+        {
+            return Algorithm::double_hash(data);
+        }
+        else if constexpr (is_multiple(Size, block_size))
+        {
+            return Algorithm::double_hash(array_cast<block_t>(data));
+        }
+        else
+        {
+            self context{};
+            context.write(data);
+            return context.double_flush();
+        }
     }
     else
     {
@@ -424,18 +486,27 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 double_hash(size_t size, const byte_t* data) NOEXCEPT
 {
-    if (size == half_size)
+    if constexpr (half_size == digest_size)
     {
-        return self::double_hash(unsafe_array_cast<uint8_t, half_size>(data));
-    }
-    else if (size == block_size)
-    {
-        return self::double_hash(unsafe_array_cast<uint8_t, block_size>(data));
-    }
-    else if (is_multiple(size, block_size))
-    {
-        const auto blocks = size / block_size;
-        return Algorithm::double_hash(unsafe_vector_cast<block_t>(data, blocks));
+        if (size == half_size)
+        {
+            return self::double_hash(unsafe_array_cast<uint8_t, half_size>(data));
+        }
+        else if (size == block_size)
+        {
+            return self::double_hash(unsafe_array_cast<uint8_t, block_size>(data));
+        }
+        else if (is_multiple(size, block_size))
+        {
+            const auto blocks = size / block_size;
+            return Algorithm::double_hash(unsafe_vector_cast<block_t>(data, blocks));
+        }
+        else
+        {
+            self context{};
+            context.write(size, data);
+            return context.double_flush();
+        }
     }
     else
     {

@@ -62,11 +62,11 @@ constexpr auto cycles_per_byte(float seconds, float ghz) noexcept
 struct parameters
 {
     static constexpr size_t strength{}; // algorithm strength (160/256/512|128/160).
-    static constexpr bool ripemd{};     // false for sha algorithm.
     static constexpr bool compressed{}; // intrinsic sha (ignored for rmd).
     static constexpr bool vectorized{}; // algorithm vectorization.
-    static constexpr bool concurrent{}; // algorithm concurrency.
+    static constexpr bool cached{};     // scheduled pad caching.
     static constexpr bool chunked{};    // false for array data.
+    static constexpr bool ripemd{};     // false for sha algorithm.
 };
 
 // Output performance run to given stream.
@@ -88,7 +88,8 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
     replace(algorithm, "struct ", "");
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    out << "test____________: " << TEST_NAME
+    out << delimiter
+        << "test____________: " << TEST_NAME
         << delimiter
         << "algorithm_______: " << algorithm
         << delimiter
@@ -100,7 +101,7 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
         << delimiter
         << "vectorized______: " << serialize(P::vectorized)
         << delimiter
-        << "concurrent______: " << serialize(P::concurrent)
+        << "cached__________: " << serialize(P::cached)
         << delimiter
         << "chunked_________: " << serialize(P::chunked)
         << delimiter
@@ -228,14 +229,6 @@ static_assert(!hash_selector<160, true, true, false, false>::cached);
 static_assert(!hash_selector<256, true, true, false, false>::cached);
 static_assert(!hash_selector<512, true, true, false, false>::cached);
 
-template <typename Parameters>
-using algorithm = hash_selector<
-    Parameters::strength,
-    Parameters::compressed,
-    Parameters::vectorized,
-    Parameters::concurrent,
-    Parameters::ripemd>;
-
 #endif
 
 // Algorithm::hash() test runner.
@@ -252,10 +245,15 @@ template<typename Parameters,
     if_base_of<parameters, Parameters> = true>
 bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
 {
+    using P = Parameters;
     using Precision = std::chrono::nanoseconds;
     using Timer = timer<Precision>;
-    using Algorithm = algorithm<Parameters>;
-    using P = Parameters;
+    using Algorithm = hash_selector<
+        P::strength,
+        P::compressed,
+        P::vectorized,
+        P::cached,
+        P::ripemd>;
 
     uint64_t time = zero;
     for (size_t seed = 0; seed < Count; ++seed)
@@ -280,22 +278,22 @@ template <bool Compressed, bool Vectorized, bool Cached, bool Chunked>
 struct sha256_parameters : parameters
 {
     static constexpr size_t strength{ 256 };
-    static constexpr bool ripemd{};
     static constexpr bool compressed{ Compressed };
     static constexpr bool vectorized{ Vectorized };
     static constexpr bool cached{ Cached };
     static constexpr bool chunked{ Chunked };
+    static constexpr bool ripemd{};
 };
 
 template <bool Chunked>
 struct rmd160_parameters : parameters
 {
     static constexpr size_t strength{ 160 };
-    static constexpr bool ripemd{ true };
     static constexpr bool compressed{};
     static constexpr bool vectorized{};
     static constexpr bool cached{};
     static constexpr bool chunked{ Chunked };
+    static constexpr bool ripemd{ true };
 };
 
 // baseline for performance tests

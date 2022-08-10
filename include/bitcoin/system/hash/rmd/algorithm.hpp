@@ -85,13 +85,11 @@ public:
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
 
-    /// Pad a number of whole blocks.
-    static constexpr void pad(state_t& state, size_t blocks) NOEXCEPT;
-    
-    /// Finalize streaming state (converts state to little-endian bytes).
-    static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
-    static constexpr void finalize(digest_t& digest,
-        const state_t& state) NOEXCEPT;
+    /// Finalize streaming state (pad and normalize, updates state).
+    static constexpr digest_t finalize(state_t& state, size_t blocks) NOEXCEPT;
+
+    /// Normalize streaming state (big-endian bytes).
+    INLINE static constexpr digest_t normalize(const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions
@@ -118,24 +116,22 @@ protected:
         auto e, auto x) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static constexpr void round(auto& state,
-        const auto& words) NOEXCEPT;
-
-    INLINE static constexpr void compress(state_t& state, const words_t& words) NOEXCEPT;
+    INLINE static constexpr void round(auto& state, const auto& words) NOEXCEPT;
     INLINE static constexpr void summarize(state_t& out, const state_t& batch1,
         const state_t& batch2) NOEXCEPT;
-
-    /// Padding
-    /// -----------------------------------------------------------------------
-    INLINE static constexpr void pad_one(words_t& words) NOEXCEPT;
-    INLINE static constexpr void pad_half(words_t& words) NOEXCEPT;
-    INLINE static constexpr void pad_n(words_t& words, count_t blocks) NOEXCEPT;
+    static constexpr void compress(state_t& state, const words_t& words) NOEXCEPT;
     
     /// Parsing
     /// -----------------------------------------------------------------------
     INLINE static constexpr void input(words_t& words, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input(words_t& words, const half_t& half) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
+
+    /// Padding
+    /// -----------------------------------------------------------------------
+    static constexpr void pad_one(words_t& words) NOEXCEPT;
+    static constexpr void pad_half(words_t& words) NOEXCEPT;
+    static constexpr void pad_n(words_t& words, count_t blocks) NOEXCEPT;
 
 private:
     using pad_t = std_array<word_t, subtract(RMD::block_words,

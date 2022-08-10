@@ -42,49 +42,6 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-// private
-// ----------------------------------------------------------------------------
-
-TEMPLATE
-CONSTEVAL typename CLASS::words_t CLASS::
-block_pad() NOEXCEPT
-{
-    // See comments in accumulator regarding padding endianness.
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
-    constexpr auto hi = sub1(array_count<words_t>);
-    constexpr auto lo = sub1(hi);
-
-    words_t words{};
-    words.front() = bit_hi<byte_t>;
-    words[lo] = to_bits(bytes);
-    return words;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::chunk_t CLASS::
-chunk_pad() NOEXCEPT
-{
-    // See comments in accumulator regarding padding endianness.
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
-    constexpr auto hi = sub1(array_count<chunk_t>);
-    constexpr auto lo = sub1(hi);
-
-    chunk_t words{};
-    words.front() = bit_hi<byte_t>;
-    words[lo] = to_bits(bytes);
-    return words;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::pad_t CLASS::
-stream_pad() NOEXCEPT
-{
-    // See comments in accumulator regarding padding endianness.
-    pad_t words{};
-    words.front() = bit_hi<byte_t>;
-    return words;
-}
-
 // Primitives
 // ---------------------------------------------------------------------------
 
@@ -253,7 +210,7 @@ round(auto& state, const auto& words) NOEXCEPT
 }
 
 TEMPLATE
-INLINE constexpr void CLASS::
+constexpr void CLASS::
 compress(state_t& state, const words_t& words) NOEXCEPT
 {
     constexpr auto offset = to_half(RMD::rounds);
@@ -378,80 +335,6 @@ summarize(state_t& state, const state_t& batch1,
         state[2] = add_(add_(state[3], batch1[4]), batch2[0]);
         state[3] = add_(add_(state[4], batch1[0]), batch2[1]);
         state[4] = add_(add_(state_0_, batch1[1]), batch2[2]);
-    }
-}
-
-// Padding
-// ---------------------------------------------------------------------------
-
-TEMPLATE
-INLINE constexpr void CLASS::
-pad_one(words_t& words) NOEXCEPT
-{
-    // Pad a single whole block with pre-prepared buffer.
-    constexpr auto pad = block_pad();
-    words = pad;
-}
-
-TEMPLATE
-INLINE constexpr void CLASS::
-pad_half(words_t& words) NOEXCEPT
-{
-    // Pad a half block.
-    constexpr auto pad = chunk_pad();
-
-    if (std::is_constant_evaluated())
-    {
-        words.at(8)  = pad.at(0);
-        words.at(9)  = pad.at(1);
-        words.at(10) = pad.at(2);
-        words.at(11) = pad.at(3);
-        words.at(12) = pad.at(4);
-        words.at(13) = pad.at(5);
-        words.at(14) = pad.at(6);
-        words.at(15) = pad.at(7);
-    }
-    else
-    {
-        constexpr auto size = array_count<chunk_t>;
-        array_cast<word_t, size, size>(words) = pad;
-    }
-}
-
-TEMPLATE
-INLINE constexpr void CLASS::
-pad_n(words_t& words, count_t blocks) NOEXCEPT
-{
-    // Pad any number of whole blocks.
-    constexpr auto pad = stream_pad();
-    const auto bits = to_bits(blocks * array_count<block_t>);
-
-    if (std::is_constant_evaluated())
-    {
-        words.at(0)  = pad.at(0);
-        words.at(1)  = pad.at(1);
-        words.at(2)  = pad.at(2);
-        words.at(3)  = pad.at(3);
-        words.at(4)  = pad.at(4);
-        words.at(5)  = pad.at(5);
-        words.at(6)  = pad.at(6);
-        words.at(7)  = pad.at(7);
-        words.at(8)  = pad.at(8);
-        words.at(9)  = pad.at(9);
-        words.at(10) = pad.at(10);
-        words.at(11) = pad.at(11);
-        words.at(12) = pad.at(12);
-        words.at(13) = pad.at(13);
-        words.at(14) = lo_word<word_t>(bits);
-        words.at(15) = hi_word<word_t>(bits);
-    }
-    else
-    {
-        array_cast<word_t, array_count<pad_t>>(words) = pad;
-
-        // Split count into hi/low words and assign end of padded buffer (LE).
-        words[14] = lo_word<word_t>(bits);
-        words[15] = hi_word<word_t>(bits);
     }
 }
 
@@ -584,6 +467,120 @@ output(const state_t& state) NOEXCEPT
     return digest;
 }
 
+// Padding
+// ---------------------------------------------------------------------------
+
+TEMPLATE
+CONSTEVAL typename CLASS::words_t CLASS::
+block_pad() NOEXCEPT
+{
+    // See comments in accumulator regarding padding endianness.
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
+    constexpr auto hi = sub1(array_count<words_t>);
+    constexpr auto lo = sub1(hi);
+
+    words_t words{};
+    words.front() = bit_hi<byte_t>;
+    words[lo] = to_bits(bytes);
+    return words;
+}
+
+TEMPLATE
+CONSTEVAL typename CLASS::chunk_t CLASS::
+chunk_pad() NOEXCEPT
+{
+    // See comments in accumulator regarding padding endianness.
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
+    constexpr auto hi = sub1(array_count<chunk_t>);
+    constexpr auto lo = sub1(hi);
+
+    chunk_t words{};
+    words.front() = bit_hi<byte_t>;
+    words[lo] = to_bits(bytes);
+    return words;
+}
+
+TEMPLATE
+CONSTEVAL typename CLASS::pad_t CLASS::
+stream_pad() NOEXCEPT
+{
+    // See comments in accumulator regarding padding endianness.
+    pad_t words{};
+    words.front() = bit_hi<byte_t>;
+    return words;
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad_one(words_t& words) NOEXCEPT
+{
+    // Pad a single whole block with pre-prepared buffer.
+    constexpr auto pad = block_pad();
+    words = pad;
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad_half(words_t& words) NOEXCEPT
+{
+    // Pad a half block.
+    constexpr auto pad = chunk_pad();
+
+    if (std::is_constant_evaluated())
+    {
+        words.at(8)  = pad.at(0);
+        words.at(9)  = pad.at(1);
+        words.at(10) = pad.at(2);
+        words.at(11) = pad.at(3);
+        words.at(12) = pad.at(4);
+        words.at(13) = pad.at(5);
+        words.at(14) = pad.at(6);
+        words.at(15) = pad.at(7);
+    }
+    else
+    {
+        constexpr auto size = array_count<chunk_t>;
+        array_cast<word_t, size, size>(words) = pad;
+    }
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad_n(words_t& words, count_t blocks) NOEXCEPT
+{
+    // Pad any number of whole blocks.
+    constexpr auto pad = stream_pad();
+    const auto bits = to_bits(blocks * array_count<block_t>);
+
+    if (std::is_constant_evaluated())
+    {
+        words.at(0)  = pad.at(0);
+        words.at(1)  = pad.at(1);
+        words.at(2)  = pad.at(2);
+        words.at(3)  = pad.at(3);
+        words.at(4)  = pad.at(4);
+        words.at(5)  = pad.at(5);
+        words.at(6)  = pad.at(6);
+        words.at(7)  = pad.at(7);
+        words.at(8)  = pad.at(8);
+        words.at(9)  = pad.at(9);
+        words.at(10) = pad.at(10);
+        words.at(11) = pad.at(11);
+        words.at(12) = pad.at(12);
+        words.at(13) = pad.at(13);
+        words.at(14) = lo_word<word_t>(bits);
+        words.at(15) = hi_word<word_t>(bits);
+    }
+    else
+    {
+        array_cast<word_t, array_count<pad_t>>(words) = pad;
+
+        // Split count into hi/low words and assign end of padded buffer (LE).
+        words[14] = lo_word<word_t>(bits);
+        words[15] = hi_word<word_t>(bits);
+    }
+}
+
 // Finalized hash functions.
 // ---------------------------------------------------------------------------
 
@@ -636,7 +633,7 @@ hash(const block_t& block) NOEXCEPT
     compress(state, words);
     pad_one(words);
     compress(state, words);
-    return finalize(state);
+    return output(state);
 }
 
 TEMPLATE
@@ -648,7 +645,7 @@ hash(const half_t& half) NOEXCEPT
     input(words, half);
     pad_half(words);
     compress(state, words);
-    return finalize(state);
+    return output(state);
 }
 
 // Streaming hash functions and finalizers.
@@ -677,24 +674,19 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
-constexpr void CLASS::
-pad(state_t& state, size_t blocks) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+finalize(state_t& state, size_t blocks) NOEXCEPT
 {
+    // The state out parameter is updated for first hash.
     words_t words{};
     pad_n(words, blocks);
     compress(state, words);
+    return output(state);
 }
 
 TEMPLATE
-constexpr void CLASS::
-finalize(digest_t& digest, const state_t& state) NOEXCEPT
-{
-    digest = output(state);
-}
-
-TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-finalize(const state_t& state) NOEXCEPT
+INLINE constexpr typename CLASS::digest_t CLASS::
+normalize(const state_t& state) NOEXCEPT
 {
     return output(state);
 }
