@@ -160,10 +160,33 @@ serialize(size_t size) NOEXCEPT
     // by Algorithm at the start of block processing. Algorithm padding
     // optimizations set values directly into buffer_t (in the word_t form).
 
-    if constexpr (Algorithm::big_end_count)
-        return to_big_endian_size<count_size>(to_bits(size));
+    if (std::is_constant_evaluated())
+    {
+        if constexpr (Algorithm::big_end_count)
+            return to_big_endian_size<count_size>(to_bits(size));
+        else
+            return to_little_endian_size<count_size>(to_bits(size));
+    }
     else
-        return to_little_endian_size<count_size>(to_bits(size));
+    {
+        if constexpr (is_integral_integer<count_t>)
+        {
+            // optimize conversion for all rmd/sha except sha512 (uint64_t).
+            const auto bits = possible_narrow_cast<count_t>(to_bits(size));
+
+            if constexpr (Algorithm::big_end_count)
+                return to_big_endian(bits);
+            else
+                return to_little_endian(bits);
+        }
+        else
+        {
+            if constexpr (Algorithm::big_end_count)
+                return to_big_endian_size<count_size>(to_bits(size));
+            else
+                return to_little_endian_size<count_size>(to_bits(size));
+        }
+    }
 }
 
 TEMPLATE

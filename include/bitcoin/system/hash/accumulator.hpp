@@ -107,6 +107,7 @@ public:
 protected:
     using half_t = typename Algorithm::half_t;
     using block_t = typename Algorithm::block_t;
+    using count_t = typename Algorithm::count_t;
     using counter = data_array<Algorithm::count_bytes>;
     using self = accumulator<Algorithm>;
 
