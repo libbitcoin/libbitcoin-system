@@ -21,51 +21,22 @@
 
 BOOST_AUTO_TEST_SUITE(functions_tests)
 
-BOOST_AUTO_TEST_CASE(functions__djb2_hash__alphanumeric__expected)
-{
-    const std::string alpha{ "01234567890abcdefghijklmnopqrstuvwxyz" };
-    const auto hash = djb2_hash(alpha);
-
-    if constexpr (sizeof(size_t) == sizeof(uint32_t))
-    {
-        BOOST_REQUIRE_EQUAL(hash, 3781598209_u32);
-    }
-    else
-    {
-        BOOST_REQUIRE_EQUAL(hash, 9646636626660989953_u64);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(functions__hash_combine__same_values__expected)
-{
-    const auto hash = hash_combine(3781598209_size, 3781598209_size);
-
-    if constexpr (sizeof(size_t) == sizeof(uint32_t))
-    {
-        BOOST_REQUIRE_EQUAL(hash, 598451203_u32);
-    }
-    else
-    {
-        BOOST_REQUIRE_EQUAL(hash, 4893418499_u64);
-    }
-}
-
 // rmd128
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_half128__null_hashes__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half128__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd128>::hash(rmd128::half_t{}), rmd_half128);
     BOOST_CHECK_EQUAL(rmd128_hash(rmd128::half_t{}), rmd_half128);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_one128__null_hashes__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one128__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd128>::hash(rmd128::block_t{}), rmd_full128);
     BOOST_CHECK_EQUAL(rmd128_hash(rmd128::block_t{}), rmd_full128);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two128__null_hashes__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two128__null_hashes__expected)
 {
     constexpr auto pair = std_array<uint8_t, array_count<rmd128::block_t> * two>{};
     constexpr auto rmd_pair128 = base16_array("1b94bc163383151a53fe49dadb7a4f0e");
@@ -76,19 +47,19 @@ BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two128__null_hashes__expec
 // rmd160
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_half160__null_hashes__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_half160__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd160>::hash(rmd160::half_t{}), rmd_half160);
     BOOST_CHECK_EQUAL(rmd160_hash(rmd160::half_t{}), rmd_half160);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_one160__null_hashes__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_one160__null_hashes__expected)
 {
     BOOST_CHECK_EQUAL(accumulator<rmd160>::hash(rmd160::block_t{}), rmd_full160);
     BOOST_CHECK_EQUAL(rmd160_hash(rmd160::block_t{}), rmd_full160);
 }
 
-BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two160__null_hashes__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd_hash_two160__null_hashes__expected)
 {
     constexpr auto pair = std_array<uint8_t, array_count<rmd160::block_t> * two>{};
     constexpr auto rmd_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
@@ -140,8 +111,8 @@ BOOST_AUTO_TEST_CASE(accumulator__sha_hash_two256__null_hashes__expected)
     constexpr auto pair = std_array<uint8_t, array_count<sha256::block_t> * two>{};
     constexpr auto sha_pair256 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
     BOOST_CHECK_EQUAL(accumulated<sha256>(sha256::block_t{}, sha256::block_t{}), sha_pair256);
+    BOOST_CHECK_EQUAL(sha256_hash2(sha256::block_t{}, sha256::block_t{}), sha_pair256);
     BOOST_CHECK_EQUAL(sha256_hash(pair), sha_pair256);
-    BOOST_CHECK_EQUAL(sha256_hash2(sha256::block_t{}, sha256::block_t{}), sha256_hash(pair));
 }
 
 // sha512
@@ -165,6 +136,38 @@ BOOST_AUTO_TEST_CASE(accumulator__sha_hash_two512__null_hashes__expected)
     constexpr auto sha_pair512 = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
     BOOST_CHECK_EQUAL(accumulated<sha512>(sha512::block_t{}, sha512::block_t{}), sha_pair512);
     BOOST_CHECK_EQUAL(sha512_hash(pair), sha_pair512);
+}
+
+// non-cryptographic hash functions
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(functions__djb2_hash__alphanumeric__expected)
+{
+    const std::string alpha{ "01234567890abcdefghijklmnopqrstuvwxyz" };
+    const auto hash = djb2_hash(alpha);
+
+    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    {
+        BOOST_REQUIRE_EQUAL(hash, 3781598209_u32);
+    }
+    else
+    {
+        BOOST_REQUIRE_EQUAL(hash, 9646636626660989953_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(functions__hash_combine__same_values__expected)
+{
+    const auto hash = hash_combine(3781598209_size, 3781598209_size);
+
+    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    {
+        BOOST_REQUIRE_EQUAL(hash, 598451203_u32);
+    }
+    else
+    {
+        BOOST_REQUIRE_EQUAL(hash, 4893418499_u64);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
