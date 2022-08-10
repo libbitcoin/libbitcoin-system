@@ -37,10 +37,7 @@ const auto reverse_chunk8 = base16_chunk("0807060504030201");
 
 BOOST_AUTO_TEST_CASE(endian__to_big_endian_size__uintx_to_data__expected)
 {
-// to_big_endian_size is RCONSTEXPR.
-#if defined(HAVE_RANGES)
     static_assert(to_big_endian_size<4>(value32) == array_forward);
-#endif
     BOOST_REQUIRE_EQUAL(to_big_endian_size<4>(value32), array_forward);
 }
 
@@ -52,9 +49,7 @@ BOOST_AUTO_TEST_CASE(endian__to_little_endian_size__uintx_to_data__expected)
 
 BOOST_AUTO_TEST_CASE(endian__to_endian_array_size__uint64_t__expected)
 {
-#if defined(HAVE_RANGES)
     static_assert(to_big_endian_size<8>(from_little_endian<uint64_t>(array8)) == reverse_array8);
-#endif
     static_assert(to_little_endian_size<8>(from_big_endian<uint64_t>(array8)) == reverse_array8);
     BOOST_REQUIRE_EQUAL(to_big_endian_size<8>(from_little_endian<uint64_t>(array8)), reverse_array8);
     BOOST_REQUIRE_EQUAL(to_little_endian_size<8>(from_big_endian<uint64_t>(array8)), reverse_array8);
@@ -65,18 +60,14 @@ BOOST_AUTO_TEST_CASE(endian__to_endian_array_size__uint64_t__expected)
 BOOST_AUTO_TEST_CASE(endian__to_big_endian_size__negative_full__expected)
 {
     constexpr data_array<mini_hash_size> full_mini_hash{ { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
-#if defined(HAVE_RANGES)
     static_assert(to_big_endian_size<mini_hash_size>(-1) == full_mini_hash);
-#endif
     BOOST_REQUIRE_EQUAL(to_big_endian_size<mini_hash_size>(-1), full_mini_hash);
 }
 
 BOOST_AUTO_TEST_CASE(endian__to_big_endian_size__negative_partial__expected)
 {
     constexpr data_array<mini_hash_size> half_mini_big{ { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 } };
-#if defined(HAVE_RANGES)
     static_assert(to_big_endian_size<mini_hash_size>(mask_right(-1, 24)) == half_mini_big);
-#endif
     BOOST_REQUIRE_EQUAL(to_big_endian_size<mini_hash_size>(mask_right(-1, 24)), half_mini_big);
 }
 

@@ -28,6 +28,9 @@
 namespace libbitcoin {
 namespace system {
 
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+
 // C++ standard: "The [shift] behavior is undefined if ... greater than or
 // equal to the width of the promoted left operand." So we must be careful to
 // not shift bytes by byte_bits (8). For this reason we specialize on byte-size
@@ -43,47 +46,50 @@ namespace system {
 // Fills Data to its preallocated size.
 
 template <typename Data, typename Integer, if_integer<Integer>>
-RCONSTEXPR Data to_big_data(Data&& bytes, Integer value) NOEXCEPT
+constexpr Data to_big_data(Data&& data, Integer value) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
     {
-        if (!bytes.empty())
-            bytes.front() = possible_sign_cast<uint8_t>(value);
+        if (!data.empty())
+            data.front() = possible_sign_cast<uint8_t>(value);
 
-        return std::move(bytes);
+        return std::move(data);
     }
     else
     {
-        // views_reverse is RCONSTEXPR.
-        for (auto& byte: views_reverse(bytes))
+        // Avoid pointer aliasing (byte& loop) using const termination.
+        for (auto byte = data.size(); byte > 0; --byte)
         {
-            byte = possible_narrow_and_sign_cast<uint8_t>(value);
+            data[sub1(byte)] = possible_narrow_and_sign_cast<uint8_t>(value);
             value >>= byte_bits;
         }
 
-        return std::move(bytes);
+        return std::move(data);
     }
 }
 
 template <typename Data, typename Integer, if_integer<Integer>>
-constexpr Data to_little_data(Data&& bytes, Integer value) NOEXCEPT
+constexpr Data to_little_data(Data&& data, Integer value) NOEXCEPT
 {
     if constexpr (is_one(sizeof(Integer)))
     {
-        if (!bytes.empty())
-            bytes.front() = possible_sign_cast<uint8_t>(value);
+        if (!data.empty())
+            data.front() = possible_sign_cast<uint8_t>(value);
 
-        return std::move(bytes);
+        return std::move(data);
     }
     else
     {
-        for (auto& byte: bytes)
+        // Avoid pointer aliasing (byte& loop) using const termination.
+        const auto size = data.size();
+
+        for (auto byte = 0; byte < size; ++byte)
         {
-            byte = possible_narrow_and_sign_cast<uint8_t>(value);
+            data[byte] = possible_narrow_and_sign_cast<uint8_t>(value);
             value >>= byte_bits;
         }
 
-        return std::move(bytes);
+        return std::move(data);
     }
 }
 
@@ -128,10 +134,7 @@ constexpr Integer from_big_array(size_t length,
         for (size_t byte = 0; byte < bytes; ++byte)
         {
             value <<= byte_bits;
-
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
             value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
-            BC_POP_WARNING()
         }
 
         return value;
@@ -154,10 +157,7 @@ VCONSTEXPR Integer from_big_chunk(size_t length,
         for (size_t byte = 0; byte < bytes; ++byte)
         {
             value <<= byte_bits;
-
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
             value |= possible_narrow_and_sign_cast<Integer>(data[byte]);
-            BC_POP_WARNING()
         }
 
         return value;
@@ -205,10 +205,7 @@ constexpr Integer from_little_array(size_t length,
         for (auto byte = bytes; byte > 0; --byte)
         {
             value <<= byte_bits;
-
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
             value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
-            BC_POP_WARNING()
         }
 
         return value;
@@ -231,10 +228,7 @@ VCONSTEXPR Integer from_little_chunk(size_t length,
         for (auto byte = bytes; byte > 0; --byte)
         {
             value <<= byte_bits;
-
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
             value |= possible_narrow_and_sign_cast<Integer>(data[sub1(byte)]);
-            BC_POP_WARNING()
         }
 
         return value;
@@ -243,5 +237,8 @@ VCONSTEXPR Integer from_little_chunk(size_t length,
 
 } // namespace system
 } // namespace libbitcoin
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 #endif
