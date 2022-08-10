@@ -29,33 +29,23 @@
 
 namespace libbitcoin {
 namespace system {
-    
-// Hash table keying.
-// ----------------------------------------------------------------------------
-
-// Value will vary with sizeof(size_t).
-// A DJB variation uses [^ byte] vs. [+ byte].
-// Objectives: deterministic, uniform distribution, efficient computation.
-INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
-{
-    // Nothing special here except that it tested well against collisions.
-    auto hash = 5381_size;
-
-    // Efficient sum of ((hash * 33) + byte) for all bytes.
-    for (const auto byte: data)
-        hash = (shift_left(hash, 5_size) + hash) + byte;
-
-    return hash;
-}
-
-// Combine hash values, such as a pair of djb2_hash outputs.
-INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
-{
-    return left ^ shift_left(right, one);
-}
 
 // General cryptographic hash functions.
 // ----------------------------------------------------------------------------
+// These functions optimize for half/N rmd160/sha1/sha256/512 block sizes.
+// They bypass accumulation, using precomputed padding and avoiding unnecessary
+// endianness conversions between double hashes. Array types are most efficient
+// as size is determined at compile time and vector casting is unnecessary.
+// For N full blocks of array data, the padding message schedule is computed at
+// compile time, saving apprimately 30% of the hash cost for the padding block.
+// For up to 1024 full blocks of non-array sha256 data, the same is applied.
+// data_chunk overloads write digest to the chunk buffer, avoiding copies.
+// Accumulator.write optimizes for writes of n > 0 blocks against an empty
+// buffer, forwarding the set of blocks (data modulo block size) to algorithm.
+// exclusive_slice is a specialization of data_slice which does not accept
+// array/vector. This allows overloading for all three data scenarios, where
+// optimizations are maximized for each independently.
+// Wallet-only sha512 and historical rmd128 are not optimized.
 
 // rmd128 [historical].
 INLINE half_hash rmd128_hash(const data_slice& data) NOEXCEPT
@@ -132,6 +122,7 @@ INLINE hash_digest sha256_hash(const hash_digest& left,
 INLINE hash_digest sha256_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
+    // Used by wallet functions on mixed left/right sizes.
     accumulator<sha256> context{};
     context.write(left);
     context.write(right);
@@ -209,6 +200,8 @@ INLINE hash_digest bitcoin_hash(const hash_digest& left,
 INLINE hash_digest bitcoin_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
+    // Used by wallet functions on mixed left/right sizes.
+    // double_flush performs second hash, avoiding endian conversion of state.
     accumulator<sha256> context{};
     context.write(left);
     context.write(right);
@@ -238,8 +231,32 @@ INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT
 // Litecoin scrypt hash [chain].
 INLINE hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 {
-    // Litecoin parameters, with concurrency enabled.
+    // Litecoin parameters, concurrency enabled (data is password and salt).
     return scrypt<1024, 1, 1, true>::hash<hash_size>(data, data);
+}
+
+// Hash table keying.
+// ----------------------------------------------------------------------------
+
+// Value will vary with sizeof(size_t).
+// A DJB variation uses [^ byte] vs. [+ byte].
+// Objectives: deterministic, uniform distribution, efficient computation.
+INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
+{
+    // Nothing special here except that it tested well against collisions.
+    auto hash = 5381_size;
+
+    // Efficient sum of ((hash * 33) + byte) for all bytes.
+    for (const auto byte : data)
+        hash = (shift_left(hash, 5_size) + hash) + byte;
+
+    return hash;
+}
+
+// Combine hash values, such as a pair of djb2_hash outputs.
+INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
+{
+    return left ^ shift_left(right, one);
 }
 
 } // namespace system

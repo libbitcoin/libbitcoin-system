@@ -22,15 +22,11 @@ BOOST_AUTO_TEST_SUITE(accumulator_tests)
 
 BOOST_AUTO_TEST_SUITE(accumulator_engine_tests)
 
-using algorithm = sha256;
-////using algorithm = sha512;
-////using algorithm = sha160;
-
-template <bool Checked>
+template <typename Algorithm, bool Checked = true>
 struct accessor
-  : accumulator<algorithm, Checked>
+  : accumulator<Algorithm, Checked>
 {
-    using base = accumulator<algorithm, Checked>;
+    using base = accumulator<Algorithm, Checked>;
     using base::base;
 
     constexpr size_t next_() const NOEXCEPT
@@ -41,6 +37,16 @@ struct accessor
     constexpr size_t gap_() const NOEXCEPT
     {
         return base::gap();
+    }
+
+    constexpr size_t is_full_() const NOEXCEPT
+    {
+        return base::is_full();
+    }
+
+    constexpr size_t is_empty_() const NOEXCEPT
+    {
+        return base::is_empty();
     }
 
     constexpr bool is_buffer_overflow_(size_t bytes) const NOEXCEPT
@@ -54,19 +60,25 @@ struct accessor
         return base::add_data(bytes, data);
     }
 
-    constexpr void increment_(size_t blocks) NOEXCEPT
+    size_t accumulate_(size_t bytes,
+        const typename base::byte_t* data) NOEXCEPT
     {
-        return base::increment(blocks);
+        return base::accumulate(bytes, data);
+    }
+
+    typename base::state_t flush_state_() NOEXCEPT
+    {
+        return base::flush_state();
+    }
+
+    static typename base::counter serialize_(size_t bytes) NOEXCEPT
+    {
+        return base::serialize(bytes);
     }
 
     constexpr size_t pad_size_() const NOEXCEPT
     {
         return base::pad_size();
-    }
-
-    static RCONSTEXPR typename base::counter serialize_(size_t bytes) NOEXCEPT
-    {
-        return base::serialize(bytes);
     }
 
     static CONSTEVAL typename base::block_t stream_pad_() NOEXCEPT
@@ -75,46 +87,94 @@ struct accessor
     }
 };
 
-using checked = accessor<true>;
-using unchecked = accessor<false>;
-constexpr auto block_size = array_count<algorithm::block_t>;
-constexpr auto count_size = algorithm::count_bytes;
+using checked = accessor<sha512, true>;
+using unchecked = accessor<sha512, false>;
+constexpr auto block_size = array_count<sha512::block_t>;
+constexpr auto count_size = sha512::count_bytes;
 
-// stream_pad
-constexpr auto expected_pad = algorithm::block_t{ bit_hi<algorithm::byte_t> };
-static_assert(checked::stream_pad_() == expected_pad);
-
-// construct/next/gap/pad_size
 BOOST_AUTO_TEST_CASE(accumulator__construct__default__initial)
 {
-    const checked writer{};
+    constexpr checked writer{};
+    BOOST_REQUIRE(writer.is_full_());
+    BOOST_REQUIRE(writer.is_empty_());
     BOOST_REQUIRE_EQUAL(writer.next_(), zero);
     BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
     BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
+
+    // state is the word_t/non-endianed digest of hashing an empty block.
+    ////BOOST_REQUIRE_EQUAL(writer.flush_state_(), state);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
 {
     constexpr auto blocks = 2u;
-    constexpr algorithm::state_t state{};
-
-    const checked writer{ state, blocks };
+    constexpr sha512::state_t state{ 42 };
+    constexpr checked writer{ state, blocks };
+    static_assert(writer.is_full_());
+    static_assert(writer.is_empty_());
+    static_assert(is_zero(writer.next_()));
+    static_assert(writer.gap_() == block_size);
+    static_assert(writer.pad_size_() == block_size - count_size);
+    BOOST_REQUIRE(writer.is_full_());
+    BOOST_REQUIRE(writer.is_empty_());
     BOOST_REQUIRE_EQUAL(writer.next_(), zero);
     BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
     BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
+
+    ////constexpr auto expected_state = sha512::hash(sha512::block_t{ 0 });
+    ////BOOST_REQUIRE_EQUAL(writer.flush_state_(), state);
 }
 
-// serialize conditionally constexpr (reverse views).
+BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
+{
+    // Test expectation limited to sha256.
+    using access = accessor<sha256>;
+    constexpr auto overflow = is_same_size<size_t, uint64_t>;
+    constexpr access writer{};
+    static_assert(!writer.is_buffer_overflow_(zero));
+    static_assert(writer.is_buffer_overflow_(max_size_t) == overflow);
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
+    BOOST_REQUIRE_EQUAL(writer.is_buffer_overflow_(max_size_t), overflow);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___unchecked__false)
+{
+    constexpr unchecked writer{};
+    static_assert(!writer.is_buffer_overflow_(zero));
+    static_assert(!writer.is_buffer_overflow_(max_size_t));
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
+    BOOST_REQUIRE(!writer.is_buffer_overflow_(max_size_t));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__stream_pad__always__expected)
+{
+    constexpr auto expected = sha512::block_t{ bit_hi<sha512::byte_t> };
+    static_assert(checked::stream_pad_() == expected);
+    constexpr checked writer{};
+    static_assert(writer.stream_pad_() == expected);
+    BOOST_REQUIRE_EQUAL(writer.stream_pad_(), expected);
+}
+
 BOOST_AUTO_TEST_CASE(accumulator__serialize__default__initial)
 {
+    // Test expectation limited to sha256.
+    using access = accessor<sha256>;
     constexpr auto count = 42u;
     constexpr auto count_bits = to_bits<uint16_t>(count);
-    constexpr auto count_lo = lo_word<algorithm::byte_t>(count_bits);
-    constexpr auto count_hi = hi_word<algorithm::byte_t>(count_bits);
-    using counter_t = std_array<algorithm::byte_t, algorithm::count_bytes>;
-    constexpr auto expected_counter = counter_t{ 0, 0, 0, 0, 0, 0, count_hi, count_lo };
-    BOOST_REQUIRE_EQUAL(checked::serialize_(count), expected_counter);
+    constexpr auto count_lo = lo_word<sha256::byte_t>(count_bits);
+    constexpr auto count_hi = hi_word<sha256::byte_t>(count_bits);
+    using counter_t = std_array<sha256::byte_t, sha256::count_bytes>;
+    constexpr auto expected = counter_t{ 0, 0, 0, 0, 0, 0, count_hi, count_lo };
+
+    // serialize is RCONSTEXPR (reverse views) but not conditionally enabled
+    // as it would complicate the use of INLINE on the same method.
+    BOOST_REQUIRE_EQUAL(access::serialize_(count), expected);
 }
+
+// write (captures test of add_data1/2 and accumulate)
+// ----------------------------------------------------------------------------
+// write is not constexpr due to unsafe_array_cast, which ensures algorithm
+// remains fully constexpr (by not accepting byte*).
 
 BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
 {
@@ -126,33 +186,19 @@ BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
 BOOST_AUTO_TEST_CASE(accumulator__write__nonzero__expected)
 {
     // Test expectation limited to sha256.
+    using access = accessor<sha256>;
+    constexpr auto size = array_count<sha256::block_t>;
     constexpr auto expected = base16_array("729e145a50396134c294aaf8e2daea0b7c89bb617cd58379ba4c2abdec2d1da7");
     constexpr auto bytes = 42u;
     constexpr auto blocks = 2u;
     constexpr data_array<bytes> data{};
-    constexpr algorithm::state_t state{};
-
-    checked writer{ state, blocks };
+    constexpr sha256::state_t state{};
+    access writer{ state, blocks };
     BOOST_REQUIRE(writer.write(data));
     BOOST_REQUIRE_EQUAL(writer.next_(), bytes);
-    BOOST_REQUIRE_EQUAL(writer.gap_(), block_size - bytes);
-    BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - bytes - algorithm::count_bytes);
+    BOOST_REQUIRE_EQUAL(writer.gap_(), size - bytes);
+    BOOST_REQUIRE_EQUAL(writer.pad_size_(), size - bytes - sha256::count_bytes);
     BOOST_REQUIRE_EQUAL(writer.flush(), expected);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
-{
-    constexpr auto overflow = is_same_size<size_t, uint64_t>;
-    const checked writer{};
-    BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
-    BOOST_REQUIRE_EQUAL(writer.is_buffer_overflow_(max_size_t), overflow);
-}
-
-BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___unchecked__false)
-{
-    const unchecked writer{};
-    BOOST_REQUIRE(!writer.is_buffer_overflow_(zero));
-    BOOST_REQUIRE(!writer.is_buffer_overflow_(max_size_t));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

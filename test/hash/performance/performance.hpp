@@ -178,69 +178,55 @@ public:
 // ----------------------------------------------------------------------------
 
 #if !defined(VISIBILE)
-template <size_t Strength, bool Vectorized, bool Concurrent>
+template <size_t Strength>
 using rmd_algorithm = rmd::algorithm<
-    iif<Strength == 160, rmd::h160<>, rmd::h128<>>, Vectorized, Concurrent>;
+    iif<Strength == 160, rmd::h160<>, rmd::h128<>>>;
 
-static_assert(is_same_type<rmd_algorithm<128, true, false>, rmd128>);
-static_assert(is_same_type<rmd_algorithm<160, true, false>, rmd160>);
+static_assert(is_same_type<rmd_algorithm<128>, rmd128>);
+static_assert(is_same_type<rmd_algorithm<160>, rmd160>);
 
-template <size_t Strength, bool Compressed, bool Vectorized, bool Concurrent>
+template <size_t Strength, bool Compressed, bool Vectorized, bool Cached>
 using sha_algorithm = sha::algorithm<
     iif<Strength == 256, sha::h256<>,
-    iif<Strength == 512, sha::h512<>, sha::h160>>, Compressed, Vectorized, Concurrent>;
+    iif<Strength == 512, sha::h512<>, sha::h160>>, Compressed, Vectorized, Cached>;
 
-static_assert(is_same_type<sha_algorithm<160, true, true, false>, sha160>);
-static_assert(is_same_type<sha_algorithm<256, true, true, false>, sha256>);
-static_assert(is_same_type<sha_algorithm<512, true, true, false>, sha512>);
+static_assert(is_same_type<sha_algorithm<160, true, true, true>, sha160>);
+static_assert(is_same_type<sha_algorithm<256, true, true, true>, sha256>);
+static_assert(is_same_type<sha_algorithm<512, true, true, true>, sha512>);
 
-template <size_t Strength, bool Compressed, bool Vectorized, bool Concurrent, bool Ripemd,
+template <size_t Strength, bool Compressed, bool Vectorized, bool Cached, bool Ripemd,
     bool_if<
        (!Ripemd && (Strength == 160 || Strength == 256 || Strength == 512)) ||
         (Ripemd && (Strength == 128 || Strength == 160))> = true>
-using hash_selector = iif<Ripemd,
-    rmd_algorithm<Strength, Vectorized, Concurrent>,
-    sha_algorithm<Strength, Compressed, Vectorized, Concurrent>>;
+using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
+    sha_algorithm<Strength, Compressed, Vectorized, Cached>>;
 
-static_assert(is_same_type<hash_selector<128, true, true, false, true>, rmd128>);
-static_assert(is_same_type<hash_selector<160, true, true, false, true>, rmd160>);
-static_assert(is_same_type<hash_selector<160, true, true, false, false>, sha160>);
-static_assert(is_same_type<hash_selector<256, true, true, false, false>, sha256>);
-static_assert(is_same_type<hash_selector<512, true, true, false, false>, sha512>);
+static_assert(is_same_type<hash_selector<128, true, true, false, true >, rmd128>);
+static_assert(is_same_type<hash_selector<160, true, true, false, true >, rmd160>);
+static_assert(is_same_type<hash_selector<160, true, true, true,  false>, sha160>);
+static_assert(is_same_type<hash_selector<256, true, true, true,  false>, sha256>);
+static_assert(is_same_type<hash_selector<512, true, true, true,  false>, sha512>);
 
-// RMD does not provide compression.
-////static_assert(hash_selector< 128, true,  true, true, true >::compressed);
-////static_assert(hash_selector< 160, true,  true, true, true >::compressed);
 static_assert(hash_selector< 160, true,  true, true, false>::compressed);
 static_assert(hash_selector< 256, true,  true, true, false>::compressed);
 static_assert(hash_selector< 512, true,  true, true, false>::compressed);
-////static_assert(!hash_selector<128, false, true, true, true >::compressed);
-////static_assert(!hash_selector<160, false, true, true, true >::compressed);
 static_assert(!hash_selector<160, false, true, true, false>::compressed);
 static_assert(!hash_selector<256, false, true, true, false>::compressed);
 static_assert(!hash_selector<512, false, true, true, false>::compressed);
 
-static_assert(hash_selector< 128, true, true,  true, true >::vectorized);
-static_assert(hash_selector< 160, true, true,  true, true >::vectorized);
 static_assert(hash_selector< 160, true, true,  true, false>::vectorized);
 static_assert(hash_selector< 256, true, true,  true, false>::vectorized);
 static_assert(hash_selector< 512, true, true,  true, false>::vectorized);
-static_assert(!hash_selector<128, true, false, true, true >::vectorized);
-static_assert(!hash_selector<160, true, false, true, true >::vectorized);
 static_assert(!hash_selector<160, true, false, true, false>::vectorized);
 static_assert(!hash_selector<256, true, false, true, false>::vectorized);
 static_assert(!hash_selector<512, true, false, true, false>::vectorized);
 
-static_assert(hash_selector< 128, true, true, true,  true >::concurrent);
-static_assert(hash_selector< 160, true, true, true,  true >::concurrent);
-static_assert(hash_selector< 160, true, true, true,  false>::concurrent);
-static_assert(hash_selector< 256, true, true, true,  false>::concurrent);
-static_assert(hash_selector< 512, true, true, true,  false>::concurrent);
-static_assert(!hash_selector<128, true, true, false, true >::concurrent);
-static_assert(!hash_selector<160, true, true, false, true >::concurrent);
-static_assert(!hash_selector<160, true, true, false, false>::concurrent);
-static_assert(!hash_selector<256, true, true, false, false>::concurrent);
-static_assert(!hash_selector<512, true, true, false, false>::concurrent);
+static_assert(hash_selector< 160, true, true, true,  false>::cached);
+static_assert(hash_selector< 256, true, true, true,  false>::cached);
+static_assert(hash_selector< 512, true, true, true,  false>::cached);
+static_assert(!hash_selector<160, true, true, false, false>::cached);
+static_assert(!hash_selector<256, true, true, false, false>::cached);
+static_assert(!hash_selector<512, true, true, false, false>::cached);
 
 template <typename Parameters>
 using algorithm = hash_selector<
@@ -290,31 +276,27 @@ bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
 // Algorithm::hash() test runner parameterization.
 // ----------------------------------------------------------------------------
 
-template <bool Compressed, bool Vectorized, bool Concurrent, bool Chunked>
+template <bool Compressed, bool Vectorized, bool Cached, bool Chunked>
 struct sha256_parameters : parameters
 {
     static constexpr size_t strength{ 256 };
-    static constexpr bool ripemd{ false };
+    static constexpr bool ripemd{};
     static constexpr bool compressed{ Compressed };
     static constexpr bool vectorized{ Vectorized };
-    static constexpr bool concurrent{ Concurrent };
+    static constexpr bool cached{ Cached };
     static constexpr bool chunked{ Chunked };
 };
 
-template <bool Compressed, bool Vectorized, bool Concurrent, bool Chunked>
+template <bool Chunked>
 struct rmd160_parameters : parameters
 {
     static constexpr size_t strength{ 160 };
     static constexpr bool ripemd{ true };
-    static constexpr bool compressed{ Compressed };
-    static constexpr bool vectorized{ Vectorized };
-    static constexpr bool concurrent{ Concurrent };
+    static constexpr bool compressed{};
+    static constexpr bool vectorized{};
+    static constexpr bool cached{};
     static constexpr bool chunked{ Chunked };
 };
-
-using sha256_optimal = sha256_parameters<false, false, false, false>;
-using rmd160_optimal = rmd160_parameters<false, false, false, false>;
-
 
 // baseline for performance tests
 // ----------------------------------------------------------------------------
@@ -366,39 +348,32 @@ inline auto base_accumulator(auto& data) noexcept
     BC_POP_WARNING()
 }
 
-// rmd160 baseline test runner.
+// baseline test runner.
 // ----------------------------------------------------------------------------
 
 namespace base {
-namespace rmd160 {
-
-struct base_parameters
+    
+template <typename Algorithm, bool Chunked>
+struct parameters
 {
-    static constexpr bool compressed{}; // intrinsic sha (ignored for rmd).
-    static constexpr bool vectorized{}; // algorithm vectorization.
-    static constexpr bool chunked{};    // false for array data.
-};
-
-struct base_default : base_parameters
-{
-    static constexpr bool compressed{ false };
-    static constexpr bool vectorized{ false };
-    static constexpr bool chunked{ false };
+    // baseline::CSHA256 or baseline::CRIPEMD160
+    using algorithm = Algorithm;
+    static constexpr bool chunked{ Chunked };
 };
 
 // Defaults to 1Mi rounds over 1KiB data (1GiB).
 template<typename Parameters,
     size_t Count = 1024 * 1024, // test iterations (1Mi)
-    size_t Size = 1024,         // bytes per iteration (1KiB)
-    if_base_of<base_parameters, Parameters> = true>
+    size_t Size = 1024>         // bytes per iteration (1KiB)
 bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
 {
     using P = Parameters;
+    using algorithm = typename P::algorithm;
     using Precision = std::chrono::nanoseconds;
     using Timer = timer<Precision>;
-    using Algorithm = baseline::CRIPEMD160;
-    using parameters = rmd160_parameters<P::compressed, P::vectorized, false,
-        P::chunked>;
+    using params = iif<is_same_type<algorithm, baseline::CSHA256>,
+        sha256_parameters<false, false, false, P::chunked>,
+        rmd160_parameters<P::chunked>>;
 
     uint64_t time = zero;
     for (size_t seed = 0; seed < Count; ++seed)
@@ -406,73 +381,17 @@ bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
         const auto data = get_data<Size, P::chunked>(seed);
         time += Timer::execution([&data]() noexcept
         {
-            base_accumulator<Algorithm>(*data);
+            base_accumulator<algorithm>(*data);
         });
     }
 
     // Dumping output also precludes compiler removal.
     // Return value, check to preclude compiler removal if output is bypassed.
-    output<parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    output<params, Count, Size, algorithm, Precision>(out, time, ghz, csv);
     return true;
 }
 
-} // namespace rmd160
 } // namespace base
-
-// sha256 baseline test runner.
-// ----------------------------------------------------------------------------
-
-namespace base {
-namespace sha256 {
-
-struct base_parameters
-{
-    static constexpr bool compressed{}; // intrinsic sha (ignored for rmd).
-    static constexpr bool vectorized{}; // algorithm vectorization.
-    static constexpr bool chunked{};    // false for array data.
-};
-
-// TODO: parameterize compression and vectorization in baseline.
-struct base_default : base_parameters
-{
-    static constexpr bool compressed{ false };
-    static constexpr bool vectorized{ false };
-    static constexpr bool chunked{ true };
-};
-
-// Defaults to 1Mi rounds over 1KiB data (1GiB).
-template<typename Parameters,
-    size_t Count = 1024 * 1024, // test iterations (1Mi)
-    size_t Size = 1024,         // bytes per iteration (1KiB)
-    if_base_of<base_parameters, Parameters> = true>
-bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
-{
-    using P = Parameters;
-    using Precision = std::chrono::nanoseconds;
-    using Timer = timer<Precision>;
-    using Algorithm = baseline::CSHA256;
-    using parameters = sha256_parameters<P::compressed, P::vectorized, false,
-        P::chunked>;
-
-    uint64_t time = zero;
-    for (size_t seed = 0; seed < Count; ++seed)
-    {
-        const auto data = get_data<Size, P::chunked>(seed);
-        time += Timer::execution([&data]() noexcept
-        {
-            base_accumulator<Algorithm>(*data);
-        });
-    }
-
-    // Dumping output also precludes compiler removal.
-    // Return value, check to preclude compiler removal if output is bypassed.
-    output<parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-    return true;
-}
-
-} // namespace sha256
-} // namespace base
-
 } // namespace performance
 
 #endif

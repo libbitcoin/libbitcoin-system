@@ -35,7 +35,7 @@ namespace sha {
 
 /// SHA hashing algorithm.
 template <typename SHA, bool Compressed = true, bool Vectorized = true,
-    bool Concurrent = false, if_same<typename SHA::T, shah_t> = true>
+    bool Cached = true, if_same<typename SHA::T, shah_t> = true>
 class algorithm : algorithm_t
 {
 public:
@@ -76,14 +76,17 @@ public:
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
     static constexpr auto compressed    = Compressed;
     static constexpr auto vectorized    = Vectorized;
-    static constexpr auto concurrent    = Concurrent;
+    static constexpr auto cached        = Cached;
     static constexpr auto big_end_count = true;
 
     /// Single hashing.
     /// -----------------------------------------------------------------------
 
-    static constexpr digest_t hash(const state_t& state) NOEXCEPT;
+    template <size_t Size>
+    static constexpr digest_t hash(const std_array<block_t, Size>& blocks) NOEXCEPT;
+    static constexpr digest_t hash(const blocks_t& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
+    static constexpr digest_t hash(const state_t& state) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t hash(const half_t& left,
         const half_t& right) NOEXCEPT;
@@ -91,6 +94,9 @@ public:
     /// Double hashing optimizations (sha256/512).
     /// -----------------------------------------------------------------------
 
+    template <size_t Size>
+    static constexpr digest_t double_hash(const std_array<block_t, Size>& blocks) NOEXCEPT;
+    static constexpr digest_t double_hash(const blocks_t& blocks) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& left,
@@ -108,7 +114,10 @@ public:
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
 
-    /// Finalize streaming state (converts state to big-endian bytes).
+    /// Pad a number of whole blocks.
+    static constexpr void pad(state_t& state, size_t blocks) NOEXCEPT;
+
+    /// Finalize streaming state (state to big-endian bytes).
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
     static constexpr void finalize(digest_t& digest,
         const state_t& state) NOEXCEPT;
@@ -160,7 +169,10 @@ protected:
 
     /// Padding
     /// -----------------------------------------------------------------------
-    INLINE static constexpr void pad_one(buffer_t& buffer) NOEXCEPT;
+    template <size_t Blocks>
+    INLINE static constexpr void schedule_n(buffer_t& buffer) NOEXCEPT;
+    INLINE static constexpr void schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT;
+    INLINE static constexpr void schedule_1(buffer_t& buffer) NOEXCEPT;
     INLINE static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
     INLINE static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
@@ -177,14 +189,13 @@ protected:
         const blocks_t& blocks) NOEXCEPT;
 
 private:
-    // Specialized padding type.
-    using blocks_pad_t = std_array<word_t, subtract(SHA::block_words,
+    using pad_t = std_array<word_t, subtract(SHA::block_words,
         count_bytes / SHA::word_bytes)>;
 
-    static CONSTEVAL auto& concurrency() NOEXCEPT;
+    template <size_t Blocks>
+    static CONSTEVAL buffer_t scheduled_pad() NOEXCEPT;
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
-    static CONSTEVAL buffer_t block_pad() NOEXCEPT;
-    static CONSTEVAL blocks_pad_t blocks_pad() NOEXCEPT;
+    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 };
 
 } // namespace sha

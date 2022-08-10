@@ -33,9 +33,8 @@ namespace libbitcoin {
 namespace system {
 namespace rmd {
 
-#define TEMPLATE template <typename RMD, bool Vectorized, bool Concurrent, \
-    if_same<typename RMD::T, rmdh_t> If>
-#define CLASS algorithm<RMD, Vectorized, Concurrent, If>
+#define TEMPLATE template <typename RMD, if_same<typename RMD::T, rmdh_t> If>
+#define CLASS algorithm<RMD, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -47,13 +46,18 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-CONSTEVAL auto& CLASS::
-concurrency() NOEXCEPT
+CONSTEVAL typename CLASS::words_t CLASS::
+block_pad() NOEXCEPT
 {
-    if constexpr (Concurrent)
-        return bc::par_unseq;
-    else
-        return bc::seq;
+    // See comments in accumulator regarding padding endianness.
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
+    constexpr auto hi = sub1(array_count<words_t>);
+    constexpr auto lo = sub1(hi);
+
+    words_t words{};
+    words.front() = bit_hi<byte_t>;
+    words[lo] = to_bits(bytes);
+    return words;
 }
 
 TEMPLATE
@@ -72,26 +76,11 @@ chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::words_t CLASS::
-block_pad() NOEXCEPT
+CONSTEVAL typename CLASS::pad_t CLASS::
+stream_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
-    constexpr auto hi = sub1(array_count<words_t>);
-    constexpr auto lo = sub1(hi);
-
-    words_t words{};
-    words.front() = bit_hi<byte_t>;
-    words[lo] = to_bits(bytes);
-    return words;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::blocks_pad_t CLASS::
-blocks_pad() NOEXCEPT
-{
-    // See comments in accumulator regarding padding endianness.
-    blocks_pad_t words{};
+    pad_t words{};
     words.front() = bit_hi<byte_t>;
     return words;
 }
@@ -434,7 +423,7 @@ INLINE constexpr void CLASS::
 pad_n(words_t& words, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks.
-    constexpr auto pad = blocks_pad();
+    constexpr auto pad = stream_pad();
     const auto bits = to_bits(blocks * array_count<block_t>);
 
     if (std::is_constant_evaluated())
@@ -458,7 +447,7 @@ pad_n(words_t& words, count_t blocks) NOEXCEPT
     }
     else
     {
-        array_cast<word_t, array_count<blocks_pad_t>>(words) = pad;
+        array_cast<word_t, array_count<pad_t>>(words) = pad;
 
         // Split count into hi/low words and assign end of padded buffer (LE).
         words[14] = lo_word<word_t>(bits);
@@ -600,15 +589,41 @@ output(const state_t& state) NOEXCEPT
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
-hash(const half_t& half) NOEXCEPT
+hash(const blocks_t& blocks) NOEXCEPT
 {
     words_t words{};
     auto state = H::get;
 
-    input(words, half);
-    pad_half(words);
+    for (auto& block: blocks)
+    {
+        input(words, block);
+        compress(state, words);
+    }
+
+    // rmd does not precompute multi-block padding, as there is no schedule.
+    pad_n(words, blocks.size());
     compress(state, words);
-    return finalize(state);
+    return output(state);
+}
+
+TEMPLATE
+template <size_t Size>
+constexpr typename CLASS::digest_t CLASS::
+hash(const std_array<block_t, Size>& blocks) NOEXCEPT
+{
+    words_t words{};
+    auto state = H::get;
+
+    for (auto& block: blocks)
+    {
+        input(words, block);
+        compress(state, words);
+    }
+
+    // rmd does not precompute multi-block padding, as there is no schedule.
+    pad_n(words, blocks.size());
+    compress(state, words);
+    return output(state);
 }
 
 TEMPLATE
@@ -617,12 +632,21 @@ hash(const block_t& block) NOEXCEPT
 {
     words_t words{};
     auto state = H::get;
-
     input(words, block);
     compress(state, words);
-
-    // pad_one is fully precomputed.
     pad_one(words);
+    compress(state, words);
+    return finalize(state);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(const half_t& half) NOEXCEPT
+{
+    words_t words{};
+    auto state = H::get;
+    input(words, half);
+    pad_half(words);
     compress(state, words);
     return finalize(state);
 }
@@ -650,6 +674,15 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
         input(words, block);
         compress(state, words);
     }
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad(state_t& state, size_t blocks) NOEXCEPT
+{
+    words_t words{};
+    pad_n(words, blocks);
+    compress(state, words);
 }
 
 TEMPLATE

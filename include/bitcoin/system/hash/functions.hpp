@@ -64,15 +64,6 @@ constexpr mini_hash null_mini_hash{};
 /// Consensus sentinel hash [signature hashing].
 constexpr hash_digest one_hash = from_uintx(uint256_t(one));
 
-/// Hash table keying.
-/// ---------------------------------------------------------------------------
-
-/// DJB2 hash key algorithm [Daniel J. Bernstein] [hash tables].
-INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT;
-
-/// Combine hash values, such as a pair of djb2_hash outputs [hash tables].
-INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT;
-
 /// Generalized cryptographic hash functions.
 /// ---------------------------------------------------------------------------
 
@@ -158,6 +149,15 @@ INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT;
 
 /// Litecoin scrypt hash [chain].
 INLINE hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
+
+/// Hash table keying.
+/// ---------------------------------------------------------------------------
+
+/// DJB2 hash key algorithm [Daniel J. Bernstein] [hash tables].
+INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT;
+
+/// Combine hash values, such as a pair of djb2_hash outputs [hash tables].
+INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

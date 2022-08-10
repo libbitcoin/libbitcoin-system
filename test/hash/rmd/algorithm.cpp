@@ -29,9 +29,7 @@ static_assert(rmd160::hash(rmd160::block_t{}) == rmd_full160);
 
 // rmd128
 // ----------------------------------------------------------------------------
-static_assert(!rmd128::concurrent);
 
-// rmd128::hash
 BOOST_AUTO_TEST_CASE(sha__rmd128_hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
@@ -39,7 +37,6 @@ BOOST_AUTO_TEST_CASE(sha__rmd128_hash__null_hash__expected)
     BOOST_REQUIRE_EQUAL(rmd128::hash(rmd128::block_t{}), rmd_full128);
 }
 
-// accumulator<rmd128>::hash
 BOOST_AUTO_TEST_CASE(sha__accumulator_rmd128_hash__test_vectors__expected)
 {
     // Verify non-const-evaluated to against public vectors.
@@ -50,23 +47,8 @@ BOOST_AUTO_TEST_CASE(sha__accumulator_rmd128_hash__test_vectors__expected)
     }
 }
 
-// accumulator<rmd_128>::hash (concurrent)
-BOOST_AUTO_TEST_CASE(sha__concurrent_accumulator_rmd128_hash__test_vectors__expected)
-{
-    using rmd_128 = rmd::algorithm<rmd::h128<>, true, true>;
-    static_assert(rmd_128::concurrent);
-
-    // Verify non-const-evaluated to against public vectors.
-    for (const auto& test: rmd128_tests)
-    {
-        const auto hash = accumulator<rmd_128>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
-}
-
 // rmd160
 // ----------------------------------------------------------------------------
-static_assert(!rmd160::concurrent);
 
 BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__null_hash__expected)
 {
@@ -81,20 +63,6 @@ BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
     for (const auto& test: rmd160_tests)
     {
         const auto hash = accumulator<rmd160>::hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
-}
-
-// accumulator<rmd_128>::hash (concurrent)
-BOOST_AUTO_TEST_CASE(rmd__concurrent_rmd160_hash__test_vectors__expected)
-{
-    using rmd_160 = rmd::algorithm<rmd::h160<>, true, true>;
-    static_assert(rmd_160::concurrent);
-
-    // Verify non-const-evaluated to against public vectors
-    for (const auto& test: rmd160_tests)
-    {
-        const auto hash = accumulator<rmd_160>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }

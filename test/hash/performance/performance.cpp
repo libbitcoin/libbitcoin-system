@@ -37,8 +37,20 @@
 BOOST_AUTO_TEST_SUITE(performance_tests)
 
 using namespace performance;
+using rmd160a          = rmd160_parameters<false>;
+using rmd160c          = rmd160_parameters<true>;
+using sha256a_cached   = sha256_parameters<true, true, true,  false>;
+using sha256c_cached   = sha256_parameters<true, true, true,  true>;
+using sha256a_uncached = sha256_parameters<true, true, false, false>;
+using sha256c_uncached = sha256_parameters<true, true, false, true>;
 
-BOOST_AUTO_TEST_CASE(performance__baseline__sha256)
+using namespace baseline;
+using base_rmd160a     = base::parameters<CRIPEMD160, false>;
+using base_rmd160c     = base::parameters<CRIPEMD160, true>;
+using base_sha256a     = base::parameters<CSHA256, false>;
+using base_sha256c     = base::parameters<CSHA256, true>;
+
+BOOST_AUTO_TEST_CASE(performance__base_sha256a)
 {
 #if !defined(VISIBLE)
     // test____________: performance__baseline__sha256
@@ -128,16 +140,15 @@ BOOST_AUTO_TEST_CASE(performance__baseline__sha256)
     // ms_per_byte_____: 1.67484e-05
 #endif
 
-    using namespace performance::base::sha256;
     auto complete = true;
-    //complete = test_hash<base_default, 1024*1024, 1024>(std::cout);
-    //complete = test_hash<base_default, 16*1024*1024, 64>(std::cout);
-    //complete = test_hash<base_default, 32*1024*1024, 32>(std::cout);
-    //complete = test_hash<base_default, 1, 1024*1024*1024>(std::cout);
+    complete = base::test_hash<base_sha256a, 1024*1024, 1024>(std::cout);
+    complete = base::test_hash<base_sha256a, 16*1024*1024, 64>(std::cout);
+    complete = base::test_hash<base_sha256a, 32*1024*1024, 32>(std::cout);
+    complete = base::test_hash<base_sha256a, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__optimal__sha256)
+BOOST_AUTO_TEST_CASE(performance__sha256a_cached)
 {
 #if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
@@ -520,16 +531,15 @@ BOOST_AUTO_TEST_CASE(performance__optimal__sha256)
     // 470%
 #endif
 
-    using namespace performance;
     auto complete = true;
-    //complete = test_hash<sha256_optimal, 1024*1024, 1024>(std::cout);
-    //complete = test_hash<sha256_optimal, 16*1024*1024, 64>(std::cout);
-    //complete = test_hash<sha256_optimal, 32*1024*1024, 32>(std::cout);
-    //complete = test_hash<sha256_optimal, 1, 1024*1024*1024>(std::cout);
+    complete = test_hash<sha256a_cached, 1024*1024, 1024>(std::cout);
+    complete = test_hash<sha256a_cached, 16*1024*1024, 64>(std::cout);
+    complete = test_hash<sha256a_cached, 32*1024*1024, 32>(std::cout);
+    complete = test_hash<sha256a_cached, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__baseline__rmd160)
+BOOST_AUTO_TEST_CASE(performance__base_rmd160a)
 {
 #if !defined(VISIBLE)
     // test____________: performance__baseline__rmd160
@@ -576,16 +586,15 @@ BOOST_AUTO_TEST_CASE(performance__baseline__rmd160)
     // ms_per_byte_____: 2.19298e-05
 #endif
 
-    using namespace performance::base::rmd160;
     auto complete = true;
-    //complete = test_hash<base_default, 1024*1024, 1024>(std::cout);
-    //complete = test_hash<base_default, 16*1024*1024, 64>(std::cout);
-    //complete = test_hash<base_default, 32*1024*1024, 32>(std::cout);
-    //complete = test_hash<base_default, 1, 1024*1024*1024>(std::cout);
+    complete = base::test_hash<base_rmd160a, 1024*1024, 1024>(std::cout);
+    complete = base::test_hash<base_rmd160a, 16*1024*1024, 64>(std::cout);
+    complete = base::test_hash<base_rmd160a, 32*1024*1024, 32>(std::cout);
+    complete = base::test_hash<base_rmd160a, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__optimal__rmd160)
+BOOST_AUTO_TEST_CASE(performance__rmd160a)
 {
 #if !defined(VISIBLE)
     // 1 round (lowest overhead, best measure of pure hashing)
@@ -843,12 +852,11 @@ BOOST_AUTO_TEST_CASE(performance__optimal__rmd160)
 
 #endif
 
-    using namespace performance;
     auto complete = true;
-    //complete = test_hash<rmd160_optimal, 1024*1024, 1024>(std::cout);
-    //complete = test_hash<rmd160_optimal, 16*1024*1024, 64>(std::cout);
-    //complete = test_hash<rmd160_optimal, 32*1024*1024, 32>(std::cout);
-    //complete = test_hash<rmd160_optimal, 1, 1024*1024*1024>(std::cout);
+    complete = test_hash<rmd160a, 1024*1024, 1024>(std::cout);
+    complete = test_hash<rmd160a, 16*1024*1024, 64>(std::cout);
+    complete = test_hash<rmd160a, 32*1024*1024, 32>(std::cout);
+    complete = test_hash<rmd160a, 1, 1024*1024*1024>(std::cout);
     BOOST_CHECK(complete);
 }
 

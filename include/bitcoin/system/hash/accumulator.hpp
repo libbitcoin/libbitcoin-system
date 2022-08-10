@@ -141,11 +141,11 @@ protected:
     /// Pad buffer, accumulate and return state (not endian final).
     INLINE state_t flush_state() NOEXCEPT;
 
-    /// Compute pad size, reserve space for counter serialization.
-    INLINE constexpr size_t pad_size() const NOEXCEPT;
-
     /// Serialize the hashed byte count for finalization
     INLINE static counter serialize(size_t size) NOEXCEPT;
+
+    /// Compute pad size, reserve space for counter serialization.
+    INLINE constexpr size_t pad_size() const NOEXCEPT;
 
     /// Precomputed streaming pad buffer.
     static CONSTEVAL block_t stream_pad() NOEXCEPT;
@@ -153,7 +153,7 @@ protected:
 private:
     size_t size_;
     state_t state_;
-    block_t buffer_;
+    block_t buffer_{};
 };
 
 } // namespace system

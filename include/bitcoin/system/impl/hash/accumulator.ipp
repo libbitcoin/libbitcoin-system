@@ -33,11 +33,9 @@ namespace system {
 #define CLASS accumulator<Algorithm, Checked, If>
 
 // Copy and array index are guarded.
-// Buffer initialization is not required due to logical sizing.
 BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_UNINITIALZIED_MEMBER)
 
 // private
 // ----------------------------------------------------------------------------
@@ -130,22 +128,21 @@ TEMPLATE
 INLINE typename CLASS::state_t CLASS::
 flush_state() NOEXCEPT
 {
-    constexpr auto pad = stream_pad();
-    const auto size = size_;
-    write(pad_size(), pad.data());
-    write(count_size, serialize(size).data());
-    return state_;
-}
-
-TEMPLATE
-INLINE constexpr size_t CLASS::
-pad_size() const NOEXCEPT
-{
-    constexpr auto singled = block_size - count_size;
-    constexpr auto doubled = block_size + singled;
-
-    const auto used = next();
-    return (used < singled ? singled - used : doubled - used);
+    if (is_empty())
+    {
+        // Algorithm has whole block padding optimization.
+        Algorithm::pad(state_, size_ / block_size);
+        return state_;
+    }
+    else
+    {
+        // Algorithm does not have partial block padding.
+        constexpr auto pad = stream_pad();
+        const auto size = size_;
+        write(pad_size(), pad.data());
+        write(count_size, serialize(size).data());
+        return state_;
+    }
 }
 
 TEMPLATE
@@ -182,6 +179,17 @@ serialize(size_t size) NOEXCEPT
     {
         return to_little_endian_size<count_size>(to_bits(size));
     }
+}
+
+TEMPLATE
+INLINE constexpr size_t CLASS::
+pad_size() const NOEXCEPT
+{
+    constexpr auto singled = block_size - count_size;
+    constexpr auto doubled = block_size + singled;
+
+    const auto used = next();
+    return (used < singled ? singled - used : doubled - used);
 }
 
 TEMPLATE
@@ -337,6 +345,10 @@ hash(const data_array<Size>& data) NOEXCEPT
     {
         return Algorithm::hash(data);
     }
+    else if constexpr (is_multiple(Size, block_size))
+    {
+        return Algorithm::hash(array_cast<block_t>(data));
+    }
     else
     {
         self context{};
@@ -356,6 +368,11 @@ hash(size_t size, const byte_t* data) NOEXCEPT
     else if (size == block_size)
     {
         return self::hash(unsafe_array_cast<uint8_t, block_size>(data));
+    }
+    else if (is_multiple(size, block_size))
+    {
+        const auto blocks = size / block_size;
+        return Algorithm::hash(unsafe_vector_cast<block_t>(data, blocks));
     }
     else
     {
@@ -391,6 +408,10 @@ double_hash(const data_array<Size>& data) NOEXCEPT
     {
         return Algorithm::double_hash(data);
     }
+    else if constexpr (is_multiple(Size, block_size))
+    {
+        return Algorithm::double_hash(array_cast<block_t>(data));
+    }
     else
     {
         self context{};
@@ -410,6 +431,11 @@ double_hash(size_t size, const byte_t* data) NOEXCEPT
     else if (size == block_size)
     {
         return self::double_hash(unsafe_array_cast<uint8_t, block_size>(data));
+    }
+    else if (is_multiple(size, block_size))
+    {
+        const auto blocks = size / block_size;
+        return Algorithm::double_hash(unsafe_vector_cast<block_t>(data, blocks));
     }
     else
     {
@@ -509,7 +535,6 @@ double_hash_chunk(const exclusive_slice& data) NOEXCEPT
     return self::double_hash_chunk(data.size(), data.data());
 }
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

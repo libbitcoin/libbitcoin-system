@@ -39,8 +39,8 @@ namespace sha {
 // TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
 
 #define TEMPLATE template <typename SHA, bool Compressed, bool Vectorized, \
-    bool Concurrent, if_same<typename SHA::T, shah_t> If>
-#define CLASS algorithm<SHA, Compressed, Vectorized, Concurrent, If>
+    bool Cached, if_same<typename SHA::T, shah_t> If>
+#define CLASS algorithm<SHA, Compressed, Vectorized, Cached, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -422,13 +422,22 @@ INLINE constexpr auto xor_(Word a, Word b) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-CONSTEVAL auto& CLASS::
-concurrency() NOEXCEPT
+template<size_t Blocks>
+CONSTEVAL typename CLASS::buffer_t CLASS::
+scheduled_pad() NOEXCEPT
 {
-    if constexpr (Concurrent)
-        return bc::par_unseq;
-    else
-        return bc::seq;
+    // This precomputed padding is limited to one word of counter.
+    static_assert(Blocks <= maximum<word_t> / byte_bits);
+
+    // See comments in accumulator regarding padding endianness.
+    constexpr auto index = sub1(array_count<words_t>);
+    constexpr auto bytes = safe_multiply(Blocks, array_count<block_t>);
+
+    buffer_t out{};
+    out.front() = bit_hi<word_t>;
+    out.at(index) = possible_narrow_cast<word_t>(to_bits(bytes));
+    schedule(out);
+    return out;
 }
 
 TEMPLATE
@@ -445,26 +454,12 @@ chunk_pad() NOEXCEPT
 }
 
 TEMPLATE
-CONSTEVAL typename CLASS::blocks_pad_t CLASS::
-blocks_pad() NOEXCEPT
+CONSTEVAL typename CLASS::pad_t CLASS::
+stream_pad() NOEXCEPT
 {
     // See comments in accumulator regarding padding endianness.
-    blocks_pad_t out{};
+    pad_t out{};
     out.front() = bit_hi<word_t>;
-    return out;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::buffer_t CLASS::
-block_pad() NOEXCEPT
-{
-    constexpr auto index = sub1(array_count<words_t>);
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
-
-    buffer_t out{};
-    out.front() = bit_hi<word_t>;
-    out.at(index) = to_bits(bytes);
-    schedule(out);
     return out;
 }
 
@@ -987,25 +982,129 @@ input(buffer_t& buffer, const state_t& state) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
+template<size_t Blocks>
 INLINE constexpr void CLASS::
-pad_one(buffer_t& buffer) NOEXCEPT
+schedule_n(buffer_t& buffer) NOEXCEPT
 {
-    // Pad a single whole block with pre-prepared buffer.
-    constexpr auto pad = block_pad();
+    // Scheduled padding for n whole blocks.
+    // This will compile in 4*64 (sha256) or 4*128 (sha512) bytes for each
+    // unique size of blocks array hashed by callers (by template expansion).
+    // and one for each that is cached for block vectors (by vector size).
+    // Given that this is template, non-cache expansion is embedded externally
+    // except for calls within library compilation units (limited).
+    constexpr auto pad = scheduled_pad<Blocks>();
     buffer = pad;
+}
+
+TEMPLATE
+INLINE constexpr void CLASS::
+schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
+{
+    // This optimization is an ~30 savings in message scheduling for one out of
+    // N blocks: (N + 70%)/(N + 100%). So the proportional benefit decreases
+    // exponentially with increasing N. For arbitrary data lengths this will
+    // benefit 1/64 hashes on average. So cache size is strictly limited.
+
+    // Get scheduled buffer from cache or generate.
+    // 8KiB of scheduled padding is explicitly cached.
+    // sha160:  9*4*64 bytes
+    // sha256: 17*4*64 bytes
+    // sha512: 3*4*128 bytes
+    if constexpr (Cached)
+    {
+        if constexpr (SHA::strength == 160)
+        {
+            switch (blocks)
+            {
+                case 0: schedule_n<0>(buffer); return;
+                case 1: schedule_n<1>(buffer); return;
+                case 2: schedule_n<2>(buffer); return;
+                case 3: schedule_n<3>(buffer); return;
+                case 4: schedule_n<4>(buffer); return;
+                case 5: schedule_n<5>(buffer); return;
+                case 6: schedule_n<6>(buffer); return;
+                case 7: schedule_n<7>(buffer); return;
+                case 8: schedule_n<8>(buffer); return;
+                default:
+                {
+                    pad_n(buffer, blocks);
+                    schedule(buffer);
+                    return;
+                }
+            }
+        }
+        else if constexpr (SHA::strength == 256)
+        {
+            switch (blocks)
+            {
+                case 0: schedule_n<0>(buffer); return;
+                case 1: schedule_n<1>(buffer); return;
+                case 2: schedule_n<2>(buffer); return;
+                case 3: schedule_n<3>(buffer); return;
+                case 4: schedule_n<4>(buffer); return;
+                case 5: schedule_n<5>(buffer); return;
+                case 6: schedule_n<6>(buffer); return;
+                case 7: schedule_n<7>(buffer); return;
+                case 8: schedule_n<8>(buffer); return;
+                case 9: schedule_n<9>(buffer); return;
+                case 10: schedule_n<10>(buffer); return;
+                case 11: schedule_n<11>(buffer); return;
+                case 12: schedule_n<12>(buffer); return;
+                case 13: schedule_n<13>(buffer); return;
+                case 14: schedule_n<14>(buffer); return;
+                case 15: schedule_n<15>(buffer); return;
+                case 16: schedule_n<16>(buffer); return;
+                default:
+                {
+                    pad_n(buffer, blocks);
+                    schedule(buffer);
+                    return;
+                }
+            }
+        }
+        else // SHA::strength == 512
+        {
+            switch (blocks)
+            {
+                case 0: schedule_n<0>(buffer); return;
+                case 1: schedule_n<1>(buffer); return;
+                case 2: schedule_n<2>(buffer); return;
+                default:
+                {
+                    pad_n(buffer, blocks);
+                    schedule(buffer);
+                    return;
+                }
+            }
+        }
+    }
+    else
+    {
+        pad_n(buffer, blocks);
+        schedule(buffer);
+        return;
+    }
+}
+
+TEMPLATE
+INLINE constexpr void CLASS::
+schedule_1(buffer_t& buffer) NOEXCEPT
+{
+    // This ensures single block padding is always prescheduled.
+    schedule_n<one>(buffer);
 }
 
 TEMPLATE
 INLINE constexpr void CLASS::
 pad_half(buffer_t& buffer) NOEXCEPT
 {
-    // Pad a half block.
+    // Pad for any half block, unscheduled buffer.
     constexpr auto pad = chunk_pad();
 
     if (std::is_constant_evaluated())
     {
-        buffer.at(8)  = pad.at(0);
-        buffer.at(9)  = pad.at(1);
+        buffer.at(8) = pad.at(0);
+        buffer.at(9) = pad.at(1);
         buffer.at(10) = pad.at(2);
         buffer.at(11) = pad.at(3);
         buffer.at(12) = pad.at(4);
@@ -1024,8 +1123,8 @@ TEMPLATE
 INLINE constexpr void CLASS::
 pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 {
-    // Pad any number of whole blocks.
-    constexpr auto pad = blocks_pad();
+    // Pad any number of whole blocks, unscheduled buffer.
+    constexpr auto pad = stream_pad();
     const auto bits = to_bits(blocks * array_count<block_t>);
 
     if (std::is_constant_evaluated())
@@ -1049,7 +1148,7 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
     }
     else
     {
-        array_cast<word_t, array_count<blocks_pad_t>>(buffer) = pad;
+        array_cast<word_t, array_count<pad_t>>(buffer) = pad;
 
         // Split count into hi/low words and assign end of padded buffer.
         buffer[14] = hi_word<word_t>(bits);
@@ -1235,17 +1334,41 @@ output(const state_t& state) NOEXCEPT
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
-hash(const state_t& state) NOEXCEPT
+hash(const blocks_t& blocks) NOEXCEPT
 {
-    static_assert(is_same_type<state_t, chunk_t>);
-
     buffer_t buffer{};
-    auto state2 = H::get;
-    input(buffer, state);
-    pad_half(buffer);
-    schedule(buffer);
-    compress(state2, buffer);
-    return output(state2);
+    auto state = H::get;
+
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+
+    schedule_n(buffer, blocks.size());
+    compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
+template <size_t Size>
+constexpr typename CLASS::digest_t CLASS::
+hash(const std_array<block_t, Size>& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    auto state = H::get;
+
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+
+    schedule_n<Size>(buffer);
+    compress(state, buffer);
+    return output(state);
 }
 
 TEMPLATE
@@ -1257,9 +1380,24 @@ hash(const block_t& block) NOEXCEPT
     input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
-    pad_one(buffer);
+    schedule_1(buffer);
     compress(state, buffer);
     return output(state);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(const state_t& state) NOEXCEPT
+{
+    static_assert(is_same_type<state_t, chunk_t>);
+
+    buffer_t buffer{};
+    auto state2 = H::get;
+    input(buffer, state);
+    pad_half(buffer);
+    schedule(buffer);
+    compress(state2, buffer);
+    return output(state2);
 }
 
 TEMPLATE
@@ -1285,7 +1423,7 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
     input2(buffer, right);
     schedule(buffer);
     compress(state, buffer);
-    pad_one(buffer);
+    schedule_1(buffer);
     compress(state, buffer);
     return output(state);
 }
@@ -1293,6 +1431,63 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 // Double Hashing.
 // ---------------------------------------------------------------------------
 // No double_hash optimizations for sha160 (requires chunk_t/half_t).
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const blocks_t& blocks) NOEXCEPT
+{
+    static_assert(is_same_type<state_t, chunk_t>);
+
+    buffer_t buffer{};
+    auto state = H::get;
+
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+
+    schedule_n(buffer, blocks.size());
+    compress(state, buffer);
+
+    // Second hash
+    input(buffer, state);
+    pad_half(buffer);
+    schedule(buffer);
+    state = H::get;
+    compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
+template <size_t Size>
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const std_array<block_t, Size>& blocks) NOEXCEPT
+{
+    static_assert(is_same_type<state_t, chunk_t>);
+
+    buffer_t buffer{};
+    auto state = H::get;
+
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+
+    schedule_n<Size>(buffer);
+    compress(state, buffer);
+
+    // Second hash
+    input(buffer, state);
+    pad_half(buffer);
+    schedule(buffer);
+    state = H::get;
+    compress(state, buffer);
+    return output(state);
+}
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
@@ -1306,9 +1501,10 @@ double_hash(const block_t& block) NOEXCEPT
     input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
-    pad_one(buffer);
+    schedule_1(buffer);
     compress(state, buffer);
 
+    // Second hash
     input(buffer, state);
     pad_half(buffer);
     schedule(buffer);
@@ -1330,6 +1526,7 @@ double_hash(const half_t& half) NOEXCEPT
     schedule(buffer);
     compress(state, buffer);
 
+    // Second hash
     input(buffer, state);
     pad_half(buffer);
     schedule(buffer);
@@ -1351,10 +1548,11 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     input2(buffer, right);
     schedule(buffer);
     compress(state, buffer);
-    pad_one(buffer);
+    schedule_1(buffer);
     compress(state, buffer);
-    input(buffer, state);
 
+    // Second hash
+    input(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1558,6 +1756,15 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
             compress(state, buffer);
         }
     }
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad(state_t& state, size_t blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    schedule_n(buffer, blocks);
+    compress(state, buffer);
 }
 
 TEMPLATE

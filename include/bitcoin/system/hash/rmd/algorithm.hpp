@@ -33,8 +33,7 @@ namespace system {
 namespace rmd {
 
 /// RMD hashing algorithm.
-template <typename RMD, bool Vectorized = true, bool Concurrent = false,
-    if_same<typename RMD::T, rmdh_t> = true>
+template <typename RMD, if_same<typename RMD::T, rmdh_t> = true>
 class algorithm : algorithm_t
 {
 public:
@@ -69,13 +68,14 @@ public:
 
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
-    static constexpr auto vectorized    = Vectorized;
-    static constexpr auto concurrent    = Concurrent;
     static constexpr auto big_end_count = false;
 
     /// Hashing (finalized).
     /// -----------------------------------------------------------------------
 
+    template <size_t Size>
+    static constexpr digest_t hash(const std_array<block_t, Size>& blocks) NOEXCEPT;
+    static constexpr digest_t hash(const blocks_t& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
 
@@ -84,6 +84,9 @@ public:
 
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
+
+    /// Pad a number of whole blocks.
+    static constexpr void pad(state_t& state, size_t blocks) NOEXCEPT;
     
     /// Finalize streaming state (converts state to little-endian bytes).
     static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
@@ -135,14 +138,12 @@ protected:
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
 private:
-    // Specialized padding type.
-    using blocks_pad_t = std_array<word_t, subtract(RMD::block_words,
+    using pad_t = std_array<word_t, subtract(RMD::block_words,
         count_bytes / RMD::word_bytes)>;
 
-    static CONSTEVAL auto& concurrency() NOEXCEPT;
-    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL words_t block_pad() NOEXCEPT;
-    static CONSTEVAL blocks_pad_t blocks_pad() NOEXCEPT;
+    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
+    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 };
 
 } // namespace rmd

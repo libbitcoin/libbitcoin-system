@@ -68,9 +68,9 @@ BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_one128__null_hashes__expec
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two128__null_hashes__expected)
 {
     constexpr auto pair = std_array<uint8_t, array_count<rmd128::block_t> * two>{};
-    constexpr auto sha_pair128 = base16_array("1b94bc163383151a53fe49dadb7a4f0e");
-    BOOST_CHECK_EQUAL(accumulated<rmd128>(rmd128::block_t{}, rmd128::block_t{}), sha_pair128);
-    BOOST_CHECK_EQUAL(rmd128_hash(pair), sha_pair128);
+    constexpr auto rmd_pair128 = base16_array("1b94bc163383151a53fe49dadb7a4f0e");
+    BOOST_CHECK_EQUAL(accumulated<rmd128>(rmd128::block_t{}, rmd128::block_t{}), rmd_pair128);
+    BOOST_CHECK_EQUAL(rmd128_hash(pair), rmd_pair128);
 }
 
 // rmd160
@@ -91,9 +91,9 @@ BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_one160__null_hashes__expec
 BOOST_AUTO_TEST_CASE(accumulator__rmd_concurrent_hash_two160__null_hashes__expected)
 {
     constexpr auto pair = std_array<uint8_t, array_count<rmd160::block_t> * two>{};
-    constexpr auto sha_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
-    BOOST_CHECK_EQUAL(accumulated<rmd160>(rmd160::block_t{}, rmd160::block_t{}), sha_pair160);
-    BOOST_CHECK_EQUAL(rmd160_hash(pair), sha_pair160);
+    constexpr auto rmd_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
+    BOOST_CHECK_EQUAL(accumulated<rmd160>(rmd160::block_t{}, rmd160::block_t{}), rmd_pair160);
+    BOOST_CHECK_EQUAL(rmd160_hash(pair), rmd_pair160);
 }
 
 // sha160
