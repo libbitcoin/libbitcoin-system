@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE(algorithm__sha256_merkle_hash__four__expected)
 }
 
 // sha256::merkle_root
-BOOST_AUTO_TEST_CASE(algorithm__sha256_merkle_root__empty__null_long_hash)
+BOOST_AUTO_TEST_CASE(algorithm__sha256_merkle_root__empty__null_hash)
 {
     constexpr auto expected = null_hash;
 #if defined (HAVE_VECTOR_CONSTEXPR)

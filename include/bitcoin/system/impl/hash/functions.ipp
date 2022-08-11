@@ -211,7 +211,7 @@ INLINE hash_digest bitcoin_hash2(const data_slice& left,
 template <size_t Size>
 INLINE data_chunk bitcoin_chunk(const data_array<Size>& data) NOEXCEPT
 {
-    return accumulator<sha256>::double_hash(data);
+    return accumulator<sha256>::double_hash_chunk(data);
 }
 INLINE data_chunk bitcoin_chunk(const data_chunk& data) NOEXCEPT
 {
