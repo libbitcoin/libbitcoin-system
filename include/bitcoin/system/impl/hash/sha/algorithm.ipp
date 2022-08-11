@@ -1299,8 +1299,8 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
         {
             case 1: schedule_n<1>(buffer); return;
             case 2: schedule_n<2>(buffer); return;
-            case 3: schedule_n<2>(buffer); return;
-            case 4: schedule_n<2>(buffer); return;
+            case 3: schedule_n<3>(buffer); return;
+            case 4: schedule_n<4>(buffer); return;
             default:
             {
                 pad_n(buffer, blocks);

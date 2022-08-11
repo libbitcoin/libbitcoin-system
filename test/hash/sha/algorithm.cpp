@@ -29,6 +29,45 @@ static_assert(sha256::hash(sha256::block_t{}) == sha_full256);
 static_assert(sha512::hash(sha512::half_t{})  == sha_half512);
 static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
 
+// Currently sha::algorithm schedule pads are cached for 1,2,3,4 blocks.
+// This verifies that sha::algorithm::schedule_n() is properly configured.
+// Testing any sha algorithm is sufficient to verify the configuration for all.
+BOOST_AUTO_TEST_CASE(verify_array_cache)
+{
+    // Empty block scheduled pad is not currently cached, but included here for completeness.
+    constexpr auto expected0 = base16_array("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    constexpr auto expected1 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b");
+    constexpr auto expected2 = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
+    constexpr auto expected3 = base16_array("5d89f056865052bcb89c910d2d62872e029fb273c3db03f8968a52a41593c1b5");
+    constexpr auto expected4 = base16_array("5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1");
+
+    constexpr auto blocks0 = std_array<sha256::block_t, 0>{};
+    constexpr auto blocks1 = std_array<sha256::block_t, 1>{};
+    constexpr auto blocks2 = std_array<sha256::block_t, 2>{};
+    constexpr auto blocks3 = std_array<sha256::block_t, 3>{};
+    constexpr auto blocks4 = std_array<sha256::block_t, 4>{};
+
+    // Array caching is performed independently from chunk caching, though if
+    // configured correctly the cache for each is the same values/locations.
+    static_assert(sha256::hash(blocks0) == expected0);
+    static_assert(sha256::hash(blocks1) == expected1);
+    static_assert(sha256::hash(blocks2) == expected2);
+    static_assert(sha256::hash(blocks3) == expected3);
+    static_assert(sha256::hash(blocks4) == expected4);
+
+    const data_chunk chunk0(0 * array_count<sha256::block_t>, 0x00_u8);
+    const data_chunk chunk1(1 * array_count<sha256::block_t>, 0x00_u8);
+    const data_chunk chunk2(2 * array_count<sha256::block_t>, 0x00_u8);
+    const data_chunk chunk3(3 * array_count<sha256::block_t>, 0x00_u8);
+    const data_chunk chunk4(4 * array_count<sha256::block_t>, 0x00_u8);
+
+    BOOST_CHECK_EQUAL(sha256_hash(chunk0), expected0);
+    BOOST_CHECK_EQUAL(sha256_hash(chunk1), expected1);
+    BOOST_CHECK_EQUAL(sha256_hash(chunk2), expected2);
+    BOOST_CHECK_EQUAL(sha256_hash(chunk3), expected3);
+    BOOST_CHECK_EQUAL(sha256_hash(chunk4), expected4);
+}
+
 // sha160 (cached)
 // ----------------------------------------------------------------------------
 static_assert(sha160::cached);
