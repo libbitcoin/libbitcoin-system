@@ -243,7 +243,8 @@ template<typename Parameters,
     size_t Count = 1024 * 1024, // test iterations (1Mi)
     size_t Size = 1024,         // bytes per iteration (1KiB)
     if_base_of<parameters, Parameters> = true>
-bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
+bool test_accumulator(std::ostream& out, float ghz = 3.0f,
+    bool csv = false) noexcept
 {
     using P = Parameters;
     using Precision = std::chrono::nanoseconds;
@@ -267,6 +268,39 @@ bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
 
     // Dumping output also precludes compiler removal.
     // Return value, check to preclude compiler removal if output is bypassed.
+    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+template<typename Parameters,
+    size_t Count = 1024 * 1024,
+    size_t Size = 1024,
+    bool_if<Size == 32 || Size == 64> = true,
+    bool_if<!Parameters::chunked> = true,
+    if_base_of<parameters, Parameters> = true>
+bool test_algorithm(std::ostream& out, float ghz = 3.0f,
+    bool csv = false) noexcept
+{
+    using P = Parameters;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using Algorithm = hash_selector<
+        P::strength,
+        P::compressed,
+        P::vectorized,
+        P::cached,
+        P::ripemd>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            Algorithm::hash(*data);
+        });
+    }
+
     output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
     return true;
 }

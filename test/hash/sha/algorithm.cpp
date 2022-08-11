@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(algorithm__sha256_hash__half_blocks__expected)
 {
     constexpr auto expected = sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 });
     static_assert(sha256::hash(sha256::block_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha256::hash({ 0 }, { 0 }), expected);
+    BOOST_CHECK_EQUAL(sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
 }
 
 // sha256::double_hash
@@ -302,7 +302,7 @@ BOOST_AUTO_TEST_CASE(algorithm__sha512_hash__half_blocks__expected)
 {
     constexpr auto expected = sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 });
     static_assert(sha512::hash(sha512::block_t{ 0 }) == expected);
-    BOOST_CHECK_EQUAL(sha512::hash({ 0 }, { 0 }), expected);
+    BOOST_CHECK_EQUAL(sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
 }
 
 // sha512::double_hash

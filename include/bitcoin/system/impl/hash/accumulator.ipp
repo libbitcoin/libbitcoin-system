@@ -113,10 +113,13 @@ accumulate(size_t size, const byte_t* data) NOEXCEPT
     if (!is_empty() || (size < block_size))
         return false;
 
-    const auto blocks = size / block_size;
+    // Normal form requires additional loop and vector of pointers allocation.
+    ////const auto blocks = size / block_size;
+    ////Algorithm::accumulate(state_, unsafe_vector_cast<block_t>(data, blocks));
+
     const auto remain = size % block_size;
     const auto bytes  = size - remain;
-    Algorithm::accumulate(state_, unsafe_vector_cast<block_t>(data, blocks));
+    Algorithm::accumulate(state_, bytes, data);
 
     // Update the counter and buffer the remainder.
     size_ += bytes;
@@ -160,6 +163,8 @@ serialize(size_t size) NOEXCEPT
     // by Algorithm at the start of block processing. Algorithm padding
     // optimizations set values directly into buffer_t (in the word_t form).
 
+    // Optimizes conversion for all rmd/sha except sha512 (uint64_t).
+    // This allows normalized algorithms without sacrificing performance.
     if (std::is_constant_evaluated())
     {
         if constexpr (Algorithm::big_end_count)
@@ -171,13 +176,12 @@ serialize(size_t size) NOEXCEPT
     {
         if constexpr (is_integral_integer<count_t>)
         {
-            // optimize conversion for all rmd/sha except sha512 (uint64_t).
-            const auto bits = possible_narrow_cast<count_t>(to_bits(size));
-
             if constexpr (Algorithm::big_end_count)
-                return to_big_endian(bits);
+                return to_big_endian(
+                    possible_narrow_cast<count_t>(to_bits(size)));
             else
-                return to_little_endian(bits);
+                return to_little_endian(
+                    possible_narrow_cast<count_t>(to_bits(size)));
         }
         else
         {
@@ -426,8 +430,7 @@ hash(size_t size, const byte_t* data) NOEXCEPT
     }
     else if (is_multiple(size, block_size))
     {
-        const auto blocks = size / block_size;
-        return Algorithm::hash(unsafe_vector_cast<block_t>(data, blocks));
+        return Algorithm::hash(size, data);
     }
     else
     {
@@ -500,8 +503,7 @@ double_hash(size_t size, const byte_t* data) NOEXCEPT
         }
         else if (is_multiple(size, block_size))
         {
-            const auto blocks = size / block_size;
-            return Algorithm::double_hash(unsafe_vector_cast<block_t>(data, blocks));
+            return Algorithm::double_hash(size, data);
         }
         else
         {

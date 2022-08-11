@@ -1158,9 +1158,7 @@ schedule_n(buffer_t& buffer) NOEXCEPT
     // Scheduled padding for n whole blocks.
     // This will compile in 4*64 (sha256) or 4*128 (sha512) bytes for each
     // unique size of blocks array hashed by callers (by template expansion).
-    // and one for each that is cached for block vectors (by vector size).
-    // Given that this is template, non-cache expansion is embedded externally
-    // except for calls within library compilation units (limited).
+    // and one for each that is cached for block vectors in schedule_n().
     constexpr auto pad = scheduled_pad<Blocks>();
     buffer = pad;
 }
@@ -1175,65 +1173,20 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
     // benefit 1/64 hashes on average. All array-sized n-block hashes have
     // precomputed schedules - this benefits only finalized chunk hashing.
     // Testing shows a 5% performance improvement for 128 byte chunk hashes.
-    // Single (and half) block hashes are optimized in hash functions, passed
-    // as array data to algorithm, thereby bypassing the accumulator. The hash
-    // functions are used exclusively in script processing.
-    // So cache size is limited to 0..4/8/2 blocks for sha160/256/512.
-
-    // Get scheduled buffer from cache or generate.
+    // Accumulator passes all write() blocks here.
     if constexpr (Cached)
     {
-        if constexpr (SHA::strength == 160)
+        switch (blocks)
         {
-            switch (blocks)
+            case 1: schedule_n<1>(buffer); return;
+            case 2: schedule_n<2>(buffer); return;
+            case 3: schedule_n<2>(buffer); return;
+            case 4: schedule_n<2>(buffer); return;
+            default:
             {
-                case 0: schedule_n<0>(buffer); return;
-                case 1: schedule_n<1>(buffer); return;
-                case 2: schedule_n<2>(buffer); return;
-                case 3: schedule_n<3>(buffer); return;
-                case 4: schedule_n<4>(buffer); return;
-                default:
-                {
-                    pad_n(buffer, blocks);
-                    schedule(buffer);
-                    return;
-                }
-            }
-        }
-        else if constexpr (SHA::strength == 256)
-        {
-            switch (blocks)
-            {
-                case 0: schedule_n<0>(buffer); return;
-                case 1: schedule_n<1>(buffer); return;
-                case 2: schedule_n<2>(buffer); return;
-                case 3: schedule_n<3>(buffer); return;
-                case 4: schedule_n<4>(buffer); return;
-                case 5: schedule_n<5>(buffer); return;
-                case 6: schedule_n<6>(buffer); return;
-                case 7: schedule_n<7>(buffer); return;
-                case 8: schedule_n<8>(buffer); return;
-                default:
-                {
-                    pad_n(buffer, blocks);
-                    schedule(buffer);
-                    return;
-                }
-            }
-        }
-        else // SHA::strength == 512
-        {
-            switch (blocks)
-            {
-                case 0: schedule_n<0>(buffer); return;
-                case 1: schedule_n<1>(buffer); return;
-                case 2: schedule_n<2>(buffer); return;
-                default:
-                {
-                    pad_n(buffer, blocks);
-                    schedule(buffer);
-                    return;
-                }
+                pad_n(buffer, blocks);
+                schedule(buffer);
+                return;
             }
         }
     }
@@ -1318,6 +1271,28 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 // Hashing.
 // ---------------------------------------------------------------------------
 // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+hash(size_t size, const uint8_t* data) NOEXCEPT
+{
+    constexpr auto block_size = array_count<block_t>;
+    BC_ASSERT(is_multiple(size, block_size));
+
+    buffer_t buffer{};
+    size_t blocks = 0;
+    auto state = H::get;
+    for (size_t block = 0; block < size; block += block_size, ++blocks)
+    {
+        input(buffer, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        schedule(buffer);
+        compress(state, buffer);
+    }
+
+    schedule_n(buffer, blocks);
+    compress(state, buffer);
+    return output(state);
+}
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
@@ -1418,6 +1393,35 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 // Double Hashing.
 // ---------------------------------------------------------------------------
 // No double_hash optimizations for sha160 (requires chunk_t/half_t).
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+double_hash(size_t size, const uint8_t* data) NOEXCEPT
+{
+    constexpr auto block_size = array_count<block_t>;
+    BC_ASSERT(is_multiple(size, block_size));
+
+    buffer_t buffer{};
+    size_t blocks = 0;
+    auto state = H::get;
+    for (size_t block = 0; block < size; block += block_size, ++blocks)
+    {
+        input(buffer, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        schedule(buffer);
+        compress(state, buffer);
+    }
+
+    schedule_n(buffer, blocks);
+    compress(state, buffer);
+
+    // Second hash
+    input(buffer, state);
+    pad_half(buffer);
+    schedule(buffer);
+    state = H::get;
+    compress(state, buffer);
+    return output(state);
+}
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
@@ -1723,6 +1727,22 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
             schedule(buffer);
             compress(state, buffer);
         }
+    }
+}
+
+TEMPLATE
+void CLASS::
+accumulate(state_t& state, size_t size, const uint8_t* data) NOEXCEPT
+{
+    constexpr auto block_size = array_count<block_t>;
+    BC_ASSERT(is_multiple(size, block_size));
+
+    buffer_t buffer{};
+    for (size_t block = 0; block < size; block += block_size)
+    {
+        input(buffer, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        schedule(buffer);
+        compress(state, buffer);
     }
 }
 

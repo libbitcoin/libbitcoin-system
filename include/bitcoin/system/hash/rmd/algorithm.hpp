@@ -78,12 +78,14 @@ public:
     static constexpr digest_t hash(const blocks_t& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
+    static digest_t hash(size_t size, const uint8_t* data) NOEXCEPT;
 
     /// Streamed hashing (unfinalized).
     /// -----------------------------------------------------------------------
 
     static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
+    static void accumulate(state_t& state, size_t size, const uint8_t* data) NOEXCEPT;
 
     /// Finalize streaming state (pad and normalize, updates state).
     static constexpr digest_t finalize(state_t& state, size_t blocks) NOEXCEPT;

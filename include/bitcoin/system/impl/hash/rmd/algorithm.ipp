@@ -585,6 +585,28 @@ pad_n(words_t& words, count_t blocks) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
+typename CLASS::digest_t CLASS::
+hash(size_t size, const uint8_t* data) NOEXCEPT
+{
+    constexpr auto block_size = array_count<block_t>;
+    BC_ASSERT(is_multiple(size, block_size));
+
+    words_t words{};
+    size_t blocks = 0;
+    auto state = H::get;
+    for (size_t block = 0; block < size; block += block_size, ++blocks)
+    {
+        input(words, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        compress(state, words);
+    }
+
+    // rmd does not precompute multi-block padding, as there is no schedule.
+    pad_n(words, blocks);
+    compress(state, words);
+    return output(state);
+}
+
+TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const blocks_t& blocks) NOEXCEPT
 {
@@ -669,6 +691,21 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
     for (auto& block: blocks)
     {
         input(words, block);
+        compress(state, words);
+    }
+}
+
+TEMPLATE
+void CLASS::
+accumulate(state_t& state, size_t size, const uint8_t* data) NOEXCEPT
+{
+    constexpr auto block_size = array_count<block_t>;
+    BC_ASSERT(is_multiple(size, block_size));
+
+    words_t words{};
+    for (size_t block = 0; block < size; block += block_size)
+    {
+        input(words, unsafe_array_cast<uint8_t, block_size>(&data[block]));
         compress(state, words);
     }
 }
