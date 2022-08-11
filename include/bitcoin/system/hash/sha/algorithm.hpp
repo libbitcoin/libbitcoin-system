@@ -34,7 +34,11 @@ namespace system {
 namespace sha {
 
 /// SHA hashing algorithm.
-template <typename SHA, bool Compressed = true, bool Vectorized = true,
+/// Presently Compressed enables non-vector sigma optimization.
+/// Presently Vectorized enables vector-friendly sigma optimization.
+/// The former is a 10% performance optimization, the latter -10% because
+/// it is not being run vectorized, so is wasteful (disabled by default).
+template <typename SHA, bool Compressed = true, bool Vectorized = false,
     bool Cached = true, if_same<typename SHA::T, shah_t> = true>
 class algorithm : algorithm_t
 {
@@ -127,11 +131,20 @@ public:
 protected:
     /// Functions
     /// -----------------------------------------------------------------------
+    using uint = unsigned int;
 
-    template <size_t A, size_t B, size_t C>
+    template <uint V, uint W, uint X, uint Y, uint Z>
+    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
+    template <uint A, uint B, uint C, if_equal<C, 7> = true>
+    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
+    template <uint A, uint B, uint C, if_not_equal<C, 7> = true>
+    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
+
+    template <uint A, uint B, uint C>
     INLINE static constexpr auto sigma(auto x) NOEXCEPT;
-    template <size_t A, size_t B, size_t C>
+    template <uint A, uint B, uint C>
     INLINE static constexpr auto Sigma(auto x) NOEXCEPT;
+
     INLINE static constexpr auto parity(auto x, auto y, auto z) NOEXCEPT;
     INLINE static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
     INLINE static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;

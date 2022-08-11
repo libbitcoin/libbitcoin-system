@@ -664,5 +664,168 @@ static_assert(sha512_256::big_end_count);
 static_assert(sha512_224::big_end_count);
 static_assert(sha512_384::big_end_count);
 
+// Sigma optimizations from Intel.
+// ----------------------------------------------------------------------------
+
+// Normal form.
+template <unsigned int A, unsigned int B, unsigned int C>
+constexpr auto sigma(auto x) noexcept
+{
+    using namespace sha;
+    constexpr auto s = bits<decltype(x)>;
+    return xor_
+    (
+        xor_
+        (
+            ror_<A, s>(x),
+            ror_<B, s>(x)
+        ),
+        shr_<C>(x)
+    );
+}
+
+// This is intended for vectorization, otherwise it's a negative.
+template <unsigned int A, unsigned int B, unsigned int C, bool s0512 = false>
+constexpr auto sigma_ex(auto x) noexcept
+{
+    using namespace sha;
+    constexpr auto s = bits<decltype(x)>;
+    constexpr auto c = s0512 ? A : C;
+    constexpr auto ac = s0512 ? C - A : A - C;
+    constexpr auto bac = s0512 ? B - C : B - A;
+
+    return xor_
+    (
+        shr_<c> // (A) for s0_512
+        (
+            xor_
+            (
+                shr_<ac> // (C-A) for s0_512
+                (
+                    xor_(shr_<bac>(x), x) // (B-C) for s0_512
+                ), x
+            )
+        ),
+        shl_<s-B>
+        (
+            xor_
+            (
+                shl_<B-A>(x), x
+            )
+        )
+    );
+}
+
+// sigma is symmtrical in AB, but not ABC. While the reversed order produces the same result,
+// it is an incorrect result in 64 bits. C must remain in place in the optimization.
+////static_assert(sigma< 7,  8, 1>(563567345_u64) == sigma_ex< 7,  8, 1, false>(563567345_u64));  // s0_512
+////static_assert(sigma< 7,  8, 1>(563567345_u64) == sigma_ex< 7,  8, 1, false>(563567345_u64));  // s0_512
+static_assert(sigma< 1,  8, 7>(563567345_u64) == sigma_ex< 1,  8, 7, true >(563567345_u64));      // s0_512
+static_assert(sigma< 8,  1, 7>(563567345_u64) == sigma_ex< 1,  8, 7, true >(563567345_u64));      // s0_512
+
+// In 32 bits the optimization works in s1 form but not in the modified s0 form.
+static_assert(sigma< 7, 18, 3>(563567345_u32) == sigma_ex< 7, 18, 3, false>(563567345_u32));      // s0_256
+static_assert(sigma<18,  7, 3>(563567345_u32) == sigma_ex< 7, 18, 3, false>(563567345_u32));      // s0_256
+////static_assert(sigma< 3, 18, 7>(563567345_u32) == sigma_ex< 3, 18, 7, true >(563567345_u32));  // s0_256
+////static_assert(sigma<18,  3, 7>(563567345_u32) == sigma_ex< 3, 18, 7, true >(563567345_u32));  // s0_256
+
+static_assert(sigma<17, 19, 10>(563567345_u32) == sigma_ex<17, 19, 10, false>(563567345_u32));     // s1_256
+static_assert(sigma<19, 61,  6>(563567345_u64) == sigma_ex<19, 61,  6, false>(563567345_u64));     // s1_512
+
+static_assert(sigma<18, 3,  7>(563567345_u32) == sigma_ex<3, 18, 7, true>(563567345_u32));
+static_assert(sigma< 3, 18, 7>(563567345_u32) == sigma_ex<3, 18, 7, true>(563567345_u32));
+
+// Little sigma is not symmetrical.
+static_assert(sigma<7, 18, 3>(563567345_u32) == sigma_ex<7, 18, 3>(563567345_u32));
+static_assert(sigma<18, 7, 3>(563567345_u32) == sigma_ex<7, 18, 3>(563567345_u32));
+static_assert(sigma<17, 19, 10>(563567345_u32) == sigma_ex<17, 19, 10>(563567345_u32));
+static_assert(sigma<19, 17, 10>(563567345_u32) == sigma_ex<17, 19, 10>(563567345_u32));
+
+// sigma0_512 matches default rewrite with constants reversed, but is incorrect.
+static_assert(sigma<7, 8, 1>(563567345_u64) == sigma_ex<7, 8, 1, false>(563567345_u64));
+static_assert(sigma<8, 7, 1>(563567345_u64) == sigma_ex<7, 8, 1, false>(563567345_u64));
+
+// sigma0_512 constants remain ordered and the rewrite is adjusted.
+static_assert(sigma<1, 8, 7>(563567345_u64) == sigma_ex<1, 8, 7, true>(563567345_u64));
+static_assert(sigma<8, 1, 7>(563567345_u64) == sigma_ex<1, 8, 7, true>(563567345_u64));
+
+// also not symmetrical.
+static_assert(sigma<1, 8, 7>(563567345_u64) == sigma_ex<1, 8, 7, true>(563567345_u64));
+static_assert(sigma<8, 1, 7>(563567345_u64) == sigma_ex<1, 8, 7, true>(563567345_u64));
+static_assert(sigma<19, 61, 6>(563567345_u64) == sigma_ex<19, 61, 6>(563567345_u64));
+static_assert(sigma<61, 19, 6>(563567345_u64) == sigma_ex<19, 61, 6>(563567345_u64));
+
+// Normal form.
+template <unsigned int A, unsigned int B, unsigned int C>
+constexpr auto Sigma(auto x) noexcept
+{
+    using namespace sha;
+    constexpr auto s = bits<decltype(x)>;
+    return xor_
+    (
+        xor_
+        (
+            ror_<A, s>(x),
+            ror_<B, s>(x)
+        ),
+        ror_<C, s>(x)
+    );
+}
+
+// This is designed for non-vectorized code.
+template <unsigned int A, unsigned int B, unsigned int C>
+constexpr auto Sigma_ex(auto x) noexcept
+{
+    using namespace sha;
+    constexpr auto s = bits<decltype(x)>;
+    return ror_<A, s>
+    (
+        xor_
+        (
+            ror_<B-A, s>
+            (
+                xor_
+                (
+                    ror_<C-B, s>(x), x
+                )
+            ), x
+        )
+    );
+}
+
+// Big sigma is not symmetrical.
+static_assert(Sigma< 2, 13, 22>(66666_u32) == Sigma_ex< 2, 13, 22>(66666_u32));
+static_assert(Sigma< 6, 11, 25>(66666_u32) == Sigma_ex< 6, 11, 25>(66666_u32));
+static_assert(Sigma<28, 34, 39>(66666_u64) == Sigma_ex<28, 34, 39>(66666_u64));
+static_assert(Sigma<14, 18, 41>(66666_u64) == Sigma_ex<14, 18, 41>(66666_u64));
+
+static_assert(Sigma<22, 13, 2>(66666_u32) == Sigma_ex<22, 13, 2>(66666_u32));
+static_assert(Sigma<22, 2, 13>(66666_u32) == Sigma_ex<22, 2, 13>(66666_u32));
+static_assert(Sigma<13, 22, 2>(66666_u32) == Sigma_ex<13, 22, 2>(66666_u32));
+static_assert(Sigma<13, 13, 2>(66666_u32) == Sigma_ex<13, 13, 2>(66666_u32));
+static_assert(Sigma<2, 22, 13>(66666_u32) == Sigma_ex<2, 22, 13>(66666_u32));
+static_assert(Sigma<2, 13, 22>(66666_u32) == Sigma_ex<2, 13, 22>(66666_u32));
+
+static_assert(Sigma<25, 11, 6>(66666_u32) == Sigma_ex<25, 11, 6>(66666_u32));
+static_assert(Sigma<25, 6, 11>(66666_u32) == Sigma_ex<25, 6, 11>(66666_u32));
+static_assert(Sigma<11, 25, 6>(66666_u32) == Sigma_ex<11, 25, 6>(66666_u32));
+static_assert(Sigma<11, 6, 25>(66666_u32) == Sigma_ex<11, 6, 25>(66666_u32));
+static_assert(Sigma<6, 25, 11>(66666_u32) == Sigma_ex<6, 25, 11>(66666_u32));
+static_assert(Sigma<6, 11, 25>(66666_u32) == Sigma_ex<6, 11, 25>(66666_u32));
+
+static_assert(Sigma<39, 34, 28>(66666_u64) == Sigma_ex<39, 34, 28>(66666_u64));
+static_assert(Sigma<39, 28, 34>(66666_u64) == Sigma_ex<39, 28, 34>(66666_u64));
+static_assert(Sigma<34, 39, 28>(66666_u64) == Sigma_ex<34, 39, 28>(66666_u64));
+static_assert(Sigma<34, 28, 39>(66666_u64) == Sigma_ex<34, 28, 39>(66666_u64));
+static_assert(Sigma<28, 39, 34>(66666_u64) == Sigma_ex<28, 39, 34>(66666_u64));
+static_assert(Sigma<28, 34, 39>(66666_u64) == Sigma_ex<28, 34, 39>(66666_u64));
+
+static_assert(Sigma<41, 18, 14>(66666_u64) == Sigma_ex<41, 18, 14>(66666_u64));
+static_assert(Sigma<41, 14, 18>(66666_u64) == Sigma_ex<41, 14, 18>(66666_u64));
+static_assert(Sigma<18, 41, 14>(66666_u64) == Sigma_ex<18, 41, 14>(66666_u64));
+static_assert(Sigma<18, 14, 41>(66666_u64) == Sigma_ex<18, 14, 41>(66666_u64));
+static_assert(Sigma<14, 41, 18>(66666_u64) == Sigma_ex<14, 41, 18>(66666_u64));
+static_assert(Sigma<14, 18, 41>(66666_u64) == Sigma_ex<14, 18, 41>(66666_u64));
+
 BOOST_AUTO_TEST_SUITE_END()
 

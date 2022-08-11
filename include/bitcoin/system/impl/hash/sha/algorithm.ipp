@@ -95,82 +95,97 @@ constexpr std_array<uint32_t, 4> bswap_mask
     ////0x00010203ul, 0x04050607ul, 0x08090a0bul, 0x0c0d0e0ful // from sha-ni
 };
 
-INLINE mint128_t byte_swap_mask128() NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE Word byte_swap_mask() NOEXCEPT
 {
     static const auto mask = _mm_set_epi32(
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3]);
     return mask;
 }
 
-INLINE mint128_t load128(const uint32_t& data) NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE Word load(const uint32_t& data) NOEXCEPT
 {
-    return _mm_loadu_si128(pointer_cast<const mint128_t>(&data));
+    return _mm_loadu_si128(pointer_cast<const Word>(&data));
 }
 
-INLINE void store128(uint8_t& data, mint128_t value) NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE void store(uint8_t& data, Word value) NOEXCEPT
 {
-    _mm_storeu_si128(pointer_cast<mint128_t>(&data), value);
+    _mm_storeu_si128(pointer_cast<Word>(&data), value);
 }
 
-INLINE mint128_t load_big_endian128(const uint8_t& data) NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE Word load_big_endian(const uint8_t& data) NOEXCEPT
 {
-    return _mm_shuffle_epi8(load128(data), byte_swap_mask128());
+    return _mm_shuffle_epi8(load<mint128_t>(data), byte_swap_mask<Word>());
 }
 
-INLINE void store_big_endian128(uint8_t& data, mint128_t value) NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE void store_big_endian(uint8_t& data, Word value) NOEXCEPT
 {
-    store128(data, _mm_shuffle_epi8(value, byte_swap_mask128()));
+    store(data, _mm_shuffle_epi8(value, byte_swap_mask<Word>()));
 }
 
-template <unsigned int B>
-INLINE auto shr_(mint128_t a) NOEXCEPT
+template <unsigned int B, typename Word,
+    if_same<Word, mint128_t> = true>
+INLINE auto shr_(Word a) NOEXCEPT
 {
     return _mm_srli_epi32(a, B);
 }
 
-template <unsigned int B>
-INLINE auto shl_(mint128_t a) NOEXCEPT
+template <unsigned int B, typename Word,
+    if_same<Word, mint128_t> = true>
+INLINE auto shl_(Word a) NOEXCEPT
 {
     return _mm_slli_epi32(a, B);
 }
 
-template <unsigned int B, unsigned int S>
-INLINE auto ror_(mint128_t a) NOEXCEPT
+template <unsigned int B, unsigned int S, typename Word,
+    if_same<Word, mint128_t> = true>
+INLINE auto ror_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
 }
 
-template <unsigned int B, unsigned int S>
-INLINE auto rol_(mint128_t a) NOEXCEPT
+template <unsigned int B, unsigned int S, typename Word,
+    if_same<Word, mint128_t> = true>
+INLINE auto rol_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
 }
 
-INLINE auto add_(mint128_t a, mint128_t b) NOEXCEPT
+template <typename Word,
+    if_same<Word, mint128_t> = true>
+INLINE auto add_(Word a, Word b) NOEXCEPT
 {
     return _mm_add_epi32(a, b);
 }
 
-template <uint32_t K>
-INLINE auto add_(mint128_t a) NOEXCEPT
+template <unsigned int K, typename Word,
+    if_same<Word, mint128_t> = true>
+INLINE auto add_(Word a) NOEXCEPT
 {
     // Broadcast 32-bit integer to all elements.
     return add_(a, _mm_set1_epi32(K));
 }
 
-INLINE auto and_(mint128_t a, mint128_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE auto and_(Word a, Word b) NOEXCEPT
 {
     return _mm_and_si128(a, b);
 }
 
-INLINE auto or_(mint128_t a, mint128_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE auto or_(Word a, Word b) NOEXCEPT
 {
     return _mm_or_si128(a, b);
 }
 
-INLINE auto xor_(mint128_t a, mint128_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint128_t> = true>
+INLINE auto xor_(Word a, Word b) NOEXCEPT
 {
     return _mm_xor_si128(a, b);
 }
@@ -178,7 +193,8 @@ INLINE auto xor_(mint128_t a, mint128_t b) NOEXCEPT
 // AVX2 primitives (for 32 bit word_t).
 // ----------------------------------------------------------------------------
 
-INLINE mint256_t byte_swap_mask256() NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE Word byte_swap_mask() NOEXCEPT
 {
     static const auto mask = _mm256_set_epi32(
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3],
@@ -186,75 +202,89 @@ INLINE mint256_t byte_swap_mask256() NOEXCEPT
     return mask;
 }
 
-INLINE mint256_t load256(const uint32_t& data) NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE Word load(const uint32_t& data) NOEXCEPT
 {
-    return _mm256_loadu_epi32(pointer_cast<const mint256_t>(&data));
+    return _mm256_loadu_epi32(pointer_cast<const Word>(&data));
 }
 
-INLINE void store256(uint8_t& data, mint256_t value) NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE void store(uint8_t& data, Word value) NOEXCEPT
 {
-    _mm256_storeu_epi32(pointer_cast<mint256_t>(&data), value);
+    _mm256_storeu_epi32(pointer_cast<Word>(&data), value);
 }
 
-INLINE mint256_t load_big_endian256(const uint8_t& data) NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE Word load_big_endian(const uint8_t& data) NOEXCEPT
 {
-    return _mm256_shuffle_epi8(load256(data), byte_swap_mask256());
+    return _mm256_shuffle_epi8(load<mint256_t>(data), byte_swap_mask<Word>());
 }
 
-INLINE void store_big_endian256(uint8_t& data, mint256_t value) NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE void store_big_endian(uint8_t& data, Word value) NOEXCEPT
 {
-    store256(data, _mm256_shuffle_epi8(value, byte_swap_mask256()));
+    store(data, _mm256_shuffle_epi8(value, byte_swap_mask<Word>()));
 }
 
-template <unsigned int B>
-INLINE auto shr_(mint256_t a) NOEXCEPT
+template <unsigned int B, typename Word,
+    if_same<Word, mint256_t> = true>
+INLINE auto shr_(Word a) NOEXCEPT
 {
     return _mm256_srli_epi32(a, B);
 }
 
-template <unsigned int B>
-INLINE auto shl_(mint256_t a) NOEXCEPT
+template <unsigned int B, typename Word,
+    if_same<Word, mint256_t> = true>
+INLINE auto shl_(Word a) NOEXCEPT
 {
     return _mm256_slli_epi32(a, B);
 }
 
-template <unsigned int B, unsigned int S>
-INLINE auto ror_(mint256_t a) NOEXCEPT
+template <unsigned int B, unsigned int S, typename Word,
+    if_same<Word, mint256_t> = true>
+INLINE auto ror_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
 }
 
-template <unsigned int B, unsigned int S>
-INLINE auto rol_(mint256_t a) NOEXCEPT
+template <unsigned int B, unsigned int S, typename Word,
+    if_same<Word, mint256_t> = true>
+INLINE auto rol_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
 }
 
-INLINE auto add_(mint256_t a, mint256_t b) NOEXCEPT
+template <typename Word,
+    if_same<Word, mint256_t> = true>
+INLINE auto add_(Word a, Word b) NOEXCEPT
 {
     return _mm256_add_epi32(a, b);
 }
 
-template <uint32_t K>
-INLINE auto add_(mint256_t a) NOEXCEPT
+template <unsigned int K, typename Word,
+    if_same<Word, mint256_t> = true>
+INLINE auto add_(Word a) NOEXCEPT
 {
     // Broadcast 32-bit integer to all elements.
     return add_(a, _mm256_set1_epi32(K));
 }
 
-INLINE auto and_(mint256_t a, mint256_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE auto and_(Word a, Word b) NOEXCEPT
 {
     return _mm256_and_si256(a, b);
 }
 
-INLINE auto or_(mint256_t a, mint256_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE auto or_(Word a, Word b) NOEXCEPT
 {
     return _mm256_or_si256(a, b);
 }
 
-INLINE auto xor_(mint256_t a, mint256_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint256_t> = true>
+INLINE auto xor_(Word a, Word b) NOEXCEPT
 {
     return _mm256_xor_si256(a, b);
 }
@@ -262,7 +292,8 @@ INLINE auto xor_(mint256_t a, mint256_t b) NOEXCEPT
 // AVX512 primitives (for 32 bit word_t).
 // ----------------------------------------------------------------------------
 
-INLINE mint512_t byte_swap_mask512() NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE Word byte_swap_mask() NOEXCEPT
 {
     static const auto mask = _mm512_set_epi32(
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3],
@@ -272,75 +303,88 @@ INLINE mint512_t byte_swap_mask512() NOEXCEPT
     return mask;
 }
 
-INLINE mint512_t load512(const uint32_t& data) NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE Word load(const uint32_t& data) NOEXCEPT
 {
-    return _mm512_loadu_epi32(pointer_cast<const mint512_t>(&data));
+    return _mm512_loadu_epi32(pointer_cast<const Word>(&data));
 }
 
-INLINE void store512(uint8_t& data, mint512_t value) NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE void store(uint8_t& data, Word value) NOEXCEPT
 {
-    _mm512_storeu_epi32(pointer_cast<mint512_t>(&data), value);
+    _mm512_storeu_epi32(pointer_cast<Word>(&data), value);
 }
 
-INLINE mint512_t load_big_endian512(const uint8_t& data) NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE Word load_big_endian(const uint8_t& data) NOEXCEPT
 {
-    return _mm512_shuffle_epi8(load512(data), byte_swap_mask512());
+    return _mm512_shuffle_epi8(load<mint512_t>(data), byte_swap_mask<Word>());
 }
 
-INLINE void store_big_endian512(uint8_t& data, mint512_t value) NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE void store_big_endian(uint8_t& data, Word value) NOEXCEPT
 {
-    store512(data, _mm512_shuffle_epi8(value, byte_swap_mask512()));
+    store(data, _mm512_shuffle_epi8(value, byte_swap_mask<Word>()));
 }
 
-template <unsigned int B>
-INLINE auto shr_(mint512_t a) NOEXCEPT
+template <unsigned int B, typename Word,
+    if_same<Word, mint512_t> = true>
+INLINE auto shr_(Word a) NOEXCEPT
 {
     return _mm512_srli_epi32(a, B);
 }
 
-template <unsigned int B>
-INLINE auto shl_(mint512_t a) NOEXCEPT
+template <unsigned int B, typename Word,
+    if_same<Word, mint512_t> = true>
+INLINE auto shl_(Word a) NOEXCEPT
 {
     return _mm512_slli_epi32(a, B);
 }
 
-template <unsigned int B, unsigned int S>
-INLINE auto ror_(mint512_t a) NOEXCEPT
+template <unsigned int B, unsigned int S, typename Word,
+    if_same<Word, mint512_t> = true>
+INLINE auto ror_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
 }
 
-template <unsigned int B, unsigned int S>
-INLINE auto rol_(mint512_t a) NOEXCEPT
+template <unsigned int B, unsigned int S, typename Word,
+    if_same<Word, mint512_t> = true>
+INLINE auto rol_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
 }
 
-INLINE auto add_(mint512_t a, mint512_t b) NOEXCEPT
+template <typename Word,
+    if_same<Word, mint512_t> = true>
+INLINE auto add_(Word a, Word b) NOEXCEPT
 {
     return _mm512_add_epi32(a, b);
 }
 
-template <uint32_t K>
-INLINE auto add_(mint512_t a) NOEXCEPT
+template <unsigned int K, typename Word,
+    if_same<Word, mint512_t> = true>
+INLINE auto add_(Word a) NOEXCEPT
 {
     // Broadcast 32-bit integer to all elements.
     return add_(a, _mm512_set1_epi32(K));
 }
 
-INLINE auto and_(mint512_t a, mint512_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE auto and_(Word a, Word b) NOEXCEPT
 {
     return _mm512_and_si512(a, b);
 }
 
-INLINE auto or_(mint512_t a, mint512_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE auto or_(Word a, Word b) NOEXCEPT
 {
     return _mm512_or_si512(a, b);
 }
-
-INLINE auto xor_(mint512_t a, mint512_t b) NOEXCEPT
+template <typename Word, if_same<Word, mint512_t> = true>
+INLINE auto xor_(Word a, Word b) NOEXCEPT
 {
     return _mm512_xor_si512(a, b);
 }
@@ -447,50 +491,125 @@ majority(auto x, auto y, auto z) NOEXCEPT
 }
 
 TEMPLATE
-template <size_t A, size_t B, size_t C>
+template <unsigned int V, unsigned int W, unsigned int X, unsigned int Y,
+    unsigned int Z>
+INLINE constexpr auto CLASS::
+sigma_(auto x) NOEXCEPT
+{
+    // TODO: not necesarily preferred for AVX (non-destructive), SSE optimal.
+    // On AVX architectures, the VEX-encoded SIMD instructions are nondestructive.
+    //
+    // intel.com/content/dam/www/public/us/en/documents/white-papers/
+    // fast-sha512-implementations-ia-processors-paper.pdf
+    //
+    // Examples:
+    // s0(a) = (a >>>  1) ^ (a >>>  8) ^ (a >> 7)
+    // s1(e) = (e >>> 19) ^ (e >>> 61) ^ (e >> 6)
+    //
+    // s0(a) = ((a >>  1) ^ (a << 63)) ^ ((a >>  8) ^ (a << 56)) ^ (a >> 7)
+    // s1(e) = ((e >> 19) ^ (e << 45)) ^ ((e >> 61) ^ (e <<  3)) ^ (e >> 6)
+    //
+    // s0(a) = (((((a >>  1) ^ a) >>  6) ^ a) >> 1) ^ ((a <<  7) ^ a) << 56
+    // s1(e) = (((((e >> 42) ^ e) >> 13) ^ e) >> 6) ^ ((e << 42) ^ e) <<  3
+    //
+    // Generalization:
+    // s (n) = (n >>> x) ^ (n >>> y) ^ (n >> z)
+    // s'(n) = (((((n >> V) ^ n) >> W) ^ n) >> X) ^ ((n << Y) ^ n) << Z
+    // V =  y - z | y - x
+    // W =  z - x | x - z
+    // X =      x | z
+    // Y =  y - x | y - x
+    // Z = 64 - y | 64 - y
+    // s0'(n) = (((((n >> (y-z)) ^ n) >> (z-x)) ^ n) >> (x)) ^ ((n << (y-x)) ^ n) << (64-y)
+    // s1'(n) = (((((n >> (y-x)) ^ n) >> (x-z)) ^ n) >> (z)) ^ ((n << (y-x)) ^ n) << (64-y)
+    //
+    // Ambiguous (and mismatched) parenthetic in original, this is explicit and correct:
+    // s0'(n) = [((((n >> (y-z)) ^ n) >> (z-x)) ^ n) >> (x)] ^ [((n << (y-x)) ^ n) << (64-y)]
+    // s1'(n) = [((((n >> (y-x)) ^ n) >> (x-z)) ^ n) >> (z)] ^ [((n << (y-x)) ^ n) << (64-y)]
+
+    constexpr auto s = SHA::word_bits;
+    return xor_
+    (
+        shr_<V>(xor_(shr_<X>(xor_(shr_<Y>(x), x)), x)),
+        shl_<s - W>(xor_(shl_<Z>(x), x))
+    );
+}
+
+TEMPLATE
+template <unsigned int A, unsigned int B, unsigned int C, if_equal<C, 7>>
+INLINE constexpr auto CLASS::
+sigma_(auto x) NOEXCEPT
+{
+    // Denormalized algorithm requires parameter shift for sigma0 sha512.
+    return sigma_<A, B, C - A, B - C, B - A>(x);
+}
+
+TEMPLATE
+template <unsigned int A, unsigned int B, unsigned int C, if_not_equal<C, 7>>
+INLINE constexpr auto CLASS::
+sigma_(auto x) NOEXCEPT
+{
+    return sigma_<C, B, A - C, B - A, B - A>(x);
+}
+
+TEMPLATE
+template <unsigned int A, unsigned int B, unsigned int C>
 INLINE constexpr auto CLASS::
 sigma(auto x) NOEXCEPT
 {
     constexpr auto s = SHA::word_bits;
-    return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), shr_<C>(x));
+
+    // TODO: using Vectorized as a test switch for now.
+    if constexpr (Vectorized)
+    {
+        return sigma_<A, B, C>(x);
+    }
+    else
+    {
+        return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), shr_<C>(x));
+    }
 }
 
-// intel.com/content/dam/www/public/us/en/documents/white-papers/
-// fast-sha512-implementations-ia-processors-paper.pdf
-//
-// AVX optimal (sha512)
-// ------ sigma0< 1,  8, 7>(x) ------
-// ------ sigma1<19, 61, 6>(x) ------
-
-// s0(a) = (a >>>  1) ^ (a >>>  8) ^ (a >> 7)
-// s1(e) = (e >>> 19) ^ (e >>> 61) ^ (e >> 6)
-//
-// SSE optimal (sha512)
-// s0(a) = ((((a >>  1) ^ a) >>  6) ^ a) >> 1) ^ ((a <<  7) ^ a) << 56
-// s1(e) = ((((e >> 42) ^ e) >> 13) ^ e) >> 6) ^ ((e << 42) ^ e) << 3
-
 TEMPLATE
-template <size_t A, size_t B, size_t C>
+template <unsigned int A, unsigned int B, unsigned int C>
 INLINE constexpr auto CLASS::
 Sigma(auto x) NOEXCEPT
 {
     constexpr auto s = SHA::word_bits;
-    return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), ror_<C, s>(x));
+
+    // This is specialized for non-vector destructive ror.
+    // "Because the ror instruction is destructive (that is, it overwrites the
+    // operand), implementing the above as written would involve a number of
+    // source register copy operations. If, however, the expressions are
+    // rewritten as... Then the number of register copies can be minimized."
+    // intel.com/content/dam/www/public/us/en/documents/white-papers/
+    // sha-256-implementations-paper.pdf
+    // AVX optimal (sha256)
+    //
+    // Examples:
+    // S0(a) = (a >>> 2) ^ (a >>> 13) ^ (a >>> 22)
+    // S1(e) = (e >>> 6) ^ (e >>> 11) ^ (e >>> 25)
+    // S0(a) = ((((a >>>  9) ^ a) >>> 11) ^ a) >>> 2
+    // S1(e) = ((((e >>> 14) ^ e) >>>  5) ^ e) >>> 6
+    //
+    // Generalization:
+    // S (n) = (n >>> x) ^ (n >>> y) ^ (n >>> z)
+    // S'(n) = ((((n >>> X) ^ n) >>> Y) ^ n) >>> Z
+    // X = z - y
+    // Y = y - x
+    // Z = x
+    // S'(n) = ((((n >>> (z-y)) ^ n) >>> (y-x)) ^ n) >>> x
+
+    // TODO: using Compressed as a test switch for now.
+    if constexpr (Compressed)
+    {
+        return ror_<A, s>(xor_(ror_<B - A, s>(xor_(ror_<C - B, s>(x), x)), x));
+    }
+    else
+    {
+        return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), ror_<C, s>(x));
+    }
 }
-
-// intel.com/content/dam/www/public/us/en/documents/white-papers/
-// sha-256-implementations-paper.pdf
-//
-// AVX optimal (sha256) [probably]
-// ------ Sigma0<2, 13, 22>(x) ------
-// ------ Sigma1<6, 11, 25>(x) ------
-
-// S0(a) = (a >>> 2) ^ (a >>> 13) ^ (a >>> 22)
-// S1(e) = (e >>> 6) ^ (e >>> 11) ^ (e >>> 25)
-//
-// SSE optimal (sha256)
-// S0(a) = (((a >>>  9) ^ a) >>> 11) ^ a) >>> 2
-// S1(e) = (((e >>> 14) ^ e) >>>  5) ^ e) >>> 6
 
 // Wrappers
 // ---------------------------------------------------------------------------

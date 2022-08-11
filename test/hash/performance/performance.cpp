@@ -26,8 +26,9 @@ BOOST_AUTO_TEST_SUITE(performance_tests)
 using namespace performance;
 using rmd160a          = rmd160_parameters<false>;
 using rmd160c          = rmd160_parameters<true>;
-using sha256c_cached   = sha256_parameters<true, true, true,  true>;
-using sha256c_uncached = sha256_parameters<true, true, false, true>;
+using sha256a          = sha256_parameters<true, false, true,  false>;
+using sha256c_cached   = sha256_parameters<true, false, true,  true>;
+using sha256c_uncached = sha256_parameters<true, false, false, true>;
 
 using sha256a_both     = sha256_parameters<true,  true,  true, false>;
 using sha256a_comp     = sha256_parameters<true,  false, true, false>;
@@ -69,6 +70,17 @@ struct v4
     static constexpr size_t c = 32 * 1024 * 1024;
     static constexpr size_t s = 32;
 };
+
+BOOST_AUTO_TEST_CASE(performance__base_sha256a)
+{
+    auto complete = true;
+    complete = base::test_hash<base_sha256a, v0::c, v0::s>(std::cout);
+    complete = base::test_hash<base_sha256a, v1::c, v1::s>(std::cout);
+    complete = base::test_hash<base_sha256a, v2::c, v2::s>(std::cout);
+    complete = base::test_hash<base_sha256a, v3::c, v3::s>(std::cout);
+    complete = base::test_hash<base_sha256a, v4::c, v4::s>(std::cout);
+    BOOST_CHECK(complete);
+}
 
 BOOST_AUTO_TEST_CASE(performance__sha256a_both)
 {
