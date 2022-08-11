@@ -56,6 +56,10 @@ using if_equal = bool_if<
     (Left == Right)>;
 
 template <uint64_t Left, uint64_t Right>
+using if_not_equal = bool_if<
+    (Left != Right)>;
+
+template <uint64_t Left, uint64_t Right>
 using if_greater = bool_if<
     (Left > Right)>;
 

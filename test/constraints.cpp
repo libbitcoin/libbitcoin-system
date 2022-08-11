@@ -67,6 +67,13 @@ static_assert(is_defined<if_equal<42, 42>>);
 ////static_assert(!is_defined<if_equal<1, 42>>);
 ////static_assert(!is_defined<if_equal<42, 1>>);
 
+static_assert(is_defined<if_not_equal<0, 1>>);
+static_assert(is_defined<if_not_equal<1, 42>>);
+static_assert(is_defined<if_not_equal<42, 1>>);
+////static_assert(!is_defined<if_not_equal<0, 0>>);
+////static_assert(!is_defined<if_not_equal<1, 1>>);
+////static_assert(!is_defined<if_not_equal<42, 42>>);
+
 static_assert(is_defined<if_greater<1, 0>>);
 ////static_assert(!is_defined<if_greater<0, 0>>);
 ////static_assert(!is_defined<if_greater<0, 1>>);
