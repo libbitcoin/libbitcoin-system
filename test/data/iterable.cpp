@@ -24,14 +24,14 @@ BOOST_AUTO_TEST_CASE(iterable__default_construct__distance__zero)
 {
     auto iterable = system::iterable<data_array<42>>{};
     BOOST_REQUIRE_EQUAL(iterable.count(), 0u);
-    BOOST_REQUIRE_EQUAL(std::distance(iterable.begin(), iterable.end()), 0u);
+    BOOST_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(const_iterable__default_construct__distance__zero)
 {
     const auto iterable = const_iterable<data_array<42>>{};
     BOOST_REQUIRE_EQUAL(iterable.count(), 0u);
-    BOOST_REQUIRE_EQUAL(std::distance(iterable.begin(), iterable.end()), 0u);
+    BOOST_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(iterable__get_data__always__expected)
