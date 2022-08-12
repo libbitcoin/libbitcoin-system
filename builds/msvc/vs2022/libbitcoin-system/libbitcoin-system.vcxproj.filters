@@ -785,6 +785,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\external_ptr.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\iterable.hpp">
+      <Filter>include\bitcoin\system\data</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\memory.hpp">
       <Filter>include\bitcoin\system\data</Filter>
     </ClInclude>

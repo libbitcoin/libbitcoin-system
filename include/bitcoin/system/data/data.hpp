@@ -29,6 +29,7 @@
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/data/exclusive_slice.hpp>
 #include <bitcoin/system/data/external_ptr.hpp>
+#include <bitcoin/system/data/iterable.hpp>
 #include <bitcoin/system/data/memory.hpp>
 #include <bitcoin/system/data/no_fill_allocator.hpp>
 #include <bitcoin/system/data/string.hpp>

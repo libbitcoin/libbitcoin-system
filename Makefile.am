@@ -256,6 +256,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/exclusive_slice.cpp \
     test/data/external_ptr.cpp \
     test/data/integer.cpp \
+    test/data/iterable.cpp \
     test/data/memory.cpp \
     test/data/no_fill_allocator.cpp \
     test/data/string.cpp \
@@ -493,6 +494,7 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/data_slice.hpp \
     include/bitcoin/system/data/exclusive_slice.hpp \
     include/bitcoin/system/data/external_ptr.hpp \
+    include/bitcoin/system/data/iterable.hpp \
     include/bitcoin/system/data/memory.hpp \
     include/bitcoin/system/data/no_fill_allocator.hpp \
     include/bitcoin/system/data/string.hpp

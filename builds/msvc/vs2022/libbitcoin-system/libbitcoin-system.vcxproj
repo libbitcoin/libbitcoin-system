@@ -307,6 +307,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\data_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\exclusive_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\external_ptr.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\data\iterable.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\memory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\no_fill_allocator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\data\string.hpp" />

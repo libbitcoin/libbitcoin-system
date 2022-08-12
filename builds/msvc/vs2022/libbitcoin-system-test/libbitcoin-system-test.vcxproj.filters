@@ -225,6 +225,9 @@
     <ClCompile Include="..\..\..\..\test\data\integer.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\iterable.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\memory.cpp">
       <Filter>src\data</Filter>
     </ClCompile>

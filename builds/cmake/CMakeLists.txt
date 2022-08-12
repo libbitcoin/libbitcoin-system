@@ -562,6 +562,7 @@ if (with-tests)
         "../../test/data/exclusive_slice.cpp"
         "../../test/data/external_ptr.cpp"
         "../../test/data/integer.cpp"
+        "../../test/data/iterable.cpp"
         "../../test/data/memory.cpp"
         "../../test/data/no_fill_allocator.cpp"
         "../../test/data/string.cpp"
