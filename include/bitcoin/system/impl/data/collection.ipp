@@ -73,7 +73,6 @@ constexpr binary_search(const Collection& list,
 template <typename To, typename From>
 inline To projection(const From& source) NOEXCEPT
 {
-    ////static no_fill_allocator<To::value_type> no_fill_to_allocator{};
     To out(std::size(source));
 
     std::transform(std::begin(source), std::end(source), std::begin(out),

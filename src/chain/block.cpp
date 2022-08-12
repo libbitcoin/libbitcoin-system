@@ -164,7 +164,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 
 data_chunk block::to_data(bool witness) const NOEXCEPT
 {
-    data_chunk data(serialized_size(witness), no_fill_byte_allocator);
+    data_chunk data(serialized_size(witness));
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
@@ -216,12 +216,11 @@ const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 
 hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
-    static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
     const auto count = txs_->size();
+    const auto size = is_odd(count) && count > one ? add1(count) : count;
+    hashes out(size);
 
-    // Excess reservation accounts for possible generate_merkle_root addition.
-    hashes out(add1(count), no_fill_hash_allocator);
-
+    // Extra allocation for odd count optimizes for merkle root.
     // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
 
@@ -351,7 +350,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
     // Move the points of all non-coinbase transactions into one set.
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
-        auto out =(*tx)->points();
+        auto out = (*tx)->points();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     }
 

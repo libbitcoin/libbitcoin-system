@@ -82,7 +82,7 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
     constexpr auto bytes = Size * Count;
     const auto seconds = seconds_total<Precision>(time);
     const auto delimiter = csv ? "," : "\n";
-    std::string algorithm{ typeid(Algorithm).name() };
+    const std::string algorithm{ typeid(Algorithm).name() };
     replace(algorithm, "libbitcoin::system::", "");
     replace(algorithm, "class ", "");
     replace(algorithm, "struct ", "");

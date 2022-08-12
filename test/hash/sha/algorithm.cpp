@@ -867,4 +867,3 @@ static_assert(Sigma<14, 41, 18>(66666_u64) == Sigma_ex<14, 41, 18>(66666_u64));
 static_assert(Sigma<14, 18, 41>(66666_u64) == Sigma_ex<14, 18, 41>(66666_u64));
 
 BOOST_AUTO_TEST_SUITE_END()
-

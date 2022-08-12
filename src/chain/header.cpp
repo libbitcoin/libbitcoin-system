@@ -155,7 +155,7 @@ header header::from_data(reader& source) NOEXCEPT
 
 data_chunk header::to_data() const NOEXCEPT
 {
-    data_chunk data(serialized_size(), no_fill_byte_allocator);
+    data_chunk data(serialized_size());
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);

@@ -71,8 +71,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
         return {};
 
     const auto bound = target_false_positive_rate * set_size;
-    static no_fill_allocator<uint64_t> no_fill_uint64_allocator{};
-    std::vector<uint64_t> hashes(items.size(), no_fill_uint64_allocator);
+    std::vector<uint64_t> hashes(items.size());
 
     // C++17: parallel policy for std::transform.
     std::transform(items.begin(), items.end(), hashes.begin(),
