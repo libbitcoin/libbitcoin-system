@@ -251,15 +251,14 @@ BOOST_AUTO_TEST_CASE(functions__merkle_root__four__expected)
     constexpr auto expected = sha256::double_hash(expected1, expected2);
     BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
 }
+
 // scrypt_hash
 // ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(functions__scrypt_hash__empty__expected)
 {
-    constexpr auto expected = base16_array("b34ab7cd1ce0c308146ab970fa75517bcf20f95c7ed7a34efc0d5f096469b2e1");
-    constexpr auto size = size_of<decltype(expected)>();
-    const auto expected2 = scrypt<16, 1, 1, true>::hash<size>("", "");
-    BOOST_REQUIRE_EQUAL(scrypt_hash(std::string{}), expected);
+    const auto expected = scrypt<1024, 1, 1, true>::hash<hash_size>("", "");
+    BOOST_REQUIRE_EQUAL(scrypt_hash(""), expected);
 }
 
 // non-cryptographic hash functions
