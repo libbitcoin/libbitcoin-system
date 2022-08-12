@@ -44,12 +44,12 @@ private:
         using pointer = const value_type*;
         using reference = const value_type&;
 
-        inline explicit iterator(const uint8_t* bytes, size_t start) noexcept
+        inline explicit iterator(const uint8_t* bytes, size_t start) NOEXCEPT
           : index_(start), bytes_(bytes)
         {
         }
 
-        inline reference operator*() const noexcept
+        inline reference operator*() const NOEXCEPT
         {
             using element = array_element<value_type>;
             constexpr auto size = array_count<value_type>;
@@ -57,26 +57,26 @@ private:
             return unsafe_array_cast<element, size>(std::next(bytes_, index_));
         }
 
-        inline iterator& operator++() noexcept
+        inline iterator& operator++() NOEXCEPT
         {
             constexpr auto element_size = size_of<value_type>();
             index_ += element_size;
             return *this;
         }
 
-        inline iterator operator++(int) noexcept
+        inline iterator operator++(int) NOEXCEPT
         {
             auto self = *this;
             ++(*this);
             return self;
         }
 
-        inline bool operator==(const iterator& other) const noexcept
+        inline bool operator==(const iterator& other) const NOEXCEPT
         {
             return index_ == other.index_;
         }
 
-        inline bool operator!=(const iterator& other) const noexcept
+        inline bool operator!=(const iterator& other) const NOEXCEPT
         {
             return !(*this == other);
         }
@@ -86,7 +86,7 @@ private:
         const uint8_t* bytes_;
     };
 
-    static constexpr size_t count(size_t size) noexcept
+    static constexpr size_t count(size_t size) NOEXCEPT
     {
         return size - (size % size_of<Array>());
     }
@@ -95,33 +95,35 @@ private:
     const uint8_t* data_;
 
 public:
+    using value_type = Array;
+
     template <typename Type, size_t Size>
-    inline const_iterable(const std_array<Type, Size>& data) noexcept
+    inline const_iterable(const std_array<Type, Size>& data) NOEXCEPT
       : end_(count(Size)), data_(data.data())
     {
     }
 
-    inline const_iterable(size_t size, const uint8_t* data) noexcept
+    inline const_iterable(size_t size, const uint8_t* data) NOEXCEPT
       : end_(count(size)), data_(data)
     {
     }
 
-    inline const_iterable(const data_chunk& data) noexcept
+    inline const_iterable(const data_chunk& data) NOEXCEPT
       : end_(count(data.size())), data_(data.data())
     {
     }
 
-    inline explicit const_iterable(const exclusive_slice& data) noexcept
+    inline explicit const_iterable(const exclusive_slice& data) NOEXCEPT
       : end_(count(data.size())), data_(data.data())
     {
     }
 
-    inline iterator<Array> begin() const noexcept
+    inline iterator<Array> begin() const NOEXCEPT
     {
         return iterator<Array>(data_, zero);
     }
 
-    inline iterator<Array> end() const noexcept
+    inline iterator<Array> end() const NOEXCEPT
     {
         return iterator<Array>(data_, end_);
     }
@@ -142,12 +144,12 @@ private:
         using pointer = value_type*;
         using reference = value_type&;
 
-        inline explicit iterator(uint8_t* bytes, size_t start) noexcept
+        inline explicit iterator(uint8_t* bytes, size_t start) NOEXCEPT
           : index_(start), bytes_(bytes)
         {
         }
 
-        inline reference operator*() noexcept
+        inline reference operator*() NOEXCEPT
         {
             using element = array_element<value_type>;
             constexpr auto size = array_count<value_type>;
@@ -155,26 +157,26 @@ private:
             return unsafe_array_cast<element, size>(std::next(bytes_, index_));
         }
 
-        inline iterator& operator++() noexcept
+        inline iterator& operator++() NOEXCEPT
         {
             constexpr auto element_size = size_of<value_type>();
             index_ += element_size;
             return *this;
         }
 
-        inline iterator operator++(int) noexcept
+        inline iterator operator++(int) NOEXCEPT
         {
             auto self = *this;
             ++(*this);
             return self;
         }
 
-        inline bool operator==(const iterator& other) const noexcept
+        inline bool operator==(const iterator& other) const NOEXCEPT
         {
             return index_ == other.index_;
         }
 
-        inline bool operator!=(const iterator& other) const noexcept
+        inline bool operator!=(const iterator& other) const NOEXCEPT
         {
             return !(*this == other);
         }
@@ -184,7 +186,7 @@ private:
         uint8_t* bytes_;
     };
 
-    static constexpr size_t count(size_t size) noexcept
+    static constexpr size_t count(size_t size) NOEXCEPT
     {
         return size - (size % size_of<Array>());
     }
@@ -193,28 +195,30 @@ private:
     uint8_t* data_;
 
 public:
+    using value_type = Array;
+
     template <typename Type, size_t Size>
-    inline iterable(std_array<Type, Size>& data) noexcept
+    inline iterable(std_array<Type, Size>& data) NOEXCEPT
       : end_(count(Size)), data_(data.data())
     {
     }
 
-    inline iterable(size_t size, uint8_t* data) noexcept
+    inline iterable(size_t size, uint8_t* data) NOEXCEPT
       : end_(count(size)), data_(data)
     {
     }
 
-    inline iterable(data_chunk& data) noexcept
+    inline iterable(data_chunk& data) NOEXCEPT
       : end_(count(data.size())), data_(data.data())
     {
     }
 
-    inline iterator<Array> begin() noexcept
+    inline iterator<Array> begin() NOEXCEPT
     {
         return iterator<Array>(data_, zero);
     }
 
-    inline iterator<Array> end() const noexcept
+    inline iterator<Array> end() const NOEXCEPT
     {
         return iterator<Array>(data_, end_);
     }
