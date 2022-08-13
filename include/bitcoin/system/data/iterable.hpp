@@ -22,16 +22,16 @@
 #include <iterator>
 #include <bitcoin/system/data/array_cast.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
-#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/exclusive_slice.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// Use Iterable.count() as basis for iterating over an Iterable, using
+/// Use Iterable.size() as basis for iterating over an Iterable, using
 /// this array_cast to obtain std::array(block_t, Lanes) for vectorization.
-/// Use offset parameter to traverse the iterable, reducing Lanes as necessary
+/// Use offset parameter to traverse the mutable_iterable, reducing Lanes as necessary
 /// until all blocks are processed.
 template <size_t Lanes, typename Iterable,
     if_std_array<typename Iterable::value_t> = true>
@@ -41,8 +41,8 @@ array_cast(const Iterable& it, size_t offset = zero) NOEXCEPT
     using block = typename Iterable::value_t;
     constexpr auto size = size_of<block>();
 
-    // Caller must check it.count().
-    BC_ASSERT_MSG(Lanes <= it.count(), "overflow");
+    // Caller must check it.size().
+    BC_ASSERT_MSG(Lanes <= it.size(), "overflow");
     BC_ASSERT_MSG(!is_multiply_overflow(size, offset), "overflow");
 
     /// Total: 1 mul (const), 1 add, 1 cast (free), 3 mov.
@@ -51,7 +51,7 @@ array_cast(const Iterable& it, size_t offset = zero) NOEXCEPT
 
 /// Iterate any data souce as a set of const std::array&.
 template<typename Array, if_std_array<Array> = true>
-class const_iterable
+class iterable
 {
 private:
     template <typename Array_>
@@ -61,26 +61,25 @@ private:
         using iterator_category = std::forward_iterator_tag;
         using value_type = Array_;
         using difference_type = ptrdiff_t;
-        using pointer = const value_type*;
-        using reference = const value_type&;
+        using pointer = value_type const*;
+        using reference = value_type const&;
 
-        inline explicit iterator(const uint8_t* bytes, size_t start) NOEXCEPT
-          : index_(start), bytes_(bytes)
+        inline iterator(uint8_t const* position) NOEXCEPT
+          : position_(position)
         {
         }
 
         inline reference operator*() const NOEXCEPT
         {
             using element = array_element<value_type>;
-            constexpr auto size = array_count<value_type>;
-            static_assert(size * size_of<element>() == size_of<value_type>());
-            return unsafe_array_cast<element, size>(std::next(bytes_, index_));
+            constexpr auto count = array_count<value_type>;
+            return unsafe_array_cast<element, count>(position_);
         }
 
         inline iterator& operator++() NOEXCEPT
         {
-            constexpr auto element_size = size_of<value_type>();
-            index_ += element_size;
+            constexpr auto size = size_of<value_type>();
+            std::advance(position_, size);
             return *this;
         }
 
@@ -93,7 +92,7 @@ private:
 
         inline bool operator==(const iterator& other) const NOEXCEPT
         {
-            return index_ == other.index_;
+            return position_ == other.position_;
         }
 
         inline bool operator!=(const iterator& other) const NOEXCEPT
@@ -102,85 +101,88 @@ private:
         }
 
     private:
-        size_t index_{};
-        const uint8_t* bytes_;
+        uint8_t const* position_;
     };
-
-    static constexpr size_t floored_size(size_t size) NOEXCEPT
-    {
-        if constexpr (is_zero(size_of<Array>()))
-        {
-            return zero;
-        }
-        else
-        {
-            return size - (size % size_of<Array>());
-        }
-    }
-
-    const size_t end_;
-    const uint8_t* data_;
 
 public:
     using value_t = Array;
+    static constexpr auto value_size = size_of<Array>();
 
-    inline const_iterable() NOEXCEPT
-      : end_(zero), data_(nullptr)
+    inline iterable() NOEXCEPT
+      : count_(zero), begin_(nullptr), end_(nullptr)
     {
     }
 
+    // This can be more efficiently achieved using array_cast, if an array of
+    // arrays type is sufficient.
     template <typename Type, size_t Size>
-    inline const_iterable(const std_array<Type, Size>& data) NOEXCEPT
-      : end_(floored_size(Size)), data_(data.data())
+    inline iterable(const std_array<Type, Size>& data) NOEXCEPT
+      : count_(count(Size)),
+        begin_(data.data()),
+        end_(std::next(begin_, count_ * value_size))
     {
     }
 
-    inline const_iterable(size_t size, const uint8_t* data) NOEXCEPT
-      : end_(floored_size(size)), data_(data)
+    inline iterable(size_t size, uint8_t const* data) NOEXCEPT
+      : count_(count(size)),
+        begin_(data),
+        end_(std::next(begin_, count_ * value_size))
     {
     }
 
-    inline const_iterable(const data_chunk& data) NOEXCEPT
-      : end_(floored_size(data.size())), data_(data.data())
-    {
-    }
-
-    inline explicit const_iterable(const exclusive_slice& data) NOEXCEPT
-      : end_(floored_size(data.size())), data_(data.data())
+    inline iterable(const data_chunk& data) NOEXCEPT
+      : count_(count(data.size())),
+        begin_(data.data()),
+        end_(std::next(begin_, count_ * value_size))
     {
     }
 
     inline iterator<Array> begin() const NOEXCEPT
     {
-        return iterator<Array>(data_, zero);
+        return iterator<Array>(begin_);
     }
 
-    inline iterator<Array> end() const NOEXCEPT
+    inline const iterator<Array> end() const NOEXCEPT
     {
-        return iterator<Array>(data_, end_);
+        return iterator<Array>(end_);
     }
 
-    inline size_t count() const NOEXCEPT
+    inline size_t size() const NOEXCEPT
     {
-        if constexpr (is_zero(size_of<Array>()))
+        return count_;
+    }
+
+    inline bool empty() const NOEXCEPT
+    {
+        return is_zero(size());
+    }
+
+    inline uint8_t const* data() const NOEXCEPT
+    {
+        return begin_;
+    }
+
+private:
+    static constexpr size_t count(size_t size) NOEXCEPT
+    {
+        if constexpr (is_zero(value_size))
         {
             return zero;
         }
         else
         {
-            return end_ / size_of<Array>();
+            return size / value_size;
         }
     }
 
-    inline const uint8_t* data() const NOEXCEPT
-    {
-        return data_;
-    }
+    const size_t count_;
+    uint8_t const* begin_;
+    uint8_t const* end_;
 };
 
 /// Iterate any non-const data souce as a non-const set of std::array&.
 template<typename Array, if_std_array<Array> = true>
-class iterable
+class mutable_iterable
 {
 private:
     template <typename Array_>
@@ -193,23 +195,22 @@ private:
         using pointer = value_type*;
         using reference = value_type&;
 
-        inline explicit iterator(uint8_t* bytes, size_t start) NOEXCEPT
-          : index_(start), bytes_(bytes)
+        inline iterator(uint8_t* position) NOEXCEPT
+          : position_(position)
         {
         }
 
         inline reference operator*() NOEXCEPT
         {
             using element = array_element<value_type>;
-            constexpr auto size = array_count<value_type>;
-            static_assert(size * size_of<element>() == size_of<value_type>());
-            return unsafe_array_cast<element, size>(std::next(bytes_, index_));
+            constexpr auto count = array_count<value_type>;
+            return unsafe_array_cast<element, count>(position_);
         }
 
         inline iterator& operator++() NOEXCEPT
         {
-            constexpr auto element_size = size_of<value_type>();
-            index_ += element_size;
+            constexpr auto size = size_of<value_type>();
+            std::advance(position_, size);
             return *this;
         }
 
@@ -222,7 +223,7 @@ private:
 
         inline bool operator==(const iterator& other) const NOEXCEPT
         {
-            return index_ == other.index_;
+            return position_ == other.position_;
         }
 
         inline bool operator!=(const iterator& other) const NOEXCEPT
@@ -231,75 +232,83 @@ private:
         }
 
     private:
-        size_t index_{};
-        uint8_t* bytes_;
+        uint8_t* position_;
     };
-
-    static constexpr size_t floored_size(size_t size) NOEXCEPT
-    {
-        if constexpr (is_zero(size_of<Array>()))
-        {
-            return zero;
-        }
-        else
-        {
-            return size - (size % size_of<Array>());
-        }
-    }
-
-    const size_t end_;
-    uint8_t* data_;
 
 public:
     using value_t = Array;
+    static constexpr auto value_size = size_of<Array>();
 
-    inline iterable() NOEXCEPT
-      : end_(zero), data_(nullptr)
+    inline mutable_iterable() NOEXCEPT
+      : count_(zero), begin_(nullptr), end_(nullptr)
     {
     }
 
+    // This can be more efficiently achieved using array_cast if an array of
+    // arrays type is sufficient.
     template <typename Type, size_t Size>
-    inline iterable(std_array<Type, Size>& data) NOEXCEPT
-      : end_(floored_size(Size)), data_(data.data())
+    inline mutable_iterable(std_array<Type, Size>& data) NOEXCEPT
+      : count_(count(Size)),
+        begin_(data.data()),        
+        end_(std::next(begin_, count_ * value_size))
     {
     }
 
-    inline iterable(size_t size, uint8_t* data) NOEXCEPT
-      : end_(floored_size(size)), data_(data)
+    inline mutable_iterable(size_t size, uint8_t* data) NOEXCEPT
+      : count_(count(size)),
+        begin_(data),        
+        end_(std::next(begin_, count_ * value_size))
     {
     }
 
-    inline iterable(data_chunk& data) NOEXCEPT
-      : end_(floored_size(data.size())), data_(data.data())
+    inline mutable_iterable(data_chunk& data) NOEXCEPT
+      : count_(count(data.size())),
+        begin_(data.data()),
+        end_(std::next(begin_, count_ * value_size))
     {
     }
 
     inline iterator<Array> begin() NOEXCEPT
     {
-        return iterator<Array>(data_, zero);
+        return iterator<Array>(begin_);
     }
 
-    inline iterator<Array> end() const NOEXCEPT
+    inline const iterator<Array> end() NOEXCEPT
     {
-        return iterator<Array>(data_, end_);
+        return iterator<Array>(end_);
     }
 
-    inline size_t count() const NOEXCEPT
+    inline size_t size() const NOEXCEPT
     {
-        if constexpr (is_zero(size_of<Array>()))
+        return count_;
+    }
+
+    inline bool empty() const NOEXCEPT
+    {
+        return is_zero(size());
+    }
+
+    inline uint8_t* data() NOEXCEPT
+    {
+        return begin_;
+    }
+
+private:
+    static constexpr size_t count(size_t size) NOEXCEPT
+    {
+        if constexpr (is_zero(value_size))
         {
             return zero;
         }
         else
         {
-            return end_ / size_of<Array>();
+            return size / value_size;
         }
     }
 
-    inline uint8_t* data() NOEXCEPT
-    {
-        return data_;
-    }
+    const size_t count_;
+    uint8_t* begin_;
+    uint8_t* end_;
 };
 
 } // namespace system

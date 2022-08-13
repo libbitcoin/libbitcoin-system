@@ -20,99 +20,101 @@
 
 BOOST_AUTO_TEST_SUITE(iterable_tests)
 
-BOOST_AUTO_TEST_CASE(iterable__default_construct__distance__zero)
+BOOST_AUTO_TEST_CASE(iterable__default_construct__always__empty)
 {
-    auto iterable = system::iterable<data_array<42>>{};
-    BOOST_REQUIRE_EQUAL(iterable.count(), 0u);
+    const system::iterable<data_array<42>> iterable{};
+    BOOST_REQUIRE(iterable.empty());
+    BOOST_REQUIRE_EQUAL(iterable.size(), 0u);
     BOOST_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(const_iterable__default_construct__distance__zero)
+BOOST_AUTO_TEST_CASE(mutable_iterable__default_construct__always__empty)
 {
-    const auto iterable = const_iterable<data_array<42>>{};
-    BOOST_REQUIRE_EQUAL(iterable.count(), 0u);
+    mutable_iterable<data_array<42>> iterable{};
+    BOOST_REQUIRE(iterable.empty());
+    BOOST_REQUIRE_EQUAL(iterable.size(), 0u);
     BOOST_REQUIRE_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__get_data__always__expected)
-{
-    auto data = null_hash;
-    constexpr auto count = hash_size / 3;
-    auto iterable = system::iterable<data_array<3>>{ data };
-    BOOST_REQUIRE_EQUAL(iterable.count(), count);
-    BOOST_CHECK_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), count);
-}
-
-BOOST_AUTO_TEST_CASE(const_iterable__get_data__always__expected)
+BOOST_AUTO_TEST_CASE(iterable__distance__always__expected)
 {
     const auto& data = null_hash;
     constexpr auto count = hash_size / 3;
-    const auto iterable = const_iterable<data_array<3>>{ data };
-    BOOST_REQUIRE_EQUAL(iterable.count(), count);
+    const auto iterable = system::iterable<data_array<3>>(data);
+    BOOST_REQUIRE_EQUAL(iterable.size(), count);
     BOOST_CHECK_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), count);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__get_count__always__expected)
+BOOST_AUTO_TEST_CASE(mutable_iterable__distance__always__expected)
 {
     auto data = null_hash;
-    BOOST_REQUIRE_EQUAL(iterable<data_array<0>>(data).count(),  0u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<1>>(data).count(), 32u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<2>>(data).count(), 16u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<3>>(data).count(), 10u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<4>>(data).count(),  8u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<5>>(data).count(),  6u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<6>>(data).count(),  5u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<7>>(data).count(),  4u); // r4
-    BOOST_REQUIRE_EQUAL(iterable<data_array<8>>(data).count(),  4u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<9>>(data).count(),  3u); // r5
-    BOOST_REQUIRE_EQUAL(iterable<data_array<10>>(data).count(), 3u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<11>>(data).count(), 2u); // r10
-    BOOST_REQUIRE_EQUAL(iterable<data_array<12>>(data).count(), 2u); // r8
-    BOOST_REQUIRE_EQUAL(iterable<data_array<13>>(data).count(), 2u); // r6
-    BOOST_REQUIRE_EQUAL(iterable<data_array<14>>(data).count(), 2u); // r4
-    BOOST_REQUIRE_EQUAL(iterable<data_array<15>>(data).count(), 2u); // r2
-    BOOST_REQUIRE_EQUAL(iterable<data_array<16>>(data).count(), 2u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<17>>(data).count(), 1u); //r15
-    BOOST_REQUIRE_EQUAL(iterable<data_array<31>>(data).count(), 1u); //r1
-    BOOST_REQUIRE_EQUAL(iterable<data_array<32>>(data).count(), 1u);
-    BOOST_REQUIRE_EQUAL(iterable<data_array<33>>(data).count(), 0u);
+    constexpr auto count = hash_size / 3;
+    auto iterable = mutable_iterable<data_array<3>>(data);
+    BOOST_REQUIRE_EQUAL(iterable.size(), count);
+    BOOST_CHECK_EQUAL(to_unsigned(std::distance(iterable.begin(), iterable.end())), count);
 }
 
-BOOST_AUTO_TEST_CASE(const_iterable__get_count__always__expected)
+BOOST_AUTO_TEST_CASE(iterable__size__always__expected)
 {
     constexpr auto& data = null_hash;
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<0>>(data).count(),  0u);
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<1>>(data).count(), 32u);
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<2>>(data).count(), 16u);
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<3>>(data).count(), 10u); // r2
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<4>>(data).count(),  8u);
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<5>>(data).count(),  6u); // r2
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<6>>(data).count(),  5u); // r2
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<7>>(data).count(),  4u); // r4
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<8>>(data).count(),  4u);
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<9>>(data).count(),  3u); // r5
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<10>>(data).count(), 3u); // r2
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<11>>(data).count(), 2u); // r10
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<12>>(data).count(), 2u); // r8
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<13>>(data).count(), 2u); // r6
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<14>>(data).count(), 2u); // r4
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<15>>(data).count(), 2u); // r2
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<16>>(data).count(), 2u);
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<17>>(data).count(), 1u); //r15
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<31>>(data).count(), 1u); //r1
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<32>>(data).count(), 1u);
-    BOOST_REQUIRE_EQUAL(const_iterable<data_array<33>>(data).count(), 0u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<0>>(data).size(),  0u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<1>>(data).size(), 32u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<2>>(data).size(), 16u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<3>>(data).size(), 10u); // r2
+    BOOST_REQUIRE_EQUAL(iterable<data_array<4>>(data).size(),  8u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<5>>(data).size(),  6u); // r2
+    BOOST_REQUIRE_EQUAL(iterable<data_array<6>>(data).size(),  5u); // r2
+    BOOST_REQUIRE_EQUAL(iterable<data_array<7>>(data).size(),  4u); // r4
+    BOOST_REQUIRE_EQUAL(iterable<data_array<8>>(data).size(),  4u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<9>>(data).size(),  3u); // r5
+    BOOST_REQUIRE_EQUAL(iterable<data_array<10>>(data).size(), 3u); // r2
+    BOOST_REQUIRE_EQUAL(iterable<data_array<11>>(data).size(), 2u); // r10
+    BOOST_REQUIRE_EQUAL(iterable<data_array<12>>(data).size(), 2u); // r8
+    BOOST_REQUIRE_EQUAL(iterable<data_array<13>>(data).size(), 2u); // r6
+    BOOST_REQUIRE_EQUAL(iterable<data_array<14>>(data).size(), 2u); // r4
+    BOOST_REQUIRE_EQUAL(iterable<data_array<15>>(data).size(), 2u); // r2
+    BOOST_REQUIRE_EQUAL(iterable<data_array<16>>(data).size(), 2u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<17>>(data).size(), 1u); //r15
+    BOOST_REQUIRE_EQUAL(iterable<data_array<31>>(data).size(), 1u); //r1
+    BOOST_REQUIRE_EQUAL(iterable<data_array<32>>(data).size(), 1u);
+    BOOST_REQUIRE_EQUAL(iterable<data_array<33>>(data).size(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(const_iterable__data_arrays__parsing__expected)
+BOOST_AUTO_TEST_CASE(mutable_iterable__size__always__expected)
+{
+    auto data = null_hash;
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<0>>(data).size(),  0u);
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<1>>(data).size(), 32u);
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<2>>(data).size(), 16u);
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<3>>(data).size(), 10u); // r2
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<4>>(data).size(),  8u);
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<5>>(data).size(),  6u); // r2
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<6>>(data).size(),  5u); // r2
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<7>>(data).size(),  4u); // r4
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<8>>(data).size(),  4u);
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<9>>(data).size(),  3u); // r5
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<10>>(data).size(), 3u); // r2
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<11>>(data).size(), 2u); // r10
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<12>>(data).size(), 2u); // r8
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<13>>(data).size(), 2u); // r6
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<14>>(data).size(), 2u); // r4
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<15>>(data).size(), 2u); // r2
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<16>>(data).size(), 2u);
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<17>>(data).size(), 1u); //r15
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<31>>(data).size(), 1u); //r1
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<32>>(data).size(), 1u);
+    BOOST_REQUIRE_EQUAL(mutable_iterable<data_array<33>>(data).size(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(iterable__data_arrays__parsing__expected)
 {
     const data_chunk data{};
     using type = data_array<8>;
-    static_assert(is_same_type<decltype(*const_iterable<type>(data).begin()), const type&>);
-    static_assert(is_same_type<decltype(*(++const_iterable<type>(data).begin())), const type&>);
+    static_assert(is_same_type<decltype(*iterable<type>(data).begin()), const type&>);
+    static_assert(is_same_type<decltype(*(++iterable<type>(data).begin())), const type&>);
 
     constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
-    const auto iterable = const_iterable<type>(hash);
+    const system::iterable<type> iterable(hash);
     const auto end = iterable.end();
     auto it = iterable.begin();
 
@@ -128,12 +130,12 @@ BOOST_AUTO_TEST_CASE(const_iterable__data_arrays__parsing__expected)
     BOOST_REQUIRE(it == end);
 }
 
-BOOST_AUTO_TEST_CASE(const_iterable__nested_arrays__parsing__expected)
+BOOST_AUTO_TEST_CASE(iterable__nested_arrays__parsing__expected)
 {
     const data_chunk data{};
     using type = std::array<std::array<uint8_t, 8>, 2>;
-    static_assert(is_same_type<decltype(*const_iterable<type>(data).begin()), const type&>);
-    static_assert(is_same_type<decltype(*(++const_iterable<type>(data).begin())), const type&>);
+    static_assert(is_same_type<decltype(*iterable<type>(data).begin()), const type&>);
+    static_assert(is_same_type<decltype(*(++iterable<type>(data).begin())), const type&>);
 
     constexpr auto expected0 = type
     {
@@ -152,22 +154,22 @@ BOOST_AUTO_TEST_CASE(const_iterable__nested_arrays__parsing__expected)
     };
 
     constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
-    auto it = const_iterable<type>(hash).begin();
+    auto it = iterable<type>(hash).begin();
     BOOST_REQUIRE_EQUAL(*it, expected0);
     BOOST_REQUIRE_EQUAL(*(++it), expected1);
 }
 
-BOOST_AUTO_TEST_CASE(iterable__nested_arrays__insertions__expected)
+BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
 {
     data_chunk data{};
     using type = std::array<std::array<uint8_t, 2>, 4>;
-    static_assert(is_same_type<decltype(*iterable<type>(data).begin()), type& > );
-    static_assert(is_same_type<decltype(*(++iterable<type>(data).begin())), type& > );
+    static_assert(is_same_type<decltype(*mutable_iterable<type>(data).begin()), type&> );
+    static_assert(is_same_type<decltype(*(++mutable_iterable<type>(data).begin())), type&> );
 
     constexpr auto expected = base16_array("11aa11112222222233aa33334444444455aa55556666666677aa777788888888");
     auto hash______________ = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
 
-    for (auto& chunk: iterable<type>(hash______________))
+    for (auto& chunk: mutable_iterable<type>(hash______________))
         chunk.front().at(1) = 0xaa;
 
     BOOST_REQUIRE_EQUAL(hash______________, expected);
@@ -191,7 +193,7 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     constexpr sha256::block_t expected14{ 14 };
     constexpr sha256::block_t expected15{ 15 };
 
-    using iterable_t = const_iterable<sha256::block_t>;
+    using iterable_t = iterable<sha256::block_t>;
     std_vector<sha256::block_t> data{};
     data.reserve(15);
 
@@ -213,9 +215,9 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
 
     const auto size = data.size() * array_count<sha256::block_t>;
     const auto bytes = data.front().data();
-    const auto iterable = iterable_t{ size, bytes };
+    const iterable_t iterable(size, bytes);
 
-    BOOST_REQUIRE_EQUAL(iterable.count(), 15u);
+    BOOST_REQUIRE_EQUAL(iterable.size(), 15u);
     BOOST_REQUIRE_EQUAL(iterable.data(), data.front().data());
 
     const auto blocks8 = array_cast<8>(iterable, 0);
