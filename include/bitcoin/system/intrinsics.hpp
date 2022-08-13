@@ -48,7 +48,6 @@ namespace libbitcoin {
 /// Runtime checks for Intel SIMD and ARM Neon availability.
 /// ---------------------------------------------------------------------------
 
-// 1 lane integral sha
 inline bool try_shani() noexcept
 {
 // TODO: shani is unverified.
@@ -64,7 +63,12 @@ inline bool try_shani() noexcept
 #endif
 }
 
-// 8 lanes
+inline bool try_avx512() noexcept
+{
+    // TODO: implement.
+    return false;
+}
+
 inline bool try_avx2() noexcept
 {
 #if defined(HAVE_X64)
@@ -84,7 +88,6 @@ inline bool try_avx2() noexcept
 #endif
 }
 
-// 4 lanes (next optimum for 4 blocks).
 inline bool try_sse41() noexcept
 {
 // TODO: sse41 faulting on HAVE_X32.
@@ -97,7 +100,6 @@ inline bool try_sse41() noexcept
 #endif
 }
 
-// 4 lanes
 inline bool try_sse41a() noexcept
 {
 // sse4 is sse41 but requires X64 build (inline assembly).
@@ -108,7 +110,6 @@ inline bool try_sse41a() noexcept
 #endif
 }
 
-// 4 lanes
 constexpr bool try_neon() noexcept
 {
 // TODO: ARM/Neon is unverified.
@@ -125,6 +126,12 @@ constexpr bool try_neon() noexcept
 inline bool have_shani() noexcept
 {
     static auto enable = try_shani();
+    return enable;
+}
+
+inline bool have_avx512() noexcept
+{
+    static auto enable = try_avx512();
     return enable;
 }
 
