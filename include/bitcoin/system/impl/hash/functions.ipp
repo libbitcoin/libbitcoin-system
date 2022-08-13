@@ -50,103 +50,47 @@ namespace system {
 // TODO: the number of functions to one per type.
 
 // rmd128 [historical].
-template <size_t Size>
-INLINE half_hash rmd128_hash(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<rmd128>::hash(data);
-}
-INLINE half_hash rmd128_hash(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<rmd128>::hash(data);
-}
-INLINE half_hash rmd128_hash(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE half_hash rmd128_hash(const Type& data) NOEXCEPT
 {
     return accumulator<rmd128>::hash(data);
 }
 
-template <size_t Size>
-INLINE data_chunk rmd128_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<rmd128>::hash_chunk(data);
-}
-INLINE data_chunk rmd128_chunk(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<rmd128>::hash_chunk(data);
-}
-INLINE data_chunk rmd128_chunk(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE data_chunk rmd128_chunk(const Type& data) NOEXCEPT
 {
     return accumulator<rmd128>::hash_chunk(data);
 }
 
 // rmd160 [script].
-template <size_t Size>
-INLINE short_hash rmd160_hash(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<rmd160>::hash(data);
-}
-INLINE short_hash rmd160_hash(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<rmd160>::hash(data);
-}
-INLINE short_hash rmd160_hash(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE short_hash rmd160_hash(const Type& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash(data);
 }
 
-template <size_t Size>
-INLINE data_chunk rmd160_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<rmd160>::hash_chunk(data);
-}
-INLINE data_chunk rmd160_chunk(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<rmd160>::hash_chunk(data);
-}
-INLINE data_chunk rmd160_chunk(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE data_chunk rmd160_chunk(const Type& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash_chunk(data);
 }
 
 // sha1 (sha160) [script].
-template <size_t Size>
-INLINE short_hash sha1_hash(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha160>::hash(data);
-}
-INLINE short_hash sha1_hash(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha160>::hash(data);
-}
-INLINE short_hash sha1_hash(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE short_hash sha1_hash(const Type& data) NOEXCEPT
 {
     return accumulator<sha160>::hash(data);
 }
 
-template <size_t Size>
-INLINE data_chunk sha1_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha160>::hash_chunk(data);
-}
-INLINE data_chunk sha1_chunk(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha160>::hash_chunk(data);
-}
-INLINE data_chunk sha1_chunk(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE data_chunk sha1_chunk(const Type& data) NOEXCEPT
 {
     return accumulator<sha160>::hash_chunk(data);
 }
 
 // sha256 [script, chain, wallet].
-template <size_t Size>
-INLINE hash_digest sha256_hash(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha256>::hash(data);
-}
-INLINE hash_digest sha256_hash(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha256>::hash(data);
-}
-INLINE hash_digest sha256_hash(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE hash_digest sha256_hash(const Type& data) NOEXCEPT
 {
     return accumulator<sha256>::hash(data);
 }
@@ -156,6 +100,7 @@ INLINE hash_digest sha256_hash(const hash_digest& left,
 {
     return sha256::hash(left, right);
 }
+
 INLINE hash_digest sha256_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
@@ -167,45 +112,21 @@ INLINE hash_digest sha256_hash2(const data_slice& left,
     return context.flush();
 }
 
-template <size_t Size>
-INLINE data_chunk sha256_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha256>::hash_chunk(data);
-}
-INLINE data_chunk sha256_chunk(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha256>::hash_chunk(data);
-}
-INLINE data_chunk sha256_chunk(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE data_chunk sha256_chunk(const Type& data) NOEXCEPT
 {
     return accumulator<sha256>::hash_chunk(data);
 }
 
 // sha512 [wallet].
-template <size_t Size>
-INLINE long_hash sha512_hash(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha512>::hash(data);
-}
-INLINE long_hash sha512_hash(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha512>::hash(data);
-}
-INLINE long_hash sha512_hash(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE long_hash sha512_hash(const Type& data) NOEXCEPT
 {
     return accumulator<sha512>::hash(data);
 }
 
-template <size_t Size>
-INLINE data_chunk sha512_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha512>::hash_chunk(data);
-}
-INLINE data_chunk sha512_chunk(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha512>::hash_chunk(data);
-}
-INLINE data_chunk sha512_chunk(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE data_chunk sha512_chunk(const Type& data) NOEXCEPT
 {
     return accumulator<sha512>::hash_chunk(data);
 }
@@ -214,45 +135,21 @@ INLINE data_chunk sha512_chunk(const exclusive_slice& data) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // Bitcoin short hash (rmd160(sha256)) [script].
-template <size_t Size>
-INLINE short_hash bitcoin_short_hash(const data_array<Size>& data) NOEXCEPT
-{
-    return rmd160::hash(accumulator<sha256>::hash(data));
-}
-INLINE short_hash bitcoin_short_hash(const data_chunk& data) NOEXCEPT
-{
-    return rmd160::hash(accumulator<sha256>::hash(data));
-}
-INLINE short_hash bitcoin_short_hash(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE short_hash bitcoin_short_hash(const Type& data) NOEXCEPT
 {
     return rmd160::hash(accumulator<sha256>::hash(data));
 }
 
-template <size_t Size>
-INLINE data_chunk bitcoin_short_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
-}
-INLINE data_chunk bitcoin_short_chunk(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
-}
-INLINE data_chunk bitcoin_short_chunk(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE data_chunk bitcoin_short_chunk(const Type& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
 }
 
 // Bitcoin hash (sha256(sha256)) [script, chain, wallet].
-template <size_t Size>
-INLINE hash_digest bitcoin_hash(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha256>::double_hash(data);
-}
-INLINE hash_digest bitcoin_hash(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha256>::double_hash(data);
-}
-INLINE hash_digest bitcoin_hash(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE hash_digest bitcoin_hash(const Type& data) NOEXCEPT
 {
     return accumulator<sha256>::double_hash(data);
 }
@@ -262,6 +159,7 @@ INLINE hash_digest bitcoin_hash(const hash_digest& left,
 {
     return sha256::double_hash(left, right);
 }
+
 INLINE hash_digest bitcoin_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
@@ -274,16 +172,8 @@ INLINE hash_digest bitcoin_hash2(const data_slice& left,
     return context.double_flush();
 }
 
-template <size_t Size>
-INLINE data_chunk bitcoin_chunk(const data_array<Size>& data) NOEXCEPT
-{
-    return accumulator<sha256>::double_hash_chunk(data);
-}
-INLINE data_chunk bitcoin_chunk(const data_chunk& data) NOEXCEPT
-{
-    return accumulator<sha256>::double_hash_chunk(data);
-}
-INLINE data_chunk bitcoin_chunk(const exclusive_slice& data) NOEXCEPT
+template <typename Type>
+INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT
 {
     return accumulator<sha256>::double_hash_chunk(data);
 }
