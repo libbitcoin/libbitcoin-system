@@ -113,13 +113,9 @@ accumulate(size_t size, const byte_t* data) NOEXCEPT
     if (!is_empty() || (size < block_size))
         return false;
 
-    // Normal form requires additional loop and vector of pointers allocation.
-    ////const auto blocks = size / block_size;
-    ////Algorithm::accumulate(state_, unsafe_vector_cast<block_t>(data, blocks));
-
     const auto remain = size % block_size;
     const auto bytes  = size - remain;
-    Algorithm::accumulate(state_, bytes, data);
+    Algorithm::accumulate(state_, iterable<block_t>(bytes, data));
 
     // Update the counter and buffer the remainder.
     size_ += bytes;
@@ -430,7 +426,7 @@ hash(size_t size, const byte_t* data) NOEXCEPT
     }
     else if (is_multiple(size, block_size))
     {
-        return Algorithm::hash(size, data);
+        return Algorithm::hash(iterable<block_t>(size, data));
     }
     else
     {
@@ -503,7 +499,7 @@ double_hash(size_t size, const byte_t* data) NOEXCEPT
         }
         else if (is_multiple(size, block_size))
         {
-            return Algorithm::double_hash(size, data);
+            return Algorithm::double_hash(iterable<block_t>(size, data));
         }
         else
         {

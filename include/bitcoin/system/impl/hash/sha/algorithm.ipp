@@ -1393,22 +1393,19 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
-hash(size_t size, const uint8_t* data) NOEXCEPT
+hash(const iterable<block_t>& blocks) NOEXCEPT
 {
-    constexpr auto block_size = array_count<block_t>;
-    BC_ASSERT(is_multiple(size, block_size));
-
     buffer_t buffer{};
-    size_t blocks = 0;
     auto state = H::get;
-    for (size_t block = 0; block < size; block += block_size, ++blocks)
+
+    for (auto& block: blocks)
     {
-        input(buffer, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
     }
 
-    schedule_n(buffer, blocks);
+    schedule_n(buffer, blocks.size());
     compress(state, buffer);
     return output(state);
 }
@@ -1515,22 +1512,21 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
-double_hash(size_t size, const uint8_t* data) NOEXCEPT
+double_hash(const iterable<block_t>& blocks) NOEXCEPT
 {
-    constexpr auto block_size = array_count<block_t>;
-    BC_ASSERT(is_multiple(size, block_size));
+    static_assert(is_same_type<state_t, chunk_t>);
 
     buffer_t buffer{};
-    size_t blocks = 0;
     auto state = H::get;
-    for (size_t block = 0; block < size; block += block_size, ++blocks)
+
+    for (auto& block: blocks)
     {
-        input(buffer, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
     }
 
-    schedule_n(buffer, blocks);
+    schedule_n(buffer, blocks.size());
     compress(state, buffer);
 
     // Second hash
@@ -1851,15 +1847,12 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 void CLASS::
-accumulate(state_t& state, size_t size, const uint8_t* data) NOEXCEPT
+accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
 {
-    constexpr auto block_size = array_count<block_t>;
-    BC_ASSERT(is_multiple(size, block_size));
-
     buffer_t buffer{};
-    for (size_t block = 0; block < size; block += block_size)
+    for (auto& block: blocks)
     {
-        input(buffer, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
     }

@@ -586,22 +586,18 @@ pad_n(words_t& words, count_t blocks) NOEXCEPT
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
-hash(size_t size, const uint8_t* data) NOEXCEPT
+hash(const iterable<block_t>& blocks) NOEXCEPT
 {
-    constexpr auto block_size = array_count<block_t>;
-    BC_ASSERT(is_multiple(size, block_size));
-
     words_t words{};
-    size_t blocks = 0;
     auto state = H::get;
-    for (size_t block = 0; block < size; block += block_size, ++blocks)
+
+    for (auto& block: blocks)
     {
-        input(words, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        input(words, block);
         compress(state, words);
     }
 
-    // rmd does not precompute multi-block padding, as there is no schedule.
-    pad_n(words, blocks);
+    pad_n(words, blocks.size());
     compress(state, words);
     return output(state);
 }
@@ -619,7 +615,6 @@ hash(const blocks_t& blocks) NOEXCEPT
         compress(state, words);
     }
 
-    // rmd does not precompute multi-block padding, as there is no schedule.
     pad_n(words, blocks.size());
     compress(state, words);
     return output(state);
@@ -639,7 +634,6 @@ hash(const std_array<block_t, Size>& blocks) NOEXCEPT
         compress(state, words);
     }
 
-    // rmd does not precompute multi-block padding, as there is no schedule.
     pad_n(words, blocks.size());
     compress(state, words);
     return output(state);
@@ -697,15 +691,13 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 void CLASS::
-accumulate(state_t& state, size_t size, const uint8_t* data) NOEXCEPT
+accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
 {
-    constexpr auto block_size = array_count<block_t>;
-    BC_ASSERT(is_multiple(size, block_size));
-
     words_t words{};
-    for (size_t block = 0; block < size; block += block_size)
+
+    for (auto& block: blocks)
     {
-        input(words, unsafe_array_cast<uint8_t, block_size>(&data[block]));
+        input(words, block);
         compress(state, words);
     }
 }
@@ -714,7 +706,6 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 finalize(state_t& state, size_t blocks) NOEXCEPT
 {
-    // The state out parameter is updated for first hash.
     words_t words{};
     pad_n(words, blocks);
     compress(state, words);
