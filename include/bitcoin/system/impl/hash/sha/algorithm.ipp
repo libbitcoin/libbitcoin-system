@@ -52,11 +52,6 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 #if defined(HAVE_MSC)
 
-// XCPU extended integrals.
-using mint128_t = __m128i;
-using mint256_t = __m256i;
-using mint512_t = __m512i;
-
 // Extended integrals are neither c++ integrals nor stdlib integers.
 static_assert(!std::is_integral_v<__m128i>);
 static_assert(!std::is_integral_v<__m256i>);
@@ -104,25 +99,25 @@ INLINE Word byte_swap_mask() NOEXCEPT
 }
 
 template <typename Word, if_same<Word, mint128_t> = true>
-INLINE Word load(const uint32_t& data) NOEXCEPT
+INLINE Word load(const uint8_t* data) NOEXCEPT
 {
-    return _mm_loadu_si128(pointer_cast<const Word>(&data));
+    return _mm_loadu_si128(pointer_cast<const Word>(data));
 }
 
 template <typename Word, if_same<Word, mint128_t> = true>
-INLINE void store(uint8_t& data, Word value) NOEXCEPT
+INLINE void store(uint8_t* data, Word value) NOEXCEPT
 {
-    _mm_storeu_si128(pointer_cast<Word>(&data), value);
+    _mm_storeu_si128(pointer_cast<Word>(data), value);
 }
 
 template <typename Word, if_same<Word, mint128_t> = true>
-INLINE Word load_big_endian(const uint8_t& data) NOEXCEPT
+INLINE Word load_big_endian(const uint8_t* data) NOEXCEPT
 {
     return _mm_shuffle_epi8(load<mint128_t>(data), byte_swap_mask<Word>());
 }
 
 template <typename Word, if_same<Word, mint128_t> = true>
-INLINE void store_big_endian(uint8_t& data, Word value) NOEXCEPT
+INLINE void store_big_endian(uint8_t* data, Word value) NOEXCEPT
 {
     store(data, _mm_shuffle_epi8(value, byte_swap_mask<Word>()));
 }
@@ -203,25 +198,25 @@ INLINE Word byte_swap_mask() NOEXCEPT
 }
 
 template <typename Word, if_same<Word, mint256_t> = true>
-INLINE Word load(const uint32_t& data) NOEXCEPT
+INLINE Word load(const uint8_t* data) NOEXCEPT
 {
-    return _mm256_loadu_epi32(pointer_cast<const Word>(&data));
+    return _mm256_loadu_epi32(pointer_cast<const Word>(data));
 }
 
 template <typename Word, if_same<Word, mint256_t> = true>
-INLINE void store(uint8_t& data, Word value) NOEXCEPT
+INLINE void store(uint8_t* data, Word value) NOEXCEPT
 {
-    _mm256_storeu_epi32(pointer_cast<Word>(&data), value);
+    _mm256_storeu_epi32(pointer_cast<Word>(data), value);
 }
 
 template <typename Word, if_same<Word, mint256_t> = true>
-INLINE Word load_big_endian(const uint8_t& data) NOEXCEPT
+INLINE Word load_big_endian(const uint8_t* data) NOEXCEPT
 {
     return _mm256_shuffle_epi8(load<mint256_t>(data), byte_swap_mask<Word>());
 }
 
 template <typename Word, if_same<Word, mint256_t> = true>
-INLINE void store_big_endian(uint8_t& data, Word value) NOEXCEPT
+INLINE void store_big_endian(uint8_t* data, Word value) NOEXCEPT
 {
     store(data, _mm256_shuffle_epi8(value, byte_swap_mask<Word>()));
 }
@@ -304,25 +299,25 @@ INLINE Word byte_swap_mask() NOEXCEPT
 }
 
 template <typename Word, if_same<Word, mint512_t> = true>
-INLINE Word load(const uint32_t& data) NOEXCEPT
+INLINE Word load(const uint8_t* data) NOEXCEPT
 {
-    return _mm512_loadu_epi32(pointer_cast<const Word>(&data));
+    return _mm512_loadu_epi32(pointer_cast<const Word>(data));
 }
 
 template <typename Word, if_same<Word, mint512_t> = true>
-INLINE void store(uint8_t& data, Word value) NOEXCEPT
+INLINE void store(uint8_t* data, Word value) NOEXCEPT
 {
-    _mm512_storeu_epi32(pointer_cast<Word>(&data), value);
+    _mm512_storeu_epi32(pointer_cast<Word>(data), value);
 }
 
 template <typename Word, if_same<Word, mint512_t> = true>
-INLINE Word load_big_endian(const uint8_t& data) NOEXCEPT
+INLINE Word load_big_endian(const uint8_t* data) NOEXCEPT
 {
     return _mm512_shuffle_epi8(load<mint512_t>(data), byte_swap_mask<Word>());
 }
 
 template <typename Word, if_same<Word, mint512_t> = true>
-INLINE void store_big_endian(uint8_t& data, Word value) NOEXCEPT
+INLINE void store_big_endian(uint8_t* data, Word value) NOEXCEPT
 {
     store(data, _mm512_shuffle_epi8(value, byte_swap_mask<Word>()));
 }
@@ -1757,6 +1752,309 @@ merkle_hash(digests_t& digests) NOEXCEPT
 
 // Streaming (unfinalized).
 // ---------------------------------------------------------------------------
+// eprint.iacr.org/2012/067.pdf
+// Message schedule vectorization across blocks.
+// Message schedules/endianness are order independent.
+
+#if defined(HAVE_MSC)
+
+TEMPLATE
+template <size_t Lanes,
+    bool_if<Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2>>
+INLINE bool CLASS::
+have() NOEXCEPT
+{
+    if constexpr (SHA::word_bytes == 8)
+    {
+        if constexpr (Lanes == 16)
+            return false;
+        if constexpr (Lanes == 8)
+            return have_avx512();
+        if constexpr (Lanes == 4)
+            return have_avx2();
+        if constexpr (Lanes == 2)
+            return have_sse41();
+    }
+    else // if constexpr (SHA::word_bytes == 4)
+    {
+        if constexpr (Lanes == 16)
+            return have_avx512();
+        if constexpr (Lanes == 8)
+            return have_avx2();
+        if constexpr (Lanes == 4)
+            return have_sse41();
+        if constexpr (Lanes == 2)
+            return have_sse41();
+    }
+}
+
+TEMPLATE
+template <size_t Lanes>
+void CLASS::
+input(bufferex_t<Lanes>& buffer, block_it& block) NOEXCEPT
+{
+    // Always 16 words per block.
+    // bufferex_t is always round count and first 1/4 holds "block".
+    // But is expanded by Lanes to hold Lanes blocks.
+    // So always fill Lane blocks into one buffer here.
+    // This is 16 wordex_t into buffer and (Lanes*4[8])*16 bytes from blocks.
+    // Lanes is half with sha256 so counts line up.
+    // word_t varies with SHA, wordex_t varies with SHA and Lanes.
+    // block iterator must be incremented by lanes.
+    // Array cast current block to array<wordex_t, 16> for iteration here.
+    // Then advance block iterator by number of blocks consumed.
+    // 16 * sizeof(wordex_t) / 64|128 -> sizeof(wordex_t) / 4|8.
+    // sha256/160: 128 -> 4, 256 -> 8, 512 -> 16
+    // sha512    : 128 -> 2, 256 -> 4, 512 ->  8
+    // This is always the number of lanes: std::advance(block, Lanes);
+
+    // Cast Lane blocks of bytes into an array of wordex_t chunks.
+    using word = wordex_t<Lanes>;
+    using chunk = data_array<sizeof(word)>;
+    constexpr auto words = SHA::block_words;
+    const auto& data = unsafe_array_cast<chunk, words>(&block->front());
+
+    buffer[0]  = load_big_endian<word>(data[0]);
+    buffer[1]  = load_big_endian<word>(data[1]);
+    buffer[2]  = load_big_endian<word>(data[2]);
+    buffer[3]  = load_big_endian<word>(data[3]);
+
+    buffer[4]  = load_big_endian<word>(data[4]);
+    buffer[5]  = load_big_endian<word>(data[5]);
+    buffer[6]  = load_big_endian<word>(data[6]);
+    buffer[7]  = load_big_endian<word>(data[7]);
+
+    buffer[8]  = load_big_endian<word>(data[8]);
+    buffer[9]  = load_big_endian<word>(data[9]);
+    buffer[10] = load_big_endian<word>(data[10]);
+    buffer[11] = load_big_endian<word>(data[11]);
+
+    buffer[12] = load_big_endian<word>(data[12]);
+    buffer[13] = load_big_endian<word>(data[13]);
+    buffer[14] = load_big_endian<word>(data[14]);
+    buffer[15] = load_big_endian<word>(data[15]);
+
+    // TODO: this iterates over ++it, make random access iterator and can +=.
+    // Advance block iterator by number of blocks consumed.
+    std::advance(block, Lanes);
+}
+
+////TEMPLATE
+////template <size_t Lanes>
+////typename CLASS::digest_t CLASS::
+////outputex(const statex_t<Lanes>& state) NOEXCEPT
+////{
+////    digest_t digest{};
+////
+////    // Always natively little endian because these are X86 optimizations.
+////
+////    auto& out = array_cast<wordex_t<Lanes>>(digest);
+////
+////    out[0] = native_to_big_end(state[0]);
+////    out[1] = native_to_big_end(state[1]);
+////    out[2] = native_to_big_end(state[2]);
+////    out[3] = native_to_big_end(state[3]);
+////    out[4] = native_to_big_end(state[4]);
+////
+////    if constexpr (SHA::strength != 160)
+////    {
+////        out[5] = native_to_big_end(state[5]);
+////        out[6] = native_to_big_end(state[6]);
+////        out[7] = native_to_big_end(state[7]);
+////    }
+////
+////    return digest;
+////}
+
+TEMPLATE
+template <size_t Lanes, if_equal<Lanes, 16>>
+inline void CLASS::
+vectorize(state_t& state, block_it& block, size_t& count) NOEXCEPT
+{
+    if (have<Lanes>())
+    {
+        for (; count >= Lanes; count -= Lanes)
+        {
+            bufferex_t<Lanes> buffers;
+            input<Lanes>(buffers, block);
+            schedule(buffers);
+
+            // TODO: use the loop unroller to consolidate all vectorize().
+            // array_cast requires integral types, could be overloaded here.
+            const auto& buffer = unsafe_array_cast<buffer_t, Lanes>(&buffers.front());
+            compress(state, buffer[0]);
+            compress(state, buffer[1]);
+            compress(state, buffer[2]);
+            compress(state, buffer[3]);
+            compress(state, buffer[4]);
+            compress(state, buffer[5]);
+            compress(state, buffer[6]);
+            compress(state, buffer[7]);
+            compress(state, buffer[8]);
+            compress(state, buffer[9]);
+            compress(state, buffer[10]);
+            compress(state, buffer[11]);
+            compress(state, buffer[12]);
+            compress(state, buffer[13]);
+            compress(state, buffer[14]);
+            compress(state, buffer[15]);
+        }
+    }
+}
+
+TEMPLATE
+template <size_t Lanes, if_equal<Lanes, 8>>
+inline void CLASS::
+vectorize(state_t& state, block_it& block, size_t& count) NOEXCEPT
+{
+    if (have<Lanes>())
+    {
+        for (; count >= Lanes; count -= Lanes)
+        {
+            bufferex_t<Lanes> buffers;
+            input<Lanes>(buffers, block);
+            schedule(buffers);
+
+            // TODO: use the loop unroller to consolidate all vectorize().
+            // array_cast requires integral types, could be overloaded here.
+            const auto& buffer = unsafe_array_cast<buffer_t, Lanes>(&buffers.front());
+            compress(state, buffer[0]);
+            compress(state, buffer[1]);
+            compress(state, buffer[2]);
+            compress(state, buffer[3]);
+            compress(state, buffer[4]);
+            compress(state, buffer[5]);
+            compress(state, buffer[6]);
+            compress(state, buffer[7]);
+        }
+    }
+}
+
+TEMPLATE
+template <size_t Lanes, if_equal<Lanes, 4>>
+inline void CLASS::
+vectorize(state_t& state, block_it& block, size_t& count) NOEXCEPT
+{
+    if (have<Lanes>())
+    {
+        for (; count >= Lanes; count -= Lanes)
+        {
+            bufferex_t<Lanes> buffers;
+            input<Lanes>(buffers, block);
+            schedule(buffers);
+
+            // TODO: use the loop unroller to consolidate all vectorize().
+            // array_cast requires integral types, could be overloaded here.
+            const auto& buffer = unsafe_array_cast<buffer_t, Lanes>(&buffers.front());
+            compress(state, buffer[0]);
+            compress(state, buffer[1]);
+            compress(state, buffer[2]);
+            compress(state, buffer[3]);
+        }
+    }
+}
+
+TEMPLATE
+template <size_t Lanes, if_equal<Lanes, 2>>
+inline void CLASS::
+vectorize(state_t& state, block_it& block, size_t& count) NOEXCEPT
+{
+    if (have<Lanes>())
+    {
+        for (; count >= Lanes; count -= Lanes)
+        {
+            bufferex_t<Lanes> buffers;
+            input<Lanes>(buffers, block);
+            schedule(buffers);
+
+            // TODO: use the loop unroller to consolidate all vectorize().
+            // array_cast requires integral types, could be overloaded here.
+            const auto& buffer = unsafe_array_cast<buffer_t, Lanes>(&buffers.front());
+            compress(state, buffer[0]);
+            compress(state, buffer[1]);
+        }
+    }
+}
+
+TEMPLATE
+template <size_t Lanes, if_equal<Lanes, 1>>
+inline void CLASS::
+vectorize(state_t& state, block_it& block, size_t& count) NOEXCEPT
+{
+    // Default processing with vectorization enabled by none available.
+    for (; count >= Lanes; count -= Lanes)
+    {
+        buffer_t buffer;
+        input(buffer, *block++);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
+
+TEMPLATE
+template <size_t Lanes, if_equal<Lanes, 0>>
+inline void CLASS::
+vectorize(state_t&, block_it&, size_t&) NOEXCEPT
+{
+    // This will not be seen by any (nop-op).
+}
+
+#endif // HAVE_MSC
+
+TEMPLATE
+void CLASS::
+accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
+{
+    if constexpr (Compressed)
+    {
+        // TODO: sha intrinsics.
+        buffer_t buffer{};
+        for (auto& block: blocks)
+        {
+            input(buffer, block);
+            schedule(buffer);
+            compress(state, buffer);
+        }
+    }
+#if defined(HAVE_MSC)
+    else if constexpr (Vectorized)
+    {
+        // sha512 is twice the width of sha156/160.
+        constexpr auto multiple = sizeof(word_t) / sizeof(uint32_t);
+
+        auto count = blocks.size();
+        auto block = blocks.begin();
+        vectorize<16 / multiple>(state, block, count); //  16/8 AVX512/AVX512
+        vectorize< 8 / multiple>(state, block, count); //   8/4 AVX2/AVX2
+        vectorize< 4 / multiple>(state, block, count); //   4/2 SSE4/SSE4
+        vectorize< 2 / multiple>(state, block, count); //   2/1 SSE4/Native
+        vectorize< 1 / multiple>(state, block, count); //   1/0 Native/[n/a]
+    }
+#endif // HAVE_MSC
+    else
+    {
+        buffer_t buffer{};
+        for (auto& block: blocks)
+        {
+            input(buffer, block);
+            schedule(buffer);
+            compress(state, buffer);
+        }
+    }
+}
+
+TEMPLATE
+VCONSTEXPR void CLASS::
+accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
 
 TEMPLATE
 constexpr void CLASS::
@@ -1766,96 +2064,6 @@ accumulate(state_t& state, const block_t& block) NOEXCEPT
     input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
-}
-
-TEMPLATE
-void CLASS::
-schedule(buffers_t&, const blocks_t&) NOEXCEPT
-{
-    // rename all uintx_t to uintx128_t, etc.
-    // alias uint128_t, uint256_t, uint512_t as extended intel/arm integrals.
-    // Pack up to 16 buffers into 1 of uint512_t.
-    // Pack up to  8 buffers into 1 of uint256_t.
-    // Pack up to  4 buffers into 1 of uint128_t.
-    // buffer_t<word_t> where word_t is uint32_t/uint128_t/uint256_t/uint512_t (sha256)
-    // buffer_t<word_t> where word_t is uint64_t/uint128_t/uint256_t/uint512_t (sha512)
-    // sha160->1/2/4/8/16 lanes
-    // sha256->1/2/4/8/16 lanes
-    // sha512->1/2/4/8 lanes
-
-    ////// TODO: vector cast by lanes.
-    ////auto xbuffers = buffers;
-    ////
-    ////for (auto& block: blocks)
-    ////{
-    ////}
-    ////
-    ////// schedule() is auto-typed for vectorization.
-    ////schedule(xbuffers);
-}
-
-TEMPLATE
-VCONSTEXPR void CLASS::
-accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
-{
-    if constexpr (Compressed)
-    {
-        // TODO: sha intrinsic schedule/compress compresion.
-        buffer_t buffer{};
-        for (auto& block: blocks)
-        {
-            input(buffer, block);
-            schedule(buffer);
-            compress(state, buffer);
-        }
-    }
-    else if constexpr (Vectorized)
-    {
-        // TODO: replace with maximal lane schedule vectorization.
-        buffer_t buffer{};
-        for (auto& block : blocks)
-        {
-            input(buffer, block);
-            schedule(buffer);
-            compress(state, buffer);
-        }
-
-        ////// TODO: size the buffer to min(lanes, blocks.size()) and iterate over
-        ////// TODO: the buffers with lane-count sequential compression rounds.
-        ////buffers_t buffers(blocks.size());
-        ////
-        ////// eprint.iacr.org/2012/067.pdf
-        ////// Message schedule vectorization across blocks.
-        ////// Message schedules/endianness are order independent.
-        ////schedule(buffers, blocks);
-        ////
-        ////for (auto& space: buffers)
-        ////    compress(state, space);
-    }
-    else
-    {
-        // Native sha evaluation (constexpr).
-        buffer_t buffer{};
-        for (auto& block: blocks)
-        {
-            input(buffer, block);
-            schedule(buffer);
-            compress(state, buffer);
-        }
-    }
-}
-
-TEMPLATE
-void CLASS::
-accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
 }
 
 TEMPLATE

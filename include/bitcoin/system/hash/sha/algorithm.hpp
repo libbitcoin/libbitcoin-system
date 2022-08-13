@@ -34,6 +34,13 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
+#if defined(HAVE_MSC)
+// XCPU extended integrals.
+using mint128_t = __m128i;
+using mint256_t = __m256i;
+using mint512_t = __m512i;
+#endif
+
 /// SHA hashing algorithm.
 /// Presently Compressed enables non-vector sigma optimization.
 /// Presently Vectorized enables vector-friendly sigma optimization.
@@ -57,7 +64,6 @@ public:
     using chunk_t   = std_array<word_t, SHA::chunk_words>;
     using words_t   = std_array<word_t, SHA::block_words>;
     using buffer_t  = std_array<word_t, K::rounds>;
-    using buffers_t = std_vector<buffer_t>;
 
     /// Byte-based types.
     using byte_t    = uint8_t;
@@ -198,11 +204,6 @@ protected:
     static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
     static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
-    /// Vectorization (WIP)
-    /// -----------------------------------------------------------------------
-    static void schedule(buffers_t& buffers,
-        const blocks_t& blocks) NOEXCEPT;
-
 private:
     using pad_t = std_array<word_t, subtract(SHA::block_words,
         count_bytes / SHA::word_bytes)>;
@@ -211,6 +212,44 @@ private:
     static CONSTEVAL buffer_t scheduled_pad() NOEXCEPT;
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
+
+#if defined(HAVE_MSC)
+protected:
+    using block_it = typename iterable<block_t>::iterator;
+    template <size_t Lanes,
+        bool_if<!(Lanes == 16 && is_same_size<word_t, uint64_t>)> = true,
+        bool_if<Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2> = true>
+    using wordex_t = iif<is_same_size<word_t, uint32_t>,
+        iif<Lanes == 16, mint512_t, iif<Lanes == 8, mint256_t, mint128_t>>,
+        iif<Lanes ==  8, mint512_t, iif<Lanes == 4, mint256_t, mint128_t>>>;
+
+    template <size_t Lanes>
+    using bufferex_t = std_array<wordex_t<Lanes>, K::rounds>;
+    ////template <size_t Lanes>
+    ////using statex_t = std_array<wordex_t<Lanes>, H::state_words>;
+
+    template <size_t Lanes,
+        bool_if<Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2> = true>
+    INLINE bool have() NOEXCEPT;
+
+    template <size_t Lanes>
+    static void input(bufferex_t<Lanes>& buffer, block_it& block) NOEXCEPT;
+    ////template <size_t Lanes>
+    ////static digest_t outputex(const statex_t<Lanes>& state) NOEXCEPT;
+
+    template <size_t Lanes, if_equal<Lanes, 16> = true>
+    inline static void vectorize(state_t& state, block_it& blocks, size_t& count) NOEXCEPT;
+    template <size_t Lanes, if_equal<Lanes, 8> = true>
+    inline static void vectorize(state_t& state, block_it& blocks, size_t& count) NOEXCEPT;
+    template <size_t Lanes, if_equal<Lanes, 4> = true>
+    inline static void vectorize(state_t& state, block_it& blocks, size_t& count) NOEXCEPT;
+    template <size_t Lanes, if_equal<Lanes, 2> = true>
+    inline static void vectorize(state_t& state, block_it& blocks, size_t& count) NOEXCEPT;
+    template <size_t Lanes, if_equal<Lanes, 1> = true>
+    inline static void vectorize(state_t& state, block_it& blocks, size_t& count) NOEXCEPT;
+    template <size_t Lanes, if_equal<Lanes, 0> = true>
+    inline static void vectorize(state_t& state, block_it& blocks, size_t& count) NOEXCEPT;
+#endif //HAVE_MSC
 };
 
 } // namespace sha

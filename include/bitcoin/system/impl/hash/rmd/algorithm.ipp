@@ -668,12 +668,15 @@ hash(const half_t& half) NOEXCEPT
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr void CLASS::
-accumulate(state_t& state, const block_t& block) NOEXCEPT
+void CLASS::
+accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
 {
     words_t words{};
-    input(words, block);
-    compress(state, words);
+    for (auto& block: blocks)
+    {
+        input(words, block);
+        compress(state, words);
+    }
 }
 
 TEMPLATE
@@ -681,7 +684,6 @@ VCONSTEXPR void CLASS::
 accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 {
     words_t words{};
-
     for (auto& block: blocks)
     {
         input(words, block);
@@ -690,16 +692,12 @@ accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
-void CLASS::
-accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
+constexpr void CLASS::
+accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     words_t words{};
-
-    for (auto& block: blocks)
-    {
-        input(words, block);
-        compress(state, words);
-    }
+    input(words, block);
+    compress(state, words);
 }
 
 TEMPLATE
