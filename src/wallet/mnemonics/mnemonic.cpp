@@ -113,7 +113,10 @@ uint8_t mnemonic::checksum_byte(const data_slice& entropy) NOEXCEPT
     // Only 4, 5, 6, 7, or 8 bits of the hash are used (based on size).
     const auto mask_bits = byte_bits - checksum_bits(entropy);
     const auto checksum_mask = max_uint8 << mask_bits;
-    return sha256_hash(entropy).front() & checksum_mask;
+
+    // TODO: provide implicit cast from data_slice to exclusive_slice.
+    return sha256_hash(exclusive_slice{ entropy.begin(), entropy.end() })
+        .front() & checksum_mask;
 }
 
 // protected static (sizers)

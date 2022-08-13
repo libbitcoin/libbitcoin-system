@@ -68,29 +68,39 @@ constexpr hash_digest one_hash = from_uintx(uint256_t(one));
 /// ---------------------------------------------------------------------------
 
 /// rmd128 [historical].
+template <size_t Size>
+INLINE half_hash  rmd128_hash(const data_array<Size>& data) NOEXCEPT;
+INLINE half_hash  rmd128_hash(const data_chunk& data) NOEXCEPT;
+INLINE half_hash  rmd128_hash(const exclusive_slice& data) NOEXCEPT;
 
-INLINE half_hash  rmd128_hash(const data_slice& data) NOEXCEPT;
-INLINE data_chunk rmd128_chunk(const data_slice& data) NOEXCEPT;
+template <size_t Size>
+INLINE data_chunk rmd128_chunk(const data_array<Size>& data) NOEXCEPT;
+INLINE data_chunk rmd128_chunk(const data_chunk& data) NOEXCEPT;
+INLINE data_chunk rmd128_chunk(const exclusive_slice& data) NOEXCEPT;
 
 /// rmd160 [script].
 
 template <size_t Size>
 INLINE short_hash rmd160_hash(const data_array<Size>& data) NOEXCEPT;
 INLINE short_hash rmd160_hash(const data_chunk& data) NOEXCEPT;
+INLINE short_hash rmd160_hash(const exclusive_slice& data) NOEXCEPT;
 
 template <size_t Size>
 INLINE data_chunk rmd160_chunk(const data_array<Size>& data) NOEXCEPT;
 INLINE data_chunk rmd160_chunk(const data_chunk& data) NOEXCEPT;
+INLINE data_chunk rmd160_chunk(const exclusive_slice& data) NOEXCEPT;
 
 /// sha1 (sha160) [script].
 
 template <size_t Size>
 INLINE short_hash sha1_hash(const data_array<Size>& data) NOEXCEPT;
 INLINE short_hash sha1_hash(const data_chunk& data) NOEXCEPT;
+INLINE short_hash sha1_hash(const exclusive_slice& data) NOEXCEPT;
 
 template <size_t Size>
 INLINE data_chunk sha1_chunk(const data_array<Size>& data) NOEXCEPT;
 INLINE data_chunk sha1_chunk(const data_chunk& data) NOEXCEPT;
+INLINE data_chunk sha1_chunk(const exclusive_slice& data) NOEXCEPT;
 
 /// sha256 [script, wallet].
 
@@ -111,8 +121,15 @@ INLINE data_chunk sha256_chunk(const exclusive_slice& data) NOEXCEPT;
 
 /// sha512 hash [wallet].
 
-INLINE long_hash  sha512_hash(const data_slice& data) NOEXCEPT;
-INLINE data_chunk sha512_chunk(const data_slice& data) NOEXCEPT;
+template <size_t Size>
+INLINE long_hash  sha512_hash(const data_array<Size>& data) NOEXCEPT;
+INLINE long_hash  sha512_hash(const data_chunk& data) NOEXCEPT;
+INLINE long_hash  sha512_hash(const exclusive_slice& data) NOEXCEPT;
+
+template <size_t Size>
+INLINE data_chunk sha512_chunk(const data_array<Size>& data) NOEXCEPT;
+INLINE data_chunk sha512_chunk(const data_chunk& data) NOEXCEPT;
+INLINE data_chunk sha512_chunk(const exclusive_slice& data) NOEXCEPT;
 
 /// Specialized cryptographic hash functions.
 /// ---------------------------------------------------------------------------
@@ -122,10 +139,12 @@ INLINE data_chunk sha512_chunk(const data_slice& data) NOEXCEPT;
 template <size_t Size>
 INLINE short_hash bitcoin_short_hash(const data_array<Size>& data) NOEXCEPT;
 INLINE short_hash bitcoin_short_hash(const data_chunk& data) NOEXCEPT;
+INLINE short_hash bitcoin_short_hash(const exclusive_slice& data) NOEXCEPT;
 
 template <size_t Size>
 INLINE data_chunk bitcoin_short_chunk(const data_array<Size>& data) NOEXCEPT;
 INLINE data_chunk bitcoin_short_chunk(const data_chunk& data) NOEXCEPT;
+INLINE data_chunk bitcoin_short_chunk(const exclusive_slice& data) NOEXCEPT;
 
 /// Bitcoin hash (sha256(sha256)) [script, chain, wallet].
 

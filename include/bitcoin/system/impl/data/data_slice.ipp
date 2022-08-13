@@ -240,19 +240,19 @@ constexpr bool data_slice::empty() const NOEXCEPT
 // operators
 // ----------------------------------------------------------------------------
 
-template <data_slice::size_type Size>
-constexpr data_slice::
-operator std::array<data_slice::value_type, Size>() const NOEXCEPT
-{
-    return to_array<Size>();
-}
-
-
-VCONSTEXPR data_slice::
-operator std::vector<data_slice::value_type>() const NOEXCEPT
-{
-    return data_slice::to_chunk();
-}
+////template <data_slice::size_type Size>
+////constexpr data_slice::
+////operator std::array<data_slice::value_type, Size>() const NOEXCEPT
+////{
+////    return to_array<Size>();
+////}
+////
+////
+////VCONSTEXPR data_slice::
+////operator std::vector<data_slice::value_type>() const NOEXCEPT
+////{
+////    return data_slice::to_chunk();
+////}
 
 constexpr data_slice::value_type data_slice::
 operator[](size_type index) const NOEXCEPT

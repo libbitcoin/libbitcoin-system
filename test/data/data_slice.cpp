@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
     // operator[] (value read past end, zero padded)
     BOOST_REQUIRE_EQUAL(slice[0], 0x00u);
 
-    // cast operators
-    BOOST_REQUIRE(static_cast<data_chunk>(slice).empty());
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<32>>(slice), null_hash);
+    ////// cast operators
+    ////BOOST_REQUIRE(static_cast<data_chunk>(slice).empty());
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<32>>(slice), null_hash);
 
     // operator==/operator!=
     BOOST_REQUIRE(slice == slice);
@@ -193,15 +193,15 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__text__expected)
     BOOST_REQUIRE_EQUAL(slice.front(), 'f');
     BOOST_REQUIRE_EQUAL(slice[0], 'f');
     BOOST_REQUIRE_EQUAL(*slice.begin(), 'f');
-    BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slice).front(), 'f');
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).front(), 'f');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slice).front(), 'f');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).front(), 'f');
     
     // end
     BOOST_REQUIRE_EQUAL(slice.back(), 'r');
     BOOST_REQUIRE_EQUAL(slice[sub1(size)], 'r');
     BOOST_REQUIRE_EQUAL(*std::prev(slice.end()), 'r');
-    BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slice).back(), 'r');
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).back(), 'r');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slice).back(), 'r');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slice).back(), 'r');
 
     // methods
     ////BOOST_REQUIRE_EQUAL(slice.encoded(), encoded);

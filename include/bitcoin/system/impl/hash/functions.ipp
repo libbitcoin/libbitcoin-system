@@ -45,14 +45,35 @@ namespace system {
 // exclusive_slice is a specialization of data_slice which does not accept
 // array/vector. This allows overloading for all three data scenarios, where
 // optimizations are maximized for each independently.
-// Wallet-only sha512 and historical rmd128 are not optimized.
+
+// TODO: provide unconstrained pass-through to accumulator, which can collpase
+// TODO: the number of functions to one per type.
 
 // rmd128 [historical].
-INLINE half_hash rmd128_hash(const data_slice& data) NOEXCEPT
+template <size_t Size>
+INLINE half_hash rmd128_hash(const data_array<Size>& data) NOEXCEPT
 {
     return accumulator<rmd128>::hash(data);
 }
-INLINE data_chunk rmd128_chunk(const data_slice& data) NOEXCEPT
+INLINE half_hash rmd128_hash(const data_chunk& data) NOEXCEPT
+{
+    return accumulator<rmd128>::hash(data);
+}
+INLINE half_hash rmd128_hash(const exclusive_slice& data) NOEXCEPT
+{
+    return accumulator<rmd128>::hash(data);
+}
+
+template <size_t Size>
+INLINE data_chunk rmd128_chunk(const data_array<Size>& data) NOEXCEPT
+{
+    return accumulator<rmd128>::hash_chunk(data);
+}
+INLINE data_chunk rmd128_chunk(const data_chunk& data) NOEXCEPT
+{
+    return accumulator<rmd128>::hash_chunk(data);
+}
+INLINE data_chunk rmd128_chunk(const exclusive_slice& data) NOEXCEPT
 {
     return accumulator<rmd128>::hash_chunk(data);
 }
@@ -67,6 +88,10 @@ INLINE short_hash rmd160_hash(const data_chunk& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash(data);
 }
+INLINE short_hash rmd160_hash(const exclusive_slice& data) NOEXCEPT
+{
+    return accumulator<rmd160>::hash(data);
+}
 
 template <size_t Size>
 INLINE data_chunk rmd160_chunk(const data_array<Size>& data) NOEXCEPT
@@ -74,6 +99,10 @@ INLINE data_chunk rmd160_chunk(const data_array<Size>& data) NOEXCEPT
     return accumulator<rmd160>::hash_chunk(data);
 }
 INLINE data_chunk rmd160_chunk(const data_chunk& data) NOEXCEPT
+{
+    return accumulator<rmd160>::hash_chunk(data);
+}
+INLINE data_chunk rmd160_chunk(const exclusive_slice& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash_chunk(data);
 }
@@ -88,6 +117,10 @@ INLINE short_hash sha1_hash(const data_chunk& data) NOEXCEPT
 {
     return accumulator<sha160>::hash(data);
 }
+INLINE short_hash sha1_hash(const exclusive_slice& data) NOEXCEPT
+{
+    return accumulator<sha160>::hash(data);
+}
 
 template <size_t Size>
 INLINE data_chunk sha1_chunk(const data_array<Size>& data) NOEXCEPT
@@ -95,6 +128,10 @@ INLINE data_chunk sha1_chunk(const data_array<Size>& data) NOEXCEPT
     return accumulator<sha160>::hash_chunk(data);
 }
 INLINE data_chunk sha1_chunk(const data_chunk& data) NOEXCEPT
+{
+    return accumulator<sha160>::hash_chunk(data);
+}
+INLINE data_chunk sha1_chunk(const exclusive_slice& data) NOEXCEPT
 {
     return accumulator<sha160>::hash_chunk(data);
 }
@@ -123,9 +160,10 @@ INLINE hash_digest sha256_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT
 {
     // Used by wallet functions on mixed left/right sizes.
+    // TODO: provide implicit cast from data_slice to exclusive_slice.
     accumulator<sha256> context{};
-    context.write(left);
-    context.write(right);
+    context.write(left.size(), left.data());
+    context.write(right.size(), right.data());
     return context.flush();
 }
 
@@ -144,11 +182,30 @@ INLINE data_chunk sha256_chunk(const exclusive_slice& data) NOEXCEPT
 }
 
 // sha512 [wallet].
-INLINE long_hash sha512_hash(const data_slice& data) NOEXCEPT
+template <size_t Size>
+INLINE long_hash sha512_hash(const data_array<Size>& data) NOEXCEPT
 {
     return accumulator<sha512>::hash(data);
 }
-INLINE data_chunk sha512_chunk(const data_slice& data) NOEXCEPT
+INLINE long_hash sha512_hash(const data_chunk& data) NOEXCEPT
+{
+    return accumulator<sha512>::hash(data);
+}
+INLINE long_hash sha512_hash(const exclusive_slice& data) NOEXCEPT
+{
+    return accumulator<sha512>::hash(data);
+}
+
+template <size_t Size>
+INLINE data_chunk sha512_chunk(const data_array<Size>& data) NOEXCEPT
+{
+    return accumulator<sha512>::hash_chunk(data);
+}
+INLINE data_chunk sha512_chunk(const data_chunk& data) NOEXCEPT
+{
+    return accumulator<sha512>::hash_chunk(data);
+}
+INLINE data_chunk sha512_chunk(const exclusive_slice& data) NOEXCEPT
 {
     return accumulator<sha512>::hash_chunk(data);
 }
@@ -166,6 +223,10 @@ INLINE short_hash bitcoin_short_hash(const data_chunk& data) NOEXCEPT
 {
     return rmd160::hash(accumulator<sha256>::hash(data));
 }
+INLINE short_hash bitcoin_short_hash(const exclusive_slice& data) NOEXCEPT
+{
+    return rmd160::hash(accumulator<sha256>::hash(data));
+}
 
 template <size_t Size>
 INLINE data_chunk bitcoin_short_chunk(const data_array<Size>& data) NOEXCEPT
@@ -173,6 +234,10 @@ INLINE data_chunk bitcoin_short_chunk(const data_array<Size>& data) NOEXCEPT
     return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
 }
 INLINE data_chunk bitcoin_short_chunk(const data_chunk& data) NOEXCEPT
+{
+    return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
+}
+INLINE data_chunk bitcoin_short_chunk(const exclusive_slice& data) NOEXCEPT
 {
     return accumulator<rmd160>::hash_chunk(accumulator<sha256>::hash(data));
 }
@@ -202,9 +267,10 @@ INLINE hash_digest bitcoin_hash2(const data_slice& left,
 {
     // Used by wallet functions on mixed left/right sizes.
     // double_flush performs second hash, avoiding endian conversion of state.
+    // TODO: provide implicit cast from data_slice to exclusive_slice.
     accumulator<sha256> context{};
-    context.write(left);
-    context.write(right);
+    context.write(left.size(), left.data());
+    context.write(right.size(), right.data());
     return context.double_flush();
 }
 

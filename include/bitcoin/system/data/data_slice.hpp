@@ -135,9 +135,9 @@ public:
 
     /// Operators.
     /// -----------------------------------------------------------------------
-    template<size_type Size>
-    constexpr operator std_array<value_type, Size>() const NOEXCEPT;
-    VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
+    ////template<size_type Size>
+    ////constexpr operator std_array<value_type, Size>() const NOEXCEPT;
+    ////VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
     constexpr value_type operator[](size_type index) const NOEXCEPT;
 
 private:

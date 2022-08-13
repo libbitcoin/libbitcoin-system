@@ -211,18 +211,18 @@ constexpr bool data_slab::empty() const NOEXCEPT
 // operators
 // ----------------------------------------------------------------------------
 
-template <data_slab::size_type Size>
-constexpr data_slab::operator
-std::array<data_slab::value_type, Size>() const NOEXCEPT
-{
-    return to_array<Size>();
-}
-
-VCONSTEXPR data_slab::operator
-std::vector<data_slab::value_type>() const NOEXCEPT
-{
-    return data_slab::to_chunk();
-}
+////template <data_slab::size_type Size>
+////constexpr data_slab::operator
+////std::array<data_slab::value_type, Size>() const NOEXCEPT
+////{
+////    return to_array<Size>();
+////}
+////
+////VCONSTEXPR data_slab::operator
+////std::vector<data_slab::value_type>() const NOEXCEPT
+////{
+////    return data_slab::to_chunk();
+////}
 
 constexpr data_slab::
 operator data_slice() const NOEXCEPT
