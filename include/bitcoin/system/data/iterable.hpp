@@ -53,13 +53,12 @@ array_cast(const Iterable& it, size_t offset = zero) NOEXCEPT
 template<typename Array, if_std_array<Array> = true>
 class iterable
 {
-private:
-    template <typename Array_>
+public:
     class iterator
     {
     public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = Array_;
+        using value_type = Array;
         using difference_type = ptrdiff_t;
         using pointer = value_type const*;
         using reference = value_type const&;
@@ -137,14 +136,14 @@ public:
     {
     }
 
-    inline iterator<Array> begin() const NOEXCEPT
+    inline iterator begin() const NOEXCEPT
     {
-        return iterator<Array>(begin_);
+        return iterator(begin_);
     }
 
-    inline const iterator<Array> end() const NOEXCEPT
+    inline const iterator end() const NOEXCEPT
     {
-        return iterator<Array>(end_);
+        return iterator(end_);
     }
 
     inline size_t size() const NOEXCEPT
@@ -184,13 +183,12 @@ private:
 template<typename Array, if_std_array<Array> = true>
 class mutable_iterable
 {
-private:
-    template <typename Array_>
+public:
     class iterator
     {
     public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = Array_;
+        using value_type = Array;
         using difference_type = ptrdiff_t;
         using pointer = value_type*;
         using reference = value_type&;
@@ -268,14 +266,14 @@ public:
     {
     }
 
-    inline iterator<Array> begin() NOEXCEPT
+    inline iterator begin() NOEXCEPT
     {
-        return iterator<Array>(begin_);
+        return iterator(begin_);
     }
 
-    inline const iterator<Array> end() NOEXCEPT
+    inline const iterator end() NOEXCEPT
     {
-        return iterator<Array>(end_);
+        return iterator(end_);
     }
 
     inline size_t size() const NOEXCEPT
