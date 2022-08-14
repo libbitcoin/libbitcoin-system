@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
     };
 
     constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
-    auto it = iterable<type>(hash).advance(1).begin();
+    auto it = iterable<type>(hash).advance<1>().begin();
     BOOST_REQUIRE_EQUAL(*it, expected);
 }
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
     auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
 
     // type is 8 bytes, so advance(1) setting .at(0) will set byte 8 and every +8.
-    for (auto& chunk: mutable_iterable<type>(hash).advance(1))
+    for (auto& chunk: mutable_iterable<type>(hash).advance<1>())
         chunk.front().at(0) = 0xaa;
 
     constexpr auto expected = base16_array("1111111122222222aa33333344444444aa55555566666666aa77777788888888");
@@ -253,17 +253,17 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     BOOST_REQUIRE_EQUAL(iterable.size(), 15u);
     BOOST_REQUIRE_EQUAL(iterable.data(), data.front().data());
 
-    const auto blocks8 = array_cast<8>(iterable, 0);
-    const auto blocks4 = array_cast<4>(iterable, 8);
-    const auto blocks2 = array_cast<2>(iterable, 12);
-    const auto blocks1 = array_cast<1>(iterable, 14);
-    const auto blocks0 = array_cast<0>(iterable, 15); // ok
+    const auto& blocks8 = array_cast<8>(iterable);    // zero offset overload.
+    const auto& blocks4 = array_cast<4>(iterable, 8);
+    const auto& blocks2 = array_cast<2>(iterable, 12);
+    const auto& blocks1 = array_cast<1>(iterable, 14);
+    const auto& blocks0 = array_cast<0>(iterable, 15); // ok
 
-    static_assert(is_same_type<decltype(blocks8), const std_array<sha256::block_t, 8>>);
-    static_assert(is_same_type<decltype(blocks4), const std_array<sha256::block_t, 4>>);
-    static_assert(is_same_type<decltype(blocks2), const std_array<sha256::block_t, 2>>);
-    static_assert(is_same_type<decltype(blocks1), const std_array<sha256::block_t, 1>>);
-    static_assert(is_same_type<decltype(blocks0), const std_array<sha256::block_t, 0>>);
+    static_assert(is_same_type<decltype(blocks8), const std_array<sha256::block_t, 8>&>);
+    static_assert(is_same_type<decltype(blocks4), const std_array<sha256::block_t, 4>&>);
+    static_assert(is_same_type<decltype(blocks2), const std_array<sha256::block_t, 2>&>);
+    static_assert(is_same_type<decltype(blocks1), const std_array<sha256::block_t, 1>&>);
+    static_assert(is_same_type<decltype(blocks0), const std_array<sha256::block_t, 0>&>);
 
     // 8 lanes
     BOOST_REQUIRE_EQUAL(blocks8[0], expected1);
@@ -287,6 +287,41 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
 
     // 1 lane
     BOOST_REQUIRE_EQUAL(blocks1[0], expected15);
+
+    const auto& blocks8_ = iterable.to_array<8>(); // no offsetting (use advance)
+    const auto& blocks4_ = iterable.to_array<4>();
+    const auto& blocks2_ = iterable.to_array<2>();
+    const auto& blocks1_ = iterable.to_array<1>();
+    const auto& blocks0_ = iterable.to_array<0>(); // ok
+
+    static_assert(is_same_type<decltype(blocks8_), const std_array<sha256::block_t, 8>&>);
+    static_assert(is_same_type<decltype(blocks4_), const std_array<sha256::block_t, 4>&>);
+    static_assert(is_same_type<decltype(blocks2_), const std_array<sha256::block_t, 2>&>);
+    static_assert(is_same_type<decltype(blocks1_), const std_array<sha256::block_t, 1>&>);
+    static_assert(is_same_type<decltype(blocks0_), const std_array<sha256::block_t, 0>&>);
+
+    // 8 lanes
+    BOOST_REQUIRE_EQUAL(blocks8_[0], expected1);
+    BOOST_REQUIRE_EQUAL(blocks8_[1], expected2);
+    BOOST_REQUIRE_EQUAL(blocks8_[2], expected3);
+    BOOST_REQUIRE_EQUAL(blocks8_[3], expected4);
+    BOOST_REQUIRE_EQUAL(blocks8_[4], expected5);
+    BOOST_REQUIRE_EQUAL(blocks8_[5], expected6);
+    BOOST_REQUIRE_EQUAL(blocks8_[6], expected7);
+    BOOST_REQUIRE_EQUAL(blocks8_[7], expected8);
+
+    // 4 lanes
+    BOOST_REQUIRE_EQUAL(blocks4_[0], expected1);
+    BOOST_REQUIRE_EQUAL(blocks4_[1], expected2);
+    BOOST_REQUIRE_EQUAL(blocks4_[2], expected3);
+    BOOST_REQUIRE_EQUAL(blocks4_[3], expected4);
+
+    // 2 lanes
+    BOOST_REQUIRE_EQUAL(blocks2_[0], expected1);
+    BOOST_REQUIRE_EQUAL(blocks2_[1], expected2);
+
+    // 1 lane
+    BOOST_REQUIRE_EQUAL(blocks1_[0], expected1);
 }
 
 // Some extra stuff

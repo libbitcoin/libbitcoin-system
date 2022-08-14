@@ -29,23 +29,39 @@
 namespace libbitcoin {
 namespace system {
 
-/// Use Iterable.size() as basis for iterating over an Iterable, using
-/// this array_cast to obtain std::array(block_t, Lanes) for vectorization.
-/// Use offset parameter to traverse the mutable_iterable, reducing Lanes as necessary
-/// until all blocks are processed.
 template <size_t Lanes, typename Iterable,
     if_std_array<typename Iterable::value_t> = true>
-inline std_array<typename Iterable::value_t, Lanes>
-array_cast(const Iterable& it, size_t offset = zero) NOEXCEPT
+inline std_array<typename Iterable::value_t, Lanes>&
+array_cast(Iterable& it) NOEXCEPT
+{
+    return unsafe_array_cast<typename Iterable::value_t, Lanes>(it.data());
+}
+
+template <size_t Lanes, typename Iterable,
+    if_std_array<typename Iterable::value_t> = true>
+inline const std_array<typename Iterable::value_t, Lanes>&
+array_cast(const Iterable& it) NOEXCEPT
+{
+    return unsafe_array_cast<typename Iterable::value_t, Lanes>(it.data());
+}
+
+template <size_t Lanes, typename Iterable,
+    if_std_array<typename Iterable::value_t> = true>
+inline std_array<typename Iterable::value_t, Lanes>&
+array_cast(Iterable& it, size_t offset) NOEXCEPT
 {
     using block = typename Iterable::value_t;
     constexpr auto size = size_of<block>();
+    return unsafe_array_cast<block, Lanes>(std::next(it.data(), offset * size));
+}
 
-    // Caller must check it.size().
-    BC_ASSERT_MSG(Lanes <= it.size(), "overflow");
-    BC_ASSERT_MSG(!is_multiply_overflow(size, offset), "overflow");
-
-    /// Total: 1 mul (const), 1 add, 1 cast (free), 3 mov.
+template <size_t Lanes, typename Iterable,
+    if_std_array<typename Iterable::value_t> = true>
+inline const std_array<typename Iterable::value_t, Lanes>&
+array_cast(const Iterable& it, size_t offset) NOEXCEPT
+{
+    using block = typename Iterable::value_t;
+    constexpr auto size = size_of<block>();
     return unsafe_array_cast<block, Lanes>(std::next(it.data(), offset * size));
 }
 
@@ -161,13 +177,19 @@ public:
         return begin_;
     }
 
-    // This advances the iterable, not the iterators.
-    inline iterable& advance(size_t offset) NOEXCEPT
+    template <size_t Elements>
+    inline iterable& advance() NOEXCEPT
     {
-        const auto size = std::min(offset, count_);
+        const auto size = std::min(Elements, count_);
         count_ -= size;
         std::advance(begin_, size * value_size);
         return *this;
+    }
+
+    template <size_t Elements>
+    inline const std_array<value_t, Elements>& to_array() const NOEXCEPT
+    {
+        return unsafe_array_cast<value_t, Elements>(begin_);
     }
 
 private:
@@ -300,13 +322,19 @@ public:
         return begin_;
     }
 
-    // This advances the iterable, not the iterators.
-    inline mutable_iterable& advance(size_t offset) NOEXCEPT
+    template <size_t Elements>
+    inline mutable_iterable& advance() NOEXCEPT
     {
-        const auto size = std::min(offset, count_);
+        const auto size = std::min(Elements, count_);
         count_ -= size;
         std::advance(begin_, size * value_size);
         return *this;
+    }
+
+    template <size_t Elements>
+    inline std_array<value_t, Elements>& to_array() NOEXCEPT
+    {
+        return unsafe_array_cast<value_t, Elements>(begin_);
     }
 
 private:
