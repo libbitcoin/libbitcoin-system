@@ -31,22 +31,10 @@
 
 namespace libbitcoin {
 namespace system {
-namespace sha {
 
-// TODO: integrate sha-ni/neon.
-// TODO: vectorize (2/4/8/16 lanes).
-// TODO: implement 5.3.6 SHA-512/t initial vector derivation.
-// TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
+#if !defined(PRIMITIVES)
 
-#define TEMPLATE template <typename SHA, bool Compressed, bool Vectorized, \
-    bool Cached, if_same<typename SHA::T, shah_t> If>
-#define CLASS algorithm<SHA, Compressed, Vectorized, Cached, If>
-
-// Bogus warning suggests constexpr when declared consteval.
-BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
-BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+#if defined(HAVE_VECTORIZATION)
 
 // TODO: move primitives to    /math/functional.hpp
 // TODO: create                /intrinsics/intrinsics.hpp
@@ -61,11 +49,6 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 // TODO: expect                /intrinsics/arm/rotate.hpp [?]
 // TODO: expect                /intrinsics/arm/functional.hpp  [match /math/functional, HAVE...]
 // TODO: expect                /intrinsics/arm/sha.hpp (256/512) [HAVE...]
-
-// TODO: move all vector primitives to /vectorization/functional.hpp
-#if !defined(VISIBLE)
-
-#if defined(HAVE_VECTORIZATION)
 
 // Extended integrals are neither c++ integrals nor stdlib integers.
 static_assert(!std::is_integral_v<__m128i>);
@@ -85,22 +68,24 @@ static_assert(to_bits(sizeof(__m128i)) == 128u);
 static_assert(to_bits(sizeof(__m256i)) == 256u);
 static_assert(to_bits(sizeof(__m512i)) == 512u);
 
-// Primitives implement rotr/rotl because these are not available in SIMD.
-// S is required for a non-member ror_/rol_ since there is no way otherwise to
-// know if we are rotating 4/8/16x32 (sha160/256) or 2/4/8x64 (sha512).
-
-// TODO: make all primitives private members with auto parameters.
-// TODO: use sha160/256 to differentiate word_t interally, invoking the
-// TODO: appropriate intrinsic (23/62 bit). Currently these are all 32 bit
-// TODO: except for the natives, which rely on auto and native 32/64 bit ops.
+// TODO: these compile without the distinction, but incorrect for sha512 (64).
+// TODO: create 8/16/32/64 namespace for the load/math subset.
+// TODO: create one set of members that select 32/64 ns based on SHA::word_size.
+// TODO: bitwise operations do not depend upon word size (so 10 total members).
+// TODO: ror_/rol_ wrappers determine width (S) from namespace.
+// TODO: add correct bswap masks for 16/32/64 (8 is N/A).
 
 // SSE4 primitives (for 32 bit word_t).
 // ----------------------------------------------------------------------------
 // Intel/AMD is always little-endian, and SHA is always big-endian (swap).
+// Primitives implement rotr/rotl because these are not available in SIMD.
 // load/set instructions are unaligned.
 
 template <typename Type>
 using chunk = data_array<sizeof(Type)>;
+using bytes128 = chunk<mint128_t>;
+using bytes256 = chunk<mint256_t>;
+using bytes512 = chunk<mint512_t>;
 
 constexpr std_array<uint32_t, 4> bswap_mask
 {
@@ -111,50 +96,76 @@ constexpr std_array<uint32_t, 4> bswap_mask
 template <typename Word, if_same<Word, mint128_t> = true>
 INLINE Word byte_swap_mask() NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     static const auto mask = _mm_set_epi32(
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3]);
+    BC_POP_WARNING()
     return mask;
 }
 
-INLINE mint128_t load(const chunk<mint128_t>& word) NOEXCEPT
+template <unsigned int Lane>
+INLINE uint32_t get(mint128_t a) NOEXCEPT
+{
+    return _mm_extract_epi32(a, Lane);
+}
+
+INLINE mint128_t set(uint64_t a, uint64_t b) NOEXCEPT
+{
+    return _mm_set_epi64x(a, b);
+}
+
+INLINE mint128_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d) NOEXCEPT
+{
+    return _mm_set_epi32(a, b, c, d);
+}
+
+INLINE mint128_t align(const bytes128& word) NOEXCEPT
 {
     return _mm_loadu_si128(pointer_cast<const mint128_t>(word.data()));
 }
 
-INLINE chunk<mint128_t> store(mint128_t value) NOEXCEPT
+INLINE bytes128 unalign(mint128_t value) NOEXCEPT
 {
-    chunk<mint128_t> word{};
+    bytes128 word{};
     _mm_storeu_si128(pointer_cast<mint128_t>(word.data()), value);
     return word;
+    ////return *pointer_cast<bytes128>(&value);
 }
 
-INLINE mint128_t native_from_big_end(const chunk<mint128_t>& word) NOEXCEPT
+INLINE mint128_t byte_swap(mint128_t value) NOEXCEPT
 {
-    return _mm_shuffle_epi8(load(word), byte_swap_mask<mint128_t>());
+    return _mm_shuffle_epi8(value, byte_swap_mask<mint128_t>());
 }
 
-INLINE chunk<mint128_t> native_to_big_end(mint128_t value) NOEXCEPT
+// From aligned to unaligned.
+INLINE mint128_t native_to_big_endian(mint128_t value) NOEXCEPT
 {
-    return store(_mm_shuffle_epi8(value, byte_swap_mask<mint128_t>()));
+    return *pointer_cast<mint128_t>(unalign(byte_swap(value)).data());
+}
+
+// From unaligned to aligned.
+INLINE mint128_t native_from_big_endian(mint128_t value) NOEXCEPT
+{
+    return byte_swap(align(*pointer_cast<bytes128>(&value)));
 }
 
 template <unsigned int B, typename Word,
     if_same<Word, mint128_t> = true>
-INLINE auto shr_(Word a) NOEXCEPT
+INLINE Word shr_(Word a) NOEXCEPT
 {
     return _mm_srli_epi32(a, B);
 }
 
 template <unsigned int B, typename Word,
     if_same<Word, mint128_t> = true>
-INLINE auto shl_(Word a) NOEXCEPT
+INLINE Word shl_(Word a) NOEXCEPT
 {
     return _mm_slli_epi32(a, B);
 }
 
 template <unsigned int B, unsigned int S, typename Word,
     if_same<Word, mint128_t> = true>
-INLINE auto ror_(Word a) NOEXCEPT
+INLINE Word ror_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
@@ -162,7 +173,7 @@ INLINE auto ror_(Word a) NOEXCEPT
 
 template <unsigned int B, unsigned int S, typename Word,
     if_same<Word, mint128_t> = true>
-INLINE auto rol_(Word a) NOEXCEPT
+INLINE Word rol_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
@@ -170,33 +181,33 @@ INLINE auto rol_(Word a) NOEXCEPT
 
 template <typename Word,
     if_same<Word, mint128_t> = true>
-INLINE auto add_(Word a, Word b) NOEXCEPT
+INLINE Word addc_(Word a, auto K) NOEXCEPT
+{
+    // Broadcast 32-bit integer to all elements.
+    return _mm_add_epi32(a, _mm_set1_epi32(K));
+}
+
+template <typename Word,
+    if_same<Word, mint128_t> = true>
+INLINE Word add_(Word a, Word b) NOEXCEPT
 {
     return _mm_add_epi32(a, b);
 }
 
-template <unsigned int K, typename Word,
-    if_same<Word, mint128_t> = true>
-INLINE auto add_(Word a) NOEXCEPT
-{
-    // Broadcast 32-bit integer to all elements.
-    return add_(a, _mm_set1_epi32(K));
-}
-
 template <typename Word, if_same<Word, mint128_t> = true>
-INLINE auto and_(Word a, Word b) NOEXCEPT
+INLINE Word and_(Word a, Word b) NOEXCEPT
 {
     return _mm_and_si128(a, b);
 }
 
 template <typename Word, if_same<Word, mint128_t> = true>
-INLINE auto or_(Word a, Word b) NOEXCEPT
+INLINE Word or_(Word a, Word b) NOEXCEPT
 {
     return _mm_or_si128(a, b);
 }
 
 template <typename Word, if_same<Word, mint128_t> = true>
-INLINE auto xor_(Word a, Word b) NOEXCEPT
+INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
     return _mm_xor_si128(a, b);
 }
@@ -207,51 +218,78 @@ INLINE auto xor_(Word a, Word b) NOEXCEPT
 template <typename Word, if_same<Word, mint256_t> = true>
 INLINE Word byte_swap_mask() NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     static const auto mask = _mm256_set_epi32(
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3],
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3]);
+    BC_POP_WARNING()
     return mask;
 }
 
-INLINE mint256_t load(const chunk<mint256_t>& word) NOEXCEPT
+INLINE mint256_t align(const bytes256& word) NOEXCEPT
 {
     return _mm256_loadu_epi32(pointer_cast<const mint256_t>(word.data()));
 }
 
-INLINE chunk<mint256_t> store(mint256_t value) NOEXCEPT
+INLINE bytes256 unalign(mint256_t value) NOEXCEPT
 {
-    chunk<mint256_t> word{};
+    bytes256 word{};
     _mm256_storeu_epi32(pointer_cast<mint256_t>(word.data()), value);
     return word;
+    ////return *pointer_cast<bytes256>(&value);
 }
 
-INLINE mint256_t native_from_big_end(const chunk<mint256_t>& word) NOEXCEPT
+INLINE mint256_t byte_swap(mint256_t value) NOEXCEPT
 {
-    return _mm256_shuffle_epi8(load(word), byte_swap_mask<mint256_t>());
+    return _mm256_shuffle_epi8(value, byte_swap_mask<mint256_t>());
 }
 
-INLINE chunk<mint256_t> native_to_big_end(mint256_t value) NOEXCEPT
+template <unsigned int Lane>
+INLINE uint32_t get(mint256_t a) NOEXCEPT
 {
-    return store(_mm256_shuffle_epi8(value, byte_swap_mask<mint256_t>()));
+    return _mm256_extract_epi32(a, Lane);
+}
+
+INLINE mint256_t set(
+    uint64_t a, uint64_t b, uint64_t c, uint64_t d) NOEXCEPT
+{
+    return _mm256_set_epi64x(a, b, c, d);
+}
+
+INLINE mint256_t set(
+    uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+    uint32_t e, uint32_t f, uint32_t g, uint32_t h) NOEXCEPT
+{
+    return _mm256_set_epi32(a, b, c, d, e, f, g, h);
+}
+
+INLINE mint256_t native_to_big_endian(mint256_t value) NOEXCEPT
+{
+    return *pointer_cast<mint256_t>(unalign(byte_swap(value)).data());
+}
+
+INLINE mint256_t native_from_big_endian(mint256_t value) NOEXCEPT
+{
+    return byte_swap(align(*pointer_cast<bytes256>(&value)));
 }
 
 template <unsigned int B, typename Word,
     if_same<Word, mint256_t> = true>
-INLINE auto shr_(Word a) NOEXCEPT
+INLINE Word shr_(Word a) NOEXCEPT
 {
     return _mm256_srli_epi32(a, B);
 }
 
 template <unsigned int B, typename Word,
     if_same<Word, mint256_t> = true>
-INLINE auto shl_(Word a) NOEXCEPT
+INLINE Word shl_(Word a) NOEXCEPT
 {
     return _mm256_slli_epi32(a, B);
 }
 
 template <unsigned int B, unsigned int S, typename Word,
     if_same<Word, mint256_t> = true>
-INLINE auto ror_(Word a) NOEXCEPT
+INLINE Word ror_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
@@ -259,7 +297,7 @@ INLINE auto ror_(Word a) NOEXCEPT
 
 template <unsigned int B, unsigned int S, typename Word,
     if_same<Word, mint256_t> = true>
-INLINE auto rol_(Word a) NOEXCEPT
+INLINE Word rol_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
@@ -267,33 +305,33 @@ INLINE auto rol_(Word a) NOEXCEPT
 
 template <typename Word,
     if_same<Word, mint256_t> = true>
-INLINE auto add_(Word a, Word b) NOEXCEPT
+INLINE Word addc_(Word a, auto K) NOEXCEPT
+{
+    // Broadcast 32-bit integer to all elements.
+    return _mm256_add_epi32(a, _mm256_set1_epi32(K));
+}
+
+template <typename Word,
+    if_same<Word, mint256_t> = true>
+INLINE Word add_(Word a, Word b) NOEXCEPT
 {
     return _mm256_add_epi32(a, b);
 }
 
-template <unsigned int K, typename Word,
-    if_same<Word, mint256_t> = true>
-INLINE auto add_(Word a) NOEXCEPT
-{
-    // Broadcast 32-bit integer to all elements.
-    return add_(a, _mm256_set1_epi32(K));
-}
-
 template <typename Word, if_same<Word, mint256_t> = true>
-INLINE auto and_(Word a, Word b) NOEXCEPT
+INLINE Word and_(Word a, Word b) NOEXCEPT
 {
     return _mm256_and_si256(a, b);
 }
 
 template <typename Word, if_same<Word, mint256_t> = true>
-INLINE auto or_(Word a, Word b) NOEXCEPT
+INLINE Word or_(Word a, Word b) NOEXCEPT
 {
     return _mm256_or_si256(a, b);
 }
 
 template <typename Word, if_same<Word, mint256_t> = true>
-INLINE auto xor_(Word a, Word b) NOEXCEPT
+INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
     return _mm256_xor_si256(a, b);
 }
@@ -304,53 +342,86 @@ INLINE auto xor_(Word a, Word b) NOEXCEPT
 template <typename Word, if_same<Word, mint512_t> = true>
 INLINE Word byte_swap_mask() NOEXCEPT
 {
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     static const auto mask = _mm512_set_epi32(
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3],
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3],
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3],
         bswap_mask[0], bswap_mask[1], bswap_mask[2], bswap_mask[3]);
+    BC_POP_WARNING()
     return mask;
 }
 
-INLINE mint512_t load(const chunk<mint512_t>& word) NOEXCEPT
+template <unsigned int Lane>
+INLINE uint32_t get(mint512_t) NOEXCEPT
+{
+    // TODO: extract mint128_t using _mm512_extractf32x4_ps(offset)
+    // TODO: and then extract the integral.
+    // return _mm512_extract_epi32(a, Lane);
+    return {};
+}
+
+INLINE mint512_t set(
+    uint64_t a, uint64_t b, uint64_t c, uint64_t d,
+    uint64_t e, uint64_t f, uint64_t g, uint64_t h) NOEXCEPT
+{
+    return _mm512_set_epi64(a, b, c, d, e, f, g, h);
+}
+
+INLINE mint512_t set(
+    uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+    uint32_t e, uint32_t f, uint32_t g, uint32_t h,
+    uint32_t i, uint32_t j, uint32_t k, uint32_t l,
+    uint32_t m, uint32_t n, uint32_t o, uint32_t p) NOEXCEPT
+{
+    return _mm512_set_epi32(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
+}
+
+INLINE mint512_t align(const bytes512& word) NOEXCEPT
 {
     return _mm512_loadu_epi32(pointer_cast<const mint512_t>(word.data()));
 }
 
-INLINE chunk<mint512_t> store(mint512_t value) NOEXCEPT
+INLINE bytes512 unalign(mint512_t value) NOEXCEPT
 {
-    chunk<mint512_t> word{};
+    bytes512 word{};
     _mm512_storeu_epi32(pointer_cast<mint512_t>(word.data()), value);
     return word;
+    ////return *pointer_cast<bytes512>(&value);
 }
 
-INLINE mint512_t native_from_big_end(const chunk<mint512_t>& word) NOEXCEPT
+INLINE mint512_t byte_swap(mint512_t value) NOEXCEPT
 {
-    return _mm512_shuffle_epi8(load(word), byte_swap_mask<mint512_t>());
+    return _mm512_shuffle_epi8(value, byte_swap_mask<mint512_t>());
 }
 
-INLINE chunk<mint512_t> native_to_big_end(mint512_t value) NOEXCEPT
+INLINE mint512_t native_to_big_endian(mint512_t value) NOEXCEPT
 {
-    return store(_mm512_shuffle_epi8(value, byte_swap_mask<mint512_t>()));
+    return *pointer_cast<mint512_t>(unalign(byte_swap(value)).data());
+}
+
+INLINE mint512_t native_from_big_endian(mint512_t value) NOEXCEPT
+{
+    return byte_swap(align(*pointer_cast<bytes512>(&value)));
 }
 
 template <unsigned int B, typename Word,
     if_same<Word, mint512_t> = true>
-INLINE auto shr_(Word a) NOEXCEPT
+INLINE Word shr_(Word a) NOEXCEPT
 {
     return _mm512_srli_epi32(a, B);
 }
 
 template <unsigned int B, typename Word,
     if_same<Word, mint512_t> = true>
-INLINE auto shl_(Word a) NOEXCEPT
+INLINE Word shl_(Word a) NOEXCEPT
 {
     return _mm512_slli_epi32(a, B);
 }
 
 template <unsigned int B, unsigned int S, typename Word,
     if_same<Word, mint512_t> = true>
-INLINE auto ror_(Word a) NOEXCEPT
+INLINE Word ror_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shr_<B>(a), shl_<S - B>(a));
@@ -358,7 +429,7 @@ INLINE auto ror_(Word a) NOEXCEPT
 
 template <unsigned int B, unsigned int S, typename Word,
     if_same<Word, mint512_t> = true>
-INLINE auto rol_(Word a) NOEXCEPT
+INLINE Word rol_(Word a) NOEXCEPT
 {
     // TODO: S will become unnecessary as the function set must be 32/64.
     return or_(shl_<B>(a), shr_<S - B>(a));
@@ -366,32 +437,32 @@ INLINE auto rol_(Word a) NOEXCEPT
 
 template <typename Word,
     if_same<Word, mint512_t> = true>
-INLINE auto add_(Word a, Word b) NOEXCEPT
+INLINE Word addc_(Word a, auto K) NOEXCEPT
+{
+    // Broadcast 32-bit integer to all elements.
+    return _mm512_add_epi32(a, _mm512_set1_epi32(K));
+}
+
+template <typename Word,
+    if_same<Word, mint512_t> = true>
+INLINE Word add_(Word a, Word b) NOEXCEPT
 {
     return _mm512_add_epi32(a, b);
 }
 
-template <unsigned int K, typename Word,
-    if_same<Word, mint512_t> = true>
-INLINE auto add_(Word a) NOEXCEPT
-{
-    // Broadcast 32-bit integer to all elements.
-    return add_(a, _mm512_set1_epi32(K));
-}
-
 template <typename Word, if_same<Word, mint512_t> = true>
-INLINE auto and_(Word a, Word b) NOEXCEPT
+INLINE Word and_(Word a, Word b) NOEXCEPT
 {
     return _mm512_and_si512(a, b);
 }
 
 template <typename Word, if_same<Word, mint512_t> = true>
-INLINE auto or_(Word a, Word b) NOEXCEPT
+INLINE Word or_(Word a, Word b) NOEXCEPT
 {
     return _mm512_or_si512(a, b);
 }
 template <typename Word, if_same<Word, mint512_t> = true>
-INLINE auto xor_(Word a, Word b) NOEXCEPT
+INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
     return _mm512_xor_si512(a, b);
 }
@@ -400,6 +471,14 @@ INLINE auto xor_(Word a, Word b) NOEXCEPT
 
 // Integral primitives (for 32/64 bit word_t).
 // ----------------------------------------------------------------------------
+
+template <unsigned int Lane, typename Word,
+    if_integral_integer<Word> = true>
+INLINE constexpr auto get(Word a) NOEXCEPT
+{
+    static_assert(Lane == one);
+    return a;
+}
 
 template <unsigned int B, typename Word,
     if_integral_integer<Word> = true>
@@ -430,13 +509,11 @@ INLINE constexpr auto rol_(Word a) NOEXCEPT
     return rotl<B>(a);
 }
 
-// auto in template?
-template <auto B, typename Word,
-    if_same<decltype(B), Word> = true,
+template <typename Word,
     if_integral_integer<Word> = true>
-INLINE constexpr auto add_(Word a) NOEXCEPT
+INLINE constexpr auto addc_(Word a, auto K) NOEXCEPT
 {
-    return a + B;
+    return a + K;
 }
 
 template <typename Word,
@@ -467,7 +544,24 @@ INLINE constexpr auto xor_(Word a, Word b) NOEXCEPT
     return a ^ b;
 }
 
-#endif // VISIBLE
+#endif // PRIMITIVES
+
+namespace sha {
+
+// TODO: integrate sha-ni/neon.
+// TODO: vectorize (2/4/8/16 lanes).
+// TODO: implement 5.3.6 SHA-512/t initial vector derivation.
+// TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
+
+#define TEMPLATE template <typename SHA, bool Compressed, bool Vectorized, \
+    bool Cached, if_same<typename SHA::T, shah_t> If>
+#define CLASS algorithm<SHA, Compressed, Vectorized, Cached, If>
+
+// Bogus warning suggests constexpr when declared consteval.
+BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // 4.1 Functions
 // ---------------------------------------------------------------------------
@@ -734,7 +828,7 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 }
 
 TEMPLATE
-template<size_t Round>
+template<size_t Round, size_t Lane>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& wk) NOEXCEPT
 {
@@ -746,7 +840,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            wk[Round]);
+            get<Lane>(wk[Round]));
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -763,7 +857,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            wk[Round]);
+            get<Lane>(wk[Round]));
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -772,98 +866,99 @@ round(auto& state, const auto& wk) NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Lane>
 constexpr void CLASS::
 compress(auto& state, const auto& buffer) NOEXCEPT
 {
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
     const state_t start{ state };
 
-    round< 0>(state, buffer);
-    round< 1>(state, buffer);
-    round< 2>(state, buffer);
-    round< 3>(state, buffer);
-    round< 4>(state, buffer);
-    round< 5>(state, buffer);
-    round< 6>(state, buffer);
-    round< 7>(state, buffer);
-    round< 8>(state, buffer);
-    round< 9>(state, buffer);
-    round<10>(state, buffer);
-    round<11>(state, buffer);
-    round<12>(state, buffer);
-    round<13>(state, buffer);
-    round<14>(state, buffer);
-    round<15>(state, buffer);
+    round< 0, Lane>(state, buffer);
+    round< 1, Lane>(state, buffer);
+    round< 2, Lane>(state, buffer);
+    round< 3, Lane>(state, buffer);
+    round< 4, Lane>(state, buffer);
+    round< 5, Lane>(state, buffer);
+    round< 6, Lane>(state, buffer);
+    round< 7, Lane>(state, buffer);
+    round< 8, Lane>(state, buffer);
+    round< 9, Lane>(state, buffer);
+    round<10, Lane>(state, buffer);
+    round<11, Lane>(state, buffer);
+    round<12, Lane>(state, buffer);
+    round<13, Lane>(state, buffer);
+    round<14, Lane>(state, buffer);
+    round<15, Lane>(state, buffer);
 
-    round<16>(state, buffer);
-    round<17>(state, buffer);
-    round<18>(state, buffer);
-    round<19>(state, buffer);
-    round<20>(state, buffer);
-    round<21>(state, buffer);
-    round<22>(state, buffer);
-    round<23>(state, buffer);
-    round<24>(state, buffer);
-    round<25>(state, buffer);
-    round<26>(state, buffer);
-    round<27>(state, buffer);
-    round<28>(state, buffer);
-    round<29>(state, buffer);
-    round<30>(state, buffer);
-    round<31>(state, buffer);
+    round<16, Lane>(state, buffer);
+    round<17, Lane>(state, buffer);
+    round<18, Lane>(state, buffer);
+    round<19, Lane>(state, buffer);
+    round<20, Lane>(state, buffer);
+    round<21, Lane>(state, buffer);
+    round<22, Lane>(state, buffer);
+    round<23, Lane>(state, buffer);
+    round<24, Lane>(state, buffer);
+    round<25, Lane>(state, buffer);
+    round<26, Lane>(state, buffer);
+    round<27, Lane>(state, buffer);
+    round<28, Lane>(state, buffer);
+    round<29, Lane>(state, buffer);
+    round<30, Lane>(state, buffer);
+    round<31, Lane>(state, buffer);
 
-    round<32>(state, buffer);
-    round<33>(state, buffer);
-    round<34>(state, buffer);
-    round<35>(state, buffer);
-    round<36>(state, buffer);
-    round<37>(state, buffer);
-    round<38>(state, buffer);
-    round<39>(state, buffer);
-    round<40>(state, buffer);
-    round<41>(state, buffer);
-    round<42>(state, buffer);
-    round<43>(state, buffer);
-    round<44>(state, buffer);
-    round<45>(state, buffer);
-    round<46>(state, buffer);
-    round<47>(state, buffer);
+    round<32, Lane>(state, buffer);
+    round<33, Lane>(state, buffer);
+    round<34, Lane>(state, buffer);
+    round<35, Lane>(state, buffer);
+    round<36, Lane>(state, buffer);
+    round<37, Lane>(state, buffer);
+    round<38, Lane>(state, buffer);
+    round<39, Lane>(state, buffer);
+    round<40, Lane>(state, buffer);
+    round<41, Lane>(state, buffer);
+    round<42, Lane>(state, buffer);
+    round<43, Lane>(state, buffer);
+    round<44, Lane>(state, buffer);
+    round<45, Lane>(state, buffer);
+    round<46, Lane>(state, buffer);
+    round<47, Lane>(state, buffer);
 
-    round<48>(state, buffer);
-    round<49>(state, buffer);
-    round<50>(state, buffer);
-    round<51>(state, buffer);
-    round<52>(state, buffer);
-    round<53>(state, buffer);
-    round<54>(state, buffer);
-    round<55>(state, buffer);
-    round<56>(state, buffer);
-    round<57>(state, buffer);
-    round<58>(state, buffer);
-    round<59>(state, buffer);
-    round<60>(state, buffer);
-    round<61>(state, buffer);
-    round<62>(state, buffer);
-    round<63>(state, buffer);
+    round<48, Lane>(state, buffer);
+    round<49, Lane>(state, buffer);
+    round<50, Lane>(state, buffer);
+    round<51, Lane>(state, buffer);
+    round<52, Lane>(state, buffer);
+    round<53, Lane>(state, buffer);
+    round<54, Lane>(state, buffer);
+    round<55, Lane>(state, buffer);
+    round<56, Lane>(state, buffer);
+    round<57, Lane>(state, buffer);
+    round<58, Lane>(state, buffer);
+    round<59, Lane>(state, buffer);
+    round<60, Lane>(state, buffer);
+    round<61, Lane>(state, buffer);
+    round<62, Lane>(state, buffer);
+    round<63, Lane>(state, buffer);
 
     if constexpr (SHA::rounds == 80)
     {
-        round<64>(state, buffer);
-        round<65>(state, buffer);
-        round<66>(state, buffer);
-        round<67>(state, buffer);
-        round<68>(state, buffer);
-        round<69>(state, buffer);
-        round<70>(state, buffer);
-        round<71>(state, buffer);
-        round<72>(state, buffer);
-        round<73>(state, buffer);
-        round<74>(state, buffer);
-        round<75>(state, buffer);
-        round<76>(state, buffer);
-        round<77>(state, buffer);
-        round<78>(state, buffer);
-        round<79>(state, buffer);
+        round<64, Lane>(state, buffer);
+        round<65, Lane>(state, buffer);
+        round<66, Lane>(state, buffer);
+        round<67, Lane>(state, buffer);
+        round<68, Lane>(state, buffer);
+        round<69, Lane>(state, buffer);
+        round<70, Lane>(state, buffer);
+        round<71, Lane>(state, buffer);
+        round<72, Lane>(state, buffer);
+        round<73, Lane>(state, buffer);
+        round<74, Lane>(state, buffer);
+        round<75, Lane>(state, buffer);
+        round<76, Lane>(state, buffer);
+        round<77, Lane>(state, buffer);
+        round<78, Lane>(state, buffer);
+        round<79, Lane>(state, buffer);
     }
 
     summarize(state, start);
@@ -892,13 +987,13 @@ prepare(auto& buffer) NOEXCEPT
             xor_(buffer[r16], buffer[r14]),
             xor_(buffer[r08], buffer[r03])));
 
-        buffer[r16] = add_<k0>(buffer[r16]);
+        buffer[r16] = addc_(buffer[r16], k0);
 
         buffer[add1(r00)] = rol_<1>(xor_(
             xor_(buffer[add1(r16)], buffer[add1(r14)]),
             xor_(buffer[add1(r08)], buffer[add1(r03)])));
 
-        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
+        buffer[add1(r16)] = addc_(buffer[add1(r16)], k1);
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -924,13 +1019,13 @@ prepare(auto& buffer) NOEXCEPT
             add_(buffer[r16], sigma0(buffer[r15])),
             add_(buffer[r07], sigma1(buffer[r02])));
 
-        buffer[r16] = add_<k0>(buffer[r16]);
+        buffer[r16] = addc_(buffer[r16], k0);
 
         buffer[add1(r00)] = add_(
             add_(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
             add_(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
 
-        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
+        buffer[add1(r16)] = addc_(buffer[add1(r16)], k1);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
@@ -950,22 +1045,22 @@ prepare(auto& buffer) NOEXCEPT
     if constexpr (Round == sub1(sub1(SHA::rounds)))
     {
         constexpr auto r = SHA::rounds - array_count<words_t>;
-        buffer[r + 0] = add_<K::get[r + 0]>(buffer[r + 0]);
-        buffer[r + 1] = add_<K::get[r + 1]>(buffer[r + 1]);
-        buffer[r + 2] = add_<K::get[r + 2]>(buffer[r + 2]);
-        buffer[r + 3] = add_<K::get[r + 3]>(buffer[r + 3]);
-        buffer[r + 4] = add_<K::get[r + 4]>(buffer[r + 4]);
-        buffer[r + 5] = add_<K::get[r + 5]>(buffer[r + 5]);
-        buffer[r + 6] = add_<K::get[r + 6]>(buffer[r + 6]);
-        buffer[r + 7] = add_<K::get[r + 7]>(buffer[r + 7]);
-        buffer[r + 8] = add_<K::get[r + 8]>(buffer[r + 8]);
-        buffer[r + 9] = add_<K::get[r + 9]>(buffer[r + 9]);
-        buffer[r + 10] = add_<K::get[r + 10]>(buffer[r + 10]);
-        buffer[r + 11] = add_<K::get[r + 11]>(buffer[r + 11]);
-        buffer[r + 12] = add_<K::get[r + 12]>(buffer[r + 12]);
-        buffer[r + 13] = add_<K::get[r + 13]>(buffer[r + 13]);
-        buffer[r + 14] = add_<K::get[r + 14]>(buffer[r + 14]);
-        buffer[r + 15] = add_<K::get[r + 15]>(buffer[r + 15]);
+        buffer[r + 0] = addc_(buffer[r + 0], K::get[r + 0]);
+        buffer[r + 1] = addc_(buffer[r + 1], K::get[r + 1]);
+        buffer[r + 2] = addc_(buffer[r + 2], K::get[r + 2]);
+        buffer[r + 3] = addc_(buffer[r + 3], K::get[r + 3]);
+        buffer[r + 4] = addc_(buffer[r + 4], K::get[r + 4]);
+        buffer[r + 5] = addc_(buffer[r + 5], K::get[r + 5]);
+        buffer[r + 6] = addc_(buffer[r + 6], K::get[r + 6]);
+        buffer[r + 7] = addc_(buffer[r + 7], K::get[r + 7]);
+        buffer[r + 8] = addc_(buffer[r + 8], K::get[r + 8]);
+        buffer[r + 9] = addc_(buffer[r + 9], K::get[r + 9]);
+        buffer[r + 10] = addc_(buffer[r + 10], K::get[r + 10]);
+        buffer[r + 11] = addc_(buffer[r + 11], K::get[r + 11]);
+        buffer[r + 12] = addc_(buffer[r + 12], K::get[r + 12]);
+        buffer[r + 13] = addc_(buffer[r + 13], K::get[r + 13]);
+        buffer[r + 14] = addc_(buffer[r + 14], K::get[r + 14]);
+        buffer[r + 15] = addc_(buffer[r + 15], K::get[r + 15]);
     }
 }
 
@@ -1034,9 +1129,8 @@ summarize(auto& out, const auto& in) NOEXCEPT
 }
 
 TEMPLATE
-template <typename Auto>
 INLINE constexpr void CLASS::
-inputs(Auto& buffer, const auto& state) NOEXCEPT
+inputs(buffer_t& buffer, const state_t& state) NOEXCEPT
 {
     // This is a double hash optimization.
     if (std::is_constant_evaluated())
@@ -1056,8 +1150,7 @@ inputs(Auto& buffer, const auto& state) NOEXCEPT
     }
     else
     {
-        using word = array_element<Auto>;
-        array_cast<word, SHA::state_words>(buffer) = state;
+        array_cast<word_t, SHA::state_words>(buffer) = state;
     }
 }
 
@@ -1066,12 +1159,9 @@ inputs(Auto& buffer, const auto& state) NOEXCEPT
 // big-endian I/O is conventional for SHA.
 
 TEMPLATE
-template <typename Auto>
 INLINE constexpr void CLASS::
-inputb(Auto& buffer, const block_t& block) NOEXCEPT
+inputb(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
-    using word = array_element<Auto>;
-
     if (std::is_constant_evaluated())
     {
         constexpr auto size = SHA::word_bytes;
@@ -1094,7 +1184,7 @@ inputb(Auto& buffer, const block_t& block) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        const auto& in = array_cast<word>(block);
+        const auto& in = array_cast<word_t>(block);
         buffer[0] = native_from_big_end(in[0]);
         buffer[1] = native_from_big_end(in[1]);
         buffer[2] = native_from_big_end(in[2]);
@@ -1114,7 +1204,8 @@ inputb(Auto& buffer, const block_t& block) NOEXCEPT
     }
     else
     {
-        array_cast<word, SHA::block_words>(buffer) = array_cast<word>(block);
+        array_cast<word_t, SHA::block_words>(buffer) =
+            array_cast<word_t>(block);
     }
 }
 
@@ -1192,12 +1283,10 @@ inputr(buffer_t& buffer, const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
-template <typename Digest, typename Auto>
-INLINE constexpr Digest CLASS::
-output(const Auto& state) NOEXCEPT
+INLINE constexpr typename CLASS::digest_t CLASS::
+output(const state_t& state) NOEXCEPT
 {
-    using word = array_element<Auto>;
-    Digest digest{};
+    digest_t digest{};
 
     if (std::is_constant_evaluated())
     {
@@ -1217,7 +1306,7 @@ output(const Auto& state) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        auto& out = array_cast<word>(digest);
+        auto& out = array_cast<word_t>(digest);
         out[0] = native_to_big_end(state[0]);
         out[1] = native_to_big_end(state[1]);
         out[2] = native_to_big_end(state[2]);
@@ -1233,7 +1322,7 @@ output(const Auto& state) NOEXCEPT
     }
     else
     {
-        array_cast<word>(digest) = state;
+        array_cast<word_t>(digest) = state;
     }
 
     return digest;
@@ -1779,30 +1868,30 @@ merkle_hash(digests_t& digests) NOEXCEPT
 #if defined(HAVE_VECTORIZATION)
 
 TEMPLATE
-template <size_t Lanes, bool_if<is_lanes<Lanes>>>
+template <size_t Lanes>
 INLINE bool CLASS::
 have() NOEXCEPT
 {
     if constexpr (SHA::word_bytes == 8)
     {
-        if constexpr (Lanes == 16)
+        if constexpr (Lanes == 16) // 16 * 64 = 1024 (not available)
             return false;
-        if constexpr (Lanes == 8)
+        if constexpr (Lanes == 8)  //  8 * 64 = 512
             return have_avx512();
-        if constexpr (Lanes == 4)
+        if constexpr (Lanes == 4)  //  4 * 64 = 256
             return have_avx2();
-        if constexpr (Lanes == 2)
+        if constexpr (Lanes == 2)  //  2 * 64 = 128
             return have_sse41();
     }
     else // if constexpr (SHA::word_bytes == 4)
     {
-        if constexpr (Lanes == 16)
+        if constexpr (Lanes == 16) // 16 * 32 = 512
             return have_avx512();
-        if constexpr (Lanes == 8)
+        if constexpr (Lanes == 8)  //  8 * 32 = 256
             return have_avx2();
-        if constexpr (Lanes == 4)
+        if constexpr (Lanes == 4)  //  4 * 32 = 128
             return have_sse41();
-        if constexpr (Lanes == 2)
+        if constexpr (Lanes == 2)  //  2 * 32 = 64 (partial fill)
             return have_sse41();
     }
 }
@@ -1823,40 +1912,80 @@ have() NOEXCEPT
 // This is always the number of lanes: std::advance(block, Lanes);
 
 TEMPLATE
+template <size_t Word, size_t Lanes>
+INLINE auto CLASS::
+load_from_big_endian(const std_array<words_t, Lanes>& words) NOEXCEPT
+{
+    // words[Lane][Word] (Lanes == count of blocks (words_t))
+    if constexpr (Lanes == 16)
+    {
+        // 32 bit only.
+        return byte_swap(set(
+            words[ 0][Word], words[ 1][Word], words[ 2][Word], words[ 3][Word],
+            words[ 4][Word], words[ 5][Word], words[ 6][Word], words[ 7][Word],
+            words[ 8][Word], words[ 9][Word], words[10][Word], words[11][Word],
+            words[12][Word], words[13][Word], words[14][Word], words[15][Word]));
+    }
+    else if constexpr (Lanes == 8)
+    {
+        // 32/64 bit.
+        return byte_swap(set(
+            words[0][Word], words[1][Word], words[2][Word], words[3][Word],
+            words[4][Word], words[5][Word], words[6][Word], words[7][Word]));
+    }
+    else if constexpr (Lanes == 4)
+    {
+        // 32/64 bit.
+        return byte_swap(set(
+            words[0][Word], words[1][Word], words[2][Word], words[3][Word]));
+    }
+}
+
+TEMPLATE
 template <size_t Lanes, if_equal<Lanes, 16>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if (have<Lanes>())
+    if (have<Lanes>() && blocks.size() >= Lanes)
     {
-        while (blocks.size() >= Lanes)
+        wbuffer_t<Lanes> wbuffer{};
+        do
         {
-            wbuffer_t<Lanes> buffer;
-            inputb(buffer, block);
-            schedule(buffer);
-
-            // array_cast is not integral limited!!!
-            // TODO: use the loop unroller to consolidate all vectorize().
-            // array_cast requires integral types, could be overloaded here.
-            const auto& buffers = unsafe_array_cast<buffer_t, Lanes>(&buffer.front());
-            compress(state, buffers[0]);
-            compress(state, buffers[1]);
-            compress(state, buffers[2]);
-            compress(state, buffers[3]);
-            compress(state, buffers[4]);
-            compress(state, buffers[5]);
-            compress(state, buffers[6]);
-            compress(state, buffers[7]);
-            compress(state, buffers[8]);
-            compress(state, buffers[9]);
-            compress(state, buffers[10]);
-            compress(state, buffers[11]);
-            compress(state, buffers[12]);
-            compress(state, buffers[13]);
-            compress(state, buffers[14]);
-            compress(state, buffers[15]);
-            blocks.advance(Lanes);
-        }
+            const auto& words = array_cast<words_t>(blocks.to_array<Lanes>());
+            wbuffer[0] = load_from_big_endian<0>(words);
+            wbuffer[1] = load_from_big_endian<1>(words);
+            wbuffer[2] = load_from_big_endian<2>(words);
+            wbuffer[3] = load_from_big_endian<3>(words);
+            wbuffer[4] = load_from_big_endian<4>(words);
+            wbuffer[5] = load_from_big_endian<5>(words);
+            wbuffer[6] = load_from_big_endian<6>(words);
+            wbuffer[7] = load_from_big_endian<7>(words);
+            wbuffer[8] = load_from_big_endian<8>(words);
+            wbuffer[9] = load_from_big_endian<9>(words);
+            wbuffer[10] = load_from_big_endian<10>(words);
+            wbuffer[11] = load_from_big_endian<11>(words);
+            wbuffer[12] = load_from_big_endian<12>(words);
+            wbuffer[13] = load_from_big_endian<13>(words);
+            wbuffer[14] = load_from_big_endian<14>(words);
+            wbuffer[15] = load_from_big_endian<15>(words);
+            schedule(wbuffer);
+            compress<0>(state, wbuffer);
+            compress<1>(state, wbuffer);
+            compress<2>(state, wbuffer);
+            compress<3>(state, wbuffer);
+            compress<4>(state, wbuffer);
+            compress<5>(state, wbuffer);
+            compress<6>(state, wbuffer);
+            compress<7>(state, wbuffer);
+            compress<8>(state, wbuffer);
+            compress<9>(state, wbuffer);
+            compress<10>(state, wbuffer);
+            compress<11>(state, wbuffer);
+            compress<12>(state, wbuffer);
+            compress<13>(state, wbuffer);
+            compress<14>(state, wbuffer);
+            compress<15>(state, wbuffer);
+        } while (blocks.advance<Lanes>().size() >= Lanes);
     }
 }
 
@@ -1865,27 +1994,30 @@ template <size_t Lanes, if_equal<Lanes, 8>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if (have<Lanes>())
+    if (have<Lanes>() && blocks.size() >= Lanes)
     {
-        while (blocks.size() >= Lanes)
+        wbuffer_t<Lanes> wbuffer{};
+        do
         {
-            wbuffer_t<Lanes> buffer;
-            input<Lanes>(buffer, block);
-            schedule(buffer);
-
-            // TODO: use the loop unroller to consolidate all vectorize().
-            // array_cast requires integral types, could be overloaded here.
-            const auto& buffers = unsafe_array_cast<buffer_t, Lanes>(&buffer.front());
-            compress(state, buffers[0]);
-            compress(state, buffers[1]);
-            compress(state, buffers[2]);
-            compress(state, buffers[3]);
-            compress(state, buffers[4]);
-            compress(state, buffers[5]);
-            compress(state, buffers[6]);
-            compress(state, buffers[7]);
-            blocks.advance(Lanes);
-        }
+            const auto& words = array_cast<words_t>(blocks.to_array<Lanes>());
+            wbuffer[0] = load_from_big_endian<0>(words);
+            wbuffer[1] = load_from_big_endian<1>(words);
+            wbuffer[2] = load_from_big_endian<2>(words);
+            wbuffer[3] = load_from_big_endian<3>(words);
+            wbuffer[4] = load_from_big_endian<4>(words);
+            wbuffer[5] = load_from_big_endian<5>(words);
+            wbuffer[6] = load_from_big_endian<6>(words);
+            wbuffer[7] = load_from_big_endian<7>(words);
+            schedule(wbuffer);
+            compress<0>(state, wbuffer);
+            compress<1>(state, wbuffer);
+            compress<2>(state, wbuffer);
+            compress<3>(state, wbuffer);
+            compress<4>(state, wbuffer);
+            compress<5>(state, wbuffer);
+            compress<6>(state, wbuffer);
+            compress<7>(state, wbuffer);
+        } while (blocks.advance<Lanes>().size() >= Lanes);
     }
 }
 
@@ -1894,24 +2026,22 @@ template <size_t Lanes, if_equal<Lanes, 4>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if (have<Lanes>())
+    if (have<Lanes>() && blocks.size() >= Lanes)
     {
-        while (blocks.size() >= Lanes)
-
+        wbuffer_t<Lanes> wbuffer{};
+        do
         {
-            wbuffer_t<Lanes> buffer;
-            input<Lanes>(buffer, block);
-            schedule(buffer);
-
-            // TODO: use the loop unroller to consolidate all vectorize().
-            // array_cast requires integral types, could be overloaded here.
-            const auto& buffers = unsafe_array_cast<buffer_t, Lanes>(&buffer.front());
-            compress(state, buffers[0]);
-            compress(state, buffers[1]);
-            compress(state, buffers[2]);
-            compress(state, buffers[3]);
-            blocks.advance(Lanes);
-        }
+            const auto& words = array_cast<words_t>(blocks.to_array<Lanes>());
+            wbuffer[0] = load_from_big_endian<0>(words);
+            wbuffer[1] = load_from_big_endian<1>(words);
+            wbuffer[2] = load_from_big_endian<2>(words);
+            wbuffer[3] = load_from_big_endian<3>(words);
+            schedule(wbuffer);
+            compress<0>(state, wbuffer);
+            compress<1>(state, wbuffer);
+            compress<2>(state, wbuffer);
+            compress<3>(state, wbuffer);
+        } while (blocks.advance<Lanes>().size() >= Lanes);
     }
 }
 
@@ -1920,22 +2050,13 @@ template <size_t Lanes, if_equal<Lanes, 2>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if (have<Lanes>())
+    // TODO: sha160/256 are partially-filled here.
+    buffer_t buffer{};
+    for (auto& block: blocks)
     {
-        while (blocks.size() >= Lanes)
-
-        {
-            wbuffer_t<Lanes> buffer;
-            input<Lanes>(buffer, block);
-            schedule(buffer);
-
-            // TODO: use the loop unroller to consolidate all vectorize().
-            // array_cast requires integral types, could be overloaded here.
-            const auto& buffers = unsafe_array_cast<buffer_t, Lanes>(&buffer.front());
-            compress(state, buffers[0]);
-            compress(state, buffers[1]);
-            blocks.advance(Lanes);
-        }
+        inputb(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
     }
 }
 
@@ -1944,14 +2065,13 @@ template <size_t Lanes, if_equal<Lanes, 1>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    // Default processing with vectorization enabled by none available.
-    while (blocks.size() >= Lanes)
+    // Nothing to vectorize here.
+    buffer_t buffer{};
+    for (auto& block: blocks)
     {
-        buffer_t buffer;
-        inputb(buffer, *block++);
+        inputb(buffer, block);
         schedule(buffer);
         compress(state, buffer);
-        blocks.advance(Lanes);
     }
 }
 
@@ -1967,7 +2087,7 @@ vectorize(state_t&, iblocks_t&) NOEXCEPT
 
 TEMPLATE
 void CLASS::
-accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT
+accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT
 {
     if constexpr (Compressed)
     {
@@ -1983,14 +2103,11 @@ accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT
 #if defined(HAVE_VECTORIZATION)
     else if constexpr (Vectorized)
     {
-        // sha512 is twice the width of sha156/160.
-        constexpr auto multiple = sizeof(word_t) / sizeof(uint32_t);
-
-        vectorize<16 / multiple>(state, blocks); //  16/8 AVX512/AVX512
-        vectorize< 8 / multiple>(state, blocks); //   8/4 AVX2/AVX2
-        vectorize< 4 / multiple>(state, blocks); //   4/2 SSE4/SSE4
-        vectorize< 2 / multiple>(state, blocks); //   2/1 SSE4/Native
-        vectorize< 1 / multiple>(state, blocks); //   1/0 Native/[n/a]
+        vectorize<lanes<16>>(state, blocks);
+        vectorize<lanes< 8>>(state, blocks);
+        vectorize<lanes< 4>>(state, blocks);
+        vectorize<lanes< 2>>(state, blocks);
+        vectorize<lanes< 1>>(state, blocks);
     }
 #endif // HAVE_VECTORIZATION
     else

@@ -32,7 +32,6 @@
 
 namespace libbitcoin {
 namespace system {
-namespace sha {
 
 ////#define HAVE_VECTORIZATION
 
@@ -43,6 +42,8 @@ using mint128_t = __m128i;
 using mint256_t = __m256i;
 using mint512_t = __m512i;
 #endif
+
+namespace sha {
 
 /// SHA hashing algorithm.
 /// Presently Compressed enables non-vector sigma optimization.
@@ -131,7 +132,7 @@ public:
 
     static VCONSTEXPR void accumulate(state_t& state, const vblocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
-    static void accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT;
+    static void accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT;
 
     /// Finalize streaming state (pad and normalize, updates state).
     static constexpr digest_t finalize(state_t& state, size_t blocks) NOEXCEPT;
@@ -177,33 +178,32 @@ protected:
     template<size_t Round, typename Auto>
     static CONSTEVAL auto functor() NOEXCEPT;
 
-    template<size_t Round>
+    template <size_t Round>
     INLINE static constexpr void round(auto a, auto& b, auto c, auto d,
         auto& e, auto wk) NOEXCEPT;
 
-    template<size_t Round>
+    template <size_t Round>
     INLINE static constexpr void round(auto a, auto b, auto c, auto& d,
         auto e, auto f, auto g, auto& h, auto wk) NOEXCEPT;
 
-    template<size_t Round>
+    template <size_t Round, size_t Lane>
     INLINE static constexpr void round(auto& state, const auto& wk) NOEXCEPT;
     INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
+
+    template <size_t Lane = one>
     static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
 
-    template<size_t Round>
+    template <size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
     static constexpr void schedule(auto& buffer) NOEXCEPT;
 
     /// Parsing
     /// -----------------------------------------------------------------------
-    template <typename Auto>
-    INLINE static constexpr void inputs(Auto& buffer, const auto& state) NOEXCEPT;
-    template <typename Auto>
-    INLINE static constexpr void inputb(Auto& buffer, const block_t& block) NOEXCEPT;
+    INLINE static constexpr void inputs(buffer_t& buffer, const state_t& state) NOEXCEPT;
+    INLINE static constexpr void inputb(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void inputl(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void inputr(buffer_t& buffer, const half_t& half) NOEXCEPT;
-    template <typename Digest = digest_t, typename Auto>
-    INLINE static constexpr Digest output(const Auto& state) NOEXCEPT;
+    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
     /// Padding
     /// -----------------------------------------------------------------------
@@ -224,25 +224,38 @@ private:
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
 #if defined(HAVE_VECTORIZATION)
-protected:
+public:
     template <size_t Lanes>
-    static constexpr auto is_lanes =
-        !(Lanes == 16 && is_same_size<word_t, uint64_t>) &&
-        (Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2);
+    static constexpr bool is_lanes =
+        !(Lanes == 16 && SHA::word_bytes == 8) &&
+        Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2 || Lanes == 1;
 
     /// Define lane-expanded types.
     template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
     using wword_t = iif<is_same_size<word_t, uint32_t>,
         iif<Lanes == 16, mint512_t, iif<Lanes == 8, mint256_t, mint128_t>>,
         iif<Lanes ==  8, mint512_t, iif<Lanes == 4, mint256_t, mint128_t>>>;
+
+    template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
+    using wblock_t = std_array<uint8_t, sizeof(wword_t<Lanes>) * H::block_words>;
+
     template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
     using wbuffer_t = std_array<wword_t<Lanes>, K::rounds>;
+
     template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
     using wstate_t = std_array<wword_t<Lanes>, H::state_words>;
 
     /// Runtime discovery of lanes availability.
-    template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
-    INLINE bool have() NOEXCEPT;
+    template <size_t Lanes>
+    INLINE static bool have() NOEXCEPT;
+
+    template <size_t Word, size_t Lanes>
+    INLINE static auto load_from_big_endian(const std_array<words_t,
+        Lanes>& words) NOEXCEPT;
+
+    /// sha512 is twice the width of sha160/256, so hs half as many lanes.
+    template <size_t Track>
+    static constexpr size_t lanes = Track / (sizeof(word_t) / sizeof(uint32_t));
 
     /// Vectorize endianness and message schedule for a single set of blocks.
     template <size_t Lanes, if_equal<Lanes, 16> = true>
