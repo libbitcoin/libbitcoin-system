@@ -33,7 +33,9 @@ namespace system {
 
 static uint32_t bitcoin_checksum(const data_slice& data) NOEXCEPT
 {
-    return from_little_endian<uint32_t>(bitcoin_hash(data));
+    // TODO: smooth out the exclusive_slice seam.
+    return from_little_endian<uint32_t>(bitcoin_hash(
+        exclusive_slice{ data.begin(), data.end() }));
 }
 
 data_chunk append_checksum(const data_loaf& slices) NOEXCEPT
@@ -45,6 +47,7 @@ data_chunk append_checksum(const data_loaf& slices) NOEXCEPT
 
 void append_checksum(data_chunk& data) NOEXCEPT
 {
+    // TODO: avoid reallocation.
     const auto check = bitcoin_checksum(data);
     extend(data, to_little_endian<uint32_t>(check));
     BC_ASSERT(verify_checksum(data));
@@ -52,12 +55,13 @@ void append_checksum(data_chunk& data) NOEXCEPT
 
 bool verify_checksum(const data_slice& data) NOEXCEPT
 {
-    if (data.size() < sizeof(uint32_t))
+    constexpr auto size = sizeof(uint32_t);
+    if (data.size() < size)
         return false;
 
-    const auto position = std::prev(data.end(), sizeof(uint32_t));
-    const auto check = from_little_endian<uint32_t>({ position, data.end() });
-    return check == bitcoin_checksum({ data.begin(), position });
+    const auto split = std::prev(data.end(), size);
+    return from_little_endian(unsafe_array_cast<uint8_t, size>(split)) ==
+        bitcoin_checksum({ data.begin(), split });
 }
 
 // bech32 checksum
@@ -116,7 +120,7 @@ static uint32_t bech32_checksum(const base32_chunk& data) NOEXCEPT
 
 // BIP173: All versions use 0x00000001 (bech32).
 // BIP350: Nonzero versions use 0x2bc830a3 (bech32m).
-static uint32_t bech32_constant(uint8_t version) NOEXCEPT
+constexpr uint32_t bech32_constant(uint8_t version) NOEXCEPT
 {
     return is_zero(version) ? 0x00000001 : 0x2bc830a3;
 }
@@ -131,7 +135,7 @@ static void bech32_prepend_prefix(base32_chunk& data,
 static void bech32_append_checksum(base32_chunk& data,
     const std::string& prefix, uint8_t version) NOEXCEPT
 {
-    auto prefixed = data;
+    base32_chunk prefixed{ data };
     bech32_prepend_prefix(prefixed, prefix);
     prefixed.resize(prefixed.size() + bech32_checksum_size, 0x00);
     const auto checksum = bech32_checksum(prefixed) ^ bech32_constant(version);
@@ -142,7 +146,7 @@ static void bech32_append_checksum(base32_chunk& data,
 static bool bech32_verify_checksum(const base32_chunk& checked,
     const std::string& prefix, uint8_t version) NOEXCEPT
 {
-    auto prefixed = checked;
+    base32_chunk prefixed{ checked };
     bech32_prepend_prefix(prefixed, prefix);
     return bech32_checksum(prefixed) == bech32_constant(version);
 }

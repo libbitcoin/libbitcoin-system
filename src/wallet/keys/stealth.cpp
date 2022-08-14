@@ -111,8 +111,8 @@ bool create_stealth_script(script& out_null_data, const ec_secret& secret,
     std::copy_n(bytes.begin(), pad_size, pad_begin);
 
     // Create an initial 32 bit nonce value from last word (avoiding pad).
-    const data_slice slice(std::next(bytes.begin(), max_pad), bytes.end());
-    const auto start = from_little_endian<uint32_t>(slice);
+    const auto& slice = array_cast<uint8_t, sizeof(uint32_t), max_pad>(bytes);
+    const auto start = from_little_endian(slice);
 
     // Mine a prefix into the double sha256 hash of the stealth script.
     // This will iterate up to 2^32 times before giving up.

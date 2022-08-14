@@ -308,7 +308,7 @@ witness_address witness_address::from_parameters(const data_slice& program,
             return from_long(to_array<hash_size>(program), prefix);
         case program_type::unknown:
             return parse_prefix(prefix, false) == parse_result::valid ?
-                witness_address{ prefix, version, program } :
+                witness_address{ prefix, version, to_chunk(program) } :
                 witness_address{};
         case program_type::invalid:
         default:
