@@ -586,7 +586,7 @@ pad_n(words_t& words, count_t blocks) NOEXCEPT
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
-hash(const iterable<block_t>& blocks) NOEXCEPT
+hash(const iblocks_t& blocks) NOEXCEPT
 {
     words_t words{};
     auto state = H::get;
@@ -604,7 +604,7 @@ hash(const iterable<block_t>& blocks) NOEXCEPT
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
-hash(const blocks_t& blocks) NOEXCEPT
+hash(const vblocks_t& blocks) NOEXCEPT
 {
     words_t words{};
     auto state = H::get;
@@ -623,7 +623,7 @@ hash(const blocks_t& blocks) NOEXCEPT
 TEMPLATE
 template <size_t Size>
 constexpr typename CLASS::digest_t CLASS::
-hash(const std_array<block_t, Size>& blocks) NOEXCEPT
+hash(const ablocks_t<Size>& blocks) NOEXCEPT
 {
     words_t words{};
     auto state = H::get;
@@ -669,7 +669,7 @@ hash(const half_t& half) NOEXCEPT
 
 TEMPLATE
 void CLASS::
-accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
+accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT
 {
     words_t words{};
     for (auto& block: blocks)
@@ -681,7 +681,7 @@ accumulate(state_t& state, const iterable<block_t>& blocks) NOEXCEPT
 
 TEMPLATE
 VCONSTEXPR void CLASS::
-accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
+accumulate(state_t& state, const vblocks_t& blocks) NOEXCEPT
 {
     words_t words{};
     for (auto& block: blocks)

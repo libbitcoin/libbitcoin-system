@@ -194,7 +194,7 @@ static_assert(is_same_type<rmd128::block_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<rmd128::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<rmd128::digest_t, std_array<uint8_t, 16>>);
 static_assert(is_same_type<rmd128::count_t, uint64_t>);
-static_assert(is_same_type<rmd128::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
+static_assert(is_same_type<rmd128::vblocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
 static_assert(is_same_type<decltype(rmd128::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(rmd128::limit_bytes), const uint64_t>);
 
@@ -215,7 +215,7 @@ static_assert(is_same_type<rmd160::block_t, std_array<uint8_t, 64>>);
 static_assert(is_same_type<rmd160::half_t, std_array<uint8_t, 32>>);
 static_assert(is_same_type<rmd160::digest_t, std_array<uint8_t, 20>>);
 static_assert(is_same_type<rmd160::count_t, uint64_t>);
-static_assert(is_same_type<rmd160::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
+static_assert(is_same_type<rmd160::vblocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
 static_assert(is_same_type<decltype(rmd160::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(rmd160::limit_bytes), const uint64_t>);
 
