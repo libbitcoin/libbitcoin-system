@@ -21,13 +21,22 @@
     
 BOOST_AUTO_TEST_SUITE(sha_algorithm_tests)
 
-// Other test vectors are dependant upon the correctness of these.
+// Other test vectors are dependent upon the correctness of these.
 static_assert(sha160::hash(sha160::half_t{})  == sha_half160);
 static_assert(sha160::hash(sha160::block_t{}) == sha_full160);
 static_assert(sha256::hash(sha256::half_t{})  == sha_half256);
 static_assert(sha256::hash(sha256::block_t{}) == sha_full256);
 static_assert(sha512::hash(sha512::half_t{})  == sha_half512);
 static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
+
+BOOST_AUTO_TEST_CASE(sha_algorithm__vectorization__test)
+{
+    static const auto sha_5_data = data_chunk(million, to_byte('a'));
+    constexpr auto sha256_5_expected = base16_array("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0");
+
+    const auto hash = accumulator<sha256>::hash(sha_5_data);
+    BOOST_REQUIRE_EQUAL(hash, sha256_5_expected);
+}
 
 // Currently sha::algorithm schedule pads are cached for 1,2,3,4 blocks.
 // This verifies that sha::algorithm::schedule_n() is properly configured.

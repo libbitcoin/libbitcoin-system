@@ -21,7 +21,7 @@
     
 BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
 
-// Other test vectors are dependant upon the correctness of these.
+// Other test vectors are dependent upon the correctness of these.
 static_assert(rmd128::hash(rmd128::half_t{})  == rmd_half128);
 static_assert(rmd128::hash(rmd128::block_t{}) == rmd_full128);
 static_assert(rmd160::hash(rmd160::half_t{})  == rmd_half160);
