@@ -105,7 +105,7 @@ constexpr size_t size_of() noexcept { return sizeof(Type); }
 template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
 constexpr size_t size_of() noexcept(false)
 {
-    // Recurse array to integral type.
+    // Recurse arrays until non-array type.
     constexpr auto size = size_of<typename Type::value_type>();
     constexpr auto count = array_count<Type>;
 
