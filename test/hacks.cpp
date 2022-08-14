@@ -19,7 +19,7 @@
 #include "test.hpp"
 #include <utility>
 
-#if !defined(HAVE_PERFORMANCE_TESTS) && defined(HAVE_EXECUTION)
+#if defined(DISABLED) && defined(HAVE_EXECUTION)
 
 BOOST_AUTO_TEST_SUITE(skip_parser_tests)
 

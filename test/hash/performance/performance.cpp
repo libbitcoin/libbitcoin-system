@@ -19,7 +19,7 @@
 #include "../../test.hpp"
 #include "performance.hpp"
 
-#if !defined(HAVE_PERFORMANCE_TESTS)
+#if defined(HAVE_PERFORMANCE_TESTS)
 
 BOOST_AUTO_TEST_SUITE(performance_tests)
 

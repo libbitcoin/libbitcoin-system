@@ -30,7 +30,7 @@
 
 /// Have slow test execution (scrypt is slow by design).
 ////#define HAVE_SLOW_TESTS
-#define HAVE_PERFORMANCE_TESTS
+////#define HAVE_PERFORMANCE_TESTS
 
 #define TEST_NAME \
     boost::unit_test::framework::current_test_case().p_name.get()
