@@ -38,6 +38,7 @@ namespace sha {
 
 #if defined(HAVE_VECTORIZATION)
 // XCPU extended integrals.
+// TODO: add funclet, typelet and type constraints.
 using mint128_t = __m128i;
 using mint256_t = __m256i;
 using mint512_t = __m512i;
@@ -201,9 +202,8 @@ protected:
     INLINE static constexpr void inputb(Auto& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void inputl(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void inputr(buffer_t& buffer, const half_t& half) NOEXCEPT;
-    template <typename Auto>
-    INLINE static constexpr void output(auto& digest, const Auto& state) NOEXCEPT;
-    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
+    template <typename Digest = digest_t, typename Auto>
+    INLINE static constexpr Digest output(const Auto& state) NOEXCEPT;
 
     /// Padding
     /// -----------------------------------------------------------------------

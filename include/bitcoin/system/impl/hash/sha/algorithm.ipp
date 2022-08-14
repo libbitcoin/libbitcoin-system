@@ -48,6 +48,21 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
+// TODO: move primitives to    /math/functional.hpp
+// TODO: create                /intrinsics/intrinsics.hpp
+// TODO: create                /intrinsics/xcpu/xcpu.hpp [HAVE_XCPU]
+// TODO: move cpuid to         /intrinsics/xcpu/cpuid.hpp
+// TODO: move /endian/byteswap /intrinsics/xcpu/byteswap.hpp [native fallbacks]
+// TODO: move /math/rotate     /intrinsics/xcpu/rotate.hpp   [native fallbacks]
+// TODO: move below math to    /intrinsics/xcpu/functional.hpp [match /math/functional, HAVE...]
+// TODO: expect                /intrinsics/xcpu/sha.hpp (256/512)
+// TODO: create                /intrinsics/arm/arm.hpp [HAVE_ARM]
+// TODO: expect                /intrinsics/arm/byteswap.hpp [?] [HAVE...]
+// TODO: expect                /intrinsics/arm/rotate.hpp [?]
+// TODO: expect                /intrinsics/arm/functional.hpp  [match /math/functional, HAVE...]
+// TODO: expect                /intrinsics/arm/sha.hpp (256/512) [HAVE...]
+
+// TODO: move all vector primitives to /vectorization/functional.hpp
 #if !defined(VISIBLE)
 
 #if defined(HAVE_VECTORIZATION)
@@ -1177,11 +1192,12 @@ inputr(buffer_t& buffer, const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
-template <typename Auto>
-INLINE constexpr void CLASS::
-output(auto& digest, const Auto& state) NOEXCEPT
+template <typename Digest, typename Auto>
+INLINE constexpr Digest CLASS::
+output(const Auto& state) NOEXCEPT
 {
     using word = array_element<Auto>;
+    Digest digest{};
 
     if (std::is_constant_evaluated())
     {
@@ -1219,14 +1235,7 @@ output(auto& digest, const Auto& state) NOEXCEPT
     {
         array_cast<word>(digest) = state;
     }
-}
 
-TEMPLATE
-INLINE constexpr typename CLASS::digest_t CLASS::
-output(const state_t& state) NOEXCEPT
-{
-    digest_t digest{};
-    output(digest, state);
     return digest;
 }
 
@@ -1826,6 +1835,7 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
             inputb(buffer, block);
             schedule(buffer);
 
+            // array_cast is not integral limited!!!
             // TODO: use the loop unroller to consolidate all vectorize().
             // array_cast requires integral types, could be overloaded here.
             const auto& buffers = unsafe_array_cast<buffer_t, Lanes>(&buffer.front());
