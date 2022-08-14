@@ -159,6 +159,24 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__parsing__expected)
     BOOST_REQUIRE_EQUAL(*(++it), expected1);
 }
 
+BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
+{
+    const data_chunk data{};
+    using type = std::array<std::array<uint8_t, 8>, 2>;
+
+    constexpr auto expected = type
+    {
+        {
+            { 0x55, 0x55, 0x55, 0x55, 0x66, 0x66, 0x66, 0x66 },
+            { 0x77, 0x77, 0x77, 0x77, 0x88, 0x88, 0x88, 0x88 }
+        }
+    };
+
+    constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
+    auto it = iterable<type>(hash).advance(1).begin();
+    BOOST_REQUIRE_EQUAL(*it, expected);
+}
+
 BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
 {
     data_chunk data{};
@@ -166,13 +184,28 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
     static_assert(is_same_type<decltype(*mutable_iterable<type>(data).begin()), type&> );
     static_assert(is_same_type<decltype(*(++mutable_iterable<type>(data).begin())), type&> );
 
+    // type is 8 bytes, so setting .at(1) will set byte 1 and every +8.
     constexpr auto expected = base16_array("11aa11112222222233aa33334444444455aa55556666666677aa777788888888");
-    auto hash______________ = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
+    auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
 
-    for (auto& chunk: mutable_iterable<type>(hash______________))
+    for (auto& chunk: mutable_iterable<type>(hash))
         chunk.front().at(1) = 0xaa;
 
-    BOOST_REQUIRE_EQUAL(hash______________, expected);
+    BOOST_REQUIRE_EQUAL(hash, expected);
+}
+
+BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
+{
+    data_chunk data{};
+    using type = std::array<std::array<uint8_t, 2>, 4>;
+    auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
+
+    // type is 8 bytes, so advance(1) setting .at(0) will set byte 8 and every +8.
+    for (auto& chunk: mutable_iterable<type>(hash).advance(1))
+        chunk.front().at(0) = 0xaa;
+
+    constexpr auto expected = base16_array("1111111122222222aa33333344444444aa55555566666666aa77777788888888");
+    BOOST_REQUIRE_EQUAL(hash, expected);
 }
 
 BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)

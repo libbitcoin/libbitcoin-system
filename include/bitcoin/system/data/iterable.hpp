@@ -161,6 +161,15 @@ public:
         return begin_;
     }
 
+    // This advances the iterable, not the iterators.
+    inline iterable& advance(size_t offset) NOEXCEPT
+    {
+        const auto size = std::min(offset, count_);
+        count_ -= size;
+        std::advance(begin_, size * value_size);
+        return *this;
+    }
+
 private:
     static constexpr size_t count(size_t size) NOEXCEPT
     {
@@ -174,7 +183,7 @@ private:
         }
     }
 
-    const size_t count_;
+    size_t count_;
     uint8_t const* begin_;
     uint8_t const* end_;
 };
@@ -291,6 +300,15 @@ public:
         return begin_;
     }
 
+    // This advances the iterable, not the iterators.
+    inline mutable_iterable& advance(size_t offset) NOEXCEPT
+    {
+        const auto size = std::min(offset, count_);
+        count_ -= size;
+        std::advance(begin_, size * value_size);
+        return *this;
+    }
+
 private:
     static constexpr size_t count(size_t size) NOEXCEPT
     {
@@ -304,7 +322,7 @@ private:
         }
     }
 
-    const size_t count_;
+    size_t count_;
     uint8_t* begin_;
     uint8_t* end_;
 };
