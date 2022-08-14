@@ -1515,25 +1515,6 @@ hash(const iblocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-hash(const vblocks_t& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    auto state = H::get;
-
-    for (auto& block: blocks)
-    {
-        inputb(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
-
-    schedule_n(buffer, blocks.size());
-    compress(state, buffer);
-    return output(state);
-}
-
-TEMPLATE
 template <size_t Size>
 constexpr typename CLASS::digest_t CLASS::
 hash(const ablocks_t<Size>& blocks) NOEXCEPT
@@ -1617,34 +1598,6 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 TEMPLATE
 typename CLASS::digest_t CLASS::
 double_hash(const iblocks_t& blocks) NOEXCEPT
-{
-    static_assert(is_same_type<state_t, chunk_t>);
-
-    buffer_t buffer{};
-    auto state = H::get;
-
-    for (auto& block: blocks)
-    {
-        inputb(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
-
-    schedule_n(buffer, blocks.size());
-    compress(state, buffer);
-
-    // Second hash
-    inputs(buffer, state);
-    pad_half(buffer);
-    schedule(buffer);
-    state = H::get;
-    compress(state, buffer);
-    return output(state);
-}
-
-TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-double_hash(const vblocks_t& blocks) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
@@ -2104,10 +2057,10 @@ accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT
     else if constexpr (Vectorized)
     {
         vectorize<lanes<16>>(state, blocks);
-        vectorize<lanes< 8>>(state, blocks);
-        vectorize<lanes< 4>>(state, blocks);
-        vectorize<lanes< 2>>(state, blocks);
-        vectorize<lanes< 1>>(state, blocks);
+        vectorize<lanes<8>>(state, blocks);
+        vectorize<lanes<4>>(state, blocks);
+        vectorize<lanes<2>>(state, blocks);
+        vectorize<lanes<1>>(state, blocks);
     }
 #endif // HAVE_VECTORIZATION
     else
@@ -2119,19 +2072,6 @@ accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT
             schedule(buffer);
             compress(state, buffer);
         }
-    }
-}
-
-TEMPLATE
-VCONSTEXPR void CLASS::
-accumulate(state_t& state, const vblocks_t& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        inputb(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
     }
 }
 

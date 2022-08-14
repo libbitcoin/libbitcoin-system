@@ -603,24 +603,6 @@ hash(const iblocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-hash(const vblocks_t& blocks) NOEXCEPT
-{
-    words_t words{};
-    auto state = H::get;
-
-    for (auto& block: blocks)
-    {
-        input(words, block);
-        compress(state, words);
-    }
-
-    pad_n(words, blocks.size());
-    compress(state, words);
-    return output(state);
-}
-
-TEMPLATE
 template <size_t Size>
 constexpr typename CLASS::digest_t CLASS::
 hash(const ablocks_t<Size>& blocks) NOEXCEPT
@@ -670,18 +652,6 @@ hash(const half_t& half) NOEXCEPT
 TEMPLATE
 void CLASS::
 accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT
-{
-    words_t words{};
-    for (auto& block: blocks)
-    {
-        input(words, block);
-        compress(state, words);
-    }
-}
-
-TEMPLATE
-VCONSTEXPR void CLASS::
-accumulate(state_t& state, const vblocks_t& blocks) NOEXCEPT
 {
     words_t words{};
     for (auto& block: blocks)

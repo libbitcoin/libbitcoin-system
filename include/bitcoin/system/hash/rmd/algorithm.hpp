@@ -61,7 +61,6 @@ public:
     /// Block collection types.
     template <size_t Size>
     using ablocks_t = std_array<block_t, Size>;
-    using vblocks_t  = std_vector<cref<block_t>>;
     using iblocks_t = iterable<block_t>;
 
     /// Constants (and count_t).
@@ -81,7 +80,6 @@ public:
 
     template <size_t Size>
     static constexpr digest_t hash(const ablocks_t<Size>& blocks) NOEXCEPT;
-    static constexpr digest_t hash(const vblocks_t& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
     static digest_t hash(const iblocks_t& blocks) NOEXCEPT;
@@ -89,7 +87,6 @@ public:
     /// Streamed hashing (unfinalized).
     /// -----------------------------------------------------------------------
 
-    static VCONSTEXPR void accumulate(state_t& state, const vblocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static void accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT;
 
