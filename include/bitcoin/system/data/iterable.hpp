@@ -29,41 +29,41 @@
 namespace libbitcoin {
 namespace system {
 
-template <size_t Lanes, typename Iterable,
-    if_std_array<typename Iterable::value_t> = true>
-inline std_array<typename Iterable::value_t, Lanes>&
-array_cast(Iterable& it) NOEXCEPT
-{
-    return unsafe_array_cast<typename Iterable::value_t, Lanes>(it.data());
-}
-
-template <size_t Lanes, typename Iterable,
-    if_std_array<typename Iterable::value_t> = true>
-inline const std_array<typename Iterable::value_t, Lanes>&
-array_cast(const Iterable& it) NOEXCEPT
-{
-    return unsafe_array_cast<typename Iterable::value_t, Lanes>(it.data());
-}
-
-template <size_t Lanes, typename Iterable,
-    if_std_array<typename Iterable::value_t> = true>
-inline std_array<typename Iterable::value_t, Lanes>&
-array_cast(Iterable& it, size_t offset) NOEXCEPT
-{
-    using block = typename Iterable::value_t;
-    constexpr auto size = size_of<block>();
-    return unsafe_array_cast<block, Lanes>(std::next(it.data(), offset * size));
-}
-
-template <size_t Lanes, typename Iterable,
-    if_std_array<typename Iterable::value_t> = true>
-inline const std_array<typename Iterable::value_t, Lanes>&
-array_cast(const Iterable& it, size_t offset) NOEXCEPT
-{
-    using block = typename Iterable::value_t;
-    constexpr auto size = size_of<block>();
-    return unsafe_array_cast<block, Lanes>(std::next(it.data(), offset * size));
-}
+////template <size_t Lanes, typename Iterable,
+////    if_std_array<typename Iterable::value_t> = true>
+////inline std_array<typename Iterable::value_t, Lanes>&
+////array_cast(Iterable& it) NOEXCEPT
+////{
+////    return unsafe_array_cast<typename Iterable::value_t, Lanes>(it.data());
+////}
+////
+////template <size_t Lanes, typename Iterable,
+////    if_std_array<typename Iterable::value_t> = true>
+////inline const std_array<typename Iterable::value_t, Lanes>&
+////array_cast(const Iterable& it) NOEXCEPT
+////{
+////    return unsafe_array_cast<typename Iterable::value_t, Lanes>(it.data());
+////}
+////
+////template <size_t Lanes, typename Iterable,
+////    if_std_array<typename Iterable::value_t> = true>
+////inline std_array<typename Iterable::value_t, Lanes>&
+////array_cast(Iterable& it, size_t offset) NOEXCEPT
+////{
+////    using block = typename Iterable::value_t;
+////    constexpr auto size = size_of<block>();
+////    return unsafe_array_cast<block, Lanes>(std::next(it.data(), offset * size));
+////}
+////
+////template <size_t Lanes, typename Iterable,
+////    if_std_array<typename Iterable::value_t> = true>
+////inline const std_array<typename Iterable::value_t, Lanes>&
+////array_cast(const Iterable& it, size_t offset) NOEXCEPT
+////{
+////    using block = typename Iterable::value_t;
+////    constexpr auto size = size_of<block>();
+////    return unsafe_array_cast<block, Lanes>(std::next(it.data(), offset * size));
+////}
 
 /// Iterate any data souce as a set of const std::array&.
 template<typename Array, if_std_array<Array> = true>

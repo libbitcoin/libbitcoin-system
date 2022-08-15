@@ -21,6 +21,9 @@
 
 #include <bitcoin/system/define.hpp>
 
+// TODO: implement 5.3.6 SHA-512/t initial vector derivation.
+// TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
+
 namespace libbitcoin {
 namespace system {
 namespace sha {

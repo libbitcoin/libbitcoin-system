@@ -353,14 +353,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\arm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\functional.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\sha.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\have.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\haves.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\byteswap.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\cpuid.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\defines.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\functional128.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\functional256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\functional512.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\interface.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\xcpu.hpp" />

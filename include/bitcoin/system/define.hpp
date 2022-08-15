@@ -53,7 +53,6 @@ namespace bc = libbitcoin;
 /// NDEBUG (conditional exclusion).
 /// ---------------------------------------------------------------------------
 
-
 #if defined(NDEBUG)
     namespace libbitcoin { constexpr auto checked_build = false; };
     #define BC_ASSERT(expression)

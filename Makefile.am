@@ -295,9 +295,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/rmd/analysis.cpp \
     test/hash/sha/algorithm.cpp \
     test/hash/sha/analysis.cpp \
-    test/intrinsics/have.cpp \
+    test/intrinsics/haves.cpp \
+    test/intrinsics/intrinsics.cpp \
     test/intrinsics/xcpu/cpuid.cpp \
-    test/intrinsics/xcpu/interface.cpp \
     test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/program.cpp \
@@ -651,7 +651,7 @@ include_bitcoin_system_impl_words_HEADERS = \
 
 include_bitcoin_system_intrinsicsdir = ${includedir}/bitcoin/system/intrinsics
 include_bitcoin_system_intrinsics_HEADERS = \
-    include/bitcoin/system/intrinsics/have.hpp \
+    include/bitcoin/system/intrinsics/haves.hpp \
     include/bitcoin/system/intrinsics/intrinsics.hpp
 
 include_bitcoin_system_intrinsics_armdir = ${includedir}/bitcoin/system/intrinsics/arm
@@ -664,10 +664,10 @@ include_bitcoin_system_intrinsics_xcpudir = ${includedir}/bitcoin/system/intrins
 include_bitcoin_system_intrinsics_xcpu_HEADERS = \
     include/bitcoin/system/intrinsics/xcpu/byteswap.hpp \
     include/bitcoin/system/intrinsics/xcpu/cpuid.hpp \
+    include/bitcoin/system/intrinsics/xcpu/defines.hpp \
     include/bitcoin/system/intrinsics/xcpu/functional128.hpp \
     include/bitcoin/system/intrinsics/xcpu/functional256.hpp \
     include/bitcoin/system/intrinsics/xcpu/functional512.hpp \
-    include/bitcoin/system/intrinsics/xcpu/interface.hpp \
     include/bitcoin/system/intrinsics/xcpu/rotate.hpp \
     include/bitcoin/system/intrinsics/xcpu/sha.hpp \
     include/bitcoin/system/intrinsics/xcpu/xcpu.hpp

@@ -16,10 +16,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_SHA_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_SHA_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_DEFINES_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_DEFINES_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
+
+#if defined(HAVE_XCPU)
+    #include <immintrin.h>
+    #if defined(HAVE_X64)
+        #include <nmmintrin.h>
+    #endif
+    #if defined(HAVE_MSC)
+        #include <intrin.h>
+    #endif
+#endif
+
+// TODO: ARM is unverified.
+#if defined(HAVE_ARM)
+    #include <arm_acle.h>
+    #if defined(HAVE_NEON)
+        #include <arm_neon.h>
+    #endif
+#endif
 
 #endif

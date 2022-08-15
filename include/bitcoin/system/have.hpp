@@ -65,37 +65,39 @@
 #endif
 
 /// GNU/MSC defines for targeted CPU architecture.
-/// HAVE_ITANIUM is defined but not used (no optimizations).
 /// sourceforge.net/p/predef/wiki/Architectures
 /// docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros
 #if defined(__i386__) || defined(_M_IX86)
     #define HAVE_X32
+    #define HAVE_XCPU
 #elif defined(__amd64__) || defined(_M_AMD64)
     #define HAVE_X64
-#elif defined(__ia64__) || defined(_M_IA64)
-    #define HAVE_ITANIUM
+    #define HAVE_XCPU
 #elif defined(__arm__) || defined(_M_ARM)
     #define HAVE_ARM32
+    #define HAVE_ARM
 #elif defined(__aarch64__) || defined(_M_ARM64)
     #define HAVE_ARM64
-#endif
-
-/// Common CPU architecture (XCPU).
-#if defined(HAVE_X32) || defined(HAVE_X64)
-    #define HAVE_XCPU
+    #define HAVE_ARM
 #endif
 
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
+/// Always enabled on XCPU, as the binary is not portable to other CPUs.
 #if defined(HAVE_XCPU)
+    // TODO: CLANG/GCC compile test XCPU and always set -mxsave.
+    // TODO: these these defines can be enabled unconditionally.
     #if defined(HAVE_CLANG)
         // Clang13: __cpuid_count/_cpuid/_xgetbv.
-        // _xgetbv requires the -mxsave compiler option, so just use assembly.
+        ////#define HAVE_XGETBV
+        ////#define HAVE_XCPUID_COUNT
     #endif
     #if defined(HAVE_GNUC)
         // GCC11: __cpuidex/_cpuid/_xgetbv.
-        // _xgetbv requires the -mxsave compiler option, so just use assembly.
+        ////#define HAVE_XGETBV
+        ////#define HAVE_XCPUIDEX
     #endif
     #if defined(HAVE_MSC)
+        // Always available without platform test or build configuration.
         // docs.microsoft.com/en-us/cpp/intrinsics/cpuid-cpuidex
         // docs.microsoft.com/en-us/cpp/intrinsics/x86-intrinsics-list
         #define HAVE_XGETBV
@@ -110,12 +112,53 @@
 
 /// ARM Neon intrinsics.
 #if defined(HAVE_ARM)
+    // -march=armv8-a+crc+crypto [all]
+    // -arch arm64 [apple] (also -isysroot to phone sdk)
     #if defined(HAVE_GNUC) || defined(__ARM_NEON) || defined(HAVE_MSC)
         #define HAVE_NEON
     #endif
 #endif
 
+
+/// WITH_ indicates build symbol.
+/// ---------------------------------------------------------------------------
+
+/// Build configured (always available on msvc).
+#if defined(HAVE_MSC) || defined(WITH_ICU)
+    #define HAVE_ICU
+#endif
+
+/// XCPU architecture intrinsics sse41, avx2, avx512f, sha-ni.
+/// All require runtime evaluation, as the binary is portable across XCPUs.
+#if defined(HAVE_XCPU)
+    // TODO: CLANG/GCC compile test and set -msse4 -mavx2 -mavx512f -msha.
+    // TODO: if set also set these WITH_ symbols, picked up here.
+    #if defined(HAVE_CLANG) || defined(HAVE_GNUC)
+        #if defined (WITH_SSE4)
+            #define HAVE_SSE4
+        #endif
+        #if defined (WITH_AVX2)
+            #define HAVE_AVX2
+        #endif
+        #if defined (WITH_AVX512)
+            #define HAVE_AVX512
+        #endif
+        #if defined (WITH_SHANI)
+            #define HAVE_SHANI
+        #endif
+    #endif
+    // Always available without platform test or build configuration.
+    #if defined(HAVE_MSC)
+        #define HAVE_SSE4
+        #define HAVE_AVX2
+        #define HAVE_AVX512
+        #define HAVE_SHANI
+    #endif
+#endif
+
 /// MSC predefined constant for Visual Studio version (exclusive).
+/// ---------------------------------------------------------------------------
+
 #if defined(HAVE_MSC)
     #if   _MSC_VER >= 1930
         #define HAVE_VS2022
@@ -161,14 +204,6 @@
 /// No std::execution on clang (C++17).
 #if defined(HAVE_CPP17) && !defined(HAVE_CLANG)
     #define HAVE_EXECUTION
-#endif
-
-/// WITH_ indicates build symbol.
-/// ---------------------------------------------------------------------------
-
-/// Build configured (always available on msvc).
-#if defined(HAVE_MSC) || defined(WITH_ICU)
-    #define HAVE_ICU
 #endif
 
 /// These are manually configured here.

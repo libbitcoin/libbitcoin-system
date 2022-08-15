@@ -22,6 +22,7 @@
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
@@ -103,6 +104,7 @@ BC_POP_WARNING()
     #define rotr64(value, shift) rotr_native(value, shift)
 #endif
 
+} // namespace system
 } // namespace libbitcoin
 
 #endif

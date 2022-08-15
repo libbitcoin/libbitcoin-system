@@ -82,13 +82,13 @@ public:
     static constexpr digest_t hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
-    static digest_t hash(const iblocks_t& blocks) NOEXCEPT;
+    static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
     /// Streamed hashing (unfinalized).
     /// -----------------------------------------------------------------------
 
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
-    static void accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT;
+    static void accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT;
 
     /// Finalize streaming state (pad and normalize, updates state).
     static constexpr digest_t finalize(state_t& state, size_t blocks) NOEXCEPT;

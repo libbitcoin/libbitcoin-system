@@ -18,9 +18,9 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_have_tests)
+BOOST_AUTO_TEST_SUITE(intrinsics_haves_tests)
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__try_shani__always__false)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__try_shani__always__match)
 {
     const auto tryit = try_shani();
 
@@ -36,7 +36,29 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__try_shani__always__false)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__try_avx2__always__true)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx512__always__match)
+{
+    const auto tryit = try_avx512();
+
+#if defined(HAVE_X64)
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    BOOST_CHECK_EQUAL(
+        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
+        get_right(ecx, cpu1_0::sse4_ecx_bit) &&
+        get_right(ecx, cpu1_0::xsave_ecx_bit) &&
+        get_right(ecx, cpu1_0::avx_ecx_bit) &&
+        get_xcr(extended, xcr0::feature) &&
+        get_right(extended, xcr0::sse_bit) &&
+        get_right(extended, xcr0::avx_bit) &&
+        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
+        get_right(ebx, cpu7_0::avx512_ebx_bit), tryit);
+#else
+    BOOST_CHECK(!tryit);
+#endif
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx2__always__match)
 {
     const auto tryit = try_avx2();
 
@@ -59,7 +81,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__try_avx2__always__true)
 }
 
 // Intrinsics fail on X32 when try_sse41 true.
-BOOST_AUTO_TEST_CASE(intrinsics_have__try_sse41__always__expected)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse41__always__match)
 {
     const auto tryit = try_sse41();
 
@@ -73,7 +95,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__try_sse41__always__expected)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__try_sse4__always__expected)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse4__always__match)
 {
     const auto tryit = try_sse41a();
 
@@ -87,7 +109,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__try_sse4__always__expected)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__try_neon__always__expected)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
 {
     constexpr auto tryit = try_neon();
 
@@ -103,7 +125,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__try_neon__always__expected)
 
 // CI matrix platform assumptions.
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__have_sse41__always__on_x64)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__on_x64)
 {
 #if defined(HAVE_X64)
     BOOST_REQUIRE(have_sse41());
@@ -112,7 +134,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__have_sse41__always__on_x64)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__have_sse41a__always__on_x64_except_msc)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41a__always__on_x64_except_msc)
 {
 #if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
     BOOST_REQUIRE(have_sse41a());
@@ -121,7 +143,12 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__have_sse41a__always__on_x64_except_msc)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__have_avx2__always__on_x64_except_mac)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__always__never)
+{
+    BOOST_REQUIRE(!have_avx512());
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__always__on_x64_except_mac)
 {
 #if defined(HAVE_X64) && !defined(HAVE_XCODE)
     BOOST_REQUIRE(have_avx2());
@@ -130,12 +157,12 @@ BOOST_AUTO_TEST_CASE(intrinsics_have__have_avx2__always__on_x64_except_mac)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__have_shani__always__false)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_shani__always__false)
 {
     BOOST_REQUIRE(!have_shani());
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_have__have_neon__always__false)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__false)
 {
     BOOST_REQUIRE(!have_neon());
 }

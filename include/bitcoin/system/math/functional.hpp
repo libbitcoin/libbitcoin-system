@@ -25,51 +25,6 @@
 namespace libbitcoin {
 namespace system {
 
-template <unsigned int B, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto shr_(Word a) NOEXCEPT
-{
-    return a >> B;
-}
-
-// unused by sha
-template <unsigned int B, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto shl_(Word a) NOEXCEPT
-{
-    return a << B;
-}
-
-template <unsigned int B, unsigned int = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto ror_(Word a) NOEXCEPT
-{
-    // intrinsics
-    return rotr<B>(a);
-}
-
-template <unsigned int B, unsigned int = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto rol_(Word a) NOEXCEPT
-{
-    // intrinsics
-    return rotl<B>(a);
-}
-
-template <auto K, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto add_(Word a) NOEXCEPT
-{
-    return a + K;
-}
-
-template <typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto add_(Word a, Word b) NOEXCEPT
-{
-    return a + b;
-}
-
 template <typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto and_(Word a, Word b) NOEXCEPT
@@ -89,6 +44,53 @@ template <typename Word,
 INLINE constexpr auto xor_(Word a, Word b) NOEXCEPT
 {
     return a ^ b;
+}
+
+template <auto B, typename Word,
+    if_integral_integer<Word> = true>
+INLINE constexpr auto shr_(Word a) NOEXCEPT
+{
+    return a >> B;
+}
+
+// unused by sha
+template <auto B, typename Word,
+    if_integral_integer<Word> = true>
+INLINE constexpr auto shl_(Word a) NOEXCEPT
+{
+    return a << B;
+}
+
+// S unused by integral overload
+template <auto B, auto S, typename Word,
+    if_integral_integer<Word> = true>
+INLINE constexpr auto ror_(Word a) NOEXCEPT
+{
+    // intrinsics
+    return rotr<B>(a);
+}
+
+// S unused by integral overload
+template <auto B, auto S, typename Word,
+    if_integral_integer<Word> = true>
+INLINE constexpr auto rol_(Word a) NOEXCEPT
+{
+    // intrinsics
+    return rotl<B>(a);
+}
+
+template <typename Word,
+    if_integral_integer<Word> = true>
+INLINE constexpr auto add_(Word a, Word b) NOEXCEPT
+{
+    return a + b;
+}
+
+template <auto K, typename Word,
+    if_integral_integer<Word> = true>
+INLINE constexpr auto add_(Word a) NOEXCEPT
+{
+    return a + K;
 }
 
 } // namespace system

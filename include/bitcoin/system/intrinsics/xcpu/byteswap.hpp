@@ -22,6 +22,7 @@
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
+namespace system {
 
 INLINE constexpr uint16_t byte_swap16_native(uint16_t value) NOEXCEPT
 {
@@ -99,6 +100,7 @@ INLINE constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
     #define byte_swap64(value) byte_swap64_native(value)
 #endif
 
+} // namespace system
 } // namespace libbitcoin
 
 #endif

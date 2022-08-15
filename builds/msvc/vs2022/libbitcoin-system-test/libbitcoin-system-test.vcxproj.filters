@@ -333,13 +333,13 @@
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\have.cpp">
+    <ClCompile Include="..\..\..\..\test\intrinsics\haves.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\intrinsics.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\cpuid.cpp">
-      <Filter>src\intrinsics\xcpu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\interface.cpp">
       <Filter>src\intrinsics\xcpu</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\literals.cpp">

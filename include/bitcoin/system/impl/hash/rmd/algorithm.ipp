@@ -586,7 +586,7 @@ pad_n(words_t& words, count_t blocks) NOEXCEPT
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
-hash(const iblocks_t& blocks) NOEXCEPT
+hash(iblocks_t&& blocks) NOEXCEPT
 {
     words_t words{};
     auto state = H::get;
@@ -651,7 +651,7 @@ hash(const half_t& half) NOEXCEPT
 
 TEMPLATE
 void CLASS::
-accumulate(state_t& state, const iblocks_t& blocks) NOEXCEPT
+accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT
 {
     words_t words{};
     for (auto& block: blocks)

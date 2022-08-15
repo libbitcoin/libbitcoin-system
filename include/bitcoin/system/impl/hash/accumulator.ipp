@@ -115,7 +115,15 @@ accumulate(size_t size, const byte_t* data) NOEXCEPT
 
     const auto remain = size % block_size;
     const auto bytes  = size - remain;
-    Algorithm::accumulate(state_, iterable<block_t>(bytes, data));
+
+    if (bytes == block_size)
+    {
+        Algorithm::accumulate(state_, unsafe_array_cast<uint8_t, block_size>(data));
+    }
+    else
+    {
+        Algorithm::accumulate(state_, iterable<block_t>(bytes, data));
+    }
 
     // Update the counter and buffer the remainder.
     size_ += bytes;

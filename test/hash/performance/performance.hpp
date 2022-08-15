@@ -87,6 +87,8 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
     replace(algorithm, "class ", "");
     replace(algorithm, "struct ", "");
 
+    // vectorized/compressed parameters of no effect if features not supported.
+    // Algorithm compressible/vectorizable actual run is reflected in the type.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     out << delimiter
         << "test____________: " << TEST_NAME
@@ -208,19 +210,19 @@ static_assert(is_same_type<hash_selector<160, true, false, true,  false>, sha160
 static_assert(is_same_type<hash_selector<256, true, false, true,  false>, sha256>);
 static_assert(is_same_type<hash_selector<512, true, false, true,  false>, sha512>);
 
-static_assert(hash_selector< 160, true,  true, true, false>::compressed);
-static_assert(hash_selector< 256, true,  true, true, false>::compressed);
-static_assert(hash_selector< 512, true,  true, true, false>::compressed);
-static_assert(!hash_selector<160, false, true, true, false>::compressed);
-static_assert(!hash_selector<256, false, true, true, false>::compressed);
-static_assert(!hash_selector<512, false, true, true, false>::compressed);
+static_assert(hash_selector< 160, true,  true, true, false>::compression == sha::compressible);
+static_assert(hash_selector< 256, true,  true, true, false>::compression == sha::compressible);
+static_assert(hash_selector< 512, true,  true, true, false>::compression == sha::compressible);
+static_assert(!hash_selector<160, false, true, true, false>::compression);
+static_assert(!hash_selector<256, false, true, true, false>::compression);
+static_assert(!hash_selector<512, false, true, true, false>::compression);
 
-static_assert(hash_selector< 160, true, true,  true, false>::vectorized);
-static_assert(hash_selector< 256, true, true,  true, false>::vectorized);
-static_assert(hash_selector< 512, true, true,  true, false>::vectorized);
-static_assert(!hash_selector<160, true, false, true, false>::vectorized);
-static_assert(!hash_selector<256, true, false, true, false>::vectorized);
-static_assert(!hash_selector<512, true, false, true, false>::vectorized);
+static_assert(hash_selector< 160, true, true,  true, false>::vectorization == sha::vectorizable);
+static_assert(hash_selector< 256, true, true,  true, false>::vectorization == sha::vectorizable);
+static_assert(hash_selector< 512, true, true,  true, false>::vectorization == sha::vectorizable);
+static_assert(!hash_selector<160, true, false, true, false>::vectorization);
+static_assert(!hash_selector<256, true, false, true, false>::vectorization);
+static_assert(!hash_selector<512, true, false, true, false>::vectorization);
 
 static_assert(hash_selector< 160, true, true, true,  false>::cached);
 static_assert(hash_selector< 256, true, true, true,  false>::cached);

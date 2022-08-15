@@ -22,6 +22,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/algorithm.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
  // This file is a common include for sha.
@@ -30,12 +31,23 @@
 #include <bitcoin/system/hash/sha/sha256.hpp>
 #include <bitcoin/system/hash/sha/sha512.hpp>
 
-////#define HAVE_VECTORIZATION
-
 namespace libbitcoin {
 namespace system {
-
 namespace sha {
+
+////#define HAVE_EXTENDED
+
+#if defined(HAVE_EXTENDED)
+    constexpr auto vectorizable = true;
+    #if defined(HAVE_SHA_INTRISICS)
+        constexpr auto compressible = true;
+    #else
+        constexpr auto compressible = false;
+    #endif
+#else
+    constexpr auto vectorizable = false;
+    constexpr auto compressible = false;
+#endif
 
 /// SHA hashing algorithm.
 /// Presently Compressed enables non-vector sigma optimization.
@@ -84,8 +96,8 @@ public:
 
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
-    static constexpr auto compressed    = Compressed;
-    static constexpr auto vectorized    = Vectorized;
+    static constexpr auto compression   = Compressed && compressible;
+    static constexpr auto vectorization = Vectorized && vectorizable;
     static constexpr auto cached        = Cached;
     static constexpr auto big_end_count = true;
 
@@ -98,7 +110,7 @@ public:
     static constexpr digest_t hash(const state_t& state) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t hash(const half_t& left, const half_t& right) NOEXCEPT;
-    static digest_t hash(const iblocks_t& blocks) NOEXCEPT;
+    static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
     /// Double hashing optimizations (sha256/512).
     /// -----------------------------------------------------------------------
@@ -108,7 +120,7 @@ public:
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& left, const half_t& right) NOEXCEPT;
-    static digest_t double_hash(const iblocks_t& blocks) NOEXCEPT;
+    static digest_t double_hash(iblocks_t&& blocks) NOEXCEPT;
 
     /// Merkle hashing (sha256/512).
     /// -----------------------------------------------------------------------
@@ -187,10 +199,10 @@ protected:
 
     /// Parsing
     /// -----------------------------------------------------------------------
-    INLINE static constexpr void inputs(buffer_t& buffer, const state_t& state) NOEXCEPT;
-    INLINE static constexpr void inputb(buffer_t& buffer, const block_t& block) NOEXCEPT;
-    INLINE static constexpr void inputl(buffer_t& buffer, const half_t& half) NOEXCEPT;
-    INLINE static constexpr void inputr(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    INLINE static constexpr void input(buffer_t& buffer, const state_t& state) NOEXCEPT;
+    INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
+    INLINE static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    INLINE static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
     /// Padding
@@ -202,6 +214,16 @@ protected:
     static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
     static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
+    /// Optimized block iteration.
+    /// -----------------------------------------------------------------------
+    template <size_t Size>
+    INLINE static constexpr void iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void iterate(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    template <size_t Size>
+    INLINE static constexpr void sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void sequential(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT;
+
 private:
     using pad_t = std_array<word_t, subtract(SHA::block_words,
         count_bytes / SHA::word_bytes)>;
@@ -211,45 +233,22 @@ private:
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
-public:
+protected:
+#if defined(HAVE_EXTENDED)
     template <size_t Lanes>
-    static constexpr bool is_lanes =
-        !(Lanes == 16 && SHA::word_bytes == 8) &&
-        Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2 || Lanes == 1;
+    using wblocks_t = std_array<words_t, Lanes>;
 
     /// Runtime discovery of lanes availability.
     template <size_t Lanes>
     INLINE static bool have() NOEXCEPT;
 
-    /// sha512 is twice the width of sha160/256, so hs half as many lanes.
+    /// Return LE extended word from Lanes count of blocks at Index offset.
+    template <typename Extended, size_t Index, size_t Lanes>
+    INLINE static Extended from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT;
+
+    /// sha512 is twice the width of sha160/256, so half as many lanes.
     template <size_t Track>
     static constexpr size_t lanes = Track / (sizeof(word_t) / sizeof(uint32_t));
-
-#if defined(HAVE_VECTORIZATION)
-    // XCPU extended integrals.
-    // TODO: add funclet, typelet and type constraints.
-    using xint128_t = __m128i;
-    using xint256_t = __m256i;
-    using xint512_t = __m512i;
-
-    /// Define lane-expanded types.
-    template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
-    using wword_t = iif<is_same_size<word_t, uint32_t>,
-        iif<Lanes == 16, xint512_t, iif<Lanes == 8, xint256_t, xint128_t>>,
-        iif<Lanes ==  8, xint512_t, iif<Lanes == 4, xint256_t, xint128_t>>>;
-
-    template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
-    using wblock_t = std_array<uint8_t, sizeof(wword_t<Lanes>) * H::block_words>;
-
-    template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
-    using wbuffer_t = std_array<wword_t<Lanes>, K::rounds>;
-
-    template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
-    using wstate_t = std_array<wword_t<Lanes>, H::state_words>;
-
-    template <size_t Word, size_t Lanes>
-    INLINE static auto load_from_big_endian(const std_array<words_t,
-        Lanes>& words) NOEXCEPT;
 
     /// Vectorize endianness and message schedule for a single set of blocks.
     template <size_t Lanes, if_equal<Lanes, 16> = true>
@@ -264,7 +263,7 @@ public:
     inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
     template <size_t Lanes, if_equal<Lanes, 0> = true>
     inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-#endif // HAVE_VECTORIZATION
+#endif // HAVE_EXTENDED
 };
 
 } // namespace sha

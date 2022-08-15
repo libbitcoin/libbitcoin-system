@@ -16,9 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../../test.hpp"
+#include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_xcpu_interface_tests)
+BOOST_AUTO_TEST_SUITE(intrinsics_tests)
+
+#if defined (DISABLED)
 
 // Types work as integrals.
 static_assert(is_same_type<xint128_t, __m128i>);
@@ -37,5 +39,7 @@ static_assert(!std::numeric_limits<xint512_t>::is_integer);
 static_assert(to_bits(sizeof(xint128_t)) == 128u);
 static_assert(to_bits(sizeof(xint256_t)) == 256u);
 static_assert(to_bits(sizeof(xint512_t)) == 512u);
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -253,40 +253,40 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     BOOST_REQUIRE_EQUAL(iterable.size(), 15u);
     BOOST_REQUIRE_EQUAL(iterable.data(), data.front().data());
 
-    const auto& blocks8 = array_cast<8>(iterable);    // zero offset overload.
-    const auto& blocks4 = array_cast<4>(iterable, 8);
-    const auto& blocks2 = array_cast<2>(iterable, 12);
-    const auto& blocks1 = array_cast<1>(iterable, 14);
-    const auto& blocks0 = array_cast<0>(iterable, 15); // ok
+    ////const auto& blocks8 = array_cast<8>(iterable);    // zero offset overload.
+    ////const auto& blocks4 = array_cast<4>(iterable, 8);
+    ////const auto& blocks2 = array_cast<2>(iterable, 12);
+    ////const auto& blocks1 = array_cast<1>(iterable, 14);
+    ////const auto& blocks0 = array_cast<0>(iterable, 15); // ok
 
-    static_assert(is_same_type<decltype(blocks8), const std_array<sha256::block_t, 8>&>);
-    static_assert(is_same_type<decltype(blocks4), const std_array<sha256::block_t, 4>&>);
-    static_assert(is_same_type<decltype(blocks2), const std_array<sha256::block_t, 2>&>);
-    static_assert(is_same_type<decltype(blocks1), const std_array<sha256::block_t, 1>&>);
-    static_assert(is_same_type<decltype(blocks0), const std_array<sha256::block_t, 0>&>);
+    ////static_assert(is_same_type<decltype(blocks8), const std_array<sha256::block_t, 8>&>);
+    ////static_assert(is_same_type<decltype(blocks4), const std_array<sha256::block_t, 4>&>);
+    ////static_assert(is_same_type<decltype(blocks2), const std_array<sha256::block_t, 2>&>);
+    ////static_assert(is_same_type<decltype(blocks1), const std_array<sha256::block_t, 1>&>);
+    ////static_assert(is_same_type<decltype(blocks0), const std_array<sha256::block_t, 0>&>);
 
-    // 8 lanes
-    BOOST_REQUIRE_EQUAL(blocks8[0], expected1);
-    BOOST_REQUIRE_EQUAL(blocks8[1], expected2);
-    BOOST_REQUIRE_EQUAL(blocks8[2], expected3);
-    BOOST_REQUIRE_EQUAL(blocks8[3], expected4);
-    BOOST_REQUIRE_EQUAL(blocks8[4], expected5);
-    BOOST_REQUIRE_EQUAL(blocks8[5], expected6);
-    BOOST_REQUIRE_EQUAL(blocks8[6], expected7);
-    BOOST_REQUIRE_EQUAL(blocks8[7], expected8);
+    ////// 8 lanes
+    ////BOOST_REQUIRE_EQUAL(blocks8[0], expected1);
+    ////BOOST_REQUIRE_EQUAL(blocks8[1], expected2);
+    ////BOOST_REQUIRE_EQUAL(blocks8[2], expected3);
+    ////BOOST_REQUIRE_EQUAL(blocks8[3], expected4);
+    ////BOOST_REQUIRE_EQUAL(blocks8[4], expected5);
+    ////BOOST_REQUIRE_EQUAL(blocks8[5], expected6);
+    ////BOOST_REQUIRE_EQUAL(blocks8[6], expected7);
+    ////BOOST_REQUIRE_EQUAL(blocks8[7], expected8);
 
-    // 4 lanes
-    BOOST_REQUIRE_EQUAL(blocks4[0], expected9);
-    BOOST_REQUIRE_EQUAL(blocks4[1], expected10);
-    BOOST_REQUIRE_EQUAL(blocks4[2], expected11);
-    BOOST_REQUIRE_EQUAL(blocks4[3], expected12);
+    ////// 4 lanes
+    ////BOOST_REQUIRE_EQUAL(blocks4[0], expected9);
+    ////BOOST_REQUIRE_EQUAL(blocks4[1], expected10);
+    ////BOOST_REQUIRE_EQUAL(blocks4[2], expected11);
+    ////BOOST_REQUIRE_EQUAL(blocks4[3], expected12);
 
-    // 2 lanes
-    BOOST_REQUIRE_EQUAL(blocks2[0], expected13);
-    BOOST_REQUIRE_EQUAL(blocks2[1], expected14);
+    ////// 2 lanes
+    ////BOOST_REQUIRE_EQUAL(blocks2[0], expected13);
+    ////BOOST_REQUIRE_EQUAL(blocks2[1], expected14);
 
-    // 1 lane
-    BOOST_REQUIRE_EQUAL(blocks1[0], expected15);
+    ////// 1 lane
+    ////BOOST_REQUIRE_EQUAL(blocks1[0], expected15);
 
     const auto& blocks8_ = iterable.to_array<8>(); // no offsetting (use advance)
     const auto& blocks4_ = iterable.to_array<4>();
