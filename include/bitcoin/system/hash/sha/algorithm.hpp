@@ -30,18 +30,10 @@
 #include <bitcoin/system/hash/sha/sha256.hpp>
 #include <bitcoin/system/hash/sha/sha512.hpp>
 
-namespace libbitcoin {
-namespace system {
-
 ////#define HAVE_VECTORIZATION
 
-#if defined(HAVE_VECTORIZATION)
-// XCPU extended integrals.
-// TODO: add funclet, typelet and type constraints.
-using mint128_t = __m128i;
-using mint256_t = __m256i;
-using mint512_t = __m512i;
-#endif
+namespace libbitcoin {
+namespace system {
 
 namespace sha {
 
@@ -219,18 +211,32 @@ private:
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
-#if defined(HAVE_VECTORIZATION)
 public:
     template <size_t Lanes>
     static constexpr bool is_lanes =
         !(Lanes == 16 && SHA::word_bytes == 8) &&
         Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2 || Lanes == 1;
 
+    /// Runtime discovery of lanes availability.
+    template <size_t Lanes>
+    INLINE static bool have() NOEXCEPT;
+
+    /// sha512 is twice the width of sha160/256, so hs half as many lanes.
+    template <size_t Track>
+    static constexpr size_t lanes = Track / (sizeof(word_t) / sizeof(uint32_t));
+
+#if defined(HAVE_VECTORIZATION)
+    // XCPU extended integrals.
+    // TODO: add funclet, typelet and type constraints.
+    using xint128_t = __m128i;
+    using xint256_t = __m256i;
+    using xint512_t = __m512i;
+
     /// Define lane-expanded types.
     template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
     using wword_t = iif<is_same_size<word_t, uint32_t>,
-        iif<Lanes == 16, mint512_t, iif<Lanes == 8, mint256_t, mint128_t>>,
-        iif<Lanes ==  8, mint512_t, iif<Lanes == 4, mint256_t, mint128_t>>>;
+        iif<Lanes == 16, xint512_t, iif<Lanes == 8, xint256_t, xint128_t>>,
+        iif<Lanes ==  8, xint512_t, iif<Lanes == 4, xint256_t, xint128_t>>>;
 
     template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
     using wblock_t = std_array<uint8_t, sizeof(wword_t<Lanes>) * H::block_words>;
@@ -241,17 +247,9 @@ public:
     template <size_t Lanes, bool_if<is_lanes<Lanes>> = true>
     using wstate_t = std_array<wword_t<Lanes>, H::state_words>;
 
-    /// Runtime discovery of lanes availability.
-    template <size_t Lanes>
-    INLINE static bool have() NOEXCEPT;
-
     template <size_t Word, size_t Lanes>
     INLINE static auto load_from_big_endian(const std_array<words_t,
         Lanes>& words) NOEXCEPT;
-
-    /// sha512 is twice the width of sha160/256, so hs half as many lanes.
-    template <size_t Track>
-    static constexpr size_t lanes = Track / (sizeof(word_t) / sizeof(uint32_t));
 
     /// Vectorize endianness and message schedule for a single set of blocks.
     template <size_t Lanes, if_equal<Lanes, 16> = true>
@@ -266,7 +264,7 @@ public:
     inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
     template <size_t Lanes, if_equal<Lanes, 0> = true>
     inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-#endif //HAVE_VECTORIZATION
+#endif // HAVE_VECTORIZATION
 };
 
 } // namespace sha

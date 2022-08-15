@@ -24,95 +24,95 @@ void merkle_sse41(digest4& out, const block4& blocks) NOEXCEPT
 
 namespace i128 {
 
-using mint128_t = __m128i;
+using xint128_t = __m128i;
 
 template <uint32_t Offset>
-uint32_t get(mint128_t a) noexcept
+uint32_t get(xint128_t a) noexcept
 {
     return _mm_extract_epi32(a, Offset);
 }
 
 // Broadcast 32-bit integer a to all elements of dst.
-mint128_t set(uint32_t a) noexcept
+xint128_t set(uint32_t a) noexcept
 {
     return _mm_set1_epi32(a);
 }
 
-mint128_t set(uint64_t a, uint64_t b) noexcept
+xint128_t set(uint64_t a, uint64_t b) noexcept
 {
     return _mm_set_epi64x(a, b);
 }
 
-mint128_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d) noexcept
+xint128_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d) noexcept
 {
     return _mm_set_epi32(a, b, c, d);
 }
 
-mint128_t sum(mint128_t a, mint128_t b) noexcept
+xint128_t sum(xint128_t a, xint128_t b) noexcept
 {
     return _mm_add_epi32(a, b);
 }
 
-mint128_t sum(mint128_t a, mint128_t b, mint128_t c) noexcept
+xint128_t sum(xint128_t a, xint128_t b, xint128_t c) noexcept
 {
     
     return sum(sum(a, b), c);
 }
 
-mint128_t sum(mint128_t a, mint128_t b, mint128_t c,
-    mint128_t d) noexcept
+xint128_t sum(xint128_t a, xint128_t b, xint128_t c,
+    xint128_t d) noexcept
 {
     return sum(sum(a, b), sum(c, d));
 }
 
-mint128_t sum(mint128_t a, mint128_t b, mint128_t c, mint128_t d,
-    mint128_t e) noexcept
+xint128_t sum(xint128_t a, xint128_t b, xint128_t c, xint128_t d,
+    xint128_t e) noexcept
 {
     return sum(sum(a, b, c), sum(d, e));
 }
 
-mint128_t inc(mint128_t& outa, mint128_t b) noexcept
+xint128_t inc(xint128_t& outa, xint128_t b) noexcept
 {
     return ((outa = sum(outa, b)));
 }
 
-mint128_t inc(mint128_t& outa, mint128_t b, mint128_t c) noexcept
+xint128_t inc(xint128_t& outa, xint128_t b, xint128_t c) noexcept
 {
     return ((outa = sum(outa, b, c)));
 }
 
-mint128_t inc(mint128_t& outa, mint128_t b, mint128_t c,
-    mint128_t d) noexcept
+xint128_t inc(xint128_t& outa, xint128_t b, xint128_t c,
+    xint128_t d) noexcept
 {
     return ((outa = sum(outa, b, c, d)));
 }
 
-mint128_t exc(mint128_t a, mint128_t b) noexcept
+xint128_t exc(xint128_t a, xint128_t b) noexcept
 {
     return _mm_xor_si128(a, b);
 }
 
-mint128_t exc(mint128_t a, mint128_t b, mint128_t c) noexcept
+xint128_t exc(xint128_t a, xint128_t b, xint128_t c) noexcept
 {
     return exc(exc(a, b), c);
 }
 
-mint128_t dis(mint128_t a, mint128_t b) noexcept
+xint128_t dis(xint128_t a, xint128_t b) noexcept
 {
     return _mm_or_si128(a, b);
 }
 
-mint128_t con(mint128_t a, mint128_t b) noexcept
+xint128_t con(xint128_t a, xint128_t b) noexcept
 {
     return _mm_and_si128(a, b);
 }
 
-mint128_t shr(mint128_t a, uint32_t bits) noexcept
+xint128_t shr(xint128_t a, uint32_t bits) noexcept
 {
     return _mm_srli_epi32(a, bits);
 }
 
-mint128_t shl(mint128_t a, uint32_t bits) noexcept
+xint128_t shl(xint128_t a, uint32_t bits) noexcept
 {
     return _mm_slli_epi32(a, bits);
 }
@@ -120,28 +120,28 @@ mint128_t shl(mint128_t a, uint32_t bits) noexcept
 /// Concatenate two 16-byte blocks into a 32-byte temporary result, shift the 
 /// result right by Shift bytes, and return the low 16 bytes.
 template <uint32_t Shift>
-mint128_t align_right(mint128_t a, mint128_t b) noexcept
+xint128_t align_right(xint128_t a, xint128_t b) noexcept
 {
     return _mm_alignr_epi8(a, b, Shift);
 }
 
 /// Blend two packed 16-bit integers using Mask.
 template <uint32_t Mask>
-mint128_t blend(mint128_t a, mint128_t b) noexcept
+xint128_t blend(xint128_t a, xint128_t b) noexcept
 {
     return _mm_blend_epi16(a, b, Mask);
 }
 
 /// Shuffle 32-bit integers using Control.
 template <uint32_t Control>
-mint128_t shuffle(mint128_t a) noexcept
+xint128_t shuffle(xint128_t a) noexcept
 {
     return _mm_shuffle_epi32(a, Control);
 }
 
 /// Shuffle packed 8-bit integers in a according to shuffle control mask in the
 /// corresponding 8-bit element of b.
-mint128_t shuffle(mint128_t a, mint128_t b) noexcept
+xint128_t shuffle(xint128_t a, xint128_t b) noexcept
 {
     return _mm_shuffle_epi8(a, b);
 }
@@ -150,15 +150,15 @@ mint128_t shuffle(mint128_t a, mint128_t b) noexcept
 
 using namespace i128;
 
-mint128_t inline SIGMA0(mint128_t x) NOEXCEPT { return exc(dis(shr(x,  2), shl(x, 30)), dis(shr(x, 13), shl(x, 19)), dis(shr(x, 22), shl(x, 10))); }
-mint128_t inline SIGMA1(mint128_t x) NOEXCEPT { return exc(dis(shr(x,  6), shl(x, 26)), dis(shr(x, 11), shl(x, 21)), dis(shr(x, 25), shl(x, 7))); }
-mint128_t inline sigma0(mint128_t x) NOEXCEPT { return exc(dis(shr(x,  7), shl(x, 25)), dis(shr(x, 18), shl(x, 14)), shr(x, 3)); }
-mint128_t inline sigma1(mint128_t x) NOEXCEPT { return exc(dis(shr(x, 17), shl(x, 15)), dis(shr(x, 19), shl(x, 13)), shr(x, 10)); }
-mint128_t inline choice(  mint128_t x, mint128_t y, mint128_t z) NOEXCEPT { return exc(z, con(x, exc(y, z))); }
-mint128_t inline majority(mint128_t x, mint128_t y, mint128_t z) NOEXCEPT { return dis(con(x, y), con(z, dis(x, y))); }
+xint128_t inline SIGMA0(xint128_t x) NOEXCEPT { return exc(dis(shr(x,  2), shl(x, 30)), dis(shr(x, 13), shl(x, 19)), dis(shr(x, 22), shl(x, 10))); }
+xint128_t inline SIGMA1(xint128_t x) NOEXCEPT { return exc(dis(shr(x,  6), shl(x, 26)), dis(shr(x, 11), shl(x, 21)), dis(shr(x, 25), shl(x, 7))); }
+xint128_t inline sigma0(xint128_t x) NOEXCEPT { return exc(dis(shr(x,  7), shl(x, 25)), dis(shr(x, 18), shl(x, 14)), shr(x, 3)); }
+xint128_t inline sigma1(xint128_t x) NOEXCEPT { return exc(dis(shr(x, 17), shl(x, 15)), dis(shr(x, 19), shl(x, 13)), shr(x, 10)); }
+xint128_t inline choice(  xint128_t x, xint128_t y, xint128_t z) NOEXCEPT { return exc(z, con(x, exc(y, z))); }
+xint128_t inline majority(xint128_t x, xint128_t y, xint128_t z) NOEXCEPT { return dis(con(x, y), con(z, dis(x, y))); }
 
-void inline round(mint128_t a, mint128_t b, mint128_t c, mint128_t& d,
-    mint128_t e, mint128_t f, mint128_t g, mint128_t& h, mint128_t k) NOEXCEPT
+void inline round(xint128_t a, xint128_t b, xint128_t c, xint128_t& d,
+    xint128_t e, xint128_t f, xint128_t g, xint128_t& h, xint128_t k) NOEXCEPT
 {
     const auto t1 = sum(h, SIGMA1(e), choice(e, f, g), k);
     const auto t2 = sum(   SIGMA0(a), majority(a, b, c));
@@ -167,7 +167,7 @@ void inline round(mint128_t a, mint128_t b, mint128_t c, mint128_t& d,
 }
 
 template <size_t Offset>
-mint128_t inline read4(const block4& blocks) NOEXCEPT
+xint128_t inline read4(const block4& blocks) NOEXCEPT
 {
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -184,7 +184,7 @@ mint128_t inline read4(const block4& blocks) NOEXCEPT
 }
 
 template <size_t Offset>
-void inline write4(digest4& hashes, mint128_t value) NOEXCEPT
+void inline write4(digest4& hashes, xint128_t value) NOEXCEPT
 {
     // bswap_mask
     value = shuffle(value, set(
@@ -212,8 +212,8 @@ void merkle_sse41(digest4& out, const block4& blocks) NOEXCEPT
     auto g = set(0x1f83d9abul);
     auto h = set(0x5be0cd19ul);
 
-    mint128_t w00, w01, w02, w03, w04, w05, w06, w07;
-    mint128_t w08, w09, w10, w11, w12, w13, w14, w15;
+    xint128_t w00, w01, w02, w03, w04, w05, w06, w07;
+    xint128_t w08, w09, w10, w11, w12, w13, w14, w15;
 
     round(a, b, c, d, e, f, g, h, sum(set(0x428a2f98ul), w00 = read4< 0>(blocks)));
     round(h, a, b, c, d, e, f, g, sum(set(0x71374491ul), w01 = read4< 4>(blocks)));
@@ -289,7 +289,7 @@ void merkle_sse41(digest4& out, const block4& blocks) NOEXCEPT
     g = sum(g, set(0x1f83d9abul));
     h = sum(h, set(0x5be0cd19ul));
 
-    const mint128_t t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
+    const xint128_t t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
 
     // Transform 2.
     round(a, b, c, d, e, f, g, h, set(0xc28a2f98ul));

@@ -202,10 +202,8 @@ test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_f
 test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
-    test/cpuid.cpp \
     test/funclets.cpp \
     test/hacks.cpp \
-    test/intrinsics.cpp \
     test/literals.cpp \
     test/main.cpp \
     test/settings.cpp \
@@ -297,6 +295,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/rmd/analysis.cpp \
     test/hash/sha/algorithm.cpp \
     test/hash/sha/analysis.cpp \
+    test/intrinsics/have.cpp \
+    test/intrinsics/xcpu/cpuid.cpp \
+    test/intrinsics/xcpu/interface.cpp \
     test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/program.cpp \
@@ -405,12 +406,10 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/boost.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
-    include/bitcoin/system/cpuid.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
     include/bitcoin/system/funclets.hpp \
     include/bitcoin/system/have.hpp \
-    include/bitcoin/system/intrinsics.hpp \
     include/bitcoin/system/literals.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/typelets.hpp \
@@ -650,6 +649,29 @@ include_bitcoin_system_impl_words_HEADERS = \
     include/bitcoin/system/impl/words/dictionaries.ipp \
     include/bitcoin/system/impl/words/dictionary.ipp
 
+include_bitcoin_system_intrinsicsdir = ${includedir}/bitcoin/system/intrinsics
+include_bitcoin_system_intrinsics_HEADERS = \
+    include/bitcoin/system/intrinsics/have.hpp \
+    include/bitcoin/system/intrinsics/intrinsics.hpp
+
+include_bitcoin_system_intrinsics_armdir = ${includedir}/bitcoin/system/intrinsics/arm
+include_bitcoin_system_intrinsics_arm_HEADERS = \
+    include/bitcoin/system/intrinsics/arm/arm.hpp \
+    include/bitcoin/system/intrinsics/arm/functional.hpp \
+    include/bitcoin/system/intrinsics/arm/sha.hpp
+
+include_bitcoin_system_intrinsics_xcpudir = ${includedir}/bitcoin/system/intrinsics/xcpu
+include_bitcoin_system_intrinsics_xcpu_HEADERS = \
+    include/bitcoin/system/intrinsics/xcpu/byteswap.hpp \
+    include/bitcoin/system/intrinsics/xcpu/cpuid.hpp \
+    include/bitcoin/system/intrinsics/xcpu/functional128.hpp \
+    include/bitcoin/system/intrinsics/xcpu/functional256.hpp \
+    include/bitcoin/system/intrinsics/xcpu/functional512.hpp \
+    include/bitcoin/system/intrinsics/xcpu/interface.hpp \
+    include/bitcoin/system/intrinsics/xcpu/rotate.hpp \
+    include/bitcoin/system/intrinsics/xcpu/sha.hpp \
+    include/bitcoin/system/intrinsics/xcpu/xcpu.hpp
+
 include_bitcoin_system_machinedir = ${includedir}/bitcoin/system/machine
 include_bitcoin_system_machine_HEADERS = \
     include/bitcoin/system/machine/interpreter.hpp \
@@ -666,6 +688,7 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/byteswap.hpp \
     include/bitcoin/system/math/cast.hpp \
     include/bitcoin/system/math/division.hpp \
+    include/bitcoin/system/math/functional.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/logarithm.hpp \
     include/bitcoin/system/math/math.hpp \

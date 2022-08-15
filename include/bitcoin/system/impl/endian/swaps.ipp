@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 
 namespace libbitcoin {
 namespace system {

@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
+#include <bitcoin/system/intrinsics/intrinsics.hpp>
 
 // Shift left is undefined for negative value.
 // Shift right is implementation-defined for negative value.
@@ -30,78 +31,6 @@
 // C++ standard: "The behavior is undefined if the right operand is negative,
 // or greater than or equal to the width of the promoted left operand."
 // So use of parameter-shifted rotl_native/rotr_native should be guarded.
-
-template <typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotl_native(Unsigned value, size_t shift) NOEXCEPT
-{
-    // unguarded.
-    constexpr auto span = bc::bits<Unsigned>;
-    return bc::system::depromote<Unsigned>(
-        (value << shift) | (value >> (span - shift)));
-}
-
-template <typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotr_native(Unsigned value, size_t shift) NOEXCEPT
-{
-    // unguarded.
-    constexpr auto span = bc::bits<Unsigned>;
-    return bc::system::depromote<Unsigned>(
-        (value >> shift) | (value << (span - shift)));
-}
-
-template <size_t Shift, typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotl_native(Unsigned value) NOEXCEPT
-{
-    constexpr auto span = bc::bits<Unsigned>;
-    constexpr auto cycle = Shift % span;
-    if constexpr (bc::is_zero(cycle)) return value;
-    else return bc::system::depromote<Unsigned>(
-        (value << cycle) | (value >> (span - cycle)));
-}
-
-template <size_t Shift, typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotr_native(Unsigned value) NOEXCEPT
-{
-    constexpr auto span = bc::bits<Unsigned>;
-    constexpr auto cycle = Shift % span;
-    if constexpr (bc::is_zero(cycle)) return value;
-    else return bc::system::depromote<Unsigned>(
-        (value >> cycle) | (value << (span - cycle)));
-}
-
-// Use intrinsics if available (portable).
-//#if defined(HAVE_LINUX)
-//#elif defined(HAVE_APPLE)
-//#elif defined(HAVE_FREEBSD)
-//#elif defined(HAVE_OPENBSD)
-//#elif defined(HAVE_NETBSD)
-#if defined(HAVE_MSC)
-    // docs.microsoft.com/en-us/cpp/intrinsics/rotl8-rotl16
-    // docs.microsoft.com/en-us/cpp/intrinsics/rotr8-rotr16
-    #include <intrin.h>
-    #define rotl8(value, shift)  _rotl8(value, shift)
-    #define rotl16(value, shift) _rotl16(value, shift)
-    #define rotl32(value, shift) _rotl(value, shift)
-    #define rotl64(value, shift) _rotl64(value, shift)
-    #define rotr8(value, shift)  _rotr8(value, shift)
-    #define rotr16(value, shift) _rotr16(value, shift)
-    #define rotr32(value, shift) _rotr(value, shift)
-    #define rotr64(value, shift) _rotr64(value, shift)
-#else
-    // Native implementation.
-    #define rotl8(value, shift)  rotl_native(value, shift)
-    #define rotl16(value, shift) rotl_native(value, shift)
-    #define rotl32(value, shift) rotl_native(value, shift)
-    #define rotl64(value, shift) rotl_native(value, shift)
-    #define rotr8(value, shift)  rotr_native(value, shift)
-    #define rotr16(value, shift) rotr_native(value, shift)
-    #define rotr32(value, shift) rotr_native(value, shift)
-    #define rotr64(value, shift) rotr_native(value, shift)
-#endif
 
 namespace libbitcoin {
 namespace system {

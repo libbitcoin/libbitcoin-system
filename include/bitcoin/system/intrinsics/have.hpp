@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_HAVE_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_HAVE_HPP
 
-#include <cstdint>
-#include <bitcoin/system/cpuid.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/xcpu/cpuid.hpp>
 
 // -msse4 -mavx2 -msha (gcc/clang)
 #if defined(HAVE_XCPU)

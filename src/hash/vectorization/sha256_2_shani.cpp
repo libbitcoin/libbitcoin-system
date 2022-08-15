@@ -39,7 +39,7 @@ using namespace i128;
 
 #ifndef VISUAL
 
-alignas(mint128_t) constexpr uint8_t mask[sizeof(mint128_t)]
+alignas(xint128_t) constexpr uint8_t mask[sizeof(xint128_t)]
 {
     0x03, 0x02, 0x01, 0x00, // 0x00010203ul
     0x07, 0x06, 0x05, 0x04, // 0x04050607ul
@@ -48,7 +48,7 @@ alignas(mint128_t) constexpr uint8_t mask[sizeof(mint128_t)]
 };
 
 // Half of little endian IV.
-alignas(mint128_t) constexpr uint8_t initial0[sizeof(mint128_t)]
+alignas(xint128_t) constexpr uint8_t initial0[sizeof(xint128_t)]
 {
     0x8c, 0x68, 0x05, 0x9b, // 0x9b05688cul [5]
     0x7f, 0x52, 0x0e, 0x51, // 0x510e527ful [4]
@@ -57,7 +57,7 @@ alignas(mint128_t) constexpr uint8_t initial0[sizeof(mint128_t)]
 };
 
 // Half of little endian IV.
-alignas(mint128_t) constexpr uint8_t initial1[sizeof(mint128_t)]
+alignas(xint128_t) constexpr uint8_t initial1[sizeof(xint128_t)]
 {
     0x19, 0xcd, 0xe0, 0x5b, // 0x5be0cd19ul [7]
     0xab, 0xd9, 0x83, 0x1f, // 0x1f83d9abul [6]
@@ -71,29 +71,29 @@ alignas(mint128_t) constexpr uint8_t initial1[sizeof(mint128_t)]
 // Loading is just an array_cast into the buffer.
 
 // Aligned only, do not use with unaligned values.
-mint128_t load32x4a(const uint8_t& bytes) NOEXCEPT
+xint128_t load32x4a(const uint8_t& bytes) NOEXCEPT
 {
-    return _mm_load_si128(pointer_cast<const mint128_t>(&bytes));
+    return _mm_load_si128(pointer_cast<const xint128_t>(&bytes));
 }
 
-mint128_t load32x4u(const uint32_t& bytes) NOEXCEPT
+xint128_t load32x4u(const uint32_t& bytes) NOEXCEPT
 {
-    return _mm_loadu_si128(pointer_cast<const mint128_t>(&bytes));
+    return _mm_loadu_si128(pointer_cast<const xint128_t>(&bytes));
 }
-void store32x4u(uint8_t& bytes, mint128_t value) NOEXCEPT
+void store32x4u(uint8_t& bytes, xint128_t value) NOEXCEPT
 {
-    _mm_storeu_si128(pointer_cast<mint128_t>(&bytes), value);
+    _mm_storeu_si128(pointer_cast<xint128_t>(&bytes), value);
 }
 
 // Aligned but for public data?
-mint128_t load(const uint8_t& data) NOEXCEPT
+xint128_t load(const uint8_t& data) NOEXCEPT
 {
     static const auto flipper = load32x4a(mask[0]);
     return i128::shuffle(load32x4a(data), flipper);
 }
 
 // Aligned but for public data?
-void store(uint8_t& out, mint128_t value) NOEXCEPT
+void store(uint8_t& out, xint128_t value) NOEXCEPT
 {
     static const auto flipper = load32x4a(mask[0]);
     store32x4u(out, i128::shuffle(value, flipper));
@@ -112,7 +112,7 @@ void store(uint8_t& out, mint128_t value) NOEXCEPT
 // evaluation of the uncommon opcode, but will be almost free to implement.
 
 // _mm_sha256rnds2_epu32 performs two rounds, so this is four.
-void round(mint128_t& s0, mint128_t& s1, uint64_t k1,
+void round(xint128_t& s0, xint128_t& s1, uint64_t k1,
     uint64_t k0) NOEXCEPT
 {
     // This is actually m + k precomputed for fixed single block padding.
@@ -122,7 +122,7 @@ void round(mint128_t& s0, mint128_t& s1, uint64_t k1,
     s0 = _mm_sha256rnds2_epu32(s0, s1, i128::shuffle<0x0e>(value));
 }
 
-void round(mint128_t& s0, mint128_t& s1, mint128_t m, uint64_t k1,
+void round(xint128_t& s0, xint128_t& s1, xint128_t m, uint64_t k1,
     uint64_t k0) NOEXCEPT
 {
     // Ths sum m + k is computed in the message schedule.
@@ -132,19 +132,19 @@ void round(mint128_t& s0, mint128_t& s1, mint128_t m, uint64_t k1,
     s0 = _mm_sha256rnds2_epu32(s0, s1, i128::shuffle<0x0e>(value));
 }
 
-void shift_message(mint128_t& out, mint128_t m) NOEXCEPT
+void shift_message(xint128_t& out, xint128_t m) NOEXCEPT
 {
     out = _mm_sha256msg1_epu32(out, m);
 }
 
-void shift_message(mint128_t m0, mint128_t m1, mint128_t& out) NOEXCEPT
+void shift_message(xint128_t m0, xint128_t m1, xint128_t& out) NOEXCEPT
 {
     constexpr auto shift = sizeof(uint32_t);
     out = _mm_sha256msg2_epu32(sum(out, align_right<shift>(m1, m0)), m1);
 }
 
-void shift_messages(mint128_t& out0, mint128_t m,
-    mint128_t& out1) NOEXCEPT
+void shift_messages(xint128_t& out0, xint128_t m,
+    xint128_t& out1) NOEXCEPT
 {
     shift_message(out0, m, out1);
     shift_message(out0, m);
@@ -156,7 +156,7 @@ void shift_messages(mint128_t& out0, mint128_t m,
 // Endianness of the buffer/digest should be computed outside of hash function.
 // Given the full mutable buffer, can be parallallized and vectorized in place.
 
-void shuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
+void shuffle(xint128_t& s0, xint128_t& s1) NOEXCEPT
 {
     const auto t1 = i128::shuffle<0xb1>(s0);
     const auto t2 = i128::shuffle<0x1b>(s1);
@@ -164,10 +164,10 @@ void shuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
     s1 = blend<15>(t2, t1);
 }
 
-void unshuffle(mint128_t& s0, mint128_t& s1) NOEXCEPT
+void unshuffle(xint128_t& s0, xint128_t& s1) NOEXCEPT
 {
-    const mint128_t t1 = i128::shuffle<0x1b>(s0);
-    const mint128_t t2 = i128::shuffle<0xb1>(s1);
+    const xint128_t t1 = i128::shuffle<0x1b>(s0);
+    const xint128_t t2 = i128::shuffle<0xb1>(s1);
     s0 = blend<15>(t1, t2);
     s1 = align_right<8>(t2, t1);
 }
@@ -179,7 +179,7 @@ void hash_shani(state& state, const block1& blocks) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-    mint128_t m0, m1, m2, m3, so0, so1;
+    xint128_t m0, m1, m2, m3, so0, so1;
 
     // From unaligned (public).
     auto s0 = load32x4u(state[0]);

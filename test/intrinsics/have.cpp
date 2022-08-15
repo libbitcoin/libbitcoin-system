@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "test.hpp"
+#include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_tests)
+BOOST_AUTO_TEST_SUITE(intrinsics_have_tests)
 
-BOOST_AUTO_TEST_CASE(intrinsics__try_shani__always__false)
+BOOST_AUTO_TEST_CASE(intrinsics_have__try_shani__always__false)
 {
     const auto tryit = try_shani();
 
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_shani__always__false)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__try_avx2__always__true)
+BOOST_AUTO_TEST_CASE(intrinsics_have__try_avx2__always__true)
 {
     const auto tryit = try_avx2();
 
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_avx2__always__true)
 }
 
 // Intrinsics fail on X32 when try_sse41 true.
-BOOST_AUTO_TEST_CASE(intrinsics__try_sse41__always__expected)
+BOOST_AUTO_TEST_CASE(intrinsics_have__try_sse41__always__expected)
 {
     const auto tryit = try_sse41();
 
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_sse41__always__expected)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__try_sse4__always__expected)
+BOOST_AUTO_TEST_CASE(intrinsics_have__try_sse4__always__expected)
 {
     const auto tryit = try_sse41a();
 
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_sse4__always__expected)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__try_neon__always__expected)
+BOOST_AUTO_TEST_CASE(intrinsics_have__try_neon__always__expected)
 {
     constexpr auto tryit = try_neon();
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__try_neon__always__expected)
 
 // CI matrix platform assumptions.
 
-BOOST_AUTO_TEST_CASE(intrinsics__have_sse41__always__on_x64)
+BOOST_AUTO_TEST_CASE(intrinsics_have__have_sse41__always__on_x64)
 {
 #if defined(HAVE_X64)
     BOOST_REQUIRE(have_sse41());
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__have_sse41__always__on_x64)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__have_sse41a__always__on_x64_except_msc)
+BOOST_AUTO_TEST_CASE(intrinsics_have__have_sse41a__always__on_x64_except_msc)
 {
 #if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
     BOOST_REQUIRE(have_sse41a());
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__have_sse41a__always__on_x64_except_msc)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__have_avx2__always__on_x64_except_mac)
+BOOST_AUTO_TEST_CASE(intrinsics_have__have_avx2__always__on_x64_except_mac)
 {
 #if defined(HAVE_X64) && !defined(HAVE_XCODE)
     BOOST_REQUIRE(have_avx2());
@@ -130,12 +130,12 @@ BOOST_AUTO_TEST_CASE(intrinsics__have_avx2__always__on_x64_except_mac)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__have_shani__always__false)
+BOOST_AUTO_TEST_CASE(intrinsics_have__have_shani__always__false)
 {
     BOOST_REQUIRE(!have_shani());
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics__have_neon__always__false)
+BOOST_AUTO_TEST_CASE(intrinsics_have__have_neon__always__false)
 {
     BOOST_REQUIRE(!have_neon());
 }

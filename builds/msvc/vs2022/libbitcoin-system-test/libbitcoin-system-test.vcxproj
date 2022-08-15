@@ -104,7 +104,6 @@
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
-    <ClCompile Include="..\..\..\..\test\cpuid.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\elliptic_curve.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\pseudo_random.cpp" />
@@ -165,7 +164,9 @@
       <ObjectFileName>$(IntDir)test_hash_sha_analysis.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
-    <ClCompile Include="..\..\..\..\test\intrinsics.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\have.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\cpuid.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\interface.cpp" />
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
