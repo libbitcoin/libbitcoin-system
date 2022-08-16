@@ -22,6 +22,10 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/xcpu/defines.hpp>
 
+// shl_/shr_ are undefined for 8 bit.
+// All others are at most SSE4.1.
+// Apart from extract and byteswap, all are at most SSE2.
+
 namespace libbitcoin {
 namespace system {
 
@@ -29,69 +33,100 @@ namespace system {
 
 using xint128_t = __m128i;
 
-// SSE4 primitives (for all element widths).
+// SSE4 bitwise primitives
 // ----------------------------------------------------------------------------
-// Bitwise functions are idependent of element widths.
 
+// SSE2
 template <typename Word, if_same<Word, xint128_t> = true>
 INLINE Word and_(Word a, Word b) NOEXCEPT
 {
     return _mm_and_si128(a, b);
 }
 
+// SSE2
 template <typename Word, if_same<Word, xint128_t> = true>
 INLINE Word or_(Word a, Word b) NOEXCEPT
 {
     return _mm_or_si128(a, b);
 }
 
+// SSE2
 template <typename Word, if_same<Word, xint128_t> = true>
 INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
     return _mm_xor_si128(a, b);
 }
 
-// SSE4 primitives (for 32 bit elements).
+// SSE4 vector primitives
 // ----------------------------------------------------------------------------
-// TODO: 64 bit elements.
 
-template <auto B, typename Word, if_same<Word, xint128_t> = true>
+// SSE2
+template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word shr_(Word a) NOEXCEPT
 {
-    return _mm_srli_epi32(a, B);
+    ////if constexpr (S == bits<uint8_t>)
+    ////    return _mm_srli_epi8(a, B);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_srli_epi16(a, B);
+    else if constexpr (S == bits<uint32_t>)
+        return _mm_srli_epi32(a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm_srli_epi64(a, B);
 }
 
-template <auto B, typename Word, if_same<Word, xint128_t> = true>
+// SSE2
+template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word shl_(Word a) NOEXCEPT
 {
-    return _mm_slli_epi32(a, B);
+    ////if constexpr (S == bits<uint8_t>)
+    ////    return _mm_slli_epi8(a, B);
+    if constexpr (S == bits<uint16_t>)
+        return _mm_slli_epi16(a, B);
+    else if constexpr (S == bits<uint32_t>)
+        return _mm_slli_epi32(a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm_slli_epi64(a, B);
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word ror_(Word a) NOEXCEPT
 {
-    // TODO: S will become unnecessary as the function set must be 32/64.
-    return or_(shr_<B>(a), shl_<S - B>(a));
+    return or_(shr_<B, S>(a), shl_<S - B, S>(a));
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word rol_(Word a) NOEXCEPT
 {
-    // TODO: S will become unnecessary as the function set must be 32/64.
-    return or_(shl_<B>(a), shr_<S - B>(a));
+    return or_(shl_<B, S>(a), shr_<S - B, S>(a));
 }
 
-template <typename Word, if_same<Word, xint128_t> = true>
+// SSE2
+template <auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word add_(Word a, Word b) NOEXCEPT
 {
-    return _mm_add_epi32(a, b);
+    if constexpr (S == bits<uint8_t>)
+        return _mm_add_epi8(a, b);
+    else if constexpr (S == bits<uint16_t>)
+        return _mm_add_epi16(a, b);
+    else if constexpr (S == bits<uint32_t>)
+        return _mm_add_epi32(a, b);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm_add_epi64(a, b);
 }
 
-template <auto K, typename Word, if_same<Word, xint128_t> = true>
+// SSE2
+template <auto K, auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word add_(Word a) NOEXCEPT
 {
-    // Broadcast 32-bit integer to all elements.
-    return add_(a, _mm_set1_epi32(K));
+    // set1 broadcast integer to all elements.
+    if constexpr (S == bits<uint8_t>)
+        return add_<S>(a, _mm_set1_epi8(K));
+    else if constexpr (S == bits<uint16_t>)
+        return add_<S>(a, _mm_set1_epi16(K));
+    else if constexpr (S == bits<uint32_t>)
+        return add_<S>(a, _mm_set1_epi32(K));
+    else if constexpr (S == bits<uint64_t>)
+        return add_<S>(a, _mm_set1_epi64x(K));
 }
 
 // SSE4 set/get (for all element widths).
@@ -101,24 +136,22 @@ INLINE Word add_(Word a) NOEXCEPT
 template <typename To, auto Lane, if_integral_integer<To> = true>
 INLINE To get(xint128_t a) NOEXCEPT
 {
-    if constexpr      (is_same_type<To, uint8_t>)
-    {
+    // SSE4.1
+    if constexpr (is_same_type<To, uint8_t>)
         return _mm_extract_epi8(a, Lane);
-    }
+
+    // SSE2
     else if constexpr (is_same_type<To, uint16_t>)
-    {
         return _mm_extract_epi16(a, Lane);
-    }
+
+    // SSE4.1
     else if constexpr (is_same_type<To, uint32_t>)
-    {
         return _mm_extract_epi32(a, Lane);
-    }
     else if constexpr (is_same_type<To, uint64_t>)
-    {
         return _mm_extract_epi64(a, Lane);
-    }
 }
 
+// SSE2
 // Low order word to the left.
 template <typename To, if_same<To, xint128_t> = true>
 INLINE To set(uint64_t x01 = 0, uint64_t x02 = 0) NOEXCEPT
@@ -127,6 +160,7 @@ INLINE To set(uint64_t x01 = 0, uint64_t x02 = 0) NOEXCEPT
     return _mm_set_epi64x(x02, x01);
 }
 
+// SSE2
 template <typename To, if_same<To, xint128_t> = true>
 INLINE To set(
     uint32_t x01 = 0, uint32_t x02 = 0,
@@ -135,6 +169,7 @@ INLINE To set(
     return _mm_set_epi32(x04, x03, x02, x01);
 }
 
+// SSE2
 template <typename To, if_same<To, xint128_t> = true>
 INLINE To set(
     uint16_t x01 = 0, uint16_t x02 = 0,
@@ -146,6 +181,7 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
+// SSE2
 template <typename To, if_same<To, xint128_t> = true>
 INLINE To set(
     uint8_t x01 = 0, uint8_t x02 = 0,
@@ -162,6 +198,11 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
+// Endianness
+// ----------------------------------------------------------------------------
+// TODO: generalize.
+
+// SSSE3
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 INLINE xint128_t byteswap(xint128_t value) NOEXCEPT
 {

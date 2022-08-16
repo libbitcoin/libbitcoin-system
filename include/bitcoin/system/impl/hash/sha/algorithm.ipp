@@ -112,8 +112,8 @@ sigma_(auto x) NOEXCEPT
     constexpr auto s = SHA::word_bits;
     return xor_
     (
-        shr_<V>(xor_(shr_<X>(xor_(shr_<Y>(x), x)), x)),
-        shl_<s - W>(xor_(shl_<Z>(x), x))
+        shr_<V, s>(xor_(shr_<X, s>(xor_(shr_<Y, s>(x), x)), x)),
+        shl_<s - W, s>(xor_(shl_<Z, s>(x), x))
     );
 }
 
@@ -151,7 +151,7 @@ sigma(auto x) NOEXCEPT
     }
     else
     {
-        return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), shr_<C>(x));
+        return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), shr_<C, s>(x));
     }
 }
 
@@ -262,7 +262,7 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto wk) NOEXCEPT
 {
     constexpr auto s = SHA::word_bits;
     constexpr auto f = functor<Round, decltype(a)>();
-    e = /*a =*/ add_(add_(add_(rol_<5, s>(a), f(b, c, d)), e), wk);
+    e = /*a =*/ add_<s>(add_<s>(add_<s>(rol_<5, s>(a), f(b, c, d)), e), wk);
     b = /*c =*/ rol_<30, s>(b);
 
     // SHA-NI
@@ -284,9 +284,10 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto wk) NOEXCEPT
 {
     // TODO: if open lanes, vectorize Sigma0 and Sigma1 (see Intel).
-    const auto t = add_(add_(add_(Sigma1(e), choice(e, f, g)), h), wk);
-    d = /*e =*/    add_(d, t);
-    h = /*a =*/    add_(add_(Sigma0(a), majority(a, b, c)), t);
+    constexpr auto s = SHA::word_bits;
+    const auto t = add_<s>(add_<s>(add_<s>(Sigma1(e), choice(e, f, g)), h), wk);
+    d = /*e =*/    add_<s>(d, t);
+    h = /*a =*/    add_<s>(add_<s>(Sigma0(a), majority(a, b, c)), t);
 
     // Rounds can be cut in half and this round doubled (intel paper).
     // Avoids the need for a temporary variable and aligns with SHA-NI.
@@ -468,13 +469,13 @@ prepare(auto& buffer) NOEXCEPT
             xor_(buffer[r16], buffer[r14]),
             xor_(buffer[r08], buffer[r03])));
 
-        buffer[r16] = add_<k0>(buffer[r16]);
+        buffer[r16] = add_<k0, s>(buffer[r16]);
 
         buffer[add1(r00)] = rol_<1, s>(xor_(
             xor_(buffer[add1(r16)], buffer[add1(r14)]),
             xor_(buffer[add1(r08)], buffer[add1(r03)])));
 
-        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
+        buffer[add1(r16)] = add_<k1, s>(buffer[add1(r16)]);
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -496,17 +497,17 @@ prepare(auto& buffer) NOEXCEPT
     else
     {
         // TODO: if open lanes, vectorize sigma0 and sigma1 (see Intel).
-        buffer[r00] = add_(
-            add_(buffer[r16], sigma0(buffer[r15])),
-            add_(buffer[r07], sigma1(buffer[r02])));
+        buffer[r00] = add_<s>(
+            add_<s>(buffer[r16], sigma0(buffer[r15])),
+            add_<s>(buffer[r07], sigma1(buffer[r02])));
 
-        buffer[r16] = add_<k0>(buffer[r16]);
+        buffer[r16] = add_<k0, s>(buffer[r16]);
 
-        buffer[add1(r00)] = add_(
-            add_(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
-            add_(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
+        buffer[add1(r00)] = add_<s>(
+            add_<s>(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
+            add_<s>(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
 
-        buffer[add1(r16)] = add_<k1>(buffer[add1(r16)]);
+        buffer[add1(r16)] = add_<k1, s>(buffer[add1(r16)]);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
@@ -526,22 +527,22 @@ prepare(auto& buffer) NOEXCEPT
     if constexpr (Round == sub1(sub1(SHA::rounds)))
     {
         constexpr auto r = SHA::rounds - array_count<words_t>;
-        buffer[r + 0] = add_<K::get[r + 0]>(buffer[r + 0]);
-        buffer[r + 1] = add_<K::get[r + 1]>(buffer[r + 1]);
-        buffer[r + 2] = add_<K::get[r + 2]>(buffer[r + 2]);
-        buffer[r + 3] = add_<K::get[r + 3]>(buffer[r + 3]);
-        buffer[r + 4] = add_<K::get[r + 4]>(buffer[r + 4]);
-        buffer[r + 5] = add_<K::get[r + 5]>(buffer[r + 5]);
-        buffer[r + 6] = add_<K::get[r + 6]>(buffer[r + 6]);
-        buffer[r + 7] = add_<K::get[r + 7]>(buffer[r + 7]);
-        buffer[r + 8] = add_<K::get[r + 8]>(buffer[r + 8]);
-        buffer[r + 9] = add_<K::get[r + 9]>(buffer[r + 9]);
-        buffer[r + 10] = add_<K::get[r + 10]>(buffer[r + 10]);
-        buffer[r + 11] = add_<K::get[r + 11]>(buffer[r + 11]);
-        buffer[r + 12] = add_<K::get[r + 12]>(buffer[r + 12]);
-        buffer[r + 13] = add_<K::get[r + 13]>(buffer[r + 13]);
-        buffer[r + 14] = add_<K::get[r + 14]>(buffer[r + 14]);
-        buffer[r + 15] = add_<K::get[r + 15]>(buffer[r + 15]);
+        buffer[r + 0] = add_<K::get[r + 0], s>(buffer[r + 0]);
+        buffer[r + 1] = add_<K::get[r + 1], s>(buffer[r + 1]);
+        buffer[r + 2] = add_<K::get[r + 2], s>(buffer[r + 2]);
+        buffer[r + 3] = add_<K::get[r + 3], s>(buffer[r + 3]);
+        buffer[r + 4] = add_<K::get[r + 4], s>(buffer[r + 4]);
+        buffer[r + 5] = add_<K::get[r + 5], s>(buffer[r + 5]);
+        buffer[r + 6] = add_<K::get[r + 6], s>(buffer[r + 6]);
+        buffer[r + 7] = add_<K::get[r + 7], s>(buffer[r + 7]);
+        buffer[r + 8] = add_<K::get[r + 8], s>(buffer[r + 8]);
+        buffer[r + 9] = add_<K::get[r + 9], s>(buffer[r + 9]);
+        buffer[r + 10] = add_<K::get[r + 10], s>(buffer[r + 10]);
+        buffer[r + 11] = add_<K::get[r + 11], s>(buffer[r + 11]);
+        buffer[r + 12] = add_<K::get[r + 12], s>(buffer[r + 12]);
+        buffer[r + 13] = add_<K::get[r + 13], s>(buffer[r + 13]);
+        buffer[r + 14] = add_<K::get[r + 14], s>(buffer[r + 14]);
+        buffer[r + 15] = add_<K::get[r + 15], s>(buffer[r + 15]);
     }
 }
 
@@ -595,17 +596,18 @@ TEMPLATE
 INLINE constexpr void CLASS::
 summarize(auto& out, const auto& in) NOEXCEPT
 {
-    out[0] = add_(out[0], in[0]);
-    out[1] = add_(out[1], in[1]);
-    out[2] = add_(out[2], in[2]);
-    out[3] = add_(out[3], in[3]);
-    out[4] = add_(out[4], in[4]);
+    constexpr auto s = SHA::word_bits;
+    out[0] = add_<s>(out[0], in[0]);
+    out[1] = add_<s>(out[1], in[1]);
+    out[2] = add_<s>(out[2], in[2]);
+    out[3] = add_<s>(out[3], in[3]);
+    out[4] = add_<s>(out[4], in[4]);
 
     if constexpr (SHA::strength != 160)
     {
-        out[5] = add_(out[5], in[5]);
-        out[6] = add_(out[6], in[6]);
-        out[7] = add_(out[7], in[7]);
+        out[5] = add_<s>(out[5], in[5]);
+        out[6] = add_<s>(out[6], in[6]);
+        out[7] = add_<s>(out[7], in[7]);
     }
 }
 

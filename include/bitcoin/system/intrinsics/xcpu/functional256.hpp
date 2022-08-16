@@ -22,6 +22,9 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/xcpu/defines.hpp>
 
+// shl_/shr_ are undefined for 8 bit.
+// All others are at most AVX2.
+
 namespace libbitcoin {
 namespace system {
 
@@ -29,69 +32,104 @@ namespace system {
 
 using xint256_t = __m256i;
 
-// AVX2 primitives (for all element widths).
+// AVX2 bitwise primitives
 // ----------------------------------------------------------------------------
-// Bitwise functions are idependent of element widths.
 
+// AVX2
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE Word and_(Word a, Word b) NOEXCEPT
 {
     return _mm256_and_si256(a, b);
 }
 
+// AVX2
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE Word or_(Word a, Word b) NOEXCEPT
 {
     return _mm256_or_si256(a, b);
 }
 
+// AVX2
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
     return _mm256_xor_si256(a, b);
 }
 
-// AVX2 primitives (for 32 bit elements).
+// AVX2 vector primitives
 // ----------------------------------------------------------------------------
-// TODO: 64 bit elements.
 
-template <auto B, typename Word, if_same<Word, xint256_t> = true>
+template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word shr_(Word a) NOEXCEPT
 {
-    return _mm256_srli_epi32(a, B);
+    // Undefined
+    ////if constexpr (S == bits<uint8_t>)
+    ////    return _mm256_srli_epi8(a, B);
+
+    // AVX2
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_srli_epi16(a, B);
+    else if constexpr (S == bits<uint32_t>)
+        return _mm256_srli_epi32(a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm256_srli_epi64(a, B);
 }
 
-template <auto B, typename Word, if_same<Word, xint256_t> = true>
+template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word shl_(Word a) NOEXCEPT
 {
-    return _mm256_slli_epi32(a, B);
+    // Undefined
+    ////if constexpr (S == bits<uint8_t>)
+    ////    return _mm256_slli_epi8(a, B);
+
+    // AVX2
+    if constexpr (S == bits<uint16_t>)
+        return _mm256_slli_epi16(a, B);
+    else if constexpr (S == bits<uint32_t>)
+        return _mm256_slli_epi32(a, B);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm256_slli_epi64(a, B);
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word ror_(Word a) NOEXCEPT
 {
-    // TODO: S will become unnecessary as the function set must be 32/64.
-    return or_(shr_<B>(a), shl_<S - B>(a));
+    return or_(shr_<B, S>(a), shl_<S - B, S>(a));
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word rol_(Word a) NOEXCEPT
 {
-    // TODO: S will become unnecessary as the function set must be 32/64.
-    return or_(shl_<B>(a), shr_<S - B>(a));
+    return or_(shl_<B, S>(a), shr_<S - B, S>(a));
 }
 
-template <typename Word, if_same<Word, xint256_t> = true>
+// AVX2
+template <auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word add_(Word a, Word b) NOEXCEPT
 {
-    return _mm256_add_epi32(a, b);
+    if constexpr (S == bits<uint8_t>)
+        return _mm256_add_epi8(a, b);
+    else if constexpr (S == bits<uint16_t>)
+        return _mm256_add_epi16(a, b);
+    else if constexpr (S == bits<uint32_t>)
+        return _mm256_add_epi32(a, b);
+    else if constexpr (S == bits<uint64_t>)
+        return _mm256_add_epi64(a, b);
 }
 
-template <auto K, typename Word, if_same<Word, xint256_t> = true>
+// AVX
+template <auto K, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word add_(Word a) NOEXCEPT
 {
-    // Broadcast 32-bit integer to all elements.
-    return add_(a, _mm256_set1_epi32(K));
+    // set1 broadcast integer to all elements.
+    if constexpr (S == bits<uint8_t>)
+        return add_<S>(a, _mm256_set1_epi8(K));
+    else if constexpr (S == bits<uint16_t>)
+        return add_<S>(a, _mm256_set1_epi16(K));
+    else if constexpr (S == bits<uint32_t>)
+        return add_<S>(a, _mm256_set1_epi32(K));
+    else if constexpr (S == bits<uint64_t>)
+        return add_<S>(a, _mm256_set1_epi64x(K));
 }
 
 // AVX2 set/get (for all element widths).
@@ -101,24 +139,20 @@ INLINE Word add_(Word a) NOEXCEPT
 template <typename To, auto Lane, if_integral_integer<To> = true>
 INLINE To get(xint256_t a) NOEXCEPT
 {
-    if constexpr      (is_same_type<To, uint8_t>)
-    {
+    // AVX2
+    if constexpr (is_same_type<To, uint8_t>)
         return _mm256_extract_epi8(a, Lane);
-    }
     else if constexpr (is_same_type<To, uint16_t>)
-    {
         return _mm256_extract_epi16(a, Lane);
-    }
+
+    // AVX
     else if constexpr (is_same_type<To, uint32_t>)
-    {
         return _mm256_extract_epi32(a, Lane);
-    }
     else if constexpr (is_same_type<To, uint64_t>)
-    {
         return _mm256_extract_epi64(a, Lane);
-    }
 }
 
+// AVX
 // Low order word to the left.
 template <typename To, if_same<To, xint256_t> = true>
 INLINE To set(
@@ -130,6 +164,7 @@ INLINE To set(
         x04, x03, x02, x01);
 }
 
+// AVX
 template <typename To, if_same<To, xint256_t> = true>
 INLINE To set(
     uint32_t x01 = 0, uint32_t x02 = 0,
@@ -141,6 +176,7 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
+// AVX
 template <typename To, if_same<To, xint256_t> = true>
 INLINE To set(
     uint16_t x01 = 0, uint16_t x02 = 0,
@@ -157,6 +193,7 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
+// AVX
 template <typename To, if_same<To, xint256_t> = true>
 INLINE To set(
     uint8_t x01 = 0, uint8_t x02 = 0,
@@ -183,7 +220,11 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
+// Endianness
+// ----------------------------------------------------------------------------
+// TODO: generalize.
 
+// AVX2
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 INLINE xint256_t byteswap(xint256_t value) NOEXCEPT
 {

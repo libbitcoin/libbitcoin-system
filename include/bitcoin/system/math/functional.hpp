@@ -26,6 +26,8 @@
 namespace libbitcoin {
 namespace system {
 
+// S arguments are set for common overload with extended functions.
+
 template <typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto and_(Word a, Word b) NOEXCEPT
@@ -47,7 +49,7 @@ INLINE constexpr auto xor_(Word a, Word b) NOEXCEPT
     return a ^ b;
 }
 
-template <auto B, typename Word,
+template <auto B, auto S = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto shr_(Word a) NOEXCEPT
 {
@@ -55,7 +57,7 @@ INLINE constexpr auto shr_(Word a) NOEXCEPT
 }
 
 // unused by sha
-template <auto B, typename Word,
+template <auto B, auto S = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto shl_(Word a) NOEXCEPT
 {
@@ -63,31 +65,31 @@ INLINE constexpr auto shl_(Word a) NOEXCEPT
 }
 
 // S unused by integral overload
-template <auto B, auto S, typename Word,
+template <auto B, auto S = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto ror_(Word a) NOEXCEPT
 {
-    // intrinsics
+    // math/intrinsics
     return rotr<B>(a);
 }
 
 // S unused by integral overload
-template <auto B, auto S, typename Word,
+template <auto B, auto S = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto rol_(Word a) NOEXCEPT
 {
-    // intrinsics
+    // math/intrinsics
     return rotl<B>(a);
 }
 
-template <typename Word,
+template <auto S = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto add_(Word a, Word b) NOEXCEPT
 {
     return a + b;
 }
 
-template <auto K, typename Word,
+template <auto K, auto S = 0, typename Word,
     if_integral_integer<Word> = true>
 INLINE constexpr auto add_(Word a) NOEXCEPT
 {
