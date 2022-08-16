@@ -82,28 +82,6 @@ BOOST_AUTO_TEST_CASE(performance__base_sha256a)
     BOOST_CHECK(complete);
 }
 
-BOOST_AUTO_TEST_CASE(performance__sha256a_both)
-{
-    auto complete = true;
-    complete = test_accumulator<sha256a_both, v0::c, v0::s>(std::cout);
-    complete = test_accumulator<sha256a_both, v1::c, v1::s>(std::cout);
-    complete = test_accumulator<sha256a_both, v2::c, v2::s>(std::cout);
-    complete = test_accumulator<sha256a_both, v3::c, v3::s>(std::cout);
-    complete = test_accumulator<sha256a_both, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
-BOOST_AUTO_TEST_CASE(performance__sha256a_comp)
-{
-    auto complete = true;
-    complete = test_accumulator<sha256a_comp, v0::c, v0::s>(std::cout);
-    complete = test_accumulator<sha256a_comp, v1::c, v1::s>(std::cout);
-    complete = test_accumulator<sha256a_comp, v2::c, v2::s>(std::cout);
-    complete = test_accumulator<sha256a_comp, v3::c, v3::s>(std::cout);
-    complete = test_accumulator<sha256a_comp, v4::c, v4::s>(std::cout);
-    BOOST_CHECK(complete);
-}
-
 BOOST_AUTO_TEST_CASE(performance__sha256a_vect)
 {
     auto complete = true;
@@ -125,6 +103,29 @@ BOOST_AUTO_TEST_CASE(performance__sha256a_none)
     complete = test_accumulator<sha256a_none, v4::c, v4::s>(std::cout);
     BOOST_CHECK(complete);
 }
+
+// The compression optimization is now unconditional.
+////BOOST_AUTO_TEST_CASE(performance__sha256a_comp)
+////{
+////    auto complete = true;
+////    complete = test_accumulator<sha256a_comp, v0::c, v0::s>(std::cout);
+////    complete = test_accumulator<sha256a_comp, v1::c, v1::s>(std::cout);
+////    complete = test_accumulator<sha256a_comp, v2::c, v2::s>(std::cout);
+////    complete = test_accumulator<sha256a_comp, v3::c, v3::s>(std::cout);
+////    complete = test_accumulator<sha256a_comp, v4::c, v4::s>(std::cout);
+////    BOOST_CHECK(complete);
+////}
+
+////BOOST_AUTO_TEST_CASE(performance__sha256a_both)
+////{
+////    auto complete = true;
+////    complete = test_accumulator<sha256a_both, v0::c, v0::s>(std::cout);
+////    complete = test_accumulator<sha256a_both, v1::c, v1::s>(std::cout);
+////    complete = test_accumulator<sha256a_both, v2::c, v2::s>(std::cout);
+////    complete = test_accumulator<sha256a_both, v3::c, v3::s>(std::cout);
+////    complete = test_accumulator<sha256a_both, v4::c, v4::s>(std::cout);
+////    BOOST_CHECK(complete);
+////}
 
 ////BOOST_AUTO_TEST_CASE(performance__sha256__baseline)
 ////{
