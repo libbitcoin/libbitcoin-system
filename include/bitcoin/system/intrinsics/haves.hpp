@@ -174,9 +174,12 @@ inline bool try_sse41() NOEXCEPT
 
 inline bool try_sse41a() NOEXCEPT
 {
+    // SSE41a implies assembly, with no need for SSE41 intrinsics.
     if constexpr (with_sse41a)
     {
-        return try_sse41();
+        uint32_t eax, ebx, ecx, edx;
+        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+            && get_bit<cpu1_0::sse4_ecx_bit>(ecx);   // SSE4.1
     }
     else
         return false;

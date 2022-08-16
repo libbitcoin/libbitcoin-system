@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_shani__always__match)
 {
     const auto tryit = try_shani();
 
-#if defined(HAVE_X64)
+#if defined(HAVE_SHANI)
     uint32_t eax{}, ebx{}, ecx{}, edx{};
     BOOST_CHECK_EQUAL(
         get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx512__always__match)
 {
     const auto tryit = try_avx512();
 
-#if defined(HAVE_X64)
+#if defined(HAVE_AVX512)
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
     BOOST_CHECK_EQUAL(
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx2__always__match)
 {
     const auto tryit = try_avx2();
 
-#if defined(HAVE_X64)
+#if defined(HAVE_AVX2)
     uint64_t extended{};
     uint32_t eax{}, ebx{}, ecx{}, edx{};
     BOOST_CHECK_EQUAL(
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse41__always__match)
 {
     const auto tryit = try_sse41();
 
-#if defined(HAVE_X64)
+#if defined(HAVE_SSE41)
     uint32_t eax{}, ebx{}, ecx{}, edx{};
     BOOST_CHECK_EQUAL(
         get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__on_x64)
 {
-#if defined(HAVE_X64)
+#if defined(HAVE_SSE41)
     BOOST_REQUIRE(have_sse41());
 #else
     BOOST_REQUIRE(!have_sse41());
@@ -192,11 +192,16 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__always__never)
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__always__on_x64_except_mac)
 {
-#if defined(HAVE_X64) && !defined(HAVE_XCODE)
+#if defined(HAVE_AVX2) && !defined(HAVE_XCODE)
     BOOST_REQUIRE(have_avx2());
 #else
     BOOST_REQUIRE(!have_avx2());
 #endif
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__always__false)
+{
+    BOOST_REQUIRE(!have_avx512());
 }
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_shani__always__false)
