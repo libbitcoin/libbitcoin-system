@@ -20,6 +20,47 @@
 
 BOOST_AUTO_TEST_SUITE(intrinsics_haves_tests)
 
+// helper
+template <typename>
+constexpr bool is_defined = true;
+
+// Build symbols to constexpr.
+// ----------------------------------------------------------------------------
+
+#if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
+    static_assert(with_sse41a);
+#else
+    static_assert(!with_sse41a);
+#endif
+#if defined(HAVE_SSE4)
+    static_assert(with_sse41);
+#else
+    static_assert(!with_sse41);
+#endif
+#if defined(HAVE_AVX2)
+    static_assert(with_avx2);
+#else
+    static_assert(!with_avx2);
+#endif
+#if defined(HAVE_AVX512)
+    static_assert(with_avx512);
+#else
+    static_assert(!with_avx512);
+#endif
+#if defined(HAVE_SHANI)
+    static_assert(with_shani);
+#else
+    static_assert(!with_shani);
+#endif
+#if defined(HAVE_NEON)
+    static_assert(with_neon);
+#else
+    static_assert(!with_neon);
+#endif
+
+// try()
+// ----------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_CASE(intrinsics_haves__try_shani__always__match)
 {
     const auto tryit = try_shani();
@@ -111,7 +152,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse4__always__match)
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
 {
-    constexpr auto tryit = try_neon();
+    const auto tryit = try_neon();
 
 #if defined(HAVE_NEON)
     uint32_t eax{}, ebx{}, ecx{}, edx{};
@@ -123,7 +164,8 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
 #endif
 }
 
-// CI matrix platform assumptions.
+// have() [CI matrix platform assumptions]
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__on_x64)
 {
@@ -166,5 +208,226 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__false)
 {
     BOOST_REQUIRE(!have_neon());
 }
+
+// types
+// ----------------------------------------------------------------------------
+// These are true (mocked) when support for the extended type is not compiled.
+
+static_assert(is_extended<xint512_t>);
+static_assert(is_extended<xint256_t>);
+static_assert(is_extended<xint128_t>);
+
+static_assert(is_defined<if_extended<xint512_t>>);
+static_assert(is_defined<if_extended<xint256_t>>);
+static_assert(is_defined<if_extended<xint128_t>>);
+////static_assert(!is_defined<if_extended<uint64_t>>);
+////static_assert(!is_defined<if_extended<uint32_t>>);
+////static_assert(!is_defined<if_extended<uint16_t>>);
+////static_assert(!is_defined<if_extended<uint8_t>>);
+
+static_assert(is_same_type<xint128_t, xint128_t>);
+static_assert(is_same_type<xint256_t, xint256_t>);
+static_assert(is_same_type<xint512_t, xint512_t>);
+
+// have<>/with<> wrappers
+// ----------------------------------------------------------------------------
+
+static_assert(with<xint512_t>() == with_avx512);
+static_assert(with<xint256_t>() == with_avx2);
+static_assert(with<xint128_t>() == with_sse41);
+
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(have<xint512_t>(), have_avx512());
+    BOOST_REQUIRE_EQUAL(have<xint256_t>(), have_avx2());
+    BOOST_REQUIRE_EQUAL(have<xint128_t>(), have_sse41());
+}
+
+// capacity
+// ----------------------------------------------------------------------------
+
+////static_assert(capacity<xint128_t, uint8_t>    == 16); // required to fill
+////static_assert(capacity<xint128_t, uint8_t, 1> == 16); // full
+////static_assert(capacity<xint128_t, uint8_t, 2> ==  8); // full
+////static_assert(capacity<xint128_t, uint8_t, 3> ==  5);
+////static_assert(capacity<xint128_t, uint8_t, 4> ==  4); // full
+////static_assert(capacity<xint128_t, uint8_t, 5> ==  3);
+////static_assert(capacity<xint128_t, uint8_t, 6> ==  2);
+////static_assert(capacity<xint128_t, uint8_t, 7> ==  2);
+////static_assert(capacity<xint128_t, uint8_t, 8> ==  2); // full
+////static_assert(capacity<xint128_t, uint8_t, 9> ==  1);
+////static_assert(capacity<xint128_t, uint8_t, 10> == 1);
+////static_assert(capacity<xint128_t, uint8_t, 11> == 1);
+////static_assert(capacity<xint128_t, uint8_t, 12> == 1);
+////static_assert(capacity<xint128_t, uint8_t, 13> == 1);
+////static_assert(capacity<xint128_t, uint8_t, 14> == 1);
+////static_assert(capacity<xint128_t, uint8_t, 15> == 1);
+////static_assert(capacity<xint128_t, uint8_t, 16> == 1); // full
+////static_assert(capacity<xint128_t, uint8_t, 17> == 0);
+////
+////static_assert(capacity<xint128_t, uint16_t>    == 8); // required to fill
+////static_assert(capacity<xint128_t, uint16_t, 1> == 8);
+////static_assert(capacity<xint128_t, uint16_t, 2> == 4); // full
+////static_assert(capacity<xint128_t, uint16_t, 3> == 2);
+////static_assert(capacity<xint128_t, uint16_t, 4> == 2); // full
+////static_assert(capacity<xint128_t, uint16_t, 5> == 1);
+////static_assert(capacity<xint128_t, uint16_t, 6> == 1);
+////static_assert(capacity<xint128_t, uint16_t, 7> == 1);
+////static_assert(capacity<xint128_t, uint16_t, 8> == 1); // full
+////static_assert(capacity<xint128_t, uint16_t, 9> == 0);
+
+static_assert(capacity<xint128_t, uint32_t>    == 4); // required to fill (lanes)
+static_assert(capacity<xint128_t, uint32_t, 1> == 4);
+static_assert(capacity<xint128_t, uint32_t, 2> == 2); // full
+static_assert(capacity<xint128_t, uint32_t, 3> == 1);
+static_assert(capacity<xint128_t, uint32_t, 4> == 1); // full
+static_assert(capacity<xint128_t, uint32_t, 5> == 0);
+////static_assert(capacity<xint128_t, uint32_t, 0> == 0);
+
+static_assert(capacity<xint128_t, uint64_t>    == 2); // required to fill (lanes)
+static_assert(capacity<xint128_t, uint64_t, 1> == 2);
+static_assert(capacity<xint128_t, uint64_t, 2> == 1); // full
+static_assert(capacity<xint128_t, uint64_t, 3> == 0);
+////static_assert(capacity<xint128_t, uint64_t, 0> == 0);
+
+////static_assert(capacity<xint256_t, uint8_t>        == 32); // required to fill
+////static_assert(capacity<xint256_t, uint8_t, 1 * 2> == 16); // full
+////static_assert(capacity<xint256_t, uint8_t, 2 * 2> ==  8); // full
+////static_assert(capacity<xint256_t, uint8_t, 3 * 2> ==  5);
+////static_assert(capacity<xint256_t, uint8_t, 4 * 2> ==  4); // full
+////static_assert(capacity<xint256_t, uint8_t, 5 * 2> ==  3);
+////static_assert(capacity<xint256_t, uint8_t, 6 * 2> ==  2);
+////static_assert(capacity<xint256_t, uint8_t, 7 * 2> ==  2);
+////static_assert(capacity<xint256_t, uint8_t, 8 * 2> ==  2); // full
+////static_assert(capacity<xint256_t, uint8_t, 9 * 2> ==  1);
+////static_assert(capacity<xint256_t, uint8_t, 10 * 2> == 1);
+////static_assert(capacity<xint256_t, uint8_t, 11 * 2> == 1);
+////static_assert(capacity<xint256_t, uint8_t, 12 * 2> == 1);
+////static_assert(capacity<xint256_t, uint8_t, 13 * 2> == 1);
+////static_assert(capacity<xint256_t, uint8_t, 14 * 2> == 1);
+////static_assert(capacity<xint256_t, uint8_t, 15 * 2> == 1);
+////static_assert(capacity<xint256_t, uint8_t, 16 * 2> == 1); // full
+////static_assert(capacity<xint256_t, uint8_t, 17 * 2> == 0);
+////
+////static_assert(capacity<xint256_t, uint16_t>        == 16); // required to fill
+////static_assert(capacity<xint256_t, uint16_t, 1 * 2> == 8);
+////static_assert(capacity<xint256_t, uint16_t, 2 * 2> == 4); // full
+////static_assert(capacity<xint256_t, uint16_t, 3 * 2> == 2);
+////static_assert(capacity<xint256_t, uint16_t, 4 * 2> == 2); // full
+////static_assert(capacity<xint256_t, uint16_t, 5 * 2> == 1);
+////static_assert(capacity<xint256_t, uint16_t, 6 * 2> == 1);
+////static_assert(capacity<xint256_t, uint16_t, 7 * 2> == 1);
+////static_assert(capacity<xint256_t, uint16_t, 8 * 2> == 1); // full
+////static_assert(capacity<xint256_t, uint16_t, 9 * 2> == 0);
+
+static_assert(capacity<xint256_t, uint32_t>        == 8); // required to fill (lanes)
+static_assert(capacity<xint256_t, uint32_t, 1 * 2> == 4);
+static_assert(capacity<xint256_t, uint32_t, 2 * 2> == 2); // full
+static_assert(capacity<xint256_t, uint32_t, 3 * 2> == 1);
+static_assert(capacity<xint256_t, uint32_t, 4 * 2> == 1); // full
+static_assert(capacity<xint256_t, uint32_t, 5 * 2> == 0);
+////static_assert(capacity<xint256_t, uint32_t, 0> == 0);
+
+static_assert(capacity<xint256_t, uint64_t>        == 4); // required to fill (lanes)
+static_assert(capacity<xint256_t, uint64_t, 1 * 2> == 2);
+static_assert(capacity<xint256_t, uint64_t, 2 * 2> == 1); // full
+static_assert(capacity<xint256_t, uint64_t, 3 * 2> == 0);
+////static_assert(capacity<xint256_t, uint64_t, 0> == 0);
+
+////static_assert(capacity<xint512_t, uint8_t>        == 64); // required to fill
+////static_assert(capacity<xint512_t, uint8_t, 1 * 4> == 16); // full
+////static_assert(capacity<xint512_t, uint8_t, 2 * 4> ==  8); // full
+////static_assert(capacity<xint512_t, uint8_t, 3 * 4> ==  5);
+////static_assert(capacity<xint512_t, uint8_t, 4 * 4> ==  4); // full
+////static_assert(capacity<xint512_t, uint8_t, 5 * 4> ==  3);
+////static_assert(capacity<xint512_t, uint8_t, 6 * 4> ==  2);
+////static_assert(capacity<xint512_t, uint8_t, 7 * 4> ==  2);
+////static_assert(capacity<xint512_t, uint8_t, 8 * 4> ==  2); // full
+////static_assert(capacity<xint512_t, uint8_t, 9 * 4> ==  1);
+////static_assert(capacity<xint512_t, uint8_t, 10 * 4> == 1);
+////static_assert(capacity<xint512_t, uint8_t, 11 * 4> == 1);
+////static_assert(capacity<xint512_t, uint8_t, 12 * 4> == 1);
+////static_assert(capacity<xint512_t, uint8_t, 13 * 4> == 1);
+////static_assert(capacity<xint512_t, uint8_t, 14 * 4> == 1);
+////static_assert(capacity<xint512_t, uint8_t, 15 * 4> == 1);
+////static_assert(capacity<xint512_t, uint8_t, 16 * 4> == 1); // full
+////static_assert(capacity<xint512_t, uint8_t, 17 * 4> == 0);
+////
+////static_assert(capacity<xint512_t, uint16_t>        == 32); // required to fill
+////static_assert(capacity<xint512_t, uint16_t, 1 * 4> == 8);
+////static_assert(capacity<xint512_t, uint16_t, 2 * 4> == 4); // full
+////static_assert(capacity<xint512_t, uint16_t, 3 * 4> == 2);
+////static_assert(capacity<xint512_t, uint16_t, 4 * 4> == 2); // full
+////static_assert(capacity<xint512_t, uint16_t, 5 * 4> == 1);
+////static_assert(capacity<xint512_t, uint16_t, 6 * 4> == 1);
+////static_assert(capacity<xint512_t, uint16_t, 7 * 4> == 1);
+////static_assert(capacity<xint512_t, uint16_t, 8 * 4> == 1); // full
+////static_assert(capacity<xint512_t, uint16_t, 9 * 4> == 0);
+
+static_assert(capacity<xint512_t, uint32_t>        == 16); // required to fill (lanes)
+static_assert(capacity<xint512_t, uint32_t, 1 * 4> == 4);
+static_assert(capacity<xint512_t, uint32_t, 2 * 4> == 2); // full
+static_assert(capacity<xint512_t, uint32_t, 3 * 4> == 1);
+static_assert(capacity<xint512_t, uint32_t, 4 * 4> == 1); // full
+static_assert(capacity<xint512_t, uint32_t, 5 * 4> == 0);
+////static_assert(capacity<xint512_t, uint32_t, 0> == 0);
+
+static_assert(capacity<xint512_t, uint64_t>        == 8); // required to fill (lanes)
+static_assert(capacity<xint512_t, uint64_t, 1 * 4> == 2);
+static_assert(capacity<xint512_t, uint64_t, 2 * 4> == 1); // full
+static_assert(capacity<xint512_t, uint64_t, 3 * 4> == 0);
+////static_assert(capacity<xint512_t, uint64_t, 0> == 0);
+
+// extend1
+// ----------------------------------------------------------------------------
+
+// uint32_t
+
+// This fails on type constraint (to_extended::if_not_greater).
+////static_assert(is_same_type<to_extended<uint32_t, 17>, xint512_t>); // undefined
+
+static_assert(is_same_type<to_extended<uint32_t, 16>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint32_t, 15>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t, 14>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t, 13>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t, 12>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t, 11>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t, 10>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t,  9>, xint512_t>); // partial
+
+static_assert(is_same_type<to_extended<uint32_t,  8>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint32_t,  7>, xint256_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t,  6>, xint256_t>); // partial
+static_assert(is_same_type<to_extended<uint32_t,  5>, xint256_t>); // partial
+
+static_assert(is_same_type<to_extended<uint32_t,  4>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint32_t,  3>, xint128_t>); // partial
+
+static_assert(is_same_type<to_extended<uint32_t,  2>, uint64_t>);  // full
+
+static_assert(is_same_type<to_extended<uint32_t,  1>, uint32_t>);  // full
+
+// This fails on type constraint (capacity::safe_divide).
+////static_assert(is_same_type<to_extended<uint32_t,  0>, uint32_t>);  // undefined
+
+// uint64_t
+
+// This fails on type constraint (to_extended::if_not_greater).
+////static_assert(is_same_type<to_extended<uint64_t, 9>, xint512_t>); // undefined
+
+static_assert(is_same_type<to_extended<uint64_t, 8>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 7>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint64_t, 6>, xint512_t>); // partial
+static_assert(is_same_type<to_extended<uint64_t, 5>, xint512_t>); // partial
+
+static_assert(is_same_type<to_extended<uint64_t, 4>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 3>, xint256_t>); // partial
+
+static_assert(is_same_type<to_extended<uint64_t, 2>, xint128_t>); // full
+
+static_assert(is_same_type<to_extended<uint64_t, 1>, uint64_t>);  // full
+
+// This fails on type constraint (capacity::safe_divide).
+////static_assert(is_same_type<to_extended<uint64_t, 0>, uint64_t>);  // undefined
 
 BOOST_AUTO_TEST_SUITE_END()

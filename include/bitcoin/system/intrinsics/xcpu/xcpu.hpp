@@ -28,4 +28,7 @@
 #include <bitcoin/system/intrinsics/xcpu/rotate.hpp>
 #include <bitcoin/system/intrinsics/xcpu/sha.hpp>
 
+/// Intel/AMD is always little-endian, and SHA is always big-endian (swap).
+/// Primitives implement rotr/rotl because these are not available in SIMD.
+
 #endif

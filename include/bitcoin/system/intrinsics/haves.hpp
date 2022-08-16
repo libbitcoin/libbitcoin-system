@@ -19,11 +19,53 @@
 #ifndef LIBBITCOIN_SYSTEM_INTRINSICS_HAVES_HPP
 #define LIBBITCOIN_SYSTEM_INTRINSICS_HAVES_HPP
 
+#include <limits>
+#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/xcpu/cpuid.hpp>
+#include <bitcoin/system/intrinsics/xcpu/functional128.hpp>
+#include <bitcoin/system/intrinsics/xcpu/functional256.hpp>
+#include <bitcoin/system/intrinsics/xcpu/functional512.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+/// Constant symbols for compiled intrinsics interfaces.
+/// ---------------------------------------------------------------------------
+
+#if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
+    constexpr auto with_sse41a = true;
+#else
+    constexpr auto with_sse41a = false;
+#endif
+#if defined(HAVE_SSE4)
+    constexpr auto with_sse41 = true;
+#else
+    constexpr auto with_sse41 = false;
+#endif
+#if defined(HAVE_AVX2)
+    constexpr auto with_avx2 = true;
+#else
+    constexpr auto with_avx2 = false;
+#endif
+#if defined(HAVE_AVX512)
+    constexpr auto with_avx512 = true;
+#else
+    constexpr auto with_avx512 = false;
+#endif
+#if defined(HAVE_SHANI)
+    constexpr auto with_shani = true;
+#else
+    constexpr auto with_shani = false;
+#endif
+#if defined(HAVE_NEON)
+    constexpr auto with_neon = true;
+#else
+    constexpr auto with_neon = false;
+#endif
+
+/// Runtime checks for Intel SIMD and ARM Neon availability.
+/// ---------------------------------------------------------------------------
 
 namespace cpu1_0
 {
@@ -53,139 +95,198 @@ namespace xcr0
 
 // Local util because no dependency on /math.
 template <size_t Bit, typename Value>
-constexpr bool get_bit(Value value) noexcept
+constexpr bool get_bit(Value value) NOEXCEPT
 {
     constexpr auto mask = (Value{ 1 } << Bit);
     return !is_zero(value & mask);
 }
 
-/// Runtime checks for Intel SIMD and ARM Neon availability.
-/// ---------------------------------------------------------------------------
-
-inline bool try_shani() noexcept
+inline bool try_shani() NOEXCEPT
 {
-// TODO: shani is unverified.
-#if defined(HAVE_X64)
-    uint32_t eax, ebx, ecx, edx;
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-        && get_bit<cpu1_0::sse4_ecx_bit>(ecx)   // SSE4.1
-        && (eax >= cpu7_0::leaf)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-        && get_bit<cpu7_0::shani_ebx_bit>(ebx);  // SHA-NI
-#else
-    return false;
-#endif
+    if constexpr (with_shani)
+    {
+        uint32_t eax, ebx, ecx, edx;
+        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+            && get_bit<cpu1_0::sse4_ecx_bit>(ecx)    // SSE4.1
+            && (eax >= cpu7_0::leaf)
+            && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+            && get_bit<cpu7_0::shani_ebx_bit>(ebx);  // SHA-NI
+    }
+    else
+        return false;
 }
 
-inline bool try_avx512() noexcept
+inline bool try_avx512() NOEXCEPT
 {
-// TODO: avx512 is unverified.
-#if defined(HAVE_X64)
-    uint64_t extended;
-    uint32_t eax, ebx, ecx, edx;
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-        && get_bit<cpu1_0::sse4_ecx_bit>(ecx)   // SSE4.1
-        && get_bit<cpu1_0::xsave_ecx_bit>(ecx)  // XSAVE
-        && get_bit<cpu1_0::avx_ecx_bit>(ecx)    // AVX
-        && get_xcr(extended, xcr0::feature)
-        && get_bit<xcr0::sse_bit>(extended)
-        && get_bit<xcr0::avx_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-        && get_bit<cpu7_0::avx512_ebx_bit>(ebx); // AVX512
-#else
-    return false;
-#endif
+    if constexpr (with_avx512)
+    {
+        uint64_t extended;
+        uint32_t eax, ebx, ecx, edx;
+        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+            && get_bit<cpu1_0::sse4_ecx_bit>(ecx)   // SSE4.1
+            && get_bit<cpu1_0::xsave_ecx_bit>(ecx)  // XSAVE
+            && get_bit<cpu1_0::avx_ecx_bit>(ecx)    // AVX
+            && get_xcr(extended, xcr0::feature)
+            && get_bit<xcr0::sse_bit>(extended)
+            && get_bit<xcr0::avx_bit>(extended)
+            && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+            && get_bit<cpu7_0::avx512_ebx_bit>(ebx); // AVX512
+    }
+    else
+        return false;
 }
 
-inline bool try_avx2() noexcept
+inline bool try_avx2() NOEXCEPT
 {
-#if defined(HAVE_X64)
-    uint64_t extended;
-    uint32_t eax, ebx, ecx, edx;
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-        && get_bit<cpu1_0::sse4_ecx_bit>(ecx)   // SSE4.1
-        && get_bit<cpu1_0::xsave_ecx_bit>(ecx)  // XSAVE
-        && get_bit<cpu1_0::avx_ecx_bit>(ecx)    // AVX
-        && get_xcr(extended, xcr0::feature)
-        && get_bit<xcr0::sse_bit>(extended)
-        && get_bit<xcr0::avx_bit>(extended)
-        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-        && get_bit<cpu7_0::avx2_ebx_bit>(ebx);   // AVX2
-#else
-    return false;
-#endif
+    if constexpr (with_avx2)
+    {
+        uint64_t extended;
+        uint32_t eax, ebx, ecx, edx;
+        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+            && get_bit<cpu1_0::sse4_ecx_bit>(ecx)   // SSE4.1
+            && get_bit<cpu1_0::xsave_ecx_bit>(ecx)  // XSAVE
+            && get_bit<cpu1_0::avx_ecx_bit>(ecx)    // AVX
+            && get_xcr(extended, xcr0::feature)
+            && get_bit<xcr0::sse_bit>(extended)
+            && get_bit<xcr0::avx_bit>(extended)
+            && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+            && get_bit<cpu7_0::avx2_ebx_bit>(ebx);   // AVX2
+    }
+    else
+        return false;
 }
 
-inline bool try_sse41() noexcept
+inline bool try_sse41() NOEXCEPT
 {
-// TODO: sse41 faulting on HAVE_X32.
-#if defined(HAVE_X64)
-    uint32_t eax, ebx, ecx, edx;
-    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-        && get_bit<cpu1_0::sse4_ecx_bit>(ecx);   // SSE4.1
-#else
-    return false;
-#endif
+    if constexpr (with_sse41)
+    {
+        uint32_t eax, ebx, ecx, edx;
+        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+            && get_bit<cpu1_0::sse4_ecx_bit>(ecx);   // SSE4.1
+    }
+    else
+        return false;
 }
 
-inline bool try_sse41a() noexcept
+inline bool try_sse41a() NOEXCEPT
 {
-// sse4 is sse41 but requires X64 build (inline assembly).
-#if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
-    return try_sse41();
-#else
-    return false;
-#endif
+    if constexpr (with_sse41a)
+    {
+        return try_sse41();
+    }
+    else
+        return false;
 }
 
-constexpr bool try_neon() noexcept
+constexpr bool try_neon() NOEXCEPT
 {
-// TODO: ARM/Neon is unverified.
-#if defined(HAVE_NEON)
-    return true;
-#else
-    return false;
-#endif
+    if constexpr (with_neon)
+    {
+        // TODO
+        return false;
+    }
+    else
+        return false;
 }
 
-/// Published tests for Intel SIMD, and ARM SIMD (Neon) availability.
+/// Runtime tests for Intel SIMD, and ARM SIMD (Neon) availability.
 /// ---------------------------------------------------------------------------
 /// TODO: statics introduce a thread guard, not ideal for excessive iteration.
 
-inline bool have_shani() noexcept
+inline bool have_shani() NOEXCEPT
 {
     static auto enable = try_shani();
     return enable;
 }
 
-inline bool have_avx512() noexcept
+inline bool have_avx512() NOEXCEPT
 {
     static auto enable = try_avx512();
     return enable;
 }
 
-inline bool have_avx2() noexcept
+inline bool have_avx2() NOEXCEPT
 {
     static auto enable = try_avx2();
     return enable;
 }
 
-inline bool have_sse41() noexcept
+inline bool have_sse41() NOEXCEPT
 {
     static auto enable = try_sse41();
     return enable;
 }
 
-inline bool have_sse41a() noexcept
+inline bool have_sse41a() NOEXCEPT
 {
     static auto enable = try_sse41a();
     return enable;
 }
 
-inline bool have_neon() noexcept
+inline bool have_neon() NOEXCEPT
 {
     static auto enable = try_neon();
     return enable;
+}
+
+/// ---------------------------------------------------------------------------
+/// xint types are always defined, though are mocked when not compiled.
+/// Type tests below do not differentiate between mock and integer type.
+/// Use with_ constants to check for compiled option and have_ functions to
+/// check for runtime API availability. This enables mostly unconditional code.
+
+template <typename Type>
+constexpr auto is_extended =
+    is_same_type<Type, xint128_t> ||
+    is_same_type<Type, xint256_t> ||
+    is_same_type<Type, xint512_t>;
+
+template <typename Type>
+using if_extended = bool_if<is_extended<Type>>;
+
+/// Determine how many integral integers can pack into the extended integer.
+template <typename Larger, typename Smaller, size_t Lanes = one,
+    ////if_extended<Larger> = true, // allow to_extended: uint32_t/uint64_t
+    if_integral_integer<Smaller> = true>
+constexpr size_t capacity = safe_divide(sizeof(Larger),
+    safe_multiply(Lanes, sizeof(Smaller)));
+
+/// Define lane-expanded 32/64 bit types.
+template <typename Integral, size_t Lanes,
+    if_integral_integer<Integral> = true,
+    if_not_greater<safe_multiply(sizeof(Integral), Lanes),
+        sizeof(xint512_t)> = true>
+using to_extended =
+    iif<capacity<uint32_t, Integral, Lanes> == one, uint32_t,
+        iif<capacity<uint64_t, Integral, Lanes> == one, uint64_t,
+            iif<capacity<xint128_t, Integral, Lanes> == one, xint128_t,
+                iif<capacity<xint256_t, Integral, Lanes> == one, xint256_t,
+                    xint512_t>>>>;
+
+/// Compile time possibility of extended integer type.
+template <typename Extended, if_extended<Extended> = true>
+inline bool have() NOEXCEPT
+{
+    if constexpr (is_same_type<Extended, xint512_t>)
+        return have_avx512();
+    else if constexpr (is_same_type<Extended, xint256_t>)
+        return have_avx2();
+    else if constexpr (is_same_type<Extended, xint128_t>)
+        return have_sse41();
+    else return false;
+}
+
+/// Runtime availability of extended integer intrinsics.
+template <typename Extended, if_extended<Extended> = true>
+CONSTEVAL bool with() NOEXCEPT
+{
+    if constexpr (is_same_type<Extended, xint512_t>)
+        return with_avx512;
+    else if constexpr (is_same_type<Extended, xint256_t>)
+        return with_avx2;
+    else if constexpr (is_same_type<Extended, xint128_t>)
+        return with_sse41;
+    else return false;
 }
 
 } // namespace system
