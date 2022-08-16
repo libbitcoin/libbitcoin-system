@@ -244,39 +244,22 @@ constexpr auto is_extended =
 template <typename Type>
 using if_extended = bool_if<is_extended<Type>>;
 
-/// Determine how many integral integers can pack into the extended integer.
-template <typename Larger, typename Smaller, size_t Lanes = one,
-    ////if_extended<Larger> = true, // allow to_extended: uint32_t/uint64_t
-    if_integral_integer<Smaller> = true>
-constexpr size_t capacity = safe_divide(sizeof(Larger),
-    safe_multiply(Lanes, sizeof(Smaller)));
-
 /// Define lane-expanded 32/64 bit types.
 template <typename Integral, size_t Lanes,
     if_integral_integer<Integral> = true,
     if_not_greater<safe_multiply(sizeof(Integral), Lanes),
         sizeof(xint512_t)> = true>
 using to_extended =
-    iif<capacity<uint32_t, Integral, Lanes> == one, uint32_t,
-        iif<capacity<uint64_t, Integral, Lanes> == one, uint64_t,
-            iif<capacity<xint128_t, Integral, Lanes> == one, xint128_t,
-                iif<capacity<xint256_t, Integral, Lanes> == one, xint256_t,
-                    xint512_t>>>>;
+    iif<capacity<uint8_t, Integral, Lanes> == one, uint8_t,
+        iif<capacity<uint16_t, Integral, Lanes> == one, uint16_t,
+            iif<capacity<uint32_t, Integral, Lanes> == one, uint32_t,
+                iif<capacity<uint64_t, Integral, Lanes> == one, uint64_t,
+                    iif<capacity<xint128_t, Integral, Lanes> == one, xint128_t,
+                        iif<capacity<xint256_t, Integral, Lanes> == one, xint256_t,
+                            xint512_t>>>>>>;
 
-/// Compile time possibility of extended integer type.
-template <typename Extended, if_extended<Extended> = true>
-inline bool have() NOEXCEPT
-{
-    if constexpr (is_same_type<Extended, xint512_t>)
-        return have_avx512();
-    else if constexpr (is_same_type<Extended, xint256_t>)
-        return have_avx2();
-    else if constexpr (is_same_type<Extended, xint128_t>)
-        return have_sse41();
-    else return false;
-}
-
-/// Runtime availability of extended integer intrinsics.
+/// Compile time (constexpr) availability of extended integer intrinsics,
+/// as a template function of the extended integer type.
 template <typename Extended, if_extended<Extended> = true>
 CONSTEVAL bool with() NOEXCEPT
 {
@@ -286,6 +269,20 @@ CONSTEVAL bool with() NOEXCEPT
         return with_avx2;
     else if constexpr (is_same_type<Extended, xint128_t>)
         return with_sse41;
+    else return false;
+}
+
+/// Runtime time availabiltiy of extended integer intrinsics, as a template
+/// function of the extended integer type.
+template <typename Extended, if_extended<Extended> = true>
+inline bool have() NOEXCEPT
+{
+    if constexpr (is_same_type<Extended, xint512_t>)
+        return have_avx512();
+    else if constexpr (is_same_type<Extended, xint256_t>)
+        return have_avx2();
+    else if constexpr (is_same_type<Extended, xint128_t>)
+        return have_sse41();
     else return false;
 }
 
