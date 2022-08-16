@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/math/rotate.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -91,6 +92,16 @@ template <auto K, typename Word,
 INLINE constexpr auto add_(Word a) NOEXCEPT
 {
     return a + K;
+}
+
+// Integral overload for vectorization coexistence.
+template <typename To, auto Lane, typename From,
+    if_integral_integer<From> = true,
+    if_integral_integer<To> = true>
+INLINE constexpr To get(From a) NOEXCEPT
+{
+    static_assert(Lane == one);
+    return a;
 }
 
 } // namespace system

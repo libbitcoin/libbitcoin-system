@@ -38,7 +38,7 @@
 // sign       -> cast
 // rotate     -> cast
 // byteswap   -> cast
-// functional -> cast
+// functional -> rotate
 // division   -> sign
 // overflow   -> sign, cast
 // bits       -> sign, cast,           logarithm (for bit_width(clog2))
