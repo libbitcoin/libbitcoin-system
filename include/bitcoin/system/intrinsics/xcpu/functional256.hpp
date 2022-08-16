@@ -39,21 +39,21 @@ using xint256_t = __m256i;
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE Word and_(Word a, Word b) NOEXCEPT
 {
-    return _mm256_and_si256(a, b);
+    return mm256_and_si256(a, b);
 }
 
 // AVX2
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE Word or_(Word a, Word b) NOEXCEPT
 {
-    return _mm256_or_si256(a, b);
+    return mm256_or_si256(a, b);
 }
 
 // AVX2
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
-    return _mm256_xor_si256(a, b);
+    return mm256_xor_si256(a, b);
 }
 
 // AVX2 vector primitives
@@ -64,15 +64,15 @@ INLINE Word shr_(Word a) NOEXCEPT
 {
     // Undefined
     ////if constexpr (S == bits<uint8_t>)
-    ////    return _mm256_srli_epi8(a, B);
+    ////    return mm256_srli_epi8(a, B);
 
     // AVX2
     if constexpr (S == bits<uint16_t>)
-        return _mm256_srli_epi16(a, B);
+        return mm256_srli_epi16(a, B);
     else if constexpr (S == bits<uint32_t>)
-        return _mm256_srli_epi32(a, B);
+        return mm256_srli_epi32(a, B);
     else if constexpr (S == bits<uint64_t>)
-        return _mm256_srli_epi64(a, B);
+        return mm256_srli_epi64(a, B);
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
@@ -80,15 +80,15 @@ INLINE Word shl_(Word a) NOEXCEPT
 {
     // Undefined
     ////if constexpr (S == bits<uint8_t>)
-    ////    return _mm256_slli_epi8(a, B);
+    ////    return mm256_slli_epi8(a, B);
 
     // AVX2
     if constexpr (S == bits<uint16_t>)
-        return _mm256_slli_epi16(a, B);
+        return mm256_slli_epi16(a, B);
     else if constexpr (S == bits<uint32_t>)
-        return _mm256_slli_epi32(a, B);
+        return mm256_slli_epi32(a, B);
     else if constexpr (S == bits<uint64_t>)
-        return _mm256_slli_epi64(a, B);
+        return mm256_slli_epi64(a, B);
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
@@ -108,13 +108,13 @@ template <auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word add_(Word a, Word b) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
-        return _mm256_add_epi8(a, b);
+        return mm256_add_epi8(a, b);
     else if constexpr (S == bits<uint16_t>)
-        return _mm256_add_epi16(a, b);
+        return mm256_add_epi16(a, b);
     else if constexpr (S == bits<uint32_t>)
-        return _mm256_add_epi32(a, b);
+        return mm256_add_epi32(a, b);
     else if constexpr (S == bits<uint64_t>)
-        return _mm256_add_epi64(a, b);
+        return mm256_add_epi64(a, b);
 }
 
 // AVX
@@ -123,13 +123,13 @@ INLINE Word add_(Word a) NOEXCEPT
 {
     // set1 broadcast integer to all elements.
     if constexpr (S == bits<uint8_t>)
-        return add_<S>(a, _mm256_set1_epi8(K));
+        return add_<S>(a, mm256_set1_epi8(K));
     else if constexpr (S == bits<uint16_t>)
-        return add_<S>(a, _mm256_set1_epi16(K));
+        return add_<S>(a, mm256_set1_epi16(K));
     else if constexpr (S == bits<uint32_t>)
-        return add_<S>(a, _mm256_set1_epi32(K));
+        return add_<S>(a, mm256_set1_epi32(K));
     else if constexpr (S == bits<uint64_t>)
-        return add_<S>(a, _mm256_set1_epi64x(K));
+        return add_<S>(a, mm256_set1_epi64x(K));
 }
 
 // AVX2 set/get (for all element widths).
@@ -141,15 +141,15 @@ INLINE To get(xint256_t a) NOEXCEPT
 {
     // AVX2
     if constexpr (is_same_type<To, uint8_t>)
-        return _mm256_extract_epi8(a, Lane);
+        return mm256_extract_epi8(a, Lane);
     else if constexpr (is_same_type<To, uint16_t>)
-        return _mm256_extract_epi16(a, Lane);
+        return mm256_extract_epi16(a, Lane);
 
     // AVX
     else if constexpr (is_same_type<To, uint32_t>)
-        return _mm256_extract_epi32(a, Lane);
+        return mm256_extract_epi32(a, Lane);
     else if constexpr (is_same_type<To, uint64_t>)
-        return _mm256_extract_epi64(a, Lane);
+        return mm256_extract_epi64(a, Lane);
 }
 
 // AVX
@@ -160,7 +160,7 @@ INLINE To set(
     uint64_t x03 = 0, uint64_t x04 = 0) NOEXCEPT
 {
     // Low order word to the right.
-    return _mm256_set_epi64x(
+    return mm256_set_epi64x(
         x04, x03, x02, x01);
 }
 
@@ -172,7 +172,7 @@ INLINE To set(
     uint32_t x05 = 0, uint32_t x06 = 0,
     uint32_t x07 = 0, uint32_t x08 = 0) NOEXCEPT
 {
-    return _mm256_set_epi32(
+    return mm256_set_epi32(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
@@ -188,7 +188,7 @@ INLINE To set(
     uint16_t x13 = 0, uint16_t x14 = 0,
     uint16_t x15 = 0, uint16_t x16 = 0) NOEXCEPT
 {
-    return _mm256_set_epi16(
+    return mm256_set_epi16(
         x16, x15, x14, x13, x12, x11, x10, x09,
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
@@ -213,7 +213,7 @@ INLINE To set(
     uint8_t x29 = 0, uint8_t x30 = 0,
     uint8_t x31 = 0, uint8_t x32 = 0) NOEXCEPT
 {
-    return _mm256_set_epi8(
+    return mm256_set_epi8(
         x32, x31, x30, x29, x28, x27, x26, x25,
         x24, x23, x22, x21, x20, x19, x18, x17,
         x16, x15, x14, x13, x12, x11, x10, x09,
@@ -226,7 +226,7 @@ INLINE To set(
 
 // AVX2
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-INLINE xint256_t byteswap(xint256_t value) NOEXCEPT
+INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 {
     constexpr std_array<uint32_t, 4> mask32
     {
@@ -237,7 +237,7 @@ INLINE xint256_t byteswap(xint256_t value) NOEXCEPT
         mask32[0], mask32[1], mask32[2], mask32[3],
         mask32[0], mask32[1], mask32[2], mask32[3]);
 
-    return _mm256_shuffle_epi8(value, mask);
+    return mm256_shuffle_epi8(a, mask);
 }
 BC_POP_WARNING()
 
@@ -255,13 +255,13 @@ struct xint256_t {};
 
 ////INLINE xint256_t align(const bytes256& word) NOEXCEPT
 ////{
-////    return _mm256_loadu_epi32(pointer_cast<const xint256_t>(word.data()));
+////    return mm256_loadu_epi32(pointer_cast<const xint256_t>(word.data()));
 ////}
 ////
 ////INLINE bytes256 unalign(xint256_t value) NOEXCEPT
 ////{
 ////    bytes256 word{};
-////    _mm256_storeu_epi32(pointer_cast<xint256_t>(word.data()), value);
+////    mm256_storeu_epi32(pointer_cast<xint256_t>(word.data()), value);
 ////    return word;
 ////    ////return *pointer_cast<bytes256>(&value);
 ////}

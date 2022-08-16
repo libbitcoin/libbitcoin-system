@@ -39,4 +39,207 @@
     #endif
 #endif
 
+// ****************************************************************************
+// The xint extended integer symbols are always defined for XCPU builds, but
+// these intrinsics are dependent upon the underlying platform and will cause
+// a build failure on CLANG/GCC if not configured into the build (after being
+// detected on the build platform). On all platforms these also require runtime
+// detection. This creates three layers of conditionality, exploding complexity.
+// These macros suppress the build failure, allowing code to operation over the
+// necessary runtime detection, with runtime detection layered over build
+// configuration symbols. Consequently there is no need for preprocessor
+// statements within application code, just a runtime test for availability.
+// These symbols will be defined where availability is possible (compiled).
+// with<xint>() is defined for constexpr conditionality and have<xint>() is
+// defined for runtime conditionality. The latter is false if is the former.
+// ****************************************************************************
+
+// TODO: define these macros (mm512_extract_epi64 required for sha512v).
+// TODO: these are multistep, as are the others, can be optimized.
+// stackoverflow.com/questions/58303958/how-to-implement-16-and-32-bit-
+// integer-insert-and-extract-operations-with-avx-51
+#define _mm512_extract_epi8(a, Lane) {}
+#define _mm512_extract_epi16(a, Lane) {}
+#define _mm512_extract_epi32(a, Lane) {}
+#define _mm512_extract_epi64(a, Lane) {}
+
+#if !defined(HAVE_SSE4)
+    #define mm_and_si128(a, b)  (a)
+    #define mm_or_si128(a, b)   (a)
+    #define mm_xor_si128(a, b)  (a)
+    #define mm_srli_epi16(a, B) (a)
+    #define mm_srli_epi32(a, B) (a)
+    #define mm_srli_epi64(a, B) (a)
+    #define mm_slli_epi16(a, B) (a)
+    #define mm_slli_epi32(a, B) (a)
+    #define mm_slli_epi64(a, B) (a)
+    #define mm_add_epi8(a, b)   (a)
+    #define mm_add_epi16(a, b)  (a)
+    #define mm_add_epi32(a, b)  (a)
+    #define mm_add_epi64(a, b)  (a)
+    #define mm_extract_epi8(a, Lane)    (a)
+    #define mm_extract_epi16(a, Lane)   (a)
+    #define mm_extract_epi32(a, Lane)   (a)
+    #define mm_extract_epi64(a, Lane)   (a)
+    #define mm_shuffle_epi8(a, mask)    (a)
+    #define mm_set1_epi8(K)
+    #define mm_set1_epi16(K)
+    #define mm_set1_epi32(K)
+    #define mm_set1_epi64x(K)
+    #define mm_set_epi64x(x02, x01)
+    #define mm_set_epi32(x04, x03, x02, x01)
+    #define mm_set_epi16(x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm_set_epi8(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+#else
+    #define mm_and_si128(a, b)          _mm_and_si128(a, b)
+    #define mm_or_si128(a, b)           _mm_or_si128(a, b)
+    #define mm_xor_si128(a, b)          _mm_xor_si128(a, b)
+    #define mm_srli_epi16(a, B)         _mm_srli_epi16(a, B)
+    #define mm_srli_epi32(a, B)         _mm_srli_epi32(a, B)
+    #define mm_srli_epi64(a, B)         _mm_srli_epi64(a, B)
+    #define mm_slli_epi16(a, B)         _mm_slli_epi16(a, B)
+    #define mm_slli_epi32(a, B)         _mm_slli_epi32(a, B)
+    #define mm_slli_epi64(a, B)         _mm_slli_epi64(a, B)
+    #define mm_add_epi8(a, b)           _mm_add_epi8(a, b)
+    #define mm_add_epi16(a, b)          _mm_add_epi16(a, b)
+    #define mm_add_epi32(a, b)          _mm_add_epi32(a, b)
+    #define mm_add_epi64(a, b)          _mm_add_epi64(a, b)
+    #define mm_extract_epi8(a, Lane)    _mm_extract_epi8(a, Lane)
+    #define mm_extract_epi16(a, Lane)   _mm_extract_epi16(a, Lane)
+    #define mm_extract_epi32(a, Lane)   _mm_extract_epi32(a, Lane)
+    #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane)
+    #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
+    #define mm_set1_epi8(K)             _mm_set1_epi8(K)
+    #define mm_set1_epi16(K)            _mm_set1_epi16(K)
+    #define mm_set1_epi32(K)            _mm_set1_epi32(K)
+    #define mm_set1_epi64x(K)           _mm_set1_epi64x(K)
+    #define mm_set_epi64x(x02, x01)     _mm_set_epi64x(x02, x01)
+    #define mm_set_epi32(x04, x03, x02, x01) \
+           _mm_set_epi32(x04, x03, x02, x01)
+    #define mm_set_epi16(x08, x07, x06, x05, x04, x03, x02, x01) \
+           _mm_set_epi16(x08, x07, x06, x05, x04, x03, x02, x01)
+    #define  mm_set_epi8(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
+            _mm_set_epi8(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+#endif
+
+#if !defined(HAVE_AVX2)
+    #define mm256_and_si256(a, b)   (a)
+    #define mm256_or_si256(a, b)    (a)
+    #define mm256_xor_si256(a, b)   (a)
+    #define mm256_srli_epi16(a, B)  (a)
+    #define mm256_srli_epi32(a, B)  (a)
+    #define mm256_srli_epi64(a, B)  (a)
+    #define mm256_slli_epi16(a, B)  (a)
+    #define mm256_slli_epi32(a, B)  (a)
+    #define mm256_slli_epi64(a, B)  (a)
+    #define mm256_add_epi8(a, b)    (a)
+    #define mm256_add_epi16(a, b)   (a)
+    #define mm256_add_epi32(a, b)   (a)
+    #define mm256_add_epi64(a, b)   (a)
+    #define mm256_extract_epi8(a, Lane)     (a)
+    #define mm256_extract_epi16(a, Lane)    (a)
+    #define mm256_extract_epi32(a, Lane)    (a)
+    #define mm256_extract_epi64(a, Lane)    (a)
+    #define mm256_shuffle_epi8(a, mask)     (a)
+    #define mm256_set1_epi8(K)
+    #define mm256_set1_epi16(K)
+    #define mm256_set1_epi32(K)
+    #define mm256_set1_epi64x(K)
+    #define mm256_set_epi64x(x04, x03, x02, x01)
+    #define mm256_set_epi32(x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm256_set_epi16(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+    #define  mm256_set_epi8(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+#else
+    #define mm256_and_si256(a, b)           _mm256_and_si256(a, b)
+    #define mm256_or_si256(a, b)            _mm256_or_si256(a, b)
+    #define mm256_xor_si256(a, b)           _mm256_xor_si256(a, b)
+    #define mm256_srli_epi16(a, B)          _mm256_srli_epi16(a, B)
+    #define mm256_srli_epi32(a, B)          _mm256_srli_epi32(a, B)
+    #define mm256_srli_epi64(a, B)          _mm256_srli_epi64(a, B)
+    #define mm256_slli_epi16(a, B)          _mm256_slli_epi16(a, B)
+    #define mm256_slli_epi32(a, B)          _mm256_slli_epi32(a, B)
+    #define mm256_slli_epi64(a, B)          _mm256_slli_epi64(a, B)
+    #define mm256_add_epi8(a, b)            _mm256_add_epi8(a, b)
+    #define mm256_add_epi16(a, b)           _mm256_add_epi16(a, b)
+    #define mm256_add_epi32(a, b)           _mm256_add_epi32(a, b)
+    #define mm256_add_epi64(a, b)           _mm256_add_epi64(a, b)
+    #define mm256_extract_epi8(a, Lane)     _mm256_extract_epi8(a, Lane)
+    #define mm256_extract_epi16(a, Lane)    _mm256_extract_epi16(a, Lane)
+    #define mm256_extract_epi32(a, Lane)    _mm256_extract_epi32(a, Lane)
+    #define mm256_extract_epi64(a, Lane)    _mm256_extract_epi64(a, Lane)
+    #define mm256_set1_epi8(K)              _mm256_set1_epi8(K)
+    #define mm256_set1_epi16(K)             _mm256_set1_epi16(K)
+    #define mm256_set1_epi32(K)             _mm256_set1_epi32(K)
+    #define mm256_set1_epi64x(K)            _mm256_set1_epi64x(K)
+    #define mm256_set_epi64x(x04, x03, x02, x01) \
+           _mm256_set_epi64x(x04, x03, x02, x01)
+    #define mm256_set_epi32(x08, x07, x06, x05, x04, x03, x02, x01) \
+           _mm256_set_epi32(x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm256_set_epi16(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
+           _mm256_set_epi16(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+    #define  mm256_set_epi8(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
+            _mm256_set_epi8(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm256_shuffle_epi8(value, mask) _mm256_shuffle_epi8(value, mask)
+#endif
+
+#if !defined(HAVE_AVX512)
+    #define mm512_and_si512(a, b)   (a)
+    #define mm512_or_si512(a, b)    (a)
+    #define mm512_xor_si512(a, b)   (a)
+    #define mm512_srli_epi16(a, B)  (a)
+    #define mm512_srli_epi32(a, B)  (a)
+    #define mm512_srli_epi64(a, B)  (a)
+    #define mm512_slli_epi16(a, B)  (a)
+    #define mm512_slli_epi32(a, B)  (a)
+    #define mm512_slli_epi64(a, B)  (a)
+    #define mm512_add_epi8(a, b)    (a)
+    #define mm512_add_epi16(a, b)   (a)
+    #define mm512_add_epi32(a, b)   (a)
+    #define mm512_add_epi64(a, b)   (a)
+    #define mm512_extract_epi8(a, Lane)     (a)
+    #define mm512_extract_epi16(a, Lane)    (a)
+    #define mm512_extract_epi32(a, Lane)    (a)
+    #define mm512_extract_epi64(a, Lane)    (a)
+    #define mm512_shuffle_epi8(a, mask)     (a)
+    #define mm512_set1_epi8(K)
+    #define mm512_set1_epi16(K)
+    #define mm512_set1_epi32(K)
+    #define mm512_set1_epi64(K)
+    #define mm512_set_epi64(x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm512_set_epi32(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm512_set_epi16(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+    #define  mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+#else
+    #define mm512_and_si512(a, b)           _mm512_and_si512(a, b)
+    #define mm512_or_si512(a, b)            _mm512_or_si512(a, b)
+    #define mm512_xor_si512(a, b)           _mm512_xor_si512(a, b)
+    #define mm512_srli_epi16(a, B)          _mm512_srli_epi16(a, B)
+    #define mm512_srli_epi32(a, B)          _mm512_srli_epi32(a, B)
+    #define mm512_srli_epi64(a, B)          _mm512_srli_epi64(a, B)
+    #define mm512_slli_epi16(a, B)          _mm512_slli_epi16(a, B)
+    #define mm512_slli_epi32(a, B)          _mm512_slli_epi32(a, B)
+    #define mm512_slli_epi64(a, B)          _mm512_slli_epi64(a, B)
+    #define mm512_add_epi8(a, b)            _mm512_add_epi8(a, b)
+    #define mm512_add_epi16(a, b)           _mm512_add_epi16(a, b)
+    #define mm512_add_epi32(a, b)           _mm512_add_epi32(a, b)
+    #define mm512_add_epi64(a, b)           _mm512_add_epi64(a, b)
+    #define mm512_extract_epi8(a, Lane)     _mm512_extract_epi8(a, Lane)
+    #define mm512_extract_epi16(a, Lane)    _mm512_extract_epi16(a, Lane)
+    #define mm512_extract_epi32(a, Lane)    _mm512_extract_epi32(a, Lane)
+    #define mm512_extract_epi64(a, Lane)    _mm512_extract_epi64(a, Lane)
+    #define mm512_shuffle_epi8(a, mask)     _mm512_shuffle_epi8(a, mask)
+    #define mm512_set1_epi8(K)              _mm512_set1_epi8(K)
+    #define mm512_set1_epi16(K)             _mm512_set1_epi16(K)
+    #define mm512_set1_epi32(K)             _mm512_set1_epi32(K)
+    #define mm512_set1_epi64(K)             _mm512_set1_epi64(K)
+    #define mm512_set_epi64(x08, x07, x06, x05, x04, x03, x02, x01) \
+           _mm512_set_epi64(x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm512_set_epi32(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
+           _mm512_set_epi32(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+    #define mm512_set_epi16(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
+           _mm512_set_epi16(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+    #define  mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
+            _mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+#endif
+
 #endif

@@ -22,13 +22,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/xcpu/defines.hpp>
 
-// TODO: truncated constant warning on add_<uint64_t K>() is indication that
-// TODO: sha512 expect all 64 bit overloads. We are doing 32 bit operations on
-// TODO: 64 bit logical elements. But should not be seeing in xint128 since we
-// TODO: aren't yet doing sha512 (uint64_t) in two lanes (xint128_t). But maybe
-// TODO: it's just the result of compiling for it, though that's not apparent.
-// TODO: should static assert against word size.
-
 // shl_/shr_ are undefined for 8 bit.
 // shl_/shr_ are AVX512BW for 16 bit.
 // byteswap() is AVX512BW (refactor)
@@ -49,21 +42,21 @@ using xint512_t = __m512i;
 template <typename Word, if_same<Word, xint512_t> = true>
 INLINE Word and_(Word a, Word b) NOEXCEPT
 {
-    return _mm512_and_si512(a, b);
+    return mm512_and_si512(a, b);
 }
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
 INLINE Word or_(Word a, Word b) NOEXCEPT
 {
-    return _mm512_or_si512(a, b);
+    return mm512_or_si512(a, b);
 }
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
 INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
-    return _mm512_xor_si512(a, b);
+    return mm512_xor_si512(a, b);
 }
 
 // AVX512 vector primitives
@@ -74,17 +67,17 @@ INLINE Word shr_(Word a) NOEXCEPT
 {
     // Undefined
     ////if constexpr (S == bits<uint8_t>)
-    ////    return _mm512_srli_epi8(a, B);
+    ////    return mm512_srli_epi8(a, B);
 
     // AVX512BW
     if constexpr (S == bits<uint16_t>)
-        return _mm512_srli_epi16(a, B);
+        return mm512_srli_epi16(a, B);
 
     // AVX512F
     else if constexpr (S == bits<uint32_t>)
-        return _mm512_srli_epi32(a, B);
+        return mm512_srli_epi32(a, B);
     else if constexpr (S == bits<uint64_t>)
-        return _mm512_srli_epi64(a, B);
+        return mm512_srli_epi64(a, B);
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
@@ -92,17 +85,17 @@ INLINE Word shl_(Word a) NOEXCEPT
 {
     // Undefined
     ////if constexpr (S == bits<uint8_t>)
-    ////    return _mm512_slli_epi8(a, B);
+    ////    return mm512_slli_epi8(a, B);
 
     // AVX512BW
     if constexpr (S == bits<uint16_t>)
-        return _mm512_slli_epi16(a, B);
+        return mm512_slli_epi16(a, B);
 
     // AVX512F
     else if constexpr (S == bits<uint32_t>)
-        return _mm512_slli_epi32(a, B);
+        return mm512_slli_epi32(a, B);
     else if constexpr (S == bits<uint64_t>)
-        return _mm512_slli_epi64(a, B);
+        return mm512_slli_epi64(a, B);
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
@@ -122,15 +115,15 @@ INLINE Word add_(Word a, Word b) NOEXCEPT
 {
     // AVX512BW
     if constexpr (S == bits<uint8_t>)
-        return _mm512_add_epi8(a, b);
+        return mm512_add_epi8(a, b);
     else if constexpr (S == bits<uint16_t>)
-        return _mm512_add_epi16(a, b);
+        return mm512_add_epi16(a, b);
 
     // AVX512F
     else if constexpr (S == bits<uint32_t>)
-        return _mm512_add_epi32(a, b);
+        return mm512_add_epi32(a, b);
     else if constexpr (S == bits<uint64_t>)
-        return _mm512_add_epi64(a, b);
+        return mm512_add_epi64(a, b);
 }
 
 // AVX512F
@@ -139,26 +132,17 @@ INLINE Word add_(Word a) NOEXCEPT
 {
     // set1 broadcast integer to all elements.
     if constexpr (S == bits<uint8_t>)
-        return add_<S>(a, _mm512_set1_epi8(K));
+        return add_<S>(a, mm512_set1_epi8(K));
     else if constexpr (S == bits<uint16_t>)
-        return add_<S>(a, _mm512_set1_epi16(K));
+        return add_<S>(a, mm512_set1_epi16(K));
     else if constexpr (S == bits<uint32_t>)
-        return add_<S>(a, _mm512_set1_epi32(K));
+        return add_<S>(a, mm512_set1_epi32(K));
     else if constexpr (S == bits<uint64_t>)
-        return add_<S>(a, _mm512_set1_epi64(K));
+        return add_<S>(a, mm512_set1_epi64(K));
 }
 
 // AVX512 set/get (for all element widths).
 // ----------------------------------------------------------------------------
-
-// TODO: define these macros (_mm512_extract_epi64 required for sha512v).
-// TODO: these are multistep, as are the others, can be optimized.
-// stackoverflow.com/questions/58303958/how-to-implement-16-and-32-bit-
-// integer-insert-and-extract-operations-with-avx-51
-#define _mm512_extract_epi8(a, Lane) 0
-#define _mm512_extract_epi16(a, Lane) 0
-#define _mm512_extract_epi32(a, Lane) 0
-#define _mm512_extract_epi64(a, Lane) 0
 
 // Extraction intrinsics not defined for any AVX512.
 // Lane zero is lowest order word.
@@ -166,13 +150,13 @@ template <typename To, auto Lane, if_integral_integer<To> = true>
 INLINE To get(xint512_t) NOEXCEPT
 {
     if constexpr (is_same_type<To, uint8_t>)
-        return _mm512_extract_epi8(0, Lane);
+        return mm512_extract_epi8(0, Lane);
     else if constexpr (is_same_type<To, uint16_t>)
-        return _mm512_extract_epi16(0, Lane);
+        return mm512_extract_epi16(0, Lane);
     else if constexpr (is_same_type<To, uint32_t>)
-        return _mm512_extract_epi32(0, Lane);
+        return mm512_extract_epi32(0, Lane);
     else if constexpr (is_same_type<To, uint64_t>)
-        return _mm512_extract_epi64(0, Lane);
+        return mm512_extract_epi64(0, Lane);
 }
 
 // AVX512F
@@ -185,7 +169,7 @@ INLINE To set(
     uint64_t x07 = 0, uint64_t x08 = 0) NOEXCEPT
 {
     // Low order word to the right.
-    return _mm512_set_epi64(
+    return mm512_set_epi64(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
@@ -201,7 +185,7 @@ INLINE To set(
     uint32_t x13 = 0, uint32_t x14 = 0,
     uint32_t x15 = 0, uint32_t x16 = 0) NOEXCEPT
 {
-    return _mm512_set_epi32(
+    return mm512_set_epi32(
         x16, x15, x14, x13, x12, x11, x10, x09,
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
@@ -226,7 +210,7 @@ INLINE To set(
     uint16_t x29 = 0, uint16_t x30 = 0,
     uint16_t x31 = 0, uint16_t x32 = 0) NOEXCEPT
 {
-    return _mm512_set_epi16(
+    return mm512_set_epi16(
         x32, x31, x30, x29, x28, x27, x26, x25,
         x24, x23, x22, x21, x20, x19, x18, x17,
         x16, x15, x14, x13, x12, x11, x10, x09,
@@ -269,7 +253,7 @@ INLINE To set(
     uint8_t x61 = 0, uint8_t x62 = 0,
     uint8_t x63 = 0, uint8_t x64 = 0) NOEXCEPT
 {
-    return _mm512_set_epi8(
+    return mm512_set_epi8(
         x64, x63, x62, x61, x60, x59, x58, x57,
         x56, x55, x54, x53, x52, x51, x50, x49,
         x48, x47, x46, x45, x44, x43, x42, x41,
@@ -284,9 +268,9 @@ INLINE To set(
 // ----------------------------------------------------------------------------
 // TODO: generalize.
 
-// AVX512BW [TODO: AVX512F:_mm512_shuffle_epi32]
+// AVX512BW [TODO: AVX512F:mm512_shuffle_epi32]
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-INLINE xint512_t byteswap(xint512_t value) NOEXCEPT
+INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
     constexpr std_array<uint32_t, 4> mask32
     {
@@ -299,7 +283,7 @@ INLINE xint512_t byteswap(xint512_t value) NOEXCEPT
         mask32[0], mask32[1], mask32[2], mask32[3],
         mask32[0], mask32[1], mask32[2], mask32[3]);
 
-    return _mm512_shuffle_epi8(value, mask);
+    return mm512_shuffle_epi8(a, mask);
 }
 BC_POP_WARNING()
 
