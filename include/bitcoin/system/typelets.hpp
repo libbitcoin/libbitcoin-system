@@ -83,6 +83,13 @@ constexpr size_t bits = to_bits(sizeof(Type));
 template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
 constexpr size_t bytes = Bits / byte_bits;
 
+/// The number of Smaller integrals that can pack into the Larger.
+template <typename Larger, typename Smaller, size_t Lanes = one,
+    std::enable_if_t<!is_zero(Lanes), bool> = true,
+    std::enable_if_t<Lanes <= (max_size_t / sizeof(Smaller)), bool> = true,
+    std::enable_if_t<std::is_integral_v<Smaller>, bool> = true>
+constexpr size_t capacity = sizeof(Larger) / (Lanes * sizeof(Smaller));
+
 /// std::array.
 /// ---------------------------------------------------------------------------
 

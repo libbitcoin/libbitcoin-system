@@ -260,6 +260,41 @@ static_assert(bytes<128u> == 16u);
 static_assert(bytes<256u> == 32u);
 static_assert(is_same_type<decltype(bytes<8u>), const size_t>);
 
+// capacity
+// ----------------------------------------------------------------------------
+
+static_assert(capacity<uint8_t, uint8_t> == 1);
+static_assert(capacity<uint16_t, uint8_t> == 2);
+static_assert(capacity<uint32_t, uint8_t> == 4);
+////static_assert(capacity<uint8_t, uint8_t, 0> == 0);
+////static_assert(capacity<uint16_t, uint16_t, 0> == 0);
+////static_assert(capacity<uint32_t, uint32_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint8_t> == 8);
+static_assert(capacity<uint64_t, uint8_t, 1> == 8);
+static_assert(capacity<uint64_t, uint8_t, 2> == 4);
+static_assert(capacity<uint64_t, uint8_t, 4> == 2);
+static_assert(capacity<uint64_t, uint8_t, 8> == 1);
+////static_assert(capacity<uint64_t, uint8_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint16_t> == 4);
+static_assert(capacity<uint64_t, uint16_t, 1> == 4);
+static_assert(capacity<uint64_t, uint16_t, 2> == 2);
+static_assert(capacity<uint64_t, uint16_t, 4> == 1);
+////static_assert(capacity<uint64_t, uint16_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint32_t> == 2);
+static_assert(capacity<uint64_t, uint32_t, 1> == 2);
+static_assert(capacity<uint64_t, uint32_t, 2> == 1);
+////static_assert(capacity<uint64_t, uint32_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint64_t> == 1);
+static_assert(capacity<uint64_t, uint64_t, 1> == 1);
+////static_assert(capacity<uint64_t, uint64_t, 0> == 0);
+
+// std::array
+// ----------------------------------------------------------------------------
+
 static_assert(is_std_array<std::array<uint8_t, 0>>);
 static_assert(is_std_array<std::array<base, 0>>);
 static_assert(!is_std_array<uint8_t>);
