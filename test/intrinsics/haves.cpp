@@ -246,6 +246,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have__always__expected)
 // capacity [for extended integers]
 // ----------------------------------------------------------------------------
 
+#if defined(HAVE_SSE4)
 static_assert(capacity<xint128_t, uint8_t>    == 16); // required to fill
 static_assert(capacity<xint128_t, uint8_t, 1> == 16); // full
 static_assert(capacity<xint128_t, uint8_t, 2> ==  8); // full
@@ -291,7 +292,9 @@ static_assert(capacity<xint128_t, uint64_t, 1> == 2);
 static_assert(capacity<xint128_t, uint64_t, 2> == 1); // full
 static_assert(capacity<xint128_t, uint64_t, 3> == 0);
 ////static_assert(capacity<xint128_t, uint64_t, 0> == 0);
+#endif
 
+#if defined(HAVE_AVX2)
 static_assert(capacity<xint256_t, uint8_t>        == 32); // required to fill
 static_assert(capacity<xint256_t, uint8_t, 1 * 2> == 16); // full
 static_assert(capacity<xint256_t, uint8_t, 2 * 2> ==  8); // full
@@ -337,7 +340,9 @@ static_assert(capacity<xint256_t, uint64_t, 1 * 2> == 2);
 static_assert(capacity<xint256_t, uint64_t, 2 * 2> == 1); // full
 static_assert(capacity<xint256_t, uint64_t, 3 * 2> == 0);
 ////static_assert(capacity<xint256_t, uint64_t, 0> == 0);
+#endif
 
+#if defined(HAVE_AVX512)
 static_assert(capacity<xint512_t, uint8_t>        == 64); // required to fill
 static_assert(capacity<xint512_t, uint8_t, 1 * 4> == 16); // full
 static_assert(capacity<xint512_t, uint8_t, 2 * 4> ==  8); // full
@@ -383,10 +388,12 @@ static_assert(capacity<xint512_t, uint64_t, 1 * 4> == 2);
 static_assert(capacity<xint512_t, uint64_t, 2 * 4> == 1); // full
 static_assert(capacity<xint512_t, uint64_t, 3 * 4> == 0);
 ////static_assert(capacity<xint512_t, uint64_t, 0> == 0);
+#endif
 
 // to_extended
 // ----------------------------------------------------------------------------
 
+#if defined(HAVE_AVX2) && defined(HAVE_SSE4) && defined(HAVE_AVX512)
 ////static_assert(is_same_type<to_extended<uint16_t, 65>, xint512_t>);
 static_assert(is_same_type<to_extended<uint8_t, 64>, xint512_t>); // full
 static_assert(is_same_type<to_extended<uint8_t, 63>, xint512_t>);
@@ -444,5 +451,6 @@ static_assert(is_same_type<to_extended<uint64_t, 3>, xint256_t>);
 static_assert(is_same_type<to_extended<uint64_t, 2>, xint128_t>); // full
 static_assert(is_same_type<to_extended<uint64_t, 1>, uint64_t>);  // full
 ////static_assert(is_same_type<to_extended<uint64_t, 0>, uint64_t>);
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

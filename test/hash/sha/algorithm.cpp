@@ -29,15 +29,8 @@ static_assert(sha256::hash(sha256::block_t{}) == sha_full256);
 static_assert(sha512::hash(sha512::half_t{})  == sha_half512);
 static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
 
-BOOST_AUTO_TEST_CASE(sha_algorithm__vectorization__test)
-{
-    static const auto sha_5_data = data_chunk(million, to_byte('a'));
-    constexpr auto sha256_5_unexpected = base16_array("0000000000000000000000000000000000000000000000000000000000000000");
-
-    using sha256v = sha::algorithm<sha::h256<>, false, true, false>;
-    const auto hash = accumulator<sha256v>::hash(sha_5_data);
-    BOOST_REQUIRE_NE(hash, sha256_5_unexpected);
-}
+constexpr auto vectorized = with_sse41 || with_avx2 || with_avx512;
+constexpr auto compressed = with_shani || with_neon;
 
 // Currently sha::algorithm schedule pads are cached for 1,2,3,4 blocks.
 // This verifies that sha::algorithm::schedule_n() is properly configured.
@@ -98,7 +91,7 @@ BOOST_AUTO_TEST_CASE(sha__fff_accumulator_sha160_hash__test_vectors__expected)
     static_assert(!sha_160::vectorization);
     static_assert(!sha_160::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
@@ -110,11 +103,11 @@ BOOST_AUTO_TEST_CASE(sha__fff_accumulator_sha160_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__tff_accumulator_sha160_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, false, false>;
-    static_assert(sha_160::compression);
+    static_assert(sha_160::compression == compressed);
     static_assert(!sha_160::vectorization);
     static_assert(!sha_160::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
@@ -126,11 +119,11 @@ BOOST_AUTO_TEST_CASE(sha__tff_accumulator_sha160_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__tft_accumulator_sha160_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, false, true>;
-    static_assert(sha_160::compression);
+    static_assert(sha_160::compression == compressed);
     static_assert(!sha_160::vectorization);
     static_assert(sha_160::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
@@ -142,11 +135,11 @@ BOOST_AUTO_TEST_CASE(sha__tft_accumulator_sha160_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__ttf_accumulator_sha160_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, true, false>;
-    static_assert(sha_160::compression);
-    static_assert(sha_160::vectorization);
+    static_assert(sha_160::compression == compressed);
+    static_assert(sha_160::vectorization == vectorized);
     static_assert(!sha_160::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
@@ -158,11 +151,11 @@ BOOST_AUTO_TEST_CASE(sha__ttf_accumulator_sha160_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__ttt_accumulator_sha160_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, true, true, true>;
-    static_assert(sha_160::compression);
-    static_assert(sha_160::vectorization);
+    static_assert(sha_160::compression == compressed);
+    static_assert(sha_160::vectorization == vectorized);
     static_assert(sha_160::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
@@ -175,10 +168,10 @@ BOOST_AUTO_TEST_CASE(sha__ftf_accumulator_sha160_hash__test_vectors__expected)
 {
     using sha_160 = sha::algorithm<sha::h160, false, true, false>;
     static_assert(!sha_160::compression);
-    static_assert(sha_160::vectorization);
+    static_assert(sha_160::vectorization == vectorized);
     static_assert(!sha_160::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
     {
         const auto hash = accumulator<sha_160>::hash(test.data);
@@ -206,7 +199,7 @@ BOOST_AUTO_TEST_CASE(sha__fff_accumulator_sha256_hash__test_vectors__expected)
     static_assert(!sha_256::vectorization);
     static_assert(!sha_256::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
@@ -218,11 +211,11 @@ BOOST_AUTO_TEST_CASE(sha__fff_accumulator_sha256_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__tff_accumulator_sha256_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, false, false>;
-    static_assert(sha_256::compression);
+    static_assert(sha_256::compression == compressed);
     static_assert(!sha_256::vectorization);
     static_assert(!sha_256::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
@@ -234,11 +227,11 @@ BOOST_AUTO_TEST_CASE(sha__tff_accumulator_sha256_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__tft_accumulator_sha256_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, false, true>;
-    static_assert(sha_256::compression);
+    static_assert(sha_256::compression == compressed);
     static_assert(!sha_256::vectorization);
     static_assert(sha_256::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
@@ -250,11 +243,11 @@ BOOST_AUTO_TEST_CASE(sha__tft_accumulator_sha256_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__ttf_accumulator_sha256_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, true, false>;
-    static_assert(sha_256::compression);
-    static_assert(sha_256::vectorization);
+    static_assert(sha_256::compression == compressed);
+    static_assert(sha_256::vectorization == vectorized);
     static_assert(!sha_256::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
@@ -266,11 +259,11 @@ BOOST_AUTO_TEST_CASE(sha__ttf_accumulator_sha256_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__ttt_accumulator_sha256_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
-    static_assert(sha_256::compression);
-    static_assert(sha_256::vectorization);
+    static_assert(sha_256::compression == compressed);
+    static_assert(sha_256::vectorization == vectorized);
     static_assert(sha_256::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
@@ -283,10 +276,10 @@ BOOST_AUTO_TEST_CASE(sha__ftf_accumulator_sha256_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, false, true, false>;
     static_assert(!sha_256::compression);
-    static_assert(sha_256::vectorization);
+    static_assert(sha_256::vectorization == vectorized);
     static_assert(!sha_256::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
@@ -446,7 +439,7 @@ BOOST_AUTO_TEST_CASE(sha__fff_accumulator_sha512_hash__test_vectors__expected)
     static_assert(!sha_512::vectorization);
     static_assert(!sha_512::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
@@ -458,11 +451,11 @@ BOOST_AUTO_TEST_CASE(sha__fff_accumulator_sha512_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__tff_accumulator_sha512_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, false, false>;
-    static_assert(sha_512::compression);
+    static_assert(sha_512::compression == compressed);
     static_assert(!sha_512::vectorization);
     static_assert(!sha_512::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
@@ -474,11 +467,11 @@ BOOST_AUTO_TEST_CASE(sha__tff_accumulator_sha512_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__tft_accumulator_sha512_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, false, true>;
-    static_assert(sha_512::compression);
+    static_assert(sha_512::compression == compressed);
     static_assert(!sha_512::vectorization);
     static_assert(sha_512::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
@@ -490,11 +483,11 @@ BOOST_AUTO_TEST_CASE(sha__tft_accumulator_sha512_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__ttf_accumulator_sha512_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, false>;
-    static_assert(sha_512::compression);
-    static_assert(sha_512::vectorization);
+    static_assert(sha_512::compression == compressed);
+    static_assert(sha_512::vectorization == vectorized);
     static_assert(!sha_512::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
@@ -506,11 +499,11 @@ BOOST_AUTO_TEST_CASE(sha__ttf_accumulator_sha512_hash__test_vectors__expected)
 BOOST_AUTO_TEST_CASE(sha__ttt_accumulator_sha512_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
-    static_assert(sha_512::compression);
-    static_assert(sha_512::vectorization);
+    static_assert(sha_512::compression == compressed);
+    static_assert(sha_512::vectorization == vectorized);
     static_assert(sha_512::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
@@ -523,10 +516,10 @@ BOOST_AUTO_TEST_CASE(sha__ftf_accumulator_sha512_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, false, true, false>;
     static_assert(!sha_512::compression);
-    static_assert(sha_512::vectorization);
+    static_assert(sha_512::vectorization == vectorized);
     static_assert(!sha_512::cached);
 
-    // Verify non-const-evaluated to against public vectors.
+    // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
