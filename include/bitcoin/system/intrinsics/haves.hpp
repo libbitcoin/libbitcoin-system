@@ -30,6 +30,9 @@
 namespace libbitcoin {
 namespace system {
 
+// Functions may only be constexpr conditionally.
+BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
+
 /// Constant symbols for compiled intrinsics interfaces.
 /// ---------------------------------------------------------------------------
 
@@ -92,6 +95,7 @@ namespace xcr0
     constexpr auto sse_bit = 1;
     constexpr auto avx_bit = 2;
 }
+
 
 // Local util because no dependency on /math.
 template <size_t Bit, typename Value>
@@ -285,6 +289,8 @@ inline bool have() NOEXCEPT
         return have_sse41();
     else return false;
 }
+
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin

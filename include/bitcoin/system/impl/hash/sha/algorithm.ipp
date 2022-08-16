@@ -879,7 +879,7 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
     // benefit 1/64 hashes on average. All array-sized n-block hashes have
     // precomputed schedules - this benefits only finalized chunk hashing.
     // Testing shows a 5% performance improvement for 128 byte chunk hashes.
-    // Accumulator passes all write() blocks here.
+    // Accumulator passes all write() of more than one block here.
     if constexpr (Cached)
     {
         switch (blocks)
@@ -1052,15 +1052,11 @@ TEMPLATE
 INLINE void CLASS::
 vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    // Allow compile without vectorize functions.
-    if constexpr (vectorization)
-    {
-        // blocks.size() is reduced by vectorization.
-        vectorize<xint512_t>(state, blocks);
-        vectorize<xint256_t>(state, blocks);
-        vectorize<xint128_t>(state, blocks);
-        sequential(state, blocks);
-    }
+    // blocks.size() is reduced by vectorization.
+    vectorize<xint512_t>(state, blocks);
+    vectorize<xint256_t>(state, blocks);
+    vectorize<xint128_t>(state, blocks);
+    sequential(state, blocks);
 }
 
 // Hashing.
