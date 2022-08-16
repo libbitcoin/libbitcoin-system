@@ -1470,41 +1470,39 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
     // x256 / u32 =  8
     // x512 / u64 =  8
     // x512 / u32 = 16 (sha160/256 only)
+    // capacity<x128|x256|x512, uint64|uint32> has only four possible values.
+    using xbuffer_t = std_array<Extended, K::rounds>;
     constexpr auto lanes = capacity<Extended, word_t>;
-
-    // capacity<x128|x256|x512, uint64|uint32> has only these four values.
     static_assert(lanes == 16 || lanes == 8 || lanes == 4 || lanes == 2);
 
-    if (have<Extended>())
+    if (have<Extended>() && blocks.size() >= lanes)
     {
-        // Extend buffer to xword_t (lanes x sizeof(word_t)).
-        using xbuffer_t = std_array<Extended, K::rounds>;
+        // Buffer of xword_t (vs. word_t).
+        xbuffer_t wbuffer;
 
-        while (blocks.advance<lanes>().size() >= lanes)
+        do
         {
-            xbuffer_t wbuffer{};
-
-            // Cast lanes x blocks to word_t for endian conversion to xword_t.
-            const auto& words = array_cast<words_t>(blocks.to_array<lanes>());
+            // Block of xword_t (vs. word_t) [cast as blocks of word_t].
+            const auto& wblock = array_cast<words_t>(blocks.to_array<lanes>());
 
             // 16 words in each block.
-            // Nth word_t of each N blocks set into nth buffer xword_t.
-            wbuffer[0] = from_big_end<0>(words);
-            wbuffer[1] = from_big_end<1>(words);
-            wbuffer[2] = from_big_end<2>(words);
-            wbuffer[3] = from_big_end<3>(words);
-            wbuffer[4] = from_big_end<4>(words);
-            wbuffer[5] = from_big_end<5>(words);
-            wbuffer[6] = from_big_end<6>(words);
-            wbuffer[7] = from_big_end<7>(words);
-            wbuffer[8] = from_big_end<8>(words);
-            wbuffer[9] = from_big_end<9>(words);
-            wbuffer[10] = from_big_end<10>(words);
-            wbuffer[11] = from_big_end<11>(words);
-            wbuffer[12] = from_big_end<12>(words);
-            wbuffer[13] = from_big_end<13>(words);
-            wbuffer[14] = from_big_end<14>(words);
-            wbuffer[15] = from_big_end<15>(words);
+            // Nth word_t of N blocks set into nth buffer xword_t.
+            wbuffer[0] = from_big_end<0>(wblock);
+            wbuffer[1] = from_big_end<1>(wblock);
+            wbuffer[2] = from_big_end<2>(wblock);
+            wbuffer[3] = from_big_end<3>(wblock);
+            wbuffer[4] = from_big_end<4>(wblock);
+            wbuffer[5] = from_big_end<5>(wblock);
+            wbuffer[6] = from_big_end<6>(wblock);
+            wbuffer[7] = from_big_end<7>(wblock);
+            wbuffer[8] = from_big_end<8>(wblock);
+            wbuffer[9] = from_big_end<9>(wblock);
+            wbuffer[10] = from_big_end<10>(wblock);
+            wbuffer[11] = from_big_end<11>(wblock);
+            wbuffer[12] = from_big_end<12>(wblock);
+            wbuffer[13] = from_big_end<13>(wblock);
+            wbuffer[14] = from_big_end<14>(wblock);
+            wbuffer[15] = from_big_end<15>(wblock);
 
             // Process message schedule for extended block.
             // This compresses 2..16 block scheduling evaluations into 1.
@@ -1549,7 +1547,7 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
                 compress<14>(state, wbuffer);
                 compress<15>(state, wbuffer);
             }
-        };
+        } while (blocks.advance<lanes>().size() >= lanes);
     }
 }
 
