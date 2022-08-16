@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
     };
 
     constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
-    auto it = iterable<type>(hash).advance<1>().begin();
+    auto it = iterable<type>(hash).template advance<1>().begin();
     BOOST_REQUIRE_EQUAL(*it, expected);
 }
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
     auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
 
     // type is 8 bytes, so advance(1) setting .at(0) will set byte 8 and every +8.
-    for (auto& chunk: mutable_iterable<type>(hash).advance<1>())
+    for (auto& chunk: mutable_iterable<type>(hash).template advance<1>())
         chunk.front().at(0) = 0xaa;
 
     constexpr auto expected = base16_array("1111111122222222aa33333344444444aa55555566666666aa77777788888888");
@@ -288,11 +288,11 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     ////// 1 lane
     ////BOOST_REQUIRE_EQUAL(blocks1[0], expected15);
 
-    const auto& blocks8_ = iterable.to_array<8>(); // no offsetting (use advance)
-    const auto& blocks4_ = iterable.to_array<4>();
-    const auto& blocks2_ = iterable.to_array<2>();
-    const auto& blocks1_ = iterable.to_array<1>();
-    const auto& blocks0_ = iterable.to_array<0>(); // ok
+    const auto& blocks8_ = iterable.template to_array<8>(); // no offsetting (use advance)
+    const auto& blocks4_ = iterable.template to_array<4>();
+    const auto& blocks2_ = iterable.template to_array<2>();
+    const auto& blocks1_ = iterable.template to_array<1>();
+    const auto& blocks0_ = iterable.template to_array<0>(); // ok
 
     static_assert(is_same_type<decltype(blocks8_), const std_array<sha256::block_t, 8>&>);
     static_assert(is_same_type<decltype(blocks4_), const std_array<sha256::block_t, 4>&>);

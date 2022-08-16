@@ -1479,7 +1479,7 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
         do
         {
             // Block of xword_t (vs. word_t) [cast as blocks of word_t].
-            const auto& wblock = array_cast<words_t>(blocks.to_array<lanes>());
+            const auto& wblock = array_cast<words_t>(blocks.template to_array<lanes>());
 
             // 16 words in each block.
             // Nth word_t of N blocks set into nth buffer xword_t.
@@ -1508,10 +1508,14 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
             // Lane parameter indicates the block being compressed.
             // A block's message schedule words are extracted by
             // wbuffer[index][lane] using one intrinsic extraction for each
-            // word * lane. This may be more efficiently done by casting the
+            // word * lane. This may be more efficiently done by converting the
             // buffer to wbuffer[index][lane] and testing its element against
-            // word_t vs. array<word_t> to select the lane dimension. If cast is
-            // usafe, batch extraction may be more lane times more efficient.
+            // word_t vs. array<word_t> to select the lane dimension. Can use
+            // these to store as xword_t back to the same buffer and then cast.
+            // TODO: create method to unload the full buffer into itself.
+            // AVX512F: _mm512_storeu_si512
+            // AVX:     _mm256_storeu_si256
+            // SSE2:    _mm_storeu_si128
             if constexpr (lanes > 0)
             {
                 compress<0>(state, wbuffer);
@@ -1543,7 +1547,7 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
                 compress<14>(state, wbuffer);
                 compress<15>(state, wbuffer);
             }
-        } while (blocks.advance<lanes>().size() >= lanes);
+        } while (blocks.template advance<lanes>().size() >= lanes);
     }
 }
 
