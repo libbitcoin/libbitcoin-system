@@ -1053,12 +1053,11 @@ vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
     // Allow compile without vectorize functions.
     if constexpr (vectorization)
     {
-        // blocks.size() is reduced to zero by vectorization.
-        vectorize<lanes<16>>(state, blocks);
-        vectorize<lanes<8>>(state, blocks);
-        vectorize<lanes<4>>(state, blocks);
-        vectorize<lanes<2>>(state, blocks);
-        vectorize<lanes<1>>(state, blocks);
+        // blocks.size() is reduced by vectorization.
+        vectorize<xint512_t>(state, blocks);
+        vectorize<xint256_t>(state, blocks);
+        vectorize<xint128_t>(state, blocks);
+        sequential(state, blocks);
     }
 }
 
@@ -1407,231 +1406,150 @@ normalize(const state_t& state) NOEXCEPT
 // Constant K addition is moved to schedule prepare.
 // eprint.iacr.org/2012/067.pdf
 
-#if defined(HAVE_EXTENDED)
-
 TEMPLATE
-template <size_t Lanes>
-INLINE bool CLASS::
-have() NOEXCEPT
-{
-    if constexpr (SHA::word_bytes == 8)
-    {
-        if constexpr (Lanes == 16) // 16 * 64 = 1024 (not available)
-            return false;
-        if constexpr (Lanes == 8)  //  8 * 64 = 512
-            return have_avx512();
-        if constexpr (Lanes == 4)  //  4 * 64 = 256
-            return have_avx2();
-        if constexpr (Lanes == 2)  //  2 * 64 = 128
-            return have_sse41();
-    }
-    else // if constexpr (SHA::word_bytes == 4)
-    {
-        if constexpr (Lanes == 16) // 16 * 32 = 512
-            return have_avx512();
-        if constexpr (Lanes == 8)  //  8 * 32 = 256
-            return have_avx2();
-        if constexpr (Lanes == 4)  //  4 * 32 = 128
-            return have_sse41();
-        if constexpr (Lanes == 2)  //  2 * 32 = 64 (partial fill)
-            return have_sse41();
-    }
-}
-
-TEMPLATE
-template <typename Extended, size_t Index, size_t Lanes>
-INLINE Extended CLASS::
+template <size_t Lane, size_t Lanes,
+    bool_if<Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2>>
+INLINE auto CLASS::
 from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT
 {
+    // x128 : u64, 2 (sha512 only)
+    // x128 : u32, 4
+    // x256 : u64, 4
+    // x256 : u32, 8
+    // x512 : u64, 8
+    // x512 : u32, 16 (sha160/256 only)
+    using xword_t = to_extended<word_t, Lanes>;
+
+    // Nth word of each 16 blocks set into one extended buffer16 word.
     if constexpr (Lanes == 16)
     {
-        // 32 bit only.
-        return byteswap(set<Extended>(
-            words[ 0][Index], words[ 1][Index],
-            words[ 2][Index], words[ 3][Index],
-            words[ 4][Index], words[ 5][Index],
-            words[ 6][Index], words[ 7][Index],
-            words[ 8][Index], words[ 9][Index],
-            words[10][Index], words[11][Index],
-            words[12][Index], words[13][Index],
-            words[14][Index], words[15][Index]));
+        return byteswap(set<xword_t>(
+            words[ 0][Lane], words[ 1][Lane],
+            words[ 2][Lane], words[ 3][Lane],
+            words[ 4][Lane], words[ 5][Lane],
+            words[ 6][Lane], words[ 7][Lane],
+            words[ 8][Lane], words[ 9][Lane],
+            words[10][Lane], words[11][Lane],
+            words[12][Lane], words[13][Lane],
+            words[14][Lane], words[15][Lane]));
     }
+    // Nth word of each 8 blocks set into one extended buffer8 word.
     else if constexpr (Lanes == 8)
     {
-        // 32/64 bit.
-        return byteswap(set<Extended>(
-            words[0][Index], words[1][Index],
-            words[2][Index], words[3][Index],
-            words[4][Index], words[5][Index],
-            words[6][Index], words[7][Index]));
+        return byteswap(set<xword_t>(
+            words[0][Lane], words[1][Lane],
+            words[2][Lane], words[3][Lane],
+            words[4][Lane], words[5][Lane],
+            words[6][Lane], words[7][Lane]));
     }
+    // Nth word of each 4 blocks set into one extended buffer4 word.
     else if constexpr (Lanes == 4)
     {
-        // 32/64 bit.
-        return byteswap(set<Extended>(
-            words[0][Index], words[1][Index],
-            words[2][Index], words[3][Index]));
+        return byteswap(set<xword_t>(
+            words[0][Lane], words[1][Lane],
+            words[2][Lane], words[3][Lane]));
     }
-    ////else if constexpr (Lanes == 2)
-    ////{
-    ////    // 64 bit only.
-    ////    return byteswap(set<Extended>(
-    ////        words[0][Index], words[1][Index]));
-    ////}
+    // Nth word of each 2 blocks set into one extended buffer2 word.
+    else //// if constexpr (Lanes == 2)
+    {
+        return byteswap(set<xword_t>(
+            words[0][Lane], words[1][Lane]));
+    }
 }
 
 TEMPLATE
-template <size_t Lanes, if_equal<Lanes, 16>>
+template <typename Extended, if_extended<Extended>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    using xword_t = to_extended<word_t, Lanes>;
-    using xbuffer_t = std_array<xword_t, K::rounds>;
+    // x128 / u64 =  2 (sha512 only)
+    // x128 / u32 =  4
+    // x256 / u64 =  4
+    // x256 / u32 =  8
+    // x512 / u64 =  8
+    // x512 / u32 = 16 (sha160/256 only)
+    constexpr auto lanes = capacity<Extended, word_t>;
 
-    if (have<Lanes>() && blocks.size() >= Lanes)
+    // capacity<x128|x256|x512, uint64|uint32> has only these four values.
+    static_assert(lanes == 16 || lanes == 8 || lanes == 4 || lanes == 2);
+
+    if (have<Extended>())
     {
-        xbuffer_t wbuffer{};
-        do
+        // Extend buffer to xword_t (lanes x sizeof(word_t)).
+        using xbuffer_t = std_array<Extended, K::rounds>;
+
+        while (blocks.advance<lanes>().size() >= lanes)
         {
-            const auto& words = array_cast<words_t>(blocks.to_array<Lanes>());
-            wbuffer[0] = from_big_end<xword_t, 0>(words);
-            wbuffer[1] = from_big_end<xword_t, 1>(words);
-            wbuffer[2] = from_big_end<xword_t, 2>(words);
-            wbuffer[3] = from_big_end<xword_t, 3>(words);
-            wbuffer[4] = from_big_end<xword_t, 4>(words);
-            wbuffer[5] = from_big_end<xword_t, 5>(words);
-            wbuffer[6] = from_big_end<xword_t, 6>(words);
-            wbuffer[7] = from_big_end<xword_t, 7>(words);
-            wbuffer[8] = from_big_end<xword_t, 8>(words);
-            wbuffer[9] = from_big_end<xword_t, 9>(words);
-            wbuffer[10] = from_big_end<xword_t, 10>(words);
-            wbuffer[11] = from_big_end<xword_t, 11>(words);
-            wbuffer[12] = from_big_end<xword_t, 12>(words);
-            wbuffer[13] = from_big_end<xword_t, 13>(words);
-            wbuffer[14] = from_big_end<xword_t, 14>(words);
-            wbuffer[15] = from_big_end<xword_t, 15>(words);
+            xbuffer_t wbuffer{};
+
+            // Cast lanes x blocks to word_t for endian conversion to xword_t.
+            const auto& words = array_cast<words_t>(blocks.to_array<lanes>());
+
+            // 16 words in each block.
+            // Nth word_t of each N blocks set into nth buffer xword_t.
+            wbuffer[0] = from_big_end<0>(words);
+            wbuffer[1] = from_big_end<1>(words);
+            wbuffer[2] = from_big_end<2>(words);
+            wbuffer[3] = from_big_end<3>(words);
+            wbuffer[4] = from_big_end<4>(words);
+            wbuffer[5] = from_big_end<5>(words);
+            wbuffer[6] = from_big_end<6>(words);
+            wbuffer[7] = from_big_end<7>(words);
+            wbuffer[8] = from_big_end<8>(words);
+            wbuffer[9] = from_big_end<9>(words);
+            wbuffer[10] = from_big_end<10>(words);
+            wbuffer[11] = from_big_end<11>(words);
+            wbuffer[12] = from_big_end<12>(words);
+            wbuffer[13] = from_big_end<13>(words);
+            wbuffer[14] = from_big_end<14>(words);
+            wbuffer[15] = from_big_end<15>(words);
+
+            // Process message schedule for extended block.
+            // This compresses 2..16 block scheduling evaluations into 1.
             schedule(wbuffer);
-            compress<0>(state, wbuffer);
-            compress<1>(state, wbuffer);
-            compress<2>(state, wbuffer);
-            compress<3>(state, wbuffer);
-            compress<4>(state, wbuffer);
-            compress<5>(state, wbuffer);
-            compress<6>(state, wbuffer);
-            compress<7>(state, wbuffer);
-            compress<8>(state, wbuffer);
-            compress<9>(state, wbuffer);
-            compress<10>(state, wbuffer);
-            compress<11>(state, wbuffer);
-            compress<12>(state, wbuffer);
-            compress<13>(state, wbuffer);
-            compress<14>(state, wbuffer);
-            compress<15>(state, wbuffer);
-        } while (blocks.advance<Lanes>().size() >= Lanes);
+
+            // Compress sequentially for number of blocks extended.
+            // Lane parameter indicates the block being compressed.
+            // A block's message schedule words are extracted by
+            // wbuffer[index][lane] using one intrinsic extraction for each
+            // word * lane. This may be more efficiently done by casting the
+            // buffer to wbuffer[index][lane] and testing its element against
+            // word_t vs. array<word_t> to select the lane dimension. If cast is
+            // usafe, batch extraction may be more lane times more efficient.
+            if constexpr (lanes > 0)
+            {
+                compress<0>(state, wbuffer);
+                compress<1>(state, wbuffer);
+            }
+
+            if constexpr (lanes > 2)
+            {
+                compress<2>(state, wbuffer);
+                compress<3>(state, wbuffer);
+            }
+
+            if constexpr (lanes > 4)
+            {
+                compress<4>(state, wbuffer);
+                compress<5>(state, wbuffer);
+                compress<6>(state, wbuffer);
+                compress<7>(state, wbuffer);
+            }
+
+            if constexpr (lanes > 8)
+            {
+                compress<8>(state, wbuffer);
+                compress<9>(state, wbuffer);
+                compress<10>(state, wbuffer);
+                compress<11>(state, wbuffer);
+                compress<12>(state, wbuffer);
+                compress<13>(state, wbuffer);
+                compress<14>(state, wbuffer);
+                compress<15>(state, wbuffer);
+            }
+        };
     }
 }
-
-TEMPLATE
-template <size_t Lanes, if_equal<Lanes, 8>>
-inline void CLASS::
-vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    using xword_t = to_extended<word_t, Lanes>;
-    using xbuffer_t = std_array<xword_t, K::rounds>;
-
-    if (have<Lanes>() && blocks.size() >= Lanes)
-    {
-        xbuffer_t wbuffer{};
-        do
-        {
-            const auto& words = array_cast<words_t>(blocks.to_array<Lanes>());
-            wbuffer[0] = from_big_end<xword_t, 0>(words);
-            wbuffer[1] = from_big_end<xword_t, 1>(words);
-            wbuffer[2] = from_big_end<xword_t, 2>(words);
-            wbuffer[3] = from_big_end<xword_t, 3>(words);
-            wbuffer[4] = from_big_end<xword_t, 4>(words);
-            wbuffer[5] = from_big_end<xword_t, 5>(words);
-            wbuffer[6] = from_big_end<xword_t, 6>(words);
-            wbuffer[7] = from_big_end<xword_t, 7>(words);
-            schedule(wbuffer);
-            compress<0>(state, wbuffer);
-            compress<1>(state, wbuffer);
-            compress<2>(state, wbuffer);
-            compress<3>(state, wbuffer);
-            compress<4>(state, wbuffer);
-            compress<5>(state, wbuffer);
-            compress<6>(state, wbuffer);
-            compress<7>(state, wbuffer);
-        } while (blocks.advance<Lanes>().size() >= Lanes);
-    }
-}
-
-TEMPLATE
-template <size_t Lanes, if_equal<Lanes, 4>>
-inline void CLASS::
-vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    using xword_t = to_extended<word_t, Lanes>;
-    using xbuffer_t = std_array<xword_t, K::rounds>;
-
-    if (have<Lanes>() && blocks.size() >= Lanes)
-    {
-        xbuffer_t wbuffer{};
-        do
-        {
-            const auto& words = array_cast<words_t>(blocks.to_array<Lanes>());
-            wbuffer[0] = from_big_end<xword_t, 0>(words);
-            wbuffer[1] = from_big_end<xword_t, 1>(words);
-            wbuffer[2] = from_big_end<xword_t, 2>(words);
-            wbuffer[3] = from_big_end<xword_t, 3>(words);
-            schedule(wbuffer);
-            compress<0>(state, wbuffer);
-            compress<1>(state, wbuffer);
-            compress<2>(state, wbuffer);
-            compress<3>(state, wbuffer);
-        } while (blocks.advance<Lanes>().size() >= Lanes);
-    }
-}
-
-TEMPLATE
-template <size_t Lanes, if_equal<Lanes, 2>>
-inline void CLASS::
-vectorize(state_t&, iblocks_t&) NOEXCEPT
-{
-    // This would also need to reduce the iterator, faster to skip it.
-    ////// TODO: sha160/256 are partially-filled here.
-    ////buffer_t buffer{};
-    ////for (auto& block: blocks)
-    ////{
-    ////    input(buffer, block);
-    ////    schedule(buffer);
-    ////    compress(state, buffer);
-    ////}
-}
-
-TEMPLATE
-template <size_t Lanes, if_equal<Lanes, 1>>
-inline void CLASS::
-vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    // This does not zeroize the iterator, not required.
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
-}
-
-TEMPLATE
-template <size_t Lanes, if_equal<Lanes, 0>>
-inline void CLASS::
-vectorize(state_t&, iblocks_t&) NOEXCEPT
-{
-}
-
-#endif // HAVE_EXTENDED
 
 // ----------------------------------------------------------------------------
 

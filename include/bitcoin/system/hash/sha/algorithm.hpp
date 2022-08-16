@@ -35,20 +35,6 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
-////#define HAVE_EXTENDED
-
-#if defined(HAVE_EXTENDED)
-    constexpr auto vectorizable = true;
-    #if defined(HAVE_SHA_INTRISICS)
-        constexpr auto compressible = true;
-    #else
-        constexpr auto compressible = false;
-    #endif
-#else
-    constexpr auto vectorizable = false;
-    constexpr auto compressible = false;
-#endif
-
 /// SHA hashing algorithm.
 /// Presently Compressed enables non-vector sigma optimization.
 /// Presently Vectorized enables vector-friendly sigma optimization.
@@ -96,8 +82,13 @@ public:
 
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
-    static constexpr auto compression   = Compressed && compressible;
-    static constexpr auto vectorization = Vectorized && vectorizable;
+    static constexpr auto have_x128     = Vectorized && system::with_sse41;
+    static constexpr auto have_x256     = Vectorized && system::with_avx2;
+    static constexpr auto have_x512     = Vectorized && system::with_avx512;
+    static constexpr auto vectorization = have_x128 || have_x256 || have_x512;
+    static constexpr auto have_shani    = Compressed && system::with_shani;
+    static constexpr auto have_neon     = Compressed && system::with_neon;
+    static constexpr auto compression   = have_shani || have_neon;
     static constexpr auto cached        = Cached;
     static constexpr auto big_end_count = true;
 
@@ -234,36 +225,17 @@ private:
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
 protected:
-#if defined(HAVE_EXTENDED)
     template <size_t Lanes>
     using wblocks_t = std_array<words_t, Lanes>;
 
-    /// Runtime discovery of lanes availability.
-    template <size_t Lanes>
-    INLINE static bool have() NOEXCEPT;
-
     /// Return LE extended word from Lanes count of blocks at Index offset.
-    template <typename Extended, size_t Index, size_t Lanes>
-    INLINE static Extended from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT;
-
-    /// sha512 is twice the width of sha160/256, so half as many lanes.
-    template <size_t Track>
-    static constexpr size_t lanes = Track / (sizeof(word_t) / sizeof(uint32_t));
+    template <size_t Lane, size_t Lanes,
+        bool_if<Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2> = true>
+    INLINE static auto from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT;
 
     /// Vectorize endianness and message schedule for a single set of blocks.
-    template <size_t Lanes, if_equal<Lanes, 16> = true>
-    inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-    template <size_t Lanes, if_equal<Lanes, 8> = true>
-    inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-    template <size_t Lanes, if_equal<Lanes, 4> = true>
-    inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-    template <size_t Lanes, if_equal<Lanes, 2> = true>
-    inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-    template <size_t Lanes, if_equal<Lanes, 1> = true>
-    inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-    template <size_t Lanes, if_equal<Lanes, 0> = true>
-    inline static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
-#endif // HAVE_EXTENDED
+    template <typename Extended, if_extended<Extended> = true>
+    static inline void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
 };
 
 } // namespace sha

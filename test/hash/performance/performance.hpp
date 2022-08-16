@@ -204,22 +204,22 @@ template <size_t Strength, bool Compressed, bool Vectorized, bool Cached, bool R
 using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
     sha_algorithm<Strength, Compressed, Vectorized, Cached>>;
 
-static_assert(is_same_type<hash_selector<128, true, true, false, true >, rmd128>);
-static_assert(is_same_type<hash_selector<160, true, true, false, true >, rmd160>);
+static_assert(is_same_type<hash_selector<128, true, true, false,  true>,  rmd128>);
+static_assert(is_same_type<hash_selector<160, true, true, false,  true>,  rmd160>);
 static_assert(is_same_type<hash_selector<160, true, false, true,  false>, sha160>);
 static_assert(is_same_type<hash_selector<256, true, false, true,  false>, sha256>);
 static_assert(is_same_type<hash_selector<512, true, false, true,  false>, sha512>);
 
-static_assert(hash_selector< 160, true,  true, true, false>::compression == sha::compressible);
-static_assert(hash_selector< 256, true,  true, true, false>::compression == sha::compressible);
-static_assert(hash_selector< 512, true,  true, true, false>::compression == sha::compressible);
+static_assert(hash_selector< 160, true,  true, true, false>::compression == with_shani || with_neon);
+static_assert(hash_selector< 256, true,  true, true, false>::compression == with_shani || with_neon);
+static_assert(hash_selector< 512, true,  true, true, false>::compression == with_shani || with_neon);
 static_assert(!hash_selector<160, false, true, true, false>::compression);
 static_assert(!hash_selector<256, false, true, true, false>::compression);
 static_assert(!hash_selector<512, false, true, true, false>::compression);
 
-static_assert(hash_selector< 160, true, true,  true, false>::vectorization == sha::vectorizable);
-static_assert(hash_selector< 256, true, true,  true, false>::vectorization == sha::vectorizable);
-static_assert(hash_selector< 512, true, true,  true, false>::vectorization == sha::vectorizable);
+static_assert(hash_selector< 160, true, true,  true, false>::vectorization == with_sse41 || with_avx2 || with_avx512);
+static_assert(hash_selector< 256, true, true,  true, false>::vectorization == with_sse41 || with_avx2 || with_avx512);
+static_assert(hash_selector< 512, true, true,  true, false>::vectorization == with_sse41 || with_avx2 || with_avx512);
 static_assert(!hash_selector<160, true, false, true, false>::vectorization);
 static_assert(!hash_selector<256, true, false, true, false>::vectorization);
 static_assert(!hash_selector<512, true, false, true, false>::vectorization);
