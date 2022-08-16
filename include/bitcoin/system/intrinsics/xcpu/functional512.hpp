@@ -103,24 +103,6 @@ INLINE Word add_(Word a) NOEXCEPT
 // AVX512 set/get (for all element widths).
 // ----------------------------------------------------------------------------
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-INLINE xint512_t byteswap(xint512_t value) NOEXCEPT
-{
-    constexpr std_array<uint32_t, 4> mask32
-    {
-        0x0c0d0e0f_u32, 0x08090a0b_u32, 0x04050607_u32, 0x00010203_u32
-    };
-
-    static const auto mask = _mm512_set_epi32(
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3]);
-
-    return _mm512_shuffle_epi8(value, mask);
-}
-BC_POP_WARNING()
-
 // TODO: define these macros (_mm512_extract_epi64 required for sha512v).
 // TODO: these are multistep, as are the others, can be optimized.
 // stackoverflow.com/questions/58303958/how-to-implement-16-and-32-bit-
@@ -252,6 +234,25 @@ INLINE To set(
         x16, x15, x14, x13, x12, x11, x10, x09,
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
+
+
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+INLINE xint512_t byteswap(xint512_t value) NOEXCEPT
+{
+    constexpr std_array<uint32_t, 4> mask32
+    {
+        0x0c0d0e0f_u32, 0x08090a0b_u32, 0x04050607_u32, 0x00010203_u32
+    };
+
+    static const auto mask = set<xint512_t>(
+        mask32[0], mask32[1], mask32[2], mask32[3],
+        mask32[0], mask32[1], mask32[2], mask32[3],
+        mask32[0], mask32[1], mask32[2], mask32[3],
+        mask32[0], mask32[1], mask32[2], mask32[3]);
+
+    return _mm512_shuffle_epi8(value, mask);
+}
+BC_POP_WARNING()
 
 #else
 

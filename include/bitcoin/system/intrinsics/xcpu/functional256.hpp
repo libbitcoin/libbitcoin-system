@@ -97,22 +97,6 @@ INLINE Word add_(Word a) NOEXCEPT
 // AVX2 set/get (for all element widths).
 // ----------------------------------------------------------------------------
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-INLINE xint256_t byteswap(xint256_t value) NOEXCEPT
-{
-    constexpr std_array<uint32_t, 4> mask32
-    {
-        0x0c0d0e0f_u32, 0x08090a0b_u32, 0x04050607_u32, 0x00010203_u32
-    };
-
-    static const auto mask = _mm256_set_epi32(
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3]);
-
-    return _mm256_shuffle_epi8(value, mask);
-}
-BC_POP_WARNING()
-
 // Lane zero is lowest order word.
 template <typename To, auto Lane, if_integral_integer<To> = true>
 INLINE To get(xint256_t a) NOEXCEPT
@@ -198,6 +182,23 @@ INLINE To set(
         x16, x15, x14, x13, x12, x11, x10, x09,
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
+
+
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+INLINE xint256_t byteswap(xint256_t value) NOEXCEPT
+{
+    constexpr std_array<uint32_t, 4> mask32
+    {
+        0x0c0d0e0f_u32, 0x08090a0b_u32, 0x04050607_u32, 0x00010203_u32
+    };
+
+    static const auto mask = set<xint256_t>(
+        mask32[0], mask32[1], mask32[2], mask32[3],
+        mask32[0], mask32[1], mask32[2], mask32[3]);
+
+    return _mm256_shuffle_epi8(value, mask);
+}
+BC_POP_WARNING()
 
 #else
 
