@@ -29,9 +29,6 @@ static_assert(sha256::hash(sha256::block_t{}) == sha_full256);
 static_assert(sha512::hash(sha512::half_t{})  == sha_half512);
 static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
 
-constexpr auto vectorized = with_sse41 || with_avx2 || with_avx512;
-constexpr auto compressed = with_shani || with_neon;
-
 // Currently sha::algorithm schedule pads are cached for 1,2,3,4 blocks.
 // This verifies that sha::algorithm::schedule_n() is properly configured.
 // Testing any sha algorithm is sufficient to verify the configuration for all.
