@@ -45,28 +45,28 @@ namespace f {
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto and_(Word a, Word b) NOEXCEPT
+INLINE Word and_(Word a, Word b) NOEXCEPT
 {
     return mm512_and_si512(a, b);
 }
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto or_(Word a, Word b) NOEXCEPT
+INLINE Word or_(Word a, Word b) NOEXCEPT
 {
     return mm512_or_si512(a, b);
 }
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto xor_(Word a, Word b) NOEXCEPT
+INLINE Word xor_(Word a, Word b) NOEXCEPT
 {
     return mm512_xor_si512(a, b);
 }
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto not_(Word a) NOEXCEPT
+INLINE Word not_(Word a) NOEXCEPT
 {
     return xor_(a, mm512_set1_epi64(-1));
 }
@@ -75,7 +75,7 @@ INLINE auto not_(Word a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
-INLINE auto shr(Word a) NOEXCEPT
+INLINE Word shr(Word a) NOEXCEPT
 {
     // Undefined
     static_assert(S != bits<uint8_t>);
@@ -94,7 +94,7 @@ INLINE auto shr(Word a) NOEXCEPT
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
-INLINE auto shl(Word a) NOEXCEPT
+INLINE Word shl(Word a) NOEXCEPT
 {
     // Undefined
     static_assert(S != bits<uint8_t>);
@@ -113,19 +113,19 @@ INLINE auto shl(Word a) NOEXCEPT
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
-INLINE auto ror(Word a) NOEXCEPT
+INLINE Word ror(Word a) NOEXCEPT
 {
     return or_(shr<B, S>(a), shl<S - B, S>(a));
 }
 
 template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
-INLINE auto rol(Word a) NOEXCEPT
+INLINE Word rol(Word a) NOEXCEPT
 {
     return or_(shl<B, S>(a), shr<S - B, S>(a));
 }
 
 template <auto S, typename Word, if_same<Word, xint512_t> = true>
-INLINE auto add(Word a, Word b) NOEXCEPT
+INLINE Word add(Word a, Word b) NOEXCEPT
 {
     // AVX512BW
     if constexpr (S == bits<uint8_t>)
@@ -142,7 +142,7 @@ INLINE auto add(Word a, Word b) NOEXCEPT
 
 // AVX512F
 template <auto K, auto S, typename Word, if_same<Word, xint512_t> = true>
-INLINE auto addc(Word a) NOEXCEPT
+INLINE Word addc(Word a) NOEXCEPT
 {
     // set1 broadcast integer to all elements.
     if constexpr (S == bits<uint8_t>)
@@ -163,7 +163,7 @@ INLINE auto addc(Word a) NOEXCEPT
 // Extraction intrinsics not defined for any AVX512.
 // Lane zero is lowest order word.
 template <typename Word, auto Lane>
-INLINE auto extract(xint512_t a) NOEXCEPT
+INLINE Word extract(xint512_t a) NOEXCEPT
 {
     // AVX512_VBMI2/AVX512F/SSE2
     static_assert(!is_same_type<Word, uint8_t>);
@@ -182,7 +182,7 @@ INLINE auto extract(xint512_t a) NOEXCEPT
 
 // First parameter is used only as a polymorphic guide.
 template <auto Lane, typename Word, if_integral_integer<Word> = true>
-INLINE auto extract_(Word, xint512_t a) NOEXCEPT
+INLINE Word extract_(Word, xint512_t a) NOEXCEPT
 {
     return extract<Word, Lane>(a);
 }
@@ -193,7 +193,7 @@ INLINE auto extract_(Word, xint512_t a) NOEXCEPT
 // AVX512F
 // Low order word to the left.
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto set(
+INLINE xint512_t set(
     uint64_t x01 = 0, uint64_t x02 = 0,
     uint64_t x03 = 0, uint64_t x04 = 0,
     uint64_t x05 = 0, uint64_t x06 = 0,
@@ -206,7 +206,7 @@ INLINE auto set(
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto set(
+INLINE xint512_t set(
     uint32_t x01 = 0, uint32_t x02 = 0,
     uint32_t x03 = 0, uint32_t x04 = 0,
     uint32_t x05 = 0, uint32_t x06 = 0,
@@ -223,7 +223,7 @@ INLINE auto set(
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto set(
+INLINE xint512_t set(
     uint16_t x01 = 0, uint16_t x02 = 0,
     uint16_t x03 = 0, uint16_t x04 = 0,
     uint16_t x05 = 0, uint16_t x06 = 0,
@@ -250,7 +250,7 @@ INLINE auto set(
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
-INLINE auto set(
+INLINE xint512_t set(
     uint8_t x01 = 0, uint8_t x02 = 0,
     uint8_t x03 = 0, uint8_t x04 = 0,
     uint8_t x05 = 0, uint8_t x06 = 0,
@@ -311,7 +311,7 @@ INLINE auto unpack(xint512_t a) NOEXCEPT
 
 // AVX512BW
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-INLINE auto byteswap(xint512_t a) NOEXCEPT
+INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
     static const auto mask = set<xint512_t>(
         0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
