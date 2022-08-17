@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
     };
 
     constexpr auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
-    auto it = iterable<type>(hash).template advance<1>().begin();
+    const auto it = iterable<type>(hash).template advance<1>().begin();
     BOOST_REQUIRE_EQUAL(*it, expected);
 }
 
@@ -187,8 +187,9 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
     // type is 8 bytes, so setting .at(1) will set byte 1 and every +8.
     constexpr auto expected = base16_array("11aa11112222222233aa33334444444455aa55556666666677aa777788888888");
     auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
+    auto iterator = mutable_iterable<type>(hash);
 
-    for (auto& chunk: mutable_iterable<type>(hash))
+    for (auto& chunk: iterator)
         chunk.front().at(1) = 0xaa;
 
     BOOST_REQUIRE_EQUAL(hash, expected);
@@ -199,9 +200,10 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
     data_chunk data{};
     using type = std::array<std::array<uint8_t, 2>, 4>;
     auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
+    auto iterator = mutable_iterable<type>(hash);
 
     // type is 8 bytes, so advance(1) setting .at(0) will set byte 8 and every +8.
-    for (auto& chunk: mutable_iterable<type>(hash).template advance<1>())
+    for (auto& chunk: iterator.template advance<1>())
         chunk.front().at(0) = 0xaa;
 
     constexpr auto expected = base16_array("1111111122222222aa33333344444444aa55555566666666aa77777788888888");
