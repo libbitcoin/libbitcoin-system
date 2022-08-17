@@ -145,14 +145,14 @@ INLINE Word addc(Word a) NOEXCEPT
 
 } // namespace f
 
-/// vector extract (overloaded by non-vector)
+/// get/set
 /// ---------------------------------------------------------------------------
 
 // Lane zero is lowest order word.
 template <typename Word, auto Lane>
-INLINE Word extract(xint256_t a) NOEXCEPT
+INLINE Word get(xint256_t a) NOEXCEPT
 {
-    // mm256_extract_epi64 defined as no-op on 32 bit builds.
+    // mm256_extract_epi64 defined as no-op on 32 bit builds (must exclude).
     ////static_assert(!build_x32 && is_same_type<Word, uint64_t>);
 
     // AVX2
@@ -167,16 +167,6 @@ INLINE Word extract(xint256_t a) NOEXCEPT
     else if constexpr (is_same_type<Word, uint64_t>)
         return mm256_extract_epi64(a, Lane);
 }
-
-// First parameter is used only as a ploymorphic guide.
-template <auto Lane, typename Word, if_integral_integer<Word> = true>
-INLINE Word extract_(Word, xint256_t a) NOEXCEPT
-{
-    return extract<Word, Lane>(a);
-}
-
-/// set/get (for all element widths)
-/// ---------------------------------------------------------------------------
 
 // AVX
 // Low order word to the left.

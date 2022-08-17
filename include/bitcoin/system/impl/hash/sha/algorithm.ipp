@@ -309,11 +309,31 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 }
 
 TEMPLATE
+template <auto Lane, typename Word>
+INLINE constexpr auto CLASS::
+extract(Word, Word a) NOEXCEPT
+{
+    // Compress vectorization and non-vectorization require no extraction.
+    static_assert(Lane == zero);
+    return a;
+}
+
+TEMPLATE
+template <auto Lane, typename Word, typename xWord,
+    if_integral_integer<Word>, if_extended<xWord>>
+INLINE Word CLASS::
+extract(Word, xWord a) NOEXCEPT
+{
+    // Schedule vectorization (with compress non-vectorization), extract word.
+    return get<Word, Lane>(a);
+}
+
+TEMPLATE
 template<size_t Round, size_t Lane>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& wk) NOEXCEPT
 {
-    // extract_ normalizes word for scedule/compress/none vectorization forms.
+    // extract() normalizes word for scedule/compress/none vectorization forms.
     // The state.front() parameter is used only as a polymorphic guide, since
     // the compiler cannot deduce this as a template argument.
     ////using word = decltype(state.front());
@@ -326,7 +346,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            extract_<Lane>(state.front(), wk[Round]));
+            extract<Lane>(state.front(), wk[Round]));
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -343,7 +363,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            extract_<Lane>(state.front(), wk[Round]));
+            extract<Lane>(state.front(), wk[Round]));
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).

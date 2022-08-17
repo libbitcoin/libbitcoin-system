@@ -56,7 +56,7 @@ INLINE constexpr auto not_(Word a) NOEXCEPT
 
 /// mathematical primitives
 /// ---------------------------------------------------------------------------
-// S arguments are set for common overload with extended functions.
+// S arguments are set for common overload with intrisic functionals.
 // rotr/rotl are implemented as intrinsic where available, otherwise shift/or.
 
 template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
@@ -96,16 +96,6 @@ INLINE constexpr auto addc(Word a) NOEXCEPT
 }
 
 } // namespace f
-
-// Overload for vectorization coexistence.
-// First parameter is used only as a polymorphic guide, as it cannot be
-// cleanly provided as a template argument in the given context.
-template <auto Lane, typename Word>
-INLINE constexpr auto extract_(Word, Word a) NOEXCEPT
-{
-    static_assert(Lane == one);
-    return a;
-}
 
 } // namespace system
 } // namespace libbitcoin

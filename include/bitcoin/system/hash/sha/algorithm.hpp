@@ -181,7 +181,7 @@ protected:
     INLINE static constexpr void round(auto& state, const auto& wk) NOEXCEPT;
     INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
 
-    template <size_t Lane = one>
+    template <size_t Lane = zero>
     static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
 
     template <size_t Round>
@@ -230,6 +230,14 @@ protected:
 
     template <size_t Lanes>
     using wblocks_t = std_array<words_t, Lanes>;
+
+    template <auto Lane, typename Word>
+    INLINE static constexpr auto extract(Word, Word a) NOEXCEPT;
+
+    template <auto Lane, typename Word, typename xWord,
+        if_integral_integer<Word> = true,
+        if_extended<xWord> = true>
+    INLINE static Word extract(Word, xWord a) NOEXCEPT;
 
     template <size_t Lane, size_t Lanes>
     INLINE static auto pack(const wblocks_t<Lanes>& words) NOEXCEPT;
