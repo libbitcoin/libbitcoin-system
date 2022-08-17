@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MATH_FUNCTIONAL_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/intrinsics.hpp>
+#include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/rotate.hpp>
 
 namespace libbitcoin {
@@ -33,70 +33,66 @@ namespace f {
 template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto and_(Word a, Word b) NOEXCEPT
 {
-    return a & b;
+    return depromote<Word>(a & b);
 }
 
 template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto or_(Word a, Word b) NOEXCEPT
 {
-    return a | b;
+    return depromote<Word>(a | b);
 }
 
 template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto xor_(Word a, Word b) NOEXCEPT
 {
-    return a ^ b;
+    return depromote<Word>(a ^ b);
 }
 
 template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto not_(Word a) NOEXCEPT
 {
-    return ~a;
+    return depromote<Word>(~a);
 }
 
 /// mathematical primitives
 /// ---------------------------------------------------------------------------
 // S arguments are set for common overload with extended functions.
+// rotr/rotl are implemented as intrinsic where available, otherwise shift/or.
 
 template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto shr(Word a) NOEXCEPT
 {
-    return a >> B;
+    return depromote<Word>(a >> B);
 }
 
-// unused by sha
 template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto shl(Word a) NOEXCEPT
 {
-    return a << B;
+    return depromote<Word>(a << B);
 }
 
-// S unused by integral overload
 template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto ror(Word a) NOEXCEPT
 {
-    // math/intrinsics
     return rotr<B>(a);
 }
 
-// S unused by integral overload
 template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto rol(Word a) NOEXCEPT
 {
-    // math/intrinsics
     return rotl<B>(a);
 }
 
 template <auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto add(Word a, Word b) NOEXCEPT
 {
-    return a + b;
+    return depromote<Word>(a + b);
 }
 
 template <auto K, auto S = 0, typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto add(Word a) NOEXCEPT
 {
-    return a + K;
+    return depromote<Word>(a + K);
 }
 
 } // namespace f
@@ -105,7 +101,7 @@ INLINE constexpr auto add(Word a) NOEXCEPT
 // First parameter is used only as a polymorphic guide, as it cannot be
 // cleanly provided as a template argument in the given context.
 template <auto Lane, typename Word>
-INLINE constexpr Word extract_(Word, Word a) NOEXCEPT
+INLINE constexpr auto extract_(Word, Word a) NOEXCEPT
 {
     static_assert(Lane == one);
     return a;
