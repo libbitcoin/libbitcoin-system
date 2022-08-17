@@ -1393,6 +1393,8 @@ vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
     // All extended integer intrinsics currently have a "64 on 32" limit.
     if constexpr (!(build_x32 && is_same_size<word_t, uint64_t>))
     {
+        // This is the only place where conditional xint types are introduced.
+        // Guards provide condtional compilation based on type availability.
         if constexpr (have_x512)
             vectorize<xint512_t>(state, blocks);
 
@@ -1459,9 +1461,11 @@ template <typename xWord, if_extended<xWord>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    using xbuffer_t = std_array<xWord, K::rounds>;
+    // Extended integer capacity for uint32_t/uint64_t is 2/4/8/16 only.
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(lanes == 16 || lanes == 8 || lanes == 4 || lanes == 2);
+
+    using xbuffer_t = std_array<xWord, K::rounds>;
 
     if (have<xWord>() && blocks.size() >= lanes)
     {
