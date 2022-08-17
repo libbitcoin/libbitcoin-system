@@ -465,14 +465,14 @@ constexpr auto sigma(auto x) noexcept
 {
     using namespace sha;
     constexpr auto s = bits<decltype(x)>;
-    return xor_
+    return f::xor_
     (
-        xor_
+        f::xor_
         (
-            ror_<A, s>(x),
-            ror_<B, s>(x)
+            f::ror<A, s>(x),
+            f::ror<B, s>(x)
         ),
-        shr_<C>(x)
+        f::shr<C>(x)
     );
 }
 
@@ -486,23 +486,23 @@ constexpr auto sigma_ex(auto x) noexcept
     constexpr auto ac = s0512 ? C - A : A - C;
     constexpr auto bac = s0512 ? B - C : B - A;
 
-    return xor_
+    return f::xor_
     (
-        shr_<c> // (A) for s0_512
+        f::shr<c> // (A) for s0_512
         (
-            xor_
+            f::xor_
             (
-                shr_<ac> // (C-A) for s0_512
+                f::shr<ac> // (C-A) for s0_512
                 (
-                    xor_(shr_<bac>(x), x) // (B-C) for s0_512
+                    f::xor_(f::shr<bac>(x), x) // (B-C) for s0_512
                 ), x
             )
         ),
-        shl_<s-B>
+        f::shl<s-B>
         (
-            xor_
+            f::xor_
             (
-                shl_<B-A>(x), x
+                f::shl<B-A>(x), x
             )
         )
     );
@@ -553,14 +553,14 @@ constexpr auto Sigma(auto x) noexcept
 {
     using namespace sha;
     constexpr auto s = bits<decltype(x)>;
-    return xor_
+    return f::xor_
     (
-        xor_
+        f::xor_
         (
-            ror_<A, s>(x),
-            ror_<B, s>(x)
+            f::ror<A, s>(x),
+            f::ror<B, s>(x)
         ),
-        ror_<C, s>(x)
+        f::ror<C, s>(x)
     );
 }
 
@@ -570,15 +570,15 @@ constexpr auto Sigma_ex(auto x) noexcept
 {
     using namespace sha;
     constexpr auto s = bits<decltype(x)>;
-    return ror_<A, s>
+    return f::ror<A, s>
     (
-        xor_
+        f::xor_
         (
-            ror_<B-A, s>
+            f::ror<B-A, s>
             (
-                xor_
+                f::xor_
                 (
-                    ror_<C-B, s>(x), x
+                    f::ror<C-B, s>(x), x
                 )
             ), x
         )

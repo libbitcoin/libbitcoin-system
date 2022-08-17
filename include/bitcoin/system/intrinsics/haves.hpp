@@ -23,9 +23,9 @@
 #include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/xcpu/cpuid.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional128.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional256.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional512.hpp>
+#include <bitcoin/system/intrinsics/xcpu/functional_128.hpp>
+#include <bitcoin/system/intrinsics/xcpu/functional_256.hpp>
+#include <bitcoin/system/intrinsics/xcpu/functional_512.hpp>
 
 namespace libbitcoin {
 namespace system {

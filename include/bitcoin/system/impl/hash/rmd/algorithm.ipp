@@ -42,46 +42,6 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-// Primitives
-// ---------------------------------------------------------------------------
-
-template<auto B>
-INLINE constexpr auto rol_(auto a) NOEXCEPT
-{
-    return rotl<B>(a);
-}
-
-template<auto B>
-INLINE constexpr auto add_(auto a) NOEXCEPT
-{
-    return a + B;
-}
-
-INLINE constexpr auto add_(auto a, auto b) NOEXCEPT
-{
-    return a + b;
-}
-
-INLINE constexpr auto and_(auto a, auto b) NOEXCEPT
-{
-    return a & b;
-}
-
-INLINE constexpr auto or_(auto a, auto b) NOEXCEPT
-{
-    return a | b;
-}
-
-INLINE constexpr auto xor_(auto a, auto b) NOEXCEPT
-{
-    return a ^ b;
-}
-
-INLINE constexpr auto not_(auto a) NOEXCEPT
-{
-    return ~a;
-}
-
 // Functions.
 // ----------------------------------------------------------------------------
 
@@ -89,35 +49,35 @@ TEMPLATE
 INLINE constexpr auto CLASS::
 f0(auto x, auto y, auto z) NOEXCEPT
 {
-    return xor_(xor_(x, y), z);
+    return f::xor_(f::xor_(x, y), z);
 }
 
 TEMPLATE
 INLINE constexpr auto CLASS::
 f1(auto x, auto y, auto z) NOEXCEPT
 {
-    return or_(and_(x, y), and_(not_(x), z));
+    return f::or_(f::and_(x, y), f::and_(f::not_(x), z));
 }
 
 TEMPLATE
 INLINE constexpr auto CLASS::
 f2(auto x, auto y, auto z) NOEXCEPT
 {
-    return xor_(or_(x, not_(y)), z);
+    return f::xor_(f::or_(x, f::not_(y)), z);
 }
 
 TEMPLATE
 INLINE constexpr auto CLASS::
 f3(auto x, auto y, auto z) NOEXCEPT
 {
-    return or_(and_(x, z), and_(y, not_(z)));
+    return f::or_(f::and_(x, z), f::and_(y, f::not_(z)));
 }
 
 TEMPLATE
 INLINE constexpr auto CLASS::
 f4(auto x, auto y, auto z) NOEXCEPT
 {
-    return xor_(x, or_(y, not_(z)));
+    return f::xor_(x, f::or_(y, f::not_(z)));
 }
 
 // Rounds
@@ -165,9 +125,9 @@ round(auto& a, auto b, auto c, auto d, auto x) NOEXCEPT
 {
     constexpr auto s = K::rot[Round];
     constexpr auto k = K::get[Round / K::columns];
-    constexpr auto f = functor<Round, decltype(a)>();
+    constexpr auto fn = functor<Round, decltype(a)>();
 
-    a = /*b =*/ rol_<s>(add_<k>(add_(add_(a, f(b, c, d)), x)));
+    a = /*b =*/ f::rol<s>(f::add<k>(f::add(f::add(a, fn(b, c, d)), x)));
 }
 
 TEMPLATE
@@ -177,10 +137,10 @@ round(auto& a, auto b, auto& c, auto d, auto e, auto x) NOEXCEPT
 {
     constexpr auto s = K::rot[Round];
     constexpr auto k = K::get[Round / K::columns];
-    constexpr auto f = functor<Round, decltype(a)>();
+    constexpr auto fn = functor<Round, decltype(a)>();
 
-    a = /*b =*/ add_(rol_<s>(add_<k>(add_(add_(a, f(b, c, d)), x))), e);
-    c = /*d =*/ rol_<10>(c);
+    a = /*b =*/ f::add(f::rol<s>(f::add<k>(f::add(f::add(a, fn(b, c, d)), x))), e);
+    c = /*d =*/ f::rol<10>(c);
 }
 
 TEMPLATE
@@ -322,19 +282,19 @@ summarize(state_t& state, const state_t& batch1,
     if constexpr (RMD::strength == 128)
     {
         const auto state_0_ = state[0];
-        state[0] = add_(add_(state[1], batch1[2]), batch2[3]);
-        state[1] = add_(add_(state[2], batch1[3]), batch2[0]);
-        state[2] = add_(add_(state[3], batch1[0]), batch2[1]);
-        state[3] = add_(add_(state_0_, batch1[1]), batch2[2]);
+        state[0] = f::add(f::add(state[1], batch1[2]), batch2[3]);
+        state[1] = f::add(f::add(state[2], batch1[3]), batch2[0]);
+        state[2] = f::add(f::add(state[3], batch1[0]), batch2[1]);
+        state[3] = f::add(f::add(state_0_, batch1[1]), batch2[2]);
     }
     else
     {
         const auto state_0_ = state[0];
-        state[0] = add_(add_(state[1], batch1[2]), batch2[3]);
-        state[1] = add_(add_(state[2], batch1[3]), batch2[4]);
-        state[2] = add_(add_(state[3], batch1[4]), batch2[0]);
-        state[3] = add_(add_(state[4], batch1[0]), batch2[1]);
-        state[4] = add_(add_(state_0_, batch1[1]), batch2[2]);
+        state[0] = f::add(f::add(state[1], batch1[2]), batch2[3]);
+        state[1] = f::add(f::add(state[2], batch1[3]), batch2[4]);
+        state[2] = f::add(f::add(state[3], batch1[4]), batch2[0]);
+        state[3] = f::add(f::add(state[4], batch1[0]), batch2[1]);
+        state[4] = f::add(f::add(state_0_, batch1[1]), batch2[2]);
     }
 }
 

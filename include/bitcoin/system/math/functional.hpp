@@ -25,85 +25,81 @@
 
 namespace libbitcoin {
 namespace system {
+namespace f {
 
-// S arguments are set for common overload with extended functions.
+/// bitwise primitives
+/// ---------------------------------------------------------------------------
 
-template <typename Word,
-    if_integral_integer<Word> = true>
+template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto and_(Word a, Word b) NOEXCEPT
 {
     return a & b;
 }
 
-template <typename Word,
-    if_integral_integer<Word> = true>
+template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto or_(Word a, Word b) NOEXCEPT
 {
     return a | b;
 }
 
-template <typename Word,
-    if_integral_integer<Word> = true>
+template <typename Word, if_integral_integer<Word> = true>
 INLINE constexpr auto xor_(Word a, Word b) NOEXCEPT
 {
     return a ^ b;
 }
 
-template <auto B, auto S = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto shr_(Word a) NOEXCEPT
+template <typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto not_(Word a) NOEXCEPT
+{
+    return ~a;
+}
+
+/// mathematical primitives
+/// ---------------------------------------------------------------------------
+// S arguments are set for common overload with extended functions.
+
+template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto shr(Word a) NOEXCEPT
 {
     return a >> B;
 }
 
 // unused by sha
-template <auto B, auto S = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto shl_(Word a) NOEXCEPT
+template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto shl(Word a) NOEXCEPT
 {
     return a << B;
 }
 
 // S unused by integral overload
-template <auto B, auto S = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto ror_(Word a) NOEXCEPT
+template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto ror(Word a) NOEXCEPT
 {
     // math/intrinsics
     return rotr<B>(a);
 }
 
 // S unused by integral overload
-template <auto B, auto S = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto rol_(Word a) NOEXCEPT
+template <auto B, auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto rol(Word a) NOEXCEPT
 {
     // math/intrinsics
     return rotl<B>(a);
 }
 
-template <auto S = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto add_(Word a, Word b) NOEXCEPT
+template <auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto add(Word a, Word b) NOEXCEPT
 {
     return a + b;
 }
 
-template <auto K, auto S = 0, typename Word,
-    if_integral_integer<Word> = true>
-INLINE constexpr auto add_(Word a) NOEXCEPT
+template <auto K, auto S = 0, typename Word, if_integral_integer<Word> = true>
+INLINE constexpr auto add(Word a) NOEXCEPT
 {
     return a + K;
 }
 
-////// Overload for vectorization coexistence.
-////// Allows either integral/itegral or extended/extended to/from.
-////template <typename To, auto Lane, typename From>
-////INLINE constexpr To extract_(From a) NOEXCEPT
-////{
-////    static_assert(Lane == one);
-////    return a;
-////}
+} // namespace f
 
 // Overload for vectorization coexistence.
 // First parameter is used only as a polymorphic guide, as it cannot be
