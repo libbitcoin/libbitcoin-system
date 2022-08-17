@@ -240,15 +240,15 @@ inline bool have_neon() NOEXCEPT
 
 /// ---------------------------------------------------------------------------
 /// xint types are always defined, though are mocked when not compiled.
-/// Type tests below do not differentiate between mock and integer type.
 /// Use with_ constants to check for compiled option and have_ functions to
 /// check for runtime API availability. This enables mostly unconditional code.
 
 template <typename Type>
 constexpr auto is_extended =
-    is_same_type<Type, xint128_t> ||
-    is_same_type<Type, xint256_t> ||
-    is_same_type<Type, xint512_t>;
+    !std::is_base_of_v<xmock_t, Type> &&
+    (is_same_type<Type, xint128_t> ||
+     is_same_type<Type, xint256_t> ||
+     is_same_type<Type, xint512_t>);
 
 template <typename Type>
 using if_extended = bool_if<is_extended<Type>>;

@@ -29,7 +29,7 @@ namespace system {
 
 /// Accumulator for SHA/RMD/MD# streaming hash algorithms.
 /// Provides size/padding optimized finalized hashing utilities.
-template <typename Algorithm, bool Checked = checked_build,
+template <typename Algorithm, bool Checked = build_checked,
     if_base_of<algorithm_t, Algorithm> = true>
 class accumulator
 {

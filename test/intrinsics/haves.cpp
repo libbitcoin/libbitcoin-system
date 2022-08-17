@@ -224,21 +224,25 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__when_defined__true)
 // ----------------------------------------------------------------------------
 // These are true (mocked) when support for the extended type is not compiled.
 
-static_assert(is_extended<xint512_t>);
-static_assert(is_extended<xint256_t>);
-static_assert(is_extended<xint128_t>);
-
-static_assert(is_defined<if_extended<xint512_t>>);
-static_assert(is_defined<if_extended<xint256_t>>);
+static_assert(is_extended<xint128_t> == with_sse41);
+#if defined(HAVE_SSE4)
 static_assert(is_defined<if_extended<xint128_t>>);
+#endif
+
+static_assert(is_extended<xint256_t> == with_avx2);
+#if defined(HAVE_AVX2)
+static_assert(is_defined<if_extended<xint256_t>>);
+#endif
+
+static_assert(is_extended<xint512_t> == with_avx512);
+#if defined(HAVE_AVX512)
+static_assert(is_defined<if_extended<xint512_t>>);
+#endif
+
 ////static_assert(!is_defined<if_extended<uint64_t>>);
 ////static_assert(!is_defined<if_extended<uint32_t>>);
 ////static_assert(!is_defined<if_extended<uint16_t>>);
 ////static_assert(!is_defined<if_extended<uint8_t>>);
-
-static_assert(is_same_type<xint128_t, xint128_t>);
-static_assert(is_same_type<xint256_t, xint256_t>);
-static_assert(is_same_type<xint512_t, xint512_t>);
 
 // have<>/with<> wrappers
 // ----------------------------------------------------------------------------

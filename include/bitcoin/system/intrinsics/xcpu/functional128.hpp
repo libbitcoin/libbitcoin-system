@@ -33,8 +33,8 @@ namespace system {
 
 using xint128_t = __m128i;
 
-// SSE4 bitwise primitives
-// ----------------------------------------------------------------------------
+/// bitwise primitives
+/// ---------------------------------------------------------------------------
 
 // SSE2
 template <typename Word, if_same<Word, xint128_t> = true>
@@ -57,8 +57,8 @@ INLINE Word xor_(Word a, Word b) NOEXCEPT
     return mm_xor_si128(a, b);
 }
 
-// SSE4 vector primitives
-// ----------------------------------------------------------------------------
+/// vector primitives
+/// ---------------------------------------------------------------------------
 
 // SSE2
 template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
@@ -135,21 +135,16 @@ INLINE Word add_(Word a) NOEXCEPT
         return add_<S>(a, mm_set1_epi64x(K));
 }
 
-// SSE4 unpack/set/get (for all element widths).
-// ----------------------------------------------------------------------------
-
-// TODO: T pack<T>(const uint8_t*).
-INLINE auto unpack(xint128_t a) NOEXCEPT
-{
-    std_array<uint8_t, sizeof(xint128_t)> bytes{};
-    mm_storeu_si128(pointer_cast<xint128_t>(&bytes.front()), a);
-    return bytes;
-}
+/// vector extract (overloaded by non-vector)
+/// ---------------------------------------------------------------------------
 
 // Lane zero is lowest order word.
 template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To extract(xint128_t a) NOEXCEPT
+INLINE To extract_(xint128_t a) NOEXCEPT
 {
+    // mm_extract_epi64 defined as no-op on 32 bit builds.
+    ////static_assert(!build_x32 && is_same_type<To, uint64_t>);
+
     // SSE4.1
     if constexpr (is_same_type<To, uint8_t>)
         return mm_extract_epi8(a, Lane);
@@ -161,15 +156,12 @@ INLINE To extract(xint128_t a) NOEXCEPT
     // SSE4.1
     else if constexpr (is_same_type<To, uint32_t>)
         return mm_extract_epi32(a, Lane);
-
-#if !defined(HAVE_X64)
-    static_assert(!is_same_type<To, uint64_t>);
-#else
-    // undefined on 32 bit builds.
     else if constexpr (is_same_type<To, uint64_t>)
         return mm_extract_epi64(a, Lane);
-#endif
 }
+
+/// set/get (for all element widths).
+/// ---------------------------------------------------------------------------
 
 // SSE2
 // Low order word to the left.
@@ -218,8 +210,19 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
-// Endianness
-// ----------------------------------------------------------------------------
+/// pack/unpack
+/// ---------------------------------------------------------------------------
+
+// TODO: T pack<T>(const uint8_t*).
+INLINE auto unpack(xint128_t a) NOEXCEPT
+{
+    std_array<uint8_t, sizeof(xint128_t)> bytes{};
+    mm_storeu_si128(pointer_cast<xint128_t>(&bytes.front()), a);
+    return bytes;
+}
+
+/// endianness
+/// ---------------------------------------------------------------------------
 
 // SSSE3
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)

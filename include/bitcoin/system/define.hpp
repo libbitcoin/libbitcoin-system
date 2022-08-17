@@ -54,20 +54,34 @@ namespace bc = libbitcoin;
 /// ---------------------------------------------------------------------------
 
 #if defined(NDEBUG)
-    namespace libbitcoin { constexpr auto checked_build = false; };
+    namespace libbitcoin { constexpr auto build_checked = false; };
     #define BC_ASSERT(expression)
     #define BC_ASSERT_MSG(expression, text)
     #define BC_DEBUG_ONLY(expression)
 #else
     #include <cassert>
-    namespace libbitcoin { constexpr auto checked_build = true; };
+    namespace libbitcoin { constexpr auto build_checked = true; };
     #define BC_RUNTIME(evaluate) if (!std::is_constant_evaluated()) { evaluate; }
     #define BC_ASSERT(expression) BC_RUNTIME(assert(expression))
     #define BC_ASSERT_MSG(expression, text) BC_RUNTIME(assert((expression)&&(text)))
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
-/// Attributes (for platform independence).
+/// Bitness.
+/// ---------------------------------------------------------------------------
+
+#if defined(HAVE_X32)
+    namespace libbitcoin { constexpr auto build_x32 = true; };
+#else
+    namespace libbitcoin { constexpr auto build_x32 = false; };
+#endif
+#if defined(HAVE_X64)
+    namespace libbitcoin { constexpr auto build_x64 = true; };
+#else
+    namespace libbitcoin { constexpr auto build_x64 = false; };
+#endif
+
+/// Attributes.
 /// ---------------------------------------------------------------------------
 
 /// Emit messages from .cpp during compilation.

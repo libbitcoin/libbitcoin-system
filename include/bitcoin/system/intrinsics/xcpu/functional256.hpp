@@ -32,8 +32,8 @@ namespace system {
 
 using xint256_t = __m256i;
 
-// AVX2 bitwise primitives
-// ----------------------------------------------------------------------------
+/// bitwise primitives
+/// ---------------------------------------------------------------------------
 
 // AVX2
 template <typename Word, if_same<Word, xint256_t> = true>
@@ -56,8 +56,8 @@ INLINE Word xor_(Word a, Word b) NOEXCEPT
     return mm256_xor_si256(a, b);
 }
 
-// AVX2 vector primitives
-// ----------------------------------------------------------------------------
+/// vector primitives
+/// ---------------------------------------------------------------------------
 
 template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word shr_(Word a) NOEXCEPT
@@ -134,21 +134,16 @@ INLINE Word add_(Word a) NOEXCEPT
         return add_<S>(a, mm256_set1_epi64x(K));
 }
 
-// AVX2 unpack/set/get (for all element widths).
-// ----------------------------------------------------------------------------
-
-// TODO: T pack<T>(const uint8_t*).
-INLINE auto unpack(xint256_t a) NOEXCEPT
-{
-    std_array<uint8_t, sizeof(xint256_t)> bytes{};
-    mm256_storeu_si256(pointer_cast<xint256_t>(&bytes.front()), a);
-    return bytes;
-}
+/// vector extract (overloaded by non-vector)
+/// ---------------------------------------------------------------------------
 
 // Lane zero is lowest order word.
 template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To extract(xint256_t a) NOEXCEPT
+INLINE To extract_(xint256_t a) NOEXCEPT
 {
+    // mm256_extract_epi64 defined as no-op on 32 bit builds.
+    ////static_assert(!build_x32 && is_same_type<To, uint64_t>);
+
     // AVX2
     if constexpr (is_same_type<To, uint8_t>)
         return mm256_extract_epi8(a, Lane);
@@ -158,15 +153,12 @@ INLINE To extract(xint256_t a) NOEXCEPT
     // AVX
     else if constexpr (is_same_type<To, uint32_t>)
         return mm256_extract_epi32(a, Lane);
-
-#if !defined(HAVE_X64)
-    static_assert(!is_same_type<To, uint64_t>);
-#else
-    // undefined on 32 bit builds.
     else if constexpr (is_same_type<To, uint64_t>)
         return mm256_extract_epi64(a, Lane);
-#endif
 }
+
+/// set/get (for all element widths)
+/// ---------------------------------------------------------------------------
 
 // AVX
 // Low order word to the left.
@@ -236,8 +228,19 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
-// Endianness
-// ----------------------------------------------------------------------------
+/// pack/unpack
+/// ---------------------------------------------------------------------------
+
+// TODO: T pack<T>(const uint8_t*).
+INLINE auto unpack(xint256_t a) NOEXCEPT
+{
+    std_array<uint8_t, sizeof(xint256_t)> bytes{};
+    mm256_storeu_si256(pointer_cast<xint256_t>(&bytes.front()), a);
+    return bytes;
+}
+
+/// endianness
+/// ---------------------------------------------------------------------------
 
 // AVX2
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)

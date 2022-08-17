@@ -321,7 +321,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            extract<word_t, Lane>(wk[Round]));
+            extract_<word_t, Lane>(wk[Round]));
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -338,7 +338,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            extract<word_t, Lane>(wk[Round]));
+            extract_<word_t, Lane>(wk[Round]));
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -1390,14 +1390,18 @@ TEMPLATE
 INLINE void CLASS::
 vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (have_x512)
-        vectorize<xint512_t>(state, blocks);
+    // All extended integer intrinsics currently have a "64 on 32" limit.
+    if constexpr (!(build_x32 && is_same_size<word_t, uint64_t>))
+    {
+        if constexpr (have_x512)
+            vectorize<xint512_t>(state, blocks);
 
-    if constexpr (have_x256)
-        vectorize<xint256_t>(state, blocks);
+        if constexpr (have_x256)
+            vectorize<xint256_t>(state, blocks);
 
-    if constexpr (have_x128)
-        vectorize<xint128_t>(state, blocks);
+        if constexpr (have_x128)
+            vectorize<xint128_t>(state, blocks);
+    }
 
     // blocks.size() is reduced by vectorization.
     sequential(state, blocks);
@@ -1456,7 +1460,6 @@ inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     using xbuffer_t = std_array<xWord, K::rounds>;
-    static_assert(!std::is_base_of_v<xmock_t, xWord>);
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(lanes == 16 || lanes == 8 || lanes == 4 || lanes == 2);
 

@@ -58,33 +58,31 @@ struct xmock_t {};
 // ****************************************************************************
 
 // These are not defined for 32 bit bit builds.
-// TODO: these affect only sha512 (i64) in 32 bit builds, narrow restriction.
+// This presently precludes sha512 vectorization on x32 builds.
 #if defined(HAVE_X32)
 #if defined(HAVE_SSE4)
-////inline auto _mm_extract_epi64(auto a, auto Lane) NOEXCEPT
-////{
-////    // TODO: define to enable sha512 vectorization on 32 bit builds.
-////    // TODO: until then disable SSE4 on HAVE_X32.
-////}
+inline auto _mm_extract_epi64(auto a, auto) NOEXCEPT
+{
+    return a;
+}
 #endif
 #if defined(HAVE_AVX2)
-////inline auto _mm256_extract_epi64(auto a, auto Lane) NOEXCEPT
-////{
-////    // TODO: define to enable sha512 vectorization on 32 bit builds.
-////    // TODO: until then disable AVX2 on HAVE_X32.
-////}
+inline auto _mm256_extract_epi64(auto a, auto) NOEXCEPT
+{
+    return a;
+}
 #endif
 #if defined(HAVE_AVX512)
-////inline auto _mm_cvtsi128_si64(auto a) NOEXCEPT
-////{
-////    // required for _mm512_extract_epi64
-////    // TODO: define to enable sha512 vectorization on 32 bit builds.
-////    // TODO: until then disable HAVE_AVX512 on HAVE_X32.
-////}
+// required for _mm512_extract_epi64
+inline auto _mm_cvtsi128_si64(auto a) NOEXCEPT
+{
+    return a;
+}
 #endif
 #endif
 
 // These are not defined.
+// 8/16 bit are not implemented here due to AVX512_VBMI2 requirement.
 // github.com/vectorclass/version2/blob/master/vectori512.h
 #if defined(HAVE_AVX512)
 ////inline auto _mm512_extract_epi8(auto a, auto Lane) NOEXCEPT
@@ -108,8 +106,9 @@ inline auto _mm512_extract_epi32(auto a, auto Lane) NOEXCEPT
 inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
 {
     // AVX512F/SSE2/AVX512F
+    // cvt undefined for 32 bit (see above).
     const auto t = _mm512_maskz_compress_epi64(__mmask8(1u << Lane), a);
-    return _mm_cvtsi128_si64(_mm512_castsi512_si128(t)); // cvt undefined for 32 bit.
+    return _mm_cvtsi128_si64(_mm512_castsi512_si128(t));
 }
 #endif
 
@@ -132,9 +131,7 @@ inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
     #define mm_extract_epi8(a, Lane)    (a)
     #define mm_extract_epi16(a, Lane)   (a)
     #define mm_extract_epi32(a, Lane)   (a)
-#if defined(HAVE_X64)
     #define mm_extract_epi64(a, Lane)   (a)
-#endif
     #define mm_shuffle_epi8(a, mask)    (a)
     #define mm_storeu_si128(a, b)
     #define mm_set1_epi8(K)
@@ -164,9 +161,7 @@ inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
     #define mm_extract_epi8(a, Lane)    _mm_extract_epi8(a, Lane)
     #define mm_extract_epi16(a, Lane)   _mm_extract_epi16(a, Lane)
     #define mm_extract_epi32(a, Lane)   _mm_extract_epi32(a, Lane)
-#if defined(HAVE_X64)
     #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane) // undefined for X32
-#endif
     #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
     #define mm_storeu_si128(a, b)       _mm_storeu_si128(a, b)
     #define mm_set1_epi8(K)             _mm_set1_epi8(K)
@@ -201,9 +196,7 @@ inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
     #define mm256_extract_epi8(a, Lane)     (a)
     #define mm256_extract_epi16(a, Lane)    (a)
     #define mm256_extract_epi32(a, Lane)    (a)
-#if defined(HAVE_X64)
     #define mm256_extract_epi64(a, Lane)    (a)
-#endif
     #define mm256_shuffle_epi8(a, mask)     (a)
     #define mm256_storeu_si256(a, b)
     #define mm256_set1_epi8(K)
@@ -233,9 +226,7 @@ inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
     #define mm256_extract_epi8(a, Lane)     _mm256_extract_epi8(a, Lane)
     #define mm256_extract_epi16(a, Lane)    _mm256_extract_epi16(a, Lane)
     #define mm256_extract_epi32(a, Lane)    _mm256_extract_epi32(a, Lane)
-#if defined(HAVE_X64)
     #define mm256_extract_epi64(a, Lane)    _mm256_extract_epi64(a, Lane) // undefined for X32
-#endif
     #define mm256_shuffle_epi8(a, mask)     _mm256_shuffle_epi8(a, mask)
     #define mm256_storeu_si256(a, b)        _mm256_storeu_si256(a, b)
     #define mm256_set1_epi8(K)              _mm256_set1_epi8(K)

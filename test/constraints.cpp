@@ -179,6 +179,13 @@ static_assert(is_defined<if_base_of<base, derived>>);
 ////static_assert(!is_defined<if_base_of<uint8_t, uint32_t>>);
 ////static_assert(!is_defined<if_base_of<float, double>>);
 
+static_assert(is_defined<if_not_base_of<base, not_derived>>);
+static_assert(is_defined<if_not_base_of<uint8_t, uint8_t>>);
+static_assert(is_defined<if_not_base_of<uint8_t, uint32_t>>);
+static_assert(is_defined<if_not_base_of<float, double>>);
+////static_assert(!is_defined<if_not_base_of<base, base>>);
+////static_assert(!is_defined<if_not_base_of<base, derived>>);
+
 static_assert(is_defined<if_same_size<bool, bool>>);
 static_assert(is_defined<if_same_size<int, int>>);
 static_assert(is_defined<if_same_size<int8_t, int8_t>>);

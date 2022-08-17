@@ -134,30 +134,24 @@
     // TODO: CLANG/GCC compile test and set -msse4 -mavx2 -mavx512f -msha.
     // TODO: if set also set these WITH_ symbols, picked up here.
     #if defined(HAVE_CLANG) || defined(HAVE_GNUC)
-        // See /xcpu/defines.hpp for 32 bit limitations for sse4/avx2/avx512.
-        #if defined(HAVE_X64)
-            #if defined (WITH_SSE4)
-                #define HAVE_SSE4
-            #endif
-            #if defined (WITH_AVX2)
-                #define HAVE_AVX2
-            #endif
-            #if defined (WITH_AVX512)
-                #define HAVE_AVX512
-            #endif
-            #if defined (WITH_SHANI)
-                #define HAVE_SHANI
-            #endif
+        #if defined (WITH_SSE4)
+            #define HAVE_SSE4
+        #endif
+        #if defined (WITH_AVX2)
+            #define HAVE_AVX2
+        #endif
+        #if defined (WITH_AVX512)
+            #define HAVE_AVX512
+        #endif
+        #if defined (WITH_SHANI)
+            #define HAVE_SHANI
         #endif
     #endif
     // Always available without platform test or build configuration.
     #if defined(HAVE_MSC)
-        // See /xcpu/defines.hpp for 32 bit limitations for sse4/avx2/avx512.
-        #if defined(HAVE_X64)
-            #define HAVE_SSE4
-            #define HAVE_AVX2
-            #define HAVE_AVX512
-        #endif
+        #define HAVE_SSE4
+        #define HAVE_AVX2
+        #define HAVE_AVX512
         #define HAVE_SHANI
     #endif
 #endif

@@ -38,8 +38,8 @@ namespace system {
 
 using xint512_t = __m512i;
 
-// AVX512 bitwise primitives
-// ----------------------------------------------------------------------------
+/// bitwise primitives
+/// ---------------------------------------------------------------------------
 
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
@@ -62,8 +62,8 @@ INLINE Word xor_(Word a, Word b) NOEXCEPT
     return mm512_xor_si512(a, b);
 }
 
-// AVX512 vector primitives
-// ----------------------------------------------------------------------------
+/// Vector primitives.
+/// ---------------------------------------------------------------------------
 
 template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
 INLINE Word shr_(Word a) NOEXCEPT
@@ -146,21 +146,13 @@ INLINE Word add_(Word a) NOEXCEPT
         return add_<S>(a, mm512_set1_epi64(K));
 }
 
-// AVX512 unpack, set (for all element widths), get (for 32/64 bit).
-// ----------------------------------------------------------------------------
-
-// TODO: T pack<T>(const uint8_t*).
-INLINE auto unpack(xint512_t a) NOEXCEPT
-{
-    std_array<uint8_t, sizeof(xint512_t)> bytes{};
-    mm512_storeu_si512(pointer_cast<xint512_t>(&bytes.front()), a);
-    return bytes;
-}
+/// Vector extract (overloaded by non-vector)
+/// ---------------------------------------------------------------------------
 
 // Extraction intrinsics not defined for any AVX512.
 // Lane zero is lowest order word.
 template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To extract(xint512_t a) NOEXCEPT
+INLINE To extract_(xint512_t a) NOEXCEPT
 {
     // AVX512_VBMI2/AVX512F/SSE2
     static_assert(!is_same_type<To, uint8_t>);
@@ -176,6 +168,9 @@ INLINE To extract(xint512_t a) NOEXCEPT
     else if constexpr (is_same_type<To, uint64_t>)
         return mm512_extract_epi64(a, Lane);
 }
+
+/// set (for all element widths), get (for 32/64 bit)
+/// ---------------------------------------------------------------------------
 
 // AVX512F
 // Low order word to the left.
@@ -282,8 +277,19 @@ INLINE To set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
-// Endianness
-// ----------------------------------------------------------------------------
+/// pack/unpack
+/// ---------------------------------------------------------------------------
+
+// TODO: T pack<T>(const uint8_t*).
+INLINE auto unpack(xint512_t a) NOEXCEPT
+{
+    std_array<uint8_t, sizeof(xint512_t)> bytes{};
+    mm512_storeu_si512(pointer_cast<xint512_t>(&bytes.front()), a);
+    return bytes;
+}
+
+/// endianness
+/// ---------------------------------------------------------------------------
 
 // AVX512BW
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
