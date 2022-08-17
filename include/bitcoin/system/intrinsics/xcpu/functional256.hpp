@@ -158,8 +158,14 @@ INLINE To extract(xint256_t a) NOEXCEPT
     // AVX
     else if constexpr (is_same_type<To, uint32_t>)
         return mm256_extract_epi32(a, Lane);
+
+#if !defined(HAVE_X64)
+    static_assert(!is_same_type<To, uint64_t>);
+#else
+    // undefined on 32 bit builds.
     else if constexpr (is_same_type<To, uint64_t>)
         return mm256_extract_epi64(a, Lane);
+#endif
 }
 
 // AVX
@@ -248,7 +254,7 @@ BC_POP_WARNING()
 #else
 
 // Symbol is defined but not usable.
-struct xint256_t {};
+struct xint256_t : xmock_t {};
 
 #endif // HAVE_AVX2
 

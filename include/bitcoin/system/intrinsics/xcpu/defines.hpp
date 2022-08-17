@@ -21,6 +21,9 @@
 
 #include <bitcoin/system/define.hpp>
 
+/// Base type for mock extended integer types, used for differentiation.
+struct xmock_t {};
+
 #if defined(HAVE_XCPU)
     #include <immintrin.h>
     #if defined(HAVE_X64)
@@ -54,13 +57,71 @@
 // defined for runtime conditionality. The latter is false if is the former.
 // ****************************************************************************
 
+// These are not defined for 32 bit bit builds.
+// TODO: these affect only sha512 (i64) in 32 bit builds, narrow restriction.
+#if defined(HAVE_X32)
+#if defined(HAVE_SSE4)
+////inline auto _mm_extract_epi64(auto a, auto Lane) NOEXCEPT
+////{
+////    // TODO: define to enable sha512 vectorization on 32 bit builds.
+////    // TODO: until then disable SSE4 on HAVE_X32.
+////}
+#endif
+#if defined(HAVE_AVX2)
+////inline auto _mm256_extract_epi64(auto a, auto Lane) NOEXCEPT
+////{
+////    // TODO: define to enable sha512 vectorization on 32 bit builds.
+////    // TODO: until then disable AVX2 on HAVE_X32.
+////}
+#endif
+#if defined(HAVE_AVX512)
+////inline auto _mm_cvtsi128_si64(auto a) NOEXCEPT
+////{
+////    // required for _mm512_extract_epi64
+////    // TODO: define to enable sha512 vectorization on 32 bit builds.
+////    // TODO: until then disable HAVE_AVX512 on HAVE_X32.
+////}
+#endif
+#endif
+
+// These are not defined.
+// github.com/vectorclass/version2/blob/master/vectori512.h
+#if defined(HAVE_AVX512)
+////inline auto _mm512_extract_epi8(auto a, auto Lane) NOEXCEPT
+////{
+////    // AVX512_VBMI2/AVX512F/SSE2
+////    const auto t = _mm512_maskz_compress_epi8(__mmask16(1u << Lane), a);
+////    return _mm_cvtsi128_si8(_mm512_castsi512_si128(t));
+////}
+////inline auto _mm512_extract_epi16(auto a, auto Lane) NOEXCEPT
+////{
+////    // AVX512_VBMI2/AVX512F/SSE2
+////    const auto t = _mm512_maskz_compress_epi16(__mmask8(1u << Lane), a);
+////    return _mm_cvtsi128_si16(_mm512_castsi512_si128(t));
+////}
+inline auto _mm512_extract_epi32(auto a, auto Lane) NOEXCEPT
+{
+    // AVX512F/SSE2/AVX512F
+    const auto t = _mm512_maskz_compress_epi32(__mmask16(1u << Lane), a);
+    return _mm_cvtsi128_si32(_mm512_castsi512_si128(t));
+}
+inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
+{
+    // AVX512F/SSE2/AVX512F
+    const auto t = _mm512_maskz_compress_epi64(__mmask8(1u << Lane), a);
+    return _mm_cvtsi128_si64(_mm512_castsi512_si128(t)); // cvt undefined for 32 bit.
+}
+#endif
+
 #if !defined(HAVE_SSE4)
     #define mm_and_si128(a, b)  (a)
     #define mm_or_si128(a, b)   (a)
     #define mm_xor_si128(a, b)  (a)
+    ////#define mm_srli_epi8(a, B) (a)
     #define mm_srli_epi16(a, B) (a)
     #define mm_srli_epi32(a, B) (a)
     #define mm_srli_epi64(a, B) (a)
+    ////#define mm_slli_epi8(a, B) (a)
     #define mm_slli_epi16(a, B) (a)
     #define mm_slli_epi32(a, B) (a)
     #define mm_slli_epi64(a, B) (a)
@@ -71,7 +132,9 @@
     #define mm_extract_epi8(a, Lane)    (a)
     #define mm_extract_epi16(a, Lane)   (a)
     #define mm_extract_epi32(a, Lane)   (a)
+#if defined(HAVE_X64)
     #define mm_extract_epi64(a, Lane)   (a)
+#endif
     #define mm_shuffle_epi8(a, mask)    (a)
     #define mm_storeu_si128(a, b)
     #define mm_set1_epi8(K)
@@ -86,9 +149,11 @@
     #define mm_and_si128(a, b)          _mm_and_si128(a, b)
     #define mm_or_si128(a, b)           _mm_or_si128(a, b)
     #define mm_xor_si128(a, b)          _mm_xor_si128(a, b)
+    ////#define mm_srli_epi8(a, B)      _mm_srli_epi8(a, B) // undefined
     #define mm_srli_epi16(a, B)         _mm_srli_epi16(a, B)
     #define mm_srli_epi32(a, B)         _mm_srli_epi32(a, B)
     #define mm_srli_epi64(a, B)         _mm_srli_epi64(a, B)
+    ////#define mm_slli_epi8(a, B)      _mm_slli_epi8(a, B) // undefined
     #define mm_slli_epi16(a, B)         _mm_slli_epi16(a, B)
     #define mm_slli_epi32(a, B)         _mm_slli_epi32(a, B)
     #define mm_slli_epi64(a, B)         _mm_slli_epi64(a, B)
@@ -99,7 +164,9 @@
     #define mm_extract_epi8(a, Lane)    _mm_extract_epi8(a, Lane)
     #define mm_extract_epi16(a, Lane)   _mm_extract_epi16(a, Lane)
     #define mm_extract_epi32(a, Lane)   _mm_extract_epi32(a, Lane)
-    #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane)
+#if defined(HAVE_X64)
+    #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane) // undefined for X32
+#endif
     #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
     #define mm_storeu_si128(a, b)       _mm_storeu_si128(a, b)
     #define mm_set1_epi8(K)             _mm_set1_epi8(K)
@@ -119,9 +186,11 @@
     #define mm256_and_si256(a, b)   (a)
     #define mm256_or_si256(a, b)    (a)
     #define mm256_xor_si256(a, b)   (a)
+    ////#define mm256_srli_epi8(a, B)   (a)
     #define mm256_srli_epi16(a, B)  (a)
     #define mm256_srli_epi32(a, B)  (a)
     #define mm256_srli_epi64(a, B)  (a)
+    ////#define mm256_slli_epi8(a, B)   (a)
     #define mm256_slli_epi16(a, B)  (a)
     #define mm256_slli_epi32(a, B)  (a)
     #define mm256_slli_epi64(a, B)  (a)
@@ -132,7 +201,9 @@
     #define mm256_extract_epi8(a, Lane)     (a)
     #define mm256_extract_epi16(a, Lane)    (a)
     #define mm256_extract_epi32(a, Lane)    (a)
+#if defined(HAVE_X64)
     #define mm256_extract_epi64(a, Lane)    (a)
+#endif
     #define mm256_shuffle_epi8(a, mask)     (a)
     #define mm256_storeu_si256(a, b)
     #define mm256_set1_epi8(K)
@@ -147,9 +218,11 @@
     #define mm256_and_si256(a, b)           _mm256_and_si256(a, b)
     #define mm256_or_si256(a, b)            _mm256_or_si256(a, b)
     #define mm256_xor_si256(a, b)           _mm256_xor_si256(a, b)
+    ////#define mm256_srli_epi8(a, B)       _mm256_srli_epi8(a, B) // undefined
     #define mm256_srli_epi16(a, B)          _mm256_srli_epi16(a, B)
     #define mm256_srli_epi32(a, B)          _mm256_srli_epi32(a, B)
     #define mm256_srli_epi64(a, B)          _mm256_srli_epi64(a, B)
+    ////#define mm256_slli_epi8(a, B)       _mm256_slli_epi8(a, B) // undefined
     #define mm256_slli_epi16(a, B)          _mm256_slli_epi16(a, B)
     #define mm256_slli_epi32(a, B)          _mm256_slli_epi32(a, B)
     #define mm256_slli_epi64(a, B)          _mm256_slli_epi64(a, B)
@@ -160,7 +233,9 @@
     #define mm256_extract_epi8(a, Lane)     _mm256_extract_epi8(a, Lane)
     #define mm256_extract_epi16(a, Lane)    _mm256_extract_epi16(a, Lane)
     #define mm256_extract_epi32(a, Lane)    _mm256_extract_epi32(a, Lane)
-    #define mm256_extract_epi64(a, Lane)    _mm256_extract_epi64(a, Lane)
+#if defined(HAVE_X64)
+    #define mm256_extract_epi64(a, Lane)    _mm256_extract_epi64(a, Lane) // undefined for X32
+#endif
     #define mm256_shuffle_epi8(a, mask)     _mm256_shuffle_epi8(a, mask)
     #define mm256_storeu_si256(a, b)        _mm256_storeu_si256(a, b)
     #define mm256_set1_epi8(K)              _mm256_set1_epi8(K)
@@ -181,10 +256,12 @@
     #define mm512_and_si512(a, b)   (a)
     #define mm512_or_si512(a, b)    (a)
     #define mm512_xor_si512(a, b)   (a)
-    ////#define mm512_srli_epi16(a, B)  (a)
+    ////#define mm512_srli_epi8(a, B)  (a)
+    #define mm512_srli_epi16(a, B)  (a)
     #define mm512_srli_epi32(a, B)  (a)
     #define mm512_srli_epi64(a, B)  (a)
-    ////#define mm512_slli_epi16(a, B)  (a)
+    ////#define mm512_slli_epi8(a, B)  (a)
+    #define mm512_slli_epi16(a, B)  (a)
     #define mm512_slli_epi32(a, B)  (a)
     #define mm512_slli_epi64(a, B)  (a)
     #define mm512_add_epi8(a, b)    (a)
@@ -209,20 +286,22 @@
     #define mm512_and_si512(a, b)           _mm512_and_si512(a, b)
     #define mm512_or_si512(a, b)            _mm512_or_si512(a, b)
     #define mm512_xor_si512(a, b)           _mm512_xor_si512(a, b)
-    ////#define mm512_srli_epi16(a, B)          _mm512_srli_epi16(a, B)
+    ////#define mm512_srli_epi8(a, B)       _mm512_srli_epi8(a, B)  // undefined
+    #define mm512_srli_epi16(a, B)          _mm512_srli_epi16(a, B) // AVX512BW
     #define mm512_srli_epi32(a, B)          _mm512_srli_epi32(a, B)
     #define mm512_srli_epi64(a, B)          _mm512_srli_epi64(a, B)
-    ////#define mm512_slli_epi16(a, B)          _mm512_slli_epi16(a, B)
+    ////#define mm512_slli_epi8(a, B)       _mm512_slli_epi8(a, B)  // undefined
+    #define mm512_slli_epi16(a, B)          _mm512_slli_epi16(a, B) // AVX512BW
     #define mm512_slli_epi32(a, B)          _mm512_slli_epi32(a, B)
     #define mm512_slli_epi64(a, B)          _mm512_slli_epi64(a, B)
-    #define mm512_add_epi8(a, b)            _mm512_add_epi8(a, b)
-    #define mm512_add_epi16(a, b)           _mm512_add_epi16(a, b)
+    #define mm512_add_epi8(a, b)            _mm512_add_epi8(a, b)   // AVX512BW
+    #define mm512_add_epi16(a, b)           _mm512_add_epi16(a, b)  // AVX512BW
     #define mm512_add_epi32(a, b)           _mm512_add_epi32(a, b)
     #define mm512_add_epi64(a, b)           _mm512_add_epi64(a, b)
-    ////#define mm512_extract_epi8(a, Lane)     _mm512_extract_epi8(a, Lane)
-    ////#define mm512_extract_epi16(a, Lane)    _mm512_extract_epi16(a, Lane)
-    #define mm512_extract_epi32(a, Lane)    _mm512_extract_epi32(a, Lane)
-    #define mm512_extract_epi64(a, Lane)    _mm512_extract_epi64(a, Lane)
+    ////#define mm512_extract_epi8(a, Lane) _mm512_extract_epi8(a, Lane)  // AVX512_VBMI2
+    ////#define mm512_extract_epi16(a, Lane)_mm512_extract_epi16(a, Lane) // AVX512_VBMI2
+    #define mm512_extract_epi32(a, Lane)    _mm512_extract_epi32(a, Lane) // undefined
+    #define mm512_extract_epi64(a, Lane)    _mm512_extract_epi64(a, Lane) // undefined
     #define mm512_shuffle_epi8(a, mask)     _mm512_shuffle_epi8(a, mask)
     #define mm512_storeu_si512(a, b)        _mm512_storeu_si512(a, b)
     #define mm512_set1_epi8(K)              _mm512_set1_epi8(K)
@@ -237,34 +316,6 @@
            _mm512_set_epi16(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
     #define  mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
             _mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
-#endif
-
-#if defined(HAVE_AVX512)
-// github.com/vectorclass/version2/blob/master/vectori512.h
-////inline auto _mm512_extract_epi8(auto a, auto Lane) NOEXCEPT
-////{
-////    // AVX512_VBMI2/AVX512F/SSE2
-////    const auto t = _mm512_maskz_compress_epi8(__mmask16(1u << Lane), a);
-////    return _mm_cvtsi128_si8(_mm512_castsi512_si128(t));
-////}
-////inline auto _mm512_extract_epi16(auto a, auto Lane) NOEXCEPT
-////{
-////    // AVX512_VBMI2/AVX512F/SSE2
-////    const auto t = _mm512_maskz_compress_epi16(__mmask8(1u << Lane), a);
-////    return _mm_cvtsi128_si16(_mm512_castsi512_si128(t));
-////}
-inline auto _mm512_extract_epi32(auto a, auto Lane) NOEXCEPT
-{
-    // AVX512F/SSE2/AVX512F
-    const auto t = _mm512_maskz_compress_epi32(__mmask16(1u << Lane), a);
-    return _mm_cvtsi128_si32(_mm512_castsi512_si128(t));
-}
-inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
-{
-    // AVX512F/SSE2/AVX512F
-    const auto t = _mm512_maskz_compress_epi64(__mmask8(1u << Lane), a);
-    return _mm_cvtsi128_si64(_mm512_castsi512_si128(t));
-}
 #endif
 
 #endif

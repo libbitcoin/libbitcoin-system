@@ -36,6 +36,7 @@ BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 /// Constant symbols for compiled intrinsics interfaces.
 /// ---------------------------------------------------------------------------
 
+// TODO: unclear if there is a necessary x64 limitation.
 #if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
     constexpr auto with_sse41a = true;
 #else

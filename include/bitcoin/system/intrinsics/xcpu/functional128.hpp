@@ -161,8 +161,14 @@ INLINE To extract(xint128_t a) NOEXCEPT
     // SSE4.1
     else if constexpr (is_same_type<To, uint32_t>)
         return mm_extract_epi32(a, Lane);
+
+#if !defined(HAVE_X64)
+    static_assert(!is_same_type<To, uint64_t>);
+#else
+    // undefined on 32 bit builds.
     else if constexpr (is_same_type<To, uint64_t>)
         return mm_extract_epi64(a, Lane);
+#endif
 }
 
 // SSE2
@@ -229,7 +235,7 @@ BC_POP_WARNING()
 #else
 
 // Symbol is defined but not usable.
-struct xint128_t {};
+struct xint128_t : xmock_t {};
 
 #endif // HAVE_SSE4
 

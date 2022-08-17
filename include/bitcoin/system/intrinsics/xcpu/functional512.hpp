@@ -302,7 +302,7 @@ BC_POP_WARNING()
 #else
 
 // Symbol is defined but not usable.
-struct xint512_t{};
+struct xint512_t : xmock_t {};
 
 #endif // HAVE_AVX512
 
