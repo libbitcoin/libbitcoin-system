@@ -63,6 +63,7 @@ template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word shr_(Word a) NOEXCEPT
 {
     // Undefined
+    static_assert(S != bits<uint8_t>);
     ////if constexpr (S == bits<uint8_t>)
     ////    return mm256_srli_epi8(a, B);
 
@@ -79,6 +80,7 @@ template <auto B, auto S, typename Word, if_same<Word, xint256_t> = true>
 INLINE Word shl_(Word a) NOEXCEPT
 {
     // Undefined
+    static_assert(S != bits<uint8_t>);
     ////if constexpr (S == bits<uint8_t>)
     ////    return mm256_slli_epi8(a, B);
 
@@ -132,12 +134,20 @@ INLINE Word add_(Word a) NOEXCEPT
         return add_<S>(a, mm256_set1_epi64x(K));
 }
 
-// AVX2 set/get (for all element widths).
+// AVX2 unpack/set/get (for all element widths).
 // ----------------------------------------------------------------------------
+
+// TODO: T pack<T>(const uint8_t*).
+INLINE auto unpack(xint256_t a) NOEXCEPT
+{
+    std_array<uint8_t, sizeof(xint256_t)> bytes{};
+    mm256_storeu_si256(pointer_cast<xint256_t>(&bytes.front()), a);
+    return bytes;
+}
 
 // Lane zero is lowest order word.
 template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To get(xint256_t a) NOEXCEPT
+INLINE To extract(xint256_t a) NOEXCEPT
 {
     // AVX2
     if constexpr (is_same_type<To, uint8_t>)
@@ -222,20 +232,14 @@ INLINE To set(
 
 // Endianness
 // ----------------------------------------------------------------------------
-// TODO: generalize.
 
 // AVX2
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 {
-    constexpr std_array<uint32_t, 4> mask32
-    {
-        0x0c0d0e0f_u32, 0x08090a0b_u32, 0x04050607_u32, 0x00010203_u32
-    };
-
     static const auto mask = set<xint256_t>(
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3]);
+        0x08090a0b0c0d0e0f_u64, 0x08090a0b0c0d0e0f_u64,
+        0x08090a0b0c0d0e0f_u64, 0x08090a0b0c0d0e0f_u64);
 
     return mm256_shuffle_epi8(a, mask);
 }

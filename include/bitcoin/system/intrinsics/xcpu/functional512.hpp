@@ -23,10 +23,13 @@
 #include <bitcoin/system/intrinsics/xcpu/defines.hpp>
 
 // shl_/shr_ are undefined for 8 bit.
-// shl_/shr_ are AVX512BW for 16 bit.
-// byteswap() is AVX512BW (refactor)
-// get() is undefined (write extraction over primitives)
-// All others are at most AVX512.
+// get() is AVX512_VBMI2 for 8/16 [disabled].
+// shl_/shr_ AVX512BW for 16 bit  [EBX bit 30].
+// add_ is AVX512BW for 8/16 bit  [EBX bit 30].
+// byteswap() is AVX512BW for all [EBX bit 30].
+// All others are at most AVX512F [EBX bit 16].
+// AVX512F-only machines started phaseout in 8/2019.
+// AVX512BW machines in production since 5/2017.
 
 namespace libbitcoin {
 namespace system {
@@ -66,6 +69,7 @@ template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
 INLINE Word shr_(Word a) NOEXCEPT
 {
     // Undefined
+    static_assert(S != bits<uint8_t>);
     ////if constexpr (S == bits<uint8_t>)
     ////    return mm512_srli_epi8(a, B);
 
@@ -84,6 +88,7 @@ template <auto B, auto S, typename Word, if_same<Word, xint512_t> = true>
 INLINE Word shl_(Word a) NOEXCEPT
 {
     // Undefined
+    static_assert(S != bits<uint8_t>);
     ////if constexpr (S == bits<uint8_t>)
     ////    return mm512_slli_epi8(a, B);
 
@@ -141,22 +146,35 @@ INLINE Word add_(Word a) NOEXCEPT
         return add_<S>(a, mm512_set1_epi64(K));
 }
 
-// AVX512 set/get (for all element widths).
+// AVX512 unpack, set (for all element widths), get (for 32/64 bit).
 // ----------------------------------------------------------------------------
+
+// TODO: T pack<T>(const uint8_t*).
+INLINE auto unpack(xint512_t a) NOEXCEPT
+{
+    std_array<uint8_t, sizeof(xint512_t)> bytes{};
+    mm512_storeu_si512(pointer_cast<xint512_t>(&bytes.front()), a);
+    return bytes;
+}
 
 // Extraction intrinsics not defined for any AVX512.
 // Lane zero is lowest order word.
 template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To get(xint512_t) NOEXCEPT
+INLINE To extract(xint512_t a) NOEXCEPT
 {
-    if constexpr (is_same_type<To, uint8_t>)
-        return mm512_extract_epi8(0, Lane);
-    else if constexpr (is_same_type<To, uint16_t>)
-        return mm512_extract_epi16(0, Lane);
-    else if constexpr (is_same_type<To, uint32_t>)
-        return mm512_extract_epi32(0, Lane);
+    // AVX512_VBMI2/AVX512F/SSE2
+    static_assert(!is_same_type<To, uint8_t>);
+    static_assert(!is_same_type<To, uint16_t>);
+    ////if constexpr (is_same_type<To, uint8_t>)
+    ////    return mm512_extract_epi8(a, Lane);
+    ////else if constexpr (is_same_type<To, uint16_t>)
+    ////    return mm512_extract_epi16(a, Lane);
+
+    // AVX512F/SSE2
+    if constexpr (is_same_type<To, uint32_t>)
+        return mm512_extract_epi32(a, Lane);
     else if constexpr (is_same_type<To, uint64_t>)
-        return mm512_extract_epi64(0, Lane);
+        return mm512_extract_epi64(a, Lane);
 }
 
 // AVX512F
@@ -266,22 +284,16 @@ INLINE To set(
 
 // Endianness
 // ----------------------------------------------------------------------------
-// TODO: generalize.
 
-// AVX512BW [TODO: AVX512F:mm512_shuffle_epi32]
+// AVX512BW
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
-    constexpr std_array<uint32_t, 4> mask32
-    {
-        0x0c0d0e0f_u32, 0x08090a0b_u32, 0x04050607_u32, 0x00010203_u32
-    };
-
     static const auto mask = set<xint512_t>(
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3],
-        mask32[0], mask32[1], mask32[2], mask32[3]);
+        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
+        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
+        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
+        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64);
 
     return mm512_shuffle_epi8(a, mask);
 }
@@ -298,26 +310,3 @@ struct xint512_t{};
 } // namespace libbitcoin
 
 #endif
-
-////INLINE xint512_t align(const bytes512& word) NOEXCEPT
-////{
-////    return _mm512_loadu_epi32(pointer_cast<const xint512_t>(word.data()));
-////}
-////
-////INLINE bytes512 unalign(xint512_t value) NOEXCEPT
-////{
-////    bytes512 word{};
-////    _mm512_storeu_epi32(pointer_cast<xint512_t>(word.data()), value);
-////    return word;
-////    ////return *pointer_cast<bytes512>(&value);
-////}
-////
-////INLINE xint512_t native_to_big_endian(xint512_t value) NOEXCEPT
-////{
-////    return *pointer_cast<xint512_t>(unalign(byteswap(value)).data());
-////}
-////
-////INLINE xint512_t native_from_big_endian(xint512_t value) NOEXCEPT
-////{
-////    return byteswap(align(*pointer_cast<bytes512>(&value)));
-////}

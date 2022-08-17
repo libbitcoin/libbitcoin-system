@@ -64,8 +64,11 @@ INLINE Word xor_(Word a, Word b) NOEXCEPT
 template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word shr_(Word a) NOEXCEPT
 {
+    // Undefined.
+    static_assert(S != bits<uint8_t>);
     ////if constexpr (S == bits<uint8_t>)
     ////    return mm_srli_epi8(a, B);
+
     if constexpr (S == bits<uint16_t>)
         return mm_srli_epi16(a, B);
     else if constexpr (S == bits<uint32_t>)
@@ -78,8 +81,11 @@ INLINE Word shr_(Word a) NOEXCEPT
 template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
 INLINE Word shl_(Word a) NOEXCEPT
 {
+    // Undefined.
+    static_assert(S != bits<uint8_t>);
     ////if constexpr (S == bits<uint8_t>)
     ////    return mm_slli_epi8(a, B);
+
     if constexpr (S == bits<uint16_t>)
         return mm_slli_epi16(a, B);
     else if constexpr (S == bits<uint32_t>)
@@ -129,12 +135,20 @@ INLINE Word add_(Word a) NOEXCEPT
         return add_<S>(a, mm_set1_epi64x(K));
 }
 
-// SSE4 set/get (for all element widths).
+// SSE4 unpack/set/get (for all element widths).
 // ----------------------------------------------------------------------------
+
+// TODO: T pack<T>(const uint8_t*).
+INLINE auto unpack(xint128_t a) NOEXCEPT
+{
+    std_array<uint8_t, sizeof(xint128_t)> bytes{};
+    mm_storeu_si128(pointer_cast<xint128_t>(&bytes.front()), a);
+    return bytes;
+}
 
 // Lane zero is lowest order word.
 template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To get(xint128_t a) NOEXCEPT
+INLINE To extract(xint128_t a) NOEXCEPT
 {
     // SSE4.1
     if constexpr (is_same_type<To, uint8_t>)
@@ -200,19 +214,13 @@ INLINE To set(
 
 // Endianness
 // ----------------------------------------------------------------------------
-// TODO: generalize.
 
 // SSSE3
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
-    constexpr std_array<uint32_t, 4> mask32
-    {
-        0x0c0d0e0f_u32, 0x08090a0b_u32, 0x04050607_u32, 0x00010203_u32
-    };
-
     static const auto mask = set<xint128_t>(
-        mask32[0], mask32[1], mask32[2], mask32[3]);
+        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64);
 
     return mm_shuffle_epi8(a, mask);
 }
@@ -229,33 +237,3 @@ struct xint128_t {};
 } // namespace libbitcoin
 
 #endif
-
-////template <typename Type, if_extended<Type> = true>
-////using xchunk = std_array<uint8_t, <sizeof(Type)>>;
-////using bytes128 = xchunk<xint128_t>;
-////using bytes256 = xchunk<xint256_t>;
-////using bytes512 = xchunk<xint512_t>;
-////INLINE xint128_t align(const bytes128& word) NOEXCEPT
-////{
-////    return mm_loadu_si128(pointer_cast<const xint128_t>(word.data()));
-////}
-////
-////INLINE bytes128 unalign(xint128_t value) NOEXCEPT
-////{
-////    bytes128 word{};
-////    mm_storeu_si128(pointer_cast<xint128_t>(word.data()), value);
-////    return word;
-////    ////return *pointer_cast<bytes128>(&value);
-////}
-////
-////// aligned to unaligned.
-////INLINE xint128_t native_to_big_endian(xint128_t value) NOEXCEPT
-////{
-////    return *pointer_cast<xint128_t>(unalign(byteswap(value)).data());
-////}
-////
-////// unaligned to aligned.
-////INLINE xint128_t native_from_big_endian(xint128_t value) NOEXCEPT
-////{
-////    return byteswap(align(*pointer_cast<bytes128>(&value)));
-////}

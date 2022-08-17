@@ -100,7 +100,7 @@ INLINE constexpr auto add_(Word a) NOEXCEPT
 template <typename To, auto Lane, typename From,
     if_integral_integer<From> = true,
     if_integral_integer<To> = true>
-INLINE constexpr To get(From a) NOEXCEPT
+INLINE constexpr To extract(From a) NOEXCEPT
 {
     static_assert(Lane == one);
     return a;

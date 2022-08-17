@@ -205,7 +205,7 @@ protected:
     static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
     static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
-    /// Optimized block iteration.
+    /// Blocks iteration.
     /// -----------------------------------------------------------------------
     template <size_t Size>
     INLINE static constexpr void iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
@@ -225,16 +225,16 @@ private:
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
 protected:
+    /// Message schedule vectorization.
+    /// -----------------------------------------------------------------------
+
     template <size_t Lanes>
     using wblocks_t = std_array<words_t, Lanes>;
 
-    /// Return LE extended word from Lanes count of blocks at Index offset.
-    template <size_t Lane, size_t Lanes,
-        bool_if<Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2> = true>
-    INLINE static auto from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT;
+    template <size_t Lane, size_t Lanes>
+    INLINE static auto pack(const wblocks_t<Lanes>& words) NOEXCEPT;
 
-    /// Vectorize endianness and message schedule for a single set of blocks.
-    template <typename Extended, if_extended<Extended> = true>
+    template <typename xWord, if_extended<xWord> = true>
     static inline void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
 };
 

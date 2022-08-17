@@ -144,7 +144,7 @@ sigma(auto x) NOEXCEPT
     // This increases native operations through ror expansion and is intended
     // only for vectorization (where ror/l are not avaialable).
     // This sigma refactoring *increases* native processing time by ~10%.
-    // Does not materially improve compiler-generated vectorize performance.
+    // Tests shows no material performance change in vectorization.
     if constexpr (!is_integral_integer<decltype(x)>)
     {
         return sigma_<A, B, C>(x);
@@ -185,7 +185,6 @@ Sigma(auto x) NOEXCEPT
     // Z = x
     // S'(n) = ((((n >>> (z-y)) ^ n) >>> (y-x)) ^ n) >>> x
 
-    // TODO: test both against vectorized independent blocks processing.
     // This Sigma refactoring reduces native processing time by ~10%.
     return ror_<A, s>(xor_(ror_<B - A, s>(xor_(ror_<C - B, s>(x), x)), x));
     ////return xor_(xor_(ror_<A, s>(x), ror_<B, s>(x)), ror_<C, s>(x));
@@ -321,7 +320,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            get<word_t, Lane>(wk[Round]));
+            extract<word_t, Lane>(wk[Round]));
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -338,7 +337,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            get<word_t, Lane>(wk[Round]));
+            extract<word_t, Lane>(wk[Round]));
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -974,91 +973,6 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
     }
 }
 
-
-// Optimized block iteration.
-// ------------------------------------------------------------------------
-
-TEMPLATE
-INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        sequential(state, blocks);
-    }
-    else
-    {
-        if constexpr (vectorization)
-        {
-            vectorized(state, blocks);
-        }
-        else
-        {
-            sequential(state, blocks);
-        }
-    }
-}
-
-TEMPLATE
-template <size_t Size>
-INLINE constexpr void CLASS::iterate(state_t& state,
-    const ablocks_t<Size>& blocks) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        sequential(state, blocks);
-    }
-    else
-    {
-        if constexpr (vectorization)
-        {
-            auto iterator = iblocks_t{ array_cast<uint8_t>(blocks) };
-            vectorized(state, iterator);
-        }
-        else
-        {
-            sequential(state, blocks);
-        }
-    }
-}
-
-TEMPLATE
-INLINE void CLASS::
-sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
-}
-
-TEMPLATE
-template <size_t Size>
-INLINE constexpr void CLASS::
-sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
-}
-
-TEMPLATE
-INLINE void CLASS::
-vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    // blocks.size() is reduced by vectorization.
-    vectorize<xint512_t>(state, blocks);
-    vectorize<xint256_t>(state, blocks);
-    vectorize<xint128_t>(state, blocks);
-    sequential(state, blocks);
-}
-
 // Hashing.
 // ---------------------------------------------------------------------------
 // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
@@ -1398,27 +1312,104 @@ normalize(const state_t& state) NOEXCEPT
     return output(state);
 }
 
-// Message schedule vectorization across blocks by maximal lane availability.
+// Blocks iteration.
+// ------------------------------------------------------------------------
+
+TEMPLATE
+INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        sequential(state, blocks);
+    }
+    else
+    {
+        if constexpr (vectorization)
+        {
+            vectorized(state, blocks);
+        }
+        else
+        {
+            sequential(state, blocks);
+        }
+    }
+}
+
+TEMPLATE
+template <size_t Size>
+INLINE constexpr void CLASS::iterate(state_t& state,
+    const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        sequential(state, blocks);
+    }
+    else
+    {
+        if constexpr (vectorization)
+        {
+            auto iterator = iblocks_t{ array_cast<uint8_t>(blocks) };
+            vectorized(state, iterator);
+        }
+        else
+        {
+            sequential(state, blocks);
+        }
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::
+sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    for (auto& block : blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
+
+TEMPLATE
+template <size_t Size>
+INLINE constexpr void CLASS::
+sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    for (auto& block : blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::
+vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    // blocks.size() is reduced by vectorization.
+    vectorize<xint512_t>(state, blocks);
+    vectorize<xint256_t>(state, blocks);
+    vectorize<xint128_t>(state, blocks);
+    sequential(state, blocks);
+}
+
+// Message schedule vectorization.
 // ----------------------------------------------------------------------------
 // Message schedules/endianness are order independent.
 // Constant K addition is moved to schedule prepare.
 // eprint.iacr.org/2012/067.pdf
 
 TEMPLATE
-template <size_t Lane, size_t Lanes,
-    bool_if<Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2>>
+template <size_t Lane, size_t Lanes>
 INLINE auto CLASS::
-from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT
+pack(const wblocks_t<Lanes>& words) NOEXCEPT
 {
-    // x128 : u64, 2 (sha512 only)
-    // x128 : u32, 4
-    // x256 : u64, 4
-    // x256 : u32, 8
-    // x512 : u64, 8
-    // x512 : u32, 16 (sha160/256 only)
     using xword_t = to_extended<word_t, Lanes>;
+    static_assert(Lanes == 16 || Lanes == 8 || Lanes == 4 || Lanes == 2);
 
-    // Nth word of each 16 blocks set into one extended buffer16 word.
     if constexpr (Lanes == 16)
     {
         return byteswap(set<xword_t>(
@@ -1431,7 +1422,6 @@ from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT
             words[12][Lane], words[13][Lane],
             words[14][Lane], words[15][Lane]));
     }
-    // Nth word of each 8 blocks set into one extended buffer8 word.
     else if constexpr (Lanes == 8)
     {
         return byteswap(set<xword_t>(
@@ -1440,14 +1430,12 @@ from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT
             words[4][Lane], words[5][Lane],
             words[6][Lane], words[7][Lane]));
     }
-    // Nth word of each 4 blocks set into one extended buffer4 word.
     else if constexpr (Lanes == 4)
     {
         return byteswap(set<xword_t>(
             words[0][Lane], words[1][Lane],
             words[2][Lane], words[3][Lane]));
     }
-    // Nth word of each 2 blocks set into one extended buffer2 word.
     else //// if constexpr (Lanes == 2)
     {
         return byteswap(set<xword_t>(
@@ -1456,66 +1444,42 @@ from_big_end(const wblocks_t<Lanes>& words) NOEXCEPT
 }
 
 TEMPLATE
-template <typename Extended, if_extended<Extended>>
+template <typename xWord, if_extended<xWord>>
 inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    // x128 / u64 =  2 (sha512 only)
-    // x128 / u32 =  4
-    // x256 / u64 =  4
-    // x256 / u32 =  8
-    // x512 / u64 =  8
-    // x512 / u32 = 16 (sha160/256 only)
-    // capacity<x128|x256|x512, uint64|uint32> has only four possible values.
-    using xbuffer_t = std_array<Extended, K::rounds>;
-    constexpr auto lanes = capacity<Extended, word_t>;
+    using xbuffer_t = std_array<xWord, K::rounds>;
+    constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(lanes == 16 || lanes == 8 || lanes == 4 || lanes == 2);
 
-    if (have<Extended>() && blocks.size() >= lanes)
+    if (have<xWord>() && blocks.size() >= lanes)
     {
-        // Buffer of xword_t (vs. word_t).
         xbuffer_t wbuffer;
 
         do
         {
-            // Block of xword_t (vs. word_t) [cast as blocks of word_t].
-            const auto& wblock = array_cast<words_t>(blocks.template to_array<lanes>());
+            const auto& wblock = array_cast<words_t>(
+                blocks.template to_array<lanes>());
 
-            // 16 words in each block.
-            // Nth word_t of N blocks set into nth buffer xword_t.
-            wbuffer[0] = from_big_end<0>(wblock);
-            wbuffer[1] = from_big_end<1>(wblock);
-            wbuffer[2] = from_big_end<2>(wblock);
-            wbuffer[3] = from_big_end<3>(wblock);
-            wbuffer[4] = from_big_end<4>(wblock);
-            wbuffer[5] = from_big_end<5>(wblock);
-            wbuffer[6] = from_big_end<6>(wblock);
-            wbuffer[7] = from_big_end<7>(wblock);
-            wbuffer[8] = from_big_end<8>(wblock);
-            wbuffer[9] = from_big_end<9>(wblock);
-            wbuffer[10] = from_big_end<10>(wblock);
-            wbuffer[11] = from_big_end<11>(wblock);
-            wbuffer[12] = from_big_end<12>(wblock);
-            wbuffer[13] = from_big_end<13>(wblock);
-            wbuffer[14] = from_big_end<14>(wblock);
-            wbuffer[15] = from_big_end<15>(wblock);
+            wbuffer[0] = pack<0>(wblock);
+            wbuffer[1] = pack<1>(wblock);
+            wbuffer[2] = pack<2>(wblock);
+            wbuffer[3] = pack<3>(wblock);
+            wbuffer[4] = pack<4>(wblock);
+            wbuffer[5] = pack<5>(wblock);
+            wbuffer[6] = pack<6>(wblock);
+            wbuffer[7] = pack<7>(wblock);
+            wbuffer[8] = pack<8>(wblock);
+            wbuffer[9] = pack<9>(wblock);
+            wbuffer[10] = pack<10>(wblock);
+            wbuffer[11] = pack<11>(wblock);
+            wbuffer[12] = pack<12>(wblock);
+            wbuffer[13] = pack<13>(wblock);
+            wbuffer[14] = pack<14>(wblock);
+            wbuffer[15] = pack<15>(wblock);
 
-            // Process message schedule for extended block.
-            // This compresses 2..16 block scheduling evaluations into 1.
             schedule(wbuffer);
 
-            // Compress sequentially for number of blocks extended.
-            // Lane parameter indicates the block being compressed.
-            // A block's message schedule words are extracted by
-            // wbuffer[index][lane] using one intrinsic extraction for each
-            // word * lane. This may be more efficiently done by converting the
-            // buffer to wbuffer[index][lane] and testing its element against
-            // word_t vs. array<word_t> to select the lane dimension. Can use
-            // these to store as xword_t back to the same buffer and then cast.
-            // TODO: create method to unload the full buffer into itself.
-            // AVX512F: _mm512_storeu_si512
-            // AVX:     _mm256_storeu_si256
-            // SSE2:    _mm_storeu_si128
             if constexpr (lanes > 0)
             {
                 compress<0>(state, wbuffer);
