@@ -261,8 +261,8 @@ INLINE constexpr void CLASS::
 round(auto a, auto& b, auto c, auto d, auto& e, auto wk) NOEXCEPT
 {
     constexpr auto s = SHA::word_bits;
-    constexpr auto f = functor<Round, decltype(a)>();
-    e = /*a =*/ f::add<s>(f::add<s>(f::add<s>(f::rol<5, s>(a), f(b, c, d)), e), wk);
+    constexpr auto fn = functor<Round, decltype(a)>();
+    e = /*a =*/ f::add<s>(f::add<s>(f::add<s>(f::rol<5, s>(a), fn(b, c, d)), e), wk);
     b = /*c =*/ f::rol<30, s>(b);
 
     // SHA-NI
