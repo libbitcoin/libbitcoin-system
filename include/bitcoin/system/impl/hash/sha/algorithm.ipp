@@ -1245,40 +1245,6 @@ merkle_hash(digests_t& digests) NOEXCEPT
     return digests;
 };
 
-// Block.txs skip-parsed hash set.
-////// Bitcoin hash set from an ordered set of ptrs [header commitment].
-////INLINE hashes bitcoin_hash(std_vector<uint8_t*>&&) NOEXCEPT
-////
-////template <size_t Size>
-////using set_t = std_vector<cref<std_array<block_t, Size>>>;
-////using states_t = std_vector<state_t>;
-////
-////TEMPLATE
-////template <size_t Size>
-////VCONSTEXPR typename CLASS::states_t CLASS::
-////accumulate(const set_t<Size>& sets) NOEXCEPT
-////{
-////    states_t states(sets.size());
-////
-////    // The set of sets is order independent across the sets (vectorizable).
-////    std_transform(concurrency(), sets.begin(), sets.end(), states.begin(),
-////        [&](const blocks_t& blocks)
-////        {
-////            buffer_t buffer{};
-////            auto state = H::get;
-////
-////            // Each set is ordered (accumulated).
-////            for (auto& block: blocks)
-////            {
-////                input(buffer, block);
-////                schedule(buffer);
-////                rounding(state, buffer);
-////            }
-////        });
-////
-////    return states;
-////}
-
 // Streaming (unfinalized).
 // ---------------------------------------------------------------------------
 
