@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_IPP
 
 #include <bit>
+#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
@@ -1389,10 +1390,16 @@ TEMPLATE
 INLINE void CLASS::
 vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
+    if constexpr (have_x512)
+        vectorize<xint512_t>(state, blocks);
+
+    if constexpr (have_x256)
+        vectorize<xint256_t>(state, blocks);
+
+    if constexpr (have_x128)
+        vectorize<xint128_t>(state, blocks);
+
     // blocks.size() is reduced by vectorization.
-    vectorize<xint512_t>(state, blocks);
-    vectorize<xint256_t>(state, blocks);
-    vectorize<xint128_t>(state, blocks);
     sequential(state, blocks);
 }
 
@@ -1449,6 +1456,7 @@ inline void CLASS::
 vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     using xbuffer_t = std_array<xWord, K::rounds>;
+    static_assert(!std::is_base_of_v<xmock_t, xWord>);
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(lanes == 16 || lanes == 8 || lanes == 4 || lanes == 2);
 
