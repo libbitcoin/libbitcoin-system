@@ -166,10 +166,10 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
 // have() [CI matrix platform assumptions]
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__when_defined__true_except_msc)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__when_defined__true)
 {
 #if defined(HAVE_AVX512)
-    BOOST_REQUIRE(!have_avx512());
+    BOOST_REQUIRE(have_avx512());
 #else
     BOOST_REQUIRE(!have_avx512());
 #endif
@@ -222,41 +222,37 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__when_defined__true)
 
 // types
 // ----------------------------------------------------------------------------
-// These are true (mocked) when support for the extended type is not compiled.
 
 static_assert(is_extended<xint128_t> == with_sse41);
 #if defined(HAVE_SSE4)
 static_assert(is_defined<if_extended<xint128_t>>);
+static_assert(with<xint128_t>() == with_sse41);
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(have<xint128_t>(), have_sse41());
+}
 #endif
 
 static_assert(is_extended<xint256_t> == with_avx2);
 #if defined(HAVE_AVX2)
 static_assert(is_defined<if_extended<xint256_t>>);
+static_assert(with<xint256_t>() == with_avx2);
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__always__expected)
+{
+    BOOST_REQUIRE_EQUAL(have<xint256_t>(), have_avx2());
+}
 #endif
 
 static_assert(is_extended<xint512_t> == with_avx512);
 #if defined(HAVE_AVX512)
 static_assert(is_defined<if_extended<xint512_t>>);
-#endif
-
-////static_assert(!is_defined<if_extended<uint64_t>>);
-////static_assert(!is_defined<if_extended<uint32_t>>);
-////static_assert(!is_defined<if_extended<uint16_t>>);
-////static_assert(!is_defined<if_extended<uint8_t>>);
-
-// have<>/with<> wrappers
-// ----------------------------------------------------------------------------
-
 static_assert(with<xint512_t>() == with_avx512);
-static_assert(with<xint256_t>() == with_avx2);
-static_assert(with<xint128_t>() == with_sse41);
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have__always__expected)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__always__expected)
 {
     BOOST_REQUIRE_EQUAL(have<xint512_t>(), have_avx512());
-    BOOST_REQUIRE_EQUAL(have<xint256_t>(), have_avx2());
-    BOOST_REQUIRE_EQUAL(have<xint128_t>(), have_sse41());
 }
+#endif
 
 // capacity [for extended integers]
 // ----------------------------------------------------------------------------
