@@ -138,8 +138,8 @@ INLINE Word add_(Word a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // Lane zero is lowest order word.
-template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To extract_(xint256_t a) NOEXCEPT
+template <typename To, auto Lane>
+INLINE To extract(xint256_t a) NOEXCEPT
 {
     // mm256_extract_epi64 defined as no-op on 32 bit builds.
     ////static_assert(!build_x32 && is_same_type<To, uint64_t>);
@@ -155,6 +155,13 @@ INLINE To extract_(xint256_t a) NOEXCEPT
         return mm256_extract_epi32(a, Lane);
     else if constexpr (is_same_type<To, uint64_t>)
         return mm256_extract_epi64(a, Lane);
+}
+
+// First parameter is used only as a ploymorphic guide.
+template <auto Lane, typename Word, if_integral_integer<Word> = true>
+INLINE Word extract_(Word, xint256_t a) NOEXCEPT
+{
+    return extract<Word, Lane>(a);
 }
 
 /// set/get (for all element widths)

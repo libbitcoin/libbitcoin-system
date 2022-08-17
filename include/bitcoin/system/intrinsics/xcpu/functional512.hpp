@@ -151,8 +151,8 @@ INLINE Word add_(Word a) NOEXCEPT
 
 // Extraction intrinsics not defined for any AVX512.
 // Lane zero is lowest order word.
-template <typename To, auto Lane, if_integral_integer<To> = true>
-INLINE To extract_(xint512_t a) NOEXCEPT
+template <typename To, auto Lane>
+INLINE To extract(xint512_t a) NOEXCEPT
 {
     // AVX512_VBMI2/AVX512F/SSE2
     static_assert(!is_same_type<To, uint8_t>);
@@ -167,6 +167,13 @@ INLINE To extract_(xint512_t a) NOEXCEPT
         return mm512_extract_epi32(a, Lane);
     else if constexpr (is_same_type<To, uint64_t>)
         return mm512_extract_epi64(a, Lane);
+}
+
+// First parameter is used only as a polymorphic guide.
+template <auto Lane, typename Word, if_integral_integer<Word> = true>
+INLINE Word extract_(Word, xint512_t a) NOEXCEPT
+{
+    return extract<Word, Lane>(a);
 }
 
 /// set (for all element widths), get (for 32/64 bit)

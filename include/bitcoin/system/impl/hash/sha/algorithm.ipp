@@ -313,6 +313,11 @@ template<size_t Round, size_t Lane>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& wk) NOEXCEPT
 {
+    // extract_ normalizes word for scedule/compress/none vectorization forms.
+    // The state.front() parameter is used only as a polymorphic guide, since
+    // the compiler cannot deduce this as a template argument.
+    ////using word = decltype(state.front());
+
     if constexpr (SHA::strength == 160)
     {
         round<Round>(
@@ -321,7 +326,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            extract_<word_t, Lane>(wk[Round]));
+            extract_<Lane>(state.front(), wk[Round]));
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -338,7 +343,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            extract_<word_t, Lane>(wk[Round]));
+            extract_<Lane>(state.front(), wk[Round]));
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -352,7 +357,8 @@ constexpr void CLASS::
 compress(auto& state, const auto& buffer) NOEXCEPT
 {
     // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
-    const state_t start{ state };
+    // This is a copy (state type varies due to vectorization).
+    const auto start = state;
 
     round< 0, Lane>(state, buffer);
     round< 1, Lane>(state, buffer);
@@ -982,7 +988,7 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 hash(iblocks_t&& blocks) NOEXCEPT
 {
-    // Save block count, as iterator decrements.
+    // Save block count, as iterable decrements.
     const auto count = blocks.size();
 
     buffer_t buffer{};
@@ -1073,7 +1079,7 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    // Save block count, as iterator decrements.
+    // Save block count, as iterable decrements.
     const auto count = blocks.size();
 
     buffer_t buffer{};
@@ -1212,15 +1218,30 @@ VCONSTEXPR typename CLASS::digests_t& CLASS::
 merkle_hash(digests_t& digests) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
-    const auto half = to_half(digests.size());
+    const auto blocks = to_half(digests.size());
 
-    // This algorithm shifts results from a pair of digests into preceding
-    // digests. This trades reduced allocation for lack of concurrency. But sha
-    // concurrency tests as net performance loss due to synchronization cost.
-    for (size_t i = 0, j = 0; i < half; ++i, j += two)
-        digests[i] = double_hash(digests[j], digests[add1(j)]);
+    if (std::is_constant_evaluated())
+    {
+        for (size_t i = 0, j = 0; i < blocks; ++i, j += two)
+            digests[i] = double_hash(digests[j], digests[add1(j)]);
+    }
+    ////else if constexpr (vectorization)
+    ////{
+    ////    // TODO: performance test both Sigma algorithms with compress vectorize.
+    ////    auto iterable = iblocks_t{ array_cast<uint8_t>(digests.front().data()) };
+    ////    // blocks are independent, so pack them into lanes and perform a single
+    ////    // schedule and compress. For compress, state must be widened to array
+    ////    // of xword, just like buffer. Should flow through compress as-is.
+    ////    using xstate_t = std_array<xWord, SHA::rounds>;
+    ////    using xbuffer_t = std_array<xWord, SHA::state_words>;
+    ////}
+    else
+    {
+        for (size_t i = 0, j = 0; i < blocks; ++i, j += two)
+            digests[i] = double_hash(digests[j], digests[add1(j)]);
+    }
 
-    digests.resize(half);
+    digests.resize(blocks);
     return digests;
 };
 
@@ -1349,8 +1370,8 @@ INLINE constexpr void CLASS::iterate(state_t& state,
     {
         if constexpr (vectorization)
         {
-            auto iterator = iblocks_t{ array_cast<uint8_t>(blocks) };
-            vectorized(state, iterator);
+            auto iterable = iblocks_t{ array_cast<uint8_t>(blocks) };
+            vectorized(state, iterable);
         }
         else
         {
@@ -1465,7 +1486,7 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(lanes == 16 || lanes == 8 || lanes == 4 || lanes == 2);
 
-    using xbuffer_t = std_array<xWord, K::rounds>;
+    using xbuffer_t = std_array<xWord, SHA::rounds>;
 
     if (have<xWord>() && blocks.size() >= lanes)
     {

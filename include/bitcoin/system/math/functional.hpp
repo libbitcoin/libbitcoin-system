@@ -96,11 +96,20 @@ INLINE constexpr auto add_(Word a) NOEXCEPT
     return a + K;
 }
 
-// Integral overload for vectorization coexistence.
-template <typename To, auto Lane, typename From,
-    if_integral_integer<From> = true,
-    if_integral_integer<To> = true>
-INLINE constexpr To extract_(From a) NOEXCEPT
+////// Overload for vectorization coexistence.
+////// Allows either integral/itegral or extended/extended to/from.
+////template <typename To, auto Lane, typename From>
+////INLINE constexpr To extract_(From a) NOEXCEPT
+////{
+////    static_assert(Lane == one);
+////    return a;
+////}
+
+// Overload for vectorization coexistence.
+// First parameter is used only as a polymorphic guide, as it cannot be
+// cleanly provided as a template argument in the given context.
+template <auto Lane, typename Word>
+INLINE constexpr Word extract_(Word, Word a) NOEXCEPT
 {
     static_assert(Lane == one);
     return a;
