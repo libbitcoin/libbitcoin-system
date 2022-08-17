@@ -165,11 +165,14 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
 
 // have() [CI matrix platform assumptions]
 // ----------------------------------------------------------------------------
+// These use BOOST_WARN to let us know if vectorization did not execute due to
+// CI platform processor configuration. Currently all CI platforms have SSE41
+// and AVX2, while about 50% have AVX512BW.
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__when_defined__true)
 {
 #if defined(HAVE_AVX512)
-    BOOST_REQUIRE(have_avx512());
+    BOOST_WARN(have_avx512());
 #else
     BOOST_REQUIRE(!have_avx512());
 #endif
@@ -178,7 +181,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__when_defined__true)
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__when_defined__true)
 {
 #if defined(HAVE_AVX2)
-    BOOST_REQUIRE(have_avx2());
+    BOOST_WARN(have_avx2());
 #else
     BOOST_REQUIRE(!have_avx2());
 #endif
@@ -187,7 +190,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__when_defined__true)
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__when_defined__true)
 {
 #if defined(HAVE_SSE4)
-    BOOST_REQUIRE(have_sse41());
+    BOOST_WARN(have_sse41());
 #else
     BOOST_REQUIRE(!have_sse41());
 #endif
@@ -196,7 +199,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__when_defined__true)
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41a__when_x64__true_except_msc)
 {
 #if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
-    BOOST_REQUIRE(have_sse41a());
+    BOOST_WARN(have_sse41a());
 #else
     BOOST_REQUIRE(!have_sse41a());
 #endif
@@ -205,7 +208,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41a__when_x64__true_except_msc)
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_shani__when_defined__true_except_msc)
 {
 #if defined(HAVE_SHANI) && !defined(HAVE_MSC)
-    BOOST_REQUIRE(have_shani());
+    BOOST_WARN(have_shani());
 #else
     BOOST_REQUIRE(!have_shani());
 #endif
@@ -214,7 +217,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_shani__when_defined__true_except_msc
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__when_defined__true)
 {
 #if defined(HAVE_NEON)
-    BOOST_REQUIRE(have_neon());
+    BOOST_WARN(have_neon());
 #else
     BOOST_REQUIRE(!have_neon());
 #endif
