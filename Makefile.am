@@ -295,6 +295,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/rmd/analysis.cpp \
     test/hash/sha/algorithm.cpp \
     test/hash/sha/analysis.cpp \
+    test/hash/sha/sha160.cpp \
+    test/hash/sha/sha256.cpp \
+    test/hash/sha/sha512.cpp \
     test/intrinsics/haves.cpp \
     test/intrinsics/intrinsics.cpp \
     test/intrinsics/xcpu/cpuid.cpp \
