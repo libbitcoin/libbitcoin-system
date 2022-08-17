@@ -19,16 +19,11 @@
 #ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_XCPU_HPP
 #define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_XCPU_HPP
 
-#include <bitcoin/system/intrinsics/xcpu/byteswap.hpp>
 #include <bitcoin/system/intrinsics/xcpu/cpuid.hpp>
 #include <bitcoin/system/intrinsics/xcpu/defines.hpp>
 #include <bitcoin/system/intrinsics/xcpu/functional_128.hpp>
 #include <bitcoin/system/intrinsics/xcpu/functional_256.hpp>
 #include <bitcoin/system/intrinsics/xcpu/functional_512.hpp>
-#include <bitcoin/system/intrinsics/xcpu/rotate.hpp>
 #include <bitcoin/system/intrinsics/xcpu/sha.hpp>
-
-/// Intel/AMD is always little-endian, and SHA is always big-endian (swap).
-/// Primitives implement rotr/rotl because these are not available in SIMD.
 
 #endif

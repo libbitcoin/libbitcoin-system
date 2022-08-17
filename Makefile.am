@@ -654,8 +654,10 @@ include_bitcoin_system_impl_words_HEADERS = \
 
 include_bitcoin_system_intrinsicsdir = ${includedir}/bitcoin/system/intrinsics
 include_bitcoin_system_intrinsics_HEADERS = \
+    include/bitcoin/system/intrinsics/byteswap.hpp \
     include/bitcoin/system/intrinsics/haves.hpp \
-    include/bitcoin/system/intrinsics/intrinsics.hpp
+    include/bitcoin/system/intrinsics/intrinsics.hpp \
+    include/bitcoin/system/intrinsics/rotate.hpp
 
 include_bitcoin_system_intrinsics_armdir = ${includedir}/bitcoin/system/intrinsics/arm
 include_bitcoin_system_intrinsics_arm_HEADERS = \
@@ -665,13 +667,11 @@ include_bitcoin_system_intrinsics_arm_HEADERS = \
 
 include_bitcoin_system_intrinsics_xcpudir = ${includedir}/bitcoin/system/intrinsics/xcpu
 include_bitcoin_system_intrinsics_xcpu_HEADERS = \
-    include/bitcoin/system/intrinsics/xcpu/byteswap.hpp \
     include/bitcoin/system/intrinsics/xcpu/cpuid.hpp \
     include/bitcoin/system/intrinsics/xcpu/defines.hpp \
     include/bitcoin/system/intrinsics/xcpu/functional_128.hpp \
     include/bitcoin/system/intrinsics/xcpu/functional_256.hpp \
     include/bitcoin/system/intrinsics/xcpu/functional_512.hpp \
-    include/bitcoin/system/intrinsics/xcpu/rotate.hpp \
     include/bitcoin/system/intrinsics/xcpu/sha.hpp \
     include/bitcoin/system/intrinsics/xcpu/xcpu.hpp
 

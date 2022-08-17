@@ -932,14 +932,17 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\sha.hpp">
       <Filter>include\bitcoin\system\intrinsics\arm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byteswap.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\haves.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\byteswap.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\cpuid.hpp">
       <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
@@ -954,9 +957,6 @@
       <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\functional_512.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\rotate.hpp">
       <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\sha.hpp">
