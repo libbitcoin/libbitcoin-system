@@ -130,7 +130,7 @@ INLINE auto add(Word a, Word b) NOEXCEPT
 
 // AVX
 template <auto K, auto S, typename Word, if_same<Word, xint256_t> = true>
-INLINE auto add(Word a) NOEXCEPT
+INLINE auto addc(Word a) NOEXCEPT
 {
     // set1 broadcast integer to all elements.
     if constexpr (S == bits<uint8_t>)

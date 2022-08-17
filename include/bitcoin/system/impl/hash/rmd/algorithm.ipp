@@ -127,7 +127,7 @@ round(auto& a, auto b, auto c, auto d, auto x) NOEXCEPT
     constexpr auto k = K::get[Round / K::columns];
     constexpr auto fn = functor<Round, decltype(a)>();
 
-    a = /*b =*/ f::rol<s>(f::add<k>(f::add(f::add(a, fn(b, c, d)), x)));
+    a = /*b =*/ f::rol<s>(f::addc<k>(f::add(f::add(a, fn(b, c, d)), x)));
 }
 
 TEMPLATE
@@ -139,7 +139,7 @@ round(auto& a, auto b, auto& c, auto d, auto e, auto x) NOEXCEPT
     constexpr auto k = K::get[Round / K::columns];
     constexpr auto fn = functor<Round, decltype(a)>();
 
-    a = /*b =*/ f::add(f::rol<s>(f::add<k>(f::add(f::add(a, fn(b, c, d)), x))), e);
+    a = /*b =*/ f::add(f::rol<s>(f::addc<k>(f::add(f::add(a, fn(b, c, d)), x))), e);
     c = /*d =*/ f::rol<10>(c);
 }
 

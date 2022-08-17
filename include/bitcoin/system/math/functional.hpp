@@ -90,7 +90,7 @@ INLINE constexpr auto add(Word a, Word b) NOEXCEPT
 }
 
 template <auto K, auto S = 0, typename Word, if_integral_integer<Word> = true>
-INLINE constexpr auto add(Word a) NOEXCEPT
+INLINE constexpr auto addc(Word a) NOEXCEPT
 {
     return depromote<Word>(a + K);
 }

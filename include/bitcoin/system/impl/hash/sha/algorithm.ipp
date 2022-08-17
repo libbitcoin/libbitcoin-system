@@ -475,13 +475,13 @@ prepare(auto& buffer) NOEXCEPT
             f::xor_(buffer[r16], buffer[r14]),
             f::xor_(buffer[r08], buffer[r03])));
 
-        buffer[r16] = f::add<k0, s>(buffer[r16]);
+        buffer[r16] = f::addc<k0, s>(buffer[r16]);
 
         buffer[add1(r00)] = f::rol<1, s>(f::xor_(
             f::xor_(buffer[add1(r16)], buffer[add1(r14)]),
             f::xor_(buffer[add1(r08)], buffer[add1(r03)])));
 
-        buffer[add1(r16)] = f::add<k1, s>(buffer[add1(r16)]);
+        buffer[add1(r16)] = f::addc<k1, s>(buffer[add1(r16)]);
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -507,13 +507,13 @@ prepare(auto& buffer) NOEXCEPT
             f::add<s>(buffer[r16], sigma0(buffer[r15])),
             f::add<s>(buffer[r07], sigma1(buffer[r02])));
 
-        buffer[r16] = f::add<k0, s>(buffer[r16]);
+        buffer[r16] = f::addc<k0, s>(buffer[r16]);
 
         buffer[add1(r00)] = f::add<s>(
             f::add<s>(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
             f::add<s>(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
 
-        buffer[add1(r16)] = f::add<k1, s>(buffer[add1(r16)]);
+        buffer[add1(r16)] = f::addc<k1, s>(buffer[add1(r16)]);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
@@ -533,22 +533,22 @@ prepare(auto& buffer) NOEXCEPT
     if constexpr (Round == sub1(sub1(SHA::rounds)))
     {
         constexpr auto r = SHA::rounds - array_count<words_t>;
-        buffer[r + 0] = f::add<K::get[r + 0], s>(buffer[r + 0]);
-        buffer[r + 1] = f::add<K::get[r + 1], s>(buffer[r + 1]);
-        buffer[r + 2] = f::add<K::get[r + 2], s>(buffer[r + 2]);
-        buffer[r + 3] = f::add<K::get[r + 3], s>(buffer[r + 3]);
-        buffer[r + 4] = f::add<K::get[r + 4], s>(buffer[r + 4]);
-        buffer[r + 5] = f::add<K::get[r + 5], s>(buffer[r + 5]);
-        buffer[r + 6] = f::add<K::get[r + 6], s>(buffer[r + 6]);
-        buffer[r + 7] = f::add<K::get[r + 7], s>(buffer[r + 7]);
-        buffer[r + 8] = f::add<K::get[r + 8], s>(buffer[r + 8]);
-        buffer[r + 9] = f::add<K::get[r + 9], s>(buffer[r + 9]);
-        buffer[r + 10] = f::add<K::get[r + 10], s>(buffer[r + 10]);
-        buffer[r + 11] = f::add<K::get[r + 11], s>(buffer[r + 11]);
-        buffer[r + 12] = f::add<K::get[r + 12], s>(buffer[r + 12]);
-        buffer[r + 13] = f::add<K::get[r + 13], s>(buffer[r + 13]);
-        buffer[r + 14] = f::add<K::get[r + 14], s>(buffer[r + 14]);
-        buffer[r + 15] = f::add<K::get[r + 15], s>(buffer[r + 15]);
+        buffer[r + 0] = f::addc<K::get[r + 0], s>(buffer[r + 0]);
+        buffer[r + 1] = f::addc<K::get[r + 1], s>(buffer[r + 1]);
+        buffer[r + 2] = f::addc<K::get[r + 2], s>(buffer[r + 2]);
+        buffer[r + 3] = f::addc<K::get[r + 3], s>(buffer[r + 3]);
+        buffer[r + 4] = f::addc<K::get[r + 4], s>(buffer[r + 4]);
+        buffer[r + 5] = f::addc<K::get[r + 5], s>(buffer[r + 5]);
+        buffer[r + 6] = f::addc<K::get[r + 6], s>(buffer[r + 6]);
+        buffer[r + 7] = f::addc<K::get[r + 7], s>(buffer[r + 7]);
+        buffer[r + 8] = f::addc<K::get[r + 8], s>(buffer[r + 8]);
+        buffer[r + 9] = f::addc<K::get[r + 9], s>(buffer[r + 9]);
+        buffer[r + 10] = f::addc<K::get[r + 10], s>(buffer[r + 10]);
+        buffer[r + 11] = f::addc<K::get[r + 11], s>(buffer[r + 11]);
+        buffer[r + 12] = f::addc<K::get[r + 12], s>(buffer[r + 12]);
+        buffer[r + 13] = f::addc<K::get[r + 13], s>(buffer[r + 13]);
+        buffer[r + 14] = f::addc<K::get[r + 14], s>(buffer[r + 14]);
+        buffer[r + 15] = f::addc<K::get[r + 15], s>(buffer[r + 15]);
     }
 }
 
