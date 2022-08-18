@@ -667,7 +667,7 @@ input(auto& buffer, const auto& state) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-inputb(buffer_t& buffer, const block_t& block) NOEXCEPT
+input(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -793,10 +793,10 @@ TEMPLATE
 INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
-    digest_t digest{};
-
     if (std::is_constant_evaluated())
     {
+        digest_t digest{};
+
         constexpr auto size = SHA::word_bytes;
         to_big<0 * size>(digest, state.at(0));
         to_big<1 * size>(digest, state.at(1));
@@ -810,29 +810,41 @@ output(const state_t& state) NOEXCEPT
             to_big<6 * size>(digest, state.at(6));
             to_big<7 * size>(digest, state.at(7));
         }
+
+        return digest;
     }
     else if constexpr (bc::is_little_endian)
     {
-        auto& out = array_cast<word_t>(digest);
-        out[0] = native_to_big_end(state[0]);
-        out[1] = native_to_big_end(state[1]);
-        out[2] = native_to_big_end(state[2]);
-        out[3] = native_to_big_end(state[3]);
-        out[4] = native_to_big_end(state[4]);
-
-        if constexpr (SHA::strength != 160)
+        if constexpr (SHA::strength == 160)
         {
-            out[5] = native_to_big_end(state[5]);
-            out[6] = native_to_big_end(state[6]);
-            out[7] = native_to_big_end(state[7]);
+            return array_cast<byte_t>(state_t
+            {
+                native_to_big_end(state[0]),
+                native_to_big_end(state[1]),
+                native_to_big_end(state[2]),
+                native_to_big_end(state[3]),
+                native_to_big_end(state[4])
+            });
+        }
+        else
+        {
+            return array_cast<byte_t>(state_t
+            {
+                native_to_big_end(state[0]),
+                native_to_big_end(state[1]),
+                native_to_big_end(state[2]),
+                native_to_big_end(state[3]),
+                native_to_big_end(state[4]),
+                native_to_big_end(state[5]),
+                native_to_big_end(state[6]),
+                native_to_big_end(state[7])
+            });
         }
     }
     else
     {
-        array_cast<word_t>(digest) = state;
+        return array_cast<byte_t>(state);
     }
-
-    return digest;
 }
 
 // 5.1 Padding the Message
@@ -1035,7 +1047,7 @@ hash(const block_t& block) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-    inputb(buffer, block);
+    input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
@@ -1145,7 +1157,7 @@ double_hash(const block_t& block) NOEXCEPT
     buffer_t buffer{};
 
     auto state = H::get;
-    inputb(buffer, block);
+    input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
@@ -1304,7 +1316,7 @@ constexpr void CLASS::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     buffer_t buffer{};
-    inputb(buffer, block);
+    input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
 }
@@ -1391,7 +1403,7 @@ sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
     buffer_t buffer{};
     for (auto& block: blocks)
     {
-        inputb(buffer, block);
+        input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
     }
@@ -1405,7 +1417,7 @@ sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     buffer_t buffer{};
     for (auto& block: blocks)
     {
-        inputb(buffer, block);
+        input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
     }
@@ -1508,30 +1520,12 @@ input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 template <typename xWord>
-INLINE auto CLASS::
-pack(const state_t& state) NOEXCEPT
-{
-    return xstate_t<xWord>
-    {
-        broadcast<xWord>(state[0]),
-        broadcast<xWord>(state[1]),
-        broadcast<xWord>(state[2]),
-        broadcast<xWord>(state[3]),
-        broadcast<xWord>(state[4]),
-        broadcast<xWord>(state[5]),
-        broadcast<xWord>(state[6]),
-        broadcast<xWord>(state[7])
-    };
-}
-
-TEMPLATE
-template <typename xWord>
-void CLASS::
-pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+inline auto CLASS::
+pack_pad_half() NOEXCEPT
 {
     constexpr auto pad = chunk_pad();
 
-    static const xchunk_t<xWord> xchunk_pad
+    return xchunk_t<xWord>
     {
         broadcast<xWord>(pad[0]),
         broadcast<xWord>(pad[1]),
@@ -1542,14 +1536,12 @@ pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
         broadcast<xWord>(pad[6]),
         broadcast<xWord>(pad[7])
     };
-
-    array_cast<xWord, SHA::chunk_words, SHA::chunk_words>(xbuffer) = xchunk_pad;
 }
 
 TEMPLATE
 template <typename xWord>
-INLINE void CLASS::
-pack_schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+inline auto CLASS::
+pack_schedule_1() NOEXCEPT
 {
     constexpr auto pad = scheduled_pad<one>();
 
@@ -1721,10 +1713,37 @@ pack_schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
+pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+{
+    static const auto xchunk_pad = pack_pad_half<xWord>();
+    array_cast<xWord, SHA::chunk_words, SHA::chunk_words>(xbuffer) = xchunk_pad;
+}
+
+TEMPLATE
+template <typename xWord>
+INLINE void CLASS::
 schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
-    static const auto xscheduled_pad = pack_schedule_1();
+    static const auto xscheduled_pad = pack_schedule_1<xWord>();
     xbuffer = xscheduled_pad;
+}
+
+TEMPLATE
+template <typename xWord>
+INLINE auto CLASS::
+pack(const state_t& state) NOEXCEPT
+{
+    return xstate_t<xWord>
+    {
+        broadcast<xWord>(state[0]),
+        broadcast<xWord>(state[1]),
+        broadcast<xWord>(state[2]),
+        broadcast<xWord>(state[3]),
+        broadcast<xWord>(state[4]),
+        broadcast<xWord>(state[5]),
+        broadcast<xWord>(state[6]),
+        broadcast<xWord>(state[7])
+    };
 }
 
 TEMPLATE

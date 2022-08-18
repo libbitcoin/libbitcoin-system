@@ -191,7 +191,7 @@ protected:
 
     /// Parsing
     /// -----------------------------------------------------------------------
-    INLINE static constexpr void inputb(buffer_t& buffer, const block_t& block) NOEXCEPT;
+    INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
@@ -256,16 +256,19 @@ protected:
     /// -----------------------------------------------------------------------
 
     template <typename xWord>
-    INLINE static auto pack(const state_t& state) NOEXCEPT;
+    static inline auto pack_pad_half() NOEXCEPT;
+
+    template <typename xWord>
+    static inline auto pack_schedule_1() NOEXCEPT;
 
     template <typename xWord>
     INLINE static void pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void pack_schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    INLINE static void schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    INLINE static auto pack(const state_t& state) NOEXCEPT;
 
     template <size_t Lane, typename xWord>
     INLINE static digest_t unpack(const xstate_t<xWord>& xstate) NOEXCEPT;
