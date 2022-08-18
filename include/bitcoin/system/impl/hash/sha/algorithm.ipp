@@ -333,10 +333,8 @@ template<size_t Round, size_t Lane>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& wk) NOEXCEPT
 {
-    // extract() normalizes word for scedule/compress/none vectorization forms.
-    // The state.front() parameter is used only as a polymorphic guide, since
-    // the compiler cannot deduce this as a template argument.
-    ////using word = decltype(state.front());
+    // Compiler cannot deduce this as a template argument.
+    ////using word = std::remove_reference<decltype(state.front())>;
 
     if constexpr (SHA::strength == 160)
     {

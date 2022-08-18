@@ -239,7 +239,7 @@ INLINE xint256_t set(
 /// pack/unpack
 /// ---------------------------------------------------------------------------
 
-// TODO: xint256_t pack<Word>(const uint8_t*).
+// TODO: auto pack<Word>(const uint8_t*).
 INLINE auto unpack(xint256_t a) NOEXCEPT
 {
     std_array<uint8_t, sizeof(xint256_t)> bytes{};
