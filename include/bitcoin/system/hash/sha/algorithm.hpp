@@ -69,7 +69,6 @@ public:
     template <size_t Size>
     using ablocks_t = std_array<block_t, Size>;
     using iblocks_t = iterable<block_t>;
-    using iblock_t = typename iblocks_t::iterator;
     using digests_t = std_vector<digest_t>;
 
     /// Constants (and count_t).
@@ -205,7 +204,7 @@ protected:
     static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
     static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
-    /// Blocks iteration.
+    /// Block iteration.
     /// -----------------------------------------------------------------------
     template <size_t Size>
     INLINE static constexpr void iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
@@ -214,6 +213,8 @@ protected:
     INLINE static constexpr void sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void sequential(state_t& state, iblocks_t& blocks) NOEXCEPT;
     INLINE static void vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    VCONSTEXPR static void sequential(digests_t& digests, size_t block = zero) NOEXCEPT;
+    VCONSTEXPR static void vectorized(digests_t& digests) NOEXCEPT;
 
 private:
     using pad_t = std_array<word_t, subtract(SHA::block_words,
@@ -225,22 +226,71 @@ private:
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
 protected:
-    /// Message schedule vectorization.
-    /// -----------------------------------------------------------------------
+    /// Extended integer capacity for uint32_t/uint64_t is 2/4/8/16 only.
+    template <size_t Lanes>
+    static constexpr auto is_valid_lanes =
+        (Lanes == 16u || Lanes == 8u || Lanes == 4u || Lanes == 2u);
 
     template <size_t Lanes>
-    using wblocks_t = std_array<words_t, Lanes>;
+    using wblock_t = std_array<words_t, Lanes>;
+
+    template <typename xWord, if_extended<xWord> = true>
+    using xbuffer_t = std_array<xWord, SHA::rounds>;
+
+    template <size_t Lane, size_t Lanes>
+    INLINE static auto pack(const wblock_t<Lanes>& wblock) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void input(xbuffer_t<xWord>& xbuffer,
+        iblocks_t& blocks) NOEXCEPT;
+
+    /// Independent single block double-hash vectorization.
+    /// -----------------------------------------------------------------------
+
+    using idigests_t = mutable_iterable<digest_t>;
+
+    template <typename xWord, if_extended<xWord> = true>
+    using xstate_t = std_array<xWord, SHA::state_words>;
+
+    template <typename xWord, if_extended<xWord> = true>
+    using xchunk_t = std_array<xWord, SHA::chunk_words>;
+
+    template <size_t Lanes>
+    INLINE static auto broadcast(const state_t& state) NOEXCEPT;
+
+    template <typename xWord, if_extended<xWord> = true>
+    INLINE static auto pack(const state_t& state) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void input(xbuffer_t<xWord>& xbuffer,
+        const xstate_t<xWord>& xstate) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
+    template <size_t Lane, typename xWord, if_extended<xWord> = true>
+    INLINE static digest_t unpack(const xstate_t<xWord>& xstate) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void output(idigests_t& digests,
+        const xstate_t<xWord>& xstate) NOEXCEPT;
+
+    template <typename xWord, if_extended<xWord> = true>
+    static inline void vectorize(idigests_t& digests,
+        iblocks_t& blocks) NOEXCEPT;
+
+    /// Message schedule vectorization.
+    /// -----------------------------------------------------------------------
 
     template <auto Lane, typename Word>
     INLINE static constexpr auto extract(Word, Word a) NOEXCEPT;
 
     template <auto Lane, typename Word, typename xWord,
-        if_integral_integer<Word> = true,
-        if_extended<xWord> = true>
+        if_integral_integer<Word> = true, if_extended<xWord> = true>
     INLINE static Word extract(Word, xWord a) NOEXCEPT;
 
-    template <size_t Lane, size_t Lanes>
-    INLINE static auto pack(const wblocks_t<Lanes>& words) NOEXCEPT;
+    template <typename xWord>
+    INLINE static void compress(state_t& state, xbuffer_t<xWord>& buffer) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
     static inline void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;

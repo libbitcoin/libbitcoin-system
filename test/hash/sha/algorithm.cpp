@@ -271,7 +271,6 @@ static_assert(is_same_type<sha160::count_t, uint64_t>);
 static_assert(is_same_type<sha160::digests_t, std_vector<std_array<uint8_t, 20>>>);
 static_assert(is_same_type<sha160::ablocks_t<42>, std_array<std_array<uint8_t, 64>, 42>>);
 static_assert(is_same_type<sha160::iblocks_t, iterable<std_array<uint8_t, 64>>>);
-static_assert(is_same_type<sha160::iblock_t, typename sha160::iblocks_t::iterator>);
 static_assert(is_same_type<decltype(sha160::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha160::limit_bytes), const uint64_t>);
 #if defined(HAVE_VECTORIZATION)
@@ -340,7 +339,6 @@ static_assert(is_same_type<sha256::count_t, uint64_t>);
 static_assert(is_same_type<sha256::digests_t, std_vector<std_array<uint8_t, 32>>>);
 static_assert(is_same_type<sha256::ablocks_t<42>, std_array<std_array<uint8_t, 64>, 42>>);
 static_assert(is_same_type<sha256::iblocks_t, iterable<std_array<uint8_t, 64>>>);
-static_assert(is_same_type<sha256::iblock_t, typename sha256::iblocks_t::iterator>);
 static_assert(is_same_type<decltype(sha256::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha256::limit_bytes), const uint64_t>);
 #if defined(HAVE_VECTORIZATION)
@@ -409,7 +407,6 @@ static_assert(is_same_type<sha512::count_t, uint128_t>);
 static_assert(is_same_type<sha512::digests_t, std_vector<std_array<uint8_t, 64>>>);
 static_assert(is_same_type<sha512::ablocks_t<42>, std_array<std_array<uint8_t, 128>, 42>>);
 static_assert(is_same_type<sha512::iblocks_t, iterable<std_array<uint8_t, 128>>>);
-static_assert(is_same_type<sha512::iblock_t, typename sha512::iblocks_t::iterator>);
 static_assert(is_same_type<decltype(sha512::limit_bits), const uint128_t>);
 static_assert(is_same_type<decltype(sha512::limit_bytes), const uint128_t>);
 #if defined(HAVE_VECTORIZATION)
