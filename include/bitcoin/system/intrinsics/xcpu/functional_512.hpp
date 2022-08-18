@@ -156,7 +156,8 @@ INLINE xint512_t addc(xint512_t a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // AVX512F
-template <typename Word, if_integral_integer<Word> = true>
+template <typename xWord, typename Word,
+    if_same<xWord, xint512_t> = true, if_integral_integer<Word> = true>
 INLINE xint512_t broadcast(Word a) NOEXCEPT
 {
     // set1 broadcasts integer to all elements.

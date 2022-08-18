@@ -144,7 +144,8 @@ INLINE xint256_t addc(xint256_t a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // AVX
-template <typename Word, if_integral_integer<Word> = true>
+template <typename xWord, typename Word,
+    if_same<xWord, xint256_t> = true, if_integral_integer<Word> = true>
 INLINE xint256_t broadcast(Word a) NOEXCEPT
 {
     // set1 broadcasts integer to all elements.

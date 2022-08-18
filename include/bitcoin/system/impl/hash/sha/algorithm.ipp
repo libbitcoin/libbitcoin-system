@@ -309,9 +309,9 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
 }
 
 TEMPLATE
-template <auto Lane, typename Word>
+template <typename Word, size_t Lane>
 INLINE constexpr auto CLASS::
-extract(Word, Word a) NOEXCEPT
+extract(Word a) NOEXCEPT
 {
     // Compress vectorization and non-vectorization require no extraction.
     static_assert(Lane == zero);
@@ -319,10 +319,10 @@ extract(Word, Word a) NOEXCEPT
 }
 
 TEMPLATE
-template <auto Lane, typename Word, typename xWord,
-    if_integral_integer<Word>, if_extended<xWord>>
+template <typename Word, size_t Lane, typename xWord,
+    if_not_same<Word, xWord>>
 INLINE Word CLASS::
-extract(Word, xWord a) NOEXCEPT
+extract(xWord a) NOEXCEPT
 {
     // Schedule vectorization (with compress non-vectorization), extract word.
     return get<Word, Lane>(a);
@@ -333,8 +333,7 @@ template<size_t Round, size_t Lane>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& wk) NOEXCEPT
 {
-    // Compiler cannot deduce this as a template argument.
-    ////using word = std::remove_reference<decltype(state.front())>;
+    using word = nocvref<decltype(state.front())>;
 
     if constexpr (SHA::strength == 160)
     {
@@ -344,7 +343,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 2 - Round) % SHA::state_words],
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-            extract<Lane>(state.front(), wk[Round]));
+            extract<word, Lane>(wk[Round]));
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -361,7 +360,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 5 - Round) % SHA::state_words],
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-            extract<Lane>(state.front(), wk[Round]));
+            extract<word, Lane>(wk[Round]));
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -637,7 +636,7 @@ summarize(auto& out, const auto& in) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input(buffer_t& buffer, const state_t& state) NOEXCEPT
+input(auto& buffer, const auto& state) NOEXCEPT
 {
     // This is a double hash optimization.
     if (std::is_constant_evaluated())
@@ -657,7 +656,8 @@ input(buffer_t& buffer, const state_t& state) NOEXCEPT
     }
     else
     {
-        array_cast<word_t, SHA::state_words>(buffer) = state;
+        using word = array_element<decltype(state)>;
+        array_cast<word, SHA::state_words>(buffer) = state;
     }
 }
 
@@ -667,7 +667,7 @@ input(buffer_t& buffer, const state_t& state) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input(buffer_t& buffer, const block_t& block) NOEXCEPT
+inputb(buffer_t& buffer, const block_t& block) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -1035,7 +1035,7 @@ hash(const block_t& block) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-    input(buffer, block);
+    inputb(buffer, block);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
@@ -1145,7 +1145,7 @@ double_hash(const block_t& block) NOEXCEPT
     buffer_t buffer{};
 
     auto state = H::get;
-    input(buffer, block);
+    inputb(buffer, block);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
@@ -1222,7 +1222,7 @@ sequential(digests_t& digests, size_t block) NOEXCEPT
 }
 
 TEMPLATE
-VCONSTEXPR void CLASS::
+INLINE void CLASS::
 vectorized(digests_t& digests) NOEXCEPT
 {
     // Create digest and block iterables from digest data.
@@ -1304,7 +1304,7 @@ constexpr void CLASS::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
     buffer_t buffer{};
-    input(buffer, block);
+    inputb(buffer, block);
     schedule(buffer);
     compress(state, buffer);
 }
@@ -1389,9 +1389,9 @@ INLINE void CLASS::
 sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     buffer_t buffer{};
-    for (auto& block : blocks)
+    for (auto& block: blocks)
     {
-        input(buffer, block);
+        inputb(buffer, block);
         schedule(buffer);
         compress(state, buffer);
     }
@@ -1403,9 +1403,9 @@ INLINE constexpr void CLASS::
 sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     buffer_t buffer{};
-    for (auto& block : blocks)
+    for (auto& block: blocks)
     {
-        input(buffer, block);
+        inputb(buffer, block);
         schedule(buffer);
         compress(state, buffer);
     }
@@ -1438,43 +1438,42 @@ vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-template <size_t Lane, size_t Lanes>
+template <size_t Word, size_t Lanes>
 INLINE auto CLASS::
 pack(const wblock_t<Lanes>& wblock) NOEXCEPT
 {
-    static_assert(is_valid_lanes<Lanes>);
-    using xword_t = to_extended<word_t, Lanes>;
+    using xword = to_extended<word_t, Lanes>;
 
     if constexpr (Lanes == 16)
     {
-        return byteswap(set<xword_t>(
-            wblock[ 0][Lane], wblock[ 1][Lane],
-            wblock[ 2][Lane], wblock[ 3][Lane],
-            wblock[ 4][Lane], wblock[ 5][Lane],
-            wblock[ 6][Lane], wblock[ 7][Lane],
-            wblock[ 8][Lane], wblock[ 9][Lane],
-            wblock[10][Lane], wblock[11][Lane],
-            wblock[12][Lane], wblock[13][Lane],
-            wblock[14][Lane], wblock[15][Lane]));
+        return byteswap(set<xword>(
+            wblock[ 0][Word], wblock[ 1][Word],
+            wblock[ 2][Word], wblock[ 3][Word],
+            wblock[ 4][Word], wblock[ 5][Word],
+            wblock[ 6][Word], wblock[ 7][Word],
+            wblock[ 8][Word], wblock[ 9][Word],
+            wblock[10][Word], wblock[11][Word],
+            wblock[12][Word], wblock[13][Word],
+            wblock[14][Word], wblock[15][Word]));
     }
     else if constexpr (Lanes == 8)
     {
-        return byteswap(set<xword_t>(
-            wblock[0][Lane], wblock[1][Lane],
-            wblock[2][Lane], wblock[3][Lane],
-            wblock[4][Lane], wblock[5][Lane],
-            wblock[6][Lane], wblock[7][Lane]));
+        return byteswap(set<xword>(
+            wblock[0][Word], wblock[1][Word],
+            wblock[2][Word], wblock[3][Word],
+            wblock[4][Word], wblock[5][Word],
+            wblock[6][Word], wblock[7][Word]));
     }
     else if constexpr (Lanes == 4)
     {
-        return byteswap(set<xword_t>(
-            wblock[0][Lane], wblock[1][Lane],
-            wblock[2][Lane], wblock[3][Lane]));
+        return byteswap(set<xword>(
+            wblock[0][Word], wblock[1][Word],
+            wblock[2][Word], wblock[3][Word]));
     }
     else //// if constexpr (Lanes == 2)
     {
-        return byteswap(set<xword_t>(
-            wblock[0][Lane], wblock[1][Lane]));
+        return byteswap(set<xword>(
+            wblock[0][Word], wblock[1][Word]));
     }
 }
 
@@ -1484,8 +1483,6 @@ INLINE void CLASS::
 input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
-    static_assert(is_valid_lanes<lanes>);
-
     const auto& wblock = array_cast<words_t>(blocks.template to_array<lanes>());
     xbuffer[0] = pack<0>(wblock);
     xbuffer[1] = pack<1>(wblock);
@@ -1510,60 +1507,21 @@ input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-template <size_t Lanes>
-INLINE auto CLASS::
-broadcast(const state_t& state) NOEXCEPT
-{
-    static_assert(is_valid_lanes<Lanes>);
-    using xword_t = to_extended<word_t, Lanes>;
-
-    if constexpr (Lanes == 16)
-    {
-        return set<xword_t>(
-            state, state, state, state,
-            state, state, state, state,
-            state, state, state, state,
-            state, state, state, state);
-    }
-    else if constexpr (Lanes == 8)
-    {
-        return set<xword_t>(
-            state, state, state, state,
-            state, state, state, state);
-    }
-    else if constexpr (Lanes == 4)
-    {
-        return set<xword_t>(state, state, state, state);
-    }
-    else //// if constexpr (Lanes == 2)
-    {
-        return set<xword_t>(state, state);
-    }
-}
-
-TEMPLATE
-template <typename xWord, if_extended<xWord>>
+template <typename xWord>
 INLINE auto CLASS::
 pack(const state_t& state) NOEXCEPT
 {
-    xstate_t<xWord> xstate;
-    xstate[0] = broadcast(state[0]);
-    xstate[1] = broadcast(state[1]);
-    xstate[2] = broadcast(state[2]);
-    xstate[3] = broadcast(state[3]);
-    xstate[4] = broadcast(state[4]);
-    xstate[5] = broadcast(state[5]);
-    xstate[6] = broadcast(state[6]);
-    xstate[7] = broadcast(state[7]);
-    return xstate;
-}
-
-TEMPLATE
-template <typename xWord>
-INLINE void CLASS::
-input(xbuffer_t<xWord>& xbuffer, const xstate_t<xWord>& xstate) NOEXCEPT
-{
-    array_cast<xWord, SHA::state_words>(xbuffer) = xstate;
+    return xstate_t<xWord>
+    {
+        broadcast<xWord>(state[0]),
+        broadcast<xWord>(state[1]),
+        broadcast<xWord>(state[2]),
+        broadcast<xWord>(state[3]),
+        broadcast<xWord>(state[4]),
+        broadcast<xWord>(state[5]),
+        broadcast<xWord>(state[6]),
+        broadcast<xWord>(state[7])
+    };
 }
 
 TEMPLATE
@@ -1571,28 +1529,28 @@ template <typename xWord>
 void CLASS::
 pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
-    constexpr auto pad = chunk_pad();
+    constexpr auto chunk = chunk_pad();
     static const xchunk_t<xWord> xpad
     {
-        broadcast(xpad[0]),
-        broadcast(xpad[1]),
-        broadcast(xpad[2]),
-        broadcast(xpad[3]),
-        broadcast(xpad[4]),
-        broadcast(xpad[5]),
-        broadcast(xpad[6]),
-        broadcast(xpad[7])
+        broadcast<xWord>(chunk[0]),
+        broadcast<xWord>(chunk[1]),
+        broadcast<xWord>(chunk[2]),
+        broadcast<xWord>(chunk[3]),
+        broadcast<xWord>(chunk[4]),
+        broadcast<xWord>(chunk[5]),
+        broadcast<xWord>(chunk[6]),
+        broadcast<xWord>(chunk[7])
     };
 
-    array_cast<word_t, SHA::chunk_words, SHA::chunk_words>(xbuffer) = xpad;
+    array_cast<xWord, SHA::chunk_words, SHA::chunk_words>(xbuffer) = xpad;
 }
 
 TEMPLATE
-template <size_t Lane, typename xWord, if_extended<xWord>>
+template <size_t Lane, typename xWord>
 INLINE static CLASS::digest_t CLASS::
 unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
-    return
+    return array_cast<byte_t>(state_t
     {
         get<word_t, Lane>(xstate[0]),
         get<word_t, Lane>(xstate[1]),
@@ -1602,7 +1560,7 @@ unpack(const xstate_t<xWord>& xstate) NOEXCEPT
         get<word_t, Lane>(xstate[5]),
         get<word_t, Lane>(xstate[6]),
         get<word_t, Lane>(xstate[7])
-    };
+    });
 }
 
 TEMPLATE
@@ -1611,9 +1569,7 @@ INLINE void CLASS::
 output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
-    static_assert(is_valid_lanes<lanes>);
-
-    const auto& wdigest = array_cast<word_t>(digests.template to_array<lanes>());
+    auto& wdigest = array_cast<digest_t>(digests.template to_array<lanes>());
 
     if constexpr (lanes > 0)
     {
@@ -1657,16 +1613,16 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 {
     BC_ASSERT(digests.size() == blocks.size());
     constexpr auto lanes = capacity<xWord, word_t>;
-    static_assert(is_valid_lanes<lanes>);
 
     if (have<xWord>() && blocks.size() >= lanes)
     {
         static auto initial = pack<xWord>(H::get);
-        auto xstate = initial;
         xbuffer_t<xWord> xbuffer;
 
         do
         {
+            auto xstate = initial;
+
             // input() advances block iterator by lanes.
             input(xbuffer, blocks);
             schedule(xbuffer);
@@ -1695,10 +1651,9 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-compress(state_t& state, xbuffer_t<xWord>& xbuffer) NOEXCEPT
+compress_(state_t& state, xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
-    static_assert(is_valid_lanes<lanes>);
 
     if constexpr (lanes > 0)
     {
@@ -1750,7 +1705,7 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
             // input() advances block iterator by lanes.
             input(xbuffer, blocks);
             schedule(xbuffer);
-            compress(state, xbuffer);
+            compress_(state, xbuffer);
         }
         while (blocks.size() >= lanes);
     }

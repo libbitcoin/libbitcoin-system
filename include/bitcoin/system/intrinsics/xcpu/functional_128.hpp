@@ -145,7 +145,8 @@ INLINE xint128_t addc(xint128_t a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // SSE2
-template <typename Word, if_integral_integer<Word> = true>
+template <typename xWord, typename Word,
+    if_same<xWord, xint128_t> = true, if_integral_integer<Word> = true>
 INLINE xint128_t broadcast(Word a) NOEXCEPT
 {
     // set1 broadcasts integer to all elements.
