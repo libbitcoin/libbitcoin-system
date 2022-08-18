@@ -1529,25 +1529,207 @@ template <typename xWord>
 void CLASS::
 pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
-    constexpr auto chunk = chunk_pad();
-    static const xchunk_t<xWord> xpad
+    constexpr auto pad = chunk_pad();
+
+    static const xchunk_t<xWord> xchunk_pad
     {
-        broadcast<xWord>(chunk[0]),
-        broadcast<xWord>(chunk[1]),
-        broadcast<xWord>(chunk[2]),
-        broadcast<xWord>(chunk[3]),
-        broadcast<xWord>(chunk[4]),
-        broadcast<xWord>(chunk[5]),
-        broadcast<xWord>(chunk[6]),
-        broadcast<xWord>(chunk[7])
+        broadcast<xWord>(pad[0]),
+        broadcast<xWord>(pad[1]),
+        broadcast<xWord>(pad[2]),
+        broadcast<xWord>(pad[3]),
+        broadcast<xWord>(pad[4]),
+        broadcast<xWord>(pad[5]),
+        broadcast<xWord>(pad[6]),
+        broadcast<xWord>(pad[7])
     };
 
-    array_cast<xWord, SHA::chunk_words, SHA::chunk_words>(xbuffer) = xpad;
+    array_cast<xWord, SHA::chunk_words, SHA::chunk_words>(xbuffer) = xchunk_pad;
+}
+
+TEMPLATE
+template <typename xWord>
+INLINE void CLASS::
+pack_schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+{
+    constexpr auto pad = scheduled_pad<one>();
+
+    if constexpr (SHA::rounds == 80)
+    {
+        return xbuffer_t<xWord>
+        {
+            broadcast<xWord>(pad[0]),
+            broadcast<xWord>(pad[1]),
+            broadcast<xWord>(pad[2]),
+            broadcast<xWord>(pad[3]),
+            broadcast<xWord>(pad[4]),
+            broadcast<xWord>(pad[5]),
+            broadcast<xWord>(pad[6]),
+            broadcast<xWord>(pad[7]),
+            broadcast<xWord>(pad[8]),
+            broadcast<xWord>(pad[9]),
+            broadcast<xWord>(pad[10]),
+            broadcast<xWord>(pad[11]),
+            broadcast<xWord>(pad[12]),
+            broadcast<xWord>(pad[13]),
+            broadcast<xWord>(pad[14]),
+            broadcast<xWord>(pad[15]),
+
+            broadcast<xWord>(pad[16]),
+            broadcast<xWord>(pad[17]),
+            broadcast<xWord>(pad[18]),
+            broadcast<xWord>(pad[19]),
+            broadcast<xWord>(pad[20]),
+            broadcast<xWord>(pad[21]),
+            broadcast<xWord>(pad[22]),
+            broadcast<xWord>(pad[23]),
+            broadcast<xWord>(pad[24]),
+            broadcast<xWord>(pad[25]),
+            broadcast<xWord>(pad[26]),
+            broadcast<xWord>(pad[27]),
+            broadcast<xWord>(pad[28]),
+            broadcast<xWord>(pad[29]),
+            broadcast<xWord>(pad[30]),
+            broadcast<xWord>(pad[31]),
+
+            broadcast<xWord>(pad[32]),
+            broadcast<xWord>(pad[33]),
+            broadcast<xWord>(pad[34]),
+            broadcast<xWord>(pad[35]),
+            broadcast<xWord>(pad[36]),
+            broadcast<xWord>(pad[37]),
+            broadcast<xWord>(pad[38]),
+            broadcast<xWord>(pad[39]),
+            broadcast<xWord>(pad[40]),
+            broadcast<xWord>(pad[41]),
+            broadcast<xWord>(pad[42]),
+            broadcast<xWord>(pad[43]),
+            broadcast<xWord>(pad[44]),
+            broadcast<xWord>(pad[45]),
+            broadcast<xWord>(pad[46]),
+            broadcast<xWord>(pad[47]),
+
+            broadcast<xWord>(pad[48]),
+            broadcast<xWord>(pad[49]),
+            broadcast<xWord>(pad[50]),
+            broadcast<xWord>(pad[51]),
+            broadcast<xWord>(pad[52]),
+            broadcast<xWord>(pad[53]),
+            broadcast<xWord>(pad[54]),
+            broadcast<xWord>(pad[55]),
+            broadcast<xWord>(pad[56]),
+            broadcast<xWord>(pad[57]),
+            broadcast<xWord>(pad[58]),
+            broadcast<xWord>(pad[59]),
+            broadcast<xWord>(pad[60]),
+            broadcast<xWord>(pad[61]),
+            broadcast<xWord>(pad[62]),
+            broadcast<xWord>(pad[63]),
+
+            broadcast<xWord>(pad[64]),
+            broadcast<xWord>(pad[65]),
+            broadcast<xWord>(pad[66]),
+            broadcast<xWord>(pad[67]),
+            broadcast<xWord>(pad[68]),
+            broadcast<xWord>(pad[69]),
+            broadcast<xWord>(pad[70]),
+            broadcast<xWord>(pad[71]),
+            broadcast<xWord>(pad[72]),
+            broadcast<xWord>(pad[73]),
+            broadcast<xWord>(pad[74]),
+            broadcast<xWord>(pad[75]),
+            broadcast<xWord>(pad[76]),
+            broadcast<xWord>(pad[77]),
+            broadcast<xWord>(pad[78]),
+            broadcast<xWord>(pad[79])
+        };
+    }
+    else
+    {
+        return xbuffer_t<xWord>
+        {
+            broadcast<xWord>(pad[0]),
+            broadcast<xWord>(pad[1]),
+            broadcast<xWord>(pad[2]),
+            broadcast<xWord>(pad[3]),
+            broadcast<xWord>(pad[4]),
+            broadcast<xWord>(pad[5]),
+            broadcast<xWord>(pad[6]),
+            broadcast<xWord>(pad[7]),
+            broadcast<xWord>(pad[8]),
+            broadcast<xWord>(pad[9]),
+            broadcast<xWord>(pad[10]),
+            broadcast<xWord>(pad[11]),
+            broadcast<xWord>(pad[12]),
+            broadcast<xWord>(pad[13]),
+            broadcast<xWord>(pad[14]),
+            broadcast<xWord>(pad[15]),
+
+            broadcast<xWord>(pad[16]),
+            broadcast<xWord>(pad[17]),
+            broadcast<xWord>(pad[18]),
+            broadcast<xWord>(pad[19]),
+            broadcast<xWord>(pad[20]),
+            broadcast<xWord>(pad[21]),
+            broadcast<xWord>(pad[22]),
+            broadcast<xWord>(pad[23]),
+            broadcast<xWord>(pad[24]),
+            broadcast<xWord>(pad[25]),
+            broadcast<xWord>(pad[26]),
+            broadcast<xWord>(pad[27]),
+            broadcast<xWord>(pad[28]),
+            broadcast<xWord>(pad[29]),
+            broadcast<xWord>(pad[30]),
+            broadcast<xWord>(pad[31]),
+
+            broadcast<xWord>(pad[32]),
+            broadcast<xWord>(pad[33]),
+            broadcast<xWord>(pad[34]),
+            broadcast<xWord>(pad[35]),
+            broadcast<xWord>(pad[36]),
+            broadcast<xWord>(pad[37]),
+            broadcast<xWord>(pad[38]),
+            broadcast<xWord>(pad[39]),
+            broadcast<xWord>(pad[40]),
+            broadcast<xWord>(pad[41]),
+            broadcast<xWord>(pad[42]),
+            broadcast<xWord>(pad[43]),
+            broadcast<xWord>(pad[44]),
+            broadcast<xWord>(pad[45]),
+            broadcast<xWord>(pad[46]),
+            broadcast<xWord>(pad[47]),
+
+            broadcast<xWord>(pad[48]),
+            broadcast<xWord>(pad[49]),
+            broadcast<xWord>(pad[50]),
+            broadcast<xWord>(pad[51]),
+            broadcast<xWord>(pad[52]),
+            broadcast<xWord>(pad[53]),
+            broadcast<xWord>(pad[54]),
+            broadcast<xWord>(pad[55]),
+            broadcast<xWord>(pad[56]),
+            broadcast<xWord>(pad[57]),
+            broadcast<xWord>(pad[58]),
+            broadcast<xWord>(pad[59]),
+            broadcast<xWord>(pad[60]),
+            broadcast<xWord>(pad[61]),
+            broadcast<xWord>(pad[62]),
+            broadcast<xWord>(pad[63])
+        };
+    }
+}
+
+TEMPLATE
+template <typename xWord>
+INLINE void CLASS::
+schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+{
+    static const auto xscheduled_pad = pack_schedule_1();
+    xbuffer = xscheduled_pad;
 }
 
 TEMPLATE
 template <size_t Lane, typename xWord>
-INLINE static CLASS::digest_t CLASS::
+INLINE typename CLASS::digest_t CLASS::
 unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
     return array_cast<byte_t>(state_t
@@ -1626,6 +1808,8 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
             // input() advances block iterator by lanes.
             input(xbuffer, blocks);
             schedule(xbuffer);
+            compress(xstate, xbuffer);
+            schedule_1(xbuffer);
             compress(xstate, xbuffer);
 
             // Second hash

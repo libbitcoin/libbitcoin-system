@@ -261,6 +261,12 @@ protected:
     template <typename xWord>
     INLINE static void pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
+    template <typename xWord>
+    INLINE static void pack_schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
     template <size_t Lane, typename xWord>
     INLINE static digest_t unpack(const xstate_t<xWord>& xstate) NOEXCEPT;
 
