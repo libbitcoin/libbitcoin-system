@@ -39,29 +39,25 @@ namespace f {
 /// ---------------------------------------------------------------------------
 
 // SSE2
-template <typename Word, if_same<Word, xint128_t> = true>
-INLINE Word and_(Word a, Word b) NOEXCEPT
+INLINE xint128_t and_(xint128_t a, xint128_t b) NOEXCEPT
 {
     return mm_and_si128(a, b);
 }
 
 // SSE2
-template <typename Word, if_same<Word, xint128_t> = true>
-INLINE Word or_(Word a, Word b) NOEXCEPT
+INLINE xint128_t or_(xint128_t a, xint128_t b) NOEXCEPT
 {
     return mm_or_si128(a, b);
 }
 
 // SSE2
-template <typename Word, if_same<Word, xint128_t> = true>
-INLINE Word xor_(Word a, Word b) NOEXCEPT
+INLINE xint128_t xor_(xint128_t a, xint128_t b) NOEXCEPT
 {
     return mm_xor_si128(a, b);
 }
 
 // SSE2
-template <typename Word, if_same<Word, xint128_t> = true>
-INLINE Word not_(Word a) NOEXCEPT
+INLINE xint128_t not_(xint128_t a) NOEXCEPT
 {
     return xor_(a, mm_set1_epi64x(-1));
 }
@@ -70,8 +66,8 @@ INLINE Word not_(Word a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // SSE2
-template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
-INLINE Word shr(Word a) NOEXCEPT
+template <auto B, auto S>
+INLINE xint128_t shr(xint128_t a) NOEXCEPT
 {
     // Undefined.
     static_assert(S != bits<uint8_t>);
@@ -87,8 +83,8 @@ INLINE Word shr(Word a) NOEXCEPT
 }
 
 // SSE2
-template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
-INLINE Word shl(Word a) NOEXCEPT
+template <auto B, auto S>
+INLINE xint128_t shl(xint128_t a) NOEXCEPT
 {
     // Undefined.
     static_assert(S != bits<uint8_t>);
@@ -103,21 +99,21 @@ INLINE Word shl(Word a) NOEXCEPT
         return mm_slli_epi64(a, B);
 }
 
-template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
-INLINE Word ror(Word a) NOEXCEPT
+template <auto B, auto S>
+INLINE xint128_t ror(xint128_t a) NOEXCEPT
 {
     return or_(shr<B, S>(a), shl<S - B, S>(a));
 }
 
-template <auto B, auto S, typename Word, if_same<Word, xint128_t> = true>
-INLINE Word rol(Word a) NOEXCEPT
+template <auto B, auto S>
+INLINE xint128_t rol(xint128_t a) NOEXCEPT
 {
     return or_(shl<B, S>(a), shr<S - B, S>(a));
 }
 
 // SSE2
-template <auto S, typename Word, if_same<Word, xint128_t> = true>
-INLINE Word add(Word a, Word b) NOEXCEPT
+template <auto S>
+INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
         return mm_add_epi8(a, b);
@@ -130,10 +126,9 @@ INLINE Word add(Word a, Word b) NOEXCEPT
 }
 
 // SSE2
-template <auto K, auto S, typename Word, if_same<Word, xint128_t> = true>
-INLINE Word addc(Word a) NOEXCEPT
+template <auto K, auto S>
+INLINE xint128_t addc(xint128_t a) NOEXCEPT
 {
-    // set1 broadcast integer to all elements.
     if constexpr (S == bits<uint8_t>)
         return add<S>(a, mm_set1_epi8(K));
     else if constexpr (S == bits<uint16_t>)
@@ -146,11 +141,26 @@ INLINE Word addc(Word a) NOEXCEPT
 
 } // namespace f
 
-/// get/set
+/// broadcast/get/set
 /// ---------------------------------------------------------------------------
 
+// SSE2
+template <typename Word, if_integral_integer<Word> = true>
+INLINE xint128_t broadcast(Word a) NOEXCEPT
+{
+    // set1 broadcasts integer to all elements.
+    if constexpr (is_same_type<Word, uint8_t>)
+        return mm_set1_epi8(a);
+    if constexpr (is_same_type<Word, uint16_t>)
+        return mm_set1_epi16(a);
+    if constexpr (is_same_type<Word, uint32_t>)
+        return mm_set1_epi32(a);
+    if constexpr (is_same_type<Word, uint64_t>)
+        return mm_set1_epi64x(a);
+}
+
 // Lane zero is lowest order word.
-template <typename Word, auto Lane>
+template <typename Word, auto Lane, if_integral_integer<Word> = true>
 INLINE Word get(xint128_t a) NOEXCEPT
 {
     // mm_extract_epi64 defined as no-op on 32 bit builds (must exclude).
@@ -221,13 +231,13 @@ INLINE xint128_t set(
 /// pack/unpack
 /// ---------------------------------------------------------------------------
 
-// TODO: auto pack<Word>(const uint8_t*).
-INLINE auto unpack(xint128_t a) NOEXCEPT
-{
-    std_array<uint8_t, sizeof(xint128_t)> bytes{};
-    mm_storeu_si128(pointer_cast<xint128_t>(&bytes.front()), a);
-    return bytes;
-}
+////// TODO: auto pack<Word>(const uint8_t*).
+////INLINE auto unpack(xint128_t a) NOEXCEPT
+////{
+////    std_array<uint8_t, sizeof(xint128_t)> bytes{};
+////    mm_storeu_si128(pointer_cast<xint128_t>(&bytes.front()), a);
+////    return bytes;
+////}
 
 /// endianness
 /// ---------------------------------------------------------------------------
