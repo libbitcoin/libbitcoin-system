@@ -128,10 +128,8 @@ public:
     {
     }
 
-    // This can be more efficiently achieved using array_cast, if an array of
-    // arrays type is sufficient.
-    template <typename Type, size_t Size>
-    inline iterable(const std_array<Type, Size>& data) NOEXCEPT
+    template <size_t Size>
+    inline iterable(const data_array<Size>& data) NOEXCEPT
       : count_(count(Size)),
         begin_(data.data()),
         end_(std::next(begin_, count_ * value_size))
@@ -273,10 +271,8 @@ public:
     {
     }
 
-    // This can be more efficiently achieved using array_cast if an array of
-    // arrays type is sufficient.
-    template <typename Type, size_t Size>
-    inline mutable_iterable(std_array<Type, Size>& data) NOEXCEPT
+    template <size_t Size>
+    inline mutable_iterable(data_array<Size>& data) NOEXCEPT
       : count_(count(Size)),
         begin_(data.data()),        
         end_(std::next(begin_, count_ * value_size))
