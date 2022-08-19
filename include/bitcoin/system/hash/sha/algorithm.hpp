@@ -38,7 +38,7 @@ namespace sha {
 /// SHA hashing algorithm.
 /// Compression not yet implemented.
 /// Vectorization of message schedules and merkle hashes.
-template <typename SHA, bool Compressed = true, bool Vectorized = true,
+template <typename SHA, bool Compressed = true, bool Vectorized = false,
     bool Cached = true, if_same<typename SHA::T, sha::shah_t> = true>
 class algorithm : algorithm_t
 {
