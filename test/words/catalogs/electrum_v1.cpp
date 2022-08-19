@@ -49,23 +49,23 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__count__all__expected)
 {
     // Any new dictionary must be added below to guarantee lack of normalization.
     // Failure to do so may lead to invalid seed generation, which is very bad.
-    BOOST_REQUIRE_MESSAGE(electrum_v1::catalogs::count() == dictionary_count, "new dictionary");
+    BOOST_CHECK_MESSAGE(electrum_v1::catalogs::count() == dictionary_count, "new dictionary");
 }
 
 // identity
 
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__all__identity__expected)
 {
-    BOOST_REQUIRE_EQUAL(identity(electrum_v1::en), identity_en);
-    BOOST_REQUIRE_EQUAL(identity(electrum_v1::pt), identity_pt);
+    BOOST_CHECK_EQUAL(identity(electrum_v1::en), identity_en);
+    BOOST_CHECK_EQUAL(identity(electrum_v1::pt), identity_pt);
 }
 
 // distinct
 
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__all__distinct__true)
 {
-    BOOST_REQUIRE(distinct(electrum_v1::en));
-    BOOST_REQUIRE(distinct(electrum_v1::pt));
+    BOOST_CHECK(distinct(electrum_v1::en));
+    BOOST_CHECK(distinct(electrum_v1::pt));
 }
 
 // sorted
@@ -73,12 +73,12 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__all__distinct__true)
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__sorted__unsorted__false)
 {
     // Compare is not locale-aware, but these are consistent across encodings.
-    BOOST_REQUIRE(!sorted8(electrum_v1::pt) && !electrum_v1::pt.sorted);
-    BOOST_REQUIRE(!sorted8(electrum_v1::en) && !electrum_v1::en.sorted);
-    BOOST_REQUIRE(!sorted16(electrum_v1::pt) && !electrum_v1::pt.sorted);
-    BOOST_REQUIRE(!sorted16(electrum_v1::en) && !electrum_v1::en.sorted);
-    BOOST_REQUIRE(!sorted32(electrum_v1::pt) && !electrum_v1::pt.sorted);
-    BOOST_REQUIRE(!sorted32(electrum_v1::en) && !electrum_v1::en.sorted);
+    BOOST_CHECK(!sorted8(electrum_v1::pt) && !electrum_v1::pt.sorted);
+    BOOST_CHECK(!sorted8(electrum_v1::en) && !electrum_v1::en.sorted);
+    BOOST_CHECK(!sorted16(electrum_v1::pt) && !electrum_v1::pt.sorted);
+    BOOST_CHECK(!sorted16(electrum_v1::en) && !electrum_v1::en.sorted);
+    BOOST_CHECK(!sorted32(electrum_v1::pt) && !electrum_v1::pt.sorted);
+    BOOST_CHECK(!sorted32(electrum_v1::en) && !electrum_v1::en.sorted);
 }
 
 // abnormal
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__sorted__unsorted__false)
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__normal__normal_words__true)
 {
     // The result is definitive only when HAVE_ICU is defined.
-    BOOST_REQUIRE(!abnormal(electrum_v1::en));
-    BOOST_REQUIRE(!abnormal(electrum_v1::pt));
+    BOOST_CHECK(!abnormal(electrum_v1::en));
+    BOOST_CHECK(!abnormal(electrum_v1::pt));
 }
 
 // intersection
@@ -99,42 +99,42 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__normal__normal_words__true)
 
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__intersections__en__expected)
 {
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum_v1::en), dictionary_size);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum_v1::pt), intersection_en_pt);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::en, electrum_v1::en), dictionary_size);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::en, electrum_v1::pt), intersection_en_pt);
 }
 
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__intersections__pt__expected)
 {
-    ////BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum_v1::en), intersection_en_pt);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum_v1::pt), dictionary_size);
+    ////BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum_v1::en), intersection_en_pt);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum_v1::pt), dictionary_size);
 }
 
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__intersections__en_electrum__expected)
 {
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::en), intersection_en_electrum_en);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::es), intersection_en_electrum_es);
-    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::it));
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::fr), intersection_en_electrum_fr);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::cs), intersection_en_electrum_cs);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::en, electrum::pt), intersection_en_electrum_pt);
-    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::ja));
-    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::ko));
-    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::zh_Hans));
-    BOOST_REQUIRE(!intersects(electrum_v1::en, electrum::zh_Hant));
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::en, electrum::en), intersection_en_electrum_en);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::en, electrum::es), intersection_en_electrum_es);
+    BOOST_CHECK(!intersects(electrum_v1::en, electrum::it));
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::en, electrum::fr), intersection_en_electrum_fr);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::en, electrum::cs), intersection_en_electrum_cs);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::en, electrum::pt), intersection_en_electrum_pt);
+    BOOST_CHECK(!intersects(electrum_v1::en, electrum::ja));
+    BOOST_CHECK(!intersects(electrum_v1::en, electrum::ko));
+    BOOST_CHECK(!intersects(electrum_v1::en, electrum::zh_Hans));
+    BOOST_CHECK(!intersects(electrum_v1::en, electrum::zh_Hant));
 }
 
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__intersections__pt_electrum__expected)
 {
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::en), intersection_pt_electrum_en);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::es), intersection_pt_electrum_es);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::it), intersection_pt_electrum_it);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::fr), intersection_pt_electrum_fr);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::cs), intersection_pt_electrum_cs);
-    BOOST_REQUIRE_EQUAL(intersection(electrum_v1::pt, electrum::pt), intersection_pt_electrum_pt);
-    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::ja));
-    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::ko));
-    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::zh_Hans));
-    BOOST_REQUIRE(!intersects(electrum_v1::pt, electrum::zh_Hant));
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum::en), intersection_pt_electrum_en);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum::es), intersection_pt_electrum_es);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum::it), intersection_pt_electrum_it);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum::fr), intersection_pt_electrum_fr);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum::cs), intersection_pt_electrum_cs);
+    BOOST_CHECK_EQUAL(intersection(electrum_v1::pt, electrum::pt), intersection_pt_electrum_pt);
+    BOOST_CHECK(!intersects(electrum_v1::pt, electrum::ja));
+    BOOST_CHECK(!intersects(electrum_v1::pt, electrum::ko));
+    BOOST_CHECK(!intersects(electrum_v1::pt, electrum::zh_Hans));
+    BOOST_CHECK(!intersects(electrum_v1::pt, electrum::zh_Hant));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

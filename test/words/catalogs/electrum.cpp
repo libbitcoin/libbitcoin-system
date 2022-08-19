@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__count__all__expected)
 {
     // Any new dictionary must be added below to guarantee lack of normalization.
     // Failure to do so may lead to invalid seed generation, which is very bad.
-    BOOST_REQUIRE_MESSAGE(electrum::catalogs::count() == dictionary_count, "new dictionary");
+    BOOST_CHECK_MESSAGE(electrum::catalogs::count() == dictionary_count, "new dictionary");
 }
 
 // subset
@@ -59,16 +59,16 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__count__all__expected)
 // This test ensures electrum dictionaries are a subset of mnemonic dictionaries.
 BOOST_AUTO_TEST_CASE(catalogs_electrum__mnemonic__subset__true)
 {
-    BOOST_REQUIRE_EQUAL(electrum::en.word, mnemonic::en.word);
-    BOOST_REQUIRE_EQUAL(electrum::es.word, mnemonic::es.word);
-    BOOST_REQUIRE_EQUAL(electrum::it.word, mnemonic::it.word);
-    BOOST_REQUIRE_EQUAL(electrum::fr.word, mnemonic::fr.word);
-    BOOST_REQUIRE_EQUAL(electrum::cs.word, mnemonic::cs.word);
-    BOOST_REQUIRE_EQUAL(electrum::pt.word, mnemonic::pt.word);
-    BOOST_REQUIRE_EQUAL(electrum::ja.word, mnemonic::ja.word);
-    BOOST_REQUIRE_EQUAL(electrum::ko.word, mnemonic::ko.word);
-    BOOST_REQUIRE_EQUAL(electrum::zh_Hans.word, mnemonic::zh_Hans.word);
-    BOOST_REQUIRE_EQUAL(electrum::zh_Hant.word, mnemonic::zh_Hant.word);
+    BOOST_CHECK_EQUAL(electrum::en.word, mnemonic::en.word);
+    BOOST_CHECK_EQUAL(electrum::es.word, mnemonic::es.word);
+    BOOST_CHECK_EQUAL(electrum::it.word, mnemonic::it.word);
+    BOOST_CHECK_EQUAL(electrum::fr.word, mnemonic::fr.word);
+    BOOST_CHECK_EQUAL(electrum::cs.word, mnemonic::cs.word);
+    BOOST_CHECK_EQUAL(electrum::pt.word, mnemonic::pt.word);
+    BOOST_CHECK_EQUAL(electrum::ja.word, mnemonic::ja.word);
+    BOOST_CHECK_EQUAL(electrum::ko.word, mnemonic::ko.word);
+    BOOST_CHECK_EQUAL(electrum::zh_Hans.word, mnemonic::zh_Hans.word);
+    BOOST_CHECK_EQUAL(electrum::zh_Hant.word, mnemonic::zh_Hant.word);
 }
 // combined
 
@@ -76,22 +76,22 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__mnemonic__subset__true)
 // This requires combinings removal in these (only) for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(catalogs_electrum__combinings__combininged_words__true)
 {
-    BOOST_REQUIRE_EQUAL(combinings(electrum::es), combinings_es);
-    BOOST_REQUIRE_EQUAL(combinings(electrum::fr), combinings_fr);
-    BOOST_REQUIRE_EQUAL(combinings(electrum::ja), combinings_ja);
+    BOOST_CHECK_EQUAL(combinings(electrum::es), combinings_es);
+    BOOST_CHECK_EQUAL(combinings(electrum::fr), combinings_fr);
+    BOOST_CHECK_EQUAL(combinings(electrum::ja), combinings_ja);
 }
 
 // No words in these dictionaries contain combining characters.
 // So there is no need to normalize combinings these for wordlist-based seedings.
 BOOST_AUTO_TEST_CASE(catalogs_electrum__combined__not_combininged_words__false)
 {
-    BOOST_REQUIRE(!combined(electrum::en));
-    BOOST_REQUIRE(!combined(electrum::it));
-    BOOST_REQUIRE(!combined(electrum::cs));
-    BOOST_REQUIRE(!combined(electrum::pt));
-    BOOST_REQUIRE(!combined(electrum::ko));
-    BOOST_REQUIRE(!combined(electrum::zh_Hans));
-    BOOST_REQUIRE(!combined(electrum::zh_Hant));
+    BOOST_CHECK(!combined(electrum::en));
+    BOOST_CHECK(!combined(electrum::it));
+    BOOST_CHECK(!combined(electrum::cs));
+    BOOST_CHECK(!combined(electrum::pt));
+    BOOST_CHECK(!combined(electrum::ko));
+    BOOST_CHECK(!combined(electrum::zh_Hans));
+    BOOST_CHECK(!combined(electrum::zh_Hant));
 }
 
 // compressed_cjk
@@ -100,16 +100,16 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__combined__not_combininged_words__false)
 // So there is no need to normalize compression for wordlist-based seeding.
 BOOST_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 {
-    BOOST_REQUIRE(!compressed(electrum::en));
-    BOOST_REQUIRE(!compressed(electrum::es));
-    BOOST_REQUIRE(!compressed(electrum::it));
-    BOOST_REQUIRE(!compressed(electrum::fr));
-    BOOST_REQUIRE(!compressed(electrum::cs));
-    BOOST_REQUIRE(!compressed(electrum::pt));
-    BOOST_REQUIRE(!compressed(electrum::ja));
-    BOOST_REQUIRE(!compressed(electrum::ko));
-    BOOST_REQUIRE(!compressed(electrum::zh_Hans));
-    BOOST_REQUIRE(!compressed(electrum::zh_Hant));
+    BOOST_CHECK(!compressed(electrum::en));
+    BOOST_CHECK(!compressed(electrum::es));
+    BOOST_CHECK(!compressed(electrum::it));
+    BOOST_CHECK(!compressed(electrum::fr));
+    BOOST_CHECK(!compressed(electrum::cs));
+    BOOST_CHECK(!compressed(electrum::pt));
+    BOOST_CHECK(!compressed(electrum::ja));
+    BOOST_CHECK(!compressed(electrum::ko));
+    BOOST_CHECK(!compressed(electrum::zh_Hans));
+    BOOST_CHECK(!compressed(electrum::zh_Hant));
 }
 
 // abnormal
@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__compressed__not_compressed_words__false)
 BOOST_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
 {
     // The result is definitive only when HAVE_ICU is defined.
-    BOOST_REQUIRE_EQUAL(abnormals(electrum_es), abnormals_es);
-    BOOST_REQUIRE_EQUAL(abnormals(electrum_ja), abnormals_ja);
+    BOOST_CHECK_EQUAL(abnormals(electrum_es), abnormals_es);
+    BOOST_CHECK_EQUAL(abnormals(electrum_ja), abnormals_ja);
 }
 
 // divergence
@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum__abnormal__unused_words__false)
 // Otherwise there could be differences in word value and/or position.
 BOOST_AUTO_TEST_CASE(catalogs_electrum__divergences__unused_words__false)
 {
-    BOOST_REQUIRE_EQUAL(divergences(electrum::es, electrum_es), divergences_es);
-    BOOST_REQUIRE_EQUAL(divergences(electrum::ja, electrum_ja), divergences_ja);
+    BOOST_CHECK_EQUAL(divergences(electrum::es, electrum_es), divergences_es);
+    BOOST_CHECK_EQUAL(divergences(electrum::ja, electrum_ja), divergences_ja);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
