@@ -27,9 +27,6 @@ namespace shax {
     bool Cached, if_same<typename SHA::T, sha::shah_t> If>
 #define CLASS algorithm<SHA, Compressed, Vectorized, Cached, If>
 
-// stdio
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
@@ -312,8 +309,8 @@ extract(Word a) NOEXCEPT
 TEMPLATE
 template <typename Word, size_t Lane, typename xWord,
     if_not_same<Word, xWord>>
-INLINE Word CLASS::
-extract(xWord a) NOEXCEPT
+    INLINE Word CLASS::
+    extract(xWord a) NOEXCEPT
 {
     // Schedule vectorization (with compress non-vectorization), extract word.
     return get<Word, Lane>(a);
@@ -764,8 +761,8 @@ input2(buffer_t& buffer, const half_t& half) NOEXCEPT
     else if constexpr (bc::is_little_endian)
     {
         const auto& in = array_cast<word>(half);
-        buffer[8]  = native_from_big_end(in[0]);
-        buffer[9]  = native_from_big_end(in[1]);
+        buffer[8] = native_from_big_end(in[0]);
+        buffer[9] = native_from_big_end(in[1]);
         buffer[10] = native_from_big_end(in[2]);
         buffer[11] = native_from_big_end(in[3]);
         buffer[12] = native_from_big_end(in[4]);
@@ -809,27 +806,27 @@ output(const state_t& state) NOEXCEPT
         if constexpr (SHA::strength == 160)
         {
             return array_cast<byte_t>(state_t
-            {
-                native_to_big_end(state[0]),
-                native_to_big_end(state[1]),
-                native_to_big_end(state[2]),
-                native_to_big_end(state[3]),
-                native_to_big_end(state[4])
-            });
+                {
+                    native_to_big_end(state[0]),
+                    native_to_big_end(state[1]),
+                    native_to_big_end(state[2]),
+                    native_to_big_end(state[3]),
+                    native_to_big_end(state[4])
+                });
         }
         else
         {
             return array_cast<byte_t>(state_t
-            {
-                native_to_big_end(state[0]),
-                native_to_big_end(state[1]),
-                native_to_big_end(state[2]),
-                native_to_big_end(state[3]),
-                native_to_big_end(state[4]),
-                native_to_big_end(state[5]),
-                native_to_big_end(state[6]),
-                native_to_big_end(state[7])
-            });
+                {
+                    native_to_big_end(state[0]),
+                    native_to_big_end(state[1]),
+                    native_to_big_end(state[2]),
+                    native_to_big_end(state[3]),
+                    native_to_big_end(state[4]),
+                    native_to_big_end(state[5]),
+                    native_to_big_end(state[6]),
+                    native_to_big_end(state[7])
+                });
         }
     }
     else
@@ -907,7 +904,7 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
     // precomputed schedules - this benefits only finalized chunk hashing.
     // Testing shows a 5% performance improvement for 128 byte chunk hashes.
     // Accumulator passes all write() of more than one block here.
-    if constexpr (Cached)
+    if constexpr (caching)
     {
         switch (blocks)
         {
@@ -973,16 +970,16 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        buffer.at(0)  = pad.at(0);
-        buffer.at(1)  = pad.at(1);
-        buffer.at(2)  = pad.at(2);
-        buffer.at(3)  = pad.at(3);
-        buffer.at(4)  = pad.at(4);
-        buffer.at(5)  = pad.at(5);
-        buffer.at(6)  = pad.at(6);
-        buffer.at(7)  = pad.at(7);
-        buffer.at(8)  = pad.at(8);
-        buffer.at(9)  = pad.at(9);
+        buffer.at(0) = pad.at(0);
+        buffer.at(1) = pad.at(1);
+        buffer.at(2) = pad.at(2);
+        buffer.at(3) = pad.at(3);
+        buffer.at(4) = pad.at(4);
+        buffer.at(5) = pad.at(5);
+        buffer.at(6) = pad.at(6);
+        buffer.at(7) = pad.at(7);
+        buffer.at(8) = pad.at(8);
+        buffer.at(9) = pad.at(9);
         buffer.at(10) = pad.at(10);
         buffer.at(11) = pad.at(11);
         buffer.at(12) = pad.at(12);
@@ -1005,6 +1002,19 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
 
 TEMPLATE
+template <size_t Size>
+constexpr typename CLASS::digest_t CLASS::
+hash(const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    auto state = H::get;
+    iterate(state, blocks);
+    schedule_n<Size>(buffer);
+    compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
 typename CLASS::digest_t CLASS::
 hash(iblocks_t&& blocks) NOEXCEPT
 {
@@ -1019,18 +1029,6 @@ hash(iblocks_t&& blocks) NOEXCEPT
     return output(state);
 }
 
-TEMPLATE
-template <size_t Size>
-constexpr typename CLASS::digest_t CLASS::
-hash(const ablocks_t<Size>& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    auto state = H::get;
-    iterate(state, blocks);
-    schedule_n<Size>(buffer);
-    compress(state, buffer);
-    return output(state);
-}
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
@@ -1094,18 +1092,16 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 // No double_hash optimizations for sha160 (requires chunk_t/half_t).
 
 TEMPLATE
-typename CLASS::digest_t CLASS::
-double_hash(iblocks_t&& blocks) NOEXCEPT
+template <size_t Size>
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
-
-    // Save block count, as iterable decrements.
-    const auto count = blocks.size();
 
     buffer_t buffer{};
     auto state = H::get;
     iterate(state, blocks);
-    schedule_n(buffer, count);
+    schedule_n<Size>(buffer);
     compress(state, buffer);
 
     // Second hash
@@ -1118,16 +1114,18 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
 }
 
 TEMPLATE
-template <size_t Size>
-constexpr typename CLASS::digest_t CLASS::
-double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
+typename CLASS::digest_t CLASS::
+double_hash(iblocks_t&& blocks) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
+
+    // Save block count, as iterable decrements.
+    const auto count = blocks.size();
 
     buffer_t buffer{};
     auto state = H::get;
     iterate(state, blocks);
-    schedule_n<Size>(buffer);
+    schedule_n(buffer, count);
     compress(state, buffer);
 
     // Second hash
@@ -1228,8 +1226,8 @@ TEMPLATE
 INLINE void CLASS::
 vectorized(digests_t& digests) NOEXCEPT
 {
-    // Create digest and block iterables from digest data.
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
+
     const auto data = digests.front().data();
     const auto size = digests.size() * array_count<digest_t>;
     auto iblocks = iblocks_t{ size, data };
@@ -1253,32 +1251,25 @@ merkle_hash(digests_t& digests) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    ////if (!std::is_constant_evaluated())
-    ////{
-    ////    std::cout << "merkle_hash_in" << std::endl;
-    ////    for (auto& digest: digests)
-    ////        std::cout << encode_base16(digest) << std::endl;
-    ////}
-
     if (std::is_constant_evaluated())
     {
         sequential(digests);
     }
     else if constexpr (vectorization)
     {
-        vectorized(digests);
+        if (digests.size() < (min_lanes * two))
+        {
+            sequential(digests);
+        }
+        else
+        {
+            vectorized(digests);
+        }
     }
     else
     {
         sequential(digests);
     }
-
-    ////if (!std::is_constant_evaluated())
-    ////{
-    ////    std::cout << "merkle_hash_out" << std::endl;
-    ////    for (auto& digest: digests)
-    ////        std::cout << encode_base16(digest) << std::endl;
-    ////}
 
     return digests;
 };
@@ -1288,18 +1279,18 @@ VCONSTEXPR typename CLASS::digest_t CLASS::
 merkle_root(digests_t&& digests) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
-    const auto count = digests.size();
 
-    if (is_zero(count))
+    if (is_zero(digests.size()))
         return {};
 
-    if (is_one(count))
-        return std::move(digests.front());
+    while (!is_one(digests.size()))
+    {
+        if (is_odd(digests.size()))
+            digests.push_back(digests.back());
 
-    if (is_odd(count))
-        digests.push_back(digests.back());
+        merkle_hash(digests);
+    }
 
-    while (merkle_hash(digests).size() > one);
     return std::move(digests.front());
 }
 
@@ -1362,23 +1353,6 @@ normalize(const state_t& state) NOEXCEPT
 // ------------------------------------------------------------------------
 
 TEMPLATE
-INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        sequential(state, blocks);
-    }
-    else if constexpr (vectorization)
-    {
-        vectorized(state, blocks);
-    }
-    else
-    {
-        sequential(state, blocks);
-    }
-}
-
-TEMPLATE
 template <size_t Size>
 INLINE constexpr void CLASS::iterate(state_t& state,
     const ablocks_t<Size>& blocks) NOEXCEPT
@@ -1387,10 +1361,23 @@ INLINE constexpr void CLASS::iterate(state_t& state,
     {
         sequential(state, blocks);
     }
-    else if constexpr (vectorization)
+    else if constexpr (!vectorization)
     {
-        auto iterable = iblocks_t{ blocks };
+        auto iterable = iblocks_t{ array_cast<byte_t>(blocks) };
         vectorized(state, iterable);
+    }
+    else
+    {
+        sequential(state, blocks);
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    if constexpr (vectorization)
+    {
+        vectorized(state, blocks);
     }
     else
     {
@@ -1403,7 +1390,7 @@ INLINE void CLASS::
 sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     buffer_t buffer{};
-    for (auto& block: blocks)
+    for (auto& block : blocks)
     {
         input(buffer, block);
         schedule(buffer);
@@ -1417,7 +1404,7 @@ INLINE constexpr void CLASS::
 sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     buffer_t buffer{};
-    for (auto& block: blocks)
+    for (auto& block : blocks)
     {
         input(buffer, block);
         schedule(buffer);
@@ -1449,37 +1436,30 @@ INLINE auto CLASS::
 pack(const wblock_t<Lanes>& wblock) NOEXCEPT
 {
     using xword = to_extended<word_t, Lanes>;
-
-    if constexpr (Lanes == 16)
+    
+    if constexpr (Lanes == 2)
     {
         return byteswap(set<xword>(
-            wblock[ 0][Word], wblock[ 1][Word],
-            wblock[ 2][Word], wblock[ 3][Word],
-            wblock[ 4][Word], wblock[ 5][Word],
-            wblock[ 6][Word], wblock[ 7][Word],
-            wblock[ 8][Word], wblock[ 9][Word],
-            wblock[10][Word], wblock[11][Word],
-            wblock[12][Word], wblock[13][Word],
-            wblock[14][Word], wblock[15][Word]));
-    }
-    else if constexpr (Lanes == 8)
-    {
-        return byteswap(set<xword>(
-            wblock[0][Word], wblock[1][Word],
-            wblock[2][Word], wblock[3][Word],
-            wblock[4][Word], wblock[5][Word],
-            wblock[6][Word], wblock[7][Word]));
+            wblock[0][Word], wblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
         return byteswap(set<xword>(
-            wblock[0][Word], wblock[1][Word],
-            wblock[2][Word], wblock[3][Word]));
+            wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word]));
     }
-    else //// if constexpr (Lanes == 2)
+    else if constexpr (Lanes == 8)
     {
         return byteswap(set<xword>(
-            wblock[0][Word], wblock[1][Word]));
+            wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word],
+            wblock[4][Word], wblock[5][Word], wblock[6][Word], wblock[7][Word]));
+    }
+    else if constexpr (Lanes == 16)
+    {
+        return byteswap(set<xword>(
+            wblock[ 0][Word], wblock[ 1][Word], wblock[ 2][Word], wblock[ 3][Word],
+            wblock[ 4][Word], wblock[ 5][Word], wblock[ 6][Word], wblock[ 7][Word],
+            wblock[ 8][Word], wblock[ 9][Word], wblock[10][Word], wblock[11][Word],
+            wblock[12][Word], wblock[13][Word], wblock[14][Word], wblock[15][Word]));
     }
 }
 
@@ -1489,7 +1469,6 @@ INLINE void CLASS::
 input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
-
     const auto& wblock = array_cast<words_t>(blocks.template to_array<lanes>());
     xbuffer[0] = pack<0>(wblock);
     xbuffer[1] = pack<1>(wblock);
@@ -1508,8 +1487,6 @@ input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
     xbuffer[14] = pack<14>(wblock);
     xbuffer[15] = pack<15>(wblock);
     blocks.template advance<lanes>();
-
-    dump<0>(xbuffer, "input");
 }
 
 // Independent single block double-hash vectorization.
@@ -1525,13 +1502,13 @@ pack_pad_half() NOEXCEPT
     return xchunk_t<xWord>
     {
         broadcast<xWord>(pad[0]),
-        broadcast<xWord>(pad[1]),
-        broadcast<xWord>(pad[2]),
-        broadcast<xWord>(pad[3]),
-        broadcast<xWord>(pad[4]),
-        broadcast<xWord>(pad[5]),
-        broadcast<xWord>(pad[6]),
-        broadcast<xWord>(pad[7])
+            broadcast<xWord>(pad[1]),
+            broadcast<xWord>(pad[2]),
+            broadcast<xWord>(pad[3]),
+            broadcast<xWord>(pad[4]),
+            broadcast<xWord>(pad[5]),
+            broadcast<xWord>(pad[6]),
+            broadcast<xWord>(pad[7])
     };
 }
 
@@ -1547,89 +1524,89 @@ pack_schedule_1() NOEXCEPT
         return xbuffer_t<xWord>
         {
             broadcast<xWord>(pad[0]),
-            broadcast<xWord>(pad[1]),
-            broadcast<xWord>(pad[2]),
-            broadcast<xWord>(pad[3]),
-            broadcast<xWord>(pad[4]),
-            broadcast<xWord>(pad[5]),
-            broadcast<xWord>(pad[6]),
-            broadcast<xWord>(pad[7]),
-            broadcast<xWord>(pad[8]),
-            broadcast<xWord>(pad[9]),
-            broadcast<xWord>(pad[10]),
-            broadcast<xWord>(pad[11]),
-            broadcast<xWord>(pad[12]),
-            broadcast<xWord>(pad[13]),
-            broadcast<xWord>(pad[14]),
-            broadcast<xWord>(pad[15]),
+                broadcast<xWord>(pad[1]),
+                broadcast<xWord>(pad[2]),
+                broadcast<xWord>(pad[3]),
+                broadcast<xWord>(pad[4]),
+                broadcast<xWord>(pad[5]),
+                broadcast<xWord>(pad[6]),
+                broadcast<xWord>(pad[7]),
+                broadcast<xWord>(pad[8]),
+                broadcast<xWord>(pad[9]),
+                broadcast<xWord>(pad[10]),
+                broadcast<xWord>(pad[11]),
+                broadcast<xWord>(pad[12]),
+                broadcast<xWord>(pad[13]),
+                broadcast<xWord>(pad[14]),
+                broadcast<xWord>(pad[15]),
 
-            broadcast<xWord>(pad[16]),
-            broadcast<xWord>(pad[17]),
-            broadcast<xWord>(pad[18]),
-            broadcast<xWord>(pad[19]),
-            broadcast<xWord>(pad[20]),
-            broadcast<xWord>(pad[21]),
-            broadcast<xWord>(pad[22]),
-            broadcast<xWord>(pad[23]),
-            broadcast<xWord>(pad[24]),
-            broadcast<xWord>(pad[25]),
-            broadcast<xWord>(pad[26]),
-            broadcast<xWord>(pad[27]),
-            broadcast<xWord>(pad[28]),
-            broadcast<xWord>(pad[29]),
-            broadcast<xWord>(pad[30]),
-            broadcast<xWord>(pad[31]),
+                broadcast<xWord>(pad[16]),
+                broadcast<xWord>(pad[17]),
+                broadcast<xWord>(pad[18]),
+                broadcast<xWord>(pad[19]),
+                broadcast<xWord>(pad[20]),
+                broadcast<xWord>(pad[21]),
+                broadcast<xWord>(pad[22]),
+                broadcast<xWord>(pad[23]),
+                broadcast<xWord>(pad[24]),
+                broadcast<xWord>(pad[25]),
+                broadcast<xWord>(pad[26]),
+                broadcast<xWord>(pad[27]),
+                broadcast<xWord>(pad[28]),
+                broadcast<xWord>(pad[29]),
+                broadcast<xWord>(pad[30]),
+                broadcast<xWord>(pad[31]),
 
-            broadcast<xWord>(pad[32]),
-            broadcast<xWord>(pad[33]),
-            broadcast<xWord>(pad[34]),
-            broadcast<xWord>(pad[35]),
-            broadcast<xWord>(pad[36]),
-            broadcast<xWord>(pad[37]),
-            broadcast<xWord>(pad[38]),
-            broadcast<xWord>(pad[39]),
-            broadcast<xWord>(pad[40]),
-            broadcast<xWord>(pad[41]),
-            broadcast<xWord>(pad[42]),
-            broadcast<xWord>(pad[43]),
-            broadcast<xWord>(pad[44]),
-            broadcast<xWord>(pad[45]),
-            broadcast<xWord>(pad[46]),
-            broadcast<xWord>(pad[47]),
+                broadcast<xWord>(pad[32]),
+                broadcast<xWord>(pad[33]),
+                broadcast<xWord>(pad[34]),
+                broadcast<xWord>(pad[35]),
+                broadcast<xWord>(pad[36]),
+                broadcast<xWord>(pad[37]),
+                broadcast<xWord>(pad[38]),
+                broadcast<xWord>(pad[39]),
+                broadcast<xWord>(pad[40]),
+                broadcast<xWord>(pad[41]),
+                broadcast<xWord>(pad[42]),
+                broadcast<xWord>(pad[43]),
+                broadcast<xWord>(pad[44]),
+                broadcast<xWord>(pad[45]),
+                broadcast<xWord>(pad[46]),
+                broadcast<xWord>(pad[47]),
 
-            broadcast<xWord>(pad[48]),
-            broadcast<xWord>(pad[49]),
-            broadcast<xWord>(pad[50]),
-            broadcast<xWord>(pad[51]),
-            broadcast<xWord>(pad[52]),
-            broadcast<xWord>(pad[53]),
-            broadcast<xWord>(pad[54]),
-            broadcast<xWord>(pad[55]),
-            broadcast<xWord>(pad[56]),
-            broadcast<xWord>(pad[57]),
-            broadcast<xWord>(pad[58]),
-            broadcast<xWord>(pad[59]),
-            broadcast<xWord>(pad[60]),
-            broadcast<xWord>(pad[61]),
-            broadcast<xWord>(pad[62]),
-            broadcast<xWord>(pad[63]),
+                broadcast<xWord>(pad[48]),
+                broadcast<xWord>(pad[49]),
+                broadcast<xWord>(pad[50]),
+                broadcast<xWord>(pad[51]),
+                broadcast<xWord>(pad[52]),
+                broadcast<xWord>(pad[53]),
+                broadcast<xWord>(pad[54]),
+                broadcast<xWord>(pad[55]),
+                broadcast<xWord>(pad[56]),
+                broadcast<xWord>(pad[57]),
+                broadcast<xWord>(pad[58]),
+                broadcast<xWord>(pad[59]),
+                broadcast<xWord>(pad[60]),
+                broadcast<xWord>(pad[61]),
+                broadcast<xWord>(pad[62]),
+                broadcast<xWord>(pad[63]),
 
-            broadcast<xWord>(pad[64]),
-            broadcast<xWord>(pad[65]),
-            broadcast<xWord>(pad[66]),
-            broadcast<xWord>(pad[67]),
-            broadcast<xWord>(pad[68]),
-            broadcast<xWord>(pad[69]),
-            broadcast<xWord>(pad[70]),
-            broadcast<xWord>(pad[71]),
-            broadcast<xWord>(pad[72]),
-            broadcast<xWord>(pad[73]),
-            broadcast<xWord>(pad[74]),
-            broadcast<xWord>(pad[75]),
-            broadcast<xWord>(pad[76]),
-            broadcast<xWord>(pad[77]),
-            broadcast<xWord>(pad[78]),
-            broadcast<xWord>(pad[79])
+                broadcast<xWord>(pad[64]),
+                broadcast<xWord>(pad[65]),
+                broadcast<xWord>(pad[66]),
+                broadcast<xWord>(pad[67]),
+                broadcast<xWord>(pad[68]),
+                broadcast<xWord>(pad[69]),
+                broadcast<xWord>(pad[70]),
+                broadcast<xWord>(pad[71]),
+                broadcast<xWord>(pad[72]),
+                broadcast<xWord>(pad[73]),
+                broadcast<xWord>(pad[74]),
+                broadcast<xWord>(pad[75]),
+                broadcast<xWord>(pad[76]),
+                broadcast<xWord>(pad[77]),
+                broadcast<xWord>(pad[78]),
+                broadcast<xWord>(pad[79])
         };
     }
     else
@@ -1637,72 +1614,72 @@ pack_schedule_1() NOEXCEPT
         return xbuffer_t<xWord>
         {
             broadcast<xWord>(pad[0]),
-            broadcast<xWord>(pad[1]),
-            broadcast<xWord>(pad[2]),
-            broadcast<xWord>(pad[3]),
-            broadcast<xWord>(pad[4]),
-            broadcast<xWord>(pad[5]),
-            broadcast<xWord>(pad[6]),
-            broadcast<xWord>(pad[7]),
-            broadcast<xWord>(pad[8]),
-            broadcast<xWord>(pad[9]),
-            broadcast<xWord>(pad[10]),
-            broadcast<xWord>(pad[11]),
-            broadcast<xWord>(pad[12]),
-            broadcast<xWord>(pad[13]),
-            broadcast<xWord>(pad[14]),
-            broadcast<xWord>(pad[15]),
+                broadcast<xWord>(pad[1]),
+                broadcast<xWord>(pad[2]),
+                broadcast<xWord>(pad[3]),
+                broadcast<xWord>(pad[4]),
+                broadcast<xWord>(pad[5]),
+                broadcast<xWord>(pad[6]),
+                broadcast<xWord>(pad[7]),
+                broadcast<xWord>(pad[8]),
+                broadcast<xWord>(pad[9]),
+                broadcast<xWord>(pad[10]),
+                broadcast<xWord>(pad[11]),
+                broadcast<xWord>(pad[12]),
+                broadcast<xWord>(pad[13]),
+                broadcast<xWord>(pad[14]),
+                broadcast<xWord>(pad[15]),
 
-            broadcast<xWord>(pad[16]),
-            broadcast<xWord>(pad[17]),
-            broadcast<xWord>(pad[18]),
-            broadcast<xWord>(pad[19]),
-            broadcast<xWord>(pad[20]),
-            broadcast<xWord>(pad[21]),
-            broadcast<xWord>(pad[22]),
-            broadcast<xWord>(pad[23]),
-            broadcast<xWord>(pad[24]),
-            broadcast<xWord>(pad[25]),
-            broadcast<xWord>(pad[26]),
-            broadcast<xWord>(pad[27]),
-            broadcast<xWord>(pad[28]),
-            broadcast<xWord>(pad[29]),
-            broadcast<xWord>(pad[30]),
-            broadcast<xWord>(pad[31]),
+                broadcast<xWord>(pad[16]),
+                broadcast<xWord>(pad[17]),
+                broadcast<xWord>(pad[18]),
+                broadcast<xWord>(pad[19]),
+                broadcast<xWord>(pad[20]),
+                broadcast<xWord>(pad[21]),
+                broadcast<xWord>(pad[22]),
+                broadcast<xWord>(pad[23]),
+                broadcast<xWord>(pad[24]),
+                broadcast<xWord>(pad[25]),
+                broadcast<xWord>(pad[26]),
+                broadcast<xWord>(pad[27]),
+                broadcast<xWord>(pad[28]),
+                broadcast<xWord>(pad[29]),
+                broadcast<xWord>(pad[30]),
+                broadcast<xWord>(pad[31]),
 
-            broadcast<xWord>(pad[32]),
-            broadcast<xWord>(pad[33]),
-            broadcast<xWord>(pad[34]),
-            broadcast<xWord>(pad[35]),
-            broadcast<xWord>(pad[36]),
-            broadcast<xWord>(pad[37]),
-            broadcast<xWord>(pad[38]),
-            broadcast<xWord>(pad[39]),
-            broadcast<xWord>(pad[40]),
-            broadcast<xWord>(pad[41]),
-            broadcast<xWord>(pad[42]),
-            broadcast<xWord>(pad[43]),
-            broadcast<xWord>(pad[44]),
-            broadcast<xWord>(pad[45]),
-            broadcast<xWord>(pad[46]),
-            broadcast<xWord>(pad[47]),
+                broadcast<xWord>(pad[32]),
+                broadcast<xWord>(pad[33]),
+                broadcast<xWord>(pad[34]),
+                broadcast<xWord>(pad[35]),
+                broadcast<xWord>(pad[36]),
+                broadcast<xWord>(pad[37]),
+                broadcast<xWord>(pad[38]),
+                broadcast<xWord>(pad[39]),
+                broadcast<xWord>(pad[40]),
+                broadcast<xWord>(pad[41]),
+                broadcast<xWord>(pad[42]),
+                broadcast<xWord>(pad[43]),
+                broadcast<xWord>(pad[44]),
+                broadcast<xWord>(pad[45]),
+                broadcast<xWord>(pad[46]),
+                broadcast<xWord>(pad[47]),
 
-            broadcast<xWord>(pad[48]),
-            broadcast<xWord>(pad[49]),
-            broadcast<xWord>(pad[50]),
-            broadcast<xWord>(pad[51]),
-            broadcast<xWord>(pad[52]),
-            broadcast<xWord>(pad[53]),
-            broadcast<xWord>(pad[54]),
-            broadcast<xWord>(pad[55]),
-            broadcast<xWord>(pad[56]),
-            broadcast<xWord>(pad[57]),
-            broadcast<xWord>(pad[58]),
-            broadcast<xWord>(pad[59]),
-            broadcast<xWord>(pad[60]),
-            broadcast<xWord>(pad[61]),
-            broadcast<xWord>(pad[62]),
-            broadcast<xWord>(pad[63])
+                broadcast<xWord>(pad[48]),
+                broadcast<xWord>(pad[49]),
+                broadcast<xWord>(pad[50]),
+                broadcast<xWord>(pad[51]),
+                broadcast<xWord>(pad[52]),
+                broadcast<xWord>(pad[53]),
+                broadcast<xWord>(pad[54]),
+                broadcast<xWord>(pad[55]),
+                broadcast<xWord>(pad[56]),
+                broadcast<xWord>(pad[57]),
+                broadcast<xWord>(pad[58]),
+                broadcast<xWord>(pad[59]),
+                broadcast<xWord>(pad[60]),
+                broadcast<xWord>(pad[61]),
+                broadcast<xWord>(pad[62]),
+                broadcast<xWord>(pad[63])
         };
     }
 }
@@ -1714,7 +1691,6 @@ pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     static const auto xchunk_pad = pack_pad_half<xWord>();
     array_cast<xWord, SHA::chunk_words, SHA::chunk_words>(xbuffer) = xchunk_pad;
-    dump<0>(xbuffer, "pad_half");
 }
 
 TEMPLATE
@@ -1724,7 +1700,6 @@ schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     static const auto xscheduled_pad = pack_schedule_1<xWord>();
     xbuffer = xscheduled_pad;
-    dump<0>(xbuffer, "schedule_1");
 }
 
 TEMPLATE
@@ -1735,13 +1710,13 @@ pack(const state_t& state) NOEXCEPT
     return xstate_t<xWord>
     {
         broadcast<xWord>(state[0]),
-        broadcast<xWord>(state[1]),
-        broadcast<xWord>(state[2]),
-        broadcast<xWord>(state[3]),
-        broadcast<xWord>(state[4]),
-        broadcast<xWord>(state[5]),
-        broadcast<xWord>(state[6]),
-        broadcast<xWord>(state[7])
+            broadcast<xWord>(state[1]),
+            broadcast<xWord>(state[2]),
+            broadcast<xWord>(state[3]),
+            broadcast<xWord>(state[4]),
+            broadcast<xWord>(state[5]),
+            broadcast<xWord>(state[6]),
+            broadcast<xWord>(state[7])
     };
 }
 
@@ -1751,16 +1726,16 @@ INLINE typename CLASS::digest_t CLASS::
 unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
     return array_cast<byte_t>(state_t
-    {
-        get<word_t, Lane>(byteswap(xstate[0])),
-        get<word_t, Lane>(byteswap(xstate[1])),
-        get<word_t, Lane>(byteswap(xstate[2])),
-        get<word_t, Lane>(byteswap(xstate[3])),
-        get<word_t, Lane>(byteswap(xstate[4])),
-        get<word_t, Lane>(byteswap(xstate[5])),
-        get<word_t, Lane>(byteswap(xstate[6])),
-        get<word_t, Lane>(byteswap(xstate[7]))
-    });
+        {
+            get<word_t, Lane>(byteswap(xstate[0])),
+            get<word_t, Lane>(byteswap(xstate[1])),
+            get<word_t, Lane>(byteswap(xstate[2])),
+            get<word_t, Lane>(byteswap(xstate[3])),
+            get<word_t, Lane>(byteswap(xstate[4])),
+            get<word_t, Lane>(byteswap(xstate[5])),
+            get<word_t, Lane>(byteswap(xstate[6])),
+            get<word_t, Lane>(byteswap(xstate[7]))
+        });
 }
 
 TEMPLATE
@@ -1775,18 +1750,12 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     {
         wdigest[0] = unpack<0>(xstate);
         wdigest[1] = unpack<1>(xstate);
-
-        dump(wdigest[0], "output[0]");
-        dump(wdigest[1], "output[1]");
     }
 
     if constexpr (lanes > 2)
     {
         wdigest[2] = unpack<2>(xstate);
         wdigest[3] = unpack<3>(xstate);
-
-        dump(wdigest[2], "output[2]");
-        dump(wdigest[3], "output[3]");
     }
 
     if constexpr (lanes > 4)
@@ -1795,11 +1764,6 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
         wdigest[5] = unpack<5>(xstate);
         wdigest[6] = unpack<6>(xstate);
         wdigest[7] = unpack<7>(xstate);
-
-        dump(wdigest[4], "output[4]");
-        dump(wdigest[5], "output[5]");
-        dump(wdigest[6], "output[6]");
-        dump(wdigest[7], "output[7]");
     }
 
     if constexpr (lanes > 8)
@@ -1812,15 +1776,6 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
         wdigest[13] = unpack<13>(xstate);
         wdigest[14] = unpack<14>(xstate);
         wdigest[15] = unpack<15>(xstate);
-
-        dump(wdigest[8], "output[8]");
-        dump(wdigest[9], "output[9]");
-        dump(wdigest[10], "output[10]");
-        dump(wdigest[11], "output[11]");
-        dump(wdigest[12], "output[12]");
-        dump(wdigest[13], "output[13]");
-        dump(wdigest[14], "output[14]");
-        dump(wdigest[15], "output[15]");
     }
 
     digests.template advance<lanes>();
@@ -1859,8 +1814,7 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 
             // output() advances digest iterator by lanes.
             output(digests, xstate);
-        }
-        while (blocks.size() >= lanes);
+        } while (blocks.size() >= lanes);
     }
 }
 
@@ -1928,145 +1882,12 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
             input(xbuffer, blocks);
             schedule(xbuffer);
             compress_(state, xbuffer);
-        }
-        while (blocks.size() >= lanes);
+        } while (blocks.size() >= lanes);
     }
 }
 
 // ----------------------------------------------------------------------------
 
-TEMPLATE
-void CLASS::
-dump(const state_t& state, const std::string& text) NOEXCEPT
-{
-    // Extract state lane and dump to console as word_t[].
-    if constexpr (dumper && SHA::strength == 256)
-    {
-        if (!std::is_constant_evaluated())
-        {
-            std::cout << "state_t[word, 8] :" << text << std::endl;
-            std::cout << serialize(state) << std::endl << std::endl;
-        }
-    }
-}
-
-TEMPLATE
-void CLASS::
-dump(const digest_t& digest, const std::string& text) NOEXCEPT
-{
-    // Dump digest to console as byte array.
-    if constexpr (dumper && SHA::strength == 256)
-    {
-        if (!std::is_constant_evaluated())
-        {
-            std::cout << "digest_t[byte, 32] : " << text << std::endl
-                << serialize(digest) << std::endl;
-        }
-
-        std::cout << std::endl;
-    }
-}
-
-TEMPLATE
-template <size_t Lane, typename xWord>
-void CLASS::
-dump(const xstate_t<xWord>& xstate, const std::string& text) NOEXCEPT
-{
-    // Extract state lane and dump to console as word_t[].
-    if constexpr (dumper && SHA::strength == 256)
-    {
-        if (!std::is_constant_evaluated())
-        {
-            const state_t state
-            {
-                get<word_t, Lane>(xstate[0]),
-                get<word_t, Lane>(xstate[1]),
-                get<word_t, Lane>(xstate[2]),
-                get<word_t, Lane>(xstate[3]),
-                get<word_t, Lane>(xstate[4]),
-                get<word_t, Lane>(xstate[5]),
-                get<word_t, Lane>(xstate[6]),
-                get<word_t, Lane>(xstate[7])
-            };
-
-            std::cout << "state_t<" << Lane << ">[word, 8] :"
-                << text << std::endl;
-            std::cout << serialize(state) << std::endl << std::endl;;
-        }
-    }
-}
-
-TEMPLATE
-template <typename xWord>
-void CLASS::
-dump(const iblocks_t& blocks, const std::string& text) NOEXCEPT
-{
-    // Dump blocks as digest[].
-    if constexpr (dumper && SHA::strength == 256)
-    {
-        if (!std::is_constant_evaluated())
-        {
-            constexpr auto lanes = capacity<xWord, word_t>;
-            const auto& digests = array_cast<digest_t>(
-                blocks.template to_array<lanes>());
-
-            std::cout << "iblocks_t<" << lanes << ">[byte, 32x2, "
-                << digests.size() << "] : " << text << std::endl;
-
-            for (auto& digest: digests)
-                std::cout << serialize(digest) << std::endl;
-
-            std::cout << std::endl;
-        }
-    }
-}
-
-TEMPLATE
-template <size_t Lane, typename xWord>
-void CLASS::
-dump(const xbuffer_t<xWord>& xbuffer, const std::string& text) NOEXCEPT
-{
-    // Extract buffer lane of first buffer block and dump 2 digests to console.
-    if constexpr (dumper && SHA::strength == 256)
-    {
-        if (!std::is_constant_evaluated())
-        {
-            const digest_t digest1 = array_cast<uint8_t>(state_t{
-            {
-                get<word_t, Lane>(xbuffer[0]),
-                get<word_t, Lane>(xbuffer[1]),
-                get<word_t, Lane>(xbuffer[2]),
-                get<word_t, Lane>(xbuffer[3]),
-                get<word_t, Lane>(xbuffer[4]),
-                get<word_t, Lane>(xbuffer[5]),
-                get<word_t, Lane>(xbuffer[6]),
-                get<word_t, Lane>(xbuffer[7])
-            }});
-
-            const digest_t digest2 = array_cast<uint8_t>(state_t{
-            {
-                get<word_t, Lane>(xbuffer[8]),
-                get<word_t, Lane>(xbuffer[9]),
-                get<word_t, Lane>(xbuffer[10]),
-                get<word_t, Lane>(xbuffer[11]),
-                get<word_t, Lane>(xbuffer[12]),
-                get<word_t, Lane>(xbuffer[13]),
-                get<word_t, Lane>(xbuffer[14]),
-                get<word_t, Lane>(xbuffer[15])
-            }});
-
-            // First 16 words of buffer are the block.
-            std::cout << "xbuffer_t<0, " << Lane << ">[byte, 32x2] : "
-                << text << std::endl;
-
-            std::cout << serialize(digest1) << std::endl;
-            std::cout << serialize(digest2) << std::endl;
-            std::cout << std::endl;
-        }
-    }
-}
-
-BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

@@ -103,7 +103,7 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
         << delimiter
         << "vectorized______: " << serialize(P::vectorized)
         << delimiter
-        << "cached__________: " << serialize(P::caching)
+        << "cached__________: " << serialize(P::cached)
         << delimiter
         << "chunked_________: " << serialize(P::chunked)
         << delimiter
@@ -307,39 +307,46 @@ bool test_algorithm(std::ostream& out, float ghz = 3.0f,
     return true;
 }
 
-////template<typename Parameters,
-////    size_t Count = 1024 * 1024,
-////    size_t Strength = 256,
-////    bool vectorized = true,
-////    bool compressed = true>
-////bool test_merkle(std::ostream& out, float ghz = 3.0f,
-////    bool csv = false) noexcept
-////{
-////    using P = Parameters;
-////    using Precision = std::chrono::nanoseconds;
-////    using Timer = timer<Precision>;
-////    using Algorithm = hash_selector<
-////        Strength,
-////        compressed,
-////        vectorized,
-////        false,
-////        false>;
-////
-////    uint64_t time = zero;
-////    for (size_t seed = 0; seed < Count; ++seed)
-////    {
-////        const auto left = get_data<Size, false>(seed);
-////        const auto right = get_data<Size, false>(seed);
-////
-////        time += Timer::execution([&]() noexcept
-////        {
-////            Algorithm::merkle_root({ left, right });
-////        });
-////    }
-////
-////    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
-////    return true;
-////}
+template<typename Parameters,
+    size_t Count = 1024 * 1024,
+    size_t Size = 1024, // count of blocks (digests / 2)
+    bool_if<!Parameters::chunked && !Parameters::ripemd> = true,
+    if_base_of<parameters, Parameters> = true>
+bool test_merkle(std::ostream& out, float ghz = 3.0f,
+    bool csv = false) noexcept
+{
+    using P = Parameters;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using Algorithm = hash_selector<
+        P::strength,
+        P::compressed,
+        P::vectorized,
+        P::cached,
+        P::ripemd>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        constexpr auto size = array_count<typename Algorithm::digest_t>;
+        std_vector<typename Algorithm::digest_t> digests{};
+        digests.reserve(Size * two);
+
+        for (size_t blocks = 0; blocks < Size; ++blocks)
+        {
+            digests.push_back(*get_data<size, false>(blocks + seed));
+            digests.push_back(*get_data<size, false>(blocks + add1(seed)));
+        }
+
+        time += Timer::execution([&]() noexcept
+        {
+            Algorithm::merkle_root(std::move(digests));
+        });
+    }
+
+    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
 
 // Algorithm::hash() test runner parameterization.
 // ----------------------------------------------------------------------------

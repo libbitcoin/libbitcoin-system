@@ -1449,36 +1449,29 @@ pack(const wblock_t<Lanes>& wblock) NOEXCEPT
 {
     using xword = to_extended<word_t, Lanes>;
 
-    if constexpr (Lanes == 16)
+    if constexpr (Lanes == 2)
     {
         return byteswap(set<xword>(
-            wblock[ 0][Word], wblock[ 1][Word],
-            wblock[ 2][Word], wblock[ 3][Word],
-            wblock[ 4][Word], wblock[ 5][Word],
-            wblock[ 6][Word], wblock[ 7][Word],
-            wblock[ 8][Word], wblock[ 9][Word],
-            wblock[10][Word], wblock[11][Word],
-            wblock[12][Word], wblock[13][Word],
-            wblock[14][Word], wblock[15][Word]));
-    }
-    else if constexpr (Lanes == 8)
-    {
-        return byteswap(set<xword>(
-            wblock[0][Word], wblock[1][Word],
-            wblock[2][Word], wblock[3][Word],
-            wblock[4][Word], wblock[5][Word],
-            wblock[6][Word], wblock[7][Word]));
+            wblock[0][Word], wblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
         return byteswap(set<xword>(
-            wblock[0][Word], wblock[1][Word],
-            wblock[2][Word], wblock[3][Word]));
+            wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word]));
     }
-    else //// if constexpr (Lanes == 2)
+    else if constexpr (Lanes == 8)
     {
         return byteswap(set<xword>(
-            wblock[0][Word], wblock[1][Word]));
+            wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word],
+            wblock[4][Word], wblock[5][Word], wblock[6][Word], wblock[7][Word]));
+    }
+    else if constexpr (Lanes == 16)
+    {
+        return byteswap(set<xword>(
+            wblock[ 0][Word], wblock[ 1][Word], wblock[ 2][Word], wblock[ 3][Word],
+            wblock[ 4][Word], wblock[ 5][Word], wblock[ 6][Word], wblock[ 7][Word],
+            wblock[ 8][Word], wblock[ 9][Word], wblock[10][Word], wblock[11][Word],
+            wblock[12][Word], wblock[13][Word], wblock[14][Word], wblock[15][Word]));
     }
 }
 
