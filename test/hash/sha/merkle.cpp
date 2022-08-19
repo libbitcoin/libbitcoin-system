@@ -21,6 +21,8 @@
 
 BOOST_AUTO_TEST_SUITE(merkle)
 
+#if defined(HAVE_VCONSTEXPR)
+
 BOOST_AUTO_TEST_CASE(merkle__hacks2)
 {
     using sha_256 = shax::algorithm<sha::h256<>, true, true, true>;
@@ -52,5 +54,7 @@ BOOST_AUTO_TEST_CASE(merkle__hacks8)
     static_assert(sha_256::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }, { 7 } }) == expected);
     BOOST_CHECK_EQUAL(sha_256::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }, { 7 } }), expected);
 }
+
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
