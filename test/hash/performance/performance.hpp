@@ -193,9 +193,9 @@ using sha_algorithm = sha::algorithm<
     iif<Strength == 256, sha::h256<>,
     iif<Strength == 512, sha::h512<>, sha::h160>>, Compressed, Vectorized, Cached>;
 
-static_assert(is_same_type<sha_algorithm<160, true, true, true>, sha160>);
-static_assert(is_same_type<sha_algorithm<256, true, true, true>, sha256>);
-static_assert(is_same_type<sha_algorithm<512, true, true, true>, sha512>);
+////static_assert(is_same_type<sha_algorithm<160, true, true, true>, sha160>);
+////static_assert(is_same_type<sha_algorithm<256, true, true, true>, sha256>);
+////static_assert(is_same_type<sha_algorithm<512, true, true, true>, sha512>);
 
 template <size_t Strength, bool Compressed, bool Vectorized, bool Cached, bool Ripemd,
     bool_if<
@@ -204,11 +204,11 @@ template <size_t Strength, bool Compressed, bool Vectorized, bool Cached, bool R
 using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
     sha_algorithm<Strength, Compressed, Vectorized, Cached>>;
 
-static_assert(is_same_type<hash_selector<128, true, true, false,  true>, rmd128>);
-static_assert(is_same_type<hash_selector<160, true, true, false,  true>, rmd160>);
-static_assert(is_same_type<hash_selector<160, true, true, true, false>, sha160>);
-static_assert(is_same_type<hash_selector<256, true, true, true, false>, sha256>);
-static_assert(is_same_type<hash_selector<512, true, true, true, false>, sha512>);
+////static_assert(is_same_type<hash_selector<128, true, true, false,  true>, rmd128>);
+////static_assert(is_same_type<hash_selector<160, true, true, false,  true>, rmd160>);
+////static_assert(is_same_type<hash_selector<160, true, true, true, false>, sha160>);
+////static_assert(is_same_type<hash_selector<256, true, true, true, false>, sha256>);
+////static_assert(is_same_type<hash_selector<512, true, true, true, false>, sha512>);
 
 static_assert(hash_selector< 160, true,  true, true, false>::compression == with_shani || with_neon);
 static_assert(hash_selector< 256, true,  true, true, false>::compression == with_shani || with_neon);
