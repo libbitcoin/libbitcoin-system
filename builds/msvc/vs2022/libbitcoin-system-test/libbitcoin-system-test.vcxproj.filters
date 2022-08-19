@@ -330,6 +330,9 @@
     <ClCompile Include="..\..\..\..\test\hash\sha\analysis.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp">
+      <Filter>src\hash\sha</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\sha160.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
@@ -653,6 +656,9 @@
     <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp">
       <Filter>src\hash\performance</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\sha\algorithm.hpp">
+      <Filter>src\hash\sha</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp">
       <Filter>src\hash</Filter>
     </ClInclude>
@@ -688,6 +694,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\test\hash\sha\algorithm.ipp">
+      <Filter>src\hash\sha</Filter>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
