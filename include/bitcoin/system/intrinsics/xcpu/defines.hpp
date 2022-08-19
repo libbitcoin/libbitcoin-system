@@ -128,10 +128,10 @@ inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
     #define mm_add_epi16(a, b)  (a)
     #define mm_add_epi32(a, b)  (a)
     #define mm_add_epi64(a, b)  (a)
-    #define mm_extract_epi8(a, Lane)    (a)
-    #define mm_extract_epi16(a, Lane)   (a)
-    #define mm_extract_epi32(a, Lane)   (a)
-    #define mm_extract_epi64(a, Lane)   (a)
+    #define mm_extract_epi8(a, Lane)    {}
+    #define mm_extract_epi16(a, Lane)   {}
+    #define mm_extract_epi32(a, Lane)   {}
+    #define mm_extract_epi64(a, Lane)   {}
     #define mm_shuffle_epi8(a, mask)    (a)
     #define mm_storeu_si128(a, b)
     #define mm_set1_epi8(K)
@@ -193,10 +193,10 @@ inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
     #define mm256_add_epi16(a, b)   (a)
     #define mm256_add_epi32(a, b)   (a)
     #define mm256_add_epi64(a, b)   (a)
-    #define mm256_extract_epi8(a, Lane)     (a)
-    #define mm256_extract_epi16(a, Lane)    (a)
-    #define mm256_extract_epi32(a, Lane)    (a)
-    #define mm256_extract_epi64(a, Lane)    (a)
+    #define mm256_extract_epi8(a, Lane)     {}
+    #define mm256_extract_epi16(a, Lane)    {}
+    #define mm256_extract_epi32(a, Lane)    {}
+    #define mm256_extract_epi64(a, Lane)    {}
     #define mm256_shuffle_epi8(a, mask)     (a)
     #define mm256_storeu_si256(a, b)
     #define mm256_set1_epi8(K)
@@ -259,10 +259,10 @@ inline auto _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
     #define mm512_add_epi16(a, b)   (a)
     #define mm512_add_epi32(a, b)   (a)
     #define mm512_add_epi64(a, b)   (a)
-    ////#define mm512_extract_epi8(a, Lane)     (a)
-    ////#define mm512_extract_epi16(a, Lane)    (a)
-    #define mm512_extract_epi32(a, Lane)    (a)
-    #define mm512_extract_epi64(a, Lane)    (a)
+    ////#define mm512_extract_epi8(a, Lane)     {}
+    ////#define mm512_extract_epi16(a, Lane)    {}
+    #define mm512_extract_epi32(a, Lane)    {}
+    #define mm512_extract_epi64(a, Lane)    {}
     #define mm512_shuffle_epi8(a, mask)     (a)
     #define mm512_storeu_si512(a, b)
     #define mm512_set1_epi8(K)
