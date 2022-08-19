@@ -1366,8 +1366,8 @@ normalize(const state_t& state) NOEXCEPT
 
 TEMPLATE
 template <size_t Size>
-INLINE constexpr void CLASS::iterate(state_t& state,
-    const ablocks_t<Size>& blocks) NOEXCEPT
+INLINE constexpr void CLASS::
+iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -1375,8 +1375,15 @@ INLINE constexpr void CLASS::iterate(state_t& state,
     }
     else if constexpr (!vectorization)
     {
-        auto iterable = iblocks_t{ array_cast<byte_t>(blocks) };
-        vectorized(state, iterable);
+        if (blocks.size() < min_lanes)
+        {
+            sequential(state, blocks);
+        }
+        else
+        {
+            auto iterable = iblocks_t{ array_cast<byte_t>(blocks) };
+            vectorized(state, iterable);
+        }
     }
     else
     {
@@ -1385,11 +1392,19 @@ INLINE constexpr void CLASS::iterate(state_t& state,
 }
 
 TEMPLATE
-INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
+INLINE void CLASS::
+iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if constexpr (vectorization)
     {
-        vectorized(state, blocks);
+        if (blocks.size() < min_lanes)
+        {
+            sequential(state, blocks);
+        }
+        else
+        {
+            vectorized(state, blocks);
+        }
     }
     else
     {
@@ -1800,6 +1815,7 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 {
     BC_ASSERT(digests.size() == blocks.size());
     constexpr auto lanes = capacity<xWord, word_t>;
+    static_assert(is_valid_lanes<lanes>);
 
     if (blocks.size() >= lanes && have<xWord>())
     {
