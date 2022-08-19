@@ -103,7 +103,7 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
         << delimiter
         << "vectorized______: " << serialize(P::vectorized)
         << delimiter
-        << "cached__________: " << serialize(P::cached)
+        << "cached__________: " << serialize(P::caching)
         << delimiter
         << "chunked_________: " << serialize(P::chunked)
         << delimiter
@@ -193,9 +193,9 @@ using sha_algorithm = sha::algorithm<
     iif<Strength == 256, sha::h256<>,
     iif<Strength == 512, sha::h512<>, sha::h160>>, Compressed, Vectorized, Cached>;
 
-static_assert(is_same_type<sha_algorithm<160, true, false, true>, sha160>);
-static_assert(is_same_type<sha_algorithm<256, true, false, true>, sha256>);
-static_assert(is_same_type<sha_algorithm<512, true, false, true>, sha512>);
+static_assert(is_same_type<sha_algorithm<160, true, true, true>, sha160>);
+static_assert(is_same_type<sha_algorithm<256, true, true, true>, sha256>);
+static_assert(is_same_type<sha_algorithm<512, true, true, true>, sha512>);
 
 template <size_t Strength, bool Compressed, bool Vectorized, bool Cached, bool Ripemd,
     bool_if<
@@ -204,11 +204,11 @@ template <size_t Strength, bool Compressed, bool Vectorized, bool Cached, bool R
 using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
     sha_algorithm<Strength, Compressed, Vectorized, Cached>>;
 
-static_assert(is_same_type<hash_selector<128, true, true, false,  true>,  rmd128>);
-static_assert(is_same_type<hash_selector<160, true, true, false,  true>,  rmd160>);
-static_assert(is_same_type<hash_selector<160, true, false, true,  false>, sha160>);
-static_assert(is_same_type<hash_selector<256, true, false, true,  false>, sha256>);
-static_assert(is_same_type<hash_selector<512, true, false, true,  false>, sha512>);
+static_assert(is_same_type<hash_selector<128, true, true, false,  true>, rmd128>);
+static_assert(is_same_type<hash_selector<160, true, true, false,  true>, rmd160>);
+static_assert(is_same_type<hash_selector<160, true, true, true, false>, sha160>);
+static_assert(is_same_type<hash_selector<256, true, true, true, false>, sha256>);
+static_assert(is_same_type<hash_selector<512, true, true, true, false>, sha512>);
 
 static_assert(hash_selector< 160, true,  true, true, false>::compression == with_shani || with_neon);
 static_assert(hash_selector< 256, true,  true, true, false>::compression == with_shani || with_neon);
@@ -224,12 +224,12 @@ static_assert(!hash_selector<160, true, false, true, false>::vectorization);
 static_assert(!hash_selector<256, true, false, true, false>::vectorization);
 static_assert(!hash_selector<512, true, false, true, false>::vectorization);
 
-static_assert(hash_selector< 160, true, true, true,  false>::cached);
-static_assert(hash_selector< 256, true, true, true,  false>::cached);
-static_assert(hash_selector< 512, true, true, true,  false>::cached);
-static_assert(!hash_selector<160, true, true, false, false>::cached);
-static_assert(!hash_selector<256, true, true, false, false>::cached);
-static_assert(!hash_selector<512, true, true, false, false>::cached);
+static_assert(hash_selector< 160, true, true, true,  false>::caching);
+static_assert(hash_selector< 256, true, true, true,  false>::caching);
+static_assert(hash_selector< 512, true, true, true,  false>::caching);
+static_assert(!hash_selector<160, true, true, false, false>::caching);
+static_assert(!hash_selector<256, true, true, false, false>::caching);
+static_assert(!hash_selector<512, true, true, false, false>::caching);
 
 #endif
 
@@ -306,6 +306,40 @@ bool test_algorithm(std::ostream& out, float ghz = 3.0f,
     output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
     return true;
 }
+
+////template<typename Parameters,
+////    size_t Count = 1024 * 1024,
+////    size_t Strength = 256,
+////    bool vectorized = true,
+////    bool compressed = true>
+////bool test_merkle(std::ostream& out, float ghz = 3.0f,
+////    bool csv = false) noexcept
+////{
+////    using P = Parameters;
+////    using Precision = std::chrono::nanoseconds;
+////    using Timer = timer<Precision>;
+////    using Algorithm = hash_selector<
+////        Strength,
+////        compressed,
+////        vectorized,
+////        false,
+////        false>;
+////
+////    uint64_t time = zero;
+////    for (size_t seed = 0; seed < Count; ++seed)
+////    {
+////        const auto left = get_data<Size, false>(seed);
+////        const auto right = get_data<Size, false>(seed);
+////
+////        time += Timer::execution([&]() noexcept
+////        {
+////            Algorithm::merkle_root({ left, right });
+////        });
+////    }
+////
+////    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+////    return true;
+////}
 
 // Algorithm::hash() test runner parameterization.
 // ----------------------------------------------------------------------------

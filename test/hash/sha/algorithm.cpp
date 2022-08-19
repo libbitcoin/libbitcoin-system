@@ -273,50 +273,6 @@ static_assert(is_same_type<sha160::ablocks_t<42>, std_array<std_array<uint8_t, 6
 static_assert(is_same_type<sha160::iblocks_t, iterable<std_array<uint8_t, 64>>>);
 static_assert(is_same_type<decltype(sha160::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha160::limit_bytes), const uint64_t>);
-#if defined(HAVE_VECTORIZATION)
-static_assert(!sha160::is_lanes<32>);
-static_assert( sha160::is_lanes<16>);
-static_assert( sha160::is_lanes<8>);
-static_assert( sha160::is_lanes<4>);
-static_assert( sha160::is_lanes<2>);
-static_assert( sha160::is_lanes<1>);
-static_assert(!sha160::is_lanes<0>);
-static_assert(sizeof(sha160::wword_t<16>) == 64);
-static_assert(sizeof(sha160::wword_t<8>) == 32);
-static_assert(sizeof(sha160::wword_t<4>) == 16);
-static_assert(sizeof(sha160::wword_t<2>) == 16); // same as 4 (unfilled)
-static_assert(sizeof(sha160::wword_t<1>) == 16); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha160::wword_t<16>, xint512_t>);
-static_assert(is_same_type<sha160::wword_t<8>, xint256_t>);
-static_assert(is_same_type<sha160::wword_t<4>, xint128_t>);
-static_assert(is_same_type<sha160::wword_t<2>, xint128_t>); // same as 4 (unfilled)
-static_assert(is_same_type<sha160::wword_t<1>, xint128_t>); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha160::wblock_t<16>, std_array<uint8_t, 16 * 64>>);
-static_assert(is_same_type<sha160::wblock_t<8>, std_array<uint8_t, 16 * 32>>);
-static_assert(is_same_type<sha160::wblock_t<4>, std_array<uint8_t, 16 * 16>>);
-static_assert(is_same_type<sha160::wblock_t<2>, std_array<uint8_t, 16 * 16>>); // same as 4 (unfilled)
-static_assert(is_same_type<sha160::wblock_t<1>, std_array<uint8_t, 16 * 16>>); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha160::wbuffer_t<16>, std_array<xint512_t, 80>>);
-static_assert(is_same_type<sha160::wbuffer_t<8>, std_array<xint256_t, 80>>);
-static_assert(is_same_type<sha160::wbuffer_t<4>, std_array<xint128_t, 80>>);
-static_assert(is_same_type<sha160::wbuffer_t<2>, std_array<xint128_t, 80>>); // same as 4 (unfilled)
-static_assert(is_same_type<sha160::wbuffer_t<1>, std_array<xint128_t, 80>>); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha160::wstate_t<16>, std_array<xint512_t, 5>>);
-static_assert(is_same_type<sha160::wstate_t<8>, std_array<xint256_t, 5>>);
-static_assert(is_same_type<sha160::wstate_t<4>, std_array<xint128_t, 5>>);
-static_assert(is_same_type<sha160::wstate_t<2>, std_array<xint128_t, 5>>); // same as 4 (unfilled)
-static_assert(is_same_type<sha160::wstate_t<1>, std_array<xint128_t, 5>>); // same as 2/4 (unfilled)
-static_assert(size_of<decltype(array_cast<16>(sha160::iblocks_t{}))> () == size_of<sha160::wblock_t<16>>());
-static_assert(size_of<decltype(array_cast<8>(sha160::iblocks_t{}))> () == size_of<sha160::wblock_t<8>>());
-static_assert(size_of<decltype(array_cast<4>(sha160::iblocks_t{}))> () == size_of<sha160::wblock_t<4>>());
-static_assert(size_of<decltype(array_cast<2>(sha160::iblocks_t{}))> () == to_half(size_of<sha160::wblock_t<4>>()));
-static_assert(size_of<decltype(array_cast<1>(sha160::iblocks_t{}))> () == to_half(to_half(size_of<sha160::wblock_t<4>>())));
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<16>(sha160::iblocks_t{})))>() == size_of<sha160::wblock_t<16>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<8>(sha160::iblocks_t{})))>() == size_of<sha160::wblock_t<8>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<4>(sha160::iblocks_t{})))>() == size_of<sha160::wblock_t<4>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<2>(sha160::iblocks_t{})))>() == to_half(size_of<sha160::wblock_t<4>>()));
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<1>(sha160::iblocks_t{})))>() == to_half(to_half(size_of<sha160::wblock_t<4>>())));
-#endif
 
 // sha256
 static_assert(sha256::big_end_count);
@@ -341,50 +297,6 @@ static_assert(is_same_type<sha256::ablocks_t<42>, std_array<std_array<uint8_t, 6
 static_assert(is_same_type<sha256::iblocks_t, iterable<std_array<uint8_t, 64>>>);
 static_assert(is_same_type<decltype(sha256::limit_bits), const uint64_t>);
 static_assert(is_same_type<decltype(sha256::limit_bytes), const uint64_t>);
-#if defined(HAVE_VECTORIZATION)
-static_assert(!sha256::is_lanes<32>);
-static_assert( sha256::is_lanes<16>);
-static_assert( sha256::is_lanes<8>);
-static_assert( sha256::is_lanes<4>);
-static_assert( sha256::is_lanes<2>);
-static_assert( sha256::is_lanes<1>);
-static_assert(!sha256::is_lanes<0>);
-static_assert(sizeof(sha256::wword_t<16>) == 64);
-static_assert(sizeof(sha256::wword_t<8>) == 32);
-static_assert(sizeof(sha256::wword_t<4>) == 16);
-static_assert(sizeof(sha256::wword_t<2>) == 16); // same as 4 (unfilled)
-static_assert(sizeof(sha256::wword_t<1>) == 16); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha256::wword_t<16>, xint512_t>);
-static_assert(is_same_type<sha256::wword_t<8>, xint256_t>);
-static_assert(is_same_type<sha256::wword_t<4>, xint128_t>);
-static_assert(is_same_type<sha256::wword_t<2>, xint128_t>); // same as 4 (unfilled)
-static_assert(is_same_type<sha256::wword_t<1>, xint128_t>); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha256::wblock_t<16>, std_array<uint8_t, 16 * 64>>);
-static_assert(is_same_type<sha256::wblock_t<8>, std_array<uint8_t, 16 * 32>>);
-static_assert(is_same_type<sha256::wblock_t<4>, std_array<uint8_t, 16 * 16>>);
-static_assert(is_same_type<sha256::wblock_t<2>, std_array<uint8_t, 16 * 16>>); // same as 4 (unfilled)
-static_assert(is_same_type<sha256::wblock_t<1>, std_array<uint8_t, 16 * 16>>); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha256::wbuffer_t<16>, std_array<xint512_t, 64>>);
-static_assert(is_same_type<sha256::wbuffer_t<8>, std_array<xint256_t, 64>>);
-static_assert(is_same_type<sha256::wbuffer_t<4>, std_array<xint128_t, 64>>);
-static_assert(is_same_type<sha256::wbuffer_t<2>, std_array<xint128_t, 64>>); // same as 4 (unfilled)
-static_assert(is_same_type<sha256::wbuffer_t<1>, std_array<xint128_t, 64>>); // same as 2/4 (unfilled)
-static_assert(is_same_type<sha256::wstate_t<16>, std_array<xint512_t, 8>>);
-static_assert(is_same_type<sha256::wstate_t<8>, std_array<xint256_t, 8>>);
-static_assert(is_same_type<sha256::wstate_t<4>, std_array<xint128_t, 8>>);
-static_assert(is_same_type<sha256::wstate_t<2>, std_array<xint128_t, 8>>); // same as 4 (unfilled)
-static_assert(is_same_type<sha256::wstate_t<1>, std_array<xint128_t, 8>>); // same as 4 (unfilled)
-static_assert(size_of<decltype(array_cast<16>(sha256::iblocks_t{}))> () == size_of<sha256::wblock_t<16>>());
-static_assert(size_of<decltype(array_cast<8>(sha256::iblocks_t{}))> () == size_of<sha256::wblock_t<8>>());
-static_assert(size_of<decltype(array_cast<4>(sha256::iblocks_t{}))> () == size_of<sha256::wblock_t<4>>());
-static_assert(size_of<decltype(array_cast<2>(sha256::iblocks_t{}))> () == to_half(size_of<sha256::wblock_t<4>>()));
-static_assert(size_of<decltype(array_cast<1>(sha256::iblocks_t{}))> () == to_half(to_half(size_of<sha256::wblock_t<4>>())));
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<16>(sha256::iblocks_t{})))>() == size_of<sha256::wblock_t<16>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<8>(sha256::iblocks_t{})))>() == size_of<sha256::wblock_t<8>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<4>(sha256::iblocks_t{})))>() == size_of<sha256::wblock_t<4>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<2>(sha256::iblocks_t{})))>() == to_half(size_of<sha256::wblock_t<4>>()));
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<1>(sha256::iblocks_t{})))>() == to_half(to_half(size_of<sha256::wblock_t<4>>())));
-#endif
 
 // sha512
 static_assert(sha512::big_end_count);
@@ -409,42 +321,6 @@ static_assert(is_same_type<sha512::ablocks_t<42>, std_array<std_array<uint8_t, 1
 static_assert(is_same_type<sha512::iblocks_t, iterable<std_array<uint8_t, 128>>>);
 static_assert(is_same_type<decltype(sha512::limit_bits), const uint128_t>);
 static_assert(is_same_type<decltype(sha512::limit_bytes), const uint128_t>);
-#if defined(HAVE_VECTORIZATION)
-static_assert(!sha512::is_lanes<32>);
-static_assert(!sha512::is_lanes<16>);
-static_assert( sha512::is_lanes<8>);
-static_assert( sha512::is_lanes<4>);
-static_assert( sha512::is_lanes<2>);
-static_assert( sha512::is_lanes<1>);
-static_assert(!sha512::is_lanes<0>);
-static_assert(sizeof(sha512::wword_t<8>) == 64);
-static_assert(sizeof(sha512::wword_t<4>) == 32);
-static_assert(sizeof(sha512::wword_t<2>) == 16);
-static_assert(sizeof(sha512::wword_t<1>) == 16); // same as 2 (unfilled)
-static_assert(is_same_type<sha512::wword_t<8>, xint512_t>);
-static_assert(is_same_type<sha512::wword_t<4>, xint256_t>);
-static_assert(is_same_type<sha512::wword_t<2>, xint128_t>);
-static_assert(is_same_type<sha512::wword_t<1>, xint128_t>); // same as 2 (unfilled)
-static_assert(is_same_type<sha512::wblock_t<8>, std_array<uint8_t, 16 * 64>>);
-static_assert(is_same_type<sha512::wblock_t<4>, std_array<uint8_t, 16 * 32>>);
-static_assert(is_same_type<sha512::wblock_t<2>, std_array<uint8_t, 16 * 16>>);
-static_assert(is_same_type<sha512::wbuffer_t<8>, std_array<xint512_t, 80>>);
-static_assert(is_same_type<sha512::wbuffer_t<4>, std_array<xint256_t, 80>>);
-static_assert(is_same_type<sha512::wbuffer_t<2>, std_array<xint128_t, 80>>);
-static_assert(is_same_type<sha512::wbuffer_t<1>, std_array<xint128_t, 80>>); // same as 2 (unfilled)
-static_assert(is_same_type<sha512::wstate_t<8>, std_array<xint512_t, 8>>);
-static_assert(is_same_type<sha512::wstate_t<4>, std_array<xint256_t, 8>>);
-static_assert(is_same_type<sha512::wstate_t<2>, std_array<xint128_t, 8>>);
-static_assert(is_same_type<sha512::wstate_t<1>, std_array<xint128_t, 8>>); // same as 2 (unfilled)
-static_assert(size_of<decltype(array_cast<8>(sha512::iblocks_t{}))> () == size_of<sha512::wblock_t<8>>());
-static_assert(size_of<decltype(array_cast<4>(sha512::iblocks_t{}))> () == size_of<sha512::wblock_t<4>>());
-static_assert(size_of<decltype(array_cast<2>(sha512::iblocks_t{}))>() == size_of<sha512::wblock_t<2>>());
-static_assert(size_of<decltype(array_cast<1>(sha512::iblocks_t{}))> () == to_half(size_of<sha512::wblock_t<2>>()));
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<8>(sha512::iblocks_t{})))>() == size_of<sha512::wblock_t<8>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<4>(sha512::iblocks_t{})))>() == size_of<sha512::wblock_t<4>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<2>(sha512::iblocks_t{})))>() == size_of<sha512::wblock_t<2>>());
-static_assert(size_of<decltype(array_cast<uint8_t>(array_cast<1>(sha512::iblocks_t{})))>() == to_half(size_of<sha512::wblock_t<2>>()));
-#endif
 
 // Truncations.
 static_assert(sha256_224::big_end_count);

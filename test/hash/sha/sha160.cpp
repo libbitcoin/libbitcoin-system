@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(sha160__fff_accumulator_hash__test_vectors__expected)
     using sha_160 = sha::algorithm<sha::h160, false, false, false>;
     static_assert(!sha_160::compression);
     static_assert(!sha_160::vectorization);
-    static_assert(!sha_160::cached);
+    static_assert(!sha_160::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(sha160__tff_accumulator_hash__test_vectors__expected)
     using sha_160 = sha::algorithm<sha::h160, true, false, false>;
     static_assert(sha_160::compression == compressed);
     static_assert(!sha_160::vectorization);
-    static_assert(!sha_160::cached);
+    static_assert(!sha_160::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(sha160__tft_accumulator_hash__test_vectors__expected)
     using sha_160 = sha::algorithm<sha::h160, true, false, true>;
     static_assert(sha_160::compression == compressed);
     static_assert(!sha_160::vectorization);
-    static_assert(sha_160::cached);
+    static_assert(sha_160::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(sha160__ttf_accumulator_hash__test_vectors__expected)
     using sha_160 = sha::algorithm<sha::h160, true, true, false>;
     static_assert(sha_160::compression == compressed);
     static_assert(sha_160::vectorization == vectorized);
-    static_assert(!sha_160::cached);
+    static_assert(!sha_160::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(sha160__ttt_accumulator_hash__test_vectors__expected)
     using sha_160 = sha::algorithm<sha::h160, true, true, true>;
     static_assert(sha_160::compression == compressed);
     static_assert(sha_160::vectorization == vectorized);
-    static_assert(sha_160::cached);
+    static_assert(sha_160::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(sha160__ftf_accumulator_hash__test_vectors__expected)
     using sha_160 = sha::algorithm<sha::h160, false, true, false>;
     static_assert(!sha_160::compression);
     static_assert(sha_160::vectorization == vectorized);
-    static_assert(!sha_160::cached);
+    static_assert(!sha_160::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha160_tests)

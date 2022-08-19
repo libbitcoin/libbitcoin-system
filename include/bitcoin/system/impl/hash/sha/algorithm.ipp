@@ -36,7 +36,7 @@ namespace system {
 namespace sha {
 
 #define TEMPLATE template <typename SHA, bool Compressed, bool Vectorized, \
-    bool Cached, if_same<typename SHA::T, shah_t> If>
+    bool Cached, if_same<typename SHA::T, sha::shah_t> If>
 #define CLASS algorithm<SHA, Compressed, Vectorized, Cached, If>
 
 // Bogus warning suggests constexpr when declared consteval.
@@ -916,7 +916,7 @@ schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
     // precomputed schedules - this benefits only finalized chunk hashing.
     // Testing shows a 5% performance improvement for 128 byte chunk hashes.
     // Accumulator passes all write() of more than one block here.
-    if constexpr (Cached)
+    if constexpr (caching)
     {
         switch (blocks)
         {
@@ -1014,6 +1014,19 @@ pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
 // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
 
 TEMPLATE
+template <size_t Size>
+constexpr typename CLASS::digest_t CLASS::
+hash(const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    auto state = H::get;
+    iterate(state, blocks);
+    schedule_n<Size>(buffer);
+    compress(state, buffer);
+    return output(state);
+}
+
+TEMPLATE
 typename CLASS::digest_t CLASS::
 hash(iblocks_t&& blocks) NOEXCEPT
 {
@@ -1028,18 +1041,6 @@ hash(iblocks_t&& blocks) NOEXCEPT
     return output(state);
 }
 
-TEMPLATE
-template <size_t Size>
-constexpr typename CLASS::digest_t CLASS::
-hash(const ablocks_t<Size>& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    auto state = H::get;
-    iterate(state, blocks);
-    schedule_n<Size>(buffer);
-    compress(state, buffer);
-    return output(state);
-}
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
@@ -1103,18 +1104,16 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 // No double_hash optimizations for sha160 (requires chunk_t/half_t).
 
 TEMPLATE
-typename CLASS::digest_t CLASS::
-double_hash(iblocks_t&& blocks) NOEXCEPT
+template <size_t Size>
+constexpr typename CLASS::digest_t CLASS::
+double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
-
-    // Save block count, as iterable decrements.
-    const auto count = blocks.size();
 
     buffer_t buffer{};
     auto state = H::get;
     iterate(state, blocks);
-    schedule_n(buffer, count);
+    schedule_n<Size>(buffer);
     compress(state, buffer);
 
     // Second hash
@@ -1127,16 +1126,18 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
 }
 
 TEMPLATE
-template <size_t Size>
-constexpr typename CLASS::digest_t CLASS::
-double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
+typename CLASS::digest_t CLASS::
+double_hash(iblocks_t&& blocks) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
+
+    // Save block count, as iterable decrements.
+    const auto count = blocks.size();
 
     buffer_t buffer{};
     auto state = H::get;
     iterate(state, blocks);
-    schedule_n<Size>(buffer);
+    schedule_n(buffer, count);
     compress(state, buffer);
 
     // Second hash
@@ -1237,8 +1238,8 @@ TEMPLATE
 INLINE void CLASS::
 vectorized(digests_t& digests) NOEXCEPT
 {
-    // Create digest and block iterables from digest data.
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
+
     const auto data = digests.front().data();
     const auto size = digests.size() * array_count<digest_t>;
     auto iblocks = iblocks_t{ size, data };
@@ -1268,7 +1269,14 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        vectorized(digests);
+        if (digests.size() < (min_lanes * two))
+        {
+            sequential(digests);
+        }
+        else
+        {
+            vectorized(digests);
+        }
     }
     else
     {
@@ -1357,23 +1365,6 @@ normalize(const state_t& state) NOEXCEPT
 // ------------------------------------------------------------------------
 
 TEMPLATE
-INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        sequential(state, blocks);
-    }
-    else if constexpr (vectorization)
-    {
-        vectorized(state, blocks);
-    }
-    else
-    {
-        sequential(state, blocks);
-    }
-}
-
-TEMPLATE
 template <size_t Size>
 INLINE constexpr void CLASS::iterate(state_t& state,
     const ablocks_t<Size>& blocks) NOEXCEPT
@@ -1382,10 +1373,23 @@ INLINE constexpr void CLASS::iterate(state_t& state,
     {
         sequential(state, blocks);
     }
-    else if constexpr (vectorization)
+    else if constexpr (!vectorization)
     {
-        auto iterable = iblocks_t{ blocks };
+        auto iterable = iblocks_t{ array_cast<byte_t>(blocks) };
         vectorized(state, iterable);
+    }
+    else
+    {
+        sequential(state, blocks);
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    if constexpr (vectorization)
+    {
+        vectorized(state, blocks);
     }
     else
     {
@@ -1742,14 +1746,14 @@ unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
     return array_cast<byte_t>(state_t
     {
-        get<word_t, Lane>(xstate[0]),
-        get<word_t, Lane>(xstate[1]),
-        get<word_t, Lane>(xstate[2]),
-        get<word_t, Lane>(xstate[3]),
-        get<word_t, Lane>(xstate[4]),
-        get<word_t, Lane>(xstate[5]),
-        get<word_t, Lane>(xstate[6]),
-        get<word_t, Lane>(xstate[7])
+        get<word_t, Lane>(byteswap(xstate[0])),
+        get<word_t, Lane>(byteswap(xstate[1])),
+        get<word_t, Lane>(byteswap(xstate[2])),
+        get<word_t, Lane>(byteswap(xstate[3])),
+        get<word_t, Lane>(byteswap(xstate[4])),
+        get<word_t, Lane>(byteswap(xstate[5])),
+        get<word_t, Lane>(byteswap(xstate[6])),
+        get<word_t, Lane>(byteswap(xstate[7]))
     });
 }
 

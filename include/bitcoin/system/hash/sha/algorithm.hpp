@@ -36,12 +36,10 @@ namespace system {
 namespace sha {
 
 /// SHA hashing algorithm.
-/// Presently Compressed enables non-vector sigma optimization.
-/// Presently Vectorized enables vector-friendly sigma optimization.
-/// The former is a 10% performance optimization, the latter -10% because
-/// it is not being run vectorized, so is wasteful (disabled by default).
-template <typename SHA, bool Compressed = true, bool Vectorized = false,
-    bool Cached = true, if_same<typename SHA::T, shah_t> = true>
+/// Compression not yet implemented.
+/// Vectorization of message schedules and merkle hashes.
+template <typename SHA, bool Compressed = true, bool Vectorized = true,
+    bool Cached = true, if_same<typename SHA::T, sha::shah_t> = true>
 class algorithm : algorithm_t
 {
 public:
@@ -80,17 +78,24 @@ public:
     static constexpr auto count_bytes   = bytes<count_bits>;
     using count_t = unsigned_exact_type<bytes<count_bits>>;
 
-    static constexpr auto limit_bits    = maximum<count_t> - count_bits;
-    static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
-    static constexpr auto have_x128     = Vectorized && system::with_sse41;
-    static constexpr auto have_x256     = Vectorized && system::with_avx2;
-    static constexpr auto have_x512     = Vectorized && system::with_avx512;
-    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512) && 
-                                          !(build_x32 && is_same_size<word_t, uint64_t>);
     static constexpr auto have_shani    = Compressed && system::with_shani;
     static constexpr auto have_neon     = Compressed && system::with_neon;
     static constexpr auto compression   = have_shani || have_neon;
-    static constexpr auto cached        = Cached;
+
+    static constexpr auto have_x128     = Vectorized && system::with_sse41;
+    static constexpr auto have_x256     = Vectorized && system::with_avx2;
+    static constexpr auto have_x512     = Vectorized && system::with_avx512;
+    static constexpr auto max_lanes     = (have_x512 ? 64 : (have_x256 ? 32 :
+                                          (have_x128 ? 16 : 0))) / SHA::word_bytes;
+    static constexpr auto min_lanes     = (have_x128 ? 16 : (have_x256 ? 32 :
+                                          (have_x128 ? 64 : 0))) / SHA::word_bytes;
+    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512) && 
+                                         !(build_x32 && is_same_size<word_t, uint64_t>);
+
+    static constexpr auto caching       = Cached;
+
+    static constexpr auto limit_bits    = maximum<count_t> - count_bits;
+    static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
     static constexpr auto big_end_count = true;
 
     /// Single hashing.

@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(sha512__fff_accumulator_hash__test_vectors__expected)
     using sha_512 = sha::algorithm<sha::h512<>, false, false, false>;
     static_assert(!sha_512::compression);
     static_assert(!sha_512::vectorization);
-    static_assert(!sha_512::cached);
+    static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(sha512__tff_accumulator_hash__test_vectors__expected)
     using sha_512 = sha::algorithm<sha::h512<>, true, false, false>;
     static_assert(sha_512::compression == compressed);
     static_assert(!sha_512::vectorization);
-    static_assert(!sha_512::cached);
+    static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(sha512__tft_accumulator_hash__test_vectors__expected)
     using sha_512 = sha::algorithm<sha::h512<>, true, false, true>;
     static_assert(sha_512::compression == compressed);
     static_assert(!sha_512::vectorization);
-    static_assert(sha_512::cached);
+    static_assert(sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(sha512__ttf_accumulator_hash__test_vectors__expected)
     using sha_512 = sha::algorithm<sha::h512<>, true, true, false>;
     static_assert(sha_512::compression == compressed);
     static_assert(sha_512::vectorization == vectorized);
-    static_assert(!sha_512::cached);
+    static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(sha512__ttt_accumulator_hash__test_vectors__expected)
     using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
     static_assert(sha_512::compression == compressed);
     static_assert(sha_512::vectorization == vectorized);
-    static_assert(sha_512::cached);
+    static_assert(sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(sha512__ftf_accumulator_hash__test_vectors__expected)
     using sha_512 = sha::algorithm<sha::h512<>, false, true, false>;
     static_assert(!sha_512::compression);
     static_assert(sha_512::vectorization == vectorized);
-    static_assert(!sha_512::cached);
+    static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
     for (const auto& test: sha512_tests)
