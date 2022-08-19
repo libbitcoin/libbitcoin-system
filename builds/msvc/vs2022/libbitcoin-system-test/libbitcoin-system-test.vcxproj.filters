@@ -330,9 +330,6 @@
     <ClCompile Include="..\..\..\..\test\hash\sha\analysis.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp">
-      <Filter>src\hash\sha</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\sha160.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
@@ -340,6 +337,9 @@
       <Filter>src\hash\sha</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp">
+      <Filter>src\hash\sha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\vectorization.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">

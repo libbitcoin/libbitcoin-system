@@ -165,12 +165,12 @@
     <ClCompile Include="..\..\..\..\test\hash\sha\analysis.cpp">
       <ObjectFileName>$(IntDir)test_hash_sha_analysis.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\sha160.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\sha256.cpp">
       <ObjectFileName>$(IntDir)test_hash_sha_sha256.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash\sha\vectorization.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\haves.cpp" />
     <ClCompile Include="..\..\..\..\test\intrinsics\intrinsics.cpp" />

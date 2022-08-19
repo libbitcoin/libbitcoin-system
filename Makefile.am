@@ -297,10 +297,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/sha/algorithm.hpp \
     test/hash/sha/algorithm.ipp \
     test/hash/sha/analysis.cpp \
-    test/hash/sha/merkle.cpp \
     test/hash/sha/sha160.cpp \
     test/hash/sha/sha256.cpp \
     test/hash/sha/sha512.cpp \
+    test/hash/sha/vectorization.cpp \
     test/intrinsics/haves.cpp \
     test/intrinsics/intrinsics.cpp \
     test/intrinsics/xcpu/cpuid.cpp \
