@@ -1291,18 +1291,18 @@ VCONSTEXPR typename CLASS::digest_t CLASS::
 merkle_root(digests_t&& digests) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
-    const auto count = digests.size();
 
-    if (is_zero(count))
+    if (is_zero(digests.size()))
         return {};
 
-    if (is_one(count))
-        return std::move(digests.front());
+    while (!is_one(digests.size()))
+    {
+        if (is_odd(digests.size()))
+            digests.push_back(digests.back());
 
-    if (is_odd(count))
-        digests.push_back(digests.back());
+        merkle_hash(digests);
+    }
 
-    while (merkle_hash(digests).size() > one);
     return std::move(digests.front());
 }
 
