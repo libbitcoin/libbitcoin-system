@@ -48,7 +48,6 @@ BOOST_AUTO_TEST_CASE(verify_array_cache)
     constexpr auto blocks4 = std_array<sha256::block_t, 4>{};
 
 // GCC doesn't like these as constexpr, complaining about sha::algorithm::iterate(array).
-// Oddly it does not complain about sha256__hash__one_block__expected, which is the same.
 #if !defined(HAVE_GNUC)
     // Array caching is performed independently from chunk caching, though if
     // configured correctly the cache for each is the same values/locations.

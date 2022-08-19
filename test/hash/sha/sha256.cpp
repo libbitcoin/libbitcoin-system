@@ -130,7 +130,10 @@ BOOST_AUTO_TEST_CASE(sha256__ftf_accumulator_hash__test_vectors__expected)
 // sha256::hash
 BOOST_AUTO_TEST_CASE(sha256__hash__one_block__expected)
 {
+// GCC doesn't like these as constexpr, complaining about sha::algorithm::iterate(array).
+#if !defined(HAVE_GNUC)
     static_assert(sha256::hash(std_array<sha256::block_t, 1>({ sha256::block_t{ 0 } })) == sha_full256);
+#endif
     BOOST_CHECK_EQUAL(sha256::hash(sha256::block_t{ 0 }), sha_full256);
 }
 
