@@ -74,6 +74,7 @@ public:
     /// Constants (and count_t).
     /// -----------------------------------------------------------------------
     /// count_t is uint64_t (sha160/256) or uint128_t (sha512).
+    /// All extended integer intrinsics currently have a "64 on 32" limit.
 
     static constexpr auto count_bits    = SHA::block_words * SHA::word_bytes;
     static constexpr auto count_bytes   = bytes<count_bits>;
@@ -84,7 +85,8 @@ public:
     static constexpr auto have_x128     = Vectorized && system::with_sse41;
     static constexpr auto have_x256     = Vectorized && system::with_avx2;
     static constexpr auto have_x512     = Vectorized && system::with_avx512;
-    static constexpr auto vectorization = have_x128 || have_x256 || have_x512;
+    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512) && 
+                                          !(build_x32 && is_same_size<word_t, uint64_t>);
     static constexpr auto have_shani    = Compressed && system::with_shani;
     static constexpr auto have_neon     = Compressed && system::with_neon;
     static constexpr auto compression   = have_shani || have_neon;

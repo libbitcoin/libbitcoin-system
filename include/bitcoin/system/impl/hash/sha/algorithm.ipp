@@ -1226,11 +1226,11 @@ TEMPLATE
 VCONSTEXPR void CLASS::
 sequential(digests_t& digests, size_t block) NOEXCEPT
 {
-    const auto half = to_half(digests.size());
-    for (auto digest = block * two; block < half; ++block, digest += two)
-        digests[block] = double_hash(digests[digest], digests[add1(digest)]);
+    const auto blocks = to_half(digests.size());
+    for (auto i = block, j = block * two; i < blocks; ++i, j += two)
+        digests[i] = double_hash(digests[j], digests[add1(j)]);
 
-    digests.resize(half);
+    digests.resize(blocks);
 }
 
 TEMPLATE
@@ -1241,22 +1241,19 @@ vectorized(digests_t& digests) NOEXCEPT
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
     const auto data = digests.front().data();
     const auto size = digests.size() * array_count<digest_t>;
-    auto iblocks = iblocks_t{ to_half(size), data };
-    auto idigests = idigests_t{ size, data };
+    auto iblocks = iblocks_t{ size, data };
+    auto idigests = idigests_t{ to_half(size), data };
+    const auto blocks = iblocks.size();
 
-    if constexpr (!(build_x32 && is_same_size<word_t, uint64_t>))
-    {
-        if constexpr (have_x512)
-            vectorize<xint512_t>(idigests, iblocks);
+    if constexpr (have_x512)
+        vectorize<xint512_t>(idigests, iblocks);
+    if constexpr (have_x256)
+        vectorize<xint256_t>(idigests, iblocks);
+    if constexpr (have_x128)
+        vectorize<xint128_t>(idigests, iblocks);
 
-        if constexpr (have_x256)
-            vectorize<xint256_t>(idigests, iblocks);
-
-        if constexpr (have_x128)
-            vectorize<xint128_t>(idigests, iblocks);
-    }
-
-    sequential(digests, iblocks.size());
+    // iblocks.size() is reduced by vectorization.
+    sequential(digests, blocks - iblocks.size());
 }
 
 TEMPLATE
@@ -1427,20 +1424,12 @@ TEMPLATE
 INLINE void CLASS::
 vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    // All extended integer intrinsics currently have a "64 on 32" limit.
-    if constexpr (!(build_x32 && is_same_size<word_t, uint64_t>))
-    {
-        // The only place where conditional xint types are introduced.
-        // Guards provide condtional compilation based on type availability.
-        if constexpr (have_x512)
-            vectorize<xint512_t>(state, blocks);
-
-        if constexpr (have_x256)
-            vectorize<xint256_t>(state, blocks);
-
-        if constexpr (have_x128)
-            vectorize<xint128_t>(state, blocks);
-    }
+    if constexpr (have_x512)
+        vectorize<xint512_t>(state, blocks);
+    if constexpr (have_x256)
+        vectorize<xint256_t>(state, blocks);
+    if constexpr (have_x128)
+        vectorize<xint128_t>(state, blocks);
 
     // blocks.size() is reduced by vectorization.
     sequential(state, blocks);
@@ -1815,7 +1804,7 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
     BC_ASSERT(digests.size() == blocks.size());
     constexpr auto lanes = capacity<xWord, word_t>;
 
-    if (have<xWord>() && blocks.size() >= lanes)
+    if (blocks.size() >= lanes && have<xWord>())
     {
         static auto initial = pack<xWord>(H::get);
         xbuffer_t<xWord> xbuffer;
@@ -1899,7 +1888,7 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    if (have<xWord>() && blocks.size() >= lanes)
+    if (blocks.size() >= lanes && have<xWord>())
     {
         xbuffer_t<xWord> xbuffer;
 
