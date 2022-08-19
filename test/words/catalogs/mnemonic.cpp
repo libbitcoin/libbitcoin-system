@@ -24,24 +24,24 @@ BOOST_AUTO_TEST_SUITE(catalogs_mnemonic_tests)
 using namespace test::catalogs_mnemonic;
 using namespace bc::system::words;
 
-const auto dictionary_count = 10u;
-const auto dictionary_size = 2048;
-const auto deviations_en_fr = 100;
-const auto intersecton_en_fr = 100;
-const auto deviations_zh = 0;
-const auto intersection_zh = 1275;
+constexpr auto dictionary_count = 10u;
+constexpr auto dictionary_size = 2048;
+constexpr auto deviations_en_fr = 100;
+constexpr auto intersecton_en_fr = 100;
+constexpr auto deviations_zh = 0;
+constexpr auto intersection_zh = 1275;
 
 // These are not "reversed" as with typical bitcoin hash presentations.
-const auto identity_en = base16_array("f18b9a84c83e38e98eceb0102b275e26438af83ab08f080cdb780a2caa9f3a6d");
-const auto identity_es = base16_array("27e99ad4328299108663c19eb611310bd3b77260af852169108713019831d07d");
-const auto identity_it = base16_array("d9664953fe4c49e0b40eb6f6378c421f5f01dc9360aaac6d2a3c294f046ef520");
-const auto identity_fr = base16_array("fd4cd57c8e86a99ac53cd0f21a6b89af366769b0143ac0d268ac7d7a39200145");
-const auto identity_cs = base16_array("92e035ca0e3680fab85fa18b9e5c7e7582b3bd9caeb6d4bc8a2ecc8e492100c9");
-const auto identity_pt = base16_array("85fea658f90c42c182823807a1d30db587abb72c14a3098e1a65f8b78d1ffcf4");
-const auto identity_ja = base16_array("e641781d89213031233ebc5130020c3de297cad96065ecc688d1c00e010ea71c");
-const auto identity_ko = base16_array("0c26059ed7ede977d7fa1c40443e71793e7850aa6a3d8aabf0cbcec91c1f95ec");
-const auto identity_zh_Hans = base16_array("a86e2bd870e228d19a887c9faae8c1374b4e624e85d2b245b59e36583cba4afc");
-const auto identity_zh_Hant = base16_array("11ef479f2f44b6d4f7fb6239dff06e3cd7a1473b83df6cf91adcbbbee598acf6");
+constexpr auto identity_en = base16_array("f18b9a84c83e38e98eceb0102b275e26438af83ab08f080cdb780a2caa9f3a6d");
+constexpr auto identity_es = base16_array("27e99ad4328299108663c19eb611310bd3b77260af852169108713019831d07d");
+constexpr auto identity_it = base16_array("d9664953fe4c49e0b40eb6f6378c421f5f01dc9360aaac6d2a3c294f046ef520");
+constexpr auto identity_fr = base16_array("fd4cd57c8e86a99ac53cd0f21a6b89af366769b0143ac0d268ac7d7a39200145");
+constexpr auto identity_cs = base16_array("92e035ca0e3680fab85fa18b9e5c7e7582b3bd9caeb6d4bc8a2ecc8e492100c9");
+constexpr auto identity_pt = base16_array("85fea658f90c42c182823807a1d30db587abb72c14a3098e1a65f8b78d1ffcf4");
+constexpr auto identity_ja = base16_array("e641781d89213031233ebc5130020c3de297cad96065ecc688d1c00e010ea71c");
+constexpr auto identity_ko = base16_array("0c26059ed7ede977d7fa1c40443e71793e7850aa6a3d8aabf0cbcec91c1f95ec");
+constexpr auto identity_zh_Hans = base16_array("a86e2bd870e228d19a887c9faae8c1374b4e624e85d2b245b59e36583cba4afc");
+constexpr auto identity_zh_Hant = base16_array("11ef479f2f44b6d4f7fb6239dff06e3cd7a1473b83df6cf91adcbbbee598acf6");
 
 // count
 

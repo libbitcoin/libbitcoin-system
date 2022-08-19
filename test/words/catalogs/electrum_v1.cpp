@@ -24,24 +24,24 @@ BOOST_AUTO_TEST_SUITE(catalogs_electrum_v1_tests)
 using namespace test::catalogs_electrum_v1;
 using namespace bc::system::words;
 
-const auto dictionary_count = 2u;
-const auto dictionary_size = 1626;
-const auto intersection_en_pt = 5;
-const auto intersection_en_electrum_en = 861;
-const auto intersection_en_electrum_es = 7;
-const auto intersection_en_electrum_fr = 50;
-const auto intersection_en_electrum_cs = 2;
-const auto intersection_en_electrum_pt = 1;
-const auto intersection_pt_electrum_en = 14;
-const auto intersection_pt_electrum_es = 69;
-const auto intersection_pt_electrum_it = 42;
-const auto intersection_pt_electrum_fr = 7;
-const auto intersection_pt_electrum_cs = 2;
-const auto intersection_pt_electrum_pt = 185;
+constexpr auto dictionary_count = 2u;
+constexpr auto dictionary_size = 1626;
+constexpr auto intersection_en_pt = 5;
+constexpr auto intersection_en_electrum_en = 861;
+constexpr auto intersection_en_electrum_es = 7;
+constexpr auto intersection_en_electrum_fr = 50;
+constexpr auto intersection_en_electrum_cs = 2;
+constexpr auto intersection_en_electrum_pt = 1;
+constexpr auto intersection_pt_electrum_en = 14;
+constexpr auto intersection_pt_electrum_es = 69;
+constexpr auto intersection_pt_electrum_it = 42;
+constexpr auto intersection_pt_electrum_fr = 7;
+constexpr auto intersection_pt_electrum_cs = 2;
+constexpr auto intersection_pt_electrum_pt = 185;
 
 // These are not "reversed" as with typical bitcoin hash presentations.
-const auto identity_en = base16_array("430ce8fc15a42a6097782a10144d1277e2596b7591be338254a257dfcf1f57d6");
-const auto identity_pt = base16_array("43da9ad5a079483e224bcdd61cd1728a68c2b2647f0f1b87832dbaab5e159a12");
+constexpr auto identity_en = base16_array("430ce8fc15a42a6097782a10144d1277e2596b7591be338254a257dfcf1f57d6");
+constexpr auto identity_pt = base16_array("43da9ad5a079483e224bcdd61cd1728a68c2b2647f0f1b87832dbaab5e159a12");
 
 // count
 
