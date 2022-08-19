@@ -183,8 +183,7 @@ INLINE Word get(xint256_t a) NOEXCEPT
 // Low order word to the left.
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE xint256_t set(
-    uint64_t x01 = 0, uint64_t x02 = 0,
-    uint64_t x03 = 0, uint64_t x04 = 0) NOEXCEPT
+    uint64_t x01, uint64_t x02, uint64_t x03, uint64_t x04) NOEXCEPT
 {
     // Low order word to the right.
     return mm256_set_epi64x(
@@ -194,10 +193,8 @@ INLINE xint256_t set(
 // AVX
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE xint256_t set(
-    uint32_t x01 = 0, uint32_t x02 = 0,
-    uint32_t x03 = 0, uint32_t x04 = 0,
-    uint32_t x05 = 0, uint32_t x06 = 0,
-    uint32_t x07 = 0, uint32_t x08 = 0) NOEXCEPT
+    uint32_t x01, uint32_t x02, uint32_t x03, uint32_t x04,
+    uint32_t x05, uint32_t x06, uint32_t x07, uint32_t x08) NOEXCEPT
 {
     return mm256_set_epi32(
         x08, x07, x06, x05, x04, x03, x02, x01);
@@ -206,14 +203,10 @@ INLINE xint256_t set(
 // AVX
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE xint256_t set(
-    uint16_t x01 = 0, uint16_t x02 = 0,
-    uint16_t x03 = 0, uint16_t x04 = 0,
-    uint16_t x05 = 0, uint16_t x06 = 0,
-    uint16_t x07 = 0, uint16_t x08 = 0,
-    uint16_t x09 = 0, uint16_t x10 = 0,
-    uint16_t x11 = 0, uint16_t x12 = 0,
-    uint16_t x13 = 0, uint16_t x14 = 0,
-    uint16_t x15 = 0, uint16_t x16 = 0) NOEXCEPT
+    uint16_t x01, uint16_t x02, uint16_t x03, uint16_t x04,
+    uint16_t x05, uint16_t x06, uint16_t x07, uint16_t x08,
+    uint16_t x09, uint16_t x10, uint16_t x11, uint16_t x12,
+    uint16_t x13, uint16_t x14, uint16_t x15, uint16_t x16) NOEXCEPT
 {
     return mm256_set_epi16(
         x16, x15, x14, x13, x12, x11, x10, x09,
@@ -223,22 +216,14 @@ INLINE xint256_t set(
 // AVX
 template <typename Word, if_same<Word, xint256_t> = true>
 INLINE xint256_t set(
-    uint8_t x01 = 0, uint8_t x02 = 0,
-    uint8_t x03 = 0, uint8_t x04 = 0,
-    uint8_t x05 = 0, uint8_t x06 = 0,
-    uint8_t x07 = 0, uint8_t x08 = 0,
-    uint8_t x09 = 0, uint8_t x10 = 0,
-    uint8_t x11 = 0, uint8_t x12 = 0,
-    uint8_t x13 = 0, uint8_t x14 = 0,
-    uint8_t x15 = 0, uint8_t x16 = 0,
-    uint8_t x17 = 0, uint8_t x18 = 0,
-    uint8_t x19 = 0, uint8_t x20 = 0,
-    uint8_t x21 = 0, uint8_t x22 = 0,
-    uint8_t x23 = 0, uint8_t x24 = 0,
-    uint8_t x25 = 0, uint8_t x26 = 0,
-    uint8_t x27 = 0, uint8_t x28 = 0,
-    uint8_t x29 = 0, uint8_t x30 = 0,
-    uint8_t x31 = 0, uint8_t x32 = 0) NOEXCEPT
+    uint8_t x01, uint8_t x02, uint8_t x03, uint8_t x04,
+    uint8_t x05, uint8_t x06, uint8_t x07, uint8_t x08,
+    uint8_t x09, uint8_t x10, uint8_t x11, uint8_t x12,
+    uint8_t x13, uint8_t x14, uint8_t x15, uint8_t x16,
+    uint8_t x17, uint8_t x18, uint8_t x19, uint8_t x20,
+    uint8_t x21, uint8_t x22, uint8_t x23, uint8_t x24,
+    uint8_t x25, uint8_t x26, uint8_t x27, uint8_t x28,
+    uint8_t x29, uint8_t x30, uint8_t x31, uint8_t x32) NOEXCEPT
 {
     return mm256_set_epi8(
         x32, x31, x30, x29, x28, x27, x26, x25,
@@ -266,8 +251,8 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 {
     static const auto mask = set<xint256_t>(
-        0x08090a0b0c0d0e0f_u64, 0x08090a0b0c0d0e0f_u64,
-        0x08090a0b0c0d0e0f_u64, 0x08090a0b0c0d0e0f_u64);
+        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
+        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64);
 
     return mm256_shuffle_epi8(a, mask);
 }

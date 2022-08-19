@@ -194,10 +194,8 @@ INLINE Word get(xint512_t a) NOEXCEPT
 // Low order word to the left.
 template <typename Word, if_same<Word, xint512_t> = true>
 INLINE xint512_t set(
-    uint64_t x01 = 0, uint64_t x02 = 0,
-    uint64_t x03 = 0, uint64_t x04 = 0,
-    uint64_t x05 = 0, uint64_t x06 = 0,
-    uint64_t x07 = 0, uint64_t x08 = 0) NOEXCEPT
+    uint64_t x01, uint64_t x02, uint64_t x03, uint64_t x04,
+    uint64_t x05, uint64_t x06, uint64_t x07, uint64_t x08) NOEXCEPT
 {
     // Low order word to the right.
     return mm512_set_epi64(
@@ -207,14 +205,10 @@ INLINE xint512_t set(
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
 INLINE xint512_t set(
-    uint32_t x01 = 0, uint32_t x02 = 0,
-    uint32_t x03 = 0, uint32_t x04 = 0,
-    uint32_t x05 = 0, uint32_t x06 = 0,
-    uint32_t x07 = 0, uint32_t x08 = 0,
-    uint32_t x09 = 0, uint32_t x10 = 0,
-    uint32_t x11 = 0, uint32_t x12 = 0,
-    uint32_t x13 = 0, uint32_t x14 = 0,
-    uint32_t x15 = 0, uint32_t x16 = 0) NOEXCEPT
+    uint32_t x01, uint32_t x02, uint32_t x03, uint32_t x04,
+    uint32_t x05, uint32_t x06, uint32_t x07, uint32_t x08,
+    uint32_t x09, uint32_t x10, uint32_t x11, uint32_t x12,
+    uint32_t x13, uint32_t x14, uint32_t x15, uint32_t x16) NOEXCEPT
 {
     return mm512_set_epi32(
         x16, x15, x14, x13, x12, x11, x10, x09,
@@ -224,22 +218,14 @@ INLINE xint512_t set(
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
 INLINE xint512_t set(
-    uint16_t x01 = 0, uint16_t x02 = 0,
-    uint16_t x03 = 0, uint16_t x04 = 0,
-    uint16_t x05 = 0, uint16_t x06 = 0,
-    uint16_t x07 = 0, uint16_t x08 = 0,
-    uint16_t x09 = 0, uint16_t x10 = 0,
-    uint16_t x11 = 0, uint16_t x12 = 0,
-    uint16_t x13 = 0, uint16_t x14 = 0,
-    uint16_t x15 = 0, uint16_t x16 = 0,
-    uint16_t x17 = 0, uint16_t x18 = 0,
-    uint16_t x19 = 0, uint16_t x20 = 0,
-    uint16_t x21 = 0, uint16_t x22 = 0,
-    uint16_t x23 = 0, uint16_t x24 = 0,
-    uint16_t x25 = 0, uint16_t x26 = 0,
-    uint16_t x27 = 0, uint16_t x28 = 0,
-    uint16_t x29 = 0, uint16_t x30 = 0,
-    uint16_t x31 = 0, uint16_t x32 = 0) NOEXCEPT
+    uint16_t x01, uint16_t x02, uint16_t x03, uint16_t x04,
+    uint16_t x05, uint16_t x06, uint16_t x07, uint16_t x08,
+    uint16_t x09, uint16_t x10, uint16_t x11, uint16_t x12,
+    uint16_t x13, uint16_t x14, uint16_t x15, uint16_t x16,
+    uint16_t x17, uint16_t x18, uint16_t x19, uint16_t x20,
+    uint16_t x21, uint16_t x22, uint16_t x23, uint16_t x24,
+    uint16_t x25, uint16_t x26, uint16_t x27, uint16_t x28,
+    uint16_t x29, uint16_t x30, uint16_t x31, uint16_t x32) NOEXCEPT
 {
     return mm512_set_epi16(
         x32, x31, x30, x29, x28, x27, x26, x25,
@@ -251,38 +237,22 @@ INLINE xint512_t set(
 // AVX512F
 template <typename Word, if_same<Word, xint512_t> = true>
 INLINE xint512_t set(
-    uint8_t x01 = 0, uint8_t x02 = 0,
-    uint8_t x03 = 0, uint8_t x04 = 0,
-    uint8_t x05 = 0, uint8_t x06 = 0,
-    uint8_t x07 = 0, uint8_t x08 = 0,
-    uint8_t x09 = 0, uint8_t x10 = 0,
-    uint8_t x11 = 0, uint8_t x12 = 0,
-    uint8_t x13 = 0, uint8_t x14 = 0,
-    uint8_t x15 = 0, uint8_t x16 = 0,
-    uint8_t x17 = 0, uint8_t x18 = 0,
-    uint8_t x19 = 0, uint8_t x20 = 0,
-    uint8_t x21 = 0, uint8_t x22 = 0,
-    uint8_t x23 = 0, uint8_t x24 = 0,
-    uint8_t x25 = 0, uint8_t x26 = 0,
-    uint8_t x27 = 0, uint8_t x28 = 0,
-    uint8_t x29 = 0, uint8_t x30 = 0,
-    uint8_t x31 = 0, uint8_t x32 = 0,
-    uint8_t x33 = 0, uint8_t x34 = 0,
-    uint8_t x35 = 0, uint8_t x36 = 0,
-    uint8_t x37 = 0, uint8_t x38 = 0,
-    uint8_t x39 = 0, uint8_t x40 = 0,
-    uint8_t x41 = 0, uint8_t x42 = 0,
-    uint8_t x43 = 0, uint8_t x44 = 0,
-    uint8_t x45 = 0, uint8_t x46 = 0,
-    uint8_t x47 = 0, uint8_t x48 = 0,
-    uint8_t x49 = 0, uint8_t x50 = 0,
-    uint8_t x51 = 0, uint8_t x52 = 0,
-    uint8_t x53 = 0, uint8_t x54 = 0,
-    uint8_t x55 = 0, uint8_t x56 = 0,
-    uint8_t x57 = 0, uint8_t x58 = 0,
-    uint8_t x59 = 0, uint8_t x60 = 0,
-    uint8_t x61 = 0, uint8_t x62 = 0,
-    uint8_t x63 = 0, uint8_t x64 = 0) NOEXCEPT
+    uint8_t x01, uint8_t x02, uint8_t x03, uint8_t x04,
+    uint8_t x05, uint8_t x06, uint8_t x07, uint8_t x08,
+    uint8_t x09, uint8_t x10, uint8_t x11, uint8_t x12,
+    uint8_t x13, uint8_t x14, uint8_t x15, uint8_t x16,
+    uint8_t x17, uint8_t x18, uint8_t x19, uint8_t x20,
+    uint8_t x21, uint8_t x22, uint8_t x23, uint8_t x24,
+    uint8_t x25, uint8_t x26, uint8_t x27, uint8_t x28,
+    uint8_t x29, uint8_t x30, uint8_t x31, uint8_t x32,
+    uint8_t x33, uint8_t x34, uint8_t x35, uint8_t x36,
+    uint8_t x37, uint8_t x38, uint8_t x39, uint8_t x40,
+    uint8_t x41, uint8_t x42, uint8_t x43, uint8_t x44,
+    uint8_t x45, uint8_t x46, uint8_t x47, uint8_t x48,
+    uint8_t x49, uint8_t x50, uint8_t x51, uint8_t x52,
+    uint8_t x53, uint8_t x54, uint8_t x55, uint8_t x56,
+    uint8_t x57, uint8_t x58, uint8_t x59, uint8_t x60,
+    uint8_t x61, uint8_t x62, uint8_t x63, uint8_t x64) NOEXCEPT
 {
     return mm512_set_epi8(
         x64, x63, x62, x61, x60, x59, x58, x57,
