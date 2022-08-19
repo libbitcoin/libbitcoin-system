@@ -107,16 +107,13 @@ long_hash mnemonic::seeder(const string_list& words,
         passphrase_prefix + phrase, hmac_iterations);
 }
 
-uint8_t mnemonic::checksum_byte(const data_slice& entropy) NOEXCEPT
+uint8_t mnemonic::checksum_byte(const data_chunk& entropy) NOEXCEPT
 {
     // The high order bits of the first sha256_hash byte are the checksum.
     // Only 4, 5, 6, 7, or 8 bits of the hash are used (based on size).
     const auto mask_bits = byte_bits - checksum_bits(entropy);
     const auto checksum_mask = max_uint8 << mask_bits;
-
-    // TODO: provide implicit cast from data_slice to exclusive_slice.
-    return sha256_hash(exclusive_slice{ entropy.begin(), entropy.end() })
-        .front() & checksum_mask;
+    return sha256_hash(entropy).front() & checksum_mask;
 }
 
 // protected static (sizers)
