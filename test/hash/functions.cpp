@@ -296,7 +296,18 @@ BOOST_AUTO_TEST_CASE(functions__merkle_root__four__expected)
     BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(functions__merkle_root__eighth_expected)
+BOOST_AUTO_TEST_CASE(functions__merkle_root__six__expected)
+{
+    constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
+    constexpr auto expected2 = sha256::double_hash({ 2 }, { 3 });
+    constexpr auto expected3 = sha256::double_hash({ 4 }, { 5 });
+    constexpr auto expected4 = sha256::double_hash(expected1, expected2);
+    constexpr auto expected5 = sha256::double_hash(expected3, expected3);
+    constexpr auto expected = sha256::double_hash(expected4, expected5);
+    BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 }, { 2 }, { 3 }, { 4 }, { 5 } }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__eight_expected)
 {
     constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha256::double_hash({ 2 }, { 3 });
