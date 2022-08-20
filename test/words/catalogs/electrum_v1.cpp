@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__count__all__expected)
 
 BOOST_AUTO_TEST_CASE(catalogs_electrum_v1__all__identity__expected)
 {
-    // These sha256 checks fail in vectorized x32/x64.
+    // These sha256 checks fail under vectorization.
     BOOST_CHECK_EQUAL(identity(electrum_v1::en), identity_en);
     BOOST_CHECK_EQUAL(identity(electrum_v1::pt), identity_pt);
 }

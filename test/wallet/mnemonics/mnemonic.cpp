@@ -599,9 +599,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_entropy__vectors_ja__expected)
         BOOST_CHECK_EQUAL(instance.sentence(), vector.sentence(ideographic_space));
         BOOST_CHECK_EQUAL(instance.words(), vector.words());
 
-        // This one check fails for all in vectorized x64, but not in x32.
-        // to_key applies pbkd<sha512>
-        // sha512 vectorization should be disabled in x32.
+        // This one check fails under vectorization (sha512, so only 64 bit).
         BOOST_CHECK_EQUAL(instance.to_key(vector.passphrase), vector.hd_key());
 #endif
     }
@@ -621,9 +619,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__construct_sentence__vectors_ja__expected)
         BOOST_CHECK_EQUAL(instance.sentence(), vector.sentence(ideographic_space));
         BOOST_CHECK_EQUAL(instance.words(), vector.words());
 
-        // This one check fails for all in vectorized x64, but not in x32.
-        // to_key applies pbkd<sha512>
-        // sha512 vectorization should be disabled in x32.
+        // This one check fails under vectorization (sha512, so only 64 bit).
         BOOST_CHECK_EQUAL(instance.to_key(vector.passphrase), vector.hd_key());
     }
 #endif

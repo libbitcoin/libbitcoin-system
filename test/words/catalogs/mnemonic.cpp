@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(catalogs_mnemonic__count__all__expected)
 
 BOOST_AUTO_TEST_CASE(catalogs_mnemonic__all__identity__expected)
 {
-    // These sha256 checks fail in vectorized x32/x64.
+    // These sha256 checks fail under vectorization.
     BOOST_CHECK_EQUAL(identity(mnemonic::en), identity_en);
     BOOST_CHECK_EQUAL(identity(mnemonic::es), identity_es);
     BOOST_CHECK_EQUAL(identity(mnemonic::it), identity_it);
