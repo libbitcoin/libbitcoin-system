@@ -220,6 +220,8 @@ protected:
     template <size_t Size>
     INLINE static constexpr void sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void sequential(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    template <size_t Size>
+    INLINE static void vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     /// Merkle iteration.

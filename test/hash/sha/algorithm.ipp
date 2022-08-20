@@ -1350,8 +1350,8 @@ normalize(const state_t& state) NOEXCEPT
 
 TEMPLATE
 template <size_t Size>
-INLINE constexpr void CLASS::iterate(state_t& state,
-    const ablocks_t<Size>& blocks) NOEXCEPT
+INLINE constexpr void CLASS::
+iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -1359,8 +1359,14 @@ INLINE constexpr void CLASS::iterate(state_t& state,
     }
     else if constexpr (vectorization)
     {
-        auto iterable = iblocks_t{ array_cast<byte_t>(blocks) };
-        vectorized(state, iterable);
+        if (blocks.size() < min_lanes)
+        {
+            sequential(state, blocks);
+        }
+        else
+        {
+            vectorized(state, blocks);
+        }
     }
     else
     {
@@ -1369,15 +1375,37 @@ INLINE constexpr void CLASS::iterate(state_t& state,
 }
 
 TEMPLATE
-INLINE void CLASS::iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
+INLINE void CLASS::
+iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if constexpr (vectorization)
     {
-        vectorized(state, blocks);
+        if (blocks.size() < min_lanes)
+        {
+            sequential(state, blocks);
+        }
+        else
+        {
+            vectorized(state, blocks);
+        }
     }
     else
     {
         sequential(state, blocks);
+    }
+}
+
+TEMPLATE
+template <size_t Size>
+INLINE constexpr void CLASS::
+sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    for (auto& block : blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
     }
 }
 
@@ -1396,16 +1424,11 @@ sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 template <size_t Size>
-INLINE constexpr void CLASS::
-sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+INLINE void CLASS::
+vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
-    buffer_t buffer{};
-    for (auto& block : blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
+    auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
+    vectorized(state, iblocks);
 }
 
 TEMPLATE

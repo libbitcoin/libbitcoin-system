@@ -144,26 +144,31 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
 
 // Message scheduling
 // ----------------------------------------------------------------------------
-// VS2022 intellisense complains shaxxx::iterate() non-constexpr.
 
 BOOST_AUTO_TEST_CASE(vectorization__sha160__scheduling__expected)
 {
     // AVX512, AVX2, SSE4, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
-    using sha_160 = sha::algorithm<sha::h512<>, true, true, true>;
-    constexpr auto blocks = std_array<sha_160::block_t, coverall>{ 1 };
-    ////constexpr auto expected = sha_160::hash(blocks);
-    BOOST_CHECK_EQUAL(sha_160::hash(blocks), sha_160::hash(blocks));
+    using sha160n = sha::algorithm<sha::h160, true, false, true>;
+    using sha160v = sha::algorithm<sha::h160, true, true, true>;
+    constexpr auto blocks = std_array<sha160::block_t, coverall>{ 1 };
+    constexpr auto hashn = sha160n::hash(blocks);
+    constexpr auto hashv = sha160v::hash(blocks);
+    static_assert(hashn == hashv);
+    ////BOOST_CHECK_EQUAL(hashn, sha160v::hash(blocks));
 }
 
 BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
 {
     // AVX512, AVX2, SSE4, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
-    using sha_256 = sha::algorithm<sha::h512<>, true, true, true>;
-    constexpr auto blocks = std_array<sha_256::block_t, coverall>{ 1 };
-    ////constexpr auto expected = sha_256::hash(blocks);
-    BOOST_CHECK_EQUAL(sha_256::hash(blocks), sha_256::hash(blocks));
+    using sha256n = sha::algorithm<sha::h256<>, true, false, true>;
+    using sha256v = sha::algorithm<sha::h256<>, true, true, true>;
+    constexpr auto blocks = std_array<sha256::block_t, coverall>{ 1 };
+    constexpr auto hashn = sha256n::hash(blocks);
+    constexpr auto hashv = sha256v::hash(blocks);
+    static_assert(hashn == hashv);
+    ////BOOST_CHECK_EQUAL(hashn, sha256v::hash(blocks));
 }
 
 // sha512 vectorization is disabled in x32 builds.
@@ -171,10 +176,13 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__scheduling__expected)
 {
     // AVX2, SSE4, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
-    using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
-    constexpr auto blocks = std_array<sha_512::block_t, coverall>{ 1 };
-    ////constexpr auto expected = sha_512::hash(blocks);
-    BOOST_CHECK_EQUAL(sha_512::hash(blocks), sha_512::hash(blocks));
+    using sha512n = sha::algorithm<sha::h512<>, true, false, true>;
+    using sha512v = sha::algorithm<sha::h512<>, true, true, true>;
+    constexpr auto blocks = std_array<sha512::block_t, coverall>{ 1 };
+    constexpr auto hashn = sha512n::hash(blocks);
+    constexpr auto hashv = sha512v::hash(blocks);
+    static_assert(hashn == hashv);
+    ////BOOST_CHECK_EQUAL(hashn, sha512v::hash(blocks));
 }
 
 #endif

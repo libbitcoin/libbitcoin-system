@@ -1383,8 +1383,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
         }
         else
         {
-            auto iterable = iblocks_t{ array_cast<byte_t>(blocks) };
-            vectorized(state, iterable);
+            vectorized(state, blocks);
         }
     }
     else
@@ -1415,6 +1414,20 @@ iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Size>
+INLINE constexpr void CLASS::
+sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
+
+TEMPLATE
 INLINE void CLASS::
 sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
@@ -1429,16 +1442,11 @@ sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 template <size_t Size>
-INLINE constexpr void CLASS::
-sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+INLINE void CLASS::
+vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
+    auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
+    vectorized(state, iblocks);
 }
 
 TEMPLATE
