@@ -166,6 +166,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
     BOOST_CHECK_EQUAL(sha_256::hash(blocks), sha_256::hash(blocks));
 }
 
+// sha512 vectorization is disabled in x32 builds.
 BOOST_AUTO_TEST_CASE(vectorization__sha512__scheduling__expected)
 {
     // AVX2, SSE4, sequential
