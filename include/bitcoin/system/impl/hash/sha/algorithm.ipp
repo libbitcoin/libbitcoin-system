@@ -480,31 +480,24 @@ INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
     // K is added to schedule words because schedule is vectorizable.
-    constexpr auto r00 = Round;
-    constexpr auto r02 = r00 - 2;
-    constexpr auto r03 = r00 - 3;
-    constexpr auto r07 = r00 - 7;
-    constexpr auto r08 = r00 - 8;
-    constexpr auto r14 = r00 - 14;
-    constexpr auto r15 = r00 - 15;
-    constexpr auto r16 = r00 - 16;
-    constexpr auto k0 = K::get[r16];
-    constexpr auto k1 = K::get[add1(r16)];
     constexpr auto s = SHA::word_bits;
 
     if constexpr (SHA::strength == 160)
     {
-        buffer[r00] = f::rol<1, s>(f::xor_(
+        constexpr auto r03 = Round - 3;
+        constexpr auto r08 = Round - 8;
+        constexpr auto r14 = Round - 14;
+        constexpr auto r16 = Round - 16;
+
+        buffer[Round] = f::rol<1, s>(f::xor_(
             f::xor_(buffer[r16], buffer[r14]),
             f::xor_(buffer[r08], buffer[r03])));
+        buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
 
-        buffer[r16] = f::addc<k0, s>(buffer[r16]);
-
-        buffer[add1(r00)] = f::rol<1, s>(f::xor_(
+        buffer[add1(Round)] = f::rol<1, s>(f::xor_(
             f::xor_(buffer[add1(r16)], buffer[add1(r14)]),
             f::xor_(buffer[add1(r08)], buffer[add1(r03)])));
-
-        buffer[add1(r16)] = f::addc<k1, s>(buffer[add1(r16)]);
+        buffer[add1(r16)] = f::addc<K::get[add1(r16)], s>(buffer[add1(r16)]);
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -525,18 +518,21 @@ prepare(auto& buffer) NOEXCEPT
     }
     else
     {
+        constexpr auto r02 = Round - 2;
+        constexpr auto r07 = Round - 7;
+        constexpr auto r15 = Round - 15;
+        constexpr auto r16 = Round - 16;
+
         // TODO: if open lanes, vectorize sigma0 and sigma1 (see Intel).
-        buffer[r00] = f::add<s>(
+        buffer[Round] = f::add<s>(
             f::add<s>(buffer[r16], sigma0(buffer[r15])),
             f::add<s>(buffer[r07], sigma1(buffer[r02])));
+        buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
 
-        buffer[r16] = f::addc<k0, s>(buffer[r16]);
-
-        buffer[add1(r00)] = f::add<s>(
+        buffer[add1(Round)] = f::add<s>(
             f::add<s>(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
             f::add<s>(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
-
-        buffer[add1(r16)] = f::addc<k1, s>(buffer[add1(r16)]);
+        buffer[add1(r16)] = f::addc<K::get[add1(r16)], s>(buffer[add1(r16)]);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI

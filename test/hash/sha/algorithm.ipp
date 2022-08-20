@@ -462,31 +462,24 @@ INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
     // K is added to schedule words because schedule is vectorizable.
-    constexpr auto r00 = Round;
-    constexpr auto r02 = r00 - 2;
-    constexpr auto r03 = r00 - 3;
-    constexpr auto r07 = r00 - 7;
-    constexpr auto r08 = r00 - 8;
-    constexpr auto r14 = r00 - 14;
-    constexpr auto r15 = r00 - 15;
-    constexpr auto r16 = r00 - 16;
-    constexpr auto k0 = K::get[r16];
-    constexpr auto k1 = K::get[add1(r16)];
     constexpr auto s = SHA::word_bits;
 
     if constexpr (SHA::strength == 160)
     {
-        buffer[r00] = f::rol<1, s>(f::xor_(
+        constexpr auto r03 = Round - 3;
+        constexpr auto r08 = Round - 8;
+        constexpr auto r14 = Round - 14;
+        constexpr auto r16 = Round - 16;
+
+        buffer[Round] = f::rol<1, s>(f::xor_(
             f::xor_(buffer[r16], buffer[r14]),
             f::xor_(buffer[r08], buffer[r03])));
+        buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
 
-        buffer[r16] = f::addc<k0, s>(buffer[r16]);
-
-        buffer[add1(r00)] = f::rol<1, s>(f::xor_(
+        buffer[add1(Round)] = f::rol<1, s>(f::xor_(
             f::xor_(buffer[add1(r16)], buffer[add1(r14)]),
             f::xor_(buffer[add1(r08)], buffer[add1(r03)])));
-
-        buffer[add1(r16)] = f::addc<k1, s>(buffer[add1(r16)]);
+        buffer[add1(r16)] = f::addc<K::get[add1(r16)], s>(buffer[add1(r16)]);
 
         // SHA-NI
         //     buffer[Round] = sha1msg2 // xor and rotl1
@@ -507,18 +500,21 @@ prepare(auto& buffer) NOEXCEPT
     }
     else
     {
+        constexpr auto r02 = Round - 2;
+        constexpr auto r07 = Round - 7;
+        constexpr auto r15 = Round - 15;
+        constexpr auto r16 = Round - 16;
+
         // TODO: if open lanes, vectorize sigma0 and sigma1 (see Intel).
-        buffer[r00] = f::add<s>(
+        buffer[Round] = f::add<s>(
             f::add<s>(buffer[r16], sigma0(buffer[r15])),
             f::add<s>(buffer[r07], sigma1(buffer[r02])));
+        buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
 
-        buffer[r16] = f::addc<k0, s>(buffer[r16]);
-
-        buffer[add1(r00)] = f::add<s>(
+        buffer[add1(Round)] = f::add<s>(
             f::add<s>(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
             f::add<s>(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
-
-        buffer[add1(r16)] = f::addc<k1, s>(buffer[add1(r16)]);
+        buffer[add1(r16)] = f::addc<K::get[add1(r16)], s>(buffer[add1(r16)]);
 
         // Each word is 128, buffer goes from 64 to 16 words.
         // SHA-NI
@@ -806,27 +802,27 @@ output(const state_t& state) NOEXCEPT
         if constexpr (SHA::strength == 160)
         {
             return array_cast<byte_t>(state_t
-                {
-                    native_to_big_end(state[0]),
-                    native_to_big_end(state[1]),
-                    native_to_big_end(state[2]),
-                    native_to_big_end(state[3]),
-                    native_to_big_end(state[4])
-                });
+            {
+                native_to_big_end(state[0]),
+                native_to_big_end(state[1]),
+                native_to_big_end(state[2]),
+                native_to_big_end(state[3]),
+                native_to_big_end(state[4])
+            });
         }
         else
         {
             return array_cast<byte_t>(state_t
-                {
-                    native_to_big_end(state[0]),
-                    native_to_big_end(state[1]),
-                    native_to_big_end(state[2]),
-                    native_to_big_end(state[3]),
-                    native_to_big_end(state[4]),
-                    native_to_big_end(state[5]),
-                    native_to_big_end(state[6]),
-                    native_to_big_end(state[7])
-                });
+            {
+                native_to_big_end(state[0]),
+                native_to_big_end(state[1]),
+                native_to_big_end(state[2]),
+                native_to_big_end(state[3]),
+                native_to_big_end(state[4]),
+                native_to_big_end(state[5]),
+                native_to_big_end(state[6]),
+                native_to_big_end(state[7])
+            });
         }
     }
     else
@@ -1361,7 +1357,7 @@ INLINE constexpr void CLASS::iterate(state_t& state,
     {
         sequential(state, blocks);
     }
-    else if constexpr (!vectorization)
+    else if constexpr (vectorization)
     {
         auto iterable = iblocks_t{ array_cast<byte_t>(blocks) };
         vectorized(state, iterable);
@@ -1502,13 +1498,13 @@ pack_pad_half() NOEXCEPT
     return xchunk_t<xWord>
     {
         broadcast<xWord>(pad[0]),
-            broadcast<xWord>(pad[1]),
-            broadcast<xWord>(pad[2]),
-            broadcast<xWord>(pad[3]),
-            broadcast<xWord>(pad[4]),
-            broadcast<xWord>(pad[5]),
-            broadcast<xWord>(pad[6]),
-            broadcast<xWord>(pad[7])
+        broadcast<xWord>(pad[1]),
+        broadcast<xWord>(pad[2]),
+        broadcast<xWord>(pad[3]),
+        broadcast<xWord>(pad[4]),
+        broadcast<xWord>(pad[5]),
+        broadcast<xWord>(pad[6]),
+        broadcast<xWord>(pad[7])
     };
 }
 
@@ -1710,13 +1706,13 @@ pack(const state_t& state) NOEXCEPT
     return xstate_t<xWord>
     {
         broadcast<xWord>(state[0]),
-            broadcast<xWord>(state[1]),
-            broadcast<xWord>(state[2]),
-            broadcast<xWord>(state[3]),
-            broadcast<xWord>(state[4]),
-            broadcast<xWord>(state[5]),
-            broadcast<xWord>(state[6]),
-            broadcast<xWord>(state[7])
+        broadcast<xWord>(state[1]),
+        broadcast<xWord>(state[2]),
+        broadcast<xWord>(state[3]),
+        broadcast<xWord>(state[4]),
+        broadcast<xWord>(state[5]),
+        broadcast<xWord>(state[6]),
+        broadcast<xWord>(state[7])
     };
 }
 
@@ -1726,16 +1722,16 @@ INLINE typename CLASS::digest_t CLASS::
 unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
     return array_cast<byte_t>(state_t
-        {
-            get<word_t, Lane>(byteswap(xstate[0])),
-            get<word_t, Lane>(byteswap(xstate[1])),
-            get<word_t, Lane>(byteswap(xstate[2])),
-            get<word_t, Lane>(byteswap(xstate[3])),
-            get<word_t, Lane>(byteswap(xstate[4])),
-            get<word_t, Lane>(byteswap(xstate[5])),
-            get<word_t, Lane>(byteswap(xstate[6])),
-            get<word_t, Lane>(byteswap(xstate[7]))
-        });
+    {
+        get<word_t, Lane>(byteswap(xstate[0])),
+        get<word_t, Lane>(byteswap(xstate[1])),
+        get<word_t, Lane>(byteswap(xstate[2])),
+        get<word_t, Lane>(byteswap(xstate[3])),
+        get<word_t, Lane>(byteswap(xstate[4])),
+        get<word_t, Lane>(byteswap(xstate[5])),
+        get<word_t, Lane>(byteswap(xstate[6])),
+        get<word_t, Lane>(byteswap(xstate[7]))
+    });
 }
 
 TEMPLATE
