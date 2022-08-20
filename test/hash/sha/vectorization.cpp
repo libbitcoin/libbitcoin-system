@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
 
 // Message scheduling
 // ----------------------------------------------------------------------------
-// VS2022 intellisense complains sha_160::hash() ::iterate() non-constexpr.
+// VS2022 intellisense complains shaxxx::iterate() non-constexpr.
 
 BOOST_AUTO_TEST_CASE(vectorization__sha160__scheduling__expected)
 {

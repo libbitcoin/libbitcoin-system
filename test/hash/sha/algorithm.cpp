@@ -46,23 +46,21 @@ BOOST_AUTO_TEST_CASE(verify_array_cache)
     constexpr auto blocks2 = std_array<sha256::block_t, 2>{};
     constexpr auto blocks3 = std_array<sha256::block_t, 3>{};
     constexpr auto blocks4 = std_array<sha256::block_t, 4>{};
+    
+    // VS2022 intellisense and GCC complain shaxxx::iterate() non-constexpr.
+    ////static_assert(sha256::hash(blocks0) == expected0);
+    ////static_assert(sha256::hash(blocks1) == expected1);
+    ////static_assert(sha256::hash(blocks2) == expected2);
+    ////static_assert(sha256::hash(blocks3) == expected3);
+    ////static_assert(sha256::hash(blocks4) == expected4);
 
-// GCC doesn't like these as constexpr, complaining about sha::algorithm::iterate(array).
-#if !defined(HAVE_GNUC)
     // Array caching is performed independently from chunk caching, though if
     // configured correctly the cache for each is the same values/locations.
-    static_assert(sha256::hash(blocks0) == expected0);
-    static_assert(sha256::hash(blocks1) == expected1);
-    static_assert(sha256::hash(blocks2) == expected2);
-    static_assert(sha256::hash(blocks3) == expected3);
-    static_assert(sha256::hash(blocks4) == expected4);
-#else
     BOOST_CHECK_EQUAL(sha256::hash(blocks0), expected0);
     BOOST_CHECK_EQUAL(sha256::hash(blocks1), expected1);
     BOOST_CHECK_EQUAL(sha256::hash(blocks2), expected2);
     BOOST_CHECK_EQUAL(sha256::hash(blocks3), expected3);
     BOOST_CHECK_EQUAL(sha256::hash(blocks4), expected4);
-#endif
 
     const data_chunk chunk0(0 * array_count<sha256::block_t>, 0x00_u8);
     const data_chunk chunk1(1 * array_count<sha256::block_t>, 0x00_u8);
