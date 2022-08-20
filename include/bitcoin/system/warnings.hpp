@@ -44,6 +44,7 @@
         #define THROW_FROM_NOEXCEPT 4297
         #define TRUNCATED_CONSTANT 4310
         #define LOCAL_VARIABLE_NOT_INITIALIZED 4700
+        #define NOT_INLINED 4714
 
         // Global (see below).
         #define LOCAL_HIDES_GLOBAL 4459

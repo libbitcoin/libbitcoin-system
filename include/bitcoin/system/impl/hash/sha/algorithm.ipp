@@ -337,6 +337,8 @@ round(auto& state, const auto& wk) NOEXCEPT
 
     if constexpr (SHA::strength == 160)
     {
+        // msvc++ not inlined in x32 for vectorized state.
+        BC_PUSH_WARNING(NOT_INLINED)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
@@ -344,6 +346,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
             extract<word, Lane>(wk[Round]));
+        BC_POP_WARNING()
 
         // SNA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -351,6 +354,8 @@ round(auto& state, const auto& wk) NOEXCEPT
     }
     else
     {
+        // msvc++ not inlined in x32 for vectorized state.
+        BC_PUSH_WARNING(NOT_INLINED)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words],
@@ -361,6 +366,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
             extract<word, Lane>(wk[Round]));
+        BC_POP_WARNING()
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -1373,7 +1379,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     {
         sequential(state, blocks);
     }
-    else if constexpr (!vectorization)
+    else if constexpr (vectorization)
     {
         if (blocks.size() < min_lanes)
         {
