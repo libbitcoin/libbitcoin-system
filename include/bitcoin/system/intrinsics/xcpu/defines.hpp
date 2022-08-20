@@ -90,26 +90,26 @@ BC_PUSH_WARNING(NO_C_STYLE_CASTS)
 ////{
 ////    // AVX512_VBMI2/AVX512F/SSE2
 ////    return _mm_cvtsi128_si8(_mm512_castsi512_si128(
-////        _mm512_maskz_compress_epi8(__mmask16(1_u16 << Lane), a)));
+////        _mm512_maskz_compress_epi8(__mmask16(1u << Lane), a)));
 ////}
 ////inline uint16_t _mm512_extract_epi16(auto a, auto Lane) NOEXCEPT
 ////{
 ////    // AVX512_VBMI2/AVX512F/SSE2
 ////    return _mm_cvtsi128_si16(_mm512_castsi512_si128(
-////        _mm512_maskz_compress_epi16(__mmask8(1_u8 << Lane), a)));
+////        _mm512_maskz_compress_epi16(__mmask8(1u << Lane), a)));
 ////}
 inline uint32_t _mm512_extract_epi32(auto a, auto Lane) NOEXCEPT
 {
     // AVX512F/SSE2/AVX512F
     return _mm_cvtsi128_si32(_mm512_castsi512_si128(
-        _mm512_maskz_compress_epi32(__mmask16(1_u16 << Lane), a)));
+        _mm512_maskz_compress_epi32(__mmask16(1u << Lane), a)));
 }
 inline uint64_t _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
 {
     // AVX512F/SSE2/AVX512F
     // cvt undefined for 32 bit (see above).
     return _mm_cvtsi128_si64(_mm512_castsi512_si128(
-        _mm512_maskz_compress_epi64(__mmask8(1_u8 << Lane), a)));
+        _mm512_maskz_compress_epi64(__mmask8(1u << Lane), a)));
 }
 BC_POP_WARNING()
 #endif
