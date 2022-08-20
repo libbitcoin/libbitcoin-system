@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_ACCUMULATOR_HPP
 #define LIBBITCOIN_SYSTEM_HASH_ACCUMULATOR_HPP
 
+#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
@@ -57,7 +58,7 @@ public:
     template <size_t Size>
     bool write(const data_array<Size>& data) NOEXCEPT;
     bool write(const data_chunk& data) NOEXCEPT;
-    bool write(const exclusive_slice& data) NOEXCEPT;
+    bool write(const std::string& data) NOEXCEPT;
     bool write(size_t size, const byte_t* data) NOEXCEPT;
 
     /// Flush accumulator state to digest (not idempotent, not destructive).
@@ -80,13 +81,13 @@ public:
     template <size_t Size>
     static digest_t hash(const data_array<Size>& data) NOEXCEPT;
     static digest_t hash(const data_chunk& data) NOEXCEPT;
-    static digest_t hash(const exclusive_slice& data) NOEXCEPT;
+    static digest_t hash(const std::string& data) NOEXCEPT;
     static digest_t hash(size_t size, const byte_t* data) NOEXCEPT;
 
     template <size_t Size>
     static data_chunk hash_chunk(const data_array<Size>& data) NOEXCEPT;
     static data_chunk hash_chunk(const data_chunk& data) NOEXCEPT;
-    static data_chunk hash_chunk(const exclusive_slice& data) NOEXCEPT;
+    static data_chunk hash_chunk(const std::string& data) NOEXCEPT;
     static data_chunk hash_chunk(size_t size, const byte_t* data) NOEXCEPT;
 
     /// Finalized double hashes (sha256/sha512 only).
@@ -95,13 +96,13 @@ public:
     template <size_t Size>
     static digest_t double_hash(const data_array<Size>& data) NOEXCEPT;
     static digest_t double_hash(const data_chunk& data) NOEXCEPT;
-    static digest_t double_hash(const exclusive_slice& data) NOEXCEPT;
+    static digest_t double_hash(const std::string& data) NOEXCEPT;
     static digest_t double_hash(size_t size, const byte_t* data) NOEXCEPT;
 
     template <size_t Size>
     static data_chunk double_hash_chunk(const data_array<Size>& data) NOEXCEPT;
     static data_chunk double_hash_chunk(const data_chunk& data) NOEXCEPT;
-    static data_chunk double_hash_chunk(const exclusive_slice& data) NOEXCEPT;
+    static data_chunk double_hash_chunk(const std::string& data) NOEXCEPT;
     static data_chunk double_hash_chunk(size_t size, const byte_t* data) NOEXCEPT;
 
 protected:

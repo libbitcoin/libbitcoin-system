@@ -93,7 +93,7 @@ bool ec_private::is_wif(const data_slice& decoded) NOEXCEPT
     if (size != wif_compressed_size && size != wif_uncompressed_size)
         return false;
 
-    if (!verify_checksum(decoded))
+    if (!verify_checksum(to_chunk(decoded)))
         return false;
 
     return (size == wif_uncompressed_size) ||

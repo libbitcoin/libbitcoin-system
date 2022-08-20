@@ -30,12 +30,11 @@ namespace system {
 
 // bitcoin checksum.
 // ----------------------------------------------------------------------------
+// TODO: avoid reallocations, was simplified due to hash interface changes.
 
-static uint32_t bitcoin_checksum(const data_slice& data) NOEXCEPT
+static uint32_t bitcoin_checksum(const data_chunk& data) NOEXCEPT
 {
-    // TODO: smooth out the exclusive_slice seam.
-    return from_little_endian<uint32_t>(bitcoin_hash(
-        exclusive_slice{ data.begin(), data.end() }));
+    return from_little_endian<uint32_t>(bitcoin_hash(data));
 }
 
 data_chunk append_checksum(const data_loaf& slices) NOEXCEPT
@@ -47,21 +46,23 @@ data_chunk append_checksum(const data_loaf& slices) NOEXCEPT
 
 void append_checksum(data_chunk& data) NOEXCEPT
 {
-    // TODO: avoid reallocation.
     const auto check = bitcoin_checksum(data);
     extend(data, to_little_endian<uint32_t>(check));
     BC_ASSERT(verify_checksum(data));
 }
 
-bool verify_checksum(const data_slice& data) NOEXCEPT
+bool verify_checksum(const data_chunk& data) NOEXCEPT
 {
     constexpr auto size = sizeof(uint32_t);
     if (data.size() < size)
         return false;
 
-    const auto split = std::prev(data.end(), size);
-    return from_little_endian(unsafe_array_cast<uint8_t, size>(split)) ==
-        bitcoin_checksum({ data.begin(), split });
+    const auto data_size = data.size() - size;
+    data_chunk bytes{ data };
+    bytes.resize(data_size);
+    const auto word = std::next(data.data(), data_size);
+    const auto& checksum = unsafe_array_cast<uint8_t, size>(word);
+    return from_little_endian(checksum) == bitcoin_checksum(bytes);
 }
 
 // bech32 checksum

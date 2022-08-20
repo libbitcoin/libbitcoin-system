@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_HASH_ACCUMULATOR_IPP
 
 #include <algorithm>
+#include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -118,7 +119,8 @@ accumulate(size_t size, const byte_t* data) NOEXCEPT
 
     if (bytes == block_size)
     {
-        Algorithm::accumulate(state_, unsafe_array_cast<uint8_t, block_size>(data));
+        Algorithm::accumulate(state_,
+            unsafe_array_cast<uint8_t, block_size>(data));
     }
     else
     {
@@ -271,9 +273,9 @@ write(const data_chunk& data) NOEXCEPT
 
 TEMPLATE
 bool CLASS::
-write(const exclusive_slice& data) NOEXCEPT
+write(const std::string& data) NOEXCEPT
 {
-    return write(data.size(), data.data());
+    return write(data.size(), pointer_cast<const byte_t>(data.data()));
 }
 
 TEMPLATE
@@ -453,9 +455,9 @@ hash(const data_chunk& data) NOEXCEPT
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
-hash(const exclusive_slice& data) NOEXCEPT
+hash(const std::string& data) NOEXCEPT
 {
-    return self::hash(data.size(), data.data());
+    return self::hash(data.size(), pointer_cast<const byte_t>(data.data()));
 }
 
 // digest_t returning double hashers
@@ -499,11 +501,13 @@ double_hash(size_t size, const byte_t* data) NOEXCEPT
     {
         if (size == half_size)
         {
-            return self::double_hash(unsafe_array_cast<uint8_t, half_size>(data));
+            return self::double_hash(
+                unsafe_array_cast<uint8_t, half_size>(data));
         }
         else if (size == block_size)
         {
-            return self::double_hash(unsafe_array_cast<uint8_t, block_size>(data));
+            return self::double_hash(
+                unsafe_array_cast<uint8_t, block_size>(data));
         }
         else if (is_multiple(size, block_size))
         {
@@ -533,9 +537,10 @@ double_hash(const data_chunk& data) NOEXCEPT
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
-double_hash(const exclusive_slice& data) NOEXCEPT
+double_hash(const std::string& data) NOEXCEPT
 {
-    return self::double_hash(data.size(), data.data());
+    return self::double_hash(data.size(),
+        pointer_cast<const byte_t>(data.data()));
 }
 
 // data_chunk returning single hashers
@@ -571,9 +576,10 @@ hash_chunk(const data_chunk& data) NOEXCEPT
 
 TEMPLATE
 data_chunk CLASS::
-hash_chunk(const exclusive_slice& data) NOEXCEPT
+hash_chunk(const std::string& data) NOEXCEPT
 {
-    return self::hash_chunk(data.size(), data.data());
+    return self::hash_chunk(data.size(),
+        pointer_cast<const byte_t>(data.data()));
 }
 
 // data_chunk returning double hashers
@@ -609,9 +615,10 @@ double_hash_chunk(const data_chunk& data) NOEXCEPT
 
 TEMPLATE
 data_chunk CLASS::
-double_hash_chunk(const exclusive_slice& data) NOEXCEPT
+double_hash_chunk(const std::string& data) NOEXCEPT
 {
-    return self::double_hash_chunk(data.size(), data.data());
+    return self::double_hash_chunk(data.size(),
+        pointer_cast<const byte_t>(data.data()));
 }
 
 BC_POP_WARNING()
