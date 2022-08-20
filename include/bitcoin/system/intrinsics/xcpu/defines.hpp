@@ -61,20 +61,20 @@ struct xmock_t {};
 // This presently precludes sha512 vectorization on x32 builds.
 #if defined(HAVE_X32)
 #if defined(HAVE_SSE4)
-inline uint64_t _mm_extract_epi64(auto a, auto) NOEXCEPT
+inline uint64_t _mm_extract_epi64(auto, auto) NOEXCEPT
 {
     return {};
 }
 #endif
 #if defined(HAVE_AVX2)
-inline uint64_t _mm256_extract_epi64(auto a, auto) NOEXCEPT
+inline uint64_t _mm256_extract_epi64(auto, auto) NOEXCEPT
 {
     return {};
 }
 #endif
 #if defined(HAVE_AVX512)
 // required for _mm512_extract_epi64
-inline uint64_t _mm_cvtsi128_si64(auto a) NOEXCEPT
+inline uint64_t _mm_cvtsi128_si64(auto) NOEXCEPT
 {
     return {};
 }
@@ -85,31 +85,33 @@ inline uint64_t _mm_cvtsi128_si64(auto a) NOEXCEPT
 // 8/16 bit are not implemented here due to AVX512_VBMI2 requirement.
 // github.com/vectorclass/version2/blob/master/vectori512.h
 #if defined(HAVE_AVX512)
+BC_PUSH_WARNING(NO_C_STYLE_CASTS)
 ////inline uint8_t _mm512_extract_epi8(auto a, auto Lane) NOEXCEPT
 ////{
 ////    // AVX512_VBMI2/AVX512F/SSE2
-////    const auto t = _mm512_maskz_compress_epi8(__mmask16(1u << Lane), a);
-////    return _mm_cvtsi128_si8(_mm512_castsi512_si128(t));
+////    return _mm_cvtsi128_si8(_mm512_castsi512_si128(
+////        _mm512_maskz_compress_epi8(__mmask16(1_u16 << Lane), a)));
 ////}
 ////inline uint16_t _mm512_extract_epi16(auto a, auto Lane) NOEXCEPT
 ////{
 ////    // AVX512_VBMI2/AVX512F/SSE2
-////    const auto t = _mm512_maskz_compress_epi16(__mmask8(1u << Lane), a);
-////    return _mm_cvtsi128_si16(_mm512_castsi512_si128(t));
+////    return _mm_cvtsi128_si16(_mm512_castsi512_si128(
+////        _mm512_maskz_compress_epi16(__mmask8(1_u8 << Lane), a)));
 ////}
 inline uint32_t _mm512_extract_epi32(auto a, auto Lane) NOEXCEPT
 {
     // AVX512F/SSE2/AVX512F
-    const auto t = _mm512_maskz_compress_epi32(__mmask16(1u << Lane), a);
-    return _mm_cvtsi128_si32(_mm512_castsi512_si128(t));
+    return _mm_cvtsi128_si32(_mm512_castsi512_si128(
+        _mm512_maskz_compress_epi32(__mmask16(1_u16 << Lane), a)));
 }
 inline uint64_t _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
 {
     // AVX512F/SSE2/AVX512F
     // cvt undefined for 32 bit (see above).
-    const auto t = _mm512_maskz_compress_epi64(__mmask8(1u << Lane), a);
-    return _mm_cvtsi128_si64(_mm512_castsi512_si128(t));
+    return _mm_cvtsi128_si64(_mm512_castsi512_si128(
+        _mm512_maskz_compress_epi64(__mmask8(1_u8 << Lane), a)));
 }
+BC_POP_WARNING()
 #endif
 
 #if !defined(HAVE_SSE4)
