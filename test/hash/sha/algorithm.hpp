@@ -293,6 +293,9 @@ protected:
 
     template <typename xWord, if_extended<xWord> = true>
     static inline void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
+
+    /// -----------------------------------------------------------------------
+    static void dump_state(state_t& state) NOEXCEPT;
 };
 
 } // namespace shax

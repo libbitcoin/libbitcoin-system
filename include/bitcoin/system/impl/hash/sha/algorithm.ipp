@@ -1476,23 +1476,23 @@ pack(const wblock_t<Lanes>& wblock) NOEXCEPT
 
     if constexpr (Lanes == 2)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[0][Word], wblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word]));
     }
     else if constexpr (Lanes == 8)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word],
             wblock[4][Word], wblock[5][Word], wblock[6][Word], wblock[7][Word]));
     }
     else if constexpr (Lanes == 16)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[ 0][Word], wblock[ 1][Word], wblock[ 2][Word], wblock[ 3][Word],
             wblock[ 4][Word], wblock[ 5][Word], wblock[ 6][Word], wblock[ 7][Word],
             wblock[ 8][Word], wblock[ 9][Word], wblock[10][Word], wblock[11][Word],
@@ -1764,14 +1764,14 @@ unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
     return array_cast<byte_t>(state_t
     {
-        get<word_t, Lane>(byteswap(xstate[0])),
-        get<word_t, Lane>(byteswap(xstate[1])),
-        get<word_t, Lane>(byteswap(xstate[2])),
-        get<word_t, Lane>(byteswap(xstate[3])),
-        get<word_t, Lane>(byteswap(xstate[4])),
-        get<word_t, Lane>(byteswap(xstate[5])),
-        get<word_t, Lane>(byteswap(xstate[6])),
-        get<word_t, Lane>(byteswap(xstate[7]))
+        get<word_t, Lane>(byteswap<word_t>(xstate[0])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[1])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[2])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[3])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[4])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[5])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[6])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[7]))
     });
 }
 

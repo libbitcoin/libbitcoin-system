@@ -303,6 +303,12 @@ extract(Word a) NOEXCEPT
 {
     // Compress vectorization and non-vectorization require no extraction.
     static_assert(Lane == zero);
+
+    if (!std::is_constant_evaluated())
+    {
+        std::cout << "lane_: " << Lane << " word: " << a << std::endl;
+    }
+
     return a;
 }
 
@@ -312,8 +318,14 @@ template <typename Word, size_t Lane, typename xWord,
     INLINE Word CLASS::
     extract(xWord a) NOEXCEPT
 {
+    ////constexpr auto lanes = capacity<xWord, word_t>;
+
     // Schedule vectorization (with compress non-vectorization), extract word.
-    return get<Word, Lane>(a);
+    const auto word = get<Word, Lane>(a);
+
+    std::cout << "lanes: " << Lane << " word: " << word << std::endl;
+
+    return word;
 }
 
 TEMPLATE
@@ -1400,12 +1412,24 @@ template <size_t Size>
 INLINE constexpr void CLASS::
 sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
+    if (!std::is_constant_evaluated())
+    {
+        std::cout << "sequential_a" << std::endl;
+        dump_state(state);
+        std::cout << std::endl;
+    }
+
     buffer_t buffer{};
-    for (auto& block : blocks)
+    for (auto& block: blocks)
     {
         input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
+
+        if (!std::is_constant_evaluated())
+        {
+            dump_state(state);
+        }
     }
 }
 
@@ -1413,12 +1437,15 @@ TEMPLATE
 INLINE void CLASS::
 sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
+    std::cout << "sequential_i" << std::endl;
+
     buffer_t buffer{};
-    for (auto& block : blocks)
+    for (auto& block: blocks)
     {
         input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
+        dump_state(state);
     }
 }
 
@@ -1427,6 +1454,10 @@ template <size_t Size>
 INLINE void CLASS::
 vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
+    std::cout << "vectorized_a" << std::endl;
+    dump_state(state);
+    std::cout << std::endl;
+
     auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
     vectorized(state, iblocks);
 }
@@ -1458,23 +1489,23 @@ pack(const wblock_t<Lanes>& wblock) NOEXCEPT
     
     if constexpr (Lanes == 2)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[0][Word], wblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word]));
     }
     else if constexpr (Lanes == 8)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[0][Word], wblock[1][Word], wblock[2][Word], wblock[3][Word],
             wblock[4][Word], wblock[5][Word], wblock[6][Word], wblock[7][Word]));
     }
     else if constexpr (Lanes == 16)
     {
-        return byteswap(set<xword>(
+        return byteswap<word_t>(set<xword>(
             wblock[ 0][Word], wblock[ 1][Word], wblock[ 2][Word], wblock[ 3][Word],
             wblock[ 4][Word], wblock[ 5][Word], wblock[ 6][Word], wblock[ 7][Word],
             wblock[ 8][Word], wblock[ 9][Word], wblock[10][Word], wblock[11][Word],
@@ -1746,14 +1777,14 @@ unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
     return array_cast<byte_t>(state_t
     {
-        get<word_t, Lane>(byteswap(xstate[0])),
-        get<word_t, Lane>(byteswap(xstate[1])),
-        get<word_t, Lane>(byteswap(xstate[2])),
-        get<word_t, Lane>(byteswap(xstate[3])),
-        get<word_t, Lane>(byteswap(xstate[4])),
-        get<word_t, Lane>(byteswap(xstate[5])),
-        get<word_t, Lane>(byteswap(xstate[6])),
-        get<word_t, Lane>(byteswap(xstate[7]))
+        get<word_t, Lane>(byteswap<word_t>(xstate[0])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[1])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[2])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[3])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[4])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[5])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[6])),
+        get<word_t, Lane>(byteswap<word_t>(xstate[7]))
     });
 }
 
@@ -1850,36 +1881,54 @@ compress_(state_t& state, xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
+    std::cout << "compress_" << std::endl;
+
     if constexpr (lanes > 0)
     {
         compress<0>(state, xbuffer);
+        dump_state(state);
         compress<1>(state, xbuffer);
+        dump_state(state);
     }
 
     if constexpr (lanes > 2)
     {
         compress<2>(state, xbuffer);
+        dump_state(state);
         compress<3>(state, xbuffer);
+        dump_state(state);
     }
 
     if constexpr (lanes > 4)
     {
         compress<4>(state, xbuffer);
+        dump_state(state);
         compress<5>(state, xbuffer);
+        dump_state(state);
         compress<6>(state, xbuffer);
+        dump_state(state);
         compress<7>(state, xbuffer);
+        dump_state(state);
     }
 
     if constexpr (lanes > 8)
     {
         compress<8>(state, xbuffer);
+        dump_state(state);
         compress<9>(state, xbuffer);
+        dump_state(state);
         compress<10>(state, xbuffer);
+        dump_state(state);
         compress<11>(state, xbuffer);
+        dump_state(state);
         compress<12>(state, xbuffer);
+        dump_state(state);
         compress<13>(state, xbuffer);
+        dump_state(state);
         compress<14>(state, xbuffer);
+        dump_state(state);
         compress<15>(state, xbuffer);
+        dump_state(state);
     }
 }
 
@@ -1906,6 +1955,13 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 }
 
 // ----------------------------------------------------------------------------
+
+TEMPLATE
+void CLASS::
+dump_state(state_t& state) NOEXCEPT
+{
+    std::cout << encode_base16(array_cast<uint8_t>(state)) << std::endl;
+}
 
 BC_POP_WARNING()
 BC_POP_WARNING()
