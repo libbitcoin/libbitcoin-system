@@ -192,7 +192,7 @@ INLINE Word get(xint512_t a) NOEXCEPT
 
 // AVX512F
 // Low order word to the left.
-template <typename Word, if_same<Word, xint512_t> = true>
+template <typename xWord, if_same<xWord, xint512_t> = true>
 INLINE xint512_t set(
     uint64_t x01, uint64_t x02, uint64_t x03, uint64_t x04,
     uint64_t x05, uint64_t x06, uint64_t x07, uint64_t x08) NOEXCEPT
@@ -203,7 +203,7 @@ INLINE xint512_t set(
 }
 
 // AVX512F
-template <typename Word, if_same<Word, xint512_t> = true>
+template <typename xWord, if_same<xWord, xint512_t> = true>
 INLINE xint512_t set(
     uint32_t x01, uint32_t x02, uint32_t x03, uint32_t x04,
     uint32_t x05, uint32_t x06, uint32_t x07, uint32_t x08,
@@ -216,7 +216,7 @@ INLINE xint512_t set(
 }
 
 // AVX512F
-template <typename Word, if_same<Word, xint512_t> = true>
+template <typename xWord, if_same<xWord, xint512_t> = true>
 INLINE xint512_t set(
     uint16_t x01, uint16_t x02, uint16_t x03, uint16_t x04,
     uint16_t x05, uint16_t x06, uint16_t x07, uint16_t x08,
@@ -235,7 +235,7 @@ INLINE xint512_t set(
 }
 
 // AVX512F
-template <typename Word, if_same<Word, xint512_t> = true>
+template <typename xWord, if_same<xWord, xint512_t> = true>
 INLINE xint512_t set(
     uint8_t x01, uint8_t x02, uint8_t x03, uint8_t x04,
     uint8_t x05, uint8_t x06, uint8_t x07, uint8_t x08,
@@ -265,33 +265,65 @@ INLINE xint512_t set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
-/// pack/unpack
+/// endianness
 /// ---------------------------------------------------------------------------
 
-////// TODO: auto pack<Word>(const uint8_t*).
+// AVX512BW
+template <typename Word, if_same<Word, uint8_t> = true>
+INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
+{
+    return a;
+}
+
+// AVX512BW
+template <typename Word, if_same<Word, uint16_t> = true>
+INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
+{
+    static const auto mask = set<xint512_t>(
+         1,  0,  3,  2,  5,  4,  7,  6,  9,  8, 11, 10, 13, 12, 15, 14,
+        17, 16, 19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30,
+        33, 32, 35, 34, 37, 36, 39, 38, 41, 40, 43, 42, 45, 44, 47, 46,
+        49, 48, 51, 50, 53, 52, 55, 54, 57, 56, 59, 58, 61, 60, 63, 62);
+
+    return mm512_shuffle_epi8(a, mask);
+}
+
+// AVX512BW
+template <typename Word, if_same<Word, uint32_t> = true>
+INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
+{
+    static const auto mask = set<xint512_t>(
+         3,  2,  1,  0,  7,  6,  5,  4, 11, 10,  9,  8, 15, 14, 13, 12,
+        19, 18, 17, 16, 23, 22, 21, 20, 27, 26, 25, 24, 31, 30, 29, 28,
+        35, 34, 33, 32, 39, 38, 37, 36, 43, 42, 41, 40, 47, 46, 45, 44,
+        51, 50, 49, 48, 55, 54, 53, 52, 59, 58, 57, 56, 63, 62, 61, 60);
+
+    return mm512_shuffle_epi8(a, mask);
+}
+
+// AVX512BW
+template <typename Word, if_same<Word, uint64_t> = true>
+INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
+{
+    static const auto mask = set<xint512_t>(
+         7,  6,  5,  4,  3,  2,  1,  0, 15, 14, 13, 12, 11, 10,  9,  8,
+        23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24,
+        39, 38, 37, 36, 35, 34, 33, 32, 47, 46, 45, 44, 43, 42, 41, 40,
+        55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61, 60, 59, 58, 57, 56);
+
+    return mm512_shuffle_epi8(a, mask);
+}
+
+/// pack/unpack
+/// ---------------------------------------------------------------------------
+////
+////// TODO: auto pack<xWord>(const uint8_t*).
 ////INLINE auto unpack(xint512_t a) NOEXCEPT
 ////{
 ////    std_array<uint8_t, sizeof(xint512_t)> bytes{};
 ////    mm512_storeu_si512(pointer_cast<xint512_t>(&bytes.front()), a);
 ////    return bytes;
 ////}
-
-/// endianness
-/// ---------------------------------------------------------------------------
-
-// AVX512BW
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
-{
-    static const auto mask = set<xint512_t>(
-        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
-        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
-        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
-        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64);
-
-    return mm512_shuffle_epi8(a, mask);
-}
-BC_POP_WARNING()
 
 #else
 

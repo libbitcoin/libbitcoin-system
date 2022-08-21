@@ -181,7 +181,7 @@ INLINE Word get(xint256_t a) NOEXCEPT
 
 // AVX
 // Low order word to the left.
-template <typename Word, if_same<Word, xint256_t> = true>
+template <typename xWord, if_same<xWord, xint256_t> = true>
 INLINE xint256_t set(
     uint64_t x01, uint64_t x02, uint64_t x03, uint64_t x04) NOEXCEPT
 {
@@ -191,7 +191,7 @@ INLINE xint256_t set(
 }
 
 // AVX
-template <typename Word, if_same<Word, xint256_t> = true>
+template <typename xWord, if_same<xWord, xint256_t> = true>
 INLINE xint256_t set(
     uint32_t x01, uint32_t x02, uint32_t x03, uint32_t x04,
     uint32_t x05, uint32_t x06, uint32_t x07, uint32_t x08) NOEXCEPT
@@ -201,7 +201,7 @@ INLINE xint256_t set(
 }
 
 // AVX
-template <typename Word, if_same<Word, xint256_t> = true>
+template <typename xWord, if_same<xWord, xint256_t> = true>
 INLINE xint256_t set(
     uint16_t x01, uint16_t x02, uint16_t x03, uint16_t x04,
     uint16_t x05, uint16_t x06, uint16_t x07, uint16_t x08,
@@ -214,7 +214,7 @@ INLINE xint256_t set(
 }
 
 // AVX
-template <typename Word, if_same<Word, xint256_t> = true>
+template <typename xWord, if_same<xWord, xint256_t> = true>
 INLINE xint256_t set(
     uint8_t x01, uint8_t x02, uint8_t x03, uint8_t x04,
     uint8_t x05, uint8_t x06, uint8_t x07, uint8_t x08,
@@ -232,31 +232,58 @@ INLINE xint256_t set(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
-/// pack/unpack
+/// endianness
 /// ---------------------------------------------------------------------------
 
-////// TODO: auto pack<Word>(const uint8_t*).
+template <typename Word, if_same<Word, uint8_t> = true>
+INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
+{
+    return a;
+}
+
+// AVX2
+template <typename Word, if_same<Word, uint16_t> = true>
+INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
+{
+    static const auto mask = set<xint256_t>(
+         1,  0,  3,  2,  5,  4,  7,  6,  9,  8, 11, 10, 13, 12, 15, 14,
+        17, 16, 19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30);
+
+    return mm256_shuffle_epi8(a, mask);
+}
+
+// AVX2
+template <typename Word, if_same<Word, uint32_t> = true>
+INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
+{
+    static const auto mask = set<xint256_t>(
+         3,  2,  1,  0,  7,  6,  5,  4, 11, 10,  9,  8, 15, 14, 13, 12,
+        19, 18, 17, 16, 23, 22, 21, 20, 27, 26, 25, 24, 31, 30, 29, 28);
+
+    return mm256_shuffle_epi8(a, mask);
+}
+
+// AVX2
+template <typename Word, if_same<Word, uint64_t> = true>
+INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
+{
+    static const auto mask = set<xint256_t>(
+         7,  6,  5,  4,  3,  2,  1,  0, 15, 14, 13, 12, 11, 10,  9,  8,
+        23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24);
+
+    return mm256_shuffle_epi8(a, mask);
+}
+
+/// pack/unpack
+/// ---------------------------------------------------------------------------
+////
+////// TODO: auto pack<xWord>(const uint8_t*).
 ////INLINE auto unpack(xint256_t a) NOEXCEPT
 ////{
 ////    std_array<uint8_t, sizeof(xint256_t)> bytes{};
 ////    mm256_storeu_si256(pointer_cast<xint256_t>(&bytes.front()), a);
 ////    return bytes;
 ////}
-
-/// endianness
-/// ---------------------------------------------------------------------------
-
-// AVX2
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
-{
-    static const auto mask = set<xint256_t>(
-        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64,
-        0x08090a0b0c0d0e0f_u64, 0x0001020304050607_u64);
-
-    return mm256_shuffle_epi8(a, mask);
-}
-BC_POP_WARNING()
 
 #else
 
