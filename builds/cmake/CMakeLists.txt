@@ -610,6 +610,7 @@ if (with-tests)
         "../../test/intrinsics/haves.cpp"
         "../../test/intrinsics/intrinsics.cpp"
         "../../test/intrinsics/xcpu/cpuid.cpp"
+        "../../test/intrinsics/xcpu/functional.cpp"
         "../../test/machine/interpreter.cpp"
         "../../test/machine/number.cpp"
         "../../test/machine/program.cpp"
