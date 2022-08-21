@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha160__scheduling__expected)
     constexpr auto hashn = sha160n::hash(blocks);
     constexpr auto hashv = sha160v::hash(blocks);
     static_assert(hashn == hashv);
-    ////BOOST_CHECK_EQUAL(hashn, sha160v::hash(blocks));
+    BOOST_CHECK_EQUAL(hashn, sha160v::hash(blocks));
 }
 
 BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
     constexpr auto hashn = sha256n::hash(blocks);
     constexpr auto hashv = sha256v::hash(blocks);
     static_assert(hashn == hashv);
-    ////BOOST_CHECK_EQUAL(hashn, sha256v::hash(blocks));
+    BOOST_CHECK_EQUAL(hashn, sha256v::hash(blocks));
 }
 
 // sha512 vectorization is disabled in x32 builds.
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__scheduling__expected)
     constexpr auto hashn = sha512n::hash(blocks);
     constexpr auto hashv = sha512v::hash(blocks);
     static_assert(hashn == hashv);
-    ////BOOST_CHECK_EQUAL(hashn, sha512v::hash(blocks));
+    BOOST_CHECK_EQUAL(hashn, sha512v::hash(blocks));
 }
 
 #endif
