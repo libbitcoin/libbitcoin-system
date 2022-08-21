@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(functional__sse4__set32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__sse4__set64__get_expected)
 {
-    if (have_sse41())
+    if (!build_x32 && have_sse41())
     {
         const auto xword = set<xint128_t>(0, 1);
         const auto word0 = get<uint64_t, 0>(xword);
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(functional__avx2__set32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx2__set64__get_expected)
 {
-    if (have_avx2())
+    if (!build_x32 && have_avx2())
     {
         const auto xword = set<xint256_t>(0, 1, 2, 3);
         const auto word0 = get<uint64_t, 0>(xword);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(functional__avx512__set32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx512__set64__get_expected)
 {
-    if (have_avx512())
+    if (!build_x32 && have_avx512())
     {
         const auto xword = set<xint512_t>(0, 1, 2, 3, 4, 5, 6, 7);
         const auto word0 = get<uint64_t, 0>(xword);
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(functional__sse4__byteswap32__expected)
 }
 BOOST_AUTO_TEST_CASE(functional__sse4__byteswap64__expected)
 {
-    if (have_sse41())
+    if (!build_x32 && have_sse41())
     {
         const auto xword = byteswap<uint64_t>(set<xint128_t>(
             0x0000000000000001, 0x0000000000000002));
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(functional__avx2__byteswap32__expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx2__byteswap64__expected)
 {
-    if (have_avx2())
+    if (!build_x32 && have_avx2())
     {
         const auto xword = byteswap<uint64_t>(set<xint256_t>(
             0x0000000000000001, 0x0000000000000002,
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(functional__avx512__byteswap32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx512__byteswap64__get_expected)
 {
-    if (have_avx512())
+    if (!build_x32 && have_avx512())
     {
         const auto xword = byteswap<uint64_t>(set<xint512_t>(
             0x0000000000000001,
