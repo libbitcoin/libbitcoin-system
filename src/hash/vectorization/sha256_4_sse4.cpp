@@ -1004,6 +1004,7 @@ void hash_sse41a(state& state, const block1& blocks) NOEXCEPT
         "movdqa %%xmm7,%%xmm5;"
         "sub    $0x1,%1;"
         "jne    Lloop2_%=;"
+
         "add    (%0),%3;"
         "mov    %3,(%0);"
         "add    0x4(%0),%4;"

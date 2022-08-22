@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(sha256_writer__stream__genesis_block__expected)
 
 BOOST_AUTO_TEST_CASE(sha256_writer__copy__genesis_block__expected)
 {
-    hash_digest hash;
+    hash_digest hash{};
     hash::sha256::copy hasher(hash);
     genesis.header().to_data(hasher);
     hasher.flush();

@@ -19,21 +19,15 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_HASH_HPP
 #define LIBBITCOIN_SYSTEM_HASH_HASH_HPP
 
+// algorithms is a group include for /sha and /rmd.
+#include <bitcoin/system/hash/accumulator.hpp>
+#include <bitcoin/system/hash/algorithm.hpp>
+#include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/hash/checksum.hpp>
 #include <bitcoin/system/hash/functions.hpp>
+#include <bitcoin/system/hash/hmac.hpp>
+#include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/hash/scrypt.hpp>
 #include <bitcoin/system/hash/siphash.hpp>
-
-// TODO: debug.
-#include <bitcoin/system/hash/rmd/algorithm.hpp>
-#include <bitcoin/system/hash/sha/algorithm.hpp>
-#include <bitcoin/system/hash/accumulator.hpp>
-#include <bitcoin/system/hash/hmac.hpp>
-
-// TODO: debug.
-#include <bitcoin/system/hash/pbkd.hpp>
-
-// TODO: delete (after rmd debugged and dependencies updated).
-#include <bitcoin/system/hash/rmd/ripemd_.hpp>
 
 #endif

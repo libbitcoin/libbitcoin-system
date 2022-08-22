@@ -55,8 +55,6 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script) NOEXCEPT
 bool create_ephemeral_key(ec_secret& out_secret,
     const data_chunk& seed) NOEXCEPT
 {
-    using hmacer = hmac<sha::algorithm<sha256>>;
-
     auto nonced_seed = splice({ 0x00 }, seed);
     ec_compressed point;
 
@@ -65,7 +63,7 @@ bool create_ephemeral_key(ec_secret& out_secret,
     for (uint8_t nonce = 0; nonce < max_uint8; ++nonce)
     {
         nonced_seed.front() = nonce;
-        out_secret = hmacer::code(nonced_seed, "Stealth seed");
+        out_secret = hmac<sha256>::code(nonced_seed, "Stealth seed");
         if (secret_to_public(point, out_secret) && is_even_key(point))
             return true;
     }
@@ -113,8 +111,8 @@ bool create_stealth_script(script& out_null_data, const ec_secret& secret,
     std::copy_n(bytes.begin(), pad_size, pad_begin);
 
     // Create an initial 32 bit nonce value from last word (avoiding pad).
-    const data_slice slice(std::next(bytes.begin(), max_pad), bytes.end());
-    const auto start = from_little_endian<uint32_t>(slice);
+    const auto& slice = array_cast<uint8_t, sizeof(uint32_t), max_pad>(bytes);
+    const auto start = from_little_endian(slice);
 
     // Mine a prefix into the double sha256 hash of the stealth script.
     // This will iterate up to 2^32 times before giving up.

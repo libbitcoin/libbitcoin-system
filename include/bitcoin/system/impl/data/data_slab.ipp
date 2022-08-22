@@ -137,12 +137,6 @@ constexpr data_slice data_slab::to_slice() const NOEXCEPT
     return { begin_, end_ };
 }
 
-////// Cannot provide a "decode" factory since the data is not owned.
-////SCONSTEXPR std::string data_slab::encoded() const NOEXCEPT
-////{
-////    return to_slice().encoded();
-////}
-
 constexpr bool data_slab::resize(size_t size) NOEXCEPT
 {
     if (size >= size_)
@@ -217,18 +211,18 @@ constexpr bool data_slab::empty() const NOEXCEPT
 // operators
 // ----------------------------------------------------------------------------
 
-template <data_slab::size_type Size>
-constexpr data_slab::operator
-std::array<data_slab::value_type, Size>() const NOEXCEPT
-{
-    return to_array<Size>();
-}
-
-VCONSTEXPR data_slab::operator
-std::vector<data_slab::value_type>() const NOEXCEPT
-{
-    return data_slab::to_chunk();
-}
+////template <data_slab::size_type Size>
+////constexpr data_slab::operator
+////std::array<data_slab::value_type, Size>() const NOEXCEPT
+////{
+////    return to_array<Size>();
+////}
+////
+////VCONSTEXPR data_slab::operator
+////std::vector<data_slab::value_type>() const NOEXCEPT
+////{
+////    return data_slab::to_chunk();
+////}
 
 constexpr data_slab::
 operator data_slice() const NOEXCEPT

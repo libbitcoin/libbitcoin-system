@@ -16,55 +16,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CPUID_HPP
-#define LIBBITCOIN_SYSTEM_CPUID_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_CPUID_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_CPUID_HPP
 
-#include <bitcoin/system/literals.hpp>
-
-#if defined(HAVE_XCPU)
-
-#include <cstdint>
-#include <immintrin.h>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
 
 /// Common CPU instructions used to locate CPU features.
 
-// MSC inline assembly (via __asm, no __asm__ support) does not support ARM
-// and x64. Since we cross compile to x64 we consider this lack of support
-// prohibitive for __asm. github.com/MicrosoftDocs/cpp-docs/blob/main/docs/
-// assembler/inline/inline-assembler.md
-
 namespace libbitcoin {
+namespace system {
 
-namespace cpu1_0
-{
-    constexpr auto leaf = 1;
-    constexpr auto subleaf = 0;
-    constexpr auto sse4_ecx_bit = 19;
-    constexpr auto xsave_ecx_bit = 27;
-    constexpr auto avx_ecx_bit = 28;
-}
-
-namespace cpu7_0
-{
-    constexpr auto leaf = 7;
-    constexpr auto subleaf = 0;
-    constexpr auto avx2_ebx_bit = 5;
-    constexpr auto shani_ebx_bit = 29;
-}
-
-namespace xcr0
-{
-    constexpr auto feature = 0;
-    constexpr auto sse_bit = 1;
-    constexpr auto avx_bit = 2;
-}
-
-template <size_t Bit, typename Value>
-constexpr bool get_bit(Value value) noexcept
-{
-    constexpr auto mask = (Value{ 1 } << Bit);
-    return (value & mask) != 0;
-}
+#if defined(HAVE_XCPU)
 
 inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
 {
@@ -92,6 +55,9 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
     c = out[2];
     d = out[3];
     return true;
+#elif defined(HAVE_XCPUID_COUNT)
+    __cpuid_count(a, b, c, d, leaf, subleaf);
+    return true;
 #elif defined(HAVE_XASSEMBLY)
     __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
     return true;
@@ -100,7 +66,9 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 #endif
 }
 
+#endif // HAVE_XCPU
+
+} // namespace system
 } // namespace libbitcoin
 
-#endif // HAVE_XCPU
 #endif

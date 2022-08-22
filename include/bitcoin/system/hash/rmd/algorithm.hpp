@@ -19,28 +19,23 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_RMD_ALGORITHM_HPP
 #define LIBBITCOIN_SYSTEM_HASH_RMD_ALGORITHM_HPP
 
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
+
+ // This file is a common include for rmd.
 #include <bitcoin/system/hash/rmd/rmd.hpp>
 #include <bitcoin/system/hash/rmd/rmd128.hpp>
 #include <bitcoin/system/hash/rmd/rmd160.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-// TODO: make these aliases algorithms, leaving rmd::hxxx unaliased.
-/// RIPEMD 128/160/256/320 variants.
-using rmd128     = rmd::h128<>;
-using rmd128_256 = rmd::h128<256>; // not fully implemented
-using rmd160     = rmd::h160<>;
-using rmd160_320 = rmd::h160<320>; // not fully implemented
-
 namespace rmd {
 
 /// RMD hashing algorithm.
-template <typename RMD, bool Concurrent = true,
-    if_same<typename RMD::T, rmdh_t> = true>
-class algorithm
+template <typename RMD, if_same<typename RMD::T, rmdh_t> = true>
+class algorithm : algorithm_t
 {
 public:
     /// Types.
@@ -63,20 +58,19 @@ public:
     using block_t   = std_array<byte_t, RMD::block_words * RMD::word_bytes>;
     using digest_t  = std_array<byte_t, bytes<RMD::digest>>;
 
-    /// Vectorization types (blocks_t is cref).
-    using blocks_t  = std_vector<cref<block_t>>;
-    using states_t  = std_vector<state_t>;
-    using digests_t = std_vector<digest_t>;
+    /// Block collection types.
+    template <size_t Size>
+    using ablocks_t = std_array<block_t, Size>;
+    using iblocks_t = iterable<block_t>;
 
     /// Constants (and count_t).
     /// -----------------------------------------------------------------------
+    /// count_t is always uint64_t for rmd.
 
-    /// count_t is 64 or 128 bit (sha512 is 128 bit and uses uint128_t).
     static constexpr auto count_bits    = RMD::block_words * RMD::word_bytes;
     static constexpr auto count_bytes   = bytes<count_bits>;
     using count_t = unsigned_exact_type<bytes<count_bits>>;
 
-    /// Limits incorporate requirement to encode counter in final block.
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
     static constexpr auto big_end_count = false;
@@ -84,71 +78,73 @@ public:
     /// Hashing (finalized).
     /// -----------------------------------------------------------------------
 
-    /// Finalized single hash.
-    static VCONSTEXPR digest_t hash(const blocks_t& blocks) NOEXCEPT;
+    template <size_t Size>
+    static constexpr digest_t hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
+    static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
-    /// Streaming (unfinalized).
+    /// Streamed hashing (unfinalized).
     /// -----------------------------------------------------------------------
 
-    /// One or more dependent blocks produces one state.
-    static VCONSTEXPR void accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT;
     static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
-    
-    /// Finalize streaming state (converts to little-endian bytes).
-    static constexpr digest_t finalize(const state_t& state) NOEXCEPT;
+    static void accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT;
+
+    /// Finalize streaming state (pad and normalize, updates state).
+    static constexpr digest_t finalize(state_t& state, size_t blocks) NOEXCEPT;
+
+    /// Normalize streaming state (big-endian bytes).
+    static constexpr digest_t normalize(const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions
     /// -----------------------------------------------------------------------
     
-    static constexpr auto f0(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f1(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f2(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f3(auto x, auto y, auto z) NOEXCEPT;
-    static constexpr auto f4(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f0(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f1(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f2(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f3(auto x, auto y, auto z) NOEXCEPT;
+    INLINE static constexpr auto f4(auto x, auto y, auto z) NOEXCEPT;
 
     /// Rounds
     /// -----------------------------------------------------------------------
 
-    template<size_t Round>
+    template<size_t Round, typename Auto>
     static CONSTEVAL auto functor() NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr auto round(auto a, auto& b, auto c, auto d,
-        auto& e, auto w) NOEXCEPT;
+    INLINE static constexpr auto round(auto& a, auto b, auto c, auto d,
+        auto x) NOEXCEPT;
 
     template<size_t Round>
-    FORCE_INLINE static constexpr void round(auto& out, const auto& in) NOEXCEPT;
+    INLINE static constexpr auto round(auto& a, auto b, auto& c, auto d,
+        auto e, auto x) NOEXCEPT;
 
-    template<bool First>
-    static constexpr void batch(state_t& out, const words_t& in) NOEXCEPT;
-    static constexpr void rounding(state_t& state, const words_t& buffer) NOEXCEPT;
-    static constexpr void summarize(state_t& out, const state_t& in1,
-        const state_t& in2) NOEXCEPT;
-
-    /// Padding
-    /// -----------------------------------------------------------------------
-    static constexpr void pad_one(words_t& out) NOEXCEPT;
-    static constexpr void pad_half(words_t& out) NOEXCEPT;
-    static constexpr void pad_n(words_t& out, count_t blocks) NOEXCEPT;
+    template<size_t Round>
+    INLINE static constexpr void round(auto& state, const auto& words) NOEXCEPT;
+    INLINE static constexpr void summarize(state_t& out, const state_t& batch1,
+        const state_t& batch2) NOEXCEPT;
+    static constexpr void compress(state_t& state, const words_t& words) NOEXCEPT;
     
     /// Parsing
     /// -----------------------------------------------------------------------
-    static constexpr void input(words_t& out, const block_t& in) NOEXCEPT;
-    static constexpr void input(words_t& out, const half_t& in) NOEXCEPT;
-    static constexpr digest_t output(const state_t& in) NOEXCEPT;
+    INLINE static constexpr void input(words_t& words, const block_t& block) NOEXCEPT;
+    INLINE static constexpr void input(words_t& words, const half_t& half) NOEXCEPT;
+    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
+
+    /// Padding
+    /// -----------------------------------------------------------------------
+    static constexpr void pad_one(words_t& words) NOEXCEPT;
+    static constexpr void pad_half(words_t& words) NOEXCEPT;
+    static constexpr void pad_n(words_t& words, count_t blocks) NOEXCEPT;
 
 private:
-    // Specialized padding type.
-    using blocks_pad_t = std_array<word_t, subtract(RMD::block_words,
+    using pad_t = std_array<word_t, subtract(RMD::block_words,
         count_bytes / RMD::word_bytes)>;
 
-    static CONSTEVAL auto& concurrency() NOEXCEPT;
-    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL words_t block_pad() NOEXCEPT;
-    static CONSTEVAL blocks_pad_t blocks_pad() NOEXCEPT;
+    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
+    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 };
 
 } // namespace rmd

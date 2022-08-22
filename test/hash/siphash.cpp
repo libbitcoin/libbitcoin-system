@@ -22,21 +22,23 @@
 #include "../test.hpp"
 #include "siphash.hpp"
 
+// This is a lot of tests, not suprisingly very fast execution.
+
 BOOST_AUTO_TEST_SUITE(siphash_tests)
 
 BOOST_AUTO_TEST_CASE(siphash__hash__test_key__expected)
 {
-    half_hash hash;
+    half_hash hash{};
     BOOST_REQUIRE(decode_base16(hash, hash_test_key));
 
-    const auto expected = 0xa129ca6149be45e5;
-    const auto message = base16_chunk("000102030405060708090a0b0c0d0e");
+    constexpr auto expected = 0xa129ca6149be45e5;
+    constexpr auto message = base16_array("000102030405060708090a0b0c0d0e");
     BOOST_REQUIRE_EQUAL(siphash(hash, message), expected);
 }
 
 BOOST_AUTO_TEST_CASE(siphash__hash__vectors__expected)
 {
-    half_hash hash;
+    half_hash hash{};
     BOOST_REQUIRE(decode_base16(hash, hash_test_key));
 
     for (const auto& result: siphash_hash_tests)
@@ -54,7 +56,7 @@ BOOST_AUTO_TEST_CASE(siphash__hash__vectors__expected)
 
 BOOST_AUTO_TEST_CASE(siphash__key__vectors__expected)
 {
-    half_hash hash;
+    half_hash hash{};
     BOOST_REQUIRE(decode_base16(hash, hash_test_key));
 
     const auto key = to_siphash_key(hash);

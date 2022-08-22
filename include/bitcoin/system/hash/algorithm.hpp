@@ -16,26 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "test.hpp"
+#ifndef LIBBITCOIN_SYSTEM_HASH_ALGORITHM_HPP
+#define LIBBITCOIN_SYSTEM_HASH_ALGORITHM_HPP
 
-BOOST_AUTO_TEST_SUITE(cpuid_tests)
+namespace libbitcoin {
+namespace system {
 
-// cpuid includes a local get_bit<> utility.
-static_assert(!get_bit<0>(0));
-static_assert( get_bit<0>(1));
-static_assert(!get_bit<0>(2));
-static_assert(!get_bit<0>(0b00010000_u8));
-static_assert( get_bit<1>(0b00010011_u8));
-static_assert( get_bit<2>(0b00010100_u8));
-static_assert( get_bit<3>(0b00011000_u8));
-static_assert( get_bit<4>(0b00010000_u8));
-static_assert( get_bit<5>(0b00110000_u8));
-static_assert( get_bit<6>(0b01010000_u8));
-static_assert( get_bit<7>(0b10010000_u8));
-static_assert( get_bit<31>(0x80000000_u32));
-static_assert( get_bit<15>(0x8000_u16));
-static_assert( get_bit< 7>(0x80_u8));
+/// For algorithm common type constraint.
+struct algorithm_t {};
 
-// get_cpu/get_xcr tested in intrinsics.cpp.
+} // namespace system
+} // namespace libbitcoin
 
-BOOST_AUTO_TEST_SUITE_END()
+#endif

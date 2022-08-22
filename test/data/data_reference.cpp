@@ -58,9 +58,9 @@ BOOST_AUTO_TEST_CASE(data_reference__construct__default__empty)
     // operator[] (value read past end, zero padded)
     BOOST_REQUIRE_EQUAL(reference[0], 0x00);
 
-    // cast operators
-    BOOST_REQUIRE(static_cast<data_chunk>(reference).empty());
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<32>>(reference), null_hash);
+    ////// cast operators
+    ////BOOST_REQUIRE(static_cast<data_chunk>(reference).empty());
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<32>>(reference), null_hash);
 
     // operator==/operator!=
     BOOST_REQUIRE(reference == reference);
@@ -130,15 +130,15 @@ BOOST_AUTO_TEST_CASE(data_reference__construct__string__expected)
     BOOST_REQUIRE_EQUAL(reference.front(), 'f');
     BOOST_REQUIRE_EQUAL(reference[0], 'f');
     BOOST_REQUIRE_EQUAL(*reference.begin(), 'f');
-    BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(reference).front(), 'f');
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(reference).front(), 'f');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(reference).front(), 'f');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(reference).front(), 'f');
     
     // end
     BOOST_REQUIRE_EQUAL(reference.back(), 'r');
     BOOST_REQUIRE_EQUAL(reference[sub1(size)], 'r');
     BOOST_REQUIRE_EQUAL(*std::prev(reference.end()), 'r');
-    BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(reference).back(), 'r');
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(reference).back(), 'r');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(reference).back(), 'r');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(reference).back(), 'r');
 
     // methods
     ////BOOST_REQUIRE_EQUAL(reference.encoded(), encoded);

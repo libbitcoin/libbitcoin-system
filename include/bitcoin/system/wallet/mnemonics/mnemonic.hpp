@@ -101,7 +101,7 @@ protected:
         language identifier) NOEXCEPT;
 
     /// Derive the checksum byte from entropy, stored in high order bits.
-    static uint8_t checksum_byte(const data_slice& entropy) NOEXCEPT;
+    static uint8_t checksum_byte(const data_chunk& entropy) NOEXCEPT;
 
     /// Map entropy to checksum bit count (4, 5, 6, 7, or 8 bits).
     static size_t checksum_bits(const data_slice& entropy) NOEXCEPT;

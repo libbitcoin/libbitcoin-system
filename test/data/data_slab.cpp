@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(data_slab__construct__default__empty)
     BOOST_REQUIRE_EQUAL(slab[0], 0x00);
 
     // cast operators
-    BOOST_REQUIRE(static_cast<data_chunk>(slab).empty());
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<32>>(slab), null_hash);
+    ////BOOST_REQUIRE(static_cast<data_chunk>(slab).empty());
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<32>>(slab), null_hash);
 
     // operator==/operator!=
     BOOST_REQUIRE(slab == slab);
@@ -140,16 +140,16 @@ BOOST_AUTO_TEST_CASE(data_slab__construct__text__expected)
     BOOST_REQUIRE_EQUAL(slab.front(), 'f');
     BOOST_REQUIRE_EQUAL(slab[0], 'f');
     BOOST_REQUIRE_EQUAL(*slab.begin(), 'f');
-    BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slab).front(), 'f');
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slab).front(), 'f');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slab).front(), 'f');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slab).front(), 'f');
     
     // end
     BOOST_REQUIRE_EQUAL(slab.back(), 'r');
     BOOST_REQUIRE_EQUAL(slab[sub1(size)], 'r');
     BOOST_REQUIRE_EQUAL(*std::prev(slab.end()), 'r');
-    BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slab).back(), 'r');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_chunk>(slab).back(), 'r');
     BOOST_REQUIRE_EQUAL(static_cast<data_slice>(slab).back(), 'r');
-    BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slab).back(), 'r');
+    ////BOOST_REQUIRE_EQUAL(static_cast<data_array<size>>(slab).back(), 'r');
 
     // methods
     ////BOOST_REQUIRE_EQUAL(slab.encoded(), encoded);

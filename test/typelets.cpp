@@ -260,17 +260,73 @@ static_assert(bytes<128u> == 16u);
 static_assert(bytes<256u> == 32u);
 static_assert(is_same_type<decltype(bytes<8u>), const size_t>);
 
+// capacity
+// ----------------------------------------------------------------------------
+
+static_assert(capacity<uint8_t, uint8_t> == 1);
+static_assert(capacity<uint16_t, uint8_t> == 2);
+static_assert(capacity<uint32_t, uint8_t> == 4);
+////static_assert(capacity<uint8_t, uint8_t, 0> == 0);
+////static_assert(capacity<uint16_t, uint16_t, 0> == 0);
+////static_assert(capacity<uint32_t, uint32_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint8_t> == 8);
+static_assert(capacity<uint64_t, uint8_t, 1> == 8);
+static_assert(capacity<uint64_t, uint8_t, 2> == 4);
+static_assert(capacity<uint64_t, uint8_t, 4> == 2);
+static_assert(capacity<uint64_t, uint8_t, 8> == 1);
+////static_assert(capacity<uint64_t, uint8_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint16_t> == 4);
+static_assert(capacity<uint64_t, uint16_t, 1> == 4);
+static_assert(capacity<uint64_t, uint16_t, 2> == 2);
+static_assert(capacity<uint64_t, uint16_t, 4> == 1);
+////static_assert(capacity<uint64_t, uint16_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint32_t> == 2);
+static_assert(capacity<uint64_t, uint32_t, 1> == 2);
+static_assert(capacity<uint64_t, uint32_t, 2> == 1);
+////static_assert(capacity<uint64_t, uint32_t, 0> == 0);
+
+static_assert(capacity<uint64_t, uint64_t> == 1);
+static_assert(capacity<uint64_t, uint64_t, 1> == 1);
+////static_assert(capacity<uint64_t, uint64_t, 0> == 0);
+
+// std::array
+// ----------------------------------------------------------------------------
+
+static_assert(!is_same_type<uint8_t, const uint8_t>);
+static_assert(is_same_type<nocvref<const uint8_t>, uint8_t>);
+
+static_assert(!is_same_type<volatile uint8_t, uint8_t>);
+static_assert(is_same_type<nocvref<volatile uint8_t>, uint8_t>);
+
+static_assert(!is_same_type<uint8_t&, uint8_t>);
+static_assert(is_same_type<nocvref<uint8_t&>, uint8_t>);
+
+static_assert(!is_same_type<const volatile uint8_t&, uint8_t>);
+static_assert(is_same_type<nocvref<const volatile uint8_t&>, uint8_t>);
+
 static_assert(is_std_array<std::array<uint8_t, 0>>);
 static_assert(is_std_array<std::array<base, 0>>);
 static_assert(!is_std_array<uint8_t>);
 static_assert(is_same_type<decltype(is_std_array<std::array<uint8_t, 0>>), const bool>);
+static_assert(is_same_type<decltype(is_std_array<const volatile std::array<uint8_t, 0>&>), const bool>);
 
 static_assert(array_count<std_array<uint8_t, 42>> == 42);
 static_assert(array_count<std_array<std_array<uint32_t, 42>, 24>> == 24);
+static_assert(array_count<const volatile std_array<std_array<uint32_t, 42>, 24>&> == 24);
+static_assert(array_count<std_array<const volatile std_array<uint32_t, 42>, 24>> == 24);
+static_assert(array_count<const volatile std_array<const volatile std_array<uint32_t, 42>, 24>&> == 24);
 
 static_assert(is_same_type<array_element<std_array<uint32_t, 42>>, uint32_t>);
 static_assert(is_same_type<array_element<std_array<derived, 42>>, derived>);
 static_assert(!is_same_type<array_element<std_array<base, 42>>, derived>);
+
+// std::remove_cvref applied.
+static_assert(is_same_type<array_element<const volatile std_array<uint32_t, 42>&>, uint32_t>);
+static_assert(is_same_type<array_element<const volatile std_array<derived, 42>&>, derived>);
+static_assert(!is_same_type<array_element<const volatile std_array<base, 42>&>, derived>);
 
 static_assert(std_array<uint8_t, 42>{}.size() == 42);
 static_assert(std_array<std_array<uint32_t, 42>, 24>{}.size() == 24);
@@ -280,6 +336,14 @@ static_assert(size_of<uint32_t>() == sizeof(uint32_t));
 static_assert(size_of<std_array<uint32_t, 42>>() == sizeof(uint32_t) * 42);
 static_assert(size_of<std_array<std_array<uint32_t, 42>, 24>>() == sizeof(uint32_t) * 42 * 24);
 static_assert(size_of<std_array<std_array<std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
+
+static_assert(size_of<const volatile uint32_t>() == sizeof(uint32_t));
+static_assert(size_of<const volatile std_array<uint32_t, 42>&>() == sizeof(uint32_t) * 42);
+static_assert(size_of<const volatile std_array<std_array<uint32_t, 42>, 24>&>() == sizeof(uint32_t) * 42 * 24);
+static_assert(size_of<const volatile std_array<std_array<std_array<uint32_t, 42>, 24>, 8>&>() == sizeof(uint32_t) * 42 * 24 * 8);
+static_assert(size_of<std_array<const volatile std_array<std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
+static_assert(size_of<std_array<std_array<const volatile std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
+static_assert(size_of<const volatile std_array<const volatile std_array<const volatile std_array<uint32_t, 42>, 24>, 8>&>() == sizeof(uint32_t) * 42 * 24 * 8);
 
 // std_array fails on "negative subscript"
 ////static_assert(size_of<std_array<uint8_t, max_size_t>>() == sizeof(uint8_t) * max_size_t);

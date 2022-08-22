@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__regtest_genesis__false)
 
 BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__valid__false)
 {
-    const auto data = base16_chunk(
+    constexpr auto data = base16_array(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a0000000"
         "0005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4dc118244d6"
         "7fb74c9d8e2f1bea5ee82a03010000000100000000000000000000000000000000000"
@@ -517,7 +517,7 @@ BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__valid__false)
 
 BOOST_AUTO_TEST_CASE(block__is_invalid_merkle_root__block100k__false)
 {
-    const auto data = base16_chunk(
+    constexpr auto data = base16_array(
         "010000007f110631052deeee06f0754a3629ad7663e56359fd5f3aa7b3e30a00"
         "000000005f55996827d9712147a8eb6d7bae44175fe0bcfa967e424a25bfe9f4"
         "dc118244d67fb74c9d8e2f1bea5ee82a03010000000100000000000000000000"

@@ -231,7 +231,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
     const auto version = source.read_4_bytes_little_endian();
 
     // Inputs must be non-const so that they may assign the witness.
-    auto inputs = read_puts<chain::input>(source);
+    auto inputs = read_puts<input>(source);
     chain::outputs_cptr outputs;
 
     // Expensive repeated recomputation, so cache segregated state.
@@ -274,7 +274,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
     else
     {
         // Default witness is populated on input construct.
-        outputs = read_puts<const chain::output>(source);
+        outputs = read_puts<const output>(source);
     }
 
     const auto locktime = source.read_4_bytes_little_endian();
@@ -290,7 +290,7 @@ data_chunk transaction::to_data(bool witness) const NOEXCEPT
 {
     witness &= segregated_;
 
-    data_chunk data(serialized_size(witness), no_fill_byte_allocator);
+    data_chunk data(serialized_size(witness));
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
@@ -444,8 +444,7 @@ size_t transaction::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 
 chain::points transaction::points() const NOEXCEPT
 {
-    static no_fill_allocator<point> no_fill_point_allocator{};
-    chain::points out(inputs_->size(), no_fill_point_allocator);
+    chain::points out(inputs_->size());
 
     const auto point = [](const auto& input) NOEXCEPT
     {

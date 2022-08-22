@@ -53,9 +53,6 @@ struct pbkd
         const data_slice& salt, size_t count) NOEXCEPT;
 
 protected:
-    template <size_t Blocks>
-    static CONSTEVAL auto words() NOEXCEPT;
-
     template <size_t Length>
     static constexpr auto xor_n(data_array<Length>& to,
         const data_array<Length>& from) NOEXCEPT;

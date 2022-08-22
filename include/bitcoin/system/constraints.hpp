@@ -56,6 +56,10 @@ using if_equal = bool_if<
     (Left == Right)>;
 
 template <uint64_t Left, uint64_t Right>
+using if_not_equal = bool_if<
+    (Left != Right)>;
+
+template <uint64_t Left, uint64_t Right>
 using if_greater = bool_if<
     (Left > Right)>;
 
@@ -113,6 +117,10 @@ template <typename Base, typename Type>
 using if_base_of = bool_if<
     std::is_base_of<Base, Type>::value>;
 
+template <typename Base, typename Type>
+using if_not_base_of = bool_if<
+    !std::is_base_of<Base, Type>::value>;
+
 template <typename Left, typename Right>
 using if_same_size = bool_if<
     is_same_size<Left, Right>>;
@@ -152,11 +160,6 @@ using if_trivially_constructible = bool_if<
 template <typename Type>
 using if_unique_object_representations = bool_if<
     std::has_unique_object_representations<Type>::value>;
-
-template <typename Type>
-using if_byte_insertable = bool_if<
-    std::is_base_of<std::string, Type>::value ||
-    std::is_base_of<std::vector<uint8_t>, Type>::value>;
 
 /// Integer types (specializable, non-floating math, non-bool).
 
@@ -237,7 +240,7 @@ using if_little_endian_integral_integer = bool_if<
     is_integral_integer<Integer> &&
     is_little_endian>;
 
-/// std::array
+/// std::array/std::vector
 
 template <typename Type>
 using if_std_array = bool_if<
@@ -245,8 +248,13 @@ using if_std_array = bool_if<
 
 template <typename Type>
 using if_integral_array = bool_if<
-    is_std_array<Type>&&
+    is_std_array<Type> &&
     is_integral_integer<typename Type::value_type>>;
+
+template <typename Type>
+using if_byte_insertable = bool_if<
+    std::is_base_of<std::string, Type>::value ||
+    std::is_base_of<std::vector<uint8_t>, Type>::value>;
 
 } // namespace libbitcoin
 

@@ -266,7 +266,7 @@ script script::from_string(const std::string& mnemonic) NOEXCEPT
 
 data_chunk script::to_data(bool prefix) const NOEXCEPT
 {
-    data_chunk data(serialized_size(prefix), no_fill_byte_allocator);
+    data_chunk data(serialized_size(prefix));
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);

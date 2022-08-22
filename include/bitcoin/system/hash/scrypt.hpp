@@ -23,18 +23,14 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/pbkd.hpp>
-#include <bitcoin/system/hash/sha/algorithm.hpp>
+#include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-/// tools.ietf.org/html/rfc7914
-/// en.wikipedia.org/wiki/Scrypt  [Colin Percival]
-/// en.wikipedia.org/wiki/Salsa20 [Daniel J. Bernstein]
-
 /// Scrypt uses pkcs5-pbkdf2-hmac-sha256 key derivation.
-using scrypt_derivation = pbkd<sha::algorithm<sha256>>;
+using scrypt_derivation = pbkd<sha256>;
 
 /// [W]ork must be a power of 2 greater than 1.
 /// [R]esources must be non-zero and <= max_size_t/128.

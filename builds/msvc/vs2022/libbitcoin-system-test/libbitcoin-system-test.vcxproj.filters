@@ -14,7 +14,7 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\chain\enums">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\config">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
@@ -34,56 +34,68 @@
     <Filter Include="src\hash">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\hash\rmd">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\hash\sha">
+    <Filter Include="src\hash\performance">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\machine">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\math">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\radix">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\serial">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream\devices">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\stream\streamers">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\unicode">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\unicode\utf8_everywhere">
+    <Filter Include="src\hash\performance\baseline">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
+    <Filter Include="src\hash\rmd">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000004}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+    <Filter Include="src\hash\sha">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\keys">
+    <Filter Include="src\intrinsics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\intrinsics\xcpu">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\machine">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\words">
+    <Filter Include="src\math">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\radix">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\serial">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stream">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stream\devices">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stream\streamers">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\unicode">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\unicode\utf8_everywhere">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\wallet\addresses">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000A1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\keys">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\words">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\words\catalogs">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000D1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -171,9 +183,6 @@
     <ClCompile Include="..\..\..\..\test\constraints.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\cpuid.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp">
       <Filter>src\crypto</Filter>
     </ClCompile>
@@ -210,10 +219,16 @@
     <ClCompile Include="..\..\..\..\test\data\data_slice.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\exclusive_slice.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\external_ptr.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\integer.cpp">
+      <Filter>src\data</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\data\iterable.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\data\memory.cpp">
@@ -285,20 +300,62 @@
     <ClCompile Include="..\..\..\..\test\hash\functions.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\hmac.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\pbkd.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\rmd160.cpp">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\performance\baseline\sha256.cpp">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\performance\performance.cpp">
+      <Filter>src\hash\performance</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\rmd\algorithm.cpp">
       <Filter>src\hash\rmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\rmd\analysis.cpp">
+      <Filter>src\hash\rmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\scrypt.cpp">
+      <Filter>src\hash</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\sha\algorithm.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\sha\merkle.cpp">
+    <ClCompile Include="..\..\..\..\test\hash\sha\analysis.cpp">
+      <Filter>src\hash\sha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\sha160.cpp">
+      <Filter>src\hash\sha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\sha256.cpp">
+      <Filter>src\hash\sha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp">
+      <Filter>src\hash\sha</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash\sha\vectorization.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\..\..\test\intrinsics\haves.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\intrinsics.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\cpuid.cpp">
+      <Filter>src\intrinsics\xcpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\functional.cpp">
+      <Filter>src\intrinsics\xcpu</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\literals.cpp">
       <Filter>src</Filter>
@@ -343,6 +400,9 @@
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\power.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\rotate.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\sign.cpp">
@@ -578,8 +638,29 @@
     <ClInclude Include="..\..\..\..\test\chain\script.hpp">
       <Filter>src\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\hash\functions.hpp">
+    <ClInclude Include="..\..\..\..\test\hash\hash.hpp">
       <Filter>src\hash</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\byteswap.h">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\common.h">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\endian.h">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\rmd160.h">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\performance\baseline\sha256.h">
+      <Filter>src\hash\performance\baseline</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp">
+      <Filter>src\hash\performance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash\sha\algorithm.hpp">
+      <Filter>src\hash\sha</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp">
       <Filter>src\hash</Filter>
@@ -616,6 +697,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\test\hash\sha\algorithm.ipp">
+      <Filter>src\hash\sha</Filter>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

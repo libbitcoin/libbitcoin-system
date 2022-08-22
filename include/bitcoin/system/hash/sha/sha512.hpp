@@ -29,6 +29,7 @@ namespace sha {
 struct k512
   : public k<512, 80>
 {
+    // added constants (K)
     static constexpr constants_t get
     {
         // rounds 0..15
@@ -92,6 +93,7 @@ struct h512
 {
     using state_t = typename h<k512, Digest>::state_t;
 
+    // initial value (H)
     static constexpr state_t get
     {
         0x6a09e667f3bcc908,

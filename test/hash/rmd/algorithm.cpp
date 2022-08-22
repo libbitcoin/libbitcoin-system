@@ -17,94 +17,215 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
+#include "../hash.hpp"
     
 BOOST_AUTO_TEST_SUITE(rmd_algorithm_tests)
 
-// Concurrency off for debug testing.
-using rmd_128 = rmd::algorithm<rmd::h128<>, false>;
-using rmd_160 = rmd::algorithm<rmd::h160<>, false>;
-
-// constexpr for all variants of rmd128/160!
-////static_assert(rmd_128::hash(rmd_128::half_t{})  == base16_array("00000000000000000000000000000000"));
-////static_assert(rmd_128::hash(rmd_128::block_t{}) == base16_array("00000000000000000000000000000000"));
-////static_assert(rmd_160::hash(rmd_160::half_t{})  == base16_array("d1a70126ff7a149ca6f9b638db084480440ff842"));
-////static_assert(rmd_160::hash(rmd_160::block_t{}) == base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229"));
+// Other test vectors are dependent upon the correctness of these.
+static_assert(rmd128::hash(rmd128::half_t{})  == rmd_half128);
+static_assert(rmd128::hash(rmd128::block_t{}) == rmd_full128);
+static_assert(rmd160::hash(rmd160::half_t{})  == rmd_half160);
+static_assert(rmd160::hash(rmd160::block_t{}) == rmd_full160);
 
 // rmd128
 // ----------------------------------------------------------------------------
 
-////constexpr auto half128 = rmd_128::half_t{};
-////constexpr auto full128 = rmd_128::block_t{};
-////constexpr auto pair128 = std_array<uint8_t, array_count<rmd_128::block_t>* two>{};
-////constexpr auto expected_half128 = base16_array("00000000000000000000000000000000");
-////constexpr auto expected_full128 = base16_array("00000000000000000000000000000000");
-////constexpr auto expected_pair128 = base16_array("00000000000000000000000000000000");
+BOOST_AUTO_TEST_CASE(sha__rmd128_hash__null_hash__expected)
+{
+    // Correlate non-const-evaluated to const-evaluated.
+    BOOST_REQUIRE_EQUAL(rmd128::hash(rmd128::half_t{}), rmd_half128);
+    BOOST_REQUIRE_EQUAL(rmd128::hash(rmd128::block_t{}), rmd_full128);
+}
 
-////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half128__null_hash__expected)
-////{
-////    static_assert(rmd_128::hash(half128) != expected_half128);
-////    BOOST_CHECK_NE(rmd_128::hash(half128), expected_half128);
-////    BOOST_CHECK_EQUAL(system::ripemd128_hash(half128), expected_half128);
-////}
-
-////// Stack overflow in debug builds.
-////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full128__null_hash__expected)
-////{
-////    ////static_assert(rmd_128::hash(full128) != expected_full128);
-////    BOOST_CHECK_NE(rmd_128::hash(full128), expected_full128);
-////    ////BOOST_CHECK_EQUAL(system::ripemd128_hash(full128), expected_full128);
-////}
-
-////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks128__null_hash__expected)
-////{
-////    const std_vector<cref<rmd_128::block_t>> pair
-////    {
-////        std::cref(full128), std::cref(full128)
-////    };
-////
-////    BOOST_CHECK_NE(rmd_128::hash(pair), expected_pair128);
-////    BOOST_CHECK_EQUAL(system::ripemd128_hash(pair128), expected_pair128);
-////}
+BOOST_AUTO_TEST_CASE(sha__accumulator_rmd128_hash__test_vectors__expected)
+{
+    // Verify non-const-evaluated to against public vectors.
+    for (const auto& test: rmd128_tests)
+    {
+        const auto hash = accumulator<rmd128>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
 
 // rmd160
 // ----------------------------------------------------------------------------
 
-////constexpr auto half160 = rmd_160::half_t{};
-////constexpr auto full160 = rmd_160::block_t{};
-////constexpr auto pair160 = std_array<uint8_t, array_count<rmd_160::block_t> * two>{};
-////constexpr auto expected_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff842");
-////constexpr auto expected_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
-////constexpr auto expected_pair160 = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
-////
-////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_half160__null_hash__expected)
-////{
-////    static_assert(rmd_160::hash(half160) != expected_half160);
-////    BOOST_CHECK_NE(rmd_160::hash(half160), expected_half160);
-////    BOOST_CHECK_EQUAL(system::ripemd160_hash(half160), expected_half160);
-////}
-////
-////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_full160__null_hash__expected)
-////{
-////    static_assert(rmd_160::hash(full160) != expected_full160);
-////    BOOST_CHECK_NE(rmd_160::hash(full160), expected_full160);
-////    BOOST_CHECK_EQUAL(system::ripemd160_hash(full160), expected_full160);
-////}
-////
-////BOOST_AUTO_TEST_CASE(rmd_algorithm__hash_blocks160__null_hash__expected)
-////{
-////    const std_vector<cref<rmd_160::block_t>> pair
-////    {
-////        std::cref(full160), std::cref(full160)
-////    };
-////
-////    BOOST_CHECK_NE(rmd_160::hash(pair), expected_pair160);
-////    BOOST_CHECK_EQUAL(system::ripemd160_hash(pair160), expected_pair160);
-////}
+BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__null_hash__expected)
+{
+    // Correlate non-const-evaluated to const-evaluated.
+    BOOST_REQUIRE_EQUAL(rmd160::hash(rmd160::half_t{}), rmd_half160);
+    BOOST_REQUIRE_EQUAL(rmd160::hash(rmd160::block_t{}), rmd_full160);
+}
 
-// Verify indirection.
+BOOST_AUTO_TEST_CASE(rmd__rmd160_hash__test_vectors__expected)
+{
+    // Verify non-const-evaluated to against public vectors
+    for (const auto& test: rmd160_tests)
+    {
+        const auto hash = accumulator<rmd160>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// Verify types.
 // ----------------------------------------------------------------------------
 
-using k_128 = typename rmd_128::K;
+using namespace rmd;
+
+// k<>
+static_assert(k<128>::strength == 128);
+static_assert(k<128>::rounds == 128);
+static_assert(k<128>::columns == 16);
+static_assert(k<128>::rows == 8);
+static_assert(k<128>::size == 256);
+static_assert(is_same_type<k<128>::constants_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<k<128>::schedule_t, std_array<uint32_t, 128>>);
+static_assert(k<160>::strength == 160);
+static_assert(k<160>::rounds == 160);
+static_assert(k<160>::columns == 16);
+static_assert(k<160>::rows == 10);
+static_assert(k<160>::size == 256);
+static_assert(is_same_type<k<160>::constants_t, std_array<uint32_t, 10>>);
+static_assert(is_same_type<k<160>::schedule_t, std_array<uint32_t, 160>>);
+
+// k128
+static_assert(k128::strength == 128);
+static_assert(k128::rounds == 128);
+static_assert(k128::columns == 16);
+static_assert(k128::rows == 8);
+static_assert(k128::size == 256);
+static_assert(k128::get[0] == 0x00000000);
+static_assert(k128::get[3] == 0x8f1bbcdc);
+static_assert(k128::get[4] == 0x50a28be6);
+static_assert(k128::get[7] == 0x00000000);
+static_assert(k128::word[0] == 0u);
+static_assert(k128::word[127] == 14u);
+static_assert(k128::rot[0] == 11u);
+static_assert(k128::rot[127] == 8u);
+static_assert(is_same_type<k128::constants_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<k128::schedule_t, std_array<uint32_t, 128>>);
+
+// k160
+static_assert(k160::strength == 160);
+static_assert(k160::rounds == 160);
+static_assert(k160::columns == 16);
+static_assert(k160::rows == 10);
+static_assert(k160::size == 256);
+static_assert(k160::get[0] == 0x00000000);
+static_assert(k160::get[4] == 0xa953fd4e);
+static_assert(k160::get[5] == 0x50a28be6);
+static_assert(k160::get[9] == 0x00000000);
+static_assert(k160::word[0] == 0u);
+static_assert(k160::word[159] == 11u);
+static_assert(k160::rot[0] == 11u);
+static_assert(k160::rot[159] == 11u);
+static_assert(is_same_type<k160::constants_t, std_array<uint32_t, 10>>);
+static_assert(is_same_type<k160::schedule_t, std_array<uint32_t, 160>>);
+
+// h<k128,...>
+static_assert(h<k128>::size == 256);
+static_assert(h<k128>::digest == 128);
+static_assert(h<k128>::strength == 128);
+static_assert(h<k128, 128>::word_bits == 32);
+static_assert(h<k128, 128>::word_bytes == 4);
+static_assert(h<k128, 128>::chunk_words == 8);
+static_assert(h<k128, 128>::block_words == 16);
+static_assert(h<k128, 128>::state_words == 4);
+static_assert(is_same_type<h<k128, 128>::K, k128>);
+static_assert(is_same_type<h<k128, 128>::word_t, uint32_t>);
+static_assert(is_same_type<h<k128, 128>::state_t, std_array<uint32_t, 4>>);
+
+// h<k160,...>
+////static_assert(h<sha::k160>::size == 256);
+static_assert(h<k160>::size == 256);
+static_assert(h<k160>::digest == 160);
+static_assert(h<k160>::strength == 160);
+static_assert(h<k160, 160>::word_bits == 32);
+static_assert(h<k160, 160>::word_bytes == 4);
+static_assert(h<k160, 160>::chunk_words == 8);
+static_assert(h<k160, 160>::block_words == 16);
+static_assert(h<k160, 160>::state_words == 5);
+static_assert(is_same_type<h<k160, 160>::K, k160>);
+static_assert(is_same_type<h<k160, 160>::word_t, uint32_t>);
+static_assert(is_same_type<h<k160, 160>::state_t, std_array<uint32_t, 5>>);
+
+// h128<>
+static_assert(h128<>::size == 256);
+static_assert(h128<>::rounds == 128);
+static_assert(h128<>::digest == 128);
+static_assert(h128<>::strength == 128);
+static_assert(h128<>::get[0] == 0x67452301);
+static_assert(h128<>::get[3] == 0x10325476);
+static_assert(h128<>::get.size() == 4);
+static_assert(h128<>::K::rounds == 128);
+static_assert(h128<>::K::get[0] == 0x00000000);
+static_assert(h128<>::K::get[7] == 0x00000000);
+static_assert(h128<>::K::get.size() == 8);
+
+// h160<>
+static_assert(h160<>::size == 256);
+static_assert(h160<>::rounds == 160);
+static_assert(h160<>::digest == 160);
+static_assert(h160<>::strength == 160);
+static_assert(h160<>::get[0] == 0x67452301);
+static_assert(h160<>::get[4] == 0xc3d2e1f0);
+static_assert(h160<>::get.size() == 5);
+static_assert(h160<>::K::rounds == 160);
+static_assert(h160<>::K::get[0] == 0x00000000);
+static_assert(h160<>::K::get[4] == 0xa953fd4e);
+static_assert(h160<>::K::get[5] == 0x50a28be6);
+static_assert(h160<>::K::get[9] == 0x00000000);
+static_assert(h160<>::K::get.size() == 10);
+
+// rmd128
+static_assert(!rmd128::big_end_count);
+static_assert(rmd128::count_bits == 64u);
+static_assert(rmd128::count_bytes == 8u);
+static_assert(rmd128::H::get.size() == 4u);
+static_assert(rmd128::K::get.size() == 8u);
+static_assert(rmd128::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
+static_assert(rmd128::limit_bytes == rmd128::limit_bits / byte_bits);
+static_assert(is_same_type<rmd128::byte_t, uint8_t>);
+static_assert(is_same_type<rmd128::word_t, uint32_t>);
+static_assert(is_same_type<rmd128::state_t, std_array<uint32_t, 4>>);
+static_assert(is_same_type<rmd128::chunk_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<rmd128::words_t, std_array<uint32_t, 16>>);
+static_assert(is_same_type<rmd128::block_t, std_array<uint8_t, 64>>);
+static_assert(is_same_type<rmd128::half_t, std_array<uint8_t, 32>>);
+static_assert(is_same_type<rmd128::digest_t, std_array<uint8_t, 16>>);
+static_assert(is_same_type<rmd128::count_t, uint64_t>);
+static_assert(is_same_type<decltype(rmd128::limit_bits), const uint64_t>);
+static_assert(is_same_type<decltype(rmd128::limit_bytes), const uint64_t>);
+
+// rmd160
+static_assert(!rmd160::big_end_count);
+static_assert(rmd160::count_bits == 64u);
+static_assert(rmd160::count_bytes == 8u);
+static_assert(rmd160::H::get.size() == 5u);
+static_assert(rmd160::K::get.size() == 10u);
+static_assert(rmd160::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
+static_assert(rmd160::limit_bytes == rmd160::limit_bits / byte_bits);
+static_assert(is_same_type<rmd160::byte_t, uint8_t>);
+static_assert(is_same_type<rmd160::word_t, uint32_t>);
+static_assert(is_same_type<rmd160::state_t, std_array<uint32_t, 5>>);
+static_assert(is_same_type<rmd160::chunk_t, std_array<uint32_t, 8>>);
+static_assert(is_same_type<rmd160::words_t, std_array<uint32_t, 16>>);
+static_assert(is_same_type<rmd160::block_t, std_array<uint8_t, 64>>);
+static_assert(is_same_type<rmd160::half_t, std_array<uint8_t, 32>>);
+static_assert(is_same_type<rmd160::digest_t, std_array<uint8_t, 20>>);
+static_assert(is_same_type<rmd160::count_t, uint64_t>);
+static_assert(is_same_type<decltype(rmd160::limit_bits), const uint64_t>);
+static_assert(is_same_type<decltype(rmd160::limit_bytes), const uint64_t>);
+
+// Expansions.
+static_assert(!rmd128_256::big_end_count);
+static_assert(!rmd160_320::big_end_count);
+
+// Verify indirection (functor and offset selection).
+// ----------------------------------------------------------------------------
+
+using k_128 = typename rmd128::K;
+using rmd_128 = rmd::algorithm<rmd::h128<>, true>;
 
 struct accessor128
   : public rmd_128
@@ -112,7 +233,7 @@ struct accessor128
     template<size_t Round>
     static constexpr auto functor()
     {
-        return rmd_128::functor<Round>();
+        return rmd_128::functor<Round, uint32_t>();
     }
 
     static constexpr auto get_f0()
@@ -236,7 +357,8 @@ static_assert(accessor128::functor<111>() == accessor128::get_f1());
 static_assert(accessor128::functor<112>() == accessor128::get_f0());
 static_assert(accessor128::functor<127>() == accessor128::get_f0());
 
-using k_160 = typename rmd_160::K;
+using k_160 = typename rmd160::K;
+using rmd_160 = rmd::algorithm<rmd::h160<>, true>;
 
 struct accessor160
   : public rmd_160
@@ -244,7 +366,7 @@ struct accessor160
     template<size_t Round>
     static constexpr auto functor()
     {
-        return rmd_160::functor<Round>();
+        return rmd_160::functor<Round, uint32_t>();
     }
 
     static constexpr auto get_f0()
@@ -392,182 +514,5 @@ static_assert(accessor160::functor<128>() == accessor160::get_f1());
 static_assert(accessor160::functor<143>() == accessor160::get_f1());
 static_assert(accessor160::functor<144>() == accessor160::get_f0());
 static_assert(accessor160::functor<159>() == accessor160::get_f0());
-
-// Verify types.
-// ----------------------------------------------------------------------------
-
-using namespace rmd;
-
-// k<>
-static_assert(k<128>::strength == 128);
-static_assert(k<128>::rounds == 128);
-static_assert(k<128>::size == 256);
-static_assert(k<128>::columns == 16);
-static_assert(k<128>::rows == 8);
-static_assert(k<160>::strength == 160);
-static_assert(k<160>::rounds == 160);
-static_assert(k<160>::size == 256);
-static_assert(k<160>::columns == 16);
-static_assert(k<160>::rows == 10);
-static_assert(is_same_type<k<128>::constants_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<k<160>::constants_t, std_array<uint32_t, 10>>);
-static_assert(is_same_type<k<128>::schedule_t, std_array<size_t, 128>>);
-static_assert(is_same_type<k<160>::schedule_t, std_array<size_t, 160>>);
-
-// k128
-static_assert(k128::strength == 128);
-static_assert(k128::rounds == 128);
-static_assert(k128::size == 256);
-static_assert(k128::columns == 16);
-static_assert(k128::rows == 8);
-static_assert(k128::get[0] == 0x00000000);
-static_assert(k128::get[3] == 0x8f1bbcdc);
-static_assert(k128::get[4] == 0x50a28be6);
-static_assert(k128::get[7] == 0x00000000);
-static_assert(k128::word[0] == 0u);
-static_assert(k128::word[127] == 14u);
-static_assert(k128::rot[0] == 11u);
-static_assert(k128::rot[127] == 8u);
-static_assert(is_same_type<k128::constants_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<k128::schedule_t, std_array<size_t, 128>>);
-
-// k160
-static_assert(k160::strength == 160);
-static_assert(k160::rounds == 160);
-static_assert(k160::size == 256);
-static_assert(k160::columns == 16);
-static_assert(k160::rows == 10);
-static_assert(k160::get[0] == 0x00000000);
-static_assert(k160::get[4] == 0xa953fd4e);
-static_assert(k160::get[5] == 0x50a28be6);
-static_assert(k160::get[9] == 0x00000000);
-static_assert(k160::word[0] == 0u);
-static_assert(k160::word[159] == 11u);
-static_assert(k160::rot[0] == 11u);
-static_assert(k160::rot[159] == 11u);
-static_assert(is_same_type<k160::constants_t, std_array<uint32_t, 10>>);
-static_assert(is_same_type<k160::schedule_t, std_array<size_t, 160>>);
-
-// h<k128,...>
-static_assert(h<k128>::size == 256);
-static_assert(h<k128>::digest == 128);
-static_assert(h<k128, 128>::word_bits == 32);
-static_assert(h<k128, 128>::word_bytes == 4);
-static_assert(h<k128, 128>::chunk_words == 8);
-static_assert(h<k128, 128>::block_words == 16);
-static_assert(h<k128, 128>::state_words == 4);
-static_assert(is_same_type<h<k128, 128>::K, k128>);
-static_assert(is_same_type<h<k128, 128>::word_t, uint32_t>);
-static_assert(is_same_type<h<k128, 128>::state_t, std_array<uint32_t, 4>>);
-
-// h<k160,...>
-////static_assert(h<sha::k160>::size == 256);
-static_assert(h<k160>::size == 256);
-static_assert(h<k160>::digest == 160);
-static_assert(h<k160, 160>::word_bits == 32);
-static_assert(h<k160, 160>::word_bytes == 4);
-static_assert(h<k160, 160>::chunk_words == 8);
-static_assert(h<k160, 160>::block_words == 16);
-static_assert(h<k160, 160>::state_words == 5);
-static_assert(is_same_type<h<k160, 160>::K, k160>);
-static_assert(is_same_type<h<k160, 160>::word_t, uint32_t>);
-static_assert(is_same_type<h<k160, 160>::state_t, std_array<uint32_t, 5>>);
-
-// h128<>
-static_assert(h128<>::size == 256);
-static_assert(h128<>::digest == 128);
-static_assert(h128<>::rounds == 128);
-static_assert(h128<>::get[0] == 0x67452301);
-static_assert(h128<>::get[3] == 0x10325476);
-static_assert(h128<>::get.size() == 4);
-static_assert(h128<>::K::rounds == 128);
-static_assert(h128<>::K::get[0] == 0x00000000);
-static_assert(h128<>::K::get[7] == 0x00000000);
-static_assert(h128<>::K::get.size() == 8);
-
-// h160<>
-static_assert(h160<>::size == 256);
-static_assert(h160<>::digest == 160);
-static_assert(h160<>::rounds == 160);
-static_assert(h160<>::get[0] == 0x67452301);
-static_assert(h160<>::get[4] == 0xc3d2e1f0);
-static_assert(h160<>::get.size() == 5);
-static_assert(h160<>::K::rounds == 160);
-static_assert(h160<>::K::get[0] == 0x00000000);
-static_assert(h160<>::K::get[4] == 0xa953fd4e);
-static_assert(h160<>::K::get[5] == 0x50a28be6);
-static_assert(h160<>::K::get[9] == 0x00000000);
-static_assert(h160<>::K::get.size() == 10);
-
-// rmd128
-static_assert(rmd128::size == 256);
-static_assert(rmd128::digest == 128);
-static_assert(rmd128::get.size() == 4);
-static_assert(rmd128::get[0] == 0x67452301);
-static_assert(rmd128::get[3] == 0x10325476);
-static_assert(rmd128::K::rounds == 128);
-static_assert(rmd128::K::get.size() == 8);
-static_assert(rmd128::K::get[0] == 0x00000000);
-static_assert(rmd128::K::get[7] == 0x00000000);
-
-// rmd160
-static_assert(rmd160::size == 256);
-static_assert(rmd160::digest == 160);
-static_assert(rmd160::get.size() == 5);
-static_assert(rmd160::get[0] == 0x67452301);
-static_assert(rmd160::get[4] == 0xc3d2e1f0);
-static_assert(rmd160::K::rounds == 160);
-static_assert(rmd160::K::get.size() == 10);
-static_assert(rmd160::K::get[0] == 0x00000000);
-static_assert(rmd160::K::get[9] == 0x00000000);
-
-// Expansions.
-static_assert(rmd128_256::digest == 256);
-static_assert(rmd160_320::digest == 320);
-
-// algorithm<rmd128>
-static_assert(!algorithm<rmd128>::big_end_count);
-static_assert(algorithm<rmd128>::count_bits == 64u);
-static_assert(algorithm<rmd128>::count_bytes == 8u);
-static_assert(algorithm<rmd128>::H::get.size() == 4u);
-static_assert(algorithm<rmd128>::K::get.size() == 8u);
-static_assert(algorithm<rmd128>::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
-static_assert(algorithm<rmd128>::limit_bytes == algorithm<rmd128>::limit_bits / byte_bits);
-static_assert(is_same_type<algorithm<rmd128>::byte_t, uint8_t>);
-static_assert(is_same_type<algorithm<rmd128>::word_t, uint32_t>);
-static_assert(is_same_type<algorithm<rmd128>::state_t, std_array<uint32_t, 4>>);
-static_assert(is_same_type<algorithm<rmd128>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<algorithm<rmd128>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<algorithm<rmd128>::block_t, std_array<uint8_t, 64>>);
-static_assert(is_same_type<algorithm<rmd128>::half_t, std_array<uint8_t, 32>>);
-static_assert(is_same_type<algorithm<rmd128>::digest_t, std_array<uint8_t, 16>>);
-static_assert(is_same_type<algorithm<rmd128>::count_t, uint64_t>);
-static_assert(is_same_type<algorithm<rmd128>::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-static_assert(is_same_type<algorithm<rmd128>::digests_t, std_vector<std_array<uint8_t, 16>>>);
-static_assert(is_same_type<decltype(algorithm<rmd128>::limit_bits), const uint64_t>);
-static_assert(is_same_type<decltype(algorithm<rmd128>::limit_bytes), const uint64_t>);
-
-// algorithm<rmd160>
-////static_assert(!algorithm<sha160>::big_end_count);
-static_assert(!algorithm<rmd160>::big_end_count);
-static_assert(algorithm<rmd160>::count_bits == 64u);
-static_assert(algorithm<rmd160>::count_bytes == 8u);
-static_assert(algorithm<rmd160>::H::get.size() == 5u);
-static_assert(algorithm<rmd160>::K::get.size() == 10u);
-static_assert(algorithm<rmd160>::limit_bits == std::numeric_limits<uint64_t>::max() - 64u);
-static_assert(algorithm<rmd160>::limit_bytes == algorithm<rmd160>::limit_bits / byte_bits);
-static_assert(is_same_type<algorithm<rmd160>::byte_t, uint8_t>);
-static_assert(is_same_type<algorithm<rmd160>::word_t, uint32_t>);
-static_assert(is_same_type<algorithm<rmd160>::state_t, std_array<uint32_t, 5>>);
-static_assert(is_same_type<algorithm<rmd160>::chunk_t, std_array<uint32_t, 8>>);
-static_assert(is_same_type<algorithm<rmd160>::words_t, std_array<uint32_t, 16>>);
-static_assert(is_same_type<algorithm<rmd160>::block_t, std_array<uint8_t, 64>>);
-static_assert(is_same_type<algorithm<rmd160>::half_t, std_array<uint8_t, 32>>);
-static_assert(is_same_type<algorithm<rmd160>::digest_t, std_array<uint8_t, 20>>);
-static_assert(is_same_type<algorithm<rmd160>::count_t, uint64_t>);
-static_assert(is_same_type<algorithm<rmd160>::blocks_t, std_vector<cref<std_array<uint8_t, 64>>>>);
-static_assert(is_same_type<algorithm<rmd160>::digests_t, std_vector<std_array<uint8_t, 20>>>);
-static_assert(is_same_type<decltype(algorithm<rmd160>::limit_bits), const uint64_t>);
-static_assert(is_same_type<decltype(algorithm<rmd160>::limit_bytes), const uint64_t>);
 
 BOOST_AUTO_TEST_SUITE_END()

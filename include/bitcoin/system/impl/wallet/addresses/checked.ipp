@@ -33,21 +33,21 @@ namespace wallet {
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked() NOEXCEPT
-  : data_slice(value_), value_()
+  : value_{}
 {
     // This is an invalid instance (unchecked).
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(checked&& other) NOEXCEPT
-  : data_slice(value_), value_(std::move(other.value_))
+  : value_(std::move(other.value_))
 {
     // This may be an invalid instance.
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(const checked& other) NOEXCEPT
-  : data_slice(value_), value_(other.value_)
+  : value_(other.value_)
 {
     // This may be an invalid instance.
 }
@@ -62,14 +62,14 @@ checked<Prefix, Payload, Checksum>::checked(const prefix_type& prefix,
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(value_type&& value) NOEXCEPT
-  : data_slice(value_), value_(std::move(value))
+  : value_(std::move(value))
 {
     // This may be an invalid instance (if value is unchecked).
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(const value_type& value) NOEXCEPT
-  : data_slice(value_), value_(value)
+  : value_(value)
 {
     // This may be an invalid instance (if value is unchecked).
 }
@@ -138,7 +138,7 @@ template <size_t Prefix, size_t Payload, size_t Checksum>
 typename checked<Prefix, Payload, Checksum>::prefix_type
 checked<Prefix, Payload, Checksum>::prefix() const NOEXCEPT
 {
-    return slice<0u, Prefix>(value_);
+    return slice<zero, Prefix>(value_);
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>

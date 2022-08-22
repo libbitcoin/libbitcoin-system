@@ -12,7 +12,6 @@
 
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 
       <!-- General -->
@@ -23,7 +22,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
 
       <!-- Language -->
-      <!-- Language extensions are enabled by default (required for STL/Boost). -->
+      <!-- /Zc is conformance mode. -->
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
@@ -38,8 +38,9 @@
 
       <!-- External Includes -->
       <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
+      <!-- Language extensions are enabled by default (required for STL/Boost). -->
       <ExternalWarningLevel>Level4</ExternalWarningLevel>
       </ClCompile>
   </ItemDefinitionGroup>
-
+  
 </Project>

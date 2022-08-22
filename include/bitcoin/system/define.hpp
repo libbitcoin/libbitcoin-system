@@ -54,19 +54,34 @@ namespace bc = libbitcoin;
 /// ---------------------------------------------------------------------------
 
 #if defined(NDEBUG)
-    namespace libbitcoin { constexpr auto checked_build = false; };
+    namespace libbitcoin { constexpr auto build_checked = false; };
     #define BC_ASSERT(expression)
     #define BC_ASSERT_MSG(expression, text)
     #define BC_DEBUG_ONLY(expression)
 #else
     #include <cassert>
-    namespace libbitcoin { constexpr auto checked_build = true; };
-    #define BC_ASSERT(expression) assert(expression)
-    #define BC_ASSERT_MSG(expression, text) assert((expression)&&(text))
+    namespace libbitcoin { constexpr auto build_checked = true; };
+    #define BC_RUNTIME(evaluate) if (!std::is_constant_evaluated()) { evaluate; }
+    #define BC_ASSERT(expression) BC_RUNTIME(assert(expression))
+    #define BC_ASSERT_MSG(expression, text) BC_RUNTIME(assert((expression)&&(text)))
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
-/// Attributes (for platform independence).
+/// Bitness.
+/// ---------------------------------------------------------------------------
+
+#if defined(HAVE_X32)
+    namespace libbitcoin { constexpr auto build_x32 = true; };
+#else
+    namespace libbitcoin { constexpr auto build_x32 = false; };
+#endif
+#if defined(HAVE_X64)
+    namespace libbitcoin { constexpr auto build_x64 = true; };
+#else
+    namespace libbitcoin { constexpr auto build_x64 = false; };
+#endif
+
+/// Attributes.
 /// ---------------------------------------------------------------------------
 
 /// Emit messages from .cpp during compilation.
@@ -122,22 +137,33 @@ namespace bc = libbitcoin;
 
 /// A stronger compiler hint for inlining.
 /// May use prior to 'constexpr' or in place of 'inline'.
+/// Do not use in conjunction with with XCONSTEXPR macros, as this will result
+/// in a double inline specification in the case of XCONSTEXPR default.
 #if defined(HAVE_MSC)
-    #define FORCE_INLINE __forceinline
-#elif defined(HAVE_GNUC)
-    #define FORCE_INLINE __attribute__((always_inline))
+    #define INLINE __forceinline
+#elif defined(HAVE_GNUC) || defined(HAVE_CLANG)
+    #define INLINE __attribute__((always_inline)) inline
 #else
-    #define FORCE_INLINE inline
+    #define INLINE inline
 #endif
 
 /// Class helpers
 /// ---------------------------------------------------------------------------
+
 #define DEFAULT5(class_name) \
     class_name(class_name&&) = default; \
     class_name(const class_name&) = default; \
     class_name& operator=(class_name&&) = default; \
     class_name& operator=(const class_name&) = default; \
     ~class_name() = default
+
+/// Destructor must be defaulted.
+#define DELETE5(class_name) \
+    class_name(class_name&&) = delete; \
+    class_name(const class_name&) = delete; \
+    class_name& operator=(class_name&&) = delete; \
+    class_name& operator=(const class_name&) = delete; \
+    inline ~class_name() = default
 
 /// Minimums
 /// ---------------------------------------------------------------------------
@@ -183,13 +209,13 @@ namespace bc = libbitcoin;
 /// C++17 (partial)
 #if defined(HAVE_EXECUTION)
     #include <execution>
-    #define std_for_each(p, b, e, l) std::for_each(p, b, e, l)
-    #define std_transform(p, b, e, t, l) std::transform(p, b, e, t, l)
+    #define std_for_each(p, b, e, l) std::for_each((p), (b), (e), (l))
+    #define std_transform(p, b, e, t, l) std::transform((p), (b), (e), (t), (l))
     namespace libbitcoin { constexpr auto par_unseq = std::execution::par_unseq; }
     namespace libbitcoin { constexpr auto seq = std::execution::seq; }
 #else
-    #define std_for_each(p, b, e, l) std::for_each(b, e, l)
-    #define std_transform(p, b, e, t, l) std::transform(b, e, t, l)
+    #define std_for_each(p, b, e, l) std::for_each((b), (e), (l))
+    #define std_transform(p, b, e, t, l) std::transform((b), (e), (t), (l))
     namespace libbitcoin { constexpr auto par_unseq = false; }
     namespace libbitcoin { constexpr auto seq = false; }
 #endif

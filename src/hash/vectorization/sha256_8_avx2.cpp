@@ -24,94 +24,94 @@ void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
 
 namespace i256 {
 
-using mint256_t = __m256i;
+using xint256_t = __m256i;
 
 template <uint32_t Offset>
-uint32_t get(mint256_t a) noexcept
+uint32_t get(xint256_t a) noexcept
 {
     return _mm256_extract_epi32(a, Offset);
 }
 
-mint256_t set(uint32_t a) noexcept 
+xint256_t set(uint32_t a) noexcept 
 {
     return _mm256_set1_epi32(a);
 }
 
-mint256_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
+xint256_t set(uint32_t a, uint32_t b, uint32_t c, uint32_t d,
     uint32_t e, uint32_t f, uint32_t g, uint32_t h) noexcept
 {
     return _mm256_set_epi32(a, b, c, d, e, f, g, h);
 }
 
-mint256_t shuffle(mint256_t a, mint256_t b) noexcept
+xint256_t shuffle(xint256_t a, xint256_t b) noexcept
 {
     return _mm256_shuffle_epi8(a, b);
 }
 
-mint256_t sum(mint256_t a, mint256_t b) noexcept
+xint256_t sum(xint256_t a, xint256_t b) noexcept
 {
     return _mm256_add_epi32(a, b);
 }
 
-mint256_t sum(mint256_t a, mint256_t b, mint256_t c) noexcept
+xint256_t sum(xint256_t a, xint256_t b, xint256_t c) noexcept
 {
     return sum(sum(a, b), c);
 }
 
-mint256_t sum(mint256_t a, mint256_t b, mint256_t c,
-    mint256_t d) noexcept
+xint256_t sum(xint256_t a, xint256_t b, xint256_t c,
+    xint256_t d) noexcept
 {
     return sum(sum(a, b), sum(c, d));
 }
 
-mint256_t sum(mint256_t a, mint256_t b, mint256_t c, mint256_t d,
-    mint256_t e) noexcept
+xint256_t sum(xint256_t a, xint256_t b, xint256_t c, xint256_t d,
+    xint256_t e) noexcept
 {
     return sum(sum(a, b, c), sum(d, e));
 }
 
-mint256_t inc(mint256_t& outa, mint256_t b) noexcept
+xint256_t inc(xint256_t& outa, xint256_t b) noexcept
 {
     return ((outa = sum(outa, b)));
 }
 
-mint256_t inc(mint256_t& outa, mint256_t b, mint256_t c) noexcept
+xint256_t inc(xint256_t& outa, xint256_t b, xint256_t c) noexcept
 {
     return ((outa = sum(outa, b, c)));
 }
 
-mint256_t inc(mint256_t& outa, mint256_t b, mint256_t c,
-    mint256_t d) noexcept
+xint256_t inc(xint256_t& outa, xint256_t b, xint256_t c,
+    xint256_t d) noexcept
 {
     return ((outa = sum(outa, b, c, d)));
 }
 
-mint256_t exc(mint256_t a, mint256_t b) noexcept
+xint256_t exc(xint256_t a, xint256_t b) noexcept
 {
     return _mm256_xor_si256(a, b);
 }
 
-mint256_t exc(mint256_t a, mint256_t b, mint256_t c) noexcept
+xint256_t exc(xint256_t a, xint256_t b, xint256_t c) noexcept
 {
     return exc(exc(a, b), c);
 }
 
-mint256_t dis(mint256_t a, mint256_t b) noexcept
+xint256_t dis(xint256_t a, xint256_t b) noexcept
 {
     return _mm256_or_si256(a, b);
 }
 
-mint256_t con(mint256_t a, mint256_t b) noexcept
+xint256_t con(xint256_t a, xint256_t b) noexcept
 {
     return _mm256_and_si256(a, b);
 }
 
-mint256_t shr(mint256_t a, uint32_t bits) noexcept
+xint256_t shr(xint256_t a, uint32_t bits) noexcept
 {
     return _mm256_srli_epi32(a, bits);
 }
 
-mint256_t shl(mint256_t a, uint32_t bits) noexcept
+xint256_t shl(xint256_t a, uint32_t bits) noexcept
 {
     return _mm256_slli_epi32(a, bits);
 }
@@ -120,15 +120,15 @@ mint256_t shl(mint256_t a, uint32_t bits) noexcept
 
 using namespace i256;
 
-mint256_t inline SIGMA0(mint256_t x) NOEXCEPT { return exc(dis(shr(x,  2), shl(x, 30)), dis(shr(x, 13), shl(x, 19)), dis(shr(x, 22), shl(x, 10))); }
-mint256_t inline SIGMA1(mint256_t x) NOEXCEPT { return exc(dis(shr(x,  6), shl(x, 26)), dis(shr(x, 11), shl(x, 21)), dis(shr(x, 25), shl(x, 7))); }
-mint256_t inline sigma0(mint256_t x) NOEXCEPT { return exc(dis(shr(x,  7), shl(x, 25)), dis(shr(x, 18), shl(x, 14)), shr(x, 3)); }
-mint256_t inline sigma1(mint256_t x) NOEXCEPT { return exc(dis(shr(x, 17), shl(x, 15)), dis(shr(x, 19), shl(x, 13)), shr(x, 10)); }
-mint256_t inline choice(  mint256_t x, mint256_t y, mint256_t z) NOEXCEPT { return exc(z, con(x, exc(y, z))); }
-mint256_t inline majority(mint256_t x, mint256_t y, mint256_t z) NOEXCEPT { return dis(con(x, y), con(z, dis(x, y))); }
+xint256_t inline SIGMA0(xint256_t x) NOEXCEPT { return exc(dis(shr(x,  2), shl(x, 30)), dis(shr(x, 13), shl(x, 19)), dis(shr(x, 22), shl(x, 10))); }
+xint256_t inline SIGMA1(xint256_t x) NOEXCEPT { return exc(dis(shr(x,  6), shl(x, 26)), dis(shr(x, 11), shl(x, 21)), dis(shr(x, 25), shl(x, 7))); }
+xint256_t inline sigma0(xint256_t x) NOEXCEPT { return exc(dis(shr(x,  7), shl(x, 25)), dis(shr(x, 18), shl(x, 14)), shr(x, 3)); }
+xint256_t inline sigma1(xint256_t x) NOEXCEPT { return exc(dis(shr(x, 17), shl(x, 15)), dis(shr(x, 19), shl(x, 13)), shr(x, 10)); }
+xint256_t inline choice(  xint256_t x, xint256_t y, xint256_t z) NOEXCEPT { return exc(z, con(x, exc(y, z))); }
+xint256_t inline majority(xint256_t x, xint256_t y, xint256_t z) NOEXCEPT { return dis(con(x, y), con(z, dis(x, y))); }
 
-void inline round(mint256_t a, mint256_t b, mint256_t c, mint256_t& d,
-    mint256_t e, mint256_t f, mint256_t g, mint256_t& h, mint256_t k) NOEXCEPT
+void inline round(xint256_t a, xint256_t b, xint256_t c, xint256_t& d,
+    xint256_t e, xint256_t f, xint256_t g, xint256_t& h, xint256_t k) NOEXCEPT
 {
     const auto t1 = sum(h, SIGMA1(e), choice(e, f, g), k);
     const auto t2 = sum(   SIGMA0(a), majority(a, b, c));
@@ -137,19 +137,19 @@ void inline round(mint256_t a, mint256_t b, mint256_t c, mint256_t& d,
 }
 
 template <size_t Offset>
-mint256_t inline read8(const block8& blocks) NOEXCEPT
+xint256_t inline read8(const block8& blocks) NOEXCEPT
 {
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     const auto value = set(
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[0][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[1][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[2][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[3][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[4][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[5][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[6][Offset])),
-        from_little_endian(unsafe_array_cast<uint8_t, four>(&blocks[7][Offset])));
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[0])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[1])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[2])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[3])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[4])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[5])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[6])),
+        from_little_endian(array_cast<uint8_t, four, Offset>(blocks[7])));
     BC_POP_WARNING()
 
     return shuffle(value, set(
@@ -158,7 +158,7 @@ mint256_t inline read8(const block8& blocks) NOEXCEPT
 }
 
 template <size_t Offset>
-void inline write8(digest8& hashes, mint256_t value) NOEXCEPT
+void inline write8(digest8& hashes, xint256_t value) NOEXCEPT
 {
     value = shuffle(value, set(
         0x0c0d0e0ful, 0x08090a0bul, 0x04050607ul, 0x00010203ul,
@@ -166,14 +166,14 @@ void inline write8(digest8& hashes, mint256_t value) NOEXCEPT
 
     constexpr auto four = sizeof(uint32_t);
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    unsafe_array_cast<uint8_t, four>(&hashes[0][Offset]) = to_little_endian(get<7>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[1][Offset]) = to_little_endian(get<6>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[2][Offset]) = to_little_endian(get<5>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[3][Offset]) = to_little_endian(get<4>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[4][Offset]) = to_little_endian(get<3>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[5][Offset]) = to_little_endian(get<2>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[6][Offset]) = to_little_endian(get<1>(value));
-    unsafe_array_cast<uint8_t, four>(&hashes[7][Offset]) = to_little_endian(get<0>(value));
+    array_cast<uint8_t, four, Offset>(hashes[0]) = to_little_endian(get<7>(value));
+    array_cast<uint8_t, four, Offset>(hashes[1]) = to_little_endian(get<6>(value));
+    array_cast<uint8_t, four, Offset>(hashes[2]) = to_little_endian(get<5>(value));
+    array_cast<uint8_t, four, Offset>(hashes[3]) = to_little_endian(get<4>(value));
+    array_cast<uint8_t, four, Offset>(hashes[4]) = to_little_endian(get<3>(value));
+    array_cast<uint8_t, four, Offset>(hashes[5]) = to_little_endian(get<2>(value));
+    array_cast<uint8_t, four, Offset>(hashes[6]) = to_little_endian(get<1>(value));
+    array_cast<uint8_t, four, Offset>(hashes[7]) = to_little_endian(get<0>(value));
     BC_POP_WARNING()
 }
 
@@ -190,8 +190,8 @@ void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
     auto g = set(0x1f83d9abul);
     auto h = set(0x5be0cd19ul);
 
-    mint256_t w00, w01, w02, w03, w04, w05, w06, w07;
-    mint256_t w08, w09, w10, w11, w12, w13, w14, w15;
+    xint256_t w00, w01, w02, w03, w04, w05, w06, w07;
+    xint256_t w08, w09, w10, w11, w12, w13, w14, w15;
 
     round(a, b, c, d, e, f, g, h, sum(set(0x428a2f98ul), w00 = read8< 0>(blocks)));
     round(h, a, b, c, d, e, f, g, sum(set(0x71374491ul), w01 = read8< 4>(blocks)));
@@ -267,7 +267,7 @@ void merkle_avx2(digest8& out, const block8& blocks) NOEXCEPT
     g = sum(g, set(0x1f83d9abul));
     h = sum(h, set(0x5be0cd19ul));
 
-    const mint256_t t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
+    const xint256_t t0 = a, t1 = b, t2 = c, t3 = d, t4 = e, t5 = f, t6 = g, t7 = h;
 
     // Transform 2.
     round(a, b, c, d, e, f, g, h, set(0xc28a2f98ul));

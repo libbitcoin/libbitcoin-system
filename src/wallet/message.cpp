@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/message.hpp>
 
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>
@@ -39,7 +38,7 @@ hash_digest hash_message(const data_slice& message) NOEXCEPT
     // This is a specified magic prefix.
     static const std::string prefix("Bitcoin Signed Message:\n");
 
-    hash_digest sha256;
+    hash_digest sha256{};
     hash::sha256::copy sink(sha256);
     sink.write_string(prefix);
     sink.write_variable(message.size());

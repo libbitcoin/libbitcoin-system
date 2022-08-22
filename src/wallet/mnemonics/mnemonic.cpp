@@ -88,7 +88,6 @@ data_chunk mnemonic::decoder(const string_list& words,
 long_hash mnemonic::seeder(const string_list& words,
     const std::string& passphrase) NOEXCEPT
 {
-    using algorithm = sha::algorithm<sha512>;
     constexpr size_t hmac_iterations = 2048;
     constexpr auto passphrase_prefix = "mnemonic";
 
@@ -104,11 +103,11 @@ long_hash mnemonic::seeder(const string_list& words,
     LCOV_EXCL_STOP()
 
     // Words are in normal (lower, nfkd) form, even without ICU.
-    return pbkd<algorithm>::key<long_hash_size>(system::join(words),
+    return pbkd<sha512>::key<long_hash_size>(system::join(words),
         passphrase_prefix + phrase, hmac_iterations);
 }
 
-uint8_t mnemonic::checksum_byte(const data_slice& entropy) NOEXCEPT
+uint8_t mnemonic::checksum_byte(const data_chunk& entropy) NOEXCEPT
 {
     // The high order bits of the first sha256_hash byte are the checksum.
     // Only 4, 5, 6, 7, or 8 bits of the hash are used (based on size).

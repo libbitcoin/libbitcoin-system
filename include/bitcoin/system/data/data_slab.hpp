@@ -46,6 +46,8 @@ namespace system {
 class data_slab
 {
 public:
+    DEFAULT5(data_slab);
+
     typedef size_t size_type;
     typedef uint8_t value_type;
 
@@ -56,20 +58,14 @@ public:
     typedef pointer iterator;
 
     /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Empty slab.
     constexpr data_slab() NOEXCEPT;
 
-    /// Defaults.
-    constexpr data_slab(data_slab&&) = default;
-    constexpr data_slab(const data_slab&) = default;
-    constexpr data_slab& operator=(data_slab&&) = default;
-    constexpr data_slab& operator=(const data_slab&) = default;
-    constexpr ~data_slab() = default;
-
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_one_byte<Byte> = true>
-    constexpr data_slab(std::array<Byte, Size>& data) NOEXCEPT;
+    constexpr data_slab(std_array<Byte, Size>& data) NOEXCEPT;
 
     // TODO: test.
     /// Byte vector constructor (casts Byte to uint8_t).
@@ -91,11 +87,12 @@ public:
     SCONSTEXPR data_slab(std::string& text) NOEXCEPT;
 
     /// Methods.
+    /// -----------------------------------------------------------------------
 
     /// Copy data to an array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
-    constexpr std::array<value_type, Size> to_array() const NOEXCEPT;
+    constexpr std_array<value_type, Size> to_array() const NOEXCEPT;
 
     /// Copy data to a vector.
     VCONSTEXPR std::vector<value_type> to_chunk() const NOEXCEPT;
@@ -106,16 +103,13 @@ public:
     /// Cast buffer to a data_slice.
     constexpr data_slice to_slice() const NOEXCEPT;
 
-    // dependency ordering
-    /////// Convert data to a base16 string.
-    ////SCONSTEXPR std::string encoded() const NOEXCEPT;
-
     /// Resize the slab by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slab.
     /// Returns true if the size was reduced (expansion is not allowed).
     constexpr bool resize(size_t size) NOEXCEPT;
 
     /// Properties.
+    /// -----------------------------------------------------------------------
     constexpr pointer data() const NOEXCEPT;
     constexpr pointer begin() const NOEXCEPT;
     constexpr pointer end() const NOEXCEPT;
@@ -124,10 +118,11 @@ public:
     constexpr size_type size() const NOEXCEPT;
     constexpr bool empty() const NOEXCEPT;
 
-    /// Unary operators.
-    template<size_type Size>
-    constexpr operator std::array<value_type, Size>() const NOEXCEPT;
-    VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
+    /// Operators.
+    /// -----------------------------------------------------------------------
+    ////template<size_type Size>
+    ////constexpr operator std_array<value_type, Size>() const NOEXCEPT;
+    ////VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
     constexpr operator data_slice() const NOEXCEPT;
     constexpr value_type operator[](size_type index) const NOEXCEPT;
 

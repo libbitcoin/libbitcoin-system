@@ -18,12 +18,9 @@
  */
 #include <bitcoin/system/chain/point.hpp>
 
-/// DELETECSTDINT
 #include <memory>
 #include <utility>
-/// DELETEMENOW
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
@@ -133,7 +130,7 @@ point point::from_data(reader& source) NOEXCEPT
 
 data_chunk point::to_data() const NOEXCEPT
 {
-    data_chunk data(serialized_size(), no_fill_byte_allocator);
+    data_chunk data(serialized_size());
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);

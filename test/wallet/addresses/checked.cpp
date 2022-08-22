@@ -29,20 +29,35 @@ typedef checked<1, mini_hash_size, 2> mini_checked;
 typedef checked<3, short_hash_size, 4> short_checked;
 typedef checked<5, long_hash_size, 8> long_checked;
 
-const data_array<0> zero_prefix{};
+////const data_array<0> zero_prefix{};
 const data_array<1> mini_prefix{ 1 };
 const data_array<3> short_prefix{ 1, 2, 3 };
 const data_array<5> long_prefix{ 1, 2, 3, 4, 5 };
 
-const data_array<0> test_zero_hash = base16_hash("");
+////const data_array<0> test_zero_hash = base16_hash("");
 const mini_hash test_mini_hash = base16_hash("000102030405");
 const short_hash test_short_hash = base16_hash("0908070605040302010009080706050403020100");
 const long_hash test_long_hash = base16_hash("09080706050403020100090807060504030201000908070605040302010009080706050403020100090807060504030201000908070605040302010003020100");
 
-const auto zero_valid_value = insert_checksum<zero_checked::value_size, 0>({ zero_prefix,  test_zero_hash });
-const auto mini_valid_value = insert_checksum<mini_checked::value_size, 2>({ mini_prefix,  test_mini_hash });
-const auto short_valid_value = insert_checksum<short_checked::value_size, 4>({ short_prefix, test_short_hash });
-const auto long_valid_value = insert_checksum<long_checked::value_size, 8>({ long_prefix,  test_long_hash });
+///const auto zero_valid_value = insert_checksum<zero_checked::value_size, 0>({ zero_prefix,  test_zero_hash });
+
+auto mini_valid_value() NOEXCEPT
+{
+    static const auto value = insert_checksum<mini_checked::value_size, 2>({ mini_prefix,  test_mini_hash });
+    return value;
+}
+
+auto short_valid_value() NOEXCEPT
+{
+    static const auto value = insert_checksum<short_checked::value_size, 4>({ short_prefix, test_short_hash });
+    return value;
+}
+
+auto long_valid_value() NOEXCEPT
+{
+    static const auto value = insert_checksum<long_checked::value_size, 8>({ long_prefix,  test_long_hash });
+    return value;
+}
 
 BOOST_AUTO_TEST_CASE(checked__default_construct__zero__valid)
 {
@@ -74,50 +89,36 @@ BOOST_AUTO_TEST_CASE(checked__values_construct__zero__valid)
     BOOST_REQUIRE(long_instance);
 }
 
-// Excluded by type constraints on split.
-//////BOOST_AUTO_TEST_CASE(checked__value_copy_construct__zero__valid)
-//////{
-//////    // Empty checksum and empty value, so no state and always valid.
-//////    const zero_checked instance(zero_valid_value);
-//////    BOOST_REQUIRE(instance);
-//////}
-
-BOOST_AUTO_TEST_CASE(checked__value_copy_construct__mini_invalid__invalid)
-{
-    const mini_checked instance(mini_valid_value);
-    BOOST_REQUIRE(instance);
-}
-
 BOOST_AUTO_TEST_CASE(checked__value_copy_construct__mini__valid)
 {
-    const mini_checked instance(mini_valid_value);
+    const mini_checked instance(mini_valid_value());
     BOOST_REQUIRE(instance);
 }
 
 BOOST_AUTO_TEST_CASE(checked__copy_construct__long__valid)
 {
-    const long_checked instance(long_valid_value);
+    const long_checked instance(long_valid_value());
     const long_checked copy(instance);
     BOOST_REQUIRE(copy);
 }
 
 BOOST_AUTO_TEST_CASE(checked__value_move_construct__short__valid)
 {
-    short_checked instance(short_valid_value);
+    short_checked instance(short_valid_value());
     const short_checked copy(std::move(instance));
     BOOST_REQUIRE(copy);
 }
 
 BOOST_AUTO_TEST_CASE(checked__move_construct__long__valid)
 {
-    long_checked instance(long_valid_value);
+    long_checked instance(long_valid_value());
     const long_checked copy(std::move(instance));
     BOOST_REQUIRE(copy);
 }
 
 BOOST_AUTO_TEST_CASE(checked__copy_assign__short__valid)
 {
-    const short_checked instance(short_valid_value);
+    const short_checked instance(short_valid_value());
     short_checked copy;
     copy = instance;
     BOOST_REQUIRE(copy);
@@ -125,27 +126,11 @@ BOOST_AUTO_TEST_CASE(checked__copy_assign__short__valid)
 
 BOOST_AUTO_TEST_CASE(checked__move_assign__short__valid)
 {
-    short_checked instance(short_valid_value);
+    short_checked instance(short_valid_value());
     short_checked copy;
     copy = std::move(instance);
     BOOST_REQUIRE(copy);
 }
-
-// Whiney compiler (can't test self-assign).
-////BOOST_AUTO_TEST_CASE(checked__copy_assign_self__short__valid)
-////{
-////    short_checked instance(short_valid_value);
-////    instance = instance;
-////    BOOST_REQUIRE(instance);
-////}
-
-// Whiney compiler (can't test self-assign).
-////BOOST_AUTO_TEST_CASE(checked__move_assign_self__short__valid)
-////{
-////    short_checked instance(short_valid_value);
-////    instance = std::move(instance);
-////    BOOST_REQUIRE(instance);
-////}
 
 BOOST_AUTO_TEST_CASE(checked__properies__zero__expected)
 {

@@ -249,7 +249,7 @@ data_chunk byte_reader<IStream>::read_bytes(size_t size) NOEXCEPT
     if (!valid())
         return{};
 
-    data_chunk out(size, no_fill_byte_allocator);
+    data_chunk out(size);
     do_read_bytes(out.data(), size);
     return out;
 }

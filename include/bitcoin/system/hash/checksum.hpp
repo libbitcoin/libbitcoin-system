@@ -51,14 +51,14 @@ void insert_checksum(data_array<Size>& data) NOEXCEPT;
 template <size_t Size, size_t Checksum = checksum_default_size>
 bool verify_checksum(const data_array<Size>& data) NOEXCEPT;
 
+/// Verify the last four bytes are a bitcoin checksum of the preceding bytes.
+BC_API bool verify_checksum(const data_chunk& data) NOEXCEPT;
+
 /// Append slices and a four byte bitcoin checksum.
 BC_API data_chunk append_checksum(const data_loaf& slices) NOEXCEPT;
 
 /// Append a four byte bitcoin checksum of data to itself.
 BC_API void append_checksum(data_chunk& data) NOEXCEPT;
-
-/// Verify the last four bytes are a bitcoin checksum of the preceding bytes.
-BC_API bool verify_checksum(const data_slice& data) NOEXCEPT;
 
 // bech32 checksum, used by witness_address.
 // ----------------------------------------------------------------------------

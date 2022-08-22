@@ -29,6 +29,7 @@ namespace sha {
 struct k256
   : public k<256, 64>
 {
+    // added constants (K)
     static constexpr constants_t get
     {
         // rounds 0..15
@@ -65,6 +66,7 @@ struct h256
 {
     using state_t = typename h<k256, Digest>::state_t;
 
+    // initial value (H)
     static constexpr state_t get
     {
         0x6a09e667,

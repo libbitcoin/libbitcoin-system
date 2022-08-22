@@ -234,7 +234,7 @@ inline void summary8(state& out, const state& in) NOEXCEPT
 
 inline void copying8(buffer& out, const state& in) NOEXCEPT
 {
-    auto& to = narrow_array_cast<uint32_t, state_size>(out);
+    auto& to = array_cast<uint32_t, state_size>(out);
     to = in;
 }
 
@@ -247,7 +247,7 @@ inline void bigend16(buffer& out, const block& in) NOEXCEPT
 {
     constexpr auto size = block_size / sizeof(uint32_t);
     auto& from = array_cast<uint32_t>(in);
-    auto& to = narrow_array_cast<uint32_t, size>(out);
+    auto& to = array_cast<uint32_t, size>(out);
     from_big_endians(to, from);
 }
 
@@ -259,11 +259,7 @@ inline void bigend08(digest& out, const state& in) NOEXCEPT
 
 inline void padding8(buffer& out) NOEXCEPT
 {
-    // TODO: safe offsetting array cast.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    auto& to = unsafe_array_cast<uint32_t, state_size>(&out[state_size]);
-    BC_POP_WARNING()
-
+    auto& to = array_cast<uint32_t, state_size, state_size>(out);
     to = pad32;
 }
 

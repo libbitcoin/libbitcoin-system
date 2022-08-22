@@ -83,8 +83,18 @@ constexpr size_t bits = to_bits(sizeof(Type));
 template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
 constexpr size_t bytes = Bits / byte_bits;
 
+/// The number of Smaller integrals that can pack into the Larger.
+template <typename Larger, typename Smaller, size_t Lanes = one,
+    std::enable_if_t<!is_zero(Lanes), bool> = true,
+    std::enable_if_t<Lanes <= (max_size_t / sizeof(Smaller)), bool> = true,
+    std::enable_if_t<std::is_integral_v<Smaller>, bool> = true>
+constexpr size_t capacity = sizeof(Larger) / (Lanes * sizeof(Smaller));
+
 /// std::array.
 /// ---------------------------------------------------------------------------
+
+template <typename Type>
+using nocvref = std::remove_cvref_t<Type>;
 
 template<typename>
 struct is_std_array_t : std::false_type {};
@@ -93,20 +103,20 @@ struct is_std_array_t<std_array<Type, Size>> : std::true_type {};
 template<typename Type>
 constexpr bool is_std_array = is_std_array_t<Type>::value;
 
-template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
-constexpr size_t array_count = std::tuple_size_v<Type>;
+template <typename Type, std::enable_if_t<is_std_array<nocvref<Type>>, bool> = true>
+constexpr size_t array_count = std::tuple_size_v<nocvref<Type>>;
 
-template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
-using array_element = typename Type::value_type;
+template <typename Type, std::enable_if_t<is_std_array<nocvref<Type>>, bool> = true>
+using array_element = typename nocvref<Type>::value_type;
 
-template <typename Type, std::enable_if_t<!is_std_array<Type>, bool> = true>
+template <typename Type, std::enable_if_t<!is_std_array<nocvref<Type>>, bool> = true>
 constexpr size_t size_of() noexcept { return sizeof(Type); }
 
-template <typename Type, std::enable_if_t<is_std_array<Type>, bool> = true>
+template <typename Type, std::enable_if_t<is_std_array<nocvref<Type>>, bool> = true>
 constexpr size_t size_of() noexcept(false)
 {
-    // Recurse array to integral type.
-    constexpr auto size = size_of<typename Type::value_type>();
+    // Recurse arrays until non-array type.
+    constexpr auto size = size_of<typename nocvref<Type>::value_type>();
     constexpr auto count = array_count<Type>;
 
     // Type constraint fails to match as throw is not constexpr.

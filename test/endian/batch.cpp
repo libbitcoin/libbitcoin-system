@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(endian__from_little_endians__non_constexpr__expected)
 template <size_t Size>
 inline const numbers<Size>& reduce(const numbers<size>& value)
 {
-    return narrow_array_cast<array_element<numbers<size>>, Size>(value);
+    return array_cast<array_element<numbers<size>>, Size>(value);
 }
 
 // These test return value and each level of the loop unroll (non-constexpr).

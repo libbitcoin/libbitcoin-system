@@ -13,7 +13,6 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <LinkIncremental>true</LinkIncremental>
     </ClCompile>
   </ItemDefinitionGroup>
   

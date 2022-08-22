@@ -62,6 +62,7 @@ void hash_neon(state& state, const block1& blocks) NOEXCEPT
     state0 = vld1q_u32(&state[0]);
     state1 = vld1q_u32(&state[4]);
 
+    // Each round is four sha rounds.
     // One block in four lanes.
     for (auto& block: blocks)
     {

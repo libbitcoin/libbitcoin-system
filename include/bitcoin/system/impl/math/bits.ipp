@@ -336,8 +336,9 @@ constexpr Value rotate_left(Value value, size_t shift) NOEXCEPT
     else
     {
         constexpr auto span = bits<Value>;
-        return bit_or(shift_left(value, shift % span),
-            shift_right(value, span - (shift % span)));
+        const auto cycle = shift % span;
+        return bit_or(shift_left(value, cycle),
+            shift_right(value, span - cycle));
     }
 }
 
@@ -352,8 +353,9 @@ constexpr void rotate_left_into(Value& value, size_t shift) NOEXCEPT
     else
     {
         constexpr auto span = bits<Value>;
-        value = bit_or(shift_left(value, shift % span),
-            shift_right(value, span - (shift % span)));
+        const auto cycle = shift % span;
+        value = bit_or(shift_left(value, cycle),
+            shift_right(value, span - cycle));
     }
 }
 
@@ -367,8 +369,9 @@ constexpr Value rotate_right(Value value, size_t shift) NOEXCEPT
     else
     {
         constexpr auto span = bits<Value>;
-        return bit_or(shift_right(value, shift % span),
-            shift_left(value, span - (shift % span)));
+        const auto cycle = shift % span;
+        return bit_or(shift_right(value, cycle),
+            shift_left(value, span - cycle));
     }
 }
 
@@ -383,8 +386,9 @@ constexpr void rotate_right_into(Value& value, size_t shift) NOEXCEPT
     else
     {
         constexpr auto span = bits<Value>;
-        value = bit_or(shift_right(value, shift % span),
-            shift_left(value, span - (shift % span)));
+        const auto cycle = shift % span;
+        value = bit_or(shift_right(value, cycle),
+            shift_left(value, span - cycle));
     }
 }
 

@@ -50,7 +50,7 @@ public:
     {
         // en.cppreference.com/w/cpp/memory/allocator
         // Base class (std::allocator) owns memory deallocation.
-        // This makes the C++20 allocation non-constexpr.
+        // Default fill is bypassed here.
         ::new(static_cast<void*>(ptr)) T;
     }
 
@@ -58,12 +58,11 @@ public:
     void construct(T* ptr, Args&&... args) noexcept(
         std::is_nothrow_default_constructible_v<Allocator>)
     {
+        // Explicit fill args are forwarded to type copy constructor here.
         std::allocator_traits<Allocator>::construct(
             static_cast<Allocator&>(*this), ptr, std::forward<Args>(args)...);
     }
 };
-
-static no_fill_allocator<uint8_t> no_fill_byte_allocator{};
 
 } // namespace system
 } // namespace libbitcoin

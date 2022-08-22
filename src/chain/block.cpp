@@ -128,7 +128,10 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 {
     const auto read_transactions = [witness](reader& source) NOEXCEPT
     {
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         auto txs = std::make_shared<transaction_ptrs>();
+        BC_POP_WARNING()
+
         txs->reserve(source.read_size(max_block_size));
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)
@@ -161,7 +164,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 
 data_chunk block::to_data(bool witness) const NOEXCEPT
 {
-    data_chunk data(serialized_size(witness), no_fill_byte_allocator);
+    data_chunk data(serialized_size(witness));
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
@@ -213,12 +216,11 @@ const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 
 hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
-    static no_fill_allocator<hash_digest> no_fill_hash_allocator{};
     const auto count = txs_->size();
+    const auto size = is_odd(count) && count > one ? add1(count) : count;
+    hashes out(size);
 
-    // Excess reservation accounts for possible generate_merkle_root addition.
-    hashes out(add1(count), no_fill_hash_allocator);
-
+    // Extra allocation for odd count optimizes for merkle root.
     // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
 
@@ -348,7 +350,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
     // Move the points of all non-coinbase transactions into one set.
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
-        auto out =(*tx)->points();
+        auto out = (*tx)->points();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     }
 
@@ -358,7 +360,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
 // private
 hash_digest block::generate_merkle_root(bool witness) const NOEXCEPT
 {
-    return merkle_root(transaction_hashes(witness));
+    return sha256::merkle_root(transaction_hashes(witness));
 }
 
 bool block::is_invalid_merkle_root() const NOEXCEPT
@@ -455,8 +457,8 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
         {
             if (output->committed_hash(committed))
             {
-                return committed == bitcoin_hash(generate_merkle_root(true),
-                    reserved);
+                return committed == sha256::double_hash(
+                    generate_merkle_root(true), reserved);
             }
         }
     }

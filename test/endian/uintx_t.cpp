@@ -26,17 +26,18 @@ BOOST_AUTO_TEST_SUITE(endian_uintx_t_tests)
 // Templates must match uintx_t<unsigned> vs. uintx_t<size_t>.
 BOOST_AUTO_TEST_CASE(endian__to_array__zero__expected)
 {
-    static_assert(from_uintx(uint5_t{   1 }) == data_array< 1>{ 1 });
-    static_assert(from_uintx(uint11_t{  1 }) == data_array< 2>{ 1 });
-    ////static_assert(from_uintx(uint48_t{  1 }) == data_array< 6>{ 1 });
+    static_assert(from_uintx(uint5_t{ 1 }) == data_array<1>{ 1 });
+    static_assert(from_uintx(uint11_t{ 1 }) == data_array<2>{ 1 });
+    // Internal compiler error msvc++.
+    ////static_assert(from_uintx(uint48_t{ 1 }) == data_array<6>{ 1 });
     static_assert(from_uintx(uint128_t{ 1 }) == data_array<16>{ 1 });
     static_assert(from_uintx(uint160_t{ 1 }) == data_array<20>{ 1 });
     static_assert(from_uintx(uint256_t{ 1 }) == data_array<32>{ 1 });
     static_assert(from_uintx(uint512_t{ 1 }) == data_array<64>{ 1 });
 
-    BOOST_REQUIRE_EQUAL(from_uintx(uint5_t{   1 }), data_array< 1>{ 1 });
-    BOOST_REQUIRE_EQUAL(from_uintx(uint11_t{  1 }), data_array< 2>{ 1 });
-    BOOST_REQUIRE_EQUAL(from_uintx(uint48_t{  1 }), data_array< 6>{ 1 });
+    BOOST_REQUIRE_EQUAL(from_uintx(uint5_t{ 1 }), data_array<1>{ 1 });
+    BOOST_REQUIRE_EQUAL(from_uintx(uint11_t{ 1 }), data_array<2>{ 1 });
+    BOOST_REQUIRE_EQUAL(from_uintx(uint48_t{ 1 }), data_array<6>{ 1 });
     BOOST_REQUIRE_EQUAL(from_uintx(uint128_t{ 1 }), data_array<16>{ 1 });
     BOOST_REQUIRE_EQUAL(from_uintx(uint160_t{ 1 }), data_array<20>{ 1 });
     BOOST_REQUIRE_EQUAL(from_uintx(uint256_t{ 1 }), data_array<32>{ 1 });
@@ -46,17 +47,17 @@ BOOST_AUTO_TEST_CASE(endian__to_array__zero__expected)
 // Templates must match uintx_t<unsigned> vs. uintx_t<size_t>.
 BOOST_AUTO_TEST_CASE(endian__to_uintx__zero__expected)
 {
-    static_assert(to_uintx(data_array< 1>{ 1 }) == uint5_t{   1 });
-    static_assert(to_uintx(data_array< 2>{ 1 }) == uint11_t{  1 });
-    static_assert(to_uintx(data_array< 6>{ 1 }) == uint48_t{  1 });
+    static_assert(to_uintx(data_array<1>{ 1 }) == uint5_t{ 1 });
+    static_assert(to_uintx(data_array<2>{ 1 }) == uint11_t{ 1 });
+    static_assert(to_uintx(data_array<6>{ 1 }) == uint48_t{ 1 });
     static_assert(to_uintx(data_array<16>{ 1 }) == uint128_t{ 1 });
     static_assert(to_uintx(data_array<20>{ 1 }) == uint160_t{ 1 });
     static_assert(to_uintx(data_array<32>{ 1 }) == uint256_t{ 1 });
     static_assert(to_uintx(data_array<64>{ 1 }) == uint512_t{ 1 });
 
-    BOOST_REQUIRE_EQUAL(to_uintx(data_array< 1>{ 1 }), uint5_t{   1 });
-    BOOST_REQUIRE_EQUAL(to_uintx(data_array< 2>{ 1 }), uint11_t{  1 });
-    BOOST_REQUIRE_EQUAL(to_uintx(data_array< 6>{ 1 }), uint48_t{  1 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<1>{ 1 }), uint5_t{ 1 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<2>{ 1 }), uint11_t{ 1 });
+    BOOST_REQUIRE_EQUAL(to_uintx(data_array<6>{ 1 }), uint48_t{ 1 });
     BOOST_REQUIRE_EQUAL(to_uintx(data_array<16>{ 1 }), uint128_t{ 1 });
     BOOST_REQUIRE_EQUAL(to_uintx(data_array<20>{ 1 }), uint160_t{ 1 });
     BOOST_REQUIRE_EQUAL(to_uintx(data_array<32>{ 1 }), uint256_t{ 1 });

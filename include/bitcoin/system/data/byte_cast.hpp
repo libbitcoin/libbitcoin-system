@@ -36,9 +36,7 @@ namespace system {
     
 /// Cast Integral& to same-sized array& of Byte.
 /// ---------------------------------------------------------------------------
-/// TODO: allow array to be longer than integral, with integral specified.
-/// TODO: allow for offsetting into byte array.
-/// TODO: rename to integral_cast.
+/// Size mismatch can be resolved using array_cast prior to byte_cast.
 
 /// Cast integral& to a byte array& with byte length of the integral.
 template <typename Byte = uint8_t, typename Integral,
@@ -63,6 +61,7 @@ byte_cast(Integral&& value) NOEXCEPT;
 
 /// Cast array& of Byte to same-sized Integral&.
 /// ---------------------------------------------------------------------------
+/// Size mismatch can be resolved using array_cast prior to byte_cast.
 
 /// Cast byte array& to unsigned integral& of same byte length.
 template <typename Byte, size_t Size,

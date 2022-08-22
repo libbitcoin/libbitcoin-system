@@ -211,13 +211,11 @@ hd_key hd_public::to_hd_key() const NOEXCEPT
 
 hd_public hd_public::derive_public(uint32_t index) const NOEXCEPT
 {
-    using hmacer = hmac<sha::algorithm<sha512>>;
-
     if (index >= hd_first_hardened_key)
         return {};
 
     const auto data = splice(point_, to_big_endian(index));
-    const auto intermediate = split(hmacer::code(data, chain_));
+    const auto intermediate = split(hmac<sha512>::code(data, chain_));
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
     auto child = point_;

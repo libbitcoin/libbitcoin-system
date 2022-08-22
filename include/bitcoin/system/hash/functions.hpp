@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
 
 #include <memory>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -47,12 +46,12 @@ typedef data_array<mini_hash_size> mini_hash;
 typedef std::shared_ptr<hash_digest> hash_ptr;
 
 /// Lists of common bitcoin hashes.
-typedef std::vector<long_hash> long_hashes;
-typedef std::vector<hash_digest> hashes;
-typedef std::vector<short_hash> short_hashes;
-typedef std::vector<half_hash> half_hashes;
-typedef std::vector<quarter_hash> quarter_hashes;
-typedef std::vector<mini_hash> mini_hashes;
+typedef std_vector<long_hash> long_hashes;
+typedef std_vector<hash_digest> hashes;
+typedef std_vector<short_hash> short_hashes;
+typedef std_vector<half_hash> half_hashes;
+typedef std_vector<quarter_hash> quarter_hashes;
+typedef std_vector<mini_hash> mini_hashes;
 
 /// Null-valued common hashes.
 constexpr long_hash null_long_hash{};
@@ -62,61 +61,86 @@ constexpr half_hash null_half_hash{};
 constexpr quarter_hash null_quarter_hash{};
 constexpr mini_hash null_mini_hash{};
 
-// Consensus sentinel hash.
+/// Consensus sentinel hash [signature hashing].
 constexpr hash_digest one_hash = from_uintx(uint256_t(one));
 
-/// Generate a bitcoin hash (sha256(sha256)).
-BC_API hash_digest bitcoin_hash(const data_slice& data) NOEXCEPT;
+/// Generalized cryptographic hash functions.
+/// ---------------------------------------------------------------------------
 
-/// Generate a bitcoin hash (sha256(sha256)) of left + right concatenation.
-/// Used for generation of witness commitment.
-BC_API hash_digest bitcoin_hash(const hash_digest& left,
+/// rmd128 [historical].
+template <typename Type>
+INLINE half_hash  rmd128_hash(const Type& data) NOEXCEPT;
+template <typename Type>
+INLINE data_chunk rmd128_chunk(const Type& data) NOEXCEPT;
+
+/// rmd160 [script].
+template <typename Type>
+INLINE short_hash rmd160_hash(const Type& data) NOEXCEPT;
+template <typename Type>
+INLINE data_chunk rmd160_chunk(const Type& data) NOEXCEPT;
+
+/// sha1 (sha160) [script].
+template <typename Type>
+INLINE short_hash sha1_hash(const Type& data) NOEXCEPT;
+template <typename Type>
+INLINE data_chunk sha1_chunk(const Type& data) NOEXCEPT;
+
+/// sha256 [script, wallet].
+template <typename Type>
+INLINE hash_digest sha256_hash(const Type& data) NOEXCEPT;
+INLINE hash_digest sha256_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT;
-
-/// Generate a bitcoin short hash (ripemd160(sha256)).
-BC_API short_hash bitcoin_short_hash(const data_slice& data) NOEXCEPT;
-
-/// Generate a bitcoin merkle root from an ordered set of hashes.
-BC_API hash_digest merkle_root(hashes&& set) NOEXCEPT;
-
-/// Generate a ripemd160 hash.
-BC_API short_hash ripemd160_hash(const data_slice& data) NOEXCEPT;
-BC_API data_chunk ripemd160_chunk(const data_slice& data) NOEXCEPT;
-
-/// Generate a sha1 (160 bit) hash.
-BC_API short_hash sha1_hash(const data_slice& data) NOEXCEPT;
-BC_API data_chunk sha1_chunk(const data_slice& data) NOEXCEPT;
-
-/// Generate a sha256 hash.
-BC_API hash_digest sha256_hash(const data_slice& data) NOEXCEPT;
-BC_API data_chunk sha256_chunk(const data_slice& data) NOEXCEPT;
-
-/// Generate a sha256 hash of left + right concatenation.
-/// This hash function is used in electrum seed stretching.
-BC_API hash_digest sha256_hash(const data_slice& left,
+INLINE hash_digest sha256_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT;
+template <typename Type>
+INLINE data_chunk sha256_chunk(const Type& data) NOEXCEPT;
 
-/// Generate a sha512 hash.
-BC_API long_hash sha512_hash(const data_slice& data) NOEXCEPT;
+/// sha512 hash [wallet].
+template <typename Type>
+INLINE long_hash  sha512_hash(const Type& data) NOEXCEPT;
+template <typename Type>
+INLINE data_chunk sha512_chunk(const Type& data) NOEXCEPT;
 
-/// Generate a scrypt hash.
-BC_API hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
+/// Specialized cryptographic hash functions.
+/// ---------------------------------------------------------------------------
 
-/// DJB2 hash key algorithm by Dan Bernstein.
-BC_API size_t djb2_hash(const data_slice& data) NOEXCEPT;
+/// Bitcoin short hash (rmd160(sha256)) [script].
+template <typename Type>
+INLINE short_hash bitcoin_short_hash(const Type& data) NOEXCEPT;
+template <typename Type>
+INLINE data_chunk bitcoin_short_chunk(const Type& data) NOEXCEPT;
 
-/// Combine hash values, such as a pair of djb2_hash outputs.
-constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
-{
-    return left ^ shift_left(right, one);
-}
+/// Bitcoin hash (sha256(sha256)) [script, chain, wallet].
+template <typename Type>
+INLINE hash_digest bitcoin_hash(const Type& data) NOEXCEPT;
+INLINE hash_digest bitcoin_hash(const hash_digest& left,
+    const hash_digest& right) NOEXCEPT;
+INLINE hash_digest bitcoin_hash2(const data_slice& left,
+    const data_slice& right) NOEXCEPT;
+template <typename Type>
+INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT;
+
+/// Merkle root from a bitcoin_hash set [chain].
+INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT;
+
+/// Litecoin scrypt hash [chain].
+INLINE hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
+
+/// Hash table keying.
+/// ---------------------------------------------------------------------------
+
+/// DJB2 hash key algorithm [Daniel J. Bernstein] [hash tables].
+INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT;
+
+/// Combine hash values, such as a pair of djb2_hash outputs [hash tables].
+INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
 
-// Extend std and boost namespaces with djb2_hash.
-// ----------------------------------------------------------------------------
-// This allows data_array/chunk to be incorporated into std/boost hash tables.
+/// Extend std and boost namespaces with djb2_hash.
+/// ---------------------------------------------------------------------------
+/// This allows data_array/chunk to be incorporated into std/boost hash tables.
 
 namespace std
 {

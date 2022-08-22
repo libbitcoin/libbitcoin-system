@@ -29,6 +29,7 @@ namespace sha {
 struct k160
   : public k<160, 80>
 {
+    // added constants (K)
     static constexpr constants_t get
     {
         // rounds 0..19
@@ -66,6 +67,7 @@ struct h160
 {
     using state_t = typename h<k160>::state_t;
 
+    // initial value (H)
     static constexpr state_t get
     {
         0x67452301,

@@ -30,7 +30,7 @@ namespace system {
 
 template <size_t Size, typename Integer,
     if_integer<Integer> = true>
-RCONSTEXPR data_array<Size> to_big_endian_size(Integer value) NOEXCEPT;
+constexpr data_array<Size> to_big_endian_size(Integer value) NOEXCEPT;
 
 template <size_t Size, typename Integer,
     if_integer<Integer> = true>

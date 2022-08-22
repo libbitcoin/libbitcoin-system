@@ -86,7 +86,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
     src/hash/checksum.cpp \
-    src/hash/functions.cpp \
     src/hash/siphash.cpp \
     src/hash/vectorization/sha256_1_native.cpp \
     src/hash/vectorization/sha256_2_shani.cpp \
@@ -203,10 +202,8 @@ test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_f
 test_libbitcoin_system_test_SOURCES = \
     test/constants.cpp \
     test/constraints.cpp \
-    test/cpuid.cpp \
     test/funclets.cpp \
     test/hacks.cpp \
-    test/intrinsics.cpp \
     test/literals.cpp \
     test/main.cpp \
     test/settings.cpp \
@@ -254,8 +251,10 @@ test_libbitcoin_system_test_SOURCES = \
     test/data/data_reference.cpp \
     test/data/data_slab.cpp \
     test/data/data_slice.cpp \
+    test/data/exclusive_slice.cpp \
     test/data/external_ptr.cpp \
     test/data/integer.cpp \
+    test/data/iterable.cpp \
     test/data/memory.cpp \
     test/data/no_fill_allocator.cpp \
     test/data/string.cpp \
@@ -277,12 +276,35 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/accumulator.cpp \
     test/hash/checksum.cpp \
     test/hash/functions.cpp \
-    test/hash/functions.hpp \
+    test/hash/hash.hpp \
+    test/hash/hmac.cpp \
+    test/hash/pbkd.cpp \
+    test/hash/scrypt.cpp \
     test/hash/siphash.cpp \
     test/hash/siphash.hpp \
+    test/hash/performance/performance.cpp \
+    test/hash/performance/performance.hpp \
+    test/hash/performance/baseline/byteswap.h \
+    test/hash/performance/baseline/common.h \
+    test/hash/performance/baseline/endian.h \
+    test/hash/performance/baseline/rmd160.cpp \
+    test/hash/performance/baseline/rmd160.h \
+    test/hash/performance/baseline/sha256.cpp \
+    test/hash/performance/baseline/sha256.h \
     test/hash/rmd/algorithm.cpp \
+    test/hash/rmd/analysis.cpp \
     test/hash/sha/algorithm.cpp \
-    test/hash/sha/merkle.cpp \
+    test/hash/sha/algorithm.hpp \
+    test/hash/sha/algorithm.ipp \
+    test/hash/sha/analysis.cpp \
+    test/hash/sha/sha160.cpp \
+    test/hash/sha/sha256.cpp \
+    test/hash/sha/sha512.cpp \
+    test/hash/sha/vectorization.cpp \
+    test/intrinsics/haves.cpp \
+    test/intrinsics/intrinsics.cpp \
+    test/intrinsics/xcpu/cpuid.cpp \
+    test/intrinsics/xcpu/functional.cpp \
     test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/program.cpp \
@@ -296,6 +318,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/math/logarithm.cpp \
     test/math/overflow.cpp \
     test/math/power.cpp \
+    test/math/rotate.cpp \
     test/math/sign.cpp \
     test/radix/base_10.cpp \
     test/radix/base_16.cpp \
@@ -390,12 +413,10 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/boost.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
-    include/bitcoin/system/cpuid.hpp \
     include/bitcoin/system/define.hpp \
     include/bitcoin/system/exceptions.hpp \
     include/bitcoin/system/funclets.hpp \
     include/bitcoin/system/have.hpp \
-    include/bitcoin/system/intrinsics.hpp \
     include/bitcoin/system/literals.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/typelets.hpp \
@@ -477,7 +498,9 @@ include_bitcoin_system_data_HEADERS = \
     include/bitcoin/system/data/data_reference.hpp \
     include/bitcoin/system/data/data_slab.hpp \
     include/bitcoin/system/data/data_slice.hpp \
+    include/bitcoin/system/data/exclusive_slice.hpp \
     include/bitcoin/system/data/external_ptr.hpp \
+    include/bitcoin/system/data/iterable.hpp \
     include/bitcoin/system/data/memory.hpp \
     include/bitcoin/system/data/no_fill_allocator.hpp \
     include/bitcoin/system/data/string.hpp
@@ -508,6 +531,8 @@ include_bitcoin_system_error_HEADERS = \
 include_bitcoin_system_hashdir = ${includedir}/bitcoin/system/hash
 include_bitcoin_system_hash_HEADERS = \
     include/bitcoin/system/hash/accumulator.hpp \
+    include/bitcoin/system/hash/algorithm.hpp \
+    include/bitcoin/system/hash/algorithms.hpp \
     include/bitcoin/system/hash/checksum.hpp \
     include/bitcoin/system/hash/functions.hpp \
     include/bitcoin/system/hash/hash.hpp \
@@ -519,7 +544,6 @@ include_bitcoin_system_hash_HEADERS = \
 include_bitcoin_system_hash_rmddir = ${includedir}/bitcoin/system/hash/rmd
 include_bitcoin_system_hash_rmd_HEADERS = \
     include/bitcoin/system/hash/rmd/algorithm.hpp \
-    include/bitcoin/system/hash/rmd/ripemd_.hpp \
     include/bitcoin/system/hash/rmd/rmd.hpp \
     include/bitcoin/system/hash/rmd/rmd128.hpp \
     include/bitcoin/system/hash/rmd/rmd160.hpp
@@ -571,8 +595,7 @@ include_bitcoin_system_impl_hash_HEADERS = \
 
 include_bitcoin_system_impl_hash_rmddir = ${includedir}/bitcoin/system/impl/hash/rmd
 include_bitcoin_system_impl_hash_rmd_HEADERS = \
-    include/bitcoin/system/impl/hash/rmd/algorithm.ipp \
-    include/bitcoin/system/impl/hash/rmd/ripemd_.ipp
+    include/bitcoin/system/impl/hash/rmd/algorithm.ipp
 
 include_bitcoin_system_impl_hash_shadir = ${includedir}/bitcoin/system/impl/hash/sha
 include_bitcoin_system_impl_hash_sha_HEADERS = \
@@ -597,6 +620,7 @@ include_bitcoin_system_impl_math_HEADERS = \
     include/bitcoin/system/impl/math/logarithm.ipp \
     include/bitcoin/system/impl/math/overflow.ipp \
     include/bitcoin/system/impl/math/power.ipp \
+    include/bitcoin/system/impl/math/rotate.ipp \
     include/bitcoin/system/impl/math/sign.ipp
 
 include_bitcoin_system_impl_radixdir = ${includedir}/bitcoin/system/impl/radix
@@ -632,6 +656,29 @@ include_bitcoin_system_impl_words_HEADERS = \
     include/bitcoin/system/impl/words/dictionaries.ipp \
     include/bitcoin/system/impl/words/dictionary.ipp
 
+include_bitcoin_system_intrinsicsdir = ${includedir}/bitcoin/system/intrinsics
+include_bitcoin_system_intrinsics_HEADERS = \
+    include/bitcoin/system/intrinsics/byteswap.hpp \
+    include/bitcoin/system/intrinsics/haves.hpp \
+    include/bitcoin/system/intrinsics/intrinsics.hpp \
+    include/bitcoin/system/intrinsics/rotate.hpp
+
+include_bitcoin_system_intrinsics_armdir = ${includedir}/bitcoin/system/intrinsics/arm
+include_bitcoin_system_intrinsics_arm_HEADERS = \
+    include/bitcoin/system/intrinsics/arm/arm.hpp \
+    include/bitcoin/system/intrinsics/arm/functional.hpp \
+    include/bitcoin/system/intrinsics/arm/sha.hpp
+
+include_bitcoin_system_intrinsics_xcpudir = ${includedir}/bitcoin/system/intrinsics/xcpu
+include_bitcoin_system_intrinsics_xcpu_HEADERS = \
+    include/bitcoin/system/intrinsics/xcpu/cpuid.hpp \
+    include/bitcoin/system/intrinsics/xcpu/defines.hpp \
+    include/bitcoin/system/intrinsics/xcpu/functional_128.hpp \
+    include/bitcoin/system/intrinsics/xcpu/functional_256.hpp \
+    include/bitcoin/system/intrinsics/xcpu/functional_512.hpp \
+    include/bitcoin/system/intrinsics/xcpu/sha.hpp \
+    include/bitcoin/system/intrinsics/xcpu/xcpu.hpp
+
 include_bitcoin_system_machinedir = ${includedir}/bitcoin/system/machine
 include_bitcoin_system_machine_HEADERS = \
     include/bitcoin/system/machine/interpreter.hpp \
@@ -648,11 +695,13 @@ include_bitcoin_system_math_HEADERS = \
     include/bitcoin/system/math/byteswap.hpp \
     include/bitcoin/system/math/cast.hpp \
     include/bitcoin/system/math/division.hpp \
+    include/bitcoin/system/math/functional.hpp \
     include/bitcoin/system/math/limits.hpp \
     include/bitcoin/system/math/logarithm.hpp \
     include/bitcoin/system/math/math.hpp \
     include/bitcoin/system/math/overflow.hpp \
     include/bitcoin/system/math/power.hpp \
+    include/bitcoin/system/math/rotate.hpp \
     include/bitcoin/system/math/sign.hpp
 
 include_bitcoin_system_radixdir = ${includedir}/bitcoin/system/radix

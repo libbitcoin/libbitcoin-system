@@ -20,24 +20,21 @@
 #define LIBBITCOIN_SYSTEM_HASH_RMD_ALGORITHM_IPP
 
 #include <bit>
+#include <iostream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/math/math.hpp>
+
+// Based on:
+// homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
+// [Dobbertin, Bosselaers, Preneel]
 
 namespace libbitcoin {
 namespace system {
 namespace rmd {
 
-// Implementation based on:
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd128.txt
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd256.txt
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd160.txt
-// homes.esat.kuleuven.be/~bosselae/ripemd/rmd320.txt
-// homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
-
-#define TEMPLATE template <typename RMD, bool Concurrent, \
-    if_same<typename RMD::T, rmdh_t> If>
-#define CLASS algorithm<RMD, Concurrent, If>
+#define TEMPLATE template <typename RMD, if_same<typename RMD::T, rmdh_t> If>
+#define CLASS algorithm<RMD, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -45,381 +42,259 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-// private
-// ----------------------------------------------------------------------------
-
-TEMPLATE
-CONSTEVAL auto& CLASS::
-concurrency() NOEXCEPT
-{
-    if constexpr (Concurrent)
-        return bc::par_unseq;
-    else
-        return bc::seq;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::chunk_t CLASS::
-chunk_pad() NOEXCEPT
-{
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
-
-    chunk_t out{};
-    out.front() = bit_hi<word_t>;
-    out.back() = to_bits(bytes);
-    return out;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::words_t CLASS::
-block_pad() NOEXCEPT
-{
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
-
-    words_t out{};
-    out.front() = bit_hi<word_t>;
-    out.back() = to_bits(bytes);
-    return out;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::blocks_pad_t CLASS::
-blocks_pad() NOEXCEPT
-{
-    blocks_pad_t out{};
-    out.front() = bit_hi<word_t>;
-    return out;
-}
-
 // Functions.
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f0(auto x, auto y, auto z) NOEXCEPT
 {
-    return x ^ y ^ z;
+    return f::xor_(f::xor_(x, y), z);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f1(auto x, auto y, auto z) NOEXCEPT
 {
-    return (x & y) | (~x & z);
+    return f::or_(f::and_(x, y), f::and_(f::not_(x), z));
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f2(auto x, auto y, auto z) NOEXCEPT
 {
-    return (x | ~y) ^ z;
+    return f::xor_(f::or_(x, f::not_(y)), z);
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f3(auto x, auto y, auto z) NOEXCEPT
 {
-    return (x & z) | (y & ~z);
+    return f::or_(f::and_(x, z), f::and_(y, f::not_(z)));
 }
 
 TEMPLATE
-constexpr auto CLASS::
+INLINE constexpr auto CLASS::
 f4(auto x, auto y, auto z) NOEXCEPT
 {
-    return x ^ (y | ~z);
+    return f::xor_(x, f::or_(y, f::not_(z)));
 }
 
 // Rounds
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-template<size_t Round>
+template<size_t Round, typename Auto>
 CONSTEVAL auto CLASS::
 functor() NOEXCEPT
 {
     using self = CLASS;
-    constexpr auto fn = Round / RMD::K::columns;
+    constexpr auto fn = Round / K::columns;
 
-    if constexpr (RMD::rounds == 128)
+    // Select function by column.
+    if constexpr (RMD::strength == 128)
     {
         if constexpr (fn == 0u || fn == 7u)
-            return &self::template f0<uint32_t, uint32_t, uint32_t>;
+            return &self::template f0<Auto, Auto, Auto>;
         else if constexpr (fn == 1u || fn == 6u)
-            return &self::template f1<uint32_t, uint32_t, uint32_t>;
+            return &self::template f1<Auto, Auto, Auto>;
         else if constexpr (fn == 2u || fn == 5u)
-            return &self::template f2<uint32_t, uint32_t, uint32_t>;
+            return &self::template f2<Auto, Auto, Auto>;
         else if constexpr (fn == 3u || fn == 4u)
-            return &self::template f3<uint32_t, uint32_t, uint32_t>;
+            return &self::template f3<Auto, Auto, Auto>;
     }
     else
     {
         if constexpr (fn == 0u || fn == 9u)
-            return &self::template f0<uint32_t, uint32_t, uint32_t>;
+            return &self::template f0<Auto, Auto, Auto>;
         else if constexpr (fn == 1u || fn == 8u)
-            return &self::template f1<uint32_t, uint32_t, uint32_t>;
+            return &self::template f1<Auto, Auto, Auto>;
         else if constexpr (fn == 2u || fn == 7u)
-            return &self::template f2<uint32_t, uint32_t, uint32_t>;
+            return &self::template f2<Auto, Auto, Auto>;
         else if constexpr (fn == 3u || fn == 6u)
-            return &self::template f3<uint32_t, uint32_t, uint32_t>;
+            return &self::template f3<Auto, Auto, Auto>;
         else if constexpr (fn == 4u || fn == 5u)
-            return &self::template f4<uint32_t, uint32_t, uint32_t>;
+            return &self::template f4<Auto, Auto, Auto>;
     }
 }
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr auto CLASS::
-round(auto a, auto& b, auto c, auto d, auto& e, auto w) NOEXCEPT
+INLINE constexpr auto CLASS::
+round(auto& a, auto b, auto c, auto d, auto x) NOEXCEPT
 {
-    constexpr auto r = K::rot[Round];
-    constexpr auto k = K::get[Round / RMD::K::columns];
-    constexpr auto f = functor<Round>();
+    constexpr auto s = K::rot[Round];
+    constexpr auto k = K::get[Round / K::columns];
+    constexpr auto fn = functor<Round, decltype(a)>();
 
-    // TODO: std::rotl(c,10) is not in RMD128.
-    e = /*a =*/ std::rotl(a + f(b, c, d) + k + w, r) + e;
-    b = /*c =*/ std::rotl(c, 10);
+    a = /*b =*/ f::rol<s>(f::addc<k>(f::add(f::add(a, fn(b, c, d)), x)));
 }
 
 TEMPLATE
 template<size_t Round>
-FORCE_INLINE constexpr void CLASS::
-round(auto& out, const auto& in) NOEXCEPT
+INLINE constexpr auto CLASS::
+round(auto& a, auto b, auto& c, auto d, auto e, auto x) NOEXCEPT
 {
-    constexpr auto words  = RMD::state_words;
-    constexpr auto rounds = RMD::rounds;
+    constexpr auto s = K::rot[Round];
+    constexpr auto k = K::get[Round / K::columns];
+    constexpr auto fn = functor<Round, decltype(a)>();
 
-    round<Round>(
-        out[(rounds + 0 - Round) % words],
-        out[(rounds + 1 - Round) % words], // c->b
-        out[(rounds + 2 - Round) % words],
-        out[(rounds + 3 - Round) % words],
-        out[(rounds + 4 - Round) % words], // a->e
-        in[K::word[Round]]);
+    a = /*b =*/ f::add(f::rol<s>(f::addc<k>(f::add(f::add(a, fn(b, c, d)), x))), e);
+    c = /*d =*/ f::rol<10>(c);
 }
 
 TEMPLATE
-template<bool First>
-constexpr void CLASS::
-batch(state_t& out, const words_t& in) NOEXCEPT
+template<size_t Round>
+INLINE constexpr void CLASS::
+round(auto& state, const auto& words) NOEXCEPT
 {
-    // Order of execution is arbitrary.
-    constexpr auto offset = First ? zero : to_half(RMD::rounds);
-
-    auto pin = in.data();
-    auto pout = out.data();
-
-    // RMD256:f0/f4, RMD128:f0/f3
-    round<offset + 0>(pout, pin);
-    round<offset + 1>(pout, pin);
-    round<offset + 2>(pout, pin);
-    round<offset + 3>(pout, pin);
-    round<offset + 4>(pout, pin);
-    round<offset + 5>(pout, pin);
-    round<offset + 6>(pout, pin);
-    round<offset + 7>(pout, pin);
-    round<offset + 8>(pout, pin);
-    round<offset + 9>(pout, pin);
-    round<offset + 10>(pout, pin);
-    round<offset + 11>(pout, pin);
-    round<offset + 12>(pout, pin);
-    round<offset + 13>(pout, pin);
-    round<offset + 14>(pout, pin);
-    round<offset + 15>(pout, pin);
-
-    // RMD256:f1/f3, RMD128:f1/f2
-    round<offset + 16>(pout, pin);
-    round<offset + 17>(pout, pin);
-    round<offset + 18>(pout, pin);
-    round<offset + 19>(pout, pin);
-    round<offset + 20>(pout, pin);
-    round<offset + 21>(pout, pin);
-    round<offset + 22>(pout, pin);
-    round<offset + 23>(pout, pin);
-    round<offset + 24>(pout, pin);
-    round<offset + 25>(pout, pin);
-    round<offset + 26>(pout, pin);
-    round<offset + 27>(pout, pin);
-    round<offset + 28>(pout, pin);
-    round<offset + 29>(pout, pin);
-    round<offset + 30>(pout, pin);
-    round<offset + 31>(pout, pin);
-
-    // RMD256:f2/f2, RMD128:f2/f1
-    round<offset + 32>(pout, pin);
-    round<offset + 33>(pout, pin);
-    round<offset + 34>(pout, pin);
-    round<offset + 35>(pout, pin);
-    round<offset + 36>(pout, pin);
-    round<offset + 37>(pout, pin);
-    round<offset + 38>(pout, pin);
-    round<offset + 39>(pout, pin);
-    round<offset + 40>(pout, pin);
-    round<offset + 41>(pout, pin);
-    round<offset + 42>(pout, pin);
-    round<offset + 43>(pout, pin);
-    round<offset + 44>(pout, pin);
-    round<offset + 45>(pout, pin);
-    round<offset + 46>(pout, pin);
-    round<offset + 47>(pout, pin);
-
-    // RMD256:f3/f1, RMD128:f3/f0
-    round<offset + 48>(pout, pin);
-    round<offset + 49>(pout, pin);
-    round<offset + 50>(pout, pin);
-    round<offset + 51>(pout, pin);
-    round<offset + 52>(pout, pin);
-    round<offset + 53>(pout, pin);
-    round<offset + 54>(pout, pin);
-    round<offset + 55>(pout, pin);
-    round<offset + 56>(pout, pin);
-    round<offset + 57>(pout, pin);
-    round<offset + 58>(pout, pin);
-    round<offset + 59>(pout, pin);
-    round<offset + 60>(pout, pin);
-
-    // msvc++ (/O2/Ob2/Ot) inlining stops here without __forceinline.
-    round<offset + 61>(pout, pin);
-    round<offset + 62>(pout, pin);
-    round<offset + 63>(pout, pin);
-
-    // RMD256:f4/f0
-    if constexpr (RMD::rounds == 160)
+    if constexpr (RMD::strength == 128)
     {
-        round<offset + 64>(pout, pin);
-        round<offset + 65>(pout, pin);
-        round<offset + 66>(pout, pin);
-        round<offset + 67>(pout, pin);
-        round<offset + 68>(pout, pin);
-        round<offset + 69>(pout, pin);
-        round<offset + 70>(pout, pin);
-        round<offset + 71>(pout, pin);
-        round<offset + 72>(pout, pin);
-        round<offset + 73>(pout, pin);
-        round<offset + 74>(pout, pin);
-        round<offset + 75>(pout, pin);
-        round<offset + 76>(pout, pin);
-        round<offset + 77>(pout, pin);
-        round<offset + 78>(pout, pin);
-        round<offset + 79>(pout, pin);
-    }
-}
-
-TEMPLATE
-constexpr void CLASS::
-rounding(state_t& state, const words_t& buffer) NOEXCEPT
-{
-    // Two copies of state (required by RMD) are saved to jobs.
-    std_array<std::pair<bool, state_t>, two> jobs
-    {
-        std::make_pair(true, state),
-        std::make_pair(false, state)
-    };
-
-    if (std::is_constant_evaluated())
-    {
-        batch<true>(jobs.front().second, buffer);
-        batch<false>(jobs.back().second, buffer);
+        round<Round>(
+            state[(RMD::rounds + 0 - Round) % RMD::state_words], // b->a
+            state[(RMD::rounds + 1 - Round) % RMD::state_words],
+            state[(RMD::rounds + 2 - Round) % RMD::state_words],
+            state[(RMD::rounds + 3 - Round) % RMD::state_words],
+            words[K::word[Round]]);
     }
     else
     {
-        // buffer is const, jobs are independent and unsequenced.
-        std_for_each(concurrency(), jobs.begin(), jobs.end(),
-            [&buffer](auto& job) NOEXCEPT
-            {
-                if (job.first)
-                    batch<true>(job.second, buffer);
-                else
-                    batch<false>(job.second, buffer);
-            });
+        round<Round>(
+            state[(RMD::rounds + 0 - Round) % RMD::state_words], // b->a
+            state[(RMD::rounds + 1 - Round) % RMD::state_words],
+            state[(RMD::rounds + 2 - Round) % RMD::state_words], // d->c
+            state[(RMD::rounds + 3 - Round) % RMD::state_words],
+            state[(RMD::rounds + 4 - Round) % RMD::state_words],
+            words[K::word[Round]]);
+    }
+}
+
+TEMPLATE
+constexpr void CLASS::
+compress(state_t& state, const words_t& words) NOEXCEPT
+{
+    constexpr auto offset = to_half(RMD::rounds);
+
+    state_t left{ state };
+    state_t right{ state };
+
+    // RMD160:f0/f4, RMD128:f0/f3
+    round< 0>(left, words);	round< 0 + offset>(right, words);
+    round< 1>(left, words);	round< 1 + offset>(right, words);
+    round< 2>(left, words);	round< 2 + offset>(right, words);
+    round< 3>(left, words);	round< 3 + offset>(right, words);
+    round< 4>(left, words);	round< 4 + offset>(right, words);
+    round< 5>(left, words);	round< 5 + offset>(right, words);
+    round< 6>(left, words);	round< 6 + offset>(right, words);
+    round< 7>(left, words);	round< 7 + offset>(right, words);
+    round< 8>(left, words);	round< 8 + offset>(right, words);
+    round< 9>(left, words);	round< 9 + offset>(right, words);
+    round<10>(left, words);	round<10 + offset>(right, words);
+    round<11>(left, words);	round<11 + offset>(right, words);
+    round<12>(left, words);	round<12 + offset>(right, words);
+    round<13>(left, words);	round<13 + offset>(right, words);
+    round<14>(left, words);	round<14 + offset>(right, words);
+    round<15>(left, words);	round<15 + offset>(right, words);
+
+    // RMD160:f1/f3, RMD128:f1/f2
+    round<16>(left, words);	round<16 + offset>(right, words);
+    round<17>(left, words);	round<17 + offset>(right, words);
+    round<18>(left, words);	round<18 + offset>(right, words);
+    round<19>(left, words);	round<19 + offset>(right, words);
+    round<20>(left, words);	round<20 + offset>(right, words);
+    round<21>(left, words);	round<21 + offset>(right, words);
+    round<22>(left, words);	round<22 + offset>(right, words);
+    round<23>(left, words);	round<23 + offset>(right, words);
+    round<24>(left, words);	round<24 + offset>(right, words);
+    round<25>(left, words);	round<25 + offset>(right, words);
+    round<26>(left, words);	round<26 + offset>(right, words);
+    round<27>(left, words);	round<27 + offset>(right, words);
+    round<28>(left, words);	round<28 + offset>(right, words);
+    round<29>(left, words);	round<29 + offset>(right, words);
+    round<30>(left, words);	round<30 + offset>(right, words);
+    round<31>(left, words);	round<31 + offset>(right, words);
+
+    // RMD160:f2/f2, RMD128:f2/f1
+    round<32>(left, words);	round<32 + offset>(right, words);
+    round<33>(left, words);	round<33 + offset>(right, words);
+    round<34>(left, words);	round<34 + offset>(right, words);
+    round<35>(left, words);	round<35 + offset>(right, words);
+    round<36>(left, words);	round<36 + offset>(right, words);
+    round<37>(left, words);	round<37 + offset>(right, words);
+    round<38>(left, words);	round<38 + offset>(right, words);
+    round<39>(left, words);	round<39 + offset>(right, words);
+    round<40>(left, words);	round<40 + offset>(right, words);
+    round<41>(left, words);	round<41 + offset>(right, words);
+    round<42>(left, words);	round<42 + offset>(right, words);
+    round<43>(left, words);	round<43 + offset>(right, words);
+    round<44>(left, words);	round<44 + offset>(right, words);
+    round<45>(left, words);	round<45 + offset>(right, words);
+    round<46>(left, words);	round<46 + offset>(right, words);
+    round<47>(left, words);	round<47 + offset>(right, words);
+
+    // RMD160:f3/f1, RMD128:f3/f0
+    round<48>(left, words);	round<48 + offset>(right, words);
+    round<49>(left, words);	round<49 + offset>(right, words);
+    round<50>(left, words);	round<50 + offset>(right, words);
+    round<51>(left, words);	round<51 + offset>(right, words);
+    round<52>(left, words);	round<52 + offset>(right, words);
+    round<53>(left, words);	round<53 + offset>(right, words);
+    round<54>(left, words);	round<54 + offset>(right, words);
+    round<55>(left, words);	round<55 + offset>(right, words);
+    round<56>(left, words);	round<56 + offset>(right, words);
+    round<57>(left, words);	round<57 + offset>(right, words);
+    round<58>(left, words);	round<58 + offset>(right, words);
+    round<59>(left, words);	round<59 + offset>(right, words);
+    round<60>(left, words);	round<60 + offset>(right, words);
+    round<61>(left, words);	round<61 + offset>(right, words);
+    round<62>(left, words);	round<62 + offset>(right, words);
+    round<63>(left, words);	round<63 + offset>(right, words);
+
+    // RMD160:f4/f0
+    if constexpr (RMD::strength == 160)
+    {
+        round<64>(left, words);	round<64 + offset>(right, words);
+        round<65>(left, words);	round<65 + offset>(right, words);
+        round<66>(left, words);	round<66 + offset>(right, words);
+        round<67>(left, words);	round<67 + offset>(right, words);
+        round<68>(left, words);	round<68 + offset>(right, words);
+        round<69>(left, words);	round<69 + offset>(right, words);
+        round<70>(left, words);	round<70 + offset>(right, words);
+        round<71>(left, words);	round<71 + offset>(right, words);
+        round<72>(left, words);	round<72 + offset>(right, words);
+        round<73>(left, words);	round<73 + offset>(right, words);
+        round<74>(left, words);	round<74 + offset>(right, words);
+        round<75>(left, words);	round<75 + offset>(right, words);
+        round<76>(left, words);	round<76 + offset>(right, words);
+        round<77>(left, words);	round<77 + offset>(right, words);
+        round<78>(left, words);	round<78 + offset>(right, words);
+        round<79>(left, words);	round<79 + offset>(right, words);
     }
 
-    // Add state from both jobs to original state.
-    summarize(state, jobs.front().second, jobs.back().second);
+    summarize(state, left, right);
 }
 
 TEMPLATE
-constexpr void CLASS::
-summarize(state_t& out, const state_t& in1, const state_t& in2) NOEXCEPT
+INLINE constexpr void CLASS::
+summarize(state_t& state, const state_t& batch1,
+    const state_t& batch2) NOEXCEPT
 {
-    out[0] += (in1[0] + in2[0]);
-    out[1] += (in1[1] + in2[1]);
-    out[2] += (in1[2] + in2[2]);
-    out[3] += (in1[3] + in2[3]);
-    out[4] += (in1[4] + in2[4]);
-}
-
-// Padding
-// ---------------------------------------------------------------------------
-
-TEMPLATE
-constexpr void CLASS::
-pad_one(words_t& out) NOEXCEPT
-{
-    // Pad a single whole block with pre-prepared buffer.
-    constexpr auto pad = block_pad();
-
-    out = pad;
-}
-
-TEMPLATE
-constexpr void CLASS::
-pad_half(words_t& out) NOEXCEPT
-{
-    // Pad a half block.
-    constexpr auto pad = chunk_pad();
-
-    if (std::is_constant_evaluated())
+    if constexpr (RMD::strength == 128)
     {
-        out.at(8)  = pad.at(0);
-        out.at(9)  = pad.at(1);
-        out.at(10) = pad.at(2);
-        out.at(11) = pad.at(3);
-        out.at(12) = pad.at(4);
-        out.at(13) = pad.at(5);
-        out.at(14) = pad.at(6);
-        out.at(15) = pad.at(7);
+        const auto state_0_ = state[0];
+        state[0] = f::add(f::add(state[1], batch1[2]), batch2[3]);
+        state[1] = f::add(f::add(state[2], batch1[3]), batch2[0]);
+        state[2] = f::add(f::add(state[3], batch1[0]), batch2[1]);
+        state[3] = f::add(f::add(state_0_, batch1[1]), batch2[2]);
     }
     else
     {
-        constexpr auto size = array_count<chunk_t>;
-        unsafe_array_cast<word_t, size>(&out[size]) = pad;
-    }
-}
-
-TEMPLATE
-constexpr void CLASS::
-pad_n(words_t& out, count_t blocks) NOEXCEPT
-{
-    // Pad any number of whole blocks.
-    constexpr auto pad = blocks_pad();
-    const auto bits = to_bits(blocks * array_count<block_t>);
-
-    if (std::is_constant_evaluated())
-    {
-        out.at(0)  = pad.at(0);
-        out.at(1)  = pad.at(1);
-        out.at(2)  = pad.at(2);
-        out.at(3)  = pad.at(3);
-        out.at(4)  = pad.at(4);
-        out.at(5)  = pad.at(5);
-        out.at(6)  = pad.at(6);
-        out.at(7)  = pad.at(7);
-        out.at(8)  = pad.at(8);
-        out.at(9)  = pad.at(9);
-        out.at(10) = pad.at(10);
-        out.at(11) = pad.at(11);
-        out.at(12) = pad.at(12);
-        out.at(13) = pad.at(13);
-        out.at(14) = hi_word<word_t>(bits);
-        out.at(15) = lo_word<word_t>(bits);
-    }
-    else
-    {
-        narrow_array_cast<word_t, array_count<blocks_pad_t>>(out) = pad;
-
-        // Split count into hi/low words and assign end of padded buffer.
-        out[14] = hi_word<word_t>(bits);
-        out[15] = lo_word<word_t>(bits);
+        const auto state_0_ = state[0];
+        state[0] = f::add(f::add(state[1], batch1[2]), batch2[3]);
+        state[1] = f::add(f::add(state[2], batch1[3]), batch2[4]);
+        state[2] = f::add(f::add(state[3], batch1[4]), batch2[0]);
+        state[3] = f::add(f::add(state[4], batch1[0]), batch2[1]);
+        state[4] = f::add(f::add(state_0_, batch1[1]), batch2[2]);
     }
 }
 
@@ -428,173 +303,348 @@ pad_n(words_t& out, count_t blocks) NOEXCEPT
 // little-endian I/O is conventional for RMD.
 
 TEMPLATE
-constexpr void CLASS::
-input(words_t& out, const block_t& in) NOEXCEPT
+INLINE constexpr void CLASS::
+input(words_t& words, const block_t& block) NOEXCEPT
 {
-    constexpr auto size = RMD::word_bytes;
-
     if (std::is_constant_evaluated())
     {
-        from_little< 0 * size>(out[ 0], in);
-        from_little< 1 * size>(out[ 1], in);
-        from_little< 2 * size>(out[ 2], in);
-        from_little< 3 * size>(out[ 3], in);
-        from_little< 4 * size>(out[ 4], in);
-        from_little< 5 * size>(out[ 5], in);
-        from_little< 6 * size>(out[ 6], in);
-        from_little< 7 * size>(out[ 7], in);
-        from_little< 8 * size>(out[ 8], in);
-        from_little< 9 * size>(out[ 9], in);
-        from_little<10 * size>(out[10], in);
-        from_little<11 * size>(out[11], in);
-        from_little<12 * size>(out[12], in);
-        from_little<13 * size>(out[13], in);
-        from_little<14 * size>(out[14], in);
-        from_little<15 * size>(out[15], in);
+        constexpr auto size = RMD::word_bytes;
+        from_little< 0 * size>(words.at( 0), block);
+        from_little< 1 * size>(words.at( 1), block);
+        from_little< 2 * size>(words.at( 2), block);
+        from_little< 3 * size>(words.at( 3), block);
+        from_little< 4 * size>(words.at( 4), block);
+        from_little< 5 * size>(words.at( 5), block);
+        from_little< 6 * size>(words.at( 6), block);
+        from_little< 7 * size>(words.at( 7), block);
+        from_little< 8 * size>(words.at( 8), block);
+        from_little< 9 * size>(words.at( 9), block);
+        from_little<10 * size>(words.at(10), block);
+        from_little<11 * size>(words.at(11), block);
+        from_little<12 * size>(words.at(12), block);
+        from_little<13 * size>(words.at(13), block);
+        from_little<14 * size>(words.at(14), block);
+        from_little<15 * size>(words.at(15), block);
+    }
+    else if constexpr (bc::is_big_endian)
+    {
+        const auto& in = array_cast<word_t>(block);
+        words[0] = native_from_little_end(in[0]);
+        words[1] = native_from_little_end(in[1]);
+        words[2] = native_from_little_end(in[2]);
+        words[3] = native_from_little_end(in[3]);
+        words[4] = native_from_little_end(in[4]);
+        words[5] = native_from_little_end(in[5]);
+        words[6] = native_from_little_end(in[6]);
+        words[7] = native_from_little_end(in[7]);
+        words[8] = native_from_little_end(in[8]);
+        words[9] = native_from_little_end(in[9]);
+        words[10] = native_from_little_end(in[10]);
+        words[11] = native_from_little_end(in[11]);
+        words[12] = native_from_little_end(in[12]);
+        words[13] = native_from_little_end(in[13]);
+        words[14] = native_from_little_end(in[14]);
+        words[15] = native_from_little_end(in[15]);
     }
     else
     {
-        from_little_endians(out, array_cast<word_t>(in));
+        words = array_cast<word_t>(block);
     }
 }
 
 TEMPLATE
-constexpr void CLASS::
-input(words_t& out, const half_t& in) NOEXCEPT
+INLINE constexpr void CLASS::
+input(words_t& words, const half_t& half) NOEXCEPT
 {
-    constexpr auto size = RMD::word_bytes;
-
     if (std::is_constant_evaluated())
     {
-        from_little<0 * size>(out[0], in);
-        from_little<1 * size>(out[1], in);
-        from_little<2 * size>(out[2], in);
-        from_little<3 * size>(out[3], in);
-        from_little<4 * size>(out[4], in);
-        from_little<5 * size>(out[5], in);
-        from_little<6 * size>(out[6], in);
-        from_little<7 * size>(out[7], in);
+        constexpr auto size = RMD::word_bytes;
+        from_little<0 * size>(words.at(0), half);
+        from_little<1 * size>(words.at(1), half);
+        from_little<2 * size>(words.at(2), half);
+        from_little<3 * size>(words.at(3), half);
+        from_little<4 * size>(words.at(4), half);
+        from_little<5 * size>(words.at(5), half);
+        from_little<6 * size>(words.at(6), half);
+        from_little<7 * size>(words.at(7), half);
+    }
+    else if constexpr (bc::is_big_endian)
+    {
+        const auto& in = array_cast<word_t>(half);
+        words[0] = native_from_little_end(in[0]);
+        words[1] = native_from_little_end(in[1]);
+        words[2] = native_from_little_end(in[2]);
+        words[3] = native_from_little_end(in[3]);
+        words[4] = native_from_little_end(in[4]);
+        words[5] = native_from_little_end(in[5]);
+        words[6] = native_from_little_end(in[6]);
+        words[7] = native_from_little_end(in[7]);
     }
     else
     {
-        auto& to = narrow_array_cast<word_t, array_count<chunk_t>>(out);
-        from_little_endians(to, array_cast<word_t>(in));
+        array_cast<word_t, array_count<chunk_t>>(words) =
+            array_cast<word_t>(half);
     }
 }
 
 TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-output(const state_t& in) NOEXCEPT
+INLINE constexpr typename CLASS::digest_t CLASS::
+output(const state_t& state) NOEXCEPT
 {
-    constexpr auto size = RMD::word_bytes;
+    digest_t digest{};
 
     if (std::is_constant_evaluated())
     {
-        digest_t out{};
+        constexpr auto size = RMD::word_bytes;
+        to_little<0 * size>(digest, state.at(0));
+        to_little<1 * size>(digest, state.at(1));
+        to_little<2 * size>(digest, state.at(2));
+        to_little<3 * size>(digest, state.at(3));
 
-        if constexpr (RMD::K::strength == 128)
+        if constexpr (RMD::strength == 160)
         {
-            to_little<0 * size>(out, in[0]);
-            to_little<1 * size>(out, in[1]);
-            to_little<2 * size>(out, in[2]);
-            to_little<3 * size>(out, in[3]);
+            to_little<4 * size>(digest, state.at(4));
         }
-        else
-        {
-            to_little<0 * size>(out, in[0]);
-            to_little<1 * size>(out, in[1]);
-            to_little<2 * size>(out, in[2]);
-            to_little<3 * size>(out, in[3]);
-            to_little<4 * size>(out, in[4]);
-        }
+    }
+    else if constexpr (bc::is_big_endian)
+    {
+        auto& out = array_cast<word_t>(digest);
+        out[0] = native_to_little_end(state[0]);
+        out[1] = native_to_little_end(state[1]);
+        out[2] = native_to_little_end(state[2]);
+        out[3] = native_to_little_end(state[3]);
 
-        return out;
+        if constexpr (RMD::strength == 160)
+        {
+            out[4] = native_to_little_end(state[4]);
+        }
     }
     else
     {
-        return array_cast<byte_t>(to_little_endians(in));
+        array_cast<word_t>(digest) = state;
     }
+
+    return digest;
 }
 
-// Streaming single hash functions.
+// Padding
 // ---------------------------------------------------------------------------
 
 TEMPLATE
-constexpr void CLASS::
-accumulate(state_t& state, const block_t& block) NOEXCEPT
+CONSTEVAL typename CLASS::words_t CLASS::
+block_pad() NOEXCEPT
 {
-    words_t space{};
-    input(space, block);
-    rounding(state, space);
+    // See comments in accumulator regarding padding endianness.
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<block_t>);
+    constexpr auto hi = sub1(array_count<words_t>);
+    constexpr auto lo = sub1(hi);
+
+    words_t words{};
+    words.front() = bit_hi<byte_t>;
+    words[lo] = to_bits(bytes);
+    return words;
 }
 
 TEMPLATE
-VCONSTEXPR void CLASS::
-accumulate(state_t& state, const blocks_t& blocks) NOEXCEPT
+CONSTEVAL typename CLASS::chunk_t CLASS::
+chunk_pad() NOEXCEPT
 {
-    words_t space{};
+    // See comments in accumulator regarding padding endianness.
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
+    constexpr auto hi = sub1(array_count<chunk_t>);
+    constexpr auto lo = sub1(hi);
+
+    chunk_t words{};
+    words.front() = bit_hi<byte_t>;
+    words[lo] = to_bits(bytes);
+    return words;
+}
+
+TEMPLATE
+CONSTEVAL typename CLASS::pad_t CLASS::
+stream_pad() NOEXCEPT
+{
+    // See comments in accumulator regarding padding endianness.
+    pad_t words{};
+    words.front() = bit_hi<byte_t>;
+    return words;
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad_one(words_t& words) NOEXCEPT
+{
+    // Pad a single whole block with pre-prepared buffer.
+    constexpr auto pad = block_pad();
+    words = pad;
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad_half(words_t& words) NOEXCEPT
+{
+    // Pad a half block.
+    constexpr auto pad = chunk_pad();
+
+    if (std::is_constant_evaluated())
+    {
+        words.at(8)  = pad.at(0);
+        words.at(9)  = pad.at(1);
+        words.at(10) = pad.at(2);
+        words.at(11) = pad.at(3);
+        words.at(12) = pad.at(4);
+        words.at(13) = pad.at(5);
+        words.at(14) = pad.at(6);
+        words.at(15) = pad.at(7);
+    }
+    else
+    {
+        constexpr auto size = array_count<chunk_t>;
+        array_cast<word_t, size, size>(words) = pad;
+    }
+}
+
+TEMPLATE
+constexpr void CLASS::
+pad_n(words_t& words, count_t blocks) NOEXCEPT
+{
+    // Pad any number of whole blocks.
+    constexpr auto pad = stream_pad();
+    const auto bits = to_bits(blocks * array_count<block_t>);
+
+    if (std::is_constant_evaluated())
+    {
+        words.at(0)  = pad.at(0);
+        words.at(1)  = pad.at(1);
+        words.at(2)  = pad.at(2);
+        words.at(3)  = pad.at(3);
+        words.at(4)  = pad.at(4);
+        words.at(5)  = pad.at(5);
+        words.at(6)  = pad.at(6);
+        words.at(7)  = pad.at(7);
+        words.at(8)  = pad.at(8);
+        words.at(9)  = pad.at(9);
+        words.at(10) = pad.at(10);
+        words.at(11) = pad.at(11);
+        words.at(12) = pad.at(12);
+        words.at(13) = pad.at(13);
+        words.at(14) = lo_word<word_t>(bits);
+        words.at(15) = hi_word<word_t>(bits);
+    }
+    else
+    {
+        array_cast<word_t, array_count<pad_t>>(words) = pad;
+
+        // Split count into hi/low words and assign end of padded buffer (LE).
+        words[14] = lo_word<word_t>(bits);
+        words[15] = hi_word<word_t>(bits);
+    }
+}
+
+// Finalized hash functions.
+// ---------------------------------------------------------------------------
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+hash(iblocks_t&& blocks) NOEXCEPT
+{
+    words_t words{};
+    auto state = H::get;
 
     for (auto& block: blocks)
     {
-        input(space, block);
-        rounding(state, space);
+        input(words, block);
+        compress(state, words);
     }
-}
 
-TEMPLATE
-constexpr typename CLASS::digest_t CLASS::
-finalize(const state_t& state) NOEXCEPT
-{
+    pad_n(words, blocks.size());
+    compress(state, words);
     return output(state);
 }
 
-// Finalized single hash functions.
-// ---------------------------------------------------------------------------
-
 TEMPLATE
+template <size_t Size>
 constexpr typename CLASS::digest_t CLASS::
-hash(const half_t& half) NOEXCEPT
+hash(const ablocks_t<Size>& blocks) NOEXCEPT
 {
-    words_t space{};
+    words_t words{};
     auto state = H::get;
 
-    input(space, half);
-    pad_half(space);
-    rounding(state, space);
-    return finalize(state);
+    for (auto& block: blocks)
+    {
+        input(words, block);
+        compress(state, words);
+    }
+
+    pad_n(words, blocks.size());
+    compress(state, words);
+    return output(state);
 }
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const block_t& block) NOEXCEPT
 {
-    words_t space{};
+    words_t words{};
     auto state = H::get;
-
-    input(space, block);
-    rounding(state, space);
-
-    pad_one(space);
-    rounding(state, space);
-    return finalize(state);
+    input(words, block);
+    compress(state, words);
+    pad_one(words);
+    compress(state, words);
+    return output(state);
 }
 
 TEMPLATE
-VCONSTEXPR typename CLASS::digest_t CLASS::
-hash(const blocks_t& blocks) NOEXCEPT
+constexpr typename CLASS::digest_t CLASS::
+hash(const half_t& half) NOEXCEPT
 {
-    words_t space{};
+    words_t words{};
     auto state = H::get;
+    input(words, half);
+    pad_half(words);
+    compress(state, words);
+    return output(state);
+}
 
+// Streaming hash functions and finalizers.
+// ---------------------------------------------------------------------------
+
+TEMPLATE
+void CLASS::
+accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT
+{
+    words_t words{};
     for (auto& block: blocks)
     {
-        input(space, block);
-        rounding(state, space);
+        input(words, block);
+        compress(state, words);
     }
+}
 
-    pad_n(space, blocks.size());
-    rounding(state, space);
-    return finalize(state);
+TEMPLATE
+constexpr void CLASS::
+accumulate(state_t& state, const block_t& block) NOEXCEPT
+{
+    words_t words{};
+    input(words, block);
+    compress(state, words);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+finalize(state_t& state, size_t blocks) NOEXCEPT
+{
+    words_t words{};
+    pad_n(words, blocks);
+    compress(state, words);
+    return output(state);
+}
+
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+normalize(const state_t& state) NOEXCEPT
+{
+    return output(state);
 }
 
 BC_POP_WARNING()

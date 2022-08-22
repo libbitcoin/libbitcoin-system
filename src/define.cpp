@@ -32,8 +32,6 @@
 // types          : exceptions
 // constants      : types
 // literals       : constants
-// cpuid          : literals
-// intrinsics     : assembly
 // funclets       : intrinsics
 // typelets       : funclets
 // constraints    : typelets
@@ -44,7 +42,8 @@
 
 // /error         : define
 // /unicode       : define
-// /math          : define
+// /intrinsics    : define
+// /math          : /intrinsics
 // /data          : /math
 // /endian        : /data
 // /words         : /data
@@ -109,8 +108,8 @@ DEFINED("HAVE_X32")
 #ifdef HAVE_X64
 DEFINED("HAVE_X64")
 #endif
-#ifdef HAVE_ITANIUM
-DEFINED("HAVE_ITANIUM")
+#ifdef HAVE_XCPU
+DEFINED("HAVE_XCPU")
 #endif
 #ifdef HAVE_ARM32
 DEFINED("HAVE_ARM32")
@@ -118,24 +117,37 @@ DEFINED("HAVE_ARM32")
 #ifdef HAVE_ARM64
 DEFINED("HAVE_ARM64")
 #endif
+#ifdef HAVE_ARM
+DEFINED("HAVE_ARM")
+#endif
 
-#ifdef HAVE_XCPU
-DEFINED("HAVE_XCPU")
-#endif
-#ifdef HAVE_XGETBV
-DEFINED("HAVE_XGETBV")
-#endif
-#ifdef HAVE_XCPUIDEX
-DEFINED("HAVE_XCPUIDEX")
-#endif
-#ifdef HAVE_XCPUID_COUNT
-DEFINED("HAVE_XCPUID_COUNT")
-#endif
 #ifdef HAVE_XASSEMBLY
 DEFINED("HAVE_XASSEMBLY")
 #endif
 #ifdef HAVE_NEON
 DEFINED("HAVE_NEON")
+#endif
+
+#ifdef HAVE_XGETBV
+DEFINED("HAVE_XGETBV")
+#endif
+#ifdef HAVE_XCPUID_COUNT
+DEFINED("HAVE_XCPUID_COUNT")
+#endif
+#ifdef HAVE_XCPUIDEX
+DEFINED("HAVE_XCPUIDEX")
+#endif
+#ifdef HAVE_SSE4
+DEFINED("HAVE_SSE4")
+#endif
+#ifdef HAVE_AVX2
+DEFINED("HAVE_AVX2")
+#endif
+#ifdef HAVE_AVX512
+DEFINED("HAVE_AVX512")
+#endif
+#ifdef HAVE_SHANI
+DEFINED("HAVE_SHANI")
 #endif
 
 #ifdef HAVE_VS2013
@@ -203,9 +215,6 @@ DEFINED("HAVE_NOEXCEPT")
 #endif
 #ifdef HAVE_DEPRECATED
 DEFINED("HAVE_DEPRECATED")
-#endif
-#ifdef HAVE_SLOW_TESTS
-DEFINED("HAVE_SLOW_TESTS")
 #endif
 
 // Force compilation of this unit.

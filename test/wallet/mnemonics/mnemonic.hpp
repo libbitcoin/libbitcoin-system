@@ -540,7 +540,7 @@ public:
     {
     }
 
-    static uint8_t checksum_byte(const data_slice& entropy)
+    static uint8_t checksum_byte(const data_chunk& entropy)
     {
         return mnemonic::checksum_byte(entropy);
     }

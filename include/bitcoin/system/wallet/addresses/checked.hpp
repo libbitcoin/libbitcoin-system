@@ -36,7 +36,6 @@ namespace wallet {
 template <size_t Prefix, size_t Payload,
     size_t Checksum = checksum_default_size>
 class checked
-  : public data_slice
 {
 public:
     static constexpr size_t value_size = (Prefix + Payload + Checksum);
@@ -53,6 +52,7 @@ public:
     checked(const checked& other) NOEXCEPT;
     checked(value_type&& value) NOEXCEPT;
     checked(const value_type& value) NOEXCEPT;
+    ~checked() = default;
 
     /// Validity is guaranteed from this construction.
     checked(const prefix_type& prefix, const payload_type& payload) NOEXCEPT;

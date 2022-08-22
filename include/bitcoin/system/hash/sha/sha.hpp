@@ -21,13 +21,15 @@
 
 #include <bitcoin/system/define.hpp>
 
+// TODO: implement 5.3.6 SHA-512/t initial vector derivation.
+// TODO: add SHA-256/224, 512/384, 512/224, 512/256 constants/types.
+
 namespace libbitcoin {
 namespace system {
 namespace sha {
 
-struct sha_t {};
-struct shak_t : sha_t {};
-struct shah_t : sha_t {};
+struct shak_t {};
+struct shah_t {};
 
 template <size_t Strength, size_t Rounds,
     bool_if<Strength == 160 || Strength == 256 || Strength == 512> = true,
@@ -37,6 +39,8 @@ struct k
     using T = shak_t;
     static constexpr auto strength = Strength;
     static constexpr auto rounds = Rounds;
+    static constexpr auto columns = 20_size;
+    static constexpr auto rows = strength / columns;
     static constexpr auto size = (strength == 160 ? 256_size : strength);
     using constants_t = std_array<
         iif<strength == 512, uint64_t, uint32_t>, rounds>;
@@ -52,6 +56,7 @@ struct h
     static constexpr auto digest       = Digest;
     static constexpr auto size         = K::size;
     static constexpr auto rounds       = K::rounds;
+    static constexpr auto strength     = K::strength;
     static constexpr auto word_bits    = bytes<size>;
     static constexpr auto word_bytes   = bytes<word_bits>;
     static constexpr auto block_words  = bytes<size> / to_half(word_bytes);

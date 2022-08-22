@@ -39,9 +39,10 @@
 #define isdigit(__c__) ((unsigned char)((signed char)(__c__) - '0') < 10)
 #define isalnum(__c__) (QRinput_lookAnTable(__c__) >= 0)
 
+/* Renamed from strdup to avoid std namespace conflict - ekv. */
 #if !HAVE_STRDUP
-#undef strdup
-char *strdup(const char *s)
+#undef strdup_
+char *strdup_(const char *s)
 {
 	size_t len = strlen(s) + 1;
 	void *newstring = malloc(len);
@@ -287,7 +288,7 @@ static char *dupAndToUpper(const char *str, QRencodeMode hint)
 	#pragma warning(disable:4996)
 #endif
 
-	newstr = strdup(str);
+	newstr = strdup_(str);
 
 #ifdef _MSC_VER
 	#pragma warning(pop)

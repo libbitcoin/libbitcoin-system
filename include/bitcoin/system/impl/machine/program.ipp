@@ -135,42 +135,42 @@ pop() NOEXCEPT
 // ============================================================================
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_prefail() const NOEXCEPT
 {
     return script_->is_prefail();
 }
 
 template <typename Stack>
-inline typename program<Stack>::op_iterator program<Stack>::
+INLINE typename program<Stack>::op_iterator program<Stack>::
 begin() const NOEXCEPT
 {
     return script_->ops().begin();
 }
 
 template <typename Stack>
-inline typename program<Stack>::op_iterator program<Stack>::
+INLINE typename program<Stack>::op_iterator program<Stack>::
 end() const NOEXCEPT
 {
     return script_->ops().end();
 }
 
 template <typename Stack>
-inline const chain::input& program<Stack>::
+INLINE const chain::input& program<Stack>::
 input() const NOEXCEPT
 {
     return **input_;
 }
 
 template <typename Stack>
-inline const chain::transaction& program<Stack>::
+INLINE const chain::transaction& program<Stack>::
 transaction() const NOEXCEPT
 {
     return transaction_;
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_enabled(chain::forks rule) const NOEXCEPT
 {
     return to_bool(forks_ & rule);
@@ -179,7 +179,7 @@ is_enabled(chain::forks rule) const NOEXCEPT
 // TODO: only perform is_push_size check on witness initialized stack.
 // TODO: others are either empty or presumed push_size from prevout script run.
 template <typename Stack>
-inline script_error_t program<Stack>::
+INLINE script_error_t program<Stack>::
 validate() const NOEXCEPT
 {
     // TODO: nops rule must first be enabled in tests and config.
@@ -203,21 +203,21 @@ validate() const NOEXCEPT
 
 // static
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 equal_chunks(const stack_variant& left, const stack_variant& right) NOEXCEPT
 {
     return primary_stack::equal_chunks(left, right);
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 peek_bool_() const NOEXCEPT
 {
     return primary_.peek_bool();
 }
 
 template <typename Stack>
-inline chunk_xptr program<Stack>::
+INLINE chunk_xptr program<Stack>::
 peek_chunk_() const NOEXCEPT
 {
     return primary_.peek_chunk();
@@ -228,7 +228,7 @@ peek_chunk_() const NOEXCEPT
 
 // This is the only source of push (write) tethering.
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_chunk(data_chunk&& datum) NOEXCEPT
 {
     primary_.push(std::move(datum));
@@ -239,7 +239,7 @@ push_chunk(data_chunk&& datum) NOEXCEPT
 BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_chunk(const chunk_cptr& datum) NOEXCEPT
 BC_POP_WARNING()
 BC_POP_WARNING()
@@ -249,28 +249,28 @@ BC_POP_WARNING()
 
 // private
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_chunk(const chunk_xptr& datum) NOEXCEPT
 {
     primary_.emplace_chunk(datum);
 }
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_bool(bool value) NOEXCEPT
 {
     primary_.emplace_boolean(value);
 }
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_signed64(int64_t value) NOEXCEPT
 {
     primary_.emplace_integer(value);
 }
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_length(size_t value) NOEXCEPT
 {
     // This is guarded by stack size and push data limits.
@@ -284,7 +284,7 @@ push_length(size_t value) NOEXCEPT
 
 // This tethers a chunk if the stack value is not chunk.
 template <typename Stack>
-inline chunk_xptr program<Stack>::
+INLINE chunk_xptr program<Stack>::
 pop_chunk_() NOEXCEPT
 {
     const auto value = peek_chunk_();
@@ -294,7 +294,7 @@ pop_chunk_() NOEXCEPT
 
 // This tethers chunks if the stack values are not chunk.
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT
 {
     if (stack_size() < count)
@@ -308,7 +308,7 @@ pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_bool_() NOEXCEPT
 {
     const auto value = peek_bool_();
@@ -317,7 +317,7 @@ pop_bool_() NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_strict_bool_() NOEXCEPT
 {
     const auto value = primary_.peek_strict_bool();
@@ -327,7 +327,7 @@ pop_strict_bool_() NOEXCEPT
 
 // private
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_signed32_(int32_t& value) NOEXCEPT
 {
     const auto result = peek_signed32_(value);
@@ -336,7 +336,7 @@ pop_signed32_(int32_t& value) NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_signed32(int32_t& value) NOEXCEPT
 {
     if (is_stack_empty())
@@ -346,7 +346,7 @@ pop_signed32(int32_t& value) NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_binary32(int32_t& left, int32_t& right) NOEXCEPT
 {
     if (stack_size() < 2)
@@ -357,7 +357,7 @@ pop_binary32(int32_t& left, int32_t& right) NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_ternary32(int32_t& upper, int32_t& lower,
     int32_t& value) NOEXCEPT
 {
@@ -378,7 +378,7 @@ pop_ternary32(int32_t& upper, int32_t& lower,
 // allowing the value to be returned as a valid and unsigned stack index.
 // ************************************************************************
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 pop_index32(size_t& index) NOEXCEPT
 {
     int32_t value;
@@ -397,7 +397,7 @@ pop_index32(size_t& index) NOEXCEPT
 
 // private
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 peek_signed32_(int32_t& value) const NOEXCEPT
 {
     return primary_.peek_signed4(value);
@@ -405,7 +405,7 @@ peek_signed32_(int32_t& value) const NOEXCEPT
 
 // private
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 peek_signed40_(int64_t& value) const NOEXCEPT
 {
     return primary_.peek_signed5(value);
@@ -417,7 +417,7 @@ peek_signed40_(int64_t& value) const NOEXCEPT
 // the negative range.
 // ****************************************************************************
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 peek_unsigned32(uint32_t& value) const NOEXCEPT
 {
     if (is_stack_empty())
@@ -439,7 +439,7 @@ peek_unsigned32(uint32_t& value) const NOEXCEPT
 // would have been introduced.
 // ****************************************************************************
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 peek_unsigned40(uint64_t& value) const NOEXCEPT
 {
     if (is_stack_empty())
@@ -460,21 +460,21 @@ peek_unsigned40(uint64_t& value) const NOEXCEPT
 
 // This swaps the variant elements of the stack vector.
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 swap_(size_t left_index, size_t right_index) NOEXCEPT
 {
     primary_.swap(left_index, right_index);
 }
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 erase_(size_t index) NOEXCEPT
 {
     primary_.erase(index);
 }
 
 template <typename Stack>
-inline const stack_variant& program<Stack>::
+INLINE const stack_variant& program<Stack>::
 peek_(size_t index) const NOEXCEPT
 {
     return primary_.peek(index);
@@ -484,28 +484,28 @@ peek_(size_t index) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 drop_() NOEXCEPT
 {
     primary_.drop();
 }
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_variant(const stack_variant& vary) NOEXCEPT
 {
     primary_.push(vary);
 }
 
 template <typename Stack>
-inline const stack_variant& program<Stack>::
+INLINE const stack_variant& program<Stack>::
 peek_() const NOEXCEPT
 {
     return primary_.top();
 }
 
 template <typename Stack>
-inline stack_variant program<Stack>::
+INLINE stack_variant program<Stack>::
 pop_() NOEXCEPT
 {
     return primary_.pop();
@@ -515,21 +515,21 @@ pop_() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Stack>
-inline size_t program<Stack>::
+INLINE size_t program<Stack>::
 stack_size() const NOEXCEPT
 {
     return primary_.size();
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_stack_empty() const NOEXCEPT
 {
     return primary_.empty();
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_stack_overflow() const NOEXCEPT
 {
     // Addition is safe due to stack size constraint.
@@ -538,7 +538,7 @@ is_stack_overflow() const NOEXCEPT
 
 // private
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_stack_clean() const NOEXCEPT
 {
     return stack_size() == one;
@@ -548,7 +548,7 @@ is_stack_clean() const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_alternate_empty() const NOEXCEPT
 {
     return alternate_.empty();
@@ -557,7 +557,7 @@ is_alternate_empty() const NOEXCEPT
 // Moving a shared pointer to the alternate stack is optimal and acceptable.
 BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 push_alternate(stack_variant&& vary) NOEXCEPT
 BC_POP_WARNING()
 {
@@ -567,7 +567,7 @@ BC_POP_WARNING()
 }
 
 template <typename Stack>
-inline stack_variant program<Stack>::
+INLINE stack_variant program<Stack>::
 pop_alternate_() NOEXCEPT
 {
     BC_ASSERT(!alternate_.empty());
@@ -581,7 +581,7 @@ pop_alternate_() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 begin_if(bool value) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
@@ -599,7 +599,7 @@ begin_if(bool value) NOEXCEPT
 // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
 // ****************************************************************************
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 else_if_() NOEXCEPT
 {
     // Subtraction must be guarded by caller logical constraints.
@@ -614,7 +614,7 @@ else_if_() NOEXCEPT
 }
 
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 end_if_() NOEXCEPT
 {
     // Subtraction must be guarded by caller logical constraints.
@@ -625,14 +625,14 @@ end_if_() NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_balanced() const NOEXCEPT
 {
     return condition_.empty();
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 is_succeess() const NOEXCEPT
 {
     // Optimization changes O(n) search [for every operation] to O(1).
@@ -641,7 +641,7 @@ is_succeess() const NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 if_(const operation& op) const NOEXCEPT
 {
     // Conditional op execution is not predicated on conditional stack.
@@ -658,13 +658,13 @@ if_(const operation& op) const NOEXCEPT
 // later revised to make this explicit, by use of a prefix increment against a
 // limit of 201.
 // ****************************************************************************
-constexpr bool operation_count_exceeded(size_t count) NOEXCEPT
+INLINE constexpr bool operation_count_exceeded(size_t count) NOEXCEPT
 {
     return count > max_counted_ops;
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 ops_increment(const operation& op) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
@@ -677,7 +677,7 @@ ops_increment(const operation& op) NOEXCEPT
 }
 
 template <typename Stack>
-inline bool program<Stack>::
+INLINE bool program<Stack>::
 ops_increment(size_t public_keys) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
@@ -707,10 +707,10 @@ set_subscript(const op_iterator& op) NOEXCEPT
     return true;
 }
 
+using strippers = std::vector<stripper, no_fill_allocator<stripper>>;
 inline strippers create_strip_ops(const chunk_xptrs& endorsements) NOEXCEPT
 {
-    static no_fill_allocator<stripper> no_fill_stripper_allocator{};
-    strippers strip(no_fill_stripper_allocator);
+    strippers strip;
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     strip.reserve(add1(endorsements.size()));
@@ -803,7 +803,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
 // ----------------------------------------------------------------------------
 
 template <typename Stack>
-inline hash_digest program<Stack>::
+INLINE hash_digest program<Stack>::
 signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
@@ -817,7 +817,7 @@ signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
 // Caches signature hashes in a map against sighash flags.
 // Prevents recomputation in the common case where flags are the same.
 template <typename Stack>
-inline void program<Stack>::
+INLINE void program<Stack>::
 signature_hash(hash_cache& cache, const script& sub,
     uint8_t flags) const NOEXCEPT
 {

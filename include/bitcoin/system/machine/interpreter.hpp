@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 
-/// DELETECSTDINT
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -36,6 +35,8 @@ class interpreter
   : public program<Stack>
 {
 public:
+    DELETE5(interpreter);
+
     using state = program<Stack>;
     using op_iterator = typename state::op_iterator;
     using input_iterator = typename input_cptrs::const_iterator;
@@ -43,15 +44,8 @@ public:
     /// Use program constructors.
     using program<Stack>::program;
 
-    /// Defaults.
-    interpreter(interpreter&&) = delete;
-    interpreter(const interpreter&) = delete;
-    interpreter& operator=(interpreter&&) = delete;
-    interpreter& operator=(const interpreter&) = delete;
-    inline ~interpreter() = default;
-
     /// Run a program.
-    inline code run() NOEXCEPT;
+    code run() NOEXCEPT;
 
     /// Connect tx.input[#].script to tx.input[#].prevout.script.
     static code connect(const context& state, const transaction& tx,
@@ -63,7 +57,7 @@ public:
 
 protected:
     /// Operation disatch.
-    inline error::op_error_t run_op(const op_iterator& op) NOEXCEPT;
+    error::op_error_t run_op(const op_iterator& op) NOEXCEPT;
 
     /// Operation handlers.
     inline error::op_error_t op_unevaluated(chain::opcode) const NOEXCEPT;

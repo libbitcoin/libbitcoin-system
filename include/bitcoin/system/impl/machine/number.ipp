@@ -31,6 +31,10 @@ namespace system {
 namespace machine {
 namespace number {
 
+#define INTEGER_TEMPLATE template <size_t Size, \
+    if_not_greater<Size, sizeof(int64_t)> If>
+#define INTEGER_CLASS integer<Size, If>
+
 // ****************************************************************************
 // CONSENSUS:
 // Due to compression, a leading sign byte is required if high bit is set.
@@ -49,18 +53,18 @@ constexpr uint8_t negative_sign_byte = to_negated(positive_sign_byte);
 
 // integer
 // ----------------------------------------------------------------------------
-// C++20: constexpr.
 
-template <size_t Size>
-inline bool integer<Size>::from_integer(Integer& out, int64_t vary) NOEXCEPT
+INTEGER_TEMPLATE
+inline constexpr bool INTEGER_CLASS::
+from_integer(Integer& out, int64_t vary) NOEXCEPT
 {
     out = possible_narrow_cast<Integer>(vary);
     return !is_overflow(vary);
 }
 
-template <size_t Size>
-inline bool integer<Size>::from_chunk(Integer& out,
-    const data_chunk& vary) NOEXCEPT
+INTEGER_TEMPLATE
+inline bool INTEGER_CLASS::
+from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT
 {
     out = 0;
 
@@ -81,22 +85,25 @@ inline bool integer<Size>::from_chunk(Integer& out,
 }
 
 // protected
-template <size_t Size>
-inline bool integer<Size>::strict_zero(const data_chunk& vary) NOEXCEPT
+INTEGER_TEMPLATE
+inline bool INTEGER_CLASS::
+strict_zero(const data_chunk& vary) NOEXCEPT
 {
     return vary.empty();
 }
 
 // protected
-template <size_t Size>
-inline bool integer<Size>::is_overflow(const data_chunk& vary) NOEXCEPT
+INTEGER_TEMPLATE
+inline bool INTEGER_CLASS::
+is_overflow(const data_chunk& vary) NOEXCEPT
 {
     return vary.size() > Size;
 }
 
 // protected
-template <size_t Size>
-inline bool integer<Size>::is_overflow(int64_t value) NOEXCEPT
+INTEGER_TEMPLATE
+inline constexpr bool INTEGER_CLASS::
+is_overflow(int64_t value) NOEXCEPT
 {
     return is_limited(value, bitcoin_min<Size>, bitcoin_max<Size>);
 }
@@ -136,12 +143,16 @@ inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
     return bytes;
 }
 
+#undef INTEGER_CLASS
+#undef INTEGER_TEMPLATE
+
 // boolean
 // ----------------------------------------------------------------------------
 // C++20: constexpr.
 
-template <size_t Size>
-inline signed_type<Size> boolean::to_integer(bool vary) NOEXCEPT
+template <size_t Size,
+    if_not_greater<Size, sizeof(int64_t)>>
+inline constexpr signed_type<Size> boolean::to_integer(bool vary) NOEXCEPT
 {
     // The cast can safely be ignored, which is why Size is defaulted.
     return bc::to_int<signed_type<Size>>(vary);
@@ -173,7 +184,7 @@ inline bool boolean::strict_from_chunk(const data_chunk& vary) NOEXCEPT
     return strict_false(vary);
 }
 
-constexpr bool boolean::to_bool(int64_t vary) NOEXCEPT
+inline constexpr bool boolean::to_bool(int64_t vary) NOEXCEPT
 {
     // Boolean is not overflow constrained.
     return bc::to_bool(vary);
@@ -186,7 +197,7 @@ inline bool boolean::strict_false(const data_chunk& vary) NOEXCEPT
 }
 
 // protected
-constexpr bool boolean::is_sign_byte(uint8_t byte) NOEXCEPT
+inline constexpr bool boolean::is_sign_byte(uint8_t byte) NOEXCEPT
 {
     return (byte == positive_sign_byte) || (byte == negative_sign_byte);
 }

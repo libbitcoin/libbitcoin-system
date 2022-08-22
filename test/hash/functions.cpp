@@ -17,236 +17,320 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include "functions.hpp"
+#include "hash.hpp"
 
 BOOST_AUTO_TEST_SUITE(functions_tests)
 
-// ripemd160
+constexpr auto text = "foobar";
+const std::string string{ text };
+const data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
+
+// rmd128_hash/rmd128_chunk
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(functions__ripemd160_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd128__text__expected)
 {
-    for (const auto& test: ripemd_tests)
-    {
-        const auto hash = ripemd160_hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    const auto expected = rmd128_chunk(string);
+    BOOST_CHECK_EQUAL(rmd128_chunk(data), expected);
+    BOOST_CHECK_EQUAL(rmd128_chunk("foobar"), expected);
+    BOOST_CHECK_EQUAL(rmd128_chunk(std::string{ "foobar" }), expected);
 }
 
-// sha1 (160)
+BOOST_AUTO_TEST_CASE(accumulator__rmd128__null_half__expected)
+{
+    BOOST_CHECK_EQUAL(accumulator<rmd128>::hash(rmd128::half_t{}), rmd_half128);
+    BOOST_CHECK_EQUAL(rmd128_hash(rmd128::half_t{}), rmd_half128);
+    BOOST_CHECK_EQUAL(rmd128_hash(to_chunk(rmd128::half_t{})), rmd_half128);
+    BOOST_CHECK_EQUAL(rmd128_chunk(rmd128::half_t{}), to_chunk(rmd_half128));
+    BOOST_CHECK_EQUAL(rmd128_chunk(to_chunk(rmd128::half_t{})), to_chunk(rmd_half128));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__rmd128__null_one__expected)
+{
+    BOOST_CHECK_EQUAL(accumulator<rmd128>::hash(rmd128::block_t{}), rmd_full128);
+    BOOST_CHECK_EQUAL(rmd128_hash(rmd128::block_t{}), rmd_full128);
+    BOOST_CHECK_EQUAL(rmd128_hash(to_chunk(rmd128::block_t{})), rmd_full128);
+    BOOST_CHECK_EQUAL(rmd128_chunk(rmd128::block_t{}), to_chunk(rmd_full128));
+    BOOST_CHECK_EQUAL(rmd128_chunk(to_chunk(rmd128::block_t{})), to_chunk(rmd_full128));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__rmd128__null_two__expected)
+{
+    constexpr auto pair = std_array<uint8_t, array_count<rmd128::block_t> * two>{};
+    constexpr auto expected = base16_array("1b94bc163383151a53fe49dadb7a4f0e");
+    BOOST_CHECK_EQUAL(accumulated<rmd128>(rmd128::block_t{}, rmd128::block_t{}), expected);
+    BOOST_CHECK_EQUAL(rmd128_hash(pair), expected);
+    BOOST_CHECK_EQUAL(rmd128_hash(to_chunk(pair)), expected);
+    BOOST_CHECK_EQUAL(rmd128_chunk(pair), to_chunk(expected));
+    BOOST_CHECK_EQUAL(rmd128_chunk(to_chunk(pair)), to_chunk(expected));
+}
+
+// rmd160_hash/rmd160_chunk
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(functions__sha1_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__rmd160__text__expected)
 {
-    for (const auto& test: sha1_tests)
-    {
-        const auto hash = sha1_hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    const auto expected = rmd160_chunk(string);
+    BOOST_CHECK_EQUAL(rmd160_chunk(data), expected);
+    BOOST_CHECK_EQUAL(rmd160_chunk("foobar"), expected);
+    BOOST_CHECK_EQUAL(rmd160_chunk(std::string{ "foobar" }), expected);
 }
 
-// sha256
+BOOST_AUTO_TEST_CASE(accumulator__rmd160__null_half__expected)
+{
+    BOOST_CHECK_EQUAL(accumulator<rmd160>::hash(rmd160::half_t{}), rmd_half160);
+    BOOST_CHECK_EQUAL(rmd160_hash(rmd160::half_t{}), rmd_half160);
+    BOOST_CHECK_EQUAL(rmd160_hash(to_chunk(rmd160::half_t{})), rmd_half160);
+    BOOST_CHECK_EQUAL(rmd160_chunk(rmd160::half_t{}), to_chunk(rmd_half160));
+    BOOST_CHECK_EQUAL(rmd160_chunk(to_chunk(rmd160::half_t{})), to_chunk(rmd_half160));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__rmd160__null_one__expected)
+{
+    BOOST_CHECK_EQUAL(accumulator<rmd160>::hash(rmd160::block_t{}), rmd_full160);
+    BOOST_CHECK_EQUAL(rmd160_hash(rmd160::block_t{}), rmd_full160);
+    BOOST_CHECK_EQUAL(rmd160_hash(to_chunk(rmd160::block_t{})), rmd_full160);
+    BOOST_CHECK_EQUAL(rmd160_chunk(rmd160::block_t{}), to_chunk(rmd_full160));
+    BOOST_CHECK_EQUAL(rmd160_chunk(to_chunk(rmd160::block_t{})), to_chunk(rmd_full160));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__rmd160__null_two__expected)
+{
+    constexpr auto pair = std_array<uint8_t, array_count<rmd160::block_t> * two>{};
+    constexpr auto expected = base16_array("4300a157335cb7c9fc9423e011d7dd51090d093f");
+    BOOST_CHECK_EQUAL(accumulated<rmd160>(rmd160::block_t{}, rmd160::block_t{}), expected);
+    BOOST_CHECK_EQUAL(rmd160_hash(pair), expected);
+    BOOST_CHECK_EQUAL(rmd160_hash(to_chunk(pair)), expected);
+    BOOST_CHECK_EQUAL(rmd160_chunk(pair), to_chunk(expected));
+    BOOST_CHECK_EQUAL(rmd160_chunk(to_chunk(pair)), to_chunk(expected));
+}
+
+// sha1_hash/sha1_chunk
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(functions__sha256_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__sha1__text__expected)
 {
-    for (const auto& test: sha256_tests)
-    {
-        const auto hash = sha256_hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    const auto expected = sha1_chunk(string);
+    BOOST_CHECK_EQUAL(sha1_chunk(data), expected);
+    BOOST_CHECK_EQUAL(sha1_chunk("foobar"), expected);
+    BOOST_CHECK_EQUAL(sha1_chunk(std::string{ "foobar" }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(functions__hmac_sha256__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__sha1__null_half__expected)
 {
-    using hmac = hmac<sha::algorithm<sha256>>;
-
-    for (const auto& test: hmac_sha256_tests)
-    {
-        const auto hash = hmac::code(test.text, test.key);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    BOOST_CHECK_EQUAL(accumulator<sha160>::hash(sha160::half_t{}), sha_half160);
+    BOOST_CHECK_EQUAL(sha1_hash(sha160::half_t{}), sha_half160);
+    BOOST_CHECK_EQUAL(sha1_hash(to_chunk(sha160::half_t{})), sha_half160);
+    BOOST_CHECK_EQUAL(sha1_chunk(sha160::half_t{}), to_chunk(sha_half160));
+    BOOST_CHECK_EQUAL(sha1_chunk(to_chunk(sha160::half_t{})), to_chunk(sha_half160));
 }
 
-BOOST_AUTO_TEST_CASE(functions__pbkd_sha256__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__sha1__null_one__expected)
 {
-    using pbkd = pbkd<sha::algorithm<sha256>>;
-
-    for (const auto& test: pbkd_sha256_tests)
-    {
-        const auto hash = pbkd::key<long_hash_size>(test.passphrase, test.salt, test.count);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    BOOST_CHECK_EQUAL(accumulator<sha160>::hash(sha160::block_t{}), sha_full160);
+    BOOST_CHECK_EQUAL(sha1_hash(sha160::block_t{}), sha_full160);
+    BOOST_CHECK_EQUAL(sha1_hash(to_chunk(sha160::block_t{})), sha_full160);
+    BOOST_CHECK_EQUAL(sha1_chunk(sha160::block_t{}), to_chunk(sha_full160));
+    BOOST_CHECK_EQUAL(sha1_chunk(to_chunk(sha160::block_t{})), to_chunk(sha_full160));
 }
 
-// sha512
+BOOST_AUTO_TEST_CASE(accumulator__sha1__null_two__expected)
+{
+    constexpr auto pair = std_array<uint8_t, array_count<sha160::block_t> * two>{};
+    constexpr auto expected = base16_array("0ae4f711ef5d6e9d26c611fd2c8c8ac45ecbf9e7");
+    BOOST_CHECK_EQUAL(accumulated<sha160>(sha160::block_t{}, sha160::block_t{}), expected);
+    BOOST_CHECK_EQUAL(sha1_hash(pair), expected);
+    BOOST_CHECK_EQUAL(sha1_hash(to_chunk(pair)), expected);
+    BOOST_CHECK_EQUAL(sha1_chunk(pair), to_chunk(expected));
+    BOOST_CHECK_EQUAL(sha1_chunk(to_chunk(pair)), to_chunk(expected));
+}
+
+// sha256_hash/sha256_hash2/sha256_chunk
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(functions__sha512_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__sha256__text__expected)
 {
-    for (const auto& test: sha512_tests)
-    {
-        const auto hash = sha512_hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    const auto expected = sha256_chunk(string);
+    BOOST_CHECK_EQUAL(sha256_chunk(data), expected);
+    BOOST_CHECK_EQUAL(sha256_chunk("foobar"), expected);
+    BOOST_CHECK_EQUAL(sha256_chunk(std::string{ "foobar" }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(functions__hmac_sha512__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__sha256__null_half__expected)
 {
-    using hmac = hmac<sha::algorithm<sha512>>;
-
-    for (const auto& test: hmac_sha512_tests)
-    {
-        const auto hash = hmac::code(test.text, test.key);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    BOOST_CHECK_EQUAL(accumulator<sha256>::hash(sha256::half_t{}), sha_half256);
+    BOOST_CHECK_EQUAL(sha256_hash(sha256::half_t{}), sha_half256);
+    BOOST_CHECK_EQUAL(sha256_hash(to_chunk(sha256::half_t{})), sha_half256);
+    BOOST_CHECK_EQUAL(sha256_chunk(sha256::half_t{}), to_chunk(sha_half256));
+    BOOST_CHECK_EQUAL(sha256_chunk(to_chunk(sha256::half_t{})), to_chunk(sha_half256));
 }
 
-BOOST_AUTO_TEST_CASE(functions__pbkd_sha512__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__sha256__null_one__expected)
 {
-    using pbkd = pbkd<sha::algorithm<sha512>>;
-
-    for (const auto& test: pbkd_sha512_tests)
-    {
-        const auto hash = pbkd::key<long_hash_size>(test.passphrase, test.salt, test.count);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    BOOST_CHECK_EQUAL(accumulator<sha256>::hash(sha256::block_t{}), sha_full256);
+    BOOST_CHECK_EQUAL(sha256_hash(sha256::block_t{}), sha_full256);
+    BOOST_CHECK_EQUAL(sha256_hash(sha256::half_t{}, sha256::half_t{}), sha_full256);
+    BOOST_CHECK_EQUAL(sha256_chunk(sha256::block_t{}), to_chunk(sha_full256));
+    BOOST_CHECK_EQUAL(sha256_chunk(to_chunk(sha256::block_t{})), to_chunk(sha_full256));
 }
 
-// scrypt
+BOOST_AUTO_TEST_CASE(accumulator__sha256__null_two__expected)
+{
+    constexpr auto pair = std_array<uint8_t, array_count<sha256::block_t> * two>{};
+    constexpr auto expected = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
+    BOOST_CHECK_EQUAL(accumulated<sha256>(sha256::block_t{}, sha256::block_t{}), expected);
+    BOOST_CHECK_EQUAL(sha256_hash(pair), expected);
+    BOOST_CHECK_EQUAL(sha256_hash(to_chunk(pair)), expected);
+    BOOST_CHECK_EQUAL(sha256_chunk(pair), to_chunk(expected));
+    BOOST_CHECK_EQUAL(sha256_chunk(to_chunk(pair)), to_chunk(expected));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__sha256_hash2__nulls__expected)
+{
+    constexpr auto expected = base16_array("38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca");
+    BOOST_CHECK_EQUAL(sha256_hash(sha256::half_t{}, sha256::half_t{}), sha_full256);
+    BOOST_CHECK_EQUAL(sha256_hash2(sha256::block_t{}, sha256::block_t{}), expected);
+    BOOST_CHECK_EQUAL(sha256_hash2(to_chunk(sha256::half_t{}), to_chunk(sha256::half_t{})), sha_full256);
+}
+
+// sha512_hash/sha512_chunk
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(functions__scrypt_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(accumulator__sha512__text__expected)
 {
-    for (const auto& test: scrypt_tests)
-    {
-        const auto hash = scrypt_hash(test.data);
-        BOOST_REQUIRE_EQUAL(hash, test.expected);
-    }
+    const auto expected = sha512_chunk(string);
+    BOOST_CHECK_EQUAL(sha512_chunk(data), expected);
+    BOOST_CHECK_EQUAL(sha512_chunk("foobar"), expected);
+    BOOST_CHECK_EQUAL(sha512_chunk(std::string{ "foobar" }), expected);
 }
 
-// scrypt rfc7914 test vectors
+BOOST_AUTO_TEST_CASE(accumulator__sha512__null_half__expected)
+{
+    BOOST_CHECK_EQUAL(accumulator<sha512>::hash(sha512::half_t{}), sha_half512);
+    BOOST_CHECK_EQUAL(sha512_hash(sha512::half_t{}), sha_half512);
+    BOOST_CHECK_EQUAL(sha512_hash(to_chunk(sha512::half_t{})), sha_half512);
+    BOOST_CHECK_EQUAL(sha512_chunk(sha512::half_t{}), to_chunk(sha_half512));
+    BOOST_CHECK_EQUAL(sha512_chunk(to_chunk(sha512::half_t{})), to_chunk(sha_half512));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__sha512__null_one__expected)
+{
+    BOOST_CHECK_EQUAL(accumulator<sha512>::hash(sha512::block_t{}), sha_full512);
+    BOOST_CHECK_EQUAL(sha512_hash(sha512::block_t{}), sha_full512);
+    BOOST_CHECK_EQUAL(sha512_hash(to_chunk(sha512::block_t{})), sha_full512);
+    BOOST_CHECK_EQUAL(sha512_chunk(sha512::block_t{}), to_chunk(sha_full512));
+    BOOST_CHECK_EQUAL(sha512_chunk(to_chunk(sha512::block_t{})), to_chunk(sha_full512));
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__sha512__null_two__expected)
+{
+    constexpr auto pair = std_array<uint8_t, array_count<sha512::block_t> * two>{};
+    constexpr auto expected = base16_array("693f95d58383a6162d2aab49eb60395dcc4bb22295120caf3f21e3039003230b287c566a03c7a0ca5accaed2133c700b1cb3f82edf8adcbddc92b4f9fb9910c6");
+    BOOST_CHECK_EQUAL(accumulated<sha512>(sha512::block_t{}, sha512::block_t{}), expected);
+    BOOST_CHECK_EQUAL(sha512_hash(pair), expected);
+    BOOST_CHECK_EQUAL(sha512_hash(to_chunk(pair)), expected);
+    BOOST_CHECK_EQUAL(sha512_chunk(pair), to_chunk(expected));
+    BOOST_CHECK_EQUAL(sha512_chunk(to_chunk(pair)), to_chunk(expected));
+}
+
+// bitcoin_short_hash
 // ----------------------------------------------------------------------------
 
-template<size_t W, size_t R, size_t P, bool C>
-class scrypt_accessor
-  : public scrypt<W, R, P, C>
+BOOST_AUTO_TEST_CASE(accumulator__bitcoin_short__null_one__expected)
 {
-public:
-    using base = scrypt<W, R, P, C>;
-    using block_t = typename base::block_t;
-    using rblock_t = typename base::rblock_t;
-
-    static void salsa_8(block_t& block) NOEXCEPT
-    {
-        base::salsa_8(block);
-    }
-
-    static bool block_mix(rblock_t& rblock) NOEXCEPT
-    {
-        return base::block_mix(rblock);
-    }
-
-    static bool romix(rblock_t& rblock) NOEXCEPT
-    {
-        return base::romix(rblock);
-    }
-};
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_salsa_8__expected)
-{
-    // W/R/P unused.
-    using test = scrypt_accessor<16, 1, 1, true>;
-    constexpr auto expected = base16_array("a41f859c6608cc993b81cacb020cef05044b2181a2fd337dfd7b1c6396682f29b4393168e3c9e6bcfe6bc5b7a06d96bae424cc102c91745c24ad673dc7618f81");
-    auto data = base16_array("7e879a214f3ec9867ca940e641718f26baee555b8c61c1b50df846116dcd3b1dee24f319df9b3d8514121e4b5ac5aa3276021d2909c74829edebc68db8b8c25e");
-    test::salsa_8(data);
-    BOOST_REQUIRE_EQUAL(data, expected);
+    constexpr auto expected = base16_array("b8bcb07f6344b42ab04250c86a6e8b75d3fdbbc6");
+    BOOST_CHECK_EQUAL(rmd160_hash(sha256_hash(null_hash)), expected);
+    BOOST_CHECK_EQUAL(bitcoin_short_hash(null_hash), expected);
+    BOOST_CHECK_EQUAL(bitcoin_short_hash(to_chunk(null_hash)), expected);
+    BOOST_CHECK_EQUAL(bitcoin_short_chunk(null_hash), to_chunk(expected));
+    BOOST_CHECK_EQUAL(bitcoin_short_chunk(to_chunk(null_hash)), to_chunk(expected));
 }
 
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_block_mix__expected)
-{
-    // W/P unused.
-    using test = scrypt_accessor<16, 1, 1, true>;
-    constexpr auto expected = base16_array("a41f859c6608cc993b81cacb020cef05044b2181a2fd337dfd7b1c6396682f29b4393168e3c9e6bcfe6bc5b7a06d96bae424cc102c91745c24ad673dc7618f8120edc975323881a80540f64c162dcd3c21077cfe5f8d5fe2b1a4168f953678b77d3b3d803b60e4ab920996e59b4d53b65d2a225877d5edf5842cb9f14eefe425");
-    auto data = base16_array("f7ce0b653d2d72a4108cf5abe912ffdd777616dbbb27a70e8204f3ae2d0f6fad89f68f4811d1e87bcc3bd7400a9ffd29094f0184639574f39ae5a1315217bcd7894991447213bb226c25b54da86370fbcd984380374666bb8ffcb5bf40c254b067d27c51ce4ad5fed829c90b505a571b7f4d1cad6a523cda770e67bceaaf7e89");
-    BOOST_REQUIRE(test::block_mix(array_cast<test::block_t>(data)));
-    BOOST_REQUIRE_EQUAL(data, expected);
-}
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_romix__expected)
-{
-    // P unused.
-    using test = scrypt_accessor<16, 1, 1, true>;
-    constexpr auto expected = base16_array("79ccc193629debca047f0b70604bf6b62ce3dd4a9626e355fafc6198e6ea2b46d58413673b99b029d665c357601fb426a0b2f4bba200ee9f0a43d19b571a9c71ef1142e65d5a266fddca832ce59faa7cac0b9cf1be2bffca300d01ee387619c4ae12fd4438f203a0e4e1c47ec314861f4e9087cb33396a6873e8f9d2539a4b8e");
-    auto data = base16_array("f7ce0b653d2d72a4108cf5abe912ffdd777616dbbb27a70e8204f3ae2d0f6fad89f68f4811d1e87bcc3bd7400a9ffd29094f0184639574f39ae5a1315217bcd7894991447213bb226c25b54da86370fbcd984380374666bb8ffcb5bf40c254b067d27c51ce4ad5fed829c90b505a571b7f4d1cad6a523cda770e67bceaaf7e89");
-    BOOST_REQUIRE(test::romix(array_cast<test::block_t>(data)));
-    BOOST_REQUIRE_EQUAL(data, expected);
-}
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_1__expected)
-{
-    using test = scrypt<16, 1, 1, true>;
-    constexpr auto expected = base16_array("77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906");
-    constexpr auto size = size_of<decltype(expected)>();
-    const auto hash = test::hash<size>("", "");
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-
-#if defined(HAVE_SLOW_TESTS)
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_2__expected)
-{
-    using test = scrypt<1024, 8, 16, true>;
-    constexpr auto expected = base16_array("fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640");
-    constexpr auto size = size_of<decltype(expected)>();
-    const auto hash = test::hash<size>("password", "NaCl");
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_3__expected)
-{
-    using test = scrypt<16384, 8, 1, true>;
-    constexpr auto expected = base16_array("7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887");
-    constexpr auto size = size_of<decltype(expected)>();
-    const auto hash = test::hash<size>("pleaseletmein", "SodiumChloride");
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_hash_4__expected)
-{
-    using test = scrypt<1048576, 8, 1, true>;
-    constexpr auto expected = base16_array("2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4");
-    constexpr auto size = size_of<decltype(expected)>();
-    const auto hash = test::hash<size>("pleaseletmein", "SodiumChloride");
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-#endif
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_pbkdf2_hmac_sha256_1__expected)
-{
-    // c=1, dkLen=64
-    using test = pbkd<sha::algorithm<sha256>>;
-    constexpr auto expected = base16_array("55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783");
-    constexpr auto size = size_of<decltype(expected)>(); 
-    const auto hash = test::key<size>("passwd", "salt", 1);
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-
-BOOST_AUTO_TEST_CASE(functions__scrypt__rfc7914_pbkdf2_hmac_sha256_2__expected)
-{
-    // c=80000, dkLen=64
-    using test = pbkd<sha::algorithm<sha256>>;
-    constexpr auto expected = base16_array("4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176a272bdebba1d078478f62b397f33c8d");
-    constexpr auto size = size_of<decltype(expected)>();
-    const auto hash = test::key<size>("Password", "NaCl", 80000);
-    BOOST_REQUIRE_EQUAL(hash, expected);
-}
-
-// djb2
+// bitcoin_hash
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(functions__djb2_hash__ad_hoc__0xe1669c01)
+BOOST_AUTO_TEST_CASE(accumulator__bitcoin__null_one__expected)
 {
-    const auto hash = djb2_hash("01234567890abcdefghijklmnopqrstuvwxyz");
+    constexpr auto expected = base16_array("2b32db6c2c0a6235fb1397e8225ea85e0f0e6e8c7b126d0016ccbde0e667151e");
+    BOOST_CHECK_EQUAL(sha256_hash(sha256_hash(null_hash)), expected);
+    BOOST_CHECK_EQUAL(bitcoin_hash(null_hash), expected);
+    BOOST_CHECK_EQUAL(bitcoin_hash(to_chunk(null_hash)), expected);
+    BOOST_CHECK_EQUAL(bitcoin_chunk(null_hash), to_chunk(expected));
+    BOOST_CHECK_EQUAL(bitcoin_chunk(to_chunk(null_hash)), to_chunk(expected));
+}
+
+// merkle_root
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__empty__null_hash)
+{
+    constexpr auto expected = null_hash;
+    BOOST_REQUIRE_EQUAL(merkle_root({}), expected);
+}
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__one__same)
+{
+    constexpr auto expected = sha256::digest_t{ 42 };
+    BOOST_REQUIRE_EQUAL(merkle_root({ { 42 } }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__two__expected)
+{
+    constexpr auto expected = sha256::double_hash({ 0 }, { 1 });
+    BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 } }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__three__expected)
+{
+    constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
+    constexpr auto expected2 = sha256::double_hash({ 2 }, { 2 });
+    constexpr auto expected = sha256::double_hash(expected1, expected2);
+    BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 }, { 2 } }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__four__expected)
+{
+    constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
+    constexpr auto expected2 = sha256::double_hash({ 2 }, { 3 });
+    constexpr auto expected = sha256::double_hash(expected1, expected2);
+    BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__six__expected)
+{
+    constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
+    constexpr auto expected2 = sha256::double_hash({ 2 }, { 3 });
+    constexpr auto expected3 = sha256::double_hash({ 4 }, { 5 });
+    constexpr auto expected4 = sha256::double_hash(expected1, expected2);
+    constexpr auto expected5 = sha256::double_hash(expected3, expected3);
+    constexpr auto expected = sha256::double_hash(expected4, expected5);
+    BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 }, { 2 }, { 3 }, { 4 }, { 5 } }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(functions__merkle_root__eight_expected)
+{
+    constexpr auto expected1 = sha256::double_hash({ 0 }, { 1 });
+    constexpr auto expected2 = sha256::double_hash({ 2 }, { 3 });
+    constexpr auto expected = sha256::double_hash(expected1, expected2);
+    BOOST_REQUIRE_EQUAL(merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
+}
+
+// scrypt_hash
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(functions__scrypt__empty__expected)
+{
+    const auto expected = scrypt<1024, 1, 1, true>::hash<hash_size>("", "");
+    BOOST_REQUIRE_EQUAL(scrypt_hash(""), expected);
+}
+
+// non-cryptographic hash functions
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(functions__djb2__alphanumeric__expected)
+{
+    const std::string alpha{ "01234567890abcdefghijklmnopqrstuvwxyz" };
+    const auto hash = djb2_hash(alpha);
 
     if constexpr (sizeof(size_t) == sizeof(uint32_t))
     {
@@ -255,6 +339,20 @@ BOOST_AUTO_TEST_CASE(functions__djb2_hash__ad_hoc__0xe1669c01)
     else
     {
         BOOST_REQUIRE_EQUAL(hash, 9646636626660989953_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(functions__hash_combine__same_values__expected)
+{
+    constexpr auto hash = hash_combine(3781598209_size, 3781598209_size);
+
+    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    {
+        BOOST_REQUIRE_EQUAL(hash, 598451203_u32);
+    }
+    else
+    {
+        BOOST_REQUIRE_EQUAL(hash, 4893418499_u64);
     }
 }
 
