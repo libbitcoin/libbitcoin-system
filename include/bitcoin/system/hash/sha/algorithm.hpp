@@ -93,7 +93,7 @@ public:
     static constexpr digest_t hash(const half_t& left, const half_t& right) NOEXCEPT;
     static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
-    /// Double hashing optimizations (sha256/512).
+    /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
     template <size_t Size>
     static constexpr digest_t double_hash(const ablocks_t<Size>& blocks) NOEXCEPT;
@@ -157,6 +157,8 @@ protected:
 
     template <size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
+    INLINE static constexpr void add_k(auto& buffer) NOEXCEPT;
+    INLINE static constexpr void schedule_(auto& buffer) NOEXCEPT;
     static constexpr void schedule(auto& buffer) NOEXCEPT;
 
     INLINE static constexpr void input(auto& buffer, const auto& state) NOEXCEPT;
@@ -186,13 +188,13 @@ protected:
     INLINE static void iterate(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     template <size_t Size>
-    INLINE static constexpr void sequential(state_t& state,
+    INLINE static constexpr void iterate_(state_t& state,
         const ablocks_t<Size>& blocks) NOEXCEPT;
-    INLINE static void sequential(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void iterate_(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     /// Merkle iteration.
     /// -----------------------------------------------------------------------
-    VCONSTEXPR static void sequential(digests_t& digests,
+    VCONSTEXPR static void merkle_hash_(digests_t& digests,
         size_t block = zero) NOEXCEPT;
 
 private:
@@ -230,7 +232,7 @@ protected:
     using xchunk_t = std_array<xWord, SHA::state_words>;
     using idigests_t = mutable_iterable<digest_t>;
 
-    /// Vector-optimized sigma (optional).
+    /// Vector-optimized sigma.
     /// -----------------------------------------------------------------------
     template <uint V, uint W, uint X, uint Y, uint Z>
     INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
@@ -282,7 +284,7 @@ protected:
 
     INLINE static void vectorized(digests_t& digests) NOEXCEPT;
 
-    /// Message Schedule.
+    /// Message Schedule (block vectorization).
     /// -----------------------------------------------------------------------
 
     template <typename Word, size_t Lane>
@@ -301,6 +303,13 @@ protected:
     template <size_t Size>
     INLINE static void vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT;
+
+    /// Message Schedule (round compression).
+    /// -----------------------------------------------------------------------
+
+    template<size_t Round>
+    INLINE static void prepare8(auto& buffer) NOEXCEPT;
+    INLINE static void schedule8(auto& buffer) NOEXCEPT;
 
 public:
     static constexpr auto have_x128     = Vectorized && system::with_sse41;

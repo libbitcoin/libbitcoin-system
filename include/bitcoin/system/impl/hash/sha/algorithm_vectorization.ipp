@@ -28,8 +28,12 @@ namespace sha {
 
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
-// Vector-optimized sigma (optional).
+// Vector-optimized sigma.
 // ----------------------------------------------------------------------------
+// This increases native operations through ror expansion and is intended
+// only for vectorization (where ror/l are not avaialable).
+// This sigma refactoring *increases* native processing time by ~10%.
+// Tests shows no material performance change in vectorization.
 
 TEMPLATE
 template <unsigned int V, unsigned int W, unsigned int X, unsigned int Y,
@@ -99,10 +103,6 @@ template <unsigned int A, unsigned int B, unsigned int C, typename xWord,
 INLINE constexpr auto CLASS::
 sigma(xWord x) NOEXCEPT
 {
-    // This increases native operations through ror expansion and is intended
-    // only for vectorization (where ror/l are not avaialable).
-    // This sigma refactoring *increases* native processing time by ~10%.
-    // Tests shows no material performance change in vectorization.
     return sigma_<A, B, C>(x);
 }
 
@@ -519,10 +519,10 @@ vectorized(digests_t& digests) NOEXCEPT
         vectorize<xint128_t>(idigests, iblocks);
 
     // iblocks.size() is reduced by vectorization.
-    sequential(digests, blocks - iblocks.size());
+    merkle_hash_(digests, blocks - iblocks.size());
 }
 
-// Message Schedule.
+// Message Schedule (block vectorization).
 // ----------------------------------------------------------------------------
 // eprint.iacr.org/2012/067.pdf
 
@@ -589,7 +589,6 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
     }
 }
 
-
 TEMPLATE
 INLINE void CLASS::
 vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
@@ -602,7 +601,7 @@ vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
         vectorize<xint128_t>(state, blocks);
 
     // blocks.size() is reduced by vectorization.
-    sequential(state, blocks);
+    iterate_(state, blocks);
 }
 
 TEMPLATE
@@ -612,6 +611,100 @@ vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
     vectorized(state, iblocks);
+}
+
+// Message Schedule (round compression).
+// ----------------------------------------------------------------------------
+
+constexpr auto add0(auto a) noexcept { return depromote<decltype(a)>(a + 0); }
+constexpr auto add2(auto a) noexcept { return depromote<decltype(a)>(a + 2); }
+constexpr auto add3(auto a) noexcept { return depromote<decltype(a)>(a + 3); }
+constexpr auto add4(auto a) noexcept { return depromote<decltype(a)>(a + 4); }
+constexpr auto add5(auto a) noexcept { return depromote<decltype(a)>(a + 5); }
+constexpr auto add6(auto a) noexcept { return depromote<decltype(a)>(a + 6); }
+constexpr auto add7(auto a) noexcept { return depromote<decltype(a)>(a + 7); }
+
+TEMPLATE
+template<size_t Round>
+INLINE void CLASS::
+prepare8(auto& buffer) NOEXCEPT
+{
+    static_assert(SHA::strength != 160);
+
+    constexpr auto r02 = Round - 2;
+    constexpr auto r07 = Round - 7;
+    constexpr auto r15 = Round - 15;
+    constexpr auto r16 = Round - 16;
+    constexpr auto s = SHA::word_bits;
+
+    // TODO: compress.
+
+    buffer[add0(Round)] = f::add<s>(
+        f::add<s>(buffer[add0(r16)], sigma0(buffer[add0(r15)])),
+        f::add<s>(buffer[add0(r07)], sigma1(buffer[add0(r02)])));
+    buffer[add0(r16)] = f::addc<K::get[add0(r16)], s>(buffer[add0(r16)]);
+
+    buffer[add1(Round)] = f::add<s>(
+        f::add<s>(buffer[add1(r16)], sigma0(buffer[add1(r15)])),
+        f::add<s>(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
+    buffer[add1(r16)] = f::addc<K::get[add1(r16)], s>(buffer[add1(r16)]);
+
+    buffer[add2(Round)] = f::add<s>(
+        f::add<s>(buffer[add2(r16)], sigma0(buffer[add2(r15)])),
+        f::add<s>(buffer[add2(r07)], sigma1(buffer[add2(r02)])));
+    buffer[add2(r16)] = f::addc<K::get[add2(r16)], s>(buffer[add2(r16)]);
+
+    buffer[add3(Round)] = f::add<s>(
+        f::add<s>(buffer[add3(r16)], sigma0(buffer[add3(r15)])),
+        f::add<s>(buffer[add3(r07)], sigma1(buffer[add3(r02)])));
+    buffer[add3(r16)] = f::addc<K::get[add3(r16)], s>(buffer[add3(r16)]);
+
+    buffer[add4(Round)] = f::add<s>(
+        f::add<s>(buffer[add4(r16)], sigma0(buffer[add4(r15)])),
+        f::add<s>(buffer[add4(r07)], sigma1(buffer[add4(r02)])));
+    buffer[add4(r16)] = f::addc<K::get[add4(r16)], s>(buffer[add4(r16)]);
+
+    buffer[add5(Round)] = f::add<s>(
+        f::add<s>(buffer[add5(r16)], sigma0(buffer[add5(r15)])),
+        f::add<s>(buffer[add5(r07)], sigma1(buffer[add5(r02)])));
+    buffer[add5(r16)] = f::addc<K::get[add5(r16)], s>(buffer[add5(r16)]);
+
+    buffer[add6(Round)] = f::add<s>(
+        f::add<s>(buffer[add6(r16)], sigma0(buffer[add6(r15)])),
+        f::add<s>(buffer[add6(r07)], sigma1(buffer[add6(r02)])));
+    buffer[add6(r16)] = f::addc<K::get[add6(r16)], s>(buffer[add6(r16)]);
+
+    buffer[add7(Round)] = f::add<s>(
+        f::add<s>(buffer[add7(r16)], sigma0(buffer[add7(r15)])),
+        f::add<s>(buffer[add7(r07)], sigma1(buffer[add7(r02)])));
+    buffer[add7(r16)] = f::addc<K::get[add7(r16)], s>(buffer[add7(r16)]);
+}
+
+TEMPLATE
+INLINE void CLASS::
+schedule8(auto& buffer) NOEXCEPT
+{
+    static_assert(SHA::strength != 160);
+
+    // TODO: determine if there is 8 and/or 4 lane capacity.
+    // TODO: this is xint256/128 for sha256 and xint512/256 for sha512.
+    // TODO: if there is only 4 lane capacity then double sigma calls.
+
+    // eight round scheduling for fewer blocks than lanes (singles).
+    prepare8<16>(buffer);
+    prepare8<24>(buffer);
+    prepare8<32>(buffer);
+    prepare8<40>(buffer);
+    prepare8<48>(buffer);
+    prepare8<56>(buffer);
+
+    if constexpr (SHA::rounds == 80)
+    {
+        prepare<64>(buffer);
+        prepare<72>(buffer);
+    }
+
+    add_k(buffer);
 }
 
 BC_POP_WARNING()

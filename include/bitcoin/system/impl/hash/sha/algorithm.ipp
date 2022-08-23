@@ -399,6 +399,7 @@ INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
     // K is added to schedule words because schedule is vectorizable.
+    // K-adding is shifted -16, with last 16 added after scheduling.
     constexpr auto s = SHA::word_bits;
 
     if constexpr (SHA::strength == 160)
@@ -457,33 +458,36 @@ prepare(auto& buffer) NOEXCEPT
         //     vsha256su1q(buffer[Round - 13], buffer[Round - 5],
         //                 buffer[Round - 1]);
     }
-
-    // Add K to last 16 words.
-    if constexpr (Round == sub1(SHA::rounds))
-    {
-        constexpr auto r = SHA::rounds - array_count<words_t>;
-        buffer[r + 0] = f::addc<K::get[r + 0], s>(buffer[r + 0]);
-        buffer[r + 1] = f::addc<K::get[r + 1], s>(buffer[r + 1]);
-        buffer[r + 2] = f::addc<K::get[r + 2], s>(buffer[r + 2]);
-        buffer[r + 3] = f::addc<K::get[r + 3], s>(buffer[r + 3]);
-        buffer[r + 4] = f::addc<K::get[r + 4], s>(buffer[r + 4]);
-        buffer[r + 5] = f::addc<K::get[r + 5], s>(buffer[r + 5]);
-        buffer[r + 6] = f::addc<K::get[r + 6], s>(buffer[r + 6]);
-        buffer[r + 7] = f::addc<K::get[r + 7], s>(buffer[r + 7]);
-        buffer[r + 8] = f::addc<K::get[r + 8], s>(buffer[r + 8]);
-        buffer[r + 9] = f::addc<K::get[r + 9], s>(buffer[r + 9]);
-        buffer[r + 10] = f::addc<K::get[r + 10], s>(buffer[r + 10]);
-        buffer[r + 11] = f::addc<K::get[r + 11], s>(buffer[r + 11]);
-        buffer[r + 12] = f::addc<K::get[r + 12], s>(buffer[r + 12]);
-        buffer[r + 13] = f::addc<K::get[r + 13], s>(buffer[r + 13]);
-        buffer[r + 14] = f::addc<K::get[r + 14], s>(buffer[r + 14]);
-        buffer[r + 15] = f::addc<K::get[r + 15], s>(buffer[r + 15]);
-    }
 }
 
 TEMPLATE
-constexpr void CLASS::
-schedule(auto& buffer) NOEXCEPT
+INLINE constexpr void CLASS::
+add_k(auto& buffer) NOEXCEPT
+{
+    // Add K to last 16 words.
+    constexpr auto s = SHA::word_bits;
+    constexpr auto r = SHA::rounds - array_count<words_t>;
+    buffer[r + 0] = f::addc<K::get[r + 0], s>(buffer[r + 0]);
+    buffer[r + 1] = f::addc<K::get[r + 1], s>(buffer[r + 1]);
+    buffer[r + 2] = f::addc<K::get[r + 2], s>(buffer[r + 2]);
+    buffer[r + 3] = f::addc<K::get[r + 3], s>(buffer[r + 3]);
+    buffer[r + 4] = f::addc<K::get[r + 4], s>(buffer[r + 4]);
+    buffer[r + 5] = f::addc<K::get[r + 5], s>(buffer[r + 5]);
+    buffer[r + 6] = f::addc<K::get[r + 6], s>(buffer[r + 6]);
+    buffer[r + 7] = f::addc<K::get[r + 7], s>(buffer[r + 7]);
+    buffer[r + 8] = f::addc<K::get[r + 8], s>(buffer[r + 8]);
+    buffer[r + 9] = f::addc<K::get[r + 9], s>(buffer[r + 9]);
+    buffer[r + 10] = f::addc<K::get[r + 10], s>(buffer[r + 10]);
+    buffer[r + 11] = f::addc<K::get[r + 11], s>(buffer[r + 11]);
+    buffer[r + 12] = f::addc<K::get[r + 12], s>(buffer[r + 12]);
+    buffer[r + 13] = f::addc<K::get[r + 13], s>(buffer[r + 13]);
+    buffer[r + 14] = f::addc<K::get[r + 14], s>(buffer[r + 14]);
+    buffer[r + 15] = f::addc<K::get[r + 15], s>(buffer[r + 15]);
+}
+
+TEMPLATE
+INLINE constexpr void CLASS::
+schedule_(auto& buffer) NOEXCEPT
 {
     prepare<16>(buffer);
     prepare<17>(buffer);
@@ -554,6 +558,28 @@ schedule(auto& buffer) NOEXCEPT
         prepare<77>(buffer);
         prepare<78>(buffer);
         prepare<79>(buffer);
+    }
+
+    add_k(buffer);
+}
+
+TEMPLATE
+constexpr void CLASS::
+schedule(auto& buffer) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        schedule_(buffer);
+    }
+    else if constexpr (vectorization
+        && is_integral_integer<decltype(buffer.front())>
+        && SHA::strength != 160)
+    {
+        schedule8(buffer);
+    }
+    else
+    {
+        schedule_(buffer);
     }
 }
 
@@ -1161,50 +1187,87 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     return output(state);
 }
 
-// Merkle Hashing (sha256/512).
+// Block iteration.
 // ------------------------------------------------------------------------
-// No merkle_hash optimizations for sha160 (double_hash requires half_t).
 
 TEMPLATE
-VCONSTEXPR void CLASS::
-sequential(digests_t& digests, size_t block) NOEXCEPT
+template <size_t Size>
+INLINE constexpr void CLASS::
+iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
-    const auto blocks = to_half(digests.size());
-    for (auto i = block, j = block * two; i < blocks; ++i, j += two)
-        digests[i] = double_hash(digests[j], digests[add1(j)]);
-
-    digests.resize(blocks);
-}
-
-
-TEMPLATE
-VCONSTEXPR typename CLASS::digests_t& CLASS::
-merkle_hash(digests_t& digests) NOEXCEPT
-{
-    static_assert(is_same_type<state_t, chunk_t>);
-
     if (std::is_constant_evaluated())
     {
-        sequential(digests);
+        iterate_(state, blocks);
     }
     else if constexpr (vectorization)
     {
-        if (digests.size() < (min_lanes * two))
+        if (blocks.size() < min_lanes)
         {
-            sequential(digests);
+            iterate_(state, blocks);
         }
         else
         {
-            vectorized(digests);
+            vectorized(state, blocks);
         }
     }
     else
     {
-        sequential(digests);
+        iterate_(state, blocks);
     }
+}
 
-    return digests;
-};
+TEMPLATE
+INLINE void CLASS::
+iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    if constexpr (vectorization)
+    {
+        if (blocks.size() < min_lanes)
+        {
+            iterate_(state, blocks);
+        }
+        else
+        {
+            vectorized(state, blocks);
+        }
+    }
+    else
+    {
+        iterate_(state, blocks);
+    }
+}
+
+TEMPLATE
+template <size_t Size>
+INLINE constexpr void CLASS::
+iterate_(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::
+iterate_(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    buffer_t buffer{};
+    for (auto& block: blocks)
+    {
+        input(buffer, block);
+        schedule(buffer);
+        compress(state, buffer);
+    }
+}
+
+
+// Merkle Hashing (sha256/512).
+// ------------------------------------------------------------------------
+// No merkle_hash optimizations for sha160 (double_hash requires half_t).
 
 TEMPLATE
 VCONSTEXPR typename CLASS::digest_t CLASS::
@@ -1224,6 +1287,46 @@ merkle_root(digests_t&& digests) NOEXCEPT
     }
 
     return std::move(digests.front());
+}
+
+TEMPLATE
+VCONSTEXPR typename CLASS::digests_t& CLASS::
+merkle_hash(digests_t& digests) NOEXCEPT
+{
+    static_assert(is_same_type<state_t, chunk_t>);
+
+    if (std::is_constant_evaluated())
+    {
+        merkle_hash_(digests);
+    }
+    else if constexpr (vectorization)
+    {
+        if (digests.size() < (min_lanes * two))
+        {
+            merkle_hash_(digests);
+        }
+        else
+        {
+            vectorized(digests);
+        }
+    }
+    else
+    {
+        merkle_hash_(digests);
+    }
+
+    return digests;
+};
+
+TEMPLATE
+VCONSTEXPR void CLASS::
+merkle_hash_(digests_t& digests, size_t block) NOEXCEPT
+{
+    const auto blocks = to_half(digests.size());
+    for (auto i = block, j = block * two; i < blocks; ++i, j += two)
+        digests[i] = double_hash(digests[j], digests[add1(j)]);
+
+    digests.resize(blocks);
 }
 
 // Streaming (unfinalized).
@@ -1279,83 +1382,6 @@ constexpr typename CLASS::digest_t CLASS::
 normalize(const state_t& state) NOEXCEPT
 {
     return output(state);
-}
-
-// Block iteration.
-// ------------------------------------------------------------------------
-
-TEMPLATE
-template <size_t Size>
-INLINE constexpr void CLASS::
-iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
-{
-    if (std::is_constant_evaluated())
-    {
-        sequential(state, blocks);
-    }
-    else if constexpr (vectorization)
-    {
-        if (blocks.size() < min_lanes)
-        {
-            sequential(state, blocks);
-        }
-        else
-        {
-            vectorized(state, blocks);
-        }
-    }
-    else
-    {
-        sequential(state, blocks);
-    }
-}
-
-TEMPLATE
-INLINE void CLASS::
-iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    if constexpr (vectorization)
-    {
-        if (blocks.size() < min_lanes)
-        {
-            sequential(state, blocks);
-        }
-        else
-        {
-            vectorized(state, blocks);
-        }
-    }
-    else
-    {
-        sequential(state, blocks);
-    }
-}
-
-TEMPLATE
-template <size_t Size>
-INLINE constexpr void CLASS::
-sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
-}
-
-TEMPLATE
-INLINE void CLASS::
-sequential(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    buffer_t buffer{};
-    for (auto& block: blocks)
-    {
-        input(buffer, block);
-        schedule(buffer);
-        compress(state, buffer);
-    }
 }
 
 BC_POP_WARNING()
