@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include "algorithm.hpp"
+#include "clone/algorithm.hpp"
 
 BOOST_AUTO_TEST_SUITE(vectorization_tests)
 

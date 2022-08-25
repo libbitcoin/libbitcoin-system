@@ -16,15 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTORIZATION_IPP
-#define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTORIZATION_IPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_SHAX_ALGORITHM_VECTORIZATION_IPP
+#define LIBBITCOIN_SYSTEM_HASH_SHAX_ALGORITHM_VECTORIZATION_IPP
 
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/intrinsics.hpp>
+#include "../../../test.hpp"
 
-namespace libbitcoin {
-namespace system {
-namespace sha {
+namespace shax {
 
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
@@ -112,9 +109,9 @@ sigma(xWord x) NOEXCEPT
 TEMPLATE
 template <size_t Word, size_t Lanes>
 INLINE auto CLASS::
-pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
+pack(const wblock_t<Lanes>& wblock) NOEXCEPT
 {
-    BC_ASSERT(size > to_half(Lanes));
+    BC_ASSERT(size >= Lanes);
     using xword = to_extended<word_t, Lanes>;
 
     if constexpr (Lanes == 2)
@@ -131,7 +128,8 @@ pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
             wblock[0][Word],
             wblock[1][Word],
             wblock[2][Word],
-            size > 3 ? wblock[3][Word] : 0));
+            wblock[3][Word]));
+            ////size > 3 ? wblock[3][Word] : 0));
     }
     else if constexpr (Lanes == 8)
     {
@@ -142,9 +140,12 @@ pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
             wblock[2][Word],
             wblock[3][Word],
             wblock[4][Word],
-            size > 5 ? wblock[5][Word] : 0,
-            size > 6 ? wblock[6][Word] : 0,
-            size > 7 ? wblock[7][Word] : 0));
+            wblock[5][Word],
+            wblock[6][Word],
+            wblock[7][Word]));
+            ////size > 5 ? wblock[5][Word] : 0,
+            ////size > 6 ? wblock[6][Word] : 0,
+            ////size > 7 ? wblock[7][Word] : 0));
     }
     else if constexpr (Lanes == 16)
     {
@@ -159,13 +160,20 @@ pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
             wblock[ 6][Word],
             wblock[ 7][Word],
             wblock[ 8][Word],
-            size >  9 ? wblock[ 9][Word] : 0,
-            size > 10 ? wblock[10][Word] : 0,
-            size > 11 ? wblock[11][Word] : 0,
-            size > 12 ? wblock[12][Word] : 0,
-            size > 13 ? wblock[13][Word] : 0,
-            size > 14 ? wblock[14][Word] : 0,
-            size > 15 ? wblock[15][Word] : 0));
+            wblock[ 9][Word],
+            wblock[10][Word],
+            wblock[11][Word],
+            wblock[12][Word],
+            wblock[13][Word],
+            wblock[14][Word],
+            wblock[15][Word]));
+            ////size >  9 ? wblock[ 9][Word] : 0,
+            ////size > 10 ? wblock[10][Word] : 0,
+            ////size > 11 ? wblock[11][Word] : 0,
+            ////size > 12 ? wblock[12][Word] : 0,
+            ////size > 13 ? wblock[13][Word] : 0,
+            ////size > 14 ? wblock[14][Word] : 0,
+            ////size > 15 ? wblock[15][Word] : 0));
     }
 }
 
@@ -176,31 +184,25 @@ input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
-    // When lanes exceeds iterator blocks.size(), the to_array<lanes>() cast
-    // remains safe, but it must not be accessed beyond its actual size.
+    ////// When lanes exceeds iterator blocks.size(), the to_array<lanes>() cast
+    ////// remains safe, but it must not be accessed beyond its actual size.
     const auto& wblock = array_cast<words_t>(blocks.template to_array<lanes>());
-
-    // Limit wblock writes to blocks.size().
-    const auto size = blocks.size();
-
-    // TODO: if (size >= lanes)... unconditional/parameterized, else conditional.
-
-    xbuffer[0] = pack<0>(wblock, size);
-    xbuffer[1] = pack<1>(wblock, size);
-    xbuffer[2] = pack<2>(wblock, size);
-    xbuffer[3] = pack<3>(wblock, size);
-    xbuffer[4] = pack<4>(wblock, size);
-    xbuffer[5] = pack<5>(wblock, size);
-    xbuffer[6] = pack<6>(wblock, size);
-    xbuffer[7] = pack<7>(wblock, size);
-    xbuffer[8] = pack<8>(wblock, size);
-    xbuffer[9] = pack<9>(wblock, size);
-    xbuffer[10] = pack<10>(wblock, size);
-    xbuffer[11] = pack<11>(wblock, size);
-    xbuffer[12] = pack<12>(wblock, size);
-    xbuffer[13] = pack<13>(wblock, size);
-    xbuffer[14] = pack<14>(wblock, size);
-    xbuffer[15] = pack<15>(wblock, size);
+    xbuffer[0] = pack<0>(wblock);
+    xbuffer[1] = pack<1>(wblock);
+    xbuffer[2] = pack<2>(wblock);
+    xbuffer[3] = pack<3>(wblock);
+    xbuffer[4] = pack<4>(wblock);
+    xbuffer[5] = pack<5>(wblock);
+    xbuffer[6] = pack<6>(wblock);
+    xbuffer[7] = pack<7>(wblock);
+    xbuffer[8] = pack<8>(wblock);
+    xbuffer[9] = pack<9>(wblock);
+    xbuffer[10] = pack<10>(wblock);
+    xbuffer[11] = pack<11>(wblock);
+    xbuffer[12] = pack<12>(wblock);
+    xbuffer[13] = pack<13>(wblock);
+    xbuffer[14] = pack<14>(wblock);
+    xbuffer[15] = pack<15>(wblock);
 
     // iterator stops at end on advance overflow.
     blocks.template advance<lanes>();
@@ -461,16 +463,11 @@ INLINE void CLASS::
 output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
-    BC_ASSERT(digests.size() > to_half(lanes));
+    BC_ASSERT(digests.size() >= lanes);
 
-    // When lanes exceeds iterator digests.size(), the to_array<lanes>() cast
-    // remains safe, but it must not be accessed beyond its actual size.
+    ////// When lanes exceeds iterator digests.size(), the to_array<lanes>() cast
+    ////// remains safe, but it must not be accessed beyond its actual size.
     auto& wdigest = array_cast<digest_t>(digests.template to_array<lanes>());
-
-    // Limit wdigest writes to digests.size().
-    const auto size = digests.size();
-
-    // TODO: if (size >= lanes)... unconditional, else conditional.
 
     // size always > 1.
     wdigest[0] = unpack<0>(xstate);
@@ -480,7 +477,7 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     {
         // size always > to_half(lanes).
         wdigest[2] = unpack<2>(xstate);
-        if (size <= 3) return;
+        ////if (size <= 3) return;
         wdigest[3] = unpack<3>(xstate);
     }
 
@@ -488,11 +485,11 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     {
         // size always > to_half(lanes).
         wdigest[4] = unpack<4>(xstate);
-        if (size <= 5) return;
+        ////if (size <= 5) return;
         wdigest[5] = unpack<5>(xstate);
-        if (size <= 6) return;
+        ////if (size <= 6) return;
         wdigest[6] = unpack<6>(xstate);
-        if (size <= 7) return;
+        ////if (size <= 7) return;
         wdigest[7] = unpack<7>(xstate);
     }
 
@@ -500,19 +497,19 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     {
         // size always > to_half(lanes).
         wdigest[8] = unpack<8>(xstate);
-        if (size <= 9) return;
+        ////if (size <= 9) return;
         wdigest[9] = unpack<9>(xstate);
-        if (size <= 10) return;
+        ////if (size <= 10) return;
         wdigest[10] = unpack<10>(xstate);
-        if (size <= 11) return;
+        ////if (size <= 11) return;
         wdigest[11] = unpack<11>(xstate);
-        if (size <= 12) return;
+        ////if (size <= 12) return;
         wdigest[12] = unpack<12>(xstate);
-        if (size <= 13) return;
+        ////if (size <= 13) return;
         wdigest[13] = unpack<13>(xstate);
-        if (size <= 14) return;
+        ////if (size <= 14) return;
         wdigest[14] = unpack<14>(xstate);
-        if (size <= 15) return;
+        ////if (size <= 15) return;
         wdigest[15] = unpack<15>(xstate);
     }
 
@@ -529,7 +526,7 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    if (blocks.size() > to_half(lanes) && have<xWord>())
+    if (blocks.size() >= lanes && have<xWord>())
     {
         static auto initial = pack<xWord>(H::get);
         xbuffer_t<xWord> xbuffer;
@@ -555,7 +552,7 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
             // output() advances digest iterator by lanes (or to end).
             output(digests, xstate);
         }
-        while (blocks.size() > to_half(lanes));
+        while (blocks.size() >= lanes);
     }
 }
 
@@ -589,13 +586,11 @@ vectorized(digests_t& digests) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
+compress_(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     // Limit compress calls to size.
     constexpr auto lanes = capacity<xWord, word_t>;
-    BC_ASSERT(size > to_half(lanes));
-
-    // TODO: if (size >= lanes)... unconditional, else conditional.
+    BC_ASSERT(size >= lanes);
 
     // size always > 1.
     compress<0>(state, xbuffer);
@@ -605,7 +600,7 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
     {
         // size always > to_half(lanes).
         compress<2>(state, xbuffer);
-        if (size <= 3) return;
+        ////if (size <= 3) return;
         compress<3>(state, xbuffer);
     }
 
@@ -613,11 +608,11 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
     {
         // size always > to_half(lanes).
         compress<4>(state, xbuffer);
-        if (size <= 5) return;
+        ////if (size <= 5) return;
         compress<5>(state, xbuffer);
-        if (size <= 6) return;
+        ////if (size <= 6) return;
         compress<6>(state, xbuffer);
-        if (size <= 7) return;
+        ////if (size <= 7) return;
         compress<7>(state, xbuffer);
     }
 
@@ -625,19 +620,19 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
     {
         // size always > to_half(lanes).
         compress<8>(state, xbuffer);
-        if (size <= 9) return;
+        ////if (size <= 9) return;
         compress<9>(state, xbuffer);
-        if (size <= 10) return;
+        ////if (size <= 10) return;
         compress<10>(state, xbuffer);
-        if (size <= 11) return;
+        ////if (size <= 11) return;
         compress<11>(state, xbuffer);
-        if (size <= 12) return;
+        ////if (size <= 12) return;
         compress<12>(state, xbuffer);
-        if (size <= 13) return;
+        ////if (size <= 13) return;
         compress<13>(state, xbuffer);
-        if (size <= 14) return;
+        ////if (size <= 14) return;
         compress<14>(state, xbuffer);
-        if (size <= 15) return;
+        ////if (size <= 15) return;
         compress<15>(state, xbuffer);
     }
 }
@@ -649,9 +644,8 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
-    auto size = blocks.size();
 
-    if (size > to_half(lanes) && have<xWord>())
+    if (blocks.size() > lanes && have<xWord>())
     {
         xbuffer_t<xWord> xbuffer;
 
@@ -660,10 +654,9 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
             // input() advances block iterator by lanes (or to end).
             input(xbuffer, blocks);
             schedule(xbuffer);
-            compress_(state, xbuffer, size);
-            size = blocks.size();
+            compress_(state, xbuffer);
         }
-        while (size > to_half(lanes));
+        while (blocks.size() >= lanes);
     }
 }
 
@@ -840,8 +833,6 @@ vectorized(auto& buffer) NOEXCEPT
 
 BC_POP_WARNING()
 
-} // namespace sha
-} // namespace system
-} // namespace libbitcoin
+} // namespace shax
 
 #endif

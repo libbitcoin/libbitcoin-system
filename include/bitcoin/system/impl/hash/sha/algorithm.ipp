@@ -571,12 +571,10 @@ schedule(auto& buffer) NOEXCEPT
     {
         schedule_(buffer);
     }
-    else if constexpr (vectorization
-        && is_integral_integer<decltype(buffer.front())>
-        && SHA::strength != 160)
-    {
-        schedule8(buffer);
-    }
+    ////else if constexpr (vectorization)
+    ////{
+    ////    schedule_8(buffer);
+    ////}
     else
     {
         schedule_(buffer);
@@ -1201,13 +1199,13 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        if (blocks.size() < min_lanes)
+        if (blocks.size() > to_half(min_lanes))
         {
-            iterate_(state, blocks);
+            vectorized(state, blocks);
         }
         else
         {
-            vectorized(state, blocks);
+            iterate_(state, blocks);
         }
     }
     else
@@ -1222,13 +1220,13 @@ iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if constexpr (vectorization)
     {
-        if (blocks.size() < min_lanes)
+        if (blocks.size() > to_half(min_lanes))
         {
-            iterate_(state, blocks);
+            vectorized(state, blocks);
         }
         else
         {
-            vectorized(state, blocks);
+            iterate_(state, blocks);
         }
     }
     else
@@ -1301,13 +1299,13 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        if (digests.size() < (min_lanes * two))
+        if (digests.size() > to_half(min_lanes * two))
         {
-            merkle_hash_(digests);
+            vectorized(digests);
         }
         else
         {
-            vectorized(digests);
+            merkle_hash_(digests);
         }
     }
     else

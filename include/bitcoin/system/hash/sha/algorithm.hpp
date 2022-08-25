@@ -247,7 +247,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     template <size_t Word, size_t Lanes>
-    INLINE static auto pack(const wblock_t<Lanes>& wblock) NOEXCEPT;
+    INLINE static auto pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT;
 
     template <typename xWord>
     INLINE static void input(xbuffer_t<xWord>& xbuffer,
@@ -295,7 +295,8 @@ protected:
     INLINE static Word extract(xWord a) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void compress_(state_t& state, xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    INLINE static void compress_(state_t& state,
+        const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
     INLINE static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
@@ -304,12 +305,18 @@ protected:
     INLINE static void vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
-    /// Message Schedule (round compression).
+    /// Message Schedule (sigma vectorization).
     /// -----------------------------------------------------------------------
 
+    template <typename xWord, if_extended<xWord> = true>
+    INLINE static auto sigma1_2(auto x1, auto x2) NOEXCEPT;
+    template <typename xWord, if_extended<xWord> = true>
+    INLINE static auto sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5,
+        auto x6, auto x7, auto x8) NOEXCEPT;
+
     template<size_t Round>
-    INLINE static void prepare8(auto& buffer) NOEXCEPT;
-    INLINE static void schedule8(auto& buffer) NOEXCEPT;
+    INLINE static void prepare_(buffer_t& buffer) NOEXCEPT;
+    INLINE static void vectorized(auto& buffer) NOEXCEPT;
 
 public:
     static constexpr auto have_x128     = Vectorized && system::with_sse41;
