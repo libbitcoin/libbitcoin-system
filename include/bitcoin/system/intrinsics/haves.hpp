@@ -281,7 +281,7 @@ CONSTEVAL bool with() NOEXCEPT
     else return false;
 }
 
-/// Runtime time availabiltiy of extended integer intrinsics, as a template
+/// Runtime time availability of extended integer intrinsics, as a template
 /// function of the extended integer type.
 template <typename Extended, if_extended<Extended> = true>
 inline bool have() NOEXCEPT
@@ -291,6 +291,22 @@ inline bool have() NOEXCEPT
     else if constexpr (is_same_type<Extended, xint256_t>)
         return have_avx2();
     else if constexpr (is_same_type<Extended, xint128_t>)
+        return have_sse41();
+    else return false;
+}
+
+/// Runtime time availability of extended integer filled by Lanes Integrals.
+template <typename Integral, size_t Lanes,
+    if_integral_integer<Integral> = true,
+    if_not_greater<safe_multiply(sizeof(Integral), Lanes),
+        sizeof(xint512_t)> = true>
+inline bool have_lanes() NOEXCEPT
+{
+    if constexpr (capacity<xint512_t, Integral> == Lanes)
+        return have_avx512();
+    else if constexpr (capacity<xint256_t, Integral> == Lanes)
+        return have_avx2();
+    else if constexpr (capacity<xint128_t, Integral> == Lanes)
         return have_sse41();
     else return false;
 }
