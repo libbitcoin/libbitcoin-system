@@ -247,10 +247,9 @@ inline bool have_neon() NOEXCEPT
 
 template <typename Type>
 constexpr auto is_extended =
-    !std::is_base_of_v<xmock_t, Type> &&
-    (is_same_type<Type, xint128_t> ||
+     is_same_type<Type, xint128_t> ||
      is_same_type<Type, xint256_t> ||
-     is_same_type<Type, xint512_t>);
+     is_same_type<Type, xint512_t>;
 
 template <typename Type>
 using if_extended = bool_if<is_extended<Type>>;
@@ -299,9 +298,7 @@ inline bool have() NOEXCEPT
 
 /// Runtime time availability of extended integer filled by Lanes Integrals.
 template <typename Integral, size_t Lanes,
-    if_integral_integer<Integral> = true,
-    if_not_greater<safe_multiply(sizeof(Integral), Lanes),
-        sizeof(xint512_t)> = true>
+    if_integral_integer<Integral> = true>
 inline bool have_lanes() NOEXCEPT
 {
     if constexpr (capacity<xint512_t, Integral> == Lanes)
