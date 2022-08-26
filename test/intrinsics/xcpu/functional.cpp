@@ -41,13 +41,16 @@ BOOST_AUTO_TEST_CASE(functional__sse4__set32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__sse4__set64__get_expected)
 {
-    if (!build_x32 && have_sse41())
+    if constexpr (!build_x32)
     {
-        const auto xword = set<xint128_t>(0, 1);
-        const auto word0 = get<uint64_t, 0>(xword);
-        const auto word1 = get<uint64_t, 1>(xword);
-        BOOST_CHECK_EQUAL(word0, 0_u64);
-        BOOST_CHECK_EQUAL(word1, 1_u64);
+        if (have_sse41())
+        {
+            const auto xword = set<xint128_t>(0, 1);
+            const auto word0 = get<uint64_t, 0>(xword);
+            const auto word1 = get<uint64_t, 1>(xword);
+            BOOST_CHECK_EQUAL(word0, 0_u64);
+            BOOST_CHECK_EQUAL(word1, 1_u64);
+        }
     }
 }
 #endif
@@ -78,17 +81,20 @@ BOOST_AUTO_TEST_CASE(functional__avx2__set32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx2__set64__get_expected)
 {
-    if (!build_x32 && have_avx2())
+    if constexpr (!build_x32)
     {
-        const auto xword = set<xint256_t>(0, 1, 2, 3);
-        const auto word0 = get<uint64_t, 0>(xword);
-        const auto word1 = get<uint64_t, 1>(xword);
-        const auto word2 = get<uint64_t, 2>(xword);
-        const auto word3 = get<uint64_t, 3>(xword);
-        BOOST_CHECK_EQUAL(word0, 0_u64);
-        BOOST_CHECK_EQUAL(word1, 1_u64);
-        BOOST_CHECK_EQUAL(word2, 2_u64);
-        BOOST_CHECK_EQUAL(word3, 3_u64);
+        if (have_avx2())
+        {
+            const auto xword = set<xint256_t>(0, 1, 2, 3);
+            const auto word0 = get<uint64_t, 0>(xword);
+            const auto word1 = get<uint64_t, 1>(xword);
+            const auto word2 = get<uint64_t, 2>(xword);
+            const auto word3 = get<uint64_t, 3>(xword);
+            BOOST_CHECK_EQUAL(word0, 0_u64);
+            BOOST_CHECK_EQUAL(word1, 1_u64);
+            BOOST_CHECK_EQUAL(word2, 2_u64);
+            BOOST_CHECK_EQUAL(word3, 3_u64);
+        }
     }
 }
 #endif
@@ -135,25 +141,28 @@ BOOST_AUTO_TEST_CASE(functional__avx512__set32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx512__set64__get_expected)
 {
-    if (!build_x32 && have_avx512())
+    if constexpr (!build_x32)
     {
-        const auto xword = set<xint512_t>(0, 1, 2, 3, 4, 5, 6, 7);
-        const auto word0 = get<uint64_t, 0>(xword);
-        const auto word1 = get<uint64_t, 1>(xword);
-        const auto word2 = get<uint64_t, 2>(xword);
-        const auto word3 = get<uint64_t, 3>(xword);
-        const auto word4 = get<uint64_t, 4>(xword);
-        const auto word5 = get<uint64_t, 5>(xword);
-        const auto word6 = get<uint64_t, 6>(xword);
-        const auto word7 = get<uint64_t, 7>(xword);
-        BOOST_CHECK_EQUAL(word0, 0_u64);
-        BOOST_CHECK_EQUAL(word1, 1_u64);
-        BOOST_CHECK_EQUAL(word2, 2_u64);
-        BOOST_CHECK_EQUAL(word3, 3_u64);
-        BOOST_CHECK_EQUAL(word4, 4_u64);
-        BOOST_CHECK_EQUAL(word5, 5_u64);
-        BOOST_CHECK_EQUAL(word6, 6_u64);
-        BOOST_CHECK_EQUAL(word7, 7_u64);
+        if (have_avx512())
+        {
+            const auto xword = set<xint512_t>(0, 1, 2, 3, 4, 5, 6, 7);
+            const auto word0 = get<uint64_t, 0>(xword);
+            const auto word1 = get<uint64_t, 1>(xword);
+            const auto word2 = get<uint64_t, 2>(xword);
+            const auto word3 = get<uint64_t, 3>(xword);
+            const auto word4 = get<uint64_t, 4>(xword);
+            const auto word5 = get<uint64_t, 5>(xword);
+            const auto word6 = get<uint64_t, 6>(xword);
+            const auto word7 = get<uint64_t, 7>(xword);
+            BOOST_CHECK_EQUAL(word0, 0_u64);
+            BOOST_CHECK_EQUAL(word1, 1_u64);
+            BOOST_CHECK_EQUAL(word2, 2_u64);
+            BOOST_CHECK_EQUAL(word3, 3_u64);
+            BOOST_CHECK_EQUAL(word4, 4_u64);
+            BOOST_CHECK_EQUAL(word5, 5_u64);
+            BOOST_CHECK_EQUAL(word6, 6_u64);
+            BOOST_CHECK_EQUAL(word7, 7_u64);
+        }
     }
 }
 #endif
@@ -181,14 +190,17 @@ BOOST_AUTO_TEST_CASE(functional__sse4__byteswap32__expected)
 }
 BOOST_AUTO_TEST_CASE(functional__sse4__byteswap64__expected)
 {
-    if (!build_x32 && have_sse41())
+    if constexpr (!build_x32)
     {
-        const auto xword = byteswap<uint64_t>(set<xint128_t>(
-            0x0000000000000001, 0x0000000000000002));
-        const auto word0 = get<uint64_t, 0>(xword);
-        const auto word1 = get<uint64_t, 1>(xword);
-        BOOST_CHECK_EQUAL(word0, 0x0100000000000000_u64);
-        BOOST_CHECK_EQUAL(word1, 0x0200000000000000_u64);
+        if (have_sse41())
+        {
+            const auto xword = byteswap<uint64_t>(set<xint128_t>(
+                0x0000000000000001, 0x0000000000000002));
+            const auto word0 = get<uint64_t, 0>(xword);
+            const auto word1 = get<uint64_t, 1>(xword);
+            BOOST_CHECK_EQUAL(word0, 0x0100000000000000_u64);
+            BOOST_CHECK_EQUAL(word1, 0x0200000000000000_u64);
+        }
     }
 }
 #endif
@@ -221,19 +233,22 @@ BOOST_AUTO_TEST_CASE(functional__avx2__byteswap32__expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx2__byteswap64__expected)
 {
-    if (!build_x32 && have_avx2())
+    if constexpr (!build_x32)
     {
-        const auto xword = byteswap<uint64_t>(set<xint256_t>(
-            0x0000000000000001, 0x0000000000000002,
-            0x0000000000000003, 0x0000000000000004));
-        const auto word0 = get<uint64_t, 0>(xword);
-        const auto word1 = get<uint64_t, 1>(xword);
-        const auto word2 = get<uint64_t, 2>(xword);
-        const auto word3 = get<uint64_t, 3>(xword);
-        BOOST_CHECK_EQUAL(word0, 0x0100000000000000_u64);
-        BOOST_CHECK_EQUAL(word1, 0x0200000000000000_u64);
-        BOOST_CHECK_EQUAL(word2, 0x0300000000000000_u64);
-        BOOST_CHECK_EQUAL(word3, 0x0400000000000000_u64);
+        if (have_avx2())
+        {
+            const auto xword = byteswap<uint64_t>(set<xint256_t>(
+                0x0000000000000001, 0x0000000000000002,
+                0x0000000000000003, 0x0000000000000004));
+            const auto word0 = get<uint64_t, 0>(xword);
+            const auto word1 = get<uint64_t, 1>(xword);
+            const auto word2 = get<uint64_t, 2>(xword);
+            const auto word3 = get<uint64_t, 3>(xword);
+            BOOST_CHECK_EQUAL(word0, 0x0100000000000000_u64);
+            BOOST_CHECK_EQUAL(word1, 0x0200000000000000_u64);
+            BOOST_CHECK_EQUAL(word2, 0x0300000000000000_u64);
+            BOOST_CHECK_EQUAL(word3, 0x0400000000000000_u64);
+        }
     }
 }
 #endif
@@ -284,33 +299,36 @@ BOOST_AUTO_TEST_CASE(functional__avx512__byteswap32__get_expected)
 }
 BOOST_AUTO_TEST_CASE(functional__avx512__byteswap64__get_expected)
 {
-    if (!build_x32 && have_avx512())
+    if constexpr (!build_x32)
     {
-        const auto xword = byteswap<uint64_t>(set<xint512_t>(
-            0x0000000000000001,
-            0x0000000000000002,
-            0x0000000000000003,
-            0x0000000000000004,
-            0x0000000000000005,
-            0x0000000000000006,
-            0x0000000000000007,
-            0x0000000000000008));
-        const auto word0 = get<uint64_t, 0>(xword);
-        const auto word1 = get<uint64_t, 1>(xword);
-        const auto word2 = get<uint64_t, 2>(xword);
-        const auto word3 = get<uint64_t, 3>(xword);
-        const auto word4 = get<uint64_t, 4>(xword);
-        const auto word5 = get<uint64_t, 5>(xword);
-        const auto word6 = get<uint64_t, 6>(xword);
-        const auto word7 = get<uint64_t, 7>(xword);
-        BOOST_CHECK_EQUAL(word0, 0x0100000000000000_u64);
-        BOOST_CHECK_EQUAL(word1, 0x0200000000000000_u64);
-        BOOST_CHECK_EQUAL(word2, 0x0300000000000000_u64);
-        BOOST_CHECK_EQUAL(word3, 0x0400000000000000_u64);
-        BOOST_CHECK_EQUAL(word4, 0x0500000000000000_u64);
-        BOOST_CHECK_EQUAL(word5, 0x0600000000000000_u64);
-        BOOST_CHECK_EQUAL(word6, 0x0700000000000000_u64);
-        BOOST_CHECK_EQUAL(word7, 0x0800000000000000_u64);
+        if (have_avx512())
+        {
+            const auto xword = byteswap<uint64_t>(set<xint512_t>(
+                0x0000000000000001,
+                0x0000000000000002,
+                0x0000000000000003,
+                0x0000000000000004,
+                0x0000000000000005,
+                0x0000000000000006,
+                0x0000000000000007,
+                0x0000000000000008));
+            const auto word0 = get<uint64_t, 0>(xword);
+            const auto word1 = get<uint64_t, 1>(xword);
+            const auto word2 = get<uint64_t, 2>(xword);
+            const auto word3 = get<uint64_t, 3>(xword);
+            const auto word4 = get<uint64_t, 4>(xword);
+            const auto word5 = get<uint64_t, 5>(xword);
+            const auto word6 = get<uint64_t, 6>(xword);
+            const auto word7 = get<uint64_t, 7>(xword);
+            BOOST_CHECK_EQUAL(word0, 0x0100000000000000_u64);
+            BOOST_CHECK_EQUAL(word1, 0x0200000000000000_u64);
+            BOOST_CHECK_EQUAL(word2, 0x0300000000000000_u64);
+            BOOST_CHECK_EQUAL(word3, 0x0400000000000000_u64);
+            BOOST_CHECK_EQUAL(word4, 0x0500000000000000_u64);
+            BOOST_CHECK_EQUAL(word5, 0x0600000000000000_u64);
+            BOOST_CHECK_EQUAL(word6, 0x0700000000000000_u64);
+            BOOST_CHECK_EQUAL(word7, 0x0800000000000000_u64);
+        }
     }
 }
 #endif
