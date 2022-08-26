@@ -111,7 +111,6 @@ template <size_t Word, size_t Lanes>
 INLINE auto CLASS::
 pack(const wblock_t<Lanes>& wblock) NOEXCEPT
 {
-    BC_ASSERT(size >= Lanes);
     using xword = to_extended<word_t, Lanes>;
 
     if constexpr (Lanes == 2)
@@ -809,7 +808,7 @@ vectorized(auto& buffer) NOEXCEPT
     }
     else if (have_lanes<word_t, 8> && have_lanes<word_t, 4>)
     {
-        // eight round scheduling for fewer blocks than lanes (singles).
+        // 8/2 lane sigma scheduling for fewer blocks than lanes.
         prepare_<16>(buffer);
         prepare_<24>(buffer);
         prepare_<32>(buffer);
