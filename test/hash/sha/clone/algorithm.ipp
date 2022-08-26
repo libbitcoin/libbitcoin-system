@@ -561,10 +561,10 @@ schedule(auto& buffer) NOEXCEPT
     {
         schedule_(buffer);
     }
-    ////else if constexpr (vectorization)
-    ////{
-    ////    vectorized(buffer);
-    ////}
+    else if constexpr (vectorization)
+    {
+        vectorized(buffer);
+    }
     else
     {
         schedule_(buffer);

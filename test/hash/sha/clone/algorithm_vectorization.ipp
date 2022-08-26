@@ -806,7 +806,7 @@ vectorized(auto& buffer) NOEXCEPT
     {
         schedule_(buffer);
     }
-    else if (have_lanes<word_t, 8> && have_lanes<word_t, 4>)
+    else if (have_lanes<word_t, 8>() && have_lanes<word_t, 4>())
     {
         // 8/2 lane sigma scheduling for fewer blocks than lanes.
         prepare_<16>(buffer);
