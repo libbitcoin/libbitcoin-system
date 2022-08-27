@@ -301,9 +301,16 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__when_defined__true)
 // types
 // ----------------------------------------------------------------------------
 
-static_assert(is_extended<xint128_t> == with_sse41);
-#if defined(HAVE_SSE4)
+// is_extended is true even with mock type.
+static_assert(!is_extended<uint32_t>);
+static_assert(is_extended<xint128_t>);
+static_assert(is_extended<xint256_t>);
+static_assert(is_extended<xint512_t>);
 static_assert(is_defined<if_extended<xint128_t>>);
+static_assert(is_defined<if_extended<xint256_t>>);
+static_assert(is_defined<if_extended<xint512_t>>);
+
+#if defined(HAVE_SSE4)
 static_assert(with<xint128_t>() == with_sse41);
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__expected)
 {
@@ -311,9 +318,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__expected)
 }
 #endif
 
-static_assert(is_extended<xint256_t> == with_avx2);
 #if defined(HAVE_AVX2)
-static_assert(is_defined<if_extended<xint256_t>>);
 static_assert(with<xint256_t>() == with_avx2);
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__always__expected)
 {
@@ -321,9 +326,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__always__expected)
 }
 #endif
 
-static_assert(is_extended<xint512_t> == with_avx512);
 #if defined(HAVE_AVX512)
-static_assert(is_defined<if_extended<xint512_t>>);
 static_assert(with<xint512_t>() == with_avx512);
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__always__expected)
