@@ -737,12 +737,10 @@ template<size_t Round>
 INLINE void CLASS::
 prepare_v(buffer_t& buffer) NOEXCEPT
 {
-    // sigma0x8 and sigma1x2 message scheduling for single block iteration.
-    // This requires avx512/avx2 for sha256 and avx2/sse41 for sha256.
-    // Could be optimized for sha512 by using avx512/sse41, but scenarios do not
-    // require maximally optimal sha512 and would be further denormalization.
-    // Could be enabled for sse41 only (sigma0x4x2) but avx2 is now common.
-
+    // This requires avx512 for sha512 and avx2 for sha256.
+    // sigma0x8 message scheduling for single block iteration.
+    // Tests of adding sigma0x8 vectorization show a gain of 3-4%.
+    // Tests of adding sigma1x2 vectorization show a loss of 8% vs. sigma0x8.
     // The simplicity of sha160 message prepare precludes this optimization.
     static_assert(SHA::strength != 160);
 
@@ -751,9 +749,7 @@ prepare_v(buffer_t& buffer) NOEXCEPT
     constexpr auto r15 = Round - 15;
     constexpr auto r16 = Round - 16;
     constexpr auto s = SHA::word_bits;
-
     using xword8 = to_extended<word_t, 8>;
-    using xword4 = to_extended<word_t, 4>;
 
     const auto xr15 = sigma0_8<xword8>(
         buffer[add0(r15)], buffer[add1(r15)],
@@ -761,67 +757,46 @@ prepare_v(buffer_t& buffer) NOEXCEPT
         buffer[add4(r15)], buffer[add5(r15)],
         buffer[add6(r15)], buffer[add7(r15)]);
 
-    auto xr02 = sigma1_2<xword4>(
-        buffer[add0(r02)], buffer[add1(r02)]);
-
     buffer[add0(Round)] = f::add<s>(
         f::add<s>(buffer[add0(r16)], get<word_t, 0>(xr15)),
-        f::add<s>(buffer[add0(r07)], get<word_t, 0>(xr02)));
+        f::add<s>(buffer[add0(r07)], sigma1(buffer[add0(r02)])));
     buffer[add0(r16)] = f::addc<K::get[add0(r16)], s>(buffer[add0(r16)]);
 
     buffer[add1(Round)] = f::add<s>(
         f::add<s>(buffer[add1(r16)], get<word_t, 1>(xr15)),
-        f::add<s>(buffer[add1(r07)], get<word_t, 1>(xr02)));
+        f::add<s>(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
     buffer[add1(r16)] = f::addc<K::get[add1(r16)], s>(buffer[add1(r16)]);
-
-    // buffer[add2(r02)] is buffer[add0(Round)].
-    // buffer[add3(r02)] is buffer[add1(Round)].
-    // This is why sigma1 is limited to two lanes.
-    xr02 = sigma1_2<xword4>(
-        buffer[add2(r02)], buffer[add3(r02)]);
 
     buffer[add2(Round)] = f::add<s>(
         f::add<s>(buffer[add2(r16)], get<word_t, 2>(xr15)),
-        f::add<s>(buffer[add2(r07)], get<word_t, 0>(xr02)));
+        f::add<s>(buffer[add2(r07)], sigma1(buffer[add2(r02)])));
     buffer[add2(r16)] = f::addc<K::get[add2(r16)], s>(buffer[add2(r16)]);
 
     buffer[add3(Round)] = f::add<s>(
         f::add<s>(buffer[add3(r16)], get<word_t, 3>(xr15)),
-        f::add<s>(buffer[add3(r07)], get<word_t, 1>(xr02)));
+        f::add<s>(buffer[add3(r07)], sigma1(buffer[add3(r02)])));
     buffer[add3(r16)] = f::addc<K::get[add3(r16)], s>(buffer[add3(r16)]);
-
-    // buffer[add4(r02)] is buffer[add2(Round)].
-    // buffer[add5(r02)] is buffer[add3(Round)].
-    // This is why sigma1 is limited to two lanes.
-    xr02 = sigma1_2<xword4>(
-        buffer[add4(r02)], buffer[add5(r02)]);
 
     buffer[add4(Round)] = f::add<s>(
         f::add<s>(buffer[add4(r16)], get<word_t, 4>(xr15)),
-        f::add<s>(buffer[add4(r07)], get<word_t, 0>(xr02)));
+        f::add<s>(buffer[add4(r07)], sigma1(buffer[add4(r02)])));
     buffer[add4(r16)] = f::addc<K::get[add4(r16)], s>(buffer[add4(r16)]);
 
     buffer[add5(Round)] = f::add<s>(
         f::add<s>(buffer[add5(r16)], get<word_t, 5>(xr15)),
-        f::add<s>(buffer[add5(r07)], get<word_t, 1>(xr02)));
+        f::add<s>(buffer[add5(r07)], sigma1(buffer[add5(r02)])));
     buffer[add5(r16)] = f::addc<K::get[add5(r16)], s>(buffer[add5(r16)]);
-
-    // buffer[add6(r02)] is buffer[add4(Round)].
-    // buffer[add7(r02)] is buffer[add5(Round)].
-    // This is why sigma1 is limited to two lanes.
-    xr02 = sigma1_2<xword4>(
-        buffer[add6(r02)], buffer[add7(r02)]);
 
     buffer[add6(Round)] = f::add<s>(
         f::add<s>(buffer[add6(r16)], get<word_t, 6>(xr15)),
-        f::add<s>(buffer[add6(r07)], get<word_t, 0>(xr02)));
+        f::add<s>(buffer[add6(r07)], sigma1(buffer[add6(r02)])));
     buffer[add6(r16)] = f::addc<K::get[add6(r16)], s>(buffer[add6(r16)]);
 
     // buffer[add7(r07)] is buffer[add0(Round)]
     // This is why sigma0 is limited to 8 lanes (vs 16).
     buffer[add7(Round)] = f::add<s>(
         f::add<s>(buffer[add7(r16)], get<word_t, 7>(xr15)),
-        f::add<s>(buffer[add7(r07)], get<word_t, 1>(xr02)));
+        f::add<s>(buffer[add7(r07)], sigma1(buffer[add7(r02)])));
     buffer[add7(r16)] = f::addc<K::get[add7(r16)], s>(buffer[add7(r16)]);
 }
 
@@ -829,14 +804,14 @@ TEMPLATE
 INLINE void CLASS::
 schedule_v(auto& buffer) NOEXCEPT
 {
-    if constexpr (SHA::strength == 160 || is_extended<decltype(buffer.front())>)
+    using word = decltype(buffer.front());
+
+    if constexpr (SHA::strength == 160 || !is_same_type<word, word_t>)
     {
-        // Revert to normal form.
         schedule_(buffer);
     }
-    else if (!have_lanes<word_t, 8>() || !have_lanes<word_t, 4>())
+    else if (!have_lanes<word_t, 8>())
     {
-        // Revert to normal form.
         schedule_(buffer);
     }
     else
