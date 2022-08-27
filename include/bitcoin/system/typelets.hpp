@@ -29,9 +29,12 @@ namespace libbitcoin {
 /// Simple functions over type argument(s).
 /// ---------------------------------------------------------------------------
 
+template <typename Type>
+using nocvref = std::remove_cvref_t<Type>;
+
 /// Alias - same size and signedness, independent of const and volatility.
 template <typename Left, typename Right>
-constexpr bool is_same_type = std::is_same_v<Left, Right>;
+constexpr bool is_same_type = std::is_same_v<nocvref<Left>, nocvref<Right>>;
 
 /// Alias - bool is unsigned: bool(-1) < bool(0). w/char sign unspecified.
 /// w/charxx_t types are unsigned. iostream relies on w/char.
@@ -92,9 +95,6 @@ constexpr size_t capacity = sizeof(Larger) / (Lanes * sizeof(Smaller));
 
 /// std::array.
 /// ---------------------------------------------------------------------------
-
-template <typename Type>
-using nocvref = std::remove_cvref_t<Type>;
 
 template<typename>
 struct is_std_array_t : std::false_type {};
