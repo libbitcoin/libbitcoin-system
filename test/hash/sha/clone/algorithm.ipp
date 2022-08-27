@@ -563,7 +563,7 @@ schedule(auto& buffer) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        vectorized(buffer);
+        schedule_v(buffer);
     }
     else
     {
@@ -1189,14 +1189,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        if (blocks.size() >= min_lanes)
-        {
-            vectorized(state, blocks);
-        }
-        else
-        {
-            iterate_(state, blocks);
-        }
+        iterate_v(state, blocks);
     }
     else
     {
@@ -1210,14 +1203,7 @@ iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if constexpr (vectorization)
     {
-        if (blocks.size() >= min_lanes)
-        {
-            vectorized(state, blocks);
-        }
-        else
-        {
-            iterate_(state, blocks);
-        }
+        iterate_v(state, blocks);
     }
     else
     {
@@ -1289,14 +1275,7 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        if (digests.size() >= min_lanes * two)
-        {
-            vectorized(digests);
-        }
-        else
-        {
-            merkle_hash_(digests);
-        }
+        merkle_hash_v(digests);
     }
     else
     {
@@ -1308,10 +1287,10 @@ merkle_hash(digests_t& digests) NOEXCEPT
 
 TEMPLATE
 VCONSTEXPR void CLASS::
-merkle_hash_(digests_t& digests, size_t block) NOEXCEPT
+merkle_hash_(digests_t& digests, size_t offset) NOEXCEPT
 {
     const auto blocks = to_half(digests.size());
-    for (auto i = block, j = block * two; i < blocks; ++i, j += two)
+    for (auto i = offset, j = offset * two; i < blocks; ++i, j += two)
         digests[i] = double_hash(digests[j], digests[add1(j)]);
 
     digests.resize(blocks);

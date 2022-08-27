@@ -183,7 +183,7 @@ protected:
     /// Merkle iteration.
     /// -----------------------------------------------------------------------
     VCONSTEXPR static void merkle_hash_(digests_t& digests,
-        size_t block = zero) NOEXCEPT;
+        size_t offset = zero) NOEXCEPT;
 
 private:
     using pad_t = std_array<word_t, subtract(SHA::block_words,
@@ -267,10 +267,10 @@ protected:
         const xstate_t<xWord>& xstate) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
-    INLINE static void vectorize(idigests_t& digests,
+    INLINE static void merkle_hash_v_(idigests_t& digests,
         iblocks_t& blocks) NOEXCEPT;
 
-    INLINE static void vectorized(digests_t& digests) NOEXCEPT;
+    INLINE static void merkle_hash_v(digests_t& digests) NOEXCEPT;
 
     /// Message Schedule (block vectorization).
     /// -----------------------------------------------------------------------
@@ -283,15 +283,15 @@ protected:
     INLINE static Word extract(xWord a) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void compress_(state_t& state,
+    INLINE static void compress_v(state_t& state,
         const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
-    INLINE static void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     template <size_t Size>
-    INLINE static void vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
-    INLINE static void vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void iterate_v(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     /// Message Schedule (sigma vectorization).
     /// -----------------------------------------------------------------------
@@ -303,8 +303,8 @@ protected:
         auto x6, auto x7, auto x8) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static void prepare_(buffer_t& buffer) NOEXCEPT;
-    INLINE static void vectorized(auto& buffer) NOEXCEPT;
+    INLINE static void prepare_v(buffer_t& buffer) NOEXCEPT;
+    INLINE static void schedule_v(auto& buffer) NOEXCEPT;
 
 public:
     static constexpr auto have_x128 = Vectorized && system::with_sse41;

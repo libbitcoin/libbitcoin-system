@@ -18,6 +18,7 @@
  */
 #include "../../test.hpp"
 #include "../hash.hpp"
+#include "clone/algorithm.hpp"
     
 BOOST_AUTO_TEST_SUITE(sha_algorithm_tests)
 

@@ -519,7 +519,7 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE void CLASS::
-vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
+merkle_hash_v_(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 {
     BC_ASSERT(digests.size() == blocks.size());
     constexpr auto lanes = capacity<xWord, word_t>;
@@ -557,25 +557,34 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-vectorized(digests_t& digests) NOEXCEPT
+merkle_hash_v(digests_t& digests) NOEXCEPT
 {
+    // Merkle vector dispatch.
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
+    auto offset = zero;
 
-    const auto data = digests.front().data();
-    const auto size = digests.size() * array_count<digest_t>;
-    auto iblocks = iblocks_t{ size, data };
-    auto idigests = idigests_t{ to_half(size), data };
-    const auto blocks = iblocks.size();
+    if (digests.size() >= min_lanes * two)
+    {
+        const auto data = digests.front().data();
+        const auto size = digests.size() * array_count<digest_t>;
+        auto iblocks = iblocks_t{ size, data };
+        auto idigests = idigests_t{ to_half(size), data };
+        const auto blocks = iblocks.size();
 
-    if constexpr (have_x512)
-        vectorize<xint512_t>(idigests, iblocks);
-    if constexpr (have_x256)
-        vectorize<xint256_t>(idigests, iblocks);
-    if constexpr (have_x128)
-        vectorize<xint128_t>(idigests, iblocks);
+        // Merkle hash vector dispatch.
+        if constexpr (have_x512)
+            merkle_hash_v_<xint512_t>(idigests, iblocks);
+        if constexpr (have_x256)
+            merkle_hash_v_<xint256_t>(idigests, iblocks);
+        if constexpr (have_x128)
+            merkle_hash_v_<xint128_t>(idigests, iblocks);
 
-    // iblocks.size() is reduced by vectorization.
-    merkle_hash_(digests, blocks - iblocks.size());
+        // iblocks.size() is reduced by vectorization.
+        offset = blocks - iblocks.size();
+    }
+
+    // Complete rounds using normal form.
+    merkle_hash_(digests, offset);
 }
 
 // Message Schedule (block vectorization).
@@ -585,11 +594,10 @@ vectorized(digests_t& digests) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-compress_(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+compress_v(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     // Limit compress calls to size.
     constexpr auto lanes = capacity<xWord, word_t>;
-    BC_ASSERT(size >= lanes);
 
     // size always > 1.
     compress<0>(state, xbuffer);
@@ -639,12 +647,12 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE void CLASS::
-vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
+iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    if (blocks.size() > lanes && have<xWord>())
+    if (blocks.size() >= lanes && have<xWord>())
     {
         xbuffer_t<xWord> xbuffer;
 
@@ -652,8 +660,8 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
         {
             // input() advances block iterator by lanes (or to end).
             input(xbuffer, blocks);
-            schedule(xbuffer);
-            compress_(state, xbuffer);
+            schedule_(xbuffer);
+            compress_v(state, xbuffer);
         }
         while (blocks.size() >= lanes);
     }
@@ -661,26 +669,38 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
+iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (have_x512)
-        vectorize<xint512_t>(state, blocks);
-    if constexpr (have_x256)
-        vectorize<xint256_t>(state, blocks);
-    if constexpr (have_x128)
-        vectorize<xint128_t>(state, blocks);
+    if (blocks.size() >= min_lanes)
+    {
+        // Schedule iteration vector dispatch.
+        if constexpr (have_x512)
+            iterate_v_<xint512_t>(state, blocks);
+        if constexpr (have_x256)
+            iterate_v_<xint256_t>(state, blocks);
+        if constexpr (have_x128)
+            iterate_v_<xint128_t>(state, blocks);
+    }
 
     // blocks.size() is reduced by vectorization.
+    // Complete rounds using normal form.
     iterate_(state, blocks);
 }
 
 TEMPLATE
 template <size_t Size>
 INLINE void CLASS::
-vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+iterate_v(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
-    auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
-    vectorized(state, iblocks);
+    if (blocks.size() >= min_lanes)
+    {
+        auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
+        iterate_v(state, iblocks);
+    }
+    else
+    {
+        iterate_(state, blocks);
+    }
 }
 
 // Message Schedule (sigma vectorization).
@@ -715,8 +735,15 @@ sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
 TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare_(buffer_t& buffer) NOEXCEPT
+prepare_v(buffer_t& buffer) NOEXCEPT
 {
+    // sigma0x8 and sigma1x2 message scheduling for single block iteration.
+    // This requires avx512/avx2 for sha256 and avx2/sse41 for sha256.
+    // Could be optimized for sha512 by using avx512/sse41, but scenarios do not
+    // require maximally optimal sha512 and would be further denormalization.
+    // Could be enabled for sse41 only (sigma0x4x2) but avx2 is now common.
+
+    // The simplicity of sha160 message prepare precludes this optimization.
     static_assert(SHA::strength != 160);
 
     constexpr auto r02 = Round - 2;
@@ -800,33 +827,35 @@ prepare_(buffer_t& buffer) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-vectorized(auto& buffer) NOEXCEPT
+schedule_v(auto& buffer) NOEXCEPT
 {
     if constexpr (SHA::strength == 160 || is_extended<decltype(buffer.front())>)
     {
+        // Revert to normal form.
         schedule_(buffer);
     }
-    else if (have_lanes<word_t, 8>() && have_lanes<word_t, 4>())
+    else if (!have_lanes<word_t, 8>() || !have_lanes<word_t, 4>())
     {
-        // 8/2 lane sigma scheduling for fewer blocks than lanes.
-        prepare_<16>(buffer);
-        prepare_<24>(buffer);
-        prepare_<32>(buffer);
-        prepare_<40>(buffer);
-        prepare_<48>(buffer);
-        prepare_<56>(buffer);
-
-        if constexpr (SHA::rounds == 80)
-        {
-            prepare_<64>(buffer);
-            prepare_<72>(buffer);
-        }
-
-        add_k(buffer);
+        // Revert to normal form.
+        schedule_(buffer);
     }
     else
     {
-        schedule_(buffer);
+        // Schedule prepare vector dispatch.
+        prepare_v<16>(buffer);
+        prepare_v<24>(buffer);
+        prepare_v<32>(buffer);
+        prepare_v<40>(buffer);
+        prepare_v<48>(buffer);
+        prepare_v<56>(buffer);
+
+        if constexpr (SHA::rounds == 80)
+        {
+            prepare_v<64>(buffer);
+            prepare_v<72>(buffer);
+        }
+
+        add_k(buffer);
     }
 }
 

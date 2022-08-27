@@ -112,9 +112,8 @@ sigma(xWord x) NOEXCEPT
 TEMPLATE
 template <size_t Word, size_t Lanes>
 INLINE auto CLASS::
-pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
+pack(const wblock_t<Lanes>& wblock) NOEXCEPT
 {
-    BC_ASSERT(size > to_half(Lanes));
     using xword = to_extended<word_t, Lanes>;
 
     if constexpr (Lanes == 2)
@@ -131,7 +130,8 @@ pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
             wblock[0][Word],
             wblock[1][Word],
             wblock[2][Word],
-            size > 3 ? wblock[3][Word] : 0));
+            wblock[3][Word]));
+            ////size > 3 ? wblock[3][Word] : 0));
     }
     else if constexpr (Lanes == 8)
     {
@@ -142,9 +142,12 @@ pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
             wblock[2][Word],
             wblock[3][Word],
             wblock[4][Word],
-            size > 5 ? wblock[5][Word] : 0,
-            size > 6 ? wblock[6][Word] : 0,
-            size > 7 ? wblock[7][Word] : 0));
+            wblock[5][Word],
+            wblock[6][Word],
+            wblock[7][Word]));
+            ////size > 5 ? wblock[5][Word] : 0,
+            ////size > 6 ? wblock[6][Word] : 0,
+            ////size > 7 ? wblock[7][Word] : 0));
     }
     else if constexpr (Lanes == 16)
     {
@@ -159,13 +162,20 @@ pack(const wblock_t<Lanes>& wblock, size_t size) NOEXCEPT
             wblock[ 6][Word],
             wblock[ 7][Word],
             wblock[ 8][Word],
-            size >  9 ? wblock[ 9][Word] : 0,
-            size > 10 ? wblock[10][Word] : 0,
-            size > 11 ? wblock[11][Word] : 0,
-            size > 12 ? wblock[12][Word] : 0,
-            size > 13 ? wblock[13][Word] : 0,
-            size > 14 ? wblock[14][Word] : 0,
-            size > 15 ? wblock[15][Word] : 0));
+            wblock[ 9][Word],
+            wblock[10][Word],
+            wblock[11][Word],
+            wblock[12][Word],
+            wblock[13][Word],
+            wblock[14][Word],
+            wblock[15][Word]));
+            ////size >  9 ? wblock[ 9][Word] : 0,
+            ////size > 10 ? wblock[10][Word] : 0,
+            ////size > 11 ? wblock[11][Word] : 0,
+            ////size > 12 ? wblock[12][Word] : 0,
+            ////size > 13 ? wblock[13][Word] : 0,
+            ////size > 14 ? wblock[14][Word] : 0,
+            ////size > 15 ? wblock[15][Word] : 0));
     }
 }
 
@@ -176,31 +186,25 @@ input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
-    // When lanes exceeds iterator blocks.size(), the to_array<lanes>() cast
-    // remains safe, but it must not be accessed beyond its actual size.
+    ////// When lanes exceeds iterator blocks.size(), the to_array<lanes>() cast
+    ////// remains safe, but it must not be accessed beyond its actual size.
     const auto& wblock = array_cast<words_t>(blocks.template to_array<lanes>());
-
-    // Limit wblock writes to blocks.size().
-    const auto size = blocks.size();
-
-    // TODO: if (size >= lanes)... unconditional/parameterized, else conditional.
-
-    xbuffer[0] = pack<0>(wblock, size);
-    xbuffer[1] = pack<1>(wblock, size);
-    xbuffer[2] = pack<2>(wblock, size);
-    xbuffer[3] = pack<3>(wblock, size);
-    xbuffer[4] = pack<4>(wblock, size);
-    xbuffer[5] = pack<5>(wblock, size);
-    xbuffer[6] = pack<6>(wblock, size);
-    xbuffer[7] = pack<7>(wblock, size);
-    xbuffer[8] = pack<8>(wblock, size);
-    xbuffer[9] = pack<9>(wblock, size);
-    xbuffer[10] = pack<10>(wblock, size);
-    xbuffer[11] = pack<11>(wblock, size);
-    xbuffer[12] = pack<12>(wblock, size);
-    xbuffer[13] = pack<13>(wblock, size);
-    xbuffer[14] = pack<14>(wblock, size);
-    xbuffer[15] = pack<15>(wblock, size);
+    xbuffer[0] = pack<0>(wblock);
+    xbuffer[1] = pack<1>(wblock);
+    xbuffer[2] = pack<2>(wblock);
+    xbuffer[3] = pack<3>(wblock);
+    xbuffer[4] = pack<4>(wblock);
+    xbuffer[5] = pack<5>(wblock);
+    xbuffer[6] = pack<6>(wblock);
+    xbuffer[7] = pack<7>(wblock);
+    xbuffer[8] = pack<8>(wblock);
+    xbuffer[9] = pack<9>(wblock);
+    xbuffer[10] = pack<10>(wblock);
+    xbuffer[11] = pack<11>(wblock);
+    xbuffer[12] = pack<12>(wblock);
+    xbuffer[13] = pack<13>(wblock);
+    xbuffer[14] = pack<14>(wblock);
+    xbuffer[15] = pack<15>(wblock);
 
     // iterator stops at end on advance overflow.
     blocks.template advance<lanes>();
@@ -461,16 +465,11 @@ INLINE void CLASS::
 output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
-    BC_ASSERT(digests.size() > to_half(lanes));
+    BC_ASSERT(digests.size() >= lanes);
 
-    // When lanes exceeds iterator digests.size(), the to_array<lanes>() cast
-    // remains safe, but it must not be accessed beyond its actual size.
+    ////// When lanes exceeds iterator digests.size(), the to_array<lanes>() cast
+    ////// remains safe, but it must not be accessed beyond its actual size.
     auto& wdigest = array_cast<digest_t>(digests.template to_array<lanes>());
-
-    // Limit wdigest writes to digests.size().
-    const auto size = digests.size();
-
-    // TODO: if (size >= lanes)... unconditional, else conditional.
 
     // size always > 1.
     wdigest[0] = unpack<0>(xstate);
@@ -480,7 +479,7 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     {
         // size always > to_half(lanes).
         wdigest[2] = unpack<2>(xstate);
-        if (size <= 3) return;
+        ////if (size <= 3) return;
         wdigest[3] = unpack<3>(xstate);
     }
 
@@ -488,11 +487,11 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     {
         // size always > to_half(lanes).
         wdigest[4] = unpack<4>(xstate);
-        if (size <= 5) return;
+        ////if (size <= 5) return;
         wdigest[5] = unpack<5>(xstate);
-        if (size <= 6) return;
+        ////if (size <= 6) return;
         wdigest[6] = unpack<6>(xstate);
-        if (size <= 7) return;
+        ////if (size <= 7) return;
         wdigest[7] = unpack<7>(xstate);
     }
 
@@ -500,19 +499,19 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     {
         // size always > to_half(lanes).
         wdigest[8] = unpack<8>(xstate);
-        if (size <= 9) return;
+        ////if (size <= 9) return;
         wdigest[9] = unpack<9>(xstate);
-        if (size <= 10) return;
+        ////if (size <= 10) return;
         wdigest[10] = unpack<10>(xstate);
-        if (size <= 11) return;
+        ////if (size <= 11) return;
         wdigest[11] = unpack<11>(xstate);
-        if (size <= 12) return;
+        ////if (size <= 12) return;
         wdigest[12] = unpack<12>(xstate);
-        if (size <= 13) return;
+        ////if (size <= 13) return;
         wdigest[13] = unpack<13>(xstate);
-        if (size <= 14) return;
+        ////if (size <= 14) return;
         wdigest[14] = unpack<14>(xstate);
-        if (size <= 15) return;
+        ////if (size <= 15) return;
         wdigest[15] = unpack<15>(xstate);
     }
 
@@ -523,13 +522,13 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE void CLASS::
-vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
+merkle_hash_v_(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 {
     BC_ASSERT(digests.size() == blocks.size());
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    if (blocks.size() > to_half(lanes) && have<xWord>())
+    if (blocks.size() >= lanes && have<xWord>())
     {
         static auto initial = pack<xWord>(H::get);
         xbuffer_t<xWord> xbuffer;
@@ -555,31 +554,40 @@ vectorize(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
             // output() advances digest iterator by lanes (or to end).
             output(digests, xstate);
         }
-        while (blocks.size() > to_half(lanes));
+        while (blocks.size() >= lanes);
     }
 }
 
 TEMPLATE
 INLINE void CLASS::
-vectorized(digests_t& digests) NOEXCEPT
+merkle_hash_v(digests_t& digests) NOEXCEPT
 {
+    // Merkle vector dispatch.
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
+    auto offset = zero;
 
-    const auto data = digests.front().data();
-    const auto size = digests.size() * array_count<digest_t>;
-    auto iblocks = iblocks_t{ size, data };
-    auto idigests = idigests_t{ to_half(size), data };
-    const auto blocks = iblocks.size();
+    if (digests.size() >= min_lanes * two)
+    {
+        const auto data = digests.front().data();
+        const auto size = digests.size() * array_count<digest_t>;
+        auto iblocks = iblocks_t{ size, data };
+        auto idigests = idigests_t{ to_half(size), data };
+        const auto blocks = iblocks.size();
 
-    if constexpr (have_x512)
-        vectorize<xint512_t>(idigests, iblocks);
-    if constexpr (have_x256)
-        vectorize<xint256_t>(idigests, iblocks);
-    if constexpr (have_x128)
-        vectorize<xint128_t>(idigests, iblocks);
+        // Merkle hash vector dispatch.
+        if constexpr (have_x512)
+            merkle_hash_v_<xint512_t>(idigests, iblocks);
+        if constexpr (have_x256)
+            merkle_hash_v_<xint256_t>(idigests, iblocks);
+        if constexpr (have_x128)
+            merkle_hash_v_<xint128_t>(idigests, iblocks);
 
-    // iblocks.size() is reduced by vectorization.
-    merkle_hash_(digests, blocks - iblocks.size());
+        // iblocks.size() is reduced by vectorization.
+        offset = blocks - iblocks.size();
+    }
+
+    // Complete rounds using normal form.
+    merkle_hash_(digests, offset);
 }
 
 // Message Schedule (block vectorization).
@@ -589,13 +597,10 @@ vectorized(digests_t& digests) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
+compress_v(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     // Limit compress calls to size.
     constexpr auto lanes = capacity<xWord, word_t>;
-    BC_ASSERT(size > to_half(lanes));
-
-    // TODO: if (size >= lanes)... unconditional, else conditional.
 
     // size always > 1.
     compress<0>(state, xbuffer);
@@ -605,7 +610,7 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
     {
         // size always > to_half(lanes).
         compress<2>(state, xbuffer);
-        if (size <= 3) return;
+        ////if (size <= 3) return;
         compress<3>(state, xbuffer);
     }
 
@@ -613,11 +618,11 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
     {
         // size always > to_half(lanes).
         compress<4>(state, xbuffer);
-        if (size <= 5) return;
+        ////if (size <= 5) return;
         compress<5>(state, xbuffer);
-        if (size <= 6) return;
+        ////if (size <= 6) return;
         compress<6>(state, xbuffer);
-        if (size <= 7) return;
+        ////if (size <= 7) return;
         compress<7>(state, xbuffer);
     }
 
@@ -625,19 +630,19 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
     {
         // size always > to_half(lanes).
         compress<8>(state, xbuffer);
-        if (size <= 9) return;
+        ////if (size <= 9) return;
         compress<9>(state, xbuffer);
-        if (size <= 10) return;
+        ////if (size <= 10) return;
         compress<10>(state, xbuffer);
-        if (size <= 11) return;
+        ////if (size <= 11) return;
         compress<11>(state, xbuffer);
-        if (size <= 12) return;
+        ////if (size <= 12) return;
         compress<12>(state, xbuffer);
-        if (size <= 13) return;
+        ////if (size <= 13) return;
         compress<13>(state, xbuffer);
-        if (size <= 14) return;
+        ////if (size <= 14) return;
         compress<14>(state, xbuffer);
-        if (size <= 15) return;
+        ////if (size <= 15) return;
         compress<15>(state, xbuffer);
     }
 }
@@ -645,13 +650,12 @@ compress_(state_t& state, const xbuffer_t<xWord>& xbuffer, size_t size) NOEXCEPT
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE void CLASS::
-vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
+iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
-    auto size = blocks.size();
 
-    if (size > to_half(lanes) && have<xWord>())
+    if (blocks.size() >= lanes && have<xWord>())
     {
         xbuffer_t<xWord> xbuffer;
 
@@ -659,36 +663,47 @@ vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT
         {
             // input() advances block iterator by lanes (or to end).
             input(xbuffer, blocks);
-            schedule(xbuffer);
-            compress_(state, xbuffer, size);
-            size = blocks.size();
+            schedule_(xbuffer);
+            compress_v(state, xbuffer);
         }
-        while (size > to_half(lanes));
+        while (blocks.size() >= lanes);
     }
 }
 
 TEMPLATE
 INLINE void CLASS::
-vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT
+iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (have_x512)
-        vectorize<xint512_t>(state, blocks);
-    if constexpr (have_x256)
-        vectorize<xint256_t>(state, blocks);
-    if constexpr (have_x128)
-        vectorize<xint128_t>(state, blocks);
+    if (blocks.size() >= min_lanes)
+    {
+        // Schedule iteration vector dispatch.
+        if constexpr (have_x512)
+            iterate_v_<xint512_t>(state, blocks);
+        if constexpr (have_x256)
+            iterate_v_<xint256_t>(state, blocks);
+        if constexpr (have_x128)
+            iterate_v_<xint128_t>(state, blocks);
+    }
 
     // blocks.size() is reduced by vectorization.
+    // Complete rounds using normal form.
     iterate_(state, blocks);
 }
 
 TEMPLATE
 template <size_t Size>
 INLINE void CLASS::
-vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+iterate_v(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
-    auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
-    vectorized(state, iblocks);
+    if (blocks.size() >= min_lanes)
+    {
+        auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
+        iterate_v(state, iblocks);
+    }
+    else
+    {
+        iterate_(state, blocks);
+    }
 }
 
 // Message Schedule (sigma vectorization).
@@ -723,8 +738,15 @@ sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
 TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare_(buffer_t& buffer) NOEXCEPT
+prepare_v(buffer_t& buffer) NOEXCEPT
 {
+    // sigma0x8 and sigma1x2 message scheduling for single block iteration.
+    // This requires avx512/avx2 for sha256 and avx2/sse41 for sha256.
+    // Could be optimized for sha512 by using avx512/sse41, but scenarios do not
+    // require maximally optimal sha512 and would be further denormalization.
+    // Could be enabled for sse41 only (sigma0x4x2) but avx2 is now common.
+
+    // The simplicity of sha160 message prepare precludes this optimization.
     static_assert(SHA::strength != 160);
 
     constexpr auto r02 = Round - 2;
@@ -808,33 +830,37 @@ prepare_(buffer_t& buffer) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-vectorized(auto& buffer) NOEXCEPT
+schedule_v(auto& buffer) NOEXCEPT
 {
     if constexpr (SHA::strength == 160 || is_extended<decltype(buffer.front())>)
     {
+        // Revert to normal form.
         schedule_(buffer);
     }
-    else if (have_lanes<word_t, 8> && have_lanes<word_t, 4>)
+    else if (!have_lanes<word_t, 8>() || !have_lanes<word_t, 4>())
     {
-        // eight round scheduling for fewer blocks than lanes (singles).
-        prepare_<16>(buffer);
-        prepare_<24>(buffer);
-        prepare_<32>(buffer);
-        prepare_<40>(buffer);
-        prepare_<48>(buffer);
-        prepare_<56>(buffer);
-
-        if constexpr (SHA::rounds == 80)
-        {
-            prepare_<64>(buffer);
-            prepare_<72>(buffer);
-        }
-
-        add_k(buffer);
+        // Revert to normal form.
+        schedule_(buffer);
     }
     else
     {
+        // Default to normal form.
         schedule_(buffer);
+        ////// Schedule prepare vector dispatch.
+        ////prepare_v<16>(buffer);
+        ////prepare_v<24>(buffer);
+        ////prepare_v<32>(buffer);
+        ////prepare_v<40>(buffer);
+        ////prepare_v<48>(buffer);
+        ////prepare_v<56>(buffer);
+        ////
+        ////if constexpr (SHA::rounds == 80)
+        ////{
+        ////    prepare_v<64>(buffer);
+        ////    prepare_v<72>(buffer);
+        ////}
+        ////
+        ////add_k(buffer);
     }
 }
 
