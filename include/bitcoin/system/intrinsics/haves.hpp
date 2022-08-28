@@ -256,7 +256,6 @@ using if_extended = bool_if<is_extended<Type>>;
 
 /// Define lane-expanded 32/64 bit types.
 template <typename Integral, size_t Lanes,
-    if_integral_integer<Integral> = true,
     if_not_greater<safe_multiply(sizeof(Integral), Lanes),
         sizeof(xint512_t)> = true>
 using to_extended =
