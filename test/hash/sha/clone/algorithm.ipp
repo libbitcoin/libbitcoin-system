@@ -80,13 +80,7 @@ Sigma(auto x) NOEXCEPT
     // sha-256-implementations-paper.pdf
     // AVX optimal (sha256)
     //
-    // Examples:
-    // S0(a) = (a >>> 2) ^ (a >>> 13) ^ (a >>> 22)
-    // S1(e) = (e >>> 6) ^ (e >>> 11) ^ (e >>> 25)
-    // S0(a) = ((((a >>>  9) ^ a) >>> 11) ^ a) >>> 2
-    // S1(e) = ((((e >>> 14) ^ e) >>>  5) ^ e) >>> 6
-    //
-    // Generalization:
+    // Translation:
     // S (n) = (n >>> x) ^ (n >>> y) ^ (n >>> z)
     // S'(n) = ((((n >>> X) ^ n) >>> Y) ^ n) >>> Z
     // X = z - y
@@ -173,17 +167,6 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto wk) NOEXCEPT
     constexpr auto fn = functor<Round, decltype(a)>();
     e = /*a =*/ f::add<s>(f::add<s>(f::add<s>(f::rol<5, s>(a), fn(b, c, d)), e), wk);
     b = /*c =*/ f::rol<30, s>(b);
-
-    // SHA-NI
-    // Four rounds (total rounds 80/4).
-    // First round is add(e, w), then sha1nexte(e, w).
-    // fk is round-based enumeration implying f selection and k value.
-    //     e1 = sha1nexte(e0, w);
-    //     abcd = sha1rnds4(abcd, e0, fk);
-    // NEON
-    // f is implied by k in wk.
-    //     e1 = vsha1h(vgetq_lane(abcd, 0);
-    //     vsha1cq(abcd, e0, vaddq(w, k));
 }
 
 TEMPLATE
@@ -192,29 +175,10 @@ INLINE constexpr void CLASS::
 round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto wk) NOEXCEPT
 {
-    // TODO: if open lanes, vectorize Sigma0 and Sigma1 (see Intel).
     constexpr auto s = SHA::word_bits;
     const auto t = f::add<s>(f::add<s>(f::add<s>(Sigma1(e), choice(e, f, g)), h), wk);
     d = /*e =*/    f::add<s>(d, t);
     h = /*a =*/    f::add<s>(f::add<s>(Sigma0(a), majority(a, b, c)), t);
-
-    // Rounds can be cut in half and this round doubled (intel paper).
-    // Avoids the need for a temporary variable and aligns with SHA-NI.
-    // Removing the temporary eliminates 2x64 instructions from the assembly.
-    // h = /*a =*/ SIGMA0(a) + SIGMA1(e) + majority(a, b, c) +
-    //             choice(e, f, g) + (k + w) + h;
-    // d = /*e =*/ SIGMA1(e) + choice(e, f, g) + (k + w) + h + d;
-    //
-    // Each call is 2 rounds, 4 rounds total.
-    // s, w and k are 128 (4 words each, s1/s2 is 8 word state).
-    // SHA-NI
-    //     const auto value = add(w, k);
-    //     abcd = sha256rnds2(abcd, efgh, value);
-    //     efgh = sha256rnds2(efgh, abcd, shuffle(value));
-    // NEON
-    //     const auto value = vaddq(w, k);
-    //     abcd = vsha256hq(abcd, efgh, value);
-    //     efgh = vsha256h2q(efgh, abcd, value);
 }
 
 TEMPLATE
@@ -240,46 +204,38 @@ template <typename Word, size_t Lane, typename xWord,
 TEMPLATE
 template<size_t Round, size_t Lane>
 INLINE constexpr void CLASS::
-round(auto& state, const auto& wk) NOEXCEPT
+round(auto& state, const auto& buffer) NOEXCEPT
 {
-    using word = nocvref<decltype(state.front())>;
+    using word = nocvref<decltype(buffer.front())>;
 
     if constexpr (SHA::strength == 160)
     {
         // msvc++ not inlined in x32 for vectorized state.
         BC_PUSH_WARNING(NOT_INLINED)
-            round<Round>(
-                state[(SHA::rounds + 0 - Round) % SHA::state_words],
-                state[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
-                state[(SHA::rounds + 2 - Round) % SHA::state_words],
-                state[(SHA::rounds + 3 - Round) % SHA::state_words],
-                state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
-                extract<word, Lane>(wk[Round]));
+        round<Round>(
+            state[(SHA::rounds + 0 - Round) % SHA::state_words],
+            state[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
+            state[(SHA::rounds + 2 - Round) % SHA::state_words],
+            state[(SHA::rounds + 3 - Round) % SHA::state_words],
+            state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
+            extract<word, Lane>(buffer[Round]));
         BC_POP_WARNING()
-
-            // SNA-NI/NEON
-            // State packs in 128 (one state variable), reduces above to 1 out[].
-            // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
     else
     {
         // msvc++ not inlined in x32 for vectorized state.
         BC_PUSH_WARNING(NOT_INLINED)
-            round<Round>(
-                state[(SHA::rounds + 0 - Round) % SHA::state_words],
-                state[(SHA::rounds + 1 - Round) % SHA::state_words],
-                state[(SHA::rounds + 2 - Round) % SHA::state_words],
-                state[(SHA::rounds + 3 - Round) % SHA::state_words], // e->d
-                state[(SHA::rounds + 4 - Round) % SHA::state_words],
-                state[(SHA::rounds + 5 - Round) % SHA::state_words],
-                state[(SHA::rounds + 6 - Round) % SHA::state_words],
-                state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
-                extract<word, Lane>(wk[Round]));
+        round<Round>(
+            state[(SHA::rounds + 0 - Round) % SHA::state_words],
+            state[(SHA::rounds + 1 - Round) % SHA::state_words],
+            state[(SHA::rounds + 2 - Round) % SHA::state_words],
+            state[(SHA::rounds + 3 - Round) % SHA::state_words], // e->d
+            state[(SHA::rounds + 4 - Round) % SHA::state_words],
+            state[(SHA::rounds + 5 - Round) % SHA::state_words],
+            state[(SHA::rounds + 6 - Round) % SHA::state_words],
+            state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
+            extract<word, Lane>(buffer[Round]));
         BC_POP_WARNING()
-
-            // SHA-NI/NEON
-            // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
-            // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
 }
 
@@ -288,8 +244,7 @@ template <size_t Lane>
 constexpr void CLASS::
 compress(auto& state, const auto& buffer) NOEXCEPT
 {
-    // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
-    // This is a copy (state type varies due to vectorization).
+    // state may be packed on multi-block axis.
     const auto start = state;
 
     round< 0, Lane>(state, buffer);
@@ -389,7 +344,7 @@ INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
     // K is added to schedule words because schedule is vectorizable.
-    // K-adding is shifted -16, with last 16 added after scheduling.
+    // K-adding is shifted -16, with last 16 words added after scheduling.
     constexpr auto s = SHA::word_bits;
 
     if constexpr (SHA::strength == 160)
@@ -402,25 +357,7 @@ prepare(auto& buffer) NOEXCEPT
         buffer[Round] = f::rol<1, s>(f::xor_(
             f::xor_(buffer[r16], buffer[r14]),
             f::xor_(buffer[r08], buffer[r03])));
-
         buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
-
-        // SHA-NI
-        //     buffer[Round] = sha1msg2 // xor and rotl1
-        //     (
-        //         xor                // not using sha1msg1
-        //         (
-        //             sha1msg1       // xor (specialized)
-        //             (
-        //                 buffer[Round - 16],
-        //                 buffer[Round - 14]
-        //             ),
-        //             buffer[Round -  8]
-        //          ),
-        //          buffer[Round -  3]
-        //     );
-        // NEON
-        //     vsha1su1q/vsha1su0q
     }
     else
     {
@@ -432,21 +369,7 @@ prepare(auto& buffer) NOEXCEPT
         buffer[Round] = f::add<s>(
             f::add<s>(buffer[r16], sigma0(buffer[r15])),
             f::add<s>(buffer[r07], sigma1(buffer[r02])));
-
         buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
-
-        // Each word is 128, buffer goes from 64 to 16 words.
-        // SHA-NI
-        // buffer[Round] =
-        //     sha256msg1(buffer[Round - 16], buffer[Round - 15]) +
-        //     sha256msg2(buffer[Round -  7], buffer[Round -  2]);
-        // NEON
-        // Not sure about these indexes.
-        // mijailovic.net/2018/06/06/sha256-armv8
-        // buffer[Round] =
-        //     vsha256su0q(buffer[Round - 13], buffer[Round - 9])
-        //     vsha256su1q(buffer[Round - 13], buffer[Round - 5],
-        //                 buffer[Round - 1]);
     }
 }
 
@@ -900,7 +823,7 @@ TEMPLATE
 constexpr void CLASS::
 schedule_1(buffer_t& buffer) NOEXCEPT
 {
-    // This ensures single block padding is always prescheduled.
+    // Single block padding is always prescheduled.
     schedule_n<one>(buffer);
 }
 

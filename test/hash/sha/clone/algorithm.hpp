@@ -137,7 +137,7 @@ protected:
         auto e, auto f, auto g, auto& h, auto wk) NOEXCEPT;
 
     template <size_t Round, size_t Lane>
-    INLINE static constexpr void round(auto& state, const auto& wk) NOEXCEPT;
+    INLINE static constexpr void round(auto& state, const auto& buffer) NOEXCEPT;
     INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
 
     template <size_t Lane = zero>
@@ -230,7 +230,7 @@ protected:
     INLINE static void input(xbuffer_t<xWord>& xbuffer,
         iblocks_t& blocks) NOEXCEPT;
 
-    /// Merkle Hash.
+    /// Merkle Hash (full vectorization).
     /// -----------------------------------------------------------------------
 
     template <typename xWord>
@@ -272,7 +272,7 @@ protected:
     INLINE static Word extract(xWord a) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void compress_v(state_t& state,
+    INLINE static void compress_lanes(state_t& state,
         const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
@@ -290,7 +290,7 @@ protected:
         auto x6, auto x7, auto x8) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static void prepare_v(buffer_t& buffer) NOEXCEPT;
+    INLINE static void prepare_8(buffer_t& buffer) NOEXCEPT;
     INLINE static void schedule_v(auto& buffer) NOEXCEPT;
 
 public:

@@ -346,6 +346,8 @@ template <size_t Lane, typename xWord>
 INLINE typename CLASS::digest_t CLASS::
 unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
+    // TODO: this is inefficient, swapping all xwords Lanes times.
+    // TODO: and getting each lane individually.
     return array_cast<byte_t>(state_t
     {
         get<word_t, Lane>(byteswap<word_t>(xstate[0])),
@@ -479,7 +481,7 @@ merkle_hash_v(digests_t& digests) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-compress_v(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+compress_lanes(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
@@ -530,7 +532,7 @@ iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT
             // input() advances block iterator by lanes.
             input(xbuffer, blocks);
             schedule_(xbuffer);
-            compress_v(state, xbuffer);
+            compress_lanes(state, xbuffer);
         }
         while (blocks.size() >= lanes);
     }
@@ -541,7 +543,7 @@ INLINE void CLASS::
 iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if (blocks.size() >= min_lanes)
-    {
+{
         // Schedule iteration vector dispatch.
         if constexpr (have_x512)
             iterate_v_<xint512_t>(state, blocks);
@@ -595,7 +597,7 @@ sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
 TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare_v(buffer_t& buffer) NOEXCEPT
+prepare_8(buffer_t& buffer) NOEXCEPT
 {
     // Requires avx512 for sha512 and avx2 for sha256.
     // sigma0x8 message scheduling for single block iteration.
@@ -676,22 +678,98 @@ schedule_v(auto& buffer) NOEXCEPT
     else
     {
         // Schedule prepare vector dispatch.
-        prepare_v<16>(buffer);
-        prepare_v<24>(buffer);
-        prepare_v<32>(buffer);
-        prepare_v<40>(buffer);
-        prepare_v<48>(buffer);
-        prepare_v<56>(buffer);
+        prepare_8<16>(buffer);
+        prepare_8<24>(buffer);
+        prepare_8<32>(buffer);
+        prepare_8<40>(buffer);
+        prepare_8<48>(buffer);
+        prepare_8<56>(buffer);
 
         if constexpr (SHA::rounds == 80)
         {
-            prepare_v<64>(buffer);
-            prepare_v<72>(buffer);
+            prepare_8<64>(buffer);
+            prepare_8<72>(buffer);
         }
 
         add_k(buffer);
     }
 }
+
+// sha intrinsics (compressing)
+// ----------------------------------------------------------------------------
+//
+// Compress.
+// SNA-NI/NEON
+// buffer[Round] is 128 (w + k).
+// buffer is packed on a different axis than full block vectorization.
+// State packs 4/5 into xint128 (one state xword plus uint32_t e).
+// State aspect is also packed on a different axist than full block,
+// though full block (merkle) doesn't support sha160 (half != digest).
+//
+// SHA-NI/NEON
+// buffer[Round] is 128 (w + k).
+// buffer is packed on a different axis than full block vectorization.
+// State packs 4/8 into xint128 (two state xwords).
+// State aspect is also packed on a different axist than full block.
+//
+// SHA-NI
+// Four rounds (total rounds 80/4).
+// First round is add(e, w), then sha1nexte(e, w).
+// fk is round-based enumeration implying f selection and k value.
+//     e1 = sha1nexte(e0, w);
+//     abcd = sha1rnds4(abcd, e0, fk);
+// NEON
+// f is implied by k in wk.
+//     e1 = vsha1h(vgetq_lane(abcd, 0);
+//     vsha1cq(abcd, e0, vaddq(w, k));
+//
+// Each call is 2 rounds, 4 rounds total.
+// s, w and k are 128 (4 words each, s1/s2 is 8 word state).
+// SHA-NI
+//     const auto value = add(w, k);
+//     abcd = sha256rnds2(abef, cdgh, value);
+//     efgh = sha256rnds2(cdgh, abef, shuffle(value));
+// NEON
+//     const auto value = vaddq(w, k);
+//     abcd = vsha256hq(abef, cdgh, value);
+//     efgh = vsha256h2q(cdgh, abef, value);
+//
+// Schedule.
+// Each word is 128, buffer goes from 16 word_t/uint32_t to 4 xint128_t.
+// TODO: these use 4 lane xint128 full block vectorization, but instead
+// TODO: of each block filling one lane, a single block packs into all 4
+// TODO: lanes (x 4 xwords = 16 word_t). This divides round count by 4.
+//
+// sha160
+// SHA-NI
+//     buffer[Round] = sha1msg2 // xor and rotl1
+//     (
+//         xor                // not using sha1msg1
+//         (
+//             sha1msg1       // xor (specialized)
+//             (
+//                 buffer[Round - 16],
+//                 buffer[Round - 14]
+//             ),
+//             buffer[Round -  8]
+//          ),
+//          buffer[Round -  3]
+//     );
+// NEON
+//     vsha1su1q/vsha1su0q
+//
+// sha256
+// SHA-NI
+// buffer[Round] =
+//     sha256msg1(buffer[Round - 16], buffer[Round - 15]) +
+//     sha256msg2(buffer[Round -  7], buffer[Round -  2]);
+// NEON
+// Not sure about these indexes.
+// mijailovic.net/2018/06/06/sha256-armv8
+// buffer[Round] =
+//     vsha256su0q(buffer[Round - 13], buffer[Round - 9])
+//     vsha256su1q(buffer[Round - 13], buffer[Round - 5],
+//                 buffer[Round - 1]);
 
 BC_POP_WARNING()
 
