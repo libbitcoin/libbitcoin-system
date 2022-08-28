@@ -254,6 +254,7 @@ BOOST_AUTO_TEST_CASE(accumulator__bitcoin__null_one__expected)
     constexpr auto expected = base16_array("2b32db6c2c0a6235fb1397e8225ea85e0f0e6e8c7b126d0016ccbde0e667151e");
     BOOST_CHECK_EQUAL(sha256_hash(sha256_hash(null_hash)), expected);
     BOOST_CHECK_EQUAL(bitcoin_hash(null_hash), expected);
+    BOOST_CHECK_EQUAL(bitcoin_hash(null_hash.size(), null_hash.data()), expected);
     BOOST_CHECK_EQUAL(bitcoin_hash(to_chunk(null_hash)), expected);
     BOOST_CHECK_EQUAL(bitcoin_chunk(null_hash), to_chunk(expected));
     BOOST_CHECK_EQUAL(bitcoin_chunk(to_chunk(null_hash)), to_chunk(expected));

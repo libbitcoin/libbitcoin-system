@@ -154,6 +154,11 @@ INLINE hash_digest bitcoin_hash(const Type& data) NOEXCEPT
     return accumulator<sha256>::double_hash(data);
 }
 
+INLINE hash_digest bitcoin_hash(size_t size, const uint8_t* data) NOEXCEPT
+{
+    return accumulator<sha256>::double_hash(size, data);
+}
+
 INLINE hash_digest bitcoin_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT
 {
