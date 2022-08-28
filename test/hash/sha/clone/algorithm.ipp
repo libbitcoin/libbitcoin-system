@@ -60,7 +60,7 @@ majority(auto x, auto y, auto z) NOEXCEPT
 TEMPLATE
 template <unsigned int A, unsigned int B, unsigned int C>
 INLINE constexpr auto CLASS::
-sigma(word_t x) NOEXCEPT
+sigma(auto x) NOEXCEPT
 {
     constexpr auto s = SHA::word_bits;
     return f::xor_(f::xor_(f::ror<A, s>(x), f::ror<B, s>(x)), f::shr<C, s>(x));
@@ -1217,7 +1217,7 @@ INLINE constexpr void CLASS::
 iterate_(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     buffer_t buffer{};
-    for (auto& block : blocks)
+    for (auto& block: blocks)
     {
         input(buffer, block);
         schedule(buffer);
@@ -1230,7 +1230,7 @@ INLINE void CLASS::
 iterate_(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     buffer_t buffer{};
-    for (auto& block : blocks)
+    for (auto& block: blocks)
     {
         input(buffer, block);
         schedule(buffer);

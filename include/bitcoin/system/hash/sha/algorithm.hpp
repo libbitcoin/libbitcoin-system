@@ -121,7 +121,7 @@ protected:
     using uint = unsigned int;
 
     template <uint A, uint B, uint C>
-    INLINE static constexpr auto sigma(word_t x) NOEXCEPT;
+    INLINE static constexpr auto sigma(auto x) NOEXCEPT;
     template <uint A, uint B, uint C>
     INLINE static constexpr auto Sigma(auto x) NOEXCEPT;
 
@@ -232,17 +232,6 @@ protected:
     using xchunk_t = std_array<xWord, SHA::state_words>;
     using idigests_t = mutable_iterable<digest_t>;
 
-    /// Vector-optimized sigma.
-    /// -----------------------------------------------------------------------
-    template <uint V, uint W, uint X, uint Y, uint Z>
-    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
-    template <uint A, uint B, uint C, if_equal<C, 7> = true>
-    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
-    template <uint A, uint B, uint C, if_not_equal<C, 7> = true>
-    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
-    template <uint A, uint B, uint C, typename xWord, if_extended<xWord> = true>
-    INLINE static constexpr auto sigma(xWord x) NOEXCEPT;
-
     /// Common.
     /// -----------------------------------------------------------------------
 
@@ -308,8 +297,6 @@ protected:
     /// Message Schedule (sigma vectorization).
     /// -----------------------------------------------------------------------
 
-    template <typename xWord, if_extended<xWord> = true>
-    INLINE static auto sigma1_2(auto x1, auto x2) NOEXCEPT;
     template <typename xWord, if_extended<xWord> = true>
     INLINE static auto sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5,
         auto x6, auto x7, auto x8) NOEXCEPT;
