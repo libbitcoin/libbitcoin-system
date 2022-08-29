@@ -178,6 +178,7 @@ public:
     template <size_t Elements>
     inline iterable& advance() NOEXCEPT
     {
+        // This is safe for overflow, will advance to end.
         const auto size = std::min(Elements, count_);
         count_ -= size;
         std::advance(begin_, size * value_size);
@@ -321,6 +322,7 @@ public:
     template <size_t Elements>
     inline mutable_iterable& advance() NOEXCEPT
     {
+        // This is safe for overflow, will advance to end.
         const auto size = std::min(Elements, count_);
         count_ -= size;
         std::advance(begin_, size * value_size);

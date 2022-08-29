@@ -163,6 +163,81 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
 #endif
 }
 
+// have_lanes
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx512__expected)
+{
+    const auto have512 = have_avx512();
+    auto have = false;
+
+    have = have_lanes<uint64_t, 8>();
+    BOOST_CHECK_EQUAL(have, have512);
+    have = have_lanes<uint32_t, 16>();
+    BOOST_CHECK_EQUAL(have, have512);
+    have = have_lanes<uint16_t, 32>();
+    BOOST_CHECK_EQUAL(have, have512);
+    have = have_lanes<uint8_t, 64>();
+    BOOST_CHECK_EQUAL(have, have512);
+
+    have = have_lanes<uint64_t, 7>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint32_t, 15>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint16_t, 31>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint8_t, 63>();
+    BOOST_CHECK(!have);
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx2__expected)
+{
+    const auto have256 = have_avx2();
+    auto have = false;
+
+    have = have_lanes<uint64_t, 4>();
+    BOOST_CHECK_EQUAL(have, have256);
+    have = have_lanes<uint32_t, 8>();
+    BOOST_CHECK_EQUAL(have, have256);
+    have = have_lanes<uint16_t, 16>();
+    BOOST_CHECK_EQUAL(have, have256);
+    have = have_lanes<uint8_t, 32>();
+    BOOST_CHECK_EQUAL(have, have256);
+
+    have = have_lanes<uint64_t, 3>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint32_t, 7>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint16_t, 15>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint8_t, 31>();
+    BOOST_CHECK(!have);
+}
+
+BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__sse41__expected)
+{
+    const auto have128 = have_sse41();
+    auto have = false;
+
+    have = have_lanes<uint64_t, 2>();
+    BOOST_CHECK_EQUAL(have, have128);
+    have = have_lanes<uint32_t, 4>();
+    BOOST_CHECK_EQUAL(have, have128);
+    have = have_lanes<uint16_t, 8>();
+    BOOST_CHECK_EQUAL(have, have128);
+    have = have_lanes<uint8_t, 16>();
+    BOOST_CHECK_EQUAL(have, have128);
+
+    have = have_lanes<uint64_t, 1>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint32_t, 3>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint16_t, 7>();
+    BOOST_CHECK(!have);
+    have = have_lanes<uint8_t, 15>();
+    BOOST_CHECK(!have);
+}
+
 // have() [CI matrix platform assumptions]
 // ----------------------------------------------------------------------------
 // These use BOOST_WARN to let us know if vectorization did not execute due to
@@ -226,9 +301,16 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__when_defined__true)
 // types
 // ----------------------------------------------------------------------------
 
-static_assert(is_extended<xint128_t> == with_sse41);
-#if defined(HAVE_SSE4)
+// is_extended is true even with mock type.
+static_assert(!is_extended<uint32_t>);
+static_assert(is_extended<xint128_t>);
+static_assert(is_extended<xint256_t>);
+static_assert(is_extended<xint512_t>);
 static_assert(is_defined<if_extended<xint128_t>>);
+static_assert(is_defined<if_extended<xint256_t>>);
+static_assert(is_defined<if_extended<xint512_t>>);
+
+#if defined(HAVE_SSE4)
 static_assert(with<xint128_t>() == with_sse41);
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__expected)
 {
@@ -236,9 +318,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__always__expected)
 }
 #endif
 
-static_assert(is_extended<xint256_t> == with_avx2);
 #if defined(HAVE_AVX2)
-static_assert(is_defined<if_extended<xint256_t>>);
 static_assert(with<xint256_t>() == with_avx2);
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__always__expected)
 {
@@ -246,9 +326,7 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__always__expected)
 }
 #endif
 
-static_assert(is_extended<xint512_t> == with_avx512);
 #if defined(HAVE_AVX512)
-static_assert(is_defined<if_extended<xint512_t>>);
 static_assert(with<xint512_t>() == with_avx512);
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__always__expected)

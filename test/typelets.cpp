@@ -29,7 +29,14 @@ class derived : base {};
 ////static_assert(is_same_type<unsigned int, uint32_t>);
 ////static_assert(!is_same_type<char, int8_t>);
 
+static_assert(is_same_type<uint8_t, const uint8_t>);
+static_assert(is_same_type<uint8_t, volatile uint8_t>);
+static_assert(is_same_type<uint8_t, uint8_t&>);
+static_assert(is_same_type<const uint8_t, uint8_t>);
+static_assert(is_same_type<volatile uint8_t, uint8_t>);
+static_assert(is_same_type<uint8_t&, uint8_t>);
 static_assert(is_same_type<uint8_t, uint8_t>);
+
 static_assert(!is_same_type<int8_t, uint8_t>);
 static_assert(!is_same_type<uint8_t, int8_t>);
 static_assert(!is_same_type<uint16_t, int8_t>);
@@ -295,16 +302,16 @@ static_assert(capacity<uint64_t, uint64_t, 1> == 1);
 // std::array
 // ----------------------------------------------------------------------------
 
-static_assert(!is_same_type<uint8_t, const uint8_t>);
+static_assert(is_same_type<uint8_t, const uint8_t>);
 static_assert(is_same_type<nocvref<const uint8_t>, uint8_t>);
 
-static_assert(!is_same_type<volatile uint8_t, uint8_t>);
+static_assert(is_same_type<volatile uint8_t, uint8_t>);
 static_assert(is_same_type<nocvref<volatile uint8_t>, uint8_t>);
 
-static_assert(!is_same_type<uint8_t&, uint8_t>);
+static_assert(is_same_type<uint8_t&, uint8_t>);
 static_assert(is_same_type<nocvref<uint8_t&>, uint8_t>);
 
-static_assert(!is_same_type<const volatile uint8_t&, uint8_t>);
+static_assert(is_same_type<const volatile uint8_t&, uint8_t>);
 static_assert(is_same_type<nocvref<const volatile uint8_t&>, uint8_t>);
 
 static_assert(is_std_array<std::array<uint8_t, 0>>);

@@ -46,11 +46,14 @@
     <Filter Include="src\hash\sha">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000005}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\hash\sha\clone">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\intrinsics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\intrinsics\xcpu">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000007}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\machine">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
@@ -68,34 +71,34 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000D}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\devices">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000008}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\streamers">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000A1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000A1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000B1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\wallet\mnemonics">
+    <Filter Include="src\wallet\keys">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet\mnemonics">
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000D1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words\catalogs">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000D1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000E1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -659,8 +662,8 @@
     <ClInclude Include="..\..\..\..\test\hash\performance\performance.hpp">
       <Filter>src\hash\performance</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\hash\sha\algorithm.hpp">
-      <Filter>src\hash\sha</Filter>
+    <ClInclude Include="..\..\..\..\test\hash\sha\clone\algorithm.hpp">
+      <Filter>src\hash\sha\clone</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\hash\siphash.hpp">
       <Filter>src\hash</Filter>
@@ -697,8 +700,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\test\hash\sha\algorithm.ipp">
-      <Filter>src\hash\sha</Filter>
+    <None Include="..\..\..\..\test\hash\sha\clone\algorithm.ipp">
+      <Filter>src\hash\sha\clone</Filter>
+    </None>
+    <None Include="..\..\..\..\test\hash\sha\clone\algorithm_compression.ipp">
+      <Filter>src\hash\sha\clone</Filter>
+    </None>
+    <None Include="..\..\..\..\test\hash\sha\clone\algorithm_vectorization.ipp">
+      <Filter>src\hash\sha\clone</Filter>
     </None>
     <None Include="packages.config" />
   </ItemGroup>

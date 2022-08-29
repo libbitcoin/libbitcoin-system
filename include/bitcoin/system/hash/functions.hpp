@@ -113,6 +113,7 @@ INLINE data_chunk bitcoin_short_chunk(const Type& data) NOEXCEPT;
 /// Bitcoin hash (sha256(sha256)) [script, chain, wallet].
 template <typename Type>
 INLINE hash_digest bitcoin_hash(const Type& data) NOEXCEPT;
+INLINE hash_digest bitcoin_hash(size_t size, const uint8_t* data) NOEXCEPT;
 INLINE hash_digest bitcoin_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT;
 INLINE hash_digest bitcoin_hash2(const data_slice& left,

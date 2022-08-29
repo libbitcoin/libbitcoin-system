@@ -1450,6 +1450,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_compression.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_vectorization.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>

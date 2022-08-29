@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHAX_ALGORITHM_HPP
 #define LIBBITCOIN_SYSTEM_HASH_SHAX_ALGORITHM_HPP
 
-#include "../../test.hpp"
+#include "../../../test.hpp"
 
 namespace shax {
 
@@ -35,21 +35,21 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Aliases.
-    using H         = SHA;
-    using K         = typename SHA::K;
-    using word_t    = typename SHA::word_t;
-    using state_t   = typename SHA::state_t;
+    using H = SHA;
+    using K = typename SHA::K;
+    using word_t = typename SHA::word_t;
+    using state_t = typename SHA::state_t;
 
     /// Word-based types.
-    using chunk_t   = std_array<word_t, SHA::chunk_words>;
-    using words_t   = std_array<word_t, SHA::block_words>;
-    using buffer_t  = std_array<word_t, K::rounds>;
+    using chunk_t = std_array<word_t, SHA::chunk_words>;
+    using words_t = std_array<word_t, SHA::block_words>;
+    using buffer_t = std_array<word_t, K::rounds>;
 
     /// Byte-based types.
-    using byte_t    = uint8_t;
-    using half_t    = std_array<byte_t, SHA::chunk_words * SHA::word_bytes>;
-    using block_t   = std_array<byte_t, SHA::block_words * SHA::word_bytes>;
-    using digest_t  = std_array<byte_t, bytes<SHA::digest>>;
+    using byte_t = uint8_t;
+    using half_t = std_array<byte_t, SHA::chunk_words* SHA::word_bytes>;
+    using block_t = std_array<byte_t, SHA::block_words* SHA::word_bytes>;
+    using digest_t = std_array<byte_t, bytes<SHA::digest>>;
 
     /// Collection types.
     template <size_t Size>
@@ -62,33 +62,17 @@ public:
     /// count_t is uint64_t (sha160/256) or uint128_t (sha512).
     /// All extended integer intrinsics currently have a "64 on 32" limit.
 
-    static constexpr auto count_bits    = SHA::block_words * SHA::word_bytes;
-    static constexpr auto count_bytes   = bytes<count_bits>;
+    static constexpr auto count_bits = SHA::block_words * SHA::word_bytes;
+    static constexpr auto count_bytes = bytes<count_bits>;
     using count_t = unsigned_exact_type<bytes<count_bits>>;
 
-    static constexpr auto have_shani    = Compressed && system::with_shani;
-    static constexpr auto have_neon     = Compressed && system::with_neon;
-    static constexpr auto compression   = have_shani || have_neon;
-
-    static constexpr auto have_x128     = Vectorized && system::with_sse41;
-    static constexpr auto have_x256     = Vectorized && system::with_avx2;
-    static constexpr auto have_x512     = Vectorized && system::with_avx512;
-    static constexpr auto max_lanes     = (have_x512 ? 64 : (have_x256 ? 32 :
-                                          (have_x128 ? 16 : 0))) / SHA::word_bytes;
-    static constexpr auto min_lanes     = (have_x128 ? 16 : (have_x256 ? 32 :
-                                          (have_x128 ? 64 : 0))) / SHA::word_bytes;
-    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512) && 
-                                         !(build_x32 && is_same_size<word_t, uint64_t>);
-
-    static constexpr auto caching       = Cached;
-
-    static constexpr auto limit_bits    = maximum<count_t> - count_bits;
-    static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
+    static constexpr auto caching = Cached;
+    static constexpr auto limit_bits = maximum<count_t> -count_bits;
+    static constexpr auto limit_bytes = to_floored_bytes(limit_bits);
     static constexpr auto big_end_count = true;
 
     /// Single hashing.
     /// -----------------------------------------------------------------------
-
     template <size_t Size>
     static constexpr digest_t hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
@@ -97,9 +81,8 @@ public:
     static constexpr digest_t hash(const half_t& left, const half_t& right) NOEXCEPT;
     static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
-    /// Double hashing optimizations (sha256/512).
+    /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
-
     template <size_t Size>
     static constexpr digest_t double_hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
@@ -109,36 +92,21 @@ public:
 
     /// Merkle hashing (sha256/512).
     /// -----------------------------------------------------------------------
-
     static VCONSTEXPR digest_t merkle_root(digests_t&& digests) NOEXCEPT;
     static VCONSTEXPR digests_t& merkle_hash(digests_t& digests) NOEXCEPT;
 
     /// Streamed hashing (unfinalized).
     /// -----------------------------------------------------------------------
-
-    static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static void accumulate(state_t& state, iblocks_t&& blocks) NOEXCEPT;
-
-    /// Finalize streaming state (pad and normalize, updates state).
+    static constexpr void accumulate(state_t& state, const block_t& block) NOEXCEPT;
     static constexpr digest_t finalize(state_t& state, size_t blocks) NOEXCEPT;
-
-    /// Double finalize streaming state (pad, rehash, and normalize, updates state1).
     static constexpr digest_t finalize_double(state_t& state, size_t blocks) NOEXCEPT;
-
-    /// Normalize streaming state (big-endian bytes).
     static constexpr digest_t normalize(const state_t& state) NOEXCEPT;
 
 protected:
     /// Functions
     /// -----------------------------------------------------------------------
     using uint = unsigned int;
-
-    template <uint V, uint W, uint X, uint Y, uint Z>
-    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
-    template <uint A, uint B, uint C, if_equal<C, 7> = true>
-    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
-    template <uint A, uint B, uint C, if_not_equal<C, 7> = true>
-    INLINE static constexpr auto sigma_(auto x) NOEXCEPT;
 
     template <uint A, uint B, uint C>
     INLINE static constexpr auto sigma(auto x) NOEXCEPT;
@@ -148,9 +116,6 @@ protected:
     INLINE static constexpr auto parity(auto x, auto y, auto z) NOEXCEPT;
     INLINE static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
     INLINE static constexpr auto majority(auto x, auto y, auto z) NOEXCEPT;
-
-    /// Aggregate functions
-    /// -----------------------------------------------------------------------
 
     INLINE static constexpr auto Sigma0(auto x) NOEXCEPT;
     INLINE static constexpr auto Sigma1(auto x) NOEXCEPT;
@@ -172,7 +137,7 @@ protected:
         auto e, auto f, auto g, auto& h, auto wk) NOEXCEPT;
 
     template <size_t Round, size_t Lane>
-    INLINE static constexpr void round(auto& state, const auto& wk) NOEXCEPT;
+    INLINE static constexpr void round(auto& state, const auto& buffer) NOEXCEPT;
     INLINE static constexpr void summarize(auto& out, const auto& in) NOEXCEPT;
 
     template <size_t Lane = zero>
@@ -180,6 +145,8 @@ protected:
 
     template <size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
+    INLINE static constexpr void add_k(auto& buffer) NOEXCEPT;
+    INLINE static constexpr void schedule_(auto& buffer) NOEXCEPT;
     static constexpr void schedule(auto& buffer) NOEXCEPT;
 
     INLINE static constexpr void input(auto& buffer, const auto& state) NOEXCEPT;
@@ -202,20 +169,21 @@ protected:
 
     /// Block iteration.
     /// -----------------------------------------------------------------------
+
     template <size_t Size>
-    INLINE static constexpr void iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static constexpr void iterate(state_t& state,
+        const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void iterate(state_t& state, iblocks_t& blocks) NOEXCEPT;
+
     template <size_t Size>
-    INLINE static constexpr void sequential(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
-    INLINE static void sequential(state_t& state, iblocks_t& blocks) NOEXCEPT;
-    template <size_t Size>
-    INLINE static void vectorized(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
-    INLINE static void vectorized(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static constexpr void iterate_(state_t& state,
+        const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void iterate_(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     /// Merkle iteration.
     /// -----------------------------------------------------------------------
-    VCONSTEXPR static void sequential(digests_t& digests, size_t block = zero) NOEXCEPT;
-    INLINE static void vectorized(digests_t& digests) NOEXCEPT;
+    VCONSTEXPR static void merkle_hash_(digests_t& digests,
+        size_t offset = zero) NOEXCEPT;
 
 private:
     using pad_t = std_array<word_t, subtract(SHA::block_words,
@@ -226,6 +194,16 @@ private:
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
+    /// Compression.
+    /// -----------------------------------------------------------------------
+protected:
+public:
+    static constexpr auto have_shani = Compressed && system::with_shani;
+    static constexpr auto have_neon = Compressed && system::with_neon;
+    static constexpr auto compression = have_shani || have_neon;
+
+    /// Vectorization.
+    /// -----------------------------------------------------------------------
 protected:
     /// Extended integer capacity for uint32_t/uint64_t is 2/4/8/16 only.
     template <size_t Lanes>
@@ -242,6 +220,9 @@ protected:
     using xchunk_t = std_array<xWord, SHA::state_words>;
     using idigests_t = mutable_iterable<digest_t>;
 
+    /// Common.
+    /// -----------------------------------------------------------------------
+
     template <size_t Word, size_t Lanes>
     INLINE static auto pack(const wblock_t<Lanes>& wblock) NOEXCEPT;
 
@@ -249,14 +230,14 @@ protected:
     INLINE static void input(xbuffer_t<xWord>& xbuffer,
         iblocks_t& blocks) NOEXCEPT;
 
-    /// Independent single block double-hash vectorization.
+    /// Merkle Hash (full vectorization).
     /// -----------------------------------------------------------------------
 
     template <typename xWord>
-    static inline auto pack_pad_half() NOEXCEPT;
+    INLINE static auto pack_pad_half() NOEXCEPT;
 
     template <typename xWord>
-    static inline auto pack_schedule_1() NOEXCEPT;
+    INLINE static auto pack_schedule_1() NOEXCEPT;
 
     template <typename xWord>
     INLINE static void pad_half(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
@@ -275,10 +256,12 @@ protected:
         const xstate_t<xWord>& xstate) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
-    static inline void vectorize(idigests_t& digests,
+    INLINE static void merkle_hash_v_(idigests_t& digests,
         iblocks_t& blocks) NOEXCEPT;
 
-    /// Message schedule vectorization.
+    INLINE static void merkle_hash_v(digests_t& digests) NOEXCEPT;
+
+    /// Message Schedule (block vectorization).
     /// -----------------------------------------------------------------------
 
     template <typename Word, size_t Lane>
@@ -289,17 +272,48 @@ protected:
     INLINE static Word extract(xWord a) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void compress_(state_t& state, xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    INLINE static void compress_lanes(state_t& state,
+        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
-    static inline void vectorize(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
+    template <size_t Size>
+    INLINE static void iterate_v(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT;
+
+    /// Message Schedule (sigma vectorization).
     /// -----------------------------------------------------------------------
-    static void dump_state(state_t& state) NOEXCEPT;
+
+    template <typename xWord, if_extended<xWord> = true>
+    INLINE static auto sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5,
+        auto x6, auto x7, auto x8) NOEXCEPT;
+
+    template<size_t Round>
+    INLINE static void prepare_8(buffer_t& buffer) NOEXCEPT;
+    INLINE static void schedule_v(auto& buffer) NOEXCEPT;
+
+public:
+    static constexpr auto have_x128 = Vectorized && system::with_sse41;
+    static constexpr auto have_x256 = Vectorized && system::with_avx2;
+    static constexpr auto have_x512 = Vectorized && system::with_avx512;
+    static constexpr auto min_lanes = (have_x128 ? 16 : (have_x256 ? 32 :
+        (have_x128 ? 64 : 0))) / SHA::word_bytes;
+    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512) &&
+        !(build_x32 && is_same_size<word_t, uint64_t>);
 };
 
 } // namespace shax
 
+#define TEMPLATE template <typename SHA, bool Compressed, bool Vectorized, \
+    bool Cached, if_same<typename SHA::T, sha::shah_t> If>
+#define CLASS algorithm<SHA, Compressed, Vectorized, Cached, If>
+
 #include "algorithm.ipp"
+#include "algorithm_compression.ipp"
+#include "algorithm_vectorization.ipp"
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

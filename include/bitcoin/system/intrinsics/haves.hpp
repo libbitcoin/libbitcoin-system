@@ -200,7 +200,9 @@ constexpr bool try_neon() NOEXCEPT
 
 /// Runtime tests for Intel SIMD, and ARM SIMD (Neon) availability.
 /// ---------------------------------------------------------------------------
-/// TODO: statics introduce a thread guard, not ideal for excessive iteration.
+/// Thread local statics introduce a guard, not ideal for excessive iteration.
+/// But no performance impact measured in sha except minor impact to merkle.
+/// These keep binary portable, otherwise can reply on "with" symbols.
 
 inline bool have_shani() NOEXCEPT
 {
@@ -245,17 +247,15 @@ inline bool have_neon() NOEXCEPT
 
 template <typename Type>
 constexpr auto is_extended =
-    !std::is_base_of_v<xmock_t, Type> &&
-    (is_same_type<Type, xint128_t> ||
+     is_same_type<Type, xint128_t> ||
      is_same_type<Type, xint256_t> ||
-     is_same_type<Type, xint512_t>);
+     is_same_type<Type, xint512_t>;
 
 template <typename Type>
 using if_extended = bool_if<is_extended<Type>>;
 
 /// Define lane-expanded 32/64 bit types.
 template <typename Integral, size_t Lanes,
-    if_integral_integer<Integral> = true,
     if_not_greater<safe_multiply(sizeof(Integral), Lanes),
         sizeof(xint512_t)> = true>
 using to_extended =
@@ -281,7 +281,7 @@ CONSTEVAL bool with() NOEXCEPT
     else return false;
 }
 
-/// Runtime time availabiltiy of extended integer intrinsics, as a template
+/// Runtime time availability of extended integer intrinsics, as a template
 /// function of the extended integer type.
 template <typename Extended, if_extended<Extended> = true>
 inline bool have() NOEXCEPT
@@ -291,6 +291,20 @@ inline bool have() NOEXCEPT
     else if constexpr (is_same_type<Extended, xint256_t>)
         return have_avx2();
     else if constexpr (is_same_type<Extended, xint128_t>)
+        return have_sse41();
+    else return false;
+}
+
+/// Runtime time availability of extended integer filled by Lanes Integrals.
+template <typename Integral, size_t Lanes,
+    if_integral_integer<Integral> = true>
+inline bool have_lanes() NOEXCEPT
+{
+    if constexpr (capacity<xint512_t, Integral> == Lanes)
+        return have_avx512();
+    else if constexpr (capacity<xint256_t, Integral> == Lanes)
+        return have_avx2();
+    else if constexpr (capacity<xint128_t, Integral> == Lanes)
         return have_sse41();
     else return false;
 }
