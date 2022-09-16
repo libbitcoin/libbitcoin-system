@@ -167,6 +167,10 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
 
+AX_BOOST_CHRONO
+AC_SUBST([boost_chrono_LIBS], [${BOOST_CHRONO_LIB}])
+AC_MSG_NOTICE([boost_chrono_LIBS : ${boost_chrono_LIBS}])
+
 AX_BOOST_IOSTREAMS
 AC_SUBST([boost_iostreams_LIBS], [${BOOST_IOSTREAMS_LIB}])
 AC_MSG_NOTICE([boost_iostreams_LIBS : ${boost_iostreams_LIBS}])

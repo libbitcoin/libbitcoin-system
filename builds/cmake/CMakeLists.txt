@@ -120,6 +120,7 @@ endif()
 # Find boost
 #------------------------------------------------------------------------------
 find_package( Boost 1.76.0 REQUIRED COMPONENTS
+    chrono
     container
     iostreams
     json
@@ -129,6 +130,7 @@ find_package( Boost 1.76.0 REQUIRED COMPONENTS
     thread
     unit_test_framework )
 
+set( boost_chrono_LIBS "-lboost_chrono" )
 set( boost_container_LIBS "-lboost_container" )
 set( boost_iostreams_LIBS "-lboost_iostreams" )
 set( boost_json_LIBS "-lboost_json" )
@@ -231,6 +233,7 @@ if (BUILD_SHARED_LIBS)
     link_libraries(
         "-fstack-protector"
         "-fstack-protector-all"
+        ${Boost_CHRONO_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
@@ -246,6 +249,7 @@ else()
     link_libraries(
         "-fstack-protector"
         "-fstack-protector-all"
+        ${Boost_CHRONO_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
@@ -434,6 +438,7 @@ target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
     target_link_libraries( ${CANONICAL_LIB_NAME}
+        ${Boost_CHRONO_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
@@ -447,6 +452,7 @@ if (BUILD_SHARED_LIBS)
         ${secp256k1_LIBRARIES} )
 else()
     target_link_libraries( ${CANONICAL_LIB_NAME}
+        ${Boost_CHRONO_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
