@@ -33,5 +33,5 @@ Cflags: -I${includedir} @icu@ @boost_CPPFLAGS@ @pthread_CPPFLAGS@
 
 # Lib directory, lib and any required that do not publish pkg-config.
 #------------------------------------------------------------------------------
-Libs: -L${libdir} -lbitcoin-system @boost_LDFLAGS@ @boost_chrono_LIBS@ @boost_date_time_LIBS@ @boost_filesystem_LIBS@ @boost_iostreams_LIBS@ @boost_json_LIBS@ @boost_locale_LIBS@ @boost_program_options_LIBS@ @boost_regex_LIBS@ @boost_system_LIBS@ @boost_thread_LIBS@ @pthread_LIBS@ @rt_LIBS@ @dl_LIBS@
+Libs: -L${libdir} -lbitcoin-system @boost_LDFLAGS@ @boost_date_time_LIBS@ @boost_filesystem_LIBS@ @boost_iostreams_LIBS@ @boost_json_LIBS@ @boost_locale_LIBS@ @boost_program_options_LIBS@ @boost_regex_LIBS@ @boost_system_LIBS@ @boost_thread_LIBS@ @pthread_LIBS@ @rt_LIBS@ @dl_LIBS@
 

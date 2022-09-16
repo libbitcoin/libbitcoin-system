@@ -120,7 +120,6 @@ endif()
 # Find boost
 #------------------------------------------------------------------------------
 find_package( Boost 1.76.0 REQUIRED COMPONENTS
-    chrono
     container
     date_time
     filesystem
@@ -133,7 +132,6 @@ find_package( Boost 1.76.0 REQUIRED COMPONENTS
     thread
     unit_test_framework )
 
-set( boost_chrono_LIBS "-lboost_chrono" )
 set( boost_container_LIBS "-lboost_container" )
 set( boost_date_time_LIBS "-lboost_date_time" )
 set( boost_filesystem_LIBS "-lboost_filesystem" )
@@ -239,7 +237,6 @@ if (BUILD_SHARED_LIBS)
     link_libraries(
         "-fstack-protector"
         "-fstack-protector-all"
-        ${Boost_CHRONO_LIBRARY}
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
@@ -258,7 +255,6 @@ else()
     link_libraries(
         "-fstack-protector"
         "-fstack-protector-all"
-        ${Boost_CHRONO_LIBRARY}
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
@@ -450,7 +446,6 @@ target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
     target_link_libraries( ${CANONICAL_LIB_NAME}
-        ${Boost_CHRONO_LIBRARY}
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
@@ -467,7 +462,6 @@ if (BUILD_SHARED_LIBS)
         ${secp256k1_LIBRARIES} )
 else()
     target_link_libraries( ${CANONICAL_LIB_NAME}
-        ${Boost_CHRONO_LIBRARY}
         ${Boost_DATE_TIME_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}

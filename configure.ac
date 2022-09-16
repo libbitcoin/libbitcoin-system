@@ -167,10 +167,6 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
 
-AX_BOOST_CHRONO
-AC_SUBST([boost_chrono_LIBS], [${BOOST_CHRONO_LIB}])
-AC_MSG_NOTICE([boost_chrono_LIBS : ${boost_chrono_LIBS}])
-
 AX_BOOST_DATE_TIME
 AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
 AC_MSG_NOTICE([boost_date_time_LIBS : ${boost_date_time_LIBS}])
