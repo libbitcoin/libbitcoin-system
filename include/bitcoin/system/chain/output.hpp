@@ -19,12 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <istream>
 #include <memory>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/stream.hpp>

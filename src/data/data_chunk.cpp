@@ -19,8 +19,6 @@
 #include <bitcoin/system/data/data_chunk.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <bitcoin/system/data/data_slice.hpp>
 
 namespace libbitcoin {

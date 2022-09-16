@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_WALLET_POINTS_VALUE_HPP
 
 #include <numeric>
-/// DELETECSTDINT
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>
 

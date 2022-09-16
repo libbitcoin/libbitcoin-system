@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_ENUMS_MAGIC_NUMBERS_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_ENUMS_MAGIC_NUMBERS_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

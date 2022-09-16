@@ -18,10 +18,8 @@
  */
 #include <bitcoin/system/wallet/addresses/tiff.hpp>
 
-/// DELETECSTDINT
 #include <iostream>
 #include <cmath>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/division.hpp>
 #include <bitcoin/system/stream/stream.hpp>

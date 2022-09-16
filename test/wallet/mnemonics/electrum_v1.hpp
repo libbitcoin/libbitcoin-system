@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_ELECTRUM_V1_HPP
 #define LIBBITCOIN_SYSTEM_TEST_ELECTRUM_V1_HPP
 
-/// DELETECSTDINT
 #include <string>
 #include <vector>
 #include <bitcoin/system.hpp>

@@ -19,11 +19,8 @@
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 
 #include <chrono>
-/// DELETECSTDINT
 #include <limits>
 #include <random>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/math.hpp>
 

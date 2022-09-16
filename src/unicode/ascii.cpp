@@ -19,10 +19,8 @@
 #include <bitcoin/system/unicode/ascii.hpp>
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <string>
 #include <iterator>
-/// DELETEMENOW
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>
 

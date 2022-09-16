@@ -22,8 +22,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_TEST_CATALOGS_MNEMONIC_HPP
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <bitcoin/system.hpp>
 
 // Avoid using namespace in shared headers, but okay here.

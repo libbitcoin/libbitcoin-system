@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_TEST_ELECTRUM_HPP
 
 #include <algorithm>
-/// DELETECSTDDEF
 #include <string>
 #include <array>
 #include <vector>

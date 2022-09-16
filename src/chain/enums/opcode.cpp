@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/enums/opcode.hpp>
 
-/// DELETECSTDINT
 #include <string>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/chain/script.hpp>

@@ -21,8 +21,6 @@
 
 #include <algorithm>
 #include <array>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iostream>
 #include <sstream>
 #include <string>

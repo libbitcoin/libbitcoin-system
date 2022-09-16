@@ -19,11 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_16_HPP
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_16_HPP
 
-/// DELETECSTDDEF
 #include <string>
 #include <string_view>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

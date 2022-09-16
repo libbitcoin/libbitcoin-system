@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_POINT_VALUE_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_POINT_VALUE_HPP
 
-/// DELETECSTDINT
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
