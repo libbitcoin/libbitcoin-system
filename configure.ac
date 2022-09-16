@@ -167,14 +167,6 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
 
-AX_BOOST_DATE_TIME
-AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
-AC_MSG_NOTICE([boost_date_time_LIBS : ${boost_date_time_LIBS}])
-
-AX_BOOST_FILESYSTEM
-AC_SUBST([boost_filesystem_LIBS], [${BOOST_FILESYSTEM_LIB}])
-AC_MSG_NOTICE([boost_filesystem_LIBS : ${boost_filesystem_LIBS}])
-
 AX_BOOST_IOSTREAMS
 AC_SUBST([boost_iostreams_LIBS], [${BOOST_IOSTREAMS_LIB}])
 AC_MSG_NOTICE([boost_iostreams_LIBS : ${boost_iostreams_LIBS}])
@@ -190,10 +182,6 @@ AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
 AX_BOOST_PROGRAM_OPTIONS
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
 AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
-
-AX_BOOST_REGEX
-AC_SUBST([boost_regex_LIBS], [${BOOST_REGEX_LIB}])
-AC_MSG_NOTICE([boost_regex_LIBS : ${boost_regex_LIBS}])
 
 AX_BOOST_SYSTEM
 AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])

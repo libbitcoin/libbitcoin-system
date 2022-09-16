@@ -121,25 +121,19 @@ endif()
 #------------------------------------------------------------------------------
 find_package( Boost 1.76.0 REQUIRED COMPONENTS
     container
-    date_time
-    filesystem
     iostreams
     json
     locale
     program_options
-    regex
     system
     thread
     unit_test_framework )
 
 set( boost_container_LIBS "-lboost_container" )
-set( boost_date_time_LIBS "-lboost_date_time" )
-set( boost_filesystem_LIBS "-lboost_filesystem" )
 set( boost_iostreams_LIBS "-lboost_iostreams" )
 set( boost_json_LIBS "-lboost_json" )
 set( boost_locale_LIBS "-lboost_locale" )
 set( boost_program_options_LIBS "-lboost_program_options" )
-set( boost_regex_LIBS "-lboost_regex" )
 set( boost_system_LIBS "-lboost_system" )
 set( boost_thread_LIBS "-lboost_thread" )
 set( boost_unit_test_framework_LIBS "-lboost_unit_test_framework" )
@@ -237,13 +231,10 @@ if (BUILD_SHARED_LIBS)
     link_libraries(
         "-fstack-protector"
         "-fstack-protector-all"
-        ${Boost_DATE_TIME_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_THREAD_LIBRARY}
         ${pthread_LIBRARIES}
@@ -255,13 +246,10 @@ else()
     link_libraries(
         "-fstack-protector"
         "-fstack-protector-all"
-        ${Boost_DATE_TIME_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_THREAD_LIBRARY}
         ${pthread_LIBRARIES}
@@ -446,13 +434,10 @@ target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
     target_link_libraries( ${CANONICAL_LIB_NAME}
-        ${Boost_DATE_TIME_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_THREAD_LIBRARY}
         ${pthread_LIBRARIES}
@@ -462,13 +447,10 @@ if (BUILD_SHARED_LIBS)
         ${secp256k1_LIBRARIES} )
 else()
     target_link_libraries( ${CANONICAL_LIB_NAME}
-        ${Boost_DATE_TIME_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_IOSTREAMS_LIBRARY}
         ${Boost_JSON_LIBRARY}
         ${Boost_LOCALE_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_REGEX_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_THREAD_LIBRARY}
         ${pthread_LIBRARIES}
