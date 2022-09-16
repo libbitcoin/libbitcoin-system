@@ -20,8 +20,6 @@
 #define LIBBITCOIN_SYSTEM_SERIAL_DESERIALIZE_HPP
 
 #include <array>
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iostream>
 #include <string>
 #include <vector>

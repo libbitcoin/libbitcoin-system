@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PREFIX_IPP
 #define LIBBITCOIN_SYSTEM_PARSE_ENCRYPTED_PREFIX_IPP
 
-/// DELETECSTDINT
-/// DELETECSTDDEF
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>
 

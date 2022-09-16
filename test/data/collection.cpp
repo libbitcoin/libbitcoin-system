@@ -18,7 +18,6 @@
  */
 #include "../test.hpp"
 #include <array>
-/// DELETECSTDINT
 #include <vector>
 
 BOOST_AUTO_TEST_SUITE(collection_tests)

@@ -21,8 +21,6 @@
 #include <filesystem>
 #include <string>
 #include <sstream>
-/// DELETEMENOW
-/// DELETEMENOW
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
 
 namespace libbitcoin {

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_CONEXT_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_CONEXT_HPP
 
-/// DELETECSTDINT
 #include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/keys/ec_private.hpp>

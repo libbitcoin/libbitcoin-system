@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_ERROR_OP_ERROR_T_HPP
 #define LIBBITCOIN_SYSTEM_ERROR_OP_ERROR_T_HPP
 
-/// DELETECSTDINT
-/// DELETEMENOW
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/macros.hpp>
 #include <bitcoin/system/error/script_error_t.hpp>

@@ -19,12 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 
-/// DELETECSTDDEF
 #include <istream>
 #include <memory>
 #include <string>
 #include <vector>
-/// DELETEMENOW
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>

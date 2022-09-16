@@ -18,11 +18,8 @@
  */
 #include <bitcoin/system/wallet/addresses/bitcoin_uri.hpp>
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <iostream>
 #include <map>
-/// DELETEMENOW
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>

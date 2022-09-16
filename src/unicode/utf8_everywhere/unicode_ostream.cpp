@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
 
-/// DELETECSTDDEF
 #include <iostream>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 

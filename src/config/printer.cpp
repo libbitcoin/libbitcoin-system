@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 #include <boost/format.hpp>
-/// DELETEMENOW
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_SERIAL_PROPS_HPP
 #define LIBBITCOIN_SYSTEM_SERIAL_PROPS_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <initializer_list>
 #include <iostream>
 #include <string>

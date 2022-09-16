@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_SETTINGS_HPP
 #define LIBBITCOIN_SYSTEM_SETTINGS_HPP
 
-/// DELETECSTDINT
-/// DELETECSTDDEF
 #include <string>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>

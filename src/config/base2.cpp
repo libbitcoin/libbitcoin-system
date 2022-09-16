@@ -22,7 +22,6 @@
 #include <sstream>
 #include <string>
 #include <utility>
-/// DELETEMENOW
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

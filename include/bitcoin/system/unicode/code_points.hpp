@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_CODE_POINTS_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_CODE_POINTS_HPP
 
-/// DELETECSTDDEF
-/// DELETECSTDINT
 #include <string>
 #include <utility>
 #include <vector>

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_10_HPP
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_10_HPP
 
-/// DELETECSTDINT
 #include <string>
 #include <bitcoin/system/define.hpp>
 

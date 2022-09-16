@@ -18,10 +18,8 @@
  */
 #include <bitcoin/system/wallet/addresses/qr_code.hpp>
 
-/// DELETECSTDINT
 #include <iostream>
 #include <string>
-/// DELETEMENOW
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

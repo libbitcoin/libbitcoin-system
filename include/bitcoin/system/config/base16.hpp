@@ -22,7 +22,6 @@
 #include <array>
 #include <iostream>
 #include <string>
-/// DELETECSTDINT
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
