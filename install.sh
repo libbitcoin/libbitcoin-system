@@ -819,7 +819,6 @@ BOOST_OPTIONS=(
 "--with-json" \
 "--with-locale" \
 "--with-program_options" \
-"--with-regex" \
 "--with-system" \
 "--with-thread" \
 "--with-test")
