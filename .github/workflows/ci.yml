@@ -18,27 +18,27 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            cxx: "clang++-13"
+            cxx: "clang++-14"
             link: "dynamic"
             optimization: "size"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
-            cc: "clang-13"
+            cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "apt"
             packages: ""
 
           - os: ubuntu-22.04
-            cxx: "clang++-13"
+            cxx: "clang++-14"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang-13"
+            cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "apt"
             packages: ""
@@ -109,6 +109,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Prepare toolchain [generic]
+        run: |
+          git config --global init.defaultBranch master
+
       - name: Prepare toolchain [apt]
         if: ${{ matrix.packager == 'apt' }}
         run: |
@@ -139,6 +143,7 @@ jobs:
       - name: Execute install.sh
         run: >
           ./install.sh
+          --enable-isystem
           --build-dir=${{ github.workspace }}/build
           --prefix=${{ github.workspace }}/prefixenv
           ${{ env.LINKAGE }}
@@ -216,27 +221,27 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            cxx: "clang++-13"
+            cxx: "clang++-14"
             link: "dynamic"
             optimization: "size"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
-            cc: "clang-13"
+            cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "apt"
             packages: ""
 
           - os: ubuntu-22.04
-            cxx: "clang++-13"
+            cxx: "clang++-14"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang-13"
+            cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "apt"
             packages: ""
@@ -306,6 +311,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Prepare toolchain [generic]
+        run: |
+          git config --global init.defaultBranch master
 
       - name: Prepare toolchain [apt]
         if: ${{ matrix.packager == 'apt' }}

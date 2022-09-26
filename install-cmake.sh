@@ -890,10 +890,10 @@ build_all()
     build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
     build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    create_from_github evoskuil secp256k1 version8
+    create_from_github libbitcoin secp256k1 version8
     build_from_github secp256k1 "$PARALLEL" false "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
     if [[ ! ($CI == true) ]]; then
-        create_from_github evoskuil libbitcoin-system master
+        create_from_github libbitcoin libbitcoin-system master
         build_from_github_cmake libbitcoin-system "$PARALLEL" true "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
@@ -946,7 +946,6 @@ BOOST_OPTIONS=(
 "--with-json" \
 "--with-locale" \
 "--with-program_options" \
-"--with-regex" \
 "--with-system" \
 "--with-thread" \
 "--with-test")
