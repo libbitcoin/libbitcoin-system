@@ -197,7 +197,7 @@ bool block::is_valid() const NOEXCEPT
     return valid_;
 }
 
-const chain::header&block::header() const NOEXCEPT
+const chain::header& block::header() const NOEXCEPT
 {
     return *header_;
 }

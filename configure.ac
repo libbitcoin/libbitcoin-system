@@ -37,13 +37,13 @@ AM_PROG_AR
 
 # Initialize libtool.
 LT_PREREQ(2.4.2)
+
+# Enable shared libraries if available, and static if they don't conflict.
 LT_INIT
+AC_SUBST([LIBTOOL_DEPS])
 
 # Determine C++ compiler to use.
 AC_PROG_CXX
-
-# Enable shared libraries if available, and static if they don't conflict.
-AC_PROG_LIBTOOL
 
 # Enable sed for substitution.
 AC_PROG_SED
@@ -171,14 +171,6 @@ AX_BOOST_CHRONO
 AC_SUBST([boost_chrono_LIBS], [${BOOST_CHRONO_LIB}])
 AC_MSG_NOTICE([boost_chrono_LIBS : ${boost_chrono_LIBS}])
 
-AX_BOOST_DATE_TIME
-AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
-AC_MSG_NOTICE([boost_date_time_LIBS : ${boost_date_time_LIBS}])
-
-AX_BOOST_FILESYSTEM
-AC_SUBST([boost_filesystem_LIBS], [${BOOST_FILESYSTEM_LIB}])
-AC_MSG_NOTICE([boost_filesystem_LIBS : ${boost_filesystem_LIBS}])
-
 AX_BOOST_IOSTREAMS
 AC_SUBST([boost_iostreams_LIBS], [${BOOST_IOSTREAMS_LIB}])
 AC_MSG_NOTICE([boost_iostreams_LIBS : ${boost_iostreams_LIBS}])
@@ -194,10 +186,6 @@ AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
 AX_BOOST_PROGRAM_OPTIONS
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
 AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
-
-AX_BOOST_REGEX
-AC_SUBST([boost_regex_LIBS], [${BOOST_REGEX_LIB}])
-AC_MSG_NOTICE([boost_regex_LIBS : ${boost_regex_LIBS}])
 
 AX_BOOST_SYSTEM
 AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])
