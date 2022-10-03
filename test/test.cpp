@@ -48,8 +48,10 @@ bool clear(const std::filesystem::path& file_directory) NOEXCEPT
     // used for setup, with no expectations of file/directory existence.
     const auto path = to_extended_path(file_directory);
     code ec;
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     std::filesystem::remove_all(path, ec);
     return !ec && std::filesystem::create_directories(path, ec);
+    BC_POP_WARNING()
 }
 
 bool create(const std::filesystem::path& file_path) NOEXCEPT
@@ -74,7 +76,9 @@ bool remove(const std::filesystem::path& file_path) NOEXCEPT
 {
     // Deletes and returns false if file did not exist (or error).
     code ec;
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::filesystem::remove(to_extended_path(file_path), ec);
+    BC_POP_WARNING()
 }
 
 } // namespace test
