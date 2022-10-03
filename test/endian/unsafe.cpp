@@ -34,4 +34,18 @@ BOOST_AUTO_TEST_CASE(endian__unsafe_from_little_endian__always__expected)
     BOOST_REQUIRE_EQUAL(unsafe_from_little_endian<uint32_t>(data_reverse.data()), value32);
 }
 
+BOOST_AUTO_TEST_CASE(endian__unsafe_to_big_endian__always__expected)
+{
+    data_chunk buffer(sizeof(uint32_t));
+    unsafe_to_big_endian(buffer.data(), value32);
+    BOOST_REQUIRE_EQUAL(buffer, data_forward);
+}
+
+BOOST_AUTO_TEST_CASE(endian__unsafe_to_little_endian__always__expected)
+{
+    data_chunk buffer(sizeof(uint32_t));
+    unsafe_to_little_endian(buffer.data(), value32);
+    BOOST_REQUIRE_EQUAL(buffer, data_reverse);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

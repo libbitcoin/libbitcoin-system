@@ -46,6 +46,23 @@ inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT
     return native_from_little_end(unsafe_byte_cast<Integral>(data));
 }
 
+
+template <typename Integral, typename Byte,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+inline void unsafe_to_big_endian(Byte* data, Integral value) NOEXCEPT
+{
+    unsafe_byte_cast<Integral>(data) = native_to_big_end(value);
+}
+
+template <typename Integral, typename Byte,
+    if_one_byte<Byte>,
+    if_integral_integer<Integral>>
+inline void unsafe_to_little_endian(Byte* data, Integral value) NOEXCEPT
+{
+    unsafe_byte_cast<Integral>(data) = native_to_little_end(value);
+}
+
 } // namespace system
 } // namespace libbitcoin
 
