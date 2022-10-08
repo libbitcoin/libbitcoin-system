@@ -24,7 +24,7 @@
 namespace libbitcoin {
 namespace system {
 
-/// Unguarded endian read from byte pointer.
+/// Unguarded byte buffer.
 /// ---------------------------------------------------------------------------
 
 template <typename Integral, typename Byte,
@@ -36,6 +36,16 @@ template <typename Integral, typename Byte,
     if_one_byte<Byte> = true,
     if_integral_integer<Integral> = true>
 inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT;
+
+template <typename Integral, typename Byte,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true>
+inline void unsafe_to_big_endian(Byte* data, Integral value) NOEXCEPT;
+
+template <typename Integral, typename Byte,
+    if_one_byte<Byte> = true,
+    if_integral_integer<Integral> = true>
+inline void unsafe_to_little_endian(Byte* data, Integral value) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
