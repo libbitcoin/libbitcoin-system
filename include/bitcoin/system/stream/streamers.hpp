@@ -79,7 +79,7 @@ namespace read
         /// A bit reader that reads data from a std::istream.
         using istream = bit_reader<std::istream>;
 
-        /// A bit reader that moves data from a data_reference.
+        /// A bit reader that copies data from a data_reference.
         using copy = make_streamer<copy_source<data_reference>, bit_reader>;
     }
 }
