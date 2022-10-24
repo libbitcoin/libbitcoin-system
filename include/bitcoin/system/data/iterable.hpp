@@ -217,6 +217,7 @@ public:
     class iterator
     {
     public:
+        // std::iterator_traits
         using iterator_category = std::forward_iterator_tag;
         using value_type = Array;
         using difference_type = ptrdiff_t;

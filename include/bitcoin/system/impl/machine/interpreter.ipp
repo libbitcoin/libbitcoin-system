@@ -608,9 +608,7 @@ op_equal() NOEXCEPT
     if (state::stack_size() < 2)
         return error::op_equal;
 
-    state::push_bool(state::equal_chunks(
-        state::pop_(),
-        state::pop_()));
+    state::push_bool(state::equal_chunks(state::pop_(), state::pop_()));
     return error::op_success;
 }
 
@@ -621,9 +619,7 @@ op_equal_verify() NOEXCEPT
     if (state::stack_size() < 2)
         return error::op_equal_verify1;
 
-    return state::equal_chunks(
-        state::pop_(),
-        state::pop_()) ?
+    return state::equal_chunks(state::pop_(), state::pop_()) ?
         error::op_success : error::op_equal_verify2;
 }
 
