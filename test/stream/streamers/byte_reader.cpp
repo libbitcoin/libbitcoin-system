@@ -431,6 +431,25 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_2_bytes_big_endian__full__expected)
     BOOST_REQUIRE(reader);
 }
 
+// read_3_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_3_bytes_big_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_3_bytes_big_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_3_bytes_big_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_3_bytes_big_endian(), 0x00080706u);
+    BOOST_REQUIRE(reader);
+}
+
 // read_4_bytes_big_endian
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_4_bytes_big_endian__empty__zero)
@@ -447,6 +466,63 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_4_bytes_big_endian__full__expected)
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_4_bytes_big_endian(), 0x08070605u);
+    BOOST_REQUIRE(reader);
+}
+
+// read_5_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_5_bytes_big_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_5_bytes_big_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_5_bytes_big_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_5_bytes_big_endian(), 0x0000000807060504u);
+    BOOST_REQUIRE(reader);
+}
+
+// read_6_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_6_bytes_big_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_6_bytes_big_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_6_bytes_big_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_6_bytes_big_endian(), 0x0000080706050403u);
+    BOOST_REQUIRE(reader);
+}
+
+// read_7_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_7_bytes_big_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_7_bytes_big_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_7_bytes_big_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_7_bytes_big_endian(), 0x0008070605040302u);
     BOOST_REQUIRE(reader);
 }
 
@@ -511,6 +587,25 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_2_bytes_little_endian__full__expected)
     BOOST_REQUIRE(reader);
 }
 
+// read_3_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_3_bytes_little_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_3_bytes_little_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_3_bytes_little_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_3_bytes_little_endian(), 0x00060708u);
+    BOOST_REQUIRE(reader);
+}
+
 // read_4_bytes_little_endian
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_4_bytes_little_endian__empty__zero)
@@ -527,6 +622,63 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_4_bytes_little_endian__full__expected)
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_4_bytes_little_endian(), 0x05060708u);
+    BOOST_REQUIRE(reader);
+}
+
+// read_5_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_5_bytes_little_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_5_bytes_little_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_5_bytes_little_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_5_bytes_little_endian(), 0x0000000405060708u);
+    BOOST_REQUIRE(reader);
+}
+
+// read_6_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_6_bytes_little_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_6_bytes_little_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_6_bytes_little_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_6_bytes_little_endian(), 0x0000030405060708u);
+    BOOST_REQUIRE(reader);
+}
+
+// read_7_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_7_bytes_little_endian__empty__zero)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_7_bytes_little_endian(), 0u);
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_7_bytes_little_endian__full__expected)
+{
+    const std::string value{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_7_bytes_little_endian(), 0x0002030405060708u);
     BOOST_REQUIRE(reader);
 }
 

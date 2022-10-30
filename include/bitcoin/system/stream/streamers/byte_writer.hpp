@@ -47,19 +47,31 @@ public:
     virtual ~byte_writer() NOEXCEPT;
 
     /// Type-inferenced integer writers.
-    template <typename Integer, if_integer<Integer> = true>
+    template <typename Integer, size_t Size = sizeof(Integer),
+        if_integer<Integer> = true,
+        if_not_greater<Size, sizeof(Integer)> = true>
     void write_big_endian(Integer value) NOEXCEPT;
-    template <typename Integer, if_integer<Integer> = true>
+    template <typename Integer, size_t Size = sizeof(Integer),
+        if_integer<Integer> = true,
+        if_not_greater<Size, sizeof(Integer)> = true>
     void write_little_endian(Integer value) NOEXCEPT;
 
     /// Write big endian integers.
     void write_2_bytes_big_endian(uint16_t value) NOEXCEPT override;
+    void write_3_bytes_big_endian(uint32_t value) NOEXCEPT override;
     void write_4_bytes_big_endian(uint32_t value) NOEXCEPT override;
+    void write_5_bytes_big_endian(uint64_t value) NOEXCEPT override;
+    void write_6_bytes_big_endian(uint64_t value) NOEXCEPT override;
+    void write_7_bytes_big_endian(uint64_t value) NOEXCEPT override;
     void write_8_bytes_big_endian(uint64_t value) NOEXCEPT override;
 
     /// Write little endian integers.
     void write_2_bytes_little_endian(uint16_t value) NOEXCEPT override;
+    void write_3_bytes_little_endian(uint32_t value) NOEXCEPT override;
     void write_4_bytes_little_endian(uint32_t value) NOEXCEPT override;
+    void write_5_bytes_little_endian(uint64_t value) NOEXCEPT override;
+    void write_6_bytes_little_endian(uint64_t value) NOEXCEPT override;
+    void write_7_bytes_little_endian(uint64_t value) NOEXCEPT override;
     void write_8_bytes_little_endian(uint64_t value) NOEXCEPT override;
 
     /// Write Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).

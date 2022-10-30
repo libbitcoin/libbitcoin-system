@@ -36,12 +36,20 @@ class bytereader
 public:
     /// Read big endian (explicit specializations of read_big_endian).
     virtual uint16_t read_2_bytes_big_endian() NOEXCEPT = 0;
+    virtual uint32_t read_3_bytes_big_endian() NOEXCEPT = 0;
     virtual uint32_t read_4_bytes_big_endian() NOEXCEPT = 0;
+    virtual uint64_t read_5_bytes_big_endian() NOEXCEPT = 0;
+    virtual uint64_t read_6_bytes_big_endian() NOEXCEPT = 0;
+    virtual uint64_t read_7_bytes_big_endian() NOEXCEPT = 0;
     virtual uint64_t read_8_bytes_big_endian() NOEXCEPT = 0;
 
     /// Little endian integer readers (specializations of read_little_endian).
     virtual uint16_t read_2_bytes_little_endian() NOEXCEPT = 0;
+    virtual uint32_t read_3_bytes_little_endian() NOEXCEPT = 0;
     virtual uint32_t read_4_bytes_little_endian() NOEXCEPT = 0;
+    virtual uint64_t read_5_bytes_little_endian() NOEXCEPT = 0;
+    virtual uint64_t read_6_bytes_little_endian() NOEXCEPT = 0;
+    virtual uint64_t read_7_bytes_little_endian() NOEXCEPT = 0;
     virtual uint64_t read_8_bytes_little_endian() NOEXCEPT = 0;
 
     /// Read Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).
