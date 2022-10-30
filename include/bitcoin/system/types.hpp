@@ -69,7 +69,6 @@ using signed_type =
                 iif<Bytes <= sizeof(int32_t), int32_t,
                     int64_t>>>>;
 
-
 template <size_t Bytes = 0u,
     std::enable_if_t<!(Bytes > sizeof(uint64_t)), bool> = true>
 using unsigned_type =
