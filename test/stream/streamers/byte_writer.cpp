@@ -151,8 +151,20 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_2_bytes_big_endian__value__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    writer.write_2_bytes_big_endian(0x42);
-    const std::string expected{ 0x00, 0x42 };
+    writer.write_2_bytes_big_endian(0x0102);
+    const std::string expected{ 0x01, 0x02 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_3_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_3_bytes_big_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_3_bytes_big_endian(0x01020304);
+    const std::string expected{ 0x02, 0x03, 0x04 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
@@ -163,8 +175,44 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_4_bytes_big_endian__value__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    writer.write_4_bytes_big_endian(0x42);
-    const std::string expected{ 0x00, 0x00, 0x00, 0x42 };
+    writer.write_4_bytes_big_endian(0x01020304);
+    const std::string expected{ 0x01, 0x02, 0x03, 0x04 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_5_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_5_bytes_big_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_5_bytes_big_endian(0x0102030405060708);
+    const std::string expected{ 0x04, 0x05, 0x06, 0x07, 0x08 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_6_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_6_bytes_big_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_6_bytes_big_endian(0x0102030405060708);
+    const std::string expected{ 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_7_bytes_big_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_7_bytes_big_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_7_bytes_big_endian(0x0102030405060708);
+    const std::string expected{ 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
@@ -175,8 +223,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_8_bytes_big_endian__value__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    writer.write_8_bytes_big_endian(0x42);
-    const std::string expected{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x42 };
+    writer.write_8_bytes_big_endian(0x0102030405060708);
+    const std::string expected{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
@@ -214,8 +262,20 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_2_bytes_little_endian__value__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    writer.write_2_bytes_little_endian(0x42);
-    const std::string expected{ 0x42, 0x00 };
+    writer.write_2_bytes_little_endian(0x0102);
+    const std::string expected{ 0x02, 0x01 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_3_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_3_bytes_little_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_3_bytes_little_endian(0x01020304);
+    const std::string expected{ 0x04, 0x03, 0x02 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
@@ -226,8 +286,44 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_4_bytes_little_endian__value__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    writer.write_4_bytes_little_endian(0x42);
-    const std::string expected{ 0x42, 0x00, 0x00, 0x00 };
+    writer.write_4_bytes_little_endian(0x01020304);
+    const std::string expected{ 0x04, 0x03, 0x02, 0x01 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_5_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_5_bytes_little_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_5_bytes_little_endian(0x0102030405060708);
+    const std::string expected{ 0x08, 0x07, 0x06, 0x05, 0x04 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_6_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_6_bytes_little_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_6_bytes_little_endian(0x0102030405060708);
+    const std::string expected{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03 };
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+// write_7_bytes_little_endian
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_7_bytes_little_endian__value__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_7_bytes_little_endian(0x0102030405060708);
+    const std::string expected{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }
@@ -238,8 +334,8 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_8_bytes_little_endian__value__expected)
 {
     std::ostringstream stream;
     write::bytes::ostream writer(stream);
-    writer.write_8_bytes_little_endian(0x42);
-    const std::string expected{ 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    writer.write_8_bytes_little_endian(0x0102030405060708);
+    const std::string expected{ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     BOOST_REQUIRE_EQUAL(stream.str(), expected);
     BOOST_REQUIRE(writer);
 }

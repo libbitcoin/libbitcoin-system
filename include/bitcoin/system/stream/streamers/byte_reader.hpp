@@ -48,19 +48,31 @@ public:
     virtual ~byte_reader() = default;
 
     /// Read integer, size determined from parameter type.
-    template <typename Integer, if_integer<Integer> = true>
+    template <typename Integer, size_t Size = sizeof(Integer),
+        if_integer<Integer> = true,
+        if_not_greater<Size, sizeof(Integer)> = true>
     Integer read_big_endian() NOEXCEPT;
-    template <typename Integer, if_integer<Integer> = true>
+    template <typename Integer, size_t Size = sizeof(Integer),
+        if_integer<Integer> = true,
+        if_not_greater<Size, sizeof(Integer)> = true>
     Integer read_little_endian() NOEXCEPT;
 
     /// Read big endian (explicit specializations of read_big_endian).
     uint16_t read_2_bytes_big_endian() NOEXCEPT override;
+    uint32_t read_3_bytes_big_endian() NOEXCEPT override;
     uint32_t read_4_bytes_big_endian() NOEXCEPT override;
+    uint64_t read_5_bytes_big_endian() NOEXCEPT override;
+    uint64_t read_6_bytes_big_endian() NOEXCEPT override;
+    uint64_t read_7_bytes_big_endian() NOEXCEPT override;
     uint64_t read_8_bytes_big_endian() NOEXCEPT override;
 
     /// Little endian integer readers (specializations of read_little_endian).
     uint16_t read_2_bytes_little_endian() NOEXCEPT override;
+    uint32_t read_3_bytes_little_endian() NOEXCEPT override;
     uint32_t read_4_bytes_little_endian() NOEXCEPT override;
+    uint64_t read_5_bytes_little_endian() NOEXCEPT override;
+    uint64_t read_6_bytes_little_endian() NOEXCEPT override;
+    uint64_t read_7_bytes_little_endian() NOEXCEPT override;
     uint64_t read_8_bytes_little_endian() NOEXCEPT override;
 
     /// Read Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).

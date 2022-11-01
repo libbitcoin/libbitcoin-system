@@ -50,14 +50,15 @@ byte_reader<IStream>::byte_reader(IStream& source) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-template <typename Integer, if_integer<Integer>>
+template <typename Integer, size_t Size,
+    if_integer<Integer>, if_not_greater<Size, sizeof(Integer)>>
 Integer byte_reader<IStream>::read_big_endian() NOEXCEPT
 {
     Integer value{};
     auto& bytes = byte_cast(value);
 
     // Call into virtual reader (vs. stream) so derived class can reuse.
-    read_bytes(bytes.data(), bytes.size());
+    read_bytes(std::next(bytes.data(), sizeof(Integer) - Size), Size);
     return native_from_big_end(value);
 }
 
@@ -68,9 +69,33 @@ uint16_t byte_reader<IStream>::read_2_bytes_big_endian() NOEXCEPT
 }
 
 template <typename IStream>
+uint32_t byte_reader<IStream>::read_3_bytes_big_endian() NOEXCEPT
+{
+    return read_big_endian<uint32_t, 3>();
+}
+
+template <typename IStream>
 uint32_t byte_reader<IStream>::read_4_bytes_big_endian() NOEXCEPT
 {
     return read_big_endian<uint32_t>();
+}
+
+template <typename IStream>
+uint64_t byte_reader<IStream>::read_5_bytes_big_endian() NOEXCEPT
+{
+    return read_big_endian<uint64_t, 5>();
+}
+
+template <typename IStream>
+uint64_t byte_reader<IStream>::read_6_bytes_big_endian() NOEXCEPT
+{
+    return read_big_endian<uint64_t, 6>();
+}
+
+template <typename IStream>
+uint64_t byte_reader<IStream>::read_7_bytes_big_endian() NOEXCEPT
+{
+    return read_big_endian<uint64_t, 7>();
 }
 
 template <typename IStream>
@@ -83,14 +108,15 @@ uint64_t byte_reader<IStream>::read_8_bytes_big_endian() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-template <typename Integer, if_integer<Integer>>
+template <typename Integer, size_t Size,
+    if_integer<Integer>, if_not_greater<Size, sizeof(Integer)>>
 Integer byte_reader<IStream>::read_little_endian() NOEXCEPT
 {
     Integer value{};
     auto& bytes = byte_cast(value);
 
     // Call into virtual reader (vs. stream) so derived class can reuse.
-    read_bytes(bytes.data(), bytes.size());
+    read_bytes(bytes.data(), Size);
     return native_from_little_end(value);
 }
 
@@ -101,9 +127,33 @@ uint16_t byte_reader<IStream>::read_2_bytes_little_endian() NOEXCEPT
 }
 
 template <typename IStream>
+uint32_t byte_reader<IStream>::read_3_bytes_little_endian() NOEXCEPT
+{
+    return read_little_endian<uint32_t, 3>();
+}
+
+template <typename IStream>
 uint32_t byte_reader<IStream>::read_4_bytes_little_endian() NOEXCEPT
 {
     return read_little_endian<uint32_t>();
+}
+
+template <typename IStream>
+uint64_t byte_reader<IStream>::read_5_bytes_little_endian() NOEXCEPT
+{
+    return read_little_endian<uint64_t, 5>();
+}
+
+template <typename IStream>
+uint64_t byte_reader<IStream>::read_6_bytes_little_endian() NOEXCEPT
+{
+    return read_little_endian<uint64_t, 6>();
+}
+
+template <typename IStream>
+uint64_t byte_reader<IStream>::read_7_bytes_little_endian() NOEXCEPT
+{
+    return read_little_endian<uint64_t, 7>();
 }
 
 template <typename IStream>

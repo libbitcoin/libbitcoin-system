@@ -69,7 +69,6 @@ using signed_type =
                 iif<Bytes <= sizeof(int32_t), int32_t,
                     int64_t>>>>;
 
-
 template <size_t Bytes = 0u,
     std::enable_if_t<!(Bytes > sizeof(uint64_t)), bool> = true>
 using unsigned_type =
@@ -150,7 +149,6 @@ using uintx_t = boost::multiprecision::number<
 /// with this seam, requiring template specialization for uintx.
 typedef boost::multiprecision::cpp_int uintx;
 
-/// C++11: use std::integral_constant (up to primitives limit).
 /// These are predefined due to use in the library, but any width is valid.
 typedef uintx_t<5u> uint5_t;
 typedef uintx_t<11u> uint11_t;

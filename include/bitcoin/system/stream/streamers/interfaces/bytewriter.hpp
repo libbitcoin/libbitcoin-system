@@ -33,12 +33,20 @@ class bytewriter
 public:
     /// Write big endian integers.
     virtual void write_2_bytes_big_endian(uint16_t value) NOEXCEPT = 0;
+    virtual void write_3_bytes_big_endian(uint32_t value) NOEXCEPT = 0;
     virtual void write_4_bytes_big_endian(uint32_t value) NOEXCEPT = 0;
+    virtual void write_5_bytes_big_endian(uint64_t value) NOEXCEPT = 0;
+    virtual void write_6_bytes_big_endian(uint64_t value) NOEXCEPT = 0;
+    virtual void write_7_bytes_big_endian(uint64_t value) NOEXCEPT = 0;
     virtual void write_8_bytes_big_endian(uint64_t value) NOEXCEPT = 0;
 
     /// Write little endian integers.
     virtual void write_2_bytes_little_endian(uint16_t value) NOEXCEPT = 0;
+    virtual void write_3_bytes_little_endian(uint32_t value) NOEXCEPT = 0;
     virtual void write_4_bytes_little_endian(uint32_t value) NOEXCEPT = 0;
+    virtual void write_5_bytes_little_endian(uint64_t value) NOEXCEPT = 0;
+    virtual void write_6_bytes_little_endian(uint64_t value) NOEXCEPT = 0;
+    virtual void write_7_bytes_little_endian(uint64_t value) NOEXCEPT = 0;
     virtual void write_8_bytes_little_endian(uint64_t value) NOEXCEPT = 0;
 
     /// Write Bitcoin variable integer (1, 3, 5, or 9 bytes, little-endian).

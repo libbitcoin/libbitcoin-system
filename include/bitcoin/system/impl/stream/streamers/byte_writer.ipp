@@ -81,13 +81,14 @@ byte_writer<OStream>::~byte_writer() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-template <typename Integer, if_integer<Integer>>
+template <typename Integer, size_t Size,
+    if_integer<Integer>, if_not_greater<Size, sizeof(Integer)>>
 void byte_writer<OStream>::write_big_endian(Integer value) NOEXCEPT
 {
-    const auto& bytes = byte_cast(native_to_big_end(value));
+    const auto bytes = byte_cast(native_to_big_end(value));
 
     // Call into virtual writer (vs. stream) so derived class can reuse.
-    write_bytes(bytes.data(), bytes.size());
+    write_bytes(std::next(bytes.data(), sizeof(Integer) - Size), Size);
 }
 
 template <typename OStream>
@@ -97,9 +98,33 @@ void byte_writer<OStream>::write_2_bytes_big_endian(uint16_t value) NOEXCEPT
 }
 
 template <typename OStream>
+void byte_writer<OStream>::write_3_bytes_big_endian(uint32_t value) NOEXCEPT
+{
+    write_big_endian<uint32_t, 3>(value);
+}
+
+template <typename OStream>
 void byte_writer<OStream>::write_4_bytes_big_endian(uint32_t value) NOEXCEPT
 {
     write_big_endian<uint32_t>(value);
+}
+
+template <typename OStream>
+void byte_writer<OStream>::write_5_bytes_big_endian(uint64_t value) NOEXCEPT
+{
+    write_big_endian<uint64_t, 5>(value);
+}
+
+template <typename OStream>
+void byte_writer<OStream>::write_6_bytes_big_endian(uint64_t value) NOEXCEPT
+{
+    write_big_endian<uint64_t, 6>(value);
+}
+
+template <typename OStream>
+void byte_writer<OStream>::write_7_bytes_big_endian(uint64_t value) NOEXCEPT
+{
+    write_big_endian<uint64_t, 7>(value);
 }
 
 template <typename OStream>
@@ -112,13 +137,14 @@ void byte_writer<OStream>::write_8_bytes_big_endian(uint64_t value) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-template <typename Integer, if_integer<Integer>>
+template <typename Integer, size_t Size,
+    if_integer<Integer>, if_not_greater<Size, sizeof(Integer)>>
 void byte_writer<OStream>::write_little_endian(Integer value) NOEXCEPT
 {
-    const auto& bytes = byte_cast(native_to_little_end(value));
+    const auto bytes = byte_cast(native_to_little_end(value));
 
     // Call into virtual writer (vs. stream) so derived class can reuse.
-    write_bytes(bytes.data(), bytes.size());
+    write_bytes(bytes.data(), Size);
 }
 
 template <typename OStream>
@@ -128,9 +154,33 @@ void byte_writer<OStream>::write_2_bytes_little_endian(uint16_t value) NOEXCEPT
 }
 
 template <typename OStream>
+void byte_writer<OStream>::write_3_bytes_little_endian(uint32_t value) NOEXCEPT
+{
+    write_little_endian<uint32_t, 3>(value);
+}
+
+template <typename OStream>
 void byte_writer<OStream>::write_4_bytes_little_endian(uint32_t value) NOEXCEPT
 {
     write_little_endian<uint32_t>(value);
+}
+
+template <typename OStream>
+void byte_writer<OStream>::write_5_bytes_little_endian(uint64_t value) NOEXCEPT
+{
+    write_little_endian<uint64_t, 5>(value);
+}
+
+template <typename OStream>
+void byte_writer<OStream>::write_6_bytes_little_endian(uint64_t value) NOEXCEPT
+{
+    write_little_endian<uint64_t, 6>(value);
+}
+
+template <typename OStream>
+void byte_writer<OStream>::write_7_bytes_little_endian(uint64_t value) NOEXCEPT
+{
+    write_little_endian<uint64_t, 7>(value);
 }
 
 template <typename OStream>
