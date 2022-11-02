@@ -58,8 +58,9 @@ protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override
     {
         using char_type = typename device<Container>::char_type;
-        const auto first = pointer_cast<char_type>(&(*container_.begin()));
-        return std::make_pair(first, std::next(first, container_.size()));
+        return std::make_pair(
+            pointer_cast<char_type>(container_.begin()),
+            pointer_cast<char_type>(container_.end()));
     }
 
 private:
