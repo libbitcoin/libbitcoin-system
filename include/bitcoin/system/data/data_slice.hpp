@@ -38,15 +38,8 @@ namespace system {
 /// A temporary is a prvalue, and includes initializer_list, but a copy is not:
 /// en.cppreference.com/w/cpp/language/implicit_conversion#Temporary_materialization
 /// When the data_slice is accepted as a const& it is either passed by
-/// reference or materialized as a prvalue. Any reference to the slice extends
-/// its lifetime to that of the reference. However, the slice does not retain
-/// references to the parameters provided in its construction. Instead pointers
-/// are initialized (copied) from addresses derived from these parameters. As a
-/// result, any temporary used to construct the slice will be orphaned when the
-/// lifetime of the temporary ends, despite retention of the slice by reference,
-/// such as by a class member. The lifetime of a temporary used in 
-/// materialization of a function parameter is the lifetime of the function,
-/// unless extended by reference.
+/// reference or materialized as a prvalue. A function/method reference extends
+/// lifetime, but a member reference does not.
 
 /// Downsizable but otherwise const iterable wrapper for const buffer.
 /// Identical to data_slab except pointer is const, and therefore accepts
