@@ -42,6 +42,9 @@ template <typename Container>
 typename device<Container>::sequence
 device<Container>::input_sequence() const NOEXCEPT
 {
+    if (is_negative(remaining_))
+        return {};
+
     // Required to match output_sequence for read/write devices.
     return do_sequence();
 }
@@ -50,6 +53,9 @@ template <typename Container>
 typename device<Container>::sequence
 device<Container>::output_sequence() const NOEXCEPT
 {
+    if (is_negative(remaining_))
+        return {};
+
     // Required to match input_sequence for read/write devices.
     return do_sequence();
 }
@@ -58,7 +64,7 @@ template <typename Container>
 typename device<Container>::size_type
 device<Container>::read(char_type* buffer, size_type count) NOEXCEPT
 {
-    if (is_null(buffer) || is_negative(count))
+    if (is_null(buffer) || is_negative(count) || is_negative(remaining_))
         return negative_one;
 
     const auto size = std::min(remaining_, count);
@@ -73,7 +79,7 @@ template <typename Container>
 typename device<Container>::size_type
 device<Container>::write(const char_type* buffer, size_type count) NOEXCEPT
 {
-    if (is_null(buffer) || is_negative(count))
+    if (is_null(buffer) || is_negative(count) || is_negative(remaining_))
         return negative_one;
 
     const auto size = std::min(remaining_, count);
