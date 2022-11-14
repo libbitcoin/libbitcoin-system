@@ -65,17 +65,17 @@ BOOST_AUTO_TEST_CASE(byte_writer__not_bool__stream_invalid__true)
     BOOST_REQUIRE(!writer);
 }
 
-BOOST_AUTO_TEST_CASE(byte_writer__get_position___stream_end__expected)
-{
-    std::stringstream stream{};
-    write::bytes::ostream writer(stream);
-    BOOST_REQUIRE_EQUAL(writer.get_position(), 0u);
-    writer.write_byte('*');
-    BOOST_REQUIRE_EQUAL(writer.get_position(), 1u);
-    writer.write_byte('*');
-    BOOST_REQUIRE_EQUAL(writer.get_position(), 2u);
-    BOOST_REQUIRE(writer);
-}
+////BOOST_AUTO_TEST_CASE(byte_writer__get_position___stream_end__expected)
+////{
+////    std::stringstream stream{};
+////    write::bytes::ostream writer(stream);
+////    BOOST_REQUIRE_EQUAL(writer.get_position(), 0u);
+////    writer.write_byte('*');
+////    BOOST_REQUIRE_EQUAL(writer.get_position(), 1u);
+////    writer.write_byte('*');
+////    BOOST_REQUIRE_EQUAL(writer.get_position(), 2u);
+////    BOOST_REQUIRE(writer);
+////}
 
 // flush
 
