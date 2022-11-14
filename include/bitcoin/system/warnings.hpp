@@ -58,6 +58,7 @@
         #define NO_VALUE_OR_CONST_REF_SHARED_PTR 26418
         #define NO_GLOBAL_INIT_CALLS 26426
         #define NO_UNGUARDED_POINTERS 26429
+        #define NO_METHOD_HIDING 26434
         #define NO_GOTO 26438
         #define USE_NOEXCEPT_FOR_FUNCTION 26440
         #define NO_ARRAY_INDEXING 26446
