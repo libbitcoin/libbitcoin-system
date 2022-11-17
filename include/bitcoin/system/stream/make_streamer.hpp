@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAMER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_MAKE_STREAMER_HPP
 
+#include <memory>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>
 
@@ -39,6 +40,8 @@ class make_streamer
   : public Streamer
 {
 public:
+    using ptr = std::shared_ptr<make_streamer<Device, Base, Stream, Streamer>>;
+
     make_streamer(typename Device::container device) NOEXCEPT
       : stream_(device), Streamer(stream_)
     {
