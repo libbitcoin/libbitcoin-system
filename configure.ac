@@ -37,13 +37,13 @@ AM_PROG_AR
 
 # Initialize libtool.
 LT_PREREQ(2.4.2)
+
+# Enable shared libraries if available, and static if they don't conflict.
 LT_INIT
+AC_SUBST([LIBTOOL_DEPS])
 
 # Determine C++ compiler to use.
 AC_PROG_CXX
-
-# Enable shared libraries if available, and static if they don't conflict.
-AC_PROG_LIBTOOL
 
 # Enable sed for substitution.
 AC_PROG_SED
