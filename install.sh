@@ -315,7 +315,7 @@ set_os_specific_compiler_settings()
 
 link_to_standard_library()
 {
-    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+    if [[ ($OS == Linux && $CC == clang*) || ($OS == OpenBSD) ]]; then
         export LDLIBS="-l$STDLIB $LDLIBS"
         export CXXFLAGS="-stdlib=lib$STDLIB $CXXFLAGS"
     fi
@@ -637,7 +637,7 @@ initialize_boost_configuration()
         BOOST_TOOLSET="toolset=$CC"
     fi
 
-    if [[ ($OS == Linux && $CC == "clang") || ($OS == OpenBSD) ]]; then
+    if [[ ($OS == Linux && $CC == clang*) || ($OS == OpenBSD) ]]; then
         STDLIB_FLAG="-stdlib=lib$STDLIB"
         BOOST_CXXFLAGS="cxxflags=$STDLIB_FLAG"
         BOOST_LINKFLAGS="linkflags=$STDLIB_FLAG"
