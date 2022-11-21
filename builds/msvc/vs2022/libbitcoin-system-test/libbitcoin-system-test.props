@@ -17,8 +17,8 @@
 
   <ItemDefinitionGroup>
     <ClCompile>
-      <!-- Disable optimization to prevent excessive compilation time in release builds due to large data statements. -->
-      <Optimization>Disabled</Optimization>
+      <!-- Set to prevent excessive compilation time due to large data statements. -->
+      <!--<Optimization>Disabled</Optimization>-->
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions Condition="'$(Option-datagen)' == 'true'">ENABLE_DATAGEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
