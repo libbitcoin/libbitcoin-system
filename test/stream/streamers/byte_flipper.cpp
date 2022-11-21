@@ -79,6 +79,37 @@ BOOST_AUTO_TEST_CASE(byte_flipper__not_bool__stream_invalid__true)
     BOOST_REQUIRE(!reader);
 }
 
+// get_position
+
+BOOST_AUTO_TEST_CASE(byte_flipper__get_position___stream_end__expected)
+{
+    std::stringstream stream{};
+    flip::bytes::iostream writer(stream);
+    BOOST_REQUIRE_EQUAL(writer.get_position(), 0u);
+    writer.write_byte('*');
+    BOOST_REQUIRE_EQUAL(writer.get_position(), 1u);
+    writer.write_byte('*');
+    BOOST_REQUIRE_EQUAL(writer.get_position(), 2u);
+    BOOST_REQUIRE(writer);
+}
+
+// get_position/set_position
+
+BOOST_AUTO_TEST_CASE(byte_flipper__get_position__read_and_reset__expected)
+{
+    std::stringstream stream{ "*" };
+    flip::bytes::iostream reader(stream);
+    const auto position = reader.get_position();
+    BOOST_REQUIRE(!reader.is_exhausted());
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+    BOOST_REQUIRE(reader.is_exhausted());
+    reader.set_position(position);
+    BOOST_REQUIRE(!reader.is_exhausted());
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+    BOOST_REQUIRE(reader.is_exhausted());
+    BOOST_REQUIRE(reader);
+}
+
 // is_exhausted
 
 BOOST_AUTO_TEST_CASE(byte_flipper__is_exhausted__default__true)

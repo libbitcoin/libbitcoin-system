@@ -28,7 +28,7 @@
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
 
-// The only multiple inheritance conflict is destructors and bool/!.
+// The only multiple inheritance conflicts are resolved below.
 BC_PUSH_WARNING(DIAMOND_INHERITANCE)
 
 namespace libbitcoin {
@@ -67,6 +67,12 @@ public:
 
     // Two base destructor calls order is unimportant (only writes flush).
     ~bit_flipper() override = default;
+
+    size_t get_position() NOEXCEPT override
+    {
+        // Rely on reader implementation, both are trivial and identical.
+        return byte_reader<IOStream>::get_position();
+    }
 
     operator bool() const NOEXCEPT override
     {

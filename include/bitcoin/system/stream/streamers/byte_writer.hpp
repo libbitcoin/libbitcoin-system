@@ -103,8 +103,8 @@ public:
     /// Flush the buffer.
     void flush() NOEXCEPT override;
 
-    /////// Get the current absolute position (fails with push_sink).
-    ////size_t get_position() NOEXCEPT override;
+    /// Get the current absolute position (fails with push_sink).
+    size_t get_position() NOEXCEPT override;
 
     /// The stream is valid.
     operator bool() const NOEXCEPT override;
