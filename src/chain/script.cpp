@@ -183,7 +183,7 @@ bool script::operator!=(const script& other) const NOEXCEPT
 // static/private
 size_t script::op_count(reader& source) NOEXCEPT
 {
-    const auto start = source.get_position();
+    const auto start = source.get_read_position();
     auto count = zero;
 
     while (operation::count_op(source))
@@ -204,7 +204,7 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
     if (prefix)
     {
         size = source.read_size();
-        start = source.get_position();
+        start = source.get_read_position();
 
         // Limit the number of bytes that ops may consume.
         source.set_limit(size);
@@ -225,7 +225,7 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit();
 
         // Stream was exhausted prior to reaching prefix size.
-        if (source.get_position() - start != size)
+        if (source.get_read_position() - start != size)
             source.invalidate();
     }
 

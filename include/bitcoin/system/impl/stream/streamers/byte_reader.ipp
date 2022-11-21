@@ -375,7 +375,7 @@ void byte_reader<IStream>::set_position(size_t absolute) NOEXCEPT
     clear();
 
     // This allows conversion of and absolute to relative position.
-    const auto position = get_position();
+    const auto position = get_read_position();
 
     if (absolute == position)
         return;
@@ -398,7 +398,7 @@ bool byte_reader<IStream>::is_exhausted() const NOEXCEPT
 // These only call non-virtual (private) methods.
 
 template <typename IStream>
-size_t byte_reader<IStream>::get_position() NOEXCEPT
+size_t byte_reader<IStream>::get_read_position() NOEXCEPT
 {
     return getter();
 }

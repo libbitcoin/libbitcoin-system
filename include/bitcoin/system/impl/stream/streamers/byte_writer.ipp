@@ -290,11 +290,11 @@ void byte_writer<OStream>::flush() NOEXCEPT
 // ----------------------------------------------------------------------------
 // These only call non-virtual (private) methods.
 
-////template <typename OStream>
-////size_t byte_writer<OStream>::get_position() NOEXCEPT
-////{
-////    return getter();
-////}
+template <typename OStream>
+size_t byte_writer<OStream>::get_write_position() NOEXCEPT
+{
+    return getter();
+}
 
 template <typename OStream>
 byte_writer<OStream>::operator bool() const NOEXCEPT

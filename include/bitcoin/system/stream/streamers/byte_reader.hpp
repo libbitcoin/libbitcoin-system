@@ -131,7 +131,7 @@ public:
     bool is_exhausted() const NOEXCEPT override;
 
     /// Get the current absolute position.
-    size_t get_position() NOEXCEPT override;
+    size_t get_read_position() NOEXCEPT override;
 
     /// Clear invalid state and set absolute position.
     void set_position(size_t absolute) NOEXCEPT override;

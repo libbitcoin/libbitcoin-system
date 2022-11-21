@@ -153,7 +153,7 @@ operation operation::from_data(reader& source) NOEXCEPT
     // serializes as data only, and fails evaluation. Only the last operation
     // in a script could become an underflow, which may possibly contain the
     // entire script. This retains the read position in case of underflow.
-    const auto start = source.get_position();
+    const auto start = source.get_read_position();
 
     // Size of a push-data opcode is not retained, as this is inherent in data.
     auto code = static_cast<opcode>(source.read_byte());

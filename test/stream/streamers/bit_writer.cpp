@@ -64,6 +64,20 @@ BOOST_AUTO_TEST_CASE(bit_writer__not_bool__stream_invalid__true)
     BOOST_REQUIRE(!writer);
 }
 
+// get_write_position
+
+BOOST_AUTO_TEST_CASE(bit_writer__get_write_position___stream_end__expected)
+{
+    std::stringstream stream{};
+    write::bits::ostream writer(stream);
+    BOOST_REQUIRE_EQUAL(writer.get_write_position(), 0u);
+    writer.write_byte('*');
+    BOOST_REQUIRE_EQUAL(writer.get_write_position(), 1u);
+    writer.write_byte('*');
+    BOOST_REQUIRE_EQUAL(writer.get_write_position(), 2u);
+    BOOST_REQUIRE(writer);
+}
+
 // flush
 
 BOOST_AUTO_TEST_CASE(bit_writer__flush__push_sink_empty__valid)

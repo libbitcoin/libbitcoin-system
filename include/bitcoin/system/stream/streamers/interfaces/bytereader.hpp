@@ -102,7 +102,7 @@ public:
     virtual bool is_exhausted() const NOEXCEPT = 0;
 
     /// Get the current absolute position.
-    virtual size_t get_position() NOEXCEPT = 0;
+    virtual size_t get_read_position() NOEXCEPT = 0;
 
     /// Clear invalid state and set absolute position.
     virtual void set_position(size_t absolute) NOEXCEPT = 0;
