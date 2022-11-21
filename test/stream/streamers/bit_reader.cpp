@@ -68,13 +68,13 @@ BOOST_AUTO_TEST_CASE(bit_reader__not_bool__stream_invalid__true)
     BOOST_REQUIRE(!reader);
 }
 
-// get_position/set_position
+// get_read_position/set_position
 
-BOOST_AUTO_TEST_CASE(bit_reader__get_position__read_and_reset__expected)
+BOOST_AUTO_TEST_CASE(bit_reader__get_read_position__read_and_reset__expected)
 {
     std::istringstream stream{ "*" };
     read::bits::istream reader(stream);
-    const auto position = reader.get_position();
+    const auto position = reader.get_read_position();
     BOOST_REQUIRE(!reader.is_exhausted());
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
     BOOST_REQUIRE(reader.is_exhausted());

@@ -79,7 +79,7 @@ public:
     virtual void flush() NOEXCEPT = 0;
 
     /// Get the current absolute position (fails with push_sink).
-    virtual size_t get_position() NOEXCEPT = 0;
+    virtual size_t get_write_position() NOEXCEPT = 0;
 
     /// The stream is valid.
     virtual operator bool() const NOEXCEPT = 0;

@@ -164,7 +164,7 @@ size_t skip_parse(reader& source) NOEXCEPT
     constexpr auto version = 4u;
     constexpr auto locktime = 4u;
 
-    const auto start = source.get_position();
+    const auto start = source.get_read_position();
     source.skip_bytes(version);
     auto inputs = source.read_size();
     skip_inputs(source, inputs);
@@ -183,7 +183,7 @@ size_t skip_parse(reader& source) NOEXCEPT
     }
 
     source.skip_bytes(locktime);
-    const auto size = (source.get_position() - start);
+    const auto size = (source.get_read_positionget_position() - start);
     return size;
 }
 

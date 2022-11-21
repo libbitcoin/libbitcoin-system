@@ -59,12 +59,6 @@ public:
     // Two base destructor calls order is unimportant (only writes flush).
     ~byte_flipper() override = default;
 
-    size_t get_position() NOEXCEPT override
-    {
-        // Rely on reader implementation, both are trivial and identical.
-        return byte_reader<IOStream>::get_position();
-    }
-
     operator bool() const NOEXCEPT override
     {
         // Rely on reader implementation, both are trivial and identical.

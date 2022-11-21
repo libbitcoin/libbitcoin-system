@@ -65,14 +65,10 @@ public:
     bit_flipper& operator=(bit_flipper&&) = default;
     bit_flipper& operator=(const bit_flipper&) = default;
 
+    /// These overrides eliminate ambiguity resulting from diamond inheritance.
+
     // Two base destructor calls order is unimportant (only writes flush).
     ~bit_flipper() override = default;
-
-    size_t get_position() NOEXCEPT override
-    {
-        // Rely on reader implementation, both are trivial and identical.
-        return byte_reader<IOStream>::get_position();
-    }
 
     operator bool() const NOEXCEPT override
     {

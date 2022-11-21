@@ -228,13 +228,13 @@ BOOST_AUTO_TEST_CASE(byte_reader__rewind__past_begin__invalid)
     BOOST_REQUIRE(!reader);
 }
 
-// get_position/set_position
+// get_read_position/set_position
 
-BOOST_AUTO_TEST_CASE(byte_reader__get_position__read_and_reset__expected)
+BOOST_AUTO_TEST_CASE(byte_reader__get_read_position__read_and_reset__expected)
 {
     std::istringstream stream{ "*" };
     read::bytes::istream reader(stream);
-    const auto position = reader.get_position();
+    const auto position = reader.get_read_position();
     BOOST_REQUIRE(!reader.is_exhausted());
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
     BOOST_REQUIRE(reader.is_exhausted());
@@ -245,14 +245,14 @@ BOOST_AUTO_TEST_CASE(byte_reader__get_position__read_and_reset__expected)
     BOOST_REQUIRE(reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__get_position__skip_to_end_set_to_middle__expected)
+BOOST_AUTO_TEST_CASE(byte_reader__get_read_position__skip_to_end_set_to_middle__expected)
 {
     const auto size = 42;
     const std::string value(size, 0x00);
     std::istringstream stream{ value + "*" + value };
     read::bytes::istream reader(stream);
     reader.skip_bytes(size);
-    const auto position = reader.get_position();
+    const auto position = reader.get_read_position();
     BOOST_REQUIRE(!reader.is_exhausted());
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
     reader.skip_bytes(size);
@@ -320,19 +320,19 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_back__limited)
     read::bytes::istream reader(stream);
 
     // Read to position 1.
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 0u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 0u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'a');
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 1u);
 
     // Position is 1, set limit +2 (to absolute 3).
     reader.set_limit(2);
 
     // Read to limit and verify.
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 1u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'b');
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 2u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 2u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'c');
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 3u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 3u);
     BOOST_REQUIRE(reader.is_exhausted());
     BOOST_REQUIRE(reader);
 
@@ -346,11 +346,11 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_back__limited)
     BOOST_REQUIRE(reader);
 
     // Read to limit and verify.
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 1u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'b');
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 2u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 2u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'c');
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 3u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 3u);
     BOOST_REQUIRE(reader.is_exhausted());
     BOOST_REQUIRE(reader);
 
@@ -366,9 +366,9 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_forward_peek__limited)
     read::bytes::istream reader(stream);
 
     // Read to position 1.
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 0u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 0u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'a');
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 1u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 1u);
 
     // Position is 1, set limit +3 (to absolute 4).
     reader.set_limit(3);
@@ -378,9 +378,9 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_forward_peek__limited)
     BOOST_REQUIRE(!reader.is_exhausted());
 
     // Read to limit and verify.
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 3u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 3u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'd');
-    BOOST_REQUIRE_EQUAL(reader.get_position(), 4u);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 4u);
     BOOST_REQUIRE(reader.is_exhausted());
     BOOST_REQUIRE(reader);
 
