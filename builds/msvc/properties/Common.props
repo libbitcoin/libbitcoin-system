@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <PropertyGroup>
     <_PropertySheetDisplayName>Common Settings</_PropertySheetDisplayName>
     <CharacterSet>Unicode</CharacterSet>
@@ -8,7 +8,11 @@
 
   <ImportGroup Label="PropertySheets">
     <Import Project="$(Platform).props" />
-  </ImportGroup>  
+  </ImportGroup>
+
+  <PropertyGroup Label="Configuration">
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
 
   <ItemDefinitionGroup>
     <ClCompile>
@@ -42,5 +46,5 @@
       <ExternalWarningLevel>Level4</ExternalWarningLevel>
       </ClCompile>
   </ItemDefinitionGroup>
-  
+
 </Project>
