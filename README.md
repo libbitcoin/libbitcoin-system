@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/libbitcoin/libbitcoin-system.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin-system)
+[![Continuous Integration Build](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml)
 
-[![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-system/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin-system)
+[![Coverage Status](https://coveralls.io/repos/github/libbitcoin/libbitcoin-system/badge.svg?branch=master)](https://coveralls.io/github/libbitcoin/libbitcoin-system?branch=master)
 
 # Libbitcoin
 
