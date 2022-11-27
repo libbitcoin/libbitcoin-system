@@ -987,11 +987,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_mi
 
 BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_zero__false)
 {
-    const bool bip113 = false;
-    const size_t height = 100;
-    const uint32_t time = 100;
-    const uint32_t past = 0;
-    const uint32_t locktime = 0;
+    constexpr bool bip113 = false;
+    constexpr size_t height = 100;
+    constexpr uint32_t time = 100;
+    constexpr uint32_t past = 0;
+    constexpr uint32_t locktime = 0;
 
     const accessor instance
     {
@@ -1007,11 +1007,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_zero__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_time_greater_threshold__false)
 {
-    const bool bip113 = false;
-    const size_t height = locktime_threshold + 100;
-    const uint32_t time = 100;
-    const uint32_t past = 0;
-    const uint32_t locktime = locktime_threshold + 50;
+    constexpr bool bip113 = false;
+    constexpr size_t height = locktime_threshold + 100;
+    constexpr uint32_t time = 100;
+    constexpr uint32_t past = 0;
+    constexpr uint32_t locktime = locktime_threshold + 50;
 
     const accessor instance
     {
@@ -1026,11 +1026,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_time_greater
 
 BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_height_less_threshold_false)
 {
-    const bool bip113 = false;
-    const size_t height = 100;
-    const uint32_t time = 100;
-    const uint32_t past = 0;
-    const uint32_t locktime = 50;
+    constexpr bool bip113 = false;
+    constexpr size_t height = 100;
+    constexpr uint32_t time = 100;
+    constexpr uint32_t past = 0;
+    constexpr uint32_t locktime = 50;
 
     const accessor instance
     {
@@ -1065,12 +1065,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_input_not_final__true)
 
 BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_inputs_final__false)
 {
-    const bool bip113 = false;
-    const size_t height = 100;
-    const uint32_t time = 100;
-    const uint32_t past = 0;
-    const uint32_t locktime = 101;
-    const uint32_t sequence = max_input_sequence;
+    constexpr bool bip113 = false;
+    constexpr size_t height = 100;
+    constexpr uint32_t time = 100;
+    constexpr uint32_t past = 0;
+    constexpr uint32_t locktime = 101;
+    constexpr uint32_t sequence = max_input_sequence;
 
     const accessor instance
     {
@@ -1226,7 +1226,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__false)
 {
-    const uint32_t version = 1;
+    constexpr uint32_t version = 1;
     const accessor instance
     {
         version,
@@ -1242,7 +1242,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_locked__version_2_empty__false)
 {
-    const uint32_t version = 2;
+    constexpr uint32_t version = 2;
     const accessor instance
     {
         version,
@@ -1258,7 +1258,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_2_empty__false)
 
 BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_one_of_two_locked_locked__false)
 {
-    const uint32_t version = 1;
+    constexpr uint32_t version = 1;
     const accessor instance
     {
         version,
@@ -1275,7 +1275,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_one_of_two_locked_locked_
 
 BOOST_AUTO_TEST_CASE(transaction__is_locked__version_4_one_of_two_locked__true)
 {
-    const uint32_t version = 4;
+    constexpr uint32_t version = 4;
     const accessor instance
     {
         version,
@@ -1356,10 +1356,10 @@ BOOST_AUTO_TEST_CASE(transaction__check_signature__single__uses_one_hash)
     const script subscript(script_data, false);
     BOOST_REQUIRE(parent_tx.is_valid());
 
-    const auto index = 1u;
-    const auto value = 0u;
-    const auto bip66 = true;
-    const auto bip143 = false;
+    constexpr auto index = 1u;
+    constexpr auto value = 0u;
+    constexpr auto bip66 = true;
+    constexpr auto bip143 = false;
     ec_signature signature;
     BOOST_REQUIRE(parse_signature(signature, distinguished, bip66));
     BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, bip143));
@@ -1378,10 +1378,10 @@ BOOST_AUTO_TEST_CASE(transaction__check_signature__normal__success)
     const script subscript(script_data, false);
     BOOST_REQUIRE(parent_tx.is_valid());
 
-    const auto index = 0u;
-    const auto value = 0u;
-    const auto bip66 = true;
-    const auto bip143 = false;
+    constexpr auto index = 0u;
+    constexpr auto value = 0u;
+    constexpr auto bip66 = true;
+    constexpr auto bip143 = false;
     ec_signature signature;
     BOOST_REQUIRE(parse_signature(signature, distinguished, bip66));
     BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, bip143));
@@ -1399,9 +1399,9 @@ BOOST_AUTO_TEST_CASE(transaction__create_endorsement__single_input_single_output
     BOOST_REQUIRE(prevout_script.is_valid());
 
     const ec_secret secret = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
-    const auto index = 0u;
-    const auto value = 0u;
-    const auto bip143 = false;
+    constexpr auto index = 0u;
+    constexpr auto value = 0u;
+    constexpr auto bip143 = false;
     endorsement out;
     BOOST_REQUIRE(test_tx.create_endorsement(out, secret, prevout_script, index, value, coverage::hash_all, script_version::unversioned, bip143));
 
@@ -1419,9 +1419,9 @@ BOOST_AUTO_TEST_CASE(transaction__create_endorsement__single_input_no_output__ex
     BOOST_REQUIRE(prevout_script.is_valid());
 
     const ec_secret secret = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
-    const auto index = 0u;
-    const auto value = 0u;
-    const auto bip143 = false;
+    constexpr auto index = 0u;
+    constexpr auto value = 0u;
+    constexpr auto bip143 = false;
     endorsement out;
     BOOST_REQUIRE(test_tx.create_endorsement(out, secret, prevout_script, index, value, coverage::hash_all, script_version::unversioned, bip143));
 
@@ -1440,9 +1440,9 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     const script prevout_script(std::string{ "dup hash160 [88350574280395ad2c3e2ee20e322073d94e5e40] equalverify checksig" });
     BOOST_REQUIRE(prevout_script.is_valid());
 
-    ////const auto index = 0u;
-    const auto value = 0u;
-    const auto bip143 = false;
+    ////constexpr auto index = 0u;
+    constexpr auto value = 0u;
+    constexpr auto bip143 = false;
     const auto& input = test_tx.inputs_ptr()->begin();
     const auto sighash = test_tx.signature_hash(input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143);
     const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
