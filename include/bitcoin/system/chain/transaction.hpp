@@ -105,6 +105,7 @@ public:
     // Methods.
     // ------------------------------------------------------------------------
 
+    bool is_empty() const NOEXCEPT;
     bool is_dusty(uint64_t minimum_output_value) const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
     chain::points points() const NOEXCEPT;
@@ -164,7 +165,7 @@ protected:
     // Check (context free).
     // ------------------------------------------------------------------------
 
-    bool is_empty() const NOEXCEPT;
+    ////bool is_empty() const NOEXCEPT;
     bool is_null_non_coinbase() const NOEXCEPT;
     bool is_invalid_coinbase_size() const NOEXCEPT;
 
