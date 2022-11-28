@@ -11,15 +11,32 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   
+  <!-- DebugInformationFormat and GenerateDebugInformation were formerly disabled. -->
+  <!-- This is why we were not getting symbols in release builds (update nuget). -->
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalOptions>/Oy- %(AdditionalOptions)</AdditionalOptions>
-      <!--<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>-->
+      <!-- performance -->
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <!-- Breaks boost.test. -->
+      <!--<CallingConvention>FastCall</CallingConvention>-->
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FunctionLevelLinking>true</FunctionLevelLinking>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <MinimalRebuild>false</MinimalRebuild>
+      <OmitFramePointers>true</OmitFramePointers>
       <Optimization>MaxSpeed</Optimization>
+
+      <!-- SSE4/AVX2 (also AVX512) -->
+      <!--TODO: these should be integrated with the HAVE build options.-->
+      <!--<EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>-->
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+  
+      <!-- Other. -->
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <StringPooling>true</StringPooling>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
@@ -27,15 +44,8 @@
     </ResourceCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <!--<GenerateDebugInformation>true</GenerateDebugInformation>-->
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
     </Link> 
   </ItemDefinitionGroup>
-
-  <ItemDefinitionGroup Condition="'$(Processor)' == 'x86'">
-    <ClCompile>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-    </ClCompile>
-  </ItemDefinitionGroup>
-
 </Project>
