@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
+
   <PropertyGroup>
     <_PropertySheetDisplayName>Common Settings</_PropertySheetDisplayName>
     <CharacterSet>Unicode</CharacterSet>
@@ -8,14 +8,43 @@
 
   <ImportGroup Label="PropertySheets">
     <Import Project="$(Platform).props" />
-  </ImportGroup>  
+  </ImportGroup>
+
+  <PropertyGroup Label="Configuration">
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
 
   <ItemDefinitionGroup>
     <ClCompile>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WarningLevel>Level3</WarningLevel>
-    </ClCompile>
+
+      <!-- General -->
+      <!-- WarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
+      <WarningLevel>Level4</WarningLevel>
+      <CompileAsManaged>false</CompileAsManaged>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+
+      <!-- Language -->
+      <!-- /Zc is conformance mode. -->
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <EnableModules>false</EnableModules>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <LanguageStandard Condition="'$(PlatformToolset)' == 'v141'">stdcpp14</LanguageStandard>
+      <LanguageStandard Condition="'$(PlatformToolset)' == 'v142'">stdcpp17</LanguageStandard>
+      <LanguageStandard Condition="'$(PlatformToolset)' == 'v143'">stdcpp20</LanguageStandard>
+      <ConformanceMode Condition="'$(PlatformToolset)' == 'v141'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(PlatformToolset)' == 'v142'">true</ConformanceMode>
+      <ConformanceMode Condition="'$(PlatformToolset)' == 'v143'">true</ConformanceMode>
+
+      <!-- External Includes -->
+      <!-- ExternalWarningLevel:EnableAllWarnings produce warning flood (mostly from STL/Boost). -->
+      <!-- Language extensions are enabled by default (required for STL/Boost). -->
+      <ExternalWarningLevel>Level4</ExternalWarningLevel>
+      </ClCompile>
   </ItemDefinitionGroup>
 
 </Project>
