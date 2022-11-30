@@ -38,7 +38,7 @@ Detailed instructions are provided below.
 
   * [Debian/Ubuntu](#debianubuntu)
   * [Macintosh](#macintosh)
-  * [Install Script Execution](#installscript)
+  * [Install Script Execution](#install-script-execution)
   * [Windows](#windows)
 
 ### Debian/Ubuntu
@@ -148,7 +148,7 @@ $ sudo port install autoconf automake libtool pkgconfig wget
 
 As above, it has been noted that the installation scripts can control the installation of boost from sources. This is desirable due to package system support changes. Installation from Homebrew or MacPorts may be accomplished, however significant parameterization may be required due to version requirements. This is left to the adventerous reader.
 
-### Installation Script Execution
+### Install Script Execution
 
 The [autotools install script](https://github.com/libbitcoin/libbitcoin-system/blob/version3/install.sh) and [cmake install script](https://github.com/libbitcoin/libbitcoin-system/blob/version3/install-cmake.sh) are written so that the manual build steps for each dependency can be inferred by a developer.
 
