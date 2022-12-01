@@ -1,8 +1,8 @@
 [![Build Status](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml/badge.svg?branch=version3)](https://github.com/libbitcoin/libbitcoin-system/actions/workflows/ci.yml)
 
-[![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin/badge.svg?branch=version3)](https://coveralls.io/r/libbitcoin/libbitcoin?branch=version3)
+[![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin-system/badge.svg?branch=version3)](https://coveralls.io/r/libbitcoin/libbitcoin-system?branch=version3)
 
-# Libbitcoin
+# Libbitcoin System
 
 *The Bitcoin Development Library*
 
@@ -14,7 +14,7 @@ All files in this repository fall under the license specified in [COPYING](COPYI
 
 **About Libbitcoin**
 
-The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the foundational [libbitcoin](https://github.com/libbitcoin/libbitcoin-system) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) 1.14+ instructions or [cmake](https://cmake.org) 3.5+ instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified via [github actions](https://github.com/features/actions).
+The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the foundational [libbitcoin-system](https://github.com/libbitcoin/libbitcoin-system) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) 1.14+ instructions or [cmake](https://cmake.org) 3.5+ instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified via [github actions](https://github.com/features/actions).
 
 ## Installation
 
@@ -157,7 +157,7 @@ You can run either install script from any directory on your system. By default 
 The build script clones, builds and installs two unpackaged repositories, namely:
 
 - [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1)
-- [libbitcoin/libbitcoin](https://github.com/libbitcoin/libbitcoin)
+- [libbitcoin/libbitcoin-system](https://github.com/libbitcoin/libbitcoin-system)
 
 The script builds from the head of their `version7` and `version3` branches respectively. The `master` branch is a staging area for changes. The version branches are considered release quality.
 
@@ -219,7 +219,7 @@ Dependencies apart from the libbitcoin libraries are available as [NuGet package
 
 The packages can be viewed using the [NuGet package manager](http://docs.nuget.org/docs/start-here/managing-nuget-packages-using-the-dialog) from the libbitcoin solution. The package manager will prompt for download of any missing packages.
 
-The libbitcoin solution files are configured with references to these packages. The location of the NuGet repository is controlled by the [nuget.config](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/nuget.config) file `repositoryPath` setting **and** the `NuGetPackageRoot` element of **each** [\[project\].props](https://github.com/libbitcoin/libbitcoin/blob/master/builds/msvc/vs2017/libbitcoin/libbitcoin.props) file.
+The libbitcoin solution files are configured with references to these packages. The location of the NuGet repository is controlled by the [nuget.config](https://github.com/libbitcoin/libbitcoin-system/blob/version3/builds/msvc/nuget.config) file `repositoryPath` setting **and** the `NuGetPackageRoot` element of **each** [\[project\].props](https://github.com/libbitcoin/libbitcoin-system/blob/version3/builds/msvc/vs2022/libbitcoin-system/libbitcoin-system.props) file.
 
 #### Build Libbitcoin Projects
 
