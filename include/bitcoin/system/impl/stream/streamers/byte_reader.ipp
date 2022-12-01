@@ -357,6 +357,25 @@ void byte_reader<IStream>::skip_bytes(size_t size) NOEXCEPT
 }
 
 template <typename IStream>
+void byte_reader<IStream>::skip_variable() NOEXCEPT
+{
+    switch (read_byte())
+    {
+        case varint_eight_bytes:
+            do_skip_bytes(8);
+            return;
+        case varint_four_bytes:
+            do_skip_bytes(4);
+            return;
+        case varint_two_bytes:
+            do_skip_bytes(2);
+            return;
+        default:
+            return;
+    }
+}
+
+template <typename IStream>
 void byte_reader<IStream>::rewind_byte() NOEXCEPT
 {
     do_rewind_bytes(one);

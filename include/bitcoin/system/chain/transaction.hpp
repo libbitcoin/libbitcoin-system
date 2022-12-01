@@ -229,12 +229,13 @@ private:
 
     void initialize_hash_cache() const NOEXCEPT;
 
-    // Witness transaction signature caching.
+    // Witness transaction hash caching.
     mutable std::unique_ptr<hash_cache> cache_;
 };
 
 typedef std::vector<transaction> transactions;
 typedef std::vector<transaction::cptr> transaction_ptrs;
+typedef std::shared_ptr<transaction_ptrs> transactions_ptr;
 typedef std::shared_ptr<const transaction_ptrs> transactions_cptr;
 
 DECLARE_JSON_VALUE_CONVERTORS(transaction);

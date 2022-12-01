@@ -94,6 +94,9 @@ public:
     virtual void skip_byte() NOEXCEPT = 0;
     virtual void skip_bytes(size_t size) NOEXCEPT = 0;
 
+    /// Read one byte and advance the iterator accordingly.
+    virtual void skip_variable() NOEXCEPT = 0;
+
     /// Rewind the iterator.
     virtual void rewind_byte() NOEXCEPT = 0;
     virtual void rewind_bytes(size_t size) NOEXCEPT = 0;

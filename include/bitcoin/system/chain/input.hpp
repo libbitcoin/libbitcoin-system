@@ -139,6 +139,7 @@ public:
 
 typedef std::vector<input> inputs;
 typedef std::vector<input::cptr> input_cptrs;
+typedef std::shared_ptr<input_cptrs> inputs_ptr;
 typedef std::shared_ptr<const input_cptrs> inputs_cptr;
 
 DECLARE_JSON_VALUE_CONVERTORS(input);

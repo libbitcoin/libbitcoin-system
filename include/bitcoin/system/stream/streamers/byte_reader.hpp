@@ -123,6 +123,9 @@ public:
     void skip_byte() NOEXCEPT override;
     void skip_bytes(size_t size) NOEXCEPT override;
 
+    /// Read one byte and advance the iterator accordingly.
+    void skip_variable() NOEXCEPT override;
+
     /// Rewind the iterator.
     void rewind_byte() NOEXCEPT override;
     void rewind_bytes(size_t size) NOEXCEPT override;
