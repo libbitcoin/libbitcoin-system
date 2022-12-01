@@ -109,6 +109,7 @@ private:
 
 typedef std::vector<output> outputs;
 typedef std::vector<output::cptr> output_cptrs;
+typedef std::shared_ptr<output_cptrs> outputs_ptr;
 typedef std::shared_ptr<const output_cptrs> outputs_cptr;
 
 DECLARE_JSON_VALUE_CONVERTORS(output);
