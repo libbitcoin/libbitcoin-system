@@ -58,7 +58,7 @@ public:
     uint64_t initial_subsidy_bitcoin;
     uint64_t subsidy_interval_blocks;
 
-    // TODO: make serialiable (see config::chain).
+    // TODO: make serializable (see config::chain).
     chain::block genesis_block;
 
     // Fork settings.
