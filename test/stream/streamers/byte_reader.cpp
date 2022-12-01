@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__invalidate__not_empty__stream_invalid)
 
 // skip
 
-BOOST_AUTO_TEST_CASE(byte_reader__skip__default_empty__invalid)
+BOOST_AUTO_TEST_CASE(byte_reader__skip_byte__default_empty__invalid)
 {
     std::istringstream stream;
     read::bytes::istream reader(stream);
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__skip__default_empty__invalid)
     BOOST_REQUIRE(!reader);
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__skip__default_single__exhausted)
+BOOST_AUTO_TEST_CASE(byte_reader__skip_byte__default_single__exhausted)
 {
     std::istringstream stream{ "*" };
     read::bytes::istream reader(stream);
@@ -168,9 +168,9 @@ BOOST_AUTO_TEST_CASE(byte_reader__skip__default_single__exhausted)
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__skip__end__exhausted)
+BOOST_AUTO_TEST_CASE(byte_reader__skip_bytes__end__exhausted)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     std::istringstream stream{ std::string(size, 0x00) };
     read::bytes::istream reader(stream);
     reader.skip_bytes(size);
@@ -178,13 +178,73 @@ BOOST_AUTO_TEST_CASE(byte_reader__skip__end__exhausted)
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__skip__past_end__invalid)
+BOOST_AUTO_TEST_CASE(byte_reader__skip_bytes__past_end__invalid)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     std::istringstream stream{ std::string(size, 0x00) };
     read::bytes::istream reader(stream);
     reader.skip_bytes(add1(size));
     BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__skip_variable__empty__invalid)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__skip_variable__one_end__exhausted)
+{
+    const std::string value{ 0x00 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__skip_variable__two_end__exhausted)
+{
+    const std::string value{ static_cast<char>(varint_two_bytes), 0x01, 0x02 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__skip_variable__four_end__exhausted)
+{
+    const std::string value{ static_cast<char>(varint_four_bytes), 0x01, 0x02, 0x03, 0x04 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__skip_variable__eight_end__exhausted)
+{
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__skip_variable__eight_from_nine__expected)
+{
+    constexpr auto expected = 42;
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, expected };
+    std::istringstream stream{ value };
+    read::bytes::istream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), expected);
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
 }
 
 // rewind
@@ -204,7 +264,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__rewind__default_single__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__rewind__skip_to_end_rewind_to_middle__expected)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     const std::string value(size, 0x00);
     std::istringstream stream{ value + "*" + value };
     read::bytes::istream reader(stream);
@@ -220,7 +280,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__rewind__skip_to_end_rewind_to_middle__expected
 
 BOOST_AUTO_TEST_CASE(byte_reader__rewind__past_begin__invalid)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     std::istringstream stream{ std::string(size, 0x00) };
     read::bytes::istream reader(stream);
     reader.skip_bytes(size);
@@ -247,7 +307,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__get_read_position__read_and_reset__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__get_read_position__skip_to_end_set_to_middle__expected)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     const std::string value(size, 0x00);
     std::istringstream stream{ value + "*" + value };
     read::bytes::istream reader(stream);
@@ -279,7 +339,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_position__empty__valid)
 
 BOOST_AUTO_TEST_CASE(byte_reader__set_position__past_end__invalid)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     std::istringstream stream{ std::string(size, 0x00) };
     read::bytes::istream reader(stream);
     reader.set_position(sub1(size));
@@ -291,7 +351,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_position__past_end__invalid)
 
 BOOST_AUTO_TEST_CASE(byte_reader__set_position__invalid__clears)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     std::istringstream stream{ std::string(size, 0x42) };
     read::bytes::istream reader(stream);
     reader.set_position(add1(size));
@@ -304,7 +364,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_position__invalid__clears)
 
 BOOST_AUTO_TEST_CASE(byte_reader__set_limit__default__unlimited)
 {
-    const auto size = 42;
+    constexpr auto size = 42;
     std::istringstream stream{ std::string(size, 0x42) };
     read::bytes::istream reader(stream);
     reader.set_limit();
@@ -716,7 +776,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__one_byte__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__two_bytes__expected)
 {
-    const std::string value{ (char)varint_two_bytes, 0x08, 0x07 };
+    const std::string value{ static_cast<char>(varint_two_bytes), 0x08, 0x07 };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x0708u);
@@ -727,7 +787,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__two_bytes__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__four_bytes__expected)
 {
-    const std::string value{ (char)varint_four_bytes, 0x08, 0x07, 0x06, 0x05 };
+    const std::string value{ static_cast<char>(varint_four_bytes), 0x08, 0x07, 0x06, 0x05 };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_size(), 0x05060708u);
@@ -738,7 +798,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__four_bytes__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_variable_size__eight_bytes__expected)
 {
-    const std::string value{ (char)varint_eight_bytes, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_variable(), 0x0102030405060708u);
@@ -769,7 +829,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_error_code__empty__default_invalid)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_error_code__value__expected)
 {
-    const std::string value{ (char)error::double_spend, 0x00, 0x00, 0x00, '*' };
+    const std::string value{ static_cast<char>(error::double_spend), 0x00, 0x00, 0x00, '*' };
     std::stringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_error_code().value(), error::double_spend);
@@ -1146,7 +1206,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string__one_byte__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_string__two_bytes__expected)
 {
-    const std::string value{ (char)varint_two_bytes, 0x03, 0x00, 'a', 'b', 'c' };
+    const std::string value{ static_cast<char>(varint_two_bytes), 0x03, 0x00, 'a', 'b', 'c' };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
@@ -1154,7 +1214,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string__two_bytes__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_string__four_bytes__expected)
 {
-    const std::string value{ (char)varint_four_bytes, 0x03, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
+    const std::string value{ static_cast<char>(varint_four_bytes), 0x03, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");
@@ -1162,7 +1222,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_string__four_bytes__expected)
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_string__eight_bytes__expected)
 {
-    const std::string value{ (char)varint_eight_bytes, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 'a', 'b', 'c' };
     std::istringstream stream{ value };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_string(), "abc");

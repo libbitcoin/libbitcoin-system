@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(bit_flipper__invalidate__not_empty__stream_invalid)
 
 // skip
 
-BOOST_AUTO_TEST_CASE(bit_flipper__skip__default_empty__invalid)
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_bytes__default_empty__invalid)
 {
     std::stringstream stream;
     flip::bits::iostream reader(stream);
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(bit_flipper__skip__default_empty__invalid)
     BOOST_REQUIRE(!reader);
 }
 
-BOOST_AUTO_TEST_CASE(bit_flipper__skip__default_single__exhausted)
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_byte__default_single__exhausted)
 {
     std::stringstream stream{ "*" };
     flip::bits::iostream reader(stream);
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(bit_flipper__skip__default_single__exhausted)
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(bit_flipper__skip__end__exhausted)
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_bytes__end__exhausted)
 {
     const auto size = 42;
     std::stringstream stream{ std::string(size, 0x00) };
@@ -221,13 +221,73 @@ BOOST_AUTO_TEST_CASE(bit_flipper__skip__end__exhausted)
     BOOST_REQUIRE(reader.is_exhausted());
 }
 
-BOOST_AUTO_TEST_CASE(bit_flipper__skip__past_end__invalid)
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_bytes__past_end__invalid)
 {
     const auto size = 42;
     std::stringstream stream{ std::string(size, 0x00) };
     flip::bits::iostream reader(stream);
     reader.skip_bytes(add1(size));
     BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_variable__empty__invalid)
+{
+    std::stringstream stream;
+    flip::bits::iostream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_variable__one_end__exhausted)
+{
+    const std::string value{ 0x00 };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_variable__two_end__exhausted)
+{
+    const std::string value{ static_cast<char>(varint_two_bytes), 0x01, 0x02 };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_variable__four_end__exhausted)
+{
+    const std::string value{ static_cast<char>(varint_four_bytes), 0x01, 0x02, 0x03, 0x04 };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_variable__eight_end__exhausted)
+{
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__skip_variable__eight_from_nine__expected)
+{
+    constexpr auto expected = 42;
+    const std::string value{ static_cast<char>(varint_eight_bytes), 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, expected };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    reader.skip_variable();
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), expected);
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE(reader.is_exhausted());
 }
 
 // rewind
