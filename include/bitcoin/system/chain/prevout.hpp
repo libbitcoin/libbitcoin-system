@@ -34,6 +34,8 @@ class BC_API prevout
 {
 public:
     // prevout::ptr is non-const.
+    // TODO: rename and declare true cptr?
+    ////typedef std::shared_ptr<prevout> ptr;
     typedef std::shared_ptr<prevout> cptr;
 
     /// Use base class constructors, default construction is invalid.

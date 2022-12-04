@@ -66,8 +66,7 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     uint64_t set_size, uint64_t target_false_positive_rate,
     const siphash_key& key) NOEXCEPT
 {
-    // Guard against overflow.
-    if (max_uint64 / set_size < target_false_positive_rate)
+    if (is_multiply_overflow(target_false_positive_rate, set_size))
         return {};
 
     const auto bound = target_false_positive_rate * set_size;
