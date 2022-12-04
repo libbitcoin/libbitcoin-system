@@ -178,6 +178,6 @@ bool match_filter(const block_filter& filter,
     return match_filter(filter, stack);
 }
 
-} // namespace chain
+} // namespace neutrino
 } // namespace system
 } // namespace libbitcoin
