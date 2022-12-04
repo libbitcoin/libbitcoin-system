@@ -53,7 +53,7 @@ public:
 ////    }
 ////}
 
-bool add_metadata(const prevout_data::list& metadata, chain::block& block)
+bool add_metadata(const prevout_data::list& metadata, const chain::block& block)
 {
     auto result = true;
 
@@ -3521,35 +3521,45 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
 
 BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__input_prevout__true)
 {
-    const neutrino::block_filter filter(
+    const neutrino::block_filter filter
+    {
         base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")
+    };
 
-    const wallet::payment_address address(
+    const wallet::payment_address address
+    {
         base16_array("001fa7459a6cfc64bdc178ba7e7a21603bb2568f"),
-        wallet::payment_address::testnet_p2kh);
+        wallet::payment_address::testnet_p2kh
+    };
 
     BOOST_REQUIRE(neutrino::match_filter(filter, address));
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__match_filter_1__unrelated_address__false)
 {
-    const neutrino::block_filter filter(
+    const neutrino::block_filter filter
+    {
         base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")
+    };
 
-    const wallet::payment_address address(
+    const wallet::payment_address address
+    {
         base16_array("001fa005900cf004b00100ba700021000b00500f"),
-        wallet::payment_address::testnet_p2kh);
+        wallet::payment_address::testnet_p2kh
+    };
 
     BOOST_REQUIRE(!neutrino::match_filter(filter, address));
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
 {
-    const neutrino::block_filter filter(
+    const neutrino::block_filter filter
+    {
         base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")
+    };
 
     const wallet::payment_address::list addresses
     {
@@ -3568,9 +3578,11 @@ BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__input_prevout__true)
 
 BOOST_AUTO_TEST_CASE(neutrino__match_filter_2__unrelated_address__false)
 {
-    const neutrino::block_filter filter(
+    const neutrino::block_filter filter
+    {
         base16_hash("00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"),
-        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026"));
+        base16_chunk("0db414c859a07e8205876354a210a75042d0463404913d61a8e068e58a3ae2aa080026")
+    };
 
     const wallet::payment_address::list addresses
     {
