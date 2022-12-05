@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 
+#include "bitcoin/system/crypto/secp256k1.hpp"
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -49,11 +50,19 @@ public:
 
     /// Connect tx.input[#].script to tx.input[#].prevout.script.
     static code connect(const context& state, const transaction& tx,
-        uint32_t index) NOEXCEPT;
+			uint32_t index) NOEXCEPT;
 
-    /// Connect tx.input[*].script to tx.input[*].prevout.script.
     static code connect(const context& state, const transaction& tx,
-        const input_iterator& it) NOEXCEPT;
+			const input_iterator& it) NOEXCEPT;
+
+  /// Connect tx.input[*].script to tx.input[*].prevout.script.
+    static code connect(const context& state, const transaction& tx,
+			const input_iterator& it, const bool sign_mode,
+			endorsements& signatures) NOEXCEPT;
+
+    static code connect_for_signing(const context& state, const transaction& tx,
+				    uint32_t index,
+				    endorsements& signatures) NOEXCEPT;
 
 protected:
     /// Operation disatch.
@@ -146,8 +155,10 @@ protected:
     inline error::op_error_t op_check_multisig() NOEXCEPT;
     inline error::op_error_t op_check_locktime_verify() const NOEXCEPT;
     inline error::op_error_t op_check_sequence_verify() const NOEXCEPT;
-};
 
+private:
+  static void collect_signatures(endorsements& target, const endorsements& signatures);
+};
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin

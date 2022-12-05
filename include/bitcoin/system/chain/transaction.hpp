@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 
+#include "bitcoin/system/crypto/secp256k1.hpp"
+#include <cstdint>
 #include <istream>
 #include <memory>
 #include <vector>
@@ -30,6 +32,7 @@
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -139,6 +142,11 @@ public:
     code check() const NOEXCEPT;
     code accept(const context& state) const NOEXCEPT;
     code connect(const context& state) const NOEXCEPT;
+
+    // Signing (for use in wallets)
+    // ------------------------------------------------------------------------
+    endorsements generate_signatures(const uint8_t input_index, const ec_secret private_key,
+				     const uint8_t flags, const context& state) const;
 
 protected:
     transaction(uint32_t version, const chain::inputs_cptr& inputs,

@@ -369,6 +369,7 @@ bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
 bool parse_signature(ec_signature& out, const data_slice& der_signature,
     bool strict) NOEXCEPT
 {
+  // KP - instead of parsing the signature
     if (der_signature.empty())
         return false;
 

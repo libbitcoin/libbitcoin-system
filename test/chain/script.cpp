@@ -297,6 +297,18 @@ BOOST_AUTO_TEST_CASE(script__from_string__empty__success)
     BOOST_REQUIRE(instance.ops().empty());
 }
 
+BOOST_AUTO_TEST_CASE(script__from_string__p2pkh__success)
+{
+    const script instance("dup hash160 [abe507d92d415f688f3c22ca9689404df66edb5e] checksigverify");
+    BOOST_REQUIRE(instance.is_valid());
+
+    const auto& ops = instance.ops();
+    BOOST_REQUIRE(ops[0] == opcode::dup);
+    BOOST_REQUIRE(ops[1] == opcode::hash160);
+    BOOST_REQUIRE_EQUAL(ops[2].to_string(forks::no_rules), "[abe507d92d415f688f3c22ca9689404df66edb5e]");
+    BOOST_REQUIRE(ops[3] == opcode::checksigverify);
+}
+
 BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
 {
     const script instance(script_2_of_3_multisig);
@@ -644,6 +656,9 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__success)
     constexpr auto value = 100000000u;
     (*tx.inputs_ptr())[index]->prevout.reset(new prevout{ value, { base16_chunk("a9144aba54e2541475f91659ccdbb13ce0b490778c7f87"), false } });
     BOOST_REQUIRE_EQUAL(tx.connect({ forks }, index), error::script_success);
+    // KP
+    // tx.sign() essentially set flag and generate signature.
+    // program should have the flag if they are signing mode or not, but this is passed through from the interpreter construct
 }
 
 BOOST_AUTO_TEST_CASE(script__verify__block_290329_tx__success)

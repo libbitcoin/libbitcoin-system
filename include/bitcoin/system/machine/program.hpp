@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
+#include "bitcoin/system/crypto/secp256k1.hpp"
 #include <unordered_map>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
@@ -46,27 +47,29 @@ public:
 
     /// Input script run (default/empty stack).
     inline program(const chain::transaction& transaction,
-        const input_iterator& input, uint32_t forks) NOEXCEPT;
+        const input_iterator& input, uint32_t forks,
+        const bool sign_mode=false) NOEXCEPT;
 
     /// Legacy p2sh or prevout script run (copied input stack).
     inline program(const program& other,
-        const chain::script::cptr& script) NOEXCEPT;
+		   const chain::script::cptr& script) NOEXCEPT;
 
     /// Legacy p2sh or prevout script run (moved input stack).
-    inline program(program&& other,
-        const chain::script::cptr& script) NOEXCEPT;
+    inline program(program&& other, const chain::script::cptr& script) NOEXCEPT;
 
     /// Witness script run (witness-initialized stack).
     inline program(const chain::transaction& transaction,
-        const input_iterator& input, const chain::script::cptr& script,
-        uint32_t forks, chain::script_version version,
-        const chunk_cptrs_ptr& stack) NOEXCEPT;
+	const input_iterator& input, const chain::script::cptr& script,
+	uint32_t forks, chain::script_version version,
+	const chunk_cptrs_ptr& stack, const bool sign_mode=false) NOEXCEPT;
 
     /// Program result.
     inline bool is_true(bool clean) const NOEXCEPT;
 
     /// Transaction must pop top input stack element (bip16).
     inline const data_chunk& pop() NOEXCEPT;
+
+    inline endorsements generated_signatures() const NOEXCEPT;
 
 protected:
     INLINE static bool equal_chunks(const stack_variant& left,
@@ -208,6 +211,12 @@ private:
 
     // Condition stack optimization.
     size_t negative_condition_count_{};
+
+    // Signing mode
+    const bool sign_mode_;
+    // TODO[KP]: Turn this into a map of old endorsement -> new endorsement.
+    // Q[KP]: Should we introduce as `typedef for std::vector<signature> signatures`
+    endorsements generated_signatures_;
 };
 
 } // namespace machine

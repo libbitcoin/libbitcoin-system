@@ -16,9 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "bitcoin/system/error/error_t.hpp"
+#include "bitcoin/system/error/transaction_error_t.hpp"
 #include <bitcoin/system/chain/transaction.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -1281,6 +1284,26 @@ code transaction::connect(const context& state) const NOEXCEPT
     }
 
     return error::transaction_success;
+}
+
+// Sign
+// ------------------------------------------------------------------------
+
+endorsements transaction::
+generate_signatures(const uint8_t input_index, const ec_secret private_key,
+    const uint8_t flags, const context& state) const
+{
+  /// turn sign_mode on
+  /// call connect
+  /// return the generated signatures returned from connect?
+  std::cerr << "In generate signatures" << std::endl;
+  endorsements signatures;
+  auto code = machine::interpreter<machine::contiguous_stack>::
+    connect_for_signing(state, *this, input_index, signatures);
+  if (code) {
+    return {};
+  }
+  return signatures;
 }
 
 // JSON value convertors.

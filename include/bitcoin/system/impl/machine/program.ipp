@@ -44,8 +44,8 @@ using namespace system::error;
 // This expectation is guaranteed by the retained tx reference.
 template <typename Stack>
 inline program<Stack>::
-program(const chain::transaction& tx, const input_iterator& input,
-     uint32_t forks) NOEXCEPT
+program(const chain::transaction &tx, const input_iterator &input,
+    uint32_t forks, const bool sign_mode) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_((*input)->script_ptr()),
@@ -53,7 +53,9 @@ program(const chain::transaction& tx, const input_iterator& input,
     value_(max_uint64),
     version_(script_version::unversioned),
     witness_(),
-    primary_()
+    primary_(),
+    sign_mode_(sign_mode),
+    generated_signatures_()
 {
 }
 
@@ -63,7 +65,7 @@ program(const chain::transaction& tx, const input_iterator& input,
 // and copied program tether (which is not tx state).
 template <typename Stack>
 inline program<Stack>::
-program(const program& other, const script::cptr& script) NOEXCEPT
+program(const program &other, const script::cptr &script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
@@ -71,14 +73,16 @@ program(const program& other, const script::cptr& script) NOEXCEPT
     value_(other.value_),
     version_(other.version_),
     witness_(),
-    primary_(other.primary_)
+    primary_(other.primary_),
+    sign_mode_(other.sign_mode_),
+    generated_signatures_(other.generated_signatures_)
 {
 }
 
 // Legacy p2sh or prevout script run (moved input stack/tether - use last).
 template <typename Stack>
 inline program<Stack>::
-program(program&& other, const script::cptr& script) NOEXCEPT
+program(program &&other, const script::cptr &script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
@@ -86,7 +90,9 @@ program(program&& other, const script::cptr& script) NOEXCEPT
     value_(other.value_),
     version_(other.version_),
     witness_(),
-    primary_(std::move(other.primary_))
+    primary_(std::move(other.primary_)),
+    sign_mode_(other.sign_mode_),
+    generated_signatures_(other.generated_signatures_)
 {
 }
 
@@ -97,9 +103,9 @@ program(program&& other, const script::cptr& script) NOEXCEPT
 // to witness is explicitly retained to guarantee the lifetime of its elements.
 template <typename Stack>
 inline program<Stack>::
-program(const chain::transaction& tx, const input_iterator& input,
-    const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_cptrs_ptr& witness) NOEXCEPT
+program(const chain::transaction &tx, const input_iterator &input,
+    const script::cptr &script, uint32_t forks, script_version version,
+    const chunk_cptrs_ptr &witness, const bool sign_mode) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_(script),
@@ -107,7 +113,9 @@ program(const chain::transaction& tx, const input_iterator& input,
     value_((*input)->prevout->value()),
     version_(version),
     witness_(witness),
-    primary_(projection<Stack>(*witness))
+    primary_(projection<Stack>(*witness)),
+    sign_mode_(sign_mode),
+    generated_signatures_()
 {
 }
 
@@ -129,6 +137,13 @@ pop() NOEXCEPT
     BC_ASSERT_MSG(!is_stack_empty(), "pop from empty stack");
 
     return *pop_chunk_();
+}
+
+template <typename Stack>
+inline endorsements program<Stack>::
+generated_signatures() const NOEXCEPT
+{
+    return generated_signatures_;
 }
 
 // Non-public.
