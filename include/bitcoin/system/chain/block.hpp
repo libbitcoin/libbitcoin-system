@@ -23,6 +23,7 @@
 #include <vector>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
+#include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -86,6 +87,7 @@ public:
     bool is_valid() const NOEXCEPT;
     const chain::header& header() const NOEXCEPT;
     const chain::header::cptr header_ptr() const NOEXCEPT;
+    const inputs_cptr inputs_ptr() const NOEXCEPT;
     const transactions_cptr& transactions_ptr() const NOEXCEPT;
     hashes transaction_hashes(bool witness) const NOEXCEPT;
 
