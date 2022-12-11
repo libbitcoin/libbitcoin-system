@@ -207,8 +207,25 @@ const chain::header::cptr block::header_ptr() const NOEXCEPT
     return header_;
 }
 
+// Roll up inputs for concurrent prevout processing.
+const inputs_cptr block::inputs_ptr() const NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    const auto inputs = std::make_shared<input_cptrs>();
+    BC_POP_WARNING()
+
+    const auto append_inputs = [&inputs](const transaction::cptr& tx)
+    {
+        const auto& tx_ins = *tx->inputs_ptr();
+        inputs->insert(inputs->end(), tx_ins.begin(), tx_ins.end());
+    };
+
+    std::for_each(txs_->begin(), txs_->end(), append_inputs);
+    return inputs;
+}
+
 // vector<transaction> is not exposed (because we don't have it).
-// This would reqiure a from_shared(txs_) conversion (expensive).
+// This would require a from_shared(txs_) conversion (expensive).
 const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 {
     return txs_;
