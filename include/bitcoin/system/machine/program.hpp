@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
 #include "bitcoin/system/crypto/secp256k1.hpp"
+#include "bitcoin/system/data/data_chunk.hpp"
 #include <unordered_map>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
@@ -32,6 +33,8 @@
 namespace libbitcoin {
 namespace system {
 namespace machine {
+
+typedef std::vector<der_signature> der_signatures;
 
 /// A set of three stacks (primary, alternate, conditional) for script state.
 /// Primary stack is optimized by peekable, swappable, and eraseable elements.
@@ -69,7 +72,8 @@ public:
     /// Transaction must pop top input stack element (bip16).
     inline const data_chunk& pop() NOEXCEPT;
 
-    inline endorsements generated_signatures() const NOEXCEPT;
+    inline der_signatures& generated_signatures() NOEXCEPT;
+    inline data_stack& signing_keys() NOEXCEPT;
 
 protected:
     INLINE static bool equal_chunks(const stack_variant& left,
@@ -162,13 +166,19 @@ protected:
         const chunk_xptrs& endorsements) const NOEXCEPT;
 
     /// Prepare signature (enables generalized signing).
-    inline bool prepare(ec_signature& signature, const data_chunk& key,
+    inline bool prepare(ec_signature& signature, const ec_secret& key,
         hash_digest& hash, const chunk_xptr& endorsement) const NOEXCEPT;
 
     /// Prepare signature, with caching for multisig with same flags.
     inline bool prepare(ec_signature& signature, const data_chunk& key,
         hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
         const chain::script& sub) const NOEXCEPT;
+
+    // Signing mode
+    const bool sign_mode_;
+
+    der_signatures generated_signatures_;
+    data_stack signing_keys_;
 
 private:
     using primary_stack = stack<Stack>;
@@ -211,12 +221,6 @@ private:
 
     // Condition stack optimization.
     size_t negative_condition_count_{};
-
-    // Signing mode
-    const bool sign_mode_;
-    // TODO[KP]: Turn this into a map of old endorsement -> new endorsement.
-    // Q[KP]: Should we introduce as `typedef for std::vector<signature> signatures`
-    endorsements generated_signatures_;
 };
 
 } // namespace machine

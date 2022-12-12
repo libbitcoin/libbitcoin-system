@@ -22,9 +22,11 @@
 #include "bitcoin/system/chain/prevout.hpp"
 #include "bitcoin/system/chain/witness.hpp"
 #include "bitcoin/system/crypto/secp256k1.hpp"
+#include "bitcoin/system/error/op_error_t.hpp"
 #include "bitcoin/system/machine/interpreter.hpp"
 #include "bitcoin/system/machine/program.hpp"
 #include "bitcoin/system/radix/base_16.hpp"
+#include "bitcoin/system/radix/base_32.hpp"
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/operation.hpp>
@@ -1033,37 +1035,48 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_check_sig_verify() NOEXCEPT
 {
-  std::cerr << "In op check sig verify" << std::endl;
-  if (state::stack_size() < 2)
+    ec_secret secret_key;
+
+    std::cerr << "In op check sig verify" << std::endl;
+    if (state::stack_size() < 2)
         return error::op_check_sig_verify1;
 
-    // KP - pop - will be a private key
     const auto key = state::pop_chunk_();
-    std::cerr << "Have private key as " << key << std::endl;
 
-    // KP - skip
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    // KP - sighash byte and zero bytes
     const auto endorsement = state::pop_chunk_();
+    std::cerr << "Have private key and sighash flash as " << endorsement
+              << std::endl;
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
         return error::op_check_sig_verify3;
 
+    if (state::sign_mode_) {
+        std::copy_n(endorsement->begin(), 32, secret_key.begin());
+        std::cerr << "Secret key from signature chunk "
+                  << encode_base16(secret_key) << std::endl;
+    }
+
     hash_digest hash;
     ec_signature sig;
-
-    // KP - prepare takes in bogus sig and private key, and passes out
-    // sig and public key
 
     // Parse endorsement into DER signature into an EC signature.
     // Also generates signature hash from endorsement sighash flags.
     // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
-    if (!state::prepare(sig, *key, hash, endorsement))
+    if (!state::prepare(sig, secret_key, hash, endorsement)) {
         return error::op_check_sig_verify_parse;
+    }
 
+    if (state::sign_mode_){
+        der_signature encoded_sig;
+        encode_signature(encoded_sig, sig);
+        state::generated_signatures_.emplace_back(encoded_sig);
+    }
+
+    std::cerr << "Parsed signature: " << encode_base16(sig) << std::endl;
     // TODO: for signing mode - make key mutable and return above.
     return system::verify_signature(*key, hash, sig) ?
         error::op_success : error::op_check_sig_verify4;
@@ -1646,7 +1659,8 @@ connect(const context& state, const transaction& tx,
 
     // Evaluate output script using stack copied from input script.
     interpreter prevout_program(input_program, input.prevout->script_ptr());
-    std::cerr << "Run prevout program: " << input.prevout->script_ptr()->to_string((state.forks))<< std::endl;
+    std::cerr << "Run prevout program: " << input.prevout->script_ptr()->
+        to_string((state.forks))<< std::endl;
     if ((ec = prevout_program.run()))
         return ec;
 
@@ -1675,9 +1689,11 @@ connect(const context& state, const transaction& tx,
 
                 // A defined version indicates bip141 is active (not bip143).
                 interpreter witness_program(tx, it, script, state.forks,
-					    input.prevout->script().version(), witness_stack, sign_mode);
+                    input.prevout->script().version(),
+                    witness_stack, sign_mode);
 
-		std::cerr << "Run witness program: " << script->to_string((state.forks))<< std::endl;
+		std::cerr << "Run witness program: " <<
+                    script->to_string((state.forks))<< std::endl;
                 if ((ec = witness_program.run()))
                     return ec;
 
@@ -1685,7 +1701,8 @@ connect(const context& state, const transaction& tx,
                 return witness_program.is_true(true) ? error::script_success :
                     error::stack_false;
 
-		interpreter::collect_signatures(signatures, witness_program.generated_signatures());
+		interpreter::collect_signatures(signatures,
+                    witness_program.generated_signatures());
             }
 
             // These versions are reserved for future extensions (bip141).
@@ -1710,14 +1727,16 @@ connect(const context& state, const transaction& tx,
 
         // Evaluate embedded script using stack moved from input script.
         interpreter embeded_program(std::move(input_program), embeded_script);
-	std::cerr << "Run embedded program: " << embeded_script->to_string((state.forks))<< std::endl;
+	std::cerr << "Run embedded program: " <<
+            embeded_script->to_string((state.forks))<< std::endl;
         if ((ec = embeded_program.run()))
             return ec;
 
         if (!embeded_program.is_true(false))
             return error::stack_false;
 
-	interpreter::collect_signatures(signatures, embeded_program.generated_signatures());
+	interpreter::collect_signatures(signatures,
+            embeded_program.generated_signatures());
 
 	// Triggered by embedded push of version and witness program (bip141).
         if ((witnessed = embeded_script->is_pay_to_witness(state.forks)))
@@ -1739,13 +1758,14 @@ connect(const context& state, const transaction& tx,
 
                     // A defined version indicates bip141 is active (not bip143).
                     interpreter witness_program(tx, it, script, state.forks,
-						embeded_script->version(), witness_stack, sign_mode);
+                        embeded_script->version(), witness_stack, sign_mode);
 
 		    std::cerr << "Run embedded witness program " << std::endl;
                     if ((ec = witness_program.run()))
                         return ec;
 
-		    interpreter::collect_signatures(signatures, witness_program.generated_signatures());
+		    interpreter::collect_signatures(signatures,
+                        witness_program.generated_signatures());
 
                     // A v0 script must succeed with a clean true stack (bip141).
                     return witness_program.is_true(true) ?
@@ -1789,9 +1809,23 @@ void interpreter<Stack>::
 interpreter::collect_signatures(endorsements& target, const endorsements& signatures_to_collect)
 {
   for (auto signature : signatures_to_collect){
-    std::cerr << "In collect signatures with to collect as " << encode_base16(signature) << std::endl;
+    std::cerr << "In collect signatures with to collect as " <<
+        encode_base16(signature) << std::endl;
   }
-  target.insert(signatures_to_collect.end(), signatures_to_collect.begin(), signatures_to_collect.end());
+  target.insert(target.end(), signatures_to_collect.begin(),
+      signatures_to_collect.end());
+}
+
+template <typename Stack>
+void interpreter<Stack>::
+interpreter::collect_signing_keys(data_stack& target, const data_stack& keys_to_collect)
+{
+  for (auto key : keys_to_collect){
+    std::cerr << "In collect key with to collect as " <<
+        encode_base16(key) << std::endl;
+  }
+  target.insert(target.end(), keys_to_collect.begin(),
+      keys_to_collect.end());
 }
 
 } // namespace machine

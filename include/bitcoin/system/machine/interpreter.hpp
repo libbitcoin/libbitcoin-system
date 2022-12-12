@@ -157,7 +157,8 @@ protected:
     inline error::op_error_t op_check_sequence_verify() const NOEXCEPT;
 
 private:
-  static void collect_signatures(endorsements& target, const endorsements& signatures);
+  static void collect_signatures(endorsements& target, const endorsements& signatures_to_collect);
+  static void collect_signing_keys(data_stack& target, const data_stack& keys_to_collect);
 };
 } // namespace machine
 } // namespace system

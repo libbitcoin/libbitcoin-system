@@ -19,6 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 
+#include "bitcoin/system/crypto/secp256k1.hpp"
+#include "bitcoin/system/data/data_array.hpp"
+#include "bitcoin/system/data/data_chunk.hpp"
+#include "bitcoin/system/radix/base_16.hpp"
 #include <iterator>
 #include <utility>
 #include <variant>
@@ -55,7 +59,8 @@ program(const chain::transaction &tx, const input_iterator &input,
     witness_(),
     primary_(),
     sign_mode_(sign_mode),
-    generated_signatures_()
+    generated_signatures_(),
+    signing_keys_()
 {
 }
 
@@ -75,7 +80,8 @@ program(const program &other, const script::cptr &script) NOEXCEPT
     witness_(),
     primary_(other.primary_),
     sign_mode_(other.sign_mode_),
-    generated_signatures_(other.generated_signatures_)
+    generated_signatures_(other.generated_signatures_),
+    signing_keys_(other.signing_keys_)
 {
 }
 
@@ -92,7 +98,8 @@ program(program &&other, const script::cptr &script) NOEXCEPT
     witness_(),
     primary_(std::move(other.primary_)),
     sign_mode_(other.sign_mode_),
-    generated_signatures_(other.generated_signatures_)
+    generated_signatures_(other.generated_signatures_),
+    signing_keys_(other.signing_keys_)
 {
 }
 
@@ -115,7 +122,8 @@ program(const chain::transaction &tx, const input_iterator &input,
     witness_(witness),
     primary_(projection<Stack>(*witness)),
     sign_mode_(sign_mode),
-    generated_signatures_()
+    generated_signatures_(),
+    signing_keys_()
 {
 }
 
@@ -140,10 +148,17 @@ pop() NOEXCEPT
 }
 
 template <typename Stack>
-inline endorsements program<Stack>::
-generated_signatures() const NOEXCEPT
+inline der_signatures& program<Stack>::
+generated_signatures() NOEXCEPT
 {
     return generated_signatures_;
+}
+
+template <typename Stack>
+inline data_stack& program<Stack>::
+signing_keys() NOEXCEPT
+{
+    return signing_keys_;
 }
 
 // Non-public.
@@ -776,7 +791,7 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 // TODO: use sighash and key to generate signature in sign mode.
 template <typename Stack>
 inline bool program<Stack>::
-prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
+prepare(ec_signature& signature, const ec_secret& secret_key, hash_digest& hash,
     const chunk_xptr& endorsement) const NOEXCEPT
 {
     uint8_t flags;
@@ -786,8 +801,18 @@ prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
     if (!parse_endorsement(flags, distinguished, *endorsement))
         return false;
 
+    std::cerr << "Parsed endorsement: " << encode_base16(distinguished) << std::endl;
     // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(*subscript({ endorsement }), flags);
+
+    std::cerr << "Signature hash: " << encode_base16(hash) << std::endl;
+
+    if(sign_mode_){
+        if (system::sign(signature, secret_key, hash)) {
+            std::cerr << "Signature: " << encode_base16(signature) << std::endl;
+            return true;
+        }
+    }
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(forks::bip66_rule);
