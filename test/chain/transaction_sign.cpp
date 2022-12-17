@@ -98,6 +98,10 @@ std::string test_name(const script_test& test)
 // The following tests are derived from the test/chain/transaction.cpp
 // create_endorsement tests
 
+// Seed: d31e623e6dff00d5c0fd3aff010b80cc63787a63cbd564cd
+// key: b1a44402170506553b367a6496cc7650ca1849a46eb4e01f5e4f5b72ef5e17de
+// public_key: 02b59709bc5c29246bd94d48e90dde62442e97d1ccd9a2315b6303c82b07aa4412
+// public_key hash: ca041a6aed6e8ab099cd75d65f8ef99e669a2d95
 BOOST_AUTO_TEST_CASE(transaction__generate_signatures__single_input_single_output__expected)
 {
     const ec_secret secret_key = base16_array("b1a44402170506553b367a6496cc7650ca1849a46eb4e01f5e4f5b72ef5e17de");
@@ -159,7 +163,7 @@ BOOST_AUTO_TEST_CASE(transaction__generate_signatures__single_input_single_outpu
     const auto prevout_script = previous_transaction.outputs_ptr()->front()->script();
 
     spending_transaction.inputs_ptr()->front()->prevout.reset(new prevout{0u, prevout_script});
-    auto signatures = spending_transaction.generate_signatures(0u, secret_key, coverage::hash_all, {forks::no_rules,0});
+    auto signatures = spending_transaction.generate_signatures(0u, {forks::no_rules,0});
 
     BOOST_REQUIRE_EQUAL(encode_base16(signatures.front()), "3044022052be662338ea349319271ff945f09b006a25e71aa6bdee421ef064d6a701af8102205a07aead4ab5b99f09ac69fd4352cbfeb52105b2dfc9f333a407925de7fdefb3");
 
@@ -173,7 +177,7 @@ BOOST_AUTO_TEST_CASE(transaction__generate_signatures__single_input_single_outpu
             {
                 // coinbase
                 chain::point{ previous_transaction.hash(false), 0u },
-                // The signature is the secret key with sighash flasg appended at the end [<secret_key><sighash_flags>]
+                // The signature is the secret key with sighash flags appended at the end [<secret_key><sighash_flags>]
                 chain::script{"[3044022052be662338ea349319271ff945f09b006a25e71aa6bdee421ef064d6a701af8102205a07aead4ab5b99f09ac69fd4352cbfeb52105b2dfc9f333a407925de7fdefb300] [02b59709bc5c29246bd94d48e90dde62442e97d1ccd9a2315b6303c82b07aa4412]"},
                 1
             },

@@ -1290,8 +1290,7 @@ code transaction::connect(const context& state) const NOEXCEPT
 // ------------------------------------------------------------------------
 
 endorsements transaction::
-generate_signatures(const uint8_t input_index, const ec_secret private_key,
-    const uint8_t flags, const context& state) const
+generate_signatures(const uint8_t input_index, const context& state) const
 {
   /// turn sign_mode on
   /// call connect
@@ -1300,9 +1299,7 @@ generate_signatures(const uint8_t input_index, const ec_secret private_key,
   endorsements signatures;
   auto code = machine::interpreter<machine::contiguous_stack>::
     connect_for_signing(state, *this, input_index, signatures);
-  if (code) {
-    return {};
-  }
+  std::cerr << "error connecting for signatures " << code << std::endl;
   return signatures;
 }
 
