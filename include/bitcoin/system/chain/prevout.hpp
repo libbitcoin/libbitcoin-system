@@ -63,7 +63,7 @@ public:
     // An unspent collision is immature (unspendable) and spent is mature.
     //*************************************************************************
     // For non-coinbase inputs this indicates spent at height.
-    bool spent = true;
+    bool spent = false;
 
     // The output is of a coinbase transaction.
     bool coinbase = false;

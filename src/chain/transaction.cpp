@@ -1069,7 +1069,7 @@ bool transaction::is_overspent() const NOEXCEPT
 }
 
 //*****************************************************************************
-// CONSENSUS: Genesis block is treated as forever immature (satoshi bug).
+// CONSENSUS: Genesis coinbase is treated as forever immature (satoshi bug).
 //*****************************************************************************
 bool transaction::is_immature(size_t height) const NOEXCEPT
 {
