@@ -834,6 +834,13 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
     // Obtain the signature hash from subscript and sighash flags.
     signature_hash(cache, sub, flags);
 
+    if (sign_mode_) {
+        ec_secret secret_key;
+        std::copy_n(endorsement.begin(), 32, secret_key.begin());
+        if (system::sign(signature, secret_key, cache[flags])) {
+            return true;
+        }
+    }
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(forks::bip66_rule);
     return parse_signature(signature, distinguished, bip66);

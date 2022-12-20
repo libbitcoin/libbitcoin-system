@@ -197,4 +197,129 @@ BOOST_AUTO_TEST_CASE(transaction__generate_signatures__single_input_single_outpu
     BOOST_REQUIRE_EQUAL(transaction_with_signature.connect({forks::no_rules, 0}), error::transaction_success);
 }
 
+// Seed: dc8a55d61556ceb2d543303a2fd777e2071acdd8ecd7d519
+// key: c9da85e0d0e1a1d257276a0aa66e0d7dc2a39b81d54f1c61b05bf583331b94f3
+// public_key: 03074b1cf714f40b9efb1d4f94b9a89bb59ff41295b24e98da60975da53efe9e8f
+// public_key hash: b01bcce4fae20a5e15ee98bde467646d9eb5b982
+
+// Seed: c0ed221ac47c45b8160997af36ea50ac4f91a594dc3ef470
+// key: 7fbda819a08ad75598ed8e0fc2922067b021cb303ada3fb39a30ceeb43637ef5
+// public_key: 036409aef83435a39e1b450a3ceb5a985bd34b4326503da0773f083c60ed5380f0
+// public_key hash: d605bdfe586866d57d9e0c881bea1a1dfba21f9c
+
+// Seed: 857eeac2e542fda11292d35bbe7bb210cfba689b0da074fc
+// key: 460fecc346a20b389a256d10755a405a376932cccfd1ee68336168de54977feb
+// public_key: 0246831318859a2b1b1e82d73c913aba6827825777391211dced5dad6213e6bc67
+// public_key hash: 214d1b4f6c6d6670b570fa0e7b56c21b272fc440
+
+
+BOOST_AUTO_TEST_CASE(transaction__generate_signatures__multi_sig__expected)
+{
+    const secret_list secret_keys = {
+        base16_array("c9da85e0d0e1a1d257276a0aa66e0d7dc2a39b81d54f1c61b05bf583331b94f3"),
+        base16_array("7fbda819a08ad75598ed8e0fc2922067b021cb303ada3fb39a30ceeb43637ef5"),
+        base16_array("460fecc346a20b389a256d10755a405a376932cccfd1ee68336168de54977feb"),
+    };
+    const compressed_list public_keys = {
+        base16_array("03074b1cf714f40b9efb1d4f94b9a89bb59ff41295b24e98da60975da53efe9e8f"),
+        base16_array("036409aef83435a39e1b450a3ceb5a985bd34b4326503da0773f083c60ed5380f0"),
+        base16_array("0246831318859a2b1b1e82d73c913aba6827825777391211dced5dad6213e6bc67"),
+    };
+    const chain::transaction previous_transaction
+    {
+        1,
+        chain::inputs
+        {
+            chain::input
+            {
+                
+                // coinbase
+                chain::point{ null_hash, point::null_index },
+                chain::script{},
+                1
+            },
+        },
+        chain::outputs
+        {
+            chain::output
+            {
+                100,
+                chain::script{"3 [03074b1cf714f40b9efb1d4f94b9a89bb59ff41295b24e98da60975da53efe9e8f] [036409aef83435a39e1b450a3ceb5a985bd34b4326503da0773f083c60ed5380f0] [0246831318859a2b1b1e82d73c913aba6827825777391211dced5dad6213e6bc67] 3 checkmultisig"}
+            },
+        },
+        144
+    };
+
+    const chain::transaction spending_transaction
+    {
+        1,
+        chain::inputs
+        {
+            chain::input
+            {
+                // coinbase
+                chain::point{ previous_transaction.hash(false), 0u },
+                // The signature is the secret key with sighash appended at the end [<secret_key><sighash_flags>]
+                chain::script{"0 [c9da85e0d0e1a1d257276a0aa66e0d7dc2a39b81d54f1c61b05bf583331b94f300] [7fbda819a08ad75598ed8e0fc2922067b021cb303ada3fb39a30ceeb43637ef500] [460fecc346a20b389a256d10755a405a376932cccfd1ee68336168de54977feb00]"},
+                1
+            },
+        },
+        chain::outputs
+        {
+            chain::output
+            {
+                90, // leave 10 as fee, spend back to d01 key hash
+                chain::script{"dup hash160 [d01453c0b2e4abaa6589fd156da42e875c413539] equalverify checksig"}
+            },
+        },
+        144
+    };
+    
+    
+    BOOST_REQUIRE(previous_transaction.is_valid());
+    BOOST_REQUIRE(spending_transaction.is_valid());
+
+    const auto prevout_script = previous_transaction.outputs_ptr()->front()->script();
+
+    spending_transaction.inputs_ptr()->front()->prevout.reset(new prevout{0u, prevout_script});
+    auto signatures = spending_transaction.generate_signatures(0u, {forks::no_rules,0});
+
+    std::cerr << signatures.size() << std::endl;
+    for (auto sig : signatures) {
+        std::cerr << "sig: " << sig << std::endl;
+    }
+    BOOST_REQUIRE_EQUAL(encode_base16(signatures.at(0)), "3044022061ccdc51a4f1b7bd6e1d89b945336bd18aad0bce3f2e9657826487569b64d96502201a3d0e8e2bc70ce0fcd8358d177ec6d710b0a0ddd6c9586729a00aab5fe49ede");
+    BOOST_REQUIRE_EQUAL(encode_base16(signatures.at(1)), "3044022010a3645d88dfa9d79e7ec90891fd306a082a855880a9fff5c47235eb4abb7c260220610d09672aead8e79e64da2c841b0a0f3579866aa73a2fc24e2d6935b798d1ea");
+    BOOST_REQUIRE_EQUAL(encode_base16(signatures.at(2)), "3045022100c0675c34df1f678892d4babc44e5cd38bc6dd80e497a5860a276cd44961845a00220035369825776a15f81c2c163aa09dad00d1e0ba06a59e1868badac424f06ea4e");
+    
+    // Now use the signature generated and verify a transaction with the signature
+    const chain::transaction transaction_with_signature
+    {
+        1,
+        chain::inputs
+        {
+            chain::input
+            {
+                // coinbase
+                chain::point{ previous_transaction.hash(false), 0u },
+                // The signature is the secret key with sighash flasg appended at the end [<secret_key><sighash_flags>]
+                chain::script{"0 [3045022100c0675c34df1f678892d4babc44e5cd38bc6dd80e497a5860a276cd44961845a00220035369825776a15f81c2c163aa09dad00d1e0ba06a59e1868badac424f06ea4e00] [3044022010a3645d88dfa9d79e7ec90891fd306a082a855880a9fff5c47235eb4abb7c260220610d09672aead8e79e64da2c841b0a0f3579866aa73a2fc24e2d6935b798d1ea00] [3044022061ccdc51a4f1b7bd6e1d89b945336bd18aad0bce3f2e9657826487569b64d96502201a3d0e8e2bc70ce0fcd8358d177ec6d710b0a0ddd6c9586729a00aab5fe49ede00]"},
+                1
+            },
+        },
+        chain::outputs
+        {
+            chain::output
+            {
+                90, // leave 10 as fee, spend back to d01 key hash
+                chain::script{"dup hash160 [d01453c0b2e4abaa6589fd156da42e875c413539] equalverify checksig"}
+            },
+        },
+        144
+    };
+
+    transaction_with_signature.inputs_ptr()->front()->prevout.reset(new prevout{0u, prevout_script});
+    BOOST_REQUIRE_EQUAL(transaction_with_signature.connect({forks::no_rules, 0}), error::transaction_success);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

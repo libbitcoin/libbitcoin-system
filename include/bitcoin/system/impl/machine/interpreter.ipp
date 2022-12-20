@@ -1168,8 +1168,14 @@ op_check_multisig_verify() NOEXCEPT
             BC_POP_WARNING()
 
             // TODO: for signing mode - make key mutable and return above.
-            if (system::verify_signature(*key, hash, sig))
+            if (system::verify_signature(*key, hash, sig)){
+                if (state::sign_mode_){
+                    der_signature encoded_sig;
+                    encode_signature(encoded_sig, sig);
+                    state::generated_signatures_.emplace_back(encoded_sig);
+                }
                 ++endorsement;
+            }
         }
     }
 
