@@ -625,7 +625,6 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_equal_verify() NOEXCEPT
 {
-
     if (state::stack_size() < 2)
         return error::op_equal_verify1;
 
@@ -1016,7 +1015,6 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_check_sig() NOEXCEPT
 {
-    std::cerr << "In op check sig" << std::endl;
     const auto verify = op_check_sig_verify();
     const auto bip66 = state::is_enabled(forks::bip66_rule);
 
@@ -1037,7 +1035,6 @@ op_check_sig_verify() NOEXCEPT
 {
     ec_secret secret_key;
 
-    std::cerr << "In op check sig verify" << std::endl;
     if (state::stack_size() < 2)
         return error::op_check_sig_verify1;
 
@@ -1047,8 +1044,6 @@ op_check_sig_verify() NOEXCEPT
         return error::op_check_sig_verify2;
 
     const auto endorsement = state::pop_chunk_();
-    std::cerr << "Have private key and sighash flash as " << endorsement
-              << std::endl;
 
     // error::op_check_sig_verify_parse causes op_check_sig fail.
     if (endorsement->empty())
@@ -1056,8 +1051,6 @@ op_check_sig_verify() NOEXCEPT
 
     if (state::sign_mode_) {
         std::copy_n(endorsement->begin(), 32, secret_key.begin());
-        std::cerr << "Secret key from signature chunk "
-                  << encode_base16(secret_key) << std::endl;
     }
 
     hash_digest hash;
@@ -1076,7 +1069,6 @@ op_check_sig_verify() NOEXCEPT
         state::generated_signatures_.emplace_back(encoded_sig);
     }
 
-    std::cerr << "Parsed signature: " << encode_base16(sig) << std::endl;
     // TODO: for signing mode - make key mutable and return above.
     return system::verify_signature(*key, hash, sig) ?
         error::op_success : error::op_check_sig_verify4;
@@ -1578,19 +1570,16 @@ run() NOEXCEPT
     error::op_error_t operation_ec;
     error::script_error_t script_ec;
 
-    std::cerr << "In run..." << std::endl;
     // Enforce script size limit (10,000) [0.3.7+].
     // Enforce initial primary stack size limit (520) [bip141].
     // Enforce first op not reserved (not skippable by condition).
     if ((script_ec = state::validate()))
         return script_ec;
 
-    std::cerr << "Script is valid..." << std::endl;
     for (auto it = state::begin(); it != state::end(); ++it)
     {
         // An iterator is required only for run_op:op_codeseparator.
         const auto& op = *it;
-	std::cerr << "Evaluating ..." << op.to_string({}) << std::endl;
 
         // Enforce unconditionally invalid opcodes ("disabled").
         if (op.is_invalid())
@@ -1653,27 +1642,27 @@ connect(const context& state, const transaction& tx,
     const auto& input = **it;
     bool witnessed;
     code ec;
-    std::cerr << "In connect with sign mode as " << sign_mode << std::endl;
 
     // Evaluate input script.
     interpreter input_program(tx, it, state.forks, sign_mode);
-    std::cerr << "Run input program: " << input.script_ptr()->to_string((state.forks))<< std::endl;
     if ((ec = input_program.run()))
         return ec;
 
-    interpreter::collect_signatures(signatures, input_program.generated_signatures());
+    if (sign_mode){
+        interpreter::collect_signatures(signatures, input_program.generated_signatures());
+    }
 
     // Evaluate output script using stack copied from input script.
     interpreter prevout_program(input_program, input.prevout->script_ptr());
-    std::cerr << "Run prevout program: " << input.prevout->script_ptr()->
-        to_string((state.forks))<< std::endl;
     if ((ec = prevout_program.run()))
         return ec;
 
     if (!prevout_program.is_true(false))
         return error::stack_false;
 
-    interpreter::collect_signatures(signatures, prevout_program.generated_signatures());
+    if (sign_mode){
+        interpreter::collect_signatures(signatures, prevout_program.generated_signatures());
+    }
 
     // Triggered by output script push of version and witness program (bip141).
     if ((witnessed = input.prevout->script().is_pay_to_witness(state.forks)))
@@ -1698,17 +1687,17 @@ connect(const context& state, const transaction& tx,
                     input.prevout->script().version(),
                     witness_stack, sign_mode);
 
-		std::cerr << "Run witness program: " <<
-                    script->to_string((state.forks))<< std::endl;
                 if ((ec = witness_program.run()))
                     return ec;
+
+                if (sign_mode){
+                    interpreter::collect_signatures(signatures,
+                        witness_program.generated_signatures());
+                }
 
                 // A v0 script must succeed with a clean true stack (bip141).
                 return witness_program.is_true(true) ? error::script_success :
                     error::stack_false;
-
-		interpreter::collect_signatures(signatures,
-                    witness_program.generated_signatures());
             }
 
             // These versions are reserved for future extensions (bip141).
@@ -1733,16 +1722,16 @@ connect(const context& state, const transaction& tx,
 
         // Evaluate embedded script using stack moved from input script.
         interpreter embeded_program(std::move(input_program), embeded_script);
-	std::cerr << "Run embedded program: " <<
-            embeded_script->to_string((state.forks))<< std::endl;
         if ((ec = embeded_program.run()))
             return ec;
 
         if (!embeded_program.is_true(false))
             return error::stack_false;
 
-	interpreter::collect_signatures(signatures,
-            embeded_program.generated_signatures());
+        if (sign_mode){
+            interpreter::collect_signatures(signatures,
+                embeded_program.generated_signatures());
+        }
 
 	// Triggered by embedded push of version and witness program (bip141).
         if ((witnessed = embeded_script->is_pay_to_witness(state.forks)))
@@ -1766,12 +1755,13 @@ connect(const context& state, const transaction& tx,
                     interpreter witness_program(tx, it, script, state.forks,
                         embeded_script->version(), witness_stack, sign_mode);
 
-		    std::cerr << "Run embedded witness program " << std::endl;
                     if ((ec = witness_program.run()))
                         return ec;
 
-		    interpreter::collect_signatures(signatures,
-                        witness_program.generated_signatures());
+                    if (sign_mode){
+                        interpreter::collect_signatures(signatures,
+                            witness_program.generated_signatures());
+                    }
 
                     // A v0 script must succeed with a clean true stack (bip141).
                     return witness_program.is_true(true) ?
@@ -1801,11 +1791,9 @@ code interpreter<Stack>::
 connect_for_signing(const context& state, const transaction& tx, uint32_t index,
     endorsements& signatures) NOEXCEPT
 {
-  std::cerr << "In connect for signing" << std::endl;
   if (index >= tx.inputs_ptr()->size())
         return error::inputs_overflow;
 
-  std::cerr << "Calling connect with sign mode..." << std::endl;
   return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index), true, signatures);
 }
 
@@ -1814,10 +1802,6 @@ template <typename Stack>
 void interpreter<Stack>::
 interpreter::collect_signatures(endorsements& target, const endorsements& signatures_to_collect)
 {
-  for (auto signature : signatures_to_collect){
-    std::cerr << "In collect signatures with to collect as " <<
-        encode_base16(signature) << std::endl;
-  }
   target.insert(target.end(), signatures_to_collect.begin(),
       signatures_to_collect.end());
 }
@@ -1826,12 +1810,7 @@ template <typename Stack>
 void interpreter<Stack>::
 interpreter::collect_signing_keys(data_stack& target, const data_stack& keys_to_collect)
 {
-  for (auto key : keys_to_collect){
-    std::cerr << "In collect key with to collect as " <<
-        encode_base16(key) << std::endl;
-  }
-  target.insert(target.end(), keys_to_collect.begin(),
-      keys_to_collect.end());
+  target.insert(target.end(), keys_to_collect.begin(), keys_to_collect.end());
 }
 
 } // namespace machine

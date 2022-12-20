@@ -1299,7 +1299,6 @@ generate_signatures(const uint8_t input_index, const context& state) const
   endorsements signatures;
   auto code = machine::interpreter<machine::contiguous_stack>::
     connect_for_signing(state, *this, input_index, signatures);
-  std::cerr << "error connecting for signatures " << code << std::endl;
   return signatures;
 }
 

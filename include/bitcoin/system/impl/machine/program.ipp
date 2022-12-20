@@ -801,15 +801,11 @@ prepare(ec_signature& signature, const ec_secret& secret_key, hash_digest& hash,
     if (!parse_endorsement(flags, distinguished, *endorsement))
         return false;
 
-    std::cerr << "Parsed endorsement: " << encode_base16(distinguished) << std::endl;
     // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(*subscript({ endorsement }), flags);
 
-    std::cerr << "Signature hash: " << encode_base16(hash) << std::endl;
-
     if(sign_mode_){
         if (system::sign(signature, secret_key, hash)) {
-            std::cerr << "Signature: " << encode_base16(signature) << std::endl;
             return true;
         }
     }
