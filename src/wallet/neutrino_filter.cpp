@@ -49,7 +49,7 @@ bool compute_filter(const chain::block& block, data_chunk& out_filter) NOEXCEPT
         {
             for (const auto& input: *(tx->inputs_ptr()))
             {
-                if (!input->prevout->is_valid())
+                if (!input->prevout)
                     return false;
 
                 const auto& script = input->prevout->script();

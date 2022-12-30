@@ -39,13 +39,13 @@ namespace chain {
 // ----------------------------------------------------------------------------
 
 // Default point is null_hash and point::null_index. 
-// Default prevout (metadata) is spent, invalid, max_size_t value. 
+// Default metadata is spent, invalid, max_size_t value. 
 input::input() NOEXCEPT
   : input(
       to_shared<chain::point>(),
       to_shared<chain::script>(),
-      to_shared<chain::witness>(), 0, false,
-      to_shared<chain::prevout>())
+      to_shared<chain::witness>(),
+      0, false)
 {
 }
 
@@ -54,8 +54,8 @@ input::input(chain::point&& point, chain::script&& script,
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
-      to_shared<chain::witness>(), sequence, true,
-      to_shared<chain::prevout>())
+      to_shared<chain::witness>(),
+      sequence, true)
 {
 }
 
@@ -64,8 +64,8 @@ input::input(const chain::point& point, const chain::script& script,
   : input(
       to_shared(point),
       to_shared(script),
-      to_shared<chain::witness>(), sequence, true,
-      to_shared<chain::prevout>())
+      to_shared<chain::witness>(),
+      sequence, true)
 {
 }
 
@@ -74,8 +74,8 @@ input::input(const chain::point::cptr& point,
   : input(
       point ? point : to_shared<chain::point>(),
       script ? script : to_shared<chain::script>(),
-      to_shared<chain::witness>(), sequence, true,
-      to_shared<chain::prevout>())
+      to_shared<chain::witness>(),
+      sequence, true)
 {
 }
 
@@ -84,8 +84,8 @@ input::input(chain::point&& point, chain::script&& script,
   : input(
       to_shared(std::move(point)),
       to_shared(std::move(script)),
-      to_shared(std::move(witness)), sequence, true,
-      to_shared<chain::prevout>())
+      to_shared(std::move(witness)),
+      sequence, true)
 {
 }
 
@@ -94,14 +94,14 @@ input::input(const chain::point& point, const chain::script& script,
   : input(
       to_shared(point),
       to_shared(script),
-      to_shared(witness), sequence, true,
-      to_shared<chain::prevout>())
+      to_shared(witness),
+      sequence, true)
 {
 }
 
 input::input(const chain::point::cptr& point, const chain::script::cptr& script,
     const chain::witness::cptr& witness, uint32_t sequence) NOEXCEPT
-  : input(point, script, witness, sequence, true, to_shared<chain::prevout>())
+  : input(point, script, witness, sequence, true)
 {
 }
 
@@ -134,14 +134,12 @@ input::input(reader& source) NOEXCEPT
 
 // protected
 input::input(const chain::point::cptr& point, const chain::script::cptr& script,
-    const chain::witness::cptr& witness, uint32_t sequence, bool valid,
-    const chain::prevout::cptr& prevout) NOEXCEPT
+    const chain::witness::cptr& witness, uint32_t sequence, bool valid) NOEXCEPT
   : point_(point),
     script_(script),
     witness_(witness),
     sequence_(sequence),
-    valid_(valid),
-    prevout(prevout)
+    valid_(valid)
 {
 }
 
@@ -179,8 +177,7 @@ input input::from_data(reader& source) NOEXCEPT
 
         to_shared<chain::witness>(),
         source.read_4_bytes_little_endian(),
-        source,
-        to_shared<chain::prevout>()
+        source
     };
 }
 
@@ -290,11 +287,11 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
     {
         // BIP68: change sequence to seconds by shifting up by 9 bits (x 512).
         auto time = shift_left(blocks, relative_locktime_seconds_shift_left);
-        auto age = floored_subtract(median_time_past, prevout->median_time_past);
+        auto age = floored_subtract(median_time_past, metadata.median_time_past);
         return age < time;
     }
 
-    auto age = floored_subtract(height, prevout->height);
+    auto age = floored_subtract(height, metadata.height);
     return age < blocks;
 }
 
@@ -310,6 +307,9 @@ bool input::reserved_hash(hash_digest& out) const NOEXCEPT
 // private
 bool input::embedded_script(chain::script& out) const NOEXCEPT
 {
+    if (!prevout)
+        return false;
+
     const auto& ops = script_->ops();
     const auto& script = prevout->script();
 
@@ -339,7 +339,7 @@ static_assert(max_script_size <
 // TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
 size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
-    if (bip141 && !prevout->is_valid())
+    if (bip141 && !prevout)
         return max_size_t;
 
     chain::script witness, embedded;

@@ -23,6 +23,7 @@
 #include <memory>
 #include <vector>
 #include <bitcoin/system/chain/context.hpp>
+#include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/point.hpp>
 #include <bitcoin/system/chain/prevout.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -43,7 +44,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
-    /// Default input is an invalid null point object with an invalid prevout.
+    /// Default input is invalid null point, nullptr prevout, invalid metadata.
     input() NOEXCEPT;
 
     /// Defaults.
@@ -116,8 +117,8 @@ protected:
     friend class transaction;
 
     input(const chain::point::cptr& point, const chain::script::cptr& script,
-        const chain::witness::cptr& witness, uint32_t sequence, bool valid,
-        const chain::prevout::cptr& prevout) NOEXCEPT;
+        const chain::witness::cptr& witness, uint32_t sequence,
+        bool valid) NOEXCEPT;
 
 private:
     static input from_data(reader& source) NOEXCEPT;
@@ -134,7 +135,8 @@ private:
 
 public:
     /// Public mutable metadata access, copied but not compared for equality.
-    mutable chain::prevout::cptr prevout;
+    mutable chain::output::cptr prevout{};
+    mutable chain::prevout metadata{ zero, max_uint32, false, false };
 };
 
 typedef std::vector<input> inputs;
