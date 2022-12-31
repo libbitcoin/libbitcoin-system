@@ -559,11 +559,11 @@ bool block::is_unspent_coinbase_collision(size_t height) const NOEXCEPT
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
-    const auto& prevout = txs_->front()->inputs_ptr()->front()->prevout;
+    const auto& prevout = txs_->front()->inputs_ptr()->front()->metadata;
 
     // This requires that prevout.spent was populated for the height of the
     // validating block, otherwise a collision (unspent) must be assumed.
-    return !(height > prevout->height && prevout->spent);
+    return !(height > prevout.height && prevout.spent);
 }
 
 // Delegated.

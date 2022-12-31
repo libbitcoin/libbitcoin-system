@@ -19,41 +19,28 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_PREVOUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_PREVOUT_HPP
 
-#include <memory>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/output.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// Prevout should be stored as shared (adds 16 bytes).
-// copy: output(3 * 64 + 1) + 2 * 64 + 2 = 41 bytes (vs. 16 when shared).
 class BC_API prevout
-  : public output
 {
 public:
-    // prevout::ptr is non-const.
-    // TODO: rename and declare true cptr?
-    ////typedef std::shared_ptr<prevout> ptr;
-    typedef std::shared_ptr<prevout> cptr;
-
-    /// Use base class constructors, default construction is invalid.
-    using chain::output::output;
-
     //*************************************************************************
     // CONSENSUS: 
     // A height of zero is immature (unspendable) despite unspent state.
     //*************************************************************************
     /// The confirmed chain height of the prevout (zero if not found).
-    size_t height = zero;
+    size_t height;
 
     //*************************************************************************
     // CONSENSUS: 
     // A mtp of max_uint32 fails locktime maturity (until time overflow).
     //*************************************************************************
     /// The median time past at height (max_uint32 if not found/confirmed).
-    uint32_t median_time_past = max_uint32;
+    uint32_t median_time_past;
 
     //*************************************************************************
     // CONSENSUS: 
@@ -63,14 +50,11 @@ public:
     // An unspent collision is immature (unspendable) and spent is mature.
     //*************************************************************************
     // For non-coinbase inputs this indicates spent at height.
-    bool spent = true;
+    bool spent;
 
     // The output is of a coinbase transaction.
-    bool coinbase = false;
+    bool coinbase;
 };
-
-DECLARE_JSON_VALUE_CONVERTORS(prevout);
-DECLARE_JSON_VALUE_CONVERTORS(prevout::cptr);
 
 } // namespace chain
 } // namespace system

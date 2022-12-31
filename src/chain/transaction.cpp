@@ -1028,10 +1028,10 @@ bool transaction::is_missing_prevouts() const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
 
-    // Invalidity indicates not found.
+    // Null or invalid prevout indicates not found.
     const auto missing = [](const auto& input) NOEXCEPT
     {
-        return !input->prevout->is_valid();
+        return !input->prevout;
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), missing);
@@ -1046,19 +1046,20 @@ uint64_t transaction::claim() const NOEXCEPT
     };
 
     // The amount claimed by outputs.
-    return std::accumulate(outputs_->begin(), outputs_->end(), min_uint64, sum);
+    return std::accumulate(outputs_->begin(), outputs_->end(), 0_u64, sum);
 }
 
 uint64_t transaction::value() const NOEXCEPT
 {
-    // Overflow and coinbase (default) return max_uint64.
+    // Overflow, not populated, and coinbase (default) return max_uint64.
     const auto sum = [](uint64_t total, const auto& input) NOEXCEPT
     {
-        return ceilinged_add(total, input->prevout->value());
+        const auto value = input->prevout ? input->prevout->value() : max_uint64;
+        return ceilinged_add(total, value);
     };
 
     // The amount of prevouts (referenced by inputs).
-    return std::accumulate(inputs_->begin(), inputs_->end(), uint64_t{0}, sum);
+    return std::accumulate(inputs_->begin(), inputs_->end(), 0_u64, sum);
 }
 
 bool transaction::is_overspent() const NOEXCEPT
@@ -1069,7 +1070,7 @@ bool transaction::is_overspent() const NOEXCEPT
 }
 
 //*****************************************************************************
-// CONSENSUS: Genesis block is treated as forever immature (satoshi bug).
+// CONSENSUS: Genesis coinbase is treated as forever immature (satoshi bug).
 //*****************************************************************************
 bool transaction::is_immature(size_t height) const NOEXCEPT
 {
@@ -1080,8 +1081,9 @@ bool transaction::is_immature(size_t height) const NOEXCEPT
     // Spends internal to a block are handled by block validation.
     const auto immature = [=](const auto& input) NOEXCEPT
     {
-        return input->prevout->coinbase && (is_zero(input->prevout->height) ||
-            height < ceilinged_add(input->prevout->height, coinbase_maturity));
+        const auto prevout_height = input->metadata.height;
+        return input->metadata.coinbase && (is_zero(prevout_height) ||
+            height < ceilinged_add(prevout_height, coinbase_maturity));
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), immature);
@@ -1118,8 +1120,8 @@ bool transaction::is_unconfirmed_spend(size_t height) const NOEXCEPT
     // Spends internal to a block are handled by block validation.
     const auto unconfirmed = [=](const auto& input) NOEXCEPT
     {
-        return is_zero(input->prevout->height) &&
-            !(height > input->prevout->height);
+        const auto prevout_height = input->metadata.height;
+        return is_zero(prevout_height) && !(height > prevout_height);
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), unconfirmed);
@@ -1132,7 +1134,7 @@ bool transaction::is_confirmed_double_spend(size_t height) const NOEXCEPT
     // Spends internal to a block are handled by block validation.
     const auto spent = [=](const auto& input) NOEXCEPT
     {
-        return input->prevout->spent && height > input->prevout->height;
+        return input->metadata.spent && height > input->metadata.height;
     };
 
     return std::any_of(inputs_->begin(), inputs_->end(), spent);
@@ -1264,7 +1266,7 @@ code transaction::connect(const context& state) const NOEXCEPT
         // Naive implementation, any op_roll in either script, late-counted.
         // TODO: precompute on script parse, tune using performance profiling.
         return contains(input.script().ops(), roll)
-            || contains(input.prevout->script().ops(), roll);
+            || (input.prevout && contains(input.prevout->script().ops(), roll));
     };
 
     // Validate scripts, skip coinbase.

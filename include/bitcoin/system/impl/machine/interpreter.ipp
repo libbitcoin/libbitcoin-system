@@ -1605,6 +1605,9 @@ connect(const context& state, const transaction& tx,
     bool witnessed;
     code ec;
 
+    if (!input.prevout)
+        return error::missing_previous_output;
+
     // Evaluate input script.
     interpreter input_program(tx, it, state.forks);
     if ((ec = input_program.run()))
@@ -1619,26 +1622,27 @@ connect(const context& state, const transaction& tx,
         return error::stack_false;
 
     // Triggered by output script push of version and witness program (bip141).
-    if ((witnessed = input.prevout->script().is_pay_to_witness(state.forks)))
+    const auto& prevout_script = input.prevout->script();
+    if ((witnessed = prevout_script.is_pay_to_witness(state.forks)))
     {
         // The input script must be empty (bip141).
         if (!input.script().ops().empty())
             return error::dirty_witness;
 
         // Validate the native script.
-        switch (input.prevout->script().version())
+        switch (prevout_script.version())
         {
             case script_version::zero:
             {
                 script::cptr script;
                 chunk_cptrs_ptr witness_stack;
                 if (!input.witness().extract_script(script, witness_stack,
-                    input.prevout->script()))
+                    prevout_script))
                     return error::invalid_witness;
 
                 // A defined version indicates bip141 is active (not bip143).
                 interpreter witness_program(tx, it, script, state.forks,
-                    input.prevout->script().version(), witness_stack);
+                    prevout_script.version(), witness_stack);
 
                 if ((ec = witness_program.run()))
                     return ec;
@@ -1659,7 +1663,7 @@ connect(const context& state, const transaction& tx,
     }
 
     // p2sh and p2w are mutually exclusive.
-    else if (input.prevout->script().is_pay_to_script_hash(state.forks))
+    else if (prevout_script.is_pay_to_script_hash(state.forks))
     {
         if (!script::is_relaxed_push(input.script().ops()))
             return error::invalid_script_embed;

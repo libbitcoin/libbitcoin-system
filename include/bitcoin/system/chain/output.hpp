@@ -41,7 +41,7 @@ public:
     // Constructors.
     // ------------------------------------------------------------------------
 
-    /// Default output is an invalid object (input.prevout relies on this).
+    /// Default output is an invalid object.
     output() NOEXCEPT;
 
     /// Defaults.

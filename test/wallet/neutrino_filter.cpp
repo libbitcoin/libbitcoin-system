@@ -44,11 +44,13 @@ public:
 ////        for (size_t index = 0; index < tx->inputs_ptr()->size(); index++)
 ////        {
 ////            auto& output = (*tx->inputs_ptr())[index]->prevout;
-////            auto script = output->script().to_data(false);
 ////            std::cout << "  input: " << index << std::endl;
-////            std::cout << "    populated : " << (output->value() != chain::output::not_found) << std::endl;
-////            std::cout << "    script    : " << script << std::endl;
 ////
+////            if (output)
+////            {
+////                auto script = output->script().to_data(false);
+////                std::cout << "    script    : " << script << std::endl;
+////            }
 ////        }
 ////    }
 ////}
@@ -57,20 +59,20 @@ bool add_metadata(const prevout_data::list& metadata, const chain::block& block)
 {
     auto result = true;
 
-    for (auto& prevout: metadata)
+    for (auto& meta: metadata)
     {
         result = false;
         const auto& txs = *block.transactions_ptr();
         for (const auto& tx: txs)
         {
-            if (tx->hash(false) == prevout.block_tx)
+            if (tx->hash(false) == meta.block_tx)
             {
                 auto& inputs = *tx->inputs_ptr();
-                auto& output = inputs[prevout.input_index]->prevout;
-                output = std::make_shared<chain::prevout>(chain::prevout
+                auto& output = inputs[meta.input_index]->prevout;
+                output = to_shared(new chain::output
                 {
-                    prevout.output_value,
-                    chain::script{ prevout.script, false }
+                    meta.output_value,
+                    chain::script{ meta.script, false }
                 });
                 result = true;
             }
