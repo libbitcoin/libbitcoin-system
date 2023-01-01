@@ -183,13 +183,16 @@ bool script::operator!=(const script& other) const NOEXCEPT
 // static/private
 size_t script::op_count(reader& source) NOEXCEPT
 {
+    // Stream errors reset by set_position so trap here.
+    if (!source)
+        return zero;
+
     const auto start = source.get_read_position();
     auto count = zero;
 
     while (operation::count_op(source))
         ++count;
 
-    // Stream errors ignored, caught in from_data.
     source.set_position(start);
     return count;
 }
