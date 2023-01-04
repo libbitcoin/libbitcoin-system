@@ -41,6 +41,9 @@ public:
     typedef std::shared_ptr<const transaction> cptr;
     typedef input_cptrs::const_iterator input_iterator;
 
+    static bool is_coinbase_mature(size_t coinbase_height,
+        size_t height) NOEXCEPT;
+
     // Constructors.
     // ------------------------------------------------------------------------
 
