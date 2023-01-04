@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 
+#include "bitcoin/system/chain/transaction.hpp"
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -54,6 +55,9 @@ public:
     /// Connect tx.input[*].script to tx.input[*].prevout.script.
     static code connect(const context& state, const transaction& tx,
         const input_iterator& it) NOEXCEPT;
+
+    static code connect_p2w(const context& state, const transaction& tx,
+        const input_iterator& it, const script& prevout_script) NOEXCEPT;
 
 protected:
     /// Operation disatch.
