@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 
-#include "bitcoin/system/chain/transaction.hpp"
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
