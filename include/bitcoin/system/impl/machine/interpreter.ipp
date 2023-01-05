@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 
+#include "bitcoin/system/chain/prevout.hpp"
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/operation.hpp>
@@ -1628,38 +1629,8 @@ connect(const context& state, const transaction& tx,
         // The input script must be empty (bip141).
         if (!input.script().ops().empty())
             return error::dirty_witness;
-
-        // Validate the native script.
-        switch (prevout_script.version())
-        {
-            case script_version::zero:
-            {
-                script::cptr script;
-                chunk_cptrs_ptr witness_stack;
-                if (!input.witness().extract_script(script, witness_stack,
-                    prevout_script))
-                    return error::invalid_witness;
-
-                // A defined version indicates bip141 is active (not bip143).
-                interpreter witness_program(tx, it, script, state.forks,
-                    prevout_script.version(), witness_stack);
-
-                if ((ec = witness_program.run()))
-                    return ec;
-
-                // A v0 script must succeed with a clean true stack (bip141).
-                return witness_program.is_true(true) ? error::script_success :
-                    error::stack_false;
-            }
-
-            // These versions are reserved for future extensions (bip141).
-            case script_version::reserved:
-                return error::script_success;
-
-            case script_version::unversioned:
-            default:
-                return error::unversioned_script;
-        }
+        if ((ec = connect_p2w(state, tx, it, prevout_script)))
+            return ec;
     }
 
     // p2sh and p2w are mutually exclusive.
@@ -1686,38 +1657,7 @@ connect(const context& state, const transaction& tx,
             // The input script must be a push of the embedded_script (bip141).
             if (input.script().ops().size() != one)
                 return error::dirty_witness;
-
-            // Validate the non-native script.
-            switch (embeded_script->version())
-            {
-                case script_version::zero:
-                {
-                    script::cptr script;
-                    chunk_cptrs_ptr witness_stack;
-                    if (!input.witness().extract_script(script, witness_stack,
-                        *embeded_script))
-                        return error::invalid_witness;
-
-                    // A defined version indicates bip141 is active (not bip143).
-                    interpreter witness_program(tx, it, script, state.forks,
-                        embeded_script->version(), witness_stack);
-
-                    if ((ec = witness_program.run()))
-                        return ec;
-
-                    // A v0 script must succeed with a clean true stack (bip141).
-                    return witness_program.is_true(true) ?
-                        error::script_success : error::stack_false;
-                }
-
-                // These versions are reserved for future extensions (bip141).
-                case script_version::reserved:
-                    return error::script_success;
-
-                case script_version::unversioned:
-                default:
-                    return error::unversioned_script;
-            }
+            return connect_p2w(state, tx, it, *embeded_script);
         }
     }
 
@@ -1726,6 +1666,47 @@ connect(const context& state, const transaction& tx,
         return error::unexpected_witness;
 
     return error::script_success;
+}
+
+template <typename Stack>
+code interpreter<Stack>::connect_p2w(const context &state,
+    const transaction& tx, const input_iterator& it,
+    const script& prevout_script) NOEXCEPT
+{
+    code ec;
+    const auto input = **it;
+
+    // Validate the native script.
+    switch (prevout_script.version())
+    {
+        case script_version::zero:
+        {
+            script::cptr script;
+            chunk_cptrs_ptr witness_stack;
+            if (!input.witness().extract_script(script, witness_stack,
+                    prevout_script))
+                return error::invalid_witness;
+
+            // A defined version indicates bip141 is active (not bip143).
+            interpreter witness_program(tx, it, script, state.forks,
+                prevout_script.version(), witness_stack);
+
+            if ((ec = witness_program.run()))
+                return ec;
+
+            // A v0 script must succeed with a clean true stack (bip141).
+            return witness_program.is_true(true) ? error::script_success :
+                error::stack_false;
+        }
+
+        // These versions are reserved for future extensions (bip141).
+        case script_version::reserved:
+            return error::script_success;
+
+        case script_version::unversioned:
+        default:
+            return error::unversioned_script;
+    }
 }
 
 } // namespace machine
