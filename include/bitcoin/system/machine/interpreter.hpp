@@ -55,10 +55,10 @@ public:
     static code connect(const context& state, const transaction& tx,
         const input_iterator& it) NOEXCEPT;
 
-    static code connect_p2w(const context& state, const transaction& tx,
+protected:
+    static code connect_witness(const context& state, const transaction& tx,
         const input_iterator& it, const script& prevout_script) NOEXCEPT;
 
-protected:
     /// Operation disatch.
     error::op_error_t run_op(const op_iterator& op) NOEXCEPT;
 
