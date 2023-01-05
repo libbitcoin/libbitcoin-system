@@ -1640,37 +1640,58 @@ connect(const context& state, const transaction& tx,
     // p2w and p2sh are mutually exclusive.
     else if (prevout_script.is_pay_to_script_hash(state.forks))
     {
-        if (!script::is_relaxed_push(input.script().ops()))
-            return error::invalid_script_embed;
-
-        // Embedded script must be at the top of the stack (bip16).
-        const auto embed = to_shared(new script{ input_program.pop(), false });
-        interpreter program(std::move(input_program), embed);
-
-        // Evaluate embedded script using stack moved from input script.
-        if ((ec = program.run()))
+        if ((ec = connect_p2sh(state, tx, it, input_program)))
             return ec;
-
-        if (!program.is_true(false))
-            return error::stack_false;
-
-        // Triggered by embedded push of version and witness program (bip141).
-        if (embed->is_pay_to_witness(state.forks))
-        {
-            witnessed = true;
-
-            // The input script must be a push of the embedded_script (bip141).
-            if (input.script().ops().size() != one)
-                return error::dirty_witness;
-
-            // Evaluate witnessed script.
-            return connect_witness(state, tx, it, *embed);
-        }
     }
 
-    // Witness must be empty if no bip141 or invalid witness program (bip141).
-    return !witnessed && !input.witness().stack().empty() ?
-        error::unexpected_witness : error::script_success;
+    else if (!witnessed && !input.witness().stack().empty())
+    {
+        // Witness must be empty if no bip141 or invalid witness program (bip141).
+        return error::unexpected_witness;
+    }
+
+    return error::script_success;
+}
+
+template <typename Stack>
+code interpreter<Stack>::connect_p2sh(const context& state,
+    const transaction& tx, const input_iterator& it,
+    interpreter& input_program) NOEXCEPT
+{
+    code ec;
+    const auto input = **it;
+    bool witnessed;
+
+    if (!script::is_relaxed_push(input.script().ops()))
+        return error::invalid_script_embed;
+
+    // Embedded script must be at the top of the stack (bip16).
+    const auto embeded_script = to_shared<script>({ input_program.pop(),
+            false });
+
+    // Evaluate embedded script using stack moved from input script.
+    interpreter embeded_program(std::move(input_program), embeded_script);
+    if ((ec = embeded_program.run()))
+        return ec;
+
+    if (!embeded_program.is_true(false))
+        return error::stack_false;
+
+    // Triggered by embedded push of version and witness program (bip141).
+    if ((witnessed = embeded_script->is_pay_to_witness(state.forks)))
+    {
+        // The input script must be a push of the embedded_script (bip141).
+        if (input.script().ops().size() != one)
+            return error::dirty_witness;
+        if ((ec = connect_p2w(state, tx, it, *embeded_script)))
+            return ec;
+    }
+
+    // Nested witness must be empty if no bip141 or invalid witness program (bip141).
+    if (!witnessed && !input.witness().stack().empty())
+        return error::unexpected_witness;
+
+    return error::script_success;
 }
 
 template <typename Stack>
