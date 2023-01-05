@@ -91,10 +91,9 @@ program(program&& other, const script::cptr& script) NOEXCEPT
 }
 
 // Witness script run (witness-initialized stack).
-// 'tx', 'input' (and iterated chain::input), and 'witness' must remain in
-// scope, as these hold chunk state referenced by weak pointers. This
-// expectation is guaranteed by retained tx and input references. A reference
-// to witness is explicitly retained to guarantee the lifetime of its elements.
+// 'tx', 'input' (and iterated chain::input) must remain in scope, as these
+// hold chunk state weak references. A witness pointer is explicitly retained
+// to guarantee the lifetime of its elements.
 template <typename Stack>
 inline program<Stack>::
 program(const chain::transaction& tx, const input_iterator& input,
