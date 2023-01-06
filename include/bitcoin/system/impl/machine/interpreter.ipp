@@ -1644,9 +1644,9 @@ connect(const context& state, const transaction& tx,
             return ec;
     }
 
+    // Witness must be empty if no bip141 or invalid witness program (bip141).
     else if (!witnessed && !input.witness().stack().empty())
     {
-        // Witness must be empty if no bip141 or invalid witness program (bip141).
         return error::unexpected_witness;
     }
 
@@ -1688,10 +1688,8 @@ code interpreter<Stack>::connect_p2sh(const context& state,
     }
 
     // Nested witness must be empty if no bip141 or invalid witness program (bip141).
-    if (!witnessed && !input.witness().stack().empty())
-        return error::unexpected_witness;
-
-    return error::script_success;
+    return !witnessed && !input.witness().stack().empty() ?
+        error::unexpected_witness : error::script_success;
 }
 
 template <typename Stack>
