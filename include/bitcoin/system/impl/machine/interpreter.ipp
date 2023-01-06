@@ -1683,7 +1683,7 @@ code interpreter<Stack>::connect_p2sh(const context& state,
         // The input script must be a push of the embedded_script (bip141).
         if (input.script().ops().size() != one)
             return error::dirty_witness;
-        if ((ec = connect_p2w(state, tx, it, *embeded_script)))
+        if ((ec = connect_witness(state, tx, it, *embeded_script)))
             return ec;
     }
 
