@@ -488,7 +488,7 @@ public:
     // Utilities.
     // ------------------------------------------------------------------------
 
-    /// Pattern optimizaitons.
+    /// Pattern optimizations.
     bool is_pay_to_witness(uint32_t forks) const NOEXCEPT;
     bool is_pay_to_script_hash(uint32_t forks) const NOEXCEPT;
 
