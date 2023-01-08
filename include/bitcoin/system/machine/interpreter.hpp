@@ -56,11 +56,13 @@ public:
         const input_iterator& it) NOEXCEPT;
 
 protected:
-    static code connect_witness(const context& state, const transaction& tx,
-        const input_iterator& it, const script& prevout_script) NOEXCEPT;
+    /// Embedded script handler.
+    static code connect_embedded(const context& state, const transaction& tx,
+        const input_iterator& it, interpreter& in_program) NOEXCEPT;
 
-    static code connect_p2sh(const context& state, const transaction& tx,
-        const input_iterator& it, interpreter& input_program) NOEXCEPT;
+    /// Witnessed script handler.
+    static code connect_witness(const context& state, const transaction& tx,
+        const input_iterator& it, const script& prevout) NOEXCEPT;
 
     /// Operation disatch.
     error::op_error_t run_op(const op_iterator& op) NOEXCEPT;

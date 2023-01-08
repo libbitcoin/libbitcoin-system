@@ -1602,122 +1602,126 @@ connect(const context& state, const transaction& tx,
     const input_iterator& it) NOEXCEPT
 {
     code ec;
-    auto witnessed = false;
     const auto& input = **it;
-
     if (!input.prevout)
         return error::missing_previous_output;
 
     // Evaluate input script.
-    interpreter input_program(tx, it, state.forks);
-    if ((ec = input_program.run()))
+    interpreter in_program(tx, it, state.forks);
+    if ((ec = in_program.run()))
         return ec;
 
-    // Evaluate output script using stack copied from input script.
-    interpreter prevout_program(input_program, input.prevout->script_ptr());
-    if ((ec = prevout_program.run()))
-        return ec;
-
-    if (!prevout_program.is_true(false))
-        return error::stack_false;
-
-    const auto& prevout_script = input.prevout->script();
-
-    // Triggered by output script push of version and witness program (bip141).
-    if (prevout_script.is_pay_to_witness(state.forks))
+    // Evaluate output script using stack copied from input script evaluation.
+    const auto& prevout = input.prevout->script_ptr();
+    interpreter out_program(in_program, prevout);
+    if ((ec = out_program.run()))
     {
-        witnessed = true;
-
+        return ec;
+    }
+    else if (!out_program.is_true(false))
+    {
+        return error::stack_false;
+    }
+    else if (prevout->is_pay_to_script_hash(state.forks))
+    {
+        // Because output script pushed script hash program (bip16).
+        if ((ec = connect_embedded(state, tx, it, in_program)))
+            return ec;
+    }
+    else if (prevout->is_pay_to_witness(state.forks))
+    {
         // The input script must be empty (bip141).
         if (!input.script().ops().empty())
             return error::dirty_witness;
 
-        // Evaluate witnessed script.
-        if ((ec = connect_witness(state, tx, it, prevout_script)))
+        // Because output script pushed version and witness program (bip141).
+        if ((ec = connect_witness(state, tx, it, *prevout)))
             return ec;
     }
-
-    // p2w and p2sh are mutually exclusive.
-    else if (prevout_script.is_pay_to_script_hash(state.forks))
+    else if (!input.witness().stack().empty())
     {
-        if ((ec = connect_p2sh(state, tx, it, input_program)))
-            return ec;
-    }
-
-    // Witness must be empty if no bip141 or invalid witness program (bip141).
-    else if (!witnessed && !input.witness().stack().empty())
-    {
+        // A non-witness program must have empty witness field (bip141).
         return error::unexpected_witness;
     }
 
     return error::script_success;
 }
 
+BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 template <typename Stack>
-code interpreter<Stack>::connect_p2sh(const context& state,
+code interpreter<Stack>::connect_embedded(const context& state,
     const transaction& tx, const input_iterator& it,
-    interpreter& input_program) NOEXCEPT
+    interpreter& in_program) NOEXCEPT
 {
     code ec;
-    const auto input = **it;
-    bool witnessed;
+    const auto& input = **it;
 
+    // Input script is limited to relaxed push data operations (bip16).
     if (!script::is_relaxed_push(input.script().ops()))
         return error::invalid_script_embed;
 
     // Embedded script must be at the top of the stack (bip16).
-    const auto embeded_script = to_shared<script>({ input_program.pop(),
-            false });
-
     // Evaluate embedded script using stack moved from input script.
-    interpreter embeded_program(std::move(input_program), embeded_script);
-    if ((ec = embeded_program.run()))
+    const auto prevout = to_shared(new script{ in_program.pop(), false });
+    interpreter out_program(std::move(in_program), prevout);
+    if ((ec = out_program.run()))
+    {
         return ec;
-
-    if (!embeded_program.is_true(false))
+    }
+    else if (!out_program.is_true(false))
+    {
         return error::stack_false;
-
-    // Triggered by embedded push of version and witness program (bip141).
-    if ((witnessed = embeded_script->is_pay_to_witness(state.forks)))
+    }
+    else if (prevout->is_pay_to_witness(state.forks))
     {
         // The input script must be a push of the embedded_script (bip141).
         if (input.script().ops().size() != one)
             return error::dirty_witness;
-        if ((ec = connect_witness(state, tx, it, *embeded_script)))
+
+        // Because output script pushed version/witness program (bip141).
+        if ((ec = connect_witness(state, tx, it, *prevout)))
             return ec;
     }
+    else if (!input.witness().stack().empty())
+    {
+        // A non-witness program must have empty witness field (bip141).
+        return error::unexpected_witness;
+    }
 
-    // Nested witness must be empty if no bip141 or invalid witness program (bip141).
-    return !witnessed && !input.witness().stack().empty() ?
-        error::unexpected_witness : error::script_success;
+    return error::script_success;
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 template <typename Stack>
 code interpreter<Stack>::connect_witness(const context &state,
     const transaction& tx, const input_iterator& it,
     const script& prevout) NOEXCEPT
 {
-    switch (prevout.version())
+    const auto& input = **it;
+    const auto version = prevout.version();
+
+    switch (version)
     {
         case script_version::zero:
         {
             code ec;
             script::cptr script;
             chunk_cptrs_ptr stack;
-            const auto& input = **it;
 
             if (!input.witness().extract_script(script, stack, prevout))
                 return error::invalid_witness;
 
             // A defined version indicates bip141 is active.
-            interpreter witness_program(tx, it, script, state.forks,
-                prevout.version(), stack);
-
-            if ((ec = witness_program.run()))
+            interpreter program(tx, it, script, state.forks, version, stack);
+            if ((ec = program.run()))
                 return ec;
 
             // A v0 script must succeed with a clean true stack (bip141).
-            return witness_program.is_true(true) ? error::script_success :
+            return program.is_true(true) ? error::script_success :
                 error::stack_false;
         }
 
