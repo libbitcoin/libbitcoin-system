@@ -333,6 +333,9 @@ bool witness::extract_sigop_script(script& out_script,
     }
 }
 
+BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // Extract script and initial execution stack.
 bool witness::extract_script(script::cptr& out_script,
     chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
@@ -355,7 +358,7 @@ bool witness::extract_script(script::cptr& out_script,
                 {
                     // Create a pay-to-key-hash input script from the program.
                     // The hash160 of public key must match program (bip141).
-                    out_script = to_shared(script{ to_pay_key_hash(
+                    out_script = to_shared(new script{ to_pay_key_hash(
                         std::move(program)) });
 
                     // Stack must be 2 elements (bip141).
@@ -374,7 +377,7 @@ bool witness::extract_script(script::cptr& out_script,
                         return false;
 
                     // Input script is popped from the stack (bip141).
-                    out_script = to_shared(script{ *pop(*out_stack), false });
+                    out_script = to_shared(new script{ *pop(*out_stack), false });
 
                     // The sha256 of popped script must match program (bip141).
                     return std::equal(program.begin(), program.end(),
@@ -397,6 +400,9 @@ bool witness::extract_script(script::cptr& out_script,
             return false;
     }
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------
