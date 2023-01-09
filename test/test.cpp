@@ -18,10 +18,6 @@
  */
 #include "test.hpp"
 
-#include <iostream>
-#include <filesystem>
-#include <bitcoin/system.hpp>
-
 namespace std {
 
 std::ostream& operator<<(std::ostream& stream,
