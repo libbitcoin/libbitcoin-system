@@ -1650,24 +1650,22 @@ connect(const context& state, const transaction& tx,
         return error::missing_previous_output;
 
     // Evaluate input script.
-    interpreter in_program(tx, it, state.forks);
+    interpreter in_program(tx, it, state.forks, sign_mode);
     if ((ec = in_program.run()))
         return ec;
 
     if (sign_mode)
-        interpreter::collect_signatures(signatures, input_program.generated_signatures());
+        interpreter::collect_signatures(signatures, in_program.generated_signatures());
 
     // Evaluate output script using stack copied from input script evaluation.
     const auto& prevout = input.prevout->script_ptr();
     interpreter out_program(in_program, prevout);
     if ((ec = out_program.run()))
-    {
         return ec;
-    }
 
     if (sign_mode)
         interpreter::collect_signatures(signatures, out_program.generated_signatures());
-    
+
     if (!out_program.is_true(false))
     {
         return error::stack_false;
@@ -1778,7 +1776,7 @@ code interpreter<Stack>::connect_witness(const context &state,
 
             if (sign_mode){
                 interpreter::collect_signatures(signatures,
-                    witness_program.generated_signatures());
+                    program.generated_signatures());
             }
 
             // A v0 script must succeed with a clean true stack (bip141).

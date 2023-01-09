@@ -286,6 +286,7 @@ BOOST_AUTO_TEST_CASE(transaction__generate_signatures__multi_sig__expected)
     spending_transaction.inputs_ptr()->front()->prevout.reset(new output{0u, prevout_script});
     auto signatures = spending_transaction.generate_signatures(0u, {forks::no_rules,0});
 
+    BOOST_REQUIRE_EQUAL(signatures.size(), 3);
     BOOST_REQUIRE_EQUAL(encode_base16(signatures.at(0)), "3044022061ccdc51a4f1b7bd6e1d89b945336bd18aad0bce3f2e9657826487569b64d96502201a3d0e8e2bc70ce0fcd8358d177ec6d710b0a0ddd6c9586729a00aab5fe49ede");
     BOOST_REQUIRE_EQUAL(encode_base16(signatures.at(1)), "3044022010a3645d88dfa9d79e7ec90891fd306a082a855880a9fff5c47235eb4abb7c260220610d09672aead8e79e64da2c841b0a0f3579866aa73a2fc24e2d6935b798d1ea");
     BOOST_REQUIRE_EQUAL(encode_base16(signatures.at(2)), "3045022100c0675c34df1f678892d4babc44e5cd38bc6dd80e497a5860a276cd44961845a00220035369825776a15f81c2c163aa09dad00d1e0ba06a59e1868badac424f06ea4e");
