@@ -515,6 +515,7 @@ if (with-tests)
         "../../test/chain/script.hpp"
         "../../test/chain/stripper.cpp"
         "../../test/chain/transaction.cpp"
+        "../../test/chain/transaction_signing.cpp"
         "../../test/chain/witness.cpp"
         "../../test/chain/enums/opcode.cpp"
         "../../test/config/base16.cpp"

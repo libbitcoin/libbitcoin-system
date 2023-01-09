@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_HPP
 
+#include "bitcoin/system/crypto/secp256k1.hpp"
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -51,18 +52,29 @@ public:
     static code connect(const context& state, const transaction& tx,
         uint32_t index) NOEXCEPT;
 
-    /// Connect tx.input[*].script to tx.input[*].prevout.script.
+    /// Connect tx.input[#].script to tx.input[#].prevout.script.
+    static code connect(const context& state, const transaction& tx,
+        uint32_t index, endorsements& signatures) NOEXCEPT;
+
+    /// Connect tx.input[*].script to tx.input[*].prevout.script for signing.
     static code connect(const context& state, const transaction& tx,
         const input_iterator& it) NOEXCEPT;
+
+    /// Connect tx.input[*].script to tx.input[*].prevout.script for signing.
+    static code connect(const context& state, const transaction& tx,
+        const input_iterator& it, endorsements& signatures,
+        const bool sign_mode=false) NOEXCEPT;
 
 protected:
     /// Embedded script handler.
     static code connect_embedded(const context& state, const transaction& tx,
-        const input_iterator& it, interpreter& in_program) NOEXCEPT;
+        const input_iterator& it, interpreter& input_program,
+        endorsements& signatures, const bool sign_mode) NOEXCEPT;
 
     /// Witnessed script handler.
     static code connect_witness(const context& state, const transaction& tx,
-        const input_iterator& it, const script& prevout) NOEXCEPT;
+        const input_iterator& it, const script& prevout_script,
+        endorsements& signatures, const bool sign_mode) NOEXCEPT;
 
     /// Operation disatch.
     error::op_error_t run_op(const op_iterator& op) NOEXCEPT;
@@ -154,6 +166,12 @@ protected:
     inline error::op_error_t op_check_multisig() NOEXCEPT;
     inline error::op_error_t op_check_locktime_verify() const NOEXCEPT;
     inline error::op_error_t op_check_sequence_verify() const NOEXCEPT;
+
+private:
+  static void collect_signatures(endorsements& target,
+      const endorsements& signatures_to_collect);
+  static void collect_signing_keys(data_stack& target,
+      const data_stack& keys_to_collect);
 };
 
 } // namespace machine

@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_IPP
 
+#include "bitcoin/system/crypto/secp256k1.hpp"
+#include "bitcoin/system/data/data_chunk.hpp"
 #include <iterator>
 #include <utility>
 #include <variant>
@@ -45,7 +47,7 @@ using namespace system::error;
 template <typename Stack>
 inline program<Stack>::
 program(const chain::transaction& tx, const input_iterator& input,
-     uint32_t forks) NOEXCEPT
+    uint32_t forks, bool sign_mode) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_((*input)->script_ptr()),
@@ -53,7 +55,10 @@ program(const chain::transaction& tx, const input_iterator& input,
     value_(max_uint64),
     version_(script_version::unversioned),
     witness_(),
-    primary_()
+    primary_(),
+    sign_mode_(sign_mode),
+    generated_signatures_(),
+    signing_keys_()
 {
 }
 
@@ -71,7 +76,10 @@ program(const program& other, const script::cptr& script) NOEXCEPT
     value_(other.value_),
     version_(other.version_),
     witness_(),
-    primary_(other.primary_)
+    primary_(other.primary_),
+    sign_mode_(other.sign_mode_),
+    generated_signatures_(other.generated_signatures_),
+    signing_keys_(other.signing_keys_)
 {
 }
 
@@ -86,7 +94,10 @@ program(program&& other, const script::cptr& script) NOEXCEPT
     value_(other.value_),
     version_(other.version_),
     witness_(),
-    primary_(std::move(other.primary_))
+    primary_(std::move(other.primary_)),
+    sign_mode_(other.sign_mode_),
+    generated_signatures_(std::move(other.generated_signatures_)),
+    signing_keys_(std::move(other.signing_keys_))
 {
 }
 
@@ -98,7 +109,7 @@ template <typename Stack>
 inline program<Stack>::
 program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t forks, script_version version,
-    const chunk_cptrs_ptr& witness) NOEXCEPT
+    const chunk_cptrs_ptr& witness, const bool sign_mode) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_(script),
@@ -106,7 +117,10 @@ program(const chain::transaction& tx, const input_iterator& input,
     value_((*input)->prevout->value()),
     version_(version),
     witness_(witness),
-    primary_(projection<Stack>(*witness))
+    primary_(projection<Stack>(*witness)),
+    sign_mode_(sign_mode),
+    generated_signatures_(),
+    signing_keys_()
 {
 }
 
@@ -760,7 +774,7 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 // TODO: use sighash and key to generate signature in sign mode.
 template <typename Stack>
 inline bool program<Stack>::
-prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
+prepare(ec_signature& signature, const data_chunk& key, hash_digest& hash,
     const chunk_xptr& endorsement) const NOEXCEPT
 {
     uint8_t flags;
@@ -772,6 +786,13 @@ prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
 
     // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(*subscript({ endorsement }), flags);
+
+    // In sign mode, make a secret_key and sign with it
+    if(sign_mode_) {
+        ec_secret secret_key;
+        std::copy_n(key.begin(), ec_secret_size, secret_key.begin());
+        return system::sign(signature, secret_key, hash);
+    }
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(forks::bip66_rule);
@@ -792,6 +813,13 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
 
     // Obtain the signature hash from subscript and sighash flags.
     signature_hash(cache, sub, flags);
+
+    // In sign mode, get secret_key, sign with it and return
+    if (sign_mode_) {
+        ec_secret secret_key;
+        std::copy_n(endorsement.begin(), ec_secret_size, secret_key.begin());
+        return system::sign(signature, secret_key, cache[flags]);
+    }
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(forks::bip66_rule);
@@ -824,6 +852,20 @@ signature_hash(hash_cache& cache, const script& sub,
     if (cache.find(flags) == cache.end())
         cache.emplace(flags, signature_hash(sub, flags));
     BC_POP_WARNING()
+}
+
+template <typename Stack>
+inline der_signatures& program<Stack>::
+generated_signatures() NOEXCEPT
+{
+    return generated_signatures_;
+}
+
+template <typename Stack>
+inline data_stack& program<Stack>::
+signing_keys() NOEXCEPT
+{
+    return signing_keys_;
 }
 
 } // namespace machine

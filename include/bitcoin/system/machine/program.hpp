@@ -19,6 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
+#include "bitcoin/system/crypto/secp256k1.hpp"
+#include "bitcoin/system/data/data_chunk.hpp"
 #include <unordered_map>
 #include <vector>
 #include <bitcoin/system/chain/chain.hpp>
@@ -31,6 +33,8 @@
 namespace libbitcoin {
 namespace system {
 namespace machine {
+
+typedef std::vector<der_signature> der_signatures;
 
 /// A set of three stacks (primary, alternate, conditional) for script state.
 /// Primary stack is optimized by peekable, swappable, and eraseable elements.
@@ -46,7 +50,8 @@ public:
 
     /// Input script run (default/empty stack).
     inline program(const chain::transaction& transaction,
-        const input_iterator& input, uint32_t forks) NOEXCEPT;
+        const input_iterator& input, uint32_t forks,
+        const bool sign_mode=false) NOEXCEPT;
 
     /// Legacy p2sh or prevout script run (copied input stack).
     inline program(const program& other,
@@ -60,13 +65,16 @@ public:
     inline program(const chain::transaction& transaction,
         const input_iterator& input, const chain::script::cptr& script,
         uint32_t forks, chain::script_version version,
-        const chunk_cptrs_ptr& stack) NOEXCEPT;
+        const chunk_cptrs_ptr& stack, const bool sign_mode=false) NOEXCEPT;
 
     /// Program result.
     inline bool is_true(bool clean) const NOEXCEPT;
 
     /// Transaction must pop top input stack element (bip16).
     inline const data_chunk& pop() NOEXCEPT;
+
+    inline der_signatures& generated_signatures() NOEXCEPT;
+    inline data_stack& signing_keys() NOEXCEPT;
 
 protected:
     INLINE static bool equal_chunks(const stack_variant& left,
@@ -166,6 +174,12 @@ protected:
     inline bool prepare(ec_signature& signature, const data_chunk& key,
         hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
         const chain::script& sub) const NOEXCEPT;
+
+    // Signing mode
+    const bool sign_mode_;
+
+    der_signatures generated_signatures_;
+    data_stack signing_keys_;
 
 private:
     using primary_stack = stack<Stack>;

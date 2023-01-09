@@ -297,6 +297,18 @@ BOOST_AUTO_TEST_CASE(script__from_string__empty__success)
     BOOST_REQUIRE(instance.ops().empty());
 }
 
+BOOST_AUTO_TEST_CASE(script__from_string__p2pkh__success)
+{
+    const script instance("dup hash160 [abe507d92d415f688f3c22ca9689404df66edb5e] checksigverify");
+    BOOST_REQUIRE(instance.is_valid());
+
+    const auto& ops = instance.ops();
+    BOOST_REQUIRE(ops[0] == opcode::dup);
+    BOOST_REQUIRE(ops[1] == opcode::hash160);
+    BOOST_REQUIRE_EQUAL(ops[2].to_string(forks::no_rules), "[abe507d92d415f688f3c22ca9689404df66edb5e]");
+    BOOST_REQUIRE(ops[3] == opcode::checksigverify);
+}
+
 BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
 {
     const script instance(script_2_of_3_multisig);

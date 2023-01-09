@@ -143,6 +143,11 @@ public:
     code accept(const context& state) const NOEXCEPT;
     code connect(const context& state) const NOEXCEPT;
 
+    // Signing (for use in wallets)
+    // ------------------------------------------------------------------------
+    endorsements generate_signatures(const uint8_t input_index,
+        const context& state) const;
+
 protected:
     transaction(uint32_t version, const chain::inputs_cptr& inputs,
         const chain::outputs_cptr& outputs, uint32_t locktime, bool segregated,

@@ -1296,6 +1296,18 @@ code transaction::connect(const context& state) const NOEXCEPT
     return error::transaction_success;
 }
 
+// Sign
+// ------------------------------------------------------------------------
+
+endorsements transaction::generate_signatures(const uint8_t input_index,
+    const context& state) const
+{
+  endorsements signatures;
+  machine::interpreter<machine::contiguous_stack>::connect(state, *this,
+      input_index, signatures);
+  return signatures;
+}
+
 // JSON value convertors.
 // ----------------------------------------------------------------------------
 

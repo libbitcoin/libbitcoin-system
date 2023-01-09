@@ -20,6 +20,10 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 
 #include "bitcoin/system/chain/prevout.hpp"
+#include "bitcoin/system/crypto/secp256k1.hpp"
+#include "bitcoin/system/data/data_chunk.hpp"
+#include "bitcoin/system/machine/interpreter.hpp"
+#include "bitcoin/system/machine/program.hpp"
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/operation.hpp>
@@ -1025,6 +1029,10 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_check_sig_verify() NOEXCEPT
 {
+    hash_digest hash;
+    ec_signature sig;
+    data_chunk secret_key_chunk;
+
     if (state::stack_size() < 2)
         return error::op_check_sig_verify1;
 
@@ -1039,16 +1047,22 @@ op_check_sig_verify() NOEXCEPT
     if (endorsement->empty())
         return error::op_check_sig_verify3;
 
-    hash_digest hash;
-    ec_signature sig;
+    if (state::sign_mode_) {
+        secret_key_chunk.resize(ec_secret_size);
+        std::copy_n(endorsement->begin(), ec_secret_size, secret_key_chunk.begin());
+        if (!state::prepare(sig, secret_key_chunk, hash, endorsement))
+            return error::op_check_sig_verify_parse;
+        der_signature encoded_sig;
+        encode_signature(encoded_sig, sig);
+        state::generated_signatures_.emplace_back(encoded_sig);
+    } else {
+        // Parse endorsement into DER signature into an EC signature.
+        // Also generates signature hash from endorsement sighash flags.
+        // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
+        if (!state::prepare(sig, *key, hash, endorsement))
+            return error::op_check_sig_verify_parse;
+    }
 
-    // Parse endorsement into DER signature into an EC signature.
-    // Also generates signature hash from endorsement sighash flags.
-    // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
-    if (!state::prepare(sig, *key, hash, endorsement))
-        return error::op_check_sig_verify_parse;
-
-    // TODO: for signing mode - make key mutable and return above.
     return system::verify_signature(*key, hash, sig) ?
         error::op_success : error::op_check_sig_verify4;
 }
@@ -1139,8 +1153,14 @@ op_check_multisig_verify() NOEXCEPT
             BC_POP_WARNING()
 
             // TODO: for signing mode - make key mutable and return above.
-            if (system::verify_signature(*key, hash, sig))
+            if (system::verify_signature(*key, hash, sig)){
+                if (state::sign_mode_){
+                    der_signature encoded_sig;
+                    encode_signature(encoded_sig, sig);
+                    state::generated_signatures_.emplace_back(encoded_sig);
+                }
                 ++endorsement;
+            }
         }
     }
 
@@ -1591,7 +1611,29 @@ connect(const context& state, const transaction& tx, uint32_t index) NOEXCEPT
     if (index >= tx.inputs_ptr()->size())
         return error::inputs_overflow;
 
-    return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index));
+    endorsements signatures;
+    return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index), signatures, false);
+}
+
+template <typename Stack>
+code interpreter<Stack>::
+connect(const context& state, const transaction& tx, uint32_t index,
+    endorsements& signatures) NOEXCEPT
+{
+    if (index >= tx.inputs_ptr()->size())
+        return error::inputs_overflow;
+
+    return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index),
+        signatures, true);
+}
+
+template <typename Stack>
+code interpreter<Stack>::
+connect(const context& state, const transaction& tx,
+    const input_iterator& it) NOEXCEPT
+{
+    endorsements signatures;
+    return connect(state, tx, it, signatures, false);
 }
 
 // TODO: Implement original op_codeseparator concatenation [< 0.3.6].
@@ -1599,7 +1641,8 @@ connect(const context& state, const transaction& tx, uint32_t index) NOEXCEPT
 template <typename Stack>
 code interpreter<Stack>::
 connect(const context& state, const transaction& tx,
-    const input_iterator& it) NOEXCEPT
+    const input_iterator& it, endorsements& signatures,
+    const bool sign_mode) NOEXCEPT
 {
     code ec;
     const auto& input = **it;
@@ -1611,6 +1654,9 @@ connect(const context& state, const transaction& tx,
     if ((ec = in_program.run()))
         return ec;
 
+    if (sign_mode)
+        interpreter::collect_signatures(signatures, input_program.generated_signatures());
+
     // Evaluate output script using stack copied from input script evaluation.
     const auto& prevout = input.prevout->script_ptr();
     interpreter out_program(in_program, prevout);
@@ -1618,14 +1664,19 @@ connect(const context& state, const transaction& tx,
     {
         return ec;
     }
-    else if (!out_program.is_true(false))
+
+    if (sign_mode)
+        interpreter::collect_signatures(signatures, out_program.generated_signatures());
+    
+    if (!out_program.is_true(false))
     {
         return error::stack_false;
     }
-    else if (prevout->is_pay_to_script_hash(state.forks))
+
+    if (prevout->is_pay_to_script_hash(state.forks))
     {
         // Because output script pushed script hash program (bip16).
-        if ((ec = connect_embedded(state, tx, it, in_program)))
+        if ((ec = connect_embedded(state, tx, it, in_program, signatures, sign_mode)))
             return ec;
     }
     else if (prevout->is_pay_to_witness(state.forks))
@@ -1635,7 +1686,7 @@ connect(const context& state, const transaction& tx,
             return error::dirty_witness;
 
         // Because output script pushed version and witness program (bip141).
-        if ((ec = connect_witness(state, tx, it, *prevout)))
+        if ((ec = connect_witness(state, tx, it, *prevout, signatures, sign_mode)))
             return ec;
     }
     else if (!input.witness().stack().empty())
@@ -1653,7 +1704,8 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 template <typename Stack>
 code interpreter<Stack>::connect_embedded(const context& state,
     const transaction& tx, const input_iterator& it,
-    interpreter& in_program) NOEXCEPT
+    interpreter& in_program, endorsements& signatures,
+    const bool sign_mode) NOEXCEPT
 {
     code ec;
     const auto& input = **it;
@@ -1674,14 +1726,17 @@ code interpreter<Stack>::connect_embedded(const context& state,
     {
         return error::stack_false;
     }
-    else if (prevout->is_pay_to_witness(state.forks))
+    if (sign_mode)
+        interpreter::collect_signatures(signatures,
+            out_program.generated_signatures());
+    if (prevout->is_pay_to_witness(state.forks))
     {
         // The input script must be a push of the embedded_script (bip141).
         if (input.script().ops().size() != one)
             return error::dirty_witness;
 
         // Because output script pushed version/witness program (bip141).
-        if ((ec = connect_witness(state, tx, it, *prevout)))
+        if ((ec = connect_witness(state, tx, it, *prevout, signatures, sign_mode)))
             return ec;
     }
     else if (!input.witness().stack().empty())
@@ -1699,7 +1754,8 @@ BC_POP_WARNING()
 template <typename Stack>
 code interpreter<Stack>::connect_witness(const context &state,
     const transaction& tx, const input_iterator& it,
-    const script& prevout) NOEXCEPT
+    const script& prevout, endorsements& signatures,
+    const bool sign_mode) NOEXCEPT
 {
     const auto& input = **it;
     const auto version = prevout.version();
@@ -1716,9 +1772,14 @@ code interpreter<Stack>::connect_witness(const context &state,
                 return error::invalid_witness;
 
             // A defined version indicates bip141 is active.
-            interpreter program(tx, it, script, state.forks, version, stack);
+            interpreter program(tx, it, script, state.forks, version, stack, sign_mode);
             if ((ec = program.run()))
                 return ec;
+
+            if (sign_mode){
+                interpreter::collect_signatures(signatures,
+                    witness_program.generated_signatures());
+            }
 
             // A v0 script must succeed with a clean true stack (bip141).
             return program.is_true(true) ? error::script_success :
@@ -1733,6 +1794,23 @@ code interpreter<Stack>::connect_witness(const context &state,
         default:
             return error::unversioned_script;
     }
+}
+
+template <typename Stack>
+void interpreter<Stack>::
+interpreter::collect_signatures(endorsements& target,
+    const endorsements& signatures_to_collect)
+{
+  target.insert(target.end(), signatures_to_collect.begin(),
+      signatures_to_collect.end());
+}
+
+template <typename Stack>
+void interpreter<Stack>::
+interpreter::collect_signing_keys(data_stack& target,
+    const data_stack& keys_to_collect)
+{
+  target.insert(target.end(), keys_to_collect.begin(), keys_to_collect.end());
 }
 
 } // namespace machine
