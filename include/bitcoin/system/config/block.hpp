@@ -30,16 +30,9 @@ namespace config {
 
 /// Serialization helper for chain::block.
 class BC_API block
+  : public chain::block
 {
 public:
-    /// Defaults.
-    block(block&&) = default;
-    block(const block&) = default;
-    block& operator=(block&&) = default;
-    block& operator=(const block&) = default;
-    ~block() = default;
-
-    /// Constructors.
     block() NOEXCEPT;
     block(chain::block&& value) NOEXCEPT;
     block(const chain::block& value) NOEXCEPT;
@@ -47,21 +40,10 @@ public:
 
     std::string to_string() const NOEXCEPT;
 
-    /// Operators.
-
-    block& operator=(chain::block&& value) NOEXCEPT;
-    block& operator=(const chain::block& value) NOEXCEPT;
-    bool operator==(const block& other) const NOEXCEPT;
-
-    operator const chain::block&() const NOEXCEPT;
-
     friend std::istream& operator>>(std::istream& stream,
         block& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
         const block& argument) NOEXCEPT;
-
-private:
-    chain::block value_;
 };
 
 } // namespace config

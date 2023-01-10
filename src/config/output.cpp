@@ -65,17 +65,17 @@ static std::string encode_output(const chain::output& output) NOEXCEPT
 }
 
 output::output() NOEXCEPT
-  : value_()
+  : chain::output()
 {
 }
 
 output::output(chain::output&& value) NOEXCEPT
-  : value_(std::move(value))
+  : chain::output(std::move(value))
 {
 }
 
 output::output(const chain::output& value) NOEXCEPT
-  : value_(value)
+  : chain::output(value)
 {
 }
 
@@ -84,18 +84,12 @@ output::output(const std::string& tuple) THROWS
 {
     std::istringstream(tuple) >> *this;
 }
-
-output::operator const chain::output&() const NOEXCEPT
-{
-    return value_;
-}
-
 std::istream& operator>>(std::istream& stream, output& argument) THROWS
 {
     std::string tuple;
     stream >> tuple;
 
-    if (!decode_output(argument.value_, tuple))
+    if (!decode_output(argument, tuple))
         throw istream_exception(tuple);
 
     return stream;
@@ -103,7 +97,7 @@ std::istream& operator>>(std::istream& stream, output& argument) THROWS
 
 std::ostream& operator<<(std::ostream& stream, const output& argument) NOEXCEPT
 {
-    stream << encode_output(argument.value_);
+    stream << encode_output(argument);
     return stream;
 }
 

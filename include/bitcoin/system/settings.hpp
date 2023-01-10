@@ -21,6 +21,7 @@
 
 #include <string>
 #include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/config/config.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -57,9 +58,7 @@ public:
     uint32_t proof_of_work_limit;
     uint64_t initial_subsidy_bitcoin;
     uint64_t subsidy_interval_blocks;
-
-    // TODO: make serializable (see config::chain).
-    chain::block genesis_block;
+    config::block genesis_block;
 
     // Fork settings.
     // -------------------------------------------------------------------------

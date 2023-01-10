@@ -30,16 +30,9 @@ namespace config {
 
 /// Serialization helper for chain::header.
 class BC_API header
+  : public chain::header
 {
 public:
-    /// Defaults.
-    header(header&&) = default;
-    header(const header&) = default;
-    header& operator=(header&&) = default;
-    header& operator=(const header&) = default;
-    ~header() = default;
-
-    /// Constructors.
     header() NOEXCEPT;
     header(chain::header&& value) NOEXCEPT;
     header(const chain::header& value) NOEXCEPT;
@@ -47,17 +40,10 @@ public:
 
     ////std::string to_string() const NOEXCEPT;
 
-    /// Operators.
-
-    operator const chain::header&() const NOEXCEPT;
-
     friend std::istream& operator>>(std::istream& stream,
         header& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
         const header& argument) NOEXCEPT;
-
-private:
-    chain::header value_;
 };
 
 } // namespace config

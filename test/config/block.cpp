@@ -21,7 +21,7 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 
-BOOST_AUTO_TEST_SUITE(block_tests)
+BOOST_AUTO_TEST_SUITE(config_block_tests)
 
 using namespace bc::system::config;
 
@@ -46,56 +46,114 @@ static const std::string encoded_genesis_block =
     "00000000";
 
 
-static const auto genesis_block = block(encoded_genesis_block);
-
-// ------------------------------------------------------------------------- //
-
-BOOST_AUTO_TEST_SUITE(block__construct)
+static const config::block genesis_config{ encoded_genesis_block };
+static const chain::block genesis_chain{ genesis_config };
 
 BOOST_AUTO_TEST_CASE(block__construct__default)
 {
-    const block block;
+    const block block{};
     BOOST_REQUIRE_EQUAL(block.to_string(), std::string(162, '0'));
 }
 
 BOOST_AUTO_TEST_CASE(block__construct__copy__expected)
 {
-    const block block(genesis_block);
-    BOOST_REQUIRE_EQUAL(block, genesis_block);
+    const block block(genesis_config);
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
 }
 
-BOOST_AUTO_TEST_CASE(block__copy_assign__always__expected)
+BOOST_AUTO_TEST_CASE(block__construct__move__expected)
 {
-    block block;
-    block = genesis_block;
-    BOOST_REQUIRE_EQUAL(block, genesis_block);
+    auto genesis = genesis_config;
+    const block block(std::move(genesis));
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
+}
+
+BOOST_AUTO_TEST_CASE(block__construct__chain_copy__expected)
+{
+    const block block(genesis_chain);
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
+}
+
+BOOST_AUTO_TEST_CASE(block__construct__chain_move__expected)
+{
+    chain::block genesis = genesis_config;
+    const block block(std::move(genesis));
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
 }
 
 BOOST_AUTO_TEST_CASE(block__construct__string__expected)
 {
     const block block(encoded_genesis_block);
-    BOOST_REQUIRE_EQUAL(block, genesis_block);
+    BOOST_REQUIRE_EQUAL(block.to_string(), encoded_genesis_block);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE(block__assign__copy__expected)
+{
+    block block{};
+    block = genesis_config;
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
+}
 
-// ------------------------------------------------------------------------- //
+BOOST_AUTO_TEST_CASE(block__assign__move__expected)
+{
+    auto genesis = genesis_config;
+    block block{};
+    block = std::move(genesis);
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
+}
 
-BOOST_AUTO_TEST_SUITE(block__istream)
+BOOST_AUTO_TEST_CASE(block__assign__chain_copy__expected)
+{
+    block block{};
+    block = genesis_chain;
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
+}
+
+BOOST_AUTO_TEST_CASE(block__assign__chain_move__expected)
+{
+    auto genesis = genesis_chain;
+    block block{};
+    block = std::move(genesis);
+    BOOST_REQUIRE_EQUAL(block, genesis_config);
+}
+
+BOOST_AUTO_TEST_CASE(block__equality__equal__true)
+{
+    const block block{ genesis_config };
+    BOOST_REQUIRE(block == genesis_config);
+}
+
+BOOST_AUTO_TEST_CASE(block__equality__not_equal__false)
+{
+    const block block{};
+    BOOST_REQUIRE(!(block == genesis_config));
+}
+
+BOOST_AUTO_TEST_CASE(block__inequality__equal__false)
+{
+    const block block{ genesis_config };
+    BOOST_REQUIRE(!(block != genesis_config));
+}
+
+BOOST_AUTO_TEST_CASE(block__inequality__not_equal__true)
+{
+    const block block{};
+    BOOST_REQUIRE(block != genesis_config);
+}
+
+BOOST_AUTO_TEST_CASE(block__equality__chain__expected)
+{
+    const block block{};
+    BOOST_REQUIRE(block != genesis_chain);
+}
 
 BOOST_AUTO_TEST_CASE(block__istream__populated__expected)
 {
-    block deserialized;
+    block deserialized{};
     std::stringstream serialized(encoded_genesis_block);
     serialized >> deserialized;
     BOOST_REQUIRE_EQUAL(deserialized.to_string(), encoded_genesis_block);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
-
-// ------------------------------------------------------------------------- //
-
-BOOST_AUTO_TEST_SUITE(block__ostream)
 
 BOOST_AUTO_TEST_CASE(block__ostream__empty__expected)
 {
@@ -107,16 +165,14 @@ BOOST_AUTO_TEST_CASE(block__ostream__empty__expected)
 BOOST_AUTO_TEST_CASE(block__ostream__populated__expected)
 {
     std::stringstream serialized;
-    serialized << genesis_block;
+    serialized << genesis_config;
     BOOST_REQUIRE_EQUAL(serialized.str(), encoded_genesis_block);
 }
 
 BOOST_AUTO_TEST_CASE(block__ostream__boost_lexical_cast__expected)
 {
-    const auto serialized = boost::lexical_cast<std::string>(genesis_block);
+    const auto serialized = boost::lexical_cast<std::string>(genesis_config);
     BOOST_REQUIRE_EQUAL(serialized, encoded_genesis_block);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

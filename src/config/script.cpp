@@ -31,23 +31,23 @@ namespace system {
 namespace config {
 
 script::script() NOEXCEPT
-  : value_()
+  : chain::script()
 {
 }
 
 script::script(chain::script&& value) NOEXCEPT
-  : value_(std::move(value))
+  : chain::script(std::move(value))
 {
 }
 
 script::script(const chain::script& value) NOEXCEPT
-  : value_(value)
+  : chain::script(value)
 {
 }
 
 script::script(const data_chunk& value) NOEXCEPT
+  : chain::script(value, false)
 {
-    value_ = chain::script(value, false);
 }
 
 script::script(const std::vector<std::string>& tokens) THROWS
@@ -60,19 +60,14 @@ script::script(const std::string& mnemonic)
     std::istringstream(mnemonic) >> *this;
 }
 
-script::operator const chain::script&() const NOEXCEPT
-{
-    return value_;
-}
-
 std::istream& operator>>(std::istream& stream, script& argument) THROWS
 {
     std::istreambuf_iterator<char> end;
     std::string mnemonic(std::istreambuf_iterator<char>(stream), end);
 
-    argument.value_ = chain::script{ mnemonic };
+    argument = chain::script{ mnemonic };
 
-    if (!argument.value_.is_valid())
+    if (!argument.is_valid())
         throw istream_exception(mnemonic);
 
     return stream;
@@ -80,7 +75,7 @@ std::istream& operator>>(std::istream& stream, script& argument) THROWS
 
 std::ostream& operator<<(std::ostream& stream, const script& argument) NOEXCEPT
 {
-    stream << argument.value_.to_string(chain::forks::all_rules);
+    stream << argument.to_string(chain::forks::all_rules);
     return stream;
 }
 

@@ -30,16 +30,9 @@ namespace config {
 
 /// Serialization helper for chain::output.
 class BC_API output
+  : public chain::output
 {
 public:
-    /// Defaults.
-    output(output&&) = default;
-    output(const output&) = default;
-    output& operator=(output&&) = default;
-    output& operator=(const output&) = default;
-    ~output() = default;
-
-    /// Constructors.
     output() NOEXCEPT;
     output(chain::output&& value) NOEXCEPT;
     output(const chain::output& value) NOEXCEPT;
@@ -47,17 +40,10 @@ public:
 
     ////std::string to_string() const NOEXCEPT;
 
-    /// Operators.
-
-    operator const chain::output&() const NOEXCEPT;
-
     friend std::istream& operator>>(std::istream& stream,
         output& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
         const output& argument) NOEXCEPT;
-
-private:
-    chain::output value_;
 };
 
 } // namespace config

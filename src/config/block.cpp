@@ -31,46 +31,24 @@ namespace system {
 namespace config {
 
 block::block() NOEXCEPT
-  : value_()
+  : chain::block()
 {
 }
 
 block::block(chain::block&& value) NOEXCEPT
-  : value_(std::move(value))
+  : chain::block(std::move(value))
 {
 }
 
 block::block(const chain::block& value) NOEXCEPT
-  : value_(value)
+  : chain::block(value)
 {
 }
 
 block::block(const std::string& base16) THROWS
-  : value_()
+  : block()
 {
     std::istringstream(base16) >> *this;
-}
-
-block& block::operator=(chain::block&& value) NOEXCEPT
-{
-    value_ = std::move(value);
-    return *this;
-}
-
-block& block::operator=(const chain::block& value) NOEXCEPT
-{
-    value_ = value;
-    return *this;
-}
-
-bool block::operator==(const block& other) const NOEXCEPT
-{
-    return value_ == other.value_;
-}
-
-block::operator const chain::block&() const NOEXCEPT
-{
-    return value_;
 }
 
 std::string block::to_string() const NOEXCEPT
@@ -89,9 +67,9 @@ std::istream& operator>>(std::istream& stream, block& argument) THROWS
     if (!decode_base16(bytes, base16))
         throw istream_exception(base16);
 
-    argument.value_ = chain::block{ bytes, true };
+    argument = chain::block{ bytes, true };
 
-    if (!argument.value_.is_valid())
+    if (!argument.is_valid())
         throw istream_exception(base16);
 
     return stream;
@@ -99,7 +77,7 @@ std::istream& operator>>(std::istream& stream, block& argument) THROWS
 
 std::ostream& operator<<(std::ostream& stream, const block& argument) NOEXCEPT
 {
-    stream << encode_base16(argument.value_.to_data(true));
+    stream << encode_base16(argument.to_data(true));
     return stream;
 }
 
