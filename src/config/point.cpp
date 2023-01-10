@@ -65,28 +65,24 @@ static std::string encode_point(const chain::point& point) NOEXCEPT
 }
 
 point::point() NOEXCEPT
-  : value_()
+  : chain::point()
 {
 }
 
 point::point(chain::point&& value) NOEXCEPT
-  : value_(std::move(value))
+  : chain::point(std::move(value))
 {
 }
 
 point::point(const chain::point& value) NOEXCEPT
-  : value_(value)
+  : chain::point(value)
 {
 }
 
 point::point(const std::string& tuple) THROWS
+  : point()
 {
     std::istringstream(tuple) >> *this;
-}
-
-point::operator const chain::point&() const NOEXCEPT
-{
-    return value_;
 }
 
 std::istream& operator>>(std::istream& stream, point& argument) THROWS
@@ -94,7 +90,7 @@ std::istream& operator>>(std::istream& stream, point& argument) THROWS
     std::string tuple;
     stream >> tuple;
 
-    if (!decode_point(argument.value_, tuple))
+    if (!decode_point(argument, tuple))
         throw istream_exception(tuple);
 
     return stream;
@@ -102,7 +98,7 @@ std::istream& operator>>(std::istream& stream, point& argument) THROWS
 
 std::ostream& operator<<(std::ostream& stream, const point& argument) NOEXCEPT
 {
-    stream << encode_point(argument.value_);
+    stream << encode_point(argument);
     return stream;
 }
 

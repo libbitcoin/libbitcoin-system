@@ -30,16 +30,9 @@ namespace config {
 
 /// Serialization helper for chain::script.
 class BC_API transaction
+  : public chain::transaction
 {
 public:
-    /// Defaults.
-    transaction(transaction&&) = default;
-    transaction(const transaction&) = default;
-    transaction& operator=(transaction&&) = default;
-    transaction& operator=(const transaction&) = default;
-    ~transaction() = default;
-
-    /// Constructors.
     transaction() NOEXCEPT;
     transaction(chain::transaction&& value) NOEXCEPT;
     transaction(const chain::transaction& value) NOEXCEPT;
@@ -47,17 +40,10 @@ public:
 
     ////std::string to_string() const NOEXCEPT;
 
-    /// Operators.
-
-    operator const chain::transaction&() const NOEXCEPT;
-
     friend std::istream& operator>>(std::istream& stream,
         transaction& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
         const transaction& argument) NOEXCEPT;
-
-private:
-    chain::transaction value_;
 };
 
 } // namespace config

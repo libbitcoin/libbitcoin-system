@@ -32,16 +32,9 @@ namespace config {
 
 /// Serialization helper for chain::script.
 class BC_API script
+  : public chain::script
 {
 public:
-    /// Defaults.
-    script(script&&) = default;
-    script(const script&) = default;
-    script& operator=(script&&) = default;
-    script& operator=(const script&) = default;
-    ~script() = default;
-
-    /// Constructors.
     script() NOEXCEPT;
     script(chain::script&& value) NOEXCEPT;
     script(const chain::script& value) NOEXCEPT;
@@ -55,17 +48,10 @@ public:
 
     ////std::string to_string() const NOEXCEPT;
 
-    /// Operators.
-
-    operator const chain::script&() const NOEXCEPT;
-
     friend std::istream& operator>>(std::istream& stream,
         script& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
         const script& argument) NOEXCEPT;
-
-private:
-    chain::script value_;
 };
 
 } // namespace config

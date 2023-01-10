@@ -30,18 +30,11 @@ namespace config {
 
 /// Serialization helper for chain::point.
 class BC_API point
+  : public chain::point
 {
 public:
     static const std::string delimiter;
 
-    /// Defaults.
-    point(point&&) = default;
-    point(const point&) = default;
-    point& operator=(point&&) = default;
-    point& operator=(const point&) = default;
-    ~point() = default;
-
-    /// Constructors.
     point() NOEXCEPT;
     point(chain::point&& value) NOEXCEPT;
     point(const chain::point& value) NOEXCEPT;
@@ -49,17 +42,10 @@ public:
 
     ////std::string to_string() const NOEXCEPT;
 
-    /// Operators.
-
-    operator const chain::point&() const NOEXCEPT;
-
     friend std::istream& operator>>(std::istream& stream,
         point& argument) THROWS;
     friend std::ostream& operator<<(std::ostream& stream,
         const point& argument) NOEXCEPT;
-
-private:
-    chain::point value_;
 };
 
 } // namespace config

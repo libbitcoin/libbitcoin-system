@@ -33,29 +33,24 @@ namespace config {
 using namespace boost::program_options;
 
 header::header() NOEXCEPT
-  : value_()
+  : chain::header()
 {
 }
 
 header::header(chain::header&& value) NOEXCEPT
-  : value_(std::move(value))
+  : chain::header(std::move(value))
 {
 }
 
 header::header(const chain::header& value) NOEXCEPT
-  : value_(value)
+  : chain::header(value)
 {
 }
 
-header::header(const std::string& hexcode) THROWS
-  : value_()
+header::header(const std::string& base16) THROWS
+  : header()
 {
-    std::istringstream(hexcode) >> *this;
-}
-
-header::operator const chain::header&() const NOEXCEPT
-{
-    return value_;
+    std::istringstream(base16) >> *this;
 }
 
 std::istream& operator>>(std::istream& stream, header& argument) THROWS
@@ -67,9 +62,9 @@ std::istream& operator>>(std::istream& stream, header& argument) THROWS
     if (!decode_base16(bytes, base16))
         throw istream_exception(base16);
 
-    argument.value_ = chain::header{ bytes };
+    argument = chain::header{ bytes };
 
-    if (!argument.value_.is_valid())
+    if (!argument.is_valid())
         throw istream_exception(base16);
 
     return stream;
@@ -77,7 +72,7 @@ std::istream& operator>>(std::istream& stream, header& argument) THROWS
 
 std::ostream& operator<<(std::ostream& stream, const header& argument) NOEXCEPT
 {
-    stream << encode_base16(argument.value_.to_data());
+    stream << encode_base16(argument.to_data());
     return stream;
 }
 

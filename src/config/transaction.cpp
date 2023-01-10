@@ -33,28 +33,24 @@ namespace config {
 using namespace boost::program_options;
 
 transaction::transaction() NOEXCEPT
-  : value_()
+  : chain::transaction()
 {
 }
 
 transaction::transaction(chain::transaction&& value) NOEXCEPT
-  : value_(std::move(value))
+  : chain::transaction(std::move(value))
 {
 }
 
 transaction::transaction(const chain::transaction& value) NOEXCEPT
-  : value_(value)
+  : chain::transaction(value)
 {
 }
 
 transaction::transaction(const std::string& base16) THROWS
+  : transaction()
 {
     std::istringstream(base16) >> *this;
-}
-
-transaction::operator const chain::transaction&() const NOEXCEPT
-{
-    return value_;
 }
 
 std::istream& operator>>(std::istream& stream,
@@ -67,9 +63,9 @@ std::istream& operator>>(std::istream& stream,
     if (!decode_base16(bytes, base16))
         throw istream_exception(base16);
 
-    argument.value_ = chain::transaction{ bytes, true };
+    argument = chain::transaction{ bytes, true };
 
-    if (!argument.value_.is_valid())
+    if (!argument.is_valid())
         throw istream_exception(base16);
 
     return stream;
@@ -78,7 +74,7 @@ std::istream& operator>>(std::istream& stream,
 std::ostream& operator<<(std::ostream& stream,
     const transaction& argument) NOEXCEPT
 {
-    stream << encode_base16(argument.value_.to_data(true));
+    stream << encode_base16(argument.to_data(true));
     return stream;
 }
 
