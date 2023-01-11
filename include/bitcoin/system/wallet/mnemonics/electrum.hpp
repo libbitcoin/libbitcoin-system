@@ -44,6 +44,8 @@ class BC_API electrum
   : public electrum_v1
 {
 public:
+    DEFAULT5(electrum);
+
     /// Seed prefix types.
     /// The values for old, bip39 and none are not actual prefixes but 
     /// here for consistency when handling electrum exceptional conditions.
@@ -110,7 +112,6 @@ public:
     static long_hash to_seed(const hd_private& key) NOEXCEPT;
 
     electrum() NOEXCEPT;
-    ////electrum(const electrum& other) NOEXCEPT;
     electrum(const electrum_v1& old) NOEXCEPT;
 
     /// Construct from the "recovery seed" (mnemonic phrase).

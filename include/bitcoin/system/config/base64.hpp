@@ -29,23 +29,13 @@ namespace system {
 namespace config {
 
 /// Serialization helper for base64 encoded data.
-class BC_API base64
+class BC_API base64 final
 {
 public:
-    /// Defaults.
-    base64(base64&&) = default;
-    base64(const base64&) = default;
-    base64& operator=(base64&&) = default;
-    base64& operator=(const base64&) = default;
-    ~base64() = default;
-
-    /// Constructors.
     base64() NOEXCEPT;
     base64(data_chunk&& value) NOEXCEPT;
     base64(const data_chunk& value) NOEXCEPT;
     base64(const std::string& base64) THROWS;
-
-    /// Operators.
 
     operator const data_chunk&() const NOEXCEPT;
 

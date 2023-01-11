@@ -39,12 +39,13 @@ class BC_API ec_public
   : public ec_point
 {
 public:
+    DEFAULT5(ec_public);
+
     static const uint8_t mainnet_p2kh;
     static const uint8_t testnet_p2kh;
 
     /// Constructors.
     ec_public() NOEXCEPT;
-    ec_public(const ec_public& other) NOEXCEPT;
     ec_public(const ec_point& point) NOEXCEPT;
     ec_public(const ec_private& secret) NOEXCEPT;
     ec_public(const data_chunk& decoded) NOEXCEPT;
@@ -54,16 +55,12 @@ public:
         bool compress=false) NOEXCEPT;
 
     /// Operators.
-    ec_public& operator=(ec_public other) NOEXCEPT;
     bool operator<(const ec_public& other) const NOEXCEPT;
     bool operator==(const ec_public& other) const NOEXCEPT;
     bool operator!=(const ec_public& other) const NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, ec_public& to);
     friend std::ostream& operator<<(std::ostream& out,
         const ec_public& of) NOEXCEPT;
-
-    // Swap implementation required to properly handle base class.
-    friend void swap(ec_public& left, ec_public& right) NOEXCEPT;
 
     /// Serializer.
     std::string encoded() const NOEXCEPT;

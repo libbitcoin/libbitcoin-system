@@ -37,16 +37,16 @@ class BC_API bitcoin_uri
   : public uri_reader
 {
 public:
+    DEFAULT5(bitcoin_uri);
+
     /// Constructors.
     bitcoin_uri() NOEXCEPT;
-    bitcoin_uri(const bitcoin_uri& other) NOEXCEPT;
     bitcoin_uri(const std::string& uri, bool strict=true) NOEXCEPT;
 
     /// Operators.
     bool operator<(const bitcoin_uri& other) const NOEXCEPT;
     bool operator==(const bitcoin_uri& other) const NOEXCEPT;
     bool operator!=(const bitcoin_uri& other) const NOEXCEPT;
-    bitcoin_uri& operator=(const bitcoin_uri& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, bitcoin_uri& to);
     friend std::ostream& operator<<(std::ostream& out,
         const bitcoin_uri& from) NOEXCEPT;

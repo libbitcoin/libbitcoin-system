@@ -40,6 +40,8 @@ class BC_API hd_private
   : public hd_public
 {
 public:
+    DEFAULT5(hd_private);
+
     static const uint64_t mainnet;
     static const uint64_t testnet;
 
@@ -57,7 +59,6 @@ public:
 
     /// Constructors.
     hd_private() NOEXCEPT;
-    hd_private(const hd_private& other) NOEXCEPT;
     hd_private(const data_chunk& entropy, uint64_t prefixes=mainnet) NOEXCEPT;
     hd_private(const hd_key& private_key) NOEXCEPT;
     hd_private(const hd_key& private_key, uint64_t prefixes) NOEXCEPT;
@@ -76,9 +77,6 @@ public:
     friend std::istream& operator>>(std::istream& in, hd_private& to);
     friend std::ostream& operator<<(std::ostream& out,
         const hd_private& of) NOEXCEPT;
-
-    /// Swap implementation required to properly handle derived class assign.
-    friend void swap(hd_private& left, hd_private& right) NOEXCEPT;
 
     /// Cast operators.
     operator const ec_secret&() const NOEXCEPT;

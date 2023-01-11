@@ -49,6 +49,8 @@ class bit_flipper
     public virtual bitflipper
 {
 public:
+    DEFAULT4(bit_flipper);
+
     /// Constructors.
     bit_flipper(IOStream& stream) NOEXCEPT
       : bit_reader<IOStream>(stream), bit_writer<IOStream>(stream)
@@ -58,12 +60,6 @@ public:
         // bit_reader -> byte_reader (istream&)
         // bit_writer -> byte_writer (ostream&)
     }
-
-    /// Defaults.
-    bit_flipper(bit_flipper&&) = default;
-    bit_flipper(const bit_flipper&) = default;
-    bit_flipper& operator=(bit_flipper&&) = default;
-    bit_flipper& operator=(const bit_flipper&) = default;
 
     /// These overrides eliminate ambiguity resulting from diamond inheritance.
 

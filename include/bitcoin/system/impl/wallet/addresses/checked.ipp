@@ -39,20 +39,6 @@ checked<Prefix, Payload, Checksum>::checked() NOEXCEPT
 }
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::checked(checked&& other) NOEXCEPT
-  : value_(std::move(other.value_))
-{
-    // This may be an invalid instance.
-}
-
-template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>::checked(const checked& other) NOEXCEPT
-  : value_(other.value_)
-{
-    // This may be an invalid instance.
-}
-
-template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::checked(const prefix_type& prefix,
     const payload_type& payload) NOEXCEPT
   : checked(from_payload(prefix, payload))
@@ -86,30 +72,6 @@ checked<Prefix, Payload, Checksum>::from_payload(const prefix_type& version,
 
 // operators
 // ----------------------------------------------------------------------------
-
-template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>&
-checked<Prefix, Payload, Checksum>::operator=(checked&& other) NOEXCEPT
-{
-    if (&other == this)
-        return *this;
-
-    // This may be an invalid instance (if value is unchecked).
-    value_ = std::move(other.value_);
-    return *this;
-}
-
-template <size_t Prefix, size_t Payload, size_t Checksum>
-checked<Prefix, Payload, Checksum>&
-checked<Prefix, Payload, Checksum>::operator=(const checked& other) NOEXCEPT
-{
-    if (&other == this)
-        return *this;
-
-    // This may be an invalid instance (if value is unchecked).
-    value_ = other.value_;
-    return *this;
-}
 
 template <size_t Prefix, size_t Payload, size_t Checksum>
 checked<Prefix, Payload, Checksum>::operator bool() const NOEXCEPT

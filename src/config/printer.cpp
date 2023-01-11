@@ -19,8 +19,6 @@
 #include <bitcoin/system/config/printer.hpp>
 
 ////#include <format>
-#include <string>
-#include <vector>
 #include <boost/format.hpp>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -30,6 +28,10 @@
 
 // We built this because po::options_description.print() sucks.
 // C++20: en.cppreference.com/w/cpp/utility/format/format
+
+namespace libbitcoin {
+namespace system {
+namespace config {
 
 // TODO: parameterize these localized values.
 // Various shared localizable strings.
@@ -62,23 +64,20 @@
 #define BC_PRINTER_SETTING_OPTIONAL_FORMAT "%1% = <%2%>\n"
 #define BC_PRINTER_SETTING_REQUIRED_FORMAT "%1% = %2%\n"
 
-namespace po = boost::program_options;
-using namespace libbitcoin::system;
-using namespace libbitcoin::system::config;
-using boost::format;
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
+using boost::format;
 const int printer::max_arguments = 256;
 
-printer::printer(const po::options_description& options,
-    const po::positional_options_description& arguments,
-    const std::string& application, const std::string& description,
-    const std::string& command) NOEXCEPT
+printer::printer(const options_metadata& options,
+    const arguments_metadata& arguments, const std::string& application,
+    const std::string& description, const std::string& command) NOEXCEPT
   : options_(options), arguments_(arguments), application_(application),
     description_(description), command_(command)
 {
 }
 
-printer::printer(const po::options_description& settings,
+printer::printer(const options_metadata& settings,
     const std::string& application, const std::string& description) NOEXCEPT
   : options_(settings), application_(application), description_(description)
 {
@@ -140,9 +139,9 @@ static std::string format_row_name(const parameter& value) NOEXCEPT
             value.short_name() % value.long_name()).str();
 }
 
-static bool match_positional(bool positional, const parameter& value)
+static bool match_positional(bool positional, const parameter& value) NOEXCEPT
 {
-    auto positioned = value.position() != parameter::not_positional;
+    const auto positioned = value.position() != parameter::not_positional;
     return positioned == positional;
 }
 
@@ -507,3 +506,9 @@ void printer::settings(std::ostream& output) NOEXCEPT
 
     output << std::endl << setting_table;
 }
+
+BC_POP_WARNING()
+
+} // namespace config
+} // namespace system
+} // namespace libbitcoin

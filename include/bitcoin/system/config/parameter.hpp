@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_PARAMETER_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_PARAMETER_HPP
 
-#include <string>
 #include <utility>
 #include <vector>
 #include <bitcoin/system/define.hpp>
@@ -30,8 +29,8 @@ namespace config {
 
 /// Shorthand for property declarations in parameter class.
 #define BC_PROPERTY(type, name) \
-    public: virtual type name() const NOEXCEPT { return name##_; } \
-    public: virtual void set_##name(type value) NOEXCEPT { name##_ = value; } \
+    public: type name() const NOEXCEPT { return name##_; } \
+    public: void set_##name(type value) NOEXCEPT { name##_ = value; } \
     private: type name##_
 
 /// A tuple to represent a positional argument name count.
@@ -46,8 +45,7 @@ typedef std::vector<parameter> parameter_list;
 
 /// Not thread safe, non-virtual.
 /// Normalized storage for command line arguments and options.
-/// TEST: option_metadata does not provide virtual methods so must wrap to mock.
-class BC_API parameter
+class BC_API parameter final
 {
 private:
     /// Enumerated options for selecting the canonical name.
@@ -73,13 +71,10 @@ public:
     /// The character used to prefix command line options.
     static const char option_prefix_char;
 
-    virtual ~parameter() NOEXCEPT;
-
-     /// Populate with normalized parameter data.
+    /// Populate with normalized parameter data.
     /// option     The metadata of the option to test.
     /// arguments  The list of supported positional arguments.
-    virtual void initialize(
-        const boost::program_options::option_description& option,
+    void initialize(const option_metadata& option,
         const argument_list& arguments) NOEXCEPT;
 
     /// Determine if the option is an argument by testing for it by name in the
@@ -87,25 +82,22 @@ public:
     /// option     The metadata of the option to position.
     /// arguments  The list of supported positional arguments.
     /// return     Relative position or -1 if not positional.
-    virtual int position(
-        const boost::program_options::option_description& option,
+    int position(const option_metadata& option,
         const argument_list& arguments) const NOEXCEPT;
 
     /// Get the value for the args_limit property.
     /// position   The option's position (or -1 of arg).
     /// arguments  The argument names list.
     /// return     The arguments limit value for the option.
-    unsigned arguments_limit(int position,
-        const boost::program_options::option_description& option,
+    unsigned arguments_limit(int position, const option_metadata& option,
         const argument_list& arguments) const NOEXCEPT;
 
     /// Get the option's short name character or zero.
     /// option  The metadata of the option to test.
     /// return  The short name character or null character.
-    virtual char short_name(
-        const boost::program_options::option_description& option) const NOEXCEPT;
+    char short_name(const option_metadata& option) const NOEXCEPT;
 
-    /// Virtual property declarations.
+    /// Property declarations.
     BC_PROPERTY(int, position);
     BC_PROPERTY(bool, required);
     BC_PROPERTY(char, short_name);

@@ -435,7 +435,7 @@ public:
 
     /// Default script is an invalid empty script object.
     script() NOEXCEPT;
-    ~script() NOEXCEPT;
+    virtual ~script() NOEXCEPT;
 
     /// Metadata is defaulted on copy/assign.
     script(script&& other) NOEXCEPT;

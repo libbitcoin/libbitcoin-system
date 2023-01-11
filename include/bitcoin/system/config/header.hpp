@@ -29,7 +29,7 @@ namespace system {
 namespace config {
 
 /// Serialization helper for chain::header.
-class BC_API header
+class BC_API header final
   : public chain::header
 {
 public:

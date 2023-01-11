@@ -53,11 +53,6 @@ ec_private::ec_private(const ec_scalar& scalar, uint8_t address) NOEXCEPT
 {
 }
 
-ec_private::ec_private(const ec_private& other) NOEXCEPT
-  : ec_scalar(other), compress_(other.compress_), versions_(other.versions_)
-{
-}
-
 ec_private::ec_private(const data_chunk& entropy, uint8_t address) NOEXCEPT
   : ec_private(from_entropy(entropy, address))
 {
@@ -223,12 +218,6 @@ payment_address ec_private::to_payment_address() const NOEXCEPT
 // Operators.
 // ----------------------------------------------------------------------------
 
-ec_private& ec_private::operator=(ec_private other) NOEXCEPT
-{
-    swap(*this, other);
-    return *this;
-}
-
 bool ec_private::operator<(const ec_private& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
@@ -262,17 +251,6 @@ std::ostream& operator<<(std::ostream& out, const ec_private& of) NOEXCEPT
 {
     out << of.encoded();
     return out;
-}
-
-// friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(ec_private& left, ec_private& right) NOEXCEPT
-{
-    using std::swap;
-
-    // Must be unqualified (no std namespace).
-    swap(static_cast<ec_scalar&>(left), static_cast<ec_scalar&>(right));
-    swap(left.compress_, right.compress_);
-    swap(left.versions_, right.versions_);
 }
 
 } // namespace wallet

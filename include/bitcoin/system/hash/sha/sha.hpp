@@ -28,8 +28,8 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
-struct shak_t {};
-struct shah_t {};
+struct shak_t{};
+struct shah_t{};
 
 template <size_t Strength, size_t Rounds,
     bool_if<Strength == 160 || Strength == 256 || Strength == 512> = true,

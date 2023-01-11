@@ -65,8 +65,6 @@ BC_API base2048_chunk base2048_pack(const data_chunk& unpacked) NOEXCEPT;
 /// Unpack any vector of 11 bit bytes to a vector of 8 bit bytes.
 BC_API data_chunk base2048_unpack(const base2048_chunk& packed) NOEXCEPT;
 
-// TODO: en.cppreference.com/w/cpp/language/user_literal
-
 } // namespace system
 } // namespace libbitcoin
 

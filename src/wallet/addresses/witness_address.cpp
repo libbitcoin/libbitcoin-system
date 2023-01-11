@@ -62,19 +62,6 @@ witness_address::witness_address() NOEXCEPT
 {
 }
 
-// move
-witness_address::witness_address(witness_address&& other) NOEXCEPT
-  : program_(std::move(other.program_)), prefix_(other.prefix_),
-    version_(other.version_)
-{
-}
-
-// copy
-witness_address::witness_address(const witness_address& other) NOEXCEPT
-  : program_(other.program_), prefix_(other.prefix_), version_(other.version_)
-{
-}
-
 // fully specified by address
 witness_address::witness_address(const std::string& address,
     bool strict) NOEXCEPT
@@ -433,23 +420,6 @@ chain::script witness_address::script() const NOEXCEPT
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-witness_address& witness_address::operator=(witness_address&& other) NOEXCEPT
-{
-    program_ = std::move(other.program_);
-    prefix_ = other.prefix_;
-    version_ = other.version_;
-    return *this;
-}
-
-witness_address& witness_address::operator=(
-    const witness_address& other) NOEXCEPT
-{
-    program_ = other.program_;
-    prefix_ = other.prefix_;
-    version_ = other.version_;
-    return *this;
-}
 
 bool witness_address::operator<(const witness_address& other) const NOEXCEPT
 {

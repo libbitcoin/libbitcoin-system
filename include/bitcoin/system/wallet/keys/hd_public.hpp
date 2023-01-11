@@ -60,6 +60,8 @@ class hd_private;
 class BC_API hd_public
 {
 public:
+    DEFAULT5(hd_public);
+
     static const uint32_t mainnet;
     static const uint32_t testnet;
 
@@ -70,7 +72,6 @@ public:
 
     /// Constructors.
     hd_public() NOEXCEPT;
-    hd_public(const hd_public& other) NOEXCEPT;
     hd_public(const hd_key& public_key) NOEXCEPT;
     hd_public(const hd_key& public_key, uint32_t prefix) NOEXCEPT;
     hd_public(const std::string& encoded) NOEXCEPT;
@@ -80,7 +81,6 @@ public:
     bool operator<(const hd_public& other) const NOEXCEPT;
     bool operator==(const hd_public& other) const NOEXCEPT;
     bool operator!=(const hd_public& other) const NOEXCEPT;
-    hd_public& operator=(const hd_public& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, hd_public& to);
     friend std::ostream& operator<<(std::ostream& out,
         const hd_public& of) NOEXCEPT;

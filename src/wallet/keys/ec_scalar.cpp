@@ -36,16 +36,6 @@ ec_scalar::ec_scalar() NOEXCEPT
 {
 }
 
-ec_scalar::ec_scalar(ec_scalar&& scalar) NOEXCEPT
-  : secret_(std::move(scalar.secret_))
-{
-}
-
-ec_scalar::ec_scalar(const ec_scalar& scalar) NOEXCEPT
-  : secret_(scalar.secret_)
-{
-}
-
 ec_scalar::ec_scalar(ec_secret&& secret) NOEXCEPT
   : secret_(std::move(secret))
 {
@@ -63,24 +53,6 @@ ec_scalar::ec_scalar(int64_t value) NOEXCEPT
 
 // assignment operators
 // ----------------------------------------------------------------------------
-
-ec_scalar& ec_scalar::operator=(ec_scalar&& scalar) NOEXCEPT
-{
-    if (&scalar == this)
-        return *this;
-
-    secret_ = std::move(scalar.secret_);
-    return *this;
-}
-
-ec_scalar& ec_scalar::operator=(const ec_scalar& scalar) NOEXCEPT
-{
-    if (&scalar == this)
-        return *this;
-
-    secret_ = scalar.secret_;
-    return *this;
-}
 
 ec_scalar& ec_scalar::operator=(ec_secret&& secret) NOEXCEPT
 {

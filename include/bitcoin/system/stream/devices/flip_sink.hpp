@@ -34,18 +34,14 @@ class flip_sink
   : public copy_sink<Container>
 {
 public:
+    DEFAULT5(flip_sink);
+
     struct category
       : ios::seekable, ios::direct_tag
     {
     };
 
     using copy_sink<Container>::copy_sink;
-    
-    flip_sink(flip_sink&&) = default;
-    flip_sink(const flip_sink&) = default;
-    flip_sink& operator=(flip_sink&&) = default;
-    flip_sink& operator=(const flip_sink&) = default;
-    ~flip_sink() override = default;
 };
 
 } // namespace system

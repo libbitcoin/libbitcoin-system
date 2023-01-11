@@ -20,19 +20,10 @@
 #define LIBBITCOIN_SYSTEM_CONFIG_PARSER_HPP
 
 #include <filesystem>
-#include <string>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-// These are just annoyingly long.
-typedef boost::program_options::variables_map variables_map;
-typedef boost::program_options::option_description option_metadata;
-typedef boost::program_options::options_description options_metadata;
-typedef boost::program_options::positional_options_description
-    arguments_metadata;
-
 namespace config {
 
 #define PROPERTY(type, property) \
@@ -50,8 +41,6 @@ public:
         const std::string& name) NOEXCEPT;
     static std::filesystem::path get_config_option(variables_map& variables,
         const std::string& name) NOEXCEPT;
-
-    virtual ~parser() NOEXCEPT;
 
     /// Load command line options (named).
     virtual options_metadata load_options() THROWS = 0;

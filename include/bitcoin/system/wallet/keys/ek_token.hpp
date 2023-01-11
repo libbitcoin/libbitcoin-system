@@ -34,17 +34,17 @@ namespace wallet {
 class BC_API ek_token
 {
 public:
+    DEFAULT5(ek_token);
+
     /// Constructors.
     ek_token() NOEXCEPT;
     ek_token(const std::string& encoded) NOEXCEPT;
     ek_token(const encrypted_token& key) NOEXCEPT;
-    ek_token(const ek_token& other) NOEXCEPT;
 
     /// Operators.
     bool operator<(const ek_token& other) const NOEXCEPT;
     bool operator==(const ek_token& other) const NOEXCEPT;
     bool operator!=(const ek_token& other) const NOEXCEPT;
-    ek_token& operator=(const ek_token& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, ek_token& to);
     friend std::ostream& operator<<(std::ostream& out,
         const ek_token& of) NOEXCEPT;

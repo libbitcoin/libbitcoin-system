@@ -19,7 +19,6 @@
 #include <bitcoin/system/config/parser.hpp>
 
 #include <filesystem>
-#include <string>
 #include <sstream>
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
 
@@ -31,9 +30,7 @@ using namespace std::filesystem;
 using namespace boost::program_options;
 using namespace boost::system;
 
-parser::~parser() NOEXCEPT
-{
-}
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // The error is obtained from boost, which circumvents our localization.
 // English-only hack to patch missing arg name in boost exception message.
@@ -116,6 +113,8 @@ bool parser::load_configuration_variables(variables_map& variables,
     store(config, variables);
     return false;
 }
+
+BC_POP_WARNING()
 
 } // namespace config
 } // namespace system

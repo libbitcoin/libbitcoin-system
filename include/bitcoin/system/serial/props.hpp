@@ -40,6 +40,8 @@ namespace system {
 class BC_API props
 {
 public:
+    DEFAULT5(props);
+
     typedef enum class truth
     {
         true_,
@@ -52,10 +54,6 @@ public:
         info,
         xml
     } format;
-
-    /// Move/copy construct.
-    props(props&& other) NOEXCEPT;
-    props(const props& other) NOEXCEPT;
 
     /// "null" property value.
     props() NOEXCEPT;
@@ -118,6 +116,8 @@ class BC_API object_props
   : public props
 {
 public:
+    DEFAULT5(object_props);
+
     /// Construct an object properties value, each child is explicitly named.
     object_props() NOEXCEPT;
     object_props(std::initializer_list<named_props> values) NOEXCEPT;

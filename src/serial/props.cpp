@@ -36,20 +36,6 @@ static const std::string null_text{ "null" };
 static const std::string true_text{ "true" };
 static const std::string false_text{ "false" };
 
-props::props(props&& other) NOEXCEPT
-  : type_(other.type_),
-    value_(std::move(other.value_)),
-    children_(std::move(other.children_))
-{
-}
-
-props::props(const props& other) NOEXCEPT
-  : type_(other.type_),
-    value_(other.value_),
-    children_(other.children_)
-{
-}
-
 props::props() NOEXCEPT
   : props(type::null_)
 {

@@ -33,20 +33,13 @@ namespace system {
 class BC_API binary
 {
 public:
+    DEFAULT5(binary);
+
     /// True if all characters are '0' or '1'.
     static bool is_base2(const std::string& text) NOEXCEPT;
 
     /// Constructors.
-
     binary() NOEXCEPT;
-
-    /// Defaults.
-    binary(binary&&) = default;
-    binary(const binary&) = default;
-    binary& operator=(binary&&) = default;
-    binary& operator=(const binary&) = default;
-    ~binary() = default;
-
     binary(const std::string& bits) NOEXCEPT;
     binary(size_t bits, const data_slice& data) NOEXCEPT;
 

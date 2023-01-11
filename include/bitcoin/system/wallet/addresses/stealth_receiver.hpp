@@ -33,6 +33,8 @@ namespace wallet {
 class BC_API stealth_receiver
 {
 public:
+    DEFAULT5(stealth_receiver);
+
     /// Constructors.
     stealth_receiver(const ec_secret& scan_private,
         const ec_secret& spend_private, const binary& filter,

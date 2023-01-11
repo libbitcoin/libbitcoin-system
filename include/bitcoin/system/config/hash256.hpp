@@ -29,27 +29,17 @@ namespace system {
 namespace config {
 
 /// Serialization helper for a bitcoin 256 bit hash.
-class BC_API hash256
+class BC_API hash256 final
 {
 public:
     typedef std::vector<hash256> list;
 
-    /// Defaults.
-    hash256(hash256&&) = default;
-    hash256(const hash256&) = default;
-    hash256& operator=(hash256&&) = default;
-    hash256& operator=(const hash256&) = default;
-    ~hash256() = default;
-
-    /// Constructors.
     hash256() NOEXCEPT;
     hash256(hash_digest&& value) NOEXCEPT;
     hash256(const hash_digest& value) NOEXCEPT;
     hash256(const std::string& base16) THROWS;
 
     std::string to_string() const NOEXCEPT;
-
-    /// Operators.
 
     operator const hash_digest&() const NOEXCEPT;
 

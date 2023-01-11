@@ -39,11 +39,6 @@ ek_token::ek_token(const std::string& encoded) NOEXCEPT
 {
 }
 
-ek_token::ek_token(const ek_token& other) NOEXCEPT
-  : valid_(other.valid_), token_(other.token_)
-{
-}
-
 ek_token::ek_token(const encrypted_token& value) NOEXCEPT
   : valid_(true), token_(value)
 {
@@ -58,7 +53,7 @@ ek_token ek_token::from_string(const std::string& encoded) NOEXCEPT
 
     encrypted_token key;
     return decode_base58(key, encoded) && verify_checksum(key) ?
-        ek_token(key) : ek_token();
+        ek_token{ key } : ek_token{};
 }
 
 // Cast operators.
@@ -93,13 +88,6 @@ const encrypted_token& ek_token::token() const NOEXCEPT
 // Operators.
 // ----------------------------------------------------------------------------
 
-ek_token& ek_token::operator=(const ek_token& other) NOEXCEPT
-{
-    valid_ = other.valid_;
-    token_ = other.token_;
-    return *this;
-}
-
 bool ek_token::operator<(const ek_token& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
@@ -119,7 +107,7 @@ std::istream& operator>>(std::istream& in, ek_token& to)
 {
     std::string value;
     in >> value;
-    to = ek_token(value);
+    to.from_string(value);
 
     if (!to)
         throw istream_exception(value);

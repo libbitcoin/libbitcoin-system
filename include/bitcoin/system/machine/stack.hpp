@@ -47,6 +47,7 @@ template <typename Container>
 class stack
 {
 public:
+    /// Stack is copied in program construct.
     DEFAULT5(stack);
 
     /// Construct.

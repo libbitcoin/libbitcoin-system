@@ -41,14 +41,10 @@ public:
 
     /// Constructors.
     ec_point() NOEXCEPT;
-    ec_point(ec_point&& point) NOEXCEPT;
-    ec_point(const ec_point& point) NOEXCEPT;
     ec_point(ec_compressed&& compressed) NOEXCEPT;
     ec_point(const ec_compressed& compressed) NOEXCEPT;
 
     /// Operators.
-    ec_point& operator=(ec_point&& point) NOEXCEPT;
-    ec_point& operator=(const ec_point& point) NOEXCEPT;
     ec_point& operator=(ec_compressed&& compressed) NOEXCEPT;
     ec_point& operator=(const ec_compressed& compressed) NOEXCEPT;
     ec_point& operator+=(const ec_point& point) NOEXCEPT;

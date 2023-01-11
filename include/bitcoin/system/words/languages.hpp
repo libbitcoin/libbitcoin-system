@@ -54,12 +54,6 @@ public:
     static string_list split(const std::string& sentence,
         language identifier) NOEXCEPT;
 
-    // constructors
-    // ------------------------------------------------------------------------
-
-    /// Class is not constructable but this is exposed for derived assignment.
-    languages(const languages& other) NOEXCEPT;
-
     // public methods
     // ------------------------------------------------------------------------
 
@@ -91,6 +85,7 @@ public:
 
 protected:
     languages() NOEXCEPT;
+    languages(const languages& other) NOEXCEPT;
     languages(const data_chunk& entropy, const string_list& words,
         language identifier) NOEXCEPT;
 

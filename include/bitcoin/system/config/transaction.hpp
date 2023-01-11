@@ -29,7 +29,7 @@ namespace system {
 namespace config {
 
 /// Serialization helper for chain::script.
-class BC_API transaction
+class BC_API transaction final
   : public chain::transaction
 {
 public:

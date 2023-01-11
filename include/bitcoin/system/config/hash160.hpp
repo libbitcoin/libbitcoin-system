@@ -29,23 +29,13 @@ namespace system {
 namespace config {
 
 /// Serialization helper for a bitcoin 160 bit hash.
-class BC_API hash160
+class BC_API hash160 final
 {
 public:
-    /// Defaults.
-    hash160(hash160&&) = default;
-    hash160(const hash160&) = default;
-    hash160& operator=(hash160&&) = default;
-    hash160& operator=(const hash160&) = default;
-    ~hash160() = default;
-
-    /// Constructors.
     hash160() NOEXCEPT;
     hash160(short_hash&& value) NOEXCEPT;
     hash160(const short_hash& value) NOEXCEPT;
     hash160(const std::string& base16) THROWS;
-
-    /// Operators.
 
     operator const short_hash&() const NOEXCEPT;
 

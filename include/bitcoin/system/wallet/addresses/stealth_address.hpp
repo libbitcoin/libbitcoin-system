@@ -34,6 +34,8 @@ namespace wallet {
 class BC_API stealth_address
 {
 public:
+    DEFAULT5(stealth_address);
+
     /// DEPRECATED: we intend to make p2kh same as payment address versions.
     static const uint8_t mainnet_p2kh;
 
@@ -50,7 +52,6 @@ public:
     stealth_address() NOEXCEPT;
     stealth_address(const data_chunk& decoded) NOEXCEPT;
     stealth_address(const std::string& encoded) NOEXCEPT;
-    stealth_address(const stealth_address& other) NOEXCEPT;
     stealth_address(const binary& filter, const ec_compressed& scan_key,
         const compressed_list& spend_keys, uint8_t signatures=0,
         uint8_t version=mainnet_p2kh) NOEXCEPT;
@@ -59,7 +60,6 @@ public:
     bool operator<(const stealth_address& other) const NOEXCEPT;
     bool operator==(const stealth_address& other) const NOEXCEPT;
     bool operator!=(const stealth_address& other) const NOEXCEPT;
-    stealth_address& operator=(const stealth_address& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, stealth_address& to);
     friend std::ostream& operator<<(std::ostream& out,
         const stealth_address& of) NOEXCEPT;

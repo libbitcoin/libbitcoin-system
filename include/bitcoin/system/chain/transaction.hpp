@@ -49,7 +49,7 @@ public:
 
     /// Default transaction is an invalid object.
     transaction() NOEXCEPT;
-    ~transaction() NOEXCEPT;
+    virtual ~transaction() NOEXCEPT;
 
     /// Metadata is defaulted on copy/assign.
     transaction(transaction&& other) NOEXCEPT;

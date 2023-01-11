@@ -33,6 +33,8 @@ namespace chain {
 class BC_API output
 {
 public:
+    DEFAULT5(output);
+
     typedef std::shared_ptr<const output> cptr;
 
     /// This is a consensus value required by script::generate_signature_hash.
@@ -43,13 +45,6 @@ public:
 
     /// Default output is an invalid object.
     output() NOEXCEPT;
-
-    /// Defaults.
-    output(output&&) = default;
-    output(const output&) = default;
-    output& operator=(output&&) = default;
-    output& operator=(const output&) = default;
-    ~output() = default;
 
     output(uint64_t value, chain::script&& script) NOEXCEPT;
     output(uint64_t value, const chain::script& script) NOEXCEPT;

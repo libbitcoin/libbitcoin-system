@@ -40,7 +40,8 @@ namespace sha {
 /// Vectorization of message schedules and merkle hashes.
 template <typename SHA, bool Compressed = true, bool Vectorized = true,
     bool Cached = true, if_same<typename SHA::T, sha::shah_t> = true>
-class algorithm : algorithm_t
+class algorithm
+  : algorithm_t
 {
 public:
     /// Types.

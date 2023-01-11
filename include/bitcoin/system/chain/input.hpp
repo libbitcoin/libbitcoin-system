@@ -39,6 +39,8 @@ namespace chain {
 class BC_API input
 {
 public:
+    DEFAULT5(input);
+
     typedef std::shared_ptr<const input> cptr;
 
     // Constructors.
@@ -46,13 +48,6 @@ public:
 
     /// Default input is invalid null point, nullptr prevout, invalid metadata.
     input() NOEXCEPT;
-
-    /// Defaults.
-    input(input&&) = default;
-    input(const input&) = default;
-    input& operator=(input&&) = default;
-    input& operator=(const input&) = default;
-    ~input() = default;
 
     input(chain::point&& point, chain::script&& script,
         uint32_t sequence) NOEXCEPT;

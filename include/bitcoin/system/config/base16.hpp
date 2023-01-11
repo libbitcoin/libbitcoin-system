@@ -30,18 +30,9 @@ namespace system {
 namespace config {
 
 /// Serialization helper for base16 encoded data.
-class BC_API base16
+class BC_API base16 final
 {
 public:
-    /// Defaults.
-    base16(base16&&) = default;
-    base16(const base16&) = default;
-    base16& operator=(base16&&) = default;
-    base16& operator=(const base16&) = default;
-    ~base16() = default;
-
-    /// Constructors.
-
     base16() NOEXCEPT;
     base16(data_chunk&& value) NOEXCEPT;
     base16(const data_chunk& value) NOEXCEPT;
@@ -53,8 +44,6 @@ public:
     {
     }
 
-    // Operators.
-    
     // unsafe
     ////operator data_slice() const NOEXCEPT;
     operator const data_chunk&() const NOEXCEPT;

@@ -36,6 +36,8 @@ namespace chain {
 class BC_API operation
 {
 public:
+    DEFAULT5(operation);
+
     typedef std::shared_ptr<const operation> cptr;
 
     // Utilities.
@@ -351,13 +353,6 @@ public:
 
     /// Default operation is any invalid opcode with underflow set.
     operation() NOEXCEPT;
-
-    /// Defaults.
-    operation(operation&&) = default;
-    operation(const operation&) = default;
-    operation& operator=(operation&&) = default;
-    operation& operator=(const operation&) = default;
-    ~operation() = default;
 
     /// Use data constructors for push_data ops.
     operation(opcode code) NOEXCEPT;

@@ -39,6 +39,8 @@ class transaction;
 class BC_API witness
 {
 public:
+    DEFAULT5(witness);
+
     typedef std::shared_ptr<const witness> cptr;
 
     // Constructors.
@@ -46,13 +48,6 @@ public:
 
     /// Default witness is an invalid empty stack object.
     witness() NOEXCEPT;
-
-    /// Defaults.
-    witness(witness&&) = default;
-    witness(const witness&) = default;
-    witness& operator=(witness&&) = default;
-    witness& operator=(const witness&) = default;
-    ~witness() = default;
 
     witness(data_stack&& stack) NOEXCEPT;
     witness(const data_stack& stack) NOEXCEPT;

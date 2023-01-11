@@ -38,6 +38,8 @@ namespace chain {
 class BC_API header
 {
 public:
+    DEFAULT5(header);
+
     typedef std::shared_ptr<const header> cptr;
 
     static constexpr size_t serialized_size() NOEXCEPT
@@ -55,13 +57,6 @@ public:
 
     /// Default header is an invalid object.
     header() NOEXCEPT;
-
-    /// Defaults.
-    header(header&&) = default;
-    header(const header&) = default;
-    header& operator=(header&&) = default;
-    header& operator=(const header&) = default;
-    ~header() = default;
 
     header(uint32_t version, hash_digest&& previous_block_hash,
         hash_digest&& merkle_root, uint32_t timestamp, uint32_t bits,

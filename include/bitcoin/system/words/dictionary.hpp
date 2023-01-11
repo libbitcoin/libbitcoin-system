@@ -35,7 +35,7 @@ namespace words {
 // POD dictionary wrapper with O(n) search and O(1) index.
 // Search order is guaranteed, always returns first match.
 template<size_t Size>
-class dictionary
+class dictionary final
 {
 public:
     typedef std::vector<size_t> search;

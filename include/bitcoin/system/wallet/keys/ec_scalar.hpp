@@ -35,15 +35,11 @@ class BC_API ec_scalar
 public:
     /// Constructors.
     ec_scalar() NOEXCEPT;
-    ec_scalar(ec_scalar&& scalar) NOEXCEPT;
-    ec_scalar(const ec_scalar& scalar) NOEXCEPT;
     ec_scalar(ec_secret&& secret) NOEXCEPT;
     ec_scalar(const ec_secret& secret) NOEXCEPT;
     ec_scalar(int64_t value) NOEXCEPT;
 
     /// Operators.
-    ec_scalar& operator=(const ec_scalar& scalar) NOEXCEPT;
-    ec_scalar& operator=(ec_scalar&& scalar) NOEXCEPT;
     ec_scalar& operator=(const ec_secret& secret) NOEXCEPT;
     ec_scalar& operator=(ec_secret&& secret) NOEXCEPT;
     ec_scalar& operator+=(const ec_scalar& scalar) NOEXCEPT;

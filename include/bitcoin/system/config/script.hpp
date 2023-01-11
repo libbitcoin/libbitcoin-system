@@ -31,7 +31,7 @@ namespace system {
 namespace config {
 
 /// Serialization helper for chain::script.
-class BC_API script
+class BC_API script final
   : public chain::script
 {
 public:

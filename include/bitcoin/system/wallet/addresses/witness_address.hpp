@@ -112,8 +112,6 @@ class BC_API witness_address
 
     /// Constructors.
     witness_address() NOEXCEPT;
-    witness_address(witness_address&& other) NOEXCEPT;
-    witness_address(const witness_address& other) NOEXCEPT;
     witness_address(const std::string& address, bool strict=false) NOEXCEPT;
     witness_address(const data_slice& program, const std::string& prefix,
         uint8_t version) NOEXCEPT;
@@ -133,8 +131,6 @@ class BC_API witness_address
         const std::string& prefix=mainnet) NOEXCEPT;
 
     /// Operators.
-    witness_address& operator=(witness_address&& other) NOEXCEPT;
-    witness_address& operator=(const witness_address& other) NOEXCEPT;
     bool operator<(const witness_address& other) const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& in, witness_address& to);

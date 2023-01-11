@@ -30,6 +30,8 @@ class BC_API unicode_ostream
   : public std::ostream
 {
 public:
+    DELETE4(unicode_ostream);
+
     /// Construct instance of a conditionally-widening output stream.
     unicode_ostream(std::ostream& narrow_stream, std::wostream& wide_stream,
         size_t wide_buffer_size) THROWS;

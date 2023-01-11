@@ -43,11 +43,6 @@ hd_private::hd_private() NOEXCEPT
 {
 }
 
-hd_private::hd_private(const hd_private& other) NOEXCEPT
-  : hd_public(other), secret_(other.secret_)
-{
-}
-
 hd_private::hd_private(const data_chunk& entropy, uint64_t prefixes) NOEXCEPT
   : hd_private(from_entropy(entropy, prefixes))
 {
@@ -277,12 +272,6 @@ hd_public hd_private::derive_public(uint32_t index) const NOEXCEPT
 // Operators.
 // ----------------------------------------------------------------------------
 
-hd_private& hd_private::operator=(hd_private other) NOEXCEPT
-{
-    swap(*this, other);
-    return *this;
-}
-
 bool hd_private::operator<(const hd_private& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
@@ -307,7 +296,7 @@ std::istream& operator>>(std::istream& in, hd_private& to)
 {
     std::string value;
     in >> value;
-    to = hd_private(value, hd_public::mainnet);
+    to.from_string(value, hd_public::mainnet);
 
     if (!to)
         throw istream_exception(value);
@@ -319,16 +308,6 @@ std::ostream& operator<<(std::ostream& out, const hd_private& of) NOEXCEPT
 {
     out << of.encoded();
     return out;
-}
-
-// friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(hd_private& left, hd_private& right) NOEXCEPT
-{
-    using std::swap;
-
-    // Must be unqualified (no std namespace).
-    swap(static_cast<hd_public&>(left), static_cast<hd_public&>(right));
-    swap(left.secret_, right.secret_);
 }
 
 } // namespace wallet

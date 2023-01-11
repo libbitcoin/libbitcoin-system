@@ -50,7 +50,7 @@ public:
     uint64_t value() const NOEXCEPT;
 
     /// A set of valued points.
-    point_value::list points;
+    point_value::list points{};
 
 private:
     static void greedy(points_value& out, const points_value& unspent,
