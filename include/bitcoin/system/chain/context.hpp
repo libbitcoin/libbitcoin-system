@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-class BC_API context
+class BC_API context final
 {
 public:
     /// Determine if the fork is ative for this block.

@@ -35,18 +35,13 @@ namespace chain {
 class BC_API checkpoint
 {
 public:
+    DEFAULT5(checkpoint);
+
     // Constructors.
     // ------------------------------------------------------------------------
 
     /// Default checkpoint is an invalid object.
     checkpoint() NOEXCEPT;
-
-    /// Defaults.
-    checkpoint(checkpoint&&) = default;
-    checkpoint(const checkpoint&) = default;
-    checkpoint& operator=(checkpoint&&) = default;
-    checkpoint& operator=(const checkpoint&) = default;
-    ~checkpoint() = default;
 
     checkpoint(hash_digest&& hash, size_t height) NOEXCEPT;
     checkpoint(const hash_digest& hash, size_t height) NOEXCEPT;

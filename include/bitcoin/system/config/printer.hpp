@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_PRINTER_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_PRINTER_HPP
 
-#include <iostream>
-#include <string>
-#include <vector>
 #include <bitcoin/system/config/parameter.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -31,19 +28,18 @@ namespace config {
 
 /// Shorthand for property declarations in printer class.
 #define BC_PROPERTY(type, name) \
-    public: virtual const type& name() const NOEXCEPT { return name##_; } \
+    public: const type& name() const NOEXCEPT { return name##_; } \
     private: type name##_
 
 /// Shorthand for reference getter declarations in printer class.
 #define BC_PROPERTY_GET_REF(type, name) \
-    public: virtual type& get_##name() NOEXCEPT { return name##_; } \
+    public: type& get_##name() NOEXCEPT { return name##_; } \
     private: type name##_
 
 /// Class for managing the serialization of command line options and arguments.
-class BC_API printer
+class BC_API printer final
 {
 public:
-
     /// Number of arguments above which the argument is considered unlimited.
     static const int max_arguments;
 
@@ -51,8 +47,7 @@ public:
     /// settings     Populated config file settings metadata.
     /// application  This application (e.g. 'bitcoin_server').
     /// description  This application description (e.g. 'Server').
-    printer(const boost::program_options::options_description& settings,
-        const std::string& application,
+    printer(const options_metadata& settings, const std::string& application,
         const std::string& description="") NOEXCEPT;
 
     /// Construct an instance of the printer class.
@@ -61,18 +56,10 @@ public:
     /// application  This application (e.g. 'bx').
     /// description  This command description (e.g. 'Convert BTC').
     /// command      This command (e.g. 'btc').
-    printer(const boost::program_options::options_description& options,
-        const boost::program_options::positional_options_description& arguments,
-        const std::string& application, const std::string& description="",
+    printer(const options_metadata& options,
+        const arguments_metadata& arguments, const std::string& application,
+        const std::string& description="",
         const std::string& command="") NOEXCEPT;
-
-
-    /// Defaults.
-    printer(printer&&) = delete;
-    printer(const printer&) = delete;
-    printer& operator=(printer&&) = delete;
-    printer& operator=(const printer&) = delete;
-    virtual ~printer() = default;
 
     /// Convert a paragraph of text into a column.
     /// This formats to 80 char width as: [ 23 | ' ' | 55 | '\n' ].
@@ -80,55 +67,35 @@ public:
     /// This always sets at least one line and always collapses whitespace.
     /// paragraph  The paragraph to columnize.
     /// return     The column, as a list of fragments.
-    virtual std::vector<std::string> columnize(const std::string& paragraph,
+    std::vector<std::string> columnize(const std::string& paragraph,
         size_t width) NOEXCEPT;
 
-    /// Format the command description.
-    virtual std::string format_description() NOEXCEPT;
-
-    /// Format the parameters table.
-    /// positional  True for positional otherwize named.
-    /// return      The formatted help arguments table.
-    virtual std::string format_parameters_table(bool positional) NOEXCEPT;
-
-    /// Format the settings table.
-    /// return  The formatted settings table.
-    virtual std::string format_settings_table() NOEXCEPT;
-
-    /// Format a paragraph.
-    /// paragraph  The text to format.
-    /// return     The formatted paragraph.
-    virtual std::string format_paragraph(
-        const std::string& paragraph) NOEXCEPT;
-
-    /// Format the command line usage.
-    /// return  The formatted usage.
-    virtual std::string format_usage() NOEXCEPT;
-
-    /// Format the command line parameters.
-    /// return  The formatted command line parameters.
-    virtual std::string format_usage_parameters() NOEXCEPT;
+    /// Format stuff.
+    std::string format_description() NOEXCEPT;
+    std::string format_parameters_table(bool positional) NOEXCEPT;
+    std::string format_settings_table() NOEXCEPT;
+    std::string format_paragraph(const std::string& paragraph) NOEXCEPT;
+    std::string format_usage() NOEXCEPT;
+    std::string format_usage_parameters() NOEXCEPT;
 
     /// Build the list of argument name/count tuples.
-    virtual void generate_argument_names() NOEXCEPT;
+    void generate_argument_names() NOEXCEPT;
 
     /// Build the list of parameters.
-    virtual void generate_parameters() NOEXCEPT;
+    void generate_parameters() NOEXCEPT;
 
     /// Parse the arguments and options into the normalized parameter list.
-    virtual void initialize() NOEXCEPT;
+    void initialize() NOEXCEPT;
 
     /// Serialize command line help (full details).
-    /// output  Stream that is sink for output.
-    virtual void commandline(std::ostream& output) NOEXCEPT;
+    void commandline(std::ostream& output) NOEXCEPT;
 
     /// Serialize as config settings (full details).
-    /// output  Stream that is sink for output.
-    virtual void settings(std::ostream& output) NOEXCEPT;
+    void settings(std::ostream& output) NOEXCEPT;
 
     /// Virtual property declarations, passed on construct.
-    BC_PROPERTY(boost::program_options::options_description, options);
-    BC_PROPERTY(boost::program_options::positional_options_description, arguments);
+    BC_PROPERTY(options_metadata, options);
+    BC_PROPERTY(arguments_metadata, arguments);
     BC_PROPERTY(std::string, application);
     BC_PROPERTY(std::string, description);
     BC_PROPERTY(std::string, command);

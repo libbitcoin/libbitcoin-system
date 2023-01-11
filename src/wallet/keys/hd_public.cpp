@@ -53,12 +53,6 @@ hd_public::hd_public() NOEXCEPT
 {
 }
 
-hd_public::hd_public(const hd_public& other) NOEXCEPT
-  : valid_(other.valid_), chain_(other.chain_), lineage_(other.lineage_),
-    point_(other.point_)
-{
-}
-
 // This cannot validate the version.
 hd_public::hd_public(const hd_key& public_key) NOEXCEPT
   : hd_public(from_key(public_key))
@@ -247,15 +241,6 @@ uint32_t hd_public::fingerprint() const NOEXCEPT
 // Operators.
 // ----------------------------------------------------------------------------
 
-hd_public& hd_public::operator=(const hd_public& other) NOEXCEPT
-{
-    valid_ = other.valid_;
-    chain_ = other.chain_;
-    lineage_ = other.lineage_;
-    point_ = other.point_;
-    return *this;
-}
-
 bool hd_public::operator<(const hd_public& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
@@ -276,7 +261,7 @@ std::istream& operator>>(std::istream& in, hd_public& to)
 {
     std::string value;
     in >> value;
-    to = hd_public(value);
+    to.from_string(value);
 
     if (!to)
         throw istream_exception(value);

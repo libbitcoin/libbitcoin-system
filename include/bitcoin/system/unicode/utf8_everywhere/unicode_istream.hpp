@@ -28,9 +28,11 @@ namespace system {
 /// Class to expose a narrowing input stream.
 /// std::wcin must be patched by console_streambuf if used for Windows input.
 class BC_API unicode_istream
-    : public std::istream
+  : public std::istream
 {
 public:
+    DELETE4(unicode_istream);
+
     /// Construct instance of a conditionally-narrowing input stream.
     unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream,
         size_t wide_buffer_size) THROWS;

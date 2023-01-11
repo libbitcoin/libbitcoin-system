@@ -41,6 +41,8 @@ namespace chain {
 class BC_API block
 {
 public:
+    DEFAULT5(block);
+
     typedef std::shared_ptr<const block> cptr;
 
     // Constructors.
@@ -48,14 +50,6 @@ public:
 
     /// Default block is an invalid object.
     block() NOEXCEPT;
-
-    /// Defaults.
-    block(block&&) = default;
-    block(const block&) = default;
-    block& operator=(block&&) = default;
-    block& operator=(const block&) = default;
-    ~block() = default;
-
     block(chain::header&& header, transactions&& txs) NOEXCEPT;
     block(const chain::header& header, const transactions& txs) NOEXCEPT;
     block(const chain::header::cptr& header,

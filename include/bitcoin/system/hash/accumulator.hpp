@@ -35,7 +35,6 @@ template <typename Algorithm, bool Checked = build_checked,
 class accumulator
 {
 public:
-    DEFAULT5(accumulator);
     using byte_t = typename Algorithm::byte_t;
     using state_t = typename Algorithm::state_t;
     using digest_t = typename Algorithm::digest_t;

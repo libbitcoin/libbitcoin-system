@@ -23,7 +23,7 @@ namespace libbitcoin {
 namespace system {
 
 /// For algorithm common type constraint.
-struct algorithm_t {};
+struct algorithm_t{};
 
 } // namespace system
 } // namespace libbitcoin

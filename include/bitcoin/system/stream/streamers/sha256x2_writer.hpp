@@ -35,14 +35,12 @@ class sha256x2_writer
   : public byte_writer<OStream>
 {
 public:
+    DEFAULT4(sha256x2_writer);
+
     /// Constructors.
     sha256x2_writer(OStream& sink) NOEXCEPT;
 
-    /// Copy/move/destruct.
-    sha256x2_writer(sha256x2_writer&&);
-    sha256x2_writer(const sha256x2_writer&);
-    sha256x2_writer& operator=(sha256x2_writer&&);
-    sha256x2_writer& operator=(const sha256x2_writer&);
+    /// Flush on destruct.
     ~sha256x2_writer() NOEXCEPT override;
 
 protected:

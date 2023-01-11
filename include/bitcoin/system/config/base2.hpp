@@ -29,23 +29,13 @@ namespace system {
 namespace config {
 
 /// Serialization helper for base2 encoded data.
-class BC_API base2
+class BC_API base2 final
 {
 public:
-    /// Defaults.
-    base2(base2&&) = default;
-    base2(const base2&) = default;
-    base2& operator=(base2&&) = default;
-    base2& operator=(const base2&) = default;
-    ~base2() = default;
-
-    /// Constructors.
     base2() NOEXCEPT;
     base2(binary&& value) NOEXCEPT;
     base2(const binary& value) NOEXCEPT;
     base2(const std::string& binary) THROWS;
-
-    /// Operators.
 
     operator const binary&() const NOEXCEPT;
 

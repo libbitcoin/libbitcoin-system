@@ -35,7 +35,8 @@ namespace rmd {
 
 /// RMD hashing algorithm.
 template <typename RMD, if_same<typename RMD::T, rmdh_t> = true>
-class algorithm : algorithm_t
+class algorithm
+  : algorithm_t
 {
 public:
     /// Types.

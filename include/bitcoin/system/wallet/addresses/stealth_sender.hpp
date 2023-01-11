@@ -34,6 +34,8 @@ namespace wallet {
 class BC_API stealth_sender
 {
 public:
+    DEFAULT5(stealth_sender);
+
     /// Constructors.
     /// Generate a send address from the stealth address.
     stealth_sender(const stealth_address& address, const data_chunk& seed,

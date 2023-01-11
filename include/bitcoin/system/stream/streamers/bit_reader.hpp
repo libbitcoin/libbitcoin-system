@@ -41,15 +41,10 @@ class bit_reader
     public virtual bitreader
 {
 public:
+    DEFAULT5(bit_reader);
+
     /// Constructors.
     bit_reader(IStream& source) NOEXCEPT;
-
-    /// Defaults.
-    bit_reader(bit_reader&&) = default;
-    bit_reader(const bit_reader&) = default;
-    bit_reader& operator=(bit_reader&&) = default;
-    bit_reader& operator=(const bit_reader&) = default;
-    ~bit_reader() override = default;
 
     /// Read one bit (high to low).
     bool read_bit() NOEXCEPT override;

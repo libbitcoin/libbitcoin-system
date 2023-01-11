@@ -481,11 +481,6 @@ electrum::electrum() NOEXCEPT
 {
 }
 
-////electrum::electrum(const electrum& other) NOEXCEPT
-////  : electrum_v1(other), prefix_(other.prefix_)
-////{
-////}
-
 electrum::electrum(const electrum_v1& old) NOEXCEPT
   : electrum_v1(old), prefix_(*this ? seed_prefix::old : seed_prefix::none)
 {

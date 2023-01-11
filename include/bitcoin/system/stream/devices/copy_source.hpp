@@ -34,6 +34,8 @@ class copy_source
   : public device<Container>
 {
 public:
+    DEFAULT5(copy_source);
+
     typedef const Container& container;
     struct category
       : ios::input_seekable, ios::direct_tag
@@ -47,12 +49,6 @@ public:
         next_(data.begin())
     {
     }
-    
-    copy_source(copy_source&&) = default;
-    copy_source(const copy_source&) = default;
-    copy_source& operator=(copy_source&&) = default;
-    copy_source& operator=(const copy_source&) = default;
-    ~copy_source() override = default;
 
 protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override

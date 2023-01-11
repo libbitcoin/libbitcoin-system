@@ -40,6 +40,8 @@ class BC_API mnemonic
   : public words::languages
 {
 public:
+    DEFAULT5(mnemonic);
+
     typedef words::mnemonic::catalog dictionary;
     typedef words::mnemonic::catalogs dictionaries;
 
@@ -69,7 +71,6 @@ public:
     static bool is_valid_word_count(size_t count) NOEXCEPT;
 
     mnemonic() NOEXCEPT;
-    ////mnemonic(const mnemonic& other) NOEXCEPT;
 
     /// wiki.trezor.io/recovery_seed
     /// Construct from the "recovery seed" (mnemonic phrase or entropy).

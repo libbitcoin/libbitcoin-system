@@ -30,23 +30,13 @@ namespace config {
 
 /// Serialization helper for base58 sodium keys.
 /// Base85 requires four byte alignment, sodium keys are 32 bytes.
-class BC_API base85
+class BC_API base85 final
 {
 public:
-    /// Defaults.
-    base85(base85&&) = default;
-    base85(const base85&) = default;
-    base85& operator=(base85&&) = default;
-    base85& operator=(const base85&) = default;
-    ~base85() = default;
-
-    /// Constructors.
     base85() NOEXCEPT;
     base85(data_chunk&& value) NOEXCEPT;
     base85(const data_chunk& value) NOEXCEPT;
     base85(const std::string& base85) THROWS;
-
-    /// Operators.
 
     /// True if the data size is evenly divisible by 4.
     operator bool() const NOEXCEPT;

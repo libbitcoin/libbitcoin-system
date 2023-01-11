@@ -39,11 +39,6 @@ ek_public::ek_public(const std::string& encoded) NOEXCEPT
 {
 }
 
-ek_public::ek_public(const ek_public& other) NOEXCEPT
-  : valid_(other.valid_), public_(other.public_)
-{
-}
-
 ek_public::ek_public(const encrypted_public& value) NOEXCEPT
   : valid_(true), public_(value)
 {
@@ -58,7 +53,7 @@ ek_public ek_public::from_string(const std::string& encoded) NOEXCEPT
 
     encrypted_public key;
     return decode_base58(key, encoded) && verify_checksum(key) ?
-        ek_public(key) : ek_public();
+        ek_public{ key } : ek_public{};
 }
 
 // Cast operators.
@@ -92,13 +87,6 @@ const encrypted_public& ek_public::public_key() const NOEXCEPT
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-ek_public& ek_public::operator=(const ek_public& other) NOEXCEPT
-{
-    valid_ = other.valid_;
-    public_ = other.public_;
-    return *this;
-}
 
 bool ek_public::operator<(const ek_public& other) const NOEXCEPT
 {

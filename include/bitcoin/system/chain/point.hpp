@@ -34,6 +34,8 @@ namespace chain {
 class BC_API point
 {
 public:
+    DEFAULT5(point);
+
     typedef std::shared_ptr<const point> cptr;
 
     /// This is a sentinel used in .index to indicate no output, e.g. coinbase.
@@ -50,13 +52,6 @@ public:
 
     /// Default point is an invalid null point (null_hash/null_index) object.
     point() NOEXCEPT;
-
-    /// Defaults.
-    point(point&&) = default;
-    point(const point&) = default;
-    point& operator=(point&&) = default;
-    point& operator=(const point&) = default;
-    ~point() = default;
 
     point(hash_digest&& hash, uint32_t index) NOEXCEPT;
     point(const hash_digest& hash, uint32_t index) NOEXCEPT;

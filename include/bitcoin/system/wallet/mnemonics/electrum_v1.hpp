@@ -64,6 +64,8 @@ class BC_API electrum_v1
   : public words::languages
 {
 public:
+    DEFAULT5(electrum_v1);
+
     typedef words::electrum_v1::catalog dictionary;
     typedef words::electrum_v1::catalogs dictionaries;
 
@@ -96,7 +98,6 @@ public:
     static bool is_valid_word_count(size_t count) NOEXCEPT;
 
     electrum_v1() NOEXCEPT;
-    electrum_v1(const electrum_v1& other) NOEXCEPT;
 
     /// Construct from the "recovery seed" (mnemonic phrase or entropy).
     /// Validity should be checked after construction.
@@ -130,12 +131,6 @@ public:
     /// result from manually-generated menmonics, which were inadvertently
     /// accepted by Electrum. github.com/spesmilo/electrum/issues/3149
     bool overflow() const NOEXCEPT;
-
-    /// Assignment.
-    electrum_v1& operator=(electrum_v1 other) NOEXCEPT;
-
-    /// Swap implementation required to properly handle derived class assign.
-    friend void swap(electrum_v1& left, electrum_v1& right) NOEXCEPT;
 
 protected:
     /// Helpers for managing decoding overflow state.

@@ -41,14 +41,12 @@ class bit_writer
     public virtual bitwriter
 {
 public:
+    DEFAULT4(bit_writer);
+
     /// Constructors.
     bit_writer(OStream& sink) NOEXCEPT;
 
-    /// Copy/move/destruct.
-    bit_writer(bit_writer&&);
-    bit_writer(const bit_writer&);
-    bit_writer& operator=(bit_writer&&);
-    bit_writer& operator=(const bit_writer&);
+    /// Flush on destruct.
     ~bit_writer() NOEXCEPT override;
 
     /// Write one bit (high to low).

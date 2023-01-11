@@ -29,7 +29,7 @@ namespace system {
 namespace config {
 
 /// Serialization helper for chain::input.
-class BC_API input
+class BC_API input final
   : public chain::input
 {
 public:

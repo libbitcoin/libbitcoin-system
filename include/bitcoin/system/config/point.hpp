@@ -29,7 +29,7 @@ namespace system {
 namespace config {
 
 /// Serialization helper for chain::point.
-class BC_API point
+class BC_API point final
   : public chain::point
 {
 public:

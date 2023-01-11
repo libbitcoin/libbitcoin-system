@@ -29,23 +29,13 @@ namespace system {
 namespace config {
 
 /// Serialization helper for base58 encoded text.
-class BC_API base58
+class BC_API base58 final
 {
 public:
-    /// Defaults.
-    base58(base58&&) = default;
-    base58(const base58&) = default;
-    base58& operator=(base58&&) = default;
-    base58& operator=(const base58&) = default;
-    ~base58() = default;
-
-    /// Constructors.
     base58() NOEXCEPT;
     base58(data_chunk&& value) NOEXCEPT;
     base58(const data_chunk& value) NOEXCEPT;
     base58(const std::string& base58) THROWS;
-
-    /// Operators.
 
     operator const data_chunk&() const NOEXCEPT;
 

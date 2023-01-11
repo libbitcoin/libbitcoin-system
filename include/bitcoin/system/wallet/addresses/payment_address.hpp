@@ -42,6 +42,8 @@ typedef checked<1, short_hash_size, 4> payment;
 class BC_API payment_address
 {
 public:
+    DEFAULT5(payment_address);
+
     static const uint8_t mainnet_p2kh;
     static const uint8_t mainnet_p2sh;
 
@@ -64,8 +66,6 @@ public:
 
     /// Constructors.
     payment_address() NOEXCEPT;
-    payment_address(payment_address&& other) NOEXCEPT;
-    payment_address(const payment_address& other) NOEXCEPT;
     payment_address(payment&& decoded) NOEXCEPT;
     payment_address(const payment& decoded) NOEXCEPT;
 
@@ -79,8 +79,6 @@ public:
         uint8_t prefix=mainnet_p2sh) NOEXCEPT;
 
     /// Operators.
-    payment_address& operator=(payment_address&& other) NOEXCEPT;
-    payment_address& operator=(const payment_address& other) NOEXCEPT;
     bool operator<(const payment_address& other) const NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, payment_address& to);
     friend std::ostream& operator<<(std::ostream& out,

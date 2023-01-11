@@ -29,23 +29,13 @@ namespace system {
 namespace config {
 
 /// Serialization helper for base32 encoded data.
-class BC_API base32
+class BC_API base32 final
 {
 public:
-    /// Defaults.
-    base32(base32&&) = default;
-    base32(const base32&) = default;
-    base32& operator=(base32&&) = default;
-    base32& operator=(const base32&) = default;
-    ~base32() = default;
-
-    /// Constructors.
     base32() NOEXCEPT;
     base32(data_chunk&& value) NOEXCEPT;
     base32(const data_chunk& value) NOEXCEPT;
     base32(const std::string& base32) THROWS;
-
-    /// Operators.
 
     operator const data_chunk&() const NOEXCEPT;
 

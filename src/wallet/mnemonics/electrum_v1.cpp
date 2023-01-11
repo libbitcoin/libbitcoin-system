@@ -278,11 +278,6 @@ electrum_v1::electrum_v1() NOEXCEPT
 {
 }
 
-electrum_v1::electrum_v1(const electrum_v1& other) NOEXCEPT
-  : languages(other), overflows_(other.overflows_)
-{
-}
-
 electrum_v1::electrum_v1(const std::string& sentence,
     language identifier) NOEXCEPT
   : electrum_v1(split(sentence, identifier), identifier)
@@ -414,26 +409,6 @@ ec_public electrum_v1::to_public_key(const context& context) const NOEXCEPT
 
     // The public key will be invalid if the private key is invalid.
     return to_seed(context).to_public();
-}
-
-// operators
-// ----------------------------------------------------------------------------
-
-electrum_v1& electrum_v1::operator=(electrum_v1 other) NOEXCEPT
-{
-    swap(*this, other);
-    return *this;
-}
-
-// friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(electrum_v1& left, electrum_v1& right) NOEXCEPT
-{
-    using std::swap;
-    using namespace bc::system::words;
-
-    // Must be unqualified (no std namespace).
-    swap(static_cast<languages&>(left), static_cast<languages&>(right));
-    swap(left.overflows_, right.overflows_);
 }
 
 } // namespace wallet

@@ -197,11 +197,6 @@ mnemonic::mnemonic() NOEXCEPT
 {
 }
 
-////mnemonic::mnemonic(const mnemonic& other) NOEXCEPT
-////  : languages(other)
-////{
-////}
-
 mnemonic::mnemonic(const std::string& sentence, language identifier) NOEXCEPT
   : mnemonic(split(sentence, identifier), identifier)
 {

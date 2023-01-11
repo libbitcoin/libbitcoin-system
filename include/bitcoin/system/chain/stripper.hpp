@@ -31,15 +31,9 @@ namespace chain {
 /// Bridges the gap between xptr (stack data) and cptr (op data). Otherwise
 /// chain::operation could be used. This is also slightly more efficient,
 /// being specialized for valid ops and the assumption of distinct data_chunks.
-class BC_API stripper
+class BC_API stripper final
 {
 public:
-    stripper(stripper&&) = default;
-    stripper(const stripper&) = default;
-    stripper& operator=(stripper&&) = default;
-    stripper& operator=(const stripper&) = default;
-    ~stripper() = default;
-
     // ************************************************************************
     // CONSENSUS: nominal endorsement operation encoding is required.
     // ************************************************************************

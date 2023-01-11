@@ -44,11 +44,6 @@ ec_public::ec_public(const ec_point& point) NOEXCEPT
 {
 }
 
-ec_public::ec_public(const ec_public& other) NOEXCEPT
-  : ec_point(other), compress_(other.compress_)
-{
-}
-
 ec_public::ec_public(const ec_private& secret) NOEXCEPT
   : ec_public(from_private(secret))
 {
@@ -195,12 +190,6 @@ payment_address ec_public::to_payment_address(uint8_t version) const NOEXCEPT
 // Operators.
 // ----------------------------------------------------------------------------
 
-ec_public& ec_public::operator=(ec_public other) NOEXCEPT
-{
-    swap(*this, other);
-    return *this;
-}
-
 bool ec_public::operator<(const ec_public& other) const NOEXCEPT
 {
     return encoded() < other.encoded();
@@ -232,16 +221,6 @@ std::ostream& operator<<(std::ostream& out, const ec_public& of) NOEXCEPT
 {
     out << of.encoded();
     return out;
-}
-
-// friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(ec_public& left, ec_public& right) NOEXCEPT
-{
-    using std::swap;
-
-    // Must be unqualified (no std namespace).
-    swap(static_cast<ec_point&>(left), static_cast<ec_point&>(right));
-    swap(left.compress_, right.compress_);
 }
 
 } // namespace wallet

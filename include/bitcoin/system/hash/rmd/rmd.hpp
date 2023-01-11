@@ -25,8 +25,8 @@ namespace libbitcoin {
 namespace system {
 namespace rmd {
 
-struct rmdk_t {};
-struct rmdh_t {};
+struct rmdk_t{};
+struct rmdh_t{};
 
 template <size_t Strength,
     bool_if<Strength == 128 || Strength == 160> = true>

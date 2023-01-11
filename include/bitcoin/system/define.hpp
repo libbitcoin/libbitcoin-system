@@ -149,6 +149,10 @@ namespace bc = libbitcoin;
 
 /// Class helpers
 /// ---------------------------------------------------------------------------
+/// Virtual concrete classes should define public virtual destructor.
+/// Abstract base classes may define protected non-virtual destructor.
+/// Non-virtual (final) classes may define public non-virtual destructor.
+/// Pure virtual base classes do not define destructor.
 
 /// Used when defining only the destructor.
 #define DELETE4(class_name) \
@@ -164,15 +168,15 @@ namespace bc = libbitcoin;
     class_name& operator=(class_name&&) = default; \
     class_name& operator=(const class_name&) = default
 
+/// Destructor must be defaulted, virtual public if class is not final.
+#define DELETE5(class_name) \
+    DELETE4(class_name); \
+    virtual ~class_name() = default
+
 /// Define default5 when required and other constructor defines remove them.
 #define DEFAULT5(class_name) \
     DEFAULT4(class_name); \
-    ~class_name() = default
-
-/// Destructor must be defaulted.
-#define DELETE5(class_name) \
-    DELETE4(class_name); \
-    ~class_name() = default
+    virtual ~class_name() = default
 
 /// Minimums
 /// ---------------------------------------------------------------------------

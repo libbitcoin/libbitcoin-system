@@ -37,15 +37,10 @@ class byte_reader
   : public virtual bytereader
 {
 public:
+    DEFAULT5(byte_reader);
+
     /// Constructors.
     byte_reader(IStream& source) NOEXCEPT;
-
-    /// Defaults.
-    byte_reader(byte_reader&&) = default;
-    byte_reader(const byte_reader&) = default;
-    byte_reader& operator=(byte_reader&&) = default;
-    byte_reader& operator=(const byte_reader&) = default;
-    virtual ~byte_reader() = default;
 
     /// Read integer, size determined from parameter type.
     template <typename Integer, size_t Size = sizeof(Integer),

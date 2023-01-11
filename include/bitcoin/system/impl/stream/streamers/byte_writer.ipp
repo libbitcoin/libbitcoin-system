@@ -48,30 +48,6 @@ byte_writer<OStream>::byte_writer(OStream& sink) NOEXCEPT
 }
 
 template <typename OStream>
-byte_writer<OStream>::byte_writer(byte_writer&& other)
-  : stream_(std::move(other.stream_))
-{
-}
-
-template <typename OStream>
-byte_writer<OStream>::byte_writer(const byte_writer& other)
-  : stream_(other.stream_)
-{
-}
-
-template <typename OStream>
-byte_writer<OStream>& byte_writer<OStream>::operator=(byte_writer&& other)
-{
-    stream_ = std::move(other.stream_);
-}
-
-template <typename OStream>
-byte_writer<OStream>& byte_writer<OStream>::operator=(const byte_writer& other)
-{
-    stream_ = other.stream_;
-}
-
-template <typename OStream>
 byte_writer<OStream>::~byte_writer() NOEXCEPT
 {
     flusher();
@@ -335,7 +311,6 @@ template <typename OStream>
 void byte_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
-    validate();
 }
 
 // private
@@ -371,6 +346,7 @@ template <typename OStream>
 void byte_writer<OStream>::flusher() NOEXCEPT
 {
     stream_.flush();
+    validate();
 }
 
 template <typename OStream>

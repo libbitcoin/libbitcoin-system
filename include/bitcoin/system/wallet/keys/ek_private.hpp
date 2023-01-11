@@ -32,17 +32,17 @@ namespace wallet {
 class BC_API ek_private
 {
 public:
+    DEFAULT5(ek_private);
+
     /// Constructors.
     ek_private() NOEXCEPT;
     ek_private(const std::string& encoded) NOEXCEPT;
     ek_private(const encrypted_private& key) NOEXCEPT;
-    ek_private(const ek_private& other) NOEXCEPT;
 
     /// Operators.
     bool operator<(const ek_private& other) const NOEXCEPT;
     bool operator==(const ek_private& other) const NOEXCEPT;
     bool operator!=(const ek_private& other) const NOEXCEPT;
-    ek_private& operator=(const ek_private& other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, ek_private& to);
     friend std::ostream& operator<<(std::ostream& out,
         const ek_private& of) NOEXCEPT;

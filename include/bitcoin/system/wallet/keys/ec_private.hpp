@@ -78,7 +78,6 @@ public:
 
     /// Constructors.
     ec_private() NOEXCEPT;
-    ec_private(const ec_private& other) NOEXCEPT;
     ec_private(const ec_scalar& scalar,
         uint8_t address = mainnet_p2kh) NOEXCEPT;
     ec_private(const data_chunk& entropy,
@@ -96,16 +95,12 @@ public:
         bool compress=true) NOEXCEPT;
 
     /// Operators.
-    ec_private& operator=(ec_private other) NOEXCEPT;
     bool operator<(const ec_private& other) const NOEXCEPT;
     bool operator==(const ec_private& other) const NOEXCEPT;
     bool operator!=(const ec_private& other) const NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, ec_private& to);
     friend std::ostream& operator<<(std::ostream& out,
         const ec_private& of) NOEXCEPT;
-
-    // Swap implementation required to properly handle base class.
-    friend void swap(ec_private& left, ec_private& right) NOEXCEPT;
 
     /// Serializer.
     std::string encoded() const NOEXCEPT;

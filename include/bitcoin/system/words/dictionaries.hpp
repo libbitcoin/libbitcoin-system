@@ -35,7 +35,7 @@ namespace words {
 // POD dictionaries wrapper with per dictionary O(n) search and O(1) index.
 // Search order is guaranteed, always returns first match.
 template<size_t Count, size_t Size>
-class dictionaries
+class dictionaries final
 {
 public:
     /// Use system::cast to convert between search and result.

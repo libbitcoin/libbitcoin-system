@@ -32,28 +32,22 @@ class BC_API point_value
   : public chain::point
 {
 public:
+    DEFAULT5(point_value);
+
     typedef std::vector<point_value> list;
 
     // Constructors.
     // ------------------------------------------------------------------------
 
     point_value() NOEXCEPT;
-    point_value(point_value&& other) NOEXCEPT;
-    point_value(const point_value& other) NOEXCEPT;
     point_value(point&& instance, uint64_t value) NOEXCEPT;
     point_value(const point& instance, uint64_t value) NOEXCEPT;
 
     // Operators.
     // ------------------------------------------------------------------------
 
-    /// This class is move assignable and copy assignable.
-    point_value& operator=(point_value other) NOEXCEPT;
-
     bool operator==(const point_value& other) const NOEXCEPT;
     bool operator!=(const point_value& other) const NOEXCEPT;
-
-    // Swap implementation required to properly handle base class.
-    friend void swap(point_value& left, point_value& right) NOEXCEPT;
 
     // Properties (accessors).
     // ------------------------------------------------------------------------

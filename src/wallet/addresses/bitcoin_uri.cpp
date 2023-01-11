@@ -43,12 +43,6 @@ bitcoin_uri::bitcoin_uri() NOEXCEPT
 {
 }
 
-bitcoin_uri::bitcoin_uri(const bitcoin_uri& other) NOEXCEPT
-  : strict_(other.strict_), scheme_(other.scheme_), address_(other.address_),
-    query_(other.query_)
-{
-}
-
 bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict) NOEXCEPT
   : bitcoin_uri(uri_reader::parse<bitcoin_uri>(uri, strict))
 {
@@ -69,7 +63,7 @@ bitcoin_uri::operator bool() const NOEXCEPT
 std::string bitcoin_uri::encoded() const NOEXCEPT
 {
     // Bitcoin URIs don't use the authority or fragment components.
-    uri out;
+    uri out{};
     out.set_scheme(bitcoin_scheme);
     out.set_path(address_);
     out.encode_query(query_);
@@ -247,15 +241,6 @@ bool bitcoin_uri::set_parameter(const std::string& key,
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-bitcoin_uri& bitcoin_uri::operator=(const bitcoin_uri& other) NOEXCEPT
-{
-    strict_ = other.strict_;
-    scheme_ = other.scheme_;
-    address_ = other.address_;
-    query_ = other.query_;
-    return *this;
-}
 
 bool bitcoin_uri::operator<(const bitcoin_uri& other) const NOEXCEPT
 {

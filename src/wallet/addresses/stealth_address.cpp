@@ -62,13 +62,6 @@ stealth_address::stealth_address() NOEXCEPT
 {
 }
 
-stealth_address::stealth_address(const stealth_address& other) NOEXCEPT
-  : valid_(other.valid_), version_(other.version_), scan_key_(other.scan_key_),
-    spend_keys_(other.spend_keys_), signatures_(other.signatures_),
-    filter_(other.filter_)
-{
-}
-
 stealth_address::stealth_address(const std::string& encoded) NOEXCEPT
   : stealth_address(from_string(encoded))
 {
@@ -315,18 +308,6 @@ uint8_t stealth_address::options() const NOEXCEPT
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-stealth_address& stealth_address::operator=(
-    const stealth_address& other) NOEXCEPT
-{
-    valid_ = other.valid_;
-    version_ = other.version_;
-    scan_key_ = other.scan_key_;
-    spend_keys_ = other.spend_keys_;
-    signatures_ = other.signatures_;
-    filter_ = other.filter_;
-    return *this;
-}
 
 bool stealth_address::operator<(const stealth_address& other) const NOEXCEPT
 {

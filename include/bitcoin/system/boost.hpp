@@ -73,4 +73,9 @@ BC_API name tag_invoke(boost::json::value_to_tag<name>, \
 BC_API void tag_invoke(boost::json::value_from_tag, \
     boost::json::value& value, const name& instance) NOEXCEPT
 
+typedef boost::program_options::variables_map variables_map;
+typedef boost::program_options::option_description option_metadata;
+typedef boost::program_options::options_description options_metadata;
+typedef boost::program_options::positional_options_description arguments_metadata;
+
 #endif

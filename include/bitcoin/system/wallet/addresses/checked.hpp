@@ -38,6 +38,8 @@ template <size_t Prefix, size_t Payload,
 class checked
 {
 public:
+    DEFAULT5(checked);
+
     static constexpr size_t value_size = (Prefix + Payload + Checksum);
 
     typedef data_array<Prefix> prefix_type;
@@ -48,19 +50,13 @@ public:
     /// Constructors.
 
     checked() NOEXCEPT;
-    checked(checked&& other) NOEXCEPT;
-    checked(const checked& other) NOEXCEPT;
     checked(value_type&& value) NOEXCEPT;
     checked(const value_type& value) NOEXCEPT;
-    ~checked() = default;
 
     /// Validity is guaranteed from this construction.
     checked(const prefix_type& prefix, const payload_type& payload) NOEXCEPT;
 
     /// Operators.
-
-    checked& operator=(checked&& other) NOEXCEPT;
-    checked& operator=(const checked& other) NOEXCEPT;
 
     operator bool() const NOEXCEPT;
     operator data_chunk() const NOEXCEPT;

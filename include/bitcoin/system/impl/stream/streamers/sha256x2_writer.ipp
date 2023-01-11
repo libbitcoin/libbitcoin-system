@@ -62,6 +62,7 @@ template <typename OStream>
 void sha256x2_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
+    byte_writer<OStream>::do_flush();
 }
 
 // private
@@ -86,7 +87,6 @@ void sha256x2_writer<OStream>::flusher() NOEXCEPT
     context_.reset();
 
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
-    byte_writer<OStream>::do_flush();
 }
 
 } // namespace system

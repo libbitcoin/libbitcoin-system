@@ -39,6 +39,8 @@ class byte_flipper
     public virtual byteflipper
 {
 public:
+    DEFAULT4(byte_flipper);
+
     byte_flipper(IOStream& stream) NOEXCEPT
       : byte_reader<IOStream>(stream), byte_writer<IOStream>(stream)
     {
@@ -47,12 +49,6 @@ public:
         // byte_reader (istream&)
         // byte_writer (ostream&)
     }
-
-    /// Defaults.
-    byte_flipper(byte_flipper&&) = default;
-    byte_flipper(const byte_flipper&) = default;
-    byte_flipper& operator=(byte_flipper&&) = default;
-    byte_flipper& operator=(const byte_flipper&) = default;
 
     /// These overrides eliminate ambiguity resulting from diamond inheritance.
 

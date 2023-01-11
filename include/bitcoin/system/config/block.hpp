@@ -29,7 +29,7 @@ namespace system {
 namespace config {
 
 /// Serialization helper for chain::block.
-class BC_API block
+class BC_API block final
   : public chain::block
 {
 public:

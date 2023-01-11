@@ -44,19 +44,19 @@ public:
     {
         wallet::uri parsed;
         if (!parsed.decode(uri, strict))
-            return UriReader();
+            return {};
 
         UriReader out;
         out.set_strict(strict);
         out.set_scheme(parsed.scheme());
         if (parsed.has_authority() && !out.set_authority(parsed.authority()))
-            return UriReader();
+            return {};
 
         if (!parsed.path().empty() && !out.set_path(parsed.path()))
-            return UriReader();
+            return {};
 
         if (parsed.has_fragment() && !out.set_fragment(parsed.fragment()))
-            return UriReader();
+            return {};
 
         const auto query = parsed.decode_query();
         for (const auto& term: query)
@@ -64,7 +64,7 @@ public:
             const auto& key = term.first;
             const auto& value = term.second;
             if (!key.empty() && !out.set_parameter(key, value))
-                return UriReader();
+                return {};
         }
 
         return out;

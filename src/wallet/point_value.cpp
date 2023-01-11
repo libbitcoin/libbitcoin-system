@@ -34,16 +34,6 @@ point_value::point_value() NOEXCEPT
 {
 }
 
-point_value::point_value(point_value&& other) NOEXCEPT
-  : value_(other.value_), point(std::move(other))
-{
-}
-
-point_value::point_value(const point_value& other) NOEXCEPT
-  : point(other), value_(other.value_)
-{
-}
-
 point_value::point_value(point&& instance, uint64_t value) NOEXCEPT
   : point(std::move(instance)), value_(value)
 {
@@ -57,13 +47,6 @@ point_value::point_value(const point& instance, uint64_t value) NOEXCEPT
 // Operators.
 //-------------------------------------------------------------------------
 
-// Copy and swap idiom, see: stackoverflow.com/a/3279550/1172329
-point_value& point_value::operator=(point_value other) NOEXCEPT
-{
-    swap(*this, other);
-    return *this;
-}
-
 bool point_value::operator==(const point_value& other) const NOEXCEPT
 {
     return static_cast<point>(*this) == static_cast<point>(other) &&
@@ -73,17 +56,6 @@ bool point_value::operator==(const point_value& other) const NOEXCEPT
 bool point_value::operator!=(const point_value& other) const NOEXCEPT
 {
     return !(*this == other);
-}
-
-// friend function, see: stackoverflow.com/a/5695855/1172329
-void swap(point_value& left, point_value& right) NOEXCEPT
-{
-    using std::swap;
-    using namespace chain;
-
-    // Must be unqualified (no std namespace).
-    swap(static_cast<point&>(left), static_cast<point&>(right));
-    swap(left.value_, right.value_);
 }
 
 // Properties (accessors).

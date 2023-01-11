@@ -34,6 +34,8 @@ class copy_sink
   : public device<Container>
 {
 public:
+    DEFAULT5(copy_sink);
+
     typedef const Container& container;
     struct category
       : ios::output_seekable, ios::direct_tag
@@ -47,12 +49,6 @@ public:
         next_(data.begin())
     {
     }
-    
-    copy_sink(copy_sink&&) = default;
-    copy_sink(const copy_sink&) = default;
-    copy_sink& operator=(copy_sink&&) = default;
-    copy_sink& operator=(const copy_sink&) = default;
-    ~copy_sink() override = default;
 
 protected:
     typename device<Container>::sequence do_sequence() const NOEXCEPT override

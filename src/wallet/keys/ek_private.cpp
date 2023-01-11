@@ -39,11 +39,6 @@ ek_private::ek_private(const std::string& encoded) NOEXCEPT
 {
 }
 
-ek_private::ek_private(const ek_private& other) NOEXCEPT
-  : valid_(other.valid_), private_(other.private_)
-{
-}
-
 ek_private::ek_private(const encrypted_private& value) NOEXCEPT
   : valid_(true), private_(value)
 {
@@ -58,7 +53,7 @@ ek_private ek_private::from_string(const std::string& encoded) NOEXCEPT
 
     encrypted_private key;
     return decode_base58(key, encoded) && verify_checksum(key) ?
-        ek_private(key) : ek_private();
+        ek_private{ key } : ek_private{};
 }
 
 // Cast operators.
@@ -92,13 +87,6 @@ const encrypted_private& ek_private::private_key() const NOEXCEPT
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-ek_private& ek_private::operator=(const ek_private& other) NOEXCEPT
-{
-    valid_ = other.valid_;
-    private_ = other.private_;
-    return *this;
-}
 
 bool ek_private::operator<(const ek_private& other) const NOEXCEPT
 {

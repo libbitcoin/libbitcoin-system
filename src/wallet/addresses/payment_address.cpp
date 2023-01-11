@@ -44,16 +44,6 @@ payment_address::payment_address() NOEXCEPT
 {
 }
 
-payment_address::payment_address(payment_address&& other) NOEXCEPT
-  : payment_(std::move(other.payment_))
-{
-}
-
-payment_address::payment_address(const payment_address& other) NOEXCEPT
-  : payment_(other.payment_)
-{
-}
-
 payment_address::payment_address(payment&& decoded) NOEXCEPT
   : payment_(std::move(decoded))
 {
@@ -197,19 +187,6 @@ const payment& payment_address::to_payment() const NOEXCEPT
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-payment_address& payment_address::operator=(payment_address&& other) NOEXCEPT
-{
-    payment_ = std::move(other.payment_);
-    return *this;
-}
-
-payment_address& payment_address::operator=(
-    const payment_address& other) NOEXCEPT
-{
-    payment_ = other.payment_;
-    return *this;
-}
 
 bool payment_address::operator<(const payment_address& other) const NOEXCEPT
 {

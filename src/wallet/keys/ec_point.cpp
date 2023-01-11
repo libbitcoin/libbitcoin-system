@@ -46,16 +46,6 @@ ec_point::ec_point() NOEXCEPT
 {
 }
 
-ec_point::ec_point(ec_point&& point) NOEXCEPT
-  : point_(std::move(point.point_))
-{
-}
-
-ec_point::ec_point(const ec_point& point) NOEXCEPT
-  : point_(point.point_)
-{
-}
-
 ec_point::ec_point(ec_compressed&& compressed) NOEXCEPT
   : point_(std::move(compressed))
 {
@@ -68,24 +58,6 @@ ec_point::ec_point(const ec_compressed& compressed) NOEXCEPT
 
 // assignment operators
 // ----------------------------------------------------------------------------
-
-ec_point& ec_point::operator=(ec_point&& point) NOEXCEPT
-{
-    if (&point == this)
-        return *this;
-
-    point_ = std::move(point.point_);
-    return *this;
-}
-
-ec_point& ec_point::operator=(const ec_point& point) NOEXCEPT
-{
-    if (&point == this)
-        return *this;
-
-    point_ = point.point_;
-    return *this;
-}
 
 ec_point& ec_point::operator=(ec_compressed&& compressed) NOEXCEPT
 {

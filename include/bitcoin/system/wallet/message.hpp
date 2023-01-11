@@ -30,55 +30,43 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/**
- * A message signature is an EC signature with one prefix byte.
- */
+/// A message signature is an EC signature with one prefix byte.
 static constexpr size_t message_signature_size = 1 + ec_signature_size;
 typedef data_array<message_signature_size> message_signature;
 
-/**
- * Hashes a messages in preparation for signing.
- */
+/// Hashes a messages in preparation for signing.
 BC_API hash_digest hash_message(const data_slice& message) NOEXCEPT;
 
-/**
- * Signs a message using deterministic signature.
- * @param[out] out_signature The signature in Bitcoin's own format.
- * This should be base64 encoded for presentation to the user.
- * @return true if wif is valid and signature encoding is successful.
- */
+/// Signs a message using deterministic signature.
+/// @param[out] out_signature The signature in Bitcoin's own format.
+/// This should be base64 encoded for presentation to the user.
+/// @return true if wif is valid and signature encoding is successful.
 BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const ec_private& secret) NOEXCEPT;
 
-/**
- * Signs a message using deterministic signature.
- * @param[out] out_signature The signature in Bitcoin's own format.
- * This should be base64 encoded for presentation to the user.
- * @return true if wif is valid and signature encoding is successful.
- */
+/// Signs a message using deterministic signature.
+/// @param[out] out_signature The signature in Bitcoin's own format.
+/// This should be base64 encoded for presentation to the user.
+/// @return true if wif is valid and signature encoding is successful.
 BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const std::string& wif) NOEXCEPT;
 
-/**
- * Signs a message using deterministic signature.
- * @param[out] out_signature The signature in Bitcoin's own format.
- * This should be base64 encoded for presentation to the user.
- * @param[in] compressed true if the bitcoin address derived from the
- * private key is in compressed format.
- * @return true if signature encoding is successful.
- */
+/// Signs a message using deterministic signature.
+/// @param[out] out_signature The signature in Bitcoin's own format.
+/// This should be base64 encoded for presentation to the user.
+/// @param[in] compressed true if the bitcoin address derived from the
+/// private key is in compressed format.
+/// @return true if signature encoding is successful.
 BC_API bool sign_message(message_signature& out_signature,
     const data_slice& message, const ec_secret& secret,
     bool compressed=true) NOEXCEPT;
 
-/**
- * Verifies a message.
- * @param[in] signature a message signature in Bitcoin's own format.
- * The user will generally provide this as a base64 string,
- * which the user interface must decode.
- * @return false if the signature does not match the address or if there are
- * any errors in the signature encoding.
- */
+/// Verifies a message.
+/// @param[in] signature a message signature in Bitcoin's own format.
+/// The user will generally provide this as a base64 string,
+/// which the user interface must decode.
+/// @return false if the signature does not match the address or if there are
+/// any errors in the signature encoding.
 BC_API bool verify_message(const data_slice& message,
     const payment_address& address,
     const message_signature& signature) NOEXCEPT;
