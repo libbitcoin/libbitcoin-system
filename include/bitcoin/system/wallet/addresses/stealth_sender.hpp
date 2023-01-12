@@ -62,7 +62,7 @@ private:
         const stealth_address& address, const data_chunk& seed,
         const binary& filter) NOEXCEPT;
 
-    const uint8_t version_;
+    uint8_t version_;
     chain::script script_;
     wallet::payment_address address_;
 };
