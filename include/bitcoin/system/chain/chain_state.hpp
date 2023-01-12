@@ -40,7 +40,7 @@ class header;
 class BC_API chain_state
 {
 public:
-    DELETE5(chain_state);
+    DELETE_COPY_MOVE_DESTRUCT(chain_state);
 
     typedef std::deque<uint32_t> bitss;
     typedef std::deque<uint32_t> versions;

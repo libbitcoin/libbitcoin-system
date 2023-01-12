@@ -33,7 +33,7 @@ namespace chain {
 class BC_API output
 {
 public:
-    DEFAULT5(output);
+    DEFAULT_COPY_MOVE_DESTRUCT(output);
 
     typedef std::shared_ptr<const output> cptr;
 

@@ -42,7 +42,7 @@ typedef checked<1, short_hash_size, 4> payment;
 class BC_API payment_address
 {
 public:
-    DEFAULT5(payment_address);
+    DEFAULT_COPY_MOVE_DESTRUCT(payment_address);
 
     static const uint8_t mainnet_p2kh;
     static const uint8_t mainnet_p2sh;

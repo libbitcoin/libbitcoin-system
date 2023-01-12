@@ -154,29 +154,42 @@ namespace bc = libbitcoin;
 /// Non-virtual (final) classes may define public non-virtual destructor.
 /// Pure virtual base classes do not define destructor.
 
-/// Used when defining only the destructor.
-#define DELETE4(class_name) \
-    class_name(class_name&&) = delete; \
-    class_name(const class_name&) = delete; \
-    class_name& operator=(class_name&&) = delete; \
-    class_name& operator=(const class_name&) = delete
+#define DELETE_COPY(name) \
+    name(const name&) = delete; \
+    name& operator=(const name&) = delete
 
-/// Used when defining only the destructor.
-#define DEFAULT4(class_name) \
-    class_name(class_name&&) = default; \
-    class_name(const class_name&) = default; \
-    class_name& operator=(class_name&&) = default; \
-    class_name& operator=(const class_name&) = default
+#define DELETE_MOVE(name) \
+    name(name&&) = delete; \
+    name& operator=(name&&) = delete
 
-/// Destructor must be defaulted, virtual public if class is not final.
-#define DELETE5(class_name) \
-    DELETE4(class_name); \
-    virtual ~class_name() = default
+#define DELETE_COPY_MOVE(name) \
+    DELETE_COPY(name); \
+    DELETE_MOVE(name)
 
-/// Define default5 when required and other constructor defines remove them.
-#define DEFAULT5(class_name) \
-    DEFAULT4(class_name); \
-    virtual ~class_name() = default
+#define DEFAULT_COPY(name) \
+    name(const name&) = default; \
+    name& operator=(const name&) = default
+
+#define DEFAULT_MOVE(name) \
+    name(name&&) = default; \
+    name& operator=(name&&) = default
+
+#define DEFAULT_COPY_MOVE(name) \
+    DEFAULT_COPY(name); \
+    DEFAULT_MOVE(name)
+
+#define DELETE_COPY_MOVE_DESTRUCT(name) \
+    DELETE_COPY_MOVE(name); \
+    virtual ~name() = default
+
+#define DEFAULT_COPY_MOVE_DESTRUCT(name) \
+    DEFAULT_COPY_MOVE(name); \
+    virtual ~name() = default
+
+////#define DELETE4  DELETE_COPY_MOVE
+////#define DELETE5  DELETE_COPY_MOVE_DESTRUCT
+////#define DEFAULT4 DEFAULT_COPY_MOVE
+////#define DEFAULT5 DEFAULT_COPY_MOVE_DESTRUCT
 
 /// Minimums
 /// ---------------------------------------------------------------------------

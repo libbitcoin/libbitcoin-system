@@ -33,7 +33,7 @@ namespace wallet {
 class BC_API stealth_receiver
 {
 public:
-    DEFAULT5(stealth_receiver);
+    DEFAULT_COPY_MOVE_DESTRUCT(stealth_receiver);
 
     /// Constructors.
     stealth_receiver(const ec_secret& scan_private,

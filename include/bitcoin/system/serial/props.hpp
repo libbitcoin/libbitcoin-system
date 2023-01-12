@@ -40,7 +40,7 @@ namespace system {
 class BC_API props
 {
 public:
-    DEFAULT5(props);
+    DEFAULT_COPY_MOVE_DESTRUCT(props);
 
     typedef enum class truth
     {
@@ -116,7 +116,7 @@ class BC_API object_props
   : public props
 {
 public:
-    DEFAULT5(object_props);
+    DEFAULT_COPY_MOVE_DESTRUCT(object_props);
 
     /// Construct an object properties value, each child is explicitly named.
     object_props() NOEXCEPT;

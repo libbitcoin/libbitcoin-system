@@ -39,7 +39,7 @@ class byte_flipper
     public virtual byteflipper
 {
 public:
-    DEFAULT4(byte_flipper);
+    DEFAULT_COPY_MOVE(byte_flipper);
 
     byte_flipper(IOStream& stream) NOEXCEPT
       : byte_reader<IOStream>(stream), byte_writer<IOStream>(stream)

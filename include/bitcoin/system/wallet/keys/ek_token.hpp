@@ -34,7 +34,7 @@ namespace wallet {
 class BC_API ek_token
 {
 public:
-    DEFAULT5(ek_token);
+    DEFAULT_COPY_MOVE_DESTRUCT(ek_token);
 
     /// Constructors.
     ek_token() NOEXCEPT;

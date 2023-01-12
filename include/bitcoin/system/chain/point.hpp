@@ -34,7 +34,7 @@ namespace chain {
 class BC_API point
 {
 public:
-    DEFAULT5(point);
+    DEFAULT_COPY_MOVE_DESTRUCT(point);
 
     typedef std::shared_ptr<const point> cptr;
 

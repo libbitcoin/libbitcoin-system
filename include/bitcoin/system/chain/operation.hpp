@@ -36,7 +36,7 @@ namespace chain {
 class BC_API operation
 {
 public:
-    DEFAULT5(operation);
+    DEFAULT_COPY_MOVE_DESTRUCT(operation);
 
     typedef std::shared_ptr<const operation> cptr;
 

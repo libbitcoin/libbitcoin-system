@@ -35,7 +35,7 @@ namespace chain {
 class BC_API checkpoint
 {
 public:
-    DEFAULT5(checkpoint);
+    DEFAULT_COPY_MOVE_DESTRUCT(checkpoint);
 
     // Constructors.
     // ------------------------------------------------------------------------

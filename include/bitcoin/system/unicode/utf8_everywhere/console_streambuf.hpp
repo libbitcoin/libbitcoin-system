@@ -33,7 +33,7 @@ class BC_API console_streambuf
   : public std::wstreambuf
 {
 public:
-    DELETE4(console_streambuf);
+    DELETE_COPY_MOVE(console_streambuf);
 
     /// Initialize stdio to use utf8 translation on Windows.
     static void initialize(size_t stream_buffer_size) THROWS;

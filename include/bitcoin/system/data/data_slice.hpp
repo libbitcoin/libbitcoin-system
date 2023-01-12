@@ -51,7 +51,7 @@ namespace system {
 class data_slice
 {
 public:
-    DEFAULT5(data_slice);
+    DEFAULT_COPY_MOVE_DESTRUCT(data_slice);
 
     typedef size_t size_type;
     typedef uint8_t value_type;

@@ -34,7 +34,7 @@ class copy_source
   : public device<Container>
 {
 public:
-    DEFAULT5(copy_source);
+    DEFAULT_COPY_MOVE_DESTRUCT(copy_source);
 
     typedef const Container& container;
     struct category

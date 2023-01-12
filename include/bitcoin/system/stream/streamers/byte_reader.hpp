@@ -37,7 +37,7 @@ class byte_reader
   : public virtual bytereader
 {
 public:
-    DEFAULT5(byte_reader);
+    DEFAULT_COPY_MOVE_DESTRUCT(byte_reader);
 
     /// Constructors.
     byte_reader(IStream& source) NOEXCEPT;

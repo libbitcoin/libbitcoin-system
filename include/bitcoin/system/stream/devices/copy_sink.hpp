@@ -34,7 +34,7 @@ class copy_sink
   : public device<Container>
 {
 public:
-    DEFAULT5(copy_sink);
+    DEFAULT_COPY_MOVE_DESTRUCT(copy_sink);
 
     typedef const Container& container;
     struct category

@@ -44,7 +44,7 @@ class BC_API electrum
   : public electrum_v1
 {
 public:
-    DEFAULT5(electrum);
+    DEFAULT_COPY_MOVE_DESTRUCT(electrum);
 
     /// Seed prefix types.
     /// The values for old, bip39 and none are not actual prefixes but 

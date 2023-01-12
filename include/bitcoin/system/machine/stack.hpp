@@ -48,7 +48,7 @@ class stack
 {
 public:
     /// Stack is copied in program construct.
-    DEFAULT5(stack);
+    DEFAULT_COPY_MOVE_DESTRUCT(stack);
 
     /// Construct.
     INLINE stack() NOEXCEPT;

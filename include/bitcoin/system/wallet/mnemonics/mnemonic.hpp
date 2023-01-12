@@ -40,7 +40,7 @@ class BC_API mnemonic
   : public words::languages
 {
 public:
-    DEFAULT5(mnemonic);
+    DEFAULT_COPY_MOVE_DESTRUCT(mnemonic);
 
     typedef words::mnemonic::catalog dictionary;
     typedef words::mnemonic::catalogs dictionaries;

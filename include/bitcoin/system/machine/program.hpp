@@ -38,7 +38,7 @@ template <typename Stack>
 class program
 {
 public:
-    DELETE5(program);
+    DELETE_COPY_MOVE_DESTRUCT(program);
 
     typedef chain::operations::const_iterator op_iterator;
     typedef chain::input_cptrs::const_iterator input_iterator;

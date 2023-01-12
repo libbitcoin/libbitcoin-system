@@ -38,7 +38,7 @@ namespace chain {
 class BC_API header
 {
 public:
-    DEFAULT5(header);
+    DEFAULT_COPY_MOVE_DESTRUCT(header);
 
     typedef std::shared_ptr<const header> cptr;
 
