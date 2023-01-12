@@ -34,8 +34,6 @@ class copy_sink
   : public device<Container>
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(copy_sink);
-
     typedef const Container& container;
     struct category
       : ios::output_seekable, ios::direct_tag

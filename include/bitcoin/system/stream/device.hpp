@@ -33,10 +33,8 @@ template <typename Container>
 class device
 {
 public:
-    device(device&&) = default;
-    device(const device&) = default;
-    device& operator=(device&&) = delete;
-    device& operator=(const device&) = delete;
+    DELETE_MOVE(device);
+    DEFAULT_COPY(device);
     virtual ~device() = default;
 
     /// device types
