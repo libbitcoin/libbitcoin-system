@@ -93,7 +93,7 @@ protected:
     std::ostream& write(std::ostream& stream, format format,
         size_t depth, bool flat, const std::string& name) const NOEXCEPT;
 
-    const type type_;
+    type type_;
     std::string value_;
     std::vector<named_props> children_;
 };

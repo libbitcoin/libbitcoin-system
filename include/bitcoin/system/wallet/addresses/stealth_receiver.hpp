@@ -55,9 +55,9 @@ public:
         const ec_compressed& ephemeral_public) const NOEXCEPT;
 
 private:
-    const uint8_t version_;
-    const ec_secret scan_private_;
-    const ec_secret spend_private_;
+    uint8_t version_;
+    ec_secret scan_private_;
+    ec_secret spend_private_;
     ec_compressed spend_public_;
     wallet::stealth_address address_;
 };
