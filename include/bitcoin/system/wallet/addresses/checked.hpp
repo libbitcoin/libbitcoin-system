@@ -38,7 +38,7 @@ template <size_t Prefix, size_t Payload,
 class checked
 {
 public:
-    DEFAULT5(checked);
+    DEFAULT_COPY_MOVE_DESTRUCT(checked);
 
     static constexpr size_t value_size = (Prefix + Payload + Checksum);
 

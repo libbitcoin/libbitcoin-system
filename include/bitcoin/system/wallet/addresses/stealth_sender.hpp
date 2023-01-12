@@ -34,7 +34,7 @@ namespace wallet {
 class BC_API stealth_sender
 {
 public:
-    DEFAULT5(stealth_sender);
+    DEFAULT_COPY_MOVE_DESTRUCT(stealth_sender);
 
     /// Constructors.
     /// Generate a send address from the stealth address.

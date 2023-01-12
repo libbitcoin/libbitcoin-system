@@ -46,7 +46,7 @@ namespace system {
 class data_slab
 {
 public:
-    DEFAULT5(data_slab);
+    DEFAULT_COPY_MOVE_DESTRUCT(data_slab);
 
     typedef size_t size_type;
     typedef uint8_t value_type;

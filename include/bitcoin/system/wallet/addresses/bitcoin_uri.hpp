@@ -37,7 +37,7 @@ class BC_API bitcoin_uri
   : public uri_reader
 {
 public:
-    DEFAULT5(bitcoin_uri);
+    DEFAULT_COPY_MOVE_DESTRUCT(bitcoin_uri);
 
     /// Constructors.
     bitcoin_uri() NOEXCEPT;

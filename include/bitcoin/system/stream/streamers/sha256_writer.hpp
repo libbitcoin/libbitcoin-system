@@ -35,7 +35,7 @@ class sha256_writer
   : public byte_writer<OStream>
 {
 public:
-    DEFAULT4(sha256_writer);
+    DEFAULT_COPY_MOVE(sha256_writer);
 
     /// Constructors.
     sha256_writer(OStream& sink) NOEXCEPT;

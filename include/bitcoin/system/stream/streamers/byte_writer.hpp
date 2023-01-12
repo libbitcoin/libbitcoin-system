@@ -36,7 +36,7 @@ class byte_writer
   : public virtual bytewriter
 {
 public:
-    DEFAULT4(byte_writer);
+    DEFAULT_COPY_MOVE(byte_writer);
 
     /// Constructors.
     byte_writer(OStream& sink) NOEXCEPT;

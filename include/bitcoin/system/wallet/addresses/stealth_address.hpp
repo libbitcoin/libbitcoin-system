@@ -34,7 +34,7 @@ namespace wallet {
 class BC_API stealth_address
 {
 public:
-    DEFAULT5(stealth_address);
+    DEFAULT_COPY_MOVE_DESTRUCT(stealth_address);
 
     /// DEPRECATED: we intend to make p2kh same as payment address versions.
     static const uint8_t mainnet_p2kh;

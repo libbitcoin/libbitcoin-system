@@ -35,7 +35,7 @@ class interpreter
   : public program<Stack>
 {
 public:
-    DELETE5(interpreter);
+    DELETE_COPY_MOVE_DESTRUCT(interpreter);
 
     using state = program<Stack>;
     using op_iterator = typename state::op_iterator;

@@ -31,7 +31,7 @@ namespace wallet {
 class BC_API uri
 {
 public:
-    DEFAULT5(uri);
+    DEFAULT_COPY_MOVE_DESTRUCT(uri);
     uri() NOEXCEPT {}
 
     /// Decodes a URI from a string.

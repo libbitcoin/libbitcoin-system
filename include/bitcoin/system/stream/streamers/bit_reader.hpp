@@ -41,7 +41,7 @@ class bit_reader
     public virtual bitreader
 {
 public:
-    DEFAULT5(bit_reader);
+    DEFAULT_COPY_MOVE_DESTRUCT(bit_reader);
 
     /// Constructors.
     bit_reader(IStream& source) NOEXCEPT;

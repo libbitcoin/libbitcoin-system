@@ -32,7 +32,7 @@ namespace wallet {
 class BC_API ek_private
 {
 public:
-    DEFAULT5(ek_private);
+    DEFAULT_COPY_MOVE_DESTRUCT(ek_private);
 
     /// Constructors.
     ek_private() NOEXCEPT;

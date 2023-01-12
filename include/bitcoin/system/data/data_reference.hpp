@@ -49,7 +49,7 @@ class data_reference
   : public data_slice
 {
 public:
-    DEFAULT5(data_reference);
+    DEFAULT_COPY_MOVE_DESTRUCT(data_reference);
 
     /// Empty reference.
     constexpr data_reference() NOEXCEPT;

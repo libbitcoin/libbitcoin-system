@@ -31,7 +31,7 @@ class BC_API unicode_istream
   : public std::istream
 {
 public:
-    DELETE4(unicode_istream);
+    DELETE_COPY_MOVE(unicode_istream);
 
     /// Construct instance of a conditionally-narrowing input stream.
     unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream,

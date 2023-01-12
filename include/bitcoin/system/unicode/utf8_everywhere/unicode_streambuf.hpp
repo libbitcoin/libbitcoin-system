@@ -34,7 +34,7 @@ class BC_API unicode_streambuf
   : public std::streambuf
 {
 public:
-    DELETE4(unicode_streambuf);
+    DELETE_COPY_MOVE(unicode_streambuf);
 
     /// Construct unicode stream buffer from a weak reference to a wide buffer.
     unicode_streambuf(std::wstreambuf* wide_buffer, size_t size) THROWS;

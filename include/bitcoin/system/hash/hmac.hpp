@@ -33,7 +33,7 @@ template <typename Algorithm>
 class hmac
 {
 public:
-    DEFAULT5(hmac);
+    DEFAULT_COPY_MOVE_DESTRUCT(hmac);
     using digest_t = typename Algorithm::digest_t;
 
     /// hmac accumulator, not resettable.

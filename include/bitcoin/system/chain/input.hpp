@@ -39,7 +39,7 @@ namespace chain {
 class BC_API input
 {
 public:
-    DEFAULT5(input);
+    DEFAULT_COPY_MOVE_DESTRUCT(input);
 
     typedef std::shared_ptr<const input> cptr;
 

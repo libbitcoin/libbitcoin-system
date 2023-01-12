@@ -41,7 +41,7 @@ class bit_writer
     public virtual bitwriter
 {
 public:
-    DEFAULT4(bit_writer);
+    DEFAULT_COPY_MOVE(bit_writer);
 
     /// Constructors.
     bit_writer(OStream& sink) NOEXCEPT;

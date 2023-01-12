@@ -34,7 +34,7 @@ class exclusive_slice
   : public data_slice
 {
 public:
-    DEFAULT5(exclusive_slice);
+    DEFAULT_COPY_MOVE_DESTRUCT(exclusive_slice);
 
     constexpr exclusive_slice() NOEXCEPT
       : data_slice()

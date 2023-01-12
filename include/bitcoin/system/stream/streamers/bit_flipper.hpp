@@ -49,7 +49,7 @@ class bit_flipper
     public virtual bitflipper
 {
 public:
-    DEFAULT4(bit_flipper);
+    DEFAULT_COPY_MOVE(bit_flipper);
 
     /// Constructors.
     bit_flipper(IOStream& stream) NOEXCEPT

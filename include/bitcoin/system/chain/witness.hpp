@@ -39,7 +39,7 @@ class transaction;
 class BC_API witness
 {
 public:
-    DEFAULT5(witness);
+    DEFAULT_COPY_MOVE_DESTRUCT(witness);
 
     typedef std::shared_ptr<const witness> cptr;
 

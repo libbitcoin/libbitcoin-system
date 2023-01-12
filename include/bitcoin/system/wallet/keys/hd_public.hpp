@@ -60,7 +60,7 @@ class hd_private;
 class BC_API hd_public
 {
 public:
-    DEFAULT5(hd_public);
+    DEFAULT_COPY_MOVE_DESTRUCT(hd_public);
 
     static const uint32_t mainnet;
     static const uint32_t testnet;

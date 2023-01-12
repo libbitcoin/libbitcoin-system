@@ -33,7 +33,7 @@ namespace system {
 class BC_API binary
 {
 public:
-    DEFAULT5(binary);
+    DEFAULT_COPY_MOVE_DESTRUCT(binary);
 
     /// True if all characters are '0' or '1'.
     static bool is_base2(const std::string& text) NOEXCEPT;

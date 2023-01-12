@@ -41,7 +41,7 @@ namespace chain {
 class BC_API block
 {
 public:
-    DEFAULT5(block);
+    DEFAULT_COPY_MOVE_DESTRUCT(block);
 
     typedef std::shared_ptr<const block> cptr;
 
