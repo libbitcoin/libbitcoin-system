@@ -34,8 +34,6 @@ class copy_source
   : public device<Container>
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(copy_source);
-
     typedef const Container& container;
     struct category
       : ios::input_seekable, ios::direct_tag

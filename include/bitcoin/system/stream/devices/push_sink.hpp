@@ -36,8 +36,6 @@ class push_sink
   : public device<Container>
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(push_sink);
-
     typedef Container& container;
     struct category
       : ios::sink_tag, ios::optimally_buffered_tag

@@ -34,8 +34,6 @@ class flip_sink
   : public copy_sink<Container>
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(flip_sink);
-
     struct category
       : ios::seekable, ios::direct_tag
     {
