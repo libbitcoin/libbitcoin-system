@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "bitcoin/system/data/memory.hpp"
 #include <bitcoin/system/chain/block.hpp>
 
 #include <algorithm>
@@ -138,7 +139,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
         {
             BC_PUSH_WARNING(NO_NEW_OR_DELETE)
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-            txs->emplace_back(new transaction{ source, witness });
+            txs->emplace_back(to_shared(transaction{ source, witness }));
             BC_POP_WARNING()
             BC_POP_WARNING()
         }
@@ -150,7 +151,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        to_shared(new chain::header{ source }),
+        to_shared(chain::header{ source }),
         BC_POP_WARNING()
         BC_POP_WARNING()
 
