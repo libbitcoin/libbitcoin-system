@@ -257,13 +257,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
                 // Safe to cast as this method exclusively owns the input and
                 // input::witness_ a mutable public property of the instance.
                 const auto setter = const_cast<chain::input*>(input.get());
-
-                // Use of pointer forward here avoids move construction.
-                BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-                BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-                setter->witness_ = to_shared(new chain::witness{ source, true });
-                BC_POP_WARNING()
-                BC_POP_WARNING()
+                setter->witness_ = to_shared<chain::witness>(source, true);
             }
             else
             {

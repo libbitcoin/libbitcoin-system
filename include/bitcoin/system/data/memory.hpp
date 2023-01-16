@@ -29,6 +29,8 @@
 namespace libbitcoin {
 namespace system {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // shared_ptr moves are avoided in vector population by using 'new' and passing
 // to shared_pointer constrcut a raw pointer via std::vector.emplace_back:
 // std::vector.emplace_back(new block{...}).
@@ -42,35 +44,37 @@ namespace system {
 template <typename Type>
 inline std::shared_ptr<Type> to_shared() NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<Type>();
-    BC_POP_WARNING()
 }
 
 /// Create shared pointer to const from instance pointer.
 template <typename Type>
 inline std::shared_ptr<const Type> to_shared(Type* value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::shared_ptr<const Type>(value);
-    BC_POP_WARNING()
 }
 
 /// Create shared pointer to const from moved instance.
 template <typename Type>
 inline std::shared_ptr<const Type> to_shared(Type&& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<const Type>(std::forward<Type>(value));
-    BC_POP_WARNING()
 }
 
 /// Create shared pointer to const from copied instance.
 template <typename Type>
 inline std::shared_ptr<const Type> to_shared(const Type& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return std::make_shared<const Type>(value);
+}
+
+/// Construct shared pointer to const from moved constructor parameters.
+template <typename Type, typename... Args>
+inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+    return std::shared_ptr<const Type>(
+        new const Type(std::forward<Args>(values)...));
     BC_POP_WARNING()
 }
 
@@ -83,6 +87,8 @@ to_shareds(std::vector<Type>&& values) NOEXCEPT;
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
 to_shareds(const std::vector<Type>& values) NOEXCEPT;
+
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
