@@ -96,8 +96,6 @@ protected:
     static inline bool romix(rblock_t& rblock) NOEXCEPT;
 
 private:
-    template<typename Block>
-    static inline auto allocate() NOEXCEPT;
     static CONSTEVAL auto& concurrency() NOEXCEPT;
 };
 

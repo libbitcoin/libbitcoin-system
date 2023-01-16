@@ -69,11 +69,8 @@ bool add_metadata(const prevout_data::list& metadata, const chain::block& block)
             {
                 auto& inputs = *tx->inputs_ptr();
                 auto& output = inputs[meta.input_index]->prevout;
-                output = to_shared(new chain::output
-                {
-                    meta.output_value,
-                    chain::script{ meta.script, false }
-                });
+                output = to_shared<chain::output>(meta.output_value,
+                    chain::script{ meta.script, false });
                 result = true;
             }
         }

@@ -28,19 +28,18 @@
 namespace libbitcoin {
 namespace system {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 /// Create shared pointer to vector of const shared ptr from the moved vector.
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
 to_shareds(std::vector<Type>&& values) NOEXCEPT
 {
-    // Pointed must be to non-const to allow vector population.
-    // Returned pointer may be copied/moved to pointer to const as required.
-    const auto out = std::make_shared<std::vector<
-        std::shared_ptr<const Type>>>(values.size());
+    const auto out = std::make_shared<std::vector<std::shared_ptr<
+        const Type>>>(values.size());
 
-    // C++17: Parallel policy for std::transform.
     std::transform(values.begin(), values.end(), out->begin(),
-        [](Type& value)
+        [](Type& value) NOEXCEPT
         {
             return to_shared(std::move(value));
         });
@@ -53,20 +52,19 @@ template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
     const std::vector<Type>& values) NOEXCEPT
 {
-    // Pointed must be to non-const to allow vector population.
-    // Returned pointer may be copied/moved to pointer to const as required.
-    const auto out = std::make_shared<std::vector<
-        std::shared_ptr<const Type>>>(values.size());
+    const auto out = std::make_shared<std::vector<std::shared_ptr<
+        const Type>>>(values.size());
 
-    // C++17: Parallel policy for std::transform.
     std::transform(values.begin(), values.end(), out->begin(),
-        [](const Type& value)
+        [](const Type& value) NOEXCEPT
         {
             return to_shared(value);
         });
 
     return out;
 }
+
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin

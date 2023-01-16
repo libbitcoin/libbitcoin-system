@@ -78,7 +78,6 @@ block::block(const data_slice& data, bool witness) NOEXCEPT
 {
 }
 
-
 block::block(std::istream&& stream, bool witness) NOEXCEPT
   : block(read::bytes::istream(stream), witness)
 {
@@ -128,10 +127,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 {
     const auto read_transactions = [witness](reader& source) NOEXCEPT
     {
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        auto txs = std::make_shared<transaction_ptrs>();
-        BC_POP_WARNING()
-
+        auto txs = to_shared<transaction_ptrs>();
         txs->reserve(source.read_size(max_block_size));
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)
@@ -148,12 +144,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 
     return
     {
-        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        to_shared(new chain::header{ source }),
-        BC_POP_WARNING()
-        BC_POP_WARNING()
-
+        to_shared<chain::header>(source),
         read_transactions(source),
         source
     };

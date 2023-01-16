@@ -444,8 +444,8 @@ BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
 
     input input0;
     input input1;
-    input0.prevout = to_shared(new output{ value0, script{} });
-    input1.prevout = to_shared(new output{ value1, script{} });
+    input0.prevout = to_shared<output>(value0, script{});
+    input1.prevout = to_shared<output>(value1, script{});
 
     const transaction instance
     {
@@ -516,8 +516,8 @@ BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
 
     const input input0;
     const input input1;
-    input0.prevout = to_shared(new output{ value0, script{} });
-    input1.prevout = to_shared(new output{ value1, script{} });
+    input0.prevout = to_shared<output>(value0, script{});
+    input1.prevout = to_shared<output>(value1, script{});
 
     transaction instance
     {
@@ -1107,7 +1107,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_inputs__true)
 BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__valid_prevout__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout = to_shared(new output{ 42, script{} });
+    input.prevout = to_shared<output>(42, script{});
     const accessor instance
     {
         0,
