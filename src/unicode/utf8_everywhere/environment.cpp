@@ -189,7 +189,7 @@ size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
         to_bytes < (from_chars * utf8_max_character_size))
         return zero;
 
-    const std::wstring wide{ from, &from[from_chars] };
+    const std::wstring wide(from, &from[from_chars]);
     const auto narrow = to_utf8(wide);
     const auto bytes = narrow.size();
 
