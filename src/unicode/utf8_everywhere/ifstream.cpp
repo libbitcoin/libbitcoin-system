@@ -30,9 +30,7 @@ ifstream::ifstream(const std::filesystem::path& path,
     std::ifstream::openmode mode) THROWS
   : std::ifstream(to_extended_path(path), mode)
 {
-    // This opens the stream, which does not require a file system file or even
-    // a valid file system path. That is required on first read. Stream does
-    // not become bad on in invalid path, but a read will fail.
+    // This opens the stream, and creates file system file if out/app mode.
 }
 
 } // namespace system
