@@ -51,6 +51,9 @@
         #define ASSIGNMENT_WITHIN_CONDITIONAL 4706
 
         // Lint.
+        #define NO_DEREFERENCE_NULL_POINTER 6011
+        #define NO_READ_OVERRUN 6385
+        #define NO_WRITE_OVERRUN 6386
         #define NO_MALLOC_OR_FREE 26408
         #define NO_NEW_OR_DELETE 26409
         #define SMART_PTR_NOT_NEEDED 26415
