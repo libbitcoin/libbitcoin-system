@@ -56,6 +56,11 @@ BC_API void set_binary_stdout() THROWS;
 // System Configuration.
 // ----------------------------------------------------------------------------
 
+/// Use for std I/O, in place of std::cin/cout/cerr.
+BC_API std::istream& cin_stream() THROWS;
+BC_API std::ostream& cout_stream() THROWS;
+BC_API std::ostream& cerr_stream() THROWS;
+
 /// Get the default configuration file path with subdirectory.
 BC_API std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT;
@@ -73,12 +78,6 @@ BC_API size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes) NOEXCEPT;
 
 #ifdef HAVE_MSC
-
-// For standard I/O.
-BC_API std::istream& cin_stream() THROWS;
-BC_API std::ostream& cout_stream() THROWS;
-BC_API std::ostream& cerr_stream() THROWS;
-
 // For args/environment.
 BC_API void free_environment(char* environment[]) NOEXCEPT;
 BC_API char** allocate_environment(wchar_t* environment[]) NOEXCEPT;
