@@ -283,7 +283,11 @@ std::ostream& cerr_stream() THROWS
 
 static std::string config_directory() NOEXCEPT
 {
+#if defined(SYSCONFDIR)
     return SYSCONFDIR;
+#else
+    return {};
+#endif
 }
 
 #endif // HAVE_MSC
