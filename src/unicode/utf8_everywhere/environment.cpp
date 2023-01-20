@@ -19,16 +19,12 @@
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 
 #include <algorithm>
-#include <cstdlib>
-#include <cstring>
 #include <cwchar>
 #include <filesystem>
 #include <iostream>
 #include <locale>
 #include <mutex>
-#include <string>
 #include <utility>
-#include <vector>
 #ifdef HAVE_MSC
     #include <fcntl.h>
     #include <io.h>
@@ -43,6 +39,15 @@
 
 namespace libbitcoin {
 namespace system {
+    
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
+BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
+
+// All pointers (except (*main)) are guarded, warning is invalid.
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 
 // Stream utilities.
 // ----------------------------------------------------------------------------
@@ -54,13 +59,13 @@ LCOV_EXCL_START("Untestable but visually-verifiable section.")
 static void set_utf8_stdio(FILE* file) THROWS
 {
     if (_setmode(_fileno(file), _O_U8TEXT) == -1)
-        throw runtime_exception("Could not set STDIO to utf8 mode.");
+        throw runtime_exception{ "Could not set STDIO to utf8 mode." };
 }
 
 static void set_binary_stdio(FILE* file) THROWS
 {
     if (_setmode(_fileno(file), _O_BINARY) == -1)
-        throw runtime_exception("Could not set STDIO to binary mode.");
+        throw runtime_exception{ "Could not set STDIO to binary mode." };
 }
 
 #else // HAVE_MSC
@@ -119,14 +124,14 @@ LCOV_EXCL_STOP()
 // ----------------------------------------------------------------------------
 
 // All non-leading bytes of utf8 have the same two bit prefix.
-inline bool is_utf8_trailing_byte(char byte) NOEXCEPT
+constexpr bool is_utf8_trailing_byte(char byte) NOEXCEPT
 {
     // 10xxxxxx
     return ((0xc0 & byte) == 0x80);
 }
 
 // Determine if the full sequence is a valid utf8 character.
-static bool is_utf8_leading_byte(char byte, size_t size) NOEXCEPT
+constexpr bool is_utf8_leading_byte(char byte, size_t size) NOEXCEPT
 {
     BC_ASSERT(size <= utf8_max_character_size);
 
@@ -155,10 +160,10 @@ static bool is_utf8_leading_byte(char byte, size_t size) NOEXCEPT
 // This assumes that the text is well formed utf8 but truncated at any point.
 size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT
 {
-    if (size == 0u)
-        return 0;
+    if (is_zero(size) || is_null(text))
+        return zero;
 
-    for (size_t length = 1; length <= std::min(utf8_max_character_size, size);
+    for (auto length = one; length <= std::min(utf8_max_character_size, size);
         ++length)
     {
         const auto byte = text[size - length];
@@ -172,7 +177,7 @@ size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT
     }
 
     // The text is not well-formed utf8, assume no truncation.
-    return 0;
+    return zero;
 }
 
 // Convert utf16 wchar_t buffer to utf8 char buffer.
@@ -180,19 +185,18 @@ size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT
 size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
     size_t from_chars) NOEXCEPT
 {
-    if (from == nullptr || out_to == nullptr || is_zero(from_chars) ||
+    if (is_null(from) || is_null(out_to) || is_zero(from_chars) ||
         to_bytes < (from_chars * utf8_max_character_size))
-        return 0;
+        return zero;
 
-    const std::wstring wide{ from, &from[from_chars] };
+    const std::wstring wide(from, &from[from_chars]);
     const auto narrow = to_utf8(wide);
     const auto bytes = narrow.size();
 
-    // C++17: parallel policy for copy_n.
     if (bytes <= to_bytes)
         std::copy_n(narrow.data(), bytes, out_to);
 
-    return bytes > to_bytes ? 0 : bytes;
+    return bytes > to_bytes ? zero : bytes;
 }
 
 // Convert utf8 char buffer to utf16 wchar_t buffer, with truncation handling.
@@ -200,10 +204,10 @@ size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
 size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes) NOEXCEPT
 {
-    remainder = 0;
-    if (from == nullptr || out_to == nullptr || is_zero(from_bytes) ||
+    remainder = zero;
+    if (is_null(from) || is_null(out_to) || is_zero(from_bytes) ||
         to_chars < from_bytes)
-        return 0;
+        return zero;
 
     // Calculate a character break offset of 0..3 bytes.
     remainder = utf8_remainder_size(from, from_bytes);
@@ -211,23 +215,21 @@ size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const std::string narrow{ from, &from[from_bytes - remainder] };
     const auto wide = to_utf16(narrow);
     const auto chars = wide.size();
-
-    // C++17: parallel policy for copy_n.
     if (chars <= to_chars)
         std::copy_n(wide.data(), chars, out_to);
 
-    return chars > to_chars ? 0 : chars;
+    return chars > to_chars ? zero : chars;
 }
-
-#ifdef HAVE_MSC
 
 // Stream utilities.
 // ----------------------------------------------------------------------------
 
+#ifdef HAVE_MSC
+
 // The width of utf16 stdio buffers.
 constexpr size_t utf16_buffer_size = 256;
 
-// Ensure console_streambuf::initialize is called only once.
+// Ensure console_streambuf::initialize is called only once for the process.
 static std::once_flag io_mutex;
 
 // Static initializer for bc::system::cin.
@@ -254,31 +256,50 @@ std::ostream& cerr_stream() THROWS
     return error;
 }
 
-// Stream utilities.
-// ----------------------------------------------------------------------------
-
-#ifdef HAVE_MSC
-static std::string windows_config_directory() NOEXCEPT
+static std::string config_directory() NOEXCEPT
 {
     wchar_t directory[MAX_PATH];
     const auto result = SHGetFolderPathW(NULL, CSIDL_COMMON_APPDATA, NULL,
         SHGFP_TYPE_CURRENT, directory);
     return SUCCEEDED(result) ? to_utf8(directory) : "";
 }
+
+#else
+
+std::istream& cin_stream() THROWS
+{
+    return std::cin;
+}
+
+std::ostream& cout_stream() THROWS
+{
+    return std::cout;
+}
+
+std::ostream& cerr_stream() THROWS
+{
+    return std::cerr;
+}
+
+static std::string config_directory() NOEXCEPT
+{
+#if defined(SYSCONFDIR)
+    return SYSCONFDIR;
+#else
+    return {};
 #endif
+}
+
+#endif // HAVE_MSC
 
 std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT
 {
-    static const std::string directory =
-#ifdef HAVE_MSC
-        windows_config_directory();
-#else
-        SYSCONFDIR;
-#endif
-
-    return std::filesystem::path{ directory } / subdirectory;
+    static const auto directory = std::filesystem::path{ config_directory() };
+    return directory / subdirectory;
 }
+
+#ifdef HAVE_MSC
 
 // BC_USE_LIBBITCOIN_MAIN
 // ----------------------------------------------------------------------------
@@ -287,7 +308,7 @@ void free_environment(char* environment[]) NOEXCEPT
 {
     if (environment != nullptr)
     {
-        for (auto index = 0; environment[index] != nullptr; ++index)
+        for (auto index = 0; !is_null(environment[index]); ++index)
             std::free(environment[index]);
 
         std::free(environment);
@@ -301,10 +322,10 @@ char** allocate_environment(int argc, wchar_t* argv[]) NOEXCEPT
     // Allocate argument pointer array.
     auto size = add1(static_cast<size_t>(argc));
     const auto buffer = std::malloc(size * sizeof(char*));
-    const auto arguments = reinterpret_cast<char**>(buffer);
+    const auto arguments = static_cast<char**>(buffer);
 
     // Out of memory.
-    if (arguments == nullptr)
+    if (is_null(arguments) || is_null(argv))
         return nullptr;
 
     // Convert each argument, allocate and assign to pointer array.
@@ -321,10 +342,12 @@ char** allocate_environment(int argc, wchar_t* argv[]) NOEXCEPT
         if (size == max_size_t)
             return nullptr;
 
-        arguments[arg] = reinterpret_cast<char*>(std::malloc(add1(size)));
+        arguments[arg] = static_cast<char*>(std::malloc(add1(size)));
 
-        // Out of memory.
-        if (arguments[arg] == nullptr)
+        // Out of memory (arguments[] is assured).
+        BC_PUSH_WARNING(NO_READ_OVERRUN)
+        if (is_null(arguments[arg]))
+        BC_POP_WARNING()
         {
             free_environment(arguments);
             return nullptr;
@@ -332,20 +355,29 @@ char** allocate_environment(int argc, wchar_t* argv[]) NOEXCEPT
 
         std::copy_n(utf8.begin(), size, arguments[arg]);
 
-        // Row terminator.
+        // Row terminator (arguments[][] is assured).
+        BC_PUSH_WARNING(NO_DEREFERENCE_NULL_POINTER)
         arguments[arg][size] = '\0';
+        BC_POP_WARNING()
     }
 
-    // Table terminator.
-    arguments[argc] = 0;
+    // Table terminator (add1 ensures arguments[]).
+    BC_PUSH_WARNING(NO_DEREFERENCE_NULL_POINTER)
+    BC_PUSH_WARNING(NO_WRITE_OVERRUN)
+    arguments[argc] = nullptr;
+    BC_POP_WARNING()
+    BC_POP_WARNING()
     return arguments;
 }
 
 // Convert UTF16/wchar_t environment buffer to utf8/char environment buffer.
 char** allocate_environment(wchar_t* environment[]) NOEXCEPT
 {
+    if (is_null(environment))
+        return nullptr;
+
     int count;
-    for (count = 0; environment[count] != nullptr; count++);
+    for (count = 0; !is_null(environment[count]); count++);
     return allocate_environment(count, environment);
 }
 
@@ -361,7 +393,7 @@ int call_utf8_main(int argc, wchar_t* argv[],
     auto environment = allocate_environment(_wenviron);
 
     // If a new environment cannot be allocated control returns immediately.
-    if (is_null(environment))
+    if (is_null(environment) || is_null(main))
         return 0;
 
     environ = environment;
@@ -424,10 +456,8 @@ std::wstring to_fully_qualified_path(
 #endif // HAVE_MSC
 
 #ifdef HAVE_MSC
-// TODO: update comments for std::filesystem conversion.
 // Use to_extended_path with APIs that compile to wide with HAVE_MSC defined
-// and to UTF8 with HAVE_MSC undefined. This includes some boost APIs - such as
-// filesystem::remove, remove_all, and create_directories, as well as some
+// and to UTF8 with HAVE_MSC undefined. This includes some boost APIs and some
 // Win32 API extensions to std libs - such as std::ofstream and std::ifstream.
 // Otherwise use in any Win32 (W) APIs with HAVE_MSC defined, such as we do in 
 // interprocess_lock::open_file -> CreateFileW, since the boost wrapper only
@@ -446,6 +476,13 @@ std::string to_extended_path(const std::filesystem::path& path) NOEXCEPT
     return path.string();
 }
 #endif // HAVE_MSC
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
