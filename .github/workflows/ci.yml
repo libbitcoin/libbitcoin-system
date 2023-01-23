@@ -75,12 +75,12 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
-            boost: ""
+            boost: "--build-boost"
             icu: "--with-icu"
             cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "brew"
-            packages: "boost icu4c"
+            packages: "icu4c"
 
           - os: macos-latest
             cxx: "clang++-14"
@@ -278,12 +278,12 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
-            boost: ""
+            boost: "--build-boost"
             icu: "--with-icu"
             cc: "clang-14"
             flags: "-Os -fPIE"
             packager: "brew"
-            packages: "boost icu4c"
+            packages: "icu4c"
 
           - os: macos-latest
             cxx: "clang++-14"
