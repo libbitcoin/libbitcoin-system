@@ -161,6 +161,9 @@ private:
     block_t buffer_{};
 };
 
+/// Prevent implicit template instantiation.
+extern template class accumulator<sha256>;
+
 } // namespace system
 } // namespace libbitcoin
 
