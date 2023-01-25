@@ -85,7 +85,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/op_error_t.cpp \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
-    src/hash/accumulators.cpp \
+    src/hash/accumulator.cpp \
     src/hash/checksum.cpp \
     src/hash/siphash.cpp \
     src/hash/vectorization/sha256_1_native.cpp \

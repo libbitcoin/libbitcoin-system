@@ -150,7 +150,7 @@
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\accumulators.cpp" />
+    <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_1_native.cpp" />
