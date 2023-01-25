@@ -369,6 +369,9 @@
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\hash\accumulators.cpp">
+      <Filter>src\hash</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
