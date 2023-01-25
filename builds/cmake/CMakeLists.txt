@@ -319,6 +319,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/error/script_error_t.cpp"
     "../../src/error/transaction_error_t.cpp"
     "../../src/hash/checksum.cpp"
+    "../../src/hash/accumulators.cpp"
     "../../src/hash/siphash.cpp"
     "../../src/hash/vectorization/sha256_1_native.cpp"
     "../../src/hash/vectorization/sha256_2_shani.cpp"
