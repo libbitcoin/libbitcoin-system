@@ -26,6 +26,7 @@ namespace system {
 
 /// Explicit template instantiation.
 template class accumulator<sha256>;
+template class accumulator<sha512>;
 
 }
 }
