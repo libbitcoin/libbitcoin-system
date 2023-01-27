@@ -20,6 +20,11 @@
 
 BOOST_AUTO_TEST_SUITE(pseudo_random_tests)
 
+BOOST_AUTO_TEST_CASE(pseudo_random_next__negative_duration__default)
+{
+    BOOST_REQUIRE(is_zero(pseudo_random::next(2, 1)));
+}
+
 BOOST_AUTO_TEST_CASE(pseudo_random__duration__zero_duration__maximum)
 {
     const int max_seconds = 0;
