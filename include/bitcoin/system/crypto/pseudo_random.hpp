@@ -65,6 +65,10 @@ class BC_API pseudo_random
     template<typename Integer, if_integer<Integer> = true>
     static Integer next(Integer begin, Integer end) NOEXCEPT
     {
+        // std::uniform_int_distribution() is undefined if begin > end.
+        if (begin > end)
+            return {};
+
         std::uniform_int_distribution<Integer> distribution(begin, end);
         return distribution(get_twister());
     }
