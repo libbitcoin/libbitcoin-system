@@ -218,7 +218,7 @@ static std::string format_setting(const parameter& value,
 static void split_setting_name(const parameter& value, std::string& name,
     std::string& section) NOEXCEPT
 {
-    const auto tokens = split(value.long_name(), ".");
+    const auto tokens = split(value.long_name(), ".", false);
     if (tokens.size() != 2)
     {
         section.clear();
