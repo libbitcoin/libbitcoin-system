@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_SETTINGS_HPP
 #define LIBBITCOIN_SYSTEM_SETTINGS_HPP
 
-#include <string>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/config/config.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -37,13 +36,17 @@ public:
 
     // Utilities.
     // ------------------------------------------------------------------------
+
+    // This is not used directly in system.
     uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
 
     // Computed properties.
     // -------------------------------------------------------------------------
 
+    // These are not used directly in system.
     uint64_t max_money() const NOEXCEPT;
     uint64_t initial_subsidy() const NOEXCEPT;
+
     uint32_t minimum_timespan() const NOEXCEPT;
     uint32_t maximum_timespan() const NOEXCEPT;
     size_t retargeting_interval() const NOEXCEPT;
@@ -51,19 +54,22 @@ public:
     // Consensus settings.
     // -------------------------------------------------------------------------
 
+    // These are not used directly in system.
+    uint32_t timestamp_limit_seconds;
+    uint64_t initial_subsidy_bitcoin;
+    uint64_t subsidy_interval_blocks;
+
     uint32_t retargeting_factor;
     uint32_t retargeting_interval_seconds;
     uint32_t block_spacing_seconds;
-    uint32_t timestamp_limit_seconds;
     uint32_t proof_of_work_limit;
-    uint64_t initial_subsidy_bitcoin;
-    uint64_t subsidy_interval_blocks;
     config::block genesis_block;
 
     // Fork settings.
     // -------------------------------------------------------------------------
 
-    // Consensus rule change activation and enforcement parameters (opaque).
+    // These are not typically read from a configuration file.
+    // Consensus rule change activation and enforcement parameters.
     uint32_t first_version;
     uint32_t bip34_version;
     uint32_t bip66_version;
@@ -73,28 +79,29 @@ public:
     uint32_t bip9_version_base;
 
     // Activation parameters (bip34-style activations).
-    size_t activation_threshold;
-    size_t enforcement_threshold;
-    size_t activation_sample;
+    size_t activation_threshold{};
+    size_t enforcement_threshold{};
+    size_t activation_sample{};
 
     // Frozen activation heights (frozen_activations).
-    size_t bip65_freeze;
-    size_t bip66_freeze;
-    size_t bip34_freeze;
+    size_t bip65_freeze{};
+    size_t bip66_freeze{};
+    size_t bip34_freeze{};
 
     // Block 514 is the first testnet block after date-based activation.
     // Block 173805 is the first mainnet block after date-based activation.
     // The first mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
-    uint32_t bip16_activation_time;
+    uint32_t bip16_activation_time{};
 
+    // This is not used in consensus computations.
     // bip90 stops checking unspent duplicates above this bip34 activation.
     chain::checkpoint bip34_active_checkpoint;
 
     // This cannot be reactivated in a future branch due to window expiration.
-    chain::checkpoint bip9_bit0_active_checkpoint;
+    chain::checkpoint bip9_bit0_active_checkpoint{};
 
     // This cannot be reactivated in a future branch due to window expiration.
-    chain::checkpoint bip9_bit1_active_checkpoint;
+    chain::checkpoint bip9_bit1_active_checkpoint{};
 };
 
 } // namespace system

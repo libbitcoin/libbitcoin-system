@@ -34,8 +34,6 @@
 namespace libbitcoin {
 namespace system {
 
-class settings;
-
 namespace chain {
 
 class BC_API block

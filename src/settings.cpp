@@ -26,15 +26,14 @@
 namespace libbitcoin {
 namespace system {
 
-// Common default values (no settings context).
 settings::settings() NOEXCEPT
-  : retargeting_factor(4),
-    retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
-    block_spacing_seconds(10 * 60),
-    timestamp_limit_seconds(2 * 60 * 60),
-    proof_of_work_limit(0x1d00ffff),
+  : timestamp_limit_seconds(2 * 60 * 60),
     initial_subsidy_bitcoin(50),
     subsidy_interval_blocks(210000),
+    retargeting_factor(4),
+    retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
+    block_spacing_seconds(10 * 60),
+    proof_of_work_limit(0x1d00ffff),
     genesis_block{},
     first_version(1),
     bip34_version(2),
