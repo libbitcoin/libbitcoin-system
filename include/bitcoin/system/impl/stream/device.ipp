@@ -65,7 +65,7 @@ typename device<Container>::size_type
 device<Container>::read(char_type* buffer, size_type count) NOEXCEPT
 {
     if (is_null(buffer) || is_negative(count) || is_negative(remaining_))
-        return negative_one;
+        return {};
 
     const auto size = std::min(remaining_, count);
     do_read(reinterpret_cast<value_type*>(buffer), size);
@@ -80,7 +80,7 @@ typename device<Container>::size_type
 device<Container>::write(const char_type* buffer, size_type count) NOEXCEPT
 {
     if (is_null(buffer) || is_negative(count) || is_negative(remaining_))
-        return negative_one;
+        return {};
 
     const auto size = std::min(remaining_, count);
     do_write(reinterpret_cast<const value_type*>(buffer), size);
