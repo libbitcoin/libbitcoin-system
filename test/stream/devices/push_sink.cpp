@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(push_sink__write__nullptr__false)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), -1);
+    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), 0);
 }
 
 BOOST_AUTO_TEST_CASE(push_sink__write__empty__true)
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(push_sink__write__negative__false)
 {
     data_chunk sink;
     push_sink<data_chunk> instance(sink);
-    BOOST_REQUIRE_EQUAL(instance.write("a", -1), -1);
+    BOOST_REQUIRE_EQUAL(instance.write("a", -1), 0);
     BOOST_REQUIRE(sink.empty());
 }
 

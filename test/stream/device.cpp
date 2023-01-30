@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(device__output_sequence__empty__nullptrs)
 BOOST_AUTO_TEST_CASE(device__write__nullptr__false)
 {
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), -1);
+    BOOST_REQUIRE_EQUAL(instance.write(nullptr, 0), 0);
 }
 
 BOOST_AUTO_TEST_CASE(device__write__empty__true)
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(device__write__negative__false)
 {
     const std::string from{ "a" };
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.write(from.data(), -1), -1);
+    BOOST_REQUIRE_EQUAL(instance.write(from.data(), -1), 0);
 }
 
 BOOST_AUTO_TEST_CASE(device__write__past_end__zero)
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(device__write__one__zero)
 BOOST_AUTO_TEST_CASE(device__read__nullptr__false)
 {
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(nullptr, 0), -1);
+    BOOST_REQUIRE_EQUAL(instance.read(nullptr, 0), 0);
 }
 
 // zero-size array .data is null pointer in msvc, but empty on other platforms.
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(device__read__negative__false)
 {
     std::array<char, 1> to;
     device_accessor instance;
-    BOOST_REQUIRE_EQUAL(instance.read(to.data(), -1), -1);
+    BOOST_REQUIRE_EQUAL(instance.read(to.data(), -1), 0);
 }
 
 BOOST_AUTO_TEST_CASE(device__read__past_end__zero)
