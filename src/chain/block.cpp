@@ -288,7 +288,7 @@ bool block::is_oversized() const NOEXCEPT
 
 bool block::is_first_non_coinbase() const NOEXCEPT
 {
-    return !txs_->front()->is_coinbase();
+    return !txs_->empty() && !txs_->front()->is_coinbase();
 }
 
 // True if there is another coinbase other than the first tx.
