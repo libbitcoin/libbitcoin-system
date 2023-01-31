@@ -263,18 +263,24 @@ uint64_t settings::max_money() const NOEXCEPT
     std::function<uint64_t(uint64_t)> total = [&](uint64_t subsidy) NOEXCEPT
     {
         // Guarded by parameterization (config).
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         return is_zero(subsidy) ? 0 : safe_add(subsidy, total(subsidy >> 1));
+        BC_POP_WARNING()
     };
 
     // Guarded by parameterization (config).
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return safe_multiply(total(initial_subsidy()), subsidy_interval_blocks);
+    BC_POP_WARNING()
 }
 
 // Used to initialize initial subsidy setting.
 uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
 {
     // Guarded by parameterization (config).
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     return safe_multiply(value, chain::satoshi_per_bitcoin);
+    BC_POP_WARNING()
 }
 
 // The initial block subsidy in satoshis.
