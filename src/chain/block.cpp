@@ -48,7 +48,7 @@ namespace chain {
 // ----------------------------------------------------------------------------
 
 block::block() NOEXCEPT
-  : block(to_shared<chain::header>(), to_shared<chain::transaction_ptrs>(),
+  : block(to_shared<chain::header>(), to_shared<chain::transaction_cptrs>(),
       false)
 {
 }
@@ -67,7 +67,7 @@ block::block(const chain::header& header,
 block::block(const chain::header::cptr& header,
     const chain::transactions_cptr& txs) NOEXCEPT
   : block(header ? header : to_shared<chain::header>(),
-      txs ? txs : to_shared<transaction_ptrs>(), true)
+      txs ? txs : to_shared<transaction_cptrs>(), true)
 {
 }
 
@@ -127,7 +127,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 {
     const auto read_transactions = [witness](reader& source) NOEXCEPT
     {
-        auto txs = to_shared<transaction_ptrs>();
+        auto txs = to_shared<transaction_cptrs>();
         txs->reserve(source.read_size(max_block_size));
 
         for (size_t tx = 0; tx < txs->capacity(); ++tx)
