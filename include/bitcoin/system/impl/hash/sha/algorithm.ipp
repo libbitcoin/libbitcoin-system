@@ -1007,7 +1007,6 @@ hash(iblocks_t&& blocks) NOEXCEPT
     return output(state);
 }
 
-
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const block_t& block) NOEXCEPT
