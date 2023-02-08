@@ -399,6 +399,7 @@ remove_install_options()
 {
     # Purge installer handled options other than --build-.
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--with-*/}")
+    CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--without-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--enable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--disable-*/}")
     CONFIGURE_OPTIONS=("${CONFIGURE_OPTIONS[@]/--prefix=*/}")
@@ -629,6 +630,12 @@ create_from_github()
     local ACCOUNT=$1
     local REPO=$2
     local BRANCH=$3
+    local BUILD=$4
+	shift 4
+
+    if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
+        return
+    fi
 
     FORK="$ACCOUNT/$REPO"
 
@@ -656,8 +663,13 @@ build_from_github()
     local REPO=$1
     local JOBS=$2
     local TEST=$3
-    local OPTIONS=$4
-    shift 4
+    local BUILD=$4
+    local OPTIONS=$5
+    shift 5
+
+    if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
+        return
+    fi
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
@@ -719,8 +731,13 @@ build_from_github_cmake()
     local REPO=$1
     local JOBS=$2
     local TEST=$3
-    local OPTIONS=$4
-    shift 4
+    local BUILD=$4
+    local OPTIONS=$5
+    shift 5
+
+    if [[ ! ($BUILD) || ($BUILD == "no") ]]; then
+        return
+    fi
 
     # Join generated and command line options.
     local CONFIGURATION=("${OPTIONS[@]}" "$@")
@@ -886,15 +903,15 @@ build_all()
     build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
     build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    create_from_github libbitcoin secp256k1 version8
-    build_from_github secp256k1 "$PARALLEL" false "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
+    create_from_github libbitcoin secp256k1 version8 "yes"
+    build_from_github secp256k1 "$PARALLEL" false "yes" "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
     if [[ ! ($CI == true) ]]; then
-        create_from_github libbitcoin libbitcoin-system master
-        build_from_github_cmake libbitcoin-system "$PARALLEL" true "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        create_from_github libbitcoin libbitcoin-system master "yes"
+        build_from_github_cmake libbitcoin-system "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
         push_directory ".."
-        build_from_github_cmake libbitcoin-system "$PARALLEL" true "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
+        build_from_github_cmake libbitcoin-system "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS_CMAKE "$@"
         pop_directory
         pop_directory
     fi
@@ -964,8 +981,14 @@ BITCOIN_SYSTEM_OPTIONS=(
 # Build the primary library and all dependencies.
 #==============================================================================
 display_configuration
-create_directory "$BUILD_DIR"
-push_directory "$BUILD_DIR"
+
+if [[ ! ($CI == true) ]]; then
+    create_directory "$BUILD_DIR"
+    push_directory "$BUILD_DIR"
+else
+    push_directory "$BUILD_DIR"
+fi
+
 initialize_git
 time build_all "${CONFIGURE_OPTIONS[@]}"
 pop_directory
