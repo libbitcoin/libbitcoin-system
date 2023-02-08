@@ -158,7 +158,7 @@ jobs:
         if: ${{ matrix.coverage == 'cov' }}
         run: |
           lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "../prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
           lcov --list coverage.info
 
       - name: Coveralls.io Upload
@@ -193,7 +193,7 @@ jobs:
       - name: Failure list libdir
         if: ${{ failure() }}
         run: |
-          ls -la ${{ github.workspace }}/prefixenv/lib
+          ls -la ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib
 
       - name: Failure display boost bootstrap.log [--build-boost]
         if: ${{ failure() && (matrix.boost == '--build-boost') }}
@@ -213,8 +213,8 @@ jobs:
       - name: Failure display pkgconfig
         if: ${{ failure() }}
         run: |
-          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
-          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/
+          cat ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/*.pc
 
   cmake:
 
@@ -366,7 +366,7 @@ jobs:
         if: ${{ matrix.coverage == 'cov' }}
         run: |
           lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "../prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
           lcov --list coverage.info
 
       - name: Coveralls.io Upload
@@ -401,7 +401,7 @@ jobs:
       - name: Failure list libdir
         if: ${{ failure() }}
         run: |
-          ls -la ${{ github.workspace }}/prefixenv/lib
+          ls -la ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib
 
       - name: Failure display boost bootstrap.log [--build-boost]
         if: ${{ failure() && (matrix.boost == '--build-boost') }}
@@ -421,13 +421,13 @@ jobs:
       - name: Failure display pkgconfig
         if: ${{ failure() }}
         run: |
-          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
-          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/
+          cat ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/*.pc
 
       - name: Failure display cmake specific libraries
         if: ${{ failure() }}
         run: |
-          ls ${{ github.workspace }}/prefixenv/lib/cmake
+          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/cmake
 
       - name: Failure display cmake LastTest.log
         if: ${{ failure() }}
@@ -549,7 +549,7 @@ jobs:
         if: ${{ matrix.coverage == 'cov' }}
         run: |
           lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "../prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
           lcov --list coverage.info
 
       - name: Coveralls.io Upload
@@ -584,7 +584,7 @@ jobs:
       - name: Failure list libdir
         if: ${{ failure() }}
         run: |
-          ls -la ${{ github.workspace }}/prefixenv/lib
+          ls -la ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib
 
       - name: Failure display boost bootstrap.log [--build-boost]
         if: ${{ failure() && (matrix.boost == '--build-boost') }}
@@ -604,13 +604,13 @@ jobs:
       - name: Failure display pkgconfig
         if: ${{ failure() }}
         run: |
-          ls ${{ github.workspace }}/prefixenv/lib/pkgconfig/
-          cat ${{ github.workspace }}/prefixenv/lib/pkgconfig/*.pc
+          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/
+          cat ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/pkgconfig/*.pc
 
       - name: Failure display cmake specific libraries
         if: ${{ failure() }}
         run: |
-          ls ${{ github.workspace }}/prefixenv/lib/cmake
+          ls ${{ env.LIBBITCOIN_SRC_PATH }}prefix/lib/cmake
 
       - name: Failure display cmake LastTest.log
         if: ${{ failure() }}
