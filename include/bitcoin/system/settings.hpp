@@ -31,6 +31,8 @@ namespace system {
 class BC_API settings
 {
 public:
+    DEFAULT_COPY_MOVE_DESTRUCT(settings);
+
     settings() NOEXCEPT;
     settings(chain::selection context) NOEXCEPT;
 
@@ -38,18 +40,18 @@ public:
     // ------------------------------------------------------------------------
 
     // This is not used directly in system.
-    uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
+    virtual uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
 
     // Computed properties.
     // -------------------------------------------------------------------------
 
     // These are not used directly in system.
-    uint64_t max_money() const NOEXCEPT;
-    uint64_t initial_subsidy() const NOEXCEPT;
+    virtual uint64_t max_money() const NOEXCEPT;
+    virtual uint64_t initial_subsidy() const NOEXCEPT;
 
-    uint32_t minimum_timespan() const NOEXCEPT;
-    uint32_t maximum_timespan() const NOEXCEPT;
-    size_t retargeting_interval() const NOEXCEPT;
+    virtual uint32_t minimum_timespan() const NOEXCEPT;
+    virtual uint32_t maximum_timespan() const NOEXCEPT;
+    virtual size_t retargeting_interval() const NOEXCEPT;
 
     // Consensus settings.
     // -------------------------------------------------------------------------
