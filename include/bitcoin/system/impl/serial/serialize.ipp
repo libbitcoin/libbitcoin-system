@@ -92,11 +92,10 @@ std::string serialize(const std::vector<Value>& values,
 template <typename Value>
 std::string serialize(const Value& value, const std::string& fallback) NOEXCEPT
 {
-    // Suppress ostringstream may throw inside NOEXCEPT.
     // The intended behavior in this case is program abort.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-    std::ostringstream ostream;
+    std::ostringstream ostream{};
     ostream << value;
     const auto token = ostream.str();
     return token.empty() ? fallback : token;

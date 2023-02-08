@@ -40,7 +40,7 @@ template <typename Value>
 bool deserialize(Value& out, std::istream& input) NOEXCEPT
 {
     // Consumes an entire whitespace-delimited stream.
-    std::istreambuf_iterator<char> begin(input), end;
+    const std::istreambuf_iterator<char> begin{ input }, end{};
     std::string text(begin, end);
     return deserialize(out, text);
 }
@@ -53,7 +53,7 @@ inline bool deserialize(std::string& out, const std::string& text) NOEXCEPT
 
 inline bool deserialize(uint8_t& out, const std::string& text) NOEXCEPT
 {
-    uint16_t value;
+    uint16_t value{};
     if (!deserialize(value, text))
         return false;
 
@@ -108,7 +108,6 @@ bool deserialize(std::vector<Value>& out, const std::string& text) NOEXCEPT
 template <typename Value>
 bool deserialize(Value& out, const std::string& text) NOEXCEPT
 {
-    // Suppress istringstream may throw inside NOEXCEPT.
     // The intended behavior in this case is program abort.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
