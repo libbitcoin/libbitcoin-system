@@ -20,12 +20,9 @@
 #define LIBBITCOIN_SYSTEM_SERIAL_DESERIALZIE_IPP
 
 #include <algorithm>
-#include <array>
 #include <iterator>
 #include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -108,17 +105,19 @@ bool deserialize(std::vector<Value>& out, const std::string& text) NOEXCEPT
 template <typename Value>
 bool deserialize(Value& out, const std::string& text) NOEXCEPT
 {
-    // The intended behavior in this case is program abort.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
     // Trimming is useful for type conversion, which otherwise fails.
     // So trimming of string types (pass-thru) is avoided by template override.
     // This can convert garbage to zero, use is_ascii_number for pre-assurance.
-    std::istringstream istream(trim_copy(text));
-    istream >> out;
-    return !istream.fail();
-
-    BC_POP_WARNING()
+    try
+    {
+        std::istringstream istream(trim_copy(text));
+        istream >> out;
+        return !istream.fail();
+    }
+    catch (std::exception)
+    {
+        return false;
+    }
 }
 
 } // namespace system

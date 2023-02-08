@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_HPP
 #define LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_HPP
 
-#include <array>
 #include <iostream>
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -30,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Convert specified Value to text, return fallback for empty results.
-/// Value may be any non-specialized serializable type (implements <<).
+/// Value may be any non-specialized serializable type (that implements <<).
 /// Any type that casts to a specialization will be specialized.
 /// The data_slice must either be explicitly sized to array serialize or
 /// it will deserialize as a data_chunk, due to its cast operators. Both work
