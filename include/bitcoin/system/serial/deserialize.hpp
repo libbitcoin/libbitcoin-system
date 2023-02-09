@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_SERIAL_DESERIALIZE_HPP
 #define LIBBITCOIN_SYSTEM_SERIAL_DESERIALIZE_HPP
 
-#include <array>
 #include <iostream>
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
@@ -30,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Trim and convert text to the Value type.
-/// Value may be any non-specialized deserializable type (implements >>).
+/// Value may be any non-specialized deserializable type (that implements >>).
 /// The data_slice type is not deserializable (cannot hold data).
 
 /// Deserialize to untrimmed/unsplit text, call deserialize(Value, string).
