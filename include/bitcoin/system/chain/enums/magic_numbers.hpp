@@ -25,19 +25,19 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// Consensus sentinels.
-// ----------------------------------------------------------------------------
+/// Consensus sentinels.
+/// ---------------------------------------------------------------------------
 
 constexpr uint32_t no_previous_output = max_uint32;
 constexpr uint32_t max_input_sequence = max_uint32;
 constexpr uint64_t sighash_null_value = max_uint64;
 
-// Script/interpreter consensus constants.
-// ----------------------------------------------------------------------------
+/// Script/interpreter consensus constants.
+/// ---------------------------------------------------------------------------
 
 constexpr size_t max_counted_ops = 201;
-constexpr size_t max_stack_size = 1000;
-constexpr size_t max_unified_script_size = 20000;
+constexpr size_t max_stack_size = 1'000;
+constexpr size_t max_unified_script_size = 20'000;
 constexpr size_t max_script_size = to_half(max_unified_script_size);
 constexpr size_t max_push_data_size = 520;
 constexpr size_t max_script_public_keys = 20;
@@ -45,22 +45,22 @@ constexpr size_t multisig_default_sigops = 20;
 constexpr size_t max_number_size_four = 4;
 constexpr size_t max_number_size_five = 5;
 
-// Validation consensus constants.
-// ----------------------------------------------------------------------------
+/// Validation consensus constants.
+/// ---------------------------------------------------------------------------
 
 constexpr size_t hash_limit = 4500;
 constexpr size_t min_coinbase_size = 2;
 constexpr size_t max_coinbase_size = 100;
 constexpr size_t coinbase_maturity = 100;
 constexpr size_t median_time_past_interval = 11;
-constexpr size_t locktime_threshold = 500000000;
-constexpr size_t max_block_size = 1000000;
+constexpr size_t locktime_threshold = 500'000'000;
+constexpr size_t max_block_size = 1'000'000;
 constexpr size_t max_sigops_factor = 50;
 constexpr size_t max_block_sigops = max_block_size / max_sigops_factor;
-constexpr uint64_t satoshi_per_bitcoin = 100000000;
+constexpr uint64_t satoshi_per_bitcoin = 100'000'000;
 
-// Relative locktime consensus constants.
-// ----------------------------------------------------------------------------
+/// Relative locktime consensus constants.
+/// ---------------------------------------------------------------------------
 
 constexpr size_t relative_locktime_min_version = 2;
 constexpr size_t relative_locktime_disabled_bit = 31;
@@ -68,8 +68,8 @@ constexpr size_t relative_locktime_time_locked_bit = 22;
 constexpr size_t relative_locktime_seconds_shift_left = 9;
 constexpr size_t relative_locktime_mask_left = 16;
 
-// Witness serialization consensus constants (bip141).
-// ----------------------------------------------------------------------------
+/// Witness serialization consensus constants (bip141).
+/// ---------------------------------------------------------------------------
 
 constexpr size_t heavy_sigops_factor = 4;
 constexpr size_t max_fast_sigops = heavy_sigops_factor * max_block_sigops;
@@ -83,8 +83,8 @@ constexpr uint32_t witness_head = 0xaa21a9ed;
 constexpr uint8_t witness_marker = 0x00;
 constexpr uint8_t witness_enabled = 0x01;
 
-// Policy constants.
-// ----------------------------------------------------------------------------
+/// Policy constants.
+/// ---------------------------------------------------------------------------
 
 constexpr size_t max_null_data_size = 80;
 
