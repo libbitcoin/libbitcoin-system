@@ -76,10 +76,12 @@
         #define NO_REINTERPRET_CAST 26490
         #define NO_CONST_CAST 26492
         #define NO_C_STYLE_CASTS 26493
+        #define NO_UNINITIALZIED_VARIABLE 26494
         #define NO_UNINITIALZIED_MEMBER 26495
         #define USE_CONST 26496
         #define USE_CONSTEXPR_FOR_FUNCTION 26497
         #define NO_USE_OF_MOVED_OBJECT 26800
+        #define UNSATISFIED_EXPECTATION 28020
     #endif
 #else
     #define BC_DISABLE_WARNING(value)
