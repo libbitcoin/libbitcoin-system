@@ -111,7 +111,7 @@ inline bool try_shani() NOEXCEPT
 {
     if constexpr (with_shani)
     {
-        uint32_t eax, ebx, ecx, edx;
+        uint32_t eax{}, ebx{}, ecx{}, edx{};
         return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
             && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
             && (eax >= cpu7_0::leaf)
@@ -126,8 +126,8 @@ inline bool try_avx512() NOEXCEPT
 {
     if constexpr (with_avx512)
     {
-        uint64_t extended;
-        uint32_t eax, ebx, ecx, edx;
+        uint64_t extended{};
+        uint32_t eax{}, ebx{}, ecx{}, edx{};
         return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
             && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
             && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
@@ -146,8 +146,8 @@ inline bool try_avx2() NOEXCEPT
 {
     if constexpr (with_avx2)
     {
-        uint64_t extended;
-        uint32_t eax, ebx, ecx, edx;
+        uint64_t extended{};
+        uint32_t eax{}, ebx{}, ecx{}, edx{};
         return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
             && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
             && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
@@ -166,7 +166,7 @@ inline bool try_sse41() NOEXCEPT
 {
     if constexpr (with_sse41)
     {
-        uint32_t eax, ebx, ecx, edx;
+        uint32_t eax{}, ebx{}, ecx{}, edx{};
         return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
             && get_bit<cpu1_0::sse41_ecx_bit>(ecx);     // SSE4.1
     }
@@ -179,7 +179,7 @@ inline bool try_sse41a() NOEXCEPT
     // SSE41a implies assembly, with no need for SSE41 intrinsics.
     if constexpr (with_sse41a)
     {
-        uint32_t eax, ebx, ecx, edx;
+        uint32_t eax{}, ebx{}, ecx{}, edx{};
         return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
             && get_bit<cpu1_0::sse41_ecx_bit>(ecx);     // SSE4.1
     }

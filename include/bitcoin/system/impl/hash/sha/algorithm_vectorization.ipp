@@ -416,7 +416,9 @@ merkle_hash_v_(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
     if (blocks.size() >= lanes && have<xWord>())
     {
         static auto initial = pack<xWord>(H::get);
+        BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
         xbuffer_t<xWord> xbuffer;
+        BC_POP_WARNING()
 
         do
         {
@@ -526,7 +528,9 @@ iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT
 
     if (blocks.size() >= lanes && have<xWord>())
     {
+        BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
         xbuffer_t<xWord> xbuffer;
+        BC_POP_WARNING()
 
         do
         {

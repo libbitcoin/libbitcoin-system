@@ -426,7 +426,13 @@ block_mix(rblock_t& rblock) NOEXCEPT
 
     // Relocate odd blocks (except last) to second half of the rblock.
     for (size_t i = 0, j = R; i < sub1(R); ++i)
+    {
+        // TODO: This may be a false positive code analysis warning.
+        // C28020: '0<=_Param_(1)&&_Param_(1)<=2-1' is not true at this call.
+        BC_PUSH_WARNING(UNSATISFIED_EXPECTATION)
         rblock[j++] = yblock[i];
+        BC_POP_WARNING()
+    }
 
 #endif // BLOCK_MIX_OPTIMAL_FORM
 
