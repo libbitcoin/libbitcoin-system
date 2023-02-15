@@ -220,8 +220,7 @@ read_puts(Source& source) NOEXCEPT
         BC_POP_WARNING()
     }
 
-    // This is a pointer copy from non-const to const, which is unavoidable if
-    // we want to avoid a vector move into a pointer to a const vector.
+    // This is a pointer copy (non-const to const).
     return puts;
 }
 

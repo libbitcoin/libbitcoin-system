@@ -139,6 +139,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
             BC_POP_WARNING()
         }
 
+        // This is a pointer copy (non-const to const).
         return txs;
     };
 
@@ -258,7 +259,6 @@ size_t block::serialized_size(bool witness) const NOEXCEPT
     return header::serialized_size()
         + variable_size(txs_->size())
         + std::accumulate(txs_->begin(), txs_->end(), zero, sum);
-
 }
 
 // Connect.
