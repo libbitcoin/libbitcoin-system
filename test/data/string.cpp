@@ -393,18 +393,42 @@ BOOST_AUTO_TEST_CASE(string__trim_copy__external_whitespace__trimmed)
     BOOST_REQUIRE_EQUAL(system::trim_copy("\t\n\v\f\r 1 \r\f\v\n\t"), "1");
 }
 
+BOOST_AUTO_TEST_CASE(string__trim_copy__move_external_whitespace__trimmed)
+{
+    BOOST_REQUIRE_EQUAL(system::trim_copy(std::string{ "\t\n\v\f\r 1 \r\f\v\n\t" }), "1");
+}
+
+BOOST_AUTO_TEST_CASE(string__trim_copy__copy_external_whitespace__trimmed)
+{
+    const std::string value{ "\t\n\v\f\r 1 \r\f\v\n\t" };
+    BOOST_REQUIRE_EQUAL(system::trim_copy(value), "1");
+}
+
 // trim_left_copy
 
-BOOST_AUTO_TEST_CASE(string__trim_left_copy__todo__todo)
+BOOST_AUTO_TEST_CASE(string__trim_left_copy__copy__expected)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    const std::string value{ "\t\n\v\f\r 1 \r\f\v\n\t" };
+    BOOST_REQUIRE_EQUAL(system::trim_left_copy(value), "1 \r\f\v\n\t");
+}
+
+BOOST_AUTO_TEST_CASE(string__trim_left_copy__move__expected)
+{
+    BOOST_REQUIRE_EQUAL(system::trim_left_copy(std::string{ "\t\n\v\f\r 1 \r\f\v\n\t" }), "1 \r\f\v\n\t");
 }
 
 // trim_right_copy
 
-BOOST_AUTO_TEST_CASE(string__trim_right_copy__todo__todo)
+BOOST_AUTO_TEST_CASE(string__trim_right_copy__copy__expected)
 {
-    BOOST_REQUIRE(TODO_TESTS);
+    const std::string value{ "\t\n\v\f\r 1 \r\f\v\n\t" };
+    BOOST_REQUIRE_EQUAL(system::trim_right_copy(value), "\t\n\v\f\r 1");
+}
+
+BOOST_AUTO_TEST_CASE(string__trim_right_copy__move__expected)
+{
+    const std::string value{ "\t\n\v\f\r 1 \r\f\v\n\t" };
+    BOOST_REQUIRE_EQUAL(system::trim_right_copy(value), "\t\n\v\f\r 1");
 }
 
 #endif // STRING_TRIM

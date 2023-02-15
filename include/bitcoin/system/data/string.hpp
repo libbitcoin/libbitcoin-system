@@ -57,10 +57,16 @@ BC_API bool trim_right(std::string& text,
 BC_API void trim(std::string& text,
     const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
 
-BC_API std::string trim_left_copy(const std::string& text,
+BC_API std::string trim_left_copy(std::string&& text,
     const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
+BC_API std::string trim_left_copy(const std::string& text,
+    const string_list& trim_tokens = ascii_whitespace) NOEXCEPT;
+BC_API std::string trim_right_copy(std::string&& text,
+    const string_list& trim_tokens = ascii_whitespace) NOEXCEPT;
 BC_API std::string trim_right_copy(const std::string& text,
     const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
+BC_API std::string trim_copy(std::string&& text,
+    const string_list& trim_tokens = ascii_whitespace) NOEXCEPT;
 BC_API std::string trim_copy(const std::string& text,
     const string_list& trim_tokens=ascii_whitespace) NOEXCEPT;
 
