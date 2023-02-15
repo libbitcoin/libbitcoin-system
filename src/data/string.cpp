@@ -61,8 +61,7 @@ void reduce(string_list& tokens, const string_list& trim_tokens,
         trim(token, trim_tokens);
 
     if (compress)
-        tokens.erase(std::remove(tokens.begin(), tokens.end(), empty),
-            tokens.end());
+        std::erase(tokens, empty);
 
     if (tokens.empty())
         tokens.push_back({});

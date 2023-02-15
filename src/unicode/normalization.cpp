@@ -368,10 +368,7 @@ std::string to_non_combining_form(const std::string& value) NOEXCEPT
 
     // utf32 ensures each word is a single unicode character.
     auto points = to_utf32(value);
-
-    points.erase(std::remove_if(points.begin(), points.end(), is_combining),
-        points.end());
-
+    std::erase_if(points, is_combining);
     return to_utf8(points);
 }
 
@@ -382,10 +379,7 @@ std::string to_non_diacritic_form(const std::string& value) NOEXCEPT
 
     // utf32 ensures each word is a single unicode character.
     auto points = to_utf32(value);
-
-    points.erase(std::remove_if(points.begin(), points.end(), is_diacritic),
-        points.end());
-
+    std::erase_if(points, is_diacritic);
     return to_utf8(points);
 }
 
