@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
-#include <string>
+#include <utility>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
@@ -225,6 +225,13 @@ std::string trim_left_copy(const std::string& text,
     return copy;
 }
 
+std::string trim_left_copy(std::string&& text,
+    const string_list& trim_tokens) NOEXCEPT
+{
+    trim_left(text, trim_tokens);
+    return std::move(text);
+}
+
 std::string trim_right_copy(const std::string& text,
     const string_list& trim_tokens) NOEXCEPT
 {
@@ -233,12 +240,26 @@ std::string trim_right_copy(const std::string& text,
     return copy;
 }
 
+std::string trim_right_copy(std::string&& text,
+    const string_list& trim_tokens) NOEXCEPT
+{
+    trim_right(text, trim_tokens);
+    return std::move(text);
+}
+
 std::string trim_copy(const std::string& text,
     const string_list& trim_tokens) NOEXCEPT
 {
     std::string copy{ text };
     trim(copy, trim_tokens);
     return copy;
+}
+
+std::string trim_copy(std::string&& text,
+    const string_list& trim_tokens) NOEXCEPT
+{
+    trim(text, trim_tokens);
+    return std::move(text);
 }
 
 bool ends_with(const std::string& text, const std::string& suffix) NOEXCEPT
