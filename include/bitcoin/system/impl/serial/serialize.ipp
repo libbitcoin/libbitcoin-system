@@ -96,7 +96,7 @@ std::string serialize(const Value& value, const std::string& fallback) NOEXCEPT
         const auto token = ostream.str();
         return token.empty() ? fallback : token;
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         return {};
     }
