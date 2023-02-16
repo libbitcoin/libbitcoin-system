@@ -114,7 +114,7 @@ bool deserialize(Value& out, const std::string& text) NOEXCEPT
         istream >> out;
         return !istream.fail();
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         return false;
     }
