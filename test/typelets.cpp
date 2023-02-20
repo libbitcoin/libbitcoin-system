@@ -303,16 +303,16 @@ static_assert(capacity<uint64_t, uint64_t, 1> == 1);
 // ----------------------------------------------------------------------------
 
 static_assert(is_same_type<uint8_t, const uint8_t>);
-static_assert(is_same_type<nocvref<const uint8_t>, uint8_t>);
+static_assert(is_same_type<std::decay_t<const uint8_t>, uint8_t>);
 
 static_assert(is_same_type<volatile uint8_t, uint8_t>);
-static_assert(is_same_type<nocvref<volatile uint8_t>, uint8_t>);
+static_assert(is_same_type<std::decay_t<volatile uint8_t>, uint8_t>);
 
 static_assert(is_same_type<uint8_t&, uint8_t>);
-static_assert(is_same_type<nocvref<uint8_t&>, uint8_t>);
+static_assert(is_same_type<std::decay_t<uint8_t&>, uint8_t>);
 
 static_assert(is_same_type<const volatile uint8_t&, uint8_t>);
-static_assert(is_same_type<nocvref<const volatile uint8_t&>, uint8_t>);
+static_assert(is_same_type<std::decay_t<const volatile uint8_t&>, uint8_t>);
 
 static_assert(is_std_array<std::array<uint8_t, 0>>);
 static_assert(is_std_array<std::array<base, 0>>);
