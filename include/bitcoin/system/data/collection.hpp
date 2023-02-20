@@ -44,6 +44,7 @@ inline To projection(const From& source) NOEXCEPT;
 template <typename Left, typename Right>
 constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT;
 
+/// C++20: list.contains(element)
 /// Determine if a collection contains the specified element.
 template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,

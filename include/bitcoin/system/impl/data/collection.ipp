@@ -104,11 +104,8 @@ template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
     const Element& element) NOEXCEPT
 {
-    return std::any_of(std::begin(list), std::end(list),
-        [&element](const auto& value) NOEXCEPT
-        {
-            return value == element;
-        });
+    return std::find(std::begin(list), std::end(list), element) !=
+        std::end(list);
 }
 
 // C++17: Parallel policy for std::find_if.

@@ -252,7 +252,7 @@ template<size_t Round, size_t Lane>
 INLINE constexpr void CLASS::
 round(auto& state, const auto& wk) NOEXCEPT
 {
-    using word = nocvref<decltype(state.front())>;
+    using word = std::decay_t<decltype(state.front())>;
 
     if constexpr (SHA::strength == 160)
     {
