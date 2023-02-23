@@ -56,6 +56,7 @@
         #define NO_WRITE_OVERRUN 6386
         #define NO_MALLOC_OR_FREE 26408
         #define NO_NEW_OR_DELETE 26409
+        #define NO_UNUSED_LOCAL_SMART_PTR 26414
         #define SMART_PTR_NOT_NEEDED 26415
         #define NO_RVALUE_REF_SHARED_PTR 26416
         #define NO_VALUE_OR_CONST_REF_SHARED_PTR 26418
