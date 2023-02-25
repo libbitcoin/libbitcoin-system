@@ -47,11 +47,11 @@ protected:
     virtual ~console_streambuf() NOEXCEPT;
 
     /// Alternate console read.
-    virtual std::streamsize xsgetn(wchar_t* buffer,
-        std::streamsize size) THROWS;
+    std::streamsize xsgetn(wchar_t* buffer,
+        std::streamsize size) THROWS override;
 
     /// Alternate console read.
-    virtual std::wstreambuf::int_type underflow() THROWS;
+    std::wstreambuf::int_type underflow() THROWS override;
 
 #ifdef HAVE_MSC
 private:

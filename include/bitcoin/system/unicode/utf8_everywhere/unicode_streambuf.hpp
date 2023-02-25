@@ -44,14 +44,14 @@ public:
 
 protected:
     /// Underflow for support of input streams.
-    virtual std::streambuf::int_type underflow() THROWS;
+    std::streambuf::int_type underflow() THROWS override;
 
     /// Overflow for support of output streams.
-    virtual std::streambuf::int_type overflow(
-        std::streambuf::int_type character) THROWS;
+    std::streambuf::int_type overflow(
+        std::streambuf::int_type character) THROWS override;
 
-    //// Sync for support of output streams.
-    virtual int sync() THROWS;
+    /// Sync for support of output streams.
+    int sync() THROWS override;
 
 private:
     // These are not thread safe.
