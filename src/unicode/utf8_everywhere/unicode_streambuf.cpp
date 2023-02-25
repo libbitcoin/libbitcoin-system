@@ -134,7 +134,6 @@ std::streambuf::int_type unicode_streambuf::overflow(
             return traits_type::eof();
     }
 
-    // C++17: parallel policy for copy_n.
     // write is necessarily no greater than unwritten.
     // Copy the fractional character to the beginning of the buffer.
     std::copy_n(&narrow_[write - unwritten], unwritten, narrow_);
