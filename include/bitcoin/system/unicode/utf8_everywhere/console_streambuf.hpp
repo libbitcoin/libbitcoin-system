@@ -35,8 +35,9 @@ class BC_API console_streambuf
 public:
     DELETE_COPY_MOVE(console_streambuf);
 
-    /// Initialize stdio to use utf8 translation on Windows.
-    static void initialize(size_t stream_buffer_size) THROWS;
+    /// Initialize console in/out to use utf8 translation on Windows.
+    static void set_input(size_t stream_buffer_size) THROWS;
+    static void set_output() THROWS;
 
 protected:
     /// Protected construction, use static initialize method.
