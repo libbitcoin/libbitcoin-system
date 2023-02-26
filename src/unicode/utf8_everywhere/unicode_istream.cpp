@@ -27,7 +27,7 @@ namespace system {
 #ifdef HAVE_MSC
 unicode_istream::unicode_istream(std::istream&, std::wistream& wide_stream,
     size_t wide_size) THROWS
-  : std::istream(new unicode_streambuf(wide_stream.rdbuf(), wide_size, true))
+  : std::istream(new unicode_streambuf(wide_stream.rdbuf(), wide_size))
 #else
 unicode_istream::unicode_istream(std::istream& narrow_stream,
     std::wistream&, size_t) THROWS
