@@ -235,7 +235,7 @@ static std::once_flag io_mutex;
 // Static initializer for bc::system::cin.
 std::istream& cin_stream() THROWS
 {
-    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
+    std::call_once(io_mutex, console_streambuf::set_input, utf16_buffer_size);
     static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
     return input;
 }
@@ -243,7 +243,7 @@ std::istream& cin_stream() THROWS
 // Static initializer for bc::system::cout.
 std::ostream& cout_stream() THROWS
 {
-    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
+    std::call_once(io_mutex, console_streambuf::set_output);
     static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
     return output;
 }
@@ -251,7 +251,7 @@ std::ostream& cout_stream() THROWS
 // Static initializer for bc::system::cerr.
 std::ostream& cerr_stream() THROWS
 {
-    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
+    std::call_once(io_mutex, console_streambuf::set_output);
     static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
     return error;
 }

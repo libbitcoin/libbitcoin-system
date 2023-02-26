@@ -34,7 +34,7 @@ public:
 
     /// Construct instance of a conditionally-widening output stream.
     unicode_ostream(std::ostream& narrow_stream, std::wostream& wide_stream,
-        size_t wide_buffer_size) THROWS;
+        size_t wide_size) THROWS;
 
     /// Delete the unicode_streambuf that wraps wide_stream.
     virtual ~unicode_ostream() NOEXCEPT;

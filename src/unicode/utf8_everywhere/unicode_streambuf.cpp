@@ -28,15 +28,15 @@
 namespace libbitcoin {
 namespace system {
 
-unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer,
+unicode_streambuf::unicode_streambuf(std::wstreambuf* buffer,
     size_t size) THROWS
   : wide_size_(size),
     narrow_size_(wide_size_ * utf8_max_character_size),
     narrow_(new char[narrow_size_]),
     wide_(new wchar_t[narrow_size_]),
-    wide_buffer_(wide_buffer)
+    wide_buffer_(buffer)
 {
-    if (is_zero(wide_size_) || wide_buffer == nullptr ||
+    if (is_zero(wide_size_) || is_null(wide_buffer_) ||
         wide_size_ > (bc::max_size_t / utf8_max_character_size))
         throw runtime_exception("unicode_streambuf parameters");
 
@@ -63,7 +63,7 @@ std::streambuf::int_type unicode_streambuf::underflow() THROWS
     // streamsize is signed.
     const auto size = static_cast<std::streamsize>(wide_size_);
 
-    // Read from the wide input buffer (non-negative).
+    // Read from the wide input buffer, blocking (non-negative).
     const auto read = wide_buffer_->sgetn(wide_, size);
 
     // Handle read termination.
@@ -90,7 +90,7 @@ std::streambuf::int_type unicode_streambuf::underflow() THROWS
 // MSVC does not support a UTF8 locale and as such streams interpret
 // narrow characters in the default locale. This implementation
 // assumes the stream will treat each byte of a multibyte narrow
-// chracter as an individual single byte character.
+// character as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
     std::streambuf::int_type character) THROWS
 {
@@ -134,7 +134,6 @@ std::streambuf::int_type unicode_streambuf::overflow(
             return traits_type::eof();
     }
 
-    // C++17: parallel policy for copy_n.
     // write is necessarily no greater than unwritten.
     // Copy the fractional character to the beginning of the buffer.
     std::copy_n(&narrow_[write - unwritten], unwritten, narrow_);
@@ -155,6 +154,10 @@ std::streambuf::int_type unicode_streambuf::overflow(
 // Flush our output sequence.
 int unicode_streambuf::sync() THROWS
 {
+    // Bypass for input.
+    if (is_null(std::streambuf::pptr()))
+        return std::streambuf::sync();
+
     const int success = zero;
     const int failure = negative_one;
 

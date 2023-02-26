@@ -38,13 +38,14 @@ static LPVOID get_input_handle() THROWS
     return handle;
 }
 
-// Hack for faulty std::wcin translation of non-ASCII keyboard input.
-void console_streambuf::initialize(size_t stream_buffer_size) THROWS
+void console_streambuf::set_input(size_t stream_buffer_size) THROWS
 {
-    // Set the console to operate in UTF-8 for this process.
+    // Set console input to operate in UTF-8 for this process.
+    // learn.microsoft.com/en-us/windows/console/setconsolecp
     if (SetConsoleCP(CP_UTF8) == FALSE)
-        throw runtime_exception("Failed to set console to utf8.");
+        throw runtime_exception("Failed to set console input to utf8.");
 
+    // Hack for faulty std::wcin translation of non-ASCII keyboard input.
     DWORD console_mode;
     if (GetConsoleMode(get_input_handle(), &console_mode) != FALSE)
     {
@@ -53,10 +54,19 @@ void console_streambuf::initialize(size_t stream_buffer_size) THROWS
     }
 }
 
-console_streambuf::console_streambuf(
-    const std::wstreambuf& stream_buffer, size_t size) THROWS
-    : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
-    std::wstreambuf(stream_buffer)
+void console_streambuf::set_output() THROWS
+{
+    // Set console output to operate in UTF-8 for this process.
+    // learn.microsoft.com/en-us/windows/console/setconsoleoutputcp
+    if (SetConsoleOutputCP(CP_UTF8) == FALSE)
+        throw runtime_exception("Failed to set console output to utf8.");
+}
+
+console_streambuf::console_streambuf(const std::wstreambuf& buffer,
+    size_t size) THROWS
+  : buffer_size_(size),
+    buffer_(new wchar_t[size]),
+    std::wstreambuf(buffer)
 {
 }
 
@@ -92,7 +102,11 @@ std::wstreambuf::int_type console_streambuf::underflow() THROWS
 
 #else
 
-void console_streambuf::initialize(size_t) THROWS
+void console_streambuf::set_input(size_t) THROWS
+{
+}
+
+void console_streambuf::set_output() THROWS
 {
 }
 

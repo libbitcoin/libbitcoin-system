@@ -37,7 +37,7 @@ int bc::system::main(int argc, char* argv[])
     system::cout << "Enter text to input..." << std::endl;
     std::string console;
     system::cin >> console;
-    system::cout << "input[0]  : " << console << std::endl;
+    system::cout << "input[0] : " << console << std::endl;
 
     if (argc > 1)
         system::cout << "argv[1] : " << argv[1] << std::endl;

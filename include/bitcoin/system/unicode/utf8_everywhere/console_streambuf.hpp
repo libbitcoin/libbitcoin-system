@@ -35,30 +35,30 @@ class BC_API console_streambuf
 public:
     DELETE_COPY_MOVE(console_streambuf);
 
-    /// Initialize stdio to use utf8 translation on Windows.
-    static void initialize(size_t stream_buffer_size) THROWS;
+    /// Initialize console in/out to use utf8 translation on Windows.
+    static void set_input(size_t stream_buffer_size) THROWS;
+    static void set_output() THROWS;
 
 protected:
     /// Protected construction, use static initialize method.
-    console_streambuf(const std::wstreambuf& stream_buffer,
-        size_t stream_buffer_size) THROWS;
+    console_streambuf(const std::wstreambuf& buffer, size_t size) THROWS;
 
     /// Delete stream buffer.
     virtual ~console_streambuf() NOEXCEPT;
 
     /// Alternate console read.
-    virtual std::streamsize xsgetn(wchar_t* buffer,
-        std::streamsize size) THROWS;
+    std::streamsize xsgetn(wchar_t* buffer,
+        std::streamsize size) THROWS override;
 
     /// Alternate console read.
-    virtual std::wstreambuf::int_type underflow() THROWS;
+    std::wstreambuf::int_type underflow() THROWS override;
 
 #ifdef HAVE_MSC
 private:
     // These are not thread safe.
 
     // The constructed buffer size.
-    size_t buffer_size_;
+    const size_t buffer_size_;
 
     // The dynamically-allocated buffers.
     wchar_t* buffer_;

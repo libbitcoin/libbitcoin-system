@@ -24,16 +24,13 @@
 namespace libbitcoin {
 namespace system {
 
-unicode_ostream::unicode_ostream(
 #ifdef HAVE_MSC
-    std::ostream&, std::wostream& wide_stream,
-    size_t wide_buffer_size) THROWS
+unicode_ostream::unicode_ostream(std::ostream&, std::wostream& wide_stream,
+    size_t wide_size) THROWS
+  : std::ostream(new unicode_streambuf(wide_stream.rdbuf(), wide_size))
 #else
-    std::ostream& narrow_stream, std::wostream&, size_t)
-#endif
-#ifdef HAVE_MSC
-  : std::ostream(new unicode_streambuf(wide_stream.rdbuf(), wide_buffer_size))
-#else
+unicode_ostream::unicode_ostream(std::ostream& narrow_stream,
+    std::wostream&, size_t) THROWS
   : std::ostream(narrow_stream.rdbuf())
 #endif
 {
