@@ -63,7 +63,7 @@ std::streambuf::int_type unicode_streambuf::underflow() THROWS
     // streamsize is signed.
     const auto size = static_cast<std::streamsize>(wide_size_);
 
-    // Read from the wide input buffer (non-negative).
+    // Read from the wide input buffer, blocking (non-negative).
     const auto read = wide_buffer_->sgetn(wide_, size);
 
     // Handle read termination.
