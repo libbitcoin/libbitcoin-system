@@ -59,7 +59,7 @@ private:
     // These are not thread safe.
 
     // The constructed buffer size.
-    size_t buffer_size_;
+    const size_t buffer_size_;
 
     // The dynamically-allocated buffers.
     wchar_t* buffer_;
