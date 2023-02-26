@@ -37,7 +37,8 @@ public:
     DELETE_COPY_MOVE(unicode_streambuf);
 
     /// Construct unicode stream buffer from a weak reference to a wide buffer.
-    unicode_streambuf(std::wstreambuf* wide_buffer, size_t size) THROWS;
+    unicode_streambuf(std::wstreambuf* wide_buffer, size_t size,
+        bool input) THROWS;
 
     /// Synchronize stream buffer.
     virtual ~unicode_streambuf() NOEXCEPT;
@@ -56,11 +57,14 @@ protected:
 private:
     // These are not thread safe.
 
+    // True for input usage.
+    const bool input_;
+
     // The constructed wide buffer size in number of characters.
-    size_t wide_size_;
+    const size_t wide_size_;
 
     // The derived narrow buffer size in utf8 (bytes).
-    size_t narrow_size_;
+    const size_t narrow_size_;
 
     // The dynamically-allocated buffers.
     wchar_t* wide_;

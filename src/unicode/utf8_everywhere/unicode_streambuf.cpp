@@ -29,8 +29,9 @@ namespace libbitcoin {
 namespace system {
 
 unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer,
-    size_t size) THROWS
-  : wide_size_(size),
+    size_t size, bool input) THROWS
+  : input_(input),
+    wide_size_(size),
     narrow_size_(wide_size_ * utf8_max_character_size),
     narrow_(new char[narrow_size_]),
     wide_(new wchar_t[narrow_size_]),
@@ -90,7 +91,7 @@ std::streambuf::int_type unicode_streambuf::underflow() THROWS
 // MSVC does not support a UTF8 locale and as such streams interpret
 // narrow characters in the default locale. This implementation
 // assumes the stream will treat each byte of a multibyte narrow
-// chracter as an individual single byte character.
+// character as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
     std::streambuf::int_type character) THROWS
 {
@@ -154,6 +155,9 @@ std::streambuf::int_type unicode_streambuf::overflow(
 // Flush our output sequence.
 int unicode_streambuf::sync() THROWS
 {
+    if (input_)
+        return std::streambuf::sync();
+
     const int success = zero;
     const int failure = negative_one;
 
