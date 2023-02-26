@@ -102,7 +102,11 @@ std::wstreambuf::int_type console_streambuf::underflow() THROWS
 
 #else
 
-void console_streambuf::initialize(size_t) THROWS
+void console_streambuf::set_input(size_t) THROWS
+{
+}
+
+void console_streambuf::set_output() THROWS
 {
 }
 
