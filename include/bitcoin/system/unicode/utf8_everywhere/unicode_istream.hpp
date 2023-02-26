@@ -35,7 +35,7 @@ public:
 
     /// Construct instance of a conditionally-narrowing input stream.
     unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream,
-        size_t wide_buffer_size) THROWS;
+        size_t wide_size) THROWS;
 
     /// Delete the unicode_streambuf that wraps wide_stream.
     virtual ~unicode_istream() NOEXCEPT;

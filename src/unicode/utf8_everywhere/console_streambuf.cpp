@@ -62,10 +62,11 @@ void console_streambuf::set_output() THROWS
         throw runtime_exception("Failed to set console output to utf8.");
 }
 
-console_streambuf::console_streambuf(
-    const std::wstreambuf& stream_buffer, size_t size) THROWS
-  : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
-    std::wstreambuf(stream_buffer)
+console_streambuf::console_streambuf(const std::wstreambuf& buffer,
+    size_t size) THROWS
+  : buffer_size_(size),
+    buffer_(new wchar_t[size]),
+    std::wstreambuf(buffer)
 {
 }
 

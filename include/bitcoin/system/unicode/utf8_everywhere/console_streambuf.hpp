@@ -41,8 +41,7 @@ public:
 
 protected:
     /// Protected construction, use static initialize method.
-    console_streambuf(const std::wstreambuf& stream_buffer,
-        size_t stream_buffer_size) THROWS;
+    console_streambuf(const std::wstreambuf& buffer, size_t size) THROWS;
 
     /// Delete stream buffer.
     virtual ~console_streambuf() NOEXCEPT;

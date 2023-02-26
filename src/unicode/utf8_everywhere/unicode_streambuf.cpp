@@ -28,16 +28,16 @@
 namespace libbitcoin {
 namespace system {
 
-unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer,
+unicode_streambuf::unicode_streambuf(std::wstreambuf* buffer,
     size_t size, bool input) THROWS
   : input_(input),
     wide_size_(size),
     narrow_size_(wide_size_ * utf8_max_character_size),
     narrow_(new char[narrow_size_]),
     wide_(new wchar_t[narrow_size_]),
-    wide_buffer_(wide_buffer)
+    wide_buffer_(buffer)
 {
-    if (is_zero(wide_size_) || wide_buffer == nullptr ||
+    if (is_zero(wide_size_) || is_null(wide_buffer_) ||
         wide_size_ > (bc::max_size_t / utf8_max_character_size))
         throw runtime_exception("unicode_streambuf parameters");
 
