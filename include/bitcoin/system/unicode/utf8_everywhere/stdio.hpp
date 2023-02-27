@@ -59,6 +59,12 @@ BC_API void set_binary_stdin() THROWS;
 /// Initialize windows to use binary for stdout. This cannot be uninitialized.
 BC_API void set_binary_stdout() THROWS;
 
+/// Console/terminal mode utilities.
+/// ---------------------------------------------------------------------------
+
+BC_API void set_console_echo() NOEXCEPT;
+BC_API void unset_console_echo() NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 

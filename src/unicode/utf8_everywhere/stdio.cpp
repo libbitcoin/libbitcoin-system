@@ -21,6 +21,9 @@
 #ifdef HAVE_MSC
     #include <fcntl.h>
     #include <io.h>
+    #include <windows.h>
+#else
+    #include <termios.h>
 #endif
 #include <iostream>
 #include <mutex>
@@ -78,6 +81,22 @@ inline void set_binary_stdio(FILE* file) THROWS
         throw runtime_exception{ "Could not set STDIO to binary mode." };
 }
 
+void set_console_echo() NOEXCEPT
+{
+    const auto handle = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode{};
+    GetConsoleMode(handle, &mode);
+    SetConsoleMode(handle, mode | ENABLE_ECHO_INPUT);
+}
+
+void unset_console_echo() NOEXCEPT
+{
+    const auto handle = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode{};
+    GetConsoleMode(handle, &mode);
+    SetConsoleMode(handle, mode & ~ENABLE_ECHO_INPUT);
+}
+
 #else // HAVE_MSC
 
 std::istream& cin_stream() THROWS { return std::cin; }
@@ -85,6 +104,22 @@ std::ostream& cout_stream() THROWS { return std::cout; }
 std::ostream& cerr_stream() THROWS {  return std::cerr; }
 inline void set_utf8_stdio(FILE*) THROWS {}
 inline void set_binary_stdio(FILE*) THROWS {}
+
+void set_console_echo() NOEXCEPT
+{
+    termios terminal{};
+    tcgetattr(0, &terminal);
+    terminal.c_lflag |= ECHO;
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
+}
+
+void unset_console_echo() NOEXCEPT
+{
+    termios terminal{};
+    tcgetattr(0, &terminal);
+    terminal.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
+}
 
 #endif // HAVE_MSC
 
