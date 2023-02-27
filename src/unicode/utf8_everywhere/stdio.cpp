@@ -71,13 +71,13 @@ std::ostream& cerr_stream() THROWS
 
 inline void set_utf8_stdio(FILE* file) THROWS
 {
-    if (!is_zero(_setmode(_fileno(file), _O_U8TEXT)))
+    if (_setmode(_fileno(file), _O_U8TEXT) == -1)
         throw runtime_exception{ "Could not set STDIO to utf8 mode." };
 }
 
 inline void set_binary_stdio(FILE* file) THROWS
 {
-    if (!is_zero(_setmode(_fileno(file), _O_BINARY)))
+    if (_setmode(_fileno(file), _O_BINARY) == -1)
         throw runtime_exception{ "Could not set STDIO to binary mode." };
 }
 
