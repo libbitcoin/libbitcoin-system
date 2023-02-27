@@ -344,6 +344,8 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/unicode/utf8_everywhere/environment.cpp"
     "../../src/unicode/utf8_everywhere/ifstream.cpp"
     "../../src/unicode/utf8_everywhere/ofstream.cpp"
+    "../../src/unicode/utf8_everywhere/paths.cpp"
+    "../../src/unicode/utf8_everywhere/stdio.cpp"
     "../../src/unicode/utf8_everywhere/unicode_istream.cpp"
     "../../src/unicode/utf8_everywhere/unicode_ostream.cpp"
     "../../src/unicode/utf8_everywhere/unicode_streambuf.cpp"

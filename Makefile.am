@@ -111,6 +111,8 @@ src_libbitcoin_system_la_SOURCES = \
     src/unicode/utf8_everywhere/environment.cpp \
     src/unicode/utf8_everywhere/ifstream.cpp \
     src/unicode/utf8_everywhere/ofstream.cpp \
+    src/unicode/utf8_everywhere/paths.cpp \
+    src/unicode/utf8_everywhere/stdio.cpp \
     src/unicode/utf8_everywhere/unicode_istream.cpp \
     src/unicode/utf8_everywhere/unicode_ostream.cpp \
     src/unicode/utf8_everywhere/unicode_streambuf.cpp \
@@ -780,6 +782,8 @@ include_bitcoin_system_unicode_utf8_everywhere_HEADERS = \
     include/bitcoin/system/unicode/utf8_everywhere/environment.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/ifstream.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/ofstream.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/paths.hpp \
+    include/bitcoin/system/unicode/utf8_everywhere/stdio.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/unicode_istream.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp \
     include/bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp \

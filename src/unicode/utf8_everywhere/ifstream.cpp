@@ -20,7 +20,7 @@
 
 #include <filesystem>
 #include <fstream>
-#include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/paths.hpp>
 
 namespace libbitcoin {
 namespace system {

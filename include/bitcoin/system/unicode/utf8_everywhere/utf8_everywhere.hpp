@@ -22,8 +22,10 @@
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
-#include <bitcoin/system/unicode/utf8_everywhere/unicode_istream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ofstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/paths.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/stdio.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/unicode_istream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
 
@@ -93,52 +95,5 @@
 // processing in Windows. This macro implements main() and forwards to
 // bc::system::main(), which should be implemented as if it was main() with
 // the expectation that argv is utf8.
-
-namespace libbitcoin {
-namespace system {
-
-#ifdef HAVE_MSC
-
-#define BC_USE_LIBBITCOIN_MAIN \
-    namespace libbitcoin \
-    { \
-    namespace system \
-    { \
-        std::istream& cin = cin_stream(); \
-        std::ostream& cout = cout_stream(); \
-        std::ostream& cerr = cerr_stream(); \
-        int main(int argc, char* argv[]); \
-    } \
-    } \
-    \
-    int wmain(int argc, wchar_t* argv[]) \
-    { \
-        return libbitcoin::system::call_utf8_main(argc, argv, \
-            &libbitcoin::system::main); \
-    }
-
-#else
-
-#define BC_USE_LIBBITCOIN_MAIN \
-    namespace libbitcoin \
-    { \
-    namespace system \
-    { \
-        std::istream& cin = std::cin; \
-        std::ostream& cout = std::cout; \
-        std::ostream& cerr = std::cerr; \
-        int main(int argc, char* argv[]); \
-    } \
-    } \
-    \
-    int main(int argc, char* argv[]) \
-    { \
-        return libbitcoin::system::main(argc, argv); \
-    }
-
-#endif
-
-} // namespace system
-} // namespace libbitcoin
 
 #endif

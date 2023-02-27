@@ -210,6 +210,8 @@
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ofstream.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/paths.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/stdio.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_istream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_ostream.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/unicode_streambuf.hpp>
