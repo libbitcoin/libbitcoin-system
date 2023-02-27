@@ -30,12 +30,12 @@ namespace libbitcoin {
 namespace system {
 
 // All pointers (except (*main)) are guarded, this warning is invalid.
-////BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-////BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
-////BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-////BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-////BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
-////BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
+BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 
 // C-style UTF8/UTF16 conversions.
 // ----------------------------------------------------------------------------
@@ -255,12 +255,12 @@ int call_utf8_main(int argc, wchar_t* argv[],
 
 #endif // HAVE_MSC
 
-////BC_POP_WARNING()
-////BC_POP_WARNING()
-////BC_POP_WARNING()
-////BC_POP_WARNING()
-////BC_POP_WARNING()
-////BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
