@@ -19,57 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_ENVIRONMENT_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_ENVIRONMENT_HPP
 
-#include <filesystem>
-#include <iostream>
-#include <string>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// Win32 UTF8 standard I/O utilities.
-// ----------------------------------------------------------------------------
-// These are no-ops when called in non-Win32 builds.
-
-/// Initialize windows to use UTF8 for stdio. This cannot be uninitialized and
-/// once set bc stdio must be used in place of std stdio.
-BC_API void set_utf8_stdio() THROWS;
-
-/// Initialize windows to use UTF8 for stdin. This cannot be uninitialized and
-/// once set bc::system::cin must be used in place of std::cin.
-BC_API void set_utf8_stdin() THROWS;
-
-/// Initialize windows to use UTF8 for stdout. This cannot be uninitialized and
-/// once set bc::system::cout must be used in place of std::cout.
-BC_API void set_utf8_stdout() THROWS;
-
-/// Initialize windows to use UTF8 for stderr. This cannot be uninitialized and
-/// once set bc::system::cerr must be used in place of std::cerr.
-BC_API void set_utf8_stderr() THROWS;
-
-/// Initialize windows to use binary for stdin. This cannot be uninitialized.
-BC_API void set_binary_stdin() THROWS;
-
-/// Initialize windows to use binary for stdout. This cannot be uninitialized.
-BC_API void set_binary_stdout() THROWS;
-
-// System Configuration.
-// ----------------------------------------------------------------------------
-
-/// Use for std I/O, in place of std::cin/cout/cerr.
-BC_API std::istream& cin_stream() THROWS;
-BC_API std::ostream& cout_stream() THROWS;
-BC_API std::ostream& cerr_stream() THROWS;
-
-/// Get the default configuration file path with subdirectory.
-BC_API std::filesystem::path default_config_path(
-    const std::filesystem::path& subdirectory) NOEXCEPT;
-
-// BC_USE_LIBBITCOIN_MAIN dependencies.
-// ----------------------------------------------------------------------------
-// Do not use these directly, they are exposed via bc::system::main.
-
-// For standard I/O, use <system/unicode/conversion.hpp>.
+/// This is for Win32 environment support, exposed for test.
+/// Use /unicode/conversion.hpp for unicode conversions.
 constexpr size_t utf8_max_character_size = 4;
 BC_API size_t utf8_remainder_size(const char text[], size_t size) NOEXCEPT;
 BC_API size_t to_utf8(char out_to[], size_t to_bytes, const wchar_t from[],
@@ -78,21 +34,51 @@ BC_API size_t to_utf16(size_t& remainder, wchar_t out_to[], size_t to_chars,
     const char from[], size_t from_bytes) NOEXCEPT;
 
 #ifdef HAVE_MSC
-// For args/environment.
+
+/// This is for Win32 environment support, exposed for test.
 BC_API void free_environment(char* environment[]) NOEXCEPT;
 BC_API char** allocate_environment(wchar_t* environment[]) NOEXCEPT;
 BC_API char** allocate_environment(int argc, wchar_t* argv[]) NOEXCEPT;
 BC_API int call_utf8_main(int argc, wchar_t* argv[],
     int(*main)(int argc, char* argv[])) NOEXCEPT;
-#endif
 
-#ifdef HAVE_MSC
-// Not thread safe.
-BC_API std::wstring to_extended_path(
-    const std::filesystem::path& path) NOEXCEPT;
+#define BC_USE_LIBBITCOIN_MAIN \
+    namespace libbitcoin \
+    { \
+    namespace system \
+    { \
+        auto& cin = cin_stream(); \
+        auto& cout = cout_stream(); \
+        auto& cerr = cerr_stream(); \
+        int main(int argc, char* argv[]); \
+    } \
+    } \
+    \
+    int wmain(int argc, wchar_t* argv[]) \
+    { \
+        return libbitcoin::system::call_utf8_main(argc, argv, \
+            &libbitcoin::system::main); \
+    }
+
 #else
-BC_API std::string to_extended_path(
-    const std::filesystem::path& path) NOEXCEPT;
+
+#define BC_USE_LIBBITCOIN_MAIN \
+    namespace libbitcoin \
+    { \
+    namespace system \
+    { \
+        auto& cin = std::cin; \
+        auto& cout = std::cout; \
+        auto& cerr = std::cerr; \
+        int main(int argc, char* argv[]); \
+    } \
+    } \
+    \
+    int main(int argc, char* argv[]) \
+    { \
+        return libbitcoin::system::main(argc, argv); \
+    }
+
 #endif
 
 } // namespace system

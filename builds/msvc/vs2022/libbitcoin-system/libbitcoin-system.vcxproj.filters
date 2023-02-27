@@ -450,6 +450,12 @@
     <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\ofstream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\paths.cpp">
+      <Filter>src\unicode\utf8_everywhere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\stdio.cpp">
+      <Filter>src\unicode\utf8_everywhere</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\utf8_everywhere\unicode_istream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
@@ -1179,6 +1185,12 @@
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\ofstream.hpp">
+      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\paths.hpp">
+      <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\stdio.hpp">
       <Filter>include\bitcoin\system\unicode\utf8_everywhere</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\unicode\utf8_everywhere\unicode_istream.hpp">
