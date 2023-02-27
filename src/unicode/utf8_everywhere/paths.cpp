@@ -40,7 +40,7 @@ static std::string config_directory() NOEXCEPT
 #elif defined(SYSCONFDIR)
 static std::string config_directory() NOEXCEPT { return SYSCONFDIR; }
 #else
-static std::string config_directory() NOEXCEPT { return SYSCONFDIR; }
+static std::string config_directory() NOEXCEPT { return {}; }
 #endif
 
 std::filesystem::path default_config_path(
