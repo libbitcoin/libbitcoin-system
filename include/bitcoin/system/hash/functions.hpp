@@ -44,6 +44,7 @@ typedef data_array<quarter_hash_size> quarter_hash;
 typedef data_array<half_hash_size> half_hash;
 typedef data_array<mini_hash_size> mini_hash;
 typedef std::shared_ptr<hash_digest> hash_ptr;
+typedef std::shared_ptr<const hash_digest> hash_cptr;
 
 /// Lists of common bitcoin hashes.
 typedef std_vector<long_hash> long_hashes;
