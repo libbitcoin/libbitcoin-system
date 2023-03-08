@@ -52,7 +52,7 @@
 // /hash          : /radix
 // /crypto        : /hash
 // /stream        : /crypto /endian /error
-// /chain         : /stream [/settings]
+// /chain         : /stream [forward: settings]
 // /machine       : /chain
 // /config        : /chain
 // /wallet        : /chain
