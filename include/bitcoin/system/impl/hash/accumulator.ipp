@@ -222,6 +222,21 @@ stream_pad() NOEXCEPT
     return { bit_hi<byte_t> };
 }
 
+TEMPLATE
+CONSTEVAL typename CLASS::digest_t CLASS::
+empty_single() NOEXCEPT
+{
+    return Algorithm::hash(std_array<block_t, zero>{});
+}
+
+TEMPLATE
+CONSTEVAL typename CLASS::digest_t CLASS::
+empty_double() NOEXCEPT
+{
+    static_assert(half_size == digest_size);
+    return Algorithm::double_hash(std_array<block_t, zero>{});
+}
+
 // constructors
 // ----------------------------------------------------------------------------
 
@@ -406,7 +421,12 @@ template <size_t Size>
 typename CLASS::digest_t CLASS::
 hash(const data_array<Size>& data) NOEXCEPT
 {
-    if constexpr (Size == half_size || Size == block_size)
+    if constexpr (is_zero(Size))
+    {
+        constexpr auto empty = empty_single();
+        return empty;
+    }
+    else if constexpr (Size == half_size || Size == block_size)
     {
         return Algorithm::hash(data);
     }
@@ -426,7 +446,12 @@ TEMPLATE
 typename CLASS::digest_t CLASS::
 hash(size_t size, const byte_t* data) NOEXCEPT
 {
-    if (size == half_size)
+    if (is_zero(size))
+    {
+        constexpr auto empty = empty_single();
+        return empty;
+    }
+    else if (size == half_size)
     {
         return self::hash(unsafe_array_cast<uint8_t, half_size>(data));
     }
@@ -470,7 +495,12 @@ double_hash(const data_array<Size>& data) NOEXCEPT
 {
     if constexpr (half_size == digest_size)
     {
-        if constexpr (Size == half_size || Size == block_size)
+        if constexpr (is_zero(Size))
+        {
+            constexpr auto empty = empty_double();
+            return empty;
+        }
+        else if constexpr (Size == half_size || Size == block_size)
         {
             return Algorithm::double_hash(data);
         }
@@ -499,7 +529,12 @@ double_hash(size_t size, const byte_t* data) NOEXCEPT
 {
     if constexpr (half_size == digest_size)
     {
-        if (size == half_size)
+        if (is_zero(size))
+        {
+            constexpr auto empty = empty_double();
+            return empty;
+        }
+        else if (size == half_size)
         {
             return self::double_hash(
                 unsafe_array_cast<uint8_t, half_size>(data));
