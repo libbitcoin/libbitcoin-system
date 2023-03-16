@@ -219,9 +219,18 @@ uint32_t header::nonce() const NOEXCEPT
     return nonce_;
 }
 
+
+void header::set_hash(hash_digest&& hash) const NOEXCEPT
+{
+    hash_ = std::make_shared<hash_digest>(std::move(hash));
+}
+
 // computed
 hash_digest header::hash() const NOEXCEPT
 {
+    if (hash_)
+        return *hash_;
+
     hash_digest digest{};
     hash::sha256x2::copy sink(digest);
     to_data(sink);
