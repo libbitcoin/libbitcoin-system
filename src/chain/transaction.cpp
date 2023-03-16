@@ -260,7 +260,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
             }
             else
             {
-                source.skip_bytes(input->witness().serialized_size(true));
+                witness::skip(source, true);
             }
         }
     }

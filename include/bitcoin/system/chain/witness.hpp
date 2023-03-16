@@ -93,10 +93,11 @@ public:
     /// Utilities.
     /// -----------------------------------------------------------------------
 
-    // C++20: constexpr.
-    static inline bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
+    /// Skip a witness (as if deserialized).
+    static void skip(reader& source, bool prefix) NOEXCEPT;
+
+    static VCONSTEXPR bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
     {
-        // C++17: parallel policy for std::all_of.
         return std::all_of(stack.begin(), stack.end(),
             [](const auto& element) NOEXCEPT
             {
@@ -104,9 +105,8 @@ public:
             });
     }
 
-    /// C++20: constexpr.
     /// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-    static inline bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
+    static VCONSTEXPR bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
     {
         return stack.size() == one && stack.front()->size() == hash_size;
     }
