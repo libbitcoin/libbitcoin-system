@@ -137,7 +137,7 @@ chain_state::activations chain_state::activation(const data& values,
     // Initialize activation results with genesis values.
     activations result{ forks::no_rules, settings.first_version };
 
-    // retarget is only activated via configuration (hard fork).
+    // regtest is only activated via configuration (hard fork).
     result.forks |= (forks::retarget & forks);
 
     // testnet is activated based on configuration alone (hard fork).
@@ -547,15 +547,18 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     if (data.timestamp.ordered.size() > timestamp_count(height, forks))
         data.timestamp.ordered.pop_front();
 
-    // Conditionally patch time warp bug (e.g. Litecoin).
-    const auto patch = script::is_enabled(forks, forks::time_warp_patch);
 
     // Regtest does not perform retargeting.
     // If promoting from retarget height, move that timestamp into retarget.
-    if (retarget &&
-        is_retarget_height(sub1(height), settings.retargeting_interval()))
-        data.timestamp.retarget = (patch && height != 1) ?
+    if (retarget && is_retarget_height(sub1(height),
+        settings.retargeting_interval()))
+    {
+        // Conditionally patch time warp bug (e.g. Litecoin).
+        const auto patch = script::is_enabled(forks, forks::time_warp_patch);
+
+        data.timestamp.retarget = (patch && height != one) ?
             *std::next(data.timestamp.ordered.crbegin()) : data.timestamp.self;
+    }
 
     // Replace previous block state with tx pool chain state for next height
     // Preserve top block timestamp for use in computation of staleness.
