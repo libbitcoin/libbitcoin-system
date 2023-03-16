@@ -43,8 +43,8 @@ public:
 
     typedef std::shared_ptr<const block> cptr;
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default block is an invalid object.
     block() NOEXCEPT;
@@ -59,21 +59,21 @@ public:
     block(reader&& source, bool witness) NOEXCEPT;
     block(reader& source, bool witness) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     bool operator==(const block& other) const NOEXCEPT;
     bool operator!=(const block& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data(bool witness) const NOEXCEPT;
     void to_data(std::ostream& stream, bool witness) const NOEXCEPT;
     void to_data(writer& sink, bool witness) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
@@ -91,8 +91,8 @@ public:
     bool is_segregated() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
 
-    // Validation.
-    // ------------------------------------------------------------------------
+    /// Validation.
+    /// -----------------------------------------------------------------------
 
     /// Consensus checks (no DoS guards for block sync without headers first).
     code check() const NOEXCEPT;
@@ -104,8 +104,8 @@ protected:
     block(const chain::header::cptr& header,
         const chain::transactions_cptr& txs, bool valid) NOEXCEPT;
 
-    // Check (context free).
-    // ------------------------------------------------------------------------
+    /// Check (context free).
+    /// -----------------------------------------------------------------------
 
     bool is_empty() const NOEXCEPT;
     bool is_oversized() const NOEXCEPT;
@@ -119,8 +119,8 @@ protected:
     // TX: error::previous_output_null
     // TX: error::invalid_coinbase_script_size
 
-    // Accept (contextual).
-    // ------------------------------------------------------------------------
+    /// Accept (contextual).
+    /// -----------------------------------------------------------------------
 
     bool is_overweight() const NOEXCEPT;
     bool is_invalid_coinbase_script(size_t height) const NOEXCEPT;

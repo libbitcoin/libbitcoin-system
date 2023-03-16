@@ -169,6 +169,22 @@ constexpr size_t variable_size(Unsigned value) noexcept
     return sizeof(uint8_t) + sizeof(uint64_t);
 }
 
+/// Determine the size of the bitcoin variable size from its prefix byte.
+constexpr size_t size_variable(uint8_t prefix) noexcept
+{
+    switch (prefix)
+    {
+        case varint_eight_bytes:
+            return sizeof(uint8_t) + sizeof(uint64_t);
+        case varint_four_bytes:
+            return sizeof(uint8_t) + sizeof(uint32_t);
+        case varint_two_bytes:
+            return sizeof(uint8_t) + sizeof(uint16_t);
+        default:
+            return sizeof(uint8_t);
+    }
+}
+
 BC_POP_WARNING()
 
 } // namespace libbitcoin

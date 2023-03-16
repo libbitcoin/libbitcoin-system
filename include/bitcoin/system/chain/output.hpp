@@ -40,8 +40,8 @@ public:
     /// This is a consensus value required by script::generate_signature_hash.
     static const uint64_t not_found;
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default output is an invalid object.
     output() NOEXCEPT;
@@ -56,21 +56,21 @@ public:
     output(reader&& source) NOEXCEPT;
     output(reader& source) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     bool operator==(const output& other) const NOEXCEPT;
     bool operator!=(const output& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data() const NOEXCEPT;
     void to_data(std::ostream& stream) const NOEXCEPT;
     void to_data(writer& sink) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
@@ -81,8 +81,8 @@ public:
     /// Computed properties.
     size_t serialized_size() const NOEXCEPT;
 
-    // Methods.
-    // ------------------------------------------------------------------------
+    /// Methods.
+    /// -----------------------------------------------------------------------
 
     bool committed_hash(hash_digest& out) const NOEXCEPT;
     size_t signature_operations(bool bip141) const NOEXCEPT;

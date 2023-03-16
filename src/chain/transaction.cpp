@@ -260,7 +260,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
             }
             else
             {
-                source.skip_bytes(input->witness().serialized_size(true));
+                witness::skip(source, true);
             }
         }
     }
@@ -387,8 +387,24 @@ uint64_t transaction::fee() const NOEXCEPT
     return floored_subtract(value(), claim());
 }
 
+void transaction::set_hash(hash_digest&& hash) const NOEXCEPT
+{
+    hash_ = std::make_unique<hash_digest>(std::move(hash));
+}
+
+void transaction::set_witness_hash(hash_digest&& hash) const NOEXCEPT
+{
+    witness_hash_ = std::make_unique<hash_digest>(std::move(hash));
+}
+
 hash_digest transaction::hash(bool witness) const NOEXCEPT
 {
+    if (!witness && hash_)
+        return *hash_;
+
+    if (witness && witness_hash_)
+        return *witness_hash_;
+
     // Witness coinbase tx hash is assumed to be null_hash (bip141).
     if (witness && segregated_ && is_coinbase())
         return null_hash;

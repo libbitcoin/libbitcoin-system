@@ -48,10 +48,8 @@ class BC_API script
 public:
     typedef std::shared_ptr<const script> cptr;
 
-    // C++17 parallel execution policy.
-
-    // Utilities.
-    // ------------------------------------------------------------------------
+    /// Utilities.
+    /// -----------------------------------------------------------------------
 
     /// Determine if the fork is enabled in the active forks set.
     static constexpr bool is_enabled(uint32_t active_forks, forks fork) NOEXCEPT
@@ -430,8 +428,8 @@ public:
         };
     }
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default script is an invalid empty script object.
     script() NOEXCEPT;
@@ -453,8 +451,8 @@ public:
     // TODO: move to config serialization wrapper.
     script(const std::string& mnemonic) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     /// Metadata is defaulted on copy/assign.
     script& operator=(script&& other) NOEXCEPT;
@@ -463,8 +461,8 @@ public:
     bool operator==(const script& other) const NOEXCEPT;
     bool operator!=(const script& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data(bool prefix) const NOEXCEPT;
     void to_data(std::ostream& stream, bool prefix) const NOEXCEPT;
@@ -473,8 +471,8 @@ public:
     // TODO: move to config serialization wrapper.
     std::string to_string(uint32_t active_forks) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
@@ -485,8 +483,8 @@ public:
     hash_digest hash() const NOEXCEPT;
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
-    // Utilities.
-    // ------------------------------------------------------------------------
+    /// Utilities.
+    /// -----------------------------------------------------------------------
 
     /// Pattern optimizations.
     bool is_pay_to_witness(uint32_t forks) const NOEXCEPT;

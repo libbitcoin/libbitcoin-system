@@ -44,14 +44,14 @@ public:
     static bool is_coinbase_mature(size_t coinbase_height,
         size_t height) NOEXCEPT;
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default transaction is an invalid object.
     transaction() NOEXCEPT;
     virtual ~transaction() NOEXCEPT;
 
-    /// Metadata is defaulted on copy/assign.
+    /// Cache is defaulted on copy/assign.
     transaction(transaction&& other) NOEXCEPT;
     transaction(const transaction& other) NOEXCEPT;
 
@@ -68,25 +68,25 @@ public:
     transaction(reader&& source, bool witness) NOEXCEPT;
     transaction(reader& source, bool witness) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
-    /// Metadata is defaulted on copy/assign.
+    /// Cache is defaulted on copy/assign.
     transaction& operator=(transaction&& other) NOEXCEPT;
     transaction& operator=(const transaction& other) NOEXCEPT;
 
     bool operator==(const transaction& other) const NOEXCEPT;
     bool operator!=(const transaction& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data(bool witness) const NOEXCEPT;
     void to_data(std::ostream& stream, bool witness) const NOEXCEPT;
     void to_data(writer& sink, bool witness) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
@@ -105,8 +105,12 @@ public:
     bool is_segregated() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
 
-    // Methods.
-    // ------------------------------------------------------------------------
+    /// Cache (these override hash(bool) computation).
+    void set_hash(hash_digest&& hash) const NOEXCEPT;
+    void set_witness_hash(hash_digest&& hash) const NOEXCEPT;
+
+    /// Methods.
+    /// -----------------------------------------------------------------------
 
     bool is_empty() const NOEXCEPT;
     bool is_dusty(uint64_t minimum_output_value) const NOEXCEPT;
@@ -130,14 +134,14 @@ public:
         const script& sub, uint32_t index, uint64_t value, uint8_t flags,
         script_version version, bool bip143) const NOEXCEPT;
 
-    // Guards (for tx pool without compact blocks).
-    // ------------------------------------------------------------------------
+    /// Guards (for tx pool without compact blocks).
+    /// -----------------------------------------------------------------------
 
     code guard() const NOEXCEPT;
     code guard(const context& state) const NOEXCEPT;
 
-    // Validation (consensus checks).
-    // ------------------------------------------------------------------------
+    /// Validation (consensus checks).
+    /// -----------------------------------------------------------------------
 
     code check() const NOEXCEPT;
     code accept(const context& state) const NOEXCEPT;
@@ -148,15 +152,15 @@ protected:
         const chain::outputs_cptr& outputs, uint32_t locktime, bool segregated,
         bool valid) NOEXCEPT;
 
-    // Guard (context free).
-    // ------------------------------------------------------------------------
+    /// Guard (context free).
+    /// -----------------------------------------------------------------------
 
     ////bool is_coinbase() const NOEXCEPT;
     bool is_internal_double_spend() const NOEXCEPT;
     bool is_oversized() const NOEXCEPT;
 
-    // Guard (contextual).
-    // ------------------------------------------------------------------------
+    /// Guard (contextual).
+    /// -----------------------------------------------------------------------
 
     ////bool is_segregated() const NOEXCEPT;
     bool is_overweight() const NOEXCEPT;
@@ -165,15 +169,15 @@ protected:
     ////bool is_missing_prevouts() const NOEXCEPT;
     bool is_signature_operations_limit(bool bip16, bool bip141) const NOEXCEPT;
 
-    // Check (context free).
-    // ------------------------------------------------------------------------
+    /// Check (context free).
+    /// -----------------------------------------------------------------------
 
     ////bool is_empty() const NOEXCEPT;
     bool is_null_non_coinbase() const NOEXCEPT;
     bool is_invalid_coinbase_size() const NOEXCEPT;
 
-    // Accept (contextual).
-    // ------------------------------------------------------------------------
+    /// Accept (contextual).
+    /// -----------------------------------------------------------------------
 
     bool is_non_final(size_t height, uint32_t timestamp,
         uint32_t median_time_past, bool bip113) const NOEXCEPT;
@@ -232,8 +236,10 @@ private:
 
     void initialize_hash_cache() const NOEXCEPT;
 
-    // Witness transaction hash caching.
-    mutable std::unique_ptr<hash_cache> cache_;
+    // Signature and identity hash cashing (witness hash if witnessed).
+    mutable std::unique_ptr<hash_cache> cache_{};
+    mutable std::unique_ptr<hash_digest> hash_{};
+    mutable std::unique_ptr<hash_digest> witness_hash_{};
 };
 
 typedef std::vector<transaction> transactions;

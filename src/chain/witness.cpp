@@ -128,6 +128,22 @@ bool witness::operator!=(const witness& other) const NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
+void witness::skip(reader& source, bool prefix) NOEXCEPT
+{
+    if (prefix)
+    {
+        const auto count = source.read_size(max_block_weight);
+
+        for (size_t element = 0; element < count; ++element)
+            source.read_bytes(source.read_size(max_block_weight));
+    }
+    else
+    {
+        while (!source.is_exhausted())
+            source.read_bytes(source.read_size(max_block_weight));
+    }
+}
+
 static data_chunk read_element(reader& source) NOEXCEPT
 {
     // Each witness encoded as variable integer prefixed byte array (bip144).

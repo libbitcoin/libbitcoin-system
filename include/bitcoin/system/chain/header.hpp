@@ -36,6 +36,7 @@ namespace chain {
 class BC_API header
 {
 public:
+    /// Cache is copied/moved on copy/assign.
     DEFAULT_COPY_MOVE_DESTRUCT(header);
 
     typedef std::shared_ptr<const header> cptr;
@@ -50,8 +51,8 @@ public:
             + sizeof(nonce_);
     }
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default header is an invalid object.
     header() NOEXCEPT;
@@ -69,22 +70,22 @@ public:
     header(reader&& source) NOEXCEPT;
     header(reader& source) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     bool operator==(const header& other) const NOEXCEPT;
     bool operator!=(const header& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data() const NOEXCEPT;
     void to_data(std::ostream& stream) const NOEXCEPT;
     void to_data(writer& sink) const NOEXCEPT;
 
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
     /// Native properties.
     bool is_valid() const NOEXCEPT;
     uint32_t version() const NOEXCEPT;
@@ -98,8 +99,11 @@ public:
     hash_digest hash() const NOEXCEPT;
     uint256_t difficulty() const NOEXCEPT;
 
-    // Validation.
-    // ------------------------------------------------------------------------
+    /// Cache (this overrides hash() computation).
+    void set_hash(hash_digest&& hash) const NOEXCEPT;
+
+    /// Validation.
+    /// -----------------------------------------------------------------------
 
     code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
         bool scrypt=false) const NOEXCEPT;
@@ -114,15 +118,15 @@ protected:
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce, bool valid) NOEXCEPT;
 
-    // Check (context free).
-    // ------------------------------------------------------------------------
+    /// Check (context free).
+    /// -----------------------------------------------------------------------
 
     bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
         bool scrypt=false) const NOEXCEPT;
     bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
 
-    // Accept (relative to chain_state).
-    // ------------------------------------------------------------------------
+    /// Accept (relative to chain_state).
+    /// -----------------------------------------------------------------------
 
     // error::checkpoints_failed
     // error::invalid_block_version
@@ -142,6 +146,9 @@ private:
     uint32_t bits_;
     uint32_t nonce_;
     bool valid_;
+
+    // Identity hash cashing.
+    mutable std::shared_ptr<hash_digest> hash_{};
 };
 
 typedef std::vector<header> headers;

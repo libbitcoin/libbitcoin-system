@@ -47,8 +47,8 @@ public:
         return hash_size + sizeof(uint32_t);
     }
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default point is an invalid null point (null_hash/null_index) object.
     point() NOEXCEPT;
@@ -62,21 +62,21 @@ public:
     point(reader&& source) NOEXCEPT;
     point(reader& source) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     bool operator==(const point& other) const NOEXCEPT;
     bool operator!=(const point& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data() const NOEXCEPT;
     void to_data(std::ostream& stream) const NOEXCEPT;
     void to_data(writer& sink) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
