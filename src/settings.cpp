@@ -27,14 +27,34 @@ namespace libbitcoin {
 namespace system {
 
 settings::settings() NOEXCEPT
-  : timestamp_limit_seconds(2 * 60 * 60),
+  : bip16(true),
+    bip30(true),
+    bip34(true),
+    bip42(true),
+    bip65(true),
+    bip66(true),
+    bip68(true),
+    bip90(true),
+    bip112(true),
+    bip113(true),
+    bip141(true),
+    bip143(true),
+    bip147(true),
+    retarget(true),
+    difficult(true),
+    time_warp_patch(false),
+    retarget_overflow_patch(false),
+    scrypt_proof_of_work(false),
+
     initial_subsidy_bitcoin(50),
     subsidy_interval_blocks(210000),
+    timestamp_limit_seconds(2 * 60 * 60),
+
     retargeting_factor(4),
     retargeting_interval_seconds(2 * 7 * 24 * 60 * 60),
     block_spacing_seconds(10 * 60),
     proof_of_work_limit(0x1d00ffff),
-    genesis_block{},
+
     first_version(1),
     bip34_version(2),
     bip66_version(3),
@@ -94,21 +114,16 @@ settings::settings(chain::selection context) NOEXCEPT
             activation_threshold = 750;
             enforcement_threshold = 950;
             activation_sample = 1000;
-
             bip65_freeze = 388381;
             bip66_freeze = 363725;
             bip34_freeze = 227931;
             bip16_activation_time = 0x4f779a80;
-            bip34_active_checkpoint = chain::checkpoint(
-                "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8",
-                bip34_freeze);
-            bip9_bit0_active_checkpoint = chain::checkpoint(
-                "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5",
-                419328);
-            bip9_bit1_active_checkpoint = chain::checkpoint(
-                "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893",
-                481824);
-
+            bip34_active_checkpoint =
+                { "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", bip34_freeze };
+            bip9_bit0_active_checkpoint =
+                { "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328 };
+            bip9_bit1_active_checkpoint =
+                { "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824 };
             break;
         }
 
@@ -161,16 +176,12 @@ settings::settings(chain::selection context) NOEXCEPT
             bip66_freeze = 330776;
             bip34_freeze = 21111;
             bip16_activation_time = 0x4f3af580;
-            bip34_active_checkpoint = chain::checkpoint(
-                "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",
-                bip34_freeze);
-            bip9_bit0_active_checkpoint = chain::checkpoint(
-                "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb",
-                770112);
-            bip9_bit1_active_checkpoint = chain::checkpoint(
-                "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca",
-                834624);
-
+            bip34_active_checkpoint =
+                { "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",  bip34_freeze };
+            bip9_bit0_active_checkpoint =
+                { "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112 };
+            bip9_bit1_active_checkpoint =
+                { "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624 };
             break;
         }
 
@@ -223,14 +234,14 @@ settings::settings(chain::selection context) NOEXCEPT
             bip34_freeze = 0;
             bip16_activation_time = 0x4f3af580;
 
-            chain::checkpoint genesis_checkpoint(genesis_block.hash(), zero);
-
-            // bip90 assumes a historical bip34 activation block, use genesis.
-            bip34_active_checkpoint = genesis_checkpoint;
-
-            // This is fixed and closed, so assume genesis activation.
-            bip9_bit0_active_checkpoint = genesis_checkpoint;
-            bip9_bit1_active_checkpoint = genesis_checkpoint;
+            // bip9's are fixed and closed, so assume genesis activation.
+            // bip90 assumes a historical bip34 activation block, so use genesis.
+            bip34_active_checkpoint =
+                { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
+            bip9_bit0_active_checkpoint =
+                { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
+            bip9_bit1_active_checkpoint =
+                { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
 
             break;
         }
@@ -243,7 +254,8 @@ settings::settings(chain::selection context) NOEXCEPT
 }
 
 // Computed properties.
-// TODO: optimize to prevent recomputation.
+// ----------------------------------------------------------------------------
+// These are not used internal to system.
 
 // The exact maximum amount of money (as of bip42).
 //*****************************************************************************
@@ -253,7 +265,7 @@ settings::settings(chain::selection context) NOEXCEPT
 // CONSENSUS: The satoshi client uses a "sanity check" value that is
 // effectively based on a round but incorrect value of recursive_money,
 // which is higher than this true value. Despite comments to the contrary
-// in the satoshi code, no value could be consensus critical unless it was
+// in the satoshi code, the value could not be consensus critical unless it was
 // *less* than the true value. This is non a consensus-critical method, as the
 // consensus limit on money is stricly a function of subsidy recursion and
 // overspend constraints.
@@ -274,24 +286,55 @@ uint64_t settings::max_money() const NOEXCEPT
     BC_POP_WARNING()
 }
 
-// Used to initialize initial subsidy setting.
-uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
-{
-    // Guarded by parameterization (config).
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return safe_multiply(value, chain::satoshi_per_bitcoin);
-    BC_POP_WARNING()
-}
-
 // The initial block subsidy in satoshis.
 uint64_t settings::initial_subsidy() const NOEXCEPT
 {
     return bitcoin_to_satoshi(initial_subsidy_bitcoin);
 }
 
+// Used to initialize initial subsidy setting.
+uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
+{
+    // Guarded by parameterization (config).
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+        return safe_multiply(value, chain::satoshi_per_bitcoin);
+    BC_POP_WARNING()
+}
+
+uint32_t settings::enabled_forks() const NOEXCEPT
+{
+    using namespace chain;
+
+    // TODO: optimize to prevent recomputation.
+    uint32_t forks = forks::no_rules;
+    forks |= (bip16 ? static_cast<uint32_t>(forks::bip16_rule) : 0);
+    forks |= (bip30 ? static_cast<uint32_t>(forks::bip30_rule) : 0);
+    forks |= (bip34 ? static_cast<uint32_t>(forks::bip34_rule) : 0);
+    forks |= (bip42 ? static_cast<uint32_t>(forks::bip42_rule) : 0);
+    forks |= (bip65 ? static_cast<uint32_t>(forks::bip65_rule) : 0);
+    forks |= (bip66 ? static_cast<uint32_t>(forks::bip66_rule) : 0);
+    forks |= (bip68 ? static_cast<uint32_t>(forks::bip68_rule) : 0);
+    forks |= (bip90 ? static_cast<uint32_t>(forks::bip90_rule) : 0);
+    forks |= (bip112 ? static_cast<uint32_t>(forks::bip112_rule) : 0);
+    forks |= (bip113 ? static_cast<uint32_t>(forks::bip113_rule) : 0);
+    forks |= (bip141 ? static_cast<uint32_t>(forks::bip141_rule) : 0);
+    forks |= (bip143 ? static_cast<uint32_t>(forks::bip143_rule) : 0);
+    forks |= (bip147 ? static_cast<uint32_t>(forks::bip147_rule) : 0);
+    forks |= (retarget ? static_cast<uint32_t>(forks::retarget) : 0);
+    forks |= (difficult ? static_cast<uint32_t>(forks::difficult) : 0);
+    forks |= (time_warp_patch ? static_cast<uint32_t>(forks::time_warp_patch) : 0);
+    forks |= (retarget_overflow_patch ? static_cast<uint32_t>(forks::retarget_overflow_patch) : 0);
+    forks |= (scrypt_proof_of_work ? static_cast<uint32_t>(forks::scrypt_proof_of_work) : 0);
+    return forks;
+}
+
+// These are used internal to system.
+// ----------------------------------------------------------------------------
+
 // The lower bound for the retargeting timespan.
 uint32_t settings::minimum_timespan() const NOEXCEPT
 {
+    // TODO: optimize to prevent recomputation.
     return chain::chain_state::minimum_timespan(retargeting_interval_seconds,
         retargeting_factor);
 }
@@ -299,6 +342,7 @@ uint32_t settings::minimum_timespan() const NOEXCEPT
 // The upper bound for the retargeting timespan.
 uint32_t settings::maximum_timespan() const NOEXCEPT
 {
+    // TODO: optimize to prevent recomputation.
     return chain::chain_state::maximum_timespan(retargeting_interval_seconds,
         retargeting_factor);
 }
@@ -306,6 +350,7 @@ uint32_t settings::maximum_timespan() const NOEXCEPT
 // The target number of blocks for 2 weeks of work (2016 blocks).
 size_t settings::retargeting_interval() const NOEXCEPT
 {
+    // TODO: optimize to prevent recomputation.
     return chain::chain_state::retargeting_interval(
         retargeting_interval_seconds, block_spacing_seconds);
 }

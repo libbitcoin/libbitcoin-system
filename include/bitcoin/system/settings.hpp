@@ -36,42 +36,63 @@ public:
     settings() NOEXCEPT;
     settings(chain::selection context) NOEXCEPT;
 
-    // Utilities.
-    // ------------------------------------------------------------------------
+    /// Computed properties.
+    /// -----------------------------------------------------------------------
 
-    // This is not used directly in system.
-    virtual uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
-
-    // Computed properties.
-    // -------------------------------------------------------------------------
-
-    // These are not used directly in system.
+    /// These are not used internal to system.
     virtual uint64_t max_money() const NOEXCEPT;
     virtual uint64_t initial_subsidy() const NOEXCEPT;
+    virtual uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
+    virtual uint32_t enabled_forks() const NOEXCEPT;
 
+    /// These are used internal to system.
     virtual uint32_t minimum_timespan() const NOEXCEPT;
     virtual uint32_t maximum_timespan() const NOEXCEPT;
     virtual size_t retargeting_interval() const NOEXCEPT;
 
-    // Consensus settings.
-    // -------------------------------------------------------------------------
+    /// Implemented chain::forks.
+    /// -----------------------------------------------------------------------
+    /// These are not used internal to system.
+    bool bip16;
+    bool bip30;
+    bool bip34;
+    bool bip42;
+    bool bip65;
+    bool bip66;
+    bool bip68;
+    bool bip90;
+    bool bip112;
+    bool bip113;
+    bool bip141;
+    bool bip143;
+    bool bip147;
+    bool retarget;                  // !regtest
+    bool difficult;                 // !testnet
+    bool time_warp_patch;           // litecoin
+    bool retarget_overflow_patch;   // litecoin
+    bool scrypt_proof_of_work;      // litecoin
 
-    // These are not used directly in system.
-    uint32_t timestamp_limit_seconds;
+    /// Consensus parameters.
+    /// -----------------------------------------------------------------------
+
+    /// These are not used internal to system.
     uint64_t initial_subsidy_bitcoin;
     uint64_t subsidy_interval_blocks;
+    uint32_t timestamp_limit_seconds;
+    chain::checkpoints checkpoints{};
+    config::block genesis_block{};
 
+    /// These are used internal to system.
     uint32_t retargeting_factor;
     uint32_t retargeting_interval_seconds;
     uint32_t block_spacing_seconds;
     uint32_t proof_of_work_limit;
-    config::block genesis_block;
 
-    // Fork settings.
-    // -------------------------------------------------------------------------
+    /// Activation settings.
+    /// -----------------------------------------------------------------------
+    /// These are used internal to system.
 
-    // These are not typically read from a configuration file.
-    // Consensus rule change activation and enforcement parameters.
+    /// Consensus rule change activation and enforcement parameters.
     uint32_t first_version;
     uint32_t bip34_version;
     uint32_t bip66_version;
@@ -80,29 +101,29 @@ public:
     uint32_t bip9_version_bit1;
     uint32_t bip9_version_base;
 
-    // Activation parameters (bip34-style activations).
+    /// Activation parameters (bip34-style activations).
     size_t activation_threshold{};
     size_t enforcement_threshold{};
     size_t activation_sample{};
 
-    // Frozen activation heights (frozen_activations).
+    /// Frozen activation heights (frozen_activations).
     size_t bip65_freeze{};
     size_t bip66_freeze{};
     size_t bip34_freeze{};
 
-    // Block 514 is the first testnet block after date-based activation.
-    // Block 173805 is the first mainnet block after date-based activation.
-    // The first mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
+    /// Block 514 is the first testnet block after date-based activation.
+    /// Block 173805 is the first mainnet block after date-based activation.
+    /// First mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
     uint32_t bip16_activation_time{};
 
-    // This is not used in consensus computations.
-    // bip90 stops checking unspent duplicates above this bip34 activation.
-    chain::checkpoint bip34_active_checkpoint;
+    /// This is not used in consensus computations.
+    /// bip90 stops checking unspent duplicates above this bip34 activation.
+    chain::checkpoint bip34_active_checkpoint{};
 
-    // This cannot be reactivated in a future branch due to window expiration.
+    /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit0_active_checkpoint{};
 
-    // This cannot be reactivated in a future branch due to window expiration.
+    /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit1_active_checkpoint{};
 };
 
