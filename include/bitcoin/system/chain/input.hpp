@@ -43,8 +43,8 @@ public:
 
     typedef std::shared_ptr<const input> cptr;
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default input is invalid null point, nullptr prevout, invalid metadata.
     input() NOEXCEPT;
@@ -69,21 +69,21 @@ public:
     input(reader&& source) NOEXCEPT;
     input(reader& source) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     bool operator==(const input& other) const NOEXCEPT;
     bool operator!=(const input& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data() const NOEXCEPT;
     void to_data(std::ostream& stream) const NOEXCEPT;
     void to_data(writer& sink) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
@@ -99,8 +99,8 @@ public:
     /// Witness accounts for witness bytes, but are serialized independently.
     size_t serialized_size(bool witness) const NOEXCEPT;
 
-    // Methods.
-    // ------------------------------------------------------------------------
+    /// Methods.
+    /// -----------------------------------------------------------------------
 
     bool is_final() const NOEXCEPT;
     bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;

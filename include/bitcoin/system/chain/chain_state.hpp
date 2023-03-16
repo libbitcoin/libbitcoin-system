@@ -201,13 +201,13 @@ public:
 protected:
     struct activations
     {
-        // The forks that are active at this height.
+        /// The forks that are active at this height.
         uint32_t forks;
 
-        // The minimum block version required at this height.
+        /// The minimum block version required at this height.
         uint32_t minimum_block_version;
 
-        // The maximum transaction version allowed at this height.
+        /// The maximum transaction version allowed at this height.
         uint32_t maximum_transaction_version;
     };
 

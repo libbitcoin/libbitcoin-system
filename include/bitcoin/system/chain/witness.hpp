@@ -43,8 +43,8 @@ public:
 
     typedef std::shared_ptr<const witness> cptr;
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default witness is an invalid empty stack object.
     witness() NOEXCEPT;
@@ -64,14 +64,14 @@ public:
     // TODO: move to config serialization wrapper.
     witness(const std::string& mnemonic) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     bool operator==(const witness& other) const NOEXCEPT;
     bool operator!=(const witness& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data(bool prefix) const NOEXCEPT;
     void to_data(std::ostream& stream, bool prefix) const NOEXCEPT;
@@ -80,8 +80,8 @@ public:
     // TODO: move to config serialization wrapper.
     std::string to_string() const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
@@ -90,8 +90,8 @@ public:
     /// Computed properties.
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
-    // Utilities.
-    // ------------------------------------------------------------------------
+    /// Utilities.
+    /// -----------------------------------------------------------------------
 
     // C++20: constexpr.
     static inline bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
@@ -104,8 +104,8 @@ public:
             });
     }
 
-    // C++20: constexpr.
-    // The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
+    /// C++20: constexpr.
+    /// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
     static inline bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
     {
         return stack.size() == one && stack.front()->size() == hash_size;

@@ -37,8 +37,8 @@ class BC_API checkpoint
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(checkpoint);
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default checkpoint is an invalid object.
     checkpoint() NOEXCEPT;
@@ -54,8 +54,8 @@ public:
     {
     }
 
-    // Deserialization.
-    // ------------------------------------------------------------------------
+    /// Deserialization.
+    /// -----------------------------------------------------------------------
 
     // TODO: move to config serialization wrapper.
     ////bool from_string(const std::string& text) NOEXCEPT;
@@ -64,16 +64,16 @@ public:
 
     bool is_valid() const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     // TODO: move to config serialization wrapper.
     std::string to_string() const NOEXCEPT;
     ////bool to_string(std::ostream& stream) const NOEXCEPT;
     ////bool to_string(writer& sink) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     size_t height() const NOEXCEPT;
     const hash_digest& hash() const NOEXCEPT;

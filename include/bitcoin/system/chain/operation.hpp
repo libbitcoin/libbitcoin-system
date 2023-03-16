@@ -40,8 +40,8 @@ public:
 
     typedef std::shared_ptr<const operation> cptr;
 
-    // Utilities.
-    // ------------------------------------------------------------------------
+    /// Utilities.
+    /// -----------------------------------------------------------------------
 
     /// Compute nominal data opcode based on size alone.
     //*************************************************************************
@@ -348,8 +348,8 @@ public:
         }
     }
 
-    // Constructors.
-    // ------------------------------------------------------------------------
+    /// Constructors.
+    /// -----------------------------------------------------------------------
 
     /// Default operation is any invalid opcode with underflow set.
     operation() NOEXCEPT;
@@ -378,14 +378,14 @@ public:
     /// Literal string is disallowed, as it conflicts with const data_slice&.
     explicit operation(const std::string& mnemonic) NOEXCEPT;
 
-    // Operators.
-    // ------------------------------------------------------------------------
+    /// Operators.
+    /// -----------------------------------------------------------------------
 
     bool operator==(const operation& other) const NOEXCEPT;
     bool operator!=(const operation& other) const NOEXCEPT;
 
-    // Serialization.
-    // ------------------------------------------------------------------------
+    /// Serialization.
+    /// -----------------------------------------------------------------------
 
     data_chunk to_data() const NOEXCEPT;
     void to_data(std::ostream& stream) const NOEXCEPT;
@@ -394,8 +394,8 @@ public:
     // TODO: move to config serialization wrapper.
     std::string to_string(uint32_t active_forks) const NOEXCEPT;
 
-    // Properties.
-    // ------------------------------------------------------------------------
+    /// Properties.
+    /// -----------------------------------------------------------------------
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
