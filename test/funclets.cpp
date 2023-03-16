@@ -149,3 +149,12 @@ static_assert(variable_size(max_uint32) == 5u);
 static_assert(variable_size(max_uint32) == 5u);
 static_assert(variable_size(max_uint64) == 9u);
 static_assert(is_same_type<decltype(variable_size(zero)), size_t>);
+
+static_assert(size_variable(zero) == 1u);
+static_assert(size_variable(1) == 1u);
+static_assert(size_variable(42) == 1u);
+static_assert(size_variable(252) == 1u);
+static_assert(size_variable(varint_two_bytes) == 3u);
+static_assert(size_variable(varint_four_bytes) == 5u);
+static_assert(size_variable(varint_eight_bytes) == 9u);
+static_assert(is_same_type<decltype(size_variable(zero)), size_t>);
