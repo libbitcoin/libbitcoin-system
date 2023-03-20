@@ -159,14 +159,11 @@ operation operation::from_data(reader& source) NOEXCEPT
     auto code = static_cast<opcode>(source.read_byte());
     const auto size = read_data_size(code, source);
 
-    // Guard against resetting the invalidated stream.
+    // read_bytes only guarded from excessive allocation by stream limit.
     if (size > max_block_size)
-    {
         source.invalidate();
-        return {};
-    }
 
-    auto push = to_shared(source.read_bytes(size));
+    auto push = to_shared(source ? source.read_bytes(size) : data_chunk{});
     const auto underflow = !source;
 
     // This requires that provided stream terminates at the end of the script.

@@ -531,9 +531,6 @@
     <ClCompile Include="..\..\..\..\test\unicode\utf8_everywhere\unicode_ostream.cpp">
       <Filter>src\unicode\utf8_everywhere</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\values.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\addresses\bitcoin_uri.cpp">
       <Filter>src\wallet\addresses</Filter>
     </ClCompile>
