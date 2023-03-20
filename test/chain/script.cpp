@@ -290,6 +290,16 @@ BOOST_AUTO_TEST_CASE(script__from_data__internal_invalid_wire_code__success)
     BOOST_REQUIRE(instance.is_valid());
 }
 
+BOOST_AUTO_TEST_CASE(script__from_data__block_163120_tx_0_script_0__success)
+{
+    const auto raw = base16_array("2cfabe6d6da181809e4eb72d7b9a8e565331015cb25daf652c81fb7373188db65eee7a45cb0100000000000000");
+    // OP_RETURN_250 OP_RETURN_190 OP_2DROP OP_2DROP OP_LESSTHANOREQUAL OP_RIGHT OP_LEFT OP_NUMNOTEQUAL OP_PUSHDATA4 <push past end>
+    // blockstream.info/tx/11dbdd3f87bf0eec51a519a9a8ac84ff9dcfb9d08e44f4f6c4101f94afd490a0
+
+    const script instance(raw, true);
+    BOOST_REQUIRE(instance.is_valid());
+}
+
 BOOST_AUTO_TEST_CASE(script__from_string__empty__success)
 {
     const script instance(std::string{});
