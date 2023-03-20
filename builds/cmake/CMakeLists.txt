@@ -502,7 +502,6 @@ if (with-tests)
         "../../test/test.hpp"
         "../../test/typelets.cpp"
         "../../test/types.cpp"
-        "../../test/values.cpp"
         "../../test/chain/block.cpp"
         "../../test/chain/chain_state.cpp"
         "../../test/chain/checkpoint.cpp"

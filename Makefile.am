@@ -214,7 +214,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/test.hpp \
     test/typelets.cpp \
     test/types.cpp \
-    test/values.cpp \
     test/chain/block.cpp \
     test/chain/chain_state.cpp \
     test/chain/checkpoint.cpp \
