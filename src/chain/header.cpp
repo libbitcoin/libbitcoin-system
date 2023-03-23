@@ -222,7 +222,7 @@ uint32_t header::nonce() const NOEXCEPT
 
 void header::set_hash(hash_digest&& hash) const NOEXCEPT
 {
-    hash_ = std::make_shared<hash_digest>(std::move(hash));
+    hash_ = to_shared(std::move(hash));
 }
 
 // computed

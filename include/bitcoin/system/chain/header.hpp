@@ -148,7 +148,7 @@ private:
     bool valid_;
 
     // Identity hash cashing.
-    mutable std::shared_ptr<hash_digest> hash_{};
+    mutable std::shared_ptr<const hash_digest> hash_{};
 };
 
 typedef std::vector<header> headers;
