@@ -407,9 +407,11 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     {
         if (witness)
         {
+            // Avoid is_coinbase call if cache present (and avoid caching it).
+            if (witness_hash_) return *witness_hash_;
+
             // Witness coinbase tx hash is assumed to be null_hash (bip141).
             if (is_coinbase()) return null_hash;
-            if (witness_hash_) return *witness_hash_;
         }
         else
         {
