@@ -389,25 +389,38 @@ uint64_t transaction::fee() const NOEXCEPT
 
 void transaction::set_hash(hash_digest&& hash) const NOEXCEPT
 {
-    hash_ = std::make_unique<hash_digest>(std::move(hash));
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    hash_ = std::make_unique<const hash_digest>(std::move(hash));
+    BC_POP_WARNING()
 }
 
 void transaction::set_witness_hash(hash_digest&& hash) const NOEXCEPT
 {
-    witness_hash_ = std::make_unique<hash_digest>(std::move(hash));
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    witness_hash_ = std::make_unique<const hash_digest>(std::move(hash));
+    BC_POP_WARNING()
 }
 
 hash_digest transaction::hash(bool witness) const NOEXCEPT
 {
-    if (!witness && hash_)
-        return *hash_;
-
-    if (witness && witness_hash_)
-        return *witness_hash_;
-
-    // Witness coinbase tx hash is assumed to be null_hash (bip141).
-    if (witness && segregated_ && is_coinbase())
-        return null_hash;
+    if (segregated_)
+    {
+        if (witness)
+        {
+            // Witness coinbase tx hash is assumed to be null_hash (bip141).
+            if (is_coinbase()) return null_hash;
+            if (witness_hash_) return *witness_hash_;
+        }
+        else
+        {
+            if (hash_) return *hash_;
+        }
+    }
+    else
+    {
+        if (hash_) return *hash_;
+        if (witness_hash_) return *witness_hash_;
+    }
 
     // This is an out parameter.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
