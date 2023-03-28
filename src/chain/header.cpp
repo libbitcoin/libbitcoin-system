@@ -320,20 +320,18 @@ code header::check(uint32_t timestamp_limit_seconds,
     return error::success;
 }
 
-code header::accept(const chain_state& state) const NOEXCEPT
+// Checkpoints and previous_block_hash are chain validation (not here).
+code header::accept(const context& ctx) const NOEXCEPT
 {
-    if (state.is_checkpoint_conflict(hash()))
-        return error::checkpoints_failed;
-
-    if (version_ < state.minimum_block_version())
+    if (version_ < ctx.minimum_block_version)
         return error::invalid_block_version;
 
-    if (timestamp_ <= state.median_time_past())
+    if (timestamp_ <= ctx.median_time_past)
         return error::timestamp_too_early;
 
     // This is the only consensus direct comparison of the header.bits value.
     // All other work comparisons performed on expanded/normalized bits values.
-    if (bits_ != state.work_required())
+    if (bits_ != ctx.work_required)
         return error::incorrect_proof_of_work;
 
     return error::success;

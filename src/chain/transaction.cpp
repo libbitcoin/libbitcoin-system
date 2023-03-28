@@ -1195,10 +1195,10 @@ code transaction::guard() const NOEXCEPT
     return error::transaction_success;
 }
 
-code transaction::guard(const context& state) const NOEXCEPT
+code transaction::guard(const context& ctx) const NOEXCEPT
 {
-    const auto bip16 = state.is_enabled(forks::bip16_rule);
-    const auto bip141 = state.is_enabled(forks::bip141_rule);
+    const auto bip16 = ctx.is_enabled(forks::bip16_rule);
+    const auto bip141 = ctx.is_enabled(forks::bip141_rule);
 
     if (!bip141 && is_segregated())
         return error::unexpected_witness_transaction;
@@ -1242,13 +1242,13 @@ code transaction::check() const NOEXCEPT
     return error::transaction_success;
 }
 
-code transaction::accept(const context& state) const NOEXCEPT
+code transaction::accept(const context& ctx) const NOEXCEPT
 {
-    const auto bip68 = state.is_enabled(forks::bip68_rule);
-    const auto bip113 = state.is_enabled(forks::bip113_rule);
+    const auto bip68 = ctx.is_enabled(forks::bip68_rule);
+    const auto bip113 = ctx.is_enabled(forks::bip113_rule);
 
     // Store note: timestamp and mtp should be merged to single field.
-    if (is_non_final(state.height, state.timestamp, state.median_time_past, bip113))
+    if (is_non_final(ctx.height, ctx.timestamp, ctx.median_time_past, bip113))
         return error::transaction_non_final;
 
     // Coinbases do not have prevouts.
@@ -1263,21 +1263,21 @@ code transaction::accept(const context& state) const NOEXCEPT
             return error::spend_exceeds_value;
 
         // Could be delegated to input loop.
-        if (is_immature(state.height))
+        if (is_immature(ctx.height))
             return error::coinbase_maturity;
 
         // Could be delegated to input loop.
-        if (bip68 && is_locked(state.height, state.median_time_past))
+        if (bip68 && is_locked(ctx.height, ctx.median_time_past))
             return error::relative_time_locked;
 
         // prevout confirmation state required
 
         // Could be delegated to input loop.
-        if (is_unconfirmed_spend(state.height))
+        if (is_unconfirmed_spend(ctx.height))
             return error::unconfirmed_spend;
 
         // Could be delegated to input loop.
-        if (is_confirmed_double_spend(state.height))
+        if (is_confirmed_double_spend(ctx.height))
             return error::confirmed_double_spend;
     }
 
@@ -1287,7 +1287,7 @@ code transaction::accept(const context& state) const NOEXCEPT
 // Connect (contextual).
 // ------------------------------------------------------------------------
 
-code transaction::connect(const context& state) const NOEXCEPT
+code transaction::connect(const context& ctx) const NOEXCEPT
 {
     code ec;
 
@@ -1312,8 +1312,8 @@ code transaction::connect(const context& state) const NOEXCEPT
         // Evaluate rolling scripts with linear search but constant erase.
         // Evaluate non-rolling scripts with constant search but linear erase.
         if ((ec = is_roller(**input) ?
-            interpreter<linked_stack>::connect(state, *this, input) :
-            interpreter<contiguous_stack>::connect(state, *this, input)))
+            interpreter<linked_stack>::connect(ctx, *this, input) :
+            interpreter<contiguous_stack>::connect(ctx, *this, input)))
             return ec;
     }
 

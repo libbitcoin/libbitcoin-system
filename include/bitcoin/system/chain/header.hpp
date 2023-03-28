@@ -104,11 +104,11 @@ public:
 
     /// Validation.
     /// -----------------------------------------------------------------------
+    /// Checkpoints and previous_block_hash are chain validation (not here).
 
     code check(uint32_t timestamp_limit_seconds, uint32_t proof_of_work_limit,
         bool scrypt=false) const NOEXCEPT;
-
-    code accept(const chain_state& state) const NOEXCEPT;
+    code accept(const context& ctx) const NOEXCEPT;
 
 protected:
     header(uint32_t version, hash_digest&& previous_block_hash,
@@ -128,7 +128,6 @@ protected:
     /// Accept (relative to chain_state).
     /// -----------------------------------------------------------------------
 
-    // error::checkpoints_failed
     // error::invalid_block_version
     // error::timestamp_too_early
     // error::incorrect_proof_of_work
