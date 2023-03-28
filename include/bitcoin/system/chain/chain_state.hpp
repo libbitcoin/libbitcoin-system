@@ -21,10 +21,10 @@
 
 #include <memory>
 #include <deque>
-#include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -79,12 +79,6 @@ public:
 
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget;
-
-        /// mainnet: 419328, testnet: 770112 (or map::unrequested)
-        size_t bip9_bit0_height;
-
-        /// mainnet: 481824, testnet: 834624 (or map::unrequested)
-        size_t bip9_bit1_height;
     };
 
     /// Values used to populate chain state at the target height.
@@ -94,13 +88,13 @@ public:
         size_t height;
 
         /// Hash of the candidate block or null_hash for memory pool.
-        hash_digest hash;
+        ////hash_digest hash;
 
-        /// Hash of the bip9_bit0 block or null_hash if unrequested.
-        hash_digest bip9_bit0_hash;
+        /////// Hash of the bip9_bit0 block or null_hash if unrequested.
+        ////hash_digest bip9_bit0_hash;
 
-        /// Hash of the bip9_bit1 block or null_hash if unrequested.
-        hash_digest bip9_bit1_hash;
+        /////// Hash of the bip9_bit1 block or null_hash if unrequested.
+        ////hash_digest bip9_bit1_hash;
 
         /// Values must be ordered by height with high (block - 1) last.
         struct
@@ -147,10 +141,8 @@ public:
     }
 
     /// Checkpoints must be ordered by height with greatest at back.
-    static map get_map(size_t height, const checkpoints& checkpoints,
-        uint32_t forks, size_t retargeting_interval, size_t activation_sample,
-        const checkpoint& bip9_bit0_active_checkpoint,
-        const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
+    static map get_map(size_t height,
+        const system::settings& settings) NOEXCEPT;
 
     static uint32_t signal_version(uint32_t forks,
         const system::settings& settings) NOEXCEPT;
@@ -169,8 +161,7 @@ public:
 
     /// Checkpoints must be ordered by height with greatest at back.
     /// Forks and checkpoints must match those provided for map creation.
-    chain_state(data&& values, const checkpoints& checkpoints, uint32_t forks,
-        uint32_t stale_seconds, const system::settings& settings) NOEXCEPT;
+    chain_state(data&& values, const system::settings& settings) NOEXCEPT;
 
     /// Properties.
     const hash_digest& hash() const NOEXCEPT;
@@ -188,15 +179,6 @@ public:
 
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const NOEXCEPT;
-
-    /// Determine if the represented block is stale (top block for pool state).
-    bool is_stale() const NOEXCEPT;
-
-    /// Determine if this block hash fails a checkpoint at this height.
-    bool is_checkpoint_conflict(const hash_digest& hash) const NOEXCEPT;
-
-    /// This block height is less than or equal to that of the top checkpoint.
-    bool is_under_checkpoint() const NOEXCEPT;
 
 protected:
     struct activations
@@ -226,16 +208,10 @@ private:
     static size_t timestamp_count(size_t height, uint32_t forks) NOEXCEPT;
     static size_t retarget_height(size_t height, uint32_t forks,
         size_t retargeting_interval) NOEXCEPT;
-    static size_t bip9_bit0_height(size_t height,
-        const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT;
-    static size_t bip9_bit1_height(size_t height,
-        const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
 
     static data to_pool(const chain_state& top,
         const system::settings& settings) NOEXCEPT;
-    static data to_block(const chain_state& pool, const block& block,
-        const checkpoint& bip9_bit0_active_checkpoint,
-        const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
+    static data to_block(const chain_state& pool, const block& block) NOEXCEPT;
     static data to_header(const chain_state& parent, const header& header,
         const system::settings& settings) NOEXCEPT;
 
@@ -255,13 +231,7 @@ private:
     // Configured forks are saved for state transitions.
     const uint32_t forks_;
 
-    // Configured minimum age in seconds for a block to be considered stale.
-    const uint32_t stale_seconds_;
-
-    // Checkpoints do not affect the data that is collected or promoted.
-    const checkpoints& checkpoints_;
-
-    // These are computed on construct from sample and checkpoints.
+    // These are computed on construct.
     const activations active_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;

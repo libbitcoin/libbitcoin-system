@@ -35,7 +35,13 @@ namespace chain {
 class BC_API checkpoint
 {
 public:
+    typedef std::vector<checkpoint> list;
+
     DEFAULT_COPY_MOVE_DESTRUCT(checkpoint);
+
+    static bool is_under(const list& checkpoints, size_t height) NOEXCEPT;
+    static bool is_conflict(const list& checkpoints, const hash_digest& hash,
+        size_t height) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
