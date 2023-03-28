@@ -268,12 +268,12 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings) NOEXCEPT
 {
-    BC_ASSERT_MSG(!is_zero(compact::expand(bits_high(values))),
-        "previous block has invalid bits value");
-
     // Invalid parameter via public interface, test is_valid for results.
     if (is_zero(values.height))
         return 0;
+
+    BC_ASSERT_MSG(!is_zero(compact::expand(bits_high(values))),
+        "previous block has invalid bits value");
 
     // Regtest bypasses all retargeting.
     if (!script::is_enabled(forks, forks::retarget))
