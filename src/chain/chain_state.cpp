@@ -173,22 +173,22 @@ chain_state::activations chain_state::activation(const data& values,
     ////}
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip34_ice || (is_active(count_2, settings.activation_threshold) && version >=
-        settings.bip34_version))
+    if (bip34_ice || (is_active(count_2, settings.activation_threshold) &&
+        version >= settings.bip34_version))
     {
         result.forks |= (forks::bip34_rule & forks);
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip66_ice || (is_active(count_3, settings.activation_threshold) && version >=
-        settings.bip66_version))
+    if (bip66_ice || (is_active(count_3, settings.activation_threshold) &&
+        version >= settings.bip66_version))
     {
         result.forks |= (forks::bip66_rule & forks);
     }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip65_ice || (is_active(count_4, settings.activation_threshold) && version >=
-        settings.bip65_version))
+    if (bip65_ice || (is_active(count_4, settings.activation_threshold) &&
+        version >= settings.bip65_version))
     {
         result.forks |= (forks::bip65_rule & forks);
     }
