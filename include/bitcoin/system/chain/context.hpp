@@ -42,6 +42,8 @@ public:
     uint32_t timestamp;
     uint32_t median_time_past;
     size_t height;
+    uint32_t minimum_block_version;
+    uint32_t work_required;
 };
 
 } // namespace chain

@@ -138,14 +138,14 @@ public:
     /// -----------------------------------------------------------------------
 
     code guard() const NOEXCEPT;
-    code guard(const context& state) const NOEXCEPT;
+    code guard(const context& ctx) const NOEXCEPT;
 
     /// Validation (consensus checks).
     /// -----------------------------------------------------------------------
 
     code check() const NOEXCEPT;
-    code accept(const context& state) const NOEXCEPT;
-    code connect(const context& state) const NOEXCEPT;
+    code accept(const context& ctx) const NOEXCEPT;
+    code connect(const context& ctx) const NOEXCEPT;
 
 protected:
     transaction(uint32_t version, const chain::inputs_cptr& inputs,
@@ -191,7 +191,6 @@ protected:
     // prevout confirmation state required
     bool is_unconfirmed_spend(size_t height) const NOEXCEPT;
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
-
 
 private:
     static transaction from_data(reader& source, bool witness) NOEXCEPT;

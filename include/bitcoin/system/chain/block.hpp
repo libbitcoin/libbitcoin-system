@@ -96,9 +96,9 @@ public:
 
     /// Consensus checks (no DoS guards for block sync without headers first).
     code check() const NOEXCEPT;
-    code accept(const context& state, size_t subsidy_interval,
+    code accept(const context& ctx, size_t subsidy_interval,
         uint64_t initial_subsidy) const NOEXCEPT;
-    code connect(const context& state) const NOEXCEPT;
+    code connect(const context& ctx) const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,
@@ -157,8 +157,8 @@ private:
 
     // delegated
     code check_transactions() const NOEXCEPT;
-    code accept_transactions(const context& state) const NOEXCEPT;
-    code connect_transactions(const context& state) const NOEXCEPT;
+    code accept_transactions(const context& ctx) const NOEXCEPT;
+    code connect_transactions(const context& ctx) const NOEXCEPT;
 
     // Block should be stored as shared (adds 16 bytes).
     // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).

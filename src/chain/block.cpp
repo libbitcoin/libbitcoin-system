@@ -571,23 +571,23 @@ code block::check_transactions() const NOEXCEPT
     return error::block_success;
 }
 
-code block::accept_transactions(const context& state) const NOEXCEPT
+code block::accept_transactions(const context& ctx) const NOEXCEPT
 {
     code ec;
 
     for (const auto& tx: *txs_)
-        if ((ec = tx->accept(state)))
+        if ((ec = tx->accept(ctx)))
             return ec;
 
     return error::block_success;
 }
 
-code block::connect_transactions(const context& state) const NOEXCEPT
+code block::connect_transactions(const context& ctx) const NOEXCEPT
 {
     code ec;
 
     for (const auto& tx: *txs_)
-        if ((ec = tx->connect(state)))
+        if ((ec = tx->connect(ctx)))
             return ec;
 
     return error::block_success;
@@ -633,29 +633,29 @@ code block::check() const NOEXCEPT
         return error::merkle_mismatch;
 
     // error::empty_transaction
-    // error::previous_output_null
     // error::invalid_coinbase_script_size
+    // error::previous_output_null
     return check_transactions();
 }
 
-// The block header is accepted independently using chain_state.
+// The block header is accepted independently.
 // These checks assume that prevout caching is completed on all tx.inputs.
-code block::accept(const context& state, size_t subsidy_interval,
+code block::accept(const context& ctx, size_t subsidy_interval,
     uint64_t initial_subsidy) const NOEXCEPT
 {
-    const auto bip16 = state.is_enabled(bip16_rule);
-    const auto bip30 = state.is_enabled(bip30_rule);
-    const auto bip34 = state.is_enabled(bip34_rule);
-    const auto bip42 = state.is_enabled(bip42_rule);
-    const auto bip50 = state.is_enabled(bip50_rule);
-    const auto bip141 = state.is_enabled(bip141_rule);
+    const auto bip16 = ctx.is_enabled(bip16_rule);
+    const auto bip30 = ctx.is_enabled(bip30_rule);
+    const auto bip34 = ctx.is_enabled(bip34_rule);
+    const auto bip42 = ctx.is_enabled(bip42_rule);
+    const auto bip50 = ctx.is_enabled(bip50_rule);
+    const auto bip141 = ctx.is_enabled(bip141_rule);
 
     // Relates block limit to total of tx.weight (pool cache tx.size(t/f)).
     if (bip141 && is_overweight())
         return error::block_weight_limit;
 
     // Relates block height to coinbase, always under checkpoint.
-    if (bip34 && is_invalid_coinbase_script(state.height))
+    if (bip34 && is_invalid_coinbase_script(ctx.height))
         return error::coinbase_height_mismatch;
 
     // Relates block time to tx and prevout hashes, always under checkpoint.
@@ -669,7 +669,7 @@ code block::accept(const context& state, size_t subsidy_interval,
     // prevouts required
 
     // Relates block height to total of tx.fee (pool cache tx.fee).
-    if (is_overspent(state.height, subsidy_interval, initial_subsidy, bip42))
+    if (is_overspent(ctx.height, subsidy_interval, initial_subsidy, bip42))
         return error::coinbase_value_limit;
 
     // Relates block limit to total of tx.sigops (pool cache tx.sigops).
@@ -678,20 +678,22 @@ code block::accept(const context& state, size_t subsidy_interval,
 
     // prevout confirmation state required
 
-    if (bip30 && !bip34 && is_unspent_coinbase_collision(state.height))
+    if (bip30 && !bip34 && is_unspent_coinbase_collision(ctx.height))
         return error::unspent_coinbase_collision;
 
-    // error::unexpected_witness_transaction
+    // error::transaction_non_final
     // error::missing_previous_output
     // error::spend_exceeds_value
     // error::coinbase_maturity
     // error::relative_time_locked
-    return accept_transactions(state);
+    // error::unconfirmed_spend
+    // error::confirmed_double_spend
+    return accept_transactions(ctx);
 }
 
-code block::connect(const context& state) const NOEXCEPT
+code block::connect(const context& ctx) const NOEXCEPT
 {
-    return connect_transactions(state);
+    return connect_transactions(ctx);
 }
 
 // JSON value convertors.
