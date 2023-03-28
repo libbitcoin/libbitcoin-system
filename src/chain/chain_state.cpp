@@ -173,22 +173,22 @@ chain_state::activations chain_state::activation(const data& values,
     ////}
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip34_ice || (is_active(count_2, settings.activation_threshold) && version >=
-        settings.bip34_version))
+    if (bip34_ice || (is_active(count_2, settings.activation_threshold) &&
+        version >= settings.bip34_version))
     {
         result.forks |= (forks::bip34_rule & forks);
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip66_ice || (is_active(count_3, settings.activation_threshold) && version >=
-        settings.bip66_version))
+    if (bip66_ice || (is_active(count_3, settings.activation_threshold) &&
+        version >= settings.bip66_version))
     {
         result.forks |= (forks::bip66_rule & forks);
     }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip65_ice || (is_active(count_4, settings.activation_threshold) && version >=
-        settings.bip65_version))
+    if (bip65_ice || (is_active(count_4, settings.activation_threshold) &&
+        version >= settings.bip65_version))
     {
         result.forks |= (forks::bip65_rule & forks);
     }
@@ -262,13 +262,35 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
         retargeting_interval : retarget_distance(height, retargeting_interval));
 }
 
+// median_time_past
+// ----------------------------------------------------------------------------
+
+//*****************************************************************************
+// CONSENSUS: satoshi associates the median time past for block N with block
+// N-1, as opposed to block N. Given that the value is actually obtained from
+// yet another preceding block in all cases except block 1 and 2, this is a
+// curious and confusing convention. We associate the median time past for
+// block N with block N. This is simple but requires care when comparing code.
+//*****************************************************************************
+uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
+{
+    // Sort the times by value to obtain the median.
+    auto times = sort_copy(values.timestamp.ordered);
+
+    // Consensus defines median time using modulo 2 element selection.
+    // This differs from arithmetic median which averages two middle values.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return times.empty() ? 0 : times.at(to_half(times.size()));
+    BC_POP_WARNING()
+}
+
 // work_required
 // ----------------------------------------------------------------------------
 
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings) NOEXCEPT
 {
-    // Invalid parameter via public interface, test is_valid for results.
+    // Genesis requires no work.
     if (is_zero(values.height))
         return 0;
 
@@ -384,7 +406,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     return proof_of_work_limit;
 }
 
-// Static
+// Public static
 // ----------------------------------------------------------------------------
 
 chain_state::map chain_state::get_map(size_t height,
@@ -446,23 +468,6 @@ uint32_t chain_state::signal_version(uint32_t forks,
 // Constructors.
 // ----------------------------------------------------------------------------
 
-//*****************************************************************************
-// CONSENSUS: satoshi associates the median time past for block N with block
-// N-1, as opposed to block N. Given that the value is actually obtained from
-// yet another preceding block in all cases except block 1 and 2, this is a
-// curious and confusing convention. We associate the median time past for
-// block N with block N. This is simple but requires care when comparing code.
-//*****************************************************************************
-uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
-{
-    // Sort the times by value to obtain the median.
-    auto times = sort_copy(values.timestamp.ordered);
-
-    // Consensus defines median time using modulo 2 element selection.
-    // This differs from arithmetic median which averages two middle values.
-    return times.empty() ? 0 : times.at(to_half(times.size()));
-}
-
 // This is promotion from a preceding height to the next.
 chain_state::data chain_state::to_pool(const chain_state& top,
     const system::settings& settings) NOEXCEPT
@@ -517,9 +522,8 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // Preserve top block timestamp for use in computation of staleness.
     // Preserve data.bip9_bit0_hash promotion.
     // Preserve data.bip9_bit1_hash promotion.
-    // Hash and bits.self are unused.
+    // bits.self is unused.
     data.height = height;
-    ////data.hash = null_hash;
     data.bits.self = 0;
     data.version.self = signal_version(forks, settings);
     return data;
@@ -546,7 +550,6 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     // Replace pool chain state with block state at same (next) height.
     // Preserve data.timestamp.retarget promotion.
     const auto& header = block.header();
-    ////data.hash = header.hash();
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
@@ -569,14 +572,11 @@ chain_state::chain_state(const chain_state& pool, const block& block,
 chain_state::data chain_state::to_header(const chain_state& parent,
     const header& header, const system::settings& settings) NOEXCEPT
 {
-    ////BC_ASSERT(header.previous_block_hash() == parent.hash());
-
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent, settings);
 
     // Replace the pool (empty) current block state with given header state.
     // Preserve data.timestamp.retarget promotion.
-    ////data.hash = header.hash();
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
@@ -610,11 +610,6 @@ chain_state::chain_state(data&& values,
 // Properties.
 // ----------------------------------------------------------------------------
 
-////const hash_digest& chain_state::hash() const NOEXCEPT
-////{
-////    return data_.hash;
-////}
-
 uint32_t chain_state::minimum_block_version() const NOEXCEPT
 {
     return active_.minimum_block_version;
@@ -642,11 +637,6 @@ uint32_t chain_state::forks() const NOEXCEPT
     return active_.forks;
 }
 
-uint32_t chain_state::policy() const NOEXCEPT
-{
-    return policy::no_policy;
-}
-
 size_t chain_state::height() const NOEXCEPT
 {
     return data_.height;
@@ -657,7 +647,6 @@ chain::context chain_state::context() const NOEXCEPT
     return
     {
         forks(),
-        policy(),
         timestamp(),
         median_time_past(),
         possible_narrow_cast<uint32_t>(height()),
@@ -674,14 +663,6 @@ inline uint64_t zulu_time_seconds() NOEXCEPT
     using wall_clock = std::chrono::system_clock;
     const auto now = wall_clock::now();
     return sign_cast<uint64_t>(wall_clock::to_time_t(now));
-}
-
-// Semantic invalidity can also arise from too many/few values in the arrays.
-// The same computations used to specify the ranges could detect such errors.
-// These are the conditions that would cause exception during execution.
-bool chain_state::is_valid() const NOEXCEPT
-{
-    return !is_zero(data_.height);
 }
 
 } // namespace chain

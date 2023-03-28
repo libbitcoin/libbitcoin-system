@@ -30,9 +30,19 @@ bool context::is_enabled(chain::forks fork) const NOEXCEPT
     return to_bool(fork & forks);
 }
 
-bool context::is_policy(chain::policy police) const NOEXCEPT
+bool operator==(const context& left, const context& right) NOEXCEPT
 {
-    return to_bool(police & policy);
+    return left.forks == right.forks
+        && left.timestamp == right.timestamp
+        && left.median_time_past == right.median_time_past
+        && left.height == right.height
+        && left.minimum_block_version == right.minimum_block_version
+        && left.work_required == right.work_required;
+}
+
+bool operator!=(const context& left, const context& right) NOEXCEPT
+{
+    return !(left == right);
 }
 
 } // namespace chain
