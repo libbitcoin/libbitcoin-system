@@ -262,6 +262,28 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
         retargeting_interval : retarget_distance(height, retargeting_interval));
 }
 
+// median_time_past
+// ----------------------------------------------------------------------------
+
+//*****************************************************************************
+// CONSENSUS: satoshi associates the median time past for block N with block
+// N-1, as opposed to block N. Given that the value is actually obtained from
+// yet another preceding block in all cases except block 1 and 2, this is a
+// curious and confusing convention. We associate the median time past for
+// block N with block N. This is simple but requires care when comparing code.
+//*****************************************************************************
+uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
+{
+    // Sort the times by value to obtain the median.
+    auto times = sort_copy(values.timestamp.ordered);
+
+    // Consensus defines median time using modulo 2 element selection.
+    // This differs from arithmetic median which averages two middle values.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return times.empty() ? 0 : times.at(to_half(times.size()));
+    BC_POP_WARNING()
+}
+
 // work_required
 // ----------------------------------------------------------------------------
 
@@ -384,7 +406,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     return proof_of_work_limit;
 }
 
-// Static
+// Public static
 // ----------------------------------------------------------------------------
 
 chain_state::map chain_state::get_map(size_t height,
@@ -445,25 +467,6 @@ uint32_t chain_state::signal_version(uint32_t forks,
 
 // Constructors.
 // ----------------------------------------------------------------------------
-
-//*****************************************************************************
-// CONSENSUS: satoshi associates the median time past for block N with block
-// N-1, as opposed to block N. Given that the value is actually obtained from
-// yet another preceding block in all cases except block 1 and 2, this is a
-// curious and confusing convention. We associate the median time past for
-// block N with block N. This is simple but requires care when comparing code.
-//*****************************************************************************
-uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
-{
-    // Sort the times by value to obtain the median.
-    auto times = sort_copy(values.timestamp.ordered);
-
-    // Consensus defines median time using modulo 2 element selection.
-    // This differs from arithmetic median which averages two middle values.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return times.empty() ? 0 : times.at(to_half(times.size()));
-    BC_POP_WARNING()
-}
 
 // This is promotion from a preceding height to the next.
 chain_state::data chain_state::to_pool(const chain_state& top,

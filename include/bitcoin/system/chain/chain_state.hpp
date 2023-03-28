@@ -60,32 +60,32 @@ public:
         static const size_t unrequested = max_size_t;
 
         /// [block - 1, floor(block - 2016, 0)] mainnet: 1, testnet: 2016|0
-        range bits;
+        range bits{};
 
         /// (block - 0), used only for populating bits.ordered on increment.
-        size_t bits_self;
+        size_t bits_self{};
 
         /// [block - 1, floor(block - 1000, 0)] mainnet: 1000, testnet: 100
-        range version;
+        range version{};
 
         /// (block - 0)
-        size_t version_self;
+        size_t version_self{};
 
         /// [block - 1, floor(block - 11, 0)]
-        range timestamp;
+        range timestamp{};
 
         /// (block - 0)
-        size_t timestamp_self;
+        size_t timestamp_self{};
 
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
-        size_t timestamp_retarget;
+        size_t timestamp_retarget{};
     };
 
     /// Values used to populate chain state at the target height.
     struct data
     {
         /// Header values are based on this height.
-        size_t height;
+        size_t height{};
 
         /// Hash of the candidate block or null_hash for memory pool.
         ////hash_digest hash;
@@ -93,23 +93,23 @@ public:
         /// Values must be ordered by height with high (block - 1) last.
         struct
         {
-            uint32_t self;
-            bitss ordered;
+            uint32_t self{};
+            bitss ordered{};
         } bits;
 
         /// Values must be ordered by height with high (block - 1) last.
         struct
         {
-            uint32_t self;
-            versions ordered;
+            uint32_t self{};
+            versions ordered{};
         } version;
 
         /// Values must be ordered by height with high (block - 1) last.
         struct
         {
-            uint32_t self;
-            uint32_t retarget;
-            timestamps ordered;
+            uint32_t self{};
+            uint32_t retarget{};
+            timestamps ordered{};
         } timestamp;
     };
 
