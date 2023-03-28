@@ -539,7 +539,6 @@ chain_state::chain_state(const chain_state& top,
     const system::settings& settings) NOEXCEPT
   : data_(to_pool(top, settings)),
     forks_(top.forks_),
-    checkpoints_(top.checkpoints_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
@@ -569,7 +568,6 @@ chain_state::chain_state(const chain_state& pool, const block& block,
     const system::settings& settings) NOEXCEPT
   : data_(to_block(pool, block)),
     forks_(pool.forks_),
-    checkpoints_(pool.checkpoints_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
@@ -600,7 +598,6 @@ chain_state::chain_state(const chain_state& parent, const header& header,
     const system::settings& settings) NOEXCEPT
   : data_(to_header(parent, header, settings)),
     forks_(parent.forks_),
-    checkpoints_(parent.checkpoints_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
@@ -612,7 +609,6 @@ chain_state::chain_state(data&& values,
     const system::settings& settings) NOEXCEPT
   : data_(std::move(values)),
     forks_(settings.enabled_forks()),
-    checkpoints_(settings.checkpoints),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
     median_time_past_(median_time_past(data_, forks_))
@@ -699,32 +695,6 @@ inline uint64_t zulu_time_seconds() NOEXCEPT
 bool chain_state::is_valid() const NOEXCEPT
 {
     return !is_zero(data_.height);
-}
-
-// Checkpoints.
-// ----------------------------------------------------------------------------
-
-bool chain_state::is_checkpoint_conflict(
-    const hash_digest& hash) const NOEXCEPT
-{
-    const auto it = std::find_if(checkpoints_.begin(), checkpoints_.end(),
-        [&](const checkpoint& item) NOEXCEPT
-        {
-            return data_.height == item.height();
-        });
-    
-    return it != checkpoints_.end() && it->hash() == hash;
-}
-
-bool chain_state::is_under_checkpoint() const NOEXCEPT
-{
-    // False if empty.
-    // This is optimial if checkpoints are sorted by increasing height.
-    return std::any_of(checkpoints_.rbegin(), checkpoints_.rend(),
-        [&](const checkpoint& item) NOEXCEPT
-        {
-            return data_.height <= item.height();
-        });
 }
 
 } // namespace chain

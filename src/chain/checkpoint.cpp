@@ -18,6 +18,7 @@
  */
 #include <bitcoin/system/chain/checkpoint.hpp>
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -30,6 +31,28 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+
+bool checkpoint::is_under(const list& checkpoints, size_t height) NOEXCEPT
+{
+    // False if empty, optimial if checkpoints sorted by increasing height.
+    return std::any_of(checkpoints.rbegin(), checkpoints.rend(),
+        [&](const auto& item) NOEXCEPT
+        {
+            return height <= item.height();
+        });
+}
+
+bool checkpoint::is_conflict(const list& checkpoints, const hash_digest& hash,
+    size_t height) NOEXCEPT
+{
+    const auto it = std::find_if(checkpoints.begin(), checkpoints.end(),
+        [&](const auto& item) NOEXCEPT
+        {
+            return height == item.height();
+        });
+
+    return it != checkpoints.end() && it->hash() == hash;
+}
 
 // Constructors.
 // ----------------------------------------------------------------------------

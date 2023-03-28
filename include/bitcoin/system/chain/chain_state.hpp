@@ -21,10 +21,10 @@
 
 #include <memory>
 #include <deque>
-#include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/forks.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -180,12 +180,6 @@ public:
     /// Construction with zero height or any empty array causes invalid state.
     bool is_valid() const NOEXCEPT;
 
-    /// Determine if this block hash fails a checkpoint at this height.
-    bool is_checkpoint_conflict(const hash_digest& hash) const NOEXCEPT;
-
-    /// This block height is less than or equal to that of the top checkpoint.
-    bool is_under_checkpoint() const NOEXCEPT;
-
 protected:
     struct activations
     {
@@ -237,10 +231,7 @@ private:
     // Configured forks are saved for state transitions.
     const uint32_t forks_;
 
-    // Checkpoints do not affect the data that is collected or promoted.
-    const checkpoints& checkpoints_;
-
-    // These are computed on construct from sample and checkpoints.
+    // These are computed on construct.
     const activations active_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;
