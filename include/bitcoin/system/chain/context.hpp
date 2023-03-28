@@ -33,18 +33,17 @@ public:
     /// Determine if the fork is ative for this block.
     bool is_enabled(chain::forks fork) const NOEXCEPT;
 
-    /// Determine if the policy is configured active.
-    bool is_policy(chain::policy police) const NOEXCEPT;
-
     /// Public mutable metadata access.
     uint32_t forks;
-    uint32_t policy;
     uint32_t timestamp;
     uint32_t median_time_past;
     size_t height;
     uint32_t minimum_block_version;
     uint32_t work_required;
 };
+
+bool operator==(const context& left, const context& right) NOEXCEPT;
+bool operator!=(const context& left, const context& right) NOEXCEPT;
 
 } // namespace chain
 } // namespace system

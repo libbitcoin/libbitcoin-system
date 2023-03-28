@@ -158,20 +158,13 @@ public:
     chain_state(data&& values, const system::settings& settings) NOEXCEPT;
 
     /// Properties.
-
-    const hash_digest& hash() const NOEXCEPT;
     chain::context context() const NOEXCEPT;
-
     uint32_t minimum_block_version() const NOEXCEPT;
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
     uint32_t median_time_past() const NOEXCEPT;
-    uint32_t policy() const NOEXCEPT;
     uint32_t forks() const NOEXCEPT;
     size_t height() const NOEXCEPT;
-
-    /// Construction with zero height or any empty array causes invalid state.
-    bool is_valid() const NOEXCEPT;
 
 protected:
     struct activations
