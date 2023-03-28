@@ -90,12 +90,6 @@ public:
         /// Hash of the candidate block or null_hash for memory pool.
         ////hash_digest hash;
 
-        /////// Hash of the bip9_bit0 block or null_hash if unrequested.
-        ////hash_digest bip9_bit0_hash;
-
-        /////// Hash of the bip9_bit1 block or null_hash if unrequested.
-        ////hash_digest bip9_bit1_hash;
-
         /// Values must be ordered by height with high (block - 1) last.
         struct
         {
@@ -164,13 +158,12 @@ public:
     chain_state(data&& values, const system::settings& settings) NOEXCEPT;
 
     /// Properties.
-    const hash_digest& hash() const NOEXCEPT;
-    uint32_t minimum_block_version() const NOEXCEPT;
-    uint32_t maximum_transaction_version() const NOEXCEPT;
-    uint32_t work_required() const NOEXCEPT;
 
-    /// Context retains forks, policy, height, and median_time_past.
+    const hash_digest& hash() const NOEXCEPT;
     chain::context context() const NOEXCEPT;
+
+    uint32_t minimum_block_version() const NOEXCEPT;
+    uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
     uint32_t median_time_past() const NOEXCEPT;
     uint32_t policy() const NOEXCEPT;
@@ -188,9 +181,6 @@ protected:
 
         /// The minimum block version required at this height.
         uint32_t minimum_block_version;
-
-        /// The maximum transaction version allowed at this height.
-        uint32_t maximum_transaction_version;
     };
 
     static activations activation(const data& values, uint32_t forks,

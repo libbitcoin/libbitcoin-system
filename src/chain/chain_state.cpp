@@ -106,12 +106,11 @@ chain_state::activations chain_state::activation(const data& values,
     ////const auto retarget = script::is_enabled(forks, forks::retarget);
     ////const auto mainnet = retarget && difficult;
 
-    // C++17: lambda closure types are literal types (use constexpr).
     //*************************************************************************
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
     // performed this comparison using the signed integer version value.
     //*************************************************************************
-    const auto ge = [](uint32_t value, uint32_t version) NOEXCEPT
+    constexpr auto ge = [](uint32_t value, uint32_t version) NOEXCEPT
     {
         return sign_cast<int32_t>(value) >= sign_cast<int32_t>(version);
     };
@@ -212,8 +211,6 @@ chain_state::activations chain_state::activation(const data& values,
         result.minimum_block_version = settings.first_version;
     }
 
-    // TODO: add configurable option to apply transaction version policy.
-    result.maximum_transaction_version = max_uint32;
     return result;
 }
 
@@ -271,12 +268,12 @@ size_t chain_state::retarget_height(size_t height, uint32_t forks,
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings) NOEXCEPT
 {
-    BC_ASSERT_MSG(!is_zero(compact::expand(bits_high(values))),
-        "previous block has invalid bits value");
-
     // Invalid parameter via public interface, test is_valid for results.
     if (is_zero(values.height))
         return 0;
+
+    BC_ASSERT_MSG(!is_zero(compact::expand(bits_high(values))),
+        "previous block has invalid bits value");
 
     // Regtest bypasses all retargeting.
     if (!script::is_enabled(forks, forks::retarget))
@@ -449,7 +446,6 @@ uint32_t chain_state::signal_version(uint32_t forks,
 // Constructors.
 // ----------------------------------------------------------------------------
 
-
 //*****************************************************************************
 // CONSENSUS: satoshi associates the median time past for block N with block
 // N-1, as opposed to block N. Given that the value is actually obtained from
@@ -464,11 +460,7 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
 
     // Consensus defines median time using modulo 2 element selection.
     // This differs from arithmetic median which averages two middle values.
-
-    // times[] indexation is guarded.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    return times.empty() ? 0 : times[to_half(times.size())];
-    BC_POP_WARNING()
+    return times.empty() ? 0 : times.at(to_half(times.size()));
 }
 
 // This is promotion from a preceding height to the next.
@@ -626,11 +618,6 @@ chain_state::chain_state(data&& values,
 uint32_t chain_state::minimum_block_version() const NOEXCEPT
 {
     return active_.minimum_block_version;
-}
-
-uint32_t chain_state::maximum_transaction_version() const NOEXCEPT
-{
-    return active_.maximum_transaction_version;
 }
 
 uint32_t chain_state::work_required() const NOEXCEPT
