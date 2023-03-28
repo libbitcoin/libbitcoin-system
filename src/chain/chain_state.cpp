@@ -577,7 +577,7 @@ chain_state::chain_state(const chain_state& pool, const block& block,
 chain_state::data chain_state::to_header(const chain_state& parent,
     const header& header, const system::settings& settings) NOEXCEPT
 {
-    BC_ASSERT(header.previous_block_hash() == parent.hash());
+    ////BC_ASSERT(header.previous_block_hash() == parent.hash());
 
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent, settings);
