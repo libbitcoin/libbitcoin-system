@@ -138,6 +138,7 @@ public:
     static map get_map(size_t height,
         const system::settings& settings) NOEXCEPT;
 
+    /// The block version to signal based on active forks.
     static uint32_t signal_version(uint32_t forks,
         const system::settings& settings) NOEXCEPT;
 
@@ -176,10 +177,15 @@ protected:
         uint32_t minimum_block_version;
     };
 
+    /// No failure sentinel.
     static activations activation(const data& values, uint32_t forks,
         const system::settings& settings) NOEXCEPT;
+
+    /// Returns zero if data is invalid.
     static uint32_t median_time_past(const data& values,
         uint32_t forks) NOEXCEPT;
+
+    /// Returns zero if data is invalid.
     static uint32_t work_required(const data& values, uint32_t forks,
         const system::settings& settings) NOEXCEPT;
 
@@ -207,14 +213,9 @@ private:
         size_t retargeting_interval, uint32_t proof_of_work_limit,
         uint32_t block_spacing_seconds) NOEXCEPT;
 
-    // This is retained as an optimization for other constructions.
-    // A similar height clone can be partially computed, reducing query cost.
+    // These are thread safe.
     const data data_;
-
-    // Configured forks are saved for state transitions.
     const uint32_t forks_;
-
-    // These are computed on construct.
     const activations active_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;
