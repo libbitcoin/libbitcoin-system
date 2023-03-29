@@ -290,12 +290,13 @@ uint32_t chain_state::median_time_past(const data& values, uint32_t) NOEXCEPT
 uint32_t chain_state::work_required(const data& values, uint32_t forks,
     const system::settings& settings) NOEXCEPT
 {
-    // Genesis requires no work.
+    // Genesis has no preceding block data.
     if (is_zero(values.height))
         return 0;
 
-    BC_ASSERT_MSG(!is_zero(compact::expand(bits_high(values))),
-        "previous block has invalid bits value");
+    // Previous block has an invalid bits value.
+    if (is_zero(compact::expand(bits_high(values))))
+        return 0;
 
     // Regtest bypasses all retargeting.
     if (!script::is_enabled(forks, forks::retarget))
