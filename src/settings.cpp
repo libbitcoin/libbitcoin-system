@@ -282,7 +282,8 @@ uint64_t settings::max_money() const NOEXCEPT
 
     // Guarded by parameterization (config).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    return safe_multiply(total(initial_subsidy()), subsidy_interval_blocks);
+    return safe_multiply<uint64_t>(total(initial_subsidy()),
+        subsidy_interval_blocks);
     BC_POP_WARNING()
 }
 
@@ -297,7 +298,7 @@ uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
 {
     // Guarded by parameterization (config).
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        return safe_multiply(value, chain::satoshi_per_bitcoin);
+    return safe_multiply(value, chain::satoshi_per_bitcoin);
     BC_POP_WARNING()
 }
 
