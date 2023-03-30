@@ -77,7 +77,7 @@ public:
 
     /// These are not used internal to system.
     uint64_t initial_subsidy_bitcoin;
-    uint64_t subsidy_interval_blocks;
+    uint32_t subsidy_interval_blocks;
     uint32_t timestamp_limit_seconds;
     chain::checkpoints checkpoints{};
     config::block genesis_block{};
