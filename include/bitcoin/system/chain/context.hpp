@@ -33,7 +33,7 @@ public:
     /// Determine if the fork is ative for this block.
     bool is_enabled(chain::forks fork) const NOEXCEPT;
 
-    /// Public mutable metadata access.
+    /// Header context within chain.
     uint32_t forks;
     uint32_t timestamp;
     uint32_t median_time_past;
