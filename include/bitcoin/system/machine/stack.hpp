@@ -80,6 +80,7 @@ public:
     inline bool peek_bool() const NOEXCEPT;
     inline bool peek_strict_bool() const NOEXCEPT;
     inline chunk_xptr peek_chunk() const NOEXCEPT;
+    inline size_t peek_size() const NOEXCEPT;
 
     static inline bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;

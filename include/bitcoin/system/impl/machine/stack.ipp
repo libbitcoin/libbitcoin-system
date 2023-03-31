@@ -315,6 +315,35 @@ inline chunk_xptr stack<Container>::peek_chunk() const NOEXCEPT
     return value;
 }
 
+// Could use peek_chunk but this overload skips allocation and tethering.
+template <typename Container>
+inline size_t stack<Container>::peek_size() const NOEXCEPT
+{
+    using namespace number;
+    size_t value{};
+
+    std::visit(overload
+    {
+        [&, this](bool vary) NOEXCEPT
+        {
+            // This is never executed in standard scripts.
+            value = chunk::from_bool(vary).size();
+        },
+        [&](int64_t vary) NOEXCEPT
+        {
+            // This is never executed in standard scripts.
+            value = chunk::from_integer(vary).size();
+        },
+        [&](const chunk_xptr& vary) NOEXCEPT
+        {
+            // This is never executed in standard scripts.
+            value = vary->size();
+        }
+    }, top());
+
+    return value;
+}
+
 /// Static variant compare with conversion.
 /// Integers are unconstrained as these are stack chunk equality comparisons.
 template <typename Container>

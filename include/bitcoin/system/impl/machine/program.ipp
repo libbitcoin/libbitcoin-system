@@ -222,6 +222,13 @@ peek_chunk_() const NOEXCEPT
     return primary_.peek_chunk();
 }
 
+template <typename Stack>
+INLINE size_t program<Stack>::
+peek_size() const NOEXCEPT
+{
+    return primary_.peek_size();
+}
+
 // Primary stack (push).
 // ----------------------------------------------------------------------------
 
