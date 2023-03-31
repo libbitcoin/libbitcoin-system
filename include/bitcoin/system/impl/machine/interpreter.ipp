@@ -558,7 +558,7 @@ op_size() NOEXCEPT
     if (state::is_stack_empty())
         return error::op_size;
 
-    state::push_length(state::pop_chunk_()->size());
+    state::push_length(state::peek_size());
     return error::op_success;
 }
 
