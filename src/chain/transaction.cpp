@@ -1289,6 +1289,7 @@ code transaction::accept(const context& ctx) const NOEXCEPT
 
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
+    BC_ASSERT(!is_coinbase());
     code ec;
 
     // Cache witness hash components that don't change per input.
@@ -1304,7 +1305,7 @@ code transaction::connect(const context& ctx) const NOEXCEPT
             || (input.prevout && contains(input.prevout->script().ops(), roll));
     };
 
-    // Validate scripts, skip coinbase.
+    // Validate scripts.
     for (auto input = inputs_->begin(); input != inputs_->end(); ++input)
     {
         using namespace machine;

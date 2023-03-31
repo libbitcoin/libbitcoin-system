@@ -525,6 +525,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
     // Preserve data.bip9_bit1_hash promotion.
     // bits.self is unused.
     data.height = height;
+    data.hash = {};
     data.bits.self = 0;
     data.version.self = signal_version(forks, settings);
     return data;
@@ -551,6 +552,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     // Replace pool chain state with block state at same (next) height.
     // Preserve data.timestamp.retarget promotion.
     const auto& header = block.header();
+    data.hash = {};
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
@@ -573,11 +575,14 @@ chain_state::chain_state(const chain_state& pool, const block& block,
 chain_state::data chain_state::to_header(const chain_state& parent,
     const header& header, const system::settings& settings) NOEXCEPT
 {
+    BC_ASSERT(header.previous_block_hash() == parent.hash());
+
     // Copy and promote data from presumed parent-height header/block state.
     auto data = to_pool(parent, settings);
 
-    // Replace the pool (empty) current block state with given header state.
+    // Replace the parent (pool or previous) block state with given state.
     // Preserve data.timestamp.retarget promotion.
+    data.hash = header.hash();
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
@@ -610,6 +615,11 @@ chain_state::chain_state(data&& values,
 
 // Properties.
 // ----------------------------------------------------------------------------
+
+const hash_digest& chain_state::hash() const NOEXCEPT
+{
+    return data_.hash;
+}
 
 uint32_t chain_state::minimum_block_version() const NOEXCEPT
 {

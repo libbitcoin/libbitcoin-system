@@ -88,7 +88,7 @@ public:
         size_t height{};
 
         /// Hash of the candidate block or null_hash for memory pool.
-        ////hash_digest hash;
+        hash_digest hash{};
 
         /// Values must be ordered by height with high (block - 1) last.
         struct
@@ -160,6 +160,7 @@ public:
 
     /// Properties.
     chain::context context() const NOEXCEPT;
+    const hash_digest& hash() const NOEXCEPT;
     uint32_t minimum_block_version() const NOEXCEPT;
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;

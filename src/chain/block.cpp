@@ -564,8 +564,8 @@ code block::check_transactions() const NOEXCEPT
 {
     code ec;
 
-    for (const auto& tx: *txs_)
-        if ((ec = tx->check()))
+    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+        if ((ec = (*tx)->check()))
             return ec;
 
     return error::block_success;
@@ -586,9 +586,10 @@ code block::connect_transactions(const context& ctx) const NOEXCEPT
 {
     code ec;
 
-    for (const auto& tx: *txs_)
-        if ((ec = tx->connect(ctx)))
-            return ec;
+    if (!is_empty())
+        for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+            if ((ec = (*tx)->connect(ctx)))
+                return ec;
 
     return error::block_success;
 }
