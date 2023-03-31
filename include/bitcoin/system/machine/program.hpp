@@ -108,6 +108,7 @@ protected:
     INLINE bool peek_bool_() const NOEXCEPT;
     INLINE bool peek_unsigned32(uint32_t& value) const NOEXCEPT;
     INLINE bool peek_unsigned40(uint64_t& value) const NOEXCEPT;
+    INLINE size_t peek_size() const NOEXCEPT;
 
     /// Primary stack (variant - index).
     INLINE void swap_(size_t left_index, size_t right_index) NOEXCEPT;
