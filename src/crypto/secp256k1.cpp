@@ -36,6 +36,8 @@ static constexpr auto maximum_recovery_id = 3;
 static constexpr auto compressed_even = 0x02_u8;
 static constexpr auto compressed_odd = 0x03_u8;
 static constexpr auto uncompressed = 0x04_u8;
+static constexpr auto hybrid_even = 0x06_u8;
+static constexpr auto hybrid_odd = 0x07_u8;
 
 constexpr int to_flags(bool compressed) NOEXCEPT
 {
@@ -49,9 +51,12 @@ constexpr int to_flags(bool compressed) NOEXCEPT
 bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
     const data_slice& point) NOEXCEPT
 {
+    if (point.empty())
+        return false;
+
     // secp256k1_ec_pubkey_parse supports compressed (33 bytes, header byte 0x02
     // or 0x03), uncompressed (65 bytes, header byte 0x04), or hybrid (65 bytes,
-    // header byte 0x06 or 0x07) format public keys. These are all consensus.
+    // header byte 0x06 or 0x07) format public keys.
     return secp256k1_ec_pubkey_parse(context, &out, point.data(), point.size())
         == ec_success;
 }
@@ -338,6 +343,16 @@ bool is_uncompressed_key(const data_slice& point) NOEXCEPT
 
     const auto first = point.front();
     return first == uncompressed;
+}
+
+bool is_hybrid_key(const data_slice& point) NOEXCEPT
+{
+    const auto size = point.size();
+    if (size != ec_uncompressed_size)
+        return false;
+
+    const auto first = point.front();
+    return first == hybrid_even || first == hybrid_odd;
 }
 
 bool is_public_key(const data_slice& point) NOEXCEPT
