@@ -28,6 +28,13 @@ BOOST_AUTO_TEST_SUITE(data_slice_tests)
 
 BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
 {
+    // Empty data_slice.data() is nullptr, like std_array and std_vector.
+    static_assert(is_null(data_array<0>{}.data()));
+    BOOST_REQUIRE(is_null(data_chunk{}.data()));
+
+    // requires VCONSTEXPR.
+    ////static_assert(is_null(data_chunk{}.data()));
+
     data_slice slice{};
 
     // properties (with value reads past end, zero padded)
