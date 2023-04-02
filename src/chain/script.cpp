@@ -473,7 +473,7 @@ constexpr bool is_multiple_sigop(opcode code) NOEXCEPT
     return code == opcode::checkmultisig || code == opcode::checkmultisigverify;
 }
 
-size_t script::sigops(bool accurate) const NOEXCEPT
+size_t script::signature_operations(bool accurate) const NOEXCEPT
 {
     auto total = zero;
     auto preceding = opcode::push_negative_1;

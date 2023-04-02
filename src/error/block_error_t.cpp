@@ -54,7 +54,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { block_non_final, "block contains a non-final transaction" },
     { coinbase_height_mismatch, "block height mismatch in coinbase" },
     { coinbase_value_limit, "coinbase value too high" },
-    { block_sigop_limit, "too many block embedded signature operations" },
+    { block_sigop_limit, "too many block signature operations" },
     { invalid_witness_commitment, "invalid witness commitment" },
     { block_weight_limit, "block weight limit exceeded" },
     { temporary_hash_limit, "block contains too many hashes" },

@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__bips_inactive__script_sigops)
     BOOST_REQUIRE(script.is_valid());
 
     const input instance{ {}, script, chain::max_input_sequence };
-    BOOST_REQUIRE_EQUAL(script.sigops(false), instance.signature_operations(false, false));
+    BOOST_REQUIRE_EQUAL(script.signature_operations(false), instance.signature_operations(false, false));
 }
 
 BOOST_AUTO_TEST_CASE(input__signature_operations__bip141_inactive__script_sigops)
@@ -332,8 +332,8 @@ BOOST_AUTO_TEST_CASE(input__signature_operations__bip141_inactive__script_sigops
     BOOST_REQUIRE(script.is_valid());
 
     const input instance{ {}, script, chain::max_input_sequence };
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, false), script.sigops(false));
-    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), script.sigops(false));
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(true, false), script.signature_operations(false));
+    BOOST_REQUIRE_EQUAL(instance.signature_operations(false, false), script.signature_operations(false));
 }
 
 BOOST_AUTO_TEST_CASE(input__signature_operations__bip141_active_missing_prevout__max_size_t_sigops)

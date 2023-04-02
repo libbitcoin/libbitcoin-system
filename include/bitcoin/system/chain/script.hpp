@@ -498,7 +498,7 @@ public:
     script_pattern output_pattern() const NOEXCEPT;
 
     /// Consensus computations.
-    size_t sigops(bool accurate) const NOEXCEPT;
+    size_t signature_operations(bool accurate) const NOEXCEPT;
     bool is_oversized() const NOEXCEPT;
     bool is_unspendable() const NOEXCEPT;
 

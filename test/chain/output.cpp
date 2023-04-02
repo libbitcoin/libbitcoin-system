@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(output__signature_operations__bip141_inactive__script_sigop
     BOOST_REQUIRE(script.is_valid());
 
     const output instance{ 42, script };
-    BOOST_REQUIRE_EQUAL(instance.script().sigops(false), instance.signature_operations(false));
+    BOOST_REQUIRE_EQUAL(instance.script().signature_operations(false), instance.signature_operations(false));
 }
 
 // is_dust

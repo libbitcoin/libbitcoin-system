@@ -462,8 +462,9 @@ size_t transaction::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     };
 
     // Overflow returns max_size_t.
-    return std::accumulate(inputs_->begin(), inputs_->end(), zero, in) +
-        std::accumulate(outputs_->begin(), outputs_->end(), zero, out);
+    return ceilinged_add(
+        std::accumulate(inputs_->begin(), inputs_->end(), zero, in),
+        std::accumulate(outputs_->begin(), outputs_->end(), zero, out));
 }
 
 chain::points transaction::points() const NOEXCEPT
