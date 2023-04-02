@@ -343,12 +343,12 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     const auto factor = bip141 ? heavy_sigops_factor : one;
 
     // Count heavy sigops in the input script.
-    const auto sigops = script_->sigops(false) * factor;
+    const auto sigops = script_->signature_operations(false) * factor;
 
     if (bip141 && witness_->extract_sigop_script(witness, prevout->script()))
     {
         // Add sigops in the witness script (bip141).
-        return ceilinged_add(sigops, witness.sigops(true));
+        return ceilinged_add(sigops, witness.signature_operations(true));
     }
 
     if (bip16 && embedded_script(embedded))
@@ -356,12 +356,13 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
         if (bip141 && witness_->extract_sigop_script(witness, embedded))
         {
             // Add sigops in the embedded witness script (bip141).
-            return ceilinged_add(sigops, witness.sigops(true));
+            return ceilinged_add(sigops, witness.signature_operations(true));
         }
         else
         {
             // Add heavy sigops in the embedded script (bip16).
-            return ceilinged_add(sigops, embedded.sigops(true) * factor);
+            return ceilinged_add(sigops,
+                embedded.signature_operations(true) * factor);
         }
     }
 

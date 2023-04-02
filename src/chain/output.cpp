@@ -205,7 +205,7 @@ size_t output::signature_operations(bool bip141) const NOEXCEPT
     const auto factor = bip141 ? heavy_sigops_factor : one;
 
     // Count heavy sigops in the output script.
-    return script_->sigops(false) * factor;
+    return script_->signature_operations(false) * factor;
 }
 
 bool output::is_dust(uint64_t minimum_value) const NOEXCEPT
