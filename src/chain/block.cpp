@@ -524,18 +524,22 @@ bool block::is_overspent(size_t height, uint64_t subsidy_interval,
         initial_block_subsidy_satoshi, bip42);
 }
 
-bool block::is_signature_operations_limited(bool bip16,
-    bool bip141) const NOEXCEPT
+size_t block::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
-    const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
-
     // Overflow returns max_size_t.
     const auto value = [=](size_t total, const transaction::cptr& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->signature_operations(bip16, bip141));
     };
 
-    return std::accumulate(txs_->begin(), txs_->end(), zero, value) > limit;
+    return std::accumulate(txs_->begin(), txs_->end(), zero, value);
+}
+
+bool block::is_signature_operations_limited(bool bip16,
+    bool bip141) const NOEXCEPT
+{
+    const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
+    return signature_operations(bip16, bip141) > limit;
 }
 
 //*****************************************************************************
