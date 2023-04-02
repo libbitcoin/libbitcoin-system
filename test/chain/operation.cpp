@@ -819,8 +819,42 @@ BOOST_AUTO_TEST_CASE(operation__to_string__nop3_bip112_rule__checksequenceverify
 ////opcode minimal_opcode_from_data(const data_chunk& data);
 ////opcode nominal_opcode_from_data(const data_chunk& data)
 ////opcode opcode_from_version(uint8_t value)
-////opcode opcode_from_positive(uint8_t value)
-////uint8_t opcode_to_positive(opcode code)
+
+// operation__opcode_from_positive__all_positives__expected
+static_assert(operation::opcode_from_positive(1u) == opcode::push_positive_1);
+static_assert(operation::opcode_from_positive(2u) == opcode::push_positive_2);
+static_assert(operation::opcode_from_positive(3u) == opcode::push_positive_3);
+static_assert(operation::opcode_from_positive(4u) == opcode::push_positive_4);
+static_assert(operation::opcode_from_positive(5u) == opcode::push_positive_5);
+static_assert(operation::opcode_from_positive(6u) == opcode::push_positive_6);
+static_assert(operation::opcode_from_positive(7u) == opcode::push_positive_7);
+static_assert(operation::opcode_from_positive(8u) == opcode::push_positive_8);
+static_assert(operation::opcode_from_positive(9u) == opcode::push_positive_9);
+static_assert(operation::opcode_from_positive(10u) == opcode::push_positive_10);
+static_assert(operation::opcode_from_positive(11u) == opcode::push_positive_11);
+static_assert(operation::opcode_from_positive(12u) == opcode::push_positive_12);
+static_assert(operation::opcode_from_positive(13u) == opcode::push_positive_13);
+static_assert(operation::opcode_from_positive(14u) == opcode::push_positive_14);
+static_assert(operation::opcode_from_positive(15u) == opcode::push_positive_15);
+static_assert(operation::opcode_from_positive(16u) == opcode::push_positive_16);
+
+// operation__opcode_to_positive__all_positives__expected
+static_assert(operation::opcode_to_positive(opcode::push_positive_1) == 1u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_2) == 2u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_3) == 3u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_4) == 4u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_5) == 5u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_6) == 6u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_7) == 7u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_8) == 8u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_9) == 9u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_10) == 10u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_11) == 11u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_12) == 12u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_13) == 13u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_14) == 14u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_15) == 15u);
+static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
 
 ////static bool is_push(opcode code);
 ////static bool is_payload(opcode code);

@@ -120,7 +120,7 @@ public:
     {
         ////BC_ASSERT(is_positive(code));
         constexpr auto op_81 = static_cast<uint8_t>(opcode::push_positive_1);
-        return static_cast<uint8_t>(code) - add1(op_81);
+        return static_cast<uint8_t>(code) - sub1(op_81);
     }
 
     /// Compute maximum push data size for the opcode (without script limit).
