@@ -450,26 +450,20 @@ bool block::is_segregated() const NOEXCEPT
 
 bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
-    if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
+    if (txs_->empty())
         return false;
 
-    hash_digest reserved{}, committed{};
-    const auto& coinbase = txs_->front();
+    const auto& coinbase = *txs_->front();
+    if (coinbase.inputs_ptr()->empty())
+        return false;
 
     // Last output of commitment pattern holds committed value (bip141).
-    if (coinbase->inputs_ptr()->front()->reserved_hash(reserved))
-    {
-        const auto& outputs = *coinbase->outputs_ptr();
-
-        for (const auto& output: views_reverse(outputs))
-        {
+    hash_digest reserved{}, committed{};
+    if (coinbase.inputs_ptr()->front()->reserved_hash(reserved))
+        for (const auto& output: views_reverse(*coinbase.outputs_ptr()))
             if (output->committed_hash(committed))
-            {
                 return committed == sha256::double_hash(
                     generate_merkle_root(true), reserved);
-            }
-        }
-    }
     
     // If no block tx has witness data the commitment is optional (bip141).
     return !is_segregated();
@@ -655,6 +649,8 @@ code block::accept(const context& ctx, size_t subsidy_interval,
     const auto bip50 = ctx.is_enabled(bip50_rule);
     const auto bip141 = ctx.is_enabled(bip141_rule);
 
+    // prevouts not required (fully concurrent with header state).
+
     // Relates block limit to total of tx.weight (pool cache tx.size(t/f)).
     if (bip141 && is_overweight())
         return error::block_weight_limit;
@@ -667,11 +663,11 @@ code block::accept(const context& ctx, size_t subsidy_interval,
     if (bip50 && is_hash_limit_exceeded())
         return error::temporary_hash_limit;
 
-    // Static check but requires context.
-    if (bip141 && is_invalid_witness_commitment())
-        return error::invalid_witness_commitment;
+    ////// Applies when witness data is present in the block.
+    ////if (bip141 && is_invalid_witness_commitment())
+    ////    return error::invalid_witness_commitment;
 
-    // prevouts required
+    // prevouts required (not ordered)
 
     // Relates block height to total of tx.fee (pool cache tx.fee).
     if (is_overspent(ctx.height, subsidy_interval, initial_subsidy, bip42))
@@ -681,7 +677,7 @@ code block::accept(const context& ctx, size_t subsidy_interval,
     if (is_signature_operations_limited(bip16, bip141))
         return error::block_sigop_limit;
 
-    // prevout confirmation state required
+    // prevout confirmation state required (ordered)
 
     if (bip30 && !bip34 && is_unspent_coinbase_collision(ctx.height))
         return error::unspent_coinbase_collision;
