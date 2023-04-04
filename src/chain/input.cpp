@@ -35,6 +35,11 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// Product overflows guarded by script size limit.
+static_assert(max_script_size < 
+    max_size_t / multisig_default_sigops / heavy_sigops_factor,
+    "input sigop overflow guard");
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -300,20 +305,16 @@ bool input::reserved_hash(hash_digest& out) const NOEXCEPT
 }
 
 // private
-bool input::embedded_script(chain::script& out) const NOEXCEPT
+// prevout_script is only used to determine is_pay_script_hash_pattern.
+bool input::extract_sigop_script(chain::script& out,
+    const chain::script& prevout_script) const NOEXCEPT
 {
-    if (!prevout)
-        return false;
-
-    const auto& ops = script_->ops();
-    const auto& script = prevout->script();
-
     // There are no embedded sigops when the prevout script is not p2sh.
-    if (!script::is_pay_script_hash_pattern(script.ops()))
+    if (!script::is_pay_script_hash_pattern(prevout_script.ops()))
         return false;
 
     // There are no embedded sigops when the input script is not push only.
-    // The first operations access must be method-based to guarantee the cache.
+    const auto& ops = script_->ops();
     if (ops.empty() || !script::is_relaxed_push(ops))
         return false;
 
@@ -323,35 +324,34 @@ bool input::embedded_script(chain::script& out) const NOEXCEPT
     return true;
 }
 
-// Product overflows guarded by script size limit.
-static_assert(max_script_size < 
-    max_size_t / multisig_default_sigops / heavy_sigops_factor,
-    "input sigop overflow guard");
-
 // TODO: Prior to block 79400 sigops were limited only by policy.
 // TODO: Create legacy sigops fork flag and pass here, return 0 if false.
 // TODO: this was an unbipped flag day soft fork, prior to BIP16/141.
 // TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
 size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
-    if (bip141 && !prevout)
-        return max_size_t;
-
-    chain::script witness, embedded;
-
     // Penalize quadratic signature operations (bip141).
     const auto factor = bip141 ? heavy_sigops_factor : one;
-
-    // Count heavy sigops in the input script.
     const auto sigops = script_->signature_operations(false) * factor;
 
+    // ************************************************************************
+    // CONSENSUS: coinbase input cannot execute, but sigops are counted anyway.
+    // ************************************************************************
+    if (!prevout)
+        return sigops;
+
+    // Null prevout/input (coinbase) cannot have witness or embedded script.
+    // Embedded/witness scripts are deserialized here and again on scipt eval.
+
+    chain::script witness;
     if (bip141 && witness_->extract_sigop_script(witness, prevout->script()))
     {
         // Add sigops in the witness script (bip141).
         return ceilinged_add(sigops, witness.signature_operations(true));
     }
 
-    if (bip16 && embedded_script(embedded))
+    chain::script embedded;
+    if (bip16 && extract_sigop_script(embedded, prevout->script()))
     {
         if (bip141 && witness_->extract_sigop_script(witness, embedded))
         {
@@ -361,8 +361,8 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
         else
         {
             // Add heavy sigops in the embedded script (bip16).
-            return ceilinged_add(sigops,
-                embedded.signature_operations(true) * factor);
+            return ceilinged_add(sigops, embedded.signature_operations(true) *
+                factor);
         }
     }
 

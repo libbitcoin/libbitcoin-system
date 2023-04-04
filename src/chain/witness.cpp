@@ -307,13 +307,12 @@ inline operations to_pay_key_hash(data_chunk&& program) NOEXCEPT
     };
 }
 
-// The return script is only useful only for sigop counting.
+// out_script is only useful only for sigop counting.
+// program_script is only used to determine witness_program type.
 bool witness::extract_sigop_script(script& out_script,
     const script& program_script) const NOEXCEPT
 {
-    // Caller may recycle script parameter.
     out_script = {};
-
     switch (program_script.version())
     {
         case script_version::zero:
