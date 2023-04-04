@@ -462,7 +462,7 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
     if (coinbase.inputs_ptr()->front()->reserved_hash(reserved))
         for (const auto& output: views_reverse(*coinbase.outputs_ptr()))
             if (output->committed_hash(committed))
-                return committed == sha256::double_hash(
+                return committed != sha256::double_hash(
                     generate_merkle_root(true), reserved);
     
     // If no block tx has witness data the commitment is optional (bip141).
@@ -663,9 +663,9 @@ code block::accept(const context& ctx, size_t subsidy_interval,
     if (bip50 && is_hash_limit_exceeded())
         return error::temporary_hash_limit;
 
-    ////// Applies when witness data is present in the block.
-    ////if (bip141 && is_invalid_witness_commitment())
-    ////    return error::invalid_witness_commitment;
+    // Applies when witness data is present in the block.
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
 
     // prevouts required (not ordered)
 
