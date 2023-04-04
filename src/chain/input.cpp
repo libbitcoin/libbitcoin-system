@@ -35,6 +35,11 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// Product overflows guarded by script size limit.
+static_assert(max_script_size < 
+    max_size_t / multisig_default_sigops / heavy_sigops_factor,
+    "input sigop overflow guard");
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -318,11 +323,6 @@ bool input::extract_sigop_script(chain::script& out,
     out = { ops.back().data(), false };
     return true;
 }
-
-// Product overflows guarded by script size limit.
-static_assert(max_script_size < 
-    max_size_t / multisig_default_sigops / heavy_sigops_factor,
-    "input sigop overflow guard");
 
 // TODO: Prior to block 79400 sigops were limited only by policy.
 // TODO: Create legacy sigops fork flag and pass here, return 0 if false.

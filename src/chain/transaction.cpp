@@ -1321,6 +1321,8 @@ code transaction::connect(const context& ctx) const NOEXCEPT
             return ec;
     }
 
+    // TODO: accumulate sigops from each connect result and add coinbase.
+    // TODO: return in override with out parameter. more impactful with segwit.
     return error::transaction_success;
 }
 
