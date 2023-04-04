@@ -473,6 +473,8 @@ constexpr bool is_multiple_sigop(opcode code) NOEXCEPT
     return code == opcode::checkmultisig || code == opcode::checkmultisigverify;
 }
 
+// TODO: compute in script evaluation and add coinbase input scripts.
+// TODO: this precludes second deserialization of script for sigop counting.
 size_t script::signature_operations(bool accurate) const NOEXCEPT
 {
     auto total = zero;

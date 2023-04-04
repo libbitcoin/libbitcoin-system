@@ -117,7 +117,8 @@ protected:
 
 private:
     static input from_data(reader& source) NOEXCEPT;
-    bool embedded_script(chain::script& out) const NOEXCEPT;
+    bool extract_sigop_script(chain::script& out,
+        const chain::script& prevout_script) const NOEXCEPT;
 
     // Input should be stored as shared (adds 16 bytes).
     // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).

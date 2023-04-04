@@ -1248,6 +1248,8 @@ code transaction::accept(const context& ctx) const NOEXCEPT
     const auto bip68 = ctx.is_enabled(forks::bip68_rule);
     const auto bip113 = ctx.is_enabled(forks::bip113_rule);
 
+    // prevouts not required (fully concurrent with header state).
+
     // Store note: timestamp and mtp should be merged to single field.
     if (is_non_final(ctx.height, ctx.timestamp, ctx.median_time_past, bip113))
         return error::transaction_non_final;
@@ -1255,7 +1257,7 @@ code transaction::accept(const context& ctx) const NOEXCEPT
     // Coinbases do not have prevouts.
     if (!is_coinbase())
     {
-        // prevouts required
+        // prevouts required (not ordered)
 
         if (is_missing_prevouts())
             return error::missing_previous_output;
@@ -1271,7 +1273,7 @@ code transaction::accept(const context& ctx) const NOEXCEPT
         if (bip68 && is_locked(ctx.height, ctx.median_time_past))
             return error::relative_time_locked;
 
-        // prevout confirmation state required
+        // prevout confirmation state required (ordered)
 
         // Could be delegated to input loop.
         if (is_unconfirmed_spend(ctx.height))
