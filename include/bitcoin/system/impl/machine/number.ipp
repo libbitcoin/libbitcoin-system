@@ -180,8 +180,8 @@ inline bool boolean::from_chunk(const data_chunk& vary) NOEXCEPT
 
 inline bool boolean::strict_from_chunk(const data_chunk& vary) NOEXCEPT
 {
-    // Strict bool tests for integral false/zero, or a single empty byte.
-    return strict_false(vary);
+    // True if not strictly false.
+    return !strict_false(vary);
 }
 
 inline constexpr bool boolean::to_bool(int64_t vary) NOEXCEPT
