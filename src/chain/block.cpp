@@ -24,6 +24,7 @@
 #include <memory>
 #include <numeric>
 #include <type_traits>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <unordered_map>
@@ -457,16 +458,19 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
     if (coinbase.inputs_ptr()->empty())
         return false;
 
+    // If there is a valid commitment, return false (valid).
     // Last output of commitment pattern holds committed value (bip141).
     hash_digest reserved{}, committed{};
     if (coinbase.inputs_ptr()->front()->reserved_hash(reserved))
         for (const auto& output: views_reverse(*coinbase.outputs_ptr()))
             if (output->committed_hash(committed))
-                return committed != sha256::double_hash(
-                    generate_merkle_root(true), reserved);
+                if (committed == sha256::double_hash(
+                    generate_merkle_root(true), reserved))
+                    return false;
     
+    // If no valid commitment, return true (invalid) if segregated.
     // If no block tx has witness data the commitment is optional (bip141).
-    return !is_segregated();
+    return is_segregated();
 }
 
 //*****************************************************************************
@@ -553,6 +557,49 @@ bool block::is_unspent_coinbase_collision(size_t height) const NOEXCEPT
     // This requires that prevout.spent was populated for the height of the
     // validating block, otherwise a collision (unspent) must be assumed.
     return !(height > prevout.height && prevout.spent);
+}
+
+void block::populate() const NOEXCEPT
+{
+    // Coinbase, outputs only, inputs only.
+    if (txs_->size() < 3u)
+        return;
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    std::unordered_map<point, output::cptr> map{};
+
+    // Skip coinbase tx.
+    auto tx = std::next(txs_->begin());
+    uint32_t index{};
+
+    // Outputs only (first tx).
+    for (const auto& out: *(*tx)->outputs_ptr())
+        map.emplace(point{ (*tx)->hash(false), index++ }, out);
+
+    // Search is ordered, no forward references or coinbase spend (consensus).
+    for (++tx; tx != std::prev(txs_->end()); ++tx)
+    {
+        for (const auto& in: *(*tx)->inputs_ptr())
+        {
+            const auto element = map.find(in->point());
+            if (element != map.end())
+                in->prevout = element->second;
+        }
+
+        index = 0;
+        for (const auto& out: *(*tx)->outputs_ptr())
+            map.emplace(point{ (*tx)->hash(false), index++ }, out);
+    }
+
+    // Inputs only (last tx).
+    for (const auto& in: *(*tx)->inputs_ptr())
+    {
+        const auto element = map.find(in->point());
+        if (element != map.end())
+            in->prevout = element->second;
+    }
+
+    BC_POP_WARNING()
 }
 
 // Delegated.

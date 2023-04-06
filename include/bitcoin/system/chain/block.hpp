@@ -101,6 +101,10 @@ public:
         uint64_t initial_subsidy) const NOEXCEPT;
     code connect(const context& ctx) const NOEXCEPT;
 
+    /// Populate previous output metadata internal to the block.
+    /// Does not populate forward references (consensus limited).
+    void populate() const NOEXCEPT;
+
 protected:
     block(const chain::header::cptr& header,
         const chain::transactions_cptr& txs, bool valid) NOEXCEPT;
