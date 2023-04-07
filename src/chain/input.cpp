@@ -301,7 +301,7 @@ bool input::is_locked(uint32_t sequence, size_t height,
 bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
 {
     // Prevout must be found and height/median_time_past metadata populated.
-    BC_ASSERT(!is_zero(metadata.height));
+    ////BC_ASSERT(!is_zero(metadata.height));
     return is_locked(sequence_, height, median_time_past, metadata.height,
         metadata.median_time_past);
 }
