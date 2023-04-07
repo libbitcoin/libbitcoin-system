@@ -1179,41 +1179,42 @@ bool transaction::is_confirmed_double_spend(size_t height) const NOEXCEPT
 // Guards (for tx pool without compact blocks).
 // ----------------------------------------------------------------------------
 
-code transaction::guard() const NOEXCEPT
+// Pools do not have coinbases.
+// Redundant with block is_internal_double_spend check.
+// Redundant with block max_block_size check.
+code transaction::guard_check() const NOEXCEPT
 {
-    // Pools do not have coinbases.
     if (is_coinbase())
         return error::coinbase_transaction;
-
-    // Redundant with block is_internal_double_spend check.
     if (is_internal_double_spend())
         return error::transaction_internal_double_spend;
-
-    // Redundant with block max_block_size check.
     if (is_oversized())
         return error::transaction_size_limit;
 
     return error::transaction_success;
 }
 
-code transaction::guard(const context& ctx) const NOEXCEPT
+// Redundant with block max_block_weight accept.
+code transaction::guard_check(const context& ctx) const NOEXCEPT
+{
+    const auto bip141 = ctx.is_enabled(forks::bip141_rule);
+
+     if (!bip141 && is_segregated())
+        return error::unexpected_witness_transaction;
+    if (bip141 && is_overweight())
+        return error::transaction_weight_limit;
+
+    return error::transaction_success;
+}
+
+// Redundant with block max_block_sigops accept.
+code transaction::guard_accept(const context& ctx) const NOEXCEPT
 {
     const auto bip16 = ctx.is_enabled(forks::bip16_rule);
     const auto bip141 = ctx.is_enabled(forks::bip141_rule);
 
-    if (!bip141 && is_segregated())
-        return error::unexpected_witness_transaction;
-
-    // Redundant with block max_block_weight accept.
-    if (bip141 && is_overweight())
-        return error::transaction_weight_limit;
-
-    // prevouts required
-
     if (is_missing_prevouts())
         return error::missing_previous_output;
-
-    // Independently computed by block accept to obtain total.
     if (is_signature_operations_limit(bip16, bip141))
         return error::transaction_sigop_limit;
 
@@ -1223,79 +1224,83 @@ code transaction::guard(const context& ctx) const NOEXCEPT
 // Validation.
 // ----------------------------------------------------------------------------
 
+// DO invoke on coinbase.
 code transaction::check() const NOEXCEPT
 {
+    const auto coinbase = is_coinbase();
+
     if (is_empty())
         return error::empty_transaction;
-
-    if (is_coinbase())
-    {
-        if (is_invalid_coinbase_size())
-            return error::invalid_coinbase_script_size;
-    }
-    else
-    {
-        // Could be delegated to input loop.
-        if (is_null_non_coinbase())
-            return error::previous_output_null;
-    }
+    if (coinbase && is_invalid_coinbase_size())
+        return error::invalid_coinbase_script_size;
+    if (!coinbase && is_null_non_coinbase())
+        return error::previous_output_null;
 
     return error::transaction_success;
 }
 
-code transaction::accept(const context& ctx) const NOEXCEPT
+// DO invoke on coinbase.
+code transaction::check(const context& ctx) const NOEXCEPT
 {
-    const auto bip68 = ctx.is_enabled(forks::bip68_rule);
-    const auto bip113 = ctx.is_enabled(forks::bip113_rule);
+    const auto bip113 = ctx.is_enabled(bip113_rule);
 
-    // prevouts not required (fully concurrent with header state).
-
-    // Store note: timestamp and mtp should be merged to single field.
     if (is_non_final(ctx.height, ctx.timestamp, ctx.median_time_past, bip113))
         return error::transaction_non_final;
 
-    // Coinbases do not have prevouts.
-    if (!is_coinbase())
-    {
-        // prevouts required (not ordered)
+    return error::transaction_success;
+}
 
-        if (is_missing_prevouts())
-            return error::missing_previous_output;
+// Do NOT invoke on coinbase.
+// These assume that prevout caching is completed on all inputs.
+code transaction::accept(const context&) const NOEXCEPT
+{
+    BC_ASSERT(!is_coinbase());
 
-        if (is_overspent())
-            return error::spend_exceeds_value;
+    ////if (is_coinbase())
+    ////    return error::transaction_success;
+    if (is_missing_prevouts())
+        return error::missing_previous_output;
+    if (is_overspent())
+        return error::spend_exceeds_value;
 
-        // Could be delegated to input loop.
-        if (is_immature(ctx.height))
-            return error::coinbase_maturity;
+    return error::transaction_success;
+}
 
-        // Could be delegated to input loop.
-        if (bip68 && is_locked(ctx.height, ctx.median_time_past))
-            return error::relative_time_locked;
+// Do NOT invoke on coinbase.
+// Node performs these checks through database query.
+// This assume that prevout and metadata caching are completed on all inputs.
+code transaction::confirm(const context& ctx) const NOEXCEPT
+{
+    BC_ASSERT(!is_coinbase());
+    const auto bip68 = ctx.is_enabled(bip68_rule);
 
-        // prevout confirmation state required (ordered)
-
-        // Could be delegated to input loop.
-        if (is_unconfirmed_spend(ctx.height))
-            return error::unconfirmed_spend;
-
-        // Could be delegated to input loop.
-        if (is_confirmed_double_spend(ctx.height))
-            return error::confirmed_double_spend;
-    }
+    ////if (is_coinbase())
+    ////    return error::transaction_success;
+    if (bip68 && is_locked(ctx.height, ctx.median_time_past))
+        return error::relative_time_locked;
+    if (is_immature(ctx.height))
+        return error::coinbase_maturity;
+    if (is_unconfirmed_spend(ctx.height))
+        return error::unconfirmed_spend;
+    if (is_confirmed_double_spend(ctx.height))
+        return error::confirmed_double_spend;
 
     return error::transaction_success;
 }
 
 // Connect (contextual).
-// ------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
+// Do NOT invoke on coinbase.
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
-    code ec;
 
-    // Cache witness hash components that don't change per input.
+    ////if (is_coinbase())
+    ////    return error::transaction_success;
+
+    code ec;
+    using namespace machine;
     initialize_hash_cache();
     
     const auto is_roller = [](const auto& input) NOEXCEPT
@@ -1311,8 +1316,6 @@ code transaction::connect(const context& ctx) const NOEXCEPT
     // Validate scripts.
     for (auto input = inputs_->begin(); input != inputs_->end(); ++input)
     {
-        using namespace machine;
-
         // Evaluate rolling scripts with linear search but constant erase.
         // Evaluate non-rolling scripts with constant search but linear erase.
         if ((ec = is_roller(**input) ?

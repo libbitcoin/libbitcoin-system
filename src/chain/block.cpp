@@ -348,6 +348,8 @@ size_t block::non_coinbase_inputs() const NOEXCEPT
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
 }
 
+// This also precludes the block merkle calculation DoS exploit.
+// bitcointalk.org/?topic=102395
 bool block::is_internal_double_spend() const NOEXCEPT
 {
     if (txs_->empty())
@@ -547,16 +549,13 @@ bool block::is_signature_operations_limited(bool bip16,
 // presumption of sha256 non-collision. So this check is bypassed for both
 // exception blocks and if bip34 is active (including under bip90 activation).
 //*****************************************************************************
-bool block::is_unspent_coinbase_collision(size_t height) const NOEXCEPT
+bool block::is_unspent_coinbase_collision() const NOEXCEPT
 {
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
-    const auto& prevout = txs_->front()->inputs_ptr()->front()->metadata;
-
-    // This requires that prevout.spent was populated for the height of the
-    // validating block, otherwise a collision (unspent) must be assumed.
-    return !(height > prevout.height && prevout.spent);
+    // May only commit a coinbase that has already been confirmed spent.
+    return !txs_->front()->inputs_ptr()->front()->metadata.spent;
 }
 
 void block::populate() const NOEXCEPT
@@ -605,28 +604,44 @@ void block::populate() const NOEXCEPT
 // Delegated.
 // ----------------------------------------------------------------------------
 
+// DO invoke on coinbase.
 code block::check_transactions() const NOEXCEPT
 {
     code ec;
-
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
-        if ((ec = (*tx)->check()))
+    
+    for (const auto& tx: *txs_)
+        if ((ec = tx->check()))
             return ec;
 
     return error::block_success;
 }
 
+// DO invoke on coinbase.
+code block::check_transactions(const context& ctx) const NOEXCEPT
+{
+    code ec;
+    
+    for (const auto& tx: *txs_)
+        if ((ec = tx->check(ctx)))
+            return ec;
+
+    return error::block_success;
+}
+
+// Do NOT invoke on coinbase.
 code block::accept_transactions(const context& ctx) const NOEXCEPT
 {
     code ec;
 
-    for (const auto& tx: *txs_)
-        if ((ec = tx->accept(ctx)))
-            return ec;
+    if (!is_empty())
+        for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+            if ((ec = (*tx)->accept(ctx)))
+                return ec;
 
     return error::block_success;
 }
 
+// Do NOT invoke on coinbase.
 code block::connect_transactions(const context& ctx) const NOEXCEPT
 {
     code ec;
@@ -639,104 +654,90 @@ code block::connect_transactions(const context& ctx) const NOEXCEPT
     return error::block_success;
 }
 
+// Do NOT invoke on coinbase.
+code block::confirm_transactions(const context& ctx) const NOEXCEPT
+{
+    code ec;
+    
+    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+        if ((ec = (*tx)->confirm(ctx)))
+            return ec;
+
+    return error::block_success;
+}
+
 // Validation.
 // ----------------------------------------------------------------------------
+// The block header is checked/accepted independently.
 
-// The block header is checked independently.
-// These checks are self-contained; blockchain (and so version) independent.
 code block::check() const NOEXCEPT
 {
-    // Inputs and outputs are required.
+    // context free.
     if (is_empty())
         return error::empty_block;
-
-    // Relates to total of tx.size (pool cache tx.size(false)).
     if (is_oversized())
         return error::block_size_limit;
-
-    // The first transaction must be coinbase.
     if (is_first_non_coinbase())
         return error::first_not_coinbase;
-
-    // Only the first transaction may be coinbase.
     if (is_extra_coinbases())
         return error::extra_coinbases;
-
-    // Determinable from tx pool graph.
-    // Satoshi implementation side effect, as tx order is otherwise irrelevant.
     if (is_forward_reference())
         return error::forward_reference;
-
-    // Determinable from tx pool graph.
-    // This also precludes the block merkle calculation DoS exploit.
-    // bitcointalk.org/?topic=102395
     if (is_internal_double_spend())
         return error::block_internal_double_spend;
-
-    // TODO: defer to accept (doubles merkle root computation past bip141).
-    // Relates height to tx.hash (pool cache tx.hash(false)).
     if (is_invalid_merkle_root())
         return error::merkle_mismatch;
 
-    // error::empty_transaction
-    // error::invalid_coinbase_script_size
-    // error::previous_output_null
     return check_transactions();
 }
 
-// The block header is accepted independently.
-// These checks assume that prevout caching is completed on all tx.inputs.
+code block::check(const context& ctx) const NOEXCEPT
+{
+    const auto bip34 = ctx.is_enabled(bip34_rule);
+    const auto bip50 = ctx.is_enabled(bip50_rule);
+    const auto bip141 = ctx.is_enabled(bip141_rule);
+
+    // context required.
+    if (bip141 && is_overweight())
+        return error::block_weight_limit;
+    if (bip34 && is_invalid_coinbase_script(ctx.height))
+        return error::coinbase_height_mismatch;
+    if (bip50 && is_hash_limit_exceeded())
+        return error::temporary_hash_limit;
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
+
+    return check_transactions(ctx);
+}
+
+// These assume that prevout caching is completed on all inputs.
 code block::accept(const context& ctx, size_t subsidy_interval,
     uint64_t initial_subsidy) const NOEXCEPT
 {
     const auto bip16 = ctx.is_enabled(bip16_rule);
-    const auto bip30 = ctx.is_enabled(bip30_rule);
-    const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip42 = ctx.is_enabled(bip42_rule);
-    const auto bip50 = ctx.is_enabled(bip50_rule);
     const auto bip141 = ctx.is_enabled(bip141_rule);
 
-    // prevouts not required (fully concurrent with header state).
-
-    // Relates block limit to total of tx.weight (pool cache tx.size(t/f)).
-    if (bip141 && is_overweight())
-        return error::block_weight_limit;
-
-    // Relates block height to coinbase, always under checkpoint.
-    if (bip34 && is_invalid_coinbase_script(ctx.height))
-        return error::coinbase_height_mismatch;
-
-    // Relates block time to tx and prevout hashes, always under checkpoint.
-    if (bip50 && is_hash_limit_exceeded())
-        return error::temporary_hash_limit;
-
-    // Applies when witness data is present in the block.
-    if (bip141 && is_invalid_witness_commitment())
-        return error::invalid_witness_commitment;
-
-    // prevouts required (not ordered)
-
-    // Relates block height to total of tx.fee (pool cache tx.fee).
+    // prevouts required.
     if (is_overspent(ctx.height, subsidy_interval, initial_subsidy, bip42))
         return error::coinbase_value_limit;
-
-    // Relates block limit to total of tx.sigops (pool cache tx.sigops).
     if (is_signature_operations_limited(bip16, bip141))
         return error::block_sigop_limit;
 
-    // prevout confirmation state required (ordered)
+    return accept_transactions(ctx);
+}
 
-    if (bip30 && !bip34 && is_unspent_coinbase_collision(ctx.height))
+// This assume that prevout and metadata caching are completed on all inputs.
+code block::confirm(const context& ctx) const NOEXCEPT
+{
+    const auto bip30 = ctx.is_enabled(bip30_rule);
+    const auto bip34 = ctx.is_enabled(bip34_rule);
+
+    // confirmations required.
+    if (bip30 && !bip34 && is_unspent_coinbase_collision())
         return error::unspent_coinbase_collision;
 
-    // error::transaction_non_final
-    // error::missing_previous_output
-    // error::spend_exceeds_value
-    // error::coinbase_maturity
-    // error::relative_time_locked
-    // error::unconfirmed_spend
-    // error::confirmed_double_spend
-    return accept_transactions(ctx);
+    return confirm_transactions(ctx);
 }
 
 code block::connect(const context& ctx) const NOEXCEPT
