@@ -313,7 +313,6 @@ code header::check(uint32_t timestamp_limit_seconds,
 {
     if (is_invalid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
-
     if (is_invalid_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 
@@ -321,16 +320,14 @@ code header::check(uint32_t timestamp_limit_seconds,
 }
 
 // Checkpoints and previous_block_hash are chain validation (not here).
+// bits_ below is the consensus direct comparison of the header.bits value.
+// All other work comparisons performed on expanded/normalized bits values.
 code header::accept(const context& ctx) const NOEXCEPT
 {
     if (version_ < ctx.minimum_block_version)
         return error::invalid_block_version;
-
     if (timestamp_ <= ctx.median_time_past)
         return error::timestamp_too_early;
-
-    // This is the only consensus direct comparison of the header.bits value.
-    // All other work comparisons performed on expanded/normalized bits values.
     if (bits_ != ctx.work_required)
         return error::incorrect_proof_of_work;
 

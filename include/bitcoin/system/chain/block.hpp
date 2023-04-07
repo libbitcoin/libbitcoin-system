@@ -97,9 +97,15 @@ public:
 
     /// Consensus checks (no DoS guards for block sync without headers first).
     code check() const NOEXCEPT;
+    code check(const context& ctx) const NOEXCEPT;
     code accept(const context& ctx, size_t subsidy_interval,
         uint64_t initial_subsidy) const NOEXCEPT;
     code connect(const context& ctx) const NOEXCEPT;
+    code confirm(const context& ctx) const NOEXCEPT;
+
+    /// Populate previous output metadata internal to the block.
+    /// Does not populate forward references (consensus limited).
+    void populate() const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,
@@ -116,10 +122,6 @@ protected:
     bool is_internal_double_spend() const NOEXCEPT;
     bool is_invalid_merkle_root() const NOEXCEPT;
 
-    // TX: error::empty_transaction
-    // TX: error::previous_output_null
-    // TX: error::invalid_coinbase_script_size
-
     /// Accept (contextual).
     /// -----------------------------------------------------------------------
 
@@ -128,22 +130,16 @@ protected:
     bool is_hash_limit_exceeded() const NOEXCEPT;
     bool is_invalid_witness_commitment() const NOEXCEPT;
 
-    // prevouts required
+    /// Requires prevouts (value).
     bool is_overspent(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
+
+    /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     bool is_signature_operations_limited(bool bip16,
         bool bip141) const NOEXCEPT;
 
-    // prevout confirmation state required
-    bool is_unspent_coinbase_collision(size_t height) const NOEXCEPT;
-
-    // TX: error::transaction_non_final (context)
-    // TX: error::missing_previous_output (prevouts)
-    // TX: error::spend_exceeds_value (prevouts)
-    // TX: error::coinbase_maturity (prevouts)
-    // TX: error::relative_time_locked (prevouts)
-    // TX: error::unconfirmed_spend (prevout confirmation state)
-    // TX: error::confirmed_double_spend (prevout confirmation state)
+    /// Requires input.metadata.spent (prevout confirmation).
+    bool is_unspent_coinbase_collision() const NOEXCEPT;
 
 private:
     static block from_data(reader& source, bool witness) NOEXCEPT;
@@ -158,8 +154,10 @@ private:
 
     // delegated
     code check_transactions() const NOEXCEPT;
+    code check_transactions(const context& ctx) const NOEXCEPT;
     code accept_transactions(const context& ctx) const NOEXCEPT;
     code connect_transactions(const context& ctx) const NOEXCEPT;
+    code confirm_transactions(const context& ctx) const NOEXCEPT;
 
     // Block should be stored as shared (adds 16 bytes).
     // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).

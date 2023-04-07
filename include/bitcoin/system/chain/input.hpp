@@ -43,6 +43,10 @@ public:
 
     typedef std::shared_ptr<const input> cptr;
 
+    static bool is_locked(uint32_t sequence, size_t height,
+        uint32_t median_time_past, size_t prevout_height,
+        uint32_t prevout_median_time_past) NOEXCEPT;
+
     /// Constructors.
     /// -----------------------------------------------------------------------
 
@@ -103,9 +107,13 @@ public:
     /// -----------------------------------------------------------------------
 
     bool is_final() const NOEXCEPT;
-    bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
     bool reserved_hash(hash_digest& out) const NOEXCEPT;
+
+    /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
+
+    /// Requires metadata.height and median_time_past (otherwise returns true).
+    bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
 
 protected:
     // So that witness may be set late in deserialization.

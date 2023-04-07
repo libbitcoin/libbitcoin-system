@@ -122,9 +122,9 @@ public:
         return block::is_signature_operations_limited(bip16, bip141);
     }
 
-    bool is_unspent_coinbase_collision(size_t height) const
+    bool is_unspent_coinbase_collision() const
     {
-        return block::is_unspent_coinbase_collision(height);
+        return block::is_unspent_coinbase_collision();
     }
 };
 

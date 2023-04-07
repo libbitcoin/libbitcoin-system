@@ -324,7 +324,7 @@ inline size_t stack<Container>::peek_size() const NOEXCEPT
 
     std::visit(overload
     {
-        [&, this](bool vary) NOEXCEPT
+        [&](bool vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = chunk::from_bool(vary).size();

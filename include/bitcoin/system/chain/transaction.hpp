@@ -114,6 +114,8 @@ public:
 
     bool is_empty() const NOEXCEPT;
     bool is_dusty(uint64_t minimum_output_value) const NOEXCEPT;
+
+    /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
     chain::points points() const NOEXCEPT;
     hash_digest outputs_hash() const NOEXCEPT;
@@ -137,15 +139,18 @@ public:
     /// Guards (for tx pool without compact blocks).
     /// -----------------------------------------------------------------------
 
-    code guard() const NOEXCEPT;
-    code guard(const context& ctx) const NOEXCEPT;
+    code guard_check() const NOEXCEPT;
+    code guard_check(const context& ctx) const NOEXCEPT;
+    code guard_accept(const context& ctx) const NOEXCEPT;
 
     /// Validation (consensus checks).
     /// -----------------------------------------------------------------------
 
     code check() const NOEXCEPT;
+    code check(const context& ctx) const NOEXCEPT;
     code accept(const context& ctx) const NOEXCEPT;
     code connect(const context& ctx) const NOEXCEPT;
+    code confirm(const context& ctx) const NOEXCEPT;
 
 protected:
     transaction(uint32_t version, const chain::inputs_cptr& inputs,
@@ -159,14 +164,16 @@ protected:
     bool is_internal_double_spend() const NOEXCEPT;
     bool is_oversized() const NOEXCEPT;
 
-    /// Guard (contextual).
+    /// Guard ((requires context).
     /// -----------------------------------------------------------------------
 
     ////bool is_segregated() const NOEXCEPT;
     bool is_overweight() const NOEXCEPT;
 
-    // prevouts required
+    /// Requires prevouts (value).
     ////bool is_missing_prevouts() const NOEXCEPT;
+
+    /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     bool is_signature_operations_limit(bool bip16, bool bip141) const NOEXCEPT;
 
     /// Check (context free).
@@ -176,20 +183,34 @@ protected:
     bool is_null_non_coinbase() const NOEXCEPT;
     bool is_invalid_coinbase_size() const NOEXCEPT;
 
-    /// Accept (contextual).
+    /// Check (requires context).
     /// -----------------------------------------------------------------------
 
     bool is_non_final(size_t height, uint32_t timestamp,
         uint32_t median_time_past, bool bip113) const NOEXCEPT;
 
-    // prevouts required
+    /// Accept (requires prevouts).
+    /// -----------------------------------------------------------------------
+
+    /// Requires prevouts.
     bool is_missing_prevouts() const NOEXCEPT;
+
+    /// Requires prevouts (value).
     bool is_overspent() const NOEXCEPT;
-    bool is_immature(size_t height) const NOEXCEPT;
+
+    /// Confirm (requires confirmation order).
+    /// -----------------------------------------------------------------------
+
+    /// Requires input.metadata.height/median_time_past (prevout confirmation).
     bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
 
-    // prevout confirmation state required
+    /// Requires input.metadata.height (prevout confirmation).
+    bool is_immature(size_t height) const NOEXCEPT;
+
+    /// Requires input.metadata.height (prevout confirmation).
     bool is_unconfirmed_spend(size_t height) const NOEXCEPT;
+
+    /// Requires input.metadata.height/spent (prevout confirmation).
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
 
 private:

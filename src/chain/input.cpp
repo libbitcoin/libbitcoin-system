@@ -273,26 +273,37 @@ bool input::is_final() const NOEXCEPT
     return sequence_ == max_input_sequence;
 }
 
-bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
+// static
+bool input::is_locked(uint32_t sequence, size_t height,
+    uint32_t median_time_past, size_t prevout_height,
+    uint32_t prevout_median_time_past) NOEXCEPT
 {
     // BIP68: if bit 31 is set then no consensus meaning is applied.
-    if (get_right(sequence_, relative_locktime_disabled_bit))
+    if (get_right(sequence, relative_locktime_disabled_bit))
         return false;
 
     // BIP68: the low 16 bits of the sequence apply to relative lock-time.
-    const auto blocks = mask_left(sequence_, relative_locktime_mask_left);
+    const auto blocks = mask_left(sequence, relative_locktime_mask_left);
 
     // BIP68: bit 22 determines if relative lock is time or block based.
-    if (get_right(sequence_, relative_locktime_time_locked_bit))
+    if (get_right(sequence, relative_locktime_time_locked_bit))
     {
-        // BIP68: change sequence to seconds by shifting up by 9 bits (x 512).
+        // BIP68: change sequence to seconds by shift up by 9 bits (x 512).
         auto time = shift_left(blocks, relative_locktime_seconds_shift_left);
-        auto age = floored_subtract(median_time_past, metadata.median_time_past);
+        auto age = floored_subtract(median_time_past, prevout_median_time_past);
         return age < time;
     }
 
-    auto age = floored_subtract(height, metadata.height);
+    const auto age = floored_subtract(height, prevout_height);
     return age < blocks;
+}
+
+bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
+{
+    // Prevout must be found and height/median_time_past metadata populated.
+    ////BC_ASSERT(!is_zero(metadata.height));
+    return is_locked(sequence_, height, median_time_past, metadata.height,
+        metadata.median_time_past);
 }
 
 bool input::reserved_hash(hash_digest& out) const NOEXCEPT
