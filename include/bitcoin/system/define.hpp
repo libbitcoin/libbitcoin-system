@@ -236,11 +236,13 @@ namespace bc = libbitcoin;
 /// C++17 (partial)
 #if defined(HAVE_EXECUTION)
     #include <execution>
+    #define std_all_of(p, b, e, l) std::all_of((p), (b), (e), (l))
     #define std_for_each(p, b, e, l) std::for_each((p), (b), (e), (l))
     #define std_transform(p, b, e, t, l) std::transform((p), (b), (e), (t), (l))
     namespace libbitcoin { constexpr auto par_unseq = std::execution::par_unseq; }
     namespace libbitcoin { constexpr auto seq = std::execution::seq; }
 #else
+    #define std_all_of(p, b, e, l) std::all_of((b), (e), (l))
     #define std_for_each(p, b, e, l) std::for_each((b), (e), (l))
     #define std_transform(p, b, e, t, l) std::transform((b), (e), (t), (l))
     namespace libbitcoin { constexpr auto par_unseq = false; }
