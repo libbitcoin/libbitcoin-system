@@ -1256,8 +1256,8 @@ code transaction::accept(const context&) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
 
-    ////if (is_coinbase())
-    ////    return error::transaction_success;
+    if (is_coinbase())
+        return error::transaction_success;
     if (is_missing_prevouts())
         return error::missing_previous_output;
     if (is_overspent())
@@ -1274,8 +1274,8 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
     BC_ASSERT(!is_coinbase());
     const auto bip68 = ctx.is_enabled(bip68_rule);
 
-    ////if (is_coinbase())
-    ////    return error::transaction_success;
+    if (is_coinbase())
+        return error::transaction_success;
     if (bip68 && is_locked(ctx.height, ctx.median_time_past))
         return error::relative_time_locked;
     if (is_immature(ctx.height))
