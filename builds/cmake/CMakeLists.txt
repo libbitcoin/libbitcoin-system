@@ -16,6 +16,8 @@ enable_testing()
 list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -40,37 +42,87 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 # Add compiler options
 #------------------------------------------------------------------------------
 # Warn on all stuff.
-add_compile_options( "-Wall" )
+check_cxx_compiler_flag( "-Wall" HAS_FLAG_WALL )
+if ( HAS_FLAG_WALL )
+    add_compile_options( "-Wall" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wall" )
+endif()
 
 # Warn on extra stuff.
-add_compile_options( "-Wextra" )
+check_cxx_compiler_flag( "-Wextra" HAS_FLAG_WEXTRA )
+if ( HAS_FLAG_WEXTRA )
+    add_compile_options( "-Wextra" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wextra" )
+endif()
 
 # Disallow warning on style order of declarations.
-add_compile_options( "-Wno-reorder" )
+check_cxx_compiler_flag( "-Wno-reorder" HAS_FLAG_WNO-REORDER )
+if ( HAS_FLAG_WNO-REORDER )
+    add_compile_options( "-Wno-reorder" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-reorder" )
+endif()
 
 # Suppress warning for incomplete field initialization.
-add_compile_options( "-Wno-missing-field-initializers" )
+check_cxx_compiler_flag( "-Wno-missing-field-initializers" HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
+if ( HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
+    add_compile_options( "-Wno-missing-field-initializers" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-missing-field-initializers" )
+endif()
 
 # Conform to style.
-add_compile_options( "-Wno-missing-braces" )
+check_cxx_compiler_flag( "-Wno-missing-braces" HAS_FLAG_WNO-MISSING-BRACES )
+if ( HAS_FLAG_WNO-MISSING-BRACES )
+    add_compile_options( "-Wno-missing-braces" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-missing-braces" )
+endif()
 
 # Ignore comments within comments or commenting of backslash extended lines.
-add_compile_options( "-Wno-comment" )
+check_cxx_compiler_flag( "-Wno-comment" HAS_FLAG_WNO-COMMENT )
+if ( HAS_FLAG_WNO-COMMENT )
+    add_compile_options( "-Wno-comment" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-comment" )
+endif()
 
 # Suppress warning for copy of implicitly generated copy constructor.
-add_compile_options( "-Wno-deprecated-copy" )
+check_cxx_compiler_flag( "-Wno-deprecated-copy" HAS_FLAG_WNO-DEPRECATED-COPY )
+if ( HAS_FLAG_WNO-DEPRECATED-COPY )
+    add_compile_options( "-Wno-deprecated-copy" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-deprecated-copy" )
+endif()
 
 # Allow use of C99 'long long' type.
-add_compile_options( "-Wno-long-long" )
+check_cxx_compiler_flag( "-Wno-long-long" HAS_FLAG_WNO-LONG-LONG )
+if ( HAS_FLAG_WNO-LONG-LONG )
+    add_compile_options( "-Wno-long-long" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-long-long" )
+endif()
 
 # Conflict in stdlib under clang.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_compile_options( "-Wno-mismatched-tags" )
+    check_cxx_compiler_flag( "-Wno-mismatched-tags" HAS_FLAG_WNO-MISMATCHED-TAGS )
+    if ( HAS_FLAG_WNO-MISMATCHED-TAGS )
+        add_compile_options( "-Wno-mismatched-tags" )
+    else()
+        message( FATAL_ERROR "Compiler does not support -Wno-mismatched-tags" )
+    endif()
 endif()
 
 # Limit delays and warnings.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_compile_options( "-fno-var-tracking-assignments" )
+    check_cxx_compiler_flag( "-fno-var-tracking-assignments" HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
+    if ( HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
+        add_compile_options( "-fno-var-tracking-assignments" )
+    else()
+        message( FATAL_ERROR "Compiler does not support -fno-var-tracking-assignments" )
+    endif()
 endif()
 
 # Implement -Dpkgconfigdir and output ${pkgconfigdir}.
@@ -97,6 +149,22 @@ if (with-icu)
     set( icu "-DWITH_ICU" )
 endif()
 
+# Implement -Denable-avx2.
+#------------------------------------------------------------------------------
+set( enable-avx2 "no" CACHE BOOL "Compile with avx2 intrinsics (specifically -mavx -mavx2)." )
+
+# Implement -Denable-avx512.
+#------------------------------------------------------------------------------
+set( enable-avx512 "no" CACHE BOOL "Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." )
+
+# Implement -Denable-sse4.
+#------------------------------------------------------------------------------
+set( enable-sse4 "no" CACHE BOOL "Compile with sse4 intrinsics (specifically -msse4.1)." )
+
+# Implement -Denable-shani.
+#------------------------------------------------------------------------------
+set( enable-shani "no" CACHE BOOL "Compile with sha native intrinsics (specifically -msse4 -msha)" )
+
 # Implement -Denable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 set( enable-ndebug "yes" CACHE BOOL "Compile without debug assertions." )
@@ -109,6 +177,124 @@ endif()
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
     add_definitions( -DBOOST_ALL_DYN_LINK )
+endif()
+
+if (enable-avx2)
+    check_cxx_compiler_flag("-mavx -mavx2" HAS_FLAGS_AVX2)
+
+    if (HAS_FLAGS_AVX2)
+        add_compile_options( "-mavx" )
+        add_compile_options( "-mavx2" )
+        set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx -mavx2" )
+    endif()
+
+    check_cxx_source_compiles("
+        #include <stdint.h>
+        #include <immintrin.h>
+        int main() {
+            __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
+            return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
+        }" HAVE_AVX2)
+
+    if (HAS_FLAGS_AVX2)
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    endif()
+
+    if ( HAVE_AVX2 )
+        add_compile_definitions( HAVE_AVX2 )
+    else()
+        message( FATAL_ERROR "Failed to enable HAVE_AVX2" )
+    endif()
+endif()
+
+if (enable-avx512)
+    check_cxx_compiler_flag("-mavx512f -mavx512bw" HAS_FLAGS_AVX512)
+
+    if (HAS_FLAGS_AVX512)
+        add_compile_options( "-mavx512f" )
+        add_compile_options( "-mavx512bw" )
+        set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -mavx512f -mavx512bw" )
+    endif()
+
+    check_cxx_source_compiles("
+        #include <stdint.h>
+        #include <immintrin.h>
+        int main() {
+            __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+            return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);
+        }" HAVE_AVX512)
+
+    if (HAS_FLAGS_AVX512)
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    endif()
+
+    if ( HAVE_AVX512 )
+        add_compile_definitions( HAVE_AVX512 )
+    else()
+        message( FATAL_ERROR "Failed to enable HAVE_AVX512" )
+    endif()
+endif()
+
+if (enable-shani)
+    check_cxx_compiler_flag("-msse4 -msha" HAS_FLAGS_SHANI)
+
+    if (HAS_FLAGS_SHANI)
+        add_compile_options( "-msse4" )
+        add_compile_options( "-msha" )
+        set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4 -msha" )
+    endif()
+
+    check_cxx_source_compiles("
+        #include <stdint.h>
+        #include <immintrin.h>
+        int main() {
+            __m128i a = _mm_set1_epi32(0);
+            __m128i b = _mm_set1_epi32(15);
+            __m128i k = _mm_set1_epi32(31);
+            return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
+        }" HAVE_SHANI)
+
+    if (HAS_FLAGS_SHANI)
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    endif()
+
+    if ( HAVE_SHANI )
+        add_compile_definitions( HAVE_SHANI )
+    else()
+        message( FATAL_ERROR "Failed to enable HAVE_SHANI" )
+    endif()
+endif()
+
+if (enable-sse4)
+    check_cxx_compiler_flag("-msse4.1" HAS_FLAGS_SSE4)
+
+    if (HAS_FLAGS_SSE4)
+        add_compile_options( "-msse4.1" )
+        set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1" )
+    endif()
+
+    check_cxx_source_compiles("
+        #include <stdint.h>
+        #include <immintrin.h>
+        int main() {
+            __m128i a = _mm_set1_epi32(0);
+            __m128i b = _mm_set1_epi32(15);
+            return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
+        }" HAVE_SSE4)
+
+    if (HAS_FLAGS_SSE4)
+        set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
+    endif()
+
+    if ( HAVE_SSE4 )
+        add_compile_definitions( HAVE_SSE4 )
+    else()
+        message( FATAL_ERROR "Failed to enable HAVE_SSE4" )
+    endif()
 endif()
 
 if (BUILD_SHARED_LIBS)
