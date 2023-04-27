@@ -143,6 +143,12 @@ jobs:
             echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
           fi
 
+      - name: Display CPU details
+        if: ${{ (runner.os == 'Linux') }}
+        shell: bash
+        run: |
+          lscpu
+
       - name: Execute install.sh
         run: >
           ./install.sh
@@ -200,11 +206,11 @@ jobs:
         run: |
           cat ${{ github.workspace }}/build/build-*/bootstrap.log
 
+
       - name: Failure display otool output
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
           otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
       - name: Failure display DYLD_PRINT_LIBRARIES
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
@@ -352,6 +358,12 @@ jobs:
             echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
           fi
 
+      - name: Display CPU details
+        if: ${{ (runner.os == 'Linux') }}
+        shell: bash
+        run: |
+          lscpu
+
       - name: Execute install-cmake.sh
         run: >
           ./install-cmake.sh
@@ -408,11 +420,11 @@ jobs:
         run: |
           cat ${{ github.workspace }}/build/build-*/bootstrap.log
 
+
       - name: Failure display otool output
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
           otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
       - name: Failure display DYLD_PRINT_LIBRARIES
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
@@ -534,6 +546,12 @@ jobs:
             echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
           fi
 
+      - name: Display CPU details
+        if: ${{ (runner.os == 'Linux') }}
+        shell: bash
+        run: |
+          lscpu
+
       - name: Execute install-cmakepresets.sh
         run: >
           ./install-cmakepresets.sh
@@ -591,11 +609,11 @@ jobs:
         run: |
           cat ${{ github.workspace }}/build/build-*/bootstrap.log
 
+
       - name: Failure display otool output
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
           otool -L ${{ github.workspace }}/test/.libs/libbitcoin-system-test
-
       - name: Failure display DYLD_PRINT_LIBRARIES
         if: ${{ failure() && (matrix.os == 'macos-latest') }}
         run: |
