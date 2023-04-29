@@ -46,6 +46,8 @@ inline Integral unsafe_from_little_endian(const Byte* data) NOEXCEPT
     return native_from_little_end(unsafe_byte_cast<Integral>(data));
 }
 
+// Unguarded endian write from byte pointer.
+// ----------------------------------------------------------------------------
 
 template <typename Integral, typename Byte,
     if_one_byte<Byte>,
