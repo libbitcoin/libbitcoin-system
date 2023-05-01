@@ -730,8 +730,8 @@ hash_digest transaction::unversioned_signature_hash(
         {
             //*****************************************************************
             // CONSENSUS: return one_hash if index exceeds outputs in sighash.
-            // Bug: https://bitcointalk.org/index.php?topic=260595
-            // Expoit: http://joncave.co.uk/2014/08/bitcoin-sighash-single/
+            // Related Bug: bitcointalk.org/index.php?topic=260595
+            // Exploit: joncave.co.uk/2014/08/bitcoin-sighash-single/
             //*****************************************************************
             if (input_index(input) >= outputs_->size())
                 return one_hash;
