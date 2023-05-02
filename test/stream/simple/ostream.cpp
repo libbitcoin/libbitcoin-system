@@ -21,8 +21,8 @@
 BOOST_AUTO_TEST_SUITE(ostream_tests)
 
 using ostream_chunk = ostream<data_chunk>;
-using pos_type = ostream_chunk::pos_type;
-using iostate = ostream_chunk::iostate;
+using pos_type = typename ostream_chunk::pos_type;
+using iostate = typename ostream_chunk::iostate;
 const auto chunk = base16_chunk("00010203040506070809");
 
 // setstate/clear

@@ -38,10 +38,10 @@ public:
     DEFAULT_COPY_MOVE_DESTRUCT(istream);
 
     using char_type = Character;
-    using int_type = std::basic_ios<char_type>::int_type;
-    using off_type = std::basic_ios<char_type>::off_type;
-    using pos_type = std::basic_ios<char_type>::pos_type;
-    using failure = std::ios_base::failure;
+    using int_type = typename std::basic_ios<char_type>::int_type;
+    using off_type = typename std::basic_ios<char_type>::off_type;
+    using pos_type = typename std::basic_ios<char_type>::pos_type;
+    using failure = typename std::ios_base::failure;
     enum iostate
     {
         goodbit = 0,

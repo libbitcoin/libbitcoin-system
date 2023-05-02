@@ -50,18 +50,18 @@ class iostream
     // Two base destructor calls order is unimportant.
     ~iostream() override = default;
 
-    inline base::iostate rdstate() const NOEXCEPT override
+    inline typename base::iostate rdstate() const NOEXCEPT override
     {
         return base::rdstate();
     }
 
-    inline void setstate(base::iostate state) NOEXCEPT override
+    inline void setstate(typename base::iostate state) NOEXCEPT override
     {
         base::setstate(state);
     }
 
-    inline void clear(
-        base::iostate state=base::iostate::goodbit) NOEXCEPT override
+    inline void clear(typename base::iostate state=
+        base::iostate::goodbit) NOEXCEPT override
     {
         base::clear(state);
     }

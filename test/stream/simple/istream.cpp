@@ -21,9 +21,9 @@
 BOOST_AUTO_TEST_SUITE(istream_tests)
 
 using istream_chunk = istream<data_chunk>;
-using seekdir = istream_chunk::seekdir;
-using pos_type = istream_chunk::pos_type;
-using iostate = istream_chunk::iostate;
+using seekdir = typename istream_chunk::seekdir;
+using pos_type = typename istream_chunk::pos_type;
+using iostate = typename istream_chunk::iostate;
 const auto chunk = base16_chunk("00010203040506070809");
 
 // setstate/clear
