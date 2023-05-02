@@ -300,7 +300,8 @@ BOOST_AUTO_TEST_CASE(istream__read__full_buffer__goodbit)
 
 BOOST_AUTO_TEST_CASE(istream__reader__read_8_bytes_big_endian__exected_goodbit)
 {
-    istream_chunk stream{ base16_chunk("010203040506070809") };
+    const auto chunk = base16_chunk("010203040506070809");
+    istream_chunk stream{ chunk };
     byte_reader<istream_chunk> reader{ stream };
     BOOST_REQUIRE_EQUAL(reader.read_8_bytes_big_endian(), 0x0102030405060708_u64);
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
