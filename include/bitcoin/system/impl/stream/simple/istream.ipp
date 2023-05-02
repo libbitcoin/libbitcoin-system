@@ -26,8 +26,10 @@
 namespace libbitcoin {
 namespace system {
 
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+
 template <typename Source, typename Character>
-inline istream<Source, Character>::istream(const Source& source) NOEXCEPT
+INLINE istream<Source, Character>::istream(const Source& source) NOEXCEPT
   : position_(source.data()),
     begin_(position_),
     end_(begin_ + source.size()),
@@ -36,14 +38,14 @@ inline istream<Source, Character>::istream(const Source& source) NOEXCEPT
 }
 
 template <typename Source, typename Character>
-inline typename istream<Source, Character>::pos_type
+INLINE typename istream<Source, Character>::pos_type
 istream<Source, Character>::tellg() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
 template <typename Source, typename Character>
-inline istream<Source, Character>&
+INLINE istream<Source, Character>&
 istream<Source, Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 {
     if (state_ != goodbit)
@@ -97,28 +99,28 @@ istream<Source, Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 }
 
 template <typename Source, typename Character>
-inline typename istream<Source, Character>::iostate
+INLINE typename istream<Source, Character>::iostate
 istream<Source, Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
 template <typename Source, typename Character>
-inline void 
+INLINE void
 istream<Source, Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
 template <typename Source, typename Character>
-inline void 
+INLINE void
 istream<Source, Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
 }
 
 template <typename Source, typename Character>
-inline void 
+INLINE void
 istream<Source, Character>::read(char_type* data, pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
@@ -135,7 +137,7 @@ istream<Source, Character>::read(char_type* data, pos_type size) NOEXCEPT
 }
 
 template <typename Source, typename Character>
-inline typename istream<Source, Character>::int_type
+INLINE typename istream<Source, Character>::int_type
 istream<Source, Character>::peek() NOEXCEPT
 {
     constexpr auto eof = std::char_traits<Character>::eof();
@@ -160,11 +162,13 @@ istream<Source, Character>::is_positive(off_type value) NOEXCEPT
 
 // private
 template <typename Source, typename Character>
-inline bool
+INLINE bool
 istream<Source, Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));
 }
+
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin

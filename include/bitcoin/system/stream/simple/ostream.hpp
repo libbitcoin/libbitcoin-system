@@ -25,9 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-
 /// Support for high level output operations on a byte buffer.
+/// As a template argument for byte_writer, inlining has no cost.
 template <typename Sink, typename Character = char>
 class ostream
 {
@@ -45,36 +44,34 @@ public:
     static constexpr iostate badbit  = 4;
 
     /// Construct the object.
-    inline ostream(Sink& sink) NOEXCEPT;
+    INLINE ostream(Sink& sink) NOEXCEPT;
 
     /// Return the relative output position indicator (zero-based).
-    virtual inline pos_type tellp() const NOEXCEPT;
+    virtual INLINE pos_type tellp() const NOEXCEPT;
 
     /// Return state flags.
-    virtual inline iostate rdstate() const NOEXCEPT;
+    virtual INLINE iostate rdstate() const NOEXCEPT;
 
     /// Set the stream error flags state in addition to currently set flags.
-    virtual inline void setstate(iostate state) NOEXCEPT;
+    virtual INLINE void setstate(iostate state) NOEXCEPT;
 
     /// Set the stream error state flags by assigning the state value.
-    virtual inline void clear(iostate state=goodbit) NOEXCEPT;
+    virtual INLINE void clear(iostate state=goodbit) NOEXCEPT;
 
     /// Write a block of characters, sets badbit on overflow.
-    virtual inline void write(const char_type* data, pos_type size) NOEXCEPT;
+    virtual INLINE void write(const char_type* data, pos_type size) NOEXCEPT;
 
     /// Synchronize with the underlying storage device.
-    virtual inline void flush() NOEXCEPT;
+    virtual INLINE void flush() NOEXCEPT;
 
 private:
-    inline bool is_overflow(pos_type size) const NOEXCEPT;
+    INLINE bool is_overflow(pos_type size) const NOEXCEPT;
 
     uint8_t* position_;
-    uint8_t* begin_;
-    uint8_t* end_;
+    uint8_t* const begin_;
+    uint8_t* const end_;
     iostate state_;
 };
-
-BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin

@@ -25,8 +25,10 @@
 namespace libbitcoin {
 namespace system {
 
+BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+
 template <typename Sink, typename Character>
-inline ostream<Sink, Character>::ostream(Sink& sink) NOEXCEPT
+INLINE ostream<Sink, Character>::ostream(Sink& sink) NOEXCEPT
   : position_(sink.data()),
     begin_(position_),
     end_(begin_ + sink.size()),
@@ -35,35 +37,35 @@ inline ostream<Sink, Character>::ostream(Sink& sink) NOEXCEPT
 }
 
 template <typename Sink, typename Character>
-inline typename ostream<Sink, Character>::pos_type
+INLINE typename ostream<Sink, Character>::pos_type
 ostream<Sink, Character>::tellp() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
 template <typename Sink, typename Character>
-inline typename ostream<Sink, Character>::iostate
+INLINE typename ostream<Sink, Character>::iostate
 ostream<Sink, Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
 template <typename Sink, typename Character>
-inline void
+INLINE void
 ostream<Sink, Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
 template <typename Sink, typename Character>
-inline void
+INLINE void
 ostream<Sink, Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
 }
 
 template <typename Sink, typename Character>
-inline void
+INLINE void
 ostream<Sink, Character>::write(const char_type* data, pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
@@ -80,7 +82,7 @@ ostream<Sink, Character>::write(const char_type* data, pos_type size) NOEXCEPT
 }
 
 template <typename Sink, typename Character>
-inline void
+INLINE void
 ostream<Sink, Character>::flush() NOEXCEPT
 {
     //  no-op.
@@ -88,11 +90,13 @@ ostream<Sink, Character>::flush() NOEXCEPT
 
 // private
 template <typename Sink, typename Character>
-inline bool
+INLINE bool
 ostream<Sink, Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));
 }
+
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin

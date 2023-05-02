@@ -25,9 +25,8 @@
 namespace libbitcoin {
 namespace system {
 
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-
 /// Support for high level input operations on a byte buffer.
+/// As a template argument for byte_reader, inlining has almost no cost.
 template <typename Source, typename Character = char>
 class istream
 {
@@ -52,40 +51,38 @@ public:
     static constexpr seekdir end = 2;
 
     /// Construct the object.
-    inline istream(const Source& source) NOEXCEPT;
+    INLINE istream(const Source& source) NOEXCEPT;
 
     /// Return the relative input position indicator (zero-based).
-    virtual inline pos_type tellg() const NOEXCEPT;
+    virtual INLINE pos_type tellg() const NOEXCEPT;
 
     /// Set the relative input position indicator (zero-based).
-    virtual inline istream& seekg(off_type offset, seekdir direction) NOEXCEPT;
+    virtual INLINE istream& seekg(off_type offset, seekdir direction) NOEXCEPT;
 
     /// Return state flags.
-    virtual inline iostate rdstate() const NOEXCEPT;
+    virtual INLINE iostate rdstate() const NOEXCEPT;
 
     /// Set the stream error flags state in addition to currently set flags.
-    virtual inline void setstate(iostate state) NOEXCEPT;
+    virtual INLINE void setstate(iostate state) NOEXCEPT;
 
     /// Set the stream error state flags by assigning the state value.
-    virtual inline void clear(iostate state = goodbit) NOEXCEPT;
+    virtual INLINE void clear(iostate state = goodbit) NOEXCEPT;
 
     /// Read a block of characters, sets badbit on underflow.
-    virtual inline void read(char_type* data, pos_type size) NOEXCEPT;
+    virtual INLINE void read(char_type* data, pos_type size) NOEXCEPT;
 
     /// Read the next character without advancing, sets badbit on underflow.
-    virtual inline int_type peek() NOEXCEPT;
+    virtual INLINE int_type peek() NOEXCEPT;
 
 private:
     static constexpr bool is_positive(off_type value) NOEXCEPT;
-    inline bool is_overflow(pos_type size) const NOEXCEPT;
+    INLINE bool is_overflow(pos_type size) const NOEXCEPT;
 
     const uint8_t* position_;
-    const uint8_t* begin_;
-    const uint8_t* end_;
+    const uint8_t* const begin_;
+    const uint8_t* const end_;
     iostate state_;
 };
-
-BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
