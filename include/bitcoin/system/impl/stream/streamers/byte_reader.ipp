@@ -165,9 +165,7 @@ uint64_t byte_reader<IStream>::read_8_bytes_little_endian() NOEXCEPT
 template <typename IStream>
 uint64_t byte_reader<IStream>::read_variable() NOEXCEPT
 {
-    const auto value = read_byte();
-
-    switch (value)
+    switch (const auto value = read_byte())
     {
         case varint_eight_bytes:
             return read_8_bytes_little_endian();
@@ -656,9 +654,9 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) NOEXCEPT
     }
 }
 
+BC_POP_WARNING()
+
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
 
 #endif

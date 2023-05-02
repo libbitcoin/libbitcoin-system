@@ -27,6 +27,9 @@
 #include <bitcoin/system/stream/devices/flip_sink.hpp>
 #include <bitcoin/system/stream/devices/push_sink.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>
+#include <bitcoin/system/stream/simple/istream.hpp>
+#include <bitcoin/system/stream/simple/iostream.hpp>
+#include <bitcoin/system/stream/simple/ostream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -43,6 +46,7 @@ namespace stream
     {
         /// An input stream that copies data from a data_reference.
         using copy = make_stream<copy_source<data_reference>>;
+        using simple = istream<data_reference>;
     }
 
     namespace out
@@ -55,12 +59,14 @@ namespace stream
         using push = make_stream<push_sink<Container>>;
         using text = push<std::string>;
         using data = push<data_chunk>;
+        using simple = ostream<data_slab>;
     }
 
     namespace flip
     {
         /// An input/output stream that copies data to a data_slab.
         using copy = make_stream<flip_sink<data_slab>>;
+        using simple = iostream<data_slab>;
     }
 }
 
