@@ -20,9 +20,24 @@
 
 BOOST_AUTO_TEST_SUITE(iostream_tests)
 
-BOOST_AUTO_TEST_CASE(iostream_test)
+using iostream_chunk = istream<data_chunk>;
+using seekdir = iostream_chunk::seekdir;
+using pos_type = iostream_chunk::pos_type;
+using iostate = iostream_chunk::iostate;
+auto chunk = base16_chunk("01020304050607080900");
+
+BOOST_AUTO_TEST_CASE(iostream__setstate__goodbit__goodbit)
 {
-    BOOST_REQUIRE(true);
+    iostream_chunk stream{ {} };
+    stream.setstate(iostate::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == iostate::goodbit);
+}
+
+BOOST_AUTO_TEST_CASE(iostream__tellg__initial__zero_goodbit)
+{
+    const iostream_chunk stream{ chunk };
+    BOOST_REQUIRE(is_zero(stream.tellg()));
+    BOOST_REQUIRE(stream.rdstate() == iostate::goodbit);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
