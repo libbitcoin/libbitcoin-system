@@ -60,8 +60,8 @@ class iostream
         base::setstate(state);
     }
 
-    inline void clear(typename base::iostate state=
-        base::iostate::goodbit) NOEXCEPT override
+    inline void clear(
+        typename base::iostate state=base::goodbit) NOEXCEPT override
     {
         base::clear(state);
     }

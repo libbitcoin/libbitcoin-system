@@ -42,26 +42,24 @@ public:
     using off_type = typename std::basic_ios<char_type>::off_type;
     using pos_type = typename std::basic_ios<char_type>::pos_type;
     using failure = typename std::ios_base::failure;
-    enum iostate
-    {
-        goodbit = 0,
-        eofbit  = 1,
-        failbit = 2,
-        badbit  = 4
-    };
-    enum seekdir
-    {
-        beg = 0,
-        cur = 1,
-        end = 2
-    };
+
+    using iostate = uint8_t;
+    static constexpr iostate goodbit = 0;
+    static constexpr iostate eofbit  = 1;
+    static constexpr iostate failbit = 2;
+    static constexpr iostate badbit  = 4;
+
+    using seekdir = uint8_t;
+    static constexpr seekdir beg = 0;
+    static constexpr seekdir cur = 1;
+    static constexpr seekdir end = 2;
 
     /// Construct the object.
     inline istream(const Source& source) NOEXCEPT
       : position_(source.data()),
         begin_(position_),
         end_(begin_ + source.size()),
-        state_(iostate::goodbit)
+        state_(goodbit)
     {
     }
 
@@ -74,13 +72,13 @@ public:
     /// Set the relative input position indicator (zero-based).
     virtual inline istream& seekg(off_type offset, seekdir direction) NOEXCEPT
     {
-        if (state_ != iostate::goodbit)
+        if (state_ != goodbit)
             return *this;
 
         using namespace system;
         switch (direction)
         {
-            case seekdir::beg:
+            case beg:
             {
                 if (is_negative(offset) || (offset > (end_ - begin_)))
                 {
@@ -91,7 +89,7 @@ public:
                 position_ = begin_ + offset;
                 break;
             }
-            case seekdir::cur:
+            case cur:
             {
                 if ((is_negative(offset) && (offset < (begin_ - position_))) ||
                     (is_positive(offset) && (offset > (end_ - position_))))
@@ -103,7 +101,7 @@ public:
                 position_ = position_ + offset;
                 break;
             }
-            case seekdir::end:
+            case end:
             {
                 if (is_positive(offset) || (offset < (begin_ - end_)))
                 {
@@ -133,13 +131,11 @@ public:
     /// Set the stream error flags state in addition to currently set flags.
     virtual inline void setstate(iostate state) NOEXCEPT
     {
-        state_ = static_cast<iostate>(
-            static_cast<std::underlying_type_t<iostate>>(state_) |
-            static_cast<std::underlying_type_t<iostate>>(state));
+        state_ |= state;
     }
 
     /// Set the stream error state flags by assigning the state value.
-    virtual inline void clear(iostate state=iostate::goodbit) NOEXCEPT
+    virtual inline void clear(iostate state=goodbit) NOEXCEPT
     {
         state_ = state;
     }
@@ -183,7 +179,7 @@ private:
 
     inline bool is_overflow(pos_type size) const NOEXCEPT
     {
-        return (state_ != iostate::goodbit) || (size > (end_ - position_));
+        return (state_ != goodbit) || (size > (end_ - position_));
     }
 
     const uint8_t* position_;

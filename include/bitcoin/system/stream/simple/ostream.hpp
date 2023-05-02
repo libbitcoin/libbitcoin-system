@@ -39,20 +39,19 @@ public:
     using char_type = Character;
     using pos_type = typename std::basic_ios<char_type>::pos_type;
     using failure = typename std::ios_base::failure;
-    enum iostate
-    {
-        goodbit = 0,
-        eofbit  = 1,
-        failbit = 2,
-        badbit  = 4
-    };
+
+    using iostate = uint8_t;
+    static constexpr iostate goodbit = 0;
+    static constexpr iostate eofbit  = 1;
+    static constexpr iostate failbit = 2;
+    static constexpr iostate badbit  = 4;
 
     /// Construct the object.
     inline ostream(Sink& sink) NOEXCEPT
       : position_(sink.data()),
         begin_(position_),
         end_(begin_ + sink.size()),
-        state_(iostate::goodbit)
+        state_(goodbit)
     {
     }
 
@@ -71,13 +70,11 @@ public:
     /// Set the stream error flags state in addition to currently set flags.
     virtual inline void setstate(iostate state) NOEXCEPT
     {
-        state_ = static_cast<iostate>(
-            static_cast<std::underlying_type_t<iostate>>(state_) |
-            static_cast<std::underlying_type_t<iostate>>(state));
+        state_ |= state;
     }
 
     /// Set the stream error state flags by assigning the state value.
-    virtual void clear(iostate state=iostate::goodbit) NOEXCEPT
+    virtual void clear(iostate state=goodbit) NOEXCEPT
     {
         state_ = state;
     }
@@ -107,7 +104,7 @@ public:
 private:
     inline bool is_overflow(pos_type size) const NOEXCEPT
     {
-        return (state_ != iostate::goodbit) || (size > (end_ - position_));
+        return (state_ != goodbit) || (size > (end_ - position_));
     }
 
     uint8_t* position_;
