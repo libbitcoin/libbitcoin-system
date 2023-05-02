@@ -19,10 +19,80 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_SIMPLE_OSTREAM_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_SIMPLE_OSTREAM_IPP
 
+#include <algorithm>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+template <typename Sink, typename Character>
+inline ostream<Sink, Character>::ostream(Sink& sink) NOEXCEPT
+  : position_(sink.data()),
+    begin_(position_),
+    end_(begin_ + sink.size()),
+    state_(goodbit)
+{
+}
+
+template <typename Sink, typename Character>
+inline typename ostream<Sink, Character>::pos_type
+ostream<Sink, Character>::tellp() const NOEXCEPT
+{
+    return static_cast<pos_type>(position_ - begin_);
+}
+
+template <typename Sink, typename Character>
+inline typename ostream<Sink, Character>::iostate
+ostream<Sink, Character>::rdstate() const NOEXCEPT
+{
+    return state_;
+}
+
+template <typename Sink, typename Character>
+inline void
+ostream<Sink, Character>::setstate(iostate state) NOEXCEPT
+{
+    state_ |= state;
+}
+
+template <typename Sink, typename Character>
+inline void
+ostream<Sink, Character>::clear(iostate state) NOEXCEPT
+{
+    state_ = state;
+}
+
+template <typename Sink, typename Character>
+inline void
+ostream<Sink, Character>::write(const char_type* data, pos_type size) NOEXCEPT
+{
+    if (is_overflow(size))
+    {
+        setstate(badbit);
+        return;
+    }
+
+    BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
+    std::copy_n(data, size, position_);
+    BC_POP_WARNING()
+
+    position_ += size;
+}
+
+template <typename Sink, typename Character>
+inline void
+ostream<Sink, Character>::flush() NOEXCEPT
+{
+    //  no-op.
+}
+
+// private
+template <typename Sink, typename Character>
+inline bool
+ostream<Sink, Character>::is_overflow(pos_type size) const NOEXCEPT
+{
+    return (state_ != goodbit) || (size > (end_ - position_));
+}
 
 } // namespace system
 } // namespace libbitcoin

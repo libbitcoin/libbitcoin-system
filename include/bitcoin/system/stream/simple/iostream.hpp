@@ -37,7 +37,7 @@ class iostream
 {
     DEFAULT_COPY_MOVE(iostream);
 
-    // Common based for state methods, just pick one.
+    /// Common based for state methods, just pick one.
     using base = istream<Buffer, Character>;
 
     /// Construct the object.

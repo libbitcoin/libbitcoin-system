@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_SIMPLE_OSTREAM_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_SIMPLE_OSTREAM_HPP
 
-#include <algorithm>
 #include <ios>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -47,65 +45,28 @@ public:
     static constexpr iostate badbit  = 4;
 
     /// Construct the object.
-    inline ostream(Sink& sink) NOEXCEPT
-      : position_(sink.data()),
-        begin_(position_),
-        end_(begin_ + sink.size()),
-        state_(goodbit)
-    {
-    }
+    inline ostream(Sink& sink) NOEXCEPT;
 
     /// Return the relative output position indicator (zero-based).
-    virtual inline pos_type tellp() const NOEXCEPT
-    {
-        return static_cast<pos_type>(position_ - begin_);
-    }
+    virtual inline pos_type tellp() const NOEXCEPT;
 
     /// Return state flags.
-    virtual inline iostate rdstate() const NOEXCEPT
-    {
-        return state_;
-    }
+    virtual inline iostate rdstate() const NOEXCEPT;
 
     /// Set the stream error flags state in addition to currently set flags.
-    virtual inline void setstate(iostate state) NOEXCEPT
-    {
-        state_ |= state;
-    }
+    virtual inline void setstate(iostate state) NOEXCEPT;
 
     /// Set the stream error state flags by assigning the state value.
-    virtual void clear(iostate state=goodbit) NOEXCEPT
-    {
-        state_ = state;
-    }
+    virtual inline void clear(iostate state=goodbit) NOEXCEPT;
 
     /// Write a block of characters, sets badbit on overflow.
-    virtual inline void write(const char_type* data, pos_type size) NOEXCEPT
-    {
-        if (is_overflow(size))
-        {
-            setstate(badbit);
-            return;
-        }
-
-        BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-        std::copy_n(data, size, position_);
-        BC_POP_WARNING()
-
-        position_ += size;
-    }
+    virtual inline void write(const char_type* data, pos_type size) NOEXCEPT;
 
     /// Synchronize with the underlying storage device.
-    virtual inline void flush() NOEXCEPT
-    {
-        //  no-op.
-    }
+    virtual inline void flush() NOEXCEPT;
 
 private:
-    inline bool is_overflow(pos_type size) const NOEXCEPT
-    {
-        return (state_ != goodbit) || (size > (end_ - position_));
-    }
+    inline bool is_overflow(pos_type size) const NOEXCEPT;
 
     uint8_t* position_;
     uint8_t* begin_;
@@ -117,5 +78,7 @@ BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/stream/simple/ostream.ipp>
 
 #endif

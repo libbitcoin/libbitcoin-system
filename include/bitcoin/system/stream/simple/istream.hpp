@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_SIMPLE_ISTREAM_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_SIMPLE_ISTREAM_HPP
 
-#include <algorithm>
 #include <ios>
-#include <string>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
@@ -55,132 +52,32 @@ public:
     static constexpr seekdir end = 2;
 
     /// Construct the object.
-    inline istream(const Source& source) NOEXCEPT
-      : position_(source.data()),
-        begin_(position_),
-        end_(begin_ + source.size()),
-        state_(goodbit)
-    {
-    }
+    inline istream(const Source& source) NOEXCEPT;
 
     /// Return the relative input position indicator (zero-based).
-    virtual inline pos_type tellg() const NOEXCEPT
-    {
-        return static_cast<pos_type>(position_ - begin_);
-    }
+    virtual inline pos_type tellg() const NOEXCEPT;
 
     /// Set the relative input position indicator (zero-based).
-    virtual inline istream& seekg(off_type offset, seekdir direction) NOEXCEPT
-    {
-        if (state_ != goodbit)
-            return *this;
-
-        using namespace system;
-        switch (direction)
-        {
-            case beg:
-            {
-                if (is_negative(offset) || (offset > (end_ - begin_)))
-                {
-                    setstate(badbit);
-                    break;
-                }
-
-                position_ = begin_ + offset;
-                break;
-            }
-            case cur:
-            {
-                if ((is_negative(offset) && (offset < (begin_ - position_))) ||
-                    (is_positive(offset) && (offset > (end_ - position_))))
-                {
-                    setstate(badbit);
-                    break;
-                }
-
-                position_ = position_ + offset;
-                break;
-            }
-            case end:
-            {
-                if (is_positive(offset) || (offset < (begin_ - end_)))
-                {
-                    setstate(badbit);
-                    break;
-                }
-
-                position_ = end_ + offset;
-                break;
-            }
-            default:
-            {
-                setstate(failbit);
-                break;
-            }
-        }
-
-        return *this;
-    }
+    virtual inline istream& seekg(off_type offset, seekdir direction) NOEXCEPT;
 
     /// Return state flags.
-    virtual inline iostate rdstate() const NOEXCEPT
-    {
-        return state_;
-    }
+    virtual inline iostate rdstate() const NOEXCEPT;
 
     /// Set the stream error flags state in addition to currently set flags.
-    virtual inline void setstate(iostate state) NOEXCEPT
-    {
-        state_ |= state;
-    }
+    virtual inline void setstate(iostate state) NOEXCEPT;
 
     /// Set the stream error state flags by assigning the state value.
-    virtual inline void clear(iostate state=goodbit) NOEXCEPT
-    {
-        state_ = state;
-    }
+    virtual inline void clear(iostate state = goodbit) NOEXCEPT;
 
     /// Read a block of characters, sets badbit on underflow.
-    virtual inline void read(char_type* data, pos_type size) NOEXCEPT
-    {
-        if (is_overflow(size))
-        {
-            setstate(badbit);
-            return;
-        }
-
-        BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-        std::copy_n(position_, size, data);
-        BC_POP_WARNING()
-
-        position_ += size;
-    }
+    virtual inline void read(char_type* data, pos_type size) NOEXCEPT;
 
     /// Read the next character without advancing, sets badbit on underflow.
-    virtual inline int_type peek() NOEXCEPT
-    {
-        constexpr auto eof = std::char_traits<Character>::eof();
-
-        if (is_overflow(1))
-        {
-            setstate(badbit);
-            return eof;
-        }
-
-        const uint8_t value = *position_;
-        return system::sign_cast<int_type>(value);
-    }
+    virtual inline int_type peek() NOEXCEPT;
 
 private:
-    static constexpr bool is_positive(off_type value) NOEXCEPT
-    {
-        return !is_zero(value) && !system::is_negative(value);
-    }
-
-    inline bool is_overflow(pos_type size) const NOEXCEPT
-    {
-        return (state_ != goodbit) || (size > (end_ - position_));
-    }
+    static constexpr bool is_positive(off_type value) NOEXCEPT;
+    inline bool is_overflow(pos_type size) const NOEXCEPT;
 
     const uint8_t* position_;
     const uint8_t* begin_;
@@ -192,5 +89,7 @@ BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/stream/simple/istream.ipp>
 
 #endif
