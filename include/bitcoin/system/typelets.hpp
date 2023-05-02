@@ -63,12 +63,12 @@ constexpr bool is_integral_size = is_integral_sized(sizeof(Type));
 /// bool is a c++ integral, but excluded here.
 /// Type is s/u int8, int16, int32, int64 (including all aliases).
 template <typename Type>
-constexpr bool is_integral = std::is_integral_v<Type> &&
+constexpr bool is_integral = std::is_integral_v<std::decay_t<Type>> &&
     is_integral_size<Type> && !is_same_type<Type, bool>;
 
 /// numeric_limits may be specialized by non-integrals (such as uintx).
 template <typename Type>
-constexpr bool is_integer = std::numeric_limits<Type>::is_integer &&
+constexpr bool is_integer = std::numeric_limits<std::decay_t<Type>>::is_integer &&
     !is_same_type<Type, bool>;
 
 /// Excludes non-integral integers (such as uintx).

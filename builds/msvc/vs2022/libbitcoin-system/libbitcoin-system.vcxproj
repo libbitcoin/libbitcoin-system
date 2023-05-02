@@ -409,6 +409,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\devices\push_sink.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\make_stream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\make_streamer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\simple\iostream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\simple\istream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\simple\ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\stream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\stream_result.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers.hpp" />
@@ -556,6 +559,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\deserialize.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\serial\serialize.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\device.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\simple\istream.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\simple\ostream.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\bit_reader.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\bit_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\byte_reader.ipp" />

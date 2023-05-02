@@ -654,9 +654,9 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) NOEXCEPT
     }
 }
 
+BC_POP_WARNING()
+
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
 
 #endif

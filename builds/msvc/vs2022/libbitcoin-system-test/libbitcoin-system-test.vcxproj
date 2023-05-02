@@ -211,6 +211,9 @@
     <ClCompile Include="..\..\..\..\test\stream\devices\copy_source.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\flip_sink.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\devices\push_sink.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\simple\iostream.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\simple\istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\simple\ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\stream.cpp">
       <ObjectFileName>$(IntDir)test_stream_stream.obj</ObjectFileName>
     </ClCompile>
@@ -343,6 +346,11 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_unit_test_framework-vc143.1.78.0\build\boost_unit_test_framework-vc143.targets'))" />
   </Target>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'">
+    <PostBuildEvent>
+      <Command>"$(TargetPath)" --run_test=istream_tests --show_progress=no --build_info=yes</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\libbitcoin-system\libbitcoin-system.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>

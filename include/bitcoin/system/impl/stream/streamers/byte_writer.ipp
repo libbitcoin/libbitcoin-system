@@ -375,9 +375,9 @@ size_t byte_writer<OStream>::getter() NOEXCEPT
         possible_narrow_and_sign_cast<size_t>(position);
 }
 
+BC_POP_WARNING()
+
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
 
 #endif

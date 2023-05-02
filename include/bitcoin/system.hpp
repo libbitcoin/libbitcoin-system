@@ -187,6 +187,9 @@
 #include <bitcoin/system/stream/devices/copy_source.hpp>
 #include <bitcoin/system/stream/devices/flip_sink.hpp>
 #include <bitcoin/system/stream/devices/push_sink.hpp>
+#include <bitcoin/system/stream/simple/iostream.hpp>
+#include <bitcoin/system/stream/simple/istream.hpp>
+#include <bitcoin/system/stream/simple/ostream.hpp>
 #include <bitcoin/system/stream/streamers/bit_flipper.hpp>
 #include <bitcoin/system/stream/streamers/bit_reader.hpp>
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>
