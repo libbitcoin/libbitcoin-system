@@ -133,9 +133,9 @@ public:
     /// Set the stream error flags state in addition to currently set flags.
     virtual inline void setstate(iostate state) NOEXCEPT
     {
-        state_ = iostate(
-            std::underlying_type_t<iostate>(state_) |
-            std::underlying_type_t<iostate>(state));
+        state_ = static_cast<iostate>(
+            static_cast<std::underlying_type_t<iostate>>(state_) |
+            static_cast<std::underlying_type_t<iostate>>(state));
     }
 
     /// Set the stream error state flags by assigning the state value.
