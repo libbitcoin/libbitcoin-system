@@ -38,6 +38,16 @@ INLINE istream<Source, Character>::istream(const Source& source) NOEXCEPT
 }
 
 template <typename Source, typename Character>
+INLINE istream<Source, Character>::istream(const uint8_t* begin,
+    ptrdiff_t size) NOEXCEPT
+  : position_(begin),
+    begin_(position_),
+    end_(begin_ + size),
+    state_(goodbit)
+{
+}
+
+template <typename Source, typename Character>
 INLINE typename istream<Source, Character>::pos_type
 istream<Source, Character>::tellg() const NOEXCEPT
 {

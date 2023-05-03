@@ -37,6 +37,16 @@ INLINE ostream<Sink, Character>::ostream(Sink& sink) NOEXCEPT
 }
 
 template <typename Sink, typename Character>
+INLINE ostream<Sink, Character>::ostream(uint8_t* begin,
+    ptrdiff_t size) NOEXCEPT
+  : position_(begin),
+    begin_(position_),
+    end_(begin_ + size),
+    state_(goodbit)
+{
+}
+
+template <typename Sink, typename Character>
 INLINE typename ostream<Sink, Character>::pos_type
 ostream<Sink, Character>::tellp() const NOEXCEPT
 {

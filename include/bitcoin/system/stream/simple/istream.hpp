@@ -52,6 +52,7 @@ public:
 
     /// Construct the object.
     INLINE istream(const Source& source) NOEXCEPT;
+    INLINE istream(const uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
     /// Return the relative input position indicator (zero-based).
     virtual INLINE pos_type tellg() const NOEXCEPT;
@@ -75,12 +76,15 @@ public:
     virtual INLINE int_type peek() NOEXCEPT;
 
 private:
+    using ptr = uint8_t*;
+    using cptr = const uint8_t*;
+
     static constexpr bool is_positive(off_type value) NOEXCEPT;
     INLINE bool is_overflow(pos_type size) const NOEXCEPT;
 
-    const uint8_t* position_;
-    const uint8_t* const begin_;
-    const uint8_t* const end_;
+    cptr position_;
+    const cptr begin_;
+    const cptr end_;
     iostate state_;
 };
 

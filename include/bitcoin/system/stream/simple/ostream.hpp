@@ -45,6 +45,7 @@ public:
 
     /// Construct the object.
     INLINE ostream(Sink& sink) NOEXCEPT;
+    INLINE ostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
     /// Return the relative output position indicator (zero-based).
     virtual INLINE pos_type tellp() const NOEXCEPT;
@@ -65,11 +66,14 @@ public:
     virtual INLINE void flush() NOEXCEPT;
 
 private:
+    using ptr = uint8_t*;
+    using cptr = const uint8_t*;
+
     INLINE bool is_overflow(pos_type size) const NOEXCEPT;
 
-    uint8_t* position_;
-    uint8_t* const begin_;
-    uint8_t* const end_;
+    ptr position_;
+    const ptr begin_;
+    const ptr end_;
     iostate state_;
 };
 

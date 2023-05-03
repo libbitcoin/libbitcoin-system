@@ -30,7 +30,8 @@ const auto chunk = base16_chunk("00010203040506070809");
 
 BOOST_AUTO_TEST_CASE(istream__setstate__goodbit__goodbit)
 {
-    istream_chunk stream{ {} };
+    const data_chunk empty{};
+    istream_chunk stream{ empty };
     stream.setstate(istream_chunk::goodbit);
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
 }
@@ -47,7 +48,8 @@ BOOST_AUTO_TEST_CASE(istream__setstate__eofbit__eofbit)
 
 BOOST_AUTO_TEST_CASE(istream__setstate__failbit__failbit)
 {
-    istream_chunk stream{ {} };
+    const data_chunk empty{};
+    istream_chunk stream{ empty };
     stream.setstate(istream_chunk::failbit);
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::failbit);
 
@@ -57,7 +59,8 @@ BOOST_AUTO_TEST_CASE(istream__setstate__failbit__failbit)
 
 BOOST_AUTO_TEST_CASE(istream__setstate__badbit__badbit)
 {
-    istream_chunk stream{ {} };
+    const data_chunk empty{};
+    istream_chunk stream{ empty };
     stream.setstate(istream_chunk::badbit);
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
 
@@ -88,7 +91,8 @@ BOOST_AUTO_TEST_CASE(istream__setstate__badbit_failbit__badbit_failbit)
 
 BOOST_AUTO_TEST_CASE(istream__tellg__empty__zero_goodbit)
 {
-    const istream_chunk stream{ {} };
+    const data_chunk empty{};
+    istream_chunk stream{ empty };
     BOOST_REQUIRE(is_zero(stream.tellg()));
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
 }
@@ -204,7 +208,8 @@ BOOST_AUTO_TEST_CASE(istream__peek__empty__eof_badbit)
 {
     constexpr auto eof = std::char_traits<char>::eof();
 
-    istream_chunk stream{ {} };
+    const data_chunk empty{};
+    istream_chunk stream{ empty };
     BOOST_REQUIRE_EQUAL(stream.peek(), eof);
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
 }
@@ -258,9 +263,10 @@ BOOST_AUTO_TEST_CASE(istream__peek__chunk__advance_expected_goodbit)
 
 BOOST_AUTO_TEST_CASE(istream__read__none_empty__goodbit)
 {
-    auto buffer = base16_chunk("");
+    data_chunk buffer{};
 
-    istream_chunk stream{ {} };
+    const data_chunk empty{};
+    istream_chunk stream{ empty };
     stream.read(system::pointer_cast<char>(buffer.data()), buffer.size());
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
 }
@@ -269,7 +275,8 @@ BOOST_AUTO_TEST_CASE(istream__read__underflow_empty__badbit)
 {
     auto buffer = base16_chunk("00000000000000000000");
 
-    istream_chunk stream{ {} };
+    const data_chunk empty{};
+    istream_chunk stream{ empty };
     stream.read(system::pointer_cast<char>(buffer.data()), buffer.size());
     BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
 }

@@ -35,7 +35,18 @@ class iostream
   : public istream<Buffer, Character>,
     public ostream<Buffer, Character>
 {
+public:
     DEFAULT_COPY_MOVE(iostream);
+
+    using char_type = Character;
+    using pos_type = typename std::basic_ios<char_type>::pos_type;
+    using failure = typename std::ios_base::failure;
+
+    using iostate = uint8_t;
+    static constexpr iostate goodbit = 0;
+    static constexpr iostate eofbit = 1;
+    static constexpr iostate failbit = 2;
+    static constexpr iostate badbit = 4;
 
     /// Common based for state methods, just pick one.
     using base = istream<Buffer, Character>;
@@ -44,6 +55,13 @@ class iostream
     iostream(Buffer& buffer) NOEXCEPT
       : istream<Buffer, Character>(buffer),
         ostream<Buffer, Character>(buffer)
+    {
+    }
+
+    /// Construct the object.
+    iostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT
+      : istream<Buffer, Character>(begin, size),
+        ostream<Buffer, Character>(begin, size)
     {
     }
 

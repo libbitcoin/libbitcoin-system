@@ -29,8 +29,8 @@ const auto chunk = base16_chunk("00010203040506070809");
 
 BOOST_AUTO_TEST_CASE(ostream__setstate__goodbit__goodbit)
 {
-    auto chunk = base16_chunk("");
-    ostream_chunk stream{ chunk };
+    data_chunk empty{};
+    ostream_chunk stream{ empty };
     stream.setstate(ostream_chunk::goodbit);
     BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
 }
@@ -48,8 +48,8 @@ BOOST_AUTO_TEST_CASE(ostream__setstate__eofbit__eofbit)
 
 BOOST_AUTO_TEST_CASE(ostream__setstate__failbit__failbit)
 {
-    auto chunk = base16_chunk("");
-    ostream_chunk stream{ chunk };
+    data_chunk empty{};
+    ostream_chunk stream{ empty };
     stream.setstate(ostream_chunk::failbit);
     BOOST_REQUIRE(stream.rdstate() == ostream_chunk::failbit);
 
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(ostream__setstate__failbit__failbit)
 
 BOOST_AUTO_TEST_CASE(ostream__setstate__badbit__badbit)
 {
-    auto chunk = base16_chunk("");
-    ostream_chunk stream{ chunk };
+    data_chunk empty{};
+    ostream_chunk stream{ empty };
     stream.setstate(ostream_chunk::badbit);
     BOOST_REQUIRE(stream.rdstate() == ostream_chunk::badbit);
 
@@ -92,16 +92,16 @@ BOOST_AUTO_TEST_CASE(ostream__setstate__badbit_failbit__badbit_failbit)
 
 BOOST_AUTO_TEST_CASE(ostream__tellp__empty__zero_goodbit)
 {
-    auto chunk = base16_chunk("");
-    ostream_chunk stream{ chunk };
+    data_chunk empty{};
+    ostream_chunk stream{ empty };
     BOOST_REQUIRE(is_zero(stream.tellp()));
     BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(ostream__tellp__initial__zero_goodbit)
 {
-    auto chunk = base16_chunk("");
-    ostream_chunk stream{ chunk };
+    data_chunk empty{};
+    ostream_chunk stream{ empty };
     BOOST_REQUIRE(is_zero(stream.tellp()));
     BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
 }
@@ -110,9 +110,9 @@ BOOST_AUTO_TEST_CASE(ostream__tellp__initial__zero_goodbit)
 
 BOOST_AUTO_TEST_CASE(ostream__write__none_empty__goodbit)
 {
-    const auto buffer = base16_chunk("");
-    auto chunk = base16_chunk("");
-    ostream_chunk stream{ chunk };
+    const data_chunk buffer{};
+    data_chunk empty{};
+    ostream_chunk stream{ empty };
     stream.write(system::pointer_cast<const char>(buffer.data()), buffer.size());
     BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
 }
@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(ostream__write__none_empty__goodbit)
 BOOST_AUTO_TEST_CASE(ostream__write__overflow_empty__badbit)
 {
     const auto buffer = base16_chunk("00010203040506070809");
-    auto chunk = base16_chunk("");
-    ostream_chunk stream{ chunk };
+    data_chunk empty{};
+    ostream_chunk stream{ empty };
     stream.write(system::pointer_cast<const char>(buffer.data()), buffer.size());
     BOOST_REQUIRE(stream.rdstate() == ostream_chunk::badbit);
 }
