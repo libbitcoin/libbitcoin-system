@@ -274,8 +274,8 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 
 #else
 
-// Symbol is defined but not usable.
-struct xint128_t : xmock_t {};
+// Symbol is defined but not usable as an integer.
+using xint128_t = std_array<uint8_t, bytes<128>>;
 
 #endif // HAVE_SSE4
 

@@ -287,8 +287,8 @@ INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 
 #else
 
-// Symbol is defined but not usable.
-struct xint256_t : xmock_t {};
+// Symbol is defined but not usable as an integer.
+using xint256_t = std_array<uint8_t, bytes<256>>;
 
 #endif // HAVE_AVX2
 

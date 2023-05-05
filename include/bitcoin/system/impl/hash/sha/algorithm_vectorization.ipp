@@ -404,15 +404,19 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     digests.template advance<lanes>();
 }
 
+// Merkle Hash.
+// ----------------------------------------------------------------------------
+
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE void CLASS::
-merkle_hash_v_(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
+merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 {
     BC_ASSERT(digests.size() == blocks.size());
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
+    // RUNTIME INTRINSIC CHECK
     if (blocks.size() >= lanes && have<xWord>())
     {
         static auto initial = pack<xWord>(H::get);
@@ -447,7 +451,7 @@ merkle_hash_v_(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-merkle_hash_v(digests_t& digests) NOEXCEPT
+merkle_hash_dispatch(digests_t& digests) NOEXCEPT
 {
     // Merkle vector dispatch.
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
@@ -463,11 +467,11 @@ merkle_hash_v(digests_t& digests) NOEXCEPT
 
         // Merkle hash vector dispatch.
         if constexpr (have_x512)
-            merkle_hash_v_<xint512_t>(idigests, iblocks);
+            merkle_hash_invoke<xint512_t>(idigests, iblocks);
         if constexpr (have_x256)
-            merkle_hash_v_<xint256_t>(idigests, iblocks);
+            merkle_hash_invoke<xint256_t>(idigests, iblocks);
         if constexpr (have_x128)
-            merkle_hash_v_<xint128_t>(idigests, iblocks);
+            merkle_hash_invoke<xint128_t>(idigests, iblocks);
 
         // iblocks.size() is reduced by vectorization.
         offset = blocks - iblocks.size();
@@ -484,7 +488,7 @@ merkle_hash_v(digests_t& digests) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-compress_v(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+compress_dispatch(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
@@ -521,11 +525,12 @@ compress_v(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE void CLASS::
-iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT
+iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
+    // RUNTIME INTRINSIC CHECK
     if (blocks.size() >= lanes && have<xWord>())
     {
         BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
@@ -537,7 +542,7 @@ iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT
             // input() advances block iterator by lanes.
             input(xbuffer, blocks);
             schedule_(xbuffer);
-            compress_v(state, xbuffer);
+            compress_dispatch(state, xbuffer);
         }
         while (blocks.size() >= lanes);
     }
@@ -545,17 +550,17 @@ iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT
+iterate_dispatch(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if (blocks.size() >= min_lanes)
     {
         // Schedule iteration vector dispatch.
         if constexpr (have_x512)
-            iterate_v_<xint512_t>(state, blocks);
+            iterate_invoke<xint512_t>(state, blocks);
         if constexpr (have_x256)
-            iterate_v_<xint256_t>(state, blocks);
+            iterate_invoke<xint256_t>(state, blocks);
         if constexpr (have_x128)
-            iterate_v_<xint128_t>(state, blocks);
+            iterate_invoke<xint128_t>(state, blocks);
     }
 
     // Complete rounds using normal form.
@@ -566,12 +571,12 @@ iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT
 TEMPLATE
 template <size_t Size>
 INLINE void CLASS::
-iterate_v(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+iterate_dispatch(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     if (blocks.size() >= min_lanes)
     {
         auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
-        iterate_v(state, iblocks);
+        iterate_dispatch(state, iblocks);
     }
     else
     {
@@ -602,7 +607,7 @@ sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
 TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare_v(buffer_t& buffer) NOEXCEPT
+prepare_dispatch(buffer_t& buffer) NOEXCEPT
 {
     // Requires avx512 for sha512 and avx2 for sha256.
     // sigma0x8 message scheduling for single block iteration.
@@ -668,35 +673,50 @@ prepare_v(buffer_t& buffer) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-schedule_v(auto& buffer) NOEXCEPT
+schedule_invoke(buffer_t& buffer) NOEXCEPT
 {
-    using word = decltype(buffer.front());
-
-    if constexpr (SHA::strength == 160 || !is_same_type<word, word_t>)
+    // RUNTIME INTRINSIC CHECK
+    if (have_lanes<word_t, 8>())
     {
-        schedule_(buffer);
-    }
-    else if (!have_lanes<word_t, 8>())
-    {
-        schedule_(buffer);
-    }
-    else
-    {
-        // Schedule prepare vector dispatch.
-        prepare_v<16>(buffer);
-        prepare_v<24>(buffer);
-        prepare_v<32>(buffer);
-        prepare_v<40>(buffer);
-        prepare_v<48>(buffer);
-        prepare_v<56>(buffer);
+        prepare_dispatch<16>(buffer);
+        prepare_dispatch<24>(buffer);
+        prepare_dispatch<32>(buffer);
+        prepare_dispatch<40>(buffer);
+        prepare_dispatch<48>(buffer);
+        prepare_dispatch<56>(buffer);
 
         if constexpr (SHA::rounds == 80)
         {
-            prepare_v<64>(buffer);
-            prepare_v<72>(buffer);
+            prepare_dispatch<64>(buffer);
+            prepare_dispatch<72>(buffer);
         }
 
         add_k(buffer);
+    }
+    else
+    {
+        schedule_(buffer);
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::
+schedule_dispatch(auto& buffer) NOEXCEPT
+{
+    // buffer may be vectorized via merkle execution path.
+    using word = decltype(buffer.front());
+
+    // Schedule prepare vector dispatch.
+    if constexpr ((SHA::strength != 160) && is_same_type<word, word_t> &&
+                 ((have_x512 && (capacity<xint512_t, word_t> == 8u)) ||
+                  (have_x256 && (capacity<xint256_t, word_t> == 8u)) ||
+                  (have_x128 && (capacity<xint128_t, word_t> == 8u))))
+    {
+        schedule_invoke(buffer);
+    }
+    else
+    {
+        schedule_(buffer);
     }
 }
 

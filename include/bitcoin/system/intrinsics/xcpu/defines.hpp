@@ -21,9 +21,6 @@
 
 #include <bitcoin/system/define.hpp>
 
-/// Base type for mock extended integer types, used for differentiation.
-struct xmock_t {};
-
 #if defined(HAVE_XCPU)
     #include <immintrin.h>
     #if defined(HAVE_X64)
