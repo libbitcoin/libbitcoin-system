@@ -28,11 +28,11 @@
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
 
-// The only multiple inheritance conflicts are resolved below.
-BC_PUSH_WARNING(DIAMOND_INHERITANCE)
-
 namespace libbitcoin {
 namespace system {
+
+// The only multiple inheritance conflicts are resolved below.
+BC_PUSH_WARNING(DIAMOND_INHERITANCE)
 
 /// A bit reader/writer that accepts an iostream.
 /// Bit actions may lead to unextected read behavior, as they are read and
@@ -79,9 +79,9 @@ public:
     }
 };
 
+BC_POP_WARNING()
+
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
 
 #endif

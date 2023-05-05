@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_STREAM_SIMPLE_ISTREAM_HPP
-#define LIBBITCOIN_SYSTEM_STREAM_SIMPLE_ISTREAM_HPP
+#ifndef LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_HPP
+#define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_HPP
 
 #include <ios>
 #include <bitcoin/system/define.hpp>
@@ -25,14 +25,12 @@
 namespace libbitcoin {
 namespace system {
 
-BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
-
-/// Support for high level input operations on a byte buffer.
-template <typename Source, typename Character = char>
-class istream
+/// Support for high level input/output operations on a byte buffer.
+template <typename Buffer, typename Character = char>
+class iostream
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(istream);
+    DEFAULT_COPY_MOVE_DESTRUCT(iostream);
 
     using char_type = Character;
     using int_type = typename std::basic_ios<char_type>::int_type;
@@ -52,44 +50,54 @@ public:
     static constexpr seekdir end = 2;
 
     /// Construct the object.
-    inline istream(const Source& source) NOEXCEPT;
-
-    /// Return the relative input position indicator (zero-based).
-    virtual inline pos_type tellg() const NOEXCEPT;
-
-    /// Set the relative input position indicator (zero-based).
-    virtual inline istream& seekg(off_type offset, seekdir direction) NOEXCEPT;
+    INLINE iostream(Buffer& buffer) NOEXCEPT;
+    INLINE iostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
     /// Return state flags.
-    virtual inline iostate rdstate() const NOEXCEPT;
+    virtual INLINE iostate rdstate() const NOEXCEPT;
 
     /// Set the stream error flags state in addition to currently set flags.
-    virtual inline void setstate(iostate state) NOEXCEPT;
+    virtual INLINE void setstate(iostate state) NOEXCEPT;
 
     /// Set the stream error state flags by assigning the state value.
-    virtual inline void clear(iostate state = goodbit) NOEXCEPT;
+    virtual INLINE void clear(iostate state = goodbit) NOEXCEPT;
 
-    /// Read a block of characters, sets badbit on underflow.
-    virtual inline void read(char_type* data, pos_type size) NOEXCEPT;
+    /// Return the relative input position indicator (zero-based).
+    virtual INLINE pos_type tellg() const NOEXCEPT;
+
+    /// Return the relative output position indicator (zero-based).
+    virtual INLINE pos_type tellp() const NOEXCEPT;
+
+    /// Set the relative input position indicator (zero-based).
+    virtual INLINE iostream& seekg(off_type offset, seekdir direction) NOEXCEPT;
 
     /// Read the next character without advancing, sets badbit on underflow.
-    virtual inline int_type peek() NOEXCEPT;
+    virtual INLINE int_type peek() NOEXCEPT;
+
+    /// Read a block of characters, sets badbit on underflow.
+    virtual INLINE void read(char_type* data, pos_type size) NOEXCEPT;
+
+    /// Write a block of characters, sets badbit on overflow.
+    virtual INLINE void write(const char_type* data, pos_type size) NOEXCEPT;
+
+    /// Synchronize with the underlying storage device (no-op).
+    virtual INLINE void flush() NOEXCEPT;
 
 private:
     static constexpr bool is_positive(off_type value) NOEXCEPT;
-    inline bool is_overflow(pos_type size) const NOEXCEPT;
+    INLINE bool is_overflow(pos_type size) const NOEXCEPT;
 
-    const uint8_t* position_;
-    const uint8_t* begin_;
-    const uint8_t* end_;
+    uint8_t* position_;
+    uint8_t* begin_;
+    uint8_t* end_;
     iostate state_;
 };
-
-BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/stream/simple/istream.ipp>
+#include <bitcoin/system/impl/stream/iostream/iostream.ipp>
+#include <bitcoin/system/impl/stream/iostream/istream.ipp>
+#include <bitcoin/system/impl/stream/iostream/ostream.ipp>
 
 #endif

@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include "clone/algorithm.hpp"
 
 BOOST_AUTO_TEST_SUITE(vectorization_tests)
 
@@ -76,12 +75,12 @@ BOOST_AUTO_TEST_CASE(vectorization__sha256__merkle_root__expected)
     constexpr auto expected = sha_256::double_hash(expected26, expected27);
 
     BOOST_CHECK_EQUAL(sha_256::merkle_root(
-        {
-            { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
-            { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
-            { 16 }, { 17 }, { 18 }, { 19 }, { 20 }, { 21 }, { 22 }, { 23 },
-            { 24 }, { 25 }, { 26 }, { 27 }
-        }), expected);
+    {
+        { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
+        { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
+        { 16 }, { 17 }, { 18 }, { 19 }, { 20 }, { 21 }, { 22 }, { 23 },
+        { 24 }, { 25 }, { 26 }, { 27 }
+    }), expected);
 }
 
 BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
@@ -134,12 +133,12 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
     constexpr auto expected = sha_512::double_hash(expected26, expected27);
 
     BOOST_CHECK_EQUAL(sha_512::merkle_root(
-        {
-            { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
-            { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
-            { 16 }, { 17 }, { 18 }, { 19 }, { 20 }, { 21 }, { 22 }, { 23 },
-            { 24 }, { 25 }, { 26 }, { 27 }
-        }), expected);
+    {
+        { 0 },  { 1 },  { 2 },  { 3 },  { 4 },  { 5 },  { 6 },  { 7 },
+        { 8 },  { 9 },  { 10 }, { 11 }, { 12 }, { 13 }, { 14 }, { 15 },
+        { 16 }, { 17 }, { 18 }, { 19 }, { 20 }, { 21 }, { 22 }, { 23 },
+        { 24 }, { 25 }, { 26 }, { 27 }
+    }), expected);
 }
 
 // Message scheduling

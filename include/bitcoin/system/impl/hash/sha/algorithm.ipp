@@ -573,7 +573,7 @@ schedule(auto& buffer) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        schedule_v(buffer);
+        schedule_dispatch(buffer);
     }
     else
     {
@@ -1198,7 +1198,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        iterate_v(state, blocks);
+        iterate_dispatch(state, blocks);
     }
     else
     {
@@ -1212,7 +1212,7 @@ iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if constexpr (vectorization)
     {
-        iterate_v(state, blocks);
+        iterate_dispatch(state, blocks);
     }
     else
     {
@@ -1284,7 +1284,7 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else if constexpr (vectorization)
     {
-        merkle_hash_v(digests);
+        merkle_hash_dispatch(digests);
     }
     else
     {

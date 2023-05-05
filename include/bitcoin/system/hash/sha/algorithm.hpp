@@ -269,10 +269,10 @@ protected:
         const xstate_t<xWord>& xstate) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
-    INLINE static void merkle_hash_v_(idigests_t& digests,
+    INLINE static void merkle_hash_invoke(idigests_t& digests,
         iblocks_t& blocks) NOEXCEPT;
 
-    INLINE static void merkle_hash_v(digests_t& digests) NOEXCEPT;
+    INLINE static void merkle_hash_dispatch(digests_t& digests) NOEXCEPT;
 
     /// Message Schedule (block vectorization).
     /// -----------------------------------------------------------------------
@@ -285,15 +285,17 @@ protected:
     INLINE static Word extract(xWord a) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void compress_v(state_t& state,
+    INLINE static void compress_dispatch(state_t& state,
         const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
-    INLINE static void iterate_v_(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
     template <size_t Size>
-    INLINE static void iterate_v(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT;
-    INLINE static void iterate_v(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void iterate_dispatch(state_t& state,
+        const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void iterate_dispatch(state_t& state,
+        iblocks_t& blocks) NOEXCEPT;
 
     /// Message Schedule (sigma vectorization).
     /// -----------------------------------------------------------------------
@@ -303,17 +305,20 @@ protected:
         auto x6, auto x7, auto x8) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static void prepare_v(buffer_t& buffer) NOEXCEPT;
-    INLINE static void schedule_v(auto& buffer) NOEXCEPT;
+    INLINE static void prepare_dispatch(buffer_t& buffer) NOEXCEPT;
+    INLINE static void schedule_invoke(buffer_t& buffer) NOEXCEPT;
+    INLINE static void schedule_dispatch(auto& buffer) NOEXCEPT;
 
 public:
     static constexpr auto have_x128     = Vectorized && system::with_sse41;
     static constexpr auto have_x256     = Vectorized && system::with_avx2;
     static constexpr auto have_x512     = Vectorized && system::with_avx512;
-    static constexpr auto min_lanes     = (have_x128 ? 16 : (have_x256 ? 32 :
-                                          (have_x128 ? 64 : 0))) / SHA::word_bytes;
-    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512) && 
-                                         !(build_x32 && is_same_size<word_t, uint64_t>);
+    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512)
+        && !(build_x32 && is_same_size<word_t, uint64_t>);
+    static constexpr auto min_lanes =
+        (have_x128 ? bytes<128> :
+            (have_x256 ? bytes<256> :
+                (have_x512 ? bytes<512> : 0))) / SHA::word_bytes;
 };
 
 } // namespace sha

@@ -301,10 +301,6 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/sha/sha256.cpp \
     test/hash/sha/sha512.cpp \
     test/hash/sha/vectorization.cpp \
-    test/hash/sha/clone/algorithm.hpp \
-    test/hash/sha/clone/algorithm.ipp \
-    test/hash/sha/clone/algorithm_compression.ipp \
-    test/hash/sha/clone/algorithm_vectorization.ipp \
     test/intrinsics/haves.cpp \
     test/intrinsics/intrinsics.cpp \
     test/intrinsics/xcpu/cpuid.cpp \
@@ -343,9 +339,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/stream/devices/copy_source.cpp \
     test/stream/devices/flip_sink.cpp \
     test/stream/devices/push_sink.cpp \
-    test/stream/simple/iostream.cpp \
-    test/stream/simple/istream.cpp \
-    test/stream/simple/ostream.cpp \
+    test/stream/iostream/iostream.cpp \
+    test/stream/iostream/istream.cpp \
+    test/stream/iostream/ostream.cpp \
     test/stream/streamers/bit_flipper.cpp \
     test/stream/streamers/bit_reader.cpp \
     test/stream/streamers/bit_writer.cpp \
@@ -647,10 +643,11 @@ include_bitcoin_system_impl_streamdir = ${includedir}/bitcoin/system/impl/stream
 include_bitcoin_system_impl_stream_HEADERS = \
     include/bitcoin/system/impl/stream/device.ipp
 
-include_bitcoin_system_impl_stream_simpledir = ${includedir}/bitcoin/system/impl/stream/simple
-include_bitcoin_system_impl_stream_simple_HEADERS = \
-    include/bitcoin/system/impl/stream/simple/istream.ipp \
-    include/bitcoin/system/impl/stream/simple/ostream.ipp
+include_bitcoin_system_impl_stream_iostreamdir = ${includedir}/bitcoin/system/impl/stream/iostream
+include_bitcoin_system_impl_stream_iostream_HEADERS = \
+    include/bitcoin/system/impl/stream/iostream/iostream.ipp \
+    include/bitcoin/system/impl/stream/iostream/istream.ipp \
+    include/bitcoin/system/impl/stream/iostream/ostream.ipp
 
 include_bitcoin_system_impl_stream_streamersdir = ${includedir}/bitcoin/system/impl/stream/streamers
 include_bitcoin_system_impl_stream_streamers_HEADERS = \
@@ -741,6 +738,7 @@ include_bitcoin_system_streamdir = ${includedir}/bitcoin/system/stream
 include_bitcoin_system_stream_HEADERS = \
     include/bitcoin/system/stream/binary.hpp \
     include/bitcoin/system/stream/device.hpp \
+    include/bitcoin/system/stream/iostream.hpp \
     include/bitcoin/system/stream/make_stream.hpp \
     include/bitcoin/system/stream/make_streamer.hpp \
     include/bitcoin/system/stream/stream.hpp \
@@ -754,12 +752,6 @@ include_bitcoin_system_stream_devices_HEADERS = \
     include/bitcoin/system/stream/devices/copy_source.hpp \
     include/bitcoin/system/stream/devices/flip_sink.hpp \
     include/bitcoin/system/stream/devices/push_sink.hpp
-
-include_bitcoin_system_stream_simpledir = ${includedir}/bitcoin/system/stream/simple
-include_bitcoin_system_stream_simple_HEADERS = \
-    include/bitcoin/system/stream/simple/iostream.hpp \
-    include/bitcoin/system/stream/simple/istream.hpp \
-    include/bitcoin/system/stream/simple/ostream.hpp
 
 include_bitcoin_system_stream_streamersdir = ${includedir}/bitcoin/system/stream/streamers
 include_bitcoin_system_stream_streamers_HEADERS = \

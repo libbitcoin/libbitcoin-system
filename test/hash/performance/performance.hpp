@@ -22,7 +22,6 @@
 #include "../../test.hpp"
 #include "baseline/rmd160.h"
 #include "baseline/sha256.h"
-#include "../sha/clone/algorithm.hpp"
 #include <chrono>
 
 namespace performance {

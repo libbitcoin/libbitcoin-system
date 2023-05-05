@@ -327,8 +327,8 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 
 #else
 
-// Symbol is defined but not usable.
-struct xint512_t : xmock_t {};
+// Symbol is defined but not usable as an integer.
+using xint512_t = std_array<uint8_t, bytes<512>>;
 
 #endif // HAVE_AVX512
 

@@ -98,7 +98,6 @@ namespace xcr0
     constexpr auto avx_bit = 2;
 }
 
-
 // Local util because no dependency on /math.
 template <size_t Bit, typename Value>
 constexpr bool get_bit(Value value) NOEXCEPT
@@ -266,20 +265,6 @@ using to_extended =
                     iif<capacity<xint128_t, Integral, Lanes> == one, xint128_t,
                         iif<capacity<xint256_t, Integral, Lanes> == one, xint256_t,
                             xint512_t>>>>>>;
-
-/// Compile time (constexpr) availability of extended integer intrinsics,
-/// as a template function of the extended integer type.
-template <typename Extended, if_extended<Extended> = true>
-CONSTEVAL bool with() NOEXCEPT
-{
-    if constexpr (is_same_type<Extended, xint512_t>)
-        return with_avx512;
-    else if constexpr (is_same_type<Extended, xint256_t>)
-        return with_avx2;
-    else if constexpr (is_same_type<Extended, xint128_t>)
-        return with_sse41;
-    else return false;
-}
 
 /// Runtime time availability of extended integer intrinsics, as a template
 /// function of the extended integer type.

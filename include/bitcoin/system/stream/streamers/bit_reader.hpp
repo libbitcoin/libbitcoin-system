@@ -27,12 +27,12 @@
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>
 
+namespace libbitcoin {
+namespace system {
+
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
 BC_PUSH_WARNING(DIAMOND_INHERITANCE)
-
-namespace libbitcoin {
-namespace system {
 
 /// A bit reader that accepts an istream.
 template <typename IStream = std::istream>
@@ -77,10 +77,10 @@ private:
     uint8_t offset_;
 };
 
+BC_POP_WARNING()
+
 } // namespace system
 } // namespace libbitcoin
-
-BC_POP_WARNING()
 
 #include <bitcoin/system/impl/stream/streamers/bit_reader.ipp>
 
