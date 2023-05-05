@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_STREAM_SIMPLE_ISTREAM_IPP
-#define LIBBITCOIN_SYSTEM_STREAM_SIMPLE_ISTREAM_IPP
+#ifndef LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_ISTREAM_IPP
+#define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_ISTREAM_IPP
 
 #include <algorithm>
 #include <type_traits>
@@ -28,35 +28,16 @@ namespace system {
 
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
-template <typename Source, typename Character>
-INLINE istream<Source, Character>::istream(const Source& source) NOEXCEPT
-  : position_(source.data()),
-    begin_(position_),
-    end_(begin_ + source.size()),
-    state_(goodbit)
-{
-}
-
-template <typename Source, typename Character>
-INLINE istream<Source, Character>::istream(const uint8_t* begin,
-    ptrdiff_t size) NOEXCEPT
-  : position_(begin),
-    begin_(position_),
-    end_(begin_ + size),
-    state_(goodbit)
-{
-}
-
-template <typename Source, typename Character>
-INLINE typename istream<Source, Character>::pos_type
-istream<Source, Character>::tellg() const NOEXCEPT
+template <typename Buffer, typename Character>
+INLINE typename iostream<Buffer, Character>::pos_type
+iostream<Buffer, Character>::tellg() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
-template <typename Source, typename Character>
-INLINE istream<Source, Character>&
-istream<Source, Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
+template <typename Buffer, typename Character>
+INLINE iostream<Buffer, Character>&
+iostream<Buffer, Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 {
     if (state_ != goodbit)
         return *this;
@@ -108,30 +89,25 @@ istream<Source, Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
     return *this;
 }
 
-template <typename Source, typename Character>
-INLINE typename istream<Source, Character>::iostate
-istream<Source, Character>::rdstate() const NOEXCEPT
+template <typename Buffer, typename Character>
+INLINE typename iostream<Buffer, Character>::int_type
+iostream<Buffer, Character>::peek() NOEXCEPT
 {
-    return state_;
+    constexpr auto eof = std::char_traits<Character>::eof();
+
+    if (is_overflow(1))
+    {
+        setstate(badbit);
+        return eof;
+    }
+
+    const uint8_t value = *position_;
+    return system::sign_cast<int_type>(value);
 }
 
-template <typename Source, typename Character>
+template <typename Buffer, typename Character>
 INLINE void
-istream<Source, Character>::setstate(iostate state) NOEXCEPT
-{
-    state_ |= state;
-}
-
-template <typename Source, typename Character>
-INLINE void
-istream<Source, Character>::clear(iostate state) NOEXCEPT
-{
-    state_ = state;
-}
-
-template <typename Source, typename Character>
-INLINE void
-istream<Source, Character>::read(char_type* data, pos_type size) NOEXCEPT
+iostream<Buffer, Character>::read(char_type* data, pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
     {
@@ -146,36 +122,12 @@ istream<Source, Character>::read(char_type* data, pos_type size) NOEXCEPT
     position_ += size;
 }
 
-template <typename Source, typename Character>
-INLINE typename istream<Source, Character>::int_type
-istream<Source, Character>::peek() NOEXCEPT
-{
-    constexpr auto eof = std::char_traits<Character>::eof();
-
-    if (is_overflow(1))
-    {
-        setstate(badbit);
-        return eof;
-    }
-
-    const uint8_t value = *position_;
-    return system::sign_cast<int_type>(value);
-}
-
 // private
-template <typename Source, typename Character>
+template <typename Buffer, typename Character>
 constexpr bool
-istream<Source, Character>::is_positive(off_type value) NOEXCEPT
+iostream<Buffer, Character>::is_positive(off_type value) NOEXCEPT
 {
     return !is_zero(value) && !system::is_negative(value);
-}
-
-// private
-template <typename Source, typename Character>
-INLINE bool
-istream<Source, Character>::is_overflow(pos_type size) const NOEXCEPT
-{
-    return (state_ != goodbit) || (size > (end_ - position_));
 }
 
 BC_POP_WARNING()
