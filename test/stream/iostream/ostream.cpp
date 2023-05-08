@@ -18,84 +18,84 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(iostream_tests)
+BOOST_AUTO_TEST_SUITE(ostream_tests)
 
-using iostream_chunk = iostream<data_chunk>;
-using pos_type = typename iostream_chunk::pos_type;
-using iostate = typename iostream_chunk::iostate;
+using ostream_chunk = ostream<data_chunk>;
+using pos_type = typename ostream_chunk::pos_type;
+using iostate = typename ostream_chunk::iostate;
 const auto chunk = base16_chunk("00010203040506070809");
 
 // tellp
 
-BOOST_AUTO_TEST_CASE(iostream__tellp__empty__zero_goodbit)
+BOOST_AUTO_TEST_CASE(ostream__tellp__empty__zero_goodbit)
 {
     data_chunk empty{};
-    iostream_chunk stream{ empty };
+    ostream_chunk stream{ empty };
     BOOST_REQUIRE(is_zero(stream.tellp()));
-    BOOST_REQUIRE(stream.rdstate() == iostream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
 }
 
-BOOST_AUTO_TEST_CASE(iostream__tellp__initial__zero_goodbit)
+BOOST_AUTO_TEST_CASE(ostream__tellp__initial__zero_goodbit)
 {
     data_chunk empty{};
-    iostream_chunk stream{ empty };
+    ostream_chunk stream{ empty };
     BOOST_REQUIRE(is_zero(stream.tellp()));
-    BOOST_REQUIRE(stream.rdstate() == iostream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
 }
 
 // write
 
-BOOST_AUTO_TEST_CASE(iostream__write__none_empty__goodbit)
+BOOST_AUTO_TEST_CASE(ostream__write__none_empty__goodbit)
 {
     const data_chunk buffer{};
     data_chunk empty{};
-    iostream_chunk stream{ empty };
+    ostream_chunk stream{ empty };
     stream.write(system::pointer_cast<const char>(buffer.data()), buffer.size());
-    BOOST_REQUIRE(stream.rdstate() == iostream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
 }
 
-BOOST_AUTO_TEST_CASE(iostream__write__overflow_empty__badbit)
+BOOST_AUTO_TEST_CASE(ostream__write__overflow_empty__badbit)
 {
     const auto buffer = base16_chunk("00010203040506070809");
     data_chunk empty{};
-    iostream_chunk stream{ empty };
+    ostream_chunk stream{ empty };
     stream.write(system::pointer_cast<const char>(buffer.data()), buffer.size());
-    BOOST_REQUIRE(stream.rdstate() == iostream_chunk::badbit);
+    BOOST_REQUIRE(stream.rdstate() == ostream_chunk::badbit);
 }
 
-BOOST_AUTO_TEST_CASE(iostream__write__overflow_nonempty__badbit)
+BOOST_AUTO_TEST_CASE(ostream__write__overflow_nonempty__badbit)
 {
     const auto buffer = base16_chunk("00010203040506070809");
     auto chunk = base16_chunk("000000000000");
-    iostream_chunk stream{ chunk };
+    ostream_chunk stream{ chunk };
     stream.write(system::pointer_cast<const char>(buffer.data()), buffer.size());
-    BOOST_REQUIRE(stream.rdstate() == iostream_chunk::badbit);
+    BOOST_REQUIRE(stream.rdstate() == ostream_chunk::badbit);
 }
 
-BOOST_AUTO_TEST_CASE(iostream__write__full_buffer__goodbit)
+BOOST_AUTO_TEST_CASE(ostream__write__full_buffer__goodbit)
 {
     const auto buffer = base16_chunk("00010203040506070809");
     auto chunk = base16_chunk("00000000000000000000000000");
     BOOST_REQUIRE_GE(chunk.size(), buffer.size());
     BOOST_REQUIRE_NE(buffer, chunk);
 
-    iostream_chunk stream{ chunk };
+    ostream_chunk stream{ chunk };
     stream.write(system::pointer_cast<const char>(buffer.data()), buffer.size());
-    BOOST_REQUIRE(stream.rdstate() == iostream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
     chunk.resize(buffer.size());
     BOOST_REQUIRE_EQUAL(buffer, chunk);
 }
 
 // writer
 
-BOOST_AUTO_TEST_CASE(iostream__writer__write_8_bytes_big_endian__exected_goodbit)
+BOOST_AUTO_TEST_CASE(ostream__writer__write_8_bytes_big_endian__exected_goodbit)
 {
     const auto expected = base16_chunk("010203040506070800");
     auto chunk = base16_chunk("000000000000000000");
-    iostream_chunk stream{ chunk };
-    byte_writer<iostream_chunk> writer{ stream };
+    ostream_chunk stream{ chunk };
+    byte_writer<ostream_chunk> writer{ stream };
     writer.write_8_bytes_big_endian(0x0102030405060708_u64);
-    BOOST_REQUIRE(stream.rdstate() == iostream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == ostream_chunk::goodbit);
     BOOST_REQUIRE_EQUAL(chunk, expected);
 }
 
