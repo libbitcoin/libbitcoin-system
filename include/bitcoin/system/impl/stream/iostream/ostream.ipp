@@ -27,8 +27,9 @@ namespace system {
 
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
-template <typename Buffer, typename Character>
-INLINE ostream<Buffer, Character>::ostream(Buffer& buffer) NOEXCEPT
+template <typename Character>
+template <typename Buffer>
+ostream<Character>::ostream(Buffer& buffer) NOEXCEPT
   : position_(buffer.data()),
     begin_(position_),
     end_(begin_ + buffer.size()),
@@ -36,8 +37,8 @@ INLINE ostream<Buffer, Character>::ostream(Buffer& buffer) NOEXCEPT
 {
 }
 
-template <typename Buffer, typename Character>
-INLINE ostream<Buffer, Character>::ostream(uint8_t* begin,
+template <typename Character>
+ostream<Character>::ostream(uint8_t* begin,
     ptrdiff_t size) NOEXCEPT
   : position_(begin),
     begin_(position_),
@@ -46,37 +47,37 @@ INLINE ostream<Buffer, Character>::ostream(uint8_t* begin,
 {
 }
 
-template <typename Buffer, typename Character>
-INLINE typename ostream<Buffer, Character>::iostate
-ostream<Buffer, Character>::rdstate() const NOEXCEPT
+template <typename Character>
+INLINE typename ostream<Character>::iostate
+ostream<Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-ostream<Buffer, Character>::setstate(iostate state) NOEXCEPT
+ostream<Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-ostream<Buffer, Character>::clear(iostate state) NOEXCEPT
+ostream<Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
 }
 
-template <typename Buffer, typename Character>
-INLINE typename ostream<Buffer, Character>::pos_type
-ostream<Buffer, Character>::tellp() const NOEXCEPT
+template <typename Character>
+INLINE typename ostream<Character>::pos_type
+ostream<Character>::tellp() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-ostream<Buffer, Character>::write(const char_type* data,
+ostream<Character>::write(const char_type* data,
     pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
@@ -92,16 +93,16 @@ ostream<Buffer, Character>::write(const char_type* data,
     position_ += size;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-ostream<Buffer, Character>::flush() NOEXCEPT
+ostream<Character>::flush() NOEXCEPT
 {
 }
 
 // private
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE bool
-ostream<Buffer, Character>::is_overflow(pos_type size) const NOEXCEPT
+ostream<Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));
 }

@@ -20,137 +20,136 @@
 
 BOOST_AUTO_TEST_SUITE(istream_tests)
 
-using istream_chunk = istream<data_chunk>;
-using seekdir = typename istream_chunk::seekdir;
-using pos_type = typename istream_chunk::pos_type;
-using iostate = typename istream_chunk::iostate;
+using seekdir = typename istream<>::seekdir;
+using pos_type = typename istream<>::pos_type;
+using iostate = typename istream<>::iostate;
 
 // tellg
 
 BOOST_AUTO_TEST_CASE(istream__tellg__empty__zero_goodbit)
 {
     data_chunk empty{};
-    istream_chunk stream{ empty };
+    istream<> stream{ empty };
     BOOST_REQUIRE(is_zero(stream.tellg()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__tellg__initial__zero_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    const istream_chunk stream{ chunk };
+    const istream<> stream{ chunk };
     BOOST_REQUIRE(is_zero(stream.tellg()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
-// istream_chunk::beg
+// istream<>::beg
 
 BOOST_AUTO_TEST_CASE(istream__seekg__zero_from_begin__tellg_zero_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE(is_zero(stream.seekg(0, istream_chunk::beg).tellg()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE(is_zero(stream.seekg(0, istream<>::beg).tellg()));
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__three_from_begin__tellg_three_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__size_from_begin__tellg_size_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE_EQUAL(stream.seekg(chunk.size(), istream_chunk::beg).tellg(), to_signed(chunk.size()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE_EQUAL(stream.seekg(chunk.size(), istream<>::beg).tellg(), to_signed(chunk.size()));
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__overflow_from_begin__unchanged_badbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE(is_zero(stream.seekg(add1(chunk.size()), istream_chunk::beg).tellg()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE(is_zero(stream.seekg(add1(chunk.size()), istream<>::beg).tellg()));
+    BOOST_REQUIRE(stream.rdstate() == istream<>::badbit);
 }
 
-// istream_chunk::cur
+// istream<>::cur
 
 BOOST_AUTO_TEST_CASE(istream__seekg__zero_from_three_current__tellg_three_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE_EQUAL(stream.seekg(0, istream_chunk::cur).tellg(), 3);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE_EQUAL(stream.seekg(0, istream<>::cur).tellg(), 3);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__three_from_three_current__tellg_six_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::cur).tellg(), 6);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::cur).tellg(), 6);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__size_from_zero_current__tellg_size_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(chunk.size(), istream_chunk::cur).tellg(), to_signed(chunk.size()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(chunk.size(), istream<>::cur).tellg(), to_signed(chunk.size()));
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__overflow_from_three_current__unchanged_badbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE(stream.seekg(chunk.size(), istream_chunk::cur).tellg() == 3);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE(stream.seekg(chunk.size(), istream<>::cur).tellg() == 3);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::badbit);
 }
 
-// istream_chunk::end
+// istream<>::end
 
 BOOST_AUTO_TEST_CASE(istream__seekg__zero_from_end__tellg_size_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE_EQUAL(stream.seekg(0, istream_chunk::end).tellg(), to_signed(chunk.size()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE_EQUAL(stream.seekg(0, istream<>::end).tellg(), to_signed(chunk.size()));
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__negative_three_from_end__tellg_size_less_three_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream_chunk::beg).tellg(), 3);
-    BOOST_REQUIRE_EQUAL(stream.seekg(-3, istream_chunk::end).tellg(), to_signed(chunk.size()) - 3);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(3, istream<>::beg).tellg(), 3);
+    BOOST_REQUIRE_EQUAL(stream.seekg(-3, istream<>::end).tellg(), to_signed(chunk.size()) - 3);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__negative_size_from_end__tellg_zero_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE(is_zero(stream.seekg(-to_signed(chunk.size()), istream_chunk::end).tellg()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE(is_zero(stream.seekg(-to_signed(chunk.size()), istream<>::end).tellg()));
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__seekg__underflow_from_end__unchanged_badbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE(is_zero(stream.seekg(add1(chunk.size()), istream_chunk::end).tellg()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
+    istream<> stream{ chunk };
+    BOOST_REQUIRE(is_zero(stream.seekg(add1(chunk.size()), istream<>::end).tellg()));
+    BOOST_REQUIRE(stream.rdstate() == istream<>::badbit);
 }
 
 // peek
@@ -159,56 +158,56 @@ BOOST_AUTO_TEST_CASE(istream__peek__empty__eof_badbit)
 {
     constexpr auto eof = std::char_traits<char>::eof();
     data_chunk empty{};
-    istream_chunk stream{ empty };
+    istream<> stream{ empty };
     BOOST_REQUIRE_EQUAL(stream.peek(), eof);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::badbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__peek__chunk__no_advance_expected_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
+    istream<> stream{ chunk };
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x00);
     BOOST_REQUIRE(is_zero(stream.tellg()));
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x00);
     BOOST_REQUIRE(is_zero(stream.tellg()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__peek__end__eof_badbit)
 {
     constexpr auto eof = std::char_traits<char>::eof();
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
-    BOOST_REQUIRE_EQUAL(stream.seekg(0, istream_chunk::end).tellg(), to_signed(chunk.size()));
+    istream<> stream{ chunk };
+    BOOST_REQUIRE_EQUAL(stream.seekg(0, istream<>::end).tellg(), to_signed(chunk.size()));
     BOOST_REQUIRE_EQUAL(stream.peek(), eof);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::badbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__peek__chunk__advance_expected_goodbit)
 {
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
+    istream<> stream{ chunk };
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x00);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 1);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 1);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x01);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 2);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 2);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x02);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 3);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 3);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x03);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 4);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 4);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x04);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 5);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 5);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x05);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 6);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 6);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x06);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 7);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 7);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x07);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 8);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 8);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x08);
-    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream_chunk::cur).tellg(), 9);
+    BOOST_REQUIRE_EQUAL(stream.seekg(1, istream<>::cur).tellg(), 9);
     BOOST_REQUIRE_EQUAL(stream.peek(), 0x09);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 // read
@@ -217,27 +216,27 @@ BOOST_AUTO_TEST_CASE(istream__read__none_empty__goodbit)
 {
     data_chunk buffer{};
     data_chunk empty{};
-    istream_chunk stream{ empty };
+    istream<> stream{ empty };
     stream.read(system::pointer_cast<char>(buffer.data()), buffer.size());
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__read__underflow_empty__badbit)
 {
     auto buffer = base16_chunk("00000000000000000000");
     data_chunk empty{};
-    istream_chunk stream{ empty };
+    istream<> stream{ empty };
     stream.read(system::pointer_cast<char>(buffer.data()), buffer.size());
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::badbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__read__underflow_nonempty__badbit)
 {
     auto buffer = base16_chunk("00000000000000000000000000");
     auto chunk = base16_chunk("00010203040506070809");
-    istream_chunk stream{ chunk };
+    istream<> stream{ chunk };
     stream.read(system::pointer_cast<char>(buffer.data()), add1(chunk.size()));
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::badbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::badbit);
 }
 
 BOOST_AUTO_TEST_CASE(istream__read__full_buffer__goodbit)
@@ -247,9 +246,9 @@ BOOST_AUTO_TEST_CASE(istream__read__full_buffer__goodbit)
     BOOST_REQUIRE_GE(buffer.size(), chunk.size());
     BOOST_REQUIRE_NE(buffer, chunk);
 
-    istream_chunk stream{ chunk };
+    istream<> stream{ chunk };
     stream.read(system::pointer_cast<char>(buffer.data()), chunk.size());
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
     buffer.resize(chunk.size());
     BOOST_REQUIRE_EQUAL(buffer, chunk);
 }
@@ -259,10 +258,10 @@ BOOST_AUTO_TEST_CASE(istream__read__full_buffer__goodbit)
 BOOST_AUTO_TEST_CASE(istream__reader__read_8_bytes_big_endian__exected_goodbit)
 {
     auto chunk = base16_chunk("010203040506070809");
-    istream_chunk stream{ chunk };
-    byte_reader<istream_chunk> reader{ stream };
+    istream<> stream{ chunk };
+    byte_reader<istream<>> reader{ stream };
     BOOST_REQUIRE_EQUAL(reader.read_8_bytes_big_endian(), 0x0102030405060708_u64);
-    BOOST_REQUIRE(stream.rdstate() == istream_chunk::goodbit);
+    BOOST_REQUIRE(stream.rdstate() == istream<>::goodbit);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

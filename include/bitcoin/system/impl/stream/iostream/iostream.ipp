@@ -26,8 +26,9 @@ namespace system {
 
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
-template <typename Buffer, typename Character>
-INLINE iostream<Buffer, Character>::iostream(Buffer& buffer) NOEXCEPT
+template <typename Character>
+template <typename Buffer>
+INLINE iostream<Character>::iostream(Buffer& buffer) NOEXCEPT
   : position_(buffer.data()),
     begin_(position_),
     end_(begin_ + buffer.size()),
@@ -35,8 +36,8 @@ INLINE iostream<Buffer, Character>::iostream(Buffer& buffer) NOEXCEPT
 {
 }
 
-template <typename Buffer, typename Character>
-INLINE iostream<Buffer, Character>::iostream(uint8_t* begin,
+template <typename Character>
+INLINE iostream<Character>::iostream(uint8_t* begin,
     ptrdiff_t size) NOEXCEPT
   : position_(begin),
     begin_(position_),
@@ -45,45 +46,45 @@ INLINE iostream<Buffer, Character>::iostream(uint8_t* begin,
 {
 }
 
-template <typename Buffer, typename Character>
-INLINE typename iostream<Buffer, Character>::iostate
-iostream<Buffer, Character>::rdstate() const NOEXCEPT
+template <typename Character>
+INLINE typename iostream<Character>::iostate
+iostream<Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-iostream<Buffer, Character>::setstate(iostate state) NOEXCEPT
+iostream<Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-iostream<Buffer, Character>::clear(iostate state) NOEXCEPT
+iostream<Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
 }
 
 
-template <typename Buffer, typename Character>
-INLINE typename iostream<Buffer, Character>::pos_type
-iostream<Buffer, Character>::tellg() const NOEXCEPT
+template <typename Character>
+INLINE typename iostream<Character>::pos_type
+iostream<Character>::tellg() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
-template <typename Buffer, typename Character>
-INLINE typename iostream<Buffer, Character>::pos_type
-iostream<Buffer, Character>::tellp() const NOEXCEPT
+template <typename Character>
+INLINE typename iostream<Character>::pos_type
+iostream<Character>::tellp() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
-template <typename Buffer, typename Character>
-INLINE iostream<Buffer, Character>&
-iostream<Buffer, Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
+template <typename Character>
+INLINE iostream<Character>&
+iostream<Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 {
     if (state_ != goodbit)
         return *this;
@@ -135,9 +136,9 @@ iostream<Buffer, Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
     return *this;
 }
 
-template <typename Buffer, typename Character>
-INLINE typename iostream<Buffer, Character>::int_type
-iostream<Buffer, Character>::peek() NOEXCEPT
+template <typename Character>
+INLINE typename iostream<Character>::int_type
+iostream<Character>::peek() NOEXCEPT
 {
     constexpr auto eof = std::char_traits<Character>::eof();
 
@@ -151,9 +152,9 @@ iostream<Buffer, Character>::peek() NOEXCEPT
     return system::sign_cast<int_type>(value);
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-iostream<Buffer, Character>::read(char_type* data, pos_type size) NOEXCEPT
+iostream<Character>::read(char_type* data, pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
     {
@@ -168,9 +169,9 @@ iostream<Buffer, Character>::read(char_type* data, pos_type size) NOEXCEPT
     position_ += size;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-iostream<Buffer, Character>::write(const char_type* data,
+iostream<Character>::write(const char_type* data,
     pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
@@ -186,24 +187,24 @@ iostream<Buffer, Character>::write(const char_type* data,
         position_ += size;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-iostream<Buffer, Character>::flush() NOEXCEPT
+iostream<Character>::flush() NOEXCEPT
 {
 }
 
 // private
-template <typename Buffer, typename Character>
+template <typename Character>
 constexpr bool
-iostream<Buffer, Character>::is_positive(off_type value) NOEXCEPT
+iostream<Character>::is_positive(off_type value) NOEXCEPT
 {
     return !is_zero(value) && !system::is_negative(value);
 }
 
 // private
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE bool
-iostream<Buffer, Character>::is_overflow(pos_type size) const NOEXCEPT
+iostream<Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));
 }

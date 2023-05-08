@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Support for high level input/output operations on a byte buffer.
-template <typename Buffer, typename Character = char>
+template <typename Character = char>
 class istream
 {
 public:
@@ -50,6 +50,7 @@ public:
     static constexpr seekdir end = 2;
 
     /// Construct the object.
+    template <typename Buffer>
     INLINE istream(const Buffer& buffer) NOEXCEPT;
     INLINE istream(const uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
