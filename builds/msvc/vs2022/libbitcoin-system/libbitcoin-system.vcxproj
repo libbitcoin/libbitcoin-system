@@ -407,7 +407,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\devices\copy_source.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\devices\flip_sink.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\devices\push_sink.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\iostream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\iostream\iostream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\iostream\istream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\iostream\ostream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\make_stream.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\make_streamer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\stream.hpp" />

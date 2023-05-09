@@ -738,7 +738,6 @@ include_bitcoin_system_streamdir = ${includedir}/bitcoin/system/stream
 include_bitcoin_system_stream_HEADERS = \
     include/bitcoin/system/stream/binary.hpp \
     include/bitcoin/system/stream/device.hpp \
-    include/bitcoin/system/stream/iostream.hpp \
     include/bitcoin/system/stream/make_stream.hpp \
     include/bitcoin/system/stream/make_streamer.hpp \
     include/bitcoin/system/stream/stream.hpp \
@@ -752,6 +751,12 @@ include_bitcoin_system_stream_devices_HEADERS = \
     include/bitcoin/system/stream/devices/copy_source.hpp \
     include/bitcoin/system/stream/devices/flip_sink.hpp \
     include/bitcoin/system/stream/devices/push_sink.hpp
+
+include_bitcoin_system_stream_iostreamdir = ${includedir}/bitcoin/system/stream/iostream
+include_bitcoin_system_stream_iostream_HEADERS = \
+    include/bitcoin/system/stream/iostream/iostream.hpp \
+    include/bitcoin/system/stream/iostream/istream.hpp \
+    include/bitcoin/system/stream/iostream/ostream.hpp
 
 include_bitcoin_system_stream_streamersdir = ${includedir}/bitcoin/system/stream/streamers
 include_bitcoin_system_stream_streamers_HEADERS = \

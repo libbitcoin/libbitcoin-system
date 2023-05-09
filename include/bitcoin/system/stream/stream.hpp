@@ -27,7 +27,9 @@
 #include <bitcoin/system/stream/devices/push_sink.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>
 #include <bitcoin/system/stream/make_streamer.hpp>
-#include <bitcoin/system/stream/iostream.hpp>
+#include <bitcoin/system/stream/iostream/iostream.hpp>
+#include <bitcoin/system/stream/iostream/istream.hpp>
+#include <bitcoin/system/stream/iostream/ostream.hpp>
 #include <bitcoin/system/stream/streamers/bit_flipper.hpp>
 #include <bitcoin/system/stream/streamers/bit_reader.hpp>
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>

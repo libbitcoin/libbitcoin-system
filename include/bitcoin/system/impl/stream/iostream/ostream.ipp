@@ -27,16 +27,58 @@ namespace system {
 
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
-template <typename Buffer, typename Character>
-INLINE typename iostream<Buffer, Character>::pos_type
-iostream<Buffer, Character>::tellp() const NOEXCEPT
+template <typename Character>
+template <typename Buffer>
+ostream<Character>::ostream(Buffer& buffer) NOEXCEPT
+  : position_(buffer.data()),
+    begin_(position_),
+    end_(begin_ + buffer.size()),
+    state_(goodbit)
+{
+}
+
+template <typename Character>
+ostream<Character>::ostream(uint8_t* begin,
+    ptrdiff_t size) NOEXCEPT
+  : position_(begin),
+    begin_(position_),
+    end_(begin_ + size),
+    state_(goodbit)
+{
+}
+
+template <typename Character>
+INLINE typename ostream<Character>::iostate
+ostream<Character>::rdstate() const NOEXCEPT
+{
+    return state_;
+}
+
+template <typename Character>
+INLINE void
+ostream<Character>::setstate(iostate state) NOEXCEPT
+{
+    state_ |= state;
+}
+
+template <typename Character>
+INLINE void
+ostream<Character>::clear(iostate state) NOEXCEPT
+{
+    state_ = state;
+}
+
+template <typename Character>
+INLINE typename ostream<Character>::pos_type
+ostream<Character>::tellp() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-iostream<Buffer, Character>::write(const char_type* data, pos_type size) NOEXCEPT
+ostream<Character>::write(const char_type* data,
+    pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
     {
@@ -51,10 +93,18 @@ iostream<Buffer, Character>::write(const char_type* data, pos_type size) NOEXCEP
     position_ += size;
 }
 
-template <typename Buffer, typename Character>
+template <typename Character>
 INLINE void
-iostream<Buffer, Character>::flush() NOEXCEPT
+ostream<Character>::flush() NOEXCEPT
 {
+}
+
+// private
+template <typename Character>
+INLINE bool
+ostream<Character>::is_overflow(pos_type size) const NOEXCEPT
+{
+    return (state_ != goodbit) || (size > (end_ - position_));
 }
 
 BC_POP_WARNING()
