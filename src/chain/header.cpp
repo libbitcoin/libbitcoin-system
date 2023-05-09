@@ -231,7 +231,8 @@ hash_digest header::hash() const NOEXCEPT
         return *hash_;
 
     hash_digest digest{};
-    hash::sha256x2::copy sink(digest);
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
     to_data(sink);
     sink.flush();
     return digest;

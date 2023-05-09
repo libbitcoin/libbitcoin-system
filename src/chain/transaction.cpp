@@ -428,8 +428,9 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
-
-    hash::sha256x2::copy sink(digest);
+        
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
     to_data(sink, witness);
     sink.flush();
     return digest;
@@ -485,8 +486,9 @@ hash_digest transaction::outputs_hash() const NOEXCEPT
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
-
-    hash::sha256x2::copy sink(digest);
+        
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
 
     const auto& outs = *outputs_;
     for (const auto& output: outs)
@@ -502,7 +504,8 @@ hash_digest transaction::points_hash() const NOEXCEPT
     hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256x2::copy sink(digest);
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
@@ -518,7 +521,8 @@ hash_digest transaction::sequences_hash() const NOEXCEPT
     hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256x2::copy sink(digest);
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
@@ -722,7 +726,8 @@ hash_digest transaction::unversioned_signature_hash(
     hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256x2::copy sink(digest);
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
 
     switch (flag)
     {
@@ -790,7 +795,8 @@ hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
     hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256x2::copy sink(digest);
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
     outputs_->at(index)->to_data(sink);
     sink.flush();
     return digest;
@@ -818,7 +824,8 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     hash_digest digest;
     BC_POP_WARNING()
 
-    hash::sha256x2::copy sink(digest);
+    ostream stream{ digest };
+    sha256x2_writer sink{ stream };
 
     // Create signature hash.
     sink.write_little_endian(version_);
