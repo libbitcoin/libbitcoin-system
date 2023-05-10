@@ -454,8 +454,6 @@ private:
             nominal_opcode_from_data(push_data);
     }
 
-    // TODO: use std::optional vs. nullable data member.
-    // TODO: use std::unique_ptr for chunk and xptr on the stack.
     // Operation should not be stored as shared (adds 16 bytes).
     // copy: 8 + 2 * 64 + 1 = 18 bytes (vs. 16 when shared).
     opcode code_;
