@@ -28,6 +28,10 @@
 
 namespace libbitcoin {
 
+/**
+ * This pseudo random number is seeded via system clock, and is not intended
+ * for uses requiring true randomness.
+ */
 class BC_API pseudo_random
 {
   public:
