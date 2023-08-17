@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2017 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2023 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -28,6 +28,10 @@
 
 namespace libbitcoin {
 
+/**
+ * This pseudo random number is seeded via system clock, and is not intended
+ * for uses requiring true randomness.
+ */
 class BC_API pseudo_random
 {
   public:

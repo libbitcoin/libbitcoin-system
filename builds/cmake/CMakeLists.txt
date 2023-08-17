@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2023 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -16,6 +16,8 @@ enable_testing()
 list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules" )
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
+include(CheckCXXCompilerFlag)
+include(CheckCXXSourceCompiles)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -40,40 +42,95 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 # Add compiler options
 #------------------------------------------------------------------------------
 # Warn on all stuff.
-add_compile_options( "-Wall" )
+check_cxx_compiler_flag( "-Wall" HAS_FLAG_WALL )
+if ( HAS_FLAG_WALL )
+    add_compile_options( "-Wall" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wall" )
+endif()
 
 # Warn on extra stuff.
-add_compile_options( "-Wextra" )
+check_cxx_compiler_flag( "-Wextra" HAS_FLAG_WEXTRA )
+if ( HAS_FLAG_WEXTRA )
+    add_compile_options( "-Wextra" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wextra" )
+endif()
 
 # Be really annoying.
-add_compile_options( "-Wpedantic" )
+check_cxx_compiler_flag( "-Wpedantic" HAS_FLAG_WPEDANTIC )
+if ( HAS_FLAG_WPEDANTIC )
+    add_compile_options( "-Wpedantic" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wpedantic" )
+endif()
 
 # Disallow warning on style order of declarations.
-add_compile_options( "-Wno-reorder" )
+check_cxx_compiler_flag( "-Wno-reorder" HAS_FLAG_WNO-REORDER )
+if ( HAS_FLAG_WNO-REORDER )
+    add_compile_options( "-Wno-reorder" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-reorder" )
+endif()
 
 # Suppress warning for incomplete field initialization.
-add_compile_options( "-Wno-missing-field-initializers" )
+check_cxx_compiler_flag( "-Wno-missing-field-initializers" HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
+if ( HAS_FLAG_WNO-MISSING-FIELD-INITIALIZERS )
+    add_compile_options( "-Wno-missing-field-initializers" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-missing-field-initializers" )
+endif()
 
 # Conform to style.
-add_compile_options( "-Wno-missing-braces" )
+check_cxx_compiler_flag( "-Wno-missing-braces" HAS_FLAG_WNO-MISSING-BRACES )
+if ( HAS_FLAG_WNO-MISSING-BRACES )
+    add_compile_options( "-Wno-missing-braces" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-missing-braces" )
+endif()
 
 # Ignore comments within comments or commenting of backslash extended lines.
-add_compile_options( "-Wno-comment" )
+check_cxx_compiler_flag( "-Wno-comment" HAS_FLAG_WNO-COMMENT )
+if ( HAS_FLAG_WNO-COMMENT )
+    add_compile_options( "-Wno-comment" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-comment" )
+endif()
 
 # Suppress warning for copy of implicitly generated copy constructor.
-add_compile_options( "-Wno-deprecated-copy" )
+check_cxx_compiler_flag( "-Wno-deprecated-copy" HAS_FLAG_WNO-DEPRECATED-COPY )
+if ( HAS_FLAG_WNO-DEPRECATED-COPY )
+    add_compile_options( "-Wno-deprecated-copy" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-deprecated-copy" )
+endif()
 
 # Allow use of C99 'long long' type.
-add_compile_options( "-Wno-long-long" )
+check_cxx_compiler_flag( "-Wno-long-long" HAS_FLAG_WNO-LONG-LONG )
+if ( HAS_FLAG_WNO-LONG-LONG )
+    add_compile_options( "-Wno-long-long" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-long-long" )
+endif()
 
 # Conflict in stdlib under clang.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_compile_options( "-Wno-mismatched-tags" )
+    check_cxx_compiler_flag( "-Wno-mismatched-tags" HAS_FLAG_WNO-MISMATCHED-TAGS )
+    if ( HAS_FLAG_WNO-MISMATCHED-TAGS )
+        add_compile_options( "-Wno-mismatched-tags" )
+    else()
+        message( FATAL_ERROR "Compiler does not support -Wno-mismatched-tags" )
+    endif()
 endif()
 
 # Limit delays and warnings.
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_compile_options( "-fno-var-tracking-assignments" )
+    check_cxx_compiler_flag( "-fno-var-tracking-assignments" HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
+    if ( HAS_FLAG_FNO-VAR-TRACKING-ASSIGNMENTS )
+        add_compile_options( "-fno-var-tracking-assignments" )
+    else()
+        message( FATAL_ERROR "Compiler does not support -fno-var-tracking-assignments" )
+    endif()
 endif()
 
 # Implement -Dpkgconfigdir and output ${pkgconfigdir}.
