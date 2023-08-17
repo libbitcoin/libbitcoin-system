@@ -21,7 +21,7 @@ The libbitcoin toolkit is a set of cross platform C++ libraries for building bit
 The master branch is a staging area for the next major release and should be used only by libbitcoin developers. The current release branch is version3. Detailed installation instructions are provided below.
 
   * [Debian/Ubuntu](#debianubuntu)
-  * [Macintosh](#macintosh)
+  * [MacOS](#macos)
   * [Windows](#windows)
 
 ### Autotools (advanced users)
@@ -56,7 +56,7 @@ $ ./install.sh --prefix=/home/me/myprefix --build-boost --disable-shared
 
 Libbitcoin is now installed in `/home/me/myprefix/`.
 
-### Macintosh
+### MacOS
 
 The macOS installation differs from Linux in the installation of the compiler and packaged dependencies. Libbitcoin supports both [Homebrew](http://brew.sh) and [MacPorts](https://www.macports.org) package managers. Both require Apple's [Xcode](https://developer.apple.com/xcode) command line tools. Neither requires Xcode as the tools may be installed independently.
 
