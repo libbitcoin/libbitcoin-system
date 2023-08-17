@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2023 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -285,7 +285,7 @@ AS_CASE([${CC}], [*gcc*],
 AS_IF([test x${enable_avx2} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-mavx -mavx2],
         [CXXFLAGS="$CXXFLAGS -mavx -mavx2";
-         AC_DEFINE([HAVE_AVX2])],
+         AC_DEFINE([WITH_AVX2])],
         [AC_MSG_ERROR([-mavx -mavx2 not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -301,7 +301,7 @@ AS_IF([test x${enable_avx2} != "xno"],
 AS_IF([test x${enable_avx512} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-mavx512f -mavx512bw],
         [CXXFLAGS="$CXXFLAGS -mavx512f -mavx512bw";
-         AC_DEFINE([HAVE_AVX512])],
+         AC_DEFINE([WITH_AVX512])],
         [AC_MSG_ERROR([-mavx512f -mavx512bw not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -317,7 +317,7 @@ AS_IF([test x${enable_avx512} != "xno"],
 AS_IF([test x${enable_shani} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-msse4 -msha],
         [CXXFLAGS="$CXXFLAGS -msse4 -msha";
-         AC_DEFINE([HAVE_SHANI])],
+         AC_DEFINE([WITH_SHANI])],
         [AC_MSG_ERROR([-msse4 -msha not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -335,7 +335,7 @@ AS_IF([test x${enable_shani} != "xno"],
 AS_IF([test x${enable_sse4} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-msse4.1],
         [CXXFLAGS="$CXXFLAGS -msse4.1";
-         AC_DEFINE([HAVE_SSE4])],
+         AC_DEFINE([WITH_SSE4])],
         [AC_MSG_ERROR([-msse4.1 not supported.])],
         [],
         [AC_LANG_PROGRAM(

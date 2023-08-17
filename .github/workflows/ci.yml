@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2023 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -27,6 +27,7 @@ jobs:
             icu: ""
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: "--enable-isystem --enable-avx2 --enable-sse4"
             packager: "apt"
             packages: ""
 
@@ -40,6 +41,7 @@ jobs:
             icu: "--build-icu --with-icu"
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: "--enable-isystem --enable-avx2"
             packager: "apt"
             packages: ""
 
@@ -53,6 +55,7 @@ jobs:
             icu: ""
             cc: "gcc-11"
             flags: "-Os -fPIE"
+            options: "--enable-isystem --enable-sse4"
             packager: "apt"
             packages: ""
 
@@ -66,6 +69,7 @@ jobs:
             icu: "--build-icu --with-icu"
             cc: "gcc-11"
             flags: "-Og -g --coverage -fPIE"
+            options: "--enable-isystem --enable-avx512"
             packager: "apt"
             packages: "lcov"
 
@@ -79,6 +83,7 @@ jobs:
             icu: "--with-icu"
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: "--enable-isystem"
             packager: "brew"
             packages: "icu4c"
 
@@ -92,6 +97,7 @@ jobs:
             icu: "--build-icu --with-icu"
             cc: "clang-14"
             flags: "-Os -fvisibility=hidden -fPIE"
+            options: "--enable-isystem"
             packager: "brew"
             packages: ""
 
@@ -152,8 +158,7 @@ jobs:
       - name: Execute install.sh
         run: >
           ./install.sh
-          --enable-isystem
-          --build-dir=$LIBBITCOIN_SRC_PATH
+          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
           --prefix=$LIBBITCOIN_SRC_PATH/prefix
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
@@ -239,6 +244,7 @@ jobs:
             icu: ""
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
             packages: ""
 
@@ -252,6 +258,7 @@ jobs:
             icu: "--build-icu --with-icu"
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: "-Denable-avx2=on"
             packager: "apt"
             packages: ""
 
@@ -265,6 +272,7 @@ jobs:
             icu: ""
             cc: "gcc-11"
             flags: "-Os -fPIE"
+            options: "-Denable-sse4=on"
             packager: "apt"
             packages: ""
 
@@ -278,6 +286,7 @@ jobs:
             icu: "--build-icu --with-icu"
             cc: "gcc-11"
             flags: "-Og -fPIE"
+            options: "-Denable-avx512=on"
             packager: "apt"
             packages: ""
 
@@ -291,6 +300,7 @@ jobs:
             icu: "--with-icu"
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: ""
             packager: "brew"
             packages: "icu4c"
 
@@ -304,6 +314,7 @@ jobs:
             icu: "--build-icu --with-icu"
             cc: "clang-14"
             flags: "-Os -fvisibility=hidden -fPIE"
+            options: ""
             packager: "brew"
             packages: ""
 
@@ -367,7 +378,7 @@ jobs:
       - name: Execute install-cmake.sh
         run: >
           ./install-cmake.sh
-          --build-dir=$LIBBITCOIN_SRC_PATH
+          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
           --prefix=$LIBBITCOIN_SRC_PATH/prefix
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
@@ -464,6 +475,7 @@ jobs:
             icu: ""
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
             packages: ""
 
@@ -478,6 +490,7 @@ jobs:
             icu: "--build-icu --with-icu"
             cc: "clang-14"
             flags: "-Os -fPIE"
+            options: "-Denable-avx2=on"
             packager: "apt"
             packages: ""
 
@@ -492,6 +505,7 @@ jobs:
             icu: ""
             cc: "gcc-11"
             flags: "-Os -fPIE"
+            options: "-Denable-sse4=on"
             packager: "apt"
             packages: ""
 
@@ -555,7 +569,7 @@ jobs:
       - name: Execute install-cmakepresets.sh
         run: >
           ./install-cmakepresets.sh
-          --build-dir=$LIBBITCOIN_SRC_PATH
+          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
           --prefix=$LIBBITCOIN_SRC_PATH/prefix/${{ matrix.preset }}
           --preset=${{ matrix.preset }}
           ${{ env.LINKAGE }}
@@ -670,6 +684,8 @@ jobs:
     steps:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
 
       - name: Checkout repository
         uses: actions/checkout@v3

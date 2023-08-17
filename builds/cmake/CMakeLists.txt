@@ -1,5 +1,5 @@
 ###############################################################################
-#  Copyright (c) 2014-2020 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2023 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -195,16 +195,16 @@ if (enable-avx2)
         int main() {
             __m256i a = _mm256_set_epi32(8, 7, 6, 5, 4, 3, 2, 1);
             return _mm256_extract_epi32(_mm256_slli_epi64(a, 2), 5);
-        }" HAVE_AVX2)
+        }" WITH_AVX2)
 
     if (HAS_FLAGS_AVX2)
         set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
     endif()
 
-    if ( HAVE_AVX2 )
-        add_compile_definitions( HAVE_AVX2 )
+    if ( WITH_AVX2 )
+        add_compile_definitions( WITH_AVX2 )
     else()
-        message( FATAL_ERROR "Failed to enable HAVE_AVX2" )
+        message( FATAL_ERROR "Failed to enable WITH_AVX2" )
     endif()
 endif()
 
@@ -224,16 +224,16 @@ if (enable-avx512)
         int main() {
             __m512i a = _mm512_set_epi32(16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
             return _mm_extract_epi32(_mm512_extracti32x4_epi32(_mm512_slli_epi64(a, 2), 2), 1);
-        }" HAVE_AVX512)
+        }" WITH_AVX512)
 
     if (HAS_FLAGS_AVX512)
         set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
     endif()
 
-    if ( HAVE_AVX512 )
-        add_compile_definitions( HAVE_AVX512 )
+    if ( WITH_AVX512 )
+        add_compile_definitions( WITH_AVX512 )
     else()
-        message( FATAL_ERROR "Failed to enable HAVE_AVX512" )
+        message( FATAL_ERROR "Failed to enable WITH_AVX512" )
     endif()
 endif()
 
@@ -255,16 +255,16 @@ if (enable-shani)
             __m128i b = _mm_set1_epi32(15);
             __m128i k = _mm_set1_epi32(31);
             return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
-        }" HAVE_SHANI)
+        }" WITH_SHANI)
 
     if (HAS_FLAGS_SHANI)
         set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
     endif()
 
-    if ( HAVE_SHANI )
-        add_compile_definitions( HAVE_SHANI )
+    if ( WITH_SHANI )
+        add_compile_definitions( WITH_SHANI )
     else()
-        message( FATAL_ERROR "Failed to enable HAVE_SHANI" )
+        message( FATAL_ERROR "Failed to enable WITH_SHANI" )
     endif()
 endif()
 
@@ -284,16 +284,16 @@ if (enable-sse4)
             __m128i a = _mm_set1_epi32(0);
             __m128i b = _mm_set1_epi32(15);
             return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
-        }" HAVE_SSE4)
+        }" WITH_SSE4)
 
     if (HAS_FLAGS_SSE4)
         set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
     endif()
 
-    if ( HAVE_SSE4 )
-        add_compile_definitions( HAVE_SSE4 )
+    if ( WITH_SSE4 )
+        add_compile_definitions( WITH_SSE4 )
     else()
-        message( FATAL_ERROR "Failed to enable HAVE_SSE4" )
+        message( FATAL_ERROR "Failed to enable WITH_SSE4" )
     endif()
 endif()
 
