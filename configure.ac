@@ -13,7 +13,7 @@
 AC_PREREQ([2.65])
 
 # Process command-line arguments and perform initialization and verification.
-AC_INIT([libbitcoin-system], [3.7.0], [eric@voskuil.org])
+AC_INIT([libbitcoin-system], [3.8.0], [eric@voskuil.org])
 
 # Do compilation tests.
 AC_LANG(C++)
