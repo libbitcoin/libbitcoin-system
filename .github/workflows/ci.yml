@@ -684,6 +684,8 @@ jobs:
     steps:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
 
       - name: Checkout repository
         uses: actions/checkout@v3
