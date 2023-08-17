@@ -32,7 +32,7 @@ else ()
   set( libdir "\${exec_prefix}/lib" )
   set( includedir "\${exec_prefix}/include" )
 
-  set( PACKAGE_VERSION "3.7.0" )
+  set( PACKAGE_VERSION "3.8.0" )
   set( VERSION "${PACKAGE_VERSION}" )
 endif ()
 
