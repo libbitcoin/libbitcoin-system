@@ -179,7 +179,7 @@ endif()
 
 # Find boost
 #------------------------------------------------------------------------------
-find_package( Boost 1.72.0 REQUIRED COMPONENTS
+find_package( Boost 1.73.0 REQUIRED COMPONENTS
     atomic
     chrono
     date_time

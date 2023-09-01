@@ -32,7 +32,7 @@ Installation of libbitcoin-system comes with requirements listed below.
 
 Use of `install-cmake.sh` additionally requires [cmake](https://cmake.org) 3.5+.
 
-A minimal libbitcoin-system build requires boost 1.72.0 to 1.76.0 and libsecp256k1. The [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1/tree/version7) repository is forked from [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) in order to control for changes and to incorporate the necessary Visual Studio build. The original repository can be used directly but recent changes to the public interface may cause build breaks. The `--enable-module-recovery` switch is required. Both of these are able to be provided via the installation script(s).
+A minimal libbitcoin-system build requires boost 1.73.0 to 1.76.0 and libsecp256k1. The [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1/tree/version7) repository is forked from [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1) in order to control for changes and to incorporate the necessary Visual Studio build. The original repository can be used directly but recent changes to the public interface may cause build breaks. The `--enable-module-recovery` switch is required. Both of these are able to be provided via the installation script(s).
 
 Detailed instructions are provided below.
 
@@ -93,7 +93,7 @@ $ sudo apt install build-essential autoconf automake libtool pkg-config git
 
 #### Boost (Not Recommended)
 
-Next install the [Boost](http://www.boost.org) (1.72.0 - 1.76.0) development package. This can be accomplished via parameterization of the installation script during libbitcoin-system installation and it is recommended to the reader that this approach be used.
+Next install the [Boost](http://www.boost.org) (1.73.0 - 1.76.0) development package. This can be accomplished via parameterization of the installation script during libbitcoin-system installation and it is recommended to the reader that this approach be used.
 
 Due to the current state of packaging, boost is not provided by the standard packaging system at the required minimum version. This requires either manual source compilation (as is controlled within the installation scripts) or trusting a 3rd party [Personal Package Archive](https://launchpad.net/ubuntu/+ppas). Verification of the build is done against the sources (required for proper use of ICU).
 

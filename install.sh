@@ -63,8 +63,8 @@ ICU_ARCHIVE="icu4c-55_2-src.tgz"
 
 # Boost archive.
 #------------------------------------------------------------------------------
-BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.72.0/boost_1_72_0.tar.bz2"
-BOOST_ARCHIVE="boost_1_72_0.tar.bz2"
+BOOST_URL="http://downloads.sourceforge.net/project/boost/boost/1.73.0/boost_1_73_0.tar.bz2"
+BOOST_ARCHIVE="boost_1_73_0.tar.bz2"
 
 
 # Define utility functions.
