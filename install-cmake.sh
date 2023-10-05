@@ -442,15 +442,9 @@ set_pkgconfigdir()
 set_with_boost_prefix()
 {
     if [[ $BUILD_BOOST ]]; then
-        # Boost has no pkg-config, m4 searches in the following order:
-        # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, $BOOST_ROOT.
-        # We use --with-boost to prioritize the --prefix path when we build it.
-        # Otherwise standard paths suffice for Linux, Homebrew and MacPorts.
-        # ax_boost_base.m4 appends /include and adds to BOOST_CPPFLAGS
-        # ax_boost_base.m4 searches for /lib /lib64 and adds to BOOST_LDFLAGS
-        #
-        # cmake does not process this argument, so it has been zeroed out.
-        with_boost=""
+        # Boost detection via FindBoost.cmake provides for path hint via
+	# $BOOT_ROOT environment variable only.
+        export BOOST_ROOT="$PREFIX"
     fi
 }
 
@@ -470,6 +464,7 @@ display_configuration()
     display_message "WITH_ICU              : $WITH_ICU"
     display_message "BUILD_ICU             : $BUILD_ICU"
     display_message "BUILD_BOOST           : $BUILD_BOOST"
+    display_message "BOOST_ROOT            : $BOOST_ROOT"
     display_message "BUILD_DIR                      : $BUILD_DIR"
     display_message "CUMULATIVE_FILTERED_ARGS       : $CUMULATIVE_FILTERED_ARGS"
     display_message "CUMULATIVE_FILTERED_ARGS_CMAKE : $CUMULATIVE_FILTERED_ARGS_CMAKE"
@@ -714,7 +709,7 @@ cmake_project_directory()
     local PROJ_CONFIG_DIR
     PROJ_CONFIG_DIR=$(pwd)
 
-    cmake $@ builds/cmake
+    cmake -LA $@ builds/cmake
     make_jobs "$JOBS"
 
     if [[ $TEST == true ]]; then
