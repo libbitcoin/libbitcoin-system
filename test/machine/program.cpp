@@ -147,7 +147,7 @@ static_assert(a0 == 2 * sizeof(size_t));
 // opcodes (and one byte for the overflow boolean). This is additional script
 // overhead in order to provide shared pointers to avoid push data copy. If
 // average data element byte length is < (2 * sizeof(pointer) + 1), such as
-// predominantly non-puh data opcodes, this implies an increased average cost.
+// predominantly non-push data opcodes, this implies an increased average cost.
 //
 // std::vector<data_chunk> => 3 pointers per element.
 // std::vector<std::shared_ptr<data_chunk>> => 5 pointers per element.
@@ -165,7 +165,7 @@ static_assert(a0 == 2 * sizeof(size_t));
 // std::vector<std::variant<boo, int64_t, std::shared_ptr<data_chunk>>> => 6
 //
 // This change to variant added a cost of 1 pointer per stack element (only) to
-// the previous cost of 2 ponters per element, making the net cost 2 pointers
+// the previous cost of 2 pointers per element, making the net cost 2 pointers
 // per stack element (with no change to the operation stack). This enables
 // strong typing of stack data as bool/int64_t (or chunk_cptr), eliminating
 // a large number of chunk<->integral conversions, as well as 3 pointer vector
