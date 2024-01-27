@@ -75,6 +75,16 @@ witness::witness(const data_slice& data, bool prefix) NOEXCEPT
 {
 }
 
+witness::witness(stream::in::fast&& stream, bool prefix) NOEXCEPT
+  : witness(read::bytes::fast(stream), prefix)
+{
+}
+
+witness::witness(stream::in::fast& stream, bool prefix) NOEXCEPT
+  : witness(read::bytes::fast(stream), prefix)
+{
+}
+
 witness::witness(std::istream&& stream, bool prefix) NOEXCEPT
   : witness(read::bytes::istream(stream), prefix)
 {

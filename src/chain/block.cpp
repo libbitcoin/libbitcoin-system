@@ -79,6 +79,16 @@ block::block(const data_slice& data, bool witness) NOEXCEPT
 {
 }
 
+block::block(stream::in::fast&& stream, bool witness) NOEXCEPT
+  : block(read::bytes::fast(stream), witness)
+{
+}
+
+block::block(stream::in::fast& stream, bool witness) NOEXCEPT
+  : block(read::bytes::fast(stream), witness)
+{
+}
+
 block::block(std::istream&& stream, bool witness) NOEXCEPT
   : block(read::bytes::istream(stream), witness)
 {

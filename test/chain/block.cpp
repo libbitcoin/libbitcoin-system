@@ -185,6 +185,16 @@ BOOST_AUTO_TEST_CASE(block__constructor__data__expected)
     BOOST_REQUIRE(!block.is_invalid_merkle_root());
 }
 
+BOOST_AUTO_TEST_CASE(block__constructor__fast__success)
+{
+    const auto genesis = settings(selection::mainnet).genesis_block;
+    const auto data = genesis.to_data(true);
+    stream::in::fast stream(data);
+    const accessor block(stream, true);
+    BOOST_REQUIRE(block.is_valid());
+    BOOST_REQUIRE(!block.is_invalid_merkle_root());
+}
+
 BOOST_AUTO_TEST_CASE(block__constructor__stream__success)
 {
     const auto genesis = settings(selection::mainnet).genesis_block;

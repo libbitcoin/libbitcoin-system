@@ -365,6 +365,8 @@ public:
 
     /// These deserialize operations (with codes), not from push-data.
     operation(const data_slice& op_data) NOEXCEPT;
+    operation(stream::in::fast&& stream) NOEXCEPT;
+    operation(stream::in::fast& stream) NOEXCEPT;
     operation(std::istream&& stream) NOEXCEPT;
     operation(std::istream& stream) NOEXCEPT;
     operation(reader&& source) NOEXCEPT;

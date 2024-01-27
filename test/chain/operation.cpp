@@ -138,6 +138,13 @@ BOOST_AUTO_TEST_CASE(operation__constructor__op_data__expected)
     BOOST_REQUIRE_EQUAL(instance.to_data(), op_data);
 }
 
+BOOST_AUTO_TEST_CASE(operation__constructor__fast__expected)
+{
+    stream::in::fast istream(op_data);
+    const operation instance(istream);
+    BOOST_REQUIRE_EQUAL(instance.to_data(), op_data);
+}
+
 BOOST_AUTO_TEST_CASE(operation__constructor__stream__expected)
 {
     stream::in::copy istream(op_data);

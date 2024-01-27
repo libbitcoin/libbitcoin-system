@@ -127,6 +127,16 @@ transaction::transaction(const data_slice& data, bool witness) NOEXCEPT
 {
 }
 
+transaction::transaction(stream::in::fast&& stream, bool witness) NOEXCEPT
+  : transaction(read::bytes::fast(stream), witness)
+{
+}
+
+transaction::transaction(stream::in::fast& stream, bool witness) NOEXCEPT
+  : transaction(read::bytes::fast(stream), witness)
+{
+}
+
 transaction::transaction(std::istream&& stream, bool witness) NOEXCEPT
   : transaction(read::bytes::istream(stream), witness)
 {
@@ -424,13 +434,12 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
         if (witness_hash_) return *witness_hash_;
     }
 
-    // This is an out parameter.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
-        
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
     to_data(sink, witness);
     sink.flush();
     return digest;
@@ -487,8 +496,8 @@ hash_digest transaction::outputs_hash() const NOEXCEPT
     hash_digest digest;
     BC_POP_WARNING()
         
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
 
     const auto& outs = *outputs_;
     for (const auto& output: outs)
@@ -504,8 +513,8 @@ hash_digest transaction::points_hash() const NOEXCEPT
     hash_digest digest;
     BC_POP_WARNING()
 
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
@@ -521,8 +530,8 @@ hash_digest transaction::sequences_hash() const NOEXCEPT
     hash_digest digest;
     BC_POP_WARNING()
 
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
 
     const auto& ins = *inputs_;
     for (const auto& input: ins)
@@ -726,8 +735,8 @@ hash_digest transaction::unversioned_signature_hash(
     hash_digest digest;
     BC_POP_WARNING()
 
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
 
     switch (flag)
     {
@@ -795,8 +804,8 @@ hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
     hash_digest digest;
     BC_POP_WARNING()
 
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
     outputs_->at(index)->to_data(sink);
     sink.flush();
     return digest;
@@ -824,8 +833,8 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     hash_digest digest;
     BC_POP_WARNING()
 
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
 
     // Create signature hash.
     sink.write_little_endian(version_);

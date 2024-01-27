@@ -25,7 +25,9 @@
 namespace libbitcoin {
 namespace system {
 
-/// Support for high level input/output operations on a byte buffer.
+/// Support for high level output operations on a byte buffer.
+/// Cannot derive from ostream and cannot make both share an interface.
+/// So this is duck-typed to the subset of std::ostream required by writers.
 template <typename Character = char>
 class ostream
 {

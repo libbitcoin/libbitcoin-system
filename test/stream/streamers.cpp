@@ -36,6 +36,14 @@ BOOST_AUTO_TEST_CASE(read__bytes__istream__expected)
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
 }
 
+BOOST_AUTO_TEST_CASE(read__bytes__fast__expected)
+{
+    const data_chunk source{ '*' };
+    stream::in::fast istream(source);
+    read::bytes::fast reader(istream);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+}
+
 BOOST_AUTO_TEST_CASE(read__bytes__copy__expected)
 {
     const data_chunk source{ '*' };
@@ -49,6 +57,14 @@ BOOST_AUTO_TEST_CASE(read__bits__istream__expected)
 {
     std::istringstream istream{ "*" };
     read::bits::istream reader(istream);
+    BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
+}
+
+BOOST_AUTO_TEST_CASE(read__bits__fast__expected)
+{
+    const data_chunk source{ '*' };
+    stream::in::fast istream(source);
+    read::bits::fast reader(istream);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), '*');
 }
 
@@ -68,6 +84,15 @@ BOOST_AUTO_TEST_CASE(write__bytes__ostream__expected)
     write::bytes::ostream writer(ostream);
     writer.write_byte('*');
     BOOST_REQUIRE_EQUAL(ostream.str(), "*");
+}
+
+BOOST_AUTO_TEST_CASE(write__bytes__fast__expected)
+{
+    data_chunk sink{ 'x' };
+    stream::out::fast ostream(sink);
+    write::bytes::fast writer(ostream);
+    writer.write_byte('*');
+    BOOST_REQUIRE_EQUAL(sink[0], '*');
 }
 
 BOOST_AUTO_TEST_CASE(write__bytes__copy__expected)
@@ -130,6 +155,15 @@ BOOST_AUTO_TEST_CASE(write__bits__ostream__expected)
     BOOST_REQUIRE_EQUAL(ostream.str(), "*");
 }
 
+BOOST_AUTO_TEST_CASE(write__bits__fast__expected)
+{
+    data_chunk sink{ 'x' };
+    stream::out::fast ostream(sink);
+    write::bits::fast writer(ostream);
+    writer.write_byte('*');
+    BOOST_REQUIRE_EQUAL(sink.front(), '*');
+}
+
 BOOST_AUTO_TEST_CASE(write__bits__copy__expected)
 {
     data_chunk sink{ 'x' };
@@ -189,6 +223,15 @@ BOOST_AUTO_TEST_CASE(flip__bytes__iostream_write__expected)
     BOOST_REQUIRE_EQUAL(iostream.str(), "*");
 }
 
+BOOST_AUTO_TEST_CASE(flip__bytes__fast_write__expected)
+{
+    data_chunk data{ 'x' };
+    stream::flip::fast iostream(data);
+    flip::bytes::fast flipper(iostream);
+    flipper.write_byte('*');
+    BOOST_REQUIRE_EQUAL(data.front(), '*');
+}
+
 BOOST_AUTO_TEST_CASE(flip__bytes__copy_write__expected)
 {
     data_chunk data{ 'x' };
@@ -203,6 +246,14 @@ BOOST_AUTO_TEST_CASE(flip__bytes__iostream_read__expected)
 {
     std::stringstream iostream{ "*" };
     flip::bytes::iostream flipper(iostream);
+    BOOST_REQUIRE_EQUAL(flipper.read_byte(), '*');
+}
+
+BOOST_AUTO_TEST_CASE(flip__bytes__fast_read__expected)
+{
+    data_chunk data{ '*' };
+    stream::flip::fast iostream(data);
+    flip::bytes::fast flipper(iostream);
     BOOST_REQUIRE_EQUAL(flipper.read_byte(), '*');
 }
 
@@ -223,6 +274,15 @@ BOOST_AUTO_TEST_CASE(flip__bits__iostream_write__expected)
     BOOST_REQUIRE_EQUAL(iostream.str(), "*");
 }
 
+BOOST_AUTO_TEST_CASE(flip__bits__fast_write__expected)
+{
+    data_chunk data{ 'x' };
+    stream::flip::fast iostream(data);
+    flip::bits::fast flipper(iostream);
+    flipper.write_byte('*');
+    BOOST_REQUIRE_EQUAL(data.front(), '*');
+}
+
 BOOST_AUTO_TEST_CASE(flip__bits__copy_write__expected)
 {
     data_chunk data{ 'x' };
@@ -237,6 +297,14 @@ BOOST_AUTO_TEST_CASE(flip__bits__iostream_read__expected)
 {
     std::stringstream iostream{ "*" };
     flip::bits::iostream flipper(iostream);
+    BOOST_REQUIRE_EQUAL(flipper.read_byte(), '*');
+}
+
+BOOST_AUTO_TEST_CASE(flip__bits__iostream_fast__expected)
+{
+    data_chunk data{ '*' };
+    stream::flip::fast iostream(data);
+    flip::bits::fast flipper(iostream);
     BOOST_REQUIRE_EQUAL(flipper.read_byte(), '*');
 }
 
