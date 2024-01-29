@@ -150,17 +150,19 @@ template <typename Character>
 void
 istream<Character>::read(char_type* data, std::streamsize count) NOEXCEPT
 {
-    if (is_overflow(count))
+    const auto bytes = possible_narrow_sign_cast<size_t>(count);
+
+    if (is_overflow(bytes))
     {
         setstate(badbit);
         return;
     }
 
     BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-    std::copy_n(position_, count, data);
+    std::copy_n(position_, bytes, data);
     BC_POP_WARNING()
 
-    position_ += count;
+    position_ += bytes;
 }
 
 // private

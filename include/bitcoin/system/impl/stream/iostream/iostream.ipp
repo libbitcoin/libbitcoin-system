@@ -19,7 +19,10 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_IOSTREAM_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_IOSTREAM_IPP
 
+#include <algorithm>
+#include <type_traits>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -157,17 +160,19 @@ template <typename Character>
 void
 iostream<Character>::read(char_type* data, std::streamsize count) NOEXCEPT
 {
-    if (is_overflow(count))
+    const auto bytes = possible_narrow_sign_cast<size_t>(count);
+
+    if (is_overflow(bytes))
     {
         setstate(badbit);
         return;
     }
 
     BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-    std::copy_n(position_, count, data);
+    std::copy_n(position_, bytes, data);
     BC_POP_WARNING()
 
-    position_ += count;
+    position_ += bytes;
 }
 
 template <typename Character>
@@ -175,17 +180,19 @@ void
 iostream<Character>::write(const char_type* data,
     std::streamsize count) NOEXCEPT
 {
-    if (is_overflow(count))
+    const auto bytes = possible_narrow_sign_cast<size_t>(count);
+
+    if (is_overflow(bytes))
     {
         setstate(badbit);
         return;
     }
 
     BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-    std::copy_n(data, count, position_);
+    std::copy_n(data, bytes, position_);
     BC_POP_WARNING()
 
-    position_ += count;
+    position_ += bytes;
 }
 
 template <typename Character>
