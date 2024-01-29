@@ -341,7 +341,9 @@ bool input::extract_sigop_script(chain::script& out,
 
     // Parse the embedded script from the last input script item (data).
     // This cannot fail because there is no prefix to invalidate the length.
-    out = { ops.back().data(), false };
+    // Workaround: XCode inteprets this as both prvalue and rvalue (ambiguous).
+    ////out = { ops.back().data(), false };
+    out = chain::script{ ops.back().data(), false };
     return true;
 }
 
