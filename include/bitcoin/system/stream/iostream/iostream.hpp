@@ -78,10 +78,10 @@ public:
     virtual int_type peek() NOEXCEPT;
 
     /// Read a block of characters, sets badbit on underflow.
-    virtual void read(char_type* data, pos_type size) NOEXCEPT;
+    virtual void read(char_type* data, std::streamsize count) NOEXCEPT;
 
     /// Write a block of characters, sets badbit on overflow.
-    virtual void write(const char_type* data, pos_type size) NOEXCEPT;
+    virtual void write(const char_type* data, std::streamsize count) NOEXCEPT;
 
     /// Synchronize with the underlying storage device (no-op).
     virtual void flush() NOEXCEPT;

@@ -25,6 +25,7 @@
 namespace libbitcoin {
 namespace system {
 
+// Alowed here for low level performance benefit.
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 template <typename Character>
@@ -78,19 +79,19 @@ ostream<Character>::tellp() const NOEXCEPT
 template <typename Character>
 void
 ostream<Character>::write(const char_type* data,
-    pos_type size) NOEXCEPT
+    std::streamsize count) NOEXCEPT
 {
-    if (is_overflow(size))
+    if (is_overflow(count))
     {
         setstate(badbit);
         return;
     }
 
     BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-    std::copy_n(data, size, position_);
+    std::copy_n(data, count, position_);
     BC_POP_WARNING()
 
-    position_ += size;
+    position_ += count;
 }
 
 template <typename Character>

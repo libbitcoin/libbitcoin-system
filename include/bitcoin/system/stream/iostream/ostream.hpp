@@ -64,7 +64,7 @@ public:
     virtual inline pos_type tellp() const NOEXCEPT;
 
     /// Write a block of characters, sets badbit on overflow.
-    virtual void write(const char_type* data, pos_type size) NOEXCEPT;
+    virtual void write(const char_type* data, std::streamsize count) NOEXCEPT;
 
     /// Synchronize with the underlying storage device (no-op).
     virtual void flush() NOEXCEPT;

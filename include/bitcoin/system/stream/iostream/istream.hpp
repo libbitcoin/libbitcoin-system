@@ -75,7 +75,7 @@ public:
     virtual int_type peek() NOEXCEPT;
 
     /// Read a block of characters, sets badbit on underflow.
-    virtual void read(char_type* data, pos_type size) NOEXCEPT;
+    virtual void read(char_type* data, std::streamsize count) NOEXCEPT;
 
 private:
     static constexpr bool is_positive(off_type value) NOEXCEPT;
