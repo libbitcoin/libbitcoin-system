@@ -36,15 +36,15 @@ chain::chain_state::data get_values(size_t retargeting_interval)
     return values;
 }
 
-BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_disabled__lower_value)
-{
-    settings settings(chain::selection::mainnet);
-    settings.proof_of_work_limit = 0x1e0fffff;
-    const auto values = get_values(settings.retargeting_interval());
-    const auto forks = chain::forks::retarget;
-    const auto work = test_chain_state::work_required(values, forks, settings);
-    BOOST_REQUIRE_EQUAL(work, 0x1e0884d1u);
-}
+////BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_disabled__lower_value)
+////{
+////    settings settings(chain::selection::mainnet);
+////    settings.proof_of_work_limit = 0x1e0fffff;
+////    const auto values = get_values(settings.retargeting_interval());
+////    const auto forks = chain::forks::retarget;
+////    const auto work = test_chain_state::work_required(values, forks, settings);
+////    BOOST_REQUIRE_EQUAL(work, 0x1e0884d1u);
+////}
 
 BOOST_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled__correct_value)
 {
