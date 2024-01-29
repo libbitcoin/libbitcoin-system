@@ -48,35 +48,35 @@ ostream<Character>::ostream(uint8_t* begin,
 }
 
 template <typename Character>
-INLINE typename ostream<Character>::iostate
+inline typename ostream<Character>::iostate
 ostream<Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
 template <typename Character>
-INLINE void
+inline void
 ostream<Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
 template <typename Character>
-INLINE void
+inline void
 ostream<Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
 }
 
 template <typename Character>
-INLINE typename ostream<Character>::pos_type
+inline typename ostream<Character>::pos_type
 ostream<Character>::tellp() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
 template <typename Character>
-INLINE void
+void
 ostream<Character>::write(const char_type* data,
     pos_type size) NOEXCEPT
 {
@@ -94,14 +94,14 @@ ostream<Character>::write(const char_type* data,
 }
 
 template <typename Character>
-INLINE void
+void
 ostream<Character>::flush() NOEXCEPT
 {
 }
 
 // private
 template <typename Character>
-INLINE bool
+bool
 ostream<Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));

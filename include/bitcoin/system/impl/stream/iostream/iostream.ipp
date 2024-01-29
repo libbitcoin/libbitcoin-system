@@ -28,7 +28,7 @@ BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 template <typename Character>
 template <typename Buffer>
-INLINE iostream<Character>::iostream(Buffer& buffer) NOEXCEPT
+iostream<Character>::iostream(Buffer& buffer) NOEXCEPT
   : position_(buffer.data()),
     begin_(position_),
     end_(begin_ + buffer.size()),
@@ -37,7 +37,7 @@ INLINE iostream<Character>::iostream(Buffer& buffer) NOEXCEPT
 }
 
 template <typename Character>
-INLINE iostream<Character>::iostream(uint8_t* begin,
+iostream<Character>::iostream(uint8_t* begin,
     ptrdiff_t size) NOEXCEPT
   : position_(begin),
     begin_(position_),
@@ -47,21 +47,21 @@ INLINE iostream<Character>::iostream(uint8_t* begin,
 }
 
 template <typename Character>
-INLINE typename iostream<Character>::iostate
+inline typename iostream<Character>::iostate
 iostream<Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
 template <typename Character>
-INLINE void
+inline void
 iostream<Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
 template <typename Character>
-INLINE void
+inline void
 iostream<Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
@@ -69,21 +69,21 @@ iostream<Character>::clear(iostate state) NOEXCEPT
 
 
 template <typename Character>
-INLINE typename iostream<Character>::pos_type
+inline typename iostream<Character>::pos_type
 iostream<Character>::tellg() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
 template <typename Character>
-INLINE typename iostream<Character>::pos_type
+inline typename iostream<Character>::pos_type
 iostream<Character>::tellp() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
 template <typename Character>
-INLINE iostream<Character>&
+iostream<Character>&
 iostream<Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 {
     if (state_ != goodbit)
@@ -137,7 +137,7 @@ iostream<Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 }
 
 template <typename Character>
-INLINE typename iostream<Character>::int_type
+typename iostream<Character>::int_type
 iostream<Character>::peek() NOEXCEPT
 {
     constexpr auto eof = std::char_traits<Character>::eof();
@@ -153,7 +153,7 @@ iostream<Character>::peek() NOEXCEPT
 }
 
 template <typename Character>
-INLINE void
+void
 iostream<Character>::read(char_type* data, pos_type size) NOEXCEPT
 {
     if (is_overflow(size))
@@ -170,7 +170,7 @@ iostream<Character>::read(char_type* data, pos_type size) NOEXCEPT
 }
 
 template <typename Character>
-INLINE void
+void
 iostream<Character>::write(const char_type* data,
     pos_type size) NOEXCEPT
 {
@@ -181,14 +181,14 @@ iostream<Character>::write(const char_type* data,
     }
 
     BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-        std::copy_n(data, size, position_);
+    std::copy_n(data, size, position_);
     BC_POP_WARNING()
 
-        position_ += size;
+    position_ += size;
 }
 
 template <typename Character>
-INLINE void
+void
 iostream<Character>::flush() NOEXCEPT
 {
 }
@@ -203,7 +203,7 @@ iostream<Character>::is_positive(off_type value) NOEXCEPT
 
 // private
 template <typename Character>
-INLINE bool
+bool
 iostream<Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));
