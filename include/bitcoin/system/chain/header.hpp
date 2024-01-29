@@ -65,7 +65,7 @@ public:
         uint32_t nonce) NOEXCEPT;
 
     header(const data_slice& data) NOEXCEPT;
-    header(stream::in::fast&& stream) NOEXCEPT;
+    ////header(stream::in::fast&& stream) NOEXCEPT;
     header(stream::in::fast& stream) NOEXCEPT;
     header(std::istream&& stream) NOEXCEPT;
     header(std::istream& stream) NOEXCEPT;

@@ -57,7 +57,7 @@ public:
     point(const hash_digest& hash, uint32_t index) NOEXCEPT;
 
     point(const data_slice& data) NOEXCEPT;
-    point(stream::in::fast&& stream) NOEXCEPT;
+    ////point(stream::in::fast&& stream) NOEXCEPT;
     point(stream::in::fast& stream) NOEXCEPT;
     point(std::istream&& stream) NOEXCEPT;
     point(std::istream& stream) NOEXCEPT;

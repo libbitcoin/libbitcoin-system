@@ -66,10 +66,10 @@ header::header(const data_slice& data) NOEXCEPT
 {
 }
 
-header::header(stream::in::fast&& stream) NOEXCEPT
-  : header(read::bytes::fast(stream))
-{
-}
+////header::header(stream::in::fast&& stream) NOEXCEPT
+////  : header(read::bytes::fast(stream))
+////{
+////}
 
 header::header(stream::in::fast& stream) NOEXCEPT
   : header(read::bytes::fast(stream))
