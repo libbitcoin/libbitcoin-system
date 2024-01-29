@@ -343,7 +343,7 @@ bool input::extract_sigop_script(chain::script& out,
     // This cannot fail because there is no prefix to invalidate the length.
     // Workaround: XCode inteprets this as both prvalue and rvalue (ambiguous).
     ////out = { ops.back().data(), false };
-    out = chain::script{ ops.back().data(), false };
+    out = std::move(chain::script{ ops.back().data(), false });
     return true;
 }
 
