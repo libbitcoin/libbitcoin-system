@@ -18,28 +18,28 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            cxx: "clang++-14"
+            cxx: "clang++-15"
             link: "dynamic"
             optimization: "size"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
-            cc: "clang-14"
+            cc: "clang-15"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-avx2 --enable-sse4"
             packager: "apt"
             packages: ""
 
           - os: ubuntu-22.04
-            cxx: "clang++-14"
+            cxx: "clang++-15"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang-14"
+            cc: "clang-15"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-avx2"
             packager: "apt"
@@ -74,28 +74,28 @@ jobs:
             packages: "lcov"
 
           - os: macos-latest
-            cxx: "clang++-14"
+            cxx: "clang++"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--with-icu"
-            cc: "clang-14"
+            cc: "clang"
             flags: "-Os -fPIE"
             options: "--enable-isystem"
             packager: "brew"
             packages: "icu4c"
 
           - os: macos-latest
-            cxx: "clang++-14"
+            cxx: "clang++"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang-14"
+            cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE"
             options: "--enable-isystem"
             packager: "brew"
@@ -149,6 +149,12 @@ jobs:
             echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
           fi
 
+      - name: Display Compiler details
+        shell: bash
+        run: |
+          ${CC} -v
+          ${CXX} -v
+
       - name: Display CPU details
         if: ${{ (runner.os == 'Linux') }}
         shell: bash
@@ -158,8 +164,8 @@ jobs:
       - name: Execute install.sh
         run: >
           ./install.sh
-          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
-          --prefix=$LIBBITCOIN_SRC_PATH/prefix
+          --build-dir=${{ env.LIBBITCOIN_SRC_PATH }} ${{ matrix.options }}
+          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
           ${{ matrix.boost }}
@@ -235,28 +241,28 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            cxx: "clang++-14"
+            cxx: "clang++-15"
             link: "dynamic"
             optimization: "size"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
-            cc: "clang-14"
+            cc: "clang-15"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
             packages: ""
 
           - os: ubuntu-22.04
-            cxx: "clang++-14"
+            cxx: "clang++-15"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang-14"
+            cc: "clang-15"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
@@ -291,28 +297,28 @@ jobs:
             packages: ""
 
           - os: macos-latest
-            cxx: "clang++-14"
+            cxx: "clang++"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--with-icu"
-            cc: "clang-14"
+            cc: "clang"
             flags: "-Os -fPIE"
             options: ""
             packager: "brew"
             packages: "icu4c"
 
           - os: macos-latest
-            cxx: "clang++-14"
+            cxx: "clang++"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang-14"
+            cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE"
             options: ""
             packager: "brew"
@@ -369,6 +375,12 @@ jobs:
             echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
           fi
 
+      - name: Display Compiler details
+        shell: bash
+        run: |
+          ${CC} -v
+          ${CXX} -v
+
       - name: Display CPU details
         if: ${{ (runner.os == 'Linux') }}
         shell: bash
@@ -378,8 +390,8 @@ jobs:
       - name: Execute install-cmake.sh
         run: >
           ./install-cmake.sh
-          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
-          --prefix=$LIBBITCOIN_SRC_PATH/prefix
+          --build-dir=${{ env.LIBBITCOIN_SRC_PATH }} ${{ matrix.options }}
+          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
           ${{ matrix.boost }}
@@ -466,14 +478,14 @@ jobs:
         include:
           - os: ubuntu-22.04
             preset: "nix-gnu-debug-shared-without_icu"
-            cxx: "clang++-14"
+            cxx: "clang++-15"
             link: "dynamic"
             optimization: "size"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
-            cc: "clang-14"
+            cc: "clang-15"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
@@ -481,14 +493,14 @@ jobs:
 
           - os: ubuntu-22.04
             preset: "nix-gnu-release-static-size-with_icu"
-            cxx: "clang++-14"
+            cxx: "clang++-15"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
-            cc: "clang-14"
+            cc: "clang-15"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
@@ -560,6 +572,12 @@ jobs:
             echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
           fi
 
+      - name: Display Compiler details
+        shell: bash
+        run: |
+          ${CC} -v
+          ${CXX} -v
+
       - name: Display CPU details
         if: ${{ (runner.os == 'Linux') }}
         shell: bash
@@ -569,8 +587,8 @@ jobs:
       - name: Execute install-cmakepresets.sh
         run: >
           ./install-cmakepresets.sh
-          --build-dir=$LIBBITCOIN_SRC_PATH ${{ matrix.options }}
-          --prefix=$LIBBITCOIN_SRC_PATH/prefix/${{ matrix.preset }}
+          --build-dir=${{ env.LIBBITCOIN_SRC_PATH }} ${{ matrix.options }}
+          --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix/${{ matrix.preset }}
           --preset=${{ matrix.preset }}
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
