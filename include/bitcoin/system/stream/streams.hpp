@@ -26,6 +26,9 @@
 #include <bitcoin/system/stream/devices/copy_source.hpp>
 #include <bitcoin/system/stream/devices/flip_sink.hpp>
 #include <bitcoin/system/stream/devices/push_sink.hpp>
+#include <bitcoin/system/stream/iostream/istream.hpp>
+#include <bitcoin/system/stream/iostream/iostream.hpp>
+#include <bitcoin/system/stream/iostream/ostream.hpp>
 #include <bitcoin/system/stream/make_stream.hpp>
 
 namespace libbitcoin {
@@ -41,16 +44,22 @@ namespace stream
 {
     namespace in
     {
-        /// An input stream that copies data from a data_reference.
+        /// A std::istream that copies data from a data_reference.
         using copy = make_stream<copy_source<data_reference>>;
+
+        /// A fast input stream that copies data from a data_reference.
+        using fast = system::istream<>;
     }
 
     namespace out
     {
-        /// An output stream that copies data to a data_slab.
+        /// A std::ostream that copies data to a data_slab.
         using copy = make_stream<copy_sink<data_slab>>;
 
-        /// An output stream that inserts data to a container.
+        /// A fast output stream that copies data to a data_slab.
+        using fast = system:: ostream<>;
+
+        /// A std::output stream that inserts data to a container.
         template <typename Container>
         using push = make_stream<push_sink<Container>>;
         using text = push<std::string>;
@@ -59,8 +68,11 @@ namespace stream
 
     namespace flip
     {
-        /// An input/output stream that copies data to a data_slab.
+        /// A std::iostream that copies data to a data_slab.
         using copy = make_stream<flip_sink<data_slab>>;
+
+        /// A fast input/output stream that copies data to a data_slab.
+        using fast = system::iostream<>;
     }
 }
 

@@ -111,6 +111,14 @@ BOOST_AUTO_TEST_CASE(input__constructor__data__expected)
     BOOST_REQUIRE(instance == expected_input);
 }
 
+BOOST_AUTO_TEST_CASE(input__constructor__fast__success)
+{
+    stream::in::fast stream(input_data);
+    const input instance(stream);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_input);
+}
+
 BOOST_AUTO_TEST_CASE(input__constructor__stream__success)
 {
     stream::in::copy stream(input_data);

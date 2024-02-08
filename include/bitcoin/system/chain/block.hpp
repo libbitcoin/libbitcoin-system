@@ -54,6 +54,8 @@ public:
         const transactions_cptr& txs) NOEXCEPT;
 
     block(const data_slice& data, bool witness) NOEXCEPT;
+    ////block(stream::in::fast&& stream, bool witness) NOEXCEPT;
+    block(stream::in::fast& stream, bool witness) NOEXCEPT;
     block(std::istream&& stream, bool witness) NOEXCEPT;
     block(std::istream& stream, bool witness) NOEXCEPT;
     block(reader&& source, bool witness) NOEXCEPT;

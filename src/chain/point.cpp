@@ -58,6 +58,16 @@ point::point(const data_slice& data) NOEXCEPT
 {
 }
 
+////point::point(stream::in::fast&& stream) NOEXCEPT
+////  : point(read::bytes::fast(stream))
+////{
+////}
+
+point::point(stream::in::fast& stream) NOEXCEPT
+  : point(read::bytes::fast(stream))
+{
+}
+
 point::point(std::istream&& stream) NOEXCEPT
   : point(read::bytes::istream(stream))
 {

@@ -232,7 +232,12 @@ BOOST_AUTO_TEST_CASE(sha512__merkle_root__two__expected)
 {
     constexpr auto expected = sha512::double_hash({ 0 }, { 1 });
 #if defined (HAVE_VECTOR_CONSTEXPR)
-    static_assert(sha512::merkle_root({ { 0 }, { 1 } }) == expected);
+
+    // MSVC Debug build internal compiler error.
+    #if !(defined(HAVE_MSC) && !defined(NDEBUG))
+        static_assert(sha512::merkle_root({ { 0 }, { 1 } }) == expected);
+    #endif
+
 #endif
     BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 } }), expected);
 }
@@ -254,7 +259,12 @@ BOOST_AUTO_TEST_CASE(sha512__merkle_root__four__expected)
     constexpr auto expected2 = sha512::double_hash({ 2 }, { 3 });
     constexpr auto expected = sha512::double_hash(expected1, expected2);
 #if defined (HAVE_VECTOR_CONSTEXPR)
-    static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }) == expected);
+
+    // MSVC Debug build internal compiler error.
+    #if !(defined(HAVE_MSC) && !defined(NDEBUG))
+        static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }) == expected);
+    #endif
+
 #endif
     BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
 }

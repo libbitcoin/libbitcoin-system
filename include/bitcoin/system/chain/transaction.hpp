@@ -63,6 +63,8 @@ public:
         const outputs_cptr& outputs, uint32_t locktime) NOEXCEPT;
     
     transaction(const data_slice& data, bool witness) NOEXCEPT;
+    ////transaction(stream::in::fast&& stream, bool witness) NOEXCEPT;
+    transaction(stream::in::fast& stream, bool witness) NOEXCEPT;
     transaction(std::istream&& stream, bool witness) NOEXCEPT;
     transaction(std::istream& stream, bool witness) NOEXCEPT;
     transaction(reader&& source, bool witness) NOEXCEPT;

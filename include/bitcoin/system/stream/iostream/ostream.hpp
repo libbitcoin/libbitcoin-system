@@ -25,7 +25,9 @@
 namespace libbitcoin {
 namespace system {
 
-/// Support for high level input/output operations on a byte buffer.
+/// Support for high level output operations on a byte buffer.
+/// Cannot derive from ostream and cannot make both share an interface.
+/// So this is duck-typed to the subset of std::ostream required by writers.
 template <typename Character = char>
 class ostream
 {
@@ -46,29 +48,29 @@ public:
 
     /// Construct the object.
     template <typename Buffer>
-    INLINE ostream(Buffer& buffer) NOEXCEPT;
-    INLINE ostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
+    ostream(Buffer& buffer) NOEXCEPT;
+    ostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
     /// Return state flags.
-    virtual INLINE iostate rdstate() const NOEXCEPT;
+    virtual inline iostate rdstate() const NOEXCEPT;
 
     /// Set the stream error flags state in addition to currently set flags.
-    virtual INLINE void setstate(iostate state) NOEXCEPT;
+    virtual inline void setstate(iostate state) NOEXCEPT;
 
     /// Set the stream error state flags by assigning the state value.
-    virtual INLINE void clear(iostate state=goodbit) NOEXCEPT;
+    virtual inline void clear(iostate state=goodbit) NOEXCEPT;
 
     /// Return the relative output position indicator (zero-based).
-    virtual INLINE pos_type tellp() const NOEXCEPT;
+    virtual inline pos_type tellp() const NOEXCEPT;
 
     /// Write a block of characters, sets badbit on overflow.
-    virtual INLINE void write(const char_type* data, pos_type size) NOEXCEPT;
+    virtual void write(const char_type* data, std::streamsize count) NOEXCEPT;
 
     /// Synchronize with the underlying storage device (no-op).
-    virtual INLINE void flush() NOEXCEPT;
+    virtual void flush() NOEXCEPT;
 
 private:
-    INLINE bool is_overflow(pos_type size) const NOEXCEPT;
+    bool is_overflow(pos_type size) const NOEXCEPT;
 
     uint8_t* position_;
     uint8_t* begin_;

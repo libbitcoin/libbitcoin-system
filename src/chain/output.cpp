@@ -65,6 +65,16 @@ output::output(const data_slice& data) NOEXCEPT
 {
 }
 
+////output::output(stream::in::fast&& stream) NOEXCEPT
+////  : output(read::bytes::fast(stream))
+////{
+////}
+
+output::output(stream::in::fast& stream) NOEXCEPT
+  : output(read::bytes::fast(stream))
+{
+}
+
 output::output(std::istream&& stream) NOEXCEPT
   : output(read::bytes::istream(stream))
 {

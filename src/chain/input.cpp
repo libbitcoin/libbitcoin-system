@@ -117,6 +117,16 @@ input::input(const data_slice& data) NOEXCEPT
 {
 }
 
+////input::input(stream::in::fast&& stream) NOEXCEPT
+////  : input(read::bytes::fast(stream))
+////{
+////}
+
+input::input(stream::in::fast& stream) NOEXCEPT
+  : input(read::bytes::fast(stream))
+{
+}
+
 input::input(std::istream&& stream) NOEXCEPT
   : input(read::bytes::istream(stream))
 {

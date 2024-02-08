@@ -128,6 +128,15 @@ BOOST_AUTO_TEST_CASE(header__constructor__data__expected)
     BOOST_REQUIRE(instance == expected_header);
 }
 
+BOOST_AUTO_TEST_CASE(header__constructor__fast__expected)
+{
+    const auto data = expected_header.to_data();
+    stream::in::fast stream(data);
+    const header instance(stream);
+    BOOST_REQUIRE(instance.is_valid());
+    BOOST_REQUIRE(instance == expected_header);
+}
+
 BOOST_AUTO_TEST_CASE(header__constructor__stream__expected)
 {
     const auto data = expected_header.to_data();

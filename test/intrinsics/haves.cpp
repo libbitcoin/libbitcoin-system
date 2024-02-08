@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__sse41__expected)
 // ----------------------------------------------------------------------------
 // These use BOOST_WARN to let us know if vectorization did not execute due to
 // CI platform processor configuration. Currently all CI platforms have SSE41
-// and AVX2, while about 50% have AVX512BW.
+// and AVX2, while about 50% have AVX512BW. Windows platforms now have SHANI.
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__when_defined__true)
 {
@@ -280,9 +280,9 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41a__when_x64__true_except_msc)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_shani__when_defined__true_except_msc)
+BOOST_AUTO_TEST_CASE(intrinsics_haves__have_shani__when_defined__true)
 {
-#if defined(HAVE_SHANI) && !defined(HAVE_MSC)
+#if defined(HAVE_SHANI)
     BOOST_WARN(have_shani());
 #else
     BOOST_REQUIRE(!have_shani());

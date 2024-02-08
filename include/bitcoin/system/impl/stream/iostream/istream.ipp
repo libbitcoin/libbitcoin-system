@@ -26,11 +26,12 @@
 namespace libbitcoin {
 namespace system {
 
+// Alowed here for low level performance benefit.
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 template <typename Character>
 template <typename Buffer>
-INLINE istream<Character>::istream(const Buffer& buffer) NOEXCEPT
+istream<Character>::istream(const Buffer& buffer) NOEXCEPT
   : position_(buffer.data()),
     begin_(position_),
     end_(begin_ + buffer.size()),
@@ -39,8 +40,7 @@ INLINE istream<Character>::istream(const Buffer& buffer) NOEXCEPT
 }
 
 template <typename Character>
-INLINE istream<Character>::istream(const uint8_t* begin,
-    ptrdiff_t size) NOEXCEPT
+istream<Character>::istream(const uint8_t* begin, ptrdiff_t size) NOEXCEPT
   : position_(begin),
     begin_(position_),
     end_(begin_ + size),
@@ -49,35 +49,35 @@ INLINE istream<Character>::istream(const uint8_t* begin,
 }
 
 template <typename Character>
-INLINE typename istream<Character>::iostate
+inline typename istream<Character>::iostate
 istream<Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
 template <typename Character>
-INLINE void
+inline void
 istream<Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
 template <typename Character>
-INLINE void
+inline void
 istream<Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
 }
 
 template <typename Character>
-INLINE typename istream<Character>::pos_type
+inline typename istream<Character>::pos_type
 istream<Character>::tellg() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
 template <typename Character>
-INLINE istream<Character>&
+istream<Character>&
 istream<Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 {
     if (state_ != goodbit)
@@ -131,7 +131,7 @@ istream<Character>::seekg(off_type offset, seekdir direction) NOEXCEPT
 }
 
 template <typename Character>
-INLINE typename istream<Character>::int_type
+typename istream<Character>::int_type
 istream<Character>::peek() NOEXCEPT
 {
     constexpr auto eof = std::char_traits<Character>::eof();
@@ -147,20 +147,22 @@ istream<Character>::peek() NOEXCEPT
 }
 
 template <typename Character>
-INLINE void
-istream<Character>::read(char_type* data, pos_type size) NOEXCEPT
+void
+istream<Character>::read(char_type* data, std::streamsize count) NOEXCEPT
 {
-    if (is_overflow(size))
+    const auto bytes = possible_narrow_sign_cast<size_t>(count);
+
+    if (is_overflow(bytes))
     {
         setstate(badbit);
         return;
     }
 
     BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-    std::copy_n(position_, size, data);
+    std::copy_n(position_, bytes, data);
     BC_POP_WARNING()
 
-    position_ += size;
+    position_ += bytes;
 }
 
 // private
@@ -173,7 +175,7 @@ istream<Character>::is_positive(off_type value) NOEXCEPT
 
 // private
 template <typename Character>
-INLINE bool
+bool
 istream<Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));

@@ -26,6 +26,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Support for high level input/output operations on a byte buffer.
+/// Cannot derive from iostream and cannot make both share an interface.
+/// So this is duck-typed to the subset of std::iostream required by flippers.
 template <typename Character = char>
 class iostream
 {
@@ -51,42 +53,42 @@ public:
 
     /// Construct the object.
     template <typename Buffer>
-    INLINE iostream(Buffer& buffer) NOEXCEPT;
-    INLINE iostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
+    iostream(Buffer& buffer) NOEXCEPT;
+    iostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT;
 
     /// Return state flags.
-    virtual INLINE iostate rdstate() const NOEXCEPT;
+    virtual inline iostate rdstate() const NOEXCEPT;
 
     /// Set the stream error flags state in addition to currently set flags.
-    virtual INLINE void setstate(iostate state) NOEXCEPT;
+    virtual inline void setstate(iostate state) NOEXCEPT;
 
     /// Set the stream error state flags by assigning the state value.
-    virtual INLINE void clear(iostate state = goodbit) NOEXCEPT;
+    virtual inline void clear(iostate state = goodbit) NOEXCEPT;
 
     /// Return the relative input position indicator (zero-based).
-    virtual INLINE pos_type tellg() const NOEXCEPT;
+    virtual inline pos_type tellg() const NOEXCEPT;
 
     /// Return the relative output position indicator (zero-based).
-    virtual INLINE pos_type tellp() const NOEXCEPT;
+    virtual inline pos_type tellp() const NOEXCEPT;
 
     /// Set the relative input position indicator (zero-based).
-    virtual INLINE iostream& seekg(off_type offset, seekdir direction) NOEXCEPT;
+    virtual iostream& seekg(off_type offset, seekdir direction) NOEXCEPT;
 
     /// Read the next character without advancing, sets badbit on underflow.
-    virtual INLINE int_type peek() NOEXCEPT;
+    virtual int_type peek() NOEXCEPT;
 
     /// Read a block of characters, sets badbit on underflow.
-    virtual INLINE void read(char_type* data, pos_type size) NOEXCEPT;
+    virtual void read(char_type* data, std::streamsize count) NOEXCEPT;
 
     /// Write a block of characters, sets badbit on overflow.
-    virtual INLINE void write(const char_type* data, pos_type size) NOEXCEPT;
+    virtual void write(const char_type* data, std::streamsize count) NOEXCEPT;
 
     /// Synchronize with the underlying storage device (no-op).
-    virtual INLINE void flush() NOEXCEPT;
+    virtual void flush() NOEXCEPT;
 
 private:
     static constexpr bool is_positive(off_type value) NOEXCEPT;
-    INLINE bool is_overflow(pos_type size) const NOEXCEPT;
+    bool is_overflow(pos_type size) const NOEXCEPT;
 
     uint8_t* position_;
     uint8_t* begin_;

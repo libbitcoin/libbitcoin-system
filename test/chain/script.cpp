@@ -252,6 +252,14 @@ BOOST_AUTO_TEST_CASE(script__factory_chunk_test)
     BOOST_REQUIRE(instance.is_valid());
 }
 
+BOOST_AUTO_TEST_CASE(script__factory_fast_test)
+{
+    const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");
+    stream::in::fast istream(raw);
+    const script instance(istream, false);
+    BOOST_REQUIRE(instance.is_valid());
+}
+
 BOOST_AUTO_TEST_CASE(script__factory_stream_test)
 {
     const auto raw = base16_chunk("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac");

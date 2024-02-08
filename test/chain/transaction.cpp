@@ -256,6 +256,26 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__data_2__expected)
     BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
 }
 
+BOOST_AUTO_TEST_CASE(transaction__constructor__fast_1__success)
+{
+    stream::in::fast stream(tx1_data);
+    const transaction tx(stream, true);
+    BOOST_REQUIRE(tx.is_valid());
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx1_data);
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx1_hash);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx1_data.size());
+}
+
+BOOST_AUTO_TEST_CASE(transaction__constructor___fast_2__success)
+{
+    stream::in::fast stream(tx2_data);
+    const transaction tx(stream, true);
+    BOOST_REQUIRE(tx.is_valid());
+    BOOST_REQUIRE_EQUAL(tx.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(tx.to_data(true), tx2_data);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(true), tx2_data.size());
+}
+
 BOOST_AUTO_TEST_CASE(transaction__constructor__stream_1__success)
 {
     stream::in::copy stream(tx1_data);

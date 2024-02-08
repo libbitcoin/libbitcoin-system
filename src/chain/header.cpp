@@ -66,6 +66,16 @@ header::header(const data_slice& data) NOEXCEPT
 {
 }
 
+////header::header(stream::in::fast&& stream) NOEXCEPT
+////  : header(read::bytes::fast(stream))
+////{
+////}
+
+header::header(stream::in::fast& stream) NOEXCEPT
+  : header(read::bytes::fast(stream))
+{
+}
+
 header::header(std::istream&& stream) NOEXCEPT
   : header(read::bytes::istream(stream))
 {
@@ -230,9 +240,12 @@ hash_digest header::hash() const NOEXCEPT
     if (hash_)
         return *hash_;
 
-    hash_digest digest{};
-    ostream stream{ digest };
-    sha256x2_writer sink{ stream };
+    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
+    hash_digest digest;
+    BC_POP_WARNING()
+
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
     to_data(sink);
     sink.flush();
     return digest;

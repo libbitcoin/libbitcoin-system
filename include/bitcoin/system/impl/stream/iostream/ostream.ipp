@@ -21,10 +21,12 @@
 
 #include <algorithm>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 
+// Alowed here for low level performance benefit.
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 template <typename Character>
@@ -48,60 +50,62 @@ ostream<Character>::ostream(uint8_t* begin,
 }
 
 template <typename Character>
-INLINE typename ostream<Character>::iostate
+inline typename ostream<Character>::iostate
 ostream<Character>::rdstate() const NOEXCEPT
 {
     return state_;
 }
 
 template <typename Character>
-INLINE void
+inline void
 ostream<Character>::setstate(iostate state) NOEXCEPT
 {
     state_ |= state;
 }
 
 template <typename Character>
-INLINE void
+inline void
 ostream<Character>::clear(iostate state) NOEXCEPT
 {
     state_ = state;
 }
 
 template <typename Character>
-INLINE typename ostream<Character>::pos_type
+inline typename ostream<Character>::pos_type
 ostream<Character>::tellp() const NOEXCEPT
 {
     return static_cast<pos_type>(position_ - begin_);
 }
 
 template <typename Character>
-INLINE void
+void
 ostream<Character>::write(const char_type* data,
-    pos_type size) NOEXCEPT
+    std::streamsize count) NOEXCEPT
 {
-    if (is_overflow(size))
+    const auto bytes = possible_narrow_sign_cast<size_t>(count);
+
+    if (is_overflow(bytes))
     {
         setstate(badbit);
         return;
     }
 
     BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
-    std::copy_n(data, size, position_);
+    std::copy_n(data, bytes, position_);
     BC_POP_WARNING()
 
-    position_ += size;
+    position_ += bytes;
 }
 
 template <typename Character>
-INLINE void
+void
 ostream<Character>::flush() NOEXCEPT
 {
 }
 
 // private
 template <typename Character>
-INLINE bool
+bool
 ostream<Character>::is_overflow(pos_type size) const NOEXCEPT
 {
     return (state_ != goodbit) || (size > (end_ - position_));
