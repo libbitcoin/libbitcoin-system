@@ -249,11 +249,23 @@ AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-copy],
         [CXXFLAGS="$CXXFLAGS -Wno-deprecated-copy"])])
 
+# Suppress warning for ignored attributes (arising on template arguments).
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-ignored-attributes],
+        [CXXFLAGS="$CXXFLAGS -Wno-ignored-attributes"])])
+
 # Conflict in stdlib under clang. Enabled in clang only.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*clang*],
     [AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],
         [CXXFLAGS="$CXXFLAGS -Wno-mismatched-tags"])])
+
+# Address -undefined dynamic_lookup MacOS error.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_LINK_FLAG([-no_fixup_chains],
+        [LDFLAGS="$LDFLAGS -no_fixup_chains"])])
 
 # Protect stack.
 #------------------------------------------------------------------------------

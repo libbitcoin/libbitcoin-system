@@ -20,13 +20,13 @@ jobs:
           - os: ubuntu-22.04
             cxx: "clang++-15"
             link: "dynamic"
-            optimization: "size"
+            optimization: "debug"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
             cc: "clang-15"
-            flags: "-Os -fPIE"
+            flags: "-Og -fPIE"
             options: "--enable-isystem --enable-avx2 --enable-sse4"
             packager: "apt"
             packages: ""
@@ -62,14 +62,14 @@ jobs:
           - os: ubuntu-22.04
             cxx: "g++-11"
             link: "static"
-            optimization: "debug"
+            optimization: "size"
             assert: "ndebug"
             coverage: "cov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             cc: "gcc-11"
-            flags: "-Og -g --coverage -fPIE"
-            options: "--enable-isystem --enable-avx512"
+            flags: "-Os -g --coverage -fPIE"
+            options: "--enable-isystem"
             packager: "apt"
             packages: "lcov"
 
@@ -113,7 +113,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare toolchain [generic]
         run: |
@@ -134,7 +134,7 @@ jobs:
         shell: bash
         run: |
           WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
+          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
             echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
           else
@@ -146,7 +146,7 @@ jobs:
             echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
           fi
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/lib" >> $GITHUB_ENV
           fi
 
       - name: Display Compiler details
@@ -243,13 +243,13 @@ jobs:
           - os: ubuntu-22.04
             cxx: "clang++-15"
             link: "dynamic"
-            optimization: "size"
+            optimization: "debug"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
             cc: "clang-15"
-            flags: "-Os -fPIE"
+            flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
             packages: ""
@@ -285,14 +285,14 @@ jobs:
           - os: ubuntu-22.04
             cxx: "g++-11"
             link: "static"
-            optimization: "debug"
+            optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             cc: "gcc-11"
-            flags: "-Og -fPIE"
-            options: "-Denable-avx512=on"
+            flags: "-Os -fPIE"
+            options: ""
             packager: "apt"
             packages: ""
 
@@ -336,7 +336,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare toolchain [generic]
         run: |
@@ -357,7 +357,7 @@ jobs:
         shell: bash
         run: |
           WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
+          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
           if [[ ${{ matrix.packager }} == 'brew' ]]; then
             echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
           fi
@@ -372,7 +372,7 @@ jobs:
             echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
           fi
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/lib" >> $GITHUB_ENV
           fi
 
       - name: Display Compiler details
@@ -480,13 +480,13 @@ jobs:
             preset: "nix-gnu-debug-shared-without_icu"
             cxx: "clang++-15"
             link: "dynamic"
-            optimization: "size"
+            optimization: "debug"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
             cc: "clang-15"
-            flags: "-Os -fPIE"
+            flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
             packages: ""
@@ -533,7 +533,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare toolchain [generic]
         run: |
@@ -554,7 +554,7 @@ jobs:
         shell: bash
         run: |
           WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
+          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
           if [[ ${{ matrix.packager }} == 'brew' ]]; then
             echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
           fi
@@ -569,7 +569,7 @@ jobs:
             echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
           fi
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
           fi
 
       - name: Display Compiler details
@@ -706,7 +706,7 @@ jobs:
           msbuild-architecture: x64
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Initialize SDK
         shell: powershell

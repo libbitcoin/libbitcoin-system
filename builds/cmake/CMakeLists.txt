@@ -7,7 +7,7 @@
 
 # libbitcoin-system project configuration.
 #------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
 project(libbitcoin-system LANGUAGES C CXX)
 
@@ -18,6 +18,7 @@ include(CheckIncludeFiles)
 include(CheckSymbolExists)
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
+include(CheckLinkerFlag)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -95,6 +96,14 @@ if ( HAS_FLAG_WNO-DEPRECATED-COPY )
     add_compile_options( "-Wno-deprecated-copy" )
 else()
     message( FATAL_ERROR "Compiler does not support -Wno-deprecated-copy" )
+endif()
+
+# Suppress warning for ignored attributes (arising on template arguments).
+check_cxx_compiler_flag( "-Wno-ignored-attributes" HAS_FLAG_WNO-IGNORED-ATTRIBUTES )
+if ( HAS_FLAG_WNO-IGNORED-ATTRIBUTES )
+    add_compile_options( "-Wno-ignored-attributes" )
+else()
+    message( FATAL_ERROR "Compiler does not support -Wno-ignored-attributes" )
 endif()
 
 # Allow use of C99 'long long' type.
@@ -326,11 +335,7 @@ set( boost_system_LIBS "-lboost_system" )
 set( boost_thread_LIBS "-lboost_thread" )
 set( boost_unit_test_framework_LIBS "-lboost_unit_test_framework" )
 
-if (enable-ndebug)
-    set( Boost_LIBRARY_DIR "${Boost_LIBRARY_DIR_DEBUG}" )
-else ()
-    set( Boost_LIBRARY_DIR "${Boost_LIBRARY_DIR_RELEASE}" )
-endif()
+set( Boost_LIBRARY_DIR $<IF:$<BOOL:${enable-ndebug}>,"${Boost_LIBRARY_DIR_RELEASE}","${Boost_LIBRARY_DIR_DEBUG}">)
 
 set( boost_CPPFLAGS "-I${Boost_INCLUDE_DIR}" )
 set( boost_LDFLAGS "-L${Boost_LIBRARY_DIR}" )
@@ -373,81 +378,92 @@ endif()
 #------------------------------------------------------------------------------
 find_package( Secp256K1 0.1.0.20 REQUIRED )
 
-# Define project common includes directories
+# Define project common includes for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    include_directories( SYSTEM
-        ${Boost_INCLUDE_DIR}
-        ${pthread_INCLUDE_DIRS}
-        ${rt_INCLUDE_DIRS}
-        ${icu_i18n_INCLUDE_DIRS}
-        ${dl_INCLUDE_DIRS}
-        ${secp256k1_INCLUDE_DIRS} )
+    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_INCLUDE_DIRS} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_INCLUDE_DIRS} CACHE STRING "Placeholder" )
 else()
-    include_directories( SYSTEM
-        ${Boost_INCLUDE_DIR}
-        ${pthread_INCLUDE_DIRS}
-        ${rt_INCLUDE_DIRS}
-        ${icu_i18n_STATIC_INCLUDE_DIRS}
-        ${dl_INCLUDE_DIRS}
-        ${secp256k1_STATIC_INCLUDE_DIRS} )
+    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
+endif()
+
+# Define project common includes directories
+#------------------------------------------------------------------------------
+include_directories( SYSTEM
+    ${Boost_INCLUDE_DIR}
+    ${pthread_INCLUDE_DIRS}
+    ${rt_INCLUDE_DIRS}
+    ${icu_i18n_FOR_BUILD_INCLUDE_DIRS}
+    ${dl_INCLUDE_DIRS}
+    ${secp256k1_FOR_BUILD_INCLUDE_DIRS} )
+
+# Define project common library directories for build.
+#------------------------------------------------------------------------------
+if (BUILD_SHARED_LIBS)
+    set( icu_i18n_FOR_BUILD_LIBRARY_DIRS ${icu_i18n_LIBRARY_DIRS} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_LIBRARY_DIRS ${secp256k1_LIBRARY_DIRS} CACHE STRING "Placeholder" )
+else()
+    set( icu_i18n_FOR_BUILD_LIBRARY_DIRS ${icu_i18n_STATIC_LIBRARY_DIRS} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_LIBRARY_DIRS ${secp256k1_STATIC_LIBRARY_DIRS} CACHE STRING "Placeholder" )
 endif()
 
 # Define project common library directories
 #------------------------------------------------------------------------------
-if (BUILD_SHARED_LIBS)
-    link_directories(
-        ${Boost_LIBRARY_DIRS}
-        ${pthread_LIBRARY_DIRS}
-        ${rt_LIBRARY_DIRS}
-        ${icu_i18n_LIBRARY_DIRS}
-        ${dl_LIBRARY_DIRS}
-        ${secp256k1_LIBRARY_DIRS} )
-else()
-    link_directories(
-        ${Boost_LIBRARY_DIRS}
-        ${pthread_LIBRARY_DIRS}
-        ${rt_LIBRARY_DIRS}
-        ${icu_i18n_STATIC_LIBRARY_DIRS}
-        ${dl_LIBRARY_DIRS}
-        ${secp256k1_STATIC_LIBRARY_DIRS} )
+link_directories(
+    ${Boost_LIBRARY_DIRS}
+    ${pthread_LIBRARY_DIRS}
+    ${rt_LIBRARY_DIRS}
+    ${icu_i18n_FOR_BUILD_LIBRARY_DIRS}
+    ${dl_LIBRARY_DIRS}
+    ${secp256k1_FOR_BUILD_LIBRARY_DIRS} )
+
+# Define project common linker flags.
+#------------------------------------------------------------------------------
+check_linker_flag(CXX "-no_fixup_chains" "no_fixup_chains_FOUND")
+
+if (no_fixup_chains_FOUND)
+    add_link_options("-no_fixup_chains")
 endif()
 
-# Define project common libraries/linker flags.
+check_linker_flag(CXX "-fstack-protector" "fstack_protector_FOUND")
+
+if (fstack_protector_FOUND)
+    add_link_options("-fstack-protector")
+endif()
+
+check_linker_flag(CXX "-fstack-protector-all" "fstack_protector_all_FOUND")
+
+if (fstack_protector_all_FOUND)
+    add_link_options("-fstack-protector-all")
+endif()
+
+
+# Define common library usage for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    link_libraries(
-        "-fstack-protector"
-        "-fstack-protector-all"
-        ${Boost_CHRONO_LIBRARY}
-        ${Boost_IOSTREAMS_LIBRARY}
-        ${Boost_JSON_LIBRARY}
-        ${Boost_LOCALE_LIBRARY}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_THREAD_LIBRARY}
-        ${pthread_LIBRARIES}
-        ${rt_LIBRARIES}
-        ${icu_i18n_LIBRARIES}
-        ${dl_LIBRARIES}
-        ${secp256k1_LIBRARIES} )
+    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_LIBRARIES} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_LIBRARIES} CACHE STRING "Placeholder" )
 else()
-    link_libraries(
-        "-fstack-protector"
-        "-fstack-protector-all"
-        ${Boost_CHRONO_LIBRARY}
-        ${Boost_IOSTREAMS_LIBRARY}
-        ${Boost_JSON_LIBRARY}
-        ${Boost_LOCALE_LIBRARY}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_THREAD_LIBRARY}
-        ${pthread_LIBRARIES}
-        ${rt_LIBRARIES}
-        ${icu_i18n_STATIC_LIBRARIES}
-        ${dl_LIBRARIES}
-        ${secp256k1_STATIC_LIBRARIES} )
+    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
 endif()
+
+# Define project common libraries.
+#------------------------------------------------------------------------------
+link_libraries(
+    ${Boost_CHRONO_LIBRARY}
+    ${Boost_IOSTREAMS_LIBRARY}
+    ${Boost_JSON_LIBRARY}
+    ${Boost_LOCALE_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${pthread_LIBRARIES}
+    ${rt_LIBRARIES}
+    ${icu_i18n_FOR_BUILD_LIBRARIES}
+    ${dl_LIBRARIES}
+    ${secp256k1_FOR_BUILD_LIBRARIES} )
 
 add_definitions(
     ${icu} )
@@ -598,62 +614,55 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/words/catalogs/electrum_v1.cpp"
     "../../src/words/catalogs/mnemonic.cpp" )
 
-# ${CANONICAL_LIB_NAME} project specific include directories.
+# ${CANONICAL_LIB_NAME} project specific include directory normalization for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
-        "../../include"
-        ${Boost_INCLUDE_DIR}
-        ${pthread_INCLUDE_DIRS}
-        ${rt_INCLUDE_DIRS}
-        ${icu_i18n_INCLUDE_DIRS}
-        ${dl_INCLUDE_DIRS}
-        ${secp256k1_INCLUDE_DIRS} )
+    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_INCLUDE_DIRS} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_INCLUDE_DIRS} CACHE STRING "Placeholder" )
 else()
-    target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
-        "../../include"
-        ${Boost_INCLUDE_DIR}
-        ${pthread_INCLUDE_DIRS}
-        ${rt_INCLUDE_DIRS}
-        ${icu_i18n_STATIC_INCLUDE_DIRS}
-        ${dl_INCLUDE_DIRS}
-        ${secp256k1_STATIC_INCLUDE_DIRS} )
+    set( icu_i18n_FOR_BUILD_INCLUDE_DIRS ${icu_i18n_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_INCLUDE_DIRS ${secp256k1_STATIC_INCLUDE_DIRS} CACHE STRING "Placeholder" )
 endif()
+
+# ${CANONICAL_LIB_NAME} project specific include directories.
+#------------------------------------------------------------------------------
+target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
+    "../../include"
+    ${Boost_INCLUDE_DIR}
+    ${pthread_INCLUDE_DIRS}
+    ${rt_INCLUDE_DIRS}
+    ${icu_i18n_FOR_BUILD_INCLUDE_DIRS}
+    ${dl_INCLUDE_DIRS}
+    ${secp256k1_FOR_BUILD_INCLUDE_DIRS} )
 
 target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 "../../include" )
 
-# ${CANONICAL_LIB_NAME} project specific libraries/linker flags.
+# ${CANONICAL_LIB_NAME} project specific libraries noramalization for build.
 #------------------------------------------------------------------------------
 if (BUILD_SHARED_LIBS)
-    target_link_libraries( ${CANONICAL_LIB_NAME}
-        ${Boost_CHRONO_LIBRARY}
-        ${Boost_IOSTREAMS_LIBRARY}
-        ${Boost_JSON_LIBRARY}
-        ${Boost_LOCALE_LIBRARY}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_THREAD_LIBRARY}
-        ${pthread_LIBRARIES}
-        ${rt_LIBRARIES}
-        ${icu_i18n_LIBRARIES}
-        ${dl_LIBRARIES}
-        ${secp256k1_LIBRARIES} )
+    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_LIBRARIES} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_LIBRARIES} CACHE STRING "Placeholder" )
 else()
-    target_link_libraries( ${CANONICAL_LIB_NAME}
-        ${Boost_CHRONO_LIBRARY}
-        ${Boost_IOSTREAMS_LIBRARY}
-        ${Boost_JSON_LIBRARY}
-        ${Boost_LOCALE_LIBRARY}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_THREAD_LIBRARY}
-        ${pthread_LIBRARIES}
-        ${rt_LIBRARIES}
-        ${icu_i18n_STATIC_LIBRARIES}
-        ${dl_LIBRARIES}
-        ${secp256k1_STATIC_LIBRARIES} )
+    set( icu_i18n_FOR_BUILD_LIBRARIES ${icu_i18n_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
+    set( secp256k1_FOR_BUILD_LIBRARIES ${secp256k1_STATIC_LIBRARIES} CACHE STRING "Placeholder" )
 endif()
+
+# ${CANONICAL_LIB_NAME} project specific libraries/linker flags.
+#------------------------------------------------------------------------------
+target_link_libraries( ${CANONICAL_LIB_NAME}
+    ${Boost_CHRONO_LIBRARY}
+    ${Boost_IOSTREAMS_LIBRARY}
+    ${Boost_JSON_LIBRARY}
+    ${Boost_LOCALE_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${pthread_LIBRARIES}
+    ${rt_LIBRARIES}
+    ${icu_i18n_FOR_BUILD_LIBRARIES}
+    ${dl_LIBRARIES}
+    ${secp256k1_FOR_BUILD_LIBRARIES} )
 
 # Define libbitcoin-system-examples project.
 #------------------------------------------------------------------------------
