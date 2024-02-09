@@ -231,6 +231,12 @@ AS_CASE([${CC}], [*clang*],
     [AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],
         [CXXFLAGS="$CXXFLAGS -Wno-mismatched-tags"])])
 
+# Address -undefined dynamic_lookup MacOS error.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_LINK_FLAG([-no_fixup_chains],
+        [LDFLAGS="$LDFLAGS -no_fixup_chains"])])
+
 # Protect stack.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],

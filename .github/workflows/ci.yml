@@ -113,7 +113,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare toolchain [generic]
         run: |
@@ -134,7 +134,7 @@ jobs:
         shell: bash
         run: |
           WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
+          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
           if [[ ${{ matrix.assert }} == 'ndebug' ]]; then
             echo "ASSERT_NDEBUG=--enable-ndebug" >> $GITHUB_ENV
           else
@@ -146,7 +146,7 @@ jobs:
             echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
           fi
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/lib" >> $GITHUB_ENV
           fi
 
       - name: Display Compiler details
@@ -336,7 +336,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare toolchain [generic]
         run: |
@@ -357,7 +357,7 @@ jobs:
         shell: bash
         run: |
           WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
+          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
           if [[ ${{ matrix.packager }} == 'brew' ]]; then
             echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
           fi
@@ -372,7 +372,7 @@ jobs:
             echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
           fi
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/lib" >> $GITHUB_ENV
           fi
 
       - name: Display Compiler details
@@ -533,7 +533,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare toolchain [generic]
         run: |
@@ -554,7 +554,7 @@ jobs:
         shell: bash
         run: |
           WORKSPACE_SUBPATH="${GITHUB_WORKSPACE%libbitcoin-system}"
-          echo "LIBBITCOIN_SRC_PATH=$WORKSPACE_SUBPATH" >> $GITHUB_ENV
+          echo "LIBBITCOIN_SRC_PATH=${WORKSPACE_SUBPATH}" >> $GITHUB_ENV
           if [[ ${{ matrix.packager }} == 'brew' ]]; then
             echo "CMAKE_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
           fi
@@ -569,7 +569,7 @@ jobs:
             echo "LINKAGE=--disable-shared" >> $GITHUB_ENV
           fi
           if [[ ${{ matrix.link }} == 'dynamic' ]]; then
-            echo "LDFLAGS=-Wl,-rpath,$WORKSPACE_SUBPATH/prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
+            echo "LDFLAGS=-Wl,-rpath,${WORKSPACE_SUBPATH}prefix/${{ matrix.preset }}/lib" >> $GITHUB_ENV
           fi
 
       - name: Display Compiler details
@@ -706,7 +706,7 @@ jobs:
           msbuild-architecture: x64
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Initialize SDK
         shell: powershell
