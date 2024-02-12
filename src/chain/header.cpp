@@ -307,7 +307,7 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
 }
 
 // ****************************************************************************
-/// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
+// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
 // ****************************************************************************
 bool header::is_invalid_timestamp(
     uint32_t timestamp_limit_seconds) const NOEXCEPT
