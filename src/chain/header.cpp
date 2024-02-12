@@ -252,7 +252,7 @@ hash_digest header::hash() const NOEXCEPT
 }
 
 // static/private
-uint256_t header::difficulty(uint32_t bits) NOEXCEPT
+uint256_t header::proof(uint32_t bits) NOEXCEPT
 {
     auto target = compact::expand(bits);
 
@@ -276,10 +276,10 @@ uint256_t header::difficulty(uint32_t bits) NOEXCEPT
 }
 
 // computed
-uint256_t header::difficulty() const NOEXCEPT
+uint256_t header::proof() const NOEXCEPT
 {
     // Returns zero if bits_ mantissa is less than one or bits_ is overflowed.
-    return difficulty(bits_);
+    return proof(bits_);
 }
 
 // Check.
