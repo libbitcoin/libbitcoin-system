@@ -252,7 +252,7 @@ hash_digest header::hash() const NOEXCEPT
 }
 
 // static/private
-uint256_t header::difficulty(uint32_t bits) NOEXCEPT
+uint256_t header::proof(uint32_t bits) NOEXCEPT
 {
     auto target = compact::expand(bits);
 
@@ -276,10 +276,10 @@ uint256_t header::difficulty(uint32_t bits) NOEXCEPT
 }
 
 // computed
-uint256_t header::difficulty() const NOEXCEPT
+uint256_t header::proof() const NOEXCEPT
 {
     // Returns zero if bits_ mantissa is less than one or bits_ is overflowed.
-    return difficulty(bits_);
+    return proof(bits_);
 }
 
 // Check.
@@ -307,7 +307,7 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
 }
 
 // ****************************************************************************
-/// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
+// CONSENSUS: bitcoin 32bit unix time: en.wikipedia.org/wiki/Year_2038_problem
 // ****************************************************************************
 bool header::is_invalid_timestamp(
     uint32_t timestamp_limit_seconds) const NOEXCEPT

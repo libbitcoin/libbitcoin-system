@@ -539,7 +539,7 @@ INLINE bool program<Stack>::
 is_stack_overflow() const NOEXCEPT
 {
     // Addition is safe due to stack size constraint.
-    return (stack_size() + alternate_.size()) > max_stack_size;
+    return (stack_size() + alternate_.size()) > max_unified_stack_size;
 }
 
 // private

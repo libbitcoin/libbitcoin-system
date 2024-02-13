@@ -99,7 +99,7 @@ public:
 
     /// Computed properties.
     hash_digest hash() const NOEXCEPT;
-    uint256_t difficulty() const NOEXCEPT;
+    uint256_t proof() const NOEXCEPT;
 
     /// Cache (this overrides hash() computation).
     void set_hash(hash_digest&& hash) const NOEXCEPT;
@@ -136,7 +136,7 @@ protected:
 
 private:
     static header from_data(reader& source) NOEXCEPT;
-    static uint256_t difficulty(uint32_t bits) NOEXCEPT;
+    static uint256_t proof(uint32_t bits) NOEXCEPT;
 
     // Header should be stored as shared (adds 16 bytes).
     // copy: 4 * 32 + 2 * 256 + 1 = 81 bytes (vs. 16 when shared).
