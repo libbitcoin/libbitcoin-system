@@ -41,6 +41,7 @@ public:
 
     typedef std::shared_ptr<const header> cptr;
 
+    static uint256_t proof(uint32_t bits) NOEXCEPT;
     static constexpr size_t serialized_size() NOEXCEPT
     {
         return sizeof(version_)
@@ -136,7 +137,6 @@ protected:
 
 private:
     static header from_data(reader& source) NOEXCEPT;
-    static uint256_t proof(uint32_t bits) NOEXCEPT;
 
     // Header should be stored as shared (adds 16 bytes).
     // copy: 4 * 32 + 2 * 256 + 1 = 81 bytes (vs. 16 when shared).

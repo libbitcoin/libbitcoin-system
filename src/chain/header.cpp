@@ -251,7 +251,7 @@ hash_digest header::hash() const NOEXCEPT
     return digest;
 }
 
-// static/private
+// static
 uint256_t header::proof(uint32_t bits) NOEXCEPT
 {
     auto target = compact::expand(bits);
