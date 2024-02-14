@@ -134,7 +134,7 @@ public:
         return retargeting_interval_seconds / block_spacing_seconds;
     }
 
-    /// Checkpoints must be ordered by height with greatest at back.
+    /// Get the map of chain data to query.
     static map get_map(size_t height,
         const system::settings& settings) NOEXCEPT;
 
@@ -154,8 +154,7 @@ public:
     chain_state(const chain_state& parent, const chain::header& header,
         const system::settings& settings) NOEXCEPT;
 
-    /// Checkpoints must be ordered by height with greatest at back.
-    /// Forks and checkpoints must match those provided for map creation.
+    /// Forks must match those provided for map creation.
     chain_state(data&& values, const system::settings& settings) NOEXCEPT;
 
     /// Properties.
