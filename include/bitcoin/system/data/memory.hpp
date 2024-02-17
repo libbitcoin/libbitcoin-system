@@ -32,7 +32,7 @@ namespace system {
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // shared_ptr moves are avoided in vector population by using 'new' and passing
-// to shared_pointer constrcut a raw pointer via std::vector.emplace_back:
+// to shared_pointer construct a raw pointer via std::vector.emplace_back:
 // std::vector.emplace_back(new block{...}).
 // Otherwise emplace_back copies the shared pointer, just as would push_back:
 // std::vector.emplace_back(std::make_shared<block>(block{...})).
