@@ -246,7 +246,7 @@ struct BC_API context
 
     uint16_t versions() const NOEXCEPT
     {
-        // TODO: inconsistency order: public, private
+        // TODO: inconsistenct order: public, private
         return ec_private::to_versions(address_version, wif_prefix);
     }
 };

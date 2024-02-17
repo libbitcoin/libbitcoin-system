@@ -125,6 +125,7 @@ class BC_API witness_address
         const std::string& prefix=mainnet) NOEXCEPT;
 
     // version_0_p2sh
+    // NOTE: ec_secret ends up here, not above in construction of ec_private.
     witness_address(const hash_digest& script_hash,
         const std::string& prefix=mainnet) NOEXCEPT;
     witness_address(const chain::script& script,
