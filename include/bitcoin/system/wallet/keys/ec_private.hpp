@@ -79,7 +79,7 @@ public:
     /// Constructors.
     ec_private() NOEXCEPT;
     ec_private(const ec_scalar& scalar,
-        uint8_t address = mainnet_p2kh) NOEXCEPT;
+        uint8_t address=mainnet_p2kh) NOEXCEPT;
     ec_private(const data_chunk& entropy,
         uint8_t address=mainnet_p2kh) NOEXCEPT;
     ec_private(const std::string& wif,
