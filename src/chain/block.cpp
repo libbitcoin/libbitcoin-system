@@ -564,7 +564,7 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
-    // May only commit a coinbase that has already been confirmed spent.
+    // May only commit  duplicate coinbase that is already confirmed spent.
     return !txs_->front()->inputs_ptr()->front()->metadata.spent;
 }
 
@@ -741,10 +741,8 @@ code block::accept(const context& ctx, size_t subsidy_interval,
 code block::confirm(const context& ctx) const NOEXCEPT
 {
     const auto bip30 = ctx.is_enabled(bip30_rule);
-    const auto bip34 = ctx.is_enabled(bip34_rule);
 
-    // confirmations required.
-    if (bip30 && !bip34 && is_unspent_coinbase_collision())
+    if (bip30 && is_unspent_coinbase_collision())
         return error::unspent_coinbase_collision;
 
     return confirm_transactions(ctx);

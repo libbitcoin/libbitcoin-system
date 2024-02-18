@@ -111,15 +111,15 @@ settings::settings(chain::selection context) NOEXCEPT
                 0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d, 0x5f,
                 0xac, 0x00, 0x00, 0x00, 0x00
             }, false);
-            activation_threshold = 750;
-            enforcement_threshold = 950;
-            activation_sample = 1000;
+            bip34_activation_threshold = 750;
+            bip34_enforcement_threshold = 950;
+            bip34_activation_sample = 1000;
             bip65_freeze = 388381;
             bip66_freeze = 363725;
             bip34_freeze = 227931;
             bip16_activation_time = 0x4f779a80;
-            bip34_active_checkpoint =
-                { "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", bip34_freeze };
+            ////bip34_active_checkpoint =
+            ////    { "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", bip34_freeze };
             bip9_bit0_active_checkpoint =
                 { "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328 };
             bip9_bit1_active_checkpoint =
@@ -168,16 +168,16 @@ settings::settings(chain::selection context) NOEXCEPT
                 0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d, 0x5f,
                 0xac, 0x00, 0x00, 0x00, 0x00
             }, false);
-            activation_threshold = 51;
-            enforcement_threshold = 75;
-            activation_sample = 100;
+            bip34_activation_threshold = 51;
+            bip34_enforcement_threshold = 75;
+            bip34_activation_sample = 100;
 
             bip65_freeze = 581885;
             bip66_freeze = 330776;
             bip34_freeze = 21111;
             bip16_activation_time = 0x4f3af580;
-            bip34_active_checkpoint =
-                { "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",  bip34_freeze };
+            ////bip34_active_checkpoint =
+            ////    { "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8",  bip34_freeze };
             bip9_bit0_active_checkpoint =
                 { "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112 };
             bip9_bit1_active_checkpoint =
@@ -236,8 +236,8 @@ settings::settings(chain::selection context) NOEXCEPT
 
             // bip9's are fixed and closed, so assume genesis activation.
             // bip90 assumes a historical bip34 activation block, so use genesis.
-            bip34_active_checkpoint =
-                { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
+            ////bip34_active_checkpoint =
+            ////    { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             bip9_bit0_active_checkpoint =
                 { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             bip9_bit1_active_checkpoint =

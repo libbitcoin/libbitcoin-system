@@ -102,9 +102,9 @@ public:
     uint32_t bip9_version_base;
 
     /// Activation parameters (bip34-style activations).
-    size_t activation_threshold{};
-    size_t enforcement_threshold{};
-    size_t activation_sample{};
+    size_t bip34_activation_threshold{};
+    size_t bip34_enforcement_threshold{};
+    size_t bip34_activation_sample{};
 
     /// Frozen activation heights (frozen_activations).
     size_t bip65_freeze{};
