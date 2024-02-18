@@ -105,7 +105,7 @@ chain_state::activations chain_state::activation(const data& values,
     const auto height = values.height;
     const auto version = values.version.self;
     const auto& history = values.version.ordered;
-    const auto frozen = script::is_enabled(forks, forks::bip90_rule);
+    const auto bip90 = script::is_enabled(forks, forks::bip90_rule);
 
     //*************************************************************************
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
@@ -131,9 +131,9 @@ chain_state::activations chain_state::activation(const data& values,
     const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
 
     // Frozen activations (require version and enforce above freeze height).
-    const auto bip34_ice = frozen && height >= settings.bip34_freeze;
-    const auto bip66_ice = frozen && height >= settings.bip66_freeze;
-    const auto bip65_ice = frozen && height >= settings.bip65_freeze;
+    const auto bip90_34 = bip90 && height >= settings.bip34_freeze;
+    const auto bip90_66 = bip90 && height >= settings.bip66_freeze;
+    const auto bip90_65 = bip90 && height >= settings.bip65_freeze;
 
     // Initialize activation results with genesis values.
     activations result{ forks::no_rules, settings.first_version };
@@ -167,7 +167,7 @@ chain_state::activations chain_state::activation(const data& values,
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
     // bip30 is disabled by bip34 or unconditional activation of it by bip90.
-    if (bip34_ice || (is_active(count_2, settings.bip34_activation_threshold) &&
+    if (bip90_34 || (is_active(count_2, settings.bip34_activation_threshold) &&
         version >= settings.bip34_version))
     {
         // TODO: check is_enabled(bip34_rule, forks) before above calculations.
@@ -187,7 +187,7 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip66_ice || (is_active(count_3, settings.bip34_activation_threshold) &&
+    if (bip90_66 || (is_active(count_3, settings.bip34_activation_threshold) &&
         version >= settings.bip66_version))
     {
         // TODO: check is_enabled(bip66_rule, forks) before above calculations.
@@ -195,7 +195,7 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip65_ice || (is_active(count_4, settings.bip34_activation_threshold) &&
+    if (bip90_65 || (is_active(count_4, settings.bip34_activation_threshold) &&
         version >= settings.bip65_version))
     {
         // TODO: check is_enabled(bip65_rule, forks) before above calculations.
@@ -203,17 +203,17 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
-    if (bip65_ice || is_enforced(count_4, settings.bip34_enforcement_threshold))
+    if (bip90_65 || is_enforced(count_4, settings.bip34_enforcement_threshold))
     {
         // TODO: requires is_enabled(bip65_rule, forks).
         result.minimum_block_version = settings.bip65_version;
     }
-    else if (bip66_ice || is_enforced(count_3, settings.bip34_enforcement_threshold))
+    else if (bip90_66 || is_enforced(count_3, settings.bip34_enforcement_threshold))
     {
         // TODO: requires is_enabled(bip66_rule, forks).
         result.minimum_block_version = settings.bip66_version;
     }
-    else if (bip34_ice || is_enforced(count_2, settings.bip34_enforcement_threshold))
+    else if (bip90_34 || is_enforced(count_2, settings.bip34_enforcement_threshold))
     {
         // TODO: requires is_enabled(bip34_rule, forks).
         result.minimum_block_version = settings.bip34_version;
