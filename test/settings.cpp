@@ -62,9 +62,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.activation_threshold, 750u);
-    BOOST_REQUIRE_EQUAL(configuration.enforcement_threshold, 950u);
-    BOOST_REQUIRE_EQUAL(configuration.activation_sample, 1000u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 750u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 950u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 1000u);
     BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 388381u);
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 363725u);
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 227931u);
@@ -100,9 +100,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.activation_threshold, 51u);
-    BOOST_REQUIRE_EQUAL(configuration.enforcement_threshold, 75u);
-    BOOST_REQUIRE_EQUAL(configuration.activation_sample, 100u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_enforcement_threshold, 75u);
+    BOOST_REQUIRE_EQUAL(configuration.bip34_activation_sample, 100u);
     BOOST_REQUIRE_EQUAL(configuration.bip65_freeze, 581885u);
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 330776u);
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 21111u);

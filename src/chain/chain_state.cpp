@@ -39,6 +39,7 @@ namespace system {
 namespace chain {
 
 // github.com/bitcoin/bips/blob/master/bip-0030.mediawiki#specification
+// As bip30 exceptions apply only to bitcoin mainnet these can be embedded.
 static const checkpoint mainnet_bip30_exception_checkpoint1
 {
     "00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec", 91842
@@ -51,14 +52,14 @@ static const checkpoint mainnet_bip30_exception_checkpoint2
 // Inlines.
 // ----------------------------------------------------------------------------
 
-constexpr bool is_active(size_t count, size_t activation_threshold) NOEXCEPT
+constexpr bool is_active(size_t count, size_t bip34_activation_threshold) NOEXCEPT
 {
-    return count >= activation_threshold;
+    return count >= bip34_activation_threshold;
 }
 
-constexpr bool is_enforced(size_t count, size_t enforcement_threshold) NOEXCEPT
+constexpr bool is_enforced(size_t count, size_t bip34_enforcement_threshold) NOEXCEPT
 {
-    return count >= enforcement_threshold;
+    return count >= bip34_enforcement_threshold;
 }
 
 // Determine the number of blocks back to the closest retarget height.
@@ -158,14 +159,15 @@ chain_state::activations chain_state::activation(const data& values,
     // scrypt_proof_of_work is activated based on configuration alone (hard fork).
     result.forks |= (forks::scrypt_proof_of_work & forks);
 
-    // bip16 was activated based on manual inspection of history (~55% rule).
+    // bip16 was activated based on manual inspection of signal history (~55% rule).
     if (values.timestamp.self >= settings.bip16_activation_time)
     {
         result.forks |= (forks::bip16_rule & forks);
     }
 
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip34_ice || (is_active(count_2, settings.activation_threshold) &&
+    // bip30 is disabled by bip34 or unconditional activation of it by bip90.
+    if (bip34_ice || (is_active(count_2, settings.bip34_activation_threshold) &&
         version >= settings.bip34_version))
     {
         // TODO: check is_enabled(bip34_rule, forks) before above calculations.
@@ -177,11 +179,7 @@ chain_state::activations chain_state::activation(const data& values,
         const auto retarget = script::is_enabled(forks, forks::retarget);
         const auto mainnet = retarget && difficult;
 
-        // If not a bip30 exception block (unspent duplicate coinbase allowed) and
-        // bip34 not active (duplicate coinbase presumed impossible) then must
-        // ensure spentness of any existing duplicate coinbase. The bip30 rule is
-        // always disabled by retroactive application to all blocks prior to bip34
-        // with the unconditional activation of bip34 by bip90 (hard fork).
+        // If not bip30 exception, existing duplicate coinbase must be spent.
         if (!is_bip30_exception({ values.hash, height }, mainnet))
         {
             result.forks |= (forks::bip30_rule & forks);
@@ -189,7 +187,7 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip66_ice || (is_active(count_3, settings.activation_threshold) &&
+    if (bip66_ice || (is_active(count_3, settings.bip34_activation_threshold) &&
         version >= settings.bip66_version))
     {
         // TODO: check is_enabled(bip66_rule, forks) before above calculations.
@@ -197,7 +195,7 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
-    if (bip65_ice || (is_active(count_4, settings.activation_threshold) &&
+    if (bip65_ice || (is_active(count_4, settings.bip34_activation_threshold) &&
         version >= settings.bip65_version))
     {
         // TODO: check is_enabled(bip65_rule, forks) before above calculations.
@@ -205,17 +203,17 @@ chain_state::activations chain_state::activation(const data& values,
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
-    if (bip65_ice || is_enforced(count_4, settings.enforcement_threshold))
+    if (bip65_ice || is_enforced(count_4, settings.bip34_enforcement_threshold))
     {
         // TODO: requires is_enabled(bip65_rule, forks).
         result.minimum_block_version = settings.bip65_version;
     }
-    else if (bip66_ice || is_enforced(count_3, settings.enforcement_threshold))
+    else if (bip66_ice || is_enforced(count_3, settings.bip34_enforcement_threshold))
     {
         // TODO: requires is_enabled(bip66_rule, forks).
         result.minimum_block_version = settings.bip66_version;
     }
-    else if (bip34_ice || is_enforced(count_2, settings.enforcement_threshold))
+    else if (bip34_ice || is_enforced(count_2, settings.bip34_enforcement_threshold))
     {
         // TODO: requires is_enabled(bip34_rule, forks).
         result.minimum_block_version = settings.bip34_version;
@@ -223,6 +221,18 @@ chain_state::activations chain_state::activation(const data& values,
     else
     {
         result.minimum_block_version = settings.first_version;
+    }
+
+    // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
+    if (values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
+    {
+        result.forks |= (forks::bip9_bit0_group & forks);
+    }
+
+    // bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
+    if (values.bip9_bit1_hash == settings.bip9_bit1_active_checkpoint.hash())
+    {
+        result.forks |= (forks::bip9_bit1_group & forks);
     }
 
     return result;
@@ -248,7 +258,7 @@ size_t chain_state::bits_count(size_t height, uint32_t forks,
 }
 
 size_t chain_state::version_count(size_t height, uint32_t forks,
-    size_t activation_sample) NOEXCEPT
+    size_t bip34_activation_sample) NOEXCEPT
 {
     if (script::is_enabled(forks, forks::bip90_rule) ||
         !script::is_enabled(forks, forks::bip34_activations))
@@ -256,7 +266,7 @@ size_t chain_state::version_count(size_t height, uint32_t forks,
         return zero;
     }
 
-    return std::min(height, activation_sample);
+    return std::min(height, bip34_activation_sample);
 }
 
 size_t chain_state::timestamp_count(size_t height, uint32_t) NOEXCEPT
@@ -421,6 +431,24 @@ uint32_t chain_state::easy_work_required(const data& values,
     return proof_of_work_limit;
 }
 
+size_t chain_state::bip9_bit0_height(size_t height,
+    const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT
+{
+    const auto activation_height = bip9_bit0_active_checkpoint.height();
+
+    // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
+    return height > activation_height ? activation_height : map::unrequested;
+}
+
+size_t chain_state::bip9_bit1_height(size_t height,
+    const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT
+{
+    const auto activation_height = bip9_bit1_active_checkpoint.height();
+
+    // Require bip9_bit1 hash at heights above historical bip9_bit1 activation.
+    return height > activation_height ? activation_height : map::unrequested;
+}
+
 // Public static
 // ----------------------------------------------------------------------------
 
@@ -448,10 +476,19 @@ chain_state::map chain_state::get_map(size_t height,
     map.version_self = height;
     map.version.high = sub1(height);
     map.version.count = version_count(height, forks,
-        settings.activation_sample);
+        settings.bip34_activation_sample);
 
     // The most recent past retarget height.
     map.timestamp_retarget = retarget_height(height, forks, interval);
+
+    // The checkpoint above which bip9_bit0 rules are enforced.
+    map.bip9_bit0_height = bip9_bit0_height(height,
+        settings.bip9_bit0_active_checkpoint);
+
+    // The checkpoint above which bip9_bit1 rules are enforced.
+    map.bip9_bit1_height = bip9_bit1_height(height,
+        settings.bip9_bit1_active_checkpoint);
+
     return map;
 }
 
@@ -513,7 +550,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
     // If version collection overflows, dequeue oldest member.
     if (data.version.ordered.size() > version_count(height, forks,
-        settings.activation_sample))
+        settings.bip34_activation_sample))
         data.version.ordered.pop_front();
 
     // If timestamp collection overflows, dequeue oldest member.
@@ -558,7 +595,7 @@ chain_state::chain_state(const chain_state& top,
 }
 
 chain_state::data chain_state::to_block(const chain_state& pool,
-    const block& block) NOEXCEPT
+    const block& block, const system::settings& settings) NOEXCEPT
 {
     // Copy data from presumed same-height pool state.
     chain_state::data data{ pool.data_ };
@@ -571,6 +608,14 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
 
+    // Cache hash of bip9 bit0 height block, otherwise use preceding state.
+    if (data.height == settings.bip9_bit0_active_checkpoint.height())
+        data.bip9_bit0_hash = data.hash;
+
+    // Cache hash of bip9 bit1 height block, otherwise use preceding state.
+    if (data.height == settings.bip9_bit1_active_checkpoint.height())
+        data.bip9_bit1_hash = data.hash;
+
     return data;
 }
 
@@ -578,7 +623,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
 // This assumes that the pool state is the same height as the block.
 chain_state::chain_state(const chain_state& pool, const block& block,
     const system::settings& settings) NOEXCEPT
-  : data_(to_block(pool, block)),
+  : data_(to_block(pool, block, settings)),
     forks_(pool.forks_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
@@ -600,6 +645,14 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
+
+    // Cache hash of bip9 bit0 height block, otherwise use preceding state.
+    if (data.height == settings.bip9_bit0_active_checkpoint.height())
+        data.bip9_bit0_hash = data.hash;
+
+    // Cache hash of bip9 bit1 height block, otherwise use preceding state.
+    if (data.height == settings.bip9_bit1_active_checkpoint.height())
+        data.bip9_bit1_hash = data.hash;
 
     return data;
 }
