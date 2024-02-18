@@ -75,6 +75,9 @@ constexpr bool is_retarget_height(size_t height,
     return is_zero(retarget_distance(height, retargeting_interval));
 }
 
+// bip30 is active for all but two mainnet blocks that violate the rule.
+// These two blocks each have a coinbase transaction that exactly duplicates
+// another that is not spent by the arrival of the corresponding duplicate.
 inline bool is_bip30_exception(const checkpoint& check, bool mainnet) NOEXCEPT
 {
     return mainnet &&
@@ -102,9 +105,6 @@ chain_state::activations chain_state::activation(const data& values,
     const auto version = values.version.self;
     const auto& history = values.version.ordered;
     const auto frozen = script::is_enabled(forks, forks::bip90_rule);
-    ////const auto difficult = script::is_enabled(forks, forks::difficult);
-    ////const auto retarget = script::is_enabled(forks, forks::retarget);
-    ////const auto mainnet = retarget && difficult;
 
     //*************************************************************************
     // CONSENSUS: Though unspecified in bip34, the satoshi implementation
@@ -124,6 +124,7 @@ chain_state::activations chain_state::activation(const data& values,
         settings.bip65_version); };
 
     // Compute bip34-based activation version summaries.
+    // TODO: avoid these computations if forks not configured.
     const auto count_2 = std::count_if(history.begin(), history.end(), ge_2);
     const auto count_3 = std::count_if(history.begin(), history.end(), ge_3);
     const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
@@ -163,26 +164,35 @@ chain_state::activations chain_state::activation(const data& values,
         result.forks |= (forks::bip16_rule & forks);
     }
 
-    ////// bip30 is active for all but two mainnet blocks that violate the rule.
-    ////// These two blocks each have a coinbase transaction that exactly duplicates
-    ////// another that is not spent by the arrival of the corresponding duplicate.
-    ////// This was later applied to the full history in implementation (a no-op).
-    ////if (!is_bip30_exception({ values.hash, height }, mainnet))
-    ////{
-    ////    result.forks |= (forks::bip30_rule & forks);
-    ////}
-
     // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
     if (bip34_ice || (is_active(count_2, settings.activation_threshold) &&
         version >= settings.bip34_version))
     {
+        // TODO: check is_enabled(bip34_rule, forks) before above calculations.
         result.forks |= (forks::bip34_rule & forks);
+    }
+    else
+    {
+        const auto difficult = script::is_enabled(forks, forks::difficult);
+        const auto retarget = script::is_enabled(forks, forks::retarget);
+        const auto mainnet = retarget && difficult;
+
+        // If not a bip30 exception block (unspent duplicate coinbase allowed) and
+        // bip34 not active (duplicate coinbase presumed impossible) then must
+        // ensure spentness of any existing duplicate coinbase. The bip30 rule is
+        // always disabled by retroactive application to all blocks prior to bip34
+        // with the unconditional activation of bip34 by bip90 (hard fork).
+        if (!is_bip30_exception({ values.hash, height }, mainnet))
+        {
+            result.forks |= (forks::bip30_rule & forks);
+        }
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
     if (bip66_ice || (is_active(count_3, settings.activation_threshold) &&
         version >= settings.bip66_version))
     {
+        // TODO: check is_enabled(bip66_rule, forks) before above calculations.
         result.forks |= (forks::bip66_rule & forks);
     }
 
@@ -190,20 +200,24 @@ chain_state::activations chain_state::activation(const data& values,
     if (bip65_ice || (is_active(count_4, settings.activation_threshold) &&
         version >= settings.bip65_version))
     {
+        // TODO: check is_enabled(bip65_rule, forks) before above calculations.
         result.forks |= (forks::bip65_rule & forks);
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
     if (bip65_ice || is_enforced(count_4, settings.enforcement_threshold))
     {
+        // TODO: requires is_enabled(bip65_rule, forks).
         result.minimum_block_version = settings.bip65_version;
     }
     else if (bip66_ice || is_enforced(count_3, settings.enforcement_threshold))
     {
+        // TODO: requires is_enabled(bip66_rule, forks).
         result.minimum_block_version = settings.bip66_version;
     }
     else if (bip34_ice || is_enforced(count_2, settings.enforcement_threshold))
     {
+        // TODO: requires is_enabled(bip34_rule, forks).
         result.minimum_block_version = settings.bip34_version;
     }
     else
@@ -664,16 +678,6 @@ chain::context chain_state::context() const NOEXCEPT
         minimum_block_version(),
         work_required()
     };
-}
-
-/// Current zulu (utc) time in seconds since epoch, using the wall clock.
-/// Although not defined, epoch is almost always: 00:00, Jan 1 1970 UTC.
-/// BUGBUG: en.wikipedia.org/wiki/Year_2038_problem
-inline uint64_t zulu_time_seconds() NOEXCEPT
-{
-    using wall_clock = std::chrono::system_clock;
-    const auto now = wall_clock::now();
-    return sign_cast<uint64_t>(wall_clock::to_time_t(now));
 }
 
 } // namespace chain
