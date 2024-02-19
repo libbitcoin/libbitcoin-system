@@ -47,7 +47,7 @@ public:
     /// An unspent coinbase collision is immature (unspendable) and spent
     /// collision is mature (bip30). Coinbase collision precluded by bip34.
     ///************************************************************************
-    /// For coinbase coinbase tx, implies fully spent at height or not found.
+    /// For coinbase tx, implies fully spent at height or not found.
     /// Coinbase value stored in first input of coinbase transaction.
     /// For a non-coinbase input this indicates spent at height.
     bool spent{ true };
