@@ -166,6 +166,79 @@ BOOST_AUTO_TEST_CASE(checkpoint__equality__different__expected)
     BOOST_REQUIRE(!(instance1 == instance2));
 }
 
+BOOST_AUTO_TEST_CASE(checkpoint__is_at__empty__false)
+{
+    const checkpoints points{};
+    BOOST_REQUIRE(!checkpoint::is_at(points, 0));
+    BOOST_REQUIRE(!checkpoint::is_at(points, 42));
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_at__non_empty__expected)
+{
+    const checkpoints points
+    {
+        { "0000000000000000000000000000000000000000000000000000000000000000", 17 },
+        { "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 },
+        { "1111111111111111111111111111111111111111111111111111111111111111", 1000 }
+    };
+
+    BOOST_REQUIRE(!checkpoint::is_at(points, 0));
+    BOOST_REQUIRE(!checkpoint::is_at(points, 1));
+    BOOST_REQUIRE(checkpoint::is_at(points, 17));
+    BOOST_REQUIRE(checkpoint::is_at(points, 42));
+    BOOST_REQUIRE(checkpoint::is_at(points, 1000));
+    BOOST_REQUIRE(!checkpoint::is_at(points, 1001));
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_under__empty__false)
+{
+    const checkpoints points{};
+    BOOST_REQUIRE(!checkpoint::is_under(points, 0));
+    BOOST_REQUIRE(!checkpoint::is_under(points, 42));
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_under__non_empty__expected)
+{
+    const checkpoints points
+    {
+        { "0000000000000000000000000000000000000000000000000000000000000000", 17 },
+        { "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 },
+        { "1111111111111111111111111111111111111111111111111111111111111111", 1000 }
+    };
+
+    BOOST_REQUIRE(checkpoint::is_under(points, 0));
+    BOOST_REQUIRE(checkpoint::is_under(points, 1));
+    BOOST_REQUIRE(checkpoint::is_under(points, 17));
+    BOOST_REQUIRE(checkpoint::is_under(points, 42));
+    BOOST_REQUIRE(checkpoint::is_under(points, 1000));
+    BOOST_REQUIRE(!checkpoint::is_under(points, 1001));
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_conflict__empty__false)
+{
+    const checkpoints points{};
+    const checkpoint point("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42);
+    BOOST_REQUIRE(!checkpoint::is_conflict(points, point.hash(), 0));
+    BOOST_REQUIRE(!checkpoint::is_conflict(points, point.hash(), point.height()));
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__is_conflict__non_empty__expected)
+{
+    const checkpoints points
+    {
+        { "0000000000000000000000000000000000000000000000000000000000000000", 17 },
+        { "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 },
+        { "1111111111111111111111111111111111111111111111111111111111111111", 1000 }
+    };
+    const auto hash = base16_hash("0102030405060708090a0102030405060708090a0102030405060708090a0b0c");
+
+    BOOST_REQUIRE(!checkpoint::is_conflict(points, hash, 0));
+    BOOST_REQUIRE(checkpoint::is_conflict(points, hash, 17));
+    BOOST_REQUIRE(!checkpoint::is_conflict(points, hash, 42));
+    BOOST_REQUIRE(checkpoint::is_conflict(points, hash, 1000));
+    BOOST_REQUIRE(!checkpoint::is_conflict(points, hash, 1001));
+}
+
 // json
 // ----------------------------------------------------------------------------
 

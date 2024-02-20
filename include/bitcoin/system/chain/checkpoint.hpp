@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <memory>
-#include <string>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -39,6 +38,7 @@ public:
 
     DEFAULT_COPY_MOVE_DESTRUCT(checkpoint);
 
+    static bool is_at(const list& checkpoints, size_t height) NOEXCEPT;
     static bool is_under(const list& checkpoints, size_t height) NOEXCEPT;
     static bool is_conflict(const list& checkpoints, const hash_digest& hash,
         size_t height) NOEXCEPT;
