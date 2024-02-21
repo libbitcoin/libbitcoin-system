@@ -45,6 +45,24 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
 
 BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
 {
+    const chain::checkpoint::list checkpoints
+    {
+        { "00000000000000004d9b4ef50f0f9d686fd69db2e03af35a100370c64632a983", 295000 },
+        { "0000000000000001ae8c72a0b0c301f67e3afca10e819efa9041e458e9bd7e40", 279000 },
+        { "000000000000003887df1f29024b06fc2200b55f8af8f35453d7be294df2d214", 250000 },
+        { "00000000000001c108384350f74090433e7fcf79a606b8e797f065b130575932", 225430 },
+        { "00000000000001b4f4b433e81ee46494af945cf96014816a4e2370f11b23df4e", 216116 },
+        { "000000000000048b95347e83192f69cf0366076336c639f9b7228e9ba171342e", 210000 },
+        { "000000000000059f452a5f7340de6682a977387c17010ff6e6c3bd83ca8b1317", 193000 },
+        { "000000000000099e61ea72015e79632f216fe6cb33d7899acb35b75c8303b763", 168000 },
+        { "00000000000005b12ffd4cd315cd34ffd4a594f430ac814c91184a0d42d2b0fe", 134444 },
+        { "000000000000774a7f8a7a12dc906ddb9e17e75d684f15e00f8767f9e8f36553", 118000 },
+        { "00000000000291ce28027faea320c8d2b054b2e0fe44a773f3eefb151d6bdc97", 105000 },
+        { "0000000000573993a3c9e41ce34471c079dcf5f52a0e824a81e7f953b8661a20", 74000 },
+        { "000000002dd5588a74784eaa7ab0507a18ad16a236e7b1ce69f00d7ddfb5d0a6", 33333 },
+        { "0000000069e244f73d78e8fd29ba2fd2ed618bd6fa2ee92559f542fdb26e7c1d", 11111 }
+    };
+
     settings configuration(chain::selection::mainnet);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
@@ -69,8 +87,6 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 363725u);
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 227931u);
     BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1333238400u);
-    const chain::checkpoint bip34_active("000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", configuration.bip34_freeze);
-    ////BOOST_REQUIRE_EQUAL(configuration.bip34_active_checkpoint, bip34_active);
     const chain::checkpoint bit0_active("000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
     const chain::checkpoint bit1_active("0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824u);
@@ -79,10 +95,16 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
 }
 
 BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
 {
+    const chain::checkpoint::list checkpoints
+    {
+        { "000000002a936ca763904c3c35fce2f3556c559c0214345d31b1bcebf76acb70", 546 }
+    };
+
     settings configuration(chain::selection::testnet);
     BOOST_REQUIRE_EQUAL(configuration.block_spacing_seconds, 600u);
     BOOST_REQUIRE_EQUAL(configuration.timestamp_limit_seconds, 7200u);
@@ -107,8 +129,6 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip66_freeze, 330776u);
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 21111u);
     BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
-    const chain::checkpoint bip34_active("0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8", configuration.bip34_freeze);
-    ////BOOST_REQUIRE_EQUAL(configuration.bip34_active_checkpoint, bip34_active);
     const chain::checkpoint bit0_active("00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
     const chain::checkpoint bit1_active("00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624u);
@@ -117,6 +137,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
 }
 
 BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
@@ -143,13 +164,13 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_freeze, 0u);
     BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
     const chain::checkpoint genesis(genesis_block.hash(), 0u);
-    ////BOOST_REQUIRE_EQUAL(configuration.bip34_active_checkpoint, genesis);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, genesis);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, genesis);
     BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
     BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 150u);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 1499999998350u);
+    BOOST_REQUIRE(configuration.checkpoints.empty());
 }
 
 // setter methods
