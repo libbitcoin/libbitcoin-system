@@ -79,8 +79,8 @@
             "description": "Factored size optimization settings.",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Os -s",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Os -s"
+                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Os",
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Os"
             }
         },
         {
