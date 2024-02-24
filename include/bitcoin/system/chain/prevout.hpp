@@ -52,7 +52,7 @@ public:
     /// For a non-coinbase input this indicates spent at height.
     bool spent{ true };
 
-    // The output is of a coinbase transaction.
+    /// The output is of a coinbase transaction.
     bool coinbase{ false };
 };
 
