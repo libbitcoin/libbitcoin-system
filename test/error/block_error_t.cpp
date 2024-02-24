@@ -53,9 +53,9 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__futuristic_timestamp__true_exected_mes
 
 // accept header
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__checkpoints_failed__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__checkpoint_conflict__true_exected_message)
 {
-    constexpr auto value = error::checkpoints_failed;
+    constexpr auto value = error::checkpoint_conflict;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
