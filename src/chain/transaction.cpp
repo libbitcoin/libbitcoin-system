@@ -1312,8 +1312,8 @@ code transaction::connect(const context& ctx) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
 
-    ////if (is_coinbase())
-    ////    return error::transaction_success;
+    if (is_coinbase())
+        return error::transaction_success;
 
     code ec;
     using namespace machine;
