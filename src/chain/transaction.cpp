@@ -1284,7 +1284,7 @@ code transaction::accept(const context&) const NOEXCEPT
 
 // Do NOT invoke on coinbase.
 // Node performs these checks through database query.
-// This assume that prevout and metadata caching are completed on all inputs.
+// This assumes that prevout and metadata caching are completed on all inputs.
 code transaction::confirm(const context& ctx) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
@@ -1312,8 +1312,8 @@ code transaction::connect(const context& ctx) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
 
-    ////if (is_coinbase())
-    ////    return error::transaction_success;
+    if (is_coinbase())
+        return error::transaction_success;
 
     code ec;
     using namespace machine;

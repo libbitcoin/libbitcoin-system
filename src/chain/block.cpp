@@ -564,48 +564,32 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
     if (txs_->empty() || txs_->front()->inputs_ptr()->empty())
         return false;
 
-    // May only commit  duplicate coinbase that is already confirmed spent.
+    // May only commit duplicate coinbase that is already confirmed spent.
+    // Metadata population defaults coinbase to spent (not a collision).
     return !txs_->front()->inputs_ptr()->front()->metadata.spent;
 }
 
+// Search is not ordered, forward references are caught by block.check.
 void block::populate() const NOEXCEPT
 {
-    // Coinbase, outputs only, inputs only.
-    if (txs_->size() < 3u)
-        return;
-
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    std::unordered_map<point, output::cptr> map{};
-
-    // Skip coinbase tx.
-    auto tx = std::next(txs_->begin());
+    std::unordered_map<point, output::cptr> points{};
     uint32_t index{};
 
-    // Outputs only (first tx).
-    for (const auto& out: *(*tx)->outputs_ptr())
-        map.emplace(point{ (*tx)->hash(false), index++ }, out);
+    // Populate outputs hash table.
+    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
+        for (const auto& out: *(*tx)->outputs_ptr())
+            points.emplace(point{ (*tx)->hash(false), index++ }, out);
 
-    // Search is ordered, no forward references or coinbase spend (consensus).
-    for (++tx; tx != std::prev(txs_->end()); ++tx)
+    // Populate input prevouts from hash table.
+    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {
-            const auto element = map.find(in->point());
-            if (element != map.end())
-                in->prevout = element->second;
+            const auto point = points.find(in->point());
+            if (point != points.end())
+                in->prevout = point->second;
         }
-
-        index = 0;
-        for (const auto& out: *(*tx)->outputs_ptr())
-            map.emplace(point{ (*tx)->hash(false), index++ }, out);
-    }
-
-    // Inputs only (last tx).
-    for (const auto& in: *(*tx)->inputs_ptr())
-    {
-        const auto element = map.find(in->point());
-        if (element != map.end())
-            in->prevout = element->second;
     }
 
     BC_POP_WARNING()
@@ -668,10 +652,11 @@ code block::connect_transactions(const context& ctx) const NOEXCEPT
 code block::confirm_transactions(const context& ctx) const NOEXCEPT
 {
     code ec;
-    
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
-        if ((ec = (*tx)->confirm(ctx)))
-            return ec;
+
+    if (!is_empty())
+        for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+            if ((ec = (*tx)->confirm(ctx)))
+                return ec;
 
     return error::block_success;
 }
