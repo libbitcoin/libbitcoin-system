@@ -705,7 +705,7 @@ code block::check(const context& ctx) const NOEXCEPT
     return check_transactions(ctx);
 }
 
-// These assume that prevout caching is completed on all inputs.
+// This assumes that prevout caching is completed on all inputs.
 code block::accept(const context& ctx, size_t subsidy_interval,
     uint64_t initial_subsidy) const NOEXCEPT
 {
@@ -722,7 +722,8 @@ code block::accept(const context& ctx, size_t subsidy_interval,
     return accept_transactions(ctx);
 }
 
-// This assume that prevout and metadata caching are completed on all inputs.
+// Node performs these checks through database query.
+// This assumes that prevout and metadata caching are completed on all inputs.
 code block::confirm(const context& ctx) const NOEXCEPT
 {
     const auto bip30 = ctx.is_enabled(bip30_rule);

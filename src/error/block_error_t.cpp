@@ -34,7 +34,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { futuristic_timestamp, "timestamp too far in the future" },
 
     // accept header
-    { checkpoints_failed, "block hash rejected by checkpoint" },
+    { checkpoint_conflict, "block hash rejected by checkpoint" },
     { invalid_block_version, "block version rejected at current height" },
     { timestamp_too_early, "block timestamp is too early" },
     { incorrect_proof_of_work, "proof of work does not match bits field" },

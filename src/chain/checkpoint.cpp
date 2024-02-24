@@ -133,25 +133,24 @@ bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT
 
 // TODO: add from_string.
 // TODO: add get_line/put_line to reader and eliminate stream_result.
-std::istream& operator>>(std::istream& stream, checkpoint& out) NOEXCEPT
+std::istream& operator>>(std::istream& stream, checkpoint& out) THROWS
 {
     std::string value;
     stream >> value;
 
     hash_digest hash;
     size_t height(zero);
-    const auto tokens = split(value, ":");
 
-    if (tokens.size() == two &&
-        decode_hash(hash, tokens.front()) &&
-        deserialize(height, tokens.back()))
-    {
-        out = { hash, height };
-        return stream_result(stream, true);
-    }
+    // std::string avoids boolean override.
+    const auto tokens = split(value, std::string{ ":" });
 
-    out = {};
-    return stream_result(stream, false);
+    if (tokens.size() != two ||
+        !decode_hash(hash, tokens.front()) ||
+        !deserialize(height, tokens.back()))
+        throw istream_exception(value);
+
+    out = { hash, height };
+    return stream;
 }
 
 bool checkpoint::is_valid() const NOEXCEPT

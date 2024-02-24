@@ -40,7 +40,7 @@ enum block_error_t : uint8_t
     // TODO: order these.
 
     // accept header
-    checkpoints_failed,
+    checkpoint_conflict,
     invalid_block_version,
     timestamp_too_early,
     incorrect_proof_of_work,
