@@ -105,8 +105,7 @@ public:
     code connect(const context& ctx) const NOEXCEPT;
     code confirm(const context& ctx) const NOEXCEPT;
 
-    /// Populate previous output metadata internal to the block.
-    /// Does not populate forward references (consensus limited).
+    /// Populate previous outputs (only, no metadata) internal to the block.
     void populate() const NOEXCEPT;
 
 protected:
