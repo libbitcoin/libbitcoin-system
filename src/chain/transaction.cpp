@@ -1267,7 +1267,7 @@ code transaction::check(const context& ctx) const NOEXCEPT
 }
 
 // Do NOT invoke on coinbase.
-// These assume that prevout caching is completed on all inputs.
+// This assumes that prevout caching is completed on all inputs.
 code transaction::accept(const context&) const NOEXCEPT
 {
     BC_ASSERT(!is_coinbase());
