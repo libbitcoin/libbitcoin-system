@@ -173,6 +173,7 @@ public:
     /// Properties.
     chain::context context() const NOEXCEPT;
     const hash_digest& hash() const NOEXCEPT;
+    const uint256_t& cumulative_work() const NOEXCEPT;
     uint32_t minimum_block_version() const NOEXCEPT;
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
@@ -237,6 +238,7 @@ private:
     const activations active_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;
+    const uint256_t cumulative_work_;
 };
 
 } // namespace chain

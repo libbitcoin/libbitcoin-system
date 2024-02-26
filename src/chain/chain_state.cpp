@@ -584,13 +584,15 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
 // Top to pool.
 // This generates a state for the pool above the presumed top block state.
+// Work is not acculuated for a pool state.
 chain_state::chain_state(const chain_state& top,
     const system::settings& settings) NOEXCEPT
   : data_(to_pool(top, settings)),
     forks_(top.forks_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
-    median_time_past_(median_time_past(data_, forks_))
+    median_time_past_(median_time_past(data_, forks_)),
+    cumulative_work_(top.cumulative_work())
 {
 }
 
@@ -627,7 +629,8 @@ chain_state::chain_state(const chain_state& pool, const block& block,
     forks_(pool.forks_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
-    median_time_past_(median_time_past(data_, forks_))
+    median_time_past_(median_time_past(data_, forks_)),
+    cumulative_work_(pool.cumulative_work() + block.header().proof())
 {
 }
 
@@ -665,7 +668,8 @@ chain_state::chain_state(const chain_state& parent, const header& header,
     forks_(parent.forks_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
-    median_time_past_(median_time_past(data_, forks_))
+    median_time_past_(median_time_past(data_, forks_)),
+    cumulative_work_(parent.cumulative_work() + header.proof())
 {
 }
 
@@ -683,9 +687,27 @@ chain_state::chain_state(data&& values,
 // Properties.
 // ----------------------------------------------------------------------------
 
+chain::context chain_state::context() const NOEXCEPT
+{
+    return
+    {
+        forks(),
+        timestamp(),
+        median_time_past(),
+        possible_narrow_cast<uint32_t>(height()),
+        minimum_block_version(),
+        work_required()
+    };
+}
+
 const hash_digest& chain_state::hash() const NOEXCEPT
 {
     return data_.hash;
+}
+
+const uint256_t& chain_state::cumulative_work() const NOEXCEPT
+{
+    return cumulative_work_;
 }
 
 uint32_t chain_state::minimum_block_version() const NOEXCEPT
@@ -718,19 +740,6 @@ uint32_t chain_state::forks() const NOEXCEPT
 size_t chain_state::height() const NOEXCEPT
 {
     return data_.height;
-}
-
-chain::context chain_state::context() const NOEXCEPT
-{
-    return
-    {
-        forks(),
-        timestamp(),
-        median_time_past(),
-        possible_narrow_cast<uint32_t>(height()),
-        minimum_block_version(),
-        work_required()
-    };
 }
 
 } // namespace chain
