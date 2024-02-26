@@ -78,6 +78,11 @@ public:
     ////bool to_string(std::ostream& stream) const NOEXCEPT;
     ////bool to_string(writer& sink) const NOEXCEPT;
 
+    /// Methods.
+    /// -----------------------------------------------------------------------
+
+    bool equals(const hash_digest& hash, size_t height) const NOEXCEPT;
+
     /// Properties.
     /// -----------------------------------------------------------------------
 
