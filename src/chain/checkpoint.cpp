@@ -110,6 +110,12 @@ checkpoint checkpoint::from_string(const std::string& hash,
     return { std::move(digest), height, true };
 }
 
+// functional equality
+bool checkpoint::equals(const hash_digest& hash, size_t height) const NOEXCEPT
+{
+    return this->hash() == hash && this->height() == height;
+}
+
 // Operators.
 // ----------------------------------------------------------------------------
 
@@ -120,7 +126,7 @@ bool operator<(const checkpoint& left, const checkpoint& right) NOEXCEPT
 
 bool operator==(const checkpoint& left, const checkpoint& right) NOEXCEPT
 {
-    return left.hash() == right.hash() && left.height() == right.height();
+    return left.equals(right.hash(), right.height());
 }
 
 bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT

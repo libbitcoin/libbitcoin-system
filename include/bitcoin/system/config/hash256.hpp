@@ -42,6 +42,7 @@ public:
     std::string to_string() const NOEXCEPT;
 
     operator const hash_digest&() const NOEXCEPT;
+    operator uint256_t() const NOEXCEPT;
 
     friend std::istream& operator>>(std::istream& stream,
         hash256& argument) THROWS;
