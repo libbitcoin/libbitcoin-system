@@ -61,6 +61,11 @@ hash256::operator const hash_digest&() const NOEXCEPT
     return value_;
 }
 
+hash256::operator uint256_t() const NOEXCEPT
+{
+    return to_uintx(value_);
+}
+
 std::istream& operator>>(std::istream& stream, hash256& argument) THROWS
 {
     std::string base16;

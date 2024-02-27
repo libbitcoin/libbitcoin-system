@@ -96,6 +96,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
     BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000052b2559353df4117b7348b64")));
+    const chain::checkpoint milestone("00000000000000000001a0a448d6cf2546b06801389cc030b2b18c6491266815", 804000u);
+    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
 BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
@@ -138,6 +141,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
     BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
+    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307")));
+    const chain::checkpoint milestone("0000000000000093bcb68c03a9a168ae252572d348a2eaeba2cdf9231d73206f", 2500000u);
+    BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
 BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
@@ -171,6 +177,8 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 1499999998350u);
     BOOST_REQUIRE(configuration.checkpoints.empty());
+    BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000")));
+    BOOST_REQUIRE_EQUAL(configuration.milestone, genesis);
 }
 
 // setter methods

@@ -137,6 +137,8 @@ settings::settings(chain::selection context) NOEXCEPT
                 { "000000002dd5588a74784eaa7ab0507a18ad16a236e7b1ce69f00d7ddfb5d0a6", 33333 },
                 { "0000000069e244f73d78e8fd29ba2fd2ed618bd6fa2ee92559f542fdb26e7c1d", 11111 }
             };
+            milestone = { "00000000000000000001a0a448d6cf2546b06801389cc030b2b18c6491266815", 804000 };
+            minimum_work = base16_hash("000000000000000000000000000000000000000052b2559353df4117b7348b64");
             break;
         }
 
@@ -195,6 +197,8 @@ settings::settings(chain::selection context) NOEXCEPT
             {
                 { "000000002a936ca763904c3c35fce2f3556c559c0214345d31b1bcebf76acb70", 546 }
             };
+            milestone = { "0000000000000093bcb68c03a9a168ae252572d348a2eaeba2cdf9231d73206f", 2500000 };
+            minimum_work = base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307");
             break;
         }
 
@@ -252,6 +256,8 @@ settings::settings(chain::selection context) NOEXCEPT
             bip9_bit0_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             bip9_bit1_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             checkpoints = {};
+            milestone = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
+            minimum_work = base16_hash("0000000000000000000000000000000000000000000000000000000000000000");
             break;
         }
 

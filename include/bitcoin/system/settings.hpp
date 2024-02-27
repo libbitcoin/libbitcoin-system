@@ -125,6 +125,12 @@ public:
 
     /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit1_active_checkpoint{};
+
+    /// A block that is presumed to be valid but not required to be present.
+    chain::checkpoint milestone{};
+
+    /// The minimum work for any branch to be considered valid.
+    config::hash256 minimum_work{};
 };
 
 } // namespace system
