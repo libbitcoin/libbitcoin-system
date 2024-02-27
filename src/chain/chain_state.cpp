@@ -584,15 +584,13 @@ chain_state::data chain_state::to_pool(const chain_state& top,
 
 // Top to pool.
 // This generates a state for the pool above the presumed top block state.
-// Work is not acculuated for a pool state.
 chain_state::chain_state(const chain_state& top,
     const system::settings& settings) NOEXCEPT
   : data_(to_pool(top, settings)),
     forks_(top.forks_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
-    median_time_past_(median_time_past(data_, forks_)),
-    cumulative_work_(top.cumulative_work())
+    median_time_past_(median_time_past(data_, forks_))
 {
 }
 
@@ -609,6 +607,7 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
+    data.cumulative_work += header.proof();
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())
@@ -629,8 +628,7 @@ chain_state::chain_state(const chain_state& pool, const block& block,
     forks_(pool.forks_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
-    median_time_past_(median_time_past(data_, forks_)),
-    cumulative_work_(pool.cumulative_work() + block.header().proof())
+    median_time_past_(median_time_past(data_, forks_))
 {
 }
 
@@ -648,6 +646,7 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.bits.self = header.bits();
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
+    data.cumulative_work += header.proof();
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())
@@ -668,8 +667,7 @@ chain_state::chain_state(const chain_state& parent, const header& header,
     forks_(parent.forks_),
     active_(activation(data_, forks_, settings)),
     work_required_(work_required(data_, forks_, settings)),
-    median_time_past_(median_time_past(data_, forks_)),
-    cumulative_work_(parent.cumulative_work() + header.proof())
+    median_time_past_(median_time_past(data_, forks_))
 {
 }
 
@@ -707,7 +705,7 @@ const hash_digest& chain_state::hash() const NOEXCEPT
 
 const uint256_t& chain_state::cumulative_work() const NOEXCEPT
 {
-    return cumulative_work_;
+    return data_.cumulative_work;
 }
 
 uint32_t chain_state::minimum_block_version() const NOEXCEPT
