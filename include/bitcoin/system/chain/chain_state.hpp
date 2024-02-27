@@ -103,6 +103,9 @@ public:
         /// Hash of the bip9_bit1 block or null_hash if unrequested.
         hash_digest bip9_bit1_hash;
 
+        /// Sum of all work from genesis to block height.
+        uint256_t cumulative_work;
+
         /// Values must be ordered by height with high (block - 1) last.
         struct
         {
