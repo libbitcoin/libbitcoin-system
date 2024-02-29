@@ -749,7 +749,7 @@ jobs:
           $BC_TEST_SINGLETON = $BC_TEST_EXES.FullName;
           Write-Host "Executing $BC_TEST_SINGLETON $env:BOOST_UNIT_TEST_OPTIONS" -ForegroundColor Yellow;
           try {
-            Invoke-Expression "$BC_TEST_SINGLETON --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
+            Invoke-Expression "$BC_TEST_SINGLETON --log_level=warning --run_test=${{ matrix.tests }} $env:BOOST_UNIT_TEST_OPTIONS"
           }
           catch {
             $ERR = $_;
