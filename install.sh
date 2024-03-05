@@ -729,12 +729,7 @@ build_from_tarball_boost()
     display_message "BOOST_OPTIONS         : $*"
     display_message "--------------------------------------------------------------------"
 
-    guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
-    CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
-    cp tools/build/src/engine/b2 .
-
     ./bootstrap.sh \
-        "--with-bjam=./b2" \
         "--prefix=$PREFIX" \
         "--with-icu=$ICU_PREFIX"
 
@@ -752,7 +747,6 @@ build_from_tarball_boost()
         "$BOOST_CXXFLAGS" \
         "$BOOST_LINKFLAGS" \
         "link=$BOOST_LINK" \
-	"warnings=off" \
         "boost.locale.iconv=$BOOST_ICU_ICONV" \
         "boost.locale.posix=$BOOST_ICU_POSIX" \
         "-sNO_BZIP2=1" \
@@ -776,22 +770,11 @@ build_from_tarball_boost()
 build_all()
 {
     unpack_from_tarball "$ICU_ARCHIVE" "$ICU_URL" gzip "$BUILD_ICU"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${ICU_FLAGS[@]}"
     build_from_tarball "$ICU_ARCHIVE" source "$PARALLEL" "$BUILD_ICU" "${ICU_OPTIONS[@]}" "$@"
-    export CPPFLAGS=$SAVE_CPPFLAGS
     unpack_from_tarball "$BOOST_ARCHIVE" "$BOOST_URL" bzip2 "$BUILD_BOOST"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${BOOST_FLAGS[@]}"
     build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
-    export CPPFLAGS=$SAVE_CPPFLAGS
     create_from_github libbitcoin secp256k1 version8 "yes"
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${SECP256K1_FLAGS[@]}"
     build_from_github secp256k1 "$PARALLEL" false "yes" "${SECP256K1_OPTIONS[@]}" "$@"
-    export CPPFLAGS=$SAVE_CPPFLAGS
-    local SAVE_CPPFLAGS="$CPPFLAGS"
-    export CPPFLAGS="$CPPFLAGS ${BITCOIN_SYSTEM_FLAGS[@]}"
     if [[ ! ($CI == true) ]]; then
         create_from_github libbitcoin libbitcoin-system master "yes"
         build_from_github libbitcoin-system "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
@@ -802,7 +785,6 @@ build_all()
         pop_directory
         pop_directory
     fi
-    export CPPFLAGS=$SAVE_CPPFLAGS
 }
 
 
@@ -821,19 +803,6 @@ remove_build_options
 set_prefix
 set_pkgconfigdir
 set_with_boost_prefix
-
-
-# Define build flags.
-#==============================================================================
-# Define icu flags.
-#------------------------------------------------------------------------------
-ICU_FLAGS=(
-"-w")
-
-# Define secp256k1 flags.
-#------------------------------------------------------------------------------
-SECP256K1_FLAGS=(
-"-w")
 
 
 # Define build options.
