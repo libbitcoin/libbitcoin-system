@@ -127,6 +127,7 @@ BOOST_AUTO_TEST_CASE(checkpoint__lesser__same__false)
     const checkpoint instance1("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42);
     const checkpoint instance2("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42);
     BOOST_REQUIRE(!(instance1 < instance2));
+    BOOST_REQUIRE(!std::less<system::chain::checkpoint>{}(instance1, instance2));
 }
 
 BOOST_AUTO_TEST_CASE(checkpoint__lesser__lesser_hash_same_height__false)
@@ -134,6 +135,7 @@ BOOST_AUTO_TEST_CASE(checkpoint__lesser__lesser_hash_same_height__false)
     const checkpoint instance1(null_hash, 42);
     const checkpoint instance2("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42);
     BOOST_REQUIRE(!(instance1 < instance2));
+    BOOST_REQUIRE(!std::less<system::chain::checkpoint>{}(instance1, instance2));
 }
 
 BOOST_AUTO_TEST_CASE(checkpoint__lesser__same_hash_lesser_height__true)
@@ -141,6 +143,7 @@ BOOST_AUTO_TEST_CASE(checkpoint__lesser__same_hash_lesser_height__true)
     const checkpoint instance1("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 41);
     const checkpoint instance2("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42);
     BOOST_REQUIRE(instance1 < instance2);
+    BOOST_REQUIRE(std::less<system::chain::checkpoint>{}(instance1, instance2));
 }
 
 BOOST_AUTO_TEST_CASE(checkpoint__lesser__same_hash_greater_height__false)
@@ -148,6 +151,7 @@ BOOST_AUTO_TEST_CASE(checkpoint__lesser__same_hash_greater_height__false)
     const checkpoint instance1("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 43);
     const checkpoint instance2("0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42);
     BOOST_REQUIRE(!(instance1 < instance2));
+    BOOST_REQUIRE(!std::less<system::chain::checkpoint>{}(instance1, instance2));
 }
 
 BOOST_AUTO_TEST_CASE(checkpoint__equality__same__expected)
