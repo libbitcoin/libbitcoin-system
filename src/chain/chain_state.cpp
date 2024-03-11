@@ -124,8 +124,7 @@ chain_state::activations chain_state::activation(const data& values,
     const auto ge_4 = [&](uint32_t value) NOEXCEPT { return ge(value,
         settings.bip65_version); };
 
-    // Compute bip34-based activation version summaries.
-    // TODO: avoid these computations if forks not configured.
+    // Compute bip34-based activation version summaries (empty if disabled).
     const auto count_2 = std::count_if(history.begin(), history.end(), ge_2);
     const auto count_3 = std::count_if(history.begin(), history.end(), ge_3);
     const auto count_4 = std::count_if(history.begin(), history.end(), ge_4);
@@ -159,62 +158,61 @@ chain_state::activations chain_state::activation(const data& values,
     // scrypt_proof_of_work is activated based on configuration alone (hard fork).
     result.forks |= (forks::scrypt_proof_of_work & forks);
 
-    // bip16 was activated based on manual inspection of signal history (~55% rule).
+    // bip16 was activated based on manual inspection of signal history (soft fork).
     if (values.timestamp.self >= settings.bip16_activation_time)
     {
         result.forks |= (forks::bip16_rule & forks);
     }
 
-    // bip34 is activated based on 75% of preceding 1000 mainnet blocks.
-    // bip30 is disabled by bip34 or unconditional activation of it by bip90.
+    // bip34 activations oscillate until enforced by minimum_block_version.
+    // bip90 does not require that the corresponding rules be defined.
+
+    // bip34 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_34 || (is_active(count_2, settings.bip34_activation_threshold) &&
         version >= settings.bip34_version))
     {
-        // TODO: check is_enabled(bip34_rule, forks) before above calculations.
         result.forks |= (forks::bip34_rule & forks);
     }
-    // If not bip30 exception, existing duplicate coinbase must be spent.
+    // bip30 is disabled by bip34 or unconditional activation of it by bip90.
+    // Otherwise if not exception, existing duplicate coinbase must be spent.
     else if (!is_bip30_exception({ values.hash, height }))
     {
         result.forks |= (forks::bip30_rule & forks);
     }
 
-    // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
+    // bip66 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_66 || (is_active(count_3, settings.bip34_activation_threshold) &&
         version >= settings.bip66_version))
     {
-        // TODO: check is_enabled(bip66_rule, forks) before above calculations.
         result.forks |= (forks::bip66_rule & forks);
     }
 
-    // bip65 is activated based on 75% of preceding 1000 mainnet blocks.
+    // bip65 is active based on 75% of preceding 1000 mainnet blocks.
     if (bip90_65 || (is_active(count_4, settings.bip34_activation_threshold) &&
         version >= settings.bip65_version))
     {
-        // TODO: check is_enabled(bip65_rule, forks) before above calculations.
         result.forks |= (forks::bip65_rule & forks);
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
     if (bip90_65 || is_enforced(count_4, settings.bip34_enforcement_threshold))
     {
-        // TODO: requires is_enabled(bip65_rule, forks).
         result.minimum_block_version = settings.bip65_version;
     }
     else if (bip90_66 || is_enforced(count_3, settings.bip34_enforcement_threshold))
     {
-        // TODO: requires is_enabled(bip66_rule, forks).
         result.minimum_block_version = settings.bip66_version;
     }
     else if (bip90_34 || is_enforced(count_2, settings.bip34_enforcement_threshold))
     {
-        // TODO: requires is_enabled(bip34_rule, forks).
         result.minimum_block_version = settings.bip34_version;
     }
     else
     {
         result.minimum_block_version = settings.first_version;
     }
+
+    // TODO: bip9 historical activation.
 
     // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
     if (values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
