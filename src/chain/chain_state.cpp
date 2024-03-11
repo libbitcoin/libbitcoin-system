@@ -79,11 +79,11 @@ constexpr bool is_retarget_height(size_t height,
 // bip30 is active for all but two mainnet blocks that violate the rule.
 // These two blocks each have a coinbase transaction that exactly duplicates
 // another that is not spent by the arrival of the corresponding duplicate.
-inline bool is_bip30_exception(const checkpoint& check, bool mainnet) NOEXCEPT
+// No need to check the configuration for mainnet (hashes presumed unique).
+inline bool is_bip30_exception(const checkpoint& check) NOEXCEPT
 {
-    return mainnet &&
-        ((check == mainnet_bip30_exception_checkpoint1) ||
-         (check == mainnet_bip30_exception_checkpoint2));
+    return (check == mainnet_bip30_exception_checkpoint1) ||
+         (check == mainnet_bip30_exception_checkpoint2);
 }
 
 inline uint32_t timestamp_high(const chain_state::data& values) NOEXCEPT
@@ -173,17 +173,10 @@ chain_state::activations chain_state::activation(const data& values,
         // TODO: check is_enabled(bip34_rule, forks) before above calculations.
         result.forks |= (forks::bip34_rule & forks);
     }
-    else
+    // If not bip30 exception, existing duplicate coinbase must be spent.
+    else if (!is_bip30_exception({ values.hash, height }))
     {
-        const auto difficult = script::is_enabled(forks, forks::difficult);
-        const auto retarget = script::is_enabled(forks, forks::retarget);
-        const auto mainnet = retarget && difficult;
-
-        // If not bip30 exception, existing duplicate coinbase must be spent.
-        if (!is_bip30_exception({ values.hash, height }, mainnet))
-        {
-            result.forks |= (forks::bip30_rule & forks);
-        }
+        result.forks |= (forks::bip30_rule & forks);
     }
 
     // bip66 is activated based on 75% of preceding 1000 mainnet blocks.
