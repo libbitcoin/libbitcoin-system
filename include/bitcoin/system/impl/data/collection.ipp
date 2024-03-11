@@ -159,6 +159,19 @@ inline pop(Collection& stack) NOEXCEPT
     return element;
 }
 
+// Collection requires front and pop_front methods (list).
+template <typename Collection>
+typename Collection::value_type
+inline pop_front(Collection& stack) NOEXCEPT
+{
+    if (std::empty(stack))
+        return {};
+
+    typename Collection::value_type element{ std::move(stack.front()) };
+    stack.pop_front();
+    return element;
+}
+
 // C++17: Parallel policy for std::sort, std::unique.
 template <typename Collection>
 constexpr bool is_distinct(Collection&& list) NOEXCEPT
