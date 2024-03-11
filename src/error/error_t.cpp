@@ -28,7 +28,6 @@ namespace error {
 DEFINE_ERROR_T_MESSAGE_MAP(error)
 {
     { success, "success" },
-    { unknown, "unknown error" },
     { not_found, "object does not exist" },
     { not_implemented, "feature not implemented" }
     ////{ error_last, "unmapped code" }
