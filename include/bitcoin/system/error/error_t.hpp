@@ -39,7 +39,6 @@ namespace error {
 enum error_t
 {
     success = 0,
-    unknown,
     not_found,
     not_implemented,
 

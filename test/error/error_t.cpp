@@ -31,15 +31,6 @@ BOOST_AUTO_TEST_CASE(error_t__code__success__false_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "success");
 }
 
-BOOST_AUTO_TEST_CASE(error_t__code__unknown__true_exected_message)
-{
-    constexpr auto value = error::unknown;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "unknown error");
-}
-
 BOOST_AUTO_TEST_CASE(error_t__code__not_found__true_exected_message)
 {
     constexpr auto value = error::not_found;
