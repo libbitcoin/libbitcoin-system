@@ -69,10 +69,15 @@ constexpr insert_sorted(Collection& list,
     const typename Collection::value_type& element,
     Predicate predicate) NOEXCEPT;
 
-/// Pop an element from the stack and return its value.
+/// Pop an element from the stack (back) and return its value.
 template <typename Collection>
 typename Collection::value_type
 inline pop(Collection& stack) NOEXCEPT;
+
+/// Pop an element from the list (front) and return its value.
+template <typename Collection>
+typename Collection::value_type
+inline pop_front(Collection& stack) NOEXCEPT;
 
 /// Determine if a collection contains only distinct members.
 template <typename Collection>

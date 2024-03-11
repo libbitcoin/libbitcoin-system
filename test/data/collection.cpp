@@ -18,6 +18,7 @@
  */
 #include "../test.hpp"
 #include <array>
+#include <list>
 #include <vector>
 
 BOOST_AUTO_TEST_SUITE(collection_tests)
@@ -187,6 +188,36 @@ BOOST_AUTO_TEST_CASE(collection__pop__multiple__popped_expected)
     const auto value = pop(stack);
     BOOST_REQUIRE_EQUAL(value, expected_value);
     BOOST_REQUIRE_EQUAL(stack, expected_stack);
+}
+
+// pop_front
+using data_queue = std::list<uint8_t>;
+
+BOOST_AUTO_TEST_CASE(collection__pop_front__empty__empty_default)
+{
+    data_queue queue{};
+    const auto value = pop_front(queue);
+    BOOST_REQUIRE(queue.empty());
+    BOOST_REQUIRE_EQUAL(value, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(collection__pop_front__single__empty_expected)
+{
+    const uint8_t expected = 42u;
+    data_queue queue{ expected };
+    const auto value = pop_front(queue);
+    BOOST_REQUIRE(queue.empty());
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
+BOOST_AUTO_TEST_CASE(collection__pop_front__multiple__popped_expected)
+{
+    const uint8_t expected_value = 42u;
+    data_queue queue{ expected_value, 0, 1, 2, 3 };
+    const data_queue expected_queue{ 0, 1, 2, 3 };
+    const auto value = pop_front(queue);
+    BOOST_REQUIRE_EQUAL(value, expected_value);
+    BOOST_REQUIRE(queue == expected_queue);
 }
 
 // is_distinct
