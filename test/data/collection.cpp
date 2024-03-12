@@ -18,7 +18,7 @@
  */
 #include "../test.hpp"
 #include <array>
-#include <list>
+#include <deque>
 #include <vector>
 
 BOOST_AUTO_TEST_SUITE(collection_tests)
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(collection__pop__multiple__popped_expected)
 }
 
 // pop_front
-using data_queue = std::list<uint8_t>;
+using data_queue = std::deque<uint8_t>;
 
 BOOST_AUTO_TEST_CASE(collection__pop_front__empty__empty_default)
 {
