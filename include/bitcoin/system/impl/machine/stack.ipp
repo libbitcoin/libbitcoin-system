@@ -20,11 +20,9 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 
 #include <iterator>
-#include <list>
 #include <type_traits>
 #include <utility>
 #include <variant>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/number.hpp>
