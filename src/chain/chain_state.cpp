@@ -427,8 +427,8 @@ size_t chain_state::bip9_bit0_height(size_t height,
 {
     const auto activation_height = bip9_bit0_active_checkpoint.height();
 
-    // Require bip9_bit0 hash at heights above historical bip9_bit0 activation.
-    return height > activation_height ? activation_height : map::unrequested;
+    // Require bip9_bit0 hash at heights at/above bip9_bit0 activation.
+    return height >= activation_height ? activation_height : map::unrequested;
 }
 
 size_t chain_state::bip9_bit1_height(size_t height,
@@ -436,8 +436,8 @@ size_t chain_state::bip9_bit1_height(size_t height,
 {
     const auto activation_height = bip9_bit1_active_checkpoint.height();
 
-    // Require bip9_bit1 hash at heights above historical bip9_bit1 activation.
-    return height > activation_height ? activation_height : map::unrequested;
+    // Require bip9_bit1 hash at heights at/above bip9_bit1 activation.
+    return height >= activation_height ? activation_height : map::unrequested;
 }
 
 // Public static
