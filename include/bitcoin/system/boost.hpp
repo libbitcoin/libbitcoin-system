@@ -54,7 +54,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 ////#include <boost/predef.h>  // platform identifications
 #include <boost/program_options.hpp>
-#include <boost/thread.hpp>    // thread_specific_ptr (pseudo_random)
 
 // C++20 suport for ranges not yet available on other platforms.
 #if defined(HAVE_RANGES)

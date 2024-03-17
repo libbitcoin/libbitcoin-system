@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_PSEUDO_RANDOM_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_PSEUDO_RANDOM_HPP
 
-#include <algorithm>
 #include <chrono>
 #include <random>
 #include <bitcoin/system/data/data.hpp>
@@ -29,21 +28,36 @@
 namespace libbitcoin {
 namespace system {
 
+/// This class uses a 32 bit clock seed for entropy and a not cryptographically
+/// secure pseudo random sequence generator (mt19937). There is no source of
+/// true randomness available to any general purpose software library. This
+/// class produces an explicitly pseudorandom sequence of numbers. If there
+/// is any doubt as to the meaning of "pseudorandom", read definition below.
+///
+/// "A pseudorandom sequence of numbers is one that appears to be statistically
+/// random, despite having been produced by a completely deterministic and
+/// repeatable process. Simply put, the problem is that many of the sources
+/// of randomness available to humans (such as rolling dice) rely on physical
+/// processes not readily available to computer programs."
+/// - en.wikipedia.org/wiki/Pseudorandomness
+/// 
+/// This class is used to randomize such things as address pool selections,
+/// which do not require true randomness. Do not ever use a pseudorandom
+/// sequence of numbers for live wallet entropy unless you want to lose money.
 class BC_API pseudo_random
 {
   public:
-    /// Fill a byte array with randomness using the default random engine.
+    /// Fill a byte array with pseudo random sequence of values.
     template<size_t Size>
     static void fill(data_array<Size>& out) NOEXCEPT
     {
-        // C++17: Parallel policy for std::transform.
         std::transform(out.begin(), out.end(), out.begin(), [](uint8_t) NOEXCEPT
         {
             return next();
         });
     }
 
-    /// Fill a byte vector with randomness using the default random engine.
+    /// Fill a byte vector with pseudo random sequence of values.
     static void fill(data_chunk& out) NOEXCEPT;
 
     /// Generate a pseudo random number within the uint8_t domain.
@@ -73,7 +87,7 @@ class BC_API pseudo_random
         return distribution(get_twister());
     }
 
-    /// Shuffle a container elements using the random engine.
+    /// Shuffle a container elements pseudo randomly.
     template<class Container>
     static void shuffle(Container& out) NOEXCEPT
     {
@@ -83,7 +97,7 @@ class BC_API pseudo_random
     /// Convert a time duration to a value in the range [max/ratio, max].
     /// maximum is the maximum value to return. ratio is the determinant
     /// of the minimum duration as the inverse portion of the maximum
-    /// duration. Returns the randomized duration.
+    /// duration. Returns the pseudo randomized duration.
     static std::chrono::steady_clock::duration duration(
         const std::chrono::steady_clock::duration& maximum,
         uint8_t ratio=2) NOEXCEPT;
