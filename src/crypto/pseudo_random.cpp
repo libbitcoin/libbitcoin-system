@@ -20,12 +20,19 @@
 
 #include <chrono>
 #include <limits>
+#include <memory>
 #include <random>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
+
+BC_PUSH_WARNING(NO_STATIC_CAST)
+BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
 using namespace std::chrono;
 
@@ -53,36 +60,20 @@ uint8_t pseudo_random::next(uint8_t begin, uint8_t end) NOEXCEPT
 
 std::mt19937& pseudo_random::get_twister() NOEXCEPT
 {
-    // Boost.thread will clean up the thread statics using this function.
-    const auto deleter = [](std::mt19937* twister) NOEXCEPT
-    {
-        delete twister;
-    };
+    // Thread storage duration: The storage for the object is allocated when
+    // the thread begins and deallocated when the thread ends. Each thread
+    // has its own instance of the object. Only objects declared thread_local
+    // have this storage duration... static is also implied.
+    // - en.cppreference.com/w/cpp/language/storage_duration
+    thread_local auto twister = std::make_unique<std::mt19937>(
+        std::mt19937(possible_narrow_sign_cast<uint32_t>(
+            high_resolution_clock::now().time_since_epoch().count())));
 
-    // Maintain thread static state space.
-    // This throws given insufficient resources.
-    static boost::thread_specific_ptr<std::mt19937> twister(deleter);
-
-    // Use the clock for seeding.
-    const auto get_clock_seed = []() NOEXCEPT
-    {
-        const auto now = high_resolution_clock::now();
-        return static_cast<uint32_t>(now.time_since_epoch().count());
-    };
-
-    // This is thread safe because the instance is thread static.
-    if (twister.get() == nullptr)
-    {
-        // Seed with high resolution clock.
-        twister.reset(new std::mt19937(get_clock_seed()));
-    }
-
-    // The instance remains in scope and is deleted by thread_specific_ptr
-    // when the thread terminates, so dereferencing the instance is safe.
+    // Reference remains valid for the lifetime of the calling thread.
     return *twister;
 }
 
-// Randomly select a time duration in the range:
+// Pseudo randomly select a time duration in the range:
 // [(expiration - expiration / ratio) .. expiration]
 // Not fully testable due to lack of random engine injection.
 steady_clock::duration pseudo_random::duration(
@@ -109,6 +100,11 @@ steady_clock::duration pseudo_random::duration(
     // [7.5..10] second duration.
     return milliseconds(expires);
 }
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 } // namespace system
 } // namespace libbitcoin
