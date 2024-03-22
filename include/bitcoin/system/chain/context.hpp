@@ -30,7 +30,7 @@ namespace chain {
 class BC_API context final
 {
 public:
-    /// Determine if the fork is ative for this block.
+    /// Determine if the fork is active for this block.
     bool is_enabled(chain::forks fork) const NOEXCEPT;
 
     /// Header context within chain.
