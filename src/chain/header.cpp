@@ -333,6 +333,10 @@ code header::check(uint32_t timestamp_limit_seconds,
     return error::success;
 }
 
+// minimum_block_version
+// median_time_past
+// work_required
+
 // Checkpoints and previous_block_hash are chain validation (not here).
 // bits_ below is the consensus direct comparison of the header.bits value.
 // All other work comparisons performed on expanded/normalized bits values.
