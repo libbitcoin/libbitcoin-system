@@ -686,6 +686,11 @@ code block::check() const NOEXCEPT
     return check_transactions();
 }
 
+// forks
+// height
+// timestamp
+// median_time_past
+
 code block::check(const context& ctx) const NOEXCEPT
 {
     const auto bip34 = ctx.is_enabled(bip34_rule);
@@ -705,6 +710,9 @@ code block::check(const context& ctx) const NOEXCEPT
     return check_transactions(ctx);
 }
 
+// forks
+// height
+
 // This assumes that prevout caching is completed on all inputs.
 code block::accept(const context& ctx, size_t subsidy_interval,
     uint64_t initial_subsidy) const NOEXCEPT
@@ -722,6 +730,8 @@ code block::accept(const context& ctx, size_t subsidy_interval,
     return accept_transactions(ctx);
 }
 
+// forks
+
 // Node performs these checks through database query.
 // This assumes that prevout and metadata caching are completed on all inputs.
 code block::confirm(const context& ctx) const NOEXCEPT
@@ -733,6 +743,8 @@ code block::confirm(const context& ctx) const NOEXCEPT
 
     return confirm_transactions(ctx);
 }
+
+// forks
 
 code block::connect(const context& ctx) const NOEXCEPT
 {

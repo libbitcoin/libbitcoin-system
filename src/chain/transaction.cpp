@@ -1255,6 +1255,11 @@ code transaction::check() const NOEXCEPT
     return error::transaction_success;
 }
 
+// forks
+// height
+// timestamp
+// median_time_past
+
 // DO invoke on coinbase.
 code transaction::check(const context& ctx) const NOEXCEPT
 {
@@ -1282,6 +1287,10 @@ code transaction::accept(const context&) const NOEXCEPT
     return error::transaction_success;
 }
 
+// forks
+// height
+// median_time_past
+
 // Do NOT invoke on coinbase.
 // Node performs these checks through database query.
 // This assumes that prevout and metadata caching are completed on all inputs.
@@ -1306,6 +1315,8 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
 
 // Connect (contextual).
 // ----------------------------------------------------------------------------
+
+// forks
 
 // Do NOT invoke on coinbase.
 code transaction::connect(const context& ctx) const NOEXCEPT
