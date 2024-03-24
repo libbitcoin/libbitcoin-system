@@ -32,7 +32,7 @@
 #include <type_traits>      // TODO: purge
 #include <vector>           // TODO: purge
 
-// Pulls chains in all /system headers (except settings.hpp).
+// Pulls in all /system headers (except settings.hpp).
 #include <bitcoin/system/constraints.hpp>
 
 #if defined(HAVE_MSC)
@@ -186,11 +186,6 @@ namespace bc = libbitcoin;
 #define DEFAULT_COPY_MOVE_DESTRUCT(name) \
     DEFAULT_COPY_MOVE(name); \
     virtual ~name() = default
-
-////#define DELETE4  DELETE_COPY_MOVE
-////#define DELETE5  DELETE_COPY_MOVE_DESTRUCT
-////#define DEFAULT4 DEFAULT_COPY_MOVE
-////#define DEFAULT5 DEFAULT_COPY_MOVE_DESTRUCT
 
 /// Minimums
 /// ---------------------------------------------------------------------------
