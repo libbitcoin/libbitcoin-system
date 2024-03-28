@@ -75,7 +75,7 @@ std::istream& operator>>(std::istream& stream, script& argument) THROWS
 
 std::ostream& operator<<(std::ostream& stream, const script& argument) NOEXCEPT
 {
-    stream << argument.to_string(chain::forks::all_rules);
+    stream << argument.to_string(chain::flags::all_rules);
     return stream;
 }
 

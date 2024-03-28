@@ -23,7 +23,7 @@
 #include <deque>
 #include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
@@ -49,7 +49,7 @@ public:
     typedef std::shared_ptr<chain_state> ptr;
     typedef struct { size_t count; size_t high; } range;
 
-    /// Chain state accepts configured forks and maps them onto active forks
+    /// Chain state accepts configured forks and maps them onto active flags
     /// for the a given validaton context (i.e. block). These are exposed as
     /// chain::chain_state.flags() and chain::context.flags. system::settings
     /// settings are using within chain_state to compute context, but are never

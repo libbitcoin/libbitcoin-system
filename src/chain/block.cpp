@@ -29,7 +29,7 @@
 #include <utility>
 #include <unordered_map>
 #include <bitcoin/system/chain/context.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/point.hpp>

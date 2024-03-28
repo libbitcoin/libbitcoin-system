@@ -394,7 +394,7 @@ public:
     void to_data(writer& sink) const NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    std::string to_string(uint32_t active_forks) const NOEXCEPT;
+    std::string to_string(uint32_t active_flags) const NOEXCEPT;
 
     /// Properties.
     /// -----------------------------------------------------------------------

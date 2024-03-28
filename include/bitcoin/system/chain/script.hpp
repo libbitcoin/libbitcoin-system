@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 #include <bitcoin/system/chain/enums/coverage.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
@@ -51,10 +51,11 @@ public:
     /// Utilities.
     /// -----------------------------------------------------------------------
 
-    /// Determine if the fork is enabled in the active forks set.
-    static constexpr bool is_enabled(uint32_t active_forks, forks fork) NOEXCEPT
+    /// Determine if the flag is enabled in the active flags set.
+    static constexpr bool is_enabled(uint32_t active_flags,
+        chain::flags flag) NOEXCEPT
     {
-        return to_bool(fork & active_forks);
+        return to_bool(flag & active_flags);
     }
 
     static inline bool is_push_only(const operations& ops) NOEXCEPT
@@ -471,7 +472,7 @@ public:
     void to_data(writer& sink, bool prefix) const NOEXCEPT;
 
     // TODO: move to config serialization wrapper.
-    std::string to_string(uint32_t active_forks) const NOEXCEPT;
+    std::string to_string(uint32_t active_flags) const NOEXCEPT;
 
     /// Properties.
     /// -----------------------------------------------------------------------
@@ -489,8 +490,8 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Pattern optimizations.
-    bool is_pay_to_witness(uint32_t forks) const NOEXCEPT;
-    bool is_pay_to_script_hash(uint32_t forks) const NOEXCEPT;
+    bool is_pay_to_witness(uint32_t active_flags) const NOEXCEPT;
+    bool is_pay_to_script_hash(uint32_t active_flags) const NOEXCEPT;
 
     /// Common pattern detection.
     const data_chunk& witness_program() const NOEXCEPT;

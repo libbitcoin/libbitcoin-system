@@ -19,7 +19,7 @@
 #include <bitcoin/system/chain/enums/opcode.hpp>
 
 #include <string>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/radix/radix.hpp>
@@ -308,10 +308,10 @@ std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) NOEXCEPT
         case opcode::nop1:
             return "nop1";
         case opcode::checklocktimeverify:
-            return script::is_enabled(active_forks, forks::bip65_rule) ?
+            return script::is_enabled(active_forks, flags::bip65_rule) ?
                 "checklocktimeverify" : "nop2";
         case opcode::checksequenceverify:
-            return script::is_enabled(active_forks, forks::bip112_rule) ?
+            return script::is_enabled(active_forks, flags::bip112_rule) ?
                 "checksequenceverify" : "nop3";
         case opcode::nop4:
             return "nop4";

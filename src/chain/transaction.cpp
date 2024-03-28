@@ -1213,7 +1213,7 @@ code transaction::guard_check() const NOEXCEPT
 // Redundant with block max_block_weight accept.
 code transaction::guard_check(const context& ctx) const NOEXCEPT
 {
-    const auto bip141 = ctx.is_enabled(forks::bip141_rule);
+    const auto bip141 = ctx.is_enabled(flags::bip141_rule);
 
      if (!bip141 && is_segregated())
         return error::unexpected_witness_transaction;
@@ -1226,8 +1226,8 @@ code transaction::guard_check(const context& ctx) const NOEXCEPT
 // Redundant with block max_block_sigops accept.
 code transaction::guard_accept(const context& ctx) const NOEXCEPT
 {
-    const auto bip16 = ctx.is_enabled(forks::bip16_rule);
-    const auto bip141 = ctx.is_enabled(forks::bip141_rule);
+    const auto bip16 = ctx.is_enabled(flags::bip16_rule);
+    const auto bip141 = ctx.is_enabled(flags::bip141_rule);
 
     if (is_missing_prevouts())
         return error::missing_previous_output;

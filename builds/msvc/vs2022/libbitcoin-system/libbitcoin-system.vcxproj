@@ -252,7 +252,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\context.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\forks.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\flags.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\magic_numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\opcode.hpp" />

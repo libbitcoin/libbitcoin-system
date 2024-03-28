@@ -44,7 +44,7 @@
 #include <bitcoin/system/chain/transaction.hpp>
 #include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>

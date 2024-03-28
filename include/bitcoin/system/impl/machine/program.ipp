@@ -45,11 +45,11 @@ using namespace system::error;
 template <typename Stack>
 inline program<Stack>::
 program(const chain::transaction& tx, const input_iterator& input,
-     uint32_t forks) NOEXCEPT
+     uint32_t active_flags) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_((*input)->script_ptr()),
-    forks_(forks),
+    flags_(active_flags),
     value_(max_uint64),
     version_(script_version::unversioned),
     witness_(),
@@ -67,7 +67,7 @@ program(const program& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
-    forks_(other.forks_),
+    flags_(other.flags_),
     value_(other.value_),
     version_(other.version_),
     witness_(),
@@ -82,7 +82,7 @@ program(program&& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
     script_(script),
-    forks_(other.forks_),
+    flags_(other.flags_),
     value_(other.value_),
     version_(other.version_),
     witness_(),
@@ -97,12 +97,12 @@ program(program&& other, const script::cptr& script) NOEXCEPT
 template <typename Stack>
 inline program<Stack>::
 program(const chain::transaction& tx, const input_iterator& input,
-    const script::cptr& script, uint32_t forks, script_version version,
+    const script::cptr& script, uint32_t active_flags, script_version version,
     const chunk_cptrs_ptr& witness) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_(script),
-    forks_(forks),
+    flags_(active_flags),
     value_((*input)->prevout->value()),
     version_(version),
     witness_(witness),
@@ -170,9 +170,9 @@ transaction() const NOEXCEPT
 
 template <typename Stack>
 INLINE bool program<Stack>::
-is_enabled(chain::forks rule) const NOEXCEPT
+is_enabled(chain::flags flag) const NOEXCEPT
 {
-    return to_bool(forks_ & rule);
+    return to_bool(flags_ & flag);
 }
 
 // TODO: only perform is_push_size check on witness initialized stack.
@@ -182,7 +182,7 @@ INLINE script_error_t program<Stack>::
 validate() const NOEXCEPT
 {
     // TODO: nops rule must first be enabled in tests and config.
-    const auto bip141 = is_enabled(forks::bip141_rule);
+    const auto bip141 = is_enabled(flags::bip141_rule);
 
     // The script was determined by the parser to contain an invalid opcode.
     if (is_prefail())
@@ -742,7 +742,7 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 {
     // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
-    if (is_enabled(forks::bip143_rule) && version_ == script_version::zero)
+    if (is_enabled(flags::bip143_rule) && version_ == script_version::zero)
         return script_;
 
     // Transform into a set of endorsement push ops and one op_codeseparator.
@@ -777,7 +777,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
     hash = signature_hash(*subscript({ endorsement }), flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
-    const auto bip66 = is_enabled(forks::bip66_rule);
+    const auto bip66 = is_enabled(flags::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
 
@@ -797,7 +797,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
     signature_hash(cache, sub, flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
-    const auto bip66 = is_enabled(forks::bip66_rule);
+    const auto bip66 = is_enabled(flags::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
 
@@ -809,7 +809,7 @@ INLINE hash_digest program<Stack>::
 signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
-    const auto bip143 = is_enabled(forks::bip143_rule);
+    const auto bip143 = is_enabled(flags::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
     return transaction_.signature_hash(input_, sub, value_, flags, version_,

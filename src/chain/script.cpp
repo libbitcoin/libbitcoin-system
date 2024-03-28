@@ -25,7 +25,7 @@
 #include <sstream>
 #include <utility>
 #include <bitcoin/system/chain/enums/coverage.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
@@ -306,7 +306,7 @@ void script::to_data(writer& sink, bool prefix) const NOEXCEPT
         op->to_data(sink);
 }
 
-std::string script::to_string(uint32_t active_forks) const NOEXCEPT
+std::string script::to_string(uint32_t active_flags) const NOEXCEPT
 {
     auto first = true;
     std::ostringstream text;
@@ -316,7 +316,7 @@ std::string script::to_string(uint32_t active_forks) const NOEXCEPT
 
     for (const auto& op: ops())
     {
-        text << (first ? "" : " ") << op.to_string(active_forks);
+        text << (first ? "" : " ") << op.to_string(active_flags);
         first = false;
     }
 
@@ -452,17 +452,17 @@ script_pattern script::input_pattern() const NOEXCEPT
     return script_pattern::non_standard;
 }
 
-bool script::is_pay_to_witness(uint32_t forks) const NOEXCEPT
+bool script::is_pay_to_witness(uint32_t active_flags) const NOEXCEPT
 {
     // This is an optimization over using script::pattern.
-    return is_enabled(forks, forks::bip141_rule) &&
+    return is_enabled(active_flags, flags::bip141_rule) &&
         is_witness_program_pattern(ops());
 }
 
-bool script::is_pay_to_script_hash(uint32_t forks) const NOEXCEPT
+bool script::is_pay_to_script_hash(uint32_t active_flags) const NOEXCEPT
 {
     // This is an optimization over using script::pattern.
-    return is_enabled(forks, forks::bip16_rule) &&
+    return is_enabled(active_flags, flags::bip16_rule) &&
         is_pay_script_hash_pattern(ops());
 }
 
@@ -543,7 +543,7 @@ script tag_invoke(json::value_to_tag<script>,
 void tag_invoke(json::value_from_tag, json::value& value,
     const script& script) NOEXCEPT
 {
-    value = script.to_string(forks::all_rules);
+    value = script.to_string(flags::all_rules);
 }
 
 BC_POP_WARNING()

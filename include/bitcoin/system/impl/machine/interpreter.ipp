@@ -70,7 +70,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_nop(opcode) const NOEXCEPT
 {
-    if (state::is_enabled(forks::nops_rule))
+    if (state::is_enabled(flags::nops_rule))
         return error::op_success;
 
     ////return op_unevaluated(code);
@@ -141,7 +141,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_ver() const NOEXCEPT
 {
-    if (state::is_enabled(forks::nops_rule))
+    if (state::is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_ver);
 
     return error::op_not_implemented;
@@ -187,7 +187,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_verif() const NOEXCEPT
 {
-    if (state::is_enabled(forks::nops_rule))
+    if (state::is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_verif);
 
     return error::op_not_implemented;
@@ -197,7 +197,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_vernotif() const NOEXCEPT
 {
-    if (state::is_enabled(forks::nops_rule))
+    if (state::is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_vernotif);
 
     return error::op_not_implemented;
@@ -243,7 +243,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_return() const NOEXCEPT
 {
-    if (state::is_enabled(forks::nops_rule))
+    if (state::is_enabled(flags::nops_rule))
         return op_unevaluated(opcode::op_return);
         
     return error::op_not_implemented;
@@ -515,7 +515,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_cat() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_cat);
 
     return error::op_not_implemented;
@@ -525,7 +525,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_substr() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_substr);
 
     return error::op_not_implemented;
@@ -535,7 +535,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_left() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_left);
 
     return error::op_not_implemented;
@@ -545,7 +545,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_right() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_right);
 
     return error::op_not_implemented;
@@ -566,7 +566,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_invert() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_invert);
 
     return error::op_not_implemented;
@@ -576,7 +576,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_and() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_and);
 
     return error::op_not_implemented;
@@ -586,7 +586,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_or() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_or);
 
     return error::op_not_implemented;
@@ -596,7 +596,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_xor() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_xor);
 
     return error::op_not_implemented;
@@ -652,7 +652,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_mul2() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_mul2);
 
     return error::op_not_implemented;
@@ -662,7 +662,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_div2() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_div2);
 
     return error::op_not_implemented;
@@ -749,7 +749,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_mul() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_mul);
 
     return error::op_not_implemented;
@@ -759,7 +759,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_div() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_div);
 
     return error::op_not_implemented;
@@ -769,7 +769,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_mod() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_mod);
 
     return error::op_not_implemented;
@@ -779,7 +779,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_lshift() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_lshift);
 
     return error::op_not_implemented;
@@ -789,7 +789,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_rshift() const NOEXCEPT
 {
-    if (state::is_enabled(forks::cats_rule))
+    if (state::is_enabled(flags::cats_rule))
         return op_unevaluated(opcode::op_rshift);
 
     return error::op_not_implemented;
@@ -1008,7 +1008,7 @@ inline op_error_t interpreter<Stack>::
 op_check_sig() NOEXCEPT
 {
     const auto verify = op_check_sig_verify();
-    const auto bip66 = state::is_enabled(forks::bip66_rule);
+    const auto bip66 = state::is_enabled(flags::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_sig_verify_parse)
@@ -1058,7 +1058,7 @@ inline op_error_t interpreter<Stack>::
 op_check_multisig() NOEXCEPT
 {
     const auto verify = op_check_multisig_verify();
-    const auto bip66 = state::is_enabled(forks::bip66_rule);
+    const auto bip66 = state::is_enabled(flags::bip66_rule);
 
     // BIP66: invalid signature encoding fails the operation.
     if (bip66 && verify == error::op_check_multisig_verify_parse)
@@ -1072,7 +1072,7 @@ template <typename Stack>
 inline op_error_t interpreter<Stack>::
 op_check_multisig_verify() NOEXCEPT
 {
-    const auto bip147 = state::is_enabled(forks::bip147_rule);
+    const auto bip147 = state::is_enabled(flags::bip147_rule);
 
     size_t count;
     if (!state::pop_index32(count))
@@ -1153,7 +1153,7 @@ inline op_error_t interpreter<Stack>::
 op_check_locktime_verify() const NOEXCEPT
 {
     // BIP65: nop2 subsumed by checklocktimeverify when bip65 fork is active.
-    if (!state::is_enabled(forks::bip65_rule))
+    if (!state::is_enabled(flags::bip65_rule))
         return op_nop(opcode::nop2);
 
     // BIP65: the tx sequence is 0xffffffff.
@@ -1185,7 +1185,7 @@ inline op_error_t interpreter<Stack>::
 op_check_sequence_verify() const NOEXCEPT
 {
     // BIP112: nop3 subsumed by checksequenceverify when bip112 fork is active.
-    if (!state::is_enabled(forks::bip112_rule))
+    if (!state::is_enabled(flags::bip112_rule))
         return op_nop(opcode::nop3);
 
     // BIP112: the stack is empty.
