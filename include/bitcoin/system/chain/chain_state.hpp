@@ -48,6 +48,12 @@ public:
     typedef std::deque<uint32_t> timestamps;
     typedef std::shared_ptr<chain_state> ptr;
     typedef struct { size_t count; size_t high; } range;
+
+    /// Chain state accepts configured forks and maps them onto active forks
+    /// for the a given validaton context (i.e. block). These are exposed as
+    /// chain::chain_state.flags() and chain::context.flags. system::settings
+    /// settings are using within chain_state to compute context, but are never
+    /// used directly within chain classes, which would be an abstraction leak.
     typedef struct
     {
         bool bip16;
