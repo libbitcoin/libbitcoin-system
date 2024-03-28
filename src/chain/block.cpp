@@ -38,7 +38,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
