@@ -41,7 +41,8 @@ enum forks : uint32_t
     /// Pay-to-script-hash enabled (soft fork, feature).
     bip16_rule = bit_right<uint32_t>(2),
 
-    /// No duplicated unspent transaction ids (soft fork, deflation).
+    /// No duplicated unspent transaction ids (soft/hard/soft fork, deflation).
+    /// This (initially) soft fork rule expires and then unexpires (hard/soft).
     bip30_rule = bit_right<uint32_t>(3),
 
     /// Coinbase must include height, redundant w/bip30 (soft fork, arbitrary).
@@ -86,54 +87,49 @@ enum forks : uint32_t
     /// Finite monetary supply, effective at 13,440,000 (soft fork, inflation).
     bip42_rule = bit_right<uint32_t>(17),
 
-    // TODO:
+    /// TODO: hardwired or obsoleted (historical).
+    /// -----------------------------------------------------------------------
+
     /// Promote nop1..nop10 [0.3.6] (hard fork, expansion).
     /// Combined script max 20,000 bytes, push_data 520 (soft fork, arbitrary).
     /// Initial script and push_data size limits (soft fork, arbitrary).
     /// Demote return, op_ver, verif, vernotif (soft fork, security).
     nops_rule = bit_right<uint32_t>(18),
 
-    // TODO:
     /// Splits script evaluation, activated by [0.3.7] (hard fork, security).
     /// Per script max 10,000 bytes, one more total byte than prior, as the
     /// previous limit was imposed after concatenating with op_codeseparator.
     split_rule = bit_right<uint32_t>(19),
 
-    // TODO:
     /// Invalidate op_cat, etc. [0.3.9] (soft fork, security).
     cats_rule = bit_right<uint32_t>(20),
 
-    // TODO:
     /// The original rule leaked output value, was plugged here (soft fork).
     /// This was activated at block 74,638 [0.3.10], later to all blocks.
     plug_rule = bit_right<uint32_t>(21),
 
-    // TODO:
     /// Limit block size to 1,000,000 bytes (soft fork, system DoS).
     /// Limit signature operations per block (soft fork, system DoS).
     /// This was activated at block 79,400 [0.3.12], and later to all blocks.
     size_rule = bit_right<uint32_t>(22),
 
-    // TODO:
     /// Release [0.8.0] removal of hash limit, chain split at block 225,430.
     /// Original rule was from Berkely DB [unknown] (hard fork, determinism).
     unlock_rule = bit_right<uint32_t>(23),
 
-    // TODO:
     /// This allowed double spends, applied and removed (hard fork, inflation).
     /// Activated (hard fork) in [0.15.0] deactivated (soft fork) in [0.16.3].
     inflation_rule = bit_right<uint32_t>(24),
 
-    // TODO:
-    /// Tx and input hashes max 4,500 per block (hard fork, determinism).
+    /// Tx and input hashes max 4,500 per block (soft/hard fork, determinism).
     /// This (initially) soft fork rule expires, which makes it a hard fork.
     bip50_rule = bit_right<uint32_t>(25),
 
-    // TODO:
     /// Reduces threshold segregated witness signaling (soft fork, feature).
     bip91_rule = bit_right<uint32_t>(26),
 
-    /// TODO: taproot rules.
+    /// Agregates
+    /// -----------------------------------------------------------------------
 
     /// Rules that use bip34-based activation.
     bip34_activations =
@@ -141,26 +137,21 @@ enum forks : uint32_t
         forks::bip65_rule |
         forks::bip66_rule,
 
-    /// TODO:
     /// Rules that use BIP9 bit 0 first time activation.
     bip9_bit0_group =
         forks::bip68_rule |
         forks::bip112_rule |
         forks::bip113_rule,
 
-    /// TODO:
     /// Rules that use BIP9 bit 1 first time activation.
     bip9_bit1_group =
         forks::bip141_rule |
         forks::bip143_rule |
         forks::bip147_rule,
 
-    /// TODO:
-    /// Rules that use BIP9 bit 4 first time activation.
-    bip9_bit4_group =
-        forks::bip91_rule,
-
-    /// TODO: rules that use taproot-style activation.
+    /////// Rules that use BIP9 bit 4 first time activation.
+    ////bip9_bit4_group =
+    ////    forks::bip91_rule,
 
     /// Mask to set all rule bits.
     all_rules = bit_all<uint32_t>

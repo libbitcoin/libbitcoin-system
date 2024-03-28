@@ -43,34 +43,17 @@ public:
     virtual uint64_t max_money() const NOEXCEPT;
     virtual uint64_t initial_subsidy() const NOEXCEPT;
     virtual uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
-    virtual uint32_t enabled_forks() const NOEXCEPT;
 
     /// These are used internal to system.
     virtual uint32_t minimum_timespan() const NOEXCEPT;
     virtual uint32_t maximum_timespan() const NOEXCEPT;
     virtual size_t retargeting_interval() const NOEXCEPT;
 
-    /// Implemented chain::forks.
+    /// Configured forks.
     /// -----------------------------------------------------------------------
+
     /// These are not used internal to system.
-    bool bip16;
-    bool bip30;
-    bool bip34;
-    bool bip42;
-    bool bip65;
-    bool bip66;
-    bool bip68;
-    bool bip90;
-    bool bip112;
-    bool bip113;
-    bool bip141;
-    bool bip143;
-    bool bip147;
-    bool retarget;                  // !regtest
-    bool difficult;                 // !testnet
-    bool time_warp_patch;           // litecoin
-    bool retarget_overflow_patch;   // litecoin
-    bool scrypt_proof_of_work;      // litecoin
+    chain::chain_state::forks_t forks{};
 
     /// Consensus parameters.
     /// -----------------------------------------------------------------------
@@ -101,24 +84,23 @@ public:
     uint32_t bip9_version_bit1;
     uint32_t bip9_version_base;
 
+    /// Block 514 is the first testnet block after date-based activation.
+    /// Block 173805 is the first mainnet block after date-based activation.
+    /// First mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
+    uint32_t bip16_activation_time{};
+
     /// Activation parameters (bip34-style activations).
     size_t bip34_activation_threshold{};
     size_t bip34_enforcement_threshold{};
     size_t bip34_activation_sample{};
 
     /// Frozen activation heights (frozen_activations).
-    size_t bip65_freeze{};
-    size_t bip66_freeze{};
-    size_t bip34_freeze{};
+    size_t bip90_bip34_height{};
+    size_t bip90_bip65_height{};
+    size_t bip90_bip66_height{};
 
-    /// Block 514 is the first testnet block after date-based activation.
-    /// Block 173805 is the first mainnet block after date-based activation.
-    /// First mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
-    uint32_t bip16_activation_time{};
-
-    /// This is not used in consensus computations.
-    /// bip90 stops checking unspent duplicates above this bip34 activation.
-    chain::checkpoint bip34_active_checkpoint{};
+    size_t bip30_reactivate_height{};
+    chain::checkpoint bip30_deactivate_checkpoint{};
 
     /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit0_active_checkpoint{};

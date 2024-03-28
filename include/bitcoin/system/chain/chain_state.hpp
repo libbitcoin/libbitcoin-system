@@ -46,9 +46,31 @@ public:
     typedef std::deque<uint32_t> bitss;
     typedef std::deque<uint32_t> versions;
     typedef std::deque<uint32_t> timestamps;
-    typedef struct { size_t count; size_t high; } range;
-
     typedef std::shared_ptr<chain_state> ptr;
+    typedef struct { size_t count; size_t high; } range;
+    typedef struct
+    {
+        bool bip16;
+        bool bip30;
+        bool bip30_deactivate;
+        bool bip30_reactivate;
+        bool bip34;
+        bool bip42;
+        bool bip65;
+        bool bip66;
+        bool bip68;
+        bool bip90;
+        bool bip112;
+        bool bip113;
+        bool bip141;
+        bool bip143;
+        bool bip147;
+        bool retarget;                // !regtest
+        bool difficult;               // !testnet
+        bool time_warp_patch;         // litecoin
+        bool retarget_overflow_patch; // litecoin
+        bool scrypt_proof_of_work;    // litecoin
+    } forks_t;
 
     /// Heights used to identify construction requirements.
     /// All values are lower-bounded by the genesis block height.
@@ -81,11 +103,14 @@ public:
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget{};
 
+        /// mainnet: 227931, testnet: 21111 (or map::unrequested)
+        size_t bip30_deactivate_height{ unrequested };
+
         /// mainnet: 419328, testnet: 770112 (or map::unrequested)
-        size_t bip9_bit0_height;
+        size_t bip9_bit0_height{ unrequested };
 
         /// mainnet: 481824, testnet: 834624 (or map::unrequested)
-        size_t bip9_bit1_height;
+        size_t bip9_bit1_height{ unrequested };
     };
 
     /// Values used to populate chain state at the target height.
@@ -97,14 +122,17 @@ public:
         /// Hash of the candidate block or null_hash for memory pool.
         hash_digest hash{};
 
+        /// Hash of the bip34 block that inactivates bip30, or null_hash.
+        hash_digest bip30_deactivate_hash{};
+
         /// Hash of the bip9_bit0 block or null_hash if unrequested.
-        hash_digest bip9_bit0_hash;
+        hash_digest bip9_bit0_hash{};
 
         /// Hash of the bip9_bit1 block or null_hash if unrequested.
-        hash_digest bip9_bit1_hash;
+        hash_digest bip9_bit1_hash{};
 
         /// Sum of all work from genesis to block height.
-        uint256_t cumulative_work;
+        uint256_t cumulative_work{};
 
         /// Values must be ordered by height with high (block - 1) last.
         struct
@@ -154,8 +182,8 @@ public:
     static map get_map(size_t height,
         const system::settings& settings) NOEXCEPT;
 
-    /// The block version to signal based on active forks.
-    static uint32_t signal_version(uint32_t forks,
+    /// The block version to signal based on configured forks.
+    static uint32_t signal_version(
         const system::settings& settings) NOEXCEPT;
 
     /// Create pool state from top chain top block state.
@@ -181,39 +209,42 @@ public:
     uint32_t work_required() const NOEXCEPT;
     uint32_t timestamp() const NOEXCEPT;
     uint32_t median_time_past() const NOEXCEPT;
-    uint32_t forks() const NOEXCEPT;
+    uint32_t flags() const NOEXCEPT;
     size_t height() const NOEXCEPT;
 
 protected:
     struct activations
     {
         /// The forks that are active at this height.
-        uint32_t forks;
+        uint32_t flags;
 
         /// The minimum block version required at this height.
         uint32_t minimum_block_version;
     };
 
     /// No failure sentinel.
-    static activations activation(const data& values, uint32_t forks,
-        const system::settings& settings) NOEXCEPT;
+    static activations activation(const data& values,
+        const forks_t& forks, const system::settings& settings) NOEXCEPT;
 
     /// Returns zero if data is invalid.
     static uint32_t median_time_past(const data& values,
-        uint32_t forks) NOEXCEPT;
+        const forks_t& forks) NOEXCEPT;
 
     /// Returns zero if data is invalid.
-    static uint32_t work_required(const data& values, uint32_t forks,
-        const system::settings& settings) NOEXCEPT;
+    static uint32_t work_required(const data& values,
+        const forks_t& forks, const system::settings& settings) NOEXCEPT;
 
 private:
-    static size_t bits_count(size_t height, uint32_t forks,
+    static size_t bits_count(size_t height, const forks_t& forks,
         size_t retargeting_interval) NOEXCEPT;
-    static size_t version_count(size_t height, uint32_t forks,
+    static size_t version_count(size_t height, const forks_t& forks,
         size_t bip34_activation_sample) NOEXCEPT;
-    static size_t timestamp_count(size_t height, uint32_t forks) NOEXCEPT;
-    static size_t retarget_height(size_t height, uint32_t forks,
+    static size_t timestamp_count(size_t height, const forks_t& forks) NOEXCEPT;
+    static size_t retarget_height(size_t height, const forks_t& forks,
         size_t retargeting_interval) NOEXCEPT;
+
+    static size_t bip30_deactivate_height(size_t height,
+        const checkpoint& bip30_deactivate_checkpoint) NOEXCEPT;
     static size_t bip9_bit0_height(size_t height,
         const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT;
     static size_t bip9_bit1_height(size_t height,
@@ -226,9 +257,10 @@ private:
     static data to_header(const chain_state& parent, const header& header,
         const system::settings& settings) NOEXCEPT;
 
-    static uint32_t work_required_retarget(const data& values, uint32_t forks,
-        uint32_t proof_of_work_limit, uint32_t minimum_timespan,
-        uint32_t maximum_timespan, uint32_t retargeting_interval_seconds) NOEXCEPT;
+    static uint32_t work_required_retarget(const data& values,
+        const forks_t& forks, uint32_t proof_of_work_limit,
+        uint32_t minimum_timespan, uint32_t maximum_timespan,
+        uint32_t retargeting_interval_seconds) NOEXCEPT;
     static uint32_t retarget_timespan(const data& values,
         uint32_t minimum_timespan, uint32_t maximum_timespan) NOEXCEPT;
     static uint32_t easy_work_required(const data& values,
@@ -237,8 +269,8 @@ private:
 
     // These are thread safe.
     const data data_;
-    const uint32_t forks_;
-    const activations active_;
+    const forks_t& forks_;
+    const activations activations_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;
     const uint256_t cumulative_work_;

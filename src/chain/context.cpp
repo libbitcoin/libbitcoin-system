@@ -27,12 +27,12 @@ namespace chain {
 
 bool context::is_enabled(chain::forks fork) const NOEXCEPT
 {
-    return to_bool(fork & forks);
+    return to_bool(fork & flags);
 }
 
 bool operator==(const context& left, const context& right) NOEXCEPT
 {
-    return left.forks == right.forks
+    return left.flags == right.flags
         && left.timestamp == right.timestamp
         && left.median_time_past == right.median_time_past
         && left.height == right.height
