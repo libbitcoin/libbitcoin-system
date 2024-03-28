@@ -1109,8 +1109,8 @@ op_check_multisig_verify() NOEXCEPT
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
-    uint8_t flags;
     ec_signature sig;
+    uint8_t sighash_flags;
     typename state::hash_cache cache;
 
     // Subscript is the same for all signatures.
@@ -1131,11 +1131,12 @@ op_check_multisig_verify() NOEXCEPT
         {
             // Parse endorsement into DER signature into an EC signature.
             // Also generates signature hash from endorsement sighash flags.
-            if (!state::prepare(sig, *key, cache, flags, **endorsement, *sub))
+            if (!state::prepare(sig, *key, cache, sighash_flags,
+                **endorsement, *sub))
                 return error::op_check_multisig_verify_parse;
 
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-            const auto& hash = cache.at(flags);
+            const auto& hash = cache.at(sighash_flags);
             BC_POP_WARNING()
 
             // TODO: for signing mode - make key mutable and return above.

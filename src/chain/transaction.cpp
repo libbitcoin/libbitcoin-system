@@ -570,9 +570,9 @@ uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
 // there are 4 possible 7 bit values that can set "single" and 4 others that
 // can set none, and yet all other values set "all".
 //*****************************************************************************
-inline coverage mask_sighash(uint8_t flags) NOEXCEPT
+inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT
 {
-    switch (flags & coverage::mask)
+    switch (sighash_flags & coverage::mask)
     {
         case coverage::hash_single:
             return coverage::hash_single;
@@ -586,13 +586,13 @@ inline coverage mask_sighash(uint8_t flags) NOEXCEPT
 /// REQUIRES INDEX.
 void transaction::signature_hash_single(writer& sink,
     const input_iterator& input, const script& sub,
-    uint8_t flags) const NOEXCEPT
+    uint8_t sighash_flags) const NOEXCEPT
 {
-    const auto write_inputs = [this, &input, &sub, flags](
+    const auto write_inputs = [this, &input, &sub, sighash_flags](
         writer& sink) NOEXCEPT
     {
         const auto& self = **input;
-        const auto anyone = to_bool(flags & coverage::anyone_can_pay);
+        const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
 
         sink.write_variable(anyone ? one : inputs_->size());
@@ -634,18 +634,18 @@ void transaction::signature_hash_single(writer& sink,
     write_inputs(sink);
     write_outputs(sink);
     sink.write_4_bytes_little_endian(locktime_);
-    sink.write_4_bytes_little_endian(flags);
+    sink.write_4_bytes_little_endian(sighash_flags);
 }
 
 void transaction::signature_hash_none(writer& sink,
     const input_iterator& input, const script& sub,
-    uint8_t flags) const NOEXCEPT
+    uint8_t sighash_flags) const NOEXCEPT
 {
-    const auto write_inputs = [this, &input, &sub, flags](
+    const auto write_inputs = [this, &input, &sub, sighash_flags](
         writer& sink) NOEXCEPT
     {
         const auto& self = **input;
-        const auto anyone = to_bool(flags & coverage::anyone_can_pay);
+        const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
 
         sink.write_variable(anyone ? one : inputs_->size());
@@ -673,7 +673,7 @@ void transaction::signature_hash_none(writer& sink,
     write_inputs(sink);
     sink.write_variable(zero);
     sink.write_4_bytes_little_endian(locktime_);
-    sink.write_4_bytes_little_endian(flags);
+    sink.write_4_bytes_little_endian(sighash_flags);
 }
 
 void transaction::signature_hash_all(writer& sink,
@@ -725,10 +725,10 @@ void transaction::signature_hash_all(writer& sink,
 // private
 hash_digest transaction::unversioned_signature_hash(
     const input_iterator& input, const script& sub,
-    uint8_t flags) const NOEXCEPT
+    uint8_t sighash_flags) const NOEXCEPT
 {
     // Set options.
-    const auto flag = mask_sighash(flags);
+    const auto flag = mask_sighash(sighash_flags);
 
     // Create hash writer.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
@@ -750,15 +750,15 @@ hash_digest transaction::unversioned_signature_hash(
             if (input_index(input) >= outputs_->size())
                 return one_hash;
 
-            signature_hash_single(sink, input, sub, flags);
+            signature_hash_single(sink, input, sub, sighash_flags);
             break;
         }
         case coverage::hash_none:
-            signature_hash_none(sink, input, sub, flags);
+            signature_hash_none(sink, input, sub, sighash_flags);
             break;
         default:
         case coverage::hash_all:
-            signature_hash_all(sink, input, sub, flags);
+            signature_hash_all(sink, input, sub, sighash_flags);
     }
 
     sink.flush();
@@ -813,17 +813,17 @@ hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
 
 // private
 hash_digest transaction::version_0_signature_hash(const input_iterator& input,
-    const script& sub, uint64_t value, uint8_t flags,
+    const script& sub, uint64_t value, uint8_t sighash_flags,
     bool bip143) const NOEXCEPT
 {
     // bip143/v0: the way of serialization is changed.
     if (!bip143)
-        return unversioned_signature_hash(input, sub, flags);
+        return unversioned_signature_hash(input, sub, sighash_flags);
 
     // Set options.
     // C++14: switch in constexpr.
-    const auto anyone = to_bool(flags & coverage::anyone_can_pay);
-    const auto flag = mask_sighash(flags);
+    const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
+    const auto flag = mask_sighash(sighash_flags);
     const auto all = (flag == coverage::hash_all);
     const auto single = (flag == coverage::hash_single);
     const auto& self = **input;
@@ -868,7 +868,7 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
         sink.write_bytes(all ? outputs_hash() : null_hash);
 
     sink.write_little_endian(locktime_);
-    sink.write_4_bytes_little_endian(flags);
+    sink.write_4_bytes_little_endian(sighash_flags);
 
     sink.flush();
     return digest;
@@ -883,8 +883,8 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
 // ****************************************************************************
 
 hash_digest transaction::signature_hash(const input_iterator& input,
-    const script& sub, uint64_t value, uint8_t flags, script_version version,
-    bool bip143) const NOEXCEPT
+    const script& sub, uint64_t value, uint8_t sighash_flags,
+    script_version version, bool bip143) const NOEXCEPT
 {
     // There is no rational interpretation of a signature hash for a coinbase.
     BC_ASSERT(!is_coinbase());
@@ -892,9 +892,10 @@ hash_digest transaction::signature_hash(const input_iterator& input,
     switch (version)
     {
         case script_version::unversioned:
-            return unversioned_signature_hash(input, sub, flags);
+            return unversioned_signature_hash(input, sub, sighash_flags);
         case script_version::zero:
-            return version_0_signature_hash(input, sub, value, flags, bip143);
+            return version_0_signature_hash(input, sub, value, sighash_flags,
+                bip143);
         case script_version::reserved:
         default:
             return {};
@@ -904,15 +905,14 @@ hash_digest transaction::signature_hash(const input_iterator& input,
 // This is not used internal to the library.
 bool transaction::check_signature(const ec_signature& signature,
     const data_slice& public_key, const script& sub, uint32_t index,
-    uint64_t value, uint8_t flags, script_version version,
+    uint64_t value, uint8_t sighash_flags, script_version version,
     bool bip143) const NOEXCEPT
 {
-    if ((index >= inputs_->size()) ||
-        signature.empty() || public_key.empty())
+    if ((index >= inputs_->size()) || signature.empty() || public_key.empty())
         return false;
 
-    const auto sighash = signature_hash(input_at(index), sub, value, flags,
-        version, bip143);
+    const auto sighash = signature_hash(input_at(index), sub, value,
+        sighash_flags, version, bip143);
 
     // Validate the EC signature.
     return verify_signature(public_key, sighash, signature);
@@ -920,15 +920,15 @@ bool transaction::check_signature(const ec_signature& signature,
 
 // This is not used internal to the library.
 bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
-    const script& sub, uint32_t index, uint64_t value, uint8_t flags,
+    const script& sub, uint32_t index, uint64_t value, uint8_t sighash_flags,
     script_version version, bool bip143) const NOEXCEPT
 {
     if (index >= inputs_->size())
         return false;
 
     out.reserve(max_endorsement_size);
-    const auto sighash = signature_hash(input_at(index), sub, value, flags,
-        version, bip143);
+    const auto sighash = signature_hash(input_at(index), sub, value,
+        sighash_flags, version, bip143);
 
     // Create the EC signature and encode as DER.
     ec_signature signature;
@@ -936,7 +936,7 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
         return false;
 
     // Add the sighash type to the end of the DER signature -> endorsement.
-    out.push_back(flags);
+    out.push_back(sighash_flags);
     out.shrink_to_fit();
     return true;
 }

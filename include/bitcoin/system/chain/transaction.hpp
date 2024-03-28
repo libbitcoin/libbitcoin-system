@@ -126,17 +126,18 @@ public:
 
     // signature_hash exposed for op_check_multisig caching.
     hash_digest signature_hash(const input_iterator& input, const script& sub,
-        uint64_t value, uint8_t flags, script_version version,
+        uint64_t value, uint8_t sighash_flags, script_version version,
         bool bip143) const NOEXCEPT;
 
     bool check_signature(const ec_signature& signature,
         const data_slice& public_key, const script& sub, uint32_t index,
-        uint64_t value, uint8_t flags, script_version version,
+        uint64_t value, uint8_t sighash_flags, script_version version,
         bool bip143) const NOEXCEPT;
 
     bool create_endorsement(endorsement& out, const ec_secret& secret,
-        const script& sub, uint32_t index, uint64_t value, uint8_t flags,
-        script_version version, bool bip143) const NOEXCEPT;
+        const script& sub, uint32_t index, uint64_t value,
+        uint8_t sighash_flags, script_version version,
+        bool bip143) const NOEXCEPT;
 
     /// Guards (for tx pool without compact blocks).
     /// -----------------------------------------------------------------------
@@ -226,15 +227,15 @@ private:
     input_iterator input_at(uint32_t index) const NOEXCEPT;
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
     void signature_hash_single(writer& sink, const input_iterator& input,
-        const script& sub, uint8_t flags) const NOEXCEPT;
+        const script& sub, uint8_t sighash_flags) const NOEXCEPT;
     void signature_hash_none(writer& sink, const input_iterator& input,
-        const script& sub, uint8_t flags) const NOEXCEPT;
+        const script& sub, uint8_t sighash_flags) const NOEXCEPT;
     void signature_hash_all(writer& sink, const input_iterator& input,
-        const script& sub, uint8_t flags) const NOEXCEPT;
+        const script& sub, uint8_t sighash_flags) const NOEXCEPT;
     hash_digest unversioned_signature_hash(const input_iterator& input,
-        const script& sub, uint8_t flags) const NOEXCEPT;
+        const script& sub, uint8_t sighash_flags) const NOEXCEPT;
     hash_digest version_0_signature_hash(const input_iterator& input,
-        const script& sub, uint64_t value, uint8_t flags,
+        const script& sub, uint64_t value, uint8_t sighash_flags,
         bool bip143) const NOEXCEPT;
 
     // Transaction should be stored as shared (adds 16 bytes).

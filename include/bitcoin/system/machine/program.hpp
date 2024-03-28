@@ -165,7 +165,7 @@ protected:
 
     /// Prepare signature, with caching for multisig with same sighash flags.
     inline bool prepare(ec_signature& signature, const data_chunk& key,
-        hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
+        hash_cache& cache, uint8_t& sighash_flags, const data_chunk& endorsement,
         const chain::script& sub) const NOEXCEPT;
 
 private:

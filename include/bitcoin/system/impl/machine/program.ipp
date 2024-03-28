@@ -766,15 +766,15 @@ inline bool program<Stack>::
 prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
     const chunk_xptr& endorsement) const NOEXCEPT
 {
-    uint8_t flags;
+    uint8_t sighash_flags;
     data_slice distinguished;
 
     // Parse Bitcoin endorsement into DER signature and sighash flags.
-    if (!parse_endorsement(flags, distinguished, *endorsement))
+    if (!parse_endorsement(sighash_flags, distinguished, *endorsement))
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
-    hash = signature_hash(*subscript({ endorsement }), flags);
+    hash = signature_hash(*subscript({ endorsement }), sighash_flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(flags::bip66_rule);
@@ -785,16 +785,17 @@ prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
 template <typename Stack>
 inline bool program<Stack>::
 prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
-    uint8_t& flags, const data_chunk& endorsement, const script& sub) const NOEXCEPT
+    uint8_t& sighash_flags, const data_chunk& endorsement,
+    const script& sub) const NOEXCEPT
 {
     data_slice distinguished;
 
     // Parse Bitcoin endorsement into DER signature and sighash flags.
-    if (!parse_endorsement(flags, distinguished, endorsement))
+    if (!parse_endorsement(sighash_flags, distinguished, endorsement))
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
-    signature_hash(cache, sub, flags);
+    signature_hash(cache, sub, sighash_flags);
 
     // Parse DER signature into an EC signature (bip66 sets strict).
     const auto bip66 = is_enabled(flags::bip66_rule);
@@ -821,11 +822,11 @@ signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
 template <typename Stack>
 INLINE void program<Stack>::
 signature_hash(hash_cache& cache, const script& sub,
-    uint8_t flags) const NOEXCEPT
+    uint8_t sighash_flags) const NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    if (cache.find(flags) == cache.end())
-        cache.emplace(flags, signature_hash(sub, flags));
+    if (cache.find(sighash_flags) == cache.end())
+        cache.emplace(sighash_flags, signature_hash(sub, sighash_flags));
     BC_POP_WARNING()
 }
 
