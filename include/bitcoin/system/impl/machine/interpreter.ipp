@@ -1607,7 +1607,7 @@ connect(const context& state, const transaction& tx,
         return error::missing_previous_output;
 
     // Evaluate input script.
-    interpreter in_program(tx, it, state.forks);
+    interpreter in_program(tx, it, state.flags);
     if ((ec = in_program.run()))
         return ec;
 
@@ -1622,13 +1622,13 @@ connect(const context& state, const transaction& tx,
     {
         return error::stack_false;
     }
-    else if (prevout->is_pay_to_script_hash(state.forks))
+    else if (prevout->is_pay_to_script_hash(state.flags))
     {
         // Because output script pushed script hash program (bip16).
         if ((ec = connect_embedded(state, tx, it, in_program)))
             return ec;
     }
-    else if (prevout->is_pay_to_witness(state.forks))
+    else if (prevout->is_pay_to_witness(state.flags))
     {
         // The input script must be empty (bip141).
         if (!input.script().ops().empty())
@@ -1674,7 +1674,7 @@ code interpreter<Stack>::connect_embedded(const context& state,
     {
         return error::stack_false;
     }
-    else if (prevout->is_pay_to_witness(state.forks))
+    else if (prevout->is_pay_to_witness(state.flags))
     {
         // The input script must be a push of the embedded_script (bip141).
         if (input.script().ops().size() != one)
@@ -1716,7 +1716,7 @@ code interpreter<Stack>::connect_witness(const context&state,
                 return error::invalid_witness;
 
             // A defined version indicates bip141 is active.
-            interpreter program(tx, it, script, state.forks, version, stack);
+            interpreter program(tx, it, script, state.flags, version, stack);
             if ((ec = program.run()))
                 return ec;
 

@@ -34,7 +34,7 @@ public:
     bool is_enabled(chain::forks fork) const NOEXCEPT;
 
     /// Header context within chain.
-    uint32_t forks;
+    uint32_t flags;
     uint32_t timestamp;
     uint32_t median_time_past;
     size_t height;
