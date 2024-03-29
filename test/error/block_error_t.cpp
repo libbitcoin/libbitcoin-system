@@ -172,6 +172,15 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_legacy_sigop_limit__true_exected
     BOOST_REQUIRE_EQUAL(ec.message(), "too many block legacy signature operations");
 }
 
+BOOST_AUTO_TEST_CASE(block_error_t__code__malleable_identifier__true_exected_message)
+{
+    constexpr auto value = error::malleable_identifier;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "block identifier is malleable");
+}
+
 // accept block
 
 BOOST_AUTO_TEST_CASE(block_error_t__code__block_non_final__true_exected_message)

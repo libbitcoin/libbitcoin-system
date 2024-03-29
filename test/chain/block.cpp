@@ -312,6 +312,7 @@ BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
     BOOST_REQUIRE_EQUAL(instance.hash(), instance.header().hash());
 }
 
+// is_malleable
 // is_segregated
 // serialized_size
 

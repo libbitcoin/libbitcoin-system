@@ -55,6 +55,7 @@ enum block_error_t : uint8_t
     forward_reference,
     merkle_mismatch,
     block_legacy_sigop_limit,
+    malleable_identifier,
 
     // accept block
     block_non_final,
