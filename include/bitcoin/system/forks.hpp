@@ -27,23 +27,45 @@ namespace system {
 /// chain::chain_state.flags() and chain::context.flags.
 typedef struct
 {
+    /// ~55% activation by "/P2SH/" in coinbase.
+    /// github.com/bitcoin/bitcoin/pull/11739
     bool bip16;
+
+    /// github.com/bitcoin/bitcoin/pull/8391
+    bool bip90;
+
+    /// github.com/bitcoin/bitcoin/commit/a206b0ea12eb4606b93323268fc81a4f1f952531
+    /// github.com/bitcoin/bitcoin/pull/6931
+    /// github.com/bitcoin/bitcoin/pull/12204
     bool bip30;
     bool bip30_deactivate;
     bool bip30_reactivate;
-    bool bip34;
+
+    /// github.com/bitcoin/bitcoin/pull/3842
     bool bip42;
+
+    /// bip34-based activations
+    bool bip34;
     bool bip65;
     bool bip66;
+
+    /// bip9 bit0 activation group
     bool bip68;
-    bool bip90;
     bool bip112;
     bool bip113;
+
+    /// bip9 bit1 activation group
     bool bip141;
     bool bip143;
     bool bip147;
-    bool retarget;                // !regtest
-    bool difficult;               // !testnet
+
+    /// Regtest does not retarget.
+    bool retarget;
+
+    /// Testnet is not difficult.
+    bool difficult;
+
+    /// Litecoin deviations from Bitcoin.
     bool time_warp_patch;         // litecoin
     bool retarget_overflow_patch; // litecoin
     bool scrypt_proof_of_work;    // litecoin
