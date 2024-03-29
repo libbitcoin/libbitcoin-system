@@ -30,6 +30,7 @@
 #include <bitcoin/system/chain/enums/policy.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/forks.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/settings.hpp>
@@ -100,7 +101,7 @@ inline uint32_t bits_high(const chain_state::data& values) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 chain_state::activations chain_state::activation(const data& values,
-    const forks_t& forks, const system::settings& settings) NOEXCEPT
+    const forks& forks, const system::settings& settings) NOEXCEPT
 {
     // Initialize activation results with genesis values.
     activations result{ flags::no_rules, settings.first_version };
@@ -270,7 +271,7 @@ chain_state::activations chain_state::activation(const data& values,
     return result;
 }
 
-size_t chain_state::bits_count(size_t height, const forks_t& forks,
+size_t chain_state::bits_count(size_t height, const forks& forks,
     size_t retargeting_interval) NOEXCEPT
 {
     // Mainnet doesn't use bits in retargeting.
@@ -289,7 +290,7 @@ size_t chain_state::bits_count(size_t height, const forks_t& forks,
     return std::min(height, retargeting_interval);
 }
 
-size_t chain_state::version_count(size_t height, const forks_t& forks,
+size_t chain_state::version_count(size_t height, const forks& forks,
     size_t bip34_activation_sample) NOEXCEPT
 {
     if (forks.bip90 || (!forks.bip34 && !forks.bip65 && !forks.bip66))
@@ -298,12 +299,12 @@ size_t chain_state::version_count(size_t height, const forks_t& forks,
     return std::min(height, bip34_activation_sample);
 }
 
-size_t chain_state::timestamp_count(size_t height, const forks_t&) NOEXCEPT
+size_t chain_state::timestamp_count(size_t height, const forks&) NOEXCEPT
 {
     return std::min(height, median_time_past_interval);
 }
 
-size_t chain_state::retarget_height(size_t height, const forks_t& forks,
+size_t chain_state::retarget_height(size_t height, const forks& forks,
     size_t retargeting_interval) NOEXCEPT
 {
     if (!forks.retarget)
@@ -326,7 +327,7 @@ size_t chain_state::retarget_height(size_t height, const forks_t& forks,
 // block N with block N. This is simple but requires care when comparing code.
 //*****************************************************************************
 uint32_t chain_state::median_time_past(const data& values,
-    const forks_t&) NOEXCEPT
+    const forks&) NOEXCEPT
 {
     // Sort the times by value to obtain the median.
     auto times = sort_copy(values.timestamp.ordered);
@@ -341,7 +342,7 @@ uint32_t chain_state::median_time_past(const data& values,
 // work_required
 // ----------------------------------------------------------------------------
 
-uint32_t chain_state::work_required(const data& values, const forks_t& forks,
+uint32_t chain_state::work_required(const data& values, const forks& forks,
     const system::settings& settings) NOEXCEPT
 {
     // Genesis has no preceding block data.
@@ -393,15 +394,15 @@ uint32_t chain_state::retarget_timespan(const data& values,
     return limit(timespan, minimum_timespan, maximum_timespan);
 }
 
-constexpr bool patch_timewarp(const chain_state::forks_t& forks,
-    const uint256_t& limit, const uint256_t& target) NOEXCEPT
+constexpr bool patch_timewarp(const forks& forks, const uint256_t& limit,
+    const uint256_t& target) NOEXCEPT
 {
     return forks.retarget_overflow_patch &&
         floored_log2(target) >= floored_log2(limit);
 }
 
 uint32_t chain_state::work_required_retarget(const data& values,
-    const forks_t& forks, uint32_t proof_of_work_limit,
+    const forks& forks, uint32_t proof_of_work_limit,
     uint32_t minimum_timespan, uint32_t maximum_timespan,
     uint32_t retargeting_interval_seconds) NOEXCEPT
 {

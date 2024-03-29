@@ -23,6 +23,7 @@
 #include <bitcoin/system/config/config.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/forks.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -53,7 +54,7 @@ public:
     /// -----------------------------------------------------------------------
     /// These are used by chain_state (only).
 
-    chain::chain_state::forks_t forks{};
+    forks forks{};
 
     /// Consensus parameters.
     /// -----------------------------------------------------------------------
