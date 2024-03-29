@@ -274,7 +274,12 @@ size_t block::serialized_size(bool witness) const NOEXCEPT
 // Connect.
 // ----------------------------------------------------------------------------
 
-////// Subset of is_internal_double_spend if sha256 collisions cannot happen.
+// Subset of is_internal_double_spend if sha256 collisions cannot happen. This
+// is because each tx must have an input and for there to be no double spend in
+// the block the inputs must be unique (and only one coinbase). As the
+// is_internal_double_spend check invalidates any block with duplicated txs,
+// there can be no tx hash duplication within the merkle tree. And a block that
+// fails block.check is not archived, and its header remains potentially valid.
 ////bool block::is_distinct_transaction_set() const
 ////{
 ////    // A set is used to collapse duplicates.
@@ -448,6 +453,30 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     }
 
     return hashes.size() > hash_limit;
+}
+
+// This is not part of validation. Should be called after *invalidation* to
+// determine if the invalidity is universal (otherwise do not cache invalid).
+// lists.linuxfoundation.org/pipermail/bitcoin-dev/2019-February/016697.html
+bool block::is_malleable() const NOEXCEPT
+{
+    // A two tx block cannot be malleable as coinbase is singular, otherwise
+    // if the last two non-witness tx hashes match then the id is malleable.
+    const auto count = txs_->size();
+    if (count > two && is_even(count) &&
+        txs_->at(sub1(count))->hash(false) == txs_->at(count)->hash(false))
+    {
+        return true;
+    }
+
+    // Hash of two same concatenated leaves is same as doubling one odd leaf.
+    const auto two_leaf_size = [](const transaction::cptr& tx) NOEXCEPT
+    {
+        return tx->serialized_size(false) == two * hash_size;
+    };
+
+    // If all non-witness tx serializations are 64 bytes the id is malleable.
+    return std::all_of(txs_->begin(), txs_->end(), two_leaf_size);
 }
 
 bool block::is_segregated() const NOEXCEPT
@@ -666,8 +695,8 @@ code block::check() const NOEXCEPT
 {
     // context free.
     // empty_block is redundant with first_not_coinbase.
-    ////if (is_empty())
-    ////    return error::empty_block;
+    //if (is_empty())
+    //    return error::empty_block;
     if (is_oversized())
         return error::block_size_limit;
     if (is_first_non_coinbase())
