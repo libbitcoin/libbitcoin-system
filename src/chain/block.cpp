@@ -29,7 +29,7 @@
 #include <utility>
 #include <unordered_map>
 #include <bitcoin/system/chain/context.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/point.hpp>
@@ -38,7 +38,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -554,10 +553,8 @@ bool block::is_signature_operations_limited(bool bip16,
 
 //*****************************************************************************
 // CONSENSUS:
-// This check is excluded under two bip30 exception blocks. This also cannot
-// occur in any branch above bip34, due to height in coinbase and the
-// presumption of sha256 non-collision. So this check is bypassed for both
-// exception blocks and if bip34 is active (including under bip90 activation).
+// This check is excluded under two bip30 exception blocks and bip30_deactivate
+// until bip30_reactivate. These conditions are rolled up into the bip30 flag.
 //*****************************************************************************
 bool block::is_unspent_coinbase_collision() const NOEXCEPT
 {
@@ -668,8 +665,9 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 code block::check() const NOEXCEPT
 {
     // context free.
-    if (is_empty())
-        return error::empty_block;
+    // empty_block is redundant with first_not_coinbase.
+    ////if (is_empty())
+    ////    return error::empty_block;
     if (is_oversized())
         return error::block_size_limit;
     if (is_first_non_coinbase())

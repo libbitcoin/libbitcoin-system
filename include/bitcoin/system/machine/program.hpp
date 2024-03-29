@@ -46,7 +46,7 @@ public:
 
     /// Input script run (default/empty stack).
     inline program(const chain::transaction& transaction,
-        const input_iterator& input, uint32_t forks) NOEXCEPT;
+        const input_iterator& input, uint32_t active_flags) NOEXCEPT;
 
     /// Legacy p2sh or prevout script run (copied input stack).
     inline program(const program& other,
@@ -59,7 +59,7 @@ public:
     /// Witness script run (witness-initialized stack).
     inline program(const chain::transaction& transaction,
         const input_iterator& input, const chain::script::cptr& script,
-        uint32_t forks, chain::script_version version,
+        uint32_t active_flags, chain::script_version version,
         const chunk_cptrs_ptr& stack) NOEXCEPT;
 
     /// Program result.
@@ -80,7 +80,7 @@ protected:
     INLINE op_iterator end() const NOEXCEPT;
     INLINE const chain::input& input() const NOEXCEPT;
     INLINE const chain::transaction& transaction() const NOEXCEPT;
-    INLINE bool is_enabled(chain::forks rule) const NOEXCEPT;
+    INLINE bool is_enabled(chain::flags flag) const NOEXCEPT;
     INLINE error::script_error_t validate() const NOEXCEPT;
 
     /// Primary stack.
@@ -163,9 +163,9 @@ protected:
     inline bool prepare(ec_signature& signature, const data_chunk& key,
         hash_digest& hash, const chunk_xptr& endorsement) const NOEXCEPT;
 
-    /// Prepare signature, with caching for multisig with same flags.
+    /// Prepare signature, with caching for multisig with same sighash flags.
     inline bool prepare(ec_signature& signature, const data_chunk& key,
-        hash_cache& cache, uint8_t& flags, const data_chunk& endorsement,
+        hash_cache& cache, uint8_t& sighash_flags, const data_chunk& endorsement,
         const chain::script& sub) const NOEXCEPT;
 
 private:
@@ -194,7 +194,7 @@ private:
     const chain::transaction& transaction_;
     const input_iterator input_;
     const chain::script::cptr script_;
-    const uint32_t forks_;
+    const uint32_t flags_;
     const uint64_t value_;
     const chain::script_version version_;
     const chunk_cptrs_ptr witness_;

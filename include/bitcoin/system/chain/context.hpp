@@ -20,7 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_CONTEXT_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 
 namespace libbitcoin {
@@ -30,8 +30,8 @@ namespace chain {
 class BC_API context final
 {
 public:
-    /// Determine if the fork is active for this block.
-    bool is_enabled(chain::forks fork) const NOEXCEPT;
+    /// Determine if the flag is active for this block.
+    bool is_enabled(chain::flags flag) const NOEXCEPT;
 
     /// Header context within chain.
     uint32_t flags;

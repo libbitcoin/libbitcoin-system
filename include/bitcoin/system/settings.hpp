@@ -23,6 +23,7 @@
 #include <bitcoin/system/config/config.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/forks.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -39,33 +40,33 @@ public:
     /// Computed properties.
     /// -----------------------------------------------------------------------
 
-    /// These are not used internal to system.
+    /// These are not used by the system library.
     virtual uint64_t max_money() const NOEXCEPT;
     virtual uint64_t initial_subsidy() const NOEXCEPT;
     virtual uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
 
-    /// These are used internal to system.
+    /// These are used by chain_state (only).
     virtual uint32_t minimum_timespan() const NOEXCEPT;
     virtual uint32_t maximum_timespan() const NOEXCEPT;
     virtual size_t retargeting_interval() const NOEXCEPT;
 
     /// Configured forks.
     /// -----------------------------------------------------------------------
+    /// These are used by chain_state (only).
 
-    /// These are not used internal to system.
-    chain::chain_state::forks_t forks{};
+    system::forks forks{};
 
     /// Consensus parameters.
     /// -----------------------------------------------------------------------
 
-    /// These are not used internal to system.
+    /// These are not used by the system library.
     uint64_t initial_subsidy_bitcoin;
     uint32_t subsidy_interval_blocks;
     uint32_t timestamp_limit_seconds;
     chain::checkpoints checkpoints{};
     config::block genesis_block{};
 
-    /// These are used internal to system.
+    /// These are used by chain_state (only).
     uint32_t retargeting_factor;
     uint32_t retargeting_interval_seconds;
     uint32_t block_spacing_seconds;
@@ -73,7 +74,7 @@ public:
 
     /// Activation settings.
     /// -----------------------------------------------------------------------
-    /// These are used internal to system.
+    /// These are used by chain_state (only).
 
     /// Consensus rule change activation and enforcement parameters.
     uint32_t first_version;

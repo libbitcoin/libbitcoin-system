@@ -18,16 +18,16 @@
  */
 #include <bitcoin/system/chain/context.hpp>
 
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-bool context::is_enabled(chain::forks fork) const NOEXCEPT
+bool context::is_enabled(chain::flags flag) const NOEXCEPT
 {
-    return to_bool(fork & flags);
+    return to_bool(flag & flags);
 }
 
 bool operator==(const context& left, const context& right) NOEXCEPT

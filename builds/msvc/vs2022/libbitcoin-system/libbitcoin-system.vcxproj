@@ -252,7 +252,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\context.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\forks.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\flags.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\magic_numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\opcode.hpp" />
@@ -332,6 +332,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\transaction_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\forks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\accumulator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\algorithm.hpp" />

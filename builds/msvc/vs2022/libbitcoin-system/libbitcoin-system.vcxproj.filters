@@ -635,7 +635,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\forks.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\flags.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\magic_numbers.hpp">
@@ -873,6 +873,9 @@
       <Filter>include\bitcoin\system\error</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\forks.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp">

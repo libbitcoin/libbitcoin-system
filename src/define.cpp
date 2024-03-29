@@ -36,6 +36,7 @@
 // typelets       : funclets
 // constraints    : typelets
 // define         : constraints
+// forks          :
 
 // Other directory common includes are not internally chained.
 // Each header includes only its required common headers.
@@ -52,11 +53,11 @@
 // /hash          : /radix
 // /crypto        : /hash
 // /stream        : /crypto /endian /error
-// /chain         : /stream [forward: settings]
+// /chain         : /stream forks [forward: settings]
 // /machine       : /chain
 // /config        : /chain
 // /wallet        : /chain
-// settings       : /chain
+// settings       : /chain forks
 
 // When a symbol is unexplainably undefined, its defining include is probably
 // creating the circularity.

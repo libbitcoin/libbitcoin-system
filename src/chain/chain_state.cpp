@@ -26,10 +26,11 @@
 #include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/context.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/policy.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/forks.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/settings.hpp>
@@ -100,58 +101,58 @@ inline uint32_t bits_high(const chain_state::data& values) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 chain_state::activations chain_state::activation(const data& values,
-    const forks_t& forks, const system::settings& settings) NOEXCEPT
+    const forks& forks, const system::settings& settings) NOEXCEPT
 {
     // Initialize activation results with genesis values.
-    activations result{ forks::no_rules, settings.first_version };
+    activations result{ flags::no_rules, settings.first_version };
 
     // regtest is only activated via configuration.
     if (forks.retarget)
     {
-        result.flags |= forks::retarget;
+        result.flags |= flags::retarget;
     }
 
     // testnet is activated based on configuration alone.
     if (forks.difficult)
     {
-        result.flags |= forks::difficult;
+        result.flags |= flags::difficult;
     }
 
     // time_warp_patch is activated based on configuration alone.
     if (forks.time_warp_patch)
     {
-        result.flags |= forks::time_warp_patch;
+        result.flags |= flags::time_warp_patch;
     }
 
     // retarget_overflow_patch is activated based on configuration alone.
     if (forks.retarget_overflow_patch)
     {
-        result.flags |= forks::retarget_overflow_patch;
+        result.flags |= flags::retarget_overflow_patch;
     }
 
     // scrypt_proof_of_work is activated based on configuration alone.
     if (forks.scrypt_proof_of_work)
     {
-        result.flags |= forks::scrypt_proof_of_work;
+        result.flags |= flags::scrypt_proof_of_work;
     }
 
     // bip42 is activated based on configuration alone (soft fork).
     if (forks.bip42)
     {
-        result.flags |= forks::bip42_rule;
+        result.flags |= flags::bip42_rule;
     }
 
     // bip90 is activated based on configuration alone (hard fork).
     if (forks.bip90)
     {
-        result.flags |= forks::bip90_rule;
+        result.flags |= flags::bip90_rule;
     }
 
     // bip16 was activated by manual inspection of signal history (soft fork).
     if (forks.bip16 &&
         (values.timestamp.self >= settings.bip16_activation_time))
     {
-        result.flags |= forks::bip16_rule;
+        result.flags |= flags::bip16_rule;
     }
 
     const auto height = values.height;
@@ -192,7 +193,7 @@ chain_state::activations chain_state::activation(const data& values,
         (is_active(count_2, settings.bip34_activation_threshold) &&
         version >= settings.bip34_version))
     {
-        result.flags |= forks::bip34_rule;
+        result.flags |= flags::bip34_rule;
     }
 
     // bip66 is active based on 75% of preceding 1000 mainnet blocks.
@@ -200,7 +201,7 @@ chain_state::activations chain_state::activation(const data& values,
         (is_active(count_3, settings.bip34_activation_threshold) &&
         version >= settings.bip66_version))
     {
-        result.flags |= forks::bip66_rule;
+        result.flags |= flags::bip66_rule;
     }
 
     // bip65 is active based on 75% of preceding 1000 mainnet blocks.
@@ -208,7 +209,7 @@ chain_state::activations chain_state::activation(const data& values,
         (is_active(count_4, settings.bip34_activation_threshold) &&
         version >= settings.bip65_version))
     {
-        result.flags |= forks::bip65_rule;
+        result.flags |= flags::bip65_rule;
     }
 
     // version 4/3/2 enforced based on 95% of preceding 1000 mainnet blocks.
@@ -237,17 +238,17 @@ chain_state::activations chain_state::activation(const data& values,
     // bip9_bit0 forks are enforced above the bip9_bit0 checkpoint.
     if (values.bip9_bit0_hash == settings.bip9_bit0_active_checkpoint.hash())
     {
-        result.flags |= forks::bip68_rule;
-        result.flags |= forks::bip112_rule;
-        result.flags |= forks::bip113_rule;
+        result.flags |= flags::bip68_rule;
+        result.flags |= flags::bip112_rule;
+        result.flags |= flags::bip113_rule;
     }
 
     // bip9_bit1 forks are enforced above the bip9_bit1 checkpoint.
     if (values.bip9_bit1_hash == settings.bip9_bit1_active_checkpoint.hash())
     {
-        result.flags |= forks::bip141_rule;
-        result.flags |= forks::bip143_rule;
-        result.flags |= forks::bip147_rule;
+        result.flags |= flags::bip141_rule;
+        result.flags |= flags::bip143_rule;
+        result.flags |= flags::bip147_rule;
     }
 
     // bip30_deactivate fork enforced above bip30_deactivate (bip34) checkpoint.
@@ -264,13 +265,13 @@ chain_state::activations chain_state::activation(const data& values,
     if (forks.bip30 && (!bip30_deactivate || bip30_reactivate) &&
         !is_bip30_exception({ values.hash, height }))
     {
-        result.flags |= forks::bip30_rule;
+        result.flags |= flags::bip30_rule;
     }
 
     return result;
 }
 
-size_t chain_state::bits_count(size_t height, const forks_t& forks,
+size_t chain_state::bits_count(size_t height, const forks& forks,
     size_t retargeting_interval) NOEXCEPT
 {
     // Mainnet doesn't use bits in retargeting.
@@ -289,7 +290,7 @@ size_t chain_state::bits_count(size_t height, const forks_t& forks,
     return std::min(height, retargeting_interval);
 }
 
-size_t chain_state::version_count(size_t height, const forks_t& forks,
+size_t chain_state::version_count(size_t height, const forks& forks,
     size_t bip34_activation_sample) NOEXCEPT
 {
     if (forks.bip90 || (!forks.bip34 && !forks.bip65 && !forks.bip66))
@@ -298,12 +299,12 @@ size_t chain_state::version_count(size_t height, const forks_t& forks,
     return std::min(height, bip34_activation_sample);
 }
 
-size_t chain_state::timestamp_count(size_t height, const forks_t&) NOEXCEPT
+size_t chain_state::timestamp_count(size_t height, const forks&) NOEXCEPT
 {
     return std::min(height, median_time_past_interval);
 }
 
-size_t chain_state::retarget_height(size_t height, const forks_t& forks,
+size_t chain_state::retarget_height(size_t height, const forks& forks,
     size_t retargeting_interval) NOEXCEPT
 {
     if (!forks.retarget)
@@ -326,7 +327,7 @@ size_t chain_state::retarget_height(size_t height, const forks_t& forks,
 // block N with block N. This is simple but requires care when comparing code.
 //*****************************************************************************
 uint32_t chain_state::median_time_past(const data& values,
-    const forks_t&) NOEXCEPT
+    const forks&) NOEXCEPT
 {
     // Sort the times by value to obtain the median.
     auto times = sort_copy(values.timestamp.ordered);
@@ -341,7 +342,7 @@ uint32_t chain_state::median_time_past(const data& values,
 // work_required
 // ----------------------------------------------------------------------------
 
-uint32_t chain_state::work_required(const data& values, const forks_t& forks,
+uint32_t chain_state::work_required(const data& values, const forks& forks,
     const system::settings& settings) NOEXCEPT
 {
     // Genesis has no preceding block data.
@@ -393,15 +394,15 @@ uint32_t chain_state::retarget_timespan(const data& values,
     return limit(timespan, minimum_timespan, maximum_timespan);
 }
 
-constexpr bool patch_timewarp(const chain_state::forks_t& forks,
-    const uint256_t& limit, const uint256_t& target) NOEXCEPT
+constexpr bool patch_timewarp(const forks& forks, const uint256_t& limit,
+    const uint256_t& target) NOEXCEPT
 {
     return forks.retarget_overflow_patch &&
         floored_log2(target) >= floored_log2(limit);
 }
 
 uint32_t chain_state::work_required_retarget(const data& values,
-    const forks_t& forks, uint32_t proof_of_work_limit,
+    const forks& forks, uint32_t proof_of_work_limit,
     uint32_t minimum_timespan, uint32_t maximum_timespan,
     uint32_t retargeting_interval_seconds) NOEXCEPT
 {

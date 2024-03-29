@@ -419,7 +419,7 @@ static std::string opcode_to_prefix(opcode code,
     }
 }
 
-std::string operation::to_string(uint32_t active_forks) const NOEXCEPT
+std::string operation::to_string(uint32_t active_flags) const NOEXCEPT
 {
     if (!is_valid())
         return "(?)";
@@ -428,7 +428,7 @@ std::string operation::to_string(uint32_t active_forks) const NOEXCEPT
         return "<" + encode_base16(*data_) + ">";
 
     if (data_->empty())
-        return opcode_to_mnemonic(code_, active_forks);
+        return opcode_to_mnemonic(code_, active_flags);
 
     // Data encoding uses single token with explicit size prefix as required.
     return "[" + opcode_to_prefix(code_, *data_) + encode_base16(*data_) + "]";
@@ -615,7 +615,7 @@ operation tag_invoke(json::value_to_tag<operation>,
 void tag_invoke(json::value_from_tag, json::value& value,
     const operation& operation) NOEXCEPT
 {
-    value = operation.to_string(forks::all_rules);
+    value = operation.to_string(flags::all_rules);
 }
 
 BC_POP_WARNING()

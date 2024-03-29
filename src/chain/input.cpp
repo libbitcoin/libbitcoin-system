@@ -346,7 +346,7 @@ bool input::extract_sigop_script(chain::script& out,
 }
 
 // TODO: Prior to block 79400 sigops were limited only by policy.
-// TODO: Create legacy sigops fork flag and pass here, return 0 if false.
+// TODO: Create legacy sigops fork/flag and pass here, return 0 if false.
 // TODO: this was an unbipped flag day soft fork, prior to BIP16/141.
 // TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
 size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT

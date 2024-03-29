@@ -321,9 +321,9 @@ BOOST_AUTO_TEST_CASE(script__from_string__two_of_three_multisig__success)
     const auto& ops = instance.ops();
     BOOST_REQUIRE_EQUAL(ops.size(), 6u);
     BOOST_REQUIRE(ops[0] == opcode::push_positive_2);
-    BOOST_REQUIRE_EQUAL(ops[1].to_string(forks::no_rules), "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864]");
-    BOOST_REQUIRE_EQUAL(ops[2].to_string(forks::no_rules), "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c]");
-    BOOST_REQUIRE_EQUAL(ops[3].to_string(forks::no_rules), "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934]");
+    BOOST_REQUIRE_EQUAL(ops[1].to_string(flags::no_rules), "[03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2e64380e860a4d59f15ac864]");
+    BOOST_REQUIRE_EQUAL(ops[2].to_string(flags::no_rules), "[02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c]");
+    BOOST_REQUIRE_EQUAL(ops[3].to_string(flags::no_rules), "[03624505c6cc3967352cce480d8550490dd68519cd019066a4c302fdfb7d1c9934]");
     BOOST_REQUIRE(ops[4] == opcode::push_positive_3);
     BOOST_REQUIRE(ops[5] == opcode::checkmultisig);
 }
@@ -464,9 +464,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to and after BIP16 activation.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::bip16_rule }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip16_rule }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) == error::script_success, name);
     }
 }
 
@@ -479,9 +479,9 @@ BOOST_AUTO_TEST_CASE(script__bip16__invalidated)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to BIP16 activation and invalid after.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::bip16_rule }, 0) != error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip16_rule }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) != error::script_success, name);
     }
 }
 
@@ -494,9 +494,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to and after BIP65 activation.
-        ////BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::bip65_rule }, 0) == error::script_success, name);
-        ////BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules & ~forks::bip112_rule }, 0) == error::script_success, name);
+        ////BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip65_rule }, 0) == error::script_success, name);
+        ////BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules & ~flags::bip112_rule }, 0) == error::script_success, name);
     }
 }
 
@@ -509,9 +509,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are invalid prior to and after BIP65 activation.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) != error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::bip65_rule }, 0) != error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules & ~forks::bip112_rule }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip65_rule }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules & ~flags::bip112_rule }, 0) != error::script_success, name);
     }
 }
 
@@ -524,9 +524,9 @@ BOOST_AUTO_TEST_CASE(script__bip65__invalidated)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are valid prior to BIP65 activation and invalid after.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::bip65_rule }, 0) != error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules & ~forks::bip112_rule }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip65_rule }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules & ~flags::bip112_rule }, 0) != error::script_success, name);
     }
 }
 
@@ -542,11 +542,11 @@ BOOST_AUTO_TEST_CASE(script__multisig__valid)
 
         // These are always valid.
         // These are scripts potentially affected by bip66 (but should not be).
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::bip66_rule }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) == error::script_success, name);
 
         // One test fails under bip147 due to alternating results on the stack.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules & ~forks::bip147_rule }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules & ~flags::bip147_rule }, 0) == error::script_success, name);
     }
 }
 
@@ -560,9 +560,9 @@ BOOST_AUTO_TEST_CASE(script__multisig__invalid)
 
         // These are always invalid.
         // These are scripts potentially affected by bip66 (but should not be).
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) != error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::bip66_rule }, 0) != error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) != error::script_success, name);
     }
 }
 
@@ -575,8 +575,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__valid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are always valid.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) == error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) == error::script_success, name);
     }
 }
 
@@ -589,8 +589,8 @@ BOOST_AUTO_TEST_CASE(script__context_free__invalid)
         BOOST_REQUIRE_MESSAGE(tx.is_valid(), name);
 
         // These are always invalid.
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::no_rules }, 0) != error::script_success, name);
-        BOOST_CHECK_MESSAGE(tx.connect({ forks::all_rules }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) != error::script_success, name);
+        BOOST_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) != error::script_success, name);
     }
 }
 
@@ -644,14 +644,14 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__success)
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     constexpr auto forks =
-        ////forks::difficult |
-        forks::retarget |
-        forks::bip16_rule |
-        forks::bip30_rule |
-        ////forks::bip34_rule |
-        ////forks::bip66_rule |
-        forks::bip65_rule | // bip65 should be superseded by bip90.
-        forks::bip90_rule;
+        ////flags::difficult |
+        flags::retarget |
+        flags::bip16_rule |
+        flags::bip30_rule |
+        ////flags::bip34_rule |
+        ////flags::bip66_rule |
+        flags::bip65_rule | // bip65 should be superseded by bip90.
+        flags::bip90_rule;
 
     constexpr auto index = 1u;
     const auto decoded_tx = base16_chunk("0100000002c0cd5346700d18a937575424eb84888bdc277bdbfade39b3bb9a4ce31fd4455101000000fdf60100483045022100f681bb660ef85bb191e337450f2ba3493c37b90a8622864d932cec5b40a74428022007cab269d846b7e63899b8e7082bdea94375d4b1c197b7c50365823c9ffd935e01483045022100b4d3be95b088c8ef176b25c9cee0b16ac7f91c10ccf645ab7421ad3de1d8aba802205c6b3bd9df0b19271abefc47997ce7bd113a6f069674003c821c01440d49a48b0148304502207fad219634211fb614cef1654bdb956a9ed751a352e47c2b64d4ac8459e05ec2022100bd4ae53e76f266938f2ec09d1b2d515eaf5e21b990e5c7df0779ca61f24a10de014830450221009f2dd7fa5eafdf9f660e764750aabffd86628bb19501d49007551151f6409266022019fad776d46c6896a849bf7fcacefa73da6d5db22680c7bacdd055d8d8547858014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffffca1ea035fedd045da687f8219f6d76982b47fd3edab01212d3def0dc917d321801000000fdf40100473044022050cf9d0bf024af1780af7ce91a8cac62fd54a3df96cc1eb27889a58aaf82f09e02205f85c010faa5978963f569cfa6bd7202363841ad82bab0a6044c1092140ba49001483045022100f3f5076e1f233acf3fd2bb1188da82f3259224ee29a50af287b707c71503543f02202e82db849e59f8eb836ec6c55dab6a3d61b6511e9d25e550901d5534276432320148304502210094ff0cd6c74dd756a07334c2b76373dd4fb8f5ef7c1da7e09a168d54cf79a7770220114337de0ac0edd7871c079b796ad422d2d5e50d350d3b9f7371b0f1bd66fe7a01473044022022bc92872b6c680da40aa6388e28ef396c7ffa410317ae574c1f31836c85b28602203b43a7d2cdcc2ba1afaf53c1a0c0b474933581b0e359aed788ad7ad819260dfb014ccf542102d7dafdc7f5d63bc1e5210a93a93c57e96acfb123df06ca02318be689791fa634210204affb8e9fd6228d370aed6b8fff2fc33bbe9603e2933ae3b92b11a67d7e7d3d210269fa9a07b38c01440ecabc74481fdd2ede1591e293a1108ba1ac511d85e40ca62102f24bda0faab218a98c5975cb7eb035b37020ec3758e454d95f382e1f274da2112102795716e51a5539961872b559f2e938a29862565c1d0c70ed6a748adb8541c82b2103828209539e87cc72694e0d397a00ae1c1b3aa3aa7931df3bb72c71172758ed7756aeffffffff02605af405000000001976a914bb6754a948265de730c60fbd745aeb5868ea921e88ac00e1f5050000000017a9144aba54e2541475f91659ccdbb13ce0b490778c7f8700000000");
@@ -678,14 +678,14 @@ BOOST_AUTO_TEST_CASE(script__verify__block_290329_tx__success)
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     constexpr auto forks =
-        ////forks::difficult |
-        forks::retarget |
-        forks::bip16_rule |
-        forks::bip30_rule |
-        ////forks::bip34_rule |
-        ////forks::bip66_rule |
-        forks::bip65_rule | // bip65 should be superseded by bip90.
-        forks::bip90_rule;
+        ////flags::difficult |
+        flags::retarget |
+        flags::bip16_rule |
+        flags::bip30_rule |
+        ////flags::bip34_rule |
+        ////flags::bip66_rule |
+        flags::bip65_rule | // bip65 should be superseded by bip90.
+        flags::bip90_rule;
 
     constexpr auto index = 1u;
     const auto decoded_tx = base16_chunk("0100000002f9cbafc519425637ba4227f8d0a0b7160b4e65168193d5af39747891de98b5b5000000006b4830450221008dd619c563e527c47d9bd53534a770b102e40faa87f61433580e04e271ef2f960220029886434e18122b53d5decd25f1f4acb2480659fea20aabd856987ba3c3907e0121022b78b756e2258af13779c1a1f37ea6800259716ca4b7f0b87610e0bf3ab52a01ffffffff42e7988254800876b69f24676b3e0205b77be476512ca4d970707dd5c60598ab00000000fd260100483045022015bd0139bcccf990a6af6ec5c1c52ed8222e03a0d51c334df139968525d2fcd20221009f9efe325476eb64c3958e4713e9eefe49bf1d820ed58d2112721b134e2a1a53034930460221008431bdfa72bc67f9d41fe72e94c88fb8f359ffa30b33c72c121c5a877d922e1002210089ef5fc22dd8bfc6bf9ffdb01a9862d27687d424d1fefbab9e9c7176844a187a014c9052483045022015bd0139bcccf990a6af6ec5c1c52ed8222e03a0d51c334df139968525d2fcd20221009f9efe325476eb64c3958e4713e9eefe49bf1d820ed58d2112721b134e2a1a5303210378d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c71210378d430274f8c5ec1321338151e9f27f4c676a008bdf8638d07c0b6be9ab35c7153aeffffffff01a08601000000000017a914d8dacdadb7462ae15cd906f1878706d0da8660e68700000000");
@@ -711,12 +711,12 @@ BOOST_AUTO_TEST_CASE(script__verify__block_438513_tx__success)
     // Isolate rules from integer values (62u/0011 0011).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     constexpr auto forks =
-        forks::difficult |
-        forks::retarget |
-        ////forks::bip16_rule | // This looks wrong.
-        ////forks::bip30_rule | // This is moot but looks wrong.
-        forks::bip34_rule |
-        forks::bip66_rule;
+        flags::difficult |
+        flags::retarget |
+        ////flags::bip16_rule | // This looks wrong.
+        ////flags::bip30_rule | // This is moot but looks wrong.
+        flags::bip34_rule |
+        flags::bip66_rule;
 
     constexpr auto index = 0u;
     const auto decoded_tx = base16_chunk("0100000001a06bf74cc36eac395188b06850c5a01d00b355065c589d14036e89e075d7518e000000009d483045022100ba555ac17a084e2a1b621c2171fa563bc4fb75cd5c0968153f44ba7203cb876f022036626f4579de16e3ad160df01f649ffb8dbf47b504ee56dc3ad7260af24ca0db0101004c50632102768e47607c52e581595711e27faffa7cb646b4f481fe269bd49691b2fbc12106ad6704355e2658b1756821028a5af8284a12848d69a25a0ac5cea20be905848eb645fd03d3b065df88a9117cacfeffffff0158920100000000001976a9149d86f66406d316d44d58cbf90d71179dd8162dd388ac355e2658");
@@ -744,20 +744,20 @@ BOOST_AUTO_TEST_CASE(script__verify__block_481824_tx__success)
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     constexpr auto forks =
-        forks::difficult |
-        forks::retarget |
-        forks::bip16_rule |
-        forks::bip30_rule |
-        forks::bip34_rule |
-        forks::bip66_rule |
-        forks::bip65_rule |
-        forks::bip90_rule |
-        forks::bip68_rule |
-        forks::bip112_rule |
-        forks::bip113_rule |
-        forks::bip141_rule |
-        forks::bip143_rule |
-        forks::bip147_rule;
+        flags::difficult |
+        flags::retarget |
+        flags::bip16_rule |
+        flags::bip30_rule |
+        flags::bip34_rule |
+        flags::bip66_rule |
+        flags::bip65_rule |
+        flags::bip90_rule |
+        flags::bip68_rule |
+        flags::bip112_rule |
+        flags::bip113_rule |
+        flags::bip141_rule |
+        flags::bip143_rule |
+        flags::bip147_rule;
 
     constexpr auto index = 0u;
     const auto decoded_tx = base16_chunk("0200000000010140d43a99926d43eb0e619bf0b3d83b4a31f60c176beecfb9d35bf45e54d0f7420100000017160014a4b4ca48de0b3fffc15404a1acdc8dbaae226955ffffffff0100e1f5050000000017a9144a1154d50b03292b3024370901711946cb7cccc387024830450221008604ef8f6d8afa892dee0f31259b6ce02dd70c545cfcfed8148179971876c54a022076d771d6e91bed212783c9b06e0de600fab2d518fad6f15a2b191d7fbd262a3e0121039d25ab79f41f75ceaf882411fd41fa670a4c672c23ffaf0e361a969cde0692e800000000");
@@ -785,20 +785,20 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_892321_tx_missing_witness__in
     // Flag bit 30 was removed as a "checkpointed" indicator (why was it set?).
     // Flag bit 0 was reversed from easy to difficult, for mainnet consistency.
     constexpr auto forks =
-        ////forks::difficult |
-        forks::retarget |
-        forks::bip16_rule |
-        forks::bip30_rule |
-        forks::bip34_rule |
-        forks::bip66_rule |
-        forks::bip65_rule |
-        forks::bip90_rule |
-        forks::bip68_rule |
-        forks::bip112_rule |
-        forks::bip113_rule |
-        forks::bip141_rule |
-        forks::bip143_rule |
-        forks::bip147_rule;
+        ////flags::difficult |
+        flags::retarget |
+        flags::bip16_rule |
+        flags::bip30_rule |
+        flags::bip34_rule |
+        flags::bip66_rule |
+        flags::bip65_rule |
+        flags::bip90_rule |
+        flags::bip68_rule |
+        flags::bip112_rule |
+        flags::bip113_rule |
+        flags::bip141_rule |
+        flags::bip143_rule |
+        flags::bip147_rule;
 
     constexpr auto index = 0u;
     const auto decoded_tx = base16_chunk("0200000001f508cd3a9902906e2101a0632e937284bf6cfe8d263052f40152ced6f5e8a5fc0000000000ffffffff0105e4020000000000160014b6aa463696df9140b1191fa2cc1891cf9b5da6d900000000");
@@ -833,24 +833,24 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wpkh_tx__success)
     (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("00141d0f172a0ecb48aee1be1f2687d2963ae33f71a1"), false } });
 
     // ordinary P2PK (no rules required).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::no_rules }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::script_success);
 
     // P2WPKH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 1), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 1), error::script_success);
 
     // Other scenarios:
 
     // extra rules (okay).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // missing bip143 (invalid sighash).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule }, 1), error::stack_false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 1), error::stack_false);
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip143_rule }, 1), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip143_rule }, 1), error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::no_rules }, 1), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 1), error::unexpected_witness);
 }
 
 BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wpkh_tx__success)
@@ -865,18 +865,18 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wpkh_tx__success)
     (*tx.inputs_ptr())[0]->prevout.reset(new output{ value, { base16_chunk("a9144733f37cf4db86fbc2efed2500b4f4e49f31202387"), false } });
 
     // P2SH-P2WPKH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // Other scenarios:
 
     // missing bip16 (required for p2sh, embedded witness not consumed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 0), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip143_rule }, 0), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip143 (invalid sighash).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule }, 0), error::stack_false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::stack_false);
 }
 
 BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__success)
@@ -895,21 +895,21 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__success)
     (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("00205d1b56b63d714eebe542309525f484b7e9d6f686b3781b6f61ef925d66d6f6a0"), false } });
 
     // ordinary P2PK (no rules required).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::no_rules }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::script_success);
 
     // native P2WSH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 1), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 1), error::script_success);
 
     // Other scenarios:
 
     // extra rules (okay).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // missing bip143 (code-separator treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule }, 1), error::op_check_sig_verify4);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 1), error::op_check_sig_verify4);
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip143_rule }, 1), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip143_rule }, 1), error::unexpected_witness);
 }
 
 BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_2_tx__success)
@@ -928,33 +928,33 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_2_tx__success)
     (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"), false } });
 
     // native P2WSH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // native P2WSH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 1), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 1), error::script_success);
 
     // all inputs
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }), error::transaction_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }), error::transaction_success);
 
     // Other scenarios:
 
     // extra rules (okay).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // extra rules (okay).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule | forks::bip143_rule }, 1), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 1), error::script_success);
 
     // missing bip143 (code-separator treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule }, 0), error::stack_false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 0), error::stack_false);
 
     // missing bip143 (code-separator treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule }, 1), error::stack_false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 1), error::stack_false);
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip143_rule }, 0), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip143_rule }, 1), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip143_rule }, 1), error::unexpected_witness);
 }
 
 // This example shows how SINGLE|ANYONECANPAY does not commit to the input index (swap input indexes).
@@ -973,13 +973,13 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_3_tx__success)
     (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"), false } });
 
     // native P2WSH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // native P2WSH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 1), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 1), error::script_success);
 
     // all inputs
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }), error::transaction_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }), error::transaction_success);
 }
 
 BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wsh_tx__success)
@@ -994,18 +994,18 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wsh_tx__success)
     (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("a9149993a429037b5d912407a71c252019287b8d27a587"), false } });
 
     // P2SH-P2WSH 6-of-6 multisig witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule | forks::bip143_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // Other scenarios:
 
     // missing bip16 (required for p2sh, embedded witness not consumed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule }, 0), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip143_rule }, 0), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip143 (invalid sighash).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule  }, 0), error::stack_false);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule  }, 0), error::stack_false);
 }
 
 BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
@@ -1020,15 +1020,15 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
     (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("00209e1be07558ea5cc8e02ed1d80c0911048afad949affa36d5c3951e3159dbea19"), false } });
 
     // P2WSH witness program.
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip141_rule | forks::bip143_rule | forks::bip147_rule }, 0), error::script_success);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule | flags::bip147_rule }, 0), error::script_success);
 
     // Other scenarios:
 
     // missing bip141 (witness not allowed).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip143_rule }, 0), error::unexpected_witness);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip143 (find-and-delete treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ forks::bip16_rule | forks::bip141_rule }, 0), error::op_check_sig_verify4);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::op_check_sig_verify4);
 }
 
 // json

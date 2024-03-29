@@ -19,12 +19,13 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_STATE_HPP
 
-#include <memory>
 #include <deque>
+#include <memory>
 #include <bitcoin/system/chain/checkpoint.hpp>
 #include <bitcoin/system/chain/context.hpp>
-#include <bitcoin/system/chain/enums/forks.hpp>
+#include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/forks.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -38,6 +39,8 @@ namespace chain {
 class block;
 class header;
 
+/// system::settings are using within chain_state to compute context, but are
+/// not used directly within chain classes, which would be an abstraction leak.
 class BC_API chain_state
 {
 public:
@@ -48,29 +51,6 @@ public:
     typedef std::deque<uint32_t> timestamps;
     typedef std::shared_ptr<chain_state> ptr;
     typedef struct { size_t count; size_t high; } range;
-    typedef struct
-    {
-        bool bip16;
-        bool bip30;
-        bool bip30_deactivate;
-        bool bip30_reactivate;
-        bool bip34;
-        bool bip42;
-        bool bip65;
-        bool bip66;
-        bool bip68;
-        bool bip90;
-        bool bip112;
-        bool bip113;
-        bool bip141;
-        bool bip143;
-        bool bip147;
-        bool retarget;                // !regtest
-        bool difficult;               // !testnet
-        bool time_warp_patch;         // litecoin
-        bool retarget_overflow_patch; // litecoin
-        bool scrypt_proof_of_work;    // litecoin
-    } forks_t;
 
     /// Heights used to identify construction requirements.
     /// All values are lower-bounded by the genesis block height.
@@ -224,23 +204,23 @@ protected:
 
     /// No failure sentinel.
     static activations activation(const data& values,
-        const forks_t& forks, const system::settings& settings) NOEXCEPT;
+        const forks& forks, const system::settings& settings) NOEXCEPT;
 
     /// Returns zero if data is invalid.
     static uint32_t median_time_past(const data& values,
-        const forks_t& forks) NOEXCEPT;
+        const forks& forks) NOEXCEPT;
 
     /// Returns zero if data is invalid.
     static uint32_t work_required(const data& values,
-        const forks_t& forks, const system::settings& settings) NOEXCEPT;
+        const forks& forks, const system::settings& settings) NOEXCEPT;
 
 private:
-    static size_t bits_count(size_t height, const forks_t& forks,
+    static size_t bits_count(size_t height, const forks& forks,
         size_t retargeting_interval) NOEXCEPT;
-    static size_t version_count(size_t height, const forks_t& forks,
+    static size_t version_count(size_t height, const forks& forks,
         size_t bip34_activation_sample) NOEXCEPT;
-    static size_t timestamp_count(size_t height, const forks_t& forks) NOEXCEPT;
-    static size_t retarget_height(size_t height, const forks_t& forks,
+    static size_t timestamp_count(size_t height, const forks& forks) NOEXCEPT;
+    static size_t retarget_height(size_t height, const forks& forks,
         size_t retargeting_interval) NOEXCEPT;
 
     static size_t bip30_deactivate_height(size_t height,
@@ -258,7 +238,7 @@ private:
         const system::settings& settings) NOEXCEPT;
 
     static uint32_t work_required_retarget(const data& values,
-        const forks_t& forks, uint32_t proof_of_work_limit,
+        const forks& forks, uint32_t proof_of_work_limit,
         uint32_t minimum_timespan, uint32_t maximum_timespan,
         uint32_t retargeting_interval_seconds) NOEXCEPT;
     static uint32_t retarget_timespan(const data& values,
@@ -269,7 +249,7 @@ private:
 
     // These are thread safe.
     const data data_;
-    const forks_t& forks_;
+    const forks& forks_;
     const activations activations_;
     const uint32_t work_required_;
     const uint32_t median_time_past_;
