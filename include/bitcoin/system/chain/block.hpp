@@ -91,6 +91,8 @@ public:
     uint64_t claim() const NOEXCEPT;
     hash_digest hash() const NOEXCEPT;
     bool is_malleable() const NOEXCEPT;
+    bool is_malleable_duplicate() const NOEXCEPT;
+    bool is_malleable_coincident() const NOEXCEPT;
     bool is_segregated() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
