@@ -120,7 +120,7 @@ stealth_address stealth_address::from_stealth(
 
     // [scan_pubkey:33]
     ++iterator;
-    auto scan_key_begin = iterator;
+    const auto scan_key_begin = iterator;
     iterator += ec_compressed_size;
     ec_compressed scan_key;
     std::copy_n(scan_key_begin, ec_compressed_size, scan_key.begin());
@@ -143,7 +143,7 @@ stealth_address stealth_address::from_stealth(
     ec_compressed point;
     for (auto key = 0; key < spend_keys_count; ++key)
     {
-        auto spend_key_begin = iterator;
+        const auto spend_key_begin = iterator;
         std::advance(iterator, ec_compressed_size);
         std::copy_n(spend_key_begin, ec_compressed_size, point.begin());
         spend_keys.push_back(point);
@@ -189,7 +189,7 @@ stealth_address stealth_address::from_stealth(const binary& filter,
         return {};
 
     // Guard against prefix too long.
-    auto prefix_number_bits = filter.bits();
+    const auto prefix_number_bits = filter.bits();
     if (prefix_number_bits > max_filter_bits)
         return {};
 
@@ -262,7 +262,7 @@ data_chunk stealth_address::to_chunk() const NOEXCEPT
     extend(address, scan_key_);
 
     // Spend_pubkeys must have been guarded against a max size of 255.
-    auto number_spend_pubkeys = static_cast<uint8_t>(spend_keys_.size());
+    auto number_spend_pubkeys = narrow_cast<uint8_t>(spend_keys_.size());
 
     // Adjust for key reuse.
     if (reuse_key())
@@ -279,7 +279,7 @@ data_chunk stealth_address::to_chunk() const NOEXCEPT
 
     // The prefix must be guarded against a size greater than 32
     // so that the bitfield can convert into uint32_t and sized by uint8_t.
-    const auto prefix_number_bits = static_cast<uint8_t>(filter_.bits());
+    const auto prefix_number_bits = narrow_cast<uint8_t>(filter_.bits());
 
     // Serialize the prefix bytes/blocks.
     address.push_back(prefix_number_bits);
