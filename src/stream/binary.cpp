@@ -85,7 +85,7 @@ binary binary::from_string(const std::string bits) NOEXCEPT
     if (!binary::is_base2(bits))
         return {};
 
-    auto length = bits.length();
+    const auto length = bits.length();
     data_chunk data(ceilinged_divide(length, byte_bits), pad);
     write::bits::copy writer(data);
 

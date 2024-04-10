@@ -66,6 +66,18 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 #endif
 }
 
+#else // HAVE_XCPU
+
+inline bool get_xcr(uint64_t&, uint32_t) noexcept
+{
+    return false;
+}
+inline bool get_cpu(uint32_t&, uint32_t&, uint32_t&, uint32_t&, uint32_t,
+    uint32_t) noexcept
+{
+    return false;
+}
+
 #endif // HAVE_XCPU
 
 } // namespace system
