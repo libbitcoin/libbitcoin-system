@@ -41,6 +41,7 @@ class BC_API block
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(block);
 
+    typedef std_vector<size_t> sizes;
     typedef std::shared_ptr<const block> cptr;
 
     /// Constructors.
@@ -90,12 +91,15 @@ public:
     uint64_t fees() const NOEXCEPT;
     uint64_t claim() const NOEXCEPT;
     hash_digest hash() const NOEXCEPT;
-    bool is_malleable() const NOEXCEPT;
-    bool is_malleable_duplicate() const NOEXCEPT;
-    bool is_malleable_coincident() const NOEXCEPT;
     bool is_segregated() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
+
+    /// Computed malleation properties.
+    bool is_malleable() const NOEXCEPT;
+    bool is_malleable64() const NOEXCEPT;
+    bool is_malleable32() const NOEXCEPT;
+    bool is_malleated32() const NOEXCEPT;
 
     /// Validation.
     /// -----------------------------------------------------------------------
@@ -114,6 +118,19 @@ public:
 protected:
     block(const chain::header::cptr& header,
         const chain::transactions_cptr& txs, bool valid) NOEXCEPT;
+
+    size_t malleated32_size() const NOEXCEPT;
+    bool is_malleated32(size_t width) const NOEXCEPT;
+    static constexpr bool is_malleable32_size(size_t set, size_t width) NOEXCEPT
+    {
+        // Malleable when set is odd at width depth and not before and not one.
+        // This is the only case in which Merkle clones the last item in a set.
+        for (auto depth = one; depth <= width; depth *= two, set = to_half(set))
+            if (is_odd(set))
+                return depth == width && !is_one(set);
+
+        return false;
+    }
 
     /// Check (context free).
     /// -----------------------------------------------------------------------

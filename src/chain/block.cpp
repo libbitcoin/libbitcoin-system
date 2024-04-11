@@ -438,40 +438,66 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     return hashes.size() > hash_limit;
 }
 
-// This is not part of validation. Should be called after *invalidation* to
-// determine if the invalidity is universal (otherwise do not cache invalid),
-// and as an abbreviated validation when under checkpoint/milestone.
-// lists.linuxfoundation.org/pipermail/bitcoin-dev/2019-February/016697.html
 bool block::is_malleable() const NOEXCEPT
 {
-    return is_malleable_coincident() || is_malleable_duplicate();
+    return is_malleable64() || is_malleable32();
 }
 
-// Repeated tx hashes is a subset of is_internal_double_spend.
-// This form of malleability also implies current block instance is invalid.
-bool block::is_malleable_duplicate() const NOEXCEPT
+bool block::is_malleable32() const NOEXCEPT
 {
-    // A set is used to collapse duplicates.
-    std::set<hash_digest> hashes;
+    const auto unmalleated = txs_->size();
+    for (auto mally = one; mally <= unmalleated; mally *= two)
+        if (is_malleable32_size(unmalleated, mally))
+            return true;
 
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    for (const auto& tx: *txs_)
-        hashes.insert(tx->hash(false));
-    BC_POP_WARNING()
-    
-    return hashes.size() == txs_->size();
+    return false;
+}
+
+bool block::is_malleated32() const NOEXCEPT
+{
+    return !is_zero(malleated32_size());
+}
+
+// protected
+// The size of an actual malleation of this block, or zero.
+size_t block::malleated32_size() const NOEXCEPT
+{
+    const auto malleated = txs_->size();
+    for (auto mally = one; mally <= to_half(malleated); mally *= two)
+        if (is_malleable32_size(malleated - mally, mally) &&
+            is_malleated32(mally))
+            return mally;
+
+    return zero;
+}
+
+// protected
+// True if the last width set of tx hashes repeats.
+bool block::is_malleated32(size_t width) const NOEXCEPT
+{
+    const auto malleated = txs_->size();
+    if (is_zero(width) || width > to_half(malleated))
+        return false;
+
+    auto mally = txs_->rbegin();
+    auto legit = std::next(mally, width);
+    while (!is_zero(width--))
+        if ((*mally++)->hash(false) != (*legit++)->hash(false))
+            return false;
+
+    return true;
 }
 
 // If all non-witness tx serializations are 64 bytes the id is malleable.
 // This form of malleability does not imply current block instance is invalid.
-bool block::is_malleable_coincident() const NOEXCEPT
+bool block::is_malleable64() const NOEXCEPT
 {
-    const auto two_leaf_size = [](const transaction::cptr& tx) NOEXCEPT
+    const auto two_leaves = [](const transaction::cptr& tx) NOEXCEPT
     {
         return tx->serialized_size(false) == two * hash_size;
     };
 
-    return std::all_of(txs_->begin(), txs_->end(), two_leaf_size);
+    return !is_empty() && std::all_of(txs_->begin(), txs_->end(), two_leaves);
 }
 
 bool block::is_segregated() const NOEXCEPT
