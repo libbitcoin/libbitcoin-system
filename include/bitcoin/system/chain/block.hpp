@@ -44,6 +44,8 @@ public:
     typedef std_vector<size_t> sizes;
     typedef std::shared_ptr<const block> cptr;
 
+    static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
+
     /// Constructors.
     /// -----------------------------------------------------------------------
 

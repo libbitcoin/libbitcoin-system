@@ -488,16 +488,22 @@ bool block::is_malleated32(size_t width) const NOEXCEPT
     return true;
 }
 
+bool block::is_malleable64() const NOEXCEPT
+{
+    return is_malleable64(*txs_);
+}
+
+// static
 // If all non-witness tx serializations are 64 bytes the id is malleable.
 // This form of malleability does not imply current block instance is invalid.
-bool block::is_malleable64() const NOEXCEPT
+bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
 {
     const auto two_leaves = [](const transaction::cptr& tx) NOEXCEPT
     {
         return tx->serialized_size(false) == two * hash_size;
     };
 
-    return !is_empty() && std::all_of(txs_->begin(), txs_->end(), two_leaves);
+    return !txs.empty() && std::all_of(txs.begin(), txs.end(), two_leaves);
 }
 
 bool block::is_segregated() const NOEXCEPT
