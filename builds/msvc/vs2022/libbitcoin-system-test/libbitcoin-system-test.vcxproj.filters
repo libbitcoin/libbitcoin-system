@@ -105,6 +105,9 @@
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\block_malleable.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\chain_state.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>

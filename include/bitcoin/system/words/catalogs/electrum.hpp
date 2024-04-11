@@ -30,6 +30,8 @@ namespace electrum {
 
 typedef words::dictionary<2048> catalog;
 
+// TODO: these are static initializations.
+
 extern const catalog::words& en;
 extern const catalog::words& es;
 extern const catalog::words& it;
