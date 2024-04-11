@@ -331,6 +331,8 @@ namespace ctx
     }
 }
 
+// TODO: these are static initializations.
+
 /// Predefined contexts for use as default parameter values.
 extern const context btc_mainnet_p2kh;
 extern const context btc_mainnet_p2sh;

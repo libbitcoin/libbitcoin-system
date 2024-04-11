@@ -24,6 +24,8 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 
+// TODO: these are static initializations.
+
 namespace libbitcoin {
 namespace system {
 
