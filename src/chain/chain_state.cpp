@@ -504,17 +504,14 @@ chain_state::map chain_state::get_map(size_t height,
     map map{};
 
     // The height bound of the reverse (high to low) retarget search.
-    map.bits_self = height;
     map.bits.high = sub1(height);
     map.bits.count = bits_count(height, forks, interval);
 
     // The height bound of the median time past function.
-    map.timestamp_self = height;
     map.timestamp.high = sub1(height);
     map.timestamp.count = timestamp_count(height, forks);
 
     // The height bound of the version sample for activations.
-    map.version_self = height;
     map.version.high = sub1(height);
     map.version.count = version_count(height, forks,
         settings.bip34_activation_sample);
