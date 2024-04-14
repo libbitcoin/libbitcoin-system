@@ -65,20 +65,11 @@ public:
         /// [block - 1, floor(block - 2016, 0)] mainnet: 1, testnet: 2016|0
         range bits{};
 
-        /// (block - 0), used only for populating bits.ordered on increment.
-        size_t bits_self{};
-
         /// [block - 1, floor(block - 1000, 0)] mainnet: 1000, testnet: 100
         range version{};
 
-        /// (block - 0)
-        size_t version_self{};
-
         /// [block - 1, floor(block - 11, 0)]
         range timestamp{};
-
-        /// (block - 0)
-        size_t timestamp_self{};
 
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget{};
