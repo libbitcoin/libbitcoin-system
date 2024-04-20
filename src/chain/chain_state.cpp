@@ -80,7 +80,7 @@ constexpr bool is_retarget_height(size_t height,
 // bip30 is active for all but two mainnet blocks that violate the rule.
 // These two blocks each have a coinbase transaction that exactly duplicates
 // another that is not spent by the arrival of the corresponding duplicate.
-// No need to check the configuration for mainnet (hashes presumed unique).
+// Exceptions: block 91842 (duplicates 91812), 91880 (duplicates 91722).
 inline bool is_bip30_exception(const checkpoint& check) NOEXCEPT
 {
     return (check == mainnet_bip30_exception_checkpoint1) ||
