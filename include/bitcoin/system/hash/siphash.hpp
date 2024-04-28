@@ -25,6 +25,7 @@
 #include <tuple>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/hash/functions.hpp>
 
 namespace libbitcoin {
@@ -37,7 +38,13 @@ BC_API uint64_t siphash(const siphash_key& key,
 BC_API uint64_t siphash(const half_hash& hash,
     const data_slice& message) NOEXCEPT;
 
-BC_API siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT;
+constexpr siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT
+{
+    const auto part = split(hash);
+    const auto hi = from_little_endian(part.first);
+    const auto lo = from_little_endian(part.second);
+    return std::make_tuple(hi, lo);
+}
 
 } // namespace system
 } // namespace libbitcoin
