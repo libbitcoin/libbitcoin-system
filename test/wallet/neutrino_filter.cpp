@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(compute__first_11_blocks__success)
     {
         const chain::block block(data, true);
         data_chunk filter;
-        BOOST_REQUIRE(neutrino::compute_filter(block, filter));
+        BOOST_REQUIRE(neutrino::compute_filter(filter, block));
         const auto header = neutrino::compute_filter_header(previous_filter_header, filter);
         ////std::cout << "header: " << encode_base16(header) << std::endl;
         ////std::cout << "filter: " << encode_base16(filter) << std::endl;
@@ -1425,7 +1425,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54503__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
 
     const auto expected_filter = base16_chunk("06294070f18c8b0ff84b92738259ca89b4");
     BOOST_REQUIRE_EQUAL(result, expected_filter);
@@ -2847,7 +2847,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_54499__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
 
     const auto expected_filter = base16_chunk("1c275e3182d7d12a3bde9c34441fddffd314e1600dc25e30bfdcecdc40a35594e1561678bd8cac799f9fd001c2f8dfd2d4c909755e5a6bdc7731c39e00b8f73326e1508039cff3bc39d000");
     BOOST_REQUIRE_EQUAL(result, expected_filter);
@@ -2879,7 +2879,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_0__success)
     ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -2905,7 +2905,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_2__success)
     ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -2931,7 +2931,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_3__success)
     ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -2957,7 +2957,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_15007__success)
     ////BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__false)
@@ -3015,7 +3015,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291_wothout_prevouts__fal
     BOOST_REQUIRE(validated_block.is_valid());
 
     data_chunk result;
-    BOOST_REQUIRE(!neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(!neutrino::compute_filter(result, validated_block));
 }
 
 BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
@@ -3148,7 +3148,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_49291__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -3274,7 +3274,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_180480__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -3419,7 +3419,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_926485__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -3444,7 +3444,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_987876__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -3490,7 +3490,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1263442__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 
@@ -3514,7 +3514,7 @@ BOOST_AUTO_TEST_CASE(neutrino__compute_filter__block_1414221__success)
     BOOST_REQUIRE(add_metadata(metadata, validated_block));
 
     data_chunk result;
-    BOOST_REQUIRE(neutrino::compute_filter(validated_block, result));
+    BOOST_REQUIRE(neutrino::compute_filter(result, validated_block));
     BOOST_REQUIRE_EQUAL(result, expected_filter);
 }
 

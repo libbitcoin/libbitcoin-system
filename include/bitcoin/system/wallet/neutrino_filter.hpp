@@ -39,8 +39,8 @@ struct BC_API block_filter
     data_chunk filter;
 };
 
-bool BC_API compute_filter(const chain::block& block,
-    data_chunk& out_filter) NOEXCEPT;
+bool BC_API compute_filter(data_chunk& out,
+    const chain::block& block) NOEXCEPT;
 
 hash_digest BC_API compute_filter_header(const hash_digest& previous_block,
     const data_chunk& filter) NOEXCEPT;
