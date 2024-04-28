@@ -37,7 +37,7 @@ constexpr uint64_t golomb_target_false_positive_rate = 784931;
 
 constexpr auto rate = golomb_target_false_positive_rate;
 
-bool compute_filter(const chain::block& block, data_chunk& out_filter) NOEXCEPT
+bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
 {
     const auto hash = block.hash();
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
@@ -75,7 +75,7 @@ bool compute_filter(const chain::block& block, data_chunk& out_filter) NOEXCEPT
     distinct(scripts);
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    stream::out::data stream(out_filter);
+    stream::out::data stream(out);
     BC_POP_WARNING()
 
     write::bytes::ostream writer(stream);
