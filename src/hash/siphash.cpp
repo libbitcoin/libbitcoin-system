@@ -110,14 +110,5 @@ uint64_t siphash(const half_hash& hash,
     return siphash(to_siphash_key(hash), message);
 }
 
-// TODO: constexpr
-siphash_key to_siphash_key(const half_hash& hash) NOEXCEPT
-{
-    const auto part = split(hash);
-    const auto hi = from_little_endian(part.first);
-    const auto lo = from_little_endian(part.second);
-    return std::make_tuple(hi, lo);
-}
-
 } // namespace system
 } // namespace libbitcoin
