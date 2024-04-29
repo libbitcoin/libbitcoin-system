@@ -181,38 +181,32 @@ constexpr bool try_neon() NOEXCEPT
 
 /// Runtime tests for Intel SIMD, and ARM SIMD (Neon) availability.
 /// ---------------------------------------------------------------------------
-/// Thread local statics introduce a guard, not ideal for excessive iteration.
-/// But no performance impact measured in sha except minor impact to merkle.
 /// These keep binary portable, otherwise can reply on "with" symbols.
+/// TODO: evaluate performance impact of removing the thread statics.
 
 inline bool have_shani() NOEXCEPT
 {
-    static auto enable = try_shani();
-    return enable;
+    return try_shani();
 }
 
 inline bool have_avx512() NOEXCEPT
 {
-    static auto enable = try_avx512();
-    return enable;
+    return try_avx512();
 }
 
 inline bool have_avx2() NOEXCEPT
 {
-    static auto enable = try_avx2();
-    return enable;
+    return try_avx2();
 }
 
 inline bool have_sse41() NOEXCEPT
 {
-    static auto enable = try_sse41();
-    return enable;
+    return try_sse41();
 }
 
 inline bool have_neon() NOEXCEPT
 {
-    static auto enable = try_neon();
-    return enable;
+    return try_neon();
 }
 
 /// ---------------------------------------------------------------------------
