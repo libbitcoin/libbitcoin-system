@@ -25,11 +25,9 @@
   <!-- These create non-portability. -->
   <ItemDefinitionGroup>
     <ClCompile>
-      <EnableEnhancedInstructionSet Condition="'$(Option-avx512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <!-- order matters -->
       <EnableEnhancedInstructionSet Condition="'$(Option-avx2)'   == 'true'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Option-avx2)'   == 'true'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Option-sse41)'  == 'true'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Option-sse41)'  == 'true'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-avx512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
     </ClCompile>
   </ItemDefinitionGroup>
 
