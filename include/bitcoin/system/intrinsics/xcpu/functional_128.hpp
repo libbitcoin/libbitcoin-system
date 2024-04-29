@@ -29,7 +29,7 @@
 namespace libbitcoin {
 namespace system {
 
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 
 using xint128_t = __m128i;
 
@@ -277,7 +277,7 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 // Symbol is defined but not usable as an integer.
 using xint128_t = std_array<uint8_t, bytes<128>>;
 
-#endif // HAVE_SSE4
+#endif // HAVE_SSE41
 
 } // namespace system
 } // namespace libbitcoin

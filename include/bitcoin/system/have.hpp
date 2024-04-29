@@ -132,26 +132,16 @@
 /// All require runtime evaluation, as the binary is portable across XCPUs.
 #if defined(HAVE_XCPU)
     // TODO: CLANG/GCC compile test and set -msse4 -mavx2 -mavx512f -msha.
-    // TODO: if set also set these WITH_ symbols, picked up here.
-    #if defined(HAVE_CLANG) || defined(HAVE_GNUC)
-        #if defined (WITH_SSE4)
-            #define HAVE_SSE4
-        #endif
-        #if defined (WITH_AVX2)
-            #define HAVE_AVX2
-        #endif
-        #if defined (WITH_AVX512)
-            #define HAVE_AVX512
-        #endif
-        #if defined (WITH_SHANI)
-            #define HAVE_SHANI
-        #endif
-    #endif
-    // Always available without platform test or build configuration.
-    #if defined(HAVE_MSC)
-        #define HAVE_SSE4
-        #define HAVE_AVX2
+    #if defined (WITH_AVX512)
         #define HAVE_AVX512
+    #endif
+    #if defined (WITH_AVX2)
+        #define HAVE_AVX2
+    #endif
+    #if defined (WITH_SSE41)
+        #define HAVE_SSE41
+    #endif
+    #if defined (WITH_SHANI)
         #define HAVE_SHANI
     #endif
 #endif

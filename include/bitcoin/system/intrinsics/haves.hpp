@@ -35,14 +35,9 @@ BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 
 /// Constant symbols for compiled intrinsics interfaces.
 /// ---------------------------------------------------------------------------
+// sse41a (assembly) optimization is implemented without assembly.
 
-// TODO: unclear if there is a necessary x64 limitation.
-#if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
-    constexpr auto with_sse41a = true;
-#else
-    constexpr auto with_sse41a = false;
-#endif
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
     constexpr auto with_sse41 = true;
 #else
     constexpr auto with_sse41 = false;
@@ -173,19 +168,6 @@ inline bool try_sse41() NOEXCEPT
         return false;
 }
 
-inline bool try_sse41a() NOEXCEPT
-{
-    // SSE41a implies assembly, with no need for SSE41 intrinsics.
-    if constexpr (with_sse41a)
-    {
-        uint32_t eax{}, ebx{}, ecx{}, edx{};
-        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-            && get_bit<cpu1_0::sse41_ecx_bit>(ecx);     // SSE4.1
-    }
-    else
-        return false;
-}
-
 constexpr bool try_neon() NOEXCEPT
 {
     if constexpr (with_neon)
@@ -199,44 +181,32 @@ constexpr bool try_neon() NOEXCEPT
 
 /// Runtime tests for Intel SIMD, and ARM SIMD (Neon) availability.
 /// ---------------------------------------------------------------------------
-/// Thread local statics introduce a guard, not ideal for excessive iteration.
-/// But no performance impact measured in sha except minor impact to merkle.
 /// These keep binary portable, otherwise can reply on "with" symbols.
+/// TODO: evaluate performance impact of removing the thread statics.
 
 inline bool have_shani() NOEXCEPT
 {
-    static auto enable = try_shani();
-    return enable;
+    return try_shani();
 }
 
 inline bool have_avx512() NOEXCEPT
 {
-    static auto enable = try_avx512();
-    return enable;
+    return try_avx512();
 }
 
 inline bool have_avx2() NOEXCEPT
 {
-    static auto enable = try_avx2();
-    return enable;
+    return try_avx2();
 }
 
 inline bool have_sse41() NOEXCEPT
 {
-    static auto enable = try_sse41();
-    return enable;
-}
-
-inline bool have_sse41a() NOEXCEPT
-{
-    static auto enable = try_sse41a();
-    return enable;
+    return try_sse41();
 }
 
 inline bool have_neon() NOEXCEPT
 {
-    static auto enable = try_neon();
-    return enable;
+    return try_neon();
 }
 
 /// ---------------------------------------------------------------------------

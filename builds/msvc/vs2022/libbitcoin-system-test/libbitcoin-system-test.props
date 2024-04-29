@@ -21,7 +21,6 @@
       <!--<Optimization>Disabled</Optimization>-->
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
-      <PreprocessorDefinitions Condition="'$(Option-datagen)' == 'true'">ENABLE_DATAGEN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(DefaultLinkage)' == 'dynamic'">BOOST_TEST_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent Condition="'$(DebugOrRelease)' == 'release'">
@@ -57,7 +56,6 @@
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
     <Message Text="Linkage-_system   : $(Linkage-libbitcoin-system)" Importance="high"/>
-    <!--<Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high" Condition="'$(Option-datagen)' == 'true'"/>-->
   </Target>
 
 </Project>

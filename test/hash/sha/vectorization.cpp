@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha256__merkle_root__expected)
     constexpr auto expected10 = sha_256::double_hash({ 18 }, { 19 });
     constexpr auto expected11 = sha_256::double_hash({ 20 }, { 21 });
     constexpr auto expected12 = sha_256::double_hash({ 22 }, { 23 });
-    // SSE4
+    // SSE41
     constexpr auto expected13 = sha_256::double_hash({ 24 }, { 25 });
     constexpr auto expected14 = sha_256::double_hash({ 26 }, { 27 });
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
     constexpr auto expected10 = sha_512::double_hash({ 18 }, { 19 });
     constexpr auto expected11 = sha_512::double_hash({ 20 }, { 21 });
     constexpr auto expected12 = sha_512::double_hash({ 22 }, { 23 });
-    // SSE4
+    // SSE41
     constexpr auto expected13 = sha_512::double_hash({ 24 }, { 25 });
     constexpr auto expected14 = sha_512::double_hash({ 26 }, { 27 });
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
 
 BOOST_AUTO_TEST_CASE(vectorization__sha160__scheduling__expected)
 {
-    // AVX512, AVX2, SSE4, sequential
+    // AVX512, AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
     using sha160n = sha::algorithm<sha::h160, true, false, true>;
     using sha160v = sha::algorithm<sha::h160, true, true, true>;
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha160__scheduling__expected)
 
 BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
 {
-    // AVX512, AVX2, SSE4, sequential
+    // AVX512, AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
     using sha256n = sha::algorithm<sha::h256<>, true, false, true>;
     using sha256v = sha::algorithm<sha::h256<>, true, true, true>;
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
 // sha512 vectorization is disabled in x32 builds.
 BOOST_AUTO_TEST_CASE(vectorization__sha512__scheduling__expected)
 {
-    // AVX2, SSE4, sequential
+    // AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
     using sha512n = sha::algorithm<sha::h512<>, true, false, true>;
     using sha512v = sha::algorithm<sha::h512<>, true, true, true>;
