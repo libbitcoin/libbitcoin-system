@@ -59,19 +59,7 @@ namespace sha256 {
 
 #if defined (DISABLED)
 
-#if !defined(HAVE_XASSEMBLY)
-
-void hash_sse41a(state&, const block1&) NOEXCEPT
-{
-    BC_ASSERT_MSG(false, "hash_sse4a undefined");
-}
-
-void merkle_sse41a(digest1&, const block1&) NOEXCEPT
-{
-    BC_ASSERT_MSG(false, "merkle_sse4a undefined");
-}
-
-#else
+#if defined(HAVE_XASSEMBLY)
 
 void hash_sse41a(state& state, const block1& blocks) NOEXCEPT
 {

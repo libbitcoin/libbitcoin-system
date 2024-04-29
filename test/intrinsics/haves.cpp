@@ -27,12 +27,7 @@ constexpr bool is_defined = true;
 // Build symbols to constexpr.
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
-    static_assert(with_sse41a);
-#else
-    static_assert(!with_sse41a);
-#endif
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
     static_assert(with_sse41);
 #else
     static_assert(!with_sse41);
@@ -116,20 +111,6 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse41__always__match)
         get_right(ecx, cpu1_0::sse41_ecx_bit), tryit);
 #else
     BOOST_CHECK_EQUAL(tryit, with_sse41);
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse41a__always__match)
-{
-    const auto tryit = try_sse41a();
-
-#if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit), tryit);
-#else
-    BOOST_CHECK_EQUAL(tryit, with_sse41a);
 #endif
 }
 
@@ -264,19 +245,10 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__when_defined__true)
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__when_defined__true)
 {
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
     BOOST_WARN(have_sse41());
 #else
     BOOST_REQUIRE(!have_sse41());
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41a__when_x64__true_except_msc)
-{
-#if defined(HAVE_X64) && defined(HAVE_XASSEMBLY)
-    BOOST_WARN(have_sse41a());
-#else
-    BOOST_REQUIRE(!have_sse41a());
 #endif
 }
 

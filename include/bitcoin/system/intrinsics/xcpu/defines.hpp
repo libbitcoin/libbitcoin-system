@@ -57,7 +57,7 @@
 // These are not defined for 32 bit bit builds.
 // This presently precludes sha512 vectorization on x32 builds.
 #if defined(HAVE_X32)
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 inline uint64_t _mm_extract_epi64(auto, auto) NOEXCEPT
 {
     return {};
@@ -111,7 +111,7 @@ inline uint64_t _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
 BC_POP_WARNING()
 #endif
 
-#if !defined(HAVE_SSE4)
+#if !defined(HAVE_SSE41)
     #define mm_and_si128(a, b)  (a)
     #define mm_or_si128(a, b)   (a)
     #define mm_xor_si128(a, b)  (a)

@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(functional_tests)
 // set/get
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 BOOST_AUTO_TEST_CASE(functional__sse4__set32__get_expected)
 {
     if (have_sse41())
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(functional__avx512__set64__get_expected)
 // ----------------------------------------------------------------------------
 // TODO: test 8/16.
 
-#if defined(HAVE_SSE4)
+#if defined(HAVE_SSE41)
 BOOST_AUTO_TEST_CASE(functional__sse4__byteswap32__expected)
 {
     if (have_sse41())
