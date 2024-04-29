@@ -14,4 +14,36 @@
       <EnumValue Name="ltcg" DisplayName="Static using link time compile generation (LTCG)" />
     </EnumProperty>
   </Rule>
+  <Rule Name="libbitcoin-system-options-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Options" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="avx512" DisplayName="avx512" />
+      <Category Name="avx2" DisplayName="avx2" />
+      <Category Name="sse41" DisplayName="sse41" />
+      <Category Name="shani" DisplayName="shani" />
+      <Category Name="neon" DisplayName="neon" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Option-avx512" DisplayName="Enable AVX512 Intrinsics" Description="Use AVX512 intrinsics." Category="avx512">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-avx2" DisplayName="Enable AVX2 Intrinsics" Description="Use AVX2 intrinsics." Category="avx2">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-sse41" DisplayName="Enable SSE4.1 Intrinsics" Description="Use SSE4.1 intrinsics." Category="sse41">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-shani" DisplayName="Enable SHA Native Intrinsics" Description="Use SHA native intrinsics." Category="shani">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+    <EnumProperty Name="Option-neon" DisplayName="Enable ARM Neon Intrinsics" Description="Use ARM Neon intrinsics." Category="neon">
+      <EnumValue Name="false" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+  </Rule>  
 </ProjectSchemaDefinitions>

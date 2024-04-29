@@ -10,6 +10,38 @@
   <ItemGroup Label="BuildOptionsExtension">
     <PropertyPageSchema Include="$(MSBuildThisFileDirectory)libbitcoin-system.import.xml" />
   </ItemGroup>
+  
+  <!-- Options -->
+
+  <!-- These create non-portability. -->
+  <PropertyGroup>
+    <Option-avx512>true</Option-avx512>
+    <Option-avx2>true</Option-avx2>
+    <Option-sse41>true</Option-sse41>
+    <Option-shani>true</Option-shani>
+    <Option-neon>false</Option-neon>
+  </PropertyGroup>
+  
+  <!-- These create non-portability. -->
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <EnableEnhancedInstructionSet Condition="'$(Option-avx512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-avx2)'   == 'true'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-avx2)'   == 'true'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-sse41)'  == 'true'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Option-sse41)'  == 'true'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- Messages -->
+
+  <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Option-avx512     : $(Option-avx512)" Importance="high"/>
+    <Message Text="Option-avx2       : $(Option-avx2)" Importance="high"/>
+    <Message Text="Option-sse41      : $(Option-sse41)" Importance="high"/>
+    <Message Text="Option-shani      : $(Option-shani)" Importance="high"/>
+    <Message Text="Option-neon       : $(Option-neon)" Importance="high"/>
+  </Target>  
 
   <!-- Linkage -->
 
@@ -22,6 +54,14 @@
       <PreprocessorDefinitions>WITH_ICU;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin-system)' == 'static' Or '$(Linkage-libbitcoin-system)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile>
+      <!-- Enable use of CPU intrinsics. -->
+      <PreprocessorDefinitions Condition="'$(Option-avx512)' == 'true'">WITH_AVX512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-avx2)'   == 'true'">WITH_AVX2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-sse41)'  == 'true'">WITH_SSE41;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-shani)'  == 'true'">WITH_SHANI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-neon)'   == 'true'">WITH_NEON;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>    
     <Link>
       <!-- 4099: warns about missing PDB files. -->
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
