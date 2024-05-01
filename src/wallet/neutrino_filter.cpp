@@ -41,7 +41,7 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
 {
     const auto hash = block.hash();
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
-    data_stack scripts;
+    data_stack scripts{};
 
     for (const auto& tx: *block.transactions_ptr())
     {
