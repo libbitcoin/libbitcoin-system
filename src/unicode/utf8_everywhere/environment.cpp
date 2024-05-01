@@ -55,20 +55,20 @@ constexpr bool is_utf8_leading_byte(char byte, size_t size) NOEXCEPT
     // See tools.ietf.org/html/rfc3629#section-3 for definition.
     switch (size)
     {
-    case 1:
-        // 0xxxxxxx
-        return ((0x80 & byte) == 0x00);
-    case 2:
-        // 110xxxxx 10xxxxxx
-        return ((0xe0 & byte) == 0xc0);
-    case 3:
-        // 1110xxxx 10xxxxxx 10xxxxxx
-        return ((0xf0 & byte) == 0xe0);
-    case 4:
-        // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-        return ((0xf8 & byte) == 0xf0);
-    default:
-        return false;
+        case 1:
+            // 0xxxxxxx
+            return ((0x80 & byte) == 0x00);
+        case 2:
+            // 110xxxxx 10xxxxxx
+            return ((0xe0 & byte) == 0xc0);
+        case 3:
+            // 1110xxxx 10xxxxxx 10xxxxxx
+            return ((0xf0 & byte) == 0xe0);
+        case 4:
+            // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+            return ((0xf8 & byte) == 0xf0);
+        default:
+            return false;
     }
 }
 
