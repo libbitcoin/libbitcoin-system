@@ -41,7 +41,7 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
 {
     const auto hash = block.hash();
     const auto key = to_siphash_key(slice<zero, to_half(hash_size)>(hash));
-    data_stack scripts;
+    data_stack scripts{};
 
     for (const auto& tx: *block.transactions_ptr())
     {
@@ -89,10 +89,10 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
     return true;
 }
 
-hash_digest compute_filter_header(const hash_digest& previous_block_hash,
+hash_digest compute_filter_header(const hash_digest& previous_header,
     const data_chunk& filter) NOEXCEPT
 {
-    return bitcoin_hash(splice(bitcoin_hash(filter), previous_block_hash));
+    return bitcoin_hash(splice(bitcoin_hash(filter), previous_header));
 }
 
 bool match_filter(const block_filter& filter,

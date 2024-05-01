@@ -42,7 +42,7 @@ struct BC_API block_filter
 bool BC_API compute_filter(data_chunk& out,
     const chain::block& block) NOEXCEPT;
 
-hash_digest BC_API compute_filter_header(const hash_digest& previous_block,
+hash_digest BC_API compute_filter_header(const hash_digest& previous_header,
     const data_chunk& filter) NOEXCEPT;
 
 bool BC_API match_filter(const block_filter& filter,
