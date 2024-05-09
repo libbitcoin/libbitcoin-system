@@ -103,80 +103,55 @@ constexpr bool get_bit(Value value) NOEXCEPT
 
 inline bool try_shani() NOEXCEPT
 {
-    if constexpr (with_shani)
-    {
-        uint32_t eax{}, ebx{}, ecx{}, edx{};
-        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-            && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
-            && (eax >= cpu7_0::leaf)
-            && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-            && get_bit<cpu7_0::shani_ebx_bit>(ebx);     // SHA-NI
-    }
-    else
-        return false;
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
+        && (eax >= cpu7_0::leaf)
+        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_bit<cpu7_0::shani_ebx_bit>(ebx);     // SHA-NI
 }
 
 inline bool try_avx512() NOEXCEPT
 {
-    if constexpr (with_avx512)
-    {
-        uint64_t extended{};
-        uint32_t eax{}, ebx{}, ecx{}, edx{};
-        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-            && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
-            && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
-            && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-            && get_xcr(extended, xcr0::feature)
-            && get_bit<xcr0::sse_bit>(extended)
-            && get_bit<xcr0::avx_bit>(extended)
-            && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-            && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx);  // AVX512BW
-    }
-    else
-        return false;
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
+        && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
+        && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
+        && get_xcr(extended, xcr0::feature)
+        && get_bit<xcr0::sse_bit>(extended)
+        && get_bit<xcr0::avx_bit>(extended)
+        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx);  // AVX512BW
 }
 
 inline bool try_avx2() NOEXCEPT
 {
-    if constexpr (with_avx2)
-    {
-        uint64_t extended{};
-        uint32_t eax{}, ebx{}, ecx{}, edx{};
-        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-            && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
-            && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
-            && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
-            && get_xcr(extended, xcr0::feature)
-            && get_bit<xcr0::sse_bit>(extended)
-            && get_bit<xcr0::avx_bit>(extended)
-            && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
-            && get_bit<cpu7_0::avx2_ebx_bit>(ebx);      // AVX2
-    }
-    else
-        return false;
+    uint64_t extended{};
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && get_bit<cpu1_0::sse41_ecx_bit>(ecx)      // SSE4.1
+        && get_bit<cpu1_0::xsave_ecx_bit>(ecx)      // XSAVE
+        && get_bit<cpu1_0::avx_ecx_bit>(ecx)        // AVX
+        && get_xcr(extended, xcr0::feature)
+        && get_bit<xcr0::sse_bit>(extended)
+        && get_bit<xcr0::avx_bit>(extended)
+        && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_bit<cpu7_0::avx2_ebx_bit>(ebx);      // AVX2
 }
 
 inline bool try_sse41() NOEXCEPT
 {
-    if constexpr (with_sse41)
-    {
-        uint32_t eax{}, ebx{}, ecx{}, edx{};
-        return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
-            && get_bit<cpu1_0::sse41_ecx_bit>(ecx);     // SSE4.1
-    }
-    else
-        return false;
+    uint32_t eax{}, ebx{}, ecx{}, edx{};
+    return get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf)
+        && get_bit<cpu1_0::sse41_ecx_bit>(ecx);     // SSE4.1
 }
 
 constexpr bool try_neon() NOEXCEPT
 {
-    if constexpr (with_neon)
-    {
-        // TODO
-        return false;
-    }
-    else
-        return false;
+    // TODO: neon detection code.
+    return false;
 }
 
 /// Runtime tests for Intel SIMD, and ARM SIMD (Neon) availability.
@@ -186,27 +161,42 @@ constexpr bool try_neon() NOEXCEPT
 
 inline bool have_shani() NOEXCEPT
 {
-    return try_shani();
+    if constexpr (with_shani)
+        return try_shani();
+    else
+        return false;
 }
 
 inline bool have_avx512() NOEXCEPT
 {
-    return try_avx512();
+    if constexpr (with_avx512)
+        return try_avx512();
+    else
+        return false;
 }
 
 inline bool have_avx2() NOEXCEPT
 {
-    return try_avx2();
+    if constexpr (with_avx2)
+        return try_avx2();
+    else
+        return false;
 }
 
 inline bool have_sse41() NOEXCEPT
 {
-    return try_sse41();
+    if constexpr (with_sse41)
+        return try_sse41();
+    else
+        return false;
 }
 
 inline bool have_neon() NOEXCEPT
 {
-    return try_neon();
+    if constexpr (with_shani)
+        return try_shani();
+    else
+        return false;
 }
 
 /// ---------------------------------------------------------------------------
