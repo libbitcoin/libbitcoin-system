@@ -170,6 +170,28 @@ BOOST_AUTO_TEST_CASE(checkpoint__equality__different__expected)
     BOOST_REQUIRE(!(instance1 == instance2));
 }
 
+BOOST_AUTO_TEST_CASE(checkpoint__sort__non_empty__expected)
+{
+    checkpoints points
+    {
+        { "1111111111111111111111111111111111111111111111111111111111111111", 1000 },
+        { "0000000000000000000000000000000000000000000000000000000000000000", 17 },
+        { "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 }
+    };
+
+    const checkpoints expected
+    {
+        { "0000000000000000000000000000000000000000000000000000000000000000", 17 },
+        { "0102030405060708090a0102030405060708090a0102030405060708090a0b0c", 42 },
+        { "1111111111111111111111111111111111111111111111111111111111111111", 1000 }
+    };
+
+    BOOST_REQUIRE_EQUAL(system::sort_copy(points), expected);
+
+    system::sort(points);
+    BOOST_REQUIRE_EQUAL(points, expected);
+}
+
 BOOST_AUTO_TEST_CASE(checkpoint__is_at__empty__false)
 {
     const checkpoints points{};
