@@ -1589,7 +1589,7 @@ template <typename Stack>
 code interpreter<Stack>::
 connect(const context& state, const transaction& tx, uint32_t index) NOEXCEPT
 {
-    if (index >= tx.inputs_ptr()->size())
+    if (index >= tx.inputs())
         return error::inputs_overflow;
 
     return connect(state, tx, std::next(tx.inputs_ptr()->begin(), index));

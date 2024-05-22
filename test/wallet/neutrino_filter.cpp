@@ -41,7 +41,7 @@ public:
 ////    for (const auto& tx: *block.transactions_ptr())
 ////    {
 ////        std::cout << "tx: " << tx->hash(false) << "\t\t\tis_coinbase: " << tx->is_coinbase() << std::endl;
-////        for (size_t index = 0; index < tx->inputs_ptr()->size(); index++)
+////        for (size_t index = 0; index < tx->inputs(); index++)
 ////        {
 ////            auto& output = (*tx->inputs_ptr())[index]->prevout;
 ////            std::cout << "  input: " << index << std::endl;
