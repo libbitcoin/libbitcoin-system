@@ -370,6 +370,16 @@ bool transaction::is_valid() const NOEXCEPT
     return valid_;
 }
 
+size_t transaction::inputs() const NOEXCEPT
+{
+    return inputs_->size();
+}
+
+size_t transaction::outputs() const NOEXCEPT
+{
+    return outputs_->size();
+}
+
 uint32_t transaction::version() const NOEXCEPT
 {
     return version_;

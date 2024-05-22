@@ -211,8 +211,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(version, instance.version());
     BOOST_REQUIRE_EQUAL(locktime, instance.locktime());
-    BOOST_REQUIRE_EQUAL(instance.inputs_ptr()->size(), 1u);
-    BOOST_REQUIRE_EQUAL(instance.outputs_ptr()->size(), 1u);
+    BOOST_REQUIRE_EQUAL(instance.inputs(), 1u);
+    BOOST_REQUIRE_EQUAL(instance.outputs(), 1u);
     BOOST_REQUIRE(*instance.inputs_ptr()->front() == input);
     BOOST_REQUIRE(*instance.outputs_ptr()->front() == output);
 }

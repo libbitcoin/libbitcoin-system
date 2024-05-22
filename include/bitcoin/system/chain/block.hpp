@@ -82,6 +82,7 @@ public:
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
+    size_t transactions() const NOEXCEPT;
     const chain::header& header() const NOEXCEPT;
     const chain::header::cptr header_ptr() const NOEXCEPT;
     const inputs_cptr inputs_ptr() const NOEXCEPT;

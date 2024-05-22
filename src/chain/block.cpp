@@ -199,6 +199,11 @@ bool block::is_valid() const NOEXCEPT
     return valid_;
 }
 
+size_t block::transactions() const NOEXCEPT
+{
+    return txs_->size();
+}
+
 const chain::header& block::header() const NOEXCEPT
 {
     return *header_;
@@ -339,7 +344,7 @@ size_t block::non_coinbase_inputs() const NOEXCEPT
     // Overflow returns max_size_t.
     const auto inputs = [](size_t total, const transaction::cptr& tx) NOEXCEPT
     {
-        return ceilinged_add(total, tx->inputs_ptr()->size());
+        return ceilinged_add(total, tx->inputs());
     };
 
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
