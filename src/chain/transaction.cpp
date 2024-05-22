@@ -410,7 +410,7 @@ uint64_t transaction::fee() const NOEXCEPT
 void transaction::set_hash(hash_digest&& hash) const NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    hash_ = std::make_unique<const hash_digest>(std::move(hash));
+    nominal_hash_ = std::make_unique<const hash_digest>(std::move(hash));
     BC_POP_WARNING()
 }
 
@@ -435,12 +435,12 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
         }
         else
         {
-            if (hash_) return *hash_;
+            if (nominal_hash_) return *nominal_hash_;
         }
     }
     else
     {
-        if (hash_) return *hash_;
+        if (nominal_hash_) return *nominal_hash_;
         if (witness_hash_) return *witness_hash_;
     }
 
