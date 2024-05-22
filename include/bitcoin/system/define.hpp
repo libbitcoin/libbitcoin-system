@@ -67,21 +67,7 @@ namespace bc = libbitcoin;
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
-/// Bitness.
-/// ---------------------------------------------------------------------------
-
-#if defined(HAVE_X32)
-    namespace libbitcoin { constexpr auto build_x32 = true; };
-#else
-    namespace libbitcoin { constexpr auto build_x32 = false; };
-#endif
-#if defined(HAVE_X64)
-    namespace libbitcoin { constexpr auto build_x64 = true; };
-#else
-    namespace libbitcoin { constexpr auto build_x64 = false; };
-#endif
-
-/// Attributes.
+/// Messages.
 /// ---------------------------------------------------------------------------
 
 /// Emit messages from .cpp during compilation.
@@ -102,6 +88,9 @@ namespace bc = libbitcoin;
 #else
     #define DEFINED(text)
 #endif
+
+/// Symbols.
+/// ---------------------------------------------------------------------------
 
 /// See gcc.gnu.org/wiki/Visibility
 /// Generic helper definitions for shared library support
@@ -135,6 +124,9 @@ namespace bc = libbitcoin;
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
+/// Inlines.
+/// ---------------------------------------------------------------------------
+
 /// A stronger compiler hint for inlining.
 /// May use prior to 'constexpr' or in place of 'inline'.
 /// Do not use in conjunction with with XCONSTEXPR macros, as this will result
@@ -148,7 +140,34 @@ namespace bc = libbitcoin;
     #define INLINE inline
 #endif
 
-/// Class helpers
+/// Major platform.
+/// ---------------------------------------------------------------------------
+
+#if defined(HAVE_X32)
+    namespace libbitcoin { constexpr auto build_x32 = true; };
+#else
+    namespace libbitcoin { constexpr auto build_x32 = false; };
+#endif
+
+#if defined(HAVE_X64)
+    namespace libbitcoin { constexpr auto build_x64 = true; };
+#else
+    namespace libbitcoin { constexpr auto build_x64 = false; };
+#endif
+
+#ifdef HAVE_XCPU
+    namespace libbitcoin { constexpr auto with_xcpu = true; };
+#else
+    namespace libbitcoin { constexpr auto with_xcpu = false; };
+#endif
+
+#ifdef HAVE_ARM
+    namespace libbitcoin { constexpr auto with_arm = true; };
+#else
+    namespace libbitcoin { constexpr auto with_arm = false; };
+#endif
+
+/// Class helpers.
 /// ---------------------------------------------------------------------------
 /// Virtual concrete classes should define public virtual destructor.
 /// Abstract base classes may define protected non-virtual destructor.
@@ -187,7 +206,7 @@ namespace bc = libbitcoin;
     DEFAULT_COPY_MOVE(name); \
     virtual ~name() = default
 
-/// Minimums
+/// Minimums.
 /// ---------------------------------------------------------------------------
 
 #if !defined(HAVE_CPP20)
