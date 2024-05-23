@@ -263,7 +263,7 @@ private:
 
     // Signature and identity hash cashing (witness hash if witnessed).
     mutable std::unique_ptr<hash_cache> cache_{};
-    mutable std::unique_ptr<const hash_digest> hash_{};
+    mutable std::unique_ptr<const hash_digest> nominal_hash_{};
     mutable std::unique_ptr<const hash_digest> witness_hash_{};
 };
 
