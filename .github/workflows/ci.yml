@@ -180,7 +180,7 @@ jobs:
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@v2.2.3
+        uses: coverallsapp/github-action@v2.3.0
         with:
           format: lcov
           files: "./coverage.info"
@@ -408,7 +408,7 @@ jobs:
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@v2.2.3
+        uses: coverallsapp/github-action@v2.3.0
         with:
           format: lcov
           files: "./coverage.info"
@@ -608,7 +608,7 @@ jobs:
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
-        uses: coverallsapp/github-action@v2.2.3
+        uses: coverallsapp/github-action@v2.3.0
         with:
           format: lcov
           files: "./coverage.info"
