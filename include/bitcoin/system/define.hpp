@@ -61,9 +61,8 @@ namespace bc = libbitcoin;
 #else
     #include <cassert>
     namespace libbitcoin { constexpr auto build_checked = true; };
-    #define BC_RUNTIME(evaluate) if (!std::is_constant_evaluated()) { evaluate; }
-    #define BC_ASSERT(expression) BC_RUNTIME(assert(expression))
-    #define BC_ASSERT_MSG(expression, text) BC_RUNTIME(assert((expression)&&(text)))
+    #define BC_ASSERT(expression) assert(expression)
+    #define BC_ASSERT_MSG(expression, text) assert((expression)&&(text))
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
