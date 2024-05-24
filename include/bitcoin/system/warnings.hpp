@@ -45,6 +45,7 @@
         #define TRUNCATED_CONSTANT 4310
         #define LOCAL_VARIABLE_NOT_INITIALIZED 4700
         #define NOT_INLINED 4714
+        #define DISCARDING_NON_DISCARDABLE 4834
 
         // Global (see below).
         #define LOCAL_HIDES_GLOBAL 4459
@@ -52,6 +53,7 @@
 
         // Lint.
         #define NO_DEREFERENCE_NULL_POINTER 6011
+        #define NO_IGNORE_RETURN_VALUE 6031
         #define NO_READ_OVERRUN 6385
         #define NO_WRITE_OVERRUN 6386
         #define NO_MALLOC_OR_FREE 26408
