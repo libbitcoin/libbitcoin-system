@@ -190,6 +190,7 @@
     <ClCompile Include="..\..\..\..\test\math\division.cpp" />
     <ClCompile Include="..\..\..\..\test\math\limits.cpp" />
     <ClCompile Include="..\..\..\..\test\math\logarithm.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\multiplication.cpp" />
     <ClCompile Include="..\..\..\..\test\math\overflow.cpp" />
     <ClCompile Include="..\..\..\..\test\math\power.cpp" />
     <ClCompile Include="..\..\..\..\test\math\rotate.cpp" />

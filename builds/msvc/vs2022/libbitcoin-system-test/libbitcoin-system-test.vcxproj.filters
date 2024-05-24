@@ -402,6 +402,9 @@
     <ClCompile Include="..\..\..\..\test\math\logarithm.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\math\multiplication.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\overflow.cpp">
       <Filter>src\math</Filter>
     </ClCompile>

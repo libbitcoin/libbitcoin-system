@@ -54,7 +54,7 @@ constexpr bool is_subtract_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// multiply/divide.
 /// ---------------------------------------------------------------------------
-/// Multiply is limited to integrals, as it requires domain bounds. 
+/// Multiply is limited to integrals, as it requires domain bounds.
 
 /// True if multiply would overflow Integer domain.
 template <typename Unsigned,
@@ -65,17 +65,6 @@ constexpr bool is_multiply_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr bool is_divide_overflow(Dividend dividend, Divisor divisor) NOEXCEPT;
-
-/// Safely determine whether product is a whole mutiple of value.
-template <typename Integer,
-    if_integer<Integer> = true>
-constexpr bool is_multiple(Integer product, Integer value) NOEXCEPT;
-
-/// Safely determine whether product is left * right.
-template <typename Integer,
-    if_integer<Integer> = true>
-constexpr bool is_product(Integer product, Integer left,
-    Integer right) NOEXCEPT;
 
 /// power/log.
 /// ---------------------------------------------------------------------------

@@ -90,20 +90,6 @@ constexpr bool is_divide_overflow(Dividend, Divisor divisor) NOEXCEPT
     return is_zero(divisor);
 }
 
-template <typename Integer, if_integer<Integer>>
-constexpr bool is_multiple(Integer product, Integer value) NOEXCEPT
-{
-    return is_nonzero(value) ? is_zero(product % value) : is_zero(product);
-}
-
-template <typename Integer, if_integer<Integer>>
-constexpr bool is_product(Integer product, Integer left,
-    Integer right) NOEXCEPT
-{
-    return (is_zero(left) || is_zero(right)) ? is_zero(product) :
-        is_zero(product % left) && ((product / left) == right);
-}
-
 // power/log
 // ----------------------------------------------------------------------------
 // TODO: type-constrain Exponent by Base/Value to preclude value overflow.
