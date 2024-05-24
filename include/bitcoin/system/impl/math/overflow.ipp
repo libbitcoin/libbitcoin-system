@@ -104,6 +104,13 @@ constexpr bool is_product(Integer product, Integer left,
         is_zero(product % left) && ((product / left) == right);
 }
 
+template <typename Unsigned, if_unsigned_integer<Unsigned>>
+constexpr Unsigned ceilinged_multiply(Unsigned left, Unsigned right) NOEXCEPT
+{
+    return is_multiply_overflow(left, right) ? maximum_<Unsigned> :
+        (left * right);
+}
+
 // power/log
 // ----------------------------------------------------------------------------
 // TODO: type-constrain Exponent by Base/Value to preclude value overflow.

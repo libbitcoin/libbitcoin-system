@@ -623,6 +623,33 @@ static_assert(!is_product(3_u8, 2_u8, max_uint8));
 static_assert(!is_product(to_half(max_uint8), max_uint8, 2_u8));
 static_assert(!is_product(to_half(max_uint8), to_half(subtract<uint8_t>(max_uint8, sub1(byte_bits))), 2_u8));
 
+// ceilinged_multiply
+// ----------------------------------------------------------------------------
+
+static_assert(ceilinged_multiply(0_u8, 0_u8) == 0_u8);
+static_assert(ceilinged_multiply(1_u8, 1_u8) == 1_u8);
+static_assert(ceilinged_multiply(2_u8, max_uint8) == max_uint8);
+static_assert(ceilinged_multiply(max_uint8, 2_u8) == max_uint8);
+static_assert(ceilinged_multiply(max_uint8, max_uint8) == max_uint8);
+
+static_assert(ceilinged_multiply(0_u16, 0_u16) == 0_u16);
+static_assert(ceilinged_multiply(1_u16, 1_u16) == 1_u16);
+static_assert(ceilinged_multiply(2_u16, max_uint16) == max_uint16);
+static_assert(ceilinged_multiply(max_uint16, 2_u16) == max_uint16);
+static_assert(ceilinged_multiply(max_uint16, max_uint16) == max_uint16);
+
+static_assert(ceilinged_multiply(0_u32, 0_u32) == 0_u32);
+static_assert(ceilinged_multiply(1_u32, 1_u32) == 1_u32);
+static_assert(ceilinged_multiply(2_u32, max_uint32) == max_uint32);
+static_assert(ceilinged_multiply(max_uint32, 2_u32) == max_uint32);
+static_assert(ceilinged_multiply(max_uint32, max_uint32) == max_uint32);
+
+static_assert(ceilinged_multiply(0_u64, 0_u64) == 0_u64);
+static_assert(ceilinged_multiply(1_u64, 1_u64) == 1_u64);
+static_assert(ceilinged_multiply(2_u64, max_uint64) == max_uint64);
+static_assert(ceilinged_multiply(max_uint64, 2_u64) == max_uint64);
+static_assert(ceilinged_multiply(max_uint64, max_uint64) == max_uint64);
+
 // safe_...
 // ----------------------------------------------------------------------------
 

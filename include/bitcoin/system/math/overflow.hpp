@@ -54,7 +54,7 @@ constexpr bool is_subtract_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// multiply/divide.
 /// ---------------------------------------------------------------------------
-/// Multiply is limited to integrals, as it requires domain bounds. 
+/// Multiply is limited to integrals, as it requires domain bounds.
 
 /// True if multiply would overflow Integer domain.
 template <typename Unsigned,
@@ -76,6 +76,11 @@ template <typename Integer,
     if_integer<Integer> = true>
 constexpr bool is_product(Integer product, Integer left,
     Integer right) NOEXCEPT;
+
+/// Integer maximum if would overflow, otherwise the product.
+template <typename Unsigned,
+    if_unsigned_integer<Unsigned> = true>
+constexpr Unsigned ceilinged_multiply(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// power/log.
 /// ---------------------------------------------------------------------------
