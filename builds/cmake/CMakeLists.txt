@@ -800,6 +800,7 @@ if (with-tests)
         "../../test/math/division.cpp"
         "../../test/math/limits.cpp"
         "../../test/math/logarithm.cpp"
+        "../../test/math/multiplication.cpp"
         "../../test/math/overflow.cpp"
         "../../test/math/power.cpp"
         "../../test/math/rotate.cpp"

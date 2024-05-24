@@ -66,22 +66,6 @@ template <typename Dividend, typename Divisor,
     if_integer<Dividend> = true, if_integer<Divisor> = true>
 constexpr bool is_divide_overflow(Dividend dividend, Divisor divisor) NOEXCEPT;
 
-/// Safely determine whether product is a whole mutiple of value.
-template <typename Integer,
-    if_integer<Integer> = true>
-constexpr bool is_multiple(Integer product, Integer value) NOEXCEPT;
-
-/// Safely determine whether product is left * right.
-template <typename Integer,
-    if_integer<Integer> = true>
-constexpr bool is_product(Integer product, Integer left,
-    Integer right) NOEXCEPT;
-
-/// Integer maximum if would overflow, otherwise the product.
-template <typename Unsigned,
-    if_unsigned_integer<Unsigned> = true>
-constexpr Unsigned ceilinged_multiply(Unsigned left, Unsigned right) NOEXCEPT;
-
 /// power/log.
 /// ---------------------------------------------------------------------------
 /// These are not limited to integral as they do not require domain bounds.

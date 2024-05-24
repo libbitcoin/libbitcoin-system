@@ -159,6 +159,7 @@
 #include <bitcoin/system/math/limits.hpp>
 #include <bitcoin/system/math/logarithm.hpp>
 #include <bitcoin/system/math/math.hpp>
+#include <bitcoin/system/math/multiplication.hpp>
 #include <bitcoin/system/math/overflow.hpp>
 #include <bitcoin/system/math/power.hpp>
 #include <bitcoin/system/math/rotate.hpp>

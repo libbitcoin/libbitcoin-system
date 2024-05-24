@@ -1031,6 +1031,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\math.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\math\multiplication.hpp">
+      <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\overflow.hpp">
       <Filter>include\bitcoin\system\math</Filter>
     </ClInclude>
@@ -1523,6 +1526,9 @@
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\logarithm.ipp">
+      <Filter>include\bitcoin\system\impl\math</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\math\multiplication.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\overflow.ipp">
