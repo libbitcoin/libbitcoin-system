@@ -183,7 +183,8 @@
     #define HAVE_CPP20
 #endif
 
-// Platforms support for C++20 features that we use varies.
+// Support for C++20 features we use varies.
+// en.cppreference.com/w/cpp/compiler_support
 // These are based on the compiler versions we test with, shown below.
 #if defined(HAVE_CPP20)
     // All versions.
