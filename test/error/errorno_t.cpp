@@ -542,6 +542,7 @@ BOOST_AUTO_TEST_CASE(errorno_t__code__not_enough_memory)
     BOOST_REQUIRE_EQUAL(ec.message(), "not_enough_memory");
 }
 
+// sourceware.org/bugzilla/show_bug.cgi?id=2363
 BOOST_AUTO_TEST_CASE(errorno_t__code__not_supported__true_exected_message)
 {
     constexpr auto value = error::not_supported;
@@ -578,22 +579,24 @@ BOOST_AUTO_TEST_CASE(errorno_t__code__operation_not_permitted__true_exected_mess
     BOOST_REQUIRE_EQUAL(ec.message(), "operation_not_permitted");
 }
 
+// sourceware.org/bugzilla/show_bug.cgi?id=2363
 BOOST_AUTO_TEST_CASE(errorno_t__code__operation_not_supported__true_exected_message)
 {
     constexpr auto value = error::operation_not_supported;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "operation_not_supported");
+    BOOST_REQUIRE_EQUAL(ec.message(), "not_supported");
 }
 
+// stackoverflow.com/questions/7003234/which-systems-define-eagain-and-ewouldblock-as-different-values
 BOOST_AUTO_TEST_CASE(errorno_t__code__operation_would_block__true_exected_message)
 {
     constexpr auto value = error::operation_would_block;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "operation_would_block");
+    BOOST_REQUIRE_EQUAL(ec.message(), "resource_unavailable_try_again");
 }
 
 BOOST_AUTO_TEST_CASE(errorno_t__code__owner_dead__true_exected_message)
@@ -650,6 +653,7 @@ BOOST_AUTO_TEST_CASE(errorno_t__code__resource_deadlock_would_occur__true_execte
     BOOST_REQUIRE_EQUAL(ec.message(), "resource_deadlock_would_occur");
 }
 
+// stackoverflow.com/questions/7003234/which-systems-define-eagain-and-ewouldblock-as-different-values
 BOOST_AUTO_TEST_CASE(errorno_t__code__resource_unavailable_try_again__true_exected_message)
 {
     constexpr auto value = error::resource_unavailable_try_again;

@@ -25,6 +25,8 @@ namespace libbitcoin {
 namespace system {
 namespace error {
 
+// on gcc/clang EWOULDBLOCK == EAGAIN so use same description.
+// on gcc/clang EOPNOTSUPP == ENOTSUP so use same description.
 DEFINE_ERROR_T_MESSAGE_MAP(errorno)
 {
     { no_error, "success" },
@@ -86,8 +88,8 @@ DEFINE_ERROR_T_MESSAGE_MAP(errorno)
     { operation_canceled, "operation_canceled" },
     { operation_in_progress, "operation_in_progress" },
     { operation_not_permitted, "operation_not_permitted" },
-    { operation_not_supported, "operation_not_supported" },
-    { operation_would_block, "operation_would_block" },
+    { operation_not_supported, "not_supported" },
+    { operation_would_block, "resource_unavailable_try_again" },
     { owner_dead, "owner_dead" },
     { permission_denied, "permission_denied" },
     { protocol_error, "protocol_error" },
