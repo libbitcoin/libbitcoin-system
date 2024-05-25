@@ -154,12 +154,11 @@ template <data_slab::size_type Size>
 constexpr std::array<data_slab::value_type, Size>
 data_slab::to_array() const NOEXCEPT
 {
-    std::array<data_slab::value_type, Size> out;
+    std::array<data_slab::value_type, Size> out{};
 
     // Array operator safely iterates and emits zeros past end.
     for (size_type index = 0; index < Size; ++index)
     {
-        // Array operator safely iterates and emits zeros past end.
         BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
         out[index] = (*this)[index];
         BC_POP_WARNING()
