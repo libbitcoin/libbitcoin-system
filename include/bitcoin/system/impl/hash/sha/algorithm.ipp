@@ -1278,11 +1278,15 @@ merkle_hash(digests_t& digests) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
+// Avoid tautological warning (std::is_constant_evaluated() always false).
+#if defined(HAVE_VECTOR_CONSTEXPR)
     if (std::is_constant_evaluated())
     {
         merkle_hash_(digests);
     }
-    else if constexpr (vectorization)
+    else
+#endif
+    if constexpr (vectorization)
     {
         merkle_hash_dispatch(digests);
     }
