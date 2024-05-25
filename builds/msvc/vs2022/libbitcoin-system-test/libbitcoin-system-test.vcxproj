@@ -138,6 +138,7 @@
     <ClCompile Include="..\..\..\..\test\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error.cpp" />
     <ClCompile Include="..\..\..\..\test\error\error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\error\errorno_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />

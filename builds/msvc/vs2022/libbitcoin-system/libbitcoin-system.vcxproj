@@ -147,6 +147,7 @@
     <ClCompile Include="..\..\..\..\src\endian\endian.cpp" />
     <ClCompile Include="..\..\..\..\src\error\block_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\error_t.cpp" />
+    <ClCompile Include="..\..\..\..\src\error\errorno_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
@@ -327,6 +328,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\block_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_t.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\errorno_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\macros.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\op_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp" />

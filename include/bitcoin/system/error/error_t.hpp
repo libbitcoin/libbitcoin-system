@@ -43,7 +43,7 @@ enum error_t
     not_implemented,
 
     // no serialization, used for test
-    error_last,
+    error_last
 };
 
 DECLARE_ERROR_T_CODE_CATEGORY(error);

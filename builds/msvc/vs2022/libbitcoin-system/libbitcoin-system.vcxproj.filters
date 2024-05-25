@@ -366,6 +366,9 @@
     <ClCompile Include="..\..\..\..\src\error\error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\error\errorno_t.cpp">
+      <Filter>src\error</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
@@ -858,6 +861,9 @@
       <Filter>include\bitcoin\system\error</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\error_t.hpp">
+      <Filter>include\bitcoin\system\error</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\error\errorno_t.hpp">
       <Filter>include\bitcoin\system\error</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\macros.hpp">

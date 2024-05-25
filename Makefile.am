@@ -82,6 +82,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/endian/endian.cpp \
     src/error/block_error_t.cpp \
     src/error/error_t.cpp \
+    src/error/errorno_t.cpp \
     src/error/op_error_t.cpp \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
@@ -273,6 +274,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/error/block_error_t.cpp \
     test/error/error.cpp \
     test/error/error_t.cpp \
+    test/error/errorno_t.cpp \
     test/error/op_error_t.cpp \
     test/error/script_error_t.cpp \
     test/error/transaction_error_t.cpp \
@@ -529,6 +531,7 @@ include_bitcoin_system_error_HEADERS = \
     include/bitcoin/system/error/block_error_t.hpp \
     include/bitcoin/system/error/error.hpp \
     include/bitcoin/system/error/error_t.hpp \
+    include/bitcoin/system/error/errorno_t.hpp \
     include/bitcoin/system/error/macros.hpp \
     include/bitcoin/system/error/op_error_t.hpp \
     include/bitcoin/system/error/script_error_t.hpp \
