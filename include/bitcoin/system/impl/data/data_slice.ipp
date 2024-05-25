@@ -160,11 +160,11 @@ template <data_slice::size_type Size>
 std::array<data_slice::value_type, Size>
 constexpr data_slice::to_array() const NOEXCEPT
 {
-    std::array<data_slice::value_type, Size> out;
+    std::array<data_slice::value_type, Size> out{};
 
+    // Array operator safely iterates and emits zeros past end.
     for (size_type index = 0; index < Size; ++index)
     {
-        // Array operator safely iterates and emits zeros past end.
         BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
         out[index] = (*this)[index];
         BC_POP_WARNING()
