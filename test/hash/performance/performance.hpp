@@ -126,7 +126,7 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
 // Each is hashed on the seed to preclude compiler/CPU optimization.
 
 template <size_t Size, bool Chunk = false>
-VCONSTEXPR auto get_data(size_t seed) noexcept
+auto get_data(size_t seed) noexcept
 {
     constexpr auto filler = [](auto seed, auto& data)
     {
