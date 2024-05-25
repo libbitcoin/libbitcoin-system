@@ -282,6 +282,9 @@
     <ClCompile Include="..\..\..\..\test\error\error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\error\errorno_t.cpp">
+      <Filter>src\error</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp">
       <Filter>src\error</Filter>
     </ClCompile>

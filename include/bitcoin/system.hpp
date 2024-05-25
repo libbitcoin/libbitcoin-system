@@ -107,6 +107,7 @@
 #include <bitcoin/system/error/block_error_t.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/error/error_t.hpp>
+#include <bitcoin/system/error/errorno_t.hpp>
 #include <bitcoin/system/error/macros.hpp>
 #include <bitcoin/system/error/op_error_t.hpp>
 #include <bitcoin/system/error/script_error_t.hpp>
