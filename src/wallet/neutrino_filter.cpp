@@ -64,7 +64,7 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
             const auto& script = output->script();
 
             // bip138: any "nil" items MUST NOT be included.
-            // bip138:exclude all outputs that start with OP_RETURN.
+            // bip138: exclude all outputs that start with OP_RETURN.
             if (!script.ops().empty() &&
                 !chain::script::is_pay_op_return_pattern(script.ops()))
                 scripts.push_back(script.to_data(false));
