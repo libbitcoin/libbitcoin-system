@@ -261,8 +261,9 @@ private:
 
     void initialize_hash_cache() const NOEXCEPT;
 
-    // Signature and identity hash cashing (witness hash if witnessed).
-    mutable std::unique_ptr<hash_cache> cache_{};
+    // TODO: use std::optional to avoid these pointer allocations (0.16%).
+    // Signature and identity hash caching (witness hash if witnessed).
+    mutable std::unique_ptr<const hash_cache> cache_{};
     mutable std::unique_ptr<const hash_digest> nominal_hash_{};
     mutable std::unique_ptr<const hash_digest> witness_hash_{};
 };

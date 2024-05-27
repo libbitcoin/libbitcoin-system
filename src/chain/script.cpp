@@ -200,6 +200,7 @@ size_t script::op_count(reader& source) NOEXCEPT
     const auto start = source.get_read_position();
     auto count = zero;
 
+    // TODO: this is expensive (0.83%).
     while (operation::count_op(source))
         ++count;
 
@@ -358,6 +359,7 @@ hash_digest script::hash() const NOEXCEPT
     return sha256;
 }
 
+// TODO: this is expensive.
 size_t script::serialized_size(bool prefix) const NOEXCEPT
 {
     const auto op_size = [](size_t total, const operation& op) NOEXCEPT

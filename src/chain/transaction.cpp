@@ -338,6 +338,7 @@ void transaction::to_data(writer& sink, bool witness) const NOEXCEPT
     sink.write_4_bytes_little_endian(locktime_);
 }
 
+// TODO: this is expensive.
 size_t transaction::serialized_size(bool witness) const NOEXCEPT
 {
     witness &= segregated_;
@@ -1281,14 +1282,14 @@ code transaction::check(const context& ctx) const NOEXCEPT
     return error::transaction_success;
 }
 
-// Do NOT invoke on coinbase.
+// Do not need to invoke on coinbase.
 // This assumes that prevout caching is completed on all inputs.
 code transaction::accept(const context&) const NOEXCEPT
 {
-    BC_ASSERT(!is_coinbase());
+    ////BC_ASSERT(!is_coinbase());
 
-    ////if (is_coinbase())
-    ////    return error::transaction_success;
+    if (is_coinbase())
+        return error::transaction_success;
     if (is_missing_prevouts())
         return error::missing_previous_output;
     if (is_overspent())
@@ -1301,16 +1302,16 @@ code transaction::accept(const context&) const NOEXCEPT
 // height
 // median_time_past
 
-// Do NOT invoke on coinbase.
+// Do not need to invoke on coinbase.
 // Node performs these checks through database query.
 // This assumes that prevout and metadata caching are completed on all inputs.
 code transaction::confirm(const context& ctx) const NOEXCEPT
 {
-    BC_ASSERT(!is_coinbase());
+    ////BC_ASSERT(!is_coinbase());
     const auto bip68 = ctx.is_enabled(bip68_rule);
 
-    ////if (is_coinbase())
-    ////    return error::transaction_success;
+    if (is_coinbase())
+        return error::transaction_success;
     if (bip68 && is_locked(ctx.height, ctx.median_time_past))
         return error::relative_time_locked;
     if (is_immature(ctx.height))
@@ -1328,13 +1329,13 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
 
 // forks
 
-// Do NOT invoke on coinbase.
+// Do not need to invoke on coinbase.
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
-    BC_ASSERT(!is_coinbase());
+    ////BC_ASSERT(!is_coinbase());
 
-    ////if (is_coinbase())
-    ////    return error::transaction_success;
+    if (is_coinbase())
+        return error::transaction_success;
 
     code ec;
     using namespace machine;

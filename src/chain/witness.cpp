@@ -293,6 +293,7 @@ size_t witness::serialized_size() const NOEXCEPT
     return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
 }
 
+// TODO: this is expensive.
 size_t witness::serialized_size(bool prefix) const NOEXCEPT
 {
     // Witness prefix is an element count, not a byte length (unlike script).

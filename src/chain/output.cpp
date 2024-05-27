@@ -157,6 +157,7 @@ void output::to_data(writer& sink) const NOEXCEPT
     script_->to_data(sink, true);
 }
 
+// TODO: this is expensive.
 size_t output::serialized_size() const NOEXCEPT
 {
     return sizeof(value_) + script_->serialized_size(true);

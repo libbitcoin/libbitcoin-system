@@ -148,7 +148,8 @@ private:
     uint32_t nonce_;
     bool valid_;
 
-    // Identity hash cashing.
+    // Identity hash caching.
+    // TODO: use std::optional to avoid this pointer allocation.
     mutable std::shared_ptr<const hash_digest> hash_{};
 };
 
