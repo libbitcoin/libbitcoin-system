@@ -263,6 +263,7 @@ hash_digest block::hash() const NOEXCEPT
     return header_->hash();
 }
 
+// TODO: this is expensive.
 size_t block::serialized_size(bool witness) const NOEXCEPT
 {
     // Overflow returns max_size_t.
@@ -350,6 +351,7 @@ size_t block::non_coinbase_inputs() const NOEXCEPT
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
 }
 
+// TODO: this is expensive (1.85%).
 // This also precludes the block merkle calculation DoS exploit.
 // bitcointalk.org/?topic=102395
 bool block::is_internal_double_spend() const NOEXCEPT

@@ -220,6 +220,7 @@ void input::to_data(writer& sink) const NOEXCEPT
     sink.write_4_bytes_little_endian(sequence_);
 }
 
+// TODO: this is expensive.
 size_t input::serialized_size(bool witness) const NOEXCEPT
 {
     // input.serialized_size(witness) provides sizing for witness, however

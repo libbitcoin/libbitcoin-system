@@ -459,6 +459,7 @@ const chunk_cptr& operation::data_ptr() const NOEXCEPT
     return data_;
 }
 
+// TODO: this is expensive.
 size_t operation::serialized_size() const NOEXCEPT
 {
     static constexpr auto op_size = sizeof(uint8_t);

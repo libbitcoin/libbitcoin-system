@@ -338,6 +338,7 @@ void transaction::to_data(writer& sink, bool witness) const NOEXCEPT
     sink.write_4_bytes_little_endian(locktime_);
 }
 
+// TODO: this is expensive.
 size_t transaction::serialized_size(bool witness) const NOEXCEPT
 {
     witness &= segregated_;
