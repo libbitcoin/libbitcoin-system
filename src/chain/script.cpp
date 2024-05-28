@@ -49,8 +49,7 @@ using namespace bc::system::machine;
 
 // static (should be inline or constexpr).
 // TODO: Avoiding circular include on machine.
-bool script::is_coinbase_pattern(const operations& ops,
-    size_t height) NOEXCEPT
+bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
 {
     // TODO: number::chunk::from_int constexpr?
     return !ops.empty()
@@ -62,7 +61,7 @@ bool script::is_coinbase_pattern(const operations& ops,
 // ----------------------------------------------------------------------------
 
 script::script() NOEXCEPT
-  : script(operations{}, false, false)
+  : script(operations{}, false, false, zero)
 {
 }
 
@@ -71,34 +70,34 @@ script::~script() NOEXCEPT
 }
 
 script::script(script&& other) NOEXCEPT
-  : script(std::move(other.ops_), other.valid_, other.prefail_)
+  : script(std::move(other.ops_), other.valid_, other.prefail_, other.size_)
 {
 }
 
 script::script(const script& other) NOEXCEPT
-  : script(other.ops_, other.valid_, other.prefail_)
+  : script(other.ops_, other.valid_, other.prefail_, other.size_)
 {
 }
 
 // Prefail is false.
 script::script(operations&& ops) NOEXCEPT
-  : script(std::move(ops), true, false)
+  : script(std::move(ops), true, false, serialized_size(ops))
 {
 }
 
 // Prefail is false.
 script::script(const operations& ops) NOEXCEPT
-  : script(ops, true, false)
+  : script(ops, true, false, serialized_size(ops))
 {
 }
 
 script::script(operations&& ops, bool prefail) NOEXCEPT
-    : script(std::move(ops), true, prefail)
+  : script(std::move(ops), true, prefail, serialized_size(ops))
 {
 }
 
 script::script(const operations& ops, bool prefail) NOEXCEPT
-    : script(ops, true, prefail)
+  : script(ops, true, prefail, serialized_size(ops))
 {
 }
 
@@ -145,14 +144,17 @@ script::script(const std::string& mnemonic) NOEXCEPT
 }
 
 // protected
-script::script(operations&& ops, bool valid, bool prefail) NOEXCEPT
-  : ops_(std::move(ops)), valid_(valid), prefail_(prefail), offset(ops_.begin())
+script::script(operations&& ops, bool valid, bool prefail, size_t size) NOEXCEPT
+  : ops_(std::move(ops)), valid_(valid), prefail_(prefail), size_(size),
+    offset(ops_.begin())
 {
 }
 
 // protected
-script::script(const operations& ops, bool valid, bool prefail) NOEXCEPT
-  : ops_(ops), valid_(valid), prefail_(prefail), offset(ops_.begin())
+script::script(const operations& ops, bool valid, bool prefail,
+    size_t size) NOEXCEPT
+  : ops_(ops), valid_(valid), prefail_(prefail), size_(size),
+    offset(ops_.begin())
 {
 }
 
@@ -164,6 +166,7 @@ script& script::operator=(script&& other) NOEXCEPT
     ops_ = std::move(other.ops_);
     valid_ = other.valid_;
     prefail_ = other.prefail_;
+    size_ = other.size_;
     offset = ops_.begin();
     return *this;
 }
@@ -173,13 +176,15 @@ script& script::operator=(const script& other) NOEXCEPT
     ops_ = other.ops_;
     valid_ = other.valid_;
     prefail_ = other.prefail_;
+    size_ = other.size_;
     offset = ops_.begin();
     return *this;
 }
 
 bool script::operator==(const script& other) const NOEXCEPT
 {
-    return (ops_ == other.ops_);
+    return size_ == other.size_
+        && ops_ == other.ops_;
 }
 
 bool script::operator!=(const script& other) const NOEXCEPT
@@ -211,21 +216,18 @@ size_t script::op_count(reader& source) NOEXCEPT
 // static/private
 script script::from_data(reader& source, bool prefix) NOEXCEPT
 {
-    auto size = zero;
-    auto start = zero;
+    auto expected = zero;
     auto prefail = false;
 
     if (prefix)
     {
-        size = source.read_size();
-        start = source.get_read_position();
-
-        // Limit the number of bytes that ops may consume.
-        source.set_limit(size);
+        expected = source.read_size();
+        source.set_limit(expected);
     }
 
     operations ops;
     ops.reserve(op_count(source));
+    const auto start = source.get_read_position();
 
     while (!source.is_exhausted())
     {
@@ -233,17 +235,16 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
         prefail |= ops.back().is_invalid();
     }
 
+    const auto size = source.get_read_position() - start;
+
     if (prefix)
     {
-        // Remove the stream limit.
         source.set_limit();
-
-        // Stream was exhausted prior to reaching prefix size.
-        if (source.get_read_position() - start != size)
+        if (size != expected)
             source.invalidate();
     }
 
-    return { std::move(ops), source, prefail };
+    return { std::move(ops), source, prefail, size };
 }
 
 // static/private
@@ -359,17 +360,19 @@ hash_digest script::hash() const NOEXCEPT
     return sha256;
 }
 
-// TODO: this is expensive.
+// static
+size_t script::serialized_size(const operations& ops) NOEXCEPT
+{
+    return std::accumulate(ops.begin(), ops.end(), zero, op_size);
+}
+
 size_t script::serialized_size(bool prefix) const NOEXCEPT
 {
-    const auto op_size = [](size_t total, const operation& op) NOEXCEPT
-    {
-        return total + op.serialized_size();
-    };
+    size_t size = size_;
 
-    // Data serialization is affected by offset metadata.
-    ////auto size = std::accumulate(ops_.begin(), ops_.end(), zero, op_size);
-    auto size = std::accumulate(offset, ops_.end(), zero, op_size);
+    // Recompute it serialization has been affected by offset metadata.
+    if (offset != ops_.begin())
+        size = std::accumulate(offset, ops_.end(), zero, op_size);
 
     if (prefix)
         size += variable_size(size);

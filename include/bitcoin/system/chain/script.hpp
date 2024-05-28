@@ -506,14 +506,21 @@ public:
     bool is_unspendable() const NOEXCEPT;
 
 protected:
-    script(operations&& ops, bool valid, bool fails) NOEXCEPT;
-    script(const operations& ops, bool valid, bool fails) NOEXCEPT;
+    script(operations&& ops, bool valid, bool prefail, size_t size) NOEXCEPT;
+    script(const operations& ops, bool valid, bool prefail,
+        size_t size) NOEXCEPT;
 
 private:
+    static size_t serialized_size(const operations& ops) NOEXCEPT;
+
     // TODO: move to config serialization wrapper.
     static script from_string(const std::string& mnemonic) NOEXCEPT;
     static script from_data(reader& source, bool prefix) NOEXCEPT;
     static size_t op_count(reader& source) NOEXCEPT;
+    static size_t op_size(size_t total, const operation& op) NOEXCEPT
+    {
+        return total + op.serialized_size();
+    };
 
     // Script should be stored as shared.
     operations ops_;
@@ -522,6 +529,7 @@ private:
     bool valid_;
     bool prefail_;
     ////bool roller_{ false };
+    size_t size_;
 
 public:
     using iterator = operations::const_iterator;

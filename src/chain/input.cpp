@@ -227,7 +227,7 @@ size_t input::serialized_size(bool witness) const NOEXCEPT
     // witnesses are serialized by the transaction. This is an ugly hack as a
     // consequence of bip144 not serializing witnesses as part of inputs, which
     // is logically the proper association.
-    return point_->serialized_size()
+    return point::serialized_size()
         + script_->serialized_size(true)
         + (witness ? witness_->serialized_size(true) : zero)
         + sizeof(sequence_);

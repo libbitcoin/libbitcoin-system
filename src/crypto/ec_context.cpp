@@ -48,7 +48,7 @@ ec_context_sign::ec_context_sign() NOEXCEPT
 
 const secp256k1_context* ec_context_sign::context() NOEXCEPT
 {
-    static ec_context_sign instance;
+    static ec_context_sign instance{};
     static auto context = instance.context_;
     return context;
 }
@@ -61,7 +61,7 @@ ec_context_verify::ec_context_verify() NOEXCEPT
 
 const secp256k1_context* ec_context_verify::context() NOEXCEPT
 {
-    static ec_context_verify instance;
+    static ec_context_verify instance{};
     static auto context = instance.context_;
     return context;
 }
