@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace system {
 
-// Alowed here for low level performance benefit.
+// Allowed here for low level performance benefit.
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 
 template <typename Character>
