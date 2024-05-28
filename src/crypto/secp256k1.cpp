@@ -165,12 +165,12 @@ bool verify_signature(const secp256k1_context* context,
     const auto parsed = pointer_cast<const secp256k1_ecdsa_signature>(
         signature.data());
 
-    secp256k1_ecdsa_signature normal;
-    secp256k1_ecdsa_signature_normalize(context, &normal, parsed);
-
     // BIP62 required low-s signatures, but that is not active.
     // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
     // bitcoin does not have such a limitation, so we always normalize.
+    secp256k1_ecdsa_signature normal;
+    secp256k1_ecdsa_signature_normalize(context, &normal, parsed);
+
     return secp256k1_ecdsa_verify(context, &normal, hash.data(), &point) ==
         ec_success;
 }
@@ -195,7 +195,7 @@ bool ec_add(ec_secret& left, const ec_secret& right) NOEXCEPT
 {
     const auto context = ec_context_verify::context();
     return secp256k1_ec_seckey_tweak_add(context, left.data(),
-        right.data()) == 1;
+        right.data()) == ec_success;
 }
 
 bool ec_add(ec_compressed& left, const ec_compressed& right) NOEXCEPT
