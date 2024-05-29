@@ -27,7 +27,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <unordered_map>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
@@ -37,6 +36,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -317,19 +317,24 @@ bool block::is_extra_coinbases() const NOEXCEPT
 //*****************************************************************************
 bool block::is_forward_reference() const NOEXCEPT
 {
+    // unordered_set manages the maximum load factor (number of elements per
+    // bucket). The container automatically increases the number of buckets
+    // if the load factor exceeds this threshold. This defaults to 1.0.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    std::unordered_map<hash_digest, bool> hashes(txs_->size());
+    std::unordered_set<hash_digest, unique_hash_t<>> hashes(txs_->size());
     BC_POP_WARNING()
 
     const auto is_forward = [&hashes](const input::cptr& input) NOEXCEPT
     {
-        return !is_zero(hashes.count(input->point().hash()));
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+        return hashes.find(input->point().hash()) != hashes.end();
+        BC_POP_WARNING()
     };
 
     for (const auto& tx: views_reverse(*txs_))
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        hashes.emplace(tx->hash(false), false);
+        hashes.emplace(tx->hash(false));
         BC_POP_WARNING()
 
         const auto& inputs = *tx->inputs_ptr();
@@ -352,7 +357,6 @@ size_t block::non_coinbase_inputs() const NOEXCEPT
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
 }
 
-// TODO: this is expensive (1.85%).
 // This also precludes the block merkle calculation DoS exploit.
 // bitcointalk.org/?topic=102395
 bool block::is_internal_double_spend() const NOEXCEPT
@@ -360,17 +364,19 @@ bool block::is_internal_double_spend() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    // A set is used to collapse duplicate points.
-    std::unordered_set<point> outs{};
+    const auto inputs = non_coinbase_inputs();
+    std::vector<point> outs{};
+    outs.reserve(inputs);
 
-    // Move the points of all non-coinbase transactions into one set.
+    // Copy all block.txs.points into the vector.
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
         auto out = (*tx)->points();
         std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
     }
 
-    return outs.size() != non_coinbase_inputs();
+    distinct(outs);
+    return outs.size() != inputs;
 }
 
 // private
@@ -418,7 +424,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
         return false;
 
     // A set is used to collapse duplicates.
-    std::unordered_set<hash_digest> hashes;
+    std::unordered_set<hash_digest, unique_hash_t<>> hashes;
 
     // Just the coinbase tx hash, skip its null input hashes.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
