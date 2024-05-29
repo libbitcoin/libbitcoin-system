@@ -19,6 +19,7 @@
 #include <bitcoin/system/chain/block.hpp>
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -331,6 +332,7 @@ bool block::is_forward_reference() const NOEXCEPT
         BC_POP_WARNING()
     };
 
+    // TODO: change to std::ref(tx.hash).
     for (const auto& tx: views_reverse(*txs_))
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -364,19 +366,29 @@ bool block::is_internal_double_spend() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto inputs = non_coinbase_inputs();
-    std::vector<point> outs{};
-    outs.reserve(inputs);
+    const auto input_count = non_coinbase_inputs();
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    unordered_set_of_constant_referenced_points points(input_count);
+    BC_POP_WARNING()
 
-    // Copy all block.txs.points into the vector.
-    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+    const auto double_in = [&points](const input::cptr& in) NOEXCEPT
     {
-        auto out = (*tx)->points();
-        std::move(out.begin(), out.end(), std::inserter(outs, outs.end()));
-    }
+        const auto& point = in->point();
+        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+        const auto found = (points.find(std::cref(point)) != points.end());
+        points.emplace(in->point());
+        BC_POP_WARNING()
 
-    distinct(outs);
-    return outs.size() != inputs;
+        return found;
+    };
+
+    const auto double_tx = [&double_in](const transaction::cptr& tx) NOEXCEPT
+    {
+        const auto& ins = *tx->inputs_ptr();
+        return std::any_of(ins.begin(), ins.end(), double_in);
+    };
+
+    return std::any_of(std::next(txs_->begin()), txs_->end(), double_tx);
 }
 
 // private

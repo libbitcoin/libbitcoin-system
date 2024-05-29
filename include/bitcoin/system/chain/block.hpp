@@ -19,7 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
+#include <functional>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
@@ -165,6 +167,10 @@ protected:
     bool is_unspent_coinbase_collision() const NOEXCEPT;
 
 private:
+    using unordered_set_of_constant_referenced_points =
+        std::unordered_set<std::reference_wrapper<const point>,
+        std::hash<std::reference_wrapper<const point>>>;
+
     static block from_data(reader& source, bool witness) NOEXCEPT;
 
     // context free
