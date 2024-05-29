@@ -138,9 +138,10 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
     const auto read_transactions = [witness](reader& source) NOEXCEPT
     {
         auto txs = to_shared<transaction_cptrs>();
-        txs->reserve(source.read_size(max_block_size));
+        const auto capacity = source.read_size(max_block_size);
+        txs->reserve(capacity);
 
-        for (size_t tx = 0; tx < txs->capacity(); ++tx)
+        for (size_t tx = 0; tx < capacity; ++tx)
         {
             BC_PUSH_WARNING(NO_NEW_OR_DELETE)
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)

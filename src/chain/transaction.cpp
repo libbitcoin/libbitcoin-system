@@ -215,13 +215,10 @@ std::shared_ptr<const std::vector<std::shared_ptr<const Put>>>
 read_puts(Source& source) NOEXCEPT
 {
     auto puts = to_shared<std::vector<std::shared_ptr<const Put>>>();
+    const auto capacity = source.read_size(max_block_size);
 
-    // Subsequent emplace is non-allocating, but still THROWS.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    puts->reserve(source.read_size(max_block_size));
-    BC_POP_WARNING()
-
-    for (auto put = zero; put < puts->capacity(); ++put)
+    puts->reserve(capacity);
+    for (auto put = zero; put < capacity; ++put)
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
