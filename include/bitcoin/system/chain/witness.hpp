@@ -118,18 +118,33 @@ public:
     bool extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
         const script& program_script) const NOEXCEPT;
 
+protected:
+    witness(chunk_cptrs&& stack, bool valid) NOEXCEPT;
+    witness(const chunk_cptrs& stack, bool valid) NOEXCEPT;
+    witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT;
+
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
     static witness from_data(reader& source, bool prefix) NOEXCEPT;
-    size_t serialized_size() const NOEXCEPT;
-
-    witness(chunk_cptrs&& stack, bool valid) NOEXCEPT;
-    witness(const chunk_cptrs& stack, bool valid) NOEXCEPT;
+    
+    BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+    BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
+    static size_t serialized_size(const chunk_cptrs& stack) NOEXCEPT;
+    static inline size_t element_size(size_t total,
+        const chunk_cptr& element) NOEXCEPT
+    {
+        // Each witness is prefixed with number of elements (bip144).
+        const auto size = element->size();
+        return total + variable_size(size) + size;
+    };
+    BC_POP_WARNING()
+    BC_POP_WARNING()
 
     // Witness should be stored as shared.
     chunk_cptrs stack_;
     bool valid_;
+    size_t size_;
 };
 
 typedef std::vector<witness> witnesses;
