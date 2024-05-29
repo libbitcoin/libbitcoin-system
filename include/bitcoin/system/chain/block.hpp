@@ -205,7 +205,7 @@ struct hash<bc::system::chain::block>
 {
     size_t operator()(const bc::system::chain::block& value) const NOEXCEPT
     {
-        return std::hash<bc::system::hash_digest>{}(value.hash());
+        return bc::system::unique_hash_t<>{}(value.hash());
     }
 };
 } // namespace std
