@@ -434,8 +434,8 @@ protected:
         bool underflow) NOEXCEPT;
 
 private:
-    // So script may call count_op.
-    friend class script;
+    ////// So script may call count_op.
+    ////friend class script;
 
     static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,
