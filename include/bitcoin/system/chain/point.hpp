@@ -124,8 +124,8 @@ struct hash<bc::system::chain::point>
 {
     size_t operator()(const bc::system::chain::point& value) const NOEXCEPT
     {
-        return bc::system::hash_combine(
-            std::hash<bc::system::hash_digest>{}(value.hash()), value.index());
+        return bc::system::hash_combine(value.index(),
+            bc::system::unique_hash_t<>{}(value.hash()));
     }
 };
 } // namespace std

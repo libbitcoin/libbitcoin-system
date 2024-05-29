@@ -288,7 +288,7 @@ struct hash<bc::system::chain::transaction>
     size_t operator()(const bc::system::chain::transaction& value) const NOEXCEPT
     {
         // Witness coinbases will collide (null_hash).
-        return std::hash<bc::system::hash_digest>{}(value.hash(true));
+        return bc::system::unique_hash_t<>{}(value.hash(true));
     }
 };
 } // namespace std

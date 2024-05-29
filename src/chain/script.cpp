@@ -214,22 +214,21 @@ bool script::operator!=(const script& other) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // static/private
-size_t script::op_count(reader& source) NOEXCEPT
-{
-    // Stream errors reset by set_position so trap here.
-    if (!source)
-        return zero;
-
-    const auto start = source.get_read_position();
-    auto count = zero;
-
-    // TODO: this is expensive (0.83%).
-    while (operation::count_op(source))
-        ++count;
-
-    source.set_position(start);
-    return count;
-}
+////size_t script::op_count(reader& source) NOEXCEPT
+////{
+////    // Stream errors reset by set_position so trap here.
+////    if (!source)
+////        return zero;
+////
+////    const auto start = source.get_read_position();
+////    size_t count{};
+////
+////    while (operation::count_op(source))
+////        ++count;
+////
+////    source.set_position(start);
+////    return count;
+////}
 
 // static/private
 script script::from_data(reader& source, bool prefix) NOEXCEPT
@@ -243,8 +242,9 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit(expected);
     }
 
-    operations ops;
-    ops.reserve(op_count(source));
+    // op_count is more expensive than the reallocations.
+    operations ops{};
+    ////ops.reserve(op_count(source));
     const auto start = source.get_read_position();
 
     while (!source.is_exhausted())

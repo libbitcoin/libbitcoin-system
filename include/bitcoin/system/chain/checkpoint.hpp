@@ -126,8 +126,8 @@ struct hash<bc::system::chain::checkpoint>
 {
     size_t operator()(const bc::system::chain::checkpoint& value) const NOEXCEPT
     {
-        return bc::system::hash_combine(
-            std::hash<bc::system::hash_digest>{}(value.hash()), value.height());
+        return bc::system::hash_combine(value.height(),
+            bc::system::unique_hash_t<>{}(value.hash()));
     }
 };
 } // namespace std
