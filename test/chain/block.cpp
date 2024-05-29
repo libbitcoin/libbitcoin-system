@@ -405,6 +405,7 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
     {
         {},
         {
+            {},
             from,
             to
         }

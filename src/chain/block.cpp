@@ -318,33 +318,37 @@ bool block::is_extra_coinbases() const NOEXCEPT
 //*****************************************************************************
 bool block::is_forward_reference() const NOEXCEPT
 {
-    // unordered_set manages the maximum load factor (number of elements per
-    // bucket). The container automatically increases the number of buckets
-    // if the load factor exceeds this threshold. This defaults to 1.0.
+    if (txs_->empty())
+        return false;
+
+    const auto non_coinbase_txs = sub1(txs_->size());
+
+    // TODO: change to reference_wrapper(tx.hash) - first make referencable.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    std::unordered_set<hash_digest, unique_hash_t<>> hashes(txs_->size());
+    std::unordered_set<hash_digest, unique_hash_t<>> hashes(non_coinbase_txs);
     BC_POP_WARNING()
 
-    const auto is_forward = [&hashes](const input::cptr& input) NOEXCEPT
+    const auto forward_in = [&hashes](const input::cptr& input) NOEXCEPT
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         return hashes.find(input->point().hash()) != hashes.end();
         BC_POP_WARNING()
     };
 
-    // TODO: change to std::ref(tx.hash).
-    for (const auto& tx: views_reverse(*txs_))
+    const auto forward_tx = [&forward_in, &hashes](
+        const transaction::cptr& tx) NOEXCEPT
     {
+        const auto& ins = *tx->inputs_ptr();
+        const auto found = std::any_of(ins.begin(), ins.end(), forward_in);
+
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         hashes.emplace(tx->hash(false));
         BC_POP_WARNING()
 
-        const auto& inputs = *tx->inputs_ptr();
-        if (std::any_of(inputs.begin(), inputs.end(), is_forward))
-            return true;
-    }
+        return found;
+    };
 
-    return false;
+    return std::any_of(txs_->rbegin(), std::prev(txs_->rend()), forward_tx);
 }
 
 // private
@@ -366,20 +370,17 @@ bool block::is_internal_double_spend() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto input_count = non_coinbase_inputs();
+    const auto non_coinbase_ins = non_coinbase_inputs();
+
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    unordered_set_of_constant_referenced_points points(input_count);
+    unordered_set_of_constant_referenced_points points(non_coinbase_ins);
     BC_POP_WARNING()
 
     const auto double_in = [&points](const input::cptr& in) NOEXCEPT
     {
-        const auto& point = in->point();
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        const auto found = (points.find(std::cref(point)) != points.end());
-        points.emplace(in->point());
+        return !points.emplace(in->point()).second;
         BC_POP_WARNING()
-
-        return found;
     };
 
     const auto double_tx = [&double_in](const transaction::cptr& tx) NOEXCEPT
