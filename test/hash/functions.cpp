@@ -385,7 +385,22 @@ BOOST_AUTO_TEST_CASE(functions__scrypt__empty__expected)
 // non-cryptographic hash functions
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(functions__djb2__alphanumeric__expected)
+BOOST_AUTO_TEST_CASE(functions__unique_hash__some_hash__expected)
+{
+    constexpr auto key = base16_hash("4242424242000000006636626660989953");
+    const auto hash = unique_hash(key);
+
+    if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    {
+        BOOST_REQUIRE_EQUAL(hash, 0x60989953_u32);
+    }
+    else
+    {
+        BOOST_REQUIRE_EQUAL(hash, 0x6636626660989953_u64);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(functions__djb2_hash__alphanumeric__expected)
 {
     const std::string alpha{ "01234567890abcdefghijklmnopqrstuvwxyz" };
     const auto hash = djb2_hash(alpha);

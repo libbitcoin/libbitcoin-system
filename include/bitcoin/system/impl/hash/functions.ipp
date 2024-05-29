@@ -199,6 +199,28 @@ INLINE hash_digest scrypt_hash(const data_slice& data) NOEXCEPT
 // Hash table keying.
 // ----------------------------------------------------------------------------
 
+/// For explicit use with std library containers.
+template <size_t Size>
+struct unique_hash_t
+{
+    size_t operator()(const data_array<Size>& key) const NOEXCEPT
+    {
+        return unique_hash(key);
+    }
+};
+
+template <size_t Size>
+INLINE constexpr size_t unique_hash(const data_array<Size>& key) NOEXCEPT
+{
+    constexpr auto size = std::min(Size, sizeof(size_t));
+
+    // This optimization breaks data portability (by endianness).
+    // Could be modified to use an endian conversion vs. simple copy.
+    size_t value{};
+    std::copy_n(key.begin(), size, system::byte_cast(value).begin());
+    return value;
+}
+
 // Value will vary with sizeof(size_t).
 // A DJB variation uses [^ byte] vs. [+ byte].
 // Objectives: deterministic, uniform distribution, efficient computation.
@@ -208,7 +230,7 @@ INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
     auto hash = 5381_size;
 
     // Efficient sum of ((hash * 33) + byte) for all bytes.
-    for (const auto byte : data)
+    for (const auto byte: data)
         hash = (shift_left(hash, 5_size) + hash) + byte;
 
     return hash;

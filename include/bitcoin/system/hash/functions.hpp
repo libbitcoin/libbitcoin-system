@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
 #define LIBBITCOIN_SYSTEM_HASH_FUNCTIONS_HPP
 
+#include <algorithm>
 #include <memory>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -130,6 +131,15 @@ INLINE hash_digest scrypt_hash(const data_slice& data) NOEXCEPT;
 
 /// Hash table keying.
 /// ---------------------------------------------------------------------------
+
+/// For explicit use with std library containers.
+template <size_t Size = hash_size>
+struct unique_hash_t;
+
+/// This is used in critical database indexation, modify with great care.
+/// Assumes high degree of uniqueness in low order sizeof(size_t) bytes of key.
+template <size_t Size>
+INLINE constexpr size_t unique_hash(const data_array<Size>& key) NOEXCEPT;
 
 /// DJB2 hash key algorithm [Daniel J. Bernstein] [hash tables].
 INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT;
