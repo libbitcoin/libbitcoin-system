@@ -81,8 +81,9 @@ script::script(const script& other) NOEXCEPT
 
 // Prefail is false.
 script::script(operations&& ops) NOEXCEPT
-  : script(std::move(ops), true, false, serialized_size(ops))
+  : script(std::move(ops), true, false)
 {
+    // ops moved so cannot pass serialized_size(ops), order not guaranteed.
 }
 
 // Prefail is false.
@@ -92,8 +93,9 @@ script::script(const operations& ops) NOEXCEPT
 }
 
 script::script(operations&& ops, bool prefail) NOEXCEPT
-  : script(std::move(ops), true, prefail, serialized_size(ops))
+  : script(std::move(ops), true, prefail)
 {
+    // ops moved so cannot pass serialized_size(ops), order not guaranteed.
 }
 
 script::script(const operations& ops, bool prefail) NOEXCEPT
@@ -144,8 +146,21 @@ script::script(const std::string& mnemonic) NOEXCEPT
 }
 
 // protected
-script::script(operations&& ops, bool valid, bool prefail, size_t size) NOEXCEPT
-  : ops_(std::move(ops)), valid_(valid), prefail_(prefail), size_(size),
+script::script(operations&& ops, bool valid, bool prefail) NOEXCEPT
+  : ops_(std::move(ops)),
+    valid_(valid),
+    prefail_(prefail),
+    size_(serialized_size(ops_)),
+    offset(ops_.begin())
+{
+}
+
+// protected
+script::script(const operations& ops, bool valid, bool prefail) NOEXCEPT
+  : ops_(ops),
+    valid_(valid),
+    prefail_(prefail),
+    size_(serialized_size(ops_)),
     offset(ops_.begin())
 {
 }
@@ -153,7 +168,10 @@ script::script(operations&& ops, bool valid, bool prefail, size_t size) NOEXCEPT
 // protected
 script::script(const operations& ops, bool valid, bool prefail,
     size_t size) NOEXCEPT
-  : ops_(ops), valid_(valid), prefail_(prefail), size_(size),
+  : ops_(ops),
+    valid_(valid),
+    prefail_(prefail),
+    size_(size),
     offset(ops_.begin())
 {
 }
@@ -360,7 +378,7 @@ hash_digest script::hash() const NOEXCEPT
     return sha256;
 }
 
-// static
+// static/private
 size_t script::serialized_size(const operations& ops) NOEXCEPT
 {
     return std::accumulate(ops.begin(), ops.end(), zero, op_size);
@@ -368,11 +386,9 @@ size_t script::serialized_size(const operations& ops) NOEXCEPT
 
 size_t script::serialized_size(bool prefix) const NOEXCEPT
 {
-    size_t size = size_;
-
     // Recompute it serialization has been affected by offset metadata.
-    if (offset != ops_.begin())
-        size = std::accumulate(offset, ops_.end(), zero, op_size);
+    auto size = (offset == ops_.begin()) ? size_ :
+        std::accumulate(offset, ops_.end(), zero, op_size);
 
     if (prefix)
         size += variable_size(size);

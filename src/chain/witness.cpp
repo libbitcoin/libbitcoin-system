@@ -44,13 +44,14 @@ static const auto checksig_script = script{ { opcode::checksig } };
 // ----------------------------------------------------------------------------
 
 witness::witness() NOEXCEPT
-  : witness(chunk_cptrs{}, false)
+  : witness(chunk_cptrs{}, false, zero)
 {
 }
 
 witness::witness(data_stack&& stack) NOEXCEPT
   : witness(*to_shareds(std::move(stack)), true)
 {
+    // stack moved so cannot pass serialized_size(stack), order not guaranteed.
 }
 
 witness::witness(const data_stack& stack) NOEXCEPT
@@ -61,10 +62,11 @@ witness::witness(const data_stack& stack) NOEXCEPT
 witness::witness(chunk_cptrs&& stack) NOEXCEPT
   : witness(std::move(stack), true)
 {
+    // stack moved so cannot pass serialized_size(stack), order not guaranteed.
 }
 
 witness::witness(const chunk_cptrs& stack) NOEXCEPT
-  : witness(stack, true)
+  : witness(stack, true, serialized_size(stack))
 {
 }
 
@@ -112,13 +114,19 @@ witness::witness(const std::string& mnemonic) NOEXCEPT
 
 // protected
 witness::witness(chunk_cptrs&& stack, bool valid) NOEXCEPT
-  : stack_(std::move(stack)), valid_(valid)
+  : stack_(std::move(stack)), valid_(valid), size_(serialized_size(stack_))
 {
 }
 
 // protected
 witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
-  : stack_(stack), valid_(valid)
+  : stack_(stack), valid_(valid), size_(serialized_size(stack))
+{
+}
+
+// protected
+witness::witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT
+  : stack_(stack), valid_(valid), size_(size)
 {
 }
 
@@ -163,16 +171,19 @@ static data_chunk read_element(reader& source) NOEXCEPT
 // static/private
 witness witness::from_data(reader& source, bool prefix) NOEXCEPT
 {
+    size_t size{};
     chunk_cptrs stack;
 
     if (prefix)
     {
-        // Each witness is prefixed with number of elements (bip144).
-        // Witness prefix is an element count, not byte length.
-        stack.reserve(source.read_size(max_block_weight));
+        const auto capacity = source.read_size(max_block_weight);
+        stack.reserve(capacity);
 
-        for (size_t element = 0; element < stack.capacity(); ++element)
+        for (size_t element = 0; element < capacity; ++element)
+        {
             stack.push_back(to_shared<data_chunk>(read_element(source)));
+            size = element_size(size, stack.back());
+        }
     }
     else
     {
@@ -180,7 +191,7 @@ witness witness::from_data(reader& source, bool prefix) NOEXCEPT
             stack.push_back(to_shared<data_chunk>(read_element(source)));
     }
 
-    return { stack, source };
+    return { stack, source, size };
 }
 
 inline bool is_push_token(const std::string& token) NOEXCEPT
@@ -280,24 +291,21 @@ const chunk_cptrs& witness::stack() const NOEXCEPT
     return stack_;
 }
 
-// private
-size_t witness::serialized_size() const NOEXCEPT
+// static/private
+size_t witness::serialized_size(const chunk_cptrs& stack) NOEXCEPT
 {
-    const auto sum = [](size_t total, const chunk_cptr& element) NOEXCEPT
-    {
-        // Tokens encoded as variable integer prefixed byte array (bip144).
-        const auto size = element->size();
-        return total + variable_size(size) + size;
-    };
-
-    return std::accumulate(stack_.begin(), stack_.end(), zero, sum);
+    return std::accumulate(stack.begin(), stack.end(), zero, element_size);
 }
 
-// TODO: this is expensive.
 size_t witness::serialized_size(bool prefix) const NOEXCEPT
 {
-    // Witness prefix is an element count, not a byte length (unlike script).
-    return (prefix ? variable_size(stack_.size()) : zero) + serialized_size();
+    auto size = size_;
+
+    // Witness prefix is an element count, not byte length (unlike script).
+    if (prefix)
+        size += variable_size(stack_.size());
+
+    return size;
 }
 
 // Utilities.
