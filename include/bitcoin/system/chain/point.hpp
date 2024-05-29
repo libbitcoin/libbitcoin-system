@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_POINT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_POINT_HPP
 
+#include <functional>
 #include <istream>
 #include <memory>
 #include <vector>
@@ -128,6 +129,24 @@ struct hash<bc::system::chain::point>
             bc::system::unique_hash_t<>{}(value.hash()));
     }
 };
+
+template<>
+struct hash<std::reference_wrapper<const bc::system::chain::point>>
+{
+    using wrapped = std::reference_wrapper<const bc::system::chain::point>;
+    std::size_t operator()(const wrapped& point) const NOEXCEPT
+    {
+        return std::hash<bc::system::chain::point>{}(point.get());
+    }
+};
+
+inline bool operator==(
+    const std::reference_wrapper<const bc::system::chain::point>& left,
+    const std::reference_wrapper<const bc::system::chain::point>& right) NOEXCEPT
+{
+    return left.get() == right.get();
+}
+
 } // namespace std
 
 #endif
