@@ -121,10 +121,6 @@ public:
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
-    chain::points points() const NOEXCEPT;
-    hash_digest outputs_hash() const NOEXCEPT;
-    hash_digest points_hash() const NOEXCEPT;
-    hash_digest sequences_hash() const NOEXCEPT;
 
     // signature_hash exposed for op_check_multisig caching.
     hash_digest signature_hash(const input_iterator& input, const script& sub,
@@ -219,6 +215,10 @@ protected:
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
 
 private:
+    chain::points points() const NOEXCEPT;
+    hash_digest outputs_hash() const NOEXCEPT;
+    hash_digest points_hash() const NOEXCEPT;
+    hash_digest sequences_hash() const NOEXCEPT;
     static transaction from_data(reader& source, bool witness) NOEXCEPT;
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;

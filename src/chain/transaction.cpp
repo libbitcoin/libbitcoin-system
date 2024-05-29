@@ -500,6 +500,9 @@ chain::points transaction::points() const NOEXCEPT
 
 hash_digest transaction::outputs_hash() const NOEXCEPT
 {
+    if (cache_)
+        return cache_->outputs;
+
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
@@ -517,6 +520,9 @@ hash_digest transaction::outputs_hash() const NOEXCEPT
 
 hash_digest transaction::points_hash() const NOEXCEPT
 {
+    if (cache_)
+        return cache_->points;
+
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
@@ -534,6 +540,9 @@ hash_digest transaction::points_hash() const NOEXCEPT
 
 hash_digest transaction::sequences_hash() const NOEXCEPT
 {
+    if (cache_)
+        return cache_->sequences;
+
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
@@ -851,16 +860,10 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     // conditionally passing them from methods avoids copying the cached hash.
 
     // points
-    if (cache_)
-        sink.write_bytes(!anyone ? cache_->points : null_hash);
-    else
-        sink.write_bytes(!anyone ? points_hash() : null_hash);
+    sink.write_bytes(!anyone ? points_hash() : null_hash);
 
     // sequences
-    if (cache_)
-        sink.write_bytes(!anyone && all ? cache_->sequences : null_hash);
-    else
-        sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
+    sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
 
     self.point().to_data(sink);
     sub.to_data(sink, prefixed);
@@ -870,8 +873,6 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     // outputs
     if (single)
         sink.write_bytes(output_hash(input));
-    else if (cache_)
-        sink.write_bytes(all ? cache_->outputs : null_hash);
     else
         sink.write_bytes(all ? outputs_hash() : null_hash);
 
@@ -959,6 +960,7 @@ bool transaction::is_coinbase() const NOEXCEPT
 
 bool transaction::is_internal_double_spend() const NOEXCEPT
 {
+    // TODO: optimize (see block.is_internal_double_spend).
     return !is_distinct(points());
 }
 
