@@ -223,7 +223,7 @@ size_t script::op_count(reader& source) NOEXCEPT
     const auto start = source.get_read_position();
     auto count = zero;
 
-    // TODO: this is expensive (0.83%).
+    // This is expensive (1.1%) but far less than vector reallocs (11.6%).
     while (operation::count_op(source))
         ++count;
 

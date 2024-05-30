@@ -112,8 +112,14 @@ public:
     /// Cache setters/getters, not thread safe.
     /// -----------------------------------------------------------------------
 
+    /// Initialize with externally-produced nominal hash value, as from store.
     void set_nominal_hash(hash_digest&& hash) const NOEXCEPT;
+
+    /// Initialize with externally-produced witness hash value, as from store.
+    /// This need not be set if the transaction is not segmented.
     void set_witness_hash(hash_digest&& hash) const NOEXCEPT;
+
+    /// Reference used to avoid copy, sets cache if not set.
     const hash_digest& get_hash(bool witness) const NOEXCEPT;
 
     /// Methods.

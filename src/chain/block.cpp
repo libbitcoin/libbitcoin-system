@@ -44,6 +44,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -72,9 +74,7 @@ block::block(const chain::header::cptr& header,
 }
 
 block::block(const data_slice& data, bool witness) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : block(stream::in::copy(data), witness)
-    BC_POP_WARNING()
 {
 }
 
@@ -144,9 +144,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
         for (size_t tx = 0; tx < capacity; ++tx)
         {
             BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
             txs->emplace_back(new transaction{ source, witness });
-            BC_POP_WARNING()
             BC_POP_WARNING()
         }
 
@@ -168,11 +166,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
 data_chunk block::to_data(bool witness) const NOEXCEPT
 {
     data_chunk data(serialized_size(witness));
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
     to_data(ostream, witness);
     return data;
 }
@@ -218,17 +212,14 @@ const chain::header::cptr block::header_ptr() const NOEXCEPT
 // Roll up inputs for concurrent prevout processing.
 const inputs_cptr block::inputs_ptr() const NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     const auto inputs = std::make_shared<input_cptrs>();
-    BC_POP_WARNING()
-
-    const auto append_inputs = [&inputs](const transaction::cptr& tx)
+    const auto append_ins = [&inputs](const transaction::cptr& tx) NOEXCEPT
     {
         const auto& tx_ins = *tx->inputs_ptr();
         inputs->insert(inputs->end(), tx_ins.begin(), tx_ins.end());
     };
 
-    std::for_each(txs_->begin(), txs_->end(), append_inputs);
+    std::for_each(txs_->begin(), txs_->end(), append_ins);
     return inputs;
 }
 
@@ -268,7 +259,7 @@ hash_digest block::hash() const NOEXCEPT
 size_t block::serialized_size(bool witness) const NOEXCEPT
 {
     // Overflow returns max_size_t.
-    const auto sum = [witness](size_t total, const transaction::cptr& tx) NOEXCEPT
+    const auto sum = [=](size_t total, const transaction::cptr& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->serialized_size(witness));
     };
@@ -320,46 +311,22 @@ bool block::is_forward_reference() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto non_coinbase_txs = sub1(txs_->size());
-
-    // TODO: change to reference_wrapper(tx.hash) - first make referencable.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    unordered_set_of_constant_referenced_hashes hashes(non_coinbase_txs);
-    BC_POP_WARNING()
-
-    const auto forward_in = [&hashes](const input::cptr& input) NOEXCEPT
+    const auto sum_txs = sub1(txs_->size());
+    unordered_set_of_constant_referenced_hashes hashes{ sum_txs };
+    const auto spent = [&hashes](const input::cptr& input) NOEXCEPT
     {
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         return hashes.find(std::ref(input->point().hash())) != hashes.end();
-        BC_POP_WARNING()
     };
 
-    const auto forward_tx = [&forward_in, &hashes](
-        const transaction::cptr& tx) NOEXCEPT
+    const auto spend = [&spent, &hashes](const transaction::cptr& tx) NOEXCEPT
     {
         const auto& ins = *tx->inputs_ptr();
-        const auto found = std::any_of(ins.begin(), ins.end(), forward_in);
-
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+        const auto forward = std::any_of(ins.begin(), ins.end(), spent);
         hashes.emplace(tx->get_hash(false));
-        BC_POP_WARNING()
-
-        return found;
+        return forward;
     };
 
-    return std::any_of(txs_->rbegin(), std::prev(txs_->rend()), forward_tx);
-}
-
-// private
-size_t block::non_coinbase_inputs() const NOEXCEPT
-{
-    // Overflow returns max_size_t.
-    const auto inputs = [](size_t total, const transaction::cptr& tx) NOEXCEPT
-    {
-        return ceilinged_add(total, tx->inputs());
-    };
-
-    return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
+    return std::any_of(txs_->rbegin(), std::prev(txs_->rend()), spend);
 }
 
 // This also precludes the block merkle calculation DoS exploit by preventing
@@ -370,26 +337,27 @@ bool block::is_internal_double_spend() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto non_coinbase_ins = non_coinbase_inputs();
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    unordered_set_of_constant_referenced_points points(non_coinbase_ins);
-    BC_POP_WARNING()
-
-    const auto double_in = [&points](const input::cptr& in) NOEXCEPT
+    // Overflow returns max_size_t.
+    const auto sum_ins = [](size_t total, const transaction::cptr& tx) NOEXCEPT
     {
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        return !points.emplace(in->point()).second;
-        BC_POP_WARNING()
+        return ceilinged_add(total, tx->inputs());
     };
 
-    const auto double_tx = [&double_in](const transaction::cptr& tx) NOEXCEPT
+    const auto tx1 = std::next(txs_->begin());
+    const auto spends_count = std::accumulate(tx1, txs_->end(), zero, sum_ins);
+    unordered_set_of_constant_referenced_points points{ spends_count };
+    const auto spent = [&points](const input::cptr& in) NOEXCEPT
+    {
+        return !points.emplace(in->point()).second;
+    };
+
+    const auto double_spent = [&spent](const transaction::cptr& tx) NOEXCEPT
     {
         const auto& ins = *tx->inputs_ptr();
-        return std::any_of(ins.begin(), ins.end(), double_in);
+        return std::any_of(ins.begin(), ins.end(), spent);
     };
 
-    return std::any_of(std::next(txs_->begin()), txs_->end(), double_tx);
+    return std::any_of(tx1, txs_->end(), double_spent);
 }
 
 // private
@@ -440,26 +408,17 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     unordered_set_of_constant_referenced_hashes hashes;
 
     // Just the coinbase tx hash, skip its null input hashes.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     hashes.emplace(txs_->front()->get_hash(false));
-    BC_POP_WARNING()
 
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
         // Insert the transaction hash.
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         hashes.emplace((*tx)->get_hash(false));
-        BC_POP_WARNING()
-
         const auto& inputs = *(*tx)->inputs_ptr();
 
         // Insert all input point hashes.
         for (const auto& input: inputs)
-        {
-            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
             hashes.emplace(input->point().hash());
-            BC_POP_WARNING()
-        }
     }
 
     return hashes.size() > hash_limit;
@@ -652,7 +611,6 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 // Search is not ordered, forward references are caught by block.check.
 void block::populate() const NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     unordered_map_of_constant_referenced_points points{};
     uint32_t index{};
 
@@ -672,8 +630,6 @@ void block::populate() const NOEXCEPT
                 in->prevout = point->second;
         }
     }
-
-    BC_POP_WARNING()
 }
 
 // Delegated.
@@ -832,6 +788,8 @@ code block::connect(const context& ctx) const NOEXCEPT
 {
     return connect_transactions(ctx);
 }
+
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------

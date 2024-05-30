@@ -167,17 +167,17 @@ protected:
     bool is_unspent_coinbase_collision() const NOEXCEPT;
 
 private:
-    using hash_cref = std::reference_wrapper<const hash_digest>;
-    using hash_hash = unique_hash_t<>;
     using point_cref = std::reference_wrapper<const point>;
     using point_hash = std::hash<std::reference_wrapper<const point>>;
+    using hash_cref = std::reference_wrapper<const hash_digest>;
+    using hash_hash = unique_hash_t<>;
 
-    using unordered_set_of_constant_referenced_hashes =
-        std::unordered_set<hash_cref, hash_hash>;
-    using unordered_set_of_constant_referenced_points =
-        std::unordered_set<point_cref, point_hash>;
     using unordered_map_of_constant_referenced_points =
         std::unordered_map<point_cref, output::cptr, point_hash>;
+    using unordered_set_of_constant_referenced_points =
+        std::unordered_set<point_cref, point_hash>;
+    using unordered_set_of_constant_referenced_hashes =
+        std::unordered_set<hash_cref, hash_hash>;
 
     static block from_data(reader& source, bool witness) NOEXCEPT;
 
@@ -185,7 +185,6 @@ private:
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
 
     // contextual
-    size_t non_coinbase_inputs() const NOEXCEPT;
     uint64_t reward(size_t height, uint64_t subsidy_interval,
         uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT;
 

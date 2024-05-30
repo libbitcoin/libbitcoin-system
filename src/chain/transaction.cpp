@@ -43,6 +43,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // Precompute fixed elements of signature hashing.
 // ----------------------------------------------------------------------------
 
@@ -97,10 +99,8 @@ transaction::transaction(const transaction& other) NOEXCEPT
 {
     if (other.cache_)
         cache_ = std::make_unique<const hash_cache>(*other.cache_);
-
     if (other.nominal_hash_)
         nominal_hash_ = std::make_unique<const hash_digest>(*other.nominal_hash_);
-
     if (other.witness_hash_)
         witness_hash_ = std::make_unique<const hash_digest>(*other.witness_hash_);
 }
@@ -128,9 +128,7 @@ transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
 }
 
 transaction::transaction(const data_slice& data, bool witness) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : transaction(stream::in::copy(data), witness)
-    BC_POP_WARNING()
 {
 }
 
@@ -237,9 +235,7 @@ read_puts(Source& source) NOEXCEPT
     for (auto put = zero; put < capacity; ++put)
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         puts->emplace_back(new Put{ source });
-        BC_POP_WARNING()
         BC_POP_WARNING()
     }
 
@@ -257,8 +253,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
     chain::outputs_cptr outputs;
 
     // Expensive repeated recomputation, so cache segregated state.
-    const auto segregated =
-        inputs->size() == witness_marker &&
+    const auto segregated = inputs->size() == witness_marker &&
         source.peek_byte() == witness_enabled;
 
     // Detect witness as no inputs (marker) and expected flag (bip144).
@@ -423,32 +418,24 @@ uint64_t transaction::fee() const NOEXCEPT
 
 void transaction::set_nominal_hash(hash_digest&& hash) const NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     nominal_hash_ = std::make_unique<const hash_digest>(std::move(hash));
-    BC_POP_WARNING()
 }
 
 void transaction::set_witness_hash(hash_digest&& hash) const NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     witness_hash_ = std::make_unique<const hash_digest>(std::move(hash));
-    BC_POP_WARNING()
 }
 
 const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
 {
     if (witness)
     {
-        if (!witness_hash_)
-            set_witness_hash(hash(witness));
-
+        if (!witness_hash_) set_witness_hash(hash(witness));
         return *witness_hash_;
     }
     else
     {
-        if (!nominal_hash_)
-            set_nominal_hash(hash(witness));
-
+        if (!nominal_hash_) set_nominal_hash(hash(witness));
         return *nominal_hash_;
     }
 }
@@ -459,10 +446,8 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     {
         if (witness)
         {
-            // Avoid is_coinbase call if cache present.
-            if (witness_hash_) return *witness_hash_;
-
             // Witness coinbase tx hash is assumed to be null_hash (bip141).
+            if (witness_hash_) return *witness_hash_;
             if (is_coinbase()) return null_hash;
         }
         else
@@ -614,7 +599,6 @@ uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
         std::distance(inputs_->begin(), input));
 }
 
-// C++14: switch in constexpr.
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
 // there are 4 possible 7 bit values that can set "single" and 4 others that
@@ -633,7 +617,6 @@ inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT
     }
 }
 
-/// REQUIRES INDEX.
 void transaction::signature_hash_single(writer& sink,
     const input_iterator& input, const script& sub,
     uint8_t sighash_flags) const NOEXCEPT
@@ -666,8 +649,7 @@ void transaction::signature_hash_single(writer& sink,
         }
     };
 
-    const auto write_outputs = [this, &input](
-        writer& sink) NOEXCEPT
+    const auto write_outputs = [this, &input](writer& sink) NOEXCEPT
     {
         // Guarded by unversioned_signature_hash.
         const auto index = input_index(input);
@@ -804,11 +786,15 @@ hash_digest transaction::unversioned_signature_hash(
             break;
         }
         case coverage::hash_none:
+        {
             signature_hash_none(sink, input, sub, sighash_flags);
             break;
+        }
         default:
         case coverage::hash_all:
+        {
             signature_hash_all(sink, input, sub, sighash_flags);
+        }
     }
 
     sink.flush();
@@ -1398,6 +1384,8 @@ code transaction::connect(const context& ctx) const NOEXCEPT
     // TODO: return in override with out parameter. more impactful with segwit.
     return error::transaction_success;
 }
+
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------
