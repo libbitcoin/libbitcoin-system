@@ -399,13 +399,14 @@ BOOST_AUTO_TEST_CASE(block__is_forward_reference__backward_reference__false)
 
 BOOST_AUTO_TEST_CASE(block__is_forward_reference__forward_reference__true)
 {
-    const transaction to{ 0, inputs{}, {}, 0 };
+    const transaction cb{ 0, inputs{}, {}, 0 };
+    const transaction to{ 0, inputs{}, {}, 42 };
     const transaction from{ 0, { { { to.hash(false), 0 }, {}, 0 } }, {}, 0 };
     const accessor instance
     {
         {},
         {
-            {},
+            cb,
             from,
             to
         }
