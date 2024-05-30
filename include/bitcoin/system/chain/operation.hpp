@@ -47,9 +47,10 @@ public:
     static constexpr opcode opcode_from_size(size_t size) NOEXCEPT;
     static constexpr opcode opcode_from_version(uint8_t value) NOEXCEPT;
     static constexpr opcode opcode_from_positive(uint8_t value) NOEXCEPT;
-    static constexpr opcode minimal_opcode_from_data(
+
+    static VCONSTEXPR opcode minimal_opcode_from_data(
         const data_chunk& data) NOEXCEPT;
-    static constexpr opcode nominal_opcode_from_data(
+    static VCONSTEXPR opcode nominal_opcode_from_data(
         const data_chunk& data) NOEXCEPT;
 
     /// Categories of opcodes.

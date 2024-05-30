@@ -40,7 +40,7 @@ constexpr bool script::is_enabled(uint32_t active_flags, flags flag) NOEXCEPT
     return to_bool(flag & active_flags);
 }
 
-constexpr bool script::is_push_only_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_push_only_pattern(const operations& ops) NOEXCEPT
 {
     const auto push = [](const operation& op) NOEXCEPT
     {
@@ -53,7 +53,7 @@ constexpr bool script::is_push_only_pattern(const operations& ops) NOEXCEPT
 // ****************************************************************************
 // CONSENSUS: this pattern is used to activate bip16 validation rules.
 // ****************************************************************************
-constexpr bool script::is_relaxed_push_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_relaxed_push_pattern(const operations& ops) NOEXCEPT
 {
     const auto push = [&](const operation& op) NOEXCEPT
     {
@@ -66,7 +66,7 @@ constexpr bool script::is_relaxed_push_pattern(const operations& ops) NOEXCEPT
 // ****************************************************************************
 // CONSENSUS: this pattern is used to commit to bip141 witness data.
 // ****************************************************************************
-constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 {
     constexpr auto header = to_big_endian(chain::witness_head);
 
@@ -83,7 +83,7 @@ constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 // ****************************************************************************
 // CONSENSUS: this pattern is used in bip141 validation rules.
 // ****************************************************************************
-constexpr bool script::is_witness_program_pattern(
+VCONSTEXPR bool script::is_witness_program_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
@@ -93,7 +93,7 @@ constexpr bool script::is_witness_program_pattern(
 }
 
 // The satoshi client now enables configurable data size for policy.
-constexpr bool script::is_pay_null_data_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_pay_null_data_pattern(const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
         && ops[0].code() == opcode::op_return
@@ -102,7 +102,7 @@ constexpr bool script::is_pay_null_data_pattern(const operations& ops) NOEXCEPT
 }
 
 // Used by neutrino.
-constexpr bool script::is_pay_op_return_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_pay_op_return_pattern(const operations& ops) NOEXCEPT
 {
     return !ops.empty()
         && ops[0].code() == opcode::op_return;
@@ -111,7 +111,7 @@ constexpr bool script::is_pay_op_return_pattern(const operations& ops) NOEXCEPT
 // The current 16 (or 20) limit does not affect server indexing because bare
 // multisig is not indexable and p2sh multisig is byte-limited to 15 sigs.
 // The satoshi client policy limit is 3 signatures for bare multisig.
-constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
 {
     constexpr auto op_1 = static_cast<uint8_t>(opcode::push_positive_1);
     constexpr auto op_16 = static_cast<uint8_t>(opcode::push_positive_16);
@@ -144,7 +144,7 @@ constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
 }
 
 // The satoshi client considers this non-standard for policy.
-constexpr bool script::is_pay_public_key_pattern(
+VCONSTEXPR bool script::is_pay_public_key_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
@@ -152,7 +152,7 @@ constexpr bool script::is_pay_public_key_pattern(
         && ops[1].code() == opcode::checksig;
 }
 
-constexpr bool script::is_pay_key_hash_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_pay_key_hash_pattern(const operations& ops) NOEXCEPT
 {
     return ops.size() == 5
         && ops[0].code() == opcode::dup
@@ -165,7 +165,7 @@ constexpr bool script::is_pay_key_hash_pattern(const operations& ops) NOEXCEPT
 // ****************************************************************************
 // CONSENSUS: this pattern is used to activate bip16 validation rules.
 // ****************************************************************************
-constexpr bool script::is_pay_script_hash_pattern(
+VCONSTEXPR bool script::is_pay_script_hash_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 3
@@ -174,14 +174,14 @@ constexpr bool script::is_pay_script_hash_pattern(
         && ops[2].code() == opcode::equal;
 }
 
-constexpr bool script::is_pay_witness_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_pay_witness_pattern(const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
         && ops[0].is_version()
         && ops[1].is_push();
 }
 
-constexpr bool script::is_pay_witness_key_hash_pattern(
+VCONSTEXPR bool script::is_pay_witness_key_hash_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
@@ -192,7 +192,7 @@ constexpr bool script::is_pay_witness_key_hash_pattern(
 // ****************************************************************************
 // CONSENSUS: this pattern is used to activate bip141 validation rules.
 // ****************************************************************************
-constexpr bool script::is_pay_witness_script_hash_pattern(
+VCONSTEXPR bool script::is_pay_witness_script_hash_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
@@ -203,7 +203,7 @@ constexpr bool script::is_pay_witness_script_hash_pattern(
 // The first push is based on wacky satoshi op_check_multisig behavior that
 // we must perpetuate, though it's appearance here is policy not consensus.
 // Limiting to push_size_0 removes pattern ambiguity with little downside.
-constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
 {
     const auto endorsement = [](const operation& op) NOEXCEPT
     {
@@ -215,7 +215,7 @@ constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
         && std::all_of(std::next(ops.begin()), ops.end(), endorsement);
 }
 
-constexpr bool script::is_sign_public_key_pattern(
+VCONSTEXPR bool script::is_sign_public_key_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 1
@@ -225,7 +225,7 @@ constexpr bool script::is_sign_public_key_pattern(
 // ****************************************************************************
 // CONSENSUS: this pattern is used to activate bip141 validation rules.
 // ****************************************************************************
-constexpr bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
+VCONSTEXPR bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
         && is_endorsement(ops[0].data())
@@ -235,7 +235,7 @@ constexpr bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
 
 // Ambiguous with is_sign_key_hash when second/last op is a public key.
 // Ambiguous with is_sign_public_key_pattern when only op is endorsement.
-constexpr bool script::is_sign_script_hash_pattern(
+VCONSTEXPR bool script::is_sign_script_hash_pattern(
     const operations& ops) NOEXCEPT
 {
     return !ops.empty()
