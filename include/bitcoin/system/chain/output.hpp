@@ -102,8 +102,9 @@ private:
     uint64_t value_;
     chain::script::cptr script_;
 
-    // cache
+    // Cache.
     bool valid_;
+    ////size_t size_;
 };
 
 typedef std::vector<output> outputs;

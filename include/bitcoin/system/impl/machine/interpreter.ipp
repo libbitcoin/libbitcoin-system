@@ -1660,7 +1660,7 @@ code interpreter<Stack>::connect_embedded(const context& state,
     const auto& input = **it;
 
     // Input script is limited to relaxed push data operations (bip16).
-    if (!script::is_relaxed_push(input.script().ops()))
+    if (!script::is_relaxed_push_pattern(input.script().ops()))
         return error::invalid_script_embed;
 
     // Embedded script must be at the top of the stack (bip16).

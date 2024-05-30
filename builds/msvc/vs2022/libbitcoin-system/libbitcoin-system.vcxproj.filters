@@ -1414,6 +1414,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\operation.ipp">
+      <Filter>include\bitcoin\system\impl\chain</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script.ipp">
+      <Filter>include\bitcoin\system\impl\chain</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp">
       <Filter>include\bitcoin\system\impl\data</Filter>
     </None>

@@ -376,7 +376,7 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
 
 size_t block::weight() const NOEXCEPT
 {
-    // Block weight is 3 * Base size * + 1 * Total size (bip141).
+    // Block weight is 3 * nominal size * + 1 * witness size (bip141).
     return base_size_contribution * serialized_size(false) +
         total_size_contribution * serialized_size(true);
 }

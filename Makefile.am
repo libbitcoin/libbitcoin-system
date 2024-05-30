@@ -567,7 +567,9 @@ include_bitcoin_system_hash_sha_HEADERS = \
 
 include_bitcoin_system_impl_chaindir = ${includedir}/bitcoin/system/impl/chain
 include_bitcoin_system_impl_chain_HEADERS = \
-    include/bitcoin/system/impl/chain/compact.ipp
+    include/bitcoin/system/impl/chain/compact.ipp \
+    include/bitcoin/system/impl/chain/operation.ipp \
+    include/bitcoin/system/impl/chain/script.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \

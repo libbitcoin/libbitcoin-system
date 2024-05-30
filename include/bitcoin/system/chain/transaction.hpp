@@ -268,6 +268,8 @@ private:
     // Cache.
     bool segregated_;
     bool valid_;
+    ////size_t nominal_size_;
+    ////size_t witness_size_;
 
     // TODO: use std::optional to avoid these pointer allocations (0.16%).
     // Signature and identity hash caching (witness hash if witnessed).

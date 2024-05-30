@@ -141,6 +141,7 @@ private:
 
     // Cache.
     bool valid_;
+    ////size_t size_;
 
 public:
     /// Public mutable metadata access, copied but not compared for equality.

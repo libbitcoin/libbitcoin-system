@@ -202,6 +202,8 @@ private:
 
     // Cache.
     bool valid_;
+    ////size_t nominal_size_;
+    ////size_t witness_size_;
 };
 
 typedef std::vector<block> blocks;
