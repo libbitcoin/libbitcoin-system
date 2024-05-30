@@ -43,7 +43,7 @@ static const auto tx1_data = base16_chunk(
     "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
     "00");
 
-static const auto tx1_hash = base16_hash(
+constexpr auto tx1_hash = base16_hash(
     "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
 
 static const auto tx2_data = base16_chunk(
@@ -65,7 +65,7 @@ static const auto tx2_data = base16_chunk(
     "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
     "e61e66fe5d88ac00000000");
 
-static const auto tx2_hash = base16_hash(
+constexpr auto tx2_hash = base16_hash(
     "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
 
 static const auto tx3_data = base16_chunk(
@@ -198,8 +198,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__copy__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
 {
-    const uint32_t version = 2345;
-    const uint32_t locktime = 4568656;
+    constexpr uint32_t version = 2345;
+    constexpr uint32_t locktime = 4568656;
 
     const input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
@@ -219,8 +219,8 @@ BOOST_AUTO_TEST_CASE(transaction__constructor__move_parameters__expected)
 
 BOOST_AUTO_TEST_CASE(transaction__constructor__copy_parameters__expected)
 {
-    const uint32_t version = 2345;
-    const uint32_t locktime = 4568656;
+    constexpr uint32_t version = 2345;
+    constexpr uint32_t locktime = 4568656;
 
     const input input(tx0_inputs);
     BOOST_REQUIRE(input.is_valid());
@@ -456,11 +456,11 @@ BOOST_AUTO_TEST_CASE(transaction__fee__default_output__zero)
 
 BOOST_AUTO_TEST_CASE(transaction__fee__nonempty__outputs_minus_inputs)
 {
-    const uint64_t value0 = 123;
-    const uint64_t value1 = 321;
-    const uint64_t claim0 = 11;
-    const uint64_t claim1 = 11;
-    const uint64_t claim2 = 22;
+    constexpr uint64_t value0 = 123;
+    constexpr uint64_t value1 = 321;
+    constexpr uint64_t claim0 = 11;
+    constexpr uint64_t claim1 = 11;
+    constexpr uint64_t claim2 = 22;
 
     input input0;
     input input1;
@@ -531,8 +531,8 @@ BOOST_AUTO_TEST_CASE(transaction__value__default_input2__max_uint64)
 
 BOOST_AUTO_TEST_CASE(transaction__value__two_prevouts__sum)
 {
-    const uint64_t value0 = 123;
-    const uint64_t value1 = 321;
+    constexpr uint64_t value0 = 123;
+    constexpr uint64_t value1 = 321;
 
     const input input0;
     const input input1;
@@ -557,6 +557,28 @@ BOOST_AUTO_TEST_CASE(transaction__hash__block320670__success)
     const transaction instance(tx4_data, true);
     BOOST_REQUIRE_EQUAL(instance.hash(false), tx4_hash);
     BOOST_REQUIRE_EQUAL(instance.to_data(true), tx4_data);
+}
+
+BOOST_AUTO_TEST_CASE(transaction__set_hash__get_hash__expected)
+{
+    const transaction instance(tx1_data, true);
+
+    BOOST_REQUIRE_EQUAL(instance.hash(false), tx1_hash);
+    BOOST_REQUIRE_EQUAL(instance.hash(true), tx1_hash);
+    BOOST_REQUIRE_EQUAL(instance.get_hash(false), tx1_hash);
+    BOOST_REQUIRE_EQUAL(instance.get_hash(true), tx1_hash);
+
+    instance.set_nominal_hash(test::move_copy(tx2_hash));
+    BOOST_REQUIRE_EQUAL(instance.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(instance.hash(true), tx2_hash);
+    BOOST_REQUIRE_EQUAL(instance.get_hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(instance.get_hash(true), tx1_hash);
+
+    instance.set_witness_hash(test::move_copy(tx4_hash));
+    BOOST_REQUIRE_EQUAL(instance.hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(instance.hash(true), tx2_hash);
+    BOOST_REQUIRE_EQUAL(instance.get_hash(false), tx2_hash);
+    BOOST_REQUIRE_EQUAL(instance.get_hash(true), tx4_hash);
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_coinbase__empty__false)
@@ -1065,12 +1087,12 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_height_less_
 
 BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_input_not_final__true)
 {
-    const bool bip113 = false;
-    const size_t height = 100;
-    const uint32_t time = 100;
-    const uint32_t past = 0;
-    const uint32_t locktime = 101;
-    const uint32_t sequence = 1;
+    constexpr bool bip113 = false;
+    constexpr size_t height = 100;
+    constexpr uint32_t time = 100;
+    constexpr uint32_t past = 0;
+    constexpr uint32_t locktime = 101;
+    constexpr uint32_t sequence = 1;
 
     const accessor instance
     {

@@ -86,7 +86,6 @@ transaction::transaction(transaction&& other) NOEXCEPT
 {
 }
 
-// Cache not copied or moved.
 transaction::transaction(const transaction& other) NOEXCEPT
   : transaction(
       other.version_,
@@ -96,6 +95,14 @@ transaction::transaction(const transaction& other) NOEXCEPT
       other.segregated_,
       other.valid_)
 {
+    if (other.cache_)
+        cache_ = std::make_unique<const hash_cache>(*other.cache_);
+
+    if (other.nominal_hash_)
+        nominal_hash_ = std::make_unique<const hash_digest>(*other.nominal_hash_);
+
+    if (other.witness_hash_)
+        witness_hash_ = std::make_unique<const hash_digest>(*other.witness_hash_);
 }
 
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
@@ -181,13 +188,22 @@ transaction& transaction::operator=(transaction&& other) NOEXCEPT
 
 transaction& transaction::operator=(const transaction& other) NOEXCEPT
 {
-    // Cache not assigned.
     version_ = other.version_;
     inputs_ = other.inputs_;
     outputs_ = other.outputs_;
     locktime_ = other.locktime_;
     segregated_ = other.segregated_;
     valid_ = other.valid_;
+
+    if (other.cache_)
+        cache_ = std::make_unique<const hash_cache>(*other.cache_);
+
+    if (other.nominal_hash_)
+        nominal_hash_ = std::make_unique<const hash_digest>(*other.nominal_hash_);
+
+    if (other.witness_hash_)
+        witness_hash_ = std::make_unique<const hash_digest>(*other.witness_hash_);
+
     return *this;
 }
 
@@ -405,7 +421,7 @@ uint64_t transaction::fee() const NOEXCEPT
     return floored_subtract(value(), claim());
 }
 
-void transaction::set_hash(hash_digest&& hash) const NOEXCEPT
+void transaction::set_nominal_hash(hash_digest&& hash) const NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     nominal_hash_ = std::make_unique<const hash_digest>(std::move(hash));
@@ -419,13 +435,31 @@ void transaction::set_witness_hash(hash_digest&& hash) const NOEXCEPT
     BC_POP_WARNING()
 }
 
+const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
+{
+    if (witness)
+    {
+        if (!witness_hash_)
+            set_witness_hash(hash(witness));
+
+        return *witness_hash_;
+    }
+    else
+    {
+        if (!nominal_hash_)
+            set_nominal_hash(hash(witness));
+
+        return *nominal_hash_;
+    }
+}
+
 hash_digest transaction::hash(bool witness) const NOEXCEPT
 {
     if (segregated_)
     {
         if (witness)
         {
-            // Avoid is_coinbase call if cache present (and avoid caching it).
+            // Avoid is_coinbase call if cache present.
             if (witness_hash_) return *witness_hash_;
 
             // Witness coinbase tx hash is assumed to be null_hash (bip141).
@@ -439,7 +473,6 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     else
     {
         if (nominal_hash_) return *nominal_hash_;
-        if (witness_hash_) return *witness_hash_;
     }
 
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)

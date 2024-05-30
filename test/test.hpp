@@ -95,6 +95,14 @@ bool create(const std::filesystem::path& file_path) NOEXCEPT;
 bool exists(const std::filesystem::path& file_path) NOEXCEPT;
 bool remove(const std::filesystem::path& file_path) NOEXCEPT;
 
+// Utility to convert a const reference instance to moveable.
+template <typename Type>
+Type move_copy(const Type& instance) NOEXCEPT
+{
+    auto copy = instance;
+    return copy;
+}
+
 } // namespace test
 
 #endif

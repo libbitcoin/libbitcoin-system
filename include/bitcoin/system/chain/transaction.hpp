@@ -109,9 +109,12 @@ public:
     bool is_segregated() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
 
-    /// Cache (these override hash(bool) computation).
-    void set_hash(hash_digest&& hash) const NOEXCEPT;
+    /// Cache setters/getters, not thread safe.
+    /// -----------------------------------------------------------------------
+
+    void set_nominal_hash(hash_digest&& hash) const NOEXCEPT;
     void set_witness_hash(hash_digest&& hash) const NOEXCEPT;
+    const hash_digest& get_hash(bool witness) const NOEXCEPT;
 
     /// Methods.
     /// -----------------------------------------------------------------------
@@ -291,6 +294,13 @@ struct hash<bc::system::chain::transaction>
         return bc::system::unique_hash_t<>{}(value.hash(true));
     }
 };
+
+inline bool operator==(
+    const std::reference_wrapper<const bc::system::hash_digest>& left,
+    const std::reference_wrapper<const bc::system::hash_digest>& right) NOEXCEPT
+{
+    return left.get() == right.get();
+}
 } // namespace std
 
 #endif

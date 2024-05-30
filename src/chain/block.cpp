@@ -26,7 +26,6 @@
 #include <set>
 #include <type_traits>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
@@ -325,13 +324,13 @@ bool block::is_forward_reference() const NOEXCEPT
 
     // TODO: change to reference_wrapper(tx.hash) - first make referencable.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    std::unordered_set<hash_digest, unique_hash_t<>> hashes(non_coinbase_txs);
+    unordered_set_of_constant_referenced_hashes hashes(non_coinbase_txs);
     BC_POP_WARNING()
 
     const auto forward_in = [&hashes](const input::cptr& input) NOEXCEPT
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        return hashes.find(input->point().hash()) != hashes.end();
+        return hashes.find(std::ref(input->point().hash())) != hashes.end();
         BC_POP_WARNING()
     };
 
@@ -342,7 +341,7 @@ bool block::is_forward_reference() const NOEXCEPT
         const auto found = std::any_of(ins.begin(), ins.end(), forward_in);
 
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        hashes.emplace(tx->hash(false));
+        hashes.emplace(tx->get_hash(false));
         BC_POP_WARNING()
 
         return found;
@@ -363,7 +362,8 @@ size_t block::non_coinbase_inputs() const NOEXCEPT
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, inputs);
 }
 
-// This also precludes the block merkle calculation DoS exploit.
+// This also precludes the block merkle calculation DoS exploit by preventing
+// duplicate txs, as a duplicate non-empty tx implies a duplicate point.
 // bitcointalk.org/?topic=102395
 bool block::is_internal_double_spend() const NOEXCEPT
 {
@@ -437,18 +437,18 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
         return false;
 
     // A set is used to collapse duplicates.
-    std::unordered_set<hash_digest, unique_hash_t<>> hashes;
+    unordered_set_of_constant_referenced_hashes hashes;
 
     // Just the coinbase tx hash, skip its null input hashes.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    hashes.insert(txs_->front()->hash(false));
+    hashes.emplace(txs_->front()->get_hash(false));
     BC_POP_WARNING()
 
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
         // Insert the transaction hash.
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        hashes.insert((*tx)->hash(false));
+        hashes.emplace((*tx)->get_hash(false));
         BC_POP_WARNING()
 
         const auto& inputs = *(*tx)->inputs_ptr();
@@ -457,7 +457,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
         for (const auto& input: inputs)
         {
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-            hashes.insert(input->point().hash());
+            hashes.emplace(input->point().hash());
             BC_POP_WARNING()
         }
     }
@@ -653,20 +653,21 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 void block::populate() const NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    std::unordered_map<point, output::cptr> points{};
+    unordered_map_of_constant_referenced_points points{};
     uint32_t index{};
 
     // Populate outputs hash table.
     for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
         for (const auto& out: *(*tx)->outputs_ptr())
-            points.emplace(point{ (*tx)->hash(false), index++ }, out);
+            points.emplace(std::pair{ point{ (*tx)->get_hash(false),
+                index++ }, out });
 
     // Populate input prevouts from hash table.
     for (auto tx = txs_->begin(); tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {
-            const auto point = points.find(in->point());
+            const auto point = points.find(std::cref(in->point()));
             if (point != points.end())
                 in->prevout = point->second;
         }
