@@ -109,6 +109,7 @@ public:
     /// -----------------------------------------------------------------------
 
     bool is_final() const NOEXCEPT;
+    bool is_roller() const NOEXCEPT;
     bool reserved_hash(hash_digest& out) const NOEXCEPT;
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
@@ -137,6 +138,8 @@ private:
     chain::script::cptr script_;
     chain::witness::cptr witness_;
     uint32_t sequence_;
+
+    // Cache.
     bool valid_;
 
 public:

@@ -97,12 +97,12 @@ transaction::transaction(const transaction& other) NOEXCEPT
       other.segregated_,
       other.valid_)
 {
-    if (other.cache_)
-        cache_ = std::make_unique<const hash_cache>(*other.cache_);
     if (other.nominal_hash_)
         nominal_hash_ = std::make_unique<const hash_digest>(*other.nominal_hash_);
     if (other.witness_hash_)
         witness_hash_ = std::make_unique<const hash_digest>(*other.witness_hash_);
+    if (other.sighash_cache_)
+        sighash_cache_ = std::make_unique<const sighash_cache>(*other.sighash_cache_);
 }
 
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
@@ -193,14 +193,12 @@ transaction& transaction::operator=(const transaction& other) NOEXCEPT
     segregated_ = other.segregated_;
     valid_ = other.valid_;
 
-    if (other.cache_)
-        cache_ = std::make_unique<const hash_cache>(*other.cache_);
-
     if (other.nominal_hash_)
         nominal_hash_ = std::make_unique<const hash_digest>(*other.nominal_hash_);
-
     if (other.witness_hash_)
         witness_hash_ = std::make_unique<const hash_digest>(*other.witness_hash_);
+    if (other.sighash_cache_)
+        sighash_cache_ = std::make_unique<const sighash_cache>(*other.sighash_cache_);
 
     return *this;
 }
@@ -302,11 +300,7 @@ data_chunk transaction::to_data(bool witness) const NOEXCEPT
     witness &= segregated_;
 
     data_chunk data(serialized_size(witness));
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
     to_data(ostream, witness);
     return data;
 }
@@ -518,8 +512,8 @@ chain::points transaction::points() const NOEXCEPT
 
 hash_digest transaction::outputs_hash() const NOEXCEPT
 {
-    if (cache_)
-        return cache_->outputs;
+    if (sighash_cache_)
+        return sighash_cache_->outputs;
 
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
@@ -538,8 +532,8 @@ hash_digest transaction::outputs_hash() const NOEXCEPT
 
 hash_digest transaction::points_hash() const NOEXCEPT
 {
-    if (cache_)
-        return cache_->points;
+    if (sighash_cache_)
+        return sighash_cache_->points;
 
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
@@ -558,8 +552,8 @@ hash_digest transaction::points_hash() const NOEXCEPT
 
 hash_digest transaction::sequences_hash() const NOEXCEPT
 {
-    if (cache_)
-        return cache_->sequences;
+    if (sighash_cache_)
+        return sighash_cache_->sequences;
 
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
@@ -806,21 +800,19 @@ hash_digest transaction::unversioned_signature_hash(
 
 // private
 // TODO: taproot requires both single and double hash of each.
-void transaction::initialize_hash_cache() const NOEXCEPT
+void transaction::initialize_sighash_cache() const NOEXCEPT
 {
     // This overconstructs the cache (anyone or !all), however it is simple and
     // the same criteria applied by satoshi.
     if (segregated_)
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        cache_.reset(new hash_cache
+        sighash_cache_.reset(new sighash_cache
         {
             outputs_hash(),
             points_hash(),
             sequences_hash()
         });
-        BC_POP_WARNING()
         BC_POP_WARNING()
     }
 }
@@ -1355,26 +1347,16 @@ code transaction::connect(const context& ctx) const NOEXCEPT
     if (is_coinbase())
         return error::transaction_success;
 
-    code ec;
+    code ec{};
     using namespace machine;
-    initialize_hash_cache();
-    
-    const auto is_roller = [](const auto& input) NOEXCEPT
-    {
-        static const auto roll = operation{ opcode::roll };
-
-        // Naive implementation, any op_roll in either script, late-counted.
-        // TODO: precompute on script parse, tune using performance profiling.
-        return contains(input.script().ops(), roll)
-            || (input.prevout && contains(input.prevout->script().ops(), roll));
-    };
+    initialize_sighash_cache();
 
     // Validate scripts.
     for (auto input = inputs_->begin(); input != inputs_->end(); ++input)
     {
         // Evaluate rolling scripts with linear search but constant erase.
         // Evaluate non-rolling scripts with constant search but linear erase.
-        if ((ec = is_roller(**input) ?
+        if ((ec = (*input)->is_roller() ?
             interpreter<linked_stack>::connect(ctx, *this, input) :
             interpreter<contiguous_stack>::connect(ctx, *this, input)))
             return ec;

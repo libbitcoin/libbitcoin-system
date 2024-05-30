@@ -368,6 +368,15 @@ const operations& script::ops() const NOEXCEPT
     return ops_;
 }
 
+bool script::is_roller() const NOEXCEPT
+{
+    static const auto roll = operation{ opcode::roll };
+
+    // Naive implementation, any op_roll in script, late-counted.
+    // TODO: precompute on script parse, tune using performance profiling.
+    return contains(ops_, roll);
+};
+
 // Consensus (witness::extract_script) and Electrum server payments key.
 hash_digest script::hash() const NOEXCEPT
 {

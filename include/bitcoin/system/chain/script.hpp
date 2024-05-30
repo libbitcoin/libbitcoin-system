@@ -483,6 +483,7 @@ public:
     const operations& ops() const NOEXCEPT;
 
     /// Computed properties.
+    bool is_roller() const NOEXCEPT;
     hash_digest hash() const NOEXCEPT;
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
@@ -526,6 +527,7 @@ private:
     // Script should be stored as shared.
     operations ops_;
 
+    // Cache.
     bool valid_;
     bool prefail_;
     size_t size_;

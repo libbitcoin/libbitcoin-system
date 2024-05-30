@@ -224,14 +224,16 @@ protected:
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
 
 private:
-    chain::points points() const NOEXCEPT;
-    hash_digest outputs_hash() const NOEXCEPT;
-    hash_digest points_hash() const NOEXCEPT;
-    hash_digest sequences_hash() const NOEXCEPT;
+    typedef struct
+    {
+        hash_digest outputs;
+        hash_digest points;
+        hash_digest sequences;
+    } sighash_cache;
+
     static transaction from_data(reader& source, bool witness) NOEXCEPT;
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;
-    ////static size_t maximum_size(bool coinbase) NOEXCEPT;
 
     // signature hash
     hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
@@ -249,6 +251,13 @@ private:
         const script& sub, uint64_t value, uint8_t sighash_flags,
         bool bip143) const NOEXCEPT;
 
+    // Caching.
+    chain::points points() const NOEXCEPT;
+    hash_digest outputs_hash() const NOEXCEPT;
+    hash_digest points_hash() const NOEXCEPT;
+    hash_digest sequences_hash() const NOEXCEPT;
+    void initialize_sighash_cache() const NOEXCEPT;
+
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
     uint32_t version_;
@@ -256,25 +265,15 @@ private:
     chain::outputs_cptr outputs_;
     uint32_t locktime_;
 
-    // TODO: pack these flags.
+    // Cache.
     bool segregated_;
     bool valid_;
 
-private:
-    typedef struct
-    {
-        hash_digest outputs;
-        hash_digest points;
-        hash_digest sequences;
-    } hash_cache;
-
-    void initialize_hash_cache() const NOEXCEPT;
-
     // TODO: use std::optional to avoid these pointer allocations (0.16%).
     // Signature and identity hash caching (witness hash if witnessed).
-    mutable std::unique_ptr<const hash_cache> cache_{};
     mutable std::unique_ptr<const hash_digest> nominal_hash_{};
     mutable std::unique_ptr<const hash_digest> witness_hash_{};
+    mutable std::unique_ptr<const sighash_cache> sighash_cache_{};
 };
 
 typedef std::vector<transaction> transactions;

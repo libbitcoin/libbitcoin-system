@@ -103,6 +103,8 @@ private:
     // copy: 256 + 32 + 1 = 37 bytes (vs. 16 when shared).
     hash_digest hash_;
     uint32_t index_;
+
+    // Cache.
     bool valid_;
 };
 

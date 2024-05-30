@@ -199,6 +199,8 @@ private:
     // copy: 4 * 64 + 1 = 33 bytes (vs. 16 when shared).
     chain::header::cptr header_;
     chain::transactions_cptr txs_;
+
+    // Cache.
     bool valid_;
 };
 

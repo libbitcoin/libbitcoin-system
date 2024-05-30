@@ -284,6 +284,11 @@ bool input::is_final() const NOEXCEPT
     return sequence_ == max_input_sequence;
 }
 
+bool input::is_roller() const NOEXCEPT
+{
+    return script_->is_roller() || (prevout && prevout->script().is_roller());
+}
+
 // static
 bool input::is_locked(uint32_t sequence, size_t height,
     uint32_t median_time_past, size_t prevout_height,
