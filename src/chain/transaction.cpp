@@ -98,11 +98,11 @@ transaction::transaction(const transaction& other) NOEXCEPT
       other.valid_)
 {
     if (other.nominal_hash_)
-        nominal_hash_ = std::make_unique<const hash_digest>(*other.nominal_hash_);
+        nominal_hash_ = to_unique(*other.nominal_hash_);
     if (other.witness_hash_)
-        witness_hash_ = std::make_unique<const hash_digest>(*other.witness_hash_);
+        witness_hash_ = to_unique(*other.witness_hash_);
     if (other.sighash_cache_)
-        sighash_cache_ = std::make_unique<const sighash_cache>(*other.sighash_cache_);
+        sighash_cache_ = to_unique(*other.sighash_cache_);
 }
 
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
@@ -194,11 +194,11 @@ transaction& transaction::operator=(const transaction& other) NOEXCEPT
     valid_ = other.valid_;
 
     if (other.nominal_hash_)
-        nominal_hash_ = std::make_unique<const hash_digest>(*other.nominal_hash_);
+        nominal_hash_ = to_unique(*other.nominal_hash_);
     if (other.witness_hash_)
-        witness_hash_ = std::make_unique<const hash_digest>(*other.witness_hash_);
+        witness_hash_ = to_unique(*other.witness_hash_);
     if (other.sighash_cache_)
-        sighash_cache_ = std::make_unique<const sighash_cache>(*other.sighash_cache_);
+        sighash_cache_ = to_unique(*other.sighash_cache_);
 
     return *this;
 }
@@ -412,12 +412,12 @@ uint64_t transaction::fee() const NOEXCEPT
 
 void transaction::set_nominal_hash(hash_digest&& hash) const NOEXCEPT
 {
-    nominal_hash_ = std::make_unique<const hash_digest>(std::move(hash));
+    nominal_hash_ = to_unique(std::move(hash));
 }
 
 void transaction::set_witness_hash(hash_digest&& hash) const NOEXCEPT
 {
-    witness_hash_ = std::make_unique<const hash_digest>(std::move(hash));
+    witness_hash_ = to_unique(std::move(hash));
 }
 
 const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
