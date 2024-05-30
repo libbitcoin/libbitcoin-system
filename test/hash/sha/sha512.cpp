@@ -247,9 +247,10 @@ BOOST_AUTO_TEST_CASE(sha512__merkle_root__three__expected)
     constexpr auto expected1 = sha512::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha512::double_hash({ 2 }, { 2 });
     constexpr auto expected = sha512::double_hash(expected1, expected2);
-#if defined (HAVE_VECTOR_CONSTEXPR)
-    static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 } }) == expected);
-#endif
+// Internal compiler error vc++.
+////#if defined (HAVE_VECTOR_CONSTEXPR)
+////    static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 } }) == expected);
+////#endif
     BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 } }), expected);
 }
 
