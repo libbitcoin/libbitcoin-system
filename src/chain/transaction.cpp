@@ -97,21 +97,29 @@ transaction::transaction(const transaction& other) NOEXCEPT
       other.segregated_,
       other.valid_)
 {
+    // Optimized for faster optional, not for copy.
+
     if (other.nominal_hash_)
         nominal_hash_ = to_unique(*other.nominal_hash_);
+    else
+        nominal_hash_.reset();
+
     if (other.witness_hash_)
         witness_hash_ = to_unique(*other.witness_hash_);
+    else
+        witness_hash_.reset();
+
     if (other.sighash_cache_)
         sighash_cache_ = to_unique(*other.sighash_cache_);
+    else
+        sighash_cache_.reset();
 }
 
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
     chain::outputs&& outputs, uint32_t locktime) NOEXCEPT
   : transaction(version, to_shareds(std::move(inputs)),
-      to_shareds(std::move(outputs)), locktime, false, true)
+      to_shareds(std::move(outputs)), locktime)
 {
-    // Defer execution for constructor move.
-    segregated_ = segregated(*inputs_);
 }
 
 transaction::transaction(uint32_t version, const chain::inputs& inputs,
@@ -171,7 +179,8 @@ transaction::transaction(uint32_t version,
     outputs_(outputs ? outputs : to_shared<output_cptrs>()),
     locktime_(locktime),
     segregated_(segregated),
-    valid_(valid)
+    valid_(valid),
+    size_(serialized_size(*inputs, *outputs, segregated))
 {
 }
 
@@ -192,13 +201,24 @@ transaction& transaction::operator=(const transaction& other) NOEXCEPT
     locktime_ = other.locktime_;
     segregated_ = other.segregated_;
     valid_ = other.valid_;
+    size_ = other.size_;
+
+    // Optimized for faster optional, not for copy.
 
     if (other.nominal_hash_)
         nominal_hash_ = to_unique(*other.nominal_hash_);
+    else
+        nominal_hash_.reset();
+
     if (other.witness_hash_)
         witness_hash_ = to_unique(*other.witness_hash_);
+    else
+        witness_hash_.reset();
+
     if (other.sighash_cache_)
         sighash_cache_ = to_unique(*other.sighash_cache_);
+    else
+        sighash_cache_.reset();
 
     return *this;
 }
@@ -269,10 +289,8 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
         {
             if (witness)
             {
-                // Safe to cast as this method exclusively owns the input and
-                // input::witness_ a mutable public property of the instance.
-                const auto setter = const_cast<chain::input*>(input.get());
-                setter->witness_ = to_shared<chain::witness>(source, true);
+                // Safe to cast as this method exclusively owns the input.
+                const_cast<chain::input*>(input.get())->set_witness(source);
             }
             else
             {
@@ -340,29 +358,69 @@ void transaction::to_data(writer& sink, bool witness) const NOEXCEPT
     sink.write_4_bytes_little_endian(locktime_);
 }
 
-// TODO: this is expensive.
+// static/private
+transaction::sizes transaction::serialized_size(
+    const chain::input_cptrs& inputs,
+    const chain::output_cptrs& outputs, bool segregated) NOEXCEPT
+{
+    sizes size{ zero, zero };
+
+    // Keep the condition outside of the loop.
+    if (segregated)
+    {
+        std::for_each(inputs.begin(), inputs.end(), [&](const auto& in) NOEXCEPT
+        {
+            size.nominal = ceilinged_add(size.nominal, in->nominal_size());
+            size.witnessed = ceilinged_add(size.witnessed, in->witnessed_size());
+        });
+    }
+    else
+    {
+        // Witness must be zeroed because witnesses have nonzero size when they
+        // are zero-valued, so they can be archived easily. Also it would be
+        // wasteful to to count mutiple zero sizes, so exclude them here.
+        std::for_each(inputs.begin(), inputs.end(), [&](const auto& in) NOEXCEPT
+        {
+            size.nominal = ceilinged_add(size.nominal, in->nominal_size());
+        });
+    }
+
+    const auto outs = [](size_t total, const auto& output) NOEXCEPT
+    {
+        return ceilinged_add(total, output->serialized_size());
+    };
+
+    constexpr auto base_const_size = ceilinged_add(
+        sizeof(version_),
+        sizeof(locktime_));
+
+    constexpr auto witness_const_size = ceilinged_add(
+        sizeof(witness_marker),
+        sizeof(witness_enabled));
+
+    const auto base_size = ceilinged_add(ceilinged_add(ceilinged_add(
+        base_const_size,
+        variable_size(inputs.size())),
+        variable_size(outputs.size())),
+        std::accumulate(outputs.begin(), outputs.end(), zero, outs));
+
+    const auto nominal_size = ceilinged_add(
+        base_size,
+        size.nominal);
+
+    const auto witnessed_size = ceilinged_add(ceilinged_add(
+        base_size,
+        witness_const_size),
+        size.witnessed);
+
+    return { nominal_size, witnessed_size };
+}
+
 size_t transaction::serialized_size(bool witness) const NOEXCEPT
 {
     witness &= segregated_;
 
-    const auto ins = [=](size_t total, const auto& input) NOEXCEPT
-    {
-        // Inputs account for witness bytes. 
-        return total + input->serialized_size(witness);
-    };
-
-    const auto outs = [](size_t total, const auto& output) NOEXCEPT
-    {
-        return total + output->serialized_size();
-    };
-
-    return sizeof(version_)
-        + (witness ? sizeof(witness_marker) + sizeof(witness_enabled) : zero)
-        + variable_size(inputs_->size())
-        + std::accumulate(inputs_->begin(), inputs_->end(), zero, ins)
-        + variable_size(outputs_->size())
-        + std::accumulate(outputs_->begin(), outputs_->end(), zero, outs)
-        + sizeof(locktime_);
+    return witness ? size_.witnessed : size_.nominal;
 }
 
 // Properties.
@@ -849,7 +907,6 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
         return unversioned_signature_hash(input, sub, sighash_flags);
 
     // Set options.
-    // C++14: switch in constexpr.
     const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
     const auto flag = mask_sighash(sighash_flags);
     const auto all = (flag == coverage::hash_all);
@@ -1014,8 +1071,9 @@ bool transaction::is_segregated() const NOEXCEPT
 size_t transaction::weight() const NOEXCEPT
 {
     // Block weight is 3 * base size * + 1 * total size (bip141).
-    return base_size_contribution * serialized_size(false) +
-        total_size_contribution * serialized_size(true);
+    return ceilinged_add(
+        ceilinged_multiply(base_size_contribution, serialized_size(false)),
+        ceilinged_multiply(total_size_contribution, serialized_size(true)));
 }
 
 bool transaction::is_overweight() const NOEXCEPT

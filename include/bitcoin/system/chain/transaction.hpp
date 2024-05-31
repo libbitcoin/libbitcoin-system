@@ -224,6 +224,7 @@ protected:
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
 
 private:
+    typedef struct { size_t nominal; size_t witnessed; } sizes;
     typedef struct
     {
         hash_digest outputs;
@@ -234,6 +235,8 @@ private:
     static transaction from_data(reader& source, bool witness) NOEXCEPT;
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;
+    static sizes serialized_size(const chain::input_cptrs& inputs,
+        const chain::output_cptrs& outputs, bool segregated) NOEXCEPT;
 
     // signature hash
     hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
@@ -268,8 +271,7 @@ private:
     // Cache.
     bool segregated_;
     bool valid_;
-    ////size_t nominal_size_;
-    ////size_t witness_size_;
+    sizes size_;
 
     // TODO: use std::optional to avoid these pointer allocations (0.16%).
     // Signature and identity hash caching (witness hash if witnessed).

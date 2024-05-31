@@ -156,6 +156,7 @@ protected:
 private:
     // So script may call count_op.
     friend class script;
+    static bool count_op(reader& source) NOEXCEPT;
 
     static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,
@@ -166,7 +167,6 @@ private:
 
     static chunk_cptr no_data_ptr() NOEXCEPT;
     static chunk_cptr any_data_ptr() NOEXCEPT;
-    static bool count_op(reader& source) NOEXCEPT;
     static uint32_t read_data_size(opcode code, reader& source) NOEXCEPT;
 
     static inline opcode opcode_from_data(const data_chunk& push_data,

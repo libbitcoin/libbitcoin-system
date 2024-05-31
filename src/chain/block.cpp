@@ -111,7 +111,10 @@ block::block(reader& source, bool witness) NOEXCEPT
 // protected
 block::block(const chain::header::cptr& header,
     const chain::transactions_cptr& txs, bool valid) NOEXCEPT
-  : header_(header), txs_(txs), valid_(valid)
+  : header_(header),
+    txs_(txs),
+    valid_(valid),
+    size_(serialized_size(*txs))
 {
 }
 
@@ -213,7 +216,7 @@ const chain::header::cptr block::header_ptr() const NOEXCEPT
 const inputs_cptr block::inputs_ptr() const NOEXCEPT
 {
     const auto inputs = std::make_shared<input_cptrs>();
-    const auto append_ins = [&inputs](const transaction::cptr& tx) NOEXCEPT
+    const auto append_ins = [&inputs](const auto& tx) NOEXCEPT
     {
         const auto& tx_ins = *tx->inputs_ptr();
         inputs->insert(inputs->end(), tx_ins.begin(), tx_ins.end());
@@ -240,7 +243,7 @@ hashes block::transaction_hashes(bool witness) const NOEXCEPT
     // Vector capacity is never reduced when resizing to smaller size.
     out.resize(count);
 
-    const auto hash = [witness](const transaction::cptr& tx) NOEXCEPT
+    const auto hash = [witness](const auto& tx) NOEXCEPT
     {
         return tx->hash(witness);
     };
@@ -255,18 +258,35 @@ hash_digest block::hash() const NOEXCEPT
     return header_->hash();
 }
 
-// TODO: this is expensive.
+// static/private
+block::sizes block::serialized_size(
+    const chain::transaction_cptrs& txs) NOEXCEPT
+{
+    sizes size{};
+    std::for_each(txs.begin(), txs.end(), [&](const auto& tx) NOEXCEPT
+    {
+        size.nominal = ceilinged_add(size.nominal, tx->serialized_size(false));
+        size.witnessed = ceilinged_add(size.witnessed, tx->serialized_size(true));
+    });
+
+    const auto common_size = ceilinged_add(
+        header::serialized_size(),
+        variable_size(txs.size()));
+
+    const auto nominal_size = ceilinged_add(
+        common_size,
+        size.nominal);
+
+    const auto witnessed_size = ceilinged_add(
+        common_size,
+        size.witnessed);
+
+    return { nominal_size, witnessed_size };
+}
+
 size_t block::serialized_size(bool witness) const NOEXCEPT
 {
-    // Overflow returns max_size_t.
-    const auto sum = [=](size_t total, const transaction::cptr& tx) NOEXCEPT
-    {
-        return ceilinged_add(total, tx->serialized_size(witness));
-    };
-
-    return header::serialized_size()
-        + variable_size(txs_->size())
-        + std::accumulate(txs_->begin(), txs_->end(), zero, sum);
+    return witness ? size_.witnessed : size_.nominal;
 }
 
 // Connect.
@@ -294,7 +314,7 @@ bool block::is_extra_coinbases() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto value = [](const transaction::cptr& tx) NOEXCEPT
+    const auto value = [](const auto& tx) NOEXCEPT
     {
         return tx->is_coinbase();
     };
@@ -318,7 +338,7 @@ bool block::is_forward_reference() const NOEXCEPT
         return hashes.find(std::ref(input->point().hash())) != hashes.end();
     };
 
-    const auto spend = [&spent, &hashes](const transaction::cptr& tx) NOEXCEPT
+    const auto spend = [&spent, &hashes](const auto& tx) NOEXCEPT
     {
         const auto& ins = *tx->inputs_ptr();
         const auto forward = std::any_of(ins.begin(), ins.end(), spent);
@@ -338,7 +358,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
         return false;
 
     // Overflow returns max_size_t.
-    const auto sum_ins = [](size_t total, const transaction::cptr& tx) NOEXCEPT
+    const auto sum_ins = [](size_t total, const auto& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->inputs());
     };
@@ -351,7 +371,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
         return !points.emplace(in->point()).second;
     };
 
-    const auto double_spent = [&spent](const transaction::cptr& tx) NOEXCEPT
+    const auto double_spent = [&spent](const auto& tx) NOEXCEPT
     {
         const auto& ins = *tx->inputs_ptr();
         return std::any_of(ins.begin(), ins.end(), spent);
@@ -377,8 +397,9 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
 size_t block::weight() const NOEXCEPT
 {
     // Block weight is 3 * nominal size * + 1 * witness size (bip141).
-    return base_size_contribution * serialized_size(false) +
-        total_size_contribution * serialized_size(true);
+    return ceilinged_add(
+        ceilinged_multiply(base_size_contribution, serialized_size(false)),
+        ceilinged_multiply(total_size_contribution, serialized_size(true)));
 }
 
 bool block::is_overweight() const NOEXCEPT
@@ -484,7 +505,7 @@ bool block::is_malleable64() const NOEXCEPT
 // This form of malleability does not imply current block instance is invalid.
 bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
 {
-    const auto two_leaves = [](const transaction::cptr& tx) NOEXCEPT
+    const auto two_leaves = [](const auto& tx) NOEXCEPT
     {
         return tx->serialized_size(false) == two * hash_size;
     };
@@ -494,7 +515,7 @@ bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
 
 bool block::is_segregated() const NOEXCEPT
 {
-    const auto segregated = [](const transaction::cptr& tx) NOEXCEPT
+    const auto segregated = [](const auto& tx) NOEXCEPT
     {
         return tx->is_segregated();
     };
@@ -547,7 +568,7 @@ static uint64_t block_subsidy(size_t height, uint64_t subsidy_interval,
 uint64_t block::fees() const NOEXCEPT
 {
     // Overflow returns max_uint64.
-    const auto value = [](uint64_t total, const transaction::cptr& tx) NOEXCEPT
+    const auto value = [](uint64_t total, const auto& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->fee());
     };
@@ -578,7 +599,7 @@ bool block::is_overspent(size_t height, uint64_t subsidy_interval,
 size_t block::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
     // Overflow returns max_size_t.
-    const auto value = [=](size_t total, const transaction::cptr& tx) NOEXCEPT
+    const auto value = [=](size_t total, const auto& tx) NOEXCEPT
     {
         return ceilinged_add(total, tx->signature_operations(bip16, bip141));
     };

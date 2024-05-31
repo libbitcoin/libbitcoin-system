@@ -178,7 +178,7 @@ inline bool have_avx512() NOEXCEPT
 inline bool have_avx2() NOEXCEPT
 {
     if constexpr (with_avx2)
-        return try_avx2();
+        return true;//// try_avx2();
     else
         return false;
 }
@@ -186,15 +186,15 @@ inline bool have_avx2() NOEXCEPT
 inline bool have_sse41() NOEXCEPT
 {
     if constexpr (with_sse41)
-        return try_sse41();
+        return true;//// try_sse41();
     else
         return false;
 }
 
 inline bool have_neon() NOEXCEPT
 {
-    if constexpr (with_shani)
-        return try_shani();
+    if constexpr (with_neon)
+        return try_neon();
     else
         return false;
 }

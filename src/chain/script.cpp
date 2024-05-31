@@ -167,7 +167,7 @@ script::script(const operations& ops, bool valid, bool prefail) NOEXCEPT
   : ops_(ops),
     valid_(valid),
     prefail_(prefail),
-    size_(serialized_size(ops_)),
+    size_(serialized_size(ops)),
     offset(ops_.begin())
 {
 }
@@ -395,13 +395,10 @@ size_t script::serialized_size(const operations& ops) NOEXCEPT
 size_t script::serialized_size(bool prefix) const NOEXCEPT
 {
     // Recompute it serialization has been affected by offset metadata.
-    auto size = (offset == ops_.begin()) ? size_ :
+    const auto size = (offset == ops_.begin()) ? size_ :
         std::accumulate(offset, ops_.end(), zero, op_size);
 
-    if (prefix)
-        size += variable_size(size);
-
-    return size;
+    return prefix ? ceilinged_add(size, variable_size(size)) : size;
 }
 
 // Utilities.

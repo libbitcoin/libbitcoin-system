@@ -154,7 +154,8 @@ input::input(const chain::point::cptr& point, const chain::script::cptr& script,
     script_(script),
     witness_(witness),
     sequence_(sequence),
-    valid_(valid)
+    valid_(valid),
+    size_(serialized_size(*script, *witness))
 {
 }
 
@@ -216,16 +217,52 @@ void input::to_data(writer& sink) const NOEXCEPT
     sink.write_4_bytes_little_endian(sequence_);
 }
 
+// static/private
+input::sizes input::serialized_size(const chain::script& script,
+    const chain::witness& witness) NOEXCEPT
+{
+    constexpr auto const_size = ceilinged_add(
+        point::serialized_size(),
+        sizeof(sequence_));
+
+    const auto nominal_size = ceilinged_add(
+        const_size,
+        script.serialized_size(true));
+
+    const auto witnessed_size = ceilinged_add(
+        nominal_size,
+        witness.serialized_size(true));
+
+    return { nominal_size, witnessed_size };
+}
+
+// input.serialized_size(witness) provides sizing for witness, however
+// witnesses are serialized by the transaction. This is an ugly hack as a
+// consequence of bip144 not serializing witnesses as part of inputs, which
+// is logically the proper association.
 size_t input::serialized_size(bool witness) const NOEXCEPT
 {
-    // input.serialized_size(witness) provides sizing for witness, however
-    // witnesses are serialized by the transaction. This is an ugly hack as a
-    // consequence of bip144 not serializing witnesses as part of inputs, which
-    // is logically the proper association.
-    return point::serialized_size()
-        + script_->serialized_size(true)
-        + (witness ? witness_->serialized_size(true) : zero)
-        + sizeof(sequence_);
+    return witness ? size_.witnessed : size_.nominal;
+}
+
+// Friend accessors (private).
+// ----------------------------------------------------------------------------
+
+size_t input::nominal_size() const NOEXCEPT
+{
+    return size_.nominal;
+}
+
+size_t input::witnessed_size() const NOEXCEPT
+{
+    return size_.witnessed;
+}
+
+void input::set_witness(reader& source) NOEXCEPT
+{
+    witness_ = to_shared<chain::witness>(source, true);
+    size_.witnessed = ceilinged_add(size_.nominal,
+        witness_->serialized_size(true));
 }
 
 // Properties.

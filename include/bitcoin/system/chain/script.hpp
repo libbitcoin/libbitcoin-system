@@ -180,7 +180,7 @@ private:
     static size_t serialized_size(const operations& ops) NOEXCEPT;
     static inline size_t op_size(size_t total, const operation& op) NOEXCEPT
     {
-        return total + op.serialized_size();
+        return ceilinged_add(total, op.serialized_size());
     };
 
     // Script should be stored as shared.
