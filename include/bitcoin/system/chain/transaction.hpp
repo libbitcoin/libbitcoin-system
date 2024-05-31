@@ -109,9 +109,18 @@ public:
     bool is_segregated() const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
 
-    /// Cache (these override hash(bool) computation).
-    void set_hash(hash_digest&& hash) const NOEXCEPT;
+    /// Cache setters/getters, not thread safe.
+    /// -----------------------------------------------------------------------
+
+    /// Initialize with externally-produced nominal hash value, as from store.
+    void set_nominal_hash(hash_digest&& hash) const NOEXCEPT;
+
+    /// Initialize with externally-produced witness hash value, as from store.
+    /// This need not be set if the transaction is not segmented.
     void set_witness_hash(hash_digest&& hash) const NOEXCEPT;
+
+    /// Reference used to avoid copy, sets cache if not set.
+    const hash_digest& get_hash(bool witness) const NOEXCEPT;
 
     /// Methods.
     /// -----------------------------------------------------------------------
@@ -121,10 +130,6 @@ public:
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
-    chain::points points() const NOEXCEPT;
-    hash_digest outputs_hash() const NOEXCEPT;
-    hash_digest points_hash() const NOEXCEPT;
-    hash_digest sequences_hash() const NOEXCEPT;
 
     // signature_hash exposed for op_check_multisig caching.
     hash_digest signature_hash(const input_iterator& input, const script& sub,
@@ -219,10 +224,16 @@ protected:
     bool is_confirmed_double_spend(size_t height) const NOEXCEPT;
 
 private:
+    typedef struct
+    {
+        hash_digest outputs;
+        hash_digest points;
+        hash_digest sequences;
+    } sighash_cache;
+
     static transaction from_data(reader& source, bool witness) NOEXCEPT;
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;
-    ////static size_t maximum_size(bool coinbase) NOEXCEPT;
 
     // signature hash
     hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
@@ -240,6 +251,13 @@ private:
         const script& sub, uint64_t value, uint8_t sighash_flags,
         bool bip143) const NOEXCEPT;
 
+    // Caching.
+    chain::points points() const NOEXCEPT;
+    hash_digest outputs_hash() const NOEXCEPT;
+    hash_digest points_hash() const NOEXCEPT;
+    hash_digest sequences_hash() const NOEXCEPT;
+    void initialize_sighash_cache() const NOEXCEPT;
+
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
     uint32_t version_;
@@ -247,25 +265,17 @@ private:
     chain::outputs_cptr outputs_;
     uint32_t locktime_;
 
-    // TODO: pack these flags.
+    // Cache.
     bool segregated_;
     bool valid_;
-
-private:
-    typedef struct
-    {
-        hash_digest outputs;
-        hash_digest points;
-        hash_digest sequences;
-    } hash_cache;
-
-    void initialize_hash_cache() const NOEXCEPT;
+    ////size_t nominal_size_;
+    ////size_t witness_size_;
 
     // TODO: use std::optional to avoid these pointer allocations (0.16%).
     // Signature and identity hash caching (witness hash if witnessed).
-    mutable std::unique_ptr<const hash_cache> cache_{};
     mutable std::unique_ptr<const hash_digest> nominal_hash_{};
     mutable std::unique_ptr<const hash_digest> witness_hash_{};
+    mutable std::unique_ptr<const sighash_cache> sighash_cache_{};
 };
 
 typedef std::vector<transaction> transactions;
@@ -291,6 +301,13 @@ struct hash<bc::system::chain::transaction>
         return bc::system::unique_hash_t<>{}(value.hash(true));
     }
 };
+
+inline bool operator==(
+    const std::reference_wrapper<const bc::system::hash_digest>& left,
+    const std::reference_wrapper<const bc::system::hash_digest>& right) NOEXCEPT
+{
+    return left.get() == right.get();
+}
 } // namespace std
 
 #endif

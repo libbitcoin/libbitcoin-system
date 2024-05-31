@@ -101,7 +101,10 @@ private:
     // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).
     uint64_t value_;
     chain::script::cptr script_;
+
+    // Cache.
     bool valid_;
+    ////size_t size_;
 };
 
 typedef std::vector<output> outputs;

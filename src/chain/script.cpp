@@ -47,14 +47,23 @@ namespace chain {
 
 using namespace bc::system::machine;
 
-// static (should be inline or constexpr).
-// TODO: Avoiding circular include on machine.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
+// static
+// TODO: would be inlined but machine is a circular include.
+//*****************************************************************************
+// CONSENSUS: BIP34 requires coinbase input script to begin with one byte
+// that indicates height size. This is inconsistent with an extreme future
+// where the size byte overflows. However satoshi actually requires nominal
+// encoding.
+//*************************************************************************
 bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
 {
-    // TODO: number::chunk::from_int constexpr?
+    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     return !ops.empty()
         && ops[0].is_nominal_push()
         && ops[0].data() == number::chunk::from_integer(to_unsigned(height));
+    BC_POP_WARNING()
 }
 
 // Constructors.
@@ -104,9 +113,7 @@ script::script(const operations& ops, bool prefail) NOEXCEPT
 }
 
 script::script(const data_slice& data, bool prefix) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : script(stream::in::copy(data), prefix)
-    BC_POP_WARNING()
 {
 }
 
@@ -214,21 +221,22 @@ bool script::operator!=(const script& other) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // static/private
-////size_t script::op_count(reader& source) NOEXCEPT
-////{
-////    // Stream errors reset by set_position so trap here.
-////    if (!source)
-////        return zero;
-////
-////    const auto start = source.get_read_position();
-////    size_t count{};
-////
-////    while (operation::count_op(source))
-////        ++count;
-////
-////    source.set_position(start);
-////    return count;
-////}
+size_t script::op_count(reader& source) NOEXCEPT
+{
+    // Stream errors reset by set_position so trap here.
+    if (!source)
+        return zero;
+
+    const auto start = source.get_read_position();
+    auto count = zero;
+
+    // This is expensive (1.1%) but far less than vector reallocs (11.6%).
+    while (operation::count_op(source))
+        ++count;
+
+    source.set_position(start);
+    return count;
+}
 
 // static/private
 script script::from_data(reader& source, bool prefix) NOEXCEPT
@@ -242,9 +250,8 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit(expected);
     }
 
-    // op_count is more expensive than the reallocations.
-    operations ops{};
-    ////ops.reserve(op_count(source));
+    operations ops;
+    ops.reserve(op_count(source));
     const auto start = source.get_read_position();
 
     while (!source.is_exhausted())
@@ -300,11 +307,7 @@ script script::from_string(const std::string& mnemonic) NOEXCEPT
 data_chunk script::to_data(bool prefix) const NOEXCEPT
 {
     data_chunk data(serialized_size(prefix));
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
     to_data(ostream, prefix);
     return data;
 }
@@ -332,8 +335,6 @@ std::string script::to_string(uint32_t active_flags) const NOEXCEPT
     std::ostringstream text;
 
     // Throwing stream aborts.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
     for (const auto& op: ops())
     {
         text << (first ? "" : " ") << op.to_string(active_flags);
@@ -342,8 +343,6 @@ std::string script::to_string(uint32_t active_flags) const NOEXCEPT
 
     // An invalid operation has a specialized serialization.
     return text.str();
-
-    BC_POP_WARNING()
 }
 
 
@@ -367,6 +366,15 @@ const operations& script::ops() const NOEXCEPT
 {
     return ops_;
 }
+
+bool script::is_roller() const NOEXCEPT
+{
+    static const auto roll = operation{ opcode::roll };
+
+    // Naive implementation, any op_roll in script, late-counted.
+    // TODO: precompute on script parse, tune using performance profiling.
+    return contains(ops_, roll);
+};
 
 // Consensus (witness::extract_script) and Electrum server payments key.
 hash_digest script::hash() const NOEXCEPT
@@ -401,7 +409,7 @@ size_t script::serialized_size(bool prefix) const NOEXCEPT
 
 const data_chunk& script::witness_program() const NOEXCEPT
 {
-    static const data_chunk empty;
+    static const data_chunk empty{};
 
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     return is_witness_program_pattern(ops()) ? ops()[1].data() : empty;
@@ -546,6 +554,8 @@ bool script::is_unspendable() const NOEXCEPT
     // scripts that fail to parse, but would otherwise be caught in evaluation.
     return operation::is_reserved(code) || operation::is_invalid(code);
 }
+
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------

@@ -35,6 +35,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // Product overflows guarded by script size limit.
 static_assert(max_script_size < 
     max_size_t / multisig_default_sigops / heavy_sigops_factor,
@@ -111,9 +113,7 @@ input::input(const chain::point::cptr& point, const chain::script::cptr& script,
 }
 
 input::input(const data_slice& data) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : input(stream::in::copy(data))
-    BC_POP_WARNING()
 {
 }
 
@@ -197,11 +197,7 @@ input input::from_data(reader& source) NOEXCEPT
 data_chunk input::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size(false));
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
     to_data(ostream);
     return data;
 }
@@ -220,7 +216,6 @@ void input::to_data(writer& sink) const NOEXCEPT
     sink.write_4_bytes_little_endian(sequence_);
 }
 
-// TODO: this is expensive.
 size_t input::serialized_size(bool witness) const NOEXCEPT
 {
     // input.serialized_size(witness) provides sizing for witness, however
@@ -284,6 +279,11 @@ bool input::is_final() const NOEXCEPT
     return sequence_ == max_input_sequence;
 }
 
+bool input::is_roller() const NOEXCEPT
+{
+    return script_->is_roller() || (prevout && prevout->script().is_roller());
+}
+
 // static
 bool input::is_locked(uint32_t sequence, size_t height,
     uint32_t median_time_past, size_t prevout_height,
@@ -337,7 +337,7 @@ bool input::extract_sigop_script(chain::script& out,
 
     // There are no embedded sigops when the input script is not push only.
     const auto& ops = script_->ops();
-    if (ops.empty() || !script::is_relaxed_push(ops))
+    if (ops.empty() || !script::is_relaxed_push_pattern(ops))
         return false;
 
     // Parse the embedded script from the last input script item (data).
@@ -390,6 +390,8 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 
     return sigops;
 }
+
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------

@@ -40,6 +40,9 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 // So in this case it constructs the shared_pointer which accepts the raw
 // pointer as its constructor argument, passed by std::vector.emplace_back.
 
+/// shared_ptr
+/// ---------------------------------------------------------------------------
+
 /// Create empty shared pointer.
 template <typename Type>
 inline std::shared_ptr<Type> to_shared() NOEXCEPT
@@ -87,6 +90,23 @@ to_shareds(std::vector<Type>&& values) NOEXCEPT;
 template <typename Type>
 std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
 to_shareds(const std::vector<Type>& values) NOEXCEPT;
+
+/// unique_ptr
+/// ---------------------------------------------------------------------------
+
+/// Create unique pointer to const from moved instance.
+template <typename Type>
+inline std::unique_ptr<const Type> to_unique(Type&& value) NOEXCEPT
+{
+    return std::make_unique<const Type>(std::forward<Type>(value));
+}
+
+/// Create unique pointer to const from copied instance.
+template <typename Type>
+inline std::unique_ptr<const Type> to_unique(const Type& value) NOEXCEPT
+{
+    return std::make_unique<const Type>(value);
+}
 
 BC_POP_WARNING()
 

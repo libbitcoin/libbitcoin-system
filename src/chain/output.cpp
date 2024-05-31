@@ -30,6 +30,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
 
@@ -59,9 +61,7 @@ output::output(uint64_t value, const chain::script::cptr& script) NOEXCEPT
 }
 
 output::output(const data_slice& data) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : output(stream::in::copy(data))
-    BC_POP_WARNING()
 {
 }
 
@@ -136,11 +136,7 @@ output output::from_data(reader& source) NOEXCEPT
 data_chunk output::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size());
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
     to_data(ostream);
     return data;
 }
@@ -227,6 +223,8 @@ bool output::is_dust(uint64_t minimum_value) const NOEXCEPT
     // transactions with unprunable outputs.
     return value_ < minimum_value && !script_->is_unspendable();
 }
+
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------

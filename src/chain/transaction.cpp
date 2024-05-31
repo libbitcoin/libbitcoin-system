@@ -43,6 +43,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // Precompute fixed elements of signature hashing.
 // ----------------------------------------------------------------------------
 
@@ -86,7 +88,6 @@ transaction::transaction(transaction&& other) NOEXCEPT
 {
 }
 
-// Cache not copied or moved.
 transaction::transaction(const transaction& other) NOEXCEPT
   : transaction(
       other.version_,
@@ -96,6 +97,12 @@ transaction::transaction(const transaction& other) NOEXCEPT
       other.segregated_,
       other.valid_)
 {
+    if (other.nominal_hash_)
+        nominal_hash_ = to_unique(*other.nominal_hash_);
+    if (other.witness_hash_)
+        witness_hash_ = to_unique(*other.witness_hash_);
+    if (other.sighash_cache_)
+        sighash_cache_ = to_unique(*other.sighash_cache_);
 }
 
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
@@ -121,9 +128,7 @@ transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
 }
 
 transaction::transaction(const data_slice& data, bool witness) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : transaction(stream::in::copy(data), witness)
-    BC_POP_WARNING()
 {
 }
 
@@ -181,13 +186,20 @@ transaction& transaction::operator=(transaction&& other) NOEXCEPT
 
 transaction& transaction::operator=(const transaction& other) NOEXCEPT
 {
-    // Cache not assigned.
     version_ = other.version_;
     inputs_ = other.inputs_;
     outputs_ = other.outputs_;
     locktime_ = other.locktime_;
     segregated_ = other.segregated_;
     valid_ = other.valid_;
+
+    if (other.nominal_hash_)
+        nominal_hash_ = to_unique(*other.nominal_hash_);
+    if (other.witness_hash_)
+        witness_hash_ = to_unique(*other.witness_hash_);
+    if (other.sighash_cache_)
+        sighash_cache_ = to_unique(*other.sighash_cache_);
+
     return *this;
 }
 
@@ -221,9 +233,7 @@ read_puts(Source& source) NOEXCEPT
     for (auto put = zero; put < capacity; ++put)
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
         puts->emplace_back(new Put{ source });
-        BC_POP_WARNING()
         BC_POP_WARNING()
     }
 
@@ -241,8 +251,7 @@ transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
     chain::outputs_cptr outputs;
 
     // Expensive repeated recomputation, so cache segregated state.
-    const auto segregated =
-        inputs->size() == witness_marker &&
+    const auto segregated = inputs->size() == witness_marker &&
         source.peek_byte() == witness_enabled;
 
     // Detect witness as no inputs (marker) and expected flag (bip144).
@@ -291,11 +300,7 @@ data_chunk transaction::to_data(bool witness) const NOEXCEPT
     witness &= segregated_;
 
     data_chunk data(serialized_size(witness));
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
     to_data(ostream, witness);
     return data;
 }
@@ -405,18 +410,28 @@ uint64_t transaction::fee() const NOEXCEPT
     return floored_subtract(value(), claim());
 }
 
-void transaction::set_hash(hash_digest&& hash) const NOEXCEPT
+void transaction::set_nominal_hash(hash_digest&& hash) const NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    nominal_hash_ = std::make_unique<const hash_digest>(std::move(hash));
-    BC_POP_WARNING()
+    nominal_hash_ = to_unique(std::move(hash));
 }
 
 void transaction::set_witness_hash(hash_digest&& hash) const NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    witness_hash_ = std::make_unique<const hash_digest>(std::move(hash));
-    BC_POP_WARNING()
+    witness_hash_ = to_unique(std::move(hash));
+}
+
+const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
+{
+    if (witness)
+    {
+        if (!witness_hash_) set_witness_hash(hash(witness));
+        return *witness_hash_;
+    }
+    else
+    {
+        if (!nominal_hash_) set_nominal_hash(hash(witness));
+        return *nominal_hash_;
+    }
 }
 
 hash_digest transaction::hash(bool witness) const NOEXCEPT
@@ -425,10 +440,8 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     {
         if (witness)
         {
-            // Avoid is_coinbase call if cache present (and avoid caching it).
-            if (witness_hash_) return *witness_hash_;
-
             // Witness coinbase tx hash is assumed to be null_hash (bip141).
+            if (witness_hash_) return *witness_hash_;
             if (is_coinbase()) return null_hash;
         }
         else
@@ -439,7 +452,6 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     else
     {
         if (nominal_hash_) return *nominal_hash_;
-        if (witness_hash_) return *witness_hash_;
     }
 
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
@@ -500,6 +512,9 @@ chain::points transaction::points() const NOEXCEPT
 
 hash_digest transaction::outputs_hash() const NOEXCEPT
 {
+    if (sighash_cache_)
+        return sighash_cache_->outputs;
+
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
@@ -517,6 +532,9 @@ hash_digest transaction::outputs_hash() const NOEXCEPT
 
 hash_digest transaction::points_hash() const NOEXCEPT
 {
+    if (sighash_cache_)
+        return sighash_cache_->points;
+
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
@@ -534,6 +552,9 @@ hash_digest transaction::points_hash() const NOEXCEPT
 
 hash_digest transaction::sequences_hash() const NOEXCEPT
 {
+    if (sighash_cache_)
+        return sighash_cache_->sequences;
+
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest digest;
     BC_POP_WARNING()
@@ -572,7 +593,6 @@ uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
         std::distance(inputs_->begin(), input));
 }
 
-// C++14: switch in constexpr.
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
 // there are 4 possible 7 bit values that can set "single" and 4 others that
@@ -591,7 +611,6 @@ inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT
     }
 }
 
-/// REQUIRES INDEX.
 void transaction::signature_hash_single(writer& sink,
     const input_iterator& input, const script& sub,
     uint8_t sighash_flags) const NOEXCEPT
@@ -624,8 +643,7 @@ void transaction::signature_hash_single(writer& sink,
         }
     };
 
-    const auto write_outputs = [this, &input](
-        writer& sink) NOEXCEPT
+    const auto write_outputs = [this, &input](writer& sink) NOEXCEPT
     {
         // Guarded by unversioned_signature_hash.
         const auto index = input_index(input);
@@ -762,11 +780,15 @@ hash_digest transaction::unversioned_signature_hash(
             break;
         }
         case coverage::hash_none:
+        {
             signature_hash_none(sink, input, sub, sighash_flags);
             break;
+        }
         default:
         case coverage::hash_all:
+        {
             signature_hash_all(sink, input, sub, sighash_flags);
+        }
     }
 
     sink.flush();
@@ -778,21 +800,19 @@ hash_digest transaction::unversioned_signature_hash(
 
 // private
 // TODO: taproot requires both single and double hash of each.
-void transaction::initialize_hash_cache() const NOEXCEPT
+void transaction::initialize_sighash_cache() const NOEXCEPT
 {
     // This overconstructs the cache (anyone or !all), however it is simple and
     // the same criteria applied by satoshi.
     if (segregated_)
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        cache_.reset(new hash_cache
+        sighash_cache_.reset(new sighash_cache
         {
             outputs_hash(),
             points_hash(),
             sequences_hash()
         });
-        BC_POP_WARNING()
         BC_POP_WARNING()
     }
 }
@@ -851,16 +871,10 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     // conditionally passing them from methods avoids copying the cached hash.
 
     // points
-    if (cache_)
-        sink.write_bytes(!anyone ? cache_->points : null_hash);
-    else
-        sink.write_bytes(!anyone ? points_hash() : null_hash);
+    sink.write_bytes(!anyone ? points_hash() : null_hash);
 
     // sequences
-    if (cache_)
-        sink.write_bytes(!anyone && all ? cache_->sequences : null_hash);
-    else
-        sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
+    sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
 
     self.point().to_data(sink);
     sub.to_data(sink, prefixed);
@@ -870,8 +884,6 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     // outputs
     if (single)
         sink.write_bytes(output_hash(input));
-    else if (cache_)
-        sink.write_bytes(all ? cache_->outputs : null_hash);
     else
         sink.write_bytes(all ? outputs_hash() : null_hash);
 
@@ -959,6 +971,7 @@ bool transaction::is_coinbase() const NOEXCEPT
 
 bool transaction::is_internal_double_spend() const NOEXCEPT
 {
+    // TODO: optimize (see block.is_internal_double_spend).
     return !is_distinct(points());
 }
 
@@ -1334,26 +1347,16 @@ code transaction::connect(const context& ctx) const NOEXCEPT
     if (is_coinbase())
         return error::transaction_success;
 
-    code ec;
+    code ec{};
     using namespace machine;
-    initialize_hash_cache();
-    
-    const auto is_roller = [](const auto& input) NOEXCEPT
-    {
-        static const auto roll = operation{ opcode::roll };
-
-        // Naive implementation, any op_roll in either script, late-counted.
-        // TODO: precompute on script parse, tune using performance profiling.
-        return contains(input.script().ops(), roll)
-            || (input.prevout && contains(input.prevout->script().ops(), roll));
-    };
+    initialize_sighash_cache();
 
     // Validate scripts.
     for (auto input = inputs_->begin(); input != inputs_->end(); ++input)
     {
         // Evaluate rolling scripts with linear search but constant erase.
         // Evaluate non-rolling scripts with constant search but linear erase.
-        if ((ec = is_roller(**input) ?
+        if ((ec = (*input)->is_roller() ?
             interpreter<linked_stack>::connect(ctx, *this, input) :
             interpreter<contiguous_stack>::connect(ctx, *this, input)))
             return ec;
@@ -1363,6 +1366,8 @@ code transaction::connect(const context& ctx) const NOEXCEPT
     // TODO: return in override with out parameter. more impactful with segwit.
     return error::transaction_success;
 }
+
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------

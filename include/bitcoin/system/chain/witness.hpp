@@ -143,6 +143,8 @@ private:
 
     // Witness should be stored as shared.
     chunk_cptrs stack_;
+
+    // Cache.
     bool valid_;
     size_t size_;
 };

@@ -486,15 +486,15 @@ size_t operation::serialized_size() const NOEXCEPT
 // static/private
 // Advances stream, returns true unless exhausted.
 // Does not advance to end position in the case of underflow operation.
-////bool operation::count_op(reader& source) NOEXCEPT
-////{
-////    if (source.is_exhausted())
-////        return false;
-////
-////    const auto code = static_cast<opcode>(source.read_byte());
-////    source.skip_bytes(read_data_size(code, source));
-////    return true;
-////}
+bool operation::count_op(reader& source) NOEXCEPT
+{
+    if (source.is_exhausted())
+        return false;
+
+    const auto code = static_cast<opcode>(source.read_byte());
+    source.skip_bytes(read_data_size(code, source));
+    return true;
+}
 
 // static/private
 uint32_t operation::read_data_size(opcode code, reader& source) NOEXCEPT
