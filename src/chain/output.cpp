@@ -98,7 +98,10 @@ output::output(reader& source) NOEXCEPT
 // protected
 output::output(uint64_t value, const chain::script::cptr& script,
     bool valid) NOEXCEPT
-  : value_(value), script_(script), valid_(valid)
+  : value_(value),
+    script_(script),
+    valid_(valid),
+    size_(serialized_size(*script, value))
 {
 }
 
@@ -153,10 +156,16 @@ void output::to_data(writer& sink) const NOEXCEPT
     script_->to_data(sink, true);
 }
 
-// TODO: this is expensive.
+// static/private
+size_t output::serialized_size(const chain::script& script,
+    uint64_t value) NOEXCEPT
+{
+    return ceilinged_add(sizeof(value), script.serialized_size(true));
+}
+
 size_t output::serialized_size() const NOEXCEPT
 {
-    return sizeof(value_) + script_->serialized_size(true);
+    return size_;
 }
 
 // Properties.

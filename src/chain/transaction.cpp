@@ -171,7 +171,8 @@ transaction::transaction(uint32_t version,
     outputs_(outputs ? outputs : to_shared<output_cptrs>()),
     locktime_(locktime),
     segregated_(segregated),
-    valid_(valid)
+    valid_(valid),
+    size_(serialized_size(*inputs, *outputs))
 {
 }
 
@@ -192,6 +193,7 @@ transaction& transaction::operator=(const transaction& other) NOEXCEPT
     locktime_ = other.locktime_;
     segregated_ = other.segregated_;
     valid_ = other.valid_;
+    size_ = other.size_;
 
     if (other.nominal_hash_)
         nominal_hash_ = to_unique(*other.nominal_hash_);
@@ -340,29 +342,47 @@ void transaction::to_data(writer& sink, bool witness) const NOEXCEPT
     sink.write_4_bytes_little_endian(locktime_);
 }
 
-// TODO: this is expensive.
+// static/private
+transaction::sizes transaction::serialized_size(
+    const chain::input_cptrs& inputs,
+    const chain::output_cptrs& outputs) NOEXCEPT
+{
+    sizes size{};
+    std::for_each(inputs.begin(), inputs.end(), [&](const auto& input) NOEXCEPT
+    {
+        size.nominal = ceilinged_add(size.nominal, input->nominal_size());
+        size.witness = ceilinged_add(size.witness, input->witness_size());
+    });
+
+    const auto outs = [](size_t total, const auto& output) NOEXCEPT
+    {
+        return ceilinged_add(total, output->serialized_size());
+    };
+
+    constexpr auto const_size = ceilinged_add(
+        sizeof(version_),
+        sizeof(locktime_));
+
+    const auto nominal_size =
+        ceilinged_add(ceilinged_add(ceilinged_add(ceilinged_add(
+            const_size,
+            variable_size(inputs.size())),
+            size.nominal),
+            variable_size(outputs.size())),
+            std::accumulate(outputs.begin(), outputs.end(), zero, outs));
+
+    const auto witness_size = ceilinged_add(
+        nominal_size,
+        size.witness);
+
+    return { nominal_size, witness_size };
+}
+
 size_t transaction::serialized_size(bool witness) const NOEXCEPT
 {
     witness &= segregated_;
 
-    const auto ins = [=](size_t total, const auto& input) NOEXCEPT
-    {
-        // Inputs account for witness bytes. 
-        return total + input->serialized_size(witness);
-    };
-
-    const auto outs = [](size_t total, const auto& output) NOEXCEPT
-    {
-        return total + output->serialized_size();
-    };
-
-    return sizeof(version_)
-        + (witness ? sizeof(witness_marker) + sizeof(witness_enabled) : zero)
-        + variable_size(inputs_->size())
-        + std::accumulate(inputs_->begin(), inputs_->end(), zero, ins)
-        + variable_size(outputs_->size())
-        + std::accumulate(outputs_->begin(), outputs_->end(), zero, outs)
-        + sizeof(locktime_);
+    return witness ? size_.witness : size_.nominal;
 }
 
 // Properties.
@@ -849,7 +869,6 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
         return unversioned_signature_hash(input, sub, sighash_flags);
 
     // Set options.
-    // C++14: switch in constexpr.
     const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
     const auto flag = mask_sighash(sighash_flags);
     const auto all = (flag == coverage::hash_all);
@@ -1014,8 +1033,9 @@ bool transaction::is_segregated() const NOEXCEPT
 size_t transaction::weight() const NOEXCEPT
 {
     // Block weight is 3 * base size * + 1 * total size (bip141).
-    return base_size_contribution * serialized_size(false) +
-        total_size_contribution * serialized_size(true);
+    return ceilinged_add(
+        ceilinged_multiply(base_size_contribution, serialized_size(false)),
+        ceilinged_multiply(total_size_contribution, serialized_size(true)));
 }
 
 bool transaction::is_overweight() const NOEXCEPT

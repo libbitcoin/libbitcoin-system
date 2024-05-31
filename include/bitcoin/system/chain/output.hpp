@@ -96,6 +96,8 @@ protected:
 
 private:
     static output from_data(reader& source) NOEXCEPT;
+    static size_t serialized_size(const chain::script& script,
+        uint64_t value) NOEXCEPT;
 
     // Output should be stored as shared (adds 16 bytes).
     // copy: 3 * 64 + 1 = 25 bytes (vs. 16 when shared).
@@ -104,7 +106,7 @@ private:
 
     // Cache.
     bool valid_;
-    ////size_t size_;
+    size_t size_;
 };
 
 typedef std::vector<output> outputs;
