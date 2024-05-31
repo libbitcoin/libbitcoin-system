@@ -119,15 +119,22 @@ public:
     bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
 
 protected:
-    // So that witness may be set late in deserialization.
-    friend class transaction;
-
     input(const chain::point::cptr& point, const chain::script::cptr& script,
         const chain::witness::cptr& witness, uint32_t sequence,
         bool valid) NOEXCEPT;
 
 private:
+    // So that witness may be set late in deserialization.
+    friend class transaction;
+    size_t nominal_size() const NOEXCEPT;
+    size_t witnessed_size() const NOEXCEPT;
+    void set_witness(reader& source) NOEXCEPT;
+
+    typedef struct { size_t nominal; size_t witnessed; } sizes;
+
     static input from_data(reader& source) NOEXCEPT;
+    static sizes serialized_size(const chain::script& script,
+        const chain::witness& witness) NOEXCEPT;
     bool extract_sigop_script(chain::script& out,
         const chain::script& prevout_script) const NOEXCEPT;
 
@@ -141,7 +148,7 @@ private:
 
     // Cache.
     bool valid_;
-    ////size_t size_;
+    sizes size_;
 
 public:
     /// Public mutable metadata access, copied but not compared for equality.

@@ -37,6 +37,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 using namespace system::machine;
 static const auto checksig_script = script{ { opcode::checksig } };
 
@@ -71,9 +73,7 @@ witness::witness(const chunk_cptrs& stack) NOEXCEPT
 }
 
 witness::witness(const data_slice& data, bool prefix) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
   : witness(stream::in::copy(data), prefix)
-    BC_POP_WARNING()
 {
 }
 
@@ -236,11 +236,7 @@ witness witness::from_string(const std::string& mnemonic) NOEXCEPT
 data_chunk witness::to_data(bool prefix) const NOEXCEPT
 {
     data_chunk data(serialized_size(prefix));
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
     to_data(ostream, prefix);
     return data;
 }
@@ -299,13 +295,10 @@ size_t witness::serialized_size(const chunk_cptrs& stack) NOEXCEPT
 
 size_t witness::serialized_size(bool prefix) const NOEXCEPT
 {
-    auto size = size_;
-
     // Witness prefix is an element count, not byte length (unlike script).
-    if (prefix)
-        size += variable_size(stack_.size());
-
-    return size;
+    // An empty stack is not a valid witnessed tx (no inputs) but a consistent
+    // serialization is used independently by database so zero stack allowed.
+    return prefix ? ceilinged_add(size_, variable_size(stack_.size())) : size_;
 }
 
 // Utilities.
@@ -366,9 +359,6 @@ bool witness::extract_sigop_script(script& out_script,
             return false;
     }
 }
-
-BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // Extract script and initial execution stack.
 bool witness::extract_script(script::cptr& out_script,
@@ -434,7 +424,6 @@ bool witness::extract_script(script::cptr& out_script,
     }
 }
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 
 // JSON value convertors.

@@ -43,7 +43,6 @@ class BC_API block
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(block);
 
-    typedef std_vector<size_t> sizes;
     typedef std::shared_ptr<const block> cptr;
 
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
@@ -167,6 +166,7 @@ protected:
     bool is_unspent_coinbase_collision() const NOEXCEPT;
 
 private:
+    typedef struct { size_t nominal; size_t witnessed; } sizes;
     using point_cref = std::reference_wrapper<const point>;
     using point_hash = std::hash<std::reference_wrapper<const point>>;
     using hash_cref = std::reference_wrapper<const hash_digest>;
@@ -180,6 +180,7 @@ private:
         std::unordered_set<hash_cref, hash_hash>;
 
     static block from_data(reader& source, bool witness) NOEXCEPT;
+    static sizes serialized_size(const chain::transaction_cptrs& txs) NOEXCEPT;
 
     // context free
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
@@ -202,8 +203,7 @@ private:
 
     // Cache.
     bool valid_;
-    ////size_t nominal_size_;
-    ////size_t witness_size_;
+    sizes size_;
 };
 
 typedef std::vector<block> blocks;
