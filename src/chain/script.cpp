@@ -250,7 +250,7 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit(expected);
     }
 
-    operations ops;
+    operations ops{};
     ops.reserve(op_count(source));
     const auto start = source.get_read_position();
 

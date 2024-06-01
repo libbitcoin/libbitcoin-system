@@ -172,7 +172,7 @@ static data_chunk read_element(reader& source) NOEXCEPT
 witness witness::from_data(reader& source, bool prefix) NOEXCEPT
 {
     size_t size{};
-    chunk_cptrs stack;
+    chunk_cptrs stack{};
 
     if (prefix)
     {
