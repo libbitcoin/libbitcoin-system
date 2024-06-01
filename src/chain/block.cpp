@@ -723,8 +723,14 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // The block header is checked/accepted independently.
 
-code block::check() const NOEXCEPT
+code block::check(bool bypass) const NOEXCEPT
 {
+    if (bypass)
+    {
+        return is_invalid_merkle_root() ? error::merkle_mismatch :
+            error::block_success;
+    }
+
     // context free.
     // empty_block is redundant with first_not_coinbase.
     //if (is_empty())
@@ -750,8 +756,15 @@ code block::check() const NOEXCEPT
 // timestamp
 // median_time_past
 
-code block::check(const context& ctx) const NOEXCEPT
+code block::check(const context& ctx, bool bypass) const NOEXCEPT
 {
+    if (bypass)
+    {
+        const auto bip141 = ctx.is_enabled(bip141_rule);
+        return bip141 && is_invalid_witness_commitment() ?
+            error::invalid_witness_commitment : error::block_success;
+    }
+
     const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip50 = ctx.is_enabled(bip50_rule);
     const auto bip141 = ctx.is_enabled(bip141_rule);
