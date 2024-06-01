@@ -109,8 +109,8 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Consensus checks (no DoS guards for block sync without headers first).
-    code check() const NOEXCEPT;
-    code check(const context& ctx) const NOEXCEPT;
+    code check(bool bypass=false) const NOEXCEPT;
+    code check(const context& ctx, bool bypass=false) const NOEXCEPT;
     code accept(const context& ctx, size_t subsidy_interval,
         uint64_t initial_subsidy) const NOEXCEPT;
     code connect(const context& ctx) const NOEXCEPT;
