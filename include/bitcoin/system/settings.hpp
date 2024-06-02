@@ -45,6 +45,10 @@ public:
     virtual uint64_t initial_subsidy() const NOEXCEPT;
     virtual uint64_t bitcoin_to_satoshi(uint64_t value) const NOEXCEPT;
 
+    /// These are used by node, top checkpoint defaults to genesis.
+    virtual chain::checkpoints sorted_checkpoints() const NOEXCEPT;
+    virtual chain::checkpoint top_checkpoint() const NOEXCEPT;
+
     /// These are used by chain_state (only).
     virtual uint32_t minimum_timespan() const NOEXCEPT;
     virtual uint32_t maximum_timespan() const NOEXCEPT;

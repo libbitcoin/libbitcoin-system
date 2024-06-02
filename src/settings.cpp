@@ -393,8 +393,26 @@ uint64_t settings::bitcoin_to_satoshi(uint64_t value) const NOEXCEPT
     BC_POP_WARNING()
 }
 
-// These are used internal to system.
+// Computed properties.
 // ----------------------------------------------------------------------------
+// These are used by node.
+
+chain::checkpoints settings::sorted_checkpoints() const NOEXCEPT
+{
+    return sort_copy(checkpoints);
+}
+
+chain::checkpoint settings::top_checkpoint() const NOEXCEPT
+{
+    if (checkpoints.empty())
+        return { genesis_block.hash(), zero };
+
+    return sorted_checkpoints().back();
+}
+
+// Computed properties.
+// ----------------------------------------------------------------------------
+// These are used internal to system.
 
 // The lower bound for the retargeting timespan.
 uint32_t settings::minimum_timespan() const NOEXCEPT
