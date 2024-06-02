@@ -145,11 +145,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
         txs->reserve(capacity);
 
         for (size_t tx = 0; tx < capacity; ++tx)
-        {
-            BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-            txs->emplace_back(new transaction{ source, witness });
-            BC_POP_WARNING()
-        }
+            txs->push_back(to_shared<transaction>(source, witness));
 
         // This is a pointer copy (non-const to const).
         return txs;
