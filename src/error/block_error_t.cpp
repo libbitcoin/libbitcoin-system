@@ -49,6 +49,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { forward_reference, "transactions out of order" },
     { merkle_mismatch, "merkle root mismatch" },
     { block_legacy_sigop_limit, "too many block legacy signature operations" },
+    { type32_malleated, "block is type32 malleated" },
 
     // accept block
     { block_non_final, "block contains a non-final transaction" },

@@ -31,15 +31,6 @@ namespace system {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// shared_ptr moves are avoided in vector population by using 'new' and passing
-// to shared_pointer construct a raw pointer via std::vector.emplace_back:
-// std::vector.emplace_back(new block{...}).
-// Otherwise emplace_back copies the shared pointer, just as would push_back:
-// std::vector.emplace_back(std::make_shared<block>(block{...})).
-// Vector emplace constructs the instance using its allocator, invoking new.
-// So in this case it constructs the shared_pointer which accepts the raw
-// pointer as its constructor argument, passed by std::vector.emplace_back.
-
 /// shared_ptr
 /// ---------------------------------------------------------------------------
 
@@ -75,10 +66,7 @@ inline std::shared_ptr<const Type> to_shared(const Type& value) NOEXCEPT
 template <typename Type, typename... Args>
 inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-    return std::shared_ptr<const Type>(
-        new const Type(std::forward<Args>(values)...));
-    BC_POP_WARNING()
+    return std::make_shared<const Type>(Type{ std::forward<Args>(values)... });
 }
 
 /// Create shared pointer to vector of const shared pointers from moved vector.
@@ -106,6 +94,13 @@ template <typename Type>
 inline std::unique_ptr<const Type> to_unique(const Type& value) NOEXCEPT
 {
     return std::make_unique<const Type>(value);
+}
+
+/// Construct unique pointer to const from moved constructor parameters.
+template <typename Type, typename... Args>
+inline std::unique_ptr<const Type> to_unique(Args&&... values) NOEXCEPT
+{
+    return std::make_unique<const Type>(Type{ std::forward<Args>(values)... });
 }
 
 BC_POP_WARNING()

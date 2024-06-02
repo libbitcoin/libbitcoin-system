@@ -172,8 +172,6 @@ private:
     using hash_cref = std::reference_wrapper<const hash_digest>;
     using hash_hash = unique_hash_t<>;
 
-    using unordered_map_of_constant_referenced_points =
-        std::unordered_map<point_cref, output::cptr, point_hash>;
     using unordered_set_of_constant_referenced_points =
         std::unordered_set<point_cref, point_hash>;
     using unordered_set_of_constant_referenced_hashes =

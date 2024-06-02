@@ -1149,7 +1149,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__default_inputs__true)
 BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__valid_prevout__false)
 {
     const input input{ { hash_digest{}, 42 }, {}, 0 };
-    input.prevout = to_shared<output>(42, script{});
+    input.prevout = to_shared<output>(42_u64, script{});
     const accessor instance
     {
         0,

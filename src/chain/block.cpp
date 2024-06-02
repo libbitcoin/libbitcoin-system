@@ -145,11 +145,7 @@ block block::from_data(reader& source, bool witness) NOEXCEPT
         txs->reserve(capacity);
 
         for (size_t tx = 0; tx < capacity; ++tx)
-        {
-            BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-            txs->emplace_back(new transaction{ source, witness });
-            BC_POP_WARNING()
-        }
+            txs->push_back(to_shared<transaction>(source, witness));
 
         // This is a pointer copy (non-const to const).
         return txs;
@@ -426,7 +422,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
         return false;
 
     // A set is used to collapse duplicates.
-    unordered_set_of_constant_referenced_hashes hashes;
+    unordered_set_of_constant_referenced_hashes hashes{};
 
     // Just the coinbase tx hash, skip its null input hashes.
     hashes.emplace(txs_->front()->get_hash(false));
@@ -471,8 +467,7 @@ size_t block::malleated32_size() const NOEXCEPT
 {
     const auto malleated = txs_->size();
     for (auto mally = one; mally <= to_half(malleated); mally *= two)
-        if (is_malleable32(malleated - mally, mally) &&
-            is_malleated32(mally))
+        if (is_malleable32(malleated - mally, mally) && is_malleated32(mally))
             return mally;
 
     return zero;
@@ -632,21 +627,21 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 // Search is not ordered, forward references are caught by block.check.
 void block::populate() const NOEXCEPT
 {
-    unordered_map_of_constant_referenced_points points{};
+    std::unordered_map<point, output::cptr> points{};
     uint32_t index{};
 
     // Populate outputs hash table.
     for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
         for (const auto& out: *(*tx)->outputs_ptr())
-            points.emplace(std::pair{ point{ (*tx)->get_hash(false),
-                index++ }, out });
+            points.emplace(std::pair{ point{ (*tx)->hash(false), index++ },
+                out });
 
     // Populate input prevouts from hash table.
     for (auto tx = txs_->begin(); tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {
-            const auto point = points.find(std::cref(in->point()));
+            const auto point = points.find(in->point());
             if (point != points.end())
                 in->prevout = point->second;
         }
@@ -723,15 +718,22 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 // ----------------------------------------------------------------------------
 // The block header is checked/accepted independently.
 
+// context free.
+// TODO: use of get_hash() in is_forward_reference makes this thread unsafe.
 code block::check(bool bypass) const NOEXCEPT
 {
     if (bypass)
     {
-        return is_invalid_merkle_root() ? error::merkle_mismatch :
-            error::block_success;
+        // type32_malleated is subset of is_internal_double_spend, assuming
+        // otherwise valid txs, as that will catch any duplicated transaction.
+        if (is_invalid_merkle_root())
+            return error::merkle_mismatch;
+        if (is_malleated32())
+            return error::type32_malleated;
+
+        return error::block_success;
     }
 
-    // context free.
     // empty_block is redundant with first_not_coinbase.
     //if (is_empty())
     //    return error::empty_block;
@@ -756,20 +758,24 @@ code block::check(bool bypass) const NOEXCEPT
 // timestamp
 // median_time_past
 
+// context required.
+// TODO: use of get_hash() in is_hash_limit_exceeded makes this thread unsafe.
 code block::check(const context& ctx, bool bypass) const NOEXCEPT
 {
     if (bypass)
     {
         const auto bip141 = ctx.is_enabled(bip141_rule);
-        return bip141 && is_invalid_witness_commitment() ?
-            error::invalid_witness_commitment : error::block_success;
+
+        if (bip141 && is_invalid_witness_commitment())
+            return error::invalid_witness_commitment;
+        
+        return error::block_success;
     }
 
     const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip50 = ctx.is_enabled(bip50_rule);
     const auto bip141 = ctx.is_enabled(bip141_rule);
 
-    // context required.
     if (bip141 && is_overweight())
         return error::block_weight_limit;
     if (bip34 && is_invalid_coinbase_script(ctx.height))

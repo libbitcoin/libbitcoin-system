@@ -251,11 +251,7 @@ read_puts(Source& source) NOEXCEPT
 
     puts->reserve(capacity);
     for (auto put = zero; put < capacity; ++put)
-    {
-        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        puts->emplace_back(new Put{ source });
-        BC_POP_WARNING()
-    }
+        puts->push_back(to_shared<Put>(source));
 
     // This is a pointer copy (non-const to const).
     return puts;
@@ -860,19 +856,16 @@ hash_digest transaction::unversioned_signature_hash(
 // TODO: taproot requires both single and double hash of each.
 void transaction::initialize_sighash_cache() const NOEXCEPT
 {
-    // This overconstructs the cache (anyone or !all), however it is simple and
-    // the same criteria applied by satoshi.
-    if (segregated_)
-    {
-        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        sighash_cache_.reset(new sighash_cache
-        {
-            outputs_hash(),
-            points_hash(),
-            sequences_hash()
-        });
-        BC_POP_WARNING()
-    }
+    // This overconstructs the cache (anyone or !all), however it is simple.
+    if (!segregated_)
+        return;
+
+    sighash_cache_ = to_unique<sighash_cache>
+    (
+        outputs_hash(),
+        points_hash(),
+        sequences_hash()
+    );
 }
 
 // private
