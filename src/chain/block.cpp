@@ -518,6 +518,10 @@ bool block::is_segregated() const NOEXCEPT
     return std::any_of(txs_->begin(), txs_->end(), segregated);
 }
 
+// The witness merkle root is obtained from wtxids, subject to malleation just
+// as the txs commitment. However, since tx duplicates are precluded by the
+// malleable32 (or complete) block check, there is no opportunity for this.
+// Similarly the witness commitment cannot be malleable64.
 bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
     if (txs_->empty())
@@ -528,7 +532,8 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
         return false;
 
     // If there is a valid commitment, return false (valid).
-    // Last output of commitment pattern holds committed value (bip141).
+    // Coinbase input witness must be 32 byte witness reserved value (bip141).
+    // Last output of commitment pattern holds the committed value (bip141).
     hash_digest reserved{}, committed{};
     if (coinbase.inputs_ptr()->front()->reserved_hash(reserved))
         for (const auto& output: views_reverse(*coinbase.outputs_ptr()))
@@ -724,10 +729,12 @@ code block::check(bool bypass) const NOEXCEPT
 {
     if (bypass)
     {
-        // type32_malleated is subset of is_internal_double_spend, assuming
-        // otherwise valid txs, as that will catch any duplicated transaction.
+        // Transaction commitment is required under checkpoint.
         if (is_invalid_merkle_root())
             return error::merkle_mismatch;
+
+        // type32_malleated is subset of is_internal_double_spend, assuming
+        // otherwise valid txs, as that will catch any duplicated transaction.
         if (is_malleated32())
             return error::type32_malleated;
 
@@ -766,6 +773,7 @@ code block::check(const context& ctx, bool bypass) const NOEXCEPT
     {
         const auto bip141 = ctx.is_enabled(bip141_rule);
 
+        // Wintness commitment is required under checkpoint.
         if (bip141 && is_invalid_witness_commitment())
             return error::invalid_witness_commitment;
         

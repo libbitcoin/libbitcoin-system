@@ -330,7 +330,7 @@ code header::check(uint32_t timestamp_limit_seconds,
     if (is_invalid_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 
-    return error::success;
+    return error::block_success;
 }
 
 // minimum_block_version
@@ -349,7 +349,7 @@ code header::accept(const context& ctx) const NOEXCEPT
     if (bits_ != ctx.work_required)
         return error::incorrect_proof_of_work;
 
-    return error::success;
+    return error::block_success;
 }
 
 // JSON value convertors.
