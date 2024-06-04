@@ -727,21 +727,16 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 // TODO: use of get_hash() in is_forward_reference makes this thread unsafe.
 code block::check(bool bypass) const NOEXCEPT
 {
+    if (is_invalid_merkle_root())
+        return error::invalid_transaction_commitment;
+
+    // type32_malleated is subset of is_internal_double_spend
+    if (bypass && is_malleated32())
+        return error::type32_malleated;
     if (bypass)
-    {
-        // Transaction commitment is required under checkpoint.
-        if (is_invalid_merkle_root())
-            return error::merkle_mismatch;
-
-        // type32_malleated is subset of is_internal_double_spend, assuming
-        // otherwise valid txs, as that will catch any duplicated transaction.
-        if (is_malleated32())
-            return error::type32_malleated;
-
         return error::block_success;
-    }
 
-    // empty_block is redundant with first_not_coinbase.
+    // empty_block is subset of first_not_coinbase.
     //if (is_empty())
     //    return error::empty_block;
     if (is_oversized())
@@ -754,8 +749,6 @@ code block::check(bool bypass) const NOEXCEPT
         return error::forward_reference;
     if (is_internal_double_spend())
         return error::block_internal_double_spend;
-    if (is_invalid_merkle_root())
-        return error::merkle_mismatch;
 
     return check_transactions();
 }
@@ -769,20 +762,16 @@ code block::check(bool bypass) const NOEXCEPT
 // TODO: use of get_hash() in is_hash_limit_exceeded makes this thread unsafe.
 code block::check(const context& ctx, bool bypass) const NOEXCEPT
 {
-    if (bypass)
-    {
-        const auto bip141 = ctx.is_enabled(bip141_rule);
+    const auto bip141 = ctx.is_enabled(bip141_rule);
 
-        // Wintness commitment is required under checkpoint.
-        if (bip141 && is_invalid_witness_commitment())
-            return error::invalid_witness_commitment;
-        
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
+
+    if (bypass)        
         return error::block_success;
-    }
 
     const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip50 = ctx.is_enabled(bip50_rule);
-    const auto bip141 = ctx.is_enabled(bip141_rule);
 
     if (bip141 && is_overweight())
         return error::block_weight_limit;
@@ -790,8 +779,6 @@ code block::check(const context& ctx, bool bypass) const NOEXCEPT
         return error::coinbase_height_mismatch;
     if (bip50 && is_hash_limit_exceeded())
         return error::temporary_hash_limit;
-    if (bip141 && is_invalid_witness_commitment())
-        return error::invalid_witness_commitment;
 
     return check_transactions(ctx);
 }

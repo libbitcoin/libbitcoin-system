@@ -47,7 +47,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { internal_duplicate, "matching transaction hashes in block" },
     { block_internal_double_spend, "double spend internal to block" },
     { forward_reference, "transactions out of order" },
-    { merkle_mismatch, "merkle root mismatch" },
+    { invalid_transaction_commitment, "invalid transaction commitment" },
     { block_legacy_sigop_limit, "too many block legacy signature operations" },
     { type32_malleated, "block is type32 malleated" },
 
