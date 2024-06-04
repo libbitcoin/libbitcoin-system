@@ -731,7 +731,7 @@ code block::check(bool bypass) const NOEXCEPT
     {
         // Transaction commitment is required under checkpoint.
         if (is_invalid_merkle_root())
-            return error::merkle_mismatch;
+            return error::invalid_transaction_commitment;
 
         // type32_malleated is subset of is_internal_double_spend, assuming
         // otherwise valid txs, as that will catch any duplicated transaction.
@@ -755,7 +755,7 @@ code block::check(bool bypass) const NOEXCEPT
     if (is_internal_double_spend())
         return error::block_internal_double_spend;
     if (is_invalid_merkle_root())
-        return error::merkle_mismatch;
+        return error::invalid_transaction_commitment;
 
     return check_transactions();
 }

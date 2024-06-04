@@ -154,13 +154,13 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__forward_reference__true_exected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "transactions out of order");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__merkle_mismatch__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_transaction_commitment__true_exected_message)
 {
-    constexpr auto value = error::merkle_mismatch;
+    constexpr auto value = error::invalid_transaction_commitment;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "merkle root mismatch");
+    BOOST_REQUIRE_EQUAL(ec.message(), "invalid transaction commitment");
 }
 
 BOOST_AUTO_TEST_CASE(block_error_t__code__block_legacy_sigop_limit__true_exected_message)

@@ -53,7 +53,7 @@ enum block_error_t : uint8_t
     internal_duplicate,
     block_internal_double_spend,
     forward_reference,
-    merkle_mismatch,
+    invalid_transaction_commitment,
     block_legacy_sigop_limit,
     type32_malleated,
 
