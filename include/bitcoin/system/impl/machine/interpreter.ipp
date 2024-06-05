@@ -1698,7 +1698,7 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 
 template <typename Stack>
-code interpreter<Stack>::connect_witness(const context&state,
+code interpreter<Stack>::connect_witness(const context& state,
     const transaction& tx, const input_iterator& it,
     const script& prevout) NOEXCEPT
 {
