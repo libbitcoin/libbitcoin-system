@@ -119,7 +119,7 @@ public:
     /// This need not be set if the transaction is not segmented.
     void set_witness_hash(hash_digest&& hash) const NOEXCEPT;
 
-    /// Reference used to avoid copy, sets cache if not set.
+    /// Reference used to avoid copy, sets cache if not set (not thread safe).
     const hash_digest& get_hash(bool witness) const NOEXCEPT;
 
     /// Methods.

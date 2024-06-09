@@ -105,6 +105,9 @@ public:
     /// Cache (this overrides hash() computation).
     void set_hash(hash_digest&& hash) const NOEXCEPT;
 
+    /// Reference used to avoid copy, sets cache if not set (not thread safe).
+    const hash_digest& get_hash() const NOEXCEPT;
+
     /// Validation.
     /// -----------------------------------------------------------------------
     /// Checkpoints and previous_block_hash are chain validation (not here).
