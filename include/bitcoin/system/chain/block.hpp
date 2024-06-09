@@ -99,6 +99,9 @@ public:
     size_t serialized_size(bool witness) const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
+    /// Reference used to avoid copy, sets cache if not set (not thread safe).
+    const hash_digest& get_hash() const NOEXCEPT;
+
     /// Computed malleation properties.
     bool is_malleable() const NOEXCEPT;
     bool is_malleable64() const NOEXCEPT;

@@ -254,6 +254,12 @@ hash_digest block::hash() const NOEXCEPT
     return header_->hash();
 }
 
+// computed
+const hash_digest& block::get_hash() const NOEXCEPT
+{
+    return header_->get_hash();
+}
+
 // static/private
 block::sizes block::serialized_size(
     const chain::transaction_cptrs& txs) NOEXCEPT

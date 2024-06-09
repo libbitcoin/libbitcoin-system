@@ -251,6 +251,14 @@ hash_digest header::hash() const NOEXCEPT
     return digest;
 }
 
+const hash_digest& header::get_hash() const NOEXCEPT
+{
+    if (!hash_)
+        set_hash(hash());
+
+    return *hash_;
+}
+
 // static
 uint256_t header::proof(uint32_t bits) NOEXCEPT
 {
