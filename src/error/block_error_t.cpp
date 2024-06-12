@@ -39,6 +39,9 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { timestamp_too_early, "block timestamp is too early" },
     { incorrect_proof_of_work, "proof of work does not match bits field" },
 
+    // confirm header
+    { orphan_block, "block parent is missing" },
+
     // check block
     { block_size_limit, "block size limit exceeded" },
     { empty_block, "block has no transactions" },
