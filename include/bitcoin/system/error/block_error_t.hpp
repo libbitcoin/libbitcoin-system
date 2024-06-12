@@ -37,13 +37,14 @@ enum block_error_t : uint8_t
     invalid_proof_of_work,
     futuristic_timestamp,
 
-    // TODO: order these.
-
     // accept header
     checkpoint_conflict,
     invalid_block_version,
     timestamp_too_early,
     incorrect_proof_of_work,
+
+    // confirm header
+    orphan_block,
 
     // check block
     block_size_limit,

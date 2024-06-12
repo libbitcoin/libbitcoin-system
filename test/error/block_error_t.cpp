@@ -89,6 +89,17 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__incorrect_proof_of_work__true_exected_
     BOOST_REQUIRE_EQUAL(ec.message(), "proof of work does not match bits field");
 }
 
+// confirm header
+
+BOOST_AUTO_TEST_CASE(block_error_t__code__orphan_block__true_exected_message)
+{
+    constexpr auto value = error::orphan_block;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "block parent is missing");
+}
+
 // check block
 
 BOOST_AUTO_TEST_CASE(block_error_t__code__block_size_limit__true_exected_message)
