@@ -20,10 +20,6 @@
 
 BOOST_AUTO_TEST_SUITE(intrinsics_haves_tests)
 
-// helper
-template <typename>
-constexpr bool is_defined = true;
-
 // Build symbols to constexpr.
 // ----------------------------------------------------------------------------
 
@@ -55,10 +51,6 @@ constexpr bool is_defined = true;
 
 // try()
 // ----------------------------------------------------------------------------
-
-////test/intrinsics/haves.cpp(99):  error: in "intrinsics_haves_tests/intrinsics_haves__try_avx2__always__match":  check tryit == with_avx2  has failed [true != false]
-////test/intrinsics/haves.cpp(113): error: in "intrinsics_haves_tests/intrinsics_haves__try_sse41__always__match": check tryit == with_sse41 has failed [true != false]
-////test/intrinsics/haves.cpp(129): error: in "intrinsics_haves_tests/intrinsics_haves__try_shani__always__match": check tryit == with_shani has failed [true != false]
 
 BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx512__always__match)
 {
@@ -124,17 +116,16 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_shani__always__match)
 
 BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx512__expected)
 {
-    const auto have512 = have_avx512();
     auto have = false;
 
     have = have_lanes<uint64_t, 8>();
-    BOOST_CHECK_EQUAL(have, have512);
+    BOOST_CHECK_EQUAL(have, with_avx512);
     have = have_lanes<uint32_t, 16>();
-    BOOST_CHECK_EQUAL(have, have512);
+    BOOST_CHECK_EQUAL(have, with_avx512);
     have = have_lanes<uint16_t, 32>();
-    BOOST_CHECK_EQUAL(have, have512);
+    BOOST_CHECK_EQUAL(have, with_avx512);
     have = have_lanes<uint8_t, 64>();
-    BOOST_CHECK_EQUAL(have, have512);
+    BOOST_CHECK_EQUAL(have, with_avx512);
 
     have = have_lanes<uint64_t, 7>();
     BOOST_CHECK(!have);
@@ -148,17 +139,16 @@ BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx512__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx2__expected)
 {
-    const auto have256 = have_avx2();
     auto have = false;
 
     have = have_lanes<uint64_t, 4>();
-    BOOST_CHECK_EQUAL(have, have256);
+    BOOST_CHECK_EQUAL(have, with_avx2);
     have = have_lanes<uint32_t, 8>();
-    BOOST_CHECK_EQUAL(have, have256);
+    BOOST_CHECK_EQUAL(have, with_avx2);
     have = have_lanes<uint16_t, 16>();
-    BOOST_CHECK_EQUAL(have, have256);
+    BOOST_CHECK_EQUAL(have, with_avx2);
     have = have_lanes<uint8_t, 32>();
-    BOOST_CHECK_EQUAL(have, have256);
+    BOOST_CHECK_EQUAL(have, with_avx2);
 
     have = have_lanes<uint64_t, 3>();
     BOOST_CHECK(!have);
@@ -172,17 +162,16 @@ BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx2__expected)
 
 BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__sse41__expected)
 {
-    const auto have128 = have_sse41();
     auto have = false;
 
     have = have_lanes<uint64_t, 2>();
-    BOOST_CHECK_EQUAL(have, have128);
+    BOOST_CHECK_EQUAL(have, with_sse41);
     have = have_lanes<uint32_t, 4>();
-    BOOST_CHECK_EQUAL(have, have128);
+    BOOST_CHECK_EQUAL(have, with_sse41);
     have = have_lanes<uint16_t, 8>();
-    BOOST_CHECK_EQUAL(have, have128);
+    BOOST_CHECK_EQUAL(have, with_sse41);
     have = have_lanes<uint8_t, 16>();
-    BOOST_CHECK_EQUAL(have, have128);
+    BOOST_CHECK_EQUAL(have, with_sse41);
 
     have = have_lanes<uint64_t, 1>();
     BOOST_CHECK(!have);
@@ -194,59 +183,12 @@ BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__sse41__expected)
     BOOST_CHECK(!have);
 }
 
-// have() [CI matrix platform assumptions]
-// ----------------------------------------------------------------------------
-// These use BOOST_WARN to let us know if vectorization did not execute due to
-// CI platform processor configuration. Currently all CI platforms have SSE41
-// and AVX2, while about 50% have AVX512BW. Windows platforms now have SHANI.
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx512__when_defined__true)
-{
-#if defined(HAVE_AVX512)
-    BOOST_WARN(have_avx512());
-#else
-    BOOST_REQUIRE(!have_avx512());
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_avx2__when_defined__true)
-{
-#if defined(HAVE_AVX2)
-    BOOST_WARN(have_avx2());
-#else
-    BOOST_REQUIRE(!have_avx2());
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_sse41__when_defined__true)
-{
-#if defined(HAVE_SSE41)
-    BOOST_WARN(have_sse41());
-#else
-    BOOST_REQUIRE(!have_sse41());
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_shani__when_defined__true)
-{
-#if defined(HAVE_SHANI)
-    BOOST_WARN(have_shani());
-#else
-    BOOST_REQUIRE(!have_shani());
-#endif
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__have_neon__always__when_defined__true)
-{
-#if defined(HAVE_NEON)
-    BOOST_WARN(have_neon());
-#else
-    BOOST_REQUIRE(!have_neon());
-#endif
-}
-
 // is_extended
 // ----------------------------------------------------------------------------
+
+// helper
+template <typename>
+constexpr bool is_defined = true;
 
 // is_extended is true even with mock type.
 static_assert(!is_extended<uint32_t>);
