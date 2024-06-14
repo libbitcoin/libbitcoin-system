@@ -63,7 +63,7 @@ BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
     constexpr auto with_neon = false;
 #endif
 
-/// Runtime checks for Intel SIMD and ARM Neon availability.
+/// Runtime checks for Intel SIMD and ARM SIMD (Neon) availability.
 /// ---------------------------------------------------------------------------
 
 namespace cpu1_0
@@ -154,51 +154,7 @@ constexpr bool try_neon() NOEXCEPT
     return false;
 }
 
-/// Runtime tests for Intel SIMD, and ARM SIMD (Neon) availability.
-/// ---------------------------------------------------------------------------
-/// These keep binary portable, otherwise can reply on "with" symbols.
-/// TODO: evaluate performance impact of removing the thread statics.
-
-inline bool have_shani() NOEXCEPT
-{
-    if constexpr (with_shani)
-        return try_shani();
-    else
-        return false;
-}
-
-inline bool have_avx512() NOEXCEPT
-{
-    if constexpr (with_avx512)
-        return try_avx512();
-    else
-        return false;
-}
-
-inline bool have_avx2() NOEXCEPT
-{
-    if constexpr (with_avx2)
-        return try_avx2();
-    else
-        return false;
-}
-
-inline bool have_sse41() NOEXCEPT
-{
-    if constexpr (with_sse41)
-        return try_sse41();
-    else
-        return false;
-}
-
-inline bool have_neon() NOEXCEPT
-{
-    if constexpr (with_shani)
-        return try_shani();
-    else
-        return false;
-}
-
+/// Type system helpers.
 /// ---------------------------------------------------------------------------
 /// xint types are always defined, though are mocked when not compiled.
 /// Use with_ constants to check for compiled option and have_ functions to
@@ -232,11 +188,11 @@ template <typename Extended, if_extended<Extended> = true>
 inline bool have() NOEXCEPT
 {
     if constexpr (is_same_type<Extended, xint512_t>)
-        return have_avx512();
+        return with_avx512;
     else if constexpr (is_same_type<Extended, xint256_t>)
-        return have_avx2();
+        return with_avx2;
     else if constexpr (is_same_type<Extended, xint128_t>)
-        return have_sse41();
+        return with_sse41;
     else return false;
 }
 
@@ -246,11 +202,11 @@ template <typename Integral, size_t Lanes,
 inline bool have_lanes() NOEXCEPT
 {
     if constexpr (capacity<xint512_t, Integral> == Lanes)
-        return have_avx512();
+        return with_avx512;
     else if constexpr (capacity<xint256_t, Integral> == Lanes)
-        return have_avx2();
+        return with_avx2;
     else if constexpr (capacity<xint128_t, Integral> == Lanes)
-        return have_sse41();
+        return with_sse41;
     else return false;
 }
 
