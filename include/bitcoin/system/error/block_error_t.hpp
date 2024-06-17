@@ -56,7 +56,7 @@ enum block_error_t : uint8_t
     forward_reference,
     invalid_transaction_commitment,
     block_legacy_sigop_limit,
-    type32_malleated,
+    block_malleated,
 
     // accept block
     block_non_final,

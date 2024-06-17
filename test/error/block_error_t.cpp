@@ -183,13 +183,13 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__block_legacy_sigop_limit__true_exected
     BOOST_REQUIRE_EQUAL(ec.message(), "too many block legacy signature operations");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__type32_malleated__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__block_malleated__true_exected_message)
 {
-    constexpr auto value = error::type32_malleated;
+    constexpr auto value = error::block_malleated;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "block is type32 malleated");
+    BOOST_REQUIRE_EQUAL(ec.message(), "block is malleated");
 }
 
 // accept block

@@ -104,9 +104,11 @@ public:
 
     /// Computed malleation properties.
     bool is_malleable() const NOEXCEPT;
-    bool is_malleable64() const NOEXCEPT;
+    bool is_malleated() const NOEXCEPT;
     bool is_malleable32() const NOEXCEPT;
     bool is_malleated32() const NOEXCEPT;
+    bool is_malleable64() const NOEXCEPT;
+    bool is_malleated64() const NOEXCEPT;
 
     /// Validation.
     /// -----------------------------------------------------------------------
