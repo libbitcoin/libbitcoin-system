@@ -52,7 +52,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
     { forward_reference, "transactions out of order" },
     { invalid_transaction_commitment, "invalid transaction commitment" },
     { block_legacy_sigop_limit, "too many block legacy signature operations" },
-    { type32_malleated, "block is type32 malleated" },
+    { block_malleated, "block is malleated" },
 
     // accept block
     { block_non_final, "block contains a non-final transaction" },

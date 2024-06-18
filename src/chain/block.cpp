@@ -452,6 +452,11 @@ bool block::is_malleable() const NOEXCEPT
     return is_malleable64() || is_malleable32();
 }
 
+bool block::is_malleated() const NOEXCEPT
+{
+    return is_malleated32() || is_malleated64();
+}
+
 bool block::is_malleable32() const NOEXCEPT
 {
     const auto unmalleated = txs_->size();
@@ -512,6 +517,14 @@ bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
     };
 
     return !txs.empty() && std::all_of(txs.begin(), txs.end(), two_leaves);
+}
+
+// A mallaeable64 block is considered malleated if the first tx is not a valid
+// coinbase. It is possible but computationally infeasible to grind a valid
+// coinbase and therefore treated similarly to sha256 hash collision.
+bool block::is_malleated64() const NOEXCEPT
+{
+    return is_malleable64(*txs_) && !txs_->front()->is_coinbase();
 }
 
 bool block::is_segregated() const NOEXCEPT
@@ -736,9 +749,10 @@ code block::check(bool bypass) const NOEXCEPT
     if (is_invalid_merkle_root())
         return error::invalid_transaction_commitment;
 
-    // type32_malleated is subset of is_internal_double_spend
-    if (bypass && is_malleated32())
-        return error::type32_malleated;
+    // type32 malleated is a subset of is_internal_double_spend
+    // type64 malleated is a subset of first_not_coinbase
+    if (bypass && is_malleated())
+        return error::block_malleated;
     if (bypass)
         return error::block_success;
 
