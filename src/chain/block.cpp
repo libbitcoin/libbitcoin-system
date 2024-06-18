@@ -746,9 +746,11 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 // TODO: use of get_hash() in is_forward_reference makes this thread unsafe.
 code block::check(bool bypass) const NOEXCEPT
 {
+    // Node relies on error::invalid_transaction_commitment.
     if (is_invalid_merkle_root())
         return error::invalid_transaction_commitment;
 
+    // Node relies on error::block_malleated.
     // type32 malleated is a subset of is_internal_double_spend
     // type64 malleated is a subset of first_not_coinbase
     if (bypass && is_malleated())
@@ -784,6 +786,7 @@ code block::check(const context& ctx, bool bypass) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
 
+    // Node relies on error::invalid_witness_commitment.
     if (bip141 && is_invalid_witness_commitment())
         return error::invalid_witness_commitment;
 
