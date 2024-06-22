@@ -71,7 +71,6 @@ iostream<Character>::clear(iostate state) NOEXCEPT
     state_ = state;
 }
 
-
 template <typename Character>
 inline typename iostream<Character>::pos_type
 iostream<Character>::tellg() const NOEXCEPT
