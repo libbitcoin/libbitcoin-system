@@ -699,7 +699,6 @@ void transaction::signature_hash_single(writer& sink,
 
     const auto write_outputs = [this, &input](writer& sink) NOEXCEPT
     {
-        // Guarded by unversioned_signature_hash.
         const auto index = input_index(input);
 
         sink.write_variable(add1(index));
@@ -707,6 +706,7 @@ void transaction::signature_hash_single(writer& sink,
         for (size_t output = 0; output < index; ++output)
             sink.write_bytes(null_output());
 
+        // Guarded by unversioned_signature_hash.
         outputs_->at(index)->to_data(sink);
     };
 
