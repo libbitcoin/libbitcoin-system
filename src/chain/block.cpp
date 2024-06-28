@@ -454,7 +454,7 @@ bool block::is_malleable() const NOEXCEPT
 
 bool block::is_malleated() const NOEXCEPT
 {
-    return is_malleated32() || is_malleated64();
+    return is_malleated64() || is_malleated32();
 }
 
 bool block::is_malleable32() const NOEXCEPT
@@ -520,11 +520,12 @@ bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
 }
 
 // A mallaeable64 block is considered malleated if the first tx is not a valid
-// coinbase. It is possible but computationally infeasible to grind a valid
-// coinbase and therefore treated similarly to sha256 hash collision.
+// coinbase and all txs are 64 bytes. It is possible but computationally
+// infeasible to grind a valid coinbase and therefore treated similarly to
+// sha256 hash collision.
 bool block::is_malleated64() const NOEXCEPT
 {
-    return is_malleable64(*txs_) && !txs_->front()->is_coinbase();
+    return !txs_->front()->is_coinbase() && is_malleable64(*txs_);
 }
 
 bool block::is_segregated() const NOEXCEPT
@@ -746,15 +747,15 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 // TODO: use of get_hash() in is_forward_reference makes this thread unsafe.
 code block::check(bool bypass) const NOEXCEPT
 {
-    // Node relies on error::invalid_transaction_commitment.
-    if (is_invalid_merkle_root())
-        return error::invalid_transaction_commitment;
-
     // Node relies on error::block_malleated.
-    // type32 malleated is a subset of is_internal_double_spend
-    // type64 malleated is a subset of first_not_coinbase
+    // Node relies on error::invalid_transaction_commitment.
+
+    // type32 malleated is a subset of is_internal_double_spend.
+    // type64 malleated is a subset of first_not_coinbase.
     if (bypass && is_malleated())
         return error::block_malleated;
+    if (is_invalid_merkle_root())
+        return error::invalid_transaction_commitment;
     if (bypass)
         return error::block_success;
 
