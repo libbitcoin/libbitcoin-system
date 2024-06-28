@@ -519,13 +519,16 @@ bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
     return !txs.empty() && std::all_of(txs.begin(), txs.end(), two_leaves);
 }
 
-// A mallaeable64 block is considered malleated if the first tx is not a valid
-// coinbase and all txs are 64 bytes. It is possible but computationally
+// A block is considered malleated if the first tx is not a valid coinbase
+// and all txs are 64 bytes (malleable64). It is possible but computationally
 // infeasible to grind a valid coinbase and therefore treated similarly to
-// sha256 hash collision.
+// sha256 hash collision. The is_malleable64 check refines the error code,
+// however treating any invalid coinbase as invalid/uncacheable due to
+// malleation is sufficient and much faster than cache entry identification.
 bool block::is_malleated64() const NOEXCEPT
 {
-    return !txs_->front()->is_coinbase() && is_malleable64(*txs_);
+    return !txs_->empty() && !txs_->front()->is_coinbase() &&
+        is_malleable64(*txs_);
 }
 
 bool block::is_segregated() const NOEXCEPT
