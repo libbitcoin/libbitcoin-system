@@ -447,6 +447,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     return hashes.size() > hash_limit;
 }
 
+// Malleability does not imply malleated.
 bool block::is_malleable() const NOEXCEPT
 {
     return is_malleable64() || is_malleable32();
@@ -457,6 +458,7 @@ bool block::is_malleated() const NOEXCEPT
     return is_malleated64() || is_malleated32();
 }
 
+// Malleability does not imply malleated.
 bool block::is_malleable32() const NOEXCEPT
 {
     const auto unmalleated = txs_->size();
@@ -467,6 +469,7 @@ bool block::is_malleable32() const NOEXCEPT
     return false;
 }
 
+// Malleated32 implies malleable and invalid due to internal tx hash pairing.
 bool block::is_malleated32() const NOEXCEPT
 {
     return !is_zero(malleated32_size());
@@ -501,6 +504,7 @@ bool block::is_malleated32(size_t width) const NOEXCEPT
     return true;
 }
 
+// Malleability does not imply malleated.
 bool block::is_malleable64() const NOEXCEPT
 {
     return is_malleable64(*txs_);
@@ -508,7 +512,6 @@ bool block::is_malleable64() const NOEXCEPT
 
 // static
 // If all non-witness tx serializations are 64 bytes the id is malleable.
-// This form of malleability does not imply current block instance is invalid.
 bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
 {
     const auto two_leaves = [](const auto& tx) NOEXCEPT
@@ -519,12 +522,9 @@ bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
     return !txs.empty() && std::all_of(txs.begin(), txs.end(), two_leaves);
 }
 
-// A block is considered malleated if the first tx is not a valid coinbase
-// and all txs are 64 bytes (malleable64). It is possible but computationally
-// infeasible to grind a valid coinbase and therefore treated similarly to
-// sha256 hash collision. The is_malleable64 check refines the error code,
-// however treating any invalid coinbase as invalid/uncacheable due to
-// malleation is sufficient and much faster than cache entry identification.
+// Malleated64 implies malleable64 and invalid due to non-null coinbase point.
+// It is considered computationally infeasible to produce malleable64 with a
+// valid (null) coinbase input point.
 bool block::is_malleated64() const NOEXCEPT
 {
     return !txs_->empty() && !txs_->front()->is_coinbase() &&
