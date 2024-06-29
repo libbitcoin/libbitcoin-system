@@ -747,12 +747,11 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 // The block header is checked/accepted independently.
 
 // context free.
+// Node relies on error::block_malleated.
+// Node relies on error::invalid_transaction_commitment.
 // TODO: use of get_hash() in is_forward_reference makes this thread unsafe.
 code block::check(bool bypass) const NOEXCEPT
 {
-    // Node relies on error::block_malleated.
-    // Node relies on error::invalid_transaction_commitment.
-
     // type32 malleated is a subset of is_internal_double_spend.
     // type64 malleated is a subset of first_not_coinbase.
     if (bypass && is_malleated())
@@ -785,15 +784,14 @@ code block::check(bool bypass) const NOEXCEPT
 // median_time_past
 
 // context required.
+// Node relies on error::invalid_witness_commitment.
 // TODO: use of get_hash() in is_hash_limit_exceeded makes this thread unsafe.
 code block::check(const context& ctx, bool bypass) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
 
-    // Node relies on error::invalid_witness_commitment.
     if (bip141 && is_invalid_witness_commitment())
         return error::invalid_witness_commitment;
-
     if (bypass)        
         return error::block_success;
 
