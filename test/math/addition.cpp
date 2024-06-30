@@ -134,7 +134,7 @@ static_assert(subtract<int64_t>(pos_int32, min_int32) == (int64_t)pos_int32 - (i
 BC_POP_WARNING()
 
 // Unsigned underflow (signed underflow fails constexpr evaluation).
-static_assert(subtract(min_uint32, max_uint32) == one);
+static_assert(is_one(subtract(min_uint32, max_uint32)));
 static_assert(is_subtract_overflow(min_uint32, max_uint32));
 
 // TODO: value tests for default and explicit typing.

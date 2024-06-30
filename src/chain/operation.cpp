@@ -292,13 +292,13 @@ operation operation::from_string(const std::string& mnemonic) NOEXCEPT
         // Data encoding uses single token with one or two parts.
         const auto parts = split_push_token(mnemonic);
 
-        if (parts.size() == 1)
+        if (parts.size() == one)
         {
             // Extract operation using nominal data size decoding.
             if ((valid = decode_base16(chunk, parts.front())))
                 code = nominal_opcode_from_data(chunk);
         }
-        else if (parts.size() == 2)
+        else if (parts.size() == two)
         {
             // Extract operation using explicit data size decoding.
 

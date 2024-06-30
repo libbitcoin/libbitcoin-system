@@ -110,7 +110,7 @@ public:
     /// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
     static VCONSTEXPR bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
     {
-        return stack.size() == one && stack.front()->size() == hash_size;
+        return is_one(stack.size()) && stack.front()->size() == hash_size;
     }
 
     bool extract_sigop_script(script& out_script,

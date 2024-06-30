@@ -125,7 +125,7 @@ constexpr Type to_bits(Type bytes) noexcept
 
 constexpr uint8_t to_byte(char value) noexcept
 {
-    static_assert(sizeof(char) == 1u);
+    static_assert(is_one(sizeof(char)));
     return static_cast<uint8_t>(value);
 }
 
@@ -147,8 +147,8 @@ constexpr Type to_int(bool value) noexcept
 template <typename Type>
 constexpr bool to_bool(Type value) noexcept
 {
-    static_assert(static_cast<Type>(true) == 1);
-    static_assert(static_cast<Type>(false) == 0);
+    static_assert(is_one(static_cast<Type>(true)));
+    static_assert(is_zero(static_cast<Type>(false)));
     return is_nonzero(value);
 }
 

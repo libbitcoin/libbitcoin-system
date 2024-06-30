@@ -88,8 +88,8 @@ template <typename Integer, if_integer<Integer>>
 constexpr bool is_negated(Integer value) NOEXCEPT
 {
     // Guard precludes zero appearing negated: ((0 % 8) + 1) == 1.
-    return is_nonzero(value) && add1(bit_width(value) % byte_bits) == one;
-};
+    return is_nonzero(value) && is_one(add1(bit_width(value) % byte_bits));
+}
 
 template <typename Integer, if_integer<Integer>>
 constexpr Integer to_negated(Integer value) NOEXCEPT

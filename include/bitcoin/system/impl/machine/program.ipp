@@ -547,7 +547,7 @@ template <typename Stack>
 INLINE bool program<Stack>::
 is_stack_clean() const NOEXCEPT
 {
-    return stack_size() == one;
+    return is_one(stack_size());
 }
 
 // Alternate stack.

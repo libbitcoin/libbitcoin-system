@@ -1016,7 +1016,7 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
 
 bool transaction::is_coinbase() const NOEXCEPT
 {
-    return inputs_->size() == one && inputs_->front()->point().is_null();
+    return is_one(inputs_->size()) && inputs_->front()->point().is_null();
 }
 
 bool transaction::is_internal_double_spend() const NOEXCEPT

@@ -201,7 +201,7 @@ static std::string format_setting(const parameter& value,
     auto required = value.required();
 
     // In terms of formatting we also treat multivalued as not required.
-    auto optional = value.args_limit() == 1;
+    auto optional = is_one(value.args_limit());
 
     std::string formatter;
     if (required)
@@ -308,10 +308,10 @@ std::string printer::format_usage_parameters() NOEXCEPT
         const auto option = parameter.position() == parameter::not_positional;
 
         // In terms of formatting we also treat multivalued as not required.
-        const auto optional = parameter.args_limit() == 1;
+        const auto optional = is_one(parameter.args_limit());
 
         // This will capture only options set to zero_tokens().
-        const auto toggle = parameter.args_limit() == 0;
+        const auto toggle = is_zero(parameter.args_limit());
 
         // A toggle with a short name gets mashed up in group.
         const auto is_short = parameter.short_name() != parameter::no_short_name;
