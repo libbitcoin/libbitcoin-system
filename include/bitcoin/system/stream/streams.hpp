@@ -57,7 +57,7 @@ namespace stream
         using copy = make_stream<copy_sink<data_slab>>;
 
         /// A fast output stream that copies data to a data_slab.
-        using fast = system:: ostream<>;
+        using fast = system::ostream<>;
 
         /// A std::output stream that inserts data to a container.
         template <typename Container>

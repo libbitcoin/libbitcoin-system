@@ -46,7 +46,7 @@ static_assert(is_same_type<argument<one, base, derived>, derived>);
 // ----------------------------------------------------------------------------
 
 // This are design limitations, and not a matter of C++ specification.
-static_assert(sizeof(char) == one);
+static_assert(is_one(sizeof(char)));
 static_assert(
     is_same_size<size_t, uint32_t> ||
     is_same_size<size_t, uint64_t>);

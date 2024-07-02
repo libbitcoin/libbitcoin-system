@@ -174,12 +174,12 @@ template <typename Integral, size_t Lanes,
     if_not_greater<safe_multiply(sizeof(Integral), Lanes),
         sizeof(xint512_t)> = true>
 using to_extended =
-    iif<capacity<uint8_t, Integral, Lanes> == one, uint8_t,
-        iif<capacity<uint16_t, Integral, Lanes> == one, uint16_t,
-            iif<capacity<uint32_t, Integral, Lanes> == one, uint32_t,
-                iif<capacity<uint64_t, Integral, Lanes> == one, uint64_t,
-                    iif<capacity<xint128_t, Integral, Lanes> == one, xint128_t,
-                        iif<capacity<xint256_t, Integral, Lanes> == one, xint256_t,
+    iif<is_one(capacity<uint8_t, Integral, Lanes>), uint8_t,
+        iif<is_one(capacity<uint16_t, Integral, Lanes>), uint16_t,
+            iif<is_one(capacity<uint32_t, Integral, Lanes>), uint32_t,
+                iif<is_one(capacity<uint64_t, Integral, Lanes>), uint64_t,
+                    iif<is_one(capacity<xint128_t, Integral, Lanes>), xint128_t,
+                        iif<is_one(capacity<xint256_t, Integral, Lanes>), xint256_t,
                             xint512_t>>>>>>;
 
 /// Runtime time availability of extended integer intrinsics, as a template

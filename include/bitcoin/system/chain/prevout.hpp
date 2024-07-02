@@ -33,6 +33,7 @@ public:
     /// A height of zero is immature (unspendable) despite unspent state.
     ///************************************************************************
     /// The confirmed chain height of the prevout (zero if not found).
+    /// Unused if the input owning this prevout is null (coinbase).
     size_t height{ zero };
 
     ///************************************************************************
@@ -40,19 +41,21 @@ public:
     /// A mtp of max_uint32 fails locktime maturity (until time overflow).
     ///************************************************************************
     /// The median time past at height (max_uint32 if not found/confirmed).
+    /// Unused if the input owning this prevout is null (coinbase).
     uint32_t median_time_past{ max_uint32 };
 
     ///************************************************************************
     /// CONSENSUS: 
     /// An unspent coinbase collision is immature (unspendable) and spent
-    /// collision is mature (bip30). Coinbase collision precluded by bip34.
+    /// collision is mature (bip30). CB collision presumed precluded by bip34.
     ///************************************************************************
-    /// For coinbase tx, implies fully spent at height or not found.
-    /// Coinbase value stored in first input of coinbase transaction.
-    /// For a non-coinbase input this indicates spent at height.
+    /// If the input owning this prevout is null (coinbase), this implies that
+    /// all outputs of any duplicate txs are fully spent at height.
+    /// If the input owning this prevout is not null (not coinbase), this
+    /// indicates whether the prevout is spent at height (double spend).
     bool spent{ true };
 
-    /// The output is of a coinbase transaction.
+    /// The previous output is of a coinbase transaction.
     bool coinbase{ false };
 };
 

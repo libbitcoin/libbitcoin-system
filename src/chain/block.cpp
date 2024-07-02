@@ -682,10 +682,8 @@ void block::populate() const NOEXCEPT
 // DO invoke on coinbase.
 code block::check_transactions() const NOEXCEPT
 {
-    code ec;
-    
     for (const auto& tx: *txs_)
-        if ((ec = tx->check()))
+        if (const auto ec = tx->check())
             return ec;
 
     return error::block_success;
@@ -694,10 +692,8 @@ code block::check_transactions() const NOEXCEPT
 // DO invoke on coinbase.
 code block::check_transactions(const context& ctx) const NOEXCEPT
 {
-    code ec;
-    
     for (const auto& tx: *txs_)
-        if ((ec = tx->check(ctx)))
+        if (const auto ec = tx->check(ctx))
             return ec;
 
     return error::block_success;
@@ -706,11 +702,9 @@ code block::check_transactions(const context& ctx) const NOEXCEPT
 // Do NOT invoke on coinbase.
 code block::accept_transactions(const context& ctx) const NOEXCEPT
 {
-    code ec;
-
     if (!is_empty())
         for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
-            if ((ec = (*tx)->accept(ctx)))
+            if (const auto ec = (*tx)->accept(ctx))
                 return ec;
 
     return error::block_success;
@@ -719,11 +713,9 @@ code block::accept_transactions(const context& ctx) const NOEXCEPT
 // Do NOT invoke on coinbase.
 code block::connect_transactions(const context& ctx) const NOEXCEPT
 {
-    code ec;
-
     if (!is_empty())
         for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
-            if ((ec = (*tx)->connect(ctx)))
+            if (const auto ec = (*tx)->connect(ctx))
                 return ec;
 
     return error::block_success;
@@ -732,35 +724,49 @@ code block::connect_transactions(const context& ctx) const NOEXCEPT
 // Do NOT invoke on coinbase.
 code block::confirm_transactions(const context& ctx) const NOEXCEPT
 {
-    code ec;
-
     if (!is_empty())
         for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
-            if ((ec = (*tx)->confirm(ctx)))
+            if (const auto ec = (*tx)->confirm(ctx))
                 return ec;
+
+    return error::block_success;
+}
+
+// Identity.
+// ----------------------------------------------------------------------------
+// invalid_transaction_commitment, invalid_witness_commitment, block_malleated
+// codes specifically indicate lack of block hash tx identification (identity).
+
+code block::identify() const NOEXCEPT
+{
+    // type64 malleated is a subset of first_not_coinbase.
+    // type32 malleated is a subset of is_internal_double_spend.
+    if (is_malleated())
+        return error::block_malleated;
+    if (is_invalid_merkle_root())
+        return error::invalid_transaction_commitment;
+
+    return error::block_success;
+}
+
+code block::identify(const context& ctx) const NOEXCEPT
+{
+    const auto bip141 = ctx.is_enabled(bip141_rule);
+
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
 
     return error::block_success;
 }
 
 // Validation.
 // ----------------------------------------------------------------------------
+// In the case of validation failure
 // The block header is checked/accepted independently.
 
-// context free.
-// Node relies on error::block_malleated.
-// Node relies on error::invalid_transaction_commitment.
 // TODO: use of get_hash() in is_forward_reference makes this thread unsafe.
-code block::check(bool bypass) const NOEXCEPT
+code block::check() const NOEXCEPT
 {
-    // type32 malleated is a subset of is_internal_double_spend.
-    // type64 malleated is a subset of first_not_coinbase.
-    if (bypass && is_malleated())
-        return error::block_malleated;
-    if (is_invalid_merkle_root())
-        return error::invalid_transaction_commitment;
-    if (bypass)
-        return error::block_success;
-
     // empty_block is subset of first_not_coinbase.
     //if (is_empty())
     //    return error::empty_block;
@@ -774,6 +780,8 @@ code block::check(bool bypass) const NOEXCEPT
         return error::forward_reference;
     if (is_internal_double_spend())
         return error::block_internal_double_spend;
+    if (is_invalid_merkle_root())
+        return error::invalid_transaction_commitment;
 
     return check_transactions();
 }
@@ -783,18 +791,10 @@ code block::check(bool bypass) const NOEXCEPT
 // timestamp
 // median_time_past
 
-// context required.
-// Node relies on error::invalid_witness_commitment.
 // TODO: use of get_hash() in is_hash_limit_exceeded makes this thread unsafe.
-code block::check(const context& ctx, bool bypass) const NOEXCEPT
+code block::check(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
-
-    if (bip141 && is_invalid_witness_commitment())
-        return error::invalid_witness_commitment;
-    if (bypass)        
-        return error::block_success;
-
     const auto bip34 = ctx.is_enabled(bip34_rule);
     const auto bip50 = ctx.is_enabled(bip50_rule);
 
@@ -804,6 +804,8 @@ code block::check(const context& ctx, bool bypass) const NOEXCEPT
         return error::coinbase_height_mismatch;
     if (bip50 && is_hash_limit_exceeded())
         return error::temporary_hash_limit;
+    if (bip141 && is_invalid_witness_commitment())
+        return error::invalid_witness_commitment;
 
     return check_transactions(ctx);
 }

@@ -102,7 +102,7 @@ VCONSTEXPR opcode operation::minimal_opcode_from_data(
 {
     const auto size = data.size();
 
-    if (size == one)
+    if (is_one(size))
     {
         const auto value = data.front();
 

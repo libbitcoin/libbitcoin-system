@@ -39,7 +39,7 @@ void points_value::greedy(points_value& out, const points_value& unspent,
         return;
 
     // Optimization for simple case not requiring search.
-    if (unspent.points.size() == 1)
+    if (is_one(unspent.points.size()))
     {
         out.points.push_back(unspent.points.front());
         return;

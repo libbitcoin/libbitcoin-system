@@ -68,7 +68,7 @@ constexpr auto merkle_hash(const auto& expected) noexcept
     };
 
     Algorithm::merkle_hash(digests);
-    return (digests.size() == one) && (digests.front() == expected);
+    return is_one(digests.size()) && (digests.front() == expected);
 };
 
 // constexpr test helper for merkle_hash with four hashes.
