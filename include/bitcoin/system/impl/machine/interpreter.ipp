@@ -291,7 +291,7 @@ op_dup2() NOEXCEPT
     if (state::stack_size() < 2)
         return error::op_dup2;
 
-    // [0,1,2,3] => 1, [0,1,2,3] =>  0,1,[0,1,2,3]
+    // [0,1,2,3] => 1,[0,1,2,3] =>  0,1,[0,1,2,3]
     state::push_variant(state::peek_(1));
     state::push_variant(state::peek_(1));
     return error::op_success;
