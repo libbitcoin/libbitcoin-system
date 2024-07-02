@@ -57,19 +57,19 @@ BOOST_AUTO_TEST_CASE(serialize__uint8__ostream__base10)
 
 BOOST_AUTO_TEST_CASE(serialize__data_array__empty__empty)
 {
-    const std::array<uint8_t, 0> value{};
+    const std_array<uint8_t, 0> value{};
     BOOST_REQUIRE_EQUAL(serialize(value), "");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__data_array__bytes__base16)
 {
-    const std::array<uint8_t, 3> value{ { 7, 42, 11 } };
+    const std_array<uint8_t, 3> value{ { 7, 42, 11 } };
     BOOST_REQUIRE_EQUAL(serialize(value), "072a0b");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__data_array__ostream__base16)
 {
-    const std::array<uint8_t, 3> value{ { 7, 42, 11 } };
+    const std_array<uint8_t, 3> value{ { 7, 42, 11 } };
     std::ostringstream out;
     serialize(out, value, "");
     BOOST_REQUIRE_EQUAL(out.str(), "072a0b");
@@ -79,19 +79,19 @@ BOOST_AUTO_TEST_CASE(serialize__data_array__ostream__base16)
 
 BOOST_AUTO_TEST_CASE(serialize__data_chunk__empty__empty)
 {
-    const std::vector<uint8_t> value{};
+    const std_vector<uint8_t> value{};
     BOOST_REQUIRE_EQUAL(serialize(value), "");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__data_chunk__bytes__base16)
 {
-    const std::vector<uint8_t> value{ 7, 42, 11 };
+    const std_vector<uint8_t> value{ 7, 42, 11 };
     BOOST_REQUIRE_EQUAL(serialize(value), "072a0b");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__data_chunk__ostream__base16)
 {
-    const std::vector<uint8_t> value{ 7, 42, 11 };
+    const std_vector<uint8_t> value{ 7, 42, 11 };
     std::ostringstream out;
     serialize(out, value, "");
     BOOST_REQUIRE_EQUAL(out.str(), "072a0b");
@@ -101,49 +101,49 @@ BOOST_AUTO_TEST_CASE(serialize__data_chunk__ostream__base16)
 
 BOOST_AUTO_TEST_CASE(serialize__array__int__base10_delimited)
 {
-    const std::array<int, 3> value{ { 7, 42, 11 } };
+    const std_array<int, 3> value{ { 7, 42, 11 } };
     BOOST_REQUIRE_EQUAL(serialize(value), "7 42 11");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__array__int_negative__base10_delimited)
 {
-    const std::array<int, 3> value{ { -7, 42, -11 } };
+    const std_array<int, 3> value{ { -7, 42, -11 } };
     BOOST_REQUIRE_EQUAL(serialize(value), "-7 42 -11");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__array__char__char_delimited)
 {
-    const std::array<char, 3> value{ { 'a', 'b', 'c' } };
+    const std_array<char, 3> value{ { 'a', 'b', 'c' } };
     BOOST_REQUIRE_EQUAL(serialize(value), "a b c");
 }
 
 BOOST_AUTO_TEST_CASE(string__array__string_class__text_delimited)
 {
-    const std::array<std::string, 3> value{ { "foo", "---", "bar" } };
+    const std_array<std::string, 3> value{ { "foo", "---", "bar" } };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo --- bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__array__string_padded__text_delimited_untrimmed)
 {
-    const std::array<const char*, 3> value{ { " foo", " --- ", "bar " } };
+    const std_array<const char*, 3> value{ { " foo", " --- ", "bar " } };
     BOOST_REQUIRE_EQUAL(serialize(value), " foo  ---  bar ");
 }
 
 BOOST_AUTO_TEST_CASE(string__array__string_empty__text_delimited_default_fallback)
 {
-    const std::array<const char*, 3> value{ { "foo", "", "bar" } };
+    const std_array<const char*, 3> value{ { "foo", "", "bar" } };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo ? bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__array__string_fallback__text_delimited_specified_fallback)
 {
-    const std::array<const char*, 3> value{ { "foo", "", "bar" } };
+    const std_array<const char*, 3> value{ { "foo", "", "bar" } };
     BOOST_REQUIRE_EQUAL(serialize(value, "*"), "foo * bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__array__istream__text_delimited_specified_fallback)
 {
-    const std::array<const char*, 3> value{ { "foo", "", "bar" } };
+    const std_array<const char*, 3> value{ { "foo", "", "bar" } };
     std::ostringstream out;
     serialize(out, value, "*");
     BOOST_REQUIRE_EQUAL(out.str(), "foo * bar");
@@ -153,49 +153,49 @@ BOOST_AUTO_TEST_CASE(string__array__istream__text_delimited_specified_fallback)
 
 BOOST_AUTO_TEST_CASE(serialize__vector__int__base10_delimited)
 {
-    const std::vector<int> value{ 7, 42, 11 };
+    const std_vector<int> value{ 7, 42, 11 };
     BOOST_REQUIRE_EQUAL(serialize(value), "7 42 11");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__int_negative__base10_delimited)
 {
-    const std::vector<int> value{ -7, 42, -11 };
+    const std_vector<int> value{ -7, 42, -11 };
     BOOST_REQUIRE_EQUAL(serialize(value), "-7 42 -11");
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__char__char_delimited)
 {
-    const std::vector<char> value{ 'a', 'b', 'c' };
+    const std_vector<char> value{ 'a', 'b', 'c' };
     BOOST_REQUIRE_EQUAL(serialize(value), "a b c");
 }
 
 BOOST_AUTO_TEST_CASE(string__vector__string_class__text_delimited)
 {
-    const std::vector<std::string> value{ "foo", "---", "bar" };
+    const std_vector<std::string> value{ "foo", "---", "bar" };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo --- bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__vector__string_padded__text_delimited_untrimmed)
 {
-    const std::vector<const char*> value{ " foo", " --- ", "bar " };
+    const std_vector<const char*> value{ " foo", " --- ", "bar " };
     BOOST_REQUIRE_EQUAL(serialize(value), " foo  ---  bar ");
 }
 
 BOOST_AUTO_TEST_CASE(string__vector__string_empty__text_delimited_default_fallback)
 {
-    const std::vector<const char*> value{ "foo", "", "bar" };
+    const std_vector<const char*> value{ "foo", "", "bar" };
     BOOST_REQUIRE_EQUAL(serialize(value), "foo ? bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__vector__string_fallback__text_delimited_specified_fallback)
 {
-    const std::vector<const char*> value{ "foo", "", "bar" };
+    const std_vector<const char*> value{ "foo", "", "bar" };
     BOOST_REQUIRE_EQUAL(serialize(value, "*"), "foo * bar");
 }
 
 BOOST_AUTO_TEST_CASE(string__vector__istream__text_delimited_specified_fallback)
 {
-    const std::vector<const char*> value{ "foo", "", "bar" };
+    const std_vector<const char*> value{ "foo", "", "bar" };
     std::ostringstream out;
     serialize(out, value, "*");
     BOOST_REQUIRE_EQUAL(out.str(), "foo * bar");

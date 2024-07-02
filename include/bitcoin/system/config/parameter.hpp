@@ -37,11 +37,11 @@ namespace config {
 typedef std::pair<const std::string, int> argument_pair;
 
 /// A type to represent the list of positional argument name counts.
-typedef std::vector<argument_pair> argument_list;
+typedef std_vector<argument_pair> argument_list;
 
 /// A type to represent a list of parameter structures.
 class parameter;
-typedef std::vector<parameter> parameter_list;
+typedef std_vector<parameter> parameter_list;
 
 /// Not thread safe, non-virtual.
 /// Normalized storage for command line arguments and options.

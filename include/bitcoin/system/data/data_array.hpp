@@ -31,7 +31,7 @@ namespace system {
 
 /// Byte array of a specified length.
 template <size_t Size>
-using data_array = std::array<uint8_t, Size>;
+using data_array = std_array<uint8_t, Size>;
 
 /// Return type for splitters.
 template <size_t Size>
@@ -52,7 +52,7 @@ constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT;
 /// Create a data stack from vector of data array.
 template <size_t Size>
 const data_stack to_stack(
-    const std::vector<data_array<Size>>& values) NOEXCEPT;
+    const std_vector<data_array<Size>>& values) NOEXCEPT;
 
 /// Concatenate several data slices into a single array.
 /// Underfill is padded with 0x00, excess is truncated.

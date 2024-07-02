@@ -243,10 +243,10 @@ bool transaction::operator!=(const transaction& other) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template<class Put, class Source>
-std::shared_ptr<const std::vector<std::shared_ptr<const Put>>>
+std::shared_ptr<const std_vector<std::shared_ptr<const Put>>>
 read_puts(Source& source) NOEXCEPT
 {
-    auto puts = to_shared<std::vector<std::shared_ptr<const Put>>>();
+    auto puts = to_shared<std_vector<std::shared_ptr<const Put>>>();
     const auto capacity = source.read_size(max_block_size);
 
     puts->reserve(capacity);

@@ -71,13 +71,13 @@ inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
 
 /// Create shared pointer to vector of const shared pointers from moved vector.
 template <typename Type>
-std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
-to_shareds(std::vector<Type>&& values) NOEXCEPT;
+std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
+to_shareds(std_vector<Type>&& values) NOEXCEPT;
 
 /// Create shared pointer to vector of const shared pointers from copied vector.
 template <typename Type>
-std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
-to_shareds(const std::vector<Type>& values) NOEXCEPT;
+std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
+to_shareds(const std_vector<Type>& values) NOEXCEPT;
 
 /// unique_ptr
 /// ---------------------------------------------------------------------------

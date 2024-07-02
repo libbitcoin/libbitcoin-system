@@ -131,7 +131,7 @@ inline bool operator!=(const external_ptr<Type>& left,
 
 /// Form of external store required by make_external.
 template <typename Type, if_default_constructible<Type> = true>
-using tether = std::vector<std::shared_ptr<Type>>;
+using tether = std_vector<std::shared_ptr<Type>>;
 
 /// Move instance to shared_ptr external ownership and return external_ptr.
 template <typename Type, if_default_constructible<Type> = true>

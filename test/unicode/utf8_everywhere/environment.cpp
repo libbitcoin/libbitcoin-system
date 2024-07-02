@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__to_utf16_array__non_ascii_truncation2__ex
 
 BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__ascii__expected)
 {
-    std::vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
+    std_vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
     auto variables = const_cast<wchar_t**>(&wide_environment[0]);
     auto narrow_environment = allocate_environment(variables);
     BOOST_REQUIRE_EQUAL(narrow_environment[0], "ascii");
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__utf16__expecte
     // We cannot use L for literal encoding of non-ascii text on Windows.
     auto utf16 = to_utf16("テスト");
     auto non_literal_utf16 = utf16.c_str();
-    std::vector<const wchar_t*> wide_environment = { L"ascii", non_literal_utf16, nullptr };
+    std_vector<const wchar_t*> wide_environment = { L"ascii", non_literal_utf16, nullptr };
     auto variables = const_cast<wchar_t**>(&wide_environment[0]);
     auto narrow_environment = allocate_environment(variables);
     BOOST_REQUIRE_EQUAL(narrow_environment[0], "ascii");
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__utf16__expecte
 
 BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__null_termination__expected)
 {
-    std::vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
+    std_vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
     auto variables = const_cast<wchar_t**>(&wide_environment[0]);
     auto expected_count = static_cast<int>(wide_environment.size()) - 1u;
     auto narrow_environment = allocate_environment(variables);
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_vars__null_terminati
 
 BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__ascii__expected)
 {
-    std::vector<const wchar_t*> wide_args = { L"ascii", nullptr };
+    std_vector<const wchar_t*> wide_args = { L"ascii", nullptr };
     auto argv = const_cast<wchar_t**>(&wide_args[0]);
     auto argc = static_cast<int>(wide_args.size()) - 1u;
     auto narrow_args = allocate_environment(argc, argv);
@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__utf16__expecte
     // We cannot use L for literal encoding of non-ascii text on Windows.
     auto utf16 = to_utf16("テスト");
     auto non_literal_utf16 = utf16.c_str();
-    std::vector<const wchar_t*> wide_args = { L"ascii", non_literal_utf16, nullptr };
+    std_vector<const wchar_t*> wide_args = { L"ascii", non_literal_utf16, nullptr };
     auto argv = const_cast<wchar_t**>(&wide_args[0]);
     auto argc = static_cast<int>(wide_args.size()) - 1u;
     auto narrow_args = allocate_environment(argc, argv);
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__utf16__expecte
 
 BOOST_AUTO_TEST_CASE(utf8_environment__allocate_environment_args__null_termination__expected)
 {
-    std::vector<const wchar_t*> wide_args = { L"ascii", nullptr };
+    std_vector<const wchar_t*> wide_args = { L"ascii", nullptr };
     auto argv = const_cast<wchar_t**>(&wide_args[0]);
     auto argc = static_cast<int>(wide_args.size()) - 1u;
     auto narrow_args = allocate_environment(argc, argv);

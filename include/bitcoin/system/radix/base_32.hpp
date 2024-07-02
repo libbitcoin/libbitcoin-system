@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-typedef std::vector<uint5_t> base32_chunk;
+typedef std_vector<uint5_t> base32_chunk;
 
 // This is NOT an implementation of RFC 4648: tools.ietf.org/html/rfc4648
 // This is a generic data-text encoder fully compliant with the data

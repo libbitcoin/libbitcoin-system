@@ -83,7 +83,7 @@ struct electrum_v1_vector
     }
 };
 
-typedef std::vector<electrum_v1_vector> electrum_v1_vectors;
+typedef std_vector<electrum_v1_vector> electrum_v1_vectors;
 
 // Vectors verified using: electrum/old_mnemonic.py
 electrum_v1_vectors vectors

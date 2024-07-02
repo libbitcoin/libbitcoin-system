@@ -33,7 +33,7 @@ struct script_test
     uint32_t version;
 };
 
-typedef std::vector<script_test> script_test_list;
+typedef std_vector<script_test> script_test_list;
 
 // These are valid prior to and after BIP16 activation.
 const script_test_list valid_bip16_scripts

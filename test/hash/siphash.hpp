@@ -31,7 +31,7 @@ struct siphash_result
     std::string result;
 };
 
-typedef std::vector<siphash_result> siphash_result_list;
+typedef std_vector<siphash_result> siphash_result_list;
 
 const std::string hash_test_key = "000102030405060708090a0b0c0d0e0f";
 

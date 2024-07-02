@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace system {
 
-typedef std::vector<uint11_t> base2048_chunk;
+typedef std_vector<uint11_t> base2048_chunk;
 
 // This is the encoding used by both BIP39 and Electrum mnemonics.
 // Dictionaries are unicode lower case and nfkd normalized.

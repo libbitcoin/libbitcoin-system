@@ -69,11 +69,11 @@ public:
 
     /// Byte array constructor (casts Byte to uint8_t).
     template <size_type Size, typename Byte, if_one_byte<Byte> = true>
-    constexpr data_reference(const std::array<Byte, Size>& data) NOEXCEPT;
+    constexpr data_reference(const std_array<Byte, Size>& data) NOEXCEPT;
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    VCONSTEXPR data_reference(const std::vector<Byte>& data) NOEXCEPT;
+    VCONSTEXPR data_reference(const std_vector<Byte>& data) NOEXCEPT;
 
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>

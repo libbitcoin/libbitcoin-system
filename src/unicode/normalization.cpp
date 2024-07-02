@@ -121,7 +121,7 @@ bool to_lower(std::string& out, const std::string& in) NOEXCEPT
     if (is_limited<DWORD>(size))
         return false;
 
-    // std::vector ensures contiguous bytes.
+    // std_vector ensures contiguous bytes.
     const auto length = static_cast<DWORD>(size);
 
     // CharLowerBuffW ensures conversion in place.
@@ -145,7 +145,7 @@ bool to_upper(std::string& out, const std::string& in) NOEXCEPT
     if (is_limited<DWORD>(size))
         return false;
 
-    // std::vector ensures contiguous bytes.
+    // std_vector ensures contiguous bytes.
     const auto length = static_cast<DWORD>(size);
 
     // CharUpperBuffW ensures conversion in place.

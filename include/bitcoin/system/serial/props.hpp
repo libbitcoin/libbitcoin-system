@@ -95,7 +95,7 @@ protected:
 
     type type_;
     std::string value_;
-    std::vector<named_props> children_;
+    std_vector<named_props> children_;
 };
 
 class BC_API array_props

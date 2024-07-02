@@ -34,7 +34,7 @@ class BC_API point_value
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(point_value);
 
-    typedef std::vector<point_value> list;
+    typedef std_vector<point_value> list;
 
     // Constructors.
     // ------------------------------------------------------------------------

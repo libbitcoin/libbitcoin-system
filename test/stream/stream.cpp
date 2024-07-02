@@ -359,14 +359,14 @@ BOOST_AUTO_TEST_CASE(istream__get__peek__expected)
 
 BOOST_AUTO_TEST_CASE(istream__read__empty_zero__valid)
 {
-    std::vector<char> ssink;
+    std_vector<char> ssink;
     std::istringstream isstream;
     BOOST_REQUIRE(isstream);
     isstream.read(ssink.data(), ssink.size());
     BOOST_REQUIRE(isstream);
     BOOST_REQUIRE_EQUAL(isstream.rdstate(), std::istream::goodbit);
 
-    std::vector<char> sink;
+    std_vector<char> sink;
     const std::string source;
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(istream__read__empty_one__inconsistent)
 {
     // sets eofbit and failbit
     std::istringstream isstream;
-    std::vector<char> ssink(1, 0x00);
+    std_vector<char> ssink(1, 0x00);
     BOOST_REQUIRE(isstream);
     isstream.read(ssink.data(), ssink.size());
     BOOST_REQUIRE(!isstream);
@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(istream__read__empty_one__inconsistent)
 
     // sets badbit
     const std::string source;
-    std::vector<char> sink(1, 0x00);
+    std_vector<char> sink(1, 0x00);
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.read(sink.data(), sink.size());
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE(istream__read__to_end__expected_valid)
 {
     const std::string source{ "+/-" };
 
-    std::vector<char> ssink(source.size(), 0x00);
+    std_vector<char> ssink(source.size(), 0x00);
     std::istringstream isstream{ source };
     BOOST_REQUIRE(isstream);
     isstream.read(ssink.data(), ssink.size());
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(istream__read__to_end__expected_valid)
     BOOST_REQUIRE_EQUAL(isstream.rdstate(), std::istream::goodbit);
     BOOST_REQUIRE_EQUAL(to_string(ssink), source);
 
-    std::vector<char> sink(source.size(), 0x00);
+    std_vector<char> sink(source.size(), 0x00);
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.read(sink.data(), sink.size());
@@ -424,7 +424,7 @@ BOOST_AUTO_TEST_CASE(istream__read__past_end__eofbit_failbit)
 {
     const std::string source{ "+/-" };
 
-    std::vector<char> ssink(add1(source.size()), 0x00);
+    std_vector<char> ssink(add1(source.size()), 0x00);
     std::istringstream isstream{ source };
     BOOST_REQUIRE(isstream);
     isstream.read(ssink.data(), ssink.size());
@@ -434,7 +434,7 @@ BOOST_AUTO_TEST_CASE(istream__read__past_end__eofbit_failbit)
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
     BOOST_REQUIRE_EQUAL(to_string(ssink).substr(0, source.size()), source);
 
-    std::vector<char> sink(add1(source.size()), 0x00);
+    std_vector<char> sink(add1(source.size()), 0x00);
     stream::in::copy istream(source);
     BOOST_REQUIRE(istream);
     istream.read(sink.data(), sink.size());
@@ -449,7 +449,7 @@ BOOST_AUTO_TEST_CASE(istream__read__failbit__failbit)
 {
     const std::string source{ "+/-" };
 
-    std::vector<char> ssink(source.size(), 0x00);
+    std_vector<char> ssink(source.size(), 0x00);
     const auto sexpected = ssink;
     std::istringstream isstream{ source };
     isstream.setstate(std::istringstream::failbit);
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(istream__read__failbit__failbit)
     BOOST_REQUIRE(!is_set(isstream.rdstate(), std::istringstream::badbit));
     BOOST_REQUIRE_EQUAL(ssink, sexpected);
 
-    std::vector<char> sink(source.size(), 0x00);
+    std_vector<char> sink(source.size(), 0x00);
     const auto expected = ssink;
     stream::in::copy istream(source);
     istream.setstate(std::istream::failbit);

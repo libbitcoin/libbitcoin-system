@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream& stream,
 // vector<Type> -> join(<<Type)
 template <typename Type>
 std::ostream& operator<<(std::ostream& stream,
-    const std::vector<Type>& values) NOEXCEPT
+    const std_vector<Type>& values) NOEXCEPT
 {
     // Ok when testing serialize because only used for error message out.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -72,7 +72,7 @@ std::ostream& operator<<(std::ostream& stream,
 // array<Type, Size> -> join(<<Type)
 template <typename Type, size_t Size>
 std::ostream& operator<<(std::ostream& stream,
-    const std::array<Type, Size>& values) NOEXCEPT
+    const std_array<Type, Size>& values) NOEXCEPT
 {
     // Ok when testing serialize because only used for error message out.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)

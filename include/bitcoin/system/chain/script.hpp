@@ -198,7 +198,7 @@ public:
     mutable iterator offset;
 };
 
-typedef std::vector<script> scripts;
+typedef std_vector<script> scripts;
 
 DECLARE_JSON_VALUE_CONVERTORS(script);
 DECLARE_JSON_VALUE_CONVERTORS(script::cptr);

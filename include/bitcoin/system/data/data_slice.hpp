@@ -79,7 +79,7 @@ public:
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    VCONSTEXPR data_slice(const std::vector<Byte>& data) NOEXCEPT;
+    VCONSTEXPR data_slice(const std_vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-const references.
     /// Byte iterators constructor (casts to uint8_t).
@@ -106,7 +106,7 @@ public:
     constexpr std_array<value_type, Size> to_array() const NOEXCEPT;
 
     /// Copy data to a vector.
-    VCONSTEXPR std::vector<value_type> to_chunk() const NOEXCEPT;
+    VCONSTEXPR std_vector<value_type> to_chunk() const NOEXCEPT;
 
     /// Convert data to a string (casts uint8_t to char).
     SCONSTEXPR std::string to_string() const NOEXCEPT;
@@ -130,7 +130,7 @@ public:
     /// -----------------------------------------------------------------------
     ////template<size_type Size>
     ////constexpr operator std_array<value_type, Size>() const NOEXCEPT;
-    ////VCONSTEXPR operator std::vector<value_type>() const NOEXCEPT;
+    ////VCONSTEXPR operator std_vector<value_type>() const NOEXCEPT;
     constexpr value_type operator[](size_type index) const NOEXCEPT;
 
 private:

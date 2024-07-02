@@ -70,7 +70,7 @@ inline bool deserialize(data_chunk& out, const std::string& text) NOEXCEPT
 }
 
 template <typename Value, size_t Size>
-bool deserialize(std::array<Value, Size>& out, const std::string& text) NOEXCEPT
+bool deserialize(std_array<Value, Size>& out, const std::string& text) NOEXCEPT
 {
     auto result = true;
     const auto deserializer = [&result](const std::string& token) NOEXCEPT
@@ -86,7 +86,7 @@ bool deserialize(std::array<Value, Size>& out, const std::string& text) NOEXCEPT
 }
 
 template <typename Value>
-bool deserialize(std::vector<Value>& out, const std::string& text) NOEXCEPT
+bool deserialize(std_vector<Value>& out, const std::string& text) NOEXCEPT
 {
     auto result = true;
     const auto deserializer = [&result](const std::string& token) NOEXCEPT

@@ -29,7 +29,7 @@ namespace system {
 
 /// Sink for ios::stream, appends bytes to Container.
 /// Container may be any insertable object with contiguous byte data.
-/// This is limited to std::string and std::vector of uint8_t.
+/// This is limited to std::string and std_vector of uint8_t.
 /// Push streams are buffered, indirect (inefficient) and require flush.
 template <typename Container, if_byte_insertable<Container> = true>
 class push_sink

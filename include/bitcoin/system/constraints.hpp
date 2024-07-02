@@ -240,7 +240,7 @@ using if_little_endian_integral_integer = bool_if<
     is_integral_integer<Integer> &&
     is_little_endian>;
 
-/// std::array/std::vector
+/// std_array/std_vector
 
 template <typename Type>
 using if_std_array = bool_if<
@@ -254,7 +254,7 @@ using if_integral_array = bool_if<
 template <typename Type>
 using if_byte_insertable = bool_if<
     std::is_base_of<std::string, Type>::value ||
-    std::is_base_of<std::vector<uint8_t>, Type>::value>;
+    std::is_base_of<std_vector<uint8_t>, Type>::value>;
 
 } // namespace libbitcoin
 

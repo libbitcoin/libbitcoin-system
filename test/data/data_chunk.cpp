@@ -45,12 +45,12 @@ BOOST_AUTO_TEST_CASE(data_chunk__types__all__expected)
     // chunk_[c]ptrs
 
     // mutable (private)
-    chunk_ptrs p3 = std::vector<chunk_ptr>({ p1 });
+    chunk_ptrs p3 = std_vector<chunk_ptr>({ p1 });
     p3.front()->push_back({ byte });        // modify container
     p3.front()->front() = byte;             // modify element
 
     // immutable (public)
-    chunk_cptrs p4 = std::vector<chunk_cptr>({ p1, p2 });
+    chunk_cptrs p4 = std_vector<chunk_cptr>({ p1, p2 });
     ////p4.front()->push_back({ byte });    // const container
     ////p4.front()->front() = byte;         // const element
 

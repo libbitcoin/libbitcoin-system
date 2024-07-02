@@ -119,21 +119,21 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_element__unsorted_contained__unlucky)
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_key__three_various_elements_unmatched__not_found)
 {
-    const std::vector<const char*> sorted{ "afgdjdfj", "btffghfg", "cfdd" };
+    const std_vector<const char*> sorted{ "afgdjdfj", "btffghfg", "cfdd" };
     const std::string value = "bcd";
     BOOST_REQUIRE_EQUAL(binary_search(sorted, value), negative_one);
 }
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_key__three_various_elements_matched__found)
 {
-    const std::vector<const char*> sorted{ "afgdjdfj", "btffghfg", "cfdd" };
+    const std_vector<const char*> sorted{ "afgdjdfj", "btffghfg", "cfdd" };
     const std::string value = "cfdd";
     BOOST_REQUIRE_EQUAL(binary_search(sorted, value), 2);
 }
 
 BOOST_AUTO_TEST_CASE(limits__binary_search_key__unsorted_contained__unlucky)
 {
-    const std::vector<const char*> unsorted{ "z", "y", "x" };
+    const std_vector<const char*> unsorted{ "z", "y", "x" };
     const std::string value = "z";
     BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), negative_one);
 }
@@ -142,12 +142,12 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_key__unsorted_contained__unlucky)
 
 BOOST_AUTO_TEST_CASE(collection__projection_vector__empty__empty)
 {
-    BOOST_REQUIRE(projection<std::vector<uint16_t>>(data_chunk{}).empty());
+    BOOST_REQUIRE(projection<std_vector<uint16_t>>(data_chunk{}).empty());
 }
 
 BOOST_AUTO_TEST_CASE(collection__projection_vector__move__same)
 {
-    const auto result = projection<std::vector<uint32_t>>(data_chunk{ 42u });
+    const auto result = projection<std_vector<uint32_t>>(data_chunk{ 42u });
     BOOST_REQUIRE_EQUAL(result.size(), 1u);
     BOOST_REQUIRE_EQUAL(result.front(), 42u);
 }
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(collection__projection_vector__move__same)
 BOOST_AUTO_TEST_CASE(collection__projection_vector__copy__same)
 {
     const data_chunk value{ 42u, 24u };
-    const auto result = projection<std::vector<size_t>>(value);
+    const auto result = projection<std_vector<size_t>>(value);
     BOOST_REQUIRE_EQUAL(value.size(), result.size());
     BOOST_REQUIRE_EQUAL(result[0], value[0]);
     BOOST_REQUIRE_EQUAL(result[1], value[1]);

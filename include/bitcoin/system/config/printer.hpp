@@ -67,7 +67,7 @@ public:
     /// This always sets at least one line and always collapses whitespace.
     /// paragraph  The paragraph to columnize.
     /// return     The column, as a list of fragments.
-    std::vector<std::string> columnize(const std::string& paragraph,
+    std_vector<std::string> columnize(const std::string& paragraph,
         size_t width) NOEXCEPT;
 
     /// Format stuff.

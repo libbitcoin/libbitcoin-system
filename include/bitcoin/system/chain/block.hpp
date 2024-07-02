@@ -215,7 +215,7 @@ private:
     sizes size_;
 };
 
-typedef std::vector<block> blocks;
+typedef std_vector<block> blocks;
 
 DECLARE_JSON_VALUE_CONVERTORS(block);
 DECLARE_JSON_VALUE_CONVERTORS(block::cptr);

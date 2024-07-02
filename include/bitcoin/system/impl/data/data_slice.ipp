@@ -41,14 +41,14 @@ constexpr data_slice::data_slice(const char(&bytes)[Size]) NOEXCEPT
 }
 
 template <data_slice::size_type Size, typename Byte, if_one_byte<Byte>>
-constexpr data_slice::data_slice(const std::array<Byte, Size>& data) NOEXCEPT
+constexpr data_slice::data_slice(const std_array<Byte, Size>& data) NOEXCEPT
   : data_slice(from_size(data.begin(), Size))
 {
 }
 
-// std::vector.begin not constexpr (need full C++20).
+// std_vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
-VCONSTEXPR data_slice::data_slice(const std::vector<Byte>& data) NOEXCEPT
+VCONSTEXPR data_slice::data_slice(const std_vector<Byte>& data) NOEXCEPT
   : data_slice(from_size_(data.begin(), data.size()))
 {
 }
@@ -157,10 +157,10 @@ SVCONSTEXPR data_slice data_slice::from_size_(Pointer begin,
 // ----------------------------------------------------------------------------
 
 template <data_slice::size_type Size>
-std::array<data_slice::value_type, Size>
+std_array<data_slice::value_type, Size>
 constexpr data_slice::to_array() const NOEXCEPT
 {
-    std::array<data_slice::value_type, Size> out{};
+    std_array<data_slice::value_type, Size> out{};
 
     // Array operator safely iterates and emits zeros past end.
     for (size_type index = 0; index < Size; ++index)
@@ -173,7 +173,7 @@ constexpr data_slice::to_array() const NOEXCEPT
     return out;
 }
 
-VCONSTEXPR std::vector<data_slice::value_type> data_slice::
+VCONSTEXPR std_vector<data_slice::value_type> data_slice::
 to_chunk() const NOEXCEPT
 {
     return { begin_, end_ };
@@ -242,14 +242,14 @@ constexpr bool data_slice::empty() const NOEXCEPT
 
 ////template <data_slice::size_type Size>
 ////constexpr data_slice::
-////operator std::array<data_slice::value_type, Size>() const NOEXCEPT
+////operator std_array<data_slice::value_type, Size>() const NOEXCEPT
 ////{
 ////    return to_array<Size>();
 ////}
 ////
 ////
 ////VCONSTEXPR data_slice::
-////operator std::vector<data_slice::value_type>() const NOEXCEPT
+////operator std_vector<data_slice::value_type>() const NOEXCEPT
 ////{
 ////    return data_slice::to_chunk();
 ////}
@@ -267,7 +267,7 @@ operator==(const data_slice& left, const data_slice& right) NOEXCEPT
     if (left.size() != right.size())
         return false;
 
-    // std::vector performs value comparison, so this does too.
+    // std_vector performs value comparison, so this does too.
 
     for (data_slice::size_type index = 0; index < left.size(); ++index)
     {

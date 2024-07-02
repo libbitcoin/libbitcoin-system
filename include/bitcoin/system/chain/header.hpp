@@ -156,8 +156,8 @@ private:
     mutable std::shared_ptr<const hash_digest> hash_{};
 };
 
-typedef std::vector<header> headers;
-typedef std::vector<header::cptr> header_cptrs;
+typedef std_vector<header> headers;
+typedef std_vector<header::cptr> header_cptrs;
 typedef std::shared_ptr<header_cptrs> headers_ptr;
 typedef std::shared_ptr<const header_cptrs> headers_cptr;
 

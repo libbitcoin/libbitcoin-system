@@ -77,7 +77,7 @@ class BC_API witness_address
         invalid
     };
 
-    typedef std::vector<witness_address> list;
+    typedef std_vector<witness_address> list;
     typedef std::shared_ptr<witness_address> ptr;
 
     /// BIP173 prefix.

@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_const_ref_bytes__always__expected
 
 BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_non_const_ref_bytes__always__expected)
 {
-    std::array<int8_t, size4> bytes{ 0x01_i8, 0x02_i8, 0x03_i8, 0x04_i8 };
+    std_array<int8_t, size4> bytes{ 0x01_i8, 0x02_i8, 0x03_i8, 0x04_i8 };
     auto& value = byte_cast(bytes);
     BOOST_REQUIRE_EQUAL(value, value4);
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_const_byte_ptr__always__expected)
 
 BOOST_AUTO_TEST_CASE(byte_cast__byte_cast_from_non_const_byte_ptr__always__expected)
 {
-    std::array<int8_t, size4> bytes{ 0x01_i8, 0x02_i8, 0x03_i8, 0x04_i8 };
+    std_array<int8_t, size4> bytes{ 0x01_i8, 0x02_i8, 0x03_i8, 0x04_i8 };
     auto bytes_ptr = bytes.data();
     auto& value = unsafe_byte_cast<uint32_t, int8_t>(bytes_ptr);
     BOOST_REQUIRE_EQUAL(value, value4);

@@ -99,24 +99,24 @@ BOOST_AUTO_TEST_CASE(deserialize__uint8__istream__base10)
 
 BOOST_AUTO_TEST_CASE(deserialize__data_array__empty__empty)
 {
-    std::array<uint8_t, 0> out;
-    const std::array<uint8_t, 0> expected{};
+    std_array<uint8_t, 0> out;
+    const std_array<uint8_t, 0> expected{};
     BOOST_REQUIRE(deserialize(out, ""));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(deserialize__data_array__bytes__base16)
 {
-    std::array<uint8_t, 3> out;
-    const std::array<uint8_t, 3> expected{ { 7, 42, 11 } };
+    std_array<uint8_t, 3> out;
+    const std_array<uint8_t, 3> expected{ { 7, 42, 11 } };
     BOOST_REQUIRE(deserialize(out, "072a0b"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(deserialize__data_array__istream__base16)
 {
-    std::array<uint8_t, 3> out;
-    const std::array<uint8_t, 3> expected{ { 7, 42, 11 } };
+    std_array<uint8_t, 3> out;
+    const std_array<uint8_t, 3> expected{ { 7, 42, 11 } };
     std::istringstream in{ "072a0b" };
     BOOST_REQUIRE(deserialize(out, in));
     BOOST_REQUIRE_EQUAL(out, expected);
@@ -126,24 +126,24 @@ BOOST_AUTO_TEST_CASE(deserialize__data_array__istream__base16)
 
 BOOST_AUTO_TEST_CASE(deserialize__data_chunk__empty__empty)
 {
-    std::vector<uint8_t> out;
-    const std::vector<uint8_t> expected{};
+    std_vector<uint8_t> out;
+    const std_vector<uint8_t> expected{};
     BOOST_REQUIRE(deserialize(out, ""));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(deserialize__data_chunk__bytes__base16)
 {
-    std::vector<uint8_t> out;
-    const std::vector<uint8_t> expected{ 7, 42, 11 };
+    std_vector<uint8_t> out;
+    const std_vector<uint8_t> expected{ 7, 42, 11 };
     BOOST_REQUIRE(deserialize(out, "072a0b"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(deserialize__data_chunk__istream__base16)
 {
-    std::vector<uint8_t> out;
-    const std::vector<uint8_t> expected{ 7, 42, 11 };
+    std_vector<uint8_t> out;
+    const std_vector<uint8_t> expected{ 7, 42, 11 };
     std::istringstream in{ "072a0b" };
     BOOST_REQUIRE(deserialize(out, in));
     BOOST_REQUIRE_EQUAL(out, expected);
@@ -153,46 +153,46 @@ BOOST_AUTO_TEST_CASE(deserialize__data_chunk__istream__base16)
 
 BOOST_AUTO_TEST_CASE(serialize__array__overflow_base10_delimited__false)
 {
-    std::array<uint16_t, 3> out;
+    std_array<uint16_t, 3> out;
     BOOST_REQUIRE(!deserialize(out, "42 9999999 42"));
 }
 
 BOOST_AUTO_TEST_CASE(serialize__array__untrimmed_base10_delimited__true)
 {
-    std::array<int, 3> out;
-    const std::array<int, 3> expected{ { 7, -42, 11 } };
+    std_array<int, 3> out;
+    const std_array<int, 3> expected{ { 7, -42, 11 } };
     BOOST_REQUIRE(deserialize(out, " 7  -42  11 "));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__array__int_base10_delimited__ints_true)
 {
-    std::array<int, 3> out;
-    const std::array<int, 3> expected{ { 7, 42, 11 } };
+    std_array<int, 3> out;
+    const std_array<int, 3> expected{ { 7, 42, 11 } };
     BOOST_REQUIRE(deserialize(out, "7 42 11"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__array__int_negative_base10_delimited__ints_true)
 {
-    std::array<int, 3> out;
-    const std::array<int, 3> expected{ { -7, 42, -11 } };
+    std_array<int, 3> out;
+    const std_array<int, 3> expected{ { -7, 42, -11 } };
     BOOST_REQUIRE(deserialize(out, "-7 42 -11"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__array__char_delimited__chars_true)
 {
-    std::array<char, 3> out;
-    const std::array<char, 3> expected{ { 'a', 'b', 'c' } };
+    std_array<char, 3> out;
+    const std_array<char, 3> expected{ { 'a', 'b', 'c' } };
     BOOST_REQUIRE(deserialize(out, "a b c"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__array__string_delimited__tokens_true)
 {
-    std::array<std::string, 3> out;
-    const std::array<std::string, 3> expected{ { "abc", "def", "ghi" } };
+    std_array<std::string, 3> out;
+    const std_array<std::string, 3> expected{ { "abc", "def", "ghi" } };
     BOOST_REQUIRE(deserialize(out, "abc def ghi"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -200,16 +200,16 @@ BOOST_AUTO_TEST_CASE(serialize__array__string_delimited__tokens_true)
 // Splitting on whitespace trims string collections before string override.
 BOOST_AUTO_TEST_CASE(serialize__array__string_delimited_padded__tokens_true)
 {
-    std::array<std::string, 3> out;
-    const std::array<std::string, 3> expected{ { "abc", "def", "ghi" } };
+    std_array<std::string, 3> out;
+    const std_array<std::string, 3> expected{ { "abc", "def", "ghi" } };
     BOOST_REQUIRE(deserialize(out, " abc \n def \n ghi "));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(deserialize__array__istream__tokens_true)
 {
-    std::array<std::string, 3> out;
-    const std::array<std::string, 3> expected{ { "abc", "def", "ghi" } };
+    std_array<std::string, 3> out;
+    const std_array<std::string, 3> expected{ { "abc", "def", "ghi" } };
     std::istringstream in{ " abc \n def \n ghi " };
     BOOST_REQUIRE(deserialize(out, in));
     BOOST_REQUIRE_EQUAL(out, expected);
@@ -219,46 +219,46 @@ BOOST_AUTO_TEST_CASE(deserialize__array__istream__tokens_true)
 
 BOOST_AUTO_TEST_CASE(serialize__vector__overflow_base10_delimited__false)
 {
-    std::vector<uint16_t> out;
+    std_vector<uint16_t> out;
     BOOST_REQUIRE(!deserialize(out, "42 9999999 42"));
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__untrimmed_base10_delimited__true)
 {
-    std::vector<int> out;
-    const std::vector<int> expected{ 7, -42, 11 };
+    std_vector<int> out;
+    const std_vector<int> expected{ 7, -42, 11 };
     BOOST_REQUIRE(deserialize(out, " 7  -42  11 "));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__int_base10_delimited__ints_true)
 {
-    std::vector<int> out;
-    const std::vector<int> expected{ 7, 42, 11 };
+    std_vector<int> out;
+    const std_vector<int> expected{ 7, 42, 11 };
     BOOST_REQUIRE(deserialize(out, "7 42 11"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__int_negative_base10_delimited__ints_true)
 {
-    std::vector<int> out;
-    const std::vector<int> expected{ -7, 42, -11 };
+    std_vector<int> out;
+    const std_vector<int> expected{ -7, 42, -11 };
     BOOST_REQUIRE(deserialize(out, "-7 42 -11"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__char_delimited__chars_true)
 {
-    std::vector<char> out;
-    const std::vector<char> expected{ 'a', 'b', 'c' };
+    std_vector<char> out;
+    const std_vector<char> expected{ 'a', 'b', 'c' };
     BOOST_REQUIRE(deserialize(out, "a b c"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__string_delimited__tokens_true)
 {
-    std::vector<std::string> out;
-    const std::vector<std::string> expected{ "abc", "def", "ghi" };
+    std_vector<std::string> out;
+    const std_vector<std::string> expected{ "abc", "def", "ghi" };
     BOOST_REQUIRE(deserialize(out, "abc def ghi"));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
@@ -266,16 +266,16 @@ BOOST_AUTO_TEST_CASE(serialize__vector__string_delimited__tokens_true)
 // Splitting on whitespace trims string collections before string override.
 BOOST_AUTO_TEST_CASE(serialize__vector__string_delimited_padded__tokens_true)
 {
-    std::vector<std::string> out;
-    const std::vector<std::string> expected{ "abc", "def", "ghi" };
+    std_vector<std::string> out;
+    const std_vector<std::string> expected{ "abc", "def", "ghi" };
     BOOST_REQUIRE(deserialize(out, " abc \n def \n ghi "));
     BOOST_REQUIRE_EQUAL(out, expected);
 }
 
 BOOST_AUTO_TEST_CASE(serialize__vector__istream__tokens_true)
 {
-    std::vector<std::string> out;
-    const std::vector<std::string> expected{ "abc", "def", "ghi" };
+    std_vector<std::string> out;
+    const std_vector<std::string> expected{ "abc", "def", "ghi" };
     std::istringstream in{ " abc \n def \n ghi " };
     BOOST_REQUIRE(deserialize(out, in));
     BOOST_REQUIRE_EQUAL(out, expected);

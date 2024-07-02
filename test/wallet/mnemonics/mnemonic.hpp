@@ -76,7 +76,7 @@ struct mnemonic_vector
     }
 };
 
-typedef std::vector<mnemonic_vector> mnemonic_vectors;
+typedef std_vector<mnemonic_vector> mnemonic_vectors;
 
 static ptrdiff_t abnormals(const mnemonic_vectors& vectors,
     const std::string& delimiter)

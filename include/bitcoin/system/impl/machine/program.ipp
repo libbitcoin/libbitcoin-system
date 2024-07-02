@@ -713,10 +713,10 @@ set_subscript(const op_iterator& op) NOEXCEPT
     return true;
 }
 
-using strippers = std::vector<stripper, no_fill_allocator<stripper>>;
+using strippers = std_vector<stripper>;
 inline strippers create_strip_ops(const chunk_xptrs& endorsements) NOEXCEPT
 {
-    strippers strip;
+    strippers strip{};
 
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     strip.reserve(add1(endorsements.size()));

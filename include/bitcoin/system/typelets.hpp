@@ -90,7 +90,7 @@ template <typename Larger, typename Smaller, size_t Lanes = one,
     std::enable_if_t<Lanes <= (max_size_t / sizeof(Smaller)), bool> = true>
 constexpr size_t capacity = sizeof(Larger) / (Lanes * sizeof(Smaller));
 
-/// std::array.
+/// std_array.
 /// ---------------------------------------------------------------------------
 
 template<typename>
