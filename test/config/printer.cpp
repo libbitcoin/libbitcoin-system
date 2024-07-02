@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_paramet
         ("required", value<path>()->required(), "Required path.")
         ("untoggled", value<bool>()->zero_tokens(), "Zero token but not short.")
         ("toggled,t", value<bool>()->zero_tokens(), "Toggled, zero token and short.")
-        ("ARRAY", value<std_vector<std::string>>(), "String vector.")
+        ("ARRAY", value<std::vector<std::string>>(), "String vector.")
         ("multy", value<int>()->multitoken(), "Multi-token int.");
         arguments.add("required", 1);
         arguments.add("SIMPLE", 1);
