@@ -40,7 +40,7 @@ namespace wallet {
 class BC_API v1_decoding
 {
 public:
-    typedef std::vector<bool> overflow;
+    typedef std_vector<bool> overflow;
 
     v1_decoding() NOEXCEPT;
     v1_decoding(const data_chunk& entropy) NOEXCEPT;

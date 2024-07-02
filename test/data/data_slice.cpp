@@ -130,8 +130,8 @@ const auto size = 6u;
 const std::string string{ "foobar" };
 const data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
 const data_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
-const std::vector<char> char_vector{ 'f', 'o', 'o', 'b', 'a', 'r' };
-const std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
+const std_vector<char> char_vector{ 'f', 'o', 'o', 'b', 'a', 'r' };
+const std_array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 ////const auto encoded = encode_base16(string);
 
 

@@ -41,7 +41,7 @@ public:
 
     /// Split or unsplit tokens.
     script(const std::string& mnemonic) THROWS;
-    script(const std::vector<std::string>& tokens) THROWS;
+    script(const std_vector<std::string>& tokens) THROWS;
 
     /// Default text encoding is mnemonic, so provide data for base16.
     script(const data_chunk& value) NOEXCEPT;

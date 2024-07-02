@@ -83,7 +83,7 @@ static std::wstring to_fully_qualified_path(
     // and converts them to fully-qualified, without an extension prefix.
     // This also converts "considered relative" paths (with ".." segments).
     // Add the prefix after calling as required in order to use a long path.
-    std::vector<wchar_t> directory(size);
+    std_vector<wchar_t> directory(size);
     size = GetFullPathNameW(normal.c_str(), size, directory.data(), NULL);
     if (is_zero(size))
         return {};

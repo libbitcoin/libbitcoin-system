@@ -149,7 +149,7 @@ private:
     size_t size_;
 };
 
-typedef std::vector<witness> witnesses;
+typedef std_vector<witness> witnesses;
 
 DECLARE_JSON_VALUE_CONVERTORS(witness);
 DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);

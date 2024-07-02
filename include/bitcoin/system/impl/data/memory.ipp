@@ -32,10 +32,10 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 /// Create shared pointer to vector of const shared ptr from the moved vector.
 template <typename Type>
-std::shared_ptr<std::vector<std::shared_ptr<const Type>>>
-to_shareds(std::vector<Type>&& values) NOEXCEPT
+std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
+to_shareds(std_vector<Type>&& values) NOEXCEPT
 {
-    const auto out = std::make_shared<std::vector<std::shared_ptr<
+    const auto out = std::make_shared<std_vector<std::shared_ptr<
         const Type>>>(values.size());
 
     std::transform(values.begin(), values.end(), out->begin(),
@@ -49,10 +49,10 @@ to_shareds(std::vector<Type>&& values) NOEXCEPT
 
 /// Create shared pointer to vector of const shared ptr from the copied vector.
 template <typename Type>
-std::shared_ptr<std::vector<std::shared_ptr<const Type>>> to_shareds(
-    const std::vector<Type>& values) NOEXCEPT
+std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
+    const std_vector<Type>& values) NOEXCEPT
 {
-    const auto out = std::make_shared<std::vector<std::shared_ptr<
+    const auto out = std::make_shared<std_vector<std::shared_ptr<
         const Type>>>(values.size());
 
     std::transform(values.begin(), values.end(), out->begin(),

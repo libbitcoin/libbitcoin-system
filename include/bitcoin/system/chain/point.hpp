@@ -111,7 +111,7 @@ private:
 /// Arbitrary compare, for uniqueness sorting.
 bool operator<(const point& left, const point& right) NOEXCEPT;
 
-typedef std::vector<point> points;
+typedef std_vector<point> points;
 
 DECLARE_JSON_VALUE_CONVERTORS(point);
 DECLARE_JSON_VALUE_CONVERTORS(point::cptr);

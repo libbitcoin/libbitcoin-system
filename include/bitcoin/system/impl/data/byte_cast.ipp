@@ -28,13 +28,13 @@
 namespace libbitcoin {
 namespace system {
     
-// byte_cast (integral to std::array<Byte>)
+// byte_cast (integral to std_array<Byte>)
 // ----------------------------------------------------------------------------
 
 template <typename Byte, typename Integral,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-inline std::array<Byte, sizeof(Integral)>&
+inline std_array<Byte, sizeof(Integral)>&
 byte_cast(Integral& value) NOEXCEPT
 {
     // Safe because passing sizeof(value).
@@ -44,7 +44,7 @@ byte_cast(Integral& value) NOEXCEPT
 template <typename Byte, typename Integral,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-inline const std::array<Byte, sizeof(Integral)>&
+inline const std_array<Byte, sizeof(Integral)>&
 byte_cast(const Integral& value) NOEXCEPT
 {
     // Safe because passing sizeof(value).
@@ -55,20 +55,20 @@ byte_cast(const Integral& value) NOEXCEPT
 template <typename Byte, typename Integral,
     if_one_byte<Byte>,
     if_integral_integer<Integral>>
-inline std::array<Byte, sizeof(Integral)>
+inline std_array<Byte, sizeof(Integral)>
 byte_cast(Integral&& value) NOEXCEPT
 {
     return byte_cast<Byte>(unmove(value));
 }
 
-// byte_cast (std::array<Byte> to integral)
+// byte_cast (std_array<Byte> to integral)
 // ----------------------------------------------------------------------------
 
 template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
 inline unsigned_type<Size>&
-byte_cast(std::array<Byte, Size>& bytes) NOEXCEPT
+byte_cast(std_array<Byte, Size>& bytes) NOEXCEPT
 {
     return *pointer_cast<unsigned_type<Size>>(&bytes);
 }
@@ -77,7 +77,7 @@ template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
 inline const unsigned_type<Size>&
-byte_cast(const std::array<Byte, Size>& bytes) NOEXCEPT
+byte_cast(const std_array<Byte, Size>& bytes) NOEXCEPT
 {
     return *pointer_cast<const unsigned_type<Size>>(&bytes);
 }
@@ -87,7 +87,7 @@ template <typename Byte, size_t Size,
     if_one_byte<Byte>,
     if_integral_size<Size>>
 inline unsigned_type<Size>
-byte_cast(std::array<Byte, Size>&& bytes) NOEXCEPT
+byte_cast(std_array<Byte, Size>&& bytes) NOEXCEPT
 {
     return byte_cast(unmove(bytes));
 }

@@ -50,7 +50,7 @@ public:
     static const uint8_t testnet_p2kh;
     static const uint8_t testnet_p2sh;
 
-    typedef std::vector<payment_address> list;
+    typedef std_vector<payment_address> list;
     typedef std::shared_ptr<payment_address> ptr;
 
     /// Extract a payment address from an input or output script.

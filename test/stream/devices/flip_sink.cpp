@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__read__nullptr__false)
 // zero-size array .data is null pointer.
 BOOST_AUTO_TEST_CASE(flip_sink__read__empty__false)
 {
-    std::array<char, 0> to;
+    std_array<char, 0> to;
     data_chunk sink{ 0x42 };
     flip_sink<data_slab> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), -1);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__read__empty__false)
 
 BOOST_AUTO_TEST_CASE(flip_sink__read__negative__false)
 {
-    std::array<char, 1> to{ { 0x00 } };
+    std_array<char, 1> to{ { 0x00 } };
     data_chunk sink{ 0x42 };
     flip_sink<data_slab> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), -1), -1);
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__read__negative__false)
 
 BOOST_AUTO_TEST_CASE(flip_sink__read__past_end__expected)
 {
-    std::array<char, 1> to{ { 0x00 } };
+    std_array<char, 1> to{ { 0x00 } };
     data_chunk sink{ 0x42 };
     flip_sink<data_slab> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 2), 1);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__read__past_end__expected)
 // This was tested with a temporary manual hack of size_type to uint8_t.
 ////BOOST_AUTO_TEST_CASE(flip_sink__read__overflow__expected)
 ////{
-////    std::array<char, max_uint8> to;
+////    std_array<char, max_uint8> to;
 ////    data_chunk sink(add1<int>(max_uint8), 0x42);
 ////    flip_sink<data_slab> instance(sink);
 ////    BOOST_REQUIRE_EQUAL(instance.read(to.data(), from.size()), max_uint8);
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__read__past_end__expected)
 
 BOOST_AUTO_TEST_CASE(flip_sink__read__zero__zero)
 {
-    std::array<char, 1> to{ { 0x00 } };
+    std_array<char, 1> to{ { 0x00 } };
     data_chunk sink{ 0x42 };
     flip_sink<data_slab> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), 0);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__read__zero__zero)
 
 BOOST_AUTO_TEST_CASE(flip_sink__read__one__expected)
 {
-    std::array<char, 1> to;
+    std_array<char, 1> to;
     data_chunk sink{ 0x42 };
     flip_sink<data_slab> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 1), 1);
@@ -116,10 +116,10 @@ BOOST_AUTO_TEST_CASE(flip_sink__read__one__expected)
 
 BOOST_AUTO_TEST_CASE(flip_sink__read__multiple__correct_tracking)
 {
-    std::array<char, 1> to1;
-    std::array<char, 2> to2;
-    std::array<char, 3> to3;
-    std::array<char, 42> to0;
+    std_array<char, 1> to1;
+    std_array<char, 2> to2;
+    std_array<char, 3> to3;
+    std_array<char, 42> to0;
     data_chunk sink{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
     flip_sink<data_slab> instance(sink);
     BOOST_REQUIRE_EQUAL(instance.read(to1.data(), 1), 1);
@@ -208,8 +208,8 @@ BOOST_AUTO_TEST_CASE(flip_sink__write__multiple__correct_tracking)
 
 BOOST_AUTO_TEST_CASE(flip_sink__read_write__read_first__expected)
 {
-    std::array<char, 1> to1;
-    std::array<char, 1> to2;
+    std_array<char, 1> to1;
+    std_array<char, 1> to2;
     const std::string from{ "b" };
     data_chunk sink{ 'a', 0x00, 'c' };
     flip_sink<data_slab> instance(sink);
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(flip_sink__read_write__read_first__expected)
 
 BOOST_AUTO_TEST_CASE(flip_sink__read_write__write_first__expected)
 {
-    std::array<char, 1> to;
+    std_array<char, 1> to;
     const std::string from1{ "a" };
     const std::string from2{ "c" };
     data_chunk sink{ 0x00, 'b', 0x00 };

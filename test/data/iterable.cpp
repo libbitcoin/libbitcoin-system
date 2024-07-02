@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(iterable__data_arrays__parsing__expected)
 BOOST_AUTO_TEST_CASE(iterable__nested_arrays__parsing__expected)
 {
     const data_chunk data{};
-    using type = std::array<std::array<uint8_t, 8>, 2>;
+    using type = std_array<std_array<uint8_t, 8>, 2>;
     static_assert(is_same_type<decltype(*iterable<type>(data).begin()), const type&>);
     static_assert(is_same_type<decltype(*(++iterable<type>(data).begin())), const type&>);
 
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__parsing__expected)
 BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
 {
     const data_chunk data{};
-    using type = std::array<std::array<uint8_t, 8>, 2>;
+    using type = std_array<std_array<uint8_t, 8>, 2>;
 
     constexpr auto expected = type
     {
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(iterable__nested_arrays__advance__expected)
 BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
 {
     data_chunk data{};
-    using type = std::array<std::array<uint8_t, 2>, 4>;
+    using type = std_array<std_array<uint8_t, 2>, 4>;
     static_assert(is_same_type<decltype(*mutable_iterable<type>(data).begin()), type&> );
     static_assert(is_same_type<decltype(*(++mutable_iterable<type>(data).begin())), type&> );
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__insertions__expected)
 BOOST_AUTO_TEST_CASE(mutable_iterable__nested_arrays__advance__expected)
 {
     data_chunk data{};
-    using type = std::array<std::array<uint8_t, 2>, 4>;
+    using type = std_array<std_array<uint8_t, 2>, 4>;
     auto hash = base16_array("1111111122222222333333334444444455555555666666667777777788888888");
     auto iterator = mutable_iterable<type>(hash);
 

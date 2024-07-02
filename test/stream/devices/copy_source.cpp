@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__nullptr__false)
 // zero-size array .data is null pointer.
 BOOST_AUTO_TEST_CASE(copy_source__read__empty__false)
 {
-    std::array<char, 0> to;
+    std_array<char, 0> to;
     const data_chunk source{ 0x42 };
     copy_source<data_reference> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), -1);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__empty__false)
 
 BOOST_AUTO_TEST_CASE(copy_source__read__negative__false)
 {
-    std::array<char, 1> to{ { 0x00 } };
+    std_array<char, 1> to{ { 0x00 } };
     const data_chunk source{ 0x42 };
     copy_source<data_reference> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), -1), -1);
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__negative__false)
 
 BOOST_AUTO_TEST_CASE(copy_source__read__past_end__expected)
 {
-    std::array<char, 1> to{ { 0x00 } };
+    std_array<char, 1> to{ { 0x00 } };
     const data_chunk source{ 0x42 };
     copy_source<data_reference> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 2), 1);
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__past_end__expected)
 // This was tested with a temporary manual hack of size_type to uint8_t.
 ////BOOST_AUTO_TEST_CASE(copy_source__read__overflow__expected)
 ////{
-////    std::array<char, max_uint8> to;
+////    std_array<char, max_uint8> to;
 ////    const data_chunk source(add1<int>(max_uint8), 0x42);
 ////    copy_source<data_reference> instance(source);
 ////    BOOST_REQUIRE_EQUAL(instance.read(to.data(), from.size()), max_uint8);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__past_end__expected)
 
 BOOST_AUTO_TEST_CASE(copy_source__read__zero__zero)
 {
-    std::array<char, 1> to{ { 0x00 } };
+    std_array<char, 1> to{ { 0x00 } };
     const data_chunk source{ 0x42 };
     copy_source<data_reference> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 0), 0);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(copy_source__read__zero__zero)
 
 BOOST_AUTO_TEST_CASE(copy_source__read__one__expected)
 {
-    std::array<char, 1> to;
+    std_array<char, 1> to;
     const data_chunk source{ 0x42 };
     copy_source<data_reference> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to.data(), 1), 1);
@@ -105,10 +105,10 @@ BOOST_AUTO_TEST_CASE(copy_source__read__one__expected)
 
 BOOST_AUTO_TEST_CASE(copy_source__read__multiple__correct_tracking)
 {
-    std::array<char, 1> to1;
-    std::array<char, 2> to2;
-    std::array<char, 3> to3;
-    std::array<char, 42> to0;
+    std_array<char, 1> to1;
+    std_array<char, 2> to2;
+    std_array<char, 3> to3;
+    std_array<char, 42> to0;
     const data_chunk source{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
     copy_source<data_reference> instance(source);
     BOOST_REQUIRE_EQUAL(instance.read(to1.data(), 1), 1);

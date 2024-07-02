@@ -217,12 +217,12 @@ static_assert(is_defined<if_portional<8u, uint64_t, 9u, uint64_t>>);
 // ----------------------------------------------------------------------------
 
 // rule out rounding in type constraint.
-using array16x128 = std::array<uint16_t, 256 / 2>;
-using array16x127 = std::array<uint16_t, 127>;
-using array16x126 = std::array<uint16_t, 254 / 2>;
-using array8x256 = std::array<uint8_t, 256>;
-using array8x255 = std::array<uint8_t, 255>; // cannot match either 127 or 128.
-using array8x254 = std::array<uint8_t, 254>;
+using array16x128 = std_array<uint16_t, 256 / 2>;
+using array16x127 = std_array<uint16_t, 127>;
+using array16x126 = std_array<uint16_t, 254 / 2>;
+using array8x256 = std_array<uint8_t, 256>;
+using array8x255 = std_array<uint8_t, 255>; // cannot match either 127 or 128.
+using array8x254 = std_array<uint8_t, 254>;
 constexpr array8x256 data8x256{};
 ////constexpr array8x255 data8x255{};
 constexpr array8x254 data8x254{};
@@ -232,7 +232,7 @@ static_assert(std::is_same_v<decltype(array_cast<uint16_t>(data8x256)), const ar
 static_assert(std::is_same_v<decltype(array_cast<uint16_t>(data8x254)), const array16x127&>);
 
 using array8x2 = data_array<2>;
-using array16x1 = std::array<uint16_t, 1>;
+using array16x1 = std_array<uint16_t, 1>;
 constexpr array8x2 const_data8x2{ 1_u8, 2_u8 };
 constexpr array16x1 const_data16x1{ 1_u16 };
 auto data8x2 = const_data8x2;
@@ -288,8 +288,8 @@ BOOST_AUTO_TEST_CASE(cast__array_cast__non_const__expected)
 // array_cast (array<integral> to array<integral, size>)
 // ----------------------------------------------------------------------------
 
-using array16x5 = std::array<uint16_t, 5>;
-using array64x3 = std::array<uint64_t, 3>;
+using array16x5 = std_array<uint16_t, 5>;
+using array64x3 = std_array<uint64_t, 3>;
 constexpr array16x5 const_data16x5{ 1_u16, 2_u16, 3_u16, 4_u16, 5_u16 };
 constexpr array64x3 const_data64x3{ 1_u64, 2_u64, 3_u64 };
 auto data16x5 = const_data16x5;
@@ -307,24 +307,24 @@ static_assert(std::is_same_v<decltype(array_cast<uint8_t, 23>(const_data64x3)), 
 ////static_assert(std::is_same_v<decltype(array_cast<uint8_t, 24>(const_data64x3)), const data_array<24>&>);
 ////static_assert(array_cast<uint8_t>(const_data64x3).size() == 24);
 
-static_assert(std::is_same_v<decltype(array_cast<uint16_t, 0>(const_data64x3)), const std::array<uint16_t, 0>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint16_t, 1>(const_data64x3)), const std::array<uint16_t, 1>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint16_t, 8>(const_data64x3)), const std::array<uint16_t, 8>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint16_t, 11>(const_data64x3)), const std::array<uint16_t, 11>&>);
-////static_assert(std::is_same_v<decltype(array_cast<uint16_t, 12>(const_data64x3)), const std::array<uint16_t, 12>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint16_t, 0>(const_data64x3)), const std_array<uint16_t, 0>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint16_t, 1>(const_data64x3)), const std_array<uint16_t, 1>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint16_t, 8>(const_data64x3)), const std_array<uint16_t, 8>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint16_t, 11>(const_data64x3)), const std_array<uint16_t, 11>&>);
+////static_assert(std::is_same_v<decltype(array_cast<uint16_t, 12>(const_data64x3)), const std_array<uint16_t, 12>&>);
 ////static_assert(array_cast<uint16_t>(const_data64x3).size() == 12);
 
-static_assert(std::is_same_v<decltype(array_cast<uint32_t, 0>(const_data64x3)), const std::array<uint32_t, 0>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint32_t, 1>(const_data64x3)), const std::array<uint32_t, 1>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint32_t, 2>(const_data64x3)), const std::array<uint32_t, 2>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint32_t, 5>(const_data64x3)), const std::array<uint32_t, 5>&>);
-////static_assert(std::is_same_v<decltype(array_cast<uint32_t, 6>(const_data64x3)), const std::array<uint32_t, 6>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint32_t, 0>(const_data64x3)), const std_array<uint32_t, 0>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint32_t, 1>(const_data64x3)), const std_array<uint32_t, 1>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint32_t, 2>(const_data64x3)), const std_array<uint32_t, 2>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint32_t, 5>(const_data64x3)), const std_array<uint32_t, 5>&>);
+////static_assert(std::is_same_v<decltype(array_cast<uint32_t, 6>(const_data64x3)), const std_array<uint32_t, 6>&>);
 ////static_assert(array_cast<uint32_t>(const_data64x3).size() == 6);
 
-static_assert(std::is_same_v<decltype(array_cast<uint64_t, 0>(const_data64x3)), const std::array<uint64_t, 0>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint64_t, 1>(const_data64x3)), const std::array<uint64_t, 1>&>);
-static_assert(std::is_same_v<decltype(array_cast<uint64_t, 2>(const_data64x3)), const std::array<uint64_t, 2>&>);
-////static_assert(std::is_same_v<decltype(array_cast<uint64_t, 5>(const_data64x3)), const std::array<uint64_t, 3>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint64_t, 0>(const_data64x3)), const std_array<uint64_t, 0>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint64_t, 1>(const_data64x3)), const std_array<uint64_t, 1>&>);
+static_assert(std::is_same_v<decltype(array_cast<uint64_t, 2>(const_data64x3)), const std_array<uint64_t, 2>&>);
+////static_assert(std::is_same_v<decltype(array_cast<uint64_t, 5>(const_data64x3)), const std_array<uint64_t, 3>&>);
 ////static_assert(array_cast<uint64_t>(const_data64x3).size() == 3);
 
 BOOST_AUTO_TEST_CASE(cast__array_cast__const_narrowing__expected)
@@ -364,29 +364,29 @@ constexpr auto llongs16 = 3_size;
 constexpr auto llints16 = (llongs16 * sizeof(uint64_t)) / sizeof(uint16_t);
 constexpr uint64_t const_llongs16[llongs16]{ 42_u64, 43_u64, 44_u64 };
 using llong_array16 = decltype(unsafe_array_cast<uint16_t, llints16>(const_llongs16));
-static_assert(std::is_same_v<llong_array16, const std::array<uint16_t, llints16>&>);
-static_assert(!std::is_same_v<llong_array16, std::array<uint16_t, llints16>&>);
+static_assert(std::is_same_v<llong_array16, const std_array<uint16_t, llints16>&>);
+static_assert(!std::is_same_v<llong_array16, std_array<uint16_t, llints16>&>);
 
 // 8 bytes to 4 shorts
 constexpr auto bytes16 = 8_size;
 constexpr auto ints16 = (bytes16 * sizeof(uint8_t)) / sizeof(uint16_t);
 constexpr uint8_t const_data16[bytes16]{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
 using const_array16 = decltype(unsafe_array_cast<uint16_t, ints16>(const_data16));
-static_assert(std::is_same_v<const_array16, const std::array<uint16_t, ints16>&>);
-static_assert(!std::is_same_v<const_array16, std::array<uint16_t, ints16>&>);
+static_assert(std::is_same_v<const_array16, const std_array<uint16_t, ints16>&>);
+static_assert(!std::is_same_v<const_array16, std_array<uint16_t, ints16>&>);
 
 // 8 bytes to 2 ints
 constexpr auto bytes32 = 8_size;
 constexpr auto ints32 = (bytes32 * sizeof(uint8_t)) / sizeof(uint32_t);
 constexpr uint8_t const_data32[bytes32]{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
 using const_array32 = decltype(unsafe_array_cast<uint32_t, ints32>(const_data32));
-static_assert(std::is_same_v<const_array32, const std::array<uint32_t, ints32>&>);
-static_assert(!std::is_same_v<const_array32, std::array<uint32_t, ints32>&>);
+static_assert(std::is_same_v<const_array32, const std_array<uint32_t, ints32>&>);
+static_assert(!std::is_same_v<const_array32, std_array<uint32_t, ints32>&>);
 
 // Type (including signedness) and array size must correspond.
-static_assert(!std::is_same_v<const_array32, const std::array<int32_t, ints32>&>);
-static_assert(!std::is_same_v<const_array32, const std::array<uint16_t, ints32>&>);
-static_assert(!std::is_same_v<const_array32, const std::array<uint32_t, ints32 * 2_size>&>);
+static_assert(!std::is_same_v<const_array32, const std_array<int32_t, ints32>&>);
+static_assert(!std::is_same_v<const_array32, const std_array<uint16_t, ints32>&>);
+static_assert(!std::is_same_v<const_array32, const std_array<uint32_t, ints32 * 2_size>&>);
 
 // But, a data buffer of any size can be cast to an array of any size.
 // This is the unsafe nature of a reinterpret_cast (and why it cannot be constexpr).
@@ -394,14 +394,14 @@ static_assert(!std::is_same_v<const_array32, const std::array<uint32_t, ints32 *
 // 1 byte to 1 int (out of bounds)
 constexpr uint8_t data1[1]{ 1_u8 };
 using const_array1 = decltype(unsafe_array_cast<uint32_t, 1>(data1));
-static_assert(std::is_same_v<const_array1, const std::array<uint32_t, 1>&>);
+static_assert(std::is_same_v<const_array1, const std_array<uint32_t, 1>&>);
 // ============================================================================
 
 // Values cannot be tested here, as reinterpret_cast is not constexpr.
 uint8_t non_const_data32[bytes32]{ 1_u8, 2_u8, 3_u8, 4_u8, 5_u8, 6_u8, 7_u8, 8_u8 };
 using non_const_array32 = decltype(unsafe_array_cast<uint32_t, ints32>(non_const_data32));
-static_assert(std::is_same_v<non_const_array32, std::array<uint32_t, ints32>&>);
-static_assert(!std::is_same_v<non_const_array32, const std::array<uint32_t, ints32>&>);
+static_assert(std::is_same_v<non_const_array32, std_array<uint32_t, ints32>&>);
+static_assert(!std::is_same_v<non_const_array32, const std_array<uint32_t, ints32>&>);
 
 BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__const__expected)
 {
@@ -436,24 +436,24 @@ BOOST_AUTO_TEST_CASE(cast__unsafe_array_cast__non_const__expected)
 // unsafe_array_cast (array of arrays of integrals)
 // ----------------------------------------------------------------------------
 
-// 3 lls to 3 arrays of 4 shorts (std::array<std::array<uint16_t, 4>, 3>)
+// 3 lls to 3 arrays of 4 shorts (std_array<std_array<uint16_t, 4>, 3>)
 constexpr auto longs = 3_size;
 constexpr uint64_t value64x3[longs]{ 0x0102030405060708_u64, 0x1122334455667788_u64, 0xabcdef1234567890_u64 };
-using inner = std::array<uint16_t, 4>;
+using inner = std_array<uint16_t, 4>;
 using outer = decltype(unsafe_array_cast<inner, 3>(value64x3));
-static_assert(std::is_same_v<outer, const std::array<inner, 3>&>);
+static_assert(std::is_same_v<outer, const std_array<inner, 3>&>);
 
 BOOST_AUTO_TEST_CASE(array_cast__unsafe_array_cast__const_array__expected)
 {
     constexpr auto longs = 3_size;
-    constexpr std::array<uint64_t, longs> value64x3
+    constexpr std_array<uint64_t, longs> value64x3
     {
         native_to_big_end(0x0102030405060708_u64),
         native_to_big_end(0x1122334455667788_u64),
         native_to_big_end(0xabcdef1234567890_u64)
     };
 
-    auto& value16x4x3 = unsafe_array_cast<std::array<uint16_t, 4>, 3>(value64x3.data());
+    auto& value16x4x3 = unsafe_array_cast<std_array<uint16_t, 4>, 3>(value64x3.data());
     BOOST_REQUIRE_EQUAL(value16x4x3[0][0], native_to_big_end(0x0102_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[0][1], native_to_big_end(0x0304_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[0][2], native_to_big_end(0x0506_u16));
@@ -471,14 +471,14 @@ BOOST_AUTO_TEST_CASE(array_cast__unsafe_array_cast__const_array__expected)
 BOOST_AUTO_TEST_CASE(array_cast__unsafe_array_cast__non_const_array__expected)
 {
     constexpr auto longs = 3_size;
-    std::array<uint64_t, longs> value64x3
+    std_array<uint64_t, longs> value64x3
     {
         native_to_big_end(0x0102030405060708_u64),
         native_to_big_end(0x1122334455667788_u64),
         native_to_big_end(0xabcdef1234567890_u64)
     };
 
-    auto& value16x4x3 = unsafe_array_cast<std::array<uint16_t, 4>, 3>(value64x3.data());
+    auto& value16x4x3 = unsafe_array_cast<std_array<uint16_t, 4>, 3>(value64x3.data());
     BOOST_REQUIRE_EQUAL(value16x4x3[0][0], native_to_big_end(0x0102_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[0][1], native_to_big_end(0x0304_u16));
     BOOST_REQUIRE_EQUAL(value16x4x3[0][2], native_to_big_end(0x0506_u16));
@@ -493,21 +493,21 @@ BOOST_AUTO_TEST_CASE(array_cast__unsafe_array_cast__non_const_array__expected)
     BOOST_REQUIRE_EQUAL(value16x4x3[2][3], native_to_big_end(0x7890_u16));
 
     // Demonstrate that this is a cast, not a copy.
-    value16x4x3[0] = std::array<uint16_t, 4>
+    value16x4x3[0] = std_array<uint16_t, 4>
     {
         native_to_big_end(1_u16),
         native_to_big_end(2_u16),
         native_to_big_end(3_u16),
         native_to_big_end(4_u16),
     };
-    value16x4x3[1] = std::array<uint16_t, 4>
+    value16x4x3[1] = std_array<uint16_t, 4>
     {
         native_to_big_end(5_u16),
         native_to_big_end(6_u16),
         native_to_big_end(7_u16),
         native_to_big_end(8_u16),
     };
-    value16x4x3[2] = std::array<uint16_t, 4>
+    value16x4x3[2] = std_array<uint16_t, 4>
     {
         native_to_big_end(9_u16),
         native_to_big_end(10_u16),

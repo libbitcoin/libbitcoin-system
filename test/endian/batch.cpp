@@ -21,7 +21,7 @@
 BOOST_AUTO_TEST_SUITE(endian_set_tests)
 
 template <size_t Count, typename Integral = uint32_t>
-using numbers = std::array<Integral, Count>;
+using numbers = std_array<Integral, Count>;
 
 template <size_t Size>
 constexpr numbers<Size> normalize(const numbers<Size>& little,

@@ -41,7 +41,7 @@ public:
     /// Use system::cast to convert between search and result.
     typedef typename dictionary<Size>::search search;
     typedef typename dictionary<Size>::result result;
-    typedef std::array<dictionary<Size>, Count> list;
+    typedef std_array<dictionary<Size>, Count> list;
 
     /// The number of dictionaries.
     static constexpr size_t count() NOEXCEPT { return Count; };

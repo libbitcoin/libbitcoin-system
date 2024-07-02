@@ -27,7 +27,7 @@
 
 // C++ now allows only vectors of "any non-const object type".
 // stackoverflow.com/questions/6954906/does-c11-allow-vectorconst-t
-// Since const std::vector<T> implies all elements are const, this is ok.
+// Since const std_vector<T> implies all elements are const, this is ok.
 // The following naming conventions are applied to pointers and vectors.
 //
 // T::ptr implies shared_ptr<T>.
@@ -54,13 +54,13 @@ namespace system {
 
 /// Define data_chunk types.
 
-typedef std::vector<uint8_t> data_chunk;
+typedef std_vector<uint8_t> data_chunk;
 
 typedef std::shared_ptr<data_chunk> chunk_ptr;
 typedef std::shared_ptr<const data_chunk> chunk_cptr;
 
-typedef std::vector<chunk_ptr> chunk_ptrs;
-typedef std::vector<chunk_cptr> chunk_cptrs;
+typedef std_vector<chunk_ptr> chunk_ptrs;
+typedef std_vector<chunk_cptr> chunk_cptrs;
 
 typedef std::shared_ptr<chunk_ptrs> chunk_ptrs_ptr;
 typedef std::shared_ptr<const chunk_ptrs> chunk_ptrs_cptr;
@@ -70,14 +70,14 @@ typedef std::shared_ptr<const chunk_cptrs> chunk_cptrs_cptr;
 
 /// Define data_stack types.
 
-typedef std::vector<data_chunk> data_stack;
+typedef std_vector<data_chunk> data_stack;
 typedef std::shared_ptr<data_stack> stack_ptr;
 typedef std::shared_ptr<const data_stack> stack_cptr;
 
 // Define chunk_xptr types.
 
 typedef external_ptr<data_chunk> chunk_xptr;
-typedef std::vector<chunk_xptr> chunk_xptrs;
+typedef std_vector<chunk_xptr> chunk_xptrs;
 
 /// Create a single byte data_chunk with given element value.
 BC_API data_chunk to_chunk(uint8_t byte) NOEXCEPT;

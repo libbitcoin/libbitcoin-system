@@ -42,7 +42,7 @@ constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT
 // TODO: test.
 template <size_t Size>
 const data_stack to_stack(
-    const std::vector<data_array<Size>>& values) NOEXCEPT
+    const std_vector<data_array<Size>>& values) NOEXCEPT
 {
     data_stack chunks(values.size());
     std::transform(values.begin(), values.end(), chunks.begin(),

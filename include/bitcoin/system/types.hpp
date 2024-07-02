@@ -20,9 +20,10 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <array>
+#include <memory_resource>
 #include <tuple>
-#include <vector>
 #include <type_traits>
+#include <vector>
 #include <bitcoin/system/exceptions.hpp>
 
 namespace libbitcoin {
@@ -31,7 +32,7 @@ namespace libbitcoin {
 /// ---------------------------------------------------------------------------
 /// is_same_type (is_same_v) and is_signed (is_signed_v) aliased in typelets.
 
-/// std::array/std::vector.
+/// std_array/std_vector.
 template <typename Type, size_t Size>
 using std_array = std::array<Type, Size>;
 template <typename Type>

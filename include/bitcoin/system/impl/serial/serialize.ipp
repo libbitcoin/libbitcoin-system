@@ -59,7 +59,7 @@ inline std::string serialize(const data_chunk& value,
 }
 
 template <typename Value, size_t Size>
-std::string serialize(const std::array<Value, Size>& values,
+std::string serialize(const std_array<Value, Size>& values,
     const std::string& fallback) NOEXCEPT
 {
     string_list tokens(values.size());
@@ -73,7 +73,7 @@ std::string serialize(const std::array<Value, Size>& values,
 }
 
 template <typename Value>
-std::string serialize(const std::vector<Value>& values,
+std::string serialize(const std_vector<Value>& values,
     const std::string& fallback) NOEXCEPT
 {
     string_list tokens(values.size());

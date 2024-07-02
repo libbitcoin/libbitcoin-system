@@ -277,7 +277,7 @@ data_chunk byte_reader<IStream>::read_bytes() NOEXCEPT
         return {};
 
     // This will always produce at least one (zero) terminating byte.
-    data_chunk out;
+    data_chunk out{};
     while (valid())
         out.push_back(read_byte());
 
@@ -325,7 +325,7 @@ std::string byte_reader<IStream>::read_string_buffer(size_t size) NOEXCEPT
         return {};
 
     // This will produce one (zero) terminating byte if size exceeds available.
-    std::string out;
+    std::string out{};
     out.reserve(add1(size));
     while (!is_zero(size--) && valid())
         out.push_back(read_byte());

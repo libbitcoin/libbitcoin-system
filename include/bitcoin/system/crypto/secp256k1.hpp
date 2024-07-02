@@ -34,17 +34,17 @@ static constexpr uint8_t ec_even_sign = 2;
 static constexpr size_t ec_secret_size = 32;
 typedef data_array<ec_secret_size> ec_secret;
 
-typedef std::vector<ec_secret> secret_list;
+typedef std_vector<ec_secret> secret_list;
 
 /// Compressed public key:
 static constexpr size_t ec_compressed_size = 33;
 typedef data_array<ec_compressed_size> ec_compressed;
-typedef std::vector<ec_compressed> compressed_list;
+typedef std_vector<ec_compressed> compressed_list;
 
 /// Uncompressed public key:
 static constexpr size_t ec_uncompressed_size = 65;
 typedef data_array<ec_uncompressed_size> ec_uncompressed;
-typedef std::vector<ec_uncompressed> uncompressed_list;
+typedef std_vector<ec_uncompressed> uncompressed_list;
 
 // Parsed ECDSA signature:
 static constexpr size_t ec_signature_size = 64;
@@ -58,7 +58,7 @@ typedef data_chunk der_signature;
 static constexpr size_t min_endorsement_size = 9;
 static constexpr size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
-typedef std::vector<endorsement> endorsements;
+typedef std_vector<endorsement> endorsements;
 
 // secg.org/sec2-v2.pdf
 constexpr ec_compressed ec_compressed_generator = base16_array("02"

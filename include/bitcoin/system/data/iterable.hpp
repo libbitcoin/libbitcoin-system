@@ -65,7 +65,7 @@ namespace system {
 ////    return unsafe_array_cast<block, Lanes>(std::next(it.data(), offset * size));
 ////}
 
-/// Iterate any data souce as a set of const std::array&.
+/// Iterate any data souce as a set of const std_array&.
 template<typename Array, if_std_array<Array> = true>
 class iterable
 {
@@ -209,7 +209,7 @@ private:
     uint8_t const* end_;
 };
 
-/// Iterate any non-const data souce as a non-const set of std::array&.
+/// Iterate any non-const data souce as a non-const set of std_array&.
 template<typename Array, if_std_array<Array> = true>
 class mutable_iterable
 {

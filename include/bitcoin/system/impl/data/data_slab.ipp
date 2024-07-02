@@ -31,14 +31,14 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <data_slab::size_type Size, typename Byte, if_one_byte<Byte>>
-constexpr data_slab::data_slab(std::array<Byte, Size>& data) NOEXCEPT
+constexpr data_slab::data_slab(std_array<Byte, Size>& data) NOEXCEPT
   : data_slab(from_size(data.begin(), Size))
 {
 }
 
-// std::vector.begin not constexpr (need full C++20).
+// std_vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
-VCONSTEXPR data_slab::data_slab(std::vector<Byte>& data) NOEXCEPT
+VCONSTEXPR data_slab::data_slab(std_vector<Byte>& data) NOEXCEPT
   : data_slab(from_size_(data.begin(), data.size()))
 {
 }
@@ -122,7 +122,7 @@ SVCONSTEXPR data_slab data_slab::from_size_(const Pointer begin,
 // methods
 // ----------------------------------------------------------------------------
 
-VCONSTEXPR std::vector<data_slab::value_type> data_slab::to_chunk() const NOEXCEPT
+VCONSTEXPR std_vector<data_slab::value_type> data_slab::to_chunk() const NOEXCEPT
 {
     return { begin_, end_ };
 }
@@ -151,10 +151,10 @@ constexpr bool data_slab::resize(size_t size) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <data_slab::size_type Size>
-constexpr std::array<data_slab::value_type, Size>
+constexpr std_array<data_slab::value_type, Size>
 data_slab::to_array() const NOEXCEPT
 {
-    std::array<data_slab::value_type, Size> out{};
+    std_array<data_slab::value_type, Size> out{};
 
     // Array operator safely iterates and emits zeros past end.
     for (size_type index = 0; index < Size; ++index)
@@ -212,13 +212,13 @@ constexpr bool data_slab::empty() const NOEXCEPT
 
 ////template <data_slab::size_type Size>
 ////constexpr data_slab::operator
-////std::array<data_slab::value_type, Size>() const NOEXCEPT
+////std_array<data_slab::value_type, Size>() const NOEXCEPT
 ////{
 ////    return to_array<Size>();
 ////}
 ////
 ////VCONSTEXPR data_slab::operator
-////std::vector<data_slab::value_type>() const NOEXCEPT
+////std_vector<data_slab::value_type>() const NOEXCEPT
 ////{
 ////    return data_slab::to_chunk();
 ////}

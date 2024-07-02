@@ -156,8 +156,8 @@ public:
     mutable chain::prevout metadata{ zero, max_uint32, false, false };
 };
 
-typedef std::vector<input> inputs;
-typedef std::vector<input::cptr> input_cptrs;
+typedef std_vector<input> inputs;
+typedef std_vector<input::cptr> input_cptrs;
 typedef std::shared_ptr<input_cptrs> inputs_ptr;
 typedef std::shared_ptr<const input_cptrs> inputs_cptr;
 

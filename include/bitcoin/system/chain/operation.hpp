@@ -183,7 +183,7 @@ private:
     bool underflow_;
 };
 
-typedef std::vector<operation> operations;
+typedef std_vector<operation> operations;
 
 DECLARE_JSON_VALUE_CONVERTORS(operation);
 DECLARE_JSON_VALUE_CONVERTORS(operation::cptr);

@@ -51,12 +51,12 @@ inline bool deserialize(data_chunk& out, const std::string& text) NOEXCEPT;
 
 /// Specialize arrays to add space delimiter.
 template <typename Value, size_t Size>
-bool deserialize(std::array<Value, Size>& out,
+bool deserialize(std_array<Value, Size>& out,
     const std::string& text) NOEXCEPT;
 
 /// Specialize arrays to add space delimiter.
 template <typename Value>
-bool deserialize(std::vector<Value>& out, const std::string& text) NOEXCEPT;
+bool deserialize(std_vector<Value>& out, const std::string& text) NOEXCEPT;
 
 /// General deserializer.
 template <typename Value>

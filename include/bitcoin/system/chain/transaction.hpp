@@ -280,8 +280,8 @@ private:
     mutable std::unique_ptr<const sighash_cache> sighash_cache_{};
 };
 
-typedef std::vector<transaction> transactions;
-typedef std::vector<transaction::cptr> transaction_cptrs;
+typedef std_vector<transaction> transactions;
+typedef std_vector<transaction::cptr> transaction_cptrs;
 typedef std::shared_ptr<transaction_cptrs> transactions_ptr;
 typedef std::shared_ptr<const transaction_cptrs> transactions_cptr;
 

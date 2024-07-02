@@ -29,7 +29,7 @@
 namespace libbitcoin {
 namespace system {
 
-typedef std::vector<std::string> string_list;
+typedef std_vector<std::string> string_list;
 typedef std::pair<char32_t, char32_t> char32_interval;
 
 /// The space (0x00000020) character is the only ASCII separator.

@@ -100,7 +100,7 @@ const auto size = 6u;
 std::string string{ "foobar" };
 data_chunk data{ 'f', 'o', 'o', 'b', 'a', 'r' };
 data_array<size> byte{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
-std::array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
+std_array<char, size> char_array{ { 'f', 'o', 'o', 'b', 'a', 'r' } };
 ////auto encoded = encode_base16(string);
 
 // copy construct

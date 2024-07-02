@@ -73,7 +73,7 @@ struct electrum_vector
     }
 };
 
-const std::array<electrum_vector::name, 5> ascii_passphrase_vector_names
+const std_array<electrum_vector::name, 5> ascii_passphrase_vector_names
 {
     {
         electrum_vector::english,
@@ -84,7 +84,7 @@ const std::array<electrum_vector::name, 5> ascii_passphrase_vector_names
     }
 };
 
-const std::array<electrum_vector::name, 10> all_vector_names
+const std_array<electrum_vector::name, 10> all_vector_names
 {
     {
         electrum_vector::english,
@@ -101,7 +101,7 @@ const std::array<electrum_vector::name, 10> all_vector_names
 };
 
 // Reduce verbosity using these.
-typedef std::vector<electrum_vector> electrum_vectors;
+typedef std_vector<electrum_vector> electrum_vectors;
 using name = electrum_vector::name;
 using prefix = electrum::seed_prefix;
 static const data_chunk no_passphrase{};

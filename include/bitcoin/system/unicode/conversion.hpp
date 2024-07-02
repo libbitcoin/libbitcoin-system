@@ -40,8 +40,8 @@ namespace system {
 /// No char (byte) within a UTF8 character can be misinterpreted as an
 /// ASCII character, as all UTF8 bytes are above 0x7f.
 
-typedef std::vector<std::wstring> wstring_list;
-typedef std::vector<std::u32string> u32string_list;
+typedef std_vector<std::wstring> wstring_list;
+typedef std_vector<std::u32string> u32string_list;
 
 BC_API std::string to_utf8(char32_t point) NOEXCEPT;
 

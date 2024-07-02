@@ -30,10 +30,10 @@ BOOST_AUTO_TEST_CASE(no_fill_allocator__construct__default__unassigned)
     // no_fill_allocator must be incorporated into container type.
     // These tests depedent upon assumptions of default memory fill, so disabled.
 
-    ////std::vector<uint8_t, no_fill_allocator<uint8_t>> bytes(size);
+    ////std_vector<uint8_t, no_fill_allocator<uint8_t>> bytes(size);
     ////BOOST_CHECK_NE(bytes.front(), 0x00_u8);
 
-    ////std::vector<hash_digest, no_fill_allocator<hash_digest>> hashes(count);
+    ////std_vector<hash_digest, no_fill_allocator<hash_digest>> hashes(count);
     ////BOOST_CHECK_NE(hashes.front(), hash_digest{});
 
     // no_fill_allocator forwards explicit fill to type copy constructor.

@@ -54,12 +54,12 @@ inline std::string serialize(const data_chunk& value,
 
 /// Specialize arrays to add fallback and join with space delimiter.
 template <typename Value, size_t Size>
-std::string serialize(const std::array<Value, Size>& values,
+std::string serialize(const std_array<Value, Size>& values,
     const std::string& fallback="?") NOEXCEPT;
 
 /// Specialize arrays to add fallback and join with space delimiter.
 template <typename Value>
-std::string serialize(const std::vector<Value>& values,
+std::string serialize(const std_vector<Value>& values,
     const std::string& fallback="?") NOEXCEPT;
 
 /// General serializer.

@@ -32,7 +32,7 @@
 namespace libbitcoin {
 namespace system {
 
-typedef std::vector<uint32_t> index_list;
+typedef std_vector<uint32_t> index_list;
 typedef std::map<ec_compressed, ec_secret> secret_keys_map;
 
 static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,

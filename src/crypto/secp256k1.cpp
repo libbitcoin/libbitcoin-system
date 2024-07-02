@@ -61,7 +61,7 @@ bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
         == ec_success;
 }
 
-bool parse(const secp256k1_context* context, std::vector<secp256k1_pubkey>& out,
+bool parse(const secp256k1_context* context, std_vector<secp256k1_pubkey>& out,
     const compressed_list& points) NOEXCEPT
 {
     out.resize(points.size());
@@ -75,10 +75,10 @@ bool parse(const secp256k1_context* context, std::vector<secp256k1_pubkey>& out,
 }
 
 // Create an array of secp256k1_pubkey pointers for secp256k1 call.
-std::vector<const secp256k1_pubkey*> to_pointers(
-    const std::vector<secp256k1_pubkey>& keys) NOEXCEPT
+std_vector<const secp256k1_pubkey*> to_pointers(
+    const std_vector<secp256k1_pubkey>& keys) NOEXCEPT
 {
-    std::vector<const secp256k1_pubkey*> pointers(keys.size());
+    std_vector<const secp256k1_pubkey*> pointers(keys.size());
 
     std::transform(keys.begin(), keys.end(), pointers.begin(),
         [](const secp256k1_pubkey& point) NOEXCEPT
@@ -217,7 +217,7 @@ bool ec_sum(ec_compressed& out, const compressed_list& points) NOEXCEPT
 
     const auto context = ec_context_verify::context();
 
-    std::vector<secp256k1_pubkey> keys;
+    std_vector<secp256k1_pubkey> keys;
     if (!parse(context, keys, points))
         return false;
 
