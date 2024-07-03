@@ -18,11 +18,33 @@
  */
 #include "../test.hpp"
 
+using namespace system::machine;
+
 BOOST_AUTO_TEST_SUITE(stack_tests)
 
-BOOST_AUTO_TEST_CASE(stack_test)
+// stack_variant is not serializable, so cannot boost compare it.
+
+BOOST_AUTO_TEST_CASE(stack__pop__pushed_bool__expected)
 {
-    BOOST_REQUIRE(true);
+    stack<contiguous_stack> stack{};
+    stack.push(true);
+    BOOST_REQUIRE(stack.pop() == stack_variant{ true });
+}
+
+BOOST_AUTO_TEST_CASE(stack__pop__pushed_int64__expected)
+{
+    stack<contiguous_stack> stack{};
+    stack.push(42);
+    BOOST_REQUIRE(stack.pop() == stack_variant{ 42 });
+}
+
+BOOST_AUTO_TEST_CASE(stack__pop__pushed_chunk__expected)
+{
+    const auto expected = data_chunk{ 0x42, 0x43, 0x44, 0x45, 0x46 };
+    const chunk_xptr ptr{ expected };
+    stack<contiguous_stack> stack{};
+    stack.push(data_chunk{ 0x42, 0x43, 0x44, 0x45, 0x46 });
+    BOOST_REQUIRE(stack.pop() == stack_variant{ ptr });
 }
 
 BOOST_AUTO_TEST_SUITE_END()
