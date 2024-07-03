@@ -96,7 +96,7 @@ std::string encode_base58(const data_slice& unencoded) NOEXCEPT
     const auto indexes_size = add1(number_nonzero * 138_size / 100_size);
 
     // Allocate enough space in big-endian base58 representation.
-    data_chunk indexes(indexes_size);
+    data_chunk indexes(indexes_size, 0x00);
 
     // Process the bytes.
     for (size_t index = leading_zeros; index < unencoded.size(); ++index)
@@ -166,7 +166,7 @@ bool decode_base58(data_chunk& out, const std::string& in) NOEXCEPT
     const size_t data_size = add1(in.size() * 733_size / 1000_size);
 
     // Allocate enough space in big-endian base256 representation.
-    data_chunk data(data_size);
+    data_chunk data(data_size, 0x00);
 
     // Process the characters.
     for (auto it = in.begin() + leading_zeros; it != in.end(); ++it)

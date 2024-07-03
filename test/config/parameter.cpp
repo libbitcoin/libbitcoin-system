@@ -55,7 +55,7 @@ static void load_test_options(po::options_description& options)
         ("toggled", value<bool>()->zero_tokens(), "Toggle only bool.")
         /* The enumerability of the data types does not control multiple,
            instance behavior but it is necessary to capture multiples. */
-        ("VECTOR", value<std_vector<std::string>>(), "String vector.")
+        ("VECTOR", value<std::vector<std::string>>(), "String vector.")
         ("multitoken", value<int>()->multitoken(), "Multi-token int.");
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2023 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2024 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -18,10 +18,9 @@
  */
 #include "../test.hpp"
 
-
 BOOST_AUTO_TEST_SUITE(interpreter_tests)
 
-BOOST_AUTO_TEST_CASE(interpreter__construct__todo__todo)
+BOOST_AUTO_TEST_CASE(interpreter_test)
 {
     BOOST_REQUIRE(true);
 }

@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <array>
-#include <memory_resource>
 #include <tuple>
 #include <type_traits>
 #include <vector>

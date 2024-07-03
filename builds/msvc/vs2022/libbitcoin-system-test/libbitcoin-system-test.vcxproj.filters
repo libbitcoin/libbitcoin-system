@@ -378,6 +378,12 @@
     <ClCompile Include="..\..\..\..\test\machine\program.cpp">
       <Filter>src\machine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\sizing.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\machine\stack.cpp">
+      <Filter>src\machine</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\main.cpp">
       <Filter>src</Filter>
     </ClCompile>

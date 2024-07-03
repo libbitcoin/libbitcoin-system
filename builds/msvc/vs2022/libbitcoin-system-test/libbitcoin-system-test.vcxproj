@@ -182,6 +182,8 @@
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\program.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\sizing.cpp" />
+    <ClCompile Include="..\..\..\..\test\machine\stack.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\math\addition.cpp" />
     <ClCompile Include="..\..\..\..\test\math\bits.cpp" />

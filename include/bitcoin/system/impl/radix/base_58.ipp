@@ -29,7 +29,7 @@ namespace system {
 template <size_t Size>
 bool decode_base58(data_array<Size>& out, const std::string& in) NOEXCEPT
 {
-    data_chunk data;
+    data_chunk data{};
     if (!decode_base58(data, in) || (data.size() != Size))
         return false;
 
@@ -42,7 +42,7 @@ template <size_t Size>
 data_array<Size * 733 / 1000> base58_array(const char(&string)[Size]) NOEXCEPT
 {
     // log(58) / log(256), rounded up.
-    data_array<Size * 733 / 1000> out;
+    data_array<Size * 733 / 1000> out{};
     if (!decode_base58(out, string))
         out.fill(0);
 
