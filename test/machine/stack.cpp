@@ -18,9 +18,9 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(number_tests)
+BOOST_AUTO_TEST_SUITE(stack_tests)
 
-BOOST_AUTO_TEST_CASE(number_test)
+BOOST_AUTO_TEST_CASE(stack_test)
 {
     BOOST_REQUIRE(true);
 }

@@ -794,6 +794,8 @@ if (with-tests)
         "../../test/machine/interpreter.cpp"
         "../../test/machine/number.cpp"
         "../../test/machine/program.cpp"
+        "../../test/machine/sizing.cpp"
+        "../../test/machine/stack.cpp"
         "../../test/math/addition.cpp"
         "../../test/math/bits.cpp"
         "../../test/math/bytes.cpp"
