@@ -22,8 +22,9 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/hash/pbkd.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
+#include <bitcoin/system/hash/pbkd.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -112,6 +113,15 @@ static_assert(scrypt<16384, 8, 8>::maximum_memory == 134'231'040_u64);
 } // namespace system
 } // namespace libbitcoin
 
+
+#define TEMPLATE \
+template<size_t W, size_t R, size_t P, bool Concurrent, \
+    bool_if<is_scrypt_args<W, R, P>> If>
+#define CLASS scrypt<W, R, P, Concurrent, If>
+
 #include <bitcoin/system/impl/hash/scrypt.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

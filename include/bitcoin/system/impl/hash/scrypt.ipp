@@ -23,11 +23,6 @@
 #include <algorithm>
 #include <bit>
 #include <memory>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/hash/pbkd.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 // Based on:
 // tools.ietf.org/html/rfc7914
@@ -36,11 +31,6 @@
 
 namespace libbitcoin {
 namespace system {
-
-#define TEMPLATE \
-template<size_t W, size_t R, size_t P, bool Concurrent, \
-    bool_if<is_scrypt_args<W, R, P>> If>
-#define CLASS scrypt<W, R, P, Concurrent, If>
 
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
@@ -535,9 +525,6 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
-
-#undef CLASS
-#undef TEMPLATE
 
 } // namespace system
 } // namespace libbitcoin

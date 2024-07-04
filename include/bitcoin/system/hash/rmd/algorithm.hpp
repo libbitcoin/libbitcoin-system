@@ -21,6 +21,7 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -152,6 +153,12 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <typename RMD, if_same<typename RMD::T, rmdh_t> If>
+#define CLASS algorithm<RMD, If>
+
 #include <bitcoin/system/impl/hash/rmd/algorithm.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

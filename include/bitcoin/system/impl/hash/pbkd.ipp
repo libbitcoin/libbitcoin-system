@@ -20,11 +20,6 @@
 #define LIBBITCOIN_SYSTEM_HASH_PBKD_IPP
 
 #include <algorithm>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/hash/hmac.hpp>
-#include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 // based on:
 // datatracker.ietf.org/doc/html/rfc8018
@@ -32,9 +27,6 @@
 
 namespace libbitcoin {
 namespace system {
-
-#define TEMPLATE template <typename Algorithm>
-#define CLASS pbkd<Algorithm>
     
 // Bugus use constexpr warning with consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -147,9 +139,6 @@ key(const data_slice& password, const data_slice& salt,
     key(dk, password, salt, count);
     return dk;
 }
-
-#undef CLASS
-#undef TEMPLATE
 
 } // namespace system
 } // namespace libbitcoin

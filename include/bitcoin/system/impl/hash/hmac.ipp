@@ -19,19 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_HMAC_IPP
 #define LIBBITCOIN_SYSTEM_HASH_HMAC_IPP
 
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/hash/accumulator.hpp>
-
 // Based on:
 // datatracker.ietf.org/doc/html/rfc2104
 // [Krawczyk, Bellare, Canetti]
 
 namespace libbitcoin {
 namespace system {
-
-#define TEMPLATE template <typename Algorithm>
-#define CLASS hmac<Algorithm>
 
 // hmac accumulator
 // ---------------------------------------------------------------------------
@@ -166,9 +159,6 @@ code(const data_slice& data, const data_slice& key) NOEXCEPT
     buffer.write(data);
     return buffer.flush();
 }
-
-#undef CLASS
-#undef TEMPLATE
 
 } // namespace system
 } // namespace libbitcoin
