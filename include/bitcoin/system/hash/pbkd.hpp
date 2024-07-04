@@ -21,6 +21,8 @@
 
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/hash/hmac.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -61,6 +63,12 @@ protected:
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <typename Algorithm>
+#define CLASS pbkd<Algorithm>
+
 #include <bitcoin/system/impl/hash/pbkd.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

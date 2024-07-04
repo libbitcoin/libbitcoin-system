@@ -21,17 +21,9 @@
 
 #include <algorithm>
 #include <string>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-#define TEMPLATE template <typename Algorithm, bool Checked, \
-    if_base_of<algorithm_t, Algorithm> If>
-#define CLASS accumulator<Algorithm, Checked, If>
 
 // Copy and array index are guarded.
 BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
@@ -659,9 +651,6 @@ double_hash_chunk(const std::string& data) NOEXCEPT
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
-
-#undef CLASS
-#undef TEMPLATE
 
 } // namespace system
 } // namespace libbitcoin

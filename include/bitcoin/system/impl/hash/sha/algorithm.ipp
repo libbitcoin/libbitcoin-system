@@ -20,9 +20,6 @@
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_IPP
 
 #include <utility>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 // Based on:
 // FIPS PUB 180-4 [Secure Hash Standard (SHS)].

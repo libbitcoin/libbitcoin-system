@@ -22,6 +22,7 @@
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -170,6 +171,13 @@ extern template class accumulator<sha512>;
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <typename Algorithm, bool Checked, \
+    if_base_of<algorithm_t, Algorithm> If>
+#define CLASS accumulator<Algorithm, Checked, If>
+
 #include <bitcoin/system/impl/hash/accumulator.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

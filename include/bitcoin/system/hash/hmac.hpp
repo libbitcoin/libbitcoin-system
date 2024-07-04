@@ -65,6 +65,12 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <typename Algorithm>
+#define CLASS hmac<Algorithm>
+
 #include <bitcoin/system/impl/hash/hmac.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

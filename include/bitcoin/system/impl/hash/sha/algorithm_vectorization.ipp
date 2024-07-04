@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTORIZATION_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTORIZATION_IPP
 
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/intrinsics.hpp>
-
 namespace libbitcoin {
 namespace system {
 namespace sha {

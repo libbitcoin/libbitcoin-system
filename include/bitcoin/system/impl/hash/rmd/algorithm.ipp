@@ -21,9 +21,6 @@
 
 #include <bit>
 #include <iostream>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/endian/endian.hpp>
-#include <bitcoin/system/math/math.hpp>
 
 // Based on:
 // homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
@@ -32,9 +29,6 @@
 namespace libbitcoin {
 namespace system {
 namespace rmd {
-
-#define TEMPLATE template <typename RMD, if_same<typename RMD::T, rmdh_t> If>
-#define CLASS algorithm<RMD, If>
 
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -651,9 +645,6 @@ BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
-
-#undef CLASS
-#undef TEMPLATE
 
 } // namespace rmd
 } // namespace system
