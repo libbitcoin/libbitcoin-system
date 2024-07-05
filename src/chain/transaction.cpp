@@ -1007,7 +1007,7 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
 
     // Add the sighash type to the end of the DER signature -> endorsement.
     out.push_back(sighash_flags);
-    out.shrink_to_fit();
+    ////out.shrink_to_fit();
     return true;
 }
 
