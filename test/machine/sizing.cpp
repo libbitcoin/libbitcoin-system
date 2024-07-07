@@ -59,13 +59,13 @@ static_assert(d3 == pmr(3) * sizeof(size_t));
 constexpr auto a4 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>*>);
 constexpr auto c4 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>>);
 static_assert(a4 == 2 * sizeof(int64_t));
-static_assert(c4 == pmr(2) * sizeof(size_t) + 2 * sizeof(int64_t));
+static_assert(c4 == 2 * sizeof(size_t) + pmr(2) * sizeof(int64_t));
 
 // std_vector<std::variant<bool, int64_t, std_vector<uint8_t>>> does not increase this (per element) cost.
 constexpr auto a5 = sizeof(std_vector<std::variant<bool, int64_t, std_vector<uint8_t>*>>::value_type);
 constexpr auto c5 = sizeof(std_vector<std::variant<bool, int64_t, std_vector<uint8_t>>>::value_type);
 static_assert(a5 == 2 * sizeof(int64_t));
-static_assert(c5 == pmr(2) * sizeof(size_t) + 2 * sizeof(int64_t));
+static_assert(c5 == 2 * sizeof(size_t) + pmr(2) * sizeof(int64_t));
 
 // std_vector<std::variant<bool, int64_t, std_vector<uint8_t>>> requires 3 pointers (singular cost).
 constexpr auto a6 = sizeof(std_vector<std::variant<bool, int64_t, std_vector<uint8_t>*>>);
@@ -95,7 +95,7 @@ constexpr auto c9 = sizeof(std::variant<bool, int64_t, std::shared_ptr<std_vecto
 constexpr auto d9 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>>);
 static_assert(a9 == 2 * sizeof(int64_t));
 static_assert(c9 == 2 * sizeof(size_t) + 1 * sizeof(int64_t));
-static_assert(d9 == pmr(2) * sizeof(size_t) + 2 * sizeof(int64_t));
+static_assert(d9 == 2 * sizeof(size_t) + pmr(2) * sizeof(int64_t));
 
 // Computed hashes can be maintained in the variant by std::unique_ptr<std_vector<uint8_t>>.
 // This constrols their lifetime without increasing the size of the union. But
