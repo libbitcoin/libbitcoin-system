@@ -43,13 +43,11 @@ constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT;
 
 template <typename Integer,
     if_integer<Integer> = true>
-VCONSTEXPR data_chunk to_big_endian_size(Integer value,
-    size_t excess=zero) NOEXCEPT;
+data_chunk to_big_endian_size(Integer value, size_t excess=zero) NOEXCEPT;
 
 template <typename Integer,
     if_integer<Integer> = true>
-VCONSTEXPR data_chunk to_little_endian_size(Integer value,
-    size_t excess=zero) NOEXCEPT;
+data_chunk to_little_endian_size(Integer value, size_t excess=zero) NOEXCEPT;
 
 /// From chunk to uintx.
 /// ---------------------------------------------------------------------------

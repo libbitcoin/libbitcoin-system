@@ -204,7 +204,7 @@ SVCONSTEXPR std::string base16_string(const char(&string)[Size]) NOEXCEPT
 }
 
 template <size_t Size, if_odd<Size>>
-VCONSTEXPR data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT
+data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT
 {
     data_chunk out;
     decode_base16(out, string);

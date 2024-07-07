@@ -173,7 +173,7 @@ constexpr data_slice::to_array() const NOEXCEPT
     return out;
 }
 
-VCONSTEXPR std_vector<data_slice::value_type> data_slice::
+inline std_vector<data_slice::value_type> data_slice::
 to_chunk() const NOEXCEPT
 {
     return { begin_, end_ };
