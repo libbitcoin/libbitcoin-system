@@ -75,7 +75,7 @@ static base32_chunk bech32_expand_prefix(const std::string& prefix) NOEXCEPT
 {
     const auto size = prefix.size();
     const auto lower = ascii_to_lower(prefix);
-    base32_chunk out(add1(2u * size), 0x00);
+    base32_chunk out(add1(2u * size));
 
     for (size_t index = 0; index < size; ++index)
     {
@@ -90,7 +90,7 @@ static base32_chunk bech32_expand_prefix(const std::string& prefix) NOEXCEPT
 
 static base32_chunk bech32_expand_checksum(uint32_t checksum) NOEXCEPT
 {
-    base32_chunk out(bech32_checksum_size, 0x00);
+    base32_chunk out(bech32_checksum_size);
     out[0] = (checksum >> 25);
     out[1] = (checksum >> 20);
     out[2] = (checksum >> 15);

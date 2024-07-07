@@ -449,7 +449,7 @@ op_pick() NOEXCEPT
 // 1 {999 times}, 998 OP_ROLL{ 200 times }"
 // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
 // Shifting larger chunks does not change time, as vector stores references.
-// This remains the current satoshi implementation (std_vector).
+// This remains in the current satoshi implementation (std_vector).
 // ****************************************************************************
 template <typename Stack>
 inline op_error_t interpreter<Stack>::

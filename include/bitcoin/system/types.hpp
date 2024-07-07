@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <array>
+#include <memory_resource>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -31,11 +32,14 @@ namespace libbitcoin {
 /// ---------------------------------------------------------------------------
 /// is_same_type (is_same_v) and is_signed (is_signed_v) aliased in typelets.
 
-/// std_array/std_vector.
+/// std_array aliased because MSVS highlights `array` as a reserved word.
 template <typename Type, size_t Size>
 using std_array = std::array<Type, Size>;
+
+/// std_vector aliased to allow seamless conditional allocator usage.
 template <typename Type>
-using std_vector = std::vector<Type>;
+using std_vector = std::vector<Type,
+    std::pmr::polymorphic_allocator<Type>>;
 
 /// Const and non-const reference wrappers.
 template <typename Type>
@@ -48,7 +52,7 @@ template <bool Condition, typename IfTrue, typename IfFalse>
 using iif = std::conditional_t<Condition, IfTrue, IfFalse>;
 
 /// Extract type argument by position in parameter pack.
-template <size_t Position, typename... Args>
+template <size_t Position, typename ...Args>
 using argument = std::tuple_element_t<Position, std::tuple<Args...>>;
 
 /// Define signed_size_t

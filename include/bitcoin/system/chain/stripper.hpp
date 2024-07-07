@@ -74,7 +74,7 @@ inline bool operator==(const operation& op, const stripper& strip) NOEXCEPT
     return op.code() == strip.code() && op.data() == strip.data();
 }
 
-typedef std_vector<stripper> strippers;
+typedef std::vector<stripper> strippers;
 
 } // namespace chain
 } // namespace system

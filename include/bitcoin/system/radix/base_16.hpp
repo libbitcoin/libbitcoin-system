@@ -78,10 +78,10 @@ constexpr bool decode_hash(data_array<Size>& out,
 template <size_t Size, if_odd<Size> = true>
 SVCONSTEXPR std::string base16_string(const char(&string)[Size]) NOEXCEPT;
 
-/// Convert a literal hexidecimal string literal to a byte array.
+/// Convert a literal hexidecimal string literal to pmr vector (not constexpr).
 /// Empty chunk returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-VCONSTEXPR data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT;
+data_chunk base16_chunk(const char(&string)[Size]) NOEXCEPT;
 
 /// Convert a hexidecimal string literal to a byte array.
 /// Zeroized array returned if decoding fails.

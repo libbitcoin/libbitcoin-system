@@ -50,7 +50,7 @@ script::script(const data_chunk& value) NOEXCEPT
 {
 }
 
-script::script(const std_vector<std::string>& tokens) THROWS
+script::script(const std::vector<std::string>& tokens) THROWS
   : script(join(tokens))
 {
 }

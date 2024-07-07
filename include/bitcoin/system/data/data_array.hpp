@@ -32,6 +32,8 @@ namespace system {
 /// Byte array of a specified length.
 template <size_t Size>
 using data_array = std_array<uint8_t, Size>;
+template <size_t Size>
+using data_array_cptr = std::shared_ptr<const data_array<Size>>;
 
 /// Return type for splitters.
 template <size_t Size>

@@ -54,7 +54,7 @@ public:
         ::new(static_cast<void*>(ptr)) T;
     }
 
-    template <typename T, typename...Args>
+    template <typename T, typename ...Args>
     void construct(T* ptr, Args&&... args) noexcept(
         std::is_nothrow_default_constructible_v<Allocator>)
     {

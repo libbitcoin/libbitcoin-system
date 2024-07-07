@@ -122,7 +122,7 @@ SVCONSTEXPR data_slab data_slab::from_size_(const Pointer begin,
 // methods
 // ----------------------------------------------------------------------------
 
-VCONSTEXPR std_vector<data_slab::value_type> data_slab::to_chunk() const NOEXCEPT
+inline std_vector<data_slab::value_type> data_slab::to_chunk() const NOEXCEPT
 {
     return { begin_, end_ };
 }

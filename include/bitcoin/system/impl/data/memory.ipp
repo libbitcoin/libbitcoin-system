@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <memory_resource>
 #include <utility>
 #include <vector>
 #include <bitcoin/system/define.hpp>
@@ -30,7 +31,7 @@ namespace system {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-/// Create shared pointer to vector of const shared ptr from the moved vector.
+// Create shared pointer to vector of const shared ptr from the moved vector.
 template <typename Type>
 std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
 to_shareds(std_vector<Type>&& values) NOEXCEPT
@@ -47,7 +48,7 @@ to_shareds(std_vector<Type>&& values) NOEXCEPT
     return out;
 }
 
-/// Create shared pointer to vector of const shared ptr from the copied vector.
+// Create shared pointer to vector of const shared ptr from the copied vector.
 template <typename Type>
 std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
     const std_vector<Type>& values) NOEXCEPT
@@ -62,6 +63,16 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
         });
 
     return out;
+}
+
+// Allocate a shared instance and construct with given arguments.
+template <typename Type, typename Allocator, typename ...Args>
+std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
+    Args&&... args) NOEXCEPT
+{
+    return std::allocate_shared<const Type,
+        std::pmr::polymorphic_allocator<const Type>>(allocator,
+            std::forward<Args>(args)...);
 }
 
 BC_POP_WARNING()

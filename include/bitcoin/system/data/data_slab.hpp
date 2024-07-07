@@ -94,8 +94,8 @@ public:
     template <size_type Size>
     constexpr std_array<value_type, Size> to_array() const NOEXCEPT;
 
-    /// Copy data to a vector.
-    VCONSTEXPR std_vector<value_type> to_chunk() const NOEXCEPT;
+    /// Copy data to a pmr vector (not constexpr).
+    inline std_vector<value_type> to_chunk() const NOEXCEPT;
 
     /// Convert data to a string (casts uint8_t to char).
     SCONSTEXPR std::string to_string() const NOEXCEPT;

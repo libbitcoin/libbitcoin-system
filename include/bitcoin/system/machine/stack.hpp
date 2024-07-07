@@ -35,13 +35,13 @@ typedef std::variant<bool, int64_t, chunk_xptr> stack_variant;
 
 // Primary stack options.
 typedef std::list<stack_variant> linked_stack;
-typedef std_vector<stack_variant> contiguous_stack;
+typedef std::vector<stack_variant> contiguous_stack;
 
 // Alternate stack requires no stack<T> abstraction.
-typedef std_vector<stack_variant> alternate_stack;
+typedef std::vector<stack_variant> alternate_stack;
 
 // Possibly space-efficient bit vector, optimized by std lib.
-typedef std_vector<bool> condition_stack;
+typedef std::vector<bool> condition_stack;
 
 template <typename Container>
 class stack

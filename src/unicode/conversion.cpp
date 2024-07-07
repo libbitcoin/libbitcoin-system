@@ -49,10 +49,10 @@ static std::basic_string<CharOut> to_utf(
 }
 
 template <typename CharOut, typename CharIn>
-static std_vector<std::basic_string<CharOut>> to_utf(
-    const std_vector<std::basic_string<CharIn>>& in) NOEXCEPT
+static std::vector<std::basic_string<CharOut>> to_utf(
+    const std::vector<std::basic_string<CharIn>>& in) NOEXCEPT
 {
-    std_vector<std::basic_string<CharOut>> out(in.size());
+    std::vector<std::basic_string<CharOut>> out(in.size());
     std::transform(in.begin(), in.end(), out.begin(),
         [](const std::basic_string<CharIn>& word) NOEXCEPT
         {

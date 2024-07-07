@@ -34,30 +34,26 @@ constexpr data_reference::data_reference() NOEXCEPT
 {
 }
 
-constexpr data_reference::data_reference(
-    const data_slice& data) NOEXCEPT
+constexpr data_reference::data_reference(const data_slice& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 // data_slice(std::string) is SCONSTEXPR.
-SCONSTEXPR data_reference::data_reference(
-    const std::string& text) NOEXCEPT
+SCONSTEXPR data_reference::data_reference(const std::string& text) NOEXCEPT
   : data_slice(text)
 {
 }
 
 // data_slice(std_vector) is VCONSTEXPR.
-VCONSTEXPR data_reference::data_reference(
-    const data_chunk& data) NOEXCEPT
+VCONSTEXPR data_reference::data_reference(const data_chunk& data) NOEXCEPT
   : data_slice(data)
 {
 }
 
 // data_array constructor.
 template <data_reference::size_type Size>
-constexpr data_reference::data_reference(
-    const data_array<Size>& data) NOEXCEPT
+constexpr data_reference::data_reference(const data_array<Size>& data) NOEXCEPT
   : data_slice(data)
 {
 }

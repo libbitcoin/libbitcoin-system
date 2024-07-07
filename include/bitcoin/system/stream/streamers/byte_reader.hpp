@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <limits>
+#include <memory_resource>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -30,17 +31,23 @@
 
 namespace libbitcoin {
 namespace system {
-    
+
 /// A byte reader that accepts an istream.
 template <typename IStream = std::istream>
 class byte_reader
   : public virtual bytereader
 {
 public:
+    using memory_resource = std::pmr::memory_resource;
+
     DEFAULT_COPY_MOVE_DESTRUCT(byte_reader);
 
     /// Constructors.
-    byte_reader(IStream& source) NOEXCEPT;
+    byte_reader(IStream& source,
+        memory_resource* allocator=default_allocator()) NOEXCEPT;
+
+    /// Integrals.
+    /// -----------------------------------------------------------------------
 
     /// Read integer, size determined from parameter type.
     template <typename Integer, size_t Size = sizeof(Integer),
@@ -80,31 +87,53 @@ public:
     /// Convert read_4_bytes_little_endian to an error code.
     code read_error_code() NOEXCEPT override;
 
+    /// Read/peek one byte (invalidates an empty stream).
+    uint8_t peek_byte() NOEXCEPT override;
+    uint8_t read_byte() NOEXCEPT override;
+
+    /// Bytes Arrays.
+    /// -----------------------------------------------------------------------
+
     /// Read size bytes into array.
     template <size_t Size>
     data_array<Size> read_forward() NOEXCEPT;
     template <size_t Size>
     data_array<Size> read_reverse() NOEXCEPT;
 
-    /// Read into stream until buffer is exhausted.
-    std::ostream& read(std::ostream& out) NOEXCEPT override;
+    /// Read size bytes into pointer to const array.
+    template <size_t Size>
+    data_array_cptr<Size> read_forward_cptr() NOEXCEPT;
+    template <size_t Size>
+    data_array_cptr<Size> read_reverse_cptr() NOEXCEPT;
 
-    /// Read hash (explicit specializations of read_forward).
+    /// Read hash to stack allocated forwarded object.
     mini_hash read_mini_hash() NOEXCEPT override;
     short_hash read_short_hash() NOEXCEPT override;
     hash_digest read_hash() NOEXCEPT override;
     long_hash read_long_hash() NOEXCEPT override;
 
-    /// Read/peek one byte (invalidates an empty stream).
-    uint8_t peek_byte() NOEXCEPT override;
-    uint8_t read_byte() NOEXCEPT override;
+    /// Read hash to heap allocated object owned by shared pointer.
+    mini_hash_cptr read_mini_hash_cptr() NOEXCEPT override;
+    short_hash_cptr read_short_hash_cptr() NOEXCEPT override;
+    hash_cptr read_hash_cptr() NOEXCEPT override;
+    long_hash_cptr read_long_hash_cptr() NOEXCEPT override;
 
-    /// Read all remaining bytes.
+    /// Bytes Vectors.
+    /// -----------------------------------------------------------------------
+
+    /// Read all remaining bytes to chunk.
     data_chunk read_bytes() NOEXCEPT override;
+    chunk_cptr read_bytes_cptr() NOEXCEPT override;
 
-    /// Read size bytes, return size is guaranteed.
+    /// Read size bytes to chunk, return size is guaranteed.
     data_chunk read_bytes(size_t size) NOEXCEPT override;
+    chunk_cptr read_bytes_cptr(size_t size) NOEXCEPT override;
+
+    /// Read size bytes to buffer, return size is guaranteed.
     void read_bytes(uint8_t* buffer, size_t size) NOEXCEPT override;
+
+    /// Strings.
+    /// -----------------------------------------------------------------------
 
     /// Read Bitcoin length-prefixed string.
     /// Returns empty and invalidates stream if would exceed read limit.
@@ -113,6 +142,15 @@ public:
     /// Read string, truncated at size or first null.
     /// This is only used for reading Bitcoin heading command text.
     std::string read_string_buffer(size_t size) NOEXCEPT override;
+
+    /// Streams.
+    /// -----------------------------------------------------------------------
+
+    /// Read into stream until buffer is exhausted.
+    std::ostream& read(std::ostream& out) NOEXCEPT override;
+
+    /// Control.
+    /// -----------------------------------------------------------------------
 
     /// Advance the iterator.
     void skip_byte() NOEXCEPT override;
@@ -162,6 +200,7 @@ protected:
     virtual bool get_exhausted() const NOEXCEPT;
 
 private:
+    static inline memory_resource* default_allocator() NOEXCEPT;
     bool valid() const NOEXCEPT;
     void invalid() NOEXCEPT;
     void validate() NOEXCEPT;
@@ -173,6 +212,7 @@ private:
 
     IStream& stream_;
     size_t remaining_;
+    memory_resource* allocator_;
 };
 
 } // namespace system

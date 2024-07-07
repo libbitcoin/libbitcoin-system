@@ -62,7 +62,7 @@ inline uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     return (product >> bits<uint64_t>).convert_to<uint64_t>();
 }
 
-static std_vector<uint64_t> hashed_set_construct(const data_stack& items,
+static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     uint64_t set_size, uint64_t target_false_positive_rate,
     const siphash_key& key) NOEXCEPT
 {
@@ -70,7 +70,7 @@ static std_vector<uint64_t> hashed_set_construct(const data_stack& items,
         return {};
 
     const auto bound = target_false_positive_rate * set_size;
-    std_vector<uint64_t> hashes(items.size());
+    std::vector<uint64_t> hashes(items.size());
 
     // C++17: parallel policy for std::transform.
     std::transform(items.begin(), items.end(), hashes.begin(),

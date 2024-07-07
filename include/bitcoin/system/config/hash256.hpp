@@ -32,7 +32,7 @@ namespace config {
 class BC_API hash256 final
 {
 public:
-    typedef std_vector<hash256> list;
+    typedef std::vector<hash256> list;
 
     hash256() NOEXCEPT;
     hash256(hash_digest&& value) NOEXCEPT;

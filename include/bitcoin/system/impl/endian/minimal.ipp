@@ -52,8 +52,7 @@ constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT
 
 template <typename Integer,
     if_integer<Integer>>
-VCONSTEXPR data_chunk to_big_endian_size(Integer value,
-    size_t excess) NOEXCEPT
+data_chunk to_big_endian_size(Integer value, size_t excess) NOEXCEPT
 {
     BC_ASSERT(!is_add_overflow(byte_width(value), excess));
 
@@ -66,8 +65,7 @@ VCONSTEXPR data_chunk to_big_endian_size(Integer value,
 
 template <typename Integer,
     if_integer<Integer>>
-VCONSTEXPR data_chunk to_little_endian_size(Integer value,
-    size_t excess) NOEXCEPT
+data_chunk to_little_endian_size(Integer value, size_t excess) NOEXCEPT
 {
     BC_ASSERT(!is_add_overflow(byte_width(value), excess));
 

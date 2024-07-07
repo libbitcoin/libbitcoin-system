@@ -36,7 +36,9 @@ namespace system {
 
 template <typename OStream>
 bit_writer<OStream>::bit_writer(OStream& sink) NOEXCEPT
-  : byte_writer<OStream>(sink), byte_(byte_writer<OStream>::pad()), offset_(0)
+  : byte_writer<OStream>(sink),
+    byte_(byte_writer<OStream>::pad()),
+    offset_(0)
 {
 }
 

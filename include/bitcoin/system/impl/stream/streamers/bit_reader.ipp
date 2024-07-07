@@ -36,7 +36,8 @@ namespace system {
 
 template <typename IStream>
 bit_reader<IStream>::bit_reader(IStream& source) NOEXCEPT
-  : byte_reader<IStream>(source), byte_(byte_reader<IStream>::pad()),
+  : byte_reader<IStream>(source),
+    byte_(byte_reader<IStream>::pad()),
     offset_(byte_bits)
 {
 }
