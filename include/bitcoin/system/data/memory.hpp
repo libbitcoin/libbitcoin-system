@@ -24,8 +24,6 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 
-// TODO: test.
-
 namespace libbitcoin {
 namespace system {
 
@@ -34,7 +32,7 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 /// shared_ptr
 /// ---------------------------------------------------------------------------
 
-/// Create empty shared pointer.
+/// Create default shared pointer.
 template <typename Type>
 inline std::shared_ptr<Type> to_shared() NOEXCEPT
 {
@@ -80,12 +78,21 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
 to_shareds(const std_vector<Type>& values) NOEXCEPT;
 
 /// Allocate a shared instance and construct with given arguments.
+/// Allocator must be pointer to instance of std::pmr::polymorphic_allocator.
+/// Allocator is passed as Type(allocator, args) and retained by Type instance.
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
     Args&&... args) NOEXCEPT;
 
 /// unique_ptr
 /// ---------------------------------------------------------------------------
+
+/// Create default unique pointer.
+template <typename Type>
+inline std::unique_ptr<const Type> to_unique() NOEXCEPT
+{
+    return std::make_unique<const Type>();
+}
 
 /// Create unique pointer to const from moved instance.
 template <typename Type>
