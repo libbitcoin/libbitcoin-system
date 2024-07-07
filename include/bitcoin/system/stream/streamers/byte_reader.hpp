@@ -93,6 +93,7 @@ public:
 
     /// Bytes Arrays.
     /// -----------------------------------------------------------------------
+    /// cptr overrides return nullptr if reader is or becomes invalid.
 
     /// Read size bytes into array.
     template <size_t Size>
@@ -120,6 +121,7 @@ public:
 
     /// Bytes Vectors.
     /// -----------------------------------------------------------------------
+    /// cptr overrides return nullptr if reader is or becomes invalid.
 
     /// Read all remaining bytes to chunk.
     data_chunk read_bytes() NOEXCEPT override;

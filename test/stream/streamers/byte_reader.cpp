@@ -871,6 +871,35 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_forward__past_end__padded_invalid)
     BOOST_REQUIRE(!reader);
 }
 
+// read_forward_cptr
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_forward_cptr__empty__nullptr_invalid)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(!reader.read_forward_cptr<1>());
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_forward_cptr__not_empty__expected)
+{
+    const data_array<4> expected{ 0x01, 0x02, 0x03, 0x04 };
+    std::istringstream stream{ "*" + to_string(expected) + "*" };
+    read::bytes::istream reader(stream);
+    reader.skip_byte();
+    BOOST_REQUIRE_EQUAL(*reader.read_forward_cptr<4>(), expected);
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_forward_cptr__past_end__nullptr_invalid)
+{
+    const data_array<4> expected{ 0x01, 0x02, pad, pad };
+    std::istringstream stream{ to_string(expected).substr(0, 2) };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(!reader.read_forward_cptr<4>());
+    BOOST_REQUIRE(!reader);
+}
+
 // read_reverse
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_reverse__empty__pad_invalid)
@@ -902,6 +931,37 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_reverse__past_end__padded_invalid)
     BOOST_REQUIRE(!reader);
 }
 
+// read_reverse_cptr
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_reverse_cptr__empty__nullptr_invalid)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(!reader.read_reverse_cptr<1>());
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_reverse_cptr__not_empty__expected)
+{
+    const data_array<4> value{ 0x01, 0x02, 0x03, 0x04 };
+    const data_array<4> expected{ 0x04, 0x03, 0x02, 0x01 };
+    std::istringstream stream{ "*" + to_string(value) + "*" };
+    read::bytes::istream reader(stream);
+    reader.skip_byte();
+    BOOST_REQUIRE_EQUAL(*reader.read_reverse_cptr<4>(), expected);
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_reverse_cptr__past_end__nullptr_invalid)
+{
+    const data_array<2> value{ 0x01, 0x02 };
+    const data_array<4> expected{ pad, pad, 0x02, 0x01 };
+    std::istringstream stream{ to_string(value) };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(!reader.read_reverse_cptr<4>());
+    BOOST_REQUIRE(!reader);
+}
+
 // read
 
 BOOST_AUTO_TEST_CASE(byte_reader__read__empty__empty)
@@ -927,7 +987,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read__value__expected)
 
 // read_mini_hash
 
-BOOST_AUTO_TEST_CASE(byte_reader__read_mini_hash__empty__null_hash)
+BOOST_AUTO_TEST_CASE(byte_reader__read_mini_hash__null_hash__null_mini_hash)
 {
     std::istringstream stream{ to_string(null_hash) };
     read::bytes::istream reader(stream);
@@ -944,6 +1004,25 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_mini_hash__value__expected)
     BOOST_REQUIRE(reader);
 }
 
+// read_mini_hash_cptr
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_mini_hash_cptr__null_hash__null_mini_hash)
+{
+    std::istringstream stream{ to_string(null_hash) };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(*reader.read_mini_hash_cptr(), null_mini_hash);
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_mini_hash_cptr__value__expected)
+{
+    const mini_hash expected{ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+    std::istringstream stream{ to_string(expected) };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(*reader.read_mini_hash_cptr(), expected);
+    BOOST_REQUIRE(reader);
+}
+
 // read_short_hash
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_short_hash__value__expected)
@@ -956,6 +1035,21 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_short_hash__value__expected)
     std::istringstream stream{ to_string(expected) };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_short_hash(), expected);
+    BOOST_REQUIRE(reader);
+}
+
+// read_short_hash_cptr
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_short_hash_cptr__value__expected)
+{
+    const short_hash expected
+    {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a
+    };
+
+    std::istringstream stream{ to_string(expected) };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(*reader.read_short_hash_cptr(), expected);
     BOOST_REQUIRE(reader);
 }
 
@@ -977,6 +1071,24 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_hash__value__expected)
     BOOST_REQUIRE(reader);
 }
 
+// read_hash_cptr
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_hash_cptr__value__expected)
+{
+    const hash_digest expected
+    {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02
+    };
+
+    std::istringstream stream{ to_string(expected) };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(*reader.read_hash_cptr(), expected);
+    BOOST_REQUIRE(reader);
+}
+
 // read_long_hash
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_long_hash__value__expected)
@@ -995,6 +1107,27 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_long_hash__value__expected)
     std::istringstream stream{ to_string(expected) };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_long_hash(), expected);
+    BOOST_REQUIRE(reader);
+}
+
+// read_long_hash_cptr
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_long_hash_cptr__value__expected)
+{
+    const long_hash expected
+    {
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
+        0x01, 0x02, 0x03, 0x04
+    };
+
+    std::istringstream stream{ to_string(expected) };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE_EQUAL(*reader.read_long_hash_cptr(), expected);
     BOOST_REQUIRE(reader);
 }
 
@@ -1066,6 +1199,15 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_byte__not_empty__expected_advanced)
 
 // read_bytes0
 
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes0__invalid__empty_invalid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.invalidate();
+    BOOST_REQUIRE(reader.read_bytes().empty());
+    BOOST_REQUIRE(!reader);
+}
+
 BOOST_AUTO_TEST_CASE(byte_reader__read_bytes0__empty__empty_valid)
 {
     std::istringstream stream;
@@ -1092,7 +1234,53 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes0__not_empty__expected)
     BOOST_REQUIRE(reader);
 }
 
+// read_bytes_cptr0
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr0__invalid__nullptr_invalid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.invalidate();
+    BOOST_REQUIRE(!reader.read_bytes_cptr());
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr0__empty__empty_valid)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(reader.read_bytes_cptr()->empty());
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr0__end__empty_valid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.skip_bytes(3);
+    BOOST_REQUIRE(reader.read_bytes_cptr()->empty());
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr0__not_empty__expected)
+{
+    std::istringstream stream{ "*abc" };
+    read::bytes::istream reader(stream);
+    reader.skip_byte();
+    BOOST_REQUIRE_EQUAL(*reader.read_bytes_cptr(), to_chunk("abc"));
+    BOOST_REQUIRE(reader);
+}
+
 // read_bytes1
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes1__invalid__empty_invalid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.invalidate();
+    BOOST_REQUIRE(reader.read_bytes(0).empty());
+    BOOST_REQUIRE(!reader);
+}
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_bytes1__empty_zero__empty_valid)
 {
@@ -1135,6 +1323,61 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes1__past_end__expected_invalid)
     std::istringstream stream{ "abc" };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE_EQUAL(reader.read_bytes(6), to_chunk("abc\0\0\0"));
+    BOOST_REQUIRE(!reader);
+}
+
+// read_bytes_cptr1
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr1__invalid__nullptr_invalid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.invalidate();
+    BOOST_REQUIRE(!reader.read_bytes_cptr(0));
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr1__empty_zero__empty_valid)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(reader.read_bytes_cptr(0)->empty());
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr1__end_zero__empty_valid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.skip_bytes(3);
+    BOOST_REQUIRE(reader.read_bytes_cptr(0)->empty());
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr1__to_end__expected)
+{
+    std::istringstream stream{ "*abc" };
+    read::bytes::istream reader(stream);
+    reader.skip_byte();
+    BOOST_REQUIRE_EQUAL(*reader.read_bytes_cptr(3), to_chunk("abc"));
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr1__middle__expected)
+{
+    std::istringstream stream{ "*abc*" };
+    read::bytes::istream reader(stream);
+    reader.skip_byte();
+    BOOST_REQUIRE_EQUAL(*reader.read_bytes_cptr(3), to_chunk("abc"));
+    BOOST_REQUIRE_EQUAL(stream.get(), '*');
+    BOOST_REQUIRE(reader);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr1__past_end__expected_invalid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(!reader.read_bytes_cptr(6));
     BOOST_REQUIRE(!reader);
 }
 
