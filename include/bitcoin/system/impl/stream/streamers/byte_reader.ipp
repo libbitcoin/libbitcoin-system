@@ -38,7 +38,7 @@ namespace system {
 
 // private/static
 template <typename IStream>
-inline byte_reader<IStream>::memory_resource*
+inline typename byte_reader<IStream>::memory_resource*
 byte_reader<IStream>::default_allocator() NOEXCEPT
 {
     return std::pmr::get_default_resource();
