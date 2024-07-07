@@ -63,7 +63,7 @@ inline std::shared_ptr<const Type> to_shared(const Type& value) NOEXCEPT
 }
 
 /// Construct shared pointer to const from moved constructor parameters.
-template <typename Type, typename... Args>
+template <typename Type, typename ...Args>
 inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
 {
     return std::make_shared<const Type>(Type{ std::forward<Args>(values)... });
@@ -78,6 +78,11 @@ to_shareds(std_vector<Type>&& values) NOEXCEPT;
 template <typename Type>
 std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
 to_shareds(const std_vector<Type>& values) NOEXCEPT;
+
+/// Allocate a shared instance and construct with given arguments.
+template <typename Type, typename Allocator, typename ...Args>
+std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
+    Args&&... args) NOEXCEPT;
 
 /// unique_ptr
 /// ---------------------------------------------------------------------------
@@ -97,7 +102,7 @@ inline std::unique_ptr<const Type> to_unique(const Type& value) NOEXCEPT
 }
 
 /// Construct unique pointer to const from moved constructor parameters.
-template <typename Type, typename... Args>
+template <typename Type, typename ...Args>
 inline std::unique_ptr<const Type> to_unique(Args&&... values) NOEXCEPT
 {
     return std::make_unique<const Type>(Type{ std::forward<Args>(values)... });
