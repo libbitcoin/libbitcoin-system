@@ -24,49 +24,54 @@
 // stdlib object sizes are subjsct to implementation (including debug builds).
 #if defined(HAVE_MSC) && defined(NDEBUG)
 
+// Must add1 when using pmr std_vector.
+constexpr auto pmr(auto value) NOEXCEPT
+{
+    return add1(value);
+}
+
 // std_vector<uint8_t> requires 3 pointers (front/back/size).
 constexpr auto a1_ = sizeof(std_vector<uint8_t>*);
 constexpr auto b1_ = sizeof(std_vector<uint8_t>&);
 constexpr auto c1_ = sizeof(std_vector<uint8_t>);
 static_assert(a1_ == 1 * sizeof(size_t));
-static_assert(b1_ == 3 * sizeof(size_t));
-static_assert(c1_ == 3 * sizeof(size_t));
+static_assert(b1_ == pmr(3) * sizeof(size_t));
+static_assert(c1_ == pmr(3) * sizeof(size_t));
 
 // std_vector<std_vector<uint8_t>> does not increase this (per element) cost.
 constexpr auto a2_ = sizeof(std_vector<std_vector<uint8_t>*>::value_type);
 constexpr auto c2_ = sizeof(std_vector<std_vector<uint8_t>>::value_type);
 constexpr auto d2_ = sizeof(std_vector<std::shared_ptr<std_vector<uint8_t>>>::value_type);
 static_assert(a2_ == 1 * sizeof(size_t));
-static_assert(c2_ == 3 * sizeof(size_t));
+static_assert(c2_ == pmr(3) * sizeof(size_t));
 static_assert(d2_ == 2 * sizeof(size_t));
 
 // std_vector<std_vector<uint8_t>> requires 3 pointers (singular cost).
 constexpr auto a3 = sizeof(std_vector<std_vector<uint8_t>*>);
 constexpr auto c3 = sizeof(std_vector<std_vector<uint8_t>>);
 constexpr auto d3 = sizeof(std_vector<std::shared_ptr<std_vector<uint8_t>>>);
-static_assert(a3 == 3 * sizeof(size_t));
-static_assert(c3 == 3 * sizeof(size_t));
-static_assert(d3 == 3 * sizeof(size_t));
-
+static_assert(a3 == pmr(3) * sizeof(size_t));
+static_assert(c3 == pmr(3) * sizeof(size_t));
+static_assert(d3 == pmr(3) * sizeof(size_t));
 // ----------------------------------------------------------------------------
 
 // std::variant<bool, int64_t, std_vector<uint8_t>> object reference requires 4 pointers (max element + 1).
 constexpr auto a4 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>*>);
 constexpr auto c4 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>>);
 static_assert(a4 == 2 * sizeof(int64_t));
-static_assert(c4 == 2 * sizeof(size_t) + 2 * sizeof(int64_t));
+static_assert(c4 == pmr(2) * sizeof(size_t) + 2 * sizeof(int64_t));
 
 // std_vector<std::variant<bool, int64_t, std_vector<uint8_t>>> does not increase this (per element) cost.
 constexpr auto a5 = sizeof(std_vector<std::variant<bool, int64_t, std_vector<uint8_t>*>>::value_type);
 constexpr auto c5 = sizeof(std_vector<std::variant<bool, int64_t, std_vector<uint8_t>>>::value_type);
 static_assert(a5 == 2 * sizeof(int64_t));
-static_assert(c5 == 2 * sizeof(size_t) + 2 * sizeof(int64_t));
+static_assert(c5 == pmr(2) * sizeof(size_t) + 2 * sizeof(int64_t));
 
 // std_vector<std::variant<bool, int64_t, std_vector<uint8_t>>> requires 3 pointers (singular cost).
 constexpr auto a6 = sizeof(std_vector<std::variant<bool, int64_t, std_vector<uint8_t>*>>);
 constexpr auto c6 = sizeof(std_vector<std::variant<bool, int64_t, std_vector<uint8_t>>>);
-static_assert(a6 == 3 * sizeof(size_t));
-static_assert(c6 == 3 * sizeof(size_t));
+static_assert(a6 == pmr(3) * sizeof(size_t));
+static_assert(c6 == pmr(3) * sizeof(size_t));
 
 // ----------------------------------------------------------------------------
 
@@ -90,7 +95,7 @@ constexpr auto c9 = sizeof(std::variant<bool, int64_t, std::shared_ptr<std_vecto
 constexpr auto d9 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>>);
 static_assert(a9 == 2 * sizeof(int64_t));
 static_assert(c9 == 2 * sizeof(size_t) + 1 * sizeof(int64_t));
-static_assert(d9 == 2 * sizeof(size_t) + 2 * sizeof(int64_t));
+static_assert(d9 == pmr(2) * sizeof(size_t) + 2 * sizeof(int64_t));
 
 // Computed hashes can be maintained in the variant by std::unique_ptr<std_vector<uint8_t>>.
 // This constrols their lifetime without increasing the size of the union. But

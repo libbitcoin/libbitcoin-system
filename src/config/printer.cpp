@@ -87,19 +87,19 @@ printer::printer(const options_metadata& settings,
 // ----------------------------------------------------------------------------
 
 static void enqueue_fragment(const std::string& fragment,
-    std_vector<std::string>& column) NOEXCEPT
+    std::vector<std::string>& column) NOEXCEPT
 {
     if (!fragment.empty())
         column.push_back(fragment);
 }
 
-std_vector<std::string> printer::columnize(const std::string& paragraph,
+std::vector<std::string> printer::columnize(const std::string& paragraph,
     size_t width) NOEXCEPT
 {
     const auto words = split(paragraph, ascii_space, false);
 
     std::string fragment;
-    std_vector<std::string> column;
+    std::vector<std::string> column;
 
     for (const auto& word: words)
     {
@@ -288,13 +288,13 @@ std::string printer::format_description() NOEXCEPT
 std::string printer::format_usage_parameters() NOEXCEPT
 {
     std::string toggle_short_options;
-    std_vector<std::string> toggle_long_options;
-    std_vector<std::string> required_options;
-    std_vector<std::string> optional_options;
-    std_vector<std::string> multiple_options;
-    std_vector<std::string> required_arguments;
-    std_vector<std::string> optional_arguments;
-    std_vector<std::string> multiple_arguments;
+    std::vector<std::string> toggle_long_options;
+    std::vector<std::string> required_options;
+    std::vector<std::string> optional_options;
+    std::vector<std::string> multiple_options;
+    std::vector<std::string> required_arguments;
+    std::vector<std::string> optional_arguments;
+    std::vector<std::string> multiple_arguments;
 
     const auto& parameters = get_parameters();
 

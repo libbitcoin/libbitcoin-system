@@ -61,13 +61,8 @@ typedef std::shared_ptr<const quarter_hash> quarter_hash_cptr;
 typedef std::shared_ptr<const half_hash> half_hash_cptr;
 typedef std::shared_ptr<const mini_hash> mini_hash_cptr;
 
-/// Lists of common bitcoin hashes.
-typedef std_vector<long_hash> long_hashes;
-typedef std_vector<hash_digest> hashes;
-typedef std_vector<short_hash> short_hashes;
-typedef std_vector<half_hash> half_hashes;
-typedef std_vector<quarter_hash> quarter_hashes;
-typedef std_vector<mini_hash> mini_hashes;
+/// Hashes are not pmr types, preserves constexpr.
+typedef std::vector<hash_digest> hashes;
 
 /// Null-valued common hashes.
 constexpr long_hash null_long_hash{};

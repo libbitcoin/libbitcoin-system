@@ -34,7 +34,7 @@ namespace chain {
 class BC_API checkpoint
 {
 public:
-    typedef std_vector<checkpoint> list;
+    typedef std::vector<checkpoint> list;
 
     DEFAULT_COPY_MOVE_DESTRUCT(checkpoint);
 
@@ -111,7 +111,7 @@ bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT;
 std::istream& operator>>(std::istream& stream, checkpoint& out) THROWS;
 std::ostream& operator<<(std::ostream& stream, const checkpoint& in) NOEXCEPT;
 
-typedef std_vector<checkpoint> checkpoints;
+typedef std::vector<checkpoint> checkpoints;
 
 DECLARE_JSON_VALUE_CONVERTORS(checkpoint);
 

@@ -69,7 +69,7 @@ public:
     template <size_t Size>
     using ablocks_t = std_array<block_t, Size>;
     using iblocks_t = iterable<block_t>;
-    using digests_t = std_vector<digest_t>;
+    using digests_t = std::vector<digest_t>;
 
     /// Constants (and count_t).
     /// -----------------------------------------------------------------------

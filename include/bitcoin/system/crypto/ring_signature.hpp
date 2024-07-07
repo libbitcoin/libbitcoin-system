@@ -35,13 +35,13 @@ namespace system {
 /// valid signature, we must use a private key from each of those sets.
 /// For example A and E and X. We can summarize this operation as:
 /// (A or B or C) and (D or E or F) and (X or Y)
-typedef std_vector<compressed_list> key_rings;
+typedef std::vector<compressed_list> key_rings;
 
 /// A borromean ring signature.
 /// theta = {e_0, s_{i_j} : 0 <= i <= n, 0 <= j <= m_i}
 struct BC_API ring_signature
 {
-    typedef std_vector<secret_list> proof_list;
+    typedef std::vector<secret_list> proof_list;
 
     ec_secret challenge;
     proof_list proofs;
