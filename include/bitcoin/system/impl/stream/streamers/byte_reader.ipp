@@ -257,8 +257,11 @@ data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
     // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
     const auto cptr = to_allocated<data_array<Size>>(allocator_);
-    const auto ptr = const_cast<data_array<Size>*>(cptr.get());
-    do_read_bytes(ptr->data(), Size);
+    if (const auto ptr = const_cast<data_array<Size>*>(cptr.get()))
+        do_read_bytes(ptr->data(), Size);
+    else
+        invalidate();
+
     return cptr;
 }
 
@@ -379,8 +382,11 @@ chunk_cptr byte_reader<IStream>::read_bytes_cptr(size_t size) NOEXCEPT
         return{};
 
     const auto cptr = to_allocated<data_chunk>(allocator_, size);
-    const auto ptr = const_cast<data_chunk*>(cptr.get());
-    do_read_bytes(ptr->data(), size);
+    if (const auto ptr = const_cast<data_chunk*>(cptr.get()))
+        do_read_bytes(ptr->data(), size);
+    else
+        invalidate();
+
     return cptr;
 }
 
