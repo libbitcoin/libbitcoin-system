@@ -191,7 +191,7 @@ private:
     void do_deallocate(void* ptr, size_t bytes, size_t) NOEXCEPT override
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        ::operator delete(ptr, bytes);
+        ::operator delete(ptr, &bytes);
         BC_POP_WARNING()
         ////report(ptr, bytes, false);
         ++dec_count;
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_values_non_pmr_vector_p
     using test_shared_vector_ptr = std::shared_ptr<const non_pmr_vector_type>;
 
     test_resource resource{};
-    const auto args = std::initializer_list{ type{ 1, 2 }, { 3, 4 }, { 5, 6 } };
+    const auto args = std::initializer_list<type>{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
     test_shared_vector_ptr cptr = to_allocated<non_pmr_vector_type>(&resource, args);
     auto ptr = const_cast<non_pmr_vector_type*>(cptr.get());
     BOOST_REQUIRE(ptr != nullptr);
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_empty_vector__cascading
     using test_shared_vector_ptr = std::shared_ptr<const pmr_vector_type>;
 
     test_resource resource{};
-    const auto args = std::initializer_list{ type{ 1, 2 }, { 3, 4 }, { 5, 6 } };
+    const auto args = std::initializer_list<type>{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
     test_shared_vector_ptr cptr = to_allocated<pmr_vector_type>(&resource, args);
     auto ptr = const_cast<pmr_vector_type*>(cptr.get());
     BOOST_REQUIRE(ptr != nullptr);
