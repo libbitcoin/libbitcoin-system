@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <limits>
-#include <memory_resource>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -38,13 +37,11 @@ class byte_reader
   : public virtual bytereader
 {
 public:
-    using memory_resource = std::pmr::memory_resource;
-
     DEFAULT_COPY_MOVE_DESTRUCT(byte_reader);
 
     /// Constructors.
     byte_reader(IStream& source,
-        memory_resource* allocator=default_allocator()) NOEXCEPT;
+        const memory_allocator& allocator=default_allocator()) NOEXCEPT;
 
     /// Integrals.
     /// -----------------------------------------------------------------------
@@ -180,6 +177,9 @@ public:
     /// Invalidate the stream.
     void invalidate() NOEXCEPT override;
 
+    /// Memory allocator used to populate vectors.
+    const memory_allocator& allocator() const NOEXCEPT override;
+
     /// The stream is valid.
     operator bool() const NOEXCEPT override;
 
@@ -202,7 +202,8 @@ protected:
     virtual bool get_exhausted() const NOEXCEPT;
 
 private:
-    static inline memory_resource* default_allocator() NOEXCEPT;
+    static inline memory_allocator default_allocator() NOEXCEPT;
+
     bool valid() const NOEXCEPT;
     void invalid() NOEXCEPT;
     void validate() NOEXCEPT;
@@ -214,7 +215,7 @@ private:
 
     IStream& stream_;
     size_t remaining_;
-    memory_resource* allocator_;
+    memory_allocator allocator_;
 };
 
 } // namespace system

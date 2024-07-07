@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <string>
-
+#include <memory_resource>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -34,6 +34,8 @@ namespace system {
 class bytereader
 {
 public:
+    using memory_allocator = std::pmr::memory_resource*;
+
     /// Integrals.
     /// -----------------------------------------------------------------------
 
@@ -144,6 +146,9 @@ public:
 
     /// Invalidate the stream.
     virtual void invalidate() NOEXCEPT = 0;
+
+    /// Memory allocator used to populate vectors.
+    virtual const memory_allocator& allocator() const NOEXCEPT = 0;
 
     /// The stream is valid.
     virtual operator bool() const NOEXCEPT = 0;

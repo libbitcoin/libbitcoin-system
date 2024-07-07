@@ -38,7 +38,7 @@ namespace system {
 
 // private/static
 template <typename IStream>
-inline typename byte_reader<IStream>::memory_resource*
+inline typename byte_reader<IStream>::memory_allocator
 byte_reader<IStream>::default_allocator() NOEXCEPT
 {
     return std::pmr::get_default_resource();
@@ -51,7 +51,7 @@ byte_reader<IStream>::default_allocator() NOEXCEPT
 
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source,
-    memory_resource* allocator) NOEXCEPT
+    const memory_allocator& allocator) NOEXCEPT
   : stream_(source),
     remaining_(system::maximum<size_t>),
     allocator_(allocator)
@@ -573,6 +573,13 @@ template <typename IStream>
 bool byte_reader<IStream>::operator!() const NOEXCEPT
 {
     return !valid();
+}
+
+template <typename IStream>
+typename const byte_reader<IStream>::memory_allocator&
+byte_reader<IStream>::allocator() const NOEXCEPT
+{
+    return allocator_;
 }
 
 // protected virtual
