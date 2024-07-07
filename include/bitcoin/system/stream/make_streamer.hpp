@@ -31,8 +31,8 @@ BC_PUSH_WARNING(4250)
 namespace libbitcoin {
 namespace system {
 
-/// Construct an output stream and feed it to a writer.
-/// For std::ostream just pass to writer on construct.
+/// Construct a stream and feed it to a streamer.
+/// For std::stream just pass to streamer on construct.
 template <typename Device,
     template <typename = make_stream<Device>> class Base,
     typename Stream = make_stream<Device>, typename Streamer = Base<Stream>>
