@@ -124,7 +124,7 @@ bool match_filter(const block_filter& filter,
     if (scripts.empty())
         return false;
 
-    data_stack stack;
+    data_stack stack{};
     stack.reserve(scripts.size());
 
     // ordered
