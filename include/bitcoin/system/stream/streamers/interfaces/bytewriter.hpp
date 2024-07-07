@@ -31,6 +31,9 @@ namespace system {
 class bytewriter
 {
 public:
+    /// Integrals.
+    /// -----------------------------------------------------------------------
+
     /// Write big endian integers.
     virtual void write_2_bytes_big_endian(uint16_t value) NOEXCEPT = 0;
     virtual void write_3_bytes_big_endian(uint32_t value) NOEXCEPT = 0;
@@ -55,17 +58,20 @@ public:
     /// Call write_4_bytes_little_endian with integer value of error code.
     virtual void write_error_code(const code& ec) NOEXCEPT = 0;
 
-    /// Write until reader is exhausted.
-    virtual std::istream& write(std::istream& in) NOEXCEPT = 0;
-
     /// Write one byte.
     virtual void write_byte(uint8_t value) NOEXCEPT = 0;
+
+    /// Bytes Buffers.
+    /// -----------------------------------------------------------------------
 
     /// Write all bytes.
     virtual void write_bytes(const data_slice& data) NOEXCEPT = 0;
 
     /// Write size bytes.
     virtual void write_bytes(const uint8_t* data, size_t size) NOEXCEPT = 0;
+
+    /// Strings.
+    /// -----------------------------------------------------------------------
 
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
     virtual void write_string(const std::string& value) NOEXCEPT = 0;
@@ -74,6 +80,15 @@ public:
     /// Write string to specified length, padded with nulls as required.
     virtual void write_string_buffer(const std::string& value, size_t size)
         NOEXCEPT = 0;
+
+    /// Streams.
+    /// -----------------------------------------------------------------------
+
+    /// Write until reader is exhausted.
+    virtual std::istream& write(std::istream& in) NOEXCEPT = 0;
+
+    /// Control.
+    /// -----------------------------------------------------------------------
 
     /// Flush the buffer.
     virtual void flush() NOEXCEPT = 0;

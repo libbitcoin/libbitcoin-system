@@ -44,6 +44,9 @@ public:
     /// Flush on destruct.
     virtual ~byte_writer() NOEXCEPT;
 
+    /// Integrals.
+    /// -----------------------------------------------------------------------
+
     /// Type-inferenced integer writers.
     template <typename Integer, size_t Size = sizeof(Integer),
         if_integer<Integer> = true,
@@ -78,17 +81,20 @@ public:
     /// Call write_4_bytes_little_endian with integer value of error code.
     void write_error_code(const code& ec) NOEXCEPT override;
 
-    /// Write into buffer until stream is exhausted.
-    std::istream& write(std::istream& in) NOEXCEPT override;
-
     /// Write one byte.
     void write_byte(uint8_t value) NOEXCEPT override;
+
+    /// Buffers.
+    /// -----------------------------------------------------------------------
 
     /// Write all bytes.
     void write_bytes(const data_slice& data) NOEXCEPT override;
 
     /// Write size bytes.
     void write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
+
+    /// Strings.
+    /// -----------------------------------------------------------------------
 
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
     void write_string(const std::string& value) NOEXCEPT override;
@@ -97,6 +103,15 @@ public:
     /// Write string to specified length, padded with nulls as required.
     void write_string_buffer(const std::string& value, size_t size) NOEXCEPT
         override;
+
+    /// Streams.
+    /// -----------------------------------------------------------------------
+
+    /// Write into buffer until stream is exhausted.
+    std::istream& write(std::istream& in) NOEXCEPT override;
+
+    /// Control.
+    /// -----------------------------------------------------------------------
 
     /// Flush the buffer.
     void flush() NOEXCEPT override;

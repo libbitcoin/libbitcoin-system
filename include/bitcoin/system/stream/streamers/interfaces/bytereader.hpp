@@ -30,10 +30,13 @@
 namespace libbitcoin {
 namespace system {
     
-/// A byte reader interface.
+// A byte reader interface.
 class bytereader
 {
 public:
+    /// Integrals.
+    /// -----------------------------------------------------------------------
+
     /// Read big endian (explicit specializations of read_big_endian).
     virtual uint16_t read_2_bytes_big_endian() NOEXCEPT = 0;
     virtual uint32_t read_3_bytes_big_endian() NOEXCEPT = 0;
@@ -62,33 +65,59 @@ public:
     /// Convert read_4_bytes_little_endian to an error code.
     virtual code read_error_code() NOEXCEPT = 0;
 
-    /// Read into stream until buffer is exhausted.
-    virtual std::ostream& read(std::ostream& out) NOEXCEPT = 0;
+    /// Read/peek one byte (invalidates an empty stream).
+    virtual uint8_t peek_byte() NOEXCEPT = 0;
+    virtual uint8_t read_byte() NOEXCEPT = 0;
 
-    /// Read hash (explicit specializations of read_forward).
+    /// Bytes Arrays.
+    /// -----------------------------------------------------------------------
+    /// Explicit specializations of read_forward.
+
+    /// Read hash to stack allocated forwarded object.
     virtual mini_hash read_mini_hash() NOEXCEPT = 0;
     virtual short_hash read_short_hash() NOEXCEPT = 0;
     virtual hash_digest read_hash() NOEXCEPT = 0;
     virtual long_hash read_long_hash() NOEXCEPT = 0;
 
-    /// Read/peek one byte (invalidates an empty stream).
-    virtual uint8_t peek_byte() NOEXCEPT = 0;
-    virtual uint8_t read_byte() NOEXCEPT = 0;
+    /// Read hash to heap allocated object owned by shared pointer.
+    virtual mini_hash_cptr read_mini_hash_cptr() NOEXCEPT = 0;
+    virtual short_hash_cptr read_short_hash_cptr() NOEXCEPT = 0;
+    virtual hash_cptr read_hash_cptr() NOEXCEPT = 0;
+    virtual long_hash_cptr read_long_hash_cptr() NOEXCEPT = 0;
 
-    /// Read all remaining bytes.
+    /// Byte Vectors.
+    /// -----------------------------------------------------------------------
+
+    /// Read all remaining bytes to chunk.
     virtual data_chunk read_bytes() NOEXCEPT = 0;
+    virtual chunk_cptr read_bytes_cptr() NOEXCEPT = 0;
 
-    /// Read size bytes, return size is guaranteed.
+    /// Read size bytes to chunk, return size is guaranteed.
     virtual data_chunk read_bytes(size_t size) NOEXCEPT = 0;
+    virtual chunk_cptr read_bytes_cptr(size_t size) NOEXCEPT = 0;
+
+    /// Read size bytes to buffer, return size is guaranteed.
     virtual void read_bytes(uint8_t* buffer, size_t size) NOEXCEPT = 0;
 
-    /// Read Bitcoin length-prefixed string.
-    /// Returns empty and invalidates stream if would exceed read limit.
+    /// Strings.
+    /// -----------------------------------------------------------------------
+
+    // Read Bitcoin length-prefixed string.
+    // Returns empty and invalidates stream if would exceed read limit.
     virtual std::string read_string(size_t limit=max_size_t) NOEXCEPT = 0;
 
     /// Read string, truncated at size or first null.
     /// This is only used for reading Bitcoin heading command text.
     virtual std::string read_string_buffer(size_t size) NOEXCEPT = 0;
+
+    /// Streams.
+    /// -----------------------------------------------------------------------
+
+    /// Read into stream until buffer is exhausted.
+    virtual std::ostream& read(std::ostream& out) NOEXCEPT = 0;
+
+    /// Control.
+    /// -----------------------------------------------------------------------
 
     /// Advance the iterator.
     virtual void skip_byte() NOEXCEPT = 0;

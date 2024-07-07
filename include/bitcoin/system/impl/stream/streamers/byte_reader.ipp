@@ -19,9 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_READER_IPP
 
+#include <algorithm>
 #include <ios>
 #include <istream>
 #include <limits>
+#include <memory>
+#include <memory_resource>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -33,14 +36,25 @@
 namespace libbitcoin {
 namespace system {
 
+// private/static
+template <typename IStream>
+inline byte_reader<IStream>::memory_resource*
+byte_reader<IStream>::default_allocator() NOEXCEPT
+{
+    return std::pmr::get_default_resource();
+}
+
 // All public methods must rely on protected for stream state except validity.
 
 // constructors
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
-byte_reader<IStream>::byte_reader(IStream& source) NOEXCEPT
-  : stream_(source), remaining_(system::maximum<size_t>)
+byte_reader<IStream>::byte_reader(IStream& source,
+    memory_resource* allocator) NOEXCEPT
+  : stream_(source),
+    remaining_(system::maximum<size_t>),
+    allocator_(allocator)
 {
     ////BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
     ////    "Input stream must not be configured to throw exceptions.");
@@ -201,7 +215,21 @@ code byte_reader<IStream>::read_error_code() NOEXCEPT
     return code(static_cast<error::error_t>(value));
 }
 
-// bytes
+template <typename IStream>
+uint8_t byte_reader<IStream>::peek_byte() NOEXCEPT
+{
+    return do_peek_byte();
+}
+
+template <typename IStream>
+uint8_t byte_reader<IStream>::read_byte() NOEXCEPT
+{
+    uint8_t value = pad();
+    do_read_bytes(&value, one);
+    return value;
+}
+
+// byte arrays
 // ----------------------------------------------------------------------------
 
 template <typename IStream>
@@ -223,12 +251,25 @@ data_array<Size> byte_reader<IStream>::read_reverse() NOEXCEPT
 }
 
 template <typename IStream>
-std::ostream& byte_reader<IStream>::read(std::ostream& out) NOEXCEPT
+template <size_t Size>
+data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
 {
-    // This creates an intermediate buffer the size of the stream.
-    // This is presumed to be more optimal than looping individual bytes.
-    byte_writer<std::ostream>(out).write_bytes(read_bytes());
-    return out;
+    // Truncated bytes are populated with 0x00.
+    // Reader supports directly populating an array, this avoids a copy.
+    const auto cptr = to_allocated<data_array<Size>>(allocator_);
+    const auto ptr = const_cast<data_array<Size>*>(cptr.get());
+    do_read_bytes(ptr->data(), Size);
+    return cptr;
+}
+
+template <typename IStream>
+template <size_t Size>
+data_array_cptr<Size> byte_reader<IStream>::read_reverse_cptr() NOEXCEPT
+{
+    const auto cptr = read_forward_cptr<Size>();
+    const auto ptr = const_cast<data_array<Size>*>(cptr.get());
+    std::reverse(ptr->begin(), ptr->end());
+    return cptr;
 }
 
 template <typename IStream>
@@ -256,35 +297,60 @@ long_hash byte_reader<IStream>::read_long_hash() NOEXCEPT
 }
 
 template <typename IStream>
-uint8_t byte_reader<IStream>::peek_byte() NOEXCEPT
+mini_hash_cptr byte_reader<IStream>::read_mini_hash_cptr() NOEXCEPT
 {
-    return do_peek_byte();
+    return read_forward_cptr<mini_hash_size>();
 }
 
 template <typename IStream>
-uint8_t byte_reader<IStream>::read_byte() NOEXCEPT
+short_hash_cptr byte_reader<IStream>::read_short_hash_cptr() NOEXCEPT
 {
-    uint8_t value = pad();
-    do_read_bytes(&value, one);
-    return value;
+    return read_forward_cptr<short_hash_size>();
 }
+
+template <typename IStream>
+hash_cptr byte_reader<IStream>::read_hash_cptr() NOEXCEPT
+{
+    return read_forward_cptr<hash_size>();
+}
+
+template <typename IStream>
+long_hash_cptr byte_reader<IStream>::read_long_hash_cptr() NOEXCEPT
+{
+    return read_forward_cptr<long_hash_size>();
+}
+
+// byte vectors
+// ----------------------------------------------------------------------------
 
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes() NOEXCEPT
 {
-    // Isolating get_exhausted to first call is an optimization (must clear).
-    if (get_exhausted())
-        return {};
+    // Count bytes to the end, avoids push_back reallocations.
+    size_t size{};
+    while (!get_exhausted())
+    {
+        ++size;
+        skip_byte();
+    };
 
-    // This will always produce at least one (zero) terminating byte.
-    data_chunk out{};
-    while (valid())
-        out.push_back(read_byte());
+    rewind_bytes(size);
+    return read_bytes(size);
+}
 
-    clear();
-    out.resize(sub1(out.size()));
-    out.shrink_to_fit();
-    return out;
+template <typename IStream>
+chunk_cptr byte_reader<IStream>::read_bytes_cptr() NOEXCEPT
+{
+    // Count bytes to the end, avoids push_back reallocations.
+    size_t size{};
+    while (!get_exhausted())
+    {
+        ++size;
+        skip_byte();
+    };
+
+    rewind_bytes(size);
+    return read_bytes_cptr(size);
 }
 
 template <typename IStream>
@@ -293,13 +359,29 @@ data_chunk byte_reader<IStream>::read_bytes(size_t size) NOEXCEPT
     if (is_zero(size))
         return {};
 
-    // This allows caller read an invalid stream without allocation.
+    // This allows caller to read an invalid stream without allocation.
     if (!valid())
         return{};
 
     data_chunk out(size);
     do_read_bytes(out.data(), size);
     return out;
+}
+
+template <typename IStream>
+chunk_cptr byte_reader<IStream>::read_bytes_cptr(size_t size) NOEXCEPT
+{
+    if (is_zero(size))
+        return {};
+
+    // This allows caller to read an invalid stream without allocation.
+    if (!valid())
+        return{};
+
+    const auto cptr = to_allocated<data_chunk>(allocator_, size);
+    const auto ptr = const_cast<data_chunk*>(cptr.get());
+    do_read_bytes(ptr->data(), size);
+    return cptr;
 }
 
 template <typename IStream>
@@ -333,9 +415,21 @@ std::string byte_reader<IStream>::read_string_buffer(size_t size) NOEXCEPT
     // Removes zero and all after, required for bitcoin string deserialization.
     const auto position = out.find('\0');
     out.resize(position == std::string::npos ? out.size() : position);
-    out.shrink_to_fit();
+    ////out.shrink_to_fit();
 
     clear();
+    return out;
+}
+
+// streams
+// ----------------------------------------------------------------------------
+
+template <typename IStream>
+std::ostream& byte_reader<IStream>::read(std::ostream& out) NOEXCEPT
+{
+    // This creates an intermediate buffer the size of the stream.
+    // This is presumed to be more optimal than looping individual bytes.
+    byte_writer<std::ostream>(out).write_bytes(read_bytes());
     return out;
 }
 
