@@ -314,11 +314,29 @@ static_assert(is_same_type<std::decay_t<uint8_t&>, uint8_t>);
 static_assert(is_same_type<const volatile uint8_t&, uint8_t>);
 static_assert(is_same_type<std::decay_t<const volatile uint8_t&>, uint8_t>);
 
-static_assert(is_std_array<std_array<uint8_t, 0>>);
-static_assert(is_std_array<std_array<base, 0>>);
+static_assert(is_std_array<std_array<uint8_t, 42>>);
+static_assert(is_std_array<std::array<uint8_t, 42>>);
+static_assert(!is_std_array<std::vector<uint8_t>>);
+static_assert(!is_std_array<std_vector<uint8_t>>);
 static_assert(!is_std_array<uint8_t>);
 static_assert(is_same_type<decltype(is_std_array<std_array<uint8_t, 0>>), const bool>);
 static_assert(is_same_type<decltype(is_std_array<const volatile std_array<uint8_t, 0>&>), const bool>);
+
+static_assert(is_std_vector<std::vector<uint8_t>>);
+static_assert(!is_std_vector<std_vector<uint8_t>>);
+static_assert(!is_std_vector<std_array<uint8_t, 42>>);
+static_assert(!is_std_vector<std::array<uint8_t, 42>>);
+static_assert(!is_std_vector<uint8_t>);
+static_assert(is_same_type<decltype(is_std_vector<std::vector<uint8_t>>), const bool>);
+static_assert(is_same_type<decltype(is_std_vector<const volatile std::vector<uint8_t>&>), const bool>);
+
+static_assert(is_pmr_vector<std_vector<uint8_t>>);
+static_assert(!is_pmr_vector<std::vector<uint8_t>>);
+static_assert(!is_pmr_vector<std_array<uint8_t, 42>>);
+static_assert(!is_pmr_vector<std::array<uint8_t, 42>>);
+static_assert(!is_pmr_vector<uint8_t>);
+static_assert(is_same_type<decltype(is_pmr_vector<std_vector<uint8_t>>), const bool>);
+static_assert(is_same_type<decltype(is_pmr_vector<const volatile std_vector<uint8_t>&>), const bool>);
 
 static_assert(array_count<std_array<uint8_t, 42>> == 42);
 static_assert(array_count<std_array<std_array<uint32_t, 42>, 24>> == 24);
@@ -351,15 +369,6 @@ static_assert(size_of<const volatile std_array<std_array<std_array<uint32_t, 42>
 static_assert(size_of<std_array<const volatile std_array<std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
 static_assert(size_of<std_array<std_array<const volatile std_array<uint32_t, 42>, 24>, 8>>() == sizeof(uint32_t) * 42 * 24 * 8);
 static_assert(size_of<const volatile std_array<const volatile std_array<const volatile std_array<uint32_t, 42>, 24>, 8>&>() == sizeof(uint32_t) * 42 * 24 * 8);
-
-// std_array fails on "negative subscript"
-////static_assert(size_of<std_array<uint8_t, max_size_t>>() == sizeof(uint8_t) * max_size_t);
-////static_assert(size_of<std_array<uint16_t, max_size_t>>() == sizeof(uint16_t) * max_size_t);
-
-// multiply overlow
-////static_assert(size_of<std_array<uint16_t, to_half(max_size_t)>>() == sizeof(uint16_t) * to_half(max_size_t));
-
-// TODO: This is not currently restricted (is_std_array || !is_std_array).
 
 static_assert(is_uintx<uint5_t>);
 static_assert(is_uintx<uint11_t>);
