@@ -67,6 +67,16 @@ inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
     return std::make_shared<const Type>(Type{ std::forward<Args>(values)... });
 }
 
+/// Obtain non constant pointer from shared_ptr to const.
+/// This is useful when allocating objects to shared const before population.
+template <typename Type>
+inline Type* to_non_const_raw_ptr(const std::shared_ptr<const Type>& cptr) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_CONST_CAST)
+    return const_cast<Type*>(cptr.get());
+    BC_POP_WARNING()
+}
+
 /// Create shared pointer to vector of const shared pointers from moved vector.
 template <typename Type>
 std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
