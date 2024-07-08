@@ -576,7 +576,7 @@ bool byte_reader<IStream>::operator!() const NOEXCEPT
 }
 
 template <typename IStream>
-typename const byte_reader<IStream>::memory_allocator&
+const typename byte_reader<IStream>::memory_allocator&
 byte_reader<IStream>::allocator() const NOEXCEPT
 {
     return allocator_;
