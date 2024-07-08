@@ -65,14 +65,6 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
     return out;
 }
 
-// Allocate a shared instance and construct.
-template <typename Type, typename Allocator>
-std::shared_ptr<const Type> to_allocated(const Allocator& allocator) NOEXCEPT
-{
-    return std::allocate_shared<const Type,
-        std::pmr::polymorphic_allocator<const Type>>(allocator);
-}
-
 // Allocate a shared instance and construct with given arguments.
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
