@@ -264,12 +264,9 @@ data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
         return cptr;
     }
 
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-    const auto ptr = const_cast<data_array<Size>*>(cptr.get());
-    BC_POP_WARNING()
-
     // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
+    const auto ptr = to_non_const_raw_ptr(cptr);
     do_read_bytes(ptr->data(), Size);
     if (!valid())
         return {};
@@ -285,10 +282,7 @@ data_array_cptr<Size> byte_reader<IStream>::read_reverse_cptr() NOEXCEPT
     if (!cptr)
         return cptr;
 
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-    const auto ptr = const_cast<data_array<Size>*>(cptr.get());
-    BC_POP_WARNING()
-
+    const auto ptr = to_non_const_raw_ptr(cptr);
     std::reverse(ptr->begin(), ptr->end());
     return cptr;
 }
