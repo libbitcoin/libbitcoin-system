@@ -256,6 +256,9 @@ private:
     ////}
 };
 
+// github.com/libbitcoin/libbitcoin-system/issues/1494
+#if !defined(HAVE_XCODE)
+
 BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_default__expected)
 {
     test_resource resource{};
@@ -386,6 +389,8 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_empty_vector__cascading
     BOOST_REQUIRE_EQUAL(resource.inc_count, resource.dec_count);
     BOOST_REQUIRE_EQUAL(resource.inc_bytes, resource.dec_bytes);
 }
+
+#endif // HAVE_XCODE
 
 // to_unique
 

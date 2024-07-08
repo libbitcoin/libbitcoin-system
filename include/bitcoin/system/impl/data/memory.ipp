@@ -65,6 +65,18 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
     return out;
 }
 
+// github.com/libbitcoin/libbitcoin-system/issues/1494
+#if defined(HAVE_XCODE)
+
+template <typename Type, typename Allocator, typename ...Args>
+std::shared_ptr<const Type> to_allocated(const Allocator&,
+    Args&&... args) NOEXCEPT
+{
+    return to_shared<const Type>(std::forward<Args>(args)...);
+}
+
+#else
+
 // Allocate a shared instance and construct with given arguments.
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
@@ -74,6 +86,8 @@ std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
         std::pmr::polymorphic_allocator<const Type>>(allocator,
             std::forward<Args>(args)...);
 }
+
+#endif
 
 BC_POP_WARNING()
 
