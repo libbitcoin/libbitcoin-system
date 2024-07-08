@@ -591,12 +591,17 @@ static_assert(is_defined<if_std_array<std_array<uint8_t, 0>>>);
 static_assert(is_defined<if_std_array<std_array<base, 0>>>);
 ////static_assert(!is_defined<if_std_array<uint8_t>>);
 
+////static_assert(!is_defined<if_not_std_array<std_array<uint8_t, 0>>>);
+////static_assert(!is_defined<if_not_std_array<std_array<base, 0>>>);
+static_assert(is_defined<if_not_std_array<uint8_t>>);
+
 static_assert(is_defined<if_integral_array<std_array<size_t, 42>>>);
 static_assert(is_defined<if_integral_array<std_array<uint8_t, 0>>>);
 ////static_assert(!is_defined<if_integral_array<std_array<base, 0>>>);
 ////static_assert(!is_defined<if_integral_array<uint8_t>>);
 
 static_assert(is_defined<if_byte_insertable<std::string>>);
+static_assert(is_defined<if_byte_insertable<std::vector<uint8_t>>>);
 static_assert(is_defined<if_byte_insertable<std_vector<uint8_t>>>);
 ////static_assert(is_defined<if_byte_insertable<std_array<uint8_t, 42>>>);
 ////static_assert(!is_defined<if_byte_insertable<std::u32string>>);

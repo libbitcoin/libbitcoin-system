@@ -38,7 +38,7 @@ namespace system {
 
 // private/static
 template <typename IStream>
-inline typename byte_reader<IStream>::memory_resource*
+inline typename byte_reader<IStream>::memory_allocator
 byte_reader<IStream>::default_allocator() NOEXCEPT
 {
     return std::pmr::get_default_resource();
@@ -51,7 +51,7 @@ byte_reader<IStream>::default_allocator() NOEXCEPT
 
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source,
-    memory_resource* allocator) NOEXCEPT
+    const memory_allocator& allocator) NOEXCEPT
   : stream_(source),
     remaining_(system::maximum<size_t>),
     allocator_(allocator)
@@ -254,13 +254,26 @@ template <typename IStream>
 template <size_t Size>
 data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
 {
+    if (!valid())
+        return {};
+
+    const auto cptr = to_allocated<data_array<Size>>(allocator_);
+    if (!cptr)
+    {
+        invalidate();
+        return cptr;
+    }
+
+    // Guarded above.
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+    const auto ptr = to_non_const_raw_ptr(cptr);
+    BC_POP_WARNING()
+
     // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
-    const auto cptr = to_allocated<data_array<Size>>(allocator_);
-    if (const auto ptr = const_cast<data_array<Size>*>(cptr.get()))
-        do_read_bytes(ptr->data(), Size);
-    else
-        invalidate();
+    do_read_bytes(ptr->data(), Size);
+    if (!valid())
+        return {};
 
     return cptr;
 }
@@ -270,7 +283,14 @@ template <size_t Size>
 data_array_cptr<Size> byte_reader<IStream>::read_reverse_cptr() NOEXCEPT
 {
     const auto cptr = read_forward_cptr<Size>();
-    const auto ptr = const_cast<data_array<Size>*>(cptr.get());
+    if (!cptr)
+        return cptr;
+
+    // Guarded above.
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+    const auto ptr = to_non_const_raw_ptr(cptr);
+    BC_POP_WARNING()
+
     std::reverse(ptr->begin(), ptr->end());
     return cptr;
 }
@@ -364,7 +384,7 @@ data_chunk byte_reader<IStream>::read_bytes(size_t size) NOEXCEPT
 
     // This allows caller to read an invalid stream without allocation.
     if (!valid())
-        return{};
+        return {};
 
     data_chunk out(size);
     do_read_bytes(out.data(), size);
@@ -374,18 +394,27 @@ data_chunk byte_reader<IStream>::read_bytes(size_t size) NOEXCEPT
 template <typename IStream>
 chunk_cptr byte_reader<IStream>::read_bytes_cptr(size_t size) NOEXCEPT
 {
-    if (is_zero(size))
-        return {};
-
     // This allows caller to read an invalid stream without allocation.
     if (!valid())
-        return{};
+        return {};
 
     const auto cptr = to_allocated<data_chunk>(allocator_, size);
-    if (const auto ptr = const_cast<data_chunk*>(cptr.get()))
-        do_read_bytes(ptr->data(), size);
-    else
+    if (!cptr)
+    {
         invalidate();
+        return cptr;
+    }
+
+    if (is_zero(size))
+        return cptr;
+
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+    const auto ptr = const_cast<data_chunk*>(cptr.get());
+    BC_POP_WARNING()
+
+    do_read_bytes(ptr->data(), size);
+    if (!valid())
+        return {};
 
     return cptr;
 }
@@ -546,6 +575,13 @@ template <typename IStream>
 bool byte_reader<IStream>::operator!() const NOEXCEPT
 {
     return !valid();
+}
+
+template <typename IStream>
+const typename byte_reader<IStream>::memory_allocator&
+byte_reader<IStream>::allocator() const NOEXCEPT
+{
+    return allocator_;
 }
 
 // protected virtual

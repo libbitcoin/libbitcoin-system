@@ -247,6 +247,10 @@ using if_std_array = bool_if<
     is_std_array<Type>>;
 
 template <typename Type>
+using if_not_std_array = bool_if<
+    !is_std_array<Type>>;
+
+template <typename Type>
 using if_integral_array = bool_if<
     is_std_array<Type> &&
     is_integral_integer<typename Type::value_type>>;

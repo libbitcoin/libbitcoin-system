@@ -24,17 +24,17 @@
 #include <vector>
 #include <bitcoin/system/define.hpp>
 
-// TODO: test.
-
 namespace libbitcoin {
 namespace system {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 /// shared_ptr
 /// ---------------------------------------------------------------------------
 
-/// Create empty shared pointer.
+/// Create default shared pointer.
 template <typename Type>
 inline std::shared_ptr<Type> to_shared() NOEXCEPT
 {
@@ -66,7 +66,17 @@ inline std::shared_ptr<const Type> to_shared(const Type& value) NOEXCEPT
 template <typename Type, typename ...Args>
 inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
 {
-    return std::make_shared<const Type>(Type{ std::forward<Args>(values)... });
+    return std::make_shared<const Type>(std::forward<Args>(values)...);
+}
+
+/// Obtain non constant pointer from shared_ptr to const.
+/// This is useful when allocating objects to shared const before population.
+template <typename Type>
+inline Type* to_non_const_raw_ptr(const std::shared_ptr<const Type>& cptr) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_CONST_CAST)
+    return const_cast<Type*>(cptr.get());
+    BC_POP_WARNING()
 }
 
 /// Create shared pointer to vector of const shared pointers from moved vector.
@@ -80,12 +90,21 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
 to_shareds(const std_vector<Type>& values) NOEXCEPT;
 
 /// Allocate a shared instance and construct with given arguments.
+/// Allocator must be pointer to instance of std::pmr::polymorphic_allocator.
+/// Allocator is passed as Type(allocator, args) and retained by Type instance.
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
     Args&&... args) NOEXCEPT;
 
 /// unique_ptr
 /// ---------------------------------------------------------------------------
+
+/// Create default unique pointer.
+template <typename Type>
+inline std::unique_ptr<const Type> to_unique() NOEXCEPT
+{
+    return std::make_unique<const Type>();
+}
 
 /// Create unique pointer to const from moved instance.
 template <typename Type>
@@ -108,6 +127,8 @@ inline std::unique_ptr<const Type> to_unique(Args&&... values) NOEXCEPT
     return std::make_unique<const Type>(Type{ std::forward<Args>(values)... });
 }
 
+BC_POP_WARNING()
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 } // namespace system

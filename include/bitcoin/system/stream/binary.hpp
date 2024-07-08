@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_BINARY_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_BINARY_HPP
 
-#include <functional>
 #include <iostream>
 #include <string>
 #include <bitcoin/system/data/data_chunk.hpp>

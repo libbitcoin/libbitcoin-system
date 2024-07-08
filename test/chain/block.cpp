@@ -55,74 +55,74 @@ public:
     // Use base class constructors.
     using block::block;
 
-    bool is_empty() const
+    bool is_empty() const NOEXCEPT
     {
         return block::is_empty();
     }
 
-    bool is_oversized() const
+    bool is_oversized() const NOEXCEPT
     {
         return block::is_oversized();
     }
 
-    bool is_first_non_coinbase() const
+    bool is_first_non_coinbase() const NOEXCEPT
     {
         return block::is_first_non_coinbase();
     }
 
-    bool is_extra_coinbases() const
+    bool is_extra_coinbases() const NOEXCEPT
     {
         return block::is_extra_coinbases();
     }
 
-    bool is_forward_reference() const
+    bool is_forward_reference() const NOEXCEPT
     {
         return block::is_forward_reference();
     }
 
-    bool is_internal_double_spend() const
+    bool is_internal_double_spend() const NOEXCEPT
     {
         return block::is_internal_double_spend();
     }
 
-    bool is_invalid_merkle_root() const
+    bool is_invalid_merkle_root() const NOEXCEPT
     {
         return block::is_invalid_merkle_root();
     }
 
-    bool is_overweight() const
+    bool is_overweight() const NOEXCEPT
     {
         return block::is_overweight();
     }
 
-    bool is_invalid_coinbase_script(size_t height) const
+    bool is_invalid_coinbase_script(size_t height) const NOEXCEPT
     {
         return block::is_invalid_coinbase_script(height);
     }
 
-    bool is_hash_limit_exceeded() const
+    bool is_hash_limit_exceeded() const NOEXCEPT
     {
         return block::is_hash_limit_exceeded();
     }
 
-    bool is_invalid_witness_commitment() const
+    bool is_invalid_witness_commitment() const NOEXCEPT
     {
         return block::is_invalid_witness_commitment();
     }
 
     bool is_overspent(size_t height, uint64_t subsidy_interval,
-        uint64_t initial_block_subsidy_satoshi, bool bip42) const
+        uint64_t initial_block_subsidy_satoshi, bool bip42) const NOEXCEPT
     {
         return block::is_overspent(height, subsidy_interval,
             initial_block_subsidy_satoshi, bip42);
     }
 
-    size_t is_signature_operations_limited(bool bip16, bool bip141) const
+    size_t is_signature_operations_limited(bool bip16, bool bip141) const NOEXCEPT
     {
         return block::is_signature_operations_limited(bip16, bip141);
     }
 
-    bool is_unspent_coinbase_collision() const
+    bool is_unspent_coinbase_collision() const NOEXCEPT
     {
         return block::is_unspent_coinbase_collision();
     }

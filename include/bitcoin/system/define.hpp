@@ -21,11 +21,12 @@
 
 /// Standard includes (do not include directly).
 /// All except <array> are included here by include ancestory.
-#include <new>              // Must be early, macOS w/pmr.
+#include <new>              // none (keep early)
 #include <array>            // TODO: purge
 #include <cstddef>          // purged
 #include <cstdint>          // purged
-#include <exception>        // TODO: purge
+////#include <exception>    // purged (exceptions.hpp)
+#include <functional>       // purged
 #include <iostream>         // TODO: purge
 #include <limits>           // TODO: purge
 #include <stdexcept>        // TODO: purge

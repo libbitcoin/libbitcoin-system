@@ -21,6 +21,8 @@
 
 BOOST_AUTO_TEST_SUITE(stream_tests)
 
+BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+
 // Failed get/peek reads are populated with 0x00 by the reader.
 constexpr uint8_t pad = 0x00;
 
@@ -1440,5 +1442,7 @@ BOOST_AUTO_TEST_CASE(byte_flipper__write_string_buffer__value__expected)
 #endif // BYTE_FLIPPER_WRITER_STRINGS
 
 #endif // BYTE_FLIPPER_WRITER
+
+BC_POP_WARNING()
 
 BOOST_AUTO_TEST_SUITE_END()

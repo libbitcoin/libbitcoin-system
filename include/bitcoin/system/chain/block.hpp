@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
-#include <functional>
 #include <memory>
 #include <unordered_set>
 #include <vector>
