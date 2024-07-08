@@ -26,8 +26,10 @@
 
 namespace libbitcoin {
 namespace system {
-
+    
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
+BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
 /// shared_ptr
 /// ---------------------------------------------------------------------------
@@ -64,7 +66,7 @@ inline std::shared_ptr<const Type> to_shared(const Type& value) NOEXCEPT
 template <typename Type, typename ...Args>
 inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
 {
-    return std::make_shared<const Type>(Type{ std::forward<Args>(values)... });
+    return std::make_shared<const Type>(std::forward<Args>(values)...);
 }
 
 /// Obtain non constant pointer from shared_ptr to const.
@@ -90,6 +92,8 @@ to_shareds(const std_vector<Type>& values) NOEXCEPT;
 /// Allocate a shared instance and construct with given arguments.
 /// Allocator must be pointer to instance of std::pmr::polymorphic_allocator.
 /// Allocator is passed as Type(allocator, args) and retained by Type instance.
+template <typename Type, typename Allocator>
+std::shared_ptr<const Type> to_allocated(const Allocator& allocator) NOEXCEPT;
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
     Args&&... args) NOEXCEPT;
@@ -125,6 +129,8 @@ inline std::unique_ptr<const Type> to_unique(Args&&... values) NOEXCEPT
     return std::make_unique<const Type>(Type{ std::forward<Args>(values)... });
 }
 
+BC_POP_WARNING()
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 } // namespace system
