@@ -21,7 +21,6 @@
 
 /// Standard includes (do not include directly).
 /// All except <array> are included here by include ancestory.
-#include <new>              // Must be early, macOS w/pmr.
 #include <array>            // TODO: purge
 #include <cstddef>          // purged
 #include <cstdint>          // purged
