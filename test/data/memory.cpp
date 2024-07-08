@@ -24,22 +24,49 @@ struct type
 {
     static constexpr int expected{ 42 };
 
-    type(int left=0, int right=expected) NOEXCEPT
-      : left_(left), right_(right) {}
+    type(int left_=0, int right_=expected) NOEXCEPT
+      : left(left_), right(right_) {}
 
-    int left_;
-    int right_;
+    int left;
+    int right;
 };
 
 // to_shared
+
+using test_array_shared_ptr = std::shared_ptr<const data_array<3>>;
+
+BOOST_AUTO_TEST_CASE(memory__to_shared1__array_default__default_values)
+{
+    const test_array_shared_ptr ptr = to_shared<data_array<3>>();
+    BOOST_REQUIRE_EQUAL(ptr->at(0), 0);
+    BOOST_REQUIRE_EQUAL(ptr->at(1), 0);
+    BOOST_REQUIRE_EQUAL(ptr->at(2), 0);
+}
+
+BOOST_AUTO_TEST_CASE(memory__to_shared5__array_copy__expected_values)
+{
+    const data_array<3> copy{ 1, 2, 3 };
+    const test_array_shared_ptr ptr = to_shared<data_array<3>>(copy);
+    BOOST_REQUIRE_EQUAL(ptr->at(0), 1);
+    BOOST_REQUIRE_EQUAL(ptr->at(1), 2);
+    BOOST_REQUIRE_EQUAL(ptr->at(2), 3);
+}
+
+BOOST_AUTO_TEST_CASE(memory__to_shared5__array_move__expected_values)
+{
+    const test_array_shared_ptr ptr = to_shared<data_array<3>>(data_array<3>{ 1, 2, 3 });
+    BOOST_REQUIRE_EQUAL(ptr->at(0), 1);
+    BOOST_REQUIRE_EQUAL(ptr->at(1), 2);
+    BOOST_REQUIRE_EQUAL(ptr->at(2), 3);
+}
 
 using test_shared_ptr = std::shared_ptr<const type>;
 
 BOOST_AUTO_TEST_CASE(memory__to_shared1__always__default)
 {
     const test_shared_ptr ptr = to_shared<type>();
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared2__default__expected)
@@ -47,8 +74,8 @@ BOOST_AUTO_TEST_CASE(memory__to_shared2__default__expected)
     BC_PUSH_WARNING(NO_NEW_OR_DELETE)
     const test_shared_ptr ptr = to_shared<type>(new type{});
     BC_POP_WARNING()
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared2__values__expected)
@@ -56,52 +83,52 @@ BOOST_AUTO_TEST_CASE(memory__to_shared2__values__expected)
     BC_PUSH_WARNING(NO_NEW_OR_DELETE)
     const test_shared_ptr ptr = to_shared<type>(new type{ 1, 2 });
     BC_POP_WARNING()
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared3__default__expected)
 {
     const test_shared_ptr ptr = to_shared<type>(type{});
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared3__values__expected)
 {
     const test_shared_ptr ptr = to_shared<type>({ 1, 2 });
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared4__default__expected)
 {
     const type instance{};
     const test_shared_ptr ptr = to_shared<type>(instance);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared4__values__expected)
 {
     const type instance{ 1, 2 };
     const test_shared_ptr ptr = to_shared<type>(instance);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared5__value1__expected)
 {
     const test_shared_ptr ptr = to_shared<type>(1);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shared5__values__expected)
 {
     const test_shared_ptr ptr = to_shared<type>(1, 2);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 // to_non_const_raw_ptr
@@ -127,10 +154,10 @@ BOOST_AUTO_TEST_CASE(memory__to_shareds1__non_empty__expected)
 {
     const test_shareds_ptr ptr = to_shareds<type>(std_vector<type>{ {}, { 1, 2 } });
     BOOST_REQUIRE_EQUAL(ptr->size(), 2u);
-    BOOST_REQUIRE_EQUAL(ptr->at(0)->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->at(0)->right_, type::expected);
-    BOOST_REQUIRE_EQUAL(ptr->at(1)->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->at(1)->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->at(0)->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->at(0)->right, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->at(1)->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->at(1)->right, 2);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_shareds2__empty__empty)
@@ -145,10 +172,10 @@ BOOST_AUTO_TEST_CASE(memory__to_shareds2__non_empty__expected)
     const auto instance = std_vector<type>{ {}, { 1, 2 } };
     const test_shareds_ptr ptr = to_shareds<type>(instance);
     BOOST_REQUIRE_EQUAL(ptr->size(), 2u);
-    BOOST_REQUIRE_EQUAL(ptr->at(0)->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->at(0)->right_, type::expected);
-    BOOST_REQUIRE_EQUAL(ptr->at(1)->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->at(1)->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->at(0)->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->at(0)->right, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->at(1)->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->at(1)->right, 2);
 }
 
 // to_allocated
@@ -157,24 +184,24 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_left__expected)
 {
     const auto allocator = std::pmr::get_default_resource();
     const test_shared_ptr ptr = to_allocated<type>(allocator);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_right__expected)
 {
     const auto allocator = std::pmr::get_default_resource();
     const test_shared_ptr ptr = to_allocated<type>(allocator, 1);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_values__expected)
 {
     const auto allocator = std::pmr::get_default_resource();
     const test_shared_ptr ptr = to_allocated<type>(allocator, 1, 2);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 class test_resource
@@ -233,8 +260,8 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_default__expected)
 {
     test_resource resource{};
     test_shared_ptr ptr = to_allocated<type>(&resource);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
     ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
@@ -250,8 +277,8 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_left__expected_allocati
 {
     test_resource resource{};
     test_shared_ptr ptr = to_allocated<type>(&resource, 1);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
     ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
@@ -270,8 +297,8 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_values__expected_alloca
 {
     test_resource resource{};
     test_shared_ptr ptr = to_allocated<type>(&resource, 1, 2);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
     ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
@@ -292,13 +319,13 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_values_non_pmr_vector_p
     using test_shared_vector_ptr = std::shared_ptr<const non_pmr_vector_type>;
 
     test_resource resource{};
-    const auto args = std::initializer_list<type>{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
+    const std::initializer_list<type> args{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
     test_shared_vector_ptr cptr = to_allocated<non_pmr_vector_type>(&resource, args);
     auto ptr = const_cast<non_pmr_vector_type*>(cptr.get());
     BOOST_REQUIRE(ptr != nullptr);
     BOOST_REQUIRE_EQUAL(ptr->size(), 3u);
-    BOOST_REQUIRE_EQUAL(ptr->at(0).left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->at(2).right_, 6);
+    BOOST_REQUIRE_EQUAL(ptr->at(0).left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->at(2).right, 6);
     ////BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
     ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 48u);
     ////BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
@@ -327,13 +354,13 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_empty_vector__cascading
     using test_shared_vector_ptr = std::shared_ptr<const pmr_vector_type>;
 
     test_resource resource{};
-    const auto args = std::initializer_list<type>{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
+    const std::initializer_list<type> args{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
     test_shared_vector_ptr cptr = to_allocated<pmr_vector_type>(&resource, args);
     auto ptr = const_cast<pmr_vector_type*>(cptr.get());
     BOOST_REQUIRE(ptr != nullptr);
     BOOST_REQUIRE_EQUAL(cptr->size(), 3u);
-    BOOST_REQUIRE_EQUAL(cptr->at(0).left_, 1);
-    BOOST_REQUIRE_EQUAL(cptr->at(2).right_, 6);
+    BOOST_REQUIRE_EQUAL(cptr->at(0).left, 1);
+    BOOST_REQUIRE_EQUAL(cptr->at(2).right, 6);
     ////BOOST_REQUIRE_EQUAL(resource.inc_count, 2u);
     ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 80u);
     ////BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
@@ -367,52 +394,52 @@ using test_unique_ptr = std::unique_ptr<const type>;
 BOOST_AUTO_TEST_CASE(memory__to_unique1__always__default)
 {
     const test_unique_ptr ptr = to_unique<type>();
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_unique2__default__expected)
 {
     const test_unique_ptr ptr = to_unique<type>(type{});
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_unique2__values__expected)
 {
     const test_unique_ptr ptr = to_unique<type>({ 1, 2 });
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_unique3__default__expected)
 {
     const type instance{};
     const test_unique_ptr ptr = to_unique<type>(instance);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 0);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 0);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_unique3__values__expected)
 {
     const type instance{ 1, 2 };
     const test_unique_ptr ptr = to_unique<type>(instance);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_unique4__value1__expected)
 {
     const test_unique_ptr ptr = to_unique<type>(1);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, type::expected);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_unique4__values__expected)
 {
     const test_unique_ptr ptr = to_unique<type>(1, 2);
-    BOOST_REQUIRE_EQUAL(ptr->left_, 1);
-    BOOST_REQUIRE_EQUAL(ptr->right_, 2);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
