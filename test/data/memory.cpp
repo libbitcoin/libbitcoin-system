@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(memory__to_shareds2__non_empty__expected)
 
 BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_left__expected)
 {
-    const auto allocator = std::pmr::get_default_resource();
+    const auto allocator = test::get_default_resource();
     const test_shared_ptr ptr = to_allocated<type>(allocator);
     BOOST_REQUIRE_EQUAL(ptr->left, 0);
     BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_left__expected)
 
 BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_right__expected)
 {
-    const auto allocator = std::pmr::get_default_resource();
+    const auto allocator = test::get_default_resource();
     const test_shared_ptr ptr = to_allocated<type>(allocator, 1);
     BOOST_REQUIRE_EQUAL(ptr->left, 1);
     BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
@@ -198,99 +198,38 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_right__expected)
 
 BOOST_AUTO_TEST_CASE(memory__to_allocated__default_resource_values__expected)
 {
-    const auto allocator = std::pmr::get_default_resource();
+    const auto allocator = test::get_default_resource();
     const test_shared_ptr ptr = to_allocated<type>(allocator, 1, 2);
     BOOST_REQUIRE_EQUAL(ptr->left, 1);
     BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
-class test_resource
-  : public std::pmr::memory_resource
-{
-public:
-    size_t inc_count{};
-    size_t inc_bytes{};
-    size_t dec_count{};
-    size_t dec_bytes{};
-
-private:
-    void* do_allocate(size_t bytes, size_t alignment) override
-    {
-        if (alignment > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
-            throw std::bad_alloc();
-
-        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        const auto ptr = ::operator new(bytes);
-        BC_POP_WARNING()
-        ////report(ptr, bytes, true);
-        ++inc_count;
-        inc_bytes += bytes;
-        return ptr;
-    }
-
-    void do_deallocate(void* ptr, size_t bytes, size_t) NOEXCEPT override
-    {
-        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        ::operator delete(ptr, &bytes);
-        BC_POP_WARNING()
-        ////report(ptr, bytes, false);
-        ++dec_count;
-        dec_bytes += bytes;
-    }
-
-    bool do_is_equal(const std::pmr::memory_resource&) const NOEXCEPT override
-    {
-        return true;
-    }
-
-    ////void report(void* ptr, size_t bytes, bool allocate) const NOEXCEPT
-    ////{
-    ////    using namespace libbitcoin::system;
-    ////    BC_PUSH_WARNING(NO_REINTERPRET_CAST)
-    ////    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    ////    std::cout << (allocate ? "+ " : "- ") << bytes << " pmr "
-    ////        << encode_base16(to_big_endian(reinterpret_cast<uint64_t>(ptr)))
-    ////        << std::endl;
-    ////    BC_POP_WARNING()
-    ////    BC_POP_WARNING()
-    ////}
-};
-
-// github.com/libbitcoin/libbitcoin-system/issues/1494
-#if !defined(HAVE_XCODE)
-
 BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_default__expected)
 {
-    test_resource resource{};
+    test::reporting_arena<false> resource{};
     test_shared_ptr ptr = to_allocated<type>(&resource);
     BOOST_REQUIRE_EQUAL(ptr->left, 0);
     BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
     BOOST_REQUIRE_EQUAL(resource.dec_bytes, 0u);
     ptr.reset();
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 32u);
 }
 
 BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_left__expected_allocations)
 {
-    test_resource resource{};
+    test::reporting_arena<false> resource{};
     test_shared_ptr ptr = to_allocated<type>(&resource, 1);
     BOOST_REQUIRE_EQUAL(ptr->left, 1);
     BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
     BOOST_REQUIRE_EQUAL(resource.dec_bytes, 0u);
     ptr.reset();
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 32u);
 
     BOOST_REQUIRE_EQUAL(resource.inc_count, resource.dec_count);
     BOOST_REQUIRE_EQUAL(resource.inc_bytes, resource.dec_bytes);
@@ -298,19 +237,16 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_left__expected_allocati
 
 BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_values__expected_allocations)
 {
-    test_resource resource{};
+    test::reporting_arena<false> resource{};
     test_shared_ptr ptr = to_allocated<type>(&resource, 1, 2);
     BOOST_REQUIRE_EQUAL(ptr->left, 1);
     BOOST_REQUIRE_EQUAL(ptr->right, 2);
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
     BOOST_REQUIRE_EQUAL(resource.dec_bytes, 0u);
     ptr.reset();
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 32u);
     BOOST_REQUIRE_EQUAL(resource.dec_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 32u);
 
     BOOST_REQUIRE_EQUAL(resource.inc_count, resource.dec_count);
     BOOST_REQUIRE_EQUAL(resource.inc_bytes, resource.dec_bytes);
@@ -321,7 +257,7 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_values_non_pmr_vector_p
     using non_pmr_vector_type = std::vector<type>;
     using test_shared_vector_ptr = std::shared_ptr<const non_pmr_vector_type>;
 
-    test_resource resource{};
+    test::reporting_arena<false> resource{};
     const std::initializer_list<type> args{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
     test_shared_vector_ptr cptr = to_allocated<non_pmr_vector_type>(&resource, args);
     auto ptr = const_cast<non_pmr_vector_type*>(cptr.get());
@@ -329,21 +265,9 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_values_non_pmr_vector_p
     BOOST_REQUIRE_EQUAL(ptr->size(), 3u);
     BOOST_REQUIRE_EQUAL(ptr->at(0).left, 1);
     BOOST_REQUIRE_EQUAL(ptr->at(2).right, 6);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 48u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 0u);
     ptr->push_back({ 7, 8 });
     ptr->push_back({ 9, 0 });
-    ////BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 48u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 0u);
     cptr.reset();
-    ////BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 48u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 48u);
 
     // Only the initial allocation.
     BOOST_REQUIRE_EQUAL(resource.inc_count, 1u);
@@ -356,7 +280,7 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_empty_vector__cascading
     using pmr_vector_type = std_vector<type>;
     using test_shared_vector_ptr = std::shared_ptr<const pmr_vector_type>;
 
-    test_resource resource{};
+    test::reporting_arena<false> resource{};
     const std::initializer_list<type> args{ { 1, 2 }, { 3, 4 }, { 5, 6 } };
     test_shared_vector_ptr cptr = to_allocated<pmr_vector_type>(&resource, args);
     auto ptr = const_cast<pmr_vector_type*>(cptr.get());
@@ -364,33 +288,15 @@ BOOST_AUTO_TEST_CASE(memory__to_allocated__test_resource_empty_vector__cascading
     BOOST_REQUIRE_EQUAL(cptr->size(), 3u);
     BOOST_REQUIRE_EQUAL(cptr->at(0).left, 1);
     BOOST_REQUIRE_EQUAL(cptr->at(2).right, 6);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_count, 2u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 80u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_count, 0u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 0u);
     ptr->push_back({ 7, 8 });
-    ////BOOST_REQUIRE_EQUAL(resource.inc_count, 3u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 112u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_count, 1u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 24u);
     ptr->push_back({ 9, 0 });
-    ////BOOST_REQUIRE_EQUAL(resource.inc_count, 4u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 160u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_count, 2u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 56u);
     cptr.reset();
-    ////BOOST_REQUIRE_EQUAL(resource.inc_count, 4u);
-    ////BOOST_REQUIRE_EQUAL(resource.inc_bytes, 160u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_count, 4u);
-    ////BOOST_REQUIRE_EQUAL(resource.dec_bytes, 160u);
 
     // The initial allocation plus at least initial vector resize.
     BOOST_REQUIRE_GE(resource.inc_count, 2u);
     BOOST_REQUIRE_EQUAL(resource.inc_count, resource.dec_count);
     BOOST_REQUIRE_EQUAL(resource.inc_bytes, resource.dec_bytes);
 }
-
-#endif // HAVE_XCODE
 
 // to_unique
 

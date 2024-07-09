@@ -90,8 +90,6 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>>
 to_shareds(const std_vector<Type>& values) NOEXCEPT;
 
 /// Allocate a shared instance and construct with given arguments.
-/// Allocator must be pointer to instance of std::pmr::polymorphic_allocator.
-/// Allocator is passed as Type(allocator, args) and retained by Type instance.
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
     Args&&... args) NOEXCEPT;

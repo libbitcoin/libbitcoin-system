@@ -26,6 +26,7 @@
 #include <iostream>
 #include <vector>
 #include <filesystem>
+#include <memory_resource>
 #include <bitcoin/system.hpp>
 
 /// Have slow test execution (scrypt is slow by design).
@@ -113,6 +114,75 @@ Type move_copy(const Type& instance) NOEXCEPT
 {
     auto copy = instance;
     return copy;
+}
+
+// Facilitates tracing memory allocations through polymorphic resource.
+template <bool Report>
+class reporting_arena
+  : public arena
+{
+public:
+    size_t inc_count{};
+    size_t inc_bytes{};
+    size_t dec_count{};
+    size_t dec_bytes{};
+
+private:
+    void* do_allocate(size_t bytes, size_t align) override
+    {
+        if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
+            throw std::bad_alloc();
+
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+        const auto ptr = ::operator new(bytes);
+        BC_POP_WARNING()
+        report(ptr, bytes, true);
+        ++inc_count;
+        inc_bytes += bytes;
+        return ptr;
+    }
+
+    void do_deallocate(void* ptr, size_t bytes, size_t) NOEXCEPT override
+    {
+        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+        ::operator delete(ptr, &bytes);
+        BC_POP_WARNING()
+        report(ptr, bytes, false);
+        ++dec_count;
+        dec_bytes += bytes;
+    }
+
+    bool do_is_equal(const arena&) const NOEXCEPT override
+    {
+        return true;
+    }
+
+    void report(void* ptr, size_t bytes, bool allocate) const NOEXCEPT
+    {
+        if constexpr (Report)
+        {
+            using namespace libbitcoin::system;
+            BC_PUSH_WARNING(NO_REINTERPRET_CAST)
+            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+            std::cout << (allocate ? "+ " : "- ") << bytes << " pmr "
+                << encode_base16(to_big_endian(reinterpret_cast<uint64_t>(ptr)))
+                << std::endl;
+            BC_POP_WARNING()
+            BC_POP_WARNING()
+        }
+    }
+};
+
+template <bool Report = false>
+test::reporting_arena<Report>* get_test_resource() NOEXCEPT
+{
+    static test::reporting_arena<Report> resource{};
+    return &resource;
+}
+
+inline arena* get_default_resource() NOEXCEPT
+{
+    return default_arena::get();
 }
 
 } // namespace test

@@ -73,6 +73,7 @@
     <Import Project="$(ProjectDir)$(ProjectName).props" />
   </ImportGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\arena.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <ObjectFileName>$(IntDir)src_chain_block.obj</ObjectFileName>
     </ClCompile>
@@ -245,6 +246,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\allocator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\arena.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain.hpp" />
@@ -391,6 +394,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\power.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\rotate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\preprocessor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_2048.hpp" />

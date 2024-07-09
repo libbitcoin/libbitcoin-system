@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <string>
-#include <memory_resource>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -34,7 +33,7 @@ namespace system {
 class bytereader
 {
 public:
-    using memory_allocator = std::pmr::memory_resource*;
+    using memory_allocator = arena*;
 
     /// Integrals.
     /// -----------------------------------------------------------------------

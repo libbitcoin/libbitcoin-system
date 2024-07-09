@@ -60,10 +60,7 @@ struct noalloc_allocator
     {
     }
  
-    // std lib uses [[nodiscard]] on allocator::allocate members.
-    // en.cppreference.com/w/cpp/language/attributes/nodiscard
-    NODISCARD 
-    Type* allocate(size_t count) noexcept(false)
+    NODISCARD Type* allocate(size_t count) noexcept(false)
     {
         if (count > std::numeric_limits<size_t>::max() / sizeof(Type))
         {

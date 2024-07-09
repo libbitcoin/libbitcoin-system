@@ -23,67 +23,19 @@ BOOST_AUTO_TEST_SUITE(stream_tests)
 
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
-class test_resource
-  : public std::pmr::memory_resource
-{
-private:
-    void* do_allocate(size_t bytes, size_t alignment) override
-    {
-        if (alignment > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
-            throw std::bad_alloc();
-
-        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        const auto ptr = ::operator new(bytes);
-        BC_POP_WARNING()
-        report(ptr, bytes, true);
-        return ptr;
-    }
-
-    void do_deallocate(void* ptr, size_t bytes, size_t) NOEXCEPT override
-    {
-        BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        ::operator delete(ptr, &bytes);
-        BC_POP_WARNING()
-        report(ptr, bytes, false);
-    }
-
-    bool do_is_equal(const std::pmr::memory_resource&) const NOEXCEPT override
-    {
-        return true;
-    }
-
-    void report(void* ptr, size_t bytes, bool allocate) const NOEXCEPT
-    {
-        using namespace libbitcoin::system;
-        BC_PUSH_WARNING(NO_REINTERPRET_CAST)
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        std::cout << (allocate ? "+ " : "- ") << bytes << " pmr "
-            << encode_base16(to_big_endian(reinterpret_cast<uint64_t>(ptr)))
-            << std::endl;
-        BC_POP_WARNING()
-        BC_POP_WARNING()
-    }
-};
-
-test_resource* test_allocator() NOEXCEPT
-{
-    static test_resource resource{};
-    return &resource;
-}
-
 BOOST_AUTO_TEST_CASE(byte_reader__construct__default__default_resource)
 {
     const data_chunk data{};
     stream::in::fast stream(data);
     read::bytes::fast source(stream);
-    BOOST_REQUIRE_EQUAL(source.allocator(), std::pmr::get_default_resource());
+    BOOST_REQUIRE_EQUAL(source.allocator(), test::get_default_resource());
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__construct__allocator__assigned_resource)
 {
     const data_chunk data{};
     stream::in::fast stream(data);
-    auto resource = test_allocator();
+    auto resource = test::get_test_resource<false>();
     read::bytes::fast source(stream, resource);
     BOOST_REQUIRE_EQUAL(source.allocator(), resource);
 }
@@ -93,7 +45,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__constructor__allocating_reader__success)
     const auto genesis = settings(chain::selection::mainnet).genesis_block;
     const auto data = genesis.to_data(true);
     stream::in::fast stream(data);
-    read::bytes::fast source(stream, test_allocator());
+    read::bytes::fast source(stream, test::get_test_resource<false>());
     const chain::block block(source, true);
     BOOST_REQUIRE(block.is_valid());
 }
@@ -1030,7 +982,6 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_reverse_cptr__not_empty__expected)
 BOOST_AUTO_TEST_CASE(byte_reader__read_reverse_cptr__past_end__nullptr_invalid)
 {
     const data_array<2> value{ 0x01, 0x02 };
-    const data_array<4> expected{ pad, pad, 0x02, 0x01 };
     std::istringstream stream{ to_string(value) };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE(!reader.read_reverse_cptr<4>());

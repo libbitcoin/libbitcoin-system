@@ -471,6 +471,7 @@ add_definitions(
 # Define ${CANONICAL_LIB_NAME} project.
 #------------------------------------------------------------------------------
 add_library( ${CANONICAL_LIB_NAME}
+    "../../src/arena.cpp"
     "../../src/define.cpp"
     "../../src/settings.cpp"
     "../../src/chain/block.cpp"
@@ -687,6 +688,8 @@ endif()
 #------------------------------------------------------------------------------
 if (with-tests)
     add_executable( libbitcoin-system-test
+        "../../test/allocator.cpp"
+        "../../test/arena.cpp"
         "../../test/constants.cpp"
         "../../test/constraints.cpp"
         "../../test/funclets.cpp"
