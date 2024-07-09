@@ -37,15 +37,35 @@ static const header expected_header
     68644
 };
 
-static const transactions expected_transactions
+struct expected_transactions
 {
-    { 1, inputs{ {} }, { {} }, 48 },
-    { 2, inputs{ {} }, { {} }, 32 },
-    { 4, inputs{ {} }, { {} }, 16 }
+    static const transactions& get() NOEXCEPT
+    {
+        static transactions txs_
+        {
+            { 1, inputs{ {} }, { {} }, 48 },
+            { 2, inputs{ {} }, { {} }, 32 },
+            { 4, inputs{ {} }, { {} }, 16 }
+        };
+
+        return txs_;
+    }
 };
 
-static const block expected_block{ expected_header, expected_transactions };
-static const auto block_data = expected_block.to_data(true);
+struct expected_block
+{
+    static const block& get() NOEXCEPT
+    {
+        static block block_{ expected_header, expected_transactions::get() };
+        return block_;
+    }
+
+    static const data_chunk& data() NOEXCEPT
+    {
+        static data_chunk chunk_{ get().to_data(true) };
+        return chunk_;
+    }
+};
 
 // Access protected validation methods.
 class accessor
@@ -134,46 +154,46 @@ public:
 
 BOOST_AUTO_TEST_CASE(block__constructor__default__invalid)
 {
-    const block instance;
+    const block instance{};
     BOOST_REQUIRE(!instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__move__expected)
 {
-    const block expected(expected_header, expected_transactions);
-    block copy(expected_header, expected_transactions);
+    const block expected(expected_header, expected_transactions::get());
+    block copy(expected_header, expected_transactions::get());
     const block instance(std::move(copy));
     BOOST_REQUIRE(instance == instance);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block);
+    BOOST_REQUIRE(instance == expected_block::get());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__copy__expected)
 {
-    const block expected(expected_header, expected_transactions);
+    const block expected(expected_header, expected_transactions::get());
     const block instance(expected);
     BOOST_REQUIRE(instance == instance);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block);
+    BOOST_REQUIRE(instance == expected_block::get());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__move_parameters__expected)
 {
     auto header = expected_header;
-    auto transactions = expected_transactions;
+    auto transactions = expected_transactions::get();
     const block instance(std::move(header), std::move(transactions));
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block);
+    BOOST_REQUIRE(instance == expected_block::get());
 
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__copy_parameters__expected)
 {
     const auto header = expected_header;
-    const auto transactions = expected_transactions;
+    const auto& transactions = expected_transactions::get();
     const block instance(header, transactions);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE(instance == expected_block);
+    BOOST_REQUIRE(instance == expected_block::get());
 }
 
 BOOST_AUTO_TEST_CASE(block__constructor__data__expected)
@@ -220,7 +240,7 @@ BOOST_AUTO_TEST_CASE(block__constructor__reader__success)
 
 BOOST_AUTO_TEST_CASE(block__assign__move__expected)
 {
-    const auto& alpha = expected_block;
+    const auto& alpha = expected_block::get();
     auto gamma = alpha;
     const auto beta = std::move(gamma);
     BOOST_REQUIRE(alpha == beta);
@@ -228,35 +248,35 @@ BOOST_AUTO_TEST_CASE(block__assign__move__expected)
 
 BOOST_AUTO_TEST_CASE(block__assign__copy__expected)
 {
-    const auto& alpha = expected_block;
+    const auto& alpha = expected_block::get();
     const auto beta = alpha;
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(block__equality__same__true)
 {
-    const auto& alpha = expected_block;
+    const auto& alpha = expected_block::get();
     const block beta(alpha);
     BOOST_REQUIRE(alpha == beta);
 }
 
 BOOST_AUTO_TEST_CASE(block__equality__different__false)
 {
-    const auto& alpha = expected_block;
+    const auto& alpha = expected_block::get();
     const block beta;
     BOOST_REQUIRE(!(alpha == beta));
 }
 
 BOOST_AUTO_TEST_CASE(block__inequality__same__false)
 {
-    const auto& alpha = expected_block;
+    const auto& alpha = expected_block::get();
     const block beta(alpha);
     BOOST_REQUIRE(!(alpha != beta));
 }
 
 BOOST_AUTO_TEST_CASE(block__inequality__different__true)
 {
-    const auto& alpha = expected_block;
+    const auto& alpha = expected_block::get();
     const block beta;
     BOOST_REQUIRE(alpha != beta);
 }
@@ -266,37 +286,37 @@ BOOST_AUTO_TEST_CASE(block__inequality__different__true)
 
 BOOST_AUTO_TEST_CASE(block__to_data__data__expected)
 {
-    const auto size = expected_block.to_data(true).size();
-    BOOST_REQUIRE_EQUAL(size, expected_block.serialized_size(true));
+    const auto size = expected_block::get().to_data(true).size();
+    BOOST_REQUIRE_EQUAL(size, expected_block::get().serialized_size(true));
 }
 
 BOOST_AUTO_TEST_CASE(block__to_data__stream__expected)
 {
     // Write block to stream.
-    std::stringstream iostream;
-    expected_block.to_data(iostream, true);
+    std::stringstream iostream{};
+    expected_block::get().to_data(iostream, true);
     BOOST_REQUIRE(iostream);
 
     // Verify stream contents.
     const block copy(iostream, true);
     BOOST_REQUIRE(iostream);
     BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_block);
+    BOOST_REQUIRE(copy == expected_block::get());
 }
 
 BOOST_AUTO_TEST_CASE(block__to_data__writer__expected)
 {
     // Write block to stream.
-    std::stringstream iostream;
+    std::stringstream iostream{};
     write::bytes::ostream out(iostream);
-    expected_block.to_data(out, true);
+    expected_block::get().to_data(out, true);
     BOOST_REQUIRE(iostream);
 
     // Verify stream contents.
     const block copy(iostream, true);
     BOOST_REQUIRE(iostream);
     BOOST_REQUIRE(copy.is_valid());
-    BOOST_REQUIRE(copy == expected_block);
+    BOOST_REQUIRE(copy == expected_block::get());
 }
 
 // properties

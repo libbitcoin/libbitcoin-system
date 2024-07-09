@@ -58,72 +58,95 @@ public:
     }
 };
 
-transaction tx60
+struct txs
 {
-    42,
-    inputs{ { point{}, script{}, 42 } },
-    outputs{ { 42, script{} } },
-    42
-};
+    static transaction tx60() NOEXCEPT
+    {
+        return
+        {
+            42,
+            inputs{ { point{}, script{}, 42 } },
+            outputs{ { 42, script{} } },
+            42
+        };
+    }
 
-transaction tx61
-{
-    42,
-    inputs{ { point{}, script{ { opcode::dup } }, 42 } },
-    outputs{ { 42, script{} } },
-    42
-};
+    static transaction tx61() NOEXCEPT
+    {
+        return
+        {
+            42,
+            inputs{ { point{}, script{ { opcode::dup } }, 42 } },
+            outputs{ { 42, script{} } },
+            42
+        };
+    }
 
-transaction tx62
-{
-    42,
-    inputs{ { point{}, script{ { opcode::dup } }, 42 } },
-    outputs{ { 42, script{ { opcode::dup } } } },
-    42
-};
+    static transaction tx62() NOEXCEPT
+    {
+        return
+        {
+            42,
+            inputs{ { point{}, script{ { opcode::dup } }, 42 } },
+            outputs{ { 42, script{ { opcode::dup } } } },
+            42
+        };
+    }
 
-transaction tx63
-{
-    42,
-    inputs{ { point{}, script{ { opcode::dup, opcode::dup } }, 42 } },
-    outputs{ { 42, script{ { opcode::dup } } } },
-    42
-};
+    static transaction tx63() NOEXCEPT
+    {
+        return
+        {
+            42,
+            inputs{ { point{}, script{ { opcode::dup, opcode::dup } }, 42 } },
+            outputs{ { 42, script{ { opcode::dup } } } },
+            42
+        };
+    }
 
-transaction tx64
-{
-    42,
-    inputs{ { point{}, script{ { opcode::dup, opcode::dup } }, 42 } },
-    outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
-    42
-};
+    static transaction tx64() NOEXCEPT
+    {
+        return
+        {
+            42,
+            inputs{ { point{}, script{ { opcode::dup, opcode::dup } }, 42 } },
+            outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
+            42
+        };
+    }
 
-transaction tx65
-{
-    42,
-    inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
-    outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
-    42
-};
+    static transaction tx65() NOEXCEPT
+    {
+        return
+        {
+            42,
+            inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
+            outputs{ { 42, script{ { opcode::dup, opcode::dup } } } },
+            42
+        };
+    }
 
-transaction tx66
-{
-    42,
-    inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
-    outputs{ { 42, script{ { opcode::dup, opcode::dup, opcode::dup } } } },
-    42
+    static transaction tx66() NOEXCEPT
+    {
+        return
+        {
+            42,
+            inputs{ { point{}, script{ { opcode::dup, opcode::dup, opcode::dup } }, 42 } },
+            outputs{ { 42, script{ { opcode::dup, opcode::dup, opcode::dup } } } },
+            42
+        };
+    }
 };
 
 BOOST_AUTO_TEST_CASE(block__transactions__sizes__expected)
 {
-    const accessor instance{};
-    BOOST_REQUIRE_EQUAL(tx60.serialized_size(false), 60u);
-    BOOST_REQUIRE_EQUAL(tx61.serialized_size(false), 61u);
-    BOOST_REQUIRE_EQUAL(tx62.serialized_size(false), 62u);
-    BOOST_REQUIRE_EQUAL(tx63.serialized_size(false), 63u);
-    BOOST_REQUIRE_EQUAL(tx64.serialized_size(false), 64u);
-    BOOST_REQUIRE_EQUAL(tx65.serialized_size(false), 65u);
-    BOOST_REQUIRE_EQUAL(tx66.serialized_size(false), 66u);
+    BOOST_REQUIRE_EQUAL(txs::tx60().serialized_size(false), 60u);
+    BOOST_REQUIRE_EQUAL(txs::tx61().serialized_size(false), 61u);
+    BOOST_REQUIRE_EQUAL(txs::tx62().serialized_size(false), 62u);
+    BOOST_REQUIRE_EQUAL(txs::tx63().serialized_size(false), 63u);
+    BOOST_REQUIRE_EQUAL(txs::tx64().serialized_size(false), 64u);
+    BOOST_REQUIRE_EQUAL(txs::tx65().serialized_size(false), 65u);
+    BOOST_REQUIRE_EQUAL(txs::tx66().serialized_size(false), 66u);
 }
 
 BOOST_AUTO_TEST_CASE(block__malleable__empty__false)
@@ -141,7 +164,7 @@ BOOST_AUTO_TEST_CASE(block__malleable__empty__false)
 
 BOOST_AUTO_TEST_CASE(block__is_malleable__64_not_32__true)
 {
-    const accessor instance{ header, { tx64 } };
+    const accessor instance{ header, { txs::tx64() } };
     BOOST_REQUIRE(instance.is_malleable());
     BOOST_REQUIRE(instance.is_malleable64());
     BOOST_REQUIRE(!instance.is_malleable32());
@@ -149,7 +172,7 @@ BOOST_AUTO_TEST_CASE(block__is_malleable__64_not_32__true)
 
 BOOST_AUTO_TEST_CASE(block__is_malleable__32_not_64__true)
 {
-    const accessor instance{ header, { tx60, tx61, tx62, tx64, tx65, tx66 } };
+    const accessor instance{ header, { txs::tx60(), txs::tx61(), txs::tx62(), txs::tx64(), txs::tx65(), txs::tx66() } };
     BOOST_REQUIRE(instance.is_malleable());
     BOOST_REQUIRE(!instance.is_malleable64());
     BOOST_REQUIRE(instance.is_malleable32());
@@ -159,43 +182,43 @@ BOOST_AUTO_TEST_CASE(block__is_malleable__32_not_64__true)
 
 BOOST_AUTO_TEST_CASE(block__is_malleable32__one_64__false)
 {
-    const accessor instance{ header, { tx64 } };
+    const accessor instance{ header, { txs::tx64() } };
     BOOST_REQUIRE(!instance.is_malleable32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable32__two__false)
 {
-    const accessor instance{ header, { tx64, tx65 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx65() } };
     BOOST_REQUIRE(!instance.is_malleable32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable32__three__true)
 {
-    const accessor instance{ header, { tx64, tx65, tx66 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx65(), txs::tx66() } };
     BOOST_REQUIRE(instance.is_malleable32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable32__four__false)
 {
-    const accessor instance{ header, { tx63, tx64, tx65, tx66 } };
+    const accessor instance{ header, { txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
     BOOST_REQUIRE(!instance.is_malleable32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable32__five__true)
 {
-    const accessor instance{ header, { tx62, tx63, tx64, tx65, tx66 } };
+    const accessor instance{ header, { txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
     BOOST_REQUIRE(instance.is_malleable32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable32__six__true)
 {
-    const accessor instance{ header, { tx61, tx62, tx63, tx64, tx65, tx66 } };
+    const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
     BOOST_REQUIRE(instance.is_malleable32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable32__six_duplicates__true)
 {
-    const accessor instance{ header, { tx61, tx62, tx63, tx62, tx65, tx62 } };
+    const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx62(), txs::tx65(), txs::tx62() } };
     BOOST_REQUIRE(instance.is_malleable32());
 }
 
@@ -203,61 +226,61 @@ BOOST_AUTO_TEST_CASE(block__is_malleable32__six_duplicates__true)
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__one_64__false)
 {
-    const accessor instance{ header, { tx64 } };
+    const accessor instance{ header, { txs::tx64() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__two_distinct__false)
 {
-    const accessor instance{ header, { tx64, tx65 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx65() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__two_same__false)
 {
-    const accessor instance{ header, { tx65, tx65 } };
+    const accessor instance{ header, { txs::tx65(), txs::tx65() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__three_two_duplicated__false)
 {
-    const accessor instance{ header, { tx64, tx65, tx65 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx65(), txs::tx65() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__four_distinct__false)
 {
-    const accessor instance{ header, { tx63, tx64, tx65, tx66 } };
+    const accessor instance{ header, { txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__four_two_duplicated__false)
 {
-    const accessor instance{ header, { tx63, tx64, tx63, tx64 } };
+    const accessor instance{ header, { txs::tx63(), txs::tx64(), txs::tx63(), txs::tx64() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__five_two_duplicated__false)
 {
-    const accessor instance{ header, { tx62, tx63, tx64, tx66, tx66 } };
+    const accessor instance{ header, { txs::tx62(), txs::tx63(), txs::tx64(), txs::tx66(), txs::tx66() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__six_distinct__false)
 {
-    const accessor instance{ header, { tx61, tx62, tx63, tx64, tx65, tx66 } };
+    const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx66() } };
     BOOST_REQUIRE(!instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__six_one_duplicated__true)
 {
-    const accessor instance{ header, { tx61, tx62, tx63, tx64, tx65, tx65 } };
+    const accessor instance{ header, { txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx65() } };
     BOOST_REQUIRE(instance.is_malleated32());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleated32__eight_two_duplicated__true)
 {
-    const accessor instance{ header, { tx60, tx61, tx62, tx63, tx64, tx65, tx64, tx65 } };
+    const accessor instance{ header, { txs::tx60(), txs::tx61(), txs::tx62(), txs::tx63(), txs::tx64(), txs::tx65(), txs::tx64(), txs::tx65() } };
     BOOST_REQUIRE(instance.is_malleated32());
 }
 
@@ -265,37 +288,37 @@ BOOST_AUTO_TEST_CASE(block__is_malleated32__eight_two_duplicated__true)
 
 BOOST_AUTO_TEST_CASE(block__is_malleable64__one_64__true)
 {
-    const accessor instance{ header, { tx64 } };
+    const accessor instance{ header, { txs::tx64() } };
     BOOST_REQUIRE(instance.is_malleable64());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable64__one_65__false)
 {
-    const accessor instance{ header, { tx65 } };
+    const accessor instance{ header, { txs::tx65() } };
     BOOST_REQUIRE(!instance.is_malleable64());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable64__two_64__true)
 {
-    const accessor instance{ header, { tx64, tx64 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx64() } };
     BOOST_REQUIRE(instance.is_malleable64());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable64__two_64_65__false)
 {
-    const accessor instance{ header, { tx64, tx65 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx65() } };
     BOOST_REQUIRE(!instance.is_malleable64());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable64__three_64_65_64__false)
 {
-    const accessor instance{ header, { tx64, tx65 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx65() } };
     BOOST_REQUIRE(!instance.is_malleable64());
 }
 
 BOOST_AUTO_TEST_CASE(block__is_malleable64__three_64_64_64__true)
 {
-    const accessor instance{ header, { tx64, tx64, tx64 } };
+    const accessor instance{ header, { txs::tx64(), txs::tx64(), txs::tx64() } };
     BOOST_REQUIRE(instance.is_malleable64());
 }
 
