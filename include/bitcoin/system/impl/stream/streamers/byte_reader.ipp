@@ -24,7 +24,6 @@
 #include <istream>
 #include <limits>
 #include <memory>
-#include <memory_resource>
 #include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -41,7 +40,7 @@ template <typename IStream>
 inline typename byte_reader<IStream>::memory_allocator
 byte_reader<IStream>::default_allocator() NOEXCEPT
 {
-    return std::pmr::get_default_resource();
+    return default_arena::get();
 }
 
 // All public methods must rely on protected for stream state except validity.

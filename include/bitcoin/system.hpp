@@ -14,6 +14,8 @@
  * Maintainers: Do not include this header internal to this library.
  */
 
+#include <bitcoin/system/allocator.hpp>
+#include <bitcoin/system/arena.hpp>
 #include <bitcoin/system/boost.hpp>
 #include <bitcoin/system/constants.hpp>
 #include <bitcoin/system/constraints.hpp>
@@ -23,6 +25,7 @@
 #include <bitcoin/system/funclets.hpp>
 #include <bitcoin/system/have.hpp>
 #include <bitcoin/system/literals.hpp>
+#include <bitcoin/system/preprocessor.hpp>
 #include <bitcoin/system/settings.hpp>
 #include <bitcoin/system/typelets.hpp>
 #include <bitcoin/system/types.hpp>

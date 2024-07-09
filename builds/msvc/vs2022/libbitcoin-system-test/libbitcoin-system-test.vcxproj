@@ -70,6 +70,8 @@
     <Import Project="$(ProjectDir)$(ProjectName).props" />
   </ImportGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\allocator.cpp" />
+    <ClCompile Include="..\..\..\..\test\arena.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
       <ObjectFileName>$(IntDir)test_chain_block.obj</ObjectFileName>
     </ClCompile>

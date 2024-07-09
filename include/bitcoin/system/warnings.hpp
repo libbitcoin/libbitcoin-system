@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WARNINGS_HPP
 #define LIBBITCOIN_SYSTEM_WARNINGS_HPP
 
-#include <bitcoin/system/have.hpp>
+#include <bitcoin/system/preprocessor.hpp>
 
 #if defined(HAVE_SUPPRESSION)
 
@@ -56,6 +56,7 @@
         #define NO_IGNORE_RETURN_VALUE 6031
         #define NO_READ_OVERRUN 6385
         #define NO_WRITE_OVERRUN 6386
+        #define NO_DELETE_RAW_POINTER 26401
         #define NO_MALLOC_OR_FREE 26408
         #define NO_NEW_OR_DELETE 26409
         #define NO_UNUSED_LOCAL_SMART_PTR 26414

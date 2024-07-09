@@ -23,12 +23,8 @@
 #include <type_traits>
 #include <bitcoin/system/constants.hpp>
 
-// duplicated in define.hpp
 // RUNTIME_LITERALS may be used to exclude test evaluation (until consteval).
-#if defined(HAVE_CONSTEVAL)
-    #define CONSTEVAL consteval
-#else
-    #define CONSTEVAL constexpr
+#if !defined(HAVE_CONSTEVAL)
     #define RUNTIME_LITERALS
 #endif
 

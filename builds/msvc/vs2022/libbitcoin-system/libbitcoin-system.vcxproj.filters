@@ -234,6 +234,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\arena.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -613,6 +616,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\system.hpp">
       <Filter>include\bitcoin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\allocator.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\arena.hpp">
+      <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp">
       <Filter>include\bitcoin\system</Filter>
@@ -1051,6 +1060,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\math\sign.hpp">
       <Filter>include\bitcoin\system\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\preprocessor.hpp">
+      <Filter>include\bitcoin\system</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_10.hpp">
       <Filter>include\bitcoin\system\radix</Filter>

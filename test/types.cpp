@@ -20,15 +20,14 @@
 
 // Guard type assumptions within the codebase.
 
-
 struct base {};
 struct derived : base {};
 
 // std lib aliases
 // ----------------------------------------------------------------------------
 
-static_assert(is_same_type<std_vector<base>, std_vector<base>>);
-static_assert(is_same_type<std_array<base, 42>, std_array<base, 42>>);
+static_assert(is_same_type<std_array<base, 42>, std::array<base, 42>>);
+static_assert(is_same_type<std_vector<base>, std::vector<base, allocator<base>>>);
 
 static_assert(is_same_type<ref<base>, std::reference_wrapper<base>>);
 static_assert(!is_same_type<ref<base>, std::reference_wrapper<derived>>);

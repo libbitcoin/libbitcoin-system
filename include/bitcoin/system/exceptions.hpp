@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_EXCEPTIONS_HPP
 #define LIBBITCOIN_SYSTEM_EXCEPTIONS_HPP
 
+#include <new>
 #include <iostream>
 #include <exception>
 #include <stdexcept>
@@ -64,6 +65,10 @@ using range_exception = std::range_error;
 using ostream_exception = std::iostream::failure;
 using istream_exception = boost::program_options::invalid_option_value;
 using ifstream_exception = boost::program_options::reading_file;
+
+/// Allocation.
+using allocation_exception = std::bad_alloc;
+
 
 } // namespace libbitcoin
 

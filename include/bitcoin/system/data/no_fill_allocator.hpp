@@ -29,33 +29,33 @@ namespace system {
 
 // bit.ly/3vdbF17
 // Convert value initialization into default initialization.
-template <typename Type, typename Allocator = std::allocator<Type>>
+template <typename Value, typename Allocator = std::allocator<Value>>
 class no_fill_allocator
   : public Allocator
 {
 public:
-    template <typename T>
+    template <typename Type>
     struct rebind
     {
         // en.cppreference.com/w/cpp/memory/allocator_traits
-        using other = no_fill_allocator<T, typename
-            std::allocator_traits<Allocator>::template rebind_alloc<T>>;
+        using other = no_fill_allocator<Type, typename
+            std::allocator_traits<Allocator>::template rebind_alloc<Type>>;
     };
 
     using Allocator::Allocator;
 
-    template <typename T>
-    void construct(T* ptr) noexcept(
-        std::is_nothrow_default_constructible_v<T>)
+    template <typename Type>
+    void construct(Type* ptr) noexcept(
+        std::is_nothrow_default_constructible_v<Type>)
     {
         // en.cppreference.com/w/cpp/memory/allocator
         // Base class (std::allocator) owns memory deallocation.
         // Default fill is bypassed here.
-        ::new(static_cast<void*>(ptr)) T;
+        ::new(static_cast<void*>(ptr)) Type;
     }
 
-    template <typename T, typename ...Args>
-    void construct(T* ptr, Args&&... args) noexcept(
+    template <typename Type, typename ...Args>
+    void construct(Type* ptr, Args&&... args) noexcept(
         std::is_nothrow_default_constructible_v<Allocator>)
     {
         // Explicit fill args are forwarded to type copy constructor here.

@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <memory_resource>
 #include <utility>
 #include <vector>
 #include <bitcoin/system/define.hpp>
@@ -65,29 +64,14 @@ std::shared_ptr<std_vector<std::shared_ptr<const Type>>> to_shareds(
     return out;
 }
 
-// github.com/libbitcoin/libbitcoin-system/issues/1494
-#if defined(HAVE_XCODE)
-
-template <typename Type, typename Allocator, typename ...Args>
-std::shared_ptr<const Type> to_allocated(const Allocator&,
-    Args&&... args) NOEXCEPT
-{
-    return to_shared<const Type>(std::forward<Args>(args)...);
-}
-
-#else
-
 // Allocate a shared instance and construct with given arguments.
 template <typename Type, typename Allocator, typename ...Args>
 std::shared_ptr<const Type> to_allocated(const Allocator& allocator,
     Args&&... args) NOEXCEPT
 {
-    return std::allocate_shared<const Type,
-        std::pmr::polymorphic_allocator<const Type>>(allocator,
-            std::forward<Args>(args)...);
+    return std::allocate_shared<const Type, bc::allocator<const Type>>(
+        allocator, std::forward<Args>(args)...);
 }
-
-#endif
 
 BC_POP_WARNING()
 

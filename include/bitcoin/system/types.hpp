@@ -20,11 +20,10 @@
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
 #include <array>
-#include <memory_resource>
 #include <tuple>
 #include <type_traits>
 #include <vector>
-#include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/allocator.hpp>
 
 namespace libbitcoin {
 
@@ -37,9 +36,13 @@ template <typename Type, size_t Size>
 using std_array = std::array<Type, Size>;
 
 /// std_vector aliased to allow seamless conditional allocator usage.
+/// The default area is applied by default, so remains globally relocatable.
+/// In some cases library code requires default allocator vectors, so these
+/// are retained but are thus not usable with utilities that accept std_vector.
+/// Since string and other containers are not widely used in high performance
+/// scenarios requiring performant memory allocation, they are not specialized.
 template <typename Type>
-using std_vector = std::vector<Type,
-    std::pmr::polymorphic_allocator<Type>>;
+using std_vector = std::vector<Type, allocator<Type>>;
 
 /// Const and non-const reference wrappers.
 template <typename Type>

@@ -36,6 +36,7 @@ src_libbitcoin_system_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_CPP
 src_libbitcoin_system_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_system_la_LIBADD = ${boost_chrono_LIBS} ${boost_iostreams_LIBS} ${boost_json_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_system_la_SOURCES = \
+    src/arena.cpp \
     src/define.cpp \
     src/settings.cpp \
     src/chain/block.cpp \
@@ -204,6 +205,8 @@ test_libbitcoin_system_test_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_BUILD_
 test_libbitcoin_system_test_LDFLAGS = ${boost_LDFLAGS}
 test_libbitcoin_system_test_LDADD = src/libbitcoin-system.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_iostreams_LIBS} ${boost_json_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_system_test_SOURCES = \
+    test/allocator.cpp \
+    test/arena.cpp \
     test/constants.cpp \
     test/constraints.cpp \
     test/funclets.cpp \
@@ -419,6 +422,8 @@ include_bitcoin_HEADERS = \
 
 include_bitcoin_systemdir = ${includedir}/bitcoin/system
 include_bitcoin_system_HEADERS = \
+    include/bitcoin/system/allocator.hpp \
+    include/bitcoin/system/arena.hpp \
     include/bitcoin/system/boost.hpp \
     include/bitcoin/system/constants.hpp \
     include/bitcoin/system/constraints.hpp \
@@ -428,6 +433,7 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/funclets.hpp \
     include/bitcoin/system/have.hpp \
     include/bitcoin/system/literals.hpp \
+    include/bitcoin/system/preprocessor.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/typelets.hpp \
     include/bitcoin/system/types.hpp \
