@@ -23,35 +23,29 @@
 
 namespace libbitcoin {
 
-/// Memory arena interface, for use with our (polymorphic) allocator.
+/// Memory resource interface, for use with our (polymorphic) allocator.
+/// Strictly conforms to std::pmr::memory_resource.
 class arena
 {
 public:
-    static constexpr auto max_align = alignof(max_align_t);
     virtual ~arena() NOEXCEPT = default;
 
     /// Allocate bytes with alignment (align must be power of 2).
+    /// Throws if the requested size and alignment cannot be obtained.
     NODISCARD ALLOCATOR void* allocate(size_t bytes,
-        size_t align=max_align) THROWS
+        size_t align=alignof(max_align_t)) THROWS
     {
-        // actual allocation.
-        auto ptr = do_allocate(bytes, align);
-
-        // non-allocating placement.
-        // "The standard library implementation performs no action and returns
-        // ptr unmodified. The behavior is undefined if this function is called
-        // through a placement new expression and ptr is a null pointer."
-        return ::operator new(bytes, ptr);
+        return do_allocate(bytes, align);
     }
 
     /// Deallocate allocated bytes with alignment (align must be power of 2).
     void deallocate(void* ptr, const size_t bytes,
-        size_t align=max_align) NOEXCEPT
+        size_t align=alignof(max_align_t)) NOEXCEPT
     {
         return do_deallocate(ptr, bytes, align);
     }
 
-    /// Other can deallocate memory allocated by this.
+    /// Other can deallocate memory allocated by this and vice versa.
     NODISCARD bool is_equal(const arena& other) const NOEXCEPT
     {
         return do_is_equal(other);
@@ -62,6 +56,9 @@ private:
     virtual void do_deallocate(void* ptr, size_t bytes, size_t align) NOEXCEPT = 0;
     virtual bool do_is_equal(const arena& other) const NOEXCEPT = 0;
 };
+
+/// Left can deallocate memory allocated by right and vice versa.
+bool operator==(const arena& left, const arena& right) NOEXCEPT;
 
 /// ***************************************************************************
 /// BE AWARE of the risks of memory relocation. Generally speaking a custom
