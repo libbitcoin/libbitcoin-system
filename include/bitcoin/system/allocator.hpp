@@ -31,14 +31,19 @@
 namespace libbitcoin {
 
 /// No-default-fill polymorphic allocator.
+/// Strictly conforms to std::pmr::polymorphic_allocator.
+/// Does not default to std::pmr::get_default_resource() but
+/// default_arena::get() exposes the same underlying global default allocators.
 template <class Value = uint8_t>
 class allocator
 {
 public:
     template <class>
     friend class allocator;
-
     using value_type = Value;
+
+    /// construct/assign
+    /// -----------------------------------------------------------------------
 
     template <class Type>
     allocator(const allocator<Type>& other) NOEXCEPT
@@ -51,27 +56,20 @@ public:
     {
     }
 
-    allocator(arena* const value) NOEXCEPT
+    allocator(arena* value) NOEXCEPT
       : arena_{ value }
     {
     }
 
+    allocator(const allocator&) = default;
     allocator& operator=(const allocator&) = delete;
 
-    NODISCARD ALLOCATOR Value* allocate(size_t count)
-    {
-        const auto bytes = get_byte_size<sizeof(Value)>(count);
-        return static_cast<Value*>(arena_->allocate(bytes, alignof(Value)));
-    }
-
-    void deallocate(Value* ptr, size_t count) NOEXCEPT
-    {
-        // No need to verify multiplication overflow.
-        arena_->deallocate(ptr, count * sizeof(Value), alignof(Value));
-    }
+    /// allocate_bytes/deallocate_bytes
+    /// -----------------------------------------------------------------------
+    /// These allocate/deallocate bytes, without consideration of other types.
 
     NODISCARD ALLOCATOR void* allocate_bytes(size_t bytes,
-        size_t align=alignof(max_align_t))
+        size_t align=alignof(max_align_t)) THROWS
     {
         return arena_->allocate(bytes, align);
     }
@@ -82,8 +80,12 @@ public:
         arena_->deallocate(ptr, bytes, align);
     }
 
+    /// allocate_object/deallocate_object
+    /// -----------------------------------------------------------------------
+    /// These allocate/deallocate bytes of Type size, for count of Type.
+
     template <class Type>
-    NODISCARD ALLOCATOR Type* allocate_object(size_t count=1)
+    NODISCARD ALLOCATOR Type* allocate_object(size_t count=1) THROWS
     {
         const auto bytes = get_byte_size<sizeof(Type)>(count);
         return static_cast<Type*>(allocate_bytes(bytes, alignof(Type)));
@@ -95,20 +97,31 @@ public:
         deallocate_bytes(ptr, count * sizeof(Type), alignof(Type));
     }
 
-    ////template <class Type>
-    ////NODISCARD ALLOCATOR Type* new_object()
-    ////{
-    ////    // Default construction fill is bypassed here.
-    ////    return allocate_object<Type>();
-    ////}
+    /// allocate/deallocate
+    /// -----------------------------------------------------------------------
+    /// These allocate/deallocate bytes of Value size, for count of Value.
 
-    template <class Type, class... Args>
-    NODISCARD ALLOCATOR Type* new_object(Args&&... args)
+    NODISCARD ALLOCATOR Value* allocate(size_t count) THROWS
+    {
+        return allocate_object<Value>(count);
+    }
+
+    void deallocate(Value* ptr, size_t count) NOEXCEPT
+    {
+        return deallocate_object<Value>(ptr, count);
+    }
+
+    /// new_object/delete_object
+    /// -----------------------------------------------------------------------
+    /// These allocate & construct / destruct & deallocate.
+
+    template <class Type, class ...Args>
+    NODISCARD ALLOCATOR Type* new_object(Args&&... args) THROWS
     {
         // construct_guard ensures deallocation if construct exception.
         auto ptr = allocate_object<Type>();
         construct_guard<Type> guard{ arena_, ptr };
-        construct(ptr, std::forward<Args>(args)...);
+        construct<Type>(ptr, std::forward<Args>(args)...);
         guard.arena_ = nullptr;
         return ptr;
     }
@@ -116,33 +129,73 @@ public:
     template <class Type>
     void delete_object(Type* ptr) NOEXCEPT
     {
-        destroy_in_place(*ptr);
+        destroy<Type>(ptr);
         deallocate_object(ptr);
     }
 
-    ////template <class Type>
-    ////void construct(Type*) NOEXCEPT
-    ////{
-    ////    // Default construction fill is bypassed here.
-    ////}
+    /// construct/destroy
+    /// -----------------------------------------------------------------------
+    /// These neither allocate nor deallocate.
 
-    template <class Type, class... Args>
-    void construct(Type* ptr, Args&&... arguments)
+    // Clang is not yet C++20 compliant in terms of aggregate initialization.
+    // See [reviews.llvm.org/D140327] for details, resolved in future releases.
+    template <class Type, class ...Args>
+    void construct(Type* ptr, Args&&... arguments) THROWS
     {
+        BC_PUSH_WARNING(NO_IMPLICIT_CONVERTABLE_CAST)
+        auto at = const_cast<void*>(static_cast<const volatile void*>(ptr));
+        BC_POP_WARNING()
+
         std::apply
         (
-            [ptr](auto&&... args)
+            // std::apply forwards second argument (tuple) as args to lambda.
+            [at](auto&&... args)
             {
-                return ::new(
-                    const_cast<void*>(static_cast<const volatile void*>(ptr)))
-                    Type(std::forward<decltype(args)>(args)...);
+                BC_PUSH_WARNING(NO_ARRAY_TO_POINTER_DECAY)
+                BC_PUSH_WARNING(NO_RETURN_MOVEABLE_HEAP_OBJECT)
+
+                // Construct Type(...) in previously-allocated address 'at'.
+                return ::new(at) Type(std::forward<decltype(args)>(args)...);
+
+                BC_POP_WARNING()
+                BC_POP_WARNING()
             },
+
+            // std::uses_allocator_construction_args merges *this as last arg
+            // if exists Type(..., const Alloc& alloc), otherwise forwards args.
             std::uses_allocator_construction_args<Type>(*this,
                 std::forward<Args>(arguments)...)
         );
     }
 
-    // Container copy results in default arena!!!
+    // www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2875r0.pdf
+    // To become undeprecated in C++26 (which basically means it is not now).
+    template <class Type>
+    void destroy(Type* ptr) NOEXCEPT
+    {
+        if constexpr (std::is_array_v<Type>)
+        {
+            using element = std::iter_value_t<Type>;
+            if constexpr (!std::is_trivially_destructible_v<element>)
+            {
+                const auto last = *ptr + std::extent_v<Type>;
+                for (auto first = *ptr; first != last; ++first)
+                {
+                    // Recurse until non-array or trivially destructible.
+                    destroy(first);
+                }
+            }
+        }
+        else
+        {
+            ptr->~Type();
+        }
+    }
+
+    /// other
+    /// -----------------------------------------------------------------------
+
+    // polymorphic allocators do not propagate on container copy construction!
     allocator select_on_container_copy_construction() const NOEXCEPT
     {
         return {};
@@ -151,14 +204,6 @@ public:
     NODISCARD arena* resource() const NOEXCEPT
     {
         return arena_;
-    }
-
-    // To become undeprecated in C++26.
-    // www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2875r0.pdf
-    template <class Type>
-    DEPRECATED void destroy(Type* ptr) NOEXCEPT
-    {
-        destroy_in_place(*ptr);
     }
 
     friend bool operator==(const allocator& left,
@@ -190,39 +235,23 @@ protected:
         if constexpr (Size > 1u)
         {
             if (count > (std::numeric_limits<size_t>::max() / Size))
-                throw overflow_exception("allocation overflow");
+                throw bad_array_new_length();
         }
 
         return count * Size;
     }
 
-    template <class Type>
-    constexpr void destroy_in_place(Type& object_) NOEXCEPT
-    {
-        if constexpr (std::is_array_v<Type>)
-        {
-            destroy_range(object_, object_ + std::extent_v<Type>);
-        }
-        else
-        {
-            object_.~Type();
-        }
-    }
-
-    template <class First, class Last>
-    constexpr void destroy_range(First first, const Last last) NOEXCEPT
-    {
-        using element = std::iter_value_t<First>;
-
-        // Optimization for debug mode, in release mode this is removed.
-        if constexpr (!std::is_trivially_destructible_v<element>)
-            for (; first != last; ++first)
-                destroy_in_place(*first);
-    }
-
 private:
     arena* arena_;
 };
+
+/// Same as friend equality but allows conversion to allocator.
+template<class Left, class Right>
+inline bool operator==(const allocator<Left>& left,
+    const allocator<Right>& right) NOEXCEPT
+{
+    return left == right;
+}
 
 } // namespace libbitcoin
 

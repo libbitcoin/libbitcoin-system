@@ -22,6 +22,11 @@ namespace libbitcoin {
 
 BC_PUSH_WARNING(NO_NEW_OR_DELETE)
 
+bool operator==(const arena& left, const arena& right) NOEXCEPT
+{
+    return &left == &right || left.is_equal(right);
+}
+
 void* default_arena::do_allocate(size_t bytes, size_t) THROWS
 {
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)

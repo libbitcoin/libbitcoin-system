@@ -67,7 +67,8 @@ using istream_exception = boost::program_options::invalid_option_value;
 using ifstream_exception = boost::program_options::reading_file;
 
 /// Allocation.
-using allocation_exception = std::bad_alloc;
+////using allocation_exception = std::bad_alloc;
+using bad_array_new_length = std::bad_array_new_length;
 
 
 } // namespace libbitcoin

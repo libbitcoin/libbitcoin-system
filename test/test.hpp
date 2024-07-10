@@ -145,16 +145,16 @@ private:
     void do_deallocate(void* ptr, size_t bytes, size_t) NOEXCEPT override
     {
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-        ::operator delete(ptr, &bytes);
+        ::operator delete(ptr);
         BC_POP_WARNING()
         report(ptr, bytes, false);
         ++dec_count;
         dec_bytes += bytes;
     }
 
-    bool do_is_equal(const arena&) const NOEXCEPT override
+    bool do_is_equal(const arena& other) const NOEXCEPT override
     {
-        return true;
+        return &other == this;
     }
 
     void report(void* ptr, size_t bytes, bool allocate) const NOEXCEPT
@@ -170,6 +170,39 @@ private:
             BC_POP_WARNING()
             BC_POP_WARNING()
         }
+    }
+};
+
+class mock_arena
+  : public arena
+{
+public:
+    size_t do_allocate_bytes{};
+    size_t do_allocate_align{};
+    void* do_deallocate_ptr{};
+    size_t do_deallocate_bytes{};
+    size_t do_deallocate_align{};
+    mutable const arena* do_is_equal_address{};
+
+private:
+    void* do_allocate(size_t bytes, size_t align) THROWS override
+    {
+        do_allocate_bytes = bytes;
+        do_allocate_align = align;
+        return this;
+    }
+
+    void do_deallocate(void* ptr, size_t bytes, size_t align) NOEXCEPT override
+    {
+        do_deallocate_ptr = ptr;
+        do_deallocate_bytes = bytes;
+        do_deallocate_align = align;
+    }
+
+    bool do_is_equal(const arena& other) const NOEXCEPT override
+    {
+        do_is_equal_address = &other;
+        return false;
     }
 };
 
