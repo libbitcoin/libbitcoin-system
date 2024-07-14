@@ -20,7 +20,7 @@
 
 BOOST_AUTO_TEST_SUITE(allocator_tests)
 
-// Doing some low level stuff we should'nt normally do.
+// Doing some low level stuff we shouldn't normally do.
 BC_PUSH_WARNING(NO_NEW_OR_DELETE)
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_DELETE_RAW_POINTER)
