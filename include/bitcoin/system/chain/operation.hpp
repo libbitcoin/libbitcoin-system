@@ -158,6 +158,27 @@ private:
     friend class script;
     static bool count_op(reader& source) NOEXCEPT;
 
+    inline bool data_empty() const NOEXCEPT
+    {
+        return !data_ || data_->empty();
+    }
+
+    inline size_t data_size() const NOEXCEPT
+    {
+        return data_ ? data_->size() : zero;
+    }
+
+    inline const data_chunk& get_data() const NOEXCEPT
+    {
+        return data_ ? *data_ : no_data();
+    }
+
+    inline const chunk_cptr& get_data_cptr() const NOEXCEPT
+    {
+        return data_ ? data_ : no_data_cptr();
+    }
+
+    void assign_data(reader& source) NOEXCEPT;
     static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,
         bool minimal) NOEXCEPT;
@@ -165,8 +186,9 @@ private:
     // TODO: move to config serialization wrapper.
     static operation from_string(const std::string& mnemonic) NOEXCEPT;
 
-    static chunk_cptr no_data_ptr() NOEXCEPT;
-    static chunk_cptr any_data_ptr() NOEXCEPT;
+    static const data_chunk& no_data() NOEXCEPT;
+    static const chunk_cptr& no_data_cptr() NOEXCEPT;
+    static const chunk_cptr& any_data_cptr() NOEXCEPT;
     static uint32_t read_data_size(opcode code, reader& source) NOEXCEPT;
 
     static inline opcode opcode_from_data(const data_chunk& push_data,
