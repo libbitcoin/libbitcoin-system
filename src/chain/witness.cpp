@@ -98,13 +98,15 @@ witness::witness(std::istream& stream, bool prefix) NOEXCEPT
 }
 
 witness::witness(reader&& source, bool prefix) NOEXCEPT
-  : witness(from_data(source, prefix))
+  : witness(source, prefix/*from_data(source, prefix)*/)
 {
 }
 
 witness::witness(reader& source, bool prefix) NOEXCEPT
-  : witness(from_data(source, prefix))
+////: witness(from_data(source, prefix))
+  : stack_(source.arena())
 {
+    assign_data(source, prefix);
 }
 
 witness::witness(const std::string& mnemonic) NOEXCEPT
@@ -162,36 +164,41 @@ void witness::skip(reader& source, bool prefix) NOEXCEPT
     }
 }
 
-static data_chunk read_element(reader& source) NOEXCEPT
+// private
+void witness::assign_data(reader& source, bool prefix) NOEXCEPT
 {
-    // Each witness encoded as variable integer prefixed byte array (bip144).
-    return source.read_bytes(source.read_size(max_block_weight));
-}
-
-// static/private
-witness witness::from_data(reader& source, bool prefix) NOEXCEPT
-{
-    size_t size{};
-    chunk_cptrs stack{};
+    size_ = zero;
+    const auto& allocator = source.allocator();
+    ////allocator.destroy<chunk_cptrs>(&stack_);
+    ////allocator.construct<chunk_cptrs>(&stack_);
 
     if (prefix)
     {
-        const auto capacity = source.read_size(max_block_weight);
-        stack.reserve(capacity);
+        const auto count = source.read_size(max_block_weight);
+        stack_.reserve(count);
 
-        for (size_t element = 0; element < capacity; ++element)
+        for (size_t element = 0; element < count; ++element)
         {
-            stack.push_back(to_shared<data_chunk>(read_element(source)));
-            size = element_size(size, stack.back());
+            const auto size = source.read_size(max_block_weight);
+            stack_.emplace_back(
+                source.read_bytes_raw(size),
+                allocator.deleter<data_chunk>(source.arena()));
+            size_ = element_size(size_, stack_.back());
         }
     }
     else
     {
         while (!source.is_exhausted())
-            stack.push_back(to_shared<data_chunk>(read_element(source)));
+        {
+            const auto size = source.read_size(max_block_weight);
+            stack_.emplace_back(
+                source.read_bytes_raw(size),
+                allocator.deleter<data_chunk>(source.arena()));
+            size_ = element_size(size_, stack_.back());
+        }
     }
 
-    return { stack, source, size };
+    valid_ = source;
 }
 
 inline bool is_push_token(const std::string& token) NOEXCEPT

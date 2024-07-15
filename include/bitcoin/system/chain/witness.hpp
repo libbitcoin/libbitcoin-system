@@ -124,9 +124,11 @@ protected:
     witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT;
 
 private:
+    void assign_data(reader& source, bool prefix) NOEXCEPT;
+    ////static witness from_data(reader& source, bool prefix) NOEXCEPT;
+
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    static witness from_data(reader& source, bool prefix) NOEXCEPT;
     
     BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
     BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
