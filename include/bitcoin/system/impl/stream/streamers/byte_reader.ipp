@@ -34,13 +34,17 @@
 
 namespace libbitcoin {
 namespace system {
+    
+// Suppress istream members and allocator may throw inside NOEXCEPT.
+// The intended behavior in this case is program abort.
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // private/static
 template <typename IStream>
-inline typename byte_reader<IStream>::memory_allocator
-byte_reader<IStream>::default_allocator() NOEXCEPT
+inline typename byte_reader<IStream>::memory_arena
+byte_reader<IStream>::default_arena() NOEXCEPT
 {
-    return default_arena::get();
+    return bc::default_arena::get();
 }
 
 // All public methods must rely on protected for stream state except validity.
@@ -50,10 +54,10 @@ byte_reader<IStream>::default_allocator() NOEXCEPT
 
 template <typename IStream>
 byte_reader<IStream>::byte_reader(IStream& source,
-    const memory_allocator& allocator) NOEXCEPT
+    const memory_arena& arena) NOEXCEPT
   : stream_(source),
     remaining_(system::maximum<size_t>),
-    allocator_(allocator)
+    allocator_(arena)
 {
     ////BC_ASSERT_MSG(stream_.exceptions() == IStream::goodbit,
     ////    "Input stream must not be configured to throw exceptions.");
@@ -256,21 +260,19 @@ data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
     if (!valid())
         return {};
 
-    const auto cptr = to_allocated<data_array<Size>>(allocator_);
+    const auto cptr = to_allocated<data_array<Size>>(arena());
     if (!cptr)
     {
         invalidate();
         return cptr;
     }
 
-    // Guarded above.
-    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-    const auto ptr = to_non_const_raw_ptr(cptr);
-    BC_POP_WARNING()
-
     // Truncated bytes are populated with 0x00.
     // Reader supports directly populating an array, this avoids a copy.
-    do_read_bytes(ptr->data(), Size);
+    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+    do_read_bytes(to_non_const_raw_ptr(cptr)->data(), Size);
+    BC_POP_WARNING()
+
     if (!valid())
         return {};
 
@@ -397,7 +399,8 @@ chunk_cptr byte_reader<IStream>::read_bytes_cptr(size_t size) NOEXCEPT
     if (!valid())
         return {};
 
-    const auto cptr = to_allocated<data_chunk>(allocator_, size);
+    // TODO: bypass vector byte fill.
+    const auto cptr = to_allocated<data_chunk>(arena(), size);
     if (!cptr)
     {
         invalidate();
@@ -407,15 +410,43 @@ chunk_cptr byte_reader<IStream>::read_bytes_cptr(size_t size) NOEXCEPT
     if (is_zero(size))
         return cptr;
 
+    // Guarded above.
     BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-    const auto ptr = const_cast<data_chunk*>(cptr.get());
+    do_read_bytes(to_non_const_raw_ptr(cptr)->data(), size);
     BC_POP_WARNING()
 
-    do_read_bytes(ptr->data(), size);
     if (!valid())
         return {};
 
     return cptr;
+}
+
+template <typename IStream>
+data_chunk* byte_reader<IStream>::read_bytes_raw(size_t size) NOEXCEPT
+{
+    // This allows caller to read an invalid stream without allocation.
+    if (!valid())
+        return nullptr;
+
+    // TODO: bypass vector byte fill.
+    const auto raw = allocator_.new_object<data_chunk>(size);
+    if (raw == nullptr)
+    {
+        invalidate();
+        return raw;
+    }
+
+    if (is_zero(size))
+        return raw;
+
+    do_read_bytes(raw->data(), size);
+    if (!valid())
+    {
+        allocator_.delete_object<data_chunk>(raw);
+        return nullptr;
+    }
+
+    return raw;
 }
 
 template <typename IStream>
@@ -577,7 +608,14 @@ bool byte_reader<IStream>::operator!() const NOEXCEPT
 }
 
 template <typename IStream>
-const typename byte_reader<IStream>::memory_allocator&
+typename byte_reader<IStream>::memory_arena
+byte_reader<IStream>::arena() const NOEXCEPT
+{
+    return allocator_.resource();
+}
+
+template <typename IStream>
+typename byte_reader<IStream>::memory_allocator&
 byte_reader<IStream>::allocator() const NOEXCEPT
 {
     return allocator_;
@@ -586,10 +624,6 @@ byte_reader<IStream>::allocator() const NOEXCEPT
 // protected virtual
 // ----------------------------------------------------------------------------
 // These may only call non-virtual (private) methods (due to overriding).
-
-// Suppress istream members may throw inside NOEXCEPT.
-// The intended behavior in this case is program abort.
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek_byte() NOEXCEPT

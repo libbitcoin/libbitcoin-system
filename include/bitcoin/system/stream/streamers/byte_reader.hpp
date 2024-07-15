@@ -41,7 +41,7 @@ public:
 
     /// Constructors.
     byte_reader(IStream& source,
-        const memory_allocator& allocator=default_allocator()) NOEXCEPT;
+        const memory_arena& arena=default_arena()) NOEXCEPT;
 
     /// Integrals.
     /// -----------------------------------------------------------------------
@@ -118,15 +118,17 @@ public:
 
     /// Bytes Vectors.
     /// -----------------------------------------------------------------------
-    /// cptr overrides return nullptr if reader is or becomes invalid.
+    /// cptr/raw overrides return nullptr if reader is or becomes invalid.
+    /// Non-null raw return must be destroyed using reader's allocator/arena.
 
     /// Read all remaining bytes to chunk.
     data_chunk read_bytes() NOEXCEPT override;
     chunk_cptr read_bytes_cptr() NOEXCEPT override;
 
-    /// Read size bytes to chunk, return size is guaranteed.
+    /// Read size bytes to data_chunk, return size is guaranteed.
     data_chunk read_bytes(size_t size) NOEXCEPT override;
     chunk_cptr read_bytes_cptr(size_t size) NOEXCEPT override;
+    NODISCARD data_chunk* read_bytes_raw(size_t size) NOEXCEPT override;
 
     /// Read size bytes to buffer, return size is guaranteed.
     void read_bytes(uint8_t* buffer, size_t size) NOEXCEPT override;
@@ -177,8 +179,11 @@ public:
     /// Invalidate the stream.
     void invalidate() NOEXCEPT override;
 
-    /// Memory allocator used to populate vectors.
-    const memory_allocator& allocator() const NOEXCEPT override;
+    /// Memory resource used to populate vectors.
+    memory_arena arena() const NOEXCEPT override;
+
+    /// Memory allocator used to construct objects.
+    memory_allocator& allocator() const NOEXCEPT override;
 
     /// The stream is valid.
     operator bool() const NOEXCEPT override;
@@ -202,7 +207,7 @@ protected:
     virtual bool get_exhausted() const NOEXCEPT;
 
 private:
-    static inline memory_allocator default_allocator() NOEXCEPT;
+    static inline memory_arena default_arena() NOEXCEPT;
 
     bool valid() const NOEXCEPT;
     void invalid() NOEXCEPT;
@@ -215,7 +220,7 @@ private:
 
     IStream& stream_;
     size_t remaining_;
-    memory_allocator allocator_;
+    mutable memory_allocator allocator_;
 };
 
 } // namespace system

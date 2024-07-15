@@ -171,7 +171,7 @@ public:
     // www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2875r0.pdf
     // To become undeprecated in C++26 (which basically means it is not now).
     template <class Type>
-    void destroy(Type* ptr) NOEXCEPT
+    static void destroy(Type* ptr) NOEXCEPT
     {
         if constexpr (std::is_array_v<Type>)
         {
@@ -190,6 +190,20 @@ public:
         {
             ptr->~Type();
         }
+    }
+
+    /// Utility for passing deleted to shared pointer construction.
+    template <typename Type>
+    static auto deleter(arena* arena) NOEXCEPT
+    {
+        return [arena](Type* ptr) NOEXCEPT
+        {
+            if (ptr != nullptr)
+            {
+                allocator<Type>::destroy(ptr);
+                arena->deallocate(ptr, sizeof(Type), alignof(Type));
+            }
+        };
     }
 
     /// other

@@ -28,19 +28,20 @@ BOOST_AUTO_TEST_CASE(byte_reader__construct__default__default_resource)
     const data_chunk data{};
     stream::in::fast stream(data);
     read::bytes::fast source(stream);
-    BOOST_REQUIRE_EQUAL(source.allocator(), test::get_default_resource());
+    BOOST_REQUIRE_EQUAL(source.arena(), test::get_default_resource());
+    BOOST_REQUIRE_EQUAL(source.arena(), source.allocator().resource());
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__construct__allocator__assigned_resource)
+BOOST_AUTO_TEST_CASE(byte_reader__construct__arena__assigned_resource)
 {
     const data_chunk data{};
     stream::in::fast stream(data);
-    auto resource = test::get_test_resource<false>();
-    read::bytes::fast source(stream, resource);
-    BOOST_REQUIRE_EQUAL(source.allocator(), resource);
+    auto arena = test::get_test_resource<false>();
+    read::bytes::fast source(stream, arena);
+    BOOST_REQUIRE_EQUAL(source.arena(), arena);
 }
 
-BOOST_AUTO_TEST_CASE(byte_reader__constructor__allocating_reader__success)
+BOOST_AUTO_TEST_CASE(byte_reader__constructor__arena_reader__success)
 {
     const auto genesis = settings(chain::selection::mainnet).genesis_block;
     const auto data = genesis.to_data(true);
@@ -1404,6 +1405,73 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_cptr1__past_end__expected_invalid)
     std::istringstream stream{ "abc" };
     read::bytes::istream reader(stream);
     BOOST_REQUIRE(!reader.read_bytes_cptr(6));
+    BOOST_REQUIRE(!reader);
+}
+
+// read_bytes_raw1
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__invalid__nullptr_invalid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.invalidate();
+    BOOST_REQUIRE(is_null(reader.read_bytes_raw(0)));
+    BOOST_REQUIRE(!reader);
+}
+
+// A pointer is returned, undefined behavior to dereference it, must destroy.
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__empty_zero__not_null_valid)
+{
+    std::istringstream stream;
+    read::bytes::istream reader(stream);
+    const auto ptr = reader.read_bytes_raw(0);
+    BOOST_REQUIRE(ptr != nullptr);
+    BOOST_REQUIRE(reader);
+    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+}
+
+// A pointer is returned, undefined behavior to dereference it, must destroy.
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__end_zero__not_null_valid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    reader.skip_bytes(3);
+    const auto ptr = reader.read_bytes_raw(0);
+    BOOST_REQUIRE(ptr != nullptr);
+    BOOST_REQUIRE(reader);
+    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__to_end__expected)
+{
+    std::istringstream stream{ "*abc" };
+    read::bytes::istream reader(stream);
+    reader.skip_byte();
+    const auto ptr = reader.read_bytes_raw(3);
+    BOOST_REQUIRE(ptr != nullptr);
+    BOOST_REQUIRE_EQUAL(*ptr, to_chunk("abc"));
+    BOOST_REQUIRE(reader);
+    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__middle__expected)
+{
+    std::istringstream stream{ "*abc*" };
+    read::bytes::istream reader(stream);
+    reader.skip_byte();
+    const auto ptr = reader.read_bytes_raw(3);
+    BOOST_REQUIRE(ptr != nullptr);
+    BOOST_REQUIRE_EQUAL(*ptr, to_chunk("abc"));
+    BOOST_REQUIRE_EQUAL(stream.get(), '*');
+    BOOST_REQUIRE(reader);
+    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+}
+
+BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__past_end__nullptr_invalid)
+{
+    std::istringstream stream{ "abc" };
+    read::bytes::istream reader(stream);
+    BOOST_REQUIRE(is_null(reader.read_bytes_raw(6)));
     BOOST_REQUIRE(!reader);
 }
 
