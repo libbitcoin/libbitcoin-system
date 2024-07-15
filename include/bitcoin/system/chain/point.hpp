@@ -93,7 +93,8 @@ protected:
     point(const hash_digest& hash, uint32_t index, bool valid) NOEXCEPT;
 
 private:
-    static point from_data(reader& source) NOEXCEPT;
+    void assign_data(reader& source) NOEXCEPT;
+    ////static point from_data(reader& source) NOEXCEPT;
 
     // The index is consensus-serialized as a fixed 4 bytes, however it is
     // effectively bound to 2^17 by the block byte size limit.

@@ -172,9 +172,11 @@ protected:
         size_t size) NOEXCEPT;
 
 private:
+    void assign_data(reader& source, bool prefix) NOEXCEPT;
+    ////static script from_data(reader& source, bool prefix) NOEXCEPT;
+
     // TODO: move to config serialization wrapper.
     static script from_string(const std::string& mnemonic) NOEXCEPT;
-    static script from_data(reader& source, bool prefix) NOEXCEPT;
 
     static size_t op_count(reader& source) NOEXCEPT;
     static size_t serialized_size(const operations& ops) NOEXCEPT;

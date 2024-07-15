@@ -138,13 +138,15 @@ script::script(std::istream& stream, bool prefix) NOEXCEPT
 }
 
 script::script(reader&& source, bool prefix) NOEXCEPT
-  : script(from_data(source, prefix))
+  : script(source, prefix/*from_data(source, prefix)*/)
 {
 }
 
 script::script(reader& source, bool prefix) NOEXCEPT
-  : script(from_data(source, prefix))
+////: script(from_data(source, prefix))
+  : ops_(source.arena())
 {
+    assign_data(source, prefix);
 }
 
 script::script(const std::string& mnemonic) NOEXCEPT
@@ -238,11 +240,11 @@ size_t script::op_count(reader& source) NOEXCEPT
     return count;
 }
 
-// static/private
-script script::from_data(reader& source, bool prefix) NOEXCEPT
+// private
+void script::assign_data(reader& source, bool prefix) NOEXCEPT
 {
-    auto expected = zero;
-    auto prefail = false;
+    size_t expected{};
+    prefail_ = false;
 
     if (prefix)
     {
@@ -250,26 +252,29 @@ script script::from_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit(expected);
     }
 
-    operations ops{};
-    ops.reserve(op_count(source));
+    ////auto& allocator = source.allocator();
+    ////allocator.destroy<operations>(&ops_);
+    ////allocator.construct<operations>(&ops_);
+    ops_.reserve(op_count(source));
     const auto start = source.get_read_position();
 
     while (!source.is_exhausted())
     {
-        ops.emplace_back(source);
-        prefail |= ops.back().is_invalid();
+        ops_.emplace_back(source);
+        prefail_ |= ops_.back().is_invalid();
     }
 
-    const auto size = source.get_read_position() - start;
+    size_ = source.get_read_position() - start;
 
     if (prefix)
     {
         source.set_limit();
-        if (size != expected)
+        if (size_ != expected)
             source.invalidate();
     }
 
-    return { std::move(ops), source, prefail, size };
+    valid_ = source;
+    offset = ops_.begin();
 }
 
 // static/private
