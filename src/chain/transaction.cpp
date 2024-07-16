@@ -161,13 +161,21 @@ transaction::transaction(std::istream& stream, bool witness) NOEXCEPT
 }
 
 transaction::transaction(reader&& source, bool witness) NOEXCEPT
-  : transaction(from_data(source, witness))
+  : transaction(source, witness/*from_data(source, witness)*/)
 {
 }
 
 transaction::transaction(reader& source, bool witness) NOEXCEPT
-  : transaction(from_data(source, witness))
+////: transaction(from_data(source, witness))
+  : version_(source.read_4_bytes_little_endian()),
+    inputs_(
+        source.get_allocator().new_object<input_cptrs>(),
+        source.get_allocator().deleter<input_cptrs>(source.get_arena())),
+    outputs_(
+        source.get_allocator().new_object<output_cptrs>(),
+        source.get_allocator().deleter<output_cptrs>(source.get_arena()))
 {
+    assign_data(source, witness);
 }
 
 // protected
@@ -242,67 +250,156 @@ bool transaction::operator!=(const transaction& other) const NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-template<class Put, class Source>
-std::shared_ptr<const std_vector<std::shared_ptr<const Put>>>
-read_puts(Source& source) NOEXCEPT
+////template<class Put, class Source>
+////std::shared_ptr<const std_vector<std::shared_ptr<const Put>>>
+////read_puts(Source& source) NOEXCEPT
+////{
+////    // Allocate arena cputs shared_ptr and std_vector(captures arena).
+////    using puts_type = std_vector<std::shared_ptr<const Put>>;
+////    auto cputs = to_allocated<puts_type>(source.get_arena());
+////
+////    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+////    auto puts = to_non_const_raw_ptr(cputs);
+////    BC_POP_WARNING()
+////
+////    // Allocate cputs capacity(uses arena).
+////    const auto capacity = source.read_size(max_block_size);
+////    puts->reserve(capacity);
+////
+////    // Allocate each shared_ptr<put> and move ptr to reservation.
+////    // Each put is constructed in place as allocated by/with its pointer.
+////    for (size_t put = 0; put < capacity; ++put)
+////        puts->push_back(to_allocated<Put>(source.get_arena(), source));
+////
+////    return cputs;
+////}
+////
+////// static/private
+////transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
+////{
+////    const auto version = source.read_4_bytes_little_endian();
+////    auto inputs = read_puts<input>(source);
+////    chain::outputs_cptr outputs;
+////
+////    // Expensive repeated recomputation, so cache segregated state.
+////    const auto segregated = inputs->size() == witness_marker &&
+////        source.peek_byte() == witness_enabled;
+////
+////    // Detect witness as no inputs (marker) and expected flag (bip144).
+////    if (segregated)
+////    {
+////        // Skip over the peeked witness flag.
+////        source.skip_byte();
+////
+////        // Inputs and outputs are constructed on a vector of const pointers.
+////        inputs = read_puts<input>(source);
+////        outputs = read_puts<output>(source);
+////
+////        // Read or skip witnesses as specified.
+////        if (witness)
+////        {
+////            for (auto& input: *inputs)
+////            {
+////                BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+////                to_non_const_raw_ptr(input)->set_witness(source);
+////                BC_POP_WARNING()
+////            }
+////        }
+////        else
+////        {
+////            for (size_t in = 0; in < inputs->size(); ++in)
+////                witness::skip(source, true);
+////        }
+////    }
+////    else
+////    {
+////        // Default witness is populated on input construct.
+////        outputs = read_puts<const output>(source);
+////    }
+////
+////    const auto locktime = source.read_4_bytes_little_endian();
+////    return { version, inputs, outputs, locktime, segregated, source };
+////}
+
+// private
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
+void transaction::assign_data(reader& source, bool witness) NOEXCEPT
 {
-    auto puts = to_shared<std_vector<std::shared_ptr<const Put>>>();
-    const auto capacity = source.read_size(max_block_size);
+    auto& allocator = source.get_allocator();
 
-    puts->reserve(capacity);
-    for (auto put = zero; put < capacity; ++put)
-        puts->push_back(to_shared<Put>(source));
+    ////allocator.construct<inputs_cptr>(&inputs_,
+    ////    allocator.new_object<input_cptrs>(),
+    ////    allocator.deleter<input_cptrs>(source.get_arena()));
+    ////
+    ////allocator.construct<outputs_cptr>(&outputs_,
+    ////    allocator.new_object<output_cptrs>(),
+    ////    allocator.deleter<output_cptrs>(source.get_arena()));
+    ////
+    ////version_ = source.read_4_bytes_little_endian();
 
-    // This is a pointer copy (non-const to const).
-    return puts;
-}
-
-// static/private
-transaction transaction::from_data(reader& source, bool witness) NOEXCEPT
-{
-    const auto version = source.read_4_bytes_little_endian();
-
-    // Inputs must be non-const so that they may assign the witness.
-    auto inputs = read_puts<input>(source);
-    chain::outputs_cptr outputs;
+    auto ins = to_non_const_raw_ptr(inputs_);
+    auto count = source.read_size(max_block_size);
+    ins->reserve(count);
+    for (size_t in = 0; in < count; ++in)
+        ins->emplace_back(
+            allocator.new_object<input>(source),
+            allocator.deleter<input>(source.get_arena()));
 
     // Expensive repeated recomputation, so cache segregated state.
-    const auto segregated = inputs->size() == witness_marker &&
+    // Detect witness as no inputs (marker) and expected flag (bip144).
+    segregated_ = 
+        inputs_->size() == witness_marker &&
         source.peek_byte() == witness_enabled;
 
-    // Detect witness as no inputs (marker) and expected flag (bip144).
-    if (segregated)
+    if (segregated_)
     {
         // Skip over the peeked witness flag.
         source.skip_byte();
 
-        // Inputs and outputs are constructed on a vector of const pointers.
-        inputs = read_puts<input>(source);
-        outputs = read_puts<output>(source);
+        count = source.read_size(max_block_size);
+        ins->reserve(count);
+        for (size_t in = 0; in < count; ++in)
+            ins->emplace_back(
+                allocator.new_object<input>(source),
+                allocator.deleter<input>(source.get_arena()));
+
+        auto outs = to_non_const_raw_ptr(outputs_);
+        count = source.read_size(max_block_size);
+        outs->reserve(count);
+        for (size_t out = 0; out < count; ++out)
+            outs->emplace_back(
+                allocator.new_object<output>(source),
+                allocator.deleter<output>(source.get_arena()));
 
         // Read or skip witnesses as specified.
-        for (auto& input: *inputs)
+        if (witness)
         {
-            if (witness)
-            {
-                // Safe to cast as this method exclusively owns the input.
-                const_cast<chain::input*>(input.get())->set_witness(source);
-            }
-            else
-            {
+            for (auto& input: *inputs_)
+                to_non_const_raw_ptr(input)->set_witness(source);
+        }
+        else
+        {
+            // Default witness is populated on input construct.
+            for (size_t in = 0; in < inputs_->size(); ++in)
                 witness::skip(source, true);
-            }
         }
     }
     else
     {
-        // Default witness is populated on input construct.
-        outputs = read_puts<const output>(source);
+        auto outs = to_non_const_raw_ptr(outputs_);
+        count = source.read_size(max_block_size);
+        outs->reserve(count);
+        for (size_t out = 0; out < count; ++out)
+            outs->emplace_back(
+                allocator.new_object<output>(source),
+                allocator.deleter<output>(source.get_arena()));
     }
 
-    const auto locktime = source.read_4_bytes_little_endian();
-    return { version, inputs, outputs, locktime, segregated, source };
+    locktime_ = source.read_4_bytes_little_endian();
+    size_ = serialized_size(*inputs_, *outputs_, segregated_);
+    valid_ = source;
 }
+BC_POP_WARNING()
 
 // Serialization.
 // ----------------------------------------------------------------------------

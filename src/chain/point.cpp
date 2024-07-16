@@ -79,13 +79,14 @@ point::point(std::istream& stream) NOEXCEPT
 }
 
 point::point(reader&& source) NOEXCEPT
-  : point(from_data(source))
+  : point(source/*from_data(source)*/)
 {
 }
 
 point::point(reader& source) NOEXCEPT
-  : point(from_data(source))
+////: point(from_data(source))
 {
+    assign_data(source);
 }
 
 // protected
@@ -125,14 +126,23 @@ bool operator<(const point& left, const point& right) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // static/private
-point point::from_data(reader& source) NOEXCEPT
+////point point::from_data(reader& source) NOEXCEPT
+////{
+////    return
+////    {
+////        source.read_hash(),
+////        source.read_4_bytes_little_endian(),
+////        source
+////    };
+////}
+
+// private
+// This denormalization eliminates allocation and copy of 32 bytes per block.
+void point::assign_data(reader& source) NOEXCEPT
 {
-    return
-    {
-        source.read_hash(),
-        source.read_4_bytes_little_endian(),
-        source
-    };
+    source.read_bytes(hash_.data(), hash_size);
+    index_ = source.read_4_bytes_little_endian();
+    valid_ = source;
 }
 
 // Serialization.

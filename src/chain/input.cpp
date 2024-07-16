@@ -138,13 +138,27 @@ input::input(std::istream& stream) NOEXCEPT
 }
 
 input::input(reader&& source) NOEXCEPT
-  : input(from_data(source))
+  : input(source/*from_data(source)*/)
 {
 }
 
+// Witness is deserialized and assigned by transaction.
 input::input(reader& source) NOEXCEPT
-  : input(from_data(source))
+////: input(from_data(source))
+  : point_(
+        source.get_allocator().new_object<chain::point>(source),
+        source.get_allocator().deleter<chain::point>(source.get_arena())),
+    script_(
+        source.get_allocator().new_object<chain::script>(source, true),
+        source.get_allocator().deleter<chain::script>(source.get_arena())),
+    witness_(
+        source.get_allocator().new_object<chain::witness>(/*empty*/),
+        source.get_allocator().deleter<chain::witness>(source.get_arena())),
+    sequence_(source.read_4_bytes_little_endian()),
+    valid_(source),
+    size_(serialized_size(*script_, *witness_))
 {
+    ////assign_data(source);
 }
 
 // protected
@@ -178,18 +192,41 @@ bool input::operator!=(const input& other) const NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-// static/private
-input input::from_data(reader& source) NOEXCEPT
+////// static/private
+////input input::from_data(reader& source) NOEXCEPT
+////{
+////    // Witness is deserialized by transaction.
+////    return
+////    {
+////        to_shared<chain::point>(source),
+////        to_shared<chain::script>(source, true),
+////        to_shared<chain::witness>(),
+////        source.read_4_bytes_little_endian(),
+////        source
+////    };
+////}
+
+// private
+void input::assign_data(reader&) NOEXCEPT
 {
-    // Witness is deserialized by transaction.
-    return
-    {
-        to_shared<chain::point>(source),
-        to_shared<chain::script>(source, true),
-        to_shared<chain::witness>(),
-        source.read_4_bytes_little_endian(),
-        source
-    };
+    ////auto& allocator = source.get_allocator();
+    ////
+    ////allocator.construct<chain::point::cptr>(&point_,
+    ////    allocator.new_object<chain::point>(source),
+    ////    allocator.deleter<chain::point>(source.get_arena()));
+    ////
+    ////allocator.construct<chain::script::cptr>(&script_,
+    ////    allocator.new_object<chain::script>(source, true),
+    ////    allocator.deleter<chain::script>(source.get_arena()));
+    ////
+    ////// Witness is deserialized and assigned by transaction.
+    ////allocator.construct<chain::witness::cptr>(&witness_,
+    ////    allocator.new_object<chain::witness>(/*empty*/),
+    ////    allocator.deleter<chain::witness>(source.get_arena()));
+    ////
+    ////sequence_ = source.read_4_bytes_little_endian();
+    ////size_ = serialized_size(*script_, *witness_);
+    ////valid_ = source;
 }
 
 // Serialization.
@@ -258,9 +295,21 @@ size_t input::witnessed_size() const NOEXCEPT
     return size_.witnessed;
 }
 
+////void input::set_witness(reader& source) NOEXCEPT
+////{
+////    witness_ = to_shared<chain::witness>(source, true);
+////    size_.witnessed = ceilinged_add(size_.nominal,
+////        witness_->serialized_size(true));
+////}
+
 void input::set_witness(reader& source) NOEXCEPT
 {
-    witness_ = to_shared<chain::witness>(source, true);
+    auto& allocator = source.get_allocator();
+
+    witness_.reset(
+        allocator.new_object<chain::witness>(source, true),
+        allocator.deleter<chain::witness>(source.get_arena()));
+
     size_.witnessed = ceilinged_add(size_.nominal,
         witness_->serialized_size(true));
 }

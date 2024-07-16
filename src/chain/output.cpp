@@ -86,13 +86,20 @@ output::output(std::istream& stream) NOEXCEPT
 }
 
 output::output(reader&& source) NOEXCEPT
-  : output(from_data(source))
+  : output(source/*from_data(source)*/)
 {
 }
 
 output::output(reader& source) NOEXCEPT
-  : output(from_data(source))
+////: output(from_data(source))
+  : value_(source.read_8_bytes_little_endian()),
+    script_(
+        source.get_allocator().new_object<chain::script>(source, true),
+        source.get_allocator().deleter<chain::script>(source.get_arena())),
+    valid_(source),
+    size_(serialized_size(*script_, value_))
 {
+    ////assign_data(source);
 }
 
 // protected
@@ -123,14 +130,29 @@ bool output::operator!=(const output& other) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // static/private
-output output::from_data(reader& source) NOEXCEPT
+////output output::from_data(reader& source) NOEXCEPT
+////{
+////    return
+////    {
+////        source.read_8_bytes_little_endian(),
+////        to_shared<chain::script>(source, true),
+////        source
+////    };
+////}
+
+// private
+void output::assign_data(reader&) NOEXCEPT
 {
-    return
-    {
-        source.read_8_bytes_little_endian(),
-        to_shared<chain::script>(source, true),
-        source
-    };
+    ////auto& allocator = source.get_allocator();
+    ////
+    ////value_ = source.read_8_bytes_little_endian();
+    ////
+    ////allocator.construct<chain::script::cptr>(&script_,
+    ////    allocator.new_object<chain::script>(source, true),
+    ////    allocator.deleter<chain::script>(source.get_arena()));
+    ////
+    ////size_ = serialized_size(*script_, value_);
+    ////valid_ = source;
 }
 
 // Serialization.

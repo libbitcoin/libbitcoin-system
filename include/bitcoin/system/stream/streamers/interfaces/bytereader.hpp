@@ -33,7 +33,8 @@ namespace system {
 class bytereader
 {
 public:
-    using memory_allocator = arena*;
+    using memory_arena = arena*;
+    using memory_allocator = allocator<uint8_t>;
 
     /// Integrals.
     /// -----------------------------------------------------------------------
@@ -93,9 +94,10 @@ public:
     virtual data_chunk read_bytes() NOEXCEPT = 0;
     virtual chunk_cptr read_bytes_cptr() NOEXCEPT = 0;
 
-    /// Read size bytes to chunk, return size is guaranteed.
+    /// Read size bytes to data_chunk, return size is guaranteed.
     virtual data_chunk read_bytes(size_t size) NOEXCEPT = 0;
     virtual chunk_cptr read_bytes_cptr(size_t size) NOEXCEPT = 0;
+    virtual data_chunk* read_bytes_raw(size_t size) NOEXCEPT = 0;
 
     /// Read size bytes to buffer, return size is guaranteed.
     virtual void read_bytes(uint8_t* buffer, size_t size) NOEXCEPT = 0;
@@ -146,8 +148,11 @@ public:
     /// Invalidate the stream.
     virtual void invalidate() NOEXCEPT = 0;
 
-    /// Memory allocator used to populate vectors.
-    virtual const memory_allocator& allocator() const NOEXCEPT = 0;
+    /// Memory resource used to populate vectors.
+    virtual memory_arena get_arena() const NOEXCEPT = 0;
+
+    /// Memory allocator used to construct objects.
+    virtual memory_allocator& get_allocator() const NOEXCEPT = 0;
 
     /// The stream is valid.
     virtual operator bool() const NOEXCEPT = 0;

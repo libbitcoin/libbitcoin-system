@@ -232,7 +232,8 @@ private:
         hash_digest sequences;
     } sighash_cache;
 
-    static transaction from_data(reader& source, bool witness) NOEXCEPT;
+    void assign_data(reader& source, bool witness) NOEXCEPT;
+    ////static transaction from_data(reader& source, bool witness) NOEXCEPT;
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;
     static sizes serialized_size(const chain::input_cptrs& inputs,
