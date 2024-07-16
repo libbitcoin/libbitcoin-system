@@ -130,12 +130,25 @@ private:
     size_t witnessed_size() const NOEXCEPT;
     void set_witness(reader& source) NOEXCEPT;
 
+    inline const chain::witness& get_witness() const NOEXCEPT
+    {
+        return witness_ ? *witness_ : no_witness();
+    }
+
+    inline const chain::witness::cptr& get_witness_cptr() const NOEXCEPT
+    {
+        return witness_ ? witness_ : no_witness_cptr();
+    }
+
     typedef struct { size_t nominal; size_t witnessed; } sizes;
 
-    void assign_data(reader& source) NOEXCEPT;
+    ////void assign_data(reader& source) NOEXCEPT;
     ////static input from_data(reader& source) NOEXCEPT;
+    static sizes serialized_size(const chain::script& script) NOEXCEPT;
     static sizes serialized_size(const chain::script& script,
         const chain::witness& witness) NOEXCEPT;
+    static const chain::witness& no_witness() NOEXCEPT;
+    static const chain::witness::cptr& no_witness_cptr() NOEXCEPT;
     bool extract_sigop_script(chain::script& out,
         const chain::script& prevout_script) const NOEXCEPT;
 

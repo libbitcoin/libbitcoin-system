@@ -98,21 +98,12 @@ transaction::transaction(const transaction& other) NOEXCEPT
       other.valid_)
 {
     // Optimized for faster optional, not for copy.
-
     if (other.nominal_hash_)
         nominal_hash_ = to_unique(*other.nominal_hash_);
-    else
-        nominal_hash_.reset();
-
     if (other.witness_hash_)
         witness_hash_ = to_unique(*other.witness_hash_);
-    else
-        witness_hash_.reset();
-
     if (other.sighash_cache_)
         sighash_cache_ = to_unique(*other.sighash_cache_);
-    else
-        sighash_cache_.reset();
 }
 
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
@@ -211,22 +202,17 @@ transaction& transaction::operator=(const transaction& other) NOEXCEPT
     valid_ = other.valid_;
     size_ = other.size_;
 
-    // Optimized for faster optional, not for copy.
+    nominal_hash_.reset();
+    witness_hash_.reset();
+    sighash_cache_.reset();
 
+    // Optimized for faster optional, not for copy.
     if (other.nominal_hash_)
         nominal_hash_ = to_unique(*other.nominal_hash_);
-    else
-        nominal_hash_.reset();
-
     if (other.witness_hash_)
         witness_hash_ = to_unique(*other.witness_hash_);
-    else
-        witness_hash_.reset();
-
     if (other.sighash_cache_)
         sighash_cache_ = to_unique(*other.sighash_cache_);
-    else
-        sighash_cache_.reset();
 
     return *this;
 }
