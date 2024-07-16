@@ -94,8 +94,8 @@ output::output(reader& source) NOEXCEPT
 ////: output(from_data(source))
   : value_(source.read_8_bytes_little_endian()),
     script_(
-        source.allocator().new_object<chain::script>(source, true),
-        source.allocator().deleter<chain::script>(source.arena())),
+        source.get_allocator().new_object<chain::script>(source, true),
+        source.get_allocator().deleter<chain::script>(source.get_arena())),
     valid_(source),
     size_(serialized_size(*script_, value_))
 {
@@ -143,13 +143,13 @@ bool output::operator!=(const output& other) const NOEXCEPT
 // private
 void output::assign_data(reader&) NOEXCEPT
 {
-    ////auto& allocator = source.allocator();
+    ////auto& allocator = source.get_allocator();
     ////
     ////value_ = source.read_8_bytes_little_endian();
     ////
     ////allocator.construct<chain::script::cptr>(&script_,
     ////    allocator.new_object<chain::script>(source, true),
-    ////    allocator.deleter<chain::script>(source.arena()));
+    ////    allocator.deleter<chain::script>(source.get_arena()));
     ////
     ////size_ = serialized_size(*script_, value_);
     ////valid_ = source;

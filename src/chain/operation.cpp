@@ -171,7 +171,7 @@ bool operation::operator!=(const operation& other) const NOEXCEPT
 // private
 void operation::assign_data(reader& source) NOEXCEPT
 {
-    auto& allocator = source.allocator();
+    auto& allocator = source.get_allocator();
 
     // Guard against resetting a previously-invalid stream.
     if (!source)
@@ -201,7 +201,7 @@ void operation::assign_data(reader& source) NOEXCEPT
     // An invalid source.read_bytes_raw returns nullptr.
     allocator.construct<chunk_cptr>(&data_,
         source.read_bytes_raw(size),
-        allocator.deleter<data_chunk>(source.arena()));
+        allocator.deleter<data_chunk>(source.get_arena()));
 
     underflow_ = !source;
 

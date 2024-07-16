@@ -260,7 +260,7 @@ data_array_cptr<Size> byte_reader<IStream>::read_forward_cptr() NOEXCEPT
     if (!valid())
         return {};
 
-    const auto cptr = to_allocated<data_array<Size>>(arena());
+    const auto cptr = to_allocated<data_array<Size>>(get_arena());
     if (!cptr)
     {
         invalidate();
@@ -400,7 +400,7 @@ chunk_cptr byte_reader<IStream>::read_bytes_cptr(size_t size) NOEXCEPT
         return {};
 
     // TODO: bypass vector byte fill.
-    const auto cptr = to_allocated<data_chunk>(arena(), size);
+    const auto cptr = to_allocated<data_chunk>(get_arena(), size);
     if (!cptr)
     {
         invalidate();
@@ -609,14 +609,14 @@ bool byte_reader<IStream>::operator!() const NOEXCEPT
 
 template <typename IStream>
 typename byte_reader<IStream>::memory_arena
-byte_reader<IStream>::arena() const NOEXCEPT
+byte_reader<IStream>::get_arena() const NOEXCEPT
 {
     return allocator_.resource();
 }
 
 template <typename IStream>
 typename byte_reader<IStream>::memory_allocator&
-byte_reader<IStream>::allocator() const NOEXCEPT
+byte_reader<IStream>::get_allocator() const NOEXCEPT
 {
     return allocator_;
 }

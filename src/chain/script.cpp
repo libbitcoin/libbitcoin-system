@@ -144,7 +144,7 @@ script::script(reader&& source, bool prefix) NOEXCEPT
 
 script::script(reader& source, bool prefix) NOEXCEPT
 ////: script(from_data(source, prefix))
-  : ops_(source.arena())
+  : ops_(source.get_arena())
 {
     assign_data(source, prefix);
 }
@@ -252,7 +252,7 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit(expected);
     }
 
-    ////auto& allocator = source.allocator();
+    ////auto& allocator = source.get_allocator();
     ////allocator.destroy<operations>(&ops_);
     ////allocator.construct<operations>(&ops_);
     ops_.reserve(op_count(source));

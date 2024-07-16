@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(byte_reader__construct__default__default_resource)
     const data_chunk data{};
     stream::in::fast stream(data);
     read::bytes::fast source(stream);
-    BOOST_REQUIRE_EQUAL(source.arena(), test::get_default_resource());
-    BOOST_REQUIRE_EQUAL(source.arena(), source.allocator().resource());
+    BOOST_REQUIRE_EQUAL(source.get_arena(), test::get_default_resource());
+    BOOST_REQUIRE_EQUAL(source.get_arena(), source.get_allocator().resource());
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__construct__arena__assigned_resource)
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__construct__arena__assigned_resource)
     stream::in::fast stream(data);
     auto arena = test::get_test_resource<false>();
     read::bytes::fast source(stream, arena);
-    BOOST_REQUIRE_EQUAL(source.arena(), arena);
+    BOOST_REQUIRE_EQUAL(source.get_arena(), arena);
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__constructor__arena_reader__success)
@@ -1427,7 +1427,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__empty_zero__not_null_valid)
     const auto ptr = reader.read_bytes_raw(0);
     BOOST_REQUIRE(ptr != nullptr);
     BOOST_REQUIRE(reader);
-    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+    allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
 }
 
 // A pointer is returned, undefined behavior to dereference it, must destroy.
@@ -1439,7 +1439,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__end_zero__not_null_valid)
     const auto ptr = reader.read_bytes_raw(0);
     BOOST_REQUIRE(ptr != nullptr);
     BOOST_REQUIRE(reader);
-    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+    allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__to_end__expected)
@@ -1451,7 +1451,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__to_end__expected)
     BOOST_REQUIRE(ptr != nullptr);
     BOOST_REQUIRE_EQUAL(*ptr, to_chunk("abc"));
     BOOST_REQUIRE(reader);
-    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+    allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__middle__expected)
@@ -1464,7 +1464,7 @@ BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__middle__expected)
     BOOST_REQUIRE_EQUAL(*ptr, to_chunk("abc"));
     BOOST_REQUIRE_EQUAL(stream.get(), '*');
     BOOST_REQUIRE(reader);
-    allocator<>::deleter<data_chunk>(reader.arena())(ptr);
+    allocator<>::deleter<data_chunk>(reader.get_arena())(ptr);
 }
 
 BOOST_AUTO_TEST_CASE(byte_reader__read_bytes_raw1__past_end__nullptr_invalid)

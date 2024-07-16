@@ -169,11 +169,11 @@ transaction::transaction(reader& source, bool witness) NOEXCEPT
 ////: transaction(from_data(source, witness))
   : version_(source.read_4_bytes_little_endian()),
     inputs_(
-        source.allocator().new_object<input_cptrs>(),
-        source.allocator().deleter<input_cptrs>(source.arena())),
+        source.get_allocator().new_object<input_cptrs>(),
+        source.get_allocator().deleter<input_cptrs>(source.get_arena())),
     outputs_(
-        source.allocator().new_object<output_cptrs>(),
-        source.allocator().deleter<output_cptrs>(source.arena()))
+        source.get_allocator().new_object<output_cptrs>(),
+        source.get_allocator().deleter<output_cptrs>(source.get_arena()))
 {
     assign_data(source, witness);
 }
@@ -256,7 +256,7 @@ bool transaction::operator!=(const transaction& other) const NOEXCEPT
 ////{
 ////    // Allocate arena cputs shared_ptr and std_vector(captures arena).
 ////    using puts_type = std_vector<std::shared_ptr<const Put>>;
-////    auto cputs = to_allocated<puts_type>(source.arena());
+////    auto cputs = to_allocated<puts_type>(source.get_arena());
 ////
 ////    BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 ////    auto puts = to_non_const_raw_ptr(cputs);
@@ -269,7 +269,7 @@ bool transaction::operator!=(const transaction& other) const NOEXCEPT
 ////    // Allocate each shared_ptr<put> and move ptr to reservation.
 ////    // Each put is constructed in place as allocated by/with its pointer.
 ////    for (size_t put = 0; put < capacity; ++put)
-////        puts->push_back(to_allocated<Put>(source.arena(), source));
+////        puts->push_back(to_allocated<Put>(source.get_arena(), source));
 ////
 ////    return cputs;
 ////}
@@ -325,15 +325,15 @@ bool transaction::operator!=(const transaction& other) const NOEXCEPT
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 void transaction::assign_data(reader& source, bool witness) NOEXCEPT
 {
-    auto& allocator = source.allocator();
+    auto& allocator = source.get_allocator();
 
     ////allocator.construct<inputs_cptr>(&inputs_,
     ////    allocator.new_object<input_cptrs>(),
-    ////    allocator.deleter<input_cptrs>(source.arena()));
+    ////    allocator.deleter<input_cptrs>(source.get_arena()));
     ////
     ////allocator.construct<outputs_cptr>(&outputs_,
     ////    allocator.new_object<output_cptrs>(),
-    ////    allocator.deleter<output_cptrs>(source.arena()));
+    ////    allocator.deleter<output_cptrs>(source.get_arena()));
     ////
     ////version_ = source.read_4_bytes_little_endian();
 
@@ -343,7 +343,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
     for (size_t in = 0; in < count; ++in)
         ins->emplace_back(
             allocator.new_object<input>(source),
-            allocator.deleter<input>(source.arena()));
+            allocator.deleter<input>(source.get_arena()));
 
     // Expensive repeated recomputation, so cache segregated state.
     // Detect witness as no inputs (marker) and expected flag (bip144).
@@ -361,7 +361,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         for (size_t in = 0; in < count; ++in)
             ins->emplace_back(
                 allocator.new_object<input>(source),
-                allocator.deleter<input>(source.arena()));
+                allocator.deleter<input>(source.get_arena()));
 
         auto outs = to_non_const_raw_ptr(outputs_);
         count = source.read_size(max_block_size);
@@ -369,7 +369,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         for (size_t out = 0; out < count; ++out)
             outs->emplace_back(
                 allocator.new_object<output>(source),
-                allocator.deleter<output>(source.arena()));
+                allocator.deleter<output>(source.get_arena()));
 
         // Read or skip witnesses as specified.
         if (witness)
@@ -392,7 +392,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         for (size_t out = 0; out < count; ++out)
             outs->emplace_back(
                 allocator.new_object<output>(source),
-                allocator.deleter<output>(source.arena()));
+                allocator.deleter<output>(source.get_arena()));
     }
 
     locktime_ = source.read_4_bytes_little_endian();

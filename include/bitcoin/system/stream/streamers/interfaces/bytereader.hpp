@@ -149,10 +149,10 @@ public:
     virtual void invalidate() NOEXCEPT = 0;
 
     /// Memory resource used to populate vectors.
-    virtual memory_arena arena() const NOEXCEPT = 0;
+    virtual memory_arena get_arena() const NOEXCEPT = 0;
 
     /// Memory allocator used to construct objects.
-    virtual memory_allocator& allocator() const NOEXCEPT = 0;
+    virtual memory_allocator& get_allocator() const NOEXCEPT = 0;
 
     /// The stream is valid.
     virtual operator bool() const NOEXCEPT = 0;

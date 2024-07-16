@@ -108,11 +108,11 @@ block::block(reader&& source, bool witness) NOEXCEPT
 block::block(reader& source, bool witness) NOEXCEPT
 ////: block(from_data(source, witness))
   : header_(
-        source.allocator().new_object<chain::header>(source),
-        source.allocator().deleter<chain::header>(source.arena())),
+        source.get_allocator().new_object<chain::header>(source),
+        source.get_allocator().deleter<chain::header>(source.get_arena())),
     txs_(
-        source.allocator().new_object<transaction_cptrs>(),
-        source.allocator().deleter<transaction_cptrs>(source.arena()))
+        source.get_allocator().new_object<transaction_cptrs>(),
+        source.get_allocator().deleter<transaction_cptrs>(source.get_arena()))
 {
     assign_data(source, witness);
 }
@@ -150,7 +150,7 @@ bool block::operator!=(const block& other) const NOEXCEPT
 ////    const auto read_transactions = [witness](reader& source) NOEXCEPT
 ////    {
 ////        // Allocate arena ctxs shared_ptr and std_vector(captures arena).
-////        auto ctxs = to_allocated<transaction_cptrs>(source.arena());
+////        auto ctxs = to_allocated<transaction_cptrs>(source.get_arena());
 ////
 ////        BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 ////        auto txs = to_non_const_raw_ptr(ctxs);
@@ -163,7 +163,7 @@ bool block::operator!=(const block& other) const NOEXCEPT
 ////        // Allocate each shared_ptr<tx> and move ptr to reservation.
 ////        // Each tx is constructed in place as allocated by/with its pointer.
 ////        for (size_t tx = 0; tx < capacity; ++tx)
-////            txs->push_back(to_allocated<transaction>(source.arena(),
+////            txs->push_back(to_allocated<transaction>(source.get_arena(),
 ////                source, witness));
 ////
 ////        return ctxs;
@@ -173,7 +173,7 @@ bool block::operator!=(const block& other) const NOEXCEPT
 ////    return
 ////    {
 ////        // Allocate header shared_ptr with header struct.
-////        to_allocated<chain::header>(source.arena(), source),
+////        to_allocated<chain::header>(source.get_arena(), source),
 ////        read_transactions(source),
 ////        source
 ////    };
@@ -183,15 +183,15 @@ bool block::operator!=(const block& other) const NOEXCEPT
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 void block::assign_data(reader& source, bool witness) NOEXCEPT
 {
-    auto& allocator = source.allocator();
+    auto& allocator = source.get_allocator();
 
     ////allocator.construct<chain::header::cptr>(&header_,
     ////    allocator.new_object<chain::header>(source),
-    ////    allocator.deleter<chain::header>(source.arena()));
+    ////    allocator.deleter<chain::header>(source.get_arena()));
     ////
     ////allocator.construct<transactions_cptr>(&txs_,
     ////    allocator.new_object<transaction_cptrs>(),
-    ////    allocator.deleter<transaction_cptrs>(source.arena()));
+    ////    allocator.deleter<transaction_cptrs>(source.get_arena()));
 
     const auto count = source.read_size(max_block_size);
     auto txs = to_non_const_raw_ptr(txs_);
@@ -200,7 +200,7 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
     for (size_t tx = 0; tx < count; ++tx)
         txs->emplace_back(
             allocator.new_object<transaction>(source, witness),
-            allocator.deleter<transaction>(source.arena()));
+            allocator.deleter<transaction>(source.get_arena()));
 
     size_ = serialized_size(*txs_);
     valid_ = source;

@@ -180,10 +180,10 @@ public:
     void invalidate() NOEXCEPT override;
 
     /// Memory resource used to populate vectors.
-    memory_arena arena() const NOEXCEPT override;
+    memory_arena get_arena() const NOEXCEPT override;
 
     /// Memory allocator used to construct objects.
-    memory_allocator& allocator() const NOEXCEPT override;
+    memory_allocator& get_allocator() const NOEXCEPT override;
 
     /// The stream is valid.
     operator bool() const NOEXCEPT override;

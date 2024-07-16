@@ -104,7 +104,7 @@ witness::witness(reader&& source, bool prefix) NOEXCEPT
 
 witness::witness(reader& source, bool prefix) NOEXCEPT
 ////: witness(from_data(source, prefix))
-  : stack_(source.arena())
+  : stack_(source.get_arena())
 {
     assign_data(source, prefix);
 }
@@ -168,7 +168,7 @@ void witness::skip(reader& source, bool prefix) NOEXCEPT
 void witness::assign_data(reader& source, bool prefix) NOEXCEPT
 {
     size_ = zero;
-    const auto& allocator = source.allocator();
+    const auto& allocator = source.get_allocator();
     ////allocator.destroy<chunk_cptrs>(&stack_);
     ////allocator.construct<chunk_cptrs>(&stack_);
 
@@ -182,7 +182,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
             const auto size = source.read_size(max_block_weight);
             stack_.emplace_back(
                 source.read_bytes_raw(size),
-                allocator.deleter<data_chunk>(source.arena()));
+                allocator.deleter<data_chunk>(source.get_arena()));
             size_ = element_size(size_, stack_.back());
         }
     }
@@ -193,7 +193,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
             const auto size = source.read_size(max_block_weight);
             stack_.emplace_back(
                 source.read_bytes_raw(size),
-                allocator.deleter<data_chunk>(source.arena()));
+                allocator.deleter<data_chunk>(source.get_arena()));
             size_ = element_size(size_, stack_.back());
         }
     }
