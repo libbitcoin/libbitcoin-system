@@ -39,14 +39,14 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 // Gotta set something when invalid minimal result, test is_valid.
 static constexpr auto any_invalid = opcode::op_xor;
 
-// static
+// static/private
 const data_chunk& operation::no_data() NOEXCEPT
 {
     static const data_chunk empty_data{};
     return empty_data;
 }
 
-// static
+// static/private
 const chunk_cptr& operation::no_data_cptr() NOEXCEPT
 {
     BC_PUSH_WARNING(NO_NEW_OR_DELETE)
@@ -58,7 +58,7 @@ const chunk_cptr& operation::no_data_cptr() NOEXCEPT
     return empty;
 }
 
-// static
+// static/private
 // Push data is not possible with an invalid code, combination is invalid.
 const chunk_cptr& operation::any_data_cptr() NOEXCEPT
 {
