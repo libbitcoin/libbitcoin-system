@@ -42,6 +42,25 @@ static_assert(max_script_size <
     max_size_t / multisig_default_sigops / heavy_sigops_factor,
     "input sigop overflow guard");
 
+// static/private
+const witness& input::no_witness() NOEXCEPT
+{
+    static const chain::witness empty_witness{};
+    return empty_witness;
+}
+
+// static/private
+const witness::cptr& input::no_witness_cptr() NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
+    static const std::shared_ptr<const chain::witness> empty
+    {
+        new const chain::witness{}
+    };
+    BC_POP_WARNING()
+    return empty;
+}
+
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -151,12 +170,10 @@ input::input(reader& source) NOEXCEPT
     script_(
         source.get_allocator().new_object<chain::script>(source, true),
         source.get_allocator().deleter<chain::script>(source.get_arena())),
-    witness_(
-        source.get_allocator().new_object<chain::witness>(/*empty*/),
-        source.get_allocator().deleter<chain::witness>(source.get_arena())),
+    witness_(nullptr),
     sequence_(source.read_4_bytes_little_endian()),
     valid_(source),
-    size_(serialized_size(*script_, *witness_))
+    size_(serialized_size(*script_))
 {
     ////assign_data(source);
 }
@@ -181,7 +198,7 @@ bool input::operator==(const input& other) const NOEXCEPT
     return (sequence_ == other.sequence_)
         && (point_ == other.point_ || *point_ == *other.point_)
         && (script_ == other.script_ || *script_ == *other.script_)
-        && (witness_ == other.witness_ || *witness_ == *other.witness_);
+        && (witness_ == other.witness_ || get_witness() == other.get_witness());
 }
 
 bool input::operator!=(const input& other) const NOEXCEPT
@@ -206,28 +223,26 @@ bool input::operator!=(const input& other) const NOEXCEPT
 ////    };
 ////}
 
-// private
-void input::assign_data(reader&) NOEXCEPT
-{
-    ////auto& allocator = source.get_allocator();
-    ////
-    ////allocator.construct<chain::point::cptr>(&point_,
-    ////    allocator.new_object<chain::point>(source),
-    ////    allocator.deleter<chain::point>(source.get_arena()));
-    ////
-    ////allocator.construct<chain::script::cptr>(&script_,
-    ////    allocator.new_object<chain::script>(source, true),
-    ////    allocator.deleter<chain::script>(source.get_arena()));
-    ////
-    ////// Witness is deserialized and assigned by transaction.
-    ////allocator.construct<chain::witness::cptr>(&witness_,
-    ////    allocator.new_object<chain::witness>(/*empty*/),
-    ////    allocator.deleter<chain::witness>(source.get_arena()));
-    ////
-    ////sequence_ = source.read_4_bytes_little_endian();
-    ////size_ = serialized_size(*script_, *witness_);
-    ////valid_ = source;
-}
+////// private
+////void input::assign_data(reader& source) NOEXCEPT
+////{
+////    auto& allocator = source.get_allocator();
+////    
+////    allocator.construct<chain::point::cptr>(&point_,
+////        allocator.new_object<chain::point>(source),
+////        allocator.deleter<chain::point>(source.get_arena()));
+////    
+////    allocator.construct<chain::script::cptr>(&script_,
+////        allocator.new_object<chain::script>(source, true),
+////        allocator.deleter<chain::script>(source.get_arena()));
+////    
+////    // Witness is deserialized and assigned by transaction.
+////    allocator.construct<chain::witness::cptr>(&witness_, nullptr);
+////    
+////    sequence_ = source.read_4_bytes_little_endian();
+////    size_ = serialized_size(*script_);
+////    valid_ = source;
+////}
 
 // Serialization.
 // ----------------------------------------------------------------------------
@@ -252,6 +267,20 @@ void input::to_data(writer& sink) const NOEXCEPT
     point_->to_data(sink);
     script_->to_data(sink, true);
     sink.write_4_bytes_little_endian(sequence_);
+}
+
+// static/private
+input::sizes input::serialized_size(const chain::script& script) NOEXCEPT
+{
+    constexpr auto const_size = ceilinged_add(
+        point::serialized_size(),
+        sizeof(sequence_));
+
+    const auto nominal_size = ceilinged_add(
+        const_size,
+        script.serialized_size(true));
+
+    return { nominal_size, zero };
 }
 
 // static/private
@@ -334,7 +363,7 @@ const chain::script& input::script() const NOEXCEPT
 
 const chain::witness& input::witness() const NOEXCEPT
 {
-    return *witness_;
+    return get_witness();
 }
 
 const point::cptr& input::point_ptr() const NOEXCEPT
@@ -349,7 +378,7 @@ const chain::script::cptr& input::script_ptr() const NOEXCEPT
 
 const chain::witness::cptr& input::witness_ptr() const NOEXCEPT
 {
-    return witness_;
+    return get_witness_cptr();
 }
 
 uint32_t input::sequence() const NOEXCEPT
@@ -405,10 +434,10 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
 
 bool input::reserved_hash(hash_digest& out) const NOEXCEPT
 {
-    if (!witness::is_reserved_pattern(witness_->stack()))
+    if (!witness::is_reserved_pattern(get_witness().stack()))
         return false;
 
-    std::copy_n(witness_->stack().front()->begin(), hash_size, out.begin());
+    std::copy_n(get_witness().stack().front()->begin(), hash_size, out.begin());
     return true;
 }
 
@@ -452,7 +481,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     // Embedded/witness scripts are deserialized here and again on scipt eval.
 
     chain::script witness;
-    if (bip141 && witness_->extract_sigop_script(witness, prevout->script()))
+    if (bip141 && get_witness().extract_sigop_script(witness, prevout->script()))
     {
         // Add sigops in the witness script (bip141).
         return ceilinged_add(sigops, witness.signature_operations(true));
@@ -461,7 +490,7 @@ size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     chain::script embedded;
     if (bip16 && extract_sigop_script(embedded, prevout->script()))
     {
-        if (bip141 && witness_->extract_sigop_script(witness, embedded))
+        if (bip141 && get_witness().extract_sigop_script(witness, embedded))
         {
             // Add sigops in the embedded witness script (bip141).
             return ceilinged_add(sigops, witness.signature_operations(true));
