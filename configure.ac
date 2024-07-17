@@ -296,8 +296,9 @@ AS_CASE([${CC}], [*gcc*],
 #==============================================================================
 AS_IF([test x${enable_avx2} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-mavx -mavx2],
-        [CXXFLAGS="$CXXFLAGS -mavx -mavx2";
-         AC_DEFINE([WITH_AVX2])],
+        [AC_DEFINE([WITH_AVX2])
+         CXXFLAGS="$CXXFLAGS -mavx -mavx2";
+         AC_SUBST([avx2], [-DWITH_AVX2])],
         [AC_MSG_ERROR([-mavx -mavx2 not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -312,8 +313,9 @@ AS_IF([test x${enable_avx2} != "xno"],
 
 AS_IF([test x${enable_avx512} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-mavx512f -mavx512bw],
-        [CXXFLAGS="$CXXFLAGS -mavx512f -mavx512bw";
-         AC_DEFINE([WITH_AVX512])],
+        [AC_DEFINE([WITH_AVX512])
+         CXXFLAGS="$CXXFLAGS -mavx512f -mavx512bw";
+         AC_SUBST([avx512], [-DWITH_AVX512])],
         [AC_MSG_ERROR([-mavx512f -mavx512bw not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -328,8 +330,9 @@ AS_IF([test x${enable_avx512} != "xno"],
 
 AS_IF([test x${enable_shani} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-msse4 -msha],
-        [CXXFLAGS="$CXXFLAGS -msse4 -msha";
-         AC_DEFINE([WITH_SHANI])],
+        [AC_DEFINE([WITH_SHANI])
+         CXXFLAGS="$CXXFLAGS -msse4 -msha";
+         AC_SUBST([shani], [-DWITH_SHANI])],
         [AC_MSG_ERROR([-msse4 -msha not supported.])],
         [],
         [AC_LANG_PROGRAM(
@@ -346,8 +349,9 @@ AS_IF([test x${enable_shani} != "xno"],
 
 AS_IF([test x${enable_sse4} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-msse4.1],
-        [CXXFLAGS="$CXXFLAGS -msse4.1";
-         AC_DEFINE([WITH_SSE4])],
+        [AC_DEFINE([WITH_SSE4])
+         CXXFLAGS="$CXXFLAGS -msse4.1";
+         AC_SUBST([sse4], [-DWITH_SSE4])],
         [AC_MSG_ERROR([-msse4.1 not supported.])],
         [],
         [AC_LANG_PROGRAM(

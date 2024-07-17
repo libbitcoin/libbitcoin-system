@@ -29,7 +29,7 @@ Requires: @icu_i18n_PKG@ libsecp256k1 >= 0.1.0.20
 
 # Include directory and any other required compiler flags.
 #------------------------------------------------------------------------------
-Cflags: -I${includedir} @icu@ @boost_CPPFLAGS@ @pthread_CPPFLAGS@
+Cflags: -I${includedir} @icu@ @avx2@ @avx512@ @shani@ @sse4@ @boost_CPPFLAGS@ @pthread_CPPFLAGS@
 
 # Lib directory, lib and any required that do not publish pkg-config.
 #------------------------------------------------------------------------------
