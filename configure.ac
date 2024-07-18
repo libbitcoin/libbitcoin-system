@@ -141,15 +141,15 @@ AC_ARG_ENABLE([avx512],
     [enable_avx512=no])
 AC_MSG_RESULT([$enable_avx512])
 
-# Implement --enable-sse4.
+# Implement --enable-sse41.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING([--enable-sse4 option])
-AC_ARG_ENABLE([sse4],
-    AS_HELP_STRING([--enable-sse4],
-        [Compile with sse4 intrinsics (specifically -msse4.1). @<:@default=no@:>@]),
-    [enable_sse4=$enableval],
-    [enable_sse4=no])
-AC_MSG_RESULT([$enable_sse4])
+AC_MSG_CHECKING([--enable-sse41 option])
+AC_ARG_ENABLE([sse41],
+    AS_HELP_STRING([--enable-sse41],
+        [Compile with sse4.1 intrinsics (specifically -msse4.1). @<:@default=no@:>@]),
+    [enable_sse41=$enableval],
+    [enable_sse41=no])
+AC_MSG_RESULT([$enable_sse41])
 
 # Implement --enable-shani.
 #------------------------------------------------------------------------------
@@ -347,11 +347,11 @@ AS_IF([test x${enable_shani} != "xno"],
             return _mm_extract_epi32(_mm_sha256msg2_epu32(_mm_sha256msg1_epu32(_mm_sha256rnds2_epu32(a, b, k), b), a), 2);
           ]])])])
 
-AS_IF([test x${enable_sse4} != "xno"],
+AS_IF([test x${enable_sse41} != "xno"],
     [AX_CHECK_COMPILE_FLAG([-msse4.1],
-        [AC_DEFINE([WITH_SSE4])
+        [AC_DEFINE([WITH_SSE41])
          CXXFLAGS="$CXXFLAGS -msse4.1";
-         AC_SUBST([sse4], [-DWITH_SSE4])],
+         AC_SUBST([sse41], [-DWITH_SSE41])],
         [AC_MSG_ERROR([-msse4.1 not supported.])],
         [],
         [AC_LANG_PROGRAM(

@@ -166,9 +166,9 @@ set( enable-avx2 "no" CACHE BOOL "Compile with avx2 intrinsics (specifically -ma
 #------------------------------------------------------------------------------
 set( enable-avx512 "no" CACHE BOOL "Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." )
 
-# Implement -Denable-sse4.
+# Implement -Denable-sse41.
 #------------------------------------------------------------------------------
-set( enable-sse4 "no" CACHE BOOL "Compile with sse4 intrinsics (specifically -msse4.1)." )
+set( enable-sse41 "no" CACHE BOOL "Compile with sse4.1 intrinsics (specifically -msse4.1)." )
 
 # Implement -Denable-shani.
 #------------------------------------------------------------------------------
@@ -280,10 +280,10 @@ if (enable-shani)
     endif()
 endif()
 
-if (enable-sse4)
-    check_cxx_compiler_flag("-msse4.1" HAS_FLAGS_SSE4)
+if (enable-sse41)
+    check_cxx_compiler_flag("-msse4.1" HAS_FLAGS_SSE41)
 
-    if (HAS_FLAGS_SSE4)
+    if (HAS_FLAGS_SSE41)
         add_compile_options( $<$<COMPILE_LANGUAGE:CXX>:-msse4.1> )
         set( CMAKE_REQUIRED_FLAGS_PREV "${CMAKE_REQUIRED_FLAGS}" )
         set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -msse4.1" )
@@ -296,17 +296,17 @@ if (enable-sse4)
             __m128i a = _mm_set1_epi32(0);
             __m128i b = _mm_set1_epi32(15);
             return _mm_extract_epi32(_mm_add_epi64(a, b), 2);
-        }" WITH_SSE4)
+        }" WITH_SSE41)
 
-    if (HAS_FLAGS_SSE4)
+    if (HAS_FLAGS_SSE41)
         set( CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_PREV}" )
     endif()
 
-    if ( WITH_SSE4 )
-        add_compile_definitions( WITH_SSE4 )
-        set( sse4 "-DWITH_SSE4" )
+    if ( WITH_SSE41 )
+        add_compile_definitions( WITH_SSE41 )
+        set( sse41 "-DWITH_SSE41" )
     else()
-        message( FATAL_ERROR "Failed to enable WITH_SSE4" )
+        message( FATAL_ERROR "Failed to enable WITH_SSE41" )
     endif()
 endif()
 
