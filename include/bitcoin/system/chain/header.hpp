@@ -153,7 +153,6 @@ private:
     bool valid_;
 
     // Identity hash caching.
-    // TODO: use std::optional to avoid this pointer allocation.
     mutable std::shared_ptr<const hash_digest> hash_{};
 };
 
