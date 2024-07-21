@@ -124,9 +124,6 @@ protected:
     witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT;
 
 private:
-    void assign_data(reader& source, bool prefix) NOEXCEPT;
-    ////static witness from_data(reader& source, bool prefix) NOEXCEPT;
-
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
     
@@ -142,6 +139,8 @@ private:
     };
     BC_POP_WARNING()
     BC_POP_WARNING()
+
+    void assign_data(reader& source, bool prefix) NOEXCEPT;
 
     // Witness should be stored as shared.
     chunk_cptrs stack_;

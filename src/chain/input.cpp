@@ -42,6 +42,9 @@ static_assert(max_script_size <
     max_size_t / multisig_default_sigops / heavy_sigops_factor,
     "input sigop overflow guard");
 
+// Null witness helpers.
+// ----------------------------------------------------------------------------
+
 // static/private
 const witness& input::no_witness() NOEXCEPT
 {
@@ -59,6 +62,16 @@ const witness::cptr& input::no_witness_cptr() NOEXCEPT
     };
     BC_POP_WARNING()
     return empty;
+}
+
+const chain::witness& input::get_witness() const NOEXCEPT
+{
+    return witness_ ? *witness_ : no_witness();
+}
+
+const chain::witness::cptr& input::get_witness_cptr() const NOEXCEPT
+{
+    return witness_ ? witness_ : no_witness_cptr();
 }
 
 // Constructors.

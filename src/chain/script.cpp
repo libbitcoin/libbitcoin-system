@@ -138,12 +138,11 @@ script::script(std::istream& stream, bool prefix) NOEXCEPT
 }
 
 script::script(reader&& source, bool prefix) NOEXCEPT
-  : script(source, prefix/*from_data(source, prefix)*/)
+  : script(source, prefix)
 {
 }
 
 script::script(reader& source, bool prefix) NOEXCEPT
-////: script(from_data(source, prefix))
   : ops_(source.get_arena())
 {
     assign_data(source, prefix);
@@ -252,9 +251,6 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
         source.set_limit(expected);
     }
 
-    ////auto& allocator = source.get_allocator();
-    ////allocator.destroy<operations>(&ops_);
-    ////allocator.construct<operations>(&ops_);
     ops_.reserve(op_count(source));
     const auto start = source.get_read_position();
 

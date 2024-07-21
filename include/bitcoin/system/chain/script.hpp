@@ -172,9 +172,6 @@ protected:
         size_t size) NOEXCEPT;
 
 private:
-    void assign_data(reader& source, bool prefix) NOEXCEPT;
-    ////static script from_data(reader& source, bool prefix) NOEXCEPT;
-
     // TODO: move to config serialization wrapper.
     static script from_string(const std::string& mnemonic) NOEXCEPT;
 
@@ -184,6 +181,8 @@ private:
     {
         return ceilinged_add(total, op.serialized_size());
     };
+
+    void assign_data(reader& source, bool prefix) NOEXCEPT;
 
     // Script should be stored as shared.
     operations ops_;

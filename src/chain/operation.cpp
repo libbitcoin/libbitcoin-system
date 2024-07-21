@@ -39,6 +39,9 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 // Gotta set something when invalid minimal result, test is_valid.
 static constexpr auto any_invalid = opcode::op_xor;
 
+// Null data helpers.
+// ----------------------------------------------------------------------------
+
 // static/private
 const data_chunk& operation::no_data() NOEXCEPT
 {
@@ -69,6 +72,26 @@ const chunk_cptr& operation::any_data_cptr() NOEXCEPT
     };
     BC_POP_WARNING()
     return any;
+}
+
+bool operation::data_empty() const NOEXCEPT
+{
+    return !data_ || data_->empty();
+}
+
+size_t operation::data_size() const NOEXCEPT
+{
+    return data_ ? data_->size() : zero;
+}
+
+const data_chunk& operation::get_data() const NOEXCEPT
+{
+    return data_ ? *data_ : no_data();
+}
+
+const chunk_cptr& operation::get_data_cptr() const NOEXCEPT
+{
+    return data_ ? data_ : no_data_cptr();
 }
 
 // Constructors.
