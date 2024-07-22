@@ -192,6 +192,7 @@ public:
     bool operator!() const NOEXCEPT override;
 
 protected:
+    static inline memory_arena default_arena() NOEXCEPT;
     static constexpr uint8_t pad() { return 0x00; };
 
     // The maximum addressable stream position.
@@ -207,8 +208,6 @@ protected:
     virtual bool get_exhausted() const NOEXCEPT;
 
 private:
-    static inline memory_arena default_arena() NOEXCEPT;
-
     bool valid() const NOEXCEPT;
     void invalid() NOEXCEPT;
     void validate() NOEXCEPT;
