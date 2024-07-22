@@ -38,6 +38,7 @@ class byte_reader
 {
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(byte_reader);
+    static inline memory_arena default_arena() NOEXCEPT;
 
     /// Constructors.
     byte_reader(IStream& source,
@@ -192,7 +193,6 @@ public:
     bool operator!() const NOEXCEPT override;
 
 protected:
-    static inline memory_arena default_arena() NOEXCEPT;
     static constexpr uint8_t pad() { return 0x00; };
 
     // The maximum addressable stream position.
