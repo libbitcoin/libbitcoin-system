@@ -39,7 +39,7 @@ namespace system {
 // The intended behavior in this case is program abort.
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// private/static
+// protected/static
 template <typename IStream>
 inline typename byte_reader<IStream>::memory_arena
 byte_reader<IStream>::default_arena() NOEXCEPT

@@ -218,7 +218,6 @@ const block& get_block() NOEXCEPT
     constexpr uint32_t locktime{ 7 };
     constexpr uint32_t sequence{ 8 };
     constexpr uint64_t value{ 9 };
-    constexpr hash_digest point_hash{ 9 };
     constexpr bool minimal{ true };
 
     static const block instance
