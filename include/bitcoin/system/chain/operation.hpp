@@ -158,27 +158,6 @@ private:
     friend class script;
     static bool count_op(reader& source) NOEXCEPT;
 
-    inline bool data_empty() const NOEXCEPT
-    {
-        return !data_ || data_->empty();
-    }
-
-    inline size_t data_size() const NOEXCEPT
-    {
-        return data_ ? data_->size() : zero;
-    }
-
-    inline const data_chunk& get_data() const NOEXCEPT
-    {
-        return data_ ? *data_ : no_data();
-    }
-
-    inline const chunk_cptr& get_data_cptr() const NOEXCEPT
-    {
-        return data_ ? data_ : no_data_cptr();
-    }
-
-    void assign_data(reader& source) NOEXCEPT;
     static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,
         bool minimal) NOEXCEPT;
@@ -190,13 +169,18 @@ private:
     static const chunk_cptr& no_data_cptr() NOEXCEPT;
     static const chunk_cptr& any_data_cptr() NOEXCEPT;
     static uint32_t read_data_size(opcode code, reader& source) NOEXCEPT;
-
     static inline opcode opcode_from_data(const data_chunk& push_data,
         bool minimal) NOEXCEPT
     {
         return minimal ? minimal_opcode_from_data(push_data) :
             nominal_opcode_from_data(push_data);
     }
+
+    bool data_empty() const NOEXCEPT;
+    size_t data_size() const NOEXCEPT;
+    const data_chunk& get_data() const NOEXCEPT;
+    const chunk_cptr& get_data_cptr() const NOEXCEPT;
+    void assign_data(reader& source) NOEXCEPT;
 
     // Operation should not be stored as shared (adds 16 bytes).
     // copy: 8 + 2 * 64 + 1 = 18 bytes (vs. 16 when shared).

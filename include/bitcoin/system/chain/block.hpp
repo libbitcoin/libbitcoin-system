@@ -188,7 +188,7 @@ private:
         std::unordered_set<hash_cref, hash_hash>;
 
     void assign_data(reader& source, bool witness) NOEXCEPT;
-    ////static block from_data(reader& source, bool witness) NOEXCEPT;
+    static block from_data(reader& source, bool witness) NOEXCEPT;
     static sizes serialized_size(const chain::transaction_cptrs& txs) NOEXCEPT;
 
     // context free

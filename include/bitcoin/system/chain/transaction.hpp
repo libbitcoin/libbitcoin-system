@@ -232,12 +232,12 @@ private:
         hash_digest sequences;
     } sighash_cache;
 
-    void assign_data(reader& source, bool witness) NOEXCEPT;
-    ////static transaction from_data(reader& source, bool witness) NOEXCEPT;
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;
     static sizes serialized_size(const chain::input_cptrs& inputs,
         const chain::output_cptrs& outputs, bool segregated) NOEXCEPT;
+
+    void assign_data(reader& source, bool witness) NOEXCEPT;
 
     // signature hash
     hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
@@ -274,7 +274,6 @@ private:
     bool valid_;
     sizes size_;
 
-    // TODO: use std::optional to avoid these pointer allocations (0.16%).
     // Signature and identity hash caching (witness hash if witnessed).
     mutable std::unique_ptr<const hash_digest> nominal_hash_{};
     mutable std::unique_ptr<const hash_digest> witness_hash_{};

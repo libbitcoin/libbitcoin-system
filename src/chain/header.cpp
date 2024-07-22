@@ -87,12 +87,11 @@ header::header(std::istream& stream) NOEXCEPT
 }
 
 header::header(reader&& source) NOEXCEPT
-  : header(source/*from_data(source)*/)
+  : header(source)
 {
 }
 
 header::header(reader& source) NOEXCEPT
-////: header(from_data(source))
 {
     assign_data(source);
 }
@@ -146,23 +145,7 @@ bool header::operator!=(const header& other) const NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-////// static/private
-////header header::from_data(reader& source) NOEXCEPT
-////{
-////    return
-////    {
-////        source.read_4_bytes_little_endian(),
-////        source.read_hash(),
-////        source.read_hash(),
-////        source.read_4_bytes_little_endian(),
-////        source.read_4_bytes_little_endian(),
-////        source.read_4_bytes_little_endian(),
-////        source
-////    };
-////}
-
 // private
-// This denormalization eliminates allocation and copy of 64 bytes per block.
 void header::assign_data(reader& source) NOEXCEPT
 {
     // Hashes are copied directly into to header-allocated space.

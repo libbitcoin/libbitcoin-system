@@ -96,7 +96,6 @@ protected:
 
 private:
     void assign_data(reader& source) NOEXCEPT;
-    ////static output from_data(reader& source) NOEXCEPT;
     static size_t serialized_size(const chain::script& script,
         uint64_t value) NOEXCEPT;
 

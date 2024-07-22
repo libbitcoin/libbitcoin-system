@@ -56,6 +56,8 @@ public:
     }
 };
 
+static_assert(header::serialized_size() == 80_size);
+
 // constructors
 // ----------------------------------------------------------------------------
 

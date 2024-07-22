@@ -140,7 +140,6 @@ protected:
 
 private:
     void assign_data(reader& source) NOEXCEPT;
-    ////static header from_data(reader& source) NOEXCEPT;
 
     // Header should be stored as shared (adds 16 bytes).
     // copy: 4 * 32 + 2 * 256 + 1 = 81 bytes (vs. 16 when shared).
@@ -153,7 +152,6 @@ private:
     bool valid_;
 
     // Identity hash caching.
-    // TODO: use std::optional to avoid this pointer allocation.
     mutable std::shared_ptr<const hash_digest> hash_{};
 };
 

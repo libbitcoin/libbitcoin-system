@@ -44,6 +44,7 @@ namespace system {
 namespace chain {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 
 // Constructors.
 // ----------------------------------------------------------------------------
@@ -98,15 +99,11 @@ block::block(std::istream& stream, bool witness) NOEXCEPT
 }
 
 block::block(reader&& source, bool witness) NOEXCEPT
-  : block(source, witness/*from_data(source, witness)*/)
+  : block(source, witness)
 {
 }
 
-// Initializing here prevents default initialization for header_/txs_, which
-// would be redundant in light of later in-place initialization. This can be
-// avoided altogether by not default-initializing, and moving to assign_data.
 block::block(reader& source, bool witness) NOEXCEPT
-////: block(from_data(source, witness))
   : header_(
         source.get_allocator().new_object<chain::header>(source),
         source.get_allocator().deleter<chain::header>(source.get_arena())),
@@ -144,55 +141,10 @@ bool block::operator!=(const block& other) const NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-////// static/private
-////block block::from_data(reader& source, bool witness) NOEXCEPT
-////{
-////    const auto read_transactions = [witness](reader& source) NOEXCEPT
-////    {
-////        // Allocate arena ctxs shared_ptr and std_vector(captures arena).
-////        auto ctxs = to_allocated<transaction_cptrs>(source.get_arena());
-////
-////        BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
-////        auto txs = to_non_const_raw_ptr(ctxs);
-////        BC_POP_WARNING()
-////
-////        // Allocate txs capacity(uses arena).
-////        const auto capacity = source.read_size(max_block_size);
-////        txs->reserve(capacity);
-////
-////        // Allocate each shared_ptr<tx> and move ptr to reservation.
-////        // Each tx is constructed in place as allocated by/with its pointer.
-////        for (size_t tx = 0; tx < capacity; ++tx)
-////            txs->push_back(to_allocated<transaction>(source.get_arena(),
-////                source, witness));
-////
-////        return ctxs;
-////    };
-////
-////    // These two pointers are discarded on assignment to allocated block.
-////    return
-////    {
-////        // Allocate header shared_ptr with header struct.
-////        to_allocated<chain::header>(source.get_arena(), source),
-////        read_transactions(source),
-////        source
-////    };
-////}
-
 // private
-BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 void block::assign_data(reader& source, bool witness) NOEXCEPT
 {
     auto& allocator = source.get_allocator();
-
-    ////allocator.construct<chain::header::cptr>(&header_,
-    ////    allocator.new_object<chain::header>(source),
-    ////    allocator.deleter<chain::header>(source.get_arena()));
-    ////
-    ////allocator.construct<transactions_cptr>(&txs_,
-    ////    allocator.new_object<transaction_cptrs>(),
-    ////    allocator.deleter<transaction_cptrs>(source.get_arena()));
-
     const auto count = source.read_size(max_block_size);
     auto txs = to_non_const_raw_ptr(txs_);
     txs->reserve(count);
@@ -205,7 +157,6 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
     size_ = serialized_size(*txs_);
     valid_ = source;
 }
-BC_POP_WARNING()
 
 // Serialization.
 // ----------------------------------------------------------------------------
@@ -899,6 +850,7 @@ code block::connect(const context& ctx) const NOEXCEPT
     return connect_transactions(ctx);
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 // JSON value convertors.

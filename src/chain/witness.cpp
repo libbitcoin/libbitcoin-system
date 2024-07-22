@@ -98,12 +98,11 @@ witness::witness(std::istream& stream, bool prefix) NOEXCEPT
 }
 
 witness::witness(reader&& source, bool prefix) NOEXCEPT
-  : witness(source, prefix/*from_data(source, prefix)*/)
+  : witness(source, prefix)
 {
 }
 
 witness::witness(reader& source, bool prefix) NOEXCEPT
-////: witness(from_data(source, prefix))
   : stack_(source.get_arena())
 {
     assign_data(source, prefix);
@@ -169,8 +168,6 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
 {
     size_ = zero;
     const auto& allocator = source.get_allocator();
-    ////allocator.destroy<chunk_cptrs>(&stack_);
-    ////allocator.construct<chunk_cptrs>(&stack_);
 
     if (prefix)
     {
