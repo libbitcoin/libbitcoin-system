@@ -158,7 +158,6 @@ private:
     friend class script;
     static bool count_op(reader& source) NOEXCEPT;
 
-    static operation from_data(reader& source) NOEXCEPT;
     static operation from_push_data(const chunk_cptr& data,
         bool minimal) NOEXCEPT;
 

@@ -170,13 +170,12 @@ input::input(std::istream& stream) NOEXCEPT
 }
 
 input::input(reader&& source) NOEXCEPT
-  : input(source/*from_data(source)*/)
+  : input(source)
 {
 }
 
 // Witness is deserialized and assigned by transaction.
 input::input(reader& source) NOEXCEPT
-////: input(from_data(source))
   : point_(
         source.get_allocator().new_object<chain::point>(source),
         source.get_allocator().deleter<chain::point>(source.get_arena())),
@@ -188,7 +187,6 @@ input::input(reader& source) NOEXCEPT
     valid_(source),
     size_(serialized_size(*script_))
 {
-    ////assign_data(source);
 }
 
 // protected
@@ -221,41 +219,6 @@ bool input::operator!=(const input& other) const NOEXCEPT
 
 // Deserialization.
 // ----------------------------------------------------------------------------
-
-////// static/private
-////input input::from_data(reader& source) NOEXCEPT
-////{
-////    // Witness is deserialized by transaction.
-////    return
-////    {
-////        to_shared<chain::point>(source),
-////        to_shared<chain::script>(source, true),
-////        to_shared<chain::witness>(),
-////        source.read_4_bytes_little_endian(),
-////        source
-////    };
-////}
-
-////// private
-////void input::assign_data(reader& source) NOEXCEPT
-////{
-////    auto& allocator = source.get_allocator();
-////    
-////    allocator.construct<chain::point::cptr>(&point_,
-////        allocator.new_object<chain::point>(source),
-////        allocator.deleter<chain::point>(source.get_arena()));
-////    
-////    allocator.construct<chain::script::cptr>(&script_,
-////        allocator.new_object<chain::script>(source, true),
-////        allocator.deleter<chain::script>(source.get_arena()));
-////    
-////    // Witness is deserialized and assigned by transaction.
-////    allocator.construct<chain::witness::cptr>(&witness_, nullptr);
-////    
-////    sequence_ = source.read_4_bytes_little_endian();
-////    size_ = serialized_size(*script_);
-////    valid_ = source;
-////}
 
 // Serialization.
 // ----------------------------------------------------------------------------

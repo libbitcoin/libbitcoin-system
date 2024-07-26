@@ -151,12 +151,11 @@ operation::operation(std::istream& stream) NOEXCEPT
 }
 
 operation::operation(reader&& source) NOEXCEPT
-  : operation(source/*from_data(source)*/)
+  : operation(source)
 {
 }
 
 operation::operation(reader& source) NOEXCEPT
-////: operation(from_data(source))
 {
     assign_data(source);
 }
