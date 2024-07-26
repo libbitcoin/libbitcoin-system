@@ -40,8 +40,6 @@ namespace chain {
 class BC_API block
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(block);
-
     typedef std::shared_ptr<const block> cptr;
 
     static bool is_malleable64(const transaction_cptrs& txs) NOEXCEPT;
@@ -51,6 +49,12 @@ public:
 
     /// Default block is an invalid object.
     block() NOEXCEPT;
+    virtual ~block() NOEXCEPT;
+
+    /// Cache is defaulted on copy/assign.
+    block(block&& other) NOEXCEPT;
+    block(const block& other) NOEXCEPT;
+
     block(chain::header&& header, transactions&& txs) NOEXCEPT;
     block(const chain::header& header, const transactions& txs) NOEXCEPT;
     block(const chain::header::cptr& header,
@@ -66,6 +70,10 @@ public:
 
     /// Operators.
     /// -----------------------------------------------------------------------
+
+    /// Cache is defaulted on copy/assign.
+    block& operator=(block&& other) NOEXCEPT;
+    block& operator=(const block& other) NOEXCEPT;
 
     bool operator==(const block& other) const NOEXCEPT;
     bool operator!=(const block& other) const NOEXCEPT;
@@ -98,9 +106,6 @@ public:
     size_t serialized_size(bool witness) const NOEXCEPT;
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
-    /// Reference used to avoid copy, sets cache if not set (not thread safe).
-    const hash_digest& get_hash() const NOEXCEPT;
-
     /// Computed malleation properties.
     bool is_malleable() const NOEXCEPT;
     bool is_malleated() const NOEXCEPT;
@@ -108,6 +113,15 @@ public:
     bool is_malleated32() const NOEXCEPT;
     bool is_malleable64() const NOEXCEPT;
     bool is_malleated64() const NOEXCEPT;
+
+    /// Cache setters/getters, not thread safe.
+    /// -----------------------------------------------------------------------
+
+    /// Reference used to avoid copy, sets cache if not set (not thread safe).
+    const hash_digest& get_hash() const NOEXCEPT;
+
+    /// Set memory retention mutex.
+    void set_retainer(retainer::ptr&& retainer) const NOEXCEPT;
 
     /// Identity.
     /// -----------------------------------------------------------------------
@@ -213,6 +227,7 @@ private:
     // Cache.
     bool valid_;
     sizes size_;
+    mutable retainer::ptr retainer_{};
 };
 
 typedef std_vector<block> blocks;
