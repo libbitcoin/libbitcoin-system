@@ -55,6 +55,20 @@ block::block() NOEXCEPT
 {
 }
 
+block::~block() NOEXCEPT
+{
+}
+
+block::block(block&& other) NOEXCEPT
+  : block(other)
+{
+}
+
+block::block(const block& other) NOEXCEPT
+  : block(other.header_, other.txs_, other.valid_)
+{
+}
+
 block::block(chain::header&& header, chain::transactions&& txs) NOEXCEPT
   : block(to_shared(std::move(header)), to_shareds(std::move(txs)), true)
 {
@@ -127,6 +141,21 @@ block::block(const chain::header::cptr& header,
 // Operators.
 // ----------------------------------------------------------------------------
 
+block& block::operator=(block&& other) NOEXCEPT
+{
+    *this = other;
+    return *this;
+}
+
+block& block::operator=(const block& other) NOEXCEPT
+{
+    header_ = other.header_;
+    txs_ = other.txs_;
+    valid_ = other.valid_;
+    size_ = other.size_;
+    return *this;
+}
+
 bool block::operator==(const block& other) const NOEXCEPT
 {
     return (header_ == other.header_ || *header_ == *other.header_)
@@ -156,6 +185,13 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
 
     size_ = serialized_size(*txs_);
     valid_ = source;
+}
+
+// Retainer will be an empty pointer when default allocator is used.
+// Retainer release informs allocator that associated memory may be freed.
+void block::set_retainer(retainer::ptr&& retainer) const NOEXCEPT
+{
+    retainer_ = std::move(retainer);
 }
 
 // Serialization.
