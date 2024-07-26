@@ -23,6 +23,7 @@
 #include <limits>
 #include <memory>
 #include <new>
+#include <shared_mutex>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -30,7 +31,31 @@
 
 namespace libbitcoin {
 
-/// No-default-fill polymorphic allocator.
+/// Shared lock object to inform allocator that memory may be freed.
+class retainer
+{
+public:
+    using ptr = std::unique_ptr<retainer>;
+
+    DELETE_COPY_MOVE_DESTRUCT(retainer);
+
+    retainer() NOEXCEPT
+      : shared_lock_{}
+    {
+    }
+
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    retainer(std::shared_mutex& mutex) NOEXCEPT
+      : shared_lock_(mutex)
+    {
+    }
+    BC_POP_WARNING()
+
+private:
+    std::shared_lock<std::shared_mutex> shared_lock_;
+};
+
+/// Default-filling polymorphic allocator.
 /// Strictly conforms to std::pmr::polymorphic_allocator.
 /// Does not default to std::pmr::get_default_resource() but
 /// default_arena::get() exposes the same underlying global default allocators.
@@ -206,20 +231,22 @@ public:
         };
     }
 
-    /// other
+    /// Other
     /// -----------------------------------------------------------------------
 
-    // polymorphic allocators do not propagate on container copy construction!
+    /// polymorphic allocators do not propagate on container copy construction!
     allocator select_on_container_copy_construction() const NOEXCEPT
     {
         return {};
     }
 
+    /// Obtain the memory resource (arena).
     NODISCARD arena* resource() const NOEXCEPT
     {
         return arena_;
     }
 
+    /// Allocated memory is interchangeable.
     friend bool operator==(const allocator& left,
         const allocator& right) NOEXCEPT
     {
