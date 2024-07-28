@@ -23,8 +23,8 @@
 
 namespace libbitcoin {
 
-/// Memory resource interface, for use with our (polymorphic) allocator.
 /// Strictly conforms to std::pmr::memory_resource.
+/// Thread safe resource interface, for use with our (polymorphic) allocator.
 class arena
 {
 public:
