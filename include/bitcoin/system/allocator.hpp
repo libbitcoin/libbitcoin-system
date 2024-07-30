@@ -35,7 +35,7 @@ namespace libbitcoin {
 class retainer
 {
 public:
-    using ptr = std::unique_ptr<retainer>;
+    using ptr = std::shared_ptr<retainer>;
 
     DELETE_COPY_MOVE_DESTRUCT(retainer);
 
