@@ -404,6 +404,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\base_85.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\radix.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\retainer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\deserialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\props.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\serial.hpp" />

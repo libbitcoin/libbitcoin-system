@@ -434,6 +434,7 @@ include_bitcoin_system_HEADERS = \
     include/bitcoin/system/have.hpp \
     include/bitcoin/system/literals.hpp \
     include/bitcoin/system/preprocessor.hpp \
+    include/bitcoin/system/retainer.hpp \
     include/bitcoin/system/settings.hpp \
     include/bitcoin/system/typelets.hpp \
     include/bitcoin/system/types.hpp \
