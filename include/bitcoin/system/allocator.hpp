@@ -21,39 +21,13 @@
 
 #include <iterator>
 #include <limits>
-#include <memory>
 #include <new>
-#include <shared_mutex>
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <bitcoin/system/arena.hpp>
+#include <bitcoin/system/retainer.hpp>
 
 namespace libbitcoin {
-
-/// Shared lock object to inform allocator that memory may be freed.
-class retainer
-{
-public:
-    using ptr = std::shared_ptr<retainer>;
-
-    DELETE_COPY_MOVE_DESTRUCT(retainer);
-
-    retainer() NOEXCEPT
-      : shared_lock_{}
-    {
-    }
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    retainer(std::shared_mutex& mutex) NOEXCEPT
-      : shared_lock_(mutex)
-    {
-    }
-    BC_POP_WARNING()
-
-private:
-    std::shared_lock<std::shared_mutex> shared_lock_;
-};
 
 /// Default-filling polymorphic allocator.
 /// Strictly conforms to std::pmr::polymorphic_allocator.

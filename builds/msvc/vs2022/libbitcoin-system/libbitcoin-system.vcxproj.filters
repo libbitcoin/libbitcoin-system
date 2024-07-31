@@ -1091,6 +1091,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\radix\radix.hpp">
       <Filter>include\bitcoin\system\radix</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\retainer.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\serial\deserialize.hpp">
       <Filter>include\bitcoin\system\serial</Filter>
     </ClInclude>
