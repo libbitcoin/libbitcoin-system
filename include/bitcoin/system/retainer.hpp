@@ -26,7 +26,7 @@
 namespace libbitcoin {
 
 /// Shared lock object to inform allocator that memory may be freed.
-class retainer
+class BC_API retainer final
 {
 public:
     using ptr = std::shared_ptr<retainer>;
@@ -46,6 +46,7 @@ public:
     BC_POP_WARNING()
 
 private:
+    // This is thread safe.
     std::shared_lock<std::shared_mutex> shared_lock_;
 };
 

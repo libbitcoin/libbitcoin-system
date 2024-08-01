@@ -74,7 +74,7 @@ bool operator==(const arena& left, const arena& right) NOEXCEPT;
 /// quuxplusone.github.io/blog/2023/06/02/not-so-quick-pmr
 /// quuxplusone.github.io/blog/2023/06/03/p1144-pmr-koans
 /// ***************************************************************************
-class default_arena
+class BC_API default_arena final
   : public arena
 {
 public:
