@@ -257,6 +257,7 @@ protected:
     }
 
 private:
+    // This is thread safe.
     arena* arena_;
 };
 

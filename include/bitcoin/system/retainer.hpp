@@ -46,6 +46,7 @@ public:
     BC_POP_WARNING()
 
 private:
+    // This is thread safe.
     std::shared_lock<std::shared_mutex> shared_lock_;
 };
 
