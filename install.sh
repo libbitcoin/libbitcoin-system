@@ -707,13 +707,22 @@ build_from_tarball_boost()
     initialize_boost_configuration
     initialize_boost_icu_configuration
 
+    guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
+    CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
+    cp tools/build/src/engine/b2 .
+    if [[ (x"$BOOST_CXXFLAGS" == "x") ]]; then
+        BOOST_CXXFLAGS="cxxflags=${BOOST_FLAGS[@]}"
+    else
+        BOOST_CXXFLAGS="$BOOST_CXXFLAGS ${BOOST_FLAGS[@]}"
+    fi
+
     display_message "Libbitcoin boost configuration."
     display_message "--------------------------------------------------------------------"
     display_message "variant               : release"
     display_message "threading             : multi"
     display_message "toolset               : $CC"
-    display_message "cxxflags              : $STDLIB_FLAG"
-    display_message "linkflags             : $STDLIB_FLAG"
+    display_message "boost cxxflags        : $BOOST_CXXFLAGS"
+    display_message "boost linkflags       : $BOOST_LINKFLAGS"
     display_message "link                  : $BOOST_LINK"
     display_message "boost.locale.iconv    : $BOOST_ICU_ICONV"
     display_message "boost.locale.posix    : $BOOST_ICU_POSIX"
@@ -727,11 +736,8 @@ build_from_tarball_boost()
     display_message "--reconfigure         : [ignore cached configuration]"
     display_message "--prefix              : $PREFIX"
     display_message "BOOST_OPTIONS         : $*"
+    display_message "cxxflags (ignored)    : $CXXFLAGS"
     display_message "--------------------------------------------------------------------"
-
-    guessed_toolset=`./tools/build/src/engine/build.sh --guess-toolset`
-    CXXFLAGS="-w" ./tools/build/src/engine/build.sh ${guessed_toolset} --cxxflags="-w"
-    cp tools/build/src/engine/b2 .
 
     ./bootstrap.sh \
         "--with-bjam=./b2" \
@@ -829,6 +835,11 @@ set_with_boost_prefix
 #------------------------------------------------------------------------------
 ICU_FLAGS=(
 "-w")
+
+# Define boost flags.
+#------------------------------------------------------------------------------
+BOOST_FLAGS=(
+"-Wno-enum-constexpr-conversion")
 
 # Define secp256k1 flags.
 #------------------------------------------------------------------------------
