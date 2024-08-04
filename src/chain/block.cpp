@@ -167,6 +167,11 @@ void block::set_retainer(retainer::ptr&& retainer) const NOEXCEPT
     retainer_ = std::move(retainer);
 }
 
+const retainer::ptr& block::get_retainer() const NOEXCEPT
+{
+    return retainer_;
+}
+
 // Serialization.
 // ----------------------------------------------------------------------------
 

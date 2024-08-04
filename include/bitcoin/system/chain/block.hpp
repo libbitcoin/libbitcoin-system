@@ -112,8 +112,9 @@ public:
     /// Reference used to avoid copy, sets cache if not set (not thread safe).
     const hash_digest& get_hash() const NOEXCEPT;
 
-    /// Set memory retention mutex.
+    /// Set/get memory retainer.
     void set_retainer(retainer::ptr&& retainer) const NOEXCEPT;
+    const retainer::ptr& get_retainer() const NOEXCEPT;
 
     /// Identity.
     /// -----------------------------------------------------------------------

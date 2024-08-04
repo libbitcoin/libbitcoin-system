@@ -25,6 +25,8 @@
 
 namespace libbitcoin {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 /// Shared lock object to inform allocator that memory may be freed.
 class BC_API retainer final
 {
@@ -33,22 +35,28 @@ public:
 
     DELETE_COPY_MOVE_DESTRUCT(retainer);
 
-    retainer() NOEXCEPT
-      : shared_lock_{}
+    inline retainer() NOEXCEPT
+      : /*allocation_{},*/ shared_lock_{}
     {
     }
 
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    retainer(std::shared_mutex& mutex) NOEXCEPT
-      : shared_lock_(mutex)
+    inline retainer(std::shared_mutex& mutex, size_t=0) NOEXCEPT
+      : /*allocation_{ allocation },*/ shared_lock_{ mutex }
     {
     }
-    BC_POP_WARNING()
+
+    inline size_t allocation() const NOEXCEPT
+    {
+        return {};//// allocation_;
+    }
 
 private:
-    // This is thread safe.
+    // These are thread safe.
+    ////size_t allocation_;
     std::shared_lock<std::shared_mutex> shared_lock_;
 };
+
+BC_POP_WARNING()
 
 } // namespace libbitcoin
 
