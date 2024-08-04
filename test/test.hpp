@@ -157,6 +157,11 @@ private:
         return &other == this;
     }
 
+    size_t do_get_capacity() const NOEXCEPT override
+    {
+        return {};
+    }
+
     void report(void* ptr, size_t bytes, bool allocate) const NOEXCEPT
     {
         if constexpr (Report)
@@ -203,6 +208,11 @@ private:
     {
         do_is_equal_address = &other;
         return false;
+    }
+
+    size_t do_get_capacity() const NOEXCEPT override
+    {
+        return {};
     }
 };
 

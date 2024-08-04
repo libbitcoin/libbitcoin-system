@@ -51,10 +51,17 @@ public:
         return do_is_equal(other);
     }
 
+    /// Get the remaining area memory capacity (additional to std::pmr).
+    NODISCARD size_t get_capacity() const NOEXCEPT
+    {
+        return do_get_capacity();
+    }
+
 private:
     virtual void* do_allocate(size_t bytes, size_t align) THROWS = 0;
     virtual void do_deallocate(void* ptr, size_t bytes, size_t align) NOEXCEPT = 0;
     virtual bool do_is_equal(const arena& other) const NOEXCEPT = 0;
+    virtual size_t do_get_capacity() const NOEXCEPT = 0;
 };
 
 /// Left can deallocate memory allocated by right and vice versa.
@@ -84,6 +91,7 @@ private:
     void* do_allocate(size_t bytes, size_t align) THROWS override;
     void do_deallocate(void* ptr, size_t bytes, size_t align) NOEXCEPT override;
     bool do_is_equal(const arena& other) const NOEXCEPT override;
+    size_t do_get_capacity() const NOEXCEPT override;
 };
 
 } // namespace libbitcoin

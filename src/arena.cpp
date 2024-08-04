@@ -18,6 +18,8 @@
  */
 #include <bitcoin/system/arena.hpp>
 
+#include <bitcoin/system/constants.hpp>
+
 namespace libbitcoin {
 
 BC_PUSH_WARNING(NO_NEW_OR_DELETE)
@@ -25,6 +27,14 @@ BC_PUSH_WARNING(NO_NEW_OR_DELETE)
 bool operator==(const arena& left, const arena& right) NOEXCEPT
 {
     return &left == &right || left.is_equal(right);
+}
+
+// static
+// use bc::default_arena::get() vs. std::pmr::get_default_resource()
+arena* default_arena::get() NOEXCEPT
+{
+    static default_arena resource{};
+    return &resource;
 }
 
 void* default_arena::do_allocate(size_t bytes, size_t) THROWS
@@ -49,11 +59,9 @@ bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
     return &other == this;
 }
 
-// use bc::default_arena::get() vs. std::pmr::get_default_resource()
-arena* default_arena::get() NOEXCEPT
+size_t default_arena::do_get_capacity() const NOEXCEPT
 {
-    static default_arena resource{};
-    return &resource;
+    return max_size_t;
 }
 
 BC_POP_WARNING()
