@@ -36,23 +36,23 @@ public:
     DELETE_COPY_MOVE_DESTRUCT(retainer);
 
     inline retainer() NOEXCEPT
-      : /*allocation_{},*/ shared_lock_{}
+      : allocation_{}, shared_lock_{}
     {
     }
 
-    inline retainer(std::shared_mutex& mutex, size_t=0) NOEXCEPT
-      : /*allocation_{ allocation },*/ shared_lock_{ mutex }
+    inline retainer(std::shared_mutex& mutex, size_t allocation=0) NOEXCEPT
+      : allocation_{ allocation }, shared_lock_{ mutex }
     {
     }
 
     inline size_t allocation() const NOEXCEPT
     {
-        return {};//// allocation_;
+        return allocation_;
     }
 
 private:
     // These are thread safe.
-    ////size_t allocation_;
+    size_t allocation_;
     std::shared_lock<std::shared_mutex> shared_lock_;
 };
 
