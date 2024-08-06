@@ -176,11 +176,9 @@ input::input(reader&& source) NOEXCEPT
 
 // Witness is deserialized and assigned by transaction.
 input::input(reader& source) NOEXCEPT
-  : point_(
-        source.get_allocator().new_object<chain::point>(source),
+  : point_(source.get_allocator().new_object<chain::point>(source),
         source.get_allocator().deleter<chain::point>(source.get_arena())),
-    script_(
-        source.get_allocator().new_object<chain::script>(source, true),
+    script_(source.get_allocator().new_object<chain::script>(source, true),
         source.get_allocator().deleter<chain::script>(source.get_arena())),
     witness_(nullptr),
     sequence_(source.read_4_bytes_little_endian()),
@@ -248,12 +246,10 @@ void input::to_data(writer& sink) const NOEXCEPT
 // static/private
 input::sizes input::serialized_size(const chain::script& script) NOEXCEPT
 {
-    constexpr auto const_size = ceilinged_add(
-        point::serialized_size(),
+    constexpr auto const_size = ceilinged_add(point::serialized_size(),
         sizeof(sequence_));
 
-    const auto nominal_size = ceilinged_add(
-        const_size,
+    const auto nominal_size = ceilinged_add(const_size,
         script.serialized_size(true));
 
     return { nominal_size, zero };
@@ -263,16 +259,13 @@ input::sizes input::serialized_size(const chain::script& script) NOEXCEPT
 input::sizes input::serialized_size(const chain::script& script,
     const chain::witness& witness) NOEXCEPT
 {
-    constexpr auto const_size = ceilinged_add(
-        point::serialized_size(),
+    constexpr auto const_size = ceilinged_add(point::serialized_size(),
         sizeof(sequence_));
 
-    const auto nominal_size = ceilinged_add(
-        const_size,
+    const auto nominal_size = ceilinged_add(const_size,
         script.serialized_size(true));
 
-    const auto witnessed_size = ceilinged_add(
-        nominal_size,
+    const auto witnessed_size = ceilinged_add(nominal_size,
         witness.serialized_size(true));
 
     return { nominal_size, witnessed_size };
@@ -311,8 +304,7 @@ void input::set_witness(reader& source) NOEXCEPT
 {
     auto& allocator = source.get_allocator();
 
-    witness_.reset(
-        allocator.new_object<chain::witness>(source, true),
+    witness_.reset(allocator.new_object<chain::witness>(source, true),
         allocator.deleter<chain::witness>(source.get_arena()));
 
     size_.witnessed = ceilinged_add(size_.nominal,
