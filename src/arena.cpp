@@ -41,7 +41,6 @@ void* default_arena::do_allocate(size_t bytes, size_t) THROWS
 {
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    return ::operator new(bytes, std::align_val_t{ align });
-
     return ::operator new(bytes);
 }
 
@@ -49,7 +48,6 @@ void default_arena::do_deallocate(void* ptr, size_t, size_t) NOEXCEPT
 {
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    ::operator delete(ptr, std::align_val_t{ align });
-
     ::operator delete(ptr);
 }
 
@@ -59,9 +57,9 @@ bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
     return &other == this;
 }
 
-size_t default_arena::do_get_capacity() const NOEXCEPT
+void* default_arena::require(size_t) NOEXCEPT
 {
-    return max_size_t;
+    return nullptr;
 }
 
 BC_POP_WARNING()
