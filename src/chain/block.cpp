@@ -155,18 +155,14 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
     valid_ = source;
 }
 
-// Retainer will be an empty pointer when default allocator is used.
-// Retainer release informs allocator that associated memory may be freed.
-// Retainer is copied on block copy/assign, since allocations are thus shared.
-// WARNING: retainer does not track objects shared from the block (e.g. tx).
-void block::set_retainer(retainer::ptr&& retainer) const NOEXCEPT
+void block::set_allocation(size_t allocation) const NOEXCEPT
 {
-    retainer_ = std::move(retainer);
+    allocation_ = allocation;
 }
 
-const retainer::ptr& block::get_retainer() const NOEXCEPT
+const size_t block::get_allocation() const NOEXCEPT
 {
-    return retainer_;
+    return allocation_;
 }
 
 // Serialization.
