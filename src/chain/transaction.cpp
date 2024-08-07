@@ -158,11 +158,9 @@ transaction::transaction(reader&& source, bool witness) NOEXCEPT
 
 transaction::transaction(reader& source, bool witness) NOEXCEPT
   : version_(source.read_4_bytes_little_endian()),
-    inputs_(
-        source.get_allocator().new_object<input_cptrs>(),
+    inputs_(source.get_allocator().new_object<input_cptrs>(),
         source.get_allocator().deleter<input_cptrs>(source.get_arena())),
-    outputs_(
-        source.get_allocator().new_object<output_cptrs>(),
+    outputs_(source.get_allocator().new_object<output_cptrs>(),
         source.get_allocator().deleter<output_cptrs>(source.get_arena()))
 {
     assign_data(source, witness);
@@ -262,16 +260,14 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         count = source.read_size(max_block_size);
         ins->reserve(count);
         for (size_t in = 0; in < count; ++in)
-            ins->emplace_back(
-                allocator.new_object<input>(source),
+            ins->emplace_back(allocator.new_object<input>(source),
                 allocator.deleter<input>(source.get_arena()));
 
         auto outs = to_non_const_raw_ptr(outputs_);
         count = source.read_size(max_block_size);
         outs->reserve(count);
         for (size_t out = 0; out < count; ++out)
-            outs->emplace_back(
-                allocator.new_object<output>(source),
+            outs->emplace_back(allocator.new_object<output>(source),
                 allocator.deleter<output>(source.get_arena()));
 
         // Read or skip witnesses as specified.
@@ -293,8 +289,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         count = source.read_size(max_block_size);
         outs->reserve(count);
         for (size_t out = 0; out < count; ++out)
-            outs->emplace_back(
-                allocator.new_object<output>(source),
+            outs->emplace_back(allocator.new_object<output>(source),
                 allocator.deleter<output>(source.get_arena()));
     }
 
@@ -386,26 +381,19 @@ transaction::sizes transaction::serialized_size(
         return ceilinged_add(total, output->serialized_size());
     };
 
-    constexpr auto base_const_size = ceilinged_add(
-        sizeof(version_),
+    constexpr auto base_const_size = ceilinged_add(sizeof(version_),
         sizeof(locktime_));
 
-    constexpr auto witness_const_size = ceilinged_add(
-        sizeof(witness_marker),
+    constexpr auto witness_const_size = ceilinged_add(sizeof(witness_marker),
         sizeof(witness_enabled));
 
     const auto base_size = ceilinged_add(ceilinged_add(ceilinged_add(
-        base_const_size,
-        variable_size(inputs.size())),
+        base_const_size, variable_size(inputs.size())),
         variable_size(outputs.size())),
         std::accumulate(outputs.begin(), outputs.end(), zero, outs));
 
-    const auto nominal_size = ceilinged_add(
-        base_size,
-        size.nominal);
-
-    const auto witnessed_size = ceilinged_add(ceilinged_add(
-        base_size,
+    const auto nominal_size = ceilinged_add(base_size, size.nominal);
+    const auto witnessed_size = ceilinged_add(ceilinged_add(base_size,
         witness_const_size),
         size.witnessed);
 

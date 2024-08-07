@@ -177,8 +177,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
         for (size_t element = 0; element < count; ++element)
         {
             const auto size = source.read_size(max_block_weight);
-            stack_.emplace_back(
-                source.read_bytes_raw(size),
+            stack_.emplace_back(source.read_bytes_raw(size),
                 allocator.deleter<data_chunk>(source.get_arena()));
             size_ = element_size(size_, stack_.back());
         }
@@ -188,8 +187,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
         while (!source.is_exhausted())
         {
             const auto size = source.read_size(max_block_weight);
-            stack_.emplace_back(
-                source.read_bytes_raw(size),
+            stack_.emplace_back(source.read_bytes_raw(size),
                 allocator.deleter<data_chunk>(source.get_arena()));
             size_ = element_size(size_, stack_.back());
         }

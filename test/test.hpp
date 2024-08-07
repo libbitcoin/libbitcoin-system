@@ -127,6 +127,11 @@ public:
     size_t dec_count{};
     size_t dec_bytes{};
 
+    void* require(size_t) NOEXCEPT override
+    {
+        return nullptr;
+    }
+
 private:
     void* do_allocate(size_t bytes, size_t align) override
     {
@@ -157,11 +162,6 @@ private:
         return &other == this;
     }
 
-    size_t do_get_capacity() const NOEXCEPT override
-    {
-        return {};
-    }
-
     void report(void* ptr, size_t bytes, bool allocate) const NOEXCEPT
     {
         if constexpr (Report)
@@ -189,6 +189,11 @@ public:
     size_t do_deallocate_align{};
     mutable const arena* do_is_equal_address{};
 
+    void* require(size_t) NOEXCEPT override
+    {
+        return nullptr;
+    }
+
 private:
     void* do_allocate(size_t bytes, size_t align) THROWS override
     {
@@ -208,11 +213,6 @@ private:
     {
         do_is_equal_address = &other;
         return false;
-    }
-
-    size_t do_get_capacity() const NOEXCEPT override
-    {
-        return {};
     }
 };
 

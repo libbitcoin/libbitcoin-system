@@ -104,11 +104,9 @@ block::block(reader&& source, bool witness) NOEXCEPT
 }
 
 block::block(reader& source, bool witness) NOEXCEPT
-  : header_(
-        source.get_allocator().new_object<chain::header>(source),
+  : header_(source.get_allocator().new_object<chain::header>(source),
         source.get_allocator().deleter<chain::header>(source.get_arena())),
-    txs_(
-        source.get_allocator().new_object<transaction_cptrs>(),
+    txs_(source.get_allocator().new_object<transaction_cptrs>(),
         source.get_allocator().deleter<transaction_cptrs>(source.get_arena()))
 {
     assign_data(source, witness);
@@ -150,8 +148,7 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
     txs->reserve(count);
 
     for (size_t tx = 0; tx < count; ++tx)
-        txs->emplace_back(
-            allocator.new_object<transaction>(source, witness),
+        txs->emplace_back(allocator.new_object<transaction>(source, witness),
             allocator.deleter<transaction>(source.get_arena()));
 
     size_ = serialized_size(*txs_);
@@ -284,17 +281,11 @@ block::sizes block::serialized_size(
         size.witnessed = ceilinged_add(size.witnessed, tx->serialized_size(true));
     });
 
-    const auto common_size = ceilinged_add(
-        header::serialized_size(),
+    const auto common_size = ceilinged_add(header::serialized_size(),
         variable_size(txs.size()));
 
-    const auto nominal_size = ceilinged_add(
-        common_size,
-        size.nominal);
-
-    const auto witnessed_size = ceilinged_add(
-        common_size,
-        size.witnessed);
+    const auto nominal_size = ceilinged_add(common_size, size.nominal);
+    const auto witnessed_size = ceilinged_add(common_size, size.witnessed);
 
     return { nominal_size, witnessed_size };
 }
