@@ -93,7 +93,7 @@ output::output(reader&& source) NOEXCEPT
 output::output(reader& source) NOEXCEPT
   : value_(source.read_8_bytes_little_endian()),
     script_(source.get_allocator().new_object<chain::script>(source, true),
-        source.get_allocator().deleter<chain::script>(source.get_arena())),
+        source.get_allocator().deleter<chain::script>()),
     valid_(source),
     size_(serialized_size(*script_, value_))
 {

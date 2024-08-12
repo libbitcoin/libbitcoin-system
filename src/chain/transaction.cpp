@@ -159,9 +159,9 @@ transaction::transaction(reader&& source, bool witness) NOEXCEPT
 transaction::transaction(reader& source, bool witness) NOEXCEPT
   : version_(source.read_4_bytes_little_endian()),
     inputs_(source.get_allocator().new_object<input_cptrs>(),
-        source.get_allocator().deleter<input_cptrs>(source.get_arena())),
+        source.get_allocator().deleter<input_cptrs>()),
     outputs_(source.get_allocator().new_object<output_cptrs>(),
-        source.get_allocator().deleter<output_cptrs>(source.get_arena()))
+        source.get_allocator().deleter<output_cptrs>())
 {
     assign_data(source, witness);
 }
@@ -244,7 +244,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
     for (size_t in = 0; in < count; ++in)
         ins->emplace_back(
             allocator.new_object<input>(source),
-            allocator.deleter<input>(source.get_arena()));
+            allocator.deleter<input>());
 
     // Expensive repeated recomputation, so cache segregated state.
     // Detect witness as no inputs (marker) and expected flag (bip144).
@@ -261,14 +261,14 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         ins->reserve(count);
         for (size_t in = 0; in < count; ++in)
             ins->emplace_back(allocator.new_object<input>(source),
-                allocator.deleter<input>(source.get_arena()));
+                allocator.deleter<input>());
 
         auto outs = to_non_const_raw_ptr(outputs_);
         count = source.read_size(max_block_size);
         outs->reserve(count);
         for (size_t out = 0; out < count; ++out)
             outs->emplace_back(allocator.new_object<output>(source),
-                allocator.deleter<output>(source.get_arena()));
+                allocator.deleter<output>());
 
         // Read or skip witnesses as specified.
         if (witness)
@@ -290,7 +290,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         outs->reserve(count);
         for (size_t out = 0; out < count; ++out)
             outs->emplace_back(allocator.new_object<output>(source),
-                allocator.deleter<output>(source.get_arena()));
+                allocator.deleter<output>());
     }
 
     locktime_ = source.read_4_bytes_little_endian();

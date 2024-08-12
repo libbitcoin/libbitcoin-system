@@ -105,9 +105,9 @@ block::block(reader&& source, bool witness) NOEXCEPT
 
 block::block(reader& source, bool witness) NOEXCEPT
   : header_(source.get_allocator().new_object<chain::header>(source),
-        source.get_allocator().deleter<chain::header>(source.get_arena())),
+        source.get_allocator().deleter<chain::header>()),
     txs_(source.get_allocator().new_object<transaction_cptrs>(),
-        source.get_allocator().deleter<transaction_cptrs>(source.get_arena()))
+        source.get_allocator().deleter<transaction_cptrs>())
 {
     assign_data(source, witness);
 }
@@ -149,7 +149,7 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
 
     for (size_t tx = 0; tx < count; ++tx)
         txs->emplace_back(allocator.new_object<transaction>(source, witness),
-            allocator.deleter<transaction>(source.get_arena()));
+            allocator.deleter<transaction>());
 
     size_ = serialized_size(*txs_);
     valid_ = source;

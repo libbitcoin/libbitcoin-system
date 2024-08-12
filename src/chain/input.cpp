@@ -177,9 +177,9 @@ input::input(reader&& source) NOEXCEPT
 // Witness is deserialized and assigned by transaction.
 input::input(reader& source) NOEXCEPT
   : point_(source.get_allocator().new_object<chain::point>(source),
-        source.get_allocator().deleter<chain::point>(source.get_arena())),
+        source.get_allocator().deleter<chain::point>()),
     script_(source.get_allocator().new_object<chain::script>(source, true),
-        source.get_allocator().deleter<chain::script>(source.get_arena())),
+        source.get_allocator().deleter<chain::script>()),
     witness_(nullptr),
     sequence_(source.read_4_bytes_little_endian()),
     valid_(source),
@@ -305,7 +305,7 @@ void input::set_witness(reader& source) NOEXCEPT
     auto& allocator = source.get_allocator();
 
     witness_.reset(allocator.new_object<chain::witness>(source, true),
-        allocator.deleter<chain::witness>(source.get_arena()));
+        allocator.deleter<chain::witness>());
 
     size_.witnessed = ceilinged_add(size_.nominal,
         witness_->serialized_size(true));

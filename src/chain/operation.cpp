@@ -222,7 +222,7 @@ void operation::assign_data(reader& source) NOEXCEPT
 
     // An invalid source.read_bytes_raw returns nullptr.
     allocator.construct<chunk_cptr>(&data_, source.read_bytes_raw(size),
-        allocator.deleter<data_chunk>(source.get_arena()));
+        allocator.deleter<data_chunk>());
 
     underflow_ = !source;
 
