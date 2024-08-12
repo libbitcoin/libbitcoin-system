@@ -205,6 +205,16 @@ public:
         };
     }
 
+    /// Utility for passing deleted to shared pointer construction.
+    template <typename Type>
+    auto deleter() NOEXCEPT
+    {
+        return [arena = arena_](Type* ptr) NOEXCEPT
+        {
+            deleter<Type>(arena)(ptr);
+        };
+    }
+
     /// Other
     /// -----------------------------------------------------------------------
 
@@ -268,6 +278,8 @@ inline bool operator==(const allocator<Left>& left,
 {
     return left == right;
 }
+
+using byte_allocator = allocator<uint8_t>;
 
 } // namespace libbitcoin
 
