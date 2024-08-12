@@ -25,7 +25,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#include <bitcoin/system/retainer.hpp>
+#include <bitcoin/system/arena.hpp>
 
 namespace libbitcoin {
 

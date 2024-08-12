@@ -112,9 +112,9 @@ public:
     /// Reference used to avoid copy, sets cache if not set (not thread safe).
     const hash_digest& get_hash() const NOEXCEPT;
 
-    /// Set/get memory retainer.
-    void set_retainer(retainer::ptr&& retainer) const NOEXCEPT;
-    const retainer::ptr& get_retainer() const NOEXCEPT;
+    /// Set/get memory allocation.
+    void set_allocation(size_t allocation) const NOEXCEPT;
+    const size_t get_allocation() const NOEXCEPT;
 
     /// Identity.
     /// -----------------------------------------------------------------------
@@ -220,7 +220,7 @@ private:
     // Cache.
     bool valid_;
     sizes size_;
-    mutable retainer::ptr retainer_{};
+    mutable size_t allocation_{};
 };
 
 typedef std_vector<block> blocks;
