@@ -114,7 +114,7 @@ public:
 
     /// Set/get memory allocation.
     void set_allocation(size_t allocation) const NOEXCEPT;
-    const size_t get_allocation() const NOEXCEPT;
+    size_t get_allocation() const NOEXCEPT;
 
     /// Identity.
     /// -----------------------------------------------------------------------

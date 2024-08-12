@@ -160,7 +160,7 @@ void block::set_allocation(size_t allocation) const NOEXCEPT
     allocation_ = allocation;
 }
 
-const size_t block::get_allocation() const NOEXCEPT
+size_t block::get_allocation() const NOEXCEPT
 {
     return allocation_;
 }
