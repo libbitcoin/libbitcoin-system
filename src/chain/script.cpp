@@ -270,6 +270,8 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
     }
 
     valid_ = source;
+
+    // TODO: possible leak with linear arena allocation.
     offset = ops_.begin();
 }
 
@@ -285,7 +287,7 @@ script script::from_string(const std::string& mnemonic) NOEXCEPT
     if (tokens.front().empty())
         tokens.clear();
 
-    operations ops;
+    operations ops{};
     ops.reserve(tokens.size());
 
     // Create an op list from the split tokens.
