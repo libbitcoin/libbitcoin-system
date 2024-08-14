@@ -51,8 +51,9 @@ public:
         return do_is_equal(other);
     }
 
-    /// Require memory capacity, return current or nullptr (custom interface).
-    virtual void* require(size_t bytes) NOEXCEPT = 0;
+    /// Non-linear allocator is a nop and returns nullptr.
+    /// Reset linear allocator and return starting address (not pmr interface).
+    virtual void* initialize() NOEXCEPT = 0;
 
 private:
     virtual void* do_allocate(size_t bytes, size_t align) THROWS = 0;
@@ -82,7 +83,7 @@ class BC_API default_arena final
 {
 public:
     static arena* get() NOEXCEPT;
-    void* require(size_t bytes) NOEXCEPT override;
+    void* initialize() NOEXCEPT override;
 
 private:
     void* do_allocate(size_t bytes, size_t align) THROWS override;

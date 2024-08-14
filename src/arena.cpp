@@ -57,7 +57,7 @@ bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
     return &other == this;
 }
 
-void* default_arena::require(size_t) NOEXCEPT
+void* default_arena::initialize() NOEXCEPT
 {
     return nullptr;
 }

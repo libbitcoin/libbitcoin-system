@@ -127,7 +127,7 @@ public:
     size_t dec_count{};
     size_t dec_bytes{};
 
-    void* require(size_t) NOEXCEPT override
+    void* initialize() NOEXCEPT override
     {
         return nullptr;
     }
@@ -189,7 +189,7 @@ public:
     size_t do_deallocate_align{};
     mutable const arena* do_is_equal_address{};
 
-    void* require(size_t) NOEXCEPT override
+    void* initialize() NOEXCEPT override
     {
         return nullptr;
     }
