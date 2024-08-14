@@ -21,6 +21,7 @@
 
 #include <istream>
 #include <memory>
+#include <optional>
 #include <vector>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -103,7 +104,7 @@ public:
     uint256_t proof() const NOEXCEPT;
 
     /// Cache (this overrides hash() computation).
-    void set_hash(hash_digest&& hash) const NOEXCEPT;
+    void set_hash(const hash_digest& hash) const NOEXCEPT;
 
     /// Reference used to avoid copy, sets cache if not set (not thread safe).
     const hash_digest& get_hash() const NOEXCEPT;
@@ -152,7 +153,7 @@ private:
     bool valid_;
 
     // Identity hash caching.
-    mutable std::shared_ptr<const hash_digest> hash_{};
+    mutable std::optional<hash_digest> hash_{};
 };
 
 typedef std_vector<header> headers;

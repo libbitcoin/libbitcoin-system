@@ -228,9 +228,9 @@ uint32_t header::nonce() const NOEXCEPT
     return nonce_;
 }
 
-void header::set_hash(hash_digest&& hash) const NOEXCEPT
+void header::set_hash(const hash_digest& hash) const NOEXCEPT
 {
-    hash_ = to_shared(std::move(hash));
+    hash_ = hash;
 }
 
 // computed

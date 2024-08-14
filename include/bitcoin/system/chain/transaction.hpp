@@ -21,6 +21,7 @@
 
 #include <istream>
 #include <memory>
+#include <optional>
 #include <vector>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/input.hpp>
@@ -38,6 +39,9 @@ namespace chain {
 class BC_API transaction
 {
 public:
+    /// Cache is copied/moved on copy/assign.
+    DEFAULT_COPY_MOVE_DESTRUCT(transaction);
+
     typedef std::shared_ptr<const transaction> cptr;
     typedef input_cptrs::const_iterator input_iterator;
 
@@ -49,11 +53,6 @@ public:
 
     /// Default transaction is an invalid object.
     transaction() NOEXCEPT;
-    virtual ~transaction() NOEXCEPT;
-
-    /// Cache is defaulted on copy/assign.
-    transaction(transaction&& other) NOEXCEPT;
-    transaction(const transaction& other) NOEXCEPT;
 
     transaction(uint32_t version, chain::inputs&& inputs,
         chain::outputs&& outputs, uint32_t locktime) NOEXCEPT;
@@ -72,10 +71,6 @@ public:
 
     /// Operators.
     /// -----------------------------------------------------------------------
-
-    /// Cache is defaulted on copy/assign.
-    transaction& operator=(transaction&& other) NOEXCEPT;
-    transaction& operator=(const transaction& other) NOEXCEPT;
 
     bool operator==(const transaction& other) const NOEXCEPT;
     bool operator!=(const transaction& other) const NOEXCEPT;
@@ -113,11 +108,11 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Initialize with externally-produced nominal hash value, as from store.
-    void set_nominal_hash(hash_digest&& hash) const NOEXCEPT;
+    void set_nominal_hash(const hash_digest& hash) const NOEXCEPT;
 
     /// Initialize with externally-produced witness hash value, as from store.
     /// This need not be set if the transaction is not segmented.
-    void set_witness_hash(hash_digest&& hash) const NOEXCEPT;
+    void set_witness_hash(const hash_digest& hash) const NOEXCEPT;
 
     /// Reference used to avoid copy, sets cache if not set (not thread safe).
     const hash_digest& get_hash(bool witness) const NOEXCEPT;
@@ -275,9 +270,9 @@ private:
     sizes size_;
 
     // Signature and identity hash caching (witness hash if witnessed).
-    mutable std::unique_ptr<const hash_digest> nominal_hash_{};
-    mutable std::unique_ptr<const hash_digest> witness_hash_{};
-    mutable std::unique_ptr<const sighash_cache> sighash_cache_{};
+    mutable std::optional<hash_digest> nominal_hash_{};
+    mutable std::optional<hash_digest> witness_hash_{};
+    mutable std::optional<sighash_cache> sighash_cache_{};
 };
 
 typedef std_vector<transaction> transactions;
