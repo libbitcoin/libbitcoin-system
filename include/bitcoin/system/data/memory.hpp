@@ -122,6 +122,7 @@ inline std::unique_ptr<const Type> to_unique(const Type& value) NOEXCEPT
 template <typename Type, typename ...Args>
 inline std::unique_ptr<const Type> to_unique(Args&&... values) NOEXCEPT
 {
+    // Type{} required due to CLang bug.
     return std::make_unique<const Type>(Type{ std::forward<Args>(values)... });
 }
 

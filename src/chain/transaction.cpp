@@ -79,33 +79,6 @@ transaction::transaction() NOEXCEPT
 {
 }
 
-transaction::~transaction() NOEXCEPT
-{
-}
-
-transaction::transaction(transaction&& other) NOEXCEPT
-  : transaction(other)
-{
-}
-
-transaction::transaction(const transaction& other) NOEXCEPT
-  : transaction(
-      other.version_,
-      other.inputs_,
-      other.outputs_,
-      other.locktime_,
-      other.segregated_,
-      other.valid_)
-{
-    // Optimized for faster optional, not for copy.
-    if (other.nominal_hash_)
-        nominal_hash_ = to_unique(*other.nominal_hash_);
-    if (other.witness_hash_)
-        witness_hash_ = to_unique(*other.witness_hash_);
-    if (other.sighash_cache_)
-        sighash_cache_ = to_unique(*other.sighash_cache_);
-}
-
 transaction::transaction(uint32_t version, chain::inputs&& inputs,
     chain::outputs&& outputs, uint32_t locktime) NOEXCEPT
   : transaction(version, to_shareds(std::move(inputs)),
@@ -182,37 +155,6 @@ transaction::transaction(uint32_t version,
 
 // Operators.
 // ----------------------------------------------------------------------------
-
-transaction& transaction::operator=(transaction&& other) NOEXCEPT
-{
-    *this = other;
-    return *this;
-}
-
-transaction& transaction::operator=(const transaction& other) NOEXCEPT
-{
-    version_ = other.version_;
-    inputs_ = other.inputs_;
-    outputs_ = other.outputs_;
-    locktime_ = other.locktime_;
-    segregated_ = other.segregated_;
-    valid_ = other.valid_;
-    size_ = other.size_;
-
-    nominal_hash_.reset();
-    witness_hash_.reset();
-    sighash_cache_.reset();
-
-    // Optimized for faster optional, not for copy.
-    if (other.nominal_hash_)
-        nominal_hash_ = to_unique(*other.nominal_hash_);
-    if (other.witness_hash_)
-        witness_hash_ = to_unique(*other.witness_hash_);
-    if (other.sighash_cache_)
-        sighash_cache_ = to_unique(*other.sighash_cache_);
-
-    return *this;
-}
 
 bool transaction::operator==(const transaction& other) const NOEXCEPT
 {
@@ -452,14 +394,14 @@ uint64_t transaction::fee() const NOEXCEPT
     return floored_subtract(value(), claim());
 }
 
-void transaction::set_nominal_hash(hash_digest&& hash) const NOEXCEPT
+void transaction::set_nominal_hash(const hash_digest& hash) const NOEXCEPT
 {
-    nominal_hash_ = to_unique(std::move(hash));
+    nominal_hash_ = hash;
 }
 
-void transaction::set_witness_hash(hash_digest&& hash) const NOEXCEPT
+void transaction::set_witness_hash(const hash_digest& hash) const NOEXCEPT
 {
-    witness_hash_ = to_unique(std::move(hash));
+    witness_hash_ = hash;
 }
 
 const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
@@ -844,16 +786,17 @@ hash_digest transaction::unversioned_signature_hash(
 // TODO: taproot requires both single and double hash of each.
 void transaction::initialize_sighash_cache() const NOEXCEPT
 {
-    // This overconstructs the cache (anyone or !all), however it is simple.
+    // C++23: std::optional<T>::or_else.
     if (!segregated_)
         return;
 
-    sighash_cache_ = to_unique<sighash_cache>
-    (
+    // This overconstructs the cache (anyone or !all), however it is simple.
+    sighash_cache_ =
+    {
         outputs_hash(),
         points_hash(),
         sequences_hash()
-    );
+    };
 }
 
 // private

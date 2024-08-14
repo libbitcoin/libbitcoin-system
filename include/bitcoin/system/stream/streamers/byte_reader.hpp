@@ -184,7 +184,7 @@ public:
     memory_arena get_arena() const NOEXCEPT override;
 
     /// Memory allocator used to construct objects.
-    memory_allocator& get_allocator() const NOEXCEPT override;
+    byte_allocator& get_allocator() const NOEXCEPT override;
 
     /// The stream is valid.
     operator bool() const NOEXCEPT override;
@@ -219,7 +219,7 @@ private:
 
     IStream& stream_;
     size_t remaining_;
-    mutable memory_allocator allocator_;
+    mutable byte_allocator allocator_;
 };
 
 } // namespace system

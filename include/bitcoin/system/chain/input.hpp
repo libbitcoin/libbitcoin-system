@@ -156,6 +156,7 @@ private:
     sizes size_;
 
 public:
+    /// TODO: prevout destruct requires input destruct.
     /// Public mutable metadata access, copied but not compared for equality.
     mutable chain::output::cptr prevout{};
     mutable chain::prevout metadata{ zero, max_uint32, false, false };

@@ -615,8 +615,7 @@ byte_reader<IStream>::get_arena() const NOEXCEPT
 }
 
 template <typename IStream>
-typename byte_reader<IStream>::memory_allocator&
-byte_reader<IStream>::get_allocator() const NOEXCEPT
+byte_allocator& byte_reader<IStream>::get_allocator() const NOEXCEPT
 {
     return allocator_;
 }
