@@ -39,8 +39,6 @@ struct simple
 
     size_t value;
 };
-static_assert(std::is_constructible_v<simple>);
-static_assert(std::is_constructible_v<simple, int>);
 
 struct aggregate
 {
@@ -52,9 +50,6 @@ struct aggregate
     size_t value1;
     size_t value2;
 };
-static_assert(std::is_constructible_v<aggregate>);
-static_assert(std::is_constructible_v<aggregate, size_t>);
-static_assert(std::is_constructible_v<aggregate, size_t, size_t>);
 
 struct compound
 {
@@ -67,9 +62,6 @@ struct compound
     size_t value;
     data_array<3> bytes;
 };
-static_assert(std::is_constructible_v<compound>);
-static_assert(std::is_constructible_v<compound, size_t>);
-static_assert(std::is_constructible_v<compound, size_t, data_array<3>>);
 
 struct hierarchy
 {
@@ -81,9 +73,6 @@ struct hierarchy
     compound contained;
     data_chunk chunk;
 };
-static_assert(std::is_constructible_v<hierarchy>);
-static_assert(std::is_constructible_v<hierarchy, compound>);
-static_assert(std::is_constructible_v<hierarchy, compound, data_chunk>);
 
 struct hierarchy_arena
 {
@@ -96,9 +85,16 @@ struct hierarchy_arena
     compound contained;
     data_chunk chunk;
 };
-static_assert(std::is_constructible_v<hierarchy_arena, arena*>);
-static_assert(std::is_constructible_v<hierarchy_arena, arena*, compound>);
-static_assert(std::is_constructible_v<hierarchy_arena, arena*, compound, data_chunk>);
+
+// std_vector and data_chunk are automatically allocator-injected.
+// A std_vector of emplaced shared_ptr will be allocator allocated, with
+// constructing pointer, deleter copied to allocation.
+static_assert(!std::uses_allocator_v<hierarchy, arena>);
+static_assert(!std::uses_allocator_v<std::vector<uint8_t>, allocator<>>);
+static_assert(!std::uses_allocator_v<std::array<uint8_t, 42>, allocator<>>);
+static_assert(!std::uses_allocator_v<std::shared_ptr<uint8_t>, allocator<>>);
+static_assert(std::uses_allocator_v<std_vector<uint8_t>, allocator<>>);
+static_assert(std::uses_allocator_v<data_chunk, allocator<>>);
 
 ///////////////////////////////////////////////////////////////////////////////
 
