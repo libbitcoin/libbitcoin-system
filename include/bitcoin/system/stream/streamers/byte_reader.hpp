@@ -125,6 +125,7 @@ public:
     /// Read all remaining bytes to chunk.
     data_chunk read_bytes() NOEXCEPT override;
     chunk_cptr read_bytes_cptr() NOEXCEPT override;
+    NODISCARD data_chunk* read_bytes_raw() NOEXCEPT override;
 
     /// Read size bytes to data_chunk, return size is guaranteed.
     data_chunk read_bytes(size_t size) NOEXCEPT override;

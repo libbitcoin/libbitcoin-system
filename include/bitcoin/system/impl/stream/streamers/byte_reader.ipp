@@ -350,7 +350,7 @@ long_hash_cptr byte_reader<IStream>::read_long_hash_cptr() NOEXCEPT
 template <typename IStream>
 data_chunk byte_reader<IStream>::read_bytes() NOEXCEPT
 {
-    // Count bytes to the end, avoids push_back reallocations.
+    // Count bytes to the end, avoids reallocations.
     size_t size{};
     while (!get_exhausted())
     {
@@ -365,7 +365,7 @@ data_chunk byte_reader<IStream>::read_bytes() NOEXCEPT
 template <typename IStream>
 chunk_cptr byte_reader<IStream>::read_bytes_cptr() NOEXCEPT
 {
-    // Count bytes to the end, avoids push_back reallocations.
+    // Count bytes to the end, avoids reallocations.
     size_t size{};
     while (!get_exhausted())
     {
@@ -375,6 +375,21 @@ chunk_cptr byte_reader<IStream>::read_bytes_cptr() NOEXCEPT
 
     rewind_bytes(size);
     return read_bytes_cptr(size);
+}
+
+template <typename IStream>
+data_chunk* byte_reader<IStream>::read_bytes_raw() NOEXCEPT
+{
+    // Count bytes to the end, avoids reallocations.
+    size_t size{};
+    while (!get_exhausted())
+    {
+        ++size;
+        skip_byte();
+    };
+
+    rewind_bytes(size);
+    return read_bytes_raw(size);
 }
 
 template <typename IStream>
