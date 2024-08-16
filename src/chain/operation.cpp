@@ -198,7 +198,7 @@ void operation::assign_data(reader& source) NOEXCEPT
     // Guard against resetting a previously-invalid stream.
     if (!source)
     {
-        allocator.construct<chunk_cptr>(&data_, nullptr);
+        INPLACE(&data_, data_chunk, allocator, nullptr);
         return;
     }
 
@@ -221,9 +221,7 @@ void operation::assign_data(reader& source) NOEXCEPT
         source.invalidate();
 
     // An invalid source.read_bytes_raw returns nullptr.
-    allocator.construct<chunk_cptr>(&data_, source.read_bytes_raw(size),
-        allocator.deleter<data_chunk>());
-
+    INPLACE(&data_, data_chunk, allocator, source.read_bytes_raw(size));
     underflow_ = !source;
 
     // This requires that provided stream terminates at the end of the script.
@@ -236,7 +234,7 @@ void operation::assign_data(reader& source) NOEXCEPT
     {
         code_ = any_invalid;
         source.set_position(start);
-        data_ = to_shared(source.read_bytes());
+        data_.reset(POINTER(data_chunk, allocator, source.read_bytes_raw()));
     }
 
     // All byte vectors are deserializable, stream indicates own failure.

@@ -131,10 +131,8 @@ transaction::transaction(reader&& source, bool witness) NOEXCEPT
 
 transaction::transaction(reader& source, bool witness) NOEXCEPT
   : version_(source.read_4_bytes_little_endian()),
-    inputs_(source.get_allocator().new_object<input_cptrs>(),
-        source.get_allocator().deleter<input_cptrs>()),
-    outputs_(source.get_allocator().new_object<output_cptrs>(),
-        source.get_allocator().deleter<output_cptrs>())
+    inputs_(CREATE(input_cptrs, source.get_allocator())),
+    outputs_(CREATE(output_cptrs, source.get_allocator()))
 {
     assign_data(source, witness);
 }
@@ -184,9 +182,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
     auto count = source.read_size(max_block_size);
     ins->reserve(count);
     for (size_t in = 0; in < count; ++in)
-        ins->emplace_back(
-            allocator.new_object<input>(source),
-            allocator.deleter<input>());
+        ins->emplace_back(CREATE(input, allocator, source));
 
     // Expensive repeated recomputation, so cache segregated state.
     // Detect witness as no inputs (marker) and expected flag (bip144).
@@ -202,15 +198,13 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         count = source.read_size(max_block_size);
         ins->reserve(count);
         for (size_t in = 0; in < count; ++in)
-            ins->emplace_back(allocator.new_object<input>(source),
-                allocator.deleter<input>());
+            ins->emplace_back(CREATE(input, allocator, source));
 
         auto outs = to_non_const_raw_ptr(outputs_);
         count = source.read_size(max_block_size);
         outs->reserve(count);
         for (size_t out = 0; out < count; ++out)
-            outs->emplace_back(allocator.new_object<output>(source),
-                allocator.deleter<output>());
+            outs->emplace_back(CREATE(output, allocator, source));
 
         // Read or skip witnesses as specified.
         if (witness)
@@ -231,8 +225,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         count = source.read_size(max_block_size);
         outs->reserve(count);
         for (size_t out = 0; out < count; ++out)
-            outs->emplace_back(allocator.new_object<output>(source),
-                allocator.deleter<output>());
+            outs->emplace_back(CREATE(output, allocator, source));
     }
 
     locktime_ = source.read_4_bytes_little_endian();
