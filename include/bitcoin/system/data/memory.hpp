@@ -66,7 +66,12 @@ inline std::shared_ptr<const Type> to_shared(const Type& value) NOEXCEPT
 template <typename Type, typename ...Args>
 inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
 {
+// Type{} required due to CLang bug.
+#if defined HAVE_CLANG
+    return std::make_shared<const Type>(Type{ std::forward<Args>(values)... });
+#else
     return std::make_shared<const Type>(std::forward<Args>(values)...);
+#endif
 }
 
 /// Obtain non constant pointer from shared_ptr to const.
@@ -123,7 +128,11 @@ template <typename Type, typename ...Args>
 inline std::unique_ptr<const Type> to_unique(Args&&... values) NOEXCEPT
 {
     // Type{} required due to CLang bug.
+#if defined HAVE_CLANG
     return std::make_unique<const Type>(Type{ std::forward<Args>(values)... });
+#else
+    return std::make_unique<const Type>(std::forward<Args>(values)...);
+#endif
 }
 
 BC_POP_WARNING()
