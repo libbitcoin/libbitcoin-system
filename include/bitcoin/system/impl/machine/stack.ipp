@@ -220,7 +220,7 @@ inline bool stack<Container>::peek_signed(Integer& value) const NOEXCEPT
         [&](const chunk_xptr& vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
-            result = integer<Bytes>::from_chunk(value , *vary);
+            result = integer<Bytes>::from_chunk(value, *vary);
         }
     }, top());
 

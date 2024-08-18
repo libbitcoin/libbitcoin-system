@@ -281,6 +281,26 @@ inline bool operator==(const allocator<Left>& left,
 
 using byte_allocator = allocator<uint8_t>;
 
+#define CREATE(Type, allocate, ...) \
+    allocate.new_object<Type>(__VA_ARGS__), allocate.deleter<Type>(), allocate
+#define POINTER(Type, allocate, ptr) \
+    ptr, allocate.deleter<Type>(), allocate
+#define INPLACE(ptr, Type, allocate, ...) \
+    allocate.construct<std::shared_ptr<const Type>>(ptr, __VA_ARGS__, \
+        allocate.deleter<Type>(), allocate)
+
+// TODO: replace above macros with parameter pack expansion.
+////template <typename Type, typename Allocator, typename... Args>
+////auto shared_ptr(Allocator allocator, Args&&... args) NOEXCEPT
+////{
+////    return std::make_tuple
+////    (
+////        allocator.new_object<Type>(std::forward<Args>(args)...),
+////        allocator.deleter<Type>(),
+////        allocator
+////    );
+////}
+
 } // namespace libbitcoin
 
 #endif

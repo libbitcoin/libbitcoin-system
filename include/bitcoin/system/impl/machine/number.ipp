@@ -119,12 +119,14 @@ inline data_chunk chunk::from_bool(bool vary) NOEXCEPT
 
 inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
 {
+    static const data_chunk empty{};
+
     // absolute(minimum<int64_t>) guarded by the presumption of int32 ops.
     BC_ASSERT(!is_negate_overflow(vary));
 
     // Just an optimization.
     if (is_zero(vary))
-        return {};
+        return empty;
 
     const auto value = absolute(vary);
     const auto negated = is_negated(value);
@@ -148,7 +150,6 @@ inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
 
 // boolean
 // ----------------------------------------------------------------------------
-// C++20: constexpr.
 
 template <size_t Size,
     if_not_greater<Size, sizeof(int64_t)>>

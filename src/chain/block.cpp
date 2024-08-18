@@ -50,7 +50,7 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 // ----------------------------------------------------------------------------
 
 block::block() NOEXCEPT
-  : block(to_shared<chain::header>(), to_shared<chain::transaction_cptrs>(),
+  : block(to_shared<chain::header>(), to_shared<transaction_cptrs>(),
       false)
 {
 }
@@ -67,7 +67,7 @@ block::block(const chain::header& header,
 }
 
 block::block(const chain::header::cptr& header,
-    const chain::transactions_cptr& txs) NOEXCEPT
+    const transactions_cptr& txs) NOEXCEPT
   : block(header ? header : to_shared<chain::header>(),
       txs ? txs : to_shared<transaction_cptrs>(), true)
 {
@@ -104,17 +104,15 @@ block::block(reader&& source, bool witness) NOEXCEPT
 }
 
 block::block(reader& source, bool witness) NOEXCEPT
-  : header_(source.get_allocator().new_object<chain::header>(source),
-        source.get_allocator().deleter<chain::header>()),
-    txs_(source.get_allocator().new_object<transaction_cptrs>(),
-        source.get_allocator().deleter<transaction_cptrs>())
+  : header_(CREATE(chain::header, source.get_allocator(), source)),
+    txs_(CREATE(transaction_cptrs, source.get_allocator()))
 {
     assign_data(source, witness);
 }
 
 // protected
 block::block(const chain::header::cptr& header,
-    const chain::transactions_cptr& txs, bool valid) NOEXCEPT
+    const transactions_cptr& txs, bool valid) NOEXCEPT
   : header_(header),
     txs_(txs),
     valid_(valid),
@@ -148,8 +146,7 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
     txs->reserve(count);
 
     for (size_t tx = 0; tx < count; ++tx)
-        txs->emplace_back(allocator.new_object<transaction>(source, witness),
-            allocator.deleter<transaction>());
+        txs->emplace_back(CREATE(transaction, allocator, source, witness));
 
     size_ = serialized_size(*txs_);
     valid_ = source;

@@ -92,6 +92,7 @@ public:
     /// Read all remaining bytes to chunk.
     virtual data_chunk read_bytes() NOEXCEPT = 0;
     virtual chunk_cptr read_bytes_cptr() NOEXCEPT = 0;
+    virtual data_chunk* read_bytes_raw() NOEXCEPT = 0;
 
     /// Read size bytes to data_chunk, return size is guaranteed.
     virtual data_chunk read_bytes(size_t size) NOEXCEPT = 0;
