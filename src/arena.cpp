@@ -57,9 +57,18 @@ bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
     return &other == this;
 }
 
-void* default_arena::initialize() NOEXCEPT
+void* default_arena::start() NOEXCEPT
 {
     return nullptr;
+}
+
+size_t default_arena::detach() NOEXCEPT
+{
+    return zero;
+}
+
+void default_arena::release(void*, size_t) NOEXCEPT
+{
 }
 
 BC_POP_WARNING()
