@@ -51,9 +51,19 @@ public:
         return do_is_equal(other);
     }
 
-    /// Non-linear allocator is a nop and returns nullptr.
-    /// Reset linear allocator and return starting address (not pmr interface).
-    virtual void* initialize() NOEXCEPT = 0;
+    /// Non-linear allocator just returns next address.
+    /// Linear allocator resets to and returns buffer first address.
+    /// Detachable linear allocator allocates buffer returns its first address.
+    virtual void* start() NOEXCEPT = 0;
+
+    /// Non-linear allocator just returns zero.
+    /// Linear allocator returns current allocation size.
+    /// Detachable linear allocator detaches allocation and returns its size.
+    virtual size_t detach() NOEXCEPT = 0;
+
+    /// Non-linear and linear allocator is a nop.
+    /// Detachable linear allocator frees the memory associated with ptr.
+    virtual void release(void* ptr, size_t bytes) NOEXCEPT = 0;
 
 private:
     virtual void* do_allocate(size_t bytes, size_t align) THROWS = 0;
@@ -83,7 +93,9 @@ class BC_API default_arena final
 {
 public:
     static arena* get() NOEXCEPT;
-    void* initialize() NOEXCEPT override;
+    void* start() NOEXCEPT override;
+    size_t detach() NOEXCEPT override;
+    void release(void* ptr, size_t bytes) NOEXCEPT override;
 
 private:
     void* do_allocate(size_t bytes, size_t align) THROWS override;
