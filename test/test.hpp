@@ -127,17 +127,17 @@ public:
     size_t dec_count{};
     size_t dec_bytes{};
 
-    void* start() NOEXCEPT override
+    void* start() THROWS override
     {
         return nullptr;
     }
 
-    size_t detach() NOEXCEPT override
+    size_t detach() THROWS override
     {
         return zero;
     }
 
-    void release(void*, size_t) NOEXCEPT override
+    void release(void*) NOEXCEPT override
     {
     }
 
@@ -198,17 +198,17 @@ public:
     size_t do_deallocate_align{};
     mutable const arena* do_is_equal_address{};
 
-    void* start() NOEXCEPT override
+    void* start() THROWS override
     {
         return nullptr;
     }
 
-    size_t detach() NOEXCEPT override
+    size_t detach() THROWS override
     {
         return zero;
     }
 
-    void release(void*, size_t) NOEXCEPT override
+    void release(void*) NOEXCEPT override
     {
     }
 
