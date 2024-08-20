@@ -114,7 +114,9 @@ is_overflow(int64_t value) NOEXCEPT
 
 inline data_chunk chunk::from_bool(bool vary) NOEXCEPT
 {
-    return { bc::to_int<uint8_t>(vary) };
+    static const data_chunk true_{ 1 };
+    static const data_chunk false_{};
+    return vary ? true_ : false_;
 }
 
 inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
