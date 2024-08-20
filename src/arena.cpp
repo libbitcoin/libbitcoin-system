@@ -57,7 +57,7 @@ bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
     return &other == this;
 }
 
-void* default_arena::start() THROWS
+void* default_arena::start(size_t) THROWS
 {
     return nullptr;
 }

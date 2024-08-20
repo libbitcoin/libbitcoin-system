@@ -127,7 +127,7 @@ public:
     size_t dec_count{};
     size_t dec_bytes{};
 
-    void* start() THROWS override
+    void* start(size_t) THROWS override
     {
         return nullptr;
     }
@@ -198,7 +198,7 @@ public:
     size_t do_deallocate_align{};
     mutable const arena* do_is_equal_address{};
 
-    void* start() THROWS override
+    void* start(size_t) THROWS override
     {
         return nullptr;
     }
