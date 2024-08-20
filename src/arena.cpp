@@ -57,17 +57,17 @@ bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
     return &other == this;
 }
 
-void* default_arena::start() NOEXCEPT
+void* default_arena::start(size_t) THROWS
 {
     return nullptr;
 }
 
-size_t default_arena::detach() NOEXCEPT
+size_t default_arena::detach() THROWS
 {
     return zero;
 }
 
-void default_arena::release(void*, size_t) NOEXCEPT
+void default_arena::release(void*) NOEXCEPT
 {
 }
 
