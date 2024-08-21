@@ -270,8 +270,6 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
     }
 
     valid_ = source;
-
-    // TODO: possible leak with linear arena allocation.
     offset = ops_.begin();
 }
 
