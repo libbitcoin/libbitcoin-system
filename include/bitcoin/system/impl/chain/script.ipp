@@ -88,6 +88,7 @@ VCONSTEXPR bool script::is_witness_program_pattern(
 {
     return ops.size() == 2
         && ops[0].is_version()
+        && ops[1].is_minimal_push()
         && ops[1].data().size() >= min_witness_program
         && ops[1].data().size() <= max_witness_program;
 }
