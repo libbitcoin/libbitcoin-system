@@ -121,6 +121,7 @@ public:
     /// -----------------------------------------------------------------------
     /// cptr/raw overrides return nullptr if reader is or becomes invalid.
     /// Non-null raw return must be destroyed using reader's allocator/arena.
+    /// Null raw return implies invalidated stream.
 
     /// Read all remaining bytes to chunk.
     data_chunk read_bytes() NOEXCEPT override;

@@ -234,6 +234,8 @@ void operation::assign_data(reader& source) NOEXCEPT
     {
         code_ = any_invalid;
         source.set_position(start);
+
+        // An invalid source.read_bytes_raw returns nullptr.
         data_.reset(POINTER(data_chunk, allocator, source.read_bytes_raw()));
     }
 
