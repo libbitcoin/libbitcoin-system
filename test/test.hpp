@@ -132,7 +132,7 @@ public:
         return nullptr;
     }
 
-    size_t detach() THROWS override
+    size_t detach() NOEXCEPT override
     {
         return zero;
     }
@@ -203,7 +203,7 @@ public:
         return nullptr;
     }
 
-    size_t detach() THROWS override
+    size_t detach() NOEXCEPT override
     {
         return zero;
     }
