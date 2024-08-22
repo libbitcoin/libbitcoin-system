@@ -59,7 +59,7 @@ public:
     /// Non-linear allocator just returns zero.
     /// Linear allocator returns current allocation size.
     /// Detachable linear allocator detaches allocation and returns its size.
-    virtual size_t detach() THROWS = 0;
+    virtual size_t detach() NOEXCEPT = 0;
 
     /// Non-linear and linear allocator is a nop.
     /// Detachable linear allocator frees the memory associated with memory.
@@ -94,7 +94,7 @@ class BC_API default_arena final
 public:
     static arena* get() NOEXCEPT;
     void* start(size_t baseline) THROWS override;
-    size_t detach() THROWS override;
+    size_t detach() NOEXCEPT override;
     void release(void* address) NOEXCEPT override;
 
 private:

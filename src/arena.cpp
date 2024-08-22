@@ -62,7 +62,7 @@ void* default_arena::start(size_t) THROWS
     return nullptr;
 }
 
-size_t default_arena::detach() THROWS
+size_t default_arena::detach() NOEXCEPT
 {
     return zero;
 }
