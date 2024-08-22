@@ -442,6 +442,27 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     return digest;
 }
 
+// static
+hash_digest transaction::desegregated_hash(size_t witnessed,
+    size_t unwitnessed, const uint8_t* data) NOEXCEPT
+{
+    if (is_null(data))
+        return null_hash;
+
+    constexpr auto preamble = sizeof(uint32_t) + two * sizeof(uint8_t);
+    const auto puts = floored_subtract(unwitnessed, two * sizeof(uint32_t));
+    const auto locktime = floored_subtract(witnessed, sizeof(uint32_t));
+
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
+    sink.write_bytes(data, sizeof(uint32_t));
+    sink.write_bytes(std::next(data, preamble), puts);
+    sink.write_bytes(std::next(data, locktime), sizeof(uint32_t));
+    sink.flush();
+    return digest;
+}
+
 // Methods.
 // ----------------------------------------------------------------------------
 

@@ -263,6 +263,44 @@ const hash_digest& block::get_hash() const NOEXCEPT
     return header_->get_hash();
 }
 
+void block::set_hashes(const data_chunk& data) NOEXCEPT
+{
+    constexpr auto header_size = chain::header::serialized_size();
+
+    // Cache header hash.
+    header_->set_hash(bitcoin_hash(header_size, data.data()));
+
+    // Skip transaction count, guarded by preceding successful block construct.
+    auto start = std::next(data.data(), header_size);
+    std::advance(start, size_variable(*start));
+
+    // Cache transaction hashes.
+    auto coinbase = true;
+    for (const auto& tx: *txs_)
+    {
+        const auto witness_size = tx->serialized_size(true);
+
+        // If !witness then wire txs cannot have been segregated.
+        if (tx->is_segregated())
+        {
+            const auto nominal_size = tx->serialized_size(false);
+
+            tx->set_nominal_hash(transaction::desegregated_hash(
+                witness_size, nominal_size, start));
+
+            if (!coinbase)
+                tx->set_witness_hash(bitcoin_hash(witness_size, start));
+        }
+        else
+        {
+            tx->set_nominal_hash(bitcoin_hash(witness_size, start));
+        }
+
+        coinbase = false;
+        std::advance(start, witness_size);
+    }
+}
+
 // static/private
 block::sizes block::serialized_size(
     const chain::transaction_cptrs& txs) NOEXCEPT
