@@ -45,8 +45,13 @@ public:
     typedef std::shared_ptr<const transaction> cptr;
     typedef input_cptrs::const_iterator input_iterator;
 
+    /// Not genesis and at least 100 blocks deep.
     static bool is_coinbase_mature(size_t coinbase_height,
         size_t height) NOEXCEPT;
+
+    /// Optimized non-witness hash derivation using witness-serialized tx.
+    static hash_digest desegregated_hash(size_t witnessed,
+        size_t unwitnessed, const uint8_t* data) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------

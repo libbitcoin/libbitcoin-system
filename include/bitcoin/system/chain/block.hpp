@@ -112,6 +112,9 @@ public:
     /// Reference used to avoid copy, sets cache if not set (not thread safe).
     const hash_digest& get_hash() const NOEXCEPT;
 
+    /// Optimized hash derivations using wire serialization of same block.
+    void set_hashes(const data_chunk& data) NOEXCEPT;
+
     /// Set/get memory allocation.
     void set_allocation(size_t allocation) const NOEXCEPT;
     size_t get_allocation() const NOEXCEPT;
