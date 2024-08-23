@@ -176,8 +176,12 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
 
         for (size_t element = 0; element < count; ++element)
         {
+            // If read_bytes_raw returns nullptr invalid source is implied.
             const auto size = source.read_size(max_block_weight);
             const auto bytes = source.read_bytes_raw(size);
+            if (is_null(bytes))
+                break;
+
             stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
             size_ = element_size(size_, stack_.back());
         }
@@ -186,8 +190,12 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
     {
         while (!source.is_exhausted())
         {
+            // If read_bytes_raw returns nullptr invalid source is implied.
             const auto size = source.read_size(max_block_weight);
             const auto bytes = source.read_bytes_raw(size);
+            if (is_null(bytes))
+                break;
+
             stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
             size_ = element_size(size_, stack_.back());
         }
