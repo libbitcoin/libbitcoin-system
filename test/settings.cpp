@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
     BOOST_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
     BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000052b2559353df4117b7348b64")));
-    const chain::checkpoint milestone("00000000000000000001a0a448d6cf2546b06801389cc030b2b18c6491266815", 804000u);
+    const chain::checkpoint milestone("0000000000000000000320283a032748cef8227873ff4872689bf23f1cda83a5", 840000u);
     BOOST_REQUIRE_EQUAL(configuration.milestone, milestone);
 }
 
