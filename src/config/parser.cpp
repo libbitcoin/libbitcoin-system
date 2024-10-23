@@ -94,7 +94,7 @@ bool parser::load_configuration_variables(variables_map& variables,
 
     // If the existence test errors out we pretend there's no file :/.
     error_code code;
-    if (!config_path.empty() && exists(config_path, code))
+    if (!config_path.empty() && exists(config_path))
     {
         const auto& path = config_path.string();
         ifstream file(path);
