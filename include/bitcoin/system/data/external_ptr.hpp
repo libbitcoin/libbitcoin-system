@@ -108,7 +108,7 @@ public:
 private:
     const Type* pointer_{};
 
-    inline const Type* get_unassigned() const NOEXCEPT
+    static inline const Type* get_unassigned() NOEXCEPT
     {
         static Type unassigned{};
         return &unassigned;
