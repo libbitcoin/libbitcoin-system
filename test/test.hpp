@@ -158,10 +158,10 @@ private:
 
     void do_deallocate(void* ptr, size_t bytes, size_t) NOEXCEPT override
     {
+        report(ptr, bytes, false);
         BC_PUSH_WARNING(NO_NEW_OR_DELETE)
         ::operator delete(ptr);
         BC_POP_WARNING()
-        report(ptr, bytes, false);
         ++dec_count;
         dec_bytes += bytes;
     }

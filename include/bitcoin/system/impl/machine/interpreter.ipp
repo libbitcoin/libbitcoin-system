@@ -1074,7 +1074,7 @@ op_check_multisig_verify() NOEXCEPT
 {
     const auto bip147 = state::is_enabled(flags::bip147_rule);
 
-    size_t count;
+    size_t count{};
     if (!state::pop_index32(count))
         return error::op_check_multisig_verify1;
 
