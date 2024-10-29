@@ -10,6 +10,7 @@ libbitcoin.pc
 
 bin
 obj
+build
 .*.swp
 *~
 /*.kdev4
