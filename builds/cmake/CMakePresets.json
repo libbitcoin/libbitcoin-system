@@ -5,7 +5,7 @@
             "name": "nix-base",
             "description": "Factored base settings for non-windows *nix based platforms.",
             "hidden": true,
-            "installDir": "${sourceParentDir}/../../prefix/${presetName}",
+            "installDir": "${sourceParentDir}/../../../prefix/${presetName}",
             "binaryDir": "${sourceParentDir}/../obj/${presetName}",
             "condition": {
                 "type": "inList",
@@ -18,11 +18,11 @@
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": {
                   "type": "PATH",
-                  "value": "${sourceParentDir}/../../prefix/${presetName}"
+                  "value": "${sourceParentDir}/../../../prefix/${presetName}"
                 },
                 "CMAKE_LIBRARY_PATH": {
                   "type": "PATH",
-                  "value": "${sourceParentDir}/../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}"
+                  "value": "${sourceParentDir}/../../../prefix/${presetName}/lib:$env{CMAKE_LIBRARY_PATH}"
                 }
             }
         },
