@@ -520,8 +520,7 @@ hash_digest transaction::outputs_hash() const NOEXCEPT
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
-    const auto& outs = *outputs_;
-    for (const auto& output: outs)
+    for (const auto& output: *outputs_)
         output->to_data(sink);
 
     sink.flush();
@@ -540,8 +539,7 @@ hash_digest transaction::points_hash() const NOEXCEPT
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
-    const auto& ins = *inputs_;
-    for (const auto& input: ins)
+    for (const auto& input: *inputs_)
         input->point().to_data(sink);
 
     sink.flush();
@@ -560,8 +558,7 @@ hash_digest transaction::sequences_hash() const NOEXCEPT
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
-    const auto& ins = *inputs_;
-    for (const auto& input: ins)
+    for (const auto& input: *inputs_)
         sink.write_4_bytes_little_endian(input->sequence());
 
     sink.flush();
@@ -616,7 +613,6 @@ void transaction::signature_hash_single(writer& sink,
     const auto write_inputs = [this, &input, &sub, sighash_flags](
         writer& sink) NOEXCEPT
     {
-        const auto& self = **input;
         const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
 
@@ -629,9 +625,9 @@ void transaction::signature_hash_single(writer& sink,
             sink.write_bytes(zero_sequence());
         }
 
-        self.point().to_data(sink);
+        (*input)->point().to_data(sink);
         sub.to_data(sink, prefixed);
-        sink.write_4_bytes_little_endian(self.sequence());
+        sink.write_4_bytes_little_endian((*input)->sequence());
 
         for (++in; !anyone && in != inputs_->end(); ++in)
         {
@@ -668,7 +664,6 @@ void transaction::signature_hash_none(writer& sink,
     const auto write_inputs = [this, &input, &sub, sighash_flags](
         writer& sink) NOEXCEPT
     {
-        const auto& self = **input;
         const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
 
@@ -681,9 +676,9 @@ void transaction::signature_hash_none(writer& sink,
             sink.write_bytes(zero_sequence());
         }
 
-        self.point().to_data(sink);
+        (*input)->point().to_data(sink);
         sub.to_data(sink, prefixed);
-        sink.write_4_bytes_little_endian(self.sequence());
+        sink.write_4_bytes_little_endian((*input)->sequence());
 
         for (++in; !anyone && in != inputs_->end(); ++in)
         {
@@ -707,7 +702,6 @@ void transaction::signature_hash_all(writer& sink,
     const auto write_inputs = [this, &input, &sub, flags](
         writer& sink) NOEXCEPT
     {
-        const auto& self = **input;
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
 
@@ -720,9 +714,9 @@ void transaction::signature_hash_all(writer& sink,
             sink.write_4_bytes_little_endian((*in)->sequence());
         }
 
-        self.point().to_data(sink);
+        (*input)->point().to_data(sink);
         sub.to_data(sink, prefixed);
-        sink.write_4_bytes_little_endian(self.sequence());
+        sink.write_4_bytes_little_endian((*input)->sequence());
 
         for (++in; !anyone && in != inputs_->end(); ++in)
         {
@@ -849,7 +843,6 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     const auto flag = mask_sighash(sighash_flags);
     const auto all = (flag == coverage::hash_all);
     const auto single = (flag == coverage::hash_single);
-    const auto& self = **input;
 
     // Create hash writer.
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
@@ -871,10 +864,10 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     // sequences
     sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
 
-    self.point().to_data(sink);
+    (*input)->point().to_data(sink);
     sub.to_data(sink, prefixed);
     sink.write_little_endian(value);
-    sink.write_little_endian(self.sequence());
+    sink.write_little_endian((*input)->sequence());
 
     // outputs
     if (single)

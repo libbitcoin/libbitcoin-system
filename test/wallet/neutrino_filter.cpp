@@ -62,13 +62,13 @@ bool add_metadata(const prevout_data::list& metadata, const chain::block& block)
     for (auto& meta: metadata)
     {
         result = false;
-        const auto& txs = *block.transactions_ptr();
-        for (const auto& tx: txs)
+        const auto& txs = block.transactions_ptr();
+        for (const auto& tx: *txs)
         {
             if (tx->hash(false) == meta.block_tx)
             {
-                auto& inputs = *tx->inputs_ptr();
-                auto& output = inputs[meta.input_index]->prevout;
+                auto& inputs = tx->inputs_ptr();
+                auto& output = (*inputs)[meta.input_index]->prevout;
                 output = to_shared<chain::output>(meta.output_value,
                     chain::script{ meta.script, false });
                 result = true;
