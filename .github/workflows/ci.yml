@@ -481,7 +481,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            preset: "nix-gnu-debug-shared-without_icu"
+            preset: "nix-gnu-debug-shared"
             cxx: "clang++-15"
             link: "dynamic"
             optimization: "debug"
@@ -496,7 +496,7 @@ jobs:
             packages: ""
 
           - os: ubuntu-22.04
-            preset: "nix-gnu-release-static-size-with_icu"
+            preset: "nix-gnu-release-static"
             cxx: "clang++-15"
             link: "static"
             optimization: "size"
@@ -511,7 +511,7 @@ jobs:
             packages: ""
 
           - os: ubuntu-22.04
-            preset: "nix-gnu-release-shared-size-without_icu"
+            preset: "nix-gnu-release-shared"
             cxx: "g++-11"
             link: "dynamic"
             optimization: "size"
