@@ -75,179 +75,44 @@
             }
         },
         {
-            "name": "gnu-optimized-size",
-            "description": "Factored size optimization settings.",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Os",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Os"
-            }
-        },
-        {
-            "name": "with_icu",
-            "description": "Factored ICU inclusion flag.",
-            "hidden": true,
-            "cacheVariables": {
-                "with-icu": {
-                  "type": "BOOL",
-                  "value": "ON"
-                }
-            }
-        },
-        {
-            "name": "without_icu",
-            "description": "Factored ICU exclusion flag.",
-            "hidden": true,
-            "cacheVariables": {
-                "with-icu": {
-                  "type": "BOOL",
-                  "value": "OFF"
-                }
-            }
-        },
-        {
-            "name": "nix-gnu-debug-static-with_icu",
-            "displayName": "*nix/GNU/Debug/Static/WithICU",
-            "description": "Debug build with static linking and with icu.",
+            "name": "nix-gnu-debug-static",
+            "displayName": "*nix/GNU/Debug/Static",
+            "description": "Debug build with static linking.",
             "hidden": false,
             "inherits": [
-                "with_icu",
                 "static",
                 "gnu-debug",
                 "nix-base"
             ]
         },
         {
-            "name": "nix-gnu-debug-static-without_icu",
-            "displayName": "*nix/GNU/Debug/Static/WithoutICU",
-            "description": "Debug build with static linking and without icu.",
+            "name": "nix-gnu-debug-shared",
+            "displayName": "*nix/GNU/Debug/Shared",
+            "description": "Debug build with shared linking.",
             "hidden": false,
             "inherits": [
-                "without_icu",
-                "static",
-                "gnu-debug",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-debug-shared-with_icu",
-            "displayName": "*nix/GNU/Debug/Shared/WithICU",
-            "description": "Debug build with shared linking and with icu.",
-            "hidden": false,
-            "inherits": [
-                "with_icu",
                 "shared",
                 "gnu-debug",
                 "nix-base"
             ]
         },
         {
-            "name": "nix-gnu-debug-shared-without_icu",
-            "displayName": "*nix/GNU/Debug/Shared/WithoutICU",
-            "description": "Debug build with shared linking and without icu.",
+            "name": "nix-gnu-release-static",
+            "displayName": "*nix/GNU/Release/Static",
+            "description": "Release build with static linking and standard optimizations.",
             "hidden": false,
             "inherits": [
-                "without_icu",
-                "shared",
-                "gnu-debug",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-release-static-with_icu",
-            "displayName": "*nix/GNU/Release/Static/WithICU",
-            "description": "Release build with static linking and standard optimizations and with icu.",
-            "hidden": false,
-            "inherits": [
-                "with_icu",
                 "static",
                 "gnu-release",
                 "nix-base"
             ]
         },
         {
-            "name": "nix-gnu-release-static-without_icu",
-            "displayName": "*nix/GNU/Release/Static/WithoutICU",
-            "description": "Release build with static linking and standard optimizations and without icu.",
+            "name": "nix-gnu-release-shared",
+            "displayName": "*nix/GNU/Release/Shared",
+            "description": "Release build with shared linking and standard optimizations.",
             "hidden": false,
             "inherits": [
-                "without_icu",
-                "static",
-                "gnu-release",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-release-shared-with_icu",
-            "displayName": "*nix/GNU/Release/Shared/WithICU",
-            "description": "Release build with shared linking and standard optimizations and with icu.",
-            "hidden": false,
-            "inherits": [
-                "with_icu",
-                "shared",
-                "gnu-release",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-release-shared-without_icu",
-            "displayName": "*nix/GNU/Release/Shared/WithoutICU",
-            "description": "Release build with shared linking and standard optimizations and without icu.",
-            "hidden": false,
-            "inherits": [
-                "without_icu",
-                "shared",
-                "gnu-release",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-release-static-size-with_icu",
-            "displayName": "*nix/GNU/Release/Static/Size/WithICU",
-            "description": "Release build with static linking and optimizations for size and with icu.",
-            "hidden": false,
-            "inherits": [
-                "with_icu",
-                "gnu-optimized-size",
-                "static",
-                "gnu-release",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-release-static-size-without_icu",
-            "displayName": "*nix/GNU/Release/Static/Size/WithoutICU",
-            "description": "Release build with static linking and optimizations for size and without icu.",
-            "hidden": false,
-            "inherits": [
-                "without_icu",
-                "gnu-optimized-size",
-                "static",
-                "gnu-release",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-release-shared-size-with_icu",
-            "displayName": "*nix/GNU/Release/Shared/Size/WithICU",
-            "description": "Release build with shared linking and optimizations for size and with icu.",
-            "hidden": false,
-            "inherits": [
-                "with_icu",
-                "gnu-optimized-size",
-                "shared",
-                "gnu-release",
-                "nix-base"
-            ]
-        },
-        {
-            "name": "nix-gnu-release-shared-size-without_icu",
-            "displayName": "*nix/GNU/Release/Shared/Size/WithoutICU",
-            "description": "Release build with shared linking and optimizations for size and without icu.",
-            "hidden": false,
-            "inherits": [
-                "without_icu",
-                "gnu-optimized-size",
                 "shared",
                 "gnu-release",
                 "nix-base"
@@ -265,76 +130,28 @@
             ]
         },
         {
-            "name": "nix-gnu-debug-static-with_icu",
-            "displayName": "*nix/GNU/Debug/Static/WithICU",
+            "name": "nix-gnu-debug-static",
+            "displayName": "*nix/GNU/Debug/Static",
             "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-debug-static-with_icu"
+            "configurePreset": "nix-gnu-debug-static"
         },
         {
-            "name": "nix-gnu-debug-static-without_icu",
-            "displayName": "*nix/GNU/Debug/Static/WithoutICU",
+            "name": "nix-gnu-debug-shared",
+            "displayName": "*nix/GNU/Debug/Shared",
             "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-debug-static-without_icu"
+            "configurePreset": "nix-gnu-debug-shared"
         },
         {
-            "name": "nix-gnu-debug-shared-with_icu",
-            "displayName": "*nix/GNU/Debug/Shared/WithICU",
+            "name": "nix-gnu-release-static",
+            "displayName": "*nix/GNU/Release/Static",
             "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-debug-shared-with_icu"
+            "configurePreset": "nix-gnu-release-static"
         },
         {
-            "name": "nix-gnu-debug-shared-without_icu",
-            "displayName": "*nix/GNU/Debug/Shared/WithoutICU",
+            "name": "nix-gnu-release-shared",
+            "displayName": "*nix/GNU/Release/Shared",
             "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-debug-shared-without_icu"
-        },
-        {
-            "name": "nix-gnu-release-static-with_icu",
-            "displayName": "*nix/GNU/Release/Static/WithICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-static-with_icu"
-        },
-        {
-            "name": "nix-gnu-release-static-without_icu",
-            "displayName": "*nix/GNU/Release/Static/WithoutICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-static-without_icu"
-        },
-        {
-            "name": "nix-gnu-release-shared-with_icu",
-            "displayName": "*nix/GNU/Release/Shared/WithICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-shared-with_icu"
-        },
-        {
-            "name": "nix-gnu-release-shared-without_icu",
-            "displayName": "*nix/GNU/Release/Shared/WithoutICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-shared-without_icu"
-        },
-        {
-            "name": "nix-gnu-release-static-size-with_icu",
-            "displayName": "*nix/GNU/Release/Static/Size/WithICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-static-size-with_icu"
-        },
-        {
-            "name": "nix-gnu-release-static-size-without_icu",
-            "displayName": "*nix/GNU/Release/Static/Size/WithoutICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-static-size-without_icu"
-        },
-        {
-            "name": "nix-gnu-release-shared-size-with_icu",
-            "displayName": "*nix/GNU/Release/Shared/Size/WithICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-shared-size-with_icu"
-        },
-        {
-            "name": "nix-gnu-release-shared-size-without_icu",
-            "displayName": "*nix/GNU/Release/Shared/Size/WithoutICU",
-            "inherits": [ "nix-target-list" ],
-            "configurePreset": "nix-gnu-release-shared-size-without_icu"
+            "configurePreset": "nix-gnu-release-shared"
         }
     ]
 }

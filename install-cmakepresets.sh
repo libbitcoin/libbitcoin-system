@@ -354,21 +354,10 @@ handle_custom_options()
         ($PRESET_ID != "gnu-release") &&
         ($PRESET_ID != "static") &&
         ($PRESET_ID != "shared") &&
-        ($PRESET_ID != "gnu-optimized-size") &&
-        ($PRESET_ID != "with_icu") &&
-        ($PRESET_ID != "without_icu") &&
-        ($PRESET_ID != "nix-gnu-debug-static-with_icu") &&
-        ($PRESET_ID != "nix-gnu-debug-static-without_icu") &&
-        ($PRESET_ID != "nix-gnu-debug-shared-with_icu") &&
-        ($PRESET_ID != "nix-gnu-debug-shared-without_icu") &&
-        ($PRESET_ID != "nix-gnu-release-static-with_icu") &&
-        ($PRESET_ID != "nix-gnu-release-static-without_icu") &&
-        ($PRESET_ID != "nix-gnu-release-shared-with_icu") &&
-        ($PRESET_ID != "nix-gnu-release-shared-without_icu") &&
-        ($PRESET_ID != "nix-gnu-release-static-size-with_icu") &&
-        ($PRESET_ID != "nix-gnu-release-static-size-without_icu") &&
-        ($PRESET_ID != "nix-gnu-release-shared-size-with_icu") &&
-        ($PRESET_ID != "nix-gnu-release-shared-size-without_icu")]]; then
+        ($PRESET_ID != "nix-gnu-debug-static") &&
+        ($PRESET_ID != "nix-gnu-debug-shared") &&
+        ($PRESET_ID != "nix-gnu-release-static") &&
+        ($PRESET_ID != "nix-gnu-release-shared")]]; then
         display_error "Unsupported preset: $PRESET_ID"
         display_error "Supported values are:"
         display_error "  nix-base"
@@ -376,27 +365,16 @@ handle_custom_options()
         display_error "  gnu-release"
         display_error "  static"
         display_error "  shared"
-        display_error "  gnu-optimized-size"
-        display_error "  with_icu"
-        display_error "  without_icu"
-        display_error "  nix-gnu-debug-static-with_icu"
-        display_error "  nix-gnu-debug-static-without_icu"
-        display_error "  nix-gnu-debug-shared-with_icu"
-        display_error "  nix-gnu-debug-shared-without_icu"
-        display_error "  nix-gnu-release-static-with_icu"
-        display_error "  nix-gnu-release-static-without_icu"
-        display_error "  nix-gnu-release-shared-with_icu"
-        display_error "  nix-gnu-release-shared-without_icu"
-        display_error "  nix-gnu-release-static-size-with_icu"
-        display_error "  nix-gnu-release-static-size-without_icu"
-        display_error "  nix-gnu-release-shared-size-with_icu"
-        display_error "  nix-gnu-release-shared-size-without_icu"
+        display_error "  nix-gnu-debug-static"
+        display_error "  nix-gnu-debug-shared"
+        display_error "  nix-gnu-release-static"
+        display_error "  nix-gnu-release-shared"
         display_error ""
         display_help
         exit 1
     fi
 
-    BASE_PRESET_ID=${PRESET_ID/%-with*_*/}
+    BASE_PRESET_ID="$PRESET_ID"
     REPO_PRESET[libbitcoin-system]="$PRESET_ID"
     display_message "REPO_PRESET[libbitcoin-system]=${REPO_PRESET[libbitcoin-system]}"
 
