@@ -1,8 +1,8 @@
 {
     "folders": [
         {
-	    "path": "../../../libbitcoin-system"
-	}
+            "path": "../../../libbitcoin-system"
+        }
     ],
     "settings": {}
 }
