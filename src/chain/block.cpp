@@ -217,8 +217,8 @@ const inputs_cptr block::inputs_ptr() const NOEXCEPT
     const auto inputs = std::make_shared<input_cptrs>();
     const auto append_ins = [&inputs](const auto& tx) NOEXCEPT
     {
-        const auto& tx_ins = *tx->inputs_ptr();
-        inputs->insert(inputs->end(), tx_ins.begin(), tx_ins.end());
+        const auto& tx_ins = tx->inputs_ptr();
+        inputs->insert(inputs->end(), tx_ins->begin(), tx_ins->end());
     };
 
     std::for_each(txs_->begin(), txs_->end(), append_ins);
@@ -377,8 +377,8 @@ bool block::is_forward_reference() const NOEXCEPT
 
     const auto spend = [&spent, &hashes](const auto& tx) NOEXCEPT
     {
-        const auto& ins = *tx->inputs_ptr();
-        const auto forward = std::any_of(ins.begin(), ins.end(), spent);
+        const auto& ins = tx->inputs_ptr();
+        const auto forward = std::any_of(ins->begin(), ins->end(), spent);
         hashes.emplace(tx->get_hash(false));
         return forward;
     };
@@ -410,8 +410,8 @@ bool block::is_internal_double_spend() const NOEXCEPT
 
     const auto double_spent = [&spent](const auto& tx) NOEXCEPT
     {
-        const auto& ins = *tx->inputs_ptr();
-        return std::any_of(ins.begin(), ins.end(), spent);
+        const auto& ins = tx->inputs_ptr();
+        return std::any_of(ins->begin(), ins->end(), spent);
     };
 
     return std::any_of(tx1, txs_->end(), double_spent);
@@ -472,10 +472,10 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
     {
         // Insert the transaction hash.
         hashes.emplace((*tx)->get_hash(false));
-        const auto& inputs = *(*tx)->inputs_ptr();
+        const auto& inputs = (*tx)->inputs_ptr();
 
         // Insert all input point hashes.
-        for (const auto& input: inputs)
+        for (const auto& input: *inputs)
             hashes.emplace(input->point().hash());
     }
 
@@ -585,16 +585,16 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto& coinbase = *txs_->front();
-    if (coinbase.inputs_ptr()->empty())
+    const auto& coinbase = txs_->front();
+    if (coinbase->inputs_ptr()->empty())
         return false;
 
     // If there is a valid commitment, return false (valid).
     // Coinbase input witness must be 32 byte witness reserved value (bip141).
     // Last output of commitment pattern holds the committed value (bip141).
     hash_digest reserved{}, committed{};
-    if (coinbase.inputs_ptr()->front()->reserved_hash(reserved))
-        for (const auto& output: views_reverse(*coinbase.outputs_ptr()))
+    if (coinbase->inputs_ptr()->front()->reserved_hash(reserved))
+        for (const auto& output: views_reverse(*coinbase->outputs_ptr()))
             if (output->committed_hash(committed))
                 if (committed == sha256::double_hash(
                     generate_merkle_root(true), reserved))
