@@ -601,7 +601,7 @@
     <Import Project="$(NuGetPackageRoot)boost_program_options-vc143.1.78.0\build\boost_program_options-vc143.targets" Condition="Exists('$(NuGetPackageRoot)boost_program_options-vc143.1.78.0\build\boost_program_options-vc143.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_system-vc143.1.78.0\build\boost_system-vc143.targets" Condition="Exists('$(NuGetPackageRoot)boost_system-vc143.1.78.0\build\boost_system-vc143.targets')" />
     <Import Project="$(NuGetPackageRoot)boost_thread-vc143.1.78.0\build\boost_thread-vc143.targets" Condition="Exists('$(NuGetPackageRoot)boost_thread-vc143.1.78.0\build\boost_thread-vc143.targets')" />
-    <Import Project="$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets')" />
+    <Import Project="$(NuGetPackageRoot)secp256k1_vc143.0.1.0.21\build\native\secp256k1_vc143.targets" Condition="Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.21\build\native\secp256k1_vc143.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -616,7 +616,7 @@
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_program_options-vc143.1.78.0\build\boost_program_options-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_program_options-vc143.1.78.0\build\boost_program_options-vc143.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_system-vc143.1.78.0\build\boost_system-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_system-vc143.1.78.0\build\boost_system-vc143.targets'))" />
     <Error Condition="!Exists('$(NuGetPackageRoot)boost_thread-vc143.1.78.0\build\boost_thread-vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)boost_thread-vc143.1.78.0\build\boost_thread-vc143.targets'))" />
-    <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc143.0.1.0.20\build\native\secp256k1_vc143.targets'))" />
+    <Error Condition="!Exists('$(NuGetPackageRoot)secp256k1_vc143.0.1.0.21\build\native\secp256k1_vc143.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(NuGetPackageRoot)secp256k1_vc143.0.1.0.21\build\native\secp256k1_vc143.targets'))" />
   </Target>
   <ItemGroup>
     <Natvis Include="..\..\debug.natvis" />
