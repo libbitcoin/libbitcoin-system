@@ -308,4 +308,22 @@ BC_POP_WARNING()
             _mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
 #endif
 
+#if !defined(HAVE_SHANI)
+    #define mm_sha1msg1_epu32(a, b)             {}
+    #define mm_sha1msg2_epu32(a, b)             {}
+    #define mm_sha1rnds4_epu32(a, b, functor)   {}
+    #define mm_sha1nexte_epu32(a, b)            {}
+    #define mm_sha256msg1_epu32(a, b)           {}
+    #define mm_sha256msg2_epu32(a, b)           {}
+    #define mm_sha256rnds2_epu32(a, b, k)       {}
+#else
+    #define mm_sha1msg1_epu32(a, b)             _mm_sha1msg1_epu32(a, b)
+    #define mm_sha1msg2_epu32(a, b)             _mm_sha1msg2_epu32(a, b)
+    #define mm_sha1rnds4_epu32(a, b, functor)   _mm_sha1rnds4_epu32(a, b, functor)
+    #define mm_sha1nexte_epu32(a, b)            _mm_sha1nexte_epu32(a, b)
+    #define mm_sha256msg1_epu32(a, b)           _mm_sha256msg1_epu32(a, b)
+    #define mm_sha256msg2_epu32(a, b)           _mm_sha256msg2_epu32(a, b)
+    #define mm_sha256rnds2_epu32(a, b, k)       _mm_sha256rnds2_epu32(a, b, k)
+#endif
+
 #endif
