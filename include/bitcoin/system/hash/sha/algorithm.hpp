@@ -306,7 +306,7 @@ protected:
         auto x6, auto x7, auto x8) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static void prepare_dispatch(buffer_t& buffer) NOEXCEPT;
+    INLINE static void prepare_invoke(buffer_t& buffer) NOEXCEPT;
     INLINE static void schedule_invoke(buffer_t& buffer) NOEXCEPT;
     INLINE static void schedule_dispatch(auto& buffer) NOEXCEPT;
 

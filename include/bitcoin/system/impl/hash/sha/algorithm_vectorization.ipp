@@ -413,7 +413,7 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    // RUNTIME INTRINSIC CHECK
+    // Compile time intrinsic check.
     if (blocks.size() >= lanes && have<xWord>())
     {
         static auto initial = pack<xWord>(H::get);
@@ -527,7 +527,7 @@ iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    // RUNTIME INTRINSIC CHECK
+    // Compile time intrinsic check.
     if (blocks.size() >= lanes && have<xWord>())
     {
         BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
@@ -604,7 +604,7 @@ sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
 TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare_dispatch(buffer_t& buffer) NOEXCEPT
+prepare_invoke(buffer_t& buffer) NOEXCEPT
 {
     // Requires avx512 for sha512 and avx2 for sha256.
     // sigma0x8 message scheduling for single block iteration.
@@ -672,20 +672,20 @@ TEMPLATE
 INLINE void CLASS::
 schedule_invoke(buffer_t& buffer) NOEXCEPT
 {
-    // RUNTIME INTRINSIC CHECK
+    // Compile time intrinsic check.
     if (have_lanes<word_t, 8>())
     {
-        prepare_dispatch<16>(buffer);
-        prepare_dispatch<24>(buffer);
-        prepare_dispatch<32>(buffer);
-        prepare_dispatch<40>(buffer);
-        prepare_dispatch<48>(buffer);
-        prepare_dispatch<56>(buffer);
+        prepare_invoke<16>(buffer);
+        prepare_invoke<24>(buffer);
+        prepare_invoke<32>(buffer);
+        prepare_invoke<40>(buffer);
+        prepare_invoke<48>(buffer);
+        prepare_invoke<56>(buffer);
 
         if constexpr (SHA::rounds == 80)
         {
-            prepare_dispatch<64>(buffer);
-            prepare_dispatch<72>(buffer);
+            prepare_invoke<64>(buffer);
+            prepare_invoke<72>(buffer);
         }
 
         add_k(buffer);
