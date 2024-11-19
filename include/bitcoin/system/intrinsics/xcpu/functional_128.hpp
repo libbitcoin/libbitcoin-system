@@ -231,7 +231,7 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
     return a;
 }
 
-// SSSE3
+// SSE3
 template <typename Word, if_same<Word, uint16_t> = true>
 INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
@@ -241,7 +241,7 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
     return mm_shuffle_epi8(a, mask);
 }
 
-// SSSE3
+// SSE3
 template <typename Word, if_same<Word, uint32_t> = true>
 INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
@@ -251,7 +251,7 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
     return mm_shuffle_epi8(a, mask);
 }
 
-// SSSE3
+// SSE3
 template <typename Word, if_same<Word, uint64_t> = true>
 INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
