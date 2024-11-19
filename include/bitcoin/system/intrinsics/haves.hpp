@@ -123,6 +123,7 @@ inline bool try_avx512() NOEXCEPT
         && get_bit<xcr0::sse_bit>(extended)
         && get_bit<xcr0::avx_bit>(extended)
         && get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf)
+        && get_bit<cpu7_0::avx2_ebx_bit>(ebx)       // AVX2 (implied?)
         && get_bit<cpu7_0::avx512bw_ebx_bit>(ebx);  // AVX512BW
 }
 
@@ -157,8 +158,6 @@ constexpr bool try_neon() NOEXCEPT
 /// Type system helpers.
 /// ---------------------------------------------------------------------------
 /// xint types are always defined, though are mocked when not compiled.
-/// Use with_ constants to check for compiled option and have_ functions to
-/// check for runtime API availability. This enables mostly unconditional code.
 
 template <typename Type>
 constexpr auto is_extended =
@@ -182,8 +181,7 @@ using to_extended =
                         iif<is_one(capacity<xint256_t, Integral, Lanes>), xint256_t,
                             xint512_t>>>>>>;
 
-/// Runtime time availability of extended integer intrinsics, as a template
-/// function of the extended integer type.
+/// Availability of extended integer intrinsics.
 template <typename Extended, if_extended<Extended> = true>
 inline bool have() NOEXCEPT
 {
@@ -196,7 +194,7 @@ inline bool have() NOEXCEPT
     else return false;
 }
 
-/// Runtime time availability of extended integer filled by Lanes Integrals.
+/// Availability of extended integer filled by Lanes Integrals.
 template <typename Integral, size_t Lanes,
     if_integral_integer<Integral> = true>
 inline bool have_lanes() NOEXCEPT
