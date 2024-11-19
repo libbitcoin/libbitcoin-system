@@ -413,36 +413,38 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    // Compile time intrinsic check.
-    if (blocks.size() >= lanes && have<xWord>())
+    if constexpr (have<xWord>())
     {
-        static auto initial = pack<xWord>(H::get);
-        BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
-        xbuffer_t<xWord> xbuffer;
-        BC_POP_WARNING()
-
-        do
+        if (blocks.size() >= lanes)
         {
-            auto xstate = initial;
+            static auto initial = pack<xWord>(H::get);
+            BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
+            xbuffer_t<xWord> xbuffer;
+            BC_POP_WARNING()
 
-            // input() advances block iterator by lanes.
-            input(xbuffer, blocks);
-            schedule(xbuffer);
-            compress(xstate, xbuffer);
-            schedule_1(xbuffer);
-            compress(xstate, xbuffer);
+            do
+            {
+                auto xstate = initial;
 
-            // Second hash
-            input(xbuffer, xstate);
-            pad_half(xbuffer);
-            schedule(xbuffer);
-            xstate = initial;
-            compress(xstate, xbuffer);
+                // input() advances block iterator by lanes.
+                input(xbuffer, blocks);
+                schedule(xbuffer);
+                compress(xstate, xbuffer);
+                schedule_1(xbuffer);
+                compress(xstate, xbuffer);
 
-            // output() advances digest iterator by lanes.
-            output(digests, xstate);
+                // Second hash
+                input(xbuffer, xstate);
+                pad_half(xbuffer);
+                schedule(xbuffer);
+                xstate = initial;
+                compress(xstate, xbuffer);
+
+                // output() advances digest iterator by lanes.
+                output(digests, xstate);
+            }
+            while (blocks.size() >= lanes);
         }
-        while (blocks.size() >= lanes);
     }
 }
 
@@ -527,21 +529,22 @@ iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    // Compile time intrinsic check.
-    if (blocks.size() >= lanes && have<xWord>())
+    if constexpr (have<xWord>())
     {
-        BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
-        xbuffer_t<xWord> xbuffer;
-        BC_POP_WARNING()
-
-        do
+        if (blocks.size() >= lanes)
         {
-            // input() advances block iterator by lanes.
-            input(xbuffer, blocks);
-            schedule_(xbuffer);
-            compress_dispatch(state, xbuffer);
+            BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
+            xbuffer_t<xWord> xbuffer;
+            BC_POP_WARNING()
+
+            do
+            {
+                // input() advances block iterator by lanes.
+                input(xbuffer, blocks);
+                schedule_(xbuffer);
+                compress_dispatch(state, xbuffer);
+            } while (blocks.size() >= lanes);
         }
-        while (blocks.size() >= lanes);
     }
 }
 
@@ -672,8 +675,7 @@ TEMPLATE
 INLINE void CLASS::
 schedule_invoke(buffer_t& buffer) NOEXCEPT
 {
-    // Compile time intrinsic check.
-    if (have_lanes<word_t, 8>())
+    if constexpr (have_lanes<word_t, 8>())
     {
         prepare_invoke<16>(buffer);
         prepare_invoke<24>(buffer);

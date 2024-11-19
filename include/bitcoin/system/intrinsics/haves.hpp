@@ -183,7 +183,7 @@ using to_extended =
 
 /// Availability of extended integer intrinsics.
 template <typename Extended, if_extended<Extended> = true>
-inline bool have() NOEXCEPT
+constexpr bool have() NOEXCEPT
 {
     if constexpr (is_same_type<Extended, xint512_t>)
         return with_avx512;
@@ -191,13 +191,14 @@ inline bool have() NOEXCEPT
         return with_avx2;
     else if constexpr (is_same_type<Extended, xint128_t>)
         return with_sse41;
-    else return false;
+    else
+        return false;
 }
 
 /// Availability of extended integer filled by Lanes Integrals.
 template <typename Integral, size_t Lanes,
     if_integral_integer<Integral> = true>
-inline bool have_lanes() NOEXCEPT
+constexpr bool have_lanes() NOEXCEPT
 {
     if constexpr (capacity<xint512_t, Integral> == Lanes)
         return with_avx512;
@@ -205,7 +206,8 @@ inline bool have_lanes() NOEXCEPT
         return with_avx2;
     else if constexpr (capacity<xint128_t, Integral> == Lanes)
         return with_sse41;
-    else return false;
+    else
+        return false;
 }
 
 BC_POP_WARNING()
