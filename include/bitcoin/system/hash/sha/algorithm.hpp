@@ -209,15 +209,21 @@ private:
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
 /// Compression.
-/// -----------------------------------------------------------------------
+/// ---------------------------------------------------------------------------
 protected:
-public:
-    static constexpr auto have_shani = Compressed && system::with_shani;
-    static constexpr auto have_neon = Compressed && system::with_neon;
-    static constexpr auto compression = have_shani || have_neon;
+    /// Compression does not change the buffer size (not expanded), just
+    /// its "shape". Four words are buffered into one xint128_t, resulting
+    /// in 1/4 the buffer array size and number of rounds. Four state words are
+    /// packed into each of two state variables. This applies to sha160 and 
+    /// sha256, but sha512 compression is not supported.
+    using cword_t = xint128_t;
+    static constexpr auto cratio = sizeof(cword_t) / SHA::word_bytes;
+    static constexpr auto crounds = SHA::rounds / cratio;
+    using cbuffer_t = std_array<cword_t, crounds>;
+    using cstate_t = std_array<xint128_t, two>;
 
 /// Vectorization.
-/// -----------------------------------------------------------------------
+/// ---------------------------------------------------------------------------
 protected:
     /// Extended integer capacity for uint32_t/uint64_t is 2/4/8/16 only.
     template <size_t Lanes>
@@ -311,10 +317,13 @@ protected:
     INLINE static void schedule_dispatch(auto& buffer) NOEXCEPT;
 
 public:
+    static constexpr auto have_neon = Compressed && system::with_neon;
+    static constexpr auto have_shani = Compressed && system::with_shani;
+    static constexpr auto compression = have_shani || have_neon;
+
     static constexpr auto have_x128 = Vectorized && system::with_sse41;
     static constexpr auto have_x256 = Vectorized && system::with_avx2;
     static constexpr auto have_x512 = Vectorized && system::with_avx512;
-
     static constexpr auto vectorization = (have_x128 || have_x256 || have_x512)
         && !(build_x32 && is_same_size<word_t, uint64_t>);
 
