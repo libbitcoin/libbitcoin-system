@@ -31,55 +31,55 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 TEMPLATE
 template <size_t Word, size_t Lanes>
 INLINE auto CLASS::
-pack(const wblock_t<Lanes>& wblock) NOEXCEPT
+pack(const xblock_t<Lanes>& xblock) NOEXCEPT
 {
     using xword = to_extended<word_t, Lanes>;
 
     if constexpr (Lanes == 2)
     {
         return byteswap<word_t>(set<xword>(
-            wblock[0][Word],
-            wblock[1][Word]));
+            xblock[0][Word],
+            xblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
         return byteswap<word_t>(set<xword>(
-            wblock[0][Word],
-            wblock[1][Word],
-            wblock[2][Word],
-            wblock[3][Word]));
+            xblock[0][Word],
+            xblock[1][Word],
+            xblock[2][Word],
+            xblock[3][Word]));
     }
     else if constexpr (Lanes == 8)
     {
         return byteswap<word_t>(set<xword>(
-            wblock[0][Word],
-            wblock[1][Word],
-            wblock[2][Word],
-            wblock[3][Word],
-            wblock[4][Word],
-            wblock[5][Word],
-            wblock[6][Word],
-            wblock[7][Word]));
+            xblock[0][Word],
+            xblock[1][Word],
+            xblock[2][Word],
+            xblock[3][Word],
+            xblock[4][Word],
+            xblock[5][Word],
+            xblock[6][Word],
+            xblock[7][Word]));
     }
     else if constexpr (Lanes == 16)
     {
         return byteswap<word_t>(set<xword>(
-            wblock[ 0][Word],
-            wblock[ 1][Word],
-            wblock[ 2][Word],
-            wblock[ 3][Word],
-            wblock[ 4][Word],
-            wblock[ 5][Word],
-            wblock[ 6][Word],
-            wblock[ 7][Word],
-            wblock[ 8][Word],
-            wblock[ 9][Word],
-            wblock[10][Word],
-            wblock[11][Word],
-            wblock[12][Word],
-            wblock[13][Word],
-            wblock[14][Word],
-            wblock[15][Word]));
+            xblock[ 0][Word],
+            xblock[ 1][Word],
+            xblock[ 2][Word],
+            xblock[ 3][Word],
+            xblock[ 4][Word],
+            xblock[ 5][Word],
+            xblock[ 6][Word],
+            xblock[ 7][Word],
+            xblock[ 8][Word],
+            xblock[ 9][Word],
+            xblock[10][Word],
+            xblock[11][Word],
+            xblock[12][Word],
+            xblock[13][Word],
+            xblock[14][Word],
+            xblock[15][Word]));
     }
 }
 
@@ -90,23 +90,23 @@ input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
-    const auto& wblock = array_cast<words_t>(blocks.template to_array<lanes>());
-    xbuffer[0] = pack<0>(wblock);
-    xbuffer[1] = pack<1>(wblock);
-    xbuffer[2] = pack<2>(wblock);
-    xbuffer[3] = pack<3>(wblock);
-    xbuffer[4] = pack<4>(wblock);
-    xbuffer[5] = pack<5>(wblock);
-    xbuffer[6] = pack<6>(wblock);
-    xbuffer[7] = pack<7>(wblock);
-    xbuffer[8] = pack<8>(wblock);
-    xbuffer[9] = pack<9>(wblock);
-    xbuffer[10] = pack<10>(wblock);
-    xbuffer[11] = pack<11>(wblock);
-    xbuffer[12] = pack<12>(wblock);
-    xbuffer[13] = pack<13>(wblock);
-    xbuffer[14] = pack<14>(wblock);
-    xbuffer[15] = pack<15>(wblock);
+    const auto& xblock = array_cast<words_t>(blocks.template to_array<lanes>());
+    xbuffer[0] = pack<0>(xblock);
+    xbuffer[1] = pack<1>(xblock);
+    xbuffer[2] = pack<2>(xblock);
+    xbuffer[3] = pack<3>(xblock);
+    xbuffer[4] = pack<4>(xblock);
+    xbuffer[5] = pack<5>(xblock);
+    xbuffer[6] = pack<6>(xblock);
+    xbuffer[7] = pack<7>(xblock);
+    xbuffer[8] = pack<8>(xblock);
+    xbuffer[9] = pack<9>(xblock);
+    xbuffer[10] = pack<10>(xblock);
+    xbuffer[11] = pack<11>(xblock);
+    xbuffer[12] = pack<12>(xblock);
+    xbuffer[13] = pack<13>(xblock);
+    xbuffer[14] = pack<14>(xblock);
+    xbuffer[15] = pack<15>(xblock);
     blocks.template advance<lanes>();
 }
 

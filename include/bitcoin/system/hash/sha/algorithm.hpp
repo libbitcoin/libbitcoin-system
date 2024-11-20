@@ -225,7 +225,7 @@ protected:
         (Lanes == 16u || Lanes == 8u || Lanes == 4u || Lanes == 2u);
 
     template <size_t Lanes, bool_if<is_valid_lanes<Lanes>> = true>
-    using wblock_t = std_array<words_t, Lanes>;
+    using xblock_t = std_array<words_t, Lanes>;
     template <typename xWord, if_extended<xWord> = true>
     using xbuffer_t = std_array<xWord, SHA::rounds>;
     template <typename xWord, if_extended<xWord> = true>
@@ -238,7 +238,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     template <size_t Word, size_t Lanes>
-    INLINE static auto pack(const wblock_t<Lanes>& wblock) NOEXCEPT;
+    INLINE static auto pack(const xblock_t<Lanes>& xblock) NOEXCEPT;
 
     template <typename xWord>
     INLINE static void input(xbuffer_t<xWord>& xbuffer,
