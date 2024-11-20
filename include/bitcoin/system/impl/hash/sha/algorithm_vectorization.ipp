@@ -454,7 +454,7 @@ merkle_hash_dispatch(digests_t& digests) NOEXCEPT
 {
     // Merkle vector dispatch.
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
-    auto offset = zero;
+    auto next = zero;
 
     if (digests.size() >= min_lanes * two)
     {
@@ -462,7 +462,7 @@ merkle_hash_dispatch(digests_t& digests) NOEXCEPT
         const auto size = digests.size() * array_count<digest_t>;
         auto iblocks = iblocks_t{ size, data };
         auto idigests = idigests_t{ to_half(size), data };
-        const auto blocks = iblocks.size();
+        const auto start = iblocks.size();
 
         // Merkle hash vector dispatch.
         if constexpr (have_x512)
@@ -473,11 +473,11 @@ merkle_hash_dispatch(digests_t& digests) NOEXCEPT
             merkle_hash_invoke<xint128_t>(idigests, iblocks);
 
         // iblocks.size() is reduced by vectorization.
-        offset = blocks - iblocks.size();
+        next = start - iblocks.size();
     }
 
     // Complete rounds using normal form.
-    merkle_hash_(digests, offset);
+    merkle_hash_(digests, next);
 }
 
 // Message Schedule (block vectorization).
@@ -552,6 +552,7 @@ TEMPLATE
 INLINE void CLASS::
 iterate_dispatch(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
+    // Schedule iteration vector dispatch.
     if (blocks.size() >= min_lanes)
     {
         // Schedule iteration vector dispatch.
@@ -610,9 +611,6 @@ INLINE void CLASS::
 prepare_invoke(buffer_t& buffer) NOEXCEPT
 {
     // Requires avx512 for sha512 and avx2 for sha256.
-    // sigma0x8 message scheduling for single block iteration.
-    // Tests of adding sigma1x2 half lanes vectorization show loss ~10%.
-    // Tests of adding sigma0x8 full lanes vectorization show a gain of ~5%.
     // The simplicity of sha160 message prepare precludes this optimization.
     static_assert(SHA::strength != 160);
 
@@ -622,6 +620,10 @@ prepare_invoke(buffer_t& buffer) NOEXCEPT
     constexpr auto r16 = Round - 16;
     constexpr auto s = SHA::word_bits;
 
+    // sigma0x8 message scheduling for single block iteration.
+    // Does not alter buffer structure, fully private to this method.
+    // Tests of adding sigma1x2 half lanes vectorization show loss ~10%.
+    // Tests of adding sigma0x8 full lanes vectorization show a gain of ~5%.
     const auto xr15 = sigma0_8<to_extended<word_t, 8>>(
         buffer[add0(r15)], buffer[add1(r15)],
         buffer[add2(r15)], buffer[add3(r15)],

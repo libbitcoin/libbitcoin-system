@@ -199,21 +199,14 @@ INLINE constexpr void CLASS::
 round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto wk) NOEXCEPT
 {
-    // TODO: if open lanes, vectorize Sigma0 and Sigma1 (see Intel).
+    // If open lanes, can vectorize Sigma0(e) with Sigma1(a) (intel).
+    // This can apparently be doubled with eliminatin of the temporary (intel).
     constexpr auto s = SHA::word_bits;
     const auto t = f::add<s>(f::add<s>(f::add<s>(Sigma1(e), choice(e, f, g)), h), wk);
     d = /*e =*/    f::add<s>(d, t);
     h = /*a =*/    f::add<s>(f::add<s>(Sigma0(a), majority(a, b, c)), t);
 
-    // Rounds can be cut in half and this round doubled (intel paper).
-    // Avoids the need for a temporary variable and aligns with SHA-NI.
-    // Removing the temporary eliminates 2x64 instructions from the assembly.
-    // h = /*a =*/ SIGMA0(a) + SIGMA1(e) + majority(a, b, c) +
-    //             choice(e, f, g) + (k + w) + h;
-    // d = /*e =*/ SIGMA1(e) + choice(e, f, g) + (k + w) + h + d;
-    //
-    // Each call is 2 rounds, 4 rounds total.
-    // s, w and k are 128 (4 words each, s1/s2 is 8 word state).
+    // Each call is 2 rounds, s, w and k are 128 (4 words each, s1/s2 is 8 word state).
     // SHA-NI
     //     const auto value = add(w, k);
     //     abcd = sha256rnds2(abcd, efgh, value);
@@ -264,7 +257,7 @@ round(auto& state, const auto& wk) NOEXCEPT
             extract<word, Lane>(wk[Round]));
         BC_POP_WARNING()
 
-        // SNA-NI/NEON
+        // SHA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
         // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
@@ -413,6 +406,7 @@ prepare(auto& buffer) NOEXCEPT
         buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
 
         // SHA-NI
+
         //     buffer[Round] = sha1msg2 // xor and rotl1
         //     (
         //         xor                // not using sha1msg1
@@ -451,9 +445,8 @@ prepare(auto& buffer) NOEXCEPT
         // Not sure about these indexes.
         // mijailovic.net/2018/06/06/sha256-armv8
         // buffer[Round] =
-        //     vsha256su0q(buffer[Round - 13], buffer[Round - 9])
-        //     vsha256su1q(buffer[Round - 13], buffer[Round - 5],
-        //                 buffer[Round - 1]);
+        //     vsha256su0q(buffer[Round - 13], buffer[Round - 9]) +
+        //     vsha256su1q(buffer[Round - 13], buffer[Round - 5], buffer[Round - 1]);
     }
 }
 
@@ -872,13 +865,13 @@ TEMPLATE
 constexpr void CLASS::
 schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
 {
-    // This optimization is saves ~30% in message scheduling for one out of
-    // N blocks: (N + 70%)/(N + 100%). So the proportional benefit decreases
-    // exponentially with increasing N. For arbitrary data lengths this will
-    // benefit 1/64 hashes on average. All array-sized n-block hashes have
-    // precomputed schedules - this benefits only finalized chunk hashing.
-    // Testing shows a 5% performance improvement for 128 byte chunk hashes.
-    // Accumulator passes all write() of more than one block here.
+    // This optimization saves ~30% in message scheduling for one out of N
+    // blocks: (N + 70%)/(N + 100%). So benefit decreases with increasing N.
+    // For arbitrary data lengths this will benefit 1/64 hashes on average.
+    // All array-sized n-block hashes have precomputed schedules - this
+    // benefits only finalized chunk hashing. Testing shows a 5% performance
+    // improvement for 128 byte chunk hashes. Accumulator passes all write()
+    // of more than one block here.
     if constexpr (caching)
     {
         switch (blocks)

@@ -197,7 +197,7 @@ protected:
     /// Merkle iteration.
     /// -----------------------------------------------------------------------
     VCONSTEXPR static void merkle_hash_(digests_t& digests,
-        size_t offset = zero) NOEXCEPT;
+        size_t offset=zero) NOEXCEPT;
 
 private:
     using pad_t = std_array<word_t, subtract(SHA::block_words,
@@ -311,11 +311,13 @@ protected:
     INLINE static void schedule_dispatch(auto& buffer) NOEXCEPT;
 
 public:
-    static constexpr auto have_x128     = Vectorized && system::with_sse41;
-    static constexpr auto have_x256     = Vectorized && system::with_avx2;
-    static constexpr auto have_x512     = Vectorized && system::with_avx512;
+    static constexpr auto have_x128 = Vectorized && system::with_sse41;
+    static constexpr auto have_x256 = Vectorized && system::with_avx2;
+    static constexpr auto have_x512 = Vectorized && system::with_avx512;
+
     static constexpr auto vectorization = (have_x128 || have_x256 || have_x512)
         && !(build_x32 && is_same_size<word_t, uint64_t>);
+
     static constexpr auto min_lanes =
         (have_x128 ? bytes<128> :
             (have_x256 ? bytes<256> :
