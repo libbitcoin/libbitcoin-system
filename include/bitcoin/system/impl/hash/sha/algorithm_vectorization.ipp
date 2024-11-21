@@ -367,35 +367,35 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     BC_ASSERT(digests.size() >= lanes);
 
-    auto& wdigest = array_cast<digest_t>(digests.template to_array<lanes>());
+    auto& xdigest = array_cast<digest_t>(digests.template to_array<lanes>());
 
-    wdigest[0] = unpack<0>(xstate);
-    wdigest[1] = unpack<1>(xstate);
+    xdigest[0] = unpack<0>(xstate);
+    xdigest[1] = unpack<1>(xstate);
 
     if constexpr (lanes >= 4)
     {
-        wdigest[2] = unpack<2>(xstate);
-        wdigest[3] = unpack<3>(xstate);
+        xdigest[2] = unpack<2>(xstate);
+        xdigest[3] = unpack<3>(xstate);
     }
 
     if constexpr (lanes >= 8)
     {
-        wdigest[4] = unpack<4>(xstate);
-        wdigest[5] = unpack<5>(xstate);
-        wdigest[6] = unpack<6>(xstate);
-        wdigest[7] = unpack<7>(xstate);
+        xdigest[4] = unpack<4>(xstate);
+        xdigest[5] = unpack<5>(xstate);
+        xdigest[6] = unpack<6>(xstate);
+        xdigest[7] = unpack<7>(xstate);
     }
 
     if constexpr (lanes >= 16)
     {
-        wdigest[8] = unpack<8>(xstate);
-        wdigest[9] = unpack<9>(xstate);
-        wdigest[10] = unpack<10>(xstate);
-        wdigest[11] = unpack<11>(xstate);
-        wdigest[12] = unpack<12>(xstate);
-        wdigest[13] = unpack<13>(xstate);
-        wdigest[14] = unpack<14>(xstate);
-        wdigest[15] = unpack<15>(xstate);
+        xdigest[8] = unpack<8>(xstate);
+        xdigest[9] = unpack<9>(xstate);
+        xdigest[10] = unpack<10>(xstate);
+        xdigest[11] = unpack<11>(xstate);
+        xdigest[12] = unpack<12>(xstate);
+        xdigest[13] = unpack<13>(xstate);
+        xdigest[14] = unpack<14>(xstate);
+        xdigest[15] = unpack<15>(xstate);
     }
 
     digests.template advance<lanes>();
