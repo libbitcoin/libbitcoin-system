@@ -434,7 +434,7 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
                 compress(xstate, xbuffer);
 
                 // Second hash
-                input(xbuffer, xstate);
+                reinput(xbuffer, xstate);
                 pad_half(xbuffer);
                 schedule(xbuffer);
                 xstate = initial;

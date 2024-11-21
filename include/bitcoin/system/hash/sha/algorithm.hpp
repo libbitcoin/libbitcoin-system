@@ -163,13 +163,14 @@ protected:
     INLINE static constexpr void schedule_(auto& buffer) NOEXCEPT;
     static constexpr void schedule(auto& buffer) NOEXCEPT;
 
-    INLINE static constexpr void input(auto& buffer, const auto& state) NOEXCEPT;
+    /// A double hash optimization (hashing the output of the first hash).
+    INLINE static constexpr void reinput(auto& buffer, const auto& state) NOEXCEPT;
 
-    /// Parsing
+    /// Parsing (endian sensitive)
     /// -----------------------------------------------------------------------
     INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
-    INLINE static constexpr void input1(buffer_t& buffer, const half_t& half) NOEXCEPT;
-    INLINE static constexpr void input2(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    INLINE static constexpr void input_left(buffer_t& buffer, const half_t& half) NOEXCEPT;
+    INLINE static constexpr void input_right(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
     /// Padding

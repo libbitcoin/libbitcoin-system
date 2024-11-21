@@ -592,9 +592,8 @@ summarize(auto& out, const auto& in) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input(auto& buffer, const auto& state) NOEXCEPT
+reinput(auto& buffer, const auto& state) NOEXCEPT
 {
-    // This is a double hash optimization.
     if (std::is_constant_evaluated())
     {
         buffer[0] = state[0];
@@ -674,7 +673,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input1(buffer_t& buffer, const half_t& half) NOEXCEPT
+input_left(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
@@ -710,7 +709,7 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input2(buffer_t& buffer, const half_t& half) NOEXCEPT
+input_right(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
@@ -1019,7 +1018,7 @@ hash(const state_t& state) NOEXCEPT
 
     buffer_t buffer{};
     auto state2 = H::get;
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     compress(state2, buffer);
@@ -1032,7 +1031,7 @@ hash(const half_t& half) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, half);
+    input_left(buffer, half);
     pad_half(buffer);
     schedule(buffer);
     compress(state, buffer);
@@ -1045,8 +1044,8 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, left);
-    input2(buffer, right);
+    input_left(buffer, left);
+    input_right(buffer, right);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
@@ -1072,7 +1071,7 @@ double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1096,7 +1095,7 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1120,7 +1119,7 @@ double_hash(const block_t& block) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1136,13 +1135,13 @@ double_hash(const half_t& half) NOEXCEPT
 
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, half);
+    input_left(buffer, half);
     pad_half(buffer);
     schedule(buffer);
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1158,15 +1157,15 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, left);
-    input2(buffer, right);
+    input_left(buffer, left);
+    input_right(buffer, right);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1339,7 +1338,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     auto state2 = H::get;
