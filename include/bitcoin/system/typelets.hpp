@@ -68,12 +68,13 @@ constexpr bool is_integral = std::is_integral_v<std::decay_t<Type>> &&
 
 /// numeric_limits may be specialized by non-integrals (such as uintx).
 template <typename Type>
-constexpr bool is_integer = std::numeric_limits<std::decay_t<Type>>::is_integer &&
-    !is_same_type<Type, bool>;
+constexpr bool is_integer = std::numeric_limits<std::decay_t<Type>>::is_integer
+    && !is_same_type<Type, bool>;
 
-/// Excludes non-integral integers (such as uintx).
+/// Excludes non-integral integers (such as uintx). Because bool is excluded,
+/// all integrals are integers.
 template <typename Type>
-constexpr bool is_integral_integer = is_integral<Type> && is_integer<Type>;
+constexpr bool is_integral_integer = is_integral<Type> /*&& is_integer<Type>*/;
 
 /// Constrained to is_integral types.
 template <typename Type, std::enable_if_t<is_integral_size<Type>, bool> = true>
