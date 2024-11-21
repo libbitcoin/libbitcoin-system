@@ -627,8 +627,8 @@ prepare8(buffer_t& buffer) NOEXCEPT
 
     // sigma0x8 message scheduling for single block iteration.
     // Does not alter buffer structure, fully private to this method.
-    // Tests of adding sigma1x2 half lanes vectorization show loss ~10%.
-    // Tests of adding sigma0x8 full lanes vectorization show a gain of ~5%.
+    // Tests of adding sigma1x2 half lanes vectorization show loss of ~10%.
+    // Tests of adding sigma0x8 full lanes vectorization show gain of ~5%.
     constexpr auto r15 = Round - 15;
     const auto xsigma0 = sigma0_8<to_extended<word_t, 8>>(
         buffer[r15 + 0], buffer[r15 + 1], buffer[r15 + 2], buffer[r15 + 3],
