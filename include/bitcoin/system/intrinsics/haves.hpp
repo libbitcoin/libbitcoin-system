@@ -197,7 +197,7 @@ constexpr bool have() NOEXCEPT
 
 /// Availability of extended integer filled by Lanes Integrals.
 template <typename Integral, size_t Lanes,
-    if_integral_integer<Integral> = true>
+    if_integral<Integral> = true>
 constexpr bool have_lanes() NOEXCEPT
 {
     if constexpr (capacity<xint512_t, Integral> == Lanes)
@@ -208,6 +208,14 @@ constexpr bool have_lanes() NOEXCEPT
         return with_sse41;
     else
         return false;
+}
+
+/// Availability of extended integer, override for non-integral word.
+template <typename Integral, size_t Lanes,
+    if_non_integral<Integral> = true>
+constexpr bool have_lanes() NOEXCEPT
+{
+    return false;
 }
 
 BC_POP_WARNING()
