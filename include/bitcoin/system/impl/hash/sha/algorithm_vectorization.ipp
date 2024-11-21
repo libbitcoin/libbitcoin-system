@@ -24,6 +24,7 @@ namespace system {
 namespace sha {
 
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
 
 // Common.
 // ----------------------------------------------------------------------------
@@ -418,9 +419,7 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
         if (blocks.size() >= lanes)
         {
             static auto initial = pack<xWord>(H::get);
-            BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
             xbuffer_t<xWord> xbuffer;
-            BC_POP_WARNING()
 
             do
             {
@@ -452,7 +451,6 @@ TEMPLATE
 INLINE void CLASS::
 merkle_hash_dispatch(digests_t& digests) NOEXCEPT
 {
-    // Merkle vector dispatch.
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
     auto next = zero;
 
@@ -487,7 +485,7 @@ merkle_hash_dispatch(digests_t& digests) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-compress_dispatch(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+compress_invoke(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
 
@@ -533,16 +531,14 @@ iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT
     {
         if (blocks.size() >= lanes)
         {
-            BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
             xbuffer_t<xWord> xbuffer;
-            BC_POP_WARNING()
 
             do
             {
                 // input() advances block iterator by lanes.
                 input(xbuffer, blocks);
                 schedule_(xbuffer);
-                compress_dispatch(state, xbuffer);
+                compress_invoke(state, xbuffer);
             } while (blocks.size() >= lanes);
         }
     }
@@ -552,7 +548,6 @@ TEMPLATE
 INLINE void CLASS::
 iterate_dispatch(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    // Schedule iteration vector dispatch.
     if (blocks.size() >= min_lanes)
     {
         // Schedule iteration vector dispatch.
@@ -645,10 +640,19 @@ prepare8(buffer_t& buffer) NOEXCEPT
 }
 
 TEMPLATE
+template <typename xWord>
 INLINE void CLASS::
-schedule_invoke(buffer_t& buffer) NOEXCEPT
+schedule_dispatch(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
-    if constexpr (have_lanes<word_t, 8>())
+    // Merkle extended buffer is not schedule dispatched.
+    schedule_(xbuffer);
+}
+
+TEMPLATE
+INLINE void CLASS::
+schedule_dispatch(buffer_t& buffer) NOEXCEPT
+{
+    if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>())
     {
         prepare8<16>(buffer);
         prepare8<24>(buffer);
@@ -671,27 +675,7 @@ schedule_invoke(buffer_t& buffer) NOEXCEPT
     }
 }
 
-TEMPLATE
-INLINE void CLASS::
-schedule_dispatch(auto& buffer) NOEXCEPT
-{
-    // buffer may be vectorized via merkle execution path.
-    using word = decltype(buffer.front());
-
-    // Schedule prepare vector dispatch.
-    if constexpr ((SHA::strength != 160) && is_same_type<word, word_t> &&
-                 ((have_x512 && (capacity<xint512_t, word_t> == 8u)) ||
-                  (have_x256 && (capacity<xint256_t, word_t> == 8u)) ||
-                  (have_x128 && (capacity<xint128_t, word_t> == 8u))))
-    {
-        schedule_invoke(buffer);
-    }
-    else
-    {
-        schedule_(buffer);
-    }
-}
-
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 } // namespace sha

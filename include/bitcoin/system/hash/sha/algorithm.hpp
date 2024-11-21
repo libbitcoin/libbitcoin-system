@@ -293,7 +293,7 @@ protected:
     INLINE static Word extract(xWord a) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void compress_dispatch(state_t& state,
+    INLINE static void compress_invoke(state_t& state,
         const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
@@ -316,8 +316,10 @@ protected:
     INLINE static void prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT;
     template<size_t Round>
     INLINE static void prepare8(buffer_t& buffer) NOEXCEPT;
-    INLINE static void schedule_invoke(buffer_t& buffer) NOEXCEPT;
-    INLINE static void schedule_dispatch(auto& buffer) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void schedule_dispatch(xbuffer_t<xWord>& buffer) NOEXCEPT;
+    INLINE static void schedule_dispatch(buffer_t& xbuffer) NOEXCEPT;
 
 public:
     static constexpr auto have_neon = Compressed && system::with_neon;
