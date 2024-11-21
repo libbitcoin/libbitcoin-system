@@ -588,14 +588,6 @@ iterate_dispatch(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 // Message Schedule (sigma vectorization).
 // ----------------------------------------------------------------------------
 
-constexpr auto add0(auto a) noexcept { return depromote<decltype(a)>(a + 0); }
-constexpr auto add2(auto a) noexcept { return depromote<decltype(a)>(a + 2); }
-constexpr auto add3(auto a) noexcept { return depromote<decltype(a)>(a + 3); }
-constexpr auto add4(auto a) noexcept { return depromote<decltype(a)>(a + 4); }
-constexpr auto add5(auto a) noexcept { return depromote<decltype(a)>(a + 5); }
-constexpr auto add6(auto a) noexcept { return depromote<decltype(a)>(a + 6); }
-constexpr auto add7(auto a) noexcept { return depromote<decltype(a)>(a + 7); }
-
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE auto CLASS::
@@ -606,71 +598,50 @@ sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
 }
 
 TEMPLATE
+template<size_t Round, size_t Offset>
+INLINE void CLASS::
+prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
+{
+    static_assert(Round >= 16);
+    constexpr auto r02 = Round - 2;
+    constexpr auto r07 = Round - 7;
+    constexpr auto r16 = Round - 16;
+    constexpr auto s = SHA::word_bits;
+
+    // buffer[r07 + 7] is buffer[Round + 0]
+    // This is why sigma0 is limited to 8 lanes (vs 16).
+    buffer[Round + Offset] = f::add<s>(
+        f::add<s>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
+        f::add<s>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
+    buffer[r16 + Offset] = f::addc<K::get[r16 + Offset], s>(buffer[r16 + Offset]);
+}
+
+TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare_invoke(buffer_t& buffer) NOEXCEPT
+prepare8(buffer_t& buffer) NOEXCEPT
 {
     // Requires avx512 for sha512 and avx2 for sha256.
     // The simplicity of sha160 message prepare precludes this optimization.
     static_assert(SHA::strength != 160);
 
-    constexpr auto r02 = Round - 2;
-    constexpr auto r07 = Round - 7;
-    constexpr auto r15 = Round - 15;
-    constexpr auto r16 = Round - 16;
-    constexpr auto s = SHA::word_bits;
-
     // sigma0x8 message scheduling for single block iteration.
     // Does not alter buffer structure, fully private to this method.
     // Tests of adding sigma1x2 half lanes vectorization show loss ~10%.
     // Tests of adding sigma0x8 full lanes vectorization show a gain of ~5%.
-    const auto xr15 = sigma0_8<to_extended<word_t, 8>>(
-        buffer[add0(r15)], buffer[add1(r15)],
-        buffer[add2(r15)], buffer[add3(r15)],
-        buffer[add4(r15)], buffer[add5(r15)],
-        buffer[add6(r15)], buffer[add7(r15)]);
+    constexpr auto r15 = Round - 15;
+    const auto xsigma0 = sigma0_8<to_extended<word_t, 8>>(
+        buffer[r15 + 0], buffer[r15 + 1], buffer[r15 + 2], buffer[r15 + 3],
+        buffer[r15 + 4], buffer[r15 + 5], buffer[r15 + 6], buffer[r15 + 7]);
 
-    buffer[add0(Round)] = f::add<s>(
-        f::add<s>(buffer[add0(r16)], get<word_t, 0>(xr15)),
-        f::add<s>(buffer[add0(r07)], sigma1(buffer[add0(r02)])));
-    buffer[add0(r16)] = f::addc<K::get[add0(r16)], s>(buffer[add0(r16)]);
-
-    buffer[add1(Round)] = f::add<s>(
-        f::add<s>(buffer[add1(r16)], get<word_t, 1>(xr15)),
-        f::add<s>(buffer[add1(r07)], sigma1(buffer[add1(r02)])));
-    buffer[add1(r16)] = f::addc<K::get[add1(r16)], s>(buffer[add1(r16)]);
-
-    buffer[add2(Round)] = f::add<s>(
-        f::add<s>(buffer[add2(r16)], get<word_t, 2>(xr15)),
-        f::add<s>(buffer[add2(r07)], sigma1(buffer[add2(r02)])));
-    buffer[add2(r16)] = f::addc<K::get[add2(r16)], s>(buffer[add2(r16)]);
-
-    buffer[add3(Round)] = f::add<s>(
-        f::add<s>(buffer[add3(r16)], get<word_t, 3>(xr15)),
-        f::add<s>(buffer[add3(r07)], sigma1(buffer[add3(r02)])));
-    buffer[add3(r16)] = f::addc<K::get[add3(r16)], s>(buffer[add3(r16)]);
-
-    buffer[add4(Round)] = f::add<s>(
-        f::add<s>(buffer[add4(r16)], get<word_t, 4>(xr15)),
-        f::add<s>(buffer[add4(r07)], sigma1(buffer[add4(r02)])));
-    buffer[add4(r16)] = f::addc<K::get[add4(r16)], s>(buffer[add4(r16)]);
-
-    buffer[add5(Round)] = f::add<s>(
-        f::add<s>(buffer[add5(r16)], get<word_t, 5>(xr15)),
-        f::add<s>(buffer[add5(r07)], sigma1(buffer[add5(r02)])));
-    buffer[add5(r16)] = f::addc<K::get[add5(r16)], s>(buffer[add5(r16)]);
-
-    buffer[add6(Round)] = f::add<s>(
-        f::add<s>(buffer[add6(r16)], get<word_t, 6>(xr15)),
-        f::add<s>(buffer[add6(r07)], sigma1(buffer[add6(r02)])));
-    buffer[add6(r16)] = f::addc<K::get[add6(r16)], s>(buffer[add6(r16)]);
-
-    // buffer[add7(r07)] is buffer[add0(Round)]
-    // This is why sigma0 is limited to 8 lanes (vs 16).
-    buffer[add7(Round)] = f::add<s>(
-        f::add<s>(buffer[add7(r16)], get<word_t, 7>(xr15)),
-        f::add<s>(buffer[add7(r07)], sigma1(buffer[add7(r02)])));
-    buffer[add7(r16)] = f::addc<K::get[add7(r16)], s>(buffer[add7(r16)]);
+    prepare1<Round, 0>(buffer, xsigma0);
+    prepare1<Round, 1>(buffer, xsigma0);
+    prepare1<Round, 2>(buffer, xsigma0);
+    prepare1<Round, 3>(buffer, xsigma0);
+    prepare1<Round, 4>(buffer, xsigma0);
+    prepare1<Round, 5>(buffer, xsigma0);
+    prepare1<Round, 6>(buffer, xsigma0);
+    prepare1<Round, 7>(buffer, xsigma0);
 }
 
 TEMPLATE
@@ -679,17 +650,17 @@ schedule_invoke(buffer_t& buffer) NOEXCEPT
 {
     if constexpr (have_lanes<word_t, 8>())
     {
-        prepare_invoke<16>(buffer);
-        prepare_invoke<24>(buffer);
-        prepare_invoke<32>(buffer);
-        prepare_invoke<40>(buffer);
-        prepare_invoke<48>(buffer);
-        prepare_invoke<56>(buffer);
+        prepare8<16>(buffer);
+        prepare8<24>(buffer);
+        prepare8<32>(buffer);
+        prepare8<40>(buffer);
+        prepare8<48>(buffer);
+        prepare8<56>(buffer);
 
         if constexpr (SHA::rounds == 80)
         {
-            prepare_invoke<64>(buffer);
-            prepare_invoke<72>(buffer);
+            prepare8<64>(buffer);
+            prepare8<72>(buffer);
         }
 
         add_k(buffer);

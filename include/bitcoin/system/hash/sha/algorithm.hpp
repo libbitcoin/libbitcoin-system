@@ -312,8 +312,10 @@ protected:
     INLINE static auto sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5,
         auto x6, auto x7, auto x8) NOEXCEPT;
 
+    template<size_t Round, size_t Offset>
+    INLINE static void prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT;
     template<size_t Round>
-    INLINE static void prepare_invoke(buffer_t& buffer) NOEXCEPT;
+    INLINE static void prepare8(buffer_t& buffer) NOEXCEPT;
     INLINE static void schedule_invoke(buffer_t& buffer) NOEXCEPT;
     INLINE static void schedule_dispatch(auto& buffer) NOEXCEPT;
 
