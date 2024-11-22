@@ -62,8 +62,8 @@ constexpr auto cycles_per_byte(float seconds, float ghz) noexcept
 struct parameters
 {
     static constexpr size_t strength{}; // algorithm strength (160/256/512|128/160).
-    static constexpr bool compressed{}; // intrinsic sha (ignored for rmd).
-    static constexpr bool vectorized{}; // algorithm vectorization.
+    static constexpr bool native{}; // intrinsic sha (ignored for rmd).
+    static constexpr bool vector{}; // algorithm vectorization.
     static constexpr bool cached{};     // scheduled pad caching.
     static constexpr bool chunked{};    // false for array data.
     static constexpr bool ripemd{};     // false for sha algorithm.
@@ -87,8 +87,8 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
     replace(algorithm, "class ", "");
     replace(algorithm, "struct ", "");
 
-    // vectorized/compressed parameters of no effect if features not supported.
-    // Algorithm compressible/vectorizable actual run is reflected in the type.
+    // vector/native parameters of no effect if features not supported.
+    // Algorithm actual run is reflected in the type.
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     out << delimiter
         << "test____________: " << TEST_NAME
@@ -99,9 +99,9 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
         << delimiter
         << "bytes_per_round_: " << serialize(Size)
         << delimiter
-        << "compressed______: " << serialize(P::compressed)
+        << "Native______: " << serialize(P::native)
         << delimiter
-        << "vectorized______: " << serialize(P::vectorized)
+        << "vectorized______: " << serialize(P::vector)
         << delimiter
         << "cached__________: " << serialize(P::cached)
         << delimiter
@@ -188,21 +188,21 @@ using rmd_algorithm = rmd::algorithm<
 static_assert(is_same_type<rmd_algorithm<128>, rmd128>);
 static_assert(is_same_type<rmd_algorithm<160>, rmd160>);
 
-template <size_t Strength, bool Compressed, bool Vectorized, bool Cached>
+template <size_t Strength, bool Native, bool Vector, bool Cached>
 using sha_algorithm = sha::algorithm<
     iif<Strength == 256, sha::h256<>,
-    iif<Strength == 512, sha::h512<>, sha::h160>>, Compressed, Vectorized, Cached>;
+    iif<Strength == 512, sha::h512<>, sha::h160>>, Native, Vector, Cached>;
 
 ////static_assert(is_same_type<sha_algorithm<160, true, true, true>, sha160>);
 ////static_assert(is_same_type<sha_algorithm<256, true, true, true>, sha256>);
 ////static_assert(is_same_type<sha_algorithm<512, true, true, true>, sha512>);
 
-template <size_t Strength, bool Compressed, bool Vectorized, bool Cached, bool Ripemd,
+template <size_t Strength, bool Native, bool Vector, bool Cached, bool Ripemd,
     bool_if<
        (!Ripemd && (Strength == 160 || Strength == 256 || Strength == 512)) ||
         (Ripemd && (Strength == 128 || Strength == 160))> = true>
 using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
-    sha_algorithm<Strength, Compressed, Vectorized, Cached>>;
+    sha_algorithm<Strength, Native, Vector, Cached>>;
 
 ////static_assert(is_same_type<hash_selector<128, true, true, false,  true>, rmd128>);
 ////static_assert(is_same_type<hash_selector<160, true, true, false,  true>, rmd160>);
@@ -210,19 +210,19 @@ using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
 ////static_assert(is_same_type<hash_selector<256, true, true, true, false>, sha256>);
 ////static_assert(is_same_type<hash_selector<512, true, true, true, false>, sha512>);
 
-static_assert(hash_selector< 160, true,  true, true, false>::compression == with_shani || with_neon);
-static_assert(hash_selector< 256, true,  true, true, false>::compression == with_shani || with_neon);
-static_assert(hash_selector< 512, true,  true, true, false>::compression == with_shani || with_neon);
-static_assert(!hash_selector<160, false, true, true, false>::compression);
-static_assert(!hash_selector<256, false, true, true, false>::compression);
-static_assert(!hash_selector<512, false, true, true, false>::compression);
+static_assert(hash_selector< 160, true,  true, true, false>::native == with_shani || with_neon);
+static_assert(hash_selector< 256, true,  true, true, false>::native == with_shani || with_neon);
+static_assert(hash_selector< 512, true,  true, true, false>::native == with_shani || with_neon);
+static_assert(!hash_selector<160, false, true, true, false>::native);
+static_assert(!hash_selector<256, false, true, true, false>::native);
+static_assert(!hash_selector<512, false, true, true, false>::native);
 
-static_assert(hash_selector< 160, true, true,  true, false>::vectorization == with_sse41 || with_avx2 || with_avx512);
-static_assert(hash_selector< 256, true, true,  true, false>::vectorization == with_sse41 || with_avx2 || with_avx512);
-static_assert(hash_selector< 512, true, true,  true, false>::vectorization == with_sse41 || with_avx2 || with_avx512);
-static_assert(!hash_selector<160, true, false, true, false>::vectorization);
-static_assert(!hash_selector<256, true, false, true, false>::vectorization);
-static_assert(!hash_selector<512, true, false, true, false>::vectorization);
+static_assert(hash_selector< 160, true, true,  true, false>::vector == with_sse41 || with_avx2 || with_avx512);
+static_assert(hash_selector< 256, true, true,  true, false>::vector == with_sse41 || with_avx2 || with_avx512);
+static_assert(hash_selector< 512, true, true,  true, false>::vector == with_sse41 || with_avx2 || with_avx512);
+static_assert(!hash_selector<160, true, false, true, false>::vector);
+static_assert(!hash_selector<256, true, false, true, false>::vector);
+static_assert(!hash_selector<512, true, false, true, false>::vector);
 
 static_assert(hash_selector< 160, true, true, true,  false>::caching);
 static_assert(hash_selector< 256, true, true, true,  false>::caching);
@@ -253,8 +253,8 @@ bool test_accumulator(std::ostream& out, float ghz = 3.0f,
     using Timer = timer<Precision>;
     using Algorithm = hash_selector<
         P::strength,
-        P::compressed,
-        P::vectorized,
+        P::native,
+        P::vector,
         P::cached,
         P::ripemd>;
 
@@ -288,8 +288,8 @@ bool test_algorithm(std::ostream& out, float ghz = 3.0f,
     using Timer = timer<Precision>;
     using Algorithm = hash_selector<
         P::strength,
-        P::compressed,
-        P::vectorized,
+        P::native,
+        P::vector,
         P::cached,
         P::ripemd>;
 
@@ -320,8 +320,8 @@ bool test_merkle(std::ostream& out, float ghz = 3.0f,
     using Timer = timer<Precision>;
     using Algorithm = hash_selector<
         P::strength,
-        P::compressed,
-        P::vectorized,
+        P::native,
+        P::vector,
         P::cached,
         P::ripemd>;
 
@@ -351,12 +351,12 @@ bool test_merkle(std::ostream& out, float ghz = 3.0f,
 // Algorithm::hash() test runner parameterization.
 // ----------------------------------------------------------------------------
 
-template <bool Compressed, bool Vectorized, bool Cached, bool Chunked>
+template <bool Native, bool Vector, bool Cached, bool Chunked>
 struct sha256_parameters : parameters
 {
     static constexpr size_t strength{ 256 };
-    static constexpr bool compressed{ Compressed };
-    static constexpr bool vectorized{ Vectorized };
+    static constexpr bool native{ Native };
+    static constexpr bool vectorized{ Vector };
     static constexpr bool cached{ Cached };
     static constexpr bool chunked{ Chunked };
     static constexpr bool ripemd{};
@@ -366,8 +366,8 @@ template <bool Chunked>
 struct rmd160_parameters : parameters
 {
     static constexpr size_t strength{ 160 };
-    static constexpr bool compressed{};
-    static constexpr bool vectorized{};
+    static constexpr bool native{};
+    static constexpr bool vector{};
     static constexpr bool cached{};
     static constexpr bool chunked{ Chunked };
     static constexpr bool ripemd{ true };

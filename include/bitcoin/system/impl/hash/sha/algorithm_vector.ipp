@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTORIZATION_IPP
-#define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTORIZATION_IPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTOR_IPP
+#define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTOR_IPP
 
 namespace libbitcoin {
 namespace system {
@@ -143,6 +143,7 @@ pack_schedule_1() NOEXCEPT
 
     if constexpr (SHA::rounds == 80)
     {
+        // TODO: align.
         return xbuffer_t<xWord>
         {
             broadcast<xWord>(pad[0]),
@@ -233,6 +234,7 @@ pack_schedule_1() NOEXCEPT
     }
     else
     {
+        // TODO: align.
         return xbuffer_t<xWord>
         {
             broadcast<xWord>(pad[0]),
@@ -419,6 +421,8 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
         if (blocks.size() >= lanes)
         {
             static auto initial = pack<xWord>(H::get);
+
+            // TODO: align.
             xbuffer_t<xWord> xbuffer;
 
             do
@@ -463,11 +467,11 @@ merkle_hash_dispatch(digests_t& digests) NOEXCEPT
         const auto start = iblocks.size();
 
         // Merkle hash vector dispatch.
-        if constexpr (have_x512)
+        if constexpr (use_x512)
             merkle_hash_invoke<xint512_t>(idigests, iblocks);
-        if constexpr (have_x256)
+        if constexpr (use_x256)
             merkle_hash_invoke<xint256_t>(idigests, iblocks);
-        if constexpr (have_x128)
+        if constexpr (use_x128)
             merkle_hash_invoke<xint128_t>(idigests, iblocks);
 
         // iblocks.size() is reduced by vectorization.
@@ -531,6 +535,7 @@ iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT
     {
         if (blocks.size() >= lanes)
         {
+            // TODO: align.
             xbuffer_t<xWord> xbuffer;
 
             do
@@ -551,11 +556,11 @@ iterate_dispatch(state_t& state, iblocks_t& blocks) NOEXCEPT
     if (blocks.size() >= min_lanes)
     {
         // Schedule iteration vector dispatch.
-        if constexpr (have_x512)
+        if constexpr (use_x512)
             iterate_invoke<xint512_t>(state, blocks);
-        if constexpr (have_x256)
+        if constexpr (use_x256)
             iterate_invoke<xint256_t>(state, blocks);
-        if constexpr (have_x128)
+        if constexpr (use_x128)
             iterate_invoke<xint128_t>(state, blocks);
     }
 
@@ -642,7 +647,7 @@ prepare8(buffer_t& buffer) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-schedule_dispatch(xbuffer_t<xWord>& xbuffer) NOEXCEPT
+schedule_vector(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     // Merkle extended buffer is not schedule dispatched.
     schedule_(xbuffer);
@@ -650,7 +655,7 @@ schedule_dispatch(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-schedule_dispatch(buffer_t& buffer) NOEXCEPT
+schedule_vector(buffer_t& buffer) NOEXCEPT
 {
     if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>())
     {

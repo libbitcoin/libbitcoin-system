@@ -30,11 +30,13 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
+// msvc++ not inlined in x32 for vectorized state.
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NOT_INLINED)
 
 // 4.1 Functions
 // ---------------------------------------------------------------------------
@@ -199,8 +201,7 @@ INLINE constexpr void CLASS::
 round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto wk) NOEXCEPT
 {
-    // If open lanes, can vectorize Sigma0(e) with Sigma1(a) (intel).
-    // This can apparently be doubled with eliminatin of the temporary (intel).
+    // TODO: This can be doubled and Sigmas vectorized (Intel).
     constexpr auto s = SHA::word_bits;
     const auto t = f::add<s>(f::add<s>(f::add<s>(Sigma1(e), choice(e, f, g)), h), wk);
     d = /*e =*/    f::add<s>(d, t);
@@ -222,7 +223,6 @@ template <typename Word, size_t Lane>
 INLINE constexpr auto CLASS::
 extract(Word a) NOEXCEPT
 {
-    // Compress vectorization and non-vectorization require no extraction.
     static_assert(Lane == zero);
     return a;
 }
@@ -233,7 +233,7 @@ template <typename Word, size_t Lane, typename xWord,
 INLINE Word CLASS::
 extract(xWord a) NOEXCEPT
 {
-    // Schedule vectorization (with compress non-vectorization), extract word.
+    // Extract work from vectorized schedule.
     return get<Word, Lane>(a);
 }
 
@@ -246,8 +246,6 @@ round(auto& state, const auto& wk) NOEXCEPT
 
     if constexpr (SHA::strength == 160)
     {
-        // msvc++ not inlined in x32 for vectorized state.
-        BC_PUSH_WARNING(NOT_INLINED)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
@@ -255,7 +253,6 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
             extract<word, Lane>(wk[Round]));
-        BC_POP_WARNING()
 
         // SHA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
@@ -263,8 +260,6 @@ round(auto& state, const auto& wk) NOEXCEPT
     }
     else
     {
-        // msvc++ not inlined in x32 for vectorized state.
-        BC_PUSH_WARNING(NOT_INLINED)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words],
@@ -275,7 +270,6 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
             extract<word, Lane>(wk[Round]));
-        BC_POP_WARNING()
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -561,9 +555,13 @@ schedule(auto& buffer) NOEXCEPT
     {
         schedule_(buffer);
     }
-    else if constexpr (vectorization)
+    ////else if constexpr (native)
+    ////{
+    ////    schedule_native(buffer);
+    ////}
+    else if constexpr (vector)
     {
-        schedule_dispatch(buffer);
+        schedule_vector(buffer);
     }
     else
     {
@@ -644,6 +642,11 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
         from_big<14 * size>(buffer.at(14), block);
         from_big<15 * size>(buffer.at(15), block);
     }
+    ////else if constexpr (native)
+    ////{
+    ////    // When native, buffer should be alignas(sizeof(xint128_t)).
+    ////    // Load each 4 word_t of block into xword_t and cast into buffer.
+    ////}
     else if constexpr (bc::is_little_endian)
     {
         const auto& in = array_cast<word_t>(block);
@@ -1185,7 +1188,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     {
         iterate_(state, blocks);
     }
-    else if constexpr (vectorization)
+    else if constexpr (vector)
     {
         iterate_dispatch(state, blocks);
     }
@@ -1199,7 +1202,7 @@ TEMPLATE
 INLINE void CLASS::
 iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (vectorization)
+    if constexpr (vector)
     {
         iterate_dispatch(state, blocks);
     }
@@ -1275,7 +1278,7 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else
 #endif
-    if constexpr (vectorization)
+    if constexpr (vector)
     {
         merkle_hash_dispatch(digests);
     }
@@ -1353,6 +1356,7 @@ normalize(const state_t& state) NOEXCEPT
     return output(state);
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

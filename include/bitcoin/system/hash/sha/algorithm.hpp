@@ -37,10 +37,10 @@ namespace system {
 namespace sha {
 
 /// SHA hashing algorithm.
-/// Compression not yet implemented.
+/// Native not yet implemented.
 /// Vectorization of message schedules and merkle hashes.
-template <typename SHA, bool Compressed = true, bool Vectorized = true,
-    bool Cached = true, if_same<typename SHA::T, sha::shah_t> = true>
+template <typename SHA, bool Native = true, bool Vector = true, bool Cached = true,
+    if_same<typename SHA::T, sha::shah_t> = true>
 class algorithm
   : algorithm_t
 {
@@ -209,20 +209,6 @@ private:
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
 
-/// Compression.
-/// ---------------------------------------------------------------------------
-protected:
-    /// Compression does not change the buffer size (not expanded), just
-    /// its "shape". Four words are buffered into one xint128_t, resulting
-    /// in 1/4 the buffer array size and number of rounds. Four state words are
-    /// packed into each of two state variables. This applies to sha160 and 
-    /// sha256, but sha512 compression is not supported.
-    using cword_t = xint128_t;
-    static constexpr auto cratio = sizeof(cword_t) / SHA::word_bytes;
-    static constexpr auto crounds = SHA::rounds / cratio;
-    using cbuffer_t = std_array<cword_t, crounds>;
-    using cstate_t = std_array<xint128_t, two>;
-
 /// Vectorization.
 /// ---------------------------------------------------------------------------
 protected:
@@ -318,37 +304,50 @@ protected:
     INLINE static void prepare8(buffer_t& buffer) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void schedule_dispatch(xbuffer_t<xWord>& buffer) NOEXCEPT;
-    INLINE static void schedule_dispatch(buffer_t& xbuffer) NOEXCEPT;
+    INLINE static void schedule_vector(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    INLINE static void schedule_vector(buffer_t& buffer) NOEXCEPT;
+
+    /// Native.
+    /// ---------------------------------------------------------------------------
+protected:
+    using cword_t = xint128_t;
+    static constexpr auto cratio = sizeof(cword_t) / SHA::word_bytes;
+    static constexpr auto crounds = SHA::rounds / cratio;
+    using cbuffer_t = std_array<cword_t, crounds>;
+    using cstate_t = std_array<xint128_t, two>;
+
+    template <typename xWord>
+    INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    INLINE static void schedule_native(buffer_t& buffer) NOEXCEPT;
 
 public:
-    static constexpr auto have_neon = Compressed && system::with_neon;
-    static constexpr auto have_shani = Compressed && system::with_shani;
-    static constexpr auto compression = have_shani || have_neon;
+    static constexpr auto use_neon = Native && system::with_neon;
+    static constexpr auto use_shani = Native && system::with_shani;
+    static constexpr auto native = use_shani || use_neon;
 
-    static constexpr auto have_x128 = Vectorized && system::with_sse41;
-    static constexpr auto have_x256 = Vectorized && system::with_avx2;
-    static constexpr auto have_x512 = Vectorized && system::with_avx512;
-    static constexpr auto vectorization = (have_x128 || have_x256 || have_x512)
+    static constexpr auto use_x128 = Vector && system::with_sse41;
+    static constexpr auto use_x256 = Vector && system::with_avx2;
+    static constexpr auto use_x512 = Vector && system::with_avx512;
+    static constexpr auto vector = (use_x128 || use_x256 || use_x512)
         && !(build_x32 && is_same_size<word_t, uint64_t>);
 
     static constexpr auto min_lanes =
-        (have_x128 ? bytes<128> :
-            (have_x256 ? bytes<256> :
-                (have_x512 ? bytes<512> : 0))) / SHA::word_bytes;
+        (use_x128 ? bytes<128> :
+            (use_x256 ? bytes<256> :
+                (use_x512 ? bytes<512> : 0))) / SHA::word_bytes;
 };
 
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
 
-#define TEMPLATE template <typename SHA, bool Compressed, bool Vectorized, \
-    bool Cached, if_same<typename SHA::T, sha::shah_t> If>
-#define CLASS algorithm<SHA, Compressed, Vectorized, Cached, If>
+#define TEMPLATE template <typename SHA, bool Native, bool Vector, bool Cached, \
+    if_same<typename SHA::T, sha::shah_t> If>
+#define CLASS algorithm<SHA, Native, Vector, Cached, If>
 
 #include <bitcoin/system/impl/hash/sha/algorithm.ipp>
-#include <bitcoin/system/impl/hash/sha/algorithm_compression.ipp>
-#include <bitcoin/system/impl/hash/sha/algorithm_vectorization.ipp>
+#include <bitcoin/system/impl/hash/sha/algorithm_native.ipp>
+#include <bitcoin/system/impl/hash/sha/algorithm_vector.ipp>
 
 #undef CLASS
 #undef TEMPLATE
