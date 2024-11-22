@@ -354,7 +354,7 @@
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\hash\sha\vectorization.cpp">
+    <ClCompile Include="..\..\..\..\test\hash\sha\vector.cpp">
       <Filter>src\hash\sha</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">

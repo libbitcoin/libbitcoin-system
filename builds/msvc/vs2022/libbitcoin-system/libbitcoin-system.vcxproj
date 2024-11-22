@@ -545,8 +545,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\rmd\algorithm.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\scrypt.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_compression.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_vectorization.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_native.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_vector.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp" />

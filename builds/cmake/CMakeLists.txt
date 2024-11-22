@@ -793,7 +793,7 @@ if (with-tests)
         "../../test/hash/sha/sha160.cpp"
         "../../test/hash/sha/sha256.cpp"
         "../../test/hash/sha/sha512.cpp"
-        "../../test/hash/sha/vectorization.cpp"
+        "../../test/hash/sha/vector.cpp"
         "../../test/intrinsics/haves.cpp"
         "../../test/intrinsics/intrinsics.cpp"
         "../../test/intrinsics/xcpu/cpuid.cpp"

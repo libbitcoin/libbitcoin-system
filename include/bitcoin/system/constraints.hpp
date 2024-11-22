@@ -168,6 +168,10 @@ using if_integer = bool_if<
     is_integer<Type>>;
 
 template <typename Type>
+using if_non_integer = bool_if<
+    !is_integer<Type>>;
+
+template <typename Type>
 using if_signed_integer = bool_if<
     is_integer<Type> &&
     is_signed<Type>>;
@@ -198,15 +202,25 @@ using if_not_uintx = bool_if<
     !is_uintx<Type>>;
 
 /// Integral integer types (native, non-floating point, non-bool).
+/// All integrals are integers but not all integers are integral.
 
+template <typename Type>
+using if_integral = bool_if<
+    is_integral<Type>>;
+
+template <typename Type>
+using if_non_integral = bool_if<
+    !is_integral<Type>>;
+
+// Alias for if_integral.
 template <typename Type>
 using if_integral_integer = bool_if<
     is_integral_integer<Type>>;
 
 template <typename Type>
 using if_non_integral_integer = bool_if<
-    is_integer<Type> &&
-    !is_integral<Type>>;
+    !is_integral<Type>  &&
+    is_integer<Type>>;
 
 template <typename Type>
 using if_signed_integral_integer = bool_if<

@@ -128,20 +128,21 @@
 #endif
 
 /// XCPU architecture intrinsics sse41, avx2, avx512f, sha-ni.
-/// All require runtime evaluation, as the binary is portable across XCPUs.
+/// This assumes that avx512 implies avx2 and that all imply sse41.
+/// All require runtime evaluation for the binary is portable across XCPUs.
 #if defined(HAVE_XCPU)
     // TODO: CLANG/GCC compile test and set -msse4 -mavx2 -mavx512f -msha.
-    #if defined (WITH_AVX512)
+    #if defined(WITH_SHANI)
+        #define HAVE_SHANI
+    #endif
+    #if defined(WITH_AVX512)
         #define HAVE_AVX512
     #endif
-    #if defined (WITH_AVX2)
+    #if defined(WITH_AVX2) || defined(WITH_AVX512)
         #define HAVE_AVX2
     #endif
-    #if defined (WITH_SSE41)
+    #if defined(WITH_SSE41) || defined(WITH_AVX2) || defined(WITH_SHANI)
         #define HAVE_SSE41
-    #endif
-    #if defined (WITH_SHANI)
-        #define HAVE_SHANI
     #endif
 #endif
 

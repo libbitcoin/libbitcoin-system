@@ -18,14 +18,14 @@
  */
 #include "../../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(vectorization_tests)
+BOOST_AUTO_TEST_SUITE(vector_tests)
 
 #if defined(HAVE_VECTOR_CONSTEXPR)
 
 // Merkle root
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(vectorization__sha256__merkle_root__expected)
+BOOST_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
 {
     using sha_256 = sha::algorithm<sha::h512<>, true, true, true>;
 
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha256__merkle_root__expected)
     }), expected);
 }
 
-BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
+BOOST_AUTO_TEST_CASE(vector__sha512__merkle_root__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
 
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha512__merkle_root__expected)
 // Message scheduling
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(vectorization__sha160__scheduling__expected)
+BOOST_AUTO_TEST_CASE(vector__sha160__scheduling__expected)
 {
     // AVX512, AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha160__scheduling__expected)
     BOOST_CHECK_EQUAL(hashn, sha160v::hash(blocks));
 }
 
-BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
+BOOST_AUTO_TEST_CASE(vector__sha256__scheduling__expected)
 {
     // AVX512, AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(vectorization__sha256__scheduling__expected)
 }
 
 // sha512 vectorization is disabled in x32 builds.
-BOOST_AUTO_TEST_CASE(vectorization__sha512__scheduling__expected)
+BOOST_AUTO_TEST_CASE(vector__sha512__scheduling__expected)
 {
     // AVX2, SSE41, sequential
     constexpr size_t coverall = 16_size + 8 + 4 + 2 + 1;

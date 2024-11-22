@@ -30,11 +30,13 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
+// msvc++ not inlined in x32 for vectorized state.
 // Bogus warning suggests constexpr when declared consteval.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+BC_PUSH_WARNING(NOT_INLINED)
 
 // 4.1 Functions
 // ---------------------------------------------------------------------------
@@ -199,21 +201,13 @@ INLINE constexpr void CLASS::
 round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     auto wk) NOEXCEPT
 {
-    // TODO: if open lanes, vectorize Sigma0 and Sigma1 (see Intel).
+    // TODO: This can be doubled and Sigmas vectorized (Intel).
     constexpr auto s = SHA::word_bits;
     const auto t = f::add<s>(f::add<s>(f::add<s>(Sigma1(e), choice(e, f, g)), h), wk);
     d = /*e =*/    f::add<s>(d, t);
     h = /*a =*/    f::add<s>(f::add<s>(Sigma0(a), majority(a, b, c)), t);
 
-    // Rounds can be cut in half and this round doubled (intel paper).
-    // Avoids the need for a temporary variable and aligns with SHA-NI.
-    // Removing the temporary eliminates 2x64 instructions from the assembly.
-    // h = /*a =*/ SIGMA0(a) + SIGMA1(e) + majority(a, b, c) +
-    //             choice(e, f, g) + (k + w) + h;
-    // d = /*e =*/ SIGMA1(e) + choice(e, f, g) + (k + w) + h + d;
-    //
-    // Each call is 2 rounds, 4 rounds total.
-    // s, w and k are 128 (4 words each, s1/s2 is 8 word state).
+    // Each call is 2 rounds, s, w and k are 128 (4 words each, s1/s2 is 8 word state).
     // SHA-NI
     //     const auto value = add(w, k);
     //     abcd = sha256rnds2(abcd, efgh, value);
@@ -229,7 +223,6 @@ template <typename Word, size_t Lane>
 INLINE constexpr auto CLASS::
 extract(Word a) NOEXCEPT
 {
-    // Compress vectorization and non-vectorization require no extraction.
     static_assert(Lane == zero);
     return a;
 }
@@ -240,7 +233,7 @@ template <typename Word, size_t Lane, typename xWord,
 INLINE Word CLASS::
 extract(xWord a) NOEXCEPT
 {
-    // Schedule vectorization (with compress non-vectorization), extract word.
+    // Extract work from vectorized schedule.
     return get<Word, Lane>(a);
 }
 
@@ -253,8 +246,6 @@ round(auto& state, const auto& wk) NOEXCEPT
 
     if constexpr (SHA::strength == 160)
     {
-        // msvc++ not inlined in x32 for vectorized state.
-        BC_PUSH_WARNING(NOT_INLINED)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words], // c->b
@@ -262,16 +253,13 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
             extract<word, Lane>(wk[Round]));
-        BC_POP_WARNING()
 
-        // SNA-NI/NEON
+        // SHA-NI/NEON
         // State packs in 128 (one state variable), reduces above to 1 out[].
         // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
     else
     {
-        // msvc++ not inlined in x32 for vectorized state.
-        BC_PUSH_WARNING(NOT_INLINED)
         round<Round>(
             state[(SHA::rounds + 0 - Round) % SHA::state_words],
             state[(SHA::rounds + 1 - Round) % SHA::state_words],
@@ -282,7 +270,6 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
             extract<word, Lane>(wk[Round]));
-        BC_POP_WARNING()
 
         // SHA-NI/NEON
         // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
@@ -413,6 +400,7 @@ prepare(auto& buffer) NOEXCEPT
         buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
 
         // SHA-NI
+
         //     buffer[Round] = sha1msg2 // xor and rotl1
         //     (
         //         xor                // not using sha1msg1
@@ -451,9 +439,8 @@ prepare(auto& buffer) NOEXCEPT
         // Not sure about these indexes.
         // mijailovic.net/2018/06/06/sha256-armv8
         // buffer[Round] =
-        //     vsha256su0q(buffer[Round - 13], buffer[Round - 9])
-        //     vsha256su1q(buffer[Round - 13], buffer[Round - 5],
-        //                 buffer[Round - 1]);
+        //     vsha256su0q(buffer[Round - 13], buffer[Round - 9]) +
+        //     vsha256su1q(buffer[Round - 13], buffer[Round - 5], buffer[Round - 1]);
     }
 }
 
@@ -568,9 +555,13 @@ schedule(auto& buffer) NOEXCEPT
     {
         schedule_(buffer);
     }
-    else if constexpr (vectorization)
+    ////else if constexpr (native)
+    ////{
+    ////    schedule_native(buffer);
+    ////}
+    else if constexpr (vector)
     {
-        schedule_dispatch(buffer);
+        schedule_vector(buffer);
     }
     else
     {
@@ -599,9 +590,8 @@ summarize(auto& out, const auto& in) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input(auto& buffer, const auto& state) NOEXCEPT
+reinput(auto& buffer, const auto& state) NOEXCEPT
 {
-    // This is a double hash optimization.
     if (std::is_constant_evaluated())
     {
         buffer[0] = state[0];
@@ -652,6 +642,11 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
         from_big<14 * size>(buffer.at(14), block);
         from_big<15 * size>(buffer.at(15), block);
     }
+    ////else if constexpr (native)
+    ////{
+    ////    // When native, buffer should be alignas(sizeof(xint128_t)).
+    ////    // Load each 4 word_t of block into xword_t and cast into buffer.
+    ////}
     else if constexpr (bc::is_little_endian)
     {
         const auto& in = array_cast<word_t>(block);
@@ -681,7 +676,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input1(buffer_t& buffer, const half_t& half) NOEXCEPT
+input_left(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
@@ -717,7 +712,7 @@ input1(buffer_t& buffer, const half_t& half) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input2(buffer_t& buffer, const half_t& half) NOEXCEPT
+input_right(buffer_t& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
@@ -872,13 +867,13 @@ TEMPLATE
 constexpr void CLASS::
 schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT
 {
-    // This optimization is saves ~30% in message scheduling for one out of
-    // N blocks: (N + 70%)/(N + 100%). So the proportional benefit decreases
-    // exponentially with increasing N. For arbitrary data lengths this will
-    // benefit 1/64 hashes on average. All array-sized n-block hashes have
-    // precomputed schedules - this benefits only finalized chunk hashing.
-    // Testing shows a 5% performance improvement for 128 byte chunk hashes.
-    // Accumulator passes all write() of more than one block here.
+    // This optimization saves ~30% in message scheduling for one out of N
+    // blocks: (N + 70%)/(N + 100%). So benefit decreases with increasing N.
+    // For arbitrary data lengths this will benefit 1/64 hashes on average.
+    // All array-sized n-block hashes have precomputed schedules - this
+    // benefits only finalized chunk hashing. Testing shows a 5% performance
+    // improvement for 128 byte chunk hashes. Accumulator passes all write()
+    // of more than one block here.
     if constexpr (caching)
     {
         switch (blocks)
@@ -1026,7 +1021,7 @@ hash(const state_t& state) NOEXCEPT
 
     buffer_t buffer{};
     auto state2 = H::get;
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     compress(state2, buffer);
@@ -1039,7 +1034,7 @@ hash(const half_t& half) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, half);
+    input_left(buffer, half);
     pad_half(buffer);
     schedule(buffer);
     compress(state, buffer);
@@ -1052,8 +1047,8 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, left);
-    input2(buffer, right);
+    input_left(buffer, left);
+    input_right(buffer, right);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
@@ -1079,7 +1074,7 @@ double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1103,7 +1098,7 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1127,7 +1122,7 @@ double_hash(const block_t& block) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1143,13 +1138,13 @@ double_hash(const half_t& half) NOEXCEPT
 
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, half);
+    input_left(buffer, half);
     pad_half(buffer);
     schedule(buffer);
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1165,15 +1160,15 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 
     buffer_t buffer{};
     auto state = H::get;
-    input1(buffer, left);
-    input2(buffer, right);
+    input_left(buffer, left);
+    input_right(buffer, right);
     schedule(buffer);
     compress(state, buffer);
     schedule_1(buffer);
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     state = H::get;
@@ -1193,7 +1188,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     {
         iterate_(state, blocks);
     }
-    else if constexpr (vectorization)
+    else if constexpr (vector)
     {
         iterate_dispatch(state, blocks);
     }
@@ -1207,7 +1202,7 @@ TEMPLATE
 INLINE void CLASS::
 iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (vectorization)
+    if constexpr (vector)
     {
         iterate_dispatch(state, blocks);
     }
@@ -1283,7 +1278,7 @@ merkle_hash(digests_t& digests) NOEXCEPT
     }
     else
 #endif
-    if constexpr (vectorization)
+    if constexpr (vector)
     {
         merkle_hash_dispatch(digests);
     }
@@ -1346,7 +1341,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
     compress(state, buffer);
 
     // Second hash
-    input(buffer, state);
+    reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     auto state2 = H::get;
@@ -1361,6 +1356,7 @@ normalize(const state_t& state) NOEXCEPT
     return output(state);
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

@@ -1510,10 +1510,10 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_compression.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_native.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_vectorization.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_vector.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">
