@@ -24,7 +24,6 @@ namespace system {
 namespace sha {
 
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-BC_PUSH_WARNING(NO_UNINITIALZIED_VARIABLE)
 
 // Common.
 // ----------------------------------------------------------------------------
@@ -423,7 +422,7 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
             static auto initial = pack<xWord>(H::get);
 
             // TODO: align.
-            xbuffer_t<xWord> xbuffer;
+            xbuffer_t<xWord> xbuffer{};
 
             do
             {
@@ -536,7 +535,7 @@ iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT
         if (blocks.size() >= lanes)
         {
             // TODO: align.
-            xbuffer_t<xWord> xbuffer;
+            xbuffer_t<xWord> xbuffer{};
 
             do
             {
@@ -680,7 +679,6 @@ schedule_vector(buffer_t& buffer) NOEXCEPT
     }
 }
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 
 } // namespace sha
