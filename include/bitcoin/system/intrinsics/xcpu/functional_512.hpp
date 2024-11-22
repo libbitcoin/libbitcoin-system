@@ -279,51 +279,58 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 template <typename Word, if_same<Word, uint16_t> = true>
 INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
-    static const auto mask = set<xint512_t>(
-         1,  0,  3,  2,  5,  4,  7,  6,  9,  8, 11, 10, 13, 12, 15, 14,
+    return mm512_shuffle_epi8(a, set<xint512_t>(
+        1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14,
         17, 16, 19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30,
         33, 32, 35, 34, 37, 36, 39, 38, 41, 40, 43, 42, 45, 44, 47, 46,
-        49, 48, 51, 50, 53, 52, 55, 54, 57, 56, 59, 58, 61, 60, 63, 62);
-
-    return mm512_shuffle_epi8(a, mask);
+        49, 48, 51, 50, 53, 52, 55, 54, 57, 56, 59, 58, 61, 60, 63, 62));
 }
 
 // AVX512BW
 template <typename Word, if_same<Word, uint32_t> = true>
 INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
-    static const auto mask = set<xint512_t>(
-         3,  2,  1,  0,  7,  6,  5,  4, 11, 10,  9,  8, 15, 14, 13, 12,
+    return mm512_shuffle_epi8(a, set<xint512_t>(
+        3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12,
         19, 18, 17, 16, 23, 22, 21, 20, 27, 26, 25, 24, 31, 30, 29, 28,
         35, 34, 33, 32, 39, 38, 37, 36, 43, 42, 41, 40, 47, 46, 45, 44,
-        51, 50, 49, 48, 55, 54, 53, 52, 59, 58, 57, 56, 63, 62, 61, 60);
-
-    return mm512_shuffle_epi8(a, mask);
+        51, 50, 49, 48, 55, 54, 53, 52, 59, 58, 57, 56, 63, 62, 61, 60));
 }
 
 // AVX512BW
 template <typename Word, if_same<Word, uint64_t> = true>
 INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
-    static const auto mask = set<xint512_t>(
-         7,  6,  5,  4,  3,  2,  1,  0, 15, 14, 13, 12, 11, 10,  9,  8,
+    return mm512_shuffle_epi8(a, set<xint512_t>(
+        7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8,
         23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24,
         39, 38, 37, 36, 35, 34, 33, 32, 47, 46, 45, 44, 43, 42, 41, 40,
-        55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61, 60, 59, 58, 57, 56);
-
-    return mm512_shuffle_epi8(a, mask);
+        55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61, 60, 59, 58, 57, 56));
 }
 
-/// pack/unpack
+/// load/store (element sizes are actually irrelevant)
 /// ---------------------------------------------------------------------------
-////
-////// TODO: auto pack<xWord>(const uint8_t*).
-////INLINE auto unpack(xint512_t a) NOEXCEPT
-////{
-////    std_array<uint8_t, sizeof(xint512_t)> bytes{};
-////    mm512_storeu_si512(pointer_cast<xint512_t>(&bytes.front()), a);
-////    return bytes;
-////}
+using data512 = std_array<uint8_t, sizeof(xint512_t)>;
+
+INLINE xint512_t load_aligned(const data512& bytes) NOEXCEPT
+{
+    return mm512_load_si512(pointer_cast<const xint512_t>(bytes.data()));
+}
+
+INLINE xint512_t load(const data512& bytes) NOEXCEPT
+{
+    return mm512_loadu_si512(pointer_cast<const xint512_t>(bytes.data()));
+}
+
+INLINE void store_aligned(data512& bytes, xint512_t a) NOEXCEPT
+{
+    mm512_store_si512(pointer_cast<xint512_t>(bytes.data()), a);
+}
+
+INLINE void store(data512& bytes, xint512_t a) NOEXCEPT
+{
+    mm512_storeu_si512(pointer_cast<xint512_t>(bytes.data()), a);
+}
 
 #else
 

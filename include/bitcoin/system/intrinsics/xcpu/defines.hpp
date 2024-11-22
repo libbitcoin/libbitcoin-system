@@ -132,7 +132,10 @@ BC_POP_WARNING()
     #define mm_extract_epi32(a, Lane)   {}
     #define mm_extract_epi64(a, Lane)   {}
     #define mm_shuffle_epi8(a, mask)    (a)
-    #define mm_storeu_si128(a, b)
+    #define mm_load_si128(a)            {}
+    #define mm_loadu_si128(a)           {}
+    #define mm_store_si128(memory, a)
+    #define mm_storeu_si128(memory, a)
     #define mm_set1_epi8(K)
     #define mm_set1_epi16(K)
     #define mm_set1_epi32(K)
@@ -162,7 +165,10 @@ BC_POP_WARNING()
     #define mm_extract_epi32(a, Lane)   _mm_extract_epi32(a, Lane)
     #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane) // undefined for X32
     #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
-    #define mm_storeu_si128(a, b)       _mm_storeu_si128(a, b)
+    #define mm_load_si128(a)            _mm_load_si128(a)
+    #define mm_loadu_si128(a)           _mm_loadu_si128(a)
+    #define mm_store_si128(memory, a)   _mm_store_si128(memory, a)
+    #define mm_storeu_si128(memory, a)  _mm_storeu_si128(memory, a)
     #define mm_set1_epi8(K)             _mm_set1_epi8(K)
     #define mm_set1_epi16(K)            _mm_set1_epi16(K)
     #define mm_set1_epi32(K)            _mm_set1_epi32(K)
@@ -197,7 +203,10 @@ BC_POP_WARNING()
     #define mm256_extract_epi32(a, Lane)    {}
     #define mm256_extract_epi64(a, Lane)    {}
     #define mm256_shuffle_epi8(a, mask)     (a)
-    #define mm256_storeu_si256(a, b)
+    #define mm256_load_si256(a)             {}
+    #define mm256_loadu_si256(a)            {}
+    #define mm256_store_si256(memory, a)    {}
+    #define mm256_storeu_si256(memory, a)   {}
     #define mm256_set1_epi8(K)
     #define mm256_set1_epi16(K)
     #define mm256_set1_epi32(K)
@@ -227,7 +236,10 @@ BC_POP_WARNING()
     #define mm256_extract_epi32(a, Lane)    _mm256_extract_epi32(a, Lane)
     #define mm256_extract_epi64(a, Lane)    _mm256_extract_epi64(a, Lane) // undefined for X32
     #define mm256_shuffle_epi8(a, mask)     _mm256_shuffle_epi8(a, mask)
-    #define mm256_storeu_si256(a, b)        _mm256_storeu_si256(a, b)
+    #define mm256_load_si256(a)             _mm256_load_si256(a)
+    #define mm256_loadu_si256(a)            _mm256_loadu_si256(a)
+    #define mm256_store_si256(memory, a)    _mm256_store_si256(memory, a)
+    #define mm256_storeu_si256(memory, a)   _mm256_storeu_si256(memory, a)
     #define mm256_set1_epi8(K)              _mm256_set1_epi8(K)
     #define mm256_set1_epi16(K)             _mm256_set1_epi16(K)
     #define mm256_set1_epi32(K)             _mm256_set1_epi32(K)
@@ -263,7 +275,10 @@ BC_POP_WARNING()
     #define mm512_extract_epi32(a, Lane)    {}
     #define mm512_extract_epi64(a, Lane)    {}
     #define mm512_shuffle_epi8(a, mask)     (a)
-    #define mm512_storeu_si512(a, b)
+    #define mm512_load_si512(a)             {}
+    #define mm512_loadu_si512(a)            {}
+    #define mm512_store_si512(memory, a)
+    #define mm512_storeu_si512(memory, a)
     #define mm512_set1_epi8(K)
     #define mm512_set1_epi16(K)
     #define mm512_set1_epi32(K)
@@ -293,7 +308,10 @@ BC_POP_WARNING()
     #define mm512_extract_epi32(a, Lane)    _mm512_extract_epi32(a, Lane) // undefined
     #define mm512_extract_epi64(a, Lane)    _mm512_extract_epi64(a, Lane) // undefined
     #define mm512_shuffle_epi8(a, mask)     _mm512_shuffle_epi8(a, mask)
-    #define mm512_storeu_si512(a, b)        _mm512_storeu_si512(a, b)
+    #define mm512_load_si512(a)             _mm512_load_si512(a)
+    #define mm512_loadu_si512(a)            _mm512_loadu_si512(a)
+    #define mm512_store_si512(memory, a)    _mm512_store_si512(memory, a)
+    #define mm512_storeu_si512(memory, a)   _mm512_storeu_si512(memory, a)
     #define mm512_set1_epi8(K)              _mm512_set1_epi8(K)
     #define mm512_set1_epi16(K)             _mm512_set1_epi16(K)
     #define mm512_set1_epi32(K)             _mm512_set1_epi32(K)

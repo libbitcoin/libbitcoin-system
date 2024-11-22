@@ -235,42 +235,49 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 template <typename Word, if_same<Word, uint16_t> = true>
 INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
-    static const auto mask = set<xint128_t>(
-        1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14);
-
-    return mm_shuffle_epi8(a, mask);
+    return mm_shuffle_epi8(a, set<xint128_t>(
+        1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14));
 }
 
 // SSE3
 template <typename Word, if_same<Word, uint32_t> = true>
 INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
-    static const auto mask = set<xint128_t>(
-        3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12);
-
-    return mm_shuffle_epi8(a, mask);
+    return mm_shuffle_epi8(a, set<xint128_t>(
+        3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12));
 }
 
 // SSE3
 template <typename Word, if_same<Word, uint64_t> = true>
 INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
-    static const auto mask = set<xint128_t>(
-        7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8);
-
-    return mm_shuffle_epi8(a, mask);
+    return mm_shuffle_epi8(a, set<xint128_t>(
+        7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8));
 }
 
-/// pack/unpack
+/// load/store (element sizes are actually irrelevant)
 /// ---------------------------------------------------------------------------
-////
-////// TODO: auto pack<xWord>(const uint8_t*).
-////INLINE auto unpack(xint128_t a) NOEXCEPT
-////{
-////    std_array<uint8_t, sizeof(xint128_t)> bytes{};
-////    mm_storeu_si128(pointer_cast<xint128_t>(&bytes.front()), a);
-////    return bytes;
-////}
+using data128 = std_array<uint8_t, sizeof(xint128_t)>;
+
+INLINE xint128_t load_aligned(const data128& bytes) NOEXCEPT
+{
+    return mm_load_si128(pointer_cast<const xint128_t>(bytes.data()));
+}
+
+INLINE xint128_t load(const data128& bytes) NOEXCEPT
+{
+    return mm_loadu_si128(pointer_cast<const xint128_t>(bytes.data()));
+}
+
+INLINE void store_aligned(data128& bytes, xint128_t a) NOEXCEPT
+{
+    mm_store_si128(pointer_cast<xint128_t>(bytes.data()), a);
+}
+
+INLINE void store(data128& bytes, xint128_t a) NOEXCEPT
+{
+    mm_storeu_si128(pointer_cast<xint128_t>(bytes.data()), a);
+}
 
 #else
 
