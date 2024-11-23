@@ -218,11 +218,13 @@ schedule(auto& buffer) NOEXCEPT
     }
     else if constexpr (native)
     {
+        // Single block shani message scheduling optimization.
         schedule_native(buffer);
     }
     else if constexpr (vector)
     {
-        // Single block without shani, message scheduling optimzation.
+        // [Multi-block vectorized scheduling is implemented by iterate().]
+        // Single block (without shani) message scheduling optimization.
         schedule_sigma(buffer);
     }
     else

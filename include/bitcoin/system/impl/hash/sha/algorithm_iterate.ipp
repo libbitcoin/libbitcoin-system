@@ -275,6 +275,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     }
     else if constexpr (vector)
     {
+        // Multi-block vectorized message scheduling optimization.
         iterate_vector(state, blocks);
     }
     else
@@ -289,6 +290,7 @@ iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     if constexpr (vector)
     {
+        // Multi-block vectorized message scheduling optimization.
         iterate_vector(state, blocks);
     }
     else
