@@ -22,10 +22,6 @@
 #include <bit>
 #include <iostream>
 
-// Based on:
-// homes.esat.kuleuven.be/~bosselae/ripemd160/pdf/AB-9601/AB-9601.pdf
-// [Dobbertin, Bosselaers, Preneel]
-
 namespace libbitcoin {
 namespace system {
 namespace rmd {

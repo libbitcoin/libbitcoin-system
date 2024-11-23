@@ -366,7 +366,7 @@ double_flush() NOEXCEPT
         if (is_empty())
             return Algorithm::finalize_double(state_, size_ / block_size);
         else
-            return Algorithm::hash(pad());
+            return Algorithm::finalize_second(pad());
     }
     else
     {
@@ -383,7 +383,7 @@ double_flush(digest_t& digest) NOEXCEPT
         if (is_empty())
             digest = Algorithm::finalize_double(state_, size_ / block_size);
         else
-            digest = Algorithm::hash(pad());
+            digest = Algorithm::finalize_second(pad());
     }
     else
     {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2023 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2024 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,15 +19,20 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_NATIVE_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_NATIVE_IPP
 
-/// Native does not change the buffer size (not expanded), just its "shape".
-/// Four words are buffered into one xint128_t, resulting in 1/4 the buffer
-/// array size and number of rounds. Four state words are  packed into each of
-/// two state variables. This applies to sha160 and sha256, but sha512 native
-/// is not supported.
+// Native (SHA-NI or NEON)
+// ============================================================================
+// Native does not change the buffer size (not expanded), just its "shape".
+// Four words are buffered into one xint128_t, resulting in 1/4 the buffer
+// array size and number of rounds. Four state words are  packed into each of
+// two state variables. This applies to sha160 and sha256, but sha512 native
+// is not supported.
 
 namespace libbitcoin {
 namespace system {
 namespace sha {
+
+// protected
+// ----------------------------------------------------------------------------
 
 TEMPLATE
 template <typename xWord>
@@ -40,29 +45,28 @@ schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-schedule_native(buffer_t&) NOEXCEPT
+schedule_native(buffer_t& buffer) NOEXCEPT
 {
-    ////if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>())
-    ////{
-    ////    prepare8<16>(buffer);
-    ////    prepare8<24>(buffer);
-    ////    prepare8<32>(buffer);
-    ////    prepare8<40>(buffer);
-    ////    prepare8<48>(buffer);
-    ////    prepare8<56>(buffer);
+    // TODO:
+    schedule_(buffer);
+}
 
-    ////    if constexpr (SHA::rounds == 80)
-    ////    {
-    ////        prepare8<64>(buffer);
-    ////        prepare8<72>(buffer);
-    ////    }
+TEMPLATE
+template <typename xWord, size_t Lane>
+INLINE void CLASS::
+compress_native(xstate_t<xWord>& xstate, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+{
+    // Merkle extended buffer is not native dispatched.
+    compress_(xstate, xbuffer);
+}
 
-    ////    add_k(buffer);
-    ////}
-    ////else
-    ////{
-    ////    schedule_(buffer);
-    ////}
+TEMPLATE
+template <size_t Lane>
+INLINE void CLASS::
+compress_native(state_t& state, const buffer_t& buffer) NOEXCEPT
+{
+    // TODO:
+    compress_(state, buffer);
 }
 
 } // namespace sha

@@ -1507,13 +1507,40 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\scrypt.ipp">
       <Filter>include\bitcoin\system\impl\hash</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_compress.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_double.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_functions.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_iterate.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_merkle.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_native.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_vector.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_padding.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_parsing.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_schedule.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_sigma.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_single.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_stream.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">
