@@ -210,7 +210,7 @@ BC_POP_WARNING()
 
 TEMPLATE
 constexpr void CLASS::
-schedule(auto& buffer) NOEXCEPT
+schedule(buffer_t& buffer) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -223,7 +223,6 @@ schedule(auto& buffer) NOEXCEPT
     }
     else if constexpr (vector)
     {
-        // [Multi-block vectorized scheduling is implemented by iterate().]
         // Single block (without shani) message scheduling optimization.
         schedule_sigma(buffer);
     }

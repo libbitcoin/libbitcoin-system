@@ -102,8 +102,6 @@ public:
     /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
 
-    static constexpr void reinput(auto& buffer, const auto& state) NOEXCEPT;
-
     template <size_t Size>
     static constexpr digest_t double_hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
@@ -126,7 +124,7 @@ public:
     static constexpr digest_t finalize_double(state_t& state, size_t blocks) NOEXCEPT;
 
 protected:
-    /// Functions
+    /// Functions.
     /// -----------------------------------------------------------------------
     using uint = unsigned int;
 
@@ -144,8 +142,11 @@ protected:
     INLINE static constexpr auto Sigma0(auto x) NOEXCEPT;
     INLINE static constexpr auto Sigma1(auto x) NOEXCEPT;
 
-    /// Compression
+    /// Compression.
     /// -----------------------------------------------------------------------
+
+    template <typename Word, size_t Lane>
+    INLINE static constexpr auto extract(Word a) NOEXCEPT;
 
     template<size_t Round, typename Auto>
     static CONSTEVAL auto functor() NOEXCEPT;
@@ -165,25 +166,25 @@ protected:
     template <size_t Lane = zero>
     static constexpr void compress_(auto& state, const auto& buffer) NOEXCEPT;
     template <size_t Lane = zero>
-    static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
+    static constexpr void compress(state_t& state, const buffer_t& buffer) NOEXCEPT;
 
-    /// Message Scheduling
+    /// Message scheduling.
     /// -----------------------------------------------------------------------
 
     template <size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
     INLINE static constexpr void add_k(auto& buffer) NOEXCEPT;
     static constexpr void schedule_(auto& buffer) NOEXCEPT;
-    static constexpr void schedule(auto& buffer) NOEXCEPT;
+    static constexpr void schedule(buffer_t& buffer) NOEXCEPT;
 
-    /// Parsing (endian sensitive)
+    /// Parsing (endian sensitive).
     /// -----------------------------------------------------------------------
     INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input_left(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input_right(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
-    /// Padding
+    /// Padding.
     /// -----------------------------------------------------------------------
     template <size_t Blocks>
     static constexpr void schedule_n(buffer_t& buffer) NOEXCEPT;
@@ -232,6 +233,11 @@ protected:
     using xchunk_t = std_array<xWord, SHA::state_words>;
     using idigests_t = mutable_iterable<digest_t>;
 
+    /// Double hashing.
+    /// -----------------------------------------------------------------------
+
+    static constexpr void reinput(auto& buffer, const auto& state) NOEXCEPT;
+
     /// Common.
     /// -----------------------------------------------------------------------
 
@@ -242,7 +248,7 @@ protected:
     INLINE static void xinput(xbuffer_t<xWord>& xbuffer,
         iblocks_t& blocks) NOEXCEPT;
 
-    /// Merkle Hash.
+    /// Merkle hashing.
     /// -----------------------------------------------------------------------
 
     template <typename xWord>
@@ -264,14 +270,11 @@ protected:
     INLINE static digest_t unpack(const xstate_t<xWord>& xstate) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void output(idigests_t& digests,
+    INLINE static void xoutput(idigests_t& digests,
         const xstate_t<xWord>& xstate) NOEXCEPT;
 
-    /// Message Schedule (block vectorization).
+    /// Message scheduling.
     /// -----------------------------------------------------------------------
-
-    template <typename Word, size_t Lane>
-    INLINE static constexpr auto extract(Word a) NOEXCEPT;
 
     template <typename Word, size_t Lane, typename xWord,
         if_not_same<Word, xWord> = true>
@@ -320,10 +323,15 @@ protected:
     INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
     INLINE static void schedule_native(buffer_t& buffer) NOEXCEPT;
 
-    template <typename xWord, size_t Lane = zero>
+    template <typename xWord, size_t Lane>
     INLINE static void compress_native(xstate_t<xWord>& xstate,
         const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-    template <size_t Lane = zero>
+
+    template <typename xWord, size_t Lane>
+    INLINE static void compress_native(state_t& state,
+        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
+    template <size_t Lane>
     INLINE static void compress_native(state_t& state,
         const buffer_t& buffer) NOEXCEPT;
 

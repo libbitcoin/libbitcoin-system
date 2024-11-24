@@ -139,33 +139,33 @@ sequential_compress(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
     // Sequential compression uses non-expanded state (normal form).
     constexpr auto lanes = capacity<xWord, word_t>;
 
-    compress<0>(state, xbuffer);
-    compress<1>(state, xbuffer);
+    compress_<0>(state, xbuffer);
+    compress_<1>(state, xbuffer);
 
     if constexpr (lanes >= 4)
     {
-        compress<2>(state, xbuffer);
-        compress<3>(state, xbuffer);
+        compress_<2>(state, xbuffer);
+        compress_<3>(state, xbuffer);
     }
 
     if constexpr (lanes >= 8)
     {
-        compress<4>(state, xbuffer);
-        compress<5>(state, xbuffer);
-        compress<6>(state, xbuffer);
-        compress<7>(state, xbuffer);
+        compress_<4>(state, xbuffer);
+        compress_<5>(state, xbuffer);
+        compress_<6>(state, xbuffer);
+        compress_<7>(state, xbuffer);
     }
 
     if constexpr (lanes >= 16)
     {
-        compress<8>(state, xbuffer);
-        compress<9>(state, xbuffer);
-        compress<10>(state, xbuffer);
-        compress<11>(state, xbuffer);
-        compress<12>(state, xbuffer);
-        compress<13>(state, xbuffer);
-        compress<14>(state, xbuffer);
-        compress<15>(state, xbuffer);
+        compress_<8>(state, xbuffer);
+        compress_<9>(state, xbuffer);
+        compress_<10>(state, xbuffer);
+        compress_<11>(state, xbuffer);
+        compress_<12>(state, xbuffer);
+        compress_<13>(state, xbuffer);
+        compress_<14>(state, xbuffer);
+        compress_<15>(state, xbuffer);
     }
 }
 

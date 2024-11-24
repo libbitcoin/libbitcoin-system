@@ -32,6 +32,16 @@ namespace sha {
 // ----------------------------------------------------------------------------
 
 TEMPLATE
+template <typename Word, size_t Lane>
+INLINE constexpr auto CLASS::
+extract(Word a) NOEXCEPT
+{
+    // Bypass lane extraction for non-expanded (normal form) buffer.
+    static_assert(Lane == zero);
+    return a;
+}
+
+TEMPLATE
 template<size_t Round, typename Auto>
 CONSTEVAL auto CLASS::
 functor() NOEXCEPT
@@ -97,16 +107,6 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     //     const auto value = vaddq(w, k);
     //     abcd = vsha256hq(abcd, efgh, value);
     //     efgh = vsha256h2q(efgh, abcd, value);
-}
-
-TEMPLATE
-template <typename Word, size_t Lane>
-INLINE constexpr auto CLASS::
-extract(Word a) NOEXCEPT
-{
-    // Bypass lane extraction for non-expanded (normal form) buffer.
-    static_assert(Lane == zero);
-    return a;
 }
 
 TEMPLATE
@@ -276,7 +276,7 @@ summarize(auto& out, const auto& in) NOEXCEPT
 TEMPLATE
 template <size_t Lane>
 constexpr void CLASS::
-compress(auto& state, const auto& buffer) NOEXCEPT
+compress(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {

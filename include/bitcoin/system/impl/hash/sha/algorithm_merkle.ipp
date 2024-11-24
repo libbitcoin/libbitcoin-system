@@ -287,7 +287,7 @@ unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 TEMPLATE
 template <typename xWord>
 INLINE void CLASS::
-output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
+xoutput(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
 {
     constexpr auto lanes = capacity<xWord, word_t>;
     BC_ASSERT(digests.size() >= lanes);
@@ -354,6 +354,7 @@ merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
     {
         if (blocks.size() >= lanes)
         {
+            // TODO: expose const structs to avoid local static.
             static auto initial = pack<xWord>(H::get);
 
             xbuffer_t<xWord> xbuffer{};
@@ -362,22 +363,22 @@ merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
             {
                 auto xstate = initial;
 
-                // input() advances block iterator by lanes.
+                // xinput() advances block iterator by lanes.
                 xinput(xbuffer, blocks);
-                schedule(xbuffer);
-                compress(xstate, xbuffer);
+                schedule_(xbuffer);
+                compress_(xstate, xbuffer);
                 schedule_1(xbuffer);
-                compress(xstate, xbuffer);
+                compress_(xstate, xbuffer);
 
                 // Second hash
                 reinput(xbuffer, xstate);
                 pad_half(xbuffer);
-                schedule(xbuffer);
+                schedule_(xbuffer);
                 xstate = initial;
-                compress(xstate, xbuffer);
+                compress_(xstate, xbuffer);
 
-                // output() advances digest iterator by lanes.
-                output(digests, xstate);
+                // xoutput() advances digest iterator by lanes.
+                xoutput(digests, xstate);
             }
             while (blocks.size() >= lanes);
         }
