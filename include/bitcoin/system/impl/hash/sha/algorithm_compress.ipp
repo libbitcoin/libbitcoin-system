@@ -285,7 +285,7 @@ compress(auto& state, const auto& buffer) NOEXCEPT
     else if constexpr (native)
     {
         // Single block shani compression optimization.
-        compress_native<Lane>(buffer);
+        compress_native<Lane>(state, buffer);
     }
     ////else if constexpr (vector)
     ////{
