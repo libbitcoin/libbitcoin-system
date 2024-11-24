@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2023 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2024 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -16,102 +16,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTOR_IPP
-#define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_VECTOR_IPP
+#ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_MERKLE_IPP
+#define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_MERKLE_IPP
+
+#include <type_traits>
+#include <utility>
+
+// Merkle hashing.
+// ============================================================================
+// No merkle_hash optimizations for sha160 (double_hash requires half_t).
 
 namespace libbitcoin {
 namespace system {
 namespace sha {
 
-BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-
-// Common.
+// expanded padding
 // ----------------------------------------------------------------------------
-
-TEMPLATE
-template <size_t Word, size_t Lanes>
-INLINE auto CLASS::
-pack(const xblock_t<Lanes>& xblock) NOEXCEPT
-{
-    using xword = to_extended<word_t, Lanes>;
-
-    if constexpr (Lanes == 2)
-    {
-        return byteswap<word_t>(set<xword>(
-            xblock[0][Word],
-            xblock[1][Word]));
-    }
-    else if constexpr (Lanes == 4)
-    {
-        return byteswap<word_t>(set<xword>(
-            xblock[0][Word],
-            xblock[1][Word],
-            xblock[2][Word],
-            xblock[3][Word]));
-    }
-    else if constexpr (Lanes == 8)
-    {
-        return byteswap<word_t>(set<xword>(
-            xblock[0][Word],
-            xblock[1][Word],
-            xblock[2][Word],
-            xblock[3][Word],
-            xblock[4][Word],
-            xblock[5][Word],
-            xblock[6][Word],
-            xblock[7][Word]));
-    }
-    else if constexpr (Lanes == 16)
-    {
-        return byteswap<word_t>(set<xword>(
-            xblock[ 0][Word],
-            xblock[ 1][Word],
-            xblock[ 2][Word],
-            xblock[ 3][Word],
-            xblock[ 4][Word],
-            xblock[ 5][Word],
-            xblock[ 6][Word],
-            xblock[ 7][Word],
-            xblock[ 8][Word],
-            xblock[ 9][Word],
-            xblock[10][Word],
-            xblock[11][Word],
-            xblock[12][Word],
-            xblock[13][Word],
-            xblock[14][Word],
-            xblock[15][Word]));
-    }
-}
-
-TEMPLATE
-template <typename xWord>
-INLINE void CLASS::
-input(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
-{
-    constexpr auto lanes = capacity<xWord, word_t>;
-
-    const auto& xblock = array_cast<words_t>(blocks.template to_array<lanes>());
-    xbuffer[0] = pack<0>(xblock);
-    xbuffer[1] = pack<1>(xblock);
-    xbuffer[2] = pack<2>(xblock);
-    xbuffer[3] = pack<3>(xblock);
-    xbuffer[4] = pack<4>(xblock);
-    xbuffer[5] = pack<5>(xblock);
-    xbuffer[6] = pack<6>(xblock);
-    xbuffer[7] = pack<7>(xblock);
-    xbuffer[8] = pack<8>(xblock);
-    xbuffer[9] = pack<9>(xblock);
-    xbuffer[10] = pack<10>(xblock);
-    xbuffer[11] = pack<11>(xblock);
-    xbuffer[12] = pack<12>(xblock);
-    xbuffer[13] = pack<13>(xblock);
-    xbuffer[14] = pack<14>(xblock);
-    xbuffer[15] = pack<15>(xblock);
-    blocks.template advance<lanes>();
-}
-
-// Merkle Hash.
-// ----------------------------------------------------------------------------
+// protected
 
 TEMPLATE
 template <typename xWord>
@@ -142,7 +63,6 @@ pack_schedule_1() NOEXCEPT
 
     if constexpr (SHA::rounds == 80)
     {
-        // TODO: align.
         return xbuffer_t<xWord>
         {
             broadcast<xWord>(pad[0]),
@@ -233,7 +153,6 @@ pack_schedule_1() NOEXCEPT
     }
     else
     {
-        // TODO: align.
         return xbuffer_t<xWord>
         {
             broadcast<xWord>(pad[0]),
@@ -325,6 +244,10 @@ schedule_1(xbuffer_t<xWord>& xbuffer) NOEXCEPT
     xbuffer = xscheduled_pad;
 }
 
+// expanded state
+// ----------------------------------------------------------------------------
+// protected
+
 TEMPLATE
 template <typename xWord>
 INLINE auto CLASS::
@@ -403,13 +326,25 @@ output(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
     digests.template advance<lanes>();
 }
 
-// Merkle Hash.
+// vectorizable digest pairs hashing
 // ----------------------------------------------------------------------------
+// protected
+
+TEMPLATE
+VCONSTEXPR void CLASS::
+merkle_hash_(digests_t& digests, size_t offset) NOEXCEPT
+{
+    const auto blocks = to_half(digests.size());
+    for (auto i = offset, j = offset * two; i < blocks; ++i, j += two)
+        digests[i] = double_hash(digests[j], digests[add1(j)]);
+
+    digests.resize(blocks);
+}
 
 TEMPLATE
 template <typename xWord, if_extended<xWord>>
 INLINE void CLASS::
-merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
+merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 {
     BC_ASSERT(digests.size() == blocks.size());
     constexpr auto lanes = capacity<xWord, word_t>;
@@ -421,7 +356,6 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
         {
             static auto initial = pack<xWord>(H::get);
 
-            // TODO: align.
             xbuffer_t<xWord> xbuffer{};
 
             do
@@ -429,7 +363,7 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
                 auto xstate = initial;
 
                 // input() advances block iterator by lanes.
-                input(xbuffer, blocks);
+                xinput(xbuffer, blocks);
                 schedule(xbuffer);
                 compress(xstate, xbuffer);
                 schedule_1(xbuffer);
@@ -452,7 +386,7 @@ merkle_hash_invoke(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-merkle_hash_dispatch(digests_t& digests) NOEXCEPT
+merkle_hash_vector(digests_t& digests) NOEXCEPT
 {
     static_assert(sizeof(digest_t) == to_half(sizeof(block_t)));
     auto next = zero;
@@ -467,11 +401,11 @@ merkle_hash_dispatch(digests_t& digests) NOEXCEPT
 
         // Merkle hash vector dispatch.
         if constexpr (use_x512)
-            merkle_hash_invoke<xint512_t>(idigests, iblocks);
+            merkle_hash_vector<xint512_t>(idigests, iblocks);
         if constexpr (use_x256)
-            merkle_hash_invoke<xint256_t>(idigests, iblocks);
+            merkle_hash_vector<xint256_t>(idigests, iblocks);
         if constexpr (use_x128)
-            merkle_hash_invoke<xint128_t>(idigests, iblocks);
+            merkle_hash_vector<xint128_t>(idigests, iblocks);
 
         // iblocks.size() is reduced by vectorization.
         next = start - iblocks.size();
@@ -481,205 +415,58 @@ merkle_hash_dispatch(digests_t& digests) NOEXCEPT
     merkle_hash_(digests, next);
 }
 
-// Message Schedule (block vectorization).
+// interface
 // ----------------------------------------------------------------------------
-// eprint.iacr.org/2012/067.pdf
+// public
 
 TEMPLATE
-template <typename xWord>
-INLINE void CLASS::
-compress_invoke(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+VCONSTEXPR typename CLASS::digest_t CLASS::
+merkle_root(digests_t&& digests) NOEXCEPT
 {
-    constexpr auto lanes = capacity<xWord, word_t>;
+    static_assert(is_same_type<state_t, chunk_t>);
 
-    compress<0>(state, xbuffer);
-    compress<1>(state, xbuffer);
+    if (is_zero(digests.size()))
+        return {};
 
-    if constexpr (lanes >= 4)
+    while (!is_one(digests.size()))
     {
-        compress<2>(state, xbuffer);
-        compress<3>(state, xbuffer);
+        if (is_odd(digests.size()))
+            digests.push_back(digests.back());
+
+        merkle_hash(digests);
     }
 
-    if constexpr (lanes >= 8)
-    {
-        compress<4>(state, xbuffer);
-        compress<5>(state, xbuffer);
-        compress<6>(state, xbuffer);
-        compress<7>(state, xbuffer);
-    }
-
-    if constexpr (lanes >= 16)
-    {
-        compress<8>(state, xbuffer);
-        compress<9>(state, xbuffer);
-        compress<10>(state, xbuffer);
-        compress<11>(state, xbuffer);
-        compress<12>(state, xbuffer);
-        compress<13>(state, xbuffer);
-        compress<14>(state, xbuffer);
-        compress<15>(state, xbuffer);
-    }
+    return std::move(digests.front());
 }
 
 TEMPLATE
-template <typename xWord, if_extended<xWord>>
-INLINE void CLASS::
-iterate_invoke(state_t& state, iblocks_t& blocks) NOEXCEPT
+VCONSTEXPR typename CLASS::digests_t& CLASS::
+merkle_hash(digests_t& digests) NOEXCEPT
 {
-    constexpr auto lanes = capacity<xWord, word_t>;
-    static_assert(is_valid_lanes<lanes>);
+    static_assert(is_same_type<state_t, chunk_t>);
 
-    if constexpr (have<xWord>())
+// Avoid tautological warning (std::is_constant_evaluated() always false).
+#if defined(HAVE_VECTOR_CONSTEXPR)
+    if (std::is_constant_evaluated())
     {
-        if (blocks.size() >= lanes)
-        {
-            // TODO: align.
-            xbuffer_t<xWord> xbuffer{};
-
-            do
-            {
-                // input() advances block iterator by lanes.
-                input(xbuffer, blocks);
-                schedule_(xbuffer);
-                compress_invoke(state, xbuffer);
-            } while (blocks.size() >= lanes);
-        }
+        merkle_hash_(digests);
     }
-}
-
-TEMPLATE
-INLINE void CLASS::
-iterate_dispatch(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    if (blocks.size() >= min_lanes)
+    else
+#endif
+    if constexpr (vector)
     {
-        // Schedule iteration vector dispatch.
-        if constexpr (use_x512)
-            iterate_invoke<xint512_t>(state, blocks);
-        if constexpr (use_x256)
-            iterate_invoke<xint256_t>(state, blocks);
-        if constexpr (use_x128)
-            iterate_invoke<xint128_t>(state, blocks);
-    }
-
-    // Complete rounds using normal form.
-    // blocks.size() is reduced by vectorization.
-    iterate_(state, blocks);
-}
-
-TEMPLATE
-template <size_t Size>
-INLINE void CLASS::
-iterate_dispatch(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
-{
-    if (blocks.size() >= min_lanes)
-    {
-        auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
-        iterate_dispatch(state, iblocks);
+        // TODO: test vector vs. native performance for the 4 lane scenario.
+        // Merkle block vectorization is applied at 16/8/4 lanes (as available)
+        // and falls back to native/normal (as available) for 3/2/1 lanes.
+        merkle_hash_vector(digests);
     }
     else
     {
-        iterate_(state, blocks);
+        merkle_hash_(digests);
     }
-}
 
-// Message Schedule (sigma vectorization).
-// ----------------------------------------------------------------------------
-
-TEMPLATE
-template <typename xWord, if_extended<xWord>>
-INLINE auto CLASS::
-sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
-    auto x8) NOEXCEPT
-{
-    return sigma0(set<xWord>(x1, x2, x3, x4, x5, x6, x7, x8));
-}
-
-TEMPLATE
-template<size_t Round, size_t Offset>
-INLINE void CLASS::
-prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
-{
-    static_assert(Round >= 16);
-    constexpr auto r02 = Round - 2;
-    constexpr auto r07 = Round - 7;
-    constexpr auto r16 = Round - 16;
-    constexpr auto s = SHA::word_bits;
-
-    // buffer[r07 + 7] is buffer[Round + 0]
-    // This is why sigma0 is limited to 8 lanes (vs 16).
-    buffer[Round + Offset] = f::add<s>(
-        f::add<s>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
-        f::add<s>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
-    buffer[r16 + Offset] = f::addc<K::get[r16 + Offset], s>(buffer[r16 + Offset]);
-}
-
-TEMPLATE
-template<size_t Round>
-INLINE void CLASS::
-prepare8(buffer_t& buffer) NOEXCEPT
-{
-    // Requires avx512 for sha512 and avx2 for sha256.
-    // The simplicity of sha160 message prepare precludes this optimization.
-    static_assert(SHA::strength != 160);
-
-    // sigma0x8 message scheduling for single block iteration.
-    // Does not alter buffer structure, fully private to this method.
-    // Tests of adding sigma1x2 half lanes vectorization show loss of ~10%.
-    // Tests of adding sigma0x8 full lanes vectorization show gain of ~5%.
-    constexpr auto r15 = Round - 15;
-    const auto xsigma0 = sigma0_8<to_extended<word_t, 8>>(
-        buffer[r15 + 0], buffer[r15 + 1], buffer[r15 + 2], buffer[r15 + 3],
-        buffer[r15 + 4], buffer[r15 + 5], buffer[r15 + 6], buffer[r15 + 7]);
-
-    prepare1<Round, 0>(buffer, xsigma0);
-    prepare1<Round, 1>(buffer, xsigma0);
-    prepare1<Round, 2>(buffer, xsigma0);
-    prepare1<Round, 3>(buffer, xsigma0);
-    prepare1<Round, 4>(buffer, xsigma0);
-    prepare1<Round, 5>(buffer, xsigma0);
-    prepare1<Round, 6>(buffer, xsigma0);
-    prepare1<Round, 7>(buffer, xsigma0);
-}
-
-TEMPLATE
-template <typename xWord>
-INLINE void CLASS::
-schedule_vector(xbuffer_t<xWord>& xbuffer) NOEXCEPT
-{
-    // Merkle extended buffer is not schedule dispatched.
-    schedule_(xbuffer);
-}
-
-TEMPLATE
-INLINE void CLASS::
-schedule_vector(buffer_t& buffer) NOEXCEPT
-{
-    if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>())
-    {
-        prepare8<16>(buffer);
-        prepare8<24>(buffer);
-        prepare8<32>(buffer);
-        prepare8<40>(buffer);
-        prepare8<48>(buffer);
-        prepare8<56>(buffer);
-
-        if constexpr (SHA::rounds == 80)
-        {
-            prepare8<64>(buffer);
-            prepare8<72>(buffer);
-        }
-
-        add_k(buffer);
-    }
-    else
-    {
-        schedule_(buffer);
-    }
-}
-
-BC_POP_WARNING()
+    return digests;
+};
 
 } // namespace sha
 } // namespace system

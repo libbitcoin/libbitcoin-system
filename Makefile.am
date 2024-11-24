@@ -618,9 +618,18 @@ include_bitcoin_system_impl_hash_rmd_HEADERS = \
 
 include_bitcoin_system_impl_hash_shadir = ${includedir}/bitcoin/system/impl/hash/sha
 include_bitcoin_system_impl_hash_sha_HEADERS = \
-    include/bitcoin/system/impl/hash/sha/algorithm.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_compress.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_double.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_functions.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_iterate.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_merkle.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_native.ipp \
-    include/bitcoin/system/impl/hash/sha/algorithm_vector.ipp
+    include/bitcoin/system/impl/hash/sha/algorithm_padding.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_parsing.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_schedule.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_sigma.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_single.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_stream.ipp
 
 include_bitcoin_system_impl_machinedir = ${includedir}/bitcoin/system/impl/machine
 include_bitcoin_system_impl_machine_HEADERS = \

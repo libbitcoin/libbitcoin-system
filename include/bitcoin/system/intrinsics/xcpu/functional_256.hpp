@@ -245,45 +245,52 @@ INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 template <typename Word, if_same<Word, uint16_t> = true>
 INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 {
-    static const auto mask = set<xint256_t>(
-         1,  0,  3,  2,  5,  4,  7,  6,  9,  8, 11, 10, 13, 12, 15, 14,
-        17, 16, 19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30);
-
-    return mm256_shuffle_epi8(a, mask);
+    return mm256_shuffle_epi8(a, set<xint256_t>(
+        1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14,
+        17, 16, 19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30));
 }
 
 // AVX2
 template <typename Word, if_same<Word, uint32_t> = true>
 INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 {
-    static const auto mask = set<xint256_t>(
-         3,  2,  1,  0,  7,  6,  5,  4, 11, 10,  9,  8, 15, 14, 13, 12,
-        19, 18, 17, 16, 23, 22, 21, 20, 27, 26, 25, 24, 31, 30, 29, 28);
-
-    return mm256_shuffle_epi8(a, mask);
+    return mm256_shuffle_epi8(a, set<xint256_t>(
+        3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12,
+        19, 18, 17, 16, 23, 22, 21, 20, 27, 26, 25, 24, 31, 30, 29, 28));
 }
 
 // AVX2
 template <typename Word, if_same<Word, uint64_t> = true>
 INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 {
-    static const auto mask = set<xint256_t>(
-         7,  6,  5,  4,  3,  2,  1,  0, 15, 14, 13, 12, 11, 10,  9,  8,
-        23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24);
-
-    return mm256_shuffle_epi8(a, mask);
+    return mm256_shuffle_epi8(a, set<xint256_t>(
+        7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8,
+        23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24));
 }
 
-/// pack/unpack
+/// load/store (element sizes are actually irrelevant)
 /// ---------------------------------------------------------------------------
-////
-////// TODO: auto pack<xWord>(const uint8_t*).
-////INLINE auto unpack(xint256_t a) NOEXCEPT
-////{
-////    std_array<uint8_t, sizeof(xint256_t)> bytes{};
-////    mm256_storeu_si256(pointer_cast<xint256_t>(&bytes.front()), a);
-////    return bytes;
-////}
+using data256 = std_array<uint8_t, sizeof(xint256_t)>;
+
+INLINE xint256_t load_aligned(const data256& bytes) NOEXCEPT
+{
+    return mm256_load_si256(pointer_cast<const xint256_t>(bytes.data()));
+}
+
+INLINE xint256_t load(const data256& bytes) NOEXCEPT
+{
+    return mm256_loadu_si256(pointer_cast<const xint256_t>(bytes.data()));
+}
+
+INLINE void store_aligned(data256& bytes, xint256_t a) NOEXCEPT
+{
+    mm256_store_si256(pointer_cast<xint256_t>(bytes.data()), a);
+}
+
+INLINE void store(data256& bytes, xint256_t a) NOEXCEPT
+{
+    mm256_storeu_si256(pointer_cast<xint256_t>(bytes.data()), a);
+}
 
 #else
 
@@ -296,26 +303,3 @@ using xint256_t = std_array<uint8_t, bytes<256>>;
 } // namespace libbitcoin
 
 #endif
-
-////INLINE xint256_t align(const bytes256& word) NOEXCEPT
-////{
-////    return mm256_loadu_epi32(pointer_cast<const xint256_t>(word.data()));
-////}
-////
-////INLINE bytes256 unalign(xint256_t value) NOEXCEPT
-////{
-////    bytes256 word{};
-////    mm256_storeu_epi32(pointer_cast<xint256_t>(word.data()), value);
-////    return word;
-////    ////return *pointer_cast<bytes256>(&value);
-////}
-////
-////INLINE xint256_t native_to_big_endian(xint256_t value) NOEXCEPT
-////{
-////    return *pointer_cast<xint256_t>(unalign(byteswap(value)).data());
-////}
-////
-////INLINE xint256_t native_from_big_endian(xint256_t value) NOEXCEPT
-////{
-////    return byteswap(align(*pointer_cast<bytes256>(&value)));
-////}

@@ -143,8 +143,8 @@ BOOST_AUTO_TEST_CASE(sha512__hash__full_block__expected)
 BOOST_AUTO_TEST_CASE(sha512__hash__state__equals_byteswapped_half)
 {
     constexpr auto expected = sha512::hash(sha512::half_t{ 42 });
-    static_assert(sha512::hash(sha512::state_t{ byteswap(42_u64) }) == expected);
-    BOOST_CHECK_EQUAL(sha512::hash(sha512::state_t{ byteswap(42_u64) }), expected);
+    static_assert(sha512::finalize_second(sha512::state_t{ byteswap(42_u64) }) == expected);
+    BOOST_CHECK_EQUAL(sha512::finalize_second(sha512::state_t{ byteswap(42_u64) }), expected);
 }
 
 BOOST_AUTO_TEST_CASE(sha512__hash__half_block__expected)

@@ -143,8 +143,8 @@ BOOST_AUTO_TEST_CASE(sha256__hash__full_block__expected)
 BOOST_AUTO_TEST_CASE(sha256__hash__state__equals_byteswapped_half)
 {
     constexpr auto expected = sha256::hash(sha256::half_t{ 42 });
-    static_assert(sha256::hash(sha256::state_t{ byteswap(42_u32) }) == expected);
-    BOOST_CHECK_EQUAL(sha256::hash(sha256::state_t{ byteswap(42_u32) }), expected);
+    static_assert(sha256::finalize_second(sha256::state_t{ byteswap(42_u32) }) == expected);
+    BOOST_CHECK_EQUAL(sha256::finalize_second(sha256::state_t{ byteswap(42_u32) }), expected);
 }
 
 BOOST_AUTO_TEST_CASE(sha256__hash__half_block__expected)
