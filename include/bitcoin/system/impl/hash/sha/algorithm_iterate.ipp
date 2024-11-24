@@ -273,9 +273,15 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     {
         iterate_(state, blocks);
     }
+    else if constexpr (native)
+    {
+        // Multiple block shani message schduling and compression optimization.
+        iterate_(state, blocks);
+    }
     else if constexpr (vector)
     {
-        // Multi-block vectorized message scheduling optimization.
+        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
+        // Multiple block vectorized message scheduling optimization.
         iterate_vector(state, blocks);
     }
     else
@@ -288,9 +294,15 @@ TEMPLATE
 INLINE void CLASS::
 iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (vector)
+    if constexpr (native)
     {
-        // Multi-block vectorized message scheduling optimization.
+        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
+        // Multiple block shani message schduling and compression optimization.
+        iterate_(state, blocks);
+    }
+    else if constexpr (vector)
+    {
+        // Multiple block vectorized message scheduling optimization.
         iterate_vector(state, blocks);
     }
     else
