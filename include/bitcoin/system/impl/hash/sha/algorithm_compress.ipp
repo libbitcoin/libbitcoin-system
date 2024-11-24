@@ -149,8 +149,27 @@ round(auto& state, const auto& wk) NOEXCEPT
     }
 }
 
+TEMPLATE
+INLINE constexpr void CLASS::
+summarize(auto& out, const auto& in) NOEXCEPT
+{
+    constexpr auto s = SHA::word_bits;
+    out[0] = f::add<s>(out[0], in[0]);
+    out[1] = f::add<s>(out[1], in[1]);
+    out[2] = f::add<s>(out[2], in[2]);
+    out[3] = f::add<s>(out[3], in[3]);
+    out[4] = f::add<s>(out[4], in[4]);
+
+    if constexpr (SHA::strength != 160)
+    {
+        out[5] = f::add<s>(out[5], in[5]);
+        out[6] = f::add<s>(out[6], in[6]);
+        out[7] = f::add<s>(out[7], in[7]);
+    }
+}
+
 // msvc++ not inlined in x32.
-BC_PUSH_WARNING(NOT_INLINED)
+////BC_PUSH_WARNING(NOT_INLINED)
 
 TEMPLATE
 template <size_t Lane>
@@ -252,26 +271,7 @@ compress_(auto& state, const auto& buffer) NOEXCEPT
     summarize(state, start);
 }
 
-BC_POP_WARNING()
-
-TEMPLATE
-INLINE constexpr void CLASS::
-summarize(auto& out, const auto& in) NOEXCEPT
-{
-    constexpr auto s = SHA::word_bits;
-    out[0] = f::add<s>(out[0], in[0]);
-    out[1] = f::add<s>(out[1], in[1]);
-    out[2] = f::add<s>(out[2], in[2]);
-    out[3] = f::add<s>(out[3], in[3]);
-    out[4] = f::add<s>(out[4], in[4]);
-
-    if constexpr (SHA::strength != 160)
-    {
-        out[5] = f::add<s>(out[5], in[5]);
-        out[6] = f::add<s>(out[6], in[6]);
-        out[7] = f::add<s>(out[7], in[7]);
-    }
-}
+////BC_POP_WARNING()
 
 TEMPLATE
 template <size_t Lane>

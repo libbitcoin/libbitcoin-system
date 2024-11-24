@@ -58,6 +58,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
+        // TODO: evaluate 4/8/16 lane optimization using byteswap.
         const auto& in = array_cast<word_t>(block);
         buffer[0] = native_from_big_end(in[0]);
         buffer[1] = native_from_big_end(in[1]);
@@ -91,6 +92,7 @@ input_left(buffer_t& buffer, const half_t& half) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
+        // TODO: evaluate 4/8 lane optimization using byteswap.
         constexpr auto size = SHA::word_bytes;
         from_big<0 * size>(buffer.at(0), half);
         from_big<1 * size>(buffer.at(1), half);
@@ -139,6 +141,7 @@ input_right(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
+        // TODO: evaluate 4/8 lane optimization using byteswap.
         const auto& in = array_cast<word>(half);
         buffer[8] = native_from_big_end(in[0]);
         buffer[9] = native_from_big_end(in[1]);
@@ -195,6 +198,7 @@ output(const state_t& state) NOEXCEPT
         }
         else
         {
+            // TODO: evaluate 4/8 lane optimization using byteswap.
             return array_cast<byte_t>(state_t
             {
                 native_to_big_end(state[0]),

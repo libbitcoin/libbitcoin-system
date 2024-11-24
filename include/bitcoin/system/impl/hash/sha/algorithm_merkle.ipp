@@ -271,6 +271,7 @@ template <size_t Lane, typename xWord>
 INLINE typename CLASS::digest_t CLASS::
 unpack(const xstate_t<xWord>& xstate) NOEXCEPT
 {
+    // TODO: byteswap state in full one time before unpacking (vs. 8 times).
     return array_cast<byte_t>(state_t
     {
         get<word_t, Lane>(byteswap<word_t>(xstate[0])),

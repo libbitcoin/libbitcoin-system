@@ -125,7 +125,7 @@ add_k(auto& buffer) NOEXCEPT
 }
 
 // msvc++ not inlined in x32.
-BC_PUSH_WARNING(NOT_INLINED)
+////BC_PUSH_WARNING(NOT_INLINED)
 
 TEMPLATE
 constexpr void CLASS::
@@ -206,7 +206,7 @@ schedule_(auto& buffer) NOEXCEPT
     add_k(buffer);
 }
 
-BC_POP_WARNING()
+////BC_POP_WARNING()
 
 TEMPLATE
 constexpr void CLASS::
@@ -218,7 +218,7 @@ schedule(buffer_t& buffer) NOEXCEPT
     }
     else if constexpr (native)
     {
-        // Single block shani message scheduling optimization.
+        // Single block (with shani) message scheduling optimization.
         schedule_native(buffer);
     }
     else if constexpr (vector)

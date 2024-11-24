@@ -47,7 +47,7 @@ TEMPLATE
 INLINE void CLASS::
 schedule_native(buffer_t& buffer) NOEXCEPT
 {
-    // TODO:
+    // TODO: single block compression.
     schedule_(buffer);
 }
 
@@ -75,7 +75,7 @@ template <size_t Lane>
 INLINE void CLASS::
 compress_native(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
-    // TODO:
+    // TODO: single block compression.
     compress_<Lane>(state, buffer);
 }
 

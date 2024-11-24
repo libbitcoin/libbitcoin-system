@@ -122,8 +122,8 @@ xinput(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 TEMPLATE
 template <typename Word, size_t Lane, typename xWord,
     if_not_same<Word, xWord>>
-    INLINE Word CLASS::
-    extract(xWord a) NOEXCEPT
+INLINE Word CLASS::
+extract(xWord a) NOEXCEPT
 {
     // Extract word from lane of vectorized buffer.
     return get<Word, Lane>(a);
