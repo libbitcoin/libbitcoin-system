@@ -54,7 +54,8 @@ schedule_native(buffer_t& buffer) NOEXCEPT
 TEMPLATE
 template <typename xWord, size_t Lane>
 INLINE void CLASS::
-compress_native(xstate_t<xWord>& xstate, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+compress_native(xstate_t<xWord>& xstate,
+    const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
     // Merkle extended buffer is not native dispatched.
     compress_(xstate, xbuffer);
