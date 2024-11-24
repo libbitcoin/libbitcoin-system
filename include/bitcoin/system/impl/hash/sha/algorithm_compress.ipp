@@ -168,9 +168,6 @@ summarize(auto& out, const auto& in) NOEXCEPT
     }
 }
 
-// msvc++ not inlined in x32.
-////BC_PUSH_WARNING(NOT_INLINED)
-
 TEMPLATE
 template <size_t Lane>
 constexpr void CLASS::
@@ -270,8 +267,6 @@ compress_(auto& state, const auto& buffer) NOEXCEPT
 
     summarize(state, start);
 }
-
-////BC_POP_WARNING()
 
 TEMPLATE
 template <size_t Lane>
