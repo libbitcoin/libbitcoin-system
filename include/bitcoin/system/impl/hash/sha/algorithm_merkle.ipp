@@ -455,6 +455,9 @@ merkle_hash(digests_t& digests) NOEXCEPT
 #endif
     if constexpr (vector)
     {
+        // TODO: test vector vs. native performance for the 4 lane scenario.
+        // Merkle block vectorization is applied at 16/8/4 lanes (as available)
+        // and falls back to native/normal (as available) for 3/2/1 lanes.
         merkle_hash_vector(digests);
     }
     else
