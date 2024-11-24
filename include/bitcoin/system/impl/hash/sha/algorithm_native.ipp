@@ -47,7 +47,7 @@ TEMPLATE
 INLINE void CLASS::
 schedule_native(buffer_t& buffer) NOEXCEPT
 {
-    // TODO:
+    // TODO: single block compression.
     schedule_(buffer);
 }
 
@@ -57,8 +57,17 @@ INLINE void CLASS::
 compress_native(xstate_t<xWord>& xstate,
     const xbuffer_t<xWord>& xbuffer) NOEXCEPT
 {
-    // Merkle extended buffer is not native dispatched.
-    compress_(xstate, xbuffer);
+    // Merkle extended state/buffer is not native dispatched.
+    compress_<Lane>(xstate, xbuffer);
+}
+
+TEMPLATE
+template <typename xWord, size_t Lane>
+INLINE void CLASS::
+compress_native(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
+{
+    // Iterate extended buffer is not native dispatched.
+    compress_<Lane>(state, xbuffer);
 }
 
 TEMPLATE
@@ -66,8 +75,8 @@ template <size_t Lane>
 INLINE void CLASS::
 compress_native(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
-    // TODO:
-    compress_(state, buffer);
+    // TODO: single block compression.
+    compress_<Lane>(state, buffer);
 }
 
 } // namespace sha

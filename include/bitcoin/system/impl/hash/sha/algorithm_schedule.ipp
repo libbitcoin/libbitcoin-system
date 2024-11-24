@@ -124,9 +124,6 @@ add_k(auto& buffer) NOEXCEPT
     buffer[r + 15] = f::addc<K::get[r + 15], s>(buffer[r + 15]);
 }
 
-// msvc++ not inlined in x32.
-BC_PUSH_WARNING(NOT_INLINED)
-
 TEMPLATE
 constexpr void CLASS::
 schedule_(auto& buffer) NOEXCEPT
@@ -206,11 +203,9 @@ schedule_(auto& buffer) NOEXCEPT
     add_k(buffer);
 }
 
-BC_POP_WARNING()
-
 TEMPLATE
 constexpr void CLASS::
-schedule(auto& buffer) NOEXCEPT
+schedule(buffer_t& buffer) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
@@ -218,12 +213,11 @@ schedule(auto& buffer) NOEXCEPT
     }
     else if constexpr (native)
     {
-        // Single block shani message scheduling optimization.
+        // Single block (with shani) message scheduling optimization.
         schedule_native(buffer);
     }
     else if constexpr (vector)
     {
-        // [Multi-block vectorized scheduling is implemented by iterate().]
         // Single block (without shani) message scheduling optimization.
         schedule_sigma(buffer);
     }

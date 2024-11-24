@@ -122,8 +122,8 @@ xinput(xbuffer_t<xWord>& xbuffer, iblocks_t& blocks) NOEXCEPT
 TEMPLATE
 template <typename Word, size_t Lane, typename xWord,
     if_not_same<Word, xWord>>
-    INLINE Word CLASS::
-    extract(xWord a) NOEXCEPT
+INLINE Word CLASS::
+extract(xWord a) NOEXCEPT
 {
     // Extract word from lane of vectorized buffer.
     return get<Word, Lane>(a);
@@ -139,33 +139,33 @@ sequential_compress(state_t& state, const xbuffer_t<xWord>& xbuffer) NOEXCEPT
     // Sequential compression uses non-expanded state (normal form).
     constexpr auto lanes = capacity<xWord, word_t>;
 
-    compress<0>(state, xbuffer);
-    compress<1>(state, xbuffer);
+    compress_<0>(state, xbuffer);
+    compress_<1>(state, xbuffer);
 
     if constexpr (lanes >= 4)
     {
-        compress<2>(state, xbuffer);
-        compress<3>(state, xbuffer);
+        compress_<2>(state, xbuffer);
+        compress_<3>(state, xbuffer);
     }
 
     if constexpr (lanes >= 8)
     {
-        compress<4>(state, xbuffer);
-        compress<5>(state, xbuffer);
-        compress<6>(state, xbuffer);
-        compress<7>(state, xbuffer);
+        compress_<4>(state, xbuffer);
+        compress_<5>(state, xbuffer);
+        compress_<6>(state, xbuffer);
+        compress_<7>(state, xbuffer);
     }
 
     if constexpr (lanes >= 16)
     {
-        compress<8>(state, xbuffer);
-        compress<9>(state, xbuffer);
-        compress<10>(state, xbuffer);
-        compress<11>(state, xbuffer);
-        compress<12>(state, xbuffer);
-        compress<13>(state, xbuffer);
-        compress<14>(state, xbuffer);
-        compress<15>(state, xbuffer);
+        compress_<8>(state, xbuffer);
+        compress_<9>(state, xbuffer);
+        compress_<10>(state, xbuffer);
+        compress_<11>(state, xbuffer);
+        compress_<12>(state, xbuffer);
+        compress_<13>(state, xbuffer);
+        compress_<14>(state, xbuffer);
+        compress_<15>(state, xbuffer);
     }
 }
 
@@ -273,9 +273,15 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     {
         iterate_(state, blocks);
     }
+    else if constexpr (native)
+    {
+        // Multiple block shani message schduling and compression optimization.
+        iterate_(state, blocks);
+    }
     else if constexpr (vector)
     {
-        // Multi-block vectorized message scheduling optimization.
+        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
+        // Multiple block vectorized message scheduling optimization.
         iterate_vector(state, blocks);
     }
     else
@@ -288,9 +294,15 @@ TEMPLATE
 INLINE void CLASS::
 iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (vector)
+    if constexpr (native)
     {
-        // Multi-block vectorized message scheduling optimization.
+        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
+        // Multiple block shani message schduling and compression optimization.
+        iterate_(state, blocks);
+    }
+    else if constexpr (vector)
+    {
+        // Multiple block vectorized message scheduling optimization.
         iterate_vector(state, blocks);
     }
     else

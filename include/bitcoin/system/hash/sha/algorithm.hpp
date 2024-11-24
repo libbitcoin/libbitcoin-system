@@ -76,16 +76,15 @@ public:
     using iblocks_t = iterable<block_t>;
     using digests_t = std::vector<digest_t>;
 
-    /// Constants (and count_t).
+    /// Constants.
     /// -----------------------------------------------------------------------
+
     /// count_t is uint64_t (sha160/256) or uint128_t (sha512).
     /// All extended integer intrinsics currently have a "64 on 32" limit.
-
     static constexpr auto count_bits    = SHA::block_words * SHA::word_bytes;
     static constexpr auto count_bytes   = bytes<count_bits>;
     using count_t = unsigned_exact_type<bytes<count_bits>>;
 
-    static constexpr auto caching       = Cached;
     static constexpr auto limit_bits    = maximum<count_t> - count_bits;
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
     static constexpr auto big_end_count = true;
@@ -102,19 +101,12 @@ public:
     /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
 
-    static constexpr void reinput(auto& buffer, const auto& state) NOEXCEPT;
-
     template <size_t Size>
     static constexpr digest_t double_hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t double_hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t double_hash(const half_t& left, const half_t& right) NOEXCEPT;
     static digest_t double_hash(iblocks_t&& blocks) NOEXCEPT;
-
-    /// Merkle hashing (sha256/512).
-    /// -----------------------------------------------------------------------
-    static VCONSTEXPR digests_t& merkle_hash(digests_t& digests) NOEXCEPT;
-    static VCONSTEXPR digest_t merkle_root(digests_t&& digests) NOEXCEPT;
 
     /// Streamed hashing (explicitly finalized).
     /// -----------------------------------------------------------------------
@@ -125,10 +117,53 @@ public:
     static constexpr digest_t finalize_second(const state_t& state) NOEXCEPT;
     static constexpr digest_t finalize_double(state_t& state, size_t blocks) NOEXCEPT;
 
-protected:
-    /// Functions
+    /// Merkle hashing (sha256/512).
     /// -----------------------------------------------------------------------
+    static VCONSTEXPR digests_t& merkle_hash(digests_t& digests) NOEXCEPT;
+    static VCONSTEXPR digest_t merkle_root(digests_t&& digests) NOEXCEPT;
+
+protected:
+    /// Intrinsics constants.
+    /// -----------------------------------------------------------------------
+
+    static constexpr auto use_shani = Native && system::with_shani;
+    static constexpr auto use_neon = Native && system::with_neon;
+    static constexpr auto use_x128 = Vector && system::with_sse41;
+    static constexpr auto use_x256 = Vector && system::with_avx2;
+    static constexpr auto use_x512 = Vector && system::with_avx512;
+
+    template <size_t Lanes>
+    static constexpr auto is_valid_lanes =
+        (Lanes == 16u || Lanes == 8u || Lanes == 4u || Lanes == 2u);
+
+    static constexpr auto min_lanes =
+        (use_x128 ? bytes<128> :
+            (use_x256 ? bytes<256> :
+                (use_x512 ? bytes<512> : 0))) / SHA::word_bytes;
+
+    /// Intrinsics types.
+    /// -----------------------------------------------------------------------
+
+    /// Extended integer capacity for uint32_t/uint64_t is 2/4/8/16 only.
+    template <size_t Lanes, bool_if<is_valid_lanes<Lanes>> = true>
+    using xblock_t = std_array<words_t, Lanes>;
+
+    template <typename xWord, if_extended<xWord> = true>
+    using xbuffer_t = std_array<xWord, SHA::rounds>;
+
+    template <typename xWord, if_extended<xWord> = true>
+    using xstate_t = std_array<xWord, SHA::state_words>;
+
+    template <typename xWord, if_extended<xWord> = true>
+    using xchunk_t = std_array<xWord, SHA::state_words>;
+
     using uint = unsigned int;
+    using idigests_t = mutable_iterable<digest_t>;
+    using pad_t = std_array<word_t, subtract(SHA::block_words,
+        count_bytes / SHA::word_bytes)>;
+
+    /// Functions.
+    /// -----------------------------------------------------------------------
 
     INLINE static constexpr auto parity(auto x, auto y, auto z) NOEXCEPT;
     INLINE static constexpr auto choice(auto x, auto y, auto z) NOEXCEPT;
@@ -144,8 +179,11 @@ protected:
     INLINE static constexpr auto Sigma0(auto x) NOEXCEPT;
     INLINE static constexpr auto Sigma1(auto x) NOEXCEPT;
 
-    /// Compression
+    /// Compression.
     /// -----------------------------------------------------------------------
+
+    template <typename Word, size_t Lane>
+    INLINE static constexpr auto extract(Word a) NOEXCEPT;
 
     template<size_t Round, typename Auto>
     static CONSTEVAL auto functor() NOEXCEPT;
@@ -165,26 +203,33 @@ protected:
     template <size_t Lane = zero>
     static constexpr void compress_(auto& state, const auto& buffer) NOEXCEPT;
     template <size_t Lane = zero>
-    static constexpr void compress(auto& state, const auto& buffer) NOEXCEPT;
+    static constexpr void compress(state_t& state, const buffer_t& buffer) NOEXCEPT;
 
-    /// Message Scheduling
+    /// Message scheduling.
     /// -----------------------------------------------------------------------
 
     template <size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
     INLINE static constexpr void add_k(auto& buffer) NOEXCEPT;
     static constexpr void schedule_(auto& buffer) NOEXCEPT;
-    static constexpr void schedule(auto& buffer) NOEXCEPT;
+    static constexpr void schedule(buffer_t& buffer) NOEXCEPT;
 
-    /// Parsing (endian sensitive)
+    /// Parsing (endian sensitive).
     /// -----------------------------------------------------------------------
+
     INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input_left(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input_right(buffer_t& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
-    /// Padding
+    /// Padding.
     /// -----------------------------------------------------------------------
+
+    template <size_t Blocks>
+    static CONSTEVAL buffer_t scheduled_pad() NOEXCEPT;
+    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
+    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
+
     template <size_t Blocks>
     static constexpr void schedule_n(buffer_t& buffer) NOEXCEPT;
     static constexpr void schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT;
@@ -192,9 +237,39 @@ protected:
     static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
     static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
 
-/// Block iteration.
-/// ---------------------------------------------------------------------------
-protected:
+    /// Double hashing.
+    /// -----------------------------------------------------------------------
+
+    static constexpr void reinput(auto& buffer, const auto& state) NOEXCEPT;
+
+    /// Iteration.
+    /// -----------------------------------------------------------------------
+
+    template <size_t Word, size_t Lanes>
+    INLINE static auto pack(const xblock_t<Lanes>& xblock) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void xinput(xbuffer_t<xWord>& xbuffer,
+        iblocks_t& blocks) NOEXCEPT;
+
+    template <typename Word, size_t Lane, typename xWord,
+        if_not_same<Word, xWord> = true>
+    INLINE static Word extract(xWord a) NOEXCEPT;
+
+    template <typename xWord>
+    INLINE static void sequential_compress(state_t& state,
+        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
+    template <typename xWord, if_extended<xWord> = true>
+    INLINE static void vector_schedule_sequential_compress(state_t& state,
+        iblocks_t& blocks) NOEXCEPT;
+
+    template <size_t Size>
+    INLINE static void iterate_vector(state_t& state,
+        const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void iterate_vector(state_t& state,
+        iblocks_t& blocks) NOEXCEPT;
+
     template <size_t Size>
     INLINE static constexpr void iterate_(state_t& state,
         const ablocks_t<Size>& blocks) NOEXCEPT;
@@ -205,44 +280,7 @@ protected:
         const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void iterate(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
-private:
-    using pad_t = std_array<word_t, subtract(SHA::block_words,
-        count_bytes / SHA::word_bytes)>;
-
-    template <size_t Blocks>
-    static CONSTEVAL buffer_t scheduled_pad() NOEXCEPT;
-    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
-    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
-
-/// Vectorization.
-/// ---------------------------------------------------------------------------
-protected:
-    /// Extended integer capacity for uint32_t/uint64_t is 2/4/8/16 only.
-    template <size_t Lanes>
-    static constexpr auto is_valid_lanes =
-        (Lanes == 16u || Lanes == 8u || Lanes == 4u || Lanes == 2u);
-
-    template <size_t Lanes, bool_if<is_valid_lanes<Lanes>> = true>
-    using xblock_t = std_array<words_t, Lanes>;
-    template <typename xWord, if_extended<xWord> = true>
-    using xbuffer_t = std_array<xWord, SHA::rounds>;
-    template <typename xWord, if_extended<xWord> = true>
-    using xstate_t = std_array<xWord, SHA::state_words>;
-    template <typename xWord, if_extended<xWord> = true>
-    using xchunk_t = std_array<xWord, SHA::state_words>;
-    using idigests_t = mutable_iterable<digest_t>;
-
-    /// Common.
-    /// -----------------------------------------------------------------------
-
-    template <size_t Word, size_t Lanes>
-    INLINE static auto pack(const xblock_t<Lanes>& xblock) NOEXCEPT;
-
-    template <typename xWord>
-    INLINE static void xinput(xbuffer_t<xWord>& xbuffer,
-        iblocks_t& blocks) NOEXCEPT;
-
-    /// Merkle Hash.
+    /// Merkle hashing.
     /// -----------------------------------------------------------------------
 
     template <typename xWord>
@@ -264,32 +302,14 @@ protected:
     INLINE static digest_t unpack(const xstate_t<xWord>& xstate) NOEXCEPT;
 
     template <typename xWord>
-    INLINE static void output(idigests_t& digests,
+    INLINE static void xoutput(idigests_t& digests,
         const xstate_t<xWord>& xstate) NOEXCEPT;
 
-    /// Message Schedule (block vectorization).
-    /// -----------------------------------------------------------------------
-
-    template <typename Word, size_t Lane>
-    INLINE static constexpr auto extract(Word a) NOEXCEPT;
-
-    template <typename Word, size_t Lane, typename xWord,
-        if_not_same<Word, xWord> = true>
-    INLINE static Word extract(xWord a) NOEXCEPT;
-
-    template <typename xWord>
-    INLINE static void sequential_compress(state_t& state,
-        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-
     template <typename xWord, if_extended<xWord> = true>
-    INLINE static void vector_schedule_sequential_compress(state_t& state,
-        iblocks_t& blocks) NOEXCEPT;
-
-    template <size_t Size>
-    INLINE static void iterate_vector(state_t& state,
-        const ablocks_t<Size>& blocks) NOEXCEPT;
-    INLINE static void iterate_vector(state_t& state,
-        iblocks_t& blocks) NOEXCEPT;
+    INLINE static void merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void merkle_hash_vector(digests_t& digests) NOEXCEPT;
+    VCONSTEXPR static void merkle_hash_(digests_t& digests,
+        size_t offset=zero) NOEXCEPT;
 
     /// sigma0 vectorization.
     /// -----------------------------------------------------------------------
@@ -300,6 +320,7 @@ protected:
 
     template<size_t Round, size_t Offset>
     INLINE static void prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT;
+
     template<size_t Round>
     INLINE static void prepare8(buffer_t& buffer) NOEXCEPT;
 
@@ -309,51 +330,35 @@ protected:
 
     /// Native.
     /// -----------------------------------------------------------------------
-protected:
-    using cword_t = xint128_t;
-    static constexpr auto cratio = sizeof(cword_t) / SHA::word_bytes;
-    static constexpr auto crounds = SHA::rounds / cratio;
-    using cbuffer_t = std_array<cword_t, crounds>;
-    using cstate_t = std_array<xint128_t, two>;
+    ////using cword_t = xint128_t;
+    ////static constexpr auto cratio = sizeof(cword_t) / SHA::word_bytes;
+    ////static constexpr auto crounds = SHA::rounds / cratio;
+    ////using cbuffer_t = std_array<cword_t, crounds>;
+    ////using cstate_t = std_array<xint128_t, two>;
 
     template <typename xWord>
     INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
     INLINE static void schedule_native(buffer_t& buffer) NOEXCEPT;
 
-    template <typename xWord, size_t Lane = zero>
+    template <typename xWord, size_t Lane>
     INLINE static void compress_native(xstate_t<xWord>& xstate,
         const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-    template <size_t Lane = zero>
+
+    template <typename xWord, size_t Lane>
+    INLINE static void compress_native(state_t& state,
+        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+
+    template <size_t Lane>
     INLINE static void compress_native(state_t& state,
         const buffer_t& buffer) NOEXCEPT;
 
-    /// Merkle.
-    /// -----------------------------------------------------------------------
-protected:
-    VCONSTEXPR static void merkle_hash_(digests_t& digests,
-        size_t offset = zero) NOEXCEPT;
-
-    template <typename xWord, if_extended<xWord> = true>
-    INLINE static void merkle_hash_vector(idigests_t& digests,
-        iblocks_t& blocks) NOEXCEPT;
-
-    INLINE static void merkle_hash_vector(digests_t& digests) NOEXCEPT;
-
 public:
-    static constexpr auto use_neon = Native && system::with_neon;
-    static constexpr auto use_shani = Native && system::with_shani;
+    /// Summary public values.
+    /// -----------------------------------------------------------------------
+    static constexpr auto caching = Cached;
     static constexpr auto native = use_shani || use_neon;
-
-    static constexpr auto use_x128 = Vector && system::with_sse41;
-    static constexpr auto use_x256 = Vector && system::with_avx2;
-    static constexpr auto use_x512 = Vector && system::with_avx512;
     static constexpr auto vector = (use_x128 || use_x256 || use_x512)
         && !(build_x32 && is_same_size<word_t, uint64_t>);
-
-    static constexpr auto min_lanes =
-        (use_x128 ? bytes<128> :
-            (use_x256 ? bytes<256> :
-                (use_x512 ? bytes<512> : 0))) / SHA::word_bytes;
 };
 
 } // namespace sha
