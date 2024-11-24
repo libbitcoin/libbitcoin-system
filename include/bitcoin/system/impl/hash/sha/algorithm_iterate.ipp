@@ -275,12 +275,12 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     }
     else if constexpr (native)
     {
+        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
         // Multiple block shani message schduling and compression optimization.
         iterate_(state, blocks);
     }
     else if constexpr (vector)
     {
-        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
         // Multiple block vectorized message scheduling optimization.
         iterate_vector(state, blocks);
     }
