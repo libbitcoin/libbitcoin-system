@@ -36,9 +36,7 @@ template<size_t Round>
 INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
-    // K is added to schedule words because schedule is vectorizable.
-    // This allows 3/4 of the cost of the K addtion to be vectorized.
-    // K-adding is shifted -16, with last 16 added after scheduling.
+    // K-adding is shifted 16 words, with last 16 added after scheduling.
     constexpr auto s = SHA::word_bits;
 
     if constexpr (SHA::strength == 160)
@@ -53,24 +51,6 @@ prepare(auto& buffer) NOEXCEPT
             f::xor_(buffer[r08], buffer[r03])));
 
         buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
-
-        // SHA-NI
-        //
-        //     buffer[Round] = sha1msg2 // xor and rotl1
-        //     (
-        //         xor                // not using sha1msg1
-        //         (
-        //             sha1msg1       // xor (specialized)
-        //             (
-        //                 buffer[Round - 16],
-        //                 buffer[Round - 14]
-        //             ),
-        //             buffer[Round -  8]
-        //          ),
-        //          buffer[Round -  3]
-        //     );
-        // NEON
-        //     vsha1su1q/vsha1su0q
     }
     else
     {
@@ -84,18 +64,6 @@ prepare(auto& buffer) NOEXCEPT
             f::add<s>(buffer[r07], sigma1(buffer[r02])));
 
         buffer[r16] = f::addc<K::get[r16], s>(buffer[r16]);
-
-        // Each word is 128, buffer goes from 64 to 16 words.
-        // SHA-NI
-        // buffer[Round] =
-        //     sha256msg1(buffer[Round - 16], buffer[Round - 15]) +
-        //     sha256msg2(buffer[Round -  7], buffer[Round -  2]);
-        // NEON
-        // Not sure about these indexes.
-        // mijailovic.net/2018/06/06/sha256-armv8
-        // buffer[Round] =
-        //     vsha256su0q(buffer[Round - 13], buffer[Round - 9]) +
-        //     vsha256su1q(buffer[Round - 13], buffer[Round - 5], buffer[Round - 1]);
     }
 }
 
@@ -104,8 +72,9 @@ INLINE constexpr void CLASS::
 add_k(auto& buffer) NOEXCEPT
 {
     // Add K to last 16 words.
+    // TODO: Consolidated K-adding can be performed in 4/8/16 lanes.
     constexpr auto s = SHA::word_bits;
-    constexpr auto r = SHA::rounds - array_count<words_t>;
+    constexpr auto r = SHA::rounds - SHA::block_words;
     buffer[r + 0] = f::addc<K::get[r + 0], s>(buffer[r + 0]);
     buffer[r + 1] = f::addc<K::get[r + 1], s>(buffer[r + 1]);
     buffer[r + 2] = f::addc<K::get[r + 2], s>(buffer[r + 2]);
@@ -128,7 +97,6 @@ TEMPLATE
 constexpr void CLASS::
 schedule_(auto& buffer) NOEXCEPT
 {
-
     prepare<16>(buffer);
     prepare<17>(buffer);
     prepare<18>(buffer);

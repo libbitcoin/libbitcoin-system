@@ -26,7 +26,7 @@
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
- // algorithm.hpp file is the common include for sha.
+// algorithm.hpp file is the common include for sha.
 #include <bitcoin/system/hash/sha/sha.hpp>
 #include <bitcoin/system/hash/sha/sha160.hpp>
 #include <bitcoin/system/hash/sha/sha256.hpp>
@@ -330,11 +330,15 @@ protected:
 
     /// Native.
     /// -----------------------------------------------------------------------
-    ////using cword_t = xint128_t;
-    ////static constexpr auto cratio = sizeof(cword_t) / SHA::word_bytes;
-    ////static constexpr auto crounds = SHA::rounds / cratio;
-    ////using cbuffer_t = std_array<cword_t, crounds>;
-    ////using cstate_t = std_array<xint128_t, two>;
+    static constexpr auto native_lanes = capacity<xint128_t, word_t>;
+    static constexpr auto native_rounds = SHA::rounds / native_lanes;
+    using cbuffer_t = std_array<xint128_t, native_rounds>;
+    using cstate_t = std_array<xint128_t, two>;
+
+    template<size_t Round>
+    INLINE static void prepare(cbuffer_t& buffer) NOEXCEPT;
+    INLINE static void add_k(cbuffer_t& buffer) NOEXCEPT;
+    static void schedule(cbuffer_t& buffer) NOEXCEPT;
 
     template <typename xWord>
     INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
@@ -356,7 +360,8 @@ public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = use_shani || use_neon;
+    static constexpr auto native = (use_shani || use_neon) &&
+        !is_same_size<word_t, uint64_t>;
     static constexpr auto vector = (use_x128 || use_x256 || use_x512)
         && !(build_x32 && is_same_size<word_t, uint64_t>);
 };

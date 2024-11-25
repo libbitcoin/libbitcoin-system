@@ -37,6 +37,7 @@ TEMPLATE
 INLINE constexpr auto CLASS::
 parity(auto x, auto y, auto z) NOEXCEPT
 {
+    // Normal form, unmodified.
     return f::xor_(f::xor_(x, y), z);
 }
 
@@ -63,6 +64,7 @@ template <unsigned int A, unsigned int B, unsigned int C>
 INLINE constexpr auto CLASS::
 sigma(auto x) NOEXCEPT
 {
+    // Normal form, unmodified.
     constexpr auto s = SHA::word_bits;
     return f::xor_(f::xor_(f::ror<A, s>(x), f::ror<B, s>(x)), f::shr<C, s>(x));
 }

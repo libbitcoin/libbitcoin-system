@@ -112,6 +112,7 @@ BC_POP_WARNING()
 #endif
 
 #if !defined(HAVE_SSE41)
+    #define mm_alignr_epi8(a, b, c) {}
     #define mm_and_si128(a, b)  (a)
     #define mm_or_si128(a, b)   (a)
     #define mm_xor_si128(a, b)  (a)
@@ -145,6 +146,7 @@ BC_POP_WARNING()
     #define mm_set_epi16(x08, x07, x06, x05, x04, x03, x02, x01)
     #define mm_set_epi8(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
 #else
+    #define mm_alignr_epi8(a, b, c)     _mm_alignr_epi8(a, b, c) // for native sha (128 only)
     #define mm_and_si128(a, b)          _mm_and_si128(a, b)
     #define mm_or_si128(a, b)           _mm_or_si128(a, b)
     #define mm_xor_si128(a, b)          _mm_xor_si128(a, b)

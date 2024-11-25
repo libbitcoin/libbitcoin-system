@@ -22,7 +22,7 @@
 BOOST_AUTO_TEST_SUITE(sha512_tests_)
 
 constexpr auto vector = (with_sse41 || with_avx2 || with_avx512) && !build_x32;
-constexpr auto native = with_shani || with_neon;
+constexpr auto native = /*(with_shani || with_neon)*/ false;
 
 BOOST_AUTO_TEST_CASE(sha512__hash__null_hash__expected)
 {
