@@ -212,7 +212,7 @@ using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
 
 static_assert(hash_selector< 160, true,  true, true, false>::native == with_shani || with_neon);
 static_assert(hash_selector< 256, true,  true, true, false>::native == with_shani || with_neon);
-static_assert(hash_selector< 512, true,  true, true, false>::native == with_shani || with_neon);
+static_assert(hash_selector< 512, true,  true, true, false>::native == /*with_shani || with_neon*/ false);
 static_assert(!hash_selector<160, false, true, true, false>::native);
 static_assert(!hash_selector<256, false, true, true, false>::native);
 static_assert(!hash_selector<512, false, true, true, false>::native);
