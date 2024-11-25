@@ -36,8 +36,6 @@ template<size_t Round>
 INLINE constexpr void CLASS::
 prepare(auto& buffer) NOEXCEPT
 {
-    // K is added to schedule words because schedule is vectorizable.
-    // This allows 3/4 of the cost of the K addtion to be vectorized.
     // K-adding is shifted 16 words, with last 16 added after scheduling.
     constexpr auto s = SHA::word_bits;
 
@@ -74,6 +72,7 @@ INLINE constexpr void CLASS::
 add_k(auto& buffer) NOEXCEPT
 {
     // Add K to last 16 words.
+    // TODO: Consolidated K-adding can be performed in 4/8/16 lanes.
     constexpr auto s = SHA::word_bits;
     constexpr auto r = SHA::rounds - SHA::block_words;
     buffer[r + 0] = f::addc<K::get[r + 0], s>(buffer[r + 0]);

@@ -41,7 +41,6 @@ template<size_t Round>
 INLINE void CLASS::
 prepare(cbuffer_t& buffer) NOEXCEPT
 {
-    // K is added to schedule words for consistency across implementation.
     // K-adding is shifted 16 words, with last 16 added after scheduling.
 
     if constexpr (SHA::strength == 160)
@@ -90,6 +89,7 @@ INLINE void CLASS::
 add_k(cbuffer_t& buffer) NOEXCEPT
 {
     // Add K to last 16 words.
+    // TODO: Consolidated K-adding can be performed in 4/8/16 lanes.
     constexpr auto k = SHA::rounds - SHA::block_words;
     constexpr auto r = k / native_lanes;
 
@@ -164,7 +164,8 @@ TEMPLATE
 INLINE void CLASS::
 schedule_native(buffer_t& buffer) NOEXCEPT
 {
-    if constexpr (SHA::strength == 160 || SHA::strength == 512)
+    // neon and sha160 not yet implemented, sha512 is not native.
+    if constexpr (SHA::strength == 160 || SHA::strength == 512 || use_neon)
     {
         schedule_(buffer);
     }
