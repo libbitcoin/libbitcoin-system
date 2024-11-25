@@ -330,11 +330,15 @@ protected:
 
     /// Native.
     /// -----------------------------------------------------------------------
-    ////using cword_t = xint128_t;
-    ////static constexpr auto cratio = sizeof(cword_t) / SHA::word_bytes;
-    ////static constexpr auto crounds = SHA::rounds / cratio;
-    ////using cbuffer_t = std_array<cword_t, crounds>;
-    ////using cstate_t = std_array<xint128_t, two>;
+    static constexpr auto native_lanes = capacity<xint128_t, word_t>;
+    static constexpr auto native_rounds = SHA::rounds / native_lanes;
+    using cbuffer_t = std_array<xint128_t, native_rounds>;
+    using cstate_t = std_array<xint128_t, two>;
+
+    template<size_t Round>
+    INLINE static void prepare(cbuffer_t& buffer) NOEXCEPT;
+    INLINE static void add_k(cbuffer_t& buffer) NOEXCEPT;
+    static void schedule(cbuffer_t& buffer) NOEXCEPT;
 
     template <typename xWord>
     INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
