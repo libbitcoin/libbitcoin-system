@@ -360,7 +360,8 @@ public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = use_shani || use_neon;
+    static constexpr auto native = (use_shani || use_neon) &&
+        !is_same_size<word_t, uint64_t>;
     static constexpr auto vector = (use_x128 || use_x256 || use_x512)
         && !(build_x32 && is_same_size<word_t, uint64_t>);
 };
