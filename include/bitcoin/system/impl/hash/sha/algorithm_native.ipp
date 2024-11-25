@@ -46,7 +46,7 @@ prepare(cbuffer_t& buffer) NOEXCEPT
 
     if constexpr (SHA::strength == 160)
     {
-        static_assert(false, "sha160 not implemented");
+        ////static_assert(false, "sha160 not implemented");
     }
     else
     {
@@ -164,7 +164,7 @@ TEMPLATE
 INLINE void CLASS::
 schedule_native(buffer_t& buffer) NOEXCEPT
 {
-    if constexpr (SHA::rounds == 80 || SHA::strength == 512)
+    if constexpr (SHA::strength == 160 || SHA::strength == 512)
     {
         schedule_(buffer);
     }
