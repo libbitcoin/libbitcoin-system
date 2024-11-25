@@ -52,13 +52,13 @@ prepare(cbuffer_t& buffer) NOEXCEPT
         static_assert(SHA::strength == 256);
 
         constexpr auto r1 = Round - 1;
-        constexpr auto r2 = Round - 2;
-        constexpr auto r3 = Round - 3;
-        constexpr auto r4 = Round - 4;
+        constexpr auto r2 = sub1(r1);
+        constexpr auto r3 = sub1(r2);
+        constexpr auto r4 = sub1(r3);
         constexpr auto k0 = Round * 4 - 16;
-        constexpr auto k1 = Round * 4 - 15;
-        constexpr auto k2 = Round * 4 - 14;
-        constexpr auto k3 = Round * 4 - 13;
+        constexpr auto k1 = add1(k0);
+        constexpr auto k2 = add1(k1);
+        constexpr auto k3 = add1(k2);
 
         buffer[Round] = mm_sha256msg2_epu32
             (
