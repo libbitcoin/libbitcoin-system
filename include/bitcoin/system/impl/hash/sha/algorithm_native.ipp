@@ -47,6 +47,10 @@ prepare(cbuffer_t& buffer) NOEXCEPT
     {
         ////static_assert(false, "sha160 not implemented");
     }
+    else if constexpr (use_neon)
+    {
+        ////static_assert(false, "neon not implemented");
+    }
     else
     {
         static_assert(SHA::strength == 256);
