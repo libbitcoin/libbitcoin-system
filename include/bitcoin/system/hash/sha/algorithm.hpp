@@ -26,7 +26,7 @@
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
- // algorithm.hpp file is the common include for sha.
+// algorithm.hpp file is the common include for sha.
 #include <bitcoin/system/hash/sha/sha.hpp>
 #include <bitcoin/system/hash/sha/sha160.hpp>
 #include <bitcoin/system/hash/sha/sha256.hpp>

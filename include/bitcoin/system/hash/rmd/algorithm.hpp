@@ -25,7 +25,7 @@
 #include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/math/math.hpp>
 
- // algorithm.hpp file is the common include for rmd.
+// algorithm.hpp file is the common include for rmd.
 #include <bitcoin/system/hash/rmd/rmd.hpp>
 #include <bitcoin/system/hash/rmd/rmd128.hpp>
 #include <bitcoin/system/hash/rmd/rmd160.hpp>
