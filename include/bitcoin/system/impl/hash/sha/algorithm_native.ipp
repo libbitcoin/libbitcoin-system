@@ -39,125 +39,66 @@ namespace sha {
 TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare(cbuffer_t& buffer) NOEXCEPT
+prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 {
-    // K-adding is shifted 16 words, with last 16 added after scheduling.
-
     if constexpr (SHA::strength == 160)
     {
         ////static_assert(false, "sha160 not implemented");
     }
     else if constexpr (use_neon)
     {
+        static_assert(SHA::strength == 256);
+
         ////static_assert(false, "neon not implemented");
     }
-    else
+    else if constexpr (use_shani)
     {
         static_assert(SHA::strength == 256);
 
-        constexpr auto r1 = Round - 1;
-        constexpr auto r2 = sub1(r1);
-        constexpr auto r3 = sub1(r2);
-        constexpr auto r4 = sub1(r3);
-        constexpr auto k0 = Round * 4 - 16;
-        constexpr auto k1 = add1(k0);
-        constexpr auto k2 = add1(k1);
-        constexpr auto k3 = add1(k2);
-
-        buffer[Round] = mm_sha256msg2_epu32
+        wbuffer[Round] = mm_sha256msg2_epu32
             (
                 mm_add_epi32
                 (
                     mm_alignr_epi8
                     (
-                        buffer[r1], buffer[r2], SHA::word_bytes
+                        wbuffer[Round - 1], wbuffer[Round - 2], SHA::word_bytes
                     ),
                     mm_sha256msg1_epu32
                     (
-                        buffer[r4], buffer[r3]
+                        wbuffer[Round - 4], wbuffer[Round - 3]
                     )
                 ),
-                buffer[r1]
-            );
-
-        buffer[r4] = mm_add_epi32
-            (
-                buffer[r4],
-                mm_set_epi32(K::get[k3], K::get[k2], K::get[k1], K::get[k0])
+                wbuffer[Round - 1]
             );
     }
 }
 
 TEMPLATE
 INLINE void CLASS::
-add_k(cbuffer_t& buffer) NOEXCEPT
+schedule(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 {
-    // Add K to last 16 words.
-    // TODO: Consolidated K-adding can be performed in 4/8/16 lanes.
-    constexpr auto k = SHA::rounds - SHA::block_words;
-    constexpr auto r = k / native_lanes;
+    prepare_native<4>(wbuffer);
+    prepare_native<5>(wbuffer);
+    prepare_native<6>(wbuffer);
+    prepare_native<7>(wbuffer);
+    prepare_native<8>(wbuffer);
+    prepare_native<9>(wbuffer);
+    prepare_native<10>(wbuffer);
+    prepare_native<11>(wbuffer);
+    prepare_native<12>(wbuffer);
+    prepare_native<13>(wbuffer);
+    prepare_native<14>(wbuffer);
+    prepare_native<15>(wbuffer);
 
-    buffer[r + 0] = mm_add_epi32
-        (
-            buffer[r + 0],
-            mm_set_epi32(
-                K::get[k + 3], K::get[k + 2],
-                K::get[k + 1], K::get[k + 0])
-        );
+    if constexpr (SHA::rounds == 80)
+    {
+        prepare_native<16>(wbuffer);
+        prepare_native<17>(wbuffer);
+        prepare_native<18>(wbuffer);
+        prepare_native<19>(wbuffer);
+    }
 
-    buffer[r + 1] = mm_add_epi32
-        (
-            buffer[r + 1],
-            mm_set_epi32(
-                K::get[k + 7], K::get[k + 6],
-                K::get[k + 5], K::get[k + 4])
-        );
-
-    buffer[r + 2] = mm_add_epi32
-        (
-            buffer[r + 2],
-            mm_set_epi32(
-                K::get[k + 11], K::get[k + 10],
-                K::get[k + 9], K::get[k + 8])
-        );
-
-    buffer[r + 3] = mm_add_epi32
-        (
-            buffer[r + 3],
-            mm_set_epi32(
-                K::get[k + 15], K::get[k + 14],
-                K::get[k + 13], K::get[k + 12])
-        );
-}
-
-TEMPLATE
-INLINE void CLASS::
-schedule(cbuffer_t& buffer) NOEXCEPT
-{
-    auto& cbuffer = array_cast<xint128_t>(buffer);
-
-    prepare<4>(cbuffer);
-    prepare<5>(cbuffer);
-    prepare<6>(cbuffer);
-    prepare<7>(cbuffer);
-    prepare<8>(cbuffer);
-    prepare<9>(cbuffer);
-    prepare<10>(cbuffer);
-    prepare<11>(cbuffer);
-    prepare<12>(cbuffer);
-    prepare<13>(cbuffer);
-    prepare<14>(cbuffer);
-    prepare<15>(cbuffer);
-
-    ////if constexpr (SHA::rounds == 80)
-    ////{
-    ////    prepare<16>(buffer);
-    ////    prepare<17>(buffer);
-    ////    prepare<18>(buffer);
-    ////    prepare<19>(buffer);
-    ////}
-
-    add_k(buffer);
+    konstant(array_cast<word_t>(wbuffer));
 }
 
 // schedule
@@ -169,13 +110,13 @@ INLINE void CLASS::
 schedule_native(buffer_t& buffer) NOEXCEPT
 {
     // neon and sha160 not yet implemented, sha512 is not native.
-    if constexpr (SHA::strength == 160 || SHA::strength == 512 || use_neon)
+    if constexpr (SHA::strength != 160 && SHA::strength != 512 && !use_neon)
     {
-        schedule_(buffer);
+        schedule(array_cast<xint128_t>(buffer));
     }
     else
     {
-        schedule(array_cast<xint128_t>(buffer));
+        schedule_(buffer);
     }
 }
 

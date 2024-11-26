@@ -49,12 +49,10 @@ prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
     constexpr auto r16 = Round - 16;
     constexpr auto s = SHA::word_bits;
 
-    // buffer[r07 + 7] is buffer[Round + 0]
-    // This is why sigma0 is limited to 8 lanes (vs 16).
+    // buffer[r07 + 7] is buffer[Round + 0], so sigma0 is limited to 8 lanes.
     buffer[Round + Offset] = f::add<s>(
         f::add<s>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
         f::add<s>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
-    buffer[r16 + Offset] = f::addc<K::get[r16 + Offset], s>(buffer[r16 + Offset]);
 }
 
 TEMPLATE
@@ -95,7 +93,7 @@ schedule_sigma(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::
+void CLASS::
 schedule_sigma(buffer_t& buffer) NOEXCEPT
 {
     if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>())
@@ -113,7 +111,7 @@ schedule_sigma(buffer_t& buffer) NOEXCEPT
             prepare8<72>(buffer);
         }
 
-        add_k(buffer);
+        konstant(buffer);
     }
     else
     {

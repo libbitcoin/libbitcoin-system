@@ -144,7 +144,8 @@ protected:
     /// Intrinsics types.
     /// -----------------------------------------------------------------------
 
-    /// Extended integer capacity for uint32_t/uint64_t is 2/4/8/16 only.
+    /// Expand is multiple of buffer/state for Lane concurrent blocks.
+    /// Multiple blocks are "striped" across the expanded buffer in xWords.
     template <size_t Lanes, bool_if<is_valid_lanes<Lanes>> = true>
     using xblock_t = std_array<words_t, Lanes>;
 
@@ -156,6 +157,17 @@ protected:
 
     template <typename xWord, if_extended<xWord> = true>
     using xchunk_t = std_array<xWord, SHA::state_words>;
+
+    /// Wide is casting of buffer_t to xWord for single block concurrency.
+    /// This is not multi-block or block striping, just larger words.
+    template <typename xWord, if_extended<xWord> = true>
+    using wbuffer_t = std_array<xWord, sizeof(buffer_t) / sizeof(xWord)>;
+
+    template <typename xWord, if_extended<xWord> = true>
+    using wstate_t = std_array<xWord, sizeof(state_t) / sizeof(xWord)>;
+
+    /// Other types.
+    /// -----------------------------------------------------------------------
 
     using uint = unsigned int;
     using idigests_t = mutable_iterable<digest_t>;
@@ -210,7 +222,6 @@ protected:
 
     template <size_t Round>
     INLINE static constexpr void prepare(auto& buffer) NOEXCEPT;
-    INLINE static constexpr void add_k(auto& buffer) NOEXCEPT;
     static constexpr void schedule_(auto& buffer) NOEXCEPT;
     static constexpr void schedule(buffer_t& buffer) NOEXCEPT;
 
@@ -242,7 +253,7 @@ protected:
 
     static constexpr void reinput(auto& buffer, const auto& state) NOEXCEPT;
 
-    /// Iteration.
+    /// Iteration (message scheduling vectorized for multiple blocks).
     /// -----------------------------------------------------------------------
 
     template <size_t Word, size_t Lanes>
@@ -280,7 +291,7 @@ protected:
         const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void iterate(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
-    /// Merkle hashing.
+    /// Merkle hashing (fully vectorized for multiple blocks).
     /// -----------------------------------------------------------------------
 
     template <typename xWord>
@@ -311,7 +322,7 @@ protected:
     VCONSTEXPR static void merkle_hash_(digests_t& digests,
         size_t offset=zero) NOEXCEPT;
 
-    /// sigma0 vectorization.
+    /// sigma0 vectorization (single blocks).
     /// -----------------------------------------------------------------------
 
     template <typename xWord, if_extended<xWord> = true>
@@ -328,17 +339,27 @@ protected:
     INLINE static void schedule_sigma(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
     INLINE static void schedule_sigma(buffer_t& buffer) NOEXCEPT;
 
-    /// Native.
+    /// [K]onstant vectorization (single and multiple blocks).
     /// -----------------------------------------------------------------------
-    static constexpr auto native_lanes = capacity<xint128_t, word_t>;
-    static constexpr auto native_rounds = SHA::rounds / native_lanes;
-    using cbuffer_t = std_array<xint128_t, native_rounds>;
-    using cstate_t = std_array<xint128_t, two>;
+
+    template <size_t Round>
+    INLINE static constexpr void konstant(auto& buffer) NOEXCEPT;
+
+    template<size_t Round, typename xWord>
+    INLINE static void vector_konstant(wbuffer_t<xWord>& wbuffer) NOEXCEPT;
+    INLINE static void vector_konstant(buffer_t& buffer) NOEXCEPT;
+
+    template <typename xWord>
+    static constexpr void konstant(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
+    static constexpr void konstant(buffer_t& buffer) NOEXCEPT;
+    static constexpr void konstant_(auto& buffer) NOEXCEPT;
+
+    /// Native SHA optimizations (single blocks).
+    /// -----------------------------------------------------------------------
 
     template<size_t Round>
-    INLINE static void prepare(cbuffer_t& buffer) NOEXCEPT;
-    INLINE static void add_k(cbuffer_t& buffer) NOEXCEPT;
-    static void schedule(cbuffer_t& buffer) NOEXCEPT;
+    INLINE static void prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
+    static void schedule(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
 
     template <typename xWord>
     INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
@@ -381,6 +402,7 @@ BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 #include <bitcoin/system/impl/hash/sha/algorithm_compress.ipp>
+#include <bitcoin/system/impl/hash/sha/algorithm_konstant.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_double.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_functions.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_iterate.ipp>

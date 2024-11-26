@@ -90,12 +90,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/hash/accumulator.cpp \
     src/hash/checksum.cpp \
     src/hash/siphash.cpp \
-    src/hash/vectorization/sha256_1_native.cpp \
-    src/hash/vectorization/sha256_2_shani.cpp \
-    src/hash/vectorization/sha256_4_neon.cpp \
-    src/hash/vectorization/sha256_4_sse4.cpp \
-    src/hash/vectorization/sha256_4_sse41.cpp \
-    src/hash/vectorization/sha256_8_avx2.cpp \
     src/math/math.cpp \
     src/radix/base_10.cpp \
     src/radix/base_2048.cpp \
@@ -622,6 +616,7 @@ include_bitcoin_system_impl_hash_sha_HEADERS = \
     include/bitcoin/system/impl/hash/sha/algorithm_double.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_functions.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_iterate.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_konstant.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_merkle.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_native.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_padding.ipp \
