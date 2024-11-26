@@ -329,7 +329,7 @@ bool test_merkle(std::ostream& out, float ghz = 3.0f,
     for (size_t seed = 0; seed < Count; ++seed)
     {
         constexpr auto size = array_count<typename Algorithm::digest_t>;
-        std_vector<typename Algorithm::digest_t> digests{};
+        std::vector<typename Algorithm::digest_t> digests{};
         digests.reserve(Size * two);
 
         for (size_t blocks = 0; blocks < Size; ++blocks)

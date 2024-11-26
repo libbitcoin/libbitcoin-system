@@ -176,7 +176,7 @@ constexpr auto alpha2_count = 16'777'216_size;
 constexpr auto long_alpha_size = alpha2_size * alpha2_count;
 static const auto alpha2 = to_array<alpha2_size>("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
 static const std_vector<long_hash> long_alpha(alpha2_count, alpha2);
-static const auto long_alpha_data = pointer_cast<uint8_t>(long_alpha.front().data());
+static const auto long_alpha_data = pointer_cast<const uint8_t>(long_alpha.front().data());
 static const auto sha_6 = to_chunk(unsafe_array_cast<uint8_t, long_alpha_size>(long_alpha_data));
 constexpr auto sha_test_count = 6;
 #else

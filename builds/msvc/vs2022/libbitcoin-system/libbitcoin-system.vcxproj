@@ -155,12 +155,6 @@
     <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_1_native.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_2_shani.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_neon.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_sse4.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_4_sse41.cpp" />
-    <ClCompile Include="..\..\..\..\src\hash\vectorization\sha256_8_avx2.cpp" />
     <ClCompile Include="..\..\..\..\src\math\math.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\src\radix\base_2048.cpp" />
@@ -548,6 +542,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_double.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_functions.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_iterate.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_konstant.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_merkle.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_native.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_padding.ipp" />
