@@ -365,6 +365,19 @@ protected:
     INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
     INLINE static void schedule_native(buffer_t& buffer) NOEXCEPT;
 
+    template<size_t Round, size_t Lane>
+    INLINE static void round_native(wstate_t<xint128_t>& state,
+        const wbuffer_t<xint128_t>& wk) NOEXCEPT;
+
+    INLINE static void shuffle(wstate_t<xint128_t>& wstate) NOEXCEPT;
+    INLINE static void unshuffle(wstate_t<xint128_t>& wstate) NOEXCEPT;
+    INLINE static void summarize_native(wstate_t<xint128_t>& out,
+        const wstate_t<xint128_t>& in) NOEXCEPT;
+
+    template <size_t Lane>
+    INLINE static void compress_native(wstate_t<xint128_t>& state,
+        const wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
+
     template <typename xWord, size_t Lane>
     INLINE static void compress_native(xstate_t<xWord>& xstate,
         const xbuffer_t<xWord>& xbuffer) NOEXCEPT;

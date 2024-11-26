@@ -173,7 +173,6 @@ template <size_t Lane>
 constexpr void CLASS::
 compress_(auto& state, const auto& buffer) NOEXCEPT
 {
-    // SHA-NI/256: 64/4 = 16 quad rounds, 8/4 = 2 state elements.
     // This is a copy (state type varies due to vectorization).
     const auto start = state;
 

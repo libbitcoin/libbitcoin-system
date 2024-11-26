@@ -133,6 +133,8 @@ BC_POP_WARNING()
     #define mm_extract_epi32(a, Lane)   {}
     #define mm_extract_epi64(a, Lane)   {}
     #define mm_shuffle_epi8(a, mask)    (a)
+    #define mm_shuffle_epi32(a, mask)   (a)
+    #define mm_blend_epi16(a, b, mask)  (a)
     #define mm_load_si128(a)            {}
     #define mm_loadu_si128(a)           {}
     #define mm_store_si128(memory, a)
@@ -167,6 +169,8 @@ BC_POP_WARNING()
     #define mm_extract_epi32(a, Lane)   _mm_extract_epi32(a, Lane)
     #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane) // undefined for X32
     #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
+    #define mm_shuffle_epi32(a, mask)   _mm_shuffle_epi32(a, mask)
+    #define mm_blend_epi16(a, b, mask)  _mm_blend_epi16(a, b, mask)
     #define mm_load_si128(a)            _mm_load_si128(a)
     #define mm_loadu_si128(a)           _mm_loadu_si128(a)
     #define mm_store_si128(memory, a)   _mm_store_si128(memory, a)

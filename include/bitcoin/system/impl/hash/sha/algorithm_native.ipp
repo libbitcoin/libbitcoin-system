@@ -35,6 +35,10 @@
 namespace libbitcoin {
 namespace system {
 namespace sha {
+    
+// schedule
+// ----------------------------------------------------------------------------
+// protected
 
 TEMPLATE
 template<size_t Round>
@@ -43,19 +47,21 @@ prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 {
     if constexpr (SHA::strength == 160)
     {
-        ////static_assert(false, "sha160 not implemented");
+        if constexpr (use_neon)
+        {
+        }
+        else if constexpr (use_shani)
+        {
+        }
     }
-    else if constexpr (use_neon)
+    else if constexpr (SHA::strength == 256)
     {
-        static_assert(SHA::strength == 256);
-
-        ////static_assert(false, "neon not implemented");
-    }
-    else if constexpr (use_shani)
-    {
-        static_assert(SHA::strength == 256);
-
-        wbuffer[Round] = mm_sha256msg2_epu32
+        if constexpr (use_neon)
+        {
+        }
+        else if constexpr (use_shani)
+        {
+            wbuffer[Round] = mm_sha256msg2_epu32
             (
                 mm_add_epi32
                 (
@@ -70,6 +76,7 @@ prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
                 ),
                 wbuffer[Round - 1]
             );
+        }
     }
 }
 
@@ -101,16 +108,12 @@ schedule(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
     konstant(array_cast<word_t>(wbuffer));
 }
 
-// schedule
-// ----------------------------------------------------------------------------
-// protected
-
 TEMPLATE
 INLINE void CLASS::
 schedule_native(buffer_t& buffer) NOEXCEPT
 {
     // neon and sha160 not yet implemented, sha512 is not native.
-    if constexpr (SHA::strength != 160 && SHA::strength != 512 && !use_neon)
+    if constexpr (SHA::strength == 256 && !use_neon)
     {
         schedule(array_cast<xint128_t>(buffer));
     }
@@ -132,6 +135,134 @@ schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT
 // compression
 // ----------------------------------------------------------------------------
 // protected
+
+TEMPLATE
+template<size_t Round, size_t Lane>
+INLINE void CLASS::
+round_native(wstate_t<xint128_t>& state,
+    const wbuffer_t<xint128_t>& wk) NOEXCEPT
+{
+    if constexpr (SHA::strength == 160)
+    {
+        if constexpr (use_neon)
+        {
+        }
+        else if constexpr (use_shani)
+        {
+        }
+    }
+    else if constexpr (SHA::strength == 256)
+    {
+        if constexpr (use_neon)
+        {
+        }
+        else if constexpr (use_shani)
+        {
+            // Process wk[Round][0..1], [HGDC][FEBA] (initial state)
+            state[1] = mm_sha256rnds2_epu32(state[1], state[0], wk[Round]);
+
+            // Process wk[Round][2..3] (shifted down)
+            state[0] = mm_sha256rnds2_epu32(state[0], state[1],
+                mm_shuffle_epi32(wk[Round], 0x0e));
+        }
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::
+summarize_native(wstate_t<xint128_t>& out,
+    const wstate_t<xint128_t>& in) NOEXCEPT
+{
+    if constexpr (SHA::strength == 160)
+    {
+        if constexpr (use_neon)
+        {
+        }
+        else if constexpr (use_shani)
+        {
+        }
+    }
+    else if constexpr (SHA::strength == 256)
+    {
+        if constexpr (use_neon)
+        {
+        }
+        else if constexpr (use_shani)
+        {
+            out[0] = mm_add_epi32(out[0], in[0]);
+            out[1] = mm_add_epi32(out[1], in[1]);
+        }
+    }
+}
+
+TEMPLATE
+INLINE void CLASS::
+shuffle(wstate_t<xint128_t>& wstate) NOEXCEPT
+{
+    // Change wstate to mm_sha256rnds2_epu32 expected form:
+    // [ABCD][EFGH] -> [FEBA][HGDC] (ordered low to high).
+    const auto t1 = mm_shuffle_epi32(wstate[0], 0xb1);
+    const auto t2 = mm_shuffle_epi32(wstate[1], 0x1b);
+    wstate[0] = mm_alignr_epi8(t1, t2, 8);
+    wstate[1] = mm_blend_epi16(t2, t1, 15);
+}
+
+TEMPLATE
+INLINE void CLASS::
+unshuffle(wstate_t<xint128_t>& wstate) NOEXCEPT
+{
+    // Restore wstate to normal form:
+    // [FEBA][HGDC] -> [ABCD][EFGH] (ordered low to high).
+    const auto t1 = mm_shuffle_epi32(wstate[0], 0x1b);
+    const auto t2 = mm_shuffle_epi32(wstate[1], 0xb1);
+    wstate[0] = mm_blend_epi16(t1, t2, 15);
+    wstate[1] = mm_alignr_epi8(t2, t1, 8);
+}
+
+TEMPLATE
+template <size_t Lane>
+INLINE void CLASS::
+compress_native(wstate_t<xint128_t>& wstate,
+    const wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
+{ 
+    // Shuffle and unshuffle can be done outside of all blocks, but this would
+    // leave state in a non-normal form, so presently absorbing that cost.
+    shuffle(wstate);
+
+    // This is a copy.
+    const auto start = wstate;
+
+    round_native< 0, Lane>(wstate, wbuffer);
+    round_native< 1, Lane>(wstate, wbuffer);
+    round_native< 2, Lane>(wstate, wbuffer);
+    round_native< 3, Lane>(wstate, wbuffer);
+    round_native< 4, Lane>(wstate, wbuffer);
+    round_native< 5, Lane>(wstate, wbuffer);
+    round_native< 6, Lane>(wstate, wbuffer);
+    round_native< 7, Lane>(wstate, wbuffer);
+    round_native< 8, Lane>(wstate, wbuffer);
+    round_native< 9, Lane>(wstate, wbuffer);
+    round_native<10, Lane>(wstate, wbuffer);
+    round_native<11, Lane>(wstate, wbuffer);
+    round_native<12, Lane>(wstate, wbuffer);
+    round_native<13, Lane>(wstate, wbuffer);
+    round_native<14, Lane>(wstate, wbuffer);
+    round_native<15, Lane>(wstate, wbuffer);
+
+    if constexpr (SHA::rounds == 80)
+    {
+        round_native<16, Lane>(wstate, wbuffer);
+        round_native<17, Lane>(wstate, wbuffer);
+        round_native<18, Lane>(wstate, wbuffer);
+        round_native<19, Lane>(wstate, wbuffer);
+    }
+
+    // This is just a vectorized version of summarize().
+    summarize_native(wstate, start);
+
+    // See above comments on shuffle().
+    unshuffle(wstate);
+}
 
 TEMPLATE
 template <typename xWord, size_t Lane>
@@ -157,8 +288,17 @@ template <size_t Lane>
 INLINE void CLASS::
 compress_native(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
-    // TODO: Single block compression.
-    compress_<Lane>(state, buffer);
+    // TODO: sha160 state is too small to array cast into two xwords.
+    // neon and sha160 not yet implemented, sha512 is not native.
+    if constexpr (SHA::strength == 256 && !use_neon)
+    {
+        compress_native<Lane>(array_cast<xint128_t>(state),
+            array_cast<xint128_t>(buffer));
+    }
+    else
+    {
+        compress_<Lane>(state, buffer);
+    }
 }
 
 } // namespace sha
