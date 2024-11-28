@@ -99,7 +99,7 @@ void output(std::ostream& out, uint64_t time, float ghz, bool csv) noexcept
         << delimiter
         << "bytes_per_round_: " << serialize(Size)
         << delimiter
-        << "Native______: " << serialize(P::native)
+        << "native__________: " << serialize(P::native)
         << delimiter
         << "vectorized______: " << serialize(P::vector)
         << delimiter
@@ -356,7 +356,7 @@ struct sha256_parameters : parameters
 {
     static constexpr size_t strength{ 256 };
     static constexpr bool native{ Native };
-    static constexpr bool vectorized{ Vector };
+    static constexpr bool vector{ Vector };
     static constexpr bool cached{ Cached };
     static constexpr bool chunked{ Chunked };
     static constexpr bool ripemd{};
