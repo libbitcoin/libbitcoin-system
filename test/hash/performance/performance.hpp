@@ -62,8 +62,8 @@ constexpr auto cycles_per_byte(float seconds, float ghz) noexcept
 struct parameters
 {
     static constexpr size_t strength{}; // algorithm strength (160/256/512|128/160).
-    static constexpr bool native{}; // intrinsic sha (ignored for rmd).
-    static constexpr bool vector{}; // algorithm vectorization.
+    static constexpr bool native{};     // intrinsic sha (ignored for rmd).
+    static constexpr bool vector{};     // algorithm vectorization.
     static constexpr bool cached{};     // scheduled pad caching.
     static constexpr bool chunked{};    // false for array data.
     static constexpr bool ripemd{};     // false for sha algorithm.
