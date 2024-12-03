@@ -81,8 +81,8 @@ prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::
-schedule(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
+void CLASS::
+schedule_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 {
     prepare_native<4>(wbuffer);
     prepare_native<5>(wbuffer);
@@ -115,7 +115,7 @@ schedule_native(buffer_t& buffer) NOEXCEPT
     // neon and sha160 not yet implemented, sha512 is not native.
     if constexpr (SHA::strength == 256 && !use_neon)
     {
-        schedule(array_cast<xint128_t>(buffer));
+        schedule_native(array_cast<xint128_t>(buffer));
     }
     else
     {
@@ -203,8 +203,8 @@ shuffle(wstate_t<xint128_t>& wstate) NOEXCEPT
     // [ABCD][EFGH] -> [FEBA][HGDC] (ordered low to high).
     const auto t1 = mm_shuffle_epi32(wstate[0], 0xb1);
     const auto t2 = mm_shuffle_epi32(wstate[1], 0x1b);
-    wstate[0] = mm_alignr_epi8(t1, t2, 8);
-    wstate[1] = mm_blend_epi16(t2, t1, 15);
+    wstate[0] = mm_alignr_epi8(t1, t2, 0x08);
+    wstate[1] = mm_blend_epi16(t2, t1, 0xf0);
 }
 
 TEMPLATE
@@ -215,13 +215,13 @@ unshuffle(wstate_t<xint128_t>& wstate) NOEXCEPT
     // [FEBA][HGDC] -> [ABCD][EFGH] (ordered low to high).
     const auto t1 = mm_shuffle_epi32(wstate[0], 0x1b);
     const auto t2 = mm_shuffle_epi32(wstate[1], 0xb1);
-    wstate[0] = mm_blend_epi16(t1, t2, 15);
-    wstate[1] = mm_alignr_epi8(t2, t1, 8);
+    wstate[0] = mm_blend_epi16(t1, t2, 0xf0);
+    wstate[1] = mm_alignr_epi8(t2, t1, 0x08);
 }
 
 TEMPLATE
 template <size_t Lane>
-INLINE void CLASS::
+void CLASS::
 compress_native(wstate_t<xint128_t>& wstate,
     const wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 { 
@@ -291,12 +291,12 @@ compress_native(state_t& state, const buffer_t& buffer) NOEXCEPT
     // TODO: debug.
     // TODO: sha160 state is too small to array cast into two xwords.
     // neon and sha160 not yet implemented, sha512 is not native.
-    ////if constexpr (SHA::strength == 256 && !use_neon)
-    ////{
-    ////    compress_native<Lane>(array_cast<xint128_t>(state),
-    ////        array_cast<xint128_t>(buffer));
-    ////}
-    ////else
+    if constexpr (SHA::strength == 256 && !use_neon)
+    {
+        compress_native<Lane>(array_cast<xint128_t>(state),
+            array_cast<xint128_t>(buffer));
+    }
+    else
     {
         compress_<Lane>(state, buffer);
     }

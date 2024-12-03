@@ -48,7 +48,7 @@
 // /unicode       : define
 // /intrinsics    : define
 // /math          : /intrinsics
-// /data          : /math
+// /data          : /math /unicode
 // /endian        : /data
 // /words         : /data
 // /radix         : /words
