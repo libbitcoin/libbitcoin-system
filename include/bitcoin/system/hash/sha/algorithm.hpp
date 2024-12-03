@@ -359,7 +359,7 @@ protected:
 
     template<size_t Round>
     INLINE static void prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
-    static void schedule(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
+    static void schedule_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
 
     template <typename xWord>
     INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
@@ -375,7 +375,7 @@ protected:
         const wstate_t<xint128_t>& in) NOEXCEPT;
 
     template <size_t Lane>
-    INLINE static void compress_native(wstate_t<xint128_t>& state,
+    static void compress_native(wstate_t<xint128_t>& state,
         const wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
 
     template <typename xWord, size_t Lane>

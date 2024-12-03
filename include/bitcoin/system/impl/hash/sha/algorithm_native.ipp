@@ -81,8 +81,8 @@ prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::
-schedule(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
+void CLASS::
+schedule_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 {
     prepare_native<4>(wbuffer);
     prepare_native<5>(wbuffer);
@@ -115,7 +115,7 @@ schedule_native(buffer_t& buffer) NOEXCEPT
     // neon and sha160 not yet implemented, sha512 is not native.
     if constexpr (SHA::strength == 256 && !use_neon)
     {
-        schedule(array_cast<xint128_t>(buffer));
+        schedule_native(array_cast<xint128_t>(buffer));
     }
     else
     {
@@ -221,7 +221,7 @@ unshuffle(wstate_t<xint128_t>& wstate) NOEXCEPT
 
 TEMPLATE
 template <size_t Lane>
-INLINE void CLASS::
+void CLASS::
 compress_native(wstate_t<xint128_t>& wstate,
     const wbuffer_t<xint128_t>& wbuffer) NOEXCEPT
 { 
@@ -291,12 +291,12 @@ compress_native(state_t& state, const buffer_t& buffer) NOEXCEPT
     // TODO: debug.
     // TODO: sha160 state is too small to array cast into two xwords.
     // neon and sha160 not yet implemented, sha512 is not native.
-    ////if constexpr (SHA::strength == 256 && !use_neon)
-    ////{
-    ////    compress_native<Lane>(array_cast<xint128_t>(state),
-    ////        array_cast<xint128_t>(buffer));
-    ////}
-    ////else
+    if constexpr (SHA::strength == 256 && !use_neon)
+    {
+        compress_native<Lane>(array_cast<xint128_t>(state),
+            array_cast<xint128_t>(buffer));
+    }
+    else
     {
         compress_<Lane>(state, buffer);
     }
