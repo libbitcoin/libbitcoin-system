@@ -58,24 +58,51 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        // TODO: evaluate 4/8/16 lane optimization using byteswap.
-        const auto& in = array_cast<word_t>(block);
-        buffer[0] = native_from_big_end(in[0]);
-        buffer[1] = native_from_big_end(in[1]);
-        buffer[2] = native_from_big_end(in[2]);
-        buffer[3] = native_from_big_end(in[3]);
-        buffer[4] = native_from_big_end(in[4]);
-        buffer[5] = native_from_big_end(in[5]);
-        buffer[6] = native_from_big_end(in[6]);
-        buffer[7] = native_from_big_end(in[7]);
-        buffer[8] = native_from_big_end(in[8]);
-        buffer[9] = native_from_big_end(in[9]);
-        buffer[10] = native_from_big_end(in[10]);
-        buffer[11] = native_from_big_end(in[11]);
-        buffer[12] = native_from_big_end(in[12]);
-        buffer[13] = native_from_big_end(in[13]);
-        buffer[14] = native_from_big_end(in[14]);
-        buffer[15] = native_from_big_end(in[15]);
+        ////if constexpr (have_lanes<word_t, 16>)
+        ////{
+        ////    using xword_t = to_extended<word_t, 16>;
+        ////    const auto& in = array_cast<xword_t>(block);
+        ////    auto& out = array_cast<xword_t>(buffer);
+        ////    out[0] = byteswap<word_t>(in[0]);
+        ////}
+        ////else if constexpr (have_lanes<word_t, 8>)
+        ////{
+        ////    using xword_t = to_extended<word_t, 8>;
+        ////    const auto& in = array_cast<xword_t>(block);
+        ////    auto& out = array_cast<xword_t>(buffer);
+        ////    out[0] = byteswap<word_t>(in[0]);
+        ////    out[1] = byteswap<word_t>(in[1]);
+        ////}
+        ////else if constexpr (have_lanes<word_t, 4>)
+        ////{
+        ////    using xword_t = to_extended<word_t, 4>;
+        ////    const auto& in = array_cast<xword_t>(block);
+        ////    auto& out = array_cast<xword_t>(buffer);
+        ////    out[0] = byteswap<word_t>(in[0]);
+        ////    out[1] = byteswap<word_t>(in[1]);
+        ////    out[2] = byteswap<word_t>(in[2]);
+        ////    out[3] = byteswap<word_t>(in[3]);
+        ////}
+        ////else
+        ////{
+            const auto& in = array_cast<word_t>(block);
+            buffer[0] = native_from_big_end(in[0]);
+            buffer[1] = native_from_big_end(in[1]);
+            buffer[2] = native_from_big_end(in[2]);
+            buffer[3] = native_from_big_end(in[3]);
+            buffer[4] = native_from_big_end(in[4]);
+            buffer[5] = native_from_big_end(in[5]);
+            buffer[6] = native_from_big_end(in[6]);
+            buffer[7] = native_from_big_end(in[7]);
+            buffer[8] = native_from_big_end(in[8]);
+            buffer[9] = native_from_big_end(in[9]);
+            buffer[10] = native_from_big_end(in[10]);
+            buffer[11] = native_from_big_end(in[11]);
+            buffer[12] = native_from_big_end(in[12]);
+            buffer[13] = native_from_big_end(in[13]);
+            buffer[14] = native_from_big_end(in[14]);
+            buffer[15] = native_from_big_end(in[15]);
+        ////}
     }
     else
     {
@@ -105,15 +132,33 @@ input_left(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        const auto& in = array_cast<word>(half);
-        buffer[0] = native_from_big_end(in[0]);
-        buffer[1] = native_from_big_end(in[1]);
-        buffer[2] = native_from_big_end(in[2]);
-        buffer[3] = native_from_big_end(in[3]);
-        buffer[4] = native_from_big_end(in[4]);
-        buffer[5] = native_from_big_end(in[5]);
-        buffer[6] = native_from_big_end(in[6]);
-        buffer[7] = native_from_big_end(in[7]);
+        ////if constexpr (have_lanes<word_t, 8>)
+        ////{
+        ////    using xword_t = to_extended<word_t, 8>;
+        ////    const auto& in = array_cast<xword_t>(half);
+        ////    auto& out = array_cast<xword_t>(buffer);
+        ////    out[0] = byteswap<word_t>(in[0]);
+        ////}
+        ////else if constexpr (have_lanes<word_t, 4>)
+        ////{
+        ////    using xword_t = to_extended<word_t, 4>;
+        ////    const auto& in = array_cast<xword_t>(half);
+        ////    auto& out = array_cast<xword_t>(buffer);
+        ////    out[0] = byteswap<word_t>(in[0]);
+        ////    out[1] = byteswap<word_t>(in[1]);
+        ////}
+        ////else
+        ////{
+            const auto& in = array_cast<word>(half);
+            buffer[0] = native_from_big_end(in[0]);
+            buffer[1] = native_from_big_end(in[1]);
+            buffer[2] = native_from_big_end(in[2]);
+            buffer[3] = native_from_big_end(in[3]);
+            buffer[4] = native_from_big_end(in[4]);
+            buffer[5] = native_from_big_end(in[5]);
+            buffer[6] = native_from_big_end(in[6]);
+            buffer[7] = native_from_big_end(in[7]);
+        ////}
     }
     else
     {
@@ -141,16 +186,33 @@ input_right(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        // TODO: evaluate 4/8 lane optimization using byteswap.
-        const auto& in = array_cast<word>(half);
-        buffer[8] = native_from_big_end(in[0]);
-        buffer[9] = native_from_big_end(in[1]);
-        buffer[10] = native_from_big_end(in[2]);
-        buffer[11] = native_from_big_end(in[3]);
-        buffer[12] = native_from_big_end(in[4]);
-        buffer[13] = native_from_big_end(in[5]);
-        buffer[14] = native_from_big_end(in[6]);
-        buffer[15] = native_from_big_end(in[7]);
+        ////if constexpr (have_lanes<word_t, 8>)
+        ////{
+        ////    using xword_t = to_extended<word_t, 8>;
+        ////    const auto& in = array_cast<xword_t>(half);
+        ////    auto& out = array_cast<xword_t>(buffer);
+        ////    out[1] = byteswap<word_t>(in[0]);
+        ////}
+        ////else if constexpr (have_lanes<word_t, 4>)
+        ////{
+        ////    using xword_t = to_extended<word_t, 4>;
+        ////    const auto& in = array_cast<xword_t>(half);
+        ////    auto& out = array_cast<xword_t>(buffer);
+        ////    out[2] = byteswap<word_t>(in[0]);
+        ////    out[3] = byteswap<word_t>(in[1]);
+        ////}
+        ////else
+        ////{
+            const auto& in = array_cast<word>(half);
+            buffer[8] = native_from_big_end(in[0]);
+            buffer[9] = native_from_big_end(in[1]);
+            buffer[10] = native_from_big_end(in[2]);
+            buffer[11] = native_from_big_end(in[3]);
+            buffer[12] = native_from_big_end(in[4]);
+            buffer[13] = native_from_big_end(in[5]);
+            buffer[14] = native_from_big_end(in[6]);
+            buffer[15] = native_from_big_end(in[7]);
+        ////}
     }
     else
     {
@@ -185,7 +247,43 @@ output(const state_t& state) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        if constexpr (SHA::strength == 160)
+        if constexpr (SHA::strength != 160)
+        {
+            ////if constexpr (have_lanes<word_t, 8>)
+            ////{
+            ////    using xword_t = to_extended<word_t, 8>;
+            ////    const auto& in = array_cast<xword_t>(state);
+            ////    return array_cast<byte_t>(wstate_t<xword_t>
+            ////    {
+            ////        byteswap<word_t>(in[0])
+            ////    });
+            ////}
+            ////else if constexpr (have_lanes<word_t, 4>)
+            ////{
+            ////    using xword_t = to_extended<word_t, 4>;
+            ////    const auto& in = array_cast<xword_t>(state);
+            ////    return array_cast<byte_t>(wstate_t<xword_t>
+            ////    {
+            ////        byteswap<word_t>(in[0]),
+            ////        byteswap<word_t>(in[1])
+            ////    });
+            ////}
+            ////else
+            ////{
+                return array_cast<byte_t>(state_t
+                {
+                    native_to_big_end(state[0]),
+                    native_to_big_end(state[1]),
+                    native_to_big_end(state[2]),
+                    native_to_big_end(state[3]),
+                    native_to_big_end(state[4]),
+                    native_to_big_end(state[5]),
+                    native_to_big_end(state[6]),
+                    native_to_big_end(state[7])
+                });
+            ////}
+        }
+        else
         {
             return array_cast<byte_t>(state_t
             {
@@ -194,21 +292,6 @@ output(const state_t& state) NOEXCEPT
                 native_to_big_end(state[2]),
                 native_to_big_end(state[3]),
                 native_to_big_end(state[4])
-            });
-        }
-        else
-        {
-            // TODO: evaluate 4/8 lane optimization using byteswap.
-            return array_cast<byte_t>(state_t
-            {
-                native_to_big_end(state[0]),
-                native_to_big_end(state[1]),
-                native_to_big_end(state[2]),
-                native_to_big_end(state[3]),
-                native_to_big_end(state[4]),
-                native_to_big_end(state[5]),
-                native_to_big_end(state[6]),
-                native_to_big_end(state[7])
             });
         }
     }

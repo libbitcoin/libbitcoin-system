@@ -351,7 +351,7 @@ merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    if constexpr (have<xWord>())
+    if constexpr (have<xWord>)
     {
         if (blocks.size() >= lanes)
         {

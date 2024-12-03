@@ -42,16 +42,8 @@
 // ****************************************************************************
 // The xint extended integer symbols are always defined for XCPU builds, but
 // these intrinsics are dependent upon the underlying platform and will cause
-// a build failure on CLANG/GCC if not configured into the build (after being
-// detected on the build platform). On all platforms these also require runtime
-// detection. This creates three layers of conditionality, exploding complexity.
-// These macros suppress the build failure, allowing code to operation over the
-// necessary runtime detection, with runtime detection layered over build
-// configuration symbols. Consequently there is no need for preprocessor
-// statements within application code, just a runtime test for availability.
-// These symbols will be defined where availability is possible (compiled).
-// with<xint>() is defined for constexpr conditionality and have<xint>() is
-// defined for runtime conditionality. The latter is false if is the former.
+// a build failure on CLANG/GCC if not configured into the build. These macros
+// suppress the build failure when symbols are not defined, without #ifdef.
 // ****************************************************************************
 
 // These are not defined for 32 bit bit builds.

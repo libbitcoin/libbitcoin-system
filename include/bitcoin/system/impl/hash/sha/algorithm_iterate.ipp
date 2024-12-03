@@ -181,7 +181,7 @@ vector_schedule_sequential_compress(state_t& state, iblocks_t& blocks) NOEXCEPT
     constexpr auto lanes = capacity<xWord, word_t>;
     static_assert(is_valid_lanes<lanes>);
 
-    if constexpr (have<xWord>())
+    if constexpr (have<xWord>)
     {
         if (blocks.size() >= lanes)
         {
