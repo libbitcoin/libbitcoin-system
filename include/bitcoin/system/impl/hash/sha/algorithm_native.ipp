@@ -203,8 +203,8 @@ shuffle(wstate_t<xint128_t>& wstate) NOEXCEPT
     // [ABCD][EFGH] -> [FEBA][HGDC] (ordered low to high).
     const auto t1 = mm_shuffle_epi32(wstate[0], 0xb1);
     const auto t2 = mm_shuffle_epi32(wstate[1], 0x1b);
-    wstate[0] = mm_alignr_epi8(t1, t2, 8);
-    wstate[1] = mm_blend_epi16(t2, t1, 15);
+    wstate[0] = mm_alignr_epi8(t1, t2, 0x08);
+    wstate[1] = mm_blend_epi16(t2, t1, 0xf0);
 }
 
 TEMPLATE
@@ -215,8 +215,8 @@ unshuffle(wstate_t<xint128_t>& wstate) NOEXCEPT
     // [FEBA][HGDC] -> [ABCD][EFGH] (ordered low to high).
     const auto t1 = mm_shuffle_epi32(wstate[0], 0x1b);
     const auto t2 = mm_shuffle_epi32(wstate[1], 0xb1);
-    wstate[0] = mm_blend_epi16(t1, t2, 15);
-    wstate[1] = mm_alignr_epi8(t2, t1, 8);
+    wstate[0] = mm_blend_epi16(t1, t2, 0xf0);
+    wstate[1] = mm_alignr_epi8(t2, t1, 0x08);
 }
 
 TEMPLATE
