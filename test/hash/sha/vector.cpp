@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(vector_tests)
 
 BOOST_AUTO_TEST_CASE(vector__sha256__merkle_root__expected)
 {
-    using sha_256 = sha::algorithm<sha::h512<>, true, true, true>;
+    using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
 
     // First round
     // AVX2
