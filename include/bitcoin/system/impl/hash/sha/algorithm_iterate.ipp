@@ -38,17 +38,17 @@ template <size_t Word, size_t Lanes>
 INLINE auto CLASS::
 pack(const xblock_t<Lanes>& xblock) NOEXCEPT
 {
-    using xword = to_extended<word_t, Lanes>;
+    using xword_t = to_extended<word_t, Lanes>;
 
     if constexpr (Lanes == 2)
     {
-        return byteswap<word_t>(set<xword>(
+        return byteswap<word_t>(set<xword_t>(
             xblock[0][Word],
             xblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
-        return byteswap<word_t>(set<xword>(
+        return byteswap<word_t>(set<xword_t>(
             xblock[0][Word],
             xblock[1][Word],
             xblock[2][Word],
@@ -56,7 +56,7 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
     }
     else if constexpr (Lanes == 8)
     {
-        return byteswap<word_t>(set<xword>(
+        return byteswap<word_t>(set<xword_t>(
             xblock[0][Word],
             xblock[1][Word],
             xblock[2][Word],
@@ -68,7 +68,7 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
     }
     else if constexpr (Lanes == 16)
     {
-        return byteswap<word_t>(set<xword>(
+        return byteswap<word_t>(set<xword_t>(
             xblock[ 0][Word],
             xblock[ 1][Word],
             xblock[ 2][Word],
