@@ -268,28 +268,27 @@ INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
         23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24));
 }
 
-/// load/store (element sizes are actually irrelevant)
+/// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-using data256 = std_array<uint8_t, sizeof(xint256_t)>;
 
-INLINE xint256_t load_aligned(const data256& bytes) NOEXCEPT
+INLINE xint256_t load_aligned(const xint256_t& bytes) NOEXCEPT
 {
-    return mm256_load_si256(pointer_cast<const xint256_t>(bytes.data()));
+    return mm256_load_si256(&bytes);
 }
 
-INLINE xint256_t load(const data256& bytes) NOEXCEPT
+INLINE xint256_t load(const xint256_t& bytes) NOEXCEPT
 {
-    return mm256_loadu_si256(pointer_cast<const xint256_t>(bytes.data()));
+    return mm256_loadu_si256(&bytes);
 }
 
-INLINE void store_aligned(data256& bytes, xint256_t a) NOEXCEPT
+INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
 {
-    mm256_store_si256(pointer_cast<xint256_t>(bytes.data()), a);
+    mm256_store_si256(&bytes, a);
 }
 
-INLINE void store(data256& bytes, xint256_t a) NOEXCEPT
+INLINE void store(xint256_t& bytes, xint256_t a) NOEXCEPT
 {
-    mm256_storeu_si256(pointer_cast<xint256_t>(bytes.data()), a);
+    mm256_storeu_si256(&bytes, a);
 }
 
 #else

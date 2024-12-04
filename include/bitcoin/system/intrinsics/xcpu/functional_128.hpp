@@ -255,28 +255,27 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
         7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8));
 }
 
-/// load/store (element sizes are actually irrelevant)
+/// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-using data128 = std_array<uint8_t, sizeof(xint128_t)>;
 
-INLINE xint128_t load_aligned(const data128& bytes) NOEXCEPT
+INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
 {
-    return mm_load_si128(pointer_cast<const xint128_t>(bytes.data()));
+    return mm_load_si128(&bytes);
 }
 
-INLINE xint128_t load(const data128& bytes) NOEXCEPT
+INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
 {
-    return mm_loadu_si128(pointer_cast<const xint128_t>(bytes.data()));
+    return mm_loadu_si128(&bytes);
 }
 
-INLINE void store_aligned(data128& bytes, xint128_t a) NOEXCEPT
+INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
 {
-    mm_store_si128(pointer_cast<xint128_t>(bytes.data()), a);
+    mm_store_si128(&bytes, a);
 }
 
-INLINE void store(data128& bytes, xint128_t a) NOEXCEPT
+INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
 {
-    mm_storeu_si128(pointer_cast<xint128_t>(bytes.data()), a);
+    mm_storeu_si128(&bytes, a);
 }
 
 #else

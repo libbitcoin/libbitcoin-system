@@ -308,28 +308,27 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
         55, 54, 53, 52, 51, 50, 49, 48, 63, 62, 61, 60, 59, 58, 57, 56));
 }
 
-/// load/store (element sizes are actually irrelevant)
+/// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-using data512 = std_array<uint8_t, sizeof(xint512_t)>;
 
-INLINE xint512_t load_aligned(const data512& bytes) NOEXCEPT
+INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
 {
-    return mm512_load_si512(pointer_cast<const xint512_t>(bytes.data()));
+    return mm512_load_si512(&bytes);
 }
 
-INLINE xint512_t load(const data512& bytes) NOEXCEPT
+INLINE xint512_t load(const xint512_t& bytes) NOEXCEPT
 {
-    return mm512_loadu_si512(pointer_cast<const xint512_t>(bytes.data()));
+    return mm512_loadu_si512(&bytes);
 }
 
-INLINE void store_aligned(data512& bytes, xint512_t a) NOEXCEPT
+INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
-    mm512_store_si512(pointer_cast<xint512_t>(bytes.data()), a);
+    mm512_store_si512(&bytes, a);
 }
 
-INLINE void store(data512& bytes, xint512_t a) NOEXCEPT
+INLINE void store(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
-    mm512_storeu_si512(pointer_cast<xint512_t>(bytes.data()), a);
+    mm512_storeu_si512(&bytes, a);
 }
 
 #else
