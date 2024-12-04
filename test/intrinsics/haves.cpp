@@ -114,74 +114,31 @@ BOOST_AUTO_TEST_CASE(intrinsics_haves__try_shani__always__match)
 // have_lanes
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx512__expected)
-{
-    auto have = false;
+static_assert(have_lanes<uint64_t, 8> == with_avx512);
+static_assert(have_lanes<uint32_t, 16> == with_avx512);
+static_assert(have_lanes<uint16_t, 32> == with_avx512);
+static_assert(!have_lanes<uint64_t, 7>);
+static_assert(!have_lanes<uint32_t, 15>);
+static_assert(!have_lanes<uint16_t, 31>);
+static_assert(!have_lanes<uint8_t, 63>);
 
-    have = have_lanes<uint64_t, 8>();
-    BOOST_CHECK_EQUAL(have, with_avx512);
-    have = have_lanes<uint32_t, 16>();
-    BOOST_CHECK_EQUAL(have, with_avx512);
-    have = have_lanes<uint16_t, 32>();
-    BOOST_CHECK_EQUAL(have, with_avx512);
-    have = have_lanes<uint8_t, 64>();
-    BOOST_CHECK_EQUAL(have, with_avx512);
+static_assert(have_lanes<uint64_t, 4> == with_avx2);
+static_assert(have_lanes<uint32_t, 8> == with_avx2);
+static_assert(have_lanes<uint16_t, 16> == with_avx2);
+static_assert(have_lanes<uint8_t, 32> == with_avx2);
+static_assert(!have_lanes<uint64_t, 3>);
+static_assert(!have_lanes<uint32_t, 7>);
+static_assert(!have_lanes<uint16_t, 15>);
+static_assert(!have_lanes<uint8_t, 31>);
 
-    have = have_lanes<uint64_t, 7>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint32_t, 15>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint16_t, 31>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint8_t, 63>();
-    BOOST_CHECK(!have);
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__avx2__expected)
-{
-    auto have = false;
-
-    have = have_lanes<uint64_t, 4>();
-    BOOST_CHECK_EQUAL(have, with_avx2);
-    have = have_lanes<uint32_t, 8>();
-    BOOST_CHECK_EQUAL(have, with_avx2);
-    have = have_lanes<uint16_t, 16>();
-    BOOST_CHECK_EQUAL(have, with_avx2);
-    have = have_lanes<uint8_t, 32>();
-    BOOST_CHECK_EQUAL(have, with_avx2);
-
-    have = have_lanes<uint64_t, 3>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint32_t, 7>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint16_t, 15>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint8_t, 31>();
-    BOOST_CHECK(!have);
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics__have_lanes__sse41__expected)
-{
-    auto have = false;
-
-    have = have_lanes<uint64_t, 2>();
-    BOOST_CHECK_EQUAL(have, with_sse41);
-    have = have_lanes<uint32_t, 4>();
-    BOOST_CHECK_EQUAL(have, with_sse41);
-    have = have_lanes<uint16_t, 8>();
-    BOOST_CHECK_EQUAL(have, with_sse41);
-    have = have_lanes<uint8_t, 16>();
-    BOOST_CHECK_EQUAL(have, with_sse41);
-
-    have = have_lanes<uint64_t, 1>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint32_t, 3>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint16_t, 7>();
-    BOOST_CHECK(!have);
-    have = have_lanes<uint8_t, 15>();
-    BOOST_CHECK(!have);
-}
+static_assert(have_lanes<uint64_t, 2> == with_sse41);
+static_assert(have_lanes<uint32_t, 4> == with_sse41);
+static_assert(have_lanes<uint16_t, 8> == with_sse41);
+static_assert(have_lanes<uint8_t, 16> == with_sse41);
+static_assert(!have_lanes<uint64_t, 1>);
+static_assert(!have_lanes<uint32_t, 3>);
+static_assert(!have_lanes<uint16_t, 7>);
+static_assert(!have_lanes<uint8_t, 15>);
 
 // is_extended
 // ----------------------------------------------------------------------------

@@ -96,7 +96,7 @@ TEMPLATE
 void CLASS::
 schedule_sigma(buffer_t& buffer) NOEXCEPT
 {
-    if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>())
+    if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>)
     {
         prepare8<16>(buffer);
         prepare8<24>(buffer);

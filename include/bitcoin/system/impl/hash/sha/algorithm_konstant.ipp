@@ -50,33 +50,28 @@ template<size_t Round, typename xWord>
 INLINE void CLASS::
 vector_konstant(wbuffer_t<xWord>& wbuffer) NOEXCEPT
 {
-    constexpr auto r = Round;
     constexpr auto s = SHA::word_bits;
     constexpr auto lanes = capacity<xWord, word_t>;
+    constexpr auto r = Round * lanes;
 
-    if constexpr (lanes == 2)
+    if constexpr (lanes == 16)
     {
         wbuffer[Round] = f::add<s>(wbuffer[Round], set<xWord>(
-            K::get[r + 1], K::get[r + 0]));
-    }
-    else if constexpr (lanes == 4)
-    {
-        wbuffer[Round] = f::add<s>(wbuffer[Round], set<xWord>(
-            K::get[r + 3], K::get[r + 2], K::get[r + 1], K::get[r + 0]));
+            K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3],
+            K::get[r + 4], K::get[r + 5], K::get[r + 6], K::get[r + 7],
+            K::get[r + 8], K::get[r + 9], K::get[r + 10], K::get[r + 11],
+            K::get[r + 12], K::get[r + 13], K::get[r + 14], K::get[r + 15]));
     }
     else if constexpr (lanes == 8)
     {
         wbuffer[Round] = f::add<s>(wbuffer[Round], set<xWord>(
-            K::get[r + 7], K::get[r + 6], K::get[r + 5], K::get[r + 4],
-            K::get[r + 3], K::get[r + 2], K::get[r + 1], K::get[r + 0]));
+            K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3],
+            K::get[r + 4], K::get[r + 5], K::get[r + 6], K::get[r + 7]));
     }
-    else if constexpr (lanes == 16)
+    else if constexpr (lanes == 4)
     {
         wbuffer[Round] = f::add<s>(wbuffer[Round], set<xWord>(
-            K::get[r + 15], K::get[r + 14], K::get[r + 13], K::get[r + 12],
-            K::get[r + 11], K::get[r + 10], K::get[r + 9], K::get[r + 8],
-            K::get[r + 7], K::get[r + 6], K::get[r + 5], K::get[r + 4],
-            K::get[r + 3], K::get[r + 2], K::get[r + 1], K::get[r + 0]));
+            K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3]));
     }
 }
 
@@ -84,9 +79,9 @@ TEMPLATE
 void CLASS::
 vector_konstant(buffer_t& buffer) NOEXCEPT
 {
-    if constexpr (use_x512)
+    if constexpr (have_lanes<word_t, 16>)
     {
-        auto& wbuffer = array_cast<xint512_t>(buffer);
+        auto& wbuffer = array_cast<to_extended<word_t, 16>>(buffer);
         vector_konstant<0>(wbuffer);
         vector_konstant<1>(wbuffer);
         vector_konstant<2>(wbuffer);
@@ -97,9 +92,9 @@ vector_konstant(buffer_t& buffer) NOEXCEPT
             vector_konstant<4>(wbuffer);
         }
     }
-    else if constexpr (use_x256)
+    else if constexpr (have_lanes<word_t, 8>)
     {
-        auto& wbuffer = array_cast<xint256_t>(buffer);
+        auto& wbuffer = array_cast<to_extended<word_t, 8>>(buffer);
         vector_konstant<0>(wbuffer);
         vector_konstant<1>(wbuffer);
         vector_konstant<2>(wbuffer);
@@ -115,9 +110,9 @@ vector_konstant(buffer_t& buffer) NOEXCEPT
             vector_konstant<9>(wbuffer);
         }
     }
-    else if constexpr (use_x128)
+    else if constexpr (have_lanes<word_t, 4>)
     {
-        auto& wbuffer = array_cast<xint128_t>(buffer);
+        auto& wbuffer = array_cast<to_extended<word_t, 4>>(buffer);
         vector_konstant<0>(wbuffer);
         vector_konstant<1>(wbuffer);
         vector_konstant<2>(wbuffer);
@@ -262,10 +257,10 @@ konstant(buffer_t& buffer) NOEXCEPT
     {
         konstant_(buffer);
     }
-    ////else if constexpr (vector)
-    ////{
-    ////    vector_konstant(buffer);
-    ////}
+    else if constexpr (vector && !with_clang)
+    {
+        vector_konstant(buffer);
+    }
     else
     {
         konstant_(buffer);

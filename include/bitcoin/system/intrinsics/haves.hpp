@@ -30,12 +30,18 @@
 namespace libbitcoin {
 namespace system {
 
+// HACK: work around vectorizations failing on non-xcode clang.
+#if defined(HAVE_CLANG) && !defined(HAVE_XCODE)
+    constexpr auto with_clang = true;
+#else
+    constexpr auto with_clang = false;
+#endif
+
 // Functions may only be constexpr conditionally.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 
 /// Constant symbols for compiled intrinsics interfaces.
 /// ---------------------------------------------------------------------------
-// sse41a (assembly) optimization is implemented without assembly.
 
 #if defined(HAVE_SSE41)
     constexpr auto with_sse41 = true;
@@ -181,9 +187,8 @@ using to_extended =
                         iif<is_one(capacity<xint256_t, Integral, Lanes>), xint256_t,
                             xint512_t>>>>>>;
 
-/// Availability of extended integer intrinsics.
 template <typename Extended, if_extended<Extended> = true>
-constexpr bool have() NOEXCEPT
+constexpr bool have_() NOEXCEPT
 {
     if constexpr (is_same_type<Extended, xint512_t>)
         return with_avx512;
@@ -195,10 +200,13 @@ constexpr bool have() NOEXCEPT
         return false;
 }
 
-/// Availability of extended integer filled by Lanes Integrals.
+/// Availability of extended integer intrinsics.
+template <typename Extended, if_extended<Extended> = true>
+constexpr bool have = have_<Extended>();
+
 template <typename Integral, size_t Lanes,
     if_integral<Integral> = true>
-constexpr bool have_lanes() NOEXCEPT
+constexpr bool have_lanes_() NOEXCEPT
 {
     if constexpr (capacity<xint512_t, Integral> == Lanes)
         return with_avx512;
@@ -210,13 +218,17 @@ constexpr bool have_lanes() NOEXCEPT
         return false;
 }
 
-/// Availability of extended integer, override for non-integral word.
 template <typename Integral, size_t Lanes,
     if_non_integral<Integral> = true>
-constexpr bool have_lanes() NOEXCEPT
+constexpr bool have_lanes_() NOEXCEPT
 {
     return false;
 }
+
+/// Availability of extended integer filled by Lanes Integrals.
+template <typename Integral, size_t Lanes,
+    if_integral<Integral> = true>
+constexpr bool have_lanes = have_lanes_<Integral, Lanes>();
 
 BC_POP_WARNING()
 
