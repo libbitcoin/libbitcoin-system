@@ -58,14 +58,14 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        if constexpr (have_lanes<word_t, 16>)
+        if constexpr (have_lanes<word_t, 16> && !with_clang)
         {
             using xword_t = to_extended<word_t, 16>;
             const auto& in = array_cast<xword_t>(block);
             auto& out = array_cast<xword_t>(buffer);
             out[0] = byteswap<word_t>(in[0]);
         }
-        else if constexpr (have_lanes<word_t, 8>)
+        else if constexpr (have_lanes<word_t, 8> && !with_clang)
         {
             using xword_t = to_extended<word_t, 8>;
             const auto& in = array_cast<xword_t>(block);
@@ -73,7 +73,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
             out[0] = byteswap<word_t>(in[0]);
             out[1] = byteswap<word_t>(in[1]);
         }
-        else if constexpr (have_lanes<word_t, 4>)
+        else if constexpr (have_lanes<word_t, 4> && !with_clang)
         {
             using xword_t = to_extended<word_t, 4>;
             const auto& in = array_cast<xword_t>(block);
@@ -131,14 +131,14 @@ input_left(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        if constexpr (have_lanes<word_t, 8>)
+        if constexpr (have_lanes<word_t, 8> && !with_clang)
         {
             using xword_t = to_extended<word_t, 8>;
             const auto& in = array_cast<xword_t>(half);
             auto& out = array_cast<xword_t>(buffer);
             out[0] = byteswap<word_t>(in[0]);
         }
-        else if constexpr (have_lanes<word_t, 4>)
+        else if constexpr (have_lanes<word_t, 4> && !with_clang)
         {
             using xword_t = to_extended<word_t, 4>;
             const auto& in = array_cast<xword_t>(half);
@@ -185,14 +185,14 @@ input_right(buffer_t& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
-        if constexpr (have_lanes<word_t, 8>)
+        if constexpr (have_lanes<word_t, 8> && !with_clang)
         {
             using xword_t = to_extended<word_t, 8>;
             const auto& in = array_cast<xword_t>(half);
             auto& out = array_cast<xword_t>(buffer);
             out[1] = byteswap<word_t>(in[0]);
         }
-        else if constexpr (have_lanes<word_t, 4>)
+        else if constexpr (have_lanes<word_t, 4> && !with_clang)
         {
             using xword_t = to_extended<word_t, 4>;
             const auto& in = array_cast<xword_t>(half);
@@ -248,7 +248,7 @@ output(const state_t& state) NOEXCEPT
     {
         if constexpr (SHA::strength != 160)
         {
-            if constexpr (have_lanes<word_t, 8>)
+            if constexpr (have_lanes<word_t, 8> && !with_clang)
             {
                 using xword_t = to_extended<word_t, 8>;
                 const auto& in = array_cast<xword_t>(state);
@@ -257,7 +257,7 @@ output(const state_t& state) NOEXCEPT
                     byteswap<word_t>(in[0])
                 });
             }
-            else if constexpr (have_lanes<word_t, 4>)
+            else if constexpr (have_lanes<word_t, 4> && !with_clang)
             {
                 using xword_t = to_extended<word_t, 4>;
                 const auto& in = array_cast<xword_t>(state);
