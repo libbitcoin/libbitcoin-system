@@ -331,7 +331,7 @@ BC_POP_WARNING()
     #define mm_sha1nexte_epu32(a, b)            {}
     #define mm_sha256msg1_epu32(a, b)           {}
     #define mm_sha256msg2_epu32(a, b)           {}
-    #define mm_sha256rnds2_epu32(a, b, k)       {}
+    #define mm_sha256rnds2_epu32(a, b, k)       (k)
 #else
     #define mm_sha1msg1_epu32(a, b)             _mm_sha1msg1_epu32(a, b)
     #define mm_sha1msg2_epu32(a, b)             _mm_sha1msg2_epu32(a, b)
