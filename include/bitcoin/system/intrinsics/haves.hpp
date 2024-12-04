@@ -30,7 +30,7 @@
 namespace libbitcoin {
 namespace system {
 
-// Hack
+// HACK: work around vectorizations failing on non-xcode clang.
 #if defined(HAVE_CLANG) && !defined(HAVE_XCODE)
     constexpr auto with_clang = true;
 #else
@@ -42,7 +42,6 @@ BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 
 /// Constant symbols for compiled intrinsics interfaces.
 /// ---------------------------------------------------------------------------
-// sse41a (assembly) optimization is implemented without assembly.
 
 #if defined(HAVE_SSE41)
     constexpr auto with_sse41 = true;
