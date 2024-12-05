@@ -228,7 +228,7 @@ iterate_vector(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     if (blocks.size() >= min_lanes)
     {
-        auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
+        iblocks_t iblocks{ array_cast<byte_t>(blocks) };
         iterate_vector(state, iblocks);
     }
     else
