@@ -47,12 +47,11 @@ prepare_1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
     constexpr auto r02 = Round - 2;
     constexpr auto r07 = Round - 7;
     constexpr auto r16 = Round - 16;
-    constexpr auto s = SHA::word_bits;
 
     // buffer[r07 + 7] is buffer[Round + 0], so sigma0 is limited to 8 lanes.
-    buffer[Round + Offset] = f::add<s>(
-        f::add<s>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
-        f::add<s>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
+    buffer[Round + Offset] = add<word_t>(
+        add<word_t>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
+        add<word_t>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
 }
 
 TEMPLATE

@@ -104,7 +104,6 @@ BC_POP_WARNING()
 #endif
 
 #if !defined(HAVE_SSE41)
-    #define mm_alignr_epi8(a, b, c) {}
     #define mm_and_si128(a, b)  (a)
     #define mm_or_si128(a, b)   (a)
     #define mm_xor_si128(a, b)  (a)
@@ -126,9 +125,8 @@ BC_POP_WARNING()
     #define mm_extract_epi64(a, Lane)   {}
     #define mm_shuffle_epi8(a, mask)    (a)
     #define mm_shuffle_epi32(a, mask)   (a)
-    #define mm_blend_epi16(a, b, mask)  (a)
-    #define mm_load_si128(a)            {}
-    #define mm_loadu_si128(a)           {}
+    #define mm_load_si128(a)            (a)
+    #define mm_loadu_si128(a)           (a)
     #define mm_store_si128(memory, a)
     #define mm_storeu_si128(memory, a)
     #define mm_set1_epi8(K)
@@ -140,7 +138,6 @@ BC_POP_WARNING()
     #define mm_set_epi16(x08, x07, x06, x05, x04, x03, x02, x01)
     #define mm_set_epi8(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
 #else
-    #define mm_alignr_epi8(a, b, c)     _mm_alignr_epi8(a, b, c) // for native sha (128 only)
     #define mm_and_si128(a, b)          _mm_and_si128(a, b)
     #define mm_or_si128(a, b)           _mm_or_si128(a, b)
     #define mm_xor_si128(a, b)          _mm_xor_si128(a, b)
@@ -162,7 +159,6 @@ BC_POP_WARNING()
     #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane) // undefined for X32
     #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
     #define mm_shuffle_epi32(a, mask)   _mm_shuffle_epi32(a, mask)
-    #define mm_blend_epi16(a, b, mask)  _mm_blend_epi16(a, b, mask)
     #define mm_load_si128(a)            _mm_load_si128(a)
     #define mm_loadu_si128(a)           _mm_loadu_si128(a)
     #define mm_store_si128(memory, a)   _mm_store_si128(memory, a)
@@ -201,8 +197,8 @@ BC_POP_WARNING()
     #define mm256_extract_epi32(a, Lane)    {}
     #define mm256_extract_epi64(a, Lane)    {}
     #define mm256_shuffle_epi8(a, mask)     (a)
-    #define mm256_load_si256(a)             {}
-    #define mm256_loadu_si256(a)            {}
+    #define mm256_load_si256(a)             (a)
+    #define mm256_loadu_si256(a)            (a)
     #define mm256_store_si256(memory, a)    {}
     #define mm256_storeu_si256(memory, a)   {}
     #define mm256_set1_epi8(K)
@@ -273,8 +269,8 @@ BC_POP_WARNING()
     #define mm512_extract_epi32(a, Lane)    {}
     #define mm512_extract_epi64(a, Lane)    {}
     #define mm512_shuffle_epi8(a, mask)     (a)
-    #define mm512_load_si512(a)             {}
-    #define mm512_loadu_si512(a)            {}
+    #define mm512_load_si512(a)             (a)
+    #define mm512_loadu_si512(a)            (a)
     #define mm512_store_si512(memory, a)
     #define mm512_storeu_si512(memory, a)
     #define mm512_set1_epi8(K)
@@ -325,21 +321,30 @@ BC_POP_WARNING()
 #endif
 
 #if !defined(HAVE_SHANI)
-    #define mm_sha1msg1_epu32(a, b)             {}
-    #define mm_sha1msg2_epu32(a, b)             {}
-    #define mm_sha1rnds4_epu32(a, b, functor)   {}
-    #define mm_sha1nexte_epu32(a, b)            {}
-    #define mm_sha256msg1_epu32(a, b)           {}
-    #define mm_sha256msg2_epu32(a, b)           {}
-    #define mm_sha256rnds2_epu32(a, b, k)       (k)
+    #define mm_sha1msg1_epu32(a, b)         {}
+    #define mm_sha1msg2_epu32(a, b)         {}
+    #define mm_sha1rnds4_epu32(a, b, f)     {}
+    #define mm_sha1nexte_epu32(a, b)        {}
+    #define mm_sha256msg1_epu32(a, b)       {}
+    #define mm_sha256msg2_epu32(a, b)       {}
+    #define mm_sha256rnds2_epu32(a, b, k)   (k)
+
+    // supporting
+    #define mm_alignr_epi8(a, b, c)         (a)
+    #define mm_blend_epi16(a, b, mask)      (a)
 #else
-    #define mm_sha1msg1_epu32(a, b)             _mm_sha1msg1_epu32(a, b)
-    #define mm_sha1msg2_epu32(a, b)             _mm_sha1msg2_epu32(a, b)
-    #define mm_sha1rnds4_epu32(a, b, functor)   _mm_sha1rnds4_epu32(a, b, functor)
-    #define mm_sha1nexte_epu32(a, b)            _mm_sha1nexte_epu32(a, b)
-    #define mm_sha256msg1_epu32(a, b)           _mm_sha256msg1_epu32(a, b)
-    #define mm_sha256msg2_epu32(a, b)           _mm_sha256msg2_epu32(a, b)
-    #define mm_sha256rnds2_epu32(a, b, k)       _mm_sha256rnds2_epu32(a, b, k)
+    #define mm_sha1msg1_epu32(a, b)         _mm_sha1msg1_epu32(a, b)
+    #define mm_sha1msg2_epu32(a, b)         _mm_sha1msg2_epu32(a, b)
+    #define mm_sha1rnds4_epu32(a, b, f)     _mm_sha1rnds4_epu32(a, b, f)
+    #define mm_sha1nexte_epu32(a, b)        _mm_sha1nexte_epu32(a, b)
+    #define mm_sha256msg1_epu32(a, b)       _mm_sha256msg1_epu32(a, b)
+    #define mm_sha256msg2_epu32(a, b)       _mm_sha256msg2_epu32(a, b)
+    #define mm_sha256rnds2_epu32(a, b, k)   _mm_sha256rnds2_epu32(a, b, k)
+
+    // supporting   
+    #define mm_alignr_epi8(a, b, c)         _mm_alignr_epi8(a, b, c)
+    #define mm_blend_epi16(a, b, mask)      _mm_blend_epi16(a, b, mask)
+
 #endif
 
 #endif

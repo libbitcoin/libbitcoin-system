@@ -75,9 +75,9 @@ INLINE xint256_t shr(xint256_t a) NOEXCEPT
     // AVX2
     if constexpr (S == bits<uint16_t>)
         return mm256_srli_epi16(a, B);
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm256_srli_epi32(a, B);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm256_srli_epi64(a, B);
 }
 
@@ -92,9 +92,9 @@ INLINE xint256_t shl(xint256_t a) NOEXCEPT
     // AVX2
     if constexpr (S == bits<uint16_t>)
         return mm256_slli_epi16(a, B);
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm256_slli_epi32(a, B);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm256_slli_epi64(a, B);
 }
 
@@ -116,11 +116,11 @@ INLINE xint256_t add(xint256_t a, xint256_t b) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
         return mm256_add_epi8(a, b);
-    else if constexpr (S == bits<uint16_t>)
+    if constexpr (S == bits<uint16_t>)
         return mm256_add_epi16(a, b);
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm256_add_epi32(a, b);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm256_add_epi64(a, b);
 }
 
@@ -130,22 +130,36 @@ INLINE xint256_t addc(xint256_t a) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
         return add<S>(a, mm256_set1_epi8(K));
-    else if constexpr (S == bits<uint16_t>)
+    if constexpr (S == bits<uint16_t>)
         return add<S>(a, mm256_set1_epi16(K));
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return add<S>(a, mm256_set1_epi32(K));
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return add<S>(a, mm256_set1_epi64x(K));
 }
 
 } // namespace f
 
-/// broadcast/get/set
+/// add/broadcast/get/set
 /// ---------------------------------------------------------------------------
 
 // AVX
-template <typename xWord, typename Word,
-    if_same<xWord, xint256_t> = true, if_integral_integer<Word> = true>
+template <typename Word, if_integral_integer<Word> = true>
+INLINE xint256_t add(xint256_t a, xint256_t b) NOEXCEPT
+{
+    if constexpr (is_same_type<Word, uint8_t>)
+        return mm256_add_epi8(a, b);
+    if constexpr (is_same_type<Word, uint16_t>)
+        return mm256_add_epi16(a, b);
+    if constexpr (is_same_type<Word, uint32_t>)
+        return mm256_add_epi32(a, b);
+    if constexpr (is_same_type<Word, uint64_t>)
+        return mm256_add_epi64(a, b);
+}
+
+// AVX
+template <typename xWord, typename Word, if_integral_integer<Word> = true,
+    if_same<xWord, xint256_t> = true>
 INLINE xint256_t broadcast(Word a) NOEXCEPT
 {
     // set1 broadcasts integer to all elements.
@@ -169,13 +183,13 @@ INLINE Word get(xint256_t a) NOEXCEPT
     // AVX2
     if constexpr (is_same_type<Word, uint8_t>)
         return mm256_extract_epi8(a, Lane);
-    else if constexpr (is_same_type<Word, uint16_t>)
+    if constexpr (is_same_type<Word, uint16_t>)
         return mm256_extract_epi16(a, Lane);
 
     // AVX
-    else if constexpr (is_same_type<Word, uint32_t>)
+    if constexpr (is_same_type<Word, uint32_t>)
         return mm256_extract_epi32(a, Lane);
-    else if constexpr (is_same_type<Word, uint64_t>)
+    if constexpr (is_same_type<Word, uint64_t>)
         return mm256_extract_epi64(a, Lane);
 }
 
@@ -270,25 +284,26 @@ INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 
 /// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-
-INLINE xint256_t load_aligned(const xint256_t& bytes) NOEXCEPT
-{
-    return mm256_load_si256(&bytes);
-}
+/// These have defined overrides for !HAVE_AVX2
 
 INLINE xint256_t load(const xint256_t& bytes) NOEXCEPT
 {
     return mm256_loadu_si256(&bytes);
 }
 
-INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
-{
-    mm256_store_si256(&bytes, a);
-}
-
 INLINE void store(xint256_t& bytes, xint256_t a) NOEXCEPT
 {
     mm256_storeu_si256(&bytes, a);
+}
+
+INLINE xint256_t load_aligned(const xint256_t& bytes) NOEXCEPT
+{
+    return mm256_load_si256(&bytes);
+}
+
+INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
+{
+    mm256_store_si256(&bytes, a);
 }
 
 #else

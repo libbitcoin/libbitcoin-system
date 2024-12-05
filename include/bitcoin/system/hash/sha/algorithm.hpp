@@ -363,43 +363,6 @@ protected:
     /// Native SHA optimizations (single blocks).
     /// -----------------------------------------------------------------------
 
-#if defined(DISABLED)
-
-    template<size_t Round>
-    INLINE static void prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
-    static void schedule_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
-
-    template <typename xWord>
-    INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-    INLINE static void schedule_native(buffer_t& buffer) NOEXCEPT;
-
-    template<size_t Round, size_t Lane>
-    INLINE static void round_native(wstate_t<xint128_t>& state,
-        const wbuffer_t<xint128_t>& wk) NOEXCEPT;
-
-    INLINE static void shuffle(wstate_t<xint128_t>& wstate) NOEXCEPT;
-    INLINE static void unshuffle(wstate_t<xint128_t>& wstate) NOEXCEPT;
-    INLINE static void summarize_native(wstate_t<xint128_t>& out,
-        const wstate_t<xint128_t>& in) NOEXCEPT;
-
-    template <size_t Lane>
-    static void compress_native(wstate_t<xint128_t>& state,
-        const wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
-
-    template <typename xWord, size_t Lane>
-    INLINE static void compress_native(xstate_t<xWord>& xstate,
-        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-
-    template <typename xWord, size_t Lane>
-    INLINE static void compress_native(state_t& state,
-        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-
-    template <size_t Lane>
-    INLINE static void compress_native(state_t& state,
-        const buffer_t& buffer) NOEXCEPT;
-
-#else // DISABLED
-
     INLINE static void shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
     INLINE static void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
     INLINE static void prepare(xint128_t& message0, xint128_t message1) NOEXCEPT;
@@ -411,8 +374,6 @@ protected:
         xint128_t message) NOEXCEPT;
 
     static void native_rounds(state_t& state, iblocks_t& blocks) NOEXCEPT;
-
-#endif // DISABLED
 
 public:
     /// Summary public values.

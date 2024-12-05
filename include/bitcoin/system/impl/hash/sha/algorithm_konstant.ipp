@@ -50,13 +50,12 @@ template<size_t Round, typename xWord>
 INLINE void CLASS::
 vector_konstant(wbuffer_t<xWord>& wbuffer) NOEXCEPT
 {
-    constexpr auto s = SHA::word_bits;
     constexpr auto lanes = capacity<xWord, word_t>;
     constexpr auto r = Round * lanes;
 
     if constexpr (lanes == 16)
     {
-        wbuffer[Round] = f::add<s>(wbuffer[Round], set<xWord>(
+        wbuffer[Round] = add<word_t>(wbuffer[Round], set<xWord>(
             K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3],
             K::get[r + 4], K::get[r + 5], K::get[r + 6], K::get[r + 7],
             K::get[r + 8], K::get[r + 9], K::get[r + 10], K::get[r + 11],
@@ -64,13 +63,13 @@ vector_konstant(wbuffer_t<xWord>& wbuffer) NOEXCEPT
     }
     else if constexpr (lanes == 8)
     {
-        wbuffer[Round] = f::add<s>(wbuffer[Round], set<xWord>(
+        wbuffer[Round] = add<word_t>(wbuffer[Round], set<xWord>(
             K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3],
             K::get[r + 4], K::get[r + 5], K::get[r + 6], K::get[r + 7]));
     }
     else if constexpr (lanes == 4)
     {
-        wbuffer[Round] = f::add<s>(wbuffer[Round], set<xWord>(
+        wbuffer[Round] = add<word_t>(wbuffer[Round], set<xWord>(
             K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3]));
     }
 }
