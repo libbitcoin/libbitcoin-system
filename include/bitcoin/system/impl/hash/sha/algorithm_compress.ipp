@@ -276,11 +276,11 @@ compress(state_t& state, const buffer_t& buffer) NOEXCEPT
     {
         compress_<Lane>(state, buffer);
     }
-    else if constexpr (native)
-    {
-        // Single block shani compression optimization.
-        compress_native<Lane>(state, buffer);
-    }
+    ////else if constexpr (native)
+    ////{
+    ////    // Single block shani compression optimization.
+    ////    compress_native<Lane>(state, buffer);
+    ////}
     ////else if constexpr (vector)
     ////{
     ////    // Compression is not vectorized within a block, however this is
