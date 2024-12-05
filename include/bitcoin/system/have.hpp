@@ -110,12 +110,13 @@
     #define HAVE_XASSEMBLY
 #endif
 
+/// DISABLED
 /// ARM Neon intrinsics.
 #if defined(HAVE_ARM)
     // -march=armv8-a+crc+crypto [all]
     // -arch arm64 [apple] (also -isysroot to phone sdk)
     #if defined(HAVE_GNUC) || defined(__ARM_NEON) || defined(HAVE_MSC)
-        #define HAVE_NEON
+        ////#define HAVE_NEON
     #endif
 #endif
 
