@@ -299,9 +299,9 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
 using xint128_t = std_array<uint8_t, bytes<128>>;
 
 template <typename Word, if_integral_integer<Word> = true>
-INLINE xint128_t add(xint128_t, xint128_t) NOEXCEPT
+INLINE xint128_t add(xint128_t, xint128_t b) NOEXCEPT
 {
-    return {};
+    return b;
 }
 
 template <typename xWord, if_same<xWord, xint128_t> = true>
@@ -311,14 +311,14 @@ INLINE xint128_t set(uint32_t, uint32_t, uint32_t, uint32_t) NOEXCEPT
 }
 
 template <typename Word, if_integral_integer<Word> = true>
-INLINE xint128_t byteswap(xint128_t) NOEXCEPT
+INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 {
-    return {};
+    return a;
 }
 
-INLINE xint128_t load(const xint128_t&) NOEXCEPT
+INLINE xint128_t load(const xint128_t& a) NOEXCEPT
 {
-    return {};
+    return a;
 }
 
 INLINE void store(xint128_t&, xint128_t) NOEXCEPT

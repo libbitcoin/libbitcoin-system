@@ -328,10 +328,9 @@ BC_POP_WARNING()
     #define mm_sha256msg1_epu32(a, b)       (b)
     #define mm_sha256msg2_epu32(a, b)       (b)
     #define mm_sha256rnds2_epu32(a, b, k)   (k)
-
-    // supporting
-    #define mm_alignr_epi8(a, b, c)         (b)
-    #define mm_blend_epi16(a, b, mask)      (b)
+    #define mm_alignr_epi8(a, b, c)         (a)
+    #define mm_blend_epi16(a, b, mask)      (a)
+    #define SHANI_ONLY(a)
 #else
     #define mm_sha1msg1_epu32(a, b)         _mm_sha1msg1_epu32(a, b)
     #define mm_sha1msg2_epu32(a, b)         _mm_sha1msg2_epu32(a, b)
@@ -341,10 +340,12 @@ BC_POP_WARNING()
     #define mm_sha256msg2_epu32(a, b)       _mm_sha256msg2_epu32(a, b)
     #define mm_sha256rnds2_epu32(a, b, k)   _mm_sha256rnds2_epu32(a, b, k)
 
-    // supporting   
+    // supporting
     #define mm_alignr_epi8(a, b, c)         _mm_alignr_epi8(a, b, c)
     #define mm_blend_epi16(a, b, mask)      _mm_blend_epi16(a, b, mask)
 
+    // unused argument suppression
+    #define SHANI_ONLY(a) a
 #endif
 
 #endif

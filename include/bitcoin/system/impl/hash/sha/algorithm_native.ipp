@@ -63,9 +63,10 @@ prepare(xint128_t& message0, xint128_t message1) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& message0, xint128_t message1, xint128_t& message2) NOEXCEPT
+prepare(xint128_t& SHANI_ONLY(message0), xint128_t message1,
+    xint128_t& message2) NOEXCEPT
 {
-    message2 = mm_sha256msg2_epu32(add<word_t>(message2,
+    message2 = mm_sha256msg2_epu32(mm_add_epi32(message2,
         mm_alignr_epi8(message1, message0, 4)), message1);
 }
 
