@@ -325,13 +325,13 @@ BC_POP_WARNING()
     #define mm_sha1msg2_epu32(a, b)         {}
     #define mm_sha1rnds4_epu32(a, b, f)     {}
     #define mm_sha1nexte_epu32(a, b)        {}
-    #define mm_sha256msg1_epu32(a, b)       {}
-    #define mm_sha256msg2_epu32(a, b)       {}
+    #define mm_sha256msg1_epu32(a, b)       (b)
+    #define mm_sha256msg2_epu32(a, b)       (b)
     #define mm_sha256rnds2_epu32(a, b, k)   (k)
 
     // supporting
-    #define mm_alignr_epi8(a, b, c)         (a)
-    #define mm_blend_epi16(a, b, mask)      (a)
+    #define mm_alignr_epi8(a, b, c)         (b)
+    #define mm_blend_epi16(a, b, mask)      (b)
 #else
     #define mm_sha1msg1_epu32(a, b)         _mm_sha1msg1_epu32(a, b)
     #define mm_sha1msg2_epu32(a, b)         _mm_sha1msg2_epu32(a, b)
