@@ -282,6 +282,11 @@ protected:
         iblocks_t& blocks) NOEXCEPT;
 
     template <size_t Size>
+    INLINE static void iterate_native(state_t& state,
+        const ablocks_t<Size>& blocks) NOEXCEPT;
+    INLINE static void iterate_native(state_t& state, iblocks_t& blocks) NOEXCEPT;
+
+    template <size_t Size>
     INLINE static constexpr void iterate_(state_t& state,
         const ablocks_t<Size>& blocks) NOEXCEPT;
     INLINE static void iterate_(state_t& state, iblocks_t& blocks) NOEXCEPT;
@@ -317,7 +322,8 @@ protected:
         const xstate_t<xWord>& xstate) NOEXCEPT;
 
     template <typename xWord, if_extended<xWord> = true>
-    INLINE static void merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT;
+    INLINE static void merkle_hash_vector(idigests_t& digests,
+        iblocks_t& blocks) NOEXCEPT;
     INLINE static void merkle_hash_vector(digests_t& digests) NOEXCEPT;
     VCONSTEXPR static void merkle_hash_(digests_t& digests,
         size_t offset=zero) NOEXCEPT;
@@ -330,10 +336,10 @@ protected:
         auto x6, auto x7, auto x8) NOEXCEPT;
 
     template<size_t Round, size_t Offset>
-    INLINE static void prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT;
+    INLINE static void prepare_1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT;
 
     template<size_t Round>
-    INLINE static void prepare8(buffer_t& buffer) NOEXCEPT;
+    INLINE static void prepare_8(buffer_t& buffer) NOEXCEPT;
 
     template <typename xWord>
     INLINE static void schedule_sigma(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
@@ -357,45 +363,24 @@ protected:
     /// Native SHA optimizations (single blocks).
     /// -----------------------------------------------------------------------
 
-    template<size_t Round>
-    INLINE static void prepare_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
-    static void schedule_native(wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
+    INLINE static void shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
+    INLINE static void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
+    INLINE static void prepare(xint128_t& message0, xint128_t message1) NOEXCEPT;
+    INLINE static void prepare(xint128_t& message0, xint128_t message1,
+        xint128_t& message2) NOEXCEPT;
 
-    template <typename xWord>
-    INLINE static void schedule_native(xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-    INLINE static void schedule_native(buffer_t& buffer) NOEXCEPT;
+    template <size_t Round>
+    INLINE static void round_4(xint128_t& state0, xint128_t& state1,
+        xint128_t message) NOEXCEPT;
 
-    template<size_t Round, size_t Lane>
-    INLINE static void round_native(wstate_t<xint128_t>& state,
-        const wbuffer_t<xint128_t>& wk) NOEXCEPT;
-
-    INLINE static void shuffle(wstate_t<xint128_t>& wstate) NOEXCEPT;
-    INLINE static void unshuffle(wstate_t<xint128_t>& wstate) NOEXCEPT;
-    INLINE static void summarize_native(wstate_t<xint128_t>& out,
-        const wstate_t<xint128_t>& in) NOEXCEPT;
-
-    template <size_t Lane>
-    static void compress_native(wstate_t<xint128_t>& state,
-        const wbuffer_t<xint128_t>& wbuffer) NOEXCEPT;
-
-    template <typename xWord, size_t Lane>
-    INLINE static void compress_native(xstate_t<xWord>& xstate,
-        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-
-    template <typename xWord, size_t Lane>
-    INLINE static void compress_native(state_t& state,
-        const xbuffer_t<xWord>& xbuffer) NOEXCEPT;
-
-    template <size_t Lane>
-    INLINE static void compress_native(state_t& state,
-        const buffer_t& buffer) NOEXCEPT;
+    static void native_rounds(state_t& state, iblocks_t& blocks) NOEXCEPT;
 
 public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = (use_shani || use_neon) &&
-        !is_same_size<word_t, uint64_t>;
+    static constexpr auto native = (use_shani || use_neon)
+        && (SHA::strength == 256 || SHA::strength == 160);
     static constexpr auto vector = (use_x128 || use_x256 || use_x512)
         && !(build_x32 && is_same_size<word_t, uint64_t>);
 };

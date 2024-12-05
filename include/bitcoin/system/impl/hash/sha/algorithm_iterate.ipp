@@ -228,7 +228,7 @@ iterate_vector(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     if (blocks.size() >= min_lanes)
     {
-        auto iblocks = iblocks_t{ array_cast<byte_t>(blocks) };
+        iblocks_t iblocks{ array_cast<byte_t>(blocks) };
         iterate_vector(state, iblocks);
     }
     else
@@ -236,6 +236,31 @@ iterate_vector(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
         iterate_(state, blocks);
     }
 }
+
+// Native SHA
+// ============================================================================
+// www.intel.com/content/dam/develop/external/us/en/documents/
+// intel-sha-extensions-white-paper-402097.pdf
+
+TEMPLATE
+INLINE void CLASS::
+iterate_native(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    native_rounds(state, blocks);
+}
+
+TEMPLATE
+template <size_t Size>
+INLINE void CLASS::
+iterate_native(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
+{
+    iblocks_t iblocks{ array_cast<byte_t>(blocks) };
+    native_rounds(state, iblocks);
+}
+
+// Dispatch and normal forms.
+// ============================================================================
+// protected
 
 TEMPLATE
 template <size_t Size>
@@ -273,11 +298,9 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     {
         iterate_(state, blocks);
     }
-    else if constexpr (native)
+    else if constexpr (native && SHA::strength == 256)
     {
-        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
-        // Multiple block shani message schduling and compression optimization.
-        iterate_(state, blocks);
+        iterate_native(state, blocks);
     }
     else if constexpr (vector)
     {
@@ -294,11 +317,9 @@ TEMPLATE
 INLINE void CLASS::
 iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (native)
+    if constexpr (native && SHA::strength == 256)
     {
-        // TODO: evaluate 4/8/16 lane message scheduling vs. shani scheduling.
-        // Multiple block shani message schduling and compression optimization.
-        iterate_(state, blocks);
+        iterate_native(state, blocks);
     }
     else if constexpr (vector)
     {

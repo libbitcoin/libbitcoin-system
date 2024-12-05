@@ -421,6 +421,10 @@ merkle_hash_vector(digests_t& digests) NOEXCEPT
 // ----------------------------------------------------------------------------
 // public
 
+// TODO: consider eliminating endianness conversions internal to the root
+// computation, instead converting on way in and way out ony, and using non
+// converting input/output (nop) functions.
+
 TEMPLATE
 VCONSTEXPR typename CLASS::digest_t CLASS::
 merkle_root(digests_t&& digests) NOEXCEPT

@@ -41,24 +41,23 @@ sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
 TEMPLATE
 template<size_t Round, size_t Offset>
 INLINE void CLASS::
-prepare1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
+prepare_1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
 {
     static_assert(Round >= 16);
     constexpr auto r02 = Round - 2;
     constexpr auto r07 = Round - 7;
     constexpr auto r16 = Round - 16;
-    constexpr auto s = SHA::word_bits;
 
     // buffer[r07 + 7] is buffer[Round + 0], so sigma0 is limited to 8 lanes.
-    buffer[Round + Offset] = f::add<s>(
-        f::add<s>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
-        f::add<s>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
+    buffer[Round + Offset] = add<word_t>(
+        add<word_t>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
+        add<word_t>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
 }
 
 TEMPLATE
 template<size_t Round>
 INLINE void CLASS::
-prepare8(buffer_t& buffer) NOEXCEPT
+prepare_8(buffer_t& buffer) NOEXCEPT
 {
     // Requires avx512 for sha512 and avx2 for sha256.
     // The simplicity of sha160 message prepare precludes this optimization.
@@ -73,14 +72,14 @@ prepare8(buffer_t& buffer) NOEXCEPT
         buffer[r15 + 0], buffer[r15 + 1], buffer[r15 + 2], buffer[r15 + 3],
         buffer[r15 + 4], buffer[r15 + 5], buffer[r15 + 6], buffer[r15 + 7]);
 
-    prepare1<Round, 0>(buffer, xsigma0);
-    prepare1<Round, 1>(buffer, xsigma0);
-    prepare1<Round, 2>(buffer, xsigma0);
-    prepare1<Round, 3>(buffer, xsigma0);
-    prepare1<Round, 4>(buffer, xsigma0);
-    prepare1<Round, 5>(buffer, xsigma0);
-    prepare1<Round, 6>(buffer, xsigma0);
-    prepare1<Round, 7>(buffer, xsigma0);
+    prepare_1<Round, 0>(buffer, xsigma0);
+    prepare_1<Round, 1>(buffer, xsigma0);
+    prepare_1<Round, 2>(buffer, xsigma0);
+    prepare_1<Round, 3>(buffer, xsigma0);
+    prepare_1<Round, 4>(buffer, xsigma0);
+    prepare_1<Round, 5>(buffer, xsigma0);
+    prepare_1<Round, 6>(buffer, xsigma0);
+    prepare_1<Round, 7>(buffer, xsigma0);
 }
 
 TEMPLATE
@@ -98,17 +97,17 @@ schedule_sigma(buffer_t& buffer) NOEXCEPT
 {
     if constexpr (SHA::strength != 160 && have_lanes<word_t, 8>)
     {
-        prepare8<16>(buffer);
-        prepare8<24>(buffer);
-        prepare8<32>(buffer);
-        prepare8<40>(buffer);
-        prepare8<48>(buffer);
-        prepare8<56>(buffer);
+        prepare_8<16>(buffer);
+        prepare_8<24>(buffer);
+        prepare_8<32>(buffer);
+        prepare_8<40>(buffer);
+        prepare_8<48>(buffer);
+        prepare_8<56>(buffer);
 
         if constexpr (SHA::rounds == 80)
         {
-            prepare8<64>(buffer);
-            prepare8<72>(buffer);
+            prepare_8<64>(buffer);
+            prepare_8<72>(buffer);
         }
 
         konstant(buffer);

@@ -138,11 +138,11 @@ schedule(buffer_t& buffer) NOEXCEPT
     {
         schedule_(buffer);
     }
-    else if constexpr (native)
-    {
-        // Single block (with shani) message scheduling optimization.
-        schedule_native(buffer);
-    }
+    ////else if constexpr (native)
+    ////{
+    ////    // Single block (with shani) message scheduling optimization.
+    ////    schedule_native(buffer);
+    ////}
     else if constexpr (vector)
     {
         // Single block (without shani) message scheduling optimization.

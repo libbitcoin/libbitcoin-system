@@ -76,9 +76,9 @@ INLINE xint128_t shr(xint128_t a) NOEXCEPT
 
     if constexpr (S == bits<uint16_t>)
         return mm_srli_epi16(a, B);
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm_srli_epi32(a, B);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm_srli_epi64(a, B);
 }
 
@@ -93,9 +93,9 @@ INLINE xint128_t shl(xint128_t a) NOEXCEPT
 
     if constexpr (S == bits<uint16_t>)
         return mm_slli_epi16(a, B);
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm_slli_epi32(a, B);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm_slli_epi64(a, B);
 }
 
@@ -117,11 +117,11 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
         return mm_add_epi8(a, b);
-    else if constexpr (S == bits<uint16_t>)
+    if constexpr (S == bits<uint16_t>)
         return mm_add_epi16(a, b);
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm_add_epi32(a, b);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm_add_epi64(a, b);
 }
 
@@ -131,22 +131,36 @@ INLINE xint128_t addc(xint128_t a) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
         return add<S>(a, mm_set1_epi8(K));
-    else if constexpr (S == bits<uint16_t>)
+    if constexpr (S == bits<uint16_t>)
         return add<S>(a, mm_set1_epi16(K));
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return add<S>(a, mm_set1_epi32(K));
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return add<S>(a, mm_set1_epi64x(K));
 }
 
 } // namespace f
 
-/// broadcast/get/set
+/// add/broadcast/gadd/get/set
 /// ---------------------------------------------------------------------------
 
 // SSE2
-template <typename xWord, typename Word,
-    if_same<xWord, xint128_t> = true, if_integral_integer<Word> = true>
+template <typename Word, if_integral_integer<Word> = true>
+INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
+{
+    if constexpr (is_same_type<Word, uint8_t>)
+        return mm_add_epi8(a, b);
+    if constexpr (is_same_type<Word, uint16_t>)
+        return mm_add_epi16(a, b);
+    if constexpr (is_same_type<Word, uint32_t>)
+        return mm_add_epi32(a, b);
+    if constexpr (is_same_type<Word, uint64_t>)
+        return mm_add_epi64(a, b);
+}
+
+// SSE2
+template <typename xWord, typename Word, if_integral_integer<Word> = true,
+    if_same<xWord, xint128_t> = true>
 INLINE xint128_t broadcast(Word a) NOEXCEPT
 {
     // set1 broadcasts integer to all elements.
@@ -172,13 +186,13 @@ INLINE Word get(xint128_t a) NOEXCEPT
         return mm_extract_epi8(a, Lane);
 
     // SSE2
-    else if constexpr (is_same_type<Word, uint16_t>)
+    if constexpr (is_same_type<Word, uint16_t>)
         return mm_extract_epi16(a, Lane);
 
     // SSE4.1
-    else if constexpr (is_same_type<Word, uint32_t>)
+    if constexpr (is_same_type<Word, uint32_t>)
         return mm_extract_epi32(a, Lane);
-    else if constexpr (is_same_type<Word, uint64_t>)
+    if constexpr (is_same_type<Word, uint64_t>)
         return mm_extract_epi64(a, Lane);
 }
 
@@ -257,20 +271,11 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 
 /// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-
-INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
-{
-    return mm_load_si128(&bytes);
-}
+/// These have defined overrides for !HAVE_SSE41
 
 INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
 {
     return mm_loadu_si128(&bytes);
-}
-
-INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
-{
-    mm_store_si128(&bytes, a);
 }
 
 INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
@@ -278,10 +283,47 @@ INLINE void store(xint128_t& bytes, xint128_t a) NOEXCEPT
     mm_storeu_si128(&bytes, a);
 }
 
+INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
+{
+    return mm_load_si128(&bytes);
+}
+
+INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
+{
+    mm_store_si128(&bytes, a);
+}
+
 #else
 
 // Symbol is defined but not usable as an integer.
 using xint128_t = std_array<uint8_t, bytes<128>>;
+
+template <typename Word, if_integral_integer<Word> = true>
+INLINE xint128_t add(xint128_t, xint128_t b) NOEXCEPT
+{
+    return b;
+}
+
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t set(uint32_t, uint32_t, uint32_t, uint32_t) NOEXCEPT
+{
+    return {};
+}
+
+template <typename Word, if_integral_integer<Word> = true>
+INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
+{
+    return a;
+}
+
+INLINE xint128_t load(const xint128_t& a) NOEXCEPT
+{
+    return a;
+}
+
+INLINE void store(xint128_t&, xint128_t) NOEXCEPT
+{
+}
 
 #endif // HAVE_SSE41
 

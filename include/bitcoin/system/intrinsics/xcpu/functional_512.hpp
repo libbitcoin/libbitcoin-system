@@ -83,9 +83,9 @@ INLINE xint512_t shr(xint512_t a) NOEXCEPT
         return mm512_srli_epi16(a, B);
 
     // AVX512F
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm512_srli_epi32(a, B);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm512_srli_epi64(a, B);
 }
 
@@ -102,9 +102,9 @@ INLINE xint512_t shl(xint512_t a) NOEXCEPT
         return mm512_slli_epi16(a, B);
 
     // AVX512F
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm512_slli_epi32(a, B);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm512_slli_epi64(a, B);
 }
 
@@ -126,13 +126,13 @@ INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
     // AVX512BW
     if constexpr (S == bits<uint8_t>)
         return mm512_add_epi8(a, b);
-    else if constexpr (S == bits<uint16_t>)
+    if constexpr (S == bits<uint16_t>)
         return mm512_add_epi16(a, b);
 
     // AVX512F
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return mm512_add_epi32(a, b);
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return mm512_add_epi64(a, b);
 }
 
@@ -142,11 +142,11 @@ INLINE xint512_t addc(xint512_t a) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
         return add<S>(a, mm512_set1_epi8(K));
-    else if constexpr (S == bits<uint16_t>)
+    if constexpr (S == bits<uint16_t>)
         return add<S>(a, mm512_set1_epi16(K));
-    else if constexpr (S == bits<uint32_t>)
+    if constexpr (S == bits<uint32_t>)
         return add<S>(a, mm512_set1_epi32(K));
-    else if constexpr (S == bits<uint64_t>)
+    if constexpr (S == bits<uint64_t>)
         return add<S>(a, mm512_set1_epi64(K));
 }
 
@@ -156,8 +156,22 @@ INLINE xint512_t addc(xint512_t a) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // AVX512F
-template <typename xWord, typename Word,
-    if_same<xWord, xint512_t> = true, if_integral_integer<Word> = true>
+template <typename Word, if_integral_integer<Word> = true>
+INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
+{
+    if constexpr (is_same_type<Word, uint8_t>)
+        return mm256_add_epi8(a, b);
+    if constexpr (is_same_type<Word, uint16_t>)
+        return mm256_add_epi16(a, b);
+    if constexpr (is_same_type<Word, uint32_t>)
+        return mm256_add_epi32(a, b);
+    if constexpr (is_same_type<Word, uint64_t>)
+        return mm256_add_epi64(a, b);
+}
+
+// AVX512F
+template <typename xWord, typename Word, if_integral_integer<Word> = true,
+    if_same<xWord, xint512_t> = true>
 INLINE xint512_t broadcast(Word a) NOEXCEPT
 {
     // set1 broadcasts integer to all elements.
@@ -310,25 +324,26 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 
 /// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-
-INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
-{
-    return mm512_load_si512(&bytes);
-}
+/// These have defined overrides for !HAVE_AVX2
 
 INLINE xint512_t load(const xint512_t& bytes) NOEXCEPT
 {
     return mm512_loadu_si512(&bytes);
 }
 
-INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
-{
-    mm512_store_si512(&bytes, a);
-}
-
 INLINE void store(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
     mm512_storeu_si512(&bytes, a);
+}
+
+INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
+{
+    return mm512_load_si512(&bytes);
+}
+
+INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
+{
+    mm512_store_si512(&bytes, a);
 }
 
 #else

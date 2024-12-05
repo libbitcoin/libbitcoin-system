@@ -71,17 +71,6 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto wk) NOEXCEPT
 
     e = /*a =*/ f::add<s>(f::add<s>(f::add<s>(f::rol<5, s>(a), fn(b, c, d)), e), wk);
     b = /*c =*/ f::rol<30, s>(b);
-
-    // SHA-NI
-    // Four rounds (total rounds 80/4).
-    // First round is add(e, w), then sha1nexte(e, w).
-    // fk is round-based enumeration implying f selection and k value.
-    //     e1 = sha1nexte(e0, w);
-    //     abcd = sha1rnds4(abcd, e0, fk);
-    // NEON
-    // f is implied by k in wk.
-    //     e1 = vsha1h(vgetq_lane(abcd, 0);
-    //     vsha1cq(abcd, e0, vaddq(w, k));
 }
 
 TEMPLATE
@@ -97,16 +86,6 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     const auto t = f::add<s>(f::add<s>(f::add<s>(Sigma1(e), choice(e, f, g)), h), wk);
     d = /*e =*/    f::add<s>(d, t);
     h = /*a =*/    f::add<s>(f::add<s>(Sigma0(a), majority(a, b, c)), t);
-
-    // Each call is 2 rounds, s, w and k are 128 (4 words each, s1/s2 is 8 word state).
-    // SHA-NI
-    //     const auto value = add(w, k);
-    //     abcd = sha256rnds2(abcd, efgh, value);
-    //     efgh = sha256rnds2(efgh, abcd, shuffle(value));
-    // NEON
-    //     const auto value = vaddq(w, k);
-    //     abcd = vsha256hq(abcd, efgh, value);
-    //     efgh = vsha256h2q(efgh, abcd, value);
 }
 
 TEMPLATE
@@ -125,10 +104,6 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 3 - Round) % SHA::state_words],
             state[(SHA::rounds + 4 - Round) % SHA::state_words], // a->e
             extract<word, Lane>(wk[Round]));
-
-        // SHA-NI/NEON
-        // State packs in 128 (one state variable), reduces above to 1 out[].
-        // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
     else
     {
@@ -142,10 +117,6 @@ round(auto& state, const auto& wk) NOEXCEPT
             state[(SHA::rounds + 6 - Round) % SHA::state_words],
             state[(SHA::rounds + 7 - Round) % SHA::state_words], // a->h
             extract<word, Lane>(wk[Round]));
-
-        // SHA-NI/NEON
-        // Each element is 128 (vs. 32), reduces above to 2 out[] (s0/s1).
-        // Input value is 128 (w). Constants (k) statically initialized as 128.
     }
 }
 
@@ -276,11 +247,11 @@ compress(state_t& state, const buffer_t& buffer) NOEXCEPT
     {
         compress_<Lane>(state, buffer);
     }
-    else if constexpr (native)
-    {
-        // Single block shani compression optimization.
-        compress_native<Lane>(state, buffer);
-    }
+    ////else if constexpr (native)
+    ////{
+    ////    // Single block shani compression optimization.
+    ////    compress_native<Lane>(state, buffer);
+    ////}
     ////else if constexpr (vector)
     ////{
     ////    // Compression is not vectorized within a block, however this is

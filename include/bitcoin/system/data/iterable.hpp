@@ -175,7 +175,7 @@ public:
         return begin_;
     }
 
-    template <size_t Elements>
+    template <size_t Elements = one>
     inline iterable& advance() NOEXCEPT
     {
         // This is safe for overflow, will advance to end.
@@ -185,7 +185,7 @@ public:
         return *this;
     }
 
-    template <size_t Elements>
+    template <size_t Elements = one>
     inline const std_array<value_t, Elements>& to_array() const NOEXCEPT
     {
         return unsafe_array_cast<value_t, Elements>(begin_);
