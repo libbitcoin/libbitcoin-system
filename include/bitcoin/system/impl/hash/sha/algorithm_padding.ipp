@@ -23,12 +23,15 @@
 
 // 5.1 Padding the Message
 // ============================================================================
+// All elements big endian (normal form) because endianness is on input.
+// However for block padding endianness is performed in algorithm. So either
+// must reverse that here and undo in algorithm, or bypass in algorithm.
 
 namespace libbitcoin {
 namespace system {
 namespace sha {
 
-// protected
+// Scheduled padding (new and existing buffer objects).
 // ----------------------------------------------------------------------------
 
 TEMPLATE
@@ -40,36 +43,13 @@ scheduled_pad() NOEXCEPT
     static_assert(Blocks <= maximum<word_t> / byte_bits);
 
     // See comments in accumulator regarding padding endianness.
-    constexpr auto index = sub1(array_count<words_t>);
     constexpr auto bytes = safe_multiply(Blocks, array_count<block_t>);
+    constexpr auto index = sub1(array_count<words_t>);
 
     buffer_t out{};
     out.front() = bit_hi<word_t>;
     out.at(index) = possible_narrow_cast<word_t>(to_bits(bytes));
     schedule(out);
-    return out;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::chunk_t CLASS::
-chunk_pad() NOEXCEPT
-{
-    // See comments in accumulator regarding padding endianness.
-    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
-
-    chunk_t out{};
-    out.front() = bit_hi<word_t>;
-    out.back() = to_bits(bytes);
-    return out;
-}
-
-TEMPLATE
-CONSTEVAL typename CLASS::pad_t CLASS::
-stream_pad() NOEXCEPT
-{
-    // See comments in accumulator regarding padding endianness.
-    pad_t out{};
-    out.front() = bit_hi<word_t>;
     return out;
 }
 
@@ -129,9 +109,64 @@ schedule_1(buffer_t& buffer) NOEXCEPT
     schedule_n<one>(buffer);
 }
 
+// Unscheduled padding (new objects).
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+typename CLASS::words_t CLASS::
+pad_blocks(count_t blocks) NOEXCEPT
+{
+    // Pad any number of whole blocks.
+    const auto bits = to_bits(blocks * array_count<block_t>);
+    constexpr auto pad = stream_pad();
+
+    words_t block{};
+    array_cast<word_t, array_count<pad_t>>(block) = pad;
+
+    // Split count into hi/low words and assign end of padded block.
+    block[14] = hi_word<word_t>(bits);
+    block[15] = lo_word<word_t>(bits);
+    return block;
+}
+
+TEMPLATE
+typename CLASS::words_t CLASS::
+pad_block() NOEXCEPT
+{
+    return pad_blocks(one);
+}
+
+TEMPLATE
+CONSTEVAL typename CLASS::chunk_t CLASS::
+chunk_pad() NOEXCEPT
+{
+    // See comments in accumulator regarding padding endianness.
+    constexpr auto bytes = possible_narrow_cast<word_t>(array_count<half_t>);
+
+    chunk_t out{};
+    out.front() = bit_hi<word_t>;
+    out.back() = to_bits(bytes);
+    return out;
+}
+
+TEMPLATE
+CONSTEVAL typename CLASS::pad_t CLASS::
+stream_pad() NOEXCEPT
+{
+    // See comments in accumulator regarding padding endianness.
+    pad_t out{};
+    out.front() = bit_hi<word_t>;
+
+    // Size is not set.
+    return out;
+}
+
+// Unscheduled padding (update block or buffer object).
+// ----------------------------------------------------------------------------
+
 TEMPLATE
 constexpr void CLASS::
-pad_half(buffer_t& buffer) NOEXCEPT
+pad_half(auto& buffer) NOEXCEPT
 {
     // Pad for any half block, unscheduled buffer.
     constexpr auto pad = chunk_pad();
@@ -155,11 +190,11 @@ pad_half(buffer_t& buffer) NOEXCEPT
 
 TEMPLATE
 constexpr void CLASS::
-pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT
+pad_n(auto& buffer, count_t blocks) NOEXCEPT
 {
     // Pad any number of whole blocks, unscheduled buffer.
-    constexpr auto pad = stream_pad();
     const auto bits = to_bits(blocks * array_count<block_t>);
+    constexpr auto pad = stream_pad();
 
     if (std::is_constant_evaluated())
     {

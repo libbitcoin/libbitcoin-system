@@ -60,6 +60,7 @@ finalize(state_t& state, size_t blocks) NOEXCEPT
     buffer_t buffer{};
     schedule_n(buffer, blocks);
     compress(state, buffer);
+
     return output(state);
 }
 
@@ -70,12 +71,14 @@ finalize_second(const state_t& state) NOEXCEPT
     // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
     static_assert(is_same_type<state_t, chunk_t>);
 
-    buffer_t buffer{};
     auto state2 = H::get;
+
+    buffer_t buffer{};
     reinput(buffer, state);
     pad_half(buffer);
     schedule(buffer);
     compress(state2, buffer);
+
     return output(state2);
 }
 
@@ -94,6 +97,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
     schedule(buffer);
     auto state2 = H::get;
     compress(state2, buffer);
+
     return output(state2);
 }
 

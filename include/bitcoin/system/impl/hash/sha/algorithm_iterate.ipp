@@ -243,19 +243,19 @@ iterate_vector(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 // intel-sha-extensions-white-paper-402097.pdf
 
 TEMPLATE
-INLINE void CLASS::
-iterate_native(state_t& state, iblocks_t& blocks) NOEXCEPT
-{
-    native_rounds(state, blocks);
-}
-
-TEMPLATE
 template <size_t Size>
 INLINE void CLASS::
 iterate_native(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     iblocks_t iblocks{ array_cast<byte_t>(blocks) };
-    native_rounds(state, iblocks);
+    native_(state, iblocks);
+}
+
+TEMPLATE
+INLINE void CLASS::
+iterate_native(state_t& state, iblocks_t& blocks) NOEXCEPT
+{
+    native_(state, blocks);
 }
 
 // Dispatch and normal forms.

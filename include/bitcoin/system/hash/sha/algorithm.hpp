@@ -166,6 +166,9 @@ protected:
     template <typename xWord, if_extended<xWord> = true>
     using wstate_t = std_array<xWord, sizeof(state_t) / sizeof(xWord)>;
 
+    ////template <typename xWord, if_extended<xWord> = true>
+    ////using wblock_t = std_array<xWord, sizeof(block_t) / sizeof(xWord)>;
+
     /// Other types.
     /// -----------------------------------------------------------------------
 
@@ -236,17 +239,23 @@ protected:
     /// Padding.
     /// -----------------------------------------------------------------------
 
+    /// Scheduled padding (new and existing buffer objects).
     template <size_t Blocks>
     static CONSTEVAL buffer_t scheduled_pad() NOEXCEPT;
-    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
-    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
-
     template <size_t Blocks>
     static constexpr void schedule_n(buffer_t& buffer) NOEXCEPT;
     static constexpr void schedule_n(buffer_t& buffer, size_t blocks) NOEXCEPT;
     static constexpr void schedule_1(buffer_t& buffer) NOEXCEPT;
-    static constexpr void pad_half(buffer_t& buffer) NOEXCEPT;
-    static constexpr void pad_n(buffer_t& buffer, count_t blocks) NOEXCEPT;
+
+    /// Unscheduled padding (new objects).
+    static words_t pad_block() NOEXCEPT;
+    static words_t pad_blocks(count_t blocks) NOEXCEPT;
+    static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
+    static CONSTEVAL pad_t stream_pad() NOEXCEPT;
+
+    /// Unscheduled padding (update block or buffer object).
+    static constexpr void pad_half(auto& buffer) NOEXCEPT;
+    static constexpr void pad_n(auto& buffer, count_t blocks) NOEXCEPT;
 
     /// Double hashing.
     /// -----------------------------------------------------------------------
@@ -363,6 +372,8 @@ protected:
     /// Native SHA optimizations (single blocks).
     /// -----------------------------------------------------------------------
 
+    template <bool Swap>
+    INLINE static xint128_t bytes(xint128_t message) NOEXCEPT;
     INLINE static void shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
     INLINE static void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
     INLINE static void prepare(xint128_t& message0, xint128_t message1) NOEXCEPT;
@@ -373,7 +384,14 @@ protected:
     INLINE static void round_4(xint128_t& state0, xint128_t& state1,
         xint128_t message) NOEXCEPT;
 
-    static void native_rounds(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    template <bool Swap>
+    INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
+        const block_t& block) NOEXCEPT;
+
+    static void native_(state_t& state, iblocks_t& blocks) NOEXCEPT;
+    static void native_(state_t& state, const block_t& block) NOEXCEPT;
+    INLINE static void native_preswapped(state_t& state,
+        const words_t& block) NOEXCEPT;
 
 public:
     /// Summary public values.
