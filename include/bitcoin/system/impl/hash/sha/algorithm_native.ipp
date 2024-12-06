@@ -35,9 +35,21 @@ namespace sha {
 // protected
 
 TEMPLATE
+template <bool Swap>
+INLINE xint128_t CLASS::
+bytes(xint128_t message) NOEXCEPT
+{
+    if constexpr (Swap)
+        return byteswap<uint32_t>(message);
+    else
+        return message;
+}
+
+TEMPLATE
 INLINE void CLASS::
 shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
+    // shuffle organizes state as expected by sha256rnds2.
     const auto shuffle0 = mm_shuffle_epi32(state0, 0xb1);
     const auto shuffle1 = mm_shuffle_epi32(state1, 0x1b);
     state0 = mm_alignr_epi8(shuffle0, shuffle1, 0x08);
@@ -48,6 +60,7 @@ TEMPLATE
 INLINE void CLASS::
 unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
+    // unshuffle restores state to normal form.
     const auto shuffle0 = mm_shuffle_epi32(state0, 0x1b);
     const auto shuffle1 = mm_shuffle_epi32(state1, 0xb1);
     state0 = mm_blend_epi16(shuffle0, shuffle1, 0xf0);
@@ -84,91 +97,124 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 }
 
 TEMPLATE
+template <bool Swap>
+INLINE void CLASS::
+native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
+{
+    const auto& wblock = array_cast<xint128_t>(block);
+
+    const auto start_lo = lo;
+    const auto start_hi = hi;
+
+    auto message0 = bytes<Swap>(load(wblock[0]));
+    round_4<0>(lo, hi, message0);
+
+    auto message1 = bytes<Swap>(load(wblock[1]));
+    round_4<1>(lo, hi, message1);
+
+    prepare(message0, message1);
+    auto message2 = bytes<Swap>(load(wblock[2]));
+    round_4<2>(lo, hi, message2);
+
+    prepare(message1, message2);
+    auto message3 = bytes<Swap>(load(wblock[3]));
+    round_4<3>(lo, hi, message3);
+
+    prepare(message2, message3, message0);
+    prepare(message2, message3);
+    round_4<4>(lo, hi, message0);
+
+    prepare(message3, message0, message1);
+    prepare(message3, message0);
+    round_4<5>(lo, hi, message1);
+
+    prepare(message0, message1, message2);
+    prepare(message0, message1);
+    round_4<6>(lo, hi, message2);
+
+    prepare(message1, message2, message3);
+    prepare(message1, message2);
+    round_4<7>(lo, hi, message3);
+
+    prepare(message2, message3, message0);
+    prepare(message2, message3);
+    round_4<8>(lo, hi, message0);
+
+    prepare(message3, message0, message1);
+    prepare(message3, message0);
+    round_4<9>(lo, hi, message1);
+
+    prepare(message0, message1, message2);
+    prepare(message0, message1);
+    round_4<10>(lo, hi, message2);
+
+    prepare(message1, message2, message3);
+    prepare(message1, message2);
+    round_4<11>(lo, hi, message3);
+
+    prepare(message2, message3, message0);
+    prepare(message2, message3);
+    round_4<12>(lo, hi, message0);
+
+    prepare(message3, message0, message1);
+    prepare(message3, message0);
+    round_4<13>(lo, hi, message1);
+
+    prepare(message0, message1, message2);
+    round_4<14>(lo, hi, message2);
+
+    prepare(message1, message2, message3);
+    round_4<15>(lo, hi, message3);
+
+    lo = add<word_t>(lo, start_lo);
+    hi = add<word_t>(hi, start_hi);
+}
+
+TEMPLATE
 void CLASS::
-native_rounds(state_t& state, iblocks_t& blocks) NOEXCEPT
+native_(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     // Individual state vars are used vs. array to ensure register persistence.
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = load(wstate[0]);
     auto hi = load(wstate[1]);
-
-    // shuffle organizes state as expected by sha256rnds2.
     shuffle(lo, hi);
 
-    while (!blocks.empty())
-    {
-        const auto start_lo = lo;
-        const auto start_hi = hi;
-        const auto& wblock = array_cast<xint128_t>(blocks.to_array());
+    for (auto& block : blocks)
+        native_rounds<true>(lo, hi, block);
 
-        auto message0 = byteswap<uint32_t>(load(wblock[0]));
-        round_4<0>(lo, hi, message0);
-
-        auto message1 = byteswap<uint32_t>(load(wblock[1]));
-        round_4<1>(lo, hi, message1);
-
-        prepare(message0, message1);
-        auto message2 = byteswap<uint32_t>(load(wblock[2]));
-        round_4<2>(lo, hi, message2);
-
-        prepare(message1, message2);
-        auto message3 = byteswap<uint32_t>(load(wblock[3]));
-        round_4<3>(lo, hi, message3);
-
-        prepare(message2, message3, message0);
-        prepare(message2, message3);
-        round_4<4>(lo, hi, message0);
-
-        prepare(message3, message0, message1);
-        prepare(message3, message0);
-        round_4<5>(lo, hi, message1);
-
-        prepare(message0, message1, message2);
-        prepare(message0, message1);
-        round_4<6>(lo, hi, message2);
-
-        prepare(message1, message2, message3);
-        prepare(message1, message2);
-        round_4<7>(lo, hi, message3);
-
-        prepare(message2, message3, message0);
-        prepare(message2, message3);
-        round_4<8>(lo, hi, message0);
-
-        prepare(message3, message0, message1);
-        prepare(message3, message0);
-        round_4<9>(lo, hi, message1);
-
-        prepare(message0, message1, message2);
-        prepare(message0, message1);
-        round_4<10>(lo, hi, message2);
-
-        prepare(message1, message2, message3);
-        prepare(message1, message2);
-        round_4<11>(lo, hi, message3);
-
-        prepare(message2, message3, message0);
-        prepare(message2, message3);
-        round_4<12>(lo, hi, message0);
-
-        prepare(message3, message0, message1);
-        prepare(message3, message0);
-        round_4<13>(lo, hi, message1);
-
-        prepare(message0, message1, message2);
-        round_4<14>(lo, hi, message2);
-
-        prepare(message1, message2, message3);
-        round_4<15>(lo, hi, message3);
-
-        lo = add<word_t>(lo, start_lo);
-        hi = add<word_t>(hi, start_hi);
-        blocks.advance();
-    }
-
-    // unshuffle restores state to normal form.
     unshuffle(lo, hi);
+    store(wstate[0], lo);
+    store(wstate[1], hi);
+}
 
+TEMPLATE
+void CLASS::
+native_(state_t& state, const block_t& block) NOEXCEPT
+{
+    auto& wstate = array_cast<xint128_t>(state);
+    auto lo = load(wstate[0]);
+    auto hi = load(wstate[1]);
+    shuffle(lo, hi);
+    native_rounds<true>(lo, hi, block);
+    unshuffle(lo, hi);
+    store(wstate[0], lo);
+    store(wstate[1], hi);
+}
+
+TEMPLATE
+INLINE void CLASS::
+native_preswapped(state_t& state, const words_t& block) NOEXCEPT
+{
+    auto& wstate = array_cast<xint128_t>(state);
+    auto lo = load(wstate[0]);
+    auto hi = load(wstate[1]);
+    shuffle(lo, hi);
+
+    // This override is for padding (big-endian, preswapped data).
+    native_rounds<false>(lo, hi, array_cast<byte_t>(block));
+
+    unshuffle(lo, hi);
     store(wstate[0], lo);
     store(wstate[1], hi);
 }

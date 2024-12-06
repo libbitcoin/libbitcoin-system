@@ -65,9 +65,10 @@ double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    buffer_t buffer{};
     auto state = H::get;
     iterate(state, blocks);
+
+    buffer_t buffer{};
     schedule_n<Size>(buffer);
     compress(state, buffer);
 
@@ -77,6 +78,7 @@ double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
     schedule(buffer);
     state = H::get;
     compress(state, buffer);
+
     return output(state);
 }
 
@@ -89,9 +91,10 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
     // Save block count, as iterable decrements.
     const auto count = blocks.size();
 
-    buffer_t buffer{};
     auto state = H::get;
     iterate(state, blocks);
+
+    buffer_t buffer{};
     schedule_n(buffer, count);
     compress(state, buffer);
 
@@ -101,6 +104,7 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
     schedule(buffer);
     state = H::get;
     compress(state, buffer);
+
     return output(state);
 }
 
@@ -110,9 +114,9 @@ double_hash(const block_t& block) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    buffer_t buffer{};
-
     auto state = H::get;
+
+    buffer_t buffer{};
     input(buffer, block);
     schedule(buffer);
     compress(state, buffer);
@@ -125,6 +129,7 @@ double_hash(const block_t& block) NOEXCEPT
     schedule(buffer);
     state = H::get;
     compress(state, buffer);
+
     return output(state);
 }
 
@@ -134,8 +139,9 @@ double_hash(const half_t& half) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    buffer_t buffer{};
     auto state = H::get;
+
+    buffer_t buffer{};
     input_left(buffer, half);
     pad_half(buffer);
     schedule(buffer);
@@ -147,6 +153,7 @@ double_hash(const half_t& half) NOEXCEPT
     schedule(buffer);
     state = H::get;
     compress(state, buffer);
+
     return output(state);
 }
 
@@ -156,8 +163,9 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    buffer_t buffer{};
     auto state = H::get;
+
+    buffer_t buffer{};
     input_left(buffer, left);
     input_right(buffer, right);
     schedule(buffer);
@@ -171,6 +179,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     schedule(buffer);
     state = H::get;
     compress(state, buffer);
+
     return output(state);
 }
 
