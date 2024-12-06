@@ -160,13 +160,13 @@ template <typename Word, if_integral_integer<Word> = true>
 INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
 {
     if constexpr (is_same_type<Word, uint8_t>)
-        return mm256_add_epi8(a, b);
+        return mm512_add_epi8(a, b);
     if constexpr (is_same_type<Word, uint16_t>)
-        return mm256_add_epi16(a, b);
+        return mm512_add_epi16(a, b);
     if constexpr (is_same_type<Word, uint32_t>)
-        return mm256_add_epi32(a, b);
+        return mm512_add_epi32(a, b);
     if constexpr (is_same_type<Word, uint64_t>)
-        return mm256_add_epi64(a, b);
+        return mm512_add_epi64(a, b);
 }
 
 // AVX512F
