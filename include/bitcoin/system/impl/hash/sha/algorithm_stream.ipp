@@ -40,10 +40,7 @@ TEMPLATE
 constexpr void CLASS::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
-    buffer_t buffer{};
-    input(buffer, block);
-    schedule(buffer);
-    compress(state, buffer);
+    iterate(state, ablocks_t<one>{ block });
 }
 
 TEMPLATE
@@ -54,14 +51,56 @@ normalize(const state_t& state) NOEXCEPT
 }
 
 TEMPLATE
+template <size_t Blocks>
+constexpr typename CLASS::digest_t CLASS::
+finalize(state_t& state) NOEXCEPT
+{
+    const auto finalize1 = [](state_t& state) NOEXCEPT
+    {
+        buffer_t buffer{};
+        schedule_n<Blocks>(buffer);
+        compress(state, buffer);
+        return output(state);
+    };
+
+    if (std::is_constant_evaluated())
+    {
+        return finalize1(state);
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        return native_finalize<Blocks>(state);
+    }
+    else
+    {
+        return finalize1(state);
+    }
+}
+
+TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 finalize(state_t& state, size_t blocks) NOEXCEPT
 {
-    buffer_t buffer{};
-    schedule_n(buffer, blocks);
-    compress(state, buffer);
+    const auto finalize1 = [](state_t& state, size_t blocks) NOEXCEPT
+    {
+        buffer_t buffer{};
+        schedule_n(buffer, blocks);
+        compress(state, buffer);
+        return output(state);
+    };
 
-    return output(state);
+    if (std::is_constant_evaluated())
+    {
+        return finalize1(state, blocks);
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        return native_finalize(state, blocks);
+    }
+    else
+    {
+        return finalize1(state, blocks);
+    }
 }
 
 TEMPLATE
@@ -71,34 +110,65 @@ finalize_second(const state_t& state) NOEXCEPT
     // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
     static_assert(is_same_type<state_t, chunk_t>);
 
-    auto state2 = H::get;
+    // This hashes a hash result (state) without the endianness conversion.
+    const auto finalize2 = [](const state_t& state) NOEXCEPT
+    {
+        auto state2 = H::get;
+        buffer_t buffer{};
+        reinput_left(buffer, state);
+        pad_half(buffer);
+        schedule(buffer);
+        compress(state2, buffer);
+        return output(state2);
+    };
 
-    buffer_t buffer{};
-    reinput(buffer, state);
-    pad_half(buffer);
-    schedule(buffer);
-    compress(state2, buffer);
-
-    return output(state2);
+    if (std::is_constant_evaluated())
+    {
+        return finalize2(state);
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        return native_finalize_second(state);
+    }
+    else
+    {
+        return finalize2(state);
+    }
 }
 
 TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 finalize_double(state_t& state, size_t blocks) NOEXCEPT
 {
-    // The state out parameter is updated for first hash.
-    buffer_t buffer{};
-    schedule_n(buffer, blocks);
-    compress(state, buffer);
+    // Pad a hash state from a number of blocks.
+    const auto finalize2 = [](state_t& state, size_t blocks) NOEXCEPT
+    {
+        buffer_t buffer{};
+        schedule_n(buffer, blocks);
+        compress(state, buffer);
 
-    // Second hash
-    reinput(buffer, state);
-    pad_half(buffer);
-    schedule(buffer);
-    auto state2 = H::get;
-    compress(state2, buffer);
+        // This is finalize_second() but reuses the initial buffer.
+        auto state2 = H::get;
+        reinput_left(buffer, state);
+        pad_half(buffer);
+        schedule(buffer);
+        compress(state2, buffer);
 
-    return output(state2);
+        return output(state2);
+    };
+
+    if (std::is_constant_evaluated())
+    {
+        return finalize2(state, blocks);
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        return native_finalize_double(state, blocks);
+    }
+    else
+    {
+        return finalize2(state, blocks);
+    }
 }
 
 } // namespace sha

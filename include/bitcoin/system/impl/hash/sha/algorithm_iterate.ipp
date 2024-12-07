@@ -248,14 +248,14 @@ INLINE void CLASS::
 iterate_native(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
     iblocks_t iblocks{ array_cast<byte_t>(blocks) };
-    native_(state, iblocks);
+    native_transform(state, iblocks);
 }
 
 TEMPLATE
 INLINE void CLASS::
 iterate_native(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    native_(state, blocks);
+    native_transform(state, blocks);
 }
 
 // Dispatch and normal forms.
