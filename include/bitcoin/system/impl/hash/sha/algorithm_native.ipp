@@ -96,9 +96,15 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
     state0 = mm_sha256rnds2_epu32(state0, state1, mm_shuffle_epi32(wk, 0x0e));
 }
 
+// Platform agnostic.
+// ----------------------------------------------------------------------------
+// Individual state vars are used vs. array to ensure register persistence.
+// This creates bifurcations in this template because of the lack of a buffer
+// and the differing optimal locations for applying endianness conversions.
+
 TEMPLATE
 template <bool Swap>
-INLINE void CLASS::
+void CLASS::
 native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 {
     const auto& wblock = array_cast<xint128_t>(block);
@@ -170,17 +176,22 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
     hi = add<word_t>(hi, start_hi);
 }
 
+// Transforms perform scheduling and compression with optional endianness
+// conversion of the block input. State is normalized, which requires some
+// additional shuffle/unshuffle calls between transformations of same state.
+// State output is not finalized, which is endianness conversion to digest_t.
+// ----------------------------------------------------------------------------
+
 TEMPLATE
 void CLASS::
-native_(state_t& state, iblocks_t& blocks) NOEXCEPT
+native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    // Individual state vars are used vs. array to ensure register persistence.
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = load(wstate[0]);
     auto hi = load(wstate[1]);
     shuffle(lo, hi);
 
-    for (auto& block : blocks)
+    for (auto& block: blocks)
         native_rounds<true>(lo, hi, block);
 
     unshuffle(lo, hi);
@@ -189,34 +200,119 @@ native_(state_t& state, iblocks_t& blocks) NOEXCEPT
 }
 
 TEMPLATE
+template <bool Swap>
 void CLASS::
-native_(state_t& state, const block_t& block) NOEXCEPT
+native_transform(state_t& state, const auto& block) NOEXCEPT
 {
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = load(wstate[0]);
     auto hi = load(wstate[1]);
     shuffle(lo, hi);
-    native_rounds<true>(lo, hi, block);
+    native_rounds<Swap>(lo, hi, array_cast<byte_t>(block));
     unshuffle(lo, hi);
     store(wstate[0], lo);
     store(wstate[1], hi);
 }
 
+// Finalization creates and/or applies a given padding block to the state
+// accumulation and performs big-endian conversion from state_t to digest_t.
+// As padding blocks are generated and therefore do not require endianness
+// conversion, those calls are not applied when transforming the pad block.
+// ----------------------------------------------------------------------------
+
 TEMPLATE
-INLINE void CLASS::
-native_preswapped(state_t& state, const words_t& block) NOEXCEPT
+typename CLASS::digest_t CLASS::
+native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 {
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = load(wstate[0]);
     auto hi = load(wstate[1]);
     shuffle(lo, hi);
-
-    // This override is for padding (big-endian, preswapped data).
-    native_rounds<false>(lo, hi, array_cast<byte_t>(block));
-
+    native_rounds<false>(lo, hi, array_cast<byte_t>(pad));
     unshuffle(lo, hi);
-    store(wstate[0], lo);
-    store(wstate[1], hi);
+
+    // digest is copied so that state remains valid (LE).
+    digest_t digest{};
+    auto& wdigest = array_cast<xint128_t>(digest);
+    store(wdigest[0], byteswap<uint32_t>(lo));
+    store(wdigest[1], byteswap<uint32_t>(hi));
+    return digest;
+}
+
+TEMPLATE
+template <size_t Blocks>
+typename CLASS::digest_t CLASS::
+native_finalize(state_t& state) NOEXCEPT
+{
+    // We could use Blocks to cache padding but given the padding blocks are
+    // unscheduled when performing native transformations there's no benefit.
+    return native_finalize(state, Blocks);
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_finalize(state_t& state, size_t blocks) NOEXCEPT
+{
+    return native_finalize(state, pad_blocks(blocks));
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_finalize_second(const state_t& state) NOEXCEPT
+{
+    // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
+    static_assert(is_same_type<state_t, chunk_t>);
+
+    // Hash a state value and finalize it.
+    auto state2 = H::get;
+    words_t block{};
+    reinput(block, state);                  // swapped
+    pad_half(block);                        // swapped
+    return native_finalize(state2, block);  // no block swap (swaps state)
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_finalize_double(state_t& state, size_t blocks) NOEXCEPT
+{
+    // Complete first hash by transforming padding, but don't convert state.
+    auto block = pad_blocks(blocks);
+    native_transform<false>(state, block);  // no swap
+
+    // This is native_finalize_second() but reuses the initial block.
+    auto state2 = H::get;
+    reinput(block, state);                  // swapped
+    pad_half(block);                        // swapped
+    return native_finalize(state2, block);  // no block swap (swaps state)
+}
+
+// Hash functions start with BE data and end with BE digest_t.
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_hash(const half_t& half) NOEXCEPT
+{
+    // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
+    static_assert(is_same_type<state_t, chunk_t>);
+
+    auto state = H::get;
+    words_t block{};
+    input_left(block, half);                // swaps
+    pad_half(block);                        // swapped
+    return native_finalize(state, block);   // no block swap (swaps state)
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_hash(const half_t& left, const half_t& right) NOEXCEPT
+{
+    auto state = H::get;
+    words_t block{};
+    input_left(block, left);                // swaps
+    input_right(block, right);              // swaps
+    native_transform<false>(state, block);  // no swap
+    return native_finalize<one>(state);     // no block swap (swaps state)
 }
 
 } // namespace sha

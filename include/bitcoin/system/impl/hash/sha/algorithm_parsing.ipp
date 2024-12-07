@@ -113,7 +113,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input_left(buffer_t& buffer, const half_t& half) NOEXCEPT
+input_left(auto& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
@@ -167,7 +167,7 @@ input_left(buffer_t& buffer, const half_t& half) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-input_right(buffer_t& buffer, const half_t& half) NOEXCEPT
+input_right(auto& buffer, const half_t& half) NOEXCEPT
 {
     using word = array_element<buffer_t>;
 
