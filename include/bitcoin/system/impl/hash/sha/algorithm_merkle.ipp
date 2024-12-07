@@ -404,9 +404,18 @@ merkle_hash_vector(digests_t& digests) NOEXCEPT
         // Merkle hash vector dispatch.
         if constexpr (use_x512)
             merkle_hash_vector<xint512_t>(idigests, iblocks);
+
+        // Use if shani is not available or at least 32 blocks.
         if constexpr (use_x256)
-            merkle_hash_vector<xint256_t>(idigests, iblocks);
-        if constexpr (use_x128)
+        {
+            if constexpr (!native)
+                merkle_hash_vector<xint256_t>(idigests, iblocks);
+            else if (start >= 32_size)
+                merkle_hash_vector<xint256_t>(idigests, iblocks);
+        }
+
+        // Only use if shani is not available.
+        if constexpr (use_x128 && !native)
             merkle_hash_vector<xint128_t>(idigests, iblocks);
 
         // iblocks.size() is reduced by vectorization.
@@ -461,7 +470,6 @@ merkle_hash(digests_t& digests) NOEXCEPT
 #endif
     if constexpr (vector)
     {
-        // TODO: test vector vs. native performance for the 4 lane scenario.
         // Merkle block vectorization is applied at 16/8/4 lanes (as available)
         // and falls back to native/normal (as available) for 3/2/1 lanes.
         merkle_hash_vector(digests);
