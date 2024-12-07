@@ -266,7 +266,7 @@ native_finalize_second(const state_t& state) NOEXCEPT
     // Hash a state value and finalize it.
     auto state2 = H::get;
     words_t block{};
-    reinput(block, state);                  // swapped
+    reinput_left(block, state);             // swapped
     pad_half(block);                        // swapped
     return native_finalize(state2, block);  // no block swap (swaps state)
 }
@@ -281,7 +281,7 @@ native_finalize_double(state_t& state, size_t blocks) NOEXCEPT
 
     // This is native_finalize_second() but reuses the initial block.
     auto state2 = H::get;
-    reinput(block, state);                  // swapped
+    reinput_left(block, state);             // swapped
     pad_half(block);                        // swapped
     return native_finalize(state2, block);  // no block swap (swaps state)
 }
@@ -309,10 +309,64 @@ native_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     auto state = H::get;
     words_t block{};
-    input_left(block, left);                // swaps
-    input_right(block, right);              // swaps
-    native_transform<false>(state, block);  // no swap
+    reinput_left(block, array_cast<word_t>(left));      // unswapped
+    reinput_right(block, array_cast<word_t>(right));    // unswapped
+    native_transform<true>(state, block);   // swap
     return native_finalize<one>(state);     // no block swap (swaps state)
+}
+
+// Double hash functions start with BE data and end with BE digest_t.
+// ----------------------------------------------------------------------------
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_double_hash(const block_t& block) NOEXCEPT
+{
+    auto state = H::get;
+    native_transform<true>(state, block);           // swap
+    native_transform<false>(state, pad_block());    // swapped
+
+    // Second hash
+    words_t block2{};
+    reinput_left(block2, state);            // swapped
+    pad_half(block2);                       // swapped
+    state = H::get;                         // [reuse state var]
+    return native_finalize(state, block2);  // no block swap (swaps state)
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_double_hash(const half_t& half) NOEXCEPT
+{
+    auto state = H::get;
+    words_t block{};
+    input_left(block, half);                // swaps
+    pad_half(block);                        // swapped
+    native_transform<false>(state, block);  // no block swap
+
+    // Second hash
+    reinput_left(block, state);             // swapped
+    pad_half(block);                        // swapped
+    state = H::get;                         // [reuse state var]
+    return native_finalize(state, block);   // no block swap (swaps state)
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
+{
+    auto state = H::get;
+    words_t block{};
+    reinput_left(block, array_cast<word_t>(left));      // unswapped
+    reinput_right(block, array_cast<word_t>(right));    // unswapped
+    native_transform<true>(state, block);               // swap
+    native_transform<false>(state, pad_block());        // swapped
+
+    // Second hash
+    reinput_left(block, state);             // swapped
+    pad_half(block);                        // swapped
+    state = H::get;                         // [reuse state var]
+    return native_finalize(state, block);   // no block swap (swaps state)
 }
 
 } // namespace sha

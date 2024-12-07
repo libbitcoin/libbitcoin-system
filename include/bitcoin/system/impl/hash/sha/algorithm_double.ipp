@@ -33,25 +33,51 @@ namespace sha {
 
 TEMPLATE
 INLINE constexpr void CLASS::
-reinput(auto& buffer, const auto& state) NOEXCEPT
+reinput_left(auto& buffer, const auto& left) NOEXCEPT
 {
-    static_assert(SHA::strength != 160);
+    using words = decltype(buffer);
+    static_assert(array_count<words> >= SHA::state_words);
 
     if (std::is_constant_evaluated())
     {
-        buffer[0] = state[0];
-        buffer[1] = state[1];
-        buffer[2] = state[2];
-        buffer[3] = state[3];
-        buffer[4] = state[4];
-        buffer[5] = state[5];
-        buffer[6] = state[6];
-        buffer[7] = state[7];
+        buffer.at(0) = left.at(0);
+        buffer.at(1) = left.at(1);
+        buffer.at(2) = left.at(2);
+        buffer.at(3) = left.at(3);
+        buffer.at(4) = left.at(4);
+        buffer.at(5) = left.at(5);
+        buffer.at(6) = left.at(6);
+        buffer.at(7) = left.at(7);
     }
     else
     {
-        using word = array_element<decltype(state)>;
-        array_cast<word, SHA::state_words>(buffer) = state;
+        using word = array_element<words>;
+        array_cast<word, SHA::state_words>(buffer) = left;
+    }
+}
+
+TEMPLATE
+INLINE constexpr void CLASS::
+reinput_right(auto& buffer, const auto& right) NOEXCEPT
+{
+    using words = decltype(buffer);
+    static_assert(array_count<words> >= SHA::state_words);
+
+    if (std::is_constant_evaluated())
+    {
+        buffer.at(8) = right.at(0);
+        buffer.at(9) = right.at(1);
+        buffer.at(10) = right.at(2);
+        buffer.at(11) = right.at(3);
+        buffer.at(12) = right.at(4);
+        buffer.at(13) = right.at(5);
+        buffer.at(14) = right.at(6);
+        buffer.at(15) = right.at(7);
+    }
+    else
+    {
+        using word = array_element<words>;
+        array_cast<word, SHA::state_words, SHA::state_words>(buffer) = right;
     }
 }
 
@@ -91,6 +117,7 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
 
     // Save block count, as iterable decrements.
     const auto count = blocks.size();
+
     auto state = H::get;
     iterate(state, blocks);
 
@@ -121,7 +148,7 @@ double_hash(const block_t& block) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        reinput(buffer, state);
+        reinput_left(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -136,7 +163,7 @@ double_hash(const block_t& block) NOEXCEPT
     }
     else if constexpr (native && SHA::strength == 256)
     {
-        return hash2(block);
+        return native_double_hash(block);
     }
     else
     {
@@ -160,7 +187,7 @@ double_hash(const half_t& half) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        reinput(buffer, state);
+        reinput_left(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -175,7 +202,7 @@ double_hash(const half_t& half) NOEXCEPT
     }
     else if constexpr (native && SHA::strength == 256)
     {
-        return hash2(half);
+        return native_double_hash(half);
     }
     else
     {
@@ -201,7 +228,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        reinput(buffer, state);
+        reinput_left(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -216,7 +243,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     }
     else if constexpr (native && SHA::strength == 256)
     {
-        return hash2(left, right);
+        return native_double_hash(left, right);
     }
     else
     {

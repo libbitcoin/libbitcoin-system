@@ -372,7 +372,7 @@ merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
                 compress_(xstate, xbuffer);
 
                 // Second hash
-                reinput(xbuffer, xstate);
+                reinput_left(xbuffer, xstate);
                 pad_half(xbuffer);
                 schedule_(xbuffer);
                 xstate = initial;
