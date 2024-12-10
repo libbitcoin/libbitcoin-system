@@ -104,7 +104,7 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 
 TEMPLATE
 template <bool Swap>
-void CLASS::
+INLINE void CLASS::
 native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 {
     const auto& wblock = array_cast<xint128_t>(block);
@@ -186,11 +186,13 @@ TEMPLATE
 void CLASS::
 native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
+    // Individual state vars are used vs. array to ensure register persistence.
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = load(wstate[0]);
     auto hi = load(wstate[1]);
     shuffle(lo, hi);
 
+    // native_rounds must be inlined here (register boundary).
     for (auto& block: blocks)
         native_rounds<true>(lo, hi, block);
 
@@ -208,7 +210,10 @@ native_transform(state_t& state, const auto& block) NOEXCEPT
     auto lo = load(wstate[0]);
     auto hi = load(wstate[1]);
     shuffle(lo, hi);
+
+    // native_rounds must be inlined here (register boundary).
     native_rounds<Swap>(lo, hi, array_cast<byte_t>(block));
+
     unshuffle(lo, hi);
     store(wstate[0], lo);
     store(wstate[1], hi);
@@ -228,6 +233,8 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
     auto lo = load(wstate[0]);
     auto hi = load(wstate[1]);
     shuffle(lo, hi);
+
+    // native_rounds must be inlined here (register boundary).
     native_rounds<false>(lo, hi, array_cast<byte_t>(pad));
     unshuffle(lo, hi);
 
