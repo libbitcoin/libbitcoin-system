@@ -243,25 +243,8 @@ template <size_t Lane>
 constexpr void CLASS::
 compress(state_t& state, const buffer_t& buffer) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
-    {
-        compress_<Lane>(state, buffer);
-    }
-    ////else if constexpr (native)
-    ////{
-    ////    // Single block shani compression optimization.
-    ////    compress_native<Lane>(state, buffer);
-    ////}
-    ////else if constexpr (vector)
-    ////{
-    ////    // Compression is not vectorized within a block, however this is
-    ////    // feasible but may not be optimal (see round() comments).
-    ////    compress_vector(buffer);
-    ////}
-    else
-    {
-        compress_<Lane>(state, buffer);
-    }
+    // block-internal vectorization is suboptimal.
+    compress_<Lane>(state, buffer);
 }
 
 } // namespace sha

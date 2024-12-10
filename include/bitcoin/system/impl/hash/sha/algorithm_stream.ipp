@@ -40,6 +40,7 @@ TEMPLATE
 constexpr void CLASS::
 accumulate(state_t& state, const block_t& block) NOEXCEPT
 {
+    // As an array of a 1 arrays is the same as the array, this compiles away.
     iterate(state, ablocks_t<one>{ block });
 }
 
