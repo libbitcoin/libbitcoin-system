@@ -19,11 +19,12 @@ private:
     uint64_t bytes;
 
 public:
-    static const size_t OUTPUT_SIZE = 32;
+    using digest_t = system::hash_digest;
+    static const size_t digest_bytes = 32;
 
     CSHA256();
     CSHA256& Write(const unsigned char* data, size_t len);
-    void Finalize(unsigned char hash[OUTPUT_SIZE]);
+    void Finalize(unsigned char hash[digest_bytes]);
     CSHA256& Reset();
 };
 

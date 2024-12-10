@@ -25,6 +25,8 @@
 #include <chrono>
 
 namespace performance {
+
+constexpr bool use_csv = false;
     
 // format timing results to ostream
 // ----------------------------------------------------------------------------
@@ -245,8 +247,8 @@ template<typename Parameters,
     size_t Count = 1024 * 1024, // test iterations (1Mi)
     size_t Size = 1024,         // bytes per iteration (1KiB)
     if_base_of<parameters, Parameters> = true>
-bool test_accumulator(std::ostream& out, float ghz = 3.0f,
-    bool csv = false) noexcept
+bool test_accumulator(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
 {
     using P = Parameters;
     using Precision = std::chrono::nanoseconds;
@@ -280,8 +282,8 @@ template<typename Parameters,
     bool_if<Size == 32 || Size == 64> = true,
     bool_if<!Parameters::chunked> = true,
     if_base_of<parameters, Parameters> = true>
-bool test_algorithm(std::ostream& out, float ghz = 3.0f,
-    bool csv = false) noexcept
+bool test_algorithm(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
 {
     using P = Parameters;
     using Precision = std::chrono::nanoseconds;
@@ -309,11 +311,110 @@ bool test_algorithm(std::ostream& out, float ghz = 3.0f,
 
 template<typename Parameters,
     size_t Count = 1024 * 1024,
+    size_t Size = 1024,
+    bool_if<Size == 32 || Size == 64> = true,
+    bool_if<!Parameters::chunked> = true,
+    if_base_of<parameters, Parameters> = true>
+bool test_algorithm_pair(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
+{
+    using P = Parameters;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using Algorithm = hash_selector<
+        P::strength,
+        P::native,
+        P::vector,
+        P::cached,
+        P::ripemd>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            Algorithm::hash(*data, *data);
+        });
+    }
+
+    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+template<typename Parameters,
+    size_t Count = 1024 * 1024,
+    size_t Size = 1024,
+    bool_if<Size == 32 || Size == 64> = true,
+    bool_if<!Parameters::chunked> = true,
+    if_base_of<parameters, Parameters> = true>
+bool test_algorithm_pair_double(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
+{
+    using P = Parameters;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using Algorithm = hash_selector<
+        P::strength,
+        P::native,
+        P::vector,
+        P::cached,
+        P::ripemd>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            Algorithm::double_hash(*data, *data);
+        });
+    }
+
+    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+template<typename Parameters,
+    size_t Count = 1024 * 1024,
+    size_t Size = 1024,
+    bool_if<Size == 32 || Size == 64 || Size == 128> = true,
+    bool_if<!Parameters::chunked> = true,
+    if_base_of<parameters, Parameters> = true>
+bool test_algorithm_double(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
+{
+    using P = Parameters;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using Algorithm = hash_selector<
+        P::strength,
+        P::native,
+        P::vector,
+        P::cached,
+        P::ripemd>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            Algorithm::double_hash(*data);
+        });
+    }
+
+    output<Parameters, Count, Size, Algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+template<typename Parameters,
+    size_t Count = 1024 * 1024,
     size_t Size = 1024, // count of blocks (digests / 2)
     bool_if<!Parameters::chunked && !Parameters::ripemd> = true,
     if_base_of<parameters, Parameters> = true>
-bool test_merkle(std::ostream& out, float ghz = 3.0f,
-    bool csv = false) noexcept
+bool test_merkle(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
 {
     using P = Parameters;
     using Precision = std::chrono::nanoseconds;
@@ -340,7 +441,7 @@ bool test_merkle(std::ostream& out, float ghz = 3.0f,
 
         time += Timer::execution([&]() noexcept
         {
-            Algorithm::merkle_root(std::move(digests));
+            Algorithm::merkle_hash(digests);
         });
     }
 
@@ -412,12 +513,78 @@ struct rmd160_parameters : parameters
 // hash_digest accumulator<sha256>::hash(data);
 // short_hash accumulator<rmd160>::hash(data);
 template <typename Algorithm>
+inline typename Algorithm::digest_t base_merkle(
+    std::vector<typename Algorithm::digest_t>& data) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    const auto bytes = system::pointer_cast<uint8_t>(data.data());
+    baseline::SHA256D64(bytes, bytes, to_half(data.size()));
+    return system::unsafe_array_cast<uint8_t, Algorithm::digest_bytes>(bytes);
+    BC_POP_WARNING()
+}
+
+// Equivalent to:
+// hash_digest accumulator<sha256>::hash(data);
+// short_hash accumulator<rmd160>::hash(data);
+template <typename Algorithm>
 inline auto base_accumulator(auto& data) noexcept
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    std_array<uint8_t, Algorithm::OUTPUT_SIZE> out{};
+    std_array<uint8_t, Algorithm::digest_bytes> out{};
     Algorithm hasher{};
     hasher.Write(data.data(), data.size());
+    hasher.Finalize(out.data());
+    return out;
+    BC_POP_WARNING()
+}
+
+// Equivalent to:
+// hash_digest accumulator<sha256>::hash(left, left);
+template <typename Algorithm>
+inline auto base_accumulator(const auto& left,
+    const auto& right) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    std_array<uint8_t, Algorithm::digest_bytes> out{};
+    Algorithm hasher{};
+    hasher.Write(left.data(), left.size());
+    hasher.Write(right.data(), right.size());
+    hasher.Finalize(out.data());
+    return out;
+    BC_POP_WARNING()
+}
+
+// Equivalent to:
+// hash_digest accumulator<sha256>::double_hash(left, left);
+template <typename Algorithm>
+inline auto base_accumulator_double(const auto& left,
+    const auto& right) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    std_array<uint8_t, Algorithm::digest_bytes> out{};
+    Algorithm hasher{};
+    hasher.Write(left.data(), left.size());
+    hasher.Write(right.data(), right.size());
+    hasher.Finalize(out.data());
+    hasher.Reset();
+    hasher.Write(out.data(), out.size());
+    hasher.Finalize(out.data());
+    return out;
+    BC_POP_WARNING()
+}
+
+// Equivalent to:
+// hash_digest accumulator<sha256>::double_hash(data);
+template <typename Algorithm>
+inline auto base_accumulator_double(const auto& data) noexcept
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    std_array<uint8_t, Algorithm::digest_bytes> out{};
+    Algorithm hasher{};
+    hasher.Write(data.data(), data.size());
+    hasher.Finalize(out.data());
+    hasher.Reset();
+    hasher.Write(out.data(), out.size());
     hasher.Finalize(out.data());
     return out;
     BC_POP_WARNING()
@@ -440,7 +607,8 @@ struct parameters
 template<typename Parameters,
     size_t Count = 1024 * 1024, // test iterations (1Mi)
     size_t Size = 1024>         // bytes per iteration (1KiB)
-bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
+bool test_hash(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
 {
     using P = Parameters;
     using algorithm = typename P::algorithm;
@@ -457,6 +625,139 @@ bool test_hash(std::ostream& out, float ghz = 3.0f, bool csv = false) noexcept
         time += Timer::execution([&data]() noexcept
         {
             base_accumulator<algorithm>(*data);
+        });
+    }
+
+    // Dumping output also precludes compiler removal.
+    // Return value, check to preclude compiler removal if output is bypassed.
+    output<params, Count, Size, algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+// Defaults to 1Mi rounds over 1KiB data (1GiB).
+template<typename Parameters,
+    size_t Count = 1024 * 1024, // test iterations (1Mi)
+    size_t Size = 32>           // bytes per iteration
+bool test_hash_pair(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
+{
+    using P = Parameters;
+    using algorithm = typename P::algorithm;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using params = iif<is_same_type<algorithm, baseline::CSHA256>,
+        sha256_parameters<false, false, false, P::chunked>,
+        rmd160_parameters<P::chunked>>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            base_accumulator<algorithm>(*data, *data);
+        });
+    }
+
+    // Dumping output also precludes compiler removal.
+    // Return value, check to preclude compiler removal if output is bypassed.
+    output<params, Count, Size, algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+// Defaults to 1Mi rounds over 1KiB data (1GiB).
+template<typename Parameters,
+    size_t Count = 1024 * 1024, // test iterations (1Mi)
+    size_t Size = 32>           // bytes per iteration
+bool test_hash_pair_double(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
+{
+    using P = Parameters;
+    using algorithm = typename P::algorithm;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using params = iif<is_same_type<algorithm, baseline::CSHA256>,
+        sha256_parameters<false, false, false, P::chunked>,
+        rmd160_parameters<P::chunked>>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            base_accumulator_double<algorithm>(*data, *data);
+        });
+    }
+
+    // Dumping output also precludes compiler removal.
+    // Return value, check to preclude compiler removal if output is bypassed.
+    output<params, Count, Size, algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+// Defaults to 1Mi rounds over 1KiB data (1GiB).
+template<typename Parameters,
+    size_t Count = 1024 * 1024, // test iterations (1Mi)
+    size_t Size = 32>           // bytes per iteration
+bool test_hash_double(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
+{
+    using P = Parameters;
+    using algorithm = typename P::algorithm;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using params = iif<is_same_type<algorithm, baseline::CSHA256>,
+        sha256_parameters<false, false, false, P::chunked>,
+        rmd160_parameters<P::chunked>>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        const auto data = get_data<Size, P::chunked>(seed);
+        time += Timer::execution([&data]() noexcept
+        {
+            base_accumulator_double<algorithm>(*data);
+        });
+    }
+
+    // Dumping output also precludes compiler removal.
+    // Return value, check to preclude compiler removal if output is bypassed.
+    output<params, Count, Size, algorithm, Precision>(out, time, ghz, csv);
+    return true;
+}
+
+// Defaults to 1Mi rounds over 1KiB data (1GiB).
+template<typename Parameters,
+    size_t Count = 1024 * 1024, // test iterations (1Mi)
+    size_t Size = 1024>         // number of blocks
+bool test_merkle(std::ostream& out, bool csv = use_csv,
+    float ghz = 3.0f) noexcept
+{
+    using P = Parameters;
+    using algorithm = typename P::algorithm;
+    using Precision = std::chrono::nanoseconds;
+    using Timer = timer<Precision>;
+    using params = iif<is_same_type<algorithm, baseline::CSHA256>,
+        sha256_parameters<false, false, false, P::chunked>,
+        rmd160_parameters<P::chunked>>;
+
+    uint64_t time = zero;
+    for (size_t seed = 0; seed < Count; ++seed)
+    {
+        constexpr auto size = array_count<typename algorithm::digest_t>;
+        std::vector<typename algorithm::digest_t> digests{};
+        digests.reserve(Size * two);
+
+        for (size_t blocks = 0; blocks < Size; ++blocks)
+        {
+            digests.push_back(*get_data<size, false>(blocks + seed));
+            digests.push_back(*get_data<size, false>(blocks + add1(seed)));
+        }
+
+        time += Timer::execution([&]() noexcept
+        {
+            base_merkle<algorithm>(digests);
         });
     }
 
