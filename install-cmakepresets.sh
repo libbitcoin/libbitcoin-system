@@ -233,8 +233,9 @@ display_help()
     display_message "                             accesses this feature, so if you do not intend to "
     display_message "                             use passphrase normalization this dependency can "
     display_message "                             be avoided."
-    display_message "  --build-icu              Builds ICU libraries."
-    display_message "  --build-boost            Builds Boost libraries."
+    display_message "  --build-icu              Build ICU libraries."
+    display_message "  --build-boost            Build Boost libraries."
+    display_message "  --build-secp256k1        Build libsecp256k1 libraries."
     display_message "  --build-dir=<path>       Location of downloaded and intermediate files."
     display_message "  --preset=<label>         CMakePreset label."
     display_message "  --prefix=<absolute-path> Library install location (defaults to /usr/local)."
@@ -264,9 +265,10 @@ parse_command_line_options()
             # Common project options.
             (--with-icu)            WITH_ICU="yes";;
 
-            # Custom build options (in the form of --build-<option>).
-            (--build-icu)           BUILD_ICU="yes";;
-            (--build-boost)         BUILD_BOOST="yes";;
+            # Custom build options.
+            (--build-icu)                              BUILD_ICU="yes";;
+            (--build-boost)                            BUILD_BOOST="yes";;
+            (--build-secp256k1)                        BUILD_SECP256K1="yes";;
 
             # Unique script options.
             (--build-dir=*)         BUILD_DIR="${OPTION#*=}";;
@@ -503,6 +505,7 @@ display_configuration()
     display_message "WITH_ICU              : $WITH_ICU"
     display_message "BUILD_ICU             : $BUILD_ICU"
     display_message "BUILD_BOOST           : $BUILD_BOOST"
+    display_message "BUILD_SECP256K1       : $BUILD_SECP256K1"
     display_message "BOOST_ROOT            : $BOOST_ROOT"
     display_message "BUILD_DIR                      : $BUILD_DIR"
     display_message "PRESET_ID                      : $PRESET_ID"
@@ -959,10 +962,10 @@ build_all()
     export CPPFLAGS="$CPPFLAGS ${BOOST_FLAGS[@]}"
     build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
     export CPPFLAGS=$SAVE_CPPFLAGS
-    create_from_github bitcoin-core secp256k1 v0.5.1 "yes"
+    create_from_github bitcoin-core secp256k1 v0.5.1 "$BUILD_SECP256K1"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS ${SECP256K1_FLAGS[@]}"
-    build_from_github secp256k1 "$PARALLEL" false "yes" "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
+    build_from_github secp256k1 "$PARALLEL" false "$BUILD_SECP256K1" "${SECP256K1_OPTIONS[@]}" $CUMULATIVE_FILTERED_ARGS
     export CPPFLAGS=$SAVE_CPPFLAGS
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS ${BITCOIN_SYSTEM_FLAGS[@]}"
