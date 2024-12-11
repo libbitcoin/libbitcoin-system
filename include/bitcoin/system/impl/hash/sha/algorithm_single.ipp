@@ -62,7 +62,7 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const half_t& half) NOEXCEPT
 {
-    const auto hash1 = [](const half_t& half) NOEXCEPT
+    const auto hasher = [](const half_t& half) NOEXCEPT
     {
         auto state = H::get;
         buffer_t buffer{};
@@ -75,7 +75,7 @@ hash(const half_t& half) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return hash1(half);
+        return hasher(half);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -83,7 +83,7 @@ hash(const half_t& half) NOEXCEPT
     }
     else
     {
-        return hash1(half);
+        return hasher(half);
     }
 }
 
@@ -91,7 +91,7 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const half_t& left, const half_t& right) NOEXCEPT
 {
-    const auto hash1 = [](const half_t& left, const half_t& right) NOEXCEPT
+    const auto hasher = [](const half_t& left, const half_t& right) NOEXCEPT
     {
         auto state = H::get;
         buffer_t buffer{};
@@ -106,7 +106,7 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return hash1(left, right);
+        return hasher(left, right);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -114,7 +114,7 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
     }
     else
     {
-        return hash1(left, right);
+        return hasher(left, right);
     }
 }
 
