@@ -25,6 +25,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "clang-15"
             flags: "-Og -fPIE"
             options: "--enable-isystem --enable-avx2 --enable-sse4"
@@ -39,6 +40,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            secp256k1: "--build-secp256k1"
             cc: "clang-15"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-avx2"
@@ -53,6 +55,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "gcc-11"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-sse4"
@@ -67,6 +70,7 @@ jobs:
             coverage: "cov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            secp256k1: "--build-secp256k1"
             cc: "gcc-11"
             flags: "-Os -g --coverage -fPIE"
             options: "--enable-isystem"
@@ -81,6 +85,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: "--enable-isystem"
@@ -95,6 +100,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: "--enable-isystem"
@@ -170,6 +176,7 @@ jobs:
           ${{ env.ASSERT_NDEBUG }}
           ${{ matrix.boost }}
           ${{ matrix.icu }}
+          ${{ matrix.secp256k1 }}
 
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
@@ -250,6 +257,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "clang-15"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
@@ -264,6 +272,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            secp256k1: "--build-secp256k1"
             cc: "clang-15"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
@@ -278,6 +287,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "gcc-11"
             flags: "-Os -fPIE"
             options: "-Denable-sse4=on"
@@ -292,6 +302,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            secp256k1: "--build-secp256k1"
             cc: "gcc-11"
             flags: "-Os -fPIE"
             options: ""
@@ -306,6 +317,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: ""
@@ -320,6 +332,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: ""
@@ -398,6 +411,7 @@ jobs:
           ${{ env.ASSERT_NDEBUG }}
           ${{ matrix.boost }}
           ${{ matrix.icu }}
+          ${{ matrix.secp256k1 }}
 
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
@@ -489,6 +503,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "clang-15"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
@@ -504,6 +519,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            secp256k1: "--build-secp256k1"
             cc: "clang-15"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
@@ -519,6 +535,7 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            secp256k1: "--build-secp256k1"
             cc: "gcc-11"
             flags: "-Os -fPIE"
             options: "-Denable-sse4=on"
@@ -598,6 +615,7 @@ jobs:
           ${{ env.ASSERT_NDEBUG }}
           ${{ matrix.boost }}
           ${{ matrix.icu }}
+          ${{ matrix.secp256k1 }}
 
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
