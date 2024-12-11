@@ -234,8 +234,8 @@ protected:
     INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input_left(auto& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input_right(auto& buffer, const half_t& half) NOEXCEPT;
-    INLINE static constexpr void reinput_left(auto& buffer, const auto& left) NOEXCEPT;
-    INLINE static constexpr void reinput_right(auto& buffer, const auto& right) NOEXCEPT;
+    INLINE static constexpr void inject_left(auto& buffer, const auto& left) NOEXCEPT;
+    INLINE static constexpr void inject_right(auto& buffer, const auto& right) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
     /// Padding.

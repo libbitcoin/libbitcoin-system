@@ -310,7 +310,7 @@ output(const state_t& state) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-reinput_left(auto& buffer, const auto& left) NOEXCEPT
+inject_left(auto& buffer, const auto& left) NOEXCEPT
 {
     using words = decltype(buffer);
     static_assert(array_count<words> >= SHA::state_words);
@@ -335,7 +335,7 @@ reinput_left(auto& buffer, const auto& left) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-reinput_right(auto& buffer, const auto& right) NOEXCEPT
+inject_right(auto& buffer, const auto& right) NOEXCEPT
 {
     using words = decltype(buffer);
     static_assert(array_count<words> >= SHA::state_words);
