@@ -401,18 +401,13 @@ merkle_hash_vector(digests_t& digests) NOEXCEPT
         auto idigests = idigests_t{ to_half(size), data };
         const auto start = iblocks.size();
 
-        // Merkle hash vector dispatch.
+        // Always use if available.
         if constexpr (use_x512)
             merkle_hash_vector<xint512_t>(idigests, iblocks);
 
-        // Use if shani is not available or at least 32 blocks.
-        if constexpr (use_x256)
-        {
-            if constexpr (!native)
-                merkle_hash_vector<xint256_t>(idigests, iblocks);
-            else if (start >= 32_size)
-                merkle_hash_vector<xint256_t>(idigests, iblocks);
-        }
+        // Only use if shani is not available.
+        if constexpr (use_x256 && !native)
+            merkle_hash_vector<xint256_t>(idigests, iblocks);
 
         // Only use if shani is not available.
         if constexpr (use_x128 && !native)

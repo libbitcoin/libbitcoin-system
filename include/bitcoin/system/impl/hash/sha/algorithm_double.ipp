@@ -28,59 +28,6 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
-// protected
-// ----------------------------------------------------------------------------
-
-TEMPLATE
-INLINE constexpr void CLASS::
-reinput_left(auto& buffer, const auto& left) NOEXCEPT
-{
-    using words = decltype(buffer);
-    static_assert(array_count<words> >= SHA::state_words);
-
-    if (std::is_constant_evaluated())
-    {
-        buffer.at(0) = left.at(0);
-        buffer.at(1) = left.at(1);
-        buffer.at(2) = left.at(2);
-        buffer.at(3) = left.at(3);
-        buffer.at(4) = left.at(4);
-        buffer.at(5) = left.at(5);
-        buffer.at(6) = left.at(6);
-        buffer.at(7) = left.at(7);
-    }
-    else
-    {
-        using word = array_element<words>;
-        array_cast<word, SHA::state_words>(buffer) = left;
-    }
-}
-
-TEMPLATE
-INLINE constexpr void CLASS::
-reinput_right(auto& buffer, const auto& right) NOEXCEPT
-{
-    using words = decltype(buffer);
-    static_assert(array_count<words> >= SHA::state_words);
-
-    if (std::is_constant_evaluated())
-    {
-        buffer.at(8) = right.at(0);
-        buffer.at(9) = right.at(1);
-        buffer.at(10) = right.at(2);
-        buffer.at(11) = right.at(3);
-        buffer.at(12) = right.at(4);
-        buffer.at(13) = right.at(5);
-        buffer.at(14) = right.at(6);
-        buffer.at(15) = right.at(7);
-    }
-    else
-    {
-        using word = array_element<words>;
-        array_cast<word, SHA::state_words, SHA::state_words>(buffer) = right;
-    }
-}
-
 // public
 // ----------------------------------------------------------------------------
 // These benefit from avoiding state endian transition and reusing buffer.

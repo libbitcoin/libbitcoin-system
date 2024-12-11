@@ -454,7 +454,7 @@ CSHA256& CSHA256::Write(const unsigned char* data, size_t len)
     return *this;
 }
 
-void CSHA256::Finalize(unsigned char hash[OUTPUT_SIZE])
+void CSHA256::Finalize(unsigned char hash[digest_bytes])
 {
     static const unsigned char pad[64] = {0x80};
     unsigned char sizedesc[8];

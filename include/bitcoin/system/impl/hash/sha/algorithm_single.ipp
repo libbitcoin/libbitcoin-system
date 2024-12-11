@@ -54,6 +54,7 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const block_t& block) NOEXCEPT
 {
+    // As an array of a 1 arrays is the same as the array, this compiles away.
     return hash(ablocks_t<one>{ block });
 }
 

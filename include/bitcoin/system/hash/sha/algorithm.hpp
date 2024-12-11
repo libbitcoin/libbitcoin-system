@@ -234,6 +234,8 @@ protected:
     INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input_left(auto& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input_right(auto& buffer, const half_t& half) NOEXCEPT;
+    INLINE static constexpr void reinput_left(auto& buffer, const auto& left) NOEXCEPT;
+    INLINE static constexpr void reinput_right(auto& buffer, const auto& right) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
 
     /// Padding.
@@ -256,12 +258,6 @@ protected:
     /// Unscheduled padding (update block or buffer object).
     static constexpr void pad_half(auto& buffer) NOEXCEPT;
     static constexpr void pad_n(auto& buffer, count_t blocks) NOEXCEPT;
-
-    /// Double hashing.
-    /// -----------------------------------------------------------------------
-
-    static constexpr void reinput_left(auto& buffer, const auto& left) NOEXCEPT;
-    static constexpr void reinput_right(auto& buffer, const auto& right) NOEXCEPT;
 
     /// Iteration (message scheduling vectorized for multiple blocks).
     /// -----------------------------------------------------------------------
@@ -386,8 +382,11 @@ protected:
         xint128_t message) NOEXCEPT;
 
     template <bool Swap>
-    static void native_rounds(xint128_t& lo, xint128_t& hi,
+    INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
         const block_t& block) NOEXCEPT;
+
+    INLINE static void native_rounds(xint128_t& lo, xint128_t& hi,
+        const half_t& left, const chunk_t& pad) NOEXCEPT;
 
     template <bool Swap>
     static void native_transform(state_t& state, const auto& block) NOEXCEPT;
@@ -408,8 +407,6 @@ protected:
     static digest_t native_double_hash(const block_t& block) NOEXCEPT;
     static digest_t native_double_hash(const half_t& half) NOEXCEPT;
     static digest_t native_double_hash(const half_t& left, const half_t& right) NOEXCEPT;
-
-
 
 public:
     /// Summary public values.
