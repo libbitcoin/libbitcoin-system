@@ -56,7 +56,7 @@ template <size_t Blocks>
 constexpr typename CLASS::digest_t CLASS::
 finalize(state_t& state) NOEXCEPT
 {
-    const auto finalize1 = [](state_t& state) NOEXCEPT
+    const auto finalizer = [](state_t& state) NOEXCEPT
     {
         buffer_t buffer{};
         schedule_n<Blocks>(buffer);
@@ -66,7 +66,7 @@ finalize(state_t& state) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return finalize1(state);
+        return finalizer(state);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -74,7 +74,7 @@ finalize(state_t& state) NOEXCEPT
     }
     else
     {
-        return finalize1(state);
+        return finalizer(state);
     }
 }
 
@@ -82,7 +82,7 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 finalize(state_t& state, size_t blocks) NOEXCEPT
 {
-    const auto finalize1 = [](state_t& state, size_t blocks) NOEXCEPT
+    const auto finalizer = [](state_t& state, size_t blocks) NOEXCEPT
     {
         buffer_t buffer{};
         schedule_n(buffer, blocks);
@@ -92,7 +92,7 @@ finalize(state_t& state, size_t blocks) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return finalize1(state, blocks);
+        return finalizer(state, blocks);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -100,7 +100,7 @@ finalize(state_t& state, size_t blocks) NOEXCEPT
     }
     else
     {
-        return finalize1(state, blocks);
+        return finalizer(state, blocks);
     }
 }
 
@@ -112,7 +112,7 @@ finalize_second(const state_t& state) NOEXCEPT
     static_assert(is_same_type<state_t, chunk_t>);
 
     // This hashes a hash result (state) without the endianness conversion.
-    const auto finalize2 = [](const state_t& state) NOEXCEPT
+    const auto finalizer = [](const state_t& state) NOEXCEPT
     {
         auto state2 = H::get;
         buffer_t buffer{};
@@ -125,7 +125,7 @@ finalize_second(const state_t& state) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return finalize2(state);
+        return finalizer(state);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -133,7 +133,7 @@ finalize_second(const state_t& state) NOEXCEPT
     }
     else
     {
-        return finalize2(state);
+        return finalizer(state);
     }
 }
 
@@ -142,7 +142,7 @@ constexpr typename CLASS::digest_t CLASS::
 finalize_double(state_t& state, size_t blocks) NOEXCEPT
 {
     // Pad a hash state from a number of blocks.
-    const auto finalize2 = [](state_t& state, size_t blocks) NOEXCEPT
+    const auto finalizer = [](state_t& state, size_t blocks) NOEXCEPT
     {
         buffer_t buffer{};
         schedule_n(buffer, blocks);
@@ -160,7 +160,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return finalize2(state, blocks);
+        return finalizer(state, blocks);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -168,7 +168,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
     }
     else
     {
-        return finalize2(state, blocks);
+        return finalizer(state, blocks);
     }
 }
 
