@@ -252,15 +252,16 @@ TEMPLATE
 INLINE constexpr void CLASS::
 konstant(buffer_t& buffer) NOEXCEPT
 {
-    if (std::is_constant_evaluated())
-    {
-        konstant_(buffer);
-    }
-    else if constexpr (vector && !with_clang)
-    {
-        vector_konstant(buffer);
-    }
-    else
+    // This optimization is neutral in 4/8/16 lane sha256 perf.
+    ////if (std::is_constant_evaluated())
+    ////{
+    ////    konstant_(buffer);
+    ////}
+    ////else if constexpr (vector && !with_clang)
+    ////{
+    ////    vector_konstant(buffer);
+    ////}
+    ////else
     {
         konstant_(buffer);
     }

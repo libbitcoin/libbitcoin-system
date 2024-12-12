@@ -58,6 +58,7 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
+        // This optimization is neutral in 4/8/16 lane sha256 perf.
         ////if constexpr (have_lanes<word_t, 16> && !with_clang)
         ////{
         ////    using xword_t = to_extended<word_t, 16>;
@@ -131,6 +132,7 @@ input_left(auto& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
+        // This optimization is neutral in 4/8 lane sha256 perf.
         ////if constexpr (have_lanes<word_t, 8> && !with_clang)
         ////{
         ////    using xword_t = to_extended<word_t, 8>;
@@ -185,6 +187,7 @@ input_right(auto& buffer, const half_t& half) NOEXCEPT
     }
     else if constexpr (bc::is_little_endian)
     {
+        // This optimization is neutral in 4/8 lane sha256 perf.
         ////if constexpr (have_lanes<word_t, 8> && !with_clang)
         ////{
         ////    using xword_t = to_extended<word_t, 8>;
@@ -248,6 +251,7 @@ output(const state_t& state) NOEXCEPT
     {
         if constexpr (SHA::strength != 160)
         {
+            // This optimization is neutral in 4/8 lane sha256 perf.
             ////if constexpr (have_lanes<word_t, 8> && !with_clang)
             ////{
             ////    using xword_t = to_extended<word_t, 8>;
@@ -306,7 +310,7 @@ output(const state_t& state) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-reinput_left(auto& buffer, const auto& left) NOEXCEPT
+inject_left(auto& buffer, const auto& left) NOEXCEPT
 {
     using words = decltype(buffer);
     static_assert(array_count<words> >= SHA::state_words);
@@ -331,7 +335,7 @@ reinput_left(auto& buffer, const auto& left) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-reinput_right(auto& buffer, const auto& right) NOEXCEPT
+inject_right(auto& buffer, const auto& right) NOEXCEPT
 {
     using words = decltype(buffer);
     static_assert(array_count<words> >= SHA::state_words);

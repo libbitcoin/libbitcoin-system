@@ -84,7 +84,7 @@ double_hash(const block_t& block) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    const auto hash2 = [](const block_t& block) NOEXCEPT
+    const auto hasher = [](const block_t& block) NOEXCEPT
     {
         auto state = H::get;
         buffer_t buffer{};
@@ -95,7 +95,7 @@ double_hash(const block_t& block) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        reinput_left(buffer, state);
+        inject_left(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -106,7 +106,7 @@ double_hash(const block_t& block) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return hash2(block);
+        return hasher(block);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -114,7 +114,7 @@ double_hash(const block_t& block) NOEXCEPT
     }
     else
     {
-        return hash2(block);
+        return hasher(block);
     }
 }
 
@@ -124,7 +124,7 @@ double_hash(const half_t& half) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    const auto hash2 = [](const half_t& half) NOEXCEPT
+    const auto hasher = [](const half_t& half) NOEXCEPT
     {
         auto state = H::get;
         buffer_t buffer{};
@@ -134,7 +134,7 @@ double_hash(const half_t& half) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        reinput_left(buffer, state);
+        inject_left(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -145,7 +145,7 @@ double_hash(const half_t& half) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return hash2(half);
+        return hasher(half);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -153,7 +153,7 @@ double_hash(const half_t& half) NOEXCEPT
     }
     else
     {
-        return hash2(half);
+        return hasher(half);
     }
 }
 
@@ -163,7 +163,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-    const auto hash2 = [](const half_t& left, const half_t& right) NOEXCEPT
+    const auto hasher = [](const half_t& left, const half_t& right) NOEXCEPT
     {
         auto state = H::get;
         buffer_t buffer{};
@@ -175,7 +175,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        reinput_left(buffer, state);
+        inject_left(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -186,7 +186,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return hash2(left, right);
+        return hasher(left, right);
     }
     else if constexpr (native && SHA::strength == 256)
     {
@@ -194,7 +194,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     }
     else
     {
-        return hash2(left, right);
+        return hasher(left, right);
     }
 }
 

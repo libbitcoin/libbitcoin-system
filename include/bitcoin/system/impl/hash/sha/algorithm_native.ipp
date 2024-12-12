@@ -21,8 +21,10 @@
 
 // Native (SHA-NI or NEON)
 // ============================================================================
-// The iterative method is used for sha native as it is an order of magnitude
-// more efficient and cannot benefit from vectorization.
+// The rotating variables method is used for sha native. Tha native
+// instructions rely on register locality to achieve performance benefits.
+// Implementation of native sha using buffer expansion is horribly slow.
+// This split creates bifurcations (additional complexities) in this template.
 
 namespace libbitcoin {
 namespace system {
@@ -98,9 +100,6 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 
 // Platform agnostic.
 // ----------------------------------------------------------------------------
-// Individual state vars are used vs. array to ensure register persistence.
-// This creates bifurcations in this template because of the lack of a buffer
-// and the differing optimal locations for applying endianness conversions.
 
 TEMPLATE
 template <bool Swap>
@@ -223,6 +222,9 @@ native_transform(state_t& state, const auto& block) NOEXCEPT
 // accumulation and performs big-endian conversion from state_t to digest_t.
 // As padding blocks are generated and therefore do not require endianness
 // conversion, those calls are not applied when transforming the pad block.
+// This lack of conversion also applies to double hashing. In both cases
+// the "inject" functions are using in place of the "input" functions.
+// There is no benefit to caching pading because it is not prescheduled.
 // ----------------------------------------------------------------------------
 
 TEMPLATE
@@ -251,8 +253,6 @@ template <size_t Blocks>
 typename CLASS::digest_t CLASS::
 native_finalize(state_t& state) NOEXCEPT
 {
-    // We could use Blocks to cache padding but given the padding blocks are
-    // unscheduled when performing native transformations there's no benefit.
     return native_finalize(state, Blocks);
 }
 
@@ -273,7 +273,7 @@ native_finalize_second(const state_t& state) NOEXCEPT
     // Hash a state value and finalize it.
     auto state2 = H::get;
     words_t block{};
-    reinput_left(block, state);             // swapped
+    inject_left(block, state);              // swapped
     pad_half(block);                        // swapped
     return native_finalize(state2, block);  // no block swap (swaps state)
 }
@@ -288,7 +288,7 @@ native_finalize_double(state_t& state, size_t blocks) NOEXCEPT
 
     // This is native_finalize_second() but reuses the initial block.
     auto state2 = H::get;
-    reinput_left(block, state);             // swapped
+    inject_left(block, state);              // swapped
     pad_half(block);                        // swapped
     return native_finalize(state2, block);  // no block swap (swaps state)
 }
@@ -316,8 +316,8 @@ native_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     auto state = H::get;
     words_t block{};
-    reinput_left(block, array_cast<word_t>(left));      // unswapped
-    reinput_right(block, array_cast<word_t>(right));    // unswapped
+    inject_left(block, array_cast<word_t>(left));   // unswapped
+    inject_right(block, array_cast<word_t>(right)); // unswapped
     native_transform<true>(state, block);   // swap
     return native_finalize<one>(state);     // no block swap (swaps state)
 }
@@ -335,7 +335,7 @@ native_double_hash(const block_t& block) NOEXCEPT
 
     // Second hash
     words_t block2{};
-    reinput_left(block2, state);            // swapped
+    inject_left(block2, state);             // swapped
     pad_half(block2);                       // swapped
     state = H::get;                         // [reuse state var]
     return native_finalize(state, block2);  // no block swap (swaps state)
@@ -352,7 +352,7 @@ native_double_hash(const half_t& half) NOEXCEPT
     native_transform<false>(state, block);  // no block swap
 
     // Second hash
-    reinput_left(block, state);             // swapped
+    inject_left(block, state);              // swapped
     pad_half(block);                        // swapped
     state = H::get;                         // [reuse state var]
     return native_finalize(state, block);   // no block swap (swaps state)
@@ -364,13 +364,13 @@ native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     auto state = H::get;
     words_t block{};
-    reinput_left(block, array_cast<word_t>(left));      // unswapped
-    reinput_right(block, array_cast<word_t>(right));    // unswapped
-    native_transform<true>(state, block);               // swap
-    native_transform<false>(state, pad_block());        // swapped
+    inject_left(block, array_cast<word_t>(left));   // unswapped
+    inject_right(block, array_cast<word_t>(right)); // unswapped
+    native_transform<true>(state, block);           // swap
+    native_transform<false>(state, pad_block());    // swapped
 
     // Second hash
-    reinput_left(block, state);             // swapped
+    inject_left(block, state);              // swapped
     pad_half(block);                        // swapped
     state = H::get;                         // [reuse state var]
     return native_finalize(state, block);   // no block swap (swaps state)
