@@ -227,6 +227,33 @@ native_transform(state_t& state, const auto& block) NOEXCEPT
 // There is no benefit to caching pading because it is not prescheduled.
 // ----------------------------------------------------------------------------
 
+// TODO: These transitions require state to be unloaded/loaded and
+// shuffled/unshuffled, whereas this is not logically necessary. This is a
+// fixed cost imposed once for any accumulation (which is inconsequential for
+// larger iterations), but reduces efficiency for lower block counts and hash
+// doubling. Large iterations are 15-16% wheras small iterations are 20-26%.
+// native_transform -> native_transform -> native_finalize
+// native_transform -> native_finalize
+// This can be resolved in the non-iterator scenarios (below) through
+// implementation of a finalizing and a doubling native_transform. This means
+// that padding must be incorporated, however since it is not prescheduled or
+// cached this is not an issue.
+
+TEMPLATE
+template <size_t Blocks>
+typename CLASS::digest_t CLASS::
+native_finalize(state_t& state) NOEXCEPT
+{
+    return native_finalize(state, Blocks);
+}
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_finalize(state_t& state, size_t blocks) NOEXCEPT
+{
+    return native_finalize(state, pad_blocks(blocks));
+}
+
 TEMPLATE
 typename CLASS::digest_t CLASS::
 native_finalize(state_t& state, const words_t& pad) NOEXCEPT
@@ -249,21 +276,6 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 }
 
 TEMPLATE
-template <size_t Blocks>
-typename CLASS::digest_t CLASS::
-native_finalize(state_t& state) NOEXCEPT
-{
-    return native_finalize(state, Blocks);
-}
-
-TEMPLATE
-typename CLASS::digest_t CLASS::
-native_finalize(state_t& state, size_t blocks) NOEXCEPT
-{
-    return native_finalize(state, pad_blocks(blocks));
-}
-
-TEMPLATE
 typename CLASS::digest_t CLASS::
 native_finalize_second(const state_t& state) NOEXCEPT
 {
@@ -273,9 +285,9 @@ native_finalize_second(const state_t& state) NOEXCEPT
     // Hash a state value and finalize it.
     auto state2 = H::get;
     words_t block{};
-    inject_left(block, state);              // swapped
-    pad_half(block);                        // swapped
-    return native_finalize(state2, block);  // no block swap (swaps state)
+    inject_left(block, state);
+    pad_half(block);
+    return native_finalize(state2, block);
 }
 
 TEMPLATE
@@ -284,17 +296,26 @@ native_finalize_double(state_t& state, size_t blocks) NOEXCEPT
 {
     // Complete first hash by transforming padding, but don't convert state.
     auto block = pad_blocks(blocks);
-    native_transform<false>(state, block);  // no swap
+    native_transform<false>(state, block);
 
     // This is native_finalize_second() but reuses the initial block.
     auto state2 = H::get;
-    inject_left(block, state);              // swapped
-    pad_half(block);                        // swapped
-    return native_finalize(state2, block);  // no block swap (swaps state)
+    inject_left(block, state);
+    pad_half(block);
+    return native_finalize(state2, block);
 }
 
 // Hash functions start with BE data and end with BE digest_t.
 // ----------------------------------------------------------------------------
+
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_hash(const block_t& block) NOEXCEPT
+{
+    auto state = H::get;
+    native_transform<true>(state, block);
+    return native_finalize(state, pad_block());
+}
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
@@ -303,11 +324,12 @@ native_hash(const half_t& half) NOEXCEPT
     // No hash(state_t) optimizations for sha160 (requires chunk_t/half_t).
     static_assert(is_same_type<state_t, chunk_t>);
 
+    // input_left is a non-native endianness conversion.
     auto state = H::get;
     words_t block{};
-    input_left(block, half);                // swaps
-    pad_half(block);                        // swapped
-    return native_finalize(state, block);   // no block swap (swaps state)
+    input_left(block, half);
+    pad_half(block);
+    return native_finalize(state, block);
 }
 
 TEMPLATE
@@ -316,10 +338,10 @@ native_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     auto state = H::get;
     words_t block{};
-    inject_left(block, array_cast<word_t>(left));   // unswapped
-    inject_right(block, array_cast<word_t>(right)); // unswapped
-    native_transform<true>(state, block);   // swap
-    return native_finalize<one>(state);     // no block swap (swaps state)
+    inject_left(block, array_cast<word_t>(left));
+    inject_right(block, array_cast<word_t>(right));
+    native_transform<true>(state, block);
+    return native_finalize<one>(state);
 }
 
 // Double hash functions start with BE data and end with BE digest_t.
@@ -330,32 +352,33 @@ typename CLASS::digest_t CLASS::
 native_double_hash(const block_t& block) NOEXCEPT
 {
     auto state = H::get;
-    native_transform<true>(state, block);           // swap
-    native_transform<false>(state, pad_block());    // swapped
+    native_transform<true>(state, block);
+    native_transform<false>(state, pad_block());
 
     // Second hash
     words_t block2{};
-    inject_left(block2, state);             // swapped
-    pad_half(block2);                       // swapped
-    state = H::get;                         // [reuse state var]
-    return native_finalize(state, block2);  // no block swap (swaps state)
+    inject_left(block2, state);
+    pad_half(block2);
+    state = H::get;
+    return native_finalize(state, block2);
 }
 
 TEMPLATE
 typename CLASS::digest_t CLASS::
 native_double_hash(const half_t& half) NOEXCEPT
 {
+    // input_left is a non-native endianness conversion.
     auto state = H::get;
     words_t block{};
-    input_left(block, half);                // swaps
-    pad_half(block);                        // swapped
-    native_transform<false>(state, block);  // no block swap
+    input_left(block, half);
+    pad_half(block);
+    native_transform<false>(state, block);
 
     // Second hash
-    inject_left(block, state);              // swapped
-    pad_half(block);                        // swapped
-    state = H::get;                         // [reuse state var]
-    return native_finalize(state, block);   // no block swap (swaps state)
+    inject_left(block, state);
+    pad_half(block);
+    state = H::get;
+    return native_finalize(state, block);
 }
 
 TEMPLATE
@@ -364,16 +387,16 @@ native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
 {
     auto state = H::get;
     words_t block{};
-    inject_left(block, array_cast<word_t>(left));   // unswapped
-    inject_right(block, array_cast<word_t>(right)); // unswapped
-    native_transform<true>(state, block);           // swap
-    native_transform<false>(state, pad_block());    // swapped
+    inject_left(block, array_cast<word_t>(left));
+    inject_right(block, array_cast<word_t>(right));
+    native_transform<true>(state, block);
+    native_transform<false>(state, pad_block());
 
     // Second hash
-    inject_left(block, state);              // swapped
-    pad_half(block);                        // swapped
-    state = H::get;                         // [reuse state var]
-    return native_finalize(state, block);   // no block swap (swaps state)
+    inject_left(block, state);
+    pad_half(block);
+    state = H::get;
+    return native_finalize(state, block);
 }
 
 } // namespace sha

@@ -247,6 +247,8 @@ template <size_t Size>
 INLINE void CLASS::
 iterate_native(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
 {
+    // Native hash() does not have an optimal array override because there is
+    // no advantage to array sizing without the benefit of prescheduling.
     iblocks_t iblocks{ array_cast<byte_t>(blocks) };
     native_transform(state, iblocks);
 }

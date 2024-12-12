@@ -400,7 +400,7 @@ protected:
     static digest_t native_finalize_second(const state_t& half) NOEXCEPT;
     static digest_t native_finalize_double(state_t& half, size_t blocks) NOEXCEPT;
 
-    ////static digest_t native_hash(const block_t& block) NOEXCEPT;
+    static digest_t native_hash(const block_t& block) NOEXCEPT;
     static digest_t native_hash(const half_t& half) NOEXCEPT;
     static digest_t native_hash(const half_t& left, const half_t& right) NOEXCEPT;
 

@@ -54,8 +54,21 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const block_t& block) NOEXCEPT
 {
-    // As an array of a 1 arrays is the same as the array, this compiles away.
-    return hash(ablocks_t<one>{ block });
+    if (std::is_constant_evaluated())
+    {
+        // As an array of 1 arrays is same as the array, this compiles away.
+        return hash(ablocks_t<one>{ block });
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        // Native hash() does not have an optimal array override.
+        return native_hash(block);
+    }
+    else
+    {
+        // As an array of 1 arrays is same as the array, this compiles away.
+        return hash(ablocks_t<one>{ block });
+    }
 }
 
 TEMPLATE
