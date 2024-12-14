@@ -33,11 +33,11 @@ using rmd160_320 = rmd::algorithm<rmd::h160<320>>; // not fully implemented
 
 /// bc::system sha algorithm aliases (compressed, vectorized, cached).
 using sha160     = sha::algorithm<sha::h160>;
-using sha256_224 = sha::algorithm<sha::h256<224>>; // not fully implemented
+using sha256_224 = sha::algorithm<sha::h256<224>>;
 using sha256     = sha::algorithm<sha::h256<>>;
-using sha512_256 = sha::algorithm<sha::h512<256>>; // not fully implemented
-using sha512_224 = sha::algorithm<sha::h512<224>>; // not fully implemented
-using sha512_384 = sha::algorithm<sha::h512<384>>; // not fully implemented
+using sha512_256 = sha::algorithm<sha::h512<256>>;
+using sha512_224 = sha::algorithm<sha::h512<224>>;
+using sha512_384 = sha::algorithm<sha::h512<384>>;
 using sha512     = sha::algorithm<sha::h512<>>;
 
 } // namespace system

@@ -84,26 +84,24 @@ input(buffer_t& buffer, const block_t& block) NOEXCEPT
         ////    out[2] = byteswap<word_t>(in[2]);
         ////    out[3] = byteswap<word_t>(in[3]);
         ////}
-        ////else
-        {
-            const auto& in = array_cast<word_t>(block);
-            buffer[0] = native_from_big_end(in[0]);
-            buffer[1] = native_from_big_end(in[1]);
-            buffer[2] = native_from_big_end(in[2]);
-            buffer[3] = native_from_big_end(in[3]);
-            buffer[4] = native_from_big_end(in[4]);
-            buffer[5] = native_from_big_end(in[5]);
-            buffer[6] = native_from_big_end(in[6]);
-            buffer[7] = native_from_big_end(in[7]);
-            buffer[8] = native_from_big_end(in[8]);
-            buffer[9] = native_from_big_end(in[9]);
-            buffer[10] = native_from_big_end(in[10]);
-            buffer[11] = native_from_big_end(in[11]);
-            buffer[12] = native_from_big_end(in[12]);
-            buffer[13] = native_from_big_end(in[13]);
-            buffer[14] = native_from_big_end(in[14]);
-            buffer[15] = native_from_big_end(in[15]);
-        }
+
+        const auto& in = array_cast<word_t>(block);
+        buffer[0] = native_from_big_end(in[0]);
+        buffer[1] = native_from_big_end(in[1]);
+        buffer[2] = native_from_big_end(in[2]);
+        buffer[3] = native_from_big_end(in[3]);
+        buffer[4] = native_from_big_end(in[4]);
+        buffer[5] = native_from_big_end(in[5]);
+        buffer[6] = native_from_big_end(in[6]);
+        buffer[7] = native_from_big_end(in[7]);
+        buffer[8] = native_from_big_end(in[8]);
+        buffer[9] = native_from_big_end(in[9]);
+        buffer[10] = native_from_big_end(in[10]);
+        buffer[11] = native_from_big_end(in[11]);
+        buffer[12] = native_from_big_end(in[12]);
+        buffer[13] = native_from_big_end(in[13]);
+        buffer[14] = native_from_big_end(in[14]);
+        buffer[15] = native_from_big_end(in[15]);
     }
     else
     {
@@ -148,18 +146,16 @@ input_left(auto& buffer, const half_t& half) NOEXCEPT
         ////    out[0] = byteswap<word_t>(in[0]);
         ////    out[1] = byteswap<word_t>(in[1]);
         ////}
-        ////else
-        {
-            const auto& in = array_cast<word>(half);
-            buffer[0] = native_from_big_end(in[0]);
-            buffer[1] = native_from_big_end(in[1]);
-            buffer[2] = native_from_big_end(in[2]);
-            buffer[3] = native_from_big_end(in[3]);
-            buffer[4] = native_from_big_end(in[4]);
-            buffer[5] = native_from_big_end(in[5]);
-            buffer[6] = native_from_big_end(in[6]);
-            buffer[7] = native_from_big_end(in[7]);
-        }
+
+        const auto& in = array_cast<word>(half);
+        buffer[0] = native_from_big_end(in[0]);
+        buffer[1] = native_from_big_end(in[1]);
+        buffer[2] = native_from_big_end(in[2]);
+        buffer[3] = native_from_big_end(in[3]);
+        buffer[4] = native_from_big_end(in[4]);
+        buffer[5] = native_from_big_end(in[5]);
+        buffer[6] = native_from_big_end(in[6]);
+        buffer[7] = native_from_big_end(in[7]);
     }
     else
     {
@@ -203,18 +199,16 @@ input_right(auto& buffer, const half_t& half) NOEXCEPT
         ////    out[2] = byteswap<word_t>(in[0]);
         ////    out[3] = byteswap<word_t>(in[1]);
         ////}
-        ////else
-        {
-            const auto& in = array_cast<word>(half);
-            buffer[8] = native_from_big_end(in[0]);
-            buffer[9] = native_from_big_end(in[1]);
-            buffer[10] = native_from_big_end(in[2]);
-            buffer[11] = native_from_big_end(in[3]);
-            buffer[12] = native_from_big_end(in[4]);
-            buffer[13] = native_from_big_end(in[5]);
-            buffer[14] = native_from_big_end(in[6]);
-            buffer[15] = native_from_big_end(in[7]);
-        }
+
+        const auto& in = array_cast<word>(half);
+        buffer[8] = native_from_big_end(in[0]);
+        buffer[9] = native_from_big_end(in[1]);
+        buffer[10] = native_from_big_end(in[2]);
+        buffer[11] = native_from_big_end(in[3]);
+        buffer[12] = native_from_big_end(in[4]);
+        buffer[13] = native_from_big_end(in[5]);
+        buffer[14] = native_from_big_end(in[6]);
+        buffer[15] = native_from_big_end(in[7]);
     }
     else
     {
@@ -227,28 +221,77 @@ TEMPLATE
 INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {
+    // Digest is truncated for 256_224, 512_384, 512_256, 512_224.
+    constexpr auto digest_bytes = array_count<digest_t>;
+
     if (std::is_constant_evaluated())
     {
+        constexpr auto size = SHA::word_bytes;
+        constexpr auto words = floored_divide(digest_bytes, size);
+
+        // digest   word    digest  word    state   digest previous
+        // bits     bits    bytes   bytes   words   words  floored
+        // --------------------------------------------------------
+        // 224      64      28      8       8       3.5     3
+        // 256      64      32      8       8       4       4
+        // 160      32      20      4       5       5       5
+        // 384      64      48      8       8       6       6
+        // 224      32      28      4       8       7       7
+        // 512      64      64      8       8       8       8
+        // 256      32      32      4       8       8       8
+
         digest_t digest{};
 
-        constexpr auto size = SHA::word_bytes;
-        to_big<0 * size>(digest, state.at(0));
-        to_big<1 * size>(digest, state.at(1));
-        to_big<2 * size>(digest, state.at(2));
-        to_big<3 * size>(digest, state.at(3));
-        to_big<4 * size>(digest, state.at(4));
-
-        if constexpr (SHA::strength != 160)
+        // all
+        if constexpr (words > 2)
         {
-            to_big<5 * size>(digest, state.at(5));
-            to_big<6 * size>(digest, state.at(6));
-            to_big<7 * size>(digest, state.at(7));
+            // Convert first three words.
+            to_big<0 * size>(digest, state.at(0));
+            to_big<1 * size>(digest, state.at(1));
+            to_big<2 * size>(digest, state.at(2));
         }
+
+        // sha512-224
+        if constexpr (words == 3)
+        {
+            // Convert fourth word into temporary.
+            data_array<size> partial{};
+            to_big<0>(partial, state.at(3));
+
+            // Copy first half of fourth word into end of digest.
+            digest.at(3 * size + 0) = partial.at(0);
+            digest.at(3 * size + 1) = partial.at(1);
+            digest.at(3 * size + 2) = partial.at(2);
+            digest.at(3 * size + 3) = partial.at(3);
+        }
+
+        // sha512-256
+        if constexpr (words > 3)
+            to_big<3 * size>(digest, state.at(3));
+
+        // sha160
+        if constexpr (words > 4)
+            to_big<4 * size>(digest, state.at(4));
+
+        // sha256-384
+        if constexpr (words > 5)
+            to_big<5 * size>(digest, state.at(5));
+
+        // sha256-224
+        if constexpr (words > 6)
+            to_big<6 * size>(digest, state.at(6));
+
+        // sha256, sha512
+        if constexpr (words > 7)
+            to_big<7 * size>(digest, state.at(7));
 
         return digest;
     }
     else if constexpr (bc::is_little_endian)
     {
+        // Below could be optimized to remove conversions that truncate, but
+        // 224 truncates on a half word boundary, complicating implementation.
+
         if constexpr (SHA::strength != 160)
         {
             // This optimization is neutral in 4/8 lane sha256 perf.
@@ -256,7 +299,7 @@ output(const state_t& state) NOEXCEPT
             ////{
             ////    using xword_t = to_extended<word_t, 8>;
             ////    const auto& in = array_cast<xword_t>(state);
-            ////    return array_cast<byte_t>(wstate_t<xword_t>
+            ////    return array_cast<byte_t, digest_bytes>(wstate_t<xword_t>
             ////    {
             ////        byteswap<word_t>(in[0])
             ////    });
@@ -265,30 +308,28 @@ output(const state_t& state) NOEXCEPT
             ////{
             ////    using xword_t = to_extended<word_t, 4>;
             ////    const auto& in = array_cast<xword_t>(state);
-            ////    return array_cast<byte_t>(wstate_t<xword_t>
+            ////    return array_cast<byte_t, digest_bytes>(wstate_t<xword_t>
             ////    {
             ////        byteswap<word_t>(in[0]),
             ////        byteswap<word_t>(in[1])
             ////    });
             ////}
-            ////else
+
+            return array_cast<byte_t, digest_bytes>(state_t
             {
-                return array_cast<byte_t>(state_t
-                {
-                    native_to_big_end(state[0]),
-                    native_to_big_end(state[1]),
-                    native_to_big_end(state[2]),
-                    native_to_big_end(state[3]),
-                    native_to_big_end(state[4]),
-                    native_to_big_end(state[5]),
-                    native_to_big_end(state[6]),
-                    native_to_big_end(state[7])
-                });
-            }
+                native_to_big_end(state[0]),
+                native_to_big_end(state[1]),
+                native_to_big_end(state[2]),
+                native_to_big_end(state[3]),
+                native_to_big_end(state[4]),
+                native_to_big_end(state[5]),
+                native_to_big_end(state[6]),
+                native_to_big_end(state[7])
+            });
         }
         else
         {
-            return array_cast<byte_t>(state_t
+            return array_cast<byte_t, digest_bytes>(state_t
             {
                 native_to_big_end(state[0]),
                 native_to_big_end(state[1]),
@@ -300,7 +341,7 @@ output(const state_t& state) NOEXCEPT
     }
     else
     {
-        return array_cast<byte_t>(state);
+        return array_cast<byte_t, digest_bytes>(state);
     }
 }
 

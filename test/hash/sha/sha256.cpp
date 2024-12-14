@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(sha256__hash__null_hash__expected)
 }
 
 // accumulator<sha256>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha256__fff_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha256_256__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, false, false, false>;
     static_assert(!sha_256::native);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(sha256__fff_accumulator_hash__test_vectors__expected)
     static_assert(!sha_256::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha256_tests)
+    for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(sha256__fff_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha256>::hash (true, false, false)
-BOOST_AUTO_TEST_CASE(sha256__tff_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha256_256__tff_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, false, false>;
     static_assert(sha_256::native == native);
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(sha256__tff_accumulator_hash__test_vectors__expected)
     static_assert(!sha_256::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha256_tests)
+    for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(sha256__tff_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha256>::hash (true, false, true)
-BOOST_AUTO_TEST_CASE(sha256__tft_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha256_256__tft_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, false, true>;
     static_assert(sha_256::native == native);
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(sha256__tft_accumulator_hash__test_vectors__expected)
     static_assert(sha_256::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha256_tests)
+    for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(sha256__tft_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha256>::hash (true, true, false)
-BOOST_AUTO_TEST_CASE(sha256__ttf_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha256_256__ttf_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, true, false>;
     static_assert(sha_256::native == native);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(sha256__ttf_accumulator_hash__test_vectors__expected)
     static_assert(!sha_256::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha256_tests)
+    for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(sha256__ttf_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha256>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha256__ttt_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha256_256__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_256 = sha::algorithm<sha::h256<>, true, true, true>;
     static_assert(sha_256::native == native);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(sha256__ttt_accumulator_hash__test_vectors__expected)
     static_assert(sha_256::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha256_tests)
+    for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -112,17 +112,51 @@ BOOST_AUTO_TEST_CASE(sha256__ttt_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha256>::hash (false, true, false)
-BOOST_AUTO_TEST_CASE(sha256__ftf_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha256_256__ftf_accumulator_hash__test_vectors__expected)
 {
-    using sha_256 = sha::algorithm<sha::h256<>, false, true, false>;
+    using sha_256 = sha::algorithm<sha::h256<256>, false, true, false>;
     static_assert(!sha_256::native);
     static_assert(sha_256::vector == vector);
     static_assert(!sha_256::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha256_tests)
+    for (const auto& test: sha256_256_tests)
     {
         const auto hash = accumulator<sha_256>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha_256_224>::hash (false, false, false)
+BOOST_AUTO_TEST_CASE(sha256_224__fff_accumulator_hash__test_vectors__expected)
+{
+    using sha_256_224 = sha::algorithm<sha::h256<224>, false, false, false>;
+    static_assert(!sha_256_224::native);
+    static_assert(!sha_256_224::vector);
+    static_assert(!sha_256_224::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha256_224_tests)
+    {
+        const auto hash = accumulator<sha_256_224>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha_256_224>::hash (true, true, true)
+BOOST_AUTO_TEST_CASE(sha256_224__ttt_accumulator_hash__test_vectors__expected)
+{
+    using sha_256_224 = sha::algorithm<sha::h256<224>, true, true, true>;
+
+    // Native only for sha256 (and sha160 when implemented).
+    static_assert(!sha_256_224::native);
+    static_assert(sha_256_224::vector == vector);
+    static_assert(sha_256_224::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha256_224_tests)
+    {
+        const auto hash = accumulator<sha_256_224>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
