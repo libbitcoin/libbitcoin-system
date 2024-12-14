@@ -173,36 +173,36 @@ static_assert(is_same_type<h<k256, 224>::state_t, std_array<uint32_t, 8>>);
 // h<k512,...>
 static_assert(h<k512, 512>::size == 512);
 static_assert(h<k512, 384>::size == 512);
-static_assert(h<k512, 224>::size == 512);
 static_assert(h<k512, 256>::size == 512);
+static_assert(h<k512, 224>::size == 512);
 static_assert(h<k512, 512>::digest == 512);
 static_assert(h<k512, 384>::digest == 384);
-static_assert(h<k512, 224>::digest == 224);
 static_assert(h<k512, 256>::digest == 256);
+static_assert(h<k512, 224>::digest == 224);
 static_assert(h<k512, 512>::strength == 512);
 static_assert(h<k512, 384>::strength == 512);
-static_assert(h<k512, 224>::strength == 512);
 static_assert(h<k512, 256>::strength == 512);
+static_assert(h<k512, 224>::strength == 512);
 static_assert(h<k512, 512>::word_bits == 64);
 static_assert(h<k512, 384>::word_bits == 64);
-static_assert(h<k512, 224>::word_bits == 64);
 static_assert(h<k512, 256>::word_bits == 64);
+static_assert(h<k512, 224>::word_bits == 64);
 static_assert(h<k512, 512>::word_bytes == 8);
 static_assert(h<k512, 384>::word_bytes == 8);
-static_assert(h<k512, 224>::word_bytes == 8);
 static_assert(h<k512, 256>::word_bytes == 8);
+static_assert(h<k512, 224>::word_bytes == 8);
 static_assert(h<k512, 512>::chunk_words == 8);
 static_assert(h<k512, 384>::chunk_words == 8);
-static_assert(h<k512, 224>::chunk_words == 8);
 static_assert(h<k512, 256>::chunk_words == 8);
+static_assert(h<k512, 224>::chunk_words == 8);
 static_assert(h<k512, 512>::block_words == 16);
 static_assert(h<k512, 384>::block_words == 16);
-static_assert(h<k512, 224>::block_words == 16);
 static_assert(h<k512, 256>::block_words == 16);
+static_assert(h<k512, 224>::block_words == 16);
 static_assert(h<k512, 512>::state_words == 8);
 static_assert(h<k512, 384>::state_words == 8);
-static_assert(h<k512, 224>::state_words == 8);
 static_assert(h<k512, 256>::state_words == 8);
+static_assert(h<k512, 224>::state_words == 8);
 static_assert(is_same_type<h<k512, 512>::K, k512>);
 static_assert(is_same_type<h<k512, 384>::K, k512>);
 static_assert(is_same_type<h<k512, 224>::K, k512>);
@@ -242,6 +242,32 @@ static_assert(h256<>::K::get[0] == 0x428a2f98);
 static_assert(h256<>::K::get[63] == 0xc67178f2);
 static_assert(h256<>::K::get.size() == 64);
 
+// h256<256>
+static_assert(h256<256>::size == 256);
+static_assert(h256<256>::rounds == 64);
+static_assert(h256<256>::digest == 256);
+static_assert(h256<256>::strength == 256);
+static_assert(h256<256>::get[0] == 0x6a09e667);
+static_assert(h256<256>::get[7] == 0x5be0cd19);
+static_assert(h256<256>::get.size() == 8);
+static_assert(h256<256>::K::rounds == 64);
+static_assert(h256<256>::K::get[0] == 0x428a2f98);
+static_assert(h256<256>::K::get[63] == 0xc67178f2);
+static_assert(h256<256>::K::get.size() == 64);
+
+// h256<256>
+static_assert(h256<224>::size == 256);
+static_assert(h256<224>::rounds == 64);
+static_assert(h256<224>::digest == 224);
+static_assert(h256<256>::strength == 256);
+static_assert(h256<224>::get[0] == 0xc1059ed8);
+static_assert(h256<224>::get[7] == 0xbefa4fa4);
+static_assert(h256<224>::get.size() == 8);
+static_assert(h256<224>::K::rounds == 64);
+static_assert(h256<224>::K::get[0] == 0x428a2f98);
+static_assert(h256<224>::K::get[63] == 0xc67178f2);
+static_assert(h256<224>::K::get.size() == 64);
+
 // h512<>
 static_assert(h512<>::size == 512);
 static_assert(h512<>::rounds == 80);
@@ -254,6 +280,58 @@ static_assert(h512<>::K::rounds == 80);
 static_assert(h512<>::K::get[0] == 0x428a2f98d728ae22);
 static_assert(h512<>::K::get[79] == 0x6c44198c4a475817);
 static_assert(h512<>::K::get.size() == 80);
+
+// h512<512>
+static_assert(h512<512>::size == 512);
+static_assert(h512<512>::rounds == 80);
+static_assert(h512<512>::digest == 512);
+static_assert(h512<512>::strength == 512);
+static_assert(h512<512>::get[0] == 0x6a09e667f3bcc908);
+static_assert(h512<512>::get[7] == 0x5be0cd19137e2179);
+static_assert(h512<512>::get.size() == 8);
+static_assert(h512<512>::K::rounds == 80);
+static_assert(h512<512>::K::get[0] == 0x428a2f98d728ae22);
+static_assert(h512<512>::K::get[79] == 0x6c44198c4a475817);
+static_assert(h512<512>::K::get.size() == 80);
+
+// h512<384>
+static_assert(h512<384>::size == 512);
+static_assert(h512<384>::rounds == 80);
+static_assert(h512<384>::digest == 384);
+static_assert(h512<384>::strength == 512);
+static_assert(h512<384>::get[0] == 0xcbbb9d5dc1059ed8);
+static_assert(h512<384>::get[7] == 0x47b5481dbefa4fa4);
+static_assert(h512<384>::get.size() == 8);
+static_assert(h512<384>::K::rounds == 80);
+static_assert(h512<384>::K::get[0] == 0x428a2f98d728ae22);
+static_assert(h512<384>::K::get[79] == 0x6c44198c4a475817);
+static_assert(h512<384>::K::get.size() == 80);
+
+// h512<256>
+static_assert(h512<256>::size == 512);
+static_assert(h512<256>::rounds == 80);
+static_assert(h512<256>::digest == 256);
+static_assert(h512<256>::strength == 512);
+static_assert(h512<256>::get[0] == 0x22312194fc2bf72c);
+static_assert(h512<256>::get[7] == 0x0eb72ddc81c52ca2);
+static_assert(h512<256>::get.size() == 8);
+static_assert(h512<256>::K::rounds == 80);
+static_assert(h512<256>::K::get[0] == 0x428a2f98d728ae22);
+static_assert(h512<256>::K::get[79] == 0x6c44198c4a475817);
+static_assert(h512<256>::K::get.size() == 80);
+
+// h512<224>
+static_assert(h512<224>::size == 512);
+static_assert(h512<224>::rounds == 80);
+static_assert(h512<224>::digest == 224);
+static_assert(h512<224>::strength == 512);
+static_assert(h512<224>::get[0] == 0x8c3d37c819544da2);
+static_assert(h512<224>::get[7] == 0x1112e6ad91d692a1);
+static_assert(h512<224>::get.size() == 8);
+static_assert(h512<224>::K::rounds == 80);
+static_assert(h512<224>::K::get[0] == 0x428a2f98d728ae22);
+static_assert(h512<224>::K::get[79] == 0x6c44198c4a475817);
+static_assert(h512<224>::K::get.size() == 80);
 
 // sha160
 ////static_assert(rmd160::big_end_count);

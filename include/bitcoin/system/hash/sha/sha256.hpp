@@ -58,13 +58,19 @@ struct k256
     };
 };
 
-// Digest 224 changes IV (specialize template).
 template <size_t Digest = 256,
     bool_if<Digest == 224 || Digest == 256> = true>
 struct h256
   : public h<k256, Digest>
 {
-    using state_t = typename h<k256, Digest>::state_t;
+    // Digest 224/256 have unique IV (specialize template).
+};
+
+template <>
+struct h256<256>
+  : public h<k256, 256>
+{
+    using state_t = typename h<k256, 256>::state_t;
 
     // initial value (H)
     static constexpr state_t get
@@ -77,6 +83,26 @@ struct h256
         0x9b05688c,
         0x1f83d9ab,
         0x5be0cd19
+    };
+};
+
+template <>
+struct h256<224>
+  : public h<k256, 224>
+{
+    using state_t = typename h<k256, 224>::state_t;
+
+    // initial value (H)
+    static constexpr state_t get
+    {
+        0xc1059ed8,
+        0x367cd507,
+        0x3070dd17,
+        0xf70e5939,
+        0xffc00b31,
+        0x68581511,
+        0x64f98fa7,
+        0xbefa4fa4
     };
 };
 

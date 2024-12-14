@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(sha512__hash__null_hash__expected)
 }
 
 // accumulator<sha512>::hash (false, false, false)
-BOOST_AUTO_TEST_CASE(sha512__fff_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha512_512__fff_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, false, false, false>;
     static_assert(!sha_512::native);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(sha512__fff_accumulator_hash__test_vectors__expected)
     static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha512_tests)
+    for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(sha512__fff_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha512>::hash (true, false, false)
-BOOST_AUTO_TEST_CASE(sha512__tff_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha512_512__tff_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, false, false>;
     static_assert(sha_512::native == native);
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(sha512__tff_accumulator_hash__test_vectors__expected)
     static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha512_tests)
+    for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(sha512__tff_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha512>::hash (true, false, true)
-BOOST_AUTO_TEST_CASE(sha512__tft_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha512_512__tft_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, false, true>;
     static_assert(sha_512::native == native);
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(sha512__tft_accumulator_hash__test_vectors__expected)
     static_assert(sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha512_tests)
+    for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(sha512__tft_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha512>::hash (true, true, false)
-BOOST_AUTO_TEST_CASE(sha512__ttf_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha512_512__ttf_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, false>;
     static_assert(sha_512::native == native);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(sha512__ttf_accumulator_hash__test_vectors__expected)
     static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha512_tests)
+    for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(sha512__ttf_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha512>::hash (true, true, true)
-BOOST_AUTO_TEST_CASE(sha512__ttt_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha512_512__ttt_accumulator_hash__test_vectors__expected)
 {
     using sha_512 = sha::algorithm<sha::h512<>, true, true, true>;
     static_assert(sha_512::native == native);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(sha512__ttt_accumulator_hash__test_vectors__expected)
     static_assert(sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha512_tests)
+    for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
@@ -112,17 +112,113 @@ BOOST_AUTO_TEST_CASE(sha512__ttt_accumulator_hash__test_vectors__expected)
 }
 
 // accumulator<sha512>::hash (false, true, false)
-BOOST_AUTO_TEST_CASE(sha512__ftf_accumulator_hash__test_vectors__expected)
+BOOST_AUTO_TEST_CASE(sha512_512__ftf_accumulator_hash__test_vectors__expected)
 {
-    using sha_512 = sha::algorithm<sha::h512<>, false, true, false>;
+    using sha_512 = sha::algorithm<sha::h512<512>, false, true, false>;
     static_assert(!sha_512::native);
     static_assert(sha_512::vector == vector);
     static_assert(!sha_512::caching);
 
     // Verify non-const-evaluated against public vectors.
-    for (const auto& test: sha512_tests)
+    for (const auto& test: sha512_512_tests)
     {
         const auto hash = accumulator<sha_512>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha512_384>::hash (true, true, true)
+BOOST_AUTO_TEST_CASE(sha512_384__ttt_accumulator_hash__test_vectors__expected)
+{
+    using sha_512_384 = sha::algorithm<sha::h512<384>, true, true, true>;
+    static_assert(sha_512_384::native == native);
+    static_assert(sha_512_384::vector == vector);
+    static_assert(sha_512_384::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha512_384_tests)
+    {
+        const auto hash = accumulator<sha_512_384>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha512_384>::hash (false, false, false)
+BOOST_AUTO_TEST_CASE(sha512_384__fff_accumulator_hash__test_vectors__expected)
+{
+    using sha_512_384 = sha::algorithm<sha::h512<384>, false, false, false>;
+    static_assert(!sha_512_384::native);
+    static_assert(!sha_512_384::vector);
+    static_assert(!sha_512_384::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha512_384_tests)
+    {
+        const auto hash = accumulator<sha_512_384>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha512_256>::hash (true, true, true)
+BOOST_AUTO_TEST_CASE(sha512_256__ttt_accumulator_hash__test_vectors__expected)
+{
+    using sha_512_256 = sha::algorithm<sha::h512<256>, true, true, true>;
+    static_assert(sha_512_256::native == native);
+    static_assert(sha_512_256::vector == vector);
+    static_assert(sha_512_256::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha512_256_tests)
+    {
+        const auto hash = accumulator<sha_512_256>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha512_256>::hash (false, false, false)
+BOOST_AUTO_TEST_CASE(sha512_256__fff_accumulator_hash__test_vectors__expected)
+{
+    using sha_512_256 = sha::algorithm<sha::h512<256>, false, false, false>;
+    static_assert(!sha_512_256::native);
+    static_assert(!sha_512_256::vector);
+    static_assert(!sha_512_256::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha512_256_tests)
+    {
+        const auto hash = accumulator<sha_512_256>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha512_224>::hash (true, true, true)
+BOOST_AUTO_TEST_CASE(sha512_224__ttt_accumulator_hash__test_vectors__expected)
+{
+    using sha_512_224 = sha::algorithm<sha::h512<224>, true, true, true>;
+    static_assert(sha_512_224::native == native);
+    static_assert(sha_512_224::vector == vector);
+    static_assert(sha_512_224::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha512_224_tests)
+    {
+        const auto hash = accumulator<sha_512_224>::hash(test.data);
+        BOOST_REQUIRE_EQUAL(hash, test.expected);
+    }
+}
+
+// accumulator<sha512_224>::hash (false, false, false)
+BOOST_AUTO_TEST_CASE(sha512_224__fff_accumulator_hash__test_vectors__expected)
+{
+    using sha_512_224 = sha::algorithm<sha::h512<224>, false, false, false>;
+    static_assert(!sha_512_224::native);
+    static_assert(!sha_512_224::vector);
+    static_assert(!sha_512_224::caching);
+
+    // Verify non-const-evaluated against public vectors.
+    for (const auto& test: sha512_224_tests)
+    {
+        const auto hash = accumulator<sha_512_224>::hash(test.data);
         BOOST_REQUIRE_EQUAL(hash, test.expected);
     }
 }
