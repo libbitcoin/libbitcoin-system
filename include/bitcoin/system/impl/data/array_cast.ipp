@@ -178,7 +178,7 @@ template <typename To, typename From,
     if_integral_integer<From>,
     if_integral_array<To>>
 inline std_vector<std::reference_wrapper<To>>
- unsafe_vector_cast(From* bytes, size_t count) NOEXCEPT
+unsafe_vector_cast(From* bytes, size_t count) NOEXCEPT
 {
     using inner_type = array_element<To>;
     constexpr auto inner_count = array_count<To>;

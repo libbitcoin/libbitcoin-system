@@ -290,7 +290,7 @@ output(const state_t& state) NOEXCEPT
     else if constexpr (bc::is_little_endian)
     {
         // Below could be optimized to remove conversions that truncate, but
-        //  224 truncates on a half word boundary, complicating implementation.
+        // 224 truncates on a half word boundary, complicating implementation.
 
         if constexpr (SHA::strength != 160)
         {

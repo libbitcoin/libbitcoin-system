@@ -23,7 +23,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
-// These are euqally-efficient generalizations of the common practice of
+// These are equally-efficient generalizations of the common practice of
 // shifting with or-ing to construct integers from bytes, and shifting with
 // masking to obtain bytes from integers. The byte<offset> template performs
 // integer byte extraction (zero offset is low order byte). These avoid byte
