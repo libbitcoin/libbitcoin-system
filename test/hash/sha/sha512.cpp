@@ -256,6 +256,13 @@ BOOST_AUTO_TEST_CASE(sha512__hash__half_blocks__expected)
     BOOST_CHECK_EQUAL(sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
 }
 
+BOOST_AUTO_TEST_CASE(sha512__hash__quart_blocks__expected)
+{
+    constexpr auto expected = sha512::hash(sha512::quart_t{ 0 }, sha512::quart_t{ 0 });
+    static_assert(sha512::hash(sha512::half_t{ 0 }) == expected);
+    BOOST_CHECK_EQUAL(sha512::hash(sha512::quart_t{ 0 }, sha512::quart_t{ 0 }), expected);
+}
+
 // sha512::double_hash
 BOOST_AUTO_TEST_CASE(sha512__double_hash__full_block__expected)
 {

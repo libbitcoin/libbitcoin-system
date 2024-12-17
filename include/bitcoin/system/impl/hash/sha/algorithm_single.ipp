@@ -131,6 +131,36 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
     }
 }
 
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(const quart_t& left, const quart_t& right) NOEXCEPT
+{
+    const auto hasher = [](const quart_t& left, const quart_t& right) NOEXCEPT
+    {
+        auto state = H::get;
+        buffer_t buffer{};
+        input_left(buffer, left);
+        input_right(buffer, right);
+        pad_half(buffer);
+        schedule(buffer);
+        compress(state, buffer);
+        return output(state);
+    };
+
+    if (std::is_constant_evaluated())
+    {
+        return hasher(left, right);
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        return native_hash(left, right);
+    }
+    else
+    {
+        return hasher(left, right);
+    }
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
