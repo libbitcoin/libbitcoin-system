@@ -151,7 +151,7 @@ serialize(size_t size) NOEXCEPT
     // as word_t: { [0x00000000], [0x00000200] }
     //
     // block_t (128 bytes), counter_t (128 bits), words_t (64 bits), byte_t (8 bits).
-    // One block bit count (0x0400) in SHA256 (BE):
+    // One block bit count (0x0400) in SHA512 (BE):
     // as byte_t: { (0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00),
     //              (0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00) }
     // as word_t: { [0x0000000000000000], [0x0000000000000400] }
