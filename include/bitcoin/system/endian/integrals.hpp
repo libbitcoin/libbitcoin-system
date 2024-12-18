@@ -37,12 +37,14 @@ namespace system {
 
 template <size_t Offset = zero, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte> = true,
-    if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)> = true>
 constexpr void to_big(std_array<Byte, Size>& data, Integral value) NOEXCEPT;
 
 template <size_t Offset = zero, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte> = true,
-    if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)> = true>
 constexpr void to_little(std_array<Byte, Size>& data, Integral value) NOEXCEPT;
 
 /// from_big/from_little (by reference, implicit, offsettable).
@@ -50,13 +52,15 @@ constexpr void to_little(std_array<Byte, Size>& data, Integral value) NOEXCEPT;
 
 template <size_t Offset = zero, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
-    if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)> = true>
 constexpr void from_big(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT;
 
 template <size_t Offset = zero, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
-    if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)> = true>
 constexpr void from_little(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT;
 
@@ -65,12 +69,14 @@ constexpr void from_little(Integral& value,
 
 template<typename Integral, size_t Offset = zero, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
-    if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)> = true>
 constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT;
 
 template<typename Integral, size_t Offset = zero, typename Byte, size_t Size,
     if_one_byte<Byte> = true,
-    if_integral_integer<Integral> = true>
+    if_integral_integer<Integral> = true,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)> = true>
 constexpr Integral from_little(const std_array<Byte, Size>& data) NOEXCEPT;
 
 /// to_big/to_little (by value, implicit).

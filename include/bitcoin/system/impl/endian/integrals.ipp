@@ -38,7 +38,8 @@ namespace system {
 
 template <size_t Offset, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte>,
-    if_integral_integer<Integral>>
+    if_integral_integer<Integral>,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)>>
 constexpr void to_big(std_array<Byte, Size>& data, Integral value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -77,7 +78,8 @@ constexpr void to_big(std_array<Byte, Size>& data, Integral value) NOEXCEPT
 
 template <size_t Offset, typename Byte, size_t Size, typename Integral,
     if_one_byte<Byte>,
-    if_integral_integer<Integral>>
+    if_integral_integer<Integral>,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)>>
 constexpr void to_little(std_array<Byte, Size>& data, Integral value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_ARRAY_INDEXING)
@@ -119,7 +121,8 @@ constexpr void to_little(std_array<Byte, Size>& data, Integral value) NOEXCEPT
 
 template <size_t Offset, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte>,
-    if_integral_integer<Integral>>
+    if_integral_integer<Integral>,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)>>
 constexpr void from_big(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT
 {
@@ -162,7 +165,8 @@ constexpr void from_big(Integral& value,
 
 template <size_t Offset, typename Integral, typename Byte, size_t Size,
     if_one_byte<Byte>,
-    if_integral_integer<Integral>>
+    if_integral_integer<Integral>,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)>>
 constexpr void from_little(Integral& value,
     const std_array<Byte, Size>& data) NOEXCEPT
 {
@@ -208,7 +212,8 @@ constexpr void from_little(Integral& value,
 
 template<typename Integral, size_t Offset, typename Byte, size_t Size,
     if_one_byte<Byte>,
-    if_integral_integer<Integral>>
+    if_integral_integer<Integral>,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)>>
 constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT
 {
     Integral out{};
@@ -218,7 +223,8 @@ constexpr Integral from_big(const std_array<Byte, Size>& data) NOEXCEPT
 
 template<typename Integral, size_t Offset, typename Byte, size_t Size,
     if_one_byte<Byte>,
-    if_integral_integer<Integral>>
+    if_integral_integer<Integral>,
+    if_not_lesser<safe_subtract(Size, Offset), sizeof(Integral)>>
 constexpr Integral from_little(const std_array<Byte, Size>& data) NOEXCEPT
 {
     Integral out{};
