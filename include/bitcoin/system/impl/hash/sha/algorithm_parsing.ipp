@@ -218,6 +218,65 @@ input_right(auto& buffer, const half_t& half) NOEXCEPT
 }
 
 TEMPLATE
+INLINE constexpr void CLASS::
+input_left(auto& buffer, const quart_t& quarter) NOEXCEPT
+{
+    using word = array_element<buffer_t>;
+
+    if (std::is_constant_evaluated())
+    {
+        constexpr auto size = SHA::word_bytes;
+        from_big<0 * size>(buffer.at(0), quarter);
+        from_big<1 * size>(buffer.at(1), quarter);
+        from_big<2 * size>(buffer.at(2), quarter);
+        from_big<3 * size>(buffer.at(3), quarter);
+    }
+    else if constexpr (bc::is_little_endian)
+    {
+        const auto& in = array_cast<word>(quarter);
+        buffer[0] = native_from_big_end(in[0]);
+        buffer[1] = native_from_big_end(in[1]);
+        buffer[2] = native_from_big_end(in[2]);
+        buffer[3] = native_from_big_end(in[3]);
+    }
+    else
+    {
+        constexpr auto short_words = to_half(SHA::chunk_words);
+        array_cast<word, short_words>(buffer) = array_cast<word>(quarter);
+    }
+}
+
+TEMPLATE
+INLINE constexpr void CLASS::
+input_right(auto& buffer, const quart_t& quarter) NOEXCEPT
+{
+    using word = array_element<buffer_t>;
+
+    if (std::is_constant_evaluated())
+    {
+        constexpr auto size = SHA::word_bytes;
+        from_big<0 * size>(buffer.at(4), quarter);
+        from_big<1 * size>(buffer.at(5), quarter);
+        from_big<2 * size>(buffer.at(6), quarter);
+        from_big<3 * size>(buffer.at(7), quarter);
+    }
+    else if constexpr (bc::is_little_endian)
+    {
+        const auto& in = array_cast<word>(quarter);
+        buffer[4] = native_from_big_end(in[0]);
+        buffer[5] = native_from_big_end(in[1]);
+        buffer[6] = native_from_big_end(in[2]);
+        buffer[7] = native_from_big_end(in[3]);
+    }
+    else
+    {
+        constexpr auto short_words = to_half(SHA::chunk_words);
+        array_cast<word, short_words, short_words>(buffer) =
+            array_cast<word>(quarter);
+    }
+}
+
+TEMPLATE
 INLINE constexpr typename CLASS::digest_t CLASS::
 output(const state_t& state) NOEXCEPT
 {

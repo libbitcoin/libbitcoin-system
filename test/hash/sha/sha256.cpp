@@ -194,6 +194,21 @@ BOOST_AUTO_TEST_CASE(sha256__hash__half_blocks__expected)
     BOOST_CHECK_EQUAL(sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
 }
 
+BOOST_AUTO_TEST_CASE(sha256__hash__quart_blocks__expected)
+{
+    constexpr auto expected = sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 });
+    static_assert(sha256::hash(sha256::half_t{ 0 }) == expected);
+    BOOST_CHECK_EQUAL(sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 }), expected);
+}
+
+BOOST_AUTO_TEST_CASE(sha256__hash__byte__expected)
+{
+    // github.com/mit-dci/rustreexo/blob/main/src/accumulator/node_hash.rs#L338
+    constexpr auto expected = base16_array("6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d");
+    static_assert(sha256::hash(0) == expected);
+    BOOST_CHECK_EQUAL(sha256::hash(0), expected);
+}
+
 // sha256::double_hash
 BOOST_AUTO_TEST_CASE(sha256__double_hash__full_block__expected)
 {
