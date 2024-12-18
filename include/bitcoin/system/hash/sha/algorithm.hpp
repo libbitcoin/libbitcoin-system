@@ -77,7 +77,7 @@ public:
     using iblocks_t = iterable<block_t>;
     using digests_t = std::vector<digest_t>;
 
-    /// Constants.
+    /// Count types.
     /// -----------------------------------------------------------------------
 
     /// count_t is uint64_t (sha160/256) or uint128_t (sha512).
@@ -92,12 +92,14 @@ public:
 
     /// Single hashing.
     /// -----------------------------------------------------------------------
+
     template <size_t Size>
     static constexpr digest_t hash(const ablocks_t<Size>& blocks) NOEXCEPT;
     static constexpr digest_t hash(const block_t& block) NOEXCEPT;
     static constexpr digest_t hash(const half_t& half) NOEXCEPT;
     static constexpr digest_t hash(const half_t& left, const half_t& right) NOEXCEPT;
     static constexpr digest_t hash(const quart_t& left, const quart_t& right) NOEXCEPT;
+    static constexpr digest_t hash(uint8_t byte) NOEXCEPT;
     static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
 
     /// Double hashing (sha256/512).
@@ -407,6 +409,7 @@ protected:
     static digest_t native_hash(const block_t& block) NOEXCEPT;
     static digest_t native_hash(const half_t& half) NOEXCEPT;
     static digest_t native_hash(const half_t& left, const half_t& right) NOEXCEPT;
+    static digest_t native_hash(uint8_t byte) NOEXCEPT;
 
     static digest_t native_double_hash(const block_t& block) NOEXCEPT;
     static digest_t native_double_hash(const half_t& half) NOEXCEPT;

@@ -161,6 +161,39 @@ hash(const quart_t& left, const quart_t& right) NOEXCEPT
     }
 }
 
+TEMPLATE
+constexpr typename CLASS::digest_t CLASS::
+hash(uint8_t byte) NOEXCEPT
+{
+    const auto hasher = [](uint8_t byte) NOEXCEPT
+    {
+        // Shift the pad sentinel one byte to make room for the value.
+        // Byte swapped for the sake of simplicity and will be reversed below.
+        constexpr auto pad = shift_left<word_t>(bit_hi<uint8_t>, byte_bits);
+
+        auto state = H::get;
+        buffer_t buffer{};
+        buffer.at(0) = byteswap(bit_or<word_t>(pad, byte));
+        buffer.at(15) = byte_bits;
+        schedule(buffer);
+        compress(state, buffer);
+        return output(state);
+    };
+
+    if (std::is_constant_evaluated())
+    {
+        return hasher(byte);
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        return native_hash(byte);
+    }
+    else
+    {
+        return hasher(byte);
+    }
+}
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin

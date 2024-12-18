@@ -344,6 +344,19 @@ native_hash(const half_t& left, const half_t& right) NOEXCEPT
     return native_finalize<one>(state);
 }
 
+TEMPLATE
+typename CLASS::digest_t CLASS::
+native_hash(uint8_t byte) NOEXCEPT
+{
+    constexpr auto pad = bit_hi<uint8_t>;
+
+    block_t block{};
+    block.at(0) = byte;
+    block.at(1) = pad;
+    block.at(63) = byte_bits;
+    return native_hash(block);
+}
+
 // Double hash functions start with BE data and end with BE digest_t.
 // ----------------------------------------------------------------------------
 
