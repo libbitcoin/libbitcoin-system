@@ -22,6 +22,7 @@
 BOOST_AUTO_TEST_SUITE(sha160_tests_)
 
 // Other test vectors are dependent upon the correctness of these.
+static_assert(sha160::hash(sha160::byte_t{}) == sha_byte160);
 static_assert(sha160::hash(sha160::half_t{})  == sha_half160);
 static_assert(sha160::hash(sha160::block_t{}) == sha_full160);
 
@@ -31,6 +32,7 @@ constexpr auto native = with_shani || with_neon;
 BOOST_AUTO_TEST_CASE(sha160__hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
+    BOOST_REQUIRE_EQUAL(sha160::hash(sha160::byte_t{}), sha_byte160);
     BOOST_REQUIRE_EQUAL(sha160::hash(sha160::half_t{}), sha_half160);
     BOOST_REQUIRE_EQUAL(sha160::hash(sha160::block_t{}), sha_full160);
 }

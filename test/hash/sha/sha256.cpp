@@ -24,9 +24,15 @@ BOOST_AUTO_TEST_SUITE(sha256_tests_)
 constexpr auto vector = with_sse41 || with_avx2 || with_avx512;
 constexpr auto native = with_shani || with_neon;
 
+// Other test vectors are dependent upon the correctness of these.
+static_assert(sha256::hash(sha256::byte_t{}) == sha_byte256);
+static_assert(sha256::hash(sha256::half_t{}) == sha_half256);
+static_assert(sha256::hash(sha256::block_t{}) == sha_full256);
+
 BOOST_AUTO_TEST_CASE(sha256__hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
+    BOOST_REQUIRE_EQUAL(sha256::hash(sha256::byte_t{}), sha_byte256);
     BOOST_REQUIRE_EQUAL(sha256::hash(sha256::half_t{}), sha_half256);
     BOOST_REQUIRE_EQUAL(sha256::hash(sha256::block_t{}), sha_full256);
 }
@@ -199,14 +205,6 @@ BOOST_AUTO_TEST_CASE(sha256__hash__quart_blocks__expected)
     constexpr auto expected = sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 });
     static_assert(sha256::hash(sha256::half_t{ 0 }) == expected);
     BOOST_CHECK_EQUAL(sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 }), expected);
-}
-
-BOOST_AUTO_TEST_CASE(sha256__hash__byte__expected)
-{
-    // github.com/mit-dci/rustreexo/blob/main/src/accumulator/node_hash.rs#L338
-    constexpr auto expected = base16_array("6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d");
-    static_assert(sha256::hash(0) == expected);
-    BOOST_CHECK_EQUAL(sha256::hash(0), expected);
 }
 
 // sha256::double_hash

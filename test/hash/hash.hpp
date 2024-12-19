@@ -28,10 +28,13 @@ constexpr auto rmd_half160 = base16_array("d1a70126ff7a149ca6f9b638db084480440ff
 constexpr auto rmd_full160 = base16_array("9b8ccc2f374ae313a914763cc9cdfb47bfe1c229");
 
 // null hash vectors.
+constexpr auto sha_byte160 = base16_array("5ba93c9db0cff93f52b521d7420e43f6eda2784f");
 constexpr auto sha_half160 = base16_array("de8a847bff8c343d69b853a215e6ee775ef2ef96");
 constexpr auto sha_full160 = base16_array("c8d7d0ef0eedfa82d2ea1aa592845b9a6d4b02b7");
+constexpr auto sha_byte256 = base16_array("6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d");
 constexpr auto sha_half256 = base16_array("66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925");
 constexpr auto sha_full256 = base16_array("f5a5fd42d16a20302798ef6ed309979b43003d2320d9f0e8ea9831a92759fb4b");
+constexpr auto sha_byte512 = base16_array("b8244d028981d693af7b456af8efa4cad63d282e19ff14942c246e50d9351d22704a802a71c3580b6370de4ceb293c324a8423342557d4e5c38438f0e36910ee");
 constexpr auto sha_half512 = base16_array("7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081");
 constexpr auto sha_full512 = base16_array("ab942f526272e456ed68a979f50202905ca903a141ed98443567b11ef0bf25a552d639051a01be58558122c58e3de07d749ee59ded36acf0c55cd91924d6ba11");
 

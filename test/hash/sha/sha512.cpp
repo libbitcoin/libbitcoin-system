@@ -24,9 +24,15 @@ BOOST_AUTO_TEST_SUITE(sha512_tests_)
 constexpr auto vector = (with_sse41 || with_avx2 || with_avx512) && !build_x32;
 constexpr auto native = /*(with_shani || with_neon)*/ false;
 
+// Other test vectors are dependent upon the correctness of these.
+static_assert(sha512::hash(sha512::byte_t{}) == sha_byte512);
+static_assert(sha512::hash(sha512::half_t{}) == sha_half512);
+static_assert(sha512::hash(sha512::block_t{}) == sha_full512);
+
 BOOST_AUTO_TEST_CASE(sha512__hash__null_hash__expected)
 {
     // Correlate non-const-evaluated to const-evaluated.
+    BOOST_REQUIRE_EQUAL(sha512::hash(sha512::byte_t{}), sha_byte512);
     BOOST_REQUIRE_EQUAL(sha512::hash(sha512::half_t{}), sha_half512);
     BOOST_REQUIRE_EQUAL(sha512::hash(sha512::block_t{}), sha_full512);
 }
