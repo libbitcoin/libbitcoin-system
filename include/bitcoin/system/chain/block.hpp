@@ -137,7 +137,7 @@ public:
     code confirm(const context& ctx) const NOEXCEPT;
 
     /// Populate previous outputs (only, no metadata) internal to the block.
-    void populate() const NOEXCEPT;
+    size_t populate() const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,

@@ -39,6 +39,18 @@ constexpr size_t bit_width(Value value) NOEXCEPT;
 template <typename Value, if_signed_integer<Value> = true>
 constexpr size_t bit_width(Value value) NOEXCEPT;
 
+// Because std::countl_* (C++20) functions return int.
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t left_zeros(Value value) NOEXCEPT;
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t right_zeros(Value value) NOEXCEPT;
+
+// Because std::countr_* (C++20) functions return int.
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t left_ones(Value value) NOEXCEPT;
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t right_ones(Value value) NOEXCEPT;
+
 /// Bitwise logical operations.
 /// ---------------------------------------------------------------------------
 

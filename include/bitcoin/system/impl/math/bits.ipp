@@ -49,6 +49,30 @@ constexpr size_t bit_width(Value value) NOEXCEPT
     return is_negative(value) ? bits<Value> : bit_width(to_unsigned(value));
 }
 
+template <typename Value, if_unsigned_integer<Value>>
+constexpr size_t left_zeros(Value value) NOEXCEPT
+{
+    return to_unsigned(std::countl_zero<Value>(value));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr size_t right_zeros(Value value) NOEXCEPT
+{
+    return to_unsigned(std::countr_zero<Value>(value));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr size_t left_ones(Value value) NOEXCEPT
+{
+    return to_unsigned(std::countl_one<Value>(value));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr size_t right_ones(Value value) NOEXCEPT
+{
+    return to_unsigned(std::countr_one<Value>(value));
+}
+
 // Bitwise logical operations.
 // ----------------------------------------------------------------------------
 

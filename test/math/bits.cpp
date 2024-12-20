@@ -111,6 +111,30 @@ static_assert(bit_width<int64_t>(0x800000000000_ni64) == 64u);
 static_assert(bit_width<int64_t>(0x80010000000000_ni64) == 64u);
 static_assert(bit_width<int64_t>(0x8000000000000000_ni64) == 64u);
 
+// zeroes
+
+static_assert(left_zeros(uint8_t{ 0b00000000 }) == 8);
+static_assert(left_zeros(uint8_t{ 0b11111111 }) == 0);
+static_assert(left_zeros(uint8_t{ 0b11110000 }) == 0);
+static_assert(left_zeros(uint8_t{ 0b00011110 }) == 3);
+
+static_assert(right_zeros(uint8_t{ 0b00000000 }) == 8);
+static_assert(right_zeros(uint8_t{ 0b11111111 }) == 0);
+static_assert(right_zeros(uint8_t{ 0b00011100 }) == 2);
+static_assert(right_zeros(uint8_t{ 0b00011101 }) == 0);
+
+// ones
+
+static_assert(left_ones(uint8_t{ 0b00000000 }) == 0);
+static_assert(left_ones(uint8_t{ 0b11111111 }) == 8);
+static_assert(left_ones(uint8_t{ 0b01111111 }) == 0);
+static_assert(left_ones(uint8_t{ 0b11100011 }) == 3);
+
+static_assert(right_ones(uint8_t{ 0b00000000 }) == 0);
+static_assert(right_ones(uint8_t{ 0b11111111 }) == 8);
+static_assert(right_ones(uint8_t{ 0b11111110 }) == 0);
+static_assert(right_ones(uint8_t{ 0b11100011 }) == 2);
+
 // ones_complement (NOT)
 // inverts all bits (~n, !bool)
 static_assert(bit_not(-4) == 3);
