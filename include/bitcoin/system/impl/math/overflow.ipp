@@ -33,6 +33,21 @@ constexpr Integral minimum_ = std::numeric_limits<Integral>::min();
 template <typename Integral, if_integer<Integral> = true>
 constexpr Integral maximum_ = std::numeric_limits<Integral>::max();
 
+// shift
+// ----------------------------------------------------------------------------
+
+template <typename Value, if_unsigned_integral_integer<Value>>
+constexpr bool is_left_shift_overflow(Value value, size_t shift) NOEXCEPT
+{
+    return to_bool(bit_and(value, unmask_left<Value>(shift)));
+}
+
+template <typename Value, if_unsigned_integral_integer<Value>>
+constexpr bool is_right_shift_overflow(Value value, size_t shift) NOEXCEPT
+{
+    return to_bool(bit_and(value, unmask_right<Value>(shift)));
+}
+
 // add/subtract
 // ----------------------------------------------------------------------------
 
