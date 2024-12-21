@@ -133,8 +133,8 @@ constexpr bool is_root_position(uint64_t position, uint64_t leaves,
 
 constexpr uint64_t remove_bit(uint64_t value, size_t bit) NOEXCEPT
 {
-    const auto lo = mask_right<uint64_t>(add1(bit));
     const auto hi = unmask_right<uint64_t>(bit);
+    const auto lo = mask_right<uint64_t>(add1(bit));
     return bit_or(shift_right(bit_and(value, lo)), bit_and(value, hi));
 }
 
