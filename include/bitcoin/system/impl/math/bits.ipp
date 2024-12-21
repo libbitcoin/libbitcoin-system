@@ -294,8 +294,8 @@ template <typename Value, if_unsigned_integral_integer<Value>>
 constexpr void shift_left_into(Value& value, size_t shift, bool overflow) NOEXCEPT
 {
     constexpr auto span = bits<Value>;
-    overflow && shift >= span ? value = 0 :
-        value <<= (shift % span);
+    overflow && shift >= span ? value = 0 : depromote<Value>(
+        value <<= (shift % span));
 }
 
 // signed overloads (shift left of negative is undefined behavior).
