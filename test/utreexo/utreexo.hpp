@@ -127,9 +127,8 @@ constexpr bool is_root_position(uint64_t position, uint64_t leaves,
     uint8_t forest_rows) NOEXCEPT
 {
     const auto row = detect_row(position, forest_rows);
-    const auto present = get_right(leaves, row);
-    const auto expected = root_position(leaves, row, forest_rows);
-    return present && (position == expected);
+    return get_right(leaves, row) &&
+        (position == root_position(leaves, row, forest_rows));
 }
 
 constexpr uint64_t remove_bit(uint64_t value, size_t bit) NOEXCEPT
