@@ -47,41 +47,41 @@ constexpr node_hash hash_from_u8(uint8_t byte) NOEXCEPT
     return sha256::hash(byte);
 }
 
-// TODO: test.
-// return parent position of passed-in child
-constexpr uint64_t parent(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t parent(uint64_t child, uint8_t forest_rows) NOEXCEPT
 {
-    return set_right(shift_right(position), forest_rows);
+    return set_right(shift_right(child), forest_rows);
 }
 
-constexpr uint64_t children(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t children(uint64_t parent, uint8_t forest_rows) NOEXCEPT
 {
-    const auto mask = unmask_right<uint64_t>(add1<size_t>(forest_rows));
-    return bit_and(shift_left(position), mask);
+    // What happens when these bits are lost?
+    BC_ASSERT(!is_left_shift_overflow(parent, add1<size_t>(forest_rows)));
+
+    return bit_and(shift_left(parent),
+        unmask_right<uint64_t>(add1<size_t>(forest_rows)));
 }
 
-// TODO: test.
-constexpr uint64_t left_child(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t left_child(uint64_t parent, uint8_t forest_rows) NOEXCEPT
 {
-    return children(position, forest_rows);
+    return children(parent, forest_rows);
 }
 
-// TODO: test.
-constexpr uint64_t right_child(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t right_child(uint64_t parent, uint8_t forest_rows) NOEXCEPT
 {
-    BC_ASSERT(!is_add_overflow<uint64_t>(children(position, forest_rows), one));
+    // What happens when these bits are lost?
+    BC_ASSERT(!is_add_overflow(children(parent, forest_rows), one));
 
-    return add1(children(position, forest_rows));
+    return add1(children(parent, forest_rows));
 }
 
-constexpr uint64_t left_sibling(uint64_t position) NOEXCEPT
+constexpr uint64_t left_sibling(uint64_t node) NOEXCEPT
 {
-    return set_right(position, zero, false);
+    return set_right(node, zero, false);
 }
 
-constexpr bool is_left_niece(uint64_t position) NOEXCEPT
+constexpr bool is_left_niece(uint64_t node) NOEXCEPT
 {
-    return !get_right(position);
+    return !get_right(node);
 }
 
 constexpr bool is_right_sibling(uint64_t node, uint64_t next) NOEXCEPT
@@ -100,22 +100,21 @@ constexpr bool is_root_populated(uint64_t leaves, uint8_t row) NOEXCEPT
     return get_right(leaves, row);
 }
 
-constexpr uint8_t detect_row(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint8_t detect_row(uint64_t node, uint8_t forest_rows) NOEXCEPT
 {
     auto bit = forest_rows;
-    while (!is_zero(bit) && get_right(position, bit)) --bit;
+    while (!is_zero(bit) && get_right(node, bit)) { --bit; }
     return subtract(forest_rows, bit);
 }
 
+// TODO: arbitrary behavior if given row does not have a root.
 constexpr uint64_t root_position(uint64_t leaves, uint8_t row,
     uint8_t forest_rows) NOEXCEPT
 {
-    // TODO: undefined behavior if given row does not have a root.
-    BC_ASSERT(!is_add_overflow<uint8_t>(row, 1));
-    BC_ASSERT(!is_add_overflow<uint8_t>(forest_rows, 1));
-    BC_ASSERT(!is_subtract_overflow<uint8_t>(add1(forest_rows), row));
+    BC_ASSERT(!is_add_overflow(row, 1_u8));
+    BC_ASSERT(!is_add_overflow(forest_rows, 1_u8));
+    BC_ASSERT(!is_subtract_overflow(add1(forest_rows), row));
 
-    // sub1 cannot overflow here.
     const auto mask = unmask_right<uint64_t>(add1(forest_rows));
     const auto before = bit_and(leaves, shift_left(mask, add1(row)));
     const auto left = shift_left(mask, subtract(add1(forest_rows), row));
@@ -135,24 +134,23 @@ constexpr bool is_root_position(uint64_t position, uint64_t leaves,
 
 constexpr uint64_t remove_bit(uint64_t value, size_t bit) NOEXCEPT
 {
-    const auto mask_lo = mask_right<uint64_t>(add1(bit));
-    const auto mask_hi = unmask_right<uint64_t>(bit);
-    return bit_or(shift_right(bit_and(value, mask_lo), 1),
-        bit_and(value, mask_hi));
+    const auto lo = mask_right<uint64_t>(add1(bit));
+    const auto hi = unmask_right<uint64_t>(bit);
+    return bit_or(shift_right(bit_and(value, lo)), bit_and(value, hi));
 }
 
-constexpr bool calculate_next(uint64_t& out, uint64_t position,
-    uint64_t delete_position, uint8_t forest_rows) NOEXCEPT
+constexpr bool calculate_next(uint64_t& out, uint64_t node,
+    uint64_t delete_node, uint8_t forest_rows) NOEXCEPT
 {
-    const auto position_row = detect_row(position, forest_rows);
-    const auto delete_row = detect_row(delete_position, forest_rows);
-    if (delete_row < position_row)
+    const auto node_row = detect_row(node, forest_rows);
+    const auto delete_row = detect_row(delete_node, forest_rows);
+    if (delete_row < node_row)
         return false;
 
-    const auto bit = subtract<uint64_t>(delete_row, position_row);
-    const auto lo = remove_bit(position, bit);
+    const auto bit = subtract<uint64_t>(delete_row, node_row);
+    const auto lo = remove_bit(node, bit);
 
-    const auto row = add1(position_row);
+    const auto row = add1(node_row);
     const auto hi = shift_left(bit_right<uint64_t>(row),
         subtract(forest_rows, row));
 
@@ -178,7 +176,6 @@ constexpr size_t number_of_roots(uint64_t leaves) NOEXCEPT
 
 constexpr uint8_t tree_rows(uint64_t leaves) NOEXCEPT
 {
-    // nothing here can overflow.
     return narrow_cast<uint8_t>(is_zero(leaves) ? zero :
         subtract(bits<uint64_t>, left_zeros<uint64_t>(sub1(leaves))));
 }

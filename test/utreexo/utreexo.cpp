@@ -25,6 +25,67 @@ BOOST_AUTO_TEST_SUITE(utreexo_tests)
 
 // inferred from rustreexo implementation (no test provided)
 
+BOOST_AUTO_TEST_CASE(utreexo__parent__various__expected)
+{
+    static_assert(parent(0, 0) == 1);
+    static_assert(parent(0, 1) == 2);
+    static_assert(parent(0, 2) == 4);
+    static_assert(parent(0, 3) == 8);
+    static_assert(parent(0, 4) == 16);
+    static_assert(parent(0, 5) == 32);
+    static_assert(parent(0, 6) == 64);
+
+    static_assert(parent(1, 0) == 1);
+    static_assert(parent(1, 1) == 2);
+    static_assert(parent(1, 2) == 4);
+    static_assert(parent(1, 3) == 8);
+    static_assert(parent(1, 4) == 16);
+    static_assert(parent(1, 5) == 32);
+    static_assert(parent(1, 6) == 64);
+
+    static_assert(parent(128, 0) == 64 + 1);
+    static_assert(parent(128, 1) == 64 + 2);
+    static_assert(parent(128, 2) == 64 + 4);
+    static_assert(parent(128, 3) == 64 + 8);
+    static_assert(parent(128, 4) == 64 + 16);
+    static_assert(parent(128, 5) == 64 + 32);
+    static_assert(parent(128, 6) == 64);
+
+    BOOST_REQUIRE_EQUAL(parent(128, 0), 65_u64);
+    BOOST_REQUIRE_EQUAL(parent(128, 1), 66_u64);
+    BOOST_REQUIRE_EQUAL(parent(128, 2), 68_u64);
+    BOOST_REQUIRE_EQUAL(parent(128, 3), 72_u64);
+    BOOST_REQUIRE_EQUAL(parent(128, 4), 80_u64);
+    BOOST_REQUIRE_EQUAL(parent(128, 5), 96_u64);
+    BOOST_REQUIRE_EQUAL(parent(128, 6), 64_u64);
+}
+
+BOOST_AUTO_TEST_CASE(utreexo__left_child__various__expected)
+{
+    // same as children()
+    static_assert(left_child(4, 2) == 0);
+    static_assert(left_child(49, 5) == 34);
+    static_assert(left_child(50, 5) == 36);
+    static_assert(left_child(44, 5) == 24);
+    BOOST_REQUIRE_EQUAL(left_child(4, 2), 0_u64);
+    BOOST_REQUIRE_EQUAL(left_child(49, 5), 34_u64);
+    BOOST_REQUIRE_EQUAL(left_child(50, 5), 36_u64);
+    BOOST_REQUIRE_EQUAL(left_child(44, 5), 24_u64);
+}
+
+BOOST_AUTO_TEST_CASE(utreexo__right_child__various__expected)
+{
+    // same as add1(children())
+    static_assert(right_child(4, 2) == 0 + 1);
+    static_assert(right_child(49, 5) == 34 + 1);
+    static_assert(right_child(50, 5) == 36 + 1);
+    static_assert(right_child(44, 5) == 24 + 1);
+    BOOST_REQUIRE_EQUAL(right_child(4, 2), 1_u64);
+    BOOST_REQUIRE_EQUAL(right_child(49, 5), 35_u64);
+    BOOST_REQUIRE_EQUAL(right_child(50, 5), 37_u64);
+    BOOST_REQUIRE_EQUAL(right_child(44, 5), 25_u64);
+}
+
 BOOST_AUTO_TEST_CASE(utreexo__is_root_populated__various__expected)
 {
     static_assert(!is_root_populated(0b00000000, 0));
@@ -66,14 +127,14 @@ BOOST_AUTO_TEST_CASE(utreexo__left_sibling__various__expected)
 BOOST_AUTO_TEST_CASE(utreexo__start_position_at_row__various__expected)
 {
     // forest_rows must be >= row.
-    static_assert(start_position_at_row(0, 0) == 0_u64);
-    static_assert(start_position_at_row(0, 1) == 0_u64);
-    static_assert(start_position_at_row(1, 1) == 2_u64);
-    static_assert(start_position_at_row(1, 2) == 4_u64);
-    static_assert(start_position_at_row(1, 3) == 8_u64);
-    static_assert(start_position_at_row(2, 2) == 6_u64);
-    static_assert(start_position_at_row(2, 3) == 12_u64);
-    static_assert(start_position_at_row(3, 3) == 14_u64);
+    static_assert(start_position_at_row(0, 0) == 0);
+    static_assert(start_position_at_row(0, 1) == 0);
+    static_assert(start_position_at_row(1, 1) == 2);
+    static_assert(start_position_at_row(1, 2) == 4);
+    static_assert(start_position_at_row(1, 3) == 8);
+    static_assert(start_position_at_row(2, 2) == 6);
+    static_assert(start_position_at_row(2, 3) == 12);
+    static_assert(start_position_at_row(3, 3) == 14);
     BOOST_REQUIRE_EQUAL(start_position_at_row(0, 0), 0_u64);
     BOOST_REQUIRE_EQUAL(start_position_at_row(0, 1), 0_u64);
     BOOST_REQUIRE_EQUAL(start_position_at_row(1, 1), 2_u64);
@@ -86,11 +147,11 @@ BOOST_AUTO_TEST_CASE(utreexo__start_position_at_row__various__expected)
 
 BOOST_AUTO_TEST_CASE(utreexo__number_of_roots__various__expected)
 {
-    static_assert(number_of_roots(0) == 0_size);
-    static_assert(number_of_roots(1) == 1_size);
-    static_assert(number_of_roots(2) == 1_size);
-    static_assert(number_of_roots(3) == 2_size);
-    static_assert(number_of_roots(0xfefefefefefefefe) == (64_size - 8_size));
+    static_assert(number_of_roots(0) == 0);
+    static_assert(number_of_roots(1) == 1);
+    static_assert(number_of_roots(2) == 1);
+    static_assert(number_of_roots(3) == 2);
+    static_assert(number_of_roots(0xfefefefefefefefe) == (64 - 8));
     BOOST_REQUIRE_EQUAL(number_of_roots(0), 0_size);
     BOOST_REQUIRE_EQUAL(number_of_roots(1), 1_size);
     BOOST_REQUIRE_EQUAL(number_of_roots(2), 1_size);
@@ -131,10 +192,10 @@ BOOST_AUTO_TEST_CASE(utreexo__is_sibling__various__expected)
 // github.com/mit-dci/rustreexo/blob/main/src/accumulator/util.rs#L474
 BOOST_AUTO_TEST_CASE(utreexo__children__various__expected)
 {
-    static_assert(children(4, 2) == 0_u64);
-    static_assert(children(49, 5) == 34_u64);
-    static_assert(children(50, 5) == 36_u64);
-    static_assert(children(44, 5) == 24_u64);
+    static_assert(children(4, 2) == 0);
+    static_assert(children(49, 5) == 34);
+    static_assert(children(50, 5) == 36);
+    static_assert(children(44, 5) == 24);
     BOOST_REQUIRE_EQUAL(children(4, 2), 0_u64);
     BOOST_REQUIRE_EQUAL(children(49, 5), 34_u64);
     BOOST_REQUIRE_EQUAL(children(50, 5), 36_u64);
@@ -151,10 +212,10 @@ BOOST_AUTO_TEST_CASE(utreexo__is_root_position__various__expected)
 // github.com/mit-dci/rustreexo/blob/main/src/accumulator/util.rs#L424
 BOOST_AUTO_TEST_CASE(utreexo__tree_rows__various__expected)
 {
-    static_assert(tree_rows(8) == 3_u8);
-    static_assert(tree_rows(9) == 4_u8);
-    static_assert(tree_rows(12) == 4_u8);
-    static_assert(tree_rows(255) == 8_u8);
+    static_assert(tree_rows(8) == 3);
+    static_assert(tree_rows(9) == 4);
+    static_assert(tree_rows(12) == 4);
+    static_assert(tree_rows(255) == 8);
     BOOST_REQUIRE_EQUAL(tree_rows(8), 3_u8);
     BOOST_REQUIRE_EQUAL(tree_rows(9), 4_u8);
     BOOST_REQUIRE_EQUAL(tree_rows(12), 4_u8);
@@ -199,8 +260,8 @@ BOOST_AUTO_TEST_CASE(utreexo__detect_row__scenario__expected)
 // github.com/mit-dci/rustreexo/blob/main/src/accumulator/util.rs#L359
 BOOST_AUTO_TEST_CASE(utreexo__root_position__various__expected)
 {
-    static_assert(root_position(5, 2, 3) == 12_u64);
-    static_assert(root_position(5, 0, 3) == 4_u64);
+    static_assert(root_position(5, 2, 3) == 12);
+    static_assert(root_position(5, 0, 3) == 4);
     BOOST_REQUIRE_EQUAL(root_position(5, 2, 3), 12_u64);
     BOOST_REQUIRE_EQUAL(root_position(5, 0, 3), 4_u64);
 }
