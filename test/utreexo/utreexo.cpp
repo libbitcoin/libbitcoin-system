@@ -309,14 +309,30 @@ BOOST_AUTO_TEST_CASE(utreexo__detwin__various__expected)
     // 0   1   2   3   4   5   6   7
 
     const positions expected1{ 7, 8, 10 };
-    positions targets1{ 0, 1, 4, 5, 7 };
-    detwin(targets1, 3);
-    BOOST_REQUIRE_EQUAL(targets1, expected1);
+    const positions targets1{ 0, 1, 4, 5, 7 };
+    BOOST_REQUIRE_EQUAL(detwin(targets1, 3), expected1);
 
     const positions expected2{ 4, 6, 12 };
-    positions targets2{ 4, 6, 8, 9 };
-    detwin(targets2, 3);
-    BOOST_REQUIRE_EQUAL(targets2, expected2);
+    const positions targets2{ 4, 6, 8, 9 };
+    BOOST_REQUIRE_EQUAL(detwin(targets2, 3), expected2);
+}
+
+BOOST_AUTO_TEST_CASE(utreexo__get_proof_positions__sorted__expected)
+{
+    const positions expected{ 6, 9 };
+    constexpr uint64_t leaves = 8;
+    constexpr auto rows = tree_rows(leaves);
+    const auto targets = get_proof_positions({ 4, 5, 7, 8 }, leaves, rows);
+    BOOST_REQUIRE_EQUAL(targets, expected);
+}
+
+BOOST_AUTO_TEST_CASE(utreexo__get_proof_positions__unsorted__expected)
+{
+    const positions expected{ 6, 9 };
+    constexpr uint64_t leaves = 8;
+    constexpr auto rows = tree_rows(leaves);
+    const auto targets = get_proof_positions({ 4, 8, 7, 5 }, leaves, rows);
+    BOOST_REQUIRE_EQUAL(targets, expected);
 }
 
 // rustreexo examples
