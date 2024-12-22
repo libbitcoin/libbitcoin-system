@@ -30,6 +30,67 @@ constexpr auto signed_zero = 0_i16;
 constexpr auto signed_max = max_int16;
 constexpr auto signed_half = to_half(signed_max);
 
+// is_left_shift_overflow
+// ----------------------------------------------------------------------------
+
+// unsigned only
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000000, 0));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000000, 1));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000000, 2));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000000, 4));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000000, 8));
+
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000001, 0));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000001, 1));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000001, 2));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00000001, 4));
+static_assert( is_left_shift_overflow<uint8_t>(0b00000001, 8));
+
+static_assert(!is_left_shift_overflow<uint8_t>(0b10000000, 0));
+static_assert( is_left_shift_overflow<uint8_t>(0b10000000, 1));
+static_assert( is_left_shift_overflow<uint8_t>(0b10000000, 2));
+static_assert( is_left_shift_overflow<uint8_t>(0b10000000, 4));
+static_assert( is_left_shift_overflow<uint8_t>(0b10000000, 8));
+
+static_assert(!is_left_shift_overflow<uint8_t>(0b00101010, 0));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00101010, 1));
+static_assert(!is_left_shift_overflow<uint8_t>(0b00101010, 2));
+static_assert( is_left_shift_overflow<uint8_t>(0b00101010, 4));
+static_assert( is_left_shift_overflow<uint8_t>(0b00101010, 8));
+
+static_assert(!is_left_shift_overflow<uint8_t>(0b11111111, 0));
+static_assert( is_left_shift_overflow<uint8_t>(0b11111111, 1));
+static_assert( is_left_shift_overflow<uint8_t>(0b11111111, 2));
+static_assert( is_left_shift_overflow<uint8_t>(0b11111111, 4));
+static_assert( is_left_shift_overflow<uint8_t>(0b11111111, 8));
+
+static_assert(!is_left_shift_overflow<uint16_t>(0b00010000'00000000, 0));
+static_assert(!is_left_shift_overflow<uint16_t>(0b00010000'00000000, 1));
+static_assert(!is_left_shift_overflow<uint16_t>(0b00010000'00000000, 2));
+static_assert( is_left_shift_overflow<uint16_t>(0b00010000'00000000, 4));
+static_assert( is_left_shift_overflow<uint16_t>(0b00010000'00000000, 8));
+static_assert( is_left_shift_overflow<uint16_t>(0b00000000'00000001, bits<uint16_t>));
+static_assert(!is_left_shift_overflow<uint16_t>(0b00000000'00000001, sub1(bits<uint16_t>)));
+
+static_assert(!is_left_shift_overflow<uint32_t>(0b00010000'00000000'00000000'00000000, 0));
+static_assert(!is_left_shift_overflow<uint32_t>(0b00010000'00000000'00000000'00000000, 1));
+static_assert(!is_left_shift_overflow<uint32_t>(0b00010000'00000000'00000000'00000000, 2));
+static_assert( is_left_shift_overflow<uint32_t>(0b00010000'00000000'00000000'00000000, 4));
+static_assert( is_left_shift_overflow<uint32_t>(0b00010000'00000000'00000000'00000000, 8));
+static_assert( is_left_shift_overflow<uint32_t>(0b00000000'00000000'00000000'00000001, bits<uint32_t>));
+static_assert(!is_left_shift_overflow<uint32_t>(0b00000000'00000000'00000000'00000001, sub1(bits<uint32_t>)));
+
+static_assert(!is_left_shift_overflow<uint64_t>(0b00010000'00000000'00000000'00000000'00010000'00000000'00000000'00000000, 0));
+static_assert(!is_left_shift_overflow<uint64_t>(0b00010000'00000000'00000000'00000000'00010000'00000000'00000000'00000000, 1));
+static_assert(!is_left_shift_overflow<uint64_t>(0b00010000'00000000'00000000'00000000'00010000'00000000'00000000'00000000, 2));
+static_assert( is_left_shift_overflow<uint64_t>(0b00010000'00000000'00000000'00000000'00010000'00000000'00000000'00000000, 4));
+static_assert( is_left_shift_overflow<uint64_t>(0b00010000'00000000'00000000'00000000'00010000'00000000'00000000'00000000, 8));
+static_assert( is_left_shift_overflow<uint64_t>(0b00000000'00000000'00000000'00000000'00000000'00000000'00000000'00000001, bits<uint64_t>));
+static_assert(!is_left_shift_overflow<uint64_t>(0b00000000'00000000'00000000'00000000'00000000'00000000'00000000'00000001, sub1(bits<uint64_t>)));
+
+// is_right_shift_overflow
+// ----------------------------------------------------------------------------
+
 // is_negate_overflow
 // ----------------------------------------------------------------------------
 
@@ -68,7 +129,7 @@ static_assert(is_add_overflow(unsigned_max, unsigned_half));
 static_assert(is_add_overflow(unsigned_half, unsigned_max));
 static_assert(!is_add_overflow(unsigned_half, unsigned_half));
 
-// is_underflow
+// is_subtract_overflow
 // ----------------------------------------------------------------------------
 
 // signed

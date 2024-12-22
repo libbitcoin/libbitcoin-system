@@ -20,21 +20,18 @@
 #define LIBBITCOIN_SYSTEM_UTREEXO_HPP
 
 #include <bit>
+#include <tuple>
 #include <utility>
 #include <bitcoin/system.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace utreexo {
-
-using node_hash = hash_digest;
+    
 using positions = std::vector<uint64_t>;
+using node_hash = hash_digest;
 constexpr auto empty_hash = node_hash{};
-
-constexpr std::pair<bool, std::string> okay(bool result) NOEXCEPT
-{
-    return { result, (result ? "success" : "fail") };
-}
+constexpr auto dummy_hash = base16_hash("4242424242424242424242424242424242424242424242424242424242424242");
 
 constexpr node_hash parent_hash(const node_hash& left,
     const node_hash& right) NOEXCEPT
@@ -47,41 +44,41 @@ constexpr node_hash hash_from_u8(uint8_t byte) NOEXCEPT
     return sha256::hash(byte);
 }
 
-// TODO: test.
-// return parent position of passed-in child
-constexpr uint64_t parent(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t parent(uint64_t child, uint8_t forest_rows) NOEXCEPT
 {
-    return set_right(shift_right(position), forest_rows);
+    return set_right(shift_right(child), forest_rows);
 }
 
-constexpr uint64_t children(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t children(uint64_t parent, uint8_t forest_rows) NOEXCEPT
 {
-    const auto mask = unmask_right<uint64_t>(add1<size_t>(forest_rows));
-    return bit_and(shift_left(position), mask);
+    // What happens when these bits are lost?
+    BC_ASSERT(!is_left_shift_overflow(parent, add1<size_t>(forest_rows)));
+
+    return bit_and(shift_left(parent),
+        unmask_right<uint64_t>(add1<size_t>(forest_rows)));
 }
 
-// TODO: test.
-constexpr uint64_t left_child(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t left_child(uint64_t parent, uint8_t forest_rows) NOEXCEPT
 {
-    return children(position, forest_rows);
+    return children(parent, forest_rows);
 }
 
-// TODO: test.
-constexpr uint64_t right_child(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint64_t right_child(uint64_t parent, uint8_t forest_rows) NOEXCEPT
 {
-    BC_ASSERT(!is_add_overflow<uint64_t>(children(position, forest_rows), one));
+    // What happens when these bits are lost?
+    BC_ASSERT(!is_add_overflow<uint64_t>(children(parent, forest_rows), one));
 
-    return add1(children(position, forest_rows));
+    return add1(children(parent, forest_rows));
 }
 
-constexpr uint64_t left_sibling(uint64_t position) NOEXCEPT
+constexpr uint64_t left_sibling(uint64_t node) NOEXCEPT
 {
-    return set_right(position, zero, false);
+    return set_right(node, zero, false);
 }
 
-constexpr bool is_left_niece(uint64_t position) NOEXCEPT
+constexpr bool is_left_niece(uint64_t node) NOEXCEPT
 {
-    return !get_right(position);
+    return !get_right(node);
 }
 
 constexpr bool is_right_sibling(uint64_t node, uint64_t next) NOEXCEPT
@@ -100,25 +97,22 @@ constexpr bool is_root_populated(uint64_t leaves, uint8_t row) NOEXCEPT
     return get_right(leaves, row);
 }
 
-constexpr uint8_t detect_row(uint64_t position, uint8_t forest_rows) NOEXCEPT
+constexpr uint8_t detect_row(uint64_t node, uint8_t forest_rows) NOEXCEPT
 {
     auto bit = forest_rows;
-    while (!is_zero(bit) && get_right(position, bit)) --bit;
+    while (!is_zero(bit) && get_right(node, bit)) { --bit; }
     return subtract(forest_rows, bit);
 }
 
+// TODO: arbitrary behavior if given row does not have a root.
 constexpr uint64_t root_position(uint64_t leaves, uint8_t row,
     uint8_t forest_rows) NOEXCEPT
 {
-    // TODO: undefined behavior if given row does not have a root.
-    BC_ASSERT(!is_add_overflow<uint8_t>(row, 1));
-    BC_ASSERT(!is_add_overflow<uint8_t>(forest_rows, 1));
-    BC_ASSERT(!is_subtract_overflow<uint8_t>(add1(forest_rows), row));
+    BC_ASSERT(!is_subtract_overflow<size_t>(add1<size_t>(forest_rows), row));
 
-    // sub1 cannot overflow here.
-    const auto mask = unmask_right<uint64_t>(add1(forest_rows));
-    const auto before = bit_and(leaves, shift_left(mask, add1(row)));
-    const auto left = shift_left(mask, subtract(add1(forest_rows), row));
+    const auto mask = unmask_right<uint64_t>(add1<size_t>(forest_rows));
+    const auto before = bit_and(leaves, shift_left(mask, add1<size_t>(row)));
+    const auto left = shift_left(mask, subtract(add1<size_t>(forest_rows), row));
     const auto right = shift_right(before, row);
     const auto shifted = bit_or(left, right);
     return bit_and(shifted, mask);
@@ -128,31 +122,29 @@ constexpr bool is_root_position(uint64_t position, uint64_t leaves,
     uint8_t forest_rows) NOEXCEPT
 {
     const auto row = detect_row(position, forest_rows);
-    const auto present = get_right(leaves, row);
-    const auto expected = root_position(leaves, row, forest_rows);
-    return present && (position == expected);
+    return get_right(leaves, row) &&
+        (position == root_position(leaves, row, forest_rows));
 }
 
 constexpr uint64_t remove_bit(uint64_t value, size_t bit) NOEXCEPT
 {
-    const auto mask_lo = mask_right<uint64_t>(add1(bit));
-    const auto mask_hi = unmask_right<uint64_t>(bit);
-    return bit_or(shift_right(bit_and(value, mask_lo), 1),
-        bit_and(value, mask_hi));
+    const auto hi = unmask_right<uint64_t>(bit);
+    const auto lo = mask_right<uint64_t>(add1(bit));
+    return bit_or(shift_right(bit_and(value, lo)), bit_and(value, hi));
 }
 
-constexpr bool calculate_next(uint64_t& out, uint64_t position,
-    uint64_t delete_position, uint8_t forest_rows) NOEXCEPT
+constexpr bool calculate_next(uint64_t& out, uint64_t node,
+    uint64_t delete_node, uint8_t forest_rows) NOEXCEPT
 {
-    const auto position_row = detect_row(position, forest_rows);
-    const auto delete_row = detect_row(delete_position, forest_rows);
-    if (delete_row < position_row)
+    const auto node_row = detect_row(node, forest_rows);
+    const auto delete_row = detect_row(delete_node, forest_rows);
+    if (is_subtract_overflow(delete_row, node_row))
         return false;
 
-    const auto bit = subtract<uint64_t>(delete_row, position_row);
-    const auto lo = remove_bit(position, bit);
+    const auto bit = subtract(delete_row, node_row);
+    const auto lo = remove_bit(node, bit);
 
-    const auto row = add1(position_row);
+    const auto row = add1(node_row);
     const auto hi = shift_left(bit_right<uint64_t>(row),
         subtract(forest_rows, row));
 
@@ -178,31 +170,173 @@ constexpr size_t number_of_roots(uint64_t leaves) NOEXCEPT
 
 constexpr uint8_t tree_rows(uint64_t leaves) NOEXCEPT
 {
-    // nothing here can overflow.
     return narrow_cast<uint8_t>(is_zero(leaves) ? zero :
         subtract(bits<uint64_t>, left_zeros<uint64_t>(sub1(leaves))));
 }
 
-inline void detwin(positions& nodes, uint8_t forest_rows) NOEXCEPT
+inline positions detwin(const positions& nodes, uint8_t forest_rows) NOEXCEPT
 {
     if (nodes.empty())
-        return;
+        return {};
 
-    for (auto node = std::next(nodes.begin()); node != nodes.end();)
+    auto out{ nodes };
+    for (auto index{ one }; index < out.size(); ++index)
     {
-        const auto prior = std::prev(node);
+        const auto node = out.at(sub1(index));
+        const auto next = out.at(index);
 
-        if (is_right_sibling(*prior, *node))
+        if (is_right_sibling(node, next))
         {
-            const auto dad = parent(*prior, forest_rows);
-            node = nodes.erase(prior, std::next(node));
-            nodes.push_back(dad);
-            sort(nodes);
-            continue;
+            const auto dad = parent(node, forest_rows);
+            const auto from = std::next(out.begin(), sub1(index));
+            const auto stop = std::next(out.begin(), add1(index));
+            out.erase(from, stop);
+            out.push_back(dad);
+            sort(out);
+            --index;
+        }
+    }
+
+    return out;
+}
+
+// TODO: test.
+// TODO: guard overflows.
+bool roots_to_destroy(positions& out, std::vector<node_hash>&& roots,
+    uint64_t adding, uint64_t leaves) NOEXCEPT
+{
+    uint8_t row{};
+
+    for (auto leaf{ adding }; !is_zero(leaf); --leaf, ++leaves)
+    {
+        while (get_right(leaves, add1(row)))
+        {
+            if (roots.empty())
+                return false;
+
+            if (roots.back() == empty_hash)
+            {
+                const auto rows = tree_rows(add(leaves, leaf));
+                out.push_back(root_position(leaves, row, rows));
+            }
+
+            roots.pop_back();
+            ++row;
         }
 
-        ++node;
+        roots.push_back(dummy_hash);
     }
+
+    return true;
+}
+
+// TODO: test.
+// TODO: guard overflows.
+std::tuple<uint8_t, uint8_t, uint64_t> detect_offset(uint64_t node,
+    uint64_t leaves) NOEXCEPT
+{
+    uint8_t trees{};
+    auto rows = tree_rows(leaves);
+    const auto row = detect_row(node, rows);
+
+    while (true)
+    {
+        const auto mask = unmask_right<uint64_t>(rows);
+        const auto size = bit_and(set_right<uint64_t>(rows), leaves);
+        if (bit_and(shift_left(node, row), mask) < size)
+            break;
+
+        if (!is_zero(size))
+        {
+            node -= size;
+            ++trees;
+        }
+
+        --rows;
+    };
+
+    return { trees, subtract(rows, row), !node };
+}
+
+// TODO: test.
+constexpr bool parent_many(uint64_t& out, uint64_t node, uint8_t rise,
+    uint8_t forest_rows) NOEXCEPT
+{
+    if (is_zero(rise))
+    {
+        out = node;
+        return true;
+    }
+
+    if (rise > forest_rows)
+        return false;
+
+    const auto left = subtract(forest_rows, sub1(rise));
+    const auto mask = sub1(bit_right<uint64_t>(add1<size_t>(forest_rows)));
+    out = bit_and(bit_or(shift_right(node, rise), shift_left(mask, left)), mask);
+    return true;
+}
+
+// TODO: test.
+constexpr bool max_position_at_row(uint64_t& out, uint8_t row, uint8_t rows,
+    uint64_t leaves) NOEXCEPT
+{
+    uint64_t many{};
+    if (!parent_many(many, leaves, row, rows))
+        return false;
+
+    out = floored_subtract(many, one);
+    return true;
+}
+
+// TODO: test.
+constexpr bool is_ancestor(uint64_t higer, uint64_t lower,
+    uint8_t forest_rows) NOEXCEPT
+{
+    if (higer == lower)
+        return false;
+
+    uint64_t ancestor{};
+    const auto lo = detect_row(lower, forest_rows);
+    const auto hi = detect_row(higer, forest_rows);
+    return !is_subtract_overflow(hi, lo) &&
+        parent_many(ancestor, lower, subtract(hi, lo), forest_rows) &&
+        (ancestor == higer);
+}
+
+inline positions get_proof_positions(positions&& targets, uint64_t leaves,
+    uint8_t forest_rows) NOEXCEPT
+{
+    sort(targets);
+    positions proof{};
+
+    for (uint8_t row{}; row < forest_rows; ++row)
+    {
+        auto sorted{ true };
+        const auto rows{ targets };
+
+        for (auto it = rows.begin(); it != rows.end(); ++it)
+        {
+            const auto node = *it;
+            if ((detect_row(node, forest_rows) != row) ||
+                is_root_position(node, leaves, forest_rows))
+                continue;
+        
+            const auto next = std::next(it);
+            if (next != rows.end() && is_sibling(node, *next))
+                ++it;
+            else
+                proof.push_back(bit_xor<uint64_t>(node, one));
+ 
+            targets.push_back(parent(node, forest_rows));
+            sorted = false;
+        }
+
+        if (!sorted)
+            sort(targets);
+    }
+
+    return proof;
 }
 
 } // namespace utreexo
@@ -210,166 +344,3 @@ inline void detwin(positions& nodes, uint8_t forest_rows) NOEXCEPT
 } // namespace libbitcoin
 
 #endif
-
-////// roots_to_destroy returns the empty roots that get written over after num_adds
-////// amount of leaves have been added.
-////pub fn roots_to_destroy<Hash: AccumulatorHash>(
-////    num_adds: u64,
-////    mut num_leaves: u64,
-////    orig_roots: &[Hash],
-////) -> Vec<u64> {
-////    let mut roots = orig_roots.to_vec();
-////    let mut deleted = vec![];
-////    let mut h = 0;
-////    for add in 0..num_adds {
-////        while (num_leaves >> h) & 1 == 1 {
-////            let root = roots
-////                .pop()
-////                .expect("If (num_leaves >> h) & 1 == 1, it must have at least one root left");
-////            if root.is_empty() {
-////                let root_pos =
-////                    root_position(num_leaves, h, tree_rows(num_leaves + (num_adds - add)));
-////                deleted.push(root_pos);
-////            }
-////            h += 1;
-////        }
-////        // Just adding a non-zero value to the slice.
-////        roots.push(AccumulatorHash::placeholder());
-////        num_leaves += 1;
-////    }
-////
-////    deleted
-////}
-
-////pub fn detect_offset(pos: u64, num_leaves: u64) -> (u8, u8, u64) {
-////    let mut tr = tree_rows(num_leaves);
-////    let nr = detect_row(pos, tr);
-////
-////    let mut bigger_trees: u8 = 0;
-////    let mut marker = pos;
-////
-////    // add trees until you would exceed position of node
-////
-////    // This is a bit of an ugly predicate.  The goal is to detect if we've
-////    // gone past the node we're looking for by inspecting progressively shorter
-////    // trees; once we have, the loop is over.
-
-////    // The predicate breaks down into 3 main terms:
-////    // A: pos << nh
-////    // B: mask
-////    // C: 1<<th & num_leaves (tree_size)
-////    // The predicate is then if (A&B >= C)
-////    // A is position up-shifted by the row of the node we're targeting.
-////    // B is the "mask" we use in other functions; a bunch of 0s at the MSB side
-////    // and then a bunch of 1s on the LSB side, such that we can use bitwise AND
-////    // to discard high bits.  Together, A&B is shifting position up by nr bits,
-////    // and then discarding (zeroing out) the high bits.  This is the same as in
-////    // n_grandchild.  C checks for whether a tree exists at the current tree
-////    // rows.  If there is no tree at tr, C is 0.  If there is a tree, it will
-////    // return a power of 2: the base size of that tree.
-////    // The C term actually is used 3 times here, which is ugly; it's redefined
-////    // right on the next line.
-////    // In total, what this loop does is to take a node position, and
-////    // see if it's in the next largest tree.  If not, then subtract everything
-////    // covered by that tree from the position, and proceed to the next tree,
-////    // skipping trees that don't exist.
-
-////    while (marker << nr) & ((2 << tr) - 1) >= (1 << tr) & num_leaves {
-////        let tree_size = (1 << tr) & num_leaves;
-////        if tree_size != 0 {
-////            marker -= tree_size;
-////            bigger_trees += 1;
-////        }
-////        tr -= 1;
-////    }
-////
-////    (bigger_trees, tr - nr, !marker)
-////}
-
-/////// max_position_at_row returns the biggest position an accumulator can have for the
-/////// requested row for the given num_leaves.
-////pub fn max_position_at_row(row: u8, total_rows: u8, num_leaves: u64) -> Result<u64, String> {
-////    Ok(parent_many(num_leaves, row, total_rows)?.saturating_sub(1))
-////}
-////
-////pub fn read_u64<Source: Read>(buf: &mut Source) -> Result<u64, String> {
-////    let mut bytes = [0u8; 8];
-////    buf.read_exact(&mut bytes)
-////        .map_err(|_| "Failed to read u64")?;
-////    Ok(u64::from_le_bytes(bytes))
-////}
-
-////pub fn parent_many(pos: u64, rise: u8, forest_rows: u8) -> Result<u64, String> {
-////    if rise == 0 {
-////        return Ok(pos);
-////    }
-////    if rise > forest_rows {
-////        return Err(format!(
-////            "Cannot rise more than the forestRows: rise: {} forest_rows: {}",
-////            rise, forest_rows
-////        ));
-////    }
-////
-////    let mask = (2_u64 << forest_rows) - 1;
-////    Ok((pos >> rise | (mask << (forest_rows - (rise - 1)) as u64)) & mask)
-////}
-
-////std::pair<bool, std::string> is_ancestor(uint64_t higher_pos,
-////    uint64_t lower_pos, uint8_t forest_rows)
-////{
-////    if (higher_pos == lower_pos)
-////        return okay(false);
-////
-////    auto lower_row = detect_row(lower_pos, forest_rows);
-////    auto higher_row = detect_row(higher_pos, forest_rows);
-////
-////    // Prevent underflows by checking that the higherRow is not less than lowerRow.
-////    if (higher_row < lower_row)
-////        return okay(false);
-////
-////    // TODO: Return false if we error out or the calculated ancestor doesn't match the higherPos.
-////    auto ancestor = parent_many(lower_pos, higher_row - lower_row, forest_rows);
-////
-////    return (higher_pos == ancestor);
-////}
-
-/////// Returns which node should have its hashes on the proof, along with all nodes
-/////// whose hashes will be calculated to reach a root
-////Vec<u64> get_proof_positions(targets: &[u64], num_leaves: u64, forest_rows: u8) NOEXCEPT
-////{
-////    let mut proof_positions = vec![];
-////    let mut computed_positions = targets.to_vec();
-////    computed_positions.sort();
-////
-////    for row in 0..=forest_rows {
-////        let mut row_targets = computed_positions
-////            .iter()
-////            .cloned()
-////            .filter(|x| super::util::detect_row(*x, forest_rows) == row)
-////            .collect::<Vec<_>>()
-////            .into_iter()
-////            .peekable();
-////
-////        while let Some(node) = row_targets.next() {
-////            if is_root_position(node, num_leaves, forest_rows) {
-////                continue;
-////            }
-////
-////            if let Some(next) = row_targets.peek() {
-////                if !is_sibling(node, *next) {
-////                    proof_positions.push(node ^ 1);
-////                } else {
-////                    row_targets.next();
-////                }
-////            } else {
-////                proof_positions.push(node ^ 1);
-////            }
-////
-////            computed_positions.push(parent(node, forest_rows));
-////        }
-////
-////        computed_positions.sort();
-////    }
-////
-////    proof_positions
-////}

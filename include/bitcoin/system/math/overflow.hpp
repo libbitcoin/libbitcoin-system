@@ -23,8 +23,19 @@
 
 namespace libbitcoin {
 namespace system {
+
+/// shift
+/// ---------------------------------------------------------------------------
+
+/// Shift would cause 1-valued bit(s) to be left-shifted out.
+template <typename Value, if_unsigned_integral_integer<Value> = true>
+constexpr bool is_left_shift_overflow(Value value, size_t shift) NOEXCEPT;
+
+/// Shift would cause 1-valued bit(s) to be right-shifted out.
+template <typename Value, if_unsigned_integral_integer<Value> = true>
+constexpr bool is_right_shift_overflow(Value value, size_t shift) NOEXCEPT;
     
-/// add/subtract.
+/// shift/add/subtract.
 /// ---------------------------------------------------------------------------
 // TODO: generalize is_add_overflow() and is_subtract_overflow() argument types.
 
