@@ -253,7 +253,9 @@ BOOST_AUTO_TEST_CASE(utreexo__detect_row__scenario__expected)
         return success;
     };
 
-    static_assert(test_detect_row_());
+
+    // constexpr evaluation hit maximum step limit.
+    ////static_assert(test_detect_row_());
     BOOST_REQUIRE(test_detect_row_());
 }
 
