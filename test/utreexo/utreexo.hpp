@@ -202,7 +202,7 @@ inline positions detwin(const positions& nodes, uint8_t forest_rows) NOEXCEPT
 
 // TODO: test.
 // TODO: guard overflows.
-bool roots_to_destroy(positions& out, std::vector<node_hash>&& roots,
+inline bool roots_to_destroy(positions& out, std::vector<node_hash>&& roots,
     uint64_t adding, uint64_t leaves) NOEXCEPT
 {
     uint8_t row{};
@@ -232,7 +232,7 @@ bool roots_to_destroy(positions& out, std::vector<node_hash>&& roots,
 
 // TODO: test.
 // TODO: guard overflows.
-std::tuple<uint8_t, uint8_t, uint64_t> detect_offset(uint64_t node,
+constexpr std::tuple<uint8_t, uint8_t, uint64_t> detect_offset(uint64_t node,
     uint64_t leaves) NOEXCEPT
 {
     uint8_t trees{};
