@@ -32,9 +32,16 @@ public:
     /// CONSENSUS: 
     /// A height of zero is immature (unspendable) despite unspent state.
     ///************************************************************************
-    /// The confirmed chain height of the prevout (zero if not found).
-    /// Unused if the input owning this prevout is null (coinbase).
-    size_t height{ zero };
+
+    union
+    {
+        /// The confirmed chain height of the prevout (zero if not found).
+        /// Unused if the input owning this prevout is null (coinbase).
+        size_t height;
+
+        /// database: populated with a database identifier for the parent tx.
+        uint64_t parent{ zero };
+    };
 
     ///************************************************************************
     /// CONSENSUS: 
@@ -42,6 +49,7 @@ public:
     ///************************************************************************
     /// The median time past at height (max_uint32 if not found/confirmed).
     /// Unused if the input owning this prevout is null (coinbase).
+    /// database: unused as validation precedes prevout block association.
     uint32_t median_time_past{ max_uint32 };
 
     ///************************************************************************
@@ -53,9 +61,11 @@ public:
     /// all outputs of any duplicate txs are fully spent at height.
     /// If the input owning this prevout is not null (not coinbase), this
     /// indicates whether the prevout is spent at height (double spend).
+    /// database: unused as validation precedes potential spend block assocs.
     bool spent{ true };
 
     /// The previous output is of a coinbase transaction.
+    /// database: populated as does not require prevout block association.
     bool coinbase{ false };
 };
 
