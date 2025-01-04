@@ -395,6 +395,12 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
         metadata.median_time_past);
 }
 
+bool input::is_internally_locked() const NOEXCEPT
+{
+    // Internal spends have zero relative height/mtp.
+    return is_locked(sequence_, {}, {}, {}, {});
+}
+
 bool input::reserved_hash(hash_digest& out) const NOEXCEPT
 {
     if (!witness::is_reserved_pattern(get_witness().stack()))
