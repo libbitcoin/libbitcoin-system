@@ -1342,6 +1342,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__empty_inputs__false
 
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_inputs__false)
 {
+    // input.metadata.spent defaults to true.
     const accessor instance
     {
         0,
@@ -1350,7 +1351,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__default_inputs__fal
         0
     };
 
-    BOOST_REQUIRE(!instance.is_confirmed_double_spend(42));
+    BOOST_REQUIRE(instance.is_confirmed_double_spend(42));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_confirmed_double_spend__unspent_input__false)

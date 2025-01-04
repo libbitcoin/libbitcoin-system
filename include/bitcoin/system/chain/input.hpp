@@ -161,8 +161,9 @@ private:
 public:
     /// TODO: prevout destruct requires input destruct.
     /// Public mutable metadata access, copied but not compared for equality.
+    /// Defaults are set so non-population issues usually imply invalidity.
     mutable chain::output::cptr prevout{};
-    mutable chain::prevout metadata{ zero, max_uint32, false, false };
+    mutable chain::prevout metadata{ zero, max_uint32, true, true };
 };
 
 typedef std_vector<input> inputs;

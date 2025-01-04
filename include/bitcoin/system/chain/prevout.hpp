@@ -25,6 +25,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// Defaults are set so non-population issues usually imply invalidity.
 class BC_API prevout final
 {
 public:
@@ -74,7 +75,7 @@ public:
 
     /// The previous output is of a coinbase transaction.
     /// database: populated, does not require prevout block association.
-    bool coinbase{ false };
+    bool coinbase{ true };
 };
 
 } // namespace chain
