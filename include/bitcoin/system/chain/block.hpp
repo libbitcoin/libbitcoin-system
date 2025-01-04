@@ -136,8 +136,8 @@ public:
     code connect(const context& ctx) const NOEXCEPT;
     code confirm(const context& ctx) const NOEXCEPT;
 
-    /// Populate previous outputs (only, no metadata) internal to the block.
-    size_t populate() const NOEXCEPT;
+    /// Populate previous outputs (and metadata.locked) internal to the block.
+    bool populate() const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,

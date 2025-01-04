@@ -688,7 +688,7 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 }
 
 // Search is not ordered, forward references are caught by block.check.
-size_t block::populate() const NOEXCEPT
+bool block::populate() const NOEXCEPT
 {
     std::unordered_map<point, output::cptr> points{};
     uint32_t index{};
@@ -699,8 +699,8 @@ size_t block::populate() const NOEXCEPT
             points.emplace(std::pair{ point{ (*tx)->hash(false), index++ },
                 out });
 
-    // Populate input prevouts from hash table and obtain count.
-    size_t count{};
+    // Populate input prevouts from hash table and obtain locked state.
+    bool locked{};
     for (auto tx = txs_->begin(); tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
@@ -708,13 +708,14 @@ size_t block::populate() const NOEXCEPT
             const auto point = points.find(in->point());
             if (point != points.end())
             {
-                ++count;
                 in->prevout = point->second;
+                in->metadata.locked = in->is_internally_locked();
+                locked |= in->metadata.locked;
             }
         }
     }
 
-    return count;
+    return !locked;
 }
 
 // Delegated.
