@@ -37,7 +37,6 @@ public:
     {
         /// The confirmed chain height of the prevout (zero if not found).
         /// Unused if the input owning this prevout is null (coinbase).
-        /// database: unused as validation precedes prevout block association.
         size_t height;
 
         /// database: populated with a database identifier for the parent tx.
@@ -55,7 +54,7 @@ public:
         /// database: unused as validation precedes prevout block association.
         uint32_t median_time_past{ max_uint32 };
 
-        /// Populated by block.populate() call as internal spends do not
+        /// database: set via block.populate() as internal spends do not
         /// require prevout block association for relative locktime checks.
         /// So median_time_past is not required as locked is determined here.
         bool locked;
@@ -66,12 +65,17 @@ public:
     /// An unspent coinbase collision is immature (unspendable) and spent
     /// collision is mature (bip30). CB collision presumed precluded by bip34.
     ///************************************************************************
-    /// If input owning this prevout is null (coinbase), this implies that
-    /// all outputs of any duplicate txs are fully spent at height.
-    /// If the input owning this prevout is not null (not coinbase), this
-    /// indicates whether the prevout is spent at height (double spend).
-    /// database: unused as validation precedes prevout block association.
-    bool spent{ true };
+    union
+    {
+        /// If input owning this prevout is null (coinbase), this implies that
+        /// all outputs of any duplicate txs are fully spent at height.
+        /// If the input owning this prevout is not null (not coinbase), this
+        /// indicates whether the prevout is spent at height (double spend).
+        bool spent{ true };
+
+        /// database: indicates that the input spends output inside same block.
+        bool inside;
+    };
 
     /// The previous output is of a coinbase transaction.
     /// database: populated, does not require prevout block association.
