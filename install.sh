@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################################################################
-#  Copyright (c) 2014-2023 libbitcoin-system developers (see COPYING).
+#  Copyright (c) 2014-2025 libbitcoin-system developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #
@@ -38,6 +38,11 @@
 
 # Define constants.
 #==============================================================================
+# Branches for github dependencies.
+#------------------------------------------------------------------------------
+SECP256K1_BRANCH="v0.5.1"
+BITCOIN_SYSTEM_BRANCH="master"
+
 # Sentinel for comparison of sequential build.
 #------------------------------------------------------------------------------
 SEQUENTIAL=1
@@ -794,7 +799,7 @@ build_all()
     export CPPFLAGS="$CPPFLAGS ${BOOST_FLAGS[@]}"
     build_from_tarball_boost "$BOOST_ARCHIVE" "$PARALLEL" "$BUILD_BOOST" "${BOOST_OPTIONS[@]}"
     export CPPFLAGS=$SAVE_CPPFLAGS
-    create_from_github bitcoin-core secp256k1 v0.5.1 "$BUILD_SECP256K1"
+    create_from_github bitcoin-core secp256k1 ${SECP256K1_BRANCH} "$BUILD_SECP256K1"
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS ${SECP256K1_FLAGS[@]}"
     build_from_github secp256k1 "$PARALLEL" false "$BUILD_SECP256K1" "${SECP256K1_OPTIONS[@]}" "$@"
@@ -802,7 +807,7 @@ build_all()
     local SAVE_CPPFLAGS="$CPPFLAGS"
     export CPPFLAGS="$CPPFLAGS ${BITCOIN_SYSTEM_FLAGS[@]}"
     if [[ ! ($CI == true) ]]; then
-        create_from_github libbitcoin libbitcoin-system master "yes"
+        create_from_github libbitcoin libbitcoin-system ${BITCOIN_SYSTEM_BRANCH} "yes"
         build_from_github libbitcoin-system "$PARALLEL" true "yes" "${BITCOIN_SYSTEM_OPTIONS[@]}" "$@"
     else
         push_directory "$PRESUMED_CI_PROJECT_PATH"
