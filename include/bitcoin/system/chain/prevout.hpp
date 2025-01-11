@@ -40,7 +40,7 @@ public:
         size_t height;
 
         /// database: populated with a database identifier for the parent tx.
-        uint64_t parent{ zero };
+        uint32_t parent{ zero };
     };
 
     ///************************************************************************
