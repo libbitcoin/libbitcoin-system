@@ -440,6 +440,17 @@ BOOST_AUTO_TEST_CASE(block__to_data__writer__expected)
 // fees
 // claim
 
+BOOST_AUTO_TEST_CASE(block__spends__genesis__zero)
+{
+    const auto genesis = settings(selection::mainnet).genesis_block;
+    BOOST_REQUIRE(is_zero(genesis.spends()));
+}
+
+BOOST_AUTO_TEST_CASE(block__spends__coinbase_only__zero)
+{
+    BOOST_REQUIRE(is_zero(get_block().spends()));
+}
+
 BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
 {
     const block instance;
