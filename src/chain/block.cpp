@@ -252,6 +252,21 @@ hashes block::transaction_hashes(bool witness) const NOEXCEPT
 }
 
 // computed
+size_t block::spends() const NOEXCEPT
+{
+    if (txs_->empty())
+        return zero;
+
+    // Overflow returns max_size_t.
+    const auto ins = [](size_t total, const auto& tx) NOEXCEPT
+    {
+         return ceilinged_add(total, tx->inputs());
+    };
+
+    return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, ins);
+}
+
+// computed
 hash_digest block::hash() const NOEXCEPT
 {
     return header_->hash();

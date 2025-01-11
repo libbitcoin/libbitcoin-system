@@ -90,6 +90,7 @@ public:
     hashes transaction_hashes(bool witness) const NOEXCEPT;
 
     /// Computed properties.
+    size_t spends() const NOEXCEPT;
     size_t weight() const NOEXCEPT;
     uint64_t fees() const NOEXCEPT;
     uint64_t claim() const NOEXCEPT;
