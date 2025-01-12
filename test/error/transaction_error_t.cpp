@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_non_final__true_exec
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "transaction currently non-final for next block");
+    BOOST_REQUIRE_EQUAL(ec.message(), "transaction currently non-final");
 }
 
 BOOST_AUTO_TEST_CASE(transaction_error_t__code__premature_validation__true_exected_message)
