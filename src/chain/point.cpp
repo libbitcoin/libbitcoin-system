@@ -118,8 +118,27 @@ bool operator<(const point& left, const point& right) NOEXCEPT
 {
     // Arbitrary compare, for uniqueness sorting.
     return left.index() == right.index() ?
-        left.hash() < right.hash() : left.index() < right.index();
+        left.hash() < right.hash() :
+        left.index() < right.index();
 }
+
+// Constant reference optimizers.
+
+bool operator<(const point_cref& left, const point_cref& right) NOEXCEPT
+{
+    return left.get() < right.get();
+}
+
+bool operator==(const point_cref& left, const point_cref& right) NOEXCEPT
+{
+    return left.get() == right.get();
+}
+
+bool operator!=(const point_cref& left, const point_cref& right) NOEXCEPT
+{
+    return !(left == right);
+}
+
 
 // Deserialization.
 // ----------------------------------------------------------------------------

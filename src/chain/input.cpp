@@ -213,6 +213,27 @@ bool input::operator!=(const input& other) const NOEXCEPT
     return !(*this == other);
 }
 
+// Constant reference optimizers.
+
+bool operator<(const cref_point& left, const cref_point& right) NOEXCEPT
+{
+    // Arbitrary compare, for uniqueness sorting.
+    return left.index == right.index ?
+        left.hash.get() < right.hash.get() :
+        left.index < right.index;
+}
+
+bool operator==(const cref_point& left, const cref_point& right) NOEXCEPT
+{
+    return (left.hash.get() == right.hash.get())
+        && (left.index == right.index);
+}
+
+bool operator!=(const cref_point& left, const cref_point& right) NOEXCEPT
+{
+    return !(left == right);
+}
+
 // Deserialization.
 // ----------------------------------------------------------------------------
 

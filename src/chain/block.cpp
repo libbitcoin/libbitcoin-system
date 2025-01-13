@@ -24,7 +24,6 @@
 #include <numeric>
 #include <set>
 #include <type_traits>
-#include <unordered_map>
 #include <utility>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
@@ -384,7 +383,7 @@ bool block::is_forward_reference() const NOEXCEPT
         return false;
 
     const auto sum_txs = sub1(txs_->size());
-    unordered_set_of_constant_referenced_hashes hashes{ sum_txs };
+    unordered_set_of_hash_cref hashes{ sum_txs };
     const auto spent = [&hashes](const input::cptr& input) NOEXCEPT
     {
         return hashes.find(std::ref(input->point().hash())) != hashes.end();
@@ -417,7 +416,7 @@ bool block::is_internal_double_spend() const NOEXCEPT
 
     const auto tx1 = std::next(txs_->begin());
     const auto spends_count = std::accumulate(tx1, txs_->end(), zero, sum_ins);
-    unordered_set_of_constant_referenced_points points{ spends_count };
+    unordered_set_of_point_cref points{ spends_count };
     const auto spent = [&points](const input::cptr& in) NOEXCEPT
     {
         return !points.emplace(in->point()).second;
@@ -478,7 +477,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
         return false;
 
     // A set is used to collapse duplicates.
-    unordered_set_of_constant_referenced_hashes hashes{};
+    unordered_set_of_hash_cref hashes{};
 
     // Just the coinbase tx hash, skip its null input hashes.
     hashes.emplace(txs_->front()->get_hash(false));
@@ -548,7 +547,7 @@ bool block::is_malleated32(size_t width) const NOEXCEPT
     auto mally = txs_->rbegin();
     auto legit = std::next(mally, width);
     while (!is_zero(width--))
-        if ((*mally++)->hash(false) != (*legit++)->hash(false))
+        if ((*mally++)->get_hash(false) != (*legit++)->get_hash(false))
             return false;
 
     return true;
@@ -705,22 +704,29 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 // Search is not ordered, forward references are caught by block.check.
 bool block::populate() const NOEXCEPT
 {
-    std::unordered_map<point, output::cptr> points{};
+    if (txs_->empty())
+        return true;
+
+    unordered_map_of_cref_point_to_output_cptr_cref points{};
+    const auto second = std::next(txs_->begin());
+    const auto last = txs_->end();
     uint32_t index{};
 
     // Populate outputs hash table.
-    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
+    for (auto tx = second; tx != last; ++tx, index = 0)
         for (const auto& out: *(*tx)->outputs_ptr())
-            points.emplace(std::pair{ point{ (*tx)->hash(false), index++ },
-                out });
+            points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
     // Populate input prevouts from hash table and obtain locked state.
-    bool locked{};
-    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx)
+    auto locked = false;
+    for (auto tx = second; tx != last; ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {
-            const auto point = points.find(in->point());
+            // Map chain::point to cref_point for search, should optimize away.
+            const auto point = points.find({ in->point().hash(),
+                in->point().index() });
+
             if (point != points.end())
             {
                 in->prevout = point->second;

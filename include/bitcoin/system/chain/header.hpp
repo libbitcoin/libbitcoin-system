@@ -175,7 +175,7 @@ struct hash<bc::system::chain::header>
 {
     size_t operator()(const bc::system::chain::header& value) const NOEXCEPT
     {
-        return bc::system::unique_hash_t<>{}(value.hash());
+        return bc::system::unique_hash(value.hash());
     }
 };
 } // namespace std

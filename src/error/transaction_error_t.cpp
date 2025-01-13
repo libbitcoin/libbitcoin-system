@@ -41,7 +41,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
 
     // accept transaction
     { unexpected_witness_transaction, "unexpected witness transaction" },
-    { transaction_non_final, "transaction currently non-final for next block" },
+    { transaction_non_final, "transaction currently non-final" },
     { premature_validation, "transaction validation under checkpoint" },
     { unspent_duplicate, "matching transaction with unspent outputs" },
     { missing_previous_output, "previous output not found" },
