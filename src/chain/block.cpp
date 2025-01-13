@@ -704,17 +704,22 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 // Search is not ordered, forward references are caught by block.check.
 bool block::populate() const NOEXCEPT
 {
-    uint32_t index{};
+    if (txs_->empty())
+        return true;
+
     unordered_map_of_cref_point_to_output_cptr_cref points{};
+    const auto second = std::next(txs_->begin());
+    const auto last = txs_->end();
+    uint32_t index{};
 
     // Populate outputs hash table.
-    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
+    for (auto tx = second; tx != last; ++tx, index = 0)
         for (const auto& out: *(*tx)->outputs_ptr())
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
     // Populate input prevouts from hash table and obtain locked state.
     auto locked = false;
-    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx)
+    for (auto tx = second; tx != last; ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {
