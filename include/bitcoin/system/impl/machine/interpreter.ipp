@@ -1111,7 +1111,9 @@ op_check_multisig_verify() NOEXCEPT
 
     ec_signature sig;
     uint8_t sighash_flags;
-    typename state::hash_cache cache;
+
+    // Bucket count default is typically around 8.
+    typename state::hash_cache cache{};
 
     // Subscript is the same for all signatures.
     const auto sub = state::subscript(endorsements);
