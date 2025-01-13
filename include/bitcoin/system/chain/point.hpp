@@ -21,6 +21,7 @@
 
 #include <istream>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -112,6 +113,13 @@ bool operator<(const point& left, const point& right) NOEXCEPT;
 
 typedef std_vector<point> points;
 
+/// Constant reference optimizers.
+using point_cref = std::reference_wrapper<const point>;
+using unordered_set_of_point_cref = std::unordered_set<point_cref>;
+BC_API bool operator<(const point_cref& left, const point_cref& right) NOEXCEPT;
+BC_API bool operator==(const point_cref& left, const point_cref& right) NOEXCEPT;
+BC_API bool operator!=(const point_cref& left, const point_cref& right) NOEXCEPT;
+
 DECLARE_JSON_VALUE_CONVERTORS(point);
 DECLARE_JSON_VALUE_CONVERTORS(point::cptr);
 
@@ -127,27 +135,19 @@ struct hash<bc::system::chain::point>
     size_t operator()(const bc::system::chain::point& value) const NOEXCEPT
     {
         return bc::system::hash_combine(value.index(),
-            bc::system::unique_hash_t<>{}(value.hash()));
+            bc::system::unique_hash(value.hash()));
     }
 };
 
 template<>
-struct hash<std::reference_wrapper<const bc::system::chain::point>>
+struct hash<bc::system::chain::point_cref>
 {
-    using wrapped = std::reference_wrapper<const bc::system::chain::point>;
-    std::size_t operator()(const wrapped& point) const NOEXCEPT
+    std::size_t operator()(
+        const bc::system::chain::point_cref& value) const NOEXCEPT
     {
-        return std::hash<bc::system::chain::point>{}(point.get());
+        return std::hash<bc::system::chain::point>{}(value.get());
     }
 };
-
-inline bool operator==(
-    const std::reference_wrapper<const bc::system::chain::point>& left,
-    const std::reference_wrapper<const bc::system::chain::point>& right) NOEXCEPT
-{
-    return left.get() == right.get();
-}
-
 } // namespace std
 
 #endif

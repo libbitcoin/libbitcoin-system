@@ -300,16 +300,9 @@ struct hash<bc::system::chain::transaction>
     size_t operator()(const bc::system::chain::transaction& value) const NOEXCEPT
     {
         // Witness coinbases will collide (null_hash).
-        return bc::system::unique_hash_t<>{}(value.hash(true));
+        return bc::system::unique_hash(value.hash(true));
     }
 };
-
-inline bool operator==(
-    const std::reference_wrapper<const bc::system::hash_digest>& left,
-    const std::reference_wrapper<const bc::system::hash_digest>& right) NOEXCEPT
-{
-    return left.get() == right.get();
-}
 } // namespace std
 
 #endif

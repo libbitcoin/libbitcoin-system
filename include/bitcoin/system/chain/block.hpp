@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
 #include <memory>
-#include <unordered_set>
 #include <vector>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
@@ -188,15 +187,6 @@ protected:
 
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
-    using point_cref = std::reference_wrapper<const point>;
-    using point_hash = std::hash<std::reference_wrapper<const point>>;
-    using hash_cref = std::reference_wrapper<const hash_digest>;
-    using hash_hash = unique_hash_t<>;
-
-    using unordered_set_of_constant_referenced_points =
-        std::unordered_set<point_cref, point_hash>;
-    using unordered_set_of_constant_referenced_hashes =
-        std::unordered_set<hash_cref, hash_hash>;
 
     void assign_data(reader& source, bool witness) NOEXCEPT;
     static block from_data(reader& source, bool witness) NOEXCEPT;
@@ -243,7 +233,7 @@ struct hash<bc::system::chain::block>
 {
     size_t operator()(const bc::system::chain::block& value) const NOEXCEPT
     {
-        return bc::system::unique_hash_t<>{}(value.hash());
+        return bc::system::unique_hash(value.hash());
     }
 };
 } // namespace std

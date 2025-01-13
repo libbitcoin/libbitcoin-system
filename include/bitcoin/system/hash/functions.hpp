@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <unordered_set>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>
@@ -156,8 +157,34 @@ INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT;
 /// Combine hash values, such as a pair of djb2_hash outputs [hash tables].
 INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT;
 
+/// Constant reference optimizers.
+using hash_cref = std::reference_wrapper<const hash_digest>;
+using unordered_set_of_hash_cref = std::unordered_set<hash_cref>;
+
 } // namespace system
 } // namespace libbitcoin
+
+/// Comparison operators for constant reference optimizers.
+namespace std
+{
+inline bool operator<(const bc::system::hash_cref& left,
+    const bc::system::hash_cref& right) NOEXCEPT
+{
+    return left.get() < right.get();
+}
+
+inline bool operator==(const bc::system::hash_cref& left,
+    const bc::system::hash_cref& right) NOEXCEPT
+{
+    return left.get() == right.get();
+}
+
+inline bool operator!=(const bc::system::hash_cref& left,
+    const bc::system::hash_cref& right) NOEXCEPT
+{
+    return !(left == right);
+}
+} // namespace std
 
 /// Extend std and boost namespaces with djb2_hash.
 /// ---------------------------------------------------------------------------
@@ -180,6 +207,15 @@ struct hash<bc::system::data_array<Size>>
     size_t operator()(const bc::system::data_array<Size>& data) const NOEXCEPT
     {
         return bc::system::djb2_hash(data);
+    }
+};
+
+template <>
+struct hash<bc::system::hash_cref>
+{
+    size_t operator()(const bc::system::hash_cref& hash) const NOEXCEPT
+    {
+        return bc::system::unique_hash(hash.get());
     }
 };
 } // namespace std

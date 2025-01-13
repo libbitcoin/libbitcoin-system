@@ -171,6 +171,14 @@ typedef std_vector<input::cptr> input_cptrs;
 typedef std::shared_ptr<input_cptrs> inputs_ptr;
 typedef std::shared_ptr<const input_cptrs> inputs_cptr;
 
+/// Constant reference optimizers.
+struct cref_point { hash_cref hash; uint32_t index; };
+using unordered_map_of_cref_point_to_output_cptr_cref =
+    std::unordered_map<cref_point, output_cptr_cref>;
+BC_API bool operator<(const cref_point& left, const cref_point& right) NOEXCEPT;
+BC_API bool operator==(const cref_point& left, const cref_point& right) NOEXCEPT;
+BC_API bool operator!=(const cref_point& left, const cref_point& right) NOEXCEPT;
+
 DECLARE_JSON_VALUE_CONVERTORS(input);
 DECLARE_JSON_VALUE_CONVERTORS(input::cptr);
 
@@ -186,6 +194,17 @@ struct hash<bc::system::chain::input>
     size_t operator()(const bc::system::chain::input& value) const NOEXCEPT
     {
         return std::hash<bc::system::data_chunk>{}(value.to_data());
+    }
+};
+
+template<>
+struct hash<bc::system::chain::cref_point>
+{
+    std::size_t operator()(
+        const bc::system::chain::cref_point& value) const NOEXCEPT
+    {
+        return bc::system::hash_combine(value.index,
+            bc::system::unique_hash(value.hash.get()));
     }
 };
 } // namespace std

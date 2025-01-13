@@ -114,6 +114,9 @@ typedef std_vector<output::cptr> output_cptrs;
 typedef std::shared_ptr<output_cptrs> outputs_ptr;
 typedef std::shared_ptr<const output_cptrs> outputs_cptr;
 
+/// Constant reference optimizers.
+using output_cptr_cref = std::reference_wrapper<const output::cptr>;
+
 DECLARE_JSON_VALUE_CONVERTORS(output);
 DECLARE_JSON_VALUE_CONVERTORS(output::cptr);
 
