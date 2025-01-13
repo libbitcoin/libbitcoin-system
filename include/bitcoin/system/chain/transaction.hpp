@@ -128,6 +128,9 @@ public:
     bool is_empty() const NOEXCEPT;
     bool is_dusty(uint64_t minimum_output_value) const NOEXCEPT;
 
+    /// Requires no metadata, true if spend in own block would be locked.
+    bool is_internal_lock(const input& in) const NOEXCEPT;
+
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
