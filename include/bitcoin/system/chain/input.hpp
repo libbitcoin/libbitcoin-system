@@ -118,13 +118,14 @@ public:
     /// Requires metadata.height and median_time_past (otherwise returns true).
     bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
 
-    /// Any non-zero relative locktime value locks internally-spent input.
-    bool is_internally_locked() const NOEXCEPT;
-
 protected:
     input(const chain::point::cptr& point, const chain::script::cptr& script,
         const chain::witness::cptr& witness, uint32_t sequence,
         bool valid) NOEXCEPT;
+
+    /// Any non-zero relative locktime value locks internally-spent input.
+    friend class transaction;
+    bool is_internal_lock() const NOEXCEPT;
 
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;

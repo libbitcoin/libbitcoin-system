@@ -730,7 +730,7 @@ bool block::populate(const chain::context& ctx) const NOEXCEPT
             if (point != points.end())
             {
                 in->prevout = point->second;
-                in->metadata.locked = bip68 && in->is_internally_locked();
+                in->metadata.locked = bip68 && (*tx)->is_internal_lock(*in);
                 locked |= in->metadata.locked;
             }
         }

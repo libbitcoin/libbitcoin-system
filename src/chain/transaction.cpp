@@ -1151,6 +1151,18 @@ bool transaction::is_immature(size_t height) const NOEXCEPT
     return !std::all_of(inputs_->begin(), inputs_->end(), mature);
 }
 
+bool transaction::is_internal_lock(const input& in) const NOEXCEPT
+{
+    // BIP68: not applied to the sequence of the input of a coinbase.
+    BC_ASSERT(!is_coinbase());
+
+    // BIP68: applied to txs with a version greater than or equal to two.
+    if (version_ < relative_locktime_min_version)
+        return false;
+
+    return in.is_internal_lock();
+}
+
 bool transaction::is_locked(size_t height,
     uint32_t median_time_past) const NOEXCEPT
 {

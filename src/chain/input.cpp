@@ -416,10 +416,11 @@ bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
         metadata.median_time_past);
 }
 
-bool input::is_internally_locked() const NOEXCEPT
+// protected (tx friend)
+bool input::is_internal_lock() const NOEXCEPT
 {
-    // Internal spends have zero relative height/mtp.
-    return is_locked(sequence_, {}, {}, {}, {});
+    // Internal spends have no relative height/mtp (any metadata values work).
+    return is_locked(metadata.height, metadata.median_time_past);
 }
 
 bool input::reserved_hash(hash_digest& out) const NOEXCEPT
