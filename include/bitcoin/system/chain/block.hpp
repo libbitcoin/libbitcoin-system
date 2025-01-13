@@ -137,7 +137,8 @@ public:
     code confirm(const context& ctx) const NOEXCEPT;
 
     /// Populate previous outputs (and metadata.locked) internal to the block.
-    bool populate() const NOEXCEPT;
+    /// False if one or more populated prevouts is locked in the block context.
+    bool populate(const context& ctx) const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,

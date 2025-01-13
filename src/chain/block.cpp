@@ -702,24 +702,24 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 }
 
 // Search is not ordered, forward references are caught by block.check.
-bool block::populate() const NOEXCEPT
+bool block::populate(const chain::context& ctx) const NOEXCEPT
 {
     if (txs_->empty())
         return true;
 
+    const auto start = std::next(txs_->begin());
+    const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
     unordered_map_of_cref_point_to_output_cptr_cref points{};
-    const auto second = std::next(txs_->begin());
-    const auto last = txs_->end();
     uint32_t index{};
 
     // Populate outputs hash table.
-    for (auto tx = second; tx != last; ++tx, index = 0)
+    for (auto tx = start; tx != txs_->end(); ++tx, index = 0)
         for (const auto& out: *(*tx)->outputs_ptr())
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
     // Populate input prevouts from hash table and obtain locked state.
     auto locked = false;
-    for (auto tx = second; tx != last; ++tx)
+    for (auto tx = start; tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
         {
@@ -730,7 +730,7 @@ bool block::populate() const NOEXCEPT
             if (point != points.end())
             {
                 in->prevout = point->second;
-                in->metadata.locked = in->is_internally_locked();
+                in->metadata.locked = bip68 && in->is_internally_locked();
                 locked |= in->metadata.locked;
             }
         }
