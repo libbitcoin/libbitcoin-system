@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(sha256_224__ttt_accumulator_hash__test_vectors__expected)
     using sha_256_224 = sha::algorithm<sha::h256<224>, true, true, true>;
 
     // Native only for sha256 (and sha160 when implemented).
-    static_assert(sha_256_224::native);
+    static_assert(sha_256_224::native == native);
     static_assert(sha_256_224::vector == vector);
     static_assert(sha_256_224::caching);
 
