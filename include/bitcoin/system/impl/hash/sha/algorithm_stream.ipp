@@ -116,7 +116,7 @@ finalize_second(const state_t& state) NOEXCEPT
     {
         auto state2 = H::get;
         buffer_t buffer{};
-        inject_left(buffer, state);
+        inject_left_half(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         compress(state2, buffer);
@@ -150,7 +150,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
 
         // This is finalize_second() but reuses the initial buffer.
         auto state2 = H::get;
-        inject_left(buffer, state);
+        inject_left_half(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         compress(state2, buffer);

@@ -410,11 +410,8 @@ output(const state_t& state) NOEXCEPT
 
 TEMPLATE
 INLINE constexpr void CLASS::
-inject_left(auto& buffer, const auto& left) NOEXCEPT
+inject_left_half(auto& buffer, const auto& left) NOEXCEPT
 {
-    using words = decltype(buffer);
-    static_assert(array_count<words> >= SHA::state_words);
-
     if (std::is_constant_evaluated())
     {
         buffer.at(0) = left.at(0);
@@ -428,18 +425,15 @@ inject_left(auto& buffer, const auto& left) NOEXCEPT
     }
     else
     {
-        using word = array_element<words>;
+        using word = array_element<decltype(buffer)>;
         array_cast<word, SHA::state_words>(buffer) = left;
     }
 }
 
 TEMPLATE
 INLINE constexpr void CLASS::
-inject_right(auto& buffer, const auto& right) NOEXCEPT
+inject_right_half(auto& buffer, const auto& right) NOEXCEPT
 {
-    using words = decltype(buffer);
-    static_assert(array_count<words> >= SHA::state_words);
-
     if (std::is_constant_evaluated())
     {
         buffer.at(8) = right.at(0);
@@ -453,8 +447,45 @@ inject_right(auto& buffer, const auto& right) NOEXCEPT
     }
     else
     {
-        using word = array_element<words>;
+        using word = array_element<decltype(buffer)>;
         array_cast<word, SHA::state_words, SHA::state_words>(buffer) = right;
+    }
+}
+
+TEMPLATE
+INLINE constexpr void CLASS::
+inject_left_quarter(auto& buffer, const auto& left) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        buffer.at(0) = left.at(0);
+        buffer.at(1) = left.at(1);
+        buffer.at(2) = left.at(2);
+        buffer.at(3) = left.at(3);
+    }
+    else
+    {
+        using word = array_element<decltype(buffer)>;
+        array_cast<word, to_half(SHA::state_words)>(buffer) = left;
+    }
+}
+
+TEMPLATE
+INLINE constexpr void CLASS::
+inject_right_quarter(auto& buffer, const auto& right) NOEXCEPT
+{
+    if (std::is_constant_evaluated())
+    {
+        buffer.at(4) = right.at(0);
+        buffer.at(5) = right.at(1);
+        buffer.at(6) = right.at(2);
+        buffer.at(7) = right.at(3);
+    }
+    else
+    {
+        using word = array_element<decltype(buffer)>;
+        constexpr auto words = to_half(SHA::state_words);
+        array_cast<word, words, words>(buffer) = right;
     }
 }
 

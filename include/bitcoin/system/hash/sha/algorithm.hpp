@@ -236,13 +236,17 @@ protected:
     /// -----------------------------------------------------------------------
 
     INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
-    INLINE static constexpr void input_left(auto& buffer, const quart_t& quarter) NOEXCEPT;
-    INLINE static constexpr void input_right(auto& buffer, const quart_t& quarter) NOEXCEPT;
+    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
+
     INLINE static constexpr void input_left(auto& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input_right(auto& buffer, const half_t& half) NOEXCEPT;
-    INLINE static constexpr void inject_left(auto& buffer, const auto& left) NOEXCEPT;
-    INLINE static constexpr void inject_right(auto& buffer, const auto& right) NOEXCEPT;
-    INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
+    INLINE static constexpr void input_left(auto& buffer, const quart_t& quarter) NOEXCEPT;
+    INLINE static constexpr void input_right(auto& buffer, const quart_t& quarter) NOEXCEPT;
+
+    INLINE static constexpr void inject_left_half(auto& buffer, const auto& left) NOEXCEPT;
+    INLINE static constexpr void inject_right_half(auto& buffer, const auto& right) NOEXCEPT;
+    INLINE static constexpr void inject_left_quarter(auto& buffer, const auto& left) NOEXCEPT;
+    INLINE static constexpr void inject_right_quarter(auto& buffer, const auto& right) NOEXCEPT;
 
     /// Padding.
     /// -----------------------------------------------------------------------
@@ -409,6 +413,7 @@ protected:
     static digest_t native_hash(const block_t& block) NOEXCEPT;
     static digest_t native_hash(const half_t& half) NOEXCEPT;
     static digest_t native_hash(const half_t& left, const half_t& right) NOEXCEPT;
+    static digest_t native_hash(const quart_t& left, const quart_t& right) NOEXCEPT;
     static digest_t native_hash(uint8_t byte) NOEXCEPT;
 
     static digest_t native_double_hash(const block_t& block) NOEXCEPT;
