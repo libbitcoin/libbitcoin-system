@@ -28,7 +28,6 @@ namespace config {
 
 using namespace std::filesystem;
 using namespace boost::program_options;
-using namespace boost::system;
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
