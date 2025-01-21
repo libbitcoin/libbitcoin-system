@@ -95,7 +95,7 @@ double_hash(const block_t& block) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        inject_left(buffer, state);
+        inject_left_half(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -134,7 +134,7 @@ double_hash(const half_t& half) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        inject_left(buffer, state);
+        inject_left_half(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
@@ -175,7 +175,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
         compress(state, buffer);
 
         // Second hash
-        inject_left(buffer, state);
+        inject_left_half(buffer, state);
         pad_half(buffer);
         schedule(buffer);
         state = H::get;
