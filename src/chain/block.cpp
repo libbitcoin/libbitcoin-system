@@ -235,7 +235,7 @@ hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
     const auto count = txs_->size();
     const auto size = is_odd(count) && count > one ? add1(count) : count;
-    hashes out(size);
+    hashes out{ size };
 
     // Extra allocation for odd count optimizes for merkle root.
     // Vector capacity is never reduced when resizing to smaller size.
@@ -251,6 +251,21 @@ hashes block::transaction_hashes(bool witness) const NOEXCEPT
 }
 
 // computed
+size_t block::outputs() const NOEXCEPT
+{
+    if (txs_->empty())
+        return zero;
+
+    // Overflow returns max_size_t.
+    const auto outs = [](size_t total, const auto& tx) NOEXCEPT
+    {
+         return ceilinged_add(total, tx->outputs());
+    };
+
+    return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, outs);
+}
+
+// computed
 size_t block::spends() const NOEXCEPT
 {
     if (txs_->empty())
@@ -262,6 +277,7 @@ size_t block::spends() const NOEXCEPT
          return ceilinged_add(total, tx->inputs());
     };
 
+    // inputs() is add1(spends()) if the block is valid (one coinbase input).
     return std::accumulate(std::next(txs_->begin()), txs_->end(), zero, ins);
 }
 
@@ -382,22 +398,17 @@ bool block::is_forward_reference() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto sum_txs = sub1(txs_->size());
-    unordered_set_of_hash_cref hashes{ sum_txs };
-    const auto spent = [&hashes](const input::cptr& input) NOEXCEPT
+    unordered_set_of_hash_cref hashes{ sub1(txs_->size()) };
+    for (auto tx = txs_->rbegin(); tx != std::prev(txs_->rend()); ++tx)
     {
-        return hashes.find(std::ref(input->point().hash())) != hashes.end();
-    };
+        for (const auto& in: *(*tx)->inputs_ptr())
+            if (hashes.contains(in->point().hash()))
+                return true;
 
-    const auto spend = [&spent, &hashes](const auto& tx) NOEXCEPT
-    {
-        const auto& ins = tx->inputs_ptr();
-        const auto forward = std::any_of(ins->begin(), ins->end(), spent);
-        hashes.emplace(tx->get_hash(false));
-        return forward;
-    };
+        hashes.emplace((*tx)->get_hash(false));
+    }
 
-    return std::any_of(txs_->rbegin(), std::prev(txs_->rend()), spend);
+    return false;
 }
 
 // This also precludes the block merkle calculation DoS exploit by preventing
@@ -408,27 +419,13 @@ bool block::is_internal_double_spend() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    // Overflow returns max_size_t.
-    const auto sum_ins = [](size_t total, const auto& tx) NOEXCEPT
-    {
-        return ceilinged_add(total, tx->inputs());
-    };
+    unordered_set_of_point_cref points{ spends() };
+    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+        for (const auto& in: *(*tx)->inputs_ptr())
+            if (!points.emplace(in->point()).second)
+                return true;
 
-    const auto tx1 = std::next(txs_->begin());
-    const auto spends_count = std::accumulate(tx1, txs_->end(), zero, sum_ins);
-    unordered_set_of_point_cref points{ spends_count };
-    const auto spent = [&points](const input::cptr& in) NOEXCEPT
-    {
-        return !points.emplace(in->point()).second;
-    };
-
-    const auto double_spent = [&spent](const auto& tx) NOEXCEPT
-    {
-        const auto& ins = tx->inputs_ptr();
-        return std::any_of(ins->begin(), ins->end(), spent);
-    };
-
-    return std::any_of(tx1, txs_->end(), double_spent);
+    return false;
 }
 
 // private
@@ -477,7 +474,7 @@ bool block::is_hash_limit_exceeded() const NOEXCEPT
         return false;
 
     // A set is used to collapse duplicates.
-    unordered_set_of_hash_cref hashes{};
+    unordered_set_of_hash_cref hashes{ txs_->size() };
 
     // Just the coinbase tx hash, skip its null input hashes.
     hashes.emplace(txs_->front()->get_hash(false));
@@ -645,7 +642,7 @@ uint64_t block::fees() const NOEXCEPT
         return ceilinged_add(total, tx->fee());
     };
 
-    return std::accumulate(txs_->begin(), txs_->end(), uint64_t{0}, value);
+    return std::accumulate(txs_->begin(), txs_->end(), uint64_t{}, value);
 }
 
 uint64_t block::claim() const NOEXCEPT
@@ -709,7 +706,7 @@ bool block::populate(const chain::context& ctx) const NOEXCEPT
 
     const auto start = std::next(txs_->begin());
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
-    unordered_map_of_cref_point_to_output_cptr_cref points{};
+    unordered_map_of_cref_point_to_output_cptr_cref points{ outputs() };
     uint32_t index{};
 
     // Populate outputs hash table.
