@@ -352,8 +352,7 @@ native_hash(const quart_t& left, const quart_t& right) NOEXCEPT
     inject_left_quarter(block, array_cast<word_t>(left));
     inject_right_quarter(block, array_cast<word_t>(right));
     pad_half(block);
-    native_transform<true>(state, block);
-    return native_finalize<one>(state);
+    return native_finalize(state, block);
 }
 
 TEMPLATE
