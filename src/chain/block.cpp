@@ -356,7 +356,7 @@ size_t block::serialized_size(bool witness) const NOEXCEPT
     return witness ? size_.witnessed : size_.nominal;
 }
 
-// Connect.
+// Check (context free).
 // ----------------------------------------------------------------------------
 
 bool block::is_empty() const NOEXCEPT
