@@ -255,8 +255,7 @@ chain_state::activations chain_state::activation(const data& values,
 
     // bip30_deactivate fork enforced above bip30_deactivate (bip34) checkpoint.
     const auto bip30_deactivate = forks.bip30 && forks.bip30_deactivate &&
-        (values.bip30_deactivate_hash ==
-            settings.bip30_deactivate_checkpoint.hash());
+        (values.bip30_deactivate_hash == settings.bip30_deactivate_checkpoint.hash());
 
     // bip30_reactivate fork is enforced above the bip30_reactivate height.
     const auto bip30_reactivate = bip30_deactivate && forks.bip30_reactivate &&
