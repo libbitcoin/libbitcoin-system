@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_INTERPRETER_IPP
 
-#include "bitcoin/system/chain/prevout.hpp"
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/operation.hpp>
