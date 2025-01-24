@@ -1721,11 +1721,18 @@ code interpreter<Stack>::connect_witness(const context& state,
             // A defined version indicates bip141 is active.
             interpreter program(tx, it, script, state.flags, version, stack);
             if ((ec = program.run()))
+            {
                 return ec;
-
-            // A v0 script must succeed with a clean true stack (bip141).
-            return program.is_true(true) ? error::script_success :
-                error::stack_false;
+            }
+            else if (!program.is_true(true))
+            {
+                // A v0 script must succeed with a clean true stack (bip141).
+                return error::stack_false;
+            }
+            else
+            {
+                return error::script_success;
+            }
         }
 
         // These versions are reserved for future extensions (bip141).
