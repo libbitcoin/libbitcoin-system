@@ -651,6 +651,10 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
 
+    // Cache hash of bip30_deactivate block, otherwise use preceding state.
+    if (data.height == settings.bip30_deactivate_checkpoint.height())
+        data.bip30_deactivate_hash = data.hash;
+
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())
         data.bip9_bit0_hash = data.hash;
@@ -689,6 +693,10 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
+
+    // Cache hash of bip30_deactivate block, otherwise use preceding state.
+    if (data.height == settings.bip30_deactivate_checkpoint.height())
+        data.bip30_deactivate_hash = data.hash;
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())
