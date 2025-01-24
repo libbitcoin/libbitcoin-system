@@ -81,10 +81,12 @@ constexpr bool is_retarget_height(size_t height,
 // These two blocks each have a coinbase transaction that exactly duplicates
 // another that is not spent by the arrival of the corresponding duplicate.
 // Exceptions: block 91842 (duplicates 91812), 91880 (duplicates 91722).
-inline bool is_bip30_exception(const checkpoint& check) NOEXCEPT
+inline bool is_bip30_exception(const hash_digest& hash, size_t height) NOEXCEPT
 {
-    return (check == mainnet_bip30_exception_checkpoint1) ||
-         (check == mainnet_bip30_exception_checkpoint2);
+    return (hash   == mainnet_bip30_exception_checkpoint1.hash() &&
+            height == mainnet_bip30_exception_checkpoint1.height()) ||
+           (hash   == mainnet_bip30_exception_checkpoint2.hash() &&
+            height == mainnet_bip30_exception_checkpoint2.height());
 }
 
 inline uint32_t timestamp_high(const chain_state::data& values) NOEXCEPT
@@ -253,8 +255,7 @@ chain_state::activations chain_state::activation(const data& values,
 
     // bip30_deactivate fork enforced above bip30_deactivate (bip34) checkpoint.
     const auto bip30_deactivate = forks.bip30 && forks.bip30_deactivate &&
-        (values.bip30_deactivate_hash ==
-            settings.bip30_deactivate_checkpoint.hash());
+        (values.bip30_deactivate_hash == settings.bip30_deactivate_checkpoint.hash());
 
     // bip30_reactivate fork is enforced above the bip30_reactivate height.
     const auto bip30_reactivate = bip30_deactivate && forks.bip30_reactivate &&
@@ -263,7 +264,7 @@ chain_state::activations chain_state::activation(const data& values,
     // bip30 is disabled by bip30_deactivate and reenabled by bip30_reactivate.
     // Otherwise if not exception, existing duplicate coinbase must be spent.
     if (forks.bip30 && (!bip30_deactivate || bip30_reactivate) &&
-        !is_bip30_exception({ values.hash, height }))
+        !is_bip30_exception(values.hash, height))
     {
         result.flags |= flags::bip30_rule;
     }
@@ -650,6 +651,10 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
 
+    // Cache hash of bip30_deactivate block, otherwise use preceding state.
+    if (data.height == settings.bip30_deactivate_checkpoint.height())
+        data.bip30_deactivate_hash = data.hash;
+
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())
         data.bip9_bit0_hash = data.hash;
@@ -688,6 +693,10 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     data.version.self = header.version();
     data.timestamp.self = header.timestamp();
     data.cumulative_work += header.proof();
+
+    // Cache hash of bip30_deactivate block, otherwise use preceding state.
+    if (data.height == settings.bip30_deactivate_checkpoint.height())
+        data.bip30_deactivate_hash = data.hash;
 
     // Cache hash of bip9 bit0 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit0_active_checkpoint.height())
