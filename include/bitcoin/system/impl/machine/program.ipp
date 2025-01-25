@@ -430,7 +430,7 @@ peek_unsigned32(uint32_t& value) const NOEXCEPT
         return false;
 
     int64_t signed64;
-    if (!peek_signed40_(signed64) || is_negative(value))
+    if (!peek_signed40_(signed64) || is_negative(signed64))
         return false;
 
     // 32 bits are used in unsigned input.sequence compare.
@@ -441,7 +441,7 @@ peek_unsigned32(uint32_t& value) const NOEXCEPT
 // ****************************************************************************
 // CONSENSUS: Read of 40 bit (vs. 32 bit) value for comparison against uint32_t
 // input.locktime allows use of the full unsigned 32 bit domain, without use of
-// the negative range. Otherwise a 2038 limit (beyond the inherent 2106 limit)
+// the negative range. Otherwise a 2038 limit (vs. the inherent 2106 limit)
 // would have been introduced.
 // ****************************************************************************
 template <typename Stack>
@@ -452,7 +452,7 @@ peek_unsigned40(uint64_t& value) const NOEXCEPT
         return false;
 
     int64_t signed64;
-    if (!peek_signed40_(signed64) || is_negative(value))
+    if (!peek_signed40_(signed64) || is_negative(signed64))
         return false;
 
     // 40 bits are usable in unsigned tx.locktime compare.
