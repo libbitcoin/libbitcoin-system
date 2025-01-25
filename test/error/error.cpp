@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(error_t__code__message_overflow__default_message)
 // Overflows can be cast in, and value retained, and yield default message.
 BOOST_AUTO_TEST_CASE(error_t__code__value_overflow__default_message)
 {
-    const auto overflow = static_cast<int>(error::error_last);
+    constexpr auto overflow = static_cast<int>(error::error_last);
     const auto ec = code(static_cast<error::error_t>(overflow));
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE_EQUAL(ec.message(), default_message);
@@ -108,6 +108,14 @@ BOOST_AUTO_TEST_CASE(error_t__code__category_name__expected)
 {
     BOOST_REQUIRE_EQUAL(code().category().name(), system_category_name);
     BOOST_REQUIRE_EQUAL(code(error::success).category().name(), bitcoin_category_name);
+    BOOST_REQUIRE_NE(code(error::script_success).category().name(), code(error::success).category().name());
+}
+
+BOOST_AUTO_TEST_CASE(error_t__code__category_contains__expected)
+{
+    BOOST_REQUIRE(system::error::error_category::contains(system::error::success));
+    BOOST_REQUIRE(!system::error::script_error_category::contains(system::error::success));
+    BOOST_REQUIRE(system::error::script_error_category::contains(system::error::script_success));
 }
 
 BOOST_AUTO_TEST_CASE(error_t__code__default_error_condition_category_name__expected)

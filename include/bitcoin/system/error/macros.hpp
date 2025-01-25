@@ -57,6 +57,7 @@ class BC_API cat##_category \
     static const message_map<cat##_t> messages; \
 public: \
     static const cat##_category singleton; \
+    static bool contains(const std::error_code& ec) noexcept; \
     virtual const char* name() const noexcept; \
     virtual std::string message(int condition) const noexcept; \
     virtual std::error_condition default_error_condition(int value) const noexcept; \
@@ -74,6 +75,7 @@ class BC_API cat##_category \
     static const message_map<cat##_t> messages; \
 public: \
     static const cat##_category singleton; \
+    static bool contains(const std::error_code& ec) noexcept; \
     virtual const char* name() const noexcept; \
     virtual std::string message(int condition) const noexcept; \
     virtual std::error_condition default_error_condition(int value) const noexcept; \
@@ -84,6 +86,10 @@ std::error_condition make_error_condition(cat##_t value) noexcept
 
 #define DEFINE_ERROR_T_CATEGORY(cat, category_name, unmapped) \
 const cat##_category cat##_category::singleton; \
+bool cat##_category::contains(const std::error_code& ec) noexcept \
+{ \
+    return is_zero(std::strcmp(ec.category().name(), category_name)); \
+} \
 const char* cat##_category::name() const noexcept \
 { \
     return category_name; \
