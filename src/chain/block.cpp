@@ -587,6 +587,16 @@ bool block::is_segregated() const NOEXCEPT
     return std::any_of(txs_->begin(), txs_->end(), segregated);
 }
 
+size_t block::segregated() const NOEXCEPT
+{
+    const auto count_segregated = [](const auto& tx) NOEXCEPT
+    {
+        return tx->is_segregated();
+    };
+
+    return std::count_if(txs_->begin(), txs_->end(), count_segregated);
+}
+
 // The witness merkle root is obtained from wtxids, subject to malleation just
 // as the txs commitment. However, since tx duplicates are precluded by the
 // malleable32 (or complete) block check, there is no opportunity for this.

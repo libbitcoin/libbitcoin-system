@@ -460,6 +460,7 @@ BOOST_AUTO_TEST_CASE(block__hash__default__matches_header_hash)
 // is_malleable
 // is_segregated
 // serialized_size
+// segregated
 
 // validation (public)
 // ----------------------------------------------------------------------------
