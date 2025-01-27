@@ -600,6 +600,10 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
     if (coinbase->inputs_ptr()->empty())
         return false;
 
+    // If no block tx has witness data the commitment is optional (bip141).
+    if (!is_segregated())
+        return false;
+
     // If there is a valid commitment, return false (valid).
     // Coinbase input witness must be 32 byte witness reserved value (bip141).
     // Last output of commitment pattern holds the committed value (bip141).
@@ -610,10 +614,8 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
                 if (committed == sha256::double_hash(
                     generate_merkle_root(true), reserved))
                     return false;
-    
-    // If no valid commitment, return true (invalid) if segregated.
-    // If no block tx has witness data the commitment is optional (bip141).
-    return is_segregated();
+
+    return true;
 }
 
 //*****************************************************************************
