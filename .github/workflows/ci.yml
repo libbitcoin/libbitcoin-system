@@ -17,61 +17,65 @@ jobs:
 
       matrix:
         include:
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Og -fPIE"
             options: "--enable-isystem --enable-avx2 --enable-sse4"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-avx2"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-sse4"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "cov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -g --coverage -fPIE"
             options: "--enable-isystem"
             packager: "apt"
@@ -85,12 +89,13 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: "llvm@16"
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: "--enable-isystem"
             packager: "brew"
-            packages: "icu4c"
+            packages: "llvm@16 icu4c"
 
           - os: macos-latest
             cxx: "clang++"
@@ -100,12 +105,13 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: "llvm@16"
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: "--enable-isystem"
             packager: "brew"
-            packages: "icu4c"
+            packages: "llvm@16 icu4c"
 
 
     runs-on: ${{ matrix.os }}
@@ -135,6 +141,9 @@ jobs:
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
+          if [[ -n ${{ matrix.llvm }} ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+          fi
 
       - name: Denormalize parameterization
         shell: bash
@@ -181,9 +190,9 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
-          lcov --list coverage.info
+          lcov --directory . --capture --ignore-errors version --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file --ignore-errors version coverage.info
+          lcov --list --ignore-errors version coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
@@ -249,61 +258,65 @@ jobs:
 
       matrix:
         include:
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: "-Denable-sse4=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: ""
             packager: "apt"
@@ -317,12 +330,13 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: "llvm@16"
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: ""
             packager: "brew"
-            packages: "icu4c"
+            packages: "llvm@16 icu4c"
 
           - os: macos-latest
             cxx: "clang++"
@@ -332,12 +346,13 @@ jobs:
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: "llvm@16"
             secp256k1: "--build-secp256k1"
             cc: "clang"
             flags: "-Os -fvisibility=hidden -fPIE -DBOOST_NO_CXX98_FUNCTION_BASE"
             options: ""
             packager: "brew"
-            packages: "icu4c"
+            packages: "llvm@16 icu4c"
 
 
     runs-on: ${{ matrix.os }}
@@ -367,6 +382,9 @@ jobs:
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
+          if [[ -n ${{ matrix.llvm }} ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+          fi
 
       - name: Denormalize parameterization
         shell: bash
@@ -416,9 +434,9 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
-          lcov --list coverage.info
+          lcov --directory . --capture --ignore-errors version --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file --ignore-errors version coverage.info
+          lcov --list --ignore-errors version coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
@@ -494,49 +512,52 @@ jobs:
 
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             preset: "nix-gnu-debug-shared"
-            cxx: "clang++-15"
+            cxx: "clang++-16"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse4=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             preset: "nix-gnu-release-static"
-            cxx: "clang++-15"
+            cxx: "clang++-16"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             preset: "nix-gnu-release-shared"
-            cxx: "g++-11"
+            cxx: "g++-12"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
             boost: "--build-boost"
             icu: ""
+            llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: "-Denable-sse4=on"
             packager: "apt"
@@ -570,6 +591,9 @@ jobs:
         if: ${{ matrix.packager == 'brew' }}
         run: |
           brew install autoconf automake libtool ${{ matrix.packages }}
+          if [[ -n ${{ matrix.llvm }} ]]; then
+              echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+          fi
 
       - name: Denormalize parameterization
         shell: bash
@@ -620,9 +644,9 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
-          lcov --list coverage.info
+          lcov --directory . --capture --ignore-errors version --output-file coverage.info
+          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file --ignore-errors version coverage.info
+          lcov --list --ignore-errors version coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
