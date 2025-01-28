@@ -869,6 +869,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\execution.hpp">
+      <Filter>include\bitcoin\system</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\forks.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>

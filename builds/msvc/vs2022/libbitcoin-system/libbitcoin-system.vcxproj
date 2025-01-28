@@ -331,6 +331,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\script_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\transaction_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\execution.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\forks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\accumulator.hpp" />

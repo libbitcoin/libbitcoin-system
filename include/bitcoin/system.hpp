@@ -21,6 +21,7 @@
 #include <bitcoin/system/constraints.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/exceptions.hpp>
+#include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/forks.hpp>
 #include <bitcoin/system/funclets.hpp>
 #include <bitcoin/system/have.hpp>
