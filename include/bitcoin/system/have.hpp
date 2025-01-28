@@ -202,7 +202,7 @@
             #define HAVE_VECTOR_CONSTEXPR
         // Ubuntu clang version 15.0.7
         #else
-            ////#define HAVE_RANGES    (N/A)
+            ////#define HAVE_RANGES    (v16)
             ////#define HAVE_CONSTEVAL (v17)
             #define HAVE_STRING_CONSTEXPR
             #define HAVE_VECTOR_CONSTEXPR
@@ -216,9 +216,17 @@
     #endif
 #endif
 
-/// No std::execution on clang (C++17).
-#if defined(HAVE_CPP17) && !defined(HAVE_CLANG)
-    #define HAVE_EXECUTION
+/// C++20: parenthesized initialization of aggregates requires clang16/xcode16.
+/// We don't have macro treatment for that, just ad-hoc conditions.
+
+/// None on xcode.
+/// Requires link with -ltbb on gcc (v9).
+/// Experimental on clang (libcxx.llvm.org/Status/PSTL.html), requires:
+/// -fexperimental-library
+#if defined(HAVE_CPP17)
+    #if defined(HAVE_MSC)
+        #define HAVE_EXECUTION
+    #endif
 #endif
 
 /// These are manually configured here.
