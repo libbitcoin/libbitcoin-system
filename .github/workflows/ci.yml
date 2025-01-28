@@ -17,8 +17,8 @@ jobs:
 
       matrix:
         include:
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
@@ -27,14 +27,14 @@ jobs:
             boost: "--build-boost"
             icu: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Og -fPIE"
             options: "--enable-isystem --enable-avx2 --enable-sse41"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -43,14 +43,14 @@ jobs:
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-avx2"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
@@ -59,14 +59,14 @@ jobs:
             boost: "--build-boost"
             icu: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: "--enable-isystem --enable-sse41"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -75,7 +75,7 @@ jobs:
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -g --coverage -fPIE"
             options: "--enable-isystem"
             packager: "apt"
@@ -279,8 +279,8 @@ jobs:
 
       matrix:
         include:
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
@@ -289,14 +289,14 @@ jobs:
             boost: "--build-boost"
             icu: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse41=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "clang++-15"
+          - os: ubuntu-24.04
+            cxx: "clang++-16"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -305,14 +305,14 @@ jobs:
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
@@ -321,14 +321,14 @@ jobs:
             boost: "--build-boost"
             icu: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: "-Denable-sse41=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
-            cxx: "g++-11"
+          - os: ubuntu-24.04
+            cxx: "g++-12"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -337,7 +337,7 @@ jobs:
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: ""
             packager: "apt"
@@ -554,9 +554,9 @@ jobs:
 
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             preset: "nix-gnu-debug-shared"
-            cxx: "clang++-15"
+            cxx: "clang++-16"
             link: "dynamic"
             optimization: "debug"
             assert: "debug"
@@ -565,15 +565,15 @@ jobs:
             boost: "--build-boost"
             icu: ""
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Og -fPIE"
             options: "-Denable-avx2=on -Denable-sse41=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             preset: "nix-gnu-release-static"
-            cxx: "clang++-15"
+            cxx: "clang++-16"
             link: "static"
             optimization: "size"
             assert: "ndebug"
@@ -582,15 +582,15 @@ jobs:
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             secp256k1: "--build-secp256k1"
-            cc: "clang-15"
+            cc: "clang-16"
             flags: "-Os -fPIE"
             options: "-Denable-avx2=on"
             packager: "apt"
             packages: ""
 
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             preset: "nix-gnu-release-shared"
-            cxx: "g++-11"
+            cxx: "g++-12"
             link: "dynamic"
             optimization: "size"
             assert: "ndebug"
@@ -599,7 +599,7 @@ jobs:
             boost: "--build-boost"
             icu: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-11"
+            cc: "gcc-12"
             flags: "-Os -fPIE"
             options: "-Denable-sse41=on"
             packager: "apt"
