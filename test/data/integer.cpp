@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_shift_right__null_hash__null_hash)
 {
     BOOST_REQUIRE_EQUAL(uint256_t() >> 0, uint256_t());
     BOOST_REQUIRE_EQUAL(uint256_t() >> 1, uint256_t());
-    BOOST_REQUIRE_EQUAL(uint256_t() >> bc::max_uint32, uint256_t());
+    BOOST_REQUIRE_EQUAL(uint256_t() >> 42, uint256_t());
 }
 
 BOOST_AUTO_TEST_CASE(integer__uint256_shift_right__unit_hash_0__unit_hash)
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_shift_right__unit_hash_positive__null_hash
 {
     static const uint256_t value(unit_hash);
     BOOST_REQUIRE_EQUAL(value >> 1, uint256_t());
-    BOOST_REQUIRE_EQUAL(value >> bc::max_uint32, uint256_t());
+    BOOST_REQUIRE_EQUAL(value >> 42, uint256_t());
 }
 
 BOOST_AUTO_TEST_CASE(integer__uint256_shift_right__max_hash_1__most_hash)
@@ -452,7 +452,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_shift_right__null_hash__null_hash)
     uint256_t value3;
     value1 >>= 0;
     value2 >>= 1;
-    value3 >>= bc::max_uint32;
+    value3 >>= 42;
     BOOST_REQUIRE_EQUAL(value1, uint256_t());
     BOOST_REQUIRE_EQUAL(value2, uint256_t());
     BOOST_REQUIRE_EQUAL(value3, uint256_t());
@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_shift_right__unit_hash_positive__nu
     uint256_t value1(unit_hash);
     uint256_t value2(unit_hash);
     value1 >>= 1;
-    value2 >>= bc::max_uint32;
+    value2 >>= 42;
     BOOST_REQUIRE_EQUAL(value1, uint256_t());
     BOOST_REQUIRE_EQUAL(value2, uint256_t());
 }
@@ -499,7 +499,7 @@ BOOST_AUTO_TEST_CASE(integer__uint256_assign_shift_left__null_hash__null_hash)
     uint256_t value3;
     value1 <<= 0;
     value2 <<= 1;
-    value3 <<= bc::max_uint32;
+    value3 <<= 42;
     BOOST_REQUIRE_EQUAL(value1, uint256_t());
     BOOST_REQUIRE_EQUAL(value2, uint256_t());
     BOOST_REQUIRE_EQUAL(value3, uint256_t());
