@@ -22,6 +22,7 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
+#include <ranges>
 #include <set>
 #include <type_traits>
 #include <utility>
@@ -619,7 +620,7 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
     // Last output of commitment pattern holds the committed value (bip141).
     hash_digest reserved{}, committed{};
     if (coinbase->inputs_ptr()->front()->reserved_hash(reserved))
-        for (const auto& output: views_reverse(*coinbase->outputs_ptr()))
+        for (const auto& output: std::views::reverse(*coinbase->outputs_ptr()))
             if (output->committed_hash(committed))
                 if (committed == sha256::double_hash(
                     generate_merkle_root(true), reserved))

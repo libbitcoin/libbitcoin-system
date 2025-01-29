@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_16_IPP
 
 #include <algorithm>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <bitcoin/system/data/data.hpp>
@@ -116,7 +117,7 @@ SRCONSTEXPR std::string encode_hash(const data_slice& hash) NOEXCEPT
     auto digit = out.begin();
 
     // views_reverse is RCONSTEXPR
-    for (const auto byte: views_reverse(hash))
+    for (const auto byte: std::views::reverse(hash))
     {
         *digit++ = to_base16_character(shift_right(byte, to_half(byte_bits)));
         *digit++ = to_base16_character(bit_and(byte, 0x0f_u8));

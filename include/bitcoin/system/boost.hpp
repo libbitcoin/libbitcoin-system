@@ -55,16 +55,6 @@
 ////#include <boost/predef.h>  // platform identifications
 #include <boost/program_options.hpp>
 
-// C++20 suport for ranges not yet available on other platforms.
-#if defined(HAVE_RANGES)
-    #include <ranges>
-    #define views_reverse std::views::reverse
-#else
-    // boost::adaptors::reverse is not constexpr.
-    #include <boost/range/adaptor/reversed.hpp>
-    #define views_reverse boost::adaptors::reverse
-#endif
-
 // ADL free functions for use with boost-json.
 #define DECLARE_JSON_VALUE_CONVERTORS(name) \
 BC_API name tag_invoke(boost::json::value_to_tag<name>, \
