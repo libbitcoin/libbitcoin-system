@@ -257,7 +257,7 @@ konstant(buffer_t& buffer) NOEXCEPT
     ////{
     ////    konstant_(buffer);
     ////}
-    ////else if constexpr (vector && !with_clang)
+    ////else if constexpr (vector)
     ////{
     ////    vector_konstant(buffer);
     ////}

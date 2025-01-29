@@ -30,13 +30,6 @@
 namespace libbitcoin {
 namespace system {
 
-// HACK: work around vectorizations failing on non-xcode clang.
-#if defined(HAVE_CLANG) && !defined(HAVE_XCODE)
-    constexpr auto with_clang = true;
-#else
-    constexpr auto with_clang = false;
-#endif
-
 // Functions may only be constexpr conditionally.
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
 
