@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(data_slice__construct__default__empty)
     static_assert(is_null(data_array<0>{}.data()));
     BOOST_REQUIRE(is_null(data_chunk{}.data()));
 
-    // requires VCONSTEXPR.
+    // requires constexpr.
     ////static_assert(is_null(data_chunk{}.data()));
 
     data_slice slice{};

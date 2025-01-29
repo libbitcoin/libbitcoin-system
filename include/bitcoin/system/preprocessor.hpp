@@ -113,8 +113,6 @@
 
 /// A stronger compiler hint for inlining.
 /// May use prior to 'constexpr' or in place of 'inline'.
-/// Do not use in conjunction with with XCONSTEXPR macros, as this will result
-/// in a double inline specification in the case of XCONSTEXPR default.
 /// Disable msc/x32 due to high level of rejection (warning volume).
 #if defined(HAVE_MSC) && !defined(HAVE_X32)
     #define INLINE __forceinline
@@ -226,41 +224,6 @@
     #define CONSTEVAL consteval
 #else
     #define CONSTEVAL constexpr
-#endif
-
-/// C++20 (partial)
-#if defined(HAVE_RANGES)
-    #define RCONSTEXPR constexpr
-#else
-    #define RCONSTEXPR inline
-#endif
-
-/// C++20 (partial)
-#if defined(HAVE_VECTOR_CONSTEXPR)
-    #define VCONSTEXPR constexpr
-#else
-    #define VCONSTEXPR inline
-#endif
-
-/// C++20 (partial)
-#if defined(HAVE_STRING_CONSTEXPR)
-    #define SCONSTEXPR constexpr
-#else
-    #define SCONSTEXPR inline
-#endif
-
-/// C++20 (partial)
-#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_RANGES)
-    #define SRCONSTEXPR constexpr
-#else
-    #define SRCONSTEXPR inline
-#endif
-
-/// C++20 (partial)
-#if defined(HAVE_STRING_CONSTEXPR) && defined(HAVE_VECTOR_CONSTEXPR)
-    #define SVCONSTEXPR constexpr
-#else
-    #define SVCONSTEXPR inline
 #endif
 
 #endif

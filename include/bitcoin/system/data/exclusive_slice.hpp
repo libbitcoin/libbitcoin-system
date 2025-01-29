@@ -59,12 +59,12 @@ public:
     {
     }
 
-    SCONSTEXPR exclusive_slice(const std::string& text) NOEXCEPT
+    constexpr exclusive_slice(const std::string& text) NOEXCEPT
       : data_slice(text)
     {
     }
 
-    SVCONSTEXPR exclusive_slice(std::initializer_list<value_type> bytes) NOEXCEPT
+    constexpr exclusive_slice(std::initializer_list<value_type> bytes) NOEXCEPT
       : data_slice(bytes.begin(), bytes.end())
     {
     }

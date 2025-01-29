@@ -189,30 +189,18 @@
 #if defined(HAVE_CPP20)
     // All versions.
     #if defined(HAVE_MSC)
-        #define HAVE_RANGES
         #define HAVE_CONSTEVAL
-        #define HAVE_STRING_CONSTEXPR
-        #define HAVE_VECTOR_CONSTEXPR
     #elif defined(HAVE_CLANG)
         // Apple clang version 15
         #if defined(HAVE_APPLE)
-            #define HAVE_RANGES
             #define HAVE_CONSTEVAL
-            #define HAVE_STRING_CONSTEXPR
-            #define HAVE_VECTOR_CONSTEXPR
         // Ubuntu clang version 16
         #else
-            #define HAVE_RANGES
             ////#define HAVE_CONSTEVAL (v17)
-            #define HAVE_STRING_CONSTEXPR
-            #define HAVE_VECTOR_CONSTEXPR
         #endif
     // gcc version 12
     #elif defined(HAVE_GCC)
-        #define HAVE_RANGES
         #define HAVE_CONSTEVAL
-        #define HAVE_STRING_CONSTEXPR
-        #define HAVE_VECTOR_CONSTEXPR
     #endif
 #endif
 

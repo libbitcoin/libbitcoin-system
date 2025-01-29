@@ -38,7 +38,7 @@ constexpr data_slab::data_slab(std_array<Byte, Size>& data) NOEXCEPT
 
 // std_vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
-VCONSTEXPR data_slab::data_slab(std_vector<Byte>& data) NOEXCEPT
+constexpr data_slab::data_slab(std_vector<Byte>& data) NOEXCEPT
   : data_slab(from_size_(data.begin(), data.size()))
 {
 }
@@ -62,7 +62,7 @@ constexpr data_slab::data_slab() NOEXCEPT
 }
 
 // std::string.begin not constexpr (need full C++20).
-SCONSTEXPR data_slab::data_slab(std::string& text) NOEXCEPT
+constexpr data_slab::data_slab(std::string& text) NOEXCEPT
   : data_slab(from_size_(text.begin(), text.size()))
 {
 }
@@ -113,7 +113,7 @@ constexpr data_slab data_slab::from_size(const Pointer begin,
 
 // static
 template <typename Pointer>
-SVCONSTEXPR data_slab data_slab::from_size_(const Pointer begin,
+constexpr data_slab data_slab::from_size_(const Pointer begin,
     size_type size) NOEXCEPT
 {
     return from_size(begin, size);
@@ -127,7 +127,7 @@ inline std_vector<data_slab::value_type> data_slab::to_chunk() const NOEXCEPT
     return { begin_, end_ };
 }
 
-SCONSTEXPR std::string data_slab::to_string() const NOEXCEPT
+constexpr std::string data_slab::to_string() const NOEXCEPT
 {
     return { begin_, end_ };
 }
@@ -217,7 +217,7 @@ constexpr bool data_slab::empty() const NOEXCEPT
 ////    return to_array<Size>();
 ////}
 ////
-////VCONSTEXPR data_slab::operator
+////constexpr data_slab::operator
 ////std_vector<data_slab::value_type>() const NOEXCEPT
 ////{
 ////    return data_slab::to_chunk();

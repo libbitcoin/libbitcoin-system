@@ -31,7 +31,7 @@ namespace system {
 /// Casts bytes directly into the string member.
 /// to_string(to_chunk(string)) == string.
 /// to_string(to_array(string)) == string.
-SCONSTEXPR std::string to_string(const data_slice& bytes) NOEXCEPT
+constexpr std::string to_string(const data_slice& bytes) NOEXCEPT
 {
     return bytes.to_string();
 }

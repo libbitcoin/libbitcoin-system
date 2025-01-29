@@ -29,7 +29,7 @@ namespace machine {
 namespace number {
 
 // Size constraint guards from_little_endian.
-// data_chunk methods are VCONSTEXPR but cannot also be INLINE (priority).
+// data_chunk methods are constexpr but cannot also be INLINE (priority).
 template <size_t Size,
     if_not_greater<Size, sizeof(int64_t)> = true>
 class integer

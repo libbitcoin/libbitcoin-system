@@ -50,7 +50,7 @@ constexpr Integer from_big_array(size_t length,
     const data_array<Size>& data) NOEXCEPT;
 
 template <typename Integer, if_integer<Integer> = true>
-VCONSTEXPR Integer from_big_chunk(size_t length,
+constexpr Integer from_big_chunk(size_t length,
     const data_chunk& data) NOEXCEPT;
 
 /// Native endianness integer from little-endian data.
@@ -65,7 +65,7 @@ constexpr Integer from_little_array(size_t length,
     const data_array<Size>& data) NOEXCEPT;
 
 template <typename Integer, if_integer<Integer> = true>
-VCONSTEXPR Integer from_little_chunk(size_t length,
+constexpr Integer from_little_chunk(size_t length,
     const data_chunk& data) NOEXCEPT;
 
 } // namespace system

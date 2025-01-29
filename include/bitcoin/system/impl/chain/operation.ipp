@@ -97,7 +97,7 @@ constexpr opcode operation::opcode_from_positive(uint8_t value) NOEXCEPT
 
 // Compute the minimal data opcode for a given chunk of data.
 // Caller should clear data if converting to non-payload opcode.
-VCONSTEXPR opcode operation::minimal_opcode_from_data(
+constexpr opcode operation::minimal_opcode_from_data(
     const data_chunk& data) NOEXCEPT
 {
     const auto size = data.size();
@@ -123,7 +123,7 @@ VCONSTEXPR opcode operation::minimal_opcode_from_data(
 
 // Compute the nominal data opcode for a given chunk of data.
 // Restricted to sized data, avoids conversion to numeric opcodes.
-VCONSTEXPR opcode operation::nominal_opcode_from_data(
+constexpr opcode operation::nominal_opcode_from_data(
     const data_chunk& data) NOEXCEPT
 {
     return opcode_from_size(data.size());

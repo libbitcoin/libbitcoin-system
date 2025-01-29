@@ -98,7 +98,7 @@ public:
     /// Skip a witness (as if deserialized).
     static void skip(reader& source, bool prefix) NOEXCEPT;
 
-    static VCONSTEXPR bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
+    static constexpr bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
     {
         return std::all_of(stack.begin(), stack.end(),
             [](const auto& element) NOEXCEPT
@@ -108,7 +108,7 @@ public:
     }
 
     /// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-    static VCONSTEXPR bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
+    static constexpr bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
     {
         return is_one(stack.size()) && stack.front()->size() == hash_size;
     }

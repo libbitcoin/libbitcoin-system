@@ -50,23 +50,23 @@ public:
 
     /// Determine if the flag is enabled in the active flags set.
     static constexpr bool is_enabled(uint32_t active_flags, flags flag) NOEXCEPT;
-    static VCONSTEXPR bool is_push_only_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_relaxed_push_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_commitment_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_witness_program_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_null_data_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_op_return_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_multisig_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_public_key_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_key_hash_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_script_hash_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_witness_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_witness_key_hash_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_pay_witness_script_hash_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_sign_multisig_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_sign_public_key_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_sign_key_hash_pattern(const operations& ops) NOEXCEPT;
-    static VCONSTEXPR bool is_sign_script_hash_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_push_only_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_relaxed_push_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_commitment_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_witness_program_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_null_data_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_op_return_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_multisig_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_public_key_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_key_hash_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_script_hash_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_witness_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_witness_key_hash_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_pay_witness_script_hash_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_sign_multisig_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_sign_public_key_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_sign_key_hash_pattern(const operations& ops) NOEXCEPT;
+    static constexpr bool is_sign_script_hash_pattern(const operations& ops) NOEXCEPT;
     static bool is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT;
 
     static inline operations to_pay_null_data_pattern(

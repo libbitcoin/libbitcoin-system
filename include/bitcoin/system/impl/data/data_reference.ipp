@@ -39,14 +39,14 @@ constexpr data_reference::data_reference(const data_slice& data) NOEXCEPT
 {
 }
 
-// data_slice(std::string) is SCONSTEXPR.
-SCONSTEXPR data_reference::data_reference(const std::string& text) NOEXCEPT
+// data_slice(std::string) is constexpr.
+constexpr data_reference::data_reference(const std::string& text) NOEXCEPT
   : data_slice(text)
 {
 }
 
-// data_slice(std_vector) is VCONSTEXPR.
-VCONSTEXPR data_reference::data_reference(const data_chunk& data) NOEXCEPT
+// data_slice(std_vector) is constexpr.
+constexpr data_reference::data_reference(const data_chunk& data) NOEXCEPT
   : data_slice(data)
 {
 }
@@ -66,10 +66,10 @@ constexpr data_reference::data_reference(
 {
 }
 
-// data_slice(std_vector) is VCONSTEXPR.
+// data_slice(std_vector) is constexpr.
 // Byte vector constructor (casts Byte to uint8_t).
 template <typename Byte, if_one_byte<Byte>>
-VCONSTEXPR data_reference::data_reference(
+constexpr data_reference::data_reference(
     const std_vector<Byte>& data) NOEXCEPT
   : data_slice(data)
 {

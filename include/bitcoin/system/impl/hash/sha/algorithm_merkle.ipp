@@ -332,7 +332,7 @@ xoutput(idigests_t& digests, const xstate_t<xWord>& xstate) NOEXCEPT
 // protected
 
 TEMPLATE
-VCONSTEXPR void CLASS::
+constexpr void CLASS::
 merkle_hash_(digests_t& digests, size_t offset) NOEXCEPT
 {
     const auto blocks = to_half(digests.size());
@@ -430,7 +430,7 @@ merkle_hash_vector(digests_t& digests) NOEXCEPT
 // converting input/output (nop) functions.
 
 TEMPLATE
-VCONSTEXPR typename CLASS::digest_t CLASS::
+constexpr typename CLASS::digest_t CLASS::
 merkle_root(digests_t&& digests) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
@@ -450,20 +450,16 @@ merkle_root(digests_t&& digests) NOEXCEPT
 }
 
 TEMPLATE
-VCONSTEXPR typename CLASS::digests_t& CLASS::
+constexpr typename CLASS::digests_t& CLASS::
 merkle_hash(digests_t& digests) NOEXCEPT
 {
     static_assert(is_same_type<state_t, chunk_t>);
 
-// Avoid tautological warning (std::is_constant_evaluated() always false).
-#if defined(HAVE_VECTOR_CONSTEXPR)
     if (std::is_constant_evaluated())
     {
         merkle_hash_(digests);
     }
-    else
-#endif
-    if constexpr (vector)
+    else if constexpr (vector)
     {
         // Merkle block vectorization is applied at 16/8/4 lanes (as available)
         // and falls back to native/normal (as available) for 3/2/1 lanes.
