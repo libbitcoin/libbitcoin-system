@@ -23,13 +23,14 @@ jobs:
             optimization: "debug"
             assert: "debug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-16"
             flags: "-Og -fPIE"
-            options: "--enable-isystem --enable-avx2 --enable-sse4"
+            options: "--enable-isystem --enable-avx2 --enable-sse41"
             packager: "apt"
             packages: ""
 
@@ -39,6 +40,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             llvm: ""
@@ -55,27 +57,29 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc-12"
             flags: "-Os -fPIE"
-            options: "--enable-isystem --enable-sse4"
+            options: "--enable-isystem --enable-sse41"
             packager: "apt"
             packages: ""
 
           - os: ubuntu-24.04
-            cxx: "g++-12"
+            cxx: "g++"
             link: "static"
             optimization: "size"
             assert: "ndebug"
             coverage: "cov"
+            detectcpuflags: "detect"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             llvm: ""
             secp256k1: "--build-secp256k1"
-            cc: "gcc-12"
+            cc: "gcc"
             flags: "-Os -g --coverage -fPIE"
             options: "--enable-isystem"
             packager: "apt"
@@ -87,6 +91,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: "llvm@16"
@@ -103,6 +108,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: "llvm@16"
@@ -145,6 +151,29 @@ jobs:
               echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
           fi
 
+      - name: Determine CPU flags
+        shell: bash
+        run: |
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sse4_1 ") ]]; then
+              echo "CPU_SUPPORT_SSE41=--enable-sse41" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx " | grep " avx2 ") ]]; then
+              echo "CPU_SUPPORT_AVX2=--enable-avx2" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx512bw ") ]]; then
+              echo "CPU_SUPPORT_AVX512=--enable-avx512" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sha_ni ") ]]; then
+              echo "CPU_SUPPORT_SHANI=--enable-shani" >> $GITHUB_ENV
+          fi
+
+          if [[ ${{ matrix.detectcpuflags }} == 'detect' ]]; then
+              echo "CPU_SUPPORTED_FLAGS='$CPU_SUPPORT_SSE41 $CPU_SUPPORT_AVX2 $CPU_SUPPORT_AVX512 $CPU_SUPPORT_SHANI'" >> $GITHUB_ENV
+          fi
+
       - name: Denormalize parameterization
         shell: bash
         run: |
@@ -183,6 +212,7 @@ jobs:
           --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
+          ${{ env.CPU_SUPPORTED_FLAGS }}
           ${{ matrix.boost }}
           ${{ matrix.icu }}
           ${{ matrix.secp256k1 }}
@@ -190,9 +220,9 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --ignore-errors version --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file --ignore-errors version coverage.info
-          lcov --list --ignore-errors version coverage.info
+          lcov --ignore-errors version,gcov,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --list coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
@@ -264,13 +294,14 @@ jobs:
             optimization: "debug"
             assert: "debug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-16"
             flags: "-Og -fPIE"
-            options: "-Denable-avx2=on -Denable-sse4=on"
+            options: "-Denable-avx2=on -Denable-sse41=on"
             packager: "apt"
             packages: ""
 
@@ -280,6 +311,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             llvm: ""
@@ -296,13 +328,14 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc-12"
             flags: "-Os -fPIE"
-            options: "-Denable-sse4=on"
+            options: "-Denable-sse41=on"
             packager: "apt"
             packages: ""
 
@@ -312,6 +345,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             llvm: ""
@@ -328,6 +362,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: "llvm@16"
@@ -344,6 +379,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: "llvm@16"
@@ -384,6 +420,29 @@ jobs:
           brew install autoconf automake libtool ${{ matrix.packages }}
           if [[ -n ${{ matrix.llvm }} ]]; then
               echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+          fi
+
+      - name: Determine CPU flags
+        shell: bash
+        run: |
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sse4_1 ") ]]; then
+              echo "CPU_SUPPORT_SSE41=-Denable-sse41=on" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx " | grep " avx2 ") ]]; then
+              echo "CPU_SUPPORT_AVX2=-Denable-avx2=on" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx512bw ") ]]; then
+              echo "CPU_SUPPORT_AVX512=-Denable-avx512=on" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sha_ni ") ]]; then
+              echo "CPU_SUPPORT_SHANI=-Denable-shani=on" >> $GITHUB_ENV
+          fi
+
+          if [[ ${{ matrix.detectcpuflags }} == 'detect' ]]; then
+              echo "CPU_SUPPORTED_FLAGS='$CPU_SUPPORT_SSE41 $CPU_SUPPORT_AVX2 $CPU_SUPPORT_AVX512 $CPU_SUPPORT_SHANI'" >> $GITHUB_ENV
           fi
 
       - name: Denormalize parameterization
@@ -427,6 +486,7 @@ jobs:
           --prefix=${{ env.LIBBITCOIN_SRC_PATH }}prefix
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
+          ${{ env.CPU_SUPPORTED_FLAGS }}
           ${{ matrix.boost }}
           ${{ matrix.icu }}
           ${{ matrix.secp256k1 }}
@@ -434,9 +494,9 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --ignore-errors version --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file --ignore-errors version coverage.info
-          lcov --list --ignore-errors version coverage.info
+          lcov --ignore-errors version,gcov,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --list coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
@@ -519,13 +579,14 @@ jobs:
             optimization: "debug"
             assert: "debug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "clang-16"
             flags: "-Og -fPIE"
-            options: "-Denable-avx2=on -Denable-sse4=on"
+            options: "-Denable-avx2=on -Denable-sse41=on"
             packager: "apt"
             packages: ""
 
@@ -536,6 +597,7 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: "--build-icu --with-icu"
             llvm: ""
@@ -553,13 +615,14 @@ jobs:
             optimization: "size"
             assert: "ndebug"
             coverage: "nocov"
+            detectcpuflags: "ignore"
             boost: "--build-boost"
             icu: ""
             llvm: ""
             secp256k1: "--build-secp256k1"
             cc: "gcc-12"
             flags: "-Os -fPIE"
-            options: "-Denable-sse4=on"
+            options: "-Denable-sse41=on"
             packager: "apt"
             packages: ""
 
@@ -593,6 +656,29 @@ jobs:
           brew install autoconf automake libtool ${{ matrix.packages }}
           if [[ -n ${{ matrix.llvm }} ]]; then
               echo "PATH=/opt/homebrew/opt/${{ matrix.llvm }}/bin:$PATH" >> $GITHUB_ENV
+          fi
+
+      - name: Determine CPU flags
+        shell: bash
+        run: |
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sse4_1 ") ]]; then
+              echo "CPU_SUPPORT_SSE41=-Denable-sse41=on" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx " | grep " avx2 ") ]]; then
+              echo "CPU_SUPPORT_AVX2=-Denable-avx2=on" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " avx512bw ") ]]; then
+              echo "CPU_SUPPORT_AVX512=-Denable-avx512=on" >> $GITHUB_ENV
+          fi
+
+          if [[ -n $(cat /proc/cpuinfo | grep flags | grep " sha_ni ") ]]; then
+              echo "CPU_SUPPORT_SHANI=-Denable-shani=on" >> $GITHUB_ENV
+          fi
+
+          if [[ ${{ matrix.detectcpuflags }} == 'detect' ]]; then
+              echo "CPU_SUPPORTED_FLAGS='$CPU_SUPPORT_SSE41 $CPU_SUPPORT_AVX2 $CPU_SUPPORT_AVX512 $CPU_SUPPORT_SHANI'" >> $GITHUB_ENV
           fi
 
       - name: Denormalize parameterization
@@ -637,6 +723,7 @@ jobs:
           --preset=${{ matrix.preset }}
           ${{ env.LINKAGE }}
           ${{ env.ASSERT_NDEBUG }}
+          ${{ env.CPU_SUPPORTED_FLAGS }}
           ${{ matrix.boost }}
           ${{ matrix.icu }}
           ${{ matrix.secp256k1 }}
@@ -644,9 +731,9 @@ jobs:
       - name: Coveralls Calculation
         if: ${{ matrix.coverage == 'cov' }}
         run: |
-          lcov --directory . --capture --ignore-errors version --output-file coverage.info
-          lcov --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file --ignore-errors version coverage.info
-          lcov --list --ignore-errors version coverage.info
+          lcov --ignore-errors version,gcov,mismatch --directory . --capture --output-file coverage.info
+          lcov --ignore-errors unused --remove coverage.info "/usr/*" "${{ env.LIBBITCOIN_SRC_PATH }}prefix/*" "${{ github.workspace }}/examples/*" "${{ github.workspace }}/test/*" "${{ github.workspace }}/src/wallet/addresses/qrencode/*" --output-file coverage.info
+          lcov --list coverage.info
 
       - name: Coveralls.io Upload
         if: ${{ matrix.coverage == 'cov' }}
