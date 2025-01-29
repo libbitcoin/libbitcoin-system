@@ -194,30 +194,30 @@
         #define HAVE_STRING_CONSTEXPR
         #define HAVE_VECTOR_CONSTEXPR
     #elif defined(HAVE_CLANG)
-        // Apple clang version 15.0.0 (clang-1500.0.40.1)
+        // Apple clang version 15
         #if defined(HAVE_APPLE)
             #define HAVE_RANGES
             #define HAVE_CONSTEVAL
             #define HAVE_STRING_CONSTEXPR
             #define HAVE_VECTOR_CONSTEXPR
-        // Ubuntu clang version 15.0.7
+        // Ubuntu clang version 16
         #else
-            ////#define HAVE_RANGES    (v16)
+            #define HAVE_RANGES
             ////#define HAVE_CONSTEVAL (v17)
             #define HAVE_STRING_CONSTEXPR
             #define HAVE_VECTOR_CONSTEXPR
         #endif
-    // gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) 
+    // gcc version 12
     #elif defined(HAVE_GCC)
         #define HAVE_RANGES
         #define HAVE_CONSTEVAL
-        ////#define HAVE_STRING_CONSTEXPR (v12)
-        ////#define HAVE_VECTOR_CONSTEXPR (v12)
+        #define HAVE_STRING_CONSTEXPR
+        #define HAVE_VECTOR_CONSTEXPR
     #endif
 #endif
 
 /// C++20: parenthesized initialization of aggregates requires clang16/xcode16.
-/// We don't have macro treatment for that, just ad-hoc conditions.
+/// We don't have macro treatment for that, just ad-hoc HAVE_CLANG conditions.
 
 /// None on xcode.
 /// Requires link with -ltbb on gcc (v9).
