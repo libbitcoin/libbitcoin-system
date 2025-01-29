@@ -59,11 +59,11 @@ constexpr Integral from_little_endian(const data_array<Size>& data) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true>
-VCONSTEXPR Integral from_big_endian(const data_chunk& data) NOEXCEPT;
+constexpr Integral from_big_endian(const data_chunk& data) NOEXCEPT;
 
 template <typename Integral,
     if_integral_integer<Integral> = true>
-VCONSTEXPR Integral from_little_endian(const data_chunk& data) NOEXCEPT;
+constexpr Integral from_little_endian(const data_chunk& data) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin

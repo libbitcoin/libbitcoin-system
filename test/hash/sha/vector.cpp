@@ -20,8 +20,6 @@
 
 BOOST_AUTO_TEST_SUITE(vector_tests)
 
-#if defined(HAVE_VECTOR_CONSTEXPR)
-
 // Merkle root
 // ----------------------------------------------------------------------------
 
@@ -183,7 +181,5 @@ BOOST_AUTO_TEST_CASE(vector__sha512__scheduling__expected)
     static_assert(hashn == hashv);
     BOOST_CHECK_EQUAL(hashn, sha512v::hash(blocks));
 }
-
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

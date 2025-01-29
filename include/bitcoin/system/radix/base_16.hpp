@@ -46,17 +46,17 @@ constexpr uint8_t encode_octet(const char(&string)[add1(octet_width)]) NOEXCEPT;
 /// ---------------------------------------------------------------------------
 
 /// Convert a byte vector to a hexidecimal string.
-SCONSTEXPR std::string encode_base16(const data_slice& data) NOEXCEPT;
+constexpr std::string encode_base16(const data_slice& data) NOEXCEPT;
 
 /// Convert a byte array to a reversed byte order hexidecimal string.
-SRCONSTEXPR std::string encode_hash(const data_slice& hash) NOEXCEPT;
+constexpr std::string encode_hash(const data_slice& hash) NOEXCEPT;
 
 /// Decoding of hex string to data_array or data_chunk.
 /// ---------------------------------------------------------------------------
 
 /// Convert a hexidecimal string to a byte vector.
 /// False if the input is malformed.
-VCONSTEXPR bool decode_base16(data_chunk& out, const std::string& in) NOEXCEPT;
+constexpr bool decode_base16(data_chunk& out, const std::string& in) NOEXCEPT;
 
 /// Convert a hexidecimal string to a byte array.
 /// False if the input is malformed, or the wrong length.
@@ -76,7 +76,7 @@ constexpr bool decode_hash(data_array<Size>& out,
 /// Convert a literal hex string to a string (bytes are cast to string chars).
 /// Empty string returned if decoding fails.
 template <size_t Size, if_odd<Size> = true>
-SVCONSTEXPR std::string base16_string(const char(&string)[Size]) NOEXCEPT;
+constexpr std::string base16_string(const char(&string)[Size]) NOEXCEPT;
 
 /// Convert a literal hexidecimal string literal to pmr vector (not constexpr).
 /// Empty chunk returned if decoding fails.

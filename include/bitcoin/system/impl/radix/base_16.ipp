@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_16_IPP
 
 #include <algorithm>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <bitcoin/system/data/data.hpp>
@@ -93,7 +94,7 @@ constexpr uint8_t encode_octet(
 // Encoding of data_slice to hex string.
 // ----------------------------------------------------------------------------
 
-SCONSTEXPR std::string encode_base16(const data_slice& data) NOEXCEPT
+constexpr std::string encode_base16(const data_slice& data) NOEXCEPT
 {
     std::string out;
     out.resize(data.size() * octet_width);
@@ -108,15 +109,14 @@ SCONSTEXPR std::string encode_base16(const data_slice& data) NOEXCEPT
     return out;
 }
 
-// std::string is SCONSTEXPR
-SRCONSTEXPR std::string encode_hash(const data_slice& hash) NOEXCEPT
+// std::string is constexpr
+constexpr std::string encode_hash(const data_slice& hash) NOEXCEPT
 {
     std::string out;
     out.resize(hash.size() * octet_width);
     auto digit = out.begin();
 
-    // views_reverse is RCONSTEXPR
-    for (const auto byte: views_reverse(hash))
+    for (const auto byte: std::views::reverse(hash))
     {
         *digit++ = to_base16_character(shift_right(byte, to_half(byte_bits)));
         *digit++ = to_base16_character(bit_and(byte, 0x0f_u8));
@@ -128,7 +128,7 @@ SRCONSTEXPR std::string encode_hash(const data_slice& hash) NOEXCEPT
 // Decoding of hex string to data_array or data_chunk.
 // ----------------------------------------------------------------------------
 
-VCONSTEXPR bool decode_base16(data_chunk& out,
+constexpr bool decode_base16(data_chunk& out,
     const std::string& in) NOEXCEPT
 {
     if (!is_multiple(in.size(), octet_width))
@@ -198,7 +198,7 @@ constexpr bool decode_hash(data_array<Size>& out,
 // ----------------------------------------------------------------------------
 
 template <size_t Size, if_odd<Size>>
-SVCONSTEXPR std::string base16_string(const char(&string)[Size]) NOEXCEPT
+constexpr std::string base16_string(const char(&string)[Size]) NOEXCEPT
 {
     return to_string(base16_chunk(string));
 }

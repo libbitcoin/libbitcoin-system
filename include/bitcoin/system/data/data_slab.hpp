@@ -70,7 +70,7 @@ public:
     // TODO: test.
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    VCONSTEXPR data_slab(std_vector<Byte>& data) NOEXCEPT;
+    constexpr data_slab(std_vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-non-const references.
     /// Byte iterators constructor (casts to uint8_t).
@@ -84,7 +84,7 @@ public:
 
     // TODO: test.
     /// String constructor (casts char to uint8_t).
-    SCONSTEXPR data_slab(std::string& text) NOEXCEPT;
+    constexpr data_slab(std::string& text) NOEXCEPT;
 
     /// Methods.
     /// -----------------------------------------------------------------------
@@ -98,7 +98,7 @@ public:
     inline std_vector<value_type> to_chunk() const NOEXCEPT;
 
     /// Convert data to a string (casts uint8_t to char).
-    SCONSTEXPR std::string to_string() const NOEXCEPT;
+    constexpr std::string to_string() const NOEXCEPT;
 
     /// Cast buffer to a data_slice.
     constexpr data_slice to_slice() const NOEXCEPT;
@@ -122,7 +122,7 @@ public:
     /// -----------------------------------------------------------------------
     ////template<size_type Size>
     ////constexpr operator std_array<value_type, Size>() const NOEXCEPT;
-    ////VCONSTEXPR operator std_vector<value_type>() const NOEXCEPT;
+    ////constexpr operator std_vector<value_type>() const NOEXCEPT;
     constexpr operator data_slice() const NOEXCEPT;
     constexpr value_type operator[](size_type index) const NOEXCEPT;
 
@@ -139,7 +139,7 @@ private:
         size_type size) NOEXCEPT;
 
     template <typename Pointer>
-    static SVCONSTEXPR data_slab from_size_(const Pointer begin,
+    static constexpr data_slab from_size_(const Pointer begin,
         size_type size) NOEXCEPT;
 
     pointer begin_;

@@ -79,7 +79,7 @@ public:
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    VCONSTEXPR data_slice(const std_vector<Byte>& data) NOEXCEPT;
+    constexpr data_slice(const std_vector<Byte>& data) NOEXCEPT;
 
     // TODO: restrict to iterator-to-const references.
     /// Byte iterators constructor (casts to uint8_t).
@@ -92,10 +92,10 @@ public:
     constexpr data_slice(const Byte* begin, const Byte* end) NOEXCEPT;
 
     /// String constructor (casts char to uint8_t).
-    SCONSTEXPR data_slice(const std::string& text) NOEXCEPT;
+    constexpr data_slice(const std::string& text) NOEXCEPT;
 
     /// Byte initializer list constructor.
-    SVCONSTEXPR data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
+    constexpr data_slice(std::initializer_list<value_type> bytes) NOEXCEPT;
 
     /// Methods.
     /// -----------------------------------------------------------------------
@@ -109,7 +109,7 @@ public:
     inline std_vector<value_type> to_chunk() const NOEXCEPT;
 
     /// Convert data to a string (casts uint8_t to char).
-    SCONSTEXPR std::string to_string() const NOEXCEPT;
+    constexpr std::string to_string() const NOEXCEPT;
 
     /// Resize the slice by decrementing the end pointer.
     /// This is the only mutable action that can be taken on the slice.
@@ -130,7 +130,7 @@ public:
     /// -----------------------------------------------------------------------
     ////template<size_type Size>
     ////constexpr operator std_array<value_type, Size>() const NOEXCEPT;
-    ////VCONSTEXPR operator std_vector<value_type>() const NOEXCEPT;
+    ////constexpr operator std_vector<value_type>() const NOEXCEPT;
     constexpr value_type operator[](size_type index) const NOEXCEPT;
 
 private:
@@ -149,7 +149,7 @@ private:
         Pointer begin, size_type size) NOEXCEPT;
 
     template <typename Pointer>
-    static SVCONSTEXPR data_slice from_size_(
+    static constexpr data_slice from_size_(
         Pointer begin, size_type size) NOEXCEPT;
 
     pointer begin_;

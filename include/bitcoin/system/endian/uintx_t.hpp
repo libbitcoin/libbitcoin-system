@@ -49,11 +49,11 @@ constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_array(
     const data_array<Size>& data) NOEXCEPT;
 
 template <size_t Size>
-VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
+constexpr uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
     const data_chunk& data) NOEXCEPT;
 
 template <size_t Size>
-VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
+constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
     const data_chunk& data) NOEXCEPT;
 
 } // namespace system

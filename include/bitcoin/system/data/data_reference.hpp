@@ -58,10 +58,10 @@ public:
     constexpr data_reference(const data_slice& data) NOEXCEPT;
 
     /// std::string constructor (casts char to uint8_t).
-    SCONSTEXPR data_reference(const std::string& text) NOEXCEPT;
+    constexpr data_reference(const std::string& text) NOEXCEPT;
 
     /// data_chunk constructor.
-    VCONSTEXPR data_reference(const data_chunk& data) NOEXCEPT;
+    constexpr data_reference(const data_chunk& data) NOEXCEPT;
 
     /// data_array constructor.
     template <size_type Size>
@@ -73,7 +73,7 @@ public:
 
     /// Byte vector constructor (casts Byte to uint8_t).
     template <typename Byte, if_one_byte<Byte> = true>
-    VCONSTEXPR data_reference(const std_vector<Byte>& data) NOEXCEPT;
+    constexpr data_reference(const std_vector<Byte>& data) NOEXCEPT;
 
     /// Byte iterators constructor (casts to uint8_t).
     template <typename Iterator>

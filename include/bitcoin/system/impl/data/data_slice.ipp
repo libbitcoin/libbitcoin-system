@@ -48,7 +48,7 @@ constexpr data_slice::data_slice(const std_array<Byte, Size>& data) NOEXCEPT
 
 // std_vector.begin not constexpr (need full C++20).
 template <typename Byte, if_one_byte<Byte>>
-VCONSTEXPR data_slice::data_slice(const std_vector<Byte>& data) NOEXCEPT
+constexpr data_slice::data_slice(const std_vector<Byte>& data) NOEXCEPT
   : data_slice(from_size_(data.begin(), data.size()))
 {
 }
@@ -72,12 +72,12 @@ constexpr data_slice::data_slice() NOEXCEPT
 }
 
 // std::string.begin not constexpr (need full C++20).
-SCONSTEXPR data_slice::data_slice(const std::string& text) NOEXCEPT
+constexpr data_slice::data_slice(const std::string& text) NOEXCEPT
   : data_slice(from_size_(text.begin(), text.size()))
 {
 }
 
-SVCONSTEXPR data_slice::data_slice(
+constexpr data_slice::data_slice(
     std::initializer_list<value_type> bytes) NOEXCEPT
   : data_slice(from_size_(bytes.begin(), bytes.size()))
 {
@@ -147,7 +147,7 @@ constexpr data_slice data_slice::from_size(Pointer begin,
 
 // static
 template <typename Pointer>
-SVCONSTEXPR data_slice data_slice::from_size_(Pointer begin,
+constexpr data_slice data_slice::from_size_(Pointer begin,
     size_type size) NOEXCEPT
 {
     return from_size(begin, size);
@@ -179,7 +179,7 @@ to_chunk() const NOEXCEPT
     return { begin_, end_ };
 }
 
-SCONSTEXPR std::string data_slice::to_string() const NOEXCEPT
+constexpr std::string data_slice::to_string() const NOEXCEPT
 {
     return { begin_, end_ };
 }
@@ -248,7 +248,7 @@ constexpr bool data_slice::empty() const NOEXCEPT
 ////}
 ////
 ////
-////VCONSTEXPR data_slice::
+////constexpr data_slice::
 ////operator std_vector<data_slice::value_type>() const NOEXCEPT
 ////{
 ////    return data_slice::to_chunk();

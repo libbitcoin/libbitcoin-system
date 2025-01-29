@@ -126,8 +126,8 @@ public:
 
     /// Merkle hashing (sha256/512).
     /// -----------------------------------------------------------------------
-    static VCONSTEXPR digests_t& merkle_hash(digests_t& digests) NOEXCEPT;
-    static VCONSTEXPR digest_t merkle_root(digests_t&& digests) NOEXCEPT;
+    static constexpr digests_t& merkle_hash(digests_t& digests) NOEXCEPT;
+    static constexpr digest_t merkle_root(digests_t&& digests) NOEXCEPT;
 
 protected:
     /// Intrinsics constants.
@@ -341,7 +341,7 @@ protected:
     INLINE static void merkle_hash_vector(idigests_t& digests,
         iblocks_t& blocks) NOEXCEPT;
     INLINE static void merkle_hash_vector(digests_t& digests) NOEXCEPT;
-    VCONSTEXPR static void merkle_hash_(digests_t& digests,
+    constexpr static void merkle_hash_(digests_t& digests,
         size_t offset=zero) NOEXCEPT;
 
     /// sigma0 vectorization (single blocks).

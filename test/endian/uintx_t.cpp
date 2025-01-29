@@ -28,8 +28,12 @@ BOOST_AUTO_TEST_CASE(endian__to_array__zero__expected)
 {
     static_assert(from_uintx(uint5_t{ 1 }) == data_array<1>{ 1 });
     static_assert(from_uintx(uint11_t{ 1 }) == data_array<2>{ 1 });
-    // Internal compiler error msvc++.
-    ////static_assert(from_uintx(uint48_t{ 1 }) == data_array<6>{ 1 });
+
+    // MSVC internal compiler error.
+    #if !defined(HAVE_MSC)
+    static_assert(from_uintx(uint48_t{ 1 }) == data_array<6>{ 1 });
+    #endif
+
     static_assert(from_uintx(uint128_t{ 1 }) == data_array<16>{ 1 });
     static_assert(from_uintx(uint160_t{ 1 }) == data_array<20>{ 1 });
     static_assert(from_uintx(uint256_t{ 1 }) == data_array<32>{ 1 });

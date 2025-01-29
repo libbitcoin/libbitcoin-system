@@ -62,14 +62,14 @@ constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_array(
 }
 
 template <size_t Size>
-VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
+constexpr uintx_t<to_bits(Size)> uintx_from_big_endian_chunk(
     const data_chunk& data) NOEXCEPT
 {
     return from_big_chunk<uintx_t<to_bits(Size)>>(Size, data);
 }
 
 template <size_t Size>
-VCONSTEXPR uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
+constexpr uintx_t<to_bits(Size)> uintx_from_little_endian_chunk(
     const data_chunk& data) NOEXCEPT
 {
     return from_little_chunk<uintx_t<to_bits(Size)>>(Size, data);

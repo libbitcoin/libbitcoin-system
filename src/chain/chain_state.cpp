@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iterator>
+#include <ranges>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/chain/checkpoint.hpp>
@@ -451,7 +452,7 @@ uint32_t chain_state::easy_work_required(const data& values,
     const auto& bits = values.bits.ordered;
 
     // Reverse iterate the ordered-by-height list of header bits.
-    for (auto bit: views_reverse(bits))
+    for (auto bit: std::views::reverse(bits))
     {
         if (is_retarget_or_non_limit(--height, bit, retargeting_interval,
             proof_of_work_limit))
