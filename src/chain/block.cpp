@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <memory>
 #include <numeric>
 #include <ranges>
 #include <set>
