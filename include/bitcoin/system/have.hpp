@@ -204,9 +204,6 @@
     #endif
 #endif
 
-/// C++20: parenthesized initialization of aggregates requires clang16/xcode16.
-/// We don't have macro treatment for that, just ad-hoc HAVE_CLANG conditions.
-
 /// None on xcode.
 /// Requires link with -ltbb on gcc (v9).
 /// Experimental on clang (libcxx.llvm.org/Status/PSTL.html), requires:

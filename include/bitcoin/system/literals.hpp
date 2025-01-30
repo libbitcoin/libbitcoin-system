@@ -35,7 +35,7 @@ namespace libbitcoin {
 /// not be subject to regressions in other code, as a break here causes a large
 /// number of test and other failures. See tests for usage and detailed info.
 /// ---------------------------------------------------------------------------
-/// These should be consteval for safety, but waiting on clang++20 to catch up.
+/// These should be consteval for safety, but waiting on clang++ v17.
 
 // Functions are consteval where available (bogus warning).
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
