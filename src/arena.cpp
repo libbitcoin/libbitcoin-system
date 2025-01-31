@@ -18,11 +18,10 @@
  */
 #include <bitcoin/system/arena.hpp>
 
+#include <cstdlib>
 #include <bitcoin/system/constants.hpp>
 
 namespace libbitcoin {
-
-BC_PUSH_WARNING(NO_NEW_OR_DELETE)
 
 bool operator==(const arena& left, const arena& right) NOEXCEPT
 {
@@ -41,14 +40,18 @@ void* default_arena::do_allocate(size_t bytes, size_t) THROWS
 {
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    return ::operator new(bytes, std::align_val_t{ align });
-    return ::operator new(bytes);
+    BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
+    return std::malloc(bytes);
+    BC_POP_WARNING()
 }
 
 void default_arena::do_deallocate(void* ptr, size_t, size_t) NOEXCEPT
 {
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    ::operator delete(ptr, std::align_val_t{ align });
-    ::operator delete(ptr);
+    BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
+    std::free(ptr);
+    BC_POP_WARNING()
 }
 
 bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
@@ -57,6 +60,7 @@ bool default_arena::do_is_equal(const arena& other) const NOEXCEPT
     return &other == this;
 }
 
+// null return indicates that this arena is not detachable.
 void* default_arena::start(size_t) THROWS
 {
     return nullptr;
@@ -70,7 +74,5 @@ size_t default_arena::detach() NOEXCEPT
 void default_arena::release(void*) NOEXCEPT
 {
 }
-
-BC_POP_WARNING()
 
 } // namespace libbitcoin

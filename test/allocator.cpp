@@ -26,10 +26,6 @@ BC_PUSH_WARNING(NO_UNGUARDED_POINTERS)
 BC_PUSH_WARNING(NO_DELETE_RAW_POINTER)
 BC_PUSH_WARNING(NO_UNCLEARED_OWNER_POINTER)
 
-// Clang is not yet C++20 compliant in terms of aggregate initialization.
-// See [reviews.llvm.org/D140327] for details. So vectors provide constructors.
-///////////////////////////////////////////////////////////////////////////////
-
 struct simple
 {
     simple(size_t arg={}) NOEXCEPT

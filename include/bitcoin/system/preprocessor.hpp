@@ -32,6 +32,22 @@
 /// Debugging.
 /// ---------------------------------------------------------------------------
 
+/// Enables ETW tracing for VS memory profiler.
+#if defined(HAVE_MSC)
+    #define ALLOCATOR __declspec(allocator)
+#else
+    #define ALLOCATOR
+#endif
+
+/// learn.microsoft.com/en-us/cpp/c-runtime-library/
+/// find-memory-leaks-using-the-crt-library
+/// _CRTDBG_MAP_ALLOC must be prior to the includes, so defined in props.
+#if defined(HAVE_MSC) && defined(_DEBUG) && defined(_CRTDBG_MAP_ALLOC)
+    #include <stdlib.h>
+    #include <crtdbg.h>
+    ////_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
 /// NDEBUG (conditional exclusion).
 #if defined(NDEBUG)
     #define BC_ASSERT(expression)
@@ -42,13 +58,6 @@
     #define BC_ASSERT(expression) assert(expression)
     #define BC_ASSERT_MSG(expression, text) assert((expression)&&(text))
     #define BC_DEBUG_ONLY(expression) expression
-#endif
-
-/// Enables ETW tracing for VS memory profiler.
-#if defined(HAVE_MSC)
-    #define ALLOCATOR __declspec(allocator)
-#else
-    #define ALLOCATOR
 #endif
 
 /// Messages.

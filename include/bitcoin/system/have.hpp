@@ -128,10 +128,10 @@
     #define HAVE_ICU
 #endif
 
-/// XCPU architecture intrinsics sse41, avx2, avx512f, sha-ni.
+/// XCPU architecture intrinsics sse41, avx2, avx512f/bw, sha-ni.
 /// This assumes that avx512 implies avx2 and that all imply sse41.
 #if defined(HAVE_XCPU)
-    // TODO: CLANG/GCC compile test and set -msse4 -mavx2 -mavx512f -msha.
+    // CLANG/GCC compile with -msse4 -mavx2 -mavx512f/-mavx512bw -msha.
     #if defined(WITH_SHANI)
         #define HAVE_SHANI
     #endif
@@ -204,9 +204,6 @@
     #endif
 #endif
 
-/// C++20: parenthesized initialization of aggregates requires clang16/xcode16.
-/// We don't have macro treatment for that, just ad-hoc HAVE_CLANG conditions.
-
 /// None on xcode.
 /// Requires link with -ltbb on gcc (v9).
 /// Experimental on clang (libcxx.llvm.org/Status/PSTL.html), requires:
@@ -227,7 +224,7 @@
 #define HAVE_SUPPRESSION
 
 /// Disable noexcept to capture stack trace.
-#define HAVE_NOEXCEPT
+////#define HAVE_NOEXCEPT
 
 /// Disable to emit all suppressed warnings.
 #define HAVE_WARNINGS

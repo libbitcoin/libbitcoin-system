@@ -74,7 +74,6 @@ namespace cpu1_0
     constexpr auto avx_ecx_bit = 28;
 }
 
-// wikichip.org/wiki/x86/avx-512
 namespace cpu7_0
 {
     constexpr auto leaf = 7;
