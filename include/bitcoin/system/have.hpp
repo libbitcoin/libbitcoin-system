@@ -128,10 +128,10 @@
     #define HAVE_ICU
 #endif
 
-/// XCPU architecture intrinsics sse41, avx2, avx512f, sha-ni.
+/// XCPU architecture intrinsics sse41, avx2, avx512f/bw, sha-ni.
 /// This assumes that avx512 implies avx2 and that all imply sse41.
 #if defined(HAVE_XCPU)
-    // TODO: CLANG/GCC compile test and set -msse4 -mavx2 -mavx512f -msha.
+    // CLANG/GCC compile with -msse4 -mavx2 -mavx512f/-mavx512bw -msha.
     #if defined(WITH_SHANI)
         #define HAVE_SHANI
     #endif
@@ -224,7 +224,7 @@
 #define HAVE_SUPPRESSION
 
 /// Disable noexcept to capture stack trace.
-#define HAVE_NOEXCEPT
+////#define HAVE_NOEXCEPT
 
 /// Disable to emit all suppressed warnings.
 #define HAVE_WARNINGS
