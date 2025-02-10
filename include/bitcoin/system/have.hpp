@@ -204,16 +204,6 @@
     #endif
 #endif
 
-/// None on xcode.
-/// Requires link with -ltbb on gcc (v9).
-/// Experimental on clang (libcxx.llvm.org/Status/PSTL.html), requires:
-/// -fexperimental-library
-#if defined(HAVE_CPP17)
-    #if defined(HAVE_MSC)
-        #define HAVE_EXECUTION
-    #endif
-#endif
-
 /// These are manually configured here.
 /// ---------------------------------------------------------------------------
 

@@ -79,16 +79,4 @@ namespace bc = libbitcoin;
     namespace libbitcoin { constexpr auto with_arm = false; };
 #endif
 
-/// Workarounds for C++ noncompliance.
-/// ---------------------------------------------------------------------------
-
-/// C++17 (partial), see HAVE_EXECUTION.
-#if defined(HAVE_EXECUTION)
-    namespace libbitcoin { constexpr auto par_unseq = std::execution::par_unseq; }
-    namespace libbitcoin { constexpr auto seq = std::execution::seq; }
-#else
-    namespace libbitcoin { constexpr auto par_unseq = false; }
-    namespace libbitcoin { constexpr auto seq = false; }
-#endif
-
 #endif
