@@ -45,9 +45,9 @@ CONSTEVAL auto& CLASS::
 concurrency() NOEXCEPT
 {
     if constexpr (Concurrent)
-        return bc::par_unseq;
+        return poolstl::execution::par;
     else
-        return bc::seq;
+        return poolstl::execution::seq;
 }
 
 // protected
@@ -499,7 +499,7 @@ CLASS::hash(data_array<Size>& out, const data_slice& password,
     //    B[i] = scryptROMix (r, B[i], N)
     // end for
     std::atomic_bool success{ true };
-    std_for_each(concurrency(), prblocks.begin(), prblocks.end(),
+    std::for_each(concurrency(), prblocks.begin(), prblocks.end(),
         [&](rblock_t& rblock) NOEXCEPT
         {
             success = success && romix(rblock);

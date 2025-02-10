@@ -19,7 +19,7 @@
 #include "test.hpp"
 #include <utility>
 
-#if defined(DISABLED) && defined(HAVE_EXECUTION)
+#if defined(DISABLED)
 
 BOOST_AUTO_TEST_SUITE(skip_parser_tests)
 
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_tx__factor__expected)
 
     for (size_t i = 0; i < factor; ++i)
     {
-        std::for_each(std::execution::par_unseq, jobs.begin(), jobs.end(),
+        std::for_each(poolstl::execution::par, jobs.begin(), jobs.end(),
             [&](const auto job)
             {
                 if (job)
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(skip_parser__skip_parse_concurrent_block__factor_txs__expec
     const auto expected1 = bitcoin_hash(tx_2);
     constexpr std_array<bool, factor> jobs{};
 
-    std::for_each(std::execution::par_unseq, jobs.begin(), jobs.end(),
+    std::for_each(poolstl::execution::par, jobs.begin(), jobs.end(),
         [&](const auto)
         {
             stream::in::copy input(tx_2);

@@ -212,21 +212,12 @@
 #define FALLTHROUGH [[fallthrough]]
 
 /// C++17 (partial)
-#if defined(HAVE_EXECUTION)
-    #include <execution>
-    #define std_any_of(p, b, e, l) std::any_of((p), (b), (e), (l))
-    #define std_all_of(p, b, e, l) std::all_of((p), (b), (e), (l))
-    #define std_for_each(p, b, e, l) std::for_each((p), (b), (e), (l))
-    #define std_reduce(p, b, e, i, l) std::reduce((p), (b), (e), (i), (l))
-    #define std_transform(p, b, e, t, l) std::transform((p), (b), (e), (t), (l))
-#else
-    #include <bitcoin/system/execution.hpp>
-    #define std_any_of(p, b, e, l) std::any_of((b), (e), (l))
-    #define std_all_of(p, b, e, l) std::all_of((b), (e), (l))
-    #define std_for_each(p, b, e, l) std::for_each((b), (e), (l))
-    #define std_reduce(p, b, e, i, l) std::reduce((b), (e), (i), (l))
-    #define std_transform(p, b, e, t, l) std::transform((b), (e), (t), (l))
-#endif
+/// None on xcode.
+/// Requires link with -ltbb on gcc (v9).
+/// Experimental on clang (libcxx.llvm.org/Status/PSTL.html), requires:
+/// -fexperimental-library
+/// using poolstl, do not include <execution>.
+#include <bitcoin/system/execution.hpp>
 
 /// C++20 (partial)
 #if defined(HAVE_CONSTEVAL)
