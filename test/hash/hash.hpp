@@ -290,7 +290,7 @@ const auto sha_5 = data_chunk(1'000'000_size, to_byte('a'));
     constexpr auto alpha_count = 16'777'216_size;
     constexpr auto long_alpha_size = alpha_size * alpha_count;
     const auto alpha2 = to_array<alpha_size>("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
-    const std_vector<long_hash> long_alpha(alpha2_count, alpha2);
+    const std_vector<long_hash> long_alpha(alpha_count, alpha2);
     const auto long_alpha_data = pointer_cast<const uint8_t>(long_alpha.front().data());
     const auto sha_6 = to_chunk(unsafe_array_cast<uint8_t, long_alpha_size>(long_alpha_data));
 #endif // !HAVE_SLOW_TESTS
