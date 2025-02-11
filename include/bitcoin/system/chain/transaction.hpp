@@ -92,6 +92,7 @@ public:
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
+    size_t spends() const NOEXCEPT;
     size_t inputs() const NOEXCEPT;
     size_t outputs() const NOEXCEPT;
     uint32_t version() const NOEXCEPT;

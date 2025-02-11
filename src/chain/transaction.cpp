@@ -349,6 +349,11 @@ bool transaction::is_valid() const NOEXCEPT
     return valid_;
 }
 
+size_t transaction::spends() const NOEXCEPT
+{
+    return is_coinbase() ? zero : inputs_->size();
+}
+
 size_t transaction::inputs() const NOEXCEPT
 {
     return inputs_->size();
