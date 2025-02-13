@@ -193,7 +193,7 @@ private:
 
     void assign_data(reader& source, bool witness) NOEXCEPT;
     static block from_data(reader& source, bool witness) NOEXCEPT;
-    static sizes serialized_size(const chain::transaction_cptrs& txs) NOEXCEPT;
+    static sizes serialized_size(const transaction_cptrs& txs) NOEXCEPT;
 
     // context free
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;

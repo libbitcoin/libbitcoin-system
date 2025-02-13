@@ -92,8 +92,8 @@ transaction::transaction(uint32_t version, const chain::inputs& inputs,
 {
 }
 
-transaction::transaction(uint32_t version, const chain::inputs_cptr& inputs,
-    const chain::outputs_cptr& outputs, uint32_t locktime) NOEXCEPT
+transaction::transaction(uint32_t version, const inputs_cptr& inputs,
+    const outputs_cptr& outputs, uint32_t locktime) NOEXCEPT
   : transaction(version, inputs, outputs, locktime, segregated(*inputs), true)
 {
 }
@@ -284,9 +284,8 @@ void transaction::to_data(writer& sink, bool witness) const NOEXCEPT
 }
 
 // static/private
-transaction::sizes transaction::serialized_size(
-    const chain::input_cptrs& inputs,
-    const chain::output_cptrs& outputs, bool segregated) NOEXCEPT
+transaction::sizes transaction::serialized_size(const input_cptrs& inputs,
+    const output_cptrs& outputs, bool segregated) NOEXCEPT
 {
     sizes size{ zero, zero };
 
@@ -988,7 +987,7 @@ bool transaction::segregated(const chain::inputs& inputs) NOEXCEPT
 }
 
 // static/private
-bool transaction::segregated(const chain::input_cptrs& inputs) NOEXCEPT
+bool transaction::segregated(const input_cptrs& inputs) NOEXCEPT
 {
     const auto witnessed = [](const auto& input) NOEXCEPT
     {
