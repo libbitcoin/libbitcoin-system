@@ -289,25 +289,12 @@ transaction::sizes transaction::serialized_size(const input_cptrs& inputs,
 {
     sizes size{ zero, zero };
 
-    // Keep the condition outside of the loop.
-    if (segregated)
+    std::for_each(inputs.begin(), inputs.end(), [&](const auto& in) NOEXCEPT
     {
-        std::for_each(inputs.begin(), inputs.end(), [&](const auto& in) NOEXCEPT
-        {
-            size.nominal = ceilinged_add(size.nominal, in->nominal_size());
+        size.nominal = ceilinged_add(size.nominal, in->nominal_size());
+        if (segregated)
             size.witnessed = ceilinged_add(size.witnessed, in->witnessed_size());
-        });
-    }
-    else
-    {
-        // Witness must be zeroed because witnesses have nonzero size when they
-        // are zero-valued, so they can be archived easily. Also it would be
-        // wasteful to to count mutiple zero sizes, so exclude them here.
-        std::for_each(inputs.begin(), inputs.end(), [&](const auto& in) NOEXCEPT
-        {
-            size.nominal = ceilinged_add(size.nominal, in->nominal_size());
-        });
-    }
+    });
 
     const auto outs = [](size_t total, const auto& output) NOEXCEPT
     {
@@ -316,7 +303,6 @@ transaction::sizes transaction::serialized_size(const input_cptrs& inputs,
 
     constexpr auto base_const_size = ceilinged_add(sizeof(version_),
         sizeof(locktime_));
-
     constexpr auto witness_const_size = ceilinged_add(sizeof(witness_marker),
         sizeof(witness_enabled));
 
@@ -324,12 +310,13 @@ transaction::sizes transaction::serialized_size(const input_cptrs& inputs,
         base_const_size, variable_size(inputs.size())),
         variable_size(outputs.size())),
         std::accumulate(outputs.begin(), outputs.end(), zero, outs));
-
     const auto nominal_size = ceilinged_add(base_size, size.nominal);
-    const auto witnessed_size = ceilinged_add(ceilinged_add(base_size,
-        witness_const_size),
-        size.witnessed);
 
+    // witnessed_size is nominal_size for non-segregated transactions.
+    const auto witnessed_size = segregated ? ceilinged_add(ceilinged_add(
+        base_size, witness_const_size), size.witnessed) : nominal_size;
+
+    // Values are the same for non-segregated transactions.
     return { nominal_size, witnessed_size };
 }
 
