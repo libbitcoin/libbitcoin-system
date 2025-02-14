@@ -92,6 +92,7 @@ public:
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
+    size_t spends() const NOEXCEPT;
     size_t inputs() const NOEXCEPT;
     size_t outputs() const NOEXCEPT;
     uint32_t version() const NOEXCEPT;
@@ -166,8 +167,8 @@ public:
     code confirm(const context& ctx) const NOEXCEPT;
 
 protected:
-    transaction(uint32_t version, const chain::inputs_cptr& inputs,
-        const chain::outputs_cptr& outputs, uint32_t locktime, bool segregated,
+    transaction(uint32_t version, const inputs_cptr& inputs,
+        const outputs_cptr& outputs, uint32_t locktime, bool segregated,
         bool valid) NOEXCEPT;
 
     /// Guard (context free).
@@ -236,9 +237,9 @@ private:
     } sighash_cache;
 
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
-    static bool segregated(const chain::input_cptrs& inputs) NOEXCEPT;
-    static sizes serialized_size(const chain::input_cptrs& inputs,
-        const chain::output_cptrs& outputs, bool segregated) NOEXCEPT;
+    static bool segregated(const input_cptrs& inputs) NOEXCEPT;
+    static sizes serialized_size(const input_cptrs& inputs,
+        const output_cptrs& outputs, bool segregated) NOEXCEPT;
 
     void assign_data(reader& source, bool witness) NOEXCEPT;
 

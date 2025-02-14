@@ -284,9 +284,14 @@ input::sizes input::serialized_size(const chain::script& script,
     const auto nominal_size = ceilinged_add(const_size,
         script.serialized_size(true));
 
+    // The input has no way to determine if its tx is segregated, as an empty
+    // witness applies to segregated tx as a one byte (zero) serialization.
+    // This determination is therefore left to the transaction, and witness
+    // retains both serialization options from construction.
     const auto witnessed_size = ceilinged_add(nominal_size,
         witness.serialized_size(true));
 
+    // Values are the same for non-segregated transactions.
     return { nominal_size, witnessed_size };
 }
 

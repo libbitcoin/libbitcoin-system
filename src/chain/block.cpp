@@ -332,8 +332,7 @@ void block::set_hashes(const data_chunk& data) NOEXCEPT
 }
 
 // static/private
-block::sizes block::serialized_size(
-    const chain::transaction_cptrs& txs) NOEXCEPT
+block::sizes block::serialized_size(const transaction_cptrs& txs) NOEXCEPT
 {
     sizes size{};
     std::for_each(txs.begin(), txs.end(), [&](const auto& tx) NOEXCEPT
@@ -342,11 +341,11 @@ block::sizes block::serialized_size(
         size.witnessed = ceilinged_add(size.witnessed, tx->serialized_size(true));
     });
 
-    const auto common_size = ceilinged_add(header::serialized_size(),
+    const auto base_size = ceilinged_add(header::serialized_size(),
         variable_size(txs.size()));
 
-    const auto nominal_size = ceilinged_add(common_size, size.nominal);
-    const auto witnessed_size = ceilinged_add(common_size, size.witnessed);
+    const auto nominal_size = ceilinged_add(base_size, size.nominal);
+    const auto witnessed_size = ceilinged_add(base_size, size.witnessed);
 
     return { nominal_size, witnessed_size };
 }

@@ -90,6 +90,7 @@ public:
     const chunk_cptrs& stack() const NOEXCEPT;
 
     /// Computed properties.
+    /// serialized_size(true) returns one for an empty witness stack.
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
     /// Utilities.
