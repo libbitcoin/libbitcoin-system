@@ -37,10 +37,10 @@ public:
     {
         /// The confirmed chain height of the prevout (zero if not found).
         /// Unused if the input owning this prevout is null (coinbase).
-        size_t height;
+        size_t height{ zero };
 
-        /// node: populated with a database identifier for the parent tx.
-        uint32_t parent{ zero };
+        /// node: populated with database identifier for prevout's parent tx.
+        uint32_t parent;
     };
 
     ///************************************************************************
@@ -51,13 +51,10 @@ public:
     {
         /// The median time past at height (max_uint32 if not found/confirmed).
         /// Unused if the input owning this prevout is null (coinbase).
-        /// node: unused as validation precedes prevout block association.
         uint32_t median_time_past{ max_uint32 };
 
-        /// node: set via block.populate() as internal spends do not
-        /// require prevout block association for relative locktime checks.
-        /// So median_time_past is not required as locked is determined here.
-        bool locked;
+        /// node: populated with database identifier for spender's parent tx.
+        uint32_t spender;
     };
 
     ///************************************************************************
@@ -76,6 +73,11 @@ public:
         /// node: indicates that the input spends output inside same block.
         bool inside;
     };
+
+    /// node: set via block.populate() as internal spends do not
+    /// require prevout block association for relative locktime checks.
+    /// So median_time_past is not required as locked is determined here.
+    bool locked{ true };
 
     /// The previous output is of a coinbase transaction.
     /// node: populated, does not require prevout block association.
