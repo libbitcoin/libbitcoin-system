@@ -160,7 +160,6 @@ private:
     sizes size_;
 
 public:
-    /// TODO: prevout destruct requires input destruct.
     /// Public mutable metadata access, copied but not compared for equality.
     /// Defaults are set so non-population issues usually imply invalidity.
     mutable chain::output::cptr prevout{};

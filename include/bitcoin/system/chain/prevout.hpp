@@ -37,10 +37,10 @@ public:
     {
         /// The confirmed chain height of the prevout (zero if not found).
         /// Unused if the input owning this prevout is null (coinbase).
-        size_t height{ zero };
+        size_t height;
 
-        /// node: populated with database identifier for prevout's parent tx.
-        uint32_t parent;
+        /// node: populated with a database identifier for the parent tx.
+        uint32_t parent{ zero };
     };
 
     ///************************************************************************
@@ -53,8 +53,8 @@ public:
         /// Unused if the input owning this prevout is null (coinbase).
         uint32_t median_time_past{ max_uint32 };
 
-        /// node: populated with database identifier for spender's parent tx.
-        uint32_t spender;
+        /// node: set to the database record of the input association.
+        uint32_t link;
     };
 
     ///************************************************************************
