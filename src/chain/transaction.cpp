@@ -1115,6 +1115,7 @@ constexpr bool is_non_coinbase_mature(size_t tx_height, size_t height) NOEXCEPT
     return tx_height <= height;
 }
 
+// static
 //*****************************************************************************
 // CONSENSUS: Coinbase output matures at 100 blocks depth.
 // CONSENSUS: Genesis coinbase is forever immature (exception).
@@ -1139,6 +1140,17 @@ bool transaction::is_immature(size_t height) const NOEXCEPT
     };
 
     return !std::all_of(inputs_->begin(), inputs_->end(), mature);
+}
+
+// static
+bool transaction::is_relative_locktime_applied(bool coinbase, uint32_t version,
+    uint32_t sequence) NOEXCEPT
+{
+    // BIP68: not applied to the sequence of the input of a coinbase.
+    // BIP68: if bit 31 is set then no consensus meaning is applied.
+    // BIP68: applied to txs with a version greater than or equal to two.
+    return !coinbase && input::is_relative_locktime_applied(sequence) &&
+        (version >= relative_locktime_min_version);
 }
 
 bool transaction::is_internal_lock(const input& in) const NOEXCEPT
