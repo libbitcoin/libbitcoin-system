@@ -45,7 +45,7 @@ public:
     typedef std::shared_ptr<const transaction> cptr;
     typedef input_cptrs::const_iterator input_iterator;
 
-    // BIP68: if bit 31 is set then no consensus meaning is applied.
+    /// Relative locktime also requires activation of bip68.
     static bool is_relative_locktime_applied(bool coinbase, uint32_t version,
         uint32_t sequence) NOEXCEPT;
 
