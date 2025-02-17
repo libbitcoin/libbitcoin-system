@@ -389,12 +389,18 @@ bool input::is_roller() const NOEXCEPT
 }
 
 // static
+bool input::is_relative_locktime_applied(uint32_t sequence) NOEXCEPT
+{
+    // BIP68: if bit 31 is set then no consensus meaning is applied.
+    return !get_right(sequence, relative_locktime_disabled_bit);
+}
+
+// static
 bool input::is_locked(uint32_t sequence, size_t height,
     uint32_t median_time_past, size_t prevout_height,
     uint32_t prevout_median_time_past) NOEXCEPT
 {
-    // BIP68: if bit 31 is set then no consensus meaning is applied.
-    if (get_right(sequence, relative_locktime_disabled_bit))
+    if (!is_relative_locktime_applied(sequence))
         return false;
 
     // BIP68: the low 16 bits of the sequence apply to relative lock-time.

@@ -43,6 +43,7 @@ public:
 
     typedef std::shared_ptr<const input> cptr;
 
+    static bool is_relative_locktime_applied(uint32_t sequence) NOEXCEPT;
     static bool is_locked(uint32_t sequence, size_t height,
         uint32_t median_time_past, size_t prevout_height,
         uint32_t prevout_median_time_past) NOEXCEPT;

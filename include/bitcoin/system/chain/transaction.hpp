@@ -45,6 +45,10 @@ public:
     typedef std::shared_ptr<const transaction> cptr;
     typedef input_cptrs::const_iterator input_iterator;
 
+    // BIP68: if bit 31 is set then no consensus meaning is applied.
+    static bool is_relative_locktime_applied(bool coinbase, uint32_t version,
+        uint32_t sequence) NOEXCEPT;
+
     /// Not genesis and at least 100 blocks deep.
     static bool is_coinbase_mature(size_t coinbase_height,
         size_t height) NOEXCEPT;
