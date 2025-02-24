@@ -323,6 +323,11 @@ set_os_specific_compiler_settings()
     else # Linux
         STDLIB="stdc++"
     fi
+
+    if [[ ($OS == Darwin) && ($CC == clang*) ]]; then
+        CFLAGS="${CFLAGS} -DBOOST_NO_CXX98_FUNCTION_BASE"
+        CXXFLAGS="${CXXFLAGS} -DBOOST_NO_CXX98_FUNCTION_BASE"
+    fi
 }
 
 link_to_standard_library()
