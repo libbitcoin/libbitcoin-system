@@ -271,7 +271,10 @@ input::sizes input::serialized_size(const chain::script& script) NOEXCEPT
     const auto nominal_size = ceilinged_add(const_size,
         script.serialized_size(true));
 
-    return { nominal_size, zero };
+    // Non-segregated input serialization requires an empty witness stack size.
+    // when serializing with witness included (witnessed_size for non-witness).
+    // This does not affect tx serialiation as does not set witness paramter.
+    return { nominal_size, add1(nominal_size) };
 }
 
 // static/private
