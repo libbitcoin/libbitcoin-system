@@ -213,9 +213,6 @@
 /// Disable to unsuppress warnings.
 #define HAVE_SUPPRESSION
 
-/// Disable noexcept to capture stack trace.
-////#define HAVE_NOEXCEPT
-
 /// Disable to emit all suppressed warnings.
 #define HAVE_WARNINGS
 
