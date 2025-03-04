@@ -60,6 +60,14 @@
     #define BC_DEBUG_ONLY(expression) expression
 #endif
 
+#if defined(NDEBUG)
+    #define NOEXCEPT
+    #define THROWS
+#else
+    #define NOEXCEPT noexcept
+    #define THROWS noexcept(false)
+#endif
+
 /// Messages.
 /// ---------------------------------------------------------------------------
 
@@ -188,15 +196,6 @@
 
 /// Workarounds for C++ noncompliance.
 /// ---------------------------------------------------------------------------
-
-/// C++11 (full)
-#if defined(HAVE_NOEXCEPT)
-    #define NOEXCEPT noexcept
-    #define THROWS noexcept(false)
-#else
-    #define NOEXCEPT
-    #define THROWS
-#endif
 
 /// C++14 (full)
 #if defined(HAVE_DEPRECATED)
