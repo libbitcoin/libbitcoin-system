@@ -131,12 +131,11 @@ private:
     BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
     BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
     static size_t serialized_size(const chunk_cptrs& stack) NOEXCEPT;
-    static inline size_t element_size(size_t total,
-        const chunk_cptr& element) NOEXCEPT
+    static inline size_t element_size(const chunk_cptr& element) NOEXCEPT
     {
         // Each witness is prefixed with number of elements (bip144).
         const auto size = element->size();
-        return total + variable_size(size) + size;
+        return ceilinged_add(variable_size(size), size);
     };
     BC_POP_WARNING()
     BC_POP_WARNING()
