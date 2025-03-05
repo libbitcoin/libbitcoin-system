@@ -136,8 +136,6 @@ public:
     /// -----------------------------------------------------------------------
     /// These neither allocate nor deallocate.
 
-    // Clang is not yet C++20 compliant in terms of aggregate initialization.
-    // See [reviews.llvm.org/D140327] for details, resolved in future releases.
     template <class Type, class ...Args>
     void construct(Type* ptr, Args&&... arguments) THROWS
     {

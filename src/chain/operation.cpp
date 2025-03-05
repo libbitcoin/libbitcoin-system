@@ -236,7 +236,7 @@ void operation::assign_data(reader& source) NOEXCEPT
         source.set_position(start);
 
         // An invalid source.read_bytes_raw returns nullptr.
-        data_.reset(POINTER(data_chunk, allocator, source.read_bytes_raw()));
+        INPLACE(&data_, data_chunk, allocator, source.read_bytes_raw());
     }
 
     // All byte vectors are deserializable, stream indicates own failure.

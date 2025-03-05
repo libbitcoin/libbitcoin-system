@@ -183,7 +183,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
                 break;
 
             stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
-            size_ = element_size(size_, stack_.back());
+            size_ = ceilinged_add(size_, element_size(stack_.back()));
         }
     }
     else
@@ -197,7 +197,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
                 break;
 
             stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
-            size_ = element_size(size_, stack_.back());
+            size_ = ceilinged_add(size_, element_size(stack_.back()));
         }
     }
 
@@ -300,7 +300,11 @@ const chunk_cptrs& witness::stack() const NOEXCEPT
 // static/private
 size_t witness::serialized_size(const chunk_cptrs& stack) NOEXCEPT
 {
-    return std::accumulate(stack.begin(), stack.end(), zero, element_size);
+    return std::accumulate(stack.begin(), stack.end(), zero,
+        [](size_t total, const chunk_cptr& element) NOEXCEPT
+        {
+            return ceilinged_add(total, element_size(element));
+        });
 }
 
 size_t witness::serialized_size(bool prefix) const NOEXCEPT
@@ -308,7 +312,7 @@ size_t witness::serialized_size(bool prefix) const NOEXCEPT
     // Witness prefix is an element count, not byte length (unlike script).
     // An empty stack is not a valid witnessed tx (no inputs) but a consistent
     // serialization is used independently by database so zero stack allowed.
-    return prefix ? ceilinged_add(size_, variable_size(stack_.size())) : size_;
+    return prefix ? ceilinged_add(variable_size(stack_.size()), size_) : size_;
 }
 
 // Utilities.
