@@ -444,6 +444,7 @@ data_chunk* byte_reader<IStream>::read_bytes_raw(size_t size) NOEXCEPT
         return nullptr;
 
     // TODO: bypass vector byte fill.
+    // std::uses_allocator_construction_args supplies allocator to vector.
     const auto raw = allocator_.new_object<data_chunk>(size);
     if (raw == nullptr)
     {
