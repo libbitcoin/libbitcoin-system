@@ -236,9 +236,31 @@ INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
     return hash;
 }
 
-// Combine hash values, such as a pair of djb2_hash outputs.
+// Formerly: return left ^ shift_left(right, one);
+// Combine hash values, such as djb2_hash or unique_hash outputs.
 INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
 {
+    ////constexpr auto prime1 = possible_narrow_cast<size_t>(0x9e3779b97f4a7c15_u64);
+    ////constexpr auto prime2 = possible_narrow_cast<size_t>(0x517cc1b727220a95_u64);
+
+    ////auto first = left;
+    ////first ^= shift_right(first, 23);
+    ////first *= prime1;
+    ////first ^= shift_right(first, 19);
+
+    ////auto second = right;
+    ////second ^= shift_right(second, 13);
+    ////second *= prime2;
+    ////second ^= shift_right(second, 31);
+
+    ////// seed parameter, defaults to zero.
+    ////first ^= second;
+    ////first += seed;
+    ////first ^= shift_right(first, 17);
+    ////first *= prime1;
+    ////first ^= shift_right(first, 29);
+
+    ////return first;
     return left ^ shift_left(right, one);
 }
 
