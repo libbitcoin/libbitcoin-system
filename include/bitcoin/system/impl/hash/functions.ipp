@@ -236,7 +236,6 @@ INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
     return hash;
 }
 
-// Formerly: return left ^ shift_left(right, one);
 // Combine hash values, such as djb2_hash or unique_hash outputs.
 INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
 {
@@ -262,7 +261,7 @@ INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
     ////first ^= shift_right(first, 29);
 
     ////return first;
-    return left ^ shift_left(right, one);
+    return bit_xor(left, shift_left(right));
 }
 
 } // namespace system
