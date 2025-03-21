@@ -33,6 +33,8 @@ else ()
   set( libdir "\${exec_prefix}/lib" )
   set( includedir "\${exec_prefix}/include" )
 
+  set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" )
+
   set( PACKAGE_VERSION "4.0.0" )
   set( VERSION "${PACKAGE_VERSION}" )
 endif ()
