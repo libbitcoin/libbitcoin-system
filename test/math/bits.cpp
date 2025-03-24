@@ -123,6 +123,11 @@ static_assert(right_zeros(uint8_t{ 0b11111111 }) == 0);
 static_assert(right_zeros(uint8_t{ 0b00011100 }) == 2);
 static_assert(right_zeros(uint8_t{ 0b00011101 }) == 0);
 
+static_assert(zeros_count(uint8_t{ 0b00000000 }) == 8);
+static_assert(zeros_count(uint8_t{ 0b11111111 }) == 0);
+static_assert(zeros_count(uint8_t{ 0b01111111 }) == 1);
+static_assert(zeros_count(uint8_t{ 0b11100011 }) == 3);
+
 // ones
 
 static_assert(left_ones(uint8_t{ 0b00000000 }) == 0);
@@ -134,6 +139,11 @@ static_assert(right_ones(uint8_t{ 0b00000000 }) == 0);
 static_assert(right_ones(uint8_t{ 0b11111111 }) == 8);
 static_assert(right_ones(uint8_t{ 0b11111110 }) == 0);
 static_assert(right_ones(uint8_t{ 0b11100011 }) == 2);
+
+static_assert(ones_count(uint8_t{ 0b00000000 }) == 0);
+static_assert(ones_count(uint8_t{ 0b11111111 }) == 8);
+static_assert(ones_count(uint8_t{ 0b11110000 }) == 4);
+static_assert(ones_count(uint8_t{ 0b00011110 }) == 4);
 
 // ones_complement (NOT)
 // inverts all bits (~n, !bool)

@@ -51,6 +51,12 @@ constexpr size_t left_ones(Value value) NOEXCEPT;
 template <typename Value, if_unsigned_integer<Value> = true>
 constexpr size_t right_ones(Value value) NOEXCEPT;
 
+// Because std::popcount (C++20) function returns int.
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t ones_count(Value value) NOEXCEPT;
+template <typename Value, if_unsigned_integer<Value> = true>
+constexpr size_t zeros_count(Value value) NOEXCEPT;
+
 /// Bitwise logical operations.
 /// ---------------------------------------------------------------------------
 
