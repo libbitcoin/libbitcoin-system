@@ -162,8 +162,21 @@ BOOST_AUTO_TEST_CASE(point__to_data__writer__expected)
 // properties
 // ----------------------------------------------------------------------------
 
-// is_null
-// serialized_size
+BOOST_AUTO_TEST_CASE(point__is_null__not_null__false)
+{
+    BOOST_REQUIRE(!expected_point.is_null());
+}
+
+BOOST_AUTO_TEST_CASE(point__is_null__default_null__true)
+{
+    BOOST_REQUIRE(point{}.is_null());
+}
+
+BOOST_AUTO_TEST_CASE(point__serialized_size__always__expected)
+{
+    static_assert(point::serialized_size() == hash_size + sizeof(uint32_t));
+    BOOST_REQUIRE_EQUAL(point::serialized_size(), hash_size + sizeof(uint32_t));
+}
 
 // json
 // ----------------------------------------------------------------------------

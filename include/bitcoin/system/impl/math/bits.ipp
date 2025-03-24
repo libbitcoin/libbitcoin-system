@@ -73,6 +73,18 @@ constexpr size_t right_ones(Value value) NOEXCEPT
     return to_unsigned(std::countr_one<Value>(value));
 }
 
+template <typename Value, if_unsigned_integer<Value>>
+constexpr size_t ones_count(Value value) NOEXCEPT
+{
+    return to_unsigned(std::popcount<Value>(value));
+}
+
+template <typename Value, if_unsigned_integer<Value>>
+constexpr size_t zeros_count(Value value) NOEXCEPT
+{
+    return to_unsigned(std::popcount<Value>(bit_not(value)));
+}
+
 // Bitwise logical operations.
 // ----------------------------------------------------------------------------
 

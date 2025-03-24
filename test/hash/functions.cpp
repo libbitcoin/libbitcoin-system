@@ -427,6 +427,16 @@ BOOST_AUTO_TEST_CASE(functions__hash_combine__same_values__expected)
     {
         BOOST_REQUIRE_EQUAL(hash, 4893418499_u64);
     }
+
+    // Complex hash.
+    ////if constexpr (sizeof(size_t) == sizeof(uint32_t))
+    ////{
+    ////    BOOST_REQUIRE_EQUAL(hash, 3172851131_u32);
+    ////}
+    ////else
+    ////{
+    ////    BOOST_REQUIRE_EQUAL(hash, 6326001304333978798_u64);
+    ////}
 }
 
 BOOST_AUTO_TEST_SUITE_END()
