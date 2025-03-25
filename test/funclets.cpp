@@ -30,6 +30,24 @@ static_assert(is_nonzero(1u));
 static_assert(is_nonzero(0xff));
 static_assert(is_same_type<decltype(is_nonzero<int16_t>(0)), bool>);
 
+const auto zeroize_helper = [](auto value)
+{
+    using type = decltype(value);
+    return zeroize(value);
+    static_assert(is_same_type<decltype(zeroize<type>(value)), type>);
+};
+static_assert(zeroize_helper(0_u8) == 0u);
+static_assert(zeroize_helper(1_u8) == 0u);
+static_assert(zeroize_helper(3_u16) == 0u);
+static_assert(zeroize_helper(4_u16) == 0u);
+static_assert(zeroize_helper(max_uint32) == 0u);
+static_assert(zeroize_helper(0_i8) == 0);
+static_assert(zeroize_helper(1_i8) == 0);
+static_assert(zeroize_helper(3_i16) == 0);
+static_assert(zeroize_helper(4_i16) == 0);
+static_assert(zeroize_helper(max_int32) == 0);
+static_assert(zeroize_helper(min_int32) == 0);
+
 static_assert(is_one(1));
 static_assert(!is_one(0u));
 static_assert(!is_one(0xff));
