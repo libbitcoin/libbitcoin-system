@@ -47,7 +47,7 @@ constexpr bool is_nonzero(Type value) noexcept
 template <typename Type>
 constexpr Type zeroize(Type& value) noexcept
 {
-    return value ^= value;
+    return (value = static_cast<Type>(0));
 }
 
 template <typename Type>
