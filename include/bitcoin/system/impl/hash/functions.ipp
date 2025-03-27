@@ -217,7 +217,7 @@ INLINE constexpr size_t unique_hash(const data_array<Size>& key) NOEXCEPT
     // This optimization breaks data portability (by endianness).
     // Could be modified to use an endian conversion vs. simple copy.
     size_t value{};
-    std::copy_n(key.begin(), size, system::byte_cast(value).begin());
+    std::copy_n(key.begin(), size, byte_cast(value).begin());
     return value;
 }
 
