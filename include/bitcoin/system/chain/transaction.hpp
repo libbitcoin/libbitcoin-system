@@ -134,7 +134,7 @@ public:
     bool is_dusty(uint64_t minimum_output_value) const NOEXCEPT;
 
     /// Requires no metadata, true if spend in own block would be locked.
-    bool is_internal_lock(const input& in) const NOEXCEPT;
+    bool is_internally_locked(const input& in) const NOEXCEPT;
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
@@ -204,7 +204,7 @@ protected:
     /// Check (requires context).
     /// -----------------------------------------------------------------------
 
-    bool is_non_final(size_t height, uint32_t timestamp,
+    bool is_absolute_locked(size_t height, uint32_t timestamp,
         uint32_t median_time_past, bool bip113) const NOEXCEPT;
 
     /// Accept (requires prevouts).
@@ -220,7 +220,8 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Requires input.metadata.height/median_time_past (prevout confirmation).
-    bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
+    bool is_relative_locked(size_t height,
+        uint32_t median_time_past) const NOEXCEPT;
 
     /// Requires input.metadata.height (prevout confirmation).
     bool is_immature(size_t height) const NOEXCEPT;
