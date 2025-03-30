@@ -44,7 +44,7 @@ public:
     typedef std::shared_ptr<const input> cptr;
 
     static bool is_relative_locktime_applied(uint32_t sequence) NOEXCEPT;
-    static bool is_locked(uint32_t sequence, size_t height,
+    static bool is_relative_locked(uint32_t sequence, size_t height,
         uint32_t median_time_past, size_t prevout_height,
         uint32_t prevout_median_time_past) NOEXCEPT;
 
@@ -117,16 +117,13 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
     /// Requires metadata.height and median_time_past (otherwise returns true).
-    bool is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT;
+    bool is_relative_locked(size_t height,
+        uint32_t median_time_past) const NOEXCEPT;
 
 protected:
     input(const chain::point::cptr& point, const chain::script::cptr& script,
         const chain::witness::cptr& witness, uint32_t sequence,
         bool valid) NOEXCEPT;
-
-    /// Any non-zero relative locktime value locks internally-spent input.
-    friend class transaction;
-    bool is_internal_lock() const NOEXCEPT;
 
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;

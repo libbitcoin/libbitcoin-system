@@ -54,6 +54,7 @@ public:
         uint32_t median_time_past{ max_uint32 };
 
         /// node: set to the database record of the input association.
+        /// node: it is necessary that Link::terminal derives from max_uint32.
         uint32_t link;
     };
 

@@ -1047,7 +1047,7 @@ bool transaction::is_invalid_coinbase_size() const NOEXCEPT
 // Accept (contextual).
 // ----------------------------------------------------------------------------
 
-bool transaction::is_non_final(size_t height, uint32_t timestamp,
+bool transaction::is_absolute_locked(size_t height, uint32_t timestamp,
     uint32_t median_time_past, bool bip113) const NOEXCEPT
 {
     // BIP113: comparing the locktime against the median of the past 11 block
@@ -1153,7 +1153,7 @@ bool transaction::is_relative_locktime_applied(bool coinbase, uint32_t version,
         (version >= relative_locktime_min_version);
 }
 
-bool transaction::is_internal_lock(const input& in) const NOEXCEPT
+bool transaction::is_internally_locked(const input& in) const NOEXCEPT
 {
     // BIP68: not applied to the sequence of the input of a coinbase.
     BC_ASSERT(!is_coinbase());
@@ -1162,10 +1162,12 @@ bool transaction::is_internal_lock(const input& in) const NOEXCEPT
     if (version_ < relative_locktime_min_version)
         return false;
 
-    return in.is_internal_lock();
+    // Internal spends have no relative height/mtp (own metadata vs. itself).
+    return in.is_relative_locked(in.metadata.height,
+        in.metadata.median_time_past);
 }
 
-bool transaction::is_locked(size_t height,
+bool transaction::is_relative_locked(size_t height,
     uint32_t median_time_past) const NOEXCEPT
 {
     // BIP68: not applied to the sequence of the input of a coinbase.
@@ -1178,11 +1180,9 @@ bool transaction::is_locked(size_t height,
     // BIP68: references to median time past are as defined by bip113.
     const auto locked = [=](const auto& input) NOEXCEPT
     {
-        return input->is_locked(height, median_time_past);
+        return input->is_relative_locked(height, median_time_past);
     };
 
-    // BIP68: when the relative lock time is block based, it is interpreted as
-    // a minimum block height constraint over the age of the input.
     return std::any_of(inputs_->begin(), inputs_->end(), locked);
 }
 
@@ -1289,8 +1289,8 @@ code transaction::check(const context& ctx) const NOEXCEPT
 {
     const auto bip113 = ctx.is_enabled(bip113_rule);
 
-    if (is_non_final(ctx.height, ctx.timestamp, ctx.median_time_past, bip113))
-        return error::transaction_non_final;
+    if (is_absolute_locked(ctx.height, ctx.timestamp, ctx.median_time_past, bip113))
+        return error::absolute_time_locked;
 
     return error::transaction_success;
 }
@@ -1325,7 +1325,7 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
 
     if (is_coinbase())
         return error::transaction_success;
-    if (bip68 && is_locked(ctx.height, ctx.median_time_past))
+    if (bip68 && is_relative_locked(ctx.height, ctx.median_time_past))
         return error::relative_time_locked;
     if (is_immature(ctx.height))
         return error::coinbase_maturity;

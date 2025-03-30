@@ -130,10 +130,10 @@ public:
         return transaction::is_invalid_coinbase_size();
     }
 
-    bool is_non_final(size_t height, uint32_t timestamp,
+    bool is_absolute_locked(size_t height, uint32_t timestamp,
         uint32_t median_time_past, bool bip113) const
     {
-        return transaction::is_non_final(height, timestamp, median_time_past,
+        return transaction::is_absolute_locked(height, timestamp, median_time_past,
             bip113);
     }
 
@@ -152,9 +152,9 @@ public:
         return transaction::is_immature(height);
     }
 
-    bool is_locked(size_t height, uint32_t median_time_past) const
+    bool is_relative_locked(size_t height, uint32_t median_time_past) const
     {
-        return transaction::is_locked(height, median_time_past);
+        return transaction::is_relative_locked(height, median_time_past);
     }
 
     bool is_unconfirmed_spend(size_t height) const
@@ -1027,7 +1027,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_invalid_coinbase_size__script_size_above_mi
     BOOST_REQUIRE(!instance.is_invalid_coinbase_size());
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_zero__false)
+BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_zero__false)
 {
     constexpr bool bip113 = false;
     constexpr size_t height = 100;
@@ -1043,11 +1043,11 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_zero__false)
         locktime
     };
 
-    BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
+    BOOST_REQUIRE(!instance.is_absolute_locked(height, time, past, bip113));
 }
 
 
-BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_time_greater_threshold__false)
+BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_less_block_time_greater_threshold__false)
 {
     constexpr bool bip113 = false;
     constexpr size_t height = locktime_threshold + 100;
@@ -1063,10 +1063,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_time_greater
         locktime
     };
 
-    BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
+    BOOST_REQUIRE(!instance.is_absolute_locked(height, time, past, bip113));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_height_less_threshold_false)
+BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_less_block_height_less_threshold_false)
 {
     constexpr bool bip113 = false;
     constexpr size_t height = 100;
@@ -1082,10 +1082,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_less_block_height_less_
         locktime
     };
 
-    BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
+    BOOST_REQUIRE(!instance.is_absolute_locked(height, time, past, bip113));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_input_not_final__true)
+BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_input_not_final__true)
 {
     constexpr bool bip113 = false;
     constexpr size_t height = 100;
@@ -1102,10 +1102,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_input_not_final__true)
         locktime,
     };
 
-    BOOST_REQUIRE(instance.is_non_final(height, time, past, bip113));
+    BOOST_REQUIRE(instance.is_absolute_locked(height, time, past, bip113));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_inputs_final__false)
+BOOST_AUTO_TEST_CASE(transaction__is_absolute_locked__locktime_inputs_final__false)
 {
     constexpr bool bip113 = false;
     constexpr size_t height = 100;
@@ -1124,7 +1124,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_non_final__locktime_inputs_final__false)
         locktime
     };
 
-    BOOST_REQUIRE(!instance.is_non_final(height, time, past, bip113));
+    BOOST_REQUIRE(!instance.is_absolute_locked(height, time, past, bip113));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__is_missing_prevouts__empty_inputs__false)
@@ -1266,7 +1266,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
     BOOST_REQUIRE(!instance.is_immature(add1(coinbase_maturity)));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__false)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_1_empty__false)
 {
     constexpr uint32_t version = 1;
     const accessor instance
@@ -1279,10 +1279,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_empty__false)
         0
     };
 
-    BOOST_REQUIRE(!instance.is_locked(0, 0));
+    BOOST_REQUIRE(!instance.is_relative_locked(0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_locked__version_2_empty__false)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_2_empty__false)
 {
     constexpr uint32_t version = 2;
     const accessor instance
@@ -1295,10 +1295,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_2_empty__false)
         0
     };
 
-    BOOST_REQUIRE(!instance.is_locked(0, 0));
+    BOOST_REQUIRE(!instance.is_relative_locked(0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_one_of_two_locked_locked__false)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_1_one_of_two_locked_locked__false)
 {
     constexpr uint32_t version = 1;
     const accessor instance
@@ -1312,10 +1312,10 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_1_one_of_two_locked_locked_
         0
     };
 
-    BOOST_REQUIRE(!instance.is_locked(0, 0));
+    BOOST_REQUIRE(!instance.is_relative_locked(0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_locked__version_4_one_of_two_locked__true)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_4_one_of_two_locked__true)
 {
     constexpr uint32_t version = 4;
     const accessor instance
@@ -1329,7 +1329,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_locked__version_4_one_of_two_locked__true)
         0
     };
 
-    BOOST_REQUIRE(instance.is_locked(0, 0));
+    BOOST_REQUIRE(instance.is_relative_locked(0, 0));
 }
 
 // is_unconfirmed_spend

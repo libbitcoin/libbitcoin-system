@@ -114,15 +114,6 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__unexpected_witness_transaction__
     BOOST_REQUIRE_EQUAL(ec.message(), "unexpected witness transaction");
 }
 
-BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_non_final__true_exected_message)
-{
-    constexpr auto value = error::transaction_non_final;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "transaction currently non-final");
-}
-
 BOOST_AUTO_TEST_CASE(transaction_error_t__code__premature_validation__true_exected_message)
 {
     constexpr auto value = error::premature_validation;
@@ -186,13 +177,22 @@ BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_sigop_limit__true_ex
     BOOST_REQUIRE_EQUAL(ec.message(), "too many transaction embedded signature operations");
 }
 
+BOOST_AUTO_TEST_CASE(transaction_error_t__code__absolute_time_locked__true_exected_message)
+{
+    constexpr auto value = error::absolute_time_locked;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "transaction absolute time locked");
+}
+
 BOOST_AUTO_TEST_CASE(transaction_error_t__code__relative_time_locked__true_exected_message)
 {
     constexpr auto value = error::relative_time_locked;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "transaction currently locked");
+    BOOST_REQUIRE_EQUAL(ec.message(), "transaction relative time locked");
 }
 
 BOOST_AUTO_TEST_CASE(transaction_error_t__code__transaction_weight_limit__true_exected_message)

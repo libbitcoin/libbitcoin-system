@@ -399,7 +399,7 @@ bool input::is_relative_locktime_applied(uint32_t sequence) NOEXCEPT
 }
 
 // static
-bool input::is_locked(uint32_t sequence, size_t height,
+bool input::is_relative_locked(uint32_t sequence, size_t height,
     uint32_t median_time_past, size_t prevout_height,
     uint32_t prevout_median_time_past) NOEXCEPT
 {
@@ -412,29 +412,26 @@ bool input::is_locked(uint32_t sequence, size_t height,
     // BIP68: bit 22 determines if relative lock is time or block based.
     if (get_right(sequence, relative_locktime_time_locked_bit))
     {
+        // BIP68: references to median time past are as defined by bip113.
         // BIP68: change sequence to seconds by shift up by 9 bits (x 512).
         auto time = shift_left(blocks, relative_locktime_seconds_shift_left);
         auto age = floored_subtract(median_time_past, prevout_median_time_past);
         return age < time;
     }
 
+    // BIP68: when the relative lock time is block based, it is interpreted as
+    // a minimum block height constraint over the age of the input.
     const auto age = floored_subtract(height, prevout_height);
     return age < blocks;
 }
 
-bool input::is_locked(size_t height, uint32_t median_time_past) const NOEXCEPT
+bool input::is_relative_locked(size_t height,
+    uint32_t median_time_past) const NOEXCEPT
 {
     // Prevout must be found and height/median_time_past metadata populated.
     ////BC_ASSERT(!is_zero(metadata.height));
-    return is_locked(sequence_, height, median_time_past, metadata.height,
-        metadata.median_time_past);
-}
-
-// protected (tx friend)
-bool input::is_internal_lock() const NOEXCEPT
-{
-    // Internal spends have no relative height/mtp (any metadata values work).
-    return is_locked(metadata.height, metadata.median_time_past);
+    return is_relative_locked(sequence_, height, median_time_past,
+        metadata.height, metadata.median_time_past);
 }
 
 bool input::reserved_hash(hash_digest& out) const NOEXCEPT

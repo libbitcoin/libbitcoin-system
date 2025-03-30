@@ -710,10 +710,38 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 }
 
 // Search is unordered, forward refs (and duplicates) caught by block.check.
-bool block::populate(const chain::context& ctx) const NOEXCEPT
+void block::populate() const NOEXCEPT
 {
     if (txs_->empty())
-        return true;
+        return;
+
+    unordered_map_of_cref_point_to_output_cptr_cref points{ outputs() };
+    uint32_t index{};
+
+    // Populate outputs hash table (coinbase included).
+    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
+        for (const auto& out: *(*tx)->outputs_ptr())
+            points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
+
+    // Populate input prevouts from hash table.
+    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+    {
+        for (const auto& in: *(*tx)->inputs_ptr())
+        {
+            // Map chain::point to cref_point for search, should optimize away.
+            const auto point = points.find({ in->point().hash(),
+                in->point().index() });
+
+            if (point != points.end())
+                in->prevout = point->second;
+        }
+    }
+}
+
+code block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
+{
+    if (txs_->empty())
+        return error::block_success;
 
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
     unordered_map_of_cref_point_to_output_cptr_cref points{ outputs() };
@@ -724,8 +752,7 @@ bool block::populate(const chain::context& ctx) const NOEXCEPT
         for (const auto& out: *(*tx)->outputs_ptr())
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
-    // Populate input prevouts from hash table and obtain locked state.
-    auto locked = false;
+    // Populate input prevouts from hash table and obtain maturity.
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
@@ -736,19 +763,23 @@ bool block::populate(const chain::context& ctx) const NOEXCEPT
 
             if (point != points.end())
             {
-                // Zero maturity coinbase spend is treated as locked.
-                const auto lock = (bip68 && (*tx)->is_internal_lock(*in));
+                // Zero maturity coinbase spend is immature.
+                const auto lock = (bip68 && (*tx)->is_internally_locked(*in));
                 const auto immature = !is_zero(coinbase_maturity) &&
                     (in->point().hash() == txs_->front()->get_hash(false));
 
                 in->prevout = point->second;
-                in->metadata.locked = immature || lock;
-                locked |= in->metadata.locked;
+                if ((in->metadata.locked = (immature || lock)))
+                {
+                    // Shortcircuit population and return above error.
+                    return immature ? error::coinbase_maturity : 
+                        error::relative_time_locked;
+                }
             }
         }
     }
 
-    return !locked;
+    return error::block_success;
 }
 
 // Delegated.
