@@ -47,7 +47,6 @@ enum transaction_error_t
 
     // accept transaction
     unexpected_witness_transaction,
-    transaction_non_final,
     premature_validation,
     unspent_duplicate,
     missing_previous_output,
@@ -55,6 +54,7 @@ enum transaction_error_t
     coinbase_maturity,
     spend_exceeds_value,
     transaction_sigop_limit,
+    absolute_time_locked,
     relative_time_locked,
     transaction_weight_limit,
 

@@ -41,7 +41,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
 
     // accept transaction
     { unexpected_witness_transaction, "unexpected witness transaction" },
-    { transaction_non_final, "transaction currently non-final" },
     { premature_validation, "transaction validation under checkpoint" },
     { unspent_duplicate, "matching transaction with unspent outputs" },
     { missing_previous_output, "previous output not found" },
@@ -49,7 +48,8 @@ DEFINE_ERROR_T_MESSAGE_MAP(transaction_error)
     { coinbase_maturity, "immature coinbase spent" },
     { spend_exceeds_value, "spend exceeds value of inputs" },
     { transaction_sigop_limit, "too many transaction embedded signature operations" },
-    { relative_time_locked, "transaction currently locked" },
+    { absolute_time_locked, "transaction absolute time locked" },
+    { relative_time_locked, "transaction relative time locked" },
     { transaction_weight_limit, "transaction weight limit exceeded" },
 
     // dconfirm transaction
