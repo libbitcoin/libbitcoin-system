@@ -142,8 +142,9 @@ public:
     void populate() const NOEXCEPT;
 
     /// Populate previous outputs and metadata.locked internal to the block.
+    /// Execution is shortcircuited for error with that metadata.locked set.
     /// False if any populated prevout is immature in the block context.
-    bool populate_with_metadata(const context& ctx) const NOEXCEPT;
+    code populate_with_metadata(const context& ctx) const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,

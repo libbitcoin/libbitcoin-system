@@ -738,10 +738,10 @@ void block::populate() const NOEXCEPT
     }
 }
 
-bool block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
+code block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
 {
     if (txs_->empty())
-        return true;
+        return error::block_success;
 
     const auto bip68 = ctx.is_enabled(chain::flags::bip68_rule);
     unordered_map_of_cref_point_to_output_cptr_cref points{ outputs() };
@@ -753,7 +753,6 @@ bool block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
     // Populate input prevouts from hash table and obtain maturity.
-    auto locked = false;
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
         for (const auto& in: *(*tx)->inputs_ptr())
@@ -765,18 +764,22 @@ bool block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
             if (point != points.end())
             {
                 // Zero maturity coinbase spend is immature.
-                const auto lock = (bip68 && (*tx)->is_internal_lock(*in));
+                const auto lock = (bip68 && (*tx)->is_internally_locked(*in));
                 const auto immature = !is_zero(coinbase_maturity) &&
                     (in->point().hash() == txs_->front()->get_hash(false));
 
                 in->prevout = point->second;
-                in->metadata.locked = immature || lock;
-                locked |= in->metadata.locked;
+                if ((in->metadata.locked = (immature || lock)))
+                {
+                    // Shortcircuit population and return above error.
+                    return immature ? error::coinbase_maturity : 
+                        error::relative_time_locked;
+                }
             }
         }
     }
 
-    return !locked;
+    return error::block_success;
 }
 
 // Delegated.
