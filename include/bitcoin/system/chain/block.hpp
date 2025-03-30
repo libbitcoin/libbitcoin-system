@@ -138,9 +138,12 @@ public:
     code connect(const context& ctx) const NOEXCEPT;
     code confirm(const context& ctx) const NOEXCEPT;
 
-    /// Populate previous outputs (and metadata.locked) internal to the block.
-    /// False if one or more populated prevouts is locked in the block context.
-    bool populate(const context& ctx) const NOEXCEPT;
+    /// Populate previous outputs internal to the block.
+    void populate() const NOEXCEPT;
+
+    /// Populate previous outputs and metadata.locked internal to the block.
+    /// False if any populated prevout is immature in the block context.
+    bool populate_with_metadata(const context& ctx) const NOEXCEPT;
 
 protected:
     block(const chain::header::cptr& header,

@@ -710,7 +710,35 @@ bool block::is_unspent_coinbase_collision() const NOEXCEPT
 }
 
 // Search is unordered, forward refs (and duplicates) caught by block.check.
-bool block::populate(const chain::context& ctx) const NOEXCEPT
+void block::populate() const NOEXCEPT
+{
+    if (txs_->empty())
+        return;
+
+    unordered_map_of_cref_point_to_output_cptr_cref points{ outputs() };
+    uint32_t index{};
+
+    // Populate outputs hash table (coinbase included).
+    for (auto tx = txs_->begin(); tx != txs_->end(); ++tx, index = 0)
+        for (const auto& out: *(*tx)->outputs_ptr())
+            points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
+
+    // Populate input prevouts from hash table.
+    for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
+    {
+        for (const auto& in: *(*tx)->inputs_ptr())
+        {
+            // Map chain::point to cref_point for search, should optimize away.
+            const auto point = points.find({ in->point().hash(),
+                in->point().index() });
+
+            if (point != points.end())
+                in->prevout = point->second;
+        }
+    }
+}
+
+bool block::populate_with_metadata(const chain::context& ctx) const NOEXCEPT
 {
     if (txs_->empty())
         return true;
@@ -724,7 +752,7 @@ bool block::populate(const chain::context& ctx) const NOEXCEPT
         for (const auto& out: *(*tx)->outputs_ptr())
             points.emplace(cref_point{ (*tx)->get_hash(false), index++ }, out);
 
-    // Populate input prevouts from hash table and obtain locked state.
+    // Populate input prevouts from hash table and obtain maturity.
     auto locked = false;
     for (auto tx = std::next(txs_->begin()); tx != txs_->end(); ++tx)
     {
@@ -736,7 +764,7 @@ bool block::populate(const chain::context& ctx) const NOEXCEPT
 
             if (point != points.end())
             {
-                // Zero maturity coinbase spend is treated as locked.
+                // Zero maturity coinbase spend is immature.
                 const auto lock = (bip68 && (*tx)->is_internal_lock(*in));
                 const auto immature = !is_zero(coinbase_maturity) &&
                     (in->point().hash() == txs_->front()->get_hash(false));
