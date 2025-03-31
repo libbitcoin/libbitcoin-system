@@ -1343,6 +1343,7 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
 // forks
 
 // Do not need to invoke on coinbase.
+// This assumes that prevout caching is completed on all inputs.
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
     ////BC_ASSERT(!is_coinbase());

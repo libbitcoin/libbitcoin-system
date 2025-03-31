@@ -952,6 +952,7 @@ code block::confirm(const context& ctx) const NOEXCEPT
 
 // forks
 
+// This assumes that prevout caching is completed on all inputs.
 code block::connect(const context& ctx) const NOEXCEPT
 {
     return connect_transactions(ctx);
