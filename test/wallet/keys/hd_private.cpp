@@ -173,6 +173,51 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_private__hardened_must_not_overflow_dept
     BOOST_REQUIRE(!xprv_256);
 }
 
+BOOST_AUTO_TEST_CASE(hd_private__derive_public__must_not_overflow_depth__expected)
+{
+    // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
+    // by manually setting the depth to 254
+    static const auto xprv_254_encoded = "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQFSjf36";
+    const hd_private xprv_254(xprv_254_encoded);
+
+    const auto xprv_255 = xprv_254.derive_private(14);
+    const auto xpub_256 = xprv_255.derive_public(70);
+
+    BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
+    BOOST_REQUIRE(xprv_254);
+    // the maximal valid depth is 255
+    BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
+    BOOST_REQUIRE(xprv_255);
+
+    // depth overflows uint from 255 to 0
+    BOOST_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
+    // which creates invalid keys
+    BOOST_REQUIRE(!xpub_256);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__derive_public__hardened_must_not_overflow_depth__expected)
+{
+    // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
+    // by manually setting the depth to 254
+    static const auto xprv_254_encoded = "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQFSjf36";
+    const hd_private xprv_254(xprv_254_encoded);
+
+    const auto xprv_255 = xprv_254.derive_private(141);
+    const auto xpub_256 = xprv_255.derive_public(19287 + hd_first_hardened_key);
+
+    BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
+    BOOST_REQUIRE(xprv_254);
+    // the maximal valid depth is 255
+    BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
+    BOOST_REQUIRE(xprv_255);
+
+    // depth overflows uint from 255 to 0
+    BOOST_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
+    // which creates invalid keys
+    BOOST_REQUIRE(!xpub_256);
+}
+
+
 BOOST_AUTO_TEST_CASE(hd_public__derive_public__must_not_overflow_depth__expected)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
