@@ -128,6 +128,24 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__long_seed__expected)
     BOOST_REQUIRE_EQUAL(m0xH1yH2_pub.encoded(), "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
 }
 
+BOOST_AUTO_TEST_CASE(hd_public__constructor__null_key_decodes_to_invalid__expected)
+{
+    // the 11...14rcJhr is a serialization of a null key;
+    static const auto null_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
+    const hd_private xpub_null(null_encoded);
+
+    BOOST_REQUIRE(!xpub_null);
+}
+
+BOOST_AUTO_TEST_CASE(hd_private__constructor__null_key_decodes_to_invalid__expected)
+{
+    // the 11...14rcJhr is a serialization of a null key;
+    static const auto null_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
+    const hd_private xprv_null(null_encoded);
+
+    BOOST_REQUIRE(!xprv_null);
+}
+
 BOOST_AUTO_TEST_CASE(hd_private__to_public__fails_from_invalid_private__expected)
 {
     // the 11...14rcJhr is a serialization of a null key;
