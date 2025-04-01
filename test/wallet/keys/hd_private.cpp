@@ -128,6 +128,16 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__long_seed__expected)
     BOOST_REQUIRE_EQUAL(m0xH1yH2_pub.encoded(), "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
 }
 
+BOOST_AUTO_TEST_CASE(hd_private__to_public__fails_from_invalid_private__expected)
+{
+    // the 11...14rcJhr is a serialization of a null key;
+    static const auto xprv_invalid_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
+    const hd_private xprv_invalid(xprv_invalid_encoded);
+
+    BOOST_REQUIRE(!xprv_invalid);
+    BOOST_REQUIRE(!xprv_invalid.to_public());
+}
+
 BOOST_AUTO_TEST_CASE(hd_private__derive_private__must_not_overflow_depth__expected)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
