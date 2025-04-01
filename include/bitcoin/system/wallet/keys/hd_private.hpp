@@ -73,7 +73,6 @@ public:
     bool operator<(const hd_private& other) const NOEXCEPT;
     bool operator==(const hd_private& other) const NOEXCEPT;
     bool operator!=(const hd_private& other) const NOEXCEPT;
-    hd_private& operator=(hd_private other) NOEXCEPT;
     friend std::istream& operator>>(std::istream& in, hd_private& to);
     friend std::ostream& operator<<(std::ostream& out,
         const hd_private& of) NOEXCEPT;
