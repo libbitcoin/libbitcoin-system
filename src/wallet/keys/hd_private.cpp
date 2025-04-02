@@ -231,6 +231,11 @@ hd_key hd_private::to_hd_key() const NOEXCEPT
 
 hd_public hd_private::to_public() const NOEXCEPT
 {
+
+    if (!valid_) {
+        return {};
+    }
+
     return hd_public(((hd_public)*this).to_hd_key(),
         hd_public::to_prefix(lineage_.prefixes));
 }
