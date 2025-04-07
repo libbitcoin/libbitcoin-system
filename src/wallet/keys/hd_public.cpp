@@ -132,7 +132,7 @@ hd_public hd_public::from_key(const hd_key& key, uint32_t prefix) NOEXCEPT
         child
     };
 
-    return hd_public(compressed, chain, lineage);
+    return { compressed, chain, lineage };
 }
 
 hd_public hd_public::from_string(const std::string& encoded,
@@ -142,7 +142,7 @@ hd_public hd_public::from_string(const std::string& encoded,
     if (!decode_base58(key, encoded))
         return {};
 
-    return hd_public(from_key(key, prefix));
+    return { from_key(key, prefix) };
 }
 
 // Cast operators.
@@ -227,7 +227,7 @@ hd_public hd_public::derive_public(uint32_t index) const NOEXCEPT
         index
     };
 
-    return hd_public(child, intermediate.second, lineage);
+    return { child, intermediate.second, lineage };
 }
 
 // Helpers.

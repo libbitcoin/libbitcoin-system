@@ -128,7 +128,7 @@ hd_private hd_private::from_entropy(const data_slice& entropy,
     static const auto magic = to_chunk("Bitcoin seed");
     const auto intermediate = split(hmac<sha512>::code(entropy, magic));
 
-    return hd_private(intermediate.first, intermediate.second, prefixes);
+    return { intermediate.first, intermediate.second, prefixes };
 }
 
 hd_private hd_private::from_key(const hd_key& key,
@@ -162,7 +162,7 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes) NOEXCEPT
         child
     };
 
-    return hd_private(secret, chain, lineage);
+    return { secret, chain, lineage };
 }
 
 hd_private hd_private::from_string(const std::string& encoded,
@@ -231,8 +231,8 @@ hd_key hd_private::to_hd_key() const NOEXCEPT
 
 hd_public hd_private::to_public() const NOEXCEPT
 {
-    return hd_public(((hd_public)*this).to_hd_key(),
-        hd_public::to_prefix(lineage_.prefixes));
+    const auto key = static_cast<hd_public>(*this).to_hd_key();
+    return { key, hd_public::to_prefix(lineage_.prefixes) };
 }
 
 hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
@@ -261,7 +261,7 @@ hd_private hd_private::derive_private(uint32_t index) const NOEXCEPT
         index
     };
 
-    return hd_private(child, intermediate.second, lineage);
+    return { child, intermediate.second, lineage };
 }
 
 hd_public hd_private::derive_public(uint32_t index) const NOEXCEPT
