@@ -134,8 +134,9 @@ struct hash<bc::system::chain::point>
 {
     size_t operator()(const bc::system::chain::point& value) const NOEXCEPT
     {
-        return bc::system::hash_combine(value.index(),
-            bc::system::unique_hash(value.hash()));
+        // Right should always be the lower entropy value (i.e. point index).
+        return bc::system::hash_combine(bc::system::unique_hash(value.hash()),
+            value.index());
     }
 };
 
