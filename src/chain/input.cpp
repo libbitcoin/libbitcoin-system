@@ -243,8 +243,9 @@ bool operator!=(const cref_point& left, const cref_point& right) NOEXCEPT
 data_chunk input::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size(false));
-    stream::out::copy ostream(data);
-    to_data(ostream);
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out);
     return data;
 }
 

@@ -167,8 +167,9 @@ size_t block::get_allocation() const NOEXCEPT
 data_chunk block::to_data(bool witness) const NOEXCEPT
 {
     data_chunk data(serialized_size(witness));
-    stream::out::copy ostream(data);
-    to_data(ostream, witness);
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out, witness);
     return data;
 }
 

@@ -397,12 +397,9 @@ operation operation::from_string(const std::string& mnemonic) NOEXCEPT
 data_chunk operation::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size());
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    stream::out::copy ostream(data);
-    BC_POP_WARNING()
-
-    to_data(ostream);
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out);
     return data;
 }
 

@@ -83,14 +83,16 @@ uint64_t siphash(const siphash_key& key,
 
     constexpr auto eight = sizeof(uint64_t);
     const auto bytes = message.size();
-    read::bytes::copy source(message);
+    stream::in::fast stream(message);
+    read::bytes::fast source(stream);
 
     for (size_t index = eight; index <= bytes; index += eight)
-        compression_round(v0, v1, v2, v3,
-            source.read_8_bytes_little_endian());
+        compression_round(v0, v1, v2, v3, source.read_8_bytes_little_endian());
 
-    auto last = is_zero(bytes % eight) ? 0_u64 :
-        source.read_8_bytes_little_endian();
+    // Read zero to seven remainder bytes (zero padded, fails stream).
+    BC_ASSERT(source);
+    auto last = source.read_8_bytes_little_endian();
+    BC_ASSERT(!source);
 
     last ^= ((bytes % max_encoded_byte_count) << to_bits(sub1(eight)));
     compression_round(v0, v1, v2, v3, last);

@@ -28,6 +28,7 @@ namespace system {
 
 // Allowed here for low level performance benefit.
 BC_PUSH_WARNING(NO_POINTER_ARITHMETIC)
+BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
 
 template <typename Character>
 template <typename Buffer>
@@ -150,18 +151,19 @@ template <typename Character>
 void
 istream<Character>::read(char_type* data, std::streamsize count) NOEXCEPT
 {
-    const auto bytes = possible_narrow_sign_cast<size_t>(count);
+    auto bytes = possible_narrow_sign_cast<size_t>(count);
 
     if (is_overflow(bytes))
     {
+        if (state_ != goodbit)
+            return;
+
+        // Allow read to end if state was good (std::istream behavior).
+        bytes = end_ - position_;
         setstate(badbit);
-        return;
     }
 
-    BC_PUSH_WARNING(NO_UNSAFE_COPY_N)
     std::copy_n(position_, bytes, data);
-    BC_POP_WARNING()
-
     position_ += bytes;
 }
 
@@ -181,6 +183,7 @@ istream<Character>::is_overflow(pos_type size) const NOEXCEPT
     return (state_ != goodbit) || (size > (end_ - position_));
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 } // namespace system
