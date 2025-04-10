@@ -131,8 +131,9 @@ bool output::operator!=(const output& other) const NOEXCEPT
 data_chunk output::to_data() const NOEXCEPT
 {
     data_chunk data(serialized_size());
-    stream::out::copy ostream(data);
-    to_data(ostream);
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out);
     return data;
 }
 

@@ -246,8 +246,9 @@ witness witness::from_string(const std::string& mnemonic) NOEXCEPT
 data_chunk witness::to_data(bool prefix) const NOEXCEPT
 {
     data_chunk data(serialized_size(prefix));
-    stream::out::copy ostream(data);
-    to_data(ostream, prefix);
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out, prefix);
     return data;
 }
 
