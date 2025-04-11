@@ -31,6 +31,9 @@ namespace libbitcoin {
 namespace system {
 namespace neutrino {
 
+// iostreams 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // Golomb-Rice related values (bip158).
 constexpr uint8_t golomb_bits = 19;
 constexpr uint64_t golomb_target_false_positive_rate = 784931;
@@ -74,18 +77,11 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
     // Order and remove duplicates.
     distinct(scripts);
 
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::out::data stream(out);
-    BC_POP_WARNING()
-
     write::bytes::ostream writer(stream);
     writer.write_variable(scripts.size());
     golomb::construct(stream, scripts, golomb_bits, key, rate);
-
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream.flush();
-    BC_POP_WARNING()
-
     return true;
 }
 
@@ -101,10 +97,7 @@ bool match_filter(const block_filter& filter,
     if (script.ops().empty())
         return false;
 
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::in::copy stream(filter.filter);
-    BC_POP_WARNING()
-
     read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
@@ -138,10 +131,7 @@ bool match_filter(const block_filter& filter,
     if (stack.empty())
         return false;
 
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     stream::in::copy stream(filter.filter);
-    BC_POP_WARNING()
-
     read::bytes::istream reader(stream);
     const auto set_size = reader.read_variable();
 
@@ -177,6 +167,8 @@ bool match_filter(const block_filter& filter,
 
     return match_filter(filter, stack);
 }
+
+BC_POP_WARNING()
 
 } // namespace neutrino
 } // namespace system
