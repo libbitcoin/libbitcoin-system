@@ -23,10 +23,12 @@
 
 #include <algorithm>
 #include <iostream>
-#include <iterator>
+#include <utility>
 #include <vector>
-#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/math/math.hpp>
 
+// TODO: change to ipp and duck type streams for performance.
+// TODO: not actually cryptographic functions, move to wallet.
 // Avoid in header, circular dependency with stream to crypto.
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -37,8 +39,8 @@ namespace golomb {
 static void encode(bitwriter& sink, uint64_t value,
     uint8_t modulo_exponent) NOEXCEPT
 {
-    const uint64_t quotient = value >> modulo_exponent;
-    for (uint64_t index = 0; index < quotient; index++)
+    const auto quotient = shift_right(value, modulo_exponent);
+    for (uint64_t index = 0; index < quotient; ++index)
         sink.write_bit(true);
 
     sink.write_bit(false);
@@ -49,10 +51,10 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent) NOEXCEPT
 {
     uint64_t quotient = 0;
     while (source.read_bit())
-        quotient++;
+        ++quotient;
 
     const auto remainder = source.read_bits(modulo_exponent);
-    return ((quotient << modulo_exponent) + remainder);
+    return shift_left(quotient, modulo_exponent) + remainder;
 }
 
 inline uint64_t hash_to_range(const data_slice& item, uint64_t bound,
@@ -69,10 +71,8 @@ static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
     if (is_multiply_overflow(target_false_positive_rate, set_size))
         return {};
 
-    const auto bound = target_false_positive_rate * set_size;
     std::vector<uint64_t> hashes(items.size());
-
-    // C++17: parallel policy for std::transform.
+    const auto bound = target_false_positive_rate * set_size;
     std::transform(items.begin(), items.end(), hashes.begin(),
         [&](const data_chunk& item) NOEXCEPT
         {
@@ -92,7 +92,7 @@ static void construct(bitwriter& sink, const data_stack& items, uint8_t bits,
         target_false_positive_rate, entropy);
 
     uint64_t previous = 0;
-    for (auto value: set)
+    for (const auto value: set)
     {
         encode(sink, value - previous, bits);
         previous = value;
