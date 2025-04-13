@@ -55,6 +55,7 @@
 // /radix         : /words
 // /serial        : /radix
 // /hash          : /radix /endian
+// /filter        : /hash
 // /crypto        : /hash
 // /stream        : /crypto /endian /error
 // /chain         : /stream forks [forward: settings]

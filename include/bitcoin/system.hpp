@@ -79,7 +79,6 @@
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
-#include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -116,6 +115,8 @@
 #include <bitcoin/system/error/op_error_t.hpp>
 #include <bitcoin/system/error/script_error_t.hpp>
 #include <bitcoin/system/error/transaction_error_t.hpp>
+#include <bitcoin/system/filter/filter.hpp>
+#include <bitcoin/system/filter/golomb_coding.hpp>
 #include <bitcoin/system/hash/accumulator.hpp>
 #include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>

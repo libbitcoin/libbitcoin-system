@@ -74,7 +74,6 @@ src_libbitcoin_system_la_SOURCES = \
     src/crypto/der_parser.cpp \
     src/crypto/ec_context.cpp \
     src/crypto/ec_context.hpp \
-    src/crypto/golomb_coding.cpp \
     src/crypto/pseudo_random.cpp \
     src/crypto/ring_signature.cpp \
     src/crypto/secp256k1.cpp \
@@ -87,6 +86,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/op_error_t.cpp \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
+    src/filter/golomb_coding.cpp \
     src/hash/accumulator.cpp \
     src/hash/checksum.cpp \
     src/hash/siphash.cpp \
@@ -495,7 +495,6 @@ include_bitcoin_system_crypto_HEADERS = \
     include/bitcoin/system/crypto/aes256.hpp \
     include/bitcoin/system/crypto/crypto.hpp \
     include/bitcoin/system/crypto/der_parser.hpp \
-    include/bitcoin/system/crypto/golomb_coding.hpp \
     include/bitcoin/system/crypto/pseudo_random.hpp \
     include/bitcoin/system/crypto/ring_signature.hpp \
     include/bitcoin/system/crypto/secp256k1.hpp
@@ -541,6 +540,11 @@ include_bitcoin_system_error_HEADERS = \
     include/bitcoin/system/error/op_error_t.hpp \
     include/bitcoin/system/error/script_error_t.hpp \
     include/bitcoin/system/error/transaction_error_t.hpp
+
+include_bitcoin_system_filterdir = ${includedir}/bitcoin/system/filter
+include_bitcoin_system_filter_HEADERS = \
+    include/bitcoin/system/filter/filter.hpp \
+    include/bitcoin/system/filter/golomb_coding.hpp
 
 include_bitcoin_system_hashdir = ${includedir}/bitcoin/system/hash
 include_bitcoin_system_hash_HEADERS = \

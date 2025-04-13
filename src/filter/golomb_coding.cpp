@@ -19,7 +19,7 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/crypto/golomb_coding.hpp>
+#include <bitcoin/system/filter/golomb_coding.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -27,8 +27,6 @@
 #include <vector>
 #include <bitcoin/system/math/math.hpp>
 
-// TODO: change to ipp and duck type streams for performance.
-// TODO: not actually cryptographic functions, move to wallet.
 // Avoid in header, circular dependency with stream to crypto.
 #include <bitcoin/system/stream/stream.hpp>
 
