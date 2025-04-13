@@ -39,22 +39,22 @@ struct BC_API block_filter
     data_chunk filter;
 };
 
-bool BC_API compute_filter(data_chunk& out,
+BC_API bool compute_filter(data_chunk& out,
     const chain::block& block) NOEXCEPT;
 
-hash_digest BC_API compute_filter_header(const hash_digest& previous_header,
+BC_API hash_digest compute_filter_header(const hash_digest& previous_header,
     const data_chunk& filter) NOEXCEPT;
 
-bool BC_API match_filter(const block_filter& filter,
+BC_API bool match_filter(const block_filter& filter,
     const chain::script& script) NOEXCEPT;
 
-bool BC_API match_filter(const block_filter& filter,
+BC_API bool match_filter(const block_filter& filter,
     const chain::scripts& scripts) NOEXCEPT;
 
-bool BC_API match_filter(const block_filter& filter,
+BC_API bool match_filter(const block_filter& filter,
     const wallet::payment_address& address) NOEXCEPT;
 
-bool BC_API match_filter(const block_filter& filter,
+BC_API bool match_filter(const block_filter& filter,
     const wallet::payment_address::list& addresses) NOEXCEPT;
 
 } // namespace neutrino
