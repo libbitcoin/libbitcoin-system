@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__long_seed__expected)
     BOOST_REQUIRE_EQUAL(m0xH1yH2_pub.encoded(), "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__constructor__null_key_decodes_to_invalid__expected)
+BOOST_AUTO_TEST_CASE(hd_private__constructor__null_key__decodes_to_invalid)
 {
     // the 11...14rcJhr is a serialization of a null key;
     static const auto null_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(hd_private__constructor__null_key_decodes_to_invalid__expec
     BOOST_REQUIRE(!xprv_null);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__to_public__fails_from_invalid_private__expected)
+BOOST_AUTO_TEST_CASE(hd_private__to_public__from_invalid_private__invalid)
 {
     // the 11...14rcJhr is a serialization of a null key;
     static const auto xprv_invalid_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(hd_private__to_public__fails_from_invalid_private__expected
     BOOST_REQUIRE(!xprv_invalid.to_public());
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_private__must_not_overflow_depth__expected)
+BOOST_AUTO_TEST_CASE(hd_private__derive_private__depth_overflow__invalid)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
@@ -160,17 +160,17 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_private__must_not_overflow_depth__expect
 
     BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
     BOOST_REQUIRE(xprv_254);
+
     // the maximal valid depth is 255
     BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
     BOOST_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
     BOOST_REQUIRE_EQUAL(xprv_256.lineage().depth, 0);
-    // which creates invalid keys
     BOOST_REQUIRE(!xprv_256);
 }
 
-BOOST_AUTO_TEST_CASE(hd_private__derive_private__hardened_must_not_overflow_depth__expected)
+BOOST_AUTO_TEST_CASE(hd_private__derive_private__hardened_depth_overflow__invalid)
 {
     // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
     // by manually setting the depth to 254
@@ -182,13 +182,13 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_private__hardened_must_not_overflow_dept
 
     BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
     BOOST_REQUIRE(xprv_254);
+
     // the maximal valid depth is 255
     BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
     BOOST_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
     BOOST_REQUIRE_EQUAL(xprv_256.lineage().depth, 0);
-    // which creates invalid keys
     BOOST_REQUIRE(!xprv_256);
 }
 
@@ -204,13 +204,13 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__must_not_overflow_depth__expecte
 
     BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
     BOOST_REQUIRE(xprv_254);
+
     // the maximal valid depth is 255
     BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
     BOOST_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
     BOOST_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
-    // which creates invalid keys
     BOOST_REQUIRE(!xpub_256);
 }
 
@@ -226,13 +226,13 @@ BOOST_AUTO_TEST_CASE(hd_private__derive_public__hardened_must_not_overflow_depth
 
     BOOST_REQUIRE_EQUAL(xprv_254.lineage().depth, 254);
     BOOST_REQUIRE(xprv_254);
+
     // the maximal valid depth is 255
     BOOST_REQUIRE_EQUAL(xprv_255.lineage().depth, 255);
     BOOST_REQUIRE(xprv_255);
 
     // depth overflows uint from 255 to 0
     BOOST_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
-    // which creates invalid keys
     BOOST_REQUIRE(!xpub_256);
 }
 
