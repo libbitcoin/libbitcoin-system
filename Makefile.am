@@ -86,7 +86,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/error/op_error_t.cpp \
     src/error/script_error_t.cpp \
     src/error/transaction_error_t.cpp \
-    src/filter/golomb_coding.cpp \
+    src/filter/golomb.cpp \
     src/hash/accumulator.cpp \
     src/hash/checksum.cpp \
     src/hash/siphash.cpp \
@@ -114,7 +114,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/unicode/utf8_everywhere/unicode_streambuf.cpp \
     src/wallet/context.cpp \
     src/wallet/message.cpp \
-    src/wallet/neutrino_filter.cpp \
+    src/wallet/neutrino.cpp \
     src/wallet/point_value.cpp \
     src/wallet/points_value.cpp \
     src/wallet/addresses/bitcoin_uri.cpp \
@@ -275,6 +275,9 @@ test_libbitcoin_system_test_SOURCES = \
     test/error/op_error_t.cpp \
     test/error/script_error_t.cpp \
     test/error/transaction_error_t.cpp \
+    test/filter/bloom.cpp \
+    test/filter/golomb.cpp \
+    test/filter/sieve.cpp \
     test/hash/accumulator.cpp \
     test/hash/checksum.cpp \
     test/hash/functions.cpp \
@@ -366,7 +369,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/utreexo/utreexo.hpp \
     test/wallet/context.cpp \
     test/wallet/message.cpp \
-    test/wallet/neutrino_filter.cpp \
+    test/wallet/neutrino.cpp \
     test/wallet/point_value.cpp \
     test/wallet/points_value.cpp \
     test/wallet/addresses/bitcoin_uri.cpp \
@@ -543,8 +546,10 @@ include_bitcoin_system_error_HEADERS = \
 
 include_bitcoin_system_filterdir = ${includedir}/bitcoin/system/filter
 include_bitcoin_system_filter_HEADERS = \
+    include/bitcoin/system/filter/bloom.hpp \
     include/bitcoin/system/filter/filter.hpp \
-    include/bitcoin/system/filter/golomb_coding.hpp
+    include/bitcoin/system/filter/golomb.hpp \
+    include/bitcoin/system/filter/sieve.hpp
 
 include_bitcoin_system_hashdir = ${includedir}/bitcoin/system/hash
 include_bitcoin_system_hash_HEADERS = \
@@ -603,6 +608,11 @@ include_bitcoin_system_impl_endian_HEADERS = \
     include/bitcoin/system/impl/endian/swaps.ipp \
     include/bitcoin/system/impl/endian/uintx_t.ipp \
     include/bitcoin/system/impl/endian/unsafe.ipp
+
+include_bitcoin_system_impl_filterdir = ${includedir}/bitcoin/system/impl/filter
+include_bitcoin_system_impl_filter_HEADERS = \
+    include/bitcoin/system/impl/filter/bloom.ipp \
+    include/bitcoin/system/impl/filter/sieve.ipp
 
 include_bitcoin_system_impl_hashdir = ${includedir}/bitcoin/system/impl/hash
 include_bitcoin_system_impl_hash_HEADERS = \
@@ -832,7 +842,7 @@ include_bitcoin_system_walletdir = ${includedir}/bitcoin/system/wallet
 include_bitcoin_system_wallet_HEADERS = \
     include/bitcoin/system/wallet/context.hpp \
     include/bitcoin/system/wallet/message.hpp \
-    include/bitcoin/system/wallet/neutrino_filter.hpp \
+    include/bitcoin/system/wallet/neutrino.hpp \
     include/bitcoin/system/wallet/point_value.hpp \
     include/bitcoin/system/wallet/points_value.hpp \
     include/bitcoin/system/wallet/wallet.hpp

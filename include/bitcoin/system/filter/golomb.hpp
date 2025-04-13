@@ -19,8 +19,8 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#ifndef LIBBITCOIN_SYSTEM_FILTER_GOLOMB_CODING
-#define LIBBITCOIN_SYSTEM_FILTER_GOLOMB_CODING
+#ifndef LIBBITCOIN_SYSTEM_FILTER_GOLOMB
+#define LIBBITCOIN_SYSTEM_FILTER_GOLOMB
 
 #include <istream>
 #include <ostream>

@@ -16,11 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_FILTER_FILTER_HPP
-#define LIBBITCOIN_SYSTEM_FILTER_FILTER_HPP
 
-#include <bitcoin/system/filter/bloom.hpp>
-#include <bitcoin/system/filter/golomb.hpp>
-#include <bitcoin/system/filter/sieve.hpp>
+#include "../test.hpp"
 
-#endif
+BOOST_AUTO_TEST_SUITE(sieve_tests)
+
+BOOST_AUTO_TEST_CASE(sieve_test)
+{
+    BOOST_REQUIRE(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()

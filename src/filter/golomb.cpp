@@ -19,15 +19,13 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/filter/golomb_coding.hpp>
+#include <bitcoin/system/filter/golomb.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <utility>
 #include <vector>
 #include <bitcoin/system/math/math.hpp>
-
-// Avoid in header, circular dependency with stream to crypto.
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {

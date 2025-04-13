@@ -144,6 +144,9 @@
     <ClCompile Include="..\..\..\..\test\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\test\error\transaction_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\test\filter\bloom.cpp" />
+    <ClCompile Include="..\..\..\..\test\filter\golomb.cpp" />
+    <ClCompile Include="..\..\..\..\test\filter\sieve.cpp" />
     <ClCompile Include="..\..\..\..\test\funclets.cpp" />
     <ClCompile Include="..\..\..\..\test\hacks.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\accumulator.cpp" />
@@ -279,7 +282,7 @@
     <ClCompile Include="..\..\..\..\test\wallet\mnemonics\mnemonic.cpp">
       <ObjectFileName>$(IntDir)test_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\neutrino_filter.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\neutrino.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\point_value.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\points_value.cpp" />
     <ClCompile Include="..\..\..\..\test\words\catalogs\electrum.cpp">

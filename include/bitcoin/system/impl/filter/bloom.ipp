@@ -16,11 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_FILTER_FILTER_HPP
-#define LIBBITCOIN_SYSTEM_FILTER_FILTER_HPP
+#ifndef LIBBITCOIN_SYSTEM_FILTER_BLOOM_IPP
+#define LIBBITCOIN_SYSTEM_FILTER_BLOOM_IPP
 
-#include <bitcoin/system/filter/bloom.hpp>
-#include <bitcoin/system/filter/golomb.hpp>
-#include <bitcoin/system/filter/sieve.hpp>
+#include <bitcoin/system/define.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif
