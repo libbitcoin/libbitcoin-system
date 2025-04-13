@@ -60,11 +60,6 @@ output::output(uint64_t value, const chain::script::cptr& script) NOEXCEPT
 {
 }
 
-output::output(const data_slice& data) NOEXCEPT
-  : output(stream::in::copy(data))
-{
-}
-
 output::output(stream::in::fast&& stream) NOEXCEPT
   : output(read::bytes::fast(stream))
 {

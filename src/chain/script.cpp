@@ -111,11 +111,6 @@ script::script(const operations& ops, bool prefail) NOEXCEPT
 {
 }
 
-script::script(const data_slice& data, bool prefix) NOEXCEPT
-  : script(stream::in::copy(data), prefix)
-{
-}
-
 script::script(stream::in::fast&& stream, bool prefix) NOEXCEPT
   : script(read::bytes::fast(stream), prefix)
 {

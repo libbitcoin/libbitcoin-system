@@ -66,7 +66,6 @@ public:
         const hash_digest& merkle_root, uint32_t timestamp, uint32_t bits,
         uint32_t nonce) NOEXCEPT;
 
-    header(const data_slice& data) NOEXCEPT;
     header(stream::in::fast&& stream) NOEXCEPT;
     header(stream::in::fast& stream) NOEXCEPT;
     header(std::istream&& stream) NOEXCEPT;

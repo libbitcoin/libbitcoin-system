@@ -98,11 +98,6 @@ transaction::transaction(uint32_t version, const inputs_cptr& inputs,
 {
 }
 
-transaction::transaction(const data_slice& data, bool witness) NOEXCEPT
-  : transaction(stream::in::copy(data), witness)
-{
-}
-
 transaction::transaction(stream::in::fast&& stream, bool witness) NOEXCEPT
   : transaction(read::bytes::fast(stream), witness)
 {
