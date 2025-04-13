@@ -22,8 +22,7 @@
 #ifndef LIBBITCOIN_SYSTEM_FILTER_GOLOMB_HPP
 #define LIBBITCOIN_SYSTEM_FILTER_GOLOMB_HPP
 
-#include <istream>
-#include <ostream>
+#include <iostream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
