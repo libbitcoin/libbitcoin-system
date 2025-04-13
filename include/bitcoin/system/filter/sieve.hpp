@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_FILTER_SIEVE
-#define LIBBITCOIN_SYSTEM_FILTER_SIEVE
+#ifndef LIBBITCOIN_SYSTEM_FILTER_SIEVE_HPP
+#define LIBBITCOIN_SYSTEM_FILTER_SIEVE_HPP
 
 #include <bitcoin/system/define.hpp>
 
