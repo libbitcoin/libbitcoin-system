@@ -103,10 +103,10 @@ transaction::transaction(const data_slice& data, bool witness) NOEXCEPT
 {
 }
 
-////transaction::transaction(stream::in::fast&& stream, bool witness) NOEXCEPT
-////  : transaction(read::bytes::fast(stream), witness)
-////{
-////}
+transaction::transaction(stream::in::fast&& stream, bool witness) NOEXCEPT
+  : transaction(read::bytes::fast(stream), witness)
+{
+}
 
 transaction::transaction(stream::in::fast& stream, bool witness) NOEXCEPT
   : transaction(read::bytes::fast(stream), witness)

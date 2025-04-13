@@ -69,7 +69,7 @@ public:
         const chain::witness::cptr& witness, uint32_t sequence) NOEXCEPT;
 
     input(const data_slice& data) NOEXCEPT;
-    ////input(stream::in::fast&& stream) NOEXCEPT;
+    input(stream::in::fast&& stream) NOEXCEPT;
     input(stream::in::fast& stream) NOEXCEPT;
     input(std::istream&& stream) NOEXCEPT;
     input(std::istream& stream) NOEXCEPT;

@@ -149,10 +149,10 @@ input::input(const data_slice& data) NOEXCEPT
 {
 }
 
-////input::input(stream::in::fast&& stream) NOEXCEPT
-////  : input(read::bytes::fast(stream))
-////{
-////}
+input::input(stream::in::fast&& stream) NOEXCEPT
+  : input(read::bytes::fast(stream))
+{
+}
 
 input::input(stream::in::fast& stream) NOEXCEPT
   : input(read::bytes::fast(stream))

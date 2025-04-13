@@ -51,7 +51,7 @@ public:
     output(uint64_t value, const chain::script::cptr& script) NOEXCEPT;
 
     output(const data_slice& data) NOEXCEPT;
-    ////output(stream::in::fast&& stream) NOEXCEPT;
+    output(stream::in::fast&& stream) NOEXCEPT;
     output(stream::in::fast& stream) NOEXCEPT;
     output(std::istream&& stream) NOEXCEPT;
     output(std::istream& stream) NOEXCEPT;

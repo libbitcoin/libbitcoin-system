@@ -130,10 +130,10 @@ operation::operation(const data_slice& op_data) NOEXCEPT
 {
 }
 
-////operation::operation(stream::in::fast&& stream) NOEXCEPT
-////  : operation(read::bytes::fast(stream))
-////{
-////}
+operation::operation(stream::in::fast&& stream) NOEXCEPT
+  : operation(read::bytes::fast(stream))
+{
+}
 
 operation::operation(stream::in::fast& stream) NOEXCEPT
   : operation(read::bytes::fast(stream))

@@ -56,7 +56,7 @@ public:
     witness(const chunk_cptrs& stack) NOEXCEPT;
 
     witness(const data_slice& data, bool prefix) NOEXCEPT;
-    ////witness(stream::in::fast&& stream, bool prefix) NOEXCEPT;
+    witness(stream::in::fast&& stream, bool prefix) NOEXCEPT;
     witness(stream::in::fast& stream, bool prefix) NOEXCEPT;
     witness(std::istream&& stream, bool prefix) NOEXCEPT;
     witness(std::istream& stream, bool prefix) NOEXCEPT;
