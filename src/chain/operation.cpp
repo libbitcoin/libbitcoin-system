@@ -221,8 +221,13 @@ void operation::assign_data(reader& source) NOEXCEPT
         source.invalidate();
 
     // An invalid source.read_bytes_raw returns nullptr.
-    INPLACE(&data_, data_chunk, allocator, source.read_bytes_raw(size));
+    const auto ptr = source.read_bytes_raw(size);
     underflow_ = !source;
+    if (!underflow_)
+    {
+        INPLACE(&data_, data_chunk, allocator, ptr);
+        return;
+    }
 
     // This requires that provided stream terminates at the end of the script.
     // When passing ops as part of a stream longer than the script, such as for
@@ -230,16 +235,9 @@ void operation::assign_data(reader& source) NOEXCEPT
     // clear the stream limit upon return. Stream invalidation and set_position
     // do not alter a stream limit, it just behaves as a smaller stream buffer.
     // Without a limit, source.read_bytes() below consumes the remaining stream.
-    if (underflow_)
-    {
-        code_ = any_invalid;
-        source.set_position(start);
-
-        // An invalid source.read_bytes_raw returns nullptr.
-        INPLACE(&data_, data_chunk, allocator, source.read_bytes_raw());
-    }
-
-    // All byte vectors are deserializable, stream indicates own failure.
+    code_ = any_invalid;
+    source.set_position(start);
+    INPLACE(&data_, data_chunk, allocator, source.read_bytes_raw());
 }
 
 // static/private
