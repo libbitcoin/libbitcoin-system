@@ -231,6 +231,9 @@ hd_key hd_private::to_hd_key() const NOEXCEPT
 
 hd_public hd_private::to_public() const NOEXCEPT
 {
+	if (!valid_)
+	    return {};
+
     const auto key = static_cast<hd_public>(*this).to_hd_key();
     return { key, hd_public::to_prefix(lineage_.prefixes) };
 }

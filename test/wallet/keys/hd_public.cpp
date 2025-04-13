@@ -44,6 +44,16 @@ BOOST_AUTO_TEST_CASE(hd_public__encoded__round_trip__expected)
     BOOST_REQUIRE_EQUAL(key.encoded(), encoded);
 }
 
+BOOST_AUTO_TEST_CASE(hd_public__constructor__null_key__decodes_to_invalid)
+{
+    // the 11...14rcJhr is a serialization of a null key;
+    static const auto null_encoded = "1111111111111111111111111111111111111111111111111111111111111111111111111111114rcJhr";
+    const hd_private xpub_null(null_encoded);
+
+    BOOST_REQUIRE(!xpub_null);
+}
+
+
 BOOST_AUTO_TEST_CASE(hd_public__derive_public__short_seed__expected)
 {
     data_chunk seed;
@@ -92,5 +102,29 @@ BOOST_AUTO_TEST_CASE(hd_public__derive_public__long_seed__expected)
     BOOST_REQUIRE_EQUAL(m0xH1yH_pub.encoded(), "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL");
     BOOST_REQUIRE_EQUAL(m0xH1yH2_pub.encoded(), "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
 }
+
+BOOST_AUTO_TEST_CASE(hd_public__derive_public__depth_overflow__invalid)
+{
+    // xprv_254_depth was created from "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
+    // by manually setting the depth to 254
+    static const auto xprv_254_encoded = "xprvJ6xRbBsatSpgzr9c3hYbM2RohnAcHiiN74vQWqdRPx914xeq41t3u4rPXTsNxd5kvLSnqpsMx1cMx8cytMM5RbS7G54nwC5p5P5MQFSjf36";
+    const hd_private xprv_254(xprv_254_encoded);
+    hd_public xpub_254 = xprv_254.to_public();
+
+    const auto xpub_255 = xpub_254.derive_public(1);
+    const auto xpub_256 = xpub_255.derive_public(0);
+
+    BOOST_REQUIRE_EQUAL(xpub_254.lineage().depth, 254);
+    BOOST_REQUIRE(xpub_254);
+
+    // the maximal valid depth is 255
+    BOOST_REQUIRE_EQUAL(xpub_255.lineage().depth, 255);
+    BOOST_REQUIRE(xpub_255);
+
+    // depth overflows uint from 255 to 0
+    BOOST_REQUIRE_EQUAL(xpub_256.lineage().depth, 0);
+    BOOST_REQUIRE(!xpub_256);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
