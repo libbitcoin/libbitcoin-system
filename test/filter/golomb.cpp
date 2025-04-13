@@ -16,13 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
 
-#include <bitcoin/system/crypto/aes256.hpp>
-#include <bitcoin/system/crypto/der_parser.hpp>
-#include <bitcoin/system/crypto/pseudo_random.hpp>
-#include <bitcoin/system/crypto/ring_signature.hpp>
-#include <bitcoin/system/crypto/secp256k1.hpp>
+#include "../test.hpp"
 
-#endif
+BOOST_AUTO_TEST_SUITE(golomb_tests)
+
+BOOST_AUTO_TEST_CASE(golomb_test)
+{
+    BOOST_REQUIRE(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()

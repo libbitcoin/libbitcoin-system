@@ -50,17 +50,10 @@ point::point(const hash_digest& hash, uint32_t index) NOEXCEPT
 {
 }
 
-point::point(const data_slice& data) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-  : point(stream::in::copy(data))
-    BC_POP_WARNING()
+point::point(stream::in::fast&& stream) NOEXCEPT
+  : point(read::bytes::fast(stream))
 {
 }
-
-////point::point(stream::in::fast&& stream) NOEXCEPT
-////  : point(read::bytes::fast(stream))
-////{
-////}
 
 point::point(stream::in::fast& stream) NOEXCEPT
   : point(read::bytes::fast(stream))

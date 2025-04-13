@@ -69,9 +69,8 @@ public:
         const chain::outputs& outputs, uint32_t locktime) NOEXCEPT;
     transaction(uint32_t version, const inputs_cptr& inputs,
         const outputs_cptr& outputs, uint32_t locktime) NOEXCEPT;
-    
-    transaction(const data_slice& data, bool witness) NOEXCEPT;
-    ////transaction(stream::in::fast&& stream, bool witness) NOEXCEPT;
+
+    transaction(stream::in::fast&& stream, bool witness) NOEXCEPT;
     transaction(stream::in::fast& stream, bool witness) NOEXCEPT;
     transaction(std::istream&& stream, bool witness) NOEXCEPT;
     transaction(std::istream& stream, bool witness) NOEXCEPT;

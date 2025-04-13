@@ -138,7 +138,6 @@
     <ClCompile Include="..\..\..\..\src\crypto\aes256.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\der_parser.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ec_context.cpp" />
-    <ClCompile Include="..\..\..\..\src\crypto\golomb_coding.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\pseudo_random.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\ring_signature.cpp" />
     <ClCompile Include="..\..\..\..\src\crypto\secp256k1.cpp" />
@@ -152,6 +151,7 @@
     <ClCompile Include="..\..\..\..\src\error\op_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\script_error_t.cpp" />
     <ClCompile Include="..\..\..\..\src\error\transaction_error_t.cpp" />
+    <ClCompile Include="..\..\..\..\src\filter\golomb.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\accumulator.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\hash\siphash.cpp" />
@@ -224,7 +224,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\mnemonics\mnemonic.cpp">
       <ObjectFileName>$(IntDir)src_wallet_mnemonics_mnemonic.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\neutrino_filter.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\neutrino.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\point_value.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\points_value.cpp" />
     <ClCompile Include="..\..\..\..\src\words\catalogs\electrum.cpp">
@@ -292,7 +292,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\aes256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\crypto.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\der_parser.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\golomb_coding.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\pseudo_random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\ring_signature.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\crypto\secp256k1.hpp" />
@@ -332,6 +331,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\error\transaction_error_t.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\exceptions.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\execution.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\bloom.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\golomb.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\filter\sieve.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\forks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\funclets.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\accumulator.hpp" />
@@ -479,7 +482,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\electrum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\electrum_v1.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\mnemonics\mnemonic.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\neutrino_filter.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\neutrino.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\point_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\points_value.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\wallet\wallet.hpp" />
@@ -532,6 +535,8 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\swaps.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\uintx_t.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\endian\unsafe.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\filter\bloom.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\filter\sieve.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\accumulator.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\functions.ipp" />

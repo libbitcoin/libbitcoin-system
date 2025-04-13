@@ -16,13 +16,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_CRYPTO_HPP
+#ifndef LIBBITCOIN_SYSTEM_FILTER_FILTER_HPP
+#define LIBBITCOIN_SYSTEM_FILTER_FILTER_HPP
 
-#include <bitcoin/system/crypto/aes256.hpp>
-#include <bitcoin/system/crypto/der_parser.hpp>
-#include <bitcoin/system/crypto/pseudo_random.hpp>
-#include <bitcoin/system/crypto/ring_signature.hpp>
-#include <bitcoin/system/crypto/secp256k1.hpp>
+#include <bitcoin/system/filter/bloom.hpp>
+#include <bitcoin/system/filter/golomb.hpp>
+#include <bitcoin/system/filter/sieve.hpp>
 
 #endif

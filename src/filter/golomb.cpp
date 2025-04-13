@@ -19,17 +19,13 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/crypto/golomb_coding.hpp>
+#include <bitcoin/system/filter/golomb.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <utility>
 #include <vector>
 #include <bitcoin/system/math/math.hpp>
-
-// TODO: change to ipp and duck type streams for performance.
-// TODO: not actually cryptographic functions, move to wallet.
-// Avoid in header, circular dependency with stream to crypto.
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -60,8 +56,9 @@ static uint64_t decode(bitreader& source, uint8_t modulo_exponent) NOEXCEPT
 inline uint64_t hash_to_range(const data_slice& item, uint64_t bound,
     const siphash_key& key) NOEXCEPT
 {
+    constexpr auto shift = bits<uint64_t>;
     const auto product = uint128_t(siphash(key, item)) * uint128_t(bound);
-    return (product >> bits<uint64_t>).convert_to<uint64_t>();
+    return (product >> shift).convert_to<uint64_t>();
 }
 
 static std::vector<uint64_t> hashed_set_construct(const data_stack& items,

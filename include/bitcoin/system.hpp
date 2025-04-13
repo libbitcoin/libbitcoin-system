@@ -79,7 +79,6 @@
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>
-#include <bitcoin/system/crypto/golomb_coding.hpp>
 #include <bitcoin/system/crypto/pseudo_random.hpp>
 #include <bitcoin/system/crypto/ring_signature.hpp>
 #include <bitcoin/system/crypto/secp256k1.hpp>
@@ -116,6 +115,10 @@
 #include <bitcoin/system/error/op_error_t.hpp>
 #include <bitcoin/system/error/script_error_t.hpp>
 #include <bitcoin/system/error/transaction_error_t.hpp>
+#include <bitcoin/system/filter/bloom.hpp>
+#include <bitcoin/system/filter/filter.hpp>
+#include <bitcoin/system/filter/golomb.hpp>
+#include <bitcoin/system/filter/sieve.hpp>
 #include <bitcoin/system/hash/accumulator.hpp>
 #include <bitcoin/system/hash/algorithm.hpp>
 #include <bitcoin/system/hash/algorithms.hpp>
@@ -228,7 +231,7 @@
 #include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
 #include <bitcoin/system/wallet/context.hpp>
 #include <bitcoin/system/wallet/message.hpp>
-#include <bitcoin/system/wallet/neutrino_filter.hpp>
+#include <bitcoin/system/wallet/neutrino.hpp>
 #include <bitcoin/system/wallet/point_value.hpp>
 #include <bitcoin/system/wallet/points_value.hpp>
 #include <bitcoin/system/wallet/wallet.hpp>

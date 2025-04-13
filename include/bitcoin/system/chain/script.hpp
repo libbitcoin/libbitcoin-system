@@ -102,8 +102,8 @@ public:
     script(const operations& ops) NOEXCEPT;
     script(operations&& ops, bool prefail) NOEXCEPT;
     script(const operations& ops, bool prefail) NOEXCEPT;
-    script(const data_slice& data, bool prefix) NOEXCEPT;
-    ////script(stream::in::fast&& stream, bool prefix) NOEXCEPT;
+
+    script(stream::in::fast&& stream, bool prefix) NOEXCEPT;
     script(stream::in::fast& stream, bool prefix) NOEXCEPT;
     script(std::istream&& stream, bool prefix) NOEXCEPT;
     script(std::istream& stream, bool prefix) NOEXCEPT;

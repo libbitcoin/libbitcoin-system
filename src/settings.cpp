@@ -73,7 +73,7 @@ settings::settings(chain::selection context) NOEXCEPT
     {
         case chain::selection::mainnet:
         {
-            genesis_block = chain::block(
+            genesis_block = chain::block(data_chunk
             {
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -169,7 +169,7 @@ settings::settings(chain::selection context) NOEXCEPT
 
         case chain::selection::testnet:
         {
-            genesis_block = chain::block(
+            genesis_block = chain::block(data_chunk
             {
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -256,7 +256,7 @@ settings::settings(chain::selection context) NOEXCEPT
         {
             proof_of_work_limit = 0x207fffff;
             subsidy_interval_blocks = 150;
-            genesis_block = chain::block(
+            genesis_block = chain::block(data_chunk
             {
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

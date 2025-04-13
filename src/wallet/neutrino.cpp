@@ -19,10 +19,11 @@
 
 // Sponsored in part by Digital Contract Design, LLC
 
-#include <bitcoin/system/wallet/neutrino_filter.hpp>
+#include <bitcoin/system/wallet/neutrino.hpp>
 
 #include <algorithm>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/filter/filter.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 #include <bitcoin/system/define.hpp>

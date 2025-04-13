@@ -72,15 +72,10 @@ block::block(const chain::header::cptr& header,
 {
 }
 
-block::block(const data_slice& data, bool witness) NOEXCEPT
-  : block(stream::in::copy(data), witness)
+block::block(stream::in::fast&& stream, bool witness) NOEXCEPT
+  : block(read::bytes::fast(stream), witness)
 {
 }
-
-////block::block(stream::in::fast&& stream, bool witness) NOEXCEPT
-////  : block(read::bytes::fast(stream), witness)
-////{
-////}
 
 block::block(stream::in::fast& stream, bool witness) NOEXCEPT
   : block(read::bytes::fast(stream), witness)

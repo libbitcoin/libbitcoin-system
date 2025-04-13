@@ -59,17 +59,10 @@ header::header(uint32_t version, const hash_digest& previous_block_hash,
 {
 }
 
-header::header(const data_slice& data) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-  : header(stream::in::copy(data))
-    BC_POP_WARNING()
+header::header(stream::in::fast&& stream) NOEXCEPT
+  : header(read::bytes::fast(stream))
 {
 }
-
-////header::header(stream::in::fast&& stream) NOEXCEPT
-////  : header(read::bytes::fast(stream))
-////{
-////}
 
 header::header(stream::in::fast& stream) NOEXCEPT
   : header(read::bytes::fast(stream))

@@ -123,17 +123,10 @@ operation::operation(const chunk_cptr& push_data, bool minimal) NOEXCEPT
 {
 }
 
-operation::operation(const data_slice& op_data) NOEXCEPT
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-  : operation(stream::in::copy(op_data))
-    BC_POP_WARNING()
+operation::operation(stream::in::fast&& stream) NOEXCEPT
+  : operation(read::bytes::fast(stream))
 {
 }
-
-////operation::operation(stream::in::fast&& stream) NOEXCEPT
-////  : operation(read::bytes::fast(stream))
-////{
-////}
 
 operation::operation(stream::in::fast& stream) NOEXCEPT
   : operation(read::bytes::fast(stream))

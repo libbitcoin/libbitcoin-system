@@ -21,7 +21,7 @@
 
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(chain_neutrino_filter_tests)
+BOOST_AUTO_TEST_SUITE(wallet_neutrino_tests)
 
 struct prevout_data
 {
@@ -82,7 +82,7 @@ bool add_metadata(const prevout_data::list& metadata, const chain::block& block)
     return result;
 }
 
-BOOST_AUTO_TEST_CASE(compute__first_11_blocks__success)
+BOOST_AUTO_TEST_CASE(neutrino__compute__first_11_blocks__success)
 {
 
     std_vector<data_chunk> block_data
