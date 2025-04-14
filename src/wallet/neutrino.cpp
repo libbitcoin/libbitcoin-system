@@ -23,22 +23,18 @@
 
 #include <algorithm>
 #include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/filter/filter.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
-#include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace neutrino {
 
-// iostreams 
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
 // Golomb-Rice related values (bip158).
 constexpr uint8_t golomb_bits = 19;
 constexpr uint64_t golomb_target_false_positive_rate = 784931;
-
 constexpr auto rate = golomb_target_false_positive_rate;
 
 bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
@@ -57,7 +53,6 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
                     return false;
 
                 const auto& script = input->prevout->script();
-
                 if (!script.ops().empty())
                     scripts.push_back(script.to_data(false));
             }
@@ -65,25 +60,25 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
 
         for (const auto& output: *(tx->outputs_ptr()))
         {
-            const auto& script = output->script();
-
             // bip138: any "nil" items MUST NOT be included.
             // bip138: exclude all outputs that start with OP_RETURN.
+            const auto& script = output->script();
             if (!script.ops().empty() &&
                 !chain::script::is_pay_op_return_pattern(script.ops()))
                 scripts.push_back(script.to_data(false));
         }
     }
 
-    // Order and remove duplicates.
     distinct(scripts);
 
+    // A vector (push) stream is used because the size is not known a-priori.
     stream::out::data stream(out);
-    write::bytes::ostream writer(stream);
+    write::bits::ostream writer(stream);
+
     writer.write_variable(scripts.size());
-    golomb::construct(stream, scripts, golomb_bits, key, rate);
-    stream.flush();
-    return true;
+    golomb::construct(writer, scripts, golomb_bits, key, rate);
+    writer.flush();
+    return !!writer;
 }
 
 hash_digest compute_filter_header(const hash_digest& previous_header,
@@ -98,8 +93,8 @@ bool match_filter(const block_filter& filter,
     if (script.ops().empty())
         return false;
 
-    stream::in::copy stream(filter.filter);
-    read::bytes::istream reader(stream);
+    stream::in::fast stream(filter.filter);
+    read::bits::fast reader(stream);
     const auto set_size = reader.read_variable();
 
     if (!reader)
@@ -109,7 +104,7 @@ bool match_filter(const block_filter& filter,
     const auto hash = slice<zero, to_half(hash_size)>(filter.hash);
     const auto key = to_siphash_key(hash);
 
-    return golomb::match(target, stream, set_size, key, golomb_bits, rate);
+    return golomb::match_single(reader, target, set_size, key, golomb_bits, rate);
 }
 
 bool match_filter(const block_filter& filter,
@@ -120,8 +115,6 @@ bool match_filter(const block_filter& filter,
 
     data_stack stack{};
     stack.reserve(scripts.size());
-
-    // ordered
     std::for_each(scripts.begin(), scripts.end(),
         [&](const auto& script) NOEXCEPT
         {
@@ -132,8 +125,8 @@ bool match_filter(const block_filter& filter,
     if (stack.empty())
         return false;
 
-    stream::in::copy stream(filter.filter);
-    read::bytes::istream reader(stream);
+    stream::in::fast stream(filter.filter);
+    read::bits::fast reader(stream);
     const auto set_size = reader.read_variable();
 
     if (!reader)
@@ -143,7 +136,7 @@ bool match_filter(const block_filter& filter,
     const auto key = to_siphash_key(hash);
 
     stack.shrink_to_fit();
-    return golomb::match(stack, stream, set_size, key, golomb_bits, rate);
+    return golomb::match_stack(reader, stack, set_size, key, golomb_bits, rate);
 }
 
 bool match_filter(const block_filter& filter,
@@ -168,8 +161,6 @@ bool match_filter(const block_filter& filter,
 
     return match_filter(filter, stack);
 }
-
-BC_POP_WARNING()
 
 } // namespace neutrino
 } // namespace system

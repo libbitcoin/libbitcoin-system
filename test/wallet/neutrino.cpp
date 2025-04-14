@@ -21,7 +21,7 @@
 
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(wallet_neutrino_tests)
+BOOST_AUTO_TEST_SUITE(neutrino_tests)
 
 struct prevout_data
 {

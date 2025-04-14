@@ -22,71 +22,81 @@
 #ifndef LIBBITCOIN_SYSTEM_FILTER_GOLOMB_HPP
 #define LIBBITCOIN_SYSTEM_FILTER_GOLOMB_HPP
 
-#include <iostream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
-namespace golomb {
 
-// Golomb-coded set construction
-// ----------------------------------------------------------------------------
+class BC_API golomb
+{
+public:
 
-BC_API data_chunk construct(const data_stack& items, uint8_t bits,
-    const half_hash& entropy, uint64_t target_false_positive_rate) NOEXCEPT;
+    /// Golomb-coded set construction
+    /// -----------------------------------------------------------------------
 
-BC_API data_chunk construct(const data_stack& items, uint8_t bits,
-    const siphash_key& entropy, uint64_t target_false_positive_rate) NOEXCEPT;
+    static void construct(bitwriter& writer, const data_stack& items,
+        uint8_t bits, const siphash_key& entropy,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API void construct(std::ostream& stream, const data_stack& items,
-    uint8_t bits, const half_hash& entropy,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    static data_chunk construct(const data_stack& items,
+        uint8_t bits, const siphash_key& entropy,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API void construct(std::ostream& stream, const data_stack& items,
-    uint8_t bits, const siphash_key& entropy,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    static data_chunk construct(const data_stack& items,
+        uint8_t bits, const half_hash& entropy,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-// Single element match
-// ----------------------------------------------------------------------------
+    /// Single element match
+    /// -----------------------------------------------------------------------
 
-BC_API bool match(const data_chunk& target, const data_chunk& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    static bool match_single(bitreader& reader,
+        const data_chunk& target, uint64_t set_size,
+        const siphash_key& entropy, uint8_t bits,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API bool match(const data_chunk& target, const data_chunk& compressed_set,
-    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    static bool match_single(const data_chunk& compressed_set,
+        const data_chunk& target, uint64_t set_size,
+        const half_hash& entropy, uint8_t bits,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API bool match(const data_chunk& target, std::istream& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    static bool match_single(const data_chunk& compressed_set,
+        const data_chunk& target, uint64_t set_size,
+        const siphash_key& entropy, uint8_t bits,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API bool match(const data_chunk& target, std::istream& compressed_set,
-    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    /// Intersection match
+    /// -----------------------------------------------------------------------
 
-// Intersection match
-// ----------------------------------------------------------------------------
+    static bool match_stack(bitreader& reader,
+        const data_stack& targets, uint64_t set_size,
+        const siphash_key& entropy, uint8_t bits,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API bool match(const data_stack& targets, const data_chunk& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    static bool match_stack(const data_chunk& compressed_set,
+        const data_stack& targets, uint64_t set_size,
+        const half_hash& entropy, uint8_t bits,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API bool match(const data_stack& targets, const data_chunk& compressed_set,
-    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+    static bool match_stack(const data_chunk& compressed_set,
+        const data_stack& targets, uint64_t set_size,
+        const siphash_key& entropy, uint8_t bits,
+        uint64_t target_false_positive_rate) NOEXCEPT;
 
-BC_API bool match(const data_stack& targets, std::istream& compressed_set,
-    uint64_t set_size, const half_hash& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
+private:
+    static void encode(bitwriter& writer, uint64_t value,
+        uint8_t modulo_exponent) NOEXCEPT;
+    static uint64_t decode(bitreader& reader,
+        uint8_t modulo_exponent) NOEXCEPT;
+    static uint64_t hash_to_range(const data_slice& item,
+        uint64_t bound, const siphash_key& key) NOEXCEPT;
+    static std::vector<uint64_t> hashed_set_construct(const data_stack& items,
+        uint64_t set_size, uint64_t target_false_positive_rate,
+        const siphash_key& key) NOEXCEPT;
+};
 
-BC_API bool match(const data_stack& targets, std::istream& compressed_set,
-    uint64_t set_size, const siphash_key& entropy, uint8_t bits,
-    uint64_t target_false_positive_rate) NOEXCEPT;
-
-} // namespace golomb
 } // namespace system
 } // namespace libbitcoin
 
