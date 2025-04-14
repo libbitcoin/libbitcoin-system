@@ -118,7 +118,7 @@ namespace write
         /// A bit writer that writes to a std::ostream.
         using ostream = bit_writer<std::ostream>;
 
-        /// A fast bit writer that writes to a std::ostream.
+        /// A fast bit writer that writes to a system::ostream.
         using fast = bit_writer<system::ostream<>>;
 
         /// A bit writer that copies to a data_slab.

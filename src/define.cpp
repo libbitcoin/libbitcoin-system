@@ -55,13 +55,13 @@
 // /radix         : /words
 // /serial        : /radix
 // /hash          : /radix /endian
-// /filter        : /hash
 // /crypto        : /hash
 // /stream        : /crypto /endian /error
+// /filter        : /stream
 // /chain         : /stream forks [forward: settings]
 // /machine       : /chain
 // /config        : /chain
-// /wallet        : /chain
+// /wallet        : /chain filter
 // settings       : /chain forks
 
 // When a symbol is unexplainably undefined, its defining include is probably
