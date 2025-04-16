@@ -181,7 +181,7 @@ protected:
     bool is_internal_double_spend() const NOEXCEPT;
     bool is_oversized() const NOEXCEPT;
 
-    /// Guard ((requires context).
+    /// Guard (requires context).
     /// -----------------------------------------------------------------------
 
     ////bool is_segregated() const NOEXCEPT;
