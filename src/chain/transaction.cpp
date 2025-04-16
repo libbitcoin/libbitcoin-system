@@ -1237,7 +1237,7 @@ code transaction::guard_check(const context& ctx) const NOEXCEPT
 
      if (!bip141 && is_segregated())
         return error::unexpected_witness_transaction;
-    if (bip141 && is_overweight())
+     if (bip141 && is_overweight())
         return error::transaction_weight_limit;
 
     return error::transaction_success;
