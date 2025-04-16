@@ -61,11 +61,11 @@
 #endif
 
 #if defined(NDEBUG)
-    #define NOEXCEPT
-    #define THROWS
-#else
     #define NOEXCEPT noexcept
     #define THROWS noexcept(false)
+#else
+    #define NOEXCEPT
+    #define THROWS
 #endif
 
 /// Messages.
