@@ -31,6 +31,7 @@ namespace system {
 namespace chain {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
@@ -218,6 +219,7 @@ bool output::is_dust(uint64_t minimum_value) const NOEXCEPT
     return value_ < minimum_value && !script_->is_unspendable();
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 // JSON value convertors.
