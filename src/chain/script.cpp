@@ -47,6 +47,7 @@ namespace chain {
 using namespace bc::system::machine;
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // static
 // TODO: would be inlined but machine is a circular include.
@@ -58,11 +59,9 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 //*************************************************************************
 bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     return !ops.empty()
         && ops[0].is_nominal_push()
         && ops[0].data() == number::chunk::from_integer(to_unsigned(height));
-    BC_POP_WARNING()
 }
 
 // Constructors.
@@ -403,10 +402,7 @@ size_t script::serialized_size(bool prefix) const NOEXCEPT
 const data_chunk& script::witness_program() const NOEXCEPT
 {
     static const data_chunk empty{};
-
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
     return is_witness_program_pattern(ops()) ? ops()[1].data() : empty;
-    BC_POP_WARNING()
 }
 
 script_version script::version() const NOEXCEPT
@@ -548,6 +544,7 @@ bool script::is_unspendable() const NOEXCEPT
     return operation::is_reserved(code) || operation::is_invalid(code);
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 // JSON value convertors.
