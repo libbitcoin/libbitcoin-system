@@ -184,6 +184,12 @@ inline bool operator!=(const bc::system::hash_cref& left,
 {
     return !(left == right);
 }
+
+inline bool operator!=(const bc::system::hash_cref& left,
+    const bc::system::hash_digest& right) NOEXCEPT
+{
+    return !(left.get() == right);
+}
 } // namespace std
 
 /// Extend std and boost namespaces with djb2_hash.
