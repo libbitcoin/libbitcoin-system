@@ -110,7 +110,7 @@ public:
 
     bool is_final() const NOEXCEPT;
     bool is_roller() const NOEXCEPT;
-    bool reserved_hash(hash_digest& out) const NOEXCEPT;
+    bool reserved_hash(hash_cref& out) const NOEXCEPT;
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;

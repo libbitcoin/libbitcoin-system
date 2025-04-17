@@ -31,6 +31,7 @@ namespace system {
 namespace chain {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
@@ -182,20 +183,17 @@ const chain::script::cptr& output::script_ptr() const NOEXCEPT
 // Methods.
 // ----------------------------------------------------------------------------
 
-bool output::committed_hash(hash_digest& out) const NOEXCEPT
+bool output::committed_hash(hash_cref& out) const NOEXCEPT
 {
     const auto& ops = script_->ops();
     if (!script::is_commitment_pattern(ops))
         return false;
 
-    // The four byte offset for the witness commitment hash (bip141).
+    // Offset four bytes for witness commitment head (bip141).
+    const auto start = std::next(ops[1].data().data(), sizeof(witness_head));
 
-    // More efficient [] dereference is guarded above.
-    BC_PUSH_WARNING(NO_ARRAY_INDEXING)
-    const auto start = std::next(ops[1].data().begin(), sizeof(witness_head));
-    BC_POP_WARNING()
-
-    std::copy_n(start, hash_size, out.begin());
+    // Guarded by is_commitment_pattern.
+    out = unsafe_array_cast<uint8_t, hash_size>(start);
     return true;
 }
 
@@ -221,6 +219,7 @@ bool output::is_dust(uint64_t minimum_value) const NOEXCEPT
     return value_ < minimum_value && !script_->is_unspendable();
 }
 
+BC_POP_WARNING()
 BC_POP_WARNING()
 
 // JSON value convertors.

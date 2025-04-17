@@ -592,6 +592,30 @@ size_t block::segregated() const NOEXCEPT
     return std::count_if(txs_->begin(), txs_->end(), count_segregated);
 }
 
+// Last output of commitment pattern holds the committed value (bip141).
+bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
+{
+    if (txs_->empty())
+        return false;
+
+    const auto& outputs = *txs_->front()->outputs_ptr();
+    for (const auto& output: std::views::reverse(outputs))
+        if (output->committed_hash(commitment))
+            return true;
+
+    return false;
+}
+
+// Coinbase input witness must be 32 byte witness reserved value (bip141).
+bool block::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
+{
+    if (txs_->empty())
+        return false;
+
+    const auto& inputs = *txs_->front()->inputs_ptr();
+    return !inputs.empty() && inputs.front()->reserved_hash(reservation);
+}
+
 // The witness merkle root is obtained from wtxids, subject to malleation just
 // as the txs commitment. However, since tx duplicates are precluded by the
 // malleable32 (or complete) block check, there is no opportunity for this.
@@ -601,26 +625,19 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    const auto& coinbase = txs_->front();
-    if (coinbase->inputs_ptr()->empty())
-        return false;
-
+    // Witness data (segregated) disallowed if no commitment (bip141).
     // If no block tx has witness data the commitment is optional (bip141).
-    if (!is_segregated())
-        return false;
+    hash_cref commit{ null_hash };
+    if (!get_witness_commitment(commit))
+        return is_segregated();
+
+    // If there is a witness reservation there must be a commitment (bip141).
+    hash_cref reserve{ null_hash };
+    if (!get_witness_reservation(reserve))
+        return true;
 
     // If there is a valid commitment, return false (valid).
-    // Coinbase input witness must be 32 byte witness reserved value (bip141).
-    // Last output of commitment pattern holds the committed value (bip141).
-    hash_digest reserved{}, committed{};
-    if (coinbase->inputs_ptr()->front()->reserved_hash(reserved))
-        for (const auto& output: std::views::reverse(*coinbase->outputs_ptr()))
-            if (output->committed_hash(committed))
-                if (committed == sha256::double_hash(
-                    generate_merkle_root(true), reserved))
-                    return false;
-
-    return true;
+    return commit != sha256::double_hash(generate_merkle_root(true), reserve);
 }
 
 //*****************************************************************************
@@ -851,6 +868,7 @@ code block::identify() const NOEXCEPT
     return error::block_success;
 }
 
+// bip141 should be disabled when the node is not accepting witness data.
 code block::identify(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
@@ -894,6 +912,7 @@ code block::check() const NOEXCEPT
 // median_time_past
 
 // TODO: use of get_hash() in is_hash_limit_exceeded makes this thread unsafe.
+// bip141 should be disabled when the node is not accepting witness data.
 code block::check(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
