@@ -868,6 +868,7 @@ code block::identify() const NOEXCEPT
     return error::block_success;
 }
 
+// bip141 should be disabled when the node is not accepting witness data.
 code block::identify(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
@@ -911,6 +912,7 @@ code block::check() const NOEXCEPT
 // median_time_past
 
 // TODO: use of get_hash() in is_hash_limit_exceeded makes this thread unsafe.
+// bip141 should be disabled when the node is not accepting witness data.
 code block::check(const context& ctx) const NOEXCEPT
 {
     const auto bip141 = ctx.is_enabled(bip141_rule);
