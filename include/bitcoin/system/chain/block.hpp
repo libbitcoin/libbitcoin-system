@@ -200,6 +200,8 @@ private:
 
     // context free
     hash_digest generate_merkle_root(bool witness) const NOEXCEPT;
+    bool get_witness_commitment(hash_cref& commitment) const NOEXCEPT;
+    bool get_witness_reservation(hash_cref& reservation) const NOEXCEPT;
 
     // contextual
     uint64_t reward(size_t height, uint64_t subsidy_interval,

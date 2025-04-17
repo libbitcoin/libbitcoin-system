@@ -85,7 +85,7 @@ public:
     /// Methods.
     /// -----------------------------------------------------------------------
 
-    bool committed_hash(hash_digest& out) const NOEXCEPT;
+    bool committed_hash(hash_cref& out) const NOEXCEPT;
     size_t signature_operations(bool bip141) const NOEXCEPT;
     bool is_dust(uint64_t minimum_output_value) const NOEXCEPT;
 

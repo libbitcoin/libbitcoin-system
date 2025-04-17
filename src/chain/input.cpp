@@ -430,12 +430,14 @@ bool input::is_relative_locked(size_t height,
         metadata.height, metadata.median_time_past);
 }
 
-bool input::reserved_hash(hash_digest& out) const NOEXCEPT
+bool input::reserved_hash(hash_cref& out) const NOEXCEPT
 {
-    if (!witness::is_reserved_pattern(get_witness().stack()))
+    const auto& stack = get_witness().stack();
+    if (!witness::is_reserved_pattern(stack))
         return false;
 
-    std::copy_n(get_witness().stack().front()->begin(), hash_size, out.begin());
+    // Guarded by is_reserved_pattern.
+    out = unsafe_array_cast<uint8_t, hash_size>(stack.front()->data());
     return true;
 }
 
