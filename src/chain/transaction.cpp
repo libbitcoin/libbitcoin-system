@@ -417,10 +417,7 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
         if (nominal_hash_) return *nominal_hash_;
     }
 
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
     to_data(sink, witness);
@@ -499,10 +496,7 @@ hash_digest transaction::outputs_hash() const NOEXCEPT
     if (sighash_cache_)
         return sighash_cache_->outputs;
 
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-        
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
@@ -518,10 +512,7 @@ hash_digest transaction::points_hash() const NOEXCEPT
     if (sighash_cache_)
         return sighash_cache_->points;
 
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
@@ -537,10 +528,7 @@ hash_digest transaction::sequences_hash() const NOEXCEPT
     if (sighash_cache_)
         return sighash_cache_->sequences;
 
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
@@ -735,10 +723,7 @@ hash_digest transaction::unversioned_signature_hash(
     const auto flag = mask_sighash(sighash_flags);
 
     // Create hash writer.
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
@@ -804,10 +789,7 @@ hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
     if (index >= outputs_->size())
         return null_hash;
 
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
     outputs_->at(index)->to_data(sink);
@@ -831,10 +813,7 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     const auto single = (flag == coverage::hash_single);
 
     // Create hash writer.
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest digest;
-    BC_POP_WARNING()
-
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
