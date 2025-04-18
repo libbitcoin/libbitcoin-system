@@ -186,6 +186,9 @@ INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT
 // Taproot tagged hash.
 // TODO: this is not optimized, use precomputed state state for known tags.
 // TODO: set the consteval mid-state computation for each into a constexpr.
+// TODO: drop mid-state into accumulator(const state_t& state, size_t blocks).
+// TODO: declare a tagged-hash streamwriter with midstate consteval
+// TODO: precomputation based on templatized tag.
 INLINE hash_digest tagged_hash(const std::string& tag,
     const data_slice& message) NOEXCEPT
 {

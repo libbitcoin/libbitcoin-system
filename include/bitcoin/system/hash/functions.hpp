@@ -109,7 +109,7 @@ INLINE data_chunk sha256_chunk(const Type& data) NOEXCEPT;
 
 /// sha512 hash [wallet].
 template <typename Type>
-INLINE long_hash  sha512_hash(const Type& data) NOEXCEPT;
+INLINE long_hash sha512_hash(const Type& data) NOEXCEPT;
 template <typename Type>
 INLINE data_chunk sha512_chunk(const Type& data) NOEXCEPT;
 
