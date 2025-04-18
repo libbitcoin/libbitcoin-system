@@ -317,6 +317,16 @@ BOOST_AUTO_TEST_CASE(functions__bitcoin__null_one__expected)
     BOOST_CHECK_EQUAL(bitcoin_chunk(to_chunk(null_hash)), to_chunk(expected));
 }
 
+// taproot tags
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(tagged_hash_test)
+{
+    // Test vector from secp256k1.
+    constexpr auto expected = base16_array("047a5e17b58647c13cc6ebc0aa583b62fb1643326877406ce276559a3bde55b3");
+    BOOST_REQUIRE_EQUAL(tagged_hash("tag", "msg"), expected);
+}
+
 // merkle_root
 // ----------------------------------------------------------------------------
 

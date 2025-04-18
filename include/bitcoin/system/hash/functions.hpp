@@ -133,6 +133,10 @@ INLINE hash_digest bitcoin_hash2(const data_slice& left,
 template <typename Type>
 INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT;
 
+/// Taproot tagged hashing.
+INLINE hash_digest tagged_hash(const std::string& tag,
+    const data_slice& message) NOEXCEPT;
+
 /// Merkle root from a bitcoin_hash set [chain].
 INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT;
 
