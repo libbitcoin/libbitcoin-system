@@ -183,7 +183,24 @@ INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT
     return accumulator<sha256>::double_hash_chunk(data);
 }
 
-/// Merkle root from a bitcoin_hash set [chain].
+// Taproot tagged hash.
+// TODO: this is not optimized, use precomputed state state for known tags.
+// TODO: set the consteval mid-state computation for each into a constexpr.
+// TODO: drop mid-state into accumulator(const state_t& state, size_t blocks).
+// TODO: declare a tagged-hash streamwriter with midstate consteval
+// TODO: precomputation based on templatized tag.
+INLINE hash_digest tagged_hash(const std::string& tag,
+    const data_slice& message) NOEXCEPT
+{
+    const auto hash = sha256_hash(tag);
+    accumulator<sha256> context{};
+    context.write(hash);
+    context.write(hash);
+    context.write(message.size(), message.data());
+    return context.flush();
+}
+
+// Merkle root from a bitcoin_hash set [chain].
 INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT
 {
     return sha256::merkle_root(std::move(set));

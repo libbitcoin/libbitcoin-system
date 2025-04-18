@@ -109,7 +109,7 @@ INLINE data_chunk sha256_chunk(const Type& data) NOEXCEPT;
 
 /// sha512 hash [wallet].
 template <typename Type>
-INLINE long_hash  sha512_hash(const Type& data) NOEXCEPT;
+INLINE long_hash sha512_hash(const Type& data) NOEXCEPT;
 template <typename Type>
 INLINE data_chunk sha512_chunk(const Type& data) NOEXCEPT;
 
@@ -132,6 +132,10 @@ INLINE hash_digest bitcoin_hash2(const data_slice& left,
     const data_slice& right) NOEXCEPT;
 template <typename Type>
 INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT;
+
+/// Taproot tagged hashing.
+INLINE hash_digest tagged_hash(const std::string& tag,
+    const data_slice& message) NOEXCEPT;
 
 /// Merkle root from a bitcoin_hash set [chain].
 INLINE hash_digest merkle_root(hashes&& set) NOEXCEPT;
