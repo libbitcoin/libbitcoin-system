@@ -884,22 +884,25 @@ code block::identify(const context& ctx) const NOEXCEPT
 // In the case of validation failure
 // The block header is checked/accepted independently.
 
-// TODO: use of get_hash() in is_forward_reference makes this thread unsafe.
+// TODO: use of get_hash() in is_forward_reference makes this thread-unsafe.
 code block::check() const NOEXCEPT
 {
     // empty_block is subset of first_not_coinbase.
-    //if (is_empty())
-    //    return error::empty_block;
+    // type64 malleated is a subset of first_not_coinbase.
+    // type32 malleated is a subset of is_internal_double_spend.
     if (is_oversized())
         return error::block_size_limit;
     if (is_first_non_coinbase())
-        return error::first_not_coinbase;
+        return (is_empty() ? error::empty_block :
+            (is_malleated() ? error::invalid_transaction_commitment :
+                error::first_not_coinbase));
     if (is_extra_coinbases())
         return error::extra_coinbases;
     if (is_forward_reference())
         return error::forward_reference;
     if (is_internal_double_spend())
-        return error::block_internal_double_spend;
+        return is_malleated() ? error::invalid_transaction_commitment : 
+            error::block_internal_double_spend;
     if (is_invalid_merkle_root())
         return error::invalid_transaction_commitment;
 
@@ -911,7 +914,7 @@ code block::check() const NOEXCEPT
 // timestamp
 // median_time_past
 
-// TODO: use of get_hash() in is_hash_limit_exceeded makes this thread unsafe.
+// TODO: use of get_hash() in is_hash_limit_exceeded makes this thread-unsafe.
 // bip141 should be disabled when the node is not accepting witness data.
 code block::check(const context& ctx) const NOEXCEPT
 {
