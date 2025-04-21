@@ -853,16 +853,10 @@ code block::confirm_transactions(const context& ctx) const NOEXCEPT
 
 // Identity.
 // ----------------------------------------------------------------------------
-// invalid_transaction_commitment, invalid_witness_commitment, block_malleated
-// codes specifically indicate lack of block hash tx identification (identity).
 
 code block::identify() const NOEXCEPT
 {
-    // type64 malleated is a subset of first_not_coinbase.
-    // type32 malleated is a subset of is_internal_double_spend.
-    if (is_malleated())
-        return error::block_malleated;
-    if (is_invalid_merkle_root())
+    if (is_malleated() || is_invalid_merkle_root())
         return error::invalid_transaction_commitment;
 
     return error::block_success;
