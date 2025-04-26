@@ -878,7 +878,7 @@ code block::identify(const context& ctx) const NOEXCEPT
 // In the case of validation failure
 // The block header is checked/accepted independently.
 
-// TODO: use of get_hash() in is_forward_reference makes this thread-unsafe.
+// Use of get_hash() in is_forward_reference makes this thread-unsafe.
 code block::check() const NOEXCEPT
 {
     // empty_block is subset of first_not_coinbase.
@@ -908,7 +908,7 @@ code block::check() const NOEXCEPT
 // timestamp
 // median_time_past
 
-// TODO: use of get_hash() in is_hash_limit_exceeded makes this thread-unsafe.
+// Use of get_hash() in is_hash_limit_exceeded makes this thread-unsafe.
 // bip141 should be disabled when the node is not accepting witness data.
 code block::check(const context& ctx) const NOEXCEPT
 {
