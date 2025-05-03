@@ -49,7 +49,7 @@ public:
     typedef std::deque<uint32_t> bitss;
     typedef std::deque<uint32_t> versions;
     typedef std::deque<uint32_t> timestamps;
-    typedef std::shared_ptr<chain_state> ptr;
+    typedef std::shared_ptr<const chain_state> cptr;
     typedef struct { size_t count; size_t high; } range;
 
     /// Heights used to identify construction requirements.

@@ -1649,7 +1649,6 @@ connect(const context& state, const transaction& tx,
     return error::script_success;
 }
 
-BC_PUSH_WARNING(NO_NEW_OR_DELETE)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 template <typename Stack>
@@ -1695,7 +1694,6 @@ code interpreter<Stack>::connect_embedded(const context& state,
     return error::script_success;
 }
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 
 template <typename Stack>

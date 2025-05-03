@@ -45,19 +45,14 @@ static constexpr auto any_invalid = opcode::op_xor;
 // static/private
 const data_chunk& operation::no_data() NOEXCEPT
 {
-    static const data_chunk empty_data{};
-    return empty_data;
+    static const data_chunk empty{};
+    return empty;
 }
 
 // static/private
 const chunk_cptr& operation::no_data_cptr() NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-    static const std::shared_ptr<const data_chunk> empty
-    {
-        new const data_chunk{}
-    };
-    BC_POP_WARNING()
+    static const auto empty = std::make_shared<const data_chunk>();
     return empty;
 }
 
@@ -65,12 +60,7 @@ const chunk_cptr& operation::no_data_cptr() NOEXCEPT
 // Push data is not possible with an invalid code, combination is invalid.
 const chunk_cptr& operation::any_data_cptr() NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-    static const std::shared_ptr<const data_chunk> any
-    {
-        new const data_chunk{ 0x42 }
-    };
-    BC_POP_WARNING()
+    static const auto any = to_shared(data_chunk{ 0x42 });
     return any;
 }
 
