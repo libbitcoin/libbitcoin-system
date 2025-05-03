@@ -30,7 +30,6 @@ namespace libbitcoin {
 namespace system {
 
 BC_PUSH_WARNING(NO_STATIC_CAST)
-BC_PUSH_WARNING(NO_NEW_OR_DELETE)
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
@@ -101,7 +100,6 @@ steady_clock::duration pseudo_random::duration(
     return milliseconds(expires);
 }
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()

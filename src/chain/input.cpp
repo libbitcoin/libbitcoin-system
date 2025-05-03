@@ -48,19 +48,14 @@ static_assert(max_script_size <
 // static/private
 const witness& input::no_witness() NOEXCEPT
 {
-    static const chain::witness empty_witness{};
-    return empty_witness;
+    static const chain::witness empty{};
+    return empty;
 }
 
 // static/private
 const witness::cptr& input::no_witness_cptr() NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_NEW_OR_DELETE)
-    static const std::shared_ptr<const chain::witness> empty
-    {
-        new const chain::witness{}
-    };
-    BC_POP_WARNING()
+    static const auto empty = std::make_shared<const chain::witness>();
     return empty;
 }
 
