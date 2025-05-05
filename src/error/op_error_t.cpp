@@ -91,12 +91,12 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_hash160, "op_hash160" },
     { op_hash256, "op_hash256" },
     { op_code_separator, "op_code_separator" },
+    { op_check_sig, "op_check_sig" },
     { op_check_sig_verify1, "op_check_sig_verify1" },
     { op_check_sig_verify2, "op_check_sig_verify2" },
     { op_check_sig_verify3, "op_check_sig_verify3" },
     { op_check_sig_verify4, "op_check_sig_verify4" },
     { op_check_sig_verify_parse, "op_check_sig_verify_parse" },
-    { op_check_sig, "op_check_sig" },
     { op_check_multisig_verify1, "op_check_multisig_verify1" },
     { op_check_multisig_verify2, "op_check_multisig_verify2" },
     { op_check_multisig_verify3, "op_check_multisig_verify3" },
@@ -117,7 +117,9 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_check_sequence_verify2, "op_check_sequence_verify2" },
     { op_check_sequence_verify3, "op_check_sequence_verify3" },
     { op_check_sequence_verify4, "op_check_sequence_verify4" },
-    { op_check_sequence_verify5, "op_check_sequence_verify5" }
+    { op_check_sequence_verify5, "op_check_sequence_verify5" },
+    { op_check_sig_add, "op_check_sig_add" },
+    { op_check_schnorr_sig, "op_check_schnorr_sig" }
 };
 
 DEFINE_ERROR_T_CATEGORY(op_error, "op", "op code")
