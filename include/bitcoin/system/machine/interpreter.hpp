@@ -149,12 +149,14 @@ protected:
     inline error::op_error_t op_hash160() NOEXCEPT;
     inline error::op_error_t op_hash256() NOEXCEPT;
     inline error::op_error_t op_codeseparator(const op_iterator& op) NOEXCEPT;
-    inline error::op_error_t op_check_sig_verify() NOEXCEPT;
     inline error::op_error_t op_check_sig() NOEXCEPT;
+    inline error::op_error_t op_check_sig_verify() NOEXCEPT;
     inline error::op_error_t op_check_multisig_verify() NOEXCEPT;
     inline error::op_error_t op_check_multisig() NOEXCEPT;
     inline error::op_error_t op_check_locktime_verify() const NOEXCEPT;
     inline error::op_error_t op_check_sequence_verify() const NOEXCEPT;
+    inline error::op_error_t op_check_sig_add() const NOEXCEPT;
+    inline error::op_error_t op_check_schnorr_sig() NOEXCEPT;
 };
 
 } // namespace machine

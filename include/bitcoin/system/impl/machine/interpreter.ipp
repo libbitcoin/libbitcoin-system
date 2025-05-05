@@ -1023,6 +1023,9 @@ TEMPLATE
 inline op_error_t CLASS::
 op_check_sig_verify() NOEXCEPT
 {
+    if (state::is_enabled(flags::bip342_rule))
+        return op_check_schnorr_sig();
+
     if (state::stack_size() < 2)
         return error::op_check_sig_verify1;
 
@@ -1055,6 +1058,9 @@ TEMPLATE
 inline op_error_t CLASS::
 op_check_multisig() NOEXCEPT
 {
+    if (state::is_enabled(flags::bip342_rule))
+        return op_unevaluated(opcode::checkmultisig);
+
     const auto verify = op_check_multisig_verify();
     const auto bip66 = state::is_enabled(flags::bip66_rule);
 
@@ -1070,6 +1076,9 @@ TEMPLATE
 inline op_error_t CLASS::
 op_check_multisig_verify() NOEXCEPT
 {
+    if (state::is_enabled(flags::bip342_rule))
+        return op_unevaluated(opcode::checkmultisigverify);
+
     const auto bip147 = state::is_enabled(flags::bip147_rule);
 
     size_t count{};
@@ -1222,6 +1231,27 @@ op_check_sequence_verify() const NOEXCEPT
         (mask_left(stack_sequence32, relative_locktime_mask_left)) >
         (mask_left(input_sequence32, relative_locktime_mask_left)) ?
         error::op_check_sequence_verify5 : error::op_success;
+}
+
+TEMPLATE
+inline op_error_t CLASS::
+op_check_sig_add() const NOEXCEPT
+{
+    // BIP342: reserved_186 subsumed by checksigadd when the script under
+    // evaluation is tapscript (bip342_rule only set in state for tapscripts).
+    if (!state::is_enabled(flags::bip342_rule))
+        return op_unevaluated(opcode::reserved_186);
+
+    // TODO implement.
+    return error::op_check_sig_add;
+}
+
+TEMPLATE
+inline op_error_t CLASS::
+op_check_schnorr_sig() NOEXCEPT
+{
+    // TODO: implement.
+    return error::op_check_schnorr_sig;
 }
 
 // Operation disatch.
@@ -1529,6 +1559,8 @@ run_op(const op_iterator& op) NOEXCEPT
         case opcode::nop9:
         case opcode::nop10:
             return op_nop(code);
+        case opcode::checksigadd:
+            return op_check_sig_add();
         default:
             return op_unevaluated(code);
     }
