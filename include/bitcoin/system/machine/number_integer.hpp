@@ -28,8 +28,7 @@ namespace system {
 namespace machine {
 namespace number {
 
-template <size_t Size,
-    if_not_greater<Size, sizeof(int64_t)> = true>
+template <size_t Size, if_not_greater<Size, sizeof(int64_t)> = true>
 class integer
 {
 public:
