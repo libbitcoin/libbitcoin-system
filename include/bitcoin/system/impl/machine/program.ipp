@@ -314,20 +314,24 @@ pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT
 
 TEMPLATE
 INLINE bool CLASS::
-pop_bool_() NOEXCEPT
+pop_strict_bool_() NOEXCEPT
 {
-    const auto value = peek_bool_();
+    const auto value = primary_.peek_strict_bool();
     drop_();
     return value;
 }
 
 TEMPLATE
 INLINE bool CLASS::
-pop_strict_bool_() NOEXCEPT
+pop_bool_(bool& value, bool minimal) NOEXCEPT
 {
-    const auto value = primary_.peek_strict_bool();
+    if (!minimal)
+        value = peek_bool_();
+    else if (!primary_.peek_minimal_bool(value))
+        return false;
+
     drop_();
-    return value;
+    return true;
 }
 
 // private

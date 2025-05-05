@@ -97,8 +97,8 @@ protected:
 
     /// Primary stack (pop).
     INLINE chunk_xptr pop_chunk_() NOEXCEPT;
-    INLINE bool pop_bool_() NOEXCEPT;
     INLINE bool pop_strict_bool_() NOEXCEPT;
+    INLINE bool pop_bool_(bool& value, bool minimal) NOEXCEPT;
     INLINE bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
     INLINE bool pop_signed32(int32_t& value) NOEXCEPT;
     INLINE bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;

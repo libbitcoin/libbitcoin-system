@@ -92,22 +92,40 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_push_four_size__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "op_push_four_size");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_if__true_exected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_if1__true_exected_message)
 {
-    constexpr auto value = error::op_if;
+    constexpr auto value = error::op_if1;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_if");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_if1");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_notif__true_exected_message)
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_if2__true_exected_message)
 {
-    constexpr auto value = error::op_notif;
+    constexpr auto value = error::op_if2;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_notif");
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_if2");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_notif1__true_exected_message)
+{
+    constexpr auto value = error::op_notif1;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_notif1");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_notif2__true_exected_message)
+{
+    constexpr auto value = error::op_notif2;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_notif2");
 }
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_else__true_exected_message)

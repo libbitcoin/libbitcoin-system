@@ -155,9 +155,10 @@ op_if() NOEXCEPT
     if (state::is_succeess())
     {
         if (state::is_stack_empty())
-            return error::op_if;
+            return error::op_if1;
 
-        value = state::pop_bool_();
+        if (!state::pop_bool_(value, state::is_enabled(flags::bip342_rule)))
+            return error::op_if2;
     }
 
     state::begin_if(value);
@@ -173,12 +174,13 @@ op_notif() NOEXCEPT
     if (state::is_succeess())
     {
         if (state::is_stack_empty())
-            return error::op_notif;
+            return error::op_notif1;
 
-        value = !state::pop_bool_();
+        if (!state::pop_bool_(value, state::is_enabled(flags::bip342_rule)))
+            return error::op_notif2;
     }
 
-    state::begin_if(value);
+    state::begin_if(!value);
     return error::op_success;
 }
 

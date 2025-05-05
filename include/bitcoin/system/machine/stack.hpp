@@ -32,19 +32,20 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-// Primary and alternate stacks have variant elements.
+/// Primary and alternate stacks have variant elements.
 typedef std::variant<bool, int64_t, chunk_xptr> stack_variant;
 
-// Primary stack options.
+/// Primary stack options.
 typedef std::list<stack_variant> linked_stack;
 typedef std::vector<stack_variant> contiguous_stack;
 
-// Alternate stack requires no stack<T> abstraction.
+/// Alternate stack requires no stack<T> abstraction.
 typedef std::vector<stack_variant> alternate_stack;
 
-// Possibly space-efficient bit vector, optimized by std lib.
+/// Possibly space-efficient bit vector, optimized by std lib.
 typedef std::vector<bool> condition_stack;
 
+/// Stack queries are not guarded against stack empty, caller must guard.
 template <typename Container>
 class stack
 {
@@ -84,6 +85,10 @@ public:
     inline chunk_xptr peek_chunk() const NOEXCEPT;
     inline size_t peek_size() const NOEXCEPT;
 
+    /// Variant data conversion with failure mode.
+    inline bool peek_minimal_bool(bool& value) const NOEXCEPT;
+
+    /// Variant data comparison.
     static inline bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;
 

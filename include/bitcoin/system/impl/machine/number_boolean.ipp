@@ -30,12 +30,11 @@ namespace system {
 namespace machine {
 namespace number {
 
-template <size_t Size, if_not_greater<Size, sizeof(int64_t)>>
-constexpr signed_type<Size> boolean::
-to_integer(bool vary) NOEXCEPT
+constexpr bool boolean::
+from_integer(int64_t vary) NOEXCEPT
 {
-    // The cast can safely be ignored, which is why Size is defaulted.
-    return bc::to_int<signed_type<Size>>(vary);
+    // Boolean is not overflow constrained.
+    return to_bool(vary);
 }
 
 constexpr bool boolean::
@@ -57,21 +56,36 @@ from_chunk(const data_chunk& vary) NOEXCEPT
 
     // Size constraint guards from_little_endian.
     // any_of optimizes by eliminating this conversion, allocation, and copy.
-    ////return bc::to_bool(from_little_endian<uintx>(vary));
+    ////return to_bool(from_little_endian<uintx>(vary));
 }
 
 constexpr bool boolean::
-strict_from_chunk(const data_chunk& vary) NOEXCEPT
+from_integer(bool& value, int64_t vary) NOEXCEPT
+{
+    // Boolean is not overflow constrained.
+    value = to_bool(vary);
+
+    // Minimal boolean must be zero or one.
+    return is_boolean(vary);
+}
+
+constexpr bool boolean::
+from_chunk(bool& value, const data_chunk& vary) NOEXCEPT
+{
+    if (strict_false(vary))
+    {
+        value = false;
+        return true;
+    }
+
+    return from_integer(value, vary.front());
+}
+
+constexpr bool boolean::
+from_chunk_strict(const data_chunk& vary) NOEXCEPT
 {
     // True if not strictly false.
     return !strict_false(vary);
-}
-
-constexpr bool boolean::
-to_bool(int64_t vary) NOEXCEPT
-{
-    // Boolean is not overflow constrained.
-    return bc::to_bool(vary);
 }
 
 // protected

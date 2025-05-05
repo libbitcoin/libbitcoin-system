@@ -31,13 +31,15 @@ namespace number {
 class BC_API boolean
 {
 public:
-    template <size_t Size = sizeof(int64_t),
-        if_not_greater<Size, sizeof(int64_t)> = true>
-    static constexpr signed_type<Size> to_integer(bool vary) NOEXCEPT;
-
+    static constexpr bool from_integer(int64_t vary) NOEXCEPT;
     static constexpr bool from_chunk(const data_chunk& vary) NOEXCEPT;
-    static constexpr bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
-    static constexpr bool to_bool(int64_t vary) NOEXCEPT;
+
+    /// minimal (bip342), integer must be 0 or 1, chunk must be [] or [0x01].
+    static constexpr bool from_integer(bool& value, int64_t vary) NOEXCEPT;
+    static constexpr bool from_chunk(bool& value, const data_chunk& vary) NOEXCEPT;
+
+    /// strict (bip147), false must be [].
+    static constexpr bool from_chunk_strict(const data_chunk& vary) NOEXCEPT;
 
 protected:
     static constexpr bool strict_false(const data_chunk& vary) NOEXCEPT;

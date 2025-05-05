@@ -86,59 +86,51 @@ size() const NOEXCEPT
     return container_.size();
 }
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 TEMPLATE
 INLINE void CLASS::
 push(data_chunk&& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(make_external(std::move(value), tether_));
-    BC_POP_WARNING()
 }
 
 TEMPLATE
 INLINE void CLASS::
 push(stack_variant&& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(std::move(value));
-    BC_POP_WARNING()
 }
 
 TEMPLATE
 INLINE void CLASS::
 push(const stack_variant& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(value);
-    BC_POP_WARNING()
 }
 
 TEMPLATE
 INLINE void CLASS::
 emplace_boolean(bool value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
-    BC_POP_WARNING()
 }
 
 TEMPLATE
 INLINE void CLASS::
 emplace_integer(int64_t value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
-    BC_POP_WARNING()
 }
 
 TEMPLATE
 INLINE void CLASS::
 emplace_chunk(const chunk_xptr& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value.get());
-    BC_POP_WARNING()
 }
+
+BC_POP_WARNING()
 
 // Positional (stack cheats).
 // ----------------------------------------------------------------------------
@@ -154,8 +146,7 @@ erase(size_t index) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-swap(size_t left_index,
-    size_t right_index) NOEXCEPT
+swap(size_t left_index, size_t right_index) NOEXCEPT
 {
     BC_ASSERT(left_index < size() && right_index < size());
 
@@ -226,7 +217,7 @@ peek_signed(Integer& value) const NOEXCEPT
         [&](bool vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
-            value = boolean::to_integer<Bytes>(vary);
+            value = to_int(vary);
         },
         [&](int64_t vary) NOEXCEPT
         {
@@ -260,7 +251,7 @@ peek_bool() const NOEXCEPT
         [&](int64_t vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
-            value = boolean::to_bool(vary);
+            value = boolean::from_integer(vary);
         },
         [&](const chunk_xptr& vary) NOEXCEPT
         {
@@ -272,7 +263,7 @@ peek_bool() const NOEXCEPT
     return value;
 }
 
-// This differs from peek_bool in that a stack chunk must be empty.
+// Differs from peek_bool in that a chunk false must be empty [].
 TEMPLATE
 inline bool CLASS::
 peek_strict_bool() const NOEXCEPT
@@ -290,16 +281,46 @@ peek_strict_bool() const NOEXCEPT
         [&](int64_t vary) NOEXCEPT
         {
             // This may be executed in standard scripts (before bip147).
-            value = boolean::to_bool(vary);
+            value = boolean::from_integer(vary);
         },
         [&](const chunk_xptr& vary) NOEXCEPT
         {
             // This may be executed in standard scripts (before bip147).
-            value = boolean::strict_from_chunk(*vary);
+            value = boolean::from_chunk_strict(*vary);
         }
     }, top());
 
     return value;
+}
+
+// A chunk false must be [] and chunk true must be [0x01], otherwise fails.
+TEMPLATE
+inline bool CLASS::
+peek_minimal_bool(bool& value) const NOEXCEPT
+{
+    using namespace number;
+    auto result{ true };
+
+    std::visit(overload
+    {
+        [&](bool vary) NOEXCEPT
+        {
+            // This is the canonical use case (tapscript).
+            value = vary;
+        },
+        [&](int64_t vary) NOEXCEPT
+        {
+            // This may be executed in tapscripts (standard).
+            result = boolean::from_integer(value, vary);
+        },
+        [&](const chunk_xptr& vary) NOEXCEPT
+        {
+            // This may be executed in tapscripts (standard).
+            result = boolean::from_chunk(value, *vary);
+        }
+    }, top());
+
+    return result;
 }
 
 // This is the only source of peek/pop (read) tethering.
@@ -312,7 +333,7 @@ peek_chunk() const NOEXCEPT
 
     std::visit(overload
     {
-        [&, this](bool vary) NOEXCEPT
+        [&](bool vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = make_external(chunk::from_bool(vary), tether_);
@@ -391,7 +412,7 @@ equal_chunks(const stack_variant& left,
                     same = std::get<bool>(right) == vary;
                     break;
                 case int64_:
-                    same = std::get<int64_t>(right) == boolean::to_integer(vary);
+                    same = std::get<int64_t>(right) == to_int(vary);
                     break;
                 case pchunk_:
                     same = *std::get<chunk_xptr>(right) == chunk::from_bool(vary);
@@ -404,7 +425,7 @@ equal_chunks(const stack_variant& left,
             switch (right_type)
             {
                 case bool_:
-                    same = boolean::to_integer(std::get<bool>(right)) == vary;
+                    same = to_int(std::get<bool>(right)) == vary;
                     break;
                 case int64_:
                     same = std::get<int64_t>(right) == vary;
