@@ -32,13 +32,15 @@ namespace system {
 namespace machine {
 
 TEMPLATE
-INLINE CLASS::stack() NOEXCEPT
+INLINE CLASS::
+stack() NOEXCEPT
   : container_{}, tether_{}
 {
 }
 
 TEMPLATE
-INLINE CLASS::stack(Container&& container) NOEXCEPT
+INLINE CLASS::
+stack(Container&& container) NOEXCEPT
   : container_(std::move(container)), tether_{}
 {
 }
@@ -47,14 +49,16 @@ INLINE CLASS::stack(Container&& container) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-INLINE const stack_variant& CLASS::top() const NOEXCEPT
+INLINE const stack_variant& CLASS::
+top() const NOEXCEPT
 {
     BC_ASSERT(!empty());
     return container_.back();
 }
 
 TEMPLATE
-INLINE stack_variant CLASS::pop() NOEXCEPT
+INLINE stack_variant CLASS::
+pop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     stack_variant temporary{ std::move(container_.back()) };
@@ -63,26 +67,30 @@ INLINE stack_variant CLASS::pop() NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::drop() NOEXCEPT
+INLINE void CLASS::
+drop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     container_.pop_back();
 }
 
 TEMPLATE
-INLINE bool CLASS::empty() const NOEXCEPT
+INLINE bool CLASS::
+empty() const NOEXCEPT
 {
     return container_.empty();
 }
 
 TEMPLATE
-INLINE size_t CLASS::size() const NOEXCEPT
+INLINE size_t CLASS::
+size() const NOEXCEPT
 {
     return container_.size();
 }
 
 TEMPLATE
-INLINE void CLASS::push(data_chunk&& value) NOEXCEPT
+INLINE void CLASS::
+push(data_chunk&& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(make_external(std::move(value), tether_));
@@ -90,7 +98,8 @@ INLINE void CLASS::push(data_chunk&& value) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::push(stack_variant&& value) NOEXCEPT
+INLINE void CLASS::
+push(stack_variant&& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(std::move(value));
@@ -98,7 +107,8 @@ INLINE void CLASS::push(stack_variant&& value) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::push(const stack_variant& value) NOEXCEPT
+INLINE void CLASS::
+push(const stack_variant& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(value);
@@ -106,7 +116,8 @@ INLINE void CLASS::push(const stack_variant& value) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::emplace_boolean(bool value) NOEXCEPT
+INLINE void CLASS::
+emplace_boolean(bool value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
@@ -114,7 +125,8 @@ INLINE void CLASS::emplace_boolean(bool value) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::emplace_integer(int64_t value) NOEXCEPT
+INLINE void CLASS::
+emplace_integer(int64_t value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
@@ -122,7 +134,8 @@ INLINE void CLASS::emplace_integer(int64_t value) NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::emplace_chunk(const chunk_xptr& value) NOEXCEPT
+INLINE void CLASS::
+emplace_chunk(const chunk_xptr& value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value.get());
@@ -134,14 +147,16 @@ INLINE void CLASS::emplace_chunk(const chunk_xptr& value) NOEXCEPT
 // These optimizations prevent used of std::stack.
 
 TEMPLATE
-INLINE void CLASS::erase(size_t index) NOEXCEPT
+INLINE void CLASS::
+erase(size_t index) NOEXCEPT
 {
     BC_ASSERT(index < size());
     container_.erase(std::prev(container_.end(), add1(index)));
 }
 
 TEMPLATE
-INLINE void CLASS::swap(size_t left_index,
+INLINE void CLASS::
+swap(size_t left_index,
     size_t right_index) NOEXCEPT
 {
     BC_ASSERT(left_index < size() && right_index < size());
@@ -164,7 +179,8 @@ INLINE void CLASS::swap(size_t left_index,
 }
 
 TEMPLATE
-INLINE const stack_variant& CLASS::peek(size_t index) const NOEXCEPT
+INLINE const stack_variant& CLASS::
+peek(size_t index) const NOEXCEPT
 {
     BC_ASSERT(index < size());
 
@@ -179,13 +195,15 @@ INLINE const stack_variant& CLASS::peek(size_t index) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-INLINE bool CLASS::peek_signed4(int32_t& value) const NOEXCEPT
+INLINE bool CLASS::
+peek_signed4(int32_t& value) const NOEXCEPT
 {
     return peek_signed<4>(value);
 }
 
 TEMPLATE
-INLINE bool CLASS::peek_signed5(int64_t& value) const NOEXCEPT
+INLINE bool CLASS::
+peek_signed5(int64_t& value) const NOEXCEPT
 {
     return peek_signed<5>(value);
 }
@@ -199,7 +217,8 @@ TEMPLATE
 template<size_t Bytes, typename Integer,
     if_not_lesser<sizeof(Integer), Bytes>,
     if_signed_integral_integer<Integer>>
-inline bool CLASS::peek_signed(Integer& value) const NOEXCEPT
+inline bool CLASS::
+peek_signed(Integer& value) const NOEXCEPT
 {
     using namespace number;
     auto result{ true };
@@ -227,7 +246,8 @@ inline bool CLASS::peek_signed(Integer& value) const NOEXCEPT
 }
 
 TEMPLATE
-inline bool CLASS::peek_bool() const NOEXCEPT
+inline bool CLASS::
+peek_bool() const NOEXCEPT
 {
     using namespace number;
     bool value{};
@@ -256,7 +276,8 @@ inline bool CLASS::peek_bool() const NOEXCEPT
 
 // This differs from peek_bool in that a stack chunk must be empty.
 TEMPLATE
-inline bool CLASS::peek_strict_bool() const NOEXCEPT
+inline bool CLASS::
+peek_strict_bool() const NOEXCEPT
 {
     using namespace number;
     bool value{};
@@ -285,7 +306,8 @@ inline bool CLASS::peek_strict_bool() const NOEXCEPT
 
 // This is the only source of peek/pop (read) tethering.
 TEMPLATE
-inline chunk_xptr CLASS::peek_chunk() const NOEXCEPT
+inline chunk_xptr CLASS::
+peek_chunk() const NOEXCEPT
 {
     using namespace number;
     chunk_xptr value{};
@@ -314,7 +336,8 @@ inline chunk_xptr CLASS::peek_chunk() const NOEXCEPT
 
 // Could use peek_chunk but this overload skips allocation and tethering.
 TEMPLATE
-inline size_t CLASS::peek_size() const NOEXCEPT
+inline size_t CLASS::
+peek_size() const NOEXCEPT
 {
     using namespace number;
     size_t value{};
@@ -344,7 +367,8 @@ inline size_t CLASS::peek_size() const NOEXCEPT
 /// Static variant compare with conversion.
 /// Integers are unconstrained as these are stack chunk equality comparisons.
 TEMPLATE
-inline bool CLASS::equal_chunks(const stack_variant& left,
+inline bool CLASS::
+equal_chunks(const stack_variant& left,
     const stack_variant& right) NOEXCEPT
 {
     enum stack_type { bool_, int64_, pchunk_ };

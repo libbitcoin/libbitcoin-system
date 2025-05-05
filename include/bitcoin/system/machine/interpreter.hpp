@@ -23,7 +23,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/chain/chain.hpp>
-#include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/program.hpp>
 
 namespace libbitcoin {

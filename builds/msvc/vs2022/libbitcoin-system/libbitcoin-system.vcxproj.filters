@@ -1010,6 +1010,15 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\number.hpp">
       <Filter>include\bitcoin\system\machine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\number_boolean.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\number_chunk.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\number_integer.hpp">
+      <Filter>include\bitcoin\system\machine</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\machine\program.hpp">
       <Filter>include\bitcoin\system\machine</Filter>
     </ClInclude>
@@ -1555,7 +1564,13 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number_boolean.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number_chunk.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number_integer.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp">

@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
-#define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
+#ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_BOOLEAN_HPP
+#define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_BOOLEAN_HPP
 
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -27,12 +28,27 @@ namespace system {
 namespace machine {
 namespace number {
 
-constexpr uint8_t positive_sign_byte = 0x00;
-constexpr uint8_t negative_sign_byte = to_negated(positive_sign_byte);
+class BC_API boolean
+{
+public:
+    template <size_t Size = sizeof(int64_t),
+        if_not_greater<Size, sizeof(int64_t)> = true>
+    static constexpr signed_type<Size> to_integer(bool vary) NOEXCEPT;
+
+    static constexpr bool from_chunk(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool strict_from_chunk(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool to_bool(int64_t vary) NOEXCEPT;
+
+protected:
+    static constexpr bool strict_false(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
+};
 
 } // namespace number
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/machine/number_boolean.ipp>
 
 #endif
