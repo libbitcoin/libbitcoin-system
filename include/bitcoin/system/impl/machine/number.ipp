@@ -31,10 +31,6 @@ namespace system {
 namespace machine {
 namespace number {
 
-#define INTEGER_TEMPLATE template <size_t Size, \
-    if_not_greater<Size, sizeof(int64_t)> If>
-#define INTEGER_CLASS integer<Size, If>
-
 // ****************************************************************************
 // CONSENSUS:
 // Due to compression, a leading sign byte is required if high bit is set.
@@ -54,16 +50,16 @@ constexpr uint8_t negative_sign_byte = to_negated(positive_sign_byte);
 // integer
 // ----------------------------------------------------------------------------
 
-INTEGER_TEMPLATE
-inline constexpr bool INTEGER_CLASS::
+TEMPLATE
+inline constexpr bool CLASS::
 from_integer(Integer& out, int64_t vary) NOEXCEPT
 {
     out = possible_narrow_cast<Integer>(vary);
     return !is_overflow(vary);
 }
 
-INTEGER_TEMPLATE
-inline bool INTEGER_CLASS::
+TEMPLATE
+inline bool CLASS::
 from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT
 {
     out = 0;
@@ -85,24 +81,24 @@ from_chunk(Integer& out, const data_chunk& vary) NOEXCEPT
 }
 
 // protected
-INTEGER_TEMPLATE
-inline bool INTEGER_CLASS::
+TEMPLATE
+inline bool CLASS::
 strict_zero(const data_chunk& vary) NOEXCEPT
 {
     return vary.empty();
 }
 
 // protected
-INTEGER_TEMPLATE
-inline bool INTEGER_CLASS::
+TEMPLATE
+inline bool CLASS::
 is_overflow(const data_chunk& vary) NOEXCEPT
 {
     return vary.size() > Size;
 }
 
 // protected
-INTEGER_TEMPLATE
-inline constexpr bool INTEGER_CLASS::
+TEMPLATE
+inline constexpr bool CLASS::
 is_overflow(int64_t value) NOEXCEPT
 {
     return is_limited(value, bitcoin_min<Size>, bitcoin_max<Size>);
@@ -147,14 +143,10 @@ inline data_chunk chunk::from_integer(int64_t vary) NOEXCEPT
     return bytes;
 }
 
-#undef INTEGER_CLASS
-#undef INTEGER_TEMPLATE
-
 // boolean
 // ----------------------------------------------------------------------------
 
-template <size_t Size,
-    if_not_greater<Size, sizeof(int64_t)>>
+template <size_t Size, if_not_greater<Size, sizeof(int64_t)>>
 inline constexpr signed_type<Size> boolean::to_integer(bool vary) NOEXCEPT
 {
     // The cast can safely be ignored, which is why Size is defaulted.

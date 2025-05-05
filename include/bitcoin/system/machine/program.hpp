@@ -26,6 +26,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/stack.hpp>
 
 namespace libbitcoin {
@@ -215,6 +216,12 @@ private:
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <typename Stack>
+#define CLASS program<Stack>
+
 #include <bitcoin/system/impl/machine/program.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

@@ -23,6 +23,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/chain/chain.hpp>
+#include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/machine/program.hpp>
 
 namespace libbitcoin {
@@ -160,6 +161,12 @@ protected:
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <typename Stack>
+#define CLASS interpreter<Stack>
+
 #include <bitcoin/system/impl/machine/interpreter.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

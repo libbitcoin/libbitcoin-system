@@ -74,6 +74,12 @@ protected:
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <size_t Size, if_not_greater<Size, sizeof(int64_t)> If>
+#define CLASS integer<Size, If>
+
 #include <bitcoin/system/impl/machine/number.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif
