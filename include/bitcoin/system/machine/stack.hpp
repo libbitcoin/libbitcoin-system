@@ -107,8 +107,8 @@ private:
 template<class... Overload>
 struct overload : Overload... { using Overload::operator()...; };
 
-// Explicit deduction guide, should not be required in C++20 (namespace scope).
-template<class... Overload> overload(Overload...) -> overload<Overload...>;
+////// Explicit deduction guide, should not be required in C++20 (namespace scope).
+////template<class... Overload> overload(Overload...) -> overload<Overload...>;
 
 } // namespace machine
 } // namespace system
