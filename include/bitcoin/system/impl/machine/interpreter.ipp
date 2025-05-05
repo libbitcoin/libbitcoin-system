@@ -1000,8 +1000,8 @@ inline op_error_t CLASS::
 op_codeseparator(const op_iterator& op) NOEXCEPT
 {
     // Not thread safe for the script (changes script object metadata).
-    return state::set_subscript(op) ? error::op_success :
-        error::op_code_separator;
+    state::set_subscript(op);
+    return error::op_success;
 }
 
 TEMPLATE
