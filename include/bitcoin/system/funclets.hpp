@@ -30,6 +30,12 @@ namespace libbitcoin {
 
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
+template <typename Type>
+constexpr Type zeroize(Type& value) noexcept
+{
+    return (value = static_cast<Type>(0));
+}
+
 /// Conditions.
 
 template <typename Type>
@@ -39,21 +45,21 @@ constexpr bool is_zero(Type value) noexcept
 }
 
 template <typename Type>
+constexpr bool is_one(Type value) noexcept
+{
+    return value == static_cast<Type>(1);
+}
+
+template <typename Type>
 constexpr bool is_nonzero(Type value) noexcept
 {
     return !is_zero(value);
 }
 
 template <typename Type>
-constexpr Type zeroize(Type& value) noexcept
+constexpr bool is_boolean(Type value) noexcept
 {
-    return (value = static_cast<Type>(0));
-}
-
-template <typename Type>
-constexpr bool is_one(Type value) noexcept
-{
-    return value == static_cast<Type>(1);
+    return is_zero(value) || is_one(value);
 }
 
 template <typename Type>

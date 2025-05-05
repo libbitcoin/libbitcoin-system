@@ -336,6 +336,51 @@ constexpr bool operation::is_reserved(opcode code) NOEXCEPT
     }
 }
 
+// This condition is only applicable with bip342 active. bip342: If any opcode
+// 80, 98, 126-129, 131-134, 137-138, 141-142, 149-153, 187-254 is encountered,
+// validation succeeds. This is most reserved and most invalid, but not all. We
+// are not renaming these codes to op_successX as succested by bip342, because:
+// (1) they remain unimplemented.
+// (2) they are not evaluated during script execution.
+// (3) they are only conditionally successful (tapscript).
+// (4) renaming them would lose important historical context.
+constexpr bool operation::is_success(opcode code) NOEXCEPT
+{
+    constexpr auto op_187 = opcode::reserved_187;
+    constexpr auto op_254 = opcode::reserved_254;
+
+    switch (code)
+    {
+        case opcode::reserved_80:
+        case opcode::op_ver:
+        ////case opcode::op_verif:      // stays invalid
+        ////case opcode::op_vernotif:   // stays invalid
+        ////case opcode::op_return:     // stays reserved
+        case opcode::op_cat:
+        case opcode::op_substr:
+        case opcode::op_left:
+        case opcode::op_right:
+        case opcode::op_invert:
+        case opcode::op_and:
+        case opcode::op_or:
+        case opcode::op_xor:
+        case opcode::reserved_137:
+        case opcode::reserved_138:
+        case opcode::op_mul2:
+        case opcode::op_div2:
+        case opcode::op_mul:
+        case opcode::op_div:
+        case opcode::op_mod:
+        case opcode::op_lshift:
+        case opcode::op_rshift:
+        ////case opcode::reserved_186:  // checksigadd subsumes
+        ////case opcode::reserved_255:  // stays reserved
+            return true;
+        default:
+            return code >= op_187 && code <= op_254;
+    }
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin

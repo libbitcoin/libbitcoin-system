@@ -16,15 +16,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MACHINE_MACHINE_HPP
-#define LIBBITCOIN_SYSTEM_MACHINE_MACHINE_HPP
+#ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_CHUNK_HPP
+#define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_CHUNK_HPP
 
-#include <bitcoin/system/machine/interpreter.hpp>
-#include <bitcoin/system/machine/number.hpp>
-#include <bitcoin/system/machine/number_boolean.hpp>
-#include <bitcoin/system/machine/number_chunk.hpp>
-#include <bitcoin/system/machine/number_integer.hpp>
-#include <bitcoin/system/machine/program.hpp>
-#include <bitcoin/system/machine/stack.hpp>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
+
+namespace libbitcoin {
+namespace system {
+namespace machine {
+namespace number {
+
+class BC_API chunk
+{
+public:
+    static inline data_chunk from_bool(bool vary) NOEXCEPT;
+    static inline data_chunk from_integer(int64_t vary) NOEXCEPT;
+};
+
+} // namespace number
+} // namespace machine
+} // namespace system
+} // namespace libbitcoin
+
+#include <bitcoin/system/impl/machine/number_chunk.ipp>
 
 #endif

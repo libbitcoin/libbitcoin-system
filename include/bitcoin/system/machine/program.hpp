@@ -26,6 +26,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/stack.hpp>
 
 namespace libbitcoin {
@@ -85,6 +86,7 @@ protected:
 
     /// Primary stack.
     /// -----------------------------------------------------------------------
+    /// Underscored names reflect lack of guard against empty stack.
 
     /// Primary stack (push).
     INLINE void push_chunk(data_chunk&& datum) NOEXCEPT;
@@ -95,8 +97,8 @@ protected:
 
     /// Primary stack (pop).
     INLINE chunk_xptr pop_chunk_() NOEXCEPT;
-    INLINE bool pop_bool_() NOEXCEPT;
     INLINE bool pop_strict_bool_() NOEXCEPT;
+    INLINE bool pop_bool_(bool& value, bool minimal) NOEXCEPT;
     INLINE bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
     INLINE bool pop_signed32(int32_t& value) NOEXCEPT;
     INLINE bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
@@ -205,16 +207,22 @@ private:
     condition_stack condition_{};
 
     // Accumulator.
-    size_t operation_count_{};
+    size_t operations_{};
 
     // Condition stack optimization.
-    size_t negative_condition_count_{};
+    size_t negative_conditions_{};
 };
 
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
 
+#define TEMPLATE template <typename Stack>
+#define CLASS program<Stack>
+
 #include <bitcoin/system/impl/machine/program.ipp>
+
+#undef CLASS
+#undef TEMPLATE
 
 #endif

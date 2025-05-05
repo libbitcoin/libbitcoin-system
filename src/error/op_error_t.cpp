@@ -35,8 +35,10 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_push_one_size, "op_push_one_size" },
     { op_push_two_size, "op_push_two_size" },
     { op_push_four_size, "op_push_four_size" },
-    { op_if, "op_if" },
-    { op_notif, "op_notif" },
+    { op_if1, "op_if1" },
+    { op_if2, "op_if2" },
+    { op_notif1, "op_notif1" },
+    { op_notif2, "op_notif2" },
     { op_else, "op_else" },
     { op_endif, "op_endif" },
     { op_verify1, "op_verify1" },
@@ -91,12 +93,12 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_hash160, "op_hash160" },
     { op_hash256, "op_hash256" },
     { op_code_separator, "op_code_separator" },
+    { op_check_sig, "op_check_sig" },
     { op_check_sig_verify1, "op_check_sig_verify1" },
     { op_check_sig_verify2, "op_check_sig_verify2" },
     { op_check_sig_verify3, "op_check_sig_verify3" },
     { op_check_sig_verify4, "op_check_sig_verify4" },
     { op_check_sig_verify_parse, "op_check_sig_verify_parse" },
-    { op_check_sig, "op_check_sig" },
     { op_check_multisig_verify1, "op_check_multisig_verify1" },
     { op_check_multisig_verify2, "op_check_multisig_verify2" },
     { op_check_multisig_verify3, "op_check_multisig_verify3" },
@@ -117,7 +119,9 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_check_sequence_verify2, "op_check_sequence_verify2" },
     { op_check_sequence_verify3, "op_check_sequence_verify3" },
     { op_check_sequence_verify4, "op_check_sequence_verify4" },
-    { op_check_sequence_verify5, "op_check_sequence_verify5" }
+    { op_check_sequence_verify5, "op_check_sequence_verify5" },
+    { op_check_sig_add, "op_check_sig_add" },
+    { op_check_schnorr_sig, "op_check_schnorr_sig" }
 };
 
 DEFINE_ERROR_T_CATEGORY(op_error, "op", "op code")

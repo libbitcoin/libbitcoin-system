@@ -26,7 +26,6 @@
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
@@ -42,8 +41,8 @@ using namespace system::error;
 // Input script run (default/empty stack).
 // 'tx' must remain in scope, this holds state referenced by weak pointers.
 // This expectation is guaranteed by the retained tx reference.
-template <typename Stack>
-inline program<Stack>::
+TEMPLATE
+inline CLASS::
 program(const chain::transaction& tx, const input_iterator& input,
      uint32_t active_flags) NOEXCEPT
   : transaction_(tx),
@@ -61,8 +60,8 @@ program(const chain::transaction& tx, const input_iterator& input,
 // 'other' must remain in scope, this holds state referenced by weak pointers.
 // This expectation is guaranteed by the retained transaction_ member reference
 // and copied program tether (which is not tx state).
-template <typename Stack>
-inline program<Stack>::
+TEMPLATE
+inline CLASS::
 program(const program& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
@@ -76,8 +75,8 @@ program(const program& other, const script::cptr& script) NOEXCEPT
 }
 
 // Legacy p2sh or prevout script run (moved input stack/tether - use last).
-template <typename Stack>
-inline program<Stack>::
+TEMPLATE
+inline CLASS::
 program(program&& other, const script::cptr& script) NOEXCEPT
   : transaction_(other.transaction_),
     input_(other.input_),
@@ -94,8 +93,8 @@ program(program&& other, const script::cptr& script) NOEXCEPT
 // 'tx', 'input' (and iterated chain::input) must remain in scope, as these
 // hold chunk state weak references. A witness pointer is explicitly retained
 // to guarantee the lifetime of its elements.
-template <typename Stack>
-inline program<Stack>::
+TEMPLATE
+inline CLASS::
 program(const chain::transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t active_flags, script_version version,
     const chunk_cptrs_ptr& witness) NOEXCEPT
@@ -113,16 +112,16 @@ program(const chain::transaction& tx, const input_iterator& input,
 // Public.
 // ----------------------------------------------------------------------------
 
-template <typename Stack>
-inline bool program<Stack>::
+TEMPLATE
+inline bool CLASS::
 is_true(bool clean_stack) const NOEXCEPT
 {
     return (!clean_stack || is_stack_clean()) && !is_stack_empty() &&
         peek_bool_();
 }
 
-template <typename Stack>
-inline const data_chunk& program<Stack>::
+TEMPLATE
+inline const data_chunk& CLASS::
 pop() NOEXCEPT
 {
     BC_ASSERT_MSG(!is_stack_empty(), "pop from empty stack");
@@ -133,43 +132,43 @@ pop() NOEXCEPT
 // Non-public.
 // ============================================================================
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_prefail() const NOEXCEPT
 {
     return script_->is_prefail();
 }
 
-template <typename Stack>
-INLINE typename program<Stack>::op_iterator program<Stack>::
+TEMPLATE
+INLINE typename CLASS::op_iterator CLASS::
 begin() const NOEXCEPT
 {
     return script_->ops().begin();
 }
 
-template <typename Stack>
-INLINE typename program<Stack>::op_iterator program<Stack>::
+TEMPLATE
+INLINE typename CLASS::op_iterator CLASS::
 end() const NOEXCEPT
 {
     return script_->ops().end();
 }
 
-template <typename Stack>
-INLINE const chain::input& program<Stack>::
+TEMPLATE
+INLINE const chain::input& CLASS::
 input() const NOEXCEPT
 {
     return **input_;
 }
 
-template <typename Stack>
-INLINE const chain::transaction& program<Stack>::
+TEMPLATE
+INLINE const chain::transaction& CLASS::
 transaction() const NOEXCEPT
 {
     return transaction_;
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_enabled(chain::flags flag) const NOEXCEPT
 {
     return to_bool(flags_ & flag);
@@ -177,8 +176,8 @@ is_enabled(chain::flags flag) const NOEXCEPT
 
 // TODO: only perform is_push_size check on witness initialized stack.
 // TODO: others are either empty or presumed push_size from prevout script run.
-template <typename Stack>
-INLINE script_error_t program<Stack>::
+TEMPLATE
+INLINE script_error_t CLASS::
 validate() const NOEXCEPT
 {
     // TODO: nops rule must first be enabled in tests and config.
@@ -201,29 +200,29 @@ validate() const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // static
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 equal_chunks(const stack_variant& left, const stack_variant& right) NOEXCEPT
 {
     return primary_stack::equal_chunks(left, right);
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 peek_bool_() const NOEXCEPT
 {
     return primary_.peek_bool();
 }
 
-template <typename Stack>
-INLINE chunk_xptr program<Stack>::
+TEMPLATE
+INLINE chunk_xptr CLASS::
 peek_chunk_() const NOEXCEPT
 {
     return primary_.peek_chunk();
 }
 
-template <typename Stack>
-INLINE size_t program<Stack>::
+TEMPLATE
+INLINE size_t CLASS::
 peek_size() const NOEXCEPT
 {
     return primary_.peek_size();
@@ -233,8 +232,8 @@ peek_size() const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // This is the only source of push (write) tethering.
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_chunk(data_chunk&& datum) NOEXCEPT
 {
     primary_.push(std::move(datum));
@@ -244,8 +243,8 @@ push_chunk(data_chunk&& datum) NOEXCEPT
 // derived callers to (unsafely) store raw pointers to unshared data_chunk.
 BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_chunk(const chunk_cptr& datum) NOEXCEPT
 BC_POP_WARNING()
 BC_POP_WARNING()
@@ -254,29 +253,29 @@ BC_POP_WARNING()
 }
 
 // private
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_chunk(const chunk_xptr& datum) NOEXCEPT
 {
     primary_.emplace_chunk(datum);
 }
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_bool(bool value) NOEXCEPT
 {
     primary_.emplace_boolean(value);
 }
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_signed64(int64_t value) NOEXCEPT
 {
     primary_.emplace_integer(value);
 }
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_length(size_t value) NOEXCEPT
 {
     // This is guarded by stack size and push data limits.
@@ -289,8 +288,8 @@ push_length(size_t value) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // This tethers a chunk if the stack value is not chunk.
-template <typename Stack>
-INLINE chunk_xptr program<Stack>::
+TEMPLATE
+INLINE chunk_xptr CLASS::
 pop_chunk_() NOEXCEPT
 {
     const auto value = peek_chunk_();
@@ -299,8 +298,8 @@ pop_chunk_() NOEXCEPT
 }
 
 // This tethers chunks if the stack values are not chunk.
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT
 {
     if (stack_size() < count)
@@ -313,17 +312,8 @@ pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT
     return true;
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
-pop_bool_() NOEXCEPT
-{
-    const auto value = peek_bool_();
-    drop_();
-    return value;
-}
-
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 pop_strict_bool_() NOEXCEPT
 {
     const auto value = primary_.peek_strict_bool();
@@ -331,9 +321,22 @@ pop_strict_bool_() NOEXCEPT
     return value;
 }
 
+TEMPLATE
+INLINE bool CLASS::
+pop_bool_(bool& value, bool minimal) NOEXCEPT
+{
+    if (!minimal)
+        value = peek_bool_();
+    else if (!primary_.peek_minimal_bool(value))
+        return false;
+
+    drop_();
+    return true;
+}
+
 // private
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 pop_signed32_(int32_t& value) NOEXCEPT
 {
     const auto result = peek_signed32_(value);
@@ -341,8 +344,8 @@ pop_signed32_(int32_t& value) NOEXCEPT
     return result;
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 pop_signed32(int32_t& value) NOEXCEPT
 {
     if (is_stack_empty())
@@ -351,8 +354,8 @@ pop_signed32(int32_t& value) NOEXCEPT
     return pop_signed32_(value);
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 pop_binary32(int32_t& left, int32_t& right) NOEXCEPT
 {
     if (stack_size() < 2)
@@ -362,8 +365,8 @@ pop_binary32(int32_t& left, int32_t& right) NOEXCEPT
     return pop_signed32_(right) && pop_signed32_(left);
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 pop_ternary32(int32_t& upper, int32_t& lower,
     int32_t& value) NOEXCEPT
 {
@@ -375,16 +378,16 @@ pop_ternary32(int32_t& upper, int32_t& lower,
         pop_signed32_(value);
 }
 
-// ************************************************************************
+// ****************************************************************************
 // CONSENSUS: Satoshi limits this value to the int32_t domain (getint()).
 // This value is only used for stack indexing (key/sig counts & pick/roll).
 // The upper bound of int32_t always exceeds the possible stack size, which
 // is checked downstream. Similarly, a negative causes a downstream script
 // failure. As such it is sufficient to fail on non-idexability here,
 // allowing the value to be returned as a valid and unsigned stack index.
-// ************************************************************************
-template <typename Stack>
-INLINE bool program<Stack>::
+// ****************************************************************************
+TEMPLATE
+INLINE bool CLASS::
 pop_index32(size_t& index) NOEXCEPT
 {
     int32_t value;
@@ -402,16 +405,16 @@ pop_index32(size_t& index) NOEXCEPT
 }
 
 // private
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 peek_signed32_(int32_t& value) const NOEXCEPT
 {
     return primary_.peek_signed4(value);
 }
 
 // private
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 peek_signed40_(int64_t& value) const NOEXCEPT
 {
     return primary_.peek_signed5(value);
@@ -422,8 +425,8 @@ peek_signed40_(int64_t& value) const NOEXCEPT
 // input.sequence allows use of the full unsigned 32 bit domain, without use of
 // the negative range.
 // ****************************************************************************
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 peek_unsigned32(uint32_t& value) const NOEXCEPT
 {
     if (is_stack_empty())
@@ -444,8 +447,8 @@ peek_unsigned32(uint32_t& value) const NOEXCEPT
 // the negative range. Otherwise a 2038 limit (vs. the inherent 2106 limit)
 // would have been introduced.
 // ****************************************************************************
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 peek_unsigned40(uint64_t& value) const NOEXCEPT
 {
     if (is_stack_empty())
@@ -465,22 +468,22 @@ peek_unsigned40(uint64_t& value) const NOEXCEPT
 // Stack index is zero-based, back() is element zero.
 
 // This swaps the variant elements of the stack vector.
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 swap_(size_t left_index, size_t right_index) NOEXCEPT
 {
     primary_.swap(left_index, right_index);
 }
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 erase_(size_t index) NOEXCEPT
 {
     primary_.erase(index);
 }
 
-template <typename Stack>
-INLINE const stack_variant& program<Stack>::
+TEMPLATE
+INLINE const stack_variant& CLASS::
 peek_(size_t index) const NOEXCEPT
 {
     return primary_.peek(index);
@@ -489,29 +492,29 @@ peek_(size_t index) const NOEXCEPT
 // Primary stack (variant - top).
 // ----------------------------------------------------------------------------
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 drop_() NOEXCEPT
 {
     primary_.drop();
 }
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_variant(const stack_variant& vary) NOEXCEPT
 {
     primary_.push(vary);
 }
 
-template <typename Stack>
-INLINE const stack_variant& program<Stack>::
+TEMPLATE
+INLINE const stack_variant& CLASS::
 peek_() const NOEXCEPT
 {
     return primary_.top();
 }
 
-template <typename Stack>
-INLINE stack_variant program<Stack>::
+TEMPLATE
+INLINE stack_variant CLASS::
 pop_() NOEXCEPT
 {
     return primary_.pop();
@@ -520,22 +523,22 @@ pop_() NOEXCEPT
 // Primary stack state (untyped).
 // ----------------------------------------------------------------------------
 
-template <typename Stack>
-INLINE size_t program<Stack>::
+TEMPLATE
+INLINE size_t CLASS::
 stack_size() const NOEXCEPT
 {
     return primary_.size();
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_stack_empty() const NOEXCEPT
 {
     return primary_.empty();
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_stack_overflow() const NOEXCEPT
 {
     // Addition is safe due to stack size constraint.
@@ -543,8 +546,8 @@ is_stack_overflow() const NOEXCEPT
 }
 
 // private
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_stack_clean() const NOEXCEPT
 {
     return is_one(stack_size());
@@ -553,8 +556,8 @@ is_stack_clean() const NOEXCEPT
 // Alternate stack.
 // ----------------------------------------------------------------------------
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_alternate_empty() const NOEXCEPT
 {
     return alternate_.empty();
@@ -562,8 +565,8 @@ is_alternate_empty() const NOEXCEPT
 
 // Moving a shared pointer to the alternate stack is optimal and acceptable.
 BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 push_alternate(stack_variant&& vary) NOEXCEPT
 BC_POP_WARNING()
 {
@@ -572,8 +575,8 @@ BC_POP_WARNING()
     BC_POP_WARNING()
 }
 
-template <typename Stack>
-INLINE stack_variant program<Stack>::
+TEMPLATE
+INLINE stack_variant CLASS::
 pop_alternate_() NOEXCEPT
 {
     BC_ASSERT(!alternate_.empty());
@@ -586,14 +589,14 @@ pop_alternate_() NOEXCEPT
 // Conditional stack.
 // ----------------------------------------------------------------------------
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 begin_if(bool value) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(value || !is_add_overflow(negative_condition_count_, one));
+    BC_ASSERT(value || !is_add_overflow(negative_conditions_, one));
 
-    negative_condition_count_ += (value ? 0 : 1);
+    negative_conditions_ += (value ? 0 : 1);
     condition_.push_back(value);
 }
 
@@ -604,50 +607,49 @@ begin_if(bool value) NOEXCEPT
 // value 2 on the stack: 1 OP_IF OP_ELSE OP_ELSE 2 OP_ENDIF"
 // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
 // ****************************************************************************
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 else_if_() NOEXCEPT
 {
     // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
 
     // Addition is safe due to script size constraint.
-    BC_ASSERT(condition_.back() ||
-        !is_add_overflow(negative_condition_count_, one));
+    BC_ASSERT(condition_.back() || !is_add_overflow(negative_conditions_, one));
 
-    negative_condition_count_ += (condition_.back() ? 1 : -1);
+    negative_conditions_ += (condition_.back() ? 1 : -1);
     condition_.back() = !condition_.back();
 }
 
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 end_if_() NOEXCEPT
 {
     // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
 
-    negative_condition_count_ += (condition_.back() ? 0 : -1);
+    negative_conditions_ += (condition_.back() ? 0 : -1);
     condition_.pop_back();
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_balanced() const NOEXCEPT
 {
     return condition_.empty();
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 is_succeess() const NOEXCEPT
 {
     // Optimization changes O(n) search [for every operation] to O(1).
     // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
-    return is_zero(negative_condition_count_);
+    return is_zero(negative_conditions_);
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 if_(const operation& op) const NOEXCEPT
 {
     // Conditional op execution is not predicated on conditional stack.
@@ -669,28 +671,28 @@ INLINE constexpr bool operation_count_exceeded(size_t count) NOEXCEPT
     return count > max_counted_ops;
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 ops_increment(const operation& op) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(!is_add_overflow(operation_count_, one));
+    BC_ASSERT(!is_add_overflow(operations_, one));
 
     if (operation::is_counted(op.code()))
-        ++operation_count_;
+        ++operations_;
 
-    return operation_count_ <= max_counted_ops;
+    return operations_ <= max_counted_ops;
 }
 
-template <typename Stack>
-INLINE bool program<Stack>::
+TEMPLATE
+INLINE bool CLASS::
 ops_increment(size_t public_keys) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(!is_add_overflow(operation_count_, public_keys));
+    BC_ASSERT(!is_add_overflow(operations_, public_keys));
 
-    operation_count_ += public_keys;
-    return !operation_count_exceeded(operation_count_);
+    operations_ += public_keys;
+    return !operation_count_exceeded(operations_);
 }
 
 // Signature validation helpers.
@@ -699,8 +701,8 @@ ops_increment(size_t public_keys) NOEXCEPT
 // Subscripts are referenced by script.offset mutable metadata. This allows for
 // efficient subscripting with no copying. However, concurrent execution of any
 // one input script instance is not thread safe (unnecessary scenario).
-template <typename Stack>
-inline bool program<Stack>::
+TEMPLATE
+inline bool CLASS::
 set_subscript(const op_iterator& op) NOEXCEPT
 {
     // End is not reachable if op is an element of script_.
@@ -736,8 +738,8 @@ inline chain::strippers create_strip_ops(
 // The order of operations is inconsequential, as they are all removed.
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
-template <typename Stack>
-inline script::cptr program<Stack>::
+TEMPLATE
+inline script::cptr CLASS::
 subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 {
     // bip141: establishes the version property.
@@ -761,8 +763,8 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
-template <typename Stack>
-inline bool program<Stack>::
+TEMPLATE
+inline bool CLASS::
 prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
     const chunk_xptr& endorsement) const NOEXCEPT
 {
@@ -782,8 +784,8 @@ prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
-template <typename Stack>
-inline bool program<Stack>::
+TEMPLATE
+inline bool CLASS::
 prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
     uint8_t& sighash_flags, const data_chunk& endorsement,
     const script& sub) const NOEXCEPT
@@ -805,8 +807,8 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
 // Signature hashing.
 // ----------------------------------------------------------------------------
 
-template <typename Stack>
-INLINE hash_digest program<Stack>::
+TEMPLATE
+INLINE hash_digest CLASS::
 signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
@@ -819,8 +821,8 @@ signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
 
 // Caches signature hashes in a map against sighash flags.
 // Prevents recomputation in the common case where flags are the same.
-template <typename Stack>
-INLINE void program<Stack>::
+TEMPLATE
+INLINE void CLASS::
 signature_hash(hash_cache& cache, const script& sub,
     uint8_t sighash_flags) const NOEXCEPT
 {

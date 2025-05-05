@@ -199,7 +199,7 @@
             ////#define HAVE_CONSTEVAL (v17)
         #endif
     // gcc version 12
-    #elif defined(HAVE_GCC)
+    #elif defined(HAVE_GNUC)
         #define HAVE_CONSTEVAL
     #endif
 #endif

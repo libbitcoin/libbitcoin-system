@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
-#define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_HPP
+#ifndef LIBBITCOIN_SYSTEM_MACHINE_NUMBER_BOOLEAN_HPP
+#define LIBBITCOIN_SYSTEM_MACHINE_NUMBER_BOOLEAN_HPP
 
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -27,12 +28,29 @@ namespace system {
 namespace machine {
 namespace number {
 
-constexpr uint8_t positive_sign_byte = 0x00;
-constexpr uint8_t negative_sign_byte = to_negated(positive_sign_byte);
+class BC_API boolean
+{
+public:
+    static constexpr bool from_integer(int64_t vary) NOEXCEPT;
+    static constexpr bool from_chunk(const data_chunk& vary) NOEXCEPT;
+
+    /// minimal (bip342), integer must be 0 or 1, chunk must be [] or [0x01].
+    static constexpr bool from_integer(bool& value, int64_t vary) NOEXCEPT;
+    static constexpr bool from_chunk(bool& value, const data_chunk& vary) NOEXCEPT;
+
+    /// strict (bip147), false must be [].
+    static constexpr bool from_chunk_strict(const data_chunk& vary) NOEXCEPT;
+
+protected:
+    static constexpr bool strict_false(const data_chunk& vary) NOEXCEPT;
+    static constexpr bool is_sign_byte(uint8_t byte) NOEXCEPT;
+};
 
 } // namespace number
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/machine/number_boolean.ipp>
 
 #endif

@@ -19,27 +19,26 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 
-#include <iterator>
-#include <type_traits>
+#include <tuple>
 #include <utility>
-#include <variant>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/machine/number.hpp>
 #include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace machine {
 
-template <typename Container>
-INLINE stack<Container>::stack() NOEXCEPT
+TEMPLATE
+INLINE CLASS::
+stack() NOEXCEPT
   : container_{}, tether_{}
 {
 }
 
-template <typename Container>
-INLINE stack<Container>::stack(Container&& container) NOEXCEPT
+TEMPLATE
+INLINE CLASS::
+stack(Container&& container) NOEXCEPT
   : container_(std::move(container)), tether_{}
 {
 }
@@ -47,15 +46,17 @@ INLINE stack<Container>::stack(Container&& container) NOEXCEPT
 // Pure stack abstraction.
 // ----------------------------------------------------------------------------
 
-template <typename Container>
-INLINE const stack_variant& stack<Container>::top() const NOEXCEPT
+TEMPLATE
+INLINE const stack_variant& CLASS::
+top() const NOEXCEPT
 {
     BC_ASSERT(!empty());
     return container_.back();
 }
 
-template <typename Container>
-INLINE stack_variant stack<Container>::pop() NOEXCEPT
+TEMPLATE
+INLINE stack_variant CLASS::
+pop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     stack_variant temporary{ std::move(container_.back()) };
@@ -63,87 +64,89 @@ INLINE stack_variant stack<Container>::pop() NOEXCEPT
     return temporary;
 }
 
-template <typename Container>
-INLINE void stack<Container>::drop() NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+drop() NOEXCEPT
 {
     BC_ASSERT(!empty());
     container_.pop_back();
 }
 
-template <typename Container>
-INLINE bool stack<Container>::empty() const NOEXCEPT
+TEMPLATE
+INLINE bool CLASS::
+empty() const NOEXCEPT
 {
     return container_.empty();
 }
 
-template <typename Container>
-INLINE size_t stack<Container>::size() const NOEXCEPT
+TEMPLATE
+INLINE size_t CLASS::
+size() const NOEXCEPT
 {
     return container_.size();
 }
 
-template <typename Container>
-INLINE void stack<Container>::push(data_chunk&& value) NOEXCEPT
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
+TEMPLATE
+INLINE void CLASS::
+push(data_chunk&& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(make_external(std::move(value), tether_));
-    BC_POP_WARNING()
 }
 
-template <typename Container>
-INLINE void stack<Container>::push(stack_variant&& value) NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+push(stack_variant&& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(std::move(value));
-    BC_POP_WARNING()
 }
 
-template <typename Container>
-INLINE void stack<Container>::push(const stack_variant& value) NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+push(const stack_variant& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.push_back(value);
-    BC_POP_WARNING()
 }
 
-template <typename Container>
-INLINE void stack<Container>::emplace_boolean(bool value) NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+emplace_boolean(bool value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
-    BC_POP_WARNING()
 }
 
-template <typename Container>
-INLINE void stack<Container>::emplace_integer(int64_t value) NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+emplace_integer(int64_t value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value);
-    BC_POP_WARNING()
 }
 
-template <typename Container>
-INLINE void stack<Container>::emplace_chunk(const chunk_xptr& value) NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+emplace_chunk(const chunk_xptr& value) NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     container_.emplace_back(value.get());
-    BC_POP_WARNING()
 }
+
+BC_POP_WARNING()
 
 // Positional (stack cheats).
 // ----------------------------------------------------------------------------
 // These optimizations prevent used of std::stack.
 
-template <typename Container>
-INLINE void stack<Container>::erase(size_t index) NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+erase(size_t index) NOEXCEPT
 {
     BC_ASSERT(index < size());
     container_.erase(std::prev(container_.end(), add1(index)));
 }
 
-template <typename Container>
-INLINE void stack<Container>::swap(size_t left_index,
-    size_t right_index) NOEXCEPT
+TEMPLATE
+INLINE void CLASS::
+swap(size_t left_index, size_t right_index) NOEXCEPT
 {
     BC_ASSERT(left_index < size() && right_index < size());
 
@@ -164,8 +167,9 @@ INLINE void stack<Container>::swap(size_t left_index,
     }
 }
 
-template <typename Container>
-INLINE const stack_variant& stack<Container>::peek(size_t index) const NOEXCEPT
+TEMPLATE
+INLINE const stack_variant& CLASS::
+peek(size_t index) const NOEXCEPT
 {
     BC_ASSERT(index < size());
 
@@ -179,14 +183,16 @@ INLINE const stack_variant& stack<Container>::peek(size_t index) const NOEXCEPT
 // Aliases.
 // ----------------------------------------------------------------------------
 
-template <typename Container>
-INLINE bool stack<Container>::peek_signed4(int32_t& value) const NOEXCEPT
+TEMPLATE
+INLINE bool CLASS::
+peek_signed4(int32_t& value) const NOEXCEPT
 {
     return peek_signed<4>(value);
 }
 
-template <typename Container>
-INLINE bool stack<Container>::peek_signed5(int64_t& value) const NOEXCEPT
+TEMPLATE
+INLINE bool CLASS::
+peek_signed5(int64_t& value) const NOEXCEPT
 {
     return peek_signed<5>(value);
 }
@@ -196,11 +202,12 @@ INLINE bool stack<Container>::peek_signed5(int64_t& value) const NOEXCEPT
 
 // Generalized integer peek for varying bit widths up to 8 bytes.
 // Chunk to integer conversions are constrained by caller (4 or 5 bytes).
-template <typename Container>
+TEMPLATE
 template<size_t Bytes, typename Integer,
     if_not_lesser<sizeof(Integer), Bytes>,
     if_signed_integral_integer<Integer>>
-inline bool stack<Container>::peek_signed(Integer& value) const NOEXCEPT
+inline bool CLASS::
+peek_signed(Integer& value) const NOEXCEPT
 {
     using namespace number;
     auto result{ true };
@@ -210,7 +217,7 @@ inline bool stack<Container>::peek_signed(Integer& value) const NOEXCEPT
         [&](bool vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
-            value = boolean::to_integer<Bytes>(vary);
+            value = to_int(vary);
         },
         [&](int64_t vary) NOEXCEPT
         {
@@ -227,8 +234,9 @@ inline bool stack<Container>::peek_signed(Integer& value) const NOEXCEPT
     return result;
 }
 
-template <typename Container>
-inline bool stack<Container>::peek_bool() const NOEXCEPT
+TEMPLATE
+inline bool CLASS::
+peek_bool() const NOEXCEPT
 {
     using namespace number;
     bool value{};
@@ -243,7 +251,7 @@ inline bool stack<Container>::peek_bool() const NOEXCEPT
         [&](int64_t vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
-            value = boolean::to_bool(vary);
+            value = boolean::from_integer(vary);
         },
         [&](const chunk_xptr& vary) NOEXCEPT
         {
@@ -255,9 +263,10 @@ inline bool stack<Container>::peek_bool() const NOEXCEPT
     return value;
 }
 
-// This differs from peek_bool in that a stack chunk must be empty.
-template <typename Container>
-inline bool stack<Container>::peek_strict_bool() const NOEXCEPT
+// Differs from peek_bool in that a chunk false must be empty [].
+TEMPLATE
+inline bool CLASS::
+peek_strict_bool() const NOEXCEPT
 {
     using namespace number;
     bool value{};
@@ -272,28 +281,59 @@ inline bool stack<Container>::peek_strict_bool() const NOEXCEPT
         [&](int64_t vary) NOEXCEPT
         {
             // This may be executed in standard scripts (before bip147).
-            value = boolean::to_bool(vary);
+            value = boolean::from_integer(vary);
         },
         [&](const chunk_xptr& vary) NOEXCEPT
         {
             // This may be executed in standard scripts (before bip147).
-            value = boolean::strict_from_chunk(*vary);
+            value = boolean::from_chunk_strict(*vary);
         }
     }, top());
 
     return value;
 }
 
+// A chunk false must be [] and chunk true must be [0x01], otherwise fails.
+TEMPLATE
+inline bool CLASS::
+peek_minimal_bool(bool& value) const NOEXCEPT
+{
+    using namespace number;
+    auto result{ true };
+
+    std::visit(overload
+    {
+        [&](bool vary) NOEXCEPT
+        {
+            // This is the canonical use case (tapscript).
+            value = vary;
+        },
+        [&](int64_t vary) NOEXCEPT
+        {
+            // This may be executed in tapscripts (standard).
+            result = boolean::from_integer(value, vary);
+        },
+        [&](const chunk_xptr& vary) NOEXCEPT
+        {
+            // This may be executed in tapscripts (standard).
+            result = boolean::from_chunk(value, *vary);
+        }
+    }, top());
+
+    return result;
+}
+
 // This is the only source of peek/pop (read) tethering.
-template <typename Container>
-inline chunk_xptr stack<Container>::peek_chunk() const NOEXCEPT
+TEMPLATE
+inline chunk_xptr CLASS::
+peek_chunk() const NOEXCEPT
 {
     using namespace number;
     chunk_xptr value{};
 
     std::visit(overload
     {
-        [&, this](bool vary) NOEXCEPT
+        [&](bool vary) NOEXCEPT
         {
             // This is never executed in standard scripts.
             value = make_external(chunk::from_bool(vary), tether_);
@@ -314,8 +354,9 @@ inline chunk_xptr stack<Container>::peek_chunk() const NOEXCEPT
 }
 
 // Could use peek_chunk but this overload skips allocation and tethering.
-template <typename Container>
-inline size_t stack<Container>::peek_size() const NOEXCEPT
+TEMPLATE
+inline size_t CLASS::
+peek_size() const NOEXCEPT
 {
     using namespace number;
     size_t value{};
@@ -344,8 +385,9 @@ inline size_t stack<Container>::peek_size() const NOEXCEPT
 
 /// Static variant compare with conversion.
 /// Integers are unconstrained as these are stack chunk equality comparisons.
-template <typename Container>
-inline bool stack<Container>::equal_chunks(const stack_variant& left,
+TEMPLATE
+inline bool CLASS::
+equal_chunks(const stack_variant& left,
     const stack_variant& right) NOEXCEPT
 {
     enum stack_type { bool_, int64_, pchunk_ };
@@ -370,7 +412,7 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
                     same = std::get<bool>(right) == vary;
                     break;
                 case int64_:
-                    same = std::get<int64_t>(right) == boolean::to_integer(vary);
+                    same = std::get<int64_t>(right) == to_int(vary);
                     break;
                 case pchunk_:
                     same = *std::get<chunk_xptr>(right) == chunk::from_bool(vary);
@@ -383,7 +425,7 @@ inline bool stack<Container>::equal_chunks(const stack_variant& left,
             switch (right_type)
             {
                 case bool_:
-                    same = boolean::to_integer(std::get<bool>(right)) == vary;
+                    same = to_int(std::get<bool>(right)) == vary;
                     break;
                 case int64_:
                     same = std::get<int64_t>(right) == vary;
