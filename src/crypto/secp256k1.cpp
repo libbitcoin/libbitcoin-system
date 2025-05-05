@@ -39,16 +39,16 @@ static constexpr auto uncompressed = 0x04_u8;
 static constexpr auto hybrid_even = 0x06_u8;
 static constexpr auto hybrid_odd = 0x07_u8;
 
+// Local functions.
+// ----------------------------------------------------------------------------
+// The templates allow strong typing of private keys without redundant code.
+
 constexpr int to_flags(bool compressed) NOEXCEPT
 {
     return compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
 }
 
-// Helper functions.
-// ----------------------------------------------------------------------------
-// The templates allow strong typing of private keys without redundant code.
-
-bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
+static bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
     const data_slice& point) NOEXCEPT
 {
     if (point.empty())
@@ -61,8 +61,8 @@ bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
         == ec_success;
 }
 
-bool parse(const secp256k1_context* context, std::vector<secp256k1_pubkey>& out,
-    const compressed_list& points) NOEXCEPT
+static bool parse(const secp256k1_context* context,
+    std::vector<secp256k1_pubkey>& out, const compressed_list& points) NOEXCEPT
 {
     out.resize(points.size());
     auto key = out.begin();
@@ -75,7 +75,7 @@ bool parse(const secp256k1_context* context, std::vector<secp256k1_pubkey>& out,
 }
 
 // Create an array of secp256k1_pubkey pointers for secp256k1 call.
-std::vector<const secp256k1_pubkey*> to_pointers(
+static std::vector<const secp256k1_pubkey*> to_pointers(
     const std::vector<secp256k1_pubkey>& keys) NOEXCEPT
 {
     std::vector<const secp256k1_pubkey*> pointers(keys.size());
@@ -90,7 +90,7 @@ std::vector<const secp256k1_pubkey*> to_pointers(
 }
 
 template <size_t Size>
-bool serialize(const secp256k1_context* context, data_array<Size>& out,
+static bool serialize(const secp256k1_context* context, data_array<Size>& out,
     const secp256k1_pubkey point) NOEXCEPT
 {
     auto size = Size;
@@ -101,7 +101,7 @@ bool serialize(const secp256k1_context* context, data_array<Size>& out,
 
 // parse, add, serialize
 template <size_t Size>
-bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
+static bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
     const ec_secret& secret) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
@@ -112,8 +112,8 @@ bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
 
 // parse, multiply, serialize
 template <size_t Size>
-bool ec_multiply(const secp256k1_context* context, data_array<Size>& in_out,
-    const ec_secret& secret) NOEXCEPT
+static bool ec_multiply(const secp256k1_context* context,
+    data_array<Size>& in_out, const ec_secret& secret) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
     return parse(context, pubkey, in_out) &&
@@ -123,7 +123,7 @@ bool ec_multiply(const secp256k1_context* context, data_array<Size>& in_out,
 
 // parse, negate, serialize
 template <size_t Size>
-bool ec_negate(const secp256k1_context* context,
+static bool ec_negate(const secp256k1_context* context,
     data_array<Size>& in_out) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
@@ -134,8 +134,8 @@ bool ec_negate(const secp256k1_context* context,
 
 // create, serialize (secrets are normal)
 template <size_t Size>
-bool secret_to_public(const secp256k1_context* context, data_array<Size>& out,
-    const ec_secret& secret) NOEXCEPT
+static bool secret_to_public(const secp256k1_context* context,
+    data_array<Size>& out, const ec_secret& secret) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
     return secp256k1_ec_pubkey_create(context, &pubkey, secret.data()) ==
@@ -144,8 +144,9 @@ bool secret_to_public(const secp256k1_context* context, data_array<Size>& out,
 
 // parse, recover, serialize
 template <size_t Size>
-bool recover_public(const secp256k1_context* context, data_array<Size>& out,
-    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
+static bool recover_public(const secp256k1_context* context,
+    data_array<Size>& out, const recoverable_signature& recoverable,
+    const hash_digest& hash) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
     secp256k1_ecdsa_recoverable_signature sign;
@@ -158,7 +159,7 @@ bool recover_public(const secp256k1_context* context, data_array<Size>& out,
 }
 
 // parsed - normalize, verify
-bool verify_signature(const secp256k1_context* context,
+static bool verify_signature(const secp256k1_context* context,
     const secp256k1_pubkey& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
@@ -449,7 +450,7 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT
 {
-    int recovery_id = 0;
+    int recovery_id{};
     const auto context = ec_context_sign::context();
     secp256k1_ecdsa_recoverable_signature signature;
 
