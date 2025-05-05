@@ -67,6 +67,7 @@ public:
     static constexpr bool is_invalid(opcode code) NOEXCEPT;
     static constexpr bool is_conditional(opcode code) NOEXCEPT;
     static constexpr bool is_reserved(opcode code) NOEXCEPT;
+    static constexpr bool is_success(opcode code) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------

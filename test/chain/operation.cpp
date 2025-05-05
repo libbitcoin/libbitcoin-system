@@ -871,8 +871,63 @@ static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
 ////static bool is_positive(opcode code);
 ////static bool is_invalid(opcode code);
 ////static bool is_reserved(opcode code);
-////static bool is_conditional(opcode code);
-////static bool is_relaxed_push(opcode code);
+////static bool is_success(opcode code);
+
+BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
+{
+    // 80
+    BOOST_REQUIRE(!operation::is_success(opcode::push_negative_1));
+    BOOST_REQUIRE( operation::is_success(opcode::reserved_80));
+    BOOST_REQUIRE(!operation::is_success(opcode::push_positive_1));
+
+    // 98
+    BOOST_REQUIRE(!operation::is_success(opcode::nop));
+    BOOST_REQUIRE( operation::is_success(opcode::op_ver));
+    BOOST_REQUIRE(!operation::is_success(opcode::if_));
+
+    // 126-129
+    BOOST_REQUIRE(!operation::is_success(opcode::tuck));
+    BOOST_REQUIRE( operation::is_success(opcode::op_cat));
+    BOOST_REQUIRE( operation::is_success(opcode::op_substr));
+    BOOST_REQUIRE( operation::is_success(opcode::op_left));
+    BOOST_REQUIRE( operation::is_success(opcode::op_right));
+    BOOST_REQUIRE(!operation::is_success(opcode::size));
+
+    // 131-134
+    BOOST_REQUIRE(!operation::is_success(opcode::size));
+    BOOST_REQUIRE( operation::is_success(opcode::op_invert));
+    BOOST_REQUIRE( operation::is_success(opcode::op_and));
+    BOOST_REQUIRE( operation::is_success(opcode::op_or));
+    BOOST_REQUIRE( operation::is_success(opcode::op_xor));
+    BOOST_REQUIRE(!operation::is_success(opcode::equal));
+
+    // 137-138
+    BOOST_REQUIRE(!operation::is_success(opcode::equalverify));
+    BOOST_REQUIRE( operation::is_success(opcode::reserved_137));
+    BOOST_REQUIRE( operation::is_success(opcode::reserved_138));
+    BOOST_REQUIRE(!operation::is_success(opcode::add1));
+
+    // 141-142
+    BOOST_REQUIRE(!operation::is_success(opcode::sub1));
+    BOOST_REQUIRE( operation::is_success(opcode::op_mul2));
+    BOOST_REQUIRE( operation::is_success(opcode::op_div2));
+    BOOST_REQUIRE(!operation::is_success(opcode::negate));
+
+    // 149-153
+    BOOST_REQUIRE(!operation::is_success(opcode::sub));
+    BOOST_REQUIRE( operation::is_success(opcode::op_mul));
+    BOOST_REQUIRE( operation::is_success(opcode::op_div));
+    BOOST_REQUIRE( operation::is_success(opcode::op_mod));
+    BOOST_REQUIRE( operation::is_success(opcode::op_lshift));
+    BOOST_REQUIRE( operation::is_success(opcode::op_rshift));
+    BOOST_REQUIRE(!operation::is_success(opcode::booland));
+
+    // 187-254
+    BOOST_REQUIRE(!operation::is_success(opcode::reserved_186));
+    BOOST_REQUIRE( operation::is_success(opcode::reserved_187));
+    BOOST_REQUIRE( operation::is_success(opcode::reserved_254));
+    BOOST_REQUIRE(!operation::is_success(opcode::reserved_255));
+}
 
 // utilities (member)
 // ----------------------------------------------------------------------------
