@@ -863,13 +863,16 @@ static_assert(operation::opcode_to_positive(opcode::push_positive_14) == 14u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_15) == 15u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
 
+////static bool is_relaxed_push(opcode code);
 ////static bool is_push(opcode code);
 ////static bool is_payload(opcode code);
 ////static bool is_counted(opcode code);
+////static bool is_positive(opcode code);
 ////static bool is_version(opcode code);
 ////static bool is_numeric(opcode code);
-////static bool is_positive(opcode code);
+////static bool is_number(opcode code);
 ////static bool is_invalid(opcode code);
+////static bool is_conditional(opcode code);
 ////static bool is_reserved(opcode code);
 ////static bool is_success(opcode code);
 
@@ -932,25 +935,26 @@ BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
 // utilities (member)
 // ----------------------------------------------------------------------------
 
+////bool is_invalid() const;
 ////bool is_push() const;
 ////bool is_payload() const;
 ////bool is_counted() const;
 ////bool is_version() const;
 ////bool is_numeric() const;
 ////bool is_positive() const;
-////bool is_invalid() const;
 ////bool is_reserved() const;
 ////bool is_conditional() const;
 ////bool is_relaxed_push() const;
-////bool is_oversized() const;
 ////bool is_minimal_push() const;
 ////bool is_nominal_push() const;
 ////bool is_underflow() const;
+////bool is_oversized() const;
+////bool is_underclaimed() const;
 
 // json
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(operation_json__conversions__expected)
+BOOST_AUTO_TEST_CASE(operation__json__conversions__expected)
 {
     const std::string text
     {
