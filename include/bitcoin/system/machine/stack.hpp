@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_HPP
 
 #include <list>
-#include <type_traits>
 #include <variant>
 #include <vector>
 #include <bitcoin/system/data/data.hpp>

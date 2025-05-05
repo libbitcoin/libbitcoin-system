@@ -19,10 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 
-#include <iterator>
-#include <type_traits>
+#include <tuple>
 #include <utility>
-#include <variant>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
