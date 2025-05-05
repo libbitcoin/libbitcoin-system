@@ -18,18 +18,6 @@
  */
 #include "test.hpp"
 
-// Conditions
-
-static_assert(is_zero(0));
-static_assert(!is_zero(1u));
-static_assert(!is_zero(0xff));
-static_assert(is_same_type<decltype(is_zero<int16_t>(0)), bool>);
-
-static_assert(!is_nonzero(0));
-static_assert(is_nonzero(1u));
-static_assert(is_nonzero(0xff));
-static_assert(is_same_type<decltype(is_nonzero<int16_t>(0)), bool>);
-
 const auto zeroize_helper = [](auto value)
 {
     using type = decltype(value);
@@ -48,10 +36,27 @@ static_assert(zeroize_helper(4_i16) == 0);
 static_assert(zeroize_helper(max_int32) == 0);
 static_assert(zeroize_helper(min_int32) == 0);
 
-static_assert(is_one(1));
+// Conditions
+
+static_assert( is_zero(0));
+static_assert(!is_zero(1u));
+static_assert(!is_zero(0xff));
+static_assert(is_same_type<decltype(is_zero<int16_t>(0)), bool>);
+
+static_assert( is_one(1));
 static_assert(!is_one(0u));
 static_assert(!is_one(0xff));
 static_assert(is_same_type<decltype(is_one<int16_t>(0)), bool>);
+
+static_assert(!is_nonzero(0));
+static_assert( is_nonzero(1u));
+static_assert( is_nonzero(0xff));
+static_assert(is_same_type<decltype(is_nonzero<int16_t>(0)), bool>);
+
+static_assert( is_boolean(0));
+static_assert( is_boolean(1u));
+static_assert(!is_boolean(0xff));
+static_assert(is_same_type<decltype(is_boolean<int16_t>(0)), bool>);
 
 static_assert(lo_bit(0) == 0);
 static_assert(lo_bit(2u) == 0);
