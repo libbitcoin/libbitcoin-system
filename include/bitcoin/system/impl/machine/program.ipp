@@ -374,14 +374,14 @@ pop_ternary32(int32_t& upper, int32_t& lower,
         pop_signed32_(value);
 }
 
-// ************************************************************************
+// ****************************************************************************
 // CONSENSUS: Satoshi limits this value to the int32_t domain (getint()).
 // This value is only used for stack indexing (key/sig counts & pick/roll).
 // The upper bound of int32_t always exceeds the possible stack size, which
 // is checked downstream. Similarly, a negative causes a downstream script
 // failure. As such it is sufficient to fail on non-idexability here,
 // allowing the value to be returned as a valid and unsigned stack index.
-// ************************************************************************
+// ****************************************************************************
 TEMPLATE
 INLINE bool CLASS::
 pop_index32(size_t& index) NOEXCEPT
@@ -590,9 +590,9 @@ INLINE void CLASS::
 begin_if(bool value) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(value || !is_add_overflow(negative_condition_count_, one));
+    BC_ASSERT(value || !is_add_overflow(negative_conditions_, one));
 
-    negative_condition_count_ += (value ? 0 : 1);
+    negative_conditions_ += (value ? 0 : 1);
     condition_.push_back(value);
 }
 
@@ -611,10 +611,9 @@ else_if_() NOEXCEPT
     BC_ASSERT(!is_balanced());
 
     // Addition is safe due to script size constraint.
-    BC_ASSERT(condition_.back() ||
-        !is_add_overflow(negative_condition_count_, one));
+    BC_ASSERT(condition_.back() || !is_add_overflow(negative_conditions_, one));
 
-    negative_condition_count_ += (condition_.back() ? 1 : -1);
+    negative_conditions_ += (condition_.back() ? 1 : -1);
     condition_.back() = !condition_.back();
 }
 
@@ -625,7 +624,7 @@ end_if_() NOEXCEPT
     // Subtraction must be guarded by caller logical constraints.
     BC_ASSERT(!is_balanced());
 
-    negative_condition_count_ += (condition_.back() ? 0 : -1);
+    negative_conditions_ += (condition_.back() ? 0 : -1);
     condition_.pop_back();
 }
 
@@ -642,7 +641,7 @@ is_succeess() const NOEXCEPT
 {
     // Optimization changes O(n) search [for every operation] to O(1).
     // bitslog.com/2017/04/17/new-quadratic-delays-in-bitcoin-scripts
-    return is_zero(negative_condition_count_);
+    return is_zero(negative_conditions_);
 }
 
 TEMPLATE
@@ -673,12 +672,12 @@ INLINE bool CLASS::
 ops_increment(const operation& op) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(!is_add_overflow(operation_count_, one));
+    BC_ASSERT(!is_add_overflow(operations_, one));
 
     if (operation::is_counted(op.code()))
-        ++operation_count_;
+        ++operations_;
 
-    return operation_count_ <= max_counted_ops;
+    return operations_ <= max_counted_ops;
 }
 
 TEMPLATE
@@ -686,10 +685,10 @@ INLINE bool CLASS::
 ops_increment(size_t public_keys) NOEXCEPT
 {
     // Addition is safe due to script size constraint.
-    BC_ASSERT(!is_add_overflow(operation_count_, public_keys));
+    BC_ASSERT(!is_add_overflow(operations_, public_keys));
 
-    operation_count_ += public_keys;
-    return !operation_count_exceeded(operation_count_);
+    operations_ += public_keys;
+    return !operation_count_exceeded(operations_);
 }
 
 // Signature validation helpers.

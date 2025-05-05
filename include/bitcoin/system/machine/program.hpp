@@ -86,6 +86,7 @@ protected:
 
     /// Primary stack.
     /// -----------------------------------------------------------------------
+    /// Underscored names reflect lack of guard against empty stack.
 
     /// Primary stack (push).
     INLINE void push_chunk(data_chunk&& datum) NOEXCEPT;
@@ -206,10 +207,10 @@ private:
     condition_stack condition_{};
 
     // Accumulator.
-    size_t operation_count_{};
+    size_t operations_{};
 
     // Condition stack optimization.
-    size_t negative_condition_count_{};
+    size_t negative_conditions_{};
 };
 
 } // namespace machine
