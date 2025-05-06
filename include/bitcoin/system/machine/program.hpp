@@ -102,8 +102,7 @@ protected:
     INLINE bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
     INLINE bool pop_signed32(int32_t& value) NOEXCEPT;
     INLINE bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
-    INLINE bool pop_ternary32(int32_t& upper, int32_t& lower,
-        int32_t& value) NOEXCEPT;
+    INLINE bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) NOEXCEPT;
     INLINE bool pop_index32(size_t& index) NOEXCEPT;
 
     /// Primary stack (peek).
@@ -155,7 +154,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     /// Set subscript position to next op.
-    inline bool set_subscript(const op_iterator& op) NOEXCEPT;
+    inline void set_subscript(const op_iterator& op) NOEXCEPT;
 
     /// Strip endorsement and code_separator opcodes from returned subscript.
     inline chain::script::cptr subscript(

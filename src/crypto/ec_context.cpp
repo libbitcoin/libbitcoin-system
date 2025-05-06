@@ -24,14 +24,15 @@
 namespace libbitcoin {
 namespace system {
 
-// Protected base class constructor.
+// Protected constructor (abstract) base class.
+// ----------------------------------------------------------------------------
+
 ec_context::ec_context(int flags) NOEXCEPT
   : context_(secp256k1_context_create(flags))
 {
     BC_ASSERT(context_ != nullptr);
 }
 
-// Clean up the context on destruct.
 ec_context::~ec_context() NOEXCEPT
 {
     BC_ASSERT(context_ != nullptr);
@@ -41,6 +42,8 @@ ec_context::~ec_context() NOEXCEPT
 }
 
 // Concrete type for signing init.
+// ----------------------------------------------------------------------------
+
 ec_context_sign::ec_context_sign() NOEXCEPT
   : ec_context(SECP256K1_CONTEXT_SIGN)
 {
@@ -54,6 +57,8 @@ const secp256k1_context* ec_context_sign::context() NOEXCEPT
 }
 
 // Concrete type for verification init.
+// ----------------------------------------------------------------------------
+
 ec_context_verify::ec_context_verify() NOEXCEPT
   : ec_context(SECP256K1_CONTEXT_VERIFY)
 {

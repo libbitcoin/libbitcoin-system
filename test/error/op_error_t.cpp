@@ -605,15 +605,6 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_hash256__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "op_hash256");
 }
 
-BOOST_AUTO_TEST_CASE(op_error_t__code__op_code_separator__true_exected_message)
-{
-    constexpr auto value = error::op_code_separator;
-    const auto ec = code(value);
-    BOOST_REQUIRE(ec);
-    BOOST_REQUIRE(ec == value);
-    BOOST_REQUIRE_EQUAL(ec.message(), "op_code_separator");
-}
-
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig__true_exected_message)
 {
     constexpr auto value = error::op_check_sig;

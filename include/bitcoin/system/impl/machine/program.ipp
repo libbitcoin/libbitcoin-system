@@ -702,17 +702,15 @@ ops_increment(size_t public_keys) NOEXCEPT
 // efficient subscripting with no copying. However, concurrent execution of any
 // one input script instance is not thread safe (unnecessary scenario).
 TEMPLATE
-inline bool CLASS::
+inline void CLASS::
 set_subscript(const op_iterator& op) NOEXCEPT
 {
-    // End is not reachable if op is an element of script_.
-    if (script_->ops().empty() || op == script_->ops().end())
-        return false;
+    // Not possible unless op is not an element of script_.
+    BC_ASSERT(!script_->ops().empty() && op != script_->ops().end());
 
     // Advance the offset to the op following the found code separator.
     // This is non-const because changes script state (despite being mutable).
     script_->offset = std::next(op);
-    return true;
 }
 
 inline chain::strippers create_strip_ops(
@@ -753,12 +751,10 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
     const op_iterator offset{ script_->offset };
 
     // If none of the strip ops are found, return the subscript.
-    // Prefail is not circumvented as subscript used only for signature hash.
     if (!is_intersecting<operations>(offset, stop, strip))
         return script_;
 
     // Create new script from stripped copy of subscript operations.
-    // Prefail is not copied to the subscript, used only for signature hash.
     return to_shared<script>(difference<operations>(offset, stop, strip));
 }
 

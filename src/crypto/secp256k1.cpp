@@ -22,6 +22,7 @@
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
+#include <secp256k1_schnorrsig.h>
 #include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -39,16 +40,16 @@ static constexpr auto uncompressed = 0x04_u8;
 static constexpr auto hybrid_even = 0x06_u8;
 static constexpr auto hybrid_odd = 0x07_u8;
 
+// Local functions.
+// ----------------------------------------------------------------------------
+// The templates allow strong typing of private keys without redundant code.
+
 constexpr int to_flags(bool compressed) NOEXCEPT
 {
     return compressed ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
 }
 
-// Helper functions.
-// ----------------------------------------------------------------------------
-// The templates allow strong typing of private keys without redundant code.
-
-bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
+static bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
     const data_slice& point) NOEXCEPT
 {
     if (point.empty())
@@ -61,8 +62,8 @@ bool parse(const secp256k1_context* context, secp256k1_pubkey& out,
         == ec_success;
 }
 
-bool parse(const secp256k1_context* context, std::vector<secp256k1_pubkey>& out,
-    const compressed_list& points) NOEXCEPT
+static bool parse(const secp256k1_context* context,
+    std::vector<secp256k1_pubkey>& out, const compressed_list& points) NOEXCEPT
 {
     out.resize(points.size());
     auto key = out.begin();
@@ -75,7 +76,7 @@ bool parse(const secp256k1_context* context, std::vector<secp256k1_pubkey>& out,
 }
 
 // Create an array of secp256k1_pubkey pointers for secp256k1 call.
-std::vector<const secp256k1_pubkey*> to_pointers(
+static std::vector<const secp256k1_pubkey*> to_pointers(
     const std::vector<secp256k1_pubkey>& keys) NOEXCEPT
 {
     std::vector<const secp256k1_pubkey*> pointers(keys.size());
@@ -90,7 +91,7 @@ std::vector<const secp256k1_pubkey*> to_pointers(
 }
 
 template <size_t Size>
-bool serialize(const secp256k1_context* context, data_array<Size>& out,
+static bool serialize(const secp256k1_context* context, data_array<Size>& out,
     const secp256k1_pubkey point) NOEXCEPT
 {
     auto size = Size;
@@ -101,7 +102,7 @@ bool serialize(const secp256k1_context* context, data_array<Size>& out,
 
 // parse, add, serialize
 template <size_t Size>
-bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
+static bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
     const ec_secret& secret) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
@@ -112,8 +113,8 @@ bool ec_add(const secp256k1_context* context, data_array<Size>& in_out,
 
 // parse, multiply, serialize
 template <size_t Size>
-bool ec_multiply(const secp256k1_context* context, data_array<Size>& in_out,
-    const ec_secret& secret) NOEXCEPT
+static bool ec_multiply(const secp256k1_context* context,
+    data_array<Size>& in_out, const ec_secret& secret) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
     return parse(context, pubkey, in_out) &&
@@ -123,7 +124,7 @@ bool ec_multiply(const secp256k1_context* context, data_array<Size>& in_out,
 
 // parse, negate, serialize
 template <size_t Size>
-bool ec_negate(const secp256k1_context* context,
+static bool ec_negate(const secp256k1_context* context,
     data_array<Size>& in_out) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
@@ -134,8 +135,8 @@ bool ec_negate(const secp256k1_context* context,
 
 // create, serialize (secrets are normal)
 template <size_t Size>
-bool secret_to_public(const secp256k1_context* context, data_array<Size>& out,
-    const ec_secret& secret) NOEXCEPT
+static bool secret_to_public(const secp256k1_context* context,
+    data_array<Size>& out, const ec_secret& secret) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
     return secp256k1_ec_pubkey_create(context, &pubkey, secret.data()) ==
@@ -144,8 +145,9 @@ bool secret_to_public(const secp256k1_context* context, data_array<Size>& out,
 
 // parse, recover, serialize
 template <size_t Size>
-bool recover_public(const secp256k1_context* context, data_array<Size>& out,
-    const recoverable_signature& recoverable, const hash_digest& hash) NOEXCEPT
+static bool recover_public(const secp256k1_context* context,
+    data_array<Size>& out, const recoverable_signature& recoverable,
+    const hash_digest& hash) NOEXCEPT
 {
     secp256k1_pubkey pubkey;
     secp256k1_ecdsa_recoverable_signature sign;
@@ -158,7 +160,7 @@ bool recover_public(const secp256k1_context* context, data_array<Size>& out,
 }
 
 // parsed - normalize, verify
-bool verify_signature(const secp256k1_context* context,
+static bool verify_signature(const secp256k1_context* context,
     const secp256k1_pubkey& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
@@ -366,8 +368,9 @@ bool is_endorsement(const endorsement& endorsement) NOEXCEPT
     return size >= min_endorsement_size && size <= max_endorsement_size;
 }
 
-// DER parse/encode
+// ECDSA parse/encode/sign/verify signature
 // ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
 
 bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
     const endorsement& endorsement) NOEXCEPT
@@ -416,22 +419,17 @@ bool encode_signature(der_signature& out,
     return true;
 }
 
-// EC sign/verify
-// ----------------------------------------------------------------------------
-
-// create (serialize???) (secrets are normal)
+// serialize?
 bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT
 {
     const auto context = ec_context_sign::context();
-    const auto signature = pointer_cast<secp256k1_ecdsa_signature>(
-        out.data());
+    const auto signature = pointer_cast<secp256k1_ecdsa_signature>(out.data());
 
     return (secp256k1_ecdsa_sign(context, signature, hash.data(), secret.data(),
         secp256k1_nonce_function_rfc6979, nullptr) == ec_success);
 }
 
-// parse<>, verify<>
 bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
@@ -442,14 +440,70 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
         verify_signature(context, pubkey, hash, signature);
 }
 
-// Recoverable sign/recover
+// Schnorr parse/sign/verify
 // ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
 
-// sign, serialize (secrets are normal)
+bool parse_schnorr(uint8_t& sighash_flags, ec_signature& signature,
+    const endorsement& endorsement) NOEXCEPT
+{
+    switch (endorsement.size())
+    {
+        // No flags are set (default).
+        case ec_signature_size:
+            sighash_flags = 0;
+            break;
+
+        // Zero is an invalid flag setting (must be explicit).
+        case add1(ec_signature_size):
+            sighash_flags = endorsement.back();
+            if (is_zero(sighash_flags)) return false;
+            break;
+
+        // Invalid signature size.
+        default:
+            return false;
+    }
+
+    signature = unsafe_array_cast<uint8_t, ec_signature_size>(
+        endorsement.data());
+    return true;
+}
+
+bool sign_schnorr(ec_signature& out, const ec_secret& secret,
+    const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT
+{
+    secp256k1_keypair keypair;
+    const auto context = ec_context_sign::context();
+
+    return secp256k1_keypair_create(context, &keypair, secret.data()) ==
+        ec_success && secp256k1_schnorrsig_sign32(context, out.data(),
+            hash.data(), &keypair, auxiliary.data()) == ec_success;
+}
+
+// parse
+bool verify_schnorr(const data_slice& x_point, const hash_digest& hash,
+    const ec_signature& signature) NOEXCEPT
+{
+    if (x_point.size() != hash_size)
+        return false;
+
+    secp256k1_xonly_pubkey pubkey;
+    const auto context = ec_context_verify::context();
+
+    return secp256k1_xonly_pubkey_parse(context, &pubkey, x_point.data()) ==
+        ec_success && secp256k1_schnorrsig_verify(context, signature.data(),
+            hash.data(), hash_size, &pubkey) == ec_success;
+}
+
+// ECDSA recoverable sign/recover
+// ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
+
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT
 {
-    int recovery_id = 0;
+    int recovery_id{};
     const auto context = ec_context_sign::context();
     secp256k1_ecdsa_recoverable_signature signature;
 
