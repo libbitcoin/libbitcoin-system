@@ -201,22 +201,6 @@ BC_API bool sign(ec_signature& out, const ec_secret& secret,
 BC_API bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT;
 
-/// Schnorr parse/sign/verify
-/// ---------------------------------------------------------------------------
-/// It is recommended to verify a signature after signing.
-
-/// Parse Schnorr endorsement into signature hash type and Schnorr signature.
-BC_API bool parse_schnorr(uint8_t& sighash_flags, ec_signature& signature,
-    const endorsement& endorsement) NOEXCEPT;
-
-/// Create a Schnorr signature using a private key (simple version, no tweaks).
-BC_API bool sign_schnorr(ec_signature& out, const ec_secret& secret,
-    const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT;
-
-/// Verify an Schnorr signature using a potential x-only point.
-BC_API bool verify_schnorr(const data_slice& x_point, const hash_digest& hash,
-    const ec_signature& signature) NOEXCEPT;
-
 /// ECDSA recoverable sign/recover
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
@@ -235,6 +219,25 @@ BC_API bool recover_public(ec_uncompressed& out,
     const recoverable_signature& recoverable,
     const hash_digest& hash) NOEXCEPT;
 
+namespace schnorr {
+
+/// Schnorr parse/sign/verify
+/// ---------------------------------------------------------------------------
+/// It is recommended to verify a signature after signing.
+
+/// Parse Schnorr endorsement into signature hash type and Schnorr signature.
+BC_API bool parse(uint8_t& sighash_flags, ec_signature& signature,
+    const endorsement& endorsement) NOEXCEPT;
+
+/// Create a Schnorr signature using a private key (simple version, no tweaks).
+BC_API bool sign(ec_signature& out, const ec_secret& secret,
+    const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT;
+
+/// Verify an Schnorr signature using a potential x-only point.
+BC_API bool verify_signature(const data_slice& x_point,
+    const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
+
+} // namespace schnorr
 } // namespace system
 } // namespace libbitcoin
 
