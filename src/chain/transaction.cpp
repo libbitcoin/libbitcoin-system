@@ -581,6 +581,26 @@ inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT
     }
 }
 
+// BIP341: Using any undefined hash_type causes validation failure if violated.
+// defined types: 0x00, 0x01, 0x02, 0x03, 0x81, 0x82, or 0x83. [zero is the
+// default and cannot be explicit, but is serialized for signature hashing.
+inline bool is_sighash_valid(uint8_t sighash_flags) NOEXCEPT
+{
+    switch (sighash_flags)
+    {
+        case coverage::hash_default:
+        case coverage::hash_all:
+        case coverage::hash_none:
+        case coverage::hash_single:
+        case coverage::all_anyone_can_pay:
+        case coverage::none_anyone_can_pay:
+        case coverage::single_anyone_can_pay:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void transaction::signature_hash_single(writer& sink,
     const input_iterator& input, const script& sub,
     uint8_t sighash_flags) const NOEXCEPT
