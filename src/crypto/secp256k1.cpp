@@ -22,6 +22,7 @@
 #include <utility>
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
+#include <secp256k1_schnorrsig.h>
 #include <bitcoin/system/crypto/der_parser.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -367,8 +368,9 @@ bool is_endorsement(const endorsement& endorsement) NOEXCEPT
     return size >= min_endorsement_size && size <= max_endorsement_size;
 }
 
-// DER parse/encode
+// ECDSA parse/encode/sign/verify signature
 // ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
 
 bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
     const endorsement& endorsement) NOEXCEPT
@@ -417,22 +419,17 @@ bool encode_signature(der_signature& out,
     return true;
 }
 
-// EC sign/verify
-// ----------------------------------------------------------------------------
-
-// create (serialize???) (secrets are normal)
+// serialize?
 bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT
 {
     const auto context = ec_context_sign::context();
-    const auto signature = pointer_cast<secp256k1_ecdsa_signature>(
-        out.data());
+    const auto signature = pointer_cast<secp256k1_ecdsa_signature>(out.data());
 
     return (secp256k1_ecdsa_sign(context, signature, hash.data(), secret.data(),
         secp256k1_nonce_function_rfc6979, nullptr) == ec_success);
 }
 
-// parse<>, verify<>
 bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
@@ -443,10 +440,66 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
         verify_signature(context, pubkey, hash, signature);
 }
 
-// Recoverable sign/recover
+// Schnorr parse/sign/verify
 // ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
 
-// sign, serialize (secrets are normal)
+bool parse_schnorr(uint8_t& sighash_flags, ec_signature& signature,
+    const endorsement& endorsement) NOEXCEPT
+{
+    switch (endorsement.size())
+    {
+        // No flags are set (default).
+        case ec_signature_size:
+            sighash_flags = 0;
+            break;
+
+        // Zero is an invalid flag setting (must be explicit).
+        case add1(ec_signature_size):
+            sighash_flags = endorsement.back();
+            if (is_zero(sighash_flags)) return false;
+            break;
+
+        // Invalid signature size.
+        default:
+            return false;
+    }
+
+    signature = unsafe_array_cast<uint8_t, ec_signature_size>(
+        endorsement.data());
+    return true;
+}
+
+bool sign_schnorr(ec_signature& out, const ec_secret& secret,
+    const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT
+{
+    secp256k1_keypair keypair;
+    const auto context = ec_context_sign::context();
+
+    return secp256k1_keypair_create(context, &keypair, secret.data()) ==
+        ec_success && secp256k1_schnorrsig_sign32(context, out.data(),
+            hash.data(), &keypair, auxiliary.data()) == ec_success;
+}
+
+// parse
+bool verify_schnorr(const data_slice& x_point, const hash_digest& hash,
+    const ec_signature& signature) NOEXCEPT
+{
+    if (x_point.size() != hash_size)
+        return false;
+
+    secp256k1_xonly_pubkey pubkey;
+    const auto context = ec_context_verify::context();
+
+    return secp256k1_xonly_pubkey_parse(context, &pubkey, x_point.data()) ==
+        ec_success && secp256k1_schnorrsig_verify(context, signature.data(),
+            hash.data(), hash_size, &pubkey) == ec_success;
+}
+
+// ECDSA recoverable sign/recover
+// ----------------------------------------------------------------------------
+// It is recommended to verify a signature after signing.
+
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT
 {

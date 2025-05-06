@@ -46,7 +46,7 @@ static constexpr size_t ec_uncompressed_size = 65;
 typedef data_array<ec_uncompressed_size> ec_uncompressed;
 typedef std_vector<ec_uncompressed> uncompressed_list;
 
-// Parsed ECDSA signature:
+// Parsed ECDSA or Schnorr signature:
 static constexpr size_t ec_signature_size = 64;
 typedef data_array<ec_signature_size> ec_signature;
 
@@ -83,8 +83,8 @@ struct BC_API recoverable_signature
     uint8_t recovery_id;
 };
 
-// Add EC values
-// ----------------------------------------------------------------------------
+/// Add EC values
+/// ---------------------------------------------------------------------------
 
 /// Compute the sum a += G * b.
 BC_API bool ec_add(ec_compressed& point, const ec_secret& scalar) NOEXCEPT;
@@ -104,8 +104,8 @@ BC_API bool ec_add(ec_compressed& left, const ec_uncompressed& right) NOEXCEPT;
 /// Compute the sum of compressed point values.
 BC_API bool ec_sum(ec_compressed& out, const compressed_list& values) NOEXCEPT;
 
-// Multiply EC values
-// ----------------------------------------------------------------------------
+/// Multiply EC values
+/// ---------------------------------------------------------------------------
 
 /// Compute the product point *= secret.
 BC_API bool ec_multiply(ec_compressed& point,
@@ -118,8 +118,8 @@ BC_API bool ec_multiply(ec_uncompressed& point,
 /// Compute the product a = (a * b) % n.
 BC_API bool ec_multiply(ec_secret& left, const ec_secret& right) NOEXCEPT;
 
-// Negate EC values
-// ----------------------------------------------------------------------------
+/// Negate EC values
+/// ---------------------------------------------------------------------------
 
 /// Negate scalar.
 BC_API bool ec_negate(ec_secret& scalar) NOEXCEPT;
@@ -131,7 +131,7 @@ BC_API bool ec_negate(ec_compressed& point) NOEXCEPT;
 BC_API bool ec_negate(ec_uncompressed& point) NOEXCEPT;
 
 // Convert keys
-// ----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 
 /// Convert uncompressed point to compressed.
 BC_API bool compress(ec_compressed& out,
@@ -149,8 +149,8 @@ BC_API bool secret_to_public(ec_compressed& out,
 BC_API bool secret_to_public(ec_uncompressed& out,
     const ec_secret& secret) NOEXCEPT;
 
-// Verify keys
-// ----------------------------------------------------------------------------
+/// Verify keys
+/// ---------------------------------------------------------------------------
 
 /// Verify secret.
 BC_API bool verify(const ec_secret& secret) NOEXCEPT;
@@ -158,8 +158,8 @@ BC_API bool verify(const ec_secret& secret) NOEXCEPT;
 /// Verify point.
 BC_API bool verify(const data_slice& point) NOEXCEPT;
 
-// Detect public keys
-// ----------------------------------------------------------------------------
+/// Detect public keys
+/// ---------------------------------------------------------------------------
 
 /// Determine if the compressed public key is even (y-valued).
 BC_API bool is_even_key(const ec_compressed& point) NOEXCEPT;
@@ -176,35 +176,50 @@ BC_API bool is_public_key(const data_slice& point) NOEXCEPT;
 /// Fast detection of endorsement structure (DER with signature hash type).
 BC_API bool is_endorsement(const endorsement& endorsement) NOEXCEPT;
 
-// DER parse/encode
-// ----------------------------------------------------------------------------
+/// ECDSA parse/encode/sign/verify signature
+/// ---------------------------------------------------------------------------
+/// It is recommended to verify a signature after signing.
 
-/// Parse an endorsement into signature hash type and DER signature.
-BC_API bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
-    const endorsement& endorsement) NOEXCEPT;
+/// Parse ECDSA endorsement into signature hash type and DER signature.
+BC_API bool parse_endorsement(uint8_t& sighash_flags,
+    data_slice& der_signature, const endorsement& endorsement) NOEXCEPT;
 
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
 BC_API bool parse_signature(ec_signature& out, const data_slice& der_signature,
     bool strict) NOEXCEPT;
 
-/// Encode an EC signature as DER (strict).
+/// Encode an ECDSA signature as DER (strict).
 BC_API bool encode_signature(der_signature& out,
     const ec_signature& signature) NOEXCEPT;
-
-// EC sign/verify
-// ----------------------------------------------------------------------------
 
 /// Create a deterministic ECDSA signature using a private key.
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT;
 
-/// Verify an EC signature using a potential point.
+/// Verify an ECDSA signature using a potential point.
 BC_API bool verify_signature(const data_slice& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT;
 
-// Recoverable sign/recover
-// ----------------------------------------------------------------------------
+/// Schnorr parse/sign/verify
+/// ---------------------------------------------------------------------------
+/// It is recommended to verify a signature after signing.
+
+/// Parse Schnorr endorsement into signature hash type and Schnorr signature.
+BC_API bool parse_schnorr(uint8_t& sighash_flags, ec_signature& signature,
+    const endorsement& endorsement) NOEXCEPT;
+
+/// Create a Schnorr signature using a private key (simple version, no tweaks).
+BC_API bool sign_schnorr(ec_signature& out, const ec_secret& secret,
+    const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT;
+
+/// Verify an Schnorr signature using a potential x-only point.
+BC_API bool verify_schnorr(const data_slice& x_point, const hash_digest& hash,
+    const ec_signature& signature) NOEXCEPT;
+
+/// ECDSA recoverable sign/recover
+/// ---------------------------------------------------------------------------
+/// It is recommended to verify a signature after signing.
 
 /// Create a recoverable signature for use in message signing.
 BC_API bool sign_recoverable(recoverable_signature& out,
