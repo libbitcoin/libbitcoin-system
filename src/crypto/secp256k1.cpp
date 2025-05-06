@@ -489,18 +489,20 @@ bool parse(uint8_t& sighash_flags, ec_signature& signature,
 {
     switch (endorsement.size())
     {
-        // No flags are set (default).
+        // BIP341: if [sighash byte] is omitted the resulting signatures are 64
+        // bytes, and [default == 0] mode is implied (implies SIGHASH_ALL).
         case ec_signature_size:
             sighash_flags = 0;
             break;
 
-        // Zero is an invalid flag setting (must be explicit).
+        // BIP341: signature has sighash byte appended in the usual fashion.
+        // BIP341: zero is invalid sighash, must be explicit to prevent mally.
         case add1(ec_signature_size):
             sighash_flags = endorsement.back();
             if (is_zero(sighash_flags)) return false;
             break;
 
-        // Invalid signature size.
+        // BIP341: A Taproot signature is a 64-byte Schnorr signature.
         default:
             return false;
     }
@@ -524,6 +526,7 @@ bool sign(ec_signature& out, const ec_secret& secret,
             auxiliary.data()) == ec_success;
 }
 
+// BIP341: A Taproot signature is a 64-byte Schnorr sig, as defined in BIP340.
 bool verify_signature(const data_slice& x_point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
