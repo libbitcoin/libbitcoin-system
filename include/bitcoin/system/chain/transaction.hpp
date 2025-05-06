@@ -138,7 +138,7 @@ public:
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
-    // signature_hash exposed for op_check_multisig caching.
+    /// signature_hash exposed for op_check_multisig caching.
     hash_digest signature_hash(const input_iterator& input, const script& sub,
         uint64_t value, uint8_t sighash_flags, script_version version,
         bool bip143) const NOEXCEPT;

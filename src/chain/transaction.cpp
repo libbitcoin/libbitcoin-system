@@ -540,7 +540,7 @@ hash_digest transaction::sequences_hash() const NOEXCEPT
     return digest;
 }
 
-// Signing (unversioned).
+// Signature hashing (unversioned).
 // ----------------------------------------------------------------------------
 
 // private
@@ -600,6 +600,11 @@ inline bool is_sighash_valid(uint8_t sighash_flags) NOEXCEPT
             return false;
     }
 }
+
+// ****************************************************************************
+// CONSENSUS: sighash flags are carried in a single byte but are encoded as 4
+// bytes in the signature hash preimage serialization.
+// ****************************************************************************
 
 void transaction::signature_hash_single(writer& sink,
     const input_iterator& input, const script& sub,
@@ -779,7 +784,7 @@ hash_digest transaction::unversioned_signature_hash(
     return digest;
 }
 
-// Signing (version 0).
+// Signature hashing (version 0).
 // ----------------------------------------------------------------------------
 
 // private
@@ -868,13 +873,8 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     return digest;
 }
 
-// Signing (unversioned and version 0).
+// Signature hashing (unversioned and version 0).
 // ----------------------------------------------------------------------------
-
-// ****************************************************************************
-// CONSENSUS: sighash flags are carried in a single byte but are encoded as 4
-// bytes in the signature hash preimage serialization.
-// ****************************************************************************
 
 hash_digest transaction::signature_hash(const input_iterator& input,
     const script& sub, uint64_t value, uint8_t sighash_flags,
@@ -896,7 +896,10 @@ hash_digest transaction::signature_hash(const input_iterator& input,
     }
 }
 
-// This is not used internal to the library.
+// Signatures
+// ----------------------------------------------------------------------------
+// These are not used internal to the library.
+
 bool transaction::check_signature(const ec_signature& signature,
     const data_slice& public_key, const script& sub, uint32_t index,
     uint64_t value, uint8_t sighash_flags, script_version version,
@@ -912,7 +915,6 @@ bool transaction::check_signature(const ec_signature& signature,
     return verify_signature(public_key, sighash, signature);
 }
 
-// This is not used internal to the library.
 bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& sub, uint32_t index, uint64_t value, uint8_t sighash_flags,
     script_version version, bool bip143) const NOEXCEPT
