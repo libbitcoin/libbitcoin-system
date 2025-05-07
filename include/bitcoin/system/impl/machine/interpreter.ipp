@@ -1042,6 +1042,7 @@ op_check_sig_verify() NOEXCEPT
     // BIP342: signature (second to top) is popped.
     const auto endorsement = state::pop_chunk_();
 
+    // op_check_sig_empty_key causes op_check_sig to fail.
     // BIP342: if public key is empty, script MUST fail and end.
     if (key->empty())
         return error::op_check_sig_empty_key;
@@ -1053,18 +1054,23 @@ op_check_sig_verify() NOEXCEPT
         if (endorsement->empty())
             return error::op_check_sig_verify2;
 
-        // TODO: count opcode toward sigop budget.
-        // BIP342: if signature not empty, opcode counted toward sigops budget.
-
         // If public key is 32 bytes it is a bip340 schnorr key.
         if (key->size() == schnorr::public_key_size)
         {
+            ///////////////////////////////////////////////////////////////////////
             // TODO: validate signature.
             // If signature is not empty, it is validated against public key.
             // Upon validation fail, script MUST fail and end (or push false).
             ////return schnorr::verify_signature(...);
-            return error::op_check_sig_verify3;
+            if (false)
+                return error::op_check_sig_verify3;
+            ///////////////////////////////////////////////////////////////////////
         }
+
+        ///////////////////////////////////////////////////////////////////////
+        // TODO: count opcode toward sigop budget.
+        // BIP342: if signature not empty, opcode counted toward sigops budget.
+        ///////////////////////////////////////////////////////////////////////
 
         // If public key size is neither 0 nor 32 bytes, it is an unknown type.
         // During script execution of signature opcodes these behave exactly as
@@ -1304,8 +1310,10 @@ op_check_sig_add() NOEXCEPT
         return error::op_success;
     }
 
-    // TODO: validate signature, count opcode toward sigop budget.
+    ///////////////////////////////////////////////////////////////////////////
+    // TODO: validate signature, if success, count opcode toward sigop budget.
     // BIP342: if signature not empty, opcode counted toward sigops budget.
+    ///////////////////////////////////////////////////////////////////////////
 
     // BIP342: if signature not empty (and successful), [number+1] pushed.
     state::push_signed64(add1<int64_t>(number));
