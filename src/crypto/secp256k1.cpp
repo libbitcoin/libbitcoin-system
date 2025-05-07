@@ -383,22 +383,27 @@ bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
     return true;
 }
 
-// BIP66 requires strict DER signature encoding.
 bool parse_signature(ec_signature& out, const data_slice& der_signature,
     bool strict) NOEXCEPT
 {
+    // BIP66: strict parse is not called for when signature is empty.
     if (der_signature.empty())
+        return false;
+
+    // BIP66: requires strict and minimal DER signature encoding.
+    if (strict && !is_valid_signature_encoding(der_signature))
         return false;
 
     const auto context = ec_context_verify::context();
     auto parsed = pointer_cast<secp256k1_ecdsa_signature>(out.data());
 
-    if (strict)
-        return secp256k1_ecdsa_signature_parse_der(context, parsed,
-            der_signature.data(), der_signature.size()) == ec_success;
-
-    return ecdsa_signature_parse_der_lax(context, parsed,
-        der_signature.data(), der_signature.size());
+    // ************************************************************************
+    // CONSENSUS: This function parses DER with various errors as allowed by
+    // Bitcoin prior to activation of BIP66. This attempts to codify the lax
+    // rules applied by version(s) of OpenSSL in use up to that time.
+    // ************************************************************************
+    return ecdsa_signature_parse_der_lax(context, parsed, der_signature.data(),
+        der_signature.size());
 }
 
 bool encode_signature(der_signature& out,
