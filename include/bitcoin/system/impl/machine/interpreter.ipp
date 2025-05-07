@@ -1014,12 +1014,14 @@ op_check_sig() NOEXCEPT
 {
     const auto verify = op_check_sig_verify();
     const auto bip66 = state::is_enabled(flags::bip66_rule);
-    const auto bip342 = state::is_enabled(flags::bip342_rule);
-    const auto strict_der = bip66 && !bip342;
 
-    // BIP66: invalid DER encoding fails the operation.
-    if (strict_der && verify == error::op_check_sig_verify_parse)
-        return error::op_check_sig;
+    // BIP342: if public key is empty, script MUST fail and end.
+    if (verify == error::op_check_sig_empty_key)
+        return verify;
+
+    // BIP66: if DER encoding invalid, script MUST fail and end.
+    if (bip66 && verify == error::op_check_sig_parse_signature)
+        return verify;
 
     // BIP342: [boolean result] is pushed onto the stack.
     state::push_bool(verify == error::op_success);
@@ -1042,21 +1044,24 @@ op_check_sig_verify() NOEXCEPT
 
     // BIP342: if public key is empty, script MUST fail and end.
     if (key->empty())
-        return error::op_check_sig_verify2;
+        return error::op_check_sig_empty_key;
 
     // BIP342: only.
     if (state::is_enabled(flags::bip342_rule))
     {
+        // If signature is empty, script MUST fail and end (or push false).
+        if (endorsement->empty())
+            return error::op_check_sig_verify2;
+
+        // TODO: count opcode toward sigop budget.
+        // BIP342: if signature not empty, opcode counted toward sigops budget.
+
         // If public key is 32 bytes it is a bip340 schnorr key.
         if (key->size() == schnorr::public_key_size)
         {
-            // If signature is empty, script MUST fail and end.
-            // op_check_sig_verify_parse causes op_check_sig NOT FAIL.
-            if (endorsement->empty())
-                return error::op_check_sig_verify_parse;
-
+            // TODO: validate signature.
             // If signature is not empty, it is validated against public key.
-            // Upon validation failure, script MUST fail and end.
+            // Upon validation fail, script MUST fail and end (or push false).
             ////return schnorr::verify_signature(...);
             return error::op_check_sig_verify3;
         }
@@ -1067,18 +1072,19 @@ op_check_sig_verify() NOEXCEPT
         return error::op_success;
     }
 
+    // Not a parse failure, so op_checksig pushes false.
     if (endorsement->empty())
         return error::op_check_sig_verify4;
 
     hash_digest hash;
     ec_signature sig;
 
-    // op_check_sig_verify_parse causes op_check_sig FAIL.
+    // op_check_sig_parse_signature causes op_check_sig to fail.
     // Parse endorsement into DER signature into an EC signature.
     // Also generates signature hash from endorsement sighash flags.
     // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
     if (!state::prepare(sig, *key, hash, endorsement))
-        return error::op_check_sig_verify_parse;
+        return error::op_check_sig_parse_signature;
 
     // TODO: for signing mode - make key mutable and return above.
     return system::verify_signature(*key, hash, sig) ?
@@ -1095,9 +1101,9 @@ op_check_multisig() NOEXCEPT
     const auto verify = op_check_multisig_verify();
     const auto bip66 = state::is_enabled(flags::bip66_rule);
 
-    // BIP66: invalid signature encoding fails the operation.
-    if (bip66 && verify == error::op_check_multisig_verify_parse)
-        return error::op_check_multisig;
+    // BIP66: if DER encoding invalid, script MUST fail and end.
+    if (bip66 && verify == error::op_check_multisig_parse_signature)
+        return verify;
 
     state::push_bool(verify == error::op_success);
     return error::op_success;
@@ -1165,14 +1171,14 @@ op_check_multisig_verify() NOEXCEPT
         if (endorsement == endorsements.end())
             break;
 
-        // error::op_check_multisig_verify_parse causes op_check_multisig fail.
+        // op_check_multisig_parse_signature causes op_check_multisig to fail.
         if (!(*endorsement)->empty())
         {
-            // Parse endorsement into DER signature into an EC signature.
+            // Parse endorsement into DER signature into an ECDSA signature.
             // Also generates signature hash from endorsement sighash flags.
             if (!state::prepare(sig, *key, cache, sighash_flags,
                 **endorsement, *sub))
-                return error::op_check_multisig_verify_parse;
+                return error::op_check_multisig_parse_signature;
 
             BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
             const auto& hash = cache.at(sighash_flags);
@@ -1273,20 +1279,20 @@ op_check_sig_add() NOEXCEPT
 
     // BIP342: if fewer than 3 elements on stack, script MUST fail and end.
     if (state::stack_size() < 3u)
-        return error::op_check_schnorr_sig;
+        return error::op_check_schnorr_sig1;
 
     // BIP342: public key (top) is popped.
     const auto key = state::pop_chunk_();
 
     // BIP342: if public key is empty, script MUST fail and end.
     if (key->empty())
-        return error::op_check_schnorr_sig;
+        return error::op_check_schnorr_sig2;
 
     // BIP342: number (second to top) is popped.
     // BIP342: if number is larger than 4 bytes, script MUST fail and end.
     int32_t number;
     if (!state::pop_signed32_(number))
-        return error::op_check_schnorr_sig;
+        return error::op_check_schnorr_sig3;
 
     // BIP342: signature (third to top) is popped.
     const auto endorsement = state::pop_chunk_();
