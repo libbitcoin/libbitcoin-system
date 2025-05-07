@@ -44,6 +44,10 @@
 // insurance against derived classes that may alter this behavior. This ensures
 // that an opcode that does not push correctly-sized data here will fail.
 
+// TODO: In signing mode, prepare_signature converts key from a private key to
+// a public key and generates the signature from key and hash. The signature is
+// then verified against the key and hash as if obtained from the script.
+
 namespace libbitcoin {
 namespace system {
 namespace machine {
@@ -276,7 +280,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_drop2() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_drop2;
 
     // 0,1,[2,3] => 1,[2,3] => [2,3]
@@ -289,7 +293,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_dup2() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_dup2;
 
     // [0,1,2,3] => 1,[0,1,2,3] =>  0,1,[0,1,2,3]
@@ -302,7 +306,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_dup3() NOEXCEPT
 {
-    if (state::stack_size() < 3)
+    if (state::stack_size() < 3u)
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
@@ -316,7 +320,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_over2() NOEXCEPT
 {
-    if (state::stack_size() < 4)
+    if (state::stack_size() < 4u)
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
@@ -329,7 +333,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_rot2() NOEXCEPT
 {
-    if (state::stack_size() < 6)
+    if (state::stack_size() < 6u)
         return error::op_rot2;
 
     // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
@@ -345,12 +349,12 @@ TEMPLATE
 inline op_error_t CLASS::
 op_swap2() NOEXCEPT
 {
-    if (state::stack_size() < 4)
+    if (state::stack_size() < 4u)
         return error::op_swap2;
 
     // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
-    state::swap_(1,3);
-    state::swap_(0,2);
+    state::swap_(1, 3);
+    state::swap_(0, 2);
     return error::op_success;
 }
 
@@ -405,7 +409,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_nip() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_nip;
 
     // [0,1,2] => 1,[0,2] => [0,2]
@@ -418,7 +422,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_over() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_over;
 
     // [0,1] => 1,[0,1]
@@ -478,12 +482,12 @@ TEMPLATE
 inline op_error_t CLASS::
 op_rot() NOEXCEPT
 {
-    if (state::stack_size() < 3)
+    if (state::stack_size() < 3u)
         return error::op_rot;
 
     // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
-    state::swap_(1,2);
-    state::swap_(0,1);
+    state::swap_(1, 2);
+    state::swap_(0, 1);
     return error::op_success;
 }
 
@@ -491,11 +495,11 @@ TEMPLATE
 inline op_error_t CLASS::
 op_swap() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_swap;
 
     // [0,1,2] = > [1,0,2]
-    state::swap_(0,1);
+    state::swap_(0, 1);
     return error::op_success;
 }
 
@@ -503,7 +507,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_tuck() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_tuck;
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
@@ -607,7 +611,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_equal() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_equal;
 
     state::push_bool(state::equal_chunks(state::pop_(), state::pop_()));
@@ -618,7 +622,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_equal_verify() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_equal_verify1;
 
     return state::equal_chunks(state::pop_(), state::pop_()) ?
@@ -1010,42 +1014,66 @@ op_check_sig() NOEXCEPT
 {
     const auto verify = op_check_sig_verify();
     const auto bip66 = state::is_enabled(flags::bip66_rule);
+    const auto bip342 = state::is_enabled(flags::bip342_rule);
+    const auto strict_der = bip66 && !bip342;
 
-    // BIP66: invalid signature encoding fails the operation.
-    if (bip66 && verify == error::op_check_sig_verify_parse)
+    // BIP66: invalid DER encoding fails the operation.
+    if (strict_der && verify == error::op_check_sig_verify_parse)
         return error::op_check_sig;
 
+    // BIP342: [boolean result] is pushed onto the stack.
     state::push_bool(verify == error::op_success);
     return error::op_success;
 }
 
-// In signing mode, prepare_signature converts key from a private key to
-// a public key and generates the signature from key and hash. The signature is
-// then verified against the key and hash as if obtained from the script.
 TEMPLATE
 inline op_error_t CLASS::
 op_check_sig_verify() NOEXCEPT
 {
-    if (state::is_enabled(flags::bip342_rule))
-        return op_check_schnorr_sig();
-
-    if (state::stack_size() < 2)
+    // BIP342: if fewer than 2 elements on stack, script MUST fail and end.
+    if (state::stack_size() < 2u)
         return error::op_check_sig_verify1;
 
+    // BIP342: public key (top) is popped.
     const auto key = state::pop_chunk_();
 
+    // BIP342: signature (second to top) is popped.
+    const auto endorsement = state::pop_chunk_();
+
+    // BIP342: if public key is empty, script MUST fail and end.
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    const auto endorsement = state::pop_chunk_();
+    // BIP342: only.
+    if (state::is_enabled(flags::bip342_rule))
+    {
+        // If public key is 32 bytes it is a bip340 schnorr key.
+        if (key->size() == schnorr::public_key_size)
+        {
+            // If signature is empty, script MUST fail and end.
+            // op_check_sig_verify_parse causes op_check_sig NOT FAIL.
+            if (endorsement->empty())
+                return error::op_check_sig_verify_parse;
 
-    // error::op_check_sig_verify_parse causes op_check_sig fail.
+            // If signature is not empty, it is validated against public key.
+            // Upon validation failure, script MUST fail and end.
+            ////return schnorr::verify_signature(...);
+            return error::op_check_sig_verify3;
+        }
+
+        // If public key size is neither 0 nor 32 bytes, it is an unknown type.
+        // During script execution of signature opcodes these behave exactly as
+        // known types except that signature validation considered successful.
+        return error::op_success;
+    }
+
     if (endorsement->empty())
-        return error::op_check_sig_verify3;
+        return error::op_check_sig_verify4;
 
     hash_digest hash;
     ec_signature sig;
 
+    // op_check_sig_verify_parse causes op_check_sig FAIL.
     // Parse endorsement into DER signature into an EC signature.
     // Also generates signature hash from endorsement sighash flags.
     // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
@@ -1054,7 +1082,7 @@ op_check_sig_verify() NOEXCEPT
 
     // TODO: for signing mode - make key mutable and return above.
     return system::verify_signature(*key, hash, sig) ?
-        error::op_success : error::op_check_sig_verify4;
+        error::op_success : error::op_check_sig_verify5;
 }
 
 TEMPLATE
@@ -1114,8 +1142,7 @@ op_check_multisig_verify() NOEXCEPT
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    // This check is unique in that it requires a single "zero" on the stack.
-    // True here implies variant non-zero ('true', '!= 0', or other than '[]').
+    // This check is unique in that a chunk must be empty to be false.
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
@@ -1238,23 +1265,45 @@ op_check_sequence_verify() const NOEXCEPT
 
 TEMPLATE
 inline op_error_t CLASS::
-op_check_sig_add() const NOEXCEPT
+op_check_sig_add() NOEXCEPT
 {
-    // BIP342: reserved_186 subsumed by checksigadd when the script under
-    // evaluation is tapscript (bip342_rule only set in state for tapscripts).
+    // BIP342: reserved_186 subsumed by checksigadd under tapscript.
     if (!state::is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::reserved_186);
 
-    // TODO implement.
-    return error::op_check_sig_add;
-}
+    // BIP342: if fewer than 3 elements on stack, script MUST fail and end.
+    if (state::stack_size() < 3u)
+        return error::op_check_schnorr_sig;
 
-TEMPLATE
-inline op_error_t CLASS::
-op_check_schnorr_sig() NOEXCEPT
-{
-    // TODO: implement.
-    return error::op_check_schnorr_sig;
+    // BIP342: public key (top) is popped.
+    const auto key = state::pop_chunk_();
+
+    // BIP342: if public key is empty, script MUST fail and end.
+    if (key->empty())
+        return error::op_check_schnorr_sig;
+
+    // BIP342: number (second to top) is popped.
+    // BIP342: if number is larger than 4 bytes, script MUST fail and end.
+    int32_t number;
+    if (!state::pop_signed32_(number))
+        return error::op_check_schnorr_sig;
+
+    // BIP342: signature (third to top) is popped.
+    const auto endorsement = state::pop_chunk_();
+
+    // BIP342: if signature is empty, [number] pushed, execution continues.
+    if (endorsement->empty())
+    {
+        state::push_signed64(number);
+        return error::op_success;
+    }
+
+    // TODO: validate signature, count opcode toward sigop budget.
+    // BIP342: if signature not empty, opcode counted toward sigops budget.
+
+    // BIP342: if signature not empty (and successful), [number+1] pushed.
+    state::push_signed64(add1<int64_t>(number));
+    return error::op_success;
 }
 
 // Operation disatch.

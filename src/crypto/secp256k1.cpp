@@ -196,8 +196,8 @@ bool ec_add(ec_uncompressed& point, const ec_secret& scalar) NOEXCEPT
 bool ec_add(ec_secret& left, const ec_secret& right) NOEXCEPT
 {
     const auto context = ec_context_verify::context();
-    return secp256k1_ec_seckey_tweak_add(context, left.data(),
-        right.data()) == ec_success;
+    return secp256k1_ec_seckey_tweak_add(context, left.data(), right.data())
+        == ec_success;
 }
 
 bool ec_add(ec_compressed& left, const ec_compressed& right) NOEXCEPT
@@ -225,8 +225,8 @@ bool ec_sum(ec_compressed& out, const compressed_list& points) NOEXCEPT
 
     secp256k1_pubkey pubkey;
     return secp256k1_ec_pubkey_combine(context, &pubkey,
-        to_pointers(keys).data(), points.size()) == 
-            ec_success && serialize(context, out, pubkey);
+        to_pointers(keys).data(), points.size()) == ec_success &&
+        serialize(context, out, pubkey);
 }
 
 // Multiply EC values
@@ -248,8 +248,8 @@ bool ec_multiply(ec_uncompressed& point, const ec_secret& scalar) NOEXCEPT
 bool ec_multiply(ec_secret& left, const ec_secret& right) NOEXCEPT
 {
     const auto context = ec_context_verify::context();
-    return secp256k1_ec_seckey_tweak_mul(context, left.data(),
-        right.data()) == ec_success;
+    return secp256k1_ec_seckey_tweak_mul(context, left.data(), right.data()) ==
+        ec_success;
 }
 
 // Negate EC values
@@ -426,8 +426,8 @@ bool sign(ec_signature& out, const ec_secret& secret,
     const auto context = ec_context_sign::context();
     const auto signature = pointer_cast<secp256k1_ecdsa_signature>(out.data());
 
-    return (secp256k1_ecdsa_sign(context, signature, hash.data(), secret.data(),
-        secp256k1_nonce_function_rfc6979, nullptr) == ec_success);
+    return secp256k1_ecdsa_sign(context, signature, hash.data(), secret.data(),
+        secp256k1_nonce_function_rfc6979, nullptr) == ec_success;
 }
 
 bool verify_signature(const data_slice& point, const hash_digest& hash,
@@ -436,64 +436,8 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
     secp256k1_pubkey pubkey;
     const auto context = ec_context_verify::context();
 
-    return parse(context, pubkey, point) &&
-        verify_signature(context, pubkey, hash, signature);
-}
-
-// Schnorr parse/sign/verify
-// ----------------------------------------------------------------------------
-// It is recommended to verify a signature after signing.
-
-bool parse_schnorr(uint8_t& sighash_flags, ec_signature& signature,
-    const endorsement& endorsement) NOEXCEPT
-{
-    switch (endorsement.size())
-    {
-        // No flags are set (default).
-        case ec_signature_size:
-            sighash_flags = 0;
-            break;
-
-        // Zero is an invalid flag setting (must be explicit).
-        case add1(ec_signature_size):
-            sighash_flags = endorsement.back();
-            if (is_zero(sighash_flags)) return false;
-            break;
-
-        // Invalid signature size.
-        default:
-            return false;
-    }
-
-    signature = unsafe_array_cast<uint8_t, ec_signature_size>(
-        endorsement.data());
-    return true;
-}
-
-bool sign_schnorr(ec_signature& out, const ec_secret& secret,
-    const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT
-{
-    secp256k1_keypair keypair;
-    const auto context = ec_context_sign::context();
-
-    return secp256k1_keypair_create(context, &keypair, secret.data()) ==
-        ec_success && secp256k1_schnorrsig_sign32(context, out.data(),
-            hash.data(), &keypair, auxiliary.data()) == ec_success;
-}
-
-// parse
-bool verify_schnorr(const data_slice& x_point, const hash_digest& hash,
-    const ec_signature& signature) NOEXCEPT
-{
-    if (x_point.size() != hash_size)
-        return false;
-
-    secp256k1_xonly_pubkey pubkey;
-    const auto context = ec_context_verify::context();
-
-    return secp256k1_xonly_pubkey_parse(context, &pubkey, x_point.data()) ==
-        ec_success && secp256k1_schnorrsig_verify(context, signature.data(),
-            hash.data(), hash_size, &pubkey) == ec_success;
+    return parse(context, pubkey, point) && verify_signature(context, pubkey,
+        hash, signature);
 }
 
 // ECDSA recoverable sign/recover
@@ -510,7 +454,7 @@ bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const auto result =
         secp256k1_ecdsa_sign_recoverable(context, &signature, hash.data(),
             secret.data(), secp256k1_nonce_function_rfc6979, nullptr) ==
-                ec_success &&
+            ec_success &&
         secp256k1_ecdsa_recoverable_signature_serialize_compact(context,
             out.signature.data(), &recovery_id, &signature) == ec_success;
 
@@ -535,5 +479,69 @@ bool recover_public(ec_uncompressed& out,
     return recover_public(context, out, recoverable, hash);
 }
 
+// Schnorr parse/sign/verify
+// ----------------------------------------------------------------------------
+
+namespace schnorr {
+
+bool parse(uint8_t& sighash_flags, ec_signature& signature,
+    const endorsement& endorsement) NOEXCEPT
+{
+    switch (endorsement.size())
+    {
+        // BIP341: if [sighash byte] is omitted the resulting signatures are 64
+        // bytes, and [default == 0] mode is implied (implies SIGHASH_ALL).
+        case signature_size:
+            sighash_flags = 0;
+            break;
+
+        // BIP341: signature has sighash byte appended in the usual fashion.
+        // BIP341: zero is invalid sighash, must be explicit to prevent mally.
+        case add1(signature_size):
+            sighash_flags = endorsement.back();
+            if (is_zero(sighash_flags)) return false;
+            break;
+
+        // BIP341: A Taproot signature is a 64-byte Schnorr signature.
+        default:
+            return false;
+    }
+
+    signature = unsafe_array_cast<uint8_t, signature_size>(endorsement.data());
+    return true;
+}
+
+// It is recommended to verify a signature after signing.
+bool sign(ec_signature& out, const ec_secret& secret,
+    const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT
+{
+    secp256k1_keypair keypair;
+    const auto context = ec_context_sign::context();
+
+    return 
+        secp256k1_keypair_create(context, &keypair, secret.data()) ==
+            ec_success &&
+        secp256k1_schnorrsig_sign32(context, out.data(), hash.data(), &keypair,
+            auxiliary.data()) == ec_success;
+}
+
+// BIP341: A Taproot signature is a 64-byte Schnorr sig, as defined in BIP340.
+bool verify_signature(const data_slice& x_point, const hash_digest& hash,
+    const ec_signature& signature) NOEXCEPT
+{
+    if (x_point.size() != hash_size)
+        return false;
+
+    secp256k1_xonly_pubkey pubkey;
+    const auto context = ec_context_verify::context();
+
+    return
+        secp256k1_xonly_pubkey_parse(context, &pubkey, x_point.data()) ==
+            ec_success && 
+        secp256k1_schnorrsig_verify(context, signature.data(),  hash.data(),
+            hash_size, &pubkey) == ec_success;
+}
+
+} // namespace schnorr
 } // namespace system
 } // namespace libbitcoin

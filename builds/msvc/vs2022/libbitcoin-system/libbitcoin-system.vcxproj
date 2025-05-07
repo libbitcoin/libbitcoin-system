@@ -102,6 +102,7 @@
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)src_chain_transaction.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sign.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />

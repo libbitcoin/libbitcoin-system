@@ -138,16 +138,18 @@ public:
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
-    // signature_hash exposed for op_check_multisig caching.
+    /// signature_hash exposed for op_check_multisig caching.
     hash_digest signature_hash(const input_iterator& input, const script& sub,
         uint64_t value, uint8_t sighash_flags, script_version version,
         bool bip143) const NOEXCEPT;
 
+    /// Not used internally.
     bool check_signature(const ec_signature& signature,
         const data_slice& public_key, const script& sub, uint32_t index,
         uint64_t value, uint8_t sighash_flags, script_version version,
         bool bip143) const NOEXCEPT;
 
+    /// Not used internally.
     bool create_endorsement(endorsement& out, const ec_secret& secret,
         const script& sub, uint32_t index, uint64_t value,
         uint8_t sighash_flags, script_version version,
@@ -233,12 +235,6 @@ protected:
 
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
-    typedef struct
-    {
-        hash_digest outputs;
-        hash_digest points;
-        hash_digest sequences;
-    } sighash_cache;
 
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const input_cptrs& inputs) NOEXCEPT;
@@ -246,29 +242,42 @@ private:
         const output_cptrs& outputs, bool segregated) NOEXCEPT;
 
     void assign_data(reader& source, bool witness) NOEXCEPT;
+    chain::points points() const NOEXCEPT;
 
-    // signature hash
-    hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
+    // Signing.
+    // ------------------------------------------------------------------------
+
+    typedef struct
+    {
+        hash_digest outputs;
+        hash_digest points;
+        hash_digest sequences;
+    } sighash_cache;
+
+    static inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
+    static inline bool is_sighash_valid(uint8_t sighash_flags) NOEXCEPT;
+
+    hash_digest outputs_hash() const NOEXCEPT;
+    hash_digest points_hash() const NOEXCEPT;
+    hash_digest sequences_hash() const NOEXCEPT;
+    void initialize_sighash_cache() const NOEXCEPT;
+
     input_iterator input_at(uint32_t index) const NOEXCEPT;
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
+    hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
+
     void signature_hash_single(writer& sink, const input_iterator& input,
         const script& sub, uint8_t sighash_flags) const NOEXCEPT;
     void signature_hash_none(writer& sink, const input_iterator& input,
         const script& sub, uint8_t sighash_flags) const NOEXCEPT;
     void signature_hash_all(writer& sink, const input_iterator& input,
         const script& sub, uint8_t sighash_flags) const NOEXCEPT;
+
     hash_digest unversioned_signature_hash(const input_iterator& input,
         const script& sub, uint8_t sighash_flags) const NOEXCEPT;
     hash_digest version_0_signature_hash(const input_iterator& input,
         const script& sub, uint64_t value, uint8_t sighash_flags,
         bool bip143) const NOEXCEPT;
-
-    // Caching.
-    chain::points points() const NOEXCEPT;
-    hash_digest outputs_hash() const NOEXCEPT;
-    hash_digest points_hash() const NOEXCEPT;
-    hash_digest sequences_hash() const NOEXCEPT;
-    void initialize_sighash_cache() const NOEXCEPT;
 
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).

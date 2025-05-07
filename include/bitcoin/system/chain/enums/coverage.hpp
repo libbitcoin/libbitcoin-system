@@ -30,6 +30,10 @@ namespace chain {
 /// Comments from: bitcoin.org/en/developer-guide#standard-transactions
 enum coverage : uint8_t
 {
+    /// BIP341: We define a new hashtype SIGHASH_DEFAULT (value 0x00) which
+    /// results in signing over the whole transaction just as for SIGHASH_ALL.
+    hash_default = 0,
+
     /// The default, signs all the inputs and outputs, protecting everything
     /// except the signature scripts against modification.
     hash_all = bit_right<uint8_t>(0),

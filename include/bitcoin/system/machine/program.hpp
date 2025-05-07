@@ -101,6 +101,7 @@ protected:
     INLINE bool pop_bool_(bool& value, bool minimal) NOEXCEPT;
     INLINE bool pop_chunks(chunk_xptrs& data, size_t count) NOEXCEPT;
     INLINE bool pop_signed32(int32_t& value) NOEXCEPT;
+    INLINE bool pop_signed32_(int32_t& value) NOEXCEPT;
     INLINE bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
     INLINE bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) NOEXCEPT;
     INLINE bool pop_index32(size_t& index) NOEXCEPT;
@@ -179,7 +180,6 @@ private:
         if_not_greater<Bytes, sizeof(Integer)> = true>
     INLINE bool peek_signed_(Integer& value) const NOEXCEPT;
     INLINE void push_chunk(const chunk_xptr& datum) NOEXCEPT;
-    INLINE bool pop_signed32_(int32_t& value) NOEXCEPT;
     INLINE chunk_xptr peek_chunk_() const NOEXCEPT;
     INLINE bool peek_signed32_(int32_t& value) const NOEXCEPT;
     INLINE bool peek_signed40_(int64_t& value) const NOEXCEPT;

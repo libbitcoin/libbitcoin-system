@@ -491,6 +491,7 @@ add_library( ${CANONICAL_LIB_NAME}
     "../../src/chain/point.cpp"
     "../../src/chain/script.cpp"
     "../../src/chain/transaction.cpp"
+    "../../src/chain/transaction_sign.cpp"
     "../../src/chain/witness.cpp"
     "../../src/chain/enums/opcode.cpp"
     "../../src/config/base16.cpp"

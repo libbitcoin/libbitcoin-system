@@ -29,6 +29,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// TODO: consider a bip342 override to "success" codes.
+
 #define RETURN_IF_OPCODE(text, code) \
 if (norm == text) { out_code = opcode::code; return true; }
 
@@ -328,6 +330,8 @@ std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) NOEXCEPT
         case opcode::nop10:
             return "nop10";
         case opcode::reserved_186:
+            return script::is_enabled(active_forks, flags::bip342_rule) ?
+                "checksigadd" : opcode_to_hexadecimal(value);
         case opcode::reserved_187:
         case opcode::reserved_188:
         case opcode::reserved_189:
@@ -597,6 +601,7 @@ bool opcode_from_mnemonic(opcode& out_code, const std::string& value) NOEXCEPT
     RETURN_IF_OPCODE("nop8", nop8);
     RETURN_IF_OPCODE("nop9", nop9);
     RETURN_IF_OPCODE("nop10", nop10);
+    RETURN_IF_OPCODE_OR_ALIAS("checksigadd", "reserved_186", checksigadd);
     RETURN_IF_OPCODE("reserved_186", reserved_186);
     RETURN_IF_OPCODE("reserved_187", reserved_187);
     RETURN_IF_OPCODE("reserved_188", reserved_188);

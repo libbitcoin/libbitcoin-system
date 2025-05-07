@@ -279,6 +279,9 @@
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sign.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
