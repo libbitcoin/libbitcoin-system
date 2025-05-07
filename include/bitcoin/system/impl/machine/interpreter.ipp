@@ -276,7 +276,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_drop2() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_drop2;
 
     // 0,1,[2,3] => 1,[2,3] => [2,3]
@@ -289,7 +289,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_dup2() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_dup2;
 
     // [0,1,2,3] => 1,[0,1,2,3] =>  0,1,[0,1,2,3]
@@ -302,7 +302,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_dup3() NOEXCEPT
 {
-    if (state::stack_size() < 3)
+    if (state::stack_size() < 3u)
         return error::op_dup3;
 
     // [0,1,2,3] => 2,[0,1,2,3] => 1,2,[0,1,2,3] => 0,1,2,[0,1,2,3]
@@ -316,7 +316,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_over2() NOEXCEPT
 {
-    if (state::stack_size() < 4)
+    if (state::stack_size() < 4u)
         return error::op_over2;
 
     // [0,1,2,3] => 3,[0,1,2,3] => 2,3,[0,1,2,3]
@@ -329,7 +329,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_rot2() NOEXCEPT
 {
-    if (state::stack_size() < 6)
+    if (state::stack_size() < 6u)
         return error::op_rot2;
 
     // [0,1,2,3,4,5] => [4,1,2,3,0,5] => [4,5,2,3,0,1] =>
@@ -345,12 +345,12 @@ TEMPLATE
 inline op_error_t CLASS::
 op_swap2() NOEXCEPT
 {
-    if (state::stack_size() < 4)
+    if (state::stack_size() < 4u)
         return error::op_swap2;
 
     // [0,1,2,3] => [0,3,2,1] => [2,3,0,1]
-    state::swap_(1,3);
-    state::swap_(0,2);
+    state::swap_(1, 3);
+    state::swap_(0, 2);
     return error::op_success;
 }
 
@@ -405,7 +405,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_nip() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_nip;
 
     // [0,1,2] => 1,[0,2] => [0,2]
@@ -418,7 +418,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_over() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_over;
 
     // [0,1] => 1,[0,1]
@@ -478,12 +478,12 @@ TEMPLATE
 inline op_error_t CLASS::
 op_rot() NOEXCEPT
 {
-    if (state::stack_size() < 3)
+    if (state::stack_size() < 3u)
         return error::op_rot;
 
     // [0,1,2,3] = > [0,2,1,3] => [2,0,1,3]
-    state::swap_(1,2);
-    state::swap_(0,1);
+    state::swap_(1, 2);
+    state::swap_(0, 1);
     return error::op_success;
 }
 
@@ -491,11 +491,11 @@ TEMPLATE
 inline op_error_t CLASS::
 op_swap() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_swap;
 
     // [0,1,2] = > [1,0,2]
-    state::swap_(0,1);
+    state::swap_(0, 1);
     return error::op_success;
 }
 
@@ -503,7 +503,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_tuck() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_tuck;
 
     // [0,1,2] = > [1,0,2]  => 0,[1,0,2]
@@ -607,7 +607,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_equal() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_equal;
 
     state::push_bool(state::equal_chunks(state::pop_(), state::pop_()));
@@ -618,7 +618,7 @@ TEMPLATE
 inline op_error_t CLASS::
 op_equal_verify() NOEXCEPT
 {
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_equal_verify1;
 
     return state::equal_chunks(state::pop_(), state::pop_()) ?
@@ -1029,17 +1029,15 @@ op_check_sig_verify() NOEXCEPT
     if (state::is_enabled(flags::bip342_rule))
         return op_check_schnorr_sig();
 
-    if (state::stack_size() < 2)
+    if (state::stack_size() < 2u)
         return error::op_check_sig_verify1;
 
     const auto key = state::pop_chunk_();
-
     if (key->empty())
         return error::op_check_sig_verify2;
 
-    const auto endorsement = state::pop_chunk_();
-
     // error::op_check_sig_verify_parse causes op_check_sig fail.
+    const auto endorsement = state::pop_chunk_();
     if (endorsement->empty())
         return error::op_check_sig_verify3;
 
@@ -1114,8 +1112,7 @@ op_check_multisig_verify() NOEXCEPT
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
-    // This check is unique in that it requires a single "zero" on the stack.
-    // True here implies variant non-zero ('true', '!= 0', or other than '[]').
+    // This check is unique in that a chunk must be empty to be false.
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
