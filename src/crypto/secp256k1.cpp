@@ -491,13 +491,13 @@ bool parse(uint8_t& sighash_flags, ec_signature& signature,
     {
         // BIP341: if [sighash byte] is omitted the resulting signatures are 64
         // bytes, and [default == 0] mode is implied (implies SIGHASH_ALL).
-        case ec_signature_size:
+        case signature_size:
             sighash_flags = 0;
             break;
 
         // BIP341: signature has sighash byte appended in the usual fashion.
         // BIP341: zero is invalid sighash, must be explicit to prevent mally.
-        case add1(ec_signature_size):
+        case add1(signature_size):
             sighash_flags = endorsement.back();
             if (is_zero(sighash_flags)) return false;
             break;
@@ -507,8 +507,7 @@ bool parse(uint8_t& sighash_flags, ec_signature& signature,
             return false;
     }
 
-    signature = unsafe_array_cast<uint8_t, ec_signature_size>(
-        endorsement.data());
+    signature = unsafe_array_cast<uint8_t, signature_size>(endorsement.data());
     return true;
 }
 

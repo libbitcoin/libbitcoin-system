@@ -221,6 +221,9 @@ BC_API bool recover_public(ec_uncompressed& out,
 
 namespace schnorr {
 
+static constexpr size_t signature_size = 64;
+static constexpr size_t public_key_size = 32;
+
 /// Schnorr parse/sign/verify
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
