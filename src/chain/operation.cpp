@@ -37,7 +37,8 @@ namespace chain {
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // Gotta set something when invalid minimal result, test is_valid.
-static constexpr auto any_invalid = opcode::op_xor;
+static constexpr auto any_invalid = opcode::op_verif;
+static_assert(operation::is_invalid(any_invalid));
 
 // Null data helpers.
 // ----------------------------------------------------------------------------
@@ -315,7 +316,7 @@ operation operation::from_string(const std::string& mnemonic) NOEXCEPT
     auto underflow = false;
 
     // Always defined below, but this fixes warning.
-    opcode code{ opcode::op_xor };
+    opcode code{ any_invalid };
 
     if (is_push_token(mnemonic))
     {
