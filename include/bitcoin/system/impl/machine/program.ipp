@@ -773,7 +773,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
     // Obtain the signature hash from subscript and sighash flags.
     hash = signature_hash(*subscript({ endorsement }), sighash_flags);
 
-    // Parse DER signature into an EC signature (bip66 sets strict).
+    // Parse DER signature into an ECDSA signature (bip66 sets strict).
     const auto bip66 = is_enabled(flags::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
@@ -794,7 +794,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
     // Obtain the signature hash from subscript and sighash flags.
     signature_hash(cache, sub, sighash_flags);
 
-    // Parse DER signature into an EC signature (bip66 sets strict).
+    // Parse DER signature into an ECDSA signature (bip66 sets strict).
     const auto bip66 = is_enabled(flags::bip66_rule);
     return parse_signature(signature, distinguished, bip66);
 }
