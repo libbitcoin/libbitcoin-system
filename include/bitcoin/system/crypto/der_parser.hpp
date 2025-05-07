@@ -1,3 +1,31 @@
+/**
+ * Copyright (c) 2011-2025 libbitcoin developers (see AUTHORS)
+ *
+ * This file is part of libbitcoin.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP
+#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP
+
+#include <secp256k1.h>
+#include <bitcoin/system/data/data.hpp>
+#include <bitcoin/system/define.hpp>
+
+/// Based on example code in bip66, but without signature hash byte.
+bool is_valid_signature_encoding(const bc::system::data_slice& sig) NOEXCEPT;
+
 /***********************************************************************
  * Copyright (c) 2015 Pieter Wuille                                    *
  * Distributed under the MIT software license, see the accompanying    *
@@ -48,12 +76,6 @@
  *   8.3.1.
  */
 
-#ifndef LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP
-#define LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP
-
-#include <secp256k1.h>
-#include <bitcoin/system/define.hpp>
-
 /** Parse a signature in "lax DER" format
  *
  *  Returns: 1 when the signature could be parsed, 0 otherwise.
@@ -74,10 +96,8 @@
  *  encoded numbers are out of range, signature validation with it is
  *  guaranteed to fail for every message and public key.
  */
-bool ecdsa_signature_parse_der_lax(
-    const secp256k1_context* ctx,
-    secp256k1_ecdsa_signature* sig,
-    const unsigned char* input,
+bool ecdsa_signature_parse_der_lax(const secp256k1_context* ctx,
+    secp256k1_ecdsa_signature* sig, const uint8_t* input,
     size_t inputlen) NOEXCEPT;
 
-#endif /* SECP256K1_CONTRIB_LAX_DER_PARSING_H */
+#endif // LIBBITCOIN_SYSTEM_CRYPTO_EXTERNAL_DER_PARSER_HPP
