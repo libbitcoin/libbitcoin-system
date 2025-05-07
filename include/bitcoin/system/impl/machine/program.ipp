@@ -334,7 +334,6 @@ pop_bool_(bool& value, bool minimal) NOEXCEPT
     return true;
 }
 
-// private
 TEMPLATE
 INLINE bool CLASS::
 pop_signed32_(int32_t& value) NOEXCEPT
