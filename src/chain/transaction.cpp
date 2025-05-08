@@ -931,8 +931,29 @@ code transaction::confirm(const context& ctx) const NOEXCEPT
     return error::transaction_success;
 }
 
+// Delegated.
+// ----------------------------------------------------------------------------
+
+code transaction::connect_input(const context& ctx,
+    const input_iterator& it) const NOEXCEPT
+{
+    using namespace machine;
+
+    // TODO: evaluate performance tradeoff.
+    if ((*it)->is_roller())
+    {
+        // Evaluate rolling scripts with linear search but constant erase.
+        return interpreter<linked_stack>::connect(ctx, *this, it);
+    }
+
+    // Evaluate non-rolling scripts with constant search but linear erase.
+    return interpreter<contiguous_stack>::connect(ctx, *this, it);
+}
+
 // Connect (contextual).
 // ----------------------------------------------------------------------------
+// TODO: accumulate sigops from each connect result and add coinbase.
+// TODO: return in override with out parameter. more impactful with segwit.
 
 // forks
 
@@ -945,23 +966,12 @@ code transaction::connect(const context& ctx) const NOEXCEPT
     if (is_coinbase())
         return error::transaction_success;
 
-    code ec{};
     initialize_sighash_cache();
-    using namespace machine;
 
-    // Validate scripts.
-    for (auto input = inputs_->begin(); input != inputs_->end(); ++input)
-    {
-        // Evaluate rolling scripts with linear search but constant erase.
-        // Evaluate non-rolling scripts with constant search but linear erase.
-        if ((ec = (*input)->is_roller() ?
-            interpreter<linked_stack>::connect(ctx, *this, input) :
-            interpreter<contiguous_stack>::connect(ctx, *this, input)))
+    for (auto in = inputs_->begin(); in != inputs_->end(); ++in)
+        if (const auto ec = connect_input(ctx, in))
             return ec;
-    }
 
-    // TODO: accumulate sigops from each connect result and add coinbase.
-    // TODO: return in override with out parameter. more impactful with segwit.
     return error::transaction_success;
 }
 
