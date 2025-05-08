@@ -426,6 +426,10 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
 // Signature hashing (version 1 - taproot).
 // ----------------------------------------------------------------------------
 
+// TODO: tapscript.
+// Because the codeseparator_position is the last input to the hash, the SHA256
+// midstate can be efficiently cached for multiple OP_CODESEPARATOR in a script.
+
 // static
 // BIP341: Using any undefined hash_type causes validation failure if violated.
 // defined types: 0x00, 0x01, 0x02, 0x03, 0x81, 0x82, or 0x83. [zero is the

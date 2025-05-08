@@ -1795,7 +1795,7 @@ code CLASS::connect_witness(const context& state,
 
     switch (version)
     {
-        case script_version::zero:
+        case script_version::segwit:
         {
             code ec;
             script::cptr script;
@@ -1820,6 +1820,10 @@ code CLASS::connect_witness(const context& state,
                 return error::script_success;
             }
         }
+
+        // TODO: taproot.
+        case script_version::taproot:
+            return error::script_success;
 
         // These versions are reserved for future extensions (bip141).
         case script_version::reserved:
