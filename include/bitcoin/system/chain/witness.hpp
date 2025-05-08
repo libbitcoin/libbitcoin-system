@@ -98,20 +98,12 @@ public:
     /// Skip a witness (as if deserialized).
     static void skip(reader& source, bool prefix) NOEXCEPT;
 
-    static constexpr bool is_push_size(const chunk_cptrs& stack) NOEXCEPT
-    {
-        return std::all_of(stack.begin(), stack.end(),
-            [](const auto& element) NOEXCEPT
-            {
-                return element->size() <= max_push_data_size;
-            });
-    }
+    /// Verify the push size of each stack element (bip141).
+    static constexpr bool is_push_size(const chunk_cptrs& stack) NOEXCEPT;
 
     /// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
-    static constexpr bool is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
-    {
-        return is_one(stack.size()) && stack.front()->size() == hash_size;
-    }
+    static constexpr bool is_reserved_pattern(
+        const chunk_cptrs& stack) NOEXCEPT;
 
     bool extract_sigop_script(script& out_script,
         const script& program_script) const NOEXCEPT;
@@ -126,18 +118,8 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    
-    BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-    BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
     static size_t serialized_size(const chunk_cptrs& stack) NOEXCEPT;
-    static inline size_t element_size(const chunk_cptr& element) NOEXCEPT
-    {
-        // Each witness is prefixed with number of elements (bip144).
-        const auto size = element->size();
-        return ceilinged_add(variable_size(size), size);
-    };
-    BC_POP_WARNING()
-    BC_POP_WARNING()
+    static inline size_t element_size(const chunk_cptr& element) NOEXCEPT;
 
     void assign_data(reader& source, bool prefix) NOEXCEPT;
 
@@ -157,6 +139,8 @@ DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/chain/witness.ipp>
 
 namespace std
 {

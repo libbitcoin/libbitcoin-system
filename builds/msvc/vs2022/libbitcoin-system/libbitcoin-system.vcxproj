@@ -521,6 +521,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\operation.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />
