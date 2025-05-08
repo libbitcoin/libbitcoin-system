@@ -1692,20 +1692,19 @@ code CLASS::
 connect(const context& state, const transaction& tx,
     const input_iterator& it) NOEXCEPT
 {
-    code ec;
     const auto& input = **it;
     if (!input.prevout)
         return error::missing_previous_output;
 
     // Evaluate input script.
     interpreter in_program(tx, it, state.flags);
-    if ((ec = in_program.run()))
+    if (const auto ec = in_program.run())
         return ec;
 
     // Evaluate output script using stack copied from input script evaluation.
     const auto& prevout = input.prevout->script_ptr();
     interpreter out_program(in_program, prevout);
-    if ((ec = out_program.run()))
+    if (auto ec = out_program.run())
     {
         return ec;
     }
@@ -1745,7 +1744,6 @@ code CLASS::connect_embedded(const context& state,
     const transaction& tx, const input_iterator& it,
     interpreter& in_program) NOEXCEPT
 {
-    code ec;
     const auto& input = **it;
 
     // Input script is limited to relaxed push data operations (bip16).
@@ -1756,7 +1754,7 @@ code CLASS::connect_embedded(const context& state,
     // Evaluate embedded script using stack moved from input script.
     const auto prevout = to_shared<script>(in_program.pop(), false);
     interpreter out_program(std::move(in_program), prevout);
-    if ((ec = out_program.run()))
+    if (auto ec = out_program.run())
     {
         return ec;
     }
@@ -1797,7 +1795,6 @@ code CLASS::connect_witness(const context& state,
     {
         case script_version::segwit:
         {
-            code ec;
             script::cptr script;
             chunk_cptrs_ptr stack;
 
@@ -1806,7 +1803,7 @@ code CLASS::connect_witness(const context& state,
 
             // A defined version indicates bip141 is active.
             interpreter program(tx, it, script, state.flags, version, stack);
-            if ((ec = program.run()))
+            if (const auto ec = program.run())
             {
                 return ec;
             }
