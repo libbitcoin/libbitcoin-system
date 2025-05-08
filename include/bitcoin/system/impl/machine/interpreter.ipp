@@ -1649,10 +1649,6 @@ run() NOEXCEPT
         // An iterator is required only for run_op:op_codeseparator.
         const auto& op = *it;
 
-        // Enforce unconditionally invalid opcodes ("disabled").
-        if (op.is_invalid())
-            return error::op_invalid;
-
         // Rule imposed by [0.3.6] soft fork.
         if (op.is_oversized())
             return error::invalid_push_data_size;
