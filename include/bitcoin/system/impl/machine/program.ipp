@@ -133,13 +133,6 @@ pop() NOEXCEPT
 // ============================================================================
 
 TEMPLATE
-INLINE bool CLASS::
-is_prefail() const NOEXCEPT
-{
-    return script_->is_prefail();
-}
-
-TEMPLATE
 INLINE typename CLASS::op_iterator CLASS::
 begin() const NOEXCEPT
 {
@@ -174,26 +167,40 @@ is_enabled(chain::flags flag) const NOEXCEPT
     return to_bool(flags_ & flag);
 }
 
-// TODO: only perform is_push_size check on witness initialized stack.
-// TODO: others are either empty or presumed push_size from prevout script run.
 TEMPLATE
 INLINE script_error_t CLASS::
 validate() const NOEXCEPT
 {
     // TODO: nops rule must first be enabled in tests and config.
+    const auto nops = true; ////is_enabled(flags::nops_rule);
     const auto bip141 = is_enabled(flags::bip141_rule);
+    const auto bip342 = is_enabled(flags::bip342_rule);
 
-    // The script was determined by the parser to contain an invalid opcode.
-    if (is_prefail())
-        return error::prefail_script;
-
-    // bip_141 introduces an initialized stack, so must validate.
+    // Apply stack element limit (520) to initial witness [bip141][tapscript].
     if (bip141 && witness_ && !witness::is_push_size(*witness_))
         return error::invalid_witness_stack;
 
-    // The nops_rule establishes script size limit.
-    return script_->is_oversized() ? error::invalid_script_size :
-        error::script_success;
+    // Script size limit (10,000) [0.3.7+], removed [tapscript].
+    if (!bip342 && nops && script_->is_oversized())
+        return error::invalid_script_size;
+
+    // Stacks element limit (1,000) applied to initial stack [tapscript].
+    if (bip342 && is_stack_overflow())
+        return error::invalid_stack_size;
+
+    // Succeed if any success code, one overrides all codes [tapscript].
+    if (bip342 && script_->is_prevalid())
+        return error::prevalid_script;
+
+    // Fail if last op underflow, lower priority than easy [tapscript].
+    if (script_->is_underflow())
+        return error::invalid_script;
+
+    // Fail if any op invalid (invalid codes reduced in tapscript).
+    if (script_->is_prefail())
+        return error::prefail_script;
+
+    return error::script_success;
 }
 
 // Primary stack (conversions).
@@ -541,6 +548,7 @@ INLINE bool CLASS::
 is_stack_overflow() const NOEXCEPT
 {
     // Addition is safe due to stack size constraint.
+    // Limit of 1000 elements in stack and altstack remains [tapscript]. 
     return (stack_size() + alternate_.size()) > max_unified_stack_size;
 }
 
@@ -674,6 +682,10 @@ TEMPLATE
 INLINE bool CLASS::
 ops_increment(const operation& op) NOEXCEPT
 {
+    // Non-push opcodes limit of 201 per script does not apply [tapscript].
+    if (is_enabled(flags::bip342_rule))
+        return true;
+
     // Addition is safe due to script size constraint.
     BC_ASSERT(!is_add_overflow(operations_, one));
 
@@ -687,6 +699,10 @@ TEMPLATE
 INLINE bool CLASS::
 ops_increment(size_t public_keys) NOEXCEPT
 {
+    // Non-push opcodes limit of 201 per script does not apply [tapscript].
+    if (is_enabled(flags::bip342_rule))
+        return true;
+
     // Addition is safe due to script size constraint.
     BC_ASSERT(!is_add_overflow(operations_, public_keys));
 

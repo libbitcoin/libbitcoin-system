@@ -863,18 +863,18 @@ static_assert(operation::opcode_to_positive(opcode::push_positive_14) == 14u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_15) == 15u);
 static_assert(operation::opcode_to_positive(opcode::push_positive_16) == 16u);
 
-////static bool is_relaxed_push(opcode code);
-////static bool is_push(opcode code);
-////static bool is_payload(opcode code);
-////static bool is_counted(opcode code);
-////static bool is_positive(opcode code);
-////static bool is_version(opcode code);
-////static bool is_numeric(opcode code);
-////static bool is_number(opcode code);
-////static bool is_invalid(opcode code);
-////static bool is_conditional(opcode code);
-////static bool is_reserved(opcode code);
-////static bool is_success(opcode code);
+////static constexpr bool is_relaxed_push(opcode code) NOEXCEPT;
+////static constexpr bool is_push(opcode code) NOEXCEPT;
+////static constexpr bool is_payload(opcode code) NOEXCEPT;
+////static constexpr bool is_positive(opcode code) NOEXCEPT;
+////static constexpr bool is_nonnegative(opcode code) NOEXCEPT;
+////static constexpr bool is_number(opcode code) NOEXCEPT;
+////static constexpr bool is_roller(opcode code) NOEXCEPT;
+////static constexpr bool is_counted(opcode code) NOEXCEPT;
+////static constexpr bool is_success(opcode code) NOEXCEPT;
+////static constexpr bool is_invalid(opcode code) NOEXCEPT;
+////static constexpr bool is_conditional(opcode code) NOEXCEPT;
+////static constexpr bool is_reserved(opcode code) NOEXCEPT;
 
 BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
 {
@@ -935,21 +935,23 @@ BOOST_AUTO_TEST_CASE(operation__is_success__bip342__expected)
 // utilities (member)
 // ----------------------------------------------------------------------------
 
-////bool is_invalid() const;
-////bool is_push() const;
-////bool is_payload() const;
-////bool is_counted() const;
-////bool is_version() const;
-////bool is_numeric() const;
-////bool is_positive() const;
-////bool is_reserved() const;
-////bool is_conditional() const;
-////bool is_relaxed_push() const;
-////bool is_minimal_push() const;
-////bool is_nominal_push() const;
-////bool is_underflow() const;
-////bool is_oversized() const;
-////bool is_underclaimed() const;
+////bool is_relaxed_push() const NOEXCEPT;
+////bool is_push() const NOEXCEPT;
+////bool is_payload() const NOEXCEPT;
+////bool is_positive() const NOEXCEPT;
+////bool is_nonnegative() const NOEXCEPT;
+////bool is_number() const NOEXCEPT;
+////bool is_roller() const NOEXCEPT;
+////bool is_counted() const NOEXCEPT;
+////bool is_success() const NOEXCEPT;
+////bool is_invalid() const NOEXCEPT;
+////bool is_conditional() const NOEXCEPT;
+////bool is_reserved() const NOEXCEPT;
+////bool is_minimal_push() const NOEXCEPT;
+////bool is_nominal_push() const NOEXCEPT;
+////bool is_underclaimed() const NOEXCEPT;
+////bool is_oversized() const NOEXCEPT;
+////bool is_underflow() const NOEXCEPT;
 
 // json
 // ----------------------------------------------------------------------------

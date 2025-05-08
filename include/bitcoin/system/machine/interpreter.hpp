@@ -39,7 +39,7 @@ public:
 
     using state = program<Stack>;
     using op_iterator = typename state::op_iterator;
-    using input_iterator = typename input_cptrs::const_iterator;
+    using input_iterator = typename chain::input_cptrs::const_iterator;
 
     /// Use program constructors.
     using program<Stack>::program;
@@ -48,21 +48,23 @@ public:
     code run() NOEXCEPT;
 
     /// Connect tx.input[#].script to tx.input[#].prevout.script.
-    static code connect(const context& state, const transaction& tx,
-        uint32_t index) NOEXCEPT;
+    static code connect(const chain::context& state,
+        const chain::transaction& tx, uint32_t index) NOEXCEPT;
 
     /// Connect tx.input[*].script to tx.input[*].prevout.script.
-    static code connect(const context& state, const transaction& tx,
-        const input_iterator& it) NOEXCEPT;
+    static code connect(const chain::context& state,
+        const chain::transaction& tx, const input_iterator& it) NOEXCEPT;
 
 protected:
     /// Embedded script handler.
-    static code connect_embedded(const context& state, const transaction& tx,
-        const input_iterator& it, interpreter& in_program) NOEXCEPT;
+    static code connect_embedded(const chain::context& state,
+        const chain::transaction& tx, const input_iterator& it,
+        interpreter& in_program) NOEXCEPT;
 
     /// Witnessed script handler.
-    static code connect_witness(const context& state, const transaction& tx,
-        const input_iterator& it, const script& prevout) NOEXCEPT;
+    static code connect_witness(const chain::context& state,
+        const chain::transaction& tx, const input_iterator& it,
+        const chain::script& prevout) NOEXCEPT;
 
     /// Operation disatch.
     error::op_error_t run_op(const op_iterator& op) NOEXCEPT;

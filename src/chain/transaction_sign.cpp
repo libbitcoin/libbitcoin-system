@@ -28,7 +28,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/machine/machine.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 

@@ -1639,14 +1639,10 @@ TEMPLATE
 code CLASS::
 run() NOEXCEPT
 {
-    error::op_error_t operation_ec;
-    error::script_error_t script_ec;
-
-    // Enforce script size limit (10,000) [0.3.7+].
-    // Enforce initial primary stack size limit (520) [bip141].
-    // Enforce first op not reserved (not skippable by condition).
-    if ((script_ec = state::validate()))
-        return script_ec;
+    // Enforce initial limits and handle early opcodes success or failure.
+    if (const auto ec = state::validate())
+        return ec == error::prevalid_script ?
+            error::script_success : ec;
 
     for (auto it = state::begin(); it != state::end(); ++it)
     {
@@ -1661,7 +1657,7 @@ run() NOEXCEPT
         if (op.is_oversized())
             return error::invalid_push_data_size;
 
-        // Enforce opcode count limit (201).
+        // Non-push opcode count limit (201).
         if (!state::ops_increment(op))
             return error::invalid_operation_count;
 
@@ -1669,10 +1665,10 @@ run() NOEXCEPT
         if (state::if_(op))
         {
             // Evaluate opcode (switch).
-            if ((operation_ec = run_op(it)))
-                return operation_ec;
+            if (const auto ec = run_op(it))
+                return ec;
 
-            // Enforce combined stacks size limit (1,000).
+            // Combined stacks size limit (1,000).
             if (state::is_stack_overflow())
                 return error::invalid_stack_size;
         }

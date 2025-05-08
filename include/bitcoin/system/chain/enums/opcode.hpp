@@ -31,7 +31,7 @@ enum class opcode : uint8_t
     // ------------------------------------------------------------------------
     // is_relaxed_push, is_push (excluding reserved_80)
 
-    push_size_0 = 0,        // is_number, is_version (pushes [] to the stack)
+    push_size_0 = 0,        // is_number, is_nonnegative (pushes [] to the stack)
     push_size_1 = 1,
     push_size_2 = 2,
     push_size_3 = 3,
@@ -110,24 +110,24 @@ enum class opcode : uint8_t
     push_one_size = 76,
     push_two_size = 77,
     push_four_size = 78,
-    push_negative_1 = 79,   // is_numeric, is_number
+    push_negative_1 = 79,   // is_number
     reserved_80 = 80,       // is_reserved [op_reserved], is_success(bip342)
-    push_positive_1 = 81,   // is_numeric, is_number, is_positive, is_version
-    push_positive_2 = 82,   // is_numeric, is_number, is_positive, is_version
-    push_positive_3 = 83,   // is_numeric, is_number, is_positive, is_version
-    push_positive_4 = 84,   // is_numeric, is_number, is_positive, is_version
-    push_positive_5 = 85,   // is_numeric, is_number, is_positive, is_version
-    push_positive_6 = 86,   // is_numeric, is_number, is_positive, is_version
-    push_positive_7 = 87,   // is_numeric, is_number, is_positive, is_version
-    push_positive_8 = 88,   // is_numeric, is_number, is_positive, is_version
-    push_positive_9 = 89,   // is_numeric, is_number, is_positive, is_version
-    push_positive_10 = 90,  // is_numeric, is_number, is_positive, is_version
-    push_positive_11 = 91,  // is_numeric, is_number, is_positive, is_version
-    push_positive_12 = 92,  // is_numeric, is_number, is_positive, is_version
-    push_positive_13 = 93,  // is_numeric, is_number, is_positive, is_version
-    push_positive_14 = 94,  // is_numeric, is_number, is_positive, is_version
-    push_positive_15 = 95,  // is_numeric, is_number, is_positive, is_version
-    push_positive_16 = 96,  // is_numeric, is_number, is_positive, is_version
+    push_positive_1 = 81,   // is_number, is_positive, is_nonnegative
+    push_positive_2 = 82,   // is_number, is_positive, is_nonnegative
+    push_positive_3 = 83,   // is_number, is_positive, is_nonnegative
+    push_positive_4 = 84,   // is_number, is_positive, is_nonnegative
+    push_positive_5 = 85,   // is_number, is_positive, is_nonnegative
+    push_positive_6 = 86,   // is_number, is_positive, is_nonnegative
+    push_positive_7 = 87,   // is_number, is_positive, is_nonnegative
+    push_positive_8 = 88,   // is_number, is_positive, is_nonnegative
+    push_positive_9 = 89,   // is_number, is_positive, is_nonnegative
+    push_positive_10 = 90,  // is_number, is_positive, is_nonnegative
+    push_positive_11 = 91,  // is_number, is_positive, is_nonnegative
+    push_positive_12 = 92,  // is_number, is_positive, is_nonnegative
+    push_positive_13 = 93,  // is_number, is_positive, is_nonnegative
+    push_positive_14 = 94,  // is_number, is_positive, is_nonnegative
+    push_positive_15 = 95,  // is_number, is_positive, is_nonnegative
+    push_positive_16 = 96,  // is_number, is_positive, is_nonnegative
 
     // ------------------------------------------------------------------------
     // is_counted

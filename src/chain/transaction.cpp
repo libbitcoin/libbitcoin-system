@@ -946,8 +946,8 @@ code transaction::connect(const context& ctx) const NOEXCEPT
         return error::transaction_success;
 
     code ec{};
-    using namespace machine;
     initialize_sighash_cache();
+    using namespace machine;
 
     // Validate scripts.
     for (auto input = inputs_->begin(); input != inputs_->end(); ++input)
