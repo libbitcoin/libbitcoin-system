@@ -29,9 +29,12 @@ namespace chain {
 enum class script_version
 {
     /// Defined by bip141. 
-    zero,
+    zero = 0,
 
-    /// All reserved script versions (1..16).
+    /// Defined by bip431. 
+    tapscript = 1,
+
+    /// All reserved script versions [2..16].
     reserved,
 
     /// All unversioned scripts.
