@@ -59,15 +59,15 @@ public:
     static constexpr bool is_relaxed_push(opcode code) NOEXCEPT;
     static constexpr bool is_push(opcode code) NOEXCEPT;
     static constexpr bool is_payload(opcode code) NOEXCEPT;
-    static constexpr bool is_counted(opcode code) NOEXCEPT;
     static constexpr bool is_positive(opcode code) NOEXCEPT;
-    static constexpr bool is_version(opcode code) NOEXCEPT;
-    static constexpr bool is_numeric(opcode code) NOEXCEPT;
+    static constexpr bool is_nonnegative(opcode code) NOEXCEPT;
     static constexpr bool is_number(opcode code) NOEXCEPT;
+    static constexpr bool is_roller(opcode code) NOEXCEPT;
+    static constexpr bool is_counted(opcode code) NOEXCEPT;
+    static constexpr bool is_success(opcode code) NOEXCEPT;
     static constexpr bool is_invalid(opcode code) NOEXCEPT;
     static constexpr bool is_conditional(opcode code) NOEXCEPT;
     static constexpr bool is_reserved(opcode code) NOEXCEPT;
-    static constexpr bool is_success(opcode code) NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
@@ -130,24 +130,28 @@ public:
 
     /// Categories of operations.
     /// -----------------------------------------------------------------------
-
     /// The is_invalid() method pertains only to opcode consensus validity and
     /// should not be confused with the inversion of is_valid (serialization).
-    bool is_invalid() const NOEXCEPT;
+    /// A final opdata code that fails to deserialze sets any is_valid opcode
+    /// and the is_underflow sentinel, so both is_invalid() and is_underflow().
+
+    bool is_relaxed_push() const NOEXCEPT;
     bool is_push() const NOEXCEPT;
     bool is_payload() const NOEXCEPT;
-    bool is_counted() const NOEXCEPT;
-    bool is_version() const NOEXCEPT;
-    bool is_numeric() const NOEXCEPT;
     bool is_positive() const NOEXCEPT;
-    bool is_reserved() const NOEXCEPT;
+    bool is_nonnegative() const NOEXCEPT;
+    bool is_number() const NOEXCEPT;
+    bool is_roller() const NOEXCEPT;
+    bool is_counted() const NOEXCEPT;
+    bool is_success() const NOEXCEPT;
+    bool is_invalid() const NOEXCEPT;
     bool is_conditional() const NOEXCEPT;
-    bool is_relaxed_push() const NOEXCEPT;
+    bool is_reserved() const NOEXCEPT;
     bool is_minimal_push() const NOEXCEPT;
     bool is_nominal_push() const NOEXCEPT;
-    bool is_underflow() const NOEXCEPT;
-    bool is_oversized() const NOEXCEPT;
     bool is_underclaimed() const NOEXCEPT;
+    bool is_oversized() const NOEXCEPT;
+    bool is_underflow() const NOEXCEPT;
 
 protected:
     operation(opcode code, const chunk_cptr& push_data_ptr,

@@ -37,7 +37,8 @@ namespace chain {
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // Gotta set something when invalid minimal result, test is_valid.
-static constexpr auto any_invalid = opcode::op_xor;
+static constexpr auto any_invalid = opcode::op_verif;
+static_assert(operation::is_invalid(any_invalid));
 
 // Null data helpers.
 // ----------------------------------------------------------------------------
@@ -315,7 +316,7 @@ operation operation::from_string(const std::string& mnemonic) NOEXCEPT
     auto underflow = false;
 
     // Always defined below, but this fixes warning.
-    opcode code{ opcode::op_xor };
+    opcode code{ any_invalid };
 
     if (is_push_token(mnemonic))
     {
@@ -546,9 +547,9 @@ uint32_t operation::read_data_size(opcode code, reader& source) NOEXCEPT
 // Categories of operations.
 // ----------------------------------------------------------------------------
 
-bool operation::is_invalid() const NOEXCEPT
+bool operation::is_relaxed_push() const NOEXCEPT
 {
-    return is_invalid(code_);
+    return is_relaxed_push(code_);
 }
 
 bool operation::is_push() const NOEXCEPT
@@ -561,29 +562,39 @@ bool operation::is_payload() const NOEXCEPT
     return is_payload(code_);
 }
 
-bool operation::is_counted() const NOEXCEPT
-{
-    return is_counted(code_);
-}
-
-bool operation::is_version() const NOEXCEPT
-{
-    return is_version(code_);
-}
-
-bool operation::is_numeric() const NOEXCEPT
-{
-    return is_numeric(code_);
-}
-
 bool operation::is_positive() const NOEXCEPT
 {
     return is_positive(code_);
 }
 
-bool operation::is_reserved() const NOEXCEPT
+bool operation::is_nonnegative() const NOEXCEPT
 {
-    return is_reserved(code_);
+    return is_nonnegative(code_);
+}
+
+bool operation::is_number() const NOEXCEPT
+{
+    return is_number(code_);
+}
+
+bool operation::is_roller() const NOEXCEPT
+{
+    return is_roller(code_);
+}
+
+bool operation::is_counted() const NOEXCEPT
+{
+    return is_counted(code_);
+}
+
+bool operation::is_success() const NOEXCEPT
+{
+    return is_success(code_);
+}
+
+bool operation::is_invalid() const NOEXCEPT
+{
+    return is_invalid(code_);
 }
 
 bool operation::is_conditional() const NOEXCEPT
@@ -591,9 +602,9 @@ bool operation::is_conditional() const NOEXCEPT
     return is_conditional(code_);
 }
 
-bool operation::is_relaxed_push() const NOEXCEPT
+bool operation::is_reserved() const NOEXCEPT
 {
-    return is_relaxed_push(code_);
+    return is_reserved(code_);
 }
 
 bool operation::is_minimal_push() const NOEXCEPT
@@ -606,20 +617,20 @@ bool operation::is_nominal_push() const NOEXCEPT
     return code_ == nominal_opcode_from_data(get_data());
 }
 
+bool operation::is_underclaimed() const NOEXCEPT
+{
+    return data_size() > operation::opcode_to_maximum_size(code_);
+}
+
 bool operation::is_oversized() const NOEXCEPT
 {
     // Rule max_push_data_size imposed by [0.3.6] soft fork.
     return data_size() > max_push_data_size;
 }
 
-bool operation::is_underclaimed() const NOEXCEPT
-{
-    return data_size() > operation::opcode_to_maximum_size(code_);
-}
-
 // ****************************************************************************
-// CONSENSUS: An underflow is sized op-undersized data. This is valid as long
-// as the operation is not executed. For example, coinbase input scripts.
+// CONSENSUS: An underflow is sized op-undersized data. Behavior is the same as
+// invalid opcode, invalidating the script if executed and not success coded.
 // ****************************************************************************
 bool operation::is_underflow() const NOEXCEPT
 {

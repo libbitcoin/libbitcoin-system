@@ -30,6 +30,7 @@ DEFINE_ERROR_T_MESSAGE_MAP(script_error)
     { script_success, "script success" },
     { inputs_overflow, "index exceeds inputs" },
     { prefail_script, "script contains invalid opcode" },
+    { prevalid_script, "script contains success opcode" },
     { invalid_script, "invalid script" },
     { invalid_script_size, "invalid script size" },
     { invalid_push_data_size, "invalid push data size" },

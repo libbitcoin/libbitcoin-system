@@ -25,7 +25,6 @@
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
-#include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 
 namespace libbitcoin {
@@ -129,7 +128,6 @@ constexpr opcode operation::nominal_opcode_from_data(
     return opcode_from_size(data.size());
 }
 
-
 // Categories of opcodes.
 // ----------------------------------------------------------------------------
 
@@ -160,13 +158,6 @@ constexpr bool operation::is_payload(opcode code) NOEXCEPT
     return code >= op_1 && code <= op_78;
 }
 
-// opcode: [97..255].
-constexpr bool operation::is_counted(opcode code) NOEXCEPT
-{
-    constexpr auto op_97 = opcode::nop;
-    return code >= op_97;
-}
-
 // stack: [1..16].
 constexpr bool operation::is_positive(opcode code) NOEXCEPT
 {
@@ -176,24 +167,76 @@ constexpr bool operation::is_positive(opcode code) NOEXCEPT
 }
 
 // stack: [0, 1..16].
-constexpr bool operation::is_version(opcode code) NOEXCEPT
+constexpr bool operation::is_nonnegative(opcode code) NOEXCEPT
 {
     constexpr auto op_0 = opcode::push_size_0;
     return code == op_0 || is_positive(code);
-}
-
-// stack: [-1, 1..16] (zero is not 'numeric' on the stack).
-constexpr bool operation::is_numeric(opcode code) NOEXCEPT
-{
-    constexpr auto op_79 = opcode::push_negative_1;
-    return code == op_79 || is_positive(code);
 }
 
 // stack: [-1, 0, 1..16].
 constexpr bool operation::is_number(opcode code) NOEXCEPT
 {
     constexpr auto op_79 = opcode::push_negative_1;
-    return code == op_79 || is_version(code);
+    return code == op_79 || is_nonnegative(code);
+}
+
+// opcode: [122].
+constexpr bool operation::is_roller(opcode code) NOEXCEPT
+{
+    constexpr auto op_122 = opcode::roll;
+    return code == op_122;
+}
+
+// opcode: [97..255].
+constexpr bool operation::is_counted(opcode code) NOEXCEPT
+{
+    constexpr auto op_97 = opcode::nop;
+    return code >= op_97;
+}
+
+// This condition is only applicable with bip342 active. bip342: If any opcode
+// 80, 98, 126-129, 131-134, 137-138, 141-142, 149-153, 187-254 is encountered,
+// validation succeeds. This is most reserved and most invalid, but not all. We
+// are not renaming these codes to op_successX as succested by bip342, because:
+// (1) they remain unimplemented.
+// (2) they are not evaluated during script execution.
+// (3) they are only conditionally successful (tapscript).
+// (4) renaming them would lose important historical context.
+constexpr bool operation::is_success(opcode code) NOEXCEPT
+{
+    constexpr auto op_187 = opcode::reserved_187;
+    constexpr auto op_254 = opcode::reserved_254;
+
+    switch (code)
+    {
+        case opcode::reserved_80:
+        case opcode::op_ver:
+        ////case opcode::op_verif:      // stays invalid
+        ////case opcode::op_vernotif:   // stays invalid
+        ////case opcode::op_return:     // stays reserved
+        case opcode::op_cat:
+        case opcode::op_substr:
+        case opcode::op_left:
+        case opcode::op_right:
+        case opcode::op_invert:
+        case opcode::op_and:
+        case opcode::op_or:
+        case opcode::op_xor:
+        case opcode::reserved_137:
+        case opcode::reserved_138:
+        case opcode::op_mul2:
+        case opcode::op_div2:
+        case opcode::op_mul:
+        case opcode::op_div:
+        case opcode::op_mod:
+        case opcode::op_lshift:
+        case opcode::op_rshift:
+        ////case opcode::reserved_186:  // checksigadd subsumes
+        ////case opcode::reserved_255:  // stays reserved
+            return true;
+        default:
+            return code >= op_187 && code <= op_254;
+    }
 }
 
 // opcode: [101, 102, 126..129, 131..134, 141, 142, 149..153]
@@ -318,7 +361,7 @@ constexpr bool operation::is_conditional(opcode code) NOEXCEPT
 // ****************************************************************************
 constexpr bool operation::is_reserved(opcode code) NOEXCEPT
 {
-    constexpr auto op_185 = opcode::nop10;
+    constexpr auto op_186 = opcode::reserved_186;
 
     switch (code)
     {
@@ -332,52 +375,7 @@ constexpr bool operation::is_reserved(opcode code) NOEXCEPT
         case opcode::reserved_138:
             return true;
         default:
-            return code > op_185;
-    }
-}
-
-// This condition is only applicable with bip342 active. bip342: If any opcode
-// 80, 98, 126-129, 131-134, 137-138, 141-142, 149-153, 187-254 is encountered,
-// validation succeeds. This is most reserved and most invalid, but not all. We
-// are not renaming these codes to op_successX as succested by bip342, because:
-// (1) they remain unimplemented.
-// (2) they are not evaluated during script execution.
-// (3) they are only conditionally successful (tapscript).
-// (4) renaming them would lose important historical context.
-constexpr bool operation::is_success(opcode code) NOEXCEPT
-{
-    constexpr auto op_187 = opcode::reserved_187;
-    constexpr auto op_254 = opcode::reserved_254;
-
-    switch (code)
-    {
-        case opcode::reserved_80:
-        case opcode::op_ver:
-        ////case opcode::op_verif:      // stays invalid
-        ////case opcode::op_vernotif:   // stays invalid
-        ////case opcode::op_return:     // stays reserved
-        case opcode::op_cat:
-        case opcode::op_substr:
-        case opcode::op_left:
-        case opcode::op_right:
-        case opcode::op_invert:
-        case opcode::op_and:
-        case opcode::op_or:
-        case opcode::op_xor:
-        case opcode::reserved_137:
-        case opcode::reserved_138:
-        case opcode::op_mul2:
-        case opcode::op_div2:
-        case opcode::op_mul:
-        case opcode::op_div:
-        case opcode::op_mod:
-        case opcode::op_lshift:
-        case opcode::op_rshift:
-        ////case opcode::reserved_186:  // checksigadd subsumes
-        ////case opcode::reserved_255:  // stays reserved
-            return true;
-        default:
-            return code >= op_187 && code <= op_254;
+            return code >= op_186;
     }
 }
 

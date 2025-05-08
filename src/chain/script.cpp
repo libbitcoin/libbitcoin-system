@@ -44,8 +44,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-using namespace bc::system::machine;
-
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
@@ -59,16 +57,17 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 //*************************************************************************
 bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
 {
+    using namespace machine::number;
     return !ops.empty()
         && ops[0].is_nominal_push()
-        && ops[0].data() == number::chunk::from_integer(to_unsigned(height));
+        && ops[0].data() == chunk::from_integer(to_unsigned(height));
 }
 
 // Constructors.
 // ----------------------------------------------------------------------------
 
 script::script() NOEXCEPT
-  : script(operations{}, false, false, zero)
+  : script(operations{}, false, false, false, false, zero)
 {
 }
 
@@ -77,36 +76,34 @@ script::~script() NOEXCEPT
 }
 
 script::script(script&& other) NOEXCEPT
-  : script(std::move(other.ops_), other.valid_, other.prefail_, other.size_)
+  : script(
+      std::move(other.ops_),
+      other.valid_,
+      other.easier_,
+      other.failer_,
+      other.roller_,
+      other.size_)
 {
 }
 
 script::script(const script& other) NOEXCEPT
-  : script(other.ops_, other.valid_, other.prefail_, other.size_)
+  : script(
+      other.ops_,
+      other.valid_,
+      other.easier_,
+      other.failer_,
+      other.roller_,
+      other.size_)
 {
 }
 
-// Prefail is false.
 script::script(operations&& ops) NOEXCEPT
-  : script(std::move(ops), true, false)
+  : script(from_operations(std::move(ops)))
 {
-    // ops moved so cannot pass serialized_size(ops), order not guaranteed.
 }
 
-// Prefail is false.
 script::script(const operations& ops) NOEXCEPT
-  : script(ops, true, false, serialized_size(ops))
-{
-}
-
-script::script(operations&& ops, bool prefail) NOEXCEPT
-  : script(std::move(ops), true, prefail)
-{
-    // ops moved so cannot pass serialized_size(ops), order not guaranteed.
-}
-
-script::script(const operations& ops, bool prefail) NOEXCEPT
-  : script(ops, true, prefail, serialized_size(ops))
+  : script(from_operations(ops))
 {
 }
 
@@ -147,31 +144,13 @@ script::script(const std::string& mnemonic) NOEXCEPT
 }
 
 // protected
-script::script(operations&& ops, bool valid, bool prefail) NOEXCEPT
-  : ops_(std::move(ops)),
-    valid_(valid),
-    prefail_(prefail),
-    size_(serialized_size(ops_)),
-    offset(ops_.begin())
-{
-}
-
-// protected
-script::script(const operations& ops, bool valid, bool prefail) NOEXCEPT
+script::script(const operations& ops, bool valid, bool easier, bool failer,
+    bool roller, size_t size) NOEXCEPT
   : ops_(ops),
     valid_(valid),
-    prefail_(prefail),
-    size_(serialized_size(ops)),
-    offset(ops_.begin())
-{
-}
-
-// protected
-script::script(const operations& ops, bool valid, bool prefail,
-    size_t size) NOEXCEPT
-  : ops_(ops),
-    valid_(valid),
-    prefail_(prefail),
+    easier_(easier),
+    failer_(failer),
+    roller_(roller),
     size_(size),
     offset(ops_.begin())
 {
@@ -184,7 +163,9 @@ script& script::operator=(script&& other) NOEXCEPT
 {
     ops_ = std::move(other.ops_);
     valid_ = other.valid_;
-    prefail_ = other.prefail_;
+    easier_ = other.easier_;
+    failer_ = other.failer_;
+    roller_ = other.roller_;
     size_ = other.size_;
     offset = ops_.begin();
     return *this;
@@ -194,7 +175,9 @@ script& script::operator=(const script& other) NOEXCEPT
 {
     ops_ = other.ops_;
     valid_ = other.valid_;
-    prefail_ = other.prefail_;
+    easier_ = other.easier_;
+    failer_ = other.failer_;
+    roller_ = other.roller_;
     size_ = other.size_;
     offset = ops_.begin();
     return *this;
@@ -232,11 +215,51 @@ size_t script::op_count(reader& source) NOEXCEPT
     return count;
 }
 
+// static/private
+script script::from_operations(operations&& ops) NOEXCEPT
+{
+    constexpr auto valid = true;
+    auto easier = false;
+    auto failer = false;
+    auto roller = false;
+
+    for (const auto& op: ops)
+    {
+        easier |= op.is_success();
+        failer |= op.is_invalid();
+        roller |= op.is_roller();
+    }
+
+    const auto size = serialized_size(ops);
+    return { std::move(ops), valid, easier, failer, roller, size };
+}
+
+// static/private
+script script::from_operations(const operations& ops) NOEXCEPT
+{
+    constexpr auto valid = true;
+    auto easier = false;
+    auto failer = false;
+    auto roller = false;
+
+    for (const auto& op : ops)
+    {
+        easier |= op.is_success();
+        failer |= op.is_invalid();
+        roller |= op.is_roller();
+    }
+
+    const auto size = serialized_size(ops);
+    return { ops, valid, easier, failer, roller, size };
+}
+
 // private
 void script::assign_data(reader& source, bool prefix) NOEXCEPT
 {
+    easier_ = false;
+    failer_ = false;
+    roller_ = false;
     size_t expected{};
-    prefail_ = false;
 
     if (prefix)
     {
@@ -250,7 +273,10 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
     while (!source.is_exhausted())
     {
         ops_.emplace_back(source);
-        prefail_ |= ops_.back().is_invalid();
+        const auto& op = ops_.back();
+        easier_ |= op.is_success();
+        failer_ |= op.is_invalid();
+        roller_ |= op.is_roller();
     }
 
     size_ = source.get_read_position() - start;
@@ -269,9 +295,13 @@ void script::assign_data(reader& source, bool prefix) NOEXCEPT
 // static/private
 script script::from_string(const std::string& mnemonic) NOEXCEPT
 {
+    constexpr auto valid = true;
+    auto easier = false;
+    auto failer = false;
+    auto roller = false;
+
     // There is always one operation per non-empty string token.
     auto tokens = split(mnemonic);
-    auto prefail = false;
 
     // Split always returns at least one token, and when trimming it will be
     // empty only if there was nothing but whitespace in the mnemonic.
@@ -285,14 +315,18 @@ script script::from_string(const std::string& mnemonic) NOEXCEPT
     for (const auto& token: tokens)
     {
         ops.emplace_back(token);
-        prefail |= ops.back().is_invalid();
+        const auto& op = ops.back();
+        easier |= op.is_success();
+        failer |= op.is_invalid();
+        roller |= op.is_roller();
 
         // This is a deserialization failure, not just an invalid code.
         if (!ops.back().is_valid())
             return {};
     }
 
-    return { std::move(ops), prefail };
+    const auto size = serialized_size(ops);
+    return { std::move(ops), valid, easier, failer, roller, size };
 }
 
 // Serialization.
@@ -340,7 +374,6 @@ std::string script::to_string(uint32_t active_flags) const NOEXCEPT
     return text.str();
 }
 
-
 // Properties.
 // ----------------------------------------------------------------------------
 
@@ -351,25 +384,33 @@ bool script::is_valid() const NOEXCEPT
     return valid_;
 }
 
+bool script::is_roller() const NOEXCEPT
+{
+    return roller_;
+};
+
 bool script::is_prefail() const NOEXCEPT
 {
-    // The script contains an invalid opcode and will thus fail evaluation.
-    return prefail_;
+    // Script contains an invalid opcode and will fail evaluation.
+    return failer_;
+}
+
+bool script::is_prevalid() const NOEXCEPT
+{
+    // Script contains a success opcode and will pass evaluation (tapscript).
+    return easier_;
+}
+
+bool script::is_underflow() const NOEXCEPT
+{
+    // Prefail implies an invalid code and a non-empty op stack.
+    return is_prefail() && ops_.back().is_underflow();
 }
 
 const operations& script::ops() const NOEXCEPT
 {
     return ops_;
 }
-
-bool script::is_roller() const NOEXCEPT
-{
-    static const auto roll = operation{ opcode::roll };
-
-    // Naive implementation, any op_roll in script, late-counted.
-    // TODO: precompute on script parse, tune using performance profiling.
-    return contains(ops_, roll);
-};
 
 // Consensus (witness::extract_script) and Electrum server payments key.
 hash_digest script::hash() const NOEXCEPT

@@ -22,15 +22,11 @@
 #include <istream>
 #include <memory>
 #include <string>
-#include <vector>
 #include <bitcoin/system/chain/enums/flags.hpp>
-#include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/operation.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -100,8 +96,6 @@ public:
     script(const script& other) NOEXCEPT;
     script(operations&& ops) NOEXCEPT;
     script(const operations& ops) NOEXCEPT;
-    script(operations&& ops, bool prefail) NOEXCEPT;
-    script(const operations& ops, bool prefail) NOEXCEPT;
 
     script(stream::in::fast&& stream, bool prefix) NOEXCEPT;
     script(stream::in::fast& stream, bool prefix) NOEXCEPT;
@@ -138,11 +132,13 @@ public:
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
+    bool is_roller() const NOEXCEPT;
     bool is_prefail() const NOEXCEPT;
+    bool is_prevalid() const NOEXCEPT;
+    bool is_underflow() const NOEXCEPT;
     const operations& ops() const NOEXCEPT;
 
     /// Computed properties.
-    bool is_roller() const NOEXCEPT;
     hash_digest hash() const NOEXCEPT;
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
@@ -166,30 +162,26 @@ public:
     bool is_unspendable() const NOEXCEPT;
 
 protected:
-    script(operations&& ops, bool valid, bool prefail) NOEXCEPT;
-    script(const operations& ops, bool valid, bool prefail) NOEXCEPT;
-    script(const operations& ops, bool valid, bool prefail,
-        size_t size) NOEXCEPT;
+    script(const operations& ops, bool valid, bool easier, bool failer,
+        bool roller, size_t size) NOEXCEPT;
 
 private:
-    // TODO: move to config serialization wrapper.
+    static inline size_t op_size(size_t total, const operation& op) NOEXCEPT;
+    static script from_operations(operations&& ops) NOEXCEPT;
+    static script from_operations(const operations& ops) NOEXCEPT;
     static script from_string(const std::string& mnemonic) NOEXCEPT;
-
     static size_t op_count(reader& source) NOEXCEPT;
     static size_t serialized_size(const operations& ops) NOEXCEPT;
-    static inline size_t op_size(size_t total, const operation& op) NOEXCEPT
-    {
-        return ceilinged_add(total, op.serialized_size());
-    };
-
     void assign_data(reader& source, bool prefix) NOEXCEPT;
 
     // Script should be stored as shared.
     operations ops_;
 
-    // Cache.
+    // Cache, computed at construction.
     bool valid_;
-    bool prefail_;
+    bool easier_;
+    bool failer_;
+    bool roller_;
     size_t size_;
 
 public:

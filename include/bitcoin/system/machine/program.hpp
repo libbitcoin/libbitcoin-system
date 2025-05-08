@@ -26,7 +26,6 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/machine/interpreter.hpp>
 #include <bitcoin/system/machine/stack.hpp>
 
 namespace libbitcoin {
@@ -76,7 +75,6 @@ protected:
     /// Constants.
     /// -----------------------------------------------------------------------
 
-    INLINE bool is_prefail() const NOEXCEPT;
     INLINE op_iterator begin() const NOEXCEPT;
     INLINE op_iterator end() const NOEXCEPT;
     INLINE const chain::input& input() const NOEXCEPT;

@@ -257,6 +257,10 @@ private:
     static inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
     static inline bool is_sighash_valid(uint8_t sighash_flags) NOEXCEPT;
 
+    // delegated
+    code connect_input(const context& ctx,
+        const input_iterator& it) const NOEXCEPT;
+
     hash_digest outputs_hash() const NOEXCEPT;
     hash_digest points_hash() const NOEXCEPT;
     hash_digest sequences_hash() const NOEXCEPT;

@@ -21,12 +21,15 @@
 
 #include <algorithm>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/crypto/crypto.hpp>
-#include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/enums/script_pattern.hpp>
+#include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/operation.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/endian/endian.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -34,6 +37,9 @@ namespace chain {
 
 // More efficient [] dereferences are all guarded here.
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+// static
+// ----------------------------------------------------------------------------
 
 constexpr bool script::is_enabled(uint32_t active_flags, flags flag) NOEXCEPT
 {
@@ -87,7 +93,7 @@ constexpr bool script::is_witness_program_pattern(
     const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
-        && ops[0].is_version()
+        && ops[0].is_nonnegative()
         && ops[1].is_minimal_push()
         && ops[1].data().size() >= min_witness_program
         && ops[1].data().size() <= max_witness_program;
@@ -178,7 +184,7 @@ constexpr bool script::is_pay_script_hash_pattern(
 constexpr bool script::is_pay_witness_pattern(const operations& ops) NOEXCEPT
 {
     return ops.size() == 2
-        && ops[0].is_version()
+        && ops[0].is_nonnegative()
         && ops[1].is_push();
 }
 
@@ -367,6 +373,12 @@ inline operations script::to_pay_witness_script_hash_pattern(
         { to_chunk(hash), false }
     };
 }
+
+// private
+inline size_t script::op_size(size_t total, const operation& op) NOEXCEPT
+{
+    return ceilinged_add(total, op.serialized_size());
+};
 
 BC_POP_WARNING()
 

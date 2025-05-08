@@ -58,6 +58,15 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__prefail_script__true_exected_message)
     BOOST_REQUIRE_EQUAL(ec.message(), "script contains invalid opcode");
 }
 
+BOOST_AUTO_TEST_CASE(script_error_t__code__prevalid_script__true_exected_message)
+{
+    constexpr auto value = error::prevalid_script;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "script contains success opcode");
+}
+
 BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_script_size__true_exected_message)
 {
     constexpr auto value = error::invalid_script_size;
