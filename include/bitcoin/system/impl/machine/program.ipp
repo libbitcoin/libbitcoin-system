@@ -153,7 +153,7 @@ INLINE error::script_error_t CLASS::
 initialize() const NOEXCEPT
 {
     // TODO: nops rule must first be enabled in tests and config.
-    const auto nops = true; ////is_enabled(flags::nops_rule);
+    constexpr auto nops = true; ////is_enabled(flags::nops_rule);
     const auto bip141 = is_enabled(flags::bip141_rule);
     const auto bip342 = is_enabled(flags::bip342_rule);
 
