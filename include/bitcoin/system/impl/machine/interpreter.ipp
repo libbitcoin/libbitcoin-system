@@ -1012,15 +1012,13 @@ op_check_sig() NOEXCEPT
     const auto verify = op_check_sig_verify();
     const auto bip66 = state::is_enabled(flags::bip66_rule);
 
-    // BIP342: if public key is empty, script MUST fail and end.
     if (verify == error::op_check_sig_empty_key)
         return verify;
 
-    // BIP66: if DER encoding invalid, script MUST fail and end.
+    // BIP66: if DER encoding invalid script MUST fail and end.
     if (bip66 && verify == error::op_check_sig_parse_signature)
         return verify;
 
-    // BIP342: [boolean result] is pushed onto the stack.
     state::push_bool(verify == error::op_success);
     return error::op_success;
 }
@@ -1029,22 +1027,17 @@ TEMPLATE
 inline error::op_error_t CLASS::
 op_check_sig_verify() NOEXCEPT
 {
-    // BIP342: if fewer than 2 elements on stack, script MUST fail and end.
     if (state::stack_size() < 2u)
         return error::op_check_sig_verify1;
 
-    // BIP342: public key (top) is popped.
     const auto key = state::pop_chunk_();
-
-    // BIP342: signature (second to top) is popped.
     const auto endorsement = state::pop_chunk_();
 
     // op_check_sig_empty_key causes op_check_sig to fail.
-    // BIP342: if public key is empty, script MUST fail and end.
     if (key->empty())
         return error::op_check_sig_empty_key;
 
-    // BIP342: only.
+    // BIP342:
     if (state::is_enabled(flags::bip342_rule))
     {
         // If signature is empty, script MUST fail and end (or push false).
@@ -1058,21 +1051,19 @@ op_check_sig_verify() NOEXCEPT
             // Upon validation fail, script MUST fail and end (or push false).
 
             ///////////////////////////////////////////////////////////////////
-            // TODO: add prepare method and generate hash.
-            //
-            ec_signature signature;
             uint8_t sighash_flags;
+            ec_signature signature;
             if (!schnorr::parse(sighash_flags, signature, *endorsement))
                 return error::op_check_sig_verify3;
 
-            hash_digest hash{};
+            // TODO: add prepare method and generate hash.
+            constexpr hash_digest hash{};
             if (!schnorr::verify_signature(*key, hash, signature))
                 return error::op_check_sig_verify4;
-            //
             ///////////////////////////////////////////////////////////////////
         }
 
-        // BIP342: if signature not empty, opcode counted toward sigops budget.
+        // If signature not empty, opcode counted toward sigops budget.
         if (!state::sigops_increment())
             return error::op_check_sig_verify5;
 
@@ -1284,7 +1275,7 @@ TEMPLATE
 inline error::op_error_t CLASS::
 op_check_sig_add() NOEXCEPT
 {
-    // BIP342: reserved_186 subsumed by checksigadd under tapscript.
+    // BIP65: nop2 subsumed by op_checksigadd when tapscript fork active.
     if (!state::is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::reserved_186);
 
@@ -1316,17 +1307,15 @@ op_check_sig_add() NOEXCEPT
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // TODO: add prepare method and generate hash.
-    //
-    ec_signature signature;
     uint8_t sighash_flags;
+    ec_signature signature;
     if (!schnorr::parse(sighash_flags, signature, *endorsement))
         return error::op_check_schnorr_sig3;
 
-    hash_digest hash{};
+    // TODO: add prepare method and generate hash.
+    constexpr hash_digest hash{};
     if (!schnorr::verify_signature(*key, hash, signature))
         return error::op_check_schnorr_sig4;
-    //
     ///////////////////////////////////////////////////////////////////////////
 
     // BIP342: if signature not empty, opcode counted toward sigops budget.
@@ -1659,36 +1648,28 @@ run() NOEXCEPT
 {
     // Enforce initial limits, determine early success or failure.
     if (const auto ec = state::initialize())
-        return ec == error::prevalid_script ?
-            error::script_success : ec;
+        return (ec == error::prevalid_script) ? error::script_success : ec;
 
     for (auto it = state::begin(); it != state::end(); ++it)
     {
-        // An iterator is required only for run_op:op_codeseparator.
         const auto& op = *it;
 
-        // Rule imposed by [0.3.6] soft fork.
         if (op.is_oversized())
             return error::invalid_push_data_size;
 
-        // Non-push opcode count limit (201).
         if (!state::ops_increment(op))
             return error::invalid_operation_count;
 
-        // Conditional evaluation scope.
         if (state::if_(op))
         {
-            // Evaluate opcode (switch).
             if (const auto ec = run_op(it))
                 return ec;
 
-            // Combined stacks size limit (1,000).
             if (state::is_stack_overflow())
                 return error::invalid_stack_size;
         }
     }
 
-    // Guard against unbalanced evaluation scope.
     return state::is_balanced() ? error::script_success :
         error::invalid_stack_scope;
 }
