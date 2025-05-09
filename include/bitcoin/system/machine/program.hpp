@@ -183,6 +183,7 @@ protected:
 
 private:
     using primary_stack = stack<Stack>;
+    static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
 
     // Private stack helpers.
     template<size_t Bytes, typename Integer,
