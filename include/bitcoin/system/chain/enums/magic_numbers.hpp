@@ -83,6 +83,11 @@ constexpr uint32_t witness_head = 0xaa21a9ed;
 constexpr uint8_t witness_marker = 0x00;
 constexpr uint8_t witness_enabled = 0x01;
 
+/// Tapscript consensus constants (bip342).
+/// ---------------------------------------------------------------------------
+
+constexpr size_t signature_budget = 50;
+
 /// Policy constants.
 /// ---------------------------------------------------------------------------
 
