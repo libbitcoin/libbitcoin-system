@@ -485,9 +485,14 @@ hash_digest transaction::signature_hash(const input_iterator& input,
     {
         case script_version::unversioned:
             return unversioned_signature_hash(input, sub, sighash_flags);
-        case script_version::zero:
+        case script_version::segwit:
             return version_0_signature_hash(input, sub, value, sighash_flags,
                 bip143);
+
+        // TODO: taproot.
+        case script_version::taproot:
+            return {};
+
         case script_version::reserved:
         default:
             return {};

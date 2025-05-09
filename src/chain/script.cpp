@@ -454,7 +454,9 @@ script_version script::version() const NOEXCEPT
     switch (ops_.front().code())
     {
         case opcode::push_size_0:
-            return script_version::zero;
+            return script_version::segwit;
+        case opcode::push_size_1:
+            return script_version::taproot;
         default:
             return script_version::reserved;
     }

@@ -337,7 +337,7 @@ bool witness::extract_sigop_script(script& out_script,
     out_script = {};
     switch (program_script.version())
     {
-        case script_version::zero:
+        case script_version::segwit:
         {
             switch (program_script.witness_program().size())
             {
@@ -358,6 +358,10 @@ bool witness::extract_sigop_script(script& out_script,
                     return true;
             }
         }
+
+        // TODO: taproot.
+        case script_version::taproot:
+            return true;
 
         // These versions are reserved for future extensions (bip141).
         case script_version::reserved:
@@ -380,7 +384,7 @@ bool witness::extract_script(script::cptr& out_script,
 
     switch (program_script.version())
     {
-        case script_version::zero:
+        case script_version::segwit:
         {
             switch (program.size())
             {
@@ -422,6 +426,10 @@ bool witness::extract_script(script::cptr& out_script,
                     return false;
             }
         }
+
+        // TODO: taproot.
+        case script_version::taproot:
+            return true;
 
         // These versions are reserved for future extensions (bip141).
         case script_version::reserved:

@@ -28,11 +28,11 @@ namespace chain {
 /// Script versions (bip141).
 enum class script_version
 {
-    /// Defined by bip141. 
-    zero = 0,
+    /// If the version byte is 0 (either P2WPKH or P2WSH or inavalid) [bip141].
+    segwit = 0,
 
-    /// Defined by bip431. 
-    tapscript = 1,
+    /// Taproot output is native segwit output with version number 1 [bip431].
+    taproot = 1,
 
     /// All reserved script versions [2..16].
     reserved,

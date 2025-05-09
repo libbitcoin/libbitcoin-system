@@ -757,7 +757,7 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 {
     // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
-    if (is_enabled(flags::bip143_rule) && version_ == script_version::zero)
+    if (is_enabled(flags::bip143_rule) && version_ == script_version::segwit)
         return script_;
 
     // Transform into a set of endorsement push ops and one op_codeseparator.
