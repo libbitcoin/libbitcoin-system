@@ -32,9 +32,6 @@ namespace libbitcoin {
 namespace system {
 namespace machine {
 
-using namespace system::chain;
-using namespace system::error;
-
 // Constructors.
 // ----------------------------------------------------------------------------
 
@@ -43,7 +40,7 @@ using namespace system::error;
 // This expectation is guaranteed by the retained tx reference.
 TEMPLATE
 inline CLASS::
-program(const chain::transaction& tx, const input_iterator& input,
+program(const transaction& tx, const input_iterator& input,
      uint32_t active_flags) NOEXCEPT
   : transaction_(tx),
     input_(input),
@@ -51,7 +48,6 @@ program(const chain::transaction& tx, const input_iterator& input,
     flags_(active_flags),
     value_(max_uint64),
     version_(script_version::unversioned),
-    witness_(),
     primary_()
 {
 }
@@ -69,7 +65,6 @@ program(const program& other, const script::cptr& script) NOEXCEPT
     flags_(other.flags_),
     value_(other.value_),
     version_(other.version_),
-    witness_(),
     primary_(other.primary_)
 {
 }
@@ -84,20 +79,19 @@ program(program&& other, const script::cptr& script) NOEXCEPT
     flags_(other.flags_),
     value_(other.value_),
     version_(other.version_),
-    witness_(),
     primary_(std::move(other.primary_))
 {
 }
 
-// Witness script run (witness-initialized stack).
+// Segwit script run (witness-initialized stack).
 // 'tx', 'input' (and iterated chain::input) must remain in scope, as these
 // hold chunk state weak references. A witness pointer is explicitly retained
 // to guarantee the lifetime of its elements.
 TEMPLATE
 inline CLASS::
-program(const chain::transaction& tx, const input_iterator& input,
-    const script::cptr& script, uint32_t active_flags, script_version version,
-    const chunk_cptrs_ptr& witness) NOEXCEPT
+program(const transaction& tx, const input_iterator& input,
+    const script::cptr& script, uint32_t active_flags,
+    script_version version, const chunk_cptrs_ptr& witness) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_(script),
@@ -106,6 +100,26 @@ program(const chain::transaction& tx, const input_iterator& input,
     version_(version),
     witness_(witness),
     primary_(projection<Stack>(*witness))
+{
+}
+
+// Taproot script run (witness-initialized stack).
+// Same as segwit but with with budget and unstripped bip342 flag.
+TEMPLATE
+inline CLASS::
+program(const transaction& tx, const input_iterator& input,
+    const script::cptr& script, uint32_t active_flags,
+    script_version version, const chunk_cptrs_ptr& witness,
+    size_t witness_size) NOEXCEPT
+  : transaction_(tx),
+    input_(input),
+    script_(script),
+    flags_(active_flags),
+    value_((*input)->prevout->value()),
+    version_(version),
+    witness_(witness),
+    primary_(projection<Stack>(*witness)),
+    budget_(ceilinged_add(chain::signature_budget, witness_size))
 {
 }
 
@@ -133,43 +147,8 @@ pop() NOEXCEPT
 // ============================================================================
 
 TEMPLATE
-INLINE typename CLASS::op_iterator CLASS::
-begin() const NOEXCEPT
-{
-    return script_->ops().begin();
-}
-
-TEMPLATE
-INLINE typename CLASS::op_iterator CLASS::
-end() const NOEXCEPT
-{
-    return script_->ops().end();
-}
-
-TEMPLATE
-INLINE const chain::input& CLASS::
-input() const NOEXCEPT
-{
-    return **input_;
-}
-
-TEMPLATE
-INLINE const chain::transaction& CLASS::
-transaction() const NOEXCEPT
-{
-    return transaction_;
-}
-
-TEMPLATE
-INLINE bool CLASS::
-is_enabled(chain::flags flag) const NOEXCEPT
-{
-    return to_bool(flags_ & flag);
-}
-
-TEMPLATE
-INLINE script_error_t CLASS::
-validate() const NOEXCEPT
+INLINE error::script_error_t CLASS::
+initialize() const NOEXCEPT
 {
     // TODO: nops rule must first be enabled in tests and config.
     const auto nops = true; ////is_enabled(flags::nops_rule);
@@ -177,7 +156,7 @@ validate() const NOEXCEPT
     const auto bip342 = is_enabled(flags::bip342_rule);
 
     // Apply stack element limit (520) to initial witness [bip141][tapscript].
-    if (bip141 && witness_ && !witness::is_push_size(*witness_))
+    if (bip141 && witness_ && !chain::witness::is_push_size(*witness_))
         return error::invalid_witness_stack;
 
     // Script size limit (10,000) [0.3.7+], removed [tapscript].
@@ -201,6 +180,41 @@ validate() const NOEXCEPT
         return error::prefail_script;
 
     return error::script_success;
+}
+
+TEMPLATE
+INLINE typename CLASS::op_iterator CLASS::
+begin() const NOEXCEPT
+{
+    return script_->ops().begin();
+}
+
+TEMPLATE
+INLINE typename CLASS::op_iterator CLASS::
+end() const NOEXCEPT
+{
+    return script_->ops().end();
+}
+
+TEMPLATE
+INLINE const chain::transaction& CLASS::
+tx() const NOEXCEPT
+{
+    return transaction_;
+}
+
+TEMPLATE
+INLINE const chain::input& CLASS::
+input() const NOEXCEPT
+{
+    return **input_;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+is_enabled(flags flag) const NOEXCEPT
+{
+    return to_bool(flags_ & flag);
 }
 
 // Primary stack (conversions).
@@ -549,7 +563,7 @@ is_stack_overflow() const NOEXCEPT
 {
     // Addition is safe due to stack size constraint.
     // Limit of 1000 elements in stack and altstack remains [tapscript]. 
-    return (stack_size() + alternate_.size()) > max_unified_stack_size;
+    return (stack_size() + alternate_.size()) > chain::max_unified_stack_size;
 }
 
 // private
@@ -675,7 +689,7 @@ if_(const operation& op) const NOEXCEPT
 // ****************************************************************************
 INLINE constexpr bool operation_count_exceeded(size_t count) NOEXCEPT
 {
-    return count > max_counted_ops;
+    return count > chain::max_counted_ops;
 }
 
 TEMPLATE
@@ -692,7 +706,7 @@ ops_increment(const operation& op) NOEXCEPT
     if (operation::is_counted(op.code()))
         ++operations_;
 
-    return operations_ <= max_counted_ops;
+    return operations_ <= chain::max_counted_ops;
 }
 
 TEMPLATE
@@ -739,7 +753,7 @@ inline chain::strippers create_strip_ops(
     for (const auto& endorsement: endorsements)
         strip.emplace_back(endorsement);
 
-    strip.emplace_back(opcode::codeseparator);
+    strip.emplace_back(chain::opcode::codeseparator);
     BC_POP_WARNING()
 
     return strip;
@@ -752,18 +766,20 @@ inline chain::strippers create_strip_ops(
 // Subscripts are not evaluated, they are limited to signature hash creation.
 // ****************************************************************************
 TEMPLATE
-inline script::cptr CLASS::
+inline chain::script::cptr CLASS::
 subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 {
     // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
-    if (is_enabled(flags::bip143_rule) && version_ == script_version::segwit)
+    if (is_enabled(flags::bip143_rule) &&
+        version_ == script_version::segwit)
         return script_;
 
     // Transform into a set of endorsement push ops and one op_codeseparator.
     const auto strip = create_strip_ops(endorsements);
     const auto stop = script_->ops().end();
     const op_iterator offset{ script_->offset };
+    using namespace chain;
 
     // If none of the strip ops are found, return the subscript.
     if (!is_intersecting<operations>(offset, stop, strip))
@@ -799,7 +815,7 @@ TEMPLATE
 inline bool CLASS::
 prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
     uint8_t& sighash_flags, const data_chunk& endorsement,
-    const script& sub) const NOEXCEPT
+    const script& subscript) const NOEXCEPT
 {
     data_slice distinguished;
 
@@ -808,7 +824,7 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
         return false;
 
     // Obtain the signature hash from subscript and sighash flags.
-    signature_hash(cache, sub, sighash_flags);
+    signature_hash(cache, subscript, sighash_flags);
 
     // Parse DER signature into an ECDSA signature (bip66 sets strict).
     const auto bip66 = is_enabled(flags::bip66_rule);
@@ -820,26 +836,26 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
 
 TEMPLATE
 INLINE hash_digest CLASS::
-signature_hash(const script& sub, uint8_t flags) const NOEXCEPT
+signature_hash(const script& subscript, uint8_t flags) const NOEXCEPT
 {
     // The bip141 fork establishes witness version, hashing is a distinct fork.
     const auto bip143 = is_enabled(flags::bip143_rule);
 
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return transaction_.signature_hash(input_, sub, value_, flags, version_,
-        bip143);
+    return transaction_.signature_hash(input_, subscript, value_, flags,
+        version_, bip143);
 }
 
 // Caches signature hashes in a map against sighash flags.
 // Prevents recomputation in the common case where flags are the same.
 TEMPLATE
 INLINE void CLASS::
-signature_hash(hash_cache& cache, const script& sub,
+signature_hash(hash_cache& cache, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     if (cache.find(sighash_flags) == cache.end())
-        cache.emplace(sighash_flags, signature_hash(sub, sighash_flags));
+        cache.emplace(sighash_flags, signature_hash(subscript, sighash_flags));
     BC_POP_WARNING()
 }
 

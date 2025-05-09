@@ -40,27 +40,32 @@ class program
 public:
     DELETE_COPY_MOVE_DESTRUCT(program);
 
-    typedef chain::operations::const_iterator op_iterator;
-    typedef chain::input_cptrs::const_iterator input_iterator;
-    typedef std::unordered_map<uint8_t, hash_digest> hash_cache;
+    using script = chain::script;
+    using transaction = chain::transaction;
+    using script_version = chain::script_version;
+    using input_iterator = chain::input_cptrs::const_iterator;
 
-    /// Input script run (default/empty stack).
-    inline program(const chain::transaction& transaction,
+    /// Input script (default/empty stack).
+    inline program(const transaction& transaction,
         const input_iterator& input, uint32_t active_flags) NOEXCEPT;
 
-    /// Legacy p2sh or prevout script run (copied input stack).
-    inline program(const program& other,
-        const chain::script::cptr& script) NOEXCEPT;
+    /// Legacy p2sh or prevout script (copied input stack).
+    inline program(const program& other, const script::cptr& script) NOEXCEPT;
 
-    /// Legacy p2sh or prevout script run (moved input stack).
-    inline program(program&& other,
-        const chain::script::cptr& script) NOEXCEPT;
+    /// Legacy p2sh or prevout script (moved input stack).
+    inline program(program&& other, const script::cptr& script) NOEXCEPT;
 
-    /// Witness script run (witness-initialized stack).
-    inline program(const chain::transaction& transaction,
-        const input_iterator& input, const chain::script::cptr& script,
-        uint32_t active_flags, chain::script_version version,
+    /// Witness v0 (segwit) script.
+    inline program(const transaction& transaction,
+        const input_iterator& input, const script::cptr& script,
+        uint32_t active_flags, script_version version,
         const chunk_cptrs_ptr& stack) NOEXCEPT;
+
+    /// Witness v1 (tapscript) script.
+    inline program(const transaction& transaction,
+        const input_iterator& input, const script::cptr& script,
+        uint32_t active_flags, script_version version,
+        const chunk_cptrs_ptr& stack, size_t witness_size) NOEXCEPT;
 
     /// Program result.
     inline bool is_true(bool clean) const NOEXCEPT;
@@ -69,18 +74,25 @@ public:
     inline const data_chunk& pop() NOEXCEPT;
 
 protected:
+    using flags = chain::flags;
+    using opcode = chain::opcode;
+    using operation = chain::operation;
+    using script_error_t = error::script_error_t;
+    using op_iterator = chain::operations::const_iterator;
+    using hash_cache = std::unordered_map<uint8_t, hash_digest>;
+
     INLINE static bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;
 
     /// Constants.
     /// -----------------------------------------------------------------------
 
+    INLINE script_error_t initialize() const NOEXCEPT;
     INLINE op_iterator begin() const NOEXCEPT;
     INLINE op_iterator end() const NOEXCEPT;
+    INLINE const transaction& tx() const NOEXCEPT;
     INLINE const chain::input& input() const NOEXCEPT;
-    INLINE const chain::transaction& transaction() const NOEXCEPT;
-    INLINE bool is_enabled(chain::flags flag) const NOEXCEPT;
-    INLINE error::script_error_t validate() const NOEXCEPT;
+    INLINE bool is_enabled(flags flag) const NOEXCEPT;
 
     /// Primary stack.
     /// -----------------------------------------------------------------------
@@ -101,7 +113,8 @@ protected:
     INLINE bool pop_signed32(int32_t& value) NOEXCEPT;
     INLINE bool pop_signed32_(int32_t& value) NOEXCEPT;
     INLINE bool pop_binary32(int32_t& left, int32_t& right) NOEXCEPT;
-    INLINE bool pop_ternary32(int32_t& upper, int32_t& lower, int32_t& value) NOEXCEPT;
+    INLINE bool pop_ternary32(int32_t& upper, int32_t& lower, 
+        int32_t& value) NOEXCEPT;
     INLINE bool pop_index32(size_t& index) NOEXCEPT;
 
     /// Primary stack (peek).
@@ -141,12 +154,12 @@ protected:
     INLINE void end_if_() NOEXCEPT;
     INLINE bool is_balanced() const NOEXCEPT;
     INLINE bool is_succeess() const NOEXCEPT;
-    INLINE bool if_(const chain::operation& op) const NOEXCEPT;
+    INLINE bool if_(const operation& op) const NOEXCEPT;
 
     /// Accumulator.
     /// -----------------------------------------------------------------------
 
-    INLINE bool ops_increment(const chain::operation& op) NOEXCEPT;
+    INLINE bool ops_increment(const operation& op) NOEXCEPT;
     INLINE bool ops_increment(size_t public_keys) NOEXCEPT;
 
     /// Signature validation helpers.
@@ -156,8 +169,7 @@ protected:
     inline void set_subscript(const op_iterator& op) NOEXCEPT;
 
     /// Strip endorsement and code_separator opcodes from returned subscript.
-    inline chain::script::cptr subscript(
-        const chunk_xptrs& endorsements) const NOEXCEPT;
+    inline script::cptr subscript(const chunk_xptrs& endorsements) const NOEXCEPT;
 
     /// Prepare signature (enables generalized signing).
     inline bool prepare(ec_signature& signature, const data_chunk& key,
@@ -166,7 +178,7 @@ protected:
     /// Prepare signature, with caching for multisig with same sighash flags.
     inline bool prepare(ec_signature& signature, const data_chunk& key,
         hash_cache& cache, uint8_t& sighash_flags, const data_chunk& endorsement,
-        const chain::script& sub) const NOEXCEPT;
+        const script& sub) const NOEXCEPT;
 
 private:
     using primary_stack = stack<Stack>;
@@ -184,29 +196,28 @@ private:
     INLINE bool is_stack_clean() const NOEXCEPT;
 
     // Signature hashing.
-    INLINE hash_digest signature_hash(const chain::script& sub,
+    INLINE hash_digest signature_hash(const script& sub,
         uint8_t flags) const NOEXCEPT;
-    INLINE void signature_hash(hash_cache& cache, const chain::script& sub,
+    INLINE void signature_hash(hash_cache& cache, const script& sub,
         uint8_t flags) const NOEXCEPT;
 
     // Constants.
-    const chain::transaction& transaction_;
+    const transaction& transaction_;
     const input_iterator input_;
-    const chain::script::cptr script_;
+    const script::cptr script_;
     const uint32_t flags_;
     const uint64_t value_;
-    const chain::script_version version_;
-    const chunk_cptrs_ptr witness_;
+    const script_version version_;
+    const chunk_cptrs_ptr witness_{};
 
-    // Three stacks.
+    // Stacks.
     primary_stack primary_;
     alternate_stack alternate_{};
     condition_stack condition_{};
 
-    // Accumulator.
+    // Accumulators.
+    size_t budget_{};
     size_t operations_{};
-
-    // Condition stack optimization.
     size_t negative_conditions_{};
 };
 
