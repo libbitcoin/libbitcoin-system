@@ -107,6 +107,7 @@ program(const transaction& tx, const input_iterator& input,
 // Same as segwit but with with budget and unstripped bip342 flag.
 // Sigop budget is 50 plus size of prefixed serialized witness [bip342].
 // Budget is initialized add1(50) to make it zero-based, avoiding signed type.
+// This program is never used to construct another, so masked flags_ never mix.
 TEMPLATE
 inline CLASS::
 program(const transaction& tx, const input_iterator& input,
@@ -173,11 +174,15 @@ initialize() const NOEXCEPT
     if (bip342 && script_->is_prevalid())
         return error::prevalid_script;
 
-    // Fail if last op underflow, lower priority than easy [bip342].
+    // Fail if last op underflow, lower priority than success codes [bip342].
     if (script_->is_underflow())
         return error::invalid_script;
 
     // Fail if any op invalid (invalid codes reduced in tapscript).
+    // Should be after underflow check since underflow is also an invalid op.
+    // Promoted success codes are not reachable here due to is_prevalid above.
+    // So only op_verif/op_vernotif (unpromoted invalids) are caught here for
+    // tapscript, otherwise is_prevalid bypassed and all invalids caught here.
     if (script_->is_prefail())
         return error::prefail_script;
 

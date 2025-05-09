@@ -202,6 +202,12 @@ constexpr bool operation::is_counted(opcode code) NOEXCEPT
 // (2) they are not evaluated during script execution.
 // (3) they are only conditionally successful (tapscript).
 // (4) renaming them would lose important historical context.
+// Regarding op_verif and op_vernotif, it seems that these were not promoted
+// because authors failed to recognize that following their demotion from
+// conditionals, these codes became unconditionally invalid, just as others.
+// Regarding reserved_255, there is no good reason to have left this reserved,
+// as op_return already provides that operation, but it's likely the authors
+// felt it exhibits special benavior as the highest value code (it does not).
 constexpr bool operation::is_success(opcode code) NOEXCEPT
 {
     constexpr auto op_187 = opcode::reserved_187;
@@ -211,8 +217,8 @@ constexpr bool operation::is_success(opcode code) NOEXCEPT
     {
         case opcode::reserved_80:
         case opcode::op_ver:
-        ////case opcode::op_verif:      // stays invalid
-        ////case opcode::op_vernotif:   // stays invalid
+        ////case opcode::op_verif:      // stays invalid (why)
+        ////case opcode::op_vernotif:   // stays invalid (why)
         ////case opcode::op_return:     // stays reserved
         case opcode::op_cat:
         case opcode::op_substr:
@@ -232,7 +238,7 @@ constexpr bool operation::is_success(opcode code) NOEXCEPT
         case opcode::op_lshift:
         case opcode::op_rshift:
         ////case opcode::reserved_186:  // checksigadd subsumes
-        ////case opcode::reserved_255:  // stays reserved
+        ////case opcode::reserved_255:  // stays reserved (why)
             return true;
         default:
             return code >= op_187 && code <= op_254;
