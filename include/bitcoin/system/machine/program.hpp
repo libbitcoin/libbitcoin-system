@@ -156,9 +156,10 @@ protected:
     INLINE bool is_succeess() const NOEXCEPT;
     INLINE bool if_(const operation& op) const NOEXCEPT;
 
-    /// Accumulator.
+    /// Accumulators.
     /// -----------------------------------------------------------------------
 
+    INLINE bool sigops_increment() NOEXCEPT;
     INLINE bool ops_increment(const operation& op) NOEXCEPT;
     INLINE bool ops_increment(size_t public_keys) NOEXCEPT;
 

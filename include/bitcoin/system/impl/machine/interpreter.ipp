@@ -1072,9 +1072,9 @@ op_check_sig_verify() NOEXCEPT
             ///////////////////////////////////////////////////////////////////
         }
 
-        ///////////////////////////////////////////////////////////////////////
         // BIP342: if signature not empty, opcode counted toward sigops budget.
-        ///////////////////////////////////////////////////////////////////////
+        if (!state::sigops_increment())
+            return error::op_check_sig_verify5;
 
         // If public key size is neither 0 nor 32 bytes, it is an unknown type.
         // During script execution of signature opcodes these behave exactly as
@@ -1329,9 +1329,9 @@ op_check_sig_add() NOEXCEPT
     //
     ///////////////////////////////////////////////////////////////////////////
 
-    ///////////////////////////////////////////////////////////////////////////
     // BIP342: if signature not empty, opcode counted toward sigops budget.
-    ///////////////////////////////////////////////////////////////////////////
+    if (!state::sigops_increment())
+        return error::op_check_schnorr_sig5;
 
     // BIP342: if signature not empty (and successful), [number+1] pushed.
     state::push_signed64(add1<int64_t>(number));

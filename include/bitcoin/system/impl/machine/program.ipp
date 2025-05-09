@@ -105,6 +105,8 @@ program(const transaction& tx, const input_iterator& input,
 
 // Taproot script run (witness-initialized stack).
 // Same as segwit but with with budget and unstripped bip342 flag.
+// Sigop budget is 50 plus size of prefixed serialized witness [bip342].
+// Budget is initialized +51 to make it zero-based, avoiding signed type.
 TEMPLATE
 inline CLASS::
 program(const transaction& tx, const input_iterator& input,
@@ -119,7 +121,7 @@ program(const transaction& tx, const input_iterator& input,
     version_(version),
     witness_(witness),
     primary_(projection<Stack>(*witness)),
-    budget_(ceilinged_add(chain::signature_budget, witness_size))
+    budget_(ceilinged_add(add1(chain::signature_budget), witness_size))
 {
 }
 
@@ -690,6 +692,20 @@ if_(const operation& op) const NOEXCEPT
 INLINE constexpr bool operation_count_exceeded(size_t count) NOEXCEPT
 {
     return count > chain::max_counted_ops;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+sigops_increment() NOEXCEPT
+{
+    BC_ASSERT(is_enabled(flags::bip342_rule));
+
+    // Executing signature op with non-empty signature decrements budget by 50.
+    // If the budget falls below zero script fails immediately [bip342].
+
+    // Budget is initialized +51 to make it zero-based, avoiding signed type.
+    budget_ = floored_subtract(budget_, chain::max_counted_ops);
+    return !is_zero(budget_);
 }
 
 TEMPLATE
