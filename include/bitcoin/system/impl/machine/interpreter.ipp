@@ -1054,18 +1054,27 @@ op_check_sig_verify() NOEXCEPT
         // If public key is 32 bytes it is a bip340 schnorr key.
         if (key->size() == schnorr::public_key_size)
         {
-            ///////////////////////////////////////////////////////////////////////
-            // TODO: validate signature.
             // If signature is not empty, it is validated against public key.
             // Upon validation fail, script MUST fail and end (or push false).
-            ////return schnorr::verify_signature(...);
-            if (false)
+
+            ///////////////////////////////////////////////////////////////////
+            // TODO: add prepare method and generate hash.
+            //
+            ec_signature signature;
+            uint8_t sighash_flags;
+            if (!schnorr::parse(sighash_flags, signature, *endorsement))
                 return error::op_check_sig_verify3;
-            ///////////////////////////////////////////////////////////////////////
+
+            hash_digest hash{};
+            if (!schnorr::verify_signature(*key, hash, signature))
+                return error::op_check_sig_verify3;
+
+            return error::op_check_sig_verify3;
+            //
+            ///////////////////////////////////////////////////////////////////
         }
 
         ///////////////////////////////////////////////////////////////////////
-        // TODO: count opcode toward sigop budget.
         // BIP342: if signature not empty, opcode counted toward sigops budget.
         ///////////////////////////////////////////////////////////////////////
 
@@ -1309,7 +1318,20 @@ op_check_sig_add() NOEXCEPT
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // TODO: validate signature, if success, count opcode toward sigop budget.
+    // TODO: add prepare method and generate hash.
+    //
+    ec_signature signature;
+    uint8_t sighash_flags;
+    if (!schnorr::parse(sighash_flags, signature, *endorsement))
+        return error::op_check_sig_verify3;
+
+    hash_digest hash{};
+    if (!schnorr::verify_signature(*key, hash, signature))
+        return error::op_check_sig_verify3;
+    //
+    ///////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////////////
     // BIP342: if signature not empty, opcode counted toward sigops budget.
     ///////////////////////////////////////////////////////////////////////////
 
