@@ -157,23 +157,23 @@ initialize() const NOEXCEPT
     const auto bip141 = is_enabled(flags::bip141_rule);
     const auto bip342 = is_enabled(flags::bip342_rule);
 
-    // Apply stack element limit (520) to initial witness [bip141][tapscript].
+    // Apply stack element limit (520) to initial witness [bip141][bip342].
     if (bip141 && witness_ && !chain::witness::is_push_size(*witness_))
         return error::invalid_witness_stack;
 
-    // Script size limit (10,000) [0.3.7+], removed [tapscript].
+    // Script size limit (10,000) [0.3.7+], removed [bip342].
     if (!bip342 && nops && script_->is_oversized())
         return error::invalid_script_size;
 
-    // Stacks element limit (1,000) applied to initial stack [tapscript].
+    // Stacks element limit (1,000) applied to initial stack [bip342].
     if (bip342 && is_stack_overflow())
         return error::invalid_stack_size;
 
-    // Succeed if any success code, one overrides all codes [tapscript].
+    // Succeed if any success code, one overrides all codes [bip342].
     if (bip342 && script_->is_prevalid())
         return error::prevalid_script;
 
-    // Fail if last op underflow, lower priority than easy [tapscript].
+    // Fail if last op underflow, lower priority than easy [bip342].
     if (script_->is_underflow())
         return error::invalid_script;
 
@@ -564,7 +564,7 @@ INLINE bool CLASS::
 is_stack_overflow() const NOEXCEPT
 {
     // Addition is safe due to stack size constraint.
-    // Limit of 1000 elements in stack and altstack remains [tapscript]. 
+    // Limit of 1000 elements in stack and altstack remains [bip342]. 
     return (stack_size() + alternate_.size()) > chain::max_unified_stack_size;
 }
 
@@ -712,7 +712,7 @@ TEMPLATE
 INLINE bool CLASS::
 ops_increment(const operation& op) NOEXCEPT
 {
-    // Non-push opcodes limit of 201 per script does not apply [tapscript].
+    // Non-push opcodes limit of 201 per script does not apply [bip342].
     if (is_enabled(flags::bip342_rule))
         return true;
 
@@ -729,7 +729,7 @@ TEMPLATE
 INLINE bool CLASS::
 ops_increment(size_t public_keys) NOEXCEPT
 {
-    // Non-push opcodes limit of 201 per script does not apply [tapscript].
+    // Non-push opcodes limit of 201 per script does not apply [bip342].
     if (is_enabled(flags::bip342_rule))
         return true;
 
