@@ -169,7 +169,7 @@ transaction_accessor test_tx(const script_test& test)
         test.locktime
     };
 
-    tx.inputs_ptr()->front()->prevout.reset(new output{ 0u, out });
+    tx.inputs_ptr()->front()->prevout = to_shared(output{ 0u, out });
     return tx;
 }
 
@@ -664,7 +664,7 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_23428_multisig_tx__success)
     BOOST_REQUIRE_GT(tx.inputs_ptr()->size(), index);
 
     constexpr auto value = 100000000u;
-    (*tx.inputs_ptr())[index]->prevout.reset(new output{ value, { base16_chunk("a9144aba54e2541475f91659ccdbb13ce0b490778c7f87"), false } });
+    (*tx.inputs_ptr())[index]->prevout = to_shared(output{ value, { base16_chunk("a9144aba54e2541475f91659ccdbb13ce0b490778c7f87"), false } });
     BOOST_REQUIRE_EQUAL(tx.connect({ forks }, index), error::script_success);
 }
 
@@ -698,7 +698,7 @@ BOOST_AUTO_TEST_CASE(script__verify__block_290329_tx__success)
     BOOST_REQUIRE_GT(tx.inputs_ptr()->size(), index);
 
     constexpr auto value = 0u;
-    (*tx.inputs_ptr())[index]->prevout.reset(new output{ value, { base16_chunk("a914d8dacdadb7462ae15cd906f1878706d0da8660e687"), false } });
+    (*tx.inputs_ptr())[index]->prevout = to_shared(output{ value, { base16_chunk("a914d8dacdadb7462ae15cd906f1878706d0da8660e687"), false } });
     BOOST_REQUIRE_EQUAL(tx.connect({ forks }, index), error::script_success);
 }
 
@@ -729,7 +729,7 @@ BOOST_AUTO_TEST_CASE(script__verify__block_438513_tx__success)
     BOOST_REQUIRE_GT(tx.inputs_ptr()->size(), index);
 
     constexpr auto value = 0u;
-    (*tx.inputs_ptr())[index]->prevout.reset(new output{ value, { base16_chunk("a914faa558780a5767f9e3be14992a578fc1cbcf483087"), false } });
+    (*tx.inputs_ptr())[index]->prevout = to_shared(output{ value, { base16_chunk("a914faa558780a5767f9e3be14992a578fc1cbcf483087"), false } });
     BOOST_REQUIRE_EQUAL(tx.connect({ forks }, index), error::script_success);
 }
 
@@ -770,7 +770,7 @@ BOOST_AUTO_TEST_CASE(script__verify__block_481824_tx__success)
     BOOST_REQUIRE_GT(tx.inputs_ptr()->size(), index);
 
     constexpr auto value = 100200000u;
-    (*tx.inputs_ptr())[index]->prevout.reset(new output{ value, { base16_chunk("a9142928f43af18d2d60e8a843540d8086b30534133987"), false } });
+    (*tx.inputs_ptr())[index]->prevout = to_shared(output{ value, { base16_chunk("a9142928f43af18d2d60e8a843540d8086b30534133987"), false } });
     BOOST_REQUIRE_EQUAL(tx.connect({ forks }, index), error::script_success);
 }
 
@@ -812,7 +812,7 @@ BOOST_AUTO_TEST_CASE(script__verify__testnet_block_892321_tx_missing_witness__in
     BOOST_REQUIRE((*tx.inputs_ptr())[index]->witness().stack().empty());
 
     constexpr auto value = 194445u;
-    (*tx.inputs_ptr())[index]->prevout.reset(new output{ value, { base16_chunk("0020925fe0a6cde95bdc7a21b08925c246cae17005f8a013efffdb5e5cb7b7f8d0c2"), false } });
+    (*tx.inputs_ptr())[index]->prevout = to_shared(output{ value, { base16_chunk("0020925fe0a6cde95bdc7a21b08925c246cae17005f8a013efffdb5e5cb7b7f8d0c2"), false } });
 
     // This is correctly invalid.
     BOOST_REQUIRE_EQUAL(tx.connect({ forks }, index), error::invalid_witness);
@@ -832,10 +832,10 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wpkh_tx__success)
     BOOST_REQUIRE(!(*tx.inputs_ptr())[1]->witness().stack().empty());
 
     constexpr auto value0 = 625000000u;
-    (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("2103c9f4836b9a4f77fc0d81f7bcb01b7f1b35916864b9476c241ce9fc198bd25432ac"), false } });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value0, { base16_chunk("2103c9f4836b9a4f77fc0d81f7bcb01b7f1b35916864b9476c241ce9fc198bd25432ac"), false } });
 
     constexpr auto value1 = 600000000u;
-    (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("00141d0f172a0ecb48aee1be1f2687d2963ae33f71a1"), false } });
+    (*tx.inputs_ptr())[1]->prevout = to_shared(output{ value1, { base16_chunk("00141d0f172a0ecb48aee1be1f2687d2963ae33f71a1"), false } });
 
     // ordinary P2PK (no rules required).
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::script_success);
@@ -867,7 +867,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wpkh_tx__success)
     BOOST_REQUIRE(!(*tx.inputs_ptr())[0]->witness().stack().empty());
 
     constexpr auto value = 1000000000u;
-    (*tx.inputs_ptr())[0]->prevout.reset(new output{ value, { base16_chunk("a9144733f37cf4db86fbc2efed2500b4f4e49f31202387"), false } });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value, { base16_chunk("a9144733f37cf4db86fbc2efed2500b4f4e49f31202387"), false } });
 
     // P2SH-P2WPKH witness program.
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
@@ -894,10 +894,10 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__success)
     BOOST_REQUIRE(!(*tx.inputs_ptr())[1]->witness().stack().empty());
 
     constexpr auto value0 = 156250000u;
-    (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("21036d5c20fa14fb2f635474c1dc4ef5909d4568e5569b79fc94d3448486e14685f8ac"), false } });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value0, { base16_chunk("21036d5c20fa14fb2f635474c1dc4ef5909d4568e5569b79fc94d3448486e14685f8ac"), false } });
 
     constexpr auto value1 = 4900000000u;
-    (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("00205d1b56b63d714eebe542309525f484b7e9d6f686b3781b6f61ef925d66d6f6a0"), false } });
+    (*tx.inputs_ptr())[1]->prevout = to_shared(output{ value1, { base16_chunk("00205d1b56b63d714eebe542309525f484b7e9d6f686b3781b6f61ef925d66d6f6a0"), false } });
 
     // ordinary P2PK (no rules required).
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::no_rules }, 0), error::script_success);
@@ -911,7 +911,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__success)
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // missing bip143 (code-separator treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 1), error::op_check_sig_verify5);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 1), error::op_check_sig_verify7);
 
     // missing bip141 (witness not allowed).
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip143_rule }, 1), error::unexpected_witness);
@@ -927,10 +927,10 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_2_tx__success)
     BOOST_REQUIRE(!(*tx.inputs_ptr())[1]->witness().stack().empty());
 
     constexpr auto value0 = 16777215u;
-    (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"), false } });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value0, { base16_chunk("0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"), false } });
 
     constexpr auto value1 = 16777215u;
-    (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"), false } });
+    (*tx.inputs_ptr())[1]->prevout = to_shared(output{ value1, { base16_chunk("0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"), false } });
 
     // native P2WSH witness program.
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
@@ -972,10 +972,10 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_3_tx__success)
     BOOST_REQUIRE(!(*tx.inputs_ptr())[1]->witness().stack().empty());
 
     constexpr auto value0 = 16777215u;
-    (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"), false } });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value0, { base16_chunk("0020d9bbfbe56af7c4b7f960a70d7ea107156913d9e5a26b0a71429df5e097ca6537"), false } });
 
     constexpr auto value1 = 16777215u;
-    (*tx.inputs_ptr())[1]->prevout.reset(new output{ value1, { base16_chunk("0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"), false } });
+    (*tx.inputs_ptr())[1]->prevout = to_shared(output{ value1, { base16_chunk("0020ba468eea561b26301e4cf69fa34bde4ad60c81e70f059f045ca9a79931004a4d"), false } });
 
     // native P2WSH witness program.
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
@@ -996,7 +996,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_p2sh_p2wsh_tx__success)
     BOOST_REQUIRE(!(*tx.inputs_ptr())[0]->witness().stack().empty());
 
     constexpr auto value0 = 987654321u;
-    (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("a9149993a429037b5d912407a71c252019287b8d27a587"), false } });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value0, { base16_chunk("a9149993a429037b5d912407a71c252019287b8d27a587"), false } });
 
     // P2SH-P2WSH 6-of-6 multisig witness program.
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
@@ -1022,7 +1022,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
     BOOST_REQUIRE(!(*tx.inputs_ptr())[0]->witness().stack().empty());
 
     constexpr auto value0 = 200000u;
-    (*tx.inputs_ptr())[0]->prevout.reset(new output{ value0, { base16_chunk("00209e1be07558ea5cc8e02ed1d80c0911048afad949affa36d5c3951e3159dbea19"), false } });
+    (*tx.inputs_ptr())[0]->prevout = to_shared(output{ value0, { base16_chunk("00209e1be07558ea5cc8e02ed1d80c0911048afad949affa36d5c3951e3159dbea19"), false } });
 
     // P2WSH witness program.
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule | flags::bip143_rule | flags::bip147_rule }, 0), error::script_success);
@@ -1033,7 +1033,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip143 (find-and-delete treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::op_check_sig_verify5);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::op_check_sig_verify7);
 }
 
 // json

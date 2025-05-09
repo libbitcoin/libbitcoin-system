@@ -512,6 +512,7 @@ bool parse(uint8_t& sighash_flags, ec_signature& signature,
             return false;
     }
 
+    // TODO: optimize unnecessary copy (e.g. could return reference).
     signature = unsafe_array_cast<uint8_t, signature_size>(endorsement.data());
     return true;
 }
