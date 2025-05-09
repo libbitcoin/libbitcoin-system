@@ -1067,9 +1067,7 @@ op_check_sig_verify() NOEXCEPT
 
             hash_digest hash{};
             if (!schnorr::verify_signature(*key, hash, signature))
-                return error::op_check_sig_verify3;
-
-            return error::op_check_sig_verify3;
+                return error::op_check_sig_verify4;
             //
             ///////////////////////////////////////////////////////////////////
         }
@@ -1086,7 +1084,7 @@ op_check_sig_verify() NOEXCEPT
 
     // Not a parse failure, so op_checksig pushes false.
     if (endorsement->empty())
-        return error::op_check_sig_verify4;
+        return error::op_check_sig_verify6;
 
     // op_check_sig_parse_signature causes op_check_sig to fail.
     // Parse endorsement into DER signature into an EC signature.
@@ -1099,7 +1097,7 @@ op_check_sig_verify() NOEXCEPT
 
     // TODO: for signing mode - make key mutable and return above.
     return system::verify_signature(*key, hash, signature) ?
-        error::op_success : error::op_check_sig_verify5;
+        error::op_success : error::op_check_sig_verify7;
 }
 
 TEMPLATE
@@ -1323,11 +1321,11 @@ op_check_sig_add() NOEXCEPT
     ec_signature signature;
     uint8_t sighash_flags;
     if (!schnorr::parse(sighash_flags, signature, *endorsement))
-        return error::op_check_sig_verify3;
+        return error::op_check_schnorr_sig3;
 
     hash_digest hash{};
     if (!schnorr::verify_signature(*key, hash, signature))
-        return error::op_check_sig_verify3;
+        return error::op_check_schnorr_sig4;
     //
     ///////////////////////////////////////////////////////////////////////////
 
