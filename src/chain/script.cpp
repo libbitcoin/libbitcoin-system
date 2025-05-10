@@ -587,6 +587,11 @@ bool script::is_unspendable() const NOEXCEPT
     return operation::is_reserved(code) || operation::is_invalid(code);
 }
 
+void script::clear_offset() const NOEXCEPT
+{
+    offset = ops_.begin();
+}
+
 BC_POP_WARNING()
 BC_POP_WARNING()
 

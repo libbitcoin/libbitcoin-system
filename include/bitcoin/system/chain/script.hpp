@@ -161,6 +161,9 @@ public:
     bool is_oversized() const NOEXCEPT;
     bool is_unspendable() const NOEXCEPT;
 
+    /// Reset mutable signature hashing op_codeseparator offset. 
+    void clear_offset() const NOEXCEPT;
+
 protected:
     script(const operations& ops, bool valid, bool easier, bool failer,
         bool roller, size_t size) NOEXCEPT;

@@ -50,7 +50,7 @@ program(const transaction& tx, const input_iterator& input,
     version_(script_version::unversioned),
     primary_()
 {
-    BC_ASSERT(script_->offset == script_->ops().begin());
+    script_->clear_offset();
 }
 
 // Legacy p2sh or prevout script run (copied input stack - use first).
@@ -68,7 +68,7 @@ program(const program& other, const script::cptr& script) NOEXCEPT
     version_(other.version_),
     primary_(other.primary_)
 {
-    BC_ASSERT(script_->offset == script_->ops().begin());
+    script_->clear_offset();
 }
 
 // Legacy p2sh or prevout script run (moved input stack/tether - use last).
@@ -83,7 +83,7 @@ program(program&& other, const script::cptr& script) NOEXCEPT
     version_(other.version_),
     primary_(std::move(other.primary_))
 {
-    BC_ASSERT(script_->offset == script_->ops().begin());
+    script_->clear_offset();
 }
 
 // Segwit script run (witness-initialized stack).
@@ -104,7 +104,7 @@ program(const transaction& tx, const input_iterator& input,
     witness_(witness),
     primary_(projection<Stack>(*witness))
 {
-    BC_ASSERT(script_->offset == script_->ops().begin());
+    script_->clear_offset();
 }
 
 // Taproot script run (witness-initialized stack).
@@ -128,7 +128,7 @@ program(const transaction& tx, const input_iterator& input,
     primary_(projection<Stack>(*witness)),
     budget_(ceilinged_add(add1(chain::signature_budget), witness_size))
 {
-    BC_ASSERT(script_->offset == script_->ops().begin());
+    script_->clear_offset();
 }
 
 // Public.
@@ -841,7 +841,12 @@ ecdsa_prepare(ec_signature& signature, hash_digest& hash,
     if (!ecdsa::parse_endorsement(sighash_flags, distinguished, *endorsement))
         return false;
 
-    // TODO: re-evaluate multisig hash caching.
+    // TODO: create array of 6 pointers (48 bytes).
+    // TODO: map each pointer type to contiguous array element.
+    // TODO: look up in array before computing hash, store after computing.
+    // TODO: store as program member, reset after each op_multisig.
+    // TODO: total cost is 6x8=48 bytes per thread, search/assign array.
+    // TODO: no hash function and no alloc/realloc.
     ////hash_cache cache{};
     ////const auto& hash = cache.at(sighash_flags);
 
