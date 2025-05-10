@@ -144,7 +144,7 @@ uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
 //*****************************************************************************
 inline coverage transaction::mask_sighash(uint8_t sighash_flags) NOEXCEPT
 {
-    switch (sighash_flags & coverage::mask)
+    switch (bit_and<uint8_t>(sighash_flags, coverage::mask))
     {
         case coverage::hash_single:
             return coverage::hash_single;
@@ -153,6 +153,11 @@ inline coverage transaction::mask_sighash(uint8_t sighash_flags) NOEXCEPT
         default:
             return coverage::hash_all;
     }
+}
+
+inline bool transaction::is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT
+{
+    return to_bool(bit_and<uint8_t>(sighash_flags, coverage::anyone_can_pay));
 }
 
 // ****************************************************************************
@@ -167,8 +172,8 @@ void transaction::signature_hash_single(writer& sink,
     const auto write_inputs = [this, &input, &subscript, sighash_flags](
         writer& sink) NOEXCEPT
     {
-        const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
+        const auto anyone = is_anyone_can_pay(sighash_flags);
 
         sink.write_variable(anyone ? one : inputs_->size());
 
@@ -218,8 +223,8 @@ void transaction::signature_hash_none(writer& sink,
     const auto write_inputs = [this, &input, &subscript, sighash_flags](
         writer& sink) NOEXCEPT
     {
-        const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
+        const auto anyone = is_anyone_can_pay(sighash_flags);
 
         sink.write_variable(anyone ? one : inputs_->size());
 
@@ -256,8 +261,8 @@ void transaction::signature_hash_all(writer& sink,
     const auto write_inputs = [this, &input, &subscript, sighash_flags](
         writer& sink) NOEXCEPT
     {
-        const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
+        const auto anyone = is_anyone_can_pay(sighash_flags);
 
         sink.write_variable(anyone ? one : inputs_->size());
 
@@ -380,7 +385,7 @@ hash_digest transaction::version_0_sighash(const input_iterator& input,
     uint8_t sighash_flags) const NOEXCEPT
 {
     // Set options.
-    const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
+    const auto anyone = is_anyone_can_pay(sighash_flags);
     const auto flag = mask_sighash(sighash_flags);
     const auto all = (flag == coverage::hash_all);
     const auto single = (flag == coverage::hash_single);
@@ -427,31 +432,48 @@ hash_digest transaction::version_0_sighash(const input_iterator& input,
 // Because the codeseparator_position is the last input to the hash, the SHA256
 // midstate can be efficiently cached for multiple OP_CODESEPARATOR in a script.
 
-// static
-// BIP341: Using any undefined hash_type causes validation failure if violated.
-// defined types: 0x00, 0x01, 0x02, 0x03, 0x81, 0x82, or 0x83. [zero is the
-// default and cannot be explicit, but is serialized for signature hashing.
-inline bool transaction::is_sighash_valid(uint8_t sighash_flags) NOEXCEPT
-{
-    switch (sighash_flags)
-    {
-        case coverage::hash_default:
-        case coverage::hash_all:
-        case coverage::hash_none:
-        case coverage::hash_single:
-        case coverage::all_anyone_can_pay:
-        case coverage::none_anyone_can_pay:
-        case coverage::single_anyone_can_pay:
-            return true;
-        default:
-            return false;
-    }
-}
-
 hash_digest transaction::version_1_sighash(const input_iterator& input,
     const script& script, uint64_t value, uint8_t sighash_flags) const NOEXCEPT
 {
-    return {};
+    // Set options.
+    const auto anyone = is_anyone_can_pay(sighash_flags);
+    const auto flag = mask_sighash(sighash_flags);
+    const auto all = (flag == coverage::hash_all);
+    const auto single = (flag == coverage::hash_single);
+
+    // Create hash writer.
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256x2::fast sink{ stream };
+
+    // Create signature hash.
+    sink.write_little_endian(version_);
+
+    // Conditioning points, sequences, and outputs writes on cache_ instead of
+    // conditionally passing them from methods avoids copying the cached hash.
+
+    // points
+    sink.write_bytes(!anyone ? points_hash() : null_hash);
+
+    // sequences
+    sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
+
+    (*input)->point().to_data(sink);
+    script.to_data(sink, prefixed);
+    sink.write_little_endian(value);
+    sink.write_little_endian((*input)->sequence());
+
+    // outputs
+    if (single)
+        sink.write_bytes(output_hash(input));
+    else
+        sink.write_bytes(all ? outputs_hash() : null_hash);
+
+    sink.write_little_endian(locktime_);
+    sink.write_4_bytes_little_endian(sighash_flags);
+
+    sink.flush();
+    return digest;
 }
 
 } // namespace chain

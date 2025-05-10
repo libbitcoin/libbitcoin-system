@@ -197,6 +197,7 @@ protected:
 private:
     using primary_stack = stack<Stack>;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
+    static inline bool is_valid_sighash_byte(uint8_t sighash_flags) NOEXCEPT;
     static inline uint32_t subscript(const chain::script& script) NOEXCEPT;
     static inline chain::strippers create_strip_ops(
         const chunk_xptrs& endorsements) NOEXCEPT;

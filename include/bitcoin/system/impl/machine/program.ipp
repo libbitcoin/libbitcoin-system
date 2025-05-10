@@ -752,6 +752,32 @@ ops_increment(size_t public_keys) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // static
+// BIP341: Using any undefined hash_type causes validation failure if violated.
+// defined types: 0x00, 0x01, 0x02, 0x03, 0x81, 0x82, or 0x83. [zero is the
+// default and cannot be explicit, but is serialized for signature hashing].
+TEMPLATE
+inline bool CLASS::
+is_valid_sighash_byte(uint8_t sighash_flags) NOEXCEPT
+{
+    using namespace chain;
+
+    switch (sighash_flags)
+    {
+        // BIP341: zero is invalid sighash, must be explicit to prevent mally.
+        ////case coverage::hash_default:
+        case coverage::hash_all:
+        case coverage::hash_none:
+        case coverage::hash_single:
+        case coverage::all_anyone_can_pay:
+        case coverage::none_anyone_can_pay:
+        case coverage::single_anyone_can_pay:
+            return true;
+        default:
+            return false;
+    }
+}
+
+// static
 TEMPLATE
 inline data_slice CLASS::
 ecdsa_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
@@ -770,6 +796,8 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
 {
     using namespace chain;
     using namespace schnorr;
+
+    sighash_flags = coverage::invalid;
     const auto size = endorsement.size();
 
     if (size == signature_size)
@@ -782,9 +810,7 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
     {
         // BIP341: signature has sighash byte appended in the usual fashion.
         const auto byte = endorsement.back();
-
-        // BIP341: zero is invalid sighash, must be explicit to prevent mally.
-        if (is_nonzero(byte))
+        if (is_valid_sighash_byte(byte))
             sighash_flags = byte;
     }
     else
@@ -792,7 +818,6 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
         // This makes an invalid return safe to dereference, and may be
         // compiled out unless a caller does in fact access it.
         static constexpr ec_signature empty{};
-        sighash_flags = coverage::invalid;
         return empty;
     }
 

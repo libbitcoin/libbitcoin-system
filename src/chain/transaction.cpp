@@ -351,6 +351,9 @@ uint64_t transaction::fee() const NOEXCEPT
     return floored_subtract(value(), claim());
 }
 
+// Hashing.
+// ----------------------------------------------------------------------------
+
 void transaction::set_nominal_hash(const hash_digest& hash) const NOEXCEPT
 {
     nominal_hash_ = hash;

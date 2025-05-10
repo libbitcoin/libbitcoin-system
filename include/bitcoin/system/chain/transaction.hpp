@@ -255,7 +255,7 @@ private:
     } sighash_cache;
 
     static inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static inline bool is_sighash_valid(uint8_t sighash_flags) NOEXCEPT;
+    static inline bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
 
     // delegated
     code connect_input(const context& ctx,
