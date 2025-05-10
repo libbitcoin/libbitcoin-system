@@ -368,6 +368,8 @@ bool is_endorsement(const endorsement& endorsement) NOEXCEPT
     return size >= min_endorsement_size && size <= max_endorsement_size;
 }
 
+namespace ecdsa {
+
 // ECDSA parse/encode/sign/verify signature
 // ----------------------------------------------------------------------------
 // It is recommended to verify a signature after signing.
@@ -441,8 +443,8 @@ bool verify_signature(const data_slice& point, const hash_digest& hash,
     secp256k1_pubkey pubkey;
     const auto context = ec_context_verify::context();
 
-    return parse(context, pubkey, point) && verify_signature(context, pubkey,
-        hash, signature);
+    return system::parse(context, pubkey, point) &&
+        system::verify_signature(context, pubkey, hash, signature);
 }
 
 // ECDSA recoverable sign/recover
@@ -484,10 +486,12 @@ bool recover_public(ec_uncompressed& out,
     return recover_public(context, out, recoverable, hash);
 }
 
-// Schnorr parse/sign/verify
-// ----------------------------------------------------------------------------
+} // namespace ecdsa
 
 namespace schnorr {
+
+// Schnorr parse/sign/verify
+// ----------------------------------------------------------------------------
 
 bool parse(uint8_t& sighash_flags, ec_signature& signature,
     const endorsement& endorsement) NOEXCEPT

@@ -41,7 +41,7 @@ namespace machine {
 TEMPLATE
 inline CLASS::
 program(const transaction& tx, const input_iterator& input,
-     uint32_t active_flags) NOEXCEPT
+    uint32_t active_flags) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_((*input)->script_ptr()),
@@ -50,6 +50,7 @@ program(const transaction& tx, const input_iterator& input,
     version_(script_version::unversioned),
     primary_()
 {
+    BC_ASSERT(script_->offset == script_->ops().begin());
 }
 
 // Legacy p2sh or prevout script run (copied input stack - use first).
@@ -67,6 +68,7 @@ program(const program& other, const script::cptr& script) NOEXCEPT
     version_(other.version_),
     primary_(other.primary_)
 {
+    BC_ASSERT(script_->offset == script_->ops().begin());
 }
 
 // Legacy p2sh or prevout script run (moved input stack/tether - use last).
@@ -81,6 +83,7 @@ program(program&& other, const script::cptr& script) NOEXCEPT
     version_(other.version_),
     primary_(std::move(other.primary_))
 {
+    BC_ASSERT(script_->offset == script_->ops().begin());
 }
 
 // Segwit script run (witness-initialized stack).
@@ -101,6 +104,7 @@ program(const transaction& tx, const input_iterator& input,
     witness_(witness),
     primary_(projection<Stack>(*witness))
 {
+    BC_ASSERT(script_->offset == script_->ops().begin());
 }
 
 // Taproot script run (witness-initialized stack).
@@ -124,6 +128,7 @@ program(const transaction& tx, const input_iterator& input,
     primary_(projection<Stack>(*witness)),
     budget_(ceilinged_add(add1(chain::signature_budget), witness_size))
 {
+    BC_ASSERT(script_->offset == script_->ops().begin());
 }
 
 // Public.
@@ -792,15 +797,13 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
 {
     // bip141: establishes the version property.
     // bip143: op stripping is not applied to bip141 v0 scripts.
-    if (is_enabled(flags::bip143_rule) &&
-        version_ == script_version::segwit)
+    if (is_enabled(flags::bip143_rule) && version_ == script_version::segwit)
         return script_;
 
     // Transform into a set of endorsement push ops and one op_codeseparator.
     const auto strip = create_strip_ops(endorsements);
     const auto stop = script_->ops().end();
     const op_iterator offset{ script_->offset };
-    using namespace chain;
 
     // If none of the strip ops are found, return the subscript.
     if (!is_intersecting<operations>(offset, stop, strip))
@@ -810,46 +813,71 @@ subscript(const chunk_xptrs& endorsements) const NOEXCEPT
     return to_shared<script>(difference<operations>(offset, stop, strip));
 }
 
-// TODO: use sighash and key to generate signature in sign mode.
+// private/static
 TEMPLATE
-inline bool CLASS::
-prepare(ec_signature& signature, const data_chunk&, hash_digest& hash,
-    const chunk_xptr& endorsement) const NOEXCEPT
+inline uint32_t CLASS::
+subscript(const script& script) NOEXCEPT
 {
-    uint8_t sighash_flags;
-    data_slice distinguished;
+    // This method is only called from the run loop, which means there are ops.
+    BC_ASSERT(!script.ops().empty());
 
-    // Parse Bitcoin endorsement into DER signature and sighash flags.
-    if (!parse_endorsement(sighash_flags, distinguished, *endorsement))
-        return false;
-
-    // Obtain the signature hash from subscript and sighash flags.
-    hash = signature_hash(*subscript({ endorsement }), sighash_flags);
-
-    // Parse DER signature into an ECDSA signature (bip66 sets strict).
-    const auto bip66 = is_enabled(flags::bip66_rule);
-    return parse_signature(signature, distinguished, bip66);
+    // BIP342: zero-based opcode position of the last executed op_codeseparator
+    // before currently executed signature opcode (0xffffffff if none).
+    const auto start = script.ops().begin();
+    const auto span = std::distance(start, script.offset);
+    const auto slot = possible_narrow_and_sign_cast<uint32_t>(span);
+    const auto none = is_zero(slot) && start->code() != opcode::codeseparator;
+    return none ? chain::default_separators : slot;
 }
 
 // TODO: use sighash and key to generate signature in sign mode.
 TEMPLATE
 inline bool CLASS::
-prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
-    uint8_t& sighash_flags, const data_chunk& endorsement,
-    const script& subscript) const NOEXCEPT
+ecdsa_prepare(ec_signature& signature, hash_digest& hash,
+    const chunk_xptr& endorsement, const script& subscript) const NOEXCEPT
 {
+    uint8_t sighash_flags;
     data_slice distinguished;
-
-    // Parse Bitcoin endorsement into DER signature and sighash flags.
-    if (!parse_endorsement(sighash_flags, distinguished, endorsement))
+    if (!ecdsa::parse_endorsement(sighash_flags, distinguished, *endorsement))
         return false;
 
-    // Obtain the signature hash from subscript and sighash flags.
-    signature_hash(cache, subscript, sighash_flags);
+    // TODO: re-evaluate multisig hash caching.
+    ////hash_cache cache{};
+    ////const auto& hash = cache.at(sighash_flags);
 
-    // Parse DER signature into an ECDSA signature (bip66 sets strict).
+    hash = signature_hash(subscript, sighash_flags);
     const auto bip66 = is_enabled(flags::bip66_rule);
-    return parse_signature(signature, distinguished, bip66);
+    return ecdsa::parse_signature(signature, distinguished, bip66);
+}
+
+// TODO: use sighash and key to generate signature in sign mode.
+TEMPLATE
+inline bool CLASS::
+ecdsa_prepare(ec_signature& signature, hash_digest& hash,
+    const chunk_xptr& endorsement) const NOEXCEPT
+{
+    uint8_t sighash_flags;
+    data_slice distinguished;
+    if (!ecdsa::parse_endorsement(sighash_flags, distinguished, *endorsement))
+        return false;
+
+    hash = signature_hash(*subscript({ endorsement }), sighash_flags);
+    const auto bip66 = is_enabled(flags::bip66_rule);
+    return ecdsa::parse_signature(signature, distinguished, bip66);
+}
+
+// TODO: can we use sighash and key to generate signature in sign mode?
+TEMPLATE
+inline bool CLASS::
+schnorr_prepare(ec_signature& signature, hash_digest& hash,
+    const chunk_xptr& endorsement) const NOEXCEPT
+{
+    uint8_t sighash_flags;
+    if (!schnorr::parse(sighash_flags, signature, *endorsement))
+        return false;
+
+    hash = signature_hash(*script_, sighash_flags);
+    return true;
 }
 
 // Signature hashing.
@@ -857,14 +885,15 @@ prepare(ec_signature& signature, const data_chunk&, hash_cache& cache,
 
 TEMPLATE
 INLINE hash_digest CLASS::
-signature_hash(const script& subscript, uint8_t flags) const NOEXCEPT
+signature_hash(const script& subscript, uint8_t sighash_flags) const NOEXCEPT
 {
-    // The bip141 fork establishes witness version, hashing is a distinct fork.
-    const auto bip143 = is_enabled(flags::bip143_rule);
-
     // bip143: the method of signature hashing is changed for v0 scripts.
-    return transaction_.signature_hash(input_, subscript, value_, flags,
-        version_, bip143);
+    // bip342: the method of signature hashing is changed for v1 scripts.
+    const auto bip143 = is_enabled(flags::bip143_rule);
+    const auto bip342 = is_enabled(flags::bip342_rule);
+
+    return transaction_.signature_hash(input_, subscript, value_,
+        sighash_flags, version_, bip143, bip342);
 }
 
 // Caches signature hashes in a map against sighash flags.
@@ -874,10 +903,8 @@ INLINE void CLASS::
 signature_hash(hash_cache& cache, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
     if (cache.find(sighash_flags) == cache.end())
         cache.emplace(sighash_flags, signature_hash(subscript, sighash_flags));
-    BC_POP_WARNING()
 }
 
 } // namespace machine

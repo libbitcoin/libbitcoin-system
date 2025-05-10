@@ -20,6 +20,8 @@
 
 BOOST_AUTO_TEST_SUITE(elliptic_curve_tests)
 
+using namespace ecdsa;
+
 // These vectors use hash encoding for sighash values.
 
 // scenario 1
