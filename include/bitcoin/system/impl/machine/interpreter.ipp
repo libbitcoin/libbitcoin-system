@@ -1834,8 +1834,6 @@ code CLASS::connect_witness(const chain::context& state,
             {
                 return error::script_success;
             }
-
-            return error::script_success;
         }
 
         // These versions are reserved for future extensions [bip141].
