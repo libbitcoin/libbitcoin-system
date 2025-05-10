@@ -72,6 +72,9 @@ enum coverage : uint8_t
     /// add or remove other inputs.
     single_anyone_can_pay = bit_or<uint8_t>(hash_single, anyone_can_pay),
 
+    /// Used internally to pass results in schnorr parsing.
+    invalid,
+
     /// Used to mask unused bits in the signature hash byte.
     mask = unmask_right<uint8_t>(5)
 };

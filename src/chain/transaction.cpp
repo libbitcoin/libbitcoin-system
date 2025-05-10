@@ -500,7 +500,7 @@ hash_digest transaction::signature_hash(const input_iterator& input,
 
 // This is not used internal to the library.
 bool transaction::check_signature(const ec_signature& signature,
-    const data_slice& public_key, const script& sub, uint32_t index,
+    const data_slice& public_key, const script& subscript, uint32_t index,
     uint64_t value, uint8_t sighash_flags, script_version version,
     uint32_t flags) const NOEXCEPT
 {
@@ -510,7 +510,7 @@ bool transaction::check_signature(const ec_signature& signature,
     const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
-    const auto sighash = signature_hash(input_at(index), sub, value,
+    const auto sighash = signature_hash(input_at(index), subscript, value,
         sighash_flags, version, bip143, bip341);
 
     // Validate the EC signature.
@@ -519,8 +519,9 @@ bool transaction::check_signature(const ec_signature& signature,
 
 // This is not used internal to the library.
 bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
-    const script& sub, uint32_t index, uint64_t value, uint8_t sighash_flags,
-    script_version version, uint32_t flags) const NOEXCEPT
+    const script& subscript, uint32_t index, uint64_t value,
+    uint8_t sighash_flags, script_version version,
+    uint32_t flags) const NOEXCEPT
 {
     if (index >= inputs_->size())
         return false;
@@ -529,7 +530,7 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
     out.reserve(max_endorsement_size);
-    const auto sighash = signature_hash(input_at(index), sub, value,
+    const auto sighash = signature_hash(input_at(index), subscript, value,
         sighash_flags, version, bip143, bip341);
 
     // Create the EC signature and encode as DER.

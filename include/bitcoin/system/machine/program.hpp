@@ -164,7 +164,18 @@ protected:
     INLINE bool ops_increment(const operation& op) NOEXCEPT;
     INLINE bool ops_increment(size_t public_keys) NOEXCEPT;
 
-    /// Signature validation helpers.
+    /// Endorsement parsing.
+    /// -----------------------------------------------------------------------
+
+    /// Parse ecdsa endorsement into signature and signature hash flags.
+    static inline data_slice ecdsa_split(uint8_t& sighash_flags,
+        const data_chunk& endorsement) NOEXCEPT;
+
+    /// Parse schnorr endorsement into signature and signature hash flags.
+    static inline const ec_signature& schnorr_split(uint8_t& sighash_flags,
+        const data_chunk& endorsement) NOEXCEPT;
+
+    /// Signature subscripting.
     /// -----------------------------------------------------------------------
 
     /// Set subscript position to next op.
@@ -172,43 +183,32 @@ protected:
 
     /// Strip endorsement and op_codeseparator from returned subscript.
     inline script::cptr subscript(const chunk_xptrs& endorsements) const NOEXCEPT;
+    inline script::cptr subscript(const chunk_xptr& endorsement) const NOEXCEPT;
 
-    /// Parse endorsement into ecdsa signature and compute signature hash.
-    /// Cache hash by signature hash (hash redundant for same sighash flags).
-    inline bool ecdsa_prepare(ec_signature& signature, hash_digest& hash,
-        /*data_chunk& key,*/ const chunk_xptr& endorsement,
-        const script& subcript) const NOEXCEPT;
+    /// Return unstripped script (schnorr hash optimization).
+    inline const chain::script& subscript() const NOEXCEPT;
 
-    /// Parse endorsement into ecdsa signature and compute signature hash.
-    inline bool ecdsa_prepare(ec_signature& signature, hash_digest& hash,
-        /*data_chunk& key,*/ const chunk_xptr& endorsement) const NOEXCEPT;
-
-    /// Parse endorsement into schnorr signature and compute signature hash.
-    inline bool schnorr_prepare(ec_signature& signature, hash_digest& hash,
-        /*data_chunk& key,*/ const chunk_xptr& endorsement) const NOEXCEPT;
+    /// Signature hashing.
+    /// -----------------------------------------------------------------------
+    INLINE hash_digest signature_hash(uint8_t sighash_flags) const NOEXCEPT;
+    INLINE hash_digest signature_hash(const script& subscript,
+        uint8_t sighash_flags) const NOEXCEPT;
 
 private:
     using primary_stack = stack<Stack>;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
-    static inline uint32_t subscript(const script& script) NOEXCEPT;
+    static inline uint32_t subscript(const chain::script& script) NOEXCEPT;
+    static inline chain::strippers create_strip_ops(
+        const chunk_xptrs& endorsements) NOEXCEPT;
+    static inline chain::strippers create_strip_ops(
+        const chunk_xptr& endorsement) NOEXCEPT;
 
     // Private stack helpers.
-    template<size_t Bytes, typename Integer,
-        if_signed_integer<Integer> = true,
-        if_integral_integer<Integer> = true,
-        if_not_greater<Bytes, sizeof(Integer)> = true>
-    INLINE bool peek_signed_(Integer& value) const NOEXCEPT;
     INLINE void push_chunk(const chunk_xptr& datum) NOEXCEPT;
     INLINE chunk_xptr peek_chunk_() const NOEXCEPT;
     INLINE bool peek_signed32_(int32_t& value) const NOEXCEPT;
     INLINE bool peek_signed40_(int64_t& value) const NOEXCEPT;
     INLINE bool is_stack_clean() const NOEXCEPT;
-
-    // Signature hashing.
-    INLINE hash_digest signature_hash(const script& subscript,
-        uint8_t sighash_flags) const NOEXCEPT;
-    INLINE void signature_hash(hash_cache& cache, const script& subscript,
-        uint8_t sighash_flags) const NOEXCEPT;
 
     // Constants.
     const transaction& transaction_;
@@ -228,6 +228,10 @@ private:
     size_t budget_{};
     size_t operations_{};
     size_t negative_conditions_{};
+
+    // cache
+    uint32_t sighash_flags_{};
+    hash_digest signature_hash_{};
 };
 
 } // namespace machine
