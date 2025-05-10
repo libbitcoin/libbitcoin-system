@@ -251,12 +251,12 @@ void transaction::signature_hash_none(writer& sink,
 
 void transaction::signature_hash_all(writer& sink,
     const input_iterator& input, const script& subscript,
-    uint8_t flags) const NOEXCEPT
+    uint8_t sighash_flags) const NOEXCEPT
 {
-    const auto write_inputs = [this, &input, &subscript, flags](
+    const auto write_inputs = [this, &input, &subscript, sighash_flags](
         writer& sink) NOEXCEPT
     {
-        const auto anyone = to_bool(flags & coverage::anyone_can_pay);
+        const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
         input_cptrs::const_iterator in;
 
         sink.write_variable(anyone ? one : inputs_->size());
@@ -291,7 +291,7 @@ void transaction::signature_hash_all(writer& sink,
     write_inputs(sink);
     write_outputs(sink);
     sink.write_4_bytes_little_endian(locktime_);
-    sink.write_4_bytes_little_endian(flags);
+    sink.write_4_bytes_little_endian(sighash_flags);
 }
 
 // private
