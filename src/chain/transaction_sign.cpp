@@ -129,7 +129,7 @@ transaction::input_iterator transaction::input_at(
 
 uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
 {
-    // Guarded by unversioned_signature_hash and output_hash.
+    // Guarded by unversioned_sighash and output_hash.
     BC_ASSERT_MSG(inputs_->begin() != inputs_->end(), "invalid input iterator");
 
     return possible_narrow_and_sign_cast<uint32_t>(
@@ -161,10 +161,10 @@ inline coverage transaction::mask_sighash(uint8_t sighash_flags) NOEXCEPT
 // ****************************************************************************
 
 void transaction::signature_hash_single(writer& sink,
-    const input_iterator& input, const script& sub,
+    const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    const auto write_inputs = [this, &input, &sub, sighash_flags](
+    const auto write_inputs = [this, &input, &subscript, sighash_flags](
         writer& sink) NOEXCEPT
     {
         const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
@@ -180,7 +180,7 @@ void transaction::signature_hash_single(writer& sink,
         }
 
         (*input)->point().to_data(sink);
-        sub.to_data(sink, prefixed);
+        subscript.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian((*input)->sequence());
 
         for (++in; !anyone && in != inputs_->end(); ++in)
@@ -200,7 +200,7 @@ void transaction::signature_hash_single(writer& sink,
         for (size_t output = 0; output < index; ++output)
             sink.write_bytes(null_output());
 
-        // Guarded by unversioned_signature_hash.
+        // Guarded by unversioned_sighash.
         outputs_->at(index)->to_data(sink);
     };
 
@@ -212,10 +212,10 @@ void transaction::signature_hash_single(writer& sink,
 }
 
 void transaction::signature_hash_none(writer& sink,
-    const input_iterator& input, const script& sub,
+    const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    const auto write_inputs = [this, &input, &sub, sighash_flags](
+    const auto write_inputs = [this, &input, &subscript, sighash_flags](
         writer& sink) NOEXCEPT
     {
         const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
@@ -231,7 +231,7 @@ void transaction::signature_hash_none(writer& sink,
         }
 
         (*input)->point().to_data(sink);
-        sub.to_data(sink, prefixed);
+        subscript.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian((*input)->sequence());
 
         for (++in; !anyone && in != inputs_->end(); ++in)
@@ -250,10 +250,10 @@ void transaction::signature_hash_none(writer& sink,
 }
 
 void transaction::signature_hash_all(writer& sink,
-    const input_iterator& input, const script& sub,
+    const input_iterator& input, const script& subscript,
     uint8_t flags) const NOEXCEPT
 {
-    const auto write_inputs = [this, &input, &sub, flags](
+    const auto write_inputs = [this, &input, &subscript, flags](
         writer& sink) NOEXCEPT
     {
         const auto anyone = to_bool(flags & coverage::anyone_can_pay);
@@ -269,7 +269,7 @@ void transaction::signature_hash_all(writer& sink,
         }
 
         (*input)->point().to_data(sink);
-        sub.to_data(sink, prefixed);
+        subscript.to_data(sink, prefixed);
         sink.write_4_bytes_little_endian((*input)->sequence());
 
         for (++in; !anyone && in != inputs_->end(); ++in)
@@ -295,8 +295,8 @@ void transaction::signature_hash_all(writer& sink,
 }
 
 // private
-hash_digest transaction::unversioned_signature_hash(
-    const input_iterator& input, const script& sub,
+hash_digest transaction::unversioned_sighash(
+    const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
     // Set options.
@@ -319,18 +319,18 @@ hash_digest transaction::unversioned_signature_hash(
             if (input_index(input) >= outputs_->size())
                 return one_hash;
 
-            signature_hash_single(sink, input, sub, sighash_flags);
+            signature_hash_single(sink, input, subscript, sighash_flags);
             break;
         }
         case coverage::hash_none:
         {
-            signature_hash_none(sink, input, sub, sighash_flags);
+            signature_hash_none(sink, input, subscript, sighash_flags);
             break;
         }
         default:
         case coverage::hash_all:
         {
-            signature_hash_all(sink, input, sub, sighash_flags);
+            signature_hash_all(sink, input, subscript, sighash_flags);
         }
     }
 
@@ -356,7 +356,8 @@ void transaction::initialize_sighash_cache() const NOEXCEPT
     };
 }
 
-hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
+hash_digest transaction::output_hash(
+    const input_iterator& input) const NOEXCEPT
 {
     const auto index = input_index(input);
 
@@ -374,14 +375,10 @@ hash_digest transaction::output_hash(const input_iterator& input) const NOEXCEPT
     return digest;
 }
 
-hash_digest transaction::version_0_signature_hash(const input_iterator& input,
-    const script& sub, uint64_t value, uint8_t sighash_flags,
-    bool bip143) const NOEXCEPT
+hash_digest transaction::version_0_sighash(const input_iterator& input,
+    const script& subscript, uint64_t value,
+    uint8_t sighash_flags) const NOEXCEPT
 {
-    // bip143/v0: the way of serialization is changed.
-    if (!bip143)
-        return unversioned_signature_hash(input, sub, sighash_flags);
-
     // Set options.
     const auto anyone = to_bool(sighash_flags & coverage::anyone_can_pay);
     const auto flag = mask_sighash(sighash_flags);
@@ -406,7 +403,7 @@ hash_digest transaction::version_0_signature_hash(const input_iterator& input,
     sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
 
     (*input)->point().to_data(sink);
-    sub.to_data(sink, prefixed);
+    subscript.to_data(sink, prefixed);
     sink.write_little_endian(value);
     sink.write_little_endian((*input)->sequence());
 
@@ -449,6 +446,12 @@ inline bool transaction::is_sighash_valid(uint8_t sighash_flags) NOEXCEPT
         default:
             return false;
     }
+}
+
+hash_digest transaction::version_1_sighash(const input_iterator& input,
+    const script& script, uint64_t value, uint8_t sighash_flags) const NOEXCEPT
+{
+    return {};
 }
 
 } // namespace chain

@@ -473,63 +473,69 @@ chain::points transaction::points() const NOEXCEPT
 // Signatures (public)
 // ----------------------------------------------------------------------------
 
-// signature_hash exposed for op_check_multisig caching.
 hash_digest transaction::signature_hash(const input_iterator& input,
-    const script& sub, uint64_t value, uint8_t sighash_flags,
-    script_version version, bool bip143) const NOEXCEPT
+    const script& subscript, uint64_t value, uint8_t sighash_flags,
+    script_version version, bool bip143, bool bip342) const NOEXCEPT
 {
     // There is no rational interpretation of a signature hash for a coinbase.
     BC_ASSERT(!is_coinbase());
 
-    switch (version)
-    {
-        case script_version::unversioned:
-            return unversioned_signature_hash(input, sub, sighash_flags);
-        case script_version::segwit:
-            return version_0_signature_hash(input, sub, value, sighash_flags,
-                bip143);
+    // This is where the connection between bip141 and bip143 is made. If a
+    // versioned 1 program (segwit) extracted by bip141 but bip143 (segwit
+    // hashing) is not active, then drop down to unversioned signature hashing.
+    if (bip143 && version == script_version::segwit)
+        return version_0_sighash(input, subscript, value, sighash_flags);
 
-        // TODO: taproot.
-        case script_version::taproot:
-            return {};
+    // This is where the connection between bip341 and bip342 is made. If a
+    // version 2 program (taproot) extracted by bip341 but bip342 (tapscript)
+    // is not active then drop down to unversioned signature hashing. 
+    if (bip342 && version == script_version::taproot)
+        return version_1_sighash(input, subscript, value, sighash_flags);
 
-        case script_version::reserved:
-        default:
-            return {};
-    }
+    // Given above forks are documented to activate together, this distinction
+    // is moot, however these are distinct BIPs and therefore must be either be
+    // differentiated as such in code, or the BIP distiction would be ignored.
+    return unversioned_sighash(input, subscript, sighash_flags);
 }
 
 // This is not used internal to the library.
 bool transaction::check_signature(const ec_signature& signature,
     const data_slice& public_key, const script& sub, uint32_t index,
     uint64_t value, uint8_t sighash_flags, script_version version,
-    bool bip143) const NOEXCEPT
+    uint32_t flags) const NOEXCEPT
 {
     if ((index >= inputs_->size()) || signature.empty() || public_key.empty())
         return false;
 
+    const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
+    const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
+
     const auto sighash = signature_hash(input_at(index), sub, value,
-        sighash_flags, version, bip143);
+        sighash_flags, version, bip143, bip341);
 
     // Validate the EC signature.
-    return verify_signature(public_key, sighash, signature);
+    return ecdsa::verify_signature(public_key, sighash, signature);
 }
 
 // This is not used internal to the library.
 bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     const script& sub, uint32_t index, uint64_t value, uint8_t sighash_flags,
-    script_version version, bool bip143) const NOEXCEPT
+    script_version version, uint32_t flags) const NOEXCEPT
 {
     if (index >= inputs_->size())
         return false;
 
+    const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
+    const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
+
     out.reserve(max_endorsement_size);
     const auto sighash = signature_hash(input_at(index), sub, value,
-        sighash_flags, version, bip143);
+        sighash_flags, version, bip143, bip341);
 
     // Create the EC signature and encode as DER.
     ec_signature signature;
-    if (!sign(signature, secret, sighash) || !encode_signature(out, signature))
+    if (!ecdsa::sign(signature, secret, sighash) ||
+        !ecdsa::encode_signature(out, signature))
         return false;
 
     // Add the sighash type to the end of the DER signature -> endorsement.

@@ -1033,7 +1033,6 @@ op_check_sig_verify() NOEXCEPT
     const auto key = state::pop_chunk_();
     const auto endorsement = state::pop_chunk_();
 
-    // op_check_sig_empty_key causes op_check_sig to fail.
     if (key->empty())
         return error::op_check_sig_empty_key;
 
@@ -1045,22 +1044,18 @@ op_check_sig_verify() NOEXCEPT
             return error::op_check_sig_verify2;
 
         // If public key is 32 bytes it is a bip340 schnorr key.
+        // If signature is not empty, it is validated against public key.
         if (key->size() == schnorr::public_key_size)
         {
-            // If signature is not empty, it is validated against public key.
-            // Upon validation fail, script MUST fail and end (or push false).
-
-            ///////////////////////////////////////////////////////////////////
-            uint8_t sighash_flags;
+            // Parse endorsement into schnorr signature and compute hash.
+            hash_digest hash;
             ec_signature signature;
-            if (!schnorr::parse(sighash_flags, signature, *endorsement))
+            if (!state::schnorr_prepare(signature, hash, endorsement))
                 return error::op_check_sig_verify3;
 
-            // TODO: add prepare method and generate hash.
-            constexpr hash_digest hash{};
+            // Upon validation fail, script MUST fail and end (or push false).
             if (!schnorr::verify_signature(*key, hash, signature))
                 return error::op_check_sig_verify4;
-            ///////////////////////////////////////////////////////////////////
         }
 
         // If signature not empty, opcode counted toward sigops budget.
@@ -1073,22 +1068,20 @@ op_check_sig_verify() NOEXCEPT
         return error::op_success;
     }
 
-    // Not a parse failure, so op_checksig pushes false.
     if (endorsement->empty())
         return error::op_check_sig_verify6;
 
-    // op_check_sig_parse_signature causes op_check_sig to fail.
-    // Parse endorsement into DER signature into an EC signature.
-    // Also generates signature hash from endorsement sighash flags.
-    // Under bip66 op_check_sig fails if parsed endorsement is not strict DER.
+    // Parse endorsement into ECDSA signature and compute hash.
     hash_digest hash;
     ec_signature signature;
-    if (!state::prepare(signature, *key, hash, endorsement))
+    if (!state::ecdsa_prepare(signature, hash, endorsement))
         return error::op_check_sig_parse_signature;
 
-    // TODO: for signing mode - make key mutable and return above.
-    return system::verify_signature(*key, hash, signature) ?
-        error::op_success : error::op_check_sig_verify7;
+    // Verify ECDSA signature against public key and signature hash.
+    if (!ecdsa::verify_signature(*key, hash, signature))
+        return error::op_check_sig_verify7;
+
+    return error::op_success;
 }
 
 TEMPLATE
@@ -1115,8 +1108,6 @@ op_check_multisig_verify() NOEXCEPT
 {
     if (state::is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::checkmultisigverify);
-
-    const auto bip147 = state::is_enabled(flags::bip147_rule);
 
     size_t count{};
     if (!state::pop_index32(count))
@@ -1148,50 +1139,45 @@ op_check_multisig_verify() NOEXCEPT
     //*************************************************************************
     // CONSENSUS: Satoshi bug, discard stack element, malleable until bip147.
     //*************************************************************************
+    const auto bip147 = state::is_enabled(flags::bip147_rule);
+
     // This check is unique in that a chunk must be empty to be false.
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
+    hash_digest hash;
     ec_signature signature;
-    uint8_t sighash_flags;
 
-    // Bucket count default is typically around 8.
-    typename state::hash_cache cache{};
-
-    // Subscript is the same for all signatures.
+    // Subscript is the same for all endorsements.
     const auto subscript = state::subscript(endorsements);
-    auto endorsement = endorsements.begin();
+    auto it = endorsements.begin();
 
-    // Keys may be empty, endorsements is an ordered subset of corresponding
-    // keys, all endorsements must be verified against a key. Under bip66,
-    // op_check_multisig fails if any parsed endorsement is not strict DER.
+    // Keys may be empty.
     for (const auto& key: keys)
     {
-        // All signatures are valid (empty does not increment the iterator).
-        if (endorsement == endorsements.end())
+        // Implies that all signatures are valid.
+        if (it == endorsements.end())
             break;
 
-        // op_check_multisig_parse_signature causes op_check_multisig to fail.
-        if (!(*endorsement)->empty())
-        {
-            // Parse endorsement into DER signature into an ECDSA signature.
-            // Also generates signature hash from endorsement sighash flags.
-            if (!state::prepare(signature, *key, cache, sighash_flags,
-                *endorsement->get(), *subscript))
-                return error::op_check_multisig_parse_signature;
+        // Empty endorsement does not increment iterator.
+        const auto endorsement = *it;
+        if (endorsement->empty())
+            continue;
 
-            BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-            const auto& hash = cache.at(sighash_flags);
-            BC_POP_WARNING()
+        // Parse endorsement into ECDSA signature and compute hash.
+        if (!state::ecdsa_prepare(signature, hash, endorsement, *subscript))
+            return error::op_check_multisig_parse_signature;
 
-            // TODO: for signing mode - make key mutable and return above.
-            if (system::verify_signature(*key, hash, signature))
-                ++endorsement;
-        }
+        // Verify ECDSA signature against public key and signature hash.
+        if (ecdsa::verify_signature(*key, hash, signature))
+            ++it;
     }
 
-    return endorsement != endorsements.end() ?
-        error::op_check_multisig_verify10 : error::op_success;
+    // All endorsements must be verified against a key.
+    if (it != endorsements.end())
+        return error::op_check_multisig_verify10;
+    
+    return error::op_success;
 }
 
 TEMPLATE
@@ -1202,13 +1188,13 @@ op_check_locktime_verify() const NOEXCEPT
     if (!state::is_enabled(flags::bip65_rule))
         return op_nop(opcode::nop2);
 
-    // BIP65: the tx sequence is 0xffffffff.
+    // The tx sequence is 0xffffffff.
     if (state::input().is_final())
         return error::op_check_locktime_verify1;
 
-    // BIP65: the stack is empty.
-    // BIP65: the top stack item is negative.
-    // BIP65: extend the (signed) script number range to 5 bytes.
+    // The stack is empty.
+    // The top stack item is negative.
+    // Extend the (signed) script number range to 5 bytes.
     // The stack top is positive and 40 bits are usable.
     uint64_t stack_locktime40;
     if (!state::peek_unsigned40(stack_locktime40))
@@ -1217,14 +1203,16 @@ op_check_locktime_verify() const NOEXCEPT
     const auto trans_locktime32 = state::tx().locktime();
     using namespace chain;
 
-    // BIP65: the stack locktime type differs from that of tx.
+    // The stack locktime type differs from that of tx.
     if ((stack_locktime40 < locktime_threshold) !=
         (trans_locktime32 < locktime_threshold))
         return error::op_check_locktime_verify3;
 
-    // BIP65: the stack locktime is greater than the tx locktime.
-    return (stack_locktime40 > trans_locktime32) ?
-        error::op_check_locktime_verify4 : error::op_success;
+    // The stack locktime is greater than the tx locktime.
+    if (stack_locktime40 > trans_locktime32)
+        return error::op_check_locktime_verify4;
+
+    return error::op_success;
 }
 
 TEMPLATE
@@ -1235,9 +1223,9 @@ op_check_sequence_verify() const NOEXCEPT
     if (!state::is_enabled(flags::bip112_rule))
         return op_nop(opcode::nop3);
 
-    // BIP112: the stack is empty.
-    // BIP112: the top stack item is negative.
-    // BIP112: extend the (signed) script number range to 5 bytes.
+    // The stack is empty.
+    // The top stack item is negative.
+    // Extend the (signed) script number range to 5 bytes.
     // The stack top is positive and 32 bits are used (33rd-40th discarded).
     uint32_t stack_sequence32;
     if (!state::peek_unsigned32(stack_sequence32))
@@ -1247,82 +1235,81 @@ op_check_sequence_verify() const NOEXCEPT
     const auto input_sequence32 = state::input().sequence();
     using namespace chain;
 
-    // BIP112: the stack sequence is disabled, treat as nop3.
+    // The stack sequence is disabled, treat as nop3.
     if (get_right(stack_sequence32, relative_locktime_disabled_bit))
         return op_nop(opcode::nop3);
 
-    // BIP112: the stack sequence is enabled and tx version less than 2.
+    // The stack sequence is enabled and tx version less than 2.
     if (state::tx().version() < relative_locktime_min_version)
         return error::op_check_sequence_verify2;
 
-    // BIP112: the transaction sequence is disabled.
+    // The transaction sequence is disabled.
     if (get_right(input_sequence32, relative_locktime_disabled_bit))
         return error::op_check_sequence_verify3;
 
-    // BIP112: the stack sequence type differs from that of tx input.
+    // The stack sequence type differs from that of tx input.
     if (get_right(stack_sequence32, relative_locktime_time_locked_bit) !=
         get_right(input_sequence32, relative_locktime_time_locked_bit))
         return error::op_check_sequence_verify4;
 
-    // BIP112: the unmasked stack sequence is greater than that of tx sequence.
-    return
-        (mask_left(stack_sequence32, relative_locktime_mask_left)) >
-        (mask_left(input_sequence32, relative_locktime_mask_left)) ?
-        error::op_check_sequence_verify5 : error::op_success;
+    // The unmasked stack sequence is greater than that of tx sequence.
+    if (mask_left(stack_sequence32, relative_locktime_mask_left) >
+        mask_left(input_sequence32, relative_locktime_mask_left))
+        return error::op_check_sequence_verify5;
+
+    return error::op_success;
 }
 
 TEMPLATE
 inline error::op_error_t CLASS::
 op_check_sig_add() NOEXCEPT
 {
-    // BIP65: nop2 subsumed by op_checksigadd when tapscript fork active.
+    // BIP342: reserved_186 subsumed by op_checksigadd when tapscript active.
     if (!state::is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::reserved_186);
 
-    // BIP342: if fewer than 3 elements on stack, script MUST fail and end.
+    // If fewer than 3 elements on stack, script MUST fail and end.
     if (state::stack_size() < 3u)
         return error::op_check_schnorr_sig1;
 
-    // BIP342: public key (top) is popped.
+    // Public key (top) is popped.
     const auto key = state::pop_chunk_();
 
-    // BIP342: if public key is empty, script MUST fail and end.
+    // If public key is empty, script MUST fail and end.
     if (key->empty())
         return error::op_check_schnorr_sig2;
 
-    // BIP342: number (second to top) is popped.
-    // BIP342: if number is larger than 4 bytes, script MUST fail and end.
+    // Number (second to top) is popped.
+    // If number is larger than 4 bytes, script MUST fail and end.
     int32_t number;
     if (!state::pop_signed32_(number))
         return error::op_check_schnorr_sig3;
 
-    // BIP342: signature (third to top) is popped.
+    // Signature (third to top) is popped.
     const auto endorsement = state::pop_chunk_();
 
-    // BIP342: if signature is empty, [number] pushed, execution continues.
+    // If signature is empty, [number] pushed, execution continues.
     if (endorsement->empty())
     {
         state::push_signed64(number);
         return error::op_success;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    uint8_t sighash_flags;
+    // Parse endorsement into schnorr signature and compute hash.
+    hash_digest hash;
     ec_signature signature;
-    if (!schnorr::parse(sighash_flags, signature, *endorsement))
+    if (!state::schnorr_prepare(signature, hash, endorsement))
         return error::op_check_schnorr_sig3;
 
-    // TODO: add prepare method and generate hash.
-    constexpr hash_digest hash{};
+    // Verify schnorr signature against public key and signature hash.
     if (!schnorr::verify_signature(*key, hash, signature))
         return error::op_check_schnorr_sig4;
-    ///////////////////////////////////////////////////////////////////////////
 
-    // BIP342: if signature not empty, opcode counted toward sigops budget.
+    // If signature not empty, opcode counted toward sigops budget.
     if (!state::sigops_increment())
         return error::op_check_schnorr_sig5;
 
-    // BIP342: if signature not empty (and successful), [number+1] pushed.
+    // If signature not empty (and successful), [number+1] pushed.
     state::push_signed64(add1<int64_t>(number));
     return error::op_success;
 }
@@ -1670,8 +1657,10 @@ run() NOEXCEPT
         }
     }
 
-    return state::is_balanced() ? error::script_success :
-        error::invalid_stack_scope;
+    if (!state::is_balanced())
+        return error::invalid_stack_scope;
+
+    return error::script_success;
 }
 
 TEMPLATE
@@ -1716,30 +1705,28 @@ connect(const chain::context& state, const chain::transaction& tx,
     }
     else if (prevout->is_pay_to_script_hash(state.flags))
     {
-        // Because output script pushed script hash program (bip16).
+        // Because output script pushed script hash program [bip16].
         if ((ec = connect_embedded(state, tx, it, in_program)))
             return ec;
     }
     else if (prevout->is_pay_to_witness(state.flags))
     {
-        // The input script must be empty (bip141).
+        // The input script must be empty [bip141].
         if (!input.script().ops().empty())
             return error::dirty_witness;
 
-        // Because output script pushed version and witness program (bip141).
+        // Because output script pushed version and witness program [bip141].
         if ((ec = connect_witness(state, tx, it, *prevout)))
             return ec;
     }
     else if (!input.witness().stack().empty())
     {
-        // A non-witness program must have empty witness field (bip141).
+        // A non-witness program must have empty witness field [bip141].
         return error::unexpected_witness;
     }
 
     return error::script_success;
 }
-
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 TEMPLATE
 code CLASS::connect_embedded(const chain::context& state,
@@ -1749,11 +1736,11 @@ code CLASS::connect_embedded(const chain::context& state,
     using namespace chain;
     const auto& input = **it;
 
-    // Input script is limited to relaxed push data operations (bip16).
+    // Input script is limited to relaxed push data operations [bip16].
     if (!script::is_relaxed_push_pattern(input.script().ops()))
         return error::invalid_script_embed;
 
-    // Embedded script must be at the top of the stack (bip16).
+    // Embedded script must be at the top of the stack [bip16].
     // Evaluate embedded script using stack moved from input script.
     const auto prevout = to_shared<script>(in_program.pop(), false);
     interpreter out_program(std::move(in_program), prevout);
@@ -1768,24 +1755,22 @@ code CLASS::connect_embedded(const chain::context& state,
     }
     else if (prevout->is_pay_to_witness(state.flags))
     {
-        // The input script must be a push of the embedded_script (bip141).
+        // The input script must be a push of the embedded_script [bip141].
         if (input.script().ops().size() != one)
             return error::dirty_witness;
 
-        // Because output script pushed version/witness program (bip141).
+        // Because output script pushed version/witness program [bip141].
         if ((ec = connect_witness(state, tx, it, *prevout)))
             return ec;
     }
     else if (!input.witness().stack().empty())
     {
-        // A non-witness program must have empty witness field (bip141).
+        // A non-witness program must have empty witness field [bip141].
         return error::unexpected_witness;
     }
 
     return error::script_success;
 }
-
-BC_POP_WARNING()
 
 TEMPLATE
 code CLASS::connect_witness(const chain::context& state,
@@ -1813,7 +1798,7 @@ code CLASS::connect_witness(const chain::context& state,
             }
             else if (!program.is_true(true))
             {
-                // A v0 script must succeed with a clean true stack (bip141).
+                // A v0 script must succeed with a clean true stack [bip141].
                 return error::stack_false;
             }
             else
@@ -1823,7 +1808,7 @@ code CLASS::connect_witness(const chain::context& state,
         }
 
         ///////////////////////////////////////////////////////////////////////
-        // TODO: properly extract tapscript/taproot.
+        // TODO: properly extract tapscript/taproot [bip341].
         ///////////////////////////////////////////////////////////////////////
         case script_version::taproot:
         {
@@ -1842,7 +1827,7 @@ code CLASS::connect_witness(const chain::context& state,
             }
             else if (!program.is_true(true))
             {
-                // A v1 script must succeed with a clean true stack (bip342).
+                // A v1 script must succeed with a clean true stack [bip342].
                 return error::stack_false;
             }
             else
@@ -1853,7 +1838,7 @@ code CLASS::connect_witness(const chain::context& state,
             return error::script_success;
         }
 
-        // These versions are reserved for future extensions (bip141).
+        // These versions are reserved for future extensions [bip141].
         case script_version::reserved:
             return error::script_success;
 

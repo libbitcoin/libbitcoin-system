@@ -176,6 +176,8 @@ BC_API bool is_public_key(const data_slice& point) NOEXCEPT;
 /// Fast detection of endorsement structure (DER with signature hash type).
 BC_API bool is_endorsement(const endorsement& endorsement) NOEXCEPT;
 
+namespace ecdsa {
+
 /// ECDSA parse/encode/sign/verify signature
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
@@ -218,6 +220,8 @@ BC_API bool recover_public(ec_compressed& out,
 BC_API bool recover_public(ec_uncompressed& out,
     const recoverable_signature& recoverable,
     const hash_digest& hash) NOEXCEPT;
+
+} // namespace ecdsa
 
 namespace schnorr {
 

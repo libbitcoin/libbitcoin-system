@@ -30,6 +30,7 @@ namespace chain {
 
 constexpr uint32_t no_previous_output = max_uint32;
 constexpr uint32_t max_input_sequence = max_uint32;
+constexpr uint32_t default_separators = max_uint32;
 constexpr uint64_t sighash_null_value = max_uint64;
 
 /// Script/interpreter consensus constants.

@@ -60,7 +60,7 @@ static bool recover(short_hash& out_hash, bool compressed,
     if (compressed)
     {
         ec_compressed point;
-        if (!recover_public(point, recoverable, message_digest))
+        if (!ecdsa::recover_public(point, recoverable, message_digest))
             return false;
 
         out_hash = bitcoin_short_hash(point);
@@ -68,7 +68,7 @@ static bool recover(short_hash& out_hash, bool compressed,
     }
 
     ec_uncompressed point;
-    if (!recover_public(point, recoverable, message_digest))
+    if (!ecdsa::recover_public(point, recoverable, message_digest))
         return false;
 
     out_hash = bitcoin_short_hash(point);
@@ -126,7 +126,7 @@ bool sign_message(message_signature& out_signature, const data_slice& message,
     const ec_secret& secret, bool compressed) NOEXCEPT
 {
     recoverable_signature recoverable;
-    if (!sign_recoverable(recoverable, secret, hash_message(message)))
+    if (!ecdsa::sign_recoverable(recoverable, secret, hash_message(message)))
         return false;
 
     uint8_t magic;

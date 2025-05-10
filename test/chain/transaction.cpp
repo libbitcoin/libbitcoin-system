@@ -1402,10 +1402,10 @@ BOOST_AUTO_TEST_CASE(transaction__check_signature__single__uses_one_hash)
     constexpr auto index = 1u;
     constexpr auto value = 0u;
     constexpr auto bip66 = true;
-    constexpr auto bip143 = false;
+    constexpr auto flags = flags::bip66_rule;
     ec_signature signature;
-    BOOST_REQUIRE(parse_signature(signature, distinguished, bip66));
-    BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, bip143));
+    BOOST_REQUIRE(ecdsa::parse_signature(signature, distinguished, bip66));
+    BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, flags));
 }
 
 BOOST_AUTO_TEST_CASE(transaction__check_signature__normal__success)
@@ -1424,10 +1424,10 @@ BOOST_AUTO_TEST_CASE(transaction__check_signature__normal__success)
     constexpr auto index = 0u;
     constexpr auto value = 0u;
     constexpr auto bip66 = true;
-    constexpr auto bip143 = false;
+    constexpr auto flags = flags::bip66_rule;
     ec_signature signature;
-    BOOST_REQUIRE(parse_signature(signature, distinguished, bip66));
-    BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, bip143));
+    BOOST_REQUIRE(ecdsa::parse_signature(signature, distinguished, bip66));
+    BOOST_REQUIRE(parent_tx.check_signature(signature, pubkey, subscript, index, value, coverage::hash_single, script_version::unversioned, flags));
 }
 
 // create_endorsement
@@ -1444,9 +1444,9 @@ BOOST_AUTO_TEST_CASE(transaction__create_endorsement__single_input_single_output
     const ec_secret secret = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
     constexpr auto index = 0u;
     constexpr auto value = 0u;
-    constexpr auto bip143 = false;
+    constexpr auto flags = flags::no_rules;
     endorsement out;
-    BOOST_REQUIRE(test_tx.create_endorsement(out, secret, prevout_script, index, value, coverage::hash_all, script_version::unversioned, bip143));
+    BOOST_REQUIRE(test_tx.create_endorsement(out, secret, prevout_script, index, value, coverage::hash_all, script_version::unversioned, flags));
 
     const auto expected = base16_chunk("3045022100e428d3cc67a724cb6cfe8634aa299e58f189d9c46c02641e936c40cc16c7e8ed0220083949910fe999c21734a1f33e42fca15fb463ea2e08f0a1bccd952aacaadbb801");
     BOOST_REQUIRE_EQUAL(out, expected);
@@ -1464,9 +1464,9 @@ BOOST_AUTO_TEST_CASE(transaction__create_endorsement__single_input_no_output__ex
     const ec_secret secret = base16_hash("ce8f4b713ffdd2658900845251890f30371856be201cd1f5b3d970f793634333");
     constexpr auto index = 0u;
     constexpr auto value = 0u;
-    constexpr auto bip143 = false;
+    constexpr auto flags = flags::no_rules;
     endorsement out;
-    BOOST_REQUIRE(test_tx.create_endorsement(out, secret, prevout_script, index, value, coverage::hash_all, script_version::unversioned, bip143));
+    BOOST_REQUIRE(test_tx.create_endorsement(out, secret, prevout_script, index, value, coverage::hash_all, script_version::unversioned, flags));
 
     const auto expected = base16_chunk("3045022100ba57820be5f0b93a0d5b880fbf2a86f819d959ecc24dc31b6b2d4f6ed286f253022071ccd021d540868ee10ca7634f4d270dfac7aea0d5912cf2b104111ac9bc756b01");
     BOOST_REQUIRE_EQUAL(out, expected);
@@ -1486,8 +1486,9 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     ////constexpr auto index = 0u;
     constexpr auto value = 0u;
     constexpr auto bip143 = false;
+    constexpr auto bip342 = false;
     const auto& input = test_tx.inputs_ptr()->begin();
-    const auto sighash = test_tx.signature_hash(input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143);
+    const auto sighash = test_tx.signature_hash(input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143, bip342);
     const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
     BOOST_REQUIRE_EQUAL(sighash, expected);
 }
