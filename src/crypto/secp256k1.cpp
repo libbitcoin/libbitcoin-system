@@ -374,17 +374,6 @@ namespace ecdsa {
 // ----------------------------------------------------------------------------
 // It is recommended to verify a signature after signing.
 
-bool parse_endorsement(uint8_t& sighash_flags, data_slice& der_signature,
-    const endorsement& endorsement) NOEXCEPT
-{
-    if (endorsement.empty())
-        return false;
-
-    sighash_flags = endorsement.back();
-    der_signature = { endorsement.begin(), std::prev(endorsement.end()) };
-    return true;
-}
-
 bool parse_signature(ec_signature& out, const data_slice& der_signature,
     bool strict) NOEXCEPT
 {
@@ -492,34 +481,6 @@ namespace schnorr {
 
 // Schnorr parse/sign/verify
 // ----------------------------------------------------------------------------
-
-bool parse(uint8_t& sighash_flags, ec_signature& signature,
-    const endorsement& endorsement) NOEXCEPT
-{
-    switch (endorsement.size())
-    {
-        // BIP341: if [sighash byte] is omitted the resulting signatures are 64
-        // bytes, and [default == 0] mode is implied (implies SIGHASH_ALL).
-        case signature_size:
-            sighash_flags = 0;
-            break;
-
-        // BIP341: signature has sighash byte appended in the usual fashion.
-        // BIP341: zero is invalid sighash, must be explicit to prevent mally.
-        case add1(signature_size):
-            sighash_flags = endorsement.back();
-            if (is_zero(sighash_flags)) return false;
-            break;
-
-        // BIP341: A Taproot signature is a 64-byte Schnorr signature.
-        default:
-            return false;
-    }
-
-    // TODO: optimize unnecessary copy (e.g. could return reference).
-    signature = unsafe_array_cast<uint8_t, signature_size>(endorsement.data());
-    return true;
-}
 
 // It is recommended to verify a signature after signing.
 bool sign(ec_signature& out, const ec_secret& secret,

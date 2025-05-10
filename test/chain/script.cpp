@@ -911,7 +911,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_native_p2wsh_1_tx__success)
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule | flags::bip143_rule }, 0), error::script_success);
 
     // missing bip143 (code-separator treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 1), error::op_check_sig_verify7);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip141_rule }, 1), error::op_check_sig_verify8);
 
     // missing bip141 (witness not allowed).
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip143_rule }, 1), error::unexpected_witness);
@@ -1033,7 +1033,7 @@ BOOST_AUTO_TEST_CASE(script__verify__bip143_no_find_and_delete_tx__success)
     BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip143_rule }, 0), error::unexpected_witness);
 
     // missing bip143 (find-and-delete treatment).
-    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::op_check_sig_verify7);
+    BOOST_REQUIRE_EQUAL(tx.connect({ flags::bip16_rule | flags::bip141_rule }, 0), error::op_check_sig_verify8);
 }
 
 // json

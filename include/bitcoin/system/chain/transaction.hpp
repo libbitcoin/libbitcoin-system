@@ -145,13 +145,13 @@ public:
 
     /// Not used internally.
     bool check_signature(const ec_signature& signature,
-        const data_slice& public_key, const script& sub, uint32_t index,
+        const data_slice& public_key, const script& subscript, uint32_t index,
         uint64_t value, uint8_t sighash_flags, script_version version,
         uint32_t flags) const NOEXCEPT;
 
     /// Not used internally.
     bool create_endorsement(endorsement& out, const ec_secret& secret,
-        const script& sub, uint32_t index, uint64_t value,
+        const script& subscript, uint32_t index, uint64_t value,
         uint8_t sighash_flags, script_version version,
         uint32_t flags) const NOEXCEPT;
 
@@ -255,7 +255,7 @@ private:
     } sighash_cache;
 
     static inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static inline bool is_sighash_valid(uint8_t sighash_flags) NOEXCEPT;
+    static inline bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
 
     // delegated
     code connect_input(const context& ctx,
