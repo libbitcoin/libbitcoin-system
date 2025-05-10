@@ -40,8 +40,7 @@ ostream<Character>::ostream(Buffer& buffer) NOEXCEPT
 }
 
 template <typename Character>
-ostream<Character>::ostream(uint8_t* begin,
-    ptrdiff_t size) NOEXCEPT
+ostream<Character>::ostream(uint8_t* begin, ptrdiff_t size) NOEXCEPT
   : position_(begin),
     begin_(position_),
     end_(begin_ + size),
