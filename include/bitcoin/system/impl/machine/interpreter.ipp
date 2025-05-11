@@ -1158,6 +1158,7 @@ op_check_multisig_verify() NOEXCEPT
     state::initialize_cache();
     auto it = endorsements.begin();
     const auto subscript = state::subscript(endorsements);
+    const auto bip66 = state::is_enabled(flags::bip66_rule);
 
     // Keys may be empty.
     for (const auto& key: keys)
@@ -1174,7 +1175,6 @@ op_check_multisig_verify() NOEXCEPT
         // Split endorsement into DER signature signature hash flags.
         uint8_t sighash_flags;
         const auto& der = state::ecdsa_split(sighash_flags, *endorsement);
-        const auto bip66 = state::is_enabled(flags::bip66_rule);
 
         // BIP66: if DER encoding invalid script MUST fail and end.
         ec_signature sig;
