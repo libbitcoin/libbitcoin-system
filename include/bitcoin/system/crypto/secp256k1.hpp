@@ -182,10 +182,6 @@ namespace ecdsa {
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
 
-/// Parse ECDSA endorsement into signature hash type and DER signature.
-BC_API bool parse_endorsement(uint8_t& sighash_flags,
-    data_slice& der_signature, const endorsement& endorsement) NOEXCEPT;
-
 /// Parse a DER encoded signature with optional strict DER enforcement.
 /// Treat an empty DER signature as invalid, in accordance with BIP66.
 BC_API bool parse_signature(ec_signature& out, const data_slice& der_signature,
@@ -231,10 +227,6 @@ static constexpr size_t public_key_size = 32;
 /// Schnorr parse/sign/verify
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
-
-/// Parse Schnorr endorsement into signature hash type and Schnorr signature.
-BC_API bool parse(uint8_t& sighash_flags, ec_signature& signature,
-    const endorsement& endorsement) NOEXCEPT;
 
 /// Create a Schnorr signature using a private key (simple version, no tweaks).
 BC_API bool sign(ec_signature& out, const ec_secret& secret,

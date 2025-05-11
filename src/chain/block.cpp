@@ -334,7 +334,8 @@ block::sizes block::serialized_size(const transaction_cptrs& txs) NOEXCEPT
     std::for_each(txs.begin(), txs.end(), [&](const auto& tx) NOEXCEPT
     {
         size.nominal = ceilinged_add(size.nominal, tx->serialized_size(false));
-        size.witnessed = ceilinged_add(size.witnessed, tx->serialized_size(true));
+        size.witnessed = ceilinged_add(size.witnessed,
+            tx->serialized_size(true));
     });
 
     const auto base_size = ceilinged_add(header::serialized_size(),
@@ -439,7 +440,7 @@ bool block::is_invalid_merkle_root() const NOEXCEPT
 
 size_t block::weight() const NOEXCEPT
 {
-    // Block weight is 3 * nominal size * + 1 * witness size (bip141).
+    // Block weight is 3 * nominal size * + 1 * witness size [bip141].
     return ceilinged_add(
         ceilinged_multiply(base_size_contribution, serialized_size(false)),
         ceilinged_multiply(total_size_contribution, serialized_size(true)));
@@ -592,7 +593,7 @@ size_t block::segregated() const NOEXCEPT
     return std::count_if(txs_->begin(), txs_->end(), count_segregated);
 }
 
-// Last output of commitment pattern holds the committed value (bip141).
+// Last output of commitment pattern holds the committed value [bip141].
 bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
 {
     if (txs_->empty())
@@ -606,7 +607,7 @@ bool block::get_witness_commitment(hash_cref& commitment) const NOEXCEPT
     return false;
 }
 
-// Coinbase input witness must be 32 byte witness reserved value (bip141).
+// Coinbase input witness must be 32 byte witness reserved value [bip141].
 bool block::get_witness_reservation(hash_cref& reservation) const NOEXCEPT
 {
     if (txs_->empty())
@@ -625,13 +626,13 @@ bool block::is_invalid_witness_commitment() const NOEXCEPT
     if (txs_->empty())
         return false;
 
-    // Witness data (segregated) disallowed if no commitment (bip141).
-    // If no block tx has witness data the commitment is optional (bip141).
+    // Witness data (segregated) disallowed if no commitment [bip141].
+    // If no block tx has witness data the commitment is optional [bip141].
     hash_cref commit{ null_hash };
     if (!get_witness_commitment(commit))
         return is_segregated();
 
-    // If there is a witness reservation there must be a commitment (bip141).
+    // If there is a witness reservation there must be a commitment [bip141].
     hash_cref reserve{ null_hash };
     if (!get_witness_reservation(reserve))
         return true;
@@ -694,7 +695,8 @@ size_t block::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     // Overflow returns max_size_t.
     const auto value = [=](size_t total, const auto& tx) NOEXCEPT
     {
-        return ceilinged_add(total, tx->signature_operations(bip16, bip141));
+        const auto add = tx->signature_operations(bip16, bip141);
+        return ceilinged_add(total, add);
     };
 
     return std::accumulate(txs_->begin(), txs_->end(), zero, value);

@@ -38,7 +38,7 @@ namespace chain {
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // Product overflows guarded by script size limit.
-static_assert(max_script_size < 
+static_assert(max_script_size <
     max_size_t / multisig_default_sigops / heavy_sigops_factor,
     "input sigop overflow guard");
 
@@ -427,7 +427,7 @@ bool input::is_relative_locked(size_t height,
 
 bool input::reserved_hash(hash_cref& out) const NOEXCEPT
 {
-    const auto& stack = get_witness().stack();
+    const auto& stack = witness().stack();
     if (!witness::is_reserved_pattern(stack))
         return false;
 
@@ -436,63 +436,45 @@ bool input::reserved_hash(hash_cref& out) const NOEXCEPT
     return true;
 }
 
-// private
-// prevout_script is only used to determine is_pay_script_hash_pattern.
-bool input::extract_sigop_script(chain::script& out,
-    const chain::script& prevout_script) const NOEXCEPT
-{
-    // There are no embedded sigops when the prevout script is not p2sh.
-    if (!script::is_pay_script_hash_pattern(prevout_script.ops()))
-        return false;
-
-    // There are no embedded sigops when the input script is not push only.
-    const auto& ops = script_->ops();
-    if (ops.empty() || !script::is_relaxed_push_pattern(ops))
-        return false;
-
-    // Parse the embedded script from the last input script item (data).
-    // This cannot fail because there is no prefix to invalidate the length.
-    out = { ops.back().data(), false };
-    return true;
-}
-
 // TODO: Prior to block 79400 sigops were limited only by policy.
 // TODO: Create legacy sigops fork/flag and pass here, return 0 if false.
 // TODO: this was an unbipped flag day soft fork, prior to BIP16/141.
 // TODO: if (nHeight > 79400 && GetSigOpCount() > MAX_BLOCK_SIGOPS).
+// ****************************************************************************
+// CONSENSUS: coinbase input cannot execute, but legacy sigops counted anyway.
+// ****************************************************************************
 size_t input::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
-    // Penalize quadratic signature operations (bip141).
+    // Sigops in the current output script, input script, and P2SH embedded
+    // script are counted at four times their previous value (heavy) [bip141].
     const auto factor = bip141 ? heavy_sigops_factor : one;
+
+    // Count heavy sigops in the input script (inaccurate).
     const auto sigops = script_->signature_operations(false) * factor;
 
-    // ************************************************************************
-    // CONSENSUS: coinbase input cannot execute, but sigops are counted anyway.
-    // ************************************************************************
+    // Null prevout/input (coinbase) cannot have witness or embedded script.
+    // Embedded/witness scripts are deserialized here and again on script eval.
     if (!prevout)
         return sigops;
 
-    // Null prevout/input (coinbase) cannot have witness or embedded script.
-    // Embedded/witness scripts are deserialized here and again on scipt eval.
-
-    chain::script witness;
-    if (bip141 && get_witness().extract_sigop_script(witness, prevout->script()))
+    chain::script script;
+    if (bip141 && witness_->extract_sigop_script(script, prevout->script()))
     {
-        // Add sigops in the witness script (bip141).
-        return ceilinged_add(sigops, witness.signature_operations(true));
+        // Add sigops in the witness script (accurate) [bip141].
+        return ceilinged_add(sigops, script.signature_operations(true));
     }
 
     chain::script embedded;
-    if (bip16 && extract_sigop_script(embedded, prevout->script()))
+    if (bip16 && script_->extract_sigop_script(embedded, prevout->script()))
     {
-        if (bip141 && get_witness().extract_sigop_script(witness, embedded))
+        if (bip141 && witness_->extract_sigop_script(script, embedded))
         {
-            // Add sigops in the embedded witness script (bip141).
-            return ceilinged_add(sigops, witness.signature_operations(true));
+            // Add sigops in the embedded witness script (accurate) [bip141].
+            return ceilinged_add(sigops, script.signature_operations(true));
         }
         else
         {
-            // Add heavy sigops in the embedded script (bip16).
+            // Add heavy sigops in the embedded script (accurate) [bip16].
             return ceilinged_add(sigops, embedded.signature_operations(true) *
                 factor);
         }

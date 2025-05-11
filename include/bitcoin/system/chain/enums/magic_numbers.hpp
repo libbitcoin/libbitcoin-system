@@ -69,7 +69,7 @@ constexpr size_t relative_locktime_time_locked_bit = 22;
 constexpr size_t relative_locktime_seconds_shift_left = 9;
 constexpr size_t relative_locktime_mask_left = 16;
 
-/// Witness serialization consensus constants (bip141).
+/// Witness serialization consensus constants [bip141].
 /// ---------------------------------------------------------------------------
 
 constexpr size_t heavy_sigops_factor = 4;
@@ -84,7 +84,7 @@ constexpr uint32_t witness_head = 0xaa21a9ed;
 constexpr uint8_t witness_marker = 0x00;
 constexpr uint8_t witness_enabled = 0x01;
 
-/// Tapscript consensus constants (bip342).
+/// Tapscript consensus constants [bip342].
 /// ---------------------------------------------------------------------------
 
 constexpr size_t signature_budget = 50;

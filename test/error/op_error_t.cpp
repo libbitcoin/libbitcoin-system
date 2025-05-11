@@ -668,6 +668,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify7__true_exected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify7");
 }
 
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify8__true_exected_message)
+{
+    constexpr auto value = error::op_check_sig_verify8;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify8");
+}
+
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_empty_key__true_exected_message)
 {
     constexpr auto value = error::op_check_sig_empty_key;
@@ -918,6 +927,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig5__true_exected_messa
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig5");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig6__true_exected_message)
+{
+    constexpr auto value = error::op_check_schnorr_sig6;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig6");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

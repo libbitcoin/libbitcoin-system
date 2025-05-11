@@ -40,7 +40,11 @@ namespace chain {
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 using namespace system::machine;
-static const auto checksig_script = script{ { opcode::checksig } };
+static const script& op_checksig_script()
+{
+    static const script signature{ { opcode::checksig } };
+    return signature;
+}
 
 // Constructors.
 // ----------------------------------------------------------------------------
@@ -259,7 +263,7 @@ void witness::to_data(writer& sink, bool prefix) const NOEXCEPT
     if (prefix)
         sink.write_variable(stack_.size());
 
-    // Tokens encoded as variable integer prefixed byte array (bip144).
+    // Tokens encoded as variable integer prefixed byte array [bip144].
     for (const auto& element: stack_)
     {
         sink.write_variable(element->size());
@@ -341,12 +345,12 @@ bool witness::extract_sigop_script(script& out_script,
         {
             switch (program_script.witness_program().size())
             {
-                // Each p2wkh input is counted as 1 sigop (bip141).
+                // Each p2wkh input is counted as 1 sigop [bip141].
                 case short_hash_size:
-                    out_script = checksig_script;
+                    out_script = op_checksig_script();
                     return true;
 
-                // p2wsh sigops are counted as before for p2sh (bip141).
+                // p2wsh sigops are counted as before for p2sh [bip141].
                 case hash_size:
                     if (!stack_.empty())
                         out_script = { *stack_.back(), false };
@@ -359,11 +363,11 @@ bool witness::extract_sigop_script(script& out_script,
             }
         }
 
-        // TODO: taproot.
+        // Sigops in tapscripts do not count towards block limit [bip342].
         case script_version::taproot:
             return true;
 
-        // These versions are reserved for future extensions (bip141).
+        // These versions are reserved for future extensions [bip141].
         case script_version::reserved:
             return true;
 
@@ -395,11 +399,11 @@ bool witness::extract_script(script::cptr& out_script,
                 case short_hash_size:
                 {
                     // Create a pay-to-key-hash input script from the program.
-                    // The hash160 of public key must match program (bip141).
+                    // The hash160 of public key must match program [bip141].
                     out_script = to_shared<script>(to_pay_key_hash(
                         std::move(program)));
 
-                    // Stack must be 2 elements (bip141).
+                    // Stack must be 2 elements [bip141].
                     return out_stack->size() == two;
                 }
 
@@ -409,14 +413,14 @@ bool witness::extract_script(script::cptr& out_script,
                 // output script : <0> <32-byte-hash-of-script>
                 case hash_size:
                 {
-                    // The stack must consist of at least 1 element (bip141).
+                    // The stack must consist of at least 1 element [bip141].
                     if (out_stack->empty())
                         return false;
 
-                    // Input script is popped from the stack (bip141).
+                    // Input script is popped from the stack [bip141].
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
-                    // The sha256 of popped script must match program (bip141).
+                    // The sha256 of popped script must match program [bip141].
                     return std::equal(program.begin(), program.end(),
                         out_script->hash().begin());
                 }
@@ -431,7 +435,7 @@ bool witness::extract_script(script::cptr& out_script,
         case script_version::taproot:
             return true;
 
-        // These versions are reserved for future extensions (bip141).
+        // These versions are reserved for future extensions [bip141].
         case script_version::reserved:
             return true;
 

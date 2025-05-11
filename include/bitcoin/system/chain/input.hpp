@@ -141,8 +141,6 @@ private:
 
     const chain::witness& get_witness() const NOEXCEPT;
     const chain::witness::cptr& get_witness_cptr() const NOEXCEPT;
-    bool extract_sigop_script(chain::script& out,
-        const chain::script& prevout_script) const NOEXCEPT;
 
     // Input should be stored as shared (adds 16 bytes).
     // copy: 8 * 64 + 32 + 1 = 69 bytes (vs. 16 when shared).

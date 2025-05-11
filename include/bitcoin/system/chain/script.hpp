@@ -157,6 +157,8 @@ public:
     script_pattern output_pattern() const NOEXCEPT;
 
     /// Consensus computations.
+    bool extract_sigop_script(script& embedded,
+        const script& prevout_script) const NOEXCEPT;
     size_t signature_operations(bool accurate) const NOEXCEPT;
     bool is_oversized() const NOEXCEPT;
     bool is_unspendable() const NOEXCEPT;

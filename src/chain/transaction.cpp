@@ -157,7 +157,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         ins->emplace_back(CREATE(input, allocator, source));
 
     // Expensive repeated recomputation, so cache segregated state.
-    // Detect witness as no inputs (marker) and expected flag (bip144).
+    // Detect witness as no inputs (marker) and expected flag [bip144].
     segregated_ = 
         inputs_->size() == witness_marker &&
         source.peek_byte() == witness_enabled;
@@ -209,8 +209,8 @@ BC_POP_WARNING()
 // Serialization.
 // ----------------------------------------------------------------------------
 
-// Transactions with empty witnesses always use old serialization (bip144).
-// If no inputs are witness programs then witness hash is tx hash (bip141).
+// Transactions with empty witnesses always use old serialization [bip144].
+// If no inputs are witness programs then witness hash is tx hash [bip141].
 data_chunk transaction::to_data(bool witness) const NOEXCEPT
 {
     witness &= segregated_;
@@ -351,6 +351,9 @@ uint64_t transaction::fee() const NOEXCEPT
     return floored_subtract(value(), claim());
 }
 
+// Hashing.
+// ----------------------------------------------------------------------------
+
 void transaction::set_nominal_hash(const hash_digest& hash) const NOEXCEPT
 {
     nominal_hash_ = hash;
@@ -381,7 +384,7 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     {
         if (witness)
         {
-            // Witness coinbase tx hash is assumed to be null_hash (bip141).
+            // Witness coinbase tx hash is assumed to be null_hash [bip141].
             if (witness_hash_) return *witness_hash_;
             if (is_coinbase()) return null_hash;
         }
@@ -439,15 +442,18 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const NOEXCEPT
 
 size_t transaction::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
-    // Includes BIP16 p2sh additional sigops, max_size_t if prevout invalid.
+    // Overflow returns max_size_t.
     const auto in = [=](size_t total, const auto& input) NOEXCEPT
     {
-        return ceilinged_add(total, input->signature_operations(bip16, bip141));
+        const auto add = input->signature_operations(bip16, bip141);
+        return ceilinged_add(total, add);
     };
 
+    // Overflow returns max_size_t.
     const auto out = [=](size_t total, const auto& output) NOEXCEPT
     {
-        return ceilinged_add(total, output->signature_operations(bip141));
+        const auto add = output->signature_operations(bip141);
+        return ceilinged_add(total, add);
     };
 
     // Overflow returns max_size_t.
@@ -500,7 +506,7 @@ hash_digest transaction::signature_hash(const input_iterator& input,
 
 // This is not used internal to the library.
 bool transaction::check_signature(const ec_signature& signature,
-    const data_slice& public_key, const script& sub, uint32_t index,
+    const data_slice& public_key, const script& subscript, uint32_t index,
     uint64_t value, uint8_t sighash_flags, script_version version,
     uint32_t flags) const NOEXCEPT
 {
@@ -510,7 +516,7 @@ bool transaction::check_signature(const ec_signature& signature,
     const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
-    const auto sighash = signature_hash(input_at(index), sub, value,
+    const auto sighash = signature_hash(input_at(index), subscript, value,
         sighash_flags, version, bip143, bip341);
 
     // Validate the EC signature.
@@ -519,8 +525,9 @@ bool transaction::check_signature(const ec_signature& signature,
 
 // This is not used internal to the library.
 bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
-    const script& sub, uint32_t index, uint64_t value, uint8_t sighash_flags,
-    script_version version, uint32_t flags) const NOEXCEPT
+    const script& subscript, uint32_t index, uint64_t value,
+    uint8_t sighash_flags, script_version version,
+    uint32_t flags) const NOEXCEPT
 {
     if (index >= inputs_->size())
         return false;
@@ -529,7 +536,7 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
     out.reserve(max_endorsement_size);
-    const auto sighash = signature_hash(input_at(index), sub, value,
+    const auto sighash = signature_hash(input_at(index), subscript, value,
         sighash_flags, version, bip143, bip341);
 
     // Create the EC signature and encode as DER.
@@ -596,7 +603,7 @@ bool transaction::is_segregated() const NOEXCEPT
 
 size_t transaction::weight() const NOEXCEPT
 {
-    // Block weight is 3 * base size * + 1 * total size (bip141).
+    // Block weight is 3 * base size * + 1 * total size [bip141].
     return ceilinged_add(
         ceilinged_multiply(base_size_contribution, serialized_size(false)),
         ceilinged_multiply(total_size_contribution, serialized_size(true)));
@@ -612,7 +619,7 @@ bool transaction::is_overweight() const NOEXCEPT
 // that coinbase input scripts are never executed. There is no need to exclude
 // p2sh coinbase sigops since there is never a script to count.
 //*****************************************************************************
-bool transaction::is_signature_operations_limit(bool bip16,
+bool transaction::is_signature_operations_limited(bool bip16,
     bool bip141) const NOEXCEPT
 {
     const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
@@ -860,7 +867,7 @@ code transaction::guard_accept(const context& ctx) const NOEXCEPT
 
     if (is_missing_prevouts())
         return error::missing_previous_output;
-    if (is_signature_operations_limit(bip16, bip141))
+    if (is_signature_operations_limited(bip16, bip141))
         return error::transaction_sigop_limit;
 
     return error::transaction_success;

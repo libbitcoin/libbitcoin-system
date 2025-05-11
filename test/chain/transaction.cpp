@@ -112,7 +112,7 @@ public:
 
     bool is_signature_operations_limit(bool bip16, bool bip141) const
     {
-        return transaction::is_signature_operations_limit(bip16, bip141);
+        return transaction::is_signature_operations_limited(bip16, bip141);
     }
 
     bool is_empty() const
@@ -166,7 +166,6 @@ public:
     {
         return transaction::is_confirmed_double_spend(height);
     }
-
 };
 
 // constructors

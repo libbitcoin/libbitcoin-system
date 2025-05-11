@@ -61,7 +61,7 @@ public:
     ///************************************************************************
     /// CONSENSUS: 
     /// An unspent coinbase collision is immature (unspendable) and spent
-    /// collision is mature (bip30). CB collision presumed precluded by bip34.
+    /// collision is mature [bip30]. CB collision presumed precluded by bip34.
     ///************************************************************************
     union
     {

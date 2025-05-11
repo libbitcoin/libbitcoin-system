@@ -1009,17 +1009,16 @@ TEMPLATE
 inline error::op_error_t CLASS::
 op_check_sig() NOEXCEPT
 {
-    const auto verify = op_check_sig_verify();
-    const auto bip66 = state::is_enabled(flags::bip66_rule);
-
-    if (verify == error::op_check_sig_empty_key)
-        return verify;
+    const auto ec = op_check_sig_verify();
+    if (ec == error::op_check_sig_empty_key)
+        return ec;
 
     // BIP66: if DER encoding invalid script MUST fail and end.
-    if (bip66 && verify == error::op_check_sig_parse_signature)
-        return verify;
+    const auto bip66 = state::is_enabled(flags::bip66_rule);
+    if (bip66 && ec == error::op_check_sig_parse_signature)
+        return ec;
 
-    state::push_bool(verify == error::op_success);
+    state::push_bool(ec == error::op_success);
     return error::op_success;
 }
 
@@ -1032,7 +1031,6 @@ op_check_sig_verify() NOEXCEPT
 
     const auto key = state::pop_chunk_();
     const auto endorsement = state::pop_chunk_();
-
     if (key->empty())
         return error::op_check_sig_empty_key;
 
@@ -1047,20 +1045,25 @@ op_check_sig_verify() NOEXCEPT
         // If signature is not empty, it is validated against public key.
         if (key->size() == schnorr::public_key_size)
         {
-            // Parse endorsement into schnorr signature and compute hash.
-            hash_digest hash;
-            ec_signature signature;
-            if (!state::schnorr_prepare(signature, hash, endorsement))
+            // Split signature and signature hash flags.
+            uint8_t sighash_flags;
+            const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
+            if (sighash_flags == chain::coverage::invalid)
                 return error::op_check_sig_verify3;
 
-            // Upon validation fail, script MUST fail and end (or push false).
-            if (!schnorr::verify_signature(*key, hash, signature))
+            // Verify schnorr signature against public key and signature hash.
+            const auto hash = state::signature_hash(sighash_flags);
+            if (!schnorr::verify_signature(*key, hash, sig))
                 return error::op_check_sig_verify4;
+
+            // If signature not empty, opcode counted toward sigops budget.
+            if (!state::sigops_increment())
+                return error::op_check_sig_verify5;
         }
 
         // If signature not empty, opcode counted toward sigops budget.
         if (!state::sigops_increment())
-            return error::op_check_sig_verify5;
+            return error::op_check_sig_verify6;
 
         // If public key size is neither 0 nor 32 bytes, it is an unknown type.
         // During script execution of signature opcodes these behave exactly as
@@ -1069,18 +1072,25 @@ op_check_sig_verify() NOEXCEPT
     }
 
     if (endorsement->empty())
-        return error::op_check_sig_verify6;
+        return error::op_check_sig_verify7;
 
-    // Parse endorsement into ECDSA signature and compute hash.
-    hash_digest hash;
-    ec_signature signature;
-    if (!state::ecdsa_prepare(signature, hash, endorsement))
+    // Split endorsement into DER signature signature hash flags.
+    uint8_t sighash_flags;
+    const auto& der = state::ecdsa_split(sighash_flags, *endorsement);
+    const auto bip66 = state::is_enabled(flags::bip66_rule);
+
+    // BIP66: if DER encoding invalid script MUST fail and end.
+    ec_signature sig;
+    if (!ecdsa::parse_signature(sig, der, bip66))
         return error::op_check_sig_parse_signature;
 
     // Verify ECDSA signature against public key and signature hash.
-    if (!ecdsa::verify_signature(*key, hash, signature))
-        return error::op_check_sig_verify7;
+    const auto subscript = state::subscript(endorsement);
+    const auto hash = state::signature_hash(*subscript, sighash_flags);
+    if (!ecdsa::verify_signature(*key, hash, sig))
+        return error::op_check_sig_verify8;
 
+    // TODO: use sighash and key to generate signature in sign mode.
     return error::op_success;
 }
 
@@ -1091,14 +1101,14 @@ op_check_multisig() NOEXCEPT
     if (state::is_enabled(flags::bip342_rule))
         return op_unevaluated(opcode::checkmultisig);
 
-    const auto verify = op_check_multisig_verify();
-    const auto bip66 = state::is_enabled(flags::bip66_rule);
+    const auto ec = op_check_multisig_verify();
 
     // BIP66: if DER encoding invalid, script MUST fail and end.
-    if (bip66 && verify == error::op_check_multisig_parse_signature)
-        return verify;
+    const auto bip66 = state::is_enabled(flags::bip66_rule);
+    if (bip66 && ec == error::op_check_multisig_parse_signature)
+        return ec;
 
-    state::push_bool(verify == error::op_success);
+    state::push_bool(ec == error::op_success);
     return error::op_success;
 }
 
@@ -1145,12 +1155,9 @@ op_check_multisig_verify() NOEXCEPT
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
-    hash_digest hash;
-    ec_signature signature;
-
-    // Subscript is the same for all endorsements.
-    const auto subscript = state::subscript(endorsements);
+    cache_.first = true;
     auto it = endorsements.begin();
+    const auto subscript = state::subscript(endorsements);
 
     // Keys may be empty.
     for (const auto& key: keys)
@@ -1164,12 +1171,26 @@ op_check_multisig_verify() NOEXCEPT
         if (endorsement->empty())
             continue;
 
-        // Parse endorsement into ECDSA signature and compute hash.
-        if (!state::ecdsa_prepare(signature, hash, endorsement, *subscript))
-            return error::op_check_multisig_parse_signature;
+        // Split endorsement into DER signature signature hash flags.
+        uint8_t sighash_flags;
+        const auto& der = state::ecdsa_split(sighash_flags, *endorsement);
+        const auto bip66 = state::is_enabled(flags::bip66_rule);
 
-        // Verify ECDSA signature against public key and signature hash.
-        if (ecdsa::verify_signature(*key, hash, signature))
+        // BIP66: if DER encoding invalid script MUST fail and end.
+        ec_signature sig;
+        if (!ecdsa::parse_signature(sig, der, bip66))
+            return error::op_check_sig_parse_signature;
+
+        // Signature hash caching (bypass signature hash if same as previous).
+        if (cache_.first || cache_.flags != sighash_flags)
+        {
+            cache_.first = false;
+            cache_.flags = sighash_flags;
+            cache_.hash = state::signature_hash(*subscript, sighash_flags);
+        }
+
+        // Verify ECDSA signature against public key and cache signature hash.
+        if (ecdsa::verify_signature(*key, cache_.hash, sig))
             ++it;
     }
 
@@ -1295,19 +1316,20 @@ op_check_sig_add() NOEXCEPT
         return error::op_success;
     }
 
-    // Parse endorsement into schnorr signature and compute hash.
-    hash_digest hash;
-    ec_signature signature;
-    if (!state::schnorr_prepare(signature, hash, endorsement))
-        return error::op_check_schnorr_sig3;
+    // Split signature and signature hash flags.
+    uint8_t sighash_flags;
+    const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
+    if (sighash_flags == chain::coverage::invalid)
+        return error::op_check_schnorr_sig4;
 
     // Verify schnorr signature against public key and signature hash.
-    if (!schnorr::verify_signature(*key, hash, signature))
-        return error::op_check_schnorr_sig4;
+    const auto hash = state::signature_hash(sighash_flags);
+    if (!schnorr::verify_signature(*key, hash, sig))
+        return error::op_check_schnorr_sig5;
 
     // If signature not empty, opcode counted toward sigops budget.
     if (!state::sigops_increment())
-        return error::op_check_schnorr_sig5;
+        return error::op_check_schnorr_sig6;
 
     // If signature not empty (and successful), [number+1] pushed.
     state::push_signed64(add1<int64_t>(number));
@@ -1742,8 +1764,8 @@ code CLASS::connect_embedded(const chain::context& state,
 
     // Embedded script must be at the top of the stack [bip16].
     // Evaluate embedded script using stack moved from input script.
-    const auto prevout = to_shared<script>(in_program.pop(), false);
-    interpreter out_program(std::move(in_program), prevout);
+    const auto embedded = to_shared<script>(in_program.pop(), false);
+    interpreter out_program(std::move(in_program), embedded);
 
     if (auto ec = out_program.run())
     {
@@ -1753,14 +1775,14 @@ code CLASS::connect_embedded(const chain::context& state,
     {
         return error::stack_false;
     }
-    else if (prevout->is_pay_to_witness(state.flags))
+    else if (embedded->is_pay_to_witness(state.flags))
     {
         // The input script must be a push of the embedded_script [bip141].
         if (input.script().ops().size() != one)
             return error::dirty_witness;
 
         // Because output script pushed version/witness program [bip141].
-        if ((ec = connect_witness(state, tx, it, *prevout)))
+        if ((ec = connect_witness(state, tx, it, *embedded)))
             return ec;
     }
     else if (!input.witness().stack().empty())
@@ -1834,8 +1856,6 @@ code CLASS::connect_witness(const chain::context& state,
             {
                 return error::script_success;
             }
-
-            return error::script_success;
         }
 
         // These versions are reserved for future extensions [bip141].
