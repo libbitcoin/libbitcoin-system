@@ -74,13 +74,6 @@ public:
     inline const data_chunk& pop() NOEXCEPT;
 
 protected:
-    struct signature_cache
-    {
-        uint8_t flags;
-        hash_digest hash;
-        bool first{ true };
-    };
-
     using flags = chain::flags;
     using opcode = chain::opcode;
     using operation = chain::operation;
@@ -201,8 +194,23 @@ protected:
     INLINE hash_digest signature_hash(const script& subscript,
         uint8_t sighash_flags) const NOEXCEPT;
 
+    /// Multisig signature hash caching.
+    /// -----------------------------------------------------------------------
+
+    INLINE void initialize_cache() NOEXCEPT;
+    INLINE bool uncached(uint8_t sighash_flags) const NOEXCEPT;
+    INLINE const hash_digest& cached_hash() const NOEXCEPT;
+    INLINE void set_hash(const chain::script& subscript,
+        uint8_t sighash_flags) NOEXCEPT;
+
 private:
     using primary_stack = stack<Stack>;
+    struct multisig_cache
+    {
+        bool first;
+        uint8_t flags;
+        hash_digest hash;
+    };
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
     static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
     static inline uint32_t subscript(const chain::script& script) NOEXCEPT;
@@ -226,6 +234,9 @@ private:
     const uint64_t value_;
     const script_version version_;
     const chunk_cptrs_ptr witness_{};
+
+    // Caches.
+    multisig_cache cache_{};
 
     // Stacks.
     primary_stack primary_;

@@ -962,6 +962,40 @@ signature_hash(const script& subscript, uint8_t sighash_flags) const NOEXCEPT
         sighash_flags, version_, bip143, bip342);
 }
 
+/// Multisig signature hash caching.
+/// -----------------------------------------------------------------------
+
+TEMPLATE
+INLINE void CLASS::
+initialize_cache() NOEXCEPT
+{
+    cache_.first = true;
+}
+
+TEMPLATE
+INLINE bool CLASS::
+uncached(uint8_t sighash_flags) const NOEXCEPT
+{
+    return cache_.first || cache_.flags != sighash_flags;
+}
+
+TEMPLATE
+INLINE void CLASS::
+set_hash(const chain::script& subscript,
+    uint8_t sighash_flags) NOEXCEPT
+{
+    cache_.first = false;
+    cache_.flags = sighash_flags;
+    cache_.hash = signature_hash(subscript, sighash_flags);
+}
+
+TEMPLATE
+INLINE const hash_digest& CLASS::
+cached_hash() const NOEXCEPT
+{
+    return cache_.hash;
+}
+
 } // namespace machine
 } // namespace system
 } // namespace libbitcoin
