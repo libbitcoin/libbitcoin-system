@@ -162,9 +162,6 @@ protected:
     inline op_error_t op_check_locktime_verify() const NOEXCEPT;
     inline op_error_t op_check_sequence_verify() const NOEXCEPT;
     inline op_error_t op_check_sig_add() NOEXCEPT;
-
-private:
-    typename state::signature_cache cache_;
 };
 
 } // namespace machine

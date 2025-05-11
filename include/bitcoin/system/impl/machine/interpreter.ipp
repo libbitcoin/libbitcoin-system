@@ -1155,7 +1155,7 @@ op_check_multisig_verify() NOEXCEPT
     if (state::pop_strict_bool_() && bip147)
         return error::op_check_multisig_verify9;
 
-    cache_.first = true;
+    state::initialize_cache();
     auto it = endorsements.begin();
     const auto subscript = state::subscript(endorsements);
 
@@ -1182,15 +1182,11 @@ op_check_multisig_verify() NOEXCEPT
             return error::op_check_sig_parse_signature;
 
         // Signature hash caching (bypass signature hash if same as previous).
-        if (cache_.first || cache_.flags != sighash_flags)
-        {
-            cache_.first = false;
-            cache_.flags = sighash_flags;
-            cache_.hash = state::signature_hash(*subscript, sighash_flags);
-        }
+        if (state::uncached(sighash_flags))
+            state::set_hash(*subscript, sighash_flags);
 
         // Verify ECDSA signature against public key and cache signature hash.
-        if (ecdsa::verify_signature(*key, cache_.hash, sig))
+        if (ecdsa::verify_signature(*key, state::cached_hash(), sig))
             ++it;
     }
 
