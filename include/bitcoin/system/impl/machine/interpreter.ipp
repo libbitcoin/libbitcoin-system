@@ -1757,7 +1757,7 @@ code CLASS::connect_embedded(const chain::context& state,
     // Embedded script must be at the top of the stack [bip16].
     // Evaluate embedded script using stack moved from input script.
     const auto embedded = to_shared<script>(in_program.pop(), false);
-    interpreter out_program(std::move(in_program), prevout);
+    interpreter out_program(std::move(in_program), embedded);
 
     if (auto ec = out_program.run())
     {

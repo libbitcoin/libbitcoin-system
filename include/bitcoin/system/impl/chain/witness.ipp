@@ -48,7 +48,7 @@ constexpr bool witness::is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
 // static/private
 inline size_t witness::element_size(const chunk_cptr& element) NOEXCEPT
 {
-    // Each witness is prefixed with number of elements (bip144).
+    // Each witness is prefixed with number of elements [bip144].
     const auto size = element->size();
     return ceilinged_add(variable_size(size), size);
 };

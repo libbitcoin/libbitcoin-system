@@ -157,7 +157,7 @@ void transaction::assign_data(reader& source, bool witness) NOEXCEPT
         ins->emplace_back(CREATE(input, allocator, source));
 
     // Expensive repeated recomputation, so cache segregated state.
-    // Detect witness as no inputs (marker) and expected flag (bip144).
+    // Detect witness as no inputs (marker) and expected flag [bip144].
     segregated_ = 
         inputs_->size() == witness_marker &&
         source.peek_byte() == witness_enabled;
@@ -209,8 +209,8 @@ BC_POP_WARNING()
 // Serialization.
 // ----------------------------------------------------------------------------
 
-// Transactions with empty witnesses always use old serialization (bip144).
-// If no inputs are witness programs then witness hash is tx hash (bip141).
+// Transactions with empty witnesses always use old serialization [bip144].
+// If no inputs are witness programs then witness hash is tx hash [bip141].
 data_chunk transaction::to_data(bool witness) const NOEXCEPT
 {
     witness &= segregated_;
@@ -384,7 +384,7 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     {
         if (witness)
         {
-            // Witness coinbase tx hash is assumed to be null_hash (bip141).
+            // Witness coinbase tx hash is assumed to be null_hash [bip141].
             if (witness_hash_) return *witness_hash_;
             if (is_coinbase()) return null_hash;
         }
@@ -603,7 +603,7 @@ bool transaction::is_segregated() const NOEXCEPT
 
 size_t transaction::weight() const NOEXCEPT
 {
-    // Block weight is 3 * base size * + 1 * total size (bip141).
+    // Block weight is 3 * base size * + 1 * total size [bip141].
     return ceilinged_add(
         ceilinged_multiply(base_size_contribution, serialized_size(false)),
         ceilinged_multiply(total_size_contribution, serialized_size(true)));

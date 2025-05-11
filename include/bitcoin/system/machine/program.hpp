@@ -70,7 +70,7 @@ public:
     /// Program result.
     inline bool is_true(bool clean) const NOEXCEPT;
 
-    /// Transaction must pop top input stack element (bip16).
+    /// Transaction must pop top input stack element [bip16].
     inline const data_chunk& pop() NOEXCEPT;
 
 protected:

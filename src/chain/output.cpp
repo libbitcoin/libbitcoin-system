@@ -194,7 +194,7 @@ bool output::committed_hash(hash_cref& out) const NOEXCEPT
     if (!script::is_commitment_pattern(ops))
         return false;
 
-    // Offset four bytes for witness commitment head (bip141).
+    // Offset four bytes for witness commitment head [bip141].
     const auto start = std::next(ops[1].data().data(), sizeof(witness_head));
 
     // Guarded by is_commitment_pattern.

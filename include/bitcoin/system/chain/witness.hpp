@@ -98,10 +98,10 @@ public:
     /// Skip a witness (as if deserialized).
     static void skip(reader& source, bool prefix) NOEXCEPT;
 
-    /// Verify the push size of each stack element (bip141).
+    /// Verify the push size of each stack element [bip141].
     static constexpr bool is_push_size(const chunk_cptrs& stack) NOEXCEPT;
 
-    /// The (only) coinbase witness must be (arbitrary) 32-byte value (bip141).
+    /// The (only) coinbase witness must be (arbitrary) 32-byte value [bip141].
     static constexpr bool is_reserved_pattern(
         const chunk_cptrs& stack) NOEXCEPT;
 

@@ -25,13 +25,13 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// Script versions (bip141).
+/// Script versions [bip141].
 enum class script_version
 {
     /// If the version byte is 0 (either P2WPKH or P2WSH or invalid) [bip141].
     segwit = 0,
 
-    /// Taproot output is native segwit output with version number 1 [bip431].
+    /// Taproot output is native segwit output with version number 1 [bip341].
     taproot = 1,
 
     /// All reserved script versions [2..16].
