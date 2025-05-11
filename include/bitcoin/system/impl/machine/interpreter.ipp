@@ -1156,6 +1156,7 @@ op_check_multisig_verify() NOEXCEPT
         return error::op_check_multisig_verify9;
 
     auto it = endorsements.begin();
+    typename state::signature_cache cache{};
     const auto subscript = state::subscript(endorsements);
 
     // Keys may be empty.
@@ -1180,9 +1181,16 @@ op_check_multisig_verify() NOEXCEPT
         if (!ecdsa::parse_signature(sig, der, bip66))
             return error::op_check_sig_parse_signature;
 
-        // Verify ECDSA signature against public key and signature hash.
-        const auto hash = state::signature_hash(*subscript, sighash_flags);
-        if (ecdsa::verify_signature(*key, hash, sig))
+        // Signature hash caching.
+        if (cache.first || cache.flags != sighash_flags)
+        {
+            cache.first = false;
+            cache.flags = sighash_flags;
+            cache.hash = state::signature_hash(*subscript, sighash_flags);
+        }
+
+        // Verify ECDSA signature against public key and cache signature hash.
+        if (ecdsa::verify_signature(*key, cache.hash, sig))
             ++it;
     }
 

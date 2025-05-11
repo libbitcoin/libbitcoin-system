@@ -74,6 +74,13 @@ public:
     inline const data_chunk& pop() NOEXCEPT;
 
 protected:
+    struct signature_cache
+    {
+        uint8_t flags;
+        hash_digest hash;
+        bool first{ true };
+    };
+
     using flags = chain::flags;
     using opcode = chain::opcode;
     using operation = chain::operation;
@@ -229,10 +236,6 @@ private:
     size_t budget_{};
     size_t operations_{};
     size_t negative_conditions_{};
-
-    // cache
-    uint32_t sighash_flags_{};
-    hash_digest signature_hash_{};
 };
 
 } // namespace machine
