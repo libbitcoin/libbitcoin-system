@@ -1756,7 +1756,7 @@ code CLASS::connect_embedded(const chain::context& state,
 
     // Embedded script must be at the top of the stack [bip16].
     // Evaluate embedded script using stack moved from input script.
-    const auto prevout = to_shared<script>(in_program.pop(), false);
+    const auto embedded = to_shared<script>(in_program.pop(), false);
     interpreter out_program(std::move(in_program), prevout);
 
     if (auto ec = out_program.run())
@@ -1767,14 +1767,14 @@ code CLASS::connect_embedded(const chain::context& state,
     {
         return error::stack_false;
     }
-    else if (prevout->is_pay_to_witness(state.flags))
+    else if (embedded->is_pay_to_witness(state.flags))
     {
         // The input script must be a push of the embedded_script [bip141].
         if (input.script().ops().size() != one)
             return error::dirty_witness;
 
         // Because output script pushed version/witness program [bip141].
-        if ((ec = connect_witness(state, tx, it, *prevout)))
+        if ((ec = connect_witness(state, tx, it, *embedded)))
             return ec;
     }
     else if (!input.witness().stack().empty())

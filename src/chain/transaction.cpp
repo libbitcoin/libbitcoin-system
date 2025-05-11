@@ -442,15 +442,18 @@ bool transaction::is_dusty(uint64_t minimum_output_value) const NOEXCEPT
 
 size_t transaction::signature_operations(bool bip16, bool bip141) const NOEXCEPT
 {
-    // Includes BIP16 p2sh additional sigops, max_size_t if prevout invalid.
+    // Overflow returns max_size_t.
     const auto in = [=](size_t total, const auto& input) NOEXCEPT
     {
-        return ceilinged_add(total, input->signature_operations(bip16, bip141));
+        const auto add = input->signature_operations(bip16, bip141);
+        return ceilinged_add(total, add);
     };
 
+    // Overflow returns max_size_t.
     const auto out = [=](size_t total, const auto& output) NOEXCEPT
     {
-        return ceilinged_add(total, output->signature_operations(bip141));
+        const auto add = output->signature_operations(bip141);
+        return ceilinged_add(total, add);
     };
 
     // Overflow returns max_size_t.
@@ -616,7 +619,7 @@ bool transaction::is_overweight() const NOEXCEPT
 // that coinbase input scripts are never executed. There is no need to exclude
 // p2sh coinbase sigops since there is never a script to count.
 //*****************************************************************************
-bool transaction::is_signature_operations_limit(bool bip16,
+bool transaction::is_signature_operations_limited(bool bip16,
     bool bip141) const NOEXCEPT
 {
     const auto limit = bip141 ? max_fast_sigops : max_block_sigops;
@@ -864,7 +867,7 @@ code transaction::guard_accept(const context& ctx) const NOEXCEPT
 
     if (is_missing_prevouts())
         return error::missing_previous_output;
-    if (is_signature_operations_limit(bip16, bip141))
+    if (is_signature_operations_limited(bip16, bip141))
         return error::transaction_sigop_limit;
 
     return error::transaction_success;

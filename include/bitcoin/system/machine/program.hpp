@@ -167,12 +167,12 @@ protected:
     /// Endorsement parsing.
     /// -----------------------------------------------------------------------
 
-    /// Parse ecdsa endorsement into signature and signature hash flags.
-    static inline data_slice ecdsa_split(uint8_t& sighash_flags,
-        const data_chunk& endorsement) NOEXCEPT;
-
     /// Parse schnorr endorsement into signature and signature hash flags.
     static inline const ec_signature& schnorr_split(uint8_t& sighash_flags,
+        const data_chunk& endorsement) NOEXCEPT;
+
+    /// Parse ecdsa endorsement into signature and signature hash flags.
+    static inline data_slice ecdsa_split(uint8_t& sighash_flags,
         const data_chunk& endorsement) NOEXCEPT;
 
     /// Signature subscripting.
@@ -197,7 +197,7 @@ protected:
 private:
     using primary_stack = stack<Stack>;
     static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
-    static inline bool is_valid_sighash_byte(uint8_t sighash_flags) NOEXCEPT;
+    static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
     static inline uint32_t subscript(const chain::script& script) NOEXCEPT;
     static inline chain::strippers create_strip_ops(
         const chunk_xptrs& endorsements) NOEXCEPT;

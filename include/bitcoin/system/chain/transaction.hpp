@@ -193,7 +193,8 @@ protected:
     ////bool is_missing_prevouts() const NOEXCEPT;
 
     /// Assumes coinbase if prevout not populated (returns only legacy sigops).
-    bool is_signature_operations_limit(bool bip16, bool bip141) const NOEXCEPT;
+    bool is_signature_operations_limited(bool bip16,
+        bool bip141) const NOEXCEPT;
 
     /// Check (context free).
     /// -----------------------------------------------------------------------

@@ -757,7 +757,7 @@ ops_increment(size_t public_keys) NOEXCEPT
 // default and cannot be explicit, but is serialized for signature hashing].
 TEMPLATE
 inline bool CLASS::
-is_valid_sighash_byte(uint8_t sighash_flags) NOEXCEPT
+is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT
 {
     using namespace chain;
 
@@ -775,18 +775,6 @@ is_valid_sighash_byte(uint8_t sighash_flags) NOEXCEPT
         default:
             return false;
     }
-}
-
-// static
-TEMPLATE
-inline data_slice CLASS::
-ecdsa_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
-{
-    BC_ASSERT(!endorsement.empty());
-    sighash_flags = endorsement.back();
-
-    // data_slice is returned since the size of the DER encoding is not fixed.
-    return { endorsement.begin(), std::prev(endorsement.end()) };
 }
 
 // static
@@ -810,7 +798,7 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
     {
         // BIP341: signature has sighash byte appended in the usual fashion.
         const auto byte = endorsement.back();
-        if (is_valid_sighash_byte(byte))
+        if (is_schnorr_sighash(byte))
             sighash_flags = byte;
     }
     else
@@ -822,6 +810,18 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
     }
 
     return unsafe_array_cast<uint8_t, signature_size>(endorsement.data());
+}
+
+// static
+TEMPLATE
+inline data_slice CLASS::
+ecdsa_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
+{
+    BC_ASSERT(!endorsement.empty());
+    sighash_flags = endorsement.back();
+
+    // data_slice is returned since the size of the DER encoding is not fixed.
+    return { endorsement.begin(), std::prev(endorsement.end()) };
 }
 
 // Signature subscripting.

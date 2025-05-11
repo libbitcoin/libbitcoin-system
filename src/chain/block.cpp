@@ -334,7 +334,8 @@ block::sizes block::serialized_size(const transaction_cptrs& txs) NOEXCEPT
     std::for_each(txs.begin(), txs.end(), [&](const auto& tx) NOEXCEPT
     {
         size.nominal = ceilinged_add(size.nominal, tx->serialized_size(false));
-        size.witnessed = ceilinged_add(size.witnessed, tx->serialized_size(true));
+        size.witnessed = ceilinged_add(size.witnessed,
+            tx->serialized_size(true));
     });
 
     const auto base_size = ceilinged_add(header::serialized_size(),
@@ -694,7 +695,8 @@ size_t block::signature_operations(bool bip16, bool bip141) const NOEXCEPT
     // Overflow returns max_size_t.
     const auto value = [=](size_t total, const auto& tx) NOEXCEPT
     {
-        return ceilinged_add(total, tx->signature_operations(bip16, bip141));
+        const auto add = tx->signature_operations(bip16, bip141);
+        return ceilinged_add(total, add);
     };
 
     return std::accumulate(txs_->begin(), txs_->end(), zero, value);

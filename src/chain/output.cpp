@@ -33,6 +33,11 @@ namespace chain {
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 
+// Product overflows guarded by script size limit.
+static_assert(max_script_size <
+    max_size_t / multisig_default_sigops / heavy_sigops_factor,
+    "output sigop overflow guard");
+
 // This is a consensus critical value that must be set on reset.
 const uint64_t output::not_found = sighash_null_value;
 
@@ -197,16 +202,13 @@ bool output::committed_hash(hash_cref& out) const NOEXCEPT
     return true;
 }
 
-// Product overflows guarded by script size limit.
-static_assert(max_script_size < max_size_t / multisig_default_sigops / 
-    heavy_sigops_factor, "output sigop overflow guard");
-
 size_t output::signature_operations(bool bip141) const NOEXCEPT
 {
-    // Penalize quadratic signature operations (bip141).
+    // Sigops in the current output script, input script, and P2SH embedded
+    // script are counted at four times their previous value (heavy) [bip141].
     const auto factor = bip141 ? heavy_sigops_factor : one;
 
-    // Count heavy sigops in the output script.
+    // Count heavy sigops in the output script (inaccurate).
     return script_->signature_operations(false) * factor;
 }
 

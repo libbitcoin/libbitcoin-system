@@ -40,7 +40,11 @@ namespace chain {
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 using namespace system::machine;
-static const auto checksig_script = script{ { opcode::checksig } };
+static const script& op_checksig_script()
+{
+    static const script signature{ { opcode::checksig } };
+    return signature;
+}
 
 // Constructors.
 // ----------------------------------------------------------------------------
@@ -343,7 +347,7 @@ bool witness::extract_sigop_script(script& out_script,
             {
                 // Each p2wkh input is counted as 1 sigop (bip141).
                 case short_hash_size:
-                    out_script = checksig_script;
+                    out_script = op_checksig_script();
                     return true;
 
                 // p2wsh sigops are counted as before for p2sh (bip141).
@@ -359,7 +363,7 @@ bool witness::extract_sigop_script(script& out_script,
             }
         }
 
-        // TODO: taproot.
+        // Sigops in tapscripts do not count towards block limit [bip342].
         case script_version::taproot:
             return true;
 

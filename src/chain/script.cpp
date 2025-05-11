@@ -527,7 +527,25 @@ bool script::is_pay_to_script_hash(uint32_t active_flags) const NOEXCEPT
         is_pay_script_hash_pattern(ops());
 }
 
-// Count 1..16 multisig accurately for embedded (bip16) and witness (bip141).
+// prevout_script is only used to determine is_pay_script_hash_pattern.
+bool script::extract_sigop_script(script& embedded,
+    const chain::script& prevout_script) const NOEXCEPT
+{
+    // There are no embedded sigops when the prevout script is not p2sh.
+    if (!is_pay_script_hash_pattern(prevout_script.ops()))
+        return false;
+
+    // There are no embedded sigops when the input script is not push only.
+    if (ops().empty() || !is_relaxed_push_pattern(ops()))
+        return false;
+
+    // Parse the embedded script from the last input script item (data).
+    // This cannot fail because there is no prefix to invalidate the length.
+    embedded = { ops().back().data(), false };
+    return true;
+}
+
+// Count 1..16 multisig accurately for embedded [bip16] and witness [bip141].
 constexpr size_t multisig_sigops(bool accurate, opcode code) NOEXCEPT
 {
     return accurate && operation::is_positive(code) ?
@@ -544,23 +562,27 @@ constexpr bool is_multiple_sigop(opcode code) NOEXCEPT
     return code == opcode::checkmultisig || code == opcode::checkmultisigverify;
 }
 
-// TODO: compute in or at script evaluation and add coinbase input scripts.
-// TODO: this precludes second deserialization of script for sigop counting.
+// TODO: compute in or at script evaluation and add coinbase input scripts?
+// TODO: this would avoid second deserialization of script for sigop counting.
 size_t script::signature_operations(bool accurate) const NOEXCEPT
 {
-    auto total = zero;
-    auto preceding = opcode::push_negative_1;
+    size_t total{};
+    auto last = opcode::push_negative_1;
 
     for (const auto& op: ops())
     {
         const auto code = op.code();
 
         if (is_single_sigop(code))
+        {
             total = ceilinged_add(total, one);
+        }
         else if (is_multiple_sigop(code))
-            total = ceilinged_add(total, multisig_sigops(accurate, preceding));
+        {
+            total = ceilinged_add(total, multisig_sigops(accurate, last));
+        }
 
-        preceding = code;
+        last = code;
     }
 
     return total;
