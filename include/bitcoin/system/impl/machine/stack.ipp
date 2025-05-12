@@ -223,5 +223,6 @@ peek_signed5(int64_t& value) const NOEXCEPT
 // op_hash160           (0..1)
 // op_hash256           (0..1)
 // op_size              (0..1)
+// op_check_sig_add     (0..2)
 // op_check_sig         (0..2, and m (endorsements) + n (keys))
 // op_check_sig_verify  (0..2, and m (endorsements) + n (keys))
