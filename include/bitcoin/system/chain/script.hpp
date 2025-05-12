@@ -150,7 +150,7 @@ public:
     bool is_pay_to_script_hash(uint32_t active_flags) const NOEXCEPT;
 
     /// Common pattern detection.
-    const data_chunk& witness_program() const NOEXCEPT;
+    const chunk_cptr& witness_program() const NOEXCEPT;
     script_version version() const NOEXCEPT;
     script_pattern pattern() const NOEXCEPT;
     script_pattern input_pattern() const NOEXCEPT;

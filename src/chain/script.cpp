@@ -440,10 +440,10 @@ size_t script::serialized_size(bool prefix) const NOEXCEPT
 // Utilities.
 // ----------------------------------------------------------------------------
 
-const data_chunk& script::witness_program() const NOEXCEPT
+const chunk_cptr& script::witness_program() const NOEXCEPT
 {
-    static const data_chunk empty{};
-    return is_witness_program_pattern(ops()) ? ops()[1].data() : empty;
+    static const auto empty = to_shared<const data_chunk>();
+    return is_witness_program_pattern(ops()) ? ops()[1].data_ptr() : empty;
 }
 
 script_version script::version() const NOEXCEPT

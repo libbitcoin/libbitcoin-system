@@ -319,15 +319,15 @@ size_t witness::serialized_size(bool prefix) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-inline operations to_pay_key_hash(data_chunk&& program) NOEXCEPT
+inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
 {
-    BC_ASSERT(program.size() == short_hash_size);
+    BC_ASSERT(program->size() == short_hash_size);
 
     return operations
     {
         { opcode::dup },
         { opcode::hash160 },
-        { std::move(program), true },
+        { program, true },
         { opcode::equalverify },
         { opcode::checksig }
     };
@@ -343,7 +343,7 @@ bool witness::extract_sigop_script(script& out_script,
     {
         case script_version::segwit:
         {
-            switch (program_script.witness_program().size())
+            switch (program_script.witness_program()->size())
             {
                 // Each p2wkh input is counted as 1 sigop [bip141].
                 case short_hash_size:
@@ -384,13 +384,13 @@ bool witness::extract_script(script::cptr& out_script,
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
     out_stack = std::make_shared<chunk_cptrs>(stack_);
-    data_chunk program{ program_script.witness_program() };
+    const auto& program = program_script.witness_program();
 
     switch (program_script.version())
     {
         case script_version::segwit:
         {
-            switch (program.size())
+            switch (program->size())
             {
                 // p2wkh
                 // witness stack : <signature> <public-key>
@@ -400,8 +400,7 @@ bool witness::extract_script(script::cptr& out_script,
                 {
                     // Create a pay-to-key-hash input script from the program.
                     // The hash160 of public key must match program [bip141].
-                    out_script = to_shared<script>(to_pay_key_hash(
-                        std::move(program)));
+                    out_script = to_shared<script>(to_pay_key_hash(program));
 
                     // Stack must be 2 elements [bip141].
                     return out_stack->size() == two;
@@ -421,8 +420,8 @@ bool witness::extract_script(script::cptr& out_script,
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
                     // The sha256 of popped script must match program [bip141].
-                    return std::equal(program.begin(), program.end(),
-                        out_script->hash().begin());
+                    return unsafe_array_cast<uint8_t, hash_size>(program->data())
+                        == out_script->hash();
                 }
 
                 // The witness extraction is invalid for v0.
