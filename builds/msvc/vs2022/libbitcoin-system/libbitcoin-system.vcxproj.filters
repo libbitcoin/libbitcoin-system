@@ -1570,6 +1570,12 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter_connect.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\interpreter_run.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number_boolean.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
@@ -1580,6 +1586,12 @@
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_construct.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program_sign.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack.ipp">

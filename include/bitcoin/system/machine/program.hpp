@@ -172,21 +172,21 @@ protected:
         const data_chunk& endorsement) NOEXCEPT;
 
     /// Parse ecdsa endorsement into signature and signature hash flags.
-    static inline data_slice ecdsa_split(uint8_t& sighash_flags,
+    static INLINE data_slice ecdsa_split(uint8_t& sighash_flags,
         const data_chunk& endorsement) NOEXCEPT;
 
     /// Signature subscripting.
     /// -----------------------------------------------------------------------
 
     /// Set subscript position to next op.
-    inline void set_subscript(const op_iterator& op) NOEXCEPT;
+    INLINE void set_subscript(const op_iterator& op) NOEXCEPT;
 
     /// Strip endorsement and op_codeseparator from returned subscript.
     inline script::cptr subscript(const chunk_xptrs& endorsements) const NOEXCEPT;
-    inline script::cptr subscript(const chunk_xptr& endorsement) const NOEXCEPT;
+    INLINE script::cptr subscript(const chunk_xptr& endorsement) const NOEXCEPT;
 
     /// Return unstripped script (schnorr hash optimization).
-    inline const chain::script& subscript() const NOEXCEPT;
+    INLINE const chain::script& subscript() const NOEXCEPT;
 
     /// Signature hashing.
     /// -----------------------------------------------------------------------
@@ -196,7 +196,6 @@ protected:
 
     /// Multisig signature hash caching.
     /// -----------------------------------------------------------------------
-
     INLINE void initialize_cache() NOEXCEPT;
     INLINE bool uncached(uint8_t sighash_flags) const NOEXCEPT;
     INLINE const hash_digest& cached_hash() const NOEXCEPT;
@@ -204,6 +203,7 @@ protected:
         uint8_t sighash_flags) NOEXCEPT;
 
 private:
+    static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
     using primary_stack = stack<Stack>;
     struct multisig_cache
     {
@@ -211,15 +211,16 @@ private:
         uint8_t flags;
         hash_digest hash;
     };
-    static constexpr auto bip342_mask = bit_not<uint32_t>(flags::bip342_rule);
+
+    // Signing helpers.
     static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
     static inline uint32_t subscript(const chain::script& script) NOEXCEPT;
     static inline chain::strippers create_strip_ops(
         const chunk_xptrs& endorsements) NOEXCEPT;
-    static inline chain::strippers create_strip_ops(
+    static INLINE chain::strippers create_strip_ops(
         const chunk_xptr& endorsement) NOEXCEPT;
 
-    // Private stack helpers.
+    // Stack helpers.
     INLINE void push_chunk(const chunk_xptr& datum) NOEXCEPT;
     INLINE chunk_xptr peek_chunk_() const NOEXCEPT;
     INLINE bool peek_signed32_(int32_t& value) const NOEXCEPT;
@@ -256,11 +257,13 @@ private:
 #define TEMPLATE template <typename Stack>
 #define CLASS program<Stack>
 
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+////BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 #include <bitcoin/system/impl/machine/program.ipp>
+#include <bitcoin/system/impl/machine/program_construct.ipp>
+#include <bitcoin/system/impl/machine/program_sign.ipp>
 
-BC_POP_WARNING()
+////BC_POP_WARNING()
 
 #undef CLASS
 #undef TEMPLATE

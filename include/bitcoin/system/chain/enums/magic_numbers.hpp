@@ -87,7 +87,7 @@ constexpr uint8_t witness_enabled = 0x01;
 /// Taproot consensus constants [bip342].
 /// ---------------------------------------------------------------------------
 
-constexpr size_t signature_budget = 50;
+constexpr size_t signature_cost = 50;
 constexpr size_t control_block_base = 33;
 constexpr size_t control_block_node = 32;
 constexpr size_t control_block_range = 128;
