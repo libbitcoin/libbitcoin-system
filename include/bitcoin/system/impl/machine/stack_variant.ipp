@@ -191,7 +191,7 @@ peek_size() const NOEXCEPT
     return value;
 }
 
-// This is the only source of peek/pop (read) tethering.
+// This is the only source of peek/pop (read) tethering (make_external).
 TEMPLATE
 inline chunk_xptr CLASS::
 peek_chunk() const NOEXCEPT
