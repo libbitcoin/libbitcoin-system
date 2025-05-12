@@ -90,36 +90,15 @@ TEMPLATE
 INLINE void CLASS::
 push(data_chunk&& value) NOEXCEPT
 {
-    // Tethering Considerations
-    //
-    // Hash results and int/bool->chunks are saved using a shared_ptr vector.
-    // The tether is not garbage-collected (until destruct) as this is a space-
-    // time performance tradeoff. The maximum number of constructable chunks is
-    // bound by the script size limit. A standard in/out script pair tethers
-    // only one chunk, the computed hash.
-    //
     // The following script operations will ALWAYS tether chunks, as the result
     // of a computed hash is *pushed* to the weak pointer (xptr) variant stack.
+    // make_external attaches value to tether returns weak pointer (chunk_xptr).
     //
     // op_ripemd160         (1)
     // op_sha1              (1)
     // op_sha256            (1)
     // op_hash160           (1)
     // op_hash256           (1)
-    //
-    // The following script operations will ONLY tether chunks in the case where
-    // the *popped* element was originally bool/int64_t but required as chunk.
-    // This is never the case in standard scripts.
-    //
-    // op_ripemd160         (0..1)
-    // op_sha1              (0..1)
-    // op_sha256            (0..1)
-    // op_hash160           (0..1)
-    // op_hash256           (0..1)
-    // op_size              (0..1)
-    // op_check_sig_add     (0..2)
-    // op_check_sig         (0..2, and m (endorsements) + n (keys))
-    // op_check_sig_verify  (0..2, and m (endorsements) + n (keys))
 
     container_.push_back(make_external(std::move(value), tether_));
 }

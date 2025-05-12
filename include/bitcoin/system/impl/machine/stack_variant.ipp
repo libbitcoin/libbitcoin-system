@@ -191,13 +191,28 @@ peek_size() const NOEXCEPT
     return value;
 }
 
-// This is the only source of peek/pop (read) tethering (make_external).
+// This is the only source of peek/pop (read) tethering.
 TEMPLATE
 inline chunk_xptr CLASS::
 peek_chunk() const NOEXCEPT
 {
     using namespace number;
     chunk_xptr value{};
+
+    // The following script operations will ONLY tether chunks in case where
+    // the *popped* element was originally bool/int64_t but required as chunk.
+    // This is never the case in standard scripts. make_external attaches moved
+    // chunk to tether and returns weak pointer (chunk_xptr).
+    //
+    // op_ripemd160         (0..1)
+    // op_sha1              (0..1)
+    // op_sha256            (0..1)
+    // op_hash160           (0..1)
+    // op_hash256           (0..1)
+    // op_size              (0..1)
+    // op_check_sig_add     (0..2)
+    // op_check_sig         (0..2, and m (endorsements) + n (keys))
+    // op_check_sig_verify  (0..2, and m (endorsements) + n (keys))
 
     std::visit(overload
     {
