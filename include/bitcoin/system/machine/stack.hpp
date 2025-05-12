@@ -33,6 +33,7 @@ namespace system {
 namespace machine {
 
 /// Primary and alternate stacks have variant elements.
+enum stack_type{ bool_, int64_, pchunk_ };
 typedef std::variant<bool, int64_t, chunk_xptr> stack_variant;
 
 /// Primary stack options.

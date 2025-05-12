@@ -221,38 +221,33 @@ peek_chunk() const NOEXCEPT
     return value;
 }
 
-/// Static variant compare with conversion.
-/// Integers are unconstrained as these are stack chunk equality comparisons.
+// Static variant compare with conversion.
+// Methods bound at compile time (free).
+// One runtime switch on variant index (cheap).
+// bool/int conversions are compile-time (free).
+// chunk conversions reduce to conventional bitcoin design.
+// Integers are unconstrained as these are stack chunk equality comparisons.
 TEMPLATE
 inline bool CLASS::
-equal_chunks(const stack_variant& left,
-    const stack_variant& right) NOEXCEPT
+equal_chunks(const stack_variant& left, const stack_variant& right) NOEXCEPT
 {
-    enum stack_type { bool_, int64_, pchunk_ };
-    static_assert(std::variant_size<stack_variant>::value == 3u);
-    const auto right_type = static_cast<stack_type>(right.index());
-
     using namespace number;
     auto same{ true };
 
-    // Methods bound at compile time (free).
-    // One runtime switch on variant index (cheap).
-    // bool/int conversions are compile-time (free).
-    // chunk conversions reduce to conventional bitcoin design.
     std::visit(overload
     {
         // This is never executed in standard scripts.
         [&](bool vary) NOEXCEPT
         {
-            switch (right_type)
+            switch (right.index())
             {
-                case bool_:
+                case stack_type::bool_:
                     same = std::get<bool>(right) == vary;
                     break;
-                case int64_:
+                case stack_type::int64_:
                     same = std::get<int64_t>(right) == to_int(vary);
                     break;
-                case pchunk_:
+                case stack_type::pchunk_:
                     same = *std::get<chunk_xptr>(right) == chunk::from_bool(vary);
             }
         },
@@ -260,15 +255,15 @@ equal_chunks(const stack_variant& left,
         // This is never executed in standard scripts.
         [&](int64_t vary) NOEXCEPT
         {
-            switch (right_type)
+            switch (right.index())
             {
-                case bool_:
+                case stack_type::bool_:
                     same = to_int(std::get<bool>(right)) == vary;
                     break;
-                case int64_:
+                case stack_type::int64_:
                     same = std::get<int64_t>(right) == vary;
                     break;
-                case pchunk_:
+                case stack_type::pchunk_:
                     same = *std::get<chunk_xptr>(right) == chunk::from_integer(vary);
             }
         },
@@ -276,17 +271,17 @@ equal_chunks(const stack_variant& left,
         // This is the canonical use case.
         [&](chunk_xptr vary) NOEXCEPT
         {
-            switch (right_type)
+            switch (right.index())
             {
-                case bool_:
+                case stack_type::bool_:
                     // This is never executed in standard scripts.
                     same = chunk::from_bool(std::get<bool>(right)) == *vary;
                     break;
-                case int64_:
+                case stack_type::int64_:
                     // This is never executed in standard scripts.
                     same = chunk::from_integer(std::get<int64_t>(right)) == *vary;
                     break;
-                case pchunk_:
+                case stack_type::pchunk_:
                     // This is the canonical use case.
                     same = *std::get<chunk_xptr>(right) == *vary;
             }
