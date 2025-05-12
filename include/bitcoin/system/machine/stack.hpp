@@ -118,7 +118,10 @@ template<class... Overload> overload(Overload...) -> overload<Overload...>;
 #define TEMPLATE template <typename Container>
 #define CLASS stack<Container>
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 #include <bitcoin/system/impl/machine/stack.ipp>
+BC_POP_WARNING()
+
 #include <bitcoin/system/impl/machine/stack_variant.ipp>
 
 #undef CLASS

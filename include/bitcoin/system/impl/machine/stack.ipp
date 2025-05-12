@@ -19,7 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 #define LIBBITCOIN_SYSTEM_MACHINE_STACK_IPP
 
-#include <tuple>
+#include <iterator>
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -86,8 +86,6 @@ size() const NOEXCEPT
     return container_.size();
 }
 
-BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
 TEMPLATE
 INLINE void CLASS::
 push(data_chunk&& value) NOEXCEPT
@@ -129,8 +127,6 @@ emplace_chunk(const chunk_xptr& value) NOEXCEPT
 {
     container_.emplace_back(value.get());
 }
-
-BC_POP_WARNING()
 
 // Positional (stack cheats).
 // ----------------------------------------------------------------------------
