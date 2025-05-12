@@ -473,7 +473,7 @@ code witness::extract_script(script::cptr& out_script,
         case script_version::taproot:
         {
             // input script  : (empty)
-            // output script : <1> <32-byte-public-key>
+            // output script : <1> <32-byte-tweaked-public-key>
             if (program->size() == hash_size)
             {
                 auto stack_size = out_stack->size();
@@ -485,7 +485,7 @@ code witness::extract_script(script::cptr& out_script,
                 // tapscript (script path spend)
                 // witness stack : [annex]<control><script>[stack-elements]
                 // input script  : (empty)
-                // output script : <1> <32-byte-schnorr-public-key>
+                // output script : <1> <32-byte-tweaked-public-key>
                 if (stack_size > one)
                 {
                     // The last stack element is control block.
@@ -526,10 +526,10 @@ code witness::extract_script(script::cptr& out_script,
                 // taproot (key path spend)
                 // witness stack : [annex]<signature>
                 // input script  : (empty)
-                // output script : <1> <32-byte-schnorr-public-key>
+                // output script : <1> <32-byte-tweaked-public-key>
                 if (stack_size > zero)
                 {
-                    // The program is q, a 32 byte schnorr public key.
+                    // The program is q, a 32 byte bip340 public key.
                     ////const auto& key = to_array32(*program);
 
                     // Only element is a signature that must be valid for q.

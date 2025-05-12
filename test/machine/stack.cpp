@@ -20,6 +20,11 @@
 
 using namespace system::machine;
 
+static_assert(std::variant_size<stack_variant>::value == 3u);
+static_assert(is_same_type<std::variant_alternative_t<stack_type::bool_, stack_variant>, bool>);
+static_assert(is_same_type<std::variant_alternative_t<stack_type::int64_, stack_variant>, int64_t>);
+static_assert(is_same_type<std::variant_alternative_t<stack_type::pchunk_, stack_variant>, chunk_xptr>);
+
 BOOST_AUTO_TEST_SUITE(stack_tests)
 
 // stack_variant is not serializable, so cannot boost compare it.

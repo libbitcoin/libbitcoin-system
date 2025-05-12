@@ -568,6 +568,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\number_integer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\program.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack_variant.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bits.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\bytes.ipp" />

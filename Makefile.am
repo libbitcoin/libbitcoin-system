@@ -652,7 +652,8 @@ include_bitcoin_system_impl_machine_HEADERS = \
     include/bitcoin/system/impl/machine/number_chunk.ipp \
     include/bitcoin/system/impl/machine/number_integer.ipp \
     include/bitcoin/system/impl/machine/program.ipp \
-    include/bitcoin/system/impl/machine/stack.ipp
+    include/bitcoin/system/impl/machine/stack.ipp \
+    include/bitcoin/system/impl/machine/stack_variant.ipp
 
 include_bitcoin_system_impl_mathdir = ${includedir}/bitcoin/system/impl/math
 include_bitcoin_system_impl_math_HEADERS = \

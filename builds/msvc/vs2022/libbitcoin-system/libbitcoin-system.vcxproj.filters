@@ -1585,6 +1585,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack.ipp">
       <Filter>include\bitcoin\system\impl\machine</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\machine\stack_variant.ipp">
+      <Filter>include\bitcoin\system\impl\machine</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\math\addition.ipp">
       <Filter>include\bitcoin\system\impl\math</Filter>
     </None>
