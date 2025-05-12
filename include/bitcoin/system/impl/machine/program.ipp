@@ -116,8 +116,7 @@ TEMPLATE
 inline CLASS::
 program(const transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t active_flags,
-    script_version version, const chunk_cptrs_ptr& witness,
-    size_t witness_size) NOEXCEPT
+    script_version version, const chunk_cptrs_ptr& witness, bool) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_(script),
@@ -126,7 +125,9 @@ program(const transaction& tx, const input_iterator& input,
     version_(version),
     witness_(witness),
     primary_(projection<Stack>(*witness)),
-    budget_(ceilinged_add(add1(chain::signature_budget), witness_size))
+    budget_(ceilinged_add(
+        add1(chain::signature_budget),
+        chain::witness::serialized_size(*witness_, true)))
 {
     script_->clear_offset();
 }

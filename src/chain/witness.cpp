@@ -322,7 +322,7 @@ size_t witness::serialized_size(bool prefix) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
+static inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
 {
     BC_ASSERT(program->size() == short_hash_size);
 
@@ -334,6 +334,30 @@ inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
         { opcode::equalverify },
         { opcode::checksig }
     };
+}
+
+static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT
+{
+    const auto& top = stack.back();
+
+    // If first byte of stack top is 0x50 it is the annex [bip341].
+    const auto annex = !top->empty() && top->front() == annex_prefix;
+    if (annex)
+        stack.pop_back();
+
+    return annex;
+}
+
+static inline bool is_valid_control_block(const data_chunk& control) NOEXCEPT
+{
+    // Control block must be size 33 + 32m, for integer m [0..128] [bip341].
+    return !is_limited(control.size(), min_control_block, max_control_block);
+}
+
+static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
+{
+    BC_ASSERT(program.size() == hash_size);
+    return unsafe_array_cast<uint8_t, hash_size>(program.data());
 }
 
 // out_script is only useful only for sigop counting.
@@ -382,7 +406,7 @@ bool witness::extract_sigop_script(script& out_script,
 }
 
 // Extract script and initial execution stack.
-bool witness::extract_script(script::cptr& out_script,
+code witness::extract_script(script::cptr& out_script,
     chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
@@ -391,6 +415,7 @@ bool witness::extract_script(script::cptr& out_script,
 
     switch (program_script.version())
     {
+        // All [bip141] comments.
         case script_version::segwit:
         {
             switch (program->size())
@@ -402,11 +427,12 @@ bool witness::extract_script(script::cptr& out_script,
                 case short_hash_size:
                 {
                     // Create a pay-to-key-hash input script from the program.
-                    // The hash160 of public key must match program [bip141].
+                    // The hash160 of public key must match program.
                     out_script = to_shared<script>(to_pay_key_hash(program));
 
-                    // Stack must be 2 elements [bip141].
-                    return out_stack->size() == two;
+                    // Stack must be 2 elements.
+                    return out_stack->size() == two ?
+                        error::script_success : error::invalid_witness;
                 }
 
                 // p2wsh
@@ -415,36 +441,119 @@ bool witness::extract_script(script::cptr& out_script,
                 // output script : <0> <32-byte-hash-of-script>
                 case hash_size:
                 {
-                    // The stack must consist of at least 1 element [bip141].
+                    // The stack must consist of at least 1 element.
                     if (out_stack->empty())
-                        return false;
+                        return error::invalid_witness;
 
-                    // Input script is popped from the stack [bip141].
+                    // Input script is popped from the stack.
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
-                    // The sha256 of popped script must match program [bip141].
-                    return unsafe_array_cast<uint8_t, hash_size>(program->data())
-                        == out_script->hash();
+                    // Popped script sha256 hash must match program.
+                    return to_array32(*program) == out_script->hash() ?
+                        error::script_success : error::invalid_witness;
                 }
 
-                // The witness extraction is invalid for v0.
+                // If the version byte is 0, but the witness program is neither
+                // 20 nor 32 bytes, the script must fail.
                 default:
-                    return false;
+                    return error::invalid_witness;
             }
         }
 
-        // TODO: taproot.
+        // All [bip341] comments.
         case script_version::taproot:
-            return true;
+        {
+            if (program->size() == hash_size)
+            {
+                auto stack_size = out_stack->size();
+
+                // If at least two elements, discard annex if present.
+                if (stack_size > one && drop_annex(*out_stack))
+                    --stack_size;
+
+                // If at least two elements remain, script path spend used.
+                if (stack_size > one)
+                {
+                    // The last stack element is control block.
+                    const auto& control = pop(*out_stack);
+
+                    // Control length must be 33 + 32m, for integer m [0..128].
+                    if (!is_valid_control_block(*control))
+                        return error::invalid_witness;
+
+                    // The second-to-last stack element is the script.
+                    out_script = to_shared<script>(*pop(*out_stack), false);
+
+                    // TODO: DO SOME NASTY SHIT WITH CONTROL(c) AND SCRIPT(s).
+
+                    // q is referred to as `taproot output key`.
+                    // p is referred to as `taproot internal key`.
+                    ////Let p = c[1:33] and let P = lift_x(int(p))
+                    ////* where lift_x and [:] are defined as in BIP340.
+                    ////* Fail if this point is not on the curve.
+                    ////Let v = c[0] & 0xfe and call it the leaf version.
+                    ////Let k0 = hashTapLeaf(v || compact_size(size of s) || s);
+                    ////* also call it the tapleaf hash.
+                    ////For j in [0,1,...,m-1]:
+                    ////Let ej = c[33+32j:65+32j].
+                    ////Let kj+1 depend on whether kj < ej (lexicographically):
+                    ////If kj <  ej: kj+1 = hashTapBranch(kj || ej).
+                    ////If kj >= ej: kj+1 = hashTapBranch(ej || kj).
+                    ////Let t = hashTapTweak(p || km).
+                    ////If t >= 0xFFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6
+                    ////* AF48A03B BFD25E8C D0364141
+                    ////* (order of secp256k1), fail.
+                    ////Let Q = P + int(t)G.
+                    ////If q != x(Q) or c[0] & 1 != y(Q) mod 2, fail.
+
+                    ///////////////////////////////////////////////////////////
+                    // Execute script with remaining stack (normal return).
+                    ///////////////////////////////////////////////////////////
+                    return error::script_success;
+                }
+
+                // If only one element remains, key path spending used.
+                if (stack_size > zero)
+                {
+                    // The program is q, a 32 byte bip340 public key.
+                    ////const auto& key = to_array32(*program);
+
+                    // Only element is a signature that must be valid for q.
+                    ////const auto& sig = out_stack->back();
+
+                    // TODO: DO SOME NASTY SHIT THAT DON'T BELONG HERE.
+
+                    // Validate signature against key (q), using appended
+                    // sighash_flags (?) and existing signature_hash function.
+                    ////hash = state::signature_hash(script, sighash_flags)
+                    ////if (!ecdsa::verify_signature(key, hash, sig))
+                    ////    return error::op_check_sig_verify8;
+
+                    ///////////////////////////////////////////////////////////
+                    // TODO: need sentinel to indicate success w/out script ex.
+                    ///////////////////////////////////////////////////////////
+                    return error::script_success;
+                }
+
+                // Fail if witness stack was empty.
+                return error::invalid_witness;
+            }
+
+            ///////////////////////////////////////////////////////////////////
+            // TODO: need sentinel to indicate success w/out script execution.
+            ///////////////////////////////////////////////////////////////////
+            // Version 1 other than 32 bytes remain unencumbered.
+            return error::script_success;
+        }
 
         // These versions are reserved for future extensions [bip141].
         case script_version::reserved:
-            return true;
+            return error::script_success;
 
         // The witness version is undefined.
         case script_version::unversioned:
         default:
-            return false;
+            return error::invalid_witness;
     }
 }
 

@@ -1734,7 +1734,7 @@ connect(const chain::context& state, const chain::transaction& tx,
             return error::dirty_witness;
 
         // Because output script pushed version and witness program [bip141].
-        if ((ec = connect_witness(state, tx, it, *prevout)))
+        if ((ec = connect_witness(state, tx, it, *prevout, false)))
             return ec;
     }
     else if (!input.witness().stack().empty())
@@ -1778,7 +1778,7 @@ code CLASS::connect_embedded(const chain::context& state,
             return error::dirty_witness;
 
         // Because output script pushed version/witness program [bip141].
-        if ((ec = connect_witness(state, tx, it, *embedded)))
+        if ((ec = connect_witness(state, tx, it, *embedded, true)))
             return ec;
     }
     else if (!input.witness().stack().empty())
@@ -1793,11 +1793,13 @@ code CLASS::connect_embedded(const chain::context& state,
 TEMPLATE
 code CLASS::connect_witness(const chain::context& state,
     const chain::transaction& tx, const input_iterator& it,
-    const chain::script& prevout) NOEXCEPT
+    const chain::script& prevout, bool embedded) NOEXCEPT
 {
     using namespace chain;
     const auto& input = **it;
+    const auto flags = state.flags;
     const auto version = prevout.version();
+    code ec;
 
     switch (version)
     {
@@ -1805,12 +1807,12 @@ code CLASS::connect_witness(const chain::context& state,
         {
             script::cptr script;
             chunk_cptrs_ptr stack;
-            if (!input.witness().extract_script(script, stack, prevout))
-                return error::invalid_witness;
+            if ((ec = input.witness().extract_script(script, stack, prevout)))
+                return ec;
 
-            interpreter program(tx, it, script, state.flags, version, stack);
+            interpreter program(tx, it, script, flags, version, stack);
 
-            if (const auto ec = program.run())
+            if ((ec = program.run()))
             {
                 return ec;
             }
@@ -1825,21 +1827,23 @@ code CLASS::connect_witness(const chain::context& state,
             }
         }
 
-        ///////////////////////////////////////////////////////////////////////
-        // TODO: properly extract tapscript/taproot [bip341].
-        ///////////////////////////////////////////////////////////////////////
         case script_version::taproot:
         {
+            const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
+
+            // Behaves as script_version::reserved if taproot not active.
+            // P2SH-wrapped version 1 outputs remain unencumbered [bip341].
+            if (!bip341 || embedded)
+                return error::script_success;
+
             script::cptr script;
             chunk_cptrs_ptr stack;
-            if (!input.witness().extract_script(script, stack, prevout))
-                return error::invalid_witness;
+            if ((ec = input.witness().extract_script(script, stack, prevout)))
+                return ec;
 
-            const auto flags = state.flags;
-            const auto size = input.witness().serialized_size(true);
-            interpreter program(tx, it, script, flags, version, stack, size);
+            interpreter program(tx, it, script, flags, version, stack, {});
 
-            if (const auto ec = program.run())
+            if ((ec = program.run()))
             {
                 return ec;
             }
