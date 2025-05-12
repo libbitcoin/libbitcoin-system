@@ -257,13 +257,10 @@ private:
 #define TEMPLATE template <typename Stack>
 #define CLASS program<Stack>
 
-////BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 #include <bitcoin/system/impl/machine/program.ipp>
 #include <bitcoin/system/impl/machine/program_construct.ipp>
 #include <bitcoin/system/impl/machine/program_sign.ipp>
-
-////BC_POP_WARNING()
 
 #undef CLASS
 #undef TEMPLATE
