@@ -939,7 +939,7 @@ BOOST_AUTO_TEST_CASE(stream__out__array__expected)
     data_array<2> sink{ { 0x00, 0x00 } };
     stream::out::copy ostream(sink);
     write(ostream, 42);
-    BOOST_REQUIRE_EQUAL(sink, to_array<2>("42"));
+    BOOST_REQUIRE_EQUAL(sink, to_array("42"));
 }
 
 BOOST_AUTO_TEST_CASE(stream__out__data__expected)

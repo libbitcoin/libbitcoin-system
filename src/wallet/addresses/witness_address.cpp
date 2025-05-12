@@ -290,9 +290,11 @@ witness_address witness_address::from_parameters(const data_slice& program,
     switch (parse_program(version, program, false))
     {
         case program_type::version_0_p2kh:
-            return from_short(to_array<short_hash_size>(program), prefix);
+            return from_short(unsafe_array_cast<uint8_t, short_hash_size>(
+                program.data()), prefix);
         case program_type::version_0_p2sh:
-            return from_long(to_array<hash_size>(program), prefix);
+            return from_long(unsafe_array_cast<uint8_t, hash_size>(
+                program.data()), prefix);
         case program_type::unknown:
             return parse_prefix(prefix, false) == parse_result::valid ?
                 witness_address{ prefix, version, to_chunk(program) } :

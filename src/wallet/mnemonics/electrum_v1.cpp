@@ -220,7 +220,7 @@ hash_digest electrum_v1::strecher(const data_chunk& seed_entropy) NOEXCEPT
     for (size_t count = 0; count < hash_iterations; ++count)
         streched = sha256_chunk(splice(streched, seed_entropy));
 
-    return to_array<hash_size>(streched);
+    return unsafe_array_cast<uint8_t, hash_size>(streched.data());
 }
 
 // protected static (sizers)

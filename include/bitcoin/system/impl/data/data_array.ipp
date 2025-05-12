@@ -33,10 +33,20 @@
 namespace libbitcoin {
 namespace system {
 
-template <size_t Size>
-constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT
+////template <size_t Size>
+////constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT
+////{
+////    return bytes.to_array<Size>();
+////}
+
+template <size_t Size, if_nonzero<Size>>
+constexpr data_array<sub1(Size)> to_array(const char(&string)[Size]) NOEXCEPT
 {
-    return bytes.to_array<Size>();
+    data_array<sub1(Size)> out{};
+    for (auto i = zero; i < sub1(Size); ++i)
+        out[i] = string[i];
+
+    return out;
 }
 
 // TODO: test.

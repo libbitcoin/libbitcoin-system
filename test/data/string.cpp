@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(string__to_string_integer__todo__todo)
 BOOST_AUTO_TEST_CASE(string__to_string_slice__to_array__inverse)
 {
     std::string result{ "foobar" };
-    BOOST_REQUIRE_EQUAL(to_string(to_array<6>(result)), result);
+    BOOST_REQUIRE_EQUAL(to_string(to_array("foobar")), result);
 }
 
 BOOST_AUTO_TEST_CASE(string__to_string_slice__to_chunk__inverse)

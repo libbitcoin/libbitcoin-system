@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(base16__decode_base16_array__all_characters__expected)
 
 BOOST_AUTO_TEST_CASE(base16__decode_base16_array__null_hash__expected)
 {
-    const auto& expected = to_array<32>(null_hash);
+    const auto& expected = null_hash;
     const auto value = "0000000000000000000000000000000000000000000000000000000000000000";
     data_array<32> out{};
     BOOST_REQUIRE(decode_base16(out, value));
