@@ -333,28 +333,40 @@ static inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
     };
 }
 
-static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT
+// If first byte of stack top is 0x50 it is the annex [bip341].
+static inline bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT
 {
     const auto& top = stack.back();
-
-    // If first byte of stack top is 0x50 it is the annex [bip341].
-    const auto annex = !top->empty() && top->front() == annex_prefix;
-    if (annex)
-        stack.pop_back();
-
-    return annex;
+    return !top->empty()
+        && (top->front() == taproot_annex_prefix);
 }
 
-static inline bool is_valid_control_block(const data_chunk& control) NOEXCEPT
+static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT
 {
-    // Control block must be size 33 + 32m, for integer m [0..128] [bip341].
-    return !is_limited(control.size(), min_control_block, max_control_block);
+    if (is_annex_pattern(stack))
+    {
+        stack.pop_back();
+        return true;
+    }
+
+    return false;
 }
 
 static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
 {
     BC_ASSERT(program.size() == hash_size);
     return unsafe_array_cast<uint8_t, hash_size>(program.data());
+}
+
+static inline bool is_valid_control_block(const data_chunk& control) NOEXCEPT
+{
+    const auto size = control.size();
+    constexpr auto maximum = control_block_base + control_block_node *
+        control_block_range;
+
+    // Control block must be size 33 + 32m, for integer m [0..128] [bip341].
+    return !is_limited(size, control_block_base, maximum)
+        && is_zero(floored_modulo(size - control_block_base, control_block_node));
 }
 
 // out_script is only useful only for sigop counting.
