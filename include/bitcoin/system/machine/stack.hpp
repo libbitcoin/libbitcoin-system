@@ -74,21 +74,16 @@ public:
     INLINE void erase(size_t index) NOEXCEPT;
     INLINE void swap(size_t left_index, size_t right_index) NOEXCEPT;
     INLINE const stack_variant& peek(size_t index) const NOEXCEPT;
-
-    /// Aliases.
     INLINE bool peek_signed4(int32_t& value) const NOEXCEPT;
     INLINE bool peek_signed5(int64_t& value) const NOEXCEPT;
 
     /// Variant data conversions.
+    /// -----------------------------------------------------------------------
     inline bool peek_bool() const NOEXCEPT;
     inline bool peek_strict_bool() const NOEXCEPT;
-    inline chunk_xptr peek_chunk() const NOEXCEPT;
-    inline size_t peek_size() const NOEXCEPT;
-
-    /// Variant data conversion with failure mode.
     inline bool peek_minimal_bool(bool& value) const NOEXCEPT;
-
-    /// Variant data comparison.
+    inline size_t peek_size() const NOEXCEPT;
+    inline chunk_xptr peek_chunk() const NOEXCEPT;
     static inline bool equal_chunks(const stack_variant& left,
         const stack_variant& right) NOEXCEPT;
 
@@ -124,6 +119,7 @@ template<class... Overload> overload(Overload...) -> overload<Overload...>;
 #define CLASS stack<Container>
 
 #include <bitcoin/system/impl/machine/stack.ipp>
+#include <bitcoin/system/impl/machine/stack_variant.ipp>
 
 #undef CLASS
 #undef TEMPLATE
