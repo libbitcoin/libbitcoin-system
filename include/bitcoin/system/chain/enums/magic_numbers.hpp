@@ -87,7 +87,10 @@ constexpr uint8_t witness_enabled = 0x01;
 /// Tapscript consensus constants [bip342].
 /// ---------------------------------------------------------------------------
 
+constexpr uint8_t annex_prefix = 0x50;
 constexpr size_t signature_budget = 50;
+constexpr size_t min_control_block = 33;
+constexpr size_t max_control_block = 33 + 32 * 128;
 
 /// Policy constants.
 /// ---------------------------------------------------------------------------
