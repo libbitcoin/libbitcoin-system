@@ -43,6 +43,10 @@ public:
 
     typedef std::shared_ptr<const witness> cptr;
 
+    /// serialized_size(..., true) returns one for an empty witness stack.
+    static size_t serialized_size(const chunk_cptrs& stack,
+        bool prefix) NOEXCEPT;
+
     /// Constructors.
     /// -----------------------------------------------------------------------
 
@@ -107,7 +111,7 @@ public:
 
     bool extract_sigop_script(script& out_script,
         const script& program_script) const NOEXCEPT;
-    bool extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
+    code extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
         const script& program_script) const NOEXCEPT;
 
 protected:
@@ -118,7 +122,6 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    static size_t serialized_size(const chunk_cptrs& stack) NOEXCEPT;
     static inline size_t element_size(const chunk_cptr& element) NOEXCEPT;
 
     void assign_data(reader& source, bool prefix) NOEXCEPT;

@@ -84,10 +84,16 @@ constexpr uint32_t witness_head = 0xaa21a9ed;
 constexpr uint8_t witness_marker = 0x00;
 constexpr uint8_t witness_enabled = 0x01;
 
-/// Tapscript consensus constants [bip342].
+/// Taproot consensus constants [bip342].
 /// ---------------------------------------------------------------------------
 
 constexpr size_t signature_budget = 50;
+constexpr size_t control_block_base = 33;
+constexpr size_t control_block_node = 32;
+constexpr size_t control_block_range = 128;
+constexpr uint8_t taproot_leaf_mask = 0xfe;
+constexpr uint8_t taproot_leaf_tapscript = 0xc0;
+constexpr uint8_t taproot_annex_prefix = 0x50;
 
 /// Policy constants.
 /// ---------------------------------------------------------------------------

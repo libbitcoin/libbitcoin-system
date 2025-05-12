@@ -69,7 +69,7 @@ protected:
     /// Witnessed script handler.
     static code connect_witness(const chain::context& state,
         const chain::transaction& tx, const input_iterator& it,
-        const chain::script& prevout) NOEXCEPT;
+        const chain::script& prevout, bool embedded) NOEXCEPT;
 
     /// Operation disatch.
     op_error_t run_op(const op_iterator& op) NOEXCEPT;

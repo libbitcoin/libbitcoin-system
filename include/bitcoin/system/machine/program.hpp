@@ -65,7 +65,7 @@ public:
     inline program(const transaction& transaction,
         const input_iterator& input, const script::cptr& script,
         uint32_t active_flags, script_version version,
-        const chunk_cptrs_ptr& stack, size_t witness_size) NOEXCEPT;
+        const chunk_cptrs_ptr& stack, bool) NOEXCEPT;
 
     /// Program result.
     inline bool is_true(bool clean) const NOEXCEPT;
