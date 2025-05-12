@@ -72,7 +72,7 @@ witness::witness(chunk_cptrs&& stack) NOEXCEPT
 }
 
 witness::witness(const chunk_cptrs& stack) NOEXCEPT
-  : witness(stack, true, serialized_size(stack))
+  : witness(stack, true, serialized_size(stack, false))
 {
 }
 
@@ -114,13 +114,14 @@ witness::witness(const std::string& mnemonic) NOEXCEPT
 
 // protected
 witness::witness(chunk_cptrs&& stack, bool valid) NOEXCEPT
-  : stack_(std::move(stack)), valid_(valid), size_(serialized_size(stack_))
+  : stack_(std::move(stack)), valid_(valid),
+    size_(serialized_size(stack_, false))
 {
 }
 
 // protected
 witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
-  : stack_(stack), valid_(valid), size_(serialized_size(stack))
+  : stack_(stack), valid_(valid), size_(serialized_size(stack_, false))
 {
 }
 
@@ -297,14 +298,16 @@ const chunk_cptrs& witness::stack() const NOEXCEPT
     return stack_;
 }
 
-// static/private
-size_t witness::serialized_size(const chunk_cptrs& stack) NOEXCEPT
+// static
+size_t witness::serialized_size(const chunk_cptrs& stack, bool prefix) NOEXCEPT
 {
-    return std::accumulate(stack.begin(), stack.end(), zero,
+    const auto size = std::accumulate(stack.begin(), stack.end(), zero,
         [](size_t total, const chunk_cptr& element) NOEXCEPT
         {
             return ceilinged_add(total, element_size(element));
         });
+
+    return prefix ? ceilinged_add(variable_size(stack.size()), size) : size;
 }
 
 size_t witness::serialized_size(bool prefix) const NOEXCEPT
