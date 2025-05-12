@@ -169,36 +169,33 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
     size_ = zero;
     auto& allocator = source.get_allocator();
 
+    const auto push_witness = [&allocator, &source, this]() NOEXCEPT
+    {
+        // If read_bytes_raw returns nullptr invalid source is implied.
+        const auto size = source.read_size(max_block_weight);
+        const auto bytes = source.read_bytes_raw(size);
+        if (is_null(bytes))
+            return false;
+
+        stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
+        size_ = ceilinged_add(size_, element_size(stack_.back()));
+        return true;
+    };
+
     if (prefix)
     {
         const auto count = source.read_size(max_block_weight);
         stack_.reserve(count);
 
         for (size_t element = 0; element < count; ++element)
-        {
-            // If read_bytes_raw returns nullptr invalid source is implied.
-            const auto size = source.read_size(max_block_weight);
-            const auto bytes = source.read_bytes_raw(size);
-            if (is_null(bytes))
+            if (!push_witness())
                 break;
-
-            stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
-            size_ = ceilinged_add(size_, element_size(stack_.back()));
-        }
     }
     else
     {
         while (!source.is_exhausted())
-        {
-            // If read_bytes_raw returns nullptr invalid source is implied.
-            const auto size = source.read_size(max_block_weight);
-            const auto bytes = source.read_bytes_raw(size);
-            if (is_null(bytes))
+            if (!push_witness())
                 break;
-
-            stack_.emplace_back(POINTER(data_chunk, allocator, bytes));
-            size_ = ceilinged_add(size_, element_size(stack_.back()));
-        }
     }
 
     valid_ = source;
