@@ -460,6 +460,8 @@ code witness::extract_script(script::cptr& out_script,
         // All [bip341] comments.
         case script_version::taproot:
         {
+            // input script  : (empty)
+            // output script : <1> <32-byte-public-key>
             if (program->size() == hash_size)
             {
                 auto stack_size = out_stack->size();
@@ -468,7 +470,10 @@ code witness::extract_script(script::cptr& out_script,
                 if (stack_size > one && drop_annex(*out_stack))
                     --stack_size;
 
-                // If at least two elements remain, script path spend used.
+                // tapscript (script path spend)
+                // witness stack : [annex]<control><script>[stack-elements]
+                // input script  : (empty)
+                // output script : <1> <32-byte-schnorr-public-key>
                 if (stack_size > one)
                 {
                     // The last stack element is control block.
@@ -482,7 +487,6 @@ code witness::extract_script(script::cptr& out_script,
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
                     // TODO: DO SOME NASTY SHIT WITH CONTROL(c) AND SCRIPT(s).
-
                     // q is referred to as `taproot output key`.
                     // p is referred to as `taproot internal key`.
                     ////Let p = c[1:33] and let P = lift_x(int(p))
@@ -503,23 +507,23 @@ code witness::extract_script(script::cptr& out_script,
                     ////Let Q = P + int(t)G.
                     ////If q != x(Q) or c[0] & 1 != y(Q) mod 2, fail.
 
-                    ///////////////////////////////////////////////////////////
-                    // Execute script with remaining stack (normal return).
-                    ///////////////////////////////////////////////////////////
+                    // Execute script with remaining stack.
                     return error::script_success;
                 }
 
-                // If only one element remains, key path spending used.
+                // taproot (key path spend)
+                // witness stack : [annex]<signature>
+                // input script  : (empty)
+                // output script : <1> <32-byte-schnorr-public-key>
                 if (stack_size > zero)
                 {
-                    // The program is q, a 32 byte bip340 public key.
+                    // The program is q, a 32 byte schnorr public key.
                     ////const auto& key = to_array32(*program);
 
                     // Only element is a signature that must be valid for q.
                     ////const auto& sig = out_stack->back();
 
                     // TODO: DO SOME NASTY SHIT THAT DON'T BELONG HERE.
-
                     // Validate signature against key (q), using appended
                     // sighash_flags (?) and existing signature_hash function.
                     ////hash = state::signature_hash(script, sighash_flags)
