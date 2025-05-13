@@ -35,7 +35,8 @@ namespace system {
 /// For std::stream just pass to streamer on construct.
 template <typename Device,
     template <typename = make_stream<Device>> class Base,
-    typename Stream = make_stream<Device>, typename Streamer = Base<Stream>>
+    typename Stream = make_stream<Device>,
+    typename Streamer = Base<Stream>>
 class make_streamer
   : public Streamer
 {
