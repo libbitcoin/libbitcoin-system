@@ -179,39 +179,30 @@ using unsigned_exact_type =
 /// Text capture.
 /// ---------------------------------------------------------------------------
 
+// Implementation requires c-style array.
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
 template <size_t Size>
 struct text_t
 {
-    CONSTEVAL text_t(const char (&string)[Size]) noexcept
-      : data(to_array(string))
-    {
-    }
-
-    template <size_t Length>
-    CONSTEVAL bool operator==(const text_t<Length>&) const noexcept
-    {
-        return Size == Length;
-    }
-
     std::array<uint8_t, Size - 1> data;
+    CONSTEVAL text_t(const char (&string)[Size]) noexcept
+      : data(to_array(string)) {}
 
 private:
     static CONSTEVAL auto to_array(const char(&string)[Size]) noexcept
     {
         std::array<uint8_t, Size - 1> data{};
         for (size_t index = 0; index < Size - 1; ++index)
-        {
-            // Implementation requires c-style array.
-            BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
-            BC_PUSH_WARNING(NO_ARRAY_INDEXING)
             data.at(index) = string[index];
-            BC_POP_WARNING()
-            BC_POP_WARNING()
-        }
 
         return data;
     }
 };
+
+BC_POP_WARNING()
+BC_POP_WARNING()
 
 /// Argument placeholders.
 /// ---------------------------------------------------------------------------
