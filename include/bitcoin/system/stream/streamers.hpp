@@ -45,6 +45,7 @@
 #include <bitcoin/system/stream/streamers/interfaces/bitwriter.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bytewriter.hpp>
 #include <bitcoin/system/stream/streamers/sha256_writer.hpp>
+#include <bitcoin/system/stream/streamers/sha256t_writer.hpp>
 #include <bitcoin/system/stream/streamers/sha256x2_writer.hpp>
 
 // Stream Exceptions:
@@ -175,6 +176,24 @@ namespace hash
         /// A hash writer that inserts a sha256 hash into a container.
         template <typename Container>
         using push = make_streamer<push_sink<Container>, sha256_writer>;
+        using text = push<std::string>;
+        using data = push<data_chunk>;
+    }
+
+    namespace sha256t
+    {
+        /// A hash writer that writes a tagged sha256 hash to a std::ostream.
+        using ostream = sha256t_writer<std::ostream>;
+
+        /// A fast hash writer that writes a tagged sha256 hash to a system::ostream.
+        using fast = sha256t_writer<system::ostream<>>;
+
+        /// A hash writer that copies a tagged sha256 hash to a data_slab.
+        using copy = make_streamer<copy_sink<data_slab>, sha256t_writer>;
+
+        /// A hash writer that inserts a tagged sha256 hash into a container.
+        template <typename Container>
+        using push = make_streamer<push_sink<Container>, sha256t_writer>;
         using text = push<std::string>;
         using data = push<data_chunk>;
     }

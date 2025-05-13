@@ -36,7 +36,22 @@ namespace chain {
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
-// Gotta set something when invalid minimal result, test is_valid.
+// Push data revalidation (op.is_underclaimed()):
+// Gotta set something when invalid minimal result, check is_valid().
+// Incorrectly-sized push data is validated upon op parse, setting an invalid
+// opcode, the underflow bit, and the op data. This invalid opcode will result
+// in script execution failure if the script is evaluated, but is otherwise
+// valid (such as for a coinbase input script). Underflow can only occur at the
+// end of a script. All bytes are valid script, but as scripts have finite
+// length, the last operation may be an undersized push data. The retention of
+// the undersized data within an invalid op allows for the script to be
+// serialized and for the proper size and hash of the transaction computed.
+// The invalid opcode with underflow data is serialized as data bytes with the
+// original opcode stored in the data member, but seen as op_verif. By design
+// it is not possible to populate an op.data size that does not correspond to
+// the op.code. Size mismatch is revalidated here as final insurance against
+// derived classes that may alter this behavior. This ensures that an opcode
+// that does not push correctly-sized data will fail.
 static constexpr auto any_invalid = opcode::op_verif;
 static_assert(operation::is_invalid(any_invalid));
 

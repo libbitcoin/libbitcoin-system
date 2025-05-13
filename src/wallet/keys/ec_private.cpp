@@ -106,9 +106,17 @@ ec_private ec_private::from_string(const std::string& wif,
         return {};
 
     if (decoded.size() == wif_compressed_size)
-        return { to_array<wif_compressed_size>(decoded), address };
+        return
+        { 
+            unsafe_array_cast<uint8_t, wif_compressed_size>(decoded.data()),
+            address
+        };
 
-    return { to_array<wif_uncompressed_size>(decoded), address };
+    return
+    {
+        unsafe_array_cast<uint8_t, wif_uncompressed_size>(decoded.data()),
+        address
+    };
 }
 
 ec_private ec_private::from_compressed(const wif_compressed& wif,

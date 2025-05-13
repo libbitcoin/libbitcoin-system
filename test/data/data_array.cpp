@@ -30,29 +30,43 @@ BOOST_AUTO_TEST_CASE(data_array__to_array1__value__expected_size_and_value)
     BOOST_REQUIRE_EQUAL(result[0], expected);
 }
 
-// to_array (data_slice)
+////// to_array (data_slice)
+////
+////BOOST_AUTO_TEST_CASE(data_array__to_array2__to_string__inverse)
+////{
+////    const data_array<3> result{ { 24, 0, 15 } };
+////    BOOST_REQUIRE_EQUAL(to_array<3>(to_string(result)), result);
+////}
+////
+////BOOST_AUTO_TEST_CASE(data_array__to_array2__double_long_hash__expected)
+////{
+////    constexpr char l = 42;
+////    constexpr uint8_t u = 24;
+////
+////    // Uses data_slice data initializer construction.
+////    const auto result = to_array<long_hash_size>(
+////    {
+////        42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+////        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+////        24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+////        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+////    });
+////    BOOST_REQUIRE_EQUAL(result[0], l);
+////    BOOST_REQUIRE_EQUAL(result[long_hash_size / 2], u);
+////}
 
-BOOST_AUTO_TEST_CASE(data_array__to_array2__to_string__inverse)
+// to_array (string literal)
+
+BOOST_AUTO_TEST_CASE(data_array__to_array3__empty__expected)
 {
-    const data_array<3> result{ { 24, 0, 15 } };
-    BOOST_REQUIRE_EQUAL(to_array<3>(to_string(result)), result);
+    BOOST_REQUIRE(to_array("").empty());
 }
 
-BOOST_AUTO_TEST_CASE(data_array__to_array2__double_long_hash__expected)
+BOOST_AUTO_TEST_CASE(data_array__to_array3__nonempty__expected)
 {
-    constexpr char l = 42;
-    constexpr uint8_t u = 24;
-
-    // Uses data_slice data initializer construction.
-    const auto result = to_array<long_hash_size>(
-    {
-        42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    });
-    BOOST_REQUIRE_EQUAL(result[0], l);
-    BOOST_REQUIRE_EQUAL(result[long_hash_size / 2], u);
+    constexpr data_array<3> expected{ '1', '2', '3' };
+    constexpr auto value = to_array("123");
+    BOOST_REQUIRE_EQUAL(value, expected);
 }
 
 // build_array

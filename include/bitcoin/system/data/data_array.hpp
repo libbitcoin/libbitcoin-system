@@ -25,6 +25,7 @@
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -42,14 +43,18 @@ using split_parts = std::pair<data_array<Size>, data_array<Size>>;
 /// Arbitrary byte storage types.
 typedef data_array<one> one_byte;
 
-/// Create a single byte arrray with given element value.
+/// Create a single byte array with given element value.
 constexpr one_byte to_array(uint8_t byte) NOEXCEPT { return { { byte } };}
 
-/// Convert the data slice to an array.
-/// Underfill is padded with 0x00, excess is truncated.
-/// to_array(to_string(data)) == data.
-template <size_t Size>
-constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT;
+/////// Convert the data slice to an array.
+/////// Underfill is padded with 0x00, excess is truncated.
+/////// to_array(to_string(data)) == data.
+////template <size_t Size>
+////constexpr data_array<Size> to_array(const data_slice& bytes) NOEXCEPT;
+
+/// Convert the string literal to an array.
+template <size_t Size, if_nonzero<Size> = true>
+constexpr data_array<sub1(Size)> to_array(const char(&string)[Size]) NOEXCEPT;
 
 /// Create a data stack from vector of data array.
 template <size_t Size>

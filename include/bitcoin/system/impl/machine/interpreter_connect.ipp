@@ -125,7 +125,7 @@ code CLASS::connect_embedded(const chain::context& state,
     else if (embedded->is_pay_to_witness(state.flags))
     {
         // The input script must be a push of the embedded_script [bip141].
-        if (input.script().ops().size() != one)
+        if (!is_one(input.script().ops().size()))
             return error::dirty_witness;
 
         // Because output script pushed version/witness program [bip141].

@@ -171,13 +171,9 @@ protected:
 #define TEMPLATE template <typename Stack>
 #define CLASS interpreter<Stack>
 
-////BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-
 #include <bitcoin/system/impl/machine/interpreter.ipp>
 #include <bitcoin/system/impl/machine/interpreter_connect.ipp>
 #include <bitcoin/system/impl/machine/interpreter_run.ipp>
-
-////BC_POP_WARNING()
 
 #undef CLASS
 #undef TEMPLATE

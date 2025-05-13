@@ -104,11 +104,18 @@ ec_public ec_public::from_data(const data_chunk& decoded) NOEXCEPT
         return {};
 
     if (is_compressed_key(decoded))
-        return ec_public{ to_array<ec_compressed_size>(decoded), true };
+        return
+        {
+            unsafe_array_cast<uint8_t, ec_compressed_size>(decoded.data()),
+            true
+        };
+
+    const auto& uncompressed =
+        unsafe_array_cast<uint8_t, ec_uncompressed_size>(decoded.data());
 
     ec_compressed compressed;
-    if (!system::compress(compressed, to_array<ec_uncompressed_size>(decoded)))
-         return {};
+    if (!system::compress(compressed, uncompressed))
+        return {};
 
     return { compressed, false };
 }
@@ -179,7 +186,8 @@ bool ec_public::to_uncompressed(ec_uncompressed& out) const NOEXCEPT
     if (!(*this))
         return false;
 
-    return decompress(out, to_array<ec_compressed_size>(point()));
+    return decompress(out,
+        unsafe_array_cast<uint8_t, ec_compressed_size>(point().data()));
 }
 
 payment_address ec_public::to_payment_address(uint8_t version) const NOEXCEPT

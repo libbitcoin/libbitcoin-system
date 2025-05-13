@@ -235,6 +235,7 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_reader.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\byte_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp" />
+    <ClCompile Include="..\..\..\..\test\stream\streamers\sha256t_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
     <ClCompile Include="..\..\..\..\test\typelets.cpp" />

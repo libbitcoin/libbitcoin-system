@@ -300,13 +300,15 @@ payment_address payment_address::extract_output(
         case chain::script_pattern::pay_key_hash:
             return
             {
-                to_array<short_hash_size>(script.ops()[2].data()),
+                unsafe_array_cast<uint8_t, short_hash_size>(
+                    script.ops().at(2).data().data()),
                 p2kh_prefix
             };
         case chain::script_pattern::pay_script_hash:
             return
             { 
-                to_array<short_hash_size>(script.ops()[1].data()),
+                unsafe_array_cast<uint8_t, short_hash_size>(
+                    script.ops().at(1).data().data()),
                 p2sh_prefix
             };
         case chain::script_pattern::pay_public_key:
