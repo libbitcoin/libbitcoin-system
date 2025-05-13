@@ -44,20 +44,27 @@ typedef struct
     /// github.com/bitcoin/bitcoin/pull/3842
     bool bip42;
 
-    /// bip34-based activations
+    /// bip34-based activations.
     bool bip34;
     bool bip65;
     bool bip66;
 
-    /// bip9 bit0 activation group
+    /// bip9 bit0 activation group ("versionbits").
     bool bip68;
     bool bip112;
     bool bip113;
 
-    /// bip9 bit1 activation group
+    /// bip9 bit1 activation group  ("segwit").
     bool bip141;
     bool bip143;
     bool bip147;
+
+    /// bip9 bit2 activation group ("taproot").
+    bool bip341;
+    bool bip342;
+
+    /////// bip9 bit4 activation group ("segsignal").
+    ////bool bip91;
 
     /// Regtest does not retarget.
     bool retarget;
