@@ -37,6 +37,17 @@ BOOST_AUTO_TEST_CASE(sha256x2_writer__stream__genesis_block__expected)
     BOOST_REQUIRE_EQUAL(hash.str(), to_string(genesis().hash()));
 }
 
+BOOST_AUTO_TEST_CASE(sha256x2_writer__fast__genesis_block__expected)
+{
+    hash_digest hash{};
+    stream::out::fast stream{ hash };
+    hash::sha256x2::fast hasher(stream);
+    genesis().header().to_data(hasher);
+    hasher.flush();
+    BOOST_REQUIRE(hasher);
+    BOOST_REQUIRE_EQUAL(hash, genesis().hash());
+}
+
 BOOST_AUTO_TEST_CASE(sha256x2_writer__copy__genesis_block__expected)
 {
     hash_digest hash;
@@ -47,16 +58,6 @@ BOOST_AUTO_TEST_CASE(sha256x2_writer__copy__genesis_block__expected)
     BOOST_REQUIRE_EQUAL(hash, genesis().hash());
 }
 
-BOOST_AUTO_TEST_CASE(sha256x2_writer__data__genesis_block__expected)
-{
-    data_chunk hash;
-    hash::sha256x2::data hasher(hash);
-    genesis().header().to_data(hasher);
-    hasher.flush();
-    BOOST_REQUIRE(hasher);
-    BOOST_REQUIRE_EQUAL(hash, to_chunk(genesis().hash()));
-}
-
 BOOST_AUTO_TEST_CASE(sha256x2_writer__text__genesis_block__expected)
 {
     std::string hash;
@@ -65,6 +66,16 @@ BOOST_AUTO_TEST_CASE(sha256x2_writer__text__genesis_block__expected)
     hasher.flush();
     BOOST_REQUIRE(hasher);
     BOOST_REQUIRE_EQUAL(hash, to_string(genesis().hash()));
+}
+
+BOOST_AUTO_TEST_CASE(sha256x2_writer__data__genesis_block__expected)
+{
+    data_chunk hash;
+    hash::sha256x2::data hasher(hash);
+    genesis().header().to_data(hasher);
+    hasher.flush();
+    BOOST_REQUIRE(hasher);
+    BOOST_REQUIRE_EQUAL(hash, to_chunk(genesis().hash()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
