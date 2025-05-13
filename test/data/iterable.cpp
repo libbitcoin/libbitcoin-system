@@ -312,21 +312,22 @@ BOOST_AUTO_TEST_CASE(iterable__array_cast__always__expected)
     // > {aka ‘const std::array<unsigned char, 64> [8]’} [-Warray-bounds]
     // Clearly the second dimension is within the bounds of [8], so this is bogus.
 
-    // TODO: HAVE_GNUC APPEARS TO NOT BE WORKING.
-////#if !defined(HAVE_GNUC)
-////    BOOST_REQUIRE_EQUAL(blocks8_[2], expected3);
-////    BOOST_REQUIRE_EQUAL(blocks8_[3], expected4);
-////    BOOST_REQUIRE_EQUAL(blocks8_[4], expected5);
-////    BOOST_REQUIRE_EQUAL(blocks8_[5], expected6);
-////    BOOST_REQUIRE_EQUAL(blocks8_[6], expected7);
-////    BOOST_REQUIRE_EQUAL(blocks8_[7], expected8);
-////#endif
+#if !defined(HAVE_GNUC)
+    BOOST_REQUIRE_EQUAL(blocks8_[2], expected3);
+    BOOST_REQUIRE_EQUAL(blocks8_[3], expected4);
+    BOOST_REQUIRE_EQUAL(blocks8_[4], expected5);
+    BOOST_REQUIRE_EQUAL(blocks8_[5], expected6);
+    BOOST_REQUIRE_EQUAL(blocks8_[6], expected7);
+    BOOST_REQUIRE_EQUAL(blocks8_[7], expected8);
+#endif
 
     // 4 lanes
     BOOST_REQUIRE_EQUAL(blocks4_[0], expected1);
     BOOST_REQUIRE_EQUAL(blocks4_[1], expected2);
+#if !defined(HAVE_GNUC)
     BOOST_REQUIRE_EQUAL(blocks4_[2], expected3);
     BOOST_REQUIRE_EQUAL(blocks4_[3], expected4);
+#endif
 
     // 2 lanes
     BOOST_REQUIRE_EQUAL(blocks2_[0], expected1);
