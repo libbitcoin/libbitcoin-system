@@ -450,6 +450,7 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 #include <bitcoin/system/impl/hash/sha/algorithm_functions.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_iterate.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_merkle.ipp>
+#include <bitcoin/system/impl/hash/sha/algorithm_midstate.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_native.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_padding.ipp>
 #include <bitcoin/system/impl/hash/sha/algorithm_parsing.ipp>

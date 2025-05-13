@@ -1549,6 +1549,9 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_merkle.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_midstate.ipp">
+      <Filter>include\bitcoin\system\impl\hash\sha</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_native.ipp">
       <Filter>include\bitcoin\system\impl\hash\sha</Filter>
     </None>
