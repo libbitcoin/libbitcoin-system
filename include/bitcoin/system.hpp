@@ -210,6 +210,7 @@
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 #include <bitcoin/system/stream/streamers/sha256_writer.hpp>
+#include <bitcoin/system/stream/streamers/sha256t_writer.hpp>
 #include <bitcoin/system/stream/streamers/sha256x2_writer.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitflipper.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>

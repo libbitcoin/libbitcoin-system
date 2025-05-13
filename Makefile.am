@@ -356,6 +356,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/stream/streamers/byte_reader.cpp \
     test/stream/streamers/byte_writer.cpp \
     test/stream/streamers/sha256_writer.cpp \
+    test/stream/streamers/sha256t_writer.cpp \
     test/stream/streamers/sha256x2_writer.cpp \
     test/unicode/ascii.cpp \
     test/unicode/code_points.cpp \
@@ -703,6 +704,7 @@ include_bitcoin_system_impl_stream_streamers_HEADERS = \
     include/bitcoin/system/impl/stream/streamers/byte_reader.ipp \
     include/bitcoin/system/impl/stream/streamers/byte_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/sha256_writer.ipp \
+    include/bitcoin/system/impl/stream/streamers/sha256t_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/sha256x2_writer.ipp
 
 include_bitcoin_system_impl_wallet_addressesdir = ${includedir}/bitcoin/system/impl/wallet/addresses
@@ -818,6 +820,7 @@ include_bitcoin_system_stream_streamers_HEADERS = \
     include/bitcoin/system/stream/streamers/byte_reader.hpp \
     include/bitcoin/system/stream/streamers/byte_writer.hpp \
     include/bitcoin/system/stream/streamers/sha256_writer.hpp \
+    include/bitcoin/system/stream/streamers/sha256t_writer.hpp \
     include/bitcoin/system/stream/streamers/sha256x2_writer.hpp
 
 include_bitcoin_system_stream_streamers_interfacesdir = ${includedir}/bitcoin/system/stream/streamers/interfaces

@@ -537,6 +537,9 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256_writer.cpp">
       <Filter>src\stream\streamers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stream\streamers\sha256t_writer.cpp">
+      <Filter>src\stream\streamers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp">
       <Filter>src\stream\streamers</Filter>
     </ClCompile>

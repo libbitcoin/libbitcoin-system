@@ -845,6 +845,7 @@ if (with-tests)
         "../../test/stream/streamers/byte_reader.cpp"
         "../../test/stream/streamers/byte_writer.cpp"
         "../../test/stream/streamers/sha256_writer.cpp"
+        "../../test/stream/streamers/sha256t_writer.cpp"
         "../../test/stream/streamers/sha256x2_writer.cpp"
         "../../test/unicode/ascii.cpp"
         "../../test/unicode/code_points.cpp"

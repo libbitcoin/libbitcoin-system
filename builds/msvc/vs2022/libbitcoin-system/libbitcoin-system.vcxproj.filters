@@ -1199,6 +1199,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\sha256_writer.hpp">
       <Filter>include\bitcoin\system\stream\streamers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\sha256t_writer.hpp">
+      <Filter>include\bitcoin\system\stream\streamers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\stream\streamers\sha256x2_writer.hpp">
       <Filter>include\bitcoin\system\stream\streamers</Filter>
     </ClInclude>
@@ -1679,6 +1682,9 @@
       <Filter>include\bitcoin\system\impl\stream\streamers</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256_writer.ipp">
+      <Filter>include\bitcoin\system\impl\stream\streamers</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256t_writer.ipp">
       <Filter>include\bitcoin\system\impl\stream\streamers</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256x2_writer.ipp">

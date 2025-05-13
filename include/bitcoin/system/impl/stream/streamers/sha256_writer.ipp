@@ -19,10 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_IPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256_WRITER_IPP
 
-#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
 namespace libbitcoin {

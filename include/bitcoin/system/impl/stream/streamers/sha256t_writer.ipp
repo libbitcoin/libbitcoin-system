@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_IPP
-#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256X2_WRITER_IPP
+#ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256T_WRITER_IPP
+#define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_SHA256T_WRITER_IPP
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -32,13 +32,13 @@ namespace system {
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-sha256x2_writer<OStream>::sha256x2_writer(OStream& sink) NOEXCEPT
+sha256t_writer<OStream>::sha256t_writer(OStream& sink) NOEXCEPT
   : byte_writer<OStream>(sink)
 {
 }
 
 template <typename OStream>
-sha256x2_writer<OStream>::~sha256x2_writer() NOEXCEPT
+sha256t_writer<OStream>::~sha256t_writer() NOEXCEPT
 {
     // Derived virtual destructor called before base destructor.
     flusher();
@@ -48,7 +48,7 @@ sha256x2_writer<OStream>::~sha256x2_writer() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
-void sha256x2_writer<OStream>::do_write_bytes(const uint8_t* data,
+void sha256t_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
     // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
@@ -57,7 +57,7 @@ void sha256x2_writer<OStream>::do_write_bytes(const uint8_t* data,
 }
 
 template <typename OStream>
-void sha256x2_writer<OStream>::do_flush() NOEXCEPT
+void sha256t_writer<OStream>::do_flush() NOEXCEPT
 {
     flusher();
     byte_writer<OStream>::do_flush();
@@ -66,21 +66,14 @@ void sha256x2_writer<OStream>::do_flush() NOEXCEPT
 // private
 // ----------------------------------------------------------------------------
 
-// Only hash overflow returns update false, which requires (2^64-8)/8 bytes.
-// The stream could invalidate, but writers shouldn't have to check this.
 template <typename OStream>
-void sha256x2_writer<OStream>::flusher() NOEXCEPT
+void sha256t_writer<OStream>::flusher() NOEXCEPT
 {
     BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
     hash_digest hash;
     BC_POP_WARNING()
 
     // Finalize streaming hash.
-    context_.flush(hash.data());
-    context_.reset();
-
-    // Hash the result of the streaming hash (update cannot overflow).
-    context_.write(hash_size, hash.data());
     context_.flush(hash.data());
     context_.reset();
 
