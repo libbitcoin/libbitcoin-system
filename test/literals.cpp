@@ -18,7 +18,18 @@
  */
 #include "test.hpp"
 
- // en.cppreference.com/w/cpp/language/integer_literal
+// text literals
+
+static_assert(is_same_type<decltype(""_array), std::array<uint8_t, 0>>);
+static_assert(""_array.empty());
+
+static_assert(is_same_type<decltype("test"_array), std::array<uint8_t, 4>>);
+static_assert("test"_array.at(0) == 't');
+static_assert("test"_array.at(1) == 'e');
+static_assert("test"_array.at(2) == 's');
+static_assert("test"_array.at(3) == 't');
+
+// en.cppreference.com/w/cpp/language/integer_literal
 
 // Custom literals cast to the specified positive type.
 static_assert(is_same_type<decltype(0xff_i8), int8_t>);
