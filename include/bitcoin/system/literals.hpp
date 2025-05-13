@@ -34,8 +34,8 @@ namespace libbitcoin {
 /// therefore be useful everywhere in the library. It is also important that it
 /// not be subject to regressions in other code, as a break here causes a large
 /// number of test and other failures. See tests for usage and detailed info.
+/// Functions should all be consteval for safety, but waiting on clang++ v17.
 /// ---------------------------------------------------------------------------
-/// These should be consteval for safety, but waiting on clang++ v17.
 
 // Functions are consteval where available (bogus warning).
 BC_PUSH_WARNING(USE_CONSTEXPR_FOR_FUNCTION)
@@ -48,21 +48,21 @@ using integer_type = unsigned long long int;
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer lower() noexcept(true)
+CONSTEVAL Integer lower() noexcept
 {
     return std::numeric_limits<Integer>::min();
 }
 
 template <typename Integer,
     std::enable_if_t<!std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL Integer upper() noexcept(true)
+CONSTEVAL Integer upper() noexcept
 {
     return std::numeric_limits<Integer>::max();
 }
 
 template <typename Integer, std::enable_if_t<
     std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept(true)
+CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept
 {
     // unsigned(|signed_min|) = unsigned(signed_min) + 1.
     return static_cast<
@@ -72,7 +72,7 @@ CONSTEVAL std::make_unsigned_t<Integer> lower() noexcept(true)
 
 template <typename Integer, std::enable_if_t<
     std::is_signed_v<Integer>, bool> = true>
-CONSTEVAL std::make_unsigned_t<Integer> upper() noexcept(true)
+CONSTEVAL std::make_unsigned_t<Integer> upper() noexcept
 {
     // unsigned(|signed_max|) = unsigned(signed_max).
     return static_cast<
@@ -114,14 +114,31 @@ CONSTEVAL Domain negative(integer_type value) noexcept(false)
     return static_cast<Domain>(~narrowed + narrow{1});
 }
 
+template <size_t Size>
+struct string_holder
+{
+    char str[Size];
+
+    CONSTEVAL string_holder(const char(&string)[Size]) noexcept
+    {
+        for (size_t i = 0; i < Size; ++i)
+            str[i] = string[i];
+    }
+};
+
 BC_POP_WARNING()
 BC_POP_WARNING()
 
-#define DECLARE_LITERAL(name, sign, type) \
-CONSTEVAL type operator "" name(integer_type value) noexcept \
-{ return sign<type>(value); }
+/// Text representations.
+/// ---------------------------------------------------------------------------
 
-/// Supported represenations.
+template <text_t Text>
+CONSTEVAL auto operator "" _array() noexcept
+{
+    return Text.data;
+}
+
+/// Integer representations.
 /// ---------------------------------------------------------------------------
 /// All integer literals are positive, so this is what there is to customize.
 /// Literals do not have negative signs, and applying the negative operator to
@@ -132,49 +149,53 @@ CONSTEVAL type operator "" name(integer_type value) noexcept \
 /// digit separators. A built-in suffix cannot be used with a user-defined
 /// suffix, and there would be no reason to do so.
 
+#define DECLARE_INTEGER_LITERAL(name, sign, type) \
+CONSTEVAL type operator "" name(integer_type value) noexcept \
+{ return sign<type>(value); }
+
 /// Literals suppress exception, causing runtime abort if !defined(CONSTEVAL).
 /// This precludes unnecessary warning on each literal in noexcept functions.
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 /// positive signed integer
-DECLARE_LITERAL(_i08, positive, int8_t)
-DECLARE_LITERAL(_i16, positive, int16_t)
-DECLARE_LITERAL(_i32, positive, int32_t)
-DECLARE_LITERAL(_i64, positive, int64_t)
+DECLARE_INTEGER_LITERAL(_i08, positive, int8_t)
+DECLARE_INTEGER_LITERAL(_i16, positive, int16_t)
+DECLARE_INTEGER_LITERAL(_i32, positive, int32_t)
+DECLARE_INTEGER_LITERAL(_i64, positive, int64_t)
 
 /// positive unsigned integer
-DECLARE_LITERAL(_u08, positive, uint8_t)
-DECLARE_LITERAL(_u16, positive, uint16_t)
-DECLARE_LITERAL(_u32, positive, uint32_t)
-DECLARE_LITERAL(_u64, positive, uint64_t)
+DECLARE_INTEGER_LITERAL(_u08, positive, uint8_t)
+DECLARE_INTEGER_LITERAL(_u16, positive, uint16_t)
+DECLARE_INTEGER_LITERAL(_u32, positive, uint32_t)
+DECLARE_INTEGER_LITERAL(_u64, positive, uint64_t)
 
 /// negative signed integer
-DECLARE_LITERAL(_ni08, negative, int8_t)
-DECLARE_LITERAL(_ni16, negative, int16_t)
-DECLARE_LITERAL(_ni32, negative, int32_t)
-DECLARE_LITERAL(_ni64, negative, int64_t)
+DECLARE_INTEGER_LITERAL(_ni08, negative, int8_t)
+DECLARE_INTEGER_LITERAL(_ni16, negative, int16_t)
+DECLARE_INTEGER_LITERAL(_ni32, negative, int32_t)
+DECLARE_INTEGER_LITERAL(_ni64, negative, int64_t)
 
 /// negative unsigned integer
-DECLARE_LITERAL(_nu08, negative, uint8_t)
-DECLARE_LITERAL(_nu16, negative, uint16_t)
-DECLARE_LITERAL(_nu32, negative, uint32_t)
-DECLARE_LITERAL(_nu64, negative, uint64_t)
+DECLARE_INTEGER_LITERAL(_nu08, negative, uint8_t)
+DECLARE_INTEGER_LITERAL(_nu16, negative, uint16_t)
+DECLARE_INTEGER_LITERAL(_nu32, negative, uint32_t)
+DECLARE_INTEGER_LITERAL(_nu64, negative, uint64_t)
 
 /// aliases (preferred)
-DECLARE_LITERAL(_i8,  positive, int8_t)
-DECLARE_LITERAL(_u8,  positive, uint8_t)
-DECLARE_LITERAL(_ni8, negative, int8_t)
-DECLARE_LITERAL(_nu8, negative, uint8_t)
+DECLARE_INTEGER_LITERAL(_i8,  positive, int8_t)
+DECLARE_INTEGER_LITERAL(_u8,  positive, uint8_t)
+DECLARE_INTEGER_LITERAL(_ni8, negative, int8_t)
+DECLARE_INTEGER_LITERAL(_nu8, negative, uint8_t)
 
 /// size_t
-DECLARE_LITERAL(_size, positive, size_t)
-DECLARE_LITERAL(_nsize, negative, signed_size_t)
+DECLARE_INTEGER_LITERAL(_size, positive, size_t)
+DECLARE_INTEGER_LITERAL(_nsize, negative, signed_size_t)
 
 BC_POP_WARNING()
 
 /// ---------------------------------------------------------------------------
 
-#undef DECLARE_LITERAL
+#undef DECLARE_INTEGER_LITERAL
 
 } // namespace libbitcoin
 

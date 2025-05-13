@@ -176,6 +176,34 @@ using unsigned_exact_type =
                     iif<Bytes == sizeof(uint64_t), uint64_t,
                         uintx_t<Bytes * 8u>>>>>>;
 
+/// Text capture.
+/// ---------------------------------------------------------------------------
+
+// Implementation requires c-style array.
+BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
+BC_PUSH_WARNING(NO_ARRAY_INDEXING)
+
+template <size_t Size>
+struct text_t
+{
+    std::array<uint8_t, Size - 1> data;
+    CONSTEVAL text_t(const char (&string)[Size]) noexcept
+      : data(to_array(string)) {}
+
+private:
+    static CONSTEVAL auto to_array(const char(&string)[Size]) noexcept
+    {
+        std::array<uint8_t, Size - 1> data{};
+        for (size_t index = 0; index < Size - 1; ++index)
+            data.at(index) = string[index];
+
+        return data;
+    }
+};
+
+BC_POP_WARNING()
+BC_POP_WARNING()
+
 /// Argument placeholders.
 /// ---------------------------------------------------------------------------
 
