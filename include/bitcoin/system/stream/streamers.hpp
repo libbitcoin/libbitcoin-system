@@ -180,24 +180,6 @@ namespace hash
         using data = push<data_chunk>;
     }
 
-    namespace sha256t
-    {
-        /// A hash writer that writes a tagged sha256 hash to a std::ostream.
-        using ostream = sha256t_writer<std::ostream>;
-
-        /// A fast hash writer that writes a tagged sha256 hash to a system::ostream.
-        using fast = sha256t_writer<system::ostream<>>;
-
-        /// A hash writer that copies a tagged sha256 hash to a data_slab.
-        using copy = make_streamer<copy_sink<data_slab>, sha256t_writer>;
-
-        /// A hash writer that inserts a tagged sha256 hash into a container.
-        template <typename Container>
-        using push = make_streamer<push_sink<Container>, sha256t_writer>;
-        using text = push<std::string>;
-        using data = push<data_chunk>;
-    }
-
     namespace sha256x2
     {
         /// A hash writer that writes a bitcoin hash to a std::ostream.
@@ -214,6 +196,29 @@ namespace hash
         using push = make_streamer<push_sink<Container>, sha256x2_writer>;
         using text = push<std::string>;
         using data = push<data_chunk>;
+    }
+
+    namespace sha256t
+    {
+        /// A hash writer that writes a tagged sha256 hash to a std::ostream.
+        template <text_t Tag>
+        using ostream = sha256t_writer<Tag, std::ostream>;
+
+        /// A fast hash writer that writes a tagged sha256 hash to a system::ostream.
+        template <text_t Tag>
+        using fast = sha256t_writer<Tag, system::ostream<>>;
+
+        /////// A hash writer that copies a tagged sha256 hash to a data_slab.
+        ////template <text_t Tag>
+        ////using copy = make_streamer<copy_sink<data_slab>, sha256t_writer<Tag>>;
+
+        /////// A hash writer that inserts a tagged sha256 hash into a container.
+        ////template <text_t Tag, typename Container>
+        ////using push = make_streamer<push_sink<Container>, sha256t_writer<Tag>>;
+        ////template <text_t Tag>
+        ////using text = push<Tag, std::string>;
+        ////template <text_t Tag>
+        ////using data = push<Tag, data_chunk>;
     }
 }
 
