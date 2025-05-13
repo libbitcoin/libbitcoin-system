@@ -25,8 +25,6 @@
 
 namespace libbitcoin {
 namespace system {
-    
-// All public methods must rely on protected for stream state except validity.
 
 // constructors
 // ----------------------------------------------------------------------------

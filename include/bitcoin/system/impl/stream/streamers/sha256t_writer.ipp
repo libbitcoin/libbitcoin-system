@@ -21,63 +21,31 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/stream/streamers/byte_writer.hpp>
+#include <bitcoin/system/stream/streamers/sha256_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
-    
-// All public methods must rely on protected for stream state except validity.
 
-// constructors
-// ----------------------------------------------------------------------------
-
-template <typename OStream>
-sha256t_writer<OStream>::sha256t_writer(OStream& sink) NOEXCEPT
-  : byte_writer<OStream>(sink)
+// static/private
+TEMPLATE
+constexpr sha256::state_t CLASS::
+midstate() NOEXCEPT
 {
+    // TODO: need <= block_t constexpr hash.
+
+    ////constexpr auto hashtag1 = sha256::hash(Tag.data);
+    ////constexpr auto hashtag2 = sha256::hash(hashtag1, hashtag1);
+
+    // TODO: hashtag2 needs to be unflushed sha256::state_t.
+    // TODO: hashtag2 is flushed to sha256::digest_t (big endian).
+    return {};
 }
 
-template <typename OStream>
-sha256t_writer<OStream>::~sha256t_writer() NOEXCEPT
+TEMPLATE
+CLASS::
+sha256t_writer(OStream& sink) NOEXCEPT
+  : sha256_writer<OStream>(sink, midstate(), one)
 {
-    // Derived virtual destructor called before base destructor.
-    flusher();
-}
-
-// protected
-// ----------------------------------------------------------------------------
-
-template <typename OStream>
-void sha256t_writer<OStream>::do_write_bytes(const uint8_t* data,
-    size_t size) NOEXCEPT
-{
-    // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
-    // The stream could be invalidated, but writers shouldn't have to check it.
-    context_.write(size, data);
-}
-
-template <typename OStream>
-void sha256t_writer<OStream>::do_flush() NOEXCEPT
-{
-    flusher();
-    byte_writer<OStream>::do_flush();
-}
-
-// private
-// ----------------------------------------------------------------------------
-
-template <typename OStream>
-void sha256t_writer<OStream>::flusher() NOEXCEPT
-{
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest hash;
-    BC_POP_WARNING()
-
-    // Finalize streaming hash.
-    context_.flush(hash.data());
-    context_.reset();
-
-    byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
 }
 
 } // namespace system

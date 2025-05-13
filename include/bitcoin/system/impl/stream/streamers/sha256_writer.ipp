@@ -25,15 +25,20 @@
 
 namespace libbitcoin {
 namespace system {
-    
-// All public methods must rely on protected for stream state except validity.
 
 // constructors
 // ----------------------------------------------------------------------------
 
 template <typename OStream>
 sha256_writer<OStream>::sha256_writer(OStream& sink) NOEXCEPT
-  : byte_writer<OStream>(sink)
+  : byte_writer<OStream>(sink), context_{}
+{
+}
+
+template <typename OStream>
+sha256_writer<OStream>::sha256_writer(OStream& sink,
+    const sha256::state_t& midstate, size_t blocks) NOEXCEPT
+  : byte_writer<OStream>(sink), context_{ midstate, blocks }
 {
 }
 
