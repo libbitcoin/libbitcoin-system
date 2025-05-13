@@ -132,8 +132,6 @@ BC_POP_WARNING()
 /// Text representations.
 /// ---------------------------------------------------------------------------
 
-static_assert(__cpp_nontype_template_args >= 201911);
-
 template <text_t Text>
 CONSTEVAL auto operator "" _array() noexcept
 {
