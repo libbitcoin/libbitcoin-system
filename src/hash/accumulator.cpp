@@ -30,4 +30,3 @@ template class accumulator<sha512>;
 
 }
 }
-

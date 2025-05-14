@@ -39,7 +39,6 @@ public:
     sha256t_writer(OStream& sink) NOEXCEPT;
 
 private:
-    // The sha256(sha256(Tag)||sha256(Tag)) midstate.
     static constexpr sha256::state_t midstate() NOEXCEPT;
 };
 
