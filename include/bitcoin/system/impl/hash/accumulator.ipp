@@ -236,8 +236,15 @@ TEMPLATE
 constexpr void CLASS::
 reset() NOEXCEPT
 {
-    size_ = zero;
-    state_ = Algorithm::H::get;
+    reset(Algorithm::H::get, zero);
+}
+
+TEMPLATE
+constexpr void CLASS::
+reset(const state_t& state, size_t blocks) NOEXCEPT
+{
+    state_ = state;
+    size_ = blocks * block_size;
 }
 
 TEMPLATE
