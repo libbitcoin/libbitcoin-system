@@ -274,20 +274,23 @@ BOOST_AUTO_TEST_CASE(sha512__midstate__half_blocks__expected)
 {
     constexpr sha512::state_t expected
     {
-        0xab942f526272e456,
-        0xed68a979f5020290,
-        0x5ca903a141ed9844,
-        0x3567b11ef0bf25a5,
-        0x52d639051a01be58,
-        0x558122c58e3de07d,
-        0x749ee59ded36acf0,
-        0xc55cd91924d6ba11
+        0xcf7881d5774acbe8,
+        0x533362e0fbc78070,
+        0x0267639d87460eda,
+        0x3086cb40e85931b0,
+        0x717dc95288a023a3,
+        0x96bab2c14ce0b5e0,
+        0x6fc4fe04eae33e0b,
+        0x91f4d80cbd668bee
     };
+
+    auto copy = expected;
 
     static_assert(sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 0 }) == expected);
     BOOST_CHECK_EQUAL(sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
-    BOOST_CHECK_EQUAL(sha512::normalize(expected), sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }));
+    BOOST_CHECK_EQUAL(sha512::finalize(copy, one), sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }));
 }
+
 // sha512::simple_hash
 BOOST_AUTO_TEST_CASE(sha512__simple_hash__minimal__expected)
 {

@@ -212,19 +212,21 @@ BOOST_AUTO_TEST_CASE(sha256__midstate__half_blocks__expected)
 {
     constexpr sha256::state_t expected
     {
-        0xf5a5fd42,
-        0xd16a2030,
-        0x2798ef6e,
-        0xd309979b,
-        0x43003d23,
-        0x20d9f0e8,
-        0xea9831a9,
-        0x2759fb4b
+        0xda5698be,
+        0x17b9b469,
+        0x62335799,
+        0x779fbeca,
+        0x8ce5d491,
+        0xc0d26243,
+        0xbafef9ea,
+        0x1837a9d8
     };
+
+    auto copy = expected;
 
     static_assert(sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 0 }) == expected);
     BOOST_CHECK_EQUAL(sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
-    BOOST_CHECK_EQUAL(sha256::normalize(expected), sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }));
+    BOOST_CHECK_EQUAL(sha256::finalize(copy, one), sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }));
 }
 
 // sha256::simple_hash

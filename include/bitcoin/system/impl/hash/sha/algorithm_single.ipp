@@ -143,8 +143,8 @@ midstate(const half_t& left, const half_t& right) NOEXCEPT
         input_right(buffer, right);
         schedule(buffer);
         compress(state, buffer);
-        schedule_1(buffer);
-        compress(state, buffer);
+        ////schedule_1(buffer);
+        ////compress(state, buffer);
         ////return output(state);
         return state;
     };
