@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_PARSING_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_PARSING_IPP
 
-#include <type_traits>
-
 // 5.2 Parsing the Message
 // ============================================================================
 // big-endian I/O is conventional for SHA.
