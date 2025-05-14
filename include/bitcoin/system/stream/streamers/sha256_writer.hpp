@@ -42,9 +42,6 @@ public:
     ~sha256_writer() NOEXCEPT override;
 
 protected:
-    sha256_writer(OStream& sink, const sha256::state_t& midstate,
-        size_t blocks) NOEXCEPT;
-
     /// The maximum addressable stream position.
     static constexpr size_t maximum = hash_size;
 

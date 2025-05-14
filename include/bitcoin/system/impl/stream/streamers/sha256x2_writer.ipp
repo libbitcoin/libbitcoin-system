@@ -69,19 +69,18 @@ void sha256x2_writer<OStream>::do_flush() NOEXCEPT
 template <typename OStream>
 void sha256x2_writer<OStream>::flusher() NOEXCEPT
 {
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest hash;
-    BC_POP_WARNING()
+    hash_digest hash{};
 
     // Finalize streaming hash.
     context_.flush(hash.data());
     context_.reset();
 
-    // Hash the result of the streaming hash (update cannot overflow).
+    // Hash the result of the streaming hash.
     context_.write(hash_size, hash.data());
     context_.flush(hash.data());
     context_.reset();
 
+    // Write hash to stream.
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
 }
 
