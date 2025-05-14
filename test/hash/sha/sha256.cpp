@@ -207,6 +207,54 @@ BOOST_AUTO_TEST_CASE(sha256__hash__quart_blocks__expected)
     BOOST_CHECK_EQUAL(sha256::hash(sha256::quart_t{ 0 }, sha256::quart_t{ 0 }), expected);
 }
 
+// sha256::midstate
+BOOST_AUTO_TEST_CASE(sha256__midstate__half_blocks__expected)
+{
+    constexpr sha256::state_t expected
+    {
+        0xf5a5fd42,
+        0xd16a2030,
+        0x2798ef6e,
+        0xd309979b,
+        0x43003d23,
+        0x20d9f0e8,
+        0xea9831a9,
+        0x2759fb4b
+    };
+
+    static_assert(sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 0 }) == expected);
+    BOOST_CHECK_EQUAL(sha256::midstate(sha256::half_t{ 0 }, sha256::half_t{ 0 }), expected);
+    BOOST_CHECK_EQUAL(sha256::normalize(expected), sha256::hash(sha256::half_t{ 0 }, sha256::half_t{ 0 }));
+}
+
+// sha256::simple_hash
+BOOST_AUTO_TEST_CASE(sha256__simple_hash__minimal__expected)
+{
+    BOOST_CHECK_EQUAL(sha256::simple_hash(data_array<zero>{}), accumulator<sha256>::hash(data_array<zero>{}));
+}
+
+BOOST_AUTO_TEST_CASE(sha256__simple_hash__byte__expected)
+{
+    static_assert(sha256::simple_hash(data_array<one>{ 0 }) == sha_byte256);
+    BOOST_CHECK_EQUAL(sha256::simple_hash(data_array<one>{ 0 }), accumulator<sha256>::hash(data_array<one>{ 0 }));
+}
+
+BOOST_AUTO_TEST_CASE(sha256__simple_hash__maximal__expected)
+{
+    BOOST_CHECK_EQUAL(sha256::simple_hash(data_array<sha256::space>{ 0 }), accumulator<sha256>::hash(data_array<sha256::space>{ 0 }));
+}
+
+BOOST_AUTO_TEST_CASE(sha256__simple_hash__quart_block__expected)
+{
+    BOOST_CHECK_EQUAL(sha256::simple_hash(sha256::quart_t{ 0 }), accumulator<sha256>::hash(sha256::quart_t{ 0 }));
+}
+
+BOOST_AUTO_TEST_CASE(sha256__simple_hash__half_block__expected)
+{
+    static_assert(sha256::simple_hash(sha256::half_t{ 0 }) == sha_half256);
+    BOOST_CHECK_EQUAL(sha256::simple_hash(sha256::half_t{ 0 }), accumulator<sha256>::hash(sha256::half_t{ 0 }));
+}
+
 // sha256::double_hash
 BOOST_AUTO_TEST_CASE(sha256__double_hash__full_block__expected)
 {

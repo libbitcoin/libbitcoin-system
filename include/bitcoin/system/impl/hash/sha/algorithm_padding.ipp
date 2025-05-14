@@ -19,7 +19,9 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_PADDING_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_PADDING_IPP
 
+#include <algorithm>
 #include <type_traits>
+#include <iterator>
 
 // 5.1 Padding the Message
 // ============================================================================
@@ -111,6 +113,18 @@ schedule_1(buffer_t& buffer) NOEXCEPT
 
 // Unscheduled padding (new objects).
 // ----------------------------------------------------------------------------
+
+TEMPLATE
+template <size_t Bytes>
+constexpr void CLASS::
+simple_pad(block_t& block) NOEXCEPT
+{
+    static_assert(Bytes <= space);
+    constexpr auto count = to_big_endian_size<SHA::word_bytes>(to_bits(Bytes));
+    const auto lo_word = std::prev(block.end(), SHA::word_bytes);
+    std::copy_n(count.begin(), SHA::word_bytes, lo_word);
+    block.at(Bytes) = bit_hi<byte_t>;
+}
 
 TEMPLATE
 typename CLASS::words_t CLASS::

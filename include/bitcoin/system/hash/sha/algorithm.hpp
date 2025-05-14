@@ -41,6 +41,24 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
+// Hacking our way around an MSVC compiler bug.
+#define CLASSIF algorithm<SHA, Native, Vector, Cached, true>
+
+#if !defined(CLASSIF)
+// minimum reproduction of compiler bug
+template <class T>
+class foo
+{
+    static constexpr bar = 1;
+    template <std::enable_if_t<bar == 1, bool> = true>
+    void f();
+};
+
+template <class T>
+template <std::enable_if_t<foo<T>::bar == 1, bool>>
+void foo<T>::f() {} // <= incompatible declaration error
+#endif // !CLASSIF
+
 /// SHA hashing algorithm.
 /// Native not yet implemented.
 /// Vectorization of message schedules and merkle hashes.
@@ -58,6 +76,7 @@ public:
     using K         = typename SHA::K;
     using word_t    = typename SHA::word_t;
     using state_t   = typename SHA::state_t;
+    using byte_t    = uint8_t;
 
     /// Word-based types.
     using chunk_t   = std_array<word_t, SHA::chunk_words>;
@@ -65,11 +84,12 @@ public:
     using buffer_t  = std_array<word_t, K::rounds>;
 
     /// Byte-based types.
-    using byte_t    = uint8_t;
-    using quart_t   = std_array<byte_t, to_half(SHA::chunk_words) * SHA::word_bytes>;
-    using half_t    = std_array<byte_t, SHA::chunk_words * SHA::word_bytes>;
-    using block_t   = std_array<byte_t, SHA::block_words * SHA::word_bytes>;
-    using digest_t  = std_array<byte_t, bytes<SHA::digest>>;
+    template <size_t Size>
+    using bytes_t   = std_array<byte_t, Size>;
+    using quart_t   = bytes_t<to_half(SHA::chunk_words) * SHA::word_bytes>;
+    using half_t    = bytes_t<SHA::chunk_words * SHA::word_bytes>;
+    using block_t   = bytes_t<SHA::block_words * SHA::word_bytes>;
+    using digest_t  = bytes_t<bytes<SHA::digest>>;
 
     /// Collection types.
     template <size_t Size>
@@ -90,6 +110,9 @@ public:
     static constexpr auto limit_bytes   = to_floored_bytes(limit_bits);
     static constexpr auto big_end_count = true;
 
+    /// Number of bytes available for data in the last sha block.
+    static constexpr auto space = sub1(array_count<block_t> - count_bytes);
+
     /// Single hashing.
     /// -----------------------------------------------------------------------
 
@@ -101,6 +124,14 @@ public:
     static constexpr digest_t hash(const quart_t& left, const quart_t& right) NOEXCEPT;
     static constexpr digest_t hash(uint8_t byte) NOEXCEPT;
     static digest_t hash(iblocks_t&& blocks) NOEXCEPT;
+
+    /// Hash array of any size up to the space available in a single sha block.
+    /// This allows for variable length constexpr hashing (avoids accumulator).
+    template <size_t Size, if_not_greater<Size, CLASSIF::space> = true>
+    static constexpr digest_t simple_hash(const bytes_t<Size>& bytes) NOEXCEPT;
+
+    /// Same as hash but returns state_t instead of converting it to digest_t.
+    static constexpr state_t midstate(const half_t& left, const half_t& right) NOEXCEPT;
 
     /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
@@ -235,13 +266,15 @@ protected:
     /// Parsing (endian sensitive).
     /// -----------------------------------------------------------------------
 
-    INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr digest_t output(const state_t& state) NOEXCEPT;
-
+    INLINE static constexpr void input(buffer_t& buffer, const block_t& block) NOEXCEPT;
     INLINE static constexpr void input_left(auto& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input_right(auto& buffer, const half_t& half) NOEXCEPT;
     INLINE static constexpr void input_left(auto& buffer, const quart_t& quarter) NOEXCEPT;
     INLINE static constexpr void input_right(auto& buffer, const quart_t& quarter) NOEXCEPT;
+
+    /// Midstate.
+    /// -----------------------------------------------------------------------
 
     INLINE static constexpr void inject_left_half(auto& buffer, const auto& left) NOEXCEPT;
     INLINE static constexpr void inject_right_half(auto& buffer, const auto& right) NOEXCEPT;
@@ -260,10 +293,12 @@ protected:
     static constexpr void schedule_1(buffer_t& buffer) NOEXCEPT;
 
     /// Unscheduled padding (new objects).
-    static words_t pad_block() NOEXCEPT;
-    static words_t pad_blocks(count_t blocks) NOEXCEPT;
+    template <size_t Bytes>
+    static constexpr void simple_pad(block_t& block) NOEXCEPT;
     static CONSTEVAL chunk_t chunk_pad() NOEXCEPT;
     static CONSTEVAL pad_t stream_pad() NOEXCEPT;
+    static words_t pad_block() NOEXCEPT;
+    static words_t pad_blocks(count_t blocks) NOEXCEPT;
 
     /// Unscheduled padding (update block or buffer object).
     static constexpr void pad_half(auto& buffer) NOEXCEPT;

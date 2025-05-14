@@ -269,6 +269,53 @@ BOOST_AUTO_TEST_CASE(sha512__hash__quart_blocks__expected)
     BOOST_CHECK_EQUAL(sha512::hash(sha512::quart_t{ 0 }, sha512::quart_t{ 0 }), expected);
 }
 
+// sha512::midstate
+BOOST_AUTO_TEST_CASE(sha512__midstate__half_blocks__expected)
+{
+    constexpr sha512::state_t expected
+    {
+        0xab942f526272e456,
+        0xed68a979f5020290,
+        0x5ca903a141ed9844,
+        0x3567b11ef0bf25a5,
+        0x52d639051a01be58,
+        0x558122c58e3de07d,
+        0x749ee59ded36acf0,
+        0xc55cd91924d6ba11
+    };
+
+    static_assert(sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 0 }) == expected);
+    BOOST_CHECK_EQUAL(sha512::midstate(sha512::half_t{ 0 }, sha512::half_t{ 0 }), expected);
+    BOOST_CHECK_EQUAL(sha512::normalize(expected), sha512::hash(sha512::half_t{ 0 }, sha512::half_t{ 0 }));
+}
+// sha512::simple_hash
+BOOST_AUTO_TEST_CASE(sha512__simple_hash__minimal__expected)
+{
+    BOOST_CHECK_EQUAL(sha512::simple_hash(data_array<zero>{}), accumulator<sha512>::hash(data_array<zero>{}));
+}
+
+BOOST_AUTO_TEST_CASE(sha512__simple_hash__byte__expected)
+{
+    static_assert(sha512::simple_hash(data_array<one>{ 0 }) == sha_byte512);
+    BOOST_CHECK_EQUAL(sha512::simple_hash(data_array<one>{ 0 }), accumulator<sha512>::hash(data_array<one>{ 0 }));
+}
+
+BOOST_AUTO_TEST_CASE(sha512__simple_hash__maximal__expected)
+{
+    BOOST_CHECK_EQUAL(sha512::simple_hash(data_array<sha512::space>{ 0 }), accumulator<sha512>::hash(data_array<sha512::space>{ 0 }));
+}
+
+BOOST_AUTO_TEST_CASE(sha512__simple_hash__quart_block__expected)
+{
+    BOOST_CHECK_EQUAL(sha512::simple_hash(sha512::quart_t{ 0 }), accumulator<sha512>::hash(sha512::quart_t{ 0 }));
+}
+
+BOOST_AUTO_TEST_CASE(sha512__simple_hash__half_block__expected)
+{
+    static_assert(sha512::simple_hash(sha512::half_t{ 0 }) == sha_half512);
+    BOOST_CHECK_EQUAL(sha512::simple_hash(sha512::half_t{ 0 }), accumulator<sha512>::hash(sha512::half_t{ 0 }));
+}
+
 // sha512::double_hash
 BOOST_AUTO_TEST_CASE(sha512__double_hash__full_block__expected)
 {

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_MIDSTATE_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_MIDSTATE_IPP
 
-#include <type_traits>
-
 // Midstate input/output.
 // ============================================================================
 // These bypass endianness, used for padding and state reintroduction.
@@ -28,6 +26,9 @@
 namespace libbitcoin {
 namespace system {
 namespace sha {
+
+// protected
+// ----------------------------------------------------------------------------
 
 TEMPLATE
 INLINE constexpr void CLASS::
