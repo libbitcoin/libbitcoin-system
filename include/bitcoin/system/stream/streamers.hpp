@@ -210,11 +210,11 @@ namespace hash
 
         /////// A hash writer that copies a tagged sha256 hash to a data_slab.
         ////template <text_t Tag>
-        ////using copy = make_streamer<copy_sink<data_slab>, sha256t_writer<Tag>>;
+        ////using copy = make_streamer<copy_sink<data_slab>, tag<Tag, sha256t_writer>::type>;
 
         /////// A hash writer that inserts a tagged sha256 hash into a container.
         ////template <text_t Tag, typename Container>
-        ////using push = make_streamer<push_sink<Container>, sha256t_writer<Tag>>;
+        ////using push = make_streamer<push_sink<Container>, tag<Tag, sha256t_writer>::type>;
         ////template <text_t Tag>
         ////using text = push<Tag, std::string>;
         ////template <text_t Tag>

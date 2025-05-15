@@ -22,7 +22,7 @@
 #include <iostream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/stream/streamers/sha256_writer.hpp>
+#include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -30,28 +30,35 @@ namespace system {
 /// A tagged hash writer that accepts an ostream.
 template <text_t Tag, typename OStream = std::ostream>
 class sha256t_writer
-  : public sha256_writer<OStream>
+  : public byte_writer<OStream>
 {
 public:
-    DEFAULT_COPY_MOVE_DESTRUCT(sha256t_writer);
+    DEFAULT_COPY_MOVE(sha256t_writer);
 
     /// Constructors.
     sha256t_writer(OStream& sink) NOEXCEPT;
 
+    /// Flush on destruct.
+    ~sha256t_writer() NOEXCEPT override;
+
+protected:
+    /// The maximum addressable stream position.
+    static constexpr size_t maximum = hash_size;
+
+    void do_write_bytes(const uint8_t* data, size_t size) NOEXCEPT override;
+    void do_flush() NOEXCEPT override;
+
 private:
-    // The sha256(sha256(Tag)||sha256(Tag)) midstate.
     static constexpr sha256::state_t midstate() NOEXCEPT;
+
+    void flusher() NOEXCEPT;
+
+    accumulator<sha256> context_;
 };
 
 } // namespace system
 } // namespace libbitcoin
 
-#define TEMPLATE template <text_t Tag, typename OStream>
-#define CLASS sha256t_writer<Tag, OStream>
-
 #include <bitcoin/system/impl/stream/streamers/sha256t_writer.ipp>
-
-#undef CLASS
-#undef TEMPLATE
 
 #endif

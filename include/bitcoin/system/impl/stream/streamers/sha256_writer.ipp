@@ -31,14 +31,7 @@ namespace system {
 
 template <typename OStream>
 sha256_writer<OStream>::sha256_writer(OStream& sink) NOEXCEPT
-  : byte_writer<OStream>(sink), context_{}
-{
-}
-
-template <typename OStream>
-sha256_writer<OStream>::sha256_writer(OStream& sink,
-    const sha256::state_t& midstate, size_t blocks) NOEXCEPT
-  : byte_writer<OStream>(sink), context_{ midstate, blocks }
+  : byte_writer<OStream>(sink)
 {
 }
 
@@ -74,14 +67,13 @@ void sha256_writer<OStream>::do_flush() NOEXCEPT
 template <typename OStream>
 void sha256_writer<OStream>::flusher() NOEXCEPT
 {
-    BC_PUSH_WARNING(LOCAL_VARIABLE_NOT_INITIALIZED)
-    hash_digest hash;
-    BC_POP_WARNING()
+    hash_digest hash{};
 
     // Finalize streaming hash.
     context_.flush(hash.data());
     context_.reset();
 
+    // Write hash to stream.
     byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
 }
 

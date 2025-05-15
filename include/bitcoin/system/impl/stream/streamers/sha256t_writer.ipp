@@ -21,31 +21,73 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/stream/streamers/sha256_writer.hpp>
+#include <bitcoin/system/stream/streamers/byte_writer.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// static/private
-TEMPLATE
-constexpr sha256::state_t CLASS::
-midstate() NOEXCEPT
+// constructors
+// ----------------------------------------------------------------------------
+
+template <text_t Tag, typename OStream>
+sha256t_writer<Tag, OStream>::sha256t_writer(OStream& sink) NOEXCEPT
+  : byte_writer<OStream>(sink), context_(midstate(), one)
 {
-    // TODO: need <= block_t constexpr hash.
-
-    ////constexpr auto hashtag1 = sha256::hash(Tag.data);
-    ////constexpr auto hashtag2 = sha256::hash(hashtag1, hashtag1);
-
-    // TODO: hashtag2 needs to be unflushed sha256::state_t.
-    // TODO: hashtag2 is flushed to sha256::digest_t (big endian).
-    return {};
 }
 
-TEMPLATE
-CLASS::
-sha256t_writer(OStream& sink) NOEXCEPT
-  : sha256_writer<OStream>(sink, midstate(), one)
+template <text_t Tag, typename OStream>
+sha256t_writer<Tag, OStream>::~sha256t_writer() NOEXCEPT
 {
+    // Derived virtual destructor called before base destructor.
+    flusher();
+}
+
+// protected
+// ----------------------------------------------------------------------------
+
+template <text_t Tag, typename OStream>
+void sha256t_writer<Tag, OStream>::do_write_bytes(const uint8_t* data,
+    size_t size) NOEXCEPT
+{
+    // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
+    // The stream could be invalidated, but writers shouldn't have to check it.
+    context_.write(size, data);
+}
+
+template <text_t Tag, typename OStream>
+void sha256t_writer<Tag, OStream>::do_flush() NOEXCEPT
+{
+    flusher();
+    byte_writer<OStream>::do_flush();
+}
+
+// private
+// ----------------------------------------------------------------------------
+
+// static
+template <text_t Tag, typename OStream>
+constexpr sha256::state_t sha256t_writer<Tag, OStream>::midstate() NOEXCEPT
+{
+    // Cache midstate of tagged hash part that does not change for a given tag.
+    // sha256(sha256(tag) || sha256(tag) || message) [bip340].
+    constexpr auto tag1 = sha256::simple_hash(Tag.data);
+    constexpr auto tag2 = sha256::midstate(tag1, tag1);
+    return tag2;
+}
+
+// Only hash overflow returns update false, which requires (2^64-8)/8 bytes.
+// The stream could invalidate, but writers shouldn't have to check this.
+template <text_t Tag, typename OStream>
+void sha256t_writer<Tag, OStream>::flusher() NOEXCEPT
+{
+    hash_digest hash{};
+
+    // Finalize streaming hash.
+    context_.flush(hash.data());
+    context_.reset(midstate(), one);
+
+    // Write hash to stream.
+    byte_writer<OStream>::do_write_bytes(hash.data(), hash_size);
 }
 
 } // namespace system

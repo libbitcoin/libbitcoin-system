@@ -132,6 +132,38 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
 }
 
 TEMPLATE
+constexpr typename CLASS::state_t CLASS::
+midstate(const half_t& left, const half_t& right) NOEXCEPT
+{
+    const auto hasher = [](const half_t& left, const half_t& right) NOEXCEPT
+    {
+        auto state = H::get;
+        buffer_t buffer{};
+        input_left(buffer, left);
+        input_right(buffer, right);
+        schedule(buffer);
+        compress(state, buffer);
+        ////schedule_1(buffer);
+        ////compress(state, buffer);
+        ////return output(state);
+        return state;
+    };
+
+    if (std::is_constant_evaluated())
+    {
+        return hasher(left, right);
+    }
+    else if constexpr (native && SHA::strength == 256)
+    {
+        return native_hash(left, right);
+    }
+    else
+    {
+        return hasher(left, right);
+    }
+}
+
+TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(const quart_t& left, const quart_t& right) NOEXCEPT
 {
@@ -165,16 +197,23 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 hash(uint8_t byte) NOEXCEPT
 {
-    const auto hasher = [](uint8_t byte) NOEXCEPT
+    return simple_hash(bytes_t<one>{ byte });
+}
+
+TEMPLATE
+template <size_t Size, if_not_greater<Size, CLASSIF::space>>
+constexpr typename CLASS::digest_t CLASS::
+simple_hash(const bytes_t<Size>& bytes) NOEXCEPT
+{
+    const auto hasher = [](const bytes_t<Size>& bytes) NOEXCEPT
     {
-        // Shift the pad sentinel one byte to make room for the value.
-        // Byte swapped for the sake of simplicity and will be reversed below.
-        constexpr auto pad = shift_left<word_t>(bit_hi<uint8_t>, byte_bits);
+        block_t block{};
+        std::copy_n(bytes.begin(), Size, block.begin());
+        simple_pad<Size>(block);
 
         auto state = H::get;
         buffer_t buffer{};
-        buffer.at(0) = byteswap(bit_or<word_t>(pad, byte));
-        buffer.at(15) = byte_bits;
+        input(buffer, block);
         schedule(buffer);
         compress(state, buffer);
         return output(state);
@@ -182,15 +221,15 @@ hash(uint8_t byte) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return hasher(byte);
+        return hasher(bytes);
     }
     else if constexpr (native && SHA::strength == 256)
     {
-        return native_hash(byte);
+        return native_hash(bytes);
     }
     else
     {
-        return hasher(byte);
+        return hasher(bytes);
     }
 }
 

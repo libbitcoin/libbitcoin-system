@@ -50,6 +50,7 @@ byte_writer<OStream>::byte_writer(OStream& sink) NOEXCEPT
 template <typename OStream>
 byte_writer<OStream>::~byte_writer() NOEXCEPT
 {
+    // Derived virtual destructor called before base destructor.
     flusher();
 }
 

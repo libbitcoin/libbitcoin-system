@@ -26,15 +26,14 @@
 // Suppress multiple inheritance warnings.
 // The inheritance is virtual, so not actually multiple.
 // But the boost type constraint 'is_virtual_base_of' triggers the warning.
-BC_PUSH_WARNING(4250)
+BC_PUSH_WARNING(DIAMOND_INHERITANCE)
 
 namespace libbitcoin {
 namespace system {
 
 /// Construct a stream and feed it to a streamer.
-/// For std::stream just pass to streamer on construct.
 template <typename Device,
-    template <typename = make_stream<Device>> class Base,
+    template <typename> class Base,
     typename Stream = make_stream<Device>,
     typename Streamer = Base<Stream>>
 class make_streamer
@@ -51,6 +50,16 @@ public:
 protected:
     Stream stream_;
 };
+
+/////// Helper to create tagged streamer type for use with make_streamer.
+/////// Captures tag, allowing streamer to match the single type template.
+////template <text_t Tag,
+////    template <text_t, typename> class Streamer>
+////struct tag
+////{
+////    template <typename Stream>
+////    using type = Streamer<Tag, Stream>;
+////};
 
 } // namespace system
 } // namespace libbitcoin

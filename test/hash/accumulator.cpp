@@ -92,6 +92,66 @@ using unchecked = accessor<sha512, false>;
 constexpr auto block_size = array_count<sha512::block_t>;
 constexpr auto count_size = sha512::count_bytes;
 
+BOOST_AUTO_TEST_CASE(accumulator__write_flush__one_under_padding_boundary__pad_one)
+{
+    // 55 is the last non-overflow byte (55 + 1 + 8 = 64).
+    using access = accessor<sha256>;
+    constexpr auto size = array_count<sha256::block_t>;
+    constexpr auto expected = base16_array("02779466cdec163811d078815c633f21901413081449002f24aa3e80f0b88ef7");
+    constexpr auto bytes = 55u;
+    constexpr data_array<bytes> data{};
+    constexpr auto pad = size - bytes - sha256::count_bytes;
+    static_assert(pad == 1u);
+
+    access writer{};
+    BOOST_REQUIRE(writer.write(data));
+    BOOST_REQUIRE_EQUAL(writer.next_(), bytes);
+    BOOST_REQUIRE_EQUAL(writer.gap_(), size - bytes);
+    BOOST_REQUIRE_EQUAL(writer.pad_size_(), pad);
+    BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+}
+
+// Notice that as bytes go from 55 to 56, padding goes from 1 to 64 (not zero).
+// This is because sha always requires a pad bit, and given that were are supporting
+// only byte-alignment, that means one byte pf padding is always required.
+BOOST_AUTO_TEST_CASE(accumulator__write_flush__at_padding_boundary__pad_64)
+{
+    // 56 is the first overflow byte (56 + 1 + 8 = 65).
+    using access = accessor<sha256>;
+    constexpr auto size = array_count<sha256::block_t>;
+    constexpr auto expected = base16_array("d4817aa5497628e7c77e6b606107042bbba3130888c5f47a375e6179be789fbb");
+    constexpr auto bytes = 56u;
+    constexpr data_array<bytes> data{};
+    constexpr auto pad = size - bytes - sha256::count_bytes;
+    static_assert(pad == 0u);
+
+    access writer{};
+    BOOST_REQUIRE(writer.write(data));
+    BOOST_REQUIRE_EQUAL(writer.next_(), bytes);
+    BOOST_REQUIRE_EQUAL(writer.gap_(), size - bytes);
+    BOOST_REQUIRE_EQUAL(writer.pad_size_(), size);
+    BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+}
+
+BOOST_AUTO_TEST_CASE(accumulator__write_flush__one_over_padding_boundary__pad_63)
+{
+    // 57 is the second overflow byte (57 + 1 + 8 = 66).
+    using access = accessor<sha256>;
+    constexpr auto size = array_count<sha256::block_t>;
+    constexpr auto expected = base16_array("65a16cb7861335d5ace3c60718b5052e44660726da4cd13bb745381b235a1785");
+    constexpr auto bytes = 57u;
+    constexpr data_array<bytes> data{};
+    constexpr auto pad = size - bytes - sha256::count_bytes;
+    static_assert(pad == -1);
+
+    access writer{};
+    BOOST_REQUIRE(writer.write(data));
+    BOOST_REQUIRE_EQUAL(writer.next_(), bytes);
+    BOOST_REQUIRE_EQUAL(writer.gap_(), size - bytes);
+    BOOST_REQUIRE_EQUAL(writer.pad_size_(), sub1(size));
+    BOOST_REQUIRE_EQUAL(writer.flush(), expected);
+}
+
 BOOST_AUTO_TEST_CASE(accumulator__construct__default__initial)
 {
     constexpr checked writer{};
@@ -100,9 +160,6 @@ BOOST_AUTO_TEST_CASE(accumulator__construct__default__initial)
     BOOST_REQUIRE_EQUAL(writer.next_(), zero);
     BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
     BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
-
-    // state is the word_t/non-endianed digest of hashing an empty block.
-    ////BOOST_REQUIRE_EQUAL(writer.flush_state_(), state);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
@@ -120,9 +177,6 @@ BOOST_AUTO_TEST_CASE(accumulator__construct__sized__expected)
     BOOST_REQUIRE_EQUAL(writer.next_(), zero);
     BOOST_REQUIRE_EQUAL(writer.gap_(), block_size);
     BOOST_REQUIRE_EQUAL(writer.pad_size_(), block_size - count_size);
-
-    ////constexpr auto expected_state = sha512::hash(sha512::block_t{ 0 });
-    ////BOOST_REQUIRE_EQUAL(writer.flush_state_(), state);
 }
 
 BOOST_AUTO_TEST_CASE(accumulator__is_buffer_overflow___checked__expected)
@@ -158,6 +212,7 @@ BOOST_AUTO_TEST_CASE(accumulator__stream_pad__always__expected)
 BOOST_AUTO_TEST_CASE(accumulator__serialize__default__initial)
 {
     // Test expectation limited to sha256.
+    // Test state is bogus, so expecatation is not hash of zero data.
     using access = accessor<sha256>;
     constexpr auto count = 42u;
     constexpr auto count_bits = to_bits<uint16_t>(count);
@@ -184,6 +239,7 @@ BOOST_AUTO_TEST_CASE(accumulator__write__zero__true)
 BOOST_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
 {
     // Test expectation limited to sha256.
+    // Test state is bogus, so expecatation is not hash of data_array<42>{}.
     using access = accessor<sha256>;
     constexpr auto size = array_count<sha256::block_t>;
     constexpr auto expected = base16_array("729e145a50396134c294aaf8e2daea0b7c89bb617cd58379ba4c2abdec2d1da7");
@@ -202,6 +258,7 @@ BOOST_AUTO_TEST_CASE(accumulator__write_flush__nonzero__expected)
 BOOST_AUTO_TEST_CASE(accumulator__write_double_flush__nonzero__expected)
 {
     // Test expectation limited to sha256.
+    // Test state is bogus, so expecatation is not hash of data_array<42>{}.
     using access = accessor<sha256>;
     constexpr auto expected = base16_array("19b7f210d600599fe35dc4516dac5acb82bb4040f8de6f54e889455fd0b9b106");
     constexpr auto bytes = 42u;

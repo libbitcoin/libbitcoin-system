@@ -49,7 +49,8 @@ public:
     /// Accepts an initial state and count of blocks accumulated by it.
     constexpr accumulator(const state_t& state, size_t blocks) NOEXCEPT;
 
-    /// Reset accumulator to initial state (to reuse after flushing).
+    /// Reset accumulator to given or initial state (to reuse after flushing).
+    constexpr void reset(const state_t& state, size_t blocks) NOEXCEPT;
     constexpr void reset() NOEXCEPT;
 
     /// Write data to accumulator.

@@ -556,6 +556,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_iterate.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_konstant.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_merkle.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_midstate.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_native.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_padding.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\hash\sha\algorithm_parsing.ipp" />

@@ -634,6 +634,7 @@ TEMPLATE
 constexpr typename CLASS::digest_t CLASS::
 normalize(const state_t& state) NOEXCEPT
 {
+    // Caller must pad state first.
     return output(state);
 }
 

@@ -638,6 +638,7 @@ include_bitcoin_system_impl_hash_sha_HEADERS = \
     include/bitcoin/system/impl/hash/sha/algorithm_iterate.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_konstant.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_merkle.ipp \
+    include/bitcoin/system/impl/hash/sha/algorithm_midstate.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_native.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_padding.ipp \
     include/bitcoin/system/impl/hash/sha/algorithm_parsing.ipp \
