@@ -52,6 +52,16 @@ protected:
     Stream stream_;
 };
 
+/////// Helper to create tagged streamer type for use with make_streamer.
+/////// Captures tag, allowing streamer to match the single type template.
+////template <text_t Tag,
+////    template <text_t, typename> class Streamer>
+////struct tag
+////{
+////    template <typename Stream>
+////    using type = Streamer<Tag, Stream>;
+////};
+
 } // namespace system
 } // namespace libbitcoin
 

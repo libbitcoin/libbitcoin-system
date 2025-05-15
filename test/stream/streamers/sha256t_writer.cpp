@@ -51,31 +51,31 @@ BOOST_AUTO_TEST_CASE(sha256t_writer__fast__genesis_block__expected)
 ////BOOST_AUTO_TEST_CASE(sha256t_writer__copy__genesis_block__expected)
 ////{
 ////    hash_digest hash{};
-////    hash::sha256t::copy hasher(hash);
+////    hash::sha256t::copy<"mytag"> hasher{ hash };
 ////    genesis().header().to_data(hasher);
 ////    hasher.flush();
 ////    BOOST_REQUIRE(hasher);
-////    BOOST_REQUIRE_EQUAL(sha256t_hash(hash), genesis().hash());
+////    BOOST_REQUIRE_EQUAL(hash, tagged_hash("mytag", genesis().header().to_data()));
 ////}
 ////
 ////BOOST_AUTO_TEST_CASE(sha256t_writer__text__genesis_block__expected)
 ////{
 ////    std::string hash;
-////    hash::sha256t::text hasher(hash);
+////    hash::sha256t::text<"mytag"> hasher(hash);
 ////    genesis().header().to_data(hasher);
 ////    hasher.flush();
 ////    BOOST_REQUIRE(hasher);
-////    BOOST_REQUIRE_EQUAL(sha256t_hash(hash), genesis().hash());
+////    BOOST_REQUIRE_EQUAL(hash, to_string(genesis().header().hash()));
 ////}
 ////
 ////BOOST_AUTO_TEST_CASE(sha256t_writer__data__genesis_block__expected)
 ////{
 ////    data_chunk hash;
-////    hash::sha256t::data hasher(hash);
+////    hash::sha256t::data<"mytag"> hasher(hash);
 ////    genesis().header().to_data(hasher);
 ////    hasher.flush();
 ////    BOOST_REQUIRE(hasher);
-////    BOOST_REQUIRE_EQUAL(sha256t_hash(hash), genesis().hash());
+////    BOOST_REQUIRE_EQUAL(hash, to_chunk(genesis().header().hash()));
 ////}
 
 BOOST_AUTO_TEST_SUITE_END()
