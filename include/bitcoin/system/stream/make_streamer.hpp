@@ -32,9 +32,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Construct a stream and feed it to a streamer.
-/// For std::stream just pass to streamer on construct.
 template <typename Device,
-    template <typename = make_stream<Device>> class Base,
+    template <typename> class Base,
     typename Stream = make_stream<Device>,
     typename Streamer = Base<Stream>>
 class make_streamer
