@@ -34,7 +34,7 @@ namespace system {
 namespace wallet {
 
 constexpr char separator = '1';
-constexpr uint8_t version_0 = 0;
+constexpr uint8_t version0 = 0;
 constexpr uint8_t version_maximum = 16;
 constexpr uint8_t version_invalid = max_uint8;
 
@@ -49,8 +49,8 @@ const size_t witness_address::program_minimum_length = 4;
 const size_t witness_address::program_maximum_length = 64;
 const size_t witness_address::program_minimum_size = 2;
 const size_t witness_address::program_maximum_size = 40;
-const size_t witness_address::version_0_p2kh_program_size = 20;
-const size_t witness_address::version_0_p2sh_program_size = 32;
+const size_t witness_address::version0_p2kh_program_size = 20;
+const size_t witness_address::version0_p2sh_program_size = 32;
 const size_t witness_address::checksum_length = 6;
 
 // Contructors.
@@ -76,35 +76,35 @@ witness_address::witness_address(const data_slice& program,
 {
 }
 
-// version_0_p2kh
+// version0_p2kh
 witness_address::witness_address(const short_hash& public_key_hash,
     const std::string& prefix) NOEXCEPT
   : witness_address(from_short(public_key_hash, prefix))
 {
 }
 
-// version_0_p2kh
+// version0_p2kh
 witness_address::witness_address(const ec_private& secret,
     const std::string& prefix) NOEXCEPT
   : witness_address(from_private(secret, prefix))
 {
 }
 
-// version_0_p2kh
+// version0_p2kh
 witness_address::witness_address(const ec_public& point,
     const std::string& prefix) NOEXCEPT
   : witness_address(from_public(point, prefix))
 {
 }
 
-// version_0_p2sh
+// version0_p2sh
 witness_address::witness_address(const hash_digest& script_hash,
     const std::string& prefix) NOEXCEPT
   : witness_address(from_long(script_hash, prefix))
 {
 }
 
-// version_0_p2sh
+// version0_p2sh
 witness_address::witness_address(const chain::script& script,
     const std::string& prefix) NOEXCEPT
   : witness_address(from_script(script, prefix))
@@ -186,14 +186,14 @@ witness_address::program_type witness_address::parse_program(uint8_t version,
 
     switch (version)
     {
-        case version_0:
+        case version0:
         {
             switch (program.size())
             {
-                case version_0_p2kh_program_size:
-                    return program_type::version_0_p2kh;
-                case version_0_p2sh_program_size:
-                    return program_type::version_0_p2sh;
+                case version0_p2kh_program_size:
+                    return program_type::version0_p2kh;
+                case version0_p2sh_program_size:
+                    return program_type::version0_p2sh;
                 default:
                     return program_type::invalid;
             }
@@ -289,10 +289,10 @@ witness_address witness_address::from_parameters(const data_slice& program,
 {
     switch (parse_program(version, program, false))
     {
-        case program_type::version_0_p2kh:
+        case program_type::version0_p2kh:
             return from_short(unsafe_array_cast<uint8_t, short_hash_size>(
                 program.data()), prefix);
-        case program_type::version_0_p2sh:
+        case program_type::version0_p2sh:
             return from_long(unsafe_array_cast<uint8_t, hash_size>(
                 program.data()), prefix);
         case program_type::unknown:
@@ -305,7 +305,7 @@ witness_address witness_address::from_parameters(const data_slice& program,
     }
 }
 
-// version_0_p2kh
+// version0_p2kh
 witness_address witness_address::from_short(const short_hash& hash,
     const std::string& prefix) NOEXCEPT
 {
@@ -314,10 +314,10 @@ witness_address witness_address::from_short(const short_hash& hash,
 
     // If the version byte is 0, and the witness program is 20 bytes it is
     // interpreted as a pay-to-witness-public-key-hash (P2WPKH) program.
-    return { prefix, version_0, to_chunk(hash) };
+    return { prefix, version0, to_chunk(hash) };
 }
 
-// version_0_p2kh
+// version0_p2kh
 witness_address witness_address::from_private(const ec_private& secret,
     const std::string& prefix) NOEXCEPT
 {
@@ -328,7 +328,7 @@ witness_address witness_address::from_private(const ec_private& secret,
     return from_public(secret, prefix);
 }
 
-// version_0_p2kh
+// version0_p2kh
 witness_address witness_address::from_public(const ec_public& point,
     const std::string& prefix) NOEXCEPT
 {
@@ -339,7 +339,7 @@ witness_address witness_address::from_public(const ec_public& point,
     return from_short(bitcoin_short_hash(point.point()), prefix);
 }
 
-// version_0_p2sh
+// version0_p2sh
 witness_address witness_address::from_long(const hash_digest& hash,
     const std::string& prefix) NOEXCEPT
 {
@@ -348,10 +348,10 @@ witness_address witness_address::from_long(const hash_digest& hash,
 
     // If the version byte is 0, and the witness program is 32 bytes it is
     // interpreted as a pay-to-witness-script-hash (P2WSH) program.
-    return { prefix, version_0, to_chunk(hash) };
+    return { prefix, version0, to_chunk(hash) };
 }
 
-// version_0_p2sh
+// version0_p2sh
 witness_address witness_address::from_script(const chain::script& script,
     const std::string& prefix) NOEXCEPT
 {

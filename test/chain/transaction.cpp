@@ -1265,7 +1265,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
     BOOST_REQUIRE(!instance.is_immature(add1(coinbase_maturity)));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_1_empty__false)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version1_empty__false)
 {
     constexpr uint32_t version = 1;
     const accessor instance
@@ -1297,7 +1297,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_2_empty__false)
     BOOST_REQUIRE(!instance.is_relative_locked(0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_1_one_of_two_locked_locked__false)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version1_one_of_two_locked_locked__false)
 {
     constexpr uint32_t version = 1;
     const accessor instance

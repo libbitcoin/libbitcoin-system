@@ -276,13 +276,28 @@
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\script_extract.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\transaction_sign.cpp">
+    <ClCompile Include="..\..\..\..\src\chain\transaction_cache.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sighash.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v0.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v1.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\witness_extract.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base16.cpp">
@@ -1447,13 +1462,13 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\operation.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\operation_patterns.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script_patterns.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness.ipp">
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp">

@@ -71,8 +71,8 @@ class BC_API witness_address
 
     enum class program_type
     {
-        version_0_p2kh,
-        version_0_p2sh,
+        version0_p2kh,
+        version0_p2sh,
         unknown,
         invalid
     };
@@ -96,8 +96,8 @@ class BC_API witness_address
     /// BIP141 constants.
     static const size_t program_minimum_size;
     static const size_t program_maximum_size;
-    static const size_t version_0_p2kh_program_size;
-    static const size_t version_0_p2sh_program_size;
+    static const size_t version0_p2kh_program_size;
+    static const size_t version0_p2sh_program_size;
 
     // TODO: script address extraction, see payment_address.
 
@@ -116,7 +116,7 @@ class BC_API witness_address
     witness_address(const data_slice& program, const std::string& prefix,
         uint8_t version) NOEXCEPT;
 
-    // version_0_p2kh
+    // version0_p2kh
     witness_address(const short_hash& public_key_hash,
         const std::string& prefix=mainnet) NOEXCEPT;
     witness_address(const ec_private& secret,
@@ -124,7 +124,7 @@ class BC_API witness_address
     witness_address(const ec_public& point,
         const std::string& prefix=mainnet) NOEXCEPT;
 
-    // version_0_p2sh
+    // version0_p2sh
     // NOTE: ec_secret ends up here, not above in construction of ec_private.
     witness_address(const hash_digest& script_hash,
         const std::string& prefix=mainnet) NOEXCEPT;
@@ -163,7 +163,7 @@ protected:
     static witness_address from_parameters(const data_slice& program,
         const std::string& prefix, uint8_t version) NOEXCEPT;
 
-    // version_0_p2kh
+    // version0_p2kh
     static witness_address from_short(const short_hash& hash,
         const std::string& prefix) NOEXCEPT;
     static witness_address from_private(const ec_private& secret,
@@ -171,7 +171,7 @@ protected:
     static witness_address from_public(const ec_public& point,
         const std::string& prefix) NOEXCEPT;
 
-    // version_0_p2sh
+    // version0_p2sh
     static witness_address from_long(const hash_digest& hash,
         const std::string& prefix) NOEXCEPT;
     static witness_address from_script(const chain::script& script,

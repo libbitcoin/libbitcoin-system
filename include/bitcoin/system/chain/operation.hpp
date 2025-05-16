@@ -39,7 +39,7 @@ public:
 
     typedef std::shared_ptr<const operation> cptr;
 
-    /// Utilities.
+    /// Conversions.
     /// -----------------------------------------------------------------------
 
     static constexpr uint8_t opcode_to_positive(opcode code) NOEXCEPT;
@@ -47,11 +47,8 @@ public:
     static constexpr opcode opcode_from_size(size_t size) NOEXCEPT;
     static constexpr opcode opcode_from_version(uint8_t value) NOEXCEPT;
     static constexpr opcode opcode_from_positive(uint8_t value) NOEXCEPT;
-
-    static constexpr opcode minimal_opcode_from_data(
-        const data_chunk& data) NOEXCEPT;
-    static constexpr opcode nominal_opcode_from_data(
-        const data_chunk& data) NOEXCEPT;
+    static constexpr opcode minimal_opcode_from_data(const data_chunk& data) NOEXCEPT;
+    static constexpr opcode nominal_opcode_from_data(const data_chunk& data) NOEXCEPT;
 
     /// Categories of opcodes.
     /// -----------------------------------------------------------------------
@@ -68,6 +65,31 @@ public:
     static constexpr bool is_invalid(opcode code) NOEXCEPT;
     static constexpr bool is_conditional(opcode code) NOEXCEPT;
     static constexpr bool is_reserved(opcode code) NOEXCEPT;
+
+    /// Categories of operations.
+    /// -----------------------------------------------------------------------
+    /// The is_invalid() method pertains only to opcode consensus validity and
+    /// should not be confused with the inversion of is_valid (serialization).
+    /// A final opdata code that fails to deserialze sets any is_valid opcode
+    /// and the is_underflow sentinel, so both is_invalid() and is_underflow().
+
+    inline bool is_relaxed_push() const NOEXCEPT;
+    inline bool is_push() const NOEXCEPT;
+    inline bool is_payload() const NOEXCEPT;
+    inline bool is_positive() const NOEXCEPT;
+    inline bool is_nonnegative() const NOEXCEPT;
+    inline bool is_number() const NOEXCEPT;
+    inline bool is_roller() const NOEXCEPT;
+    inline bool is_counted() const NOEXCEPT;
+    inline bool is_success() const NOEXCEPT;
+    inline bool is_invalid() const NOEXCEPT;
+    inline bool is_conditional() const NOEXCEPT;
+    inline bool is_reserved() const NOEXCEPT;
+    inline bool is_minimal_push() const NOEXCEPT;
+    inline bool is_nominal_push() const NOEXCEPT;
+    inline bool is_underclaimed() const NOEXCEPT;
+    inline bool is_oversized() const NOEXCEPT;
+    inline bool is_underflow() const NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
@@ -128,31 +150,6 @@ public:
     /// Computed properties.
     size_t serialized_size() const NOEXCEPT;
 
-    /// Categories of operations.
-    /// -----------------------------------------------------------------------
-    /// The is_invalid() method pertains only to opcode consensus validity and
-    /// should not be confused with the inversion of is_valid (serialization).
-    /// A final opdata code that fails to deserialze sets any is_valid opcode
-    /// and the is_underflow sentinel, so both is_invalid() and is_underflow().
-
-    bool is_relaxed_push() const NOEXCEPT;
-    bool is_push() const NOEXCEPT;
-    bool is_payload() const NOEXCEPT;
-    bool is_positive() const NOEXCEPT;
-    bool is_nonnegative() const NOEXCEPT;
-    bool is_number() const NOEXCEPT;
-    bool is_roller() const NOEXCEPT;
-    bool is_counted() const NOEXCEPT;
-    bool is_success() const NOEXCEPT;
-    bool is_invalid() const NOEXCEPT;
-    bool is_conditional() const NOEXCEPT;
-    bool is_reserved() const NOEXCEPT;
-    bool is_minimal_push() const NOEXCEPT;
-    bool is_nominal_push() const NOEXCEPT;
-    bool is_underclaimed() const NOEXCEPT;
-    bool is_oversized() const NOEXCEPT;
-    bool is_underflow() const NOEXCEPT;
-
 protected:
     operation(opcode code, const chunk_cptr& push_data_ptr,
         bool underflow) NOEXCEPT;
@@ -201,7 +198,7 @@ DECLARE_JSON_VALUE_CONVERTORS(operation::cptr);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/chain/operation.ipp>
+#include <bitcoin/system/impl/chain/operation_patterns.ipp>
 
 namespace std
 {

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_IPP
-#define LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_IPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_PATTERNS_IPP
+#define LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_PATTERNS_IPP
 
 #include <algorithm>
 #include <bitcoin/system/define.hpp>
@@ -379,6 +379,20 @@ inline size_t script::op_size(size_t total, const operation& op) NOEXCEPT
 {
     return ceilinged_add(total, op.serialized_size());
 };
+
+// This is an optimization over using script::pattern.
+inline bool script::is_pay_to_witness(uint32_t active_flags) const NOEXCEPT
+{
+    return is_enabled(active_flags, flags::bip141_rule) &&
+        is_witness_program_pattern(ops());
+}
+
+// This is an optimization over using script::pattern.
+inline bool script::is_pay_to_script_hash(uint32_t active_flags) const NOEXCEPT
+{
+    return is_enabled(active_flags, flags::bip16_rule) &&
+        is_pay_script_hash_pattern(ops());
+}
 
 BC_POP_WARNING()
 

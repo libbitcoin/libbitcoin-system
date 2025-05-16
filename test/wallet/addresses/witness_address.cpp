@@ -59,17 +59,17 @@ BOOST_AUTO_TEST_CASE(witness_address__string_construct__empty__invalid)
     BOOST_REQUIRE(!witness_address(""));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__string_construct__invalid_version_0__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__string_construct__invalid_version0__invalid)
 {
     BOOST_REQUIRE(!witness_address("split1checkupstagehandshakeupstreamerranterredcaperred2y9e3w"));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__string_construct__invalid_version_0_lax__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__string_construct__invalid_version0_lax__invalid)
 {
     BOOST_REQUIRE(!witness_address("split1checkupstagehandshakeupstreamerranterredcaperred2y9e3w", false));
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__string_construct__valid_version_0_strict__valid)
+BOOST_AUTO_TEST_CASE(witness_address__string_construct__valid_version0_strict__valid)
 {
     BOOST_REQUIRE(witness_address("tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7"));
 }
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__invalid_checksum__checksum_
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::checksum_invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_17__version_invalid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_address__version17__version_invalid)
 {
     const size_t version = 17;
     const data_chunk program(2, 0x00);
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_17__version_invalid
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::version_invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_16_minimal_program_strict__program_invalid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_address__version16_minimal_program_strict__program_invalid)
 {
     const size_t version = 16;
     const data_chunk program(2, 0x00);
@@ -311,7 +311,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_16_minimal_program_
     BOOST_REQUIRE_EQUAL(out3, program);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_empty_program__payload_too_short)
+BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_empty_program__payload_too_short)
 {
     const std::string prefix{ "bc" };
     const auto address = prefix + "1" + encode_base32(bech32_build_checked(0, {}, prefix));
@@ -319,7 +319,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_empty_program__pa
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::payload_too_short);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_minimal_program__program_invalid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_minimal_program__program_invalid)
 {
     const std::string prefix{ "bc" };
     const auto address = prefix + "1" + encode_base32(bech32_build_checked(0, data_chunk(2, 0x00), prefix));
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_minimal_program__
     BOOST_REQUIRE(witness_address::parse_address(out1, out2, out3, address) == result::program_invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_null_short_hash_program__valid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_null_short_hash_program__valid)
 {
     const size_t version = 0;
     const data_chunk program = to_chunk(null_short_hash);
@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_null_short_hash_p
     BOOST_REQUIRE_EQUAL(out3, program);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_null_hash_program__valid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_address__version0_null_hash_program__valid)
 {
     const size_t version = 0;
     const data_chunk program = to_chunk(null_hash);
@@ -355,22 +355,22 @@ BOOST_AUTO_TEST_CASE(witness_address__parse_address__version_0_null_hash_program
 
 // parse_program
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_0_short_hash_size__version_0_p2kh)
+BOOST_AUTO_TEST_CASE(witness_address__parse_program__version0_short_hash_size__version0_p2kh)
 {
-    BOOST_REQUIRE(witness_address::parse_program(0, null_short_hash) == type::version_0_p2kh);
+    BOOST_REQUIRE(witness_address::parse_program(0, null_short_hash) == type::version0_p2kh);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_0_hash_size__version_0_p2sh)
+BOOST_AUTO_TEST_CASE(witness_address__parse_program__version0_hash_size__version0_p2sh)
 {
-    BOOST_REQUIRE(witness_address::parse_program(0, null_hash) == type::version_0_p2sh);
+    BOOST_REQUIRE(witness_address::parse_program(0, null_hash) == type::version0_p2sh);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_16_short__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_program__version16_short__invalid)
 {
     BOOST_REQUIRE(witness_address::parse_program(16, data_chunk(1, 0x00)) == type::invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__parse_program__version_16_long__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__parse_program__version16_long__invalid)
 {
     BOOST_REQUIRE(witness_address::parse_program(16, data_chunk(40 + 1, 0x00)) == type::invalid);
 }
@@ -627,47 +627,47 @@ BOOST_AUTO_TEST_CASE(witness_address__identifier__invalid__invalid)
     BOOST_REQUIRE(instance.identifier() == type::invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__identifier__version_17_address__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__identifier__version17_address__invalid)
 {
     const witness_address instance{ "bc13qqqqjggfzq" };
     BOOST_REQUIRE(instance.identifier() == type::invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__identifier__version_16_address__unknown)
+BOOST_AUTO_TEST_CASE(witness_address__identifier__version16_address__unknown)
 {
     const witness_address instance{ "bc1sqqqqkfw08p" };
     BOOST_REQUIRE(instance.identifier() == type::unknown);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__identifier__version_0_minimal__invalid)
+BOOST_AUTO_TEST_CASE(witness_address__identifier__version0_minimal__invalid)
 {
     const witness_address instance{ "bc1qqqqq399cqn" };
     BOOST_REQUIRE(instance.identifier() == type::invalid);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__identifier__key_hash__version_0_p2kh)
+BOOST_AUTO_TEST_CASE(witness_address__identifier__key_hash__version0_p2kh)
 {
     const witness_address instance{ null_short_hash };
-    BOOST_REQUIRE(instance.identifier() == type::version_0_p2kh);
+    BOOST_REQUIRE(instance.identifier() == type::version0_p2kh);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__identifier__script_hash__version_0_p2sh)
+BOOST_AUTO_TEST_CASE(witness_address__identifier__script_hash__version0_p2sh)
 {
     const auto script = chain::script(script::to_pay_null_data_pattern(null_hash));
     const witness_address instance{ sha256_hash(script.to_data(false)) };
-    BOOST_REQUIRE(instance.identifier() == type::version_0_p2sh);
+    BOOST_REQUIRE(instance.identifier() == type::version0_p2sh);
 }
 
-BOOST_AUTO_TEST_CASE(witness_address__identifier__script__version_0_p2sh)
+BOOST_AUTO_TEST_CASE(witness_address__identifier__script__version0_p2sh)
 {
     const auto script = chain::script(script::to_pay_null_data_pattern(null_hash));
     const witness_address instance{ script };
-    BOOST_REQUIRE(instance.identifier() == type::version_0_p2sh);
+    BOOST_REQUIRE(instance.identifier() == type::version0_p2sh);
 }
 
 // script
 
-BOOST_AUTO_TEST_CASE(witness_address__script__version_16_address__valid)
+BOOST_AUTO_TEST_CASE(witness_address__script__version16_address__valid)
 {
     const witness_address instance{ "bc1sqqqqkfw08p" };
     BOOST_REQUIRE(chain::script::is_pay_witness_pattern(instance.script().ops()));
@@ -936,7 +936,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address1__expected)
 {
     const witness_address address("BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4");
     BOOST_REQUIRE_EQUAL(address.version(), 0u);
-    BOOST_REQUIRE(address.identifier() == type::version_0_p2kh);
+    BOOST_REQUIRE(address.identifier() == type::version0_p2kh);
     BOOST_REQUIRE_EQUAL(address.program(), base16_chunk("751e76e8199196d454941c45d1b3a323f1433bd6"));
     BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "zero [751e76e8199196d454941c45d1b3a323f1433bd6]");
 }
@@ -945,7 +945,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address2__expected)
 {
     const witness_address address("tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7");
     BOOST_REQUIRE_EQUAL(address.version(), 0u);
-    BOOST_REQUIRE(address.identifier() == type::version_0_p2sh);
+    BOOST_REQUIRE(address.identifier() == type::version0_p2sh);
     BOOST_REQUIRE_EQUAL(address.program(), base16_chunk("1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"));
     BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "zero [1863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262]");
 }
@@ -994,7 +994,7 @@ BOOST_AUTO_TEST_CASE(witness_address__bip173__valid_address6__expected)
     // Bech32m/Bech32 same (version 0).
     const witness_address address("tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy");
     BOOST_REQUIRE_EQUAL(address.version(), 0u);
-    BOOST_REQUIRE(address.identifier() == type::version_0_p2sh);
+    BOOST_REQUIRE(address.identifier() == type::version0_p2sh);
     BOOST_REQUIRE_EQUAL(address.program(), base16_chunk("000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"));
     BOOST_REQUIRE_EQUAL(address.script().to_string(chain::all_rules), "zero [000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433]");
 }

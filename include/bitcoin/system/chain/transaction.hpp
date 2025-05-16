@@ -108,9 +108,9 @@ public:
     uint64_t fee() const NOEXCEPT;
     uint64_t claim() const NOEXCEPT;
     uint64_t value() const NOEXCEPT;
-    hash_digest hash(bool witness) const NOEXCEPT;
     bool is_coinbase() const NOEXCEPT;
     bool is_segregated() const NOEXCEPT;
+    hash_digest hash(bool witness) const NOEXCEPT;
     size_t serialized_size(bool witness) const NOEXCEPT;
 
     /// Cache setters/getters, not thread safe.
@@ -123,7 +123,7 @@ public:
     /// This need not be set if the transaction is not segmented.
     void set_witness_hash(const hash_digest& hash) const NOEXCEPT;
 
-    /// Reference used to avoid copy, sets cache if not set (not thread safe).
+    /// Reference used to avoid copy (not thread safe unless cached).
     const hash_digest& get_hash(bool witness) const NOEXCEPT;
 
     /// Methods.
@@ -242,35 +242,68 @@ private:
     static sizes serialized_size(const input_cptrs& inputs,
         const output_cptrs& outputs, bool segregated) NOEXCEPT;
 
+    input_iterator input_at(uint32_t index) const NOEXCEPT;
     void assign_data(reader& source, bool witness) NOEXCEPT;
     chain::points points() const NOEXCEPT;
-
-    // Signing.
-    // ------------------------------------------------------------------------
-
-    typedef struct
-    {
-        hash_digest outputs;
-        hash_digest points;
-        hash_digest sequences;
-    } sighash_cache;
-
-    static inline coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static inline bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
+    ////bool is_taproot() const NOEXCEPT;
 
     // delegated
     code connect_input(const context& ctx,
         const input_iterator& it) const NOEXCEPT;
 
-    hash_digest outputs_hash() const NOEXCEPT;
-    hash_digest points_hash() const NOEXCEPT;
-    hash_digest sequences_hash() const NOEXCEPT;
-    void initialize_sighash_cache() const NOEXCEPT;
+    // Caching.
+    // ------------------------------------------------------------------------
 
-    input_iterator input_at(uint32_t index) const NOEXCEPT;
+    typedef struct
+    {
+        hash_digest points;
+        hash_digest sequences;
+        hash_digest outputs;
+    } v0_cache;
+
+    typedef struct
+    {
+        hash_digest amounts;
+        hash_digest scripts;
+        hash_digest points;
+        hash_digest sequences;
+        hash_digest outputs;
+    } v1_cache;
+
+    // Set sha256 cache if not set, so not thread safe unless cached.
+    const hash_digest& single_hash_points() const NOEXCEPT;
+    const hash_digest& single_hash_amounts() const NOEXCEPT;
+    const hash_digest& single_hash_scripts() const NOEXCEPT;
+    const hash_digest& single_hash_sequences() const NOEXCEPT;
+    const hash_digest& single_hash_outputs() const NOEXCEPT;
+
+    // Set sha256x2 cache if not set, so not thread safe unless cached.
+    const hash_digest& double_hash_points() const NOEXCEPT;
+    const hash_digest& double_hash_sequences() const NOEXCEPT;
+    const hash_digest& double_hash_outputs() const NOEXCEPT;
+
+    // Set v1 and/or v0 signature hash caches as applicable.
+    void initialize_sighash_cache() const NOEXCEPT;
+    void initialize_v0_cache() const NOEXCEPT;
+    void initialize_v1_cache() const NOEXCEPT;
+
+    hash_digest hash_points() const NOEXCEPT;
+    hash_digest hash_sequences() const NOEXCEPT;
+    hash_digest hash_outputs() const NOEXCEPT;
+
+    // Signature hashing.
+    // ------------------------------------------------------------------------
+
+    static coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
+    static bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
+
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
-    hash_digest output_hash_v0(const input_iterator& input) const NOEXCEPT;
-    bool output_hash_v1(hash_digest& out,
+
+    bool invalid_output_hash(coverage flag,
+        const input_iterator& input) const NOEXCEPT;
+    hash_digest version0_output_hash(
+        const input_iterator& input) const NOEXCEPT;
+    bool version1_output_hash(hash_digest& out,
         const input_iterator& input) const NOEXCEPT;
 
     void signature_hash_single(writer& sink, const input_iterator& input,
@@ -282,12 +315,14 @@ private:
 
     bool unversioned_sighash(hash_digest& out, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
-    bool version_0_sighash(hash_digest& out, const input_iterator& input,
+    bool version0_sighash(hash_digest& out, const input_iterator& input,
         const script& subscript, uint64_t value,
         uint8_t sighash_flags) const NOEXCEPT;
-    bool version_1_sighash(hash_digest& out, const input_iterator& input,
+    bool version1_sighash(hash_digest& out, const input_iterator& input,
         const script& script, uint64_t value,
         uint8_t sighash_flags) const NOEXCEPT;
+
+    // ------------------------------------------------------------------------
 
     // Transaction should be stored as shared (adds 16 bytes).
     // copy: 5 * 64 + 2 = 41 bytes (vs. 16 when shared).
@@ -304,7 +339,10 @@ private:
     // Signature and identity hash caching (witness hash if witnessed).
     mutable std::optional<hash_digest> nominal_hash_{};
     mutable std::optional<hash_digest> witness_hash_{};
-    mutable std::optional<sighash_cache> sighash_cache_{};
+
+    mutable std::optional<v0_cache> sighash_cache_{};
+    ////mutable std::shared_ptr<v0_cache> v0_cache_{};
+    ////mutable std::shared_ptr<v1_cache> v1_cache_{};
 };
 
 typedef std_vector<transaction> transactions;

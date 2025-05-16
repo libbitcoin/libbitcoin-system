@@ -41,7 +41,7 @@ class BC_API script
 public:
     typedef std::shared_ptr<const script> cptr;
 
-    /// Utilities.
+    /// Patterns.
     /// -----------------------------------------------------------------------
 
     /// Determine if the flag is enabled in the active flags set.
@@ -83,6 +83,10 @@ public:
         const short_hash& hash) NOEXCEPT;
     static inline operations to_pay_witness_script_hash_pattern(
         const hash_digest& hash) NOEXCEPT;
+
+    /// Pattern optimizations.
+    inline bool is_pay_to_witness(uint32_t active_flags) const NOEXCEPT;
+    inline bool is_pay_to_script_hash(uint32_t active_flags) const NOEXCEPT;
 
     /// Constructors.
     /// -----------------------------------------------------------------------
@@ -127,27 +131,25 @@ public:
     // TODO: move to config serialization wrapper.
     std::string to_string(uint32_t active_flags) const NOEXCEPT;
 
+    /// Reset mutable signature hashing op_codeseparator offset. 
+    void clear_offset() const NOEXCEPT;
+
     /// Properties.
     /// -----------------------------------------------------------------------
 
-    /// Native properties.
     bool is_valid() const NOEXCEPT;
     bool is_roller() const NOEXCEPT;
     bool is_prefail() const NOEXCEPT;
     bool is_prevalid() const NOEXCEPT;
     bool is_underflow() const NOEXCEPT;
+    bool is_oversized() const NOEXCEPT;
+    bool is_unspendable() const NOEXCEPT;
     const operations& ops() const NOEXCEPT;
-
-    /// Computed properties.
-    hash_digest hash() const NOEXCEPT;
     size_t serialized_size(bool prefix) const NOEXCEPT;
+    hash_digest hash() const NOEXCEPT;
 
-    /// Utilities.
+    /// Extraction.
     /// -----------------------------------------------------------------------
-
-    /// Pattern optimizations.
-    bool is_pay_to_witness(uint32_t active_flags) const NOEXCEPT;
-    bool is_pay_to_script_hash(uint32_t active_flags) const NOEXCEPT;
 
     /// Common pattern detection.
     const chunk_cptr& witness_program() const NOEXCEPT;
@@ -160,11 +162,6 @@ public:
     bool extract_sigop_script(script& embedded,
         const script& prevout_script) const NOEXCEPT;
     size_t signature_operations(bool accurate) const NOEXCEPT;
-    bool is_oversized() const NOEXCEPT;
-    bool is_unspendable() const NOEXCEPT;
-
-    /// Reset mutable signature hashing op_codeseparator offset. 
-    void clear_offset() const NOEXCEPT;
 
 protected:
     script(const operations& ops, bool valid, bool easier, bool failer,
@@ -205,7 +202,7 @@ DECLARE_JSON_VALUE_CONVERTORS(script::cptr);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/chain/script.ipp>
+#include <bitcoin/system/impl/chain/script_patterns.ipp>
 
 namespace std
 {
