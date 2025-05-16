@@ -319,7 +319,7 @@ size_t witness::serialized_size(bool prefix) const NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
-static inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
+inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
 {
     BC_ASSERT(program->size() == short_hash_size);
 
@@ -333,32 +333,13 @@ static inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
     };
 }
 
-// If first byte of stack top is 0x50 it is the annex [bip341].
-static inline bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT
-{
-    const auto& top = stack.back();
-    return !top->empty()
-        && (top->front() == taproot_annex_prefix);
-}
-
-static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT
-{
-    if (is_annex_pattern(stack))
-    {
-        stack.pop_back();
-        return true;
-    }
-
-    return false;
-}
-
-static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
+inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
 {
     BC_ASSERT(program.size() == hash_size);
     return unsafe_array_cast<uint8_t, hash_size>(program.data());
 }
 
-static inline bool is_valid_control_block(const data_chunk& control) NOEXCEPT
+inline bool is_valid_control_block(const data_chunk& control) NOEXCEPT
 {
     const auto size = control.size();
     constexpr auto maximum = control_block_base + control_block_node *
@@ -479,7 +460,7 @@ code witness::extract_script(script::cptr& out_script,
                 auto stack_size = out_stack->size();
 
                 // If at least two elements, discard annex if present.
-                if (stack_size > one && drop_annex(*out_stack))
+                if (drop_annex(*out_stack))
                     --stack_size;
 
                 // tapscript (script path spend)
@@ -499,6 +480,7 @@ code witness::extract_script(script::cptr& out_script,
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
                     // TODO: DO SOME NASTY SHIT WITH CONTROL(c) AND SCRIPT(s).
+                    // TODO: MUST OBTAIN tapleaf_hash for signature hash.
                     // q is referred to as `taproot output key`.
                     // p is referred to as `taproot internal key`.
                     ////Let p = c[1:33] and let P = lift_x(int(p))
@@ -506,7 +488,7 @@ code witness::extract_script(script::cptr& out_script,
                     ////* Fail if this point is not on the curve.
                     ////Let v = c[0] & 0xfe and call it the leaf version.
                     ////Let k0 = hashTapLeaf(v || compact_size(size of s) || s);
-                    ////* also call it the tapleaf hash.
+                    ////* also call it the tapleaf_hash.
                     ////For j in [0,1,...,m-1]:
                     ////Let ej = c[33+32j:65+32j].
                     ////Let kj+1 depend on whether kj < ej (lexicographically):
@@ -540,7 +522,7 @@ code witness::extract_script(script::cptr& out_script,
                     // sighash_flags (?) and existing signature_hash function.
                     ////hash = state::signature_hash(script, sighash_flags)
                     ////if (!ecdsa::verify_signature(key, hash, sig))
-                    ////    return error::op_check_sig_verify8;
+                    ////    return error::fail;
 
                     ///////////////////////////////////////////////////////////
                     // TODO: need sentinel to indicate success w/out script ex.

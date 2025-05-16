@@ -109,6 +109,10 @@ public:
     static constexpr bool is_reserved_pattern(
         const chunk_cptrs& stack) NOEXCEPT;
 
+    /// The stack adheres to the annex pattern [bip341].
+    inline bool is_annex_pattern() const NOEXCEPT;
+
+    // Script extractors.
     bool extract_sigop_script(script& out_script,
         const script& program_script) const NOEXCEPT;
     code extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
@@ -122,7 +126,9 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    static inline size_t element_size(const chunk_cptr& element) NOEXCEPT;
+    static constexpr size_t element_size(const chunk_cptr& element) NOEXCEPT;
+    static constexpr bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT;
+    static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
 
     void assign_data(reader& source, bool prefix) NOEXCEPT;
 

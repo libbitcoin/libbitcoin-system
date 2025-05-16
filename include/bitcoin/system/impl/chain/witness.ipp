@@ -29,6 +29,14 @@ namespace chain {
 BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
+// static/private
+constexpr size_t witness::element_size(const chunk_cptr& element) NOEXCEPT
+{
+    // Each witness is prefixed with number of elements [bip144].
+    const auto size = element->size();
+    return ceilinged_add(variable_size(size), size);
+};
+
 // static
 constexpr bool witness::is_push_size(const chunk_cptrs& stack) NOEXCEPT
 {
@@ -46,12 +54,33 @@ constexpr bool witness::is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
 }
 
 // static/private
-inline size_t witness::element_size(const chunk_cptr& element) NOEXCEPT
+constexpr bool witness::is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT
 {
-    // Each witness is prefixed with number of elements [bip144].
-    const auto size = element->size();
-    return ceilinged_add(variable_size(size), size);
-};
+    // If at least two elements, discard annex if present.
+    if (stack.size() <= one)
+        return false;
+
+    // If first byte of stack top is 0x50 it is the annex [bip341].
+    const auto& top = stack.back();
+    return !top->empty() && (top->front() == taproot_annex_prefix);
+}
+
+inline bool witness::is_annex_pattern() const NOEXCEPT
+{
+    return is_annex_pattern(stack_);
+}
+
+// static/private
+inline bool witness::drop_annex(chunk_cptrs& stack) NOEXCEPT
+{
+    if (is_annex_pattern(stack))
+    {
+        stack.pop_back();
+        return true;
+    }
+
+    return false;
+}
 
 BC_POP_WARNING()
 BC_POP_WARNING()
