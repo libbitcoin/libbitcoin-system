@@ -289,14 +289,14 @@ bool witness::is_valid() const NOEXCEPT
     return valid_;
 }
 
-const annex& witness::annex() const NOEXCEPT
-{
-    return annex_;
-}
-
 const chunk_cptrs& witness::stack() const NOEXCEPT
 {
     return stack_;
+}
+
+const chain::annex& witness::annex() const NOEXCEPT
+{
+    return annex_;
 }
 
 // static

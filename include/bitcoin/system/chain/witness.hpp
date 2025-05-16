@@ -93,8 +93,8 @@ public:
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
-    const annex& annex() const NOEXCEPT;
     const chunk_cptrs& stack() const NOEXCEPT;
+    const chain::annex& annex() const NOEXCEPT;
 
     /// Computed properties.
     /// serialized_size(true) returns one for an empty witness stack.
