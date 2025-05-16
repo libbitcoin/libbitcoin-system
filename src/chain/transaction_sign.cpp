@@ -207,7 +207,7 @@ void transaction::signature_hash_single(writer& sink,
         for (size_t output = 0; output < index; ++output)
             sink.write_bytes(null_output());
 
-        // Guarded by unversioned_sighash.
+        // Guarded by unversioned_sighash().
         outputs_->at(index)->to_data(sink);
     };
 
@@ -306,7 +306,7 @@ bool transaction::unversioned_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    // Set options.
+    // Mask anyone_can_pay and unused bits, and set hash_all by default.
     const auto flag = mask_sighash(sighash_flags);
 
     //*************************************************************************

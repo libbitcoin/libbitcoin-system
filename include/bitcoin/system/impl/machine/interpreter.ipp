@@ -1025,7 +1025,7 @@ op_check_sig_verify() NOEXCEPT
         // If signature is not empty, it is validated against public key.
         if (key->size() == schnorr::public_key_size)
         {
-            // Split signature and signature hash flags.
+            // Split endorsement into schnorr sig and signature hash flags.
             uint8_t sighash_flags;
             const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
             if (sighash_flags == chain::coverage::invalid)
@@ -1160,7 +1160,7 @@ op_check_multisig_verify() NOEXCEPT
         if (endorsement->empty())
             continue;
 
-        // Split endorsement into DER signature signature hash flags.
+        // Split endorsement into DER signature and signature hash flags.
         uint8_t sighash_flags;
         const auto& der = state::ecdsa_split(sighash_flags, *endorsement);
 
@@ -1303,7 +1303,7 @@ op_check_sig_add() NOEXCEPT
         return error::op_success;
     }
 
-    // Split signature and signature hash flags.
+    // Split endorsement into schnorr signature and signature hash flags.
     uint8_t sighash_flags;
     const auto& sig = state::schnorr_split(sighash_flags, *endorsement);
     if (sighash_flags == chain::coverage::invalid)

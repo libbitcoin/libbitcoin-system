@@ -80,6 +80,8 @@ schnorr_split(uint8_t& sighash_flags, const data_chunk& endorsement) NOEXCEPT
     {
         // BIP341: signature has sighash byte appended in the usual fashion.
         const auto byte = endorsement.back();
+
+        // BIP341: Defined sighash type required (otherwise invalid is set).
         if (is_schnorr_sighash(byte))
             sighash_flags = byte;
     }
