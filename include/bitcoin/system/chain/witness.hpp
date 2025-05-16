@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <bitcoin/system/chain/annex.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -93,6 +94,7 @@ public:
 
     /// Native properties.
     bool is_valid() const NOEXCEPT;
+    const annex& annex() const NOEXCEPT;
     const chunk_cptrs& stack() const NOEXCEPT;
 
     /// Computed properties.
@@ -138,6 +140,9 @@ private:
     // Cache.
     bool valid_;
     size_t size_;
+
+    // Annex member should not even consume space.
+    chain::annex annex_{ *this };
 };
 
 typedef std_vector<witness> witnesses;
@@ -149,6 +154,7 @@ DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);
 } // namespace system
 } // namespace libbitcoin
 
+#include <bitcoin/system/impl/chain/annex.ipp>
 #include <bitcoin/system/impl/chain/witness_patterns.ipp>
 
 namespace std

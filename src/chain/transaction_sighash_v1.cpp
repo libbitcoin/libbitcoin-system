@@ -72,12 +72,7 @@ bool transaction::version1_sighash(hash_digest& out,
         extension::taproot) };
 
     const auto& in = **input;
-    const auto& witness = in.witness();
-    const auto has_annex = witness.is_annex_pattern();
-
-    // Extension and annex flag are combined into a single byte. It might have
-    // been simpler to just use independent bytes and not waste one below.
-    const auto spend_type = set_right(shift_left(ext_flag), 0, has_annex);
+    const auto& annex = in.witness().annex();
 
     // Create tagged hash writer.
     stream::out::fast stream{ out };
@@ -116,13 +111,10 @@ bool transaction::version1_sighash(hash_digest& out,
         sink.write_4_bytes_little_endian(input_index(input));
     }
 
-    if (has_annex)
+    if (annex)
     {
-        const auto& annex = *witness.stack().back();
-        hash::sha256::fast annexer{ stream };
-        annexer.write_variable(annex.size());
-        annexer.write_bytes(annex);
-        annexer.flush();
+        sink.write_variable(annex.size());
+        sink.write_bytes(annex.hash());
     }
 
     if (single)

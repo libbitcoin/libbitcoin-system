@@ -249,6 +249,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\allocator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\arena.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\annex.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\chain_state.hpp" />
@@ -526,6 +527,7 @@
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\annex.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\operation_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script_patterns.ipp" />

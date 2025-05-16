@@ -707,6 +707,7 @@ if (with-tests)
         "../../test/test.hpp"
         "../../test/typelets.cpp"
         "../../test/types.cpp"
+        "../../test/chain/annex.cpp"
         "../../test/chain/block.cpp"
         "../../test/chain/block_malleable.cpp"
         "../../test/chain/chain_state.cpp"

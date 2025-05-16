@@ -218,6 +218,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/test.hpp \
     test/typelets.cpp \
     test/types.cpp \
+    test/chain/annex.cpp \
     test/chain/block.cpp \
     test/chain/block_malleable.cpp \
     test/chain/chain_state.cpp \
@@ -449,6 +450,7 @@ include_bitcoin_system_HEADERS = \
 
 include_bitcoin_system_chaindir = ${includedir}/bitcoin/system/chain
 include_bitcoin_system_chain_HEADERS = \
+    include/bitcoin/system/chain/annex.hpp \
     include/bitcoin/system/chain/block.hpp \
     include/bitcoin/system/chain/chain.hpp \
     include/bitcoin/system/chain/chain_state.hpp \
@@ -590,6 +592,7 @@ include_bitcoin_system_hash_sha_HEADERS = \
 
 include_bitcoin_system_impl_chaindir = ${includedir}/bitcoin/system/impl/chain
 include_bitcoin_system_impl_chain_HEADERS = \
+    include/bitcoin/system/impl/chain/annex.ipp \
     include/bitcoin/system/impl/chain/compact.ipp \
     include/bitcoin/system/impl/chain/operation_patterns.ipp \
     include/bitcoin/system/impl/chain/script_patterns.ipp \
