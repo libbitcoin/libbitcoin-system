@@ -1265,7 +1265,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_immature__mature_non_coinbase__false)
     BOOST_REQUIRE(!instance.is_immature(add1(coinbase_maturity)));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_1_empty__false)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version1_empty__false)
 {
     constexpr uint32_t version = 1;
     const accessor instance
@@ -1297,7 +1297,7 @@ BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_2_empty__false)
     BOOST_REQUIRE(!instance.is_relative_locked(0, 0));
 }
 
-BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version_1_one_of_two_locked_locked__false)
+BOOST_AUTO_TEST_CASE(transaction__is_relative_locked__version1_one_of_two_locked_locked__false)
 {
     constexpr uint32_t version = 1;
     const accessor instance
@@ -1487,7 +1487,10 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     constexpr auto bip143 = false;
     constexpr auto bip342 = false;
     const auto& input = test_tx.inputs_ptr()->begin();
-    const auto sighash = test_tx.signature_hash(input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143, bip342);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(test_tx.signature_hash(sighash, input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143, bip342));
+
     const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
     BOOST_REQUIRE_EQUAL(sighash, expected);
 }

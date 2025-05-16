@@ -351,82 +351,6 @@ uint64_t transaction::fee() const NOEXCEPT
     return floored_subtract(value(), claim());
 }
 
-// Hashing.
-// ----------------------------------------------------------------------------
-
-void transaction::set_nominal_hash(const hash_digest& hash) const NOEXCEPT
-{
-    nominal_hash_ = hash;
-}
-
-void transaction::set_witness_hash(const hash_digest& hash) const NOEXCEPT
-{
-    witness_hash_ = hash;
-}
-
-const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
-{
-    if (witness)
-    {
-        if (!witness_hash_) set_witness_hash(hash(witness));
-        return *witness_hash_;
-    }
-    else
-    {
-        if (!nominal_hash_) set_nominal_hash(hash(witness));
-        return *nominal_hash_;
-    }
-}
-
-hash_digest transaction::hash(bool witness) const NOEXCEPT
-{
-    if (segregated_)
-    {
-        if (witness)
-        {
-            // Witness coinbase tx hash is assumed to be null_hash [bip141].
-            if (witness_hash_) return *witness_hash_;
-            if (is_coinbase()) return null_hash;
-        }
-        else
-        {
-            if (nominal_hash_) return *nominal_hash_;
-        }
-    }
-    else
-    {
-        if (nominal_hash_) return *nominal_hash_;
-    }
-
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
-    hash::sha256x2::fast sink{ stream };
-    to_data(sink, witness);
-    sink.flush();
-    return digest;
-}
-
-// static
-hash_digest transaction::desegregated_hash(size_t witnessed,
-    size_t unwitnessed, const uint8_t* data) NOEXCEPT
-{
-    if (is_null(data))
-        return null_hash;
-
-    constexpr auto preamble = sizeof(uint32_t) + two * sizeof(uint8_t);
-    const auto puts = floored_subtract(unwitnessed, two * sizeof(uint32_t));
-    const auto locktime = floored_subtract(witnessed, sizeof(uint32_t));
-
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
-    hash::sha256x2::fast sink{ stream };
-    sink.write_bytes(data, sizeof(uint32_t));
-    sink.write_bytes(std::next(data, preamble), puts);
-    sink.write_bytes(std::next(data, locktime), sizeof(uint32_t));
-    sink.flush();
-    return digest;
-}
-
 // Methods.
 // ----------------------------------------------------------------------------
 
@@ -476,32 +400,30 @@ chain::points transaction::points() const NOEXCEPT
     return out;
 }
 
+////// private
+////bool transaction::is_taproot() const NOEXCEPT
+////{
+////    if (!is_segregated())
+////        return false;
+////
+////    const auto rooted = [](const auto& input) NOEXCEPT
+////    {
+////        return input->script().version() == script_version::taproot;
+////    };
+////
+////    return std::any_of(inputs_->begin(), inputs_->end(), rooted);
+////}
+
 // Signatures (public)
 // ----------------------------------------------------------------------------
 
-hash_digest transaction::signature_hash(const input_iterator& input,
-    const script& subscript, uint64_t value, uint8_t sighash_flags,
-    script_version version, bool bip143, bool bip342) const NOEXCEPT
+transaction::input_iterator transaction::input_at(
+    uint32_t index) const NOEXCEPT
 {
-    // There is no rational interpretation of a signature hash for a coinbase.
-    BC_ASSERT(!is_coinbase());
+    // Guarded by check_signature and create_endorsement.
+    BC_ASSERT_MSG(index < inputs_->size(), "invalid input index");
 
-    // This is where the connection between bip141 and bip143 is made. If a
-    // versioned 1 program (segwit) extracted by bip141 but bip143 (segwit
-    // hashing) is not active, then drop down to unversioned signature hashing.
-    if (bip143 && version == script_version::segwit)
-        return version_0_sighash(input, subscript, value, sighash_flags);
-
-    // This is where the connection between bip341 and bip342 is made. If a
-    // version 2 program (taproot) extracted by bip341 but bip342 (tapscript)
-    // is not active then drop down to unversioned signature hashing. 
-    if (bip342 && version == script_version::taproot)
-        return version_1_sighash(input, subscript, value, sighash_flags);
-
-    // Given above forks are documented to activate together, this distinction
-    // is moot, however these are distinct BIPs and therefore must be either be
-    // differentiated as such in code, or the BIP distiction would be ignored.
-    return unversioned_sighash(input, subscript, sighash_flags);
+    return std::next(inputs_->begin(), index);
 }
 
 // This is not used internal to the library.
@@ -516,10 +438,12 @@ bool transaction::check_signature(const ec_signature& signature,
     const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
-    const auto sighash = signature_hash(input_at(index), subscript, value,
-        sighash_flags, version, bip143, bip341);
+    hash_digest sighash{};
+    if (!signature_hash(sighash, input_at(index), subscript, value,
+        sighash_flags, version, bip143, bip341))
+        return false;
 
-    // Validate the EC signature.
+    // Validate the ECDSA signature.
     return ecdsa::verify_signature(public_key, sighash, signature);
 }
 
@@ -535,11 +459,13 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
+    hash_digest sighash{};
     out.reserve(max_endorsement_size);
-    const auto sighash = signature_hash(input_at(index), subscript, value,
-        sighash_flags, version, bip143, bip341);
+    if (!signature_hash(sighash, input_at(index), subscript, value,
+        sighash_flags, version, bip143, bip341))
+        return false;
 
-    // Create the EC signature and encode as DER.
+    // Create the ECDSA signature and encode as DER.
     ec_signature signature;
     if (!ecdsa::sign(signature, secret, sighash) ||
         !ecdsa::encode_signature(out, signature))

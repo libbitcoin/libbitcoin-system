@@ -252,6 +252,60 @@ operation operation::from_push_data(const chunk_cptr& data,
     return { code, push, false };
 }
 
+// Serialization.
+// ----------------------------------------------------------------------------
+
+data_chunk operation::to_data() const NOEXCEPT
+{
+    data_chunk data(serialized_size());
+    stream::out::fast ostream(data);
+    write::bytes::fast out(ostream);
+    to_data(out);
+    return data;
+}
+
+void operation::to_data(std::ostream& stream) const NOEXCEPT
+{
+    write::bytes::ostream out(stream);
+    to_data(out);
+}
+
+void operation::to_data(writer& sink) const NOEXCEPT
+{
+    // Underflow is op-undersized data, it is serialized with no opcode.
+    // An underflow could only be a final token in a script deserialization.
+    if (is_underflow())
+    {
+        sink.write_bytes(get_data());
+    }
+    else
+    {
+        const auto size = data_size();
+        sink.write_byte(static_cast<uint8_t>(code_));
+
+        switch (code_)
+        {
+            case opcode::push_one_size:
+                sink.write_byte(narrow_cast<uint8_t>(size));
+                break;
+            case opcode::push_two_size:
+                sink.write_2_bytes_little_endian(narrow_cast<uint16_t>(size));
+                break;
+            case opcode::push_four_size:
+                sink.write_4_bytes_little_endian(
+                    possible_narrow_cast<uint32_t>(size));
+                break;
+            default:
+            break;
+        }
+
+        sink.write_bytes(get_data());
+    }
+}
+
+// Text.
+// ----------------------------------------------------------------------------
+
 inline bool is_push_token(const std::string& token) NOEXCEPT
 {
     return token.size() > one && token.front() == '[' && token.back() == ']';
@@ -388,60 +442,6 @@ operation operation::from_string(const std::string& mnemonic) NOEXCEPT
     return { code, to_shared(std::move(chunk)), underflow };
 }
 
-// Serialization.
-// ----------------------------------------------------------------------------
-
-data_chunk operation::to_data() const NOEXCEPT
-{
-    data_chunk data(serialized_size());
-    stream::out::fast ostream(data);
-    write::bytes::fast out(ostream);
-    to_data(out);
-    return data;
-}
-
-void operation::to_data(std::ostream& stream) const NOEXCEPT
-{
-    write::bytes::ostream out(stream);
-    to_data(out);
-}
-
-void operation::to_data(writer& sink) const NOEXCEPT
-{
-    // Underflow is op-undersized data, it is serialized with no opcode.
-    // An underflow could only be a final token in a script deserialization.
-    if (is_underflow())
-    {
-        sink.write_bytes(get_data());
-    }
-    else
-    {
-        const auto size = data_size();
-        sink.write_byte(static_cast<uint8_t>(code_));
-
-        switch (code_)
-        {
-            case opcode::push_one_size:
-                sink.write_byte(narrow_cast<uint8_t>(size));
-                break;
-            case opcode::push_two_size:
-                sink.write_2_bytes_little_endian(narrow_cast<uint16_t>(size));
-                break;
-            case opcode::push_four_size:
-                sink.write_4_bytes_little_endian(
-                    possible_narrow_cast<uint32_t>(size));
-                break;
-            default:
-            break;
-        }
-
-        sink.write_bytes(get_data());
-    }
-}
-
-// To String.
-// ----------------------------------------------------------------------------
-
 static std::string opcode_to_prefix(opcode code,
     const data_chunk& data) NOEXCEPT
 {
@@ -559,98 +559,7 @@ uint32_t operation::read_data_size(opcode code, reader& source) NOEXCEPT
     }
 }
 
-// Categories of operations.
-// ----------------------------------------------------------------------------
-
-bool operation::is_relaxed_push() const NOEXCEPT
-{
-    return is_relaxed_push(code_);
-}
-
-bool operation::is_push() const NOEXCEPT
-{
-    return is_push(code_);
-}
-
-bool operation::is_payload() const NOEXCEPT
-{
-    return is_payload(code_);
-}
-
-bool operation::is_positive() const NOEXCEPT
-{
-    return is_positive(code_);
-}
-
-bool operation::is_nonnegative() const NOEXCEPT
-{
-    return is_nonnegative(code_);
-}
-
-bool operation::is_number() const NOEXCEPT
-{
-    return is_number(code_);
-}
-
-bool operation::is_roller() const NOEXCEPT
-{
-    return is_roller(code_);
-}
-
-bool operation::is_counted() const NOEXCEPT
-{
-    return is_counted(code_);
-}
-
-bool operation::is_success() const NOEXCEPT
-{
-    return is_success(code_);
-}
-
-bool operation::is_invalid() const NOEXCEPT
-{
-    return is_invalid(code_);
-}
-
-bool operation::is_conditional() const NOEXCEPT
-{
-    return is_conditional(code_);
-}
-
-bool operation::is_reserved() const NOEXCEPT
-{
-    return is_reserved(code_);
-}
-
-bool operation::is_minimal_push() const NOEXCEPT
-{
-    return code_ == minimal_opcode_from_data(get_data());
-}
-
-bool operation::is_nominal_push() const NOEXCEPT
-{
-    return code_ == nominal_opcode_from_data(get_data());
-}
-
-bool operation::is_underclaimed() const NOEXCEPT
-{
-    return data_size() > operation::opcode_to_maximum_size(code_);
-}
-
-bool operation::is_oversized() const NOEXCEPT
-{
-    // Rule max_push_data_size imposed by [0.3.6] soft fork.
-    return data_size() > max_push_data_size;
-}
-
-// ****************************************************************************
-// CONSENSUS: An underflow is sized op-undersized data. Behavior is the same as
-// invalid opcode, invalidating the script if executed and not success coded.
-// ****************************************************************************
-bool operation::is_underflow() const NOEXCEPT
-{
-    return underflow_;
-}
+BC_POP_WARNING()
 
 // JSON value convertors.
 // ----------------------------------------------------------------------------
@@ -690,7 +599,6 @@ void tag_invoke(json::value_from_tag tag, json::value& value,
     tag_invoke(tag, value, *operation);
 }
 
-BC_POP_WARNING()
 BC_POP_WARNING()
 BC_POP_WARNING()
 

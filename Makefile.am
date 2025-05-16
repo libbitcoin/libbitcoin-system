@@ -49,9 +49,14 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/output.cpp \
     src/chain/point.cpp \
     src/chain/script.cpp \
+    src/chain/script_extract.cpp \
     src/chain/transaction.cpp \
-    src/chain/transaction_sign.cpp \
+    src/chain/transaction_cache.cpp \
+    src/chain/transaction_sighash.cpp \
+    src/chain/transaction_sighash_v0.cpp \
+    src/chain/transaction_sighash_v1.cpp \
     src/chain/witness.cpp \
+    src/chain/witness_extract.cpp \
     src/chain/enums/opcode.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
@@ -464,7 +469,9 @@ include_bitcoin_system_chain_HEADERS = \
 include_bitcoin_system_chain_enumsdir = ${includedir}/bitcoin/system/chain/enums
 include_bitcoin_system_chain_enums_HEADERS = \
     include/bitcoin/system/chain/enums/coverage.hpp \
+    include/bitcoin/system/chain/enums/extension.hpp \
     include/bitcoin/system/chain/enums/flags.hpp \
+    include/bitcoin/system/chain/enums/key_version.hpp \
     include/bitcoin/system/chain/enums/magic_numbers.hpp \
     include/bitcoin/system/chain/enums/numbers.hpp \
     include/bitcoin/system/chain/enums/opcode.hpp \
@@ -584,9 +591,9 @@ include_bitcoin_system_hash_sha_HEADERS = \
 include_bitcoin_system_impl_chaindir = ${includedir}/bitcoin/system/impl/chain
 include_bitcoin_system_impl_chain_HEADERS = \
     include/bitcoin/system/impl/chain/compact.ipp \
-    include/bitcoin/system/impl/chain/operation.ipp \
-    include/bitcoin/system/impl/chain/script.ipp \
-    include/bitcoin/system/impl/chain/witness.ipp
+    include/bitcoin/system/impl/chain/operation_patterns.ipp \
+    include/bitcoin/system/impl/chain/script_patterns.ipp \
+    include/bitcoin/system/impl/chain/witness_patterns.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data
 include_bitcoin_system_impl_data_HEADERS = \

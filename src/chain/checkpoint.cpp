@@ -99,17 +99,6 @@ checkpoint::checkpoint(const hash_digest& hash, size_t height,
 {
 }
 
-// private
-checkpoint checkpoint::from_string(const std::string& hash,
-    size_t height) NOEXCEPT
-{
-    hash_digest digest;
-    if (!decode_hash(digest, hash))
-        return {};
-
-    return { std::move(digest), height, true };
-}
-
 // functional equality
 bool checkpoint::equals(const hash_digest& hash, size_t height) const NOEXCEPT
 {
@@ -137,7 +126,6 @@ bool operator!=(const checkpoint& left, const checkpoint& right) NOEXCEPT
 // Deserialization.
 // ----------------------------------------------------------------------------
 
-// TODO: add from_string.
 // TODO: add get_line/put_line to reader and eliminate stream_result.
 std::istream& operator>>(std::istream& stream, checkpoint& out) THROWS
 {
@@ -157,6 +145,17 @@ std::istream& operator>>(std::istream& stream, checkpoint& out) THROWS
 
     out = { hash, height };
     return stream;
+}
+
+// private
+checkpoint checkpoint::from_string(const std::string& hash,
+    size_t height) NOEXCEPT
+{
+    hash_digest digest;
+    if (!decode_hash(digest, hash))
+        return {};
+
+    return { std::move(digest), height, true };
 }
 
 bool checkpoint::is_valid() const NOEXCEPT

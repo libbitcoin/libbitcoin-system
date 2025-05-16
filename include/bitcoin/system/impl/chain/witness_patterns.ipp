@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_IPP
-#define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_IPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_PATTERNS_IPP
+#define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_PATTERNS_IPP
 
 #include <algorithm>
 #include <bitcoin/system/define.hpp>
@@ -46,12 +46,21 @@ constexpr bool witness::is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
 }
 
 // static/private
-inline size_t witness::element_size(const chunk_cptr& element) NOEXCEPT
+constexpr bool witness::is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT
 {
-    // Each witness is prefixed with number of elements [bip144].
-    const auto size = element->size();
-    return ceilinged_add(variable_size(size), size);
-};
+    // If at least two elements, discard annex if present.
+    if (stack.size() <= one)
+        return false;
+
+    // If first byte of stack top is 0x50 it is the annex [bip341].
+    const auto& top = stack.back();
+    return !top->empty() && (top->front() == taproot_annex_prefix);
+}
+
+inline bool witness::is_annex_pattern() const NOEXCEPT
+{
+    return is_annex_pattern(stack_);
+}
 
 BC_POP_WARNING()
 BC_POP_WARNING()

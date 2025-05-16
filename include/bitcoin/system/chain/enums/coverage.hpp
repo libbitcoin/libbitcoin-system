@@ -30,18 +30,26 @@ namespace chain {
 /// Comments from: bitcoin.org/en/developer-guide#standard-transactions
 enum coverage : uint8_t
 {
+    /// Used to mask unused bits in the signature hash byte.
+    mask = unmask_right<uint8_t>(5),
+
+    /// Used to set and select bits here and in signature hashing.
+    hash_all_bit = 0,
+    hash_none_bit = 1,
+    anyone_can_pay_bit = 7,
+
     /// BIP341: We define a new hashtype SIGHASH_DEFAULT (value 0x00) which
     /// results in signing over the whole transaction just as for SIGHASH_ALL.
     hash_default = 0,
 
     /// The default, signs all the inputs and outputs, protecting everything
     /// except the signature scripts against modification.
-    hash_all = bit_right<uint8_t>(0),
+    hash_all = bit_right<uint8_t>(hash_all_bit),
 
     /// Signs all of the inputs but none of the outputs, allowing anyone to
     /// change where the satoshis are going unless other signatures using
     /// other signature hash flags protect the outputs.
-    hash_none = bit_right<uint8_t>(1),
+    hash_none = bit_right<uint8_t>(hash_none_bit),
 
     /// The only output signed is the one corresponding to this input (the
     /// output with the same output index number as this input), ensuring
@@ -55,7 +63,7 @@ enum coverage : uint8_t
 
     /// The above types can be modified with this flag, creating three new
     /// combined types.
-    anyone_can_pay = bit_right<uint8_t>(7),
+    anyone_can_pay = bit_right<uint8_t>(anyone_can_pay_bit),
 
     /// Signs all of the outputs but only this one input, and it also allows
     /// anyone to add or remove other inputs, so anyone can contribute
@@ -73,10 +81,7 @@ enum coverage : uint8_t
     single_anyone_can_pay = bit_or<uint8_t>(hash_single, anyone_can_pay),
 
     /// Used internally to pass results in schnorr parsing.
-    invalid,
-
-    /// Used to mask unused bits in the signature hash byte.
-    mask = unmask_right<uint8_t>(5)
+    invalid
 };
 
 } // namespace chain

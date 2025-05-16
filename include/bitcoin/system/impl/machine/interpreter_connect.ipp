@@ -193,6 +193,7 @@ code CLASS::connect_witness(const chain::context& state,
             if ((ec = input.witness().extract_script(script, stack, prevout)))
                 return ec;
 
+            // TODO: either TAPROOT or TAPSCRIPT.
             interpreter program(tx, it, script, flags, version, stack, {});
 
             if ((ec = program.run()))

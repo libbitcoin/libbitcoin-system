@@ -26,7 +26,9 @@
 #include <bitcoin/system/chain/compact.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
+#include <bitcoin/system/chain/enums/extension.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>
+#include <bitcoin/system/chain/enums/key_version.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/numbers.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>

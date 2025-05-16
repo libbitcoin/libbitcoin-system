@@ -78,6 +78,9 @@ public:
     /// Serialization.
     /// -----------------------------------------------------------------------
 
+    /// Skip a witness (as if deserialized).
+    static void skip(reader& source, bool prefix) NOEXCEPT;
+
     data_chunk to_data(bool prefix) const NOEXCEPT;
     void to_data(std::ostream& stream, bool prefix) const NOEXCEPT;
     void to_data(writer& sink, bool prefix) const NOEXCEPT;
@@ -96,11 +99,8 @@ public:
     /// serialized_size(true) returns one for an empty witness stack.
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
-    /// Utilities.
+    /// Patterns.
     /// -----------------------------------------------------------------------
-
-    /// Skip a witness (as if deserialized).
-    static void skip(reader& source, bool prefix) NOEXCEPT;
 
     /// Verify the push size of each stack element [bip141].
     static constexpr bool is_push_size(const chunk_cptrs& stack) NOEXCEPT;
@@ -109,6 +109,11 @@ public:
     static constexpr bool is_reserved_pattern(
         const chunk_cptrs& stack) NOEXCEPT;
 
+    /// The stack adheres to the annex pattern [bip341].
+    inline bool is_annex_pattern() const NOEXCEPT;
+
+    /// Script extractors.
+    /// -----------------------------------------------------------------------
     bool extract_sigop_script(script& out_script,
         const script& program_script) const NOEXCEPT;
     code extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
@@ -122,7 +127,8 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    static inline size_t element_size(const chunk_cptr& element) NOEXCEPT;
+    static constexpr bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT;
+    static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
 
     void assign_data(reader& source, bool prefix) NOEXCEPT;
 
@@ -143,7 +149,7 @@ DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);
 } // namespace system
 } // namespace libbitcoin
 
-#include <bitcoin/system/impl/chain/witness.ipp>
+#include <bitcoin/system/impl/chain/witness_patterns.ipp>
 
 namespace std
 {

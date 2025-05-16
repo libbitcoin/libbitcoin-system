@@ -190,8 +190,9 @@ protected:
 
     /// Signature hashing.
     /// -----------------------------------------------------------------------
-    INLINE hash_digest signature_hash(uint8_t sighash_flags) const NOEXCEPT;
-    INLINE hash_digest signature_hash(const script& subscript,
+    INLINE bool signature_hash(hash_digest& out,
+        uint8_t sighash_flags) const NOEXCEPT;
+    INLINE bool signature_hash(hash_digest& out, const script& subscript,
         uint8_t sighash_flags) const NOEXCEPT;
 
     /// Multisig signature hash caching.
@@ -199,7 +200,7 @@ protected:
     INLINE void initialize_cache() NOEXCEPT;
     INLINE bool uncached(uint8_t sighash_flags) const NOEXCEPT;
     INLINE const hash_digest& cached_hash() const NOEXCEPT;
-    INLINE void set_hash(const chain::script& subscript,
+    INLINE bool set_hash(const chain::script& subscript,
         uint8_t sighash_flags) NOEXCEPT;
 
 private:

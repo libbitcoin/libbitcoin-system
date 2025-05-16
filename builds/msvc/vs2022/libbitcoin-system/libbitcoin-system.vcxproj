@@ -99,11 +99,16 @@
     <ClCompile Include="..\..\..\..\src\chain\script.cpp">
       <ObjectFileName>$(IntDir)src_chain_script.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\script_extract.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
       <ObjectFileName>$(IntDir)src_chain_transaction.obj</ObjectFileName>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\transaction_sign.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\transaction_cache.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sighash.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v0.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\transaction_sighash_v1.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\witness.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\witness_extract.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base2.cpp" />
     <ClCompile Include="..\..\..\..\src\config\base32.cpp" />
@@ -251,7 +256,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\compact.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\context.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\extension.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\flags.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\key_version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\magic_numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\numbers.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\opcode.hpp" />
@@ -520,9 +527,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\operation.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\operation_patterns.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script_patterns.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\array_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\byte_cast.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\data\collection.ipp" />

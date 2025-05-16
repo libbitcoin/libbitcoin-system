@@ -161,6 +161,18 @@ static_assert(to_bool(42));
 static_assert(!to_bool(0));
 static_assert(is_same_type<decltype(to_bool<int16_t>(0)), bool>);
 
+enum class interdimensional : uint8_t
+{
+    you,
+    pass,
+    butter
+};
+
+static_assert(to_value(interdimensional::you) == 0_u8);
+static_assert(to_value(interdimensional::pass) == 1_u8);
+static_assert(to_value(interdimensional::butter) == 2_u8);
+static_assert(is_same_type<decltype(to_value(interdimensional::you)), uint8_t>);
+
 static_assert(variable_size(zero) == 1u);
 static_assert(variable_size(1u) == 1u);
 static_assert(variable_size(0xfeu) == 3u);

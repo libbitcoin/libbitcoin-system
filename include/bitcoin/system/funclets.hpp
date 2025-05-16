@@ -164,6 +164,13 @@ constexpr bool to_bool(Type value) noexcept
     return is_nonzero(value);
 }
 
+template <typename Enum>
+constexpr auto to_value(Enum value) noexcept
+{
+    static_assert(std::is_enum_v<Enum>);
+    return static_cast<std::underlying_type_t<Enum>>(value);
+}
+
 /// Determine the bitcoin variable-serialized size of a given value.
 template <typename Unsigned,
     std::enable_if_t<std::is_unsigned_v<Unsigned>, bool> = true>

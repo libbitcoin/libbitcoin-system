@@ -105,6 +105,8 @@ enum op_error_t : uint8_t
     op_check_sig_verify6,
     op_check_sig_verify7,
     op_check_sig_verify8,
+    op_check_sig_verify9,
+    op_check_sig_verify10,
     op_check_sig_empty_key,
     op_check_sig_parse_signature,
     op_check_multisig_verify1,
@@ -117,6 +119,7 @@ enum op_error_t : uint8_t
     op_check_multisig_verify8,
     op_check_multisig_verify9,
     op_check_multisig_verify10,
+    op_check_multisig_verify11,
     op_check_multisig_parse_signature,
     op_check_locktime_verify1,
     op_check_locktime_verify2,
@@ -133,7 +136,8 @@ enum op_error_t : uint8_t
     op_check_schnorr_sig3,
     op_check_schnorr_sig4,
     op_check_schnorr_sig5,
-    op_check_schnorr_sig6
+    op_check_schnorr_sig6,
+    op_check_schnorr_sig7
 };
 
 DECLARE_ERROR_T_CODE_CATEGORY(op_error);
