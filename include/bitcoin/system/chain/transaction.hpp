@@ -296,6 +296,7 @@ private:
     static coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
     static bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
+    uint8_t spend_type_v1(bool annex, bool tapscript) const NOEXCEPT;
 
     bool invalid_output_hash(coverage flag,
         const input_iterator& input) const NOEXCEPT;

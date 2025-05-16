@@ -29,13 +29,12 @@
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
-    
-class transaction;
 
 class BC_API witness
 {
@@ -116,8 +115,12 @@ public:
 
     /// Script extractors.
     /// -----------------------------------------------------------------------
+
+    /// Script for witness version 0 signature operation counting.
     bool extract_sigop_script(script& out_script,
         const script& program_script) const NOEXCEPT;
+
+    /// Script for witness validation.
     code extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
         const script& program_script) const NOEXCEPT;
 

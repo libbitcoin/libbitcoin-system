@@ -53,6 +53,15 @@ bool transaction::version1_output_hash(hash_digest& out,
     return true;
 }
 
+// ext_flags and annex flag are combined into one byte, who knows why.
+uint8_t transaction::spend_type_v1(bool annex, bool tapscript) const NOEXCEPT
+{
+    const auto ext_flags = to_value(tapscript ?
+        extension::tapscript : extension::taproot);
+
+    return set_right(shift_left(ext_flags), zero, annex);
+}
+
 bool transaction::version1_sighash(hash_digest& out,
     const input_iterator& input, const script& script, uint64_t value,
     uint8_t sighash_flags) const NOEXCEPT
@@ -60,16 +69,12 @@ bool transaction::version1_sighash(hash_digest& out,
     // TODO: obtain.
     constexpr bool tapscript{};
 
-    // sighash_flags previously verified (see schnorr_split).
     // Mask anyone_can_pay, and set hash_all by default.
+    // sighash_flags previously verified (see schnorr_split).
     const auto flag = mask_sighash(sighash_flags);
     const auto anyone = is_anyone_can_pay(sighash_flags);
     const auto single = (flag == coverage::hash_single);
     const auto all = (flag == coverage::hash_all);
-
-    constexpr uint8_t epoch{ 0 };
-    constexpr uint8_t ext_flag{ to_value(tapscript ? extension::tapscript :
-        extension::taproot) };
 
     const auto& in = **input;
     const auto& annex = in.witness().annex();
@@ -78,7 +83,7 @@ bool transaction::version1_sighash(hash_digest& out,
     stream::out::fast stream{ out };
     hash::sha256t::fast<"TapSighash"> sink{ stream };
 
-    sink.write_byte(epoch);
+    sink.write_byte(0);
     sink.write_byte(sighash_flags);
     sink.write_4_bytes_little_endian(version_);
     sink.write_4_bytes_little_endian(locktime_);
@@ -96,11 +101,10 @@ bool transaction::version1_sighash(hash_digest& out,
         sink.write_bytes(single_hash_outputs());
     }
 
-    sink.write_byte(spend_type);
+    sink.write_byte(spend_type_v1(annex, tapscript));
 
     if (anyone)
     {
-        // Script is always 35 bytes.
         in.point().to_data(sink);
         sink.write_8_bytes_little_endian(value);
         script.to_data(sink, true);
@@ -123,22 +127,11 @@ bool transaction::version1_sighash(hash_digest& out,
         if (!version1_output_hash(hash_output, input))
             return false;
 
-        // TODO: measure this prevalence.
-        // Tapscripts with multiple hash_single sigops are extremely rare.
-        // The small cost of caching output hashes likely exceeds the benefit.
-        // Even allocating stack (hash|ptr) to maybe hold cache may be net bad.
-        // To pre-cache we could just look at the stack on program construct
-        // and check for 65 byte elements with a 0x03 signature hash type byte.
+        // TODO: measure this prevalence for caching benefit (rare).
         sink.write_bytes(hash_output);
     }
 
-    // Total message length is at most 206 bytes (!anyone, no epoch) [bip341].
-    BC_ASSERT(!anyone && sink.get_write_position() == add1(206u));
-    BC_ASSERT( anyone && sink.get_write_position() == add1(157u));
-
-    // Additional for TAPSCRIPT [bip342].
-    // ========================================================================
-
+    // Additional for tapscript [bip342].
     if (tapscript)
     {
         // TODO: obtain.
@@ -156,6 +149,10 @@ bool transaction::version1_sighash(hash_digest& out,
         sink.write_byte(to_value(key_version::tapscript));
         sink.write_4_bytes_little_endian(code_separator);
     }
+
+    // Total length at most 206 bytes (!anyone, no epoch/tapscript) [bip341].
+    BC_ASSERT(!anyone && sink.get_write_position() == (add1(206u) + 37));
+    BC_ASSERT( anyone && sink.get_write_position() == (add1(157u) + 37));
 
     sink.flush();
     return true;

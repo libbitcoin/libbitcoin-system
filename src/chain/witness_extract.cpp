@@ -40,6 +40,12 @@ namespace chain {
 // Extract.
 // ----------------------------------------------------------------------------
 
+static const script& op_checksig_script() NOEXCEPT
+{
+    static const script signature{ { opcode::checksig } };
+    return signature;
+}
+
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
 static inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
 {
@@ -55,13 +61,13 @@ static inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
     };
 }
 
-inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
+static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
 {
     BC_ASSERT(program.size() == hash_size);
     return unsafe_array_cast<uint8_t, hash_size>(program.data());
 }
 
-inline bool is_valid_control_block(const data_chunk& control) NOEXCEPT
+static bool is_valid_control_block(const data_chunk& control) NOEXCEPT
 {
     const auto size = control.size();
     constexpr auto maximum = control_block_base + control_block_node *
@@ -70,12 +76,6 @@ inline bool is_valid_control_block(const data_chunk& control) NOEXCEPT
     // Control block must be size 33 + 32m, for integer m [0..128] [bip341].
     return !is_limited(size, control_block_base, maximum)
         && is_zero(floored_modulo(size - control_block_base, control_block_node));
-}
-
-static const script& op_checksig_script()
-{
-    static const script signature{ { opcode::checksig } };
-    return signature;
 }
 
 // out_script is only useful only for sigop counting.
