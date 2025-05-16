@@ -23,6 +23,7 @@
 #include <memory>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
@@ -187,6 +188,16 @@ const chain::script::cptr& output::script_ptr() const NOEXCEPT
 
 // Methods.
 // ----------------------------------------------------------------------------
+
+hash_digest output::hash() const NOEXCEPT
+{
+    hash_digest out{};
+    stream::out::fast stream{ out };
+    hash::sha256::fast sink{ stream };
+    to_data(sink);
+    sink.flush();
+    return out;
+}
 
 bool output::committed_hash(hash_cref& out) const NOEXCEPT
 {
