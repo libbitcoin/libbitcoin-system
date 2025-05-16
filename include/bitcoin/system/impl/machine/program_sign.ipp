@@ -225,22 +225,23 @@ subscript(const script& script) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 TEMPLATE
-INLINE hash_digest CLASS::
-signature_hash(uint8_t sighash_flags) const NOEXCEPT
+INLINE bool CLASS::
+signature_hash(hash_digest& out, uint8_t sighash_flags) const NOEXCEPT
 {
-    return signature_hash(subscript(), sighash_flags);
+    return signature_hash(out, subscript(), sighash_flags);
 }
 
 TEMPLATE
-INLINE hash_digest CLASS::
-signature_hash(const script& subscript, uint8_t sighash_flags) const NOEXCEPT
+INLINE bool CLASS::
+signature_hash(hash_digest& out, const script& subscript,
+    uint8_t sighash_flags) const NOEXCEPT
 {
     // bip143: the method of signature hashing is changed for v0 scripts.
     // bip342: the method of signature hashing is changed for v1 scripts.
     const auto bip143 = is_enabled(flags::bip143_rule);
     const auto bip342 = is_enabled(flags::bip342_rule);
 
-    return transaction_.signature_hash(input_, subscript, value_,
+    return transaction_.signature_hash(out, input_, subscript, value_,
         sighash_flags, version_, bip143, bip342);
 }
 
@@ -262,13 +263,12 @@ uncached(uint8_t sighash_flags) const NOEXCEPT
 }
 
 TEMPLATE
-INLINE void CLASS::
-set_hash(const chain::script& subscript,
-    uint8_t sighash_flags) NOEXCEPT
+INLINE bool CLASS::
+set_hash(const chain::script& subscript, uint8_t sighash_flags) NOEXCEPT
 {
     cache_.first = false;
     cache_.flags = sighash_flags;
-    cache_.hash = signature_hash(subscript, sighash_flags);
+    return signature_hash(cache_.hash, subscript, sighash_flags);
 }
 
 TEMPLATE

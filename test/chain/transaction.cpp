@@ -1487,7 +1487,10 @@ BOOST_AUTO_TEST_CASE(transaction__signature_hash__all__expected)
     constexpr auto bip143 = false;
     constexpr auto bip342 = false;
     const auto& input = test_tx.inputs_ptr()->begin();
-    const auto sighash = test_tx.signature_hash(input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143, bip342);
+
+    hash_digest sighash{};
+    BOOST_REQUIRE(test_tx.signature_hash(sighash, input, prevout_script, value, coverage::hash_all, script_version::unversioned, bip143, bip342));
+
     const auto expected = base16_array("f89572635651b2e4f89778350616989183c98d1a721c911324bf9f17a0cf5bf0");
     BOOST_REQUIRE_EQUAL(sighash, expected);
 }

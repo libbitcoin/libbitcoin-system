@@ -1031,19 +1031,23 @@ op_check_sig_verify() NOEXCEPT
             if (sighash_flags == chain::coverage::invalid)
                 return error::op_check_sig_verify3;
 
-            // Verify schnorr signature against public key and signature hash.
-            const auto hash = state::signature_hash(sighash_flags);
-            if (!schnorr::verify_signature(*key, hash, sig))
+            // Generate signature hash.
+            hash_digest hash{};
+            if (!state::signature_hash(hash, sighash_flags))
                 return error::op_check_sig_verify4;
+
+            // Verify schnorr signature against public key and signature hash.
+            if (!schnorr::verify_signature(*key, hash, sig))
+                return error::op_check_sig_verify5;
 
             // If signature not empty, opcode counted toward sigops budget.
             if (!state::sigops_increment())
-                return error::op_check_sig_verify5;
+                return error::op_check_sig_verify6;
         }
 
         // If signature not empty, opcode counted toward sigops budget.
         if (!state::sigops_increment())
-            return error::op_check_sig_verify6;
+            return error::op_check_sig_verify7;
 
         // If public key size is neither 0 nor 32 bytes, it is an unknown type.
         // During script execution of signature opcodes these behave exactly as
@@ -1052,9 +1056,9 @@ op_check_sig_verify() NOEXCEPT
     }
 
     if (endorsement->empty())
-        return error::op_check_sig_verify7;
+        return error::op_check_sig_verify8;
 
-    // Split endorsement into DER signature signature hash flags.
+    // Split endorsement into DER signature and signature hash flags.
     uint8_t sighash_flags;
     const auto& der = state::ecdsa_split(sighash_flags, *endorsement);
     const auto bip66 = state::is_enabled(flags::bip66_rule);
@@ -1064,11 +1068,15 @@ op_check_sig_verify() NOEXCEPT
     if (!ecdsa::parse_signature(sig, der, bip66))
         return error::op_check_sig_parse_signature;
 
-    // Verify ECDSA signature against public key and signature hash.
+    // Generate signature hash.
+    hash_digest hash{};
     const auto subscript = state::subscript(endorsement);
-    const auto hash = state::signature_hash(*subscript, sighash_flags);
+    if (!state::signature_hash(hash, *subscript, sighash_flags))
+        return error::op_check_sig_verify9;
+
+    // Verify ECDSA signature against public key and signature hash.
     if (!ecdsa::verify_signature(*key, hash, sig))
-        return error::op_check_sig_verify8;
+        return error::op_check_sig_verify10;
 
     // TODO: use sighash and key to generate signature in sign mode.
     return error::op_success;
@@ -1163,7 +1171,8 @@ op_check_multisig_verify() NOEXCEPT
 
         // Signature hash caching (bypass signature hash if same as previous).
         if (state::uncached(sighash_flags))
-            state::set_hash(*subscript, sighash_flags);
+            if (!state::set_hash(*subscript, sighash_flags))
+                return error::op_check_multisig_verify10;
 
         // Verify ECDSA signature against public key and cache signature hash.
         if (ecdsa::verify_signature(*key, state::cached_hash(), sig))
@@ -1172,7 +1181,7 @@ op_check_multisig_verify() NOEXCEPT
 
     // All endorsements must be verified against a key.
     if (it != endorsements.end())
-        return error::op_check_multisig_verify10;
+        return error::op_check_multisig_verify11;
 
     // TODO: use sighash and key to generate signature in sign mode.
     return error::op_success;
@@ -1300,14 +1309,18 @@ op_check_sig_add() NOEXCEPT
     if (sighash_flags == chain::coverage::invalid)
         return error::op_check_schnorr_sig4;
 
-    // Verify schnorr signature against public key and signature hash.
-    const auto hash = state::signature_hash(sighash_flags);
-    if (!schnorr::verify_signature(*key, hash, sig))
+    // Generate signature hash.
+    hash_digest hash{};
+    if (!state::signature_hash(hash, sighash_flags))
         return error::op_check_schnorr_sig5;
+
+    // Verify schnorr signature against public key and signature hash.
+    if (!schnorr::verify_signature(*key, hash, sig))
+        return error::op_check_schnorr_sig6;
 
     // If signature not empty, opcode counted toward sigops budget.
     if (!state::sigops_increment())
-        return error::op_check_schnorr_sig6;
+        return error::op_check_schnorr_sig7;
 
     // If signature not empty (and successful), [number+1] pushed.
     state::push_signed64(add1<int64_t>(number));

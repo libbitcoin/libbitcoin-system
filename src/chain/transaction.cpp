@@ -479,7 +479,7 @@ chain::points transaction::points() const NOEXCEPT
 // Signatures (public)
 // ----------------------------------------------------------------------------
 
-hash_digest transaction::signature_hash(const input_iterator& input,
+bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
     const script& subscript, uint64_t value, uint8_t sighash_flags,
     script_version version, bool bip143, bool bip342) const NOEXCEPT
 {
@@ -490,18 +490,18 @@ hash_digest transaction::signature_hash(const input_iterator& input,
     // versioned 1 program (segwit) extracted by bip141 but bip143 (segwit
     // hashing) is not active, then drop down to unversioned signature hashing.
     if (bip143 && version == script_version::segwit)
-        return version_0_sighash(input, subscript, value, sighash_flags);
+        return version_0_sighash(out, input, subscript, value, sighash_flags);
 
     // This is where the connection between bip341 and bip342 is made. If a
     // version 2 program (taproot) extracted by bip341 but bip342 (tapscript)
     // is not active then drop down to unversioned signature hashing. 
     if (bip342 && version == script_version::taproot)
-        return version_1_sighash(input, subscript, value, sighash_flags);
+        return version_1_sighash(out, input, subscript, value, sighash_flags);
 
     // Given above forks are documented to activate together, this distinction
     // is moot, however these are distinct BIPs and therefore must be either be
     // differentiated as such in code, or the BIP distiction would be ignored.
-    return unversioned_sighash(input, subscript, sighash_flags);
+    return unversioned_sighash(out, input, subscript, sighash_flags);
 }
 
 // This is not used internal to the library.
@@ -516,10 +516,12 @@ bool transaction::check_signature(const ec_signature& signature,
     const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
-    const auto sighash = signature_hash(input_at(index), subscript, value,
-        sighash_flags, version, bip143, bip341);
+    hash_digest sighash{};
+    if (!signature_hash(sighash, input_at(index), subscript, value,
+        sighash_flags, version, bip143, bip341))
+        return false;
 
-    // Validate the EC signature.
+    // Validate the ECDSA signature.
     return ecdsa::verify_signature(public_key, sighash, signature);
 }
 
@@ -535,11 +537,13 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
     const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
 
+    hash_digest sighash{};
     out.reserve(max_endorsement_size);
-    const auto sighash = signature_hash(input_at(index), subscript, value,
-        sighash_flags, version, bip143, bip341);
+    if (!signature_hash(sighash, input_at(index), subscript, value,
+        sighash_flags, version, bip143, bip341))
+        return false;
 
-    // Create the EC signature and encode as DER.
+    // Create the ECDSA signature and encode as DER.
     ec_signature signature;
     if (!ecdsa::sign(signature, secret, sighash) ||
         !ecdsa::encode_signature(out, signature))

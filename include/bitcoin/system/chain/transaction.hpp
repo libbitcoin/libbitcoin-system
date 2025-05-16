@@ -139,9 +139,9 @@ public:
     size_t signature_operations(bool bip16, bool bip141) const NOEXCEPT;
 
     /// signature_hash exposed for op_check_multisig caching.
-    hash_digest signature_hash(const input_iterator& input, const script& sub,
-        uint64_t value, uint8_t sighash_flags, script_version version,
-        bool bip143, bool bip341) const NOEXCEPT;
+    bool signature_hash(hash_digest& out, const input_iterator& input,
+        const script& sub, uint64_t value, uint8_t sighash_flags,
+        script_version version, bool bip143, bool bip341) const NOEXCEPT;
 
     /// Not used internally.
     bool check_signature(const ec_signature& signature,
@@ -269,7 +269,9 @@ private:
 
     input_iterator input_at(uint32_t index) const NOEXCEPT;
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
-    hash_digest output_hash(const input_iterator& input) const NOEXCEPT;
+    hash_digest output_hash_v0(const input_iterator& input) const NOEXCEPT;
+    bool output_hash_v1(hash_digest& out,
+        const input_iterator& input) const NOEXCEPT;
 
     void signature_hash_single(writer& sink, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
@@ -278,12 +280,12 @@ private:
     void signature_hash_all(writer& sink, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
 
-    hash_digest unversioned_sighash(const input_iterator& input,
+    bool unversioned_sighash(hash_digest& out, const input_iterator& input,
         const script& subscript, uint8_t sighash_flags) const NOEXCEPT;
-    hash_digest version_0_sighash(const input_iterator& input,
+    bool version_0_sighash(hash_digest& out, const input_iterator& input,
         const script& subscript, uint64_t value,
         uint8_t sighash_flags) const NOEXCEPT;
-    hash_digest version_1_sighash(const input_iterator& input,
+    bool version_1_sighash(hash_digest& out, const input_iterator& input,
         const script& script, uint64_t value,
         uint8_t sighash_flags) const NOEXCEPT;
 

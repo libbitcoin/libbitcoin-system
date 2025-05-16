@@ -20,6 +20,8 @@
 
 #include <iterator>
 #include <bitcoin/system/chain/enums/coverage.hpp>
+#include <bitcoin/system/chain/enums/extension.hpp>
+#include <bitcoin/system/chain/enums/key_version.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -300,30 +302,33 @@ void transaction::signature_hash_all(writer& sink,
 }
 
 // private
-hash_digest transaction::unversioned_sighash(
+bool transaction::unversioned_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
 {
     // Set options.
     const auto flag = mask_sighash(sighash_flags);
 
+    //*************************************************************************
+    // CONSENSUS: return one_hash if index exceeds outputs in sighash.
+    // Related Bug: bitcointalk.org/index.php?topic=260595
+    // Exploit: joncave.co.uk/2014/08/bitcoin-sighash-single/
+    //*************************************************************************
+    if (flag == coverage::hash_single &&
+        input_index(input) >= outputs_->size())
+    {
+        out = one_hash;
+        return true;
+    }
+
     // Create hash writer.
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
+    stream::out::fast stream{ out };
     hash::sha256x2::fast sink{ stream };
 
     switch (flag)
     {
         case coverage::hash_single:
         {
-            //*****************************************************************
-            // CONSENSUS: return one_hash if index exceeds outputs in sighash.
-            // Related Bug: bitcointalk.org/index.php?topic=260595
-            // Exploit: joncave.co.uk/2014/08/bitcoin-sighash-single/
-            //*****************************************************************
-            if (input_index(input) >= outputs_->size())
-                return one_hash;
-
             signature_hash_single(sink, input, subscript, sighash_flags);
             break;
         }
@@ -340,7 +345,7 @@ hash_digest transaction::unversioned_sighash(
     }
 
     sink.flush();
-    return digest;
+    return true;
 }
 
 // Signature hashing (version 0 - segwit).
@@ -361,7 +366,7 @@ void transaction::initialize_sighash_cache() const NOEXCEPT
     };
 }
 
-hash_digest transaction::output_hash(
+hash_digest transaction::output_hash_v0(
     const input_iterator& input) const NOEXCEPT
 {
     const auto index = input_index(input);
@@ -380,23 +385,23 @@ hash_digest transaction::output_hash(
     return digest;
 }
 
-hash_digest transaction::version_0_sighash(const input_iterator& input,
-    const script& subscript, uint64_t value,
+// bip143
+bool transaction::version_0_sighash(hash_digest& out,
+    const input_iterator& input, const script& subscript, uint64_t value,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    // Set options.
-    const auto anyone = is_anyone_can_pay(sighash_flags);
+    // Mask anyone_can_pay and unused bits, and set hash_all by default.
     const auto flag = mask_sighash(sighash_flags);
-    const auto all = (flag == coverage::hash_all);
+    const auto anyone = is_anyone_can_pay(sighash_flags);
     const auto single = (flag == coverage::hash_single);
+    const auto all = (flag == coverage::hash_all);
 
     // Create hash writer.
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
+    stream::out::fast stream{ out };
     hash::sha256x2::fast sink{ stream };
 
     // Create signature hash.
-    sink.write_little_endian(version_);
+    sink.write_4_bytes_little_endian(version_);
 
     // Conditioning points, sequences, and outputs writes on cache_ instead of
     // conditionally passing them from methods avoids copying the cached hash.
@@ -409,71 +414,162 @@ hash_digest transaction::version_0_sighash(const input_iterator& input,
 
     (*input)->point().to_data(sink);
     subscript.to_data(sink, prefixed);
-    sink.write_little_endian(value);
-    sink.write_little_endian((*input)->sequence());
+    sink.write_8_bytes_little_endian(value);
+    sink.write_4_bytes_little_endian((*input)->sequence());
 
     // outputs
     if (single)
-        sink.write_bytes(output_hash(input));
+        sink.write_bytes(output_hash_v0(input));
     else
         sink.write_bytes(all ? outputs_hash() : null_hash);
 
-    sink.write_little_endian(locktime_);
+    sink.write_4_bytes_little_endian(locktime_);
     sink.write_4_bytes_little_endian(sighash_flags);
 
     sink.flush();
-    return digest;
+    return true;
 }
 
 // Signature hashing (version 1 - taproot).
 // ----------------------------------------------------------------------------
 
-// TODO: tapscript.
-// Because the codeseparator_position is the last input to the hash, the SHA256
-// midstate can be efficiently cached for multiple OP_CODESEPARATOR in a script.
-
-hash_digest transaction::version_1_sighash(const input_iterator& input,
-    const script& script, uint64_t value, uint8_t sighash_flags) const NOEXCEPT
+bool transaction::output_hash_v1(hash_digest& out,
+    const input_iterator& input) const NOEXCEPT
 {
-    // Set options.
-    const auto anyone = is_anyone_can_pay(sighash_flags);
-    const auto flag = mask_sighash(sighash_flags);
-    const auto all = (flag == coverage::hash_all);
-    const auto single = (flag == coverage::hash_single);
+    const auto index = input_index(input);
 
-    // Create hash writer.
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
-    hash::sha256x2::fast sink{ stream };
+    if (index >= outputs_->size())
+        return false;
+
+    stream::out::fast stream{ out };
+    hash::sha256::fast sink{ stream };
+    outputs_->at(index)->to_data(sink);
+    sink.flush();
+    return true;
+}
+
+bool transaction::version_1_sighash(hash_digest& out,
+    const input_iterator& input, const script& script, uint64_t value,
+    uint8_t sighash_flags) const NOEXCEPT
+{
+    // sighash_flags previously verified (see schnorr_split).
+    // Mask anyone_can_pay, and set hash_all by default.
+    const auto flag = mask_sighash(sighash_flags);
+    const auto anyone = is_anyone_can_pay(sighash_flags);
+    const auto single = (flag == coverage::hash_single);
+    const auto all = (flag == coverage::hash_all);
+
+    // TODO: compute/cache these.
+    constexpr hash_digest hash1_prevouts{};
+    constexpr hash_digest hash1_amounts{};
+    constexpr hash_digest hash1_scripts{};
+    constexpr hash_digest hash1_sequences{};
+    constexpr hash_digest hash1_outputs{};
+
+    // TODO: derive bool tapscript from extension flag value.
+    constexpr uint8_t ext_flag{ to_value(extension::tapscript) };
+    constexpr bool tapscript{ ext_flag == to_value(extension::tapscript) };
+
+    // Signature hash is prefixed with 0x00, called the epoch.
+    constexpr uint8_t epoch{ 0 };
+
+    const auto& in = **input;
+    const auto& witness = in.witness();
+    const auto has_annex = witness.is_annex_pattern();
+
+    // Create tagged hash writer.
+    stream::out::fast stream{ out };
+    hash::sha256t::fast<"TapSighash"> sink{ stream };
 
     // Create signature hash.
-    sink.write_little_endian(version_);
+    sink.write_byte(epoch);
+    sink.write_byte(sighash_flags);
+    sink.write_4_bytes_little_endian(version_);
+    sink.write_4_bytes_little_endian(locktime_);
 
-    // Conditioning points, sequences, and outputs writes on cache_ instead of
-    // conditionally passing them from methods avoids copying the cached hash.
+    if (!anyone)
+    {
+        sink.write_bytes(hash1_prevouts);
+        sink.write_bytes(hash1_amounts);
+        sink.write_bytes(hash1_scripts);
+        sink.write_bytes(hash1_sequences);
+    }
 
-    // points
-    sink.write_bytes(!anyone ? points_hash() : null_hash);
+    if (all)
+    {
+        sink.write_bytes(hash1_outputs);
+    }
 
-    // sequences
-    sink.write_bytes(!anyone && all ? sequences_hash() : null_hash);
+    // Extension and annex flag are combined into a single byte. It might have
+    // been simpler to just use independent bytes and not waste one below.
+    const auto spend_type = set_right(shift_left(ext_flag), 0, has_annex);
+    sink.write_byte(spend_type);
 
-    (*input)->point().to_data(sink);
-    script.to_data(sink, prefixed);
-    sink.write_little_endian(value);
-    sink.write_little_endian((*input)->sequence());
-
-    // outputs
-    if (single)
-        sink.write_bytes(output_hash(input));
+    if (anyone)
+    {
+        // ********************************************************************
+        // CONSENSUS: Script is always 35 bytes, and the script is 2 opcodes
+        // and 32 bytes: `<1> <32-byte-tweaked-public-key>` so an unnecessary
+        // size prefix is implied in prevout script sighash serialization.
+        // ********************************************************************
+        in.point().to_data(sink);
+        sink.write_8_bytes_little_endian(value);
+        script.to_data(sink, true);
+        sink.write_4_bytes_little_endian(in.sequence());
+    }
     else
-        sink.write_bytes(all ? outputs_hash() : null_hash);
+    {
+        sink.write_4_bytes_little_endian(input_index(input));
+    }
 
-    sink.write_little_endian(locktime_);
-    sink.write_4_bytes_little_endian(sighash_flags);
+    if (has_annex)
+    {
+        const auto& annex = *witness.stack().back();
+
+        // The sha256 of (compact_size(size of annex) || prefixed annex).
+        hash::sha256::fast annexer{ stream };
+        annexer.write_variable(annex.size());
+        annexer.write_bytes(annex);
+        annexer.flush();
+    }
+
+    // TODO: can hash_output be cached?
+    if (single)
+    {
+        hash_digest hash_output{};
+        if (!output_hash_v1(hash_output, input))
+            return false;
+
+        sink.write_bytes(hash_output);
+    }
+
+    // Total message length is at most 206 bytes (!anyone, no epoch) [bip341].
+    BC_ASSERT(!anyone && sink.get_write_position() == add1(206u));
+    BC_ASSERT( anyone && sink.get_write_position() == add1(157u));
+
+    // Additional for TAPSCRIPT [bip342].
+    // ========================================================================
+
+    if (tapscript)
+    {
+        // TODO:
+        // The tapleaf hash (as defined in BIP341).
+        constexpr hash_digest tapleaf_hash{};
+
+        // TODO:
+        // The opcode position of last executed op_codeseparator before the
+        // currently executing signature opcode. Because code_separator is the
+        // last input to signature hash, the signature hash sha256 midstate
+        // (above) can be cached for multiple op_codeseparators.
+        constexpr uint32_t code_separator{ 0 };
+
+        sink.write_bytes(tapleaf_hash);
+        sink.write_byte(to_value(key_version::tapscript));
+        sink.write_4_bytes_little_endian(code_separator);
+    }
 
     sink.flush();
-    return digest;
+    return true;
 }
 
 } // namespace chain
