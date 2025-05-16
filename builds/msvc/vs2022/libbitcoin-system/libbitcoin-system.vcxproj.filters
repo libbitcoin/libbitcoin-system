@@ -638,7 +638,13 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\coverage.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\extension.hpp">
+      <Filter>include\bitcoin\system\chain\enums</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\flags.hpp">
+      <Filter>include\bitcoin\system\chain\enums</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\key_version.hpp">
       <Filter>include\bitcoin\system\chain\enums</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\enums\magic_numbers.hpp">

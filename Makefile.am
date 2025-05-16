@@ -464,7 +464,9 @@ include_bitcoin_system_chain_HEADERS = \
 include_bitcoin_system_chain_enumsdir = ${includedir}/bitcoin/system/chain/enums
 include_bitcoin_system_chain_enums_HEADERS = \
     include/bitcoin/system/chain/enums/coverage.hpp \
+    include/bitcoin/system/chain/enums/extension.hpp \
     include/bitcoin/system/chain/enums/flags.hpp \
+    include/bitcoin/system/chain/enums/key_version.hpp \
     include/bitcoin/system/chain/enums/magic_numbers.hpp \
     include/bitcoin/system/chain/enums/numbers.hpp \
     include/bitcoin/system/chain/enums/opcode.hpp \
