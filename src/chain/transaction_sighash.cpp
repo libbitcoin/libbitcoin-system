@@ -230,11 +230,9 @@ void transaction::signature_hash_all(writer& sink,
 // Related Bug: bitcointalk.org/index.php?topic=260595
 // Exploit: joncave.co.uk/2014/08/bitcoin-sighash-single/
 //*****************************************************************************
-bool transaction::invalid_output_hash(coverage flag,
-    const input_iterator& input) const NOEXCEPT
+bool transaction::output_overflow(size_t input) const NOEXCEPT
 {
-    return flag == coverage::hash_single && 
-        input_index(input) >= outputs_->size();
+    return input >= outputs_->size();
 }
 
 bool transaction::unversioned_sighash(hash_digest& out,
@@ -243,7 +241,8 @@ bool transaction::unversioned_sighash(hash_digest& out,
 {
     // Mask anyone_can_pay and unused bits, and set hash_all by default.
     const auto flag = mask_sighash(sighash_flags);
-    if (invalid_output_hash(flag, input))
+
+    if (flag == coverage::hash_single && output_overflow(input_index(input)))
     {
         out = one_hash;
         return true;

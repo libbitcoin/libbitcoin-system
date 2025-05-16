@@ -36,23 +36,6 @@ namespace chain {
 // Signature hashing (version 1 - taproot).
 // ----------------------------------------------------------------------------
 
-//*****************************************************************************
-// CONSENSUS: if index exceeds outputs in signature hash, fail validation.
-//*****************************************************************************
-bool transaction::version1_output_hash(hash_digest& out,
-    const input_iterator& input) const NOEXCEPT
-{
-    const auto index = input_index(input);
-    if (index >= outputs_->size())
-        return false;
-
-    stream::out::fast stream{ out };
-    hash::sha256::fast sink{ stream };
-    outputs_->at(index)->to_data(sink);
-    sink.flush();
-    return true;
-}
-
 // ext_flags and annex flag are combined into one byte, who knows why.
 uint8_t transaction::spend_type_v1(bool annex, bool tapscript) const NOEXCEPT
 {
@@ -123,12 +106,11 @@ bool transaction::version1_sighash(hash_digest& out,
 
     if (single)
     {
-        hash_digest hash_output{};
-        if (!version1_output_hash(hash_output, input))
+        const auto index = input_index(input);
+        if (output_overflow(index))
             return false;
 
-        // TODO: measure this prevalence for caching benefit (rare).
-        sink.write_bytes(hash_output);
+        sink.write_bytes(outputs_->at(index)->hash());
     }
 
     // Additional for tapscript [bip342].

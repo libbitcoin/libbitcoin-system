@@ -36,11 +36,11 @@ namespace chain {
 //*****************************************************************************
 // CONSENSUS: if index exceeds outputs in signature hash, return null_hash.
 //*****************************************************************************
-hash_digest transaction::version0_output_hash(
+hash_digest transaction::output_hash_v0(
     const input_iterator& input) const NOEXCEPT
 {
     const auto index = input_index(input);
-    if (index >= outputs_->size())
+    if (output_overflow(index))
         return null_hash;
 
     hash_digest digest{};
@@ -83,7 +83,7 @@ bool transaction::version0_sighash(hash_digest& out,
     sink.write_4_bytes_little_endian((*input)->sequence());
 
     if (single)
-        sink.write_bytes(version0_output_hash(input));
+        sink.write_bytes(output_hash_v0(input));
     else
         sink.write_bytes(all ? hash_outputs() : null_hash);
 
