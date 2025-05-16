@@ -677,6 +677,24 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify8__true_exected_messag
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify8");
 }
 
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify9__true_exected_message)
+{
+    constexpr auto value = error::op_check_sig_verify9;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify9");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_verify10__true_exected_message)
+{
+    constexpr auto value = error::op_check_sig_verify10;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_sig_verify10");
+}
+
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_sig_empty_key__true_exected_message)
 {
     constexpr auto value = error::op_check_sig_empty_key;
@@ -783,6 +801,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify10__true_exected_
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify10");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_verify11__true_exected_message)
+{
+    constexpr auto value = error::op_check_multisig_verify11;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_multisig_verify11");
 }
 
 BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_multisig_parse_signature__true_exected_message)
@@ -936,6 +963,15 @@ BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig6__true_exected_messa
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig6");
+}
+
+BOOST_AUTO_TEST_CASE(op_error_t__code__op_check_schnorr_sig7__true_exected_message)
+{
+    constexpr auto value = error::op_check_schnorr_sig7;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "op_check_schnorr_sig7");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
