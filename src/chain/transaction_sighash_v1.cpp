@@ -83,7 +83,6 @@ bool transaction::version1_sighash(hash_digest& out,
     stream::out::fast stream{ out };
     hash::sha256t::fast<"TapSighash"> sink{ stream };
 
-    // Create signature hash.
     sink.write_byte(epoch);
     sink.write_byte(sighash_flags);
     sink.write_4_bytes_little_endian(version_);
@@ -120,8 +119,6 @@ bool transaction::version1_sighash(hash_digest& out,
     if (has_annex)
     {
         const auto& annex = *witness.stack().back();
-
-        // The sha256 of (compact_size(size of annex) || prefixed annex).
         hash::sha256::fast annexer{ stream };
         annexer.write_variable(annex.size());
         annexer.write_bytes(annex);

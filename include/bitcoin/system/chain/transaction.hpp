@@ -245,7 +245,6 @@ private:
     input_iterator input_at(uint32_t index) const NOEXCEPT;
     void assign_data(reader& source, bool witness) NOEXCEPT;
     chain::points points() const NOEXCEPT;
-    ////bool is_taproot() const NOEXCEPT;
 
     // delegated
     code connect_input(const context& ctx,
@@ -296,7 +295,6 @@ private:
 
     static coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
     static bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
-
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
 
     bool invalid_output_hash(coverage flag,

@@ -36,15 +36,6 @@ namespace chain {
 // Signature hashing (shared).
 // ----------------------------------------------------------------------------
 
-uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
-{
-    // Guarded by unversioned_sighash and output_hash.
-    BC_ASSERT_MSG(inputs_->begin() != inputs_->end(), "invalid input iterator");
-
-    return possible_narrow_and_sign_cast<uint32_t>(
-        std::distance(inputs_->begin(), input));
-}
-
 // static
 //*****************************************************************************
 // CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
@@ -66,7 +57,16 @@ coverage transaction::mask_sighash(uint8_t sighash_flags) NOEXCEPT
 
 bool transaction::is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT
 {
-    return to_bool(bit_and<uint8_t>(sighash_flags, coverage::anyone_can_pay));
+    return get_right(sighash_flags, coverage::anyone_can_pay_bit);
+}
+
+uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
+{
+    // Guarded by unversioned_sighash and output_hash.
+    BC_ASSERT_MSG(inputs_->begin() != inputs_->end(), "invalid input iterator");
+
+    return possible_narrow_and_sign_cast<uint32_t>(
+        std::distance(inputs_->begin(), input));
 }
 
 // Signature hashing (unversioned).
@@ -104,7 +104,6 @@ void transaction::signature_hash_single(writer& sink,
     {
         input_cptrs::const_iterator in;
         const auto anyone = is_anyone_can_pay(sighash_flags);
-
         sink.write_variable(anyone ? one : inputs_->size());
 
         for (in = inputs_->begin(); !anyone && in != input; ++in)
@@ -129,7 +128,6 @@ void transaction::signature_hash_single(writer& sink,
     const auto write_outputs = [this, &input](writer& sink) NOEXCEPT
     {
         const auto index = input_index(input);
-
         sink.write_variable(add1(index));
 
         for (size_t output = 0; output < index; ++output)
@@ -155,7 +153,6 @@ void transaction::signature_hash_none(writer& sink,
     {
         input_cptrs::const_iterator in;
         const auto anyone = is_anyone_can_pay(sighash_flags);
-
         sink.write_variable(anyone ? one : inputs_->size());
 
         for (in = inputs_->begin(); !anyone && in != input; ++in)
@@ -193,7 +190,6 @@ void transaction::signature_hash_all(writer& sink,
     {
         input_cptrs::const_iterator in;
         const auto anyone = is_anyone_can_pay(sighash_flags);
-
         sink.write_variable(anyone ? one : inputs_->size());
 
         for (in = inputs_->begin(); !anyone && in != input; ++in)
@@ -260,20 +256,14 @@ bool transaction::unversioned_sighash(hash_digest& out,
     switch (flag)
     {
         case coverage::hash_single:
-        {
             signature_hash_single(sink, input, subscript, sighash_flags);
             break;
-        }
         case coverage::hash_none:
-        {
             signature_hash_none(sink, input, subscript, sighash_flags);
             break;
-        }
         default:
         case coverage::hash_all:
-        {
             signature_hash_all(sink, input, subscript, sighash_flags);
-        }
     }
 
     sink.flush();

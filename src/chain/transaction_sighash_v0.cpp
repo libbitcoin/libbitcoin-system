@@ -69,17 +69,12 @@ bool transaction::version0_sighash(hash_digest& out,
     stream::out::fast stream{ out };
     hash::sha256x2::fast sink{ stream };
 
-    // Create signature hash.
-    sink.write_4_bytes_little_endian(version_);
-
     ///////////////////////////////////////////////////////////////////////////
     // TODO: update cache calls.
     ///////////////////////////////////////////////////////////////////////////
 
-    // points
+    sink.write_4_bytes_little_endian(version_);
     sink.write_bytes(!anyone ? hash_points() : null_hash);
-
-    // sequences
     sink.write_bytes(!anyone && all ? hash_sequences() : null_hash);
 
     (*input)->point().to_data(sink);
@@ -87,7 +82,6 @@ bool transaction::version0_sighash(hash_digest& out,
     sink.write_8_bytes_little_endian(value);
     sink.write_4_bytes_little_endian((*input)->sequence());
 
-    // outputs
     if (single)
         sink.write_bytes(version0_output_hash(input));
     else
