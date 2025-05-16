@@ -29,14 +29,6 @@ namespace chain {
 BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
 BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 
-// static/private
-constexpr size_t witness::element_size(const chunk_cptr& element) NOEXCEPT
-{
-    // Each witness is prefixed with number of elements [bip144].
-    const auto size = element->size();
-    return ceilinged_add(variable_size(size), size);
-};
-
 // static
 constexpr bool witness::is_push_size(const chunk_cptrs& stack) NOEXCEPT
 {
@@ -81,6 +73,14 @@ inline bool witness::drop_annex(chunk_cptrs& stack) NOEXCEPT
 
     return false;
 }
+
+// static/private
+inline size_t witness::element_size(const chunk_cptr& element) NOEXCEPT
+{
+    // Each witness is prefixed with number of elements [bip144].
+    const auto size = element->size();
+    return ceilinged_add(variable_size(size), size);
+};
 
 BC_POP_WARNING()
 BC_POP_WARNING()

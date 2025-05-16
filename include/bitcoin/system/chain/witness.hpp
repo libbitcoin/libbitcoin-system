@@ -126,8 +126,8 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    static constexpr size_t element_size(const chunk_cptr& element) NOEXCEPT;
     static constexpr bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT;
+    static inline size_t element_size(const chunk_cptr& element) NOEXCEPT;
     static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
 
     void assign_data(reader& source, bool prefix) NOEXCEPT;
