@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHAIN_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHAIN_HPP
 
+#include <bitcoin/system/chain/annex.hpp>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/chain/chain_state.hpp>

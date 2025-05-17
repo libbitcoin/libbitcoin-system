@@ -24,6 +24,7 @@
 #include <vector>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -85,6 +86,7 @@ public:
     /// Methods.
     /// -----------------------------------------------------------------------
 
+    hash_digest hash() const NOEXCEPT;
     bool committed_hash(hash_cref& out) const NOEXCEPT;
     size_t signature_operations(bool bip141) const NOEXCEPT;
     bool is_dust(uint64_t minimum_output_value) const NOEXCEPT;

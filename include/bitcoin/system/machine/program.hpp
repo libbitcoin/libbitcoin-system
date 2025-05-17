@@ -185,9 +185,6 @@ protected:
     inline script::cptr subscript(const chunk_xptrs& endorsements) const NOEXCEPT;
     INLINE script::cptr subscript(const chunk_xptr& endorsement) const NOEXCEPT;
 
-    /// Return unstripped script (schnorr hash optimization).
-    INLINE const chain::script& subscript() const NOEXCEPT;
-
     /// Signature hashing.
     /// -----------------------------------------------------------------------
     INLINE bool signature_hash(hash_digest& out,
@@ -215,7 +212,6 @@ private:
 
     // Signing helpers.
     static inline bool is_schnorr_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static inline uint32_t subscript(const chain::script& script) NOEXCEPT;
     static inline chain::strippers create_strip_ops(
         const chunk_xptrs& endorsements) NOEXCEPT;
     static INLINE chain::strippers create_strip_ops(
@@ -257,7 +253,6 @@ private:
 
 #define TEMPLATE template <typename Stack>
 #define CLASS program<Stack>
-
 
 #include <bitcoin/system/impl/machine/program.ipp>
 #include <bitcoin/system/impl/machine/program_construct.ipp>

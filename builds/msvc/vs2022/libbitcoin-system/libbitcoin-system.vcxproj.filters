@@ -632,6 +632,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\boost.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\annex.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\block.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
@@ -1459,6 +1462,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\annex.ipp">
+      <Filter>include\bitcoin\system\impl\chain</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\compact.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>

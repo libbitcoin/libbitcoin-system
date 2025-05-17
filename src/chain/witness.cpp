@@ -294,6 +294,11 @@ const chunk_cptrs& witness::stack() const NOEXCEPT
     return stack_;
 }
 
+const chain::annex& witness::annex() const NOEXCEPT
+{
+    return annex_;
+}
+
 // static
 size_t witness::serialized_size(const chunk_cptrs& stack, bool prefix) NOEXCEPT
 {

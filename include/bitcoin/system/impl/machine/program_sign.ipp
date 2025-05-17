@@ -199,30 +199,6 @@ subscript(const chunk_xptr& endorsement) const NOEXCEPT
     return to_shared<script>(difference<operations>(start, stop, strip));
 }
 
-TEMPLATE
-INLINE const chain::script& CLASS::
-subscript() const NOEXCEPT
-{
-    return *script_;
-}
-
-// private/static
-TEMPLATE
-inline uint32_t CLASS::
-subscript(const script& script) NOEXCEPT
-{
-    // This method is only called from the run loop, which means there are ops.
-    BC_ASSERT(!script.ops().empty());
-
-    // BIP342: zero-based opcode position of the last executed op_codeseparator
-    // before currently executed signature opcode (0xffffffff if none).
-    const auto start = script.ops().begin();
-    const auto span = std::distance(start, script.offset);
-    const auto slot = possible_narrow_and_sign_cast<uint32_t>(span);
-    const auto none = is_zero(slot) && start->code() != opcode::codeseparator;
-    return none ? chain::default_separators : slot;
-}
-
 // Signature hashing.
 // ----------------------------------------------------------------------------
 
@@ -230,7 +206,7 @@ TEMPLATE
 INLINE bool CLASS::
 signature_hash(hash_digest& out, uint8_t sighash_flags) const NOEXCEPT
 {
-    return signature_hash(out, subscript(), sighash_flags);
+    return signature_hash(out, *script_, sighash_flags);
 }
 
 TEMPLATE

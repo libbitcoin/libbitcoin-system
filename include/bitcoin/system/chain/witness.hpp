@@ -23,18 +23,18 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <bitcoin/system/chain/annex.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
-    
-class transaction;
 
 class BC_API witness
 {
@@ -94,6 +94,7 @@ public:
     /// Native properties.
     bool is_valid() const NOEXCEPT;
     const chunk_cptrs& stack() const NOEXCEPT;
+    const chain::annex& annex() const NOEXCEPT;
 
     /// Computed properties.
     /// serialized_size(true) returns one for an empty witness stack.
@@ -114,8 +115,12 @@ public:
 
     /// Script extractors.
     /// -----------------------------------------------------------------------
+
+    /// Script for witness version 0 signature operation counting.
     bool extract_sigop_script(script& out_script,
         const script& program_script) const NOEXCEPT;
+
+    /// Script for witness validation.
     code extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
         const script& program_script) const NOEXCEPT;
 
@@ -138,6 +143,9 @@ private:
     // Cache.
     bool valid_;
     size_t size_;
+
+    // Annex member should not even consume space.
+    chain::annex annex_{ *this };
 };
 
 typedef std_vector<witness> witnesses;
@@ -149,6 +157,7 @@ DECLARE_JSON_VALUE_CONVERTORS(witness::cptr);
 } // namespace system
 } // namespace libbitcoin
 
+#include <bitcoin/system/impl/chain/annex.ipp>
 #include <bitcoin/system/impl/chain/witness_patterns.ipp>
 
 namespace std
