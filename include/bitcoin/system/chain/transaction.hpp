@@ -23,6 +23,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
@@ -30,6 +31,7 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -236,6 +238,20 @@ protected:
 
 private:
     typedef struct { size_t nominal; size_t witnessed; } sizes;
+    typedef struct
+    {
+        hash_digest points;
+        hash_digest sequences;
+        hash_digest outputs;
+    } v0_cache;
+    typedef struct
+    {
+        hash_digest amounts;
+        hash_digest scripts;
+        hash_digest points;
+        hash_digest sequences;
+        hash_digest outputs;
+    } v1_cache;
 
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const input_cptrs& inputs) NOEXCEPT;
@@ -250,24 +266,14 @@ private:
     code connect_input(const context& ctx,
         const input_iterator& it) const NOEXCEPT;
 
-    // Caching.
+    // Patterns.
     // ------------------------------------------------------------------------
 
-    typedef struct
-    {
-        hash_digest points;
-        hash_digest sequences;
-        hash_digest outputs;
-    } v0_cache;
+    static constexpr coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
+    static constexpr bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
 
-    typedef struct
-    {
-        hash_digest amounts;
-        hash_digest scripts;
-        hash_digest points;
-        hash_digest sequences;
-        hash_digest outputs;
-    } v1_cache;
+    // Caching.
+    // ------------------------------------------------------------------------
 
     // Set sha256 cache if not set, so not thread safe unless cached.
     const hash_digest& single_hash_points() const NOEXCEPT;
@@ -293,8 +299,6 @@ private:
     // Signature hashing.
     // ------------------------------------------------------------------------
 
-    static coverage mask_sighash(uint8_t sighash_flags) NOEXCEPT;
-    static bool is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT;
     static uint32_t subscript_v1(const script& script) NOEXCEPT;
     uint8_t spend_type_v1(bool annex, bool tapscript) const NOEXCEPT;
     uint32_t input_index(const input_iterator& input) const NOEXCEPT;
@@ -352,6 +356,8 @@ DECLARE_JSON_VALUE_CONVERTORS(transaction::cptr);
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/chain/transaction_patterns.ipp>
 
 namespace std
 {

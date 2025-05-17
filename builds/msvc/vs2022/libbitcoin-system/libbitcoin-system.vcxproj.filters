@@ -1460,6 +1460,9 @@
     <ClInclude Include="..\..\resource.h">
       <Filter>resource</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp">
+      <Filter>include\bitcoin\system\impl\chain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\annex.ipp">

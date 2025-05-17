@@ -33,42 +33,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// Signature hashing (shared).
-// ----------------------------------------------------------------------------
-
-// static
-//*****************************************************************************
-// CONSENSUS: Due to masking of bits 6/7 (8 is the anyone_can_pay flag),
-// there are 4 possible 7 bit values that can set "single" and 4 others that
-// can set none, and yet all other values set "all".
-//*****************************************************************************
-coverage transaction::mask_sighash(uint8_t sighash_flags) NOEXCEPT
-{
-    switch (bit_and<uint8_t>(sighash_flags, coverage::mask))
-    {
-        case coverage::hash_single:
-            return coverage::hash_single;
-        case coverage::hash_none:
-            return coverage::hash_none;
-        default:
-            return coverage::hash_all;
-    }
-}
-
-bool transaction::is_anyone_can_pay(uint8_t sighash_flags) NOEXCEPT
-{
-    return get_right(sighash_flags, coverage::anyone_can_pay_bit);
-}
-
-uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
-{
-    // Guarded by unversioned_sighash and output_hash.
-    BC_ASSERT_MSG(inputs_->begin() != inputs_->end(), "invalid input iterator");
-
-    return possible_narrow_and_sign_cast<uint32_t>(
-        std::distance(inputs_->begin(), input));
-}
-
 // Signature hashing (unversioned).
 // ----------------------------------------------------------------------------
 
@@ -225,16 +189,6 @@ void transaction::signature_hash_all(writer& sink,
     sink.write_4_bytes_little_endian(sighash_flags);
 }
 
-//*****************************************************************************
-// CONSENSUS: if index exceeds outputs in signature hash, return one_hash.
-// Related Bug: bitcointalk.org/index.php?topic=260595
-// Exploit: joncave.co.uk/2014/08/bitcoin-sighash-single/
-//*****************************************************************************
-bool transaction::output_overflow(size_t input) const NOEXCEPT
-{
-    return input >= outputs_->size();
-}
-
 bool transaction::unversioned_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript,
     uint8_t sighash_flags) const NOEXCEPT
@@ -269,7 +223,26 @@ bool transaction::unversioned_sighash(hash_digest& out,
     return true;
 }
 
-// Dispatch.
+// Common for all script versions.
+// ----------------------------------------------------------------------------
+
+//*****************************************************************************
+// CONSENSUS: if index exceeds outputs in signature hash, return one_hash.
+// Related Bug: bitcointalk.org/index.php?topic=260595
+// Exploit: joncave.co.uk/2014/08/bitcoin-sighash-single/
+//*****************************************************************************
+bool transaction::output_overflow(size_t input) const NOEXCEPT
+{
+    return input >= outputs_->size();
+}
+
+uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
+{
+    return possible_narrow_and_sign_cast<uint32_t>(
+        std::distance(inputs_->begin(), input));
+}
+
+// Dispatch by script version.
 // ----------------------------------------------------------------------------
 
 // There are three versions of signature hashing and verification.

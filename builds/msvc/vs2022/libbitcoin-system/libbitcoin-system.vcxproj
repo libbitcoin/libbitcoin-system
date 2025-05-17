@@ -366,6 +366,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\sha\sha512.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\hash\siphash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\arm.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\functional.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\sha.hpp" />
