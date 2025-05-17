@@ -40,10 +40,24 @@ namespace chain {
 // Extract.
 // ----------------------------------------------------------------------------
 
-static const script& op_checksig_script() NOEXCEPT
+static script checksig_script() NOEXCEPT
 {
-    static const script signature{ { opcode::checksig } };
-    return signature;
+    static const script cached{ { { opcode::checksig } } };
+    return cached;
+}
+
+static script::cptr success_script_ptr() NOEXCEPT
+{
+    constexpr auto op_success = opcode::reserved_80;
+    static_assert(operation::is_success(op_success));
+    static const auto cached = to_shared<script>({ { op_success } });
+    return cached;
+}
+
+static script::cptr checksig_script_ptr() NOEXCEPT
+{
+    static const auto cached = to_shared<script>(checksig_script());
+    return cached;
 }
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
@@ -92,7 +106,7 @@ bool witness::extract_sigop_script(script& out_script,
             {
                 // Each p2wkh input is counted as 1 sigop [bip141].
                 case short_hash_size:
-                    out_script = op_checksig_script();
+                    out_script = checksig_script();
                     return true;
 
                 // p2wsh sigops are counted as before for p2sh [bip141].
@@ -193,6 +207,7 @@ code witness::extract_script(script::cptr& out_script,
         // All [bip341] comments.
         case script_version::taproot:
         {
+            // witness stack : [annex]...
             if (program->size() == hash_size)
             {
                 auto stack_size = out_stack->size();
@@ -202,7 +217,7 @@ code witness::extract_script(script::cptr& out_script,
                     --stack_size;
 
                 // p2ts (tapscript, script path spend)
-                // witness stack : [annex]<control><script>[stack-elements]
+                // witness stack : <control><script>[stack-elements]
                 // input script  : (empty)
                 // output script : <1> <32-byte-tweaked-public-key>
                 if (stack_size > one)
@@ -244,24 +259,18 @@ code witness::extract_script(script::cptr& out_script,
                 }
 
                 // p2tr (taproot, key path spend)
-                // witness stack : [annex]<signature>
+                // witness stack : <signature>
                 // input script  : (empty)
                 // output script : <1> <32-byte-tweaked-public-key>
-                if (stack_size > zero)
+                if (is_one(stack_size))
                 {
-                    // The program is q, a 32 byte bip340 public key.
-                    ////const auto& key = to_array32(*program);
+                    // Stack element is a signature that must be valid for q.
+                    // Program is q, a 32 byte bip340 public key, so push it.
+                    out_stack->push_back(program);
+                    out_script = checksig_script_ptr();
 
-                    // Only element is a signature that must be valid for q.
-                    ////const auto& sig = out_stack->back();
-
-                    // TODO: DO SOME NASTY SHIT THAT DON'T BELONG HERE.
-                    // Validate signature against key (q), using appended
-                    // sighash_flags (?) and existing signature_hash function.
-                    ////hash = state::signature_hash(script, sighash_flags)
-                    ////if (!ecdsa::verify_signature(key, hash, sig))
-                    ////    return error::fail;
-
+                    // out_stack  : <public-key><signature>
+                    // out_script : <op_checksig>
                     return error::script_success;
                 }
 
@@ -269,10 +278,11 @@ code witness::extract_script(script::cptr& out_script,
                 return error::invalid_witness;
             }
 
-            ///////////////////////////////////////////////////////////////////
-            // TODO: need sentinel to indicate success w/out script execution.
-            ///////////////////////////////////////////////////////////////////
-            // Version 1 other than 32 bytes remain unencumbered.
+            // This op_success script succeeds immediately with bip342 active.
+            out_script = success_script_ptr();
+            out_stack->clear();
+
+            // Version 1 other than 32 bytes remain unencumbered (success).
             return error::script_success;
         }
 
