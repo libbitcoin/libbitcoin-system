@@ -157,6 +157,15 @@ BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_witness_stack__true_exected_m
     BOOST_REQUIRE_EQUAL(ec.message(), "invalid witness stack");
 }
 
+BOOST_AUTO_TEST_CASE(script_error_t__code__invalid_commitment__true_exected_message)
+{
+    constexpr auto value = error::invalid_commitment;
+    const auto ec = code(value);
+    BOOST_REQUIRE(ec);
+    BOOST_REQUIRE(ec == value);
+    BOOST_REQUIRE_EQUAL(ec.message(), "invalid tapscript commitment");
+}
+
 BOOST_AUTO_TEST_CASE(script_error_t__code__dirty_witness__true_exected_message)
 {
     constexpr auto value = error::dirty_witness;
