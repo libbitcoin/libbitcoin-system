@@ -213,7 +213,7 @@ code witness::extract_script(script::cptr& out_script,
                     --stack_size;
 
                 // p2ts (tapscript, script path spend)
-                // witness stack : <control><script>[stack-elements]
+                // witness stack : <control> <script> [stack-elements]
                 // input script  : (empty)
                 // output script : <1> <32-byte-tweaked-public-key>
                 if (stack_size > one)
@@ -265,7 +265,7 @@ code witness::extract_script(script::cptr& out_script,
                     out_stack->push_back(program);
                     out_script = checksig_script_ptr();
 
-                    // out_stack  : <public-key><signature>
+                    // out_stack  : <public-key> <signature>
                     // out_script : <op_checksig>
                     return error::script_success;
                 }
