@@ -25,6 +25,7 @@
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
@@ -82,11 +83,11 @@ static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
 static bool is_valid_control_block(const data_chunk& control) NOEXCEPT
 {
     const auto size = control.size();
-    constexpr auto max = add1(hash_size) + hash_size * taproot_max_nodes;
+    constexpr auto max = add1(ec_xonly_size) + ec_xonly_size * taproot_max_keys;
 
     // Control block must be add1(32) + 32m, for integer m [0..128] [bip341].
-    return !is_limited(size, add1(hash_size), max) && is_zero(
-        floored_modulo(size - add1(hash_size), hash_size));
+    return !is_limited(size, add1(ec_xonly_size), max) && is_zero(
+        floored_modulo(size - add1(ec_xonly_size), ec_xonly_size));
 }
 
 // out_script is only useful only for sigop counting.
@@ -144,6 +145,86 @@ inline bool witness::drop_annex(chunk_cptrs& stack) NOEXCEPT
     }
 
     return false;
+}
+
+static hash_digest get_tapleaf_hash(uint8_t version,
+    const script& script) NOEXCEPT
+{
+    hash_digest out{};
+    stream::out::fast stream{ out };
+    hash::sha256t::fast<"TapLeaf"> sink{ stream };
+    sink.write_byte(version);
+    script.to_data(sink, true);
+    sink.flush();
+    return out;
+}
+
+static hash_digest get_taptweak_hash(const ec_xonly& key,
+    const hash_digest& merkle) NOEXCEPT
+{
+    hash_digest out{};
+    stream::out::fast stream{ out };
+    hash::sha256t::fast<"TapTweak"> sink{ stream };
+    sink.write_bytes(key);
+    sink.write_bytes(merkle);
+    sink.flush();
+    return out;
+}
+
+static hash_digest get_tapbranch_hash(const hash_digest& left,
+    const hash_digest& right) NOEXCEPT
+{
+    hash_digest out{};
+    stream::out::fast stream{ out };
+    hash::sha256t::fast<"TapBranch"> sink{ stream };
+
+    if (std::lexicographical_compare(left.begin(), left.end(),
+        right.begin(), right.end()))
+    {
+        sink.write_bytes(left);
+        sink.write_bytes(right);
+    }
+    else
+    {
+        sink.write_bytes(right);
+        sink.write_bytes(left);
+    }
+
+    sink.flush();
+    return out;
+}
+
+static hash_digest get_merkle_root(const data_chunk& control,
+    const hash_digest& tapleaf_hash) NOEXCEPT
+{
+    BC_ASSERT(is_valid_control_block(control));
+
+    constexpr auto start = add1(ec_xonly_size);
+    const auto bytes = floored_subtract(control.size(), start);
+    const auto count = floored_divide(bytes, ec_xonly_size);
+    const auto begin = std::next(control.data(), start);
+    const auto nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
+
+    hash_digest hash{ tapleaf_hash };
+    for (size_t node{}; node < count; ++node)
+        hash = get_tapbranch_hash(hash, nodes.at(node));
+
+    return hash;
+}
+
+static bool verify_commitment(const data_chunk& control,
+    const data_chunk& program, const hash_digest& hash,
+    bool parity) NOEXCEPT
+{
+    BC_ASSERT(is_valid_control_block(control));
+
+    const auto out = program.data();
+    const auto& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
+    const auto in = std::next(control.data());
+    const auto& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
+    const auto merkle = get_merkle_root(control, hash);
+    const auto tweak = get_taptweak_hash(out_key, merkle);
+    return schnorr::verify_commitment(in_key, tweak, out_key, parity);
 }
 
 // Extract script and initial execution stack.
@@ -205,7 +286,7 @@ code witness::extract_script(script::cptr& out_script,
         case script_version::taproot:
         {
             // witness stack : [annex]...
-            if (program->size() == hash_size)
+            if (program->size() == ec_xonly_size)
             {
                 auto stack_size = out_stack->size();
 
@@ -227,139 +308,30 @@ code witness::extract_script(script::cptr& out_script,
                     // The second-to-last stack element is the script.
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
+                    // Extract version and parity from control byte.
                     const auto bits = control->front();
                     const auto version = bit_and(bits, tapleaf_root_mask);
                     const auto parity = bit_and(bits, bit_not(tapleaf_root_mask));
 
-                    // TODO: pass into signature hashing.
-                    const auto tapscript = (version == tapleaf_tapscript);
-
-                    if (tapscript)
+                    if (version == tapleaf_tapscript)
                     {
-                        const auto get_tapleaf_hash = [](uint8_t version,
-                            const script& script) NOEXCEPT
-                        {
-                            hash_digest out{};
-                            stream::out::fast stream{ out };
-                            hash::sha256t::fast<"TapLeaf"> sink{ stream };
-                            sink.write_byte(version);
-                            script.to_data(sink, true);
-                            sink.flush();
-                            return out;
-                        };
-
                         // TODO: pass into tapscript signature hashing.
-                        const auto tapleaf_hash = get_tapleaf_hash(version,
-                            *out_script);
-
-                        const auto get_taptweak_hash = [](
-                            const hash_digest& out_key,
-                            const hash_digest& merkle) NOEXCEPT
-                        {
-                            hash_digest out{};
-                            stream::out::fast stream{ out };
-                            hash::sha256t::fast<"TapTweak"> sink{ stream };
-                            sink.write_bytes(out_key);
-                            sink.write_bytes(merkle);
-                            sink.flush();
-                            return out;
-                        };
-
-                        // TODO: add secp256k1_xonly_pubkey_parse to secp256k1.
-                        // TODO: add secp256k1_xonly_pubkey_tweak_add_check to secp256k1.
-                        const auto check_taptweak = [&](
-                            const hash_digest& /* in_key */,
-                            const hash_digest& out_key,
-                            const hash_digest& merkle,
-                            bool /* parity */) NOEXCEPT
-                        {
-                            ////secp256k1_xonly_pubkey xonly_pubkey{};
-                            ////if (!secp256k1_xonly_pubkey_parse(
-                            ////    secp256k1_context_static,
-                            ////    &xonly_pubkey,
-                            ////    out_key.data()))
-                            ////    return false;
-
-                            /* const auto hash = */ get_taptweak_hash(out_key, merkle);
-                            ////return secp256k1_xonly_pubkey_tweak_add_check(
-                            ////    secp256k1_context_static,
-                            ////    in_key.begin(),
-                            ////    parity,
-                            ////    &xonly_pubkey,
-                            ////    hash.data());
-                            return false;
-                        };
-
-                        const auto get_tapbranch_hash = [](const hash_digest& left,
-                            const hash_digest& right) NOEXCEPT
-                        {
-                            hash_digest out{};
-                            stream::out::fast stream{ out };
-                            hash::sha256t::fast<"TapBranch"> sink{ stream };
-
-                            // lesser is true, shorter is lesser, equal is not.
-                            if (std::lexicographical_compare(left.begin(), left.end(),
-                                right.begin(), right.end()))
-                            {
-                                sink.write_bytes(left);
-                                sink.write_bytes(right);
-                            }
-                            else
-                            {
-                                sink.write_bytes(right);
-                                sink.write_bytes(left);
-                            }
-
-                            sink.flush();
-                            return out;
-                        };
-
-                        // There is no null in validation path.
-                        const auto get_merkle_root = [&](const data_chunk& control,
-                            const hash_digest& tapleaf_hash) NOEXCEPT
-                        {
-                            BC_ASSERT(is_valid_control_block(control));
-                            using node_t = std_array<uint8_t, hash_size>;
-                            constexpr auto key = add1(hash_size);
-                            constexpr auto max = taproot_max_nodes;
-                            hash_digest hash{ tapleaf_hash };
-
-                            // Cast control into std::array<node_t, 128> (unsafe).
-                            const auto bytes = floored_subtract(control.size(), key);
-                            const auto count = floored_divide(bytes, hash_size);
-                            const auto first = std::next(control.data(), key);
-                            const auto nodes = unsafe_array_cast<node_t, max>(first);
-
-                            // Read only to actual count of nodes (safe).
-                            for (size_t node{}; node < count; ++node)
-                                hash = get_tapbranch_hash(hash, nodes.at(node));
-
-                            return hash;
-                        };
-
-                        const auto verify_commitment = [&](const data_chunk& control,
-                            const data_chunk& program, const hash_digest& hash) NOEXCEPT
-                        {
-                            const auto out = program.data();
-                            const auto in = std::next(control.data());
-                            const auto& in_key = unsafe_array_cast<uint8_t, hash_size>(in);
-                            const auto& out_key = unsafe_array_cast<uint8_t, hash_size>(out);
-                            const auto merkle = get_merkle_root(control, hash);
-                            return check_taptweak(in_key, out_key, merkle, parity);
-                        };
-
-                        if (!verify_commitment(*control, *program, tapleaf_hash))
+                        const auto tapleaf_hash = get_tapleaf_hash(version, *out_script);
+                        if (!verify_commitment(*control, *program, tapleaf_hash, parity))
                             return error::invalid_commitment;
 
-                        // Execute script with remaining stack.
+                        // TODO: return tapleaf_hash in pointer.
+                        // Execute tapleaf script.
+                        // out stack  : [stack-elements]
+                        // out script : (popped-from-stack)
                         return error::script_success;
                     }
 
-                    // This op_success script succeeds immediately.
+                    // Others remain unencumbered (success).
+                    // out stack  : (empty)
+                    // out script : <op_success>
                     out_script = success_script_ptr();
                     out_stack->clear();
-
-                    // Others remain unencumbered (success).
                     return error::script_success;
                 }
 
@@ -371,34 +343,42 @@ code witness::extract_script(script::cptr& out_script,
                 {
                     // Stack element is a signature that must be valid for q.
                     // Program is q, a 32 byte bip340 public key, so push it.
+                    // out stack  : (empty)
+                    // out script : <op_checksig>
                     out_stack->push_back(program);
                     out_script = checksig_script_ptr();
-
-                    // out_stack  : <public-key> <signature>
-                    // out_script : <op_checksig>
                     return error::script_success;
                 }
 
                 // Fail if witness stack was empty.
+                // witness stack : (empty)
+                // input script  : (empty)
+                // output script : <1> <32-byte-value>
                 return error::invalid_witness;
             }
 
-            // pay-to-anchor (p2a) programs land here (standardness).
+            // pay-to-anchor (p2a) programs pass by here (standardness).
             ////script::is_anchor_program_pattern(program_script.ops())
 
-            // This op_success script succeeds immediately.
+            // Version 1 other than 32 bytes...
+            // witness stack : [stack-elements]
+            // input script  : (empty)
+            // output script : <1> <2..40 byte program>
+            // ...remain unencumbered (success).
+            // out stack  : (empty)
+            // out script : <op_success>
             out_script = success_script_ptr();
             out_stack->clear();
-
-            // Version 1 other than 32 bytes remain unencumbered (success).
             return error::script_success;
         }
 
         // These versions are reserved for future extensions [bip141].
+        // output script : <2..16> <2..40 byte program>
         case script_version::reserved:
             return error::script_success;
 
         // The witness version is undefined.
+        // output script : <!0..16> <2..40 byte program>
         case script_version::unversioned:
         default:
             return error::invalid_witness;
