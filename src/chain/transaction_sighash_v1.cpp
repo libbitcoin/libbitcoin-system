@@ -18,9 +18,12 @@
  */
 #include <bitcoin/system/chain/transaction.hpp>
 
+#include <iterator>
+#include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/extension.hpp>
 #include <bitcoin/system/chain/enums/key_version.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
@@ -35,6 +38,21 @@ namespace chain {
 
 // Signature hashing (version 1 - taproot).
 // ----------------------------------------------------------------------------
+
+// static
+// Zero-based opcode position of the last executed op_codeseparator before
+// currently executed signature opcode (0xffffffff if none) [bip342].
+uint32_t transaction::subscript_v1(const script& script) NOEXCEPT
+{
+    if (script.ops().empty())
+        return chain::default_separators;
+
+    const auto start = script.ops().begin();
+    const auto span = std::distance(start, script.offset);
+    const auto slot = possible_narrow_and_sign_cast<uint32_t>(span);
+    const auto none = is_zero(slot) && start->code() != opcode::codeseparator;
+    return none ? chain::default_separators : slot;
+}
 
 // ext_flags and annex flag are combined into one byte, who knows why.
 uint8_t transaction::spend_type_v1(bool annex, bool tapscript) const NOEXCEPT
@@ -116,20 +134,9 @@ bool transaction::version1_sighash(hash_digest& out,
     // Additional for tapscript [bip342].
     if (tapscript)
     {
-        // TODO: obtain.
-        // The tapleaf hash as defined in BIP341.
-        constexpr hash_digest tapleaf_hash{};
-
-        // TODO: obtain.
-        // The opcode position of last executed op_codeseparator before the
-        // currently executing signature opcode. Because code_separator is the
-        // last input to signature hash, the signature hash sha256 midstate
-        // (above) can be cached for multiple op_codeseparators.
-        constexpr uint32_t code_separator{ 0 };
-
-        sink.write_bytes(tapleaf_hash);
+        sink.write_bytes(tapleaf);
         sink.write_byte(to_value(key_version::tapscript));
-        sink.write_4_bytes_little_endian(code_separator);
+        sink.write_4_bytes_little_endian(subscript_v1(script));
     }
 
     // Total length at most 206 bytes (!anyone, no epoch/tapscript) [bip341].
