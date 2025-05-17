@@ -26,32 +26,48 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+inline annex::annex() NOEXCEPT
+  : data_(nullptr)
+{
+}
 
-static const data_chunk& empty_annex() NOEXCEPT
+// Witness checks is_annex_pattern() and passes data, avoiding excess copying.
+inline annex::annex(const chunk_cptr& data) NOEXCEPT
+  : data_(data)
+{
+}
+
+inline annex::annex(const chunk_cptrs& stack) NOEXCEPT
+  : data_(from_stack(stack))
+{
+}
+
+// static/protected
+inline chunk_cptr annex::from_stack(const chunk_cptrs& stack) NOEXCEPT
+{
+    return witness::is_annex_pattern(stack) ? stack.back() : nullptr;
+}
+
+// static/private
+inline const data_chunk& annex::empty_annex() NOEXCEPT
 {
     static const data_chunk empty{};
     return empty;
 }
 
-inline annex::annex(const witness& owner) NOEXCEPT
-  : witness_(owner)
-{
-}
-
 inline annex::operator bool() const NOEXCEPT
 {
-    return witness_.get().is_annex_pattern();
+    return data_.operator bool();
 }
 
 inline size_t annex::size() const NOEXCEPT
 {
-    return data().size();
+    return data_ ? data_->size() : zero;
 }
 
 inline const data_chunk& annex::data() const NOEXCEPT
 {
-    const auto& stack = witness_.get().stack();
-    return stack.empty() ? empty_annex() : *stack.back();
+    return data_ ? *data_ : empty_annex();
 }
 
 inline const hash_digest annex::hash() const NOEXCEPT

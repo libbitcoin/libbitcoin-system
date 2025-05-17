@@ -103,6 +103,9 @@ public:
     /// Patterns.
     /// -----------------------------------------------------------------------
 
+    /// The stack adheres to the annex pattern [bip341].
+    static constexpr bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT;
+
     /// Verify the push size of each stack element [bip141].
     static constexpr bool is_push_size(const chunk_cptrs& stack) NOEXCEPT;
 
@@ -132,7 +135,6 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    static constexpr bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT;
     static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
 
     void assign_data(reader& source, bool prefix) NOEXCEPT;
@@ -140,12 +142,10 @@ private:
     // Witness should be stored as shared.
     chunk_cptrs stack_;
 
-    // Cache.
+    // Cache/alias.
     bool valid_;
     size_t size_;
-
-    // Annex member should not even consume space.
-    chain::annex annex_{ *this };
+    chain::annex annex_;
 };
 
 typedef std_vector<witness> witnesses;
