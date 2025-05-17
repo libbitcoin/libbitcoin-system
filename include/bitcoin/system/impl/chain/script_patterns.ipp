@@ -99,6 +99,15 @@ constexpr bool script::is_witness_program_pattern(
         && ops[1].data().size() <= max_witness_program;
 }
 
+// A witness program used only for policy (not implemented).
+constexpr bool script::is_anchor_program_pattern(const operations& ops) NOEXCEPT
+{
+    return is_witness_program_pattern(ops)
+        && ops[1].data().size() == 2
+        && ops[1].data()[0] == 0x4e
+        && ops[1].data()[1] == 0x73;
+}
+
 // The satoshi client now enables configurable data size for policy.
 constexpr bool script::is_pay_null_data_pattern(const operations& ops) NOEXCEPT
 {

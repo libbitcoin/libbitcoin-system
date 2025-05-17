@@ -274,6 +274,9 @@ code witness::extract_script(script::cptr& out_script,
                 return error::invalid_witness;
             }
 
+            // pay-to-anchor (p2a) programs land here (standardness).
+            ////script::is_anchor_program_pattern(program_script.ops())
+
             // This op_success script succeeds immediately with bip342 active.
             out_script = success_script_ptr();
             out_stack->clear();
