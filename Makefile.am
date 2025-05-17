@@ -596,6 +596,7 @@ include_bitcoin_system_impl_chain_HEADERS = \
     include/bitcoin/system/impl/chain/compact.ipp \
     include/bitcoin/system/impl/chain/operation_patterns.ipp \
     include/bitcoin/system/impl/chain/script_patterns.ipp \
+    include/bitcoin/system/impl/chain/transaction_patterns.ipp \
     include/bitcoin/system/impl/chain/witness_patterns.ipp
 
 include_bitcoin_system_impl_datadir = ${includedir}/bitcoin/system/impl/data

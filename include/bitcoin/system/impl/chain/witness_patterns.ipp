@@ -45,7 +45,7 @@ constexpr bool witness::is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
     return is_one(stack.size()) && stack.front()->size() == hash_size;
 }
 
-// static/private
+// static
 constexpr bool witness::is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT
 {
     // If at least two elements, discard annex if present.

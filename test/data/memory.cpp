@@ -131,6 +131,14 @@ BOOST_AUTO_TEST_CASE(memory__to_shared5__values__expected)
     BOOST_REQUIRE_EQUAL(ptr->right, 2);
 }
 
+BOOST_AUTO_TEST_CASE(memory__make_shared__value1__expected)
+{
+    // This creates a copy of the non-const into a const pointer.
+    const test_shared_ptr ptr = make_shared<type>(1);
+    BOOST_REQUIRE_EQUAL(ptr->left, 1);
+    BOOST_REQUIRE_EQUAL(ptr->right, type::expected);
+}
+
 // to_non_const_raw_ptr
 
 BOOST_AUTO_TEST_CASE(memory__to_non_const_raw_ptr__always__equals_parameter)

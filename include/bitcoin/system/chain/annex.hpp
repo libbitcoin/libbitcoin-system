@@ -27,23 +27,28 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-class witness;
-
-/// Annex is an abstraction over a witness stack.
+/// Annex is an abstraction over the top witness stack element.
 class BC_API annex
 {
 public:
     DEFAULT_COPY_MOVE_DESTRUCT(annex);
 
-    inline annex(const witness& owner) NOEXCEPT;
+    inline annex() NOEXCEPT;
+    inline annex(const chunk_cptr& data) NOEXCEPT;
+    inline annex(const chunk_cptrs& stack) NOEXCEPT;
 
     inline size_t size() const NOEXCEPT;
     inline const data_chunk& data() const NOEXCEPT;
     inline const hash_digest hash() const NOEXCEPT;
     inline operator bool() const NOEXCEPT;
 
+protected:
+    static inline chunk_cptr from_stack(const chunk_cptrs& stack) NOEXCEPT;
+
 private:
-    std::reference_wrapper<const witness> witness_;
+    static inline const data_chunk& empty_annex() NOEXCEPT;
+
+    chunk_cptr data_;
 };
 
 } // namespace chain

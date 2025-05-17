@@ -190,12 +190,16 @@ code CLASS::connect_witness(const chain::context& state,
 
             script::cptr script;
             chunk_cptrs_ptr stack;
+
+            // TODO: extract tapleaf_hash, nullable.
             if ((ec = input.witness().extract_script(script, stack, prevout)))
                 return ec;
 
-            // TODO: either TAPROOT or TAPSCRIPT.
+            // TODO: pass tapleaf_hash in last parameter, nullable.
             interpreter program(tx, it, script, flags, version, stack, {});
 
+            // TODO: capture tapleaf_hash in program construct and use to
+            // TODO: obtain both tapscript boolean and tapleaf_hash values.
             if ((ec = program.run()))
             {
                 return ec;

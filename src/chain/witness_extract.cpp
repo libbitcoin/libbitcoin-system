@@ -19,19 +19,17 @@
 #include <bitcoin/system/chain/witness.hpp>
 
 #include <algorithm>
-#include <istream>
-#include <memory>
-#include <numeric>
-#include <string>
-#include <utility>
+#include <iterator>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/enums/script_version.hpp>
+#include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/machine/machine.hpp>
-#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -40,10 +38,24 @@ namespace chain {
 // Extract.
 // ----------------------------------------------------------------------------
 
-static const script& op_checksig_script() NOEXCEPT
+static script checksig_script() NOEXCEPT
 {
-    static const script signature{ { opcode::checksig } };
-    return signature;
+    static const script cached{ { { opcode::checksig } } };
+    return cached;
+}
+
+static script::cptr success_script_ptr() NOEXCEPT
+{
+    constexpr auto op_success = opcode::reserved_80;
+    static_assert(operation::is_success(op_success));
+    static const auto cached = to_shared<script>({ { op_success } });
+    return cached;
+}
+
+static script::cptr checksig_script_ptr() NOEXCEPT
+{
+    static const auto cached = to_shared<script>(checksig_script());
+    return cached;
 }
 
 // This is an internal optimization over using script::to_pay_key_hash_pattern.
@@ -70,12 +82,11 @@ static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
 static bool is_valid_control_block(const data_chunk& control) NOEXCEPT
 {
     const auto size = control.size();
-    constexpr auto maximum = control_block_base + control_block_node *
-        control_block_range;
+    constexpr auto max = add1(hash_size) + hash_size * taproot_max_nodes;
 
-    // Control block must be size 33 + 32m, for integer m [0..128] [bip341].
-    return !is_limited(size, control_block_base, maximum)
-        && is_zero(floored_modulo(size - control_block_base, control_block_node));
+    // Control block must be add1(32) + 32m, for integer m [0..128] [bip341].
+    return !is_limited(size, add1(hash_size), max) && is_zero(
+        floored_modulo(size - add1(hash_size), hash_size));
 }
 
 // out_script is only useful only for sigop counting.
@@ -92,7 +103,7 @@ bool witness::extract_sigop_script(script& out_script,
             {
                 // Each p2wkh input is counted as 1 sigop [bip141].
                 case short_hash_size:
-                    out_script = op_checksig_script();
+                    out_script = checksig_script();
                     return true;
 
                 // p2wsh sigops are counted as before for p2sh [bip141].
@@ -140,7 +151,7 @@ code witness::extract_script(script::cptr& out_script,
     chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
-    out_stack = std::make_shared<chunk_cptrs>(stack_);
+    out_stack = make_shared<chunk_cptrs>(stack_);
     const auto& program = program_script.witness_program();
 
     switch (program_script.version())
@@ -193,8 +204,7 @@ code witness::extract_script(script::cptr& out_script,
         // All [bip341] comments.
         case script_version::taproot:
         {
-            // input script  : (empty)
-            // output script : <1> <32-byte-tweaked-public-key>
+            // witness stack : [annex]...
             if (program->size() == hash_size)
             {
                 auto stack_size = out_stack->size();
@@ -203,70 +213,169 @@ code witness::extract_script(script::cptr& out_script,
                 if (drop_annex(*out_stack))
                     --stack_size;
 
-                // tapscript (script path spend)
-                // witness stack : [annex]<control><script>[stack-elements]
+                // p2ts (tapscript, script path spend)
+                // witness stack : <control> <script> [stack-elements]
                 // input script  : (empty)
                 // output script : <1> <32-byte-tweaked-public-key>
                 if (stack_size > one)
                 {
-                    // The last stack element is control block.
-                    const auto& control = pop(*out_stack);
-
-                    // Control length must be 33 + 32m, for integer m [0..128].
+                    // The last stack element is the control block.
+                    const auto control = pop(*out_stack);
                     if (!is_valid_control_block(*control))
                         return error::invalid_witness;
 
                     // The second-to-last stack element is the script.
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
-                    // TODO: DO SOME NASTY SHIT WITH CONTROL(c) AND SCRIPT(s).
-                    // TODO: MUST OBTAIN tapleaf_hash for signature hash.
-                    // q is referred to as `taproot output key`.
-                    // p is referred to as `taproot internal key`.
-                    ////Let p = c[1:33] and let P = lift_x(int(p))
-                    ////* where lift_x and [:] are defined as in BIP340.
-                    ////* Fail if this point is not on the curve.
-                    ////Let v = c[0] & 0xfe and call it the leaf version.
-                    ////Let k0 = hashTapLeaf(v || compact_size(size of s) || s);
-                    ////* also call it the tapleaf_hash.
-                    ////For j in [0,1,...,m-1]:
-                    ////Let ej = c[33+32j:65+32j].
-                    ////Let kj+1 depend on whether kj < ej (lexicographically):
-                    ////If kj <  ej: kj+1 = hashTapBranch(kj || ej).
-                    ////If kj >= ej: kj+1 = hashTapBranch(ej || kj).
-                    ////Let t = hashTapTweak(p || km).
-                    ////If t >= 0xFFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6
-                    ////* AF48A03B BFD25E8C D0364141
-                    ////* (order of secp256k1), fail.
-                    ////Let Q = P + int(t)G.
-                    ////If q != x(Q) or c[0] & 1 != y(Q) mod 2, fail.
+                    const auto bits = control->front();
+                    const auto version = bit_and(bits, tapleaf_root_mask);
+                    const auto parity = bit_and(bits, bit_not(tapleaf_root_mask));
 
-                    // Execute script with remaining stack.
+                    // TODO: pass into signature hashing.
+                    const auto tapscript = (version == tapleaf_tapscript);
+
+                    if (tapscript)
+                    {
+                        const auto get_tapleaf_hash = [](uint8_t version,
+                            const script& script) NOEXCEPT
+                        {
+                            hash_digest out{};
+                            stream::out::fast stream{ out };
+                            hash::sha256t::fast<"TapLeaf"> sink{ stream };
+                            sink.write_byte(version);
+                            script.to_data(sink, true);
+                            sink.flush();
+                            return out;
+                        };
+
+                        // TODO: pass into tapscript signature hashing.
+                        const auto tapleaf_hash = get_tapleaf_hash(version,
+                            *out_script);
+
+                        const auto get_taptweak_hash = [](
+                            const hash_digest& out_key,
+                            const hash_digest& merkle) NOEXCEPT
+                        {
+                            hash_digest out{};
+                            stream::out::fast stream{ out };
+                            hash::sha256t::fast<"TapTweak"> sink{ stream };
+                            sink.write_bytes(out_key);
+                            sink.write_bytes(merkle);
+                            sink.flush();
+                            return out;
+                        };
+
+                        // TODO: add secp256k1_xonly_pubkey_parse to secp256k1.
+                        // TODO: add secp256k1_xonly_pubkey_tweak_add_check to secp256k1.
+                        const auto check_taptweak = [&](
+                            const hash_digest& /* in_key */,
+                            const hash_digest& out_key,
+                            const hash_digest& merkle,
+                            bool /* parity */) NOEXCEPT
+                        {
+                            ////secp256k1_xonly_pubkey xonly_pubkey{};
+                            ////if (!secp256k1_xonly_pubkey_parse(
+                            ////    secp256k1_context_static,
+                            ////    &xonly_pubkey,
+                            ////    out_key.data()))
+                            ////    return false;
+
+                            /* const auto hash = */ get_taptweak_hash(out_key, merkle);
+                            ////return secp256k1_xonly_pubkey_tweak_add_check(
+                            ////    secp256k1_context_static,
+                            ////    in_key.begin(),
+                            ////    parity,
+                            ////    &xonly_pubkey,
+                            ////    hash.data());
+                            return false;
+                        };
+
+                        const auto get_tapbranch_hash = [](const hash_digest& left,
+                            const hash_digest& right) NOEXCEPT
+                        {
+                            hash_digest out{};
+                            stream::out::fast stream{ out };
+                            hash::sha256t::fast<"TapBranch"> sink{ stream };
+
+                            // lesser is true, shorter is lesser, equal is not.
+                            if (std::lexicographical_compare(left.begin(), left.end(),
+                                right.begin(), right.end()))
+                            {
+                                sink.write_bytes(left);
+                                sink.write_bytes(right);
+                            }
+                            else
+                            {
+                                sink.write_bytes(right);
+                                sink.write_bytes(left);
+                            }
+
+                            sink.flush();
+                            return out;
+                        };
+
+                        // There is no null in validation path.
+                        const auto get_merkle_root = [&](const data_chunk& control,
+                            const hash_digest& tapleaf_hash) NOEXCEPT
+                        {
+                            BC_ASSERT(is_valid_control_block(control));
+                            using node_t = std_array<uint8_t, hash_size>;
+                            constexpr auto key = add1(hash_size);
+                            constexpr auto max = taproot_max_nodes;
+                            hash_digest hash{ tapleaf_hash };
+
+                            // Cast control into std::array<node_t, 128> (unsafe).
+                            const auto bytes = floored_subtract(control.size(), key);
+                            const auto count = floored_divide(bytes, hash_size);
+                            const auto first = std::next(control.data(), key);
+                            const auto nodes = unsafe_array_cast<node_t, max>(first);
+
+                            // Read only to actual count of nodes (safe).
+                            for (size_t node{}; node < count; ++node)
+                                hash = get_tapbranch_hash(hash, nodes.at(node));
+
+                            return hash;
+                        };
+
+                        const auto verify_commitment = [&](const data_chunk& control,
+                            const data_chunk& program, const hash_digest& hash) NOEXCEPT
+                        {
+                            const auto out = program.data();
+                            const auto in = std::next(control.data());
+                            const auto& in_key = unsafe_array_cast<uint8_t, hash_size>(in);
+                            const auto& out_key = unsafe_array_cast<uint8_t, hash_size>(out);
+                            const auto merkle = get_merkle_root(control, hash);
+                            return check_taptweak(in_key, out_key, merkle, parity);
+                        };
+
+                        if (!verify_commitment(*control, *program, tapleaf_hash))
+                            return error::invalid_commitment;
+
+                        // Execute script with remaining stack.
+                        return error::script_success;
+                    }
+
+                    // This op_success script succeeds immediately.
+                    out_script = success_script_ptr();
+                    out_stack->clear();
+
+                    // Others remain unencumbered (success).
                     return error::script_success;
                 }
 
-                // taproot (key path spend)
-                // witness stack : [annex]<signature>
+                // p2tr (taproot, key path spend)
+                // witness stack : <signature>
                 // input script  : (empty)
                 // output script : <1> <32-byte-tweaked-public-key>
-                if (stack_size > zero)
+                if (is_one(stack_size))
                 {
-                    // The program is q, a 32 byte bip340 public key.
-                    ////const auto& key = to_array32(*program);
+                    // Stack element is a signature that must be valid for q.
+                    // Program is q, a 32 byte bip340 public key, so push it.
+                    out_stack->push_back(program);
+                    out_script = checksig_script_ptr();
 
-                    // Only element is a signature that must be valid for q.
-                    ////const auto& sig = out_stack->back();
-
-                    // TODO: DO SOME NASTY SHIT THAT DON'T BELONG HERE.
-                    // Validate signature against key (q), using appended
-                    // sighash_flags (?) and existing signature_hash function.
-                    ////hash = state::signature_hash(script, sighash_flags)
-                    ////if (!ecdsa::verify_signature(key, hash, sig))
-                    ////    return error::fail;
-
-                    ///////////////////////////////////////////////////////////
-                    // TODO: need sentinel to indicate success w/out script ex.
-                    ///////////////////////////////////////////////////////////
+                    // out_stack  : <public-key> <signature>
+                    // out_script : <op_checksig>
                     return error::script_success;
                 }
 
@@ -274,10 +383,14 @@ code witness::extract_script(script::cptr& out_script,
                 return error::invalid_witness;
             }
 
-            ///////////////////////////////////////////////////////////////////
-            // TODO: need sentinel to indicate success w/out script execution.
-            ///////////////////////////////////////////////////////////////////
-            // Version 1 other than 32 bytes remain unencumbered.
+            // pay-to-anchor (p2a) programs land here (standardness).
+            ////script::is_anchor_program_pattern(program_script.ops())
+
+            // This op_success script succeeds immediately.
+            out_script = success_script_ptr();
+            out_stack->clear();
+
+            // Version 1 other than 32 bytes remain unencumbered (success).
             return error::script_success;
         }
 

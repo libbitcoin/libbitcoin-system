@@ -68,7 +68,7 @@ const data_chunk& operation::no_data() NOEXCEPT
 // static/private
 const chunk_cptr& operation::no_data_cptr() NOEXCEPT
 {
-    static const auto empty = std::make_shared<const data_chunk>();
+    static const auto empty = to_shared<const data_chunk>();
     return empty;
 }
 

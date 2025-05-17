@@ -90,8 +90,9 @@ witness::witness(reader&& source, bool prefix) NOEXCEPT
 }
 
 witness::witness(reader& source, bool prefix) NOEXCEPT
-  : stack_(source.get_arena())
+  : stack_(source.get_arena()), annex_()
 {
+    // annex_ may be reconstructed, since it requires the populated stack.
     assign_data(source, prefix);
 }
 
@@ -103,19 +104,26 @@ witness::witness(const std::string& mnemonic) NOEXCEPT
 // protected
 witness::witness(chunk_cptrs&& stack, bool valid) NOEXCEPT
   : stack_(std::move(stack)), valid_(valid),
-    size_(serialized_size(stack_, false))
+    size_(serialized_size(stack_, false)),
+    annex_(stack_)
 {
 }
 
 // protected
 witness::witness(const chunk_cptrs& stack, bool valid) NOEXCEPT
-  : stack_(stack), valid_(valid), size_(serialized_size(stack_, false))
+  : stack_(stack),
+    valid_(valid),
+    size_(serialized_size(stack_, false)),
+    annex_(stack_)
 {
 }
 
 // protected
 witness::witness(const chunk_cptrs& stack, bool valid, size_t size) NOEXCEPT
-  : stack_(stack), valid_(valid), size_(size)
+  : stack_(stack),
+    valid_(valid),
+    size_(size),
+    annex_(stack_)
 {
 }
 
@@ -193,6 +201,9 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
             if (!push_witness())
                 break;
     }
+
+    if (witness::is_annex_pattern(stack_))
+        annex_ = { stack_.back() };
 
     valid_ = source;
 }

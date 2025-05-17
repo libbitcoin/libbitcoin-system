@@ -69,6 +69,16 @@ inline std::shared_ptr<const Type> to_shared(Args&&... values) NOEXCEPT
     return std::make_shared<const Type>(std::forward<Args>(values)...);
 }
 
+/// shared_ptr<non-const>
+/// ---------------------------------------------------------------------------
+
+/// Create non-const shared pointer from copied instance.
+template <typename Type>
+inline std::shared_ptr<Type> make_shared(const Type& value) NOEXCEPT
+{
+    return std::make_shared<Type>(value);
+}
+
 /// Obtain non constant pointer from shared_ptr to const.
 /// This is useful when allocating objects to shared const before population.
 template <typename Type>

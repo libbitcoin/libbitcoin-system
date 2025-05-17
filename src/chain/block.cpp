@@ -209,7 +209,7 @@ const chain::header::cptr block::header_ptr() const NOEXCEPT
 // Roll up inputs for concurrent prevout processing.
 const inputs_cptr block::inputs_ptr() const NOEXCEPT
 {
-    const auto inputs = std::make_shared<input_cptrs>();
+    const auto inputs = to_shared<input_cptrs>();
     const auto append_ins = [&inputs](const auto& tx) NOEXCEPT
     {
         const auto& tx_ins = tx->inputs_ptr();
