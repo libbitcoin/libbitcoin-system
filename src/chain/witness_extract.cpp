@@ -18,20 +18,16 @@
  */
 #include <bitcoin/system/chain/witness.hpp>
 
-#include <algorithm>
-#include <istream>
-#include <memory>
-#include <numeric>
-#include <string>
-#include <utility>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/enums/script_version.hpp>
+#include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
+#include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/machine/machine.hpp>
-#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -232,7 +228,7 @@ code witness::extract_script(script::cptr& out_script,
                     // The second-to-last stack element is the script.
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
-                    // TODO: DO SOME NASTY SHIT WITH CONTROL(c) AND SCRIPT(s).
+                    // TODO: DO SOME NASTY SHIT WITH CONTROL AND SCRIPT.
                     // TODO: MUST OBTAIN tapleaf_hash for signature hash.
                     // q is referred to as `taproot output key`.
                     // p is referred to as `taproot internal key`.
