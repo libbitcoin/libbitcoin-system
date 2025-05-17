@@ -43,7 +43,7 @@ public:
     inline operator bool() const NOEXCEPT;
 
 private:
-    const witness& witness_;
+    std::reference_wrapper<const witness> witness_;
 };
 
 } // namespace chain
