@@ -244,6 +244,7 @@ code witness::extract_script(script::cptr& out_script,
                     ////If kj <  ej: kj+1 = hashTapBranch(kj || ej).
                     ////If kj >= ej: kj+1 = hashTapBranch(ej || kj).
                     ////Let t = hashTapTweak(p || km).
+                    //// secp256k1_ecdsa_const_order_as_fe...
                     ////If t >= 0xFFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6
                     ////* AF48A03B BFD25E8C D0364141
                     ////* (order of secp256k1), fail.

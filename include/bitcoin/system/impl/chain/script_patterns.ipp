@@ -217,8 +217,7 @@ constexpr bool script::is_pay_witness_script_hash_pattern(
 }
 
 // The first push is based on wacky satoshi op_check_multisig behavior that
-// we must perpetuate, though it's appearance here is policy not consensus.
-// Limiting to push_size_0 removes pattern ambiguity with little downside.
+// we must perpetuate, though this is not used in consensus validation.
 constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
 {
     const auto endorsement = [](const operation& op) NOEXCEPT
