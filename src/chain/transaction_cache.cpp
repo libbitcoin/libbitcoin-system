@@ -192,7 +192,7 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
 
 void transaction::initialize_v0_cache() const NOEXCEPT
 {
-    ////v0_cache_ = make_shared<v0_cache>(
+    ////v0_cache_ = to_shared<v0_cache>(
     ////    double_hash_points(),
     ////    double_hash_sequences(),
     ////    double_hash_outputs());
@@ -200,7 +200,7 @@ void transaction::initialize_v0_cache() const NOEXCEPT
 
 void transaction::initialize_v1_cache() const NOEXCEPT
 {
-    ////v1_cache_ = make_shared<v1_cache>(
+    ////v1_cache_ = to_shared<v1_cache>(
     ////    single_hash_amounts(),
     ////    single_hash_scripts(),
     ////    single_hash_points(),
