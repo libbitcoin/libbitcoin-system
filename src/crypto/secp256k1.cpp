@@ -497,20 +497,44 @@ bool sign(ec_signature& out, const ec_secret& secret,
 }
 
 // BIP341: A Taproot signature is a 64-byte Schnorr sig, as defined in BIP340.
-bool verify_signature(const data_slice& x_point, const hash_digest& hash,
+bool verify_signature(const data_chunk& x_point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
-    if (x_point.size() != hash_size)
+    constexpr auto size = public_key_size;
+    if (x_point.size() != size)
         return false;
 
+    const auto& pubkey = unsafe_array_cast<uint8_t, size>(x_point.data());
+    return verify_signature(pubkey, hash, signature);
+}
+
+// BIP341: A Taproot signature is a 64-byte Schnorr sig, as defined in BIP340.
+bool verify_signature(const ec_xonly& x_point, const hash_digest& hash,
+    const ec_signature& signature) NOEXCEPT
+{
     secp256k1_xonly_pubkey pubkey;
     const auto context = ec_context_verify::context();
 
     return
         secp256k1_xonly_pubkey_parse(context, &pubkey, x_point.data()) ==
             ec_success && 
-        secp256k1_schnorrsig_verify(context, signature.data(),  hash.data(),
+        secp256k1_schnorrsig_verify(context, signature.data(), hash.data(),
             hash_size, &pubkey) == ec_success;
+}
+
+// BIP341: If q != x(Q) or c[0] & 1 != y(Q) mod 2, fail.
+bool verify_commitment(const ec_xonly& internal_key, const hash_digest& tweak,
+    const ec_xonly& tweaked_key, bool tweaked_key_parity) NOEXCEPT
+{
+    secp256k1_xonly_pubkey pubkey;
+    const auto context = ec_context_verify::context();
+    const auto parity = to_int(tweaked_key_parity);
+
+    return
+        secp256k1_xonly_pubkey_parse(context, &pubkey, internal_key.data()) ==
+            ec_success &&
+        secp256k1_xonly_pubkey_tweak_add_check(context, tweaked_key.data(),
+            parity, &pubkey, tweak.data()) == ec_success;
 }
 
 } // namespace schnorr

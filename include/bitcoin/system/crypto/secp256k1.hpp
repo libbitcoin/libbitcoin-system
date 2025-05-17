@@ -36,15 +36,19 @@ typedef data_array<ec_secret_size> ec_secret;
 
 typedef std_vector<ec_secret> secret_list;
 
-/// Compressed public key:
+/// Compressed ECDSA public key:
 static constexpr size_t ec_compressed_size = 33;
 typedef data_array<ec_compressed_size> ec_compressed;
 typedef std_vector<ec_compressed> compressed_list;
 
-/// Uncompressed public key:
+/// Uncompressed ECDSA public key:
 static constexpr size_t ec_uncompressed_size = 65;
 typedef data_array<ec_uncompressed_size> ec_uncompressed;
 typedef std_vector<ec_uncompressed> uncompressed_list;
+
+/// X-only Schnorr public key:
+static constexpr size_t ec_xonly_size = 32;
+typedef data_array<ec_xonly_size> ec_xonly;
 
 // Parsed ECDSA or Schnorr signature:
 static constexpr size_t ec_signature_size = 64;
@@ -228,13 +232,22 @@ static constexpr size_t public_key_size = 32;
 /// ---------------------------------------------------------------------------
 /// It is recommended to verify a signature after signing.
 
-/// Create a Schnorr signature using a private key (simple version, no tweaks).
+/// Create Schnorr signature using a private key (simple version, no tweaks).
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
     const hash_digest& hash, const hash_digest& auxiliary) NOEXCEPT;
 
-/// Verify an Schnorr signature using a potential x-only point.
-BC_API bool verify_signature(const data_slice& x_point,
+/// Verify Schnorr signature of hash by associated secret of the x-only point.
+BC_API bool verify_signature(const data_chunk& x_point,
     const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
+
+/// Verify Schnorr signature of hash by associated secret of the x-only point.
+BC_API bool verify_signature(const ec_xonly& x_point,
+    const hash_digest& hash, const ec_signature& signature) NOEXCEPT;
+
+/// Verify Schnorr commitment of key/parity to hash, results in x-only point.
+BC_API bool verify_commitment(const ec_xonly& internal_key,
+    const hash_digest& tweak, const ec_xonly& tweaked_key,
+    bool tweaked_key_parity) NOEXCEPT;
 
 } // namespace schnorr
 } // namespace system

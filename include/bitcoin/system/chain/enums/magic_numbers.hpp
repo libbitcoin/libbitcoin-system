@@ -88,7 +88,7 @@ constexpr uint8_t witness_enabled = 0x01;
 /// ---------------------------------------------------------------------------
 
 constexpr size_t signature_cost = 50;
-constexpr size_t taproot_max_nodes = 128;
+constexpr size_t taproot_max_keys = 128;
 constexpr uint8_t taproot_annex_prefix = 0x50;
 constexpr uint8_t tapleaf_tapscript = 0b1100'0000; // 0xc0
 constexpr uint8_t tapleaf_root_mask = 0b1111'1110; // 0xfe
