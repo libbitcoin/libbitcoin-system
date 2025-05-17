@@ -40,7 +40,7 @@ inline annex::annex(const witness& owner) NOEXCEPT
 
 inline annex::operator bool() const NOEXCEPT
 {
-    return witness_.is_annex_pattern();
+    return witness_.get().is_annex_pattern();
 }
 
 inline size_t annex::size() const NOEXCEPT
@@ -50,7 +50,7 @@ inline size_t annex::size() const NOEXCEPT
 
 inline const data_chunk& annex::data() const NOEXCEPT
 {
-    const auto& stack = witness_.stack();
+    const auto& stack = witness_.get().stack();
     return stack.empty() ? empty_annex() : *stack.back();
 }
 
