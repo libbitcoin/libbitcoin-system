@@ -67,8 +67,13 @@ bool transaction::version1_sighash(hash_digest& out,
     const input_iterator& input, const script& script, uint64_t value,
     uint8_t sighash_flags) const NOEXCEPT
 {
-    // TODO: obtain.
+    // TODO: obtain tapscript indicator and access to tapleaf hash.
+    constexpr uint8_t epoch{};
     constexpr bool tapscript{};
+    constexpr hash_digest tapleaf{};
+
+    const auto& in = **input;
+    const auto& annex = in.witness().annex();
 
     // Mask anyone_can_pay, and set hash_all by default.
     // sighash_flags previously verified (see schnorr_split).
@@ -77,14 +82,11 @@ bool transaction::version1_sighash(hash_digest& out,
     const auto single = (flag == coverage::hash_single);
     const auto all = (flag == coverage::hash_all);
 
-    const auto& in = **input;
-    const auto& annex = in.witness().annex();
-
     // Create tagged hash writer.
     stream::out::fast stream{ out };
     hash::sha256t::fast<"TapSighash"> sink{ stream };
 
-    sink.write_byte(0);
+    sink.write_byte(epoch);
     sink.write_byte(sighash_flags);
     sink.write_4_bytes_little_endian(version_);
     sink.write_4_bytes_little_endian(locktime_);
@@ -128,10 +130,12 @@ bool transaction::version1_sighash(hash_digest& out,
         if (output_overflow(index))
             return false;
 
+        // Hash is cacheable for use with each single sigop in the tapscript.
         sink.write_bytes(outputs_->at(index)->hash());
     }
 
     // Additional for tapscript [bip342].
+    // Above midstate is cacheable for use when same sigop flag for the script.
     if (tapscript)
     {
         sink.write_bytes(tapleaf);
