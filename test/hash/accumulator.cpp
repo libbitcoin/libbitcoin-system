@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(accumulator__write_flush__one_over_padding_boundary__pad_63
     constexpr auto bytes = 57u;
     constexpr data_array<bytes> data{};
     constexpr auto pad = size - bytes - sha256::count_bytes;
-    static_assert(pad == -1_size);
+    static_assert(pad == bit_all<size_t>);
 
     access writer{};
     BOOST_REQUIRE(writer.write(data));

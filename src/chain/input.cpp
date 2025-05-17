@@ -55,7 +55,7 @@ const witness& input::no_witness() NOEXCEPT
 // static/private
 const witness::cptr& input::no_witness_cptr() NOEXCEPT
 {
-    static const auto empty = std::make_shared<const chain::witness>();
+    static const auto empty = to_shared<const chain::witness>();
     return empty;
 }
 

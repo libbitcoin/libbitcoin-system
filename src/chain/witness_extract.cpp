@@ -140,7 +140,7 @@ code witness::extract_script(script::cptr& out_script,
     chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
-    out_stack = std::make_shared<chunk_cptrs>(stack_);
+    out_stack = make_shared<chunk_cptrs>(stack_);
     const auto& program = program_script.witness_program();
 
     switch (program_script.version())
@@ -193,8 +193,6 @@ code witness::extract_script(script::cptr& out_script,
         // All [bip341] comments.
         case script_version::taproot:
         {
-            // input script  : (empty)
-            // output script : <1> <32-byte-tweaked-public-key>
             if (program->size() == hash_size)
             {
                 auto stack_size = out_stack->size();
@@ -203,13 +201,13 @@ code witness::extract_script(script::cptr& out_script,
                 if (drop_annex(*out_stack))
                     --stack_size;
 
-                // tapscript (script path spend)
+                // p2ts (tapscript, script path spend)
                 // witness stack : [annex]<control><script>[stack-elements]
                 // input script  : (empty)
                 // output script : <1> <32-byte-tweaked-public-key>
                 if (stack_size > one)
                 {
-                    // The last stack element is control block.
+                    // The last stack element is the control block.
                     const auto& control = pop(*out_stack);
 
                     // Control length must be 33 + 32m, for integer m [0..128].
@@ -245,7 +243,7 @@ code witness::extract_script(script::cptr& out_script,
                     return error::script_success;
                 }
 
-                // taproot (key path spend)
+                // p2tr (taproot, key path spend)
                 // witness stack : [annex]<signature>
                 // input script  : (empty)
                 // output script : <1> <32-byte-tweaked-public-key>
@@ -264,9 +262,6 @@ code witness::extract_script(script::cptr& out_script,
                     ////if (!ecdsa::verify_signature(key, hash, sig))
                     ////    return error::fail;
 
-                    ///////////////////////////////////////////////////////////
-                    // TODO: need sentinel to indicate success w/out script ex.
-                    ///////////////////////////////////////////////////////////
                     return error::script_success;
                 }
 
