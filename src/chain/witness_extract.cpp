@@ -252,7 +252,7 @@ code witness::extract_script(script::cptr& out_script,
                         const auto tapleaf_hash = get_tapleaf_hash(version,
                             *out_script);
 
-                        const auto get_tap_tweak_hash = [](
+                        const auto get_taptweak_hash = [](
                             const hash_digest& out_key,
                             const hash_digest& merkle) NOEXCEPT
                         {
@@ -267,7 +267,7 @@ code witness::extract_script(script::cptr& out_script,
 
                         // TODO: add secp256k1_xonly_pubkey_parse to secp256k1.
                         // TODO: add secp256k1_xonly_pubkey_tweak_add_check to secp256k1.
-                        const auto check_tap_tweak = [&](
+                        const auto check_taptweak = [&](
                             const hash_digest& /* in_key */,
                             const hash_digest& out_key,
                             const hash_digest& merkle,
@@ -280,7 +280,7 @@ code witness::extract_script(script::cptr& out_script,
                             ////    out_key.data()))
                             ////    return false;
 
-                            /* const auto hash = */ get_tap_tweak_hash(out_key, merkle);
+                            /* const auto hash = */ get_taptweak_hash(out_key, merkle);
                             ////return secp256k1_xonly_pubkey_tweak_add_check(
                             ////    secp256k1_context_static,
                             ////    in_key.begin(),
@@ -290,7 +290,7 @@ code witness::extract_script(script::cptr& out_script,
                             return false;
                         };
 
-                        const auto get_tap_branch_hash = [](const hash_digest& left,
+                        const auto get_tapbranch_hash = [](const hash_digest& left,
                             const hash_digest& right) NOEXCEPT
                         {
                             hash_digest out{};
@@ -332,7 +332,7 @@ code witness::extract_script(script::cptr& out_script,
 
                             // Read only to actual count of nodes (safe).
                             for (size_t node{}; node < count; ++node)
-                                hash = get_tap_branch_hash(hash, nodes.at(node));
+                                hash = get_tapbranch_hash(hash, nodes.at(node));
 
                             return hash;
                         };
@@ -345,7 +345,7 @@ code witness::extract_script(script::cptr& out_script,
                             const auto& in_key = unsafe_array_cast<uint8_t, hash_size>(in);
                             const auto& out_key = unsafe_array_cast<uint8_t, hash_size>(out);
                             const auto merkle = get_merkle_root(control, hash);
-                            return check_tap_tweak(in_key, out_key, merkle, parity);
+                            return check_taptweak(in_key, out_key, merkle, parity);
                         };
 
                         if (!verify_commitment(*control, *program, tapleaf_hash))
