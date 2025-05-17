@@ -74,8 +74,8 @@ static bool is_valid_control_block(const data_chunk& control) NOEXCEPT
         control_block_range;
 
     // Control block must be size 33 + 32m, for integer m [0..128] [bip341].
-    return !is_limited(size, control_block_base, maximum)
-        && is_zero(floored_modulo(size - control_block_base, control_block_node));
+    return !is_limited(size, control_block_base, maximum) && is_zero(
+        floored_modulo(size - control_block_base, control_block_node));
 }
 
 // out_script is only useful only for sigop counting.
