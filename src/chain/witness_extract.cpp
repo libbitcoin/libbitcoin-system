@@ -18,9 +18,6 @@
  */
 #include <bitcoin/system/chain/witness.hpp>
 
-#include <algorithm>
-#include <iterator>
-#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/operation.hpp>
@@ -31,7 +28,6 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/machine/machine.hpp>
 
 namespace libbitcoin {
 namespace system {
