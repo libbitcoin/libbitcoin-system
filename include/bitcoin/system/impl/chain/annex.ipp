@@ -57,7 +57,7 @@ inline const data_chunk& annex::empty_annex() NOEXCEPT
 
 inline annex::operator bool() const NOEXCEPT
 {
-    return data_.operator bool();
+    return as_bool(data_);
 }
 
 inline size_t annex::size() const NOEXCEPT
