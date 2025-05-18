@@ -109,11 +109,12 @@ hash_digest taproot::leaf_hash(uint8_t version,
 taproot::tap taproot::parse(const data_chunk& control) NOEXCEPT
 {
     BC_ASSERT(!control.empty());
+    constexpr auto parity_mask = bit_not(tapscript_mask);
     const auto byte = control.front();
     return
     {
         bit_and(byte, tapscript_mask),
-        to_bool(bit_and(byte, bit_not(tapscript_mask)))
+        to_bool(bit_and(byte, parity_mask))
     };
 }
 
