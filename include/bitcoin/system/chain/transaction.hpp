@@ -142,8 +142,9 @@ public:
 
     /// signature_hash exposed for op_check_multisig caching.
     bool signature_hash(hash_digest& out, const input_iterator& input,
-        const script& sub, uint64_t value, uint8_t sighash_flags,
-        script_version version, bool bip143, bool bip341) const NOEXCEPT;
+        const script& subscript, uint64_t value, const hash_cptr& tapleaf,
+        script_version version, uint8_t sighash_flags,
+        uint32_t flags) const NOEXCEPT;
 
     /// Not used internally.
     bool check_signature(const ec_signature& signature,
@@ -319,7 +320,7 @@ private:
         const script& subscript, uint64_t value,
         uint8_t sighash_flags) const NOEXCEPT;
     bool version1_sighash(hash_digest& out, const input_iterator& input,
-        const script& script, uint64_t value,
+        const script& script, uint64_t value, const hash_cptr& tapleaf,
         uint8_t sighash_flags) const NOEXCEPT;
 
     // ------------------------------------------------------------------------

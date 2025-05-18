@@ -18,19 +18,16 @@
  */
 #include <bitcoin/system/chain/witness.hpp>
 
-#include <algorithm>
-#include <iterator>
-#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/enums/opcode.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/taproot.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/machine/machine.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -78,16 +75,6 @@ static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
 {
     BC_ASSERT(program.size() == hash_size);
     return unsafe_array_cast<uint8_t, hash_size>(program.data());
-}
-
-static bool is_valid_control_block(const data_chunk& control) NOEXCEPT
-{
-    const auto size = control.size();
-    constexpr auto max = add1(ec_xonly_size) + ec_xonly_size * taproot_max_keys;
-
-    // Control block must be add1(32) + 32m, for integer m [0..128] [bip341].
-    return !is_limited(size, add1(ec_xonly_size), max) && is_zero(
-        floored_modulo(size - add1(ec_xonly_size), ec_xonly_size));
 }
 
 // out_script is only useful only for sigop counting.
@@ -147,88 +134,16 @@ inline bool witness::drop_annex(chunk_cptrs& stack) NOEXCEPT
     return false;
 }
 
-static hash_digest get_tapleaf_hash(uint8_t version,
-    const script& script) NOEXCEPT
-{
-    hash_digest out{};
-    stream::out::fast stream{ out };
-    hash::sha256t::fast<"TapLeaf"> sink{ stream };
-    sink.write_byte(version);
-    script.to_data(sink, true);
-    sink.flush();
-    return out;
-}
-
-static hash_digest get_taptweak_hash(const ec_xonly& key,
-    const hash_digest& merkle) NOEXCEPT
-{
-    hash_digest out{};
-    stream::out::fast stream{ out };
-    hash::sha256t::fast<"TapTweak"> sink{ stream };
-    sink.write_bytes(key);
-    sink.write_bytes(merkle);
-    sink.flush();
-    return out;
-}
-
-static hash_digest get_tapbranch_hash(const hash_digest& left,
-    const hash_digest& right) NOEXCEPT
-{
-    hash_digest out{};
-    stream::out::fast stream{ out };
-    hash::sha256t::fast<"TapBranch"> sink{ stream };
-
-    if (std::lexicographical_compare(left.begin(), left.end(),
-        right.begin(), right.end()))
-    {
-        sink.write_bytes(left);
-        sink.write_bytes(right);
-    }
-    else
-    {
-        sink.write_bytes(right);
-        sink.write_bytes(left);
-    }
-
-    sink.flush();
-    return out;
-}
-
-static hash_digest get_merkle_root(const data_chunk& control,
-    const hash_digest& tapleaf_hash) NOEXCEPT
-{
-    BC_ASSERT(is_valid_control_block(control));
-
-    constexpr auto start = add1(ec_xonly_size);
-    const auto bytes = floored_subtract(control.size(), start);
-    const auto count = floored_divide(bytes, ec_xonly_size);
-    const auto begin = std::next(control.data(), start);
-    const auto nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
-
-    hash_digest hash{ tapleaf_hash };
-    for (size_t node{}; node < count; ++node)
-        hash = get_tapbranch_hash(hash, nodes.at(node));
-
-    return hash;
-}
-
-static bool verify_commitment(const data_chunk& control,
-    const data_chunk& program, const hash_digest& hash,
-    bool parity) NOEXCEPT
-{
-    BC_ASSERT(is_valid_control_block(control));
-
-    const auto out = program.data();
-    const auto& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
-    const auto in = std::next(control.data());
-    const auto& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
-    const auto merkle = get_merkle_root(control, hash);
-    const auto tweak = get_taptweak_hash(out_key, merkle);
-    return schnorr::verify_commitment(in_key, tweak, out_key, parity);
-}
-
 // Extract script and initial execution stack.
 code witness::extract_script(script::cptr& out_script,
+    chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
+{
+    hash_cptr unused{};
+    return extract_script(unused, out_script, out_stack, program_script);
+}
+
+// Extract script and initial execution stack (with tapleaf hash return).
+code witness::extract_script(hash_cptr& out_leaf, script::cptr& out_script,
     chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
@@ -302,25 +217,22 @@ code witness::extract_script(script::cptr& out_script,
                 {
                     // The last stack element is the control block.
                     const auto control = pop(*out_stack);
-                    if (!is_valid_control_block(*control))
+                    if (!taproot::is_valid_control_block(*control))
                         return error::invalid_witness;
 
                     // The second-to-last stack element is the script.
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
                     // Extract version and parity from control byte.
-                    const auto bits = control->front();
-                    const auto version = bit_and(bits, tapleaf_root_mask);
-                    const auto parity = bit_and(bits, bit_not(tapleaf_root_mask));
-
-                    if (version == tapleaf_tapscript)
+                    if (const auto tap = taproot::parse(*control))
                     {
-                        // TODO: pass into tapscript signature hashing.
-                        const auto tapleaf_hash = get_tapleaf_hash(version, *out_script);
-                        if (!verify_commitment(*control, *program, tapleaf_hash, parity))
+                        out_leaf = to_shared(taproot::leaf_hash(tap.version,
+                            *out_script));
+
+                        if (!taproot::verify_commitment(*control, *program,
+                            *out_leaf, tap.parity))
                             return error::invalid_commitment;
 
-                        // TODO: return tapleaf_hash in pointer.
                         // Execute tapleaf script.
                         // out stack  : [stack-elements]
                         // out script : (popped-from-stack)

@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_FUNCLETS_HPP
 #define LIBBITCOIN_SYSTEM_FUNCLETS_HPP
 
+#include <memory>
 #include <type_traits>
 #include <bitcoin/system/literals.hpp>
 
@@ -162,6 +163,13 @@ constexpr bool to_bool(Type value) noexcept
     static_assert(is_one(static_cast<Type>(true)));
     static_assert(is_zero(static_cast<Type>(false)));
     return is_nonzero(value);
+}
+
+template <typename Type>
+constexpr bool as_bool(const std::shared_ptr<Type>& ptr) noexcept
+{
+    // Use as_bool(ptr) because shared_ptr bool overload is explicit.
+    return ptr.operator bool();
 }
 
 template <typename Enum>

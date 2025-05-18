@@ -106,7 +106,7 @@ program(const transaction& tx, const input_iterator& input,
 }
 
 // Taproot script run (witness-initialized stack).
-// Same as segwit but with with budget and unstripped bip342 flag.
+// Same as segwit but with tapleaf, budget, and unstripped bip342 flag.
 // Sigop budget is 50 plus size of prefixed serialized witness [bip342].
 // Budget is initialized add1(50) to make it zero-based, avoiding signed type.
 // This program is never used to construct another, so masked flags_ never mix.
@@ -114,7 +114,8 @@ TEMPLATE
 inline CLASS::
 program(const transaction& tx, const input_iterator& input,
     const script::cptr& script, uint32_t active_flags,
-    script_version version, const chunk_cptrs_ptr& witness, bool) NOEXCEPT
+    script_version version, const chunk_cptrs_ptr& witness,
+    const hash_cptr& tapleaf) NOEXCEPT
   : transaction_(tx),
     input_(input),
     script_(script),
@@ -122,6 +123,7 @@ program(const transaction& tx, const input_iterator& input,
     value_((*input)->prevout->value()),
     version_(version),
     witness_(witness),
+    tapleaf_(tapleaf),
     primary_(projection<Stack>(*witness)),
     budget_(ceilinged_add(
         add1(chain::signature_cost),

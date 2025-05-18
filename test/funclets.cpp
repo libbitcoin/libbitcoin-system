@@ -161,6 +161,21 @@ static_assert(to_bool(42));
 static_assert(!to_bool(0));
 static_assert(is_same_type<decltype(to_bool<int16_t>(0)), bool>);
 
+BOOST_AUTO_TEST_SUITE(funclets_tests)
+
+static_assert(is_same_type<decltype(as_bool<std::shared_ptr<std::string>>(0)), bool>);
+
+BOOST_AUTO_TEST_CASE(funclets__to_bool__shared_ptr__expected)
+{
+    const std::shared_ptr<std::string> empty_is_false{};
+    BOOST_REQUIRE(!as_bool(empty_is_false));
+
+    const auto nonempty_is_true = std::make_shared<std::string>("42");
+    BOOST_REQUIRE(as_bool(nonempty_is_true));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 enum class interdimensional : uint8_t
 {
     you,

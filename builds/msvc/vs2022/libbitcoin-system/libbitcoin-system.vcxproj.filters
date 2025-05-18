@@ -279,6 +279,9 @@
     <ClCompile Include="..\..\..\..\src\chain\script_extract.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\taproot.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -708,6 +711,9 @@
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\stripper.hpp">
+      <Filter>include\bitcoin\system\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\taproot.hpp">
       <Filter>include\bitcoin\system\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\chain\transaction.hpp">
@@ -1460,9 +1466,6 @@
     <ClInclude Include="..\..\resource.h">
       <Filter>resource</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp">
-      <Filter>include\bitcoin\system\impl\chain</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\annex.ipp">
@@ -1475,6 +1478,9 @@
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\script_patterns.ipp">
+      <Filter>include\bitcoin\system\impl\chain</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\system\impl\chain\transaction_patterns.ipp">
       <Filter>include\bitcoin\system\impl\chain</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\system\impl\chain\witness_patterns.ipp">
