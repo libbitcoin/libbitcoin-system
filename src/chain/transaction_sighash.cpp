@@ -249,11 +249,16 @@ uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
 // Version: (unversioned) original, (v0) bip143/segwit, (v1) bip341/taproot.
 
 bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
-    const script& subscript, uint64_t value, uint8_t sighash_flags,
-    script_version version, bool bip143, bool bip342) const NOEXCEPT
+    const script& subscript, uint64_t value, const hash_cptr& tapleaf,
+    script_version version, uint8_t sighash_flags, uint32_t flags) const NOEXCEPT
 {
     // There is no rational interpretation of a signature hash for a coinbase.
     BC_ASSERT(!is_coinbase());
+
+    // bip143: the method of signature hashing is changed for v0 scripts.
+    // bip342: the method of signature hashing is changed for v1 scripts.
+    const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
+    const auto bip342 = script::is_enabled(flags, flags::bip342_rule);
 
     // This is where the connection between bip141 and bip143 is made. If a
     // versioned 1 program (segwit) extracted by bip141 but bip143 (segwit
@@ -265,7 +270,8 @@ bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
     // version 2 program (taproot) extracted by bip341 but bip342 (tapscript)
     // is not active then drop down to unversioned signature hashing. 
     if (bip342 && version == script_version::taproot)
-        return version1_sighash(out, input, subscript, value, sighash_flags);
+        return version1_sighash(out, input, subscript, value, tapleaf,
+            sighash_flags);
 
     // Given above forks are documented to activate together, this distinction
     // is moot, however these are distinct BIPs and therefore must be either be

@@ -188,15 +188,14 @@ code CLASS::connect_witness(const chain::context& state,
             if (!bip341 || embedded)
                 return error::script_success;
 
+            hash_cptr tapleaf{};
             script::cptr script;
             chunk_cptrs_ptr stack;
-
-            // TODO: extract tapleaf_hash, nullable.
-            if ((ec = input.witness().extract_script(script, stack, prevout)))
+            if ((ec = input.witness().extract_script(tapleaf, script, stack,
+                prevout)))
                 return ec;
 
-            // TODO: pass tapleaf_hash in last parameter, nullable.
-            interpreter program(tx, it, script, flags, version, stack, {});
+            interpreter program(tx, it, script, flags, version, stack, tapleaf);
 
             // TODO: capture tapleaf_hash in program construct and use to
             // TODO: obtain both tapscript boolean and tapleaf_hash values.

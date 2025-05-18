@@ -65,7 +65,7 @@ public:
     inline program(const transaction& transaction,
         const input_iterator& input, const script::cptr& script,
         uint32_t active_flags, script_version version,
-        const chunk_cptrs_ptr& stack, bool) NOEXCEPT;
+        const chunk_cptrs_ptr& stack, const hash_cptr& tapleaf) NOEXCEPT;
 
     /// Program result.
     inline bool is_true(bool clean) const NOEXCEPT;
@@ -87,7 +87,6 @@ protected:
 
     /// Constants.
     /// -----------------------------------------------------------------------
-
     INLINE script_error_t initialize() const NOEXCEPT;
     INLINE op_iterator begin() const NOEXCEPT;
     INLINE op_iterator end() const NOEXCEPT;
@@ -142,14 +141,12 @@ protected:
 
     /// Alternate stack.
     /// -----------------------------------------------------------------------
-
     INLINE bool is_alternate_empty() const NOEXCEPT;
     INLINE void push_alternate(stack_variant&& vary) NOEXCEPT;
     INLINE stack_variant pop_alternate_() NOEXCEPT;
 
     /// Conditional stack.
     /// -----------------------------------------------------------------------
-
     INLINE void begin_if(bool value) NOEXCEPT;
     INLINE void else_if_() NOEXCEPT;
     INLINE void end_if_() NOEXCEPT;
@@ -159,7 +156,6 @@ protected:
 
     /// Accumulators.
     /// -----------------------------------------------------------------------
-
     INLINE bool sigops_increment() NOEXCEPT;
     INLINE bool ops_increment(const operation& op) NOEXCEPT;
     INLINE bool ops_increment(size_t public_keys) NOEXCEPT;
@@ -232,6 +228,7 @@ private:
     const uint64_t value_;
     const script_version version_;
     const chunk_cptrs_ptr witness_{};
+    const hash_cptr tapleaf_{};
 
     // Caches.
     multisig_cache cache_{};

@@ -147,7 +147,9 @@ inline bool witness::drop_annex(chunk_cptrs& stack) NOEXCEPT
     return false;
 }
 
-static hash_digest get_tapleaf_hash(uint8_t version,
+namespace taproot {
+
+static hash_digest leaf_hash(uint8_t version,
     const script& script) NOEXCEPT
 {
     hash_digest out{};
@@ -159,7 +161,7 @@ static hash_digest get_tapleaf_hash(uint8_t version,
     return out;
 }
 
-static hash_digest get_taptweak_hash(const ec_xonly& key,
+static hash_digest tweak_hash(const ec_xonly& key,
     const hash_digest& merkle) NOEXCEPT
 {
     hash_digest out{};
@@ -171,7 +173,7 @@ static hash_digest get_taptweak_hash(const ec_xonly& key,
     return out;
 }
 
-static hash_digest get_tapbranch_hash(const hash_digest& left,
+static hash_digest branch_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT
 {
     hash_digest out{};
@@ -194,7 +196,7 @@ static hash_digest get_tapbranch_hash(const hash_digest& left,
     return out;
 }
 
-static hash_digest get_merkle_root(const data_chunk& control,
+static hash_digest merkle_root(const data_chunk& control,
     const hash_digest& tapleaf_hash) NOEXCEPT
 {
     BC_ASSERT(is_valid_control_block(control));
@@ -207,7 +209,7 @@ static hash_digest get_merkle_root(const data_chunk& control,
 
     hash_digest hash{ tapleaf_hash };
     for (size_t node{}; node < count; ++node)
-        hash = get_tapbranch_hash(hash, nodes.at(node));
+        hash = branch_hash(hash, nodes.at(node));
 
     return hash;
 }
@@ -222,13 +224,42 @@ static bool verify_commitment(const data_chunk& control,
     const auto& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
     const auto in = std::next(control.data());
     const auto& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
-    const auto merkle = get_merkle_root(control, hash);
-    const auto tweak = get_taptweak_hash(out_key, merkle);
+    const auto root = merkle_root(control, hash);
+    const auto tweak = tweak_hash(out_key, root);
     return schnorr::verify_commitment(in_key, tweak, out_key, parity);
 }
 
+struct tap
+{
+    operator bool() const NOEXCEPT { return version == tapscript_version; }
+    uint8_t version;
+    bool parity;
+};
+
+static tap parse(const data_chunk& control) NOEXCEPT
+{
+    BC_ASSERT(!control.empty());
+
+    const auto byte = control.front();
+    return
+    {
+        bit_and(byte, tapscript_mask),
+        to_bool(bit_and(byte, bit_not(tapscript_mask)))
+    };
+}
+
+} // namespace taproot
+
 // Extract script and initial execution stack.
 code witness::extract_script(script::cptr& out_script,
+    chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
+{
+    hash_cptr unused{};
+    return extract_script(unused, out_script, out_stack, program_script);
+}
+
+// Extract script and initial execution stack (with tapleaf hash return).
+code witness::extract_script(hash_cptr& out_leaf, script::cptr& out_script,
     chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
@@ -309,18 +340,13 @@ code witness::extract_script(script::cptr& out_script,
                     out_script = to_shared<script>(*pop(*out_stack), false);
 
                     // Extract version and parity from control byte.
-                    const auto bits = control->front();
-                    const auto version = bit_and(bits, tapleaf_root_mask);
-                    const auto parity = bit_and(bits, bit_not(tapleaf_root_mask));
-
-                    if (version == tapleaf_tapscript)
+                    if (const auto tap = taproot::parse(*control))
                     {
-                        // TODO: pass into tapscript signature hashing.
-                        const auto tapleaf_hash = get_tapleaf_hash(version, *out_script);
-                        if (!verify_commitment(*control, *program, tapleaf_hash, parity))
-                            return error::invalid_commitment;
+                        using namespace taproot;
+                        out_leaf = to_shared(leaf_hash(tap.version, *out_script));
+                        if (!verify_commitment(*control, *program, *out_leaf,
+                            tap.parity)) return error::invalid_commitment;
 
-                        // TODO: return tapleaf_hash in pointer.
                         // Execute tapleaf script.
                         // out stack  : [stack-elements]
                         // out script : (popped-from-stack)

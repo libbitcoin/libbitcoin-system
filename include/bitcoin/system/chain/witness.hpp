@@ -126,6 +126,8 @@ public:
     /// Script for witness validation.
     code extract_script(script::cptr& out_script, chunk_cptrs_ptr& out_stack,
         const script& program_script) const NOEXCEPT;
+    code extract_script(hash_cptr& out_leaf, script::cptr& out_script,
+        chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT;
 
 protected:
     witness(chunk_cptrs&& stack, bool valid) NOEXCEPT;

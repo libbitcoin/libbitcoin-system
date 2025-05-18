@@ -65,13 +65,9 @@ uint8_t transaction::spend_type_v1(bool annex, bool tapscript) const NOEXCEPT
 
 bool transaction::version1_sighash(hash_digest& out,
     const input_iterator& input, const script& script, uint64_t value,
-    uint8_t sighash_flags) const NOEXCEPT
+    const hash_cptr& tapleaf, uint8_t sighash_flags) const NOEXCEPT
 {
-    // TODO: obtain tapscript indicator and access to tapleaf hash.
     constexpr uint8_t epoch{};
-    constexpr bool tapscript{};
-    constexpr hash_digest tapleaf{};
-
     const auto& in = **input;
     const auto& annex = in.witness().annex();
 
@@ -104,7 +100,7 @@ bool transaction::version1_sighash(hash_digest& out,
         sink.write_bytes(single_hash_outputs());
     }
 
-    sink.write_byte(spend_type_v1(annex, tapscript));
+    sink.write_byte(spend_type_v1(annex, as_bool(tapleaf)));
 
     if (anyone)
     {
@@ -136,9 +132,9 @@ bool transaction::version1_sighash(hash_digest& out,
 
     // Additional for tapscript [bip342].
     // Above midstate is cacheable for use when same sigop flag for the script.
-    if (tapscript)
+    if (tapleaf)
     {
-        sink.write_bytes(tapleaf);
+        sink.write_bytes(*tapleaf);
         sink.write_byte(to_value(key_version::tapscript));
         sink.write_4_bytes_little_endian(subscript_v1(script));
     }

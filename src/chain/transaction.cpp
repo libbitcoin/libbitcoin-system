@@ -435,12 +435,10 @@ bool transaction::check_signature(const ec_signature& signature,
     if ((index >= inputs_->size()) || signature.empty() || public_key.empty())
         return false;
 
-    const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
-    const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
-
     hash_digest sighash{};
+    const hash_cptr unused{};
     if (!signature_hash(sighash, input_at(index), subscript, value,
-        sighash_flags, version, bip143, bip341))
+        unused, version, sighash_flags, flags))
         return false;
 
     // Validate the ECDSA signature.
@@ -456,13 +454,11 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     if (index >= inputs_->size())
         return false;
 
-    const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
-    const auto bip341 = script::is_enabled(flags, flags::bip341_rule);
-
     hash_digest sighash{};
+    const hash_cptr unused{};
     out.reserve(max_endorsement_size);
-    if (!signature_hash(sighash, input_at(index), subscript, value,
-        sighash_flags, version, bip143, bip341))
+    if (!signature_hash(sighash, input_at(index), subscript, value, unused,
+        version, sighash_flags, flags))
         return false;
 
     // Create the ECDSA signature and encode as DER.
