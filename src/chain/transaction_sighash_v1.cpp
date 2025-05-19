@@ -101,7 +101,7 @@ bool transaction::version1_sighash(hash_digest& out,
         sink.write_bytes(single_hash_outputs());
     }
 
-    sink.write_byte(spend_type_v1(annex, as_bool(tapleaf)));
+    sink.write_byte(spend_type_v1(annex, !is_null(tapleaf)));
 
     if (anyone)
     {

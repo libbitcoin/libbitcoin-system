@@ -165,13 +165,6 @@ constexpr bool to_bool(Type value) noexcept
     return is_nonzero(value);
 }
 
-template <typename Type>
-constexpr bool as_bool(const std::shared_ptr<Type>& ptr) noexcept
-{
-    // Use as_bool(ptr) because shared_ptr bool overload is explicit.
-    return ptr.operator bool();
-}
-
 template <typename Enum>
 constexpr auto to_value(Enum value) noexcept
 {
