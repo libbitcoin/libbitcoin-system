@@ -147,7 +147,7 @@ code witness::extract_script(hash_cptr& out_leaf, script::cptr& out_script,
     chunk_cptrs_ptr& out_stack, const script& program_script) const NOEXCEPT
 {
     // Copy stack of shared const pointers for use as mutable witness stack.
-    out_stack = make_shared<chunk_cptrs>(stack_);
+    out_stack = std::make_shared<chunk_cptrs>(stack_);
     const auto& program = program_script.witness_program();
 
     switch (program_script.version())
