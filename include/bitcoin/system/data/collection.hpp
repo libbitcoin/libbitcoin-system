@@ -111,6 +111,11 @@ template <typename Left, typename Right>
 constexpr bool is_intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) NOEXCEPT;
 
+/// Move all elements from positions at or above found element position.
+template <typename Collection>
+bool part(Collection& from, Collection& to,
+    const typename Collection::value_type& element) NOEXCEPT;
+
 /// Reverse the order of collection elements.
 /// Use reverse_view for reverse iteration.
 template <typename Collection>

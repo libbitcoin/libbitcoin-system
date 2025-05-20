@@ -69,7 +69,6 @@ constexpr binary_search(const Collection& list,
     return negative_one;
 }
 
-// C++17: Parallel policy for std::transform.
 template <typename To, typename From>
 inline To projection(const From& source) NOEXCEPT
 {
@@ -85,7 +84,6 @@ inline To projection(const From& source) NOEXCEPT
     return out;
 }
 
-// C++17: Parallel policy for std::equal.
 template <typename Left, typename Right>
 constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT
 {
@@ -100,7 +98,6 @@ constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT
         });
 }
 
-// C++17: Parallel policy for std::any_of.
 template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
     const Element& element) NOEXCEPT
@@ -109,7 +106,6 @@ constexpr bool contains(const Collection& list,
         std::end(list);
 }
 
-// C++17: Parallel policy for std::find_if.
 template <typename Collection>
 typename Collection::difference_type
 constexpr find_pair_position(const Collection& list,
@@ -125,7 +121,6 @@ constexpr find_pair_position(const Collection& list,
         std::distance(std::begin(list), position);
 }
 
-// C++17: Parallel policy for std::find.
 template <typename Collection>
 typename Collection::difference_type
 constexpr find_position(const Collection& list,
@@ -172,7 +167,6 @@ inline pop_front(Collection& stack) NOEXCEPT
     return element;
 }
 
-// C++17: Parallel policy for std::sort, std::unique.
 template <typename Collection>
 constexpr bool is_distinct(Collection&& list) NOEXCEPT
 {
@@ -187,14 +181,12 @@ constexpr bool is_distinct(const Collection& list) NOEXCEPT
     return is_distinct(copy);
 }
 
-// C++17: Parallel policy for std::is_sorted.
 template <typename Collection>
 constexpr bool is_sorted(const Collection& list) NOEXCEPT
 {
     return std::is_sorted(std::begin(list), std::end(list));
 }
 
-// C++17: Parallel policy for std::sort, std::erase.
 template <typename Collection>
 constexpr void distinct(Collection& list) NOEXCEPT
 {
@@ -244,7 +236,6 @@ constexpr bool is_intersecting(const Left& left, const Right& right) NOEXCEPT
     return is_intersecting<Left>(std::begin(left), std::end(left), right);
 }
 
-// C++17: Parallel policy for std::find_first_of.
 template <typename Left, typename Right>
 constexpr bool is_intersecting(const typename Left::const_iterator& begin,
     const typename Left::const_iterator& end, const Right& right) NOEXCEPT
@@ -253,7 +244,26 @@ constexpr bool is_intersecting(const typename Left::const_iterator& begin,
         std::end(right)) != end;
 }
 
-// C++17: Parallel policy for std::reverse.
+template <typename Collection>
+bool part(Collection& from, Collection& to,
+    const typename Collection::value_type& element) NOEXCEPT
+{
+    using Type = typename Collection::value_type;
+    const auto it = std::find_if(from.begin(), from.end(),
+        [&](const Type& value) noexcept
+        {
+            return value == element;
+        });
+
+    if (it == from.end())
+        return false;
+
+    to.insert(to.end(), std::make_move_iterator(it),
+        std::make_move_iterator(from.end()));
+    from.erase(it, from.end());
+    return true;
+}
+
 template <typename Collection>
 inline Collection reverse(Collection&& list) NOEXCEPT
 {
@@ -267,7 +277,6 @@ inline Collection reverse_copy(const Collection& list) NOEXCEPT
     return reverse(Collection{ list });
 }
 
-// C++17: Parallel policy for std::sort.
 template <typename Collection>
 constexpr void sort(Collection& list) NOEXCEPT
 {
@@ -287,7 +296,6 @@ inline Collection sort_copy(const Collection& list) NOEXCEPT
     return sort(Collection{ list });
 }
 
-// C++17: Parallel policy for std::equal.
 template <typename Collection>
 constexpr bool starts_with(const typename Collection::const_iterator& begin,
     const typename Collection::const_iterator& end,
