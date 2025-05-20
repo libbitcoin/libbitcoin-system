@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(limits__binary_search_native__sorted_contained__expected)
 BOOST_AUTO_TEST_CASE(limits__binary_search_native__reverse_sorted_contained__unlucky)
 {
     const std::string unsorted = "zyxwvutscba";
-    const auto value = 'x';
+    constexpr auto value = 'x';
     BOOST_REQUIRE_EQUAL(binary_search(unsorted, value), -1);
 }
 
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(collection__pop__empty__empty_default)
 
 BOOST_AUTO_TEST_CASE(collection__pop__single__empty_expected)
 {
-    const uint8_t expected = 42u;
+    constexpr uint8_t expected = 42u;
     data_chunk stack{ expected };
     const auto value = pop(stack);
     BOOST_REQUIRE(stack.empty());
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(collection__pop_front__empty__empty_default)
 
 BOOST_AUTO_TEST_CASE(collection__pop_front__single__empty_expected)
 {
-    const uint8_t expected = 42u;
+    constexpr uint8_t expected = 42u;
     data_queue queue{ expected };
     const auto value = pop_front(queue);
     BOOST_REQUIRE(queue.empty());
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(collection__pop_front__single__empty_expected)
 
 BOOST_AUTO_TEST_CASE(collection__pop_front__multiple__popped_expected)
 {
-    const uint8_t expected_value = 42u;
+    constexpr uint8_t expected_value = 42u;
     data_queue queue{ expected_value, 0, 1, 2, 3 };
     const data_queue expected_queue{ 0, 1, 2, 3 };
     const auto value = pop_front(queue);
@@ -435,6 +435,98 @@ BOOST_AUTO_TEST_CASE(collection__difference__subtrahend_subset__expected)
     BOOST_REQUIRE_EQUAL(difference(minuend, subtrahend), expected);
 }
 
+// part
+
+BOOST_AUTO_TEST_CASE(collection__part__vector__true)
+{
+    std::vector<int> from = { 1, 2, 4, 7, 8, 3, 1, 5, 3 };
+    std::vector<int> to{};
+    BOOST_REQUIRE(part(from, to, 3));
+    BOOST_REQUIRE_EQUAL(from, (std::vector<int>{1, 2, 4, 7, 8}));
+    BOOST_REQUIRE_EQUAL(to, (std::vector<int>{3, 1, 5, 3}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__list__true)
+{
+    std::list<int> from = { 1, 2, 4, 7, 8, 3, 1, 5, 3 };
+    std::list<int> to{};
+    BOOST_REQUIRE(part(from, to, 3));
+    BOOST_REQUIRE(from == (std::list<int>{1, 2, 4, 7, 8}));
+    BOOST_REQUIRE(to == (std::list<int>{3, 1, 5, 3}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__deque__true)
+{
+    std::deque<int> from = { 1, 2, 4, 7, 8, 3, 1, 5, 3 };
+    std::deque<int> to{};
+    BOOST_REQUIRE(part(from, to, 3));
+    BOOST_REQUIRE(from == (std::deque<int>{1, 2, 4, 7, 8}));
+    BOOST_REQUIRE(to == (std::deque<int>{3, 1, 5, 3}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__vector_empty__false)
+{
+    std::vector<int> from{};
+    std::vector<int> to{};
+    BOOST_REQUIRE(!part(from, to, 3));
+    BOOST_REQUIRE_EQUAL(from, (std::vector<int>{}));
+    BOOST_REQUIRE_EQUAL(to, (std::vector<int>{}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__vector_no_equal__false)
+{
+    std::vector<int> from = { 1, 2, 4, 5 };
+    std::vector<int> to{};
+    BOOST_REQUIRE(!part(from, to, 3));
+    BOOST_REQUIRE_EQUAL(from, (std::vector<int>{1, 2, 4, 5}));
+    BOOST_REQUIRE_EQUAL(to, (std::vector<int>{}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__list_first_equal__true)
+{
+    std::list<int> from = { 3, 6, 7, 8 };
+    std::list<int> to{};
+    BOOST_REQUIRE(part(from, to, 3));
+    BOOST_REQUIRE(from == (std::list<int>{}));
+    BOOST_REQUIRE(to == (std::list<int>{3, 6, 7, 8}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__vector_non_empty_to__true)
+{
+    std::vector<int> from = { 1, 3, 4, 5 };
+    std::vector<int> to = { 10, 11 };
+    BOOST_REQUIRE(part(from, to, 3));
+    BOOST_REQUIRE_EQUAL(from, (std::vector<int>{1}));
+    BOOST_REQUIRE_EQUAL(to, (std::vector<int>{10, 11, 3, 4, 5}));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__string_list__true)
+{
+    string_list from = { "apple", "date", "banana", "cherry" };
+    string_list to{};
+    BOOST_REQUIRE(part(from, to, std::string("date")));
+    BOOST_REQUIRE_EQUAL(from, (string_list{ "apple" }));
+    BOOST_REQUIRE_EQUAL(to, (string_list{ "date", "banana", "cherry" }));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__string_list_first_equal__true)
+{
+    string_list from = { "apple", "banana", "cherry", "date" };
+    string_list to{};
+    BOOST_REQUIRE(part(from, to, std::string("apple")));
+    BOOST_REQUIRE_EQUAL(from, (string_list{}));
+    BOOST_REQUIRE_EQUAL(to, (string_list{ "apple", "banana", "cherry", "date" }));
+}
+
+BOOST_AUTO_TEST_CASE(collection__part__string_list_last_equal__true)
+{
+    string_list from = { "banana", "cherry", "date", "apple" };
+    string_list to{};
+    BOOST_REQUIRE(part(from, to, std::string("apple")));
+    BOOST_REQUIRE_EQUAL(from, (string_list{ "banana", "cherry", "date" }));
+    BOOST_REQUIRE_EQUAL(to, (string_list{ "apple" }));
+}
+
 // reverse
 
 BOOST_AUTO_TEST_CASE(collection__reverse_move__empty__empty)
@@ -444,7 +536,7 @@ BOOST_AUTO_TEST_CASE(collection__reverse_move__empty__empty)
 
 BOOST_AUTO_TEST_CASE(collection__reverse_move__single__unchanged)
 {
-    const uint8_t expected = 42;
+    constexpr uint8_t expected = 42;
     BOOST_REQUIRE_EQUAL(reverse(data_chunk{ expected }).front(), expected);
 }
 
@@ -472,7 +564,7 @@ BOOST_AUTO_TEST_CASE(collection__sort_move__empty__empty)
 
 BOOST_AUTO_TEST_CASE(collection__sort_move__single__unchanged)
 {
-    const uint8_t expected = 42;
+    constexpr uint8_t expected = 42;
     BOOST_REQUIRE_EQUAL(sort(data_chunk{ expected }).front(), expected);
 }
 
