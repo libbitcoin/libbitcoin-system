@@ -400,7 +400,7 @@ chain::points transaction::points() const NOEXCEPT
     return out;
 }
 
-// Signatures (public)
+// Signatures (public).
 // ----------------------------------------------------------------------------
 
 transaction::input_iterator transaction::input_at(
