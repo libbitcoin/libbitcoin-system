@@ -19,18 +19,13 @@
 #include <bitcoin/system/chain/transaction.hpp>
 
 #include <iterator>
-#include <bitcoin/system/chain/enums/coverage.hpp>
-#include <bitcoin/system/chain/enums/extension.hpp>
-#include <bitcoin/system/chain/enums/key_version.hpp>
 #include <bitcoin/system/chain/input.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/endian/endian.hpp>
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/error/error.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
