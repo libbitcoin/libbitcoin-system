@@ -56,7 +56,7 @@ hash_digest transaction::hash_points() const NOEXCEPT
     if (sighash_cache_)
         return sighash_cache_->points;
 
-    static hash_digest digest{};
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
@@ -72,7 +72,7 @@ hash_digest transaction::hash_sequences() const NOEXCEPT
     if (sighash_cache_)
         return sighash_cache_->sequences;
 
-    static hash_digest digest{};
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
@@ -88,7 +88,7 @@ hash_digest transaction::hash_outputs() const NOEXCEPT
     if (sighash_cache_)
         return sighash_cache_->outputs;
 
-    static hash_digest digest{};
+    hash_digest digest{};
     stream::out::fast stream{ digest };
     hash::sha256x2::fast sink{ stream };
 
