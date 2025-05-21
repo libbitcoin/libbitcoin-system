@@ -45,27 +45,17 @@ arena* default_arena::get() NOEXCEPT
 
 void* default_arena::do_allocate(size_t bytes, size_t) THROWS
 {
-//#ifdef WITH_TRACY
     ZoneScopedN("default_arena::do_allocate"); // Profile allocation
-//#endif
+
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    return ::operator new(bytes, std::align_val_t{ align });
     BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
-    //void* ptr = std::malloc(bytes);
     return std::malloc(bytes);
-//#ifdef WITH_TRACY
-    //TracyAlloc(ptr, bytes); // Track allocated memory
-//#endif
-    //return ptr;
     BC_POP_WARNING()
 }
 
 void default_arena::do_deallocate(void* ptr, size_t, size_t) NOEXCEPT
 {
-//#ifdef WITH_TRACY
-    ZoneScopedN("default_arena::do_deallocate"); // Profile deallocation
-    //TracyFree(ptr); // Track freed memory
-//#endif
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    ::operator delete(ptr, std::align_val_t{ align });
     BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
