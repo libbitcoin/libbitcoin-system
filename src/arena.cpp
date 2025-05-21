@@ -24,7 +24,8 @@
 //#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
 
 //#ifdef WITH_TRACY
-#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
+//#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
+#include <../_deps/tracy-src/public/tracy/Tracy.hpp>
 //#endif
 
 namespace libbitcoin {
