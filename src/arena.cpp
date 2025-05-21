@@ -25,7 +25,7 @@
 
 //#ifdef WITH_TRACY
 //#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
-//#include <../_deps/tracy-src/public/tracy/Tracy.hpp>
+#include <../_deps/tracy-src/public/tracy/Tracy.hpp>
 //#endif
 
 namespace libbitcoin {
@@ -45,7 +45,7 @@ arena* default_arena::get() NOEXCEPT
 
 void* default_arena::do_allocate(size_t bytes, size_t) THROWS
 {
-    //ZoneScopedN("default_arena::do_allocate"); // Profile allocation
+    ZoneScopedN("default_arena::do_allocate"); // Profile allocation
 
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    return ::operator new(bytes, std::align_val_t{ align });
