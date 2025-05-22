@@ -244,15 +244,12 @@ private:
         hash_digest points;
         hash_digest sequences;
         hash_digest outputs;
-    } v0_cache;
+    } base_cache;
     typedef struct
     {
         hash_digest amounts;
         hash_digest scripts;
-        hash_digest points;
-        hash_digest sequences;
-        hash_digest outputs;
-    } v1_cache;
+    } only_cache;
 
     static bool segregated(const chain::inputs& inputs) NOEXCEPT;
     static bool segregated(const input_cptrs& inputs) NOEXCEPT;
@@ -276,6 +273,17 @@ private:
     // Caching.
     // ------------------------------------------------------------------------
 
+    // Uncached generators.
+    void set_x1_base_hash() const NOEXCEPT;
+    void set_x2_base_hash() const NOEXCEPT;
+    void set_v1_only_hash() const NOEXCEPT;
+
+    hash_digest x1_base_hash_points() const NOEXCEPT;
+    hash_digest x1_base_hash_sequences() const NOEXCEPT;
+    hash_digest x1_base_hash_outputs() const NOEXCEPT;
+    hash_digest v1_only_hash_amounts() const NOEXCEPT;
+    hash_digest v1_only_hash_scripts() const NOEXCEPT;
+
     // Set sha256 cache if not set, so not thread safe unless cached.
     const hash_digest& single_hash_points() const NOEXCEPT;
     const hash_digest& single_hash_amounts() const NOEXCEPT;
@@ -287,15 +295,6 @@ private:
     const hash_digest& double_hash_points() const NOEXCEPT;
     const hash_digest& double_hash_sequences() const NOEXCEPT;
     const hash_digest& double_hash_outputs() const NOEXCEPT;
-
-    // Set v1 and/or v0 signature hash caches as applicable.
-    void initialize_sighash_cache() const NOEXCEPT;
-    void initialize_v0_cache() const NOEXCEPT;
-    void initialize_v1_cache() const NOEXCEPT;
-
-    hash_digest hash_points() const NOEXCEPT;
-    hash_digest hash_sequences() const NOEXCEPT;
-    hash_digest hash_outputs() const NOEXCEPT;
 
     // Signature hashing.
     // ------------------------------------------------------------------------
@@ -337,13 +336,14 @@ private:
     bool valid_;
     sizes size_;
 
-    // Signature and identity hash caching (witness hash if witnessed).
+    // Identity hash caching (witness if witnessed).
     mutable std::optional<hash_digest> nominal_hash_{};
     mutable std::optional<hash_digest> witness_hash_{};
 
-    mutable std::optional<v0_cache> sighash_cache_{};
-    ////mutable std::shared_ptr<v0_cache> v0_cache_{};
-    ////mutable std::shared_ptr<v1_cache> v1_cache_{};
+    // Signature hash caching (witness and taproot).
+    mutable std::shared_ptr<base_cache> x1_base_cache_{};
+    mutable std::shared_ptr<base_cache> x2_base_cache_{};
+    mutable std::shared_ptr<only_cache> v1_only_cache_{};
 };
 
 typedef std_vector<transaction> transactions;

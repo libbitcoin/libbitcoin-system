@@ -942,8 +942,6 @@ code transaction::connect(const context& ctx) const NOEXCEPT
     if (is_coinbase())
         return error::transaction_success;
 
-    initialize_sighash_cache();
-
     for (auto in = inputs_->begin(); in != inputs_->end(); ++in)
         if (const auto ec = connect_input(ctx, in))
             return ec;

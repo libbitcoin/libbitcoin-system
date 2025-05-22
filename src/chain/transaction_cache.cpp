@@ -32,69 +32,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-void transaction::initialize_sighash_cache() const NOEXCEPT
-{
-    if (!segregated_)
-        return;
-
-    // This overconstructs the cache (anyone or !all), however it is simple.
-    sighash_cache_ =
-    {
-        hash_points(),
-        hash_sequences(),
-        hash_outputs()
-    };
-}
-
-hash_digest transaction::hash_points() const NOEXCEPT
-{
-    if (sighash_cache_)
-        return sighash_cache_->points;
-
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
-    hash::sha256x2::fast sink{ stream };
-
-    for (const auto& input: *inputs_)
-        input->point().to_data(sink);
-
-    sink.flush();
-    return digest;
-}
-
-hash_digest transaction::hash_sequences() const NOEXCEPT
-{
-    if (sighash_cache_)
-        return sighash_cache_->sequences;
-
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
-    hash::sha256x2::fast sink{ stream };
-
-    for (const auto& input: *inputs_)
-        sink.write_4_bytes_little_endian(input->sequence());
-
-    sink.flush();
-    return digest;
-}
-
-hash_digest transaction::hash_outputs() const NOEXCEPT
-{
-    if (sighash_cache_)
-        return sighash_cache_->outputs;
-
-    hash_digest digest{};
-    stream::out::fast stream{ digest };
-    hash::sha256x2::fast sink{ stream };
-
-    for (const auto& output : *outputs_)
-        output->to_data(sink);
-
-    sink.flush();
-    return digest;
-}
-
-// Cached identity hashing.
+// Identity hashing.
 // ----------------------------------------------------------------------------
 
 // static
@@ -119,34 +57,7 @@ hash_digest transaction::desegregated_hash(size_t witnessed,
     return digest;
 }
 
-// Used to populate nominal hash after wire deserialization and store read.
-void transaction::set_nominal_hash(const hash_digest& hash) const NOEXCEPT
-{
-    nominal_hash_ = hash;
-}
-
-// Used to populate witness hash after wire deserialization (not stored).
-void transaction::set_witness_hash(const hash_digest& hash) const NOEXCEPT
-{
-    witness_hash_ = hash;
-}
-
-// More efficient than hash(bool) but not thead safe unless cached.
-const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
-{
-    if (witness)
-    {
-        if (!witness_hash_) set_witness_hash(hash(witness));
-        return *witness_hash_;
-    }
-    else
-    {
-        if (!nominal_hash_) set_nominal_hash(hash(witness));
-        return *nominal_hash_;
-    }
-}
-
-// Canonical form (thread safe).
+// Canonical hash, recomputes if not cached, returns copy if cached.
 hash_digest transaction::hash(bool witness) const NOEXCEPT
 {
     if (segregated_)
@@ -175,87 +86,189 @@ hash_digest transaction::hash(bool witness) const NOEXCEPT
     return digest;
 }
 
-// Cached for signature hashing (not thead safe unless cached).
+// Cached identity hashing (not thead safe).
 // ----------------------------------------------------------------------------
-// These rarely overconstruct the cache (anyone or !all) and are simple.
 
-////void transaction::initialize_sighash_cache() const NOEXCEPT
-////{
-////    initialize_v0_cache();
-////    initialize_v1_cache();
-////}
-
-void transaction::initialize_v0_cache() const NOEXCEPT
+// Used to populate nominal hash after wire deserialization and store read.
+void transaction::set_nominal_hash(const hash_digest& hash) const NOEXCEPT
 {
-    ////v0_cache_ = to_shared<v0_cache>(
-    ////    double_hash_points(),
-    ////    double_hash_sequences(),
-    ////    double_hash_outputs());
+    nominal_hash_ = hash;
 }
 
-void transaction::initialize_v1_cache() const NOEXCEPT
+// Used to populate witness hash after wire deserialization (not stored).
+void transaction::set_witness_hash(const hash_digest& hash) const NOEXCEPT
 {
-    ////v1_cache_ = to_shared<v1_cache>(
-    ////    single_hash_amounts(),
-    ////    single_hash_scripts(),
-    ////    single_hash_points(),
-    ////    single_hash_sequences(),
-    ////    single_hash_outputs());
+    witness_hash_ = hash;
 }
 
-// sha256x1
+// Efficient because always returns a reference and never recomputes.
+const hash_digest& transaction::get_hash(bool witness) const NOEXCEPT
+{
+    if (witness)
+    {
+        if (!witness_hash_) set_witness_hash(hash(witness));
+        return *witness_hash_;
+    }
+    else
+    {
+        if (!nominal_hash_) set_nominal_hash(hash(witness));
+        return *nominal_hash_;
+    }
+}
+
+// Cached signature hashing (not thead safe).
+// ----------------------------------------------------------------------------
+
+hash_digest transaction::x1_base_hash_points() const NOEXCEPT
+{
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256::fast sink{ stream };
+    for (const auto& input: *inputs_)
+        input->point().to_data(sink);
+
+    sink.flush();
+    return digest;
+}
+
+hash_digest transaction::x1_base_hash_sequences() const NOEXCEPT
+{
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256::fast sink{ stream };
+    for (const auto& input: *inputs_)
+        sink.write_4_bytes_little_endian(input->sequence());
+
+    sink.flush();
+    return digest;
+}
+
+hash_digest transaction::x1_base_hash_outputs() const NOEXCEPT
+{
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256::fast sink{ stream };
+    for (const auto& output : *outputs_)
+        output->to_data(sink);
+
+    sink.flush();
+    return digest;
+}
+
+// This requires ALL prevouts of the tx are populated (new in taproot).
+hash_digest transaction::v1_only_hash_amounts() const NOEXCEPT
+{
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256::fast sink{ stream };
+    for (const auto& input : *inputs_)
+        sink.write_8_bytes_little_endian(input->prevout->value());
+
+    sink.flush();
+    return digest;
+}
+
+// This requires ALL prevouts of the tx are populated (new in taproot).
+hash_digest transaction::v1_only_hash_scripts() const NOEXCEPT
+{
+    hash_digest digest{};
+    stream::out::fast stream{ digest };
+    hash::sha256::fast sink{ stream };
+    for (const auto& input : *inputs_)
+        input->prevout->script().to_data(sink, true);
+
+    sink.flush();
+    return digest;
+}
+
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
+void transaction::set_x1_base_hash() const NOEXCEPT
+{
+    if (!x1_base_cache_)
+        x1_base_cache_ = std::make_shared<base_cache>
+        (
+            x1_base_hash_points(),
+            x1_base_hash_sequences(),
+            x1_base_hash_outputs()
+        );
+}
+
+void transaction::set_x2_base_hash() const NOEXCEPT
+{
+    if (!x2_base_cache_)
+        x2_base_cache_ = std::make_shared<base_cache>
+        (
+            sha256_hash(single_hash_points()),
+            sha256_hash(single_hash_sequences()),
+            sha256_hash(single_hash_outputs())
+        );
+}
+
+void transaction::set_v1_only_hash() const NOEXCEPT
+{
+    if (!v1_only_cache_)
+        v1_only_cache_ = std::make_shared<only_cache>
+        (
+            v1_only_hash_amounts(),
+            v1_only_hash_scripts()
+        );
+}
+
+BC_POP_WARNING()
+
+// sha256x1 (script verson 1)
+// ----------------------------------------------------------------------------
 
 const hash_digest& transaction::single_hash_points() const NOEXCEPT
 {
-    // TODO: if cache not computed, compute and then return from cache.
-    static constexpr hash_digest hash{};
-    return hash;
-}
-
-const hash_digest& transaction::single_hash_amounts() const NOEXCEPT
-{
-    static constexpr hash_digest hash{};
-    return hash;
-}
-
-const hash_digest& transaction::single_hash_scripts() const NOEXCEPT
-{
-    static constexpr hash_digest hash{};
-    return hash;
+    set_x1_base_hash();
+    return x1_base_cache_->points;
 }
 
 const hash_digest& transaction::single_hash_sequences() const NOEXCEPT
 {
-    static constexpr hash_digest hash{};
-    return hash;
+    set_x1_base_hash();
+    return x1_base_cache_->sequences;
 }
 
 const hash_digest& transaction::single_hash_outputs() const NOEXCEPT
 {
-    static constexpr hash_digest hash{};
-    return hash;
+    set_x1_base_hash();
+    return x1_base_cache_->outputs;
 }
 
-// sha256x2
+const hash_digest& transaction::single_hash_amounts() const NOEXCEPT
+{
+    set_v1_only_hash();
+    return v1_only_cache_->amounts;
+}
+
+const hash_digest& transaction::single_hash_scripts() const NOEXCEPT
+{
+    set_v1_only_hash();
+    return v1_only_cache_->scripts;
+}
+
+// sha256x2 (script verson 0)
+// ----------------------------------------------------------------------------
 
 const hash_digest& transaction::double_hash_points() const NOEXCEPT
 {
-    // TODO: if cache not computed, compute and then return from cache.
-    // TODO: compute single hashes if not computed.
-    static constexpr hash_digest hash{};
-    return hash;
+    set_x2_base_hash();
+    return x2_base_cache_->points;
 }
 
 const hash_digest& transaction::double_hash_sequences() const NOEXCEPT
 {
-    static constexpr hash_digest hash{};
-    return hash;
+    set_x2_base_hash();
+    return x2_base_cache_->sequences;
 }
 
 const hash_digest& transaction::double_hash_outputs() const NOEXCEPT
 {
-    static constexpr hash_digest hash{};
-    return hash;
+    set_x2_base_hash();
+    return x2_base_cache_->outputs;
 }
 
 } // namespace chain

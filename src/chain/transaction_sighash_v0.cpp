@@ -77,8 +77,8 @@ bool transaction::version0_sighash(hash_digest& out,
     ///////////////////////////////////////////////////////////////////////////
 
     sink.write_4_bytes_little_endian(version_);
-    sink.write_bytes(!anyone ? hash_points() : null_hash);
-    sink.write_bytes(!anyone && all ? hash_sequences() : null_hash);
+    sink.write_bytes(!anyone ? double_hash_points() : null_hash);
+    sink.write_bytes(!anyone && all ? double_hash_sequences() : null_hash);
 
     (*input)->point().to_data(sink);
     subscript.to_data(sink, true);
@@ -88,7 +88,7 @@ bool transaction::version0_sighash(hash_digest& out,
     if (single)
         sink.write_bytes(output_hash_v0(input));
     else
-        sink.write_bytes(all ? hash_outputs() : null_hash);
+        sink.write_bytes(all ? double_hash_outputs() : null_hash);
 
     sink.write_4_bytes_little_endian(locktime_);
     sink.write_4_bytes_little_endian(sighash_flags);
