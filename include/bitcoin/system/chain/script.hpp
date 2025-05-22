@@ -148,7 +148,7 @@ public:
     const operations& ops() const NOEXCEPT;
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
-    /// Single sha256 hash as used for Electrum indexation.
+    /// Single sha256 hash, as used for Electrum indexation (not cached).
     hash_digest hash() const NOEXCEPT;
 
     /// Extraction.
