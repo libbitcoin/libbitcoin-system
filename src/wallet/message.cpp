@@ -38,13 +38,14 @@ hash_digest hash_message(const data_slice& message) NOEXCEPT
     // This is a specified magic prefix.
     static const std::string prefix("Bitcoin Signed Message:\n");
 
-    hash_digest sha256{};
-    hash::sha256::copy sink(sha256);
+    hash_digest hash{};
+    stream::out::fast stream{ hash };
+    hash::sha256x2::fast sink(stream);
     sink.write_string(prefix);
     sink.write_variable(message.size());
     sink.write_bytes(message);
     sink.flush();
-    return sha256_hash(sha256);
+    return hash;
 }
 
 static bool recover(short_hash& out_hash, bool compressed,

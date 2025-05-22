@@ -39,8 +39,9 @@ static ec_scalar borromean_hash(const hash_digest& M, const data_slice& R,
     uint32_t i, uint32_t j) NOEXCEPT
 {
     // e = H(M || R || i || j)
-    hash_digest hash;
-    hash::sha256::copy sink(hash);
+    hash_digest hash{};
+    stream::out::fast stream{ hash };
+    hash::sha256::fast sink(stream);
     sink.write_bytes(R);
     sink.write_bytes(M);
     sink.write_4_bytes_big_endian(i);
@@ -177,8 +178,9 @@ static bool calculate_e0(ring_signature& out, const key_rings& rings,
     const hash_digest& digest, const secret_list& salts,
     const index_list& known_key_indexes) NOEXCEPT
 {
-    hash_digest hash;
-    hash::sha256::copy sink(hash);
+    hash_digest hash{};
+    stream::out::fast stream{ hash };
+    hash::sha256::fast sink(stream);
 
     BC_ASSERT(known_key_indexes.size() == rings.size());
     BC_ASSERT(out.proofs.size() == rings.size());
@@ -309,8 +311,9 @@ static ec_point calculate_last_R_verify(const compressed_list& ring,
 
 hash_digest digest(const data_slice& message, const key_rings& rings) NOEXCEPT
 {
-    hash_digest hash;
-    hash::sha256::copy sink(hash);
+    hash_digest hash{};
+    stream::out::fast stream{ hash };
+    hash::sha256::fast sink(stream);
 
     sink.write_bytes(message);
 
@@ -359,8 +362,9 @@ bool verify(const key_rings& rings, const hash_digest& digest,
         return false;
 
     // Hash data to produce e0 value.
-    hash_digest hash;
-    hash::sha256::copy sink(hash);
+    hash_digest hash{};
+    stream::out::fast stream{ hash };
+    hash::sha256::fast sink(stream);
 
     for (uint32_t i = 0; i < rings.size(); ++i)
     {

@@ -434,11 +434,12 @@ const operations& script::ops() const NOEXCEPT
 // Consensus (witness::extract_script) and Electrum server payments key.
 hash_digest script::hash() const NOEXCEPT
 {
-    hash_digest sha256{};
-    hash::sha256::copy sink(sha256);
+    hash_digest hash{};
+    stream::out::fast stream{ hash };
+    hash::sha256::fast sink(stream);
     to_data(sink, false);
     sink.flush();
-    return sha256;
+    return hash;
 }
 
 // static/private

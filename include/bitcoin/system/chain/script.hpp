@@ -147,6 +147,8 @@ public:
     bool is_unspendable() const NOEXCEPT;
     const operations& ops() const NOEXCEPT;
     size_t serialized_size(bool prefix) const NOEXCEPT;
+
+    /// Single sha256 hash as used for Electrum indexation.
     hash_digest hash() const NOEXCEPT;
 
     /// Extraction.
