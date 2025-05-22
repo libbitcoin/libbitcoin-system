@@ -38,7 +38,7 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
-#include <../../_deps/tracy-src/public/tracy/Tracy.hpp>
+#include <../_deps/tracy-src/public/tracy/Tracy.hpp>
 
 namespace libbitcoin {
 namespace system {
