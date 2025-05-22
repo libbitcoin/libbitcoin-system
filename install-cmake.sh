@@ -267,6 +267,7 @@ parse_command_line_options()
             (--build-icu)                              BUILD_ICU="yes";;
             (--build-boost)                            BUILD_BOOST="yes";;
             (--build-secp256k1)                        BUILD_SECP256K1="yes";;
+            (--with-tracy)                             WITH-TRACY="yes";;
 
             # Unique script options.
             (--build-dir=*)         BUILD_DIR="${OPTION#*=}";;
@@ -984,7 +985,6 @@ BOOST_FLAGS=(
 #------------------------------------------------------------------------------
 SECP256K1_FLAGS=(
 "-w")
-
 
 # Define build options.
 #==============================================================================
