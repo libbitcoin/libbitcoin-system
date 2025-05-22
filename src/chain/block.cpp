@@ -38,6 +38,8 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
+#include <../../_deps/tracy-src/public/tracy/Tracy.hpp>
+
 namespace libbitcoin {
 namespace system {
 namespace chain {
@@ -134,13 +136,21 @@ bool block::operator!=(const block& other) const NOEXCEPT
 // private
 void block::assign_data(reader& source, bool witness) NOEXCEPT
 {
+    ZoneScopedN("block::assign_data");
+
     auto& allocator = source.get_allocator();
     const auto count = source.read_size(max_block_size);
     auto txs = to_non_const_raw_ptr(txs_);
     txs->reserve(count);
+    TracyAlloc(txs->data(), sizeof(transaction_cptr) * count); // Instrumentiere reserve
 
     for (size_t tx = 0; tx < count; ++tx)
-        txs->emplace_back(CREATE(transaction, allocator, source, witness));
+        ZoneScopedN("block::assign_data-add transaction");
+
+        auto tx_ptr = CREATE(transaction, allocator, source, witness);
+        TracyAlloc(tx_ptr.get(), sizeof(transaction)); // Instrumentiere CREATE
+        //txs->emplace_back(CREATE(transaction, allocator, source, witness));
+        txs->emplace_back(tx_ptr);
 
     size_ = serialized_size(*txs_);
     valid_ = source;
