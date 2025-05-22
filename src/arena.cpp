@@ -50,15 +50,21 @@ void* default_arena::do_allocate(size_t bytes, size_t) THROWS
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    return ::operator new(bytes, std::align_val_t{ align });
     BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
-    return std::malloc(bytes);
+    auto ptr = std::malloc(bytes);
+    TracyAlloc(ptr, bytes);
+    //return std::malloc(bytes);
+    return ptr;
     BC_POP_WARNING()
 }
 
 void default_arena::do_deallocate(void* ptr, size_t, size_t) NOEXCEPT
 {
+    ZoneScopedN("default_arena::do_deallocate");
+
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    ::operator delete(ptr, std::align_val_t{ align });
     BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
+    TracyFree(ptr);
     std::free(ptr);
     BC_POP_WARNING()
 }
