@@ -400,21 +400,7 @@ chain::points transaction::points() const NOEXCEPT
     return out;
 }
 
-////// private
-////bool transaction::is_taproot() const NOEXCEPT
-////{
-////    if (!is_segregated())
-////        return false;
-////
-////    const auto rooted = [](const auto& input) NOEXCEPT
-////    {
-////        return input->script().version() == script_version::taproot;
-////    };
-////
-////    return std::any_of(inputs_->begin(), inputs_->end(), rooted);
-////}
-
-// Signatures (public)
+// Signatures (public).
 // ----------------------------------------------------------------------------
 
 transaction::input_iterator transaction::input_at(
@@ -471,6 +457,58 @@ bool transaction::create_endorsement(endorsement& out, const ec_secret& secret,
     out.push_back(sighash_flags);
     ////out.shrink_to_fit();
     return true;
+}
+
+// Signature hashing (common).
+// ----------------------------------------------------------------------------
+
+uint32_t transaction::input_index(const input_iterator& input) const NOEXCEPT
+{
+    return possible_narrow_and_sign_cast<uint32_t>(
+        std::distance(inputs_->begin(), input));
+}
+
+//*****************************************************************************
+// CONSENSUS: if index exceeds outputs in signature hash, return one_hash.
+// Related Bug: bitcointalk.org/index.php?topic=260595
+// Exploit: joncave.co.uk/2014/08/bitcoin-sighash-single/
+//*****************************************************************************
+bool transaction::output_overflow(size_t input) const NOEXCEPT
+{
+    return input >= outputs_->size();
+}
+
+// There are three versions of signature hashing and verification.
+// Version: (unversioned) original, (v0) bip143/segwit, (v1) bip341/taproot.
+bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
+    const script& subscript, uint64_t value, const hash_cptr& tapleaf,
+    script_version version, uint8_t sighash_flags, uint32_t flags) const NOEXCEPT
+{
+    // There is no rational interpretation of a signature hash for a coinbase.
+    BC_ASSERT(!is_coinbase());
+
+    // bip143: the method of signature hashing is changed for v0 scripts.
+    // bip342: the method of signature hashing is changed for v1 scripts.
+    const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
+    const auto bip342 = script::is_enabled(flags, flags::bip342_rule);
+
+    // This is where the connection between bip141 and bip143 is made. If a
+    // versioned 1 program (segwit) extracted by bip141 but bip143 (segwit
+    // hashing) is not active, then drop down to unversioned signature hashing.
+    if (bip143 && version == script_version::segwit)
+        return version0_sighash(out, input, subscript, value, sighash_flags);
+
+    // This is where the connection between bip341 and bip342 is made. If a
+    // version 2 program (taproot) extracted by bip341 but bip342 (tapscript)
+    // is not active then drop down to unversioned signature hashing. 
+    if (bip342 && version == script_version::taproot)
+        return version1_sighash(out, input, subscript, value, tapleaf,
+            sighash_flags);
+
+    // Given above forks are documented to activate together, this distinction
+    // is moot, however these are distinct BIPs and therefore must be either be
+    // differentiated as such in code, or the BIP distiction would be ignored.
+    return unversioned_sighash(out, input, subscript, sighash_flags);
 }
 
 // Guard (context free).
@@ -897,16 +935,12 @@ code transaction::connect_input(const context& ctx,
 
 // forks
 
-// Do not need to invoke on coinbase.
-// This assumes that prevout caching is completed on all inputs.
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
     ////BC_ASSERT(!is_coinbase());
 
     if (is_coinbase())
         return error::transaction_success;
-
-    initialize_sighash_cache();
 
     for (auto in = inputs_->begin(); in != inputs_->end(); ++in)
         if (const auto ec = connect_input(ctx, in))

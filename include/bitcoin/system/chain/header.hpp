@@ -102,10 +102,13 @@ public:
     hash_digest hash() const NOEXCEPT;
     uint256_t proof() const NOEXCEPT;
 
-    /// Cache (this overrides hash() computation).
+    /// Cache setters/getters, not thread safe.
+    /// -----------------------------------------------------------------------
+
+    /// Cache (overrides hash() computation).
     void set_hash(const hash_digest& hash) const NOEXCEPT;
 
-    /// Reference used to avoid copy, sets cache if not set (not thread safe).
+    /// Reference used to avoid copy, sets cache if not set.
     const hash_digest& get_hash() const NOEXCEPT;
 
     /// Validation.

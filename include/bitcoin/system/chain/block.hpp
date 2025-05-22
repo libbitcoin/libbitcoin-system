@@ -110,11 +110,11 @@ public:
     /// Cache setters/getters, not thread safe.
     /// -----------------------------------------------------------------------
 
-    /// Reference used to avoid copy, sets cache if not set (not thread safe).
-    const hash_digest& get_hash() const NOEXCEPT;
-
-    /// Optimized hash derivations using wire serialization of same block.
+    /// Cache (overrides hash() computation).
     void set_hashes(const data_chunk& data) NOEXCEPT;
+
+    /// Reference used to avoid copy, sets cache if not set.
+    const hash_digest& get_hash() const NOEXCEPT;
 
     /// Set/get memory allocation.
     void set_allocation(size_t allocation) const NOEXCEPT;
