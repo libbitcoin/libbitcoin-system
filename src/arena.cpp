@@ -21,14 +21,11 @@
 #include <cstdlib>
 #include <bitcoin/system/constants.hpp>
 
-//#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
-
 //#ifdef WITH_TRACY
 //#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
-#include <../_deps/tracy-src/public/tracy/Tracy.hpp>
+//#include <../_deps/tracy-src/public/tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
 //#endif
-
-//Jetzt gehts ab
 
 namespace libbitcoin {
 

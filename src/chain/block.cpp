@@ -38,7 +38,11 @@
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
-#include <../../_deps/tracy-src/public/tracy/Tracy.hpp>
+//#ifdef WITH_TRACY
+//#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
+//#include <../../_deps/tracy-src/public/tracy/Tracy.hpp>
+#include <tracy/Tracy.hpp>
+//#endif
 
 namespace libbitcoin {
 namespace system {
@@ -59,6 +63,9 @@ block::block() NOEXCEPT
 block::block(chain::header&& header, chain::transactions&& txs) NOEXCEPT
   : block(to_shared(std::move(header)), to_shareds(std::move(txs)), true)
 {
+    //ZoneScopedN("Block Move Constructor");
+    //TracyAlloc(header_.get(), sizeof(chain::header));
+    //TracyAlloc(txs_.get(), sizeof(transaction_cptrs));
 }
 
 block::block(const chain::header& header,
@@ -136,21 +143,24 @@ bool block::operator!=(const block& other) const NOEXCEPT
 // private
 void block::assign_data(reader& source, bool witness) NOEXCEPT
 {
+    //#ifdef WITH_TRACY
     ZoneScopedN("block::assign_data");
+    //#endif
 
     auto& allocator = source.get_allocator();
     const auto count = source.read_size(max_block_size);
     auto txs = to_non_const_raw_ptr(txs_);
     txs->reserve(count);
-    TracyAlloc(txs->data(), sizeof(transaction_cptr) * count); // Instrumentiere reserve
+    
+    TracyAlloc(txs->data(), sizeof(transaction_cptrs) * count); // Instrumentiere reserve
 
     for (size_t tx = 0; tx < count; ++tx)
-        ZoneScopedN("block::assign_data-add transaction");
+        //ZoneScopedN("block::assign_data-add transaction");
 
-        auto tx_ptr = CREATE(transaction, allocator, source, witness);
-        TracyAlloc(tx_ptr.get(), sizeof(transaction)); // Instrumentiere CREATE
-        //txs->emplace_back(CREATE(transaction, allocator, source, witness));
-        txs->emplace_back(tx_ptr);
+        //auto tx_ptr = CREATE(transaction, allocator, source, witness);
+        //TracyAlloc(tx_ptr.get(), sizeof(transaction)); // Instrumentiere CREATE
+        txs->emplace_back(CREATE(transaction, allocator, source, witness));
+        //txs->emplace_back(tx_ptr);
 
     size_ = serialized_size(*txs_);
     valid_ = source;
