@@ -39,9 +39,8 @@
 #include <bitcoin/system/stream/stream.hpp>
 
 //#ifdef WITH_TRACY
-//#include <../obj/nix-gnu-debug-shared/_deps/tracy-src/public/tracy/Tracy.hpp>
-//#include <../../_deps/tracy-src/public/tracy/Tracy.hpp>
 #include <tracy/Tracy.hpp>
+//#else
 //#endif
 
 namespace libbitcoin {
@@ -144,7 +143,7 @@ bool block::operator!=(const block& other) const NOEXCEPT
 void block::assign_data(reader& source, bool witness) NOEXCEPT
 {
     //#ifdef WITH_TRACY
-    ZoneScopedN("block::assign_data");
+    //ZoneScopedN("block::assign_data");
     //#endif
 
     auto& allocator = source.get_allocator();
@@ -152,7 +151,7 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
     auto txs = to_non_const_raw_ptr(txs_);
     txs->reserve(count);
     
-    TracyAlloc(txs->data(), sizeof(transaction_cptrs) * count); // Instrumentiere reserve
+    //TracyAlloc(txs->data(), sizeof(transaction_cptrs) * count); // Instrumentiere reserve
 
     for (size_t tx = 0; tx < count; ++tx)
         //ZoneScopedN("block::assign_data-add transaction");
