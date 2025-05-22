@@ -127,8 +127,9 @@ bool transaction::version1_sighash(hash_digest& out,
         if (output_overflow(index))
             return false;
 
-        // Hash is cacheable for use with each single sigop in the tapscript.
-        sink.write_bytes(outputs_->at(index)->hash());
+        // Hash is cached for use with each single sigop in the same script.
+        // TODO: it may be more optimal to not cache, since benefit is rare.
+        sink.write_bytes(outputs_->at(index)->get_hash());
     }
 
     // Additional for tapscript [bip342].
