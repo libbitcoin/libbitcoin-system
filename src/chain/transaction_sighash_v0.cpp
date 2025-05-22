@@ -55,6 +55,9 @@ hash_digest transaction::output_hash_v0(
 // CONSENSUS: sighash flags are carried in a single byte but are encoded as 4
 // bytes in the signature hash preimage serialization.
 // ****************************************************************************
+
+// NOT THREAD SAFE
+// Concurrent input validation for a tx unsafe due to on-demand hash caching.
 bool transaction::version0_sighash(hash_digest& out,
     const input_iterator& input, const script& subscript, uint64_t value,
     uint8_t sighash_flags) const NOEXCEPT

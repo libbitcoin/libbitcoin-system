@@ -935,8 +935,6 @@ code transaction::connect_input(const context& ctx,
 
 // forks
 
-// Do not need to invoke on coinbase.
-// This assumes that prevout caching is completed on all inputs.
 code transaction::connect(const context& ctx) const NOEXCEPT
 {
     ////BC_ASSERT(!is_coinbase());
