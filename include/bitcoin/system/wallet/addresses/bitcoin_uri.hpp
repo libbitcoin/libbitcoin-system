@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_BITCOIN_URI_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_BITCOIN_URI_HPP
 
-#include <iostream>
 #include <map>
-#include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>

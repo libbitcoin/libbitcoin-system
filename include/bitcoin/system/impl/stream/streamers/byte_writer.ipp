@@ -21,8 +21,6 @@
 
 #include <algorithm>
 #include <ios>
-#include <ostream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

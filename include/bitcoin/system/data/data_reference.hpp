@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_REFERENCE_HPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_REFERENCE_HPP
 
-#include <array>
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data_array.hpp>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>

@@ -19,7 +19,6 @@
 #include <bitcoin/system/unicode/ascii.hpp>
 
 #include <algorithm>
-#include <string>
 #include <iterator>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/unicode/normalization.hpp>

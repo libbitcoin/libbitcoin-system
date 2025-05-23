@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_COMPRESS_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_COMPRESS_IPP
 
-#include <type_traits>
 
 // Buffer compression.
 // ============================================================================

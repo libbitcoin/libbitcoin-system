@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_CODE_POINTS_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_CODE_POINTS_HPP
 
-#include <string>
 #include <utility>
-#include <vector>
 #include <bitcoin/system/define.hpp>
 
 // TODO: these are static initializations.

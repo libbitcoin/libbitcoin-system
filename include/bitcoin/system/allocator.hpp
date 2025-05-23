@@ -20,11 +20,8 @@
 #define LIBBITCOIN_SYSTEM_ALLOCATOR_HPP
 
 #include <iterator>
-#include <limits>
 #include <new>
-#include <type_traits>
 #include <utility>
-#include <vector>
 #include <bitcoin/system/arena.hpp>
 
 namespace libbitcoin {

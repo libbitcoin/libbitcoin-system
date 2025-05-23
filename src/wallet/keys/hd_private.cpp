@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/wallet/keys/hd_private.hpp>
 
-#include <iostream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

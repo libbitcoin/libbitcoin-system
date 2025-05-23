@@ -19,8 +19,6 @@
 #include <bitcoin/system/wallet/mnemonics/electrum_v1.hpp>
 
 #include <algorithm>
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>

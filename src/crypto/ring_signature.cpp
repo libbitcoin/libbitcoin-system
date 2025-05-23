@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <map>
 #include <numeric>
-#include <vector>
 #include <secp256k1.h>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/stream/stream.hpp>

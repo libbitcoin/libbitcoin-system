@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/wallet/keys/ek_private.hpp>
 
-#include <iostream>
 #include <sstream>
-#include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/radix/radix.hpp>

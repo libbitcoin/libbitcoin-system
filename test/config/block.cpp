@@ -18,7 +18,6 @@
  */
 #include "../test.hpp"
 #include <sstream>
-#include <string>
 #include <boost/lexical_cast.hpp>
 
 BOOST_AUTO_TEST_SUITE(config_block_tests)

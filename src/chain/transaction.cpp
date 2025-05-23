@@ -21,9 +21,7 @@
 #include <algorithm>
 #include <iterator>
 #include <numeric>
-#include <type_traits>
 #include <utility>
-#include <vector>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>

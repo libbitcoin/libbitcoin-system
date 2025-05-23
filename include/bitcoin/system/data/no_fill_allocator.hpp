@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_DATA_NO_FILL_ALLOCATOR_HPP
 
 #include <memory>
-#include <type_traits>
 #include <utility>
 #include <bitcoin/system/define.hpp>
 

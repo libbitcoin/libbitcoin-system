@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONSTRAINTS_HPP
 #define LIBBITCOIN_SYSTEM_CONSTRAINTS_HPP
 
-#include <string>
-#include <type_traits>
-#include <vector>
 #include <bitcoin/system/typelets.hpp>
 
 namespace libbitcoin {

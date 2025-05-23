@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_BLOCK_HPP
 
 #include <memory>
-#include <vector>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/header.hpp>
 #include <bitcoin/system/chain/input.hpp>

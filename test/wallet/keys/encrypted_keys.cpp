@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include <algorithm>
-#include <string>
 
 BOOST_AUTO_TEST_SUITE(encrypted_tests)
 

@@ -19,7 +19,6 @@
 #include <bitcoin/system/wallet/addresses/stealth_address.hpp>
 
 #include <algorithm>
-#include <iostream>
 #include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

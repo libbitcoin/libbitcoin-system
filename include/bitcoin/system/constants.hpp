@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_CONSTANTS_HPP
 
 #include <bit>
-#include <limits>
 #include <bitcoin/system/types.hpp>
 
 namespace libbitcoin {

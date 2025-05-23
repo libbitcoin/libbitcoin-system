@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_INTRINSICS_HAVES_HPP
 #define LIBBITCOIN_SYSTEM_INTRINSICS_HAVES_HPP
 
-#include <limits>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/xcpu/cpuid.hpp>
 #include <bitcoin/system/intrinsics/xcpu/functional_128.hpp>

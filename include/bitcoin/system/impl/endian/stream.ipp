@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_ENDIAN_STREAM_IPP
 #define LIBBITCOIN_SYSTEM_ENDIAN_STREAM_IPP
 
-#include <iostream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/swaps.hpp>
 #include <bitcoin/system/math/math.hpp>

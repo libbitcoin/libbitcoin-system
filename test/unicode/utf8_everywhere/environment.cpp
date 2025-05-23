@@ -18,7 +18,6 @@
  */
 #include "../../test.hpp"
 #include <cstring>
-#include <vector>
 
 BOOST_AUTO_TEST_SUITE(utf8_environment_tests)
 

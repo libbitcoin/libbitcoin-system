@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/stream/binary.hpp>
 
-#include <iostream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>

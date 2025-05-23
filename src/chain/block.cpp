@@ -23,7 +23,6 @@
 #include <numeric>
 #include <ranges>
 #include <set>
-#include <type_traits>
 #include <utility>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/enums/flags.hpp>

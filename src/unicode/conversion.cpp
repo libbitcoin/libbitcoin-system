@@ -19,7 +19,6 @@
 #include <bitcoin/system/unicode/conversion.hpp>
 
 #include <algorithm>
-#include <string>
 
 namespace libbitcoin {
 namespace system {

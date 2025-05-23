@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_FUNCLETS_HPP
 
 #include <memory>
-#include <type_traits>
 #include <bitcoin/system/literals.hpp>
 
 /// Simple type safe functions over value parameter.

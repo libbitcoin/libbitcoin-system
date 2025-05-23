@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/mnemonics/mnemonic.hpp>
 
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/math/math.hpp>

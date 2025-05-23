@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_DATA_EXCLUSIVE_SLICE_HPP
 
 #include <initializer_list>
-#include <string>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 

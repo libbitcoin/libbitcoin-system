@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/chain/enums/opcode.hpp>
 
-#include <string>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>

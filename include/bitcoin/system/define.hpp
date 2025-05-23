@@ -20,17 +20,19 @@
 #define LIBBITCOIN_SYSTEM_DEFINE_HPP
 
 /// Standard includes (do not include directly).
-/// All except <array> are included here by include ancestory.
-#include <array>            // TODO: purge
+/// All except 'array' are included here by include ancestory.
+#include <array>            // purged
 #include <cstddef>          // purged
 #include <cstdint>          // purged
 #include <functional>       // purged
-#include <iostream>         // TODO: purge
-#include <limits>           // TODO: purge
-#include <stdexcept>        // TODO: purge
-#include <string>           // TODO: purge
-#include <type_traits>      // TODO: purge
-#include <vector>           // TODO: purge
+#include <istream>          // purged
+#include <ostream>          // purged
+#include <iostream>         // purged
+#include <limits>           // purged
+#include <stdexcept>        // purged
+#include <string>           // purged
+#include <type_traits>      // purged
+#include <vector>           // purged
 
 // Pulls in all /system headers (except settings.hpp).
 #include <bitcoin/system/constraints.hpp>

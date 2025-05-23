@@ -19,10 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_TRANSACTION_HPP
 
-#include <istream>
 #include <memory>
 #include <optional>
-#include <vector>
 #include <bitcoin/system/chain/enums/coverage.hpp>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/input.hpp>

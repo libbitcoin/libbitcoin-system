@@ -19,8 +19,6 @@
 #include <bitcoin/system/chain/script.hpp>
 
 #include <algorithm>
-#include <iostream>
-#include <string>
 #include <sstream>
 #include <utility>
 #include <bitcoin/system/chain/enums/flags.hpp>

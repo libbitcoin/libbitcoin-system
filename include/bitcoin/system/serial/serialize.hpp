@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_HPP
 #define LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_HPP
 
-#include <iostream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

@@ -20,9 +20,6 @@
 
 #include <algorithm>
 #include <initializer_list>
-#include <iostream>
-#include <string>
-#include <vector>
 #include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/serial/serial.hpp>
 #include <bitcoin/system/stream/stream.hpp>

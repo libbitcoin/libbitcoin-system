@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_SIGN_HPP
 #define LIBBITCOIN_SYSTEM_MATH_SIGN_HPP
 
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

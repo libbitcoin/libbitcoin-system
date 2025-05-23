@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/unicode/utf8_everywhere/console_streambuf.hpp>
 
-#include <iostream>
 #include <new>
 #include <streambuf>
 #include <bitcoin/system/define.hpp>

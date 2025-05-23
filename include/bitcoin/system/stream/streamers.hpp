@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_HPP
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/binary.hpp>
 #include <bitcoin/system/stream/device.hpp>
