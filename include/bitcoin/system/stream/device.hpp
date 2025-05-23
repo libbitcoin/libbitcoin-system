@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_DEVICE_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_DEVICE_HPP
 
-#include <iostream>
 #include <utility>
 #include <bitcoin/system/define.hpp>
 

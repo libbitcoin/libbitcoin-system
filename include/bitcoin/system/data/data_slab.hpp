@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_SLAB_HPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLAB_HPP
 
-#include <array>
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 

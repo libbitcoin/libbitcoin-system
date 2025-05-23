@@ -18,7 +18,6 @@
  */
 #include "../test.hpp"
 #include <sstream>
-#include <string>
 
 BOOST_AUTO_TEST_SUITE(integer_tests)
 

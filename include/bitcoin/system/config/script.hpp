@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_SCRIPT_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_SCRIPT_HPP
 
-#include <iostream>
-#include <string>
-#include <vector>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

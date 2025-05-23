@@ -22,7 +22,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_READER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_READER_HPP
 
-#include <iostream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/byte_reader.hpp>
 #include <bitcoin/system/stream/streamers/interfaces/bitreader.hpp>

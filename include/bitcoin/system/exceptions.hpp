@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_EXCEPTIONS_HPP
 #define LIBBITCOIN_SYSTEM_EXCEPTIONS_HPP
 
-#include <new>
-#include <iostream>
 #include <exception>
-#include <stdexcept>
 #include <bitcoin/system/boost.hpp>
 
 namespace libbitcoin {

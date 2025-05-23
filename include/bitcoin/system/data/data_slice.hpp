@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_SLICE_HPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLICE_HPP
 
-#include <array>
 #include <initializer_list>
-#include <string>
-#include <vector>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

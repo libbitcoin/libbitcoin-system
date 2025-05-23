@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_INPUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_INPUT_HPP
 
-#include <istream>
 #include <memory>
-#include <vector>
 #include <bitcoin/system/chain/context.hpp>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/chain/point.hpp>

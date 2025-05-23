@@ -19,9 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_WRITER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BYTE_WRITER_HPP
 
-#include <iostream>
-#include <limits>
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/error.hpp>

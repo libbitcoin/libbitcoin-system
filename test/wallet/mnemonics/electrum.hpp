@@ -20,9 +20,6 @@
 #define LIBBITCOIN_SYSTEM_TEST_ELECTRUM_HPP
 
 #include <algorithm>
-#include <string>
-#include <array>
-#include <vector>
 #include <bitcoin/system.hpp>
 
 // Avoid using namespace in shared headers, but okay here.

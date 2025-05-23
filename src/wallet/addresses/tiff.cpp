@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/addresses/tiff.hpp>
 
-#include <iostream>
 #include <cmath>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/math/division.hpp>

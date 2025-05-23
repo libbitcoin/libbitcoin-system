@@ -21,10 +21,7 @@
 
 #include <algorithm>
 #include <ios>
-#include <istream>
-#include <limits>
 #include <memory>
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/endian/endian.hpp>

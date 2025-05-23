@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_ROTATE_IPP
 #define LIBBITCOIN_SYSTEM_MATH_ROTATE_IPP
 
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>

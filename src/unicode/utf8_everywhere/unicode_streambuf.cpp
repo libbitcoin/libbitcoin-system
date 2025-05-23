@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <cstring>
-#include <iostream>
 #include <streambuf>
 #include <bitcoin/system/unicode/conversion.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/environment.hpp>

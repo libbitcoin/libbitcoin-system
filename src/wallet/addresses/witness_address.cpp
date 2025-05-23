@@ -19,7 +19,6 @@
 #include <bitcoin/system/wallet/addresses/witness_address.hpp>
 
 #include <algorithm>
-#include <string>
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>

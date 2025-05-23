@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_2048_HPP
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_2048_HPP
 
-#include <string>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/words/words.hpp>

@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_URI_HPP
 
 #include <map>
-#include <string>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

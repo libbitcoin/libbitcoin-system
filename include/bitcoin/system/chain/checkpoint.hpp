@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHECKPOINT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHECKPOINT_HPP
 
-#include <iostream>
 #include <memory>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>

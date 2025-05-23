@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/config/hash256.hpp>
 
-#include <iostream>
 #include <sstream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/hash/hash.hpp>
 #include <bitcoin/system/radix/radix.hpp>

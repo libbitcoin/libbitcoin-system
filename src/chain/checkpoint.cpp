@@ -19,7 +19,6 @@
 #include <bitcoin/system/chain/checkpoint.hpp>
 
 #include <algorithm>
-#include <iostream>
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/hash/hash.hpp>

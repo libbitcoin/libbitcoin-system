@@ -21,7 +21,6 @@
 
 #include <list>
 #include <variant>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/machine/number_boolean.hpp>

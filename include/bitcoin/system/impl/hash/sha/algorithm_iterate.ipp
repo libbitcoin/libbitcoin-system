@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_ITERATE_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_ITERATE_IPP
 
-#include <type_traits>
 
 // Vectorized message scheduling (across sets of dependent blocks).
 // ============================================================================

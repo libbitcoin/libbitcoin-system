@@ -20,9 +20,7 @@
 
 #include <algorithm>
 #include <mutex>
-#include <string>
 #ifdef HAVE_MSC
-    #include <limits>
 #else
     #include <mutex>
 #endif

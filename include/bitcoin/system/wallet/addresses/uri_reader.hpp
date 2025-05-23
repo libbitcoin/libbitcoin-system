@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_URI_READER_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_URI_READER_HPP
 
-#include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/addresses/uri.hpp>
 

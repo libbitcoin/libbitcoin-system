@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <ranges>
-#include <string>
 #include <string_view>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

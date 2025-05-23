@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_BINARY_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_BINARY_HPP
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/data/data_chunk.hpp>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>

@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/radix/base_64.hpp>
 
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 
 // base64

@@ -19,8 +19,6 @@
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>
 
 #include <algorithm>
-#include <iostream>
-#include <string>
 #include <tuple>
 #include <utility>
 #include <bitcoin/system/chain/chain.hpp>

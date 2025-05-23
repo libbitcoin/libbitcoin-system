@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 
-#include <istream>
 #include <memory>
-#include <vector>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>

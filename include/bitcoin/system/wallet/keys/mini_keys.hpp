@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_MINI_KEYS_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_KEYS_MINI_KEYS_HPP
 
-#include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 

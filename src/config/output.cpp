@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/config/output.hpp>
 
-#include <iostream>
 #include <sstream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/chain/output.hpp>
 #include <bitcoin/system/config/point.hpp>

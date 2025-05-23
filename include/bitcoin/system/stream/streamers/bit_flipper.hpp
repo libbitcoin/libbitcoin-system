@@ -22,7 +22,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_FLIPPER_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMERS_BIT_FLIPPER_HPP
 
-#include <iostream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/stream/streamers/bit_reader.hpp>
 #include <bitcoin/system/stream/streamers/bit_writer.hpp>

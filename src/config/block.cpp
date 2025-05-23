@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/config/block.hpp>
 
-#include <iostream>
 #include <sstream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/chain/block.hpp>
 #include <bitcoin/system/config/base16.hpp>

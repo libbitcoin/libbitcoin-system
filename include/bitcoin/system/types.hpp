@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPES_HPP
 #define LIBBITCOIN_SYSTEM_TYPES_HPP
 
-#include <array>
 #include <tuple>
-#include <type_traits>
-#include <vector>
 #include <bitcoin/system/allocator.hpp>
 
 namespace libbitcoin {

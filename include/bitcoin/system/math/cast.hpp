@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_CAST_HPP
 #define LIBBITCOIN_SYSTEM_MATH_CAST_HPP
 
-#include <array>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

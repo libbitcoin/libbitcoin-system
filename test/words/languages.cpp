@@ -18,7 +18,6 @@
  */
 #include "../test.hpp"
 #include "languages.hpp"
-#include <string>
 
 BOOST_AUTO_TEST_SUITE(languages_tests)
 

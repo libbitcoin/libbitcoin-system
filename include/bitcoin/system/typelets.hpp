@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_TYPELETS_HPP
 #define LIBBITCOIN_SYSTEM_TYPELETS_HPP
 
-#include <limits>
 #include <tuple>
-#include <type_traits>
 #include <bitcoin/system/funclets.hpp>
 
 namespace libbitcoin {

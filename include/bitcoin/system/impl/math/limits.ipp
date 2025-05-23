@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 #define LIBBITCOIN_SYSTEM_MATH_LIMITS_IPP
 
-#include <limits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/cast.hpp>
 #include <bitcoin/system/math/sign.hpp>

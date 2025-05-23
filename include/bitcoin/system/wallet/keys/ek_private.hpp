@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_EK_PRIVATE_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_KEYS_EK_PRIVATE_HPP
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>
 

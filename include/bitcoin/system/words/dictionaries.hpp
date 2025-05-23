@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_WORDS_DICTIONARIES_HPP
 #define LIBBITCOIN_SYSTEM_WORDS_DICTIONARIES_HPP
 
-#include <array>
 #include <iterator>
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/words/dictionary.hpp>
