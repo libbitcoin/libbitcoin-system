@@ -200,7 +200,7 @@ set( enable-sse41 "yes" CACHE BOOL "Compile with sse4.1 intrinsics (specifically
 
 # Implement -Denable-shani.
 #------------------------------------------------------------------------------
-set( enable-shani "yes" CACHE BOOL "Compile with sha native intrinsics (specifically -msse4 -msha)" )
+set( enable-shani "no" CACHE BOOL "Compile with sha native intrinsics (specifically -msse4 -msha)" )
 
 # Implement -Denable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
