@@ -172,7 +172,7 @@ set( with-examples "yes" CACHE BOOL "Compile with examples." )
 
 # Implement -Dwith-profiling and declare with-profiling.
 #------------------------------------------------------------------------------
-set( with-tracy "no" CACHE BOOL "Compile debug application with tracy libs (https://github.com/wolfpld/tracy)." )
+set( with-tracy "yes" CACHE BOOL "Compile debug application with tracy libs (https://github.com/wolfpld/tracy)." )
 
 # Implement -Dwith-icu and define BOOST_HAS_ICU and output ${icu}.
 #------------------------------------------------------------------------------
