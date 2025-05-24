@@ -254,6 +254,13 @@ chain_state::activations chain_state::activation(const data& values,
         result.flags |= flags::bip147_rule;
     }
 
+    // bip9_bit2 forks are enforced above the bip9_bit2 checkpoint.
+    if (values.bip9_bit2_hash == settings.bip9_bit2_active_checkpoint.hash())
+    {
+        result.flags |= flags::bip341_rule;
+        result.flags |= flags::bip342_rule;
+    }
+
     // bip30_deactivate fork enforced above bip30_deactivate (bip34) checkpoint.
     const auto bip30_deactivate = forks.bip30 && forks.bip30_deactivate &&
         (values.bip30_deactivate_hash == settings.bip30_deactivate_checkpoint.hash());
@@ -465,6 +472,15 @@ uint32_t chain_state::easy_work_required(const data& values,
     return proof_of_work_limit;
 }
 
+// ****************************************************************************
+// CONSENSUS: Hardcoded in satoshi client 0.10.0 (pull request #6931), based on
+// the assumption that bip34 made bip30 redundant (at least if bip34 active).
+// However it was later learned that bip34 does not make bip30 redundant. As a
+// result satoshi client 0.17.0 (pull request #12204) restored the checks. This
+// constitutes a hard fork and a subsequent soft fork in addition to bip30. We
+// refer to these as bip30_deactivate and bip30_reactivate and roll them into
+// the bip30 flag for validation purposes.
+// ****************************************************************************
 size_t chain_state::bip30_deactivate_height(size_t height,
     const checkpoint& bip30_deactivate_checkpoint) NOEXCEPT
 {
@@ -474,6 +490,9 @@ size_t chain_state::bip30_deactivate_height(size_t height,
     return height < activation_height ? map::unrequested : activation_height;
 }
 
+// ****************************************************************************
+// CONSENSUS: Hardcoded with bip90 activated.
+// ****************************************************************************
 size_t chain_state::bip9_bit0_height(size_t height,
     const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT
 {
@@ -483,12 +502,27 @@ size_t chain_state::bip9_bit0_height(size_t height,
     return height < activation_height ? map::unrequested : activation_height;
 }
 
+// ****************************************************************************
+// CONSENSUS: Hardcoded in satoshi client (pull request #????).
+// ****************************************************************************
 size_t chain_state::bip9_bit1_height(size_t height,
     const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT
 {
     const auto activation_height = bip9_bit1_active_checkpoint.height();
 
     // Require bip9_bit1 hash at heights at/above bip9_bit1 active.
+    return height < activation_height ? map::unrequested : activation_height;
+}
+
+// ****************************************************************************
+// CONSENSUS: Not yet hardcoded in satoshi client (as of 0.29.0).
+// ****************************************************************************
+size_t chain_state::bip9_bit2_height(size_t height,
+    const checkpoint& bip9_bit2_active_checkpoint) NOEXCEPT
+{
+    const auto activation_height = bip9_bit2_active_checkpoint.height();
+
+    // Require bip9_bit2 hash at heights at/above bip9_bit2 active.
     return height < activation_height ? map::unrequested : activation_height;
 }
 
@@ -542,6 +576,11 @@ chain_state::map chain_state::get_map(size_t height,
 uint32_t chain_state::signal_version(const system::settings& settings) NOEXCEPT
 {
     const auto& forks = settings.forks;
+
+    // TODO: these can be retired.
+    // Signal bip9 bit2 if any of the group is configured.
+    if (forks.bip341 || forks.bip342)
+        return settings.bip9_version_base | settings.bip9_version_bit2;
 
     // TODO: these can be retired.
     // Signal bip9 bit1 if any of the group is configured.

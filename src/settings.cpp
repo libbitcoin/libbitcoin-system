@@ -42,6 +42,7 @@ settings::settings() NOEXCEPT
     bip65_version(4),
     bip9_version_bit0(1 << 0),
     bip9_version_bit1(1 << 1),
+    bip9_version_bit2(1 << 2),
     bip9_version_base(0x20000000)
 {
     forks.bip16 = true;
@@ -59,6 +60,8 @@ settings::settings() NOEXCEPT
     forks.bip141 = true;
     forks.bip143 = true;
     forks.bip147 = true;
+    forks.bip341 = true;
+    forks.bip342 = true;
     forks.retarget = true;                 // !regtest
     forks.difficult = true;                // !testnet
     forks.time_warp_patch = false;         // litecoin
@@ -128,6 +131,8 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip141 = true;
             forks.bip143 = true;
             forks.bip147 = true;
+            forks.bip341 = true;
+            forks.bip342 = true;
             forks.retarget = true;                 // !regtest
             forks.difficult = true;                // !testnet
             forks.time_warp_patch = false;         // litecoin
@@ -145,6 +150,7 @@ settings::settings(chain::selection context) NOEXCEPT
             bip30_deactivate_checkpoint = { "000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8", 227931 };
             bip9_bit0_active_checkpoint = { "000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5", 419328 };
             bip9_bit1_active_checkpoint = { "0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824 };
+            bip9_bit2_active_checkpoint = { "0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632 };
             checkpoints =
             {
                 { "00000000000000004d9b4ef50f0f9d686fd69db2e03af35a100370c64632a983", 295000 },
@@ -223,6 +229,8 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip141 = true;
             forks.bip143 = true;
             forks.bip147 = true;
+            forks.bip341 = true;
+            forks.bip342 = true;
             forks.retarget = true;                 // !regtest
             forks.difficult = false;               // !testnet
             forks.time_warp_patch = false;         // litecoin
@@ -237,11 +245,13 @@ settings::settings(chain::selection context) NOEXCEPT
             bip90_bip65_height = 581885;
             bip90_bip66_height = 330776;
 
-            // yes, 1983702 is only relevant to mainnet (lazy bitcoind impl).
-            bip30_reactivate_height = 1983702;
+            // Approximation, see satoshi PR#12204.
+            bip30_reactivate_height = 486'000'000_size;
+
             bip30_deactivate_checkpoint = { "0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8", 21111 };
             bip9_bit0_active_checkpoint = { "00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb", 770112 };
             bip9_bit1_active_checkpoint = { "00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624 };
+            bip9_bit2_active_checkpoint = { "000000000000eb906ab072652b86b05a1afeb95df53ed5c5a63aa3574e1f1b33", 2011968};
             checkpoints =
             {
                 { "000000002a936ca763904c3c35fce2f3556c559c0214345d31b1bcebf76acb70", 546 }
@@ -310,6 +320,8 @@ settings::settings(chain::selection context) NOEXCEPT
             forks.bip141 = true;
             forks.bip143 = true;
             forks.bip147 = true;
+            forks.bip341 = true;
+            forks.bip342 = true;
             forks.retarget = false;                // !regtest
             forks.difficult = true;                // !testnet
             forks.time_warp_patch = false;         // litecoin
@@ -330,6 +342,7 @@ settings::settings(chain::selection context) NOEXCEPT
             // bip90 assumes a historical bip34 activation block, so use genesis.
             bip9_bit0_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             bip9_bit1_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
+            bip9_bit2_active_checkpoint = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             checkpoints = {};
             milestone = { "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206", 0 };
             minimum_work = base16_hash("0000000000000000000000000000000000000000000000000000000000000000");
