@@ -47,7 +47,7 @@
 #if defined(__clang__)
     #define HAVE_CLANG
 #endif
-#if defined(__APPLE__) && defined(HAVE_CLANG)
+#if defined(__APPLE__) && defined(HAVE_CLANG) && defined(__apple_build_version__)
     #define HAVE_XCODE
 #endif
 #if defined(__GNUC__) && !defined(HAVE_CLANG)
