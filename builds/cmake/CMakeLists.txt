@@ -21,6 +21,7 @@ include(CheckCXXSourceCompiles)
 include(CheckLinkerFlag)
 include(FetchContent)
 
+# Define tracy version and define the source
 FetchContent_Declare(
   tracy
   GIT_REPOSITORY https://github.com/wolfpld/tracy.git
@@ -28,7 +29,18 @@ FetchContent_Declare(
   GIT_SHALLOW TRUE
   GIT_PROGRESS TRUE
 )
+# Download and make tracy available
 FetchContent_MakeAvailable(tracy)
+
+# Define Boost-Version 1.78.0 and define the source
+FetchContent_Declare(
+    boost
+    URL https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.gz
+    #URL_HASH SHA256=79e6d3f986444e5a80afbeccdaf2d1c1cf964baa8d766d20859d653a16c39848
+)
+
+# Download Boost and make it available
+#FetchContent_MakeAvailable(boost)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -160,7 +172,7 @@ set( with-examples "yes" CACHE BOOL "Compile with examples." )
 
 # Implement -Dwith-profiling and declare with-profiling.
 #------------------------------------------------------------------------------
-set( with-tracy "yes" CACHE BOOL "Compile debug application with tracy libs (https://github.com/wolfpld/tracy)." )
+set( with-tracy "no" CACHE BOOL "Compile debug application with tracy libs (https://github.com/wolfpld/tracy)." )
 
 # Implement -Dwith-icu and define BOOST_HAS_ICU and output ${icu}.
 #------------------------------------------------------------------------------
@@ -176,23 +188,23 @@ endif()
 
 # Implement -Denable-avx2.
 #------------------------------------------------------------------------------
-set( enable-avx2 "no" CACHE BOOL "Compile with avx2 intrinsics (specifically -mavx -mavx2)." )
+set( enable-avx2 "yes" CACHE BOOL "Compile with avx2 intrinsics (specifically -mavx -mavx2)." )
 
 # Implement -Denable-avx512.
 #------------------------------------------------------------------------------
-set( enable-avx512 "no" CACHE BOOL "Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." )
+set( enable-avx512 "yes" CACHE BOOL "Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." )
 
 # Implement -Denable-sse41.
 #------------------------------------------------------------------------------
-set( enable-sse41 "no" CACHE BOOL "Compile with sse4.1 intrinsics (specifically -msse4.1)." )
+set( enable-sse41 "yes" CACHE BOOL "Compile with sse4.1 intrinsics (specifically -msse4.1)." )
 
 # Implement -Denable-shani.
 #------------------------------------------------------------------------------
-set( enable-shani "no" CACHE BOOL "Compile with sha native intrinsics (specifically -msse4 -msha)" )
+set( enable-shani "yes" CACHE BOOL "Compile with sha native intrinsics (specifically -msse4 -msha)" )
 
 # Implement -Denable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
-set( enable-ndebug "yes" CACHE BOOL "Compile without debug assertions." )
+set( enable-ndebug "no" CACHE BOOL "Compile without debug assertions." )
 
 if (enable-ndebug)
     add_definitions( -DNDEBUG )
