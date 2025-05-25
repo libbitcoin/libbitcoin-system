@@ -996,8 +996,8 @@ void tag_invoke(json::value_from_tag, json::value& value,
 {
     value =
     {
-        { "header", block.header() },
-        { "transactions", *block.transactions_ptr() },
+        { "header", json::value_from(block.header()) },
+        { "transactions", json::value_from(*block.transactions_ptr()) },
     };
 }
 
