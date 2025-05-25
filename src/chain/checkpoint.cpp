@@ -194,6 +194,9 @@ const hash_digest& checkpoint::hash() const NOEXCEPT
 
 namespace json = boost::json;
 
+// boost/json will soon have NOEXCEPT: github.com/boostorg/json/pull/636
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 checkpoint tag_invoke(json::value_to_tag<checkpoint>,
     const json::value& value) NOEXCEPT
 {
@@ -217,6 +220,8 @@ void tag_invoke(json::value_from_tag, json::value& value,
         { "height", checkpoint.height() }
     };
 }
+
+BC_POP_WARNING()
 
 } // namespace chain
 } // namespace system
