@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/config/base2.hpp>
 
-#include <iostream>
 #include <sstream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/stream/stream.hpp>
 

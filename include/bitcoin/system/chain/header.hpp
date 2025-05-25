@@ -19,10 +19,8 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_HEADER_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_HEADER_HPP
 
-#include <istream>
 #include <memory>
 #include <optional>
-#include <vector>
 #include <bitcoin/system/chain/chain_state.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -102,10 +100,13 @@ public:
     hash_digest hash() const NOEXCEPT;
     uint256_t proof() const NOEXCEPT;
 
-    /// Cache (this overrides hash() computation).
+    /// Cache setters/getters, not thread safe.
+    /// -----------------------------------------------------------------------
+
+    /// Cache (overrides hash() computation).
     void set_hash(const hash_digest& hash) const NOEXCEPT;
 
-    /// Reference used to avoid copy, sets cache if not set (not thread safe).
+    /// Reference used to avoid copy, sets cache if not set.
     const hash_digest& get_hash() const NOEXCEPT;
 
     /// Validation.

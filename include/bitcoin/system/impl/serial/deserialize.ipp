@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <iostream>
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

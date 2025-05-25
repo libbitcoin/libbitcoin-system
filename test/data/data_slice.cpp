@@ -17,10 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../test.hpp"
-#include <array>
 #include <iterator>
-#include <string>
-#include <vector>
 
 BOOST_AUTO_TEST_SUITE(data_slice_tests)
 

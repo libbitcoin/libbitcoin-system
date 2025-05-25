@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_KEYS_ENCRYPTED_KEYS_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_KEYS_ENCRYPTED_KEYS_HPP
 
-#include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

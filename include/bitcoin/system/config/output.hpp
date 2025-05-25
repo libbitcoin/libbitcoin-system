@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_OUTPUT_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_OUTPUT_HPP
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/define.hpp>
 

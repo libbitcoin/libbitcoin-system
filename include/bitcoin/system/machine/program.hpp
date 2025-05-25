@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_MACHINE_PROGRAM_HPP
 
 #include <unordered_map>
-#include <vector>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_SCRIPT_HPP
 #define LIBBITCOIN_SYSTEM_TEST_SCRIPT_HPP
 
-#include <string>
-#include <vector>
 #include <bitcoin/system.hpp>
 
 struct script_test

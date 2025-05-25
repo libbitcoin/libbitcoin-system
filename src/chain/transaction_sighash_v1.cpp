@@ -63,7 +63,8 @@ uint8_t transaction::spend_type_v1(bool annex, bool tapscript) const NOEXCEPT
     return set_right(shift_left(ext_flags), zero, annex);
 }
 
-// TapSighash
+// NOT THREAD SAFE
+// Concurrent input validation for a tx unsafe due to on-demand hash caching.
 bool transaction::version1_sighash(hash_digest& out,
     const input_iterator& input, const script& script, uint64_t value,
     const hash_cptr& tapleaf, uint8_t sighash_flags) const NOEXCEPT
@@ -127,12 +128,13 @@ bool transaction::version1_sighash(hash_digest& out,
         if (output_overflow(index))
             return false;
 
-        // Hash is cacheable for use with each single sigop in the tapscript.
-        sink.write_bytes(outputs_->at(index)->hash());
+        // Hash is cached for use with each single sigop in the same script.
+        // TODO: it may be more optimal to not cache, since benefit is rare.
+        sink.write_bytes(outputs_->at(index)->get_hash());
     }
 
     // Additional for tapscript [bip342].
-    // Above midstate is cacheable for use when same sigop flag for the script.
+    // Above midstate is cacheable for use when same sigop flag for script.
     if (tapleaf)
     {
         sink.write_bytes(*tapleaf);

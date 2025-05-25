@@ -87,6 +87,7 @@ public:
     uint32_t bip65_version;
     uint32_t bip9_version_bit0;
     uint32_t bip9_version_bit1;
+    uint32_t bip9_version_bit2;
     uint32_t bip9_version_base;
 
     /// Block 514 is the first testnet block after date-based activation.
@@ -112,6 +113,9 @@ public:
 
     /// This cannot be reactivated in a future branch due to window expiration.
     chain::checkpoint bip9_bit1_active_checkpoint{};
+
+    /// This cannot be reactivated in a future branch due to window expiration.
+    chain::checkpoint bip9_bit2_active_checkpoint{};
 
     /// A block that is presumed to be valid but not required to be present.
     chain::checkpoint milestone{};

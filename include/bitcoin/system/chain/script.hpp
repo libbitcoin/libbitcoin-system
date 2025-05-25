@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_SCRIPT_HPP
 
-#include <istream>
 #include <memory>
-#include <string>
 #include <bitcoin/system/chain/enums/flags.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/operation.hpp>
@@ -147,6 +145,8 @@ public:
     bool is_unspendable() const NOEXCEPT;
     const operations& ops() const NOEXCEPT;
     size_t serialized_size(bool prefix) const NOEXCEPT;
+
+    /// Single sha256 hash, as used for Electrum indexation (not cached).
     hash_digest hash() const NOEXCEPT;
 
     /// Extraction.

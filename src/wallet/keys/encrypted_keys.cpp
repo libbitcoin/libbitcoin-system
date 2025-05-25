@@ -19,7 +19,6 @@
 #include <bitcoin/system/wallet/keys/encrypted_keys.hpp>
 
 #include <algorithm>
-#include <stdexcept>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

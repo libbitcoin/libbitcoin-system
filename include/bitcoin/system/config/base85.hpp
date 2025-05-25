@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_BASE85_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_BASE85_HPP
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

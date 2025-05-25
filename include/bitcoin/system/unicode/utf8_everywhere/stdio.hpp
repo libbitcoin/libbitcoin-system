@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_STDIO_HPP
 #define LIBBITCOIN_SYSTEM_UNICODE_UTF8_EVERYWHERE_STDIO_HPP
 
-#include <iostream>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

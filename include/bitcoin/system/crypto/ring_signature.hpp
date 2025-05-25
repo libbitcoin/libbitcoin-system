@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_RING_SIGNATURE_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_RING_SIGNATURE_HPP
 
-#include <vector>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

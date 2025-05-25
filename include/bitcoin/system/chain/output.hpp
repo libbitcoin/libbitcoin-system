@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_OUTPUT_HPP
 
-#include <istream>
 #include <memory>
-#include <vector>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -91,6 +89,11 @@ public:
     size_t signature_operations(bool bip141) const NOEXCEPT;
     bool is_dust(uint64_t minimum_output_value) const NOEXCEPT;
 
+    /// Cache setters/getters, not thread safe.
+    /// -----------------------------------------------------------------------
+
+    const hash_digest& get_hash() const NOEXCEPT;
+
 protected:
     output(uint64_t value, const chain::script::cptr& script,
         bool valid) NOEXCEPT;
@@ -108,6 +111,9 @@ private:
     // Cache.
     bool valid_;
     size_t size_;
+
+    // Signature hash caching (tapscript hash_single).
+    mutable std::shared_ptr<const hash_digest> cache_{};
 };
 
 typedef std_vector<output> outputs;

@@ -19,10 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_HPP
 
-#include <istream>
 #include <memory>
-#include <string>
-#include <vector>
 #include <bitcoin/system/chain/annex.hpp>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>

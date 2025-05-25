@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_SERIAL_SERIALIZE_IPP
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

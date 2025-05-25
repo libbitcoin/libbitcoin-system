@@ -18,8 +18,6 @@
  */
 #include <bitcoin/system/wallet/keys/hd_public.hpp>
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>

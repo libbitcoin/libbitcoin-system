@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_HASH256_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_HASH256_HPP
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 

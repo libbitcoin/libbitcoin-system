@@ -199,6 +199,16 @@ hash_digest output::hash() const NOEXCEPT
     return out;
 }
 
+// NOT THREAD SAFE
+// Proves benefit only with multiple tapscript hash_single per input script.
+const hash_digest& output::get_hash() const NOEXCEPT
+{
+    if (!cache_)
+        cache_ = std::make_shared<const hash_digest>(hash());
+
+    return *cache_;
+}
+
 bool output::committed_hash(hash_cref& out) const NOEXCEPT
 {
     const auto& ops = script_->ops();
@@ -259,7 +269,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value =
     {
         { "value", output.value() },
-        { "script", output.script() },
+        { "script", json::value_from(output.script()) },
     };
 }
 

@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_LITERALS_HPP
 #define LIBBITCOIN_SYSTEM_LITERALS_HPP
 
-#include <limits>
-#include <type_traits>
 #include <bitcoin/system/constants.hpp>
 
 // RUNTIME_LITERALS may be used to exclude test evaluation (until consteval).

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_STRING_HPP
 #define LIBBITCOIN_SYSTEM_DATA_STRING_HPP
 
-#include <string>
 #include <bitcoin/system/data/data_slice.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/code_points.hpp>

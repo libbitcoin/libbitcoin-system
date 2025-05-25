@@ -19,9 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CHAIN_CHECKPOINT_HPP
 #define LIBBITCOIN_SYSTEM_CHAIN_CHECKPOINT_HPP
 
-#include <iostream>
 #include <memory>
-#include <vector>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -63,20 +61,12 @@ public:
     /// Deserialization.
     /// -----------------------------------------------------------------------
 
-    // TODO: move to config serialization wrapper.
-    ////bool from_string(const std::string& text) NOEXCEPT;
-    ////bool from_string(std::istream& stream) NOEXCEPT;
-    ////bool from_string(reader& source) NOEXCEPT;
-
     bool is_valid() const NOEXCEPT;
 
     /// Serialization.
     /// -----------------------------------------------------------------------
 
-    // TODO: move to config serialization wrapper.
     std::string to_string() const NOEXCEPT;
-    ////bool to_string(std::ostream& stream) const NOEXCEPT;
-    ////bool to_string(writer& sink) const NOEXCEPT;
 
     /// Methods.
     /// -----------------------------------------------------------------------

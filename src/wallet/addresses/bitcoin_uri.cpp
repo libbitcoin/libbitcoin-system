@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/addresses/bitcoin_uri.hpp>
 
-#include <iostream>
 #include <map>
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/wallet/addresses/payment_address.hpp>

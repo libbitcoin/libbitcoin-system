@@ -20,8 +20,6 @@
 #define LIBBITCOIN_SYSTEM_TEST_MNEMONIC_HPP
 
 #include <algorithm>
-#include <string>
-#include <vector>
 #include <bitcoin/system.hpp>
 
  // Avoid using namespace in shared headers, but okay here.

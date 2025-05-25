@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_HASH_ACCUMULATOR_IPP
 
 #include <algorithm>
-#include <string>
 
 namespace libbitcoin {
 namespace system {

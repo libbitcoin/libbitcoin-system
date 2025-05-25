@@ -21,10 +21,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <array>
 #include <chrono>
-#include <iostream>
-#include <vector>
 #include <filesystem>
 #include <memory_resource>
 #include <bitcoin/system.hpp>

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_MERKLE_IPP
 #define LIBBITCOIN_SYSTEM_HASH_SHA_ALGORITHM_MERKLE_IPP
 
-#include <type_traits>
 #include <utility>
 
 // Merkle hashing.

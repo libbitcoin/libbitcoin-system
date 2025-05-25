@@ -20,9 +20,6 @@
 #define LIBBITCOIN_SYSTEM_SERIAL_PROPS_HPP
 
 #include <initializer_list>
-#include <iostream>
-#include <string>
-#include <vector>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {

@@ -18,9 +18,7 @@
  */
 #include <bitcoin/system/config/base58.hpp>
 
-#include <iostream>
 #include <sstream>
-#include <string>
 #include <utility>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/radix/radix.hpp>

@@ -19,7 +19,6 @@
 #include <bitcoin/system/wallet/keys/ec_public.hpp>
 
 #include <algorithm>
-#include <iostream>
 #include <utility>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>

@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_STREAM_STREAMS_HPP
 #define LIBBITCOIN_SYSTEM_STREAM_STREAMS_HPP
 
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/stream/device.hpp>
 #include <bitcoin/system/stream/devices/copy_sink.hpp>

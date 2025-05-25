@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_STREAM_IOSTREAM_IOSTREAM_IPP
 
 #include <algorithm>
-#include <type_traits>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

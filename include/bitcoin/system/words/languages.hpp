@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WORDS_LANGUAGES_HPP
 #define LIBBITCOIN_SYSTEM_WORDS_LANGUAGES_HPP
 
-#include <iostream>
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>

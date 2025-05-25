@@ -18,7 +18,6 @@
  */
 #include <bitcoin/system/wallet/keys/mini_keys.hpp>
 
-#include <string>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/hash/hash.hpp>
 

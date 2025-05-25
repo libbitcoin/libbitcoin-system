@@ -22,8 +22,6 @@
 #ifndef LIBBITCOIN_SYSTEM_TEST_SIPHASH_HPP
 #define LIBBITCOIN_SYSTEM_TEST_SIPHASH_HPP
 
-#include <string>
-#include <vector>
 
 struct siphash_result
 {

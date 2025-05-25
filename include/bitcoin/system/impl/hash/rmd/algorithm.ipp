@@ -20,7 +20,6 @@
 #define LIBBITCOIN_SYSTEM_HASH_RMD_ALGORITHM_IPP
 
 #include <bit>
-#include <iostream>
 
 namespace libbitcoin {
 namespace system {

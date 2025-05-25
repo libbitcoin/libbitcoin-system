@@ -20,7 +20,6 @@
 
 #include <iterator>
 #include <sstream>
-#include <string>
 #include <utility>
 
 BOOST_AUTO_TEST_SUITE(witness_address_tests)

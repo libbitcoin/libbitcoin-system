@@ -20,8 +20,6 @@
 #define LIBBITCOIN_SYSTEM_WORDS_DICTIONARY_IPP
 
 #include <algorithm>
-#include <string>
-#include <type_traits>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

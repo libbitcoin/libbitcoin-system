@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_MESSAGE_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_MESSAGE_HPP
 
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>

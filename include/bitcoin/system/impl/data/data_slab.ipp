@@ -19,8 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_DATA_SLAB_IPP
 #define LIBBITCOIN_SYSTEM_DATA_DATA_SLAB_IPP
 
-#include <array>
-#include <vector>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

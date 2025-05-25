@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_HPP
 #define LIBBITCOIN_SYSTEM_DATA_BYTE_CAST_HPP
 
-#include <array>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
 

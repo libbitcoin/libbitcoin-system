@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_RADIX_BASE_64_HPP
 #define LIBBITCOIN_SYSTEM_RADIX_BASE_64_HPP
 
-#include <string>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 

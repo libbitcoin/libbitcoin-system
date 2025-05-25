@@ -197,8 +197,6 @@ code CLASS::connect_witness(const chain::context& state,
 
             interpreter program(tx, it, script, flags, version, stack, tapleaf);
 
-            // TODO: capture tapleaf_hash in program construct and use to
-            // TODO: obtain both tapscript boolean and tapleaf_hash values.
             if ((ec = program.run()))
             {
                 return ec;
