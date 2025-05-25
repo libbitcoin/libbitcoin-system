@@ -188,15 +188,15 @@ endif()
 
 # Implement -Denable-avx2.
 #------------------------------------------------------------------------------
-set( enable-avx2 "yes" CACHE BOOL "Compile with avx2 intrinsics (specifically -mavx -mavx2)." )
+set( enable-avx2 "no" CACHE BOOL "Compile with avx2 intrinsics (specifically -mavx -mavx2)." )
 
 # Implement -Denable-avx512.
 #------------------------------------------------------------------------------
-set( enable-avx512 "yes" CACHE BOOL "Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." )
+set( enable-avx512 "no" CACHE BOOL "Compile with avx512 intrinsics (specifically -mavx512bw -mavx512f)." )
 
 # Implement -Denable-sse41.
 #------------------------------------------------------------------------------
-set( enable-sse41 "yes" CACHE BOOL "Compile with sse4.1 intrinsics (specifically -msse4.1)." )
+set( enable-sse41 "no" CACHE BOOL "Compile with sse4.1 intrinsics (specifically -msse4.1)." )
 
 # Implement -Denable-shani.
 #------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ set( enable-shani "no" CACHE BOOL "Compile with sha native intrinsics (specifica
 
 # Implement -Denable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
-set( enable-ndebug "no" CACHE BOOL "Compile without debug assertions." )
+set( enable-ndebug "yes" CACHE BOOL "Compile without debug assertions." )
 
 if (enable-ndebug)
     add_definitions( -DNDEBUG )
