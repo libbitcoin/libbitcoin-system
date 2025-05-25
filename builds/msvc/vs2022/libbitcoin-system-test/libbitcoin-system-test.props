@@ -21,7 +21,6 @@
       <!--<Optimization>Disabled</Optimization>-->
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
-      <!--<PreprocessorDefinitions Condition="'$(DefaultLinkage)' == 'dynamic'">BOOST_TEST_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
     </ClCompile>
     <PostBuildEvent Condition="'$(DebugOrRelease)' == 'release'">
       <Command>"$(TargetPath)" --log_level=warning --run_test=* --show_progress=no --build_info=yes</Command>

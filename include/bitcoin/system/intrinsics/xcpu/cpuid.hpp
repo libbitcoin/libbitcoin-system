@@ -34,7 +34,7 @@ inline bool get_xcr(uint64_t& value, uint32_t index) noexcept
 #if defined(HAVE_XGETBV)
     value = _xgetbv(index);
     return true;
-#elif defined(HAVE_XASSEMBLY)
+#elif defined(HAVE_XCPU_ASSEMBLY)
     uint32_t a{}, d{};
     __asm__("xgetbv" : "=a"(a), "=d"(d) : "c"(index));
     value = (static_cast<uint64_t>(d) << 32) | a;
@@ -58,7 +58,7 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 #elif defined(HAVE_XCPUID_COUNT)
     __cpuid_count(a, b, c, d, leaf, subleaf);
     return true;
-#elif defined(HAVE_XASSEMBLY)
+#elif defined(HAVE_XCPU_ASSEMBLY)
     __asm__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "0"(leaf), "2"(subleaf));
     return true;
 #else

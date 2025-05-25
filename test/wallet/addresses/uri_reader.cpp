@@ -17,8 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "../../test.hpp"
-#include <boost/optional/optional.hpp>
-#include <boost/utility/in_place_factory.hpp>
+
+#include <optional>
+#include <utility>
 
 BOOST_AUTO_TEST_SUITE(uri_reader_tests)
 
@@ -70,7 +71,7 @@ struct custom_reader
 
     virtual bool set_fragment(const std::string& fragment) NOEXCEPT
     {
-        myfragment = boost::in_place(fragment);
+        myfragment = std::optional<std::string>(std::in_place, fragment);
         return true;
     }
 
@@ -78,9 +79,9 @@ struct custom_reader
         const std::string& value) NOEXCEPT
     {
         if (key == "myparam1")
-            myparam1 = boost::in_place(value);
+            myparam1 = std::optional<std::string>(std::in_place, value);
         else if (key == "myparam2")
-            myparam2 = boost::in_place(value);
+            myparam2 = std::optional<std::string>(std::in_place, value);
         else
             return !strict_;
 
@@ -92,9 +93,9 @@ struct custom_reader
     std::string mypath;
 
     // Use optionals when there is a semantic distinction between no value and default value.
-    boost::optional<std::string> myfragment;
-    boost::optional<std::string> myparam1;
-    boost::optional<std::string> myparam2;
+    std::optional<std::string> myfragment;
+    std::optional<std::string> myparam1;
+    std::optional<std::string> myparam2;
 
 private:
     bool strict_;
@@ -271,11 +272,11 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__custom_reader_optional_parameter_type__t
     BOOST_REQUIRE_EQUAL(custom.myscheme, "foo");
     BOOST_REQUIRE_EQUAL(custom.mypath, "part/abc");
     BOOST_REQUIRE(custom.myfragment);
-    BOOST_REQUIRE_EQUAL(custom.myfragment.get(), "myfrag");
+    BOOST_REQUIRE_EQUAL(custom.myfragment.value(), "myfrag");
     BOOST_REQUIRE(custom.myparam1);
-    BOOST_REQUIRE_EQUAL(custom.myparam1.get(), "1");
+    BOOST_REQUIRE_EQUAL(custom.myparam1.value(), "1");
     BOOST_REQUIRE(custom.myparam2);
-    BOOST_REQUIRE_EQUAL(custom.myparam2.get(), "2");
+    BOOST_REQUIRE_EQUAL(custom.myparam2.value(), "2");
 }
 
 BOOST_AUTO_TEST_CASE(uri_reader__parse__custom_reader_unsupported_component__invalid)

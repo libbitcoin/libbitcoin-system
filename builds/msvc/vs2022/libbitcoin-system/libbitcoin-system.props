@@ -23,6 +23,8 @@
       <!-- NOMINMAX enables use of std::min/max without conflict. -->
       <!-- WIN32_LEAN_AND_MEAN avoids inclusion of certain headers, winsock.h conflicts with boost and protocol use of winsock2.h. -->
       <PreprocessorDefinitions>WITH_ICU;WIN32_LEAN_AND_MEAN;NOMINMAX;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- Disable auto-linking for all boost-json and its dependency boost-container so they can be header only. -->
+      <PreprocessorDefinitions>BOOST_JSON_NO_LIB;BOOST_CONTAINER_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'DynamicLibrary'">BC_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Debug')) != -1">_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
