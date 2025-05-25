@@ -513,6 +513,14 @@ BOOST_AUTO_TEST_CASE(string__reduce_copy__todo__todo)
 
 // replace
 
+BOOST_AUTO_TEST_CASE(string__replace__from_empty__unchanged)
+{
+    std::string value{ "def" };
+    const std::string expected{ "def" };
+    BOOST_REQUIRE_EQUAL(replace(value, "", "klm"), 0u);
+    BOOST_REQUIRE_EQUAL(value, expected);
+}
+
 BOOST_AUTO_TEST_CASE(string__replace__empty__empty)
 {
     std::string value{};
