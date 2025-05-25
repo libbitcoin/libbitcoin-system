@@ -172,6 +172,10 @@ AC_ARG_ENABLE([ndebug],
 AC_MSG_RESULT([$enable_ndebug])
 AS_CASE([${enable_ndebug}], [yes], AC_DEFINE([NDEBUG]))
 
+# Inherit --enable-shared and define BOOST_ALL_DYN_LINK.
+#------------------------------------------------------------------------------
+AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_ALL_DYN_LINK]))
+
 # Implement --enable-isystem.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-isystem option])
@@ -393,6 +397,10 @@ AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
 AX_BOOST_PROGRAM_OPTIONS
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
 AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
+
+AX_BOOST_THREAD
+AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
+AC_MSG_NOTICE([boost_thread_LIBS : ${boost_thread_LIBS}])
 
 AS_CASE([${with_tests}], [yes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK

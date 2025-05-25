@@ -1007,6 +1007,7 @@ BOOST_OPTIONS=(
 "--with-iostreams" \
 "--with-locale" \
 "--with-program_options" \
+"--with-thread" \
 "--with-test")
 
 # Define secp256k1 options.
