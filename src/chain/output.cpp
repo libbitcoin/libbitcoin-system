@@ -269,7 +269,7 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value =
     {
         { "value", output.value() },
-        { "script", output.script() },
+        { "script", json::value_from(output.script()) },
     };
 }
 

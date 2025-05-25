@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <_PropertySheetDisplayName>ARM32 Settings</_PropertySheetDisplayName>
+  </PropertyGroup>
+    
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <!-- Note that WIN32 and _WIN32 are safe for ARM32 builds and ensure compatibility with 
+      Windows headers, as they imply Windows 32-bit or above. _ARM_ indicates the 32-bit ARM 
+      architecture. -->
+      <PreprocessorDefinitions>WIN32;_WIN32;_ARM_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineARM</TargetMachine>
+    </Link>
+    <Lib>
+      <AdditionalOptions>/MACHINE:ARM %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+
+</Project>

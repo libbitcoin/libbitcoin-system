@@ -53,10 +53,11 @@ BOOST_AUTO_TEST_CASE(settings__construct__default_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
-    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
 }
 
@@ -76,8 +77,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
     BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1333238400u);
     BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 750u);
@@ -90,10 +92,13 @@ BOOST_AUTO_TEST_CASE(settings__construct__mainnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
     const chain::checkpoint bit1_active("0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893", 481824u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
+    const chain::checkpoint bit2_active("0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, bit2_active);
     BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
     BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
     BOOST_REQUIRE_EQUAL(configuration.checkpoints, mainnet_checkpoints);
     BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000052b2559353df4117b7348b64")));
     const chain::checkpoint milestone("00000000000000000002a0b5db2a7f8d9087464c2586b546be7bce8eb53b8187", 850000u);
@@ -121,8 +126,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
     BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
     BOOST_REQUIRE_EQUAL(configuration.bip34_activation_threshold, 51u);
@@ -135,10 +141,13 @@ BOOST_AUTO_TEST_CASE(settings__construct__testnet_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, bit0_active);
     const chain::checkpoint bit1_active("00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca", 834624u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, bit1_active);
+    ////const chain::checkpoint bit2_active("0000000000000000000687bca986194dc2c1f949318629b44bb54ec0a94d8244", 709632);
+    ////BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, bit2_active);
     BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
     BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 210000u);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 2099999997690000u);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
     BOOST_REQUIRE_EQUAL(configuration.checkpoints, checkpoints);
     BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("000000000000000000000000000000000000000000000b6a51f415a67c0da307")));
     const chain::checkpoint milestone("0000000000000093bcb68c03a9a168ae252572d348a2eaeba2cdf9231d73206f", 2500000u);
@@ -161,8 +170,9 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     BOOST_REQUIRE_EQUAL(configuration.bip34_version, 2u);
     BOOST_REQUIRE_EQUAL(configuration.bip66_version, 3u);
     BOOST_REQUIRE_EQUAL(configuration.bip65_version, 4u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, 1u);
-    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, 2u);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit0, bit_right<uint32_t>(0));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit1, bit_right<uint32_t>(1));
+    BOOST_REQUIRE_EQUAL(configuration.bip9_version_bit2, bit_right<uint32_t>(2));
     BOOST_REQUIRE_EQUAL(configuration.bip9_version_base, 0x20000000u);
     BOOST_REQUIRE_EQUAL(configuration.bip16_activation_time, 1329264000u);
     BOOST_REQUIRE_EQUAL(configuration.bip90_bip34_height, 100000000u);
@@ -171,10 +181,12 @@ BOOST_AUTO_TEST_CASE(settings__construct__regtest_context__expected)
     const chain::checkpoint genesis(genesis_block.hash(), 0u);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit0_active_checkpoint, genesis);
     BOOST_REQUIRE_EQUAL(configuration.bip9_bit1_active_checkpoint, genesis);
+    BOOST_REQUIRE_EQUAL(configuration.bip9_bit2_active_checkpoint, genesis);
     BOOST_REQUIRE_EQUAL(configuration.initial_subsidy_bitcoin, 50u);
     BOOST_REQUIRE_EQUAL(configuration.subsidy_interval_blocks, 150u);
     BOOST_REQUIRE_EQUAL(configuration.bitcoin_to_satoshi(1), 100000000u);
     BOOST_REQUIRE_EQUAL(configuration.max_money(), 1499999998350u);
+    BOOST_REQUIRE_EQUAL(configuration.initial_subsidy(), 5'000'000'000_u64);
     BOOST_REQUIRE(configuration.checkpoints.empty());
     BOOST_REQUIRE_EQUAL(configuration.minimum_work, to_uintx(base16_hash("0000000000000000000000000000000000000000000000000000000000000000")));
     BOOST_REQUIRE_EQUAL(configuration.milestone, genesis);

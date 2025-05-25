@@ -975,8 +975,8 @@ void tag_invoke(json::value_from_tag, json::value& value,
     value =
     {
         { "version", tx.version() },
-        { "inputs", *tx.inputs_ptr() },
-        { "outputs", *tx.outputs_ptr() },
+        { "inputs", json::value_from(*tx.inputs_ptr()) },
+        { "outputs", json::value_from(*tx.outputs_ptr()) },
         { "locktime", tx.locktime() }
     };
 }

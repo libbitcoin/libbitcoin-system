@@ -82,6 +82,9 @@ public:
 
         /// mainnet: 481824, testnet: 834624 (or map::unrequested)
         size_t bip9_bit1_height{ unrequested };
+
+        /// mainnet: 709632, testnet: 2011968 (or map::unrequested)
+        size_t bip9_bit2_height{ unrequested };
     };
 
     /// Values used to populate chain state at the target height.
@@ -101,6 +104,9 @@ public:
 
         /// Hash of the bip9_bit1 block or null_hash if unrequested.
         hash_digest bip9_bit1_hash{};
+
+        /// Hash of the bip9_bit2 block or null_hash if unrequested.
+        hash_digest bip9_bit2_hash{};
 
         /// Sum of all work from genesis to block height.
         uint256_t cumulative_work{};
@@ -220,6 +226,8 @@ private:
         const checkpoint& bip9_bit0_active_checkpoint) NOEXCEPT;
     static size_t bip9_bit1_height(size_t height,
         const checkpoint& bip9_bit1_active_checkpoint) NOEXCEPT;
+    static size_t bip9_bit2_height(size_t height,
+        const checkpoint& bip9_bit2_active_checkpoint) NOEXCEPT;
 
     static data to_pool(const chain_state& top,
         const system::settings& settings) NOEXCEPT;
