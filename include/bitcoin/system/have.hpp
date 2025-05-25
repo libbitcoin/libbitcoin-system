@@ -240,6 +240,9 @@
     #endif
 #endif
 
+// NEON DISABLED
+#undef HAVE_NEON
+
 /// Build configured (always available on msvc).
 #if defined(HAVE_MSC) || defined(WITH_ICU)
     #define HAVE_ICU
