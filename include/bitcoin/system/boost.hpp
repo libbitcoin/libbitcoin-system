@@ -19,32 +19,12 @@
 #ifndef LIBBITCOIN_SYSTEM_BOOST_HPP
 #define LIBBITCOIN_SYSTEM_BOOST_HPP
 
-// "By default, enable_current_exception and enable_error_info are integrated
-// directly in the throw_exception function. Defining BOOST_EXCEPTION_DISABLE
-// disables this integration."
-// www.boost.org/doc/libs/1_78_0/libs/exception/doc/configuration_macros.html
-// This does not prevent interfaces that are documented to throw from doing so.
-// It only prevents boost from internally wrapping the exception object with
-// another class (in boost/throw_exception.hpp). Nearly all instances of the
-// internal boost exceptions affecting this library occur in streambuf and are
-// caught and presumed discarded in std::istream (standards allow propagation).
-// See more comments in streamers.hpp on streams that may throw exceptions.
-// Must be set on the command line to ensure it is captured by all includes.
-////#define BOOST_EXCEPTION_DISABLE
-
-// std::auto_ptr is deprecated in C++11 and removed in C++17:
-// en.cppreference.com/w/cpp/memory/auto_ptr
-// boost.locale exposes it to the API, so cannot remove it until C++17:
-// github.com/boostorg/locale/issues/27#issuecomment-414932853
-// Must use BOOST_LOCALE_HIDE_AUTO_PTR to hide the warnings.
-#define BOOST_LOCALE_HIDE_AUTO_PTR
-
 // Apply any warning suppressions to boost.
 // Any boost includes within headers will not benefit from suppression, as the
 // warnings are included by define.hpp which follows boost includes.
 #include <bitcoin/system/warnings.hpp>
 
-// Include boost in cpp files only from here, so exception disable works.
+// Include boost only from here, so exception disable works.
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
