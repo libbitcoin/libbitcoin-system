@@ -394,10 +394,6 @@ AX_BOOST_PROGRAM_OPTIONS
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
 AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
 
-AX_BOOST_THREAD
-AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
-AC_MSG_NOTICE([boost_thread_LIBS : ${boost_thread_LIBS}])
-
 AS_CASE([${with_tests}], [yes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
      AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])
