@@ -709,9 +709,8 @@ bool block::is_signature_operations_limited(bool bip16,
 }
 
 //*****************************************************************************
-// CONSENSUS:
-// This check is excluded under two bip30 exception blocks and bip30_deactivate
-// until bip30_reactivate. These conditions are rolled up into the bip30 flag.
+// CONSENSUS: check excluded under bip30 exception blocks and bip30_deactivate
+// until bip30_reactivate. Those conditions are rolled up into the bip30 flag.
 //*****************************************************************************
 bool block::is_unspent_coinbase_collision() const NOEXCEPT
 {
@@ -997,8 +996,8 @@ void tag_invoke(json::value_from_tag, json::value& value,
 {
     value =
     {
-        { "header", block.header() },
-        { "transactions", *block.transactions_ptr() },
+        { "header", json::value_from(block.header()) },
+        { "transactions", json::value_from(*block.transactions_ptr()) },
     };
 }
 

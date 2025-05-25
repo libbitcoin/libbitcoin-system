@@ -509,9 +509,9 @@ void tag_invoke(json::value_from_tag, json::value& value,
 {
     value =
     {
-        { "point", input.point() },
-        { "script", input.script() },
-        { "witness", input.witness() },
+        { "point", json::value_from(input.point()) },
+        { "script", json::value_from(input.script()) },
+        { "witness", json::value_from(input.witness()) },
         { "sequence", input.sequence() }
     };
 }

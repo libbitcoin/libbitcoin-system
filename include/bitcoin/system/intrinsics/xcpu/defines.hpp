@@ -33,7 +33,7 @@
 
 // TODO: ARM is unverified.
 #if defined(HAVE_ARM)
-    #include <arm_acle.h>
+    ////#include <arm_acle.h>
     #if defined(HAVE_NEON)
         #include <arm_neon.h>
     #endif

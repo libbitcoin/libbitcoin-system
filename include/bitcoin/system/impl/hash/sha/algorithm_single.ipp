@@ -155,7 +155,11 @@ midstate(const half_t& left, const half_t& right) NOEXCEPT
     }
     else if constexpr (native && SHA::strength == 256)
     {
+#if defined(HAVE_ARM)
+        return {};
+#else
         return native_hash(left, right);
+#endif
     }
     else
     {
@@ -225,7 +229,11 @@ simple_hash(const bytes_t<Size>& bytes) NOEXCEPT
     }
     else if constexpr (native && SHA::strength == 256)
     {
-        return native_hash(bytes);
+#if defined(HAVE_ARM)
+        return {};
+#else
+        ////return native_hash(bytes);
+#endif
     }
     else
     {
