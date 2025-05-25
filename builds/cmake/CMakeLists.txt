@@ -184,12 +184,6 @@ if (enable-ndebug)
     add_definitions( -DNDEBUG )
 endif()
 
-# Inherit -Denable-shared and define BOOST_ALL_DYN_LINK.
-#------------------------------------------------------------------------------
-if (BUILD_SHARED_LIBS)
-    add_definitions( -DBOOST_ALL_DYN_LINK )
-endif()
-
 if (enable-avx2)
     check_cxx_compiler_flag("-mavx -mavx2" HAS_FLAGS_AVX2)
 

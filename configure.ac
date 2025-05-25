@@ -172,10 +172,6 @@ AC_ARG_ENABLE([ndebug],
 AC_MSG_RESULT([$enable_ndebug])
 AS_CASE([${enable_ndebug}], [yes], AC_DEFINE([NDEBUG]))
 
-# Inherit --enable-shared and define BOOST_ALL_DYN_LINK.
-#------------------------------------------------------------------------------
-AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_ALL_DYN_LINK]))
-
 # Implement --enable-isystem.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-isystem option])
