@@ -320,7 +320,7 @@ endif()
 
 # Find boost
 #------------------------------------------------------------------------------
-find_package( Boost 1.76.0 REQUIRED COMPONENTS
+find_package( Boost 1.86.0 REQUIRED COMPONENTS
     iostreams
     locale
     program_options
