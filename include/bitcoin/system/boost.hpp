@@ -25,7 +25,6 @@
 #include <bitcoin/system/warnings.hpp>
 
 // Include boost only from here, so exception disable works.
-#include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/json.hpp>
