@@ -79,6 +79,8 @@ size_t replace(std::string& text, const std::string& from,
     const std::string& to) NOEXCEPT
 {
     auto count = zero;
+    if (from.empty())
+        return count;
 
     for (auto position = text.find(from);
         position != std::string::npos;

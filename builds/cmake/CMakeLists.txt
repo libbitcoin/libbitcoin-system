@@ -346,24 +346,16 @@ endif()
 
 # Find boost
 #------------------------------------------------------------------------------
-find_package( Boost 1.76.0 REQUIRED COMPONENTS
-    chrono
-    container
+find_package( Boost 1.86.0 REQUIRED COMPONENTS
     iostreams
-    json
     locale
     program_options
-    system
     thread
     unit_test_framework )
 
-set( boost_chrono_LIBS "-lboost_chrono" )
-set( boost_container_LIBS "-lboost_container" )
 set( boost_iostreams_LIBS "-lboost_iostreams" )
-set( boost_json_LIBS "-lboost_json" )
 set( boost_locale_LIBS "-lboost_locale" )
 set( boost_program_options_LIBS "-lboost_program_options" )
-set( boost_system_LIBS "-lboost_system" )
 set( boost_thread_LIBS "-lboost_thread" )
 set( boost_unit_test_framework_LIBS "-lboost_unit_test_framework" )
 
@@ -484,12 +476,9 @@ endif()
 # Define project common libraries.
 #------------------------------------------------------------------------------
 link_libraries(
-    ${Boost_CHRONO_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
-    ${Boost_JSON_LIBRARY}
     ${Boost_LOCALE_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${pthread_LIBRARIES}
     ${rt_LIBRARIES}
@@ -696,12 +685,9 @@ endif()
 # ${CANONICAL_LIB_NAME} project specific libraries/linker flags.
 #------------------------------------------------------------------------------
 target_link_libraries( ${CANONICAL_LIB_NAME}
-    ${Boost_CHRONO_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
-    ${Boost_JSON_LIBRARY}
     ${Boost_LOCALE_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${pthread_LIBRARIES}
     ${rt_LIBRARIES}

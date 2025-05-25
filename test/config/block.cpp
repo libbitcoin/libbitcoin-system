@@ -18,7 +18,6 @@
  */
 #include "../test.hpp"
 #include <sstream>
-#include <boost/lexical_cast.hpp>
 
 BOOST_AUTO_TEST_SUITE(config_block_tests)
 
@@ -172,12 +171,6 @@ BOOST_AUTO_TEST_CASE(block__ostream__populated__expected)
     std::stringstream serialized;
     serialized << genesis_config();
     BOOST_REQUIRE_EQUAL(serialized.str(), encoded_genesis_block);
-}
-
-BOOST_AUTO_TEST_CASE(block__ostream__boost_lexical_cast__expected)
-{
-    const auto serialized = boost::lexical_cast<std::string>(genesis_config());
-    BOOST_REQUIRE_EQUAL(serialized, encoded_genesis_block);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

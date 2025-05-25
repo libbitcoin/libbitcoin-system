@@ -20,13 +20,13 @@
 
 #include <filesystem>
 #include <sstream>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace config {
 
-using namespace std::filesystem;
 using namespace boost::program_options;
 
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
@@ -37,11 +37,11 @@ std::string parser::format_invalid_parameter(
     const std::string& message) NOEXCEPT
 {
     std::string clean_message(message);
-    boost::replace_all(clean_message, "for option is invalid", "is invalid");
+    replace(clean_message, "for option is invalid", "is invalid");
     return "Error: " + clean_message;
 }
 
-path parser::get_config_option(variables_map& variables,
+std::filesystem::path parser::get_config_option(variables_map& variables,
     const std::string& name) NOEXCEPT
 {
     // read config from the map so we don't require an early notify
@@ -49,9 +49,9 @@ path parser::get_config_option(variables_map& variables,
 
     // prevent exception in the case where the config variable is not set
     if (config.empty())
-        return path();
+        return {};
 
-    return config.as<path>();
+    return config.as<std::filesystem::path>();
 }
 
 bool parser::get_option(variables_map& variables,

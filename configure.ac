@@ -368,17 +368,17 @@ AS_IF([test x${enable_sse41} != "xno"],
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.76.0 and output ${boost_CPPFLAGS/LDFLAGS}.
+# Require Boost of at least version 1.86.0 and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
-    [AX_BOOST_BASE([1.76.0],
+    [AX_BOOST_BASE([1.86.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
          AC_SUBST([boost_ISYS_CPPFLAGS], [`echo ${BOOST_CPPFLAGS} | $SED s/^-I/-isystem/g | $SED s/' -I'/' -isystem'/g`])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
          AC_MSG_NOTICE([boost_ISYS_CPPFLAGS : ${boost_ISYS_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
-        [AC_MSG_ERROR([Boost 1.76.0 or later is required but was not found.])])])
+        [AC_MSG_ERROR([Boost 1.86.0 or later is required but was not found.])])])
 
 AS_CASE([${enable_isystem}],[yes],
     [AC_SUBST([boost_BUILD_CPPFLAGS], [${boost_ISYS_CPPFLAGS}])],
@@ -386,17 +386,9 @@ AS_CASE([${enable_isystem}],[yes],
 
 AC_MSG_NOTICE([boost_BUILD_CPPFLAGS : ${boost_BUILD_CPPFLAGS}])
 
-AX_BOOST_CHRONO
-AC_SUBST([boost_chrono_LIBS], [${BOOST_CHRONO_LIB}])
-AC_MSG_NOTICE([boost_chrono_LIBS : ${boost_chrono_LIBS}])
-
 AX_BOOST_IOSTREAMS
 AC_SUBST([boost_iostreams_LIBS], [${BOOST_IOSTREAMS_LIB}])
 AC_MSG_NOTICE([boost_iostreams_LIBS : ${boost_iostreams_LIBS}])
-
-AX_BOOST_JSON
-AC_SUBST([boost_json_LIBS], [${BOOST_JSON_LIB}])
-AC_MSG_NOTICE([boost_json_LIBS : ${boost_json_LIBS}])
 
 AX_BOOST_LOCALE
 AC_SUBST([boost_locale_LIBS], [${BOOST_LOCALE_LIB}])
@@ -405,10 +397,6 @@ AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
 AX_BOOST_PROGRAM_OPTIONS
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
 AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
-
-AX_BOOST_SYSTEM
-AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])
-AC_MSG_NOTICE([boost_system_LIBS : ${boost_system_LIBS}])
 
 AX_BOOST_THREAD
 AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
