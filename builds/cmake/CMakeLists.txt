@@ -21,16 +21,19 @@ include(CheckCXXSourceCompiles)
 include(CheckLinkerFlag)
 include(FetchContent)
 
-# Define tracy version and define the source
-FetchContent_Declare(
-  tracy
-  GIT_REPOSITORY https://github.com/wolfpld/tracy.git
-  GIT_TAG master
-  GIT_SHALLOW TRUE
-  GIT_PROGRESS TRUE
-)
-# Download and make tracy available
-FetchContent_MakeAvailable(tracy)
+# Conditionally get tracy profiler
+if (with-tracy)
+    # Define tracy version and define the source
+    FetchContent_Declare(
+    tracy
+    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+    GIT_TAG master
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+    )
+    # Download and make tracy available
+    FetchContent_MakeAvailable(tracy)
+endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -648,6 +651,7 @@ target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
     ${icu_i18n_FOR_BUILD_INCLUDE_DIRS}
     ${dl_INCLUDE_DIRS}
     ${secp256k1_FOR_BUILD_INCLUDE_DIRS}
+    # Conditionally add tracy includes
     "$<$<BOOL:${with-tracy}>:${tracy_SOURCE_DIR}/public>" )
 
 target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
