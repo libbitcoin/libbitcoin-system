@@ -32,16 +32,6 @@ FetchContent_Declare(
 # Download and make tracy available
 FetchContent_MakeAvailable(tracy)
 
-# Define Boost-Version 1.78.0 and define the source
-FetchContent_Declare(
-    boost
-    URL https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.gz
-    #URL_HASH SHA256=79e6d3f986444e5a80afbeccdaf2d1c1cf964baa8d766d20859d653a16c39848
-)
-
-# Download Boost and make it available
-#FetchContent_MakeAvailable(boost)
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if (MSVC)
@@ -172,7 +162,7 @@ set( with-examples "yes" CACHE BOOL "Compile with examples." )
 
 # Implement -Dwith-profiling and declare with-profiling.
 #------------------------------------------------------------------------------
-set( with-tracy "yes" CACHE BOOL "Compile debug application with tracy libs (https://github.com/wolfpld/tracy)." )
+set( with-tracy "no" CACHE BOOL "Compile/Build with tracy profiler (https://github.com/wolfpld/tracy)." )
 
 # Implement -Dwith-icu and define BOOST_HAS_ICU and output ${icu}.
 #------------------------------------------------------------------------------
@@ -694,6 +684,7 @@ target_link_libraries( ${CANONICAL_LIB_NAME}
     ${icu_i18n_FOR_BUILD_LIBRARIES}
     ${dl_LIBRARIES}
     ${secp256k1_FOR_BUILD_LIBRARIES}
+    # Conditionally add tracy libs
     "$<$<BOOL:${with-tracy}>:Tracy::TracyClient>" )
 
 # Define libbitcoin-system-examples project.
