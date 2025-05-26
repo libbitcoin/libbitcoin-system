@@ -21,10 +21,6 @@
 #include <cstdlib>
 #include <bitcoin/system/constants.hpp>
 
-#ifdef WITH_TRACY
-    #include <tracy/Tracy.hpp>
-#endif
-
 namespace libbitcoin {
 
 bool operator==(const arena& left, const arena& right) NOEXCEPT

@@ -37,6 +37,10 @@
 // Pulls in all /system headers (except settings.hpp).
 #include <bitcoin/system/constraints.hpp>
 
+#if defined(WITH_TRACY)
+    #include <tracy/Tracy.hpp>
+#endif
+
 #if defined(HAVE_MSC)
     #include <windows.h>
 #endif
