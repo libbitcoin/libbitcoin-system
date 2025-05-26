@@ -661,8 +661,9 @@ target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 #------------------------------------------------------------------------------
 if (with-tracy)
     target_compile_definitions( ${CANONICAL_LIB_NAME} PRIVATE
+        WITH_TRACY    
         TRACY_ENABLE
-        TRACY_ON_DEMAND
+        TRACY_ON_DEMAND       
     )
 endif()
 
