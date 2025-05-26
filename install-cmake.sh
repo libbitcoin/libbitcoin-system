@@ -17,6 +17,7 @@
 #                            accesses this feature, so if you do not intend to
 #                            use passphrase normalization this dependency can
 #                            be avoided.
+# --with-tracy             Add support for tracy profiler.
 # --build-icu              Builds ICU libraries.
 # --build-boost            Builds Boost libraries.
 # --build-dir=<path>       Location of downloaded and intermediate files.
@@ -232,6 +233,7 @@ display_help()
     display_message "                             accesses this feature, so if you do not intend to "
     display_message "                             use passphrase normalization this dependency can "
     display_message "                             be avoided."
+    display_message "  --with-tracy             Add support for tracy profiler."
     display_message "  --build-icu              Build ICU libraries."
     display_message "  --build-boost            Build Boost libraries."
     display_message "  --build-secp256k1        Build libsecp256k1 libraries."
@@ -262,12 +264,12 @@ parse_command_line_options()
 
             # Common project options.
             (--with-icu)            WITH_ICU="yes";;
+            (--with-tracy)          WITH_TRACY="yes";;
 
             # Custom build options.
-            (--build-icu)                              BUILD_ICU="yes";;
-            (--build-boost)                            BUILD_BOOST="yes";;
-            (--build-secp256k1)                        BUILD_SECP256K1="yes";;
-            (--with-tracy)                             WITH-TRACY="yes";;
+            (--build-icu)           BUILD_ICU="yes";;
+            (--build-boost)         BUILD_BOOST="yes";;
+            (--build-secp256k1)     BUILD_SECP256K1="yes";;
 
             # Unique script options.
             (--build-dir=*)         BUILD_DIR="${OPTION#*=}";;
@@ -399,6 +401,12 @@ handle_custom_options()
     if [[ $WITH_ICU ]]; then
         CUMULATIVE_FILTERED_ARGS+=" --with-icu"
         CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-icu=yes"
+    fi
+
+    # Process tracy
+    if [[ $WITH_TRACY ]]; then
+        CUMULATIVE_FILTERED_ARGS+=" --with-tracy"
+        CUMULATIVE_FILTERED_ARGS_CMAKE+=" -Dwith-tracy=yes"
     fi
 }
 
