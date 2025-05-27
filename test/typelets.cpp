@@ -299,6 +299,10 @@ static_assert(capacity<uint64_t, uint64_t> == 1);
 static_assert(capacity<uint64_t, uint64_t, 1> == 1);
 ////static_assert(capacity<uint64_t, uint64_t, 0> == 0);
 
+static_assert(capacity<data_array<64>, uint64_t> == 8);
+static_assert(capacity<uint64_t, data_array<64>> == 0);
+static_assert(capacity<data_array<64>, data_array<64>> == 1);
+
 // std_array
 // ----------------------------------------------------------------------------
 
