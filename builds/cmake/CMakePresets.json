@@ -31,8 +31,8 @@
             "description": "Factored debug settings.",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g -fno-omit-frame-pointer -msse4.1 -msha -mavx512f -mavx512dq -mavx512bw --coverage",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g -fno-omit-frame-pointer -msse4.1 -msha -mavx512f -mavx512dq -mavx512bw --coverage",
+                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -Og -g --coverage",
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -Og -g --coverage",
                 "enable-ndebug": {
                   "type": "BOOL",
                   "value": "OFF"
@@ -44,8 +44,8 @@
             "description": "Factored release settings.",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -O3 -msse4.1 -msha -mavx512f -mavx512dq -mavx512bw ",
-                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3 -msse4.1 -msha -mavx512f -mavx512dq -mavx512bw ",
+                "CMAKE_C_FLAGS": "$env{CMAKE_C_FLAGS} -O3",
+                "CMAKE_CXX_FLAGS": "$env{CMAKE_CXX_FLAGS} -O3",
                 "enable-ndebug": {
                   "type": "BOOL",
                   "value": "ON"
