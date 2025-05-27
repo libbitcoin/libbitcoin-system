@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_512_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_512_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_FUNCTIONAL_512_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_FUNCTIONAL_512_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
+#include <bitcoin/system/intrinsics/types.hpp>
+#include <bitcoin/system/intrinsics/platforms/platforms.hpp>
 
 // shl_/shr_ are undefined for 8 bit.
 // get() is AVX512_VBMI2 for 8/16 [disabled].
@@ -33,10 +34,9 @@
 
 namespace libbitcoin {
 namespace system {
-
-#if defined(HAVE_AVX512)
-
-using xint512_t = __m512i;
+    
+// all 512 symbols must be defined whenever HAVE_512 is defined.
+#if defined(HAVE_512)
 
 namespace f {
 
@@ -324,7 +324,7 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 
 /// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-/// These have defined overrides for !HAVE_AVX2
+/// These have defined overrides for !HAVE_512
 
 INLINE xint512_t load(const xint512_t& bytes) NOEXCEPT
 {
@@ -346,12 +346,27 @@ INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
     mm512_store_si512(&bytes, a);
 }
 
-#else
+#else // HAVE_512
 
-// Symbol is defined but not usable as an integer.
-using xint512_t = std_array<uint8_t, bytes<512>>;
+INLINE xint512_t load(const xint512_t& bytes) NOEXCEPT
+{
+    return bytes;
+}
 
-#endif // HAVE_AVX512
+INLINE void store(xint512_t&, xint512_t) NOEXCEPT
+{
+}
+
+INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
+{
+    return bytes;
+}
+
+INLINE void store_aligned(xint512_t&, xint512_t) NOEXCEPT
+{
+}
+
+#endif // HAVE_512
 
 } // namespace system
 } // namespace libbitcoin

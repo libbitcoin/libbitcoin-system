@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_128_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_128_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_FUNCTIONAL_128_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_FUNCTIONAL_128_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
+#include <bitcoin/system/intrinsics/types.hpp>
+#include <bitcoin/system/intrinsics/platforms/platforms.hpp>
 
 // shl_/shr_ are undefined for 8 bit.
 // All others are at most SSE4.1.
@@ -29,9 +30,8 @@
 namespace libbitcoin {
 namespace system {
 
-#if defined(HAVE_SSE41)
-
-using xint128_t = __m128i;
+// all 128 symbols must be defined whenever HAVE_128 is defined.
+#if defined(HAVE_128)
 
 namespace f {
 
@@ -179,7 +179,7 @@ template <typename Word, auto Lane, if_integral_integer<Word> = true>
 INLINE Word get(xint128_t a) NOEXCEPT
 {
     // mm_extract_epi64 defined as no-op on 32 bit builds (must exclude).
-    ////static_assert(!build_x32 && is_same_type<Word, uint64_t>);
+    ////static_assert(!have_32b && is_same_type<Word, uint64_t>);
 
     // SSE4.1
     if constexpr (is_same_type<Word, uint8_t>)
@@ -271,7 +271,7 @@ INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
 
 /// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-/// These have defined overrides for !HAVE_SSE41
+/// These have defined overrides for !HAVE_128
 
 INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
 {
@@ -293,39 +293,34 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
     mm_store_si128(&bytes, a);
 }
 
-#else
+#else // HAVE_128
 
-// Symbol is defined but not usable as an integer.
-using xint128_t = std_array<uint8_t, bytes<128>>;
-
-template <typename Word, if_integral_integer<Word> = true>
-INLINE xint128_t add(xint128_t, xint128_t b) NOEXCEPT
+INLINE xint128_t load(const xint128_t& bytes) NOEXCEPT
 {
-    return b;
-}
-
-template <typename xWord, if_same<xWord, xint128_t> = true>
-INLINE xint128_t set(uint32_t, uint32_t, uint32_t, uint32_t) NOEXCEPT
-{
-    return {};
-}
-
-template <typename Word, if_integral_integer<Word> = true>
-INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
-{
-    return a;
-}
-
-INLINE xint128_t load(const xint128_t& a) NOEXCEPT
-{
-    return a;
+    return bytes;
 }
 
 INLINE void store(xint128_t&, xint128_t) NOEXCEPT
 {
 }
 
-#endif // HAVE_SSE41
+INLINE xint128_t load_aligned(const xint128_t& bytes) NOEXCEPT
+{
+    return bytes;
+}
+
+INLINE void store_aligned(xint128_t&, xint128_t) NOEXCEPT
+{
+}
+
+// Exposed by sha native.
+template <typename Word, if_integral_integer<Word> = true>
+INLINE xint128_t byteswap(xint128_t a) NOEXCEPT
+{
+    return a;
+}
+
+#endif // HAVE_128
 
 } // namespace system
 } // namespace libbitcoin

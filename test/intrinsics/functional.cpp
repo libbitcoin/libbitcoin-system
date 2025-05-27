@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "../../test.hpp"
+#include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(functional_tests)
+BOOST_AUTO_TEST_SUITE(intrinsics_functional_tests)
 
 // set/get
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_SSE41)
-BOOST_AUTO_TEST_CASE(functional__sse4__set32__get_expected)
+#if defined(HAVE_128)
+BOOST_AUTO_TEST_CASE(functional__128__set32__get_expected)
 {
-    if (with_sse41)
+    if (have_128)
     {
         const auto xword = set<xint128_t>(0, 1, 2, 3);
         const auto word0 = get<uint32_t, 0>(xword);
@@ -39,11 +39,11 @@ BOOST_AUTO_TEST_CASE(functional__sse4__set32__get_expected)
         BOOST_CHECK_EQUAL(word3, 3_u32);
     }
 }
-BOOST_AUTO_TEST_CASE(functional__sse4__set64__get_expected)
+BOOST_AUTO_TEST_CASE(functional__128__set64__get_expected)
 {
-    if constexpr (!build_x32)
+    if constexpr (!have_32b)
     {
-        if (with_sse41)
+        if (have_128)
         {
             const auto xword = set<xint128_t>(0, 1);
             const auto word0 = get<uint64_t, 0>(xword);
@@ -55,10 +55,10 @@ BOOST_AUTO_TEST_CASE(functional__sse4__set64__get_expected)
 }
 #endif
 
-#if defined(HAVE_AVX2)
-BOOST_AUTO_TEST_CASE(functional__avx2__set32__get_expected)
+#if defined(HAVE_256)
+BOOST_AUTO_TEST_CASE(functional__256__set32__get_expected)
 {
-    if (with_avx2)
+    if (have_256)
     {
         const auto xword = set<xint256_t>(0, 1, 2, 3, 4, 5, 6, 7);
         const auto word0 = get<uint32_t, 0>(xword);
@@ -79,11 +79,11 @@ BOOST_AUTO_TEST_CASE(functional__avx2__set32__get_expected)
         BOOST_CHECK_EQUAL(word7, 7_u32);
     }
 }
-BOOST_AUTO_TEST_CASE(functional__avx2__set64__get_expected)
+BOOST_AUTO_TEST_CASE(functional__256__set64__get_expected)
 {
-    if constexpr (!build_x32)
+    if constexpr (!have_32b)
     {
-        if (with_avx2)
+        if (have_256)
         {
             const auto xword = set<xint256_t>(0, 1, 2, 3);
             const auto word0 = get<uint64_t, 0>(xword);
@@ -99,10 +99,10 @@ BOOST_AUTO_TEST_CASE(functional__avx2__set64__get_expected)
 }
 #endif
 
-#if defined(HAVE_AVX512)
-BOOST_AUTO_TEST_CASE(functional__avx512__set32__get_expected)
+#if defined(HAVE_512)
+BOOST_AUTO_TEST_CASE(functional__512__set32__get_expected)
 {
-    if (with_avx512)
+    if (have_512)
     {
         const auto xword = set<xint512_t>(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
         const auto word0 = get<uint32_t, 0>(xword);
@@ -139,11 +139,11 @@ BOOST_AUTO_TEST_CASE(functional__avx512__set32__get_expected)
         BOOST_CHECK_EQUAL(word15, 15_u32);
     }
 }
-BOOST_AUTO_TEST_CASE(functional__avx512__set64__get_expected)
+BOOST_AUTO_TEST_CASE(functional__512__set64__get_expected)
 {
-    if constexpr (!build_x32)
+    if constexpr (!have_32b)
     {
-        if (with_avx512)
+        if (have_512)
         {
             const auto xword = set<xint512_t>(0, 1, 2, 3, 4, 5, 6, 7);
             const auto word0 = get<uint64_t, 0>(xword);
@@ -171,10 +171,10 @@ BOOST_AUTO_TEST_CASE(functional__avx512__set64__get_expected)
 // ----------------------------------------------------------------------------
 // TODO: test 8/16.
 
-#if defined(HAVE_SSE41)
-BOOST_AUTO_TEST_CASE(functional__sse4__byteswap32__expected)
+#if defined(HAVE_128)
+BOOST_AUTO_TEST_CASE(functional__128__byteswap32__expected)
 {
-    if (with_sse41)
+    if (have_128)
     {
         const auto xword = byteswap<uint32_t>(set<xint128_t>(
             0x00000001, 0x00000002, 0x00000003, 0x00000004));
@@ -188,11 +188,11 @@ BOOST_AUTO_TEST_CASE(functional__sse4__byteswap32__expected)
         BOOST_CHECK_EQUAL(word3, 0x04000000_u32);
     }
 }
-BOOST_AUTO_TEST_CASE(functional__sse4__byteswap64__expected)
+BOOST_AUTO_TEST_CASE(functional__128__byteswap64__expected)
 {
-    if constexpr (!build_x32)
+    if constexpr (!have_32b)
     {
-        if (with_sse41)
+        if (have_128)
         {
             const auto xword = byteswap<uint64_t>(set<xint128_t>(
                 0x0000000000000001, 0x0000000000000002));
@@ -205,10 +205,10 @@ BOOST_AUTO_TEST_CASE(functional__sse4__byteswap64__expected)
 }
 #endif
 
-#if defined(HAVE_AVX2)
-BOOST_AUTO_TEST_CASE(functional__avx2__byteswap32__expected)
+#if defined(HAVE_256)
+BOOST_AUTO_TEST_CASE(functional__256__byteswap32__expected)
 {
-    if (with_avx2)
+    if (have_256)
     {
         const auto xword = byteswap<uint32_t>(set<xint256_t>(
             0x00000001, 0x00000002, 0x00000003, 0x00000004,
@@ -231,11 +231,11 @@ BOOST_AUTO_TEST_CASE(functional__avx2__byteswap32__expected)
         BOOST_CHECK_EQUAL(word7, 0x08000000_u32);
     }
 }
-BOOST_AUTO_TEST_CASE(functional__avx2__byteswap64__expected)
+BOOST_AUTO_TEST_CASE(functional__256__byteswap64__expected)
 {
-    if constexpr (!build_x32)
+    if constexpr (!have_32b)
     {
-        if (with_avx2)
+        if (have_256)
         {
             const auto xword = byteswap<uint64_t>(set<xint256_t>(
                 0x0000000000000001, 0x0000000000000002,
@@ -253,10 +253,10 @@ BOOST_AUTO_TEST_CASE(functional__avx2__byteswap64__expected)
 }
 #endif
 
-#if defined(HAVE_AVX512)
-BOOST_AUTO_TEST_CASE(functional__avx512__byteswap32__get_expected)
+#if defined(HAVE_512)
+BOOST_AUTO_TEST_CASE(functional__512__byteswap32__get_expected)
 {
-    if (with_avx512)
+    if (have_512)
     {
         const auto xword = byteswap<uint32_t>(set<xint512_t>(
             0x00000001, 0x00000002, 0x00000003, 0x00000004,
@@ -297,11 +297,11 @@ BOOST_AUTO_TEST_CASE(functional__avx512__byteswap32__get_expected)
         BOOST_CHECK_EQUAL(word15, 0x00000000_u32);
     }
 }
-BOOST_AUTO_TEST_CASE(functional__avx512__byteswap64__get_expected)
+BOOST_AUTO_TEST_CASE(functional__512__byteswap64__get_expected)
 {
-    if constexpr (!build_x32)
+    if constexpr (!have_32b)
     {
-        if (with_avx512)
+        if (have_512)
         {
             const auto xword = byteswap<uint64_t>(set<xint512_t>(
                 0x0000000000000001,

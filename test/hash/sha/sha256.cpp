@@ -21,8 +21,8 @@
     
 BOOST_AUTO_TEST_SUITE(sha256_tests_)
 
-constexpr auto vector = with_sse41 || with_avx2 || with_avx512;
-constexpr auto native = with_shani || with_neon;
+constexpr auto vector = have_128 || have_256 || have_512;
+constexpr auto native = have_sha;
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(sha256::hash(sha256::byte_t{}) == sha_byte256);

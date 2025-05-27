@@ -164,20 +164,19 @@ protected:
     /// Intrinsics constants.
     /// -----------------------------------------------------------------------
 
-    static constexpr auto use_shani = Native && system::with_shani;
-    static constexpr auto use_neon = Native && system::with_neon;
-    static constexpr auto use_x128 = Vector && system::with_sse41;
-    static constexpr auto use_x256 = Vector && system::with_avx2;
-    static constexpr auto use_x512 = Vector && system::with_avx512;
+    static constexpr auto use_sha = Native && bc::have_sha;
+    static constexpr auto use_128 = Vector && bc::have_128;
+    static constexpr auto use_256 = Vector && bc::have_256;
+    static constexpr auto use_512 = Vector && bc::have_512;
 
     template <size_t Lanes>
     static constexpr auto is_valid_lanes =
         (Lanes == 16u || Lanes == 8u || Lanes == 4u || Lanes == 2u);
 
     static constexpr auto min_lanes =
-        (use_x128 ? bytes<128> :
-            (use_x256 ? bytes<256> :
-                (use_x512 ? bytes<512> : 0))) / SHA::word_bytes;
+        (use_128 ? bytes<128> :
+            (use_256 ? bytes<256> :
+                (use_512 ? bytes<512> : 0))) / SHA::word_bytes;
 
     /// Intrinsics types.
     /// -----------------------------------------------------------------------
@@ -459,10 +458,10 @@ public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = (use_shani || use_neon)
-        && (SHA::strength == 256 || SHA::strength == 160);
-    static constexpr auto vector = (use_x128 || use_x256 || use_x512)
-        && !(build_x32 && is_same_size<word_t, uint64_t>);
+    static constexpr auto native = use_sha &&
+        (SHA::strength == 256 || SHA::strength == 160);
+    static constexpr auto vector = (use_128 || use_256 || use_512) &&
+        !(have_32b && is_same_size<word_t, uint64_t>);
 };
 
 } // namespace sha

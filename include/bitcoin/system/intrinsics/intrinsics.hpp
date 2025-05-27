@@ -19,10 +19,19 @@
 #ifndef LIBBITCOIN_SYSTEM_INTRINSICS_INTRINSICS_HPP
 #define LIBBITCOIN_SYSTEM_INTRINSICS_INTRINSICS_HPP
 
-#include <bitcoin/system/intrinsics/arm/arm.hpp>
 #include <bitcoin/system/intrinsics/byteswap.hpp>
-#include <bitcoin/system/intrinsics/haves.hpp>
+#include <bitcoin/system/intrinsics/cpuid.hpp>
+#include <bitcoin/system/intrinsics/detection.hpp>
+#include <bitcoin/system/intrinsics/functional_128.hpp>
+#include <bitcoin/system/intrinsics/functional_256.hpp>
+#include <bitcoin/system/intrinsics/functional_512.hpp>
+#include <bitcoin/system/intrinsics/platforms/intel.hpp>
+#include <bitcoin/system/intrinsics/platforms/neon.hpp>
+#include <bitcoin/system/intrinsics/platforms/none.hpp>
+#include <bitcoin/system/intrinsics/platforms/platforms.hpp>
+#include <bitcoin/system/intrinsics/platforms/sve.hpp>
 #include <bitcoin/system/intrinsics/rotate.hpp>
-#include <bitcoin/system/intrinsics/xcpu/xcpu.hpp>
+#include <bitcoin/system/intrinsics/sha.hpp>
+#include <bitcoin/system/intrinsics/types.hpp>
 
 #endif

@@ -207,11 +207,11 @@ iterate_vector(state_t& state, iblocks_t& blocks) NOEXCEPT
     if (blocks.size() >= min_lanes)
     {
         // Schedule iteration vector dispatch.
-        if constexpr (use_x512)
+        if constexpr (use_512)
             vector_schedule_sequential_compress<xint512_t>(state, blocks);
-        if constexpr (use_x256)
+        if constexpr (use_256)
             vector_schedule_sequential_compress<xint256_t>(state, blocks);
-        if constexpr (use_x128)
+        if constexpr (use_128)
             vector_schedule_sequential_compress<xint128_t>(state, blocks);
     }
 

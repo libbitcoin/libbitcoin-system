@@ -401,15 +401,15 @@ merkle_hash_vector(digests_t& digests) NOEXCEPT
         const auto start = iblocks.size();
 
         // Always use if available.
-        if constexpr (use_x512)
+        if constexpr (use_512)
             merkle_hash_vector<xint512_t>(idigests, iblocks);
 
         // Only use if shani is not available.
-        if constexpr (use_x256 && !native)
+        if constexpr (use_256 && !native)
             merkle_hash_vector<xint256_t>(idigests, iblocks);
 
         // Only use if shani is not available.
-        if constexpr (use_x128 && !native)
+        if constexpr (use_128 && !native)
             merkle_hash_vector<xint128_t>(idigests, iblocks);
 
         // iblocks.size() is reduced by vectorization.

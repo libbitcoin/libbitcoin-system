@@ -41,44 +41,66 @@
     #include <windows.h>
 #endif
 
-/// Create bc namespace alias.
-namespace libbitcoin{ namespace system {} }
-namespace bc = libbitcoin;
-
-/// NDEBUG (conditional exclusion).
-/// ---------------------------------------------------------------------------
-
+namespace libbitcoin
+{
 #if defined(NDEBUG)
-    namespace libbitcoin { constexpr auto build_checked = false; };
+    constexpr auto build_checked = false;
 #else
-    namespace libbitcoin { constexpr auto build_checked = true; };
+    constexpr auto build_checked = true;
 #endif
 
-/// Major platform.
-/// ---------------------------------------------------------------------------
 
-#if defined(HAVE_X32)
-    namespace libbitcoin { constexpr auto build_x32 = true; };
+#if defined(HAVE_X32) || defined(HAVE_ARM32)
+    constexpr auto have_32b = true;
 #else
-    namespace libbitcoin { constexpr auto build_x32 = false; };
+    constexpr auto have_32b = false;
 #endif
 
-#if defined(HAVE_X64)
-    namespace libbitcoin { constexpr auto build_x64 = true; };
+#if defined(HAVE_X64) || defined(HAVE_ARM64)
+    constexpr auto have_64b = true;
 #else
-    namespace libbitcoin { constexpr auto build_x64 = false; };
+    constexpr auto have_64b = false;
 #endif
 
 #ifdef HAVE_XCPU
-    namespace libbitcoin { constexpr auto with_xcpu = true; };
+    constexpr auto have_xcpu = true;
 #else
-    namespace libbitcoin { constexpr auto with_xcpu = false; };
+    constexpr auto have_xcpu = false;
 #endif
 
 #ifdef HAVE_ARM
-    namespace libbitcoin { constexpr auto with_arm = true; };
+    constexpr auto have_arm = true;
 #else
-    namespace libbitcoin { constexpr auto with_arm = false; };
+    constexpr auto have_arm = false;
 #endif
+
+#if defined(HAVE_128)
+    constexpr auto have_128 = true;
+#else
+    constexpr auto have_128 = false;
+#endif
+    
+#if defined(HAVE_256)
+    constexpr auto have_256 = true;
+#else
+    constexpr auto have_256 = false;
+#endif
+
+#if defined(HAVE_512)
+    constexpr auto have_512 = true;
+#else
+    constexpr auto have_512 = false;
+#endif
+
+#if defined(HAVE_SHA)
+    constexpr auto have_sha = true;
+#else
+    constexpr auto have_sha = false;
+#endif
+
+} // namespace libbitcoin
+
+/// Create bc namespace alias.
+namespace bc = libbitcoin;
 
 #endif

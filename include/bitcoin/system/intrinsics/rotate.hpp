@@ -74,7 +74,7 @@ INLINE constexpr Unsigned rotr_native(Unsigned value) NOEXCEPT
 
 BC_POP_WARNING()
 
-// Use intrinsics if available (portable).
+// TODO: Use intrinsics if available (portable).
 //#if defined(HAVE_LINUX)
 //#elif defined(HAVE_APPLE)
 //#elif defined(HAVE_FREEBSD)

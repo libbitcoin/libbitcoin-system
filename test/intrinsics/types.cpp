@@ -18,123 +18,55 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_haves_tests)
+BOOST_AUTO_TEST_SUITE(intrinsics_types_tests)
 
-// Build symbols to constexpr.
+// extended types
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_SSE41)
-    static_assert(with_sse41);
-#else
-    static_assert(!with_sse41);
-#endif
-#if defined(HAVE_AVX2)
-    static_assert(with_avx2);
-#else
-    static_assert(!with_avx2);
-#endif
-#if defined(HAVE_AVX512)
-    static_assert(with_avx512);
-#else
-    static_assert(!with_avx512);
-#endif
-#if defined(HAVE_SHANI)
-    static_assert(with_shani);
-#else
-    static_assert(!with_shani);
-#endif
-#if defined(HAVE_NEON)
-    static_assert(with_neon);
-#else
-    static_assert(!with_neon);
-#endif
+// Extended integrals are always defined and return the same size_of.
+static_assert(size_of<xint128_t>() == 16u);
+static_assert(size_of<xint256_t>() == 32u);
+static_assert(size_of<xint512_t>() == 64u);
 
-// try()
+// Extended integrals are neither c++ integrals nor stdlib integers.
+static_assert(!std::is_integral_v<xint128_t>);
+static_assert(!std::is_integral_v<xint256_t>);
+static_assert(!std::is_integral_v<xint512_t>);
+static_assert(!std::numeric_limits<xint128_t>::is_integer);
+static_assert(!std::numeric_limits<xint256_t>::is_integer);
+static_assert(!std::numeric_limits<xint512_t>::is_integer);
+
+// have
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx512__always__match)
-{
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
-        get_right(ecx, cpu1_0::xsave_ecx_bit) &&
-        get_right(ecx, cpu1_0::avx_ecx_bit) &&
-        get_xcr(extended, xcr0::feature) &&
-        get_right(extended, xcr0::sse_bit) &&
-        get_right(extended, xcr0::avx_bit) &&
-        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
-        get_right(ebx, cpu7_0::avx512bw_ebx_bit), try_avx512());
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx2__always__match)
-{
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
-        get_right(ecx, cpu1_0::xsave_ecx_bit) &&
-        get_right(ecx, cpu1_0::avx_ecx_bit) &&
-        get_xcr(extended, xcr0::feature) &&
-        get_right(extended, xcr0::sse_bit) &&
-        get_right(extended, xcr0::avx_bit) &&
-        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
-        get_right(ebx, cpu7_0::avx2_ebx_bit), try_avx2());
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse41__always__match)
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit), try_sse41());
-}
-
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_shani__always__match)
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
-        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
-        get_right(ebx, cpu7_0::shani_ebx_bit), try_shani());
-}
-
-// Unknown vector.
-////BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
-////{
-////    uint32_t eax{}, ebx{}, ecx{}, edx{};
-////    BOOST_CHECK_EQUAL(
-////        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-////        get_right(ecx, cpu1_0::sse41_ecx_bit), try_neon());
-////}
+static_assert(have<xint512_t> == have_512);
+static_assert(have<xint256_t> == have_256);
+static_assert(have<xint128_t> == have_128);
 
 // have_lanes
 // ----------------------------------------------------------------------------
 
-static_assert(have_lanes<uint64_t, 8> == with_avx512);
-static_assert(have_lanes<uint32_t, 16> == with_avx512);
-static_assert(have_lanes<uint16_t, 32> == with_avx512);
+static_assert(have_lanes<uint64_t, 8> == have_512);
+static_assert(have_lanes<uint32_t, 16> == have_512);
+static_assert(have_lanes<uint16_t, 32> == have_512);
 static_assert(!have_lanes<uint64_t, 7>);
 static_assert(!have_lanes<uint32_t, 15>);
 static_assert(!have_lanes<uint16_t, 31>);
 static_assert(!have_lanes<uint8_t, 63>);
 
-static_assert(have_lanes<uint64_t, 4> == with_avx2);
-static_assert(have_lanes<uint32_t, 8> == with_avx2);
-static_assert(have_lanes<uint16_t, 16> == with_avx2);
-static_assert(have_lanes<uint8_t, 32> == with_avx2);
+static_assert(have_lanes<uint64_t, 4> == have_256);
+static_assert(have_lanes<uint32_t, 8> == have_256);
+static_assert(have_lanes<uint16_t, 16> == have_256);
+static_assert(have_lanes<uint8_t, 32> == have_256);
 static_assert(!have_lanes<uint64_t, 3>);
 static_assert(!have_lanes<uint32_t, 7>);
 static_assert(!have_lanes<uint16_t, 15>);
 static_assert(!have_lanes<uint8_t, 31>);
 
-static_assert(have_lanes<uint64_t, 2> == with_sse41);
-static_assert(have_lanes<uint32_t, 4> == with_sse41);
-static_assert(have_lanes<uint16_t, 8> == with_sse41);
-static_assert(have_lanes<uint8_t, 16> == with_sse41);
+static_assert(have_lanes<uint64_t, 2> == have_128);
+static_assert(have_lanes<uint32_t, 4> == have_128);
+static_assert(have_lanes<uint16_t, 8> == have_128);
+static_assert(have_lanes<uint8_t, 16> == have_128);
 static_assert(!have_lanes<uint64_t, 1>);
 static_assert(!have_lanes<uint32_t, 3>);
 static_assert(!have_lanes<uint16_t, 7>);

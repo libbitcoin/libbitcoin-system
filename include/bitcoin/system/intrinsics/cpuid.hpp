@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_CPUID_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_CPUID_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_CPUID_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_CPUID_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
 
 /// Common CPU instructions used to locate CPU features.
 
@@ -66,12 +65,14 @@ inline bool get_cpu(uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
 #endif
 }
 
+// TODO: HAVE_ARM equivalents.
 #else // HAVE_XCPU
 
 inline bool get_xcr(uint64_t&, uint32_t) noexcept
 {
     return false;
 }
+
 inline bool get_cpu(uint32_t&, uint32_t&, uint32_t&, uint32_t&, uint32_t,
     uint32_t) noexcept
 {

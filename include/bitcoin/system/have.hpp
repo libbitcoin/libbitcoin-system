@@ -81,8 +81,124 @@
     #define HAVE_ARM
 #endif
 
+/// WITH_ build symbols.
+/// ---------------------------------------------------------------------------
+
+/// Build configured (always available on msvc).
+#if defined(HAVE_MSC) || defined(WITH_ICU)
+    #define HAVE_ICU
+#endif
+
+/// vc++: There are no flags for SHANI/CRYPTO, so use custom WITH_SHA option.
+#if defined(HAVE_MSC) && defined(WITH_SHA)
+    #if defined(HAVE_XCPU)
+        #define __SHA__
+    #elif defined(HAVE_ARM)
+        #define __ARM_FEATURE_CRYPTO
+    #endif
+#endif
+
+// Custom options to use extended SVE variable width.
+#if defined(__ARM_FEATURE_SVE)
+    #if defined(WITH_512)
+        #define HAVE_512
+    #endif
+    #if defined(WITH_256)
+        #define HAVE_256
+    #endif
+#endif
+
 /// Platform features derived.
 /// ---------------------------------------------------------------------------
+
+/// vc++: There are no flags for SSE41 so use AVX as it implies at least sse41.
+#if defined(HAVE_MSC) && defined(__AVX__) && !defined(__SSE4_1__)
+    #define __SSE4_1__
+#endif
+
+/// vc++: ARM implies NEON, SVE not supported, CRYPTO requires custom option.
+#if defined(HAVE_MSC) && defined(HAVE_ARM) && !defined(__ARM_NEON)
+    #define __ARM_NEON
+#endif
+
+/// Guard assumption of hierarchy.
+#if defined(__SHA__) && !defined(__SSE4_1__)
+    #define __SSE4_1__
+#endif
+#if defined(__AVX512BW__) && !defined(__AVX2__)
+    #define __AVX2__
+#endif
+#if defined(__AVX2__) && !defined(__AVX__)
+    #define __AVX__
+#endif
+#if defined(__AVX__) && !defined(__SSE4_1__)
+    #define __SSE4_1__
+#endif
+#if defined(__ARM_FEATURE_CRYPTO) && !defined(__ARM_NEON)
+    #define __ARM_NEON
+#endif
+#if defined(__ARM_FEATURE_SVE) && !defined(__ARM_NEON)
+    #define __ARM_NEON
+#endif
+
+/// Map standard XCPU defines for intrinsics usage.
+/// vc++: There are no native flags for SHA and SSE41.
+#if defined(HAVE_XCPU)
+    // -msha
+    // vc++: SHANI not independently configurable (requires custom option).
+    #if defined(__SHA__)
+        #define HAVE_SHANI
+        #define HAVE_SHA
+    #endif
+    // -mavx512bw
+    // vc++: Advanced Vector Extensions 512 (X86/X64) (/arch:AVX512)
+    #if defined(__AVX512BW__)
+        #define HAVE_AVX512
+        #define HAVE_512
+    #endif
+    // -mavx2
+    // vc++: Advanced Vector Extensions 2 (X86/X64) (/arch:AVX2)
+    #if defined(__AVX2__)
+        #define HAVE_AVX2
+        #define HAVE_256
+    #endif
+    // -msse4.1
+    // vc++: Use Advanced Vector Extensions (X86/X64) (/arch:AVX).
+    #if defined(__SSE4_1__)
+        #define HAVE_SSE4
+        #define HAVE_128
+    #endif
+#endif
+
+/// Map standard ARM defines for intrinsics usage. 
+/// SVE maximum width is not detectable (requires custom options).
+#if defined(HAVE_ARM)
+    // -march=armv8-a+crypto
+    // Requires 64 bit build.
+    #if defined(__ARM_FEATURE_CRYPTO)
+        #define HAVE_CRYPTO
+        #define HAVE_SHA
+    #endif
+    // -march=armv8-a+sve
+    // Requires 64 bit build.
+    #if defined(__ARM_FEATURE_SVE)
+        #define HAVE_SVE
+    #endif
+    // -march=armv8-a (64 bit)
+    // -march=armv7-a -mfpu=neon -mfloat-abi=hard (32 bit)
+    #if defined(__ARM_NEON)
+        #define HAVE_NEON
+        #define HAVE_128
+    #endif
+#endif
+
+#if defined(HAVE_ARM)
+    #undef HAVE_CRYPTO
+    #undef HAVE_SVE
+    #undef HAVE_NEON
+    #undef HAVE_SHA
+    #undef HAVE_128
+#endif
 
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
 /// Always enabled on XCPU, as the binary is not portable to other CPUs.
@@ -116,136 +232,6 @@
 /// ARM architecture inline assembly.
 #if defined(HAVE_ARM) && !(defined(HAVE_MSC) && defined(HAVE_X32))
     #define HAVE_ARM_ASSEMBLY
-#endif
-
-/// Map standard XCPU defines for intrinsics usage.
-/// vc++: SHA and SSE41 not independently configurable, all cross compilable.
-#if defined(HAVE_XCPU)
-    // -msha
-    // vc++: SHANI not independently configurable.
-    #if defined(__SHA__)
-        #define HAVE_SHANI
-        #define HAVE_SSE41
-        ////#define HAVE_SHA
-        ////#define HAVE_128
-    #endif
-    // -mavx512bw
-    // vc++: Advanced Vector Extensions 512 (X86/X64) (/arch:AVX512)
-    #if defined(__AVX512BW__)
-        #define HAVE_AVX512
-        #define HAVE_AVX2
-        ////#define HAVE_512
-        ////#define HAVE_256
-        ////#define HAVE_128
-    #endif
-    // -mavx2
-    // vc++: Advanced Vector Extensions 2 (X86/X64) (/arch:AVX2)
-    #if defined(__AVX2__)
-        #define HAVE_AVX2
-        #define HAVE_SSE41
-        ////#define HAVE_256
-        ////#define HAVE_128
-    #endif
-    // -msse4.1
-    // vc++: SSE41 not independently configurable.
-    #if defined(__SSE4_1__)
-        #define HAVE_SSE41
-        ////#define HAVE_128
-    #endif
-#endif
-
-/// Map standard ARM defines for intrinsics usage. 
-#if defined(HAVE_ARM)
-    // -march=armv8-a+crypto
-    // vc++: not independently configurable, cross compilable.
-    #if defined(__ARM_FEATURE_CRYPTO) || defined(HAVE_MSC)
-        #define HAVE_CRYPTO
-        #define HAVE_NEON
-        ////#define HAVE_SHA
-        ////#define HAVE_128
-    #endif
-    // vc++: notsupported.
-    #if defined(__ARM_FEATURE_SVE) 
-        #define HAVE_SVE
-        #define HAVE_NEON
-        ////#define HAVE_512
-        ////#define HAVE_256
-        ////#define HAVE_128
-    #endif
-    // -march=armv8-a (64), march=armv7-a -mfpu=neon -mfloat-abi=hard (32)
-    // vc++: not independently configurable, cross compilable.
-    #if defined(__ARM_NEON) || defined(HAVE_MSC)
-        #define HAVE_NEON
-        ////#define HAVE_128
-    #endif
-#endif
-
-/// WITH_ build symbols.
-/// ---------------------------------------------------------------------------
-
-/// XCPU architecture intrinsics.
-#if defined(HAVE_XCPU)
-    #if defined(WITH_SHANI)
-        #define HAVE_SHANI
-        #define HAVE_SSE41
-        ////#define HAVE_SHA
-        ////#define HAVE_128
-    #endif
-    #if defined(WITH_AVX512)
-        #define HAVE_AVX512
-        #define HAVE_AVX2
-        #define HAVE_SSE41
-        ////#define HAVE_512
-        ////#define HAVE_256
-        ////#define HAVE_128
-    #endif
-    #if defined(WITH_AVX2)
-        #define HAVE_AVX2
-        #define HAVE_SSE41
-        ////#define HAVE_256
-        ////#define HAVE_128
-    #endif
-    #if defined(WITH_SSE41)
-        #define HAVE_SSE41
-        ////#define HAVE_128
-    #endif
-#endif
-
-/// ARM architecture intrinsics (SVE dynamic length covers both 256 and 512).
-#if defined(HAVE_ARM)
-    #if defined(WITH_SHANI)
-        #define HAVE_CRYPTO
-        #define HAVE_NEON
-        ////#define HAVE_SHA
-        ////#define HAVE_128
-    #endif
-    #if defined(WITH_AVX512) && !defined(HAVE_MSC)
-        // vc++: SVE not supported.
-        #define HAVE_SVE
-        #define HAVE_NEON
-        ////#define HAVE_512
-        ////#define HAVE_256
-        ////#define HAVE_128
-    #endif
-    #if defined(WITH_AVX2) && !defined(HAVE_MSC)
-        // vc++: SVE not supported.
-        #define HAVE_SVE
-        #define HAVE_NEON
-        ////#define HAVE_256
-        ////#define HAVE_128
-    #endif
-    #if defined(WITH_SSE41)
-        #define HAVE_NEON
-        ////#define HAVE_128
-    #endif
-#endif
-
-// NEON DISABLED
-#undef HAVE_NEON
-
-/// Build configured (always available on msvc).
-#if defined(HAVE_MSC) || defined(WITH_ICU)
-    #define HAVE_ICU
 #endif
 
 /// MSC predefined constant for Visual Studio version (exclusive).

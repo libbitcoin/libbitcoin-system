@@ -16,14 +16,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_XCPU_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_XCPU_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_PLATFORMS_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_PLATFORMS_HPP
 
-#include <bitcoin/system/intrinsics/xcpu/cpuid.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional_128.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional_256.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional_512.hpp>
-#include <bitcoin/system/intrinsics/xcpu/sha.hpp>
+#include <bitcoin/system/intrinsics/platforms/intel.hpp>
+#include <bitcoin/system/intrinsics/platforms/neon.hpp>
+#include <bitcoin/system/intrinsics/platforms/none.hpp>
+#include <bitcoin/system/intrinsics/platforms/sve.hpp>
 
 #endif

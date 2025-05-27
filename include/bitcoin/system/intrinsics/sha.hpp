@@ -16,18 +16,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_SHA_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_SHA_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_SHA_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_SHA_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional_128.hpp>
+#include <bitcoin/system/intrinsics/functional_128.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// HAVE_SHANI implies HAVE_SSE41, which defines xint128_t (__m128i).
-#if defined(HAVE_SHANI)
+#if defined(HAVE_SHA)
 
 // SHA1 (SHA160)
 // ----------------------------------------------------------------------------
@@ -100,7 +98,7 @@ INLINE xint128_t sha256_two_rounds(xint128_t a, xint128_t b, xint128_t wk) NOEXC
     return mm_sha256rnds2_epu32(a, b, wk);
 }
 
-#endif
+#endif // HAVE_SHA
 
 } // namespace system
 } // namespace libbitcoin

@@ -16,21 +16,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_256_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_256_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_FUNCTIONAL_256_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_FUNCTIONAL_256_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
+#include <bitcoin/system/intrinsics/types.hpp>
+#include <bitcoin/system/intrinsics/platforms/platforms.hpp>
 
 // shl_/shr_ are undefined for 8 bit.
 // All others are at most AVX2.
 
 namespace libbitcoin {
 namespace system {
-
-#if defined(HAVE_AVX2)
-
-using xint256_t = __m256i;
+    
+// all 256 symbols must be defined whenever HAVE_256 is defined.
+#if defined(HAVE_256)
 
 namespace f {
 
@@ -178,7 +178,7 @@ template <typename Word, auto Lane, if_integral_integer<Word> = true>
 INLINE Word get(xint256_t a) NOEXCEPT
 {
     // mm256_extract_epi64 defined as no-op on 32 bit builds (must exclude).
-    ////static_assert(!build_x32 && is_same_type<Word, uint64_t>);
+    ////static_assert(!have_32b && is_same_type<Word, uint64_t>);
 
     // AVX2
     if constexpr (is_same_type<Word, uint8_t>)
@@ -284,7 +284,7 @@ INLINE xint256_t byteswap(xint256_t a) NOEXCEPT
 
 /// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-/// These have defined overrides for !HAVE_AVX2
+/// These have defined overrides for !HAVE_256
 
 INLINE xint256_t load(const xint256_t& bytes) NOEXCEPT
 {
@@ -306,12 +306,27 @@ INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
     mm256_store_si256(&bytes, a);
 }
 
-#else
+#else // HAVE_256
 
-// Symbol is defined but not usable as an integer.
-using xint256_t = std_array<uint8_t, bytes<256>>;
+INLINE xint256_t load(const xint256_t& bytes) NOEXCEPT
+{
+    return bytes;
+}
 
-#endif // HAVE_AVX2
+INLINE void store(xint256_t&, xint256_t) NOEXCEPT
+{
+}
+
+INLINE xint256_t load_aligned(const xint256_t& bytes) NOEXCEPT
+{
+    return bytes;
+}
+
+INLINE void store_aligned(xint256_t&, xint256_t) NOEXCEPT
+{
+}
+
+#endif // HAVE_256
 
 } // namespace system
 } // namespace libbitcoin

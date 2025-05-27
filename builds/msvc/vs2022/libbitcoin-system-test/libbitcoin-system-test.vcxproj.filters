@@ -52,9 +52,6 @@
     <Filter Include="src\intrinsics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\intrinsics\xcpu">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\machine">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000A}</UniqueIdentifier>
     </Filter>
@@ -71,19 +68,19 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\devices">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\iostream">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000A1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000010}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\stream\streamers">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000B1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000A1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-00000000000F}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\unicode\utf8_everywhere">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000C1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000B1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\utreexo">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000001}</UniqueIdentifier>
@@ -92,19 +89,19 @@
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\addresses">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000D1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000C1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\keys">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000E1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000D1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet\mnemonics">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000F1}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000E1}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000003}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\words\catalogs">
-      <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000002}</UniqueIdentifier>
+      <UniqueIdentifier>{51A424A9-2C12-4211-0000-0000000000F1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -264,6 +261,9 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\define.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\batch.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
@@ -381,17 +381,17 @@
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\haves.cpp">
+    <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\intrinsics.cpp">
+    <ClCompile Include="..\..\..\..\test\intrinsics\detection.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\cpuid.cpp">
-      <Filter>src\intrinsics\xcpu</Filter>
+    <ClCompile Include="..\..\..\..\test\intrinsics\functional.cpp">
+      <Filter>src\intrinsics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\functional.cpp">
-      <Filter>src\intrinsics\xcpu</Filter>
+    <ClCompile Include="..\..\..\..\test\intrinsics\types.cpp">
+      <Filter>src\intrinsics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\literals.cpp">
       <Filter>src</Filter>

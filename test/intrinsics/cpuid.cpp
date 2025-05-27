@@ -18,28 +18,24 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_tests)
+BOOST_AUTO_TEST_SUITE(intrinsics_cpuid_tests)
 
-#if defined (DISABLED)
+// cpuid includes a local get_bit<> utility.
+static_assert(!get_bit<0>(0));
+static_assert( get_bit<0>(1));
+static_assert(!get_bit<0>(2));
+static_assert(!get_bit<0>(0b00010000_u8));
+static_assert( get_bit<1>(0b00010011_u8));
+static_assert( get_bit<2>(0b00010100_u8));
+static_assert( get_bit<3>(0b00011000_u8));
+static_assert( get_bit<4>(0b00010000_u8));
+static_assert( get_bit<5>(0b00110000_u8));
+static_assert( get_bit<6>(0b01010000_u8));
+static_assert( get_bit<7>(0b10010000_u8));
+static_assert( get_bit<31>(0x80000000_u32));
+static_assert( get_bit<15>(0x8000_u16));
+static_assert( get_bit< 7>(0x80_u8));
 
-// Types work as integrals.
-static_assert(is_same_type<xint128_t, __m128i>);
-static_assert(is_same_type<xint256_t, __m256i>);
-static_assert(is_same_type<xint512_t, __m512i>);
-
-// Extended integrals are neither c++ integrals nor stdlib integers.
-static_assert(!std::is_integral_v<xint128_t>);
-static_assert(!std::is_integral_v<xint256_t>);
-static_assert(!std::is_integral_v<xint512_t>);
-static_assert(!std::numeric_limits<xint128_t>::is_integer);
-static_assert(!std::numeric_limits<xint256_t>::is_integer);
-static_assert(!std::numeric_limits<xint512_t>::is_integer);
-
-// sizeof() works as expected.
-static_assert(to_bits(sizeof(xint128_t)) == 128u);
-static_assert(to_bits(sizeof(xint256_t)) == 256u);
-static_assert(to_bits(sizeof(xint512_t)) == 512u);
-
-#endif
+// get_cpu/get_xcr tested in detection.cpp.
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,8 +21,8 @@
     
 BOOST_AUTO_TEST_SUITE(sha512_tests_)
 
-constexpr auto vector = (with_sse41 || with_avx2 || with_avx512) && !build_x32;
-constexpr auto native = /*(with_shani || with_neon)*/ false;
+constexpr auto vector = (have_128 || have_256 || have_512) && !have_32b;
+constexpr auto native = /*have_sha*/ false;
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(sha512::hash(sha512::byte_t{}) == sha_byte512);

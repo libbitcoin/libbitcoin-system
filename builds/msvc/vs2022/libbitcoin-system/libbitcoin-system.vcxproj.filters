@@ -106,11 +106,8 @@
     <Filter Include="include\bitcoin\system\intrinsics">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\intrinsics\arm">
+    <Filter Include="include\bitcoin\system\intrinsics\platforms">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\system\intrinsics\xcpu">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\machine">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
@@ -128,43 +125,43 @@
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\devices">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\iostream">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\streamers">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\streamers\interfaces">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\unicode">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A2}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\unicode\utf8_everywhere">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B2}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet\addresses">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet\keys">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet\mnemonics">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A4}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\words">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C2}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\words\catalogs">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B4}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A4}</UniqueIdentifier>
     </Filter>
     <Filter Include="resource">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C4}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B4}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000000}</UniqueIdentifier>
@@ -989,47 +986,50 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\arm.hpp">
-      <Filter>include\bitcoin\system\intrinsics\arm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\functional.hpp">
-      <Filter>include\bitcoin\system\intrinsics\arm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\arm\sha.hpp">
-      <Filter>include\bitcoin\system\intrinsics\arm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byteswap.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\haves.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\cpuid.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\detection.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\functional_128.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\functional_256.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\functional_512.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\intel.hpp">
+      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\neon.hpp">
+      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\none.hpp">
+      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\platforms.hpp">
+      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\sve.hpp">
+      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\cpuid.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\sha.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\defines.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\functional_128.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\functional_256.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\functional_512.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\sha.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\xcpu\xcpu.hpp">
-      <Filter>include\bitcoin\system\intrinsics\xcpu</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\types.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\literals.hpp">
       <Filter>include\bitcoin\system</Filter>
