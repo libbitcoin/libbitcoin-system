@@ -137,9 +137,10 @@ void block::assign_data(reader& source, bool witness) NOEXCEPT
     const auto count = source.read_size(max_block_size);
     auto txs = to_non_const_raw_ptr(txs_);
     txs->reserve(count);
-    
+
     for (size_t tx = 0; tx < count; ++tx)
         txs->emplace_back(CREATE(transaction, allocator, source, witness));
+
     size_ = serialized_size(*txs_);
     valid_ = source;
 }
