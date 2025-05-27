@@ -96,4 +96,5 @@ size_t default_arena::detach() NOEXCEPT
 void default_arena::release(void*) NOEXCEPT
 {
 }
+
 } // namespace libbitcoin
