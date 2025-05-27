@@ -163,9 +163,9 @@ set( with-tests "yes" CACHE BOOL "Compile with unit tests." )
 #------------------------------------------------------------------------------
 set( with-examples "yes" CACHE BOOL "Compile with examples." )
 
-# Implement -Dwith-profiling and declare with-profiling.
+# Implement -Dwith-tracy and declare with-tracy.
 #------------------------------------------------------------------------------
-set( with-tracy "no" CACHE BOOL "Compile/Build with tracy profiler (https://github.com/wolfpld/tracy)." )
+set( with-tracy "no" CACHE BOOL "Compile/Build with tracy profiler." )
 
 # Implement -Dwith-icu and define BOOST_HAS_ICU and output ${icu}.
 #------------------------------------------------------------------------------
@@ -657,7 +657,7 @@ target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
 target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 "../../include" )
 
-# Conditionally enable Tracy profiling.
+# Conditionally enable tracy profiling.
 #------------------------------------------------------------------------------
 if (with-tracy)
     target_compile_definitions( ${CANONICAL_LIB_NAME} PRIVATE
