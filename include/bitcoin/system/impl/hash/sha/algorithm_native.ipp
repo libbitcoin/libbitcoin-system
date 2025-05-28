@@ -71,14 +71,14 @@ unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& message0, xint128_t message1) NOEXCEPT
+prepare(xint128_t& message0, const xint128_t message1) NOEXCEPT
 {
     message0 = mm_sha256msg1_epu32(message0, message1);
 }
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& SHA_ONLY(message0), xint128_t message1,
+prepare(const xint128_t SHA_ONLY(message0), const xint128_t message1,
     xint128_t& message2) NOEXCEPT
 {
     message2 = mm_sha256msg2_epu32(mm_add_epi32(message2,
