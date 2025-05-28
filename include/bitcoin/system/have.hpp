@@ -81,6 +81,24 @@
     #define HAVE_ARM
 #endif
 
+/// Set byte order.
+#if defined(__BYTE_ORDER__)
+    #if (__BYTE_ORDER__ == __BIG_ENDIAN__)
+        #define HAVE_BIG_ENDIAN
+    #elif (__BYTE_ORDER__ == __LITTLE_ENDIAN__)
+        #define HAVE_LITTLE_ENDIAN
+    #else
+        #define HAVE_UNKNOWN_ENDIAN
+    #endif
+#elif defined(__BIG_ENDIAN)
+    #define HAVE_BIG_ENDIAN
+#elif defined(HAVE_MSC)
+    // Assumes MSC is always LE on ARM.
+    #define HAVE_LITTLE_ENDIAN
+#else
+    #define HAVE_UNKNOWN_ENDIAN
+#endif
+
 /// WITH_ build symbols.
 /// ---------------------------------------------------------------------------
 
@@ -171,11 +189,12 @@
 #endif
 
 /// Map standard ARM defines for intrinsics usage. 
+/// Big endian is supported generally, but not yet for ARM NEON SHA.
 /// SVE maximum width is not detectable (requires custom options).
 #if defined(HAVE_ARM)
     // -march=armv8-a+crypto
     // Requires 64 bit build.
-    #if defined(__ARM_FEATURE_CRYPTO)
+    #if defined(__ARM_FEATURE_CRYPTO) && defined(HAVE_LITTLE_ENDIAN)
         #define HAVE_CRYPTO
         #define HAVE_SHA
     #endif
@@ -192,10 +211,9 @@
     #endif
 #endif
 
-// ARM SHA is disabled and SVE is not implemented.
+// ARM SHA DISABLED
 #if defined(HAVE_ARM)
-    #undef HAVE_SHA
-    ////#undef HAVE_128
+    #undef HAVE_CRYPTO
 #endif
 
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
