@@ -35,14 +35,13 @@
     #define mm_slli_epi64(a, B) (a)
     #define mm_add_epi8(a, b)   (a)
     #define mm_add_epi16(a, b)  (a)
-    #define mm_add_epi32(a, b)  (a)
+    #define mm_add_epi32(a, b)  (a) // also sha
     #define mm_add_epi64(a, b)  (a)
     #define mm_extract_epi8(a, Lane)    {}
     #define mm_extract_epi16(a, Lane)   {}
     #define mm_extract_epi32(a, Lane)   {}
     #define mm_extract_epi64(a, Lane)   {}
     #define mm_shuffle_epi8(a, mask)    (a)
-    #define mm_shuffle_epi32(a, mask)   (a)
     #define mm_load_si128(a)            (a)
     #define mm_loadu_si128(a)           (a)
     #define mm_store_si128(memory, a)
@@ -136,6 +135,7 @@
     #define mm_sha256msg2_epu32(a, b)       (b)
     #define mm_sha256rnds2_epu32(a, b, k)   (k)
     #define mm_alignr_epi8(a, b, c)         (a)
+    #define mm_shuffle_epi32(a, mask)       (a)
     #define mm_blend_epi16(a, b, mask)      (a)
     #define SHA_ONLY(a)
 #endif // !HAVE_SHA

@@ -95,14 +95,13 @@ BC_POP_WARNING()
     #define mm_slli_epi64(a, B)         _mm_slli_epi64(a, B)
     #define mm_add_epi8(a, b)           _mm_add_epi8(a, b)
     #define mm_add_epi16(a, b)          _mm_add_epi16(a, b)
-    #define mm_add_epi32(a, b)          _mm_add_epi32(a, b)
+    #define mm_add_epi32(a, b)          _mm_add_epi32(a, b) // also sha
     #define mm_add_epi64(a, b)          _mm_add_epi64(a, b)
     #define mm_extract_epi8(a, Lane)    _mm_extract_epi8(a, Lane)
     #define mm_extract_epi16(a, Lane)   _mm_extract_epi16(a, Lane)
     #define mm_extract_epi32(a, Lane)   _mm_extract_epi32(a, Lane)
     #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane) // undefined for X32
     #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
-    #define mm_shuffle_epi32(a, mask)   _mm_shuffle_epi32(a, mask)
     #define mm_load_si128(a)            _mm_load_si128(a)
     #define mm_loadu_si128(a)           _mm_loadu_si128(a)
     #define mm_store_si128(memory, a)   _mm_store_si128(memory, a)
@@ -212,6 +211,7 @@ BC_POP_WARNING()
 
     // supporting
     #define mm_alignr_epi8(a, b, c)         _mm_alignr_epi8(a, b, c)
+    #define mm_shuffle_epi32(a, mask)       _mm_shuffle_epi32(a, mask)
     #define mm_blend_epi16(a, b, mask)      _mm_blend_epi16(a, b, mask)
 
     // unused argument suppression

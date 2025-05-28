@@ -50,14 +50,13 @@ inline uint64_t vgetq_lane_s64(auto, auto) NOEXCEPT
     #define mm_slli_epi64(a, B)             vshlq_n_s64((int64x2_t)a, B)
     #define mm_add_epi8(a, b)               vaddq_s8((int8x16_t)a, (int8x16_t)b)
     #define mm_add_epi16(a, b)              vaddq_s16((int16x8_t)a, (int16x8_t)b)
-    #define mm_add_epi32(a, b)              vaddq_s32((int32x4_t)a, (int32x4_t)b)
+    #define mm_add_epi32(a, b)              vaddq_s32((int32x4_t)a, (int32x4_t)b) // also sha
     #define mm_add_epi64(a, b)              vaddq_s64((int64x2_t)a, (int64x2_t)b)
     #define mm_extract_epi8(a, Lane)        vgetq_lane_s8((int8x16_t)a, Lane)
     #define mm_extract_epi16(a, Lane)       vgetq_lane_s16((int16x8_t)a, Lane)
     #define mm_extract_epi32(a, Lane)       vgetq_lane_s32((int32x4_t)a, Lane)
     #define mm_extract_epi64(a, Lane)       vgetq_lane_s64((int64x2_t)a, Lane) // undefined for X32
     #define mm_shuffle_epi8(a, mask)        vqtbl1q_s8((int8x16_t)a, (uint8x16_t)mask)
-    #define mm_shuffle_epi32(a, mask)       vqtbl1q_s8((int8x16_t)a, (uint8x16_t)vcombine_u8(vcreate_u8((uint64_t)mask), vcreate_u8((uint64_t)mask)))
     #define mm_load_si128(a)                vld1q_s32((const int32_t*)a)
     #define mm_loadu_si128(a)               vld1q_s32((const int32_t*)a)
     #define mm_store_si128(memory, a)       vst1q_s32((int32_t*)memory, (int32x4_t)a)
@@ -111,6 +110,7 @@ inline uint64_t vgetq_lane_s64(auto, auto) NOEXCEPT
 
     // supporting
     #define mm_alignr_epi8(a, b, c)         vextq_u8((uint8x16_t)b, (uint8x16_t)a, c)
+    #define mm_shuffle_epi32(a, mask)       vqtbl1q_s8((int8x16_t)a, (uint8x16_t)vcombine_u8(vcreate_u8((uint64_t)mask), vcreate_u8((uint64_t)mask)))
     #define mm_blend_epi16(a, b, mask)      vbslq_u16(vcreate_u16( \
                                                 ((mask & 0x01 ? 0xffff_u64 : 0_u64) <<  0) | \
                                                 ((mask & 0x02 ? 0xffff_u64 : 0_u64) << 16) | \
