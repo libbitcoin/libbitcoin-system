@@ -28,7 +28,7 @@
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
-    <EnumProperty Name="Option-512" DisplayName="Enable 512 Bit Vectorization" Description="Requires AVX512 (xcpu) or SVE (arm) CPU." Category="512">
+    <!--<EnumProperty Name="Option-512" DisplayName="Enable 512 Bit Vectorization" Description="Requires AVX512 (xcpu) or SVE (arm) CPU." Category="512">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
@@ -39,6 +39,6 @@
     <EnumProperty Name="Option-128" DisplayName="Enable 128 Bit Vectorization" Description="Requires SSE4.1 (xcpu) or Neon (arm) CPU." Category="128">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
-    </EnumProperty>
+    </EnumProperty>-->
   </Rule>  
 </ProjectSchemaDefinitions>

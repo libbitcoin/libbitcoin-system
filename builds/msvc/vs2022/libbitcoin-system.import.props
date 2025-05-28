@@ -17,16 +17,18 @@
   <!-- These will compile to the target regardless of the compiling platform. -->
   <!-- That will result in a crash of test/executable execution if mismatched. -->
   <PropertyGroup>
-    <Option-512>false</Option-512>
-    <Option-256>true</Option-256>
-    <Option-128>true</Option-128>
+    <!--<Option-512>false</Option-512>-->
+    <!--<Option-256>true</Option-256>-->
+    <!--<Option-128>true</Option-128>-->
     <Option-sha>false</Option-sha>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <!-- order matters -->
-      <EnableEnhancedInstructionSet Condition="'$(Option-256)' == 'true'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Option-512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <!-- Native configuration now specifyies avx, avx2 or avx512 - in which case we run 128, 256, 512. -->
+      <!--<EnableEnhancedInstructionSet Condition="'$(Option-128)' == 'true'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>-->
+      <!--<EnableEnhancedInstructionSet Condition="'$(Option-256)' == 'true'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>-->
+      <!--<EnableEnhancedInstructionSet Condition="'$(Option-512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>-->
     </ClCompile>
   </ItemDefinitionGroup>
 
@@ -53,10 +55,11 @@
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin-system)' == 'static' Or '$(Linkage-libbitcoin-system)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Debug')) != -1">_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!-- Enable use of CPU intrinsics. -->
+      <!-- Eventually these options will be used to select SVE levels. -->
       <PreprocessorDefinitions Condition="'$(Option-sha)' == 'true'">WITH_SHA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-512)' == 'true'">WITH_512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-256)' == 'true'">WITH_256;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-128)' == 'true'">WITH_128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!--<PreprocessorDefinitions Condition="'$(Option-512)' == 'true'">WITH_512;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
+      <!--<PreprocessorDefinitions Condition="'$(Option-256)' == 'true'">WITH_256;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
+      <!--<PreprocessorDefinitions Condition="'$(Option-128)' == 'true'">WITH_128;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
     </ClCompile>    
     <Link>
       <!-- 4099: warns about missing PDB files. -->

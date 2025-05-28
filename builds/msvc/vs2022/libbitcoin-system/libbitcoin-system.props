@@ -29,9 +29,9 @@
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Debug')) != -1">_CRTDBG_MAP_ALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!-- Enable use of CPU intrinsics. -->
-      <PreprocessorDefinitions Condition="'$(Option-512)' == 'true'">WITH_512;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-256)' == 'true'">WITH_256;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-128)' == 'true'">WITH_128;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!--<PreprocessorDefinitions Condition="'$(Option-512)' == 'true'">WITH_512;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
+      <!--<PreprocessorDefinitions Condition="'$(Option-256)' == 'true'">WITH_256;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
+      <!--<PreprocessorDefinitions Condition="'$(Option-128)' == 'true'">WITH_128;%(PreprocessorDefinitions)</PreprocessorDefinitions>-->
       <PreprocessorDefinitions Condition="'$(Option-sha)' == 'true'">WITH_SHA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -66,8 +66,10 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <!-- order matters -->
-      <EnableEnhancedInstructionSet Condition="'$(Option-256)' == 'true'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Option-512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+      <!-- Native configuration now specifyies avx, avx2 or avx512 - in which case we run 128, 256, 512. -->
+      <!--<EnableEnhancedInstructionSet Condition="'$(Option-128)' == 'true'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>-->
+      <!--<EnableEnhancedInstructionSet Condition="'$(Option-256)' == 'true'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>-->
+      <!--<EnableEnhancedInstructionSet Condition="'$(Option-512)' == 'true'">AdvancedVectorExtensions512</EnableEnhancedInstructionSet>-->
     </ClCompile>
   </ItemDefinitionGroup>
 
@@ -75,9 +77,9 @@
 
   <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Option-sha        : $(Option-sha)" Importance="high"/>
-    <Message Text="Option-512        : $(Option-512)" Importance="high"/>
-    <Message Text="Option-256        : $(Option-256)" Importance="high"/>
-    <Message Text="Option-128        : $(Option-128)" Importance="high"/>
+    <!--<Message Text="Option-512        : $(Option-512)" Importance="high"/>-->
+    <!--<Message Text="Option-256        : $(Option-256)" Importance="high"/>-->
+    <!--<Message Text="Option-128        : $(Option-128)" Importance="high"/>-->
   </Target>
 
   <!-- Linkage -->
