@@ -192,12 +192,10 @@
     #endif
 #endif
 
+// ARM SHA is disabled and SVE is not implemented.
 #if defined(HAVE_ARM)
-    #undef HAVE_CRYPTO
-    #undef HAVE_SVE
-    #undef HAVE_NEON
     #undef HAVE_SHA
-    #undef HAVE_128
+    ////#undef HAVE_128
 #endif
 
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
