@@ -38,6 +38,7 @@ namespace system {
 template <auto B>
 inline auto mm_srli_epi8(auto a) NOEXCEPT
 {
+    static_assert(B < 8);
     constexpr auto mask = shift_right(0xff_u8, B);
     return _mm_and_si128(_mm_srli_epi16(a, B), _mm_set1_epi8(mask));
 }
@@ -46,6 +47,7 @@ inline auto mm_srli_epi8(auto a) NOEXCEPT
 template <auto B>
 inline auto mm_slli_epi8(auto a) NOEXCEPT
 {
+    static_assert(B < 8);
     constexpr auto mask = shift_left(0xff_u8, B);
     return _mm_and_si128(_mm_slli_epi16(a, B), _mm_set1_epi8(mask));
 }
@@ -58,6 +60,7 @@ inline auto mm_slli_epi8(auto a) NOEXCEPT
 template <auto B>
 inline auto mm256_srli_epi8(auto a) NOEXCEPT
 {
+    static_assert(B < 8);
     constexpr auto mask = shift_right(0xff_u8, B);
     return _mm256_and_si256(_mm256_srli_epi16(a, B), _mm256_set1_epi8(mask));
 }
@@ -66,6 +69,7 @@ inline auto mm256_srli_epi8(auto a) NOEXCEPT
 template <auto B>
 inline auto mm256_slli_epi8(auto a) NOEXCEPT
 {
+    static_assert(B < 8);
     constexpr auto mask = shift_left(0xff_u8, B);
     return _mm256_and_si256(_mm256_slli_epi16(a, B), _mm256_set1_epi8(mask));
 }
@@ -78,6 +82,7 @@ inline auto mm256_slli_epi8(auto a) NOEXCEPT
 template <auto B>
 inline auto mm512_srli_epi8(auto a) NOEXCEPT
 {
+    static_assert(B < 8);
     constexpr auto mask = shift_right(0xff_u8, B);
     return _mm512_and_si512(_mm512_srli_epi16(a, B), _mm512_set1_epi8(mask));
 }
@@ -86,6 +91,7 @@ inline auto mm512_srli_epi8(auto a) NOEXCEPT
 template <auto B>
 inline auto mm512_slli_epi8(auto a) NOEXCEPT
 {
+    static_assert(B < 8);
     constexpr auto mask = shift_left(0xff_u8, B);
     return _mm512_and_si512(_mm512_slli_epi16(a, B), _mm512_set1_epi8(mask));
 }
@@ -102,6 +108,7 @@ inline auto mm512_slli_epi8(auto a) NOEXCEPT
 template <auto Lane>
 inline uint8_t mm512_extract_epi8(auto a) NOEXCEPT
 {
+    static_assert(Lane < 64);
     constexpr __mmask64 mask = shift_left(1_u64, Lane);
     return narrow_sign_cast<uint8_t>(_mm_cvtsi128_si32(
         _mm512_castsi512_si128(_mm512_maskz_compress_epi8(mask, a))));
@@ -111,6 +118,7 @@ inline uint8_t mm512_extract_epi8(auto a) NOEXCEPT
 template <auto Lane>
 inline uint16_t mm512_extract_epi16(auto a) NOEXCEPT
 {
+    static_assert(Lane < 32);
     constexpr __mmask32 mask = shift_left(1_u32, Lane);
     return narrow_sign_cast<uint16_t>(_mm_cvtsi128_si32(
         _mm512_castsi512_si128(_mm512_maskz_compress_epi16(mask, a))));
@@ -120,6 +128,7 @@ inline uint16_t mm512_extract_epi16(auto a) NOEXCEPT
 template <auto Lane>
 inline uint32_t mm512_extract_epi32(auto a) NOEXCEPT
 {
+    static_assert(Lane < 16);
     constexpr __mmask16 mask = shift_left(1_u16, Lane);
     return sign_cast<uint32_t>(_mm_cvtsi128_si32(
         _mm512_castsi512_si128(_mm512_maskz_compress_epi32(mask, a))));
@@ -129,6 +138,7 @@ inline uint32_t mm512_extract_epi32(auto a) NOEXCEPT
 template <auto Lane>
 inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
 {
+    static_assert(Lane < 8);
     constexpr __mmask8 mask = shift_left(1_u8, Lane);
     const auto value = _mm512_castsi512_si128(
         _mm512_maskz_compress_epi64(mask, a));
@@ -160,21 +170,22 @@ inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
 template <auto Lane>
 inline uint64_t mm_extract_epi64(auto a) NOEXCEPT
 {
-    if constexpr (have_64b)
-    {
-        // This is not available in 32 bit builds.
-        return sign_cast<uint64_t>(_mm_extract_epi64(a, Lane));
-    }
-    else
-    {
-        constexpr auto shift = bits<uint32_t>;
-        constexpr auto lane = shift_left(Lane);
-        return bit_or
-        (
-            shift_left<uint64_t>(_mm_extract_epi32(a, add1(lane)), shift),
-            wide_sign_cast<uint64_t>(_mm_extract_epi32(a, lane))
-        );
-    }
+    static_assert(Lane < 2);
+    ////if constexpr (have_64b)
+    ////{
+    ////    // This is not available in 32 bit builds.
+    ////    return (uint64_t)_mm_extract_epi64(a, Lane);
+    ////}
+    ////else
+    ////{
+    ////    return
+    ////        ((uint64_t)(_mm_extract_epi32(a, (Lane << 1) + 1)) << 32) |
+    ////        ((uint64_t)(_mm_extract_epi32(a, (Lane << 1) + 0)) << 0);
+    ////}
+
+    alignas(16) uint64_t buffer[2];
+    _mm_storeu_si128((__m128i*)buffer, a);
+    return buffer[Lane];
 }
 
 #endif // HAVE_128
@@ -184,6 +195,7 @@ inline uint64_t mm_extract_epi64(auto a) NOEXCEPT
 template <auto Lane>
 inline uint64_t mm256_extract_epi64(auto a) NOEXCEPT
 {
+    static_assert(Lane < 4);
     if constexpr (have_64b)
     {
         // This is not available in 32 bit builds.
@@ -192,7 +204,7 @@ inline uint64_t mm256_extract_epi64(auto a) NOEXCEPT
     else
     {
         constexpr auto shift = bits<uint32_t>;
-        constexpr auto lane = shift_left(Lane);
+        constexpr auto lane = shift_left<int>(Lane);
         return bit_or
         (
             shift_left<uint64_t>(_mm256_extract_epi32(a, add1(lane)), shift),
