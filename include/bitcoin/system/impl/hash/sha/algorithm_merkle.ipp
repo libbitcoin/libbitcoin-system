@@ -355,7 +355,7 @@ merkle_hash_vector(idigests_t& digests, iblocks_t& blocks) NOEXCEPT
         if (blocks.size() >= lanes)
         {
             // TODO: expose const structs to avoid local static.
-            static auto initial = pack<xWord>(H::get);
+            static const auto initial = pack<xWord>(H::get);
 
             xbuffer_t<xWord> xbuffer{};
 
