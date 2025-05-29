@@ -27,8 +27,8 @@ namespace system {
 BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
 
 template <typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotl_native(Unsigned value, size_t shift) NOEXCEPT
+    if_unsigned_integral_integer<Unsigned> = true>
+INLINE constexpr Unsigned rotl_nominal(Unsigned value, size_t shift) NOEXCEPT
 {
     // unguarded.
     constexpr auto span = bits<Unsigned>;
@@ -37,8 +37,8 @@ INLINE constexpr Unsigned rotl_native(Unsigned value, size_t shift) NOEXCEPT
 }
 
 template <typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotr_native(Unsigned value, size_t shift) NOEXCEPT
+    if_unsigned_integral_integer<Unsigned> = true>
+INLINE constexpr Unsigned rotr_nominal(Unsigned value, size_t shift) NOEXCEPT
 {
     // unguarded.
     constexpr auto span = bits<Unsigned>;
@@ -47,8 +47,8 @@ INLINE constexpr Unsigned rotr_native(Unsigned value, size_t shift) NOEXCEPT
 }
 
 template <size_t Shift, typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotl_native(Unsigned value) NOEXCEPT
+    if_unsigned_integral_integer<Unsigned> = true>
+INLINE constexpr Unsigned rotl_nominal(Unsigned value) NOEXCEPT
 {
     constexpr auto span = bits<Unsigned>;
     constexpr auto cycle = Shift % span;
@@ -60,8 +60,8 @@ INLINE constexpr Unsigned rotl_native(Unsigned value) NOEXCEPT
 }
 
 template <size_t Shift, typename Unsigned,
-    bc::if_unsigned_integral_integer<Unsigned> = true>
-INLINE constexpr Unsigned rotr_native(Unsigned value) NOEXCEPT
+    if_unsigned_integral_integer<Unsigned> = true>
+INLINE constexpr Unsigned rotr_nominal(Unsigned value) NOEXCEPT
 {
     constexpr auto span = bits<Unsigned>;
     constexpr auto cycle = Shift % span;
@@ -94,14 +94,14 @@ BC_POP_WARNING()
     #define rotr64(value, shift) _rotr64(value, shift)
 #else
     // Native implementation.
-    #define rotl8(value, shift)  rotl_native(value, shift)
-    #define rotl16(value, shift) rotl_native(value, shift)
-    #define rotl32(value, shift) rotl_native(value, shift)
-    #define rotl64(value, shift) rotl_native(value, shift)
-    #define rotr8(value, shift)  rotr_native(value, shift)
-    #define rotr16(value, shift) rotr_native(value, shift)
-    #define rotr32(value, shift) rotr_native(value, shift)
-    #define rotr64(value, shift) rotr_native(value, shift)
+    #define rotl8(value, shift)  rotl_nominal(value, shift)
+    #define rotl16(value, shift) rotl_nominal(value, shift)
+    #define rotl32(value, shift) rotl_nominal(value, shift)
+    #define rotl64(value, shift) rotl_nominal(value, shift)
+    #define rotr8(value, shift)  rotr_nominal(value, shift)
+    #define rotr16(value, shift) rotr_nominal(value, shift)
+    #define rotr32(value, shift) rotr_nominal(value, shift)
+    #define rotr64(value, shift) rotr_nominal(value, shift)
 #endif
 
 } // namespace system

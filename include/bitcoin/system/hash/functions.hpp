@@ -133,7 +133,7 @@ INLINE hash_digest bitcoin_hash2(const data_slice& left,
 template <typename Type>
 INLINE data_chunk bitcoin_chunk(const Type& data) NOEXCEPT;
 
-/// Taproot tagged hashing.
+/// Taproot tagged hashing (use sha256t_writer for best performance).
 INLINE hash_digest tagged_hash(const std::string& tag,
     const data_slice& message) NOEXCEPT;
 

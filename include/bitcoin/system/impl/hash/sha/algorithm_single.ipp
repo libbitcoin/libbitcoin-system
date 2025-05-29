@@ -59,7 +59,7 @@ hash(const block_t& block) NOEXCEPT
         // As an array of 1 arrays is same as the array, this compiles away.
         return hash(ablocks_t<one>{ block });
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         // Native hash() does not have an optimal array override.
         return native_hash(block);
@@ -90,7 +90,7 @@ hash(const half_t& half) NOEXCEPT
     {
         return hasher(half);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_hash(half);
     }
@@ -121,7 +121,7 @@ hash(const half_t& left, const half_t& right) NOEXCEPT
     {
         return hasher(left, right);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_hash(left, right);
     }
@@ -135,32 +135,14 @@ TEMPLATE
 constexpr typename CLASS::state_t CLASS::
 midstate(const half_t& left, const half_t& right) NOEXCEPT
 {
-    const auto hasher = [](const half_t& left, const half_t& right) NOEXCEPT
-    {
-        auto state = H::get;
-        buffer_t buffer{};
-        input_left(buffer, left);
-        input_right(buffer, right);
-        schedule(buffer);
-        compress(state, buffer);
-        ////schedule_1(buffer);
-        ////compress(state, buffer);
-        ////return output(state);
-        return state;
-    };
-
-    if (std::is_constant_evaluated())
-    {
-        return hasher(left, right);
-    }
-    else if constexpr (native && SHA::strength == 256)
-    {
-        return native_hash(left, right);
-    }
-    else
-    {
-        return hasher(left, right);
-    }
+    // Taproot midstate computations are contexval, so no need for native here.
+    auto state = H::get;
+    buffer_t buffer{};
+    input_left(buffer, left);
+    input_right(buffer, right);
+    schedule(buffer);
+    compress(state, buffer);
+    return state;
 }
 
 TEMPLATE
@@ -183,7 +165,7 @@ hash(const quart_t& left, const quart_t& right) NOEXCEPT
     {
         return hasher(left, right);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_hash(left, right);
     }
@@ -205,12 +187,12 @@ template <size_t Size, if_not_greater<Size, CLASSIF::space>>
 constexpr typename CLASS::digest_t CLASS::
 simple_hash(const bytes_t<Size>& bytes) NOEXCEPT
 {
-    const auto hasher = [](const bytes_t<Size>& bytes) NOEXCEPT
-    {
-        block_t block{};
-        std::copy_n(bytes.begin(), Size, block.begin());
-        simple_pad<Size>(block);
+    block_t block{};
+    std::copy_n(bytes.begin(), Size, block.begin());
+    simple_pad<Size>(block);
 
+    const auto hasher = [](const block_t& block) NOEXCEPT
+    {
         auto state = H::get;
         buffer_t buffer{};
         input(buffer, block);
@@ -221,15 +203,17 @@ simple_hash(const bytes_t<Size>& bytes) NOEXCEPT
 
     if (std::is_constant_evaluated())
     {
-        return hasher(bytes);
+        return hasher(block);
     }
-    else if constexpr (native && SHA::strength == 256)
-    {
-        return native_hash(bytes);
-    }
+    ////else if constexpr (native)
+    ////{
+    ////    // TODO: figure out what's wrong with this.
+    ////    auto state = H::get;
+    ////    return native_finalize(state, array_cast<word_t>(block));
+    ////}
     else
     {
-        return hasher(bytes);
+        return hasher(block);
     }
 }
 

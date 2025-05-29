@@ -27,7 +27,7 @@ static_assert(sha160::hash(sha160::half_t{})  == sha_half160);
 static_assert(sha160::hash(sha160::block_t{}) == sha_full160);
 
 constexpr auto vector = have_128 || have_256 || have_512;
-constexpr auto native = have_sha;
+constexpr auto native = /*have_sha*/ false;
 
 BOOST_AUTO_TEST_CASE(sha160__hash__null_hash__expected)
 {

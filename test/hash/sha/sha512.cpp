@@ -21,7 +21,7 @@
     
 BOOST_AUTO_TEST_SUITE(sha512_tests_)
 
-constexpr auto vector = (have_128 || have_256 || have_512) && !have_32b;
+constexpr auto vector = have_128 || have_256 || have_512;
 constexpr auto native = /*have_sha*/ false;
 
 // Other test vectors are dependent upon the correctness of these.

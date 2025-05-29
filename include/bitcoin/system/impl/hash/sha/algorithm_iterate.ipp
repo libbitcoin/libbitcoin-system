@@ -299,7 +299,7 @@ iterate(state_t& state, const ablocks_t<Size>& blocks) NOEXCEPT
     {
         iterate_(state, blocks);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         iterate_native(state, blocks);
     }
@@ -318,7 +318,7 @@ TEMPLATE
 INLINE void CLASS::
 iterate(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
-    if constexpr (native && SHA::strength == 256)
+    if constexpr (native)
     {
         iterate_native(state, blocks);
     }

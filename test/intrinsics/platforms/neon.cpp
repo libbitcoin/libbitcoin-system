@@ -16,19 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_NEON_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_NEON_HPP
+#include "../../test.hpp"
 
-#include <bitcoin/system/define.hpp>
+BOOST_AUTO_TEST_SUITE(intrinsics_platforms_neon_tests)
 
-#if defined(HAVE_NEON)
-#include <arm_neon.h>
+BOOST_AUTO_TEST_CASE(intrinsics_platforms_neon_test)
+{
+    BOOST_REQUIRE(true);
+}
 
-namespace libbitcoin {
-namespace system {
-} // namespace system
-} // namespace libbitcoin
-
-#endif // HAVE_NEON
-
-#endif
+BOOST_AUTO_TEST_SUITE_END()

@@ -22,6 +22,13 @@
 #include <bitcoin/system/define.hpp>
 
 #if defined(HAVE_SVE)
-#endif
+#include <arm_sve.h>
+
+namespace libbitcoin {
+namespace system {
+} // namespace system
+} // namespace libbitcoin
+
+#endif // HAVE_SVE
 
 #endif

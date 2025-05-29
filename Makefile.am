@@ -314,10 +314,17 @@ test_libbitcoin_system_test_SOURCES = \
     test/hash/sha/sha256.cpp \
     test/hash/sha/sha512.cpp \
     test/hash/sha/vector.cpp \
+    test/intrinsics/byte_swap.cpp \
     test/intrinsics/cpuid.cpp \
     test/intrinsics/detection.cpp \
-    test/intrinsics/functional.cpp \
+    test/intrinsics/intel_128.cpp \
+    test/intrinsics/intel_256.cpp \
+    test/intrinsics/intel_512.cpp \
+    test/intrinsics/rotate.cpp \
     test/intrinsics/types.cpp \
+    test/intrinsics/platforms/intel.cpp \
+    test/intrinsics/platforms/neon.cpp \
+    test/intrinsics/platforms/sve.cpp \
     test/machine/interpreter.cpp \
     test/machine/number.cpp \
     test/machine/program.cpp \
@@ -734,23 +741,24 @@ include_bitcoin_system_impl_words_HEADERS = \
 
 include_bitcoin_system_intrinsicsdir = ${includedir}/bitcoin/system/intrinsics
 include_bitcoin_system_intrinsics_HEADERS = \
-    include/bitcoin/system/intrinsics/byteswap.hpp \
+    include/bitcoin/system/intrinsics/byte_swap.hpp \
     include/bitcoin/system/intrinsics/cpuid.hpp \
     include/bitcoin/system/intrinsics/detection.hpp \
-    include/bitcoin/system/intrinsics/functional_128.hpp \
-    include/bitcoin/system/intrinsics/functional_256.hpp \
-    include/bitcoin/system/intrinsics/functional_512.hpp \
+    include/bitcoin/system/intrinsics/intel_128.hpp \
+    include/bitcoin/system/intrinsics/intel_256.hpp \
+    include/bitcoin/system/intrinsics/intel_512.hpp \
+    include/bitcoin/system/intrinsics/intel_sha.hpp \
     include/bitcoin/system/intrinsics/intrinsics.hpp \
+    include/bitcoin/system/intrinsics/neon_128.hpp \
+    include/bitcoin/system/intrinsics/neon_sha.hpp \
+    include/bitcoin/system/intrinsics/none_128.hpp \
     include/bitcoin/system/intrinsics/rotate.hpp \
-    include/bitcoin/system/intrinsics/sha.hpp \
     include/bitcoin/system/intrinsics/types.hpp
 
 include_bitcoin_system_intrinsics_platformsdir = ${includedir}/bitcoin/system/intrinsics/platforms
 include_bitcoin_system_intrinsics_platforms_HEADERS = \
     include/bitcoin/system/intrinsics/platforms/intel.hpp \
     include/bitcoin/system/intrinsics/platforms/neon.hpp \
-    include/bitcoin/system/intrinsics/platforms/none.hpp \
-    include/bitcoin/system/intrinsics/platforms/platforms.hpp \
     include/bitcoin/system/intrinsics/platforms/sve.hpp
 
 include_bitcoin_system_machinedir = ${includedir}/bitcoin/system/machine

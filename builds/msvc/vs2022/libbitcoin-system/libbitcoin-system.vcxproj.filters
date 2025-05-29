@@ -986,7 +986,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\have.hpp">
       <Filter>include\bitcoin\system</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byteswap.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\byte_swap.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\cpuid.hpp">
@@ -995,16 +995,28 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\detection.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\functional_128.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_128.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\functional_256.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_256.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\functional_512.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_512.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_sha.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon_128.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon_sha.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none_128.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\intel.hpp">
@@ -1013,19 +1025,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\neon.hpp">
       <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\none.hpp">
-      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\platforms.hpp">
-      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\sve.hpp">
       <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\sha.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\types.hpp">

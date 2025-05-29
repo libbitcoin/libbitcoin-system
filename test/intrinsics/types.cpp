@@ -36,6 +36,83 @@ static_assert(!std::numeric_limits<xint128_t>::is_integer);
 static_assert(!std::numeric_limits<xint256_t>::is_integer);
 static_assert(!std::numeric_limits<xint512_t>::is_integer);
 
+// to_extended
+// ----------------------------------------------------------------------------
+
+////static_assert(is_same_type<to_extended<uint16_t, 65>, xint512_t>);
+static_assert(is_same_type<to_extended<uint8_t, 64>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint8_t, 63>, xint512_t>);
+static_assert(is_same_type<to_extended<uint8_t, 33>, xint512_t>);
+static_assert(is_same_type<to_extended<uint8_t, 32>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint8_t, 31>, xint256_t>);
+static_assert(is_same_type<to_extended<uint8_t, 17>, xint256_t>);
+static_assert(is_same_type<to_extended<uint8_t, 16>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint8_t, 15>, xint128_t>);
+static_assert(is_same_type<to_extended<uint8_t,  9>, xint128_t>);
+static_assert(is_same_type<to_extended<uint8_t,  8>, uint64_t>);  // full
+static_assert(is_same_type<to_extended<uint8_t,  7>, uint64_t>);
+static_assert(is_same_type<to_extended<uint8_t,  5>, uint64_t>);
+static_assert(is_same_type<to_extended<uint8_t,  4>, uint32_t>);  // full
+static_assert(is_same_type<to_extended<uint8_t,  3>, uint32_t>);
+static_assert(is_same_type<to_extended<uint8_t,  2>, uint16_t>);  // full
+static_assert(is_same_type<to_extended<uint8_t,  1>, uint8_t>);   // full
+////static_assert(is_same_type<to_extended<uint8_t,  0>, uint16_t>);
+
+////static_assert(is_same_type<to_extended<uint16_t, 33>, xint512_t>);
+static_assert(is_same_type<to_extended<uint16_t, 32>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint16_t, 31>, xint512_t>);
+static_assert(is_same_type<to_extended<uint16_t, 17>, xint512_t>);
+static_assert(is_same_type<to_extended<uint16_t, 16>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint16_t, 15>, xint256_t>);
+static_assert(is_same_type<to_extended<uint16_t,  9>, xint256_t>);
+static_assert(is_same_type<to_extended<uint16_t,  8>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint16_t,  7>, xint128_t>);
+static_assert(is_same_type<to_extended<uint16_t,  5>, xint128_t>);
+static_assert(is_same_type<to_extended<uint16_t,  4>, uint64_t>);  // full
+static_assert(is_same_type<to_extended<uint16_t,  3>, uint64_t>);
+static_assert(is_same_type<to_extended<uint16_t,  2>, uint32_t>);  // full
+static_assert(is_same_type<to_extended<uint16_t,  1>, uint16_t>);  // full
+////static_assert(is_same_type<to_extended<uint16_t,  0>, uint16_t>);
+
+////static_assert(is_same_type<to_extended<uint32_t, 17>, xint512_t>);
+static_assert(is_same_type<to_extended<uint32_t, 16>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint32_t, 15>, xint512_t>);
+static_assert(is_same_type<to_extended<uint32_t,  9>, xint512_t>);
+static_assert(is_same_type<to_extended<uint32_t,  8>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint32_t,  7>, xint256_t>);
+static_assert(is_same_type<to_extended<uint32_t,  5>, xint256_t>);
+static_assert(is_same_type<to_extended<uint32_t,  4>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint32_t,  3>, xint128_t>);
+static_assert(is_same_type<to_extended<uint32_t,  2>, uint64_t>);  // full
+static_assert(is_same_type<to_extended<uint32_t,  1>, uint32_t>);  // full
+////static_assert(is_same_type<to_extended<uint32_t,  0>, uint32_t>);
+
+////static_assert(is_same_type<to_extended<uint64_t, 9>, xint512_t>);
+static_assert(is_same_type<to_extended<uint64_t, 8>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 7>, xint512_t>);
+static_assert(is_same_type<to_extended<uint64_t, 5>, xint512_t>);
+static_assert(is_same_type<to_extended<uint64_t, 4>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 3>, xint256_t>);
+static_assert(is_same_type<to_extended<uint64_t, 2>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 1>, uint64_t>);  // full
+////static_assert(is_same_type<to_extended<uint64_t, 0>, uint64_t>);
+
+// is_extended
+// ----------------------------------------------------------------------------
+
+// helper
+template <typename>
+constexpr bool is_defined = true;
+
+// is_extended is true even with mock type.
+static_assert(!is_extended<uint32_t>);
+static_assert(is_extended<xint128_t>);
+static_assert(is_extended<xint256_t>);
+static_assert(is_extended<xint512_t>);
+static_assert(is_defined<if_extended<xint128_t>>);
+static_assert(is_defined<if_extended<xint256_t>>);
+static_assert(is_defined<if_extended<xint512_t>>);
+
 // have
 // ----------------------------------------------------------------------------
 
@@ -71,22 +148,6 @@ static_assert(!have_lanes<uint64_t, 1>);
 static_assert(!have_lanes<uint32_t, 3>);
 static_assert(!have_lanes<uint16_t, 7>);
 static_assert(!have_lanes<uint8_t, 15>);
-
-// is_extended
-// ----------------------------------------------------------------------------
-
-// helper
-template <typename>
-constexpr bool is_defined = true;
-
-// is_extended is true even with mock type.
-static_assert(!is_extended<uint32_t>);
-static_assert(is_extended<xint128_t>);
-static_assert(is_extended<xint256_t>);
-static_assert(is_extended<xint512_t>);
-static_assert(is_defined<if_extended<xint128_t>>);
-static_assert(is_defined<if_extended<xint256_t>>);
-static_assert(is_defined<if_extended<xint512_t>>);
 
 // capacity [for extended integers]
 // ----------------------------------------------------------------------------
@@ -228,66 +289,5 @@ static_assert(capacity<xint512_t, uint64_t, 1 * 4> == 2);
 static_assert(capacity<xint512_t, uint64_t, 2 * 4> == 1); // full
 static_assert(capacity<xint512_t, uint64_t, 3 * 4> == 0);
 ////static_assert(capacity<xint512_t, uint64_t, 0> == 0);
-
-// to_extended
-// ----------------------------------------------------------------------------
-
-////static_assert(is_same_type<to_extended<uint16_t, 65>, xint512_t>);
-static_assert(is_same_type<to_extended<uint8_t, 64>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint8_t, 63>, xint512_t>);
-static_assert(is_same_type<to_extended<uint8_t, 33>, xint512_t>);
-static_assert(is_same_type<to_extended<uint8_t, 32>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint8_t, 31>, xint256_t>);
-static_assert(is_same_type<to_extended<uint8_t, 17>, xint256_t>);
-static_assert(is_same_type<to_extended<uint8_t, 16>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint8_t, 15>, xint128_t>);
-static_assert(is_same_type<to_extended<uint8_t,  9>, xint128_t>);
-static_assert(is_same_type<to_extended<uint8_t,  8>, uint64_t>);  // full
-static_assert(is_same_type<to_extended<uint8_t,  7>, uint64_t>);
-static_assert(is_same_type<to_extended<uint8_t,  5>, uint64_t>);
-static_assert(is_same_type<to_extended<uint8_t,  4>, uint32_t>);  // full
-static_assert(is_same_type<to_extended<uint8_t,  3>, uint32_t>);
-static_assert(is_same_type<to_extended<uint8_t,  2>, uint16_t>);  // full
-static_assert(is_same_type<to_extended<uint8_t,  1>, uint8_t>);   // full
-////static_assert(is_same_type<to_extended<uint8_t,  0>, uint16_t>);
-
-////static_assert(is_same_type<to_extended<uint16_t, 33>, xint512_t>);
-static_assert(is_same_type<to_extended<uint16_t, 32>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint16_t, 31>, xint512_t>);
-static_assert(is_same_type<to_extended<uint16_t, 17>, xint512_t>);
-static_assert(is_same_type<to_extended<uint16_t, 16>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint16_t, 15>, xint256_t>);
-static_assert(is_same_type<to_extended<uint16_t,  9>, xint256_t>);
-static_assert(is_same_type<to_extended<uint16_t,  8>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint16_t,  7>, xint128_t>);
-static_assert(is_same_type<to_extended<uint16_t,  5>, xint128_t>);
-static_assert(is_same_type<to_extended<uint16_t,  4>, uint64_t>);  // full
-static_assert(is_same_type<to_extended<uint16_t,  3>, uint64_t>);
-static_assert(is_same_type<to_extended<uint16_t,  2>, uint32_t>);  // full
-static_assert(is_same_type<to_extended<uint16_t,  1>, uint16_t>);  // full
-////static_assert(is_same_type<to_extended<uint16_t,  0>, uint16_t>);
-
-////static_assert(is_same_type<to_extended<uint32_t, 17>, xint512_t>);
-static_assert(is_same_type<to_extended<uint32_t, 16>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint32_t, 15>, xint512_t>);
-static_assert(is_same_type<to_extended<uint32_t,  9>, xint512_t>);
-static_assert(is_same_type<to_extended<uint32_t,  8>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint32_t,  7>, xint256_t>);
-static_assert(is_same_type<to_extended<uint32_t,  5>, xint256_t>);
-static_assert(is_same_type<to_extended<uint32_t,  4>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint32_t,  3>, xint128_t>);
-static_assert(is_same_type<to_extended<uint32_t,  2>, uint64_t>);  // full
-static_assert(is_same_type<to_extended<uint32_t,  1>, uint32_t>);  // full
-////static_assert(is_same_type<to_extended<uint32_t,  0>, uint32_t>);
-
-////static_assert(is_same_type<to_extended<uint64_t, 9>, xint512_t>);
-static_assert(is_same_type<to_extended<uint64_t, 8>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint64_t, 7>, xint512_t>);
-static_assert(is_same_type<to_extended<uint64_t, 5>, xint512_t>);
-static_assert(is_same_type<to_extended<uint64_t, 4>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint64_t, 3>, xint256_t>);
-static_assert(is_same_type<to_extended<uint64_t, 2>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint64_t, 1>, uint64_t>);  // full
-////static_assert(is_same_type<to_extended<uint64_t, 0>, uint64_t>);
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -96,7 +96,7 @@ inline unsigned_type<Size> byte_swap_medium(const data_array<Size>& data) NOEXCE
     BC_POP_WARNING()
 
     // Compare medium (bitwise).
-    return byte_swap32_native(to_unsigned(value));
+    return byte_swap32_nominal(to_unsigned(value));
 }
 
 // The intrinsic approach is the fastest, a single CPU operation.

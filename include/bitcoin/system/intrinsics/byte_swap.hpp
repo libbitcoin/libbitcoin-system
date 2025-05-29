@@ -16,22 +16,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_BYTESWAP_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_BYTESWAP_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_BYTE_SWAP_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_BYTE_SWAP_HPP
 
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-INLINE constexpr uint16_t byte_swap16_native(uint16_t value) NOEXCEPT
+// For completeness.
+INLINE constexpr uint8_t byte_swap8_nominal(uint8_t value) NOEXCEPT
+{
+    return value;
+}
+
+INLINE constexpr uint16_t byte_swap16_nominal(uint16_t value) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
     return static_cast<uint16_t>((value << 8u) | (value >> 8u));
     BC_POP_WARNING()
 }
 
-INLINE constexpr uint32_t byte_swap32_native(uint32_t value) NOEXCEPT
+INLINE constexpr uint32_t byte_swap32_nominal(uint32_t value) NOEXCEPT
 {
     return
         ((value << 24) |
@@ -40,7 +46,7 @@ INLINE constexpr uint32_t byte_swap32_native(uint32_t value) NOEXCEPT
          (value >> 24));
 }
 
-INLINE constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
+INLINE constexpr uint64_t byte_swap64_nominal(uint64_t value) NOEXCEPT
 {
     return
         ((value << 56) |
@@ -95,9 +101,9 @@ INLINE constexpr uint64_t byte_swap64_native(uint64_t value) NOEXCEPT
     #define byte_swap64(value) _byteswap_uint64(value)
 #else
     // Native implementation.
-    #define byte_swap16(value) byte_swap16_native(value)
-    #define byte_swap32(value) byte_swap32_native(value)
-    #define byte_swap64(value) byte_swap64_native(value)
+    #define byte_swap16(value) byte_swap16_nominal(value)
+    #define byte_swap32(value) byte_swap32_nominal(value)
+    #define byte_swap64(value) byte_swap64_nominal(value)
 #endif
 
 } // namespace system

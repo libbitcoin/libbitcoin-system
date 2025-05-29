@@ -29,7 +29,7 @@
 
 // C++ standard: "The behavior is undefined if the right operand is negative,
 // or greater than or equal to the width of the promoted left operand."
-// So use of parameter-shifted rotl_native/rotr_native should be guarded.
+// So use of parameter-shifted rotl_nominal/rotr_nominal should be guarded.
 
 namespace libbitcoin {
 namespace system {
@@ -40,7 +40,7 @@ INLINE constexpr Integral rotl(Integral value, size_t shift) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        return rotl_native(to_unsigned(value), shift);
+        return rotl_nominal(to_unsigned(value), shift);
     }
     else if constexpr (is_same_size<Integral, uint8_t>)
     {
@@ -70,7 +70,7 @@ INLINE constexpr Integral rotr(Integral value, size_t shift) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        return rotr_native(to_unsigned(value), shift);
+        return rotr_nominal(to_unsigned(value), shift);
     }
     else if constexpr (is_same_size<Integral, uint8_t>)
     {
@@ -100,7 +100,7 @@ INLINE constexpr Integral rotl(Integral value) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        return rotl_native<Shift>(to_unsigned(value));
+        return rotl_nominal<Shift>(to_unsigned(value));
     }
     else
     {
@@ -116,7 +116,7 @@ INLINE constexpr Integral rotr(Integral value) NOEXCEPT
 {
     if (std::is_constant_evaluated())
     {
-        return rotr_native<Shift>(to_unsigned(value));
+        return rotr_nominal<Shift>(to_unsigned(value));
     }
     else
     {

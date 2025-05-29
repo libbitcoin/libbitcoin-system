@@ -16,19 +16,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_NEON_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_NEON_HPP
+#include "../test.hpp"
 
-#include <bitcoin/system/define.hpp>
+constexpr auto value16 = 0x0102_u16;
+constexpr auto value32 = 0x01020304_u32;
+constexpr auto value64 = 0x0102030405060708_u64;
 
-#if defined(HAVE_NEON)
-#include <arm_neon.h>
+constexpr auto swap16 = 0x0201_u16;
+constexpr auto swap32 = 0x04030201_u32;
+constexpr auto swap64 = 0x0807060504030201_u64;
 
-namespace libbitcoin {
-namespace system {
-} // namespace system
-} // namespace libbitcoin
+static_assert(byte_swap8_nominal(0x01_u8) == 0x01_u8);
+static_assert(byte_swap16_nominal(value16) == swap16);
+static_assert(byte_swap32_nominal(value32) == swap32);
+static_assert(byte_swap64_nominal(value64) == swap64);
 
-#endif // HAVE_NEON
-
-#endif
+// platform intrinsic, falls back to nominal
+BOOST_AUTO_TEST_CASE(byte_swap__intrinsic__always__swapped)
+{
+    BOOST_REQUIRE_EQUAL(byte_swap16(value16), swap16);
+    BOOST_REQUIRE_EQUAL(byte_swap32(value32), swap32);
+    BOOST_REQUIRE_EQUAL(byte_swap64(value64), swap64);
+}

@@ -271,7 +271,7 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
     std::array<xint128_t, 2> wdigest{};
     store(wdigest[0], byteswap<uint32_t>(lo));
     store(wdigest[1], byteswap<uint32_t>(hi));
-    return array_cast<byte_t, sizeof(digest_t)>(wdigest);
+    return array_cast<byte_t, array_count<digest_t>>(wdigest);
 }
 
 TEMPLATE

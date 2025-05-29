@@ -16,12 +16,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_PLATFORMS_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_PLATFORMS_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_NEON_SHA_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_NEON_SHA_HPP
 
-#include <bitcoin/system/intrinsics/platforms/intel.hpp>
+#include <bitcoin/system/define.hpp>
+#include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/platforms/neon.hpp>
-#include <bitcoin/system/intrinsics/platforms/none.hpp>
-#include <bitcoin/system/intrinsics/platforms/sve.hpp>
+
+namespace libbitcoin {
+namespace system {
+
+#if defined(HAVE_CRYPTO)
+#endif // HAVE_CRYPTO
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif

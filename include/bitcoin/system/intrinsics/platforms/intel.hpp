@@ -20,203 +20,191 @@
 #define LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_INTEL_HPP
 
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/math/math.hpp>
 
 #if defined(HAVE_XCPU)
+#include <immintrin.h>
 
-#if defined(HAVE_X32)
-#if defined(HAVE_128)
-inline uint64_t _mm_extract_epi64(auto, auto) NOEXCEPT
-{
-    // This presently precludes sha512 vectorization on x32 builds.
-    std::abort();
-}
-#endif
-#if defined(HAVE_256)
-inline uint64_t _mm256_extract_epi64(auto, auto) NOEXCEPT
-{
-    // This presently precludes sha512 vectorization on x32 builds.
-    std::abort();
-}
-#endif
-#if defined(HAVE_512)
-inline uint64_t _mm_cvtsi128_si64(auto) NOEXCEPT
-{
-    // required for _mm512_extract_epi64
-    // This presently precludes sha512 vectorization on x32 builds.
-    std::abort();
-}
-#endif
-#endif // HAVE_X32
+namespace libbitcoin {
+namespace system {
 
-// These are not defined.
-// 8/16 bit are not implemented here due to AVX512_VBMI2 requirement.
-// github.com/vectorclass/version2/blob/master/vectori512.h
-#if defined(HAVE_512)
-BC_PUSH_WARNING(NO_C_STYLE_CASTS)
-////inline uint8_t _mm512_extract_epi8(auto a, auto Lane) NOEXCEPT
-////{
-////    // AVX512_VBMI2/AVX512F/SSE2
-////    return _mm_cvtsi128_si8(_mm512_castsi512_si128(
-////        _mm512_maskz_compress_epi8(__mmask16(1u << Lane), a)));
-////}
-////inline uint16_t _mm512_extract_epi16(auto a, auto Lane) NOEXCEPT
-////{
-////    // AVX512_VBMI2/AVX512F/SSE2
-////    return _mm_cvtsi128_si16(_mm512_castsi512_si128(
-////        _mm512_maskz_compress_epi16(__mmask8(1u << Lane), a)));
-////}
-inline uint32_t _mm512_extract_epi32(auto a, auto Lane) NOEXCEPT
-{
-    // AVX512F/SSE2/AVX512F
-    return _mm_cvtsi128_si32(_mm512_castsi512_si128(
-        _mm512_maskz_compress_epi32(__mmask16(1u << Lane), a)));
-}
-inline uint64_t _mm512_extract_epi64(auto a, auto Lane) NOEXCEPT
-{
-    // AVX512F/SSE2/AVX512F
-    // cvt undefined for 32 bit (see above).
-    return _mm_cvtsi128_si64(_mm512_castsi512_si128(
-        _mm512_maskz_compress_epi64(__mmask8(1u << Lane), a)));
-}
-BC_POP_WARNING()
-#endif // HAVE_512
+/// Provide 8 bit shifts to complete matrix.
+/// ---------------------------------------------------------------------------
+/// These are only defined for 16/32/64 bits.
 
 #if defined(HAVE_128)
-    #define mm_and_si128(a, b)          _mm_and_si128(a, b)
-    #define mm_or_si128(a, b)           _mm_or_si128(a, b)
-    #define mm_xor_si128(a, b)          _mm_xor_si128(a, b)
-    ////#define mm_srli_epi8(a, B)      _mm_srli_epi8(a, B) // undefined
-    #define mm_srli_epi16(a, B)         _mm_srli_epi16(a, B)
-    #define mm_srli_epi32(a, B)         _mm_srli_epi32(a, B)
-    #define mm_srli_epi64(a, B)         _mm_srli_epi64(a, B)
-    ////#define mm_slli_epi8(a, B)      _mm_slli_epi8(a, B) // undefined
-    #define mm_slli_epi16(a, B)         _mm_slli_epi16(a, B)
-    #define mm_slli_epi32(a, B)         _mm_slli_epi32(a, B)
-    #define mm_slli_epi64(a, B)         _mm_slli_epi64(a, B)
-    #define mm_add_epi8(a, b)           _mm_add_epi8(a, b)
-    #define mm_add_epi16(a, b)          _mm_add_epi16(a, b)
-    #define mm_add_epi32(a, b)          _mm_add_epi32(a, b) // also sha
-    #define mm_add_epi64(a, b)          _mm_add_epi64(a, b)
-    #define mm_extract_epi8(a, Lane)    _mm_extract_epi8(a, Lane)
-    #define mm_extract_epi16(a, Lane)   _mm_extract_epi16(a, Lane)
-    #define mm_extract_epi32(a, Lane)   _mm_extract_epi32(a, Lane)
-    #define mm_extract_epi64(a, Lane)   _mm_extract_epi64(a, Lane) // undefined for X32
-    #define mm_shuffle_epi8(a, mask)    _mm_shuffle_epi8(a, mask)
-    #define mm_load_si128(a)            _mm_load_si128(a)
-    #define mm_loadu_si128(a)           _mm_loadu_si128(a)
-    #define mm_store_si128(memory, a)   _mm_store_si128(memory, a)
-    #define mm_storeu_si128(memory, a)  _mm_storeu_si128(memory, a)
-    #define mm_set1_epi8(K)             _mm_set1_epi8(K)
-    #define mm_set1_epi16(K)            _mm_set1_epi16(K)
-    #define mm_set1_epi32(K)            _mm_set1_epi32(K)
-    #define mm_set1_epi64x(K)           _mm_set1_epi64x(K)
-    #define mm_set_epi64x(x02, x01)     _mm_set_epi64x(x02, x01)
-    #define mm_set_epi32(x04, x03, x02, x01) \
-           _mm_set_epi32(x04, x03, x02, x01)
-    #define mm_set_epi16(x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm_set_epi16(x08, x07, x06, x05, x04, x03, x02, x01)
-    #define mm_set_epi8(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm_set_epi8(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+
+// SSE2
+template <auto B>
+inline auto mm_srli_epi8(auto a) NOEXCEPT
+{
+    constexpr auto mask = shift_right(0xff_u8, B);
+    return _mm_and_si128(_mm_srli_epi16(a, B), _mm_set1_epi8(mask));
+}
+
+// SSE2
+template <auto B>
+inline auto mm_slli_epi8(auto a) NOEXCEPT
+{
+    constexpr auto mask = shift_left(0xff_u8, B);
+    return _mm_and_si128(_mm_slli_epi16(a, B), _mm_set1_epi8(mask));
+}
+
 #endif // HAVE_128
 
 #if defined(HAVE_256)
-    #define mm256_and_si256(a, b)           _mm256_and_si256(a, b)
-    #define mm256_or_si256(a, b)            _mm256_or_si256(a, b)
-    #define mm256_xor_si256(a, b)           _mm256_xor_si256(a, b)
-    ////#define mm256_srli_epi8(a, B)       _mm256_srli_epi8(a, B) // undefined
-    #define mm256_srli_epi16(a, B)          _mm256_srli_epi16(a, B)
-    #define mm256_srli_epi32(a, B)          _mm256_srli_epi32(a, B)
-    #define mm256_srli_epi64(a, B)          _mm256_srli_epi64(a, B)
-    ////#define mm256_slli_epi8(a, B)       _mm256_slli_epi8(a, B) // undefined
-    #define mm256_slli_epi16(a, B)          _mm256_slli_epi16(a, B)
-    #define mm256_slli_epi32(a, B)          _mm256_slli_epi32(a, B)
-    #define mm256_slli_epi64(a, B)          _mm256_slli_epi64(a, B)
-    #define mm256_add_epi8(a, b)            _mm256_add_epi8(a, b)
-    #define mm256_add_epi16(a, b)           _mm256_add_epi16(a, b)
-    #define mm256_add_epi32(a, b)           _mm256_add_epi32(a, b)
-    #define mm256_add_epi64(a, b)           _mm256_add_epi64(a, b)
-    #define mm256_extract_epi8(a, Lane)     _mm256_extract_epi8(a, Lane)
-    #define mm256_extract_epi16(a, Lane)    _mm256_extract_epi16(a, Lane)
-    #define mm256_extract_epi32(a, Lane)    _mm256_extract_epi32(a, Lane)
-    #define mm256_extract_epi64(a, Lane)    _mm256_extract_epi64(a, Lane) // undefined for X32
-    #define mm256_shuffle_epi8(a, mask)     _mm256_shuffle_epi8(a, mask)
-    #define mm256_load_si256(a)             _mm256_load_si256(a)
-    #define mm256_loadu_si256(a)            _mm256_loadu_si256(a)
-    #define mm256_store_si256(memory, a)    _mm256_store_si256(memory, a)
-    #define mm256_storeu_si256(memory, a)   _mm256_storeu_si256(memory, a)
-    #define mm256_set1_epi8(K)              _mm256_set1_epi8(K)
-    #define mm256_set1_epi16(K)             _mm256_set1_epi16(K)
-    #define mm256_set1_epi32(K)             _mm256_set1_epi32(K)
-    #define mm256_set1_epi64x(K)            _mm256_set1_epi64x(K)
-    #define mm256_set_epi64x(x04, x03, x02, x01) \
-           _mm256_set_epi64x(x04, x03, x02, x01)
-    #define mm256_set_epi32(x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm256_set_epi32(x08, x07, x06, x05, x04, x03, x02, x01)
-    #define mm256_set_epi16(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm256_set_epi16(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
-    #define mm256_set_epi8(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm256_set_epi8(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+
+// AVX2
+template <auto B>
+inline auto mm256_srli_epi8(auto a) NOEXCEPT
+{
+    constexpr auto mask = shift_right(0xff_u8, B);
+    return _mm256_and_si256(_mm256_srli_epi16(a, B), _mm256_set1_epi8(mask));
+}
+
+// AVX2
+template <auto B>
+inline auto mm256_slli_epi8(auto a) NOEXCEPT
+{
+    constexpr auto mask = shift_left(0xff_u8, B);
+    return _mm256_and_si256(_mm256_slli_epi16(a, B), _mm256_set1_epi8(mask));
+}
+
 #endif // HAVE_256
 
 #if defined(HAVE_512)
-    #define mm512_and_si512(a, b)           _mm512_and_si512(a, b)
-    #define mm512_or_si512(a, b)            _mm512_or_si512(a, b)
-    #define mm512_xor_si512(a, b)           _mm512_xor_si512(a, b)
-    ////#define mm512_srli_epi8(a, B)       _mm512_srli_epi8(a, B)  // undefined
-    #define mm512_srli_epi16(a, B)          _mm512_srli_epi16(a, B) // AVX512BW
-    #define mm512_srli_epi32(a, B)          _mm512_srli_epi32(a, B)
-    #define mm512_srli_epi64(a, B)          _mm512_srli_epi64(a, B)
-    ////#define mm512_slli_epi8(a, B)       _mm512_slli_epi8(a, B)  // undefined
-    #define mm512_slli_epi16(a, B)          _mm512_slli_epi16(a, B) // AVX512BW
-    #define mm512_slli_epi32(a, B)          _mm512_slli_epi32(a, B)
-    #define mm512_slli_epi64(a, B)          _mm512_slli_epi64(a, B)
-    #define mm512_add_epi8(a, b)            _mm512_add_epi8(a, b)   // AVX512BW
-    #define mm512_add_epi16(a, b)           _mm512_add_epi16(a, b)  // AVX512BW
-    #define mm512_add_epi32(a, b)           _mm512_add_epi32(a, b)
-    #define mm512_add_epi64(a, b)           _mm512_add_epi64(a, b)
-    ////#define mm512_extract_epi8(a, Lane) _mm512_extract_epi8(a, Lane)  // AVX512_VBMI2
-    ////#define mm512_extract_epi16(a, Lane)_mm512_extract_epi16(a, Lane) // AVX512_VBMI2
-    #define mm512_extract_epi32(a, Lane)    _mm512_extract_epi32(a, Lane) // undefined
-    #define mm512_extract_epi64(a, Lane)    _mm512_extract_epi64(a, Lane) // undefined
-    #define mm512_shuffle_epi8(a, mask)     _mm512_shuffle_epi8(a, mask)
-    #define mm512_load_si512(a)             _mm512_load_si512(a)
-    #define mm512_loadu_si512(a)            _mm512_loadu_si512(a)
-    #define mm512_store_si512(memory, a)    _mm512_store_si512(memory, a)
-    #define mm512_storeu_si512(memory, a)   _mm512_storeu_si512(memory, a)
-    #define mm512_set1_epi8(K)              _mm512_set1_epi8(K)
-    #define mm512_set1_epi16(K)             _mm512_set1_epi16(K)
-    #define mm512_set1_epi32(K)             _mm512_set1_epi32(K)
-    #define mm512_set1_epi64(K)             _mm512_set1_epi64(K)
-    #define mm512_set_epi64(x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm512_set_epi64(x08, x07, x06, x05, x04, x03, x02, x01)
-    #define mm512_set_epi32(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm512_set_epi32(x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
-    #define mm512_set_epi16(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm512_set_epi16(x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
-    #define mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01) \
-           _mm512_set_epi8(x64, x63, x62, x61, x60, x59, x58, x57, x56, x55, x54, x53, x52, x51, x50, x49, x48, x47, x46, x45, x44, x43, x42, x41, x40, x39, x38, x37, x36, x35, x34, x33, x32, x31, x30, x29, x28, x27, x26, x25, x24, x23, x22, x21, x20, x19, x18, x17, x16, x15, x14, x13, x12, x11, x10, x09, x08, x07, x06, x05, x04, x03, x02, x01)
+
+// AVX512BW
+template <auto B>
+inline auto mm512_srli_epi8(auto a) NOEXCEPT
+{
+    constexpr auto mask = shift_right(0xff_u8, B);
+    return _mm512_and_si512(_mm512_srli_epi16(a, B), _mm512_set1_epi8(mask));
+}
+
+// AVX512BW
+template <auto B>
+inline auto mm512_slli_epi8(auto a) NOEXCEPT
+{
+    constexpr auto mask = shift_left(0xff_u8, B);
+    return _mm512_and_si512(_mm512_slli_epi16(a, B), _mm512_set1_epi8(mask));
+}
+
 #endif // HAVE_512
 
-#if defined(HAVE_SHA)
-    // sha1
-    #define mm_sha1msg1_epu32(a, b)         _mm_sha1msg1_epu32(a, b)
-    #define mm_sha1msg2_epu32(a, b)         _mm_sha1msg2_epu32(a, b)
-    #define mm_sha1nexte_epu32(a, b)        _mm_sha1nexte_epu32(a, b)
-    #define mm_sha1rnds4_epu32(a, b, f)     _mm_sha1rnds4_epu32(a, b, f)
+/// Provide mm512 extractors to complete matrix.
+/// ---------------------------------------------------------------------------
+/// There are no native versions of these.
 
-    // sha256
-    #define mm_sha256msg1_epu32(a, b)       _mm_sha256msg1_epu32(a, b)
-    #define mm_sha256rnds2_epu32(a, b, k)   _mm_sha256rnds2_epu32(a, b, k)
-    #define mm_sha256msg2_epu32(a, b)       _mm_sha256msg2_epu32(a, b)
+#if defined(HAVE_512)
 
-    // supporting
-    #define mm_alignr_epi8(a, b, c)         _mm_alignr_epi8(a, b, c)
-    #define mm_shuffle_epi32(a, mask)       _mm_shuffle_epi32(a, mask)
-    #define mm_blend_epi16(a, b, mask)      _mm_blend_epi16(a, b, mask)
+// AVX512BW
+template <auto Lane>
+inline uint8_t mm512_extract_epi8(auto a) NOEXCEPT
+{
+    constexpr __mmask64 mask = shift_left(1_u64, Lane);
+    return narrow_sign_cast<uint8_t>(_mm_cvtsi128_si32(
+        _mm512_castsi512_si128(_mm512_maskz_compress_epi8(mask, a))));
+}
 
-    // unused argument suppression
-    #define SHA_ONLY(a) a
-#endif // HAVE_SHA
+// AVX512BW
+template <auto Lane>
+inline uint16_t mm512_extract_epi16(auto a) NOEXCEPT
+{
+    constexpr __mmask32 mask = shift_left(1_u32, Lane);
+    return narrow_sign_cast<uint16_t>(_mm_cvtsi128_si32(
+        _mm512_castsi512_si128(_mm512_maskz_compress_epi16(mask, a))));
+}
+
+// AVX512F
+template <auto Lane>
+inline uint32_t mm512_extract_epi32(auto a) NOEXCEPT
+{
+    constexpr __mmask16 mask = shift_left(1_u16, Lane);
+    return sign_cast<uint32_t>(_mm_cvtsi128_si32(
+        _mm512_castsi512_si128(_mm512_maskz_compress_epi32(mask, a))));
+}
+
+// AVX512F
+template <auto Lane>
+inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
+{
+    constexpr __mmask8 mask = shift_left(1_u8, Lane);
+    const auto value = _mm512_castsi512_si128(
+        _mm512_maskz_compress_epi64(mask, a));
+
+    if constexpr (have_64b)
+    {
+        // This is not available in 32 bit builds.
+        return sign_cast<uint64_t>(_mm_cvtsi128_si64(value));
+    }
+    else
+    {
+        constexpr auto shift = bits<uint32_t>;
+        return bit_or
+        (
+            shift_left<uint64_t>(_mm_extract_epi32(value, 1), shift),
+            wide_sign_cast<uint64_t>(_mm_cvtsi128_si32(value))
+        );
+    }
+}
+
+#endif // HAVE_512
+
+/// Provide 64 bit extractors in 32 bit builds to complete matrix.
+/// ---------------------------------------------------------------------------
+/// There are no 32 bit versions of these.
+
+#if defined(HAVE_128)
+
+template <auto Lane>
+inline uint64_t mm_extract_epi64(auto a) NOEXCEPT
+{
+    if constexpr (have_64b)
+    {
+        // This is not available in 32 bit builds.
+        return sign_cast<uint64_t>(_mm_extract_epi64(a, Lane));
+    }
+    else
+    {
+        constexpr auto shift = bits<uint32_t>;
+        constexpr auto lane = shift_left(Lane);
+        return bit_or
+        (
+            shift_left<uint64_t>(_mm_extract_epi32(a, add1(lane)), shift),
+            wide_sign_cast<uint64_t>(_mm_extract_epi32(a, lane))
+        );
+    }
+}
+
+#endif // HAVE_128
+
+#if defined(HAVE_256)
+
+template <auto Lane>
+inline uint64_t mm256_extract_epi64(auto a) NOEXCEPT
+{
+    if constexpr (have_64b)
+    {
+        // This is not available in 32 bit builds.
+        return sign_cast<uint64_t>(_mm256_extract_epi64(a, Lane));
+    }
+    else
+    {
+        constexpr auto shift = bits<uint32_t>;
+        constexpr auto lane = shift_left(Lane);
+        return bit_or
+        (
+            shift_left<uint64_t>(_mm256_extract_epi32(a, add1(lane)), shift),
+            wide_sign_cast<uint64_t>(_mm256_extract_epi32(a, lane))
+        );
+    }
+}
+
+#endif // HAVE_256
+
+} // namespace system
+} // namespace libbitcoin
 
 #endif // HAVE_XCPU
 

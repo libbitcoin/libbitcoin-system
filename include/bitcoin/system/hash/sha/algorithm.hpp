@@ -60,8 +60,8 @@ void foo<T>::f() {} // <= incompatible declaration error
 #endif // !CLASSIF
 
 /// SHA hashing algorithm.
-/// Native not yet implemented.
 /// Vectorization of message schedules and merkle hashes.
+/// Native sha256 (native sha160/sha512 not yet implemented).
 template <typename SHA, bool Native = true, bool Vector = true, bool Cached = true,
     if_same<typename SHA::T, sha::shah_t> = true>
 class algorithm
@@ -131,7 +131,8 @@ public:
     static constexpr digest_t simple_hash(const bytes_t<Size>& bytes) NOEXCEPT;
 
     /// Same as hash but returns state_t instead of converting it to digest_t.
-    static constexpr state_t midstate(const half_t& left, const half_t& right) NOEXCEPT;
+    static constexpr state_t midstate(const half_t& left,
+        const half_t& right) NOEXCEPT;
 
     /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
@@ -458,10 +459,8 @@ public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = use_sha &&
-        (SHA::strength == 256 || SHA::strength == 160);
-    static constexpr auto vector = (use_128 || use_256 || use_512) &&
-        !(have_32b && is_same_size<word_t, uint64_t>);
+    static constexpr auto native = use_sha && SHA::strength == 256;
+    static constexpr auto vector = (use_128 || use_256 || use_512);
 };
 
 } // namespace sha
