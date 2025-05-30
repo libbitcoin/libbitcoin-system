@@ -16,9 +16,9 @@
   </Rule>
   <Rule Name="libbitcoin-system-options-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Options" SwitchPrefix="/" Order="1">
     <Rule.Categories>
-      <Category Name="512" DisplayName="512" />
-      <Category Name="256" DisplayName="256" />
-      <Category Name="128" DisplayName="128" />
+      <!--<Category Name="512" DisplayName="512" />-->
+      <!--<Category Name="256" DisplayName="256" />-->
+      <!--<Category Name="128" DisplayName="128" />-->
       <Category Name="sha" DisplayName="sha" />
     </Rule.Categories>
     <Rule.DataSource>

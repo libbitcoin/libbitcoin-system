@@ -36,9 +36,9 @@
 
   <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Option-sha        : $(Option-sha)" Importance="high"/>
-    <Message Text="Option-512        : $(Option-512)" Importance="high"/>
-    <Message Text="Option-256        : $(Option-256)" Importance="high"/>
-    <Message Text="Option-128        : $(Option-128)" Importance="high"/>
+    <!--<Message Text="Option-512        : $(Option-512)" Importance="high"/>-->
+    <!--<Message Text="Option-256        : $(Option-256)" Importance="high"/>-->
+    <!--<Message Text="Option-128        : $(Option-128)" Importance="high"/>-->
   </Target>
 
   <!-- Linkage -->

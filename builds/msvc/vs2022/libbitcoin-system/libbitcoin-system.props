@@ -58,9 +58,9 @@
   <!-- These will compile to the target regardless of the compiling platform. -->
   <!-- That will result in a crash of test/executable execution if mismatched. -->
   <PropertyGroup>
-    <Option-512>false</Option-512>
-    <Option-256>true</Option-256>
-    <Option-128>true</Option-128>
+    <!--<Option-512>false</Option-512>-->
+    <!--<Option-256>true</Option-256>-->
+    <!--<Option-128>true</Option-128>-->
     <Option-sha>false</Option-sha>
   </PropertyGroup>
   <ItemDefinitionGroup>
