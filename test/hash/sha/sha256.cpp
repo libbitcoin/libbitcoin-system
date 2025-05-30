@@ -320,12 +320,7 @@ BOOST_AUTO_TEST_CASE(sha256__merkle_root__one__same)
 BOOST_AUTO_TEST_CASE(sha256__merkle_root__two__expected)
 {
     constexpr auto expected = sha256::double_hash({ 0 }, { 1 });
-
-    // MSVC Debug build internal compiler error.
-    #if !(defined(HAVE_MSC) && !defined(NDEBUG))
     static_assert(sha256::merkle_root({ { 0 }, { 1 } }) == expected);
-    #endif
-
     BOOST_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 } }), expected);
 }
 
