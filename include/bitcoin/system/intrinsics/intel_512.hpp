@@ -64,7 +64,6 @@ INLINE xint512_t not_(xint512_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint512_t shr(xint512_t a) NOEXCEPT
 {
-    // Native 8 bits shifts defined.
     if constexpr (S == bits<uint8_t>)
         return mm512_srli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
@@ -79,7 +78,6 @@ INLINE xint512_t shr(xint512_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint512_t shl(xint512_t a) NOEXCEPT
 {
-    // Native 8 bits shifts defined.
     if constexpr (S == bits<uint8_t>)
         return mm512_slli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
@@ -170,7 +168,6 @@ INLINE xint512_t broadcast(Word a) NOEXCEPT
 template <typename Word, auto Lane, if_integral_integer<Word> = true>
 INLINE Word get(xint512_t a) NOEXCEPT
 {
-    // Native mm512_extract_epi* are not defined.
     if constexpr (is_same_type<Word, uint8_t>)
         return mm512_extract_epi8<Lane>(a);
     else if constexpr (is_same_type<Word, uint16_t>)

@@ -64,7 +64,6 @@ INLINE xint128_t not_(xint128_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint128_t shr(xint128_t a) NOEXCEPT
 {
-    // Native 8 bits shifts defined.
     if constexpr (S == bits<uint8_t>)
         return mm_srli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
@@ -79,7 +78,6 @@ INLINE xint128_t shr(xint128_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint128_t shl(xint128_t a) NOEXCEPT
 {
-    // Native 8 bits shifts defined.
     if constexpr (S == bits<uint8_t>)
         return mm_slli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
@@ -165,23 +163,17 @@ INLINE xint128_t broadcast(Word a) NOEXCEPT
         return _mm_set1_epi64x(a);
 }
 
+// SSE4.1
 // Lane zero is lowest order word.
 template <typename Word, auto Lane, if_integral_integer<Word> = true>
 INLINE Word get(xint128_t a) NOEXCEPT
 {
-    // SSE4.1
     if constexpr (is_same_type<Word, uint8_t>)
         return _mm_extract_epi8(a, Lane);
-
-    // SSE2
     if constexpr (is_same_type<Word, uint16_t>)
         return _mm_extract_epi16(a, Lane);
-
-    // SSE4.1
     if constexpr (is_same_type<Word, uint32_t>)
         return _mm_extract_epi32(a, Lane);
-
-    // Native is 64 bit only.
     if constexpr (is_same_type<Word, uint64_t>)
         return mm_extract_epi64<Lane>(a);
 }

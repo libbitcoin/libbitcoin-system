@@ -64,7 +64,6 @@ INLINE xint256_t not_(xint256_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint256_t shr(xint256_t a) NOEXCEPT
 {
-    // Native 8 bits shifts defined.
     if constexpr (S == bits<uint8_t>)
         return mm256_srli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
@@ -79,7 +78,6 @@ INLINE xint256_t shr(xint256_t a) NOEXCEPT
 template <auto B, auto S>
 INLINE xint256_t shl(xint256_t a) NOEXCEPT
 {
-    // Native 8 bits shifts defined.
     if constexpr (S == bits<uint8_t>)
         return mm256_slli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
@@ -176,8 +174,6 @@ INLINE Word get(xint256_t a) NOEXCEPT
         return _mm256_extract_epi16(a, Lane);
     if constexpr (is_same_type<Word, uint32_t>)
         return _mm256_extract_epi32(a, Lane);
-
-    // Native is 64 bit only.
     if constexpr (is_same_type<Word, uint64_t>)
         return mm256_extract_epi64<Lane>(a);
 }
