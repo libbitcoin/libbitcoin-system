@@ -46,7 +46,7 @@ double_hash(const ablocks_t<Size>& blocks) NOEXCEPT
     {
         return finalize_double(state, Size);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_finalize_double(state, Size);
     }
@@ -68,7 +68,7 @@ double_hash(iblocks_t&& blocks) NOEXCEPT
     auto state = H::get;
     iterate(state, blocks);
 
-    if constexpr (native && SHA::strength == 256)
+    if constexpr (native)
     {
         return native_finalize_double(state, count);
     }
@@ -108,7 +108,7 @@ double_hash(const block_t& block) NOEXCEPT
     {
         return hasher(block);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_double_hash(block);
     }
@@ -147,7 +147,7 @@ double_hash(const half_t& half) NOEXCEPT
     {
         return hasher(half);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_double_hash(half);
     }
@@ -188,7 +188,7 @@ double_hash(const half_t& left, const half_t& right) NOEXCEPT
     {
         return hasher(left, right);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_double_hash(left, right);
     }

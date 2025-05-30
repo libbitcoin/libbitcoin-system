@@ -60,8 +60,8 @@ void foo<T>::f() {} // <= incompatible declaration error
 #endif // !CLASSIF
 
 /// SHA hashing algorithm.
-/// Native not yet implemented.
 /// Vectorization of message schedules and merkle hashes.
+/// Native sha256 (native sha160/sha512 not yet implemented).
 template <typename SHA, bool Native = true, bool Vector = true, bool Cached = true,
     if_same<typename SHA::T, sha::shah_t> = true>
 class algorithm
@@ -131,7 +131,8 @@ public:
     static constexpr digest_t simple_hash(const bytes_t<Size>& bytes) NOEXCEPT;
 
     /// Same as hash but returns state_t instead of converting it to digest_t.
-    static constexpr state_t midstate(const half_t& left, const half_t& right) NOEXCEPT;
+    static constexpr state_t midstate(const half_t& left,
+        const half_t& right) NOEXCEPT;
 
     /// Double hashing (sha256/512).
     /// -----------------------------------------------------------------------
@@ -164,20 +165,19 @@ protected:
     /// Intrinsics constants.
     /// -----------------------------------------------------------------------
 
-    static constexpr auto use_shani = Native && system::with_shani;
-    static constexpr auto use_neon = Native && system::with_neon;
-    static constexpr auto use_x128 = Vector && system::with_sse41;
-    static constexpr auto use_x256 = Vector && system::with_avx2;
-    static constexpr auto use_x512 = Vector && system::with_avx512;
+    static constexpr auto use_sha = Native && bc::have_sha;
+    static constexpr auto use_128 = Vector && bc::have_128;
+    static constexpr auto use_256 = Vector && bc::have_256;
+    static constexpr auto use_512 = Vector && bc::have_512;
 
     template <size_t Lanes>
     static constexpr auto is_valid_lanes =
         (Lanes == 16u || Lanes == 8u || Lanes == 4u || Lanes == 2u);
 
     static constexpr auto min_lanes =
-        (use_x128 ? bytes<128> :
-            (use_x256 ? bytes<256> :
-                (use_x512 ? bytes<512> : 0))) / SHA::word_bytes;
+        (use_128 ? bytes<128> :
+            (use_256 ? bytes<256> :
+                (use_512 ? bytes<512> : 0))) / SHA::word_bytes;
 
     /// Intrinsics types.
     /// -----------------------------------------------------------------------
@@ -418,8 +418,8 @@ protected:
     INLINE static xint128_t bytes(xint128_t message) NOEXCEPT;
     INLINE static void shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
     INLINE static void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
-    INLINE static void prepare(xint128_t& message0, xint128_t message1) NOEXCEPT;
-    INLINE static void prepare(xint128_t& message0, xint128_t message1,
+    INLINE static void prepare(xint128_t& message0, const xint128_t message1) NOEXCEPT;
+    INLINE static void prepare(const xint128_t message0, const xint128_t message1,
         xint128_t& message2) NOEXCEPT;
 
     template <size_t Round>
@@ -459,10 +459,8 @@ public:
     /// Summary public values.
     /// -----------------------------------------------------------------------
     static constexpr auto caching = Cached;
-    static constexpr auto native = (use_shani || use_neon)
-        && (SHA::strength == 256 || SHA::strength == 160);
-    static constexpr auto vector = (use_x128 || use_x256 || use_x512)
-        && !(build_x32 && is_same_size<word_t, uint64_t>);
+    static constexpr auto native = use_sha && SHA::strength == 256;
+    static constexpr auto vector = (use_128 || use_256 || use_512);
 };
 
 } // namespace sha

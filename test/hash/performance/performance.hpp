@@ -212,16 +212,16 @@ using hash_selector = iif<Ripemd, rmd_algorithm<Strength>,
 ////static_assert(is_same_type<hash_selector<256, true, true, true, false>, sha256>);
 ////static_assert(is_same_type<hash_selector<512, true, true, true, false>, sha512>);
 
-static_assert(hash_selector< 160, true,  true, true, false>::native == with_shani || with_neon);
-static_assert(hash_selector< 256, true,  true, true, false>::native == with_shani || with_neon);
-static_assert(hash_selector< 512, true,  true, true, false>::native == /*with_shani || with_neon*/ false);
+static_assert(hash_selector< 160, true,  true, true, false>::native == /*have_sha*/ false);
+static_assert(hash_selector< 256, true,  true, true, false>::native == have_sha);
+static_assert(hash_selector< 512, true,  true, true, false>::native == /*have_sha*/ false);
 static_assert(!hash_selector<160, false, true, true, false>::native);
 static_assert(!hash_selector<256, false, true, true, false>::native);
 static_assert(!hash_selector<512, false, true, true, false>::native);
 
-static_assert(hash_selector< 160, true, true,  true, false>::vector == with_sse41 || with_avx2 || with_avx512);
-static_assert(hash_selector< 256, true, true,  true, false>::vector == with_sse41 || with_avx2 || with_avx512);
-static_assert(hash_selector< 512, true, true,  true, false>::vector == with_sse41 || with_avx2 || with_avx512);
+static_assert(hash_selector< 160, true, true,  true, false>::vector == have_128 || have_256 || have_512);
+static_assert(hash_selector< 256, true, true,  true, false>::vector == have_128 || have_256 || have_512);
+static_assert(hash_selector< 512, true, true,  true, false>::vector == have_128 || have_256 || have_512);
 static_assert(!hash_selector<160, true, false, true, false>::vector);
 static_assert(!hash_selector<256, true, false, true, false>::vector);
 static_assert(!hash_selector<512, true, false, true, false>::vector);

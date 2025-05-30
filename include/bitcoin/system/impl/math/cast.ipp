@@ -97,6 +97,16 @@ constexpr To wide_cast(From value) NOEXCEPT
     return value;
 }
 
+template <typename To, typename From,
+    if_greater_size<To, From>,
+    if_not_same_signed_integer<To, From>>
+    constexpr To wide_sign_cast(From value) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<To>(value);
+    BC_POP_WARNING()
+}
+
 // Possible integer casts.
 // ----------------------------------------------------------------------------
 

@@ -21,8 +21,8 @@
     
 BOOST_AUTO_TEST_SUITE(sha256_tests_)
 
-constexpr auto vector = with_sse41 || with_avx2 || with_avx512;
-constexpr auto native = with_shani || with_neon;
+constexpr auto vector = have_128 || have_256 || have_512;
+constexpr auto native = have_sha;
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(sha256::hash(sha256::byte_t{}) == sha_byte256);
@@ -320,12 +320,7 @@ BOOST_AUTO_TEST_CASE(sha256__merkle_root__one__same)
 BOOST_AUTO_TEST_CASE(sha256__merkle_root__two__expected)
 {
     constexpr auto expected = sha256::double_hash({ 0 }, { 1 });
-
-    // MSVC Debug build internal compiler error.
-    #if !(defined(HAVE_MSC) && !defined(NDEBUG))
     static_assert(sha256::merkle_root({ { 0 }, { 1 } }) == expected);
-    #endif
-
     BOOST_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 } }), expected);
 }
 

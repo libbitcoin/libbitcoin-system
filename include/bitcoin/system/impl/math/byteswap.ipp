@@ -49,7 +49,7 @@ INLINE constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to intrinsic call for non-constexpr.
     return std::is_constant_evaluated() ?
-        possible_sign_cast<Integral>(byte_swap16_native(to_unsigned(value))) :
+        possible_sign_cast<Integral>(byte_swap16_nominal(to_unsigned(value))) :
         possible_sign_cast<Integral>(byte_swap16(to_unsigned(value)));
 }
 
@@ -61,7 +61,7 @@ INLINE constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to intrinsic call for non-constexpr.
     return std::is_constant_evaluated() ?
-        possible_sign_cast<Integral>(byte_swap32_native(to_unsigned(value))) :
+        possible_sign_cast<Integral>(byte_swap32_nominal(to_unsigned(value))) :
         possible_sign_cast<Integral>(byte_swap32(to_unsigned(value)));
 }
 
@@ -73,7 +73,7 @@ INLINE constexpr Integral byteswap(Integral value) NOEXCEPT
 {
     // Compiles away to intrinsic call for non-constexpr.
     return std::is_constant_evaluated() ?
-        possible_sign_cast<Integral>(byte_swap64_native(to_unsigned(value))) :
+        possible_sign_cast<Integral>(byte_swap64_nominal(to_unsigned(value))) :
         possible_sign_cast<Integral>(byte_swap64(to_unsigned(value)));
 }
 

@@ -74,6 +74,12 @@ template <typename To, typename From,
     if_same_signed_integer<To, From> = true>
 constexpr To wide_cast(From value) NOEXCEPT;
 
+/// Promote integer to integer of wider bit width and change sign.
+template <typename To, typename From,
+    if_greater_size<To, From> = true,
+    if_not_same_signed_integer<To, From> = true>
+constexpr To wide_sign_cast(From value) NOEXCEPT;
+
 /// Possible integer casts.
 /// ---------------------------------------------------------------------------
 

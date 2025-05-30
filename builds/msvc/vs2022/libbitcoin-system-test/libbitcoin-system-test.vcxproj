@@ -176,6 +176,7 @@
     <ClCompile Include="..\..\..\..\test\data\memory.cpp" />
     <ClCompile Include="..\..\..\..\test\data\no_fill_allocator.cpp" />
     <ClCompile Include="..\..\..\..\test\data\string.cpp" />
+    <ClCompile Include="..\..\..\..\test\define.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\batch.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integers.cpp" />
     <ClCompile Include="..\..\..\..\test\endian\integrals.cpp" />
@@ -229,10 +230,21 @@
     <ClCompile Include="..\..\..\..\test\hash\sha\sha512.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\sha\vector.cpp" />
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp" />
-    <ClCompile Include="..\..\..\..\test\intrinsics\haves.cpp" />
-    <ClCompile Include="..\..\..\..\test\intrinsics\intrinsics.cpp" />
-    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\cpuid.cpp" />
-    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\functional.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\detection.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\intel_128.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\intel_256.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\intel_512.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\intel.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\neon.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\sve.cpp" />
+    <ClCompile Include="..\..\..\..\test\intrinsics\rotate.cpp">
+      <ObjectFileName>$(IntDir)test_intrinsics_rotate.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\types.cpp">
+      <ObjectFileName>$(IntDir)test_intrinsics_types.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\literals.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\interpreter.cpp" />
     <ClCompile Include="..\..\..\..\test\machine\number.cpp" />
@@ -251,7 +263,9 @@
     <ClCompile Include="..\..\..\..\test\math\multiplication.cpp" />
     <ClCompile Include="..\..\..\..\test\math\overflow.cpp" />
     <ClCompile Include="..\..\..\..\test\math\power.cpp" />
-    <ClCompile Include="..\..\..\..\test\math\rotate.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\rotate.cpp">
+      <ObjectFileName>$(IntDir)test_math_rotate.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\math\sign.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_10.cpp" />
     <ClCompile Include="..\..\..\..\test\radix\base_16.cpp" />
@@ -289,7 +303,9 @@
     <ClCompile Include="..\..\..\..\test\stream\streamers\sha256x2_writer.cpp" />
     <ClCompile Include="..\..\..\..\test\test.cpp" />
     <ClCompile Include="..\..\..\..\test\typelets.cpp" />
-    <ClCompile Include="..\..\..\..\test\types.cpp" />
+    <ClCompile Include="..\..\..\..\test\types.cpp">
+      <ObjectFileName>$(IntDir)test_types.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode\ascii.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\code_points.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode\conversion.cpp" />

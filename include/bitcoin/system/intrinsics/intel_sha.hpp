@@ -16,18 +16,58 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_SHA_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_SHA_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_INTEL_SHA_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_INTEL_SHA_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
-#include <bitcoin/system/intrinsics/xcpu/functional_128.hpp>
+#include <bitcoin/system/intrinsics/types.hpp>
+#include <bitcoin/system/intrinsics/platforms/intel.hpp>
 
 namespace libbitcoin {
 namespace system {
 
-// HAVE_SHANI implies HAVE_SSE41, which defines xint128_t (__m128i).
-#if defined(HAVE_SHANI)
+#if !defined(HAVE_SHANI)
+
+    // sha1
+    #define mm_sha1msg1_epu32(a, b)         {}
+    #define mm_sha1msg2_epu32(a, b)         {}
+    #define mm_sha1rnds4_epu32(a, b, f)     {}
+
+    // sha256
+    #define mm_sha1nexte_epu32(a, b)        {}
+    #define mm_sha256msg1_epu32(a, b)       (b)
+    #define mm_sha256msg2_epu32(a, b)       (b)
+    #define mm_sha256rnds2_epu32(a, b, k)   (k)
+
+    // supporting
+    #define mm_alignr_epi8(a, b, c)         (a)
+    #define mm_shuffle_epi32(a, mask)       (a)
+    #define mm_blend_epi16(a, b, mask)      (a)
+
+    // unused argument suppression
+    #define SHA_ONLY(a)
+
+#else // HAVE_SHANI
+
+    // sha1
+    #define mm_sha1msg1_epu32(a, b)         _mm_sha1msg1_epu32(a, b)
+    #define mm_sha1msg2_epu32(a, b)         _mm_sha1msg2_epu32(a, b)
+    #define mm_sha1nexte_epu32(a, b)        _mm_sha1nexte_epu32(a, b)
+    #define mm_sha1rnds4_epu32(a, b, f)     _mm_sha1rnds4_epu32(a, b, f)
+
+    // sha256
+    #define mm_sha256msg1_epu32(a, b)       _mm_sha256msg1_epu32(a, b)
+    #define mm_sha256rnds2_epu32(a, b, k)   _mm_sha256rnds2_epu32(a, b, k)
+    #define mm_sha256msg2_epu32(a, b)       _mm_sha256msg2_epu32(a, b)
+
+    // supporting
+    #define mm_add_epi32(a, b)              _mm_add_epi32(a, b)
+    #define mm_alignr_epi8(a, b, c)         _mm_alignr_epi8(a, b, c)
+    #define mm_shuffle_epi32(a, mask)       _mm_shuffle_epi32(a, mask)
+    #define mm_blend_epi16(a, b, mask)      _mm_blend_epi16(a, b, mask)
+
+    // unused argument suppression
+    #define SHA_ONLY(a) a
 
 // SHA1 (SHA160)
 // ----------------------------------------------------------------------------
@@ -100,7 +140,7 @@ INLINE xint128_t sha256_two_rounds(xint128_t a, xint128_t b, xint128_t wk) NOEXC
     return mm_sha256rnds2_epu32(a, b, wk);
 }
 
-#endif
+#endif // HAVE_SHANI
 
 } // namespace system
 } // namespace libbitcoin

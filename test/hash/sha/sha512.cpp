@@ -21,8 +21,8 @@
     
 BOOST_AUTO_TEST_SUITE(sha512_tests_)
 
-constexpr auto vector = (with_sse41 || with_avx2 || with_avx512) && !build_x32;
-constexpr auto native = /*(with_shani || with_neon)*/ false;
+constexpr auto vector = have_128 || have_256 || have_512;
+constexpr auto native = /*have_sha*/ false;
 
 // Other test vectors are dependent upon the correctness of these.
 static_assert(sha512::hash(sha512::byte_t{}) == sha_byte512);
@@ -382,12 +382,7 @@ BOOST_AUTO_TEST_CASE(sha512__merkle_root__one__same)
 BOOST_AUTO_TEST_CASE(sha512__merkle_root__two__expected)
 {
     constexpr auto expected = sha512::double_hash({ 0 }, { 1 });
-
-    // MSVC Debug build internal compiler error.
-    #if !(defined(HAVE_MSC) && !defined(NDEBUG))
     static_assert(sha512::merkle_root({ { 0 }, { 1 } }) == expected);
-    #endif
-
     BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 } }), expected);
 }
 
@@ -405,12 +400,7 @@ BOOST_AUTO_TEST_CASE(sha512__merkle_root__four__expected)
     constexpr auto expected1 = sha512::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha512::double_hash({ 2 }, { 3 });
     constexpr auto expected = sha512::double_hash(expected1, expected2);
-
-    // MSVC Debug build internal compiler error.
-    #if !(defined(HAVE_MSC) && !defined(NDEBUG))
     static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }) == expected);
-    #endif
-
     BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
 }
 

@@ -83,12 +83,6 @@ constexpr size_t bits = to_bits(sizeof(Type));
 template <size_t Bits, std::enable_if_t<is_byte_sized(Bits), bool> = true>
 constexpr size_t bytes = Bits / byte_bits;
 
-/// The number of Smaller types that can pack into the Larger.
-template <typename Larger, typename Smaller, size_t Lanes = one,
-    std::enable_if_t<!is_zero(Lanes), bool> = true,
-    std::enable_if_t<Lanes <= (max_size_t / sizeof(Smaller)), bool> = true>
-constexpr size_t capacity = sizeof(Larger) / (Lanes * sizeof(Smaller));
-
 /// std_array.
 /// ---------------------------------------------------------------------------
 
@@ -119,11 +113,12 @@ constexpr size_t array_count = std::tuple_size_v<std::decay_t<Type>>;
 template <typename Type, std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
 using array_element = typename std::decay_t<Type>::value_type;
 
+// TODO: use executed lambda to remove ().
 template <typename Type, std::enable_if_t<!is_std_array<std::decay_t<Type>>, bool> = true>
-constexpr size_t size_of() noexcept { return sizeof(Type); }
+constexpr size_t size_of() { return sizeof(Type); }
 
 template <typename Type, std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
-constexpr size_t size_of() noexcept(false)
+constexpr size_t size_of()
 {
     // Recurse arrays until non-array type.
     constexpr auto size = size_of<typename std::decay_t<Type>::value_type>();
@@ -135,6 +130,12 @@ constexpr size_t size_of() noexcept(false)
 
     return size * count;
 }
+
+/// The number of Smaller types that can pack into the Larger.
+template <typename Larger, typename Smaller, size_t Lanes = one,
+    std::enable_if_t<!is_zero(Lanes), bool> = true>
+    ////std::enable_if_t<Lanes <= (max_size_t / size_of<Smaller>()), bool> = true>
+constexpr size_t capacity = size_of<Larger>() / (Lanes * size_of<Smaller>());
 
 /// uintx_t detection.
 /// ---------------------------------------------------------------------------

@@ -18,127 +18,84 @@
  */
 #include "../test.hpp"
 
-BOOST_AUTO_TEST_SUITE(intrinsics_haves_tests)
+BOOST_AUTO_TEST_SUITE(intrinsics_types_tests)
 
-// Build symbols to constexpr.
+// extended types
 // ----------------------------------------------------------------------------
 
-#if defined(HAVE_SSE41)
-    static_assert(with_sse41);
-#else
-    static_assert(!with_sse41);
-#endif
-#if defined(HAVE_AVX2)
-    static_assert(with_avx2);
-#else
-    static_assert(!with_avx2);
-#endif
-#if defined(HAVE_AVX512)
-    static_assert(with_avx512);
-#else
-    static_assert(!with_avx512);
-#endif
-#if defined(HAVE_SHANI)
-    static_assert(with_shani);
-#else
-    static_assert(!with_shani);
-#endif
-#if defined(HAVE_NEON)
-    static_assert(with_neon);
-#else
-    static_assert(!with_neon);
-#endif
+// Extended integrals are always defined and return the same size_of.
+static_assert(size_of<xint128_t>() == 16u);
+static_assert(size_of<xint256_t>() == 32u);
+static_assert(size_of<xint512_t>() == 64u);
 
-// try()
+// Extended integrals are neither c++ integrals nor stdlib integers.
+static_assert(!std::is_integral_v<xint128_t>);
+static_assert(!std::is_integral_v<xint256_t>);
+static_assert(!std::is_integral_v<xint512_t>);
+static_assert(!std::numeric_limits<xint128_t>::is_integer);
+static_assert(!std::numeric_limits<xint256_t>::is_integer);
+static_assert(!std::numeric_limits<xint512_t>::is_integer);
+
+// to_extended
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx512__always__match)
-{
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
-        get_right(ecx, cpu1_0::xsave_ecx_bit) &&
-        get_right(ecx, cpu1_0::avx_ecx_bit) &&
-        get_xcr(extended, xcr0::feature) &&
-        get_right(extended, xcr0::sse_bit) &&
-        get_right(extended, xcr0::avx_bit) &&
-        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
-        get_right(ebx, cpu7_0::avx512bw_ebx_bit), try_avx512());
-}
+////static_assert(is_same_type<to_extended<uint16_t, 65>, xint512_t>);
+static_assert(is_same_type<to_extended<uint8_t, 64>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint8_t, 63>, xint512_t>);
+static_assert(is_same_type<to_extended<uint8_t, 33>, xint512_t>);
+static_assert(is_same_type<to_extended<uint8_t, 32>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint8_t, 31>, xint256_t>);
+static_assert(is_same_type<to_extended<uint8_t, 17>, xint256_t>);
+static_assert(is_same_type<to_extended<uint8_t, 16>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint8_t, 15>, xint128_t>);
+static_assert(is_same_type<to_extended<uint8_t,  9>, xint128_t>);
+static_assert(is_same_type<to_extended<uint8_t,  8>, uint64_t>);  // full
+static_assert(is_same_type<to_extended<uint8_t,  7>, uint64_t>);
+static_assert(is_same_type<to_extended<uint8_t,  5>, uint64_t>);
+static_assert(is_same_type<to_extended<uint8_t,  4>, uint32_t>);  // full
+static_assert(is_same_type<to_extended<uint8_t,  3>, uint32_t>);
+static_assert(is_same_type<to_extended<uint8_t,  2>, uint16_t>);  // full
+static_assert(is_same_type<to_extended<uint8_t,  1>, uint8_t>);   // full
+////static_assert(is_same_type<to_extended<uint8_t,  0>, uint16_t>);
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_avx2__always__match)
-{
-    uint64_t extended{};
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
-        get_right(ecx, cpu1_0::xsave_ecx_bit) &&
-        get_right(ecx, cpu1_0::avx_ecx_bit) &&
-        get_xcr(extended, xcr0::feature) &&
-        get_right(extended, xcr0::sse_bit) &&
-        get_right(extended, xcr0::avx_bit) &&
-        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
-        get_right(ebx, cpu7_0::avx2_ebx_bit), try_avx2());
-}
+////static_assert(is_same_type<to_extended<uint16_t, 33>, xint512_t>);
+static_assert(is_same_type<to_extended<uint16_t, 32>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint16_t, 31>, xint512_t>);
+static_assert(is_same_type<to_extended<uint16_t, 17>, xint512_t>);
+static_assert(is_same_type<to_extended<uint16_t, 16>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint16_t, 15>, xint256_t>);
+static_assert(is_same_type<to_extended<uint16_t,  9>, xint256_t>);
+static_assert(is_same_type<to_extended<uint16_t,  8>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint16_t,  7>, xint128_t>);
+static_assert(is_same_type<to_extended<uint16_t,  5>, xint128_t>);
+static_assert(is_same_type<to_extended<uint16_t,  4>, uint64_t>);  // full
+static_assert(is_same_type<to_extended<uint16_t,  3>, uint64_t>);
+static_assert(is_same_type<to_extended<uint16_t,  2>, uint32_t>);  // full
+static_assert(is_same_type<to_extended<uint16_t,  1>, uint16_t>);  // full
+////static_assert(is_same_type<to_extended<uint16_t,  0>, uint16_t>);
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_sse41__always__match)
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit), try_sse41());
-}
+////static_assert(is_same_type<to_extended<uint32_t, 17>, xint512_t>);
+static_assert(is_same_type<to_extended<uint32_t, 16>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint32_t, 15>, xint512_t>);
+static_assert(is_same_type<to_extended<uint32_t,  9>, xint512_t>);
+static_assert(is_same_type<to_extended<uint32_t,  8>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint32_t,  7>, xint256_t>);
+static_assert(is_same_type<to_extended<uint32_t,  5>, xint256_t>);
+static_assert(is_same_type<to_extended<uint32_t,  4>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint32_t,  3>, xint128_t>);
+static_assert(is_same_type<to_extended<uint32_t,  2>, uint64_t>);  // full
+static_assert(is_same_type<to_extended<uint32_t,  1>, uint32_t>);  // full
+////static_assert(is_same_type<to_extended<uint32_t,  0>, uint32_t>);
 
-BOOST_AUTO_TEST_CASE(intrinsics_haves__try_shani__always__match)
-{
-    uint32_t eax{}, ebx{}, ecx{}, edx{};
-    BOOST_CHECK_EQUAL(
-        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-        get_right(ecx, cpu1_0::sse41_ecx_bit) &&
-        get_cpu(eax, ebx, ecx, edx, cpu7_0::leaf, cpu7_0::subleaf) &&
-        get_right(ebx, cpu7_0::shani_ebx_bit), try_shani());
-}
-
-// Unknown vector.
-////BOOST_AUTO_TEST_CASE(intrinsics_haves__try_neon__always__match)
-////{
-////    uint32_t eax{}, ebx{}, ecx{}, edx{};
-////    BOOST_CHECK_EQUAL(
-////        get_cpu(eax, ebx, ecx, edx, cpu1_0::leaf, cpu1_0::subleaf) &&
-////        get_right(ecx, cpu1_0::sse41_ecx_bit), try_neon());
-////}
-
-// have_lanes
-// ----------------------------------------------------------------------------
-
-static_assert(have_lanes<uint64_t, 8> == with_avx512);
-static_assert(have_lanes<uint32_t, 16> == with_avx512);
-static_assert(have_lanes<uint16_t, 32> == with_avx512);
-static_assert(!have_lanes<uint64_t, 7>);
-static_assert(!have_lanes<uint32_t, 15>);
-static_assert(!have_lanes<uint16_t, 31>);
-static_assert(!have_lanes<uint8_t, 63>);
-
-static_assert(have_lanes<uint64_t, 4> == with_avx2);
-static_assert(have_lanes<uint32_t, 8> == with_avx2);
-static_assert(have_lanes<uint16_t, 16> == with_avx2);
-static_assert(have_lanes<uint8_t, 32> == with_avx2);
-static_assert(!have_lanes<uint64_t, 3>);
-static_assert(!have_lanes<uint32_t, 7>);
-static_assert(!have_lanes<uint16_t, 15>);
-static_assert(!have_lanes<uint8_t, 31>);
-
-static_assert(have_lanes<uint64_t, 2> == with_sse41);
-static_assert(have_lanes<uint32_t, 4> == with_sse41);
-static_assert(have_lanes<uint16_t, 8> == with_sse41);
-static_assert(have_lanes<uint8_t, 16> == with_sse41);
-static_assert(!have_lanes<uint64_t, 1>);
-static_assert(!have_lanes<uint32_t, 3>);
-static_assert(!have_lanes<uint16_t, 7>);
-static_assert(!have_lanes<uint8_t, 15>);
+////static_assert(is_same_type<to_extended<uint64_t, 9>, xint512_t>);
+static_assert(is_same_type<to_extended<uint64_t, 8>, xint512_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 7>, xint512_t>);
+static_assert(is_same_type<to_extended<uint64_t, 5>, xint512_t>);
+static_assert(is_same_type<to_extended<uint64_t, 4>, xint256_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 3>, xint256_t>);
+static_assert(is_same_type<to_extended<uint64_t, 2>, xint128_t>); // full
+static_assert(is_same_type<to_extended<uint64_t, 1>, uint64_t>);  // full
+////static_assert(is_same_type<to_extended<uint64_t, 0>, uint64_t>);
 
 // is_extended
 // ----------------------------------------------------------------------------
@@ -155,6 +112,42 @@ static_assert(is_extended<xint512_t>);
 static_assert(is_defined<if_extended<xint128_t>>);
 static_assert(is_defined<if_extended<xint256_t>>);
 static_assert(is_defined<if_extended<xint512_t>>);
+
+// have
+// ----------------------------------------------------------------------------
+
+static_assert(have<xint512_t> == have_512);
+static_assert(have<xint256_t> == have_256);
+static_assert(have<xint128_t> == have_128);
+
+// have_lanes
+// ----------------------------------------------------------------------------
+
+static_assert(have_lanes<uint64_t, 8> == have_512);
+static_assert(have_lanes<uint32_t, 16> == have_512);
+static_assert(have_lanes<uint16_t, 32> == have_512);
+static_assert(!have_lanes<uint64_t, 7>);
+static_assert(!have_lanes<uint32_t, 15>);
+static_assert(!have_lanes<uint16_t, 31>);
+static_assert(!have_lanes<uint8_t, 63>);
+
+static_assert(have_lanes<uint64_t, 4> == have_256);
+static_assert(have_lanes<uint32_t, 8> == have_256);
+static_assert(have_lanes<uint16_t, 16> == have_256);
+static_assert(have_lanes<uint8_t, 32> == have_256);
+static_assert(!have_lanes<uint64_t, 3>);
+static_assert(!have_lanes<uint32_t, 7>);
+static_assert(!have_lanes<uint16_t, 15>);
+static_assert(!have_lanes<uint8_t, 31>);
+
+static_assert(have_lanes<uint64_t, 2> == have_128);
+static_assert(have_lanes<uint32_t, 4> == have_128);
+static_assert(have_lanes<uint16_t, 8> == have_128);
+static_assert(have_lanes<uint8_t, 16> == have_128);
+static_assert(!have_lanes<uint64_t, 1>);
+static_assert(!have_lanes<uint32_t, 3>);
+static_assert(!have_lanes<uint16_t, 7>);
+static_assert(!have_lanes<uint8_t, 15>);
 
 // capacity [for extended integers]
 // ----------------------------------------------------------------------------
@@ -296,66 +289,5 @@ static_assert(capacity<xint512_t, uint64_t, 1 * 4> == 2);
 static_assert(capacity<xint512_t, uint64_t, 2 * 4> == 1); // full
 static_assert(capacity<xint512_t, uint64_t, 3 * 4> == 0);
 ////static_assert(capacity<xint512_t, uint64_t, 0> == 0);
-
-// to_extended
-// ----------------------------------------------------------------------------
-
-////static_assert(is_same_type<to_extended<uint16_t, 65>, xint512_t>);
-static_assert(is_same_type<to_extended<uint8_t, 64>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint8_t, 63>, xint512_t>);
-static_assert(is_same_type<to_extended<uint8_t, 33>, xint512_t>);
-static_assert(is_same_type<to_extended<uint8_t, 32>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint8_t, 31>, xint256_t>);
-static_assert(is_same_type<to_extended<uint8_t, 17>, xint256_t>);
-static_assert(is_same_type<to_extended<uint8_t, 16>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint8_t, 15>, xint128_t>);
-static_assert(is_same_type<to_extended<uint8_t,  9>, xint128_t>);
-static_assert(is_same_type<to_extended<uint8_t,  8>, uint64_t>);  // full
-static_assert(is_same_type<to_extended<uint8_t,  7>, uint64_t>);
-static_assert(is_same_type<to_extended<uint8_t,  5>, uint64_t>);
-static_assert(is_same_type<to_extended<uint8_t,  4>, uint32_t>);  // full
-static_assert(is_same_type<to_extended<uint8_t,  3>, uint32_t>);
-static_assert(is_same_type<to_extended<uint8_t,  2>, uint16_t>);  // full
-static_assert(is_same_type<to_extended<uint8_t,  1>, uint8_t>);   // full
-////static_assert(is_same_type<to_extended<uint8_t,  0>, uint16_t>);
-
-////static_assert(is_same_type<to_extended<uint16_t, 33>, xint512_t>);
-static_assert(is_same_type<to_extended<uint16_t, 32>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint16_t, 31>, xint512_t>);
-static_assert(is_same_type<to_extended<uint16_t, 17>, xint512_t>);
-static_assert(is_same_type<to_extended<uint16_t, 16>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint16_t, 15>, xint256_t>);
-static_assert(is_same_type<to_extended<uint16_t,  9>, xint256_t>);
-static_assert(is_same_type<to_extended<uint16_t,  8>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint16_t,  7>, xint128_t>);
-static_assert(is_same_type<to_extended<uint16_t,  5>, xint128_t>);
-static_assert(is_same_type<to_extended<uint16_t,  4>, uint64_t>);  // full
-static_assert(is_same_type<to_extended<uint16_t,  3>, uint64_t>);
-static_assert(is_same_type<to_extended<uint16_t,  2>, uint32_t>);  // full
-static_assert(is_same_type<to_extended<uint16_t,  1>, uint16_t>);  // full
-////static_assert(is_same_type<to_extended<uint16_t,  0>, uint16_t>);
-
-////static_assert(is_same_type<to_extended<uint32_t, 17>, xint512_t>);
-static_assert(is_same_type<to_extended<uint32_t, 16>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint32_t, 15>, xint512_t>);
-static_assert(is_same_type<to_extended<uint32_t,  9>, xint512_t>);
-static_assert(is_same_type<to_extended<uint32_t,  8>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint32_t,  7>, xint256_t>);
-static_assert(is_same_type<to_extended<uint32_t,  5>, xint256_t>);
-static_assert(is_same_type<to_extended<uint32_t,  4>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint32_t,  3>, xint128_t>);
-static_assert(is_same_type<to_extended<uint32_t,  2>, uint64_t>);  // full
-static_assert(is_same_type<to_extended<uint32_t,  1>, uint32_t>);  // full
-////static_assert(is_same_type<to_extended<uint32_t,  0>, uint32_t>);
-
-////static_assert(is_same_type<to_extended<uint64_t, 9>, xint512_t>);
-static_assert(is_same_type<to_extended<uint64_t, 8>, xint512_t>); // full
-static_assert(is_same_type<to_extended<uint64_t, 7>, xint512_t>);
-static_assert(is_same_type<to_extended<uint64_t, 5>, xint512_t>);
-static_assert(is_same_type<to_extended<uint64_t, 4>, xint256_t>); // full
-static_assert(is_same_type<to_extended<uint64_t, 3>, xint256_t>);
-static_assert(is_same_type<to_extended<uint64_t, 2>, xint128_t>); // full
-static_assert(is_same_type<to_extended<uint64_t, 1>, uint64_t>);  // full
-////static_assert(is_same_type<to_extended<uint64_t, 0>, uint64_t>);
 
 BOOST_AUTO_TEST_SUITE_END()

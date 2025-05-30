@@ -2,34 +2,29 @@
 <ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
   <Rule Name="libbitcoin-system-uiextension" PageTemplate="tool" DisplayName="Bitcoin System Options" SwitchPrefix="/" Order="1">
     <Rule.Categories>
-      <Category Name="avx512" DisplayName="avx512" />
-      <Category Name="avx2" DisplayName="avx2" />
-      <Category Name="sse41" DisplayName="sse41" />
-      <Category Name="shani" DisplayName="shani" />
-      <Category Name="neon" DisplayName="neon" />
+      <!--<Category Name="512" DisplayName="512" />-->
+      <!--<Category Name="256" DisplayName="256" />-->
+      <!--<Category Name="128" DisplayName="128" />-->
+      <Category Name="sha" DisplayName="sha" />
     </Rule.Categories>
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
     </Rule.DataSource>
-    <EnumProperty Name="Option-avx512" DisplayName="Enable AVX512 Intrinsics" Description="Use AVX512 intrinsics." Category="avx512">
+    <EnumProperty Name="Option-sha" DisplayName="Enable SHA Native Hashing" Description="Requires SHANI (xcpu) or Neon (arm) CPU." Category="sha">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
-    <EnumProperty Name="Option-avx2" DisplayName="Enable AVX2 Intrinsics" Description="Use AVX2 intrinsics." Category="avx2">
+    <!--<EnumProperty Name="Option-512" DisplayName="Enable 512 Bit Vectorization" Description="Requires AVX512 (xcpu) or SVE (arm) CPU." Category="512">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
-    <EnumProperty Name="Option-sse41" DisplayName="Enable SSE4.1 Intrinsics" Description="Use SSE4.1 intrinsics." Category="sse41">
+    <EnumProperty Name="Option-256" DisplayName="Enable 256 Bit Vectorization" Description="Requires AVX2 (xcpu) or SVE (arm) CPU." Category="256">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
-    <EnumProperty Name="Option-shani" DisplayName="Enable SHA Native Intrinsics" Description="Use SHA native intrinsics." Category="shani">
+    <EnumProperty Name="Option-128" DisplayName="Enable 128 Bit Vectorization" Description="Requires SSE4.1 (xcpu) or Neon (arm) CPU." Category="128">
       <EnumValue Name="false" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
-    </EnumProperty>
-    <EnumProperty Name="Option-neon" DisplayName="Enable ARM Neon Intrinsics" Description="Use ARM Neon intrinsics." Category="neon">
-      <EnumValue Name="false" DisplayName="No" />
-      <EnumValue Name="true" DisplayName="Yes" />
-    </EnumProperty>
+    </EnumProperty>-->
   </Rule>
 </ProjectSchemaDefinitions>

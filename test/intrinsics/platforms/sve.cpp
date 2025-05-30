@@ -16,10 +16,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_ARM_ARM_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_ARM_ARM_HPP
+#include "../../test.hpp"
 
-#include <bitcoin/system/intrinsics/arm/functional.hpp>
-#include <bitcoin/system/intrinsics/arm/sha.hpp>
+BOOST_AUTO_TEST_SUITE(intrinsics_platforms_sve_tests)
 
-#endif
+BOOST_AUTO_TEST_CASE(intrinsics_platforms_sve_test)
+{
+    BOOST_REQUIRE(true);
+}
+
+BOOST_AUTO_TEST_SUITE_END()

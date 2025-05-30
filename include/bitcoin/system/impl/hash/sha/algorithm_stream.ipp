@@ -69,7 +69,7 @@ finalize(state_t& state) NOEXCEPT
     {
         return finalizer(state);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_finalize<Blocks>(state);
     }
@@ -95,7 +95,7 @@ finalize(state_t& state, size_t blocks) NOEXCEPT
     {
         return finalizer(state, blocks);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_finalize(state, blocks);
     }
@@ -128,7 +128,7 @@ finalize_second(const state_t& state) NOEXCEPT
     {
         return finalizer(state);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_finalize_second(state);
     }
@@ -163,7 +163,7 @@ finalize_double(state_t& state, size_t blocks) NOEXCEPT
     {
         return finalizer(state, blocks);
     }
-    else if constexpr (native && SHA::strength == 256)
+    else if constexpr (native)
     {
         return native_finalize_double(state, blocks);
     }

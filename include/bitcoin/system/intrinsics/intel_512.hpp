@@ -16,27 +16,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_512_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_XCPU_FUNCTIONAL_512_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_INTEL_512_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_INTEL_512_HPP
 
 #include <bitcoin/system/define.hpp>
-#include <bitcoin/system/intrinsics/xcpu/defines.hpp>
-
-// shl_/shr_ are undefined for 8 bit.
-// get() is AVX512_VBMI2 for 8/16 [disabled].
-// shl_/shr_ AVX512BW for 16 bit  [EBX bit 30].
-// add_ is AVX512BW for 8/16 bit  [EBX bit 30].
-// byteswap() is AVX512BW for all [EBX bit 30].
-// All others are at most AVX512F [EBX bit 16].
-// AVX512F-only machines started phaseout in 8/2019.
-// AVX512BW machines in production since 5/2017.
+#include <bitcoin/system/intrinsics/types.hpp>
+#include <bitcoin/system/intrinsics/platforms/intel.hpp>
 
 namespace libbitcoin {
 namespace system {
 
 #if defined(HAVE_AVX512)
-
-using xint512_t = __m512i;
 
 namespace f {
 
@@ -46,66 +36,56 @@ namespace f {
 // AVX512F
 INLINE xint512_t and_(xint512_t a, xint512_t b) NOEXCEPT
 {
-    return mm512_and_si512(a, b);
+    return _mm512_and_si512(a, b);
 }
 
 // AVX512F
 INLINE xint512_t or_(xint512_t a, xint512_t b) NOEXCEPT
 {
-    return mm512_or_si512(a, b);
+    return _mm512_or_si512(a, b);
 }
 
 // AVX512F
 INLINE xint512_t xor_(xint512_t a, xint512_t b) NOEXCEPT
 {
-    return mm512_xor_si512(a, b);
+    return _mm512_xor_si512(a, b);
 }
 
 // AVX512F
 INLINE xint512_t not_(xint512_t a) NOEXCEPT
 {
-    return xor_(a, mm512_set1_epi64(-1));
+    return xor_(a, _mm512_set1_epi64(-1));
 }
 
 /// Vector primitives.
 /// ---------------------------------------------------------------------------
 
+// AVX512BW
 template <auto B, auto S>
 INLINE xint512_t shr(xint512_t a) NOEXCEPT
 {
-    // Undefined
-    static_assert(S != bits<uint8_t>);
-    ////if constexpr (S == bits<uint8_t>)
-    ////    return mm512_srli_epi8(a, B);
-
-    // AVX512BW
+    if constexpr (S == bits<uint8_t>)
+        return mm512_srli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
-        return mm512_srli_epi16(a, B);
-
-    // AVX512F
+        return _mm512_srli_epi16(a, B);
     if constexpr (S == bits<uint32_t>)
-        return mm512_srli_epi32(a, B);
+        return _mm512_srli_epi32(a, B);
     if constexpr (S == bits<uint64_t>)
-        return mm512_srli_epi64(a, B);
+        return _mm512_srli_epi64(a, B);
 }
 
+// AVX512BW
 template <auto B, auto S>
 INLINE xint512_t shl(xint512_t a) NOEXCEPT
 {
-    // Undefined
-    static_assert(S != bits<uint8_t>);
-    ////if constexpr (S == bits<uint8_t>)
-    ////    return mm512_slli_epi8(a, B);
-
-    // AVX512BW
+    if constexpr (S == bits<uint8_t>)
+        return mm512_slli_epi8<B>(a);
     if constexpr (S == bits<uint16_t>)
-        return mm512_slli_epi16(a, B);
-
-    // AVX512F
+        return _mm512_slli_epi16(a, B);
     if constexpr (S == bits<uint32_t>)
-        return mm512_slli_epi32(a, B);
+        return _mm512_slli_epi32(a, B);
     if constexpr (S == bits<uint64_t>)
-        return mm512_slli_epi64(a, B);
+        return _mm512_slli_epi64(a, B);
 }
 
 template <auto B, auto S>
@@ -120,20 +100,18 @@ INLINE xint512_t rol(xint512_t a) NOEXCEPT
     return or_(shl<B, S>(a), shr<S - B, S>(a));
 }
 
+// AVX512BW
 template <auto S>
 INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
 {
-    // AVX512BW
     if constexpr (S == bits<uint8_t>)
-        return mm512_add_epi8(a, b);
+        return _mm512_add_epi8(a, b);
     if constexpr (S == bits<uint16_t>)
-        return mm512_add_epi16(a, b);
-
-    // AVX512F
+        return _mm512_add_epi16(a, b);
     if constexpr (S == bits<uint32_t>)
-        return mm512_add_epi32(a, b);
+        return _mm512_add_epi32(a, b);
     if constexpr (S == bits<uint64_t>)
-        return mm512_add_epi64(a, b);
+        return _mm512_add_epi64(a, b);
 }
 
 // AVX512F
@@ -141,13 +119,13 @@ template <auto K, auto S>
 INLINE xint512_t addc(xint512_t a) NOEXCEPT
 {
     if constexpr (S == bits<uint8_t>)
-        return add<S>(a, mm512_set1_epi8(K));
+        return add<S>(a, _mm512_set1_epi8(K));
     if constexpr (S == bits<uint16_t>)
-        return add<S>(a, mm512_set1_epi16(K));
+        return add<S>(a, _mm512_set1_epi16(K));
     if constexpr (S == bits<uint32_t>)
-        return add<S>(a, mm512_set1_epi32(K));
+        return add<S>(a, _mm512_set1_epi32(K));
     if constexpr (S == bits<uint64_t>)
-        return add<S>(a, mm512_set1_epi64(K));
+        return add<S>(a, _mm512_set1_epi64(K));
 }
 
 } // namespace f
@@ -160,13 +138,13 @@ template <typename Word, if_integral_integer<Word> = true>
 INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
 {
     if constexpr (is_same_type<Word, uint8_t>)
-        return mm512_add_epi8(a, b);
+        return _mm512_add_epi8(a, b);
     if constexpr (is_same_type<Word, uint16_t>)
-        return mm512_add_epi16(a, b);
+        return _mm512_add_epi16(a, b);
     if constexpr (is_same_type<Word, uint32_t>)
-        return mm512_add_epi32(a, b);
+        return _mm512_add_epi32(a, b);
     if constexpr (is_same_type<Word, uint64_t>)
-        return mm512_add_epi64(a, b);
+        return _mm512_add_epi64(a, b);
 }
 
 // AVX512F
@@ -176,32 +154,28 @@ INLINE xint512_t broadcast(Word a) NOEXCEPT
 {
     // set1 broadcasts integer to all elements.
     if constexpr (is_same_type<Word, uint8_t>)
-        return mm512_set1_epi8(a);
+        return _mm512_set1_epi8(a);
     if constexpr (is_same_type<Word, uint16_t>)
-        return mm512_set1_epi16(a);
+        return _mm512_set1_epi16(a);
     if constexpr (is_same_type<Word, uint32_t>)
-        return mm512_set1_epi32(a);
+        return _mm512_set1_epi32(a);
     if constexpr (is_same_type<Word, uint64_t>)
-        return mm512_set1_epi64(a);
+        return _mm512_set1_epi64(a);
 }
 
+// AVX512BW
 // Lane zero is lowest order word.
 template <typename Word, auto Lane, if_integral_integer<Word> = true>
 INLINE Word get(xint512_t a) NOEXCEPT
 {
-    // AVX512_VBMI2/AVX512F/SSE2
-    static_assert(!is_same_type<Word, uint8_t>);
-    static_assert(!is_same_type<Word, uint16_t>);
-    ////if constexpr (is_same_type<Word, uint8_t>)
-    ////    return mm512_extract_epi8(a, Lane);
-    ////else if constexpr (is_same_type<Word, uint16_t>)
-    ////    return mm512_extract_epi16(a, Lane);
-
-    // AVX512F/SSE2
+    if constexpr (is_same_type<Word, uint8_t>)
+        return mm512_extract_epi8<Lane>(a);
+    else if constexpr (is_same_type<Word, uint16_t>)
+        return mm512_extract_epi16<Lane>(a);
     if constexpr (is_same_type<Word, uint32_t>)
-        return mm512_extract_epi32(a, Lane);
+        return mm512_extract_epi32<Lane>(a);
     else if constexpr (is_same_type<Word, uint64_t>)
-        return mm512_extract_epi64(a, Lane);
+        return mm512_extract_epi64<Lane>(a);
 }
 
 // AVX512F
@@ -212,7 +186,7 @@ INLINE xint512_t set(
     uint64_t x05, uint64_t x06, uint64_t x07, uint64_t x08) NOEXCEPT
 {
     // Low order word to the right.
-    return mm512_set_epi64(
+    return _mm512_set_epi64(
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
 
@@ -224,7 +198,7 @@ INLINE xint512_t set(
     uint32_t x09, uint32_t x10, uint32_t x11, uint32_t x12,
     uint32_t x13, uint32_t x14, uint32_t x15, uint32_t x16) NOEXCEPT
 {
-    return mm512_set_epi32(
+    return _mm512_set_epi32(
         x16, x15, x14, x13, x12, x11, x10, x09,
         x08, x07, x06, x05, x04, x03, x02, x01);
 }
@@ -241,7 +215,7 @@ INLINE xint512_t set(
     uint16_t x25, uint16_t x26, uint16_t x27, uint16_t x28,
     uint16_t x29, uint16_t x30, uint16_t x31, uint16_t x32) NOEXCEPT
 {
-    return mm512_set_epi16(
+    return _mm512_set_epi16(
         x32, x31, x30, x29, x28, x27, x26, x25,
         x24, x23, x22, x21, x20, x19, x18, x17,
         x16, x15, x14, x13, x12, x11, x10, x09,
@@ -268,7 +242,7 @@ INLINE xint512_t set(
     uint8_t x57, uint8_t x58, uint8_t x59, uint8_t x60,
     uint8_t x61, uint8_t x62, uint8_t x63, uint8_t x64) NOEXCEPT
 {
-    return mm512_set_epi8(
+    return _mm512_set_epi8(
         x64, x63, x62, x61, x60, x59, x58, x57,
         x56, x55, x54, x53, x52, x51, x50, x49,
         x48, x47, x46, x45, x44, x43, x42, x41,
@@ -293,7 +267,7 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 template <typename Word, if_same<Word, uint16_t> = true>
 INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
-    return mm512_shuffle_epi8(a, set<xint512_t>(
+    return _mm512_shuffle_epi8(a, set<xint512_t>(
         1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14,
         17, 16, 19, 18, 21, 20, 23, 22, 25, 24, 27, 26, 29, 28, 31, 30,
         33, 32, 35, 34, 37, 36, 39, 38, 41, 40, 43, 42, 45, 44, 47, 46,
@@ -304,7 +278,7 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 template <typename Word, if_same<Word, uint32_t> = true>
 INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
-    return mm512_shuffle_epi8(a, set<xint512_t>(
+    return _mm512_shuffle_epi8(a, set<xint512_t>(
         3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12,
         19, 18, 17, 16, 23, 22, 21, 20, 27, 26, 25, 24, 31, 30, 29, 28,
         35, 34, 33, 32, 39, 38, 37, 36, 43, 42, 41, 40, 47, 46, 45, 44,
@@ -315,7 +289,7 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 template <typename Word, if_same<Word, uint64_t> = true>
 INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 {
-    return mm512_shuffle_epi8(a, set<xint512_t>(
+    return _mm512_shuffle_epi8(a, set<xint512_t>(
         7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8,
         23, 22, 21, 20, 19, 18, 17, 16, 31, 30, 29, 28, 27, 26, 25, 24,
         39, 38, 37, 36, 35, 34, 33, 32, 47, 46, 45, 44, 43, 42, 41, 40,
@@ -324,32 +298,26 @@ INLINE xint512_t byteswap(xint512_t a) NOEXCEPT
 
 /// load/store (from casted to loaded/stored)
 /// ---------------------------------------------------------------------------
-/// These have defined overrides for !HAVE_AVX2
 
 INLINE xint512_t load(const xint512_t& bytes) NOEXCEPT
 {
-    return mm512_loadu_si512(&bytes);
+    return _mm512_loadu_si512(&bytes);
 }
 
 INLINE void store(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
-    mm512_storeu_si512(&bytes, a);
+    _mm512_storeu_si512(&bytes, a);
 }
 
 INLINE xint512_t load_aligned(const xint512_t& bytes) NOEXCEPT
 {
-    return mm512_load_si512(&bytes);
+    return _mm512_load_si512(&bytes);
 }
 
 INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
 {
-    mm512_store_si512(&bytes, a);
+    _mm512_store_si512(&bytes, a);
 }
-
-#else
-
-// Symbol is defined but not usable as an integer.
-using xint512_t = std_array<uint8_t, bytes<512>>;
 
 #endif // HAVE_AVX512
 

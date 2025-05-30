@@ -52,7 +52,7 @@
     <Filter Include="src\intrinsics">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\intrinsics\xcpu">
+    <Filter Include="src\intrinsics\platforms">
       <UniqueIdentifier>{51A424A9-2C12-4211-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\machine">
@@ -264,6 +264,9 @@
     <ClCompile Include="..\..\..\..\test\data\string.cpp">
       <Filter>src\data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\define.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\endian\batch.cpp">
       <Filter>src\endian</Filter>
     </ClCompile>
@@ -381,17 +384,38 @@
     <ClCompile Include="..\..\..\..\test\hash\siphash.cpp">
       <Filter>src\hash</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\haves.cpp">
+    <ClCompile Include="..\..\..\..\test\intrinsics\byte_swap.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\intrinsics.cpp">
+    <ClCompile Include="..\..\..\..\test\intrinsics\cpuid.cpp">
       <Filter>src\intrinsics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\cpuid.cpp">
-      <Filter>src\intrinsics\xcpu</Filter>
+    <ClCompile Include="..\..\..\..\test\intrinsics\detection.cpp">
+      <Filter>src\intrinsics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\intrinsics\xcpu\functional.cpp">
-      <Filter>src\intrinsics\xcpu</Filter>
+    <ClCompile Include="..\..\..\..\test\intrinsics\intel_128.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\intel_256.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\intel_512.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\intel.cpp">
+      <Filter>src\intrinsics\platforms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\neon.cpp">
+      <Filter>src\intrinsics\platforms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\platforms\sve.cpp">
+      <Filter>src\intrinsics\platforms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\rotate.cpp">
+      <Filter>src\intrinsics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\intrinsics\types.cpp">
+      <Filter>src\intrinsics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\literals.cpp">
       <Filter>src</Filter>

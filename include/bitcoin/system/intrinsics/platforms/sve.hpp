@@ -9,16 +9,26 @@
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUT ANY WARRANTY; without any implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_ARM_SHA_HPP
-#define LIBBITCOIN_SYSTEM_INTRINSICS_ARM_SHA_HPP
+#ifndef LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_SVE_HPP
+#define LIBBITCOIN_SYSTEM_INTRINSICS_PLATFORMS_SVE_HPP
 
 #include <bitcoin/system/define.hpp>
+
+#if defined(HAVE_SVE)
+#include <arm_sve.h>
+
+namespace libbitcoin {
+namespace system {
+} // namespace system
+} // namespace libbitcoin
+
+#endif // HAVE_SVE
 
 #endif

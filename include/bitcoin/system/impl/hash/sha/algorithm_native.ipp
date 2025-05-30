@@ -71,14 +71,14 @@ unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& message0, xint128_t message1) NOEXCEPT
+prepare(xint128_t& message0, const xint128_t message1) NOEXCEPT
 {
     message0 = mm_sha256msg1_epu32(message0, message1);
 }
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& SHANI_ONLY(message0), xint128_t message1,
+prepare(const xint128_t SHA_ONLY(message0), const xint128_t message1,
     xint128_t& message2) NOEXCEPT
 {
     message2 = mm_sha256msg2_epu32(mm_add_epi32(message2,
@@ -271,7 +271,7 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
     std::array<xint128_t, 2> wdigest{};
     store(wdigest[0], byteswap<uint32_t>(lo));
     store(wdigest[1], byteswap<uint32_t>(hi));
-    return array_cast<byte_t, sizeof(digest_t)>(wdigest);
+    return array_cast<byte_t, array_count<digest_t>>(wdigest);
 }
 
 TEMPLATE
