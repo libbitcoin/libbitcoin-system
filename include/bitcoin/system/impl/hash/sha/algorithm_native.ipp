@@ -71,18 +71,18 @@ unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& message0, const xint128_t message1) NOEXCEPT
+prepare(xint128_t& message0, xint128_t message1) NOEXCEPT
 {
     message0 = mm_sha256msg1_epu32(message0, message1);
 }
 
 TEMPLATE
 INLINE void CLASS::
-prepare(const xint128_t SHA_ONLY(message0), const xint128_t message1,
-    xint128_t& message2) NOEXCEPT
+prepare(xint128_t& message0, xint128_t SHA_ONLY(message1),
+    xint128_t message2) NOEXCEPT
 {
-    message2 = mm_sha256msg2_epu32(mm_add_epi32(message2,
-        mm_alignr_epi8(message1, message0, 4)), message1);
+    message0 = mm_sha256msg2_epu32(mm_add_epi32(message0,
+        mm_alignr_epi8(message2, message1, 4)), message2);
 }
 
 TEMPLATE
@@ -125,50 +125,50 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
     auto message3 = bytes<Swap>(load(wblock[3]));
     round_4<3>(lo, hi, message3);
 
-    prepare(message2, message3, message0);
+    prepare(message0, message2, message3);
     prepare(message2, message3);
     round_4<4>(lo, hi, message0);
 
-    prepare(message3, message0, message1);
+    prepare(message1, message3, message0);
     prepare(message3, message0);
     round_4<5>(lo, hi, message1);
 
-    prepare(message0, message1, message2);
+    prepare(message2, message0, message1);
     prepare(message0, message1);
     round_4<6>(lo, hi, message2);
 
-    prepare(message1, message2, message3);
+    prepare(message3, message1, message2);
     prepare(message1, message2);
     round_4<7>(lo, hi, message3);
 
-    prepare(message2, message3, message0);
+    prepare(message0, message2, message3);
     prepare(message2, message3);
     round_4<8>(lo, hi, message0);
 
-    prepare(message3, message0, message1);
+    prepare(message1, message3, message0);
     prepare(message3, message0);
     round_4<9>(lo, hi, message1);
 
-    prepare(message0, message1, message2);
+    prepare(message2, message0, message1);
     prepare(message0, message1);
     round_4<10>(lo, hi, message2);
 
-    prepare(message1, message2, message3);
+    prepare(message3, message1, message2);
     prepare(message1, message2);
     round_4<11>(lo, hi, message3);
 
-    prepare(message2, message3, message0);
+    prepare(message0, message2, message3);
     prepare(message2, message3);
     round_4<12>(lo, hi, message0);
 
-    prepare(message3, message0, message1);
+    prepare(message1, message3, message0);
     prepare(message3, message0);
     round_4<13>(lo, hi, message1);
 
-    prepare(message0, message1, message2);
+    prepare(message2, message0, message1);
     round_4<14>(lo, hi, message2);
 
-    prepare(message1, message2, message3);
+    prepare(message3, message1, message2);
     round_4<15>(lo, hi, message3);
 
     lo = add<word_t>(lo, start_lo);
