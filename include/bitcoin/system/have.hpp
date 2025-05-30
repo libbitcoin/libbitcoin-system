@@ -194,7 +194,8 @@
 #if defined(HAVE_ARM)
     // -march=armv8-a+crypto
     // Requires 64 bit build.
-    #if defined(__ARM_FEATURE_CRYPTO) && defined(HAVE_LITTLE_ENDIAN)
+    #if defined(__ARM_FEATURE_CRYPTO)
+    ////    && defined(HAVE_LITTLE_ENDIAN)
         #define HAVE_CRYPTO
         #define HAVE_SHA
     #endif
