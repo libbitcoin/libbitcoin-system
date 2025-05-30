@@ -30,7 +30,7 @@ namespace system {
 
 /// Provide 8 bit shifts to complete matrix.
 /// ---------------------------------------------------------------------------
-/// These are only defined for 16/32/64 bits.
+/// These are no epi8 versions of these.
 
 #if defined(HAVE_128)
 
@@ -98,93 +98,20 @@ inline auto mm512_slli_epi8(auto a) NOEXCEPT
 
 #endif // HAVE_512
 
-/// Provide mm512 extractors to complete matrix.
-/// ---------------------------------------------------------------------------
-/// There are no native versions of these.
-
-#if defined(HAVE_512)
-
-// AVX512BW
-template <auto Lane>
-inline uint8_t mm512_extract_epi8(auto a) NOEXCEPT
-{
-    static_assert(Lane < 64);
-    constexpr __mmask64 mask = shift_left(1_u64, Lane);
-    return narrow_sign_cast<uint8_t>(_mm_cvtsi128_si32(
-        _mm512_castsi512_si128(_mm512_maskz_compress_epi8(mask, a))));
-}
-
-// AVX512BW
-template <auto Lane>
-inline uint16_t mm512_extract_epi16(auto a) NOEXCEPT
-{
-    static_assert(Lane < 32);
-    constexpr __mmask32 mask = shift_left(1_u32, Lane);
-    return narrow_sign_cast<uint16_t>(_mm_cvtsi128_si32(
-        _mm512_castsi512_si128(_mm512_maskz_compress_epi16(mask, a))));
-}
-
-// AVX512F
-template <auto Lane>
-inline uint32_t mm512_extract_epi32(auto a) NOEXCEPT
-{
-    static_assert(Lane < 16);
-    constexpr __mmask16 mask = shift_left(1_u16, Lane);
-    return sign_cast<uint32_t>(_mm_cvtsi128_si32(
-        _mm512_castsi512_si128(_mm512_maskz_compress_epi32(mask, a))));
-}
-
-// AVX512F
-template <auto Lane>
-inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
-{
-    static_assert(Lane < 8);
-    constexpr __mmask8 mask = shift_left(1_u8, Lane);
-    const auto value = _mm512_castsi512_si128(
-        _mm512_maskz_compress_epi64(mask, a));
-
-    if constexpr (have_64b)
-    {
-        // This is not available in 32 bit builds.
-        return sign_cast<uint64_t>(_mm_cvtsi128_si64(value));
-    }
-    else
-    {
-        constexpr auto shift = bits<uint32_t>;
-        return bit_or
-        (
-            shift_left<uint64_t>(_mm_extract_epi32(value, 1), shift),
-            wide_sign_cast<uint64_t>(_mm_cvtsi128_si32(value))
-        );
-    }
-}
-
-#endif // HAVE_512
-
 /// Provide 64 bit extractors in 32 bit builds to complete matrix.
 /// ---------------------------------------------------------------------------
-/// There are no 32 bit versions of these.
+/// There are no 32 bit build versions of these.
 
 #if defined(HAVE_128)
 
+// SSE2
 template <auto Lane>
 inline uint64_t mm_extract_epi64(auto a) NOEXCEPT
 {
+    // _mm_extract_epi64 is not available in 32 bit builds.
     static_assert(Lane < 2);
-    ////if constexpr (have_64b)
-    ////{
-    ////    // This is not available in 32 bit builds.
-    ////    return (uint64_t)_mm_extract_epi64(a, Lane);
-    ////}
-    ////else
-    ////{
-    ////    return
-    ////        ((uint64_t)(_mm_extract_epi32(a, (Lane << 1) + 1)) << 32) |
-    ////        ((uint64_t)(_mm_extract_epi32(a, (Lane << 1) + 0)) << 0);
-    ////}
-
     alignas(16) uint64_t buffer[2];
-    _mm_storeu_si128((__m128i*)buffer, a);
+    _mm_storeu_si128(pointer_cast<__m128i>(buffer), a);
     return buffer[Lane];
 }
 
@@ -192,28 +119,67 @@ inline uint64_t mm_extract_epi64(auto a) NOEXCEPT
 
 #if defined(HAVE_256)
 
+// AVX
 template <auto Lane>
 inline uint64_t mm256_extract_epi64(auto a) NOEXCEPT
 {
+    // _mm256_extract_epi64 is not available in 32 bit builds.
     static_assert(Lane < 4);
-    if constexpr (have_64b)
-    {
-        // This is not available in 32 bit builds.
-        return sign_cast<uint64_t>(_mm256_extract_epi64(a, Lane));
-    }
-    else
-    {
-        constexpr auto shift = bits<uint32_t>;
-        constexpr auto lane = shift_left<int>(Lane);
-        return bit_or
-        (
-            shift_left<uint64_t>(_mm256_extract_epi32(a, add1(lane)), shift),
-            wide_sign_cast<uint64_t>(_mm256_extract_epi32(a, lane))
-        );
-    }
+    alignas(32) uint64_t buffer[4];
+    _mm256_storeu_si256(pointer_cast<__m256i>(buffer), a);
+    return buffer[Lane];
 }
 
 #endif // HAVE_256
+
+/// Provide mm512 extractors to complete matrix.
+/// ---------------------------------------------------------------------------
+/// There are no intrisic versions of these.
+
+#if defined(HAVE_512)
+
+// AVX512F
+template <auto Lane>
+inline uint8_t mm512_extract_epi8(auto a) NOEXCEPT
+{
+    static_assert(Lane < 64);
+    alignas(64) uint8_t buffer[64];
+    _mm512_storeu_si512(pointer_cast<__m512i>(buffer), a);
+    return buffer[Lane];
+}
+
+// AVX512F
+template <auto Lane>
+inline uint16_t mm512_extract_epi16(auto a) NOEXCEPT
+{
+    static_assert(Lane < 32);
+    alignas(64) uint16_t buffer[32];
+    _mm512_storeu_si512(pointer_cast<__m512i>(buffer), a);
+    return buffer[Lane];
+}
+
+// AVX512F
+template <auto Lane>
+inline uint32_t mm512_extract_epi32(auto a) NOEXCEPT
+{
+    static_assert(Lane < 16);
+    alignas(64) uint32_t buffer[16];
+    _mm512_storeu_si512(pointer_cast<__m512i>(buffer), a);
+    return buffer[Lane];
+}
+
+// AVX512F
+template <auto Lane>
+inline uint64_t mm512_extract_epi64(auto a) NOEXCEPT
+{
+    // _mm_cvtsi128_si64 is not available in 32 bit builds.
+    static_assert(Lane < 8);
+    alignas(64) uint64_t buffer[8];
+    _mm512_storeu_si512(pointer_cast<__m512i>(buffer), a);
+    return buffer[Lane];
+}
+
+#endif // HAVE_512
 
 } // namespace system
 } // namespace libbitcoin
