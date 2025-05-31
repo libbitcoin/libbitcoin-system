@@ -652,7 +652,7 @@ chain_state::data chain_state::to_pool(const chain_state& top,
         settings.retargeting_interval()))
     {
         // Conditionally patch time warp bug (e.g. Litecoin).
-        data.timestamp.retarget = (forks.time_warp_patch && height != one) ?
+        data.timestamp.retarget = (forks.time_warp_patch && !is_one(height)) ?
             *std::next(data.timestamp.ordered.crbegin()) : data.timestamp.self;
     }
 
