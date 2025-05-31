@@ -192,11 +192,6 @@
     #endif
 #endif
 
-// ARM SHA DISABLED
-#if defined(HAVE_ARM)
-    #undef HAVE_CRYPTO
-#endif
-
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
 /// Always enabled on XCPU, as the binary is not portable to other CPUs.
 #if defined(HAVE_XCPU)
