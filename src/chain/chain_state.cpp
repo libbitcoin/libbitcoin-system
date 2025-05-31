@@ -570,6 +570,11 @@ chain_state::map chain_state::get_map(size_t height,
         map.bip9_bit1_height = bip9_bit1_height(height,
             settings.bip9_bit1_active_checkpoint);
 
+    // The checkpoint at/above which bip9_bit2 rules are enforced.
+    if (forks.bip341 || forks.bip342)
+        map.bip9_bit2_height = bip9_bit2_height(height,
+            settings.bip9_bit2_active_checkpoint);
+
     return map;
 }
 
@@ -703,6 +708,10 @@ chain_state::data chain_state::to_block(const chain_state& pool,
     if (data.height == settings.bip9_bit1_active_checkpoint.height())
         data.bip9_bit1_hash = data.hash;
 
+    // Cache hash of bip9 bit2 height block, otherwise use preceding state.
+    if (data.height == settings.bip9_bit2_active_checkpoint.height())
+        data.bip9_bit2_hash = data.hash;
+
     return data;
 }
 
@@ -745,6 +754,10 @@ chain_state::data chain_state::to_header(const chain_state& parent,
     // Cache hash of bip9 bit1 height block, otherwise use preceding state.
     if (data.height == settings.bip9_bit1_active_checkpoint.height())
         data.bip9_bit1_hash = data.hash;
+
+    // Cache hash of bip9 bit2 height block, otherwise use preceding state.
+    if (data.height == settings.bip9_bit2_active_checkpoint.height())
+        data.bip9_bit2_hash = data.hash;
 
     return data;
 }
