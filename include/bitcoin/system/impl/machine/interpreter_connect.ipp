@@ -159,7 +159,7 @@ code CLASS::connect_witness(const chain::context& state,
         {
             script::cptr script;
             chunk_cptrs_ptr stack;
-            if ((ec = input.witness().extract_script(script, stack, prevout)))
+            if ((ec = input.witness().extract_segwit(script, stack, prevout)))
                 return ec;
 
             interpreter program(tx, it, script, flags, version, stack);
@@ -191,7 +191,7 @@ code CLASS::connect_witness(const chain::context& state,
             hash_cptr tapleaf{};
             script::cptr script;
             chunk_cptrs_ptr stack;
-            if ((ec = input.witness().extract_script(tapleaf, script, stack,
+            if ((ec = input.witness().extract_taproot(tapleaf, script, stack,
                 prevout)))
                 return ec;
 
