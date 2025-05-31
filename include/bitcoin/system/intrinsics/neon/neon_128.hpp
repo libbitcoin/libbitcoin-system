@@ -23,11 +23,10 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/neon/neon.hpp>
 
-namespace libbitcoin {
-namespace system {
-
 #if defined(HAVE_NEON)
 
+namespace libbitcoin {
+namespace system {
 namespace f {
 
 /// bitwise primitives
@@ -121,11 +120,6 @@ INLINE xint128_t addc(xint128_t a) NOEXCEPT
         return add<S>(a, (xint128_t)vdupq_n_u64((uint64_t)K));
 }
 
-} // namespace f
-
-/// add/broadcast/get/set
-/// ---------------------------------------------------------------------------
-
 template <typename Word, if_integral_integer<Word> = true>
 INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
 {
@@ -138,6 +132,9 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
     if constexpr (is_same_type<Word, uint64_t>)
         return (xint128_t)vaddq_u64((uint64x2_t)a, (uint64x2_t)b);
 }
+
+/// broadcast/get/set
+/// ---------------------------------------------------------------------------
 
 template <typename xWord, typename Word, if_integral_integer<Word> = true,
     if_same<xWord, xint128_t> = true>
@@ -273,9 +270,10 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
     vst1q_u32((uint32_t*)&bytes, a);
 }
 
-#endif // HAVE_NEON
-
+} // namespace f
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_NEON
 
 #endif

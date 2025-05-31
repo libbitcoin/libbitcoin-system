@@ -23,11 +23,10 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 
-namespace libbitcoin {
-namespace system {
-
 #if defined(HAVE_AVX512)
 
+namespace libbitcoin {
+namespace system {
 namespace f {
 
 /// bitwise primitives
@@ -128,11 +127,6 @@ INLINE xint512_t addc(xint512_t a) NOEXCEPT
         return add<S>(a, _mm512_set1_epi64(K));
 }
 
-} // namespace f
-
-/// broadcast/get/set
-/// ---------------------------------------------------------------------------
-
 // AVX512F
 template <typename Word, if_integral_integer<Word> = true>
 INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
@@ -146,6 +140,9 @@ INLINE xint512_t add(xint512_t a, xint512_t b) NOEXCEPT
     if constexpr (is_same_type<Word, uint64_t>)
         return _mm512_add_epi64(a, b);
 }
+
+/// broadcast/get/set
+/// ---------------------------------------------------------------------------
 
 // AVX512F
 template <typename xWord, typename Word, if_integral_integer<Word> = true,
@@ -319,9 +316,10 @@ INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
     _mm512_store_si512(&bytes, a);
 }
 
-#endif // HAVE_AVX512
-
+} // namespace f
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_AVX512
 
 #endif

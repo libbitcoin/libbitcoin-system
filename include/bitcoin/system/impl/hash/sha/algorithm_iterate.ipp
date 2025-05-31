@@ -41,13 +41,13 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
 
     if constexpr (Lanes == 2)
     {
-        return byteswap<word_t>(set<xword_t>(
+        return f::byteswap<word_t>(f::set<xword_t>(
             xblock[0][Word],
             xblock[1][Word]));
     }
     else if constexpr (Lanes == 4)
     {
-        return byteswap<word_t>(set<xword_t>(
+        return f::byteswap<word_t>(f::set<xword_t>(
             xblock[0][Word],
             xblock[1][Word],
             xblock[2][Word],
@@ -55,7 +55,7 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
     }
     else if constexpr (Lanes == 8)
     {
-        return byteswap<word_t>(set<xword_t>(
+        return f::byteswap<word_t>(f::set<xword_t>(
             xblock[0][Word],
             xblock[1][Word],
             xblock[2][Word],
@@ -67,7 +67,7 @@ pack(const xblock_t<Lanes>& xblock) NOEXCEPT
     }
     else if constexpr (Lanes == 16)
     {
-        return byteswap<word_t>(set<xword_t>(
+        return f::byteswap<word_t>(f::set<xword_t>(
             xblock[ 0][Word],
             xblock[ 1][Word],
             xblock[ 2][Word],
@@ -125,7 +125,7 @@ INLINE Word CLASS::
 extract(xWord a) NOEXCEPT
 {
     // Extract word from lane of vectorized buffer.
-    return get<Word, Lane>(a);
+    return f::get<Word, Lane>(a);
 }
 
 TEMPLATE

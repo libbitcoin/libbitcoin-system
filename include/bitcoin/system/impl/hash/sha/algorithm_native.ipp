@@ -26,6 +26,9 @@
 // Implementation of native sha using buffer expansion is horribly slow.
 // This split creates bifurcations (additional complexities) in this template.
 
+// protected
+// ----------------------------------------------------------------------------
+
 namespace libbitcoin {
 namespace system {
 namespace sha {
@@ -36,7 +39,7 @@ INLINE xint128_t CLASS::
 endian(xint128_t message) NOEXCEPT
 {
     if constexpr (Swap && !is_big_endian)
-        return byteswap<uint32_t>(message);
+        return f::byteswap<uint32_t>(message);
     else
         return message;
 }
@@ -75,7 +78,7 @@ INLINE void CLASS::
 round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 {
     constexpr auto r = Round * 4;
-    sha::compress(state0, state1, add<word_t>(message, set<xint128_t>(
+    sha::compress(state0, state1, f::add<word_t>(message, f::set<xint128_t>(
         K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3])));
 }
 
@@ -89,10 +92,10 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 {
     const auto& wblock = array_cast<xint128_t>(block);
 
-    auto message0 = endian<Swap>(load(wblock[0]));
-    auto message1 = endian<Swap>(load(wblock[1]));
-    auto message2 = endian<Swap>(load(wblock[2]));
-    auto message3 = endian<Swap>(load(wblock[3]));
+    auto message0 = endian<Swap>(f::load(wblock[0]));
+    auto message1 = endian<Swap>(f::load(wblock[1]));
+    auto message2 = endian<Swap>(f::load(wblock[2]));
+    auto message3 = endian<Swap>(f::load(wblock[3]));
 
     const auto start_lo = lo;
     const auto start_hi = hi;
@@ -150,8 +153,8 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
     prepare(message3, message1, message2);
     round_4<15>(lo, hi, message3);
 
-    lo = add<word_t>(lo, start_lo);
-    hi = add<word_t>(hi, start_hi);
+    lo = f::add<word_t>(lo, start_lo);
+    hi = f::add<word_t>(hi, start_hi);
 }
 
 // Transforms perform scheduling and compression with optional endianness
@@ -166,8 +169,8 @@ native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     // Individual state vars are used vs. array to ensure register persistence.
     auto& wstate = array_cast<xint128_t>(state);
-    auto lo = load(wstate[0]);
-    auto hi = load(wstate[1]);
+    auto lo = f::load(wstate[0]);
+    auto hi = f::load(wstate[1]);
     shuffle(lo, hi);
 
     // native_rounds must be inlined here (register boundary).
@@ -175,8 +178,8 @@ native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
         native_rounds<true>(lo, hi, block);
 
     unshuffle(lo, hi);
-    store(wstate[0], lo);
-    store(wstate[1], hi);
+    f::store(wstate[0], lo);
+    f::store(wstate[1], hi);
 }
 
 TEMPLATE
@@ -185,16 +188,16 @@ void CLASS::
 native_transform(state_t& state, const auto& block) NOEXCEPT
 {
     auto& wstate = array_cast<xint128_t>(state);
-    auto lo = load(wstate[0]);
-    auto hi = load(wstate[1]);
+    auto lo = f::load(wstate[0]);
+    auto hi = f::load(wstate[1]);
     shuffle(lo, hi);
 
     // native_rounds must be inlined here (register boundary).
     native_rounds<Swap>(lo, hi, array_cast<byte_t>(block));
 
     unshuffle(lo, hi);
-    store(wstate[0], lo);
-    store(wstate[1], hi);
+    f::store(wstate[0], lo);
+    f::store(wstate[1], hi);
 }
 
 // Finalization creates and/or applies a given padding block to the state
@@ -238,8 +241,8 @@ typename CLASS::digest_t CLASS::
 native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 {
     auto& wstate = array_cast<xint128_t>(state);
-    auto lo = load(wstate[0]);
-    auto hi = load(wstate[1]);
+    auto lo = f::load(wstate[0]);
+    auto hi = f::load(wstate[1]);
     shuffle(lo, hi);
 
     // native_rounds must be inlined here (register boundary).
@@ -248,8 +251,8 @@ native_finalize(state_t& state, const words_t& pad) NOEXCEPT
 
     // digest is copied so that state remains valid (LE).
     std::array<xint128_t, 2> wdigest{};
-    store(wdigest[0], byteswap<uint32_t>(lo));
-    store(wdigest[1], byteswap<uint32_t>(hi));
+    f::store(wdigest[0], f::byteswap<uint32_t>(lo));
+    f::store(wdigest[1], f::byteswap<uint32_t>(hi));
     return array_cast<byte_t, array_count<digest_t>>(wdigest);
 }
 

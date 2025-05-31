@@ -23,12 +23,6 @@
 
 #if defined(HAVE_NEON)
 #include <arm_neon.h>
-
-namespace libbitcoin {
-namespace system {
-} // namespace system
-} // namespace libbitcoin
-
 #endif // HAVE_NEON
 
 #endif

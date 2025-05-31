@@ -23,11 +23,10 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 
-namespace libbitcoin {
-namespace system {
-
 #if defined(HAVE_AVX2)
 
+namespace libbitcoin {
+namespace system {
 namespace f {
 
 /// bitwise primitives
@@ -128,11 +127,6 @@ INLINE xint256_t addc(xint256_t a) NOEXCEPT
         return add<S>(a, _mm256_set1_epi64x(K));
 }
 
-} // namespace f
-
-/// add/broadcast/get/set
-/// ---------------------------------------------------------------------------
-
 // AVX
 template <typename Word, if_integral_integer<Word> = true>
 INLINE xint256_t add(xint256_t a, xint256_t b) NOEXCEPT
@@ -146,6 +140,9 @@ INLINE xint256_t add(xint256_t a, xint256_t b) NOEXCEPT
     if constexpr (is_same_type<Word, uint64_t>)
         return _mm256_add_epi64(a, b);
 }
+
+/// broadcast/get/set
+/// ---------------------------------------------------------------------------
 
 // AVX
 template <typename xWord, typename Word, if_integral_integer<Word> = true,
@@ -290,9 +287,10 @@ INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
     _mm256_store_si256(&bytes, a);
 }
 
-#endif // HAVE_AVX2
-
+} // namespace f
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_AVX2
 
 #endif
