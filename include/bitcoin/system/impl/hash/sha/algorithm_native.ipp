@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
-// TODO: intel sha160, arm sha160, arm sha256
+// TODO: intel/arm sha160, arm sha512.
 
 // intel sha256
 // ----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ template <bool Swap>
 INLINE xint128_t CLASS::
 bytes(xint128_t message) NOEXCEPT
 {
-    if constexpr (Swap)
+    if constexpr (Swap && !is_big_endian)
         return byteswap<uint32_t>(message);
     else
         return message;
@@ -51,38 +51,28 @@ TEMPLATE
 INLINE void CLASS::
 shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    // shuffle organizes state as expected by sha256rnds2.
-    const auto shuffle0 = mm_shuffle_epi32(state0, 0xb1);
-    const auto shuffle1 = mm_shuffle_epi32(state1, 0x1b);
-    state0 = mm_alignr_epi8(shuffle0, shuffle1, 0x08);
-    state1 = mm_blend_epi16(shuffle1, shuffle0, 0xf0);
+    sha::shuffle(state0, state1);
 }
 
 TEMPLATE
 INLINE void CLASS::
 unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    // unshuffle restores state to normal form.
-    const auto shuffle0 = mm_shuffle_epi32(state0, 0x1b);
-    const auto shuffle1 = mm_shuffle_epi32(state1, 0xb1);
-    state0 = mm_blend_epi16(shuffle0, shuffle1, 0xf0);
-    state1 = mm_alignr_epi8(shuffle1, shuffle0, 0x08);
+    sha::unshuffle(state0, state1);
 }
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& message0, const xint128_t message1) NOEXCEPT
+prepare(xint128_t& message0, xint128_t message1) NOEXCEPT
 {
-    message0 = mm_sha256msg1_epu32(message0, message1);
+    sha::schedule(message0, message1);
 }
 
 TEMPLATE
 INLINE void CLASS::
-prepare(const xint128_t SHA_ONLY(message0), const xint128_t message1,
-    xint128_t& message2) NOEXCEPT
+prepare(xint128_t& message0, xint128_t message1, xint128_t message2) NOEXCEPT
 {
-    message2 = mm_sha256msg2_epu32(mm_add_epi32(message2,
-        mm_alignr_epi8(message1, message0, 4)), message1);
+    sha::schedule(message0, message1, message2);
 }
 
 TEMPLATE
@@ -91,11 +81,8 @@ INLINE void CLASS::
 round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 {
     constexpr auto r = Round * 4;
-    const auto wk = add<word_t>(message, set<xint128_t>(
-        K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3]));
-
-    state1 = mm_sha256rnds2_epu32(state1, state0, wk);
-    state0 = mm_sha256rnds2_epu32(state0, state1, mm_shuffle_epi32(wk, 0x0e));
+    sha::compress(state0, state1, add<word_t>(message, set<xint128_t>(
+        K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3])));
 }
 
 // Platform agnostic.
@@ -108,67 +95,65 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 {
     const auto& wblock = array_cast<xint128_t>(block);
 
+    auto message0 = bytes<Swap>(load(wblock[0]));
+    auto message1 = bytes<Swap>(load(wblock[1]));
+    auto message2 = bytes<Swap>(load(wblock[2]));
+    auto message3 = bytes<Swap>(load(wblock[3]));
+
     const auto start_lo = lo;
     const auto start_hi = hi;
 
-    auto message0 = bytes<Swap>(load(wblock[0]));
     round_4<0>(lo, hi, message0);
-
-    auto message1 = bytes<Swap>(load(wblock[1]));
     round_4<1>(lo, hi, message1);
-
-    prepare(message0, message1);
-    auto message2 = bytes<Swap>(load(wblock[2]));
     round_4<2>(lo, hi, message2);
-
-    prepare(message1, message2);
-    auto message3 = bytes<Swap>(load(wblock[3]));
     round_4<3>(lo, hi, message3);
 
-    prepare(message2, message3, message0);
-    prepare(message2, message3);
+    prepare(message0, message1);
+    prepare(message0, message2, message3);
     round_4<4>(lo, hi, message0);
 
-    prepare(message3, message0, message1);
-    prepare(message3, message0);
+    prepare(message1, message2);
+    prepare(message1, message3, message0);
     round_4<5>(lo, hi, message1);
 
-    prepare(message0, message1, message2);
-    prepare(message0, message1);
+    prepare(message2, message3);
+    prepare(message2, message0, message1);
     round_4<6>(lo, hi, message2);
 
-    prepare(message1, message2, message3);
-    prepare(message1, message2);
+    prepare(message3, message0);
+    prepare(message3, message1, message2);
     round_4<7>(lo, hi, message3);
 
-    prepare(message2, message3, message0);
-    prepare(message2, message3);
+    prepare(message0, message1);
+    prepare(message0, message2, message3);
     round_4<8>(lo, hi, message0);
 
-    prepare(message3, message0, message1);
-    prepare(message3, message0);
+    prepare(message1, message2);
+    prepare(message1, message3, message0);
     round_4<9>(lo, hi, message1);
 
-    prepare(message0, message1, message2);
-    prepare(message0, message1);
+    prepare(message2, message3);
+    prepare(message2, message0, message1);
     round_4<10>(lo, hi, message2);
 
-    prepare(message1, message2, message3);
-    prepare(message1, message2);
+    prepare(message3, message0);
+    prepare(message3, message1, message2);
     round_4<11>(lo, hi, message3);
 
-    prepare(message2, message3, message0);
-    prepare(message2, message3);
+    prepare(message0, message1);
+    prepare(message0, message2, message3);
     round_4<12>(lo, hi, message0);
 
-    prepare(message3, message0, message1);
-    prepare(message3, message0);
+    prepare(message1, message2);
+    prepare(message1, message3, message0);
     round_4<13>(lo, hi, message1);
 
-    prepare(message0, message1, message2);
+    prepare(message2, message3);
+    prepare(message2, message0, message1);
     round_4<14>(lo, hi, message2);
 
-    prepare(message1, message2, message3);
+    prepare(message3, message0);
+    prepare(message3, message1, message2);
     round_4<15>(lo, hi, message3);
 
     lo = add<word_t>(lo, start_lo);

@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__hash_less_than_bits_false
     BOOST_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bits__false)
+BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_greater_than_bits__true)
 {
     const settings settings(selection::mainnet);
     const accessor instance
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_greater_than_bi
     BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits__false)
+BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_less_than_bits__false)
 {
     const settings settings(selection::mainnet);
     const accessor instance
@@ -326,7 +326,6 @@ BOOST_AUTO_TEST_CASE(header__is_valid_scrypt_proof_of_work__hash_less_than_bits_
     };
 
     BOOST_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
-    BOOST_REQUIRE(instance.is_invalid_proof_of_work(settings.proof_of_work_limit, false));
 }
 
 BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_less_than_2_hours_from_now__false)

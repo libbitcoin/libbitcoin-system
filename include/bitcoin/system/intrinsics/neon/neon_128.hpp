@@ -21,9 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
-#include <bitcoin/system/intrinsics/platforms/neon.hpp>
-
-// All operations use NEON intrinsics.
+#include <bitcoin/system/intrinsics/neon/neon.hpp>
 
 namespace libbitcoin {
 namespace system {

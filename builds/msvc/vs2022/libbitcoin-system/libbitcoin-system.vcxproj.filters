@@ -106,8 +106,17 @@
     <Filter Include="include\bitcoin\system\intrinsics">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\system\intrinsics\platforms">
+    <Filter Include="include\bitcoin\system\intrinsics\intel">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\intrinsics\neon">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\intrinsics\none">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\system\intrinsics\sve">
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\machine">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
@@ -125,43 +134,43 @@
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\devices">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000006}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\iostream">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000007}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\streamers">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000008}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\stream\streamers\interfaces">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000009}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\unicode">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A2}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\unicode\utf8_everywhere">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000010}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B2}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet\addresses">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000011}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A4}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet\keys">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000012}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B4}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\wallet\mnemonics">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000013}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C4}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\words">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000C2}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\system\words\catalogs">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000A4}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000D4}</UniqueIdentifier>
     </Filter>
     <Filter Include="resource">
-      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000B4}</UniqueIdentifier>
+      <UniqueIdentifier>{39F60708-FF48-4C22-0000-0000000000E4}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{39F60708-FF48-4C22-0000-000000000000}</UniqueIdentifier>
@@ -995,41 +1004,44 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\detection.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_128.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel.hpp">
+      <Filter>include\bitcoin\system\intrinsics\intel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_256.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_128.hpp">
+      <Filter>include\bitcoin\system\intrinsics\intel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_512.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_256.hpp">
+      <Filter>include\bitcoin\system\intrinsics\intel</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel_sha.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_512.hpp">
+      <Filter>include\bitcoin\system\intrinsics\intel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intel\intel_sha.hpp">
+      <Filter>include\bitcoin\system\intrinsics\intel</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\intrinsics.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon_128.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon.hpp">
+      <Filter>include\bitcoin\system\intrinsics\neon</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon_sha.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_128.hpp">
+      <Filter>include\bitcoin\system\intrinsics\neon</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none_128.hpp">
-      <Filter>include\bitcoin\system\intrinsics</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon\neon_sha.hpp">
+      <Filter>include\bitcoin\system\intrinsics\neon</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\intel.hpp">
-      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_128.hpp">
+      <Filter>include\bitcoin\system\intrinsics\none</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\neon.hpp">
-      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\sve.hpp">
-      <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none\none_sha.hpp">
+      <Filter>include\bitcoin\system\intrinsics\none</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\rotate.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\sve\sve.hpp">
+      <Filter>include\bitcoin\system\intrinsics\sve</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\types.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
