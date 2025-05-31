@@ -48,7 +48,7 @@ script_version script::version() const NOEXCEPT
     {
         case opcode::push_size_0:
             return script_version::segwit;
-        case opcode::push_size_1:
+        case opcode::push_positive_1:
             return script_version::taproot;
         default:
             return script_version::reserved;
