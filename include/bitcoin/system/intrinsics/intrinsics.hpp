@@ -22,18 +22,18 @@
 #include <bitcoin/system/intrinsics/byte_swap.hpp>
 #include <bitcoin/system/intrinsics/cpuid.hpp>
 #include <bitcoin/system/intrinsics/detection.hpp>
-#include <bitcoin/system/intrinsics/intel_128.hpp>
-#include <bitcoin/system/intrinsics/intel_256.hpp>
-#include <bitcoin/system/intrinsics/intel_512.hpp>
-#include <bitcoin/system/intrinsics/intel_sha.hpp>
-#include <bitcoin/system/intrinsics/neon_128.hpp>
-#include <bitcoin/system/intrinsics/neon_sha.hpp>
-#include <bitcoin/system/intrinsics/none_128.hpp>
-#include <bitcoin/system/intrinsics/none_sha.hpp>
-#include <bitcoin/system/intrinsics/platforms/intel.hpp>
-#include <bitcoin/system/intrinsics/platforms/neon.hpp>
-#include <bitcoin/system/intrinsics/platforms/sve.hpp>
+#include <bitcoin/system/intrinsics/intel/intel.hpp>
+#include <bitcoin/system/intrinsics/intel/intel_128.hpp>
+#include <bitcoin/system/intrinsics/intel/intel_256.hpp>
+#include <bitcoin/system/intrinsics/intel/intel_512.hpp>
+#include <bitcoin/system/intrinsics/intel/intel_sha.hpp>
+#include <bitcoin/system/intrinsics/neon/neon.hpp>
+#include <bitcoin/system/intrinsics/neon/neon_128.hpp>
+#include <bitcoin/system/intrinsics/neon/neon_sha.hpp>
+#include <bitcoin/system/intrinsics/none/none_128.hpp>
+#include <bitcoin/system/intrinsics/none/none_sha.hpp>
 #include <bitcoin/system/intrinsics/rotate.hpp>
+#include <bitcoin/system/intrinsics/sve/sve.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 
 #endif

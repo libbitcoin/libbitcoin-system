@@ -21,7 +21,7 @@
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
-#include <bitcoin/system/intrinsics/platforms/intel.hpp>
+#include <bitcoin/system/intrinsics/intel/intel.hpp>
 
 namespace libbitcoin {
 namespace system {

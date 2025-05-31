@@ -744,23 +744,32 @@ include_bitcoin_system_intrinsics_HEADERS = \
     include/bitcoin/system/intrinsics/byte_swap.hpp \
     include/bitcoin/system/intrinsics/cpuid.hpp \
     include/bitcoin/system/intrinsics/detection.hpp \
-    include/bitcoin/system/intrinsics/intel_128.hpp \
-    include/bitcoin/system/intrinsics/intel_256.hpp \
-    include/bitcoin/system/intrinsics/intel_512.hpp \
-    include/bitcoin/system/intrinsics/intel_sha.hpp \
     include/bitcoin/system/intrinsics/intrinsics.hpp \
-    include/bitcoin/system/intrinsics/neon_128.hpp \
-    include/bitcoin/system/intrinsics/neon_sha.hpp \
-    include/bitcoin/system/intrinsics/none_128.hpp \
-    include/bitcoin/system/intrinsics/none_sha.hpp \
     include/bitcoin/system/intrinsics/rotate.hpp \
     include/bitcoin/system/intrinsics/types.hpp
 
-include_bitcoin_system_intrinsics_platformsdir = ${includedir}/bitcoin/system/intrinsics/platforms
-include_bitcoin_system_intrinsics_platforms_HEADERS = \
-    include/bitcoin/system/intrinsics/platforms/intel.hpp \
-    include/bitcoin/system/intrinsics/platforms/neon.hpp \
-    include/bitcoin/system/intrinsics/platforms/sve.hpp
+include_bitcoin_system_intrinsics_inteldir = ${includedir}/bitcoin/system/intrinsics/intel
+include_bitcoin_system_intrinsics_intel_HEADERS = \
+    include/bitcoin/system/intrinsics/intel/intel.hpp \
+    include/bitcoin/system/intrinsics/intel/intel_128.hpp \
+    include/bitcoin/system/intrinsics/intel/intel_256.hpp \
+    include/bitcoin/system/intrinsics/intel/intel_512.hpp \
+    include/bitcoin/system/intrinsics/intel/intel_sha.hpp
+
+include_bitcoin_system_intrinsics_neondir = ${includedir}/bitcoin/system/intrinsics/neon
+include_bitcoin_system_intrinsics_neon_HEADERS = \
+    include/bitcoin/system/intrinsics/neon/neon.hpp \
+    include/bitcoin/system/intrinsics/neon/neon_128.hpp \
+    include/bitcoin/system/intrinsics/neon/neon_sha.hpp
+
+include_bitcoin_system_intrinsics_nonedir = ${includedir}/bitcoin/system/intrinsics/none
+include_bitcoin_system_intrinsics_none_HEADERS = \
+    include/bitcoin/system/intrinsics/none/none_128.hpp \
+    include/bitcoin/system/intrinsics/none/none_sha.hpp
+
+include_bitcoin_system_intrinsics_svedir = ${includedir}/bitcoin/system/intrinsics/sve
+include_bitcoin_system_intrinsics_sve_HEADERS = \
+    include/bitcoin/system/intrinsics/sve/sve.hpp
 
 include_bitcoin_system_machinedir = ${includedir}/bitcoin/system/machine
 include_bitcoin_system_machine_HEADERS = \
