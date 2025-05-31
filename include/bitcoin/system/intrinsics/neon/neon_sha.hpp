@@ -48,11 +48,11 @@ INLINE void compress(xint128_t& state0, xint128_t& state1,
     state1 = vsha256h2q_u32(state1, state, wk);
 }
 
-INLINE void shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
+INLINE void shuffle(xint128_t&, xint128_t&) NOEXCEPT
 {
 }
 
-INLINE void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
+INLINE void unshuffle(xint128_t&, xint128_t&) NOEXCEPT
 {
 }
 
