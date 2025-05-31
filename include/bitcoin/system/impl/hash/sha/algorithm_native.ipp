@@ -41,7 +41,7 @@ template <bool Swap>
 INLINE xint128_t CLASS::
 bytes(xint128_t message) NOEXCEPT
 {
-    if constexpr (Swap)
+    if constexpr (Swap && !is_big_endian)
         return byteswap<uint32_t>(message);
     else
         return message;
