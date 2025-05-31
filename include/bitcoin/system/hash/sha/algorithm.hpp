@@ -415,7 +415,7 @@ protected:
     /// -----------------------------------------------------------------------
 
     template <bool Swap>
-    INLINE static xint128_t bytes(xint128_t message) NOEXCEPT;
+    INLINE static xint128_t endian(xint128_t message) NOEXCEPT;
     INLINE static void shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
     INLINE static void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT;
     INLINE static void prepare(xint128_t& message0, xint128_t message1) NOEXCEPT;

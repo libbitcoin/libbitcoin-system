@@ -33,7 +33,7 @@ namespace sha {
 TEMPLATE
 template <bool Swap>
 INLINE xint128_t CLASS::
-bytes(xint128_t message) NOEXCEPT
+endian(xint128_t message) NOEXCEPT
 {
     if constexpr (Swap && !is_big_endian)
         return byteswap<uint32_t>(message);
@@ -89,10 +89,10 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 {
     const auto& wblock = array_cast<xint128_t>(block);
 
-    auto message0 = bytes<Swap>(load(wblock[0]));
-    auto message1 = bytes<Swap>(load(wblock[1]));
-    auto message2 = bytes<Swap>(load(wblock[2]));
-    auto message3 = bytes<Swap>(load(wblock[3]));
+    auto message0 = endian<Swap>(load(wblock[0]));
+    auto message1 = endian<Swap>(load(wblock[1]));
+    auto message2 = endian<Swap>(load(wblock[2]));
+    auto message3 = endian<Swap>(load(wblock[3]));
 
     const auto start_lo = lo;
     const auto start_hi = hi;
