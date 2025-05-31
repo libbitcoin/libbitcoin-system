@@ -427,6 +427,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon_128.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\neon_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none_128.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none_sha.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\intel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\neon.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\sve.hpp" />

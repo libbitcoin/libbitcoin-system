@@ -153,6 +153,7 @@
 #include <bitcoin/system/intrinsics/neon_128.hpp>
 #include <bitcoin/system/intrinsics/neon_sha.hpp>
 #include <bitcoin/system/intrinsics/none_128.hpp>
+#include <bitcoin/system/intrinsics/none_sha.hpp>
 #include <bitcoin/system/intrinsics/rotate.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/platforms/intel.hpp>

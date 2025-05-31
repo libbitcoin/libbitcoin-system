@@ -25,123 +25,50 @@
 
 namespace libbitcoin {
 namespace system {
+namespace sha {
 
-#if !defined(HAVE_SHANI)
+#if defined(HAVE_SHANI)
 
-    // sha1
-    #define mm_sha1msg1_epu32(a, b)         {}
-    #define mm_sha1msg2_epu32(a, b)         {}
-    #define mm_sha1rnds4_epu32(a, b, f)     {}
-
-    // sha256
-    #define mm_sha1nexte_epu32(a, b)        {}
-    #define mm_sha256msg1_epu32(a, b)       (b)
-    #define mm_sha256msg2_epu32(a, b)       (b)
-    #define mm_sha256rnds2_epu32(a, b, k)   (k)
-
-    // supporting
-    #define mm_alignr_epi8(a, b, c)         (a)
-    #define mm_shuffle_epi32(a, mask)       (a)
-    #define mm_blend_epi16(a, b, mask)      (a)
-
-    // unused argument suppression
-    #define SHA_ONLY(a)
-
-#else // HAVE_SHANI
-
-    // sha1
-    #define mm_sha1msg1_epu32(a, b)         _mm_sha1msg1_epu32(a, b)
-    #define mm_sha1msg2_epu32(a, b)         _mm_sha1msg2_epu32(a, b)
-    #define mm_sha1nexte_epu32(a, b)        _mm_sha1nexte_epu32(a, b)
-    #define mm_sha1rnds4_epu32(a, b, f)     _mm_sha1rnds4_epu32(a, b, f)
-
-    // sha256
-    #define mm_sha256msg1_epu32(a, b)       _mm_sha256msg1_epu32(a, b)
-    #define mm_sha256rnds2_epu32(a, b, k)   _mm_sha256rnds2_epu32(a, b, k)
-    #define mm_sha256msg2_epu32(a, b)       _mm_sha256msg2_epu32(a, b)
-
-    // supporting
-    #define mm_add_epi32(a, b)              _mm_add_epi32(a, b)
-    #define mm_alignr_epi8(a, b, c)         _mm_alignr_epi8(a, b, c)
-    #define mm_shuffle_epi32(a, mask)       _mm_shuffle_epi32(a, mask)
-    #define mm_blend_epi16(a, b, mask)      _mm_blend_epi16(a, b, mask)
-
-    // unused argument suppression
-    #define SHA_ONLY(a) a
-
-// SHA1 (SHA160)
-// ----------------------------------------------------------------------------
-
-INLINE xint128_t sha160_message1(xint128_t a, xint128_t b) NOEXCEPT
+INLINE void schedule(xint128_t& message0, xint128_t message1) NOEXCEPT
 {
-    // "Perform an intermediate calculation for the next four SHA1 message
-    // values (unsigned 32-bit integers) using previous message values from a
-    // and b, and store the result in destination." - Intel
-    return mm_sha1msg1_epu32(a, b);
+    message0 = _mm_sha256msg1_epu32(message0, message1);
 }
 
-INLINE xint128_t sha160_message2(xint128_t a, xint128_t b) NOEXCEPT
+INLINE void schedule(xint128_t& message0, xint128_t message1,
+    xint128_t message2) NOEXCEPT
 {
-    // "Perform the final calculation for the next four SHA1 message values
-    // (unsigned 32-bit integers) using the intermediate result in a and the
-    // previous message values in b, and store the result in destination."
-    // - Intel
-    return mm_sha1msg2_epu32(a, b);
+    message0 = _mm_sha256msg2_epu32(_mm_add_epi32(message0,
+        _mm_alignr_epi8(message2, message1, 4)), message2);
 }
 
-template <int Functor,
-    if_not_lesser<Functor, 0> = true, if_not_greater<Functor,3> = true>
-INLINE xint128_t sha160_four_rounds(xint128_t a, xint128_t b) NOEXCEPT
+INLINE void compress(xint128_t& state0, xint128_t& state1,
+    xint128_t wk) NOEXCEPT
 {
-    // "Perform four rounds of SHA1 operation using an initial SHA1 state
-    // (A,B,C,D) from a and some pre-computed sum of the next 4 round message
-    // values (unsigned 32-bit integers), and state variable E from b, and
-    // store the updated SHA1 state (A,B,C,D) in destination. Functor contains
-    // the logic functions and round constants." - Intel
-    return mm_sha1rnds4_epu32(a, b, Functor);
+    state1 = _mm_sha256rnds2_epu32(state1, state0, wk);
+    state0 = _mm_sha256rnds2_epu32(state0, state1, _mm_shuffle_epi32(wk, 0x0e));
 }
 
-INLINE xint128_t sha160_next_e(xint128_t a, xint128_t b) NOEXCEPT
+INLINE void shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    // "Calculate SHA1 state variable E after four rounds of operation from
-    // the current SHA1 state variable a, add that value to the scheduled
-    // values (unsigned 32-bit integers) in b, and store the result in
-    // destination." - Intel
-    return mm_sha1nexte_epu32(a, b);
+    // shuffle organizes state as expected by sha256rnds2.
+    const auto shuffle0 = _mm_shuffle_epi32(state0, 0xb1);
+    const auto shuffle1 = _mm_shuffle_epi32(state1, 0x1b);
+    state0 = _mm_alignr_epi8(shuffle0, shuffle1, 0x08);
+    state1 = _mm_blend_epi16(shuffle1, shuffle0, 0xf0);
 }
 
-// SHA256
-// ----------------------------------------------------------------------------
-
-INLINE xint128_t sha256_message1(xint128_t a, xint128_t b) NOEXCEPT
+INLINE void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    // Perform an intermediate calculation for the next four SHA256 message
-    // values (unsigned 32-bit integers) using previous message values from a
-    // and b, and store the result in destination." - Intel
-    return mm_sha256msg1_epu32(a, b);
-}
-
-INLINE xint128_t sha256_message2(xint128_t a, xint128_t b) NOEXCEPT
-{
-    // Perform the final calculation for the next four SHA256 message values
-    // (unsigned 32-bit integers) using previous message values from a and b,
-    // and store the result in destination." - Intel
-    return mm_sha256msg2_epu32(a, b);
-}
-
-// wk is w+k in a two (x 32 bit) lane vector (sha256rnds2 performs two rounds).
-INLINE xint128_t sha256_two_rounds(xint128_t a, xint128_t b, xint128_t wk) NOEXCEPT
-{
-    // Perform 2 rounds of SHA256 operation using an initial SHA256 state
-    // (C,D,G,H) from a, an initial SHA256 state (A,B,E,F) from b, and a
-    // pre-computed sum of the next 2 round message values (unsigned 32-bit
-    // integers) and the corresponding round constants from k, and store the
-    // updated SHA256 state (A,B,E,F) in destination." - Intel
-    return mm_sha256rnds2_epu32(a, b, wk);
+    // unshuffle restores state to normal form.
+    const auto shuffle0 = _mm_shuffle_epi32(state0, 0x1b);
+    const auto shuffle1 = _mm_shuffle_epi32(state1, 0xb1);
+    state0 = _mm_blend_epi16(shuffle0, shuffle1, 0xf0);
+    state1 = _mm_alignr_epi8(shuffle1, shuffle0, 0x08);
 }
 
 #endif // HAVE_SHANI
 
+} // namespace sha
 } // namespace system
 } // namespace libbitcoin
 

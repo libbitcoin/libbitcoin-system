@@ -29,6 +29,7 @@
 #include <bitcoin/system/intrinsics/neon_128.hpp>
 #include <bitcoin/system/intrinsics/neon_sha.hpp>
 #include <bitcoin/system/intrinsics/none_128.hpp>
+#include <bitcoin/system/intrinsics/none_sha.hpp>
 #include <bitcoin/system/intrinsics/platforms/intel.hpp>
 #include <bitcoin/system/intrinsics/platforms/neon.hpp>
 #include <bitcoin/system/intrinsics/platforms/sve.hpp>

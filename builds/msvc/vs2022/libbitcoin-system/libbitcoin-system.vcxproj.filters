@@ -1019,6 +1019,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none_128.hpp">
       <Filter>include\bitcoin\system\intrinsics</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\none_sha.hpp">
+      <Filter>include\bitcoin\system\intrinsics</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\intrinsics\platforms\intel.hpp">
       <Filter>include\bitcoin\system\intrinsics\platforms</Filter>
     </ClInclude>

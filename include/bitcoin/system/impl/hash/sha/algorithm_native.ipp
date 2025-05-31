@@ -51,58 +51,28 @@ TEMPLATE
 INLINE void CLASS::
 shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    if constexpr (have_xcpu)
-    {
-        // shuffle organizes state as expected by sha256rnds2.
-        const auto shuffle0 = mm_shuffle_epi32(state0, 0xb1);
-        const auto shuffle1 = mm_shuffle_epi32(state1, 0x1b);
-        state0 = mm_alignr_epi8(shuffle0, shuffle1, 0x08);
-        state1 = mm_blend_epi16(shuffle1, shuffle0, 0xf0);
-    }
+    sha::shuffle(state0, state1);
 }
 
 TEMPLATE
 INLINE void CLASS::
 unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    if constexpr (have_xcpu)
-    {
-        // unshuffle restores state to normal form.
-        const auto shuffle0 = mm_shuffle_epi32(state0, 0x1b);
-        const auto shuffle1 = mm_shuffle_epi32(state1, 0xb1);
-        state0 = mm_blend_epi16(shuffle0, shuffle1, 0xf0);
-        state1 = mm_alignr_epi8(shuffle1, shuffle0, 0x08);
-    }
+    sha::unshuffle(state0, state1);
 }
 
 TEMPLATE
 INLINE void CLASS::
 prepare(xint128_t& message0, xint128_t message1) NOEXCEPT
 {
-    if constexpr (have_xcpu)
-    {
-        message0 = mm_sha256msg1_epu32(message0, message1);
-    }
-    else
-    {
-        message0 = vsha256su0q_u32(message0, message1);
-    }
-
+    sha::schedule(message0, message1);
 }
 
 TEMPLATE
 INLINE void CLASS::
 prepare(xint128_t& message0, xint128_t message1, xint128_t message2) NOEXCEPT
 {
-    if constexpr (have_xcpu)
-    {
-        message0 = mm_sha256msg2_epu32(mm_add_epi32(message0,
-            mm_alignr_epi8(message2, message1, 4)), message2);
-    }
-    else
-    {
-        message0 = vsha256su1q_u32(message0, message1, message2);
-    }
+    sha::schedule(message0, message1, message2);
 }
 
 TEMPLATE
@@ -111,20 +81,8 @@ INLINE void CLASS::
 round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
 {
     constexpr auto r = Round * 4;
-    const auto wk = add<word_t>(message, set<xint128_t>(
-        K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3]));
-
-    if constexpr (have_xcpu)
-    {
-        state1 = mm_sha256rnds2_epu32(state1, state0, wk);
-        state0 = mm_sha256rnds2_epu32(state0, state1, mm_shuffle_epi32(wk, 0x0e));
-    }
-    else
-    {
-        const auto state = state0;
-        state0 = vsha256hq_u32(state, state1, wk);
-        state1 = vsha256h2q_u32(state1, state, wk);
-    }
+    sha::compress(state0, state1, add<word_t>(message, set<xint128_t>(
+        K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3])));
 }
 
 // Platform agnostic.
