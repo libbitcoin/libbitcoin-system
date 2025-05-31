@@ -82,9 +82,6 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
         K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3])));
 }
 
-// Platform agnostic.
-// ----------------------------------------------------------------------------
-
 TEMPLATE
 template <bool Swap>
 INLINE void CLASS::
