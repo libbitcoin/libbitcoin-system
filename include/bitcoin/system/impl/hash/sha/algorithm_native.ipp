@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
-// TODO: intel sha160, arm sha160, arm sha256
+// TODO: intel/arm sha160, arm sha512.
 
 // intel sha256
 // ----------------------------------------------------------------------------
