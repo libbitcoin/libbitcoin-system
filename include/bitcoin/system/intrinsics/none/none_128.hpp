@@ -22,10 +22,60 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 
+#if !defined(HAVE_128)
+
 namespace libbitcoin {
 namespace system {
+namespace f {
 
-#if !defined(HAVE_128)
+// These are implemented for integrals in /math/functional `f` namespace:
+// and_, or_, xor_, not_, shr<>, shl<>, ror<>, rol<>, add<>, addc<>, add.
+// Those names should not be applied explicitly to extended types unless
+// conditionally compiled. The following are okay for explicit extension.
+
+template <typename xWord, typename Word, if_integral_integer<Word> = true,
+    if_same<xWord, xint128_t> = true>
+INLINE xint128_t broadcast(Word) NOEXCEPT
+{
+    return {};
+}
+
+template <typename Word, auto Lane, if_integral_integer<Word> = true>
+INLINE Word get(xint128_t) NOEXCEPT
+{
+    return {};
+}
+
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t set(uint64_t, uint64_t) NOEXCEPT
+{
+    return {};
+}
+
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t set(
+    uint32_t, uint32_t, uint32_t, uint32_t) NOEXCEPT
+{
+    return {};
+}
+
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t set(
+    uint16_t, uint16_t, uint16_t, uint16_t,
+    uint16_t, uint16_t, uint16_t, uint16_t) NOEXCEPT
+{
+    return {};
+}
+
+template <typename xWord, if_same<xWord, xint128_t> = true>
+INLINE xint128_t set(
+    uint8_t, uint8_t, uint8_t, uint8_t,
+    uint8_t, uint8_t, uint8_t, uint8_t,
+    uint8_t, uint8_t, uint8_t, uint8_t,
+    uint8_t, uint8_t, uint8_t, uint8_t) NOEXCEPT
+{
+    return {};
+}
 
 template <typename Word, if_same<Word, uint8_t> = true>
 INLINE xint128_t byteswap(xint128_t) NOEXCEPT
@@ -51,9 +101,28 @@ INLINE xint128_t byteswap(xint128_t) NOEXCEPT
     return {};
 }
 
-#endif // HAVE_128
+INLINE xint128_t load(const xint128_t&) NOEXCEPT
+{
+    return {};
+}
 
+INLINE void store(xint128_t&, xint128_t) NOEXCEPT
+{
+}
+
+INLINE xint128_t load_aligned(const xint128_t&) NOEXCEPT
+{
+    return {};
+}
+
+INLINE void store_aligned(xint128_t&, xint128_t) NOEXCEPT
+{
+}
+
+} // namespace f
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_128
 
 #endif

@@ -23,11 +23,11 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/neon/neon.hpp>
 
+#if defined(HAVE_CRYPTO)
+
 namespace libbitcoin {
 namespace system {
 namespace sha {
-
-#if defined(HAVE_CRYPTO)
 
 INLINE void schedule(xint128_t& message0, xint128_t message1) NOEXCEPT
 {
@@ -55,11 +55,10 @@ INLINE void shuffle(xint128_t&, xint128_t&) NOEXCEPT
 INLINE void unshuffle(xint128_t&, xint128_t&) NOEXCEPT
 {
 }
-
-#endif // HAVE_SHANI
-
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_SHANI
 
 #endif

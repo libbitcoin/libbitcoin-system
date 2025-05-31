@@ -22,11 +22,11 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/types.hpp>
 
+#if !defined(HAVE_SHA)
+
 namespace libbitcoin {
 namespace system {
 namespace sha {
-
-#if !defined(HAVE_SHA)
 
 INLINE void schedule(xint128_t&, xint128_t) NOEXCEPT
 {
@@ -48,10 +48,10 @@ INLINE void unshuffle(xint128_t&, xint128_t&) NOEXCEPT
 {
 }
 
-#endif // HAVE_SHA
-
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_SHA
 
 #endif

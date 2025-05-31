@@ -23,11 +23,11 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 
+#if defined(HAVE_SHANI)
+
 namespace libbitcoin {
 namespace system {
 namespace sha {
-
-#if defined(HAVE_SHANI)
 
 INLINE void schedule(xint128_t& message0, xint128_t message1) NOEXCEPT
 {
@@ -66,10 +66,10 @@ INLINE void unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
     state1 = _mm_alignr_epi8(shuffle1, shuffle0, 0x08);
 }
 
-#endif // HAVE_SHANI
-
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_SHANI
 
 #endif

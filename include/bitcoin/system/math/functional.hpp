@@ -96,7 +96,6 @@ INLINE constexpr auto addc(Word a) NOEXCEPT
 }
 
 } // namespace f
-
 } // namespace system
 } // namespace libbitcoin
 

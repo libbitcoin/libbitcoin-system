@@ -35,7 +35,7 @@ INLINE auto CLASS::
 sigma0_8(auto x1, auto x2, auto x3, auto x4, auto x5, auto x6, auto x7,
     auto x8) NOEXCEPT
 {
-    return sigma0(set<xWord>(x1, x2, x3, x4, x5, x6, x7, x8));
+    return sigma0(f::set<xWord>(x1, x2, x3, x4, x5, x6, x7, x8));
 }
 
 TEMPLATE
@@ -49,9 +49,9 @@ prepare_1(buffer_t& buffer, const auto& xsigma0) NOEXCEPT
     constexpr auto r16 = Round - 16;
 
     // buffer[r07 + 7] is buffer[Round + 0], so sigma0 is limited to 8 lanes.
-    buffer[Round + Offset] = add<word_t>(
-        add<word_t>(buffer[r16 + Offset], get<word_t, Offset>(xsigma0)),
-        add<word_t>(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
+    buffer[Round + Offset] = add(
+        add(buffer[r16 + Offset], f::get<word_t, Offset>(xsigma0)),
+        add(buffer[r07 + Offset], sigma1(buffer[r02 + Offset])));
 }
 
 TEMPLATE

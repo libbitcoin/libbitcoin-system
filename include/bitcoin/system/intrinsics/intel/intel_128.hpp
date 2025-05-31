@@ -23,11 +23,10 @@
 #include <bitcoin/system/intrinsics/types.hpp>
 #include <bitcoin/system/intrinsics/intel/intel.hpp>
 
-namespace libbitcoin {
-namespace system {
-
 #if defined(HAVE_SSE4)
 
+namespace libbitcoin {
+namespace system {
 namespace f {
 
 /// bitwise primitives
@@ -128,11 +127,6 @@ INLINE xint128_t addc(xint128_t a) NOEXCEPT
         return add<S>(a, _mm_set1_epi64x(K));
 }
 
-} // namespace f
-
-/// add/broadcast/gadd/get/set
-/// ---------------------------------------------------------------------------
-
 // SSE2
 template <typename Word, if_integral_integer<Word> = true>
 INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
@@ -146,6 +140,9 @@ INLINE xint128_t add(xint128_t a, xint128_t b) NOEXCEPT
     if constexpr (is_same_type<Word, uint64_t>)
         return _mm_add_epi64(a, b);
 }
+
+/// broadcast/get/get/set
+/// ---------------------------------------------------------------------------
 
 // SSE2
 template <typename xWord, typename Word, if_integral_integer<Word> = true,
@@ -274,9 +271,10 @@ INLINE void store_aligned(xint128_t& bytes, xint128_t a) NOEXCEPT
     _mm_store_si128(&bytes, a);
 }
 
-#endif // HAVE_SSE4
-
+} // namespace f
 } // namespace system
 } // namespace libbitcoin
+
+#endif // HAVE_SSE4
 
 #endif
