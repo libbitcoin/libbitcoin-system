@@ -51,38 +51,58 @@ TEMPLATE
 INLINE void CLASS::
 shuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    // shuffle organizes state as expected by sha256rnds2.
-    const auto shuffle0 = mm_shuffle_epi32(state0, 0xb1);
-    const auto shuffle1 = mm_shuffle_epi32(state1, 0x1b);
-    state0 = mm_alignr_epi8(shuffle0, shuffle1, 0x08);
-    state1 = mm_blend_epi16(shuffle1, shuffle0, 0xf0);
+    if constexpr (have_xcpu)
+    {
+        // shuffle organizes state as expected by sha256rnds2.
+        const auto shuffle0 = mm_shuffle_epi32(state0, 0xb1);
+        const auto shuffle1 = mm_shuffle_epi32(state1, 0x1b);
+        state0 = mm_alignr_epi8(shuffle0, shuffle1, 0x08);
+        state1 = mm_blend_epi16(shuffle1, shuffle0, 0xf0);
+    }
 }
 
 TEMPLATE
 INLINE void CLASS::
 unshuffle(xint128_t& state0, xint128_t& state1) NOEXCEPT
 {
-    // unshuffle restores state to normal form.
-    const auto shuffle0 = mm_shuffle_epi32(state0, 0x1b);
-    const auto shuffle1 = mm_shuffle_epi32(state1, 0xb1);
-    state0 = mm_blend_epi16(shuffle0, shuffle1, 0xf0);
-    state1 = mm_alignr_epi8(shuffle1, shuffle0, 0x08);
+    if constexpr (have_xcpu)
+    {
+        // unshuffle restores state to normal form.
+        const auto shuffle0 = mm_shuffle_epi32(state0, 0x1b);
+        const auto shuffle1 = mm_shuffle_epi32(state1, 0xb1);
+        state0 = mm_blend_epi16(shuffle0, shuffle1, 0xf0);
+        state1 = mm_alignr_epi8(shuffle1, shuffle0, 0x08);
+    }
 }
 
 TEMPLATE
 INLINE void CLASS::
 prepare(xint128_t& message0, xint128_t message1) NOEXCEPT
 {
-    message0 = mm_sha256msg1_epu32(message0, message1);
+    if constexpr (have_xcpu)
+    {
+        message0 = mm_sha256msg1_epu32(message0, message1);
+    }
+    else
+    {
+        message0 = vsha256su0q_u32(message0, message1);
+    }
+
 }
 
 TEMPLATE
 INLINE void CLASS::
-prepare(xint128_t& message0, xint128_t SHA_ONLY(message1),
-    xint128_t message2) NOEXCEPT
+prepare(xint128_t& message0, xint128_t message1, xint128_t message2) NOEXCEPT
 {
-    message0 = mm_sha256msg2_epu32(mm_add_epi32(message0,
-        mm_alignr_epi8(message2, message1, 4)), message2);
+    if constexpr (have_xcpu)
+    {
+        message0 = mm_sha256msg2_epu32(mm_add_epi32(message0,
+            mm_alignr_epi8(message2, message1, 4)), message2);
+    }
+    else
+    {
+        message0 = vsha256su1q_u32(message0, message1, message2);
+    }
 }
 
 TEMPLATE
@@ -94,8 +114,17 @@ round_4(xint128_t& state0, xint128_t& state1, xint128_t message) NOEXCEPT
     const auto wk = add<word_t>(message, set<xint128_t>(
         K::get[r + 0], K::get[r + 1], K::get[r + 2], K::get[r + 3]));
 
-    state1 = mm_sha256rnds2_epu32(state1, state0, wk);
-    state0 = mm_sha256rnds2_epu32(state0, state1, mm_shuffle_epi32(wk, 0x0e));
+    if constexpr (have_xcpu)
+    {
+        state1 = mm_sha256rnds2_epu32(state1, state0, wk);
+        state0 = mm_sha256rnds2_epu32(state0, state1, mm_shuffle_epi32(wk, 0x0e));
+    }
+    else
+    {
+        const auto state = state0;
+        state0 = vsha256hq_u32(state, state1, wk);
+        state1 = vsha256h2q_u32(state1, state, wk);
+    }
 }
 
 // Platform agnostic.
@@ -108,66 +137,64 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 {
     const auto& wblock = array_cast<xint128_t>(block);
 
+    auto message0 = bytes<Swap>(load(wblock[0]));
+    auto message1 = bytes<Swap>(load(wblock[1]));
+    auto message2 = bytes<Swap>(load(wblock[2]));
+    auto message3 = bytes<Swap>(load(wblock[3]));
+
     const auto start_lo = lo;
     const auto start_hi = hi;
 
-    auto message0 = bytes<Swap>(load(wblock[0]));
     round_4<0>(lo, hi, message0);
-
-    auto message1 = bytes<Swap>(load(wblock[1]));
     round_4<1>(lo, hi, message1);
-
-    prepare(message0, message1);
-    auto message2 = bytes<Swap>(load(wblock[2]));
     round_4<2>(lo, hi, message2);
-
-    prepare(message1, message2);
-    auto message3 = bytes<Swap>(load(wblock[3]));
     round_4<3>(lo, hi, message3);
 
+    prepare(message0, message1);
     prepare(message0, message2, message3);
-    prepare(message2, message3);
     round_4<4>(lo, hi, message0);
 
+    prepare(message1, message2);
     prepare(message1, message3, message0);
-    prepare(message3, message0);
     round_4<5>(lo, hi, message1);
 
+    prepare(message2, message3);
     prepare(message2, message0, message1);
-    prepare(message0, message1);
     round_4<6>(lo, hi, message2);
 
+    prepare(message3, message0);
     prepare(message3, message1, message2);
-    prepare(message1, message2);
     round_4<7>(lo, hi, message3);
 
+    prepare(message0, message1);
     prepare(message0, message2, message3);
-    prepare(message2, message3);
     round_4<8>(lo, hi, message0);
 
+    prepare(message1, message2);
     prepare(message1, message3, message0);
-    prepare(message3, message0);
     round_4<9>(lo, hi, message1);
 
+    prepare(message2, message3);
     prepare(message2, message0, message1);
-    prepare(message0, message1);
     round_4<10>(lo, hi, message2);
 
+    prepare(message3, message0);
     prepare(message3, message1, message2);
-    prepare(message1, message2);
     round_4<11>(lo, hi, message3);
 
+    prepare(message0, message1);
     prepare(message0, message2, message3);
-    prepare(message2, message3);
     round_4<12>(lo, hi, message0);
 
+    prepare(message1, message2);
     prepare(message1, message3, message0);
-    prepare(message3, message0);
     round_4<13>(lo, hi, message1);
 
+    prepare(message2, message3);
     prepare(message2, message0, message1);
     round_4<14>(lo, hi, message2);
 
+    prepare(message3, message0);
     prepare(message3, message1, message2);
     round_4<15>(lo, hi, message3);
 
