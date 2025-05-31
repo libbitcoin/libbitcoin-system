@@ -30,12 +30,6 @@ namespace libbitcoin {
 namespace system {
 namespace sha {
 
-// TODO: intel/arm sha160, arm sha512.
-
-// intel sha256
-// ----------------------------------------------------------------------------
-// protected
-
 TEMPLATE
 template <bool Swap>
 INLINE xint128_t CLASS::
