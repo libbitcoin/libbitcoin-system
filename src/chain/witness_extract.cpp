@@ -194,14 +194,13 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
             if (!control.is_valid())
                 return error::invalid_witness;
 
-            // The second-to-last stack element is the script.
-            out_script = to_shared<script>(*pop(*out_stack), false);
-
             if (control.is_tapscript())
             {
                 const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(
                     program->data());
-
+                
+                // The second-to-last stack element is the script.
+                out_script = to_shared<script>(*pop(*out_stack), false);
                 out_leaf = to_shared(taproot::leaf_hash(control.version(),
                     *out_script));
 
