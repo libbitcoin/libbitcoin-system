@@ -44,7 +44,7 @@ hash_digest taproot::merkle_root(const data_chunk& control,
     const auto bytes = floored_subtract(control.size(), start);
     const auto count = floored_divide(bytes, ec_xonly_size);
     const auto begin = std::next(control.data(), start);
-    const auto nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
+    const auto& nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
 
     hash_digest hash{ tapleaf_hash };
     for (size_t node{}; node < count; ++node)
