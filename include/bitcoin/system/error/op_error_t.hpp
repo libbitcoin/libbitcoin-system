@@ -106,7 +106,6 @@ enum op_error_t : uint8_t
     op_check_sig_verify7,
     op_check_sig_verify8,
     op_check_sig_verify9,
-    op_check_sig_verify10,
     op_check_sig_empty_key,
     op_check_sig_parse_signature,
     op_check_multisig_verify1,
