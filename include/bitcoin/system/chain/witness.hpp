@@ -110,9 +110,6 @@ public:
     static constexpr bool is_reserved_pattern(
         const chunk_cptrs& stack) NOEXCEPT;
 
-    /// The stack adheres to the annex pattern [bip341].
-    inline bool is_annex_pattern() const NOEXCEPT;
-
     /// Script extractors.
     /// -----------------------------------------------------------------------
 
@@ -134,8 +131,6 @@ protected:
 private:
     // TODO: move to config serialization wrapper.
     static witness from_string(const std::string& mnemonic) NOEXCEPT;
-    static inline bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
-
     void assign_data(reader& source, bool prefix) NOEXCEPT;
 
     // Witness should be stored as shared.

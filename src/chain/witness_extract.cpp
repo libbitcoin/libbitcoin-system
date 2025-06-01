@@ -33,7 +33,7 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-// Extract.
+// Cached scripts.
 // ----------------------------------------------------------------------------
 
 static script checksig_script() NOEXCEPT
@@ -56,26 +56,8 @@ static script::cptr checksig_script_ptr() NOEXCEPT
     return cached;
 }
 
-// This is an internal optimization over using script::to_pay_key_hash_pattern.
-static inline operations to_pay_key_hash(const chunk_cptr& program) NOEXCEPT
-{
-    BC_ASSERT(program->size() == short_hash_size);
-
-    return operations
-    {
-        { opcode::dup },
-        { opcode::hash160 },
-        { program, true },
-        { opcode::equalverify },
-        { opcode::checksig }
-    };
-}
-
-static inline const hash_digest& to_array32(const data_chunk& program) NOEXCEPT
-{
-    BC_ASSERT(program.size() == hash_size);
-    return unsafe_array_cast<uint8_t, hash_size>(program.data());
-}
+// Extract.
+// ----------------------------------------------------------------------------
 
 // out_script is only useful only for sigop counting.
 // program_script is only used to determine witness_program type.
@@ -123,18 +105,6 @@ bool witness::extract_sigop_script(script& out_script,
     }
 }
 
-// static/private
-inline bool witness::drop_annex(chunk_cptrs& stack) NOEXCEPT
-{
-    if (is_annex_pattern(stack))
-    {
-        stack.pop_back();
-        return true;
-    }
-
-    return false;
-}
-
 BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 // All [bip141] comments.
@@ -158,7 +128,8 @@ code witness::extract_segwit(script::cptr& out_script,
         {
             // Create a pay-to-key-hash input script from the program.
             // The hash160 of public key must match program.
-            out_script = to_shared<script>(to_pay_key_hash(program));
+            out_script = to_shared<script>(
+                script::to_pay_key_hash_pattern(program));
 
             // Stack must be 2 elements.
             return out_stack->size() == two ?
@@ -179,8 +150,9 @@ code witness::extract_segwit(script::cptr& out_script,
             out_script = to_shared<script>(*pop(*out_stack), false);
 
             // Popped script sha256 hash must match program.
-            return to_array32(*program) == out_script->hash() ?
-                error::script_success : error::invalid_witness;
+            return unsafe_array_cast<uint8_t, hash_size>(program->data()) ==
+                out_script->hash() ? error::script_success :
+                error::invalid_witness;
         }
 
         // If the version byte is 0, but the witness program is neither
@@ -207,7 +179,7 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
         auto stack_size = out_stack->size();
 
         // If at least two elements, discard annex if present.
-        if (drop_annex(*out_stack))
+        if (taproot::drop_annex(*out_stack))
             --stack_size;
 
         // p2ts (tapscript, script path spend)
@@ -218,7 +190,7 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
         {
             // The last stack element is the control block.
             const auto control = pop(*out_stack);
-            if (!taproot::is_valid_control_block(*control))
+            if (!taproot::is_control_block(*control))
                 return error::invalid_witness;
 
             // The second-to-last stack element is the script.
@@ -230,14 +202,12 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
                 out_leaf = to_shared(taproot::leaf_hash(tap.version,
                     *out_script));
 
-                if (!taproot::verify_commitment(*control, *program, *out_leaf,
-                    tap.parity))
-                    return error::invalid_commitment;
-
                 // Execute tapleaf script.
                 // out stack  : [stack-elements]
                 // out script : (popped-from-stack)
-                return error::script_success;
+                return taproot::verify_commitment(*control, *program,
+                    *out_leaf, tap.parity) ? error::script_success :
+                    error::invalid_commitment;
             }
 
             // Others remain unencumbered (success).

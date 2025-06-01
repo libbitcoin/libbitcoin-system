@@ -44,7 +44,8 @@ public:
     };
 
     static tap parse(const data_chunk& control) NOEXCEPT;
-    static bool is_valid_control_block(const data_chunk& control) NOEXCEPT;
+    static bool is_control_block(const data_chunk& control) NOEXCEPT;
+    static bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
     static hash_digest leaf_hash(uint8_t version,
         const script& script) NOEXCEPT;
 

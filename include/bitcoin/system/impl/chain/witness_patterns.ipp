@@ -57,11 +57,6 @@ constexpr bool witness::is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT
     return !top->empty() && (top->front() == taproot_annex_prefix);
 }
 
-inline bool witness::is_annex_pattern() const NOEXCEPT
-{
-    return is_annex_pattern(stack_);
-}
-
 BC_POP_WARNING()
 BC_POP_WARNING()
 

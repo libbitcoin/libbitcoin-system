@@ -22,6 +22,7 @@
 #include <iterator>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -39,7 +40,7 @@ namespace chain {
 hash_digest taproot::merkle_root(const data_chunk& control,
     const hash_digest& tapleaf_hash) NOEXCEPT
 {
-    BC_ASSERT(is_valid_control_block(control));
+    BC_ASSERT(is_control_block(control));
     constexpr auto start = add1(ec_xonly_size);
     const auto bytes = floored_subtract(control.size(), start);
     const auto count = floored_divide(bytes, ec_xonly_size);
@@ -106,6 +107,18 @@ hash_digest taproot::leaf_hash(uint8_t version,
     return out;
 }
 
+// static
+bool taproot::drop_annex(chunk_cptrs& stack) NOEXCEPT
+{
+    if (witness::is_annex_pattern(stack))
+    {
+        stack.pop_back();
+        return true;
+    }
+
+    return false;
+}
+
 taproot::tap taproot::parse(const data_chunk& control) NOEXCEPT
 {
     BC_ASSERT(!control.empty());
@@ -118,7 +131,7 @@ taproot::tap taproot::parse(const data_chunk& control) NOEXCEPT
     };
 }
 
-bool taproot::is_valid_control_block(const data_chunk& control) NOEXCEPT
+bool taproot::is_control_block(const data_chunk& control) NOEXCEPT
 {
     const auto size = control.size();
     constexpr auto max = add1(ec_xonly_size) + ec_xonly_size * taproot_max_keys;
@@ -133,7 +146,7 @@ bool taproot::verify_commitment(const data_chunk& control,
     bool parity) NOEXCEPT
 {
     // vc++ debug compiler error using `auto` below.
-    BC_ASSERT(is_valid_control_block(control));
+    BC_ASSERT(is_control_block(control));
     const auto out = program.data();
     const ec_xonly& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
     const auto in = std::next(control.data());
