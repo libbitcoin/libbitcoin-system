@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_TAPSCRIPT_IPP
 
 #include <iterator>
+#include <utility>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -31,8 +32,8 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-inline tapscript::tapscript() NOEXCEPT
-  : tapscript(nullptr)
+inline tapscript::tapscript(chunk_cptr&& control) NOEXCEPT
+  : control_(is_control(*control) ? std::move(control) : nullptr)
 {
 }
 

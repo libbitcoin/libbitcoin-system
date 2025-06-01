@@ -37,7 +37,7 @@ public:
     
     inline static bool is_control(const data_chunk& control) NOEXCEPT;
 
-    inline tapscript() NOEXCEPT;
+    inline tapscript(chunk_cptr&& control) NOEXCEPT;
     inline tapscript(const chunk_cptr& control) NOEXCEPT;
 
     inline bool is_valid() const NOEXCEPT;
@@ -49,7 +49,7 @@ public:
     inline const keys_t& keys() const NOEXCEPT;
 
 private:
-    const chunk_cptr control_;
+    chunk_cptr control_;
 };
 
 } // namespace chain
