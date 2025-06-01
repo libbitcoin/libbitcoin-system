@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_COMPACT_NUMBER_IPP
-#define LIBBITCOIN_SYSTEM_CHAIN_COMPACT_NUMBER_IPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_COMPACT_IPP
+#define LIBBITCOIN_SYSTEM_CHAIN_COMPACT_IPP
 
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>

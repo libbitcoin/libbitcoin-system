@@ -712,6 +712,7 @@ if (with-tests)
         "../../test/chain/script.hpp"
         "../../test/chain/stripper.cpp"
         "../../test/chain/taproot.cpp"
+        "../../test/chain/tapscript.cpp"
         "../../test/chain/transaction.cpp"
         "../../test/chain/witness.cpp"
         "../../test/chain/enums/opcode.cpp"

@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/system/chain/annex.hpp>
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_ANNEX_IPP
+#define LIBBITCOIN_SYSTEM_CHAIN_ANNEX_IPP
 
-#include <bitcoin/system/chain/witness.hpp>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
@@ -26,6 +27,7 @@
 namespace libbitcoin {
 namespace system {
 namespace chain {
+
 inline annex::annex() NOEXCEPT
   : data_(nullptr)
 {
@@ -45,7 +47,7 @@ inline annex::annex(const chunk_cptrs& stack) NOEXCEPT
 // static/protected
 inline chunk_cptr annex::from_stack(const chunk_cptrs& stack) NOEXCEPT
 {
-    return witness::is_annex_pattern(stack) ? stack.back() : nullptr;
+    return is_annex_pattern(stack) ? stack.back() : nullptr;
 }
 
 // static/private
@@ -75,6 +77,21 @@ inline const hash_digest annex::hash() const NOEXCEPT
     return sha256_hash(data());
 }
 
+// static
+constexpr bool annex::is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT
+{
+    // If at least two elements, discard annex if present.
+    if (stack.size() <= one)
+        return false;
+
+    // If first byte of stack top is 0x50 it is the annex [bip341].
+    const auto& top = stack.back();
+    return !top->empty() && (top->front() == taproot_annex_prefix);
+}
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+#endif
+

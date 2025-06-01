@@ -19,15 +19,13 @@
 #include <bitcoin/system/chain/taproot.hpp>
 
 #include <algorithm>
-#include <iterator>
-#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/chain/annex.hpp>
 #include <bitcoin/system/chain/script.hpp>
-#include <bitcoin/system/chain/witness.hpp>
+#include <bitcoin/system/chain/tapscript.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
-#include <bitcoin/system/math/math.hpp>
 #include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
@@ -37,18 +35,12 @@ namespace chain {
 // protected
 // ----------------------------------------------------------------------------
 
-hash_digest taproot::merkle_root(const data_chunk& control,
+hash_digest taproot::merkle_root(const tapscript::keys_t& keys, size_t count,
     const hash_digest& tapleaf_hash) NOEXCEPT
 {
-    BC_ASSERT(is_control_block(control));
-    constexpr auto start = add1(ec_xonly_size);
-    const auto bytes = floored_subtract(control.size(), start);
-    const auto count = floored_divide(bytes, ec_xonly_size);
-    const auto begin = std::next(control.data(), start);
-    const auto& nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
     hash_digest hash{ tapleaf_hash };
-    for (size_t node{}; node < count; ++node)
-        hash = sorted_branch_hash(hash, nodes.at(node));
+    for (size_t key{}; key < count; ++key)
+        hash = sorted_branch_hash(hash, keys.at(key));
 
     return hash;
 }
@@ -106,50 +98,20 @@ hash_digest taproot::leaf_hash(uint8_t version,
 // static
 bool taproot::drop_annex(chunk_cptrs& stack) NOEXCEPT
 {
-    if (witness::is_annex_pattern(stack))
-    {
-        stack.pop_back();
-        return true;
-    }
+    if (!annex::is_annex_pattern(stack))
+        return false;
 
-    return false;
+    stack.pop_back();
+    return true;
 }
 
-taproot::tap taproot::parse(const data_chunk& control) NOEXCEPT
+bool taproot::verify_commit(const tapscript& control, const ec_xonly& out_key,
+    const hash_digest& hash) NOEXCEPT
 {
-    BC_ASSERT(!control.empty());
-    constexpr auto parity_mask = bit_not(tapscript_mask);
-    const auto byte = control.front();
-    return
-    {
-        bit_and(byte, tapscript_mask),
-        to_bool(bit_and(byte, parity_mask))
-    };
-}
-
-bool taproot::is_control_block(const data_chunk& control) NOEXCEPT
-{
-    const auto size = control.size();
-    constexpr auto max = add1(ec_xonly_size) + ec_xonly_size * taproot_max_keys;
-
-    // Control block must be add1(32) + 32m, for integer m [0..128] [bip341].
-    return !is_limited(size, add1(ec_xonly_size), max) && is_zero(
-        floored_modulo(size - add1(ec_xonly_size), ec_xonly_size));
-}
-
-bool taproot::verify_commitment(const data_chunk& control,
-    const data_chunk& program, const hash_digest& hash,
-    bool parity) NOEXCEPT
-{
-    // vc++ debug compiler failure using `auto` below.
-    BC_ASSERT(is_control_block(control));
-    const auto out = program.data();
-    const ec_xonly& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
-    const auto in = std::next(control.data());
-    const ec_xonly& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
-    const auto root = merkle_root(control, hash);
-    const auto tweak = tweak_hash(in_key, root);
-    return schnorr::verify_commitment(in_key, tweak, out_key, parity);
+    using namespace schnorr;
+    const auto root = merkle_root(control.keys(), control.count(), hash);
+    const auto tweak = tweak_hash(control.key(), root);
+    return verify_commitment(control.key(), tweak, out_key, control.parity());
 }
 
 } // namespace chain

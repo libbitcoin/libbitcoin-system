@@ -23,6 +23,7 @@
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/chain/taproot.hpp>
+#include <bitcoin/system/chain/tapscript.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -189,25 +190,26 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
         if (stack_size > one)
         {
             // The last stack element is the control block.
-            const auto control = pop(*out_stack);
-            if (!taproot::is_control_block(*control))
+            const auto control = tapscript{ pop(*out_stack) };
+            if (!control.is_valid())
                 return error::invalid_witness;
 
             // The second-to-last stack element is the script.
             out_script = to_shared<script>(*pop(*out_stack), false);
 
-            // Extract version and parity from control byte.
-            if (const auto tap = taproot::parse(*control))
+            if (control.is_tapscript())
             {
-                out_leaf = to_shared(taproot::leaf_hash(tap.version,
+                const auto& key = unsafe_array_cast<uint8_t, ec_xonly_size>(
+                    program->data());
+
+                out_leaf = to_shared(taproot::leaf_hash(control.version(),
                     *out_script));
 
                 // Execute tapleaf script.
                 // out stack  : [stack-elements]
                 // out script : (popped-from-stack)
-                return taproot::verify_commitment(*control, *program,
-                    *out_leaf, tap.parity) ? error::script_success :
-                    error::invalid_commitment;
+                return taproot::verify_commit(control, key, *out_leaf) ?
+                    error::script_success : error::invalid_commitment;
             }
 
             // Others remain unencumbered (success).

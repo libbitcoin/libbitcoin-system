@@ -200,7 +200,7 @@ void witness::assign_data(reader& source, bool prefix) NOEXCEPT
                 break;
     }
 
-    if (witness::is_annex_pattern(stack_))
+    if (annex::is_annex_pattern(stack_))
         annex_ = { stack_.back() };
 
     valid_ = source;

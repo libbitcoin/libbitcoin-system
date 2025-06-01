@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_CHAIN_TAPROOT_HPP
 
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/tapscript.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -32,30 +33,15 @@ namespace chain {
 class BC_API taproot
 {
 public:
-    struct tap
-    {
-        INLINE operator bool() const NOEXCEPT
-        {
-            return version == tapscript_version;
-        }
-
-        uint8_t version;
-        bool parity;
-    };
-
-    static tap parse(const data_chunk& control) NOEXCEPT;
-    static bool is_control_block(const data_chunk& control) NOEXCEPT;
-    static bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
     static hash_digest leaf_hash(uint8_t version,
         const script& script) NOEXCEPT;
-
-    static bool verify_commitment(const data_chunk& control,
-        const data_chunk& program, const hash_digest& hash,
-        bool parity) NOEXCEPT;
+    static bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
+    static bool verify_commit(const tapscript& control,
+        const ec_xonly& out_key, const hash_digest& hash) NOEXCEPT;
 
 protected:
-    static hash_digest merkle_root(const data_chunk& control,
-        const hash_digest& tapleaf_hash) NOEXCEPT;
+    static hash_digest merkle_root(const tapscript::keys_t& keys,
+        size_t count, const hash_digest& tapleaf_hash) NOEXCEPT;
     static hash_digest sorted_branch_hash(const hash_digest& left,
         const hash_digest& right) NOEXCEPT;
     static hash_digest branch_hash(const hash_digest& first,
@@ -63,9 +49,9 @@ protected:
     static hash_digest tweak_hash(const ec_xonly& key,
         const hash_digest& merkle) NOEXCEPT;
 };
+
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
-
 
 #endif

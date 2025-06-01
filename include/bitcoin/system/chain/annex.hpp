@@ -42,6 +42,9 @@ public:
     inline const hash_digest hash() const NOEXCEPT;
     inline operator bool() const NOEXCEPT;
 
+    /// The stack adheres to the annex pattern [bip341].
+    static constexpr bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT;
+
 protected:
     static inline chunk_cptr from_stack(const chunk_cptrs& stack) NOEXCEPT;
 
@@ -54,5 +57,7 @@ private:
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/chain/annex.ipp>
 
 #endif
