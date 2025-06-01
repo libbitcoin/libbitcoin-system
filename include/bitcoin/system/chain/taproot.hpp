@@ -37,7 +37,7 @@ public:
         const script& script) NOEXCEPT;
     static bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
     static bool verify_commit(const tapscript& control,
-        const ec_xonly& out_key, const hash_digest& hash) NOEXCEPT;
+        const ec_xonly& out_key, const hash_digest& leaf) NOEXCEPT;
 
 protected:
     static hash_digest merkle_root(const tapscript::keys_t& keys,

@@ -106,10 +106,10 @@ bool taproot::drop_annex(chunk_cptrs& stack) NOEXCEPT
 }
 
 bool taproot::verify_commit(const tapscript& control, const ec_xonly& out_key,
-    const hash_digest& hash) NOEXCEPT
+    const hash_digest& leaf) NOEXCEPT
 {
     using namespace schnorr;
-    const auto root = merkle_root(control.keys(), control.count(), hash);
+    const auto root = merkle_root(control.keys(), control.count(), leaf);
     const auto tweak = tweak_hash(control.key(), root);
     return verify_commitment(control.key(), tweak, out_key, control.parity());
 }
