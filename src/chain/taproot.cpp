@@ -132,13 +132,14 @@ bool taproot::verify_commitment(const data_chunk& control,
     const data_chunk& program, const hash_digest& hash,
     bool parity) NOEXCEPT
 {
+    // vc++ debug compiler error using `auto` below.
     BC_ASSERT(is_valid_control_block(control));
     const auto out = program.data();
-    const auto& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
+    const ec_xonly& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
     const auto in = std::next(control.data());
-    const auto& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
+    const ec_xonly& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
     const auto root = merkle_root(control, hash);
-    const auto tweak = tweak_hash(out_key, root);
+    const auto tweak = tweak_hash(in_key, root);
     return schnorr::verify_commitment(in_key, tweak, out_key, parity);
 }
 
