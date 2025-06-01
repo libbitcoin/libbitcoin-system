@@ -32,10 +32,15 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
+// Move of the shared pointer object is intended.
+BC_PUSH_WARNING(NO_RVALUE_REF_SHARED_PTR)
+
 inline tapscript::tapscript(chunk_cptr&& control) NOEXCEPT
   : control_(is_control(*control) ? std::move(control) : nullptr)
 {
 }
+
+BC_POP_WARNING()
 
 inline tapscript::tapscript(const chunk_cptr& control) NOEXCEPT
   : control_(is_control(*control) ? control : nullptr)
