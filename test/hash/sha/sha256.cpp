@@ -320,7 +320,8 @@ BOOST_AUTO_TEST_CASE(sha256__merkle_root__one__same)
 BOOST_AUTO_TEST_CASE(sha256__merkle_root__two__expected)
 {
     constexpr auto expected = sha256::double_hash({ 0 }, { 1 });
-    static_assert(sha256::merkle_root({ { 0 }, { 1 } }) == expected);
+    // vc++ debug compiler failure.
+    ////static_assert(sha256::merkle_root({ { 0 }, { 1 } }) == expected);
     BOOST_CHECK_EQUAL(sha256::merkle_root({ { 0 }, { 1 } }), expected);
 }
 

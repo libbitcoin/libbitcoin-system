@@ -145,7 +145,7 @@ bool taproot::verify_commitment(const data_chunk& control,
     const data_chunk& program, const hash_digest& hash,
     bool parity) NOEXCEPT
 {
-    // vc++ debug compiler error using `auto` below.
+    // vc++ debug compiler failure using `auto` below.
     BC_ASSERT(is_control_block(control));
     const auto out = program.data();
     const ec_xonly& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
