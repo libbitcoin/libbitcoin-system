@@ -382,7 +382,8 @@ BOOST_AUTO_TEST_CASE(sha512__merkle_root__one__same)
 BOOST_AUTO_TEST_CASE(sha512__merkle_root__two__expected)
 {
     constexpr auto expected = sha512::double_hash({ 0 }, { 1 });
-    static_assert(sha512::merkle_root({ { 0 }, { 1 } }) == expected);
+    // vc++ debug compiler failure.
+    ////static_assert(sha512::merkle_root({ { 0 }, { 1 } }) == expected);
     BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 } }), expected);
 }
 
@@ -400,7 +401,8 @@ BOOST_AUTO_TEST_CASE(sha512__merkle_root__four__expected)
     constexpr auto expected1 = sha512::double_hash({ 0 }, { 1 });
     constexpr auto expected2 = sha512::double_hash({ 2 }, { 3 });
     constexpr auto expected = sha512::double_hash(expected1, expected2);
-    static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }) == expected);
+    // vc++ debug compiler failure.
+    ////static_assert(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }) == expected);
     BOOST_CHECK_EQUAL(sha512::merkle_root({ { 0 }, { 1 }, { 2 }, { 3 } }), expected);
 }
 

@@ -55,10 +55,11 @@ INLINE void shuffle(xint128_t&, xint128_t&) NOEXCEPT
 INLINE void unshuffle(xint128_t&, xint128_t&) NOEXCEPT
 {
 }
+
 } // namespace sha
 } // namespace system
 } // namespace libbitcoin
 
-#endif // HAVE_SHANI
+#endif // HAVE_CRYPTO
 
 #endif

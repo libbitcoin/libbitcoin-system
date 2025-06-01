@@ -44,7 +44,8 @@ public:
     };
 
     static tap parse(const data_chunk& control) NOEXCEPT;
-    static bool is_valid_control_block(const data_chunk& control) NOEXCEPT;
+    static bool is_control_block(const data_chunk& control) NOEXCEPT;
+    static bool drop_annex(chunk_cptrs& stack) NOEXCEPT;
     static hash_digest leaf_hash(uint8_t version,
         const script& script) NOEXCEPT;
 
@@ -55,8 +56,10 @@ public:
 protected:
     static hash_digest merkle_root(const data_chunk& control,
         const hash_digest& tapleaf_hash) NOEXCEPT;
-    static hash_digest branch_hash(const hash_digest& left,
+    static hash_digest sorted_branch_hash(const hash_digest& left,
         const hash_digest& right) NOEXCEPT;
+    static hash_digest branch_hash(const hash_digest& first,
+        const hash_digest& second) NOEXCEPT;
     static hash_digest tweak_hash(const ec_xonly& key,
         const hash_digest& merkle) NOEXCEPT;
 };

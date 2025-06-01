@@ -69,6 +69,8 @@ public:
     static inline operations to_pay_public_key_pattern(
         const data_slice& point) NOEXCEPT;
     static inline operations to_pay_key_hash_pattern(
+        const chunk_cptr& hash) NOEXCEPT;
+    static inline operations to_pay_key_hash_pattern(
         const short_hash& hash) NOEXCEPT;
     static inline operations to_pay_script_hash_pattern(
         const short_hash& hash) NOEXCEPT;

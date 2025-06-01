@@ -1045,10 +1045,6 @@ op_check_sig_verify() NOEXCEPT
                 return error::op_check_sig_verify6;
         }
 
-        // If signature not empty, opcode counted toward sigops budget.
-        if (!state::sigops_increment())
-            return error::op_check_sig_verify7;
-
         // If public key size is neither 0 nor 32 bytes, it is an unknown type.
         // During script execution of signature opcodes these behave exactly as
         // known types except that signature validation considered successful.
@@ -1056,7 +1052,7 @@ op_check_sig_verify() NOEXCEPT
     }
 
     if (endorsement->empty())
-        return error::op_check_sig_verify8;
+        return error::op_check_sig_verify7;
 
     // Split endorsement into DER signature and signature hash flags.
     uint8_t sighash_flags;
@@ -1072,11 +1068,11 @@ op_check_sig_verify() NOEXCEPT
     hash_digest hash{};
     const auto subscript = state::subscript(endorsement);
     if (!state::signature_hash(hash, *subscript, sighash_flags))
-        return error::op_check_sig_verify9;
+        return error::op_check_sig_verify8;
 
     // Verify ECDSA signature against public key and signature hash.
     if (!ecdsa::verify_signature(*key, hash, sig))
-        return error::op_check_sig_verify10;
+        return error::op_check_sig_verify9;
 
     // TODO: use sighash and key to generate signature in sign mode.
     return error::op_success;

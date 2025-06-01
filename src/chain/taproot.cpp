@@ -22,6 +22,7 @@
 #include <iterator>
 #include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/script.hpp>
+#include <bitcoin/system/chain/witness.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
@@ -39,40 +40,36 @@ namespace chain {
 hash_digest taproot::merkle_root(const data_chunk& control,
     const hash_digest& tapleaf_hash) NOEXCEPT
 {
-    BC_ASSERT(is_valid_control_block(control));
+    BC_ASSERT(is_control_block(control));
     constexpr auto start = add1(ec_xonly_size);
     const auto bytes = floored_subtract(control.size(), start);
     const auto count = floored_divide(bytes, ec_xonly_size);
     const auto begin = std::next(control.data(), start);
-    const auto nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
-
+    const auto& nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
     hash_digest hash{ tapleaf_hash };
     for (size_t node{}; node < count; ++node)
-        hash = branch_hash(hash, nodes.at(node));
+        hash = sorted_branch_hash(hash, nodes.at(node));
 
     return hash;
 }
 
-// TapBranch
-hash_digest taproot::branch_hash(const hash_digest& left,
+hash_digest taproot::sorted_branch_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT
+{
+    return std::lexicographical_compare(left.begin(), left.end(),
+        right.begin(), right.end()) ? branch_hash(left, right) :
+        branch_hash(right, left);
+}
+
+// TapBranch
+hash_digest taproot::branch_hash(const hash_digest& first,
+    const hash_digest& second) NOEXCEPT
 {
     hash_digest out{};
     stream::out::fast stream{ out };
     hash::sha256t::fast<"TapBranch"> sink{ stream };
-
-    if (std::lexicographical_compare(left.begin(), left.end(),
-        right.begin(), right.end()))
-    {
-        sink.write_bytes(left);
-        sink.write_bytes(right);
-    }
-    else
-    {
-        sink.write_bytes(right);
-        sink.write_bytes(left);
-    }
-
+    sink.write_bytes(first);
+    sink.write_bytes(second);
     sink.flush();
     return out;
 }
@@ -106,6 +103,18 @@ hash_digest taproot::leaf_hash(uint8_t version,
     return out;
 }
 
+// static
+bool taproot::drop_annex(chunk_cptrs& stack) NOEXCEPT
+{
+    if (witness::is_annex_pattern(stack))
+    {
+        stack.pop_back();
+        return true;
+    }
+
+    return false;
+}
+
 taproot::tap taproot::parse(const data_chunk& control) NOEXCEPT
 {
     BC_ASSERT(!control.empty());
@@ -118,7 +127,7 @@ taproot::tap taproot::parse(const data_chunk& control) NOEXCEPT
     };
 }
 
-bool taproot::is_valid_control_block(const data_chunk& control) NOEXCEPT
+bool taproot::is_control_block(const data_chunk& control) NOEXCEPT
 {
     const auto size = control.size();
     constexpr auto max = add1(ec_xonly_size) + ec_xonly_size * taproot_max_keys;
@@ -132,13 +141,14 @@ bool taproot::verify_commitment(const data_chunk& control,
     const data_chunk& program, const hash_digest& hash,
     bool parity) NOEXCEPT
 {
-    BC_ASSERT(is_valid_control_block(control));
+    // vc++ debug compiler failure using `auto` below.
+    BC_ASSERT(is_control_block(control));
     const auto out = program.data();
-    const auto& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
+    const ec_xonly& out_key = unsafe_array_cast<uint8_t, ec_xonly_size>(out);
     const auto in = std::next(control.data());
-    const auto& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
+    const ec_xonly& in_key = unsafe_array_cast<uint8_t, ec_xonly_size>(in);
     const auto root = merkle_root(control, hash);
-    const auto tweak = tweak_hash(out_key, root);
+    const auto tweak = tweak_hash(in_key, root);
     return schnorr::verify_commitment(in_key, tweak, out_key, parity);
 }
 

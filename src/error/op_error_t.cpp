@@ -101,7 +101,6 @@ DEFINE_ERROR_T_MESSAGE_MAP(op_error)
     { op_check_sig_verify7, "op_check_sig_verify7" },
     { op_check_sig_verify8, "op_check_sig_verify8" },
     { op_check_sig_verify9, "op_check_sig_verify9" },
-    { op_check_sig_verify10, "op_check_sig_verify10" },
     { op_check_sig_empty_key, "op_check_sig_empty_key" },
     { op_check_sig_parse_signature, "op_check_sig_parse_signature" },
     { op_check_multisig_verify1, "op_check_multisig_verify1" },

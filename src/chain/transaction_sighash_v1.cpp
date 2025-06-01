@@ -142,9 +142,10 @@ bool transaction::version1_sighash(hash_digest& out,
         sink.write_4_bytes_little_endian(subscript_v1(script));
     }
 
+    // TODO: write position pertains to the hash instance (written at flush).
     // Total length at most 206 bytes (!anyone, no epoch/tapscript) [bip341].
-    BC_ASSERT(!anyone && sink.get_write_position() == (add1(206u) + 37));
-    BC_ASSERT( anyone && sink.get_write_position() == (add1(157u) + 37));
+    ////BC_ASSERT(!anyone && sink.get_write_position() == (add1(206u) + 37));
+    ////BC_ASSERT( anyone && sink.get_write_position() == (add1(157u) + 37));
 
     sink.flush();
     return true;

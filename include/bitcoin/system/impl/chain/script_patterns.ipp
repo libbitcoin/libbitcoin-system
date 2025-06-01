@@ -287,11 +287,19 @@ inline operations script::to_pay_public_key_pattern(
 inline operations script::to_pay_key_hash_pattern(
     const short_hash& hash) NOEXCEPT
 {
+    return to_pay_key_hash_pattern(to_shared(to_chunk(hash)));
+}
+
+inline operations script::to_pay_key_hash_pattern(
+    const chunk_cptr& hash) NOEXCEPT
+{
+    BC_ASSERT(hash->size() == short_hash_size);
+
     return
     {
         { opcode::dup },
         { opcode::hash160 },
-        { to_chunk(hash), false },
+        { hash, false },
         { opcode::equalverify },
         { opcode::checksig }
     };
