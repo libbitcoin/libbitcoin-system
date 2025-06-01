@@ -40,7 +40,7 @@ run() NOEXCEPT
 {
     // Enforce initial limits, determine early success or failure.
     if (const auto ec = state::initialize())
-        return (ec == error::prevalid_script) ? error::script_success : ec;
+        return ec;
 
     for (auto it = state::begin(); it != state::end(); ++it)
     {

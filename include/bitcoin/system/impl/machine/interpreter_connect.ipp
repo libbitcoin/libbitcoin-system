@@ -199,7 +199,7 @@ code CLASS::connect_witness(const chain::context& state,
 
             if ((ec = program.run()))
             {
-                return ec;
+                return ec == error::prevalid_script ? error::script_success : ec;
             }
             else if (!program.is_true(true))
             {
