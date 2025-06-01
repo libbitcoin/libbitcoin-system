@@ -46,34 +46,30 @@ hash_digest taproot::merkle_root(const data_chunk& control,
     const auto count = floored_divide(bytes, ec_xonly_size);
     const auto begin = std::next(control.data(), start);
     const auto& nodes = unsafe_array_cast<ec_xonly, taproot_max_keys>(begin);
-
     hash_digest hash{ tapleaf_hash };
     for (size_t node{}; node < count; ++node)
-        hash = branch_hash(hash, nodes.at(node));
+        hash = sorted_branch_hash(hash, nodes.at(node));
 
     return hash;
 }
 
-// TapBranch
-hash_digest taproot::branch_hash(const hash_digest& left,
+hash_digest taproot::sorted_branch_hash(const hash_digest& left,
     const hash_digest& right) NOEXCEPT
+{
+    return std::lexicographical_compare(left.begin(), left.end(),
+        right.begin(), right.end()) ? branch_hash(left, right) :
+        branch_hash(right, left);
+}
+
+// TapBranch
+hash_digest taproot::branch_hash(const hash_digest& first,
+    const hash_digest& second) NOEXCEPT
 {
     hash_digest out{};
     stream::out::fast stream{ out };
     hash::sha256t::fast<"TapBranch"> sink{ stream };
-
-    if (std::lexicographical_compare(left.begin(), left.end(),
-        right.begin(), right.end()))
-    {
-        sink.write_bytes(left);
-        sink.write_bytes(right);
-    }
-    else
-    {
-        sink.write_bytes(right);
-        sink.write_bytes(left);
-    }
-
+    sink.write_bytes(first);
+    sink.write_bytes(second);
     sink.flush();
     return out;
 }

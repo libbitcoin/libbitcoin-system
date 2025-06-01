@@ -56,8 +56,10 @@ public:
 protected:
     static hash_digest merkle_root(const data_chunk& control,
         const hash_digest& tapleaf_hash) NOEXCEPT;
-    static hash_digest branch_hash(const hash_digest& left,
+    static hash_digest sorted_branch_hash(const hash_digest& left,
         const hash_digest& right) NOEXCEPT;
+    static hash_digest branch_hash(const hash_digest& first,
+        const hash_digest& second) NOEXCEPT;
     static hash_digest tweak_hash(const ec_xonly& key,
         const hash_digest& merkle) NOEXCEPT;
 };
