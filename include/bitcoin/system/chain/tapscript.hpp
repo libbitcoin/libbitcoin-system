@@ -16,40 +16,46 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SYSTEM_CHAIN_WITNESS_PATTERNS_IPP
-#define LIBBITCOIN_SYSTEM_CHAIN_WITNESS_PATTERNS_IPP
+#ifndef LIBBITCOIN_SYSTEM_CHAIN_TAPSCRIPT_HPP
+#define LIBBITCOIN_SYSTEM_CHAIN_TAPSCRIPT_HPP
 
-#include <algorithm>
+#include <bitcoin/system/chain/enums/magic_numbers.hpp>
+#include <bitcoin/system/crypto/crypto.hpp>
+#include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace chain {
 
-BC_PUSH_WARNING(SMART_PTR_NOT_NEEDED)
-BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
-
-// static
-constexpr bool witness::is_push_size(const chunk_cptrs& stack) NOEXCEPT
+class BC_API tapscript
 {
-    return std::all_of(stack.begin(), stack.end(),
-        [](const auto& element) NOEXCEPT
-        {
-            return element->size() <= max_push_data_size;
-        });
-}
+public:
+    using keys_t = std::array<ec_xonly, taproot_max_keys>;
 
-// static
-constexpr bool witness::is_reserved_pattern(const chunk_cptrs& stack) NOEXCEPT
-{
-    return is_one(stack.size()) && stack.front()->size() == hash_size;
-}
+    DEFAULT_COPY_MOVE_DESTRUCT(tapscript);
+    
+    inline static bool is_control(const data_chunk& control) NOEXCEPT;
 
-BC_POP_WARNING()
-BC_POP_WARNING()
+    inline tapscript(chunk_cptr&& control) NOEXCEPT;
+    inline tapscript(const chunk_cptr& control) NOEXCEPT;
+
+    inline bool is_valid() const NOEXCEPT;
+    inline bool is_tapscript() const NOEXCEPT;
+    inline bool parity() const NOEXCEPT;
+    inline size_t count() const NOEXCEPT;
+    inline uint8_t version() const NOEXCEPT;
+    inline const ec_xonly& key() const NOEXCEPT;
+    inline const keys_t& keys() const NOEXCEPT;
+
+private:
+    chunk_cptr control_;
+};
 
 } // namespace chain
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/chain/tapscript.ipp>
 
 #endif

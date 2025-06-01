@@ -21,7 +21,6 @@
 
 #include <memory>
 #include <bitcoin/system/chain/annex.hpp>
-#include <bitcoin/system/chain/enums/magic_numbers.hpp>
 #include <bitcoin/system/chain/operation.hpp>
 #include <bitcoin/system/chain/script.hpp>
 #include <bitcoin/system/data/data.hpp>
@@ -99,9 +98,6 @@ public:
 
     /// Patterns.
     /// -----------------------------------------------------------------------
-
-    /// The stack adheres to the annex pattern [bip341].
-    static constexpr bool is_annex_pattern(const chunk_cptrs& stack) NOEXCEPT;
 
     /// Verify the push size of each stack element [bip141].
     static constexpr bool is_push_size(const chunk_cptrs& stack) NOEXCEPT;

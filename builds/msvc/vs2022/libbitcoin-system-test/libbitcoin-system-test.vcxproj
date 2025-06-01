@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\stripper.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\taproot.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\tapscript.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\witness.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
