@@ -39,7 +39,7 @@ public:
 
     inline size_t size() const NOEXCEPT;
     inline const data_chunk& data() const NOEXCEPT;
-    inline const hash_digest hash() const NOEXCEPT;
+    inline const hash_digest hash(bool prefix) const NOEXCEPT;
     inline operator bool() const NOEXCEPT;
 
     /// The stack adheres to the annex pattern [bip341].
