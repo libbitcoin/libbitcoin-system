@@ -106,9 +106,13 @@ bool transaction::version1_sighash(hash_digest& out,
 
     if (anyone)
     {
+        // This implies a parameterization error, and will fail the script.
+        if (is_null(in.prevout))
+            return false;
+
         in.point().to_data(sink);
         sink.write_8_bytes_little_endian(value);
-        script.to_data(sink, true);
+        in.prevout->script().to_data(sink, true);
         sink.write_4_bytes_little_endian(in.sequence());
     }
     else
