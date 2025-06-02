@@ -72,10 +72,6 @@ bool transaction::version0_sighash(hash_digest& out,
     stream::out::fast stream{ out };
     hash::sha256x2::fast sink{ stream };
 
-    ///////////////////////////////////////////////////////////////////////////
-    // TODO: update cache calls.
-    ///////////////////////////////////////////////////////////////////////////
-
     sink.write_4_bytes_little_endian(version_);
     sink.write_bytes(!anyone ? double_hash_points() : null_hash);
     sink.write_bytes(!anyone && all ? double_hash_sequences() : null_hash);
