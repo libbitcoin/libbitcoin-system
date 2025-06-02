@@ -65,7 +65,7 @@ initialize() const NOEXCEPT
     if (bip342 && script_->is_prevalid())
         return error::prevalid_script;
 
-    // Fail if last op is underflow (same behavior as prefail - invalid code).
+    // Fail if last op is underflow (same behavior as prefail, invalid code).
     if (script_->is_underflow())
         return error::invalid_script;
 
@@ -73,8 +73,8 @@ initialize() const NOEXCEPT
     if (bip342 && is_stack_overflow())
         return error::invalid_stack_size;
 
-    // Apply stack element limit (520) to initial witness [bip141][bip342].
-    if (bip141 && witness_ && !chain::witness::is_push_size(*witness_))
+    // Apply stack element limit (520) to initial witness [bip342|bip141].
+    if ((bip342 || bip141) && witness_ && !chain::witness::is_push_size(*witness_))
         return error::invalid_witness_stack;
 
     // Script size limit (10,000) [0.3.7+], removed [bip342].
