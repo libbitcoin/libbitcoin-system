@@ -23,6 +23,7 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/hash/hash.hpp>
+#include <bitcoin/system/stream/stream.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -72,9 +73,18 @@ inline const data_chunk& annex::data() const NOEXCEPT
     return data_ ? *data_ : empty_annex();
 }
 
-inline const hash_digest annex::hash() const NOEXCEPT
+inline const hash_digest annex::hash(bool prefix) const NOEXCEPT
 {
-    return sha256_hash(data());
+    if (!prefix)
+        return sha256_hash(data());
+
+    hash_digest out{};
+    stream::out::fast stream{ out };
+    hash::sha256::fast sink{ stream };
+    sink.write_variable(size());
+    sink.write_bytes(data());
+    sink.flush();
+    return out;
 }
 
 // static

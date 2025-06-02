@@ -122,8 +122,7 @@ bool transaction::version1_sighash(hash_digest& out,
 
     if (annex)
     {
-        sink.write_variable(annex.size());
-        sink.write_bytes(annex.hash());
+        sink.write_bytes(annex.hash(true));
     }
 
     if (single)
