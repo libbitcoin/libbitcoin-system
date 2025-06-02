@@ -38,7 +38,6 @@ TEMPLATE
 code CLASS::
 run() NOEXCEPT
 {
-    // Enforce initial limits, determine early success or failure.
     if (const auto ec = state::initialize())
         return ec;
 
