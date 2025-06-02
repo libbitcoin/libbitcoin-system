@@ -61,6 +61,18 @@ initialize() const NOEXCEPT
     const auto bip141 = is_enabled(flags::bip141_rule);
     const auto bip342 = is_enabled(flags::bip342_rule);
 
+    // Succeed if any success code, overrides all codes and errors [bip342].
+    if (bip342 && script_->is_prevalid())
+        return error::prevalid_script;
+
+    // Fail if last op is underflow (same behavior as prefail - invalid code).
+    if (script_->is_underflow())
+        return error::invalid_script;
+
+    // Stack limit (1,000) applied to initial stack [bip342].
+    if (bip342 && is_stack_overflow())
+        return error::invalid_stack_size;
+
     // Apply stack element limit (520) to initial witness [bip141][bip342].
     if (bip141 && witness_ && !chain::witness::is_push_size(*witness_))
         return error::invalid_witness_stack;
@@ -68,18 +80,6 @@ initialize() const NOEXCEPT
     // Script size limit (10,000) [0.3.7+], removed [bip342].
     if (!bip342 && nops && script_->is_oversized())
         return error::invalid_script_size;
-
-    // Stacks element limit (1,000) applied to initial stack [bip342].
-    if (bip342 && is_stack_overflow())
-        return error::invalid_stack_size;
-
-    // Succeed if any success code, one overrides all codes [bip342].
-    if (bip342 && script_->is_prevalid())
-        return error::prevalid_script;
-
-    // Fail if last op underflow, lower priority than success codes [bip342].
-    if (script_->is_underflow())
-        return error::invalid_script;
 
     // Fail if any op invalid (invalid codes reduced in tapscript).
     // Should be after underflow check since underflow is also an invalid op.
