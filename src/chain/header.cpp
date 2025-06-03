@@ -306,7 +306,7 @@ bool header::is_invalid_proof_of_work(uint32_t proof_of_work_limit,
 // ****************************************************************************
 // CONSENSUS: 32 bit unsigned unix time overflows in 2106.
 // ****************************************************************************
-bool header::is_invalid_timestamp(
+bool header::is_futuristic_timestamp(
     uint32_t timestamp_limit_seconds) const NOEXCEPT
 {
     using namespace std::chrono;
@@ -324,7 +324,7 @@ code header::check(uint32_t timestamp_limit_seconds,
 {
     if (is_invalid_proof_of_work(proof_of_work_limit, scrypt))
         return error::invalid_proof_of_work;
-    if (is_invalid_timestamp(timestamp_limit_seconds))
+    if (is_futuristic_timestamp(timestamp_limit_seconds))
         return error::futuristic_timestamp;
 
     return error::block_success;
@@ -339,11 +339,11 @@ code header::check(uint32_t timestamp_limit_seconds,
 // All other work comparisons performed on expanded/normalized bits values.
 code header::accept(const context& ctx) const NOEXCEPT
 {
-    if (version_ < ctx.minimum_block_version)
-        return error::invalid_block_version;
-    if (timestamp_ <= ctx.median_time_past)
-        return error::timestamp_too_early;
-    if (bits_ != ctx.work_required)
+    if (ctx.is_insufficient_version(version_))
+        return error::insufficient_block_version;
+    if (ctx.is_anachronistic_timestamp(timestamp_))
+        return error::anachronistic_timestamp;
+    if (ctx.is_invalid_work(bits_))
         return error::incorrect_proof_of_work;
 
     return error::block_success;

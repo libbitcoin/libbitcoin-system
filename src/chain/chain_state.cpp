@@ -106,8 +106,8 @@ inline uint32_t bits_high(const chain_state::data& values) NOEXCEPT
 chain_state::activations chain_state::activation(const data& values,
     const forks& forks, const system::settings& settings) NOEXCEPT
 {
-    // Initialize activation results with genesis values.
-    activations result{ flags::no_rules, settings.first_version };
+    // There are no constraints on block version before bip34.
+    activations result{ flags::no_rules, 0 };
 
     // regtest is only activated via configuration.
     if (forks.retarget)
@@ -230,10 +230,6 @@ chain_state::activations chain_state::activation(const data& values,
         is_enforced(count_2, settings.bip34_enforcement_threshold))
     {
         result.minimum_block_version = settings.bip34_version;
-    }
-    else
-    {
-        result.minimum_block_version = settings.first_version;
     }
 
     // TODO: bip9 historical activation.

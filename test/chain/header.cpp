@@ -50,9 +50,9 @@ public:
         return header::is_invalid_proof_of_work(proof_of_work_limit, scrypt);
     }
 
-    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const
+    bool is_futuristic_timestamp(uint32_t timestamp_limit_seconds) const
     {
-        return header::is_invalid_timestamp(timestamp_limit_seconds);
+        return header::is_futuristic_timestamp(timestamp_limit_seconds);
     }
 };
 
@@ -328,21 +328,21 @@ BOOST_AUTO_TEST_CASE(header__is_invalid_proof_of_work__scrypt_hash_less_than_bit
     BOOST_REQUIRE(!instance.is_invalid_proof_of_work(settings.proof_of_work_limit, true));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_less_than_2_hours_from_now__false)
+BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_less_than_2_hours_from_now__false)
 {
     const auto now = std::chrono::system_clock::now();
     const auto now_time = possible_narrow_and_sign_cast<uint32_t>(std::chrono::system_clock::to_time_t(now));
     const accessor instance{ {}, hash_digest{}, {}, now_time, {}, {} };
-    BOOST_REQUIRE(!instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
+    BOOST_REQUIRE(!instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
 }
 
-BOOST_AUTO_TEST_CASE(header__is_invalid_timestamp__timestamp_greater_than_2_hours_from_now__true)
+BOOST_AUTO_TEST_CASE(header__is_futuristic_timestamp__timestamp_greater_than_2_hours_from_now__true)
 {
     const auto now = std::chrono::system_clock::now();
     const auto duration = std::chrono::hours(3);
     const auto future = possible_narrow_and_sign_cast<uint32_t>(std::chrono::system_clock::to_time_t(now + duration));
     const accessor instance{ {}, hash_digest{}, {}, future, {}, {} };
-    BOOST_REQUIRE(instance.is_invalid_timestamp(settings().timestamp_limit_seconds));
+    BOOST_REQUIRE(instance.is_futuristic_timestamp(settings().timestamp_limit_seconds));
 }
 
 // json

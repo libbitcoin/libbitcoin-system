@@ -129,13 +129,13 @@ protected:
 
     bool is_invalid_proof_of_work(uint32_t proof_of_work_limit,
         bool scrypt=false) const NOEXCEPT;
-    bool is_invalid_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
+    bool is_futuristic_timestamp(uint32_t timestamp_limit_seconds) const NOEXCEPT;
 
     /// Accept (relative to chain_state).
     /// -----------------------------------------------------------------------
 
-    // error::invalid_block_version
-    // error::timestamp_too_early
+    // error::insufficient_block_version
+    // error::anachronistic_timestamp
     // error::incorrect_proof_of_work
 
 private:

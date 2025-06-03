@@ -62,18 +62,18 @@ BOOST_AUTO_TEST_CASE(block_error_t__code__checkpoint_conflict__true_exected_mess
     BOOST_REQUIRE_EQUAL(ec.message(), "block hash rejected by checkpoint");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__invalid_block_version__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__insufficient_block_version__true_exected_message)
 {
-    constexpr auto value = error::invalid_block_version;
+    constexpr auto value = error::insufficient_block_version;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
     BOOST_REQUIRE_EQUAL(ec.message(), "block version rejected at current height");
 }
 
-BOOST_AUTO_TEST_CASE(block_error_t__code__timestamp_too_early__true_exected_message)
+BOOST_AUTO_TEST_CASE(block_error_t__code__anachronistic_timestamp__true_exected_message)
 {
-    constexpr auto value = error::timestamp_too_early;
+    constexpr auto value = error::anachronistic_timestamp;
     const auto ec = code(value);
     BOOST_REQUIRE(ec);
     BOOST_REQUIRE(ec == value);
