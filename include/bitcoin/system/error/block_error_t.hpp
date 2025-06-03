@@ -39,8 +39,8 @@ enum block_error_t : uint8_t
 
     // accept header
     checkpoint_conflict,
-    invalid_block_version,
-    timestamp_too_early,
+    insufficient_block_version,
+    anachronistic_timestamp,
     incorrect_proof_of_work,
 
     // confirm header

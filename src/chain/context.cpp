@@ -25,11 +25,6 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-bool context::is_enabled(chain::flags flag) const NOEXCEPT
-{
-    return to_bool(flag & flags);
-}
-
 bool operator==(const context& left, const context& right) NOEXCEPT
 {
     return left.flags == right.flags

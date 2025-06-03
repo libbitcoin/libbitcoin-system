@@ -35,8 +35,8 @@ DEFINE_ERROR_T_MESSAGE_MAP(block_error)
 
     // accept header
     { checkpoint_conflict, "block hash rejected by checkpoint" },
-    { invalid_block_version, "block version rejected at current height" },
-    { timestamp_too_early, "block timestamp is too early" },
+    { insufficient_block_version, "block version rejected at current height" },
+    { anachronistic_timestamp, "block timestamp is too early" },
     { incorrect_proof_of_work, "proof of work does not match bits field" },
 
     // confirm header

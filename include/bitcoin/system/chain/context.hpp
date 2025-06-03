@@ -31,7 +31,30 @@ class BC_API context final
 {
 public:
     /// Determine if the flag is active for this block.
-    bool is_enabled(chain::flags flag) const NOEXCEPT;
+    inline bool is_enabled(chain::flags flag) const NOEXCEPT
+    {
+        return to_bool(flag & flags);
+    }
+
+    // ************************************************************************
+    // CONSENSUS: Soft forks imposed minimum block versioning using a signed
+    // interpretation of header.version, which would otherwise be unsigned.
+    // ************************************************************************
+    inline bool is_insufficient_version(uint32_t version) const NOEXCEPT
+    {
+        return is_nonzero(minimum_block_version) &&
+            to_signed(version) < to_signed(minimum_block_version);
+    }
+
+    inline bool is_anachronistic_timestamp(uint32_t time_stamp) const NOEXCEPT
+    {
+        return time_stamp <= median_time_past;
+    }
+
+    inline bool is_invalid_work(uint32_t bits) const NOEXCEPT
+    {
+        return bits != work_required;
+    }
 
     /// Header context within chain.
     uint32_t flags;
