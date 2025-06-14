@@ -59,6 +59,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/chain/witness.cpp \
     src/chain/witness_extract.cpp \
     src/chain/enums/opcode.cpp \
+    src/config/authority.cpp \
     src/config/base16.cpp \
     src/config/base2.cpp \
     src/config/base32.cpp \
@@ -66,6 +67,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/base64.cpp \
     src/config/base85.cpp \
     src/config/block.cpp \
+    src/config/endpoint.cpp \
     src/config/hash160.cpp \
     src/config/hash256.cpp \
     src/config/header.cpp \
@@ -77,6 +79,7 @@ src_libbitcoin_system_la_SOURCES = \
     src/config/printer.cpp \
     src/config/script.cpp \
     src/config/transaction.cpp \
+    src/config/utilities.cpp \
     src/crypto/aes256.cpp \
     src/crypto/der_parser.cpp \
     src/crypto/ec_context.cpp \
@@ -241,6 +244,7 @@ test_libbitcoin_system_test_SOURCES = \
     test/chain/transaction.cpp \
     test/chain/witness.cpp \
     test/chain/enums/opcode.cpp \
+    test/config/authority.cpp \
     test/config/base16.cpp \
     test/config/base2.cpp \
     test/config/base32.cpp \
@@ -248,9 +252,11 @@ test_libbitcoin_system_test_SOURCES = \
     test/config/base64.cpp \
     test/config/base85.cpp \
     test/config/block.cpp \
+    test/config/endpoint.cpp \
     test/config/hash256.cpp \
     test/config/parameter.cpp \
     test/config/printer.cpp \
+    test/config/utilities.cpp \
     test/crypto/aes256.cpp \
     test/crypto/elliptic_curve.cpp \
     test/crypto/pseudo_random.cpp \
@@ -497,6 +503,7 @@ include_bitcoin_system_chain_enums_HEADERS = \
 
 include_bitcoin_system_configdir = ${includedir}/bitcoin/system/config
 include_bitcoin_system_config_HEADERS = \
+    include/bitcoin/system/config/authority.hpp \
     include/bitcoin/system/config/base16.hpp \
     include/bitcoin/system/config/base2.hpp \
     include/bitcoin/system/config/base32.hpp \
@@ -505,6 +512,7 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/base85.hpp \
     include/bitcoin/system/config/block.hpp \
     include/bitcoin/system/config/config.hpp \
+    include/bitcoin/system/config/endpoint.hpp \
     include/bitcoin/system/config/hash160.hpp \
     include/bitcoin/system/config/hash256.hpp \
     include/bitcoin/system/config/header.hpp \
@@ -515,7 +523,8 @@ include_bitcoin_system_config_HEADERS = \
     include/bitcoin/system/config/point.hpp \
     include/bitcoin/system/config/printer.hpp \
     include/bitcoin/system/config/script.hpp \
-    include/bitcoin/system/config/transaction.hpp
+    include/bitcoin/system/config/transaction.hpp \
+    include/bitcoin/system/config/utilities.hpp
 
 include_bitcoin_system_cryptodir = ${includedir}/bitcoin/system/crypto
 include_bitcoin_system_crypto_HEADERS = \

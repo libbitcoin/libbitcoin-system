@@ -25,6 +25,7 @@
 #include <bitcoin/system/warnings.hpp>
 
 // Include boost only from here, so exception disable works.
+#include <boost/asio.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/json.hpp>
@@ -40,6 +41,13 @@ BC_API void tag_invoke(boost::json::value_from_tag, \
     boost::json::value& value, const name& instance) NOEXCEPT
 
 namespace libbitcoin {
+    
+namespace system {
+namespace asio {
+typedef boost::asio::ip::address address;
+typedef boost::asio::ip::tcp::endpoint endpoint;
+} // system
+} // asio
 
 typedef boost::program_options::variables_map variables_map;
 typedef boost::program_options::option_description option_metadata;

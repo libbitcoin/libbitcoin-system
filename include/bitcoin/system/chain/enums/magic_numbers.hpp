@@ -80,9 +80,9 @@ constexpr size_t base_size_contribution = 3;
 constexpr size_t total_size_contribution = 1;
 constexpr size_t min_witness_program = 2;
 constexpr size_t max_witness_program = 40;
-constexpr uint32_t witness_head = 0xaa21a9ed;
 constexpr uint8_t witness_marker = 0x00;
 constexpr uint8_t witness_enabled = 0x01;
+constexpr uint32_t witness_head = 0xaa21a9ed;
 
 /// Taproot consensus constants [bip342].
 /// ---------------------------------------------------------------------------
