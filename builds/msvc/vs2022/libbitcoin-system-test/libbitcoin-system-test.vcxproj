@@ -144,6 +144,7 @@
     <ClCompile Include="..\..\..\..\test\chain\tapscript.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\witness.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base2.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base32.cpp" />
@@ -153,9 +154,11 @@
     <ClCompile Include="..\..\..\..\test\config\block.cpp">
       <ObjectFileName>$(IntDir)test_config_block.obj</ObjectFileName>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\config\hash256.cpp" />
     <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\utilities.cpp" />
     <ClCompile Include="..\..\..\..\test\constants.cpp" />
     <ClCompile Include="..\..\..\..\test\constraints.cpp" />
     <ClCompile Include="..\..\..\..\test\crypto\aes256.cpp" />

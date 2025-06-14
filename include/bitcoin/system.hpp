@@ -62,6 +62,7 @@
 #include <bitcoin/system/chain/enums/script_pattern.hpp>
 #include <bitcoin/system/chain/enums/script_version.hpp>
 #include <bitcoin/system/chain/enums/selection.hpp>
+#include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base2.hpp>
 #include <bitcoin/system/config/base32.hpp>
@@ -70,6 +71,7 @@
 #include <bitcoin/system/config/base85.hpp>
 #include <bitcoin/system/config/block.hpp>
 #include <bitcoin/system/config/config.hpp>
+#include <bitcoin/system/config/endpoint.hpp>
 #include <bitcoin/system/config/hash160.hpp>
 #include <bitcoin/system/config/hash256.hpp>
 #include <bitcoin/system/config/header.hpp>
@@ -81,6 +83,7 @@
 #include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/crypto/aes256.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/crypto/der_parser.hpp>

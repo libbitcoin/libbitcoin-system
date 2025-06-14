@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_SYSTEM_CONFIG_CONFIG_HPP
 #define LIBBITCOIN_SYSTEM_CONFIG_CONFIG_HPP
 
+#include <bitcoin/system/config/authority.hpp>
 #include <bitcoin/system/config/base2.hpp>
 #include <bitcoin/system/config/base16.hpp>
 #include <bitcoin/system/config/base32.hpp>
@@ -26,6 +27,7 @@
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/base85.hpp>
 #include <bitcoin/system/config/block.hpp>
+#include <bitcoin/system/config/endpoint.hpp>
 #include <bitcoin/system/config/hash160.hpp>
 #include <bitcoin/system/config/hash256.hpp>
 #include <bitcoin/system/config/header.hpp>
@@ -37,5 +39,6 @@
 #include <bitcoin/system/config/printer.hpp>
 #include <bitcoin/system/config/script.hpp>
 #include <bitcoin/system/config/transaction.hpp>
+#include <bitcoin/system/config/utilities.hpp>
 
 #endif
