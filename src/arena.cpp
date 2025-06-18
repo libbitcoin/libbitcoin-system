@@ -21,6 +21,10 @@
 #include <cstdlib>
 #include <bitcoin/system/constants.hpp>
 
+#ifdef WITH_TRACY
+    #include <tracy/Tracy.hpp>
+#endif
+
 namespace libbitcoin {
 
 bool operator==(const arena& left, const arena& right) NOEXCEPT
@@ -38,18 +42,36 @@ arena* default_arena::get() NOEXCEPT
 
 void* default_arena::do_allocate(size_t bytes, size_t) THROWS
 {
+    #ifdef WITH_TRACY
+        ZoneScopedN("default_arena::do_allocate");
+    #endif
+
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    return ::operator new(bytes, std::align_val_t{ align });
     BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
-    return std::malloc(bytes);
+    #ifdef WITH_TRACY
+        auto ptr = std::malloc(bytes);
+        TracyAlloc(ptr, bytes);
+        return ptr;
+    #else
+        return std::malloc(bytes);
+    #endif
+    
     BC_POP_WARNING()
 }
 
 void default_arena::do_deallocate(void* ptr, size_t, size_t) NOEXCEPT
 {
+    #ifdef WITH_TRACY
+        ZoneScopedN("default_arena::do_deallocate");
+    #endif
+
     ////if (align > __STDCPP_DEFAULT_NEW_ALIGNMENT__)
     ////    ::operator delete(ptr, std::align_val_t{ align });
     BC_PUSH_WARNING(NO_MALLOC_OR_FREE)
+    #ifdef WITH_TRACY
+        TracyFree(ptr);
+    #endif
     std::free(ptr);
     BC_POP_WARNING()
 }
