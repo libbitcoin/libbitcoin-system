@@ -73,9 +73,8 @@ inline To projection(const From& source) NOEXCEPT
 
     std::transform(std::begin(source), std::end(source), std::begin(out),
         [](const typename From::value_type& element) NOEXCEPT
-            -> typename To::value_type
         {
-            return { element };
+            return typename To::value_type{ element };
         });
 
     return out;
