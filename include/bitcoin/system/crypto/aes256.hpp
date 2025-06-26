@@ -26,7 +26,9 @@ namespace libbitcoin {
 namespace system {
 namespace aes256 {
     
-/// This is an implementation of AES256.
+/// This is an implementation of AES256 (in ECB mode).
+/// ECB mode is the simplest block cipher mode but is insecure for most
+/// applications because it doesn't hide patterns in the plaintext.
 /// NIST selected three members of the Rijndael family, each with a block
 /// size of 128 bits, but three different key lengths: 128, 192 and 256 bits.
 
