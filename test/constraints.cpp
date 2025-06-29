@@ -622,6 +622,13 @@ static_assert(is_defined<if_not_same_signed_integral_integer<int, size_t>>);
 ////static_assert(is_defined<if_big_endian_integral_integer<uint8_t>>);
 ////static_assert(is_defined<if_little_endian_integral_integer<uint8_t>>);
 
+////static_assert(!is_defined<if_floating_point<int>>);
+////static_assert(!is_defined<if_floating_point<bool>>);
+static_assert(is_defined<if_floating_point<float>>);
+static_assert(is_defined<if_floating_point<const float>>);
+static_assert(is_defined<if_floating_point<double>>);
+static_assert(is_defined<if_floating_point<long double>>);
+
 // std_array/std_vector
 
 static_assert(is_defined<if_std_array<std_array<uint8_t, 0>>>);

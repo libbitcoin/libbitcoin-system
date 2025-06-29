@@ -209,6 +209,27 @@ static_assert(!is_integral_integer<bool>);
 static_assert(!is_integral_integer<std::string>);
 static_assert(is_same_type<decltype(is_integral_integer<int32_t>), const bool>);
 
+static_assert(!is_floating_point<uintx>);
+static_assert(!is_floating_point<uint128_t>);
+static_assert(!is_floating_point<uint8_t>);
+static_assert(!is_floating_point<uint16_t>);
+static_assert(!is_floating_point<uint32_t>);
+static_assert(!is_floating_point<uint64_t>);
+static_assert(!is_floating_point<size_t>);
+static_assert(!is_floating_point<int8_t>);
+static_assert(!is_floating_point<int16_t>);
+static_assert(!is_floating_point<int32_t>);
+static_assert(!is_floating_point<int64_t>);
+static_assert(!is_floating_point<char>);
+static_assert(!is_floating_point<wchar_t>);
+static_assert(!is_floating_point<bool>);
+static_assert(!is_floating_point<std::string>);
+static_assert(is_floating_point<float>);
+static_assert(is_floating_point<const float>);
+static_assert(is_floating_point<double>);
+static_assert(is_floating_point<long double>);
+static_assert(is_same_type<decltype(is_floating_point<float>), const bool>);
+
 // These may be unexpected, which is why we generally avoid them.
 static_assert(sizeof(bool) >= 1u);
 ////static_assert(bits<bool> >= 1u);
