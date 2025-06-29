@@ -206,6 +206,31 @@ constexpr Unsigned to_unsigned(Unsigned value) NOEXCEPT
     return value;
 }
 
+// Floating point casts.
+// ----------------------------------------------------------------------------
+
+template <typename Integer, typename Float,
+    if_integral_integer<Integer>,
+    if_floating_point<Float>>
+constexpr Integer to_integer(Float value) NOEXCEPT
+{
+    // Floating point conversion in c++ requires explicit or implicit cast.
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Integer>(value);
+    BC_POP_WARNING()
+}
+
+template <typename Float, typename Integer,
+    if_floating_point<Float>,
+    if_integral_integer<Integer>>
+constexpr Float to_floating(Integer value) NOEXCEPT
+{
+    // Floating point conversion in c++ requires explicit or implicit cast.
+    BC_PUSH_WARNING(NO_CASTS_FOR_ARITHMETIC_CONVERSION)
+    return static_cast<Float>(value);
+    BC_POP_WARNING()
+}
+
 } // namespace system
 } // namespace libbitcoin
 

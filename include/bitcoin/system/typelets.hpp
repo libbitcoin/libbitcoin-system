@@ -74,6 +74,11 @@ constexpr bool is_integer = std::numeric_limits<std::decay_t<Type>>::is_integer
 template <typename Type>
 constexpr bool is_integral_integer = is_integral<Type> /*&& is_integer<Type>*/;
 
+/// numeric_limits may be specialized by non-integrals (such as uintx).
+template <typename Type>
+constexpr bool is_floating_point =
+    std::is_floating_point_v<std::decay_t<Type>>;
+
 /// Constrained to is_integral types.
 template <typename Type, std::enable_if_t<is_integral_size<Type>, bool> = true>
 constexpr size_t bits = to_bits(sizeof(Type));

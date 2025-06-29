@@ -62,6 +62,20 @@ static_assert(is_same_type<decltype(to_unsigned(0u)), unsigned>);
 static_assert(is_same_type<decltype(to_unsigned(1)), unsigned>);
 static_assert(is_same_type<decltype(to_unsigned(1u)), unsigned>);
 
+static_assert(to_integer(1.0f) == 1_size);
+static_assert(to_integer<int>(1.0f) == 1u);
+static_assert(to_integer<unsigned>(2.0) == 2u);
+static_assert(is_same_type<decltype(to_integer(1.0f)), size_t>);
+static_assert(is_same_type<decltype(to_integer<int>(1.0f)), int>);
+static_assert(is_same_type<decltype(to_integer<unsigned>(1.0)), unsigned>);
+
+static_assert(to_floating(1u) == 1.0);
+static_assert(to_floating<float>(1u) == 1.0f);
+static_assert(to_floating<double>(2u) == 2.0);
+static_assert(is_same_type<decltype(to_floating(1u)), double>);
+static_assert(is_same_type<decltype(to_floating<float>(1u)), float>);
+static_assert(is_same_type<decltype(to_floating<double>(2u)), double>);
+
 // Verify compiler "usual arithmetic conversion" expectations.
 // ----------------------------------------------------------------------------
 // Shift works like a unary op (right operand is not incorporated).

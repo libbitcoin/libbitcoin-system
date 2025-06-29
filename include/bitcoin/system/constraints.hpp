@@ -216,7 +216,7 @@ using if_integral_integer = bool_if<
 
 template <typename Type>
 using if_non_integral_integer = bool_if<
-    !is_integral<Type>  &&
+    !is_integral<Type> &&
     is_integer<Type>>;
 
 template <typename Type>
@@ -250,6 +250,10 @@ template <typename Integer>
 using if_little_endian_integral_integer = bool_if<
     is_integral_integer<Integer> &&
     is_little_endian>;
+
+template <typename Integer>
+using if_floating_point = bool_if<
+    is_floating_point<Integer>>;
 
 /// std::array/std::vector
 

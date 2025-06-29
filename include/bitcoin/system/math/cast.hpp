@@ -139,6 +139,21 @@ constexpr to_unsigned_type<Signed> to_unsigned(Signed value) NOEXCEPT;
 template <typename Unsigned, if_unsigned_integer<Unsigned> = true>
 constexpr Unsigned to_unsigned(Unsigned value) NOEXCEPT;
 
+/// Floating point casts.
+/// ---------------------------------------------------------------------------
+
+/// Cast floating point to integral integer, overflow unguarded.
+template <typename Integer = size_t, typename Float,
+    if_integral_integer<Integer> = true,
+    if_floating_point<Float> = true>
+constexpr Integer to_integer(Float value) NOEXCEPT;
+
+/// Cast integral integer to floating point, overflow unguarded.
+template <typename Float = double, typename Integer,
+    if_floating_point<Float> = true,
+    if_integral_integer<Integer> = true>
+constexpr Float to_floating(Integer value) NOEXCEPT;
+
 } // namespace system
 } // namespace libbitcoin
 
