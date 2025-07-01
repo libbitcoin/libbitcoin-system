@@ -167,7 +167,7 @@ settings::settings(chain::selection context) NOEXCEPT
                 { "000000002dd5588a74784eaa7ab0507a18ad16a236e7b1ce69f00d7ddfb5d0a6", 33333 },
                 { "0000000069e244f73d78e8fd29ba2fd2ed618bd6fa2ee92559f542fdb26e7c1d", 11111 }
             };
-            milestone = { "00000000000000000002a0b5db2a7f8d9087464c2586b546be7bce8eb53b8187", 850000 };
+            milestone = { "000000000000000000010538edbfd2d5b809a33dd83f284aeea41c6d0d96968a", 900000 };
             minimum_work = base16_hash("000000000000000000000000000000000000000052b2559353df4117b7348b64");
             break;
         }
