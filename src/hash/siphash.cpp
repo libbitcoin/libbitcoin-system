@@ -73,8 +73,7 @@ constexpr void compression_round(uint64_t& v0, uint64_t& v1, uint64_t& v2,
     v0 ^= word;
 }
 
-uint64_t siphash(const siphash_key& key,
-    const data_slice& message) NOEXCEPT
+uint64_t siphash(const siphash_key& key, const data_slice& message) NOEXCEPT
 {
     auto v0 = siphash_magic_0 ^ std::get<0>(key);
     auto v1 = siphash_magic_1 ^ std::get<1>(key);
@@ -106,8 +105,7 @@ uint64_t siphash(const siphash_key& key,
     return v0 ^ v1 ^ v2 ^ v3;
 }
 
-uint64_t siphash(const half_hash& hash,
-    const data_slice& message) NOEXCEPT
+uint64_t siphash(const half_hash& hash, const data_slice& message) NOEXCEPT
 {
     return siphash(to_siphash_key(hash), message);
 }
