@@ -81,10 +81,17 @@ bool compute_filter(data_chunk& out, const chain::block& block) NOEXCEPT
     return !!writer;
 }
 
-hash_digest compute_filter_header(const hash_digest& previous_header,
+hash_digest compute_header(const hash_digest& previous_header,
     const data_chunk& filter) NOEXCEPT
 {
-    return bitcoin_hash(splice(bitcoin_hash(filter), previous_header));
+    return bitcoin_hash(bitcoin_hash(filter), previous_header);
+}
+
+hash_digest compute_header(hash_digest& filter_hash,
+    const hash_digest& previous_header, const data_chunk& filter) NOEXCEPT
+{
+    filter_hash = bitcoin_hash(filter);
+    return bitcoin_hash(filter_hash, previous_header);
 }
 
 bool match_filter(const block_filter& filter,
