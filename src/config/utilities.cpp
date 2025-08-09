@@ -139,12 +139,24 @@ BC_POP_WARNING()
 // asio/asio conversions.
 // ----------------------------------------------------------------------------
 
-inline bool is_embedded_v4(const boost::asio::ip::address_v6& ip6) NOEXCEPT
+bool is_embedded_v4(const boost::asio::ip::address_v6& ip6)
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    // is_v4_compatible is deprecated, removed in 1.87, no replacement.
-    return ip6.is_v4_mapped() || ip6.is_v4_compatible();
-    BC_POP_WARNING()
+    // Still works in Boost ≥ 1.70
+    if (ip6.is_v4_mapped())
+        return true;
+
+    // Replacement for removed is_v4_compatible()
+    auto bytes = ip6.to_bytes();
+    bool compatible = true;
+    for (size_t i = 0; i < 12; ++i)
+    {
+        if (bytes[i] != 0)
+        {
+            compatible = false;
+            break;
+        }
+    }
+    return compatible;
 }
 
 // Convert IPv6-mapped to IPV4 (ensures consistent internal matching).
@@ -157,8 +169,10 @@ asio::address denormalize(const asio::address& ip) NOEXCEPT
         {
             const auto ip6 = ip.to_v6();
 
-            // to_v4 is deprecated, removed in 1.87, no replacement.
-            if (is_embedded_v4(ip6)) return { ip6.to_v4() };
+           auto bytes = ip6.to_bytes();
+std::array<unsigned char, 4> v4bytes;
+std::copy(bytes.begin() + 12, bytes.end(), v4bytes.begin());
+return boost::asio::ip::address_v4(v4bytes);
         }
         catch (const std::exception&)
         {
@@ -171,19 +185,22 @@ asio::address denormalize(const asio::address& ip) NOEXCEPT
 // asio/string host conversions.
 // ----------------------------------------------------------------------------
 
-inline std::string to_host(const boost::asio::ip::address_v6& ip6) NOEXCEPT
+std::string to_host(const boost::asio::ip::address_v6& ip6)
 {
-    try
+    if (is_embedded_v4(ip6))
     {
-        BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        return is_embedded_v4(ip6) ? to_host(ip6.to_v4()) : ip6.to_string();
-        BC_POP_WARNING()
+        auto bytes = ip6.to_bytes();
+        std::array<unsigned char, 4> v4bytes;
+        std::copy(bytes.begin() + 12, bytes.end(), v4bytes.begin());
+        boost::asio::ip::address_v4 v4addr(v4bytes);
+        return to_host(v4addr);
     }
-    catch (const std::exception&)
+    else
     {
-        return { "::" };
+        return ip6.to_string();
     }
 }
+
 
 inline std::string to_host(const boost::asio::ip::address_v4& ip4) NOEXCEPT
 {
