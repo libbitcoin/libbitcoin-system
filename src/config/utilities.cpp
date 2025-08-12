@@ -146,7 +146,7 @@ bool is_embedded_v4(const boost::asio::ip::address_v6& ip6)
         return true;
 
     // Replacement for removed is_v4_compatible()
-    auto bytes = ip6.to_bytes();
+    const auto bytes = ip6.to_bytes();
     bool compatible = true;
     for (size_t i = 0; i < 12; ++i)
     {
