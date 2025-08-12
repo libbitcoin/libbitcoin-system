@@ -141,22 +141,7 @@ BC_POP_WARNING()
 
 bool is_embedded_v4(const boost::asio::ip::address_v6& ip6)
 {
-    // Still works in Boost ≥ 1.70
-    if (ip6.is_v4_mapped())
-        return true;
-
-    // Replacement for removed is_v4_compatible()
-    const auto bytes = ip6.to_bytes();
-    bool compatible = true;
-    for (size_t i = 0; i < 12; ++i)
-    {
-        if (bytes[i] != 0)
-        {
-            compatible = false;
-            break;
-        }
-    }
-    return compatible;
+    return ip6.is_v4_mapped() || system::starts_with(ip6.to_bytes(), std::array<uint8_t, 12>{});
 }
 
 // Convert IPv6-mapped to IPV4 (ensures consistent internal matching).

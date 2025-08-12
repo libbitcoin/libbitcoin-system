@@ -17,15 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/system/unicode/utf8_everywhere/stdio.hpp>
-#include <windows.h>
 #ifdef HAVE_MSC
     #include <fcntl.h>
     #include <io.h>
     #include <windows.h>
 #else
-   #if !defined(_WIN32)
-#include <termios.h>
-#endif
+    #include <termios.h>
 #endif
 #include <mutex>
 #include <bitcoin/system/define.hpp>
@@ -38,7 +35,6 @@ namespace system {
 
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
-#ifdef HAVE_MSC
 
 // The width of utf16 stdio buffers.
 constexpr size_t utf16_buffer_size = 256;
@@ -83,29 +79,33 @@ inline void set_binary_stdio(FILE* file) THROWS
 }
 
 #ifndef _WIN32
-void set_console_echo() {
+void unset_console_echo()
+{
     termios terminal{};
     tcgetattr(0, &terminal);
-    terminal.c_lflag |= ECHO;
+    terminal.c_lflag &= ~ECHO;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
-}
+}}
 
-void unset_console_echo() {
+void unset_console_echo() 
+{
     termios terminal{};
     tcgetattr(0, &terminal);
     terminal.c_lflag &= ~ECHO;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
 }
 #else
-void set_console_echo() {
+void set_console_echo() 
+{
     // TODO: Windows console echo handling if needed
 }
-void unset_console_echo() {
+void unset_console_echo() 
+{
     // TODO: Windows console echo handling if needed
 }
 #endif
 
-#else // HAVE_MSC
+
 
 std::istream& cin_stream() THROWS { return std::cin; }
 std::ostream& cout_stream() THROWS { return std::cout; }
@@ -136,7 +136,7 @@ void unset_console_echo() {
 }
 #endif
 
-#endif // HAVE_MSC
+
 
 void set_utf8_stdio() THROWS
 {
