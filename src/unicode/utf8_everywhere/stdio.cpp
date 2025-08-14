@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/system/unicode/utf8_everywhere/stdio.hpp>
+
 #ifdef HAVE_MSC
     #include <fcntl.h>
     #include <io.h>
@@ -35,6 +36,7 @@ namespace system {
 
 LCOV_EXCL_START("Untestable but visually-verifiable section.")
 
+#ifdef HAVE_MSC
 
 // The width of utf16 stdio buffers.
 constexpr size_t utf16_buffer_size = 256;
@@ -78,34 +80,25 @@ inline void set_binary_stdio(FILE* file) THROWS
         throw runtime_exception{ "Could not set STDIO to binary mode." };
 }
 
-#ifndef _WIN32
-void unset_console_echo()
+void set_console_echo() NOEXCEPT
 {
-    termios terminal{};
-    tcgetattr(0, &terminal);
-    terminal.c_lflag &= ~ECHO;
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
-}}
-
-void unset_console_echo() 
-{
-    termios terminal{};
-    tcgetattr(0, &terminal);
-    terminal.c_lflag &= ~ECHO;
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
+    const auto handle = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode{};
+    GetConsoleMode(handle, &mode);
+    SetConsoleMode(handle, mode | ENABLE_ECHO_INPUT);
+    FlushConsoleInputBuffer(handle);
 }
-#else
-void set_console_echo() 
-{
-    // TODO: Windows console echo handling if needed
-}
-void unset_console_echo() 
-{
-    // TODO: Windows console echo handling if needed
-}
-#endif
 
+void unset_console_echo() NOEXCEPT
+{
+    const auto handle = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode{};
+    GetConsoleMode(handle, &mode);
+    SetConsoleMode(handle, mode & ~ENABLE_ECHO_INPUT);
+    FlushConsoleInputBuffer(handle);
+}
 
+#else // HAVE_MSC
 
 std::istream& cin_stream() THROWS { return std::cin; }
 std::ostream& cout_stream() THROWS { return std::cout; }
@@ -113,30 +106,23 @@ std::ostream& cerr_stream() THROWS {  return std::cerr; }
 inline void set_utf8_stdio(FILE*) THROWS {}
 inline void set_binary_stdio(FILE*) THROWS {}
 
-#ifndef _WIN32
-void set_console_echo() {
+void set_console_echo() NOEXCEPT
+{
     termios terminal{};
     tcgetattr(0, &terminal);
     terminal.c_lflag |= ECHO;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
 }
 
-void unset_console_echo() {
+void unset_console_echo() NOEXCEPT
+{
     termios terminal{};
     tcgetattr(0, &terminal);
     terminal.c_lflag &= ~ECHO;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminal);
 }
-#else
-void set_console_echo() {
-    // TODO: Windows console echo handling if needed
-}
-void unset_console_echo() {
-    // TODO: Windows console echo handling if needed
-}
-#endif
 
-
+#endif // HAVE_MSC
 
 void set_utf8_stdio() THROWS
 {
