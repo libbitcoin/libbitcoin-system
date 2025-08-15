@@ -139,12 +139,26 @@ BC_POP_WARNING()
 // asio/asio conversions.
 // ----------------------------------------------------------------------------
 
-inline bool is_embedded_v4(const boost::asio::ip::address_v6& ip6) NOEXCEPT
+// address_v6.to_v4 removed in boost 1.87, no replacement.
+inline asio::address to_v4(const boost::asio::ip::address_v6& ip6) THROWS
 {
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    // is_v4_compatible is deprecated, removed in 1.87, no replacement.
-    return ip6.is_v4_mapped() || ip6.is_v4_compatible();
-    BC_POP_WARNING()
+    // Required for equivalence with boost 1.86.
+    if (!ip6.is_v4_mapped())
+        throw std::exception{};
+
+    const auto bytes = ip6.to_bytes();
+    return
+    {
+        boost::asio::ip::address_v4
+        {
+            boost::asio::ip::address_v4::bytes_type
+            {
+                {
+                    bytes.at(12), bytes.at(13), bytes.at(14), bytes.at(15)
+                }
+            }
+        } 
+    };
 }
 
 // Convert IPv6-mapped to IPV4 (ensures consistent internal matching).
@@ -155,13 +169,11 @@ asio::address denormalize(const asio::address& ip) NOEXCEPT
     {
         try
         {
-            const auto ip6 = ip.to_v6();
-
-            // to_v4 is deprecated, removed in 1.87, no replacement.
-            if (is_embedded_v4(ip6)) return { ip6.to_v4() };
+            return { to_v4(ip.to_v6()) };
         }
         catch (const std::exception&)
         {
+            return ip;
         }
     }
 
@@ -176,7 +188,7 @@ inline std::string to_host(const boost::asio::ip::address_v6& ip6) NOEXCEPT
     try
     {
         BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-        return is_embedded_v4(ip6) ? to_host(ip6.to_v4()) : ip6.to_string();
+        return ip6.is_v4_mapped() ? to_host(to_v4(ip6)) : ip6.to_string();
         BC_POP_WARNING()
     }
     catch (const std::exception&)

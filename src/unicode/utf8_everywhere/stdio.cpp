@@ -86,6 +86,7 @@ void set_console_echo() NOEXCEPT
     DWORD mode{};
     GetConsoleMode(handle, &mode);
     SetConsoleMode(handle, mode | ENABLE_ECHO_INPUT);
+    FlushConsoleInputBuffer(handle);
 }
 
 void unset_console_echo() NOEXCEPT
@@ -94,6 +95,7 @@ void unset_console_echo() NOEXCEPT
     DWORD mode{};
     GetConsoleMode(handle, &mode);
     SetConsoleMode(handle, mode & ~ENABLE_ECHO_INPUT);
+    FlushConsoleInputBuffer(handle);
 }
 
 #else // HAVE_MSC
