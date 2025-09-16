@@ -499,6 +499,21 @@ std::string byte_reader<IStream>::read_string_buffer(size_t size) NOEXCEPT
     return out;
 }
 
+template <typename IStream>
+std::string byte_reader<IStream>::read_line(const std::string& end) NOEXCEPT
+{
+    // This leaves current position after terminator, zero sized if invalid.
+    const auto size = line_length(end);
+    if (is_zero(size))
+        return {};
+
+    std::string out(size, '\0');
+    do_rewind_bytes(size + end.size());
+    do_read_bytes(pointer_cast<uint8_t>(out.data()), size);
+    do_skip_bytes(end.size());
+    return out;
+}
+
 // streams
 // ----------------------------------------------------------------------------
 
@@ -635,7 +650,7 @@ byte_allocator& byte_reader<IStream>::get_allocator() const NOEXCEPT
 
 // protected virtual
 // ----------------------------------------------------------------------------
-// These may only call non-virtual (private) methods (due to overriding).
+// These may only call non-virtual methods (due to protected overriding).
 
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek_byte() NOEXCEPT
@@ -730,7 +745,7 @@ bool byte_reader<IStream>::get_exhausted() const NOEXCEPT
 
 // private
 // ----------------------------------------------------------------------------
-// These may only call other private methods (due to overriding).
+// These may only call other private methods (due to protected overriding).
 
 template <typename IStream>
 bool byte_reader<IStream>::valid() const NOEXCEPT
@@ -803,7 +818,7 @@ bool byte_reader<IStream>::limiter(size_t size) NOEXCEPT
     if (size > remaining_)
     {
         // Does not reset the current position or the remaining limit.
-        invalidate();
+        invalid();
         return true;
     }
 
@@ -833,6 +848,60 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) NOEXCEPT
     {
         invalid();
     }
+}
+
+// private
+// ----------------------------------------------------------------------------
+// This calls virtual methods but is isolated from protected overriding.
+
+template <typename IStream>
+size_t byte_reader<IStream>::line_length(const std::string& end) NOEXCEPT
+{
+    if (!end.empty())
+    {
+        size_t index{};
+        size_t length{};
+
+        // Count bytes to end, avoids reallocations.
+        while (!get_exhausted())
+        {
+            const auto byte = read_byte();
+            if (byte == end.at(index))
+            {
+                // Full match, read line.
+                if (++index == end.size())
+                    return length;
+            }
+            else
+            {
+                if (!is_zero(index))
+                {
+                    // Partial match, include bytes up to mismatch.
+                    length += index;
+
+                    // Re-check current byte for new terminator start.
+                    if (byte == end.front())
+                    {
+                        index = one;
+                    }
+                    else
+                    {
+                        index = zero;
+                        ++length;
+                    }
+                }
+                else
+                {
+                    // Non-match, just increment.
+                    ++length;
+                }
+            }
+        }
+    }
+
+    // Line terminator not found.
+    invalid();
+    return {};
 }
 
 BC_POP_WARNING()

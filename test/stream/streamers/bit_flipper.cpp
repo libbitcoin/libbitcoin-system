@@ -1026,6 +1026,83 @@ BOOST_AUTO_TEST_CASE(bit_flipper__read_string_buffer__partial_embedded_null__tru
     BOOST_REQUIRE_EQUAL(stream.get(), '*');
 }
 
+// read_line
+
+BOOST_AUTO_TEST_CASE(bit_flipper__read_line__no_terminator__invalidates)
+{
+    const std::string value{ "hello" };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "");
+    BOOST_REQUIRE(!reader);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__read_line__custom_terminator__expected)
+{
+    const std::string value{ "test|done" };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_line("|"), "test");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 5u);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__read_line__terminator_only__expected_position_empty)
+{
+    const std::string value{ "\r\n" };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 2u);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__read_line__multiple_terminators__expected_positions_empty)
+{
+    const std::string value{ "\r\n\r\n" };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 2u);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 4u);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__read_line__text_before_terminator__returns_text)
+{
+    const std::string value{ "hello\r\n" };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "hello");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 7u);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__read_line__partial_match__handles_correctly)
+{
+    const std::string value{ "\rabc\r\n" };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "\rabc");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 6u);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__read_line__multiple_lines__returns_sequential)
+{
+    const std::string value{ "line1\r\nline2\r\n" };
+    std::stringstream stream{ value };
+    flip::bits::iostream reader(stream);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "line1");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 7u);
+    BOOST_REQUIRE_EQUAL(reader.read_line(), "line2");
+    BOOST_REQUIRE(reader);
+    BOOST_REQUIRE_EQUAL(reader.get_read_position(), 14u);
+}
+
 #endif // BIT_FLIPPER_READER_STRINGS
 
 #endif // BIT_FLIPPER_READER

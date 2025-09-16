@@ -111,6 +111,10 @@ public:
     /// This is only used for reading Bitcoin heading command text.
     virtual std::string read_string_buffer(size_t size) NOEXCEPT = 0;
 
+    /// Read a line up to specified terminator (skip and exclude terminator).
+    /// Returns empty and invalidates stream if terminator is not found.
+    virtual std::string read_line(const std::string& end="\r\n") NOEXCEPT = 0;
+
     /// Streams.
     /// -----------------------------------------------------------------------
 

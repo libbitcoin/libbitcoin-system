@@ -144,6 +144,10 @@ public:
     /// This is only used for reading Bitcoin heading command text.
     std::string read_string_buffer(size_t size) NOEXCEPT override;
 
+    /// Read a line up to specified terminator (skip and exclude terminator).
+    /// Returns empty and invalidates stream if terminator is not found.
+    std::string read_line(const std::string& end="\r\n") NOEXCEPT override;
+
     /// Streams.
     /// -----------------------------------------------------------------------
 
@@ -215,6 +219,7 @@ private:
     void limit(size_t size) NOEXCEPT;
     bool limiter(size_t size) NOEXCEPT;
     void seeker(typename IStream::pos_type offset) NOEXCEPT;
+    size_t line_length(const std::string& end) NOEXCEPT;
 
     IStream& stream_;
     size_t remaining_;
