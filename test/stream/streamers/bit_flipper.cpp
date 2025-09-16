@@ -1519,6 +1519,65 @@ BOOST_AUTO_TEST_CASE(bit_flipper__write_string_buffer__value__expected)
     BOOST_REQUIRE(writer);
 }
 
+// write_line
+
+BOOST_AUTO_TEST_CASE(bit_flipper__write_line__default__expected)
+{
+    std::stringstream stream;
+    flip::bits::iostream writer(stream);
+    writer.write_line();
+    BOOST_REQUIRE_EQUAL(stream.str(), "\r\n");
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__write_line__empty_default__expected)
+{
+    std::stringstream stream;
+    flip::bits::iostream writer(stream);
+    writer.write_line("");
+    BOOST_REQUIRE_EQUAL(stream.str(), "\r\n");
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__write_line__empty_empty__expected)
+{
+    std::stringstream stream;
+    flip::bits::iostream writer(stream);
+    writer.write_line("", "");
+    BOOST_REQUIRE(stream.str().empty());
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__write_line__value_empty__expected)
+{
+    std::stringstream stream;
+    flip::bits::iostream writer(stream);
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    writer.write_line(expected, "");
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__write_line__value_explicit__expected)
+{
+    std::stringstream stream;
+    flip::bits::iostream writer(stream);
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    writer.write_line(expected, "|");
+    BOOST_REQUIRE_EQUAL(stream.str(), expected + "|");
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(bit_flipper__write_line__value_default__expected)
+{
+    std::stringstream stream;
+    flip::bits::iostream writer(stream);
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    writer.write_line(expected);
+    BOOST_REQUIRE_EQUAL(stream.str(), expected + "\r\n");
+    BOOST_REQUIRE(writer);
+}
+
 #endif // BIT_FLIPPER_WRITER_STRINGS
 
 #endif // BIT_FLIPPER_WRITER

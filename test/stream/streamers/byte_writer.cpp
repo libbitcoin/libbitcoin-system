@@ -565,6 +565,65 @@ BOOST_AUTO_TEST_CASE(byte_writer__write_string_buffer__value__expected)
     BOOST_REQUIRE(writer);
 }
 
+// write_line
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_line__default__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_line();
+    BOOST_REQUIRE_EQUAL(stream.str(), "\r\n");
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_line__empty_default__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_line("");
+    BOOST_REQUIRE_EQUAL(stream.str(), "\r\n");
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_line__empty_empty__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    writer.write_line("", "");
+    BOOST_REQUIRE(stream.str().empty());
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_line__value_empty__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    writer.write_line(expected, "");
+    BOOST_REQUIRE_EQUAL(stream.str(), expected);
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_line__value_explicit__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    writer.write_line(expected, "|");
+    BOOST_REQUIRE_EQUAL(stream.str(), expected + "|");
+    BOOST_REQUIRE(writer);
+}
+
+BOOST_AUTO_TEST_CASE(byte_writer__write_line__value_default__expected)
+{
+    std::ostringstream stream;
+    write::bytes::ostream writer(stream);
+    const std::string expected{ "abcdefghijklmnopqrstuvwxyz" };
+    writer.write_line(expected);
+    BOOST_REQUIRE_EQUAL(stream.str(), expected + "\r\n");
+    BOOST_REQUIRE(writer);
+}
+
 #endif // BYTE_WRITER_STRINGS
 
 BOOST_AUTO_TEST_SUITE_END()

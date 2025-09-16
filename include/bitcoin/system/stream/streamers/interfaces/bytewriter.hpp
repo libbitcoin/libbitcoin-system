@@ -80,6 +80,10 @@ public:
     virtual void write_string_buffer(const std::string& value, size_t size)
         NOEXCEPT = 0;
 
+    /// Write value and specified terminator.
+    virtual void write_line(const std::string& value="",
+        const std::string& end="\r\n") NOEXCEPT = 0;
+
     /// Streams.
     /// -----------------------------------------------------------------------
 

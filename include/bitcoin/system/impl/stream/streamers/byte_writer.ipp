@@ -252,6 +252,14 @@ void byte_writer<OStream>::write_string_buffer(const std::string& value,
     write_bytes(data_chunk(size - length, pad()));
 }
 
+template <typename OStream>
+void byte_writer<OStream>::write_line(const std::string& value,
+    const std::string& end) NOEXCEPT
+{
+    write_string_buffer(value, value.size());
+    write_string_buffer(end, end.size());
+}
+
 // context
 // ----------------------------------------------------------------------------
 
