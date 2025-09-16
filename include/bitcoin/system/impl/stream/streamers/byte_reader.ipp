@@ -502,15 +502,14 @@ std::string byte_reader<IStream>::read_string_buffer(size_t size) NOEXCEPT
 template <typename IStream>
 std::string byte_reader<IStream>::read_line(const std::string& end) NOEXCEPT
 {
-    const auto start = get_read_position();
-    std::string out(line_length(end), 0x00);
-
-    // set_position resets valid.
-    if (!valid())
+    // This leaves current position after terminator, zero sized if invalid.
+    const auto size = line_length(end);
+    if (is_zero(size))
         return {};
 
-    set_position(start);
-    do_read_bytes(pointer_cast<uint8_t>(out.data()), out.size());
+    std::string out(size, '\0');
+    do_rewind_bytes(size + end.size());
+    do_read_bytes(pointer_cast<uint8_t>(out.data()), size);
     do_skip_bytes(end.size());
     return out;
 }
@@ -858,52 +857,49 @@ void byte_reader<IStream>::seeker(typename IStream::pos_type offset) NOEXCEPT
 template <typename IStream>
 size_t byte_reader<IStream>::line_length(const std::string& end) NOEXCEPT
 {
-    if (end.empty())
+    if (!end.empty())
     {
-        invalid();
-        return {};
-    }
+        size_t index{};
+        size_t length{};
 
-    size_t index{};
-    size_t length{};
-
-    // Count bytes to end, avoids reallocations.
-    while (!get_exhausted())
-    {
-        const auto byte = read_byte();
-        if (byte == end.at(index))
+        // Count bytes to end, avoids reallocations.
+        while (!get_exhausted())
         {
-            // Full match, read line.
-            if (++index == end.size())
-                return length;
-        }
-        else
-        {
-            if (!is_zero(index))
+            const auto byte = read_byte();
+            if (byte == end.at(index))
             {
-                // Partial match, include bytes up to mismatch.
-                length += index;
-
-                // Re-check current byte for new terminator start.
-                if (byte == end.front())
-                {
-                    index = one;
-                }
-                else
-                {
-                    index = zero;
-                    ++length;
-                }
+                // Full match, read line.
+                if (++index == end.size())
+                    return length;
             }
             else
             {
-                // Non-match, just increment.
-                ++length;
+                if (!is_zero(index))
+                {
+                    // Partial match, include bytes up to mismatch.
+                    length += index;
+
+                    // Re-check current byte for new terminator start.
+                    if (byte == end.front())
+                    {
+                        index = one;
+                    }
+                    else
+                    {
+                        index = zero;
+                        ++length;
+                    }
+                }
+                else
+                {
+                    // Non-match, just increment.
+                    ++length;
+                }
             }
         }
     }
 
-    // Expected line terminator not found.
+    // Line terminator not found.
     invalid();
     return {};
 }

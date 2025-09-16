@@ -145,6 +145,7 @@ public:
     std::string read_string_buffer(size_t size) NOEXCEPT override;
 
     /// Read a line up to specified terminator (skip and exclude terminator).
+    /// Returns empty and invalidates stream if terminator is not found.
     std::string read_line(const std::string& end="\r\n") NOEXCEPT override;
 
     /// Streams.
