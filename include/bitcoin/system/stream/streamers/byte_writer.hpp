@@ -101,6 +101,10 @@ public:
     void write_string_buffer(const std::string& value, size_t size) NOEXCEPT
         override;
 
+    /// Write value and specified terminator.
+    void write_line(const std::string& value="",
+        const std::string& end="\r\n") NOEXCEPT override;
+
     /// Streams.
     /// -----------------------------------------------------------------------
 
