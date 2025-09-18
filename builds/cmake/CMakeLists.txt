@@ -19,6 +19,21 @@ include(CheckSymbolExists)
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
 include(CheckLinkerFlag)
+include(FetchContent)
+
+# Conditionally get tracy profiler
+if (with-tracy)
+    # Define tracy version and define the source
+    FetchContent_Declare(
+    tracy
+    GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+    GIT_TAG master
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+    )
+    # Download and make tracy available
+    FetchContent_MakeAvailable(tracy)
+endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -147,6 +162,10 @@ set( with-tests "yes" CACHE BOOL "Compile with unit tests." )
 # Implement -Dwith-examples and declare with-examples.
 #------------------------------------------------------------------------------
 set( with-examples "yes" CACHE BOOL "Compile with examples." )
+
+# Implement -Dwith-tracy and declare with-tracy.
+#------------------------------------------------------------------------------
+set( with-tracy "no" CACHE BOOL "Compile/Build with tracy profiler." )
 
 # Implement -Dwith-icu and define BOOST_HAS_ICU and output ${icu}.
 #------------------------------------------------------------------------------
@@ -634,10 +653,22 @@ target_include_directories( ${CANONICAL_LIB_NAME} PRIVATE
     ${rt_INCLUDE_DIRS}
     ${icu_i18n_FOR_BUILD_INCLUDE_DIRS}
     ${dl_INCLUDE_DIRS}
-    ${secp256k1_FOR_BUILD_INCLUDE_DIRS} )
+    ${secp256k1_FOR_BUILD_INCLUDE_DIRS}
+    # Conditionally add tracy includes
+    "$<$<BOOL:${with-tracy}>:${tracy_SOURCE_DIR}/public>" )
 
 target_include_directories( ${CANONICAL_LIB_NAME} PUBLIC
 "../../include" )
+
+# Conditionally enable tracy profiling.
+#------------------------------------------------------------------------------
+if (with-tracy)
+    target_compile_definitions( ${CANONICAL_LIB_NAME} PRIVATE
+        WITH_TRACY    
+        TRACY_ENABLE
+        TRACY_ON_DEMAND       
+    )
+endif()
 
 # ${CANONICAL_LIB_NAME} project specific libraries noramalization for build.
 #------------------------------------------------------------------------------
@@ -660,7 +691,9 @@ target_link_libraries( ${CANONICAL_LIB_NAME}
     ${rt_LIBRARIES}
     ${icu_i18n_FOR_BUILD_LIBRARIES}
     ${dl_LIBRARIES}
-    ${secp256k1_FOR_BUILD_LIBRARIES} )
+    ${secp256k1_FOR_BUILD_LIBRARIES}
+    # Conditionally add tracy libs
+    "$<$<BOOL:${with-tracy}>:Tracy::TracyClient>" )
 
 # Define libbitcoin-system-examples project.
 #------------------------------------------------------------------------------
