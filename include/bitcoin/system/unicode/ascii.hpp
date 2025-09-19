@@ -25,10 +25,13 @@ namespace libbitcoin {
 namespace system {
 
 /// Character tests.
-BC_API bool is_ascii_character(char32_t point) NOEXCEPT;
-BC_API bool is_ascii_number(char32_t point) NOEXCEPT;
-BC_API bool is_ascii_separator(char32_t point) NOEXCEPT;
-BC_API bool is_ascii_whitespace(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_character(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_number(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_lower(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_upper(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_alpha(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_separator(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_whitespace(char32_t point) NOEXCEPT;
 
 /// Convert each ASCII letter in text to lower case.
 BC_API std::string ascii_to_lower(const std::string& text) NOEXCEPT;
@@ -51,5 +54,7 @@ BC_API bool is_ascii_numeric(const std::string& text) NOEXCEPT;
 
 } // namespace system
 } // namespace libbitcoin
+
+#include <bitcoin/system/impl/unicode/ascii.ipp>
 
 #endif

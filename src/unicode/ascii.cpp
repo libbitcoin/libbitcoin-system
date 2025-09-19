@@ -20,35 +20,11 @@
 
 #include <algorithm>
 #include <iterator>
+#include <bitcoin/system/define.hpp>
 #include <bitcoin/system/math/math.hpp>
-#include <bitcoin/system/unicode/normalization.hpp>
 
 namespace libbitcoin {
 namespace system {
-
-// TODO: move to .ipp and make constexpr/inline.
-
-// char32_t functions.
-
-bool is_ascii_character(char32_t character) NOEXCEPT
-{
-    return is_zero(character & 0xffffff80);
-}
-
-bool is_ascii_number(char32_t point) NOEXCEPT
-{
-    return '0' <= point && point <= '9';
-}
-
-bool is_ascii_separator(char32_t point) NOEXCEPT
-{
-    return is_ascii_character(point) && is_separator(point);
-}
-
-bool is_ascii_whitespace(char32_t point) NOEXCEPT
-{
-    return is_ascii_character(point) && is_whitespace(point);
-}
 
 // string functions.
 
@@ -69,9 +45,7 @@ bool is_ascii_numeric(const std::string& text) NOEXCEPT
 
 std::string ascii_to_lower(const std::string& text) NOEXCEPT
 {
-    std::string copy{ text};
-
-    // C++17: parallel policy for std::transform.
+    std::string copy{ text };
     std::transform(text.begin(), text.end(), copy.begin(),
         [](char value) NOEXCEPT
         {
@@ -84,8 +58,6 @@ std::string ascii_to_lower(const std::string& text) NOEXCEPT
 std::string ascii_to_upper(const std::string& text) NOEXCEPT
 {
     std::string copy{ text };
-
-    // C++17: parallel policy for std::transform.
     std::transform(text.begin(), text.end(), copy.begin(),
         [](char value) NOEXCEPT
         {
@@ -98,7 +70,6 @@ std::string ascii_to_upper(const std::string& text) NOEXCEPT
 
 bool has_ascii_whitespace(const std::string& text) NOEXCEPT
 {
-    // C++17: parallel policy for std::any_of.
     return std::any_of(text.begin(), text.end(),
         [](char character) NOEXCEPT
         {
