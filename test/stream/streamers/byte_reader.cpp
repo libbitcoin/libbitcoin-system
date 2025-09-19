@@ -467,6 +467,11 @@ BOOST_AUTO_TEST_CASE(byte_reader__set_limit__set_position_forward_peek__limited)
     reader.set_position(3);
     BOOST_REQUIRE(!reader.is_exhausted());
 
+    // Peek does not consume limit (as verified by subsequent reads).
+    BOOST_REQUIRE_EQUAL(reader.peek_byte(), 'd');
+    BOOST_REQUIRE_EQUAL(reader.peek_byte(), 'd');
+    BOOST_REQUIRE_EQUAL(reader.peek_byte(), 'd');
+
     // Read to limit and verify.
     BOOST_REQUIRE_EQUAL(reader.get_read_position(), 3u);
     BOOST_REQUIRE_EQUAL(reader.read_byte(), 'd');

@@ -655,8 +655,11 @@ byte_allocator& byte_reader<IStream>::get_allocator() const NOEXCEPT
 template <typename IStream>
 uint8_t byte_reader<IStream>::do_peek_byte() NOEXCEPT
 {
-    if (limiter(one))
+    if (is_zero(remaining_))
+    {
+        invalid();
         return pad();
+    }
 
     // This sets eofbit (or badbit) on empty and eofbit if otherwise at end.
     // eofbit does not cause !!eofbit == true, but badbit does, so we validate
