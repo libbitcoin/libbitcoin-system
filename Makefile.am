@@ -742,6 +742,10 @@ include_bitcoin_system_impl_stream_streamers_HEADERS = \
     include/bitcoin/system/impl/stream/streamers/sha256t_writer.ipp \
     include/bitcoin/system/impl/stream/streamers/sha256x2_writer.ipp
 
+include_bitcoin_system_impl_unicodedir = ${includedir}/bitcoin/system/impl/unicode
+include_bitcoin_system_impl_unicode_HEADERS = \
+    include/bitcoin/system/impl/unicode/ascii.ipp
+
 include_bitcoin_system_impl_wallet_addressesdir = ${includedir}/bitcoin/system/impl/wallet/addresses
 include_bitcoin_system_impl_wallet_addresses_HEADERS = \
     include/bitcoin/system/impl/wallet/addresses/checked.ipp

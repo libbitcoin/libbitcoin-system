@@ -110,6 +110,72 @@ BOOST_AUTO_TEST_CASE(ascii__is_ascii_number__non_numbers__false)
     BOOST_REQUIRE(!is_ascii_number('X'));
 }
 
+// is_ascii_lower
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_lower__ascii_lowers__true)
+{
+    BOOST_REQUIRE(is_ascii_lower('a'));
+    BOOST_REQUIRE(is_ascii_lower('b'));
+    BOOST_REQUIRE(is_ascii_lower('c'));
+    BOOST_REQUIRE(is_ascii_lower('x'));
+    BOOST_REQUIRE(is_ascii_lower('y'));
+    BOOST_REQUIRE(is_ascii_lower('z'));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_lower__ascii_uppers__false)
+{
+    BOOST_REQUIRE(!is_ascii_lower('A'));
+    BOOST_REQUIRE(!is_ascii_lower('B'));
+    BOOST_REQUIRE(!is_ascii_lower('C'));
+    BOOST_REQUIRE(!is_ascii_lower('X'));
+    BOOST_REQUIRE(!is_ascii_lower('Y'));
+    BOOST_REQUIRE(!is_ascii_lower('Z'));
+}
+
+// is_ascii_upper
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_upper__ascii_uppers__true)
+{
+    BOOST_REQUIRE(is_ascii_upper('A'));
+    BOOST_REQUIRE(is_ascii_upper('B'));
+    BOOST_REQUIRE(is_ascii_upper('C'));
+    BOOST_REQUIRE(is_ascii_upper('X'));
+    BOOST_REQUIRE(is_ascii_upper('Y'));
+    BOOST_REQUIRE(is_ascii_upper('Z'));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_upper__ascii_lowers__false)
+{
+    BOOST_REQUIRE(!is_ascii_upper('a'));
+    BOOST_REQUIRE(!is_ascii_upper('b'));
+    BOOST_REQUIRE(!is_ascii_upper('c'));
+    BOOST_REQUIRE(!is_ascii_upper('x'));
+    BOOST_REQUIRE(!is_ascii_upper('y'));
+    BOOST_REQUIRE(!is_ascii_upper('z'));
+}
+
+// is_ascii_alpha
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alpha__ascii_alphas__true)
+{
+    BOOST_REQUIRE(is_ascii_alpha('A'));
+    BOOST_REQUIRE(is_ascii_alpha('B'));
+    BOOST_REQUIRE(is_ascii_alpha('C'));
+    BOOST_REQUIRE(is_ascii_alpha('X'));
+    BOOST_REQUIRE(is_ascii_alpha('Y'));
+    BOOST_REQUIRE(is_ascii_alpha('Z'));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alpha__ascii_non_alphas__false)
+{
+    BOOST_REQUIRE(!is_ascii_alpha('1'));
+    BOOST_REQUIRE(!is_ascii_alpha('2'));
+    BOOST_REQUIRE(!is_ascii_alpha('3'));
+    BOOST_REQUIRE(!is_ascii_alpha('*'));
+    BOOST_REQUIRE(!is_ascii_alpha('!'));
+    BOOST_REQUIRE(!is_ascii_alpha('#'));
+}
+
 // is_ascii_separator
 
 BOOST_AUTO_TEST_CASE(ascii__is_ascii_separator__ascii_space__true)

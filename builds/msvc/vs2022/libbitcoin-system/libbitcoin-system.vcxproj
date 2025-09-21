@@ -675,6 +675,7 @@
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256t_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\stream\streamers\sha256x2_writer.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\system\impl\unicode\ascii.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\wallet\addresses\checked.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionaries.ipp" />
     <None Include="..\..\..\..\include\bitcoin\system\impl\words\dictionary.ipp" />
