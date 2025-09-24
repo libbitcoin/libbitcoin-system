@@ -26,6 +26,9 @@
 #include <bitcoin/system/radix/radix.hpp>
 #include <bitcoin/system/unicode/unicode.hpp>
 
+// TODO: reimplement using boost.url (non-header).
+////#include <boost/url.hpp>
+
 namespace libbitcoin {
 namespace system {
 namespace wallet {

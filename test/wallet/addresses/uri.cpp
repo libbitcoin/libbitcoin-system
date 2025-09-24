@@ -22,7 +22,17 @@ BOOST_AUTO_TEST_SUITE(uri_tests)
 
 using namespace bc::system::wallet;
 
-BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_bar__expected)
+BOOST_AUTO_TEST_CASE(uri__parse__slash_foo_dot_bar__path)
+{
+    uri parsed;
+    BOOST_REQUIRE(parsed.decode("/foo.bar", true, false));
+    BOOST_REQUIRE_EQUAL(parsed.path(), "/foo.bar");
+    BOOST_REQUIRE(!parsed.has_scheme());
+    BOOST_REQUIRE(!parsed.has_authority());
+    BOOST_REQUIRE(!parsed.has_query());
+}
+
+BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_bar__scheme_and_bar)
 {
     uri parsed;
     BOOST_REQUIRE(parsed.decode("foo:bar?baz=boo"));
@@ -34,7 +44,7 @@ BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_bar__expected)
     BOOST_REQUIRE_EQUAL(parsed.query(), "baz=boo");
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_slash_bar__expected)
+BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_slash_bar__scheme_and_path)
 {
     uri parsed;
     BOOST_REQUIRE(parsed.decode("foo:/bar?baz=boo"));
@@ -46,7 +56,7 @@ BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_slash_bar__expected)
     BOOST_REQUIRE_EQUAL(parsed.query(), "baz=boo");
 }
 
-BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_double_slash_bar__expected)
+BOOST_AUTO_TEST_CASE(uri__parse__foo_colon_double_slash_bar__scheme_and_authority)
 {
     uri parsed;
     BOOST_REQUIRE(parsed.decode("foo://bar/bee?baz=boo"));
