@@ -32,6 +32,7 @@
 #include <boost/locale.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/program_options.hpp>
+#include <boost/url.hpp>
 
 // ADL free functions for use with boost-json.
 #define DECLARE_JSON_VALUE_CONVERTORS(name) \
