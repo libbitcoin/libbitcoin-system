@@ -49,8 +49,8 @@ std::string ascii_to_lower(const std::string& text) NOEXCEPT
     std::transform(text.begin(), text.end(), copy.begin(),
         [](char value) NOEXCEPT
         {
-            return narrow_sign_cast<uint8_t>(
-                'A' <= value && value <= 'Z' ? value + ('a' - 'A') : value);
+            return narrow_sign_cast<uint8_t>(is_ascii_upper(value) ?
+                value + ('a' - 'A') : value);
         });
     return copy;
 }
@@ -61,8 +61,8 @@ std::string ascii_to_upper(const std::string& text) NOEXCEPT
     std::transform(text.begin(), text.end(), copy.begin(),
         [](char value) NOEXCEPT
         {
-            return narrow_sign_cast<uint8_t>(
-                'a' <= value && value <= 'z' ? value + ('A' - 'a') : value);
+            return narrow_sign_cast<uint8_t>(is_ascii_lower(value) ?
+                value + ('A' - 'a') : value);
         });
 
     return copy;
@@ -82,12 +82,11 @@ bool has_mixed_ascii_case(const std::string& text) NOEXCEPT
     auto lower = false;
     auto upper = false;
 
-    // non-parallel (side effect).
     std::for_each(text.begin(), text.end(),
         [&](char character) NOEXCEPT
         {
-            lower |= ('a' <= character && character <= 'z');
-            upper |= ('A' <= character && character <= 'Z');
+            lower |= is_ascii_lower(character);
+            upper |= is_ascii_upper(character);
         });
 
     return lower && upper;
