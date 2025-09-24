@@ -20,6 +20,7 @@
 
 #include <iomanip>
 #include <iterator>
+#include <ranges>
 #include <sstream>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/radix/radix.hpp>
@@ -29,47 +30,61 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
+BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+
 // These character classification functions correspond to RFC 3986.
 // They avoid C standard library character classification functions,
 // since those give different answers based on the current locale.
-constexpr bool is_alpha(const char c) NOEXCEPT
+
+constexpr char path_character[]
 {
-    return
-        ('A' <= c && c <= 'Z') ||
-        ('a' <= c && c <= 'z');
+    '-',
+    '.',
+    '_',
+    '~',
+    '!',
+    '$',
+    '&',
+    '\'',
+    '(',
+    ')',
+    '*',
+    '+',
+    ',',
+    ';',
+    '=',
+    ':',
+    '@'
+};
+
+constexpr bool is_path_character(const char point) NOEXCEPT
+{
+    return is_ascii_alphanumeric(point) || std::ranges::any_of(path_character,
+        [=](auto path) NOEXCEPT
+        {
+            return path == point;
+        });
 }
 
-constexpr bool is_scheme(const char c) NOEXCEPT
+constexpr bool is_path(const char point) NOEXCEPT
 {
-    return
-        is_alpha(c) || ('0' <= c && c <= '9') ||
-        '+' == c || '-' == c || '.' == c;
+    return is_path_character(point) || point == '/';
 }
 
-constexpr bool is_path_character(const char c) NOEXCEPT
+constexpr bool is_scheme(const char point) NOEXCEPT
 {
-    return
-        is_alpha(c) || ('0' <= c && c <= '9') ||
-        '-' == c || '.' == c || '_' == c || '~' == c || // unreserved
-        '!' == c || '$' == c || '&' == c || '\'' == c ||
-        '(' == c || ')' == c || '*' == c || '+' == c ||
-        ',' == c || ';' == c || '=' == c || // sub-delims
-        ':' == c || '@' == c;
+    return is_ascii_alphanumeric(point) ||
+        point == '+' || point == '-' || point == '.';
 }
 
-constexpr bool is_path(const char c) NOEXCEPT
+constexpr bool is_query(const char point) NOEXCEPT
 {
-    return is_path_character(c) || '/' == c;
+    return is_path_character(point) || point == '/' || point == '?';
 }
 
-constexpr bool is_query(const char c) NOEXCEPT
+constexpr bool is_query_character(const char point) NOEXCEPT
 {
-    return is_path_character(c) || '/' == c || '?' == c;
-}
-
-constexpr bool is_query_character(const char c) NOEXCEPT
-{
-    return is_query(c) && '&' != c && '=' != c;
+    return is_query(point) && point != '&' && point != '=';
 }
 
 // Verifies that all RFC 3986 escape sequences in a string are valid, and that
@@ -109,8 +124,7 @@ static std::string unescape(const std::string& in) NOEXCEPT
     std::string out;
     out.reserve(in.size());
 
-    auto it = in.begin();
-    while (it != in.end())
+    for (auto it = in.begin(); it != in.end();)
     {
         // If % and is octet.
         if ((*it == '%') && (std::distance(it, in.end()) > 2) &&
@@ -157,7 +171,7 @@ bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
         ++it;
 
     scheme_ = std::string(start, it);
-    if (scheme_.empty() || !is_alpha(scheme_[0]))
+    if (scheme_.empty() || !is_ascii_alpha(scheme_[0]))
         return false;
 
     if (!std::all_of(scheme_.begin(), scheme_.end(), is_scheme))
@@ -387,6 +401,8 @@ void uri::encode_query(const query_map& map) NOEXCEPT
     has_query_ = !map.empty();
     query_ = query.str();
 }
+
+BC_POP_WARNING()
 
 } // namespace wallet
 } // namespace system
