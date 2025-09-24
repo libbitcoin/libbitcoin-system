@@ -465,6 +465,9 @@
     <ClCompile Include="..\..\..\..\src\stream\binary.cpp">
       <Filter>src\stream</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\unicode\ascii.cpp">
+      <Filter>src\unicode</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\unicode\code_points.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
@@ -635,9 +638,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\words\languages.cpp">
       <Filter>src\words</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\unicode\ascii.cpp">
-      <Filter>src\unicode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
