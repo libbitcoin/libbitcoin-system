@@ -45,9 +45,11 @@ public:
         if (!parsed.decode(uri, strict))
             return {};
 
-        UriReader out;
+        UriReader out{};
         out.set_strict(strict);
-        out.set_scheme(parsed.scheme());
+        if (!out.set_scheme(parsed.scheme()))
+            return {};
+
         if (parsed.has_authority() && !out.set_authority(parsed.authority()))
             return {};
 
