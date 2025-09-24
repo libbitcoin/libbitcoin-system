@@ -174,7 +174,7 @@ bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
     if (scheme_.empty() || !is_ascii_alpha(scheme_[0]))
         return false;
 
-    if (!std::all_of(scheme_.begin(), scheme_.end(), is_scheme))
+    if (!std::ranges::all_of(scheme_, is_scheme))
         return false;
 
     // Consume ':':
