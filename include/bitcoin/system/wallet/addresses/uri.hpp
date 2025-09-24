@@ -34,7 +34,7 @@ public:
     uri() NOEXCEPT {}
 
     /// Decodes a URI from a string.
-    /// @param strict Set to false to tolerate unescaped special characters.
+    /// @param strict set to false to tolerate unescaped special characters.
     bool decode(const std::string& encoded, bool strict=true) NOEXCEPT;
     std::string encoded() const NOEXCEPT;
 
