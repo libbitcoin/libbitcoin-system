@@ -32,21 +32,21 @@ namespace wallet {
 // These character classification functions correspond to RFC 3986.
 // They avoid C standard library character classification functions,
 // since those give different answers based on the current locale.
-static bool is_alpha(const char c) NOEXCEPT
+constexpr bool is_alpha(const char c) NOEXCEPT
 {
     return
         ('A' <= c && c <= 'Z') ||
         ('a' <= c && c <= 'z');
 }
 
-static bool is_scheme(const char c) NOEXCEPT
+constexpr bool is_scheme(const char c) NOEXCEPT
 {
     return
         is_alpha(c) || ('0' <= c && c <= '9') ||
         '+' == c || '-' == c || '.' == c;
 }
 
-static bool is_path_character(const char c)
+constexpr bool is_path_character(const char c) NOEXCEPT
 {
     return
         is_alpha(c) || ('0' <= c && c <= '9') ||
@@ -57,17 +57,17 @@ static bool is_path_character(const char c)
         ':' == c || '@' == c;
 }
 
-static bool is_path(const char c) NOEXCEPT
+constexpr bool is_path(const char c) NOEXCEPT
 {
     return is_path_character(c) || '/' == c;
 }
 
-static bool is_query(const char c) NOEXCEPT
+constexpr bool is_query(const char c) NOEXCEPT
 {
     return is_path_character(c) || '/' == c || '?' == c;
 }
 
-static bool is_query_character(const char c) NOEXCEPT
+constexpr bool is_query_character(const char c) NOEXCEPT
 {
     return is_query(c) && '&' != c && '=' != c;
 }
