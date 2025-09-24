@@ -34,12 +34,15 @@ public:
     uri() NOEXCEPT {}
 
     /// Decodes a URI from a string.
-    /// @param strict set to false to tolerate unescaped special characters.
-    bool decode(const std::string& encoded, bool strict=true) NOEXCEPT;
+    /// Strict set to false to tolerate unescaped special characters.
+    /// Scheme set to false to allow empty scheme parsing.
+    bool decode(const std::string& encoded, bool strict=true,
+        bool scheme=true) NOEXCEPT;
     std::string encoded() const NOEXCEPT;
 
-    /// Returns the lowercased URI scheme.
+    /// Returns the lowercased URI scheme (set empty to remove).
     std::string scheme() const NOEXCEPT;
+    bool has_scheme() const NOEXCEPT;
     void set_scheme(const std::string& scheme) NOEXCEPT;
 
     /// Obtains the unescaped authority part, if any (user@server:port).

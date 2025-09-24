@@ -79,7 +79,7 @@ constexpr bool is_scheme(const char point) NOEXCEPT
 
 constexpr bool is_query(const char point) NOEXCEPT
 {
-    return is_path_character(point) || point == '/' || point == '?';
+    return is_path(point) || point == '?';
 }
 
 constexpr bool is_query_character(const char point) NOEXCEPT
@@ -115,6 +115,11 @@ static bool validate(const std::string& in,
     }
 
     return true;
+}
+
+static bool validate_scheme(const std::string& in) NOEXCEPT
+{
+    return !in.empty() && is_ascii_alpha(in[0]) && validate(in, is_scheme);
 }
 
 // Decodes all RFC 3986 escape sequences in a string.
@@ -161,37 +166,66 @@ static std::string escape(const std::string& in,
     return stream.str();
 }
 
-bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
+// Break a raw string up into URI parts.
+bool uri::decode(const std::string& encoded, bool strict, bool scheme) NOEXCEPT
 {
+    if (encoded.empty())
+        return false;
+
     auto it = encoded.begin();
-
-    // Store the scheme:
     auto start = it;
-    while (it != encoded.end() && *it != ':')
+
+    // Store the scheme part.
+    scheme_.clear();
+    while (it != encoded.end())
+    {
+        // Consume ":".
+        if (*it == ':')
+        {
+            scheme_ = std::string(start, it++);
+            if (!validate_scheme(scheme_))
+            {
+                if (scheme) return false;
+                scheme_.clear();
+            }
+
+            // Found non-empty scheme, iterator is set.
+            break;
+        }
+
+        // No scheme if hit non-scheme character.
+        if (!is_scheme(*it))
+            break;
+
         ++it;
+    }
 
-    scheme_ = std::string(start, it);
-    if (scheme_.empty() || !is_ascii_alpha(scheme_[0]))
-        return false;
+    // No scheme found.
+    if (scheme_.empty())
+    {
+        if (scheme) return false;
+        it = start;
+    }
 
-    if (!std::ranges::all_of(scheme_, is_scheme))
-        return false;
-
-    // Consume ':':
-    if (it == encoded.end())
-        return false;
-
-    ++it;
-
-    // Consume "//":
+    // Consume "//".
     authority_.clear();
     has_authority_ = false;
-    if (std::distance(it, encoded.end()) > 1 && it[0] == '/' && it[1] == '/')
+    if (has_scheme() &&
+        std::distance(it, encoded.end()) > 1 && it[0] == '/' && it[1] == '/')
     {
+        // Following a scheme, authority must start with //.
         has_authority_ = true;
         it += 2;
+    }
+    else if (!has_scheme() && it != encoded.end() && it[0] != '/')
+    {
+        // If no scheme, authority may not start with // (or / which is path).
+        has_authority_ = true;
+    }
 
-        // Store authority part:
+    // Store authority part.
+    if (has_authority_)
+    {
         start = it;
         while (it != encoded.end() && *it != '#' && *it != '?' && *it != '/')
             ++it;
@@ -201,7 +235,7 @@ bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
             return false;
     }
 
-    // Store the path part:
+    // Store path part.
     start = it;
     while (it != encoded.end() && *it != '#' && *it != '?')
         ++it;
@@ -210,7 +244,7 @@ bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
     if (strict && !validate(path_, is_path))
         return false;
 
-    // Consume '?':
+    // Consume '?'.
     has_query_ = false;
     if (it != encoded.end() && *it != '#')
     {
@@ -218,7 +252,7 @@ bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
         ++it;
     }
 
-    // Store the query part:
+    // Store query part.
     start = it;
     while (it != encoded.end() && *it != '#')
         ++it;
@@ -227,15 +261,15 @@ bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
     if (strict && !validate(query_, is_query))
         return false;
 
-    // Consume '#':
+    // Consume '#'.
     has_fragment_ = false;
-    if (encoded.end() != it)
+    if (it != encoded.end())
     {
         has_fragment_ = true;
         ++it;
     }
 
-    // Store the fragment part:
+    // Store fragment part.
     fragment_ = std::string(it, encoded.end());
     return !strict || validate(fragment_, is_query);
 }
@@ -243,7 +277,9 @@ bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
 std::string uri::encoded() const NOEXCEPT
 {
     std::ostringstream out;
-    out << scheme_ << ':';
+    if (has_scheme())
+        out << scheme_ << ':';
+
     if (has_authority_)
         out << "//" << authority_;
 
@@ -262,6 +298,11 @@ std::string uri::encoded() const NOEXCEPT
 std::string uri::scheme() const NOEXCEPT
 {
     return ascii_to_lower(scheme_);
+}
+
+bool uri::has_scheme() const NOEXCEPT
+{
+    return !scheme_.empty();
 }
 
 void uri::set_scheme(const std::string& scheme) NOEXCEPT
