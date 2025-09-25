@@ -25,7 +25,7 @@ using namespace bc::system::wallet;
 BOOST_AUTO_TEST_CASE(uri__parse__slash_foo_dot_bar__path)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("/foo.bar", true, false));
+    BOOST_REQUIRE(parsed.decode("/foo.bar"));
     BOOST_REQUIRE_EQUAL(parsed.path(), "/foo.bar");
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_authority());
@@ -110,8 +110,6 @@ BOOST_AUTO_TEST_CASE(uri__parse__messy_roundtrip__expected)
 BOOST_AUTO_TEST_CASE(uri__parse__scheme__expected)
 {
     uri parsed;
-
-    // Invalid scheme cases
     BOOST_REQUIRE(!parsed.decode(""));
     BOOST_REQUIRE(!parsed.decode("1:"));
 
@@ -128,27 +126,21 @@ BOOST_AUTO_TEST_CASE(uri__parse__scheme__expected)
 
     // Empty scheme
     BOOST_REQUIRE(!parsed.decode(":"));
-    BOOST_REQUIRE(parsed.decode("%78:", true, false));
-    BOOST_REQUIRE(!parsed.has_scheme());
-
-    BOOST_REQUIRE(parsed.decode(":/path", true, false));
-    BOOST_REQUIRE(!parsed.has_scheme());
-    BOOST_REQUIRE(parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.authority(), ":");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
+    BOOST_REQUIRE(!parsed.decode("%78:"));
+    BOOST_REQUIRE(!parsed.decode(":/path"));
 }
 
 BOOST_AUTO_TEST_CASE(uri__parse__no_scheme__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("/path", true, false));
+    BOOST_REQUIRE(parsed.decode("/path"));
     BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_authority());
     BOOST_REQUIRE(!parsed.has_query());
     BOOST_REQUIRE(!parsed.has_fragment());
 
-    BOOST_REQUIRE(parsed.decode("/path?query=val", true, false));
+    BOOST_REQUIRE(parsed.decode("/path?query=val"));
     BOOST_REQUIRE(parsed.has_query());
     BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
     BOOST_REQUIRE_EQUAL(parsed.query(), "query=val");
@@ -156,25 +148,15 @@ BOOST_AUTO_TEST_CASE(uri__parse__no_scheme__expected)
     BOOST_REQUIRE(!parsed.has_authority());
     BOOST_REQUIRE(!parsed.has_fragment());
 
-    // Authority cannot start with // without a scheme.
-    BOOST_REQUIRE(parsed.decode("//host:port", true, false));
-    BOOST_REQUIRE(!parsed.has_authority());
+    BOOST_REQUIRE(parsed.decode("//host:42"));
+    BOOST_REQUIRE(parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.authority(), "host:42");
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_query());
     BOOST_REQUIRE(!parsed.has_fragment());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "//host:port");
 
-    BOOST_REQUIRE(parsed.decode("//host#frag", true, false));
-    BOOST_REQUIRE(!parsed.decode("/path%GG", true, false));
-}
-
-BOOST_AUTO_TEST_CASE(uri__parsing__non_strict__expected)
-{
-    uri parsed;
-    BOOST_REQUIRE(!parsed.decode("test:?テスト"));
-    BOOST_REQUIRE(parsed.decode("test:テスト", false));
-    BOOST_REQUIRE_EQUAL(parsed.scheme(), "test");
-    BOOST_REQUIRE_EQUAL(parsed.path(), "テスト");
+    BOOST_REQUIRE(parsed.decode("//host#frag"));
+    BOOST_REQUIRE(!parsed.decode("/path%GG"));
 }
 
 BOOST_AUTO_TEST_CASE(uri__parse__authority__expected)
@@ -209,10 +191,9 @@ BOOST_AUTO_TEST_CASE(uri__parse__authority__expected)
     BOOST_REQUIRE_EQUAL(parsed.path(), "/path/");
 
     // Invalid authority-form
-    // The // is a delimiter for URI, not part of the authority.
-    BOOST_REQUIRE(parsed.decode("//host", true, false));
-    BOOST_REQUIRE_EQUAL(parsed.path(), "//host");
-    BOOST_REQUIRE(!parsed.has_authority());
+    BOOST_REQUIRE(parsed.decode("//host"));
+    BOOST_REQUIRE(parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.authority(), "host");
     BOOST_REQUIRE(!parsed.has_scheme());
 }
 
@@ -241,7 +222,7 @@ BOOST_AUTO_TEST_CASE(uri__parse__query__expected)
     BOOST_REQUIRE_EQUAL(map["z"], "");
 
     // Scheme-less query
-    BOOST_REQUIRE(parsed.decode("/path?key=value", true, false));
+    BOOST_REQUIRE(parsed.decode("/path?key=value"));
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_authority());
     BOOST_REQUIRE(parsed.has_query());
@@ -252,11 +233,11 @@ BOOST_AUTO_TEST_CASE(uri__parse__query__expected)
 BOOST_AUTO_TEST_CASE(uri__parse__fragment__expected)
 {
     uri parsed;
-    BOOST_REQUIRE(parsed.decode("test:?", true, true));
+    BOOST_REQUIRE(parsed.decode("test:?"));
     BOOST_REQUIRE(parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_fragment());
 
-    BOOST_REQUIRE(parsed.decode("test:#", false, false));
+    BOOST_REQUIRE(parsed.decode("test:#"));
     BOOST_REQUIRE(parsed.has_scheme());
     BOOST_REQUIRE(parsed.has_fragment());
     BOOST_REQUIRE_EQUAL(parsed.fragment(), "");
@@ -267,7 +248,7 @@ BOOST_AUTO_TEST_CASE(uri__parse__fragment__expected)
     BOOST_REQUIRE_EQUAL(parsed.fragment(), "?");
 
     // Scheme-less fragment
-    BOOST_REQUIRE(parsed.decode("/path#frag", true, false));
+    BOOST_REQUIRE(parsed.decode("/path#frag"));
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_authority());
     BOOST_REQUIRE(parsed.has_fragment());
@@ -305,14 +286,14 @@ BOOST_AUTO_TEST_CASE(uri__parse__http1_1_targets__expected)
     BOOST_REQUIRE(!parsed.decode(""));
 
     // Origin-form
-    BOOST_REQUIRE(parsed.decode("/path", true, false));
+    BOOST_REQUIRE(parsed.decode("/path"));
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_authority());
     BOOST_REQUIRE(!parsed.has_query());
     BOOST_REQUIRE(!parsed.has_fragment());
     BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
 
-    BOOST_REQUIRE(parsed.decode("/path?query=val", true, false));
+    BOOST_REQUIRE(parsed.decode("/path?query=val"));
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_authority());
     BOOST_REQUIRE(parsed.has_query());
@@ -329,23 +310,21 @@ BOOST_AUTO_TEST_CASE(uri__parse__http1_1_targets__expected)
     BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
     BOOST_REQUIRE(!parsed.has_query());
     BOOST_REQUIRE(!parsed.has_fragment());
+    BOOST_REQUIRE(parsed.decode("/path#frag"));
+    BOOST_REQUIRE_EQUAL(parsed.path(), "/path");
+    BOOST_REQUIRE_EQUAL(parsed.fragment(), "frag");
 
-    // Invalid authority-form
-    // The // is a delimiter for URI, not part of the authority.
-    BOOST_REQUIRE(parsed.decode("//host:port", true, false));
-    BOOST_REQUIRE(!parsed.has_authority());
-    BOOST_REQUIRE_EQUAL(parsed.path(), "//host:port");
+    // Authority-form
+    BOOST_REQUIRE(parsed.decode("//host:42"));
+    BOOST_REQUIRE(parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.authority(), "host:42");
     BOOST_REQUIRE(!parsed.has_scheme());
     BOOST_REQUIRE(!parsed.has_query());
     BOOST_REQUIRE(!parsed.has_fragment());
 
-    // Empty requried scheme
-    BOOST_REQUIRE(!parsed.decode(":/path", true, true));
-    BOOST_REQUIRE(!parsed.decode("/path#frag", true));
-
     // Invalid encoding
-    BOOST_REQUIRE(!parsed.decode("/path%GG", true, false));
-    BOOST_REQUIRE(parsed.decode("/path%GG", false, false));
+    BOOST_REQUIRE(!parsed.decode(":/path"));
+    BOOST_REQUIRE(!parsed.decode("/path%GG"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

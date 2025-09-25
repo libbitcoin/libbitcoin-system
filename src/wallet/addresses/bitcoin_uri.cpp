@@ -38,12 +38,11 @@ static const auto parameter_req_ = "req-";
 static constexpr size_t parameter_req_length = 4;
 
 bitcoin_uri::bitcoin_uri() NOEXCEPT
-  : strict_(true)
 {
 }
 
-bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict) NOEXCEPT
-  : bitcoin_uri(uri_reader::parse<bitcoin_uri>(uri, strict))
+bitcoin_uri::bitcoin_uri(const std::string& uri) NOEXCEPT
+  : bitcoin_uri(uri_reader::parse<bitcoin_uri>(uri))
 {
 }
 
@@ -171,7 +170,7 @@ void bitcoin_uri::set_address(const stealth_address& stealth) NOEXCEPT
 bool bitcoin_uri::set_amount(const std::string& satoshis) NOEXCEPT
 {
     uint64_t decoded;
-    if (!decode_base10(decoded, satoshis, btc_decimal_places, strict_))
+    if (!decode_base10(decoded, satoshis, btc_decimal_places, true))
         return false;
 
     // Normalize the encoding for string-based getter (parameter).
@@ -181,11 +180,6 @@ bool bitcoin_uri::set_amount(const std::string& satoshis) NOEXCEPT
 
 // uri_reader implementation.
 // ----------------------------------------------------------------------------
-
-void bitcoin_uri::set_strict(bool strict) NOEXCEPT
-{
-    strict_ = strict;
-}
 
 bool bitcoin_uri::set_scheme(const std::string& scheme) NOEXCEPT
 {
@@ -201,8 +195,8 @@ bool bitcoin_uri::set_scheme(const std::string& scheme) NOEXCEPT
 bool bitcoin_uri::set_authority(const std::string& authority) NOEXCEPT
 {
     // Using "bitcoin://" instead of "bitcoin:" is a common mistake, so we
-    // allow the authority in place of the path when not strict.
-    return !strict_ && set_path(authority);
+    // allow the authority in place of the path.
+    return set_path(authority);
 }
 
 bool bitcoin_uri::set_path(const std::string& path) NOEXCEPT
@@ -248,8 +242,8 @@ bool bitcoin_uri::operator<(const bitcoin_uri& other) const NOEXCEPT
 
 bool bitcoin_uri::operator==(const bitcoin_uri& other) const NOEXCEPT
 {
-    return strict_ == other.strict_ && scheme_ == other.scheme_ &&
-        address_ == other.address_ && query_ == other.query_;
+    return scheme_ == other.scheme_ && address_ == other.address_ &&
+        query_ == other.query_;
 }
 
 bool bitcoin_uri::operator!=(const bitcoin_uri& other) const NOEXCEPT

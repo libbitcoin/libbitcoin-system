@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_SUITE(uri_reader_tests)
 using namespace bc::system::wallet;
 
 // Test helper that relies on bitcoin_uri.
-static bitcoin_uri parse(const std::string& uri, bool strict=true)
+static bitcoin_uri parse(const std::string& uri)
 {
-    return uri_reader::parse<bitcoin_uri>(uri, strict);
+    return uri_reader::parse<bitcoin_uri>(uri);
 }
 
 // Demonstrate custom uri_reader.
@@ -36,18 +36,13 @@ struct custom_reader
   : public uri_reader
 {
     custom_reader() NOEXCEPT
-      : strict_(true), authority_(false)
+      : authority_(false)
     {
     }
 
     bool is_valid() const NOEXCEPT
     {
         return !myscheme.empty() && !authority_;
-    }
-
-    void set_strict(bool strict) NOEXCEPT
-    {
-        strict_ = strict;
     }
 
     virtual bool set_scheme(const std::string& scheme) NOEXCEPT
@@ -82,8 +77,6 @@ struct custom_reader
             myparam1 = std::optional<std::string>(std::in_place, value);
         else if (key == "myparam2")
             myparam2 = std::optional<std::string>(std::in_place, value);
-        else
-            return !strict_;
 
         return true;
     }
@@ -98,7 +91,6 @@ struct custom_reader
     std::optional<std::string> myparam2;
 
 private:
-    bool strict_;
     bool authority_;
 };
 
@@ -236,13 +228,8 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__encoded_multibyte_utf8__test)
 
 BOOST_AUTO_TEST_CASE(uri_reader__parse__non_strict_encoded_multibyte_utf8_with_unencoded_label_space__test)
 {
-    const auto uri = parse("bitcoin:?label=Some テスト", false);
-    BOOST_REQUIRE_EQUAL(uri.label(), "Some テスト");
-}
-
-BOOST_AUTO_TEST_CASE(uri_reader__parse__negative_strict_encoded_multibyte_utf8_with_unencoded_label_space__test)
-{
-    BOOST_REQUIRE(!parse("bitcoin:?label=Some テスト", true));
+    const auto uri = parse("bitcoin:?label=Some テスト");
+    BOOST_REQUIRE(uri.label().empty());
 }
 
 BOOST_AUTO_TEST_CASE(uri_reader__parse__message_only__test)
@@ -284,14 +271,9 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__custom_reader_unsupported_component__inv
     BOOST_REQUIRE(!uri_reader::parse<custom_reader>("foo://bar:42/part/abc?myparam1=1&myparam2=2#myfrag").is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(uri_reader__parse__custom_reader_strict__test)
+BOOST_AUTO_TEST_CASE(uri_reader__parse__custom_reader__test)
 {
-    BOOST_REQUIRE(!uri_reader::parse<custom_reader>("foo:?unknown=fail-when-strict").is_valid());
-}
-
-BOOST_AUTO_TEST_CASE(uri_reader__parse__custom_reader_not_strict__test)
-{
-    BOOST_REQUIRE(uri_reader::parse<custom_reader>("foo:?unknown=not-fail-when-not-strict", false).is_valid());
+    BOOST_REQUIRE(uri_reader::parse<custom_reader>("foo:?unknown=test").is_valid());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

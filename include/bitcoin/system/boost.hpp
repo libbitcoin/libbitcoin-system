@@ -26,6 +26,7 @@
 
 // Include boost only from here, so exception disable works.
 #include <boost/asio.hpp>
+#include <boost/beast.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/json.hpp>
