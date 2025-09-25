@@ -45,13 +45,13 @@ BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 // that indicates height size. This is inconsistent with an extreme future
 // where the size byte overflows. However satoshi actually requires nominal
 // encoding.
-//*************************************************************************
+//*****************************************************************************
 bool script::is_coinbase_pattern(const operations& ops, size_t height) NOEXCEPT
 {
     using namespace machine::number;
     return !ops.empty()
         && ops[0].is_nominal_push()
-        && ops[0].data() == chunk::from_integer(to_unsigned(height));
+        && ops[0].data() == chunk::from_integer(to_signed(height));
 }
 
 // Constructors.
