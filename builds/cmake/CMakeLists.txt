@@ -325,12 +325,14 @@ find_package( Boost 1.86.0 REQUIRED COMPONENTS
     locale
     program_options
     thread
+    url
     unit_test_framework )
 
 set( boost_iostreams_LIBS "-lboost_iostreams" )
 set( boost_locale_LIBS "-lboost_locale" )
 set( boost_program_options_LIBS "-lboost_program_options" )
 set( boost_thread_LIBS "-lboost_thread" )
+set( boost_url_LIBS "-lboost_url" )
 set( boost_unit_test_framework_LIBS "-lboost_unit_test_framework" )
 
 set( Boost_LIBRARY_DIR $<IF:$<BOOL:${enable-ndebug}>,"${Boost_LIBRARY_DIR_RELEASE}","${Boost_LIBRARY_DIR_DEBUG}">)
@@ -454,6 +456,7 @@ link_libraries(
     ${Boost_LOCALE_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_THREAD_LIBRARY}
+    ${Boost_URL_LIBRARY}
     ${pthread_LIBRARIES}
     ${rt_LIBRARIES}
     ${icu_i18n_FOR_BUILD_LIBRARIES}
@@ -656,6 +659,7 @@ target_link_libraries( ${CANONICAL_LIB_NAME}
     ${Boost_LOCALE_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_THREAD_LIBRARY}
+    ${Boost_URL_LIBRARY}
     ${pthread_LIBRARIES}
     ${rt_LIBRARIES}
     ${icu_i18n_FOR_BUILD_LIBRARIES}

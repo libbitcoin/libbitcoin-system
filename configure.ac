@@ -402,6 +402,10 @@ AX_BOOST_THREAD
 AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
 AC_MSG_NOTICE([boost_thread_LIBS : ${boost_thread_LIBS}])
 
+AX_BOOST_URL
+AC_SUBST([boost_url_LIBS], [${BOOST_URL_LIB}])
+AC_MSG_NOTICE([boost_url_LIBS : ${boost_url_LIBS}])
+
 AS_CASE([${with_tests}], [yes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
      AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])

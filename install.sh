@@ -882,6 +882,7 @@ BOOST_OPTIONS=(
 "--with-locale" \
 "--with-program_options" \
 "--with-thread" \
+"--with-url" \
 "--with-test")
 
 # Define secp256k1 options.
