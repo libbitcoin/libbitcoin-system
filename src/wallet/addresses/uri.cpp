@@ -18,374 +18,217 @@
  */
 #include <bitcoin/system/wallet/addresses/uri.hpp>
 
-#include <iomanip>
-#include <iterator>
-#include <sstream>
-#include <bitcoin/system/define.hpp>
-#include <bitcoin/system/radix/radix.hpp>
+#include <algorithm>
+#include <ranges>
 #include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// These character classification functions correspond to RFC 3986.
-// They avoid C standard library character classification functions,
-// since those give different answers based on the current locale.
-static bool is_alpha(const char c) NOEXCEPT
-{
-    return
-        ('A' <= c && c <= 'Z') ||
-        ('a' <= c && c <= 'z');
-}
+using namespace boost::urls;
 
-static bool is_scheme(const char c) NOEXCEPT
+bool uri::decode(const std::string& encoded) NOEXCEPT
 {
-    return
-        is_alpha(c) || ('0' <= c && c <= '9') ||
-        '+' == c || '-' == c || '.' == c;
-}
+    if (encoded.empty())
+        return false;
 
-static bool is_path_character(const char c)
-{
-    return
-        is_alpha(c) || ('0' <= c && c <= '9') ||
-        '-' == c || '.' == c || '_' == c || '~' == c || // unreserved
-        '!' == c || '$' == c || '&' == c || '\'' == c ||
-        '(' == c || ')' == c || '*' == c || '+' == c ||
-        ',' == c || ';' == c || '=' == c || // sub-delims
-        ':' == c || '@' == c;
-}
+    // throw std::length_error only for s.size() > url_view::max_size.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    const auto parts = parse_uri_reference(encoded);
+    BC_POP_WARNING()
 
-static bool is_path(const char c) NOEXCEPT
-{
-    return is_path_character(c) || '/' == c;
-}
-
-static bool is_query(const char c) NOEXCEPT
-{
-    return is_path_character(c) || '/' == c || '?' == c;
-}
-
-static bool is_query_character(const char c) NOEXCEPT
-{
-    return is_query(c) && '&' != c && '=' != c;
-}
-
-// Verifies that all RFC 3986 escape sequences in a string are valid, and that
-// all characters belong to the given class.
-static bool validate(const std::string& in,
-    bool (*is_valid)(const char)) NOEXCEPT
-{
-    for (auto it = in.begin(); it != in.end();)
+    if (parts)
     {
-        if (*it == '%')
+        try
         {
-            // If not octet.
-            if (!((std::distance(it, in.end()) > 2) &&
-                is_base16(it[1]) && is_base16(it[2])))
-            {
-                return false;
-            }
-
-            std::advance(it, 3);
+            url_ = { parts.value() };
+            return true;
         }
-        else
+        catch (...)
         {
-            if (!is_valid(*it))
-                return false;
-
-            std::advance(it, 1);
         }
     }
 
-    return true;
-}
-
-// Decodes all RFC 3986 escape sequences in a string.
-static std::string unescape(const std::string& in) NOEXCEPT
-{
-    // Do the conversion:
-    std::string out;
-    out.reserve(in.size());
-
-    auto it = in.begin();
-    while (it != in.end())
-    {
-        // If % and is octet.
-        if ((*it == '%') && (std::distance(it, in.end()) > 2) &&
-            is_base16(it[1]) && is_base16(it[2]))
-        {
-            out.push_back(encode_octet({ it[1], it[2], '\0' }));
-            std::advance(it, 3);
-        }
-        else
-        {
-            out.push_back(*it);
-            std::advance(it, 1);
-        }
-    }
-
-    return out;
-}
-
-// URI encodes a string (i.e. percent encoding).
-// is_valid a function returning true for acceptable characters.
-static std::string escape(const std::string& in,
-    bool (*is_valid)(char)) NOEXCEPT
-{
-    std::ostringstream stream;
-    stream << std::hex << std::uppercase << std::setfill('0');
-    for (const auto character: in)
-    {
-        if (is_valid(character))
-            stream << character;
-        else
-            stream << '%' << std::setw(2) << +character;
-    }
-
-    return stream.str();
-}
-
-bool uri::decode(const std::string& encoded, bool strict) NOEXCEPT
-{
-    auto it = encoded.begin();
-
-    // Store the scheme:
-    auto start = it;
-    while (it != encoded.end() && *it != ':')
-        ++it;
-
-    scheme_ = std::string(start, it);
-    if (scheme_.empty() || !is_alpha(scheme_[0]))
-        return false;
-
-    if (!std::all_of(scheme_.begin(), scheme_.end(), is_scheme))
-        return false;
-
-    // Consume ':':
-    if (it == encoded.end())
-        return false;
-
-    ++it;
-
-    // Consume "//":
-    authority_.clear();
-    has_authority_ = false;
-    if (std::distance(it, encoded.end()) > 1 && it[0] == '/' && it[1] == '/')
-    {
-        has_authority_ = true;
-        it += 2;
-
-        // Store authority part:
-        start = it;
-        while (it != encoded.end() && *it != '#' && *it != '?' && *it != '/')
-            ++it;
-
-        authority_ = std::string(start, it);
-        if (strict && !validate(authority_, is_path_character))
-            return false;
-    }
-
-    // Store the path part:
-    start = it;
-    while (it != encoded.end() && *it != '#' && *it != '?')
-        ++it;
-
-    path_ = std::string(start, it);
-    if (strict && !validate(path_, is_path))
-        return false;
-
-    // Consume '?':
-    has_query_ = false;
-    if (it != encoded.end() && *it != '#')
-    {
-        has_query_ = true;
-        ++it;
-    }
-
-    // Store the query part:
-    start = it;
-    while (it != encoded.end() && *it != '#')
-        ++it;
-
-    query_ = std::string(start, it);
-    if (strict && !validate(query_, is_query))
-        return false;
-
-    // Consume '#':
-    has_fragment_ = false;
-    if (encoded.end() != it)
-    {
-        has_fragment_ = true;
-        ++it;
-    }
-
-    // Store the fragment part:
-    fragment_ = std::string(it, encoded.end());
-    return !strict || validate(fragment_, is_query);
+    url_.clear();
+    return false;
 }
 
 std::string uri::encoded() const NOEXCEPT
 {
-    std::ostringstream out;
-    out << scheme_ << ':';
-    if (has_authority_)
-        out << "//" << authority_;
-
-    out << path_;
-    if (has_query_)
-        out << '?' << query_;
-
-    if (has_fragment_)
-        out << '#' << fragment_;
-
-    return out.str();
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return url_.buffer();
+    BC_POP_WARNING()
 }
-
-// Scheme accessors:
 
 std::string uri::scheme() const NOEXCEPT
 {
-    return ascii_to_lower(scheme_);
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return system::ascii_to_lower(url_.scheme());
+    BC_POP_WARNING()
 }
 
-void uri::set_scheme(const std::string& scheme) NOEXCEPT
+bool uri::has_scheme() const NOEXCEPT
 {
-    scheme_ = scheme;
+    return url_.has_scheme();
 }
 
-// Authority accessors:
+bool uri::set_scheme(const std::string& scheme) NOEXCEPT
+{
+    try
+    {
+        url_.set_scheme(scheme);
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
 
 std::string uri::authority() const NOEXCEPT
 {
-    return unescape(authority_);
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return url_.authority().buffer();
+    BC_POP_WARNING()
 }
 
 bool uri::has_authority() const NOEXCEPT
 {
-    return has_authority_;
+    return url_.has_authority();
 }
 
-void uri::set_authority(const std::string& authority) NOEXCEPT
+bool uri::set_authority(const std::string& authority) NOEXCEPT
 {
-    has_authority_ = true;
-    authority_ = escape(authority, is_path_character);
+    try
+    {
+        url_.set_encoded_authority(authority);
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 
 void uri::remove_authority() NOEXCEPT
 {
-    has_authority_ = false;
+    // Documented to throw nothing, but not noexcept.
+    // original.boost.org/doc/libs/1_86_0/libs/url/doc/html/url/ref/
+    // boost__urls__url/remove_authority.html
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    url_.remove_authority();
+    BC_POP_WARNING()
 }
-
-// Path accessors:
 
 std::string uri::path() const NOEXCEPT
 {
-    return unescape(path_);
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return url_.path();
+    BC_POP_WARNING()
 }
 
-void uri::set_path(const std::string& path) NOEXCEPT
+bool uri::set_path(const std::string& path) NOEXCEPT
 {
-    path_ = escape(path, is_path);
+    try
+    {
+        url_.set_path(path);
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
-
-// Query accessors:
 
 std::string uri::query() const NOEXCEPT
 {
-    return unescape(query_);
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return url_.query();
+    BC_POP_WARNING()
 }
 
 bool uri::has_query() const NOEXCEPT
 {
-    return has_query_;
+    return url_.has_query();
 }
 
-void uri::set_query(const std::string& query) NOEXCEPT
+bool uri::set_query(const std::string& query) NOEXCEPT
 {
-    has_query_ = true;
-    query_ = escape(query, is_query);
+    try
+    {
+        url_.set_query(query);
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 
 void uri::remove_query() NOEXCEPT
 {
-    has_query_ = false;
+    url_.remove_query();
 }
-
-// Fragment accessors:
 
 std::string uri::fragment() const NOEXCEPT
 {
-    return unescape(fragment_);
+    // String allocation exception only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return url_.fragment();
+    BC_POP_WARNING()
 }
 
 bool uri::has_fragment() const NOEXCEPT
 {
-    return has_fragment_;
+    return url_.has_fragment();
 }
 
-void uri::set_fragment(const std::string& fragment) NOEXCEPT
+bool uri::set_fragment(const std::string& fragment) NOEXCEPT
 {
-    has_fragment_ = true;
-    fragment_ = escape(fragment, is_query);
+    try
+    {
+        url_.set_fragment(fragment);
+        return true;
+    }
+    catch (...)
+    {
+        return false;
+    }
 }
 
 void uri::remove_fragment() NOEXCEPT
 {
-    has_fragment_ = false;
+    url_.remove_fragment();
 }
-
-// Query interpretation:
 
 uri::query_map uri::decode_query() const NOEXCEPT
 {
-    query_map out;
-    for (auto it = query_.begin(); it != query_.end();)
-    {
-        // Read the key:
-        auto begin = it;
-        while (it != query_.end() && *it != '&' && *it != '=')
-            ++it;
+    query_map out{};
 
-        auto key = unescape(std::string(begin, it));
-
-        // Consume '=':
-        if (it != query_.end() && *it != '&')
-            ++it;
-
-        // Read the value:
-        begin = it;
-        while (it != query_.end() && *it != '&')
-            ++it;
-
-        out[key] = unescape(std::string(begin, it));
-
-        // Consume '&':
-        if (query_.end() != it)
-            ++it;
-    }
-
+    // Allocation exceptions only.
+    // Last value wins for duplicate keys.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    for (const auto& parameter: url_.params())
+        out[parameter.key] = parameter.value;
+    BC_POP_WARNING()
     return out;
 }
 
 void uri::encode_query(const query_map& map) NOEXCEPT
 {
-    auto first = true;
-    std::ostringstream query;
-    for (const auto& term: map)
-    {
-        if (!first)
-            query << '&';
+    url_.params().clear();
 
-        first = false;
-        query << escape(term.first, is_query_character);
-        if (!term.second.empty())
-            query << '=' << escape(term.second, is_query_character);
-    }
-
-    has_query_ = !map.empty();
-    query_ = query.str();
+    // Allocation exceptions only.
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    for (const auto& parameter: map)
+        url_.params().append({ parameter.first, parameter.second });
+    BC_POP_WARNING()
 }
 
 } // namespace wallet

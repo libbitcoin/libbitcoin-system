@@ -30,6 +30,7 @@ constexpr bool is_ascii_number(char32_t point) NOEXCEPT;
 constexpr bool is_ascii_lower(char32_t point) NOEXCEPT;
 constexpr bool is_ascii_upper(char32_t point) NOEXCEPT;
 constexpr bool is_ascii_alpha(char32_t point) NOEXCEPT;
+constexpr bool is_ascii_alphanumeric(char32_t point) NOEXCEPT;
 constexpr bool is_ascii_separator(char32_t point) NOEXCEPT;
 constexpr bool is_ascii_whitespace(char32_t point) NOEXCEPT;
 

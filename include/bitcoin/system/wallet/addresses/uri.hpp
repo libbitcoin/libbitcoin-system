@@ -30,41 +30,41 @@ namespace wallet {
 class BC_API uri
 {
 public:
+    typedef std::map<std::string, std::string> query_map;
+
     DEFAULT_COPY_MOVE_DESTRUCT(uri);
     uri() NOEXCEPT {}
 
     /// Decodes a URI from a string.
-    /// @param strict set to false to tolerate unescaped special characters.
-    bool decode(const std::string& encoded, bool strict=true) NOEXCEPT;
+    bool decode(const std::string& encoded) NOEXCEPT;
     std::string encoded() const NOEXCEPT;
 
-    /// Returns the lowercased URI scheme.
+    /// Returns the lowercased URI scheme (set empty to remove).
     std::string scheme() const NOEXCEPT;
-    void set_scheme(const std::string& scheme) NOEXCEPT;
+    bool has_scheme() const NOEXCEPT;
+    bool set_scheme(const std::string& scheme) NOEXCEPT;
 
     /// Obtains the unescaped authority part, if any (user@server:port).
     std::string authority() const NOEXCEPT;
     bool has_authority() const NOEXCEPT;
-    void set_authority(const std::string& authority) NOEXCEPT;
+    bool set_authority(const std::string& authority) NOEXCEPT;
     void remove_authority() NOEXCEPT;
 
     /// Obtains the unescaped path part.
     std::string path() const NOEXCEPT;
-    void set_path(const std::string& path) NOEXCEPT;
+    bool set_path(const std::string& path) NOEXCEPT;
 
     /// Returns the unescaped query string, if any.
     std::string query() const NOEXCEPT;
     bool has_query() const NOEXCEPT;
-    void set_query(const std::string& query) NOEXCEPT;
+    bool set_query(const std::string& query) NOEXCEPT;
     void remove_query() NOEXCEPT;
 
     /// Returns the unescaped fragment string, if any.
     std::string fragment() const NOEXCEPT;
     bool has_fragment() const NOEXCEPT;
-    void set_fragment(const std::string& fragment) NOEXCEPT;
+    bool set_fragment(const std::string& fragment) NOEXCEPT;
     void remove_fragment() NOEXCEPT;
-
-    typedef std::map<std::string, std::string> query_map;
 
     /// Interprets the query string as a sequence of key-value pairs.
     /// All query strings are valid, so this function cannot fail.
@@ -74,16 +74,8 @@ public:
     void encode_query(const query_map& map) NOEXCEPT;
 
 private:
-    // All parts are stored with their original escaping.
-    std::string scheme_;
-    std::string authority_;
-    std::string path_;
-    std::string query_;
-    std::string fragment_;
-
-    bool has_authority_ = false;
-    bool has_query_ = false;
-    bool has_fragment_ = false;
+    // Mutable URL object to store the parsed URI.
+    boost::urls::url url_;
 };
 
 } // namespace wallet

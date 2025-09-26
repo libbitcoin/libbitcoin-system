@@ -54,6 +54,11 @@ constexpr bool is_ascii_alpha(char32_t point) NOEXCEPT
     return is_ascii_lower(point) || is_ascii_upper(point);
 }
 
+constexpr bool is_ascii_alphanumeric(char32_t point) NOEXCEPT
+{
+    return is_ascii_alpha(point) || is_ascii_number(point);
+}
+
 // see char32_separators[]
 constexpr bool is_ascii_separator(char32_t point) NOEXCEPT
 {

@@ -164,16 +164,50 @@ BOOST_AUTO_TEST_CASE(ascii__is_ascii_alpha__ascii_alphas__true)
     BOOST_REQUIRE(is_ascii_alpha('X'));
     BOOST_REQUIRE(is_ascii_alpha('Y'));
     BOOST_REQUIRE(is_ascii_alpha('Z'));
+    BOOST_REQUIRE(is_ascii_alpha('a'));
+    BOOST_REQUIRE(is_ascii_alpha('b'));
+    BOOST_REQUIRE(is_ascii_alpha('c'));
+    BOOST_REQUIRE(is_ascii_alpha('x'));
+    BOOST_REQUIRE(is_ascii_alpha('y'));
+    BOOST_REQUIRE(is_ascii_alpha('z'));
 }
 
 BOOST_AUTO_TEST_CASE(ascii__is_ascii_alpha__ascii_non_alphas__false)
 {
+    BOOST_REQUIRE(!is_ascii_alpha('0'));
     BOOST_REQUIRE(!is_ascii_alpha('1'));
-    BOOST_REQUIRE(!is_ascii_alpha('2'));
-    BOOST_REQUIRE(!is_ascii_alpha('3'));
+    BOOST_REQUIRE(!is_ascii_alpha('9'));
     BOOST_REQUIRE(!is_ascii_alpha('*'));
     BOOST_REQUIRE(!is_ascii_alpha('!'));
     BOOST_REQUIRE(!is_ascii_alpha('#'));
+}
+
+// is_ascii_alphanumeric
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alphanumeric__ascii_alphanumerics__true)
+{
+    BOOST_REQUIRE(is_ascii_alphanumeric('A'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('B'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('C'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('X'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('Y'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('Z'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('a'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('b'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('c'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('x'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('y'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('z'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('0'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('1'));
+    BOOST_REQUIRE(is_ascii_alphanumeric('9'));
+}
+
+BOOST_AUTO_TEST_CASE(ascii__is_ascii_alphanumeric__ascii_non_alphanumerics__false)
+{
+    BOOST_REQUIRE(!is_ascii_alphanumeric('*'));
+    BOOST_REQUIRE(!is_ascii_alphanumeric('!'));
+    BOOST_REQUIRE(!is_ascii_alphanumeric('#'));
 }
 
 // is_ascii_separator

@@ -39,7 +39,7 @@ public:
 
     /// Constructors.
     bitcoin_uri() NOEXCEPT;
-    bitcoin_uri(const std::string& uri, bool strict=true) NOEXCEPT;
+    bitcoin_uri(const std::string& uri) NOEXCEPT;
 
     /// Operators.
     bool operator<(const bitcoin_uri& other) const NOEXCEPT;
@@ -75,7 +75,6 @@ public:
     void set_address(const stealth_address& stealth) NOEXCEPT;
 
     /// uri_reader implementation.
-    void set_strict(bool strict) NOEXCEPT;
     bool set_scheme(const std::string& scheme) NOEXCEPT;
     bool set_authority(const std::string& authority) NOEXCEPT;
     bool set_path(const std::string& path) NOEXCEPT;
@@ -87,7 +86,6 @@ private:
     bool set_amount(const std::string& satoshis) NOEXCEPT;
 
     /// Member state.
-    bool strict_;
     std::string scheme_;
     std::string address_;
     std::map<std::string, std::string> query_;
