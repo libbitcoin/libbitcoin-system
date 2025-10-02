@@ -31,13 +31,25 @@ struct type
     int right;
 };
 
+// make_shared
+
+using test_array_shared_ptr = std::shared_ptr<data_array<3>>;
+
+BOOST_AUTO_TEST_CASE(memory__make_shared__array_move__expected_values)
+{
+    const test_array_shared_ptr ptr = make_shared<data_array<3>>(data_array<3>{ 1, 2, 3 });
+    BOOST_REQUIRE_EQUAL(ptr->at(0), 1);
+    BOOST_REQUIRE_EQUAL(ptr->at(1), 2);
+    BOOST_REQUIRE_EQUAL(ptr->at(2), 3);
+}
+
 // to_shared
 
-using test_array_shared_ptr = std::shared_ptr<const data_array<3>>;
+using test_const_array_shared_ptr = std::shared_ptr<const data_array<3>>;
 
 BOOST_AUTO_TEST_CASE(memory__to_shared1__array_default__default_values)
 {
-    const test_array_shared_ptr ptr = to_shared<data_array<3>>();
+    const test_const_array_shared_ptr ptr = to_shared<data_array<3>>();
     BOOST_REQUIRE_EQUAL(ptr->at(0), 0);
     BOOST_REQUIRE_EQUAL(ptr->at(1), 0);
     BOOST_REQUIRE_EQUAL(ptr->at(2), 0);
@@ -46,7 +58,7 @@ BOOST_AUTO_TEST_CASE(memory__to_shared1__array_default__default_values)
 BOOST_AUTO_TEST_CASE(memory__to_shared5__array_copy__expected_values)
 {
     const data_array<3> copy{ 1, 2, 3 };
-    const test_array_shared_ptr ptr = to_shared<data_array<3>>(copy);
+    const test_const_array_shared_ptr ptr = to_shared<data_array<3>>(copy);
     BOOST_REQUIRE_EQUAL(ptr->at(0), 1);
     BOOST_REQUIRE_EQUAL(ptr->at(1), 2);
     BOOST_REQUIRE_EQUAL(ptr->at(2), 3);
@@ -54,7 +66,7 @@ BOOST_AUTO_TEST_CASE(memory__to_shared5__array_copy__expected_values)
 
 BOOST_AUTO_TEST_CASE(memory__to_shared5__array_move__expected_values)
 {
-    const test_array_shared_ptr ptr = to_shared<data_array<3>>(data_array<3>{ 1, 2, 3 });
+    const test_const_array_shared_ptr ptr = to_shared<data_array<3>>(data_array<3>{ 1, 2, 3 });
     BOOST_REQUIRE_EQUAL(ptr->at(0), 1);
     BOOST_REQUIRE_EQUAL(ptr->at(1), 2);
     BOOST_REQUIRE_EQUAL(ptr->at(2), 3);

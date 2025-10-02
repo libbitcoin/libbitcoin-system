@@ -33,6 +33,13 @@ BC_PUSH_WARNING(NO_VALUE_OR_CONST_REF_SHARED_PTR)
 /// shared_ptr
 /// ---------------------------------------------------------------------------
 
+/// Create shared pointer to non-const from moved instance.
+template <typename Type>
+inline std::shared_ptr<Type> make_shared(Type&& value) NOEXCEPT
+{
+    return std::make_shared<Type>(std::forward<Type>(value));
+}
+
 /// Create default shared pointer.
 template <typename Type>
 inline std::shared_ptr<Type> to_shared() NOEXCEPT
