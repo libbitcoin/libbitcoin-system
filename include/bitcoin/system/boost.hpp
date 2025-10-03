@@ -24,9 +24,15 @@
 // warnings are included by define.hpp which follows boost includes.
 #include <bitcoin/system/warnings.hpp>
 
-// Include boost only from here, so exception disable works.
+// Include boost only from here, so this exclusion works.
+// Avoid namespace conflict between boost::placeholders and std::placeholders.
+// This arises when including <functional>, which declares std::placeholders.
+// www.boost.org/doc/libs/1_78_0/boost/bind.hpp
+// Include boost only from here, so placeholders exclusion works.
+#define BOOST_BIND_NO_PLACEHOLDERS
+#include <boost/bind.hpp>
+
 #include <boost/asio.hpp>
-#include <boost/beast.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/json.hpp>
