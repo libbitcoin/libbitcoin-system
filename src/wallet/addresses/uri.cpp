@@ -30,20 +30,16 @@ using namespace boost::urls;
 
 bool uri::decode(const std::string& encoded) NOEXCEPT
 {
-    if (encoded.empty())
-        return false;
-
-    // throw std::length_error only for s.size() > url_view::max_size.
-    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    const auto parts = parse_uri_reference(encoded);
-    BC_POP_WARNING()
-
-    if (parts)
+    if (!encoded.empty())
     {
         try
         {
-            url_ = { parts.value() };
-            return true;
+            // throw std::length_error only for s.size() > url_view::max_size.
+            if (const auto parts = parse_uri_reference(encoded))
+            {
+                url_ = { parts.value() };
+                return true;
+            }
         }
         catch (...)
         {
