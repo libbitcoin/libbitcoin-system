@@ -41,7 +41,6 @@ BC_API std::string join(const string_list& tokens,
 
 /// Split text into tokens by the specified delimiter(s).
 /// Compression removes all but a last empty token (after trimming).
-/// Compression removes all but a last empty token (after trimming).
 BC_API string_list split(const std::string& text, bool compress=true) NOEXCEPT;
 BC_API string_list split(const std::string& text,
     const std::string& delimiter, bool trim=true, bool compress=true) NOEXCEPT;
