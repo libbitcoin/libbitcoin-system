@@ -27,7 +27,7 @@ namespace system {
 
 ofstream::ofstream(const std::filesystem::path& path,
     std::ofstream::openmode mode) THROWS
-  : std::ofstream(to_extended(path), mode)
+  : std::ofstream(extended_path(path), mode)
 {
     // This opens the stream, and creates file system file if out/app mode.
 }

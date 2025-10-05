@@ -37,31 +37,12 @@ BC_API std::filesystem::path to_path(const std::string& value) NOEXCEPT;
 BC_API std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT;
 
-/// These allow std::*fstream(to_extended_path(std::filesystem::path)),
-/// due to a vc++ fstream extension that accepts std::wstring path.
-
 /// Extend the path and return it as another.
 /// std::filesystem::path does not extend long paths, so we provide this.
 /// Not thread safe. If another thread calls SetCurrentDirectory during this
 /// call, the result may be corrupted as static storage is used for directory.
-BC_API std::filesystem::path to_extended(
+BC_API std::filesystem::path extended_path(
     const std::filesystem::path& path) NOEXCEPT;
-
-#ifdef HAVE_MSC
-
-/// Convert to std::wstring path, extended for win32.
-/// std::filesystem::path does not extend long paths, so we provide this.
-/// Not thread safe. If another thread calls SetCurrentDirectory during this
-/// call, the result may be corrupted as static storage is used for directory.
-BC_API std::wstring to_extended_path(
-    const std::filesystem::path& path) NOEXCEPT;
-
-#else
-
-/// Return std::string path, for portability with std::wstring version.
-BC_API std::string to_extended_path(const std::filesystem::path& path) NOEXCEPT;
-
-#endif
 
 } // namespace system
 } // namespace libbitcoin

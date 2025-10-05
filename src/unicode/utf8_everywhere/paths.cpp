@@ -124,34 +124,23 @@ static std::wstring to_fully_qualified_path(
     return { directory.begin(), std::next(directory.begin(), size) };
 }
 
-// Use to_extended_path with APIs that compile to wide with HAVE_MSC defined
-// and to UTF8 with HAVE_MSC undefined. This includes some boost APIs and some
-// Win32 API extensions to std libs - such as std::ofstream and std::ifstream.
-// Otherwise use in any Win32 (W) APIs with HAVE_MSC defined, such as we do in 
-// interprocess_lock::open_file -> CreateFileW, since the boost wrapper only
-// calls CreateFileA. The length extension prefix requires Win32 (W) APIs.
-std::wstring to_extended_path(const std::filesystem::path& path) NOEXCEPT
+std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
 {
     // The length extension prefix works only with a fully-qualified path.
     // However this includes "considered relative" paths (with ".." segments).
     // That is of no consequence here because those will also be converted.
     const auto full = to_fully_qualified_path(path);
-    return (full.length() > MAX_PATH) ? L"\\\\?\\" + full : full;
+    return { (full.length() > MAX_PATH) ? L"\\\\?\\" + full : full };
 }
 
 #else
 
-std::string to_extended_path(const std::filesystem::path& path) NOEXCEPT
+std::filesystem::path extended_path(const std::filesystem::path& path) NOEXCEPT
 {
-    return path.string();
+    return path;
 }
 
 #endif // HAVE_MSC
-
-std::filesystem::path to_extended(const std::filesystem::path& path) NOEXCEPT
-{
-    return to_extended_path(path);
-}
 
 } // namespace system
 } // namespace libbitcoin
