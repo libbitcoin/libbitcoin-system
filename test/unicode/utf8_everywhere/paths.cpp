@@ -18,9 +18,13 @@
  */
 #include "../../test.hpp"
 
+// MSVC literals in a UTF8 source file.
 // Use of L and U is not recommended as it will only work for ASCII when
 // the source file does not have a BOM (which we avoid for other reasons).
-// We use it below to simplify creation of ASCII test vectors.
+// We use it below to simplify creation of ASCII test vectors. The prefix
+// types the data but doesn't convert it at compile time (interestingly
+// intellisense picks up the conversion propery. So non-asci text below
+// is not actually converted property.
 
 BOOST_AUTO_TEST_SUITE(paths_tests)
 
@@ -114,10 +118,34 @@ BOOST_AUTO_TEST_CASE(paths__to_path__always__expected)
     const std::string long_input{ reinterpret_cast<const char*>(u8"\\\\?\\C:\\very\\long\\path\\exceeding\\MAX_PATH\\Unicode 文件名.txt") };
     result = to_path(long_input);
     BOOST_REQUIRE(result.u8string() == u8"\\\\?\\C:\\very\\long\\path\\exceeding\\MAX_PATH\\Unicode 文件名.txt");
+}
 
-    // Verify UTF-16 internal representation
-    const std::wstring wide_expected{ L"\\\\?\\C:\\very\\long\\path\\exceeding\\MAX_PATH\\Unicode \xe6\x96\x87\xe4\xbb\xb6\xe5\x90\x8d.txt" };
-    BOOST_REQUIRE(result.wstring() == wide_expected);
+// See comment at head of file.
+BOOST_AUTO_TEST_CASE(paths__literal__utf8_file_no_bom__prefixes_ineffective)
+{
+    const auto wide08a = std::filesystem::path{ "名" }.wstring();
+    const auto wide08 = std::filesystem::path{ to_utf8(to_utf32("名")) }.wstring();
+    const auto wide16 = std::filesystem::path{ to_utf16("名") }.wstring();
+    const auto wide32_16 = std::filesystem::path{ to_utf16(to_utf32("名")) }.wstring();
+    const auto wide32 = std::filesystem::path{ to_utf32("名") }.wstring();
+    const auto wide16_32 = std::filesystem::path{ to_utf32(to_utf16("名")) }.wstring();
+
+    // Thse SHOULD NOT succeed, since it's typed as char and std::filesystem::path converts from ANSI.
+    BOOST_CHECK_NE(static_cast<uint16_t>(wide08a.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
+    BOOST_CHECK_NE(static_cast<uint16_t>(wide08.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
+
+    // These succeed because they accept char as utf8 (based on the file encoding).
+    BOOST_CHECK_EQUAL(static_cast<uint16_t>(wide16.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
+    BOOST_CHECK_EQUAL(static_cast<uint16_t>(wide32_16.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
+    BOOST_CHECK_EQUAL(static_cast<uint16_t>(wide32.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
+    BOOST_CHECK_EQUAL(static_cast<uint16_t>(wide16_32.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
+
+    const auto wide08b = std::filesystem::path{ U"名" }.wstring();
+    const auto wide08c = std::filesystem::path{ u8"名" }.wstring();
+
+    // These fail because the U/u8 preix is ineffective and std::filesystem::path converts from ANSI.
+    BOOST_CHECK_NE(static_cast<uint16_t>(wide08b.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
+    BOOST_CHECK_NE(static_cast<uint16_t>(wide08c.at(0)), static_cast<uint16_t>(L"\x540d"[0]));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
