@@ -867,6 +867,7 @@ if (with-tests)
         "../../test/unicode/utf8_everywhere/environment.cpp"
         "../../test/unicode/utf8_everywhere/ifstream.cpp"
         "../../test/unicode/utf8_everywhere/ofstream.cpp"
+        "../../test/unicode/utf8_everywhere/paths.cpp"
         "../../test/unicode/utf8_everywhere/unicode_istream.cpp"
         "../../test/unicode/utf8_everywhere/unicode_ostream.cpp"
         "../../test/utreexo/utreexo.cpp"

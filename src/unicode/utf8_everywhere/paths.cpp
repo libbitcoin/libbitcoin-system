@@ -29,13 +29,41 @@
 namespace libbitcoin {
 namespace system {
 
+std::string cast_to_string(const std::u8string& value) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_REINTERPRET_CAST)
+    return { reinterpret_cast<const char*>(value.c_str()) };
+    BC_POP_WARNING()
+}
+
+std::u8string cast_to_u8string(const std::string& value) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_REINTERPRET_CAST)
+    return { reinterpret_cast<const char8_t*>(value.c_str()) };
+    BC_POP_WARNING()
+}
+
+std::string from_path(const std::filesystem::path& value) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return cast_to_string(value.u8string());
+    BC_POP_WARNING()
+}
+
+std::filesystem::path to_path(const std::string& value) NOEXCEPT
+{
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    return { cast_to_u8string(value) };
+    BC_POP_WARNING()
+}
+
 #ifdef HAVE_MSC
-static std::string config_directory() NOEXCEPT
+static std::wstring config_directory() NOEXCEPT
 {
     wchar_t directory[MAX_PATH];
     const auto result = SHGetFolderPathW(NULL, CSIDL_COMMON_APPDATA, NULL,
         SHGFP_TYPE_CURRENT, &directory[0]);
-    return SUCCEEDED(result) ? to_utf8(&directory[0]) : "";
+    return SUCCEEDED(result) ? &directory[0] : L"";
 }
 #elif defined(SYSCONFDIR)
 static std::string config_directory() NOEXCEPT { return SYSCONFDIR; }
@@ -47,30 +75,33 @@ std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT
 {
     BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
-    static const auto directory = std::filesystem::path{ config_directory() };
-    return directory / subdirectory;
+    static const auto folder = std::filesystem::path{ config_directory() };
+    return folder / subdirectory;
     BC_POP_WARNING()
 }
 
 #ifdef HAVE_MSC
 
+// Helper for to_fully_qualified_path.
+inline auto replace_all(std::wstring text, wchar_t from, wchar_t to) NOEXCEPT
+{
+    for (auto position = text.find(from); position != std::string::npos;
+        position = text.find(from, position + sizeof(wchar_t)))
+    {
+        text.replace(position, sizeof(wchar_t), { to });
+    }
+
+    return text;
+};
+
 // docs.microsoft.com/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
 static std::wstring to_fully_qualified_path(
     const std::filesystem::path& path) NOEXCEPT
 {
-    const auto replace_all = [](std::string text, char from, char to) NOEXCEPT
-    {
-        for (auto position = text.find(from); position != std::string::npos;
-            position = text.find(from, position + sizeof(char)))
-        {
-            text.replace(position, sizeof(char), { to });
-        }
-
-        return text;
-    };
-
     // Separator normalization required by use of length extender.
-    const auto normal = to_utf16(replace_all(path.string(), '/', '\\'));
+    BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
+    const auto normal = replace_all(path.wstring(), '/', '\\');
+    BC_POP_WARNING()
 
     // GetFullPathName is not thread safe. If another thread calls
     // SetCurrentDirectory during a call of GetFullPathName the value may be
@@ -116,6 +147,11 @@ std::string to_extended_path(const std::filesystem::path& path) NOEXCEPT
 }
 
 #endif // HAVE_MSC
+
+std::filesystem::path to_extended(const std::filesystem::path& path) NOEXCEPT
+{
+    return to_extended_path(path);
+}
 
 } // namespace system
 } // namespace libbitcoin
