@@ -18,9 +18,12 @@
  */
 #include "../test.hpp"
 
+// MSVC literals in a UTF8 source file.
 // Use of L and U is not recommended as it will only work for ASCII when
 // the source file does not have a BOM (which we avoid for other reasons).
-// We use it below to simplify creation of ASCII test vectors.
+// We use it below to simplify creation of ASCII test vectors. The prefix
+// types the data but doesn't convert it at compile time (interestingly
+// intellisense picks up the conversion propery.
 
 BOOST_AUTO_TEST_SUITE(conversion_tests)
 

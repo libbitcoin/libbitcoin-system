@@ -39,6 +39,8 @@ public:
         const std::string& message) NOEXCEPT;
     static bool get_option(variables_map& variables,
         const std::string& name) NOEXCEPT;
+
+    /// Path is read as u8string (c++20) and held internally as wide on win32.
     static std::filesystem::path get_config_option(variables_map& variables,
         const std::string& name) NOEXCEPT;
 

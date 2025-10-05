@@ -21,7 +21,8 @@
 #include <filesystem>
 #include <sstream>
 #include <bitcoin/system/data/data.hpp>
-#include <bitcoin/system/unicode/utf8_everywhere/ifstream.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
+#include <bitcoin/system/unicode/utf8_everywhere/utf8_everywhere.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -51,7 +52,8 @@ std::filesystem::path parser::get_config_option(variables_map& variables,
     if (config.empty())
         return {};
 
-    return config.as<std::filesystem::path>();
+    // Capture as utf8 so std::filesystem::path does assume ansi code page.
+    return { config.as<std::u8string>() };
 }
 
 bool parser::get_option(variables_map& variables,
@@ -88,27 +90,26 @@ void parser::load_environment_variables(variables_map& variables,
 bool parser::load_configuration_variables(variables_map& variables,
     const std::string& option_name) THROWS
 {
-    const auto config_settings = load_settings();
-    const auto config_path = get_config_option(variables, option_name);
+    const auto settings = load_settings();
+    const auto path = get_config_option(variables, option_name);
+    const auto extended = extended_path(path);
 
     // If the existence test errors out we pretend there's no file :/.
-    std::error_code code;
-    if (!config_path.empty() && exists(config_path, code))
+    std::error_code code{};
+    if (!path.empty() && std::filesystem::exists(extended, code))
     {
-        const auto& path = config_path.string();
-        ifstream file(path);
-
+        ifstream file{ path };
         if (!file.good())
-            throw ifstream_exception(path.c_str());
+            throw ifstream_exception{ from_path(extended).c_str() };
 
-        const auto config = parse_config_file(file, config_settings);
+        const auto config = parse_config_file(file, settings);
         store(config, variables);
         return true;
     }
 
     // Loading from an empty stream causes the defaults to populate.
-    std::istringstream stream;
-    const auto config = parse_config_file(stream, config_settings);
+    std::istringstream stream{};
+    const auto config = parse_config_file(stream, settings);
     store(config, variables);
     return false;
 }

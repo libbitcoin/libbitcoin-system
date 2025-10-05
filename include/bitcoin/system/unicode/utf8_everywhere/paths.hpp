@@ -25,28 +25,24 @@
 namespace libbitcoin {
 namespace system {
 
+/// std::filesystem::path maintains path internally as unicode, constructing
+/// from the current ANSI code page on Win32. This must be avoided when using
+/// utf8-everywhere. These utilities simplify proper contruction and extraction.
+BC_API std::string cast_to_string(const std::u8string& value) NOEXCEPT;
+BC_API std::u8string cast_to_u8string(const std::string& value) NOEXCEPT;
+BC_API std::string from_path(const std::filesystem::path& value) NOEXCEPT;
+BC_API std::filesystem::path to_path(const std::string& value) NOEXCEPT;
+
 /// Get the default configuration file path with subdirectory.
 BC_API std::filesystem::path default_config_path(
     const std::filesystem::path& subdirectory) NOEXCEPT;
 
-/// These allow std::*fstream(to_extended_path(std::filesystem::path)),
-/// due to a vc++ fstream extension that accepts std::wstring path.
-
-#ifdef HAVE_MSC
-
-/// Convert to std::wstring path, extended for win32.
+/// Extend the path and return it as another.
+/// std::filesystem::path does not extend long paths, so we provide this.
 /// Not thread safe. If another thread calls SetCurrentDirectory during this
 /// call, the result may be corrupted as static storage is used for directory.
-BC_API std::wstring to_extended_path(
+BC_API std::filesystem::path extended_path(
     const std::filesystem::path& path) NOEXCEPT;
-
-#else
-
-/// Return std::string path, for consistency with std::wstring version.
-BC_API std::string to_extended_path(
-    const std::filesystem::path& path) NOEXCEPT;
-
-#endif
 
 } // namespace system
 } // namespace libbitcoin

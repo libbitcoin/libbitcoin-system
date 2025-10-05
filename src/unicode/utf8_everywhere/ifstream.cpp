@@ -25,10 +25,9 @@
 namespace libbitcoin {
 namespace system {
  
-// VC++ EXTENSION: "construct with wide-named file".
 ifstream::ifstream(const std::filesystem::path& path,
     std::ifstream::openmode mode) THROWS
-  : std::ifstream(to_extended_path(path), mode)
+  : std::ifstream(extended_path(path), mode)
 {
     // This opens the stream, and creates file system file if out/app mode.
 }
