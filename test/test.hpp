@@ -105,6 +105,20 @@ bool create(const std::filesystem::path& file_path) NOEXCEPT;
 bool exists(const std::filesystem::path& file_path) NOEXCEPT;
 bool remove(const std::filesystem::path& file_path) NOEXCEPT;
 
+struct directory_setup_fixture
+{
+    DELETE_COPY_MOVE(directory_setup_fixture);
+
+    directory_setup_fixture() NOEXCEPT
+    {
+        BOOST_REQUIRE(clear(directory));
+    }
+    ~directory_setup_fixture() NOEXCEPT
+    {
+        BOOST_REQUIRE(clear(directory));
+    }
+};
+
 // Utility to convert a const reference instance to moveable.
 template <typename Type>
 Type move_copy(const Type& instance) NOEXCEPT
