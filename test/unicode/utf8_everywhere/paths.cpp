@@ -26,6 +26,8 @@
 // intellisense picks up the conversion propery. So non-asci text below
 // is not actually converted property.
 
+BC_PUSH_WARNING(NO_REINTERPRET_CAST)
+
 BOOST_AUTO_TEST_SUITE(paths_tests)
 
 BOOST_AUTO_TEST_CASE(paths__cast_to_string__always__expected)
@@ -149,3 +151,5 @@ BOOST_AUTO_TEST_CASE(paths__literal__utf8_file_no_bom__prefixes_ineffective)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BC_POP_WARNING()
