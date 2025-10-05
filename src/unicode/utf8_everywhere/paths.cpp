@@ -57,7 +57,7 @@ std::filesystem::path to_path(const std::string& value) NOEXCEPT
     BC_POP_WARNING()
 }
 
-#ifdef HAVE_MSC
+#if defined(HAVE_MSC)
 static std::wstring config_directory() NOEXCEPT
 {
     wchar_t directory[MAX_PATH];
@@ -80,15 +80,15 @@ std::filesystem::path default_config_path(
     BC_POP_WARNING()
 }
 
-#ifdef HAVE_MSC
+#if defined(HAVE_MSC)
 
 // Helper for to_fully_qualified_path.
 inline auto replace_all(std::wstring text, wchar_t from, wchar_t to) NOEXCEPT
 {
     for (auto position = text.find(from); position != std::string::npos;
-        position = text.find(from, position + sizeof(wchar_t)))
+        position = text.find(from, add1(position)))
     {
-        text.replace(position, sizeof(wchar_t), { to });
+        text.replace(position, one, { to });
     }
 
     return text;
