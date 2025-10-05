@@ -18,24 +18,11 @@
  */
 #include "../../test.hpp"
 
-struct ofstream_tests_setup_fixture
-{
-    ofstream_tests_setup_fixture()
-    {
-        test::remove(TEST_NAME);
-    }
-
-    ~ofstream_tests_setup_fixture()
-    {
-        test::remove(TEST_NAME);
-    }
-};
-
-BOOST_FIXTURE_TEST_SUITE(ofstream_tests, ofstream_tests_setup_fixture)
+BOOST_FIXTURE_TEST_SUITE(ofstream_tests, test::directory_setup_fixture)
 
 BOOST_AUTO_TEST_CASE(ofstream__construct__valid_path__round_trip)
 {
-    ofstream out(TEST_NAME, std::ofstream::out);
+    ofstream out(TEST_PATH, std::ofstream::out);
     BOOST_REQUIRE(out.good());
     BOOST_REQUIRE(!out.bad());
 
@@ -46,7 +33,7 @@ BOOST_AUTO_TEST_CASE(ofstream__construct__valid_path__round_trip)
     out.close();
     BOOST_REQUIRE(out.good());
 
-    ifstream in(TEST_NAME);
+    ifstream in(TEST_PATH);
     BOOST_REQUIRE(in.good());
 
     std::string line;
