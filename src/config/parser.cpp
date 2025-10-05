@@ -52,8 +52,9 @@ std::filesystem::path parser::get_config_option(variables_map& variables,
     if (config.empty())
         return {};
 
-    // Capture as utf8 so std::filesystem::path does assume ansi code page.
-    return { config.as<std::u8string>() };
+    // TODO: if we create config::path for utf8 path decoding this changes too.
+    ////return { config.as<std::u8string>() };
+    return { config.as<std::filesystem::path>() };
 }
 
 bool parser::get_option(variables_map& variables,
