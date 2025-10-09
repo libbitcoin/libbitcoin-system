@@ -61,8 +61,10 @@ public:
     /// Methods.
     /// -----------------------------------------------------------------------
 
-    /// The endpoint is of the form host[:port], empty (zero) port is omitted.
-    std::string to_string() const NOEXCEPT;
+    /// The endpoint is of the form host[:port], empty port if zero (default).
+    /// Specify non-zero default to explicitly serialize in case of default.
+    std::string to_string(uint16_t default_port=0) const NOEXCEPT;
+    std::string to_lower(uint16_t default_port=0) const NOEXCEPT;
 
     /// Return a new endpoint that replaces host instances of "*" with
     /// "localhost". This is intended for clients that wish to connect

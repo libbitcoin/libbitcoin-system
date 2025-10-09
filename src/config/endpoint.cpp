@@ -24,6 +24,7 @@
 #include <bitcoin/system/config/utilities.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/serial/serial.hpp>
+#include <bitcoin/system/unicode/unicode.hpp>
 
 namespace libbitcoin {
 namespace system {
@@ -85,9 +86,15 @@ endpoint endpoint::to_local() const NOEXCEPT
     return { host, port_ };
 }
 
-std::string endpoint::to_string() const NOEXCEPT
+std::string endpoint::to_string(uint16_t default_port) const NOEXCEPT
 {
-    return is_zero(port()) ? host() : host() + ":" + serialize(port());
+    const auto value = is_zero(port()) ? default_port : port();
+    return is_zero(value) ? host() : host() + ":" + serialize(value);
+}
+
+std::string endpoint::to_lower(uint16_t default_port) const NOEXCEPT
+{
+    return system::ascii_to_lower(to_string(default_port));
 }
 
 // Operators.
